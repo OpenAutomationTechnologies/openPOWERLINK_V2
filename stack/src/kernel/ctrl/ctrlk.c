@@ -125,9 +125,9 @@ The function initializes the kernel control module.
 //------------------------------------------------------------------------------
 tOplkError ctrlk_init(void)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
 
-    if ((ret = ctrlkcal_init()) != kEplSuccessful)
+    if ((ret = ctrlkcal_init()) != kErrorOk)
     {
         DEBUG_LVL_ERROR_TRACE("ctrlkcal_init failed!\n");
         goto ExitCleanup;
@@ -136,7 +136,7 @@ tOplkError ctrlk_init(void)
     // initialize heartbeat counter
     instance_l.heartbeat = 1;
 
-    return kEplSuccessful;
+    return kErrorOk;
 
 ExitCleanup:
     ctrlkcal_exit();
@@ -173,13 +173,13 @@ commands from the user part of the stack and executes them.
 //------------------------------------------------------------------------------
 BOOL ctrlk_process(void)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     tOplkError          fRet;
     UINT16              status;
     tCtrlCmdType        cmd = kCtrlNone;
     BOOL                fExit = FALSE;
 
-    if (ctrlkcal_getCmd(&cmd) != kEplSuccessful)
+    if (ctrlkcal_getCmd(&cmd) != kErrorOk)
     {
         DEBUG_LVL_ERROR_TRACE ("%s: error getting command!\n", __func__);
         return FALSE;
@@ -188,7 +188,7 @@ BOOL ctrlk_process(void)
     if (cmd != kCtrlNone)
     {
         ret = ctrlk_executeCmd(cmd, &fRet, &status, &fExit);
-        if (ret == kEplSuccessful)
+        if (ret == kErrorOk)
         {
             ctrlkcal_sendReturn(fRet);
             ctrlkcal_setStatus(status);
@@ -198,7 +198,7 @@ BOOL ctrlk_process(void)
     eventkcal_process();
 
     ret = ctrlkcal_process();
-    if(ret != kEplSuccessful)
+    if(ret != kErrorOk)
     {
         DEBUG_LVL_ERROR_TRACE("%s: CAL process returned with 0x%X\n", __func__, ret);
         fExit = TRUE;
@@ -228,7 +228,7 @@ pointer to the status and exit flag is not NULL the appropriate data is stored.
 tOplkError ctrlk_executeCmd(tCtrlCmdType cmd_p, tOplkError* pRet_p, UINT16* pStatus_p,
                             BOOL* pfExit_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     UINT16              status;
     BOOL                fExit;
 
@@ -257,7 +257,7 @@ tOplkError ctrlk_executeCmd(tCtrlCmdType cmd_p, tOplkError* pRet_p, UINT16* pSta
 
         default:
             TRACE ("Unknown command\n");
-            ret = kEplGeneralError;
+            ret = kErrorGeneralError;
             status = kCtrlStatusUnavailable;
             fExit = TRUE;
             break;
@@ -333,10 +333,10 @@ static tOplkError initStack(void)
 
     ctrlkcal_readInitParam(&instance_l.initParam);
 
-    if ((ret = eventk_init()) != kEplSuccessful)
+    if ((ret = eventk_init()) != kErrorOk)
         return ret;
 
-    if ((ret = nmtk_init()) != kEplSuccessful)
+    if ((ret = nmtk_init()) != kErrorOk)
         return ret;
 
     EPL_MEMCPY(dllkInitParam.aLocalMac, instance_l.initParam.aMacAddress, 6);
@@ -344,7 +344,7 @@ static tOplkError initStack(void)
     dllkInitParam.hwParam.m_uiDevNumber = instance_l.initParam.ethDevNumber;
 
     ret = dllk_addInstance(&dllkInitParam);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
         return ret;
 
     // copy MAC address back to instance structure
@@ -354,17 +354,17 @@ static tOplkError initStack(void)
     dllk_regSyncHandler(pdok_sendSyncEvent);
 
     // initialize EplDllkCal module
-    if ((ret = dllkcal_init()) != kEplSuccessful)
+    if ((ret = dllkcal_init()) != kErrorOk)
         return ret;
 
 #if defined(CONFIG_INCLUDE_PDO)
-    if ((ret = pdok_init()) != kEplSuccessful)
+    if ((ret = pdok_init()) != kErrorOk)
         return ret;
 #endif
 
     // initialize Virtual Ethernet Driver
 #if defined(CONFIG_INCLUDE_VETH)
-    if ((ret = veth_addInstance(instance_l.initParam.aMacAddress)) != kEplSuccessful)
+    if ((ret = veth_addInstance(instance_l.initParam.aMacAddress)) != kErrorOk)
     return ret;
 #endif
 
@@ -379,7 +379,7 @@ static tOplkError initStack(void)
 
 The function cleans up the kernel stack modules
 
-\return Returns always kEplSuccessful
+\return Returns always kErrorOk
 */
 //------------------------------------------------------------------------------
 static tOplkError shutdownStack(void)
@@ -402,7 +402,7 @@ static tOplkError shutdownStack(void)
     eventk_exit();
     errhndk_exit();
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------

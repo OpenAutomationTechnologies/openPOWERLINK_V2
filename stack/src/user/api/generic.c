@@ -120,7 +120,7 @@ oplk_execNmtCommand(kNmtEventSwReset).
                                 parameters must be set by the application.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          Stack was successfully initialized.
+\retval kErrorOk          Stack was successfully initialized.
 
 \ingroup module_api
 */
@@ -131,7 +131,7 @@ tOplkError oplk_init(tEplApiInitParam* pInitParam_p)
 
     target_init();
 
-    if ((ret = ctrlu_init()) != kEplSuccessful)
+    if ((ret = ctrlu_init()) != kErrorOk)
     {
         target_cleanup();
         return ret;
@@ -149,7 +149,7 @@ it should be stopped by sending the NMT command kNmtEventSwitchOff. The command
 can be sent by calling oplk_execNmtCommand(kNmtEventSwitchOff);
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          Stack was successfully shut down.
+\retval kErrorOk          Stack was successfully shut down.
 
 \ingroup module_api
 */
@@ -183,7 +183,7 @@ is actually executed.
 //------------------------------------------------------------------------------
 tOplkError oplk_execNmtCommand(tNmtEvent nmtEvent_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
 
     ret = nmtu_postNmtEvent(nmtEvent_p);
     return ret;
@@ -209,11 +209,11 @@ in the object dictionary (OD).
 \param  firstSubindex_p     Specifies the first subindex to be linked.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          The variables are successfully linked to the
+\retval kErrorOk          The variables are successfully linked to the
                                 object dictionary.
-\retval kEplObdIndexNotExist    The object index does not exist in the object
+\retval kErrorObdIndexNotExist    The object index does not exist in the object
                                 dictionary.
-\retval kEplObdSubindexNotExist The subindex does not exist in the object
+\retval kErrorObdSubindexNotExist The subindex does not exist in the object
                                 dictionary.
 
 \ingroup module_api
@@ -230,10 +230,10 @@ tOplkError oplk_linkObject(UINT objIndex_p, void* pVar_p, UINT* pVarEntries_p,
     tObdSize        entrySize;
     tObdSize        usedSize;
 
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
 
     if ((pVar_p == NULL) || (pVarEntries_p == NULL) || (*pVarEntries_p == 0) || (pEntrySize_p == NULL))
-        return kEplApiInvalidParam;
+        return kErrorApiInvalidParam;
 
     pData      = (UINT8 MEM*) pVar_p;
     varEntries = (UINT8)*pVarEntries_p;
@@ -249,11 +249,11 @@ tOplkError oplk_linkObject(UINT objIndex_p, void* pVar_p, UINT* pVarEntries_p,
         // read number of entries
         entrySize = (tObdSize)sizeof(indexEntries);
         ret = obd_readEntry (objIndex_p, 0x00, (void GENERIC*) &indexEntries, &entrySize );
-        if ((ret != kEplSuccessful) || (indexEntries == 0x00))
+        if ((ret != kErrorOk) || (indexEntries == 0x00))
         {
             // Object doesn't exist or invalid entry number
             TRACE("%s() Object %04x not existing\n", __func__, objIndex_p);
-            return kEplObdIndexNotExist;
+            return kErrorObdIndexNotExist;
         }
     }
     else
@@ -278,7 +278,7 @@ tOplkError oplk_linkObject(UINT objIndex_p, void* pVar_p, UINT* pVarEntries_p,
             if ((entrySize = obd_getDataSize(objIndex_p, subindex)) == 0x00)
             {
                 // invalid entry size (maybe object doesn't exist or entry of type DOMAIN is empty)
-                return kEplObdSubindexNotExist;
+                return kErrorObdSubindexNotExist;
             }
         }
         else
@@ -293,7 +293,7 @@ tOplkError oplk_linkObject(UINT objIndex_p, void* pVar_p, UINT* pVarEntries_p,
         usedSize += entrySize;
         pData   += entrySize;
 
-        if ((ret = obd_defineVar(&varParam)) != kEplSuccessful)
+        if ((ret = obd_defineVar(&varParam)) != kErrorOk)
             break;
     }
 
@@ -309,7 +309,7 @@ tOplkError oplk_linkObject(UINT objIndex_p, void* pVar_p, UINT* pVarEntries_p,
 
 The function reads the specified entry from the object dictionary of the specified
 node. If this node is a remote node, it performs a SDO transfer, which means this
-function returns kEplApiTaskDeferred and the application is informed via the
+function returns kErrorApiTaskDeferred and the application is informed via the
 event callback function when the task is completed.
 
 \param  pSdoComConHdl_p     A pointer to the SDO connection handle. It may be
@@ -337,11 +337,11 @@ tOplkError oplk_readObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT i
                            UINT subindex_p, void* pDstData_le_p, UINT* pSize_p,
                            tSdoType sdoType_p, void* pUserArg_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     tObdSize        obdSize;
 
     if ((index_p == 0) || (pDstData_le_p == NULL) || (pSize_p == NULL) || (*pSize_p == 0))
-        return kEplApiInvalidParam;
+        return kErrorApiInvalidParam;
 
     if (nodeId_p == 0 || nodeId_p == obd_getNodeId())
     {   // local OD access can be performed
@@ -356,16 +356,16 @@ tOplkError oplk_readObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT i
 
         // check if application provides space for handle
         if (pSdoComConHdl_p == NULL)
-            return kEplApiInvalidParam;
+            return kErrorApiInvalidParam;
 
 #if defined(CONFIG_INCLUDE_CFM)
         if (cfmu_isSdoRunning(nodeId_p))
-            return kEplApiSdoBusyIntern;
+            return kErrorApiSdoBusyIntern;
 #endif
 
         // init command layer connection
         ret = sdocom_defineConnection(pSdoComConHdl_p, nodeId_p, sdoType_p);
-        if ((ret != kEplSuccessful) && (ret != kEplSdoComHandleExists))
+        if ((ret != kErrorOk) && (ret != kErrorSdoComHandleExists))
         {
             return ret;
         }
@@ -379,13 +379,13 @@ tOplkError oplk_readObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT i
         transParamByIndex.pfnSdoFinishedCb = cbSdoCon;
         transParamByIndex.pUserArg = pUserArg_p;
 
-        if ((ret = sdocom_initTransferByIndex(&transParamByIndex)) != kEplSuccessful)
+        if ((ret = sdocom_initTransferByIndex(&transParamByIndex)) != kErrorOk)
             return ret;
 
-        ret = kEplApiTaskDeferred;
+        ret = kErrorApiTaskDeferred;
 
 #else
-        ret = kEplApiInvalidParam;
+        ret = kErrorApiInvalidParam;
 #endif
     }
     return ret;
@@ -397,7 +397,7 @@ tOplkError oplk_readObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT i
 
 The function writes the specified entry to the object dictionary of the specified
 node. If this node is a remote node, it performs a SDO transfer, which means this
-function returns kEplApiTaskDeferred and the application is informed via the
+function returns kErrorApiTaskDeferred and the application is informed via the
 event callback function when the task is completed.
 
 \param  pSdoComConHdl_p     A pointer to the SDO connection handle. It may be
@@ -423,10 +423,10 @@ tOplkError oplk_writeObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT 
                             UINT subindex_p, void* pSrcData_le_p, UINT size_p,
                             tSdoType sdoType_p, void* pUserArg_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
 
     if ((index_p == 0) || (pSrcData_le_p == NULL) || (size_p == 0))
-        return kEplApiInvalidParam;
+        return kErrorApiInvalidParam;
 
     if (nodeId_p == 0 || nodeId_p == obd_getNodeId())
     {   // local OD access can be performed
@@ -439,21 +439,21 @@ tOplkError oplk_writeObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT 
 
         // check if application provides space for handle
         if (pSdoComConHdl_p == NULL)
-            return kEplApiInvalidParam;
+            return kErrorApiInvalidParam;
 
 #if defined(CONFIG_INCLUDE_CFM)
         if (cfmu_isSdoRunning(nodeId_p))
-            return kEplApiSdoBusyIntern;
+            return kErrorApiSdoBusyIntern;
 #endif
         // d.k.: How to recycle command layer connection?
-        //       Try to redefine it, which will return kEplSdoComHandleExists
+        //       Try to redefine it, which will return kErrorSdoComHandleExists
         //       and the existing command layer handle.
         //       If the returned handle is busy, sdocom_initTransferByIndex()
         //       will return with error.
 
         // init command layer connection
         ret = sdocom_defineConnection(pSdoComConHdl_p, nodeId_p, sdoType_p);
-        if ((ret != kEplSuccessful) && (ret != kEplSdoComHandleExists))
+        if ((ret != kErrorOk) && (ret != kErrorSdoComHandleExists))
             return ret;
 
         transParamByIndex.pData = pSrcData_le_p;
@@ -465,13 +465,13 @@ tOplkError oplk_writeObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT 
         transParamByIndex.pfnSdoFinishedCb = cbSdoCon;
         transParamByIndex.pUserArg = pUserArg_p;
 
-        if ((ret = sdocom_initTransferByIndex(&transParamByIndex)) != kEplSuccessful)
+        if ((ret = sdocom_initTransferByIndex(&transParamByIndex)) != kErrorOk)
             return ret;
 
-        ret = kEplApiTaskDeferred;
+        ret = kErrorApiTaskDeferred;
 
 #else
-        ret = kEplApiInvalidParam;
+        ret = kErrorApiInvalidParam;
 #endif
     }
     return ret;
@@ -494,14 +494,14 @@ callback function when the last SDO transfer to a remote node has completed.
 //------------------------------------------------------------------------------
 tOplkError oplk_freeSdoChannel(tSdoComConHdl sdoComConHdl_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
 
 #if defined(CONFIG_INCLUDE_SDOC)
 
 #if defined(CONFIG_INCLUDE_CFM)
     if (cfmu_isSdoRunning(sdocom_getNodeId(sdoComConHdl_p)))
     {
-        ret = kEplApiSdoBusyIntern;
+        ret = kErrorApiSdoBusyIntern;
     }
     else
 #endif
@@ -510,7 +510,7 @@ tOplkError oplk_freeSdoChannel(tSdoComConHdl sdoComConHdl_p)
         ret = sdocom_undefineConnection(sdoComConHdl_p);
     }
 #else
-    ret = kEplApiInvalidParam;
+    ret = kErrorApiInvalidParam;
 #endif
     return ret;
 }
@@ -532,14 +532,14 @@ The function aborts the running SDO transfer on the specified SDO channel.
 //------------------------------------------------------------------------------
 tOplkError oplk_abortSdo(tSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
 
 #if defined(CONFIG_INCLUDE_SDOC)
 
 #if defined(CONFIG_INCLUDE_CFM)
     if (cfmu_isSdoRunning(sdocom_getNodeId(sdoComConHdl_p)))
     {
-        ret = kEplApiSdoBusyIntern;
+        ret = kErrorApiSdoBusyIntern;
     }
     else
 #endif
@@ -547,7 +547,7 @@ tOplkError oplk_abortSdo(tSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p)
         ret = sdocom_abortTransfer(sdoComConHdl_p, abortCode_p);
     }
 #else
-    ret = kEplApiInvalidParam;
+    ret = kErrorApiInvalidParam;
 #endif
 
     return ret;
@@ -574,7 +574,7 @@ The function reads the specified entry from the local object dictionary.
 tOplkError oplk_readLocalObject(UINT index_p, UINT subindex_p, void* pDstData_p,
                                 UINT* pSize_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     tObdSize        obdSize;
 
     obdSize = (tObdSize)*pSize_p;
@@ -635,7 +635,7 @@ tOplkError oplk_sendAsndFrame(UINT8 dstNodeId_p, tEplAsndFrame *pAsndFrame_p,
 
     // Check for correct input
     if ((pAsndFrame_p == NULL) || (frameInfo.frameSize >= sizeof(buffer)))
-        return  kEplReject;
+        return  kErrorReject;
 
     // Calculate size of frame (Asnd data + header)
     frameInfo.frameSize = asndSize_p + offsetof(tEplFrame, m_Data);
@@ -755,7 +755,7 @@ tOplkError oplk_triggerMnStateChange(UINT nodeId_p, tNmtNodeCommand nodeCommand_
     UNUSED_PARAMETER(nodeId_p);
     UNUSED_PARAMETER(nodeCommand_p);
 
-    return kEplApiInvalidParam;
+    return kErrorApiInvalidParam;
 #endif
 }
 
@@ -778,12 +778,12 @@ tOplkError oplk_setCdcBuffer(BYTE* pCdc_p, UINT cdcSize_p)
 {
 #if (CONFIG_OBD_USE_LOAD_CONCISEDCF != FALSE)
     obdcdc_setBuffer(pCdc_p, cdcSize_p);
-    return kEplSuccessful;
+    return kErrorOk;
 #else
     UNUSED_PARAMETER(pCdc_p);
     UNUSED_PARAMETER(cdcSize_p);
 
-    return kEplApiInvalidParam;
+    return kErrorApiInvalidParam;
 #endif
 }
 
@@ -806,11 +806,11 @@ tOplkError oplk_setCdcFilename(char* pCdcFilename_p)
 {
 #if (CONFIG_OBD_USE_LOAD_CONCISEDCF != FALSE)
     obdcdc_setFilename(pCdcFilename_p);
-    return kEplSuccessful;
+    return kErrorOk;
 #else
     UNUSED_PARAMETER(pCdcFilename_p);
 
-    return kEplApiInvalidParam;
+    return kErrorApiInvalidParam;
 #endif
 }
 
@@ -891,7 +891,7 @@ tOplkError oplk_getIdentResponse(UINT nodeId_p, tEplIdentResponse** ppIdentRespo
     UNUSED_PARAMETER(nodeId_p);
     UNUSED_PARAMETER(ppIdentResponse_p);
 
-    return kEplApiInvalidParam;
+    return kErrorApiInvalidParam;
 #endif
 }
 
@@ -918,7 +918,7 @@ SDO event to the application.
 #if defined(CONFIG_INCLUDE_SDOC)
 static tOplkError cbSdoCon(tSdoComFinished* pSdoComFinished_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     tEplApiEventArg     eventArg;
 
     eventArg.m_Sdo = *pSdoComFinished_p;
@@ -941,7 +941,7 @@ Frames will be forwarded to the application by sending a user event.
 //------------------------------------------------------------------------------
 static tOplkError cbReceivedAsnd(tFrameInfo *pFrameInfo_p)
 {
-    tOplkError              ret = kEplSuccessful;
+    tOplkError              ret = kErrorOk;
     UINT                    asndOffset;
     tEplApiEventArg         apiEventArg;
     tEplApiEventType        eventType;
@@ -951,7 +951,7 @@ static tOplkError cbReceivedAsnd(tFrameInfo *pFrameInfo_p)
 
     if ((pFrameInfo_p->frameSize <= asndOffset + 1) ||
         (pFrameInfo_p->frameSize > EPL_C_DLL_MAX_ASYNC_MTU))
-        return kEplReject;
+        return kErrorReject;
 
     // Forward received ASnd frame
     apiEventArg.m_RcvAsnd.m_pFrame = pFrameInfo_p->pFrame;

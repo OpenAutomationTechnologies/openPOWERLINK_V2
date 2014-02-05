@@ -181,7 +181,7 @@ This function initializes the Synchronization timer module.
 //------------------------------------------------------------------------------
 tOplkError synctimer_addInstance(void)
 {
-    tOplkError ret = kEplSuccessful;
+    tOplkError ret = kErrorOk;
 
     EPL_MEMSET(&instance_l, 0, sizeof (instance_l));
 
@@ -210,7 +210,7 @@ This function deletes the Synchronization timer module.
 //------------------------------------------------------------------------------
 tOplkError synctimer_delInstance(void)
 {
-    tOplkError ret = kEplSuccessful;
+    tOplkError ret = kErrorOk;
 
     openmac_timerIrqDisable(HWTIMER_SYNC);
     openmac_timerSetCompareValue(HWTIMER_SYNC, 0);
@@ -242,7 +242,7 @@ This function registers the synchronization handler callback.
 //------------------------------------------------------------------------------
 tOplkError synctimer_registerHandler(tSyncTimerCbSync pfnSyncCb_p)
 {
-    tOplkError ret = kEplSuccessful;
+    tOplkError ret = kErrorOk;
 
     instance_l.pfnSyncCb = pfnSyncCb_p;
 
@@ -264,7 +264,7 @@ This function registers the loss of synchronization handler callback.
 //------------------------------------------------------------------------------
 tOplkError synctimer_registerLossOfSyncHandler(tSyncTimerCbLossOfSync pfnLossOfSyncCb_p)
 {
-    tOplkError ret = kEplSuccessful;
+    tOplkError ret = kErrorOk;
 
     instance_l.pfnLossOfSyncCb = pfnLossOfSyncCb_p;
 
@@ -287,7 +287,7 @@ This function registers the second synchronization handler callback.
 //------------------------------------------------------------------------------
 tOplkError synctimer_registerLossOfSyncHandler2(tSyncTimerCbLossOfSync pfnLossOfSync2Cb_p)
 {
-    tOplkError ret = kEplSuccessful;
+    tOplkError ret = kErrorOk;
 
     instance_l.pfnLossOfSync2Cb = pfnLossOfSync2Cb_p;
 
@@ -310,7 +310,7 @@ This function sets the negative time shift.
 //------------------------------------------------------------------------------
 tOplkError synctimer_setSyncShift(UINT32 advanceShift_p)
 {
-    tOplkError ret = kEplSuccessful;
+    tOplkError ret = kErrorOk;
 
     instance_l.advanceShift = OMETH_US_2_TICKS(advanceShift_p);
 
@@ -332,7 +332,7 @@ This function sets the cycle time.
 //------------------------------------------------------------------------------
 tOplkError synctimer_setCycleLen(UINT32 cycleLen_p)
 {
-    tOplkError ret = kEplSuccessful;
+    tOplkError ret = kErrorOk;
 
     ctrlSetConfiguredTimeDiff(OMETH_US_2_TICKS(cycleLen_p));
 
@@ -354,7 +354,7 @@ This function sets the loss of synchronization tolerance.
 //------------------------------------------------------------------------------
 tOplkError synctimer_setLossOfSyncTolerance(UINT32 lossOfSyncTolerance_p)
 {
-    tOplkError ret = kEplSuccessful;
+    tOplkError ret = kErrorOk;
 
     instance_l.lossOfSyncTolerance = lossOfSyncTolerance_p;
 
@@ -379,7 +379,7 @@ This function sets the loss of synchronization tolerance.
 //------------------------------------------------------------------------------
 tOplkError synctimer_setLossOfSyncTolerance2(UINT32 lossOfSyncTolerance2_p)
 {
-    tOplkError ret = kEplSuccessful;
+    tOplkError ret = kErrorOk;
 
     instance_l.lossOfSyncTolerance2 = lossOfSyncTolerance2_p;
 
@@ -412,11 +412,11 @@ This function sets the synchronization time trigger at a specific time stamp.
 //------------------------------------------------------------------------------
 tOplkError synctimer_syncTriggerAtTimeStamp(tEplTgtTimeStamp* pTimeStamp_p)
 {
-    tOplkError ret = kEplSuccessful;
+    tOplkError ret = kErrorOk;
 
     ret = drvModifyTimerAbs(TIMER_HDL_LOSSOFSYNC,
                                       (pTimeStamp_p->timeStamp + instance_l.lossOfSyncTimeout));
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
     {
         goto Exit;
     }
@@ -426,7 +426,7 @@ tOplkError synctimer_syncTriggerAtTimeStamp(tEplTgtTimeStamp* pTimeStamp_p)
     {
         ret = drvModifyTimerAbs(TIMER_HDL_LOSSOFSYNC2,
                                           (pTimeStamp_p->timeStamp + instance_l.lossOfSyncTimeout2));
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
         {
             goto Exit;
         }
@@ -452,7 +452,7 @@ This function stops the module.
 //------------------------------------------------------------------------------
 tOplkError synctimer_stopSync(void)
 {
-    tOplkError ret = kEplSuccessful;
+    tOplkError ret = kErrorOk;
 
     instance_l.fRun = FALSE;
 
@@ -529,7 +529,7 @@ This function adjusts the synchronization mechanism with a filter.
 //------------------------------------------------------------------------------
 static tOplkError ctrlDoSyncAdjustment(UINT32 timeStamp_p)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
     UINT32      actualTimeDiff;
     INT         deviation;
     BOOL        fCurrentSyncModified = FALSE;
@@ -734,12 +734,12 @@ This function modifies the timer's absolute timer value.
 //------------------------------------------------------------------------------
 static tOplkError drvModifyTimerAbs(UINT timerHdl_p, UINT32 absoluteTime_p)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
     tTimerInfo* pTimerInfo;
 
     if (timerHdl_p >= TIMER_COUNT)
     {
-        ret = kEplTimerInvalidHandle;
+        ret = kErrorTimerInvalidHandle;
         goto Exit;
     }
 
@@ -770,12 +770,12 @@ This function modifies the timer's realtive timer value.
 static tOplkError drvModifyTimerRel(UINT timerHdl_p, INT timeAdjustment_p,
         UINT32* pAbsoluteTime_p, BOOL* pfAbsoluteTimeAlreadySet_p)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
     tTimerInfo* pTimerInfo;
 
     if (timerHdl_p >= TIMER_COUNT)
     {
-        ret = kEplTimerInvalidHandle;
+        ret = kErrorTimerInvalidHandle;
         goto Exit;
     }
 
@@ -813,12 +813,12 @@ This function deletes the timer handle.
 //------------------------------------------------------------------------------
 static tOplkError drvDeleteTimer(UINT timerHdl_p)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
     tTimerInfo* pTimerInfo;
 
     if (timerHdl_p >= TIMER_COUNT)
     {
-        ret = kEplTimerInvalidHandle;
+        ret = kErrorTimerInvalidHandle;
         goto Exit;
     }
 

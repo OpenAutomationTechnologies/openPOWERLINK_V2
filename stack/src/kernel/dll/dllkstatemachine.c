@@ -160,13 +160,13 @@ changes the DLL state depending on the NMT state and the received event.
 //------------------------------------------------------------------------------
 tOplkError dllk_changeState(tNmtEvent nmtEvent_p, tNmtState nmtState_p)
 {
-    tOplkError              ret = kEplSuccessful;
+    tOplkError              ret = kErrorOk;
     tErrHndkEvent           dllEvent;
 
     dllEvent.m_ulDllErrorEvents = 0;
     dllEvent.m_uiNodeId = 0;
     dllEvent.m_NmtState = nmtState_p;
-    dllEvent.m_EplError = kEplSuccessful;
+    dllEvent.m_EplError = kErrorOk;
 
     switch (nmtState_p)
     {
@@ -183,7 +183,7 @@ tOplkError dllk_changeState(tNmtEvent nmtEvent_p, tNmtState nmtState_p)
         case kNmtMsPreOperational2:
         case kNmtMsReadyToOperate:
         case kNmtMsOperational:
-            if ((ret = processNmtMsFullCycle(nmtState_p, nmtEvent_p, &dllEvent)) != kEplSuccessful)
+            if ((ret = processNmtMsFullCycle(nmtState_p, nmtEvent_p, &dllEvent)) != kErrorOk)
                 return ret;
             break;
 #endif
@@ -219,7 +219,7 @@ tOplkError dllk_changeState(tNmtEvent nmtEvent_p, tNmtState nmtState_p)
             break;
 
         case kNmtMsPreOperational1:
-            if ((ret = processNmtMsPreop1(nmtState_p, nmtEvent_p, &dllEvent)) != kEplSuccessful)
+            if ((ret = processNmtMsPreop1(nmtState_p, nmtEvent_p, &dllEvent)) != kErrorOk)
                 return ret;
             break;
 #endif
@@ -258,7 +258,7 @@ The function handles DLL state changes in NMT state MsPreoperational1
 static tOplkError processNmtMsPreop1(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
                                      tErrHndkEvent* pDllEvent_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     tDllState       DummyDllState;
 
     UNUSED_PARAMETER(pDllEvent_p);
@@ -267,7 +267,7 @@ static tOplkError processNmtMsPreop1(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
     {   // stop cycle timer
 
         ret = edrvcyclic_stopCycle();
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
             return ret;
 
         dllkInstance_g.dllState = kDllMsNonCyclic;
@@ -283,12 +283,12 @@ static tOplkError processNmtMsPreop1(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
 
             ret = dllk_asyncFrameNotReceived(dllkInstance_g.aLastReqServiceId[dllkInstance_g.curLastSoaReq],
                                              dllkInstance_g.aLastTargetNodeId[dllkInstance_g.curLastSoaReq]);
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
                 return ret;
 
             // $$$ d.k. only continue with sending of the SoA, if the received ASnd was the requested one
             //          or the transmission of the previous SoA has already finished.
-            //          If we receive multiple ASnd after a SoA, we will get kEplInvalidOperation in SendSoa()
+            //          If we receive multiple ASnd after a SoA, we will get kErrorInvalidOperation in SendSoa()
             //          otherwise.
 
             // go ahead and send SoA
@@ -297,7 +297,7 @@ static tOplkError processNmtMsPreop1(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
 
             // increment cycle counter to detect if EPL_C_DLL_PREOP1_START_CYCLES empty cycles are elapsed
             dllkInstance_g.cycleCount++;
-            ret = kEplSuccessful;
+            ret = kErrorOk;
             // reprogramming of timer will be done in CbFrameTransmitted()
             break;
 
@@ -324,7 +324,7 @@ MsPreOperational2, MsReadyToOperate and MsOperational.
 static tOplkError processNmtMsFullCycle(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
                                         tErrHndkEvent* pDllEvent_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
 
     UNUSED_PARAMETER(nmtState_p);
 
@@ -346,10 +346,10 @@ static tOplkError processNmtMsFullCycle(tNmtState nmtState_p, tNmtEvent nmtEvent
                     // start continuous cycle timer
                     // ASndTimeout is checked on next SoC Tx callback function
                     ret = hrestimer_deleteTimer(&dllkInstance_g.timerHdlCycle);
-                    if (ret != kEplSuccessful)
+                    if (ret != kErrorOk)
                         return ret;
 
-                    if ((ret = edrvcyclic_startCycle())  != kEplSuccessful)
+                    if ((ret = edrvcyclic_startCycle())  != kErrorOk)
                         return ret;
 
                     dllkInstance_g.dllState = kDllMsWaitSocTrig;
@@ -359,7 +359,7 @@ static tOplkError processNmtMsFullCycle(tNmtState nmtState_p, tNmtEvent nmtEvent
                     // forward dummy SoA event to DLLk, ErrorHandler and PDO module
                     // to trigger preparation of first cycle
                     ret = dllk_postEvent(kEplEventTypeSync);
-                    if (ret != kEplSuccessful)
+                    if (ret != kErrorOk)
                         return ret;
                     break;
 
@@ -471,7 +471,7 @@ static tOplkError processCsFullCycleDllWaitPreq(tNmtState nmtState_p, tNmtEvent 
             break;
     }
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -522,7 +522,7 @@ static tOplkError processCsFullCycleDllWaitSoc(tNmtState nmtState_p, tNmtEvent n
             // remain in this state
             break;
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -582,7 +582,7 @@ static tOplkError processCsFullCycleDllWaitSoa(tNmtState nmtState_p, tNmtEvent n
             // remain in this state
             break;
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -609,7 +609,7 @@ static tOplkError processCsFullCycleDllGsInit(tNmtState nmtState_p, tNmtEvent nm
     // enter DLL_CS_WAIT_PREQ
     dllkInstance_g.dllState = kDllCsWaitPreq;
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -660,7 +660,7 @@ static tOplkError processCsStoppedDllWaitPreq(tNmtState nmtState_p, tNmtEvent nm
             // remain in this state
             break;
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -704,7 +704,7 @@ static tOplkError processCsStoppedDllWaitSoc(tNmtState nmtState_p, tNmtEvent nmt
             // remain in this state
             break;
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -764,7 +764,7 @@ static tOplkError processCsStoppedDllWaitSoa(tNmtState nmtState_p, tNmtEvent nmt
             // remain in this state
             break;
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -790,7 +790,7 @@ static tOplkError processCsStoppedDllGsInit(tNmtState nmtState_p, tNmtEvent nmtE
 
     // enter DLL_CS_WAIT_PREQ
     dllkInstance_g.dllState = kDllCsWaitSoa;
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 ///\}

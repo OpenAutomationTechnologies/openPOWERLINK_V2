@@ -100,7 +100,7 @@ static tEventDispatchEntry tstEventDispatchTbl_l[] =
 //------------------------------------------------------------------------------
 void test_getHandlerForSink_FirstExist(void)
 {
-    tOplkError              ret = kEplIllegalInstance;
+    tOplkError              ret = kErrorIllegalInstance;
     tEplEventSource         eventSource = kEplEventSourceInvalid;
     tEplProcessEventCb      pfnEventHandler = NULL;
     tEventDispatchEntry*    pDispatchEntry;
@@ -110,7 +110,7 @@ void test_getHandlerForSink_FirstExist(void)
     ret = event_getHandlerForSink(&pDispatchEntry, kEplEventSinkNmtu,
                                   &pfnEventHandler, &eventSource);
 
-    CU_ASSERT_EQUAL(ret, kEplSuccessful);
+    CU_ASSERT_EQUAL(ret, kErrorOk);
     CU_ASSERT_EQUAL(pfnEventHandler, processHandler1);
     CU_ASSERT_EQUAL(eventSource, kEplEventSourceNmtu);
     CU_ASSERT_EQUAL(pDispatchEntry, &tstEventDispatchTbl_l[1]);
@@ -124,7 +124,7 @@ void test_getHandlerForSink_FirstExist(void)
 //------------------------------------------------------------------------------
 void test_getHandlerForSink_FurtherExist(void)
 {
-    tOplkError              ret = kEplIllegalInstance;
+    tOplkError              ret = kErrorIllegalInstance;
     tEplEventSource         eventSource = kEplEventSourceInvalid;
     tEplProcessEventCb      pfnEventHandler = NULL;
     tEventDispatchEntry*    pDispatchEntry;
@@ -137,7 +137,7 @@ void test_getHandlerForSink_FurtherExist(void)
     ret = event_getHandlerForSink(&pDispatchEntry, kEplEventSinkNmtu,
                                   &pfnEventHandler, &eventSource);
 
-    CU_ASSERT_EQUAL(ret, kEplSuccessful);
+    CU_ASSERT_EQUAL(ret, kErrorOk);
     CU_ASSERT_EQUAL(pfnEventHandler, processHandler2);
     CU_ASSERT_EQUAL(eventSource, kEplEventSourceNmtMnu);
     CU_ASSERT_EQUAL(pDispatchEntry, &tstEventDispatchTbl_l[2]);
@@ -150,7 +150,7 @@ void test_getHandlerForSink_FurtherExist(void)
 //------------------------------------------------------------------------------
 void test_getHandlerForSink_NotExist(void)
 {
-    tOplkError              ret = kEplIllegalInstance;
+    tOplkError              ret = kErrorIllegalInstance;
     tEplEventSource         eventSource = kEplEventSourceInvalid;
     tEplProcessEventCb      pfnEventHandler = NULL;
     tEventDispatchEntry*    pDispatchEntry;
@@ -160,7 +160,7 @@ void test_getHandlerForSink_NotExist(void)
     ret = event_getHandlerForSink(&pDispatchEntry, kEplEventSinkDllk,
                                   &pfnEventHandler, &eventSource);
 
-    CU_ASSERT_EQUAL(ret, kEplEventUnknownSink);
+    CU_ASSERT_EQUAL(ret, kErrorEventUnknownSink);
     CU_ASSERT_EQUAL(pfnEventHandler, NULL);
     CU_ASSERT_EQUAL(eventSource, kEplEventSourceInvalid);
 }
@@ -176,22 +176,22 @@ void test_eventk_process(void)
     tEplEvent       event;
 
     event.m_EventSink = kEplEventSinkDllk;
-    CU_ASSERT_EQUAL(eventk_process(&event), kEplSuccessful);
+    CU_ASSERT_EQUAL(eventk_process(&event), kErrorOk);
 
     event.m_EventSink = kEplEventSinkDllkCal;
-    CU_ASSERT_EQUAL(eventk_process(&event), kEplSuccessful);
+    CU_ASSERT_EQUAL(eventk_process(&event), kErrorOk);
 
     event.m_EventSink = kEplEventSinkNmtk;
-    CU_ASSERT_EQUAL(eventk_process(&event), kEplSuccessful);
+    CU_ASSERT_EQUAL(eventk_process(&event), kErrorOk);
 
     event.m_EventSink = kEplEventSinkErrk;
-    CU_ASSERT_EQUAL(eventk_process(&event), kEplSuccessful);
+    CU_ASSERT_EQUAL(eventk_process(&event), kErrorOk);
 
     event.m_EventSink = kEplEventSinkPdokCal;
-    CU_ASSERT_EQUAL(eventk_process(&event), kEplSuccessful);
+    CU_ASSERT_EQUAL(eventk_process(&event), kErrorOk);
 
     event.m_EventSink = kEplEventSinkPdok;
-    CU_ASSERT_EQUAL(eventk_process(&event), kEplEventUnknownSink);
+    CU_ASSERT_EQUAL(eventk_process(&event), kErrorEventUnknownSink);
 
 }
 
@@ -207,7 +207,7 @@ void test_eventk_process(void)
 static tOplkError processHandler1(tEplEvent* pEvent_p)
 {
     UNUSED_PARAMETER(pEvent_p);
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -218,7 +218,7 @@ static tOplkError processHandler1(tEplEvent* pEvent_p)
 static tOplkError processHandler2(tEplEvent* pEvent_p)
 {
     UNUSED_PARAMETER(pEvent_p);
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 

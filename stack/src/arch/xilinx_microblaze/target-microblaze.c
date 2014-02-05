@@ -213,7 +213,7 @@ tOplkError target_init(void)
     // enable the interrupt master
     enableInterruptMaster();
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -244,7 +244,7 @@ tOplkError target_cleanup(void)
     // disable the interrupt master
     disableInterruptMaster();
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------

@@ -114,7 +114,7 @@ The function initializes the synchronous data application
 //------------------------------------------------------------------------------
 tOplkError initApp(void)
 {
-    tOplkError ret = kEplSuccessful;
+    tOplkError ret = kErrorOk;
 
     ret = initProcessImage();
 
@@ -150,12 +150,12 @@ The function implements the synchronous data handler.
 //------------------------------------------------------------------------------
 tOplkError processSync(void)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     UINT32          appOutVal;
     UINT8           appInVal;
 
     ret = oplk_exchangeProcessImageOut();
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
         return ret;
 
     /* read input image - digital outputs */
@@ -196,7 +196,7 @@ The function initializes the process image of the application.
 //------------------------------------------------------------------------------
 static tOplkError initProcessImage(void)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     UINT            varEntries;
     tObdSize        obdSize;
 
@@ -205,7 +205,7 @@ static tOplkError initProcessImage(void)
     PRINTF("Size of input process image: %d\n", (UINT32)sizeof(PI_IN));
     PRINTF("Size of output process image: %d\n", (UINT32)sizeof (PI_OUT));
     ret = oplk_allocProcessImage(sizeof(PI_IN), sizeof(PI_OUT));
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
     {
         return ret;
     }
@@ -220,7 +220,7 @@ static tOplkError initProcessImage(void)
     varEntries = 4;
     ret = oplk_linkProcessImageObject(0x6000, 0x01, offsetof(PI_IN, digitalIn),
                                      FALSE, obdSize, &varEntries);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
     {
         PRINTF("linking process vars ... error %04x\n\n", ret);
         return ret;
@@ -230,7 +230,7 @@ static tOplkError initProcessImage(void)
     varEntries = 4;
     ret = oplk_linkProcessImageObject(0x6200, 0x01, offsetof(PI_OUT, digitalOut),
                                      TRUE, obdSize, &varEntries);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
     {
         PRINTF("linking process vars ... error %04x\n\n", ret);
         return ret;
@@ -238,7 +238,7 @@ static tOplkError initProcessImage(void)
 
     PRINTF("Linking process vars... ok\n\n");
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 ///\}

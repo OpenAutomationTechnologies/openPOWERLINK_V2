@@ -118,11 +118,11 @@ The function initializes the PDO kernel module.
 //------------------------------------------------------------------------------
 tOplkError pdok_init(void)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
 
     EPL_MEMSET(&pdokInstance_g, 0, sizeof(pdokInstance_g));
 
-    if ((ret = pdokcal_init()) != kEplSuccessful)
+    if ((ret = pdokcal_init()) != kErrorOk)
     {
         return ret;
     }
@@ -150,7 +150,7 @@ tOplkError pdok_exit(void)
     pdok_deAllocChannelMem();
     pdokcal_cleanupPdoMem();
     pdokcal_exit();
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -166,7 +166,7 @@ This function deallocates memory for PDOs.
 //------------------------------------------------------------------------------
 tOplkError pdok_deAllocChannelMem(void)
 {
-    tOplkError      Ret = kEplSuccessful;
+    tOplkError      Ret = kErrorOk;
 
 #if EPL_NMT_MAX_NODE_ID > 0
     tDllNodeOpParam     NodeOpParam;
@@ -174,7 +174,7 @@ tOplkError pdok_deAllocChannelMem(void)
     NodeOpParam.opNodeType = kDllNodeOpTypeFilterPdo;
     NodeOpParam.nodeId = EPL_C_ADR_BROADCAST;
     Ret = dllk_deleteNode(&NodeOpParam);
-    if (Ret != kEplSuccessful)
+    if (Ret != kErrorOk)
     {
         DEBUG_LVL_PDO_TRACE("%s() EplDllkDeleteNode failed (%s)\n",
                              __func__, EplGetOplkErrorStr(Ret));
@@ -222,7 +222,7 @@ This function allocates memory for the PDO channels
 //------------------------------------------------------------------------------
 tOplkError pdok_allocChannelMem(tPdoAllocationParam* pAllocationParam_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
 
 #if EPL_NMT_MAX_NODE_ID > 0
     tDllNodeOpParam     nodeOpParam;
@@ -230,7 +230,7 @@ tOplkError pdok_allocChannelMem(tPdoAllocationParam* pAllocationParam_p)
     nodeOpParam.opNodeType = kDllNodeOpTypeFilterPdo;
     nodeOpParam.nodeId = EPL_C_ADR_BROADCAST;
     ret = dllk_deleteNode(&nodeOpParam);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
     {
         goto Exit;
     }
@@ -253,7 +253,7 @@ tOplkError pdok_allocChannelMem(tPdoAllocationParam* pAllocationParam_p)
 
             if (pdokInstance_g.pdoChannels.pRxPdoChannel == NULL)
             {
-                ret = kEplPdoInitError;
+                ret = kErrorPdoInitError;
                 goto Exit;
             }
         }
@@ -280,7 +280,7 @@ tOplkError pdok_allocChannelMem(tPdoAllocationParam* pAllocationParam_p)
 
             if (pdokInstance_g.pdoChannels.pTxPdoChannel == NULL)
             {
-                ret = kEplPdoInitError;
+                ret = kErrorPdoInitError;
                 goto Exit;
             }
         }
@@ -306,7 +306,7 @@ Exit:
 //------------------------------------------------------------------------------
 tOplkError pdok_configureChannel(tPdoChannelConf* pChannelConf_p)
 {
-    tOplkError          Ret = kEplSuccessful;
+    tOplkError          Ret = kErrorOk;
     tPdoChannel*        pDestPdoChannel;
 
     if (pChannelConf_p->fTx == FALSE)
@@ -318,7 +318,7 @@ tOplkError pdok_configureChannel(tPdoChannelConf* pChannelConf_p)
 
         if (pChannelConf_p->channelId >= pdokInstance_g.pdoChannels.allocation.rxPdoChannelCount)
         {
-            Ret = kEplPdoNotExist;
+            Ret = kErrorPdoNotExist;
             goto Exit;
         }
 
@@ -330,7 +330,7 @@ tOplkError pdok_configureChannel(tPdoChannelConf* pChannelConf_p)
         {   // disable old PRes filter in DLL
             NodeOpParam.nodeId = pDestPdoChannel->nodeId;
             Ret = dllk_deleteNode(&NodeOpParam);
-            if (Ret != kEplSuccessful)
+            if (Ret != kErrorOk)
             {
                 goto Exit;
             }
@@ -347,7 +347,7 @@ tOplkError pdok_configureChannel(tPdoChannelConf* pChannelConf_p)
         {   // enable new PRes filter in DLL
             NodeOpParam.nodeId = pDestPdoChannel->nodeId;
             Ret = dllk_addNode(&NodeOpParam);
-            if (Ret != kEplSuccessful)
+            if (Ret != kErrorOk)
             {
                 goto Exit;
             }
@@ -359,7 +359,7 @@ tOplkError pdok_configureChannel(tPdoChannelConf* pChannelConf_p)
     {   // TPDO
         if (pChannelConf_p->channelId >= pdokInstance_g.pdoChannels.allocation.txPdoChannelCount)
         {
-            Ret = kEplPdoNotExist;
+            Ret = kErrorPdoNotExist;
             goto Exit;
         }
 
@@ -391,7 +391,7 @@ The function processes a received RxPDO.
 //------------------------------------------------------------------------------
 tOplkError pdok_processRxPdo(tEplFrame* pFrame_p, UINT frameSize_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     BYTE                frameData;
     UINT                nodeId;
     tEplMsgType         msgType;
@@ -490,12 +490,12 @@ tOplkError pdok_setupPdoBuffers(size_t rxPdoMemSize_p, size_t txPdoMemSize_p)
 
     ret = pdokcal_initPdoMem(&pdokInstance_g.pdoChannels, rxPdoMemSize_p,
                              txPdoMemSize_p);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
         return ret;
 
     pdokInstance_g.fRunning = TRUE;
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -512,7 +512,7 @@ The function sends a sync event.
 tOplkError pdok_sendSyncEvent(void)
 {
     pdokcal_sendSyncEvent();
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //============================================================================//
@@ -536,7 +536,7 @@ in NMT_CS_PRE_OPERATIONAL_2, NMT_CS_READY_TO_OPERATE and NMT_CS_OPERATIONAL.
 //------------------------------------------------------------------------------
 static tOplkError cbProcessTpdo(tFrameInfo * pFrameInfo_p, BOOL fReadyFlag_p)
 {
-    tOplkError      Ret = kEplSuccessful;
+    tOplkError      Ret = kErrorOk;
     Ret = copyTxPdo(pFrameInfo_p->pFrame, pFrameInfo_p->frameSize, fReadyFlag_p);
     return Ret;
 }
@@ -578,7 +578,7 @@ This function copies a PDO into the specified frame.
 //---------------------------------------------------------------------------
 static tOplkError copyTxPdo(tEplFrame* pFrame_p, UINT frameSize_p, BOOL fReadyFlag_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     BYTE                flag1;
     UINT                nodeId;
     tEplMsgType         msgType;

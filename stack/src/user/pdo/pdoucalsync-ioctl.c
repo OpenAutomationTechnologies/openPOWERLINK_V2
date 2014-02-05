@@ -110,7 +110,7 @@ tOplkError pdoucal_initSync(tEplSyncCb pfnSyncCb_p)
     UNUSED_PARAMETER(pfnSyncCb_p);
 
     fd_l = ctrlucal_getFd();
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -134,8 +134,8 @@ The function waits for a sync event.
                         forever.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful      Successfully received sync event
-\retval kEplGeneralError    Error while waiting on sync event
+\retval kErrorOk      Successfully received sync event
+\retval kErrorGeneralError    Error while waiting on sync event
 */
 //------------------------------------------------------------------------------
 tOplkError pdoucal_waitSyncEvent(ULONG timeout_p)
@@ -145,9 +145,9 @@ tOplkError pdoucal_waitSyncEvent(ULONG timeout_p)
     ret = ioctl(fd_l, PLK_CMD_PDO_SYNC, timeout_p);
     if (ret == 0)
     {
-        return kEplSuccessful;
+        return kErrorOk;
     }
-    return kEplGeneralError;
+    return kErrorGeneralError;
 }
 
 //============================================================================//

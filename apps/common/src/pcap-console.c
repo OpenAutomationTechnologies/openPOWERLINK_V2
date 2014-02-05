@@ -115,7 +115,7 @@ tOplkError selectPcapDevice(char *pDevName_p)
     if (pcap_findalldevs(&alldevs, sErr_Msg) == -1)
     {
         fprintf(stderr, "Error in pcap_findalldevs: %s\n", sErr_Msg);
-        return kEplNoResource;
+        return kErrorNoResource;
     }
 
     PRINTF("--------------------------------------------------\n");
@@ -137,7 +137,7 @@ tOplkError selectPcapDevice(char *pDevName_p)
     if (i == 0)
     {
         PRINTF("\nNo interfaces found! Make sure pcap library is installed.\n");
-        return kEplNoResource;
+        return kErrorNoResource;
     }
 
     PRINTF("--------------------------------------------------\n");
@@ -145,7 +145,7 @@ tOplkError selectPcapDevice(char *pDevName_p)
     if (scanf("%d", &inum) == EOF)
     {
         pcap_freealldevs(alldevs);
-        return kEplNoResource;
+        return kErrorNoResource;
     }
 
     PRINTF("--------------------------------------------------\n");
@@ -153,7 +153,7 @@ tOplkError selectPcapDevice(char *pDevName_p)
     {
         PRINTF("\nInterface number out of range.\n");
         pcap_freealldevs(alldevs);
-        return kEplNoResource;
+        return kErrorNoResource;
     }
 
     /* Jump to the selected adapter */
@@ -162,7 +162,7 @@ tOplkError selectPcapDevice(char *pDevName_p)
     }
     strncpy(pDevName_p, seldev->name, 127);
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //============================================================================//

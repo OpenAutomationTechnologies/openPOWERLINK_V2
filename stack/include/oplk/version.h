@@ -55,7 +55,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 #define EPL_DEFINED_STACK_VERSION   EPL_STACK_VERSION   (2, 0, 0)
 #define EPL_DEFINED_OBJ1018_VERSION EPL_OBJ1018_VERSION (2, 0, 0)
-#define EPL_DEFINED_STRING_VERSION  EPL_STRING_VERSION  (2, 0, 0, "pre1")
+#define EPL_DEFINED_STRING_VERSION  EPL_STRING_VERSION  (2, 0, 0, "b1")
 
 
 // -----------------------------------------------------------------------------

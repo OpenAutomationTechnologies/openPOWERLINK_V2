@@ -100,7 +100,7 @@ is specified by eventQueue_p.
 \param  eventQueue_p            Event queue to initialize.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          If function executes correctly
+\retval kErrorOk          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventkcal
@@ -113,13 +113,13 @@ tOplkError eventkcal_initQueueCircbuf(tEventQueue eventQueue_p)
     if (eventQueue_p > kEventQueueNum)
     {
         TRACE("%s() Error: invalid queue %d!\n", __func__, eventQueue_p);
-        return kEplInvalidInstanceParam;
+        return kErrorInvalidInstanceParam;
     }
 
     if (instance_l[eventQueue_p] != NULL)
     {
         TRACE("%s() Error: instance of queue %d not NULL!\n", __func__, eventQueue_p);
-        return kEplNoResource;
+        return kErrorNoResource;
     }
 
     switch(eventQueue_p)
@@ -130,7 +130,7 @@ tOplkError eventkcal_initQueueCircbuf(tEventQueue eventQueue_p)
             if (circError != kCircBufOk)
             {
                 TRACE("PLK : Could not allocate CIRCBUF_USER_INTERNAL_QUEUE circbuffer\n");
-                return kEplNoResource;
+                return kErrorNoResource;
             }
             break;
 
@@ -140,7 +140,7 @@ tOplkError eventkcal_initQueueCircbuf(tEventQueue eventQueue_p)
             if (circError != kCircBufOk)
             {
                 TRACE("PLK : Could not allocate CIRCBUF_USER_TO_KERNEL_QUEUE circbuffer\n");
-                return kEplNoResource;
+                return kErrorNoResource;
             }
 
             break;
@@ -151,7 +151,7 @@ tOplkError eventkcal_initQueueCircbuf(tEventQueue eventQueue_p)
             if (circError != kCircBufOk)
             {
                 TRACE("PLK : Could not allocate CIRCBUF_KERNEL_TO_USER_QUEUE circbuffer\n");
-                return kEplNoResource;
+                return kErrorNoResource;
             }
             break;
 
@@ -161,16 +161,16 @@ tOplkError eventkcal_initQueueCircbuf(tEventQueue eventQueue_p)
             if (circError != kCircBufOk)
             {
                 TRACE("PLK : Could not allocate CIRCBUF_KERNEL_TO_USER_QUEUE circbuffer\n");
-                return kEplNoResource;
+                return kErrorNoResource;
             }
             break;
 
         default:
-            return kEplInvalidInstanceParam;
+            return kErrorInvalidInstanceParam;
             break;
     }
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -183,7 +183,7 @@ specified by eventQueue_p.
 \param  eventQueue_p            Event queue to cleanup.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          If function executes correctly
+\retval kErrorOk          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventkcal
@@ -192,16 +192,16 @@ specified by eventQueue_p.
 tOplkError eventkcal_exitQueueCircbuf (tEventQueue eventQueue_p)
 {
     if (eventQueue_p > kEventQueueNum)
-        return kEplInvalidInstanceParam;
+        return kErrorInvalidInstanceParam;
 
     if (instance_l[eventQueue_p] == NULL)
-        return kEplSuccessful;
+        return kErrorOk;
 
     circbuf_free(instance_l[eventQueue_p]);
 
     instance_l[eventQueue_p] = NULL;
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -214,7 +214,7 @@ This function posts an event to the provided queue instance.
 \param  pEvent_p                Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          If function executes correctly
+\retval kErrorOk          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventkcal
@@ -222,19 +222,19 @@ This function posts an event to the provided queue instance.
 //------------------------------------------------------------------------------
 tOplkError eventkcal_postEventCircbuf (tEventQueue eventQueue_p, tEplEvent *pEvent_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     tCircBufError       circError;
 
     if (eventQueue_p > kEventQueueNum)
     {
         TRACE("%s() invalid queue %d!\n", __func__, eventQueue_p);
-        return kEplInvalidInstanceParam;
+        return kErrorInvalidInstanceParam;
     }
 
     if (instance_l[eventQueue_p] == NULL)
     {
         TRACE("%s() instance %d = NULL!\n", __func__, eventQueue_p);
-        return kEplInvalidInstanceParam;
+        return kErrorInvalidInstanceParam;
     }
 
     /*TRACE("%s() Event:%d Sink:%d\n", __func__, pEvent_p->m_EventType, pEvent_p->m_EventSink);*/
@@ -249,7 +249,7 @@ tOplkError eventkcal_postEventCircbuf (tEventQueue eventQueue_p, tEplEvent *pEve
     }
     if(circError != kCircBufOk)
     {
-        ret = kEplEventPostError;
+        ret = kErrorEventPostError;
     }
     return ret;
 }
@@ -264,7 +264,7 @@ by calling the event handlers process function.
 \param  eventQueue_p            Event queue used for reading the event.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          if function executes correctly
+\retval kErrorOk          if function executes correctly
 \retval other                   error
 
 \ingroup module_eventkcal
@@ -274,7 +274,7 @@ tOplkError eventkcal_processEventCircbuf(tEventQueue eventQueue_p)
 {
     tEplEvent*          pEplEvent;
     tCircBufError       error;
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     size_t              readSize;
     tCircBufInstance*   pCircBufInstance;
 
@@ -283,13 +283,13 @@ tOplkError eventkcal_processEventCircbuf(tEventQueue eventQueue_p)
     if (eventQueue_p > kEventQueueNum)
     {
         TRACE("%s() invalid queue %d!\n", __func__, eventQueue_p);
-        return kEplInvalidInstanceParam;
+        return kErrorInvalidInstanceParam;
     }
 
     if (instance_l[eventQueue_p] == NULL)
     {
         TRACE("%s() instance %d = NULL!\n", __func__, eventQueue_p);
-        return kEplInvalidInstanceParam;
+        return kErrorInvalidInstanceParam;
     }
 
     pCircBufInstance = instance_l[eventQueue_p];
@@ -299,12 +299,12 @@ tOplkError eventkcal_processEventCircbuf(tEventQueue eventQueue_p)
     if(error != kCircBufOk)
     {
         if (error == kCircBufNoReadableData)
-            return kEplSuccessful;
+            return kErrorOk;
 
-        eventk_postError(kEplEventSourceEventk, kEplEventReadError,
+        eventk_postError(kEplEventSourceEventk, kErrorEventReadError,
                          sizeof(tCircBufError), &error);
 
-        return kEplGeneralError;
+        return kErrorGeneralError;
     }
     pEplEvent = (tEplEvent *) aRxBuffer_l[eventQueue_p];
     pEplEvent->m_uiSize = (readSize - sizeof(tEplEvent));
@@ -336,7 +336,7 @@ at pDataBuffer_p.
 \param  pReadSize_p             Pointer to store length of event.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          if function executes correctly
+\retval kErrorOk          if function executes correctly
 \retval other                   error
 
 \ingroup module_eventkcal
@@ -351,13 +351,13 @@ tOplkError eventkcal_getEventCircbuf(tEventQueue eventQueue_p, BYTE* pDataBuffer
     if (eventQueue_p > kEventQueueNum)
     {
         TRACE("%s() invalid queue %d!\n", __func__, eventQueue_p);
-        return kEplInvalidInstanceParam;
+        return kErrorInvalidInstanceParam;
     }
 
     if (instance_l[eventQueue_p] == NULL)
     {
         TRACE("%s() instance %d = NULL!\n", __func__, eventQueue_p);
-        return kEplInvalidInstanceParam;
+        return kErrorInvalidInstanceParam;
     }
 
     pCircBufInstance = instance_l[eventQueue_p];
@@ -367,15 +367,15 @@ tOplkError eventkcal_getEventCircbuf(tEventQueue eventQueue_p, BYTE* pDataBuffer
     if(error != kCircBufOk)
     {
         if (error == kCircBufNoReadableData)
-            return kEplSuccessful;
+            return kErrorOk;
 
-        eventk_postError(kEplEventSourceEventk, kEplEventReadError,
+        eventk_postError(kEplEventSourceEventk, kErrorEventReadError,
                          sizeof(tCircBufError), &error);
 
-        return kEplGeneralError;
+        return kErrorGeneralError;
     }
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -428,13 +428,13 @@ queue.
 tOplkError eventkcal_setSignalingCircbuf(tEventQueue eventQueue_p, VOIDFUNCPTR pfnSignalCb_p)
 {
     if (eventQueue_p > kEventQueueNum)
-        return kEplInvalidInstanceParam;
+        return kErrorInvalidInstanceParam;
 
     if (instance_l[eventQueue_p] == NULL)
-        return kEplInvalidInstanceParam;
+        return kErrorInvalidInstanceParam;
 
     circBuf_setSignaling(instance_l[eventQueue_p], pfnSignalCb_p);
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //============================================================================//

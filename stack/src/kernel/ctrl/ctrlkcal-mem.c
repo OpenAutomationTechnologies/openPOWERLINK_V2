@@ -103,16 +103,16 @@ the memory block access functions.
 tOplkError ctrlkcal_init (void)
 {
     tCtrlBuf        ctrl;
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
 
-    if ((ret = ctrlcal_init(sizeof(tCtrlBuf))) != kEplSuccessful)
-        return kEplNoResource;
+    if ((ret = ctrlcal_init(sizeof(tCtrlBuf))) != kErrorOk)
+        return kErrorNoResource;
 
     EPL_MEMSET(&ctrl, 0, sizeof(tCtrlBuf));
     ctrl.magic = CTRL_MAGIC;
     ctrl.status = kCtrlStatusReady;
     ctrlcal_writeData(0, &ctrl, sizeof(tCtrlBuf));
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -148,7 +148,7 @@ This function provides processing time for the CAL module.
 //------------------------------------------------------------------------------
 tOplkError ctrlkcal_process (void)
 {
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------

@@ -132,7 +132,7 @@ tOplkError ctrlucal_init(void)
     if(hifRet != kHostifSuccessful)
     {
         DEBUG_LVL_ERROR_TRACE ("Could not initialize Host Interface (0x%X)\n", hifRet);
-        return kEplNoResource;
+        return kErrorNoResource;
     }
 
     //disable master irq
@@ -142,10 +142,10 @@ tOplkError ctrlucal_init(void)
     if(hifRet != kHostifSuccessful)
     {
         DEBUG_LVL_ERROR_TRACE ("Could not disable Master Irq (0x%X)\n", hifRet);
-        return kEplNoResource;
+        return kErrorNoResource;
     }
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -197,11 +197,11 @@ tOplkError ctrlucal_process (void)
         if(hifRet != kHostifSuccessful)
         {
             DEBUG_LVL_ERROR_TRACE ("Could not enable Master Irq (0x%X)\n", hifRet);
-            return kEplNoResource;
+            return kErrorNoResource;
         }
     }
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -234,11 +234,11 @@ tOplkError ctrlucal_executeCmd(tCtrlCmdType cmd_p)
 
         hifret = hostif_getCommand(instance_l.hifInstance, &hifcmd);
         if(hifret != kHostifSuccessful)
-            return kEplGeneralError;
+            return kErrorGeneralError;
 
         hifret = hostif_getError(instance_l.hifInstance, &hiferr);
         if(hifret != kHostifSuccessful)
-            return kEplGeneralError;
+            return kErrorGeneralError;
 
         if(hifcmd == 0)
         {
@@ -247,7 +247,7 @@ tOplkError ctrlucal_executeCmd(tCtrlCmdType cmd_p)
     }
 
     TRACE("%s() Timeout waiting for return!\n", __func__);
-    return kEplGeneralError;
+    return kErrorGeneralError;
 }
 
 
@@ -259,8 +259,8 @@ The function checks the state of the kernel stack. If it is already running
 it tries to shutdown.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful  If kernel stack is initialized
-\retval kEplNoResource  If kernel stack is not running or in wrong state
+\retval kErrorOk  If kernel stack is initialized
+\retval kErrorNoResource  If kernel stack is not running or in wrong state
 
 \ingroup module_ctrlucal
 */
@@ -281,7 +281,7 @@ tOplkError ctrlucal_checkKernelStack(void)
             case kCtrlStatusReady:
                 TRACE("-> Kernel Stack is ready\n");
                 fExit = TRUE;
-                ret = kEplSuccessful;
+                ret = kErrorOk;
                 break;
 
             case kCtrlStatusRunning:
@@ -289,10 +289,10 @@ tOplkError ctrlucal_checkKernelStack(void)
                 TRACE("-> Try to shutdown Kernel Stack\n");
 
                 ret = ctrlucal_executeCmd(kCtrlCleanupStack);
-                if(ret != kEplSuccessful)
+                if(ret != kErrorOk)
                 {
                     fExit = TRUE;
-                    ret = kEplNoResource;
+                    ret = kErrorNoResource;
                 }
                 break;
 
@@ -305,7 +305,7 @@ tOplkError ctrlucal_checkKernelStack(void)
                 if(timeout++ >= CMD_TIMEOUT_SEC)
                 {
                     fExit = TRUE;
-                    ret = kEplNoResource;
+                    ret = kErrorNoResource;
                 }
                 break;
         }
@@ -331,7 +331,7 @@ UINT16 ctrlucal_getStatus(void)
     UINT16 status;
 
     hifret = hostif_getState(instance_l.hifInstance, (tHostifState*)&status);
-    if(hifret != kEplSuccessful)
+    if(hifret != kErrorOk)
         status = kCtrlStatusUnavailable;
 
     return status;
@@ -354,7 +354,7 @@ UINT16 ctrlucal_getHeartbeat(void)
     UINT16 heartbeat;
 
     hifret = hostif_getHeartbeat(instance_l.hifInstance, &heartbeat);
-    if(hifret != kEplSuccessful)
+    if(hifret != kErrorOk)
         heartbeat = 0; // return constant heartbeat, so the user recognizes issue
 
     return heartbeat;
@@ -391,7 +391,7 @@ The function reads the initialization parameter from the kernel stack.
 \param  pInitParam_p        Specifies where to store the read init parameters.
 
 \return The function returns a tOplkError error code. It returns always
-        kEplSuccessful!
+        kErrorOk!
 
 \ingroup module_ctrlucal
 */
@@ -401,13 +401,13 @@ tOplkError ctrlucal_readInitParam(tCtrlInitParam* pInitParam_p)
     UINT8* pSrc = memInitParamGetDynBuff();
 
     if(pSrc == NULL)
-        return kEplNoResource;
+        return kErrorNoResource;
 
     EPL_MEMCPY(pInitParam_p, pSrc, sizeof(tCtrlInitParam));
 
     memInitParamFreeDynBuff();
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 

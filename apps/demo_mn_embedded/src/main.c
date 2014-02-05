@@ -128,7 +128,7 @@ This is the main function of the openPOWERLINK console MN demo application.
 //------------------------------------------------------------------------------
 int main(void)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
     const UINT8 aMacAddr[] = {MAC_ADDR};
     UINT8       nodeid;
 
@@ -160,10 +160,10 @@ int main(void)
     PRINTF("NODEID=0x%02X\n", instance_l.nodeId);
     lcd_printNodeId((WORD)instance_l.nodeId);
 
-    if((ret = initPowerlink(&instance_l)) != kEplSuccessful)
+    if((ret = initPowerlink(&instance_l)) != kErrorOk)
         goto Exit;
 
-    if((ret = initApp()) != kEplSuccessful)
+    if((ret = initApp()) != kErrorOk)
         goto Exit;
 
     loopMain(&instance_l);
@@ -194,7 +194,7 @@ The function initializes the openPOWERLINK stack.
 //------------------------------------------------------------------------------
 static tOplkError initPowerlink(tInstance* pInstance_p)
 {
-    tOplkError                  ret = kEplSuccessful;
+    tOplkError                  ret = kErrorOk;
     static tEplApiInitParam     initParam;
     char*                       sHostname = HOSTNAME;
 
@@ -242,20 +242,20 @@ static tOplkError initPowerlink(tInstance* pInstance_p)
 
     // initialize POWERLINK stack
     ret = oplk_init(&initParam);
-    if(ret != kEplSuccessful)
+    if(ret != kErrorOk)
     {
         PRINTF("oplk_init() failed (Error:0x%x!)\n", ret);
         return ret;
     }
 
     ret = oplk_setCdcBuffer(pInstance_p->pCdcBuffer, pInstance_p->cdcBufferSize);
-    if(ret != kEplSuccessful)
+    if(ret != kErrorOk)
     {
         PRINTF("oplk_setCdcBuffer() failed (Error:0x%x!)\n", ret);
         return ret;
     }
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -272,17 +272,17 @@ This function implements the main loop of the demo application.
 //------------------------------------------------------------------------------
 static tOplkError loopMain(tInstance* pInstance_p)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
     UINT        checkStack = 0;
 
     // start processing
-    if((ret = oplk_execNmtCommand(kNmtEventSwReset)) != kEplSuccessful)
+    if((ret = oplk_execNmtCommand(kNmtEventSwReset)) != kErrorOk)
         return ret;
 
     while(1)
     {
         // do background tasks
-        if((ret = oplk_process()) != kEplSuccessful)
+        if((ret = oplk_process()) != kErrorOk)
             break;
 
         // check the kernel part from time to time

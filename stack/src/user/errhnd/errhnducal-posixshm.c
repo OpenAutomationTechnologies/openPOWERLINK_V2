@@ -106,7 +106,7 @@ The function initializes the user layer CAL module of the error handler.
 
 \param  pLocalObjects_p         Pointer to local error objects
 
-\return Always returns kEplSuccessful
+\return Always returns kErrorOk
 
 \ingroup module_errhnducal
 */
@@ -118,18 +118,18 @@ tOplkError errhnducal_init (tErrHndObjects *pLocalObjects_p)
     pLocalObjects_l = pLocalObjects_p;
 
     if (pErrHndMem_l != NULL)
-        return kEplNoFreeInstance;
+        return kErrorNoFreeInstance;
 
     if ((fd_l = shm_open(ERRHND_SHM_NAME, O_RDWR | O_CREAT, 0)) < 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s() shm_open failed!\n", __func__);
-        return kEplNoResource;
+        return kErrorNoResource;
     }
 
     if (fstat(fd_l, &stat) != 0)
     {
         close (fd_l);
-        return kEplNoResource;
+        return kErrorNoResource;
     }
 
     if (stat.st_size == 0)
@@ -139,7 +139,7 @@ tOplkError errhnducal_init (tErrHndObjects *pLocalObjects_p)
             DEBUG_LVL_ERROR_TRACE("%s() ftruncate failed!\n", __func__);
             close (fd_l);
             shm_unlink(ERRHND_SHM_NAME);
-            return kEplNoResource;
+            return kErrorNoResource;
         }
         fCreator_l = TRUE;
     }
@@ -151,14 +151,14 @@ tOplkError errhnducal_init (tErrHndObjects *pLocalObjects_p)
         close (fd_l);
         if (fCreator_l)
             shm_unlink(ERRHND_SHM_NAME);
-        return kEplNoResource;
+        return kErrorNoResource;
     }
 
     if (fCreator_l)
     {
         EPL_MEMSET(pErrHndMem_l, 0, sizeof(tErrHndObjects));
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -209,7 +209,7 @@ tOplkError errhnducal_writeErrorObject(UINT index_p, UINT subIndex_p, UINT32 *pP
 
     offset = (char *)pParam_p - (char *)pLocalObjects_l;
     *(UINT32*)(pErrHndMem_l + offset) = *pParam_p;
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -237,7 +237,7 @@ tOplkError errhnducal_readErrorObject(UINT index_p, UINT subIndex_p, UINT32* pPa
 
     offset = (char *)pParam_p - (char *)pLocalObjects_l;
     *pParam_p = *(UINT32*)(pErrHndMem_l + offset);
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //============================================================================//

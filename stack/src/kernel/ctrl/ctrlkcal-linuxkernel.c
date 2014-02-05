@@ -102,7 +102,7 @@ implementation nothing has to be done!
 tOplkError ctrlkcal_init (void)
 {
     status_g = kCtrlStatusReady;
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -134,7 +134,7 @@ This function provides processing time for the CAL module.
 //------------------------------------------------------------------------------
 tOplkError ctrlkcal_process (void)
 {
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -158,7 +158,7 @@ block to execute a kernel control function.
 tOplkError ctrlkcal_getCmd (tCtrlCmdType *pCmd_p)
 {
     UNUSED_PARAMETER(pCmd_p);
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -258,7 +258,7 @@ The function reads the initialization parameter from the user stack.
 \param  pInitParam_p        Specifies where to store the read init parameters.
 
 \return The function returns a tOplkError error code. It returns always
-        kEplSuccessful!
+        kErrorOk!
 
 \ingroup module_ctrlkcal
 */
@@ -266,6 +266,6 @@ The function reads the initialization parameter from the user stack.
 tOplkError ctrlkcal_readInitParam(tCtrlInitParam* pInitParam_p)
 {
     EPL_MEMCPY(pInitParam_p, &kernelInitParam_g, sizeof(tCtrlInitParam));
-    return kEplSuccessful;
+    return kErrorOk;
 }
 

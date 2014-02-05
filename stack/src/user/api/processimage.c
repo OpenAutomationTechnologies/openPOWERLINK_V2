@@ -111,21 +111,21 @@ The function allocates the input and output process images
 //------------------------------------------------------------------------------
 tOplkError oplk_allocProcessImage(UINT sizeProcessImageIn_p, UINT sizeProcessImageOut_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
 
     TRACE("%s(): Alloc(%u, %u)\n", __func__, sizeProcessImageIn_p,
                                    sizeProcessImageOut_p);
 
     if ((instance_l.inputImage.m_pImage != NULL)|| (instance_l.outputImage.m_pImage != NULL))
     {
-        ret = kEplApiPIAlreadyAllocated;
+        ret = kErrorApiPIAlreadyAllocated;
         goto Exit;
     }
 
     instance_l.inputImage.m_pImage = EPL_MALLOC(sizeProcessImageIn_p);
     if (instance_l.inputImage.m_pImage == NULL)
     {
-        ret = kEplApiPIOutOfMemory;
+        ret = kErrorApiPIOutOfMemory;
         goto Exit;
     }
     instance_l.inputImage.m_uiSize = sizeProcessImageIn_p;
@@ -133,7 +133,7 @@ tOplkError oplk_allocProcessImage(UINT sizeProcessImageIn_p, UINT sizeProcessIma
     instance_l.outputImage.m_pImage = EPL_MALLOC(sizeProcessImageOut_p);
     if (instance_l.outputImage.m_pImage == NULL)
     {
-        ret = kEplApiPIOutOfMemory;
+        ret = kErrorApiPIOutOfMemory;
         goto Exit;
     }
     instance_l.outputImage.m_uiSize = sizeProcessImageOut_p;
@@ -160,7 +160,7 @@ The function frees the allocated process images
 
 tOplkError oplk_freeProcessImage(void)
 {
-    tOplkError      Ret = kEplSuccessful;
+    tOplkError      Ret = kErrorOk;
 
     if ((instance_l.inputImage.m_pImage == NULL) &&
         (instance_l.outputImage.m_pImage == NULL))
@@ -208,21 +208,21 @@ tOplkError oplk_linkProcessImageObject(UINT objIndex_p, UINT firstSubindex_p,
                                        UINT offsetPI_p, BOOL fOutputPI_p,
                                        tObdSize entrySize_p, UINT* pVarEntries_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     void*           pVar;
 
     if (pVarEntries_p == NULL)
-        return kEplApiInvalidParam;
+        return kErrorApiInvalidParam;
 
     if ((instance_l.inputImage.m_pImage == NULL) || (instance_l.outputImage.m_pImage == NULL))
-        return kEplApiPINotAllocated;
+        return kErrorApiPINotAllocated;
 
     if (fOutputPI_p)
     {
         pVar = ((BYTE*) instance_l.outputImage.m_pImage) + offsetPI_p;
         if ((offsetPI_p + entrySize_p) > instance_l.outputImage.m_uiSize)
         {   // at least one entry should fit into the PI, but it doesn't
-            return kEplApiPISizeExceeded;
+            return kErrorApiPISizeExceeded;
         }
         if ((offsetPI_p + (*pVarEntries_p * entrySize_p)) > instance_l.outputImage.m_uiSize)
         {   // limit the number of entries
@@ -234,7 +234,7 @@ tOplkError oplk_linkProcessImageObject(UINT objIndex_p, UINT firstSubindex_p,
         pVar = ((BYTE*) instance_l.inputImage.m_pImage) + offsetPI_p;
         if ((offsetPI_p + entrySize_p) > instance_l.inputImage.m_uiSize)
         {   // at least one entry should fit into the PI, but it doesn't
-            return kEplApiPISizeExceeded;
+            return kErrorApiPISizeExceeded;
         }
         if ((offsetPI_p + (*pVarEntries_p * entrySize_p)) > instance_l.inputImage.m_uiSize)
         {   // limit the number of entries
@@ -265,7 +265,7 @@ tOplkError oplk_exchangeProcessImageIn(void)
     if (instance_l.inputImage.m_pImage != NULL)
         ret = pdou_copyTxPdoFromPi();
     else
-        ret = kEplApiPINotAllocated;
+        ret = kErrorApiPINotAllocated;
 
     return ret;
 }
@@ -288,7 +288,7 @@ tOplkError oplk_exchangeProcessImageOut(void)
     if (instance_l.outputImage.m_pImage != NULL)
         ret = pdou_copyRxPdoToPi();
     else
-        ret = kEplApiPINotAllocated;
+        ret = kErrorApiPINotAllocated;
 
     return ret;
 }

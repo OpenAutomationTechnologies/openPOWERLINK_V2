@@ -89,13 +89,13 @@ configuration it gets the function pointer interface of the used queue
 implementations and calls the appropriate init functions.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          If function executes correctly
+\retval kErrorOk          If function executes correctly
 \retval other error codes       If an error occurred
 */
 //------------------------------------------------------------------------------
 tOplkError eventkcal_init (void)
 {
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -106,13 +106,13 @@ The function cleans up the kernel event CAL module. For cleanup it calls the exi
 functions of the queue implementations for each used queue.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          If function executes correctly
+\retval kErrorOk          If function executes correctly
 \retval other error codes       If an error occurred
 */
 //------------------------------------------------------------------------------
 tOplkError eventkcal_exit (void)
 {
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -126,13 +126,13 @@ queue post function is called.
 \param  pEvent_p                Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          If function executes correctly
+\retval kErrorOk          If function executes correctly
 \retval other error codes       If an error occurred
 */
 //------------------------------------------------------------------------------
 tOplkError eventkcal_postEvent (tEplEvent *pEvent_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
 
     // split event post to user internal and user to kernel
     switch(pEvent_p->m_EventSink)
@@ -145,7 +145,7 @@ tOplkError eventkcal_postEvent (tEplEvent *pEvent_p)
         case kEplEventSinkDlluCal:
         case kEplEventSinkErru:
         case kEplEventSinkLedu:
-            ret = kEplSuccessful;
+            ret = kErrorOk;
             break;
 
         // kernel layer modules
@@ -156,11 +156,11 @@ tOplkError eventkcal_postEvent (tEplEvent *pEvent_p)
         case kEplEventSinkPdok:
         case kEplEventSinkPdokCal:
         case kEplEventSinkErrk:
-            ret = kEplSuccessful;
+            ret = kErrorOk;
             break;
 
         default:
-            ret = kEplEventUnknownSink;
+            ret = kErrorEventUnknownSink;
             break;
     }
 
@@ -177,13 +177,13 @@ This is the event receive function for events posted to the kernel layer.
 \param  pEvent_p                Received event to be processed.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          If function executes correctly
+\retval kErrorOk          If function executes correctly
 \retval other error codes       If an error occurred
 */
 //------------------------------------------------------------------------------
 tOplkError eventkcal_rxHandler (tEplEvent *pEvent_p)
 {
-    tOplkError ret = kEplSuccessful;
+    tOplkError ret = kErrorOk;
 
     ret = eventk_process(pEvent_p);
 

@@ -124,7 +124,7 @@ The function initializes the architecture specific stuff of the user event
 CAL module.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          If function executes correctly
+\retval kErrorOk          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventucal
@@ -142,15 +142,15 @@ tOplkError eventucal_init (void)
     if ((instance_l.semKernelData = sem_open("/semKernelEvent", O_RDWR)) == SEM_FAILED)
         goto Exit;
 
-    if (eventucal_initQueueCircbuf(kEventQueueK2U) != kEplSuccessful)
+    if (eventucal_initQueueCircbuf(kEventQueueK2U) != kErrorOk)
         goto Exit;
 
-    if (eventucal_initQueueCircbuf(kEventQueueU2K) != kEplSuccessful)
+    if (eventucal_initQueueCircbuf(kEventQueueU2K) != kErrorOk)
         goto Exit;
 
     eventucal_setSignalingCircbuf(kEventQueueU2K, signalKernelEvent);
 
-    if (eventucal_initQueueCircbuf(kEventQueueUInt) != kEplSuccessful)
+    if (eventucal_initQueueCircbuf(kEventQueueUInt) != kErrorOk)
         goto Exit;
 
     eventucal_setSignalingCircbuf(kEventQueueUInt, signalUserEvent);
@@ -166,7 +166,7 @@ tOplkError eventucal_init (void)
                __func__, schedParam.__sched_priority);
     }
     instance_l.fInitialized = TRUE;
-    return kEplSuccessful;
+    return kErrorOk;
 
 Exit:
     if (instance_l.semUserData != SEM_FAILED)
@@ -179,7 +179,7 @@ Exit:
     eventucal_exitQueueCircbuf(kEventQueueU2K);
     eventucal_exitQueueCircbuf(kEventQueueUInt);
 
-    return kEplNoResource;
+    return kErrorNoResource;
 }
 
 //------------------------------------------------------------------------------
@@ -190,7 +190,7 @@ The function cleans up the kernel event CAL module. For cleanup it calls the exi
 functions of the queue implementations for each used queue.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          If function executes correctly
+\retval kErrorOk          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventucal
@@ -222,7 +222,7 @@ tOplkError eventucal_exit (void)
     }
     instance_l.fInitialized = FALSE;
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -236,7 +236,7 @@ queue post function is called.
 \param  pEvent_p                Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          If function executes correctly
+\retval kErrorOk          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventucal
@@ -264,7 +264,7 @@ queue post function is called.
 \param  pEvent_p                Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          If function executes correctly
+\retval kErrorOk          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventucal

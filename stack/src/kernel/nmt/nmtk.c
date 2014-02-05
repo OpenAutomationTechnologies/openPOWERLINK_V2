@@ -209,7 +209,7 @@ tOplkError nmtk_init(void)
     nmtkInstance_g.fAllMandatoryCNIdent = FALSE;
     nmtkInstance_g.fFrozen = FALSE;
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -226,7 +226,7 @@ The function deletes the NMT kernel module instance
 tOplkError nmtk_delInstance(void)
 {
     nmtkInstance_g.stateIndex = kNmtkGsOff;
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -250,7 +250,7 @@ tOplkError nmtk_process(tEplEvent* pEvent_p)
     tEplEvent               event;
     tEventNmtStateChange    nmtStateChange;
 
-    ret = kEplSuccessful;
+    ret = kErrorOk;
 
     switch(pEvent_p->m_EventType)
     {
@@ -263,7 +263,7 @@ tOplkError nmtk_process(tEplEvent* pEvent_p)
             break;
 
         default:
-            return kEplNmtInvalidEvent;
+            return kErrorNmtInvalidEvent;
     }
 
     // save NMT-State
@@ -292,7 +292,7 @@ tOplkError nmtk_process(tEplEvent* pEvent_p)
         // inform DLLk module about state change
         event.m_EventSink = kEplEventSinkDllk;
         ret = dllk_process(&event);
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
            return ret;
 
         // inform higher layer about state change
@@ -327,7 +327,7 @@ static tOplkError doStateGsOff(tNmtEvent nmtEvent_p)
     {   // NMT_GT8, NMT_GT1 -> new state kNmtGsInitialising
         nmtkInstance_g.stateIndex = kNmtkGsInitialising;
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -363,7 +363,7 @@ static tOplkError doStateGsInitialising(tNmtEvent nmtEvent_p)
         default:
             break;
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -408,7 +408,7 @@ static tOplkError doStateGsResetApplication(tNmtEvent nmtEvent_p)
         default:
             break;
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -457,7 +457,7 @@ static tOplkError doStateGsResetCommunication(tNmtEvent nmtEvent_p)
         default:
             break;
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -528,7 +528,7 @@ static tOplkError doStateGsResetConfiguration(tNmtEvent nmtEvent_p)
         default:
             break;
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -595,7 +595,7 @@ static tOplkError doStateCsNotActive(tNmtEvent nmtEvent_p)
         default:
             break;
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -655,7 +655,7 @@ static tOplkError doStateCsPreOperational1(tNmtEvent nmtEvent_p)
         default:
             break;
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -757,7 +757,7 @@ static tOplkError doStateCsPreOperational2(tNmtEvent nmtEvent_p)
         default:
             break;
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -828,7 +828,7 @@ static tOplkError doStateCsReadyToOperate(tNmtEvent nmtEvent_p)
         default:
             break;
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -899,7 +899,7 @@ static tOplkError doStateCsOperational(tNmtEvent nmtEvent_p)
         default:
             break;
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -966,7 +966,7 @@ static tOplkError doStateCsStopped(tNmtEvent nmtEvent_p)
         default:
             break;
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -1034,7 +1034,7 @@ static tOplkError doStateCsBasicEthernet(tNmtEvent nmtEvent_p)
         default:
             break;
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -1127,7 +1127,7 @@ static tOplkError doStateMsNotActive(tNmtEvent nmtEvent_p)
 
     }
 #endif
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
@@ -1223,7 +1223,7 @@ static tOplkError doStateMsPreOperational1(tNmtEvent nmtEvent_p)
             break;
 
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -1295,7 +1295,7 @@ static tOplkError doStateMsPreOperational2(tNmtEvent nmtEvent_p)
         default:
             break;
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -1368,7 +1368,7 @@ static tOplkError doStateMsReadyToOperate(tNmtEvent nmtEvent_p)
         default:
             break;
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 //------------------------------------------------------------------------------
 /**
@@ -1434,7 +1434,7 @@ static tOplkError doStateMsOperational(tNmtEvent nmtEvent_p)
         default:
             break;
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -1501,7 +1501,7 @@ tOplkError doStateMsBasicEthernet(tNmtEvent nmtEvent_p)
         default:
             break;
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 #endif

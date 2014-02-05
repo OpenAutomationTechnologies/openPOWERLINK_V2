@@ -57,7 +57,7 @@ openPOWERLINK stack.
 //------------------------------------------------------------------------------
 tOplkError target_init(void)
 {
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -71,7 +71,7 @@ The function cleans-up target specific stuff.
 //------------------------------------------------------------------------------
 tOplkError target_cleanup(void)
 {
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------

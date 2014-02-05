@@ -108,9 +108,9 @@ tOplkError pdokcal_initSync(void)
     if ((syncSem_l = sem_open(PDO_SYNC_BSDSEM, O_CREAT, S_IRWXG, 1)) == SEM_FAILED)
     {
         TRACE ("%s() creating sem failed!\n", __func__);
-        return kEplNoResource;
+        return kErrorNoResource;
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -141,7 +141,7 @@ The function sends a sync event
 tOplkError pdokcal_sendSyncEvent(void)
 {
     sem_post(syncSem_l);
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -160,7 +160,7 @@ The function enables sync events
 tOplkError pdokcal_controlSync(BOOL fEnable_p)
 {
     UNUSED_PARAMETER(fEnable_p);
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //============================================================================//

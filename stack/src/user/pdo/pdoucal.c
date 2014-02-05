@@ -100,7 +100,7 @@ tOplkError pdoucal_init(tEplSyncCb pfnSyncCb_p)
 {
     tOplkError      ret;
 
-    if ((ret = pdoucal_openMem()) != kEplSuccessful)
+    if ((ret = pdoucal_openMem()) != kErrorOk)
         return ret;
 
     return pdoucal_initSync(pfnSyncCb_p);
@@ -121,7 +121,7 @@ tOplkError pdoucal_exit(void)
 {
     pdoucal_closeMem();
     pdoucal_exitSync();
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -141,7 +141,7 @@ in the Pdok module by sending the appropriate event to Pdok.
 //------------------------------------------------------------------------------
 tOplkError pdoucal_postPdokChannelAlloc(tPdoAllocationParam* pAllocationParam_p)
 {
-    tOplkError  Ret = kEplSuccessful;
+    tOplkError  Ret = kErrorOk;
     tEplEvent   Event;
 
     Event.m_EventSink = kEplEventSinkPdokCal;
@@ -170,7 +170,7 @@ kEplEventTypePdokConfig to the kernel PDO module.
 //------------------------------------------------------------------------------
 tOplkError pdoucal_postConfigureChannel(tPdoChannelConf* pChannelConf_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     tEplEvent       Event;
 
     Event.m_EventSink = kEplEventSinkPdokCal;
@@ -199,7 +199,7 @@ a kEplEventTypePdokSetupPdoBuf event.
 //------------------------------------------------------------------------------
 tOplkError pdoucal_postSetupPdoBuffers(size_t rxPdoMemSize_p, size_t txPdoMemSize_p)
 {
-    tOplkError      Ret = kEplSuccessful;
+    tOplkError      Ret = kErrorOk;
     tEplEvent       Event;
     tPdoMemSize     pdoMemSize;
 

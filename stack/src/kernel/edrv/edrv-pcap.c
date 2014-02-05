@@ -166,8 +166,8 @@ static DWORD WINAPI  EdrvWorkerThread(void *);
 //
 // Parameters:  pEdrvInitParam_p    = pointer to struct including the init-parameters
 //
-// Returns:     Errorcode           = kEplSuccessful
-//                                  = kEplNoResource
+// Returns:     Errorcode           = kErrorOk
+//                                  = kErrorNoResource
 //
 // State:
 //
@@ -184,7 +184,7 @@ PIP_ADAPTER_INFO pAdapterInfo;
 PIP_ADAPTER_INFO pAdapter = NULL;
 DWORD dwRetVal = 0;
 
-    Ret = kEplSuccessful;
+    Ret = kErrorOk;
 
 
     // clear instance structure
@@ -192,7 +192,7 @@ DWORD dwRetVal = 0;
 
     if (pEdrvInitParam_p->hwParam.m_pszDevName == NULL)
     {
-        Ret = kEplEdrvInitError;
+        Ret = kErrorEdrvInit;
         goto Exit;
     }
 
@@ -202,7 +202,7 @@ DWORD dwRetVal = 0;
     if (pAdapterInfo == NULL)
     {
         printf("Error allocating memory needed to call GetAdaptersinfo\n");
-        Ret = kEplNoResource;
+        Ret = kErrorNoResource;
         goto Exit;
     }
 
@@ -216,7 +216,7 @@ DWORD dwRetVal = 0;
         if (pAdapterInfo == NULL)
         {
             printf("Error allocating memory needed to call GetAdaptersinfo\n");
-            Ret = kEplNoResource;
+            Ret = kErrorNoResource;
             goto Exit;
         }
     }
@@ -264,7 +264,7 @@ DWORD dwRetVal = 0;
     if ( EdrvInstance_l.m_pPcap == NULL )
     {
         printf("Error!! Can't open pcap: %s\n", sErr_Msg);
-        Ret = kEplEdrvInitError;
+        Ret = kErrorEdrvInit;
         goto Exit;
     }
 
@@ -290,7 +290,7 @@ DWORD dwRetVal = 0;
     if (EdrvInstance_l.m_ahHandle[EDRV_HANDLE_TIMER0] == NULL)
     {
         printf("CreateWaitableTimer failed (%d)\n", GetLastError());
-        Ret = kEplEdrvInitError;
+        Ret = kErrorEdrvInit;
         goto Exit;
     }
 
@@ -299,7 +299,7 @@ DWORD dwRetVal = 0;
     if (EdrvInstance_l.m_ahHandle[EDRV_HANDLE_TIMER1] == NULL)
     {
         printf("CreateWaitableTimer failed (%d)\n", GetLastError());
-        Ret = kEplEdrvInitError;
+        Ret = kErrorEdrvInit;
         goto Exit;
     }
 
@@ -320,7 +320,7 @@ DWORD dwRetVal = 0;
 
     if (EdrvInstance_l.m_hThread == NULL)
     {
-         Ret = kEplEdrvInitError;
+         Ret = kErrorEdrvInit;
          goto Exit;
     }
 
@@ -339,7 +339,7 @@ Exit:
 //
 // Parameters:  void
 //
-// Returns:     Errorcode   = kEplSuccessful
+// Returns:     Errorcode   = kErrorOk
 //
 // State:
 //
@@ -365,7 +365,7 @@ tOplkError edrv_shutdown( void )
     // clear instance structure
     EPL_MEMSET(&EdrvInstance_l, 0, sizeof (EdrvInstance_l));
 
-    return kEplSuccessful; //assuming no problems with closing the handle
+    return kErrorOk; //assuming no problems with closing the handle
 }
 
 
@@ -377,7 +377,7 @@ tOplkError edrv_shutdown( void )
 //
 // Parameters:  pBuffer_p   = buffer descriptor to transmit
 //
-// Returns:     Errorcode   = kEplSuccessful
+// Returns:     Errorcode   = kErrorOk
 //
 // State:
 //
@@ -385,14 +385,14 @@ tOplkError edrv_shutdown( void )
 
 tOplkError edrv_sendTxBuffer(tEdrvTxBuffer *pBuffer_p)
 {
-tOplkError  Ret = kEplSuccessful;
+tOplkError  Ret = kErrorOk;
 int         iRet;
 
 //    TRACE("%s: TxB=%p (%02X), last TxB=%p\n", __func__, pBuffer_p, (UINT)pBuffer_p->pBuffer[5], EdrvInstance_l.m_pTransmittedTxBufferLastEntry);
 
     if (pBuffer_p->txBufferNumber.pArg != NULL)
     {
-        Ret = kEplInvalidOperation;
+        Ret = kErrorInvalidOperation;
         goto Exit;
     }
 
@@ -413,7 +413,7 @@ int         iRet;
     if  (iRet != 0)
     {
         PRINTF("%s pcap_sendpacket returned %d (%s)\n", __func__, iRet, pcap_geterr(EdrvInstance_l.m_pPcap));
-        Ret = kEplInvalidOperation;
+        Ret = kErrorInvalidOperation;
     }
 
 Exit:
@@ -430,8 +430,8 @@ Exit:
 //
 // Parameters:  pBuffer_p   = pointer to Buffer structure
 //
-// Returns:     Errorcode   = kEplSuccessful
-//                          = kEplEdrvNoFreeBufEntry
+// Returns:     Errorcode   = kErrorOk
+//                          = kErrorEdrvNoFreeBufEntry
 //
 // State:
 //
@@ -439,11 +439,11 @@ Exit:
 
 tOplkError edrv_allocTxBuffer(tEdrvTxBuffer * pBuffer_p)
 {
-tOplkError Ret = kEplSuccessful;
+tOplkError Ret = kErrorOk;
 
     if (pBuffer_p->maxBufferSize > EDRV_MAX_FRAME_SIZE)
     {
-        Ret = kEplEdrvNoFreeBufEntry;
+        Ret = kErrorEdrvNoFreeBufEntry;
         goto Exit;
     }
 
@@ -451,7 +451,7 @@ tOplkError Ret = kEplSuccessful;
     pBuffer_p->pBuffer = EPL_MALLOC(pBuffer_p->maxBufferSize);
     if (pBuffer_p->pBuffer == NULL)
     {
-        Ret = kEplEdrvNoFreeBufEntry;
+        Ret = kErrorEdrvNoFreeBufEntry;
         goto Exit;
     }
 
@@ -472,7 +472,7 @@ Exit:
 //
 // Parameters:  pBuffer_p   = pointer to Buffer structure
 //
-// Returns:     Errorcode   = kEplSuccessful
+// Returns:     Errorcode   = kErrorOk
 //
 // State:
 //
@@ -487,7 +487,7 @@ BYTE*   pbBuffer = pBuffer_p->pBuffer;
 
     EPL_FREE(pbBuffer);
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 
@@ -496,7 +496,7 @@ tOplkError edrv_changeRxFilter(tEdrvFilter*    pFilter_p,
                             unsigned int    uiEntryChanged_p,
                             unsigned int    uiChangeFlags_p)
 {
-tOplkError      Ret = kEplSuccessful;
+tOplkError      Ret = kErrorOk;
 
     UNUSED_PARAMETER(pFilter_p);
     UNUSED_PARAMETER(uiCount_p);
@@ -514,7 +514,7 @@ tOplkError      Ret = kEplSuccessful;
 //
 // Parameters:  pbMacAddr_p     = pointer to multicast entry to reset
 //
-// Returns:     Errorcode       = kEplSuccessful
+// Returns:     Errorcode       = kErrorOk
 //
 // State:
 //
@@ -524,7 +524,7 @@ tOplkError edrv_clearRxMulticastMacAddr (BYTE * pbMacAddr_p)
 {
     UNUSED_PARAMETER(pbMacAddr_p);
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 
@@ -536,7 +536,7 @@ tOplkError edrv_clearRxMulticastMacAddr (BYTE * pbMacAddr_p)
 //
 // Parameters:  pbMacAddr_p     = pointer to multicast entry to set
 //
-// Returns:     Errorcode       = kEplSuccessful
+// Returns:     Errorcode       = kErrorOk
 //
 // State:
 //
@@ -546,7 +546,7 @@ tOplkError edrv_setRxMulticastMacAddr   (BYTE * pbMacAddr_p)
 {
     UNUSED_PARAMETER(pbMacAddr_p);
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 
@@ -872,7 +872,7 @@ tOplkError  Ret;
 
 tOplkError PUBLIC hrestimer_addInstance(void)
 {
-tOplkError      Ret = kEplSuccessful;
+tOplkError      Ret = kErrorOk;
 LONG            lRet = 0;
 ULONG           ulMin = ~0UL;
 ULONG           ulMax = ~0UL;
@@ -887,7 +887,7 @@ ULONG           ulCur = ~0UL;
     if (EplTimerHighReskInstance_l.m_hinstLibNtDll == NULL)
     {
         printf("LoadLibrary(ntdll.dll) failed (%d)\n", GetLastError());
-        Ret = kEplNoResource;
+        Ret = kErrorNoResource;
         goto Exit;
     }
 
@@ -898,7 +898,7 @@ ULONG           ulCur = ~0UL;
     if (NtQueryTimerResolution == NULL)
     {
         printf("GetProcAddress(NtQueryTimerResolution) failed (%d)\n", GetLastError());
-        Ret = kEplNoResource;
+        Ret = kErrorNoResource;
         goto Exit;
     }
 
@@ -909,7 +909,7 @@ ULONG           ulCur = ~0UL;
     if (NtSetTimerResolution == NULL)
     {
         printf("GetProcAddress(NtSetTimerResolution) failed (%d)\n", GetLastError());
-        Ret = kEplNoResource;
+        Ret = kErrorNoResource;
         goto Exit;
     }
 
@@ -945,7 +945,7 @@ Exit:
 
 tOplkError PUBLIC hrestimer_delInstance(void)
 {
-tOplkError  Ret = kEplSuccessful;
+tOplkError  Ret = kErrorOk;
 LONG            lRet = 0;
 ULONG           ulCur = ~0UL;
 
@@ -999,7 +999,7 @@ tOplkError PUBLIC hrestimer_modifyTimer(tTimerHdl*     pTimerHdl_p,
                                     unsigned long       ulArgument_p,
                                     BOOL                fContinuously_p)
 {
-tOplkError                  Ret = kEplSuccessful;
+tOplkError                  Ret = kErrorOk;
 BOOL                        fRet;
 unsigned int                uiIndex;
 tEplTimerHighReskTimerInfo* pTimerInfo;
@@ -1010,7 +1010,7 @@ LARGE_INTEGER               liDueTime;
     // check pointer to handle
     if(pTimerHdl_p == NULL)
     {
-        Ret = kEplTimerInvalidHandle;
+        Ret = kErrorTimerInvalidHandle;
         goto Exit;
     }
 
@@ -1027,7 +1027,7 @@ LARGE_INTEGER               liDueTime;
         }
         if (uiIndex >= TIMER_COUNT)
         {   // no free structure found
-            Ret = kEplTimerNoTimerCreated;
+            Ret = kErrorTimerNoTimerCreated;
             goto Exit;
         }
     }
@@ -1036,7 +1036,7 @@ LARGE_INTEGER               liDueTime;
         uiIndex = (unsigned int)(*pTimerHdl_p >> TIMERHDL_SHIFT) - 1;
         if (uiIndex >= TIMER_COUNT)
         {   // invalid handle
-            Ret = kEplTimerInvalidHandle;
+            Ret = kErrorTimerInvalidHandle;
             goto Exit;
         }
         pTimerInfo = &EplTimerHighReskInstance_l.m_aTimerInfo[uiIndex];
@@ -1044,7 +1044,7 @@ LARGE_INTEGER               liDueTime;
 /*        if ((pTimerInfo->m_EventArg.timerHdl != *pTimerHdl_p)
             && (pTimerInfo->m_pfnCallback == NULL))
         {   // invalid handle
-            Ret = kEplTimerInvalidHandle;
+            Ret = kErrorTimerInvalidHandle;
             goto Exit;
         }*/
     }
@@ -1086,7 +1086,7 @@ LARGE_INTEGER               liDueTime;
     if (!fRet)
     {
         printf("SetWaitableTimer failed (%d)\n", GetLastError());
-        Ret = kEplTimerNoTimerCreated;
+        Ret = kErrorTimerNoTimerCreated;
         goto Exit;
     }
 
@@ -1113,7 +1113,7 @@ Exit:
 
 tOplkError PUBLIC hrestimer_deleteTimer(tTimerHdl*     pTimerHdl_p)
 {
-tOplkError                  Ret = kEplSuccessful;
+tOplkError                  Ret = kErrorOk;
 unsigned int                uiIndex;
 tEplTimerHighReskTimerInfo* pTimerInfo;
 HANDLE                      hTimer;
@@ -1121,7 +1121,7 @@ HANDLE                      hTimer;
     // check pointer to handle
     if(pTimerHdl_p == NULL)
     {
-        Ret = kEplTimerInvalidHandle;
+        Ret = kErrorTimerInvalidHandle;
         goto Exit;
     }
 
@@ -1134,7 +1134,7 @@ HANDLE                      hTimer;
         uiIndex = (unsigned int)(*pTimerHdl_p >> TIMERHDL_SHIFT) - 1;
         if (uiIndex >= TIMER_COUNT)
         {   // invalid handle
-            Ret = kEplTimerInvalidHandle;
+            Ret = kErrorTimerInvalidHandle;
             goto Exit;
         }
         pTimerInfo = &EplTimerHighReskInstance_l.m_aTimerInfo[uiIndex];

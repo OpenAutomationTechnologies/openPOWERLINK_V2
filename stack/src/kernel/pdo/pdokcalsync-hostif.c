@@ -107,7 +107,7 @@ tOplkError pdokcal_initSync(void)
     if(pHifInstance_l == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s: Could not find hostif instance!\n", __func__);
-        return kEplNoResource;
+        return kErrorNoResource;
     }
 
     return enableSyncIrq(FALSE);
@@ -146,7 +146,7 @@ The function sends a sync event
 //------------------------------------------------------------------------------
 tOplkError pdokcal_sendSyncEvent(void)
 {
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -167,7 +167,7 @@ tOplkError pdokcal_controlSync(BOOL fEnable_p)
     if(pHifInstance_l == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s: Could not find hostif instance!\n", __func__);
-        return kEplNoResource;
+        return kErrorNoResource;
     }
 
     return enableSyncIrq(fEnable_p);
@@ -196,8 +196,8 @@ static tOplkError enableSyncIrq(BOOL fEnable_p)
     {
         DEBUG_LVL_ERROR_TRACE("%s irq not possible (%d)!\n",
                    fEnable_p ? "enable" : "disable", hifRet);
-        return kEplNoResource;
+        return kErrorNoResource;
     }
 
-    return kEplSuccessful;
+    return kErrorOk;
 }

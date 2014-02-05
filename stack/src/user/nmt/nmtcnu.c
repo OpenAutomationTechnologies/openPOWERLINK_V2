@@ -127,7 +127,7 @@ The function adds a nmtcnu module instance.
 //------------------------------------------------------------------------------
 tOplkError nmtcnu_addInstance(UINT nodeId_p)
 {
-    tOplkError ret = kEplSuccessful;
+    tOplkError ret = kErrorOk;
 
     EPL_MEMSET(&nmtCnuInstance_g, 0, sizeof (nmtCnuInstance_g));
 
@@ -152,7 +152,7 @@ The function deletes an nmtcnu module instance.
 //------------------------------------------------------------------------------
 tOplkError nmtcnu_delInstance(void)
 {
-    tOplkError ret = kEplSuccessful;
+    tOplkError ret = kErrorOk;
 
     // deregister callback function from DLL
     ret = dllucal_regAsndService(kDllAsndNmtCommand, NULL, kDllAsndFilterNone);
@@ -180,7 +180,7 @@ tOplkError nmtcnu_sendNmtRequest(UINT nodeId_p, tNmtCommand nmtCommand_p)
     tFrameInfo      nmtRequestFrameInfo;
     tEplFrame       nmtRequestFrame;
 
-    ret = kEplSuccessful;
+    ret = kErrorOk;
 
     // build frame
     EPL_MEMSET(&nmtRequestFrame.m_be_abDstMac[0], 0x00, sizeof(nmtRequestFrame.m_be_abDstMac)); // set by DLL
@@ -222,7 +222,7 @@ NMT-Change-State-Event.
 tOplkError nmtcnu_registerCheckEventCb(tNmtuCheckEventCallback pfnNmtCheckEventCb_p)
 {
     nmtCnuInstance_g.pfnCheckEventCb = pfnNmtCheckEventCb_p;
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //============================================================================//
@@ -244,13 +244,13 @@ The function processes NMT commands.
 //------------------------------------------------------------------------------
 static tOplkError commandCb(tFrameInfo* pFrameInfo_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     tNmtCommand     nmtCommand;
     BOOL            fNodeIdInList;
     tNmtEvent       nmtEvent = kNmtEventNoEvent;
 
     if(pFrameInfo_p == NULL)
-        return kEplNmtInvalidFramePointer;
+        return kErrorNmtInvalidFramePointer;
 
     nmtCommand = getNmtCommand(pFrameInfo_p);
     switch(nmtCommand)
@@ -420,7 +420,7 @@ static tOplkError commandCb(tFrameInfo* pFrameInfo_p)
         //------------------------------------------------------------------------
         // default
         default:
-            return kEplNmtUnknownCommand;
+            return kErrorNmtUnknownCommand;
             break;
     } // end of switch(NmtCommand)
 
@@ -429,11 +429,11 @@ static tOplkError commandCb(tFrameInfo* pFrameInfo_p)
         if (nmtCnuInstance_g.pfnCheckEventCb != NULL)
         {
             ret = nmtCnuInstance_g.pfnCheckEventCb(nmtEvent);
-            if (ret == kEplReject)
+            if (ret == kErrorReject)
             {
-                return kEplSuccessful;
+                return kErrorOk;
             }
-            else if (ret != kEplSuccessful)
+            else if (ret != kErrorOk)
             {
                 return ret;
             }

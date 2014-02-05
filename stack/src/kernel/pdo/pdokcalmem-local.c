@@ -101,7 +101,7 @@ For the local memory implementation nothing needs to be done.
 //------------------------------------------------------------------------------
 tOplkError pdokcal_openMem(void)
 {
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -120,7 +120,7 @@ For the local memory implementation nothing needs to be done.
 //------------------------------------------------------------------------------
 tOplkError pdokcal_closeMem(void)
 {
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -146,12 +146,12 @@ tOplkError pdokcal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
     {
         TRACE ("%s() malloc failed!}n", __func__);
         *ppPdoMem_p = NULL;
-        return kEplNoResource;
+        return kErrorNoResource;
     }
     *ppPdoMem_p = pdokcalmem_pPdo_g;
 
     TRACE ("%s() Allocated memory for PDO at %p size:%d\n", __func__, *ppPdoMem_p, memSize_p);
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -175,7 +175,7 @@ tOplkError pdokcal_freeMem(BYTE* pMem_p, size_t memSize_p)
 
     TRACE ("%s()\n", __func__);
     EPL_FREE(pMem_p);
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //============================================================================//

@@ -279,7 +279,7 @@ AppCbEvent() implements the openPOWERLINKs event callback function.
 tOplkError ProcessThread::processEvent(tEplApiEventType EventType_p,
                       tEplApiEventArg* pEventArg_p, void GENERIC* pUserArg_p)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
 
     switch (EventType_p)
     {
@@ -343,7 +343,7 @@ tOplkError ProcessThread::processStateChangeEvent(tEplApiEventType EventType_p,
                                           tEplApiEventArg* pEventArg_p,
                                           void GENERIC* pUserArg_p)
 {
-    tOplkError                  ret = kEplSuccessful;
+    tOplkError                  ret = kErrorOk;
     tEventNmtStateChange*       pNmtStateChange = &pEventArg_p->m_NmtStateChange;
 #if !defined(CONFIG_INCLUDE_CFM)
     UINT                        varLen;
@@ -365,7 +365,7 @@ tOplkError ProcessThread::processStateChangeEvent(tEplApiEventType EventType_p,
             // NMT state machine was shut down,
             // because of user signal (CTRL-C) or critical EPL stack error
             // -> also shut down EplApiProcess()
-            ret = kEplShutdown;
+            ret = kErrorShutdown;
             // and unblock DataInDataOutThread
             oplk_freeProcessImage(); //jba do we need it here?
 
@@ -396,7 +396,7 @@ tOplkError ProcessThread::processStateChangeEvent(tEplApiEventType EventType_p,
             varLen = sizeof(UINT32);
             EplRet = EplApiReadObject(NULL, 0, 0x1006, 0x00, &cycleLen_g,
                                       &varLen, kSdoTypeAsnd, NULL);
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
             {   // local OD access failed
                 break;
             }
@@ -494,7 +494,7 @@ tOplkError ProcessThread::processErrorWarningEvent(tEplApiEventType EventType_p,
             //sigPrintLog(QString("\n"));
             break;
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -531,7 +531,7 @@ tOplkError ProcessThread::processHistoryEvent(tEplApiEventType EventType_p,
             .arg((WORD)pHistoryEntry->m_abAddInfo[6], 2, 16, QLatin1Char('0'))
             .arg((WORD)pHistoryEntry->m_abAddInfo[7], 2, 16, QLatin1Char('0')));
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -552,7 +552,7 @@ tOplkError ProcessThread::processNodeEvent(tEplApiEventType EventType_p,
                                    void GENERIC* pUserArg_p)
 {
     tEplApiEventNode*   pNode = &pEventArg_p->m_Node;
-    tOplkError          EplRet = kEplSuccessful;
+    tOplkError          EplRet = kErrorOk;
 
     UNUSED_PARAMETER(EventType_p);
     UNUSED_PARAMETER(pUserArg_p);
@@ -571,11 +571,11 @@ tOplkError ProcessThread::processNodeEvent(tEplApiEventType EventType_p,
             EplRet = EplApiWriteObject(&SdoComConHdl, pEventArg_p->m_Node.m_uiNodeId,
                                        0x1006, 0x00, &cycleLen_g, 4,
                                        kSdoTypeAsnd, NULL);
-            if (EplRet == kEplApiTaskDeferred)
+            if (EplRet == kErrorApiTaskDeferred)
             {   // SDO transfer started
-                EplRet = kEplReject;
+                EplRet = kErrorReject;
             }
-            else if (EplRet == kEplSuccessful)
+            else if (EplRet == kErrorOk)
             {   // local OD access (should not occur)
                 printf("AppCbEvent(Node) write to local OD\n");
             }
@@ -588,9 +588,9 @@ tOplkError ProcessThread::processNodeEvent(tEplApiEventType EventType_p,
                 EplRet = EplApiWriteObject(&SdoComConHdl, pEventArg_p->m_Node.m_uiNodeId,
                                            0x1006, 0x00, &cycleLen_g, 4,
                                            kSdoTypeAsnd, NULL);
-                if (EplRet == kEplApiTaskDeferred)
+                if (EplRet == kErrorApiTaskDeferred)
                 {   // SDO transfer started
-                    EplRet = kEplReject;
+                    EplRet = kErrorReject;
                 }
                 else
                 {
@@ -654,7 +654,7 @@ tOplkError ProcessThread::processNodeEvent(tEplApiEventType EventType_p,
         default:
             break;
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -687,13 +687,13 @@ tOplkError ProcessThread::processCfmProgressEvent(tEplApiEventType EventType_p,
              .arg((ULONG)pCfmProgress->totalNumberOfBytes, 0, 10));
 
     if ((pCfmProgress->sdoAbortCode != 0)
-        || (pCfmProgress->error != kEplSuccessful))
+        || (pCfmProgress->error != kErrorOk))
     {
         sigPrintLog(QString("             -> SDO Abort=0x%1, Error=0x%2)")
                  .arg((ULONG) pCfmProgress->sdoAbortCode, 0, 16 , QLatin1Char('0'))
                  .arg(pCfmProgress->error, 0, 16, QLatin1Char('0')));
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -742,7 +742,7 @@ tOplkError ProcessThread::processCfmResultEvent(tEplApiEventType EventType_p,
                     .arg(pCfmResult->m_NodeCommand, 4, 16, QLatin1Char('0')));
             break;
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -763,13 +763,13 @@ tOplkError ProcessThread::processSdoEvent(tEplApiEventType EventType_p,
                                   void GENERIC* pUserArg_p)
 {
     tSdoComFinished*          pSdo = &pEventArg_p->m_Sdo;
-    tOplkError                ret = kEplSuccessful;
+    tOplkError                ret = kErrorOk;
 
     UNUSED_PARAMETER(EventType_p);
     UNUSED_PARAMETER(pUserArg_p);
 
     // SDO transfer finished
-    if ((ret = oplk_freeSdoChannel(pSdo->sdoAccessType)) != kEplSuccessful)
+    if ((ret = oplk_freeSdoChannel(pSdo->sdoAccessType)) != kErrorOk)
     {
         return ret;
     }
@@ -796,7 +796,7 @@ not available.
 //------------------------------------------------------------------------------
 tOplkError ProcessThread::setDefaultNodeAssignment(void)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
     DWORD       nodeAssignment;
 
     nodeAssignment = (EPL_NODEASSIGN_NODE_IS_CN | EPL_NODEASSIGN_NODE_EXISTS);    // 0x00000003L

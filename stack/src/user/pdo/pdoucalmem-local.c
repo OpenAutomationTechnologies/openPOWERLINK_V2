@@ -105,7 +105,7 @@ For the local memory implementation nothing needs to be done.
 //------------------------------------------------------------------------------
 tOplkError pdoucal_openMem(void)
 {
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -124,7 +124,7 @@ For the local memory implementation nothing needs to be done.
 //------------------------------------------------------------------------------
 tOplkError pdoucal_closeMem(void)
 {
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -149,7 +149,7 @@ tOplkError pdoucal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
     while(pdokcalmem_pPdo_g == NULL)
         target_msleep(1);
     *ppPdoMem_p = pdokcalmem_pPdo_g;
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -172,7 +172,7 @@ tOplkError pdoucal_freeMem(BYTE* pMem_p, size_t memSize_p)
     UNUSED_PARAMETER(pMem_p);
     UNUSED_PARAMETER(memSize_p);
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //============================================================================//

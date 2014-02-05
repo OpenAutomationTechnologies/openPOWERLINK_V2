@@ -60,7 +60,7 @@ openPOWERLINK stack.
 //------------------------------------------------------------------------------
 tOplkError target_init(void)
 {
-    tOplkError  Ret  = kEplSuccessful;
+    tOplkError  Ret  = kErrorOk;
     sigset_t    mask;
 
     /*
@@ -86,7 +86,7 @@ The function cleans-up target specific stuff.
 //------------------------------------------------------------------------------
 tOplkError target_cleanup(void)
 {
-    tOplkError  Ret  = kEplSuccessful;
+    tOplkError  Ret  = kErrorOk;
     return Ret;
 }
 
@@ -156,7 +156,7 @@ interface.
 //------------------------------------------------------------------------------
 tOplkError target_setIpAdrs(char* ifName_p, UINT32 ipAddress_p, UINT32 subnetMask_p, UINT16 mtu_p)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
     INT         iRet;
     char        sBufferIp[16];
     char        sBufferMask[16];
@@ -181,7 +181,7 @@ tOplkError target_setIpAdrs(char* ifName_p, UINT32 ipAddress_p, UINT32 subnetMas
     if ((iRet = system(command)) < 0)
     {
         TRACE("ifconfig %s %s returned %d\n", ifName_p, sBufferIp, iRet);
-        return kEplNoResource;
+        return kErrorNoResource;
     }
 
     return ret;
@@ -202,7 +202,7 @@ The function sets the default gateway of an Ethernet interface.
 //------------------------------------------------------------------------------
 tOplkError target_setDefaultGateway(UINT32 defaultGateway_p)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
     INT         iRet;
     char        sBuffer[16];
     char        command[128];
@@ -224,7 +224,7 @@ tOplkError target_setDefaultGateway(UINT32 defaultGateway_p)
         if ((iRet = system(command)) < 0)
         {
             TRACE("route add default gw %s returned %d\n", sBuffer, iRet);
-            return kEplNoResource;
+            return kErrorNoResource;
         }
     }
     return ret;

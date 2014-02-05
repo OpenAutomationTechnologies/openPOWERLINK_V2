@@ -154,7 +154,7 @@ tOplkError PUBLIC processEvents(tEplApiEventType EventType_p,
                                 tEplApiEventArg* pEventArg_p,
                                 void GENERIC* pUserArg_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
 
     UNUSED_PARAMETER(pUserArg_p);
 
@@ -223,7 +223,7 @@ static tOplkError processStateChangeEvent(tEplApiEventType EventType_p,
                                           tEplApiEventArg* pEventArg_p,
                                           void GENERIC* pUserArg_p)
 {
-    tOplkError                  ret = kEplSuccessful;
+    tOplkError                  ret = kErrorOk;
     tEventNmtStateChange*       pNmtStateChange = &pEventArg_p->m_NmtStateChange;
 
     UNUSED_PARAMETER(EventType_p);
@@ -232,7 +232,7 @@ static tOplkError processStateChangeEvent(tEplApiEventType EventType_p,
     if (pfGsOff_l == NULL)
     {
         console_printlog("Applications event module isn't initialized!\n");
-        return kEplGeneralError;
+        return kErrorGeneralError;
     }
 
     switch (pNmtStateChange->newNmtState)
@@ -241,7 +241,7 @@ static tOplkError processStateChangeEvent(tEplApiEventType EventType_p,
            // NMT state machine was shut down,
             // because of user signal (CTRL-C) or critical EPL stack error
             // -> also shut down oplk_process() and main()
-            ret = kEplShutdown;
+            ret = kErrorShutdown;
 
             console_printlog("StateChangeEvent:kNmtGsOff originating event = 0x%X (%s)\n",
                      pNmtStateChange->nmtEvent,
@@ -352,7 +352,7 @@ static tOplkError processErrorWarningEvent(tEplApiEventType EventType_p,
             console_printlog("\n");
             break;
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -391,7 +391,7 @@ static tOplkError processHistoryEvent(tEplApiEventType EventType_p,
             (WORD)pHistoryEntry->m_abAddInfo[4], (WORD)pHistoryEntry->m_abAddInfo[5],
             (WORD)pHistoryEntry->m_abAddInfo[6], (WORD)pHistoryEntry->m_abAddInfo[7]);
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -447,7 +447,7 @@ static tOplkError processNodeEvent(tEplApiEventType EventType_p,
         default:
             break;
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 #ifdef CONFIG_INCLUDE_CFM
@@ -482,7 +482,7 @@ static tOplkError processCfmProgressEvent(tEplApiEventType EventType_p,
                             (ULONG)pCfmProgress->totalNumberOfBytes);
 
     if ((pCfmProgress->sdoAbortCode != 0)
-        || (pCfmProgress->error != kEplSuccessful))
+        || (pCfmProgress->error != kErrorOk))
     {
         console_printlogadd(" -> SDO Abort=0x%lX, Error=0x%X)\n",
                (ULONG) pCfmProgress->sdoAbortCode,
@@ -492,7 +492,7 @@ static tOplkError processCfmProgressEvent(tEplApiEventType EventType_p,
     {
         console_printlogadd(")\n");
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -540,7 +540,7 @@ static tOplkError processCfmResultEvent(tEplApiEventType EventType_p,
                                                                 pCfmResult->m_NodeCommand);
             break;
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 #else
@@ -563,13 +563,13 @@ static tOplkError processSdoEvent(tEplApiEventType EventType_p,
                                   void GENERIC* pUserArg_p)
 {
     tSdoComFinished*          pSdo = &pEventArg_p->m_Sdo;
-    tOplkError                ret = kEplSuccessful;
+    tOplkError                ret = kErrorOk;
 
     UNUSED_PARAMETER(EventType_p);
     UNUSED_PARAMETER(pUserArg_p);
 
     // SDO transfer finished
-    if ((ret = oplk_freeSdoChannel(pSdo->sdoAccessType)) != kEplSuccessful)
+    if ((ret = oplk_freeSdoChannel(pSdo->sdoAccessType)) != kErrorOk)
     {
         return ret;
     }
@@ -597,7 +597,7 @@ not available.
 //------------------------------------------------------------------------------
 static tOplkError setDefaultNodeAssignment(void)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
     DWORD       nodeAssignment;
 
     nodeAssignment = (EPL_NODEASSIGN_NODE_IS_CN | EPL_NODEASSIGN_NODE_EXISTS);    // 0x00000003L

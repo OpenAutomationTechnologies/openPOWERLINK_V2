@@ -138,9 +138,9 @@ tOplkError pdokcal_initPdoMem(tPdoChannelSetup* pPdoChannels, size_t rxPdoMemSiz
         pdokcal_freeMem((BYTE*)pPdoMem_l, pdoMemRegionSize_l);
 
     pdoMemRegionSize_l = (pdoMemSize * 3) + sizeof(tPdoMemRegion);
-    if (pdokcal_allocateMem(pdoMemRegionSize_l, (BYTE**)&pPdoMem_l) != kEplSuccessful)
+    if (pdokcal_allocateMem(pdoMemRegionSize_l, (BYTE**)&pPdoMem_l) != kErrorOk)
     {
-        return kEplNoResource;
+        return kErrorNoResource;
     }
 
     pTripleBuf_l[0] = (BYTE *)pPdoMem_l + sizeof(tPdoMemRegion);
@@ -156,7 +156,7 @@ tOplkError pdokcal_initPdoMem(tPdoChannelSetup* pPdoChannels, size_t rxPdoMemSiz
 
     OPLK_ATOMIC_INIT(pPdoMem_l);
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -217,7 +217,7 @@ tOplkError pdokcal_writeRxPdo(UINT channelId_p, BYTE *pPayload_p, UINT16 pdoSize
 
     //TRACE ("%s() chan:%d new wi:%d\n", __func__, channelId_p, pPdoMem_l->rxChannelInfo[channelId_p].writeBuf);
     //TRACE ("%s() *pPayload_p:%02x\n", __func__, *pPayload_p);
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -257,7 +257,7 @@ tOplkError pdokcal_readTxPdo(UINT channelId_p, BYTE* pPayload_p, UINT16 pdoSize_
 
     memcpy (pPayload_p, pPdo, pdoSize_p);
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //============================================================================//

@@ -387,7 +387,7 @@ This function adds a PRes filter for the specified node.
 tOplkError dllk_addNodeFilter(tDllkNodeInfo* pIntNodeInfo_p, tDllNodeOpType nodeOpType_p,
                               BOOL fUpdateEdrv_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     UINT8           presFilterFlags = 0;
 
     switch (nodeOpType_p)
@@ -401,7 +401,7 @@ tOplkError dllk_addNodeFilter(tDllkNodeInfo* pIntNodeInfo_p, tDllNodeOpType node
             break;
 
         default:
-            ret = kEplDllInvalidParam;
+            ret = kErrorDllInvalidParam;
             goto Exit;
     }
 
@@ -417,7 +417,7 @@ tOplkError dllk_addNodeFilter(tDllkNodeInfo* pIntNodeInfo_p, tDllNodeOpType node
                 dllkInstance_g.aFilter[DLLK_FILTER_PRES].fEnable = TRUE;
                 ret = edrv_changeRxFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT,
                                        DLLK_FILTER_PRES, EDRV_FILTER_CHANGE_STATE);
-                if (ret != kEplSuccessful)
+                if (ret != kErrorOk)
                     goto Exit;
             }
 
@@ -433,7 +433,7 @@ tOplkError dllk_addNodeFilter(tDllkNodeInfo* pIntNodeInfo_p, tDllNodeOpType node
 
                     ret = edrv_changeRxFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT,
                                            handle, (EDRV_FILTER_CHANGE_STATE | EDRV_FILTER_CHANGE_VALUE));
-                    if (ret != kEplSuccessful)
+                    if (ret != kErrorOk)
                         goto Exit;
                     break;
                 }
@@ -463,7 +463,7 @@ This function deletes a PRes filter for the specified node.
 tOplkError dllk_deleteNodeFilter(tDllkNodeInfo* pIntNodeInfo_p, tDllNodeOpType nodeOpType_p,
                                  BOOL fUpdateEdrv_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     BYTE            bPresFilterFlags = 0;
 
     switch (nodeOpType_p)
@@ -477,7 +477,7 @@ tOplkError dllk_deleteNodeFilter(tDllkNodeInfo* pIntNodeInfo_p, tDllNodeOpType n
             break;
 
         default:
-            ret = kEplDllInvalidParam;
+            ret = kErrorDllInvalidParam;
             goto Exit;
     }
 
@@ -497,7 +497,7 @@ tOplkError dllk_deleteNodeFilter(tDllkNodeInfo* pIntNodeInfo_p, tDllNodeOpType n
                 dllkInstance_g.aFilter[DLLK_FILTER_PRES].fEnable = FALSE;
                 ret = edrv_changeRxFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT,
                                        DLLK_FILTER_PRES, EDRV_FILTER_CHANGE_STATE);
-                if (ret != kEplSuccessful)
+                if (ret != kErrorOk)
                     goto Exit;
             }
 
@@ -514,7 +514,7 @@ tOplkError dllk_deleteNodeFilter(tDllkNodeInfo* pIntNodeInfo_p, tDllNodeOpType n
 
                     ret = edrv_changeRxFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT,
                                            handle, EDRV_FILTER_CHANGE_STATE);
-                    if (ret != kEplSuccessful)
+                    if (ret != kErrorOk)
                         goto Exit;
                     break;
                 }

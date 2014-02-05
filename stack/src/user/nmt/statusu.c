@@ -124,7 +124,7 @@ The function adds an status module instance
 //------------------------------------------------------------------------------
 tOplkError statusu_addInstance(void)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
 
     EPL_MEMSET(&instance_g, 0, sizeof (instance_g));
 
@@ -149,7 +149,7 @@ The function deletes an status module instance
 //------------------------------------------------------------------------------
 tOplkError statusu_delInstance(void)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
 
     // deregister StatusResponse callback function
     ret = dllucal_regAsndService(kDllAsndStatusResponse, NULL, kDllAsndFilterNone);
@@ -172,7 +172,7 @@ tOplkError statusu_reset(void)
     // reset instance structure
     EPL_MEMSET(&instance_g, 0, sizeof(instance_g));
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -192,7 +192,7 @@ The function requests the StatusResponse for a specified node.
 //------------------------------------------------------------------------------
 tOplkError statusu_requestStatusResponse(UINT nodeId_p, tStatusuCbResponse pfnCbResponse_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
 
 #if !defined(CONFIG_INCLUDE_NMT_MN)
     UNUSED_PARAMETER(pfnCbResponse_p);
@@ -213,7 +213,7 @@ tOplkError statusu_requestStatusResponse(UINT nodeId_p, tStatusuCbResponse pfnCb
 #if defined(CONFIG_INCLUDE_NMT_MN)
         if (instance_g.apfnCbResponse[nodeId_p] != NULL)
         {   // request already issued (maybe by someone else)
-            ret = kEplInvalidOperation;
+            ret = kErrorInvalidOperation;
         }
         else
         {
@@ -221,12 +221,12 @@ tOplkError statusu_requestStatusResponse(UINT nodeId_p, tStatusuCbResponse pfnCb
             ret = dllucal_issueRequest(kDllReqServiceStatus, (nodeId_p + 1), 0xFF);
         }
 #else
-        ret = kEplInvalidOperation;
+        ret = kErrorInvalidOperation;
 #endif
     }
     else
     {   // invalid node ID specified
-        ret = kEplInvalidNodeId;
+        ret = kErrorInvalidNodeId;
     }
 
     return ret;
@@ -255,7 +255,7 @@ StatusResponse is received.
 //------------------------------------------------------------------------------
 static tOplkError statusu_cbStatusResponse(tFrameInfo * pFrameInfo_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     UINT                nodeId;
     UINT                index;
     tStatusuCbResponse  pfnCbResponse;

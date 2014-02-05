@@ -435,13 +435,13 @@ The function adds a nmtmnu module instance.
 tOplkError nmtmnu_addInstance(tNmtMnuCbNodeEvent pfnCbNodeEvent_p,
                               tNmtMnuCbBootEvent pfnCbBootEvent_p)
 {
-    tOplkError ret = kEplSuccessful;
+    tOplkError ret = kErrorOk;
 
     EPL_MEMSET(&nmtMnuInstance_g, 0, sizeof(nmtMnuInstance_g));
 
     if ((pfnCbNodeEvent_p == NULL) || (pfnCbBootEvent_p == NULL))
     {
-        ret = kEplNmtInvalidParam;
+        ret = kErrorNmtInvalidParam;
         goto Exit;
     }
     nmtMnuInstance_g.pfnCbNodeEvent = pfnCbNodeEvent_p;
@@ -473,7 +473,7 @@ The function deletes an nmtmnu module instance.
 //------------------------------------------------------------------------------
 tOplkError nmtmnu_delInstance(void)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
 
     dllucal_regAsndService(kDllAsndNmtRequest, NULL, kDllAsndFilterNone);
     ret = reset();
@@ -508,18 +508,18 @@ tOplkError nmtmnu_sendNmtCommandEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
     tNmtMnuNodeInfo*    pNodeInfo;
 #endif
 
-    ret = kEplSuccessful;
+    ret = kErrorOk;
 
     if ((nodeId_p == 0) || (nodeId_p > EPL_C_ADR_BROADCAST))
     {   // invalid node ID specified
-        ret = kEplInvalidNodeId;
+        ret = kErrorInvalidNodeId;
         goto Exit;
     }
 
     if ((pNmtCommandData_p != NULL) &&
         (uiDataSize_p > (EPL_C_DLL_MINSIZE_NMTCMDEXT - EPL_C_DLL_MINSIZE_NMTCMD)))
     {
-        ret = kEplNmtInvalidParam;
+        ret = kErrorNmtInvalidParam;
         goto Exit;
     }
 
@@ -565,16 +565,16 @@ tOplkError nmtmnu_sendNmtCommandEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
                     ret = syncu_requestSyncResponse(prcCbSyncResNextAction, &SyncReqData, size);
                     switch (ret)
                     {
-                        case kEplSuccessful:
+                        case kErrorOk:
                             // Mark node as removed from the isochronous phase
                             pNodeInfo->flags &= ~NMTMNU_NODE_FLAG_ISOCHRON;
                             // Send NMT command when SyncRes is received
                             goto Exit;
 
-                        case kEplNmtSyncReqRejected:
+                        case kErrorNmtSyncReqRejected:
                             // There has already been posted a SyncReq for this node.
                             // Retry when SyncRes is received
-                            ret = kEplSuccessful;
+                            ret = kErrorOk;
                             goto Exit;
 
                         default:
@@ -622,7 +622,7 @@ tOplkError nmtmnu_sendNmtCommandEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
 
     // send NMT-Request
     ret = dllucal_sendAsyncFrame(&frameInfo, kDllAsyncReqPrioNmt);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
     {
         goto Exit;
     }
@@ -729,19 +729,19 @@ also be applied to the local node.
 //------------------------------------------------------------------------------
 tOplkError nmtmnu_requestNmtCommand(UINT nodeId_p, tNmtCommand  nmtCommand_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     tNmtState       nmtState;
 
     nmtState = nmtu_getNmtState();
     if (nmtState <= kNmtMsNotActive)
     {
-        ret = kEplInvalidOperation;
+        ret = kErrorInvalidOperation;
         goto Exit;
     }
 
     if (nodeId_p > EPL_C_ADR_BROADCAST)
     {
-        ret = kEplInvalidNodeId;
+        ret = kErrorInvalidNodeId;
         goto Exit;
     }
 
@@ -771,7 +771,7 @@ tOplkError nmtmnu_requestNmtCommand(UINT nodeId_p, tNmtCommand  nmtCommand_p)
 
             case kNmtCmdInvalidService:
             default:
-                ret = kEplObdAccessViolation;
+                ret = kErrorObdAccessViolation;
                 goto Exit;
         }
     }
@@ -858,12 +858,12 @@ to the specified node.
 //------------------------------------------------------------------------------
 tOplkError nmtmnu_triggerStateChange(UINT nodeId_p, tNmtNodeCommand nodeCommand_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     tNmtMnuNodeCmd      nodeCmd;
     tEplEvent           event;
 
     if ((nodeId_p == 0) || (nodeId_p >= EPL_C_ADR_BROADCAST))
-        return kEplInvalidNodeId;
+        return kErrorInvalidNodeId;
 
     nodeCmd.nodeCommand = nodeCommand_p;
     nodeCmd.nodeId = nodeId_p;
@@ -892,13 +892,13 @@ The function implements the callback function for NMT state changes
 //------------------------------------------------------------------------------
 tOplkError nmtmnu_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     UINT8           newMnNmtState;
 
     // Save new MN state in object 0x1F8E
     newMnNmtState   = (UINT8) nmtStateChange_p.newNmtState;
     ret = obd_writeEntry(0x1F8E, 240, &newMnNmtState, 1);
-    if(ret != kEplSuccessful)
+    if(ret != kErrorOk)
         return  ret;
 
     // do work which must be done in that state
@@ -913,13 +913,13 @@ tOplkError nmtmnu_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
                 // read object 0x1F80 NMT_StartUp_U32
                 obdSize = 4;
                 ret = obd_readEntry(0x1F80, 0, &nmtMnuInstance_g.nmtStartup, &obdSize);
-                if (ret != kEplSuccessful)
+                if (ret != kErrorOk)
                     break;
 
                 // compute StatusReqDelay = object 0x1006 * EPL_C_NMT_STATREQ_CYCLE
                 obdSize = sizeof (dwTimeout);
                 ret = obd_readEntry(0x1006, 0, &dwTimeout, &obdSize);
-                if (ret != kEplSuccessful)
+                if (ret != kErrorOk)
                     break;
 
                 if (dwTimeout != 0L)
@@ -941,7 +941,7 @@ tOplkError nmtmnu_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
                 // fetch MNTimeoutPreOp2_U32 from OD
                 obdSize = sizeof (dwTimeout);
                 ret = obd_readEntry(0x1F89, 4, &dwTimeout, &obdSize);
-                if (ret != kEplSuccessful)
+                if (ret != kErrorOk)
                     break;
 
                 if (dwTimeout != 0L)
@@ -1024,7 +1024,7 @@ This module will reject some NMT commands while MN.
 //------------------------------------------------------------------------------
 tOplkError nmtmnu_cbCheckEvent(tNmtEvent nmtEvent_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     UNUSED_PARAMETER(nmtEvent_p);
     return ret;
 }
@@ -1044,7 +1044,7 @@ The function implements the callback function for NMT events.
 //------------------------------------------------------------------------------
 tOplkError nmtmnu_processEvent(tEplEvent* pEvent_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
 
     // process event
     switch(pEvent_p->m_EventType)
@@ -1065,7 +1065,7 @@ tOplkError nmtmnu_processEvent(tEplEvent* pEvent_p)
                     pNodeInfo = NMTMNU_GET_NODEINFO(nodeId);
                     ObdSize = 1;
                     ret = obd_readEntry(0x1F8E, nodeId, &bNmtState, &ObdSize);
-                    if (ret != kEplSuccessful)
+                    if (ret != kErrorOk)
                         break;
 
                     if ((pTimerEventArg->m_Arg.value & NMTMNU_TIMERARG_IDENTREQ) != 0L)
@@ -1172,7 +1172,7 @@ tOplkError nmtmnu_processEvent(tEplEvent* pEvent_p)
 
                 if (pEvent_p->m_uiSize < EPL_C_DLL_MINSIZE_NMTCMD)
                 {
-                    ret = eventu_postError(kEplEventSourceNmtMnu, kEplNmtInvalidFramePointer, sizeof (pEvent_p->m_uiSize), &pEvent_p->m_uiSize);
+                    ret = eventu_postError(kEplEventSourceNmtMnu, kErrorNmtInvalidFramePointer, sizeof (pEvent_p->m_uiSize), &pEvent_p->m_uiSize);
                     break;
                 }
 
@@ -1229,7 +1229,7 @@ tOplkError nmtmnu_processEvent(tEplEvent* pEvent_p)
                         {
                             ret = processInternalEvent(uiNodeId, (tNmtState) (bNmtState | NMT_TYPE_CS),
                                                        0, kNmtMnuIntNodeEventNmtCmdSent);
-                            if (ret != kEplSuccessful)
+                            if (ret != kErrorOk)
                                 goto Exit;
                         }
                     }
@@ -1261,7 +1261,7 @@ tOplkError nmtmnu_processEvent(tEplEvent* pEvent_p)
                                 goto Exit;
                         }
                         ret = nmtu_postNmtEvent(NmtEvent);
-                        if (ret != kEplSuccessful)
+                        if (ret != kErrorOk)
                             goto Exit;
                     }
                 }
@@ -1278,7 +1278,7 @@ tOplkError nmtmnu_processEvent(tEplEvent* pEvent_p)
 
                 if ((pNodeCmd->nodeId == 0) || (pNodeCmd->nodeId >= EPL_C_ADR_BROADCAST))
                 {
-                    ret = kEplInvalidNodeId;
+                    ret = kErrorInvalidNodeId;
                     goto Exit;
                 }
 
@@ -1313,7 +1313,7 @@ tOplkError nmtmnu_processEvent(tEplEvent* pEvent_p)
                 // fetch current NMT state
                 ObdSize = sizeof (bNmtState);
                 ret = obd_readEntry(0x1F8E, pNodeCmd->nodeId, &bNmtState, &ObdSize);
-                if (ret != kEplSuccessful)
+                if (ret != kErrorOk)
                     goto Exit;
 
                 ret = processInternalEvent(pNodeCmd->nodeId,
@@ -1332,7 +1332,7 @@ tOplkError nmtmnu_processEvent(tEplEvent* pEvent_p)
             break;
 
         default:
-            ret = kEplNmtInvalidEvent;
+            ret = kErrorNmtInvalidEvent;
             break;
     }
 
@@ -1359,13 +1359,13 @@ tOplkError nmtmnu_getDiagnosticInfo(UINT* pMandatorySlaveCount_p,
                                     UINT* pSignalSlaveCount_p, UINT16* pFlags_p)
 {
     if ((pMandatorySlaveCount_p == NULL) || (pSignalSlaveCount_p == NULL) || (pFlags_p == NULL))
-        return kEplNmtInvalidParam;
+        return kErrorNmtInvalidParam;
 
     *pMandatorySlaveCount_p = nmtMnuInstance_g.mandatorySlaveCount;
     *pSignalSlaveCount_p = nmtMnuInstance_g.signalSlaveCount;
     *pFlags_p = nmtMnuInstance_g.flags;
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
@@ -1386,7 +1386,7 @@ tOplkError nmtmnu_configPrc(tEplNmtMnuConfigParam* pConfigParam_p)
 {
     nmtMnuInstance_g.prcPResTimeFirstCorrectionNs = pConfigParam_p->prcPResTimeFirstCorrectionNs;
     nmtMnuInstance_g.prcPResTimeFirstNegOffsetNs = pConfigParam_p->prcPResTimeFirstNegOffsetNs;
-    return kEplSuccessful;
+    return kErrorOk;
 }
 #endif
 
@@ -1409,20 +1409,20 @@ The function implements the callback function for NMT requests.
 //------------------------------------------------------------------------------
 static tOplkError cbNmtRequest(tFrameInfo * pFrameInfo_p)
 {
-    tOplkError              ret = kEplSuccessful;
+    tOplkError              ret = kErrorOk;
     UINT                    targetNodeId;
     tNmtCommand             nmtCommand;
     tEplNmtRequestService*  pNmtRequestService;
     UINT                    sourceNodeId;
 
     if ((pFrameInfo_p == NULL) || (pFrameInfo_p->pFrame == NULL))
-        return kEplNmtInvalidFramePointer;
+        return kErrorNmtInvalidFramePointer;
 
     pNmtRequestService = &pFrameInfo_p->pFrame->m_Data.m_Asnd.m_Payload.m_NmtRequestService;
     nmtCommand = (tNmtCommand)ami_getUint8Le(&pNmtRequestService->m_le_bNmtCommandId);
     targetNodeId = ami_getUint8Le(&pNmtRequestService->m_le_bTargetNodeId);
     ret = nmtmnu_requestNmtCommand(targetNodeId, nmtCommand);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
     {   // error -> reply with kNmtCmdInvalidService
         sourceNodeId = ami_getUint8Le(&pFrameInfo_p->pFrame->m_le_bSrcNodeId);
         ret = nmtmnu_sendNmtCommand(sourceNodeId, kNmtCmdInvalidService);
@@ -1445,7 +1445,7 @@ The function implements the callback function for Ident responses
 //------------------------------------------------------------------------------
 static tOplkError PUBLIC cbIdentResponse(UINT nodeId_p, tEplIdentResponse* pIdentResponse_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     tObdSize        obdSize;
     UINT32          dwDevType;
     UINT16          errorCode;
@@ -1466,7 +1466,7 @@ static tOplkError PUBLIC cbIdentResponse(UINT nodeId_p, tEplIdentResponse* pIden
         // check DeviceType (0x1F84)
         obdSize = 4;
         ret = obd_readEntry(0x1F84, nodeId_p, &dwDevType, &obdSize);
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
             goto Exit;
 
         if (dwDevType != 0L)
@@ -1499,7 +1499,7 @@ The function implements the callback function for Status responses
 //------------------------------------------------------------------------------
 static tOplkError PUBLIC cbStatusResponse(UINT nodeId_p, tEplStatusResponse* pStatusResponse_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
 
     if (pStatusResponse_p == NULL)
     {   // node did not answer
@@ -1529,7 +1529,7 @@ called after the addressed node has been added in module dllk.
 //------------------------------------------------------------------------------
 static tOplkError cbNodeAdded(UINT nodeId_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     tNmtMnuNodeInfo*    pNodeInfo;
     tNmtState           nmtState;
 
@@ -1565,14 +1565,14 @@ static tOplkError addNodeIsochronous(UINT nodeId_p)
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
     tNmtMnuNodeInfo* pNodeInfo;
 
-    ret = kEplSuccessful;
+    ret = kErrorOk;
 
     if (nodeId_p != EPL_C_ADR_INVALID)
     {
         pNodeInfo = NMTMNU_GET_NODEINFO(nodeId_p);
         if (pNodeInfo == NULL)
         {
-            ret = kEplInvalidNodeId;
+            ret = kErrorInvalidNodeId;
             goto Exit;
         }
 
@@ -1668,7 +1668,7 @@ The function starts the BootStep1.
 //------------------------------------------------------------------------------
 static tOplkError startBootStep1(BOOL fNmtResetAllIssued_p)
 {
-    tOplkError            ret = kEplSuccessful;
+    tOplkError            ret = kErrorOk;
     UINT                subIndex;
     UINT                localNodeId;
     UINT32                nodeCfg;
@@ -1686,7 +1686,7 @@ static tOplkError startBootStep1(BOOL fNmtResetAllIssued_p)
     {
         obdSize = 4;
         ret = obd_readEntry(0x1F81, subIndex, &nodeCfg, &obdSize);
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
             goto Exit;
 
         if (subIndex != localNodeId)
@@ -1720,7 +1720,7 @@ static tOplkError startBootStep1(BOOL fNmtResetAllIssued_p)
                 {
                     // identify the node
                     ret = identu_requestIdentResponse(subIndex, cbIdentResponse);
-                    if (ret != kEplSuccessful)
+                    if (ret != kErrorOk)
                         goto Exit;
                 }
 
@@ -1767,7 +1767,7 @@ static tOplkError doPreop1(tEventNmtStateChange nmtStateChange_p)
     tObdSize        obdSize;
     tEplEvent       event;
     BOOL            fNmtResetAllIssued = FALSE;
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
 
     // reset IdentResponses and running IdentRequests and StatusRequests
     ret = identu_reset();
@@ -1791,7 +1791,7 @@ static tOplkError doPreop1(tEventNmtStateChange nmtStateChange_p)
     event.m_pArg = NULL;
     event.m_uiSize = 0;
     ret = eventu_postEvent(&event);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
         return ret;
 
     // reset all nodes
@@ -1805,7 +1805,7 @@ static tOplkError doPreop1(tEventNmtStateChange nmtStateChange_p)
         NMTMNU_DBG_POST_TRACE_VALUE(0, EPL_C_ADR_BROADCAST, kNmtCmdResetNode);
 
         ret = nmtmnu_sendNmtCommand(EPL_C_ADR_BROADCAST, kNmtCmdResetNode);
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
             return ret;
 
         fNmtResetAllIssued = TRUE;
@@ -1820,7 +1820,7 @@ static tOplkError doPreop1(tEventNmtStateChange nmtStateChange_p)
     // start timer for 0x1F89/2 MNTimeoutPreOp1_U32
     obdSize = sizeof (dwTimeout);
     ret = obd_readEntry(0x1F89, 2, &dwTimeout, &obdSize);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
         return ret;
 
     if (dwTimeout != 0L)
@@ -1850,7 +1850,7 @@ NMT command EnableReadyToOp is sent.
 //------------------------------------------------------------------------------
 static tOplkError startBootStep2(void)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     UINT                index;
     tNmtMnuNodeInfo*    pNodeInfo;
     tObdSize            obdSize;
@@ -1871,7 +1871,7 @@ static tOplkError startBootStep2(void)
         obdSize = 1;
         // read object 0x1F8F NMT_MNNodeExpState_AU8
         ret = obd_readEntry(0x1F8F, index, &nmtState, &obdSize);
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
             goto Exit;
 
         // compute expected NMT state
@@ -1891,13 +1891,13 @@ static tOplkError startBootStep2(void)
 
             ret = timeru_modifyTimer(&pNodeInfo->timerHdlStatReq,
                                          nmtMnuInstance_g.statusRequestDelay, timerArg);
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
                 goto Exit;
 
             // update object 0x1F8F NMT_MNNodeExpState_AU8 to PreOp2
             nmtState = (UINT8)(kNmtCsPreOperational2 & 0xFF);
             ret = obd_writeEntry(0x1F8F, index, &nmtState, 1);
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
                 goto Exit;
 
             if ((pNodeInfo->nodeState == kNmtMnuNodeStateConfigured) &&
@@ -1942,7 +1942,7 @@ timeout.
 //------------------------------------------------------------------------------
 static tOplkError nodeBootStep2(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     tTimerArg           timerArg;
     UINT8               bNmtState;
     tNmtState           nmtState;
@@ -1953,7 +1953,7 @@ static tOplkError nodeBootStep2(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p)
         // read object 0x1F8E NMT_MNNodeCurrState_AU8
         obdSize = 1;
         ret = obd_readEntry(0x1F8E, nodeId_p, &bNmtState, &obdSize);
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
             goto Exit;
 
         nmtState = (tNmtState) (bNmtState | NMT_TYPE_CS);
@@ -1973,7 +1973,7 @@ static tOplkError nodeBootStep2(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p)
     NMTMNU_DBG_POST_TRACE_VALUE(0, nodeId_p, kNmtCmdEnableReadyToOperate);
 
     ret = nmtmnu_sendNmtCommand(nodeId_p, kNmtCmdEnableReadyToOperate);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
         goto Exit;
 
     if (nmtMnuInstance_g.timeoutReadyToOp != 0L)
@@ -1998,7 +1998,7 @@ The function starts CheckCommunication.
 //------------------------------------------------------------------------------
 static tOplkError startCheckCom(void)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     UINT            index;
     tNmtMnuNodeInfo* pNodeInfo;
 
@@ -2016,7 +2016,7 @@ static tOplkError startCheckCom(void)
             if (pNodeInfo->nodeState == kNmtMnuNodeStateReadyToOp)
             {
                 ret = nodeCheckCom(index, pNodeInfo);
-                if (ret == kEplReject)
+                if (ret == kErrorReject)
                 {   // timer was started
                     // wait until it expires
                     if ((pNodeInfo->nodeCfg & EPL_NODEASSIGN_MANDATORY_CN) != 0)
@@ -2026,7 +2026,7 @@ static tOplkError startCheckCom(void)
                 }
                 else
                 {
-                    if (ret != kEplSuccessful)
+                    if (ret != kErrorOk)
                         goto Exit;
                 }
 
@@ -2039,7 +2039,7 @@ static tOplkError startCheckCom(void)
             }
         }
     }
-    ret = kEplSuccessful;
+    ret = kErrorOk;
 Exit:
     return ret;
 }
@@ -2059,7 +2059,7 @@ waits some time and if no error occured everything is OK.
 //------------------------------------------------------------------------------
 static tOplkError nodeCheckCom(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     UINT32          nodeCfg;
     tTimerArg       timerArg;
 
@@ -2077,8 +2077,8 @@ static tOplkError nodeCheckCom(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p)
                                      nmtMnuInstance_g.timeoutCheckCom, timerArg);
 
         // update mandatory slave counter, because timer was started
-        if (ret == kEplSuccessful)
-            ret = kEplReject;
+        if (ret == kErrorOk)
+            ret = kErrorReject;
     }
     else
     {   // timer was not started
@@ -2099,7 +2099,7 @@ The function starts all nodes which are ReadyToOp and CheckCom did not fail.
 //------------------------------------------------------------------------------
 static tOplkError startNodes(void)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     UINT            index;
     tNmtMnuNodeInfo* pNodeInfo;
 
@@ -2120,7 +2120,7 @@ static tOplkError startNodes(void)
                 {
                     NMTMNU_DBG_POST_TRACE_VALUE(0, index, kNmtCmdStartNode);
                     ret = nmtmnu_sendNmtCommand(index, kNmtCmdStartNode);
-                    if (ret != kEplSuccessful)
+                    if (ret != kErrorOk)
                         goto Exit;
                 }
 
@@ -2144,7 +2144,7 @@ static tOplkError startNodes(void)
         {
             NMTMNU_DBG_POST_TRACE_VALUE(0, EPL_C_ADR_BROADCAST, kNmtCmdStartNode);
             ret = nmtmnu_sendNmtCommand(EPL_C_ADR_BROADCAST, kNmtCmdStartNode);
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
                 goto Exit;
         }
     }
@@ -2214,20 +2214,20 @@ static INT processNodeEventIdentResponse(UINT nodeId_p, tNmtState nodeNmtState_p
 
             *pRet_p = timeru_modifyTimer(&pNodeInfo->timerHdlStatReq,
                                              nmtMnuInstance_g.statusRequestDelay, timerArg);
-            if (*pRet_p != kEplSuccessful)
+            if (*pRet_p != kErrorOk)
                 return -1;
         }
     }
     *pRet_p = obd_writeEntry(0x1F8F, nodeId_p, &bNmtState, 1);
-    if (*pRet_p != kEplSuccessful)
+    if (*pRet_p != kErrorOk)
         return -1;
 
     // check NMT state of CN
     *pRet_p = checkNmtState(nodeId_p, pNodeInfo, nodeNmtState_p, errorCode_p, nmtState_p);
-    if (*pRet_p != kEplSuccessful)
+    if (*pRet_p != kErrorOk)
     {
-        if (*pRet_p == kEplReject)
-            *pRet_p = kEplSuccessful;
+        if (*pRet_p == kErrorReject)
+            *pRet_p = kErrorOk;
         return 0;
     }
 
@@ -2236,15 +2236,15 @@ static INT processNodeEventIdentResponse(UINT nodeId_p, tNmtState nodeNmtState_p
         // Request StatusResponse immediately,
         // because we want a fast boot-up of CNs
         *pRet_p = statusu_requestStatusResponse(nodeId_p, cbStatusResponse);
-        if (*pRet_p != kEplSuccessful)
+        if (*pRet_p != kErrorOk)
         {
             NMTMNU_DBG_POST_TRACE_VALUE(kNmtMnuIntNodeEventIdentResponse, nodeId_p, *pRet_p);
-            if (*pRet_p == kEplInvalidOperation)
+            if (*pRet_p == kErrorInvalidOperation)
             {   // the only situation when this should happen is, when
                 // StatusResponse was already requested from within
                 // the StatReq timer event.
                 // so ignore this error.
-                *pRet_p = kEplSuccessful;
+                *pRet_p = kErrorOk;
             }
             else
             {
@@ -2260,15 +2260,15 @@ static INT processNodeEventIdentResponse(UINT nodeId_p, tNmtState nodeNmtState_p
         *pRet_p = nmtMnuInstance_g.pfnCbNodeEvent(nodeId_p, kNmtNodeEventFound,
                                               nodeNmtState_p, EPL_E_NO_ERROR,
                                               (pNodeInfo->nodeCfg & EPL_NODEASSIGN_MANDATORY_CN) != 0);
-        if (*pRet_p == kEplReject)
+        if (*pRet_p == kErrorReject)
         {   // interrupt boot process on user request
             NMTMNU_DBG_POST_TRACE_VALUE(kNmtMnuIntNodeEventIdentResponse, nodeId_p,
                                             ((pNodeInfo->nodeState << 8) | *pRet_p));
 
-            *pRet_p = kEplSuccessful;
+            *pRet_p = kErrorOk;
             return 0;
         }
-        else if (*pRet_p != kEplSuccessful)
+        else if (*pRet_p != kErrorOk)
         {
             NMTMNU_DBG_POST_TRACE_VALUE(kNmtMnuIntNodeEventIdentResponse, nodeId_p,
                                             ((pNodeInfo->nodeState << 8) | *pRet_p));
@@ -2315,14 +2315,14 @@ static INT processNodeEventBoot(UINT nodeId_p, tNmtState nodeNmtState_p, tNmtSta
         *pRet_p = nmtMnuInstance_g.pfnCbNodeEvent(nodeId_p, kNmtNodeEventCheckConf,
                                               nodeNmtState_p, EPL_E_NO_ERROR,
                                               (pNodeInfo->nodeCfg & EPL_NODEASSIGN_MANDATORY_CN) != 0);
-        if (*pRet_p == kEplReject)
+        if (*pRet_p == kErrorReject)
         {   // interrupt boot process on user request
             NMTMNU_DBG_POST_TRACE_VALUE(kNmtMnuIntNodeEventBoot, nodeId_p,
                                             ((pNodeInfo->nodeState << 8) | *pRet_p));
-            *pRet_p = kEplSuccessful;
+            *pRet_p = kErrorOk;
             return 0;
         }
-        else if (*pRet_p != kEplSuccessful)
+        else if (*pRet_p != kErrorOk)
         {
             NMTMNU_DBG_POST_TRACE_VALUE(kNmtMnuIntNodeEventBoot, nodeId_p,
                                             ((pNodeInfo->nodeState << 8) | *pRet_p));
@@ -2336,14 +2336,14 @@ static INT processNodeEventBoot(UINT nodeId_p, tNmtState nodeNmtState_p, tNmtSta
         *pRet_p = nmtMnuInstance_g.pfnCbNodeEvent(nodeId_p, kNmtNodeEventUpdateConf,
                                               nodeNmtState_p, EPL_E_NO_ERROR,
                                               (pNodeInfo->nodeCfg & EPL_NODEASSIGN_MANDATORY_CN) != 0);
-        if (*pRet_p == kEplReject)
+        if (*pRet_p == kErrorReject)
         {   // interrupt boot process on user request
             NMTMNU_DBG_POST_TRACE_VALUE(kNmtMnuIntNodeEventBoot, nodeId_p,
                                             ((pNodeInfo->nodeState << 8) | *pRet_p));
-            *pRet_p = kEplSuccessful;
+            *pRet_p = kErrorOk;
             return 0;
         }
-        else if (*pRet_p != kEplSuccessful)
+        else if (*pRet_p != kErrorOk)
         {
             NMTMNU_DBG_POST_TRACE_VALUE(kNmtMnuIntNodeEventBoot, nodeId_p,
                                             ((pNodeInfo->nodeState << 8) | *pRet_p));
@@ -2451,11 +2451,11 @@ INT processNodeEventNoIdentResponse(UINT nodeId_p, tNmtState nodeNmtState_p, tNm
 
     // check NMT state of CN
     *pRet_p = checkNmtState(nodeId_p, pNodeInfo, nodeNmtState_p, errorCode_p, nmtState_p);
-    if (*pRet_p == kEplReject)
+    if (*pRet_p == kErrorReject)
     {
-        *pRet_p = kEplSuccessful;
+        *pRet_p = kErrorOk;
     }
-    else if (*pRet_p != kEplSuccessful)
+    else if (*pRet_p != kErrorOk)
     {
         return 0;
     }
@@ -2516,10 +2516,10 @@ static INT processNodeEventStatusResponse(UINT nodeId_p, tNmtState nodeNmtState_
 
     // check NMT state of CN
     *pRet_p = checkNmtState(nodeId_p, pNodeInfo, nodeNmtState_p, errorCode_p, nmtState_p);
-    if (*pRet_p != kEplSuccessful)
+    if (*pRet_p != kErrorOk)
     {
-        if (*pRet_p == kEplReject)
-            *pRet_p = kEplSuccessful;
+        if (*pRet_p == kErrorReject)
+            *pRet_p = kErrorOk;
         return 0;
     }
 
@@ -2527,7 +2527,7 @@ static INT processNodeEventStatusResponse(UINT nodeId_p, tNmtState nodeNmtState_
     {
         // request next StatusResponse immediately
         *pRet_p = statusu_requestStatusResponse(nodeId_p, cbStatusResponse);
-        if (*pRet_p != kEplSuccessful)
+        if (*pRet_p != kErrorOk)
         {
             NMTMNU_DBG_POST_TRACE_VALUE(kNmtMnuIntNodeEventStatusResponse, nodeId_p, *pRet_p);
         }
@@ -2573,8 +2573,8 @@ static INT processNodeEventNoStatusResponse(UINT nodeId_p, tNmtState nodeNmtStat
 
     // check NMT state of CN
     *pRet_p = checkNmtState(nodeId_p, pNodeInfo, nodeNmtState_p, errorCode_p, nmtState_p);
-    if (*pRet_p == kEplReject)
-        *pRet_p = kEplSuccessful;
+    if (*pRet_p == kErrorReject)
+        *pRet_p = kErrorOk;
 
     return 0;
 }
@@ -2614,8 +2614,8 @@ static INT processNodeEventError(UINT nodeId_p, tNmtState nodeNmtState_p, tNmtSt
     // check NMT state of CN
     *pRet_p = checkNmtState(nodeId_p, pNodeInfo, kNmtCsNotActive,
                             errorCode_p, nmtState_p);
-    if (*pRet_p == kEplReject)
-        *pRet_p = kEplSuccessful;
+    if (*pRet_p == kErrorReject)
+        *pRet_p = kErrorOk;
 
     return 0;
 }
@@ -2732,8 +2732,8 @@ static INT processNodeEventHeartbeat(UINT nodeId_p, tNmtState nodeNmtState_p, tN
 
     // check NMT state of CN
     *pRet_p = checkNmtState(nodeId_p, pNodeInfo, nodeNmtState_p, errorCode_p, nmtState_p);
-    if (*pRet_p == kEplReject)
-        *pRet_p = kEplSuccessful;
+    if (*pRet_p == kErrorReject)
+        *pRet_p = kErrorOk;
 
     return 0;
 }
@@ -2764,14 +2764,14 @@ static INT processNodeEventTimerIdentReq(UINT nodeId_p, tNmtState nodeNmtState_p
     DEBUG_LVL_NMTMN_TRACE("TimerStatReq->IdentReq(%02X)\n", nodeId_p);
     // trigger IdentRequest again
     *pRet_p = identu_requestIdentResponse(nodeId_p, cbIdentResponse);
-    if (*pRet_p != kEplSuccessful)
+    if (*pRet_p != kErrorOk)
     {
         NMTMNU_DBG_POST_TRACE_VALUE(kNmtMnuIntNodeEventTimerIdentReq, nodeId_p,
                                         (((nodeNmtState_p & 0xFF) << 8) | *pRet_p));
-        if (*pRet_p == kEplInvalidOperation)
+        if (*pRet_p == kErrorInvalidOperation)
         {   // this can happen because of a bug in EplTimeruLinuxKernel.c
             // so ignore this error.
-            *pRet_p = kEplSuccessful;
+            *pRet_p = kErrorOk;
         }
     }
     return 0;
@@ -2803,16 +2803,16 @@ static INT processNodeEventTimerStatReq(UINT nodeId_p, tNmtState nodeNmtState_p,
     DEBUG_LVL_NMTMN_TRACE("TimerStatReq->StatReq(%02X)\n", nodeId_p);
     // request next StatusResponse
     *pRet_p = statusu_requestStatusResponse(nodeId_p, cbStatusResponse);
-    if (*pRet_p != kEplSuccessful)
+    if (*pRet_p != kErrorOk)
     {
        NMTMNU_DBG_POST_TRACE_VALUE(kNmtMnuIntNodeEventTimerStatReq, nodeId_p,
                                        (((nodeNmtState_p & 0xFF) << 8) | *pRet_p));
-       if (*pRet_p == kEplInvalidOperation)
+       if (*pRet_p == kErrorInvalidOperation)
        {   // the only situation when this should happen is, when
            // StatusResponse was already requested while processing
            // event IdentResponse.
            // so ignore this error.
-           *pRet_p = kEplSuccessful;
+           *pRet_p = kErrorOk;
        }
     }
     return 0;
@@ -2887,8 +2887,8 @@ static INT processNodeEventTimerLonger(UINT nodeId_p, tNmtState nodeNmtState_p, 
             // node should be ReadyToOp but it is not
             // check NMT state which shall be intentionally wrong, so that ERROR_TREATMENT will be started
             *pRet_p = checkNmtState(nodeId_p, pNodeInfo, kNmtCsNotActive, EPL_E_NMT_BPO2, nmtState_p);
-            if (*pRet_p == kEplReject)
-                *pRet_p = kEplSuccessful;
+            if (*pRet_p == kErrorReject)
+                *pRet_p = kErrorOk;
             break;
 
         case kNmtMnuNodeStateReadyToOp:
@@ -2958,7 +2958,7 @@ static INT processNodeEventNmtCmdSent(UINT nodeId_p, tNmtState nodeNmtState_p, t
 
     // write object 0x1F8F NMT_MNNodeExpState_AU8
     *pRet_p = obd_writeEntry(0x1F8F, nodeId_p, &bNmtState, 1);
-    if (*pRet_p != kEplSuccessful)
+    if (*pRet_p != kErrorOk)
         return -1;
 
     if (nodeNmtState_p == kNmtCsNotActive)
@@ -2997,7 +2997,7 @@ The function processes internal node events.
 static tOplkError processInternalEvent(UINT nodeId_p, tNmtState nodeNmtState_p,
                                        UINT16 errorCode_p, tNmtMnuIntNodeEvent nodeEvent_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     tNmtState           nmtState;
 
     nmtState = nmtu_getNmtState();
@@ -3021,11 +3021,11 @@ static tOplkError processInternalEvent(UINT nodeId_p, tNmtState nodeNmtState_p,
                     // inform application
                     ret = nmtMnuInstance_g.pfnCbBootEvent(kNmtBootEventBootStep1Finish,
                                                           nmtState, EPL_E_NO_ERROR);
-                    if (ret != kEplSuccessful)
+                    if (ret != kErrorOk)
                     {
-                        if (ret == kEplReject)
+                        if (ret == kErrorReject)
                             // wait for application
-                            ret = kEplSuccessful;
+                            ret = kErrorOk;
                         break;
                     }
                     // enter PreOp2
@@ -3041,11 +3041,11 @@ static tOplkError processInternalEvent(UINT nodeId_p, tNmtState nodeNmtState_p,
                     // inform application
                     ret = nmtMnuInstance_g.pfnCbBootEvent(kNmtBootEventBootStep2Finish,
                                                           nmtState, EPL_E_NO_ERROR);
-                    if (ret != kEplSuccessful)
+                    if (ret != kErrorOk)
                     {
-                        if (ret == kEplReject)
+                        if (ret == kErrorReject)
                             // wait for application
-                            ret = kEplSuccessful;
+                            ret = kErrorOk;
                         break;
                     }
                     // enter ReadyToOp
@@ -3061,11 +3061,11 @@ static tOplkError processInternalEvent(UINT nodeId_p, tNmtState nodeNmtState_p,
                     // inform application
                     ret = nmtMnuInstance_g.pfnCbBootEvent(kNmtBootEventCheckComFinish,
                                                           nmtState, EPL_E_NO_ERROR);
-                    if (ret != kEplSuccessful)
+                    if (ret != kErrorOk)
                     {
-                        if (ret == kEplReject)
+                        if (ret == kErrorReject)
                             // wait for application
-                            ret = kEplSuccessful;
+                            ret = kErrorOk;
                         break;
                     }
                     // enter Operational
@@ -3081,11 +3081,11 @@ static tOplkError processInternalEvent(UINT nodeId_p, tNmtState nodeNmtState_p,
                     // inform application
                     ret = nmtMnuInstance_g.pfnCbBootEvent(kNmtBootEventOperational,
                                                           nmtState, EPL_E_NO_ERROR);
-                    if (ret != kEplSuccessful)
+                    if (ret != kErrorOk)
                     {
-                        if (ret == kEplReject)
+                        if (ret == kErrorReject)
                             // ignore error code
-                            ret = kEplSuccessful;
+                            ret = kErrorOk;
                         break;
                     }
                 }
@@ -3121,8 +3121,8 @@ static tOplkError checkNmtState(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p,
                                 tNmtState nodeNmtState_p, UINT16 errorCode_p,
                                 tNmtState localNmtState_p)
 {
-    tOplkError      ret = kEplSuccessful;
-    tOplkError      retUpdate = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
+    tOplkError      retUpdate = kErrorOk;
     tObdSize        obdSize;
     UINT8           nodeNmtState;
     UINT8           bExpNmtState;
@@ -3135,14 +3135,14 @@ static tOplkError checkNmtState(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p,
     if (pNodeInfo_p->nodeState == kNmtMnuNodeStateUnknown)
     {   // CN is already in state unknown, which means that it got
         // NMT reset command earlier
-        ret = kEplReject;
+        ret = kErrorReject;
         goto ExitButUpdate;
     }
 
     obdSize = 1;
     // read object 0x1F8F NMT_MNNodeExpState_AU8
     ret = obd_readEntry(0x1F8F, nodeId_p, &bExpNmtState, &obdSize);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
         goto Exit;
 
     // compute expected NMT state
@@ -3150,7 +3150,7 @@ static tOplkError checkNmtState(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p,
 
     if (expNmtState == kNmtCsNotActive)
     {   // ignore the current state, because the CN shall be not active
-        ret = kEplReject;
+        ret = kErrorReject;
         goto ExitButUpdate;
     }
     else if ((expNmtState == kNmtCsStopped) && (nodeNmtState_p == kNmtCsStopped))
@@ -3176,7 +3176,7 @@ static tOplkError checkNmtState(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p,
             else
             {   // add node to isochronous phase
                 ret = addNodeIsochronous(nodeId_p);
-                if (ret != kEplSuccessful)
+                if (ret != kErrorOk)
                     goto Exit;
             }
         }
@@ -3185,14 +3185,14 @@ static tOplkError checkNmtState(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p,
     {   // CN switched to ReadyToOp
         // delete timer for timeout handling
         ret = timeru_deleteTimer(&pNodeInfo_p->timerHdlLonger);
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
             goto Exit;
 
         pNodeInfo_p->nodeState = kNmtMnuNodeStateReadyToOp;
 
         // update object 0x1F8F NMT_MNNodeExpState_AU8 to ReadyToOp
         ret = obd_writeEntry(0x1F8F, nodeId_p, &nodeNmtState, 1);
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
             goto Exit;
 
         if ((pNodeInfo_p->nodeCfg & EPL_NODEASSIGN_MANDATORY_CN) != 0)
@@ -3202,7 +3202,7 @@ static tOplkError checkNmtState(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p,
         if (localNmtState_p >= kNmtMsReadyToOperate)
         {   // start procedure CheckCommunication for this node
             ret = nodeCheckCom(nodeId_p, pNodeInfo_p);
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
                 goto ExitButUpdate;
 
             if ((localNmtState_p == kNmtMsOperational) && (pNodeInfo_p->nodeState == kNmtMnuNodeStateComChecked))
@@ -3212,7 +3212,7 @@ static tOplkError checkNmtState(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p,
 
                 // immediately start optional CN, because communication is always OK (e.g. async-only CN)
                 ret = nmtmnu_sendNmtCommand(nodeId_p, kNmtCmdStartNode);
-                if (ret != kEplSuccessful)
+                if (ret != kErrorOk)
                     goto Exit;
             }
         }
@@ -3257,7 +3257,7 @@ static tOplkError checkNmtState(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p,
         ret = nmtMnuInstance_g.pfnCbNodeEvent(nodeId_p, kNmtNodeEventError,
                                               nodeNmtState_p, errorCode_p,
                                               (pNodeInfo_p->nodeCfg & EPL_NODEASSIGN_MANDATORY_CN) != 0);
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
             goto ExitButUpdate;
 
         NMTMNU_DBG_POST_TRACE_VALUE(0, nodeId_p, (((nodeNmtState_p & 0xFF) << 8) | kNmtCmdResetNode));
@@ -3266,8 +3266,8 @@ static tOplkError checkNmtState(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p,
         // store error code in NMT command data for diagnostic purpose
         ami_setUint16Le(&beErrorCode, errorCode_p);
         ret = nmtmnu_sendNmtCommandEx(nodeId_p, kNmtCmdResetNode, &beErrorCode, sizeof (beErrorCode));
-        if (ret == kEplSuccessful)
-            ret = kEplReject;
+        if (ret == kErrorOk)
+            ret = kErrorReject;
 
         // d.k. continue with updating the current NMT state of the CN
 //        goto Exit;
@@ -3277,7 +3277,7 @@ ExitButUpdate:
     // check if NMT_MNNodeCurrState_AU8 has to be changed
     obdSize = 1;
     retUpdate = obd_readEntry(0x1F8E, nodeId_p, &nmtStatePrev, &obdSize);
-    if (retUpdate != kEplSuccessful)
+    if (retUpdate != kErrorOk)
     {
         ret = retUpdate;
         goto Exit;
@@ -3286,7 +3286,7 @@ ExitButUpdate:
     {
         // update object 0x1F8E NMT_MNNodeCurrState_AU8
         retUpdate = obd_writeEntry(0x1F8E, nodeId_p, &nodeNmtState, 1);
-        if (retUpdate != kEplSuccessful)
+        if (retUpdate != kErrorOk)
         {
             ret =retUpdate;
             goto Exit;
@@ -3294,7 +3294,7 @@ ExitButUpdate:
         retUpdate = nmtMnuInstance_g.pfnCbNodeEvent(nodeId_p, kNmtNodeEventNmtState,
                                                     nodeNmtState_p, errorCode_p,
                                                     (pNodeInfo_p->nodeCfg & EPL_NODEASSIGN_MANDATORY_CN) != 0);
-        if (retUpdate != kEplSuccessful)
+        if (retUpdate != kErrorOk)
         {
             ret = retUpdate;
             goto Exit;
@@ -3353,7 +3353,7 @@ static tOplkError prcMeasure(void)
     UINT                nodeIdPredNode;
     UINT                nodeIdPrevSyncReq;
 
-    ret = kEplSuccessful;
+    ret = kErrorOk;
 
     fSyncReqSentToPredNode = FALSE;
     nodeIdPredNode       = EPL_C_ADR_INVALID;
@@ -3404,7 +3404,7 @@ static tOplkError prcMeasure(void)
                         SyncRequestData.nodeId = nodeIdPredNode;
 
                         ret = syncu_requestSyncResponse(prcCbSyncResMeasure, &SyncRequestData, uiSize);
-                        if (ret != kEplSuccessful)
+                        if (ret != kErrorOk)
                         {
                             goto Exit;
                         }
@@ -3413,7 +3413,7 @@ static tOplkError prcMeasure(void)
                     SyncRequestData.nodeId = nodeId;
 
                     ret = syncu_requestSyncResponse(prcCbSyncResMeasure, &SyncRequestData, uiSize);
-                    if (ret != kEplSuccessful)
+                    if (ret != kErrorOk)
                     {
                         goto Exit;
                     }
@@ -3482,7 +3482,7 @@ static tOplkError prcCalculate(UINT nodeIdFirstNode_p)
 
     if ((nodeIdFirstNode_p == EPL_C_ADR_INVALID) || (nodeIdFirstNode_p >= EPL_C_ADR_BROADCAST))
     {   // invalid node ID specified
-        return kEplInvalidNodeId;
+        return kErrorInvalidNodeId;
     }
 
     nodeIdPredNode = EPL_C_ADR_INVALID;
@@ -3497,7 +3497,7 @@ static tOplkError prcCalculate(UINT nodeIdFirstNode_p)
               (pNodeInfo->prcFlags & NMTMNU_NODE_FLAG_PRC_ADD_IN_PROGRESS)))
         {
             ret = prcCalcPResResponseTimeNs(nodeId, nodeIdPredNode, &pResResponseTimeNs);
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
                 goto Exit;
 
             if (pNodeInfo->pResTimeFirstNs < pResResponseTimeNs)
@@ -3513,7 +3513,7 @@ static tOplkError prcCalculate(UINT nodeIdFirstNode_p)
     }
 
     ret = prcCalcPResChainingSlotTimeNs(nodeIdPredNode, &pResMnTimeoutNs);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
         goto Exit;
 
     if (nmtMnuInstance_g.prcPResMnTimeoutNs < pResMnTimeoutNs)
@@ -3525,7 +3525,7 @@ static tOplkError prcCalculate(UINT nodeIdFirstNode_p)
         dllNodeInfo.presTimeoutNs = pResMnTimeoutNs;
         dllNodeInfo.nodeId = EPL_C_ADR_MN_DEF_NODE_ID;
         ret = dllucal_configNode(&dllNodeInfo);
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
             goto Exit;
     }
     // enter next phase
@@ -3555,7 +3555,7 @@ static tOplkError prcCalcPResResponseTimeNs(UINT nodeId_p, UINT nodeIdPredNode_p
     tNmtMnuNodeInfo*        pNodeInfoPredNode;
     tObdSize                obdSize;
 
-    ret = kEplSuccessful;
+    ret = kErrorOk;
 
     if (nodeIdPredNode_p == EPL_C_ADR_INVALID)
     {   // no predecessor node passed
@@ -3574,7 +3574,7 @@ static tOplkError prcCalcPResResponseTimeNs(UINT nodeId_p, UINT nodeIdPredNode_p
     // read object 0x1F8D NMT_PResPayloadLimitList_AU16
     obdSize = 2;
     ret = obd_readEntry(0x1F8D, nodeIdPredNode_p, &pResPayloadLimitPredNode, &obdSize);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
         goto Exit;
 
     *pPResResponseTimeNs_p =
@@ -3631,19 +3631,19 @@ static tOplkError prcCalcPResChainingSlotTimeNs(UINT nodeIdLastNode_p,
     // Sub-Index 05h PResActPayloadLimit_U16
     obdSize = 2;
     ret = obd_readEntry(0x1F98, 5, &pResActPayloadLimit, &obdSize);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
         goto Exit;
 
     // read object 0x1F8B NMT_MNPReqPayloadLimitList_AU16
     obdSize = 2;
     ret = obd_readEntry(0x1F8B, nodeIdLastNode_p, &cnPReqPayloadLastNode, &obdSize);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
         goto Exit;
 
     // read object 0x1F92 NMT_MNCNPResTimeout_AU32
     obdSize = 4;
     ret = obd_readEntry(0x1F92, nodeIdLastNode_p, &cnResTimeoutLastNodeNs, &obdSize);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
         goto Exit;
 
     *pPResChainingSlotTimeNs_p =
@@ -3803,7 +3803,7 @@ static tOplkError prcShift(UINT nodeIdPrevShift_p)
     tDllSyncRequest     syncRequestData;
     UINT                size;
 
-    ret = kEplSuccessful;
+    ret = kErrorOk;
     if (nodeIdPrevShift_p == EPL_C_ADR_INVALID)
         nodeIdPrevShift_p = 254;
 
@@ -3911,7 +3911,7 @@ static tOplkError prcAdd(UINT nodeIdPrevAdd_p)
     UINT                syncReqNum;
     tNmtMnuNodeInfo*    pNodeInfoLastSyncReq;
 
-    ret = kEplSuccessful;
+    ret = kErrorOk;
     // prepare SyncReq
     syncReqData.syncControl = EPL_SYNC_PRES_MODE_SET |
                                   EPL_SYNC_PRES_TIME_FIRST_VALID |
@@ -3921,12 +3921,12 @@ static tOplkError prcAdd(UINT nodeIdPrevAdd_p)
     // read object 0x1006 NMT_CycleLen_U32
     obdSize = sizeof(UINT32);
     ret = obd_readEntry(0x1006, 0, &cycleLenUs, &obdSize);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
         goto Exit;
 
     // read object 0x1C14 DLL_CNLossOfSocTolerance_U32
     ret = obd_readEntry(0x1C14, 0, &cNLossOfSocToleranceNs, &obdSize);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
         goto Exit;
 
     syncReqData.pResFallBackTimeout = cycleLenUs * 1000 + cNLossOfSocToleranceNs;
@@ -3946,7 +3946,7 @@ static tOplkError prcAdd(UINT nodeIdPrevAdd_p)
             syncReqData.nodeId        = nodeId;
             syncReqData.pResTimeFirst = pNodeInfo->pResTimeFirstNs;
             ret = syncu_requestSyncResponse(prcCbSyncResAdd, &syncReqData, sizeof(syncReqData));
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
                 goto Exit;
 
             pNodeInfo->prcFlags |= NMTMNU_NODE_FLAG_PRC_ADD_SYNCREQ_SENT;
@@ -4017,7 +4017,7 @@ static tOplkError PUBLIC prcCbSyncResAdd(UINT nodeId_p, tEplSyncResponse* pSyncR
     // No additional node-added event is received for PRC nodes
     // thus the handler has to be called manually.
     ret = cbNodeAdded(nodeId_p);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
         goto Exit;
 
     // Flag ISOCHRON has been set in cbNodeAdded,
@@ -4052,7 +4052,7 @@ static tOplkError prcVerify(UINT nodeId_p)
     tDllSyncRequest         syncReqData;
     UINT                    size;
 
-    ret = kEplSuccessful;
+    ret = kErrorOk;
 
     pNodeInfo = NMTMNU_GET_NODEINFO(nodeId_p);
     if (pNodeInfo->flags & NMTMNU_NODE_FLAG_ISOCHRON)
@@ -4141,7 +4141,7 @@ static tOplkError prcCbSyncResNextAction(UINT nodeId_p, tEplSyncResponse* pSyncR
     tNmtCommand             nmtCommand;
 
     UNUSED_PARAMETER(pSyncResponse_p);
-    ret = kEplSuccessful;
+    ret = kErrorOk;
 
     pNodeInfo = NMTMNU_GET_NODEINFO(nodeId_p);
     switch (pNodeInfo->prcFlags & NMTMNU_NODE_FLAG_PRC_RESET_MASK)
@@ -4176,7 +4176,7 @@ static tOplkError prcCbSyncResNextAction(UINT nodeId_p, tEplSyncResponse* pSyncR
     if (nmtCommand != kNmtCmdInvalidService)
     {
         ret = nmtmnu_sendNmtCommand(nodeId_p, nmtCommand);
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
             goto Exit;
     }
 
@@ -4190,14 +4190,14 @@ static tOplkError prcCbSyncResNextAction(UINT nodeId_p, tEplSyncResponse* pSyncR
         case NMTMNU_NODE_FLAG_PRC_CALL_SHIFT:
             pNodeInfo->prcFlags &= ~NMTMNU_NODE_FLAG_PRC_CALL_MASK;
             ret = prcShift(nodeId_p);
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
                 goto Exit;
             break;
 
         case NMTMNU_NODE_FLAG_PRC_CALL_ADD:
             pNodeInfo->prcFlags &= ~NMTMNU_NODE_FLAG_PRC_CALL_MASK;
             ret = prcAdd(nodeId_p);
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
                 goto Exit;
             break;
 

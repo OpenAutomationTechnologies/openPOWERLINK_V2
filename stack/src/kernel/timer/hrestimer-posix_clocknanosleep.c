@@ -177,7 +177,7 @@ The function adds an instance of the high-resolution timer module.
 //------------------------------------------------------------------------------
 tOplkError hrestimer_addInstance(void)
 {
-    tOplkError                  ret = kEplSuccessful;
+    tOplkError                  ret = kErrorOk;
     UINT                        index;
     struct sched_param          schedParam;
     tHresTimerInfo*             pTimerInfo;
@@ -198,13 +198,13 @@ tOplkError hrestimer_addInstance(void)
         if (sem_init(&pTimerInfo->syncSem, 0, 0) != 0)
         {
             DEBUG_LVL_ERROR_TRACE("%s() Couldn't init semaphore!\n", __func__);
-            return kEplNoResource;
+            return kErrorNoResource;
         }
 
         if (pthread_create(&pTimerInfo->timerThreadId, NULL, timerThread, pTimerInfo) != 0)
         {
             sem_destroy(&pTimerInfo->syncSem);
-            return kEplNoResource;
+            return kErrorNoResource;
         }
 
         schedParam.__sched_priority = EPL_THREAD_PRIORITY_HIGH;
@@ -213,7 +213,7 @@ tOplkError hrestimer_addInstance(void)
             DEBUG_LVL_ERROR_TRACE("%s() Couldn't set thread scheduling parameters!\n", __func__);
             sem_destroy(&pTimerInfo->syncSem);
             pthread_cancel(pTimerInfo->timerThreadId);
-            return kEplNoResource;
+            return kErrorNoResource;
         }
     }
 
@@ -234,7 +234,7 @@ The function deletes an instance of the high-resolution timer module.
 tOplkError hrestimer_delInstance(void)
 {
     tHresTimerInfo*         pTimerInfo;
-    tOplkError              ret = kEplSuccessful;
+    tOplkError              ret = kErrorOk;
     UINT                    index;
 
     for (index = 0; index < TIMER_COUNT; index++)
@@ -289,7 +289,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
                                  tTimerkCallback pfnCallback_p, ULONG argument_p,
                                  BOOL fContinue_p)
 {
-    tOplkError              ret = kEplSuccessful;
+    tOplkError              ret = kErrorOk;
     UINT                    index;
     tHresTimerInfo*         pTimerInfo;
 
@@ -297,7 +297,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
                             __func__, (unsigned int)pTimerHdl_p,(unsigned int)*pTimerHdl_p);
 
     if(pTimerHdl_p == NULL)
-        return kEplTimerInvalidHandle;
+        return kErrorTimerInvalidHandle;
 
     if (*pTimerHdl_p == 0)
     {   // no timer created yet
@@ -312,7 +312,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
         }
         if (index >= TIMER_COUNT)
         {   // no free structure found
-            return kEplTimerNoTimerCreated;
+            return kErrorTimerNoTimerCreated;
         }
 
         pTimerInfo->eventArg.timerHdl = HDL_INIT(index);
@@ -322,7 +322,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
         index = HDL_TO_IDX(*pTimerHdl_p);
         if (index >= TIMER_COUNT)
         {   // invalid handle
-            return kEplTimerInvalidHandle;
+            return kErrorTimerInvalidHandle;
         }
 
         pTimerInfo = &hresTimerInstance_l.aTimerInfo[index];
@@ -374,13 +374,13 @@ by its timer handle. After deleting the handle is reset to zero.
 //------------------------------------------------------------------------------
 tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
 {
-    tOplkError              ret = kEplSuccessful;
+    tOplkError              ret = kErrorOk;
     UINT                    index;
     tHresTimerInfo*         pTimerInfo;
 
     // check pointer to handle
     if(pTimerHdl_p == NULL)
-        return kEplTimerInvalidHandle;
+        return kErrorTimerInvalidHandle;
 
     if (*pTimerHdl_p == 0)
     {   // no timer created yet
@@ -391,7 +391,7 @@ tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
         index = HDL_TO_IDX(*pTimerHdl_p);
         if (index >= TIMER_COUNT)
         {   // invalid handle
-            return kEplTimerInvalidHandle;
+            return kErrorTimerInvalidHandle;
         }
         pTimerInfo = &hresTimerInstance_l.aTimerInfo[index];
         if (pTimerInfo->eventArg.timerHdl != *pTimerHdl_p)

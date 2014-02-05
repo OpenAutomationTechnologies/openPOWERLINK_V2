@@ -109,19 +109,19 @@ tOplkError pdoucal_initSync(tEplSyncCb pfnSyncCb_p)
     if(pHifInstance == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s: Could not find hostif instance!\n", __func__);
-        return kEplNoResource;
+        return kErrorNoResource;
     }
 
     hifRet = hostif_irqRegHdl(pHifInstance, kHostifIrqSrcSync, hostifIrqSyncCb);
     if(hifRet != kHostifSuccessful)
     {
         DEBUG_LVL_ERROR_TRACE("%s: Enable irq not possible!\n", __func__);
-        return kEplNoResource;
+        return kErrorNoResource;
     }
 
     pfnSyncCb_l = pfnSyncCb_p;
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -157,14 +157,14 @@ The function waits for a sync event.
                         forever.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful      Successfully received sync event
-\retval kEplGeneralError    Error while waiting on sync event
+\retval kErrorOk      Successfully received sync event
+\retval kErrorGeneralError    Error while waiting on sync event
 */
 //------------------------------------------------------------------------------
 tOplkError pdoucal_waitSyncEvent(ULONG timeout_p)
 {
     UNUSED_PARAMETER(timeout_p);
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //============================================================================//

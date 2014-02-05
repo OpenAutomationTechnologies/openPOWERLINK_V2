@@ -155,7 +155,7 @@ tOplkError edrvcyclic_init(void)
     // clear instance structure
     EPL_MEMSET(&instance_l, 0, sizeof (instance_l));
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -178,7 +178,7 @@ tOplkError edrvcyclic_shutdown(void)
         instance_l.maxTxBufferCount = 0;
     }
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -196,7 +196,7 @@ This function determines the maxmimum size of the cyclic Tx buffer list.
 //------------------------------------------------------------------------------
 tOplkError edrvcyclic_setMaxTxBufferListSize(UINT maxListSize_p)
 {
-    tOplkError ret = kEplSuccessful;
+    tOplkError ret = kErrorOk;
 
     if (instance_l.maxTxBufferCount != maxListSize_p)
     {
@@ -210,7 +210,7 @@ tOplkError edrvcyclic_setMaxTxBufferListSize(UINT maxListSize_p)
         instance_l.apTxBufferList = EPL_MALLOC(sizeof (*instance_l.apTxBufferList) * maxListSize_p * 2);
         if (instance_l.apTxBufferList == NULL)
         {
-            ret = kEplEdrvNoFreeBufEntry;
+            ret = kErrorEdrvNoFreeBufEntry;
         }
 
         instance_l.currrentTxBufferList = 0;
@@ -237,7 +237,7 @@ This function forwards the next cycle Tx buffer list to the cyclic Edrv.
 //------------------------------------------------------------------------------
 tOplkError edrvcyclic_setNextTxBufferList(tEdrvTxBuffer** ppTxBuffer_p, UINT txBufferCount_p)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
     UINT        nextTxBufferList;
 
     nextTxBufferList = instance_l.currrentTxBufferList ^ instance_l.maxTxBufferCount;
@@ -245,20 +245,20 @@ tOplkError edrvcyclic_setNextTxBufferList(tEdrvTxBuffer** ppTxBuffer_p, UINT txB
     // check if next list is free
     if (instance_l.apTxBufferList[nextTxBufferList] != NULL)
     {
-        ret = kEplEdrvNextTxListNotEmpty;
+        ret = kErrorEdrvNextTxListNotEmpty;
         goto Exit;
     }
 
     if (txBufferCount_p == 0 || txBufferCount_p > instance_l.maxTxBufferCount)
     {
-        ret = kEplEdrvInvalidParam;
+        ret = kErrorEdrvInvalidParam;
         goto Exit;
     }
 
     // check if last entry in list equals a NULL pointer
     if (ppTxBuffer_p[txBufferCount_p - 1] != NULL)
     {
-        ret = kEplEdrvInvalidParam;
+        ret = kErrorEdrvInvalidParam;
         goto Exit;
     }
 
@@ -285,7 +285,7 @@ tOplkError edrvcyclic_setCycleTime(UINT32 cycleTimeUs_p)
 {
     instance_l.cycleLengthUs = cycleTimeUs_p;
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -301,12 +301,12 @@ This function starts the cycles.
 //------------------------------------------------------------------------------
 tOplkError edrvcyclic_startCycle(void)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
     INT         i;
 
     if (instance_l.cycleLengthUs == 0)
     {
-        ret = kEplEdrvInvalidCycleLen;
+        ret = kErrorEdrvInvalidCycleLen;
         goto Exit;
     }
 
@@ -368,7 +368,7 @@ tOplkError edrvcyclic_regSyncHandler(tEdrvCyclicCbSync pfnCbSync_p)
 {
     instance_l.pfnSyncCb = pfnCbSync_p;
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -388,7 +388,7 @@ tOplkError edrvcyclic_regErrorHandler(tEdrvCyclicCbError pfnCbError_p)
 {
     instance_l.pfnErrorCb = pfnCbError_p;
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //============================================================================//
@@ -410,7 +410,7 @@ This function is called by the cyclic timer. It starts the next cycle.
 //------------------------------------------------------------------------------
 static tOplkError timerHdlCycleCb(tTimerEventArg* pEventArg_p)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
     UINT32      macTimeDiff;
     UINT32      macTime1;
     UINT32      macTime2;
@@ -425,7 +425,7 @@ static tOplkError timerHdlCycleCb(tTimerEventArg* pEventArg_p)
 
     if (instance_l.apTxBufferList[instance_l.currentTxBufferEntry] != NULL)
     {
-        ret = kEplEdrvTxListNotFinishedYet;
+        ret = kErrorEdrvTxListNotFinishedYet;
         goto Exit;
     }
 
@@ -437,7 +437,7 @@ static tOplkError timerHdlCycleCb(tTimerEventArg* pEventArg_p)
 
     if (instance_l.apTxBufferList[instance_l.currentTxBufferEntry] == NULL)
     {
-        ret = kEplEdrvCurTxListEmpty;
+        ret = kErrorEdrvCurTxListEmpty;
         goto Exit;
     }
 
@@ -448,7 +448,7 @@ static tOplkError timerHdlCycleCb(tTimerEventArg* pEventArg_p)
 
     ret = processTxBufferList();
 
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
     {
         goto Exit;
     }
@@ -491,7 +491,7 @@ static tOplkError timerHdlCycleCb(tTimerEventArg* pEventArg_p)
 
 Exit:
     BENCHMARK_MOD_01_RESET(0);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
     {
 
         if (instance_l.pfnErrorCb != NULL)
@@ -514,7 +514,7 @@ descriptors to the Ethernet driver.
 //------------------------------------------------------------------------------
 static tOplkError processTxBufferList(void)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     tEdrvTxBuffer*  pTxBuffer = NULL;
     UINT32          absoluteTime; //absolute time accumulator
     BOOL            fFirstPkt = TRUE; //flag to identify first packet
@@ -613,7 +613,7 @@ static tOplkError processTxBufferList(void)
         pTxBuffer->timeOffsetAbs = absoluteTime | 1; //lowest bit enables time triggered send
 
         ret = edrv_sendTxBuffer(pTxBuffer);
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
         {
             goto Exit;
         }
@@ -644,7 +644,7 @@ static tOplkError processTxBufferList(void)
     ret = hrestimer_modifyTimer(&instance_l.timerHdlCycle, nextTimerIrqNs,
             timerHdlCycleCb, 0L, FALSE);
 
-    if(ret != kEplSuccessful)
+    if(ret != kErrorOk)
     {
         PRINTF("%s: hrestimer_modifyTimer ret=0x%X\n", __func__, ret);
         goto Exit;
@@ -678,14 +678,14 @@ static tOplkError processCycleViolation(UINT32 nextTimerIrqNs_p)
     ret = hrestimer_modifyTimer(&instance_l.timerHdlCycle, nextTimerIrqNs_p,
             timerHdlCycleCb, 0L, FALSE);
 
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
     {
         PRINTF("%s: hrestimer_modifyTimer ret=0x%X\n", __func__, ret);
         goto Exit;
     }
 
     //post error to generate EPL_DLL_ERR_MN_CYCTIMEEXCEED in EplDllkCbCyclicError()
-    ret = kEplEdrvTxListNotFinishedYet;
+    ret = kErrorEdrvTxListNotFinishedYet;
 Exit:
     return ret;
 }

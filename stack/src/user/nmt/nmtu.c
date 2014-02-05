@@ -135,7 +135,7 @@ The function adds a NMT user module instance
 tOplkError nmtu_addInstance(void)
 {
     nmtuInstance_g.pfnNmtChangeCb = NULL;
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -151,7 +151,7 @@ The function deletes a NMT user module instance
 //------------------------------------------------------------------------------
 tOplkError nmtu_delInstance(void)
 {
-    tOplkError ret = kEplSuccessful;
+    tOplkError ret = kErrorOk;
 
     nmtuInstance_g.pfnNmtChangeCb = NULL;
     ret = timeru_deleteTimer(&nmtuInstance_g.timerHdl);
@@ -220,7 +220,7 @@ The function processes events sent to the NMT user module.
 //------------------------------------------------------------------------------
 tOplkError nmtu_processEvent(tEplEvent* pEvent_p)
 {
-    tOplkError                  ret = kEplSuccessful;
+    tOplkError                  ret = kErrorOk;
     tEventNmtStateChange*       pNmtStateChange;
 
     switch(pEvent_p->m_EventType)
@@ -237,7 +237,7 @@ tOplkError nmtu_processEvent(tEplEvent* pEvent_p)
                 ret = nmtuInstance_g.pfnNmtChangeCb(*pNmtStateChange);
             }
 
-            if (ret == kEplSuccessful)
+            if (ret == kErrorOk)
             {
                 /* handle state changes, state machine is split in general, CN and
                  * MN states. */
@@ -249,7 +249,7 @@ tOplkError nmtu_processEvent(tEplEvent* pEvent_p)
                         if (!processMnStateChange(pNmtStateChange->newNmtState, &ret))
 #endif
                         {
-                            ret = kEplNmtInvalidState;
+                            ret = kErrorNmtInvalidState;
                             TRACE("EplNmtuProcess(): unhandled NMT state 0x%X\n",
                                   pNmtStateChange->newNmtState);
                         }
@@ -257,15 +257,15 @@ tOplkError nmtu_processEvent(tEplEvent* pEvent_p)
                 }
 
             }
-            else if (ret == kEplReject)
+            else if (ret == kErrorReject)
             {   // application wants to change NMT state itself, it's OK
-                ret = kEplSuccessful;
+                ret = kErrorOk;
             }
             DEBUG_LVL_NMTU_TRACE("EplNmtuProcessEvent(): NMT-State-Maschine announce change of NMT State\n");
             break;
 
         default:
-            ret = kEplNmtInvalidEvent;
+            ret = kErrorNmtInvalidEvent;
             break;
     }
     return ret;
@@ -287,7 +287,7 @@ The function registers a callback function for NMT state change events.
 tOplkError nmtu_registerStateChangeCb(tNmtuStateChangeCallback pfnNmtStateChangeCb_p)
 {
     nmtuInstance_g.pfnNmtChangeCb = pfnNmtStateChangeCb_p;
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //============================================================================//
@@ -312,7 +312,7 @@ for each active node in object 0x1F81.
 //------------------------------------------------------------------------------
 static tOplkError configureDll(void)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     UINT32          nodeCfg;
     tObdSize        obdSize;
     tDllNodeInfo    dllNodeInfo;
@@ -322,11 +322,11 @@ static tOplkError configureDll(void)
     // read number of nodes from object 0x1F81/0
     obdSize = sizeof (count);
     ret = obd_readEntry(0x1F81, 0, &count, &obdSize);
-    if ((ret == kEplObdIndexNotExist) || (ret == kEplObdSubindexNotExist))
+    if ((ret == kErrorObdIndexNotExist) || (ret == kErrorObdSubindexNotExist))
     {
-        return kEplSuccessful;
+        return kErrorOk;
     }
-    else if (ret != kEplSuccessful)
+    else if (ret != kErrorOk)
     {
         return ret;
     }
@@ -335,11 +335,11 @@ static tOplkError configureDll(void)
     {
         obdSize = sizeof (nodeCfg);
         ret = obd_readEntry(0x1F81, index, &nodeCfg, &obdSize);
-        if (ret == kEplObdSubindexNotExist)
+        if (ret == kErrorObdSubindexNotExist)
         {   // not all subindexes of object 0x1F81 have to exist
             continue;
         }
-        else if (ret != kEplSuccessful)
+        else if (ret != kErrorOk)
         {
             return ret;
         }
@@ -350,11 +350,11 @@ static tOplkError configureDll(void)
 
             obdSize = sizeof (dllNodeInfo.presPayloadLimit);
             ret = obd_readEntry(0x1F8D, index, &dllNodeInfo.presPayloadLimit, &obdSize);
-            if ((ret == kEplObdIndexNotExist) || (ret == kEplObdSubindexNotExist))
+            if ((ret == kErrorObdIndexNotExist) || (ret == kErrorObdSubindexNotExist))
             {
                 dllNodeInfo.presPayloadLimit = 0;
             }
-            else if (ret != kEplSuccessful)
+            else if (ret != kErrorOk)
             {
                 return ret;
             }
@@ -368,12 +368,12 @@ static tOplkError configureDll(void)
             {   // node is CN
                 obdSize = sizeof (dllNodeInfo.preqPayloadLimit);
                 ret = obd_readEntry(0x1F8B, index, &dllNodeInfo.preqPayloadLimit, &obdSize);
-                if (ret != kEplSuccessful)
+                if (ret != kErrorOk)
                     return ret;
 
                 obdSize = sizeof (dllNodeInfo.presTimeoutNs);
                 ret = obd_readEntry(0x1F92, index, &dllNodeInfo.presTimeoutNs, &obdSize);
-                if (ret != kEplSuccessful)
+                if (ret != kErrorOk)
                     return ret;
             }
             else
@@ -384,7 +384,7 @@ static tOplkError configureDll(void)
 #endif // if defined(INCLUDE_CONFIG_NMT_MN)
 
             ret = dllucal_configNode(&dllNodeInfo);
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
                 return ret;
         }
     }
@@ -408,7 +408,7 @@ The function processes a state change to a general NMT state.
 //------------------------------------------------------------------------------
 static BOOL processGeneralStateChange(tNmtState newNmtState_p, tOplkError* pRet_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     UINT                nodeId;
     BOOL                fHandled = TRUE;
 
@@ -439,7 +439,7 @@ static BOOL processGeneralStateChange(tNmtState newNmtState_p, tOplkError* pRet_
 #if EPL_NMT_MAX_NODE_ID > 0
             // configure the DLL (PReq/PRes payload limits and PRes timeout)
             ret = configureDll();
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
             {
                 break;
             }
@@ -487,7 +487,7 @@ The function processes a state change to a MN NMT state.
 //------------------------------------------------------------------------------
 static BOOL processMnStateChange(tNmtState newNmtState_p, tOplkError* pRet_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     BOOL                fHandled = TRUE;
     UINT32              waitTime;
     UINT32              startUp;
@@ -502,7 +502,7 @@ static BOOL processMnStateChange(tNmtState newNmtState_p, tOplkError* pRet_p)
             // check NMT_StartUp_U32.Bit13
             obdSize = sizeof(startUp);
             ret = obd_readEntry(0x1F80, 0x00, &startUp,&obdSize);
-            if(ret != kEplSuccessful)
+            if(ret != kErrorOk)
                 break;
 
             if((startUp & EPL_NMTST_BASICETHERNET) == 0)
@@ -517,7 +517,7 @@ static BOOL processMnStateChange(tNmtState newNmtState_p, tOplkError* pRet_p)
             // read NMT_BootTime_REC.MNWaitNotAct_U32 from OD
             obdSize = sizeof(waitTime);
             ret = obd_readEntry(0x1F89, 0x01, &waitTime, &obdSize);
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
                 break;
 
             ret = setupNmtTimerEvent(waitTime, timerEvent);
@@ -531,7 +531,7 @@ static BOOL processMnStateChange(tNmtState newNmtState_p, tOplkError* pRet_p)
             // read NMT_BootTime_REC.MNWaitPreOp1_U32 from OD
             obdSize = sizeof(waitTime);
             ret = obd_readEntry(0x1F89, 0x03, &waitTime, &obdSize);
-            if(ret != kEplSuccessful)
+            if(ret != kErrorOk)
             {
                 // ignore error, because this timeout is optional
                 waitTime = 0;
@@ -588,7 +588,7 @@ The function processes a state change to a CN NMT state.
 //------------------------------------------------------------------------------
 static BOOL processCnStateChange(tNmtState newNmtState_p, tOplkError* pRet_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     BOOL                fHandled = TRUE;
     UINT32              basicEthernetTimeout;
     tObdSize            obdSize;
@@ -601,7 +601,7 @@ static BOOL processCnStateChange(tNmtState newNmtState_p, tOplkError* pRet_p)
             // read NMT_CNBasicEthernetTimeout_U32 from OD
             obdSize = sizeof(basicEthernetTimeout);
             ret = obd_readEntry(0x1F99, 0x00, &basicEthernetTimeout, &obdSize);
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
                 break;
 
             if (basicEthernetTimeout != 0)

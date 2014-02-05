@@ -169,7 +169,7 @@ tOplkError PUBLIC hrestimer_addInstance(void)
     tEplTimerHighReskTimerInfo*  pTimerInfo;
     tHrtimerSig                  sig;
 
-    Ret = kEplSuccessful;
+    Ret = kErrorOk;
 
     EPL_MEMSET(&EplTimerHighReskInstance_l, 0, sizeof (EplTimerHighReskInstance_l));
 
@@ -185,7 +185,7 @@ tOplkError PUBLIC hrestimer_addInstance(void)
 
         if (hrtimer_create(CLOCK_MONOTONIC, &sig, &pTimerInfo->m_timer) != 0)
         {
-            Ret = kEplNoResource;
+            Ret = kErrorNoResource;
             goto Exit;
         }
     }
@@ -209,7 +209,7 @@ tOplkError PUBLIC hrestimer_delInstance(void)
     tOplkError                  Ret;
     UINT                        uiIndex;
 
-    Ret = kEplSuccessful;
+    Ret = kErrorOk;
 
     for (uiIndex = 0; uiIndex < TIMER_COUNT; uiIndex++)
     {
@@ -253,13 +253,13 @@ tOplkError PUBLIC hrestimer_modifyTimer(tTimerHdl*     pTimerHdl_p,
     struct itimerspec            RelTime;
 
 
-    Ret = kEplSuccessful;
+    Ret = kErrorOk;
 
     // check pointer to handle
     if(pTimerHdl_p == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Invalid timer handle\n", __func__);
-        Ret = kEplTimerInvalidHandle;
+        Ret = kErrorTimerInvalidHandle;
         goto Exit;
     }
 
@@ -278,7 +278,7 @@ tOplkError PUBLIC hrestimer_modifyTimer(tTimerHdl*     pTimerHdl_p,
         {   // no free structure found
             DEBUG_LVL_ERROR_TRACE("%s() Invalid timer index:%d\n", __func__,
                                     uiIndex);
-            Ret = kEplTimerNoTimerCreated;
+            Ret = kErrorTimerNoTimerCreated;
             goto Exit;
         }
 
@@ -291,7 +291,7 @@ tOplkError PUBLIC hrestimer_modifyTimer(tTimerHdl*     pTimerHdl_p,
         {   // invalid handle
             DEBUG_LVL_ERROR_TRACE("%s() Invalid timer index:%d\n", __func__,
                                     uiIndex);
-            Ret = kEplTimerInvalidHandle;
+            Ret = kErrorTimerInvalidHandle;
             goto Exit;
         }
 
@@ -381,7 +381,7 @@ Exit:
 //---------------------------------------------------------------------------
 tOplkError PUBLIC hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
 {
-    tOplkError                  Ret = kEplSuccessful;
+    tOplkError                  Ret = kErrorOk;
     UINT                        uiIndex;
     tEplTimerHighReskTimerInfo* pTimerInfo;
     struct itimerspec           RelTime;
@@ -392,7 +392,7 @@ tOplkError PUBLIC hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
     // check pointer to handle
     if(pTimerHdl_p == NULL)
     {
-        Ret = kEplTimerInvalidHandle;
+        Ret = kErrorTimerInvalidHandle;
         goto Exit;
     }
 
@@ -405,7 +405,7 @@ tOplkError PUBLIC hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
         uiIndex = HDL_TO_IDX(*pTimerHdl_p);
         if (uiIndex >= TIMER_COUNT)
         {   // invalid handle
-            Ret = kEplTimerInvalidHandle;
+            Ret = kErrorTimerInvalidHandle;
             goto Exit;
         }
         pTimerInfo = &EplTimerHighReskInstance_l.m_aTimerInfo[uiIndex];

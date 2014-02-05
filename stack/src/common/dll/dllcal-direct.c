@@ -148,14 +148,14 @@ Add a direct call instance for TX packet forwarding in DLL CAL
 \param  dllCalQueue_p           Parameter that determines the queue
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          if function executes correctly
+\retval kErrorOk          if function executes correctly
 \retval other                   error
 */
 //------------------------------------------------------------------------------
 static tOplkError addInstance (tDllCalQueueInstance *ppDllCalQueue_p,
                                tDllCalQueue dllCalQueue_p)
 {
-    tOplkError                  ret = kEplSuccessful;
+    tOplkError                  ret = kErrorOk;
     tDllCalDirectInstance*      pSearch;
     tDllCalDirectInstance*      pDllCalDirectInstance;
     BOOL                        fInstanceFound;
@@ -192,7 +192,7 @@ static tOplkError addInstance (tDllCalQueueInstance *ppDllCalQueue_p,
 
         if(pDllCalDirectInstance == NULL)
         {
-            ret = kEplNoResource;
+            ret = kErrorNoResource;
             goto Exit;
         }
 
@@ -238,7 +238,7 @@ Delete the direct call instance.
 \param  pDllCalQueue_p          Pointer to DllCal Queue instance
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          if function executes correctly
+\retval kErrorOk          if function executes correctly
 \retval other                   error
 */
 //------------------------------------------------------------------------------
@@ -287,7 +287,7 @@ static tOplkError delInstance (tDllCalQueueInstance pDllCalQueue_p)
         EPL_FREE(pSearch);
     }
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -303,27 +303,27 @@ any type (e.g. TX packet).
                                 inserted.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          if function executes correctly
+\retval kErrorOk          if function executes correctly
 \retval other                   error
 */
 //------------------------------------------------------------------------------
 static tOplkError insertDataBlock (tDllCalQueueInstance pDllCalQueue_p,
                                    BYTE *pData_p, UINT *pDataSize_p)
 {
-    tOplkError                  ret = kEplSuccessful;
+    tOplkError                  ret = kErrorOk;
     tDllCalDirectInstance*      pDllCalDirectInstance =
                                     (tDllCalDirectInstance*)pDllCalQueue_p;
 
     if(pDllCalDirectInstance == NULL)
     {
-        ret = kEplInvalidInstanceParam;
+        ret = kErrorInvalidInstanceParam;
         goto Exit;
     }
 
     if(pDllCalDirectInstance->frameSize != EPL_DLLCALDIRECT_TXBUF_EMPTY)
     {
         //TX buffer is not free
-        ret = kEplDllAsyncTxBufferFull;
+        ret = kErrorDllAsyncTxBufferFull;
         goto Exit;
     }
 
@@ -352,20 +352,20 @@ type (e.g. TX packet).
                                 (will be replaced with actual data block size)
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          if function executes correctly
+\retval kErrorOk          if function executes correctly
 \retval other                   error
 */
 //------------------------------------------------------------------------------
 static tOplkError getDataBlock (tDllCalQueueInstance pDllCalQueue_p,
                                 BYTE *pData_p, UINT *pDataSize_p)
 {
-    tOplkError                  ret = kEplSuccessful;
+    tOplkError                  ret = kErrorOk;
     tDllCalDirectInstance*      pDllCalDirectInstance =
                                     (tDllCalDirectInstance*)pDllCalQueue_p;
 
     if(pDllCalDirectInstance == NULL)
     {
-        ret = kEplInvalidInstanceParam;
+        ret = kErrorInvalidInstanceParam;
         goto Exit;
     }
 
@@ -373,14 +373,14 @@ static tOplkError getDataBlock (tDllCalQueueInstance pDllCalQueue_p,
        pDllCalDirectInstance->frameSize == EPL_DLLCALDIRECT_TXBUF_FILLING)
     {
         //TX buffer is empty or not ready
-        ret = kEplDllAsyncTxBufferEmpty;
+        ret = kErrorDllAsyncTxBufferEmpty;
         goto Exit;
     }
 
     if(pDllCalDirectInstance->frameSize > *pDataSize_p)
     {
         //provided data buffer is too small
-        ret = kEplNoResource;
+        ret = kErrorNoResource;
         goto Exit;
     }
 
@@ -407,7 +407,7 @@ Returns the data block counter.
 \param  pDataBlockCount_p       Pointer which returns the data block count
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          if function executes correctly
+\retval kErrorOk          if function executes correctly
 \retval other                   error
 */
 //------------------------------------------------------------------------------
@@ -419,7 +419,7 @@ static tOplkError getDataBlockCount (tDllCalQueueInstance pDllCalQueue_p,
 
     if(pDllCalDirectInstance == NULL)
     {
-        return kEplInvalidInstanceParam;
+        return kErrorInvalidInstanceParam;
     }
 
     if(pDllCalDirectInstance->frameSize == EPL_DLLCALDIRECT_TXBUF_EMPTY ||
@@ -432,7 +432,7 @@ static tOplkError getDataBlockCount (tDllCalQueueInstance pDllCalQueue_p,
         *pDataBlockCount_p = 1;
     }
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -445,7 +445,7 @@ Resets the direct call instance
 \param  timeOutMs_p             Timeout in milliseconds.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          if function executes correctly
+\retval kErrorOk          if function executes correctly
 \retval other                   error
 */
 //------------------------------------------------------------------------------
@@ -459,13 +459,13 @@ static tOplkError resetDataBlockQueue (tDllCalQueueInstance pDllCalQueue_p,
 
     if(pDllCalDirectInstance == NULL)
     {
-        return kEplInvalidInstanceParam;
+        return kErrorInvalidInstanceParam;
     }
 
     //empty the buffer
     pDllCalDirectInstance->frameSize = EPL_DLLCALDIRECT_TXBUF_EMPTY;
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 

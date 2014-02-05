@@ -176,14 +176,14 @@ The function adds an instance of the high-resolution timer module
 //------------------------------------------------------------------------------
 tOplkError hrestimer_addInstance(void)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     UINT            index;
 
     EPL_MEMSET(&hresTimerInstance_l, 0, sizeof (hresTimerInstance_l));
 
 #ifndef CONFIG_HIGH_RES_TIMERS
     printk("EplTimerHighResk: Kernel symbol CONFIG_HIGH_RES_TIMERS is required.\n");
-    ret = kEplNoResource;
+    ret = kErrorNoResource;
     return ret;
 #endif
 
@@ -223,7 +223,7 @@ The function deletes an instance of the high-resolution timer module
 tOplkError hrestimer_delInstance(void)
 {
     tHresTimerInfo*         pTimerInfo;
-    tOplkError              ret = kEplSuccessful;
+    tOplkError              ret = kErrorOk;
     UINT                    index;
 
     for (index = 0; index < TIMER_COUNT; index++)
@@ -270,13 +270,13 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
                                  tTimerkCallback pfnCallback_p, ULONG argument_p,
                                  BOOL fContinue_p)
 {
-    tOplkError              ret = kEplSuccessful;
+    tOplkError              ret = kErrorOk;
     UINT                    index;
     tHresTimerInfo*         pTimerInfo;
     ktime_t                 relTime;
 
     if(pTimerHdl_p == NULL)
-        return kEplTimerInvalidHandle;
+        return kErrorTimerInvalidHandle;
 
     if (*pTimerHdl_p == 0)
     {   // no timer created yet
@@ -288,7 +288,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
                 break;      // free structure found
         }
         if (index >= TIMER_COUNT)
-            return kEplTimerNoTimerCreated;     // no free structure found
+            return kErrorTimerNoTimerCreated;     // no free structure found
 
         pTimerInfo->eventArg.timerHdl = HDL_INIT(index);
     }
@@ -296,7 +296,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
     {
         index = HDL_TO_IDX(*pTimerHdl_p);
         if (index >= TIMER_COUNT)
-            return kEplTimerInvalidHandle;      // invalid handle
+            return kErrorTimerInvalidHandle;      // invalid handle
 
         pTimerInfo = &hresTimerInstance_l.aTimerInfo[index];
     }
@@ -351,12 +351,12 @@ by its timer handle. After deleting the handle is reset to zero.
 //------------------------------------------------------------------------------
 tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
 {
-    tOplkError              ret = kEplSuccessful;
+    tOplkError              ret = kErrorOk;
     UINT                    index;
     tHresTimerInfo*         pTimerInfo;
 
     if(pTimerHdl_p == NULL)
-        return kEplTimerInvalidHandle;
+        return kErrorTimerInvalidHandle;
 
     if (*pTimerHdl_p == 0)
     {
@@ -367,7 +367,7 @@ tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
         index = HDL_TO_IDX(*pTimerHdl_p);
         if (index >= TIMER_COUNT)
         {   // invalid handle
-            return kEplTimerInvalidHandle;
+            return kErrorTimerInvalidHandle;
         }
 
         pTimerInfo = &hresTimerInstance_l.aTimerInfo[index];

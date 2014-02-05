@@ -156,7 +156,7 @@ This function initializes the kernel DLL CAL module.
 //------------------------------------------------------------------------------
 tOplkError dllkcal_init(void)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
 #ifdef CONFIG_INCLUDE_NMT_MN
     tCircBufError   circErr;
 #endif
@@ -172,7 +172,7 @@ tOplkError dllkcal_init(void)
 
     ret = instance_l.pTxNmtFuncs->pfnAddInstance(&instance_l.dllCalQueueTxNmt,
                                                  kDllCalQueueTxNmt);
-    if(ret != kEplSuccessful)
+    if(ret != kErrorOk)
     {
         DEBUG_LVL_ERROR_TRACE ("%s() TxNmt failed\n", __func__);
         goto Exit;
@@ -180,7 +180,7 @@ tOplkError dllkcal_init(void)
 
     ret = instance_l.pTxGenFuncs->pfnAddInstance(&instance_l.dllCalQueueTxGen,
                                                  kDllCalQueueTxGen);
-    if(ret != kEplSuccessful)
+    if(ret != kErrorOk)
     {
         DEBUG_LVL_ERROR_TRACE("%s() TxGen failed\n", __func__);
         goto Exit;
@@ -189,7 +189,7 @@ tOplkError dllkcal_init(void)
 #if EPL_DLL_PRES_CHAINING_MN != FALSE
     ret = instance_l.pTxSyncFuncs->pfnAddInstance(&instance_l.dllCalQueueTxSync,
                                                   kDllCalQueueTxSync);
-    if(ret != kEplSuccessful)
+    if(ret != kErrorOk)
     {
         DEBUG_LVL_ERROR_TRACE("%s() TxSync failed\n", __func__);
         goto Exit;
@@ -247,7 +247,7 @@ This function cleans up the kernel DLL CAL module.
 //------------------------------------------------------------------------------
 tOplkError dllkcal_exit(void)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
 
 #ifdef CONFIG_INCLUDE_NMT_MN
     circbuf_free(instance_l.pQueueCnRequestGen);
@@ -283,7 +283,7 @@ This function is the event handler of the kernel DLL CAL module.
 //------------------------------------------------------------------------------
 tOplkError dllkcal_process(tEplEvent* pEvent_p)
 {
-    tOplkError                  ret = kEplSuccessful;
+    tOplkError                  ret = kErrorOk;
     tDllCalAsndServiceIdFilter* pServFilter;
     tDllIdentParam*             pIdentParam;
     tDllConfigParam*            pConfigParam;
@@ -360,7 +360,7 @@ tOplkError dllkcal_process(tEplEvent* pEvent_p)
 #endif
 
         default:
-            ret = kEplInvalidEvent;
+            ret = kErrorInvalidEvent;
             break;
     }
 
@@ -384,12 +384,12 @@ This function returns the count of TX frames of the FIFO with highest priority.
 tOplkError dllkcal_getAsyncTxCount(tDllAsyncReqPriority* pPriority_p,
                                    UINT* pCount_p)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
     ULONG       frameCount;
 
     ret = instance_l.pTxNmtFuncs->pfnGetDataBlockCount(instance_l.dllCalQueueTxNmt,
                                                        &frameCount);
-    if(ret != kEplSuccessful)
+    if(ret != kErrorOk)
     {
         goto Exit;
     }
@@ -408,7 +408,7 @@ tOplkError dllkcal_getAsyncTxCount(tDllAsyncReqPriority* pPriority_p,
 
     ret = instance_l.pTxGenFuncs->pfnGetDataBlockCount(instance_l.dllCalQueueTxGen,
                                                        &frameCount);
-    if(ret != kEplSuccessful)
+    if(ret != kErrorOk)
     {
         goto Exit;
     }
@@ -444,7 +444,7 @@ The function return TX frames form the specified FIFO.
 tOplkError dllkcal_getAsyncTxFrame(void* pFrame_p, UINT* pFrameSize_p,
                                    tDllAsyncReqPriority priority_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
 
     switch (priority_p)
     {
@@ -480,7 +480,7 @@ only for frames with registered AsndServiceIds.
 //------------------------------------------------------------------------------
 tOplkError dllkcal_asyncFrameReceived(tFrameInfo* pFrameInfo_p)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
     tEplEvent   event;
 
     event.m_EventSink = kEplEventSinkDlluCal;
@@ -494,7 +494,7 @@ tOplkError dllkcal_asyncFrameReceived(tFrameInfo* pFrameInfo_p)
 #endif
 
     ret = eventk_postEvent(&event);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
     {
         instance_l.statistics.curRxFrameCount++;
     }
@@ -502,7 +502,7 @@ tOplkError dllkcal_asyncFrameReceived(tFrameInfo* pFrameInfo_p)
     {
         instance_l.statistics.maxRxFrameCount++;
 #if DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS != FALSE
-        ret = kEplReject; // Signalizes dllk to release buffer later
+        ret = kErrorReject; // Signalizes dllk to release buffer later
 #endif
     }
 
@@ -527,7 +527,7 @@ priority.
 tOplkError dllkcal_sendAsyncFrame(tFrameInfo* pFrameInfo_p,
                                   tDllAsyncReqPriority priority_p)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
     tEplEvent   event;
 
     switch (priority_p)
@@ -547,7 +547,7 @@ tOplkError dllkcal_sendAsyncFrame(tFrameInfo* pFrameInfo_p,
             break;
     }
 
-    if(ret != kEplSuccessful)
+    if(ret != kErrorOk)
     {
         goto Exit;
     }
@@ -580,7 +580,7 @@ The function writes the given frame into the specified dll CAL queue.
 //------------------------------------------------------------------------------
 tOplkError dllkcal_writeAsyncFrame(tFrameInfo* pFrameInfo_p, tDllCalQueue dllQueue)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
 
     switch (dllQueue)
     {
@@ -625,7 +625,7 @@ The function clear the asynchronous transmit buffers.
 //------------------------------------------------------------------------------
 tOplkError dllkcal_clearAsyncBuffer(void)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
 
     //ret is ignored
     ret = instance_l.pTxNmtFuncs->pfnResetDataBlockQueue(
@@ -651,7 +651,7 @@ The function clears the asynchronous transmit queues.
 #if defined(CONFIG_INCLUDE_NMT_MN)
 tOplkError dllkcal_clearAsyncQueues(void)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
 
 #if EPL_DLL_PRES_CHAINING_MN != FALSE
     //ret is ignored
@@ -686,7 +686,7 @@ The function returns statistics of the asynchronous queues
 //------------------------------------------------------------------------------
 tOplkError dllkcal_getStatistics(tDllkCalStatistics** ppStatistics)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
 
     //ret is ignored
     ret = instance_l.pTxNmtFuncs->pfnGetDataBlockCount(instance_l.dllCalQueueTxNmt,
@@ -721,13 +721,13 @@ The function issues a StatusRequest or an IdentRequest to the specified node.
 tOplkError dllkcal_issueRequest(tDllReqServiceId service_p, UINT nodeId_p,
                                   BYTE soaFlag1_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     tCircBufError   err;
 
     if (soaFlag1_p != 0xFF)
     {
         ret = dllk_setFlag1OfNode(nodeId_p, soaFlag1_p);
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
         {
             goto Exit;
         }
@@ -740,7 +740,7 @@ tOplkError dllkcal_issueRequest(tDllReqServiceId service_p, UINT nodeId_p,
             err = circbuf_writeData(instance_l.pQueueIdentReq, &nodeId_p, sizeof(nodeId_p));
             if(err != kCircBufOk)
             {   // queue is full
-                ret = kEplDllAsyncTxBufferFull;
+                ret = kErrorDllAsyncTxBufferFull;
                 goto Exit;
             }
             break;
@@ -749,13 +749,13 @@ tOplkError dllkcal_issueRequest(tDllReqServiceId service_p, UINT nodeId_p,
             err = circbuf_writeData(instance_l.pQueueStatusReq, &nodeId_p, sizeof(nodeId_p));
             if(err != kCircBufOk)
             {   // queue is full
-                ret = kEplDllAsyncTxBufferFull;
+                ret = kErrorDllAsyncTxBufferFull;
                 goto Exit;
             }
             break;
 
         default:
-            ret = kEplDllInvalidParam;
+            ret = kErrorDllInvalidParam;
             goto Exit;
     }
 
@@ -788,7 +788,7 @@ DLL module.
 tOplkError dllkcal_getSoaRequest(tDllReqServiceId* pReqServiceId_p,
                                  UINT* pNodeId_p, tEplSoaPayload* pSoaPayload_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     UINT            count;
 
 #if EPL_DLL_PRES_CHAINING_MN == FALSE
@@ -858,7 +858,7 @@ tOplkError dllkcal_setAsyncPendingRequests(UINT nodeId_p,
                                            tDllAsyncReqPriority asyncReqPrio_p,
                                            UINT count_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     tCircBufError       err;
     UINT*               pLocalRequestCnt;
     tCircBufInstance*   pTargetQueue;
@@ -1100,7 +1100,7 @@ static BOOL getMnStatusRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_
 
 The function returns the next MN Sync request.
 
-todo how to handle errors (ret != kEplSuccessful)? Is it sufficient that we
+todo how to handle errors (ret != kErrorOk)? Is it sufficient that we
      return TRUE as when we successfully finish?
 
 \param  pReqServiceId_p         Pointer to store the next request.
@@ -1126,7 +1126,7 @@ static BOOL getMnSyncRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p,
     instance_l.nextRequestQueue = 0;
     ret = instance_l.pTxSyncFuncs->pfnGetDataBlockCount(
                                 instance_l.dllCalQueueTxSync, &syncReqCount);
-    if(ret != kEplSuccessful)
+    if(ret != kErrorOk)
     {
         return TRUE;
     }
@@ -1136,7 +1136,7 @@ static BOOL getMnSyncRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p,
         ret = instance_l.pTxSyncFuncs->pfnGetDataBlock(
                                instance_l.dllCalQueueTxSync,
                                (BYTE *)&syncRequest, &syncReqSize);
-        if(ret != kEplSuccessful)
+        if(ret != kErrorOk)
         {
             return TRUE;
         }
@@ -1150,7 +1150,7 @@ static BOOL getMnSyncRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p,
                 nodeOpParam.opNodeType = kDllNodeOpTypeIsochronous;
                 nodeOpParam.nodeId = syncRequest.nodeId;
                 ret = dllk_addNode(&nodeOpParam);
-                if (ret != kEplSuccessful)
+                if (ret != kErrorOk)
                 {
                     return TRUE;
                 }
@@ -1160,7 +1160,7 @@ static BOOL getMnSyncRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p,
                 nodeOpParam.opNodeType = kDllNodeOpTypeIsochronous;
                 nodeOpParam.nodeId = syncRequest.nodeId;
                 ret = dllk_deleteNode(&nodeOpParam);
-                if (ret != kEplSuccessful)
+                if (ret != kErrorOk)
                 {
                     return TRUE;
                 }
@@ -1181,7 +1181,7 @@ static BOOL getMnSyncRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p,
         {
             ret = dllk_getCnMacAddress(syncRequest.nodeId,
                             &pSoaPayload_p->m_SyncRequest.m_be_abDestMacAddress[0]);
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
             {
                 return TRUE;
             }

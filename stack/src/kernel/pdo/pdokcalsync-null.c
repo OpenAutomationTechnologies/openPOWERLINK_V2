@@ -101,7 +101,7 @@ The function initializes the kernel PDO CAL sync module.
 //------------------------------------------------------------------------------
 tOplkError pdokcal_initSync(void)
 {
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -150,7 +150,7 @@ The function enables sync events
 tOplkError pdokcal_controlSync(BOOL fEnable_p)
 {
     UNUSED_PARAMETER(fEnable_p);
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //============================================================================//

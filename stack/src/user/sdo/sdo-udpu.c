@@ -178,7 +178,7 @@ The function adds an instance of a SDO over UDP module.
 //------------------------------------------------------------------------------
 tOplkError sdoudp_addInstance(tSequLayerReceiveCb pfnReceiveCb_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
 
 #if (TARGET_SYSTEM == _WIN32_)
     int                 error;
@@ -193,13 +193,13 @@ tOplkError sdoudp_addInstance(tSequLayerReceiveCb pfnReceiveCb_p)
     }
     else
     {
-        return kEplSdoUdpMissCb;
+        return kErrorSdoUdpMissCb;
     }
 
 #if (TARGET_SYSTEM == _WIN32_)
     //  windows specific start of socket
     if ((error = WSAStartup(MAKEWORD(2,0), &wsa)) != 0)
-        return kEplSdoUdpNoSocket;
+        return kErrorSdoUdpNoSocket;
 
     // create critical section for access of instance variables
     sdoUdpInstance_l.pCriticalSection = &sdoUdpInstance_l.criticalSection;
@@ -227,7 +227,7 @@ sockets and deletes the listener thread.
 //------------------------------------------------------------------------------
 tOplkError sdoudp_delInstance(void)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
 
 #if (TARGET_SYSTEM == _WIN32_)
     BOOL                fTermError;
@@ -238,11 +238,11 @@ tOplkError sdoudp_delInstance(void)
 #if (TARGET_SYSTEM == _WIN32_)
         fTermError = TerminateThread(sdoUdpInstance_l.threadHandle, 0);
         if(fTermError == FALSE)
-            return kEplSdoUdpThreadError;
+            return kErrorSdoUdpThreadError;
 #elif (TARGET_SYSTEM == _LINUX_)
         sdoUdpInstance_l.fStopThread = TRUE;
         if (pthread_join(sdoUdpInstance_l.threadHandle, NULL) != 0)
-            return kEplSdoUdpThreadError;
+            return kErrorSdoUdpThreadError;
 #endif
         sdoUdpInstance_l.threadHandle = 0;
     }
@@ -277,7 +277,7 @@ NMT_ResetConfiguration.
 //------------------------------------------------------------------------------
 tOplkError sdoudp_config(ULONG ipAddr_p, UINT port_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     struct sockaddr_in  addr;
     INT                 error;
 
@@ -292,7 +292,7 @@ tOplkError sdoudp_config(ULONG ipAddr_p, UINT port_p)
     }
     else if (port_p > 65535)
     {
-        return kEplSdoUdpSocketError;
+        return kErrorSdoUdpSocketError;
     }
 
     if (sdoUdpInstance_l.threadHandle != 0)
@@ -300,11 +300,11 @@ tOplkError sdoudp_config(ULONG ipAddr_p, UINT port_p)
 #if (TARGET_SYSTEM == _WIN32_)
         fTermError = TerminateThread(sdoUdpInstance_l.threadHandle, 0);
         if(fTermError == FALSE)
-            return kEplSdoUdpThreadError;
+            return kErrorSdoUdpThreadError;
 #elif (TARGET_SYSTEM == _LINUX_)
         sdoUdpInstance_l.fStopThread = TRUE;
         if (pthread_join(sdoUdpInstance_l.threadHandle, NULL) != 0)
-            return kEplSdoUdpThreadError;
+            return kErrorSdoUdpThreadError;
 #endif
         sdoUdpInstance_l.threadHandle = 0;
     }
@@ -314,14 +314,14 @@ tOplkError sdoudp_config(ULONG ipAddr_p, UINT port_p)
         error = closesocket(sdoUdpInstance_l.udpSocket);
         sdoUdpInstance_l.udpSocket = INVALID_SOCKET;
         if(error != 0)
-            return kEplSdoUdpSocketError;
+            return kErrorSdoUdpSocketError;
     }
 
     // create Socket
     sdoUdpInstance_l.udpSocket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (sdoUdpInstance_l.udpSocket == INVALID_SOCKET)
     {
-        ret = kEplSdoUdpNoSocket;
+        ret = kErrorSdoUdpNoSocket;
         DEBUG_LVL_SDO_TRACE("sdoudp_config: socket() failed\n");
         return ret;
     }
@@ -334,7 +334,7 @@ tOplkError sdoudp_config(ULONG ipAddr_p, UINT port_p)
     if (error < 0)
     {
         DEBUG_LVL_SDO_TRACE("sdoudp_config: bind() finished with %i\n", error);
-        return kEplSdoUdpNoSocket;
+        return kErrorSdoUdpNoSocket;
     }
 
     // create Listen-Thread
@@ -343,10 +343,10 @@ tOplkError sdoudp_config(ULONG ipAddr_p, UINT port_p)
     sdoUdpInstance_l.threadHandle = CreateThread(NULL, 0, sdoUdpThread, &sdoUdpInstance_l,
                                                  0, &threadId);
     if (sdoUdpInstance_l.threadHandle == NULL)
-        return kEplSdoUdpThreadError;
+        return kErrorSdoUdpThreadError;
 #elif (TARGET_SYSTEM == _LINUX_)
     if (pthread_create(&sdoUdpInstance_l.threadHandle, NULL, sdoUdpThread, (void*)&sdoUdpInstance_l) != 0)
-        return kEplSdoUdpThreadError;
+        return kErrorSdoUdpThreadError;
 #endif
 
     return ret;
@@ -369,7 +369,7 @@ The function initializes a new connection.
 //------------------------------------------------------------------------------
 tOplkError sdoudp_initCon(tSdoConHdl* pSdoConHandle_p, UINT targetNodeId_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     UINT                count;
     UINT                freeCon;
     tSdoUdpCon*         pSdoUdpCon;
@@ -397,7 +397,7 @@ tOplkError sdoudp_initCon(tSdoConHdl* pSdoConHandle_p, UINT targetNodeId_p)
 
     if (freeCon == SDO_MAX_CONNECTION_UDP)
     {
-        ret = kEplSdoUdpNoFreeHandle;
+        ret = kErrorSdoUdpNoFreeHandle;
     }
     else
     {
@@ -435,7 +435,7 @@ tOplkError sdoudp_sendData(tSdoConHdl sdoConHandle_p, tEplFrame* pSrcData_p, UIN
 
     array = (sdoConHandle_p & ~SDO_ASY_HANDLE_MASK);
     if(array >= SDO_MAX_CONNECTION_UDP)
-        return kEplSdoUdpInvalidHdl;
+        return kErrorSdoUdpInvalidHdl;
 
     ami_setUint8Le(&pSrcData_p->m_le_bMessageType, 0x06);   // set message type SDO
     ami_setUint8Le(&pSrcData_p->m_le_bDstNodeId, 0x00);     // target node id (for Udp = 0)
@@ -458,9 +458,9 @@ tOplkError sdoudp_sendData(tSdoConHdl sdoConHandle_p, tEplFrame* pSrcData_p, UIN
     if(error < 0)
     {
         DEBUG_LVL_SDO_TRACE("sdoudp_sendData: sendto() finished with %i\n", iError);
-        return kEplSdoUdpSendError;
+        return kErrorSdoUdpSendError;
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -478,13 +478,13 @@ The function deletes an existing connection.
 //------------------------------------------------------------------------------
 tOplkError sdoudp_delConnection(tSdoConHdl sdoConHandle_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     UINT            array;
 
     array = (sdoConHandle_p & ~SDO_ASY_HANDLE_MASK);
     if(array >= SDO_MAX_CONNECTION_UDP)
     {
-        return kEplSdoUdpInvalidHdl;
+        return kErrorSdoUdpInvalidHdl;
     }
     // delete connection
     sdoUdpInstance_l.aSdoAbsUdpConnection[array].ipAddr = 0;
@@ -568,7 +568,7 @@ void receiveFromSocket(tSdoUdpInstance* pInstance_p)
 
                 // offset 4 -> start of SDO Sequence header
                 ret = pInstance_p->pfnSdoAsySeqCb(sdoConHdl, (tAsySdoSeq*)&aBuffer[4], (error - 4));
-                if (ret != kEplSuccessful)
+                if (ret != kErrorOk)
                 {
                     DEBUG_LVL_ERROR_TRACE("%s new con: ip=%lX, port=%u, Ret=0x%X\n", __func__,
                           (ULONG) ntohl(pInstance_p->aSdoAbsUdpConnection[freeEntry].ipAddr),
@@ -593,7 +593,7 @@ LeaveCriticalSection(sdoUdpInstance_l.pCriticalSection);
 #endif
             // offset 4 -> start of SDO Sequence header
             ret = pInstance_p->pfnSdoAsySeqCb(sdoConHdl, (tAsySdoSeq*)&aBuffer[4], (error - 4));
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
             {
                 DEBUG_LVL_ERROR_TRACE("%s known con: ip=%lX, port=%u, Ret=0x%X\n", __func__,
                       (ULONG) ntohl(pInstance_p->aSdoAbsUdpConnection[count].ipAddr),

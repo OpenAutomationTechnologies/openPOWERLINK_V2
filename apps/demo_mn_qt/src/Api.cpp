@@ -229,7 +229,7 @@ Api::Api(MainWindow *pMainWindow_p, UINT nodeId_p, QString devName_p)
 
     // init EPL
     ret = oplk_init(&initParam);
-    if(ret != kEplSuccessful)
+    if(ret != kErrorOk)
     {
         QMessageBox::critical(0, "POWERLINK demo",
                               QString("Initialization of openPOWERLINK Stack failed.\n") +
@@ -240,13 +240,13 @@ Api::Api(MainWindow *pMainWindow_p, UINT nodeId_p, QString devName_p)
     }
 
     ret = oplk_setCdcFilename(pszCdcFilename_g);
-    if(ret != kEplSuccessful)
+    if(ret != kErrorOk)
     {
         goto Exit;
     }
 
     ret = pDataInOutThread->setupProcessImage();
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
     {
         QMessageBox::critical(0, "POWERLINK demo",
                               QString("Initialization of process image failed.\n") +

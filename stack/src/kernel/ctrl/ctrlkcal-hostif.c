@@ -136,12 +136,12 @@ tOplkError ctrlkcal_init (void)
 
     ctrlkcal_setStatus(kCtrlStatusReady);
 
-    return kEplSuccessful;
+    return kErrorOk;
 
 Cleanup:
     DEBUG_LVL_ERROR_TRACE ("Could not initialize Host Interface (0x%X)\n", hifRet);
     ctrlkcal_exit();
-    return kEplNoResource;
+    return kErrorNoResource;
 }
 
 //------------------------------------------------------------------------------
@@ -179,7 +179,7 @@ This function provides processing time for the CAL module.
 //------------------------------------------------------------------------------
 tOplkError ctrlkcal_process (void)
 {
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -202,15 +202,15 @@ tOplkError ctrlkcal_getCmd (tCtrlCmdType *pCmd_p)
     tHostifCommand hifcmd;
 
     if(pCmd_p == NULL)
-        return kEplGeneralError;
+        return kErrorGeneralError;
 
     hifret = hostif_getCommand(instance_l.hifInstance, &hifcmd);
     if(hifret != kHostifSuccessful)
-        return kEplGeneralError;
+        return kErrorGeneralError;
 
     *pCmd_p = (tCtrlCmdType)hifcmd;
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -322,11 +322,11 @@ The function reads the initialization parameter from the user stack.
 tOplkError ctrlkcal_readInitParam(tCtrlInitParam* pInitParam_p)
 {
     if(instance_l.pInitParamBase == NULL)
-        return kEplNoResource;
+        return kErrorNoResource;
 
     EPL_MEMCPY(pInitParam_p, instance_l.pInitParamBase, sizeof(tCtrlInitParam));
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //============================================================================//

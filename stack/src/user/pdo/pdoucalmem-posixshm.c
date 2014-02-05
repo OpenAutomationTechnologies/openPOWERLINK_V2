@@ -112,9 +112,9 @@ tOplkError pdoucal_openMem(void)
     if ((fd_l = shm_open(PDO_SHMEM_NAME, O_RDWR, 0)) < 0)
     {
         TRACE ("%s() Error open shared memory!\n", __func__);
-        return kEplNoResource;
+        return kErrorNoResource;
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -134,7 +134,7 @@ For the Posix shared-memory implementation it unlinks the shared memory segment.
 tOplkError pdoucal_closeMem(void)
 {
     shm_unlink(PDO_SHMEM_NAME);
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -159,9 +159,9 @@ tOplkError pdoucal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
     {
         TRACE ("%s() mmap failed!\n", __func__);
         *ppPdoMem_p = NULL;
-        return kEplNoResource;
+        return kErrorNoResource;
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -184,9 +184,9 @@ tOplkError pdoucal_freeMem(BYTE* pMem_p, size_t memSize_p)
     if(munmap(pMem_p, memSize_p) != 0)
     {
         TRACE ("%s() munmap failed (%s)\n", __func__, strerror(errno));
-        return kEplGeneralError;
+        return kErrorGeneralError;
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //============================================================================//

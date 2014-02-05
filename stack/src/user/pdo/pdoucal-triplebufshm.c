@@ -127,11 +127,11 @@ tOplkError pdoucal_initPdoMem(tPdoChannelSetup* pPdoChannels_p, size_t rxPdoMemS
     memSize_l = (pdoMemSize * 3) + sizeof(tPdoMemRegion);
     if (memSize_l != 0)
     {
-        if (pdoucal_allocateMem(memSize_l, (BYTE**)&pPdoMem_l) != kEplSuccessful)
+        if (pdoucal_allocateMem(memSize_l, (BYTE**)&pPdoMem_l) != kErrorOk)
         {
             DEBUG_LVL_ERROR_TRACE ("%s() Allocating PDO memory failed!\n", __func__);
             pPdoMem_l = NULL;
-            return kEplNoResource;
+            return kErrorNoResource;
         }
     }
 
@@ -146,7 +146,7 @@ tOplkError pdoucal_initPdoMem(tPdoChannelSetup* pPdoChannels_p, size_t rxPdoMemS
 
     OPLK_ATOMIC_INIT(pPdoMem_l);
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -162,7 +162,7 @@ void pdoucal_cleanupPdoMem(void)
 {
     if (pPdoMem_l != NULL)
     {
-        if (pdoucal_freeMem((BYTE *)pPdoMem_l, memSize_l) != kEplSuccessful)
+        if (pdoucal_freeMem((BYTE *)pPdoMem_l, memSize_l) != kErrorOk)
         {
             DEBUG_LVL_ERROR_TRACE ("%s() Unmapping shared PDO mem failed\n", __func__);
         }
@@ -227,7 +227,7 @@ tOplkError pdoucal_setTxPdo(UINT channelId_p, BYTE* pPdo_p,  WORD pdoSize_p)
 
     //TRACE ("%s() chan:%d new wi:%d\n", __func__, channelId_p, pPdoMem_l->txChannelInfo[channelId_p].writeBuf);
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -263,7 +263,7 @@ tOplkError pdoucal_getRxPdo(BYTE** ppPdo_p, UINT channelId_p, WORD pdoSize_p)
     readBuf = pPdoMem_l->rxChannelInfo[channelId_p].readBuf;
     *ppPdo_p =  pTripleBuf_l[readBuf] + pPdoMem_l->rxChannelInfo[channelId_p].channelOffset;
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //============================================================================//

@@ -133,7 +133,7 @@ tOplkError PUBLIC processEvents(tEplApiEventType EventType_p,
                                 tEplApiEventArg* pEventArg_p,
                                 void GENERIC* pUserArg_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
 
     UNUSED_PARAMETER(pUserArg_p);
 
@@ -170,7 +170,7 @@ tOplkError PUBLIC processEvents(tEplApiEventType EventType_p,
     }
 
     // call user event call back
-    if((ret == kEplSuccessful) && (pfnEventCb_l != NULL))
+    if((ret == kErrorOk) && (pfnEventCb_l != NULL))
         ret = pfnEventCb_l(EventType_p, pEventArg_p, pUserArg_p);
 
     return ret;
@@ -209,7 +209,7 @@ static tOplkError processStateChangeEvent(tEplApiEventType EventType_p,
            pNmtStateChange->nmtEvent,
            debugstr_getNmtEventStr(pNmtStateChange->nmtEvent));
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -276,7 +276,7 @@ static tOplkError processErrorWarningEvent(tEplApiEventType EventType_p,
             PRINTF("\n");
             break;
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 ///\}

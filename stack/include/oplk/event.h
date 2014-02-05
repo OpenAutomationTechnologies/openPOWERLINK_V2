@@ -241,7 +241,7 @@ typedef struct
         UINT32                  m_dwArg;        ///< UINT32 argument
         tEplEventSource         m_EventSource;  ///< Argument from Eventk/u module (originating error source)
         tEplEventObdError       m_ObdError;     ///< Argument from Obd module
-        tEplEventSink           m_EventSink;    ///< Argument from Eventk/u module on m_EplError == kEplEventUnknownSink
+        tEplEventSink           m_EventSink;    ///< Argument from Eventk/u module on m_EplError == kErrorEventUnknownSink
         //tEplErrHistoryEntry   m_HistoryEntry; ///< from Nmtk/u module
     } m_Arg;
 } tEplEventError;

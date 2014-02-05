@@ -152,21 +152,21 @@ tOplkError timeru_addInstance(void)
     if ((timeruInstance_l.msgQueue = msgQCreate(TIMERU_MAX_MSGS,
                                                   sizeof(unsigned long),
                                                   MSG_Q_FIFO)) == NULL)
-        return kEplTimerThreadError;
+        return kErrorTimerThreadError;
 
     /* initialize mutexe for synchronisation */
     if ((timeruInstance_l.mutex = semMCreate (SEM_Q_PRIORITY | SEM_DELETE_SAFE |
                                                 SEM_INVERSION_SAFE)) == NULL)
-        return kEplTimerThreadError;
+        return kErrorTimerThreadError;
 
     /* create user timer task */
     if ((timeruInstance_l.taskId =
                     taskSpawn("tTimerEplu", EPL_TASK_PRIORITY_UTIMER, 0, EPL_TASK_STACK_SIZE,
                               (FUNCPTR)processTask,
                               0, 0, 0, 0, 0, 0, 0, 0, 0, 0)) == ERROR)
-        return kEplTimerThreadError;
+        return kErrorTimerThreadError;
 
-    return kEplSuccessful;
+    return kErrorOk;
 
 }
 
@@ -211,7 +211,7 @@ tOplkError timeru_delInstance(void)
     timeruInstance_l.pFirstTimer = NULL;
     timeruInstance_l.pLastTimer = NULL;
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -230,7 +230,7 @@ whether a timer has expired.
 //------------------------------------------------------------------------------
 tOplkError timeru_process(void)
 {
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -256,13 +256,13 @@ tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg a
     tHrtimerSig         sig;
 
     if(pTimerHdl_p == NULL)
-        return kEplTimerInvalidHandle;
+        return kErrorTimerInvalidHandle;
 
     pData = (tTimeruData*) EPL_MALLOC(sizeof (tTimeruData));
     if (pData == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("error allocating user timer memory!\n");
-        return kEplNoResource;
+        return kErrorNoResource;
     }
 
     EPL_MEMCPY(&pData->timerArg, &argument_p, sizeof(tTimerArg));
@@ -276,7 +276,7 @@ tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg a
     if (hrtimer_create(CLOCK_MONOTONIC, &sig, &pData->timer) != 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Error hrtimer_create!\n", __func__);
-        return kEplNoResource;
+        return kErrorNoResource;
     }
 
     if (timeInMs_p >= 1000)
@@ -299,12 +299,12 @@ tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg a
     if (hrtimer_settime(pData->timer, 0, &relTime, NULL) < 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Error hrtimer_settime!\n", __func__);
-        return kEplTimerNoTimerCreated;
+        return kErrorTimerNoTimerCreated;
     }
 
     *pTimerHdl_p = (tTimerHdl) pData;
 
-    return kEplSuccessful;
+    return kErrorOk;
 
 }
 
@@ -330,7 +330,7 @@ tOplkError timeru_modifyTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerAr
     struct itimerspec   relTime;
 
     if(pTimerHdl_p == NULL)
-        return kEplTimerInvalidHandle;
+        return kErrorTimerInvalidHandle;
 
     // check handle itself, i.e. was the handle initialized before
     if (*pTimerHdl_p == 0)
@@ -359,7 +359,7 @@ tOplkError timeru_modifyTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerAr
     if (hrtimer_settime(pData->timer, 0, &relTime, NULL) != 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Error timer_settime!\n", __func__);
-        return kEplTimerNoTimerCreated;
+        return kErrorTimerNoTimerCreated;
     }
 
     // copy the TimerArg after the timer is restarted,
@@ -369,7 +369,7 @@ tOplkError timeru_modifyTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerAr
     // But if the new timer is too fast, it may get lost.
     EPL_MEMCPY(&pData->timerArg, &argument_p, sizeof(tTimerArg));
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -381,8 +381,8 @@ This function deletes an existing timer.
 \param  pTimerHdl_p     Pointer to timer handle of timer to delete.
 
 \return The function returns a tOplkError error code.
-\retval kEplTimerInvalidHandle  If an invalid timer handle was specified.
-\retval kEplSuccessful          If the timer is deleted.
+\retval kErrorTimerInvalidHandle  If an invalid timer handle was specified.
+\retval kErrorOk          If the timer is deleted.
 
 \ingroup module_timeru
 */
@@ -393,11 +393,11 @@ tOplkError timeru_deleteTimer(tTimerHdl* pTimerHdl_p)
 
     // check pointer to handle
     if(pTimerHdl_p == NULL)
-        return kEplTimerInvalidHandle;
+        return kErrorTimerInvalidHandle;
 
     // check handle itself, i.e. was the handle initialized before
     if (*pTimerHdl_p == 0)
-        return kEplSuccessful;
+        return kErrorOk;
 
     pData = (tTimeruData*) *pTimerHdl_p;
 
@@ -408,7 +408,7 @@ tOplkError timeru_deleteTimer(tTimerHdl* pTimerHdl_p)
     // uninitialize handle
     *pTimerHdl_p = 0;
 
-    return kEplSuccessful;
+    return kErrorOk;
 
 }
 
@@ -463,7 +463,7 @@ by the timer when it expires.
 //------------------------------------------------------------------------------
 static void cbTimer(ULONG parameter_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     tTimeruData*        pData;
     tEplEvent           event;
     tTimerEventArg      timerEventArg;

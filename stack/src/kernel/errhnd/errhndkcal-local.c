@@ -96,14 +96,14 @@ tErrHndObjects              errhndk_errorObjects_g;
 
 The function initializes the user layer CAL module of the error handler.
 
-\return     Returns always kEplSuccessful
+\return     Returns always kErrorOk
 
 \ingroup module_errhndkcal
 */
 //------------------------------------------------------------------------------
 tOplkError errhndkcal_init (void)
 {
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------

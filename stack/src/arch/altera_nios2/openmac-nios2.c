@@ -132,7 +132,7 @@ This function registers a callback for a specific interrupt source.
 //------------------------------------------------------------------------------
 tOplkError openmac_isrReg(tOpenmacIrqSource irqSource_p, tOpenmacIrqCb pfnIsrCb_p, void* pArg_p)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
     UINT32      irqId;
     UINT32      icId;
 
@@ -147,13 +147,13 @@ tOplkError openmac_isrReg(tOpenmacIrqSource irqSource_p, tOpenmacIrqCb pfnIsrCb_
             irqId = OPENMAC_TXRX_IRQ;
             break;
         default:
-            ret = kEplNoResource;
+            ret = kErrorNoResource;
             goto Exit;
     }
 
     if (alt_ic_isr_register(icId, irqId, irqHandler, (void*)irqSource_p, NULL))
     {
-        return kEplNoResource;
+        return kErrorNoResource;
     }
 
     instance_l.pfnIrqCb[irqSource_p] = pfnIsrCb_p;

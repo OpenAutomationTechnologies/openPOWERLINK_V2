@@ -113,7 +113,7 @@ interrupt context.
 //------------------------------------------------------------------------------
 tOplkError dllk_process(tEplEvent* pEvent_p)
 {
-    tOplkError              ret = kEplSuccessful;
+    tOplkError              ret = kErrorOk;
     tEventNmtStateChange*   pNmtStateChange;
 
     switch (pEvent_p->m_EventType)
@@ -160,8 +160,8 @@ tOplkError dllk_process(tEplEvent* pEvent_p)
 #endif
 
         default:
-            ret = kEplInvalidEvent;
-            ASSERTMSG(ret != kEplInvalidEvent, "EplDllkProcess(): unhandled event type!\n");
+            ret = kErrorInvalidEvent;
+            ASSERTMSG(ret != kErrorInvalidEvent, "EplDllkProcess(): unhandled event type!\n");
             break;
     }
 
@@ -184,7 +184,7 @@ The function forwards a loss of PRes event to the error handler module.
 //------------------------------------------------------------------------------
 tOplkError dllk_issueLossOfPres(UINT nodeId_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     tDllkNodeInfo*      pIntNodeInfo;
     tEplEvent           event;
     tDllNodeOpParam     nodeOpParam;
@@ -199,7 +199,7 @@ tOplkError dllk_issueLossOfPres(UINT nodeId_p)
             dllEvent.m_ulDllErrorEvents = EPL_DLL_ERR_MN_CN_LOSS_PRES;
             dllEvent.m_uiNodeId = pIntNodeInfo->nodeId;
             ret = errhndk_postError(&dllEvent);
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
                 return ret;
         }
         else
@@ -292,7 +292,7 @@ The function processes a NMT state change event.
 //------------------------------------------------------------------------------
 static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNmtState_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
 
     switch (newNmtState_p)
     {
@@ -334,32 +334,32 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
         // node processes only async frames
         case kNmtCsPreOperational1:
 #if EPL_TIMER_USE_HIGHRES != FALSE
-            if ((ret = hrestimer_deleteTimer(&dllkInstance_g.timerHdlCycle)) != kEplSuccessful)
+            if ((ret = hrestimer_deleteTimer(&dllkInstance_g.timerHdlCycle)) != kErrorOk)
                 return ret;
 #endif
             /// deactivate sync generation
-            if ((ret = controlPdokcalSync(FALSE)) != kEplSuccessful)
+            if ((ret = controlPdokcalSync(FALSE)) != kErrorOk)
                 return ret;
 
 #if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
-            if ((ret = synctimer_stopSync()) != kEplSuccessful)
+            if ((ret = synctimer_stopSync()) != kErrorOk)
                 return ret;
 #endif
 
 #if EPL_DLL_PRES_CHAINING_CN != FALSE
-            if ((ret = dllk_presChainingDisable()) != kEplSuccessful)
+            if ((ret = dllk_presChainingDisable()) != kErrorOk)
                 return ret;
 #endif
 
             // update IdentRes and StatusRes
             ret = dllk_updateFrameStatusRes(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_STATUSRES + dllkInstance_g.curTxBufferOffsetStatusRes],
                                        newNmtState_p);
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
                 return ret;
 
             ret = dllk_updateFrameIdentRes(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_IDENTRES + dllkInstance_g.curTxBufferOffsetIdentRes],
                                       newNmtState_p);
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
                 return ret;
 
             // enable IdentRes and StatusRes
@@ -368,14 +368,14 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
             dllkInstance_g.aFilter[DLLK_FILTER_SOA_STATREQ].fEnable = TRUE;
             ret = edrv_changeRxFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT,
                                    DLLK_FILTER_SOA_STATREQ, EDRV_FILTER_CHANGE_STATE);
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
                 return ret;
 
             // enable corresponding Rx filter
             dllkInstance_g.aFilter[DLLK_FILTER_SOA_IDREQ].fEnable = TRUE;
             ret = edrv_changeRxFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT,
                                    DLLK_FILTER_SOA_IDREQ, EDRV_FILTER_CHANGE_STATE);
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
                 return ret;
 
 #if EPL_DLL_PRES_CHAINING_CN != FALSE
@@ -383,7 +383,7 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
             dllkInstance_g.aFilter[DLLK_FILTER_SOA_SYNCREQ].fEnable = TRUE;
             ret = edrv_changeRxFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT,
                                    DLLK_FILTER_SOA_SYNCREQ, EDRV_FILTER_CHANGE_STATE);
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
                 return ret;
 #endif
 #endif
@@ -391,12 +391,12 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
             // update PRes (for sudden changes to PreOp2)
             ret = dllk_updateFramePres(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES + (dllkInstance_g.curTxBufferOffsetCycle ^ 1)],
                                   newNmtState_p);
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
                 return ret;
 
             ret = dllk_updateFramePres(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES + dllkInstance_g.curTxBufferOffsetCycle],
                                   newNmtState_p);
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
                 return ret;
 
             // enable PRes (for sudden changes to PreOp2)
@@ -406,7 +406,7 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
             dllkInstance_g.aFilter[DLLK_FILTER_PREQ].pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES];
             ret = edrv_changeRxFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT,
                                    DLLK_FILTER_PREQ, EDRV_FILTER_CHANGE_STATE | EDRV_FILTER_CHANGE_AUTO_RESPONSE);
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
                 return ret;
 #endif
             break;
@@ -423,7 +423,7 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
             dllkInstance_g.aFilter[DLLK_FILTER_PREQ].pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES];
             ret = edrv_changeRxFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT,
                                    DLLK_FILTER_PREQ, EDRV_FILTER_CHANGE_STATE | EDRV_FILTER_CHANGE_AUTO_RESPONSE);
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
                 return ret;
 #endif
             break;
@@ -432,22 +432,22 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
         case kNmtMsPreOperational1:
 #if EPL_TIMER_USE_HIGHRES != FALSE
             ret = hrestimer_deleteTimer(&dllkInstance_g.timerHdlCycle);
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
                 return ret;
 #endif
             /// deactivate sync generation
-            if ((ret = controlPdokcalSync(FALSE)) != kEplSuccessful)
+            if ((ret = controlPdokcalSync(FALSE)) != kErrorOk)
                 return ret;
 
             ret = edrvcyclic_stopCycle();
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
                 return ret;
 
             // update IdentRes and StatusRes
             ret = dllk_updateFrameIdentRes(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_IDENTRES +
                                                                 dllkInstance_g.curTxBufferOffsetIdentRes],
                                       newNmtState_p);
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
                 return ret;
 
             ret = dllk_updateFrameStatusRes(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_STATUSRES +
@@ -457,7 +457,7 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
 
         case kNmtMsReadyToOperate:
             /// activate sync generation
-            if ((ret = controlPdokcalSync(TRUE)) != kEplSuccessful)
+            if ((ret = controlPdokcalSync(TRUE)) != kErrorOk)
                 return ret;
             break;
 
@@ -471,7 +471,7 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
 
         case kNmtCsReadyToOperate:
             /// activate sync generation
-            if ((ret = controlPdokcalSync(TRUE)) != kEplSuccessful)
+            if ((ret = controlPdokcalSync(TRUE)) != kErrorOk)
                 return ret;
 
             // NOTE: This fall through is intended since IdentRes and StatusRes
@@ -492,7 +492,7 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
             dllkInstance_g.aFilter[DLLK_FILTER_PREQ].pTxBuffer = NULL;
             ret = edrv_changeRxFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT,
                                    DLLK_FILTER_PREQ, EDRV_FILTER_CHANGE_AUTO_RESPONSE);
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
                 return ret;
 #endif
 
@@ -500,13 +500,13 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
             ret = dllk_updateFramePres(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES +
                                                             (dllkInstance_g.curTxBufferOffsetCycle ^ 1)],
                                          newNmtState_p);
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
                 return ret;
 
             ret = dllk_updateFramePres(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES +
                                                             dllkInstance_g.curTxBufferOffsetCycle],
                                          newNmtState_p);
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
                 return ret;
             break;
 
@@ -515,12 +515,12 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
         case kNmtCsBasicEthernet:
             // Fill Async Tx Buffer, because state BasicEthernet was entered
             ret = processFillTx(kDllAsyncReqPrioGeneric, newNmtState_p);
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
                 return ret;
             break;
 
         default:
-            return kEplNmtInvalidState;
+            return kErrorNmtInvalidState;
             break;
 
     }
@@ -546,7 +546,7 @@ The function processes a NMT event.
 //------------------------------------------------------------------------------
 static tOplkError processNmtEvent(tEplEvent * pEvent_p)
 {
-    tOplkError      Ret = kEplSuccessful;
+    tOplkError      Ret = kErrorOk;
     tNmtEvent*      pNmtEvent;
     tNmtState       NmtState;
 
@@ -588,7 +588,7 @@ The function processes the fill TX event.
 //------------------------------------------------------------------------------
 static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtState nmtState_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     tEplFrame*      pTxFrame;
     tEdrvTxBuffer*  pTxBuffer;
     UINT            frameSize;
@@ -629,7 +629,7 @@ static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtSta
 
             // copy frame from shared loop buffer to Tx buffer
             ret = dllkcal_getAsyncTxFrame(pTxBuffer->pBuffer, &frameSize, asyncReqPriority_p);
-            if (ret == kEplSuccessful)
+            if (ret == kErrorOk)
             {
                 pTxFrame = (tEplFrame *) pTxBuffer->pBuffer;
                 ret = dllk_checkFrame(pTxFrame, frameSize);
@@ -645,14 +645,14 @@ static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtSta
                     dllkInstance_g.aFilter[filterEntry].fEnable = TRUE;
                     ret = edrv_changeRxFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT,
                                            filterEntry, EDRV_FILTER_CHANGE_STATE);
-                    if (ret != kEplSuccessful)
+                    if (ret != kErrorOk)
                         goto Exit;
                 }
 #endif
             }
-            else if (ret == kEplDllAsyncTxBufferEmpty)
+            else if (ret == kErrorDllAsyncTxBufferEmpty)
             {   // empty Tx buffer is not a real problem so just ignore it
-                ret = kEplSuccessful;
+                ret = kErrorOk;
                 pTxBuffer->txFrameSize = DLLK_BUFLEN_EMPTY;    // mark Tx buffer as empty
 
 #if (EDRV_AUTO_RESPONSE != FALSE)
@@ -662,7 +662,7 @@ static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtSta
                     dllkInstance_g.aFilter[filterEntry].fEnable = FALSE;
                     ret = edrv_changeRxFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT,
                                            filterEntry, EDRV_FILTER_CHANGE_STATE);
-                    if (ret != kEplSuccessful)
+                    if (ret != kErrorOk)
                         goto Exit;
                 }
 #endif
@@ -696,9 +696,9 @@ static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtSta
                 ret = edrv_sendTxBuffer(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONEPL +
                                                               dllkInstance_g.curTxBufferOffsetNonEpl]);
             }
-            if (ret == kEplInvalidOperation)
+            if (ret == kErrorInvalidOperation)
             {   // ignore error if caused by already active transmission
-                ret = kEplSuccessful;
+                ret = kErrorOk;
             }
         }
         dllkInstance_g.flag2 = 0;               // reset PRes flag 2
@@ -767,7 +767,7 @@ The function processes a cycle finish event.
 //------------------------------------------------------------------------------
 static tOplkError processCycleFinish(tNmtState nmtState_p)
 {
-    tOplkError      ret = kEplReject;
+    tOplkError      ret = kErrorReject;
     tEdrvTxBuffer*  pTxBuffer;
 
     switch (dllkInstance_g.updateTxFrame)
@@ -778,7 +778,7 @@ static tOplkError processCycleFinish(tNmtState nmtState_p)
                                                   dllkInstance_g.curTxBufferOffsetIdentRes];
             if (pTxBuffer->pBuffer != NULL)
             {   // IdentRes does exist
-                if ((ret = dllk_updateFrameIdentRes(pTxBuffer, nmtState_p)) != kEplSuccessful)
+                if ((ret = dllk_updateFrameIdentRes(pTxBuffer, nmtState_p)) != kErrorOk)
                     return ret;
             }
             // fall-through
@@ -789,7 +789,7 @@ static tOplkError processCycleFinish(tNmtState nmtState_p)
                                                   dllkInstance_g.curTxBufferOffsetStatusRes];
             if (pTxBuffer->pBuffer != NULL)
             {   // StatusRes does exist
-                if ((ret = dllk_updateFrameStatusRes(pTxBuffer, nmtState_p)) != kEplSuccessful)
+                if ((ret = dllk_updateFrameStatusRes(pTxBuffer, nmtState_p)) != kErrorOk)
                     return ret;
             }
 
@@ -829,15 +829,15 @@ The function processes the sync event.
 //------------------------------------------------------------------------------
 static tOplkError processSync(tNmtState nmtState_p)
 {
-    tOplkError      ret = kEplReject;
+    tOplkError      ret = kErrorReject;
     BOOL            fReadyFlag = FALSE;
 
     if (dllkInstance_g.pfnCbSync != NULL)
     {
         ret = dllkInstance_g.pfnCbSync();
-        if (ret == kEplReject)
+        if (ret == kErrorReject)
             fReadyFlag = FALSE;
-        else if (ret == kEplSuccessful)
+        else if (ret == kErrorOk)
             fReadyFlag = TRUE;
         else
             return ret;
@@ -875,7 +875,7 @@ The function processes the sync event on a CN.
 //------------------------------------------------------------------------------
 static tOplkError processSyncCn(tNmtState nmtState_p, BOOL fReadyFlag_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     tEplFrame*          pTxFrame;
     tEdrvTxBuffer*      pTxBuffer;
     tFrameInfo          FrameInfo;
@@ -893,13 +893,13 @@ static tOplkError processSyncCn(tNmtState nmtState_p, BOOL fReadyFlag_p)
         FrameInfo.pFrame = pTxFrame;
         FrameInfo.frameSize = pTxBuffer->txFrameSize;
         ret = dllk_processTpdo(&FrameInfo, fReadyFlag_p);
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
             return ret;
 
 //      BENCHMARK_MOD_02_TOGGLE(7);
 
         ret = dllk_updateFramePres(pTxBuffer, nmtState_p);
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
             return ret;
 
         // switch to next cycle
@@ -924,7 +924,7 @@ The function processes the sync event on a MN.
 //------------------------------------------------------------------------------
 static tOplkError processSyncMn(tNmtState nmtState_p, BOOL fReadyFlag_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     tEplFrame*          pTxFrame;
     tEdrvTxBuffer*      pTxBuffer;
     UINT                index = 0;
@@ -946,7 +946,7 @@ static tOplkError processSyncMn(tNmtState nmtState_p, BOOL fReadyFlag_p)
     index++;
 
     ret = dllk_setupSyncPhase(nmtState_p, fReadyFlag_p, nextTxBufferOffset, &nextTimeOffsetNs, &index);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
         return ret;
 
     dllk_setupAsyncPhase(nmtState_p, nextTxBufferOffset, nextTimeOffsetNs, &index);
@@ -975,7 +975,7 @@ The function processes the PRes Ready event.
 //------------------------------------------------------------------------------
 static tOplkError processPresReady(tNmtState nmtState_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     tEplFrame*          pTxFrame;
 
     // post PRes to transmit FIFO
@@ -1022,7 +1022,7 @@ The function processes the StartReducedCycle event.
 //------------------------------------------------------------------------------
 static tOplkError processStartReducedCycle(void)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
 
     // start the reduced cycle by programming the cycle timer
     // it is issued by NMT MN module, when PreOp1 is entered
@@ -1038,7 +1038,7 @@ static tOplkError processStartReducedCycle(void)
     while (dllkInstance_g.pFirstNodeInfo != NULL)
     {
         ret = dllk_deleteNodeIsochronous(dllkInstance_g.pFirstNodeInfo);
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
             goto Exit;
     }
 
@@ -1046,7 +1046,7 @@ static tOplkError processStartReducedCycle(void)
     while (dllkInstance_g.pFirstPrcNodeInfo != NULL)
     {
         ret = dllk_deleteNodeIsochronous(dllkInstance_g.pFirstPrcNodeInfo);
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
             goto Exit;
     }
 #endif

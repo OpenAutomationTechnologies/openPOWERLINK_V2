@@ -134,7 +134,7 @@ configuration it gets the function pointer interface of the used queue
 implementations and calls the appropriate init functions.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          If function executes correctly
+\retval kErrorOk          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventkcal
@@ -149,16 +149,16 @@ tOplkError eventkcal_init (void)
     atomic_set(&instance_l.kernelEventCount, 0);
     atomic_set(&instance_l.userEventCount, 0);
 
-    if (eventkcal_initQueueCircbuf(kEventQueueK2U) != kEplSuccessful)
+    if (eventkcal_initQueueCircbuf(kEventQueueK2U) != kErrorOk)
         goto Exit;
 
-    if (eventkcal_initQueueCircbuf(kEventQueueU2K) != kEplSuccessful)
+    if (eventkcal_initQueueCircbuf(kEventQueueU2K) != kErrorOk)
         goto Exit;
 
-    if (eventkcal_initQueueCircbuf(kEventQueueKInt) != kEplSuccessful)
+    if (eventkcal_initQueueCircbuf(kEventQueueKInt) != kErrorOk)
         goto Exit;
 
-    if (eventkcal_initQueueCircbuf(kEventQueueUInt) != kEplSuccessful)
+    if (eventkcal_initQueueCircbuf(kEventQueueUInt) != kErrorOk)
         goto Exit;
 
     eventkcal_setSignalingCircbuf(kEventQueueK2U, signalUserEvent);
@@ -175,7 +175,7 @@ tOplkError eventkcal_init (void)
 
     instance_l.fInitialized = TRUE;
 
-    return kEplSuccessful;
+    return kErrorOk;
 
 Exit:
     TRACE("%s() Initialization error!\n", __func__);
@@ -184,7 +184,7 @@ Exit:
     eventkcal_exitQueueCircbuf(kEventQueueKInt);
     eventkcal_exitQueueCircbuf(kEventQueueUInt);
 
-    return kEplNoResource;
+    return kErrorNoResource;
 }
 
 //------------------------------------------------------------------------------
@@ -195,7 +195,7 @@ The function cleans up the kernel event CAL module. For cleanup it calls the exi
 functions of the queue implementations for each used queue.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          If function executes correctly
+\retval kErrorOk          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventkcal
@@ -224,7 +224,7 @@ tOplkError eventkcal_exit (void)
     eventkcal_exitQueueCircbuf(kEventQueueUInt);
     eventkcal_exitQueueCircbuf(kEventQueueKInt);
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -238,7 +238,7 @@ queue post function is called.
 \param  pEvent_p                Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          If function executes correctly
+\retval kErrorOk          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventkcal
@@ -246,7 +246,7 @@ queue post function is called.
 //------------------------------------------------------------------------------
 tOplkError eventkcal_postUserEvent (tEplEvent *pEvent_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
 
     /*TRACE("K2U  type:%s(%d) sink:%s(%d) size:%d!\n",
            debugstr_getEventTypeStr(pEvent_p->m_EventType), pEvent_p->m_EventType,
@@ -269,7 +269,7 @@ queue post function is called.
 \param  pEvent_p                Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          If function executes correctly
+\retval kErrorOk          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventkcal
@@ -277,7 +277,7 @@ queue post function is called.
 //------------------------------------------------------------------------------
 tOplkError eventkcal_postKernelEvent (tEplEvent *pEvent_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
 
     /*TRACE("KINT  type:%s(%d) sink:%s(%d) size:%d!\n",
            debugstr_getEventTypeStr(pEvent_p->m_EventType), pEvent_p->m_EventType,
@@ -317,7 +317,7 @@ This function posts a event from the user layer to a queue.
 //------------------------------------------------------------------------------
 int eventkcal_postEventFromUser(unsigned long arg)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     tEplEvent       event;
     char            *pArg = NULL;
     int             order = 0;
@@ -428,7 +428,7 @@ int eventkcal_getEventForUser(unsigned long arg)
         atomic_dec(&instance_l.userEventCount);
 
         error = eventkcal_getEventCircbuf(kEventQueueK2U, instance_l.aK2URxBuffer, &readSize);
-        if(error != kEplSuccessful)
+        if(error != kErrorOk)
         {
             DEBUG_LVL_ERROR_TRACE ("%s() Error reading K2U events %d!\n", __func__, error);
             return -EIO;
@@ -448,7 +448,7 @@ int eventkcal_getEventForUser(unsigned long arg)
             atomic_dec(&instance_l.userEventCount);
 
             error = eventkcal_getEventCircbuf(kEventQueueUInt, instance_l.aUintRxBuffer, &readSize);
-            if(error != kEplSuccessful)
+            if(error != kErrorOk)
             {
                 DEBUG_LVL_ERROR_TRACE ("%s() Error reading UINT events %d!\n", __func__, error);
                 return -EIO;

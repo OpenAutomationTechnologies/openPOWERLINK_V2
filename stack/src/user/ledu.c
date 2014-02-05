@@ -148,7 +148,7 @@ tOplkError ledu_init(tLeduStateChangeCallback pfnCbStateChange_p)
     EPL_MEMSET(&leduInstance_g, 0, sizeof(tLeduInstance));
     leduInstance_g.pfnCbStateChange = pfnCbStateChange_p;
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -164,7 +164,7 @@ The function deinitializes the user LED module.
 //------------------------------------------------------------------------------
 tOplkError ledu_exit(void)
 {
-    tOplkError ret = kEplSuccessful;
+    tOplkError ret = kErrorOk;
 
     ret = timeru_deleteTimer(&leduInstance_g.timerHdlLedBlink);
     EPL_MEMSET(&leduInstance_g, 0, sizeof(tLeduInstance));
@@ -188,7 +188,7 @@ changes.
 //------------------------------------------------------------------------------
 tOplkError ledu_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
 
     // activate status LED according to NMT state
     switch (nmtStateChange_p.newNmtState)
@@ -296,7 +296,7 @@ tOplkError ledu_processEvent(tEplEvent* pEvent_p)
     BOOL                fLedOn = FALSE;
     tTimerEventArg   *  pTimerEventArg;
 
-    ret = kEplSuccessful;
+    ret = kErrorOk;
 
     switch(pEvent_p->m_EventType)
     {
@@ -406,7 +406,7 @@ tOplkError ledu_processEvent(tEplEvent* pEvent_p)
             break;
 
         default:
-            ret = kEplNmtInvalidEvent;
+            ret = kErrorNmtInvalidEvent;
 
     }
 
@@ -435,7 +435,7 @@ The function calls the registered state change function
 //------------------------------------------------------------------------------
 static tOplkError callStateChanged(tLedType ledType_p, BOOL fOn_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
 
     if (leduInstance_g.pfnCbStateChange != NULL)
     {
@@ -463,7 +463,7 @@ static tOplkError changeMode(tLeduMode newMode_p)
     UINT32          timeout;
     BOOL            fLedOn;
 
-    ret = kEplSuccessful;
+    ret = kErrorOk;
 
     oldMode = leduInstance_g.statusLedMode;
 

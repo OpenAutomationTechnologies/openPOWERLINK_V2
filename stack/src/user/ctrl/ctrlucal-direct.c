@@ -98,7 +98,7 @@ static UINT16       dummyHeartbeat_l;
 The function initializes the user control CAL module.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful  Returns always kEplSuccessful.
+\retval kErrorOk  Returns always kErrorOk.
 
 \ingroup module_ctrlucal
 */
@@ -107,7 +107,7 @@ tOplkError ctrlucal_init(void)
 {
     status_l = kCtrlStatusReady;
     dummyHeartbeat_l = 0;
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -137,7 +137,7 @@ This function provides processing time for the CAL module.
 //------------------------------------------------------------------------------
 tOplkError ctrlucal_process (void)
 {
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -158,7 +158,7 @@ tOplkError ctrlucal_executeCmd(tCtrlCmdType cmd_p)
     tOplkError          ret;
     tOplkError          fRet;
 
-    if ((ret = ctrlk_executeCmd(cmd_p, &fRet, &status_l, NULL)) != kEplSuccessful)
+    if ((ret = ctrlk_executeCmd(cmd_p, &fRet, &status_l, NULL)) != kErrorOk)
         return ret;
 
     return fRet;
@@ -174,15 +174,15 @@ The function checks the state of the kernel stack.
 for direct calls as the kernel stack runs in the same instance.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful  If kernel stack is initialized
-\retval kEplNoResource  If kernel stack is not running or in wrong state
+\retval kErrorOk  If kernel stack is initialized
+\retval kErrorNoResource  If kernel stack is not running or in wrong state
 
 \ingroup module_ctrlucal
 */
 //------------------------------------------------------------------------------
 tOplkError ctrlucal_checkKernelStack(void)
 {
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -246,7 +246,7 @@ The function reads the initialization parameter from the kernel stack.
 \param  pInitParam_p        Specifies where to store the read init parameters.
 
 \return The function returns a tOplkError error code. It returns always
-        kEplSuccessful!
+        kErrorOk!
 
 \ingroup module_ctrlucal
 */
@@ -254,6 +254,6 @@ The function reads the initialization parameter from the kernel stack.
 tOplkError ctrlucal_readInitParam(tCtrlInitParam* pInitParam_p)
 {
     EPL_MEMCPY(pInitParam_p, &kernelInitParam_g, sizeof(tCtrlInitParam));
-    return kEplSuccessful;
+    return kErrorOk;
 }
 

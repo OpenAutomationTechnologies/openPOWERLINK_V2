@@ -110,9 +110,9 @@ tOplkError pdokcal_openMem(void)
 {
     if ((fd_l = shm_open(PDO_SHMEM_NAME, O_RDWR | O_CREAT, 0)) == -1)
     {
-        return kEplNoResource;
+        return kErrorNoResource;
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -132,7 +132,7 @@ For the Posix shared-memory implementation it unlinks the shared memory segment.
 tOplkError pdokcal_closeMem(void)
 {
     shm_unlink(PDO_SHMEM_NAME);
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -153,18 +153,18 @@ tOplkError pdokcal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
 {
     TRACE ("%s()\n", __func__);
     if (ftruncate(fd_l, memSize_p) < 0)
-        return kEplNoResource;
+        return kErrorNoResource;
 
     *ppPdoMem_p = mmap(NULL, memSize_p, PROT_READ | PROT_WRITE, MAP_SHARED, fd_l, 0);
     if (*ppPdoMem_p == MAP_FAILED)
     {
         TRACE ("%s() mmap failed!}n", __func__);
         *ppPdoMem_p = NULL;
-        return kEplNoResource;
+        return kErrorNoResource;
     }
 
     TRACE ("%s() Allocated memory for PDO at %p size:%d\n", __func__, *ppPdoMem_p, memSize_p);
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -189,9 +189,9 @@ tOplkError pdokcal_freeMem(BYTE* pMem_p, size_t memSize_p)
     if (munmap(pMem_p, memSize_p) != 0)
     {
         TRACE ("%s() munmap failed!\n", __func__);
-        return kEplGeneralError;
+        return kErrorGeneralError;
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //============================================================================//

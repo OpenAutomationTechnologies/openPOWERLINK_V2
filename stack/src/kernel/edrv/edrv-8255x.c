@@ -451,7 +451,7 @@ This function initializes the Ethernet driver.
 //------------------------------------------------------------------------------
 tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
     INT         result;
     INT         i;
 
@@ -473,7 +473,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     if (result != 0)
     {
         printk("%s pci_register_driver failed with %d\n", __FUNCTION__, result);
-        ret = kEplNoResource;
+        ret = kErrorNoResource;
         goto Exit;
     }
 
@@ -481,7 +481,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     {
         printk("%s pPciDev=NULL\n", __FUNCTION__);
         ret = edrv_shutdown();
-        ret = kEplNoResource;
+        ret = kErrorNoResource;
         goto Exit;
     }
 
@@ -516,7 +516,7 @@ tOplkError edrv_shutdown(void)
     printk("%s calling pci_unregister_driver()\n", __FUNCTION__);
     pci_unregister_driver (&edrvDriver_l);
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -534,7 +534,7 @@ This function sets a multicast entry into the Ethernet controller.
 //------------------------------------------------------------------------------
 tOplkError edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     struct sCmdBlock*   pCb;
     UINT8*              pCnt;
     int                 cbCnt = 0;
@@ -573,7 +573,7 @@ This function removes the multicast entry from the Ethernet controller.
 //------------------------------------------------------------------------------
 tOplkError edrv_clearRxMulticastMacAddr(UINT8* pMacAddr_p)
 {
-    tOplkError ret = kEplSuccessful;
+    tOplkError ret = kErrorOk;
 
     ret = multicastCmd(OP_MULTICAST, 0, pMacAddr_p, MULTICAST_ADDR_REM);
 
@@ -609,7 +609,7 @@ tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
     UNUSED_PARAMETER(entryChanged_p);
     UNUSED_PARAMETER(changeFlags_p);
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -627,19 +627,19 @@ This function allocates a Tx buffer.
 //------------------------------------------------------------------------------
 tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
     UINT        i;
 
     if (pBuffer_p->maxBufferSize > EDRV_MAX_FRAME_SIZE)
     {
-        ret = kEplEdrvNoFreeBufEntry;
+        ret = kErrorEdrvNoFreeBufEntry;
         goto Exit;
     }
 
     if (edrvInstance_l.pTxBuf == NULL)
     {
         printk("%s Tx buffers currently not allocated\n", __FUNCTION__);
-        ret = kEplEdrvNoFreeBufEntry;
+        ret = kErrorEdrvNoFreeBufEntry;
         goto Exit;
     }
 
@@ -658,7 +658,7 @@ tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
     }
     if (i >= EDRV_MAX_TX_BUFFERS)
     {
-        ret = kEplEdrvNoFreeBufEntry;
+        ret = kErrorEdrvNoFreeBufEntry;
         goto Exit;
     }
 
@@ -691,7 +691,7 @@ tOplkError edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p)
         edrvInstance_l.afTxBufUsed[bufferNumber] = FALSE;
     }
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -709,12 +709,12 @@ This function sends the Tx buffer.
 //------------------------------------------------------------------------------
 tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     struct sCmdBlock*   pCmdBlock;
 
     if (((edrvInstance_l.tailTxDesc + 1) % MAX_CBS) == edrvInstance_l.headTxDesc)
     {
-        ret = kEplEdrvNoFreeTxDesc;
+        ret = kErrorEdrvNoFreeTxDesc;
             goto Exit;
     }
 
@@ -923,7 +923,7 @@ This function issues an individual address command to insert the MAC address.
 //------------------------------------------------------------------------------
 static tOplkError individualAddressCmd(UINT opcode_p, UINT count_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     tCommandBlock*  pCmdBlock;
 
     //pointer to the Command Block specified by the count value
@@ -952,11 +952,11 @@ static tOplkError individualAddressCmd(UINT opcode_p, UINT count_p)
 
     if(pCmdBlock->stateCmd & CS_OK)
     {
-        ret = kEplSuccessful;
+        ret = kErrorOk;
     }
     else
     {
-        ret = kEplEdrvInitError;
+        ret = kErrorEdrvInit;
     }
 
     return ret;
@@ -976,7 +976,7 @@ This function issues a configure command to the Ethernet controller.
 //------------------------------------------------------------------------------
 static tOplkError configureCmd(UINT opcode_p, UINT count_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     tCommandBlock*  pCmdBlock;
 
     //pointer to the Command Block specified by the count_p value
@@ -1038,11 +1038,11 @@ static tOplkError configureCmd(UINT opcode_p, UINT count_p)
 
     if(pCmdBlock->stateCmd & CS_OK)
     {
-        ret = kEplSuccessful;
+        ret = kErrorOk;
     }
     else
     {
-        ret = kEplEdrvInitError;
+        ret = kErrorEdrvInit;
     }
 
     return ret;
@@ -1065,7 +1065,7 @@ This function issues a multicast command to the Ethernet controller.
 //------------------------------------------------------------------------------
 static tOplkError multicastCmd(UINT opcode_p, UINT count_p, UINT8* pMacAddr_p, UINT mode_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     struct sCmdBlock*   pCmdBlock;
     UINT8*              pByte;
     UINT16*             pByteCount;
@@ -1129,7 +1129,7 @@ static tOplkError multicastCmd(UINT opcode_p, UINT count_p, UINT8* pMacAddr_p, U
 
         if(0 == memCmpref)
         {
-                ret = kEplSuccessful;
+                ret = kErrorOk;
                 goto Exit;
         }
     }
@@ -1147,11 +1147,11 @@ static tOplkError multicastCmd(UINT opcode_p, UINT count_p, UINT8* pMacAddr_p, U
 
     if(pCmdBlock->cmdStat & CS_OK)
     {
-        ret = kEplSuccessful;
+        ret = kErrorOk;
     }
     else
     {
-        ret = kEplEdrvInitError;
+        ret = kErrorEdrvInit;
     }
 
 Exit:
@@ -1172,7 +1172,7 @@ This function issues a transmit command to the Ethernet controller
 //------------------------------------------------------------------------------
 static tOplkError transmitCmd(UINT opcode_p, UINT count_p)
 {
-    tOplkError              ret = kEplSuccessful;
+    tOplkError              ret = kErrorOk;
     struct sCmdBlock*       pCmdBlock = NULL;
     struct sTxCmdBlock*     pTxCmdBlock;
     struct sTxDescCmdBlock* pTxDescCmdBlock;
@@ -1383,7 +1383,7 @@ This function issues a command to write to the Tx descriptors.
 //------------------------------------------------------------------------------
 static tOplkError cmdDescWrite(UINT opcode_p, UINT count_p)
 {
-    tOplkError ret = kEplSuccessful;
+    tOplkError ret = kErrorOk;
 
     switch (opcode_p)
     {
@@ -1425,7 +1425,7 @@ This function issues a command writing to the Rx descriptors.
 static tOplkError rxDescWrite(INT count_p)
 {
     struct sRxDescCmdBlock* pRxDescCmdBlock;
-    tOplkError              ret = kEplSuccessful;
+    tOplkError              ret = kErrorOk;
 
     //select the virtual address of the RX descriptor whose status bits are to be cleared
     pRxDescCmdBlock = (struct sRxDescCmdBlock *)((edrvInstance_l.pRfdVirtAdd) + (RFD_REQUIRED_SIZE * count_p));
@@ -1510,7 +1510,7 @@ This function initializes one PCI device.
 //------------------------------------------------------------------------------
 static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* pId_p)
 {
-    tOplkError              ret = kEplSuccessful;
+    tOplkError              ret = kErrorOk;
     INT                     result = 0;
     INT                     loopCount;
     struct sCmdBlock*       pCmdBlock;
@@ -1665,13 +1665,13 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
     // fill RFDs for which memory has been allocated - end
 
     ret = cmdDescWrite(OP_ADDRSETUP, 0);
-    if(ret != kEplSuccessful)
+    if(ret != kErrorOk)
     {
         result = -EIO;
         goto Exit;
     }
     ret = cmdDescWrite(OP_CONFIGURE, 0);
-    if(ret != kEplSuccessful)
+    if(ret != kErrorOk)
     {
         result = -EIO;
         goto Exit;

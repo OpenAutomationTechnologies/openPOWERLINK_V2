@@ -247,12 +247,12 @@ The function adds an instance of the command layer module.
 //------------------------------------------------------------------------------
 tOplkError sdocom_addInstance(void)
 {
-    tOplkError ret = kEplSuccessful;
+    tOplkError ret = kErrorOk;
 
     EPL_MEMSET(&sdoComInstance_l, 0x00, sizeof(sdoComInstance_l));
 
     ret = sdoseq_addInstance(receiveCb, conStateChangeCb);
-    if(ret != kEplSuccessful)
+    if(ret != kErrorOk)
         return ret;
 
 #if defined(WIN32) || defined(_WIN32)
@@ -275,7 +275,7 @@ The function deletes an instance of the command layer module.
 //------------------------------------------------------------------------------
 tOplkError sdocom_delInstance(void)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
 
 #if defined(WIN32) || defined(_WIN32)
     DeleteCriticalSection(sdoComInstance_l.pCriticalSection);
@@ -293,7 +293,7 @@ The function defines a SDO command layer connection to another node. It
 initializes the lower layer and returns a handle for the connection. Multiple
 client connections to the same node via the same protocol are not allowed.
 If this function detects such a situation it will return
-kEplSdoComHandleExists and the handle of the existing connection in
+kErrorSdoComHandleExists and the handle of the existing connection in
 pSdoComConHdl_p.
 
 \param  pSdoComConHdl_p         Pointer to store the connection handle.
@@ -315,7 +315,7 @@ tOplkError sdocom_defineConnection(tSdoComConHdl* pSdoComConHdl_p, UINT targetNo
     tSdoComCon*     pSdoComCon;
 
     if((targetNodeId_p == EPL_C_ADR_INVALID) || (targetNodeId_p >= EPL_C_ADR_BROADCAST))
-        ret = kEplInvalidNodeId;
+        ret = kErrorInvalidNodeId;
 
     // search free control structure
     pSdoComCon = &sdoComInstance_l.sdoComCon[0];
@@ -330,7 +330,7 @@ tOplkError sdocom_defineConnection(tSdoComConHdl* pSdoComConHdl_p, UINT targetNo
         else if ((pSdoComCon->nodeId == targetNodeId_p) && (pSdoComCon->sdoProtocolType == protType_p))
         {   // existing client connection with same node ID and same protocol type
             *pSdoComConHdl_p = count;
-            return kEplSdoComHandleExists;
+            return kErrorSdoComHandleExists;
         }
         count++;
         pSdoComCon++;
@@ -338,7 +338,7 @@ tOplkError sdocom_defineConnection(tSdoComConHdl* pSdoComConHdl_p, UINT targetNo
 
     if (freeHdl == MAX_SDO_COM_CON)
     {
-        return kEplSdoComNoFreeHandle;
+        return kErrorSdoComNoFreeHandle;
     }
 
     pSdoComCon = &sdoComInstance_l.sdoComCon[freeHdl];
@@ -353,19 +353,19 @@ tOplkError sdocom_defineConnection(tSdoComConHdl* pSdoComConHdl_p, UINT targetNo
     {
         case kSdoTypeUdp:
             ret = sdoseq_initCon(&pSdoComCon->sdoSeqConHdl, pSdoComCon->nodeId, kSdoTypeUdp);
-            if(ret != kEplSuccessful)
+            if(ret != kErrorOk)
                 return ret;
             break;
 
         case kSdoTypeAsnd:
             ret = sdoseq_initCon(&pSdoComCon->sdoSeqConHdl, pSdoComCon->nodeId, kSdoTypeAsnd);
-            if(ret != kEplSuccessful)
+            if(ret != kErrorOk)
                 return ret;
             break;
 
         case kSdoTypePdo:       // SDO over PDO -> not supported
         default:
-            return kEplSdoComUnsupportedProt;
+            return kErrorSdoComUnsupportedProt;
             break;
     }
 
@@ -394,20 +394,20 @@ tOplkError sdocom_initTransferByIndex(tSdoComTransParamByIndex* pSdoComTransPara
     if ((pSdoComTransParam_p->subindex >= 0xFF) || (pSdoComTransParam_p->index == 0) ||
         (pSdoComTransParam_p->index > 0xFFFF) || (pSdoComTransParam_p->pData == NULL) ||
         (pSdoComTransParam_p->dataSize == 0))
-        return kEplSdoComInvalidParam;
+        return kErrorSdoComInvalidParam;
 
     if(pSdoComTransParam_p->sdoComConHdl >= MAX_SDO_COM_CON)
-        return kEplSdoComInvalidHandle;
+        return kErrorSdoComInvalidHandle;
 
     // get pointer to control structure of connection
     pSdoComCon = &sdoComInstance_l.sdoComCon[pSdoComTransParam_p->sdoComConHdl];
 
     if(pSdoComCon->sdoSeqConHdl == 0)
-        return kEplSdoComInvalidHandle;
+        return kErrorSdoComInvalidHandle;
 
     // check if command layer is idle
     if ((pSdoComCon->transferredBytes + pSdoComCon->transferSize) > 0)
-        return kEplSdoComHandleBusy;
+        return kErrorSdoComHandleBusy;
 
     // callback function for end of transfer
     pSdoComCon->pfnTransferFinished = pSdoComTransParam_p->pfnSdoFinishedCb;
@@ -453,11 +453,11 @@ The function deletes a SDO command layer connection to another node.
 //------------------------------------------------------------------------------
 tOplkError sdocom_undefineConnection(tSdoComConHdl sdoComConHdl_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     tSdoComCon*         pSdoComCon;
 
     if(sdoComConHdl_p >= MAX_SDO_COM_CON)
-        return kEplSdoComInvalidHandle;
+        return kErrorSdoComInvalidHandle;
 
     // get pointer to control structure
     pSdoComCon = &sdoComInstance_l.sdoComCon[sdoComConHdl_p];
@@ -477,7 +477,7 @@ tOplkError sdocom_undefineConnection(tSdoComConHdl sdoComConHdl_p)
             case kSdoTypePdo:
             case kSdoTypeAuto:
             default:
-                return kEplSdoComUnsupportedProt;
+                return kErrorSdoComUnsupportedProt;
                 break;
         }
     }
@@ -502,18 +502,18 @@ The function returns the state of a command layer connection.
 //------------------------------------------------------------------------------
 tOplkError sdocom_getState(tSdoComConHdl sdoComConHdl_p, tSdoComFinished* pSdoComFinished_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     tSdoComCon*         pSdoComCon;
 
     if(sdoComConHdl_p >= MAX_SDO_COM_CON)
-        return kEplSdoComInvalidHandle;
+        return kErrorSdoComInvalidHandle;
 
     // get pointer to control structure
     pSdoComCon = &sdoComInstance_l.sdoComCon[sdoComConHdl_p];
 
     // check if handle ok
     if(pSdoComCon->sdoSeqConHdl == 0)
-        return kEplSdoComInvalidHandle;
+        return kErrorSdoComInvalidHandle;
 
     pSdoComFinished_p->pUserArg = pSdoComCon->pUserArg;
     pSdoComFinished_p->nodeId = pSdoComCon->nodeId;
@@ -604,13 +604,13 @@ tOplkError sdocom_abortTransfer(tSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p
     tSdoComCon*     pSdoComCon;
 
     if(sdoComConHdl_p >= MAX_SDO_COM_CON)
-        return kEplSdoComInvalidHandle;
+        return kErrorSdoComInvalidHandle;
 
     // get pointer to control structure of connection
     pSdoComCon = &sdoComInstance_l.sdoComCon[sdoComConHdl_p];
 
     if(pSdoComCon->sdoSeqConHdl == 0)
-        return kEplSdoComInvalidHandle;
+        return kErrorSdoComInvalidHandle;
 
     pSdoComCon->pData = (UINT8*)&abortCode_p;
     ret = processState(sdoComConHdl_p, kSdoComConEventAbort, (tAsySdoCom*)NULL);
@@ -669,7 +669,7 @@ of the connection.
 static tOplkError conStateChangeCb (tSdoSeqConHdl sdoSeqConHdl_p,
                                     tAsySdoConState sdoConnectionState_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     tSdoComConEvent     sdoComConEvent = kSdoComConEventSendFirst;
 
     switch(sdoConnectionState_p)
@@ -743,7 +743,7 @@ static tOplkError searchConnection(tSdoSeqConHdl sdoSeqConHdl_p, tSdoComConEvent
     tSdoComConHdl       hdlCount;
     tSdoComConHdl       hdlFree;
 
-    ret = kEplSdoComNotResponsible;
+    ret = kErrorSdoComNotResponsible;
 
     // get pointer to first element of the array
     pSdoComCon = &sdoComInstance_l.sdoComCon[0];
@@ -763,14 +763,14 @@ static tOplkError searchConnection(tSdoSeqConHdl sdoSeqConHdl_p, tSdoComConEvent
         hdlCount++;
     }
 
-    if (ret == kEplSdoComNotResponsible)
+    if (ret == kErrorSdoComNotResponsible)
     {   // no responsible command layer handle found
         if (hdlFree == 0xFFFF)
         {   // no free handle delete connection immediately
             // 2008/04/14 m.u./d.k. This connection actually does not exist.
             //                      pSdoComCon is invalid.
             // ret = sdoseq_deleteCon(pSdoComCon->sdoSeqConHdl);
-            ret = kEplSdoComNoFreeHandle;
+            ret = kErrorSdoComNoFreeHandle;
         }
         else
         {   // create new handle
@@ -799,7 +799,7 @@ The function processes the SDO command handler state: kSdoComStateIdle
 static tOplkError processStateIdle(tSdoComConHdl sdoComConHdl_p, tSdoComConEvent sdoComConEvent_p,
                                    tAsySdoCom* pRecvdCmdLayer_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     tSdoComCon*         pSdoComCon;
 
 #if defined(CONFIG_INCLUDE_SDOS)
@@ -876,7 +876,7 @@ static tOplkError processStateIdle(tSdoComConHdl sdoComConHdl_p, tSdoComConEvent
             else
             {   // this command layer handle is not responsible
                 // (wrong direction or wrong transaction ID)
-                return kEplSdoComNotResponsible;
+                return kErrorSdoComNotResponsible;
             }
 #endif
             break;
@@ -913,7 +913,7 @@ The function processes the SDO command handler state: kSdoComStateServerSegmTran
 static tOplkError processStateServerSegmTrans(tSdoComConHdl sdoComConHdl_p, tSdoComConEvent sdoComConEvent_p,
                                               tAsySdoCom* pRecvdCmdLayer_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     UINT                size;
     UINT8               flag;
     tSdoComCon*         pSdoComCon;
@@ -1009,7 +1009,7 @@ static tOplkError processStateServerSegmTrans(tSdoComConHdl sdoComConHdl_p, tSdo
             else
             {   // this command layer handle is not responsible
                 // (wrong direction or wrong transaction ID)
-                ret = kEplSdoComNotResponsible;
+                ret = kErrorSdoComNotResponsible;
             }
             break;
 
@@ -1045,7 +1045,7 @@ The function processes the SDO command handler state: processStateClientWaitInit
 static tOplkError processStateClientWaitInit(tSdoComConHdl sdoComConHdl_p, tSdoComConEvent sdoComConEvent_p,
                                              tAsySdoCom* pRecvdCmdLayer_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     tSdoComCon*         pSdoComCon;
 
     UNUSED_PARAMETER(pRecvdCmdLayer_p);
@@ -1061,19 +1061,19 @@ static tOplkError processStateClientWaitInit(tSdoComConHdl sdoComConHdl_p, tSdoC
         {
             case kSdoTypeUdp:
                 ret = sdoseq_initCon(&pSdoComCon->sdoSeqConHdl, pSdoComCon->nodeId, kSdoTypeUdp);
-                if(ret != kEplSuccessful)
+                if(ret != kErrorOk)
                     return ret;
                 break;
 
             case kSdoTypeAsnd:
                 ret = sdoseq_initCon(&pSdoComCon->sdoSeqConHdl, pSdoComCon->nodeId, kSdoTypeAsnd);
-                if(ret != kEplSuccessful)
+                if(ret != kErrorOk)
                     return ret;
                 break;
 
             case kSdoTypePdo:   // Pdo -> not supported
             default:
-                ret = kEplSdoComUnsupportedProt;
+                ret = kErrorSdoComUnsupportedProt;
                 return ret;
                 break;
         }
@@ -1099,7 +1099,7 @@ static tOplkError processStateClientWaitInit(tSdoComConHdl sdoComConHdl_p, tSdoC
                 }
 
                 ret = clientSend(pSdoComCon);
-                if (ret != kEplSuccessful)
+                if (ret != kErrorOk)
                     return ret;
             }
             else
@@ -1159,7 +1159,7 @@ static tOplkError processStateClientConnected(tSdoComConHdl sdoComConHdl_p, tSdo
                                               tAsySdoCom* pRecvdCmdLayer_p)
 {
 
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     UINT8               flag;
     tSdoComCon*         pSdoComCon;
 
@@ -1172,7 +1172,7 @@ static tOplkError processStateClientConnected(tSdoComConHdl sdoComConHdl_p, tSdo
         case kSdoComConEventAckReceived:
         case kSdoComConEventFrameSended:
             ret = clientSend(pSdoComCon);
-            if(ret != kEplSuccessful)
+            if(ret != kErrorOk)
                 return ret;
 
             // check if read transfer finished
@@ -1225,7 +1225,7 @@ static tOplkError processStateClientConnected(tSdoComConHdl sdoComConHdl_p, tSdo
             else
             {   // this command layer handle is not responsible
                 // (wrong direction or wrong transaction ID)
-                ret = kEplSdoComNotResponsible;
+                ret = kErrorSdoComNotResponsible;
                 return ret;
             }
             break;
@@ -1284,7 +1284,7 @@ The function processes the SDO command handler state: kSdoComStateClientSegmTran
 static tOplkError processStateClientSegmTransfer(tSdoComConHdl sdoComConHdl_p, tSdoComConEvent sdoComConEvent_p,
                                                  tAsySdoCom* pRecvdCmdLayer_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     UINT8               flag;
     tSdoComCon*         pSdoComCon;
 
@@ -1296,7 +1296,7 @@ static tOplkError processStateClientSegmTransfer(tSdoComConHdl sdoComConHdl_p, t
         case kSdoComConEventAckReceived:
         case kSdoComConEventFrameSended:
             ret = clientSend(pSdoComCon);
-            if(ret != kEplSuccessful)
+            if(ret != kErrorOk)
                 return ret;
 
             // check if read transfer finished
@@ -1403,7 +1403,7 @@ on the state the command layer event is processed.
 static tOplkError processState(tSdoComConHdl sdoComConHdl_p, tSdoComConEvent sdoComConEvent_p,
                                tAsySdoCom* pRecvdCmdLayer_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     tSdoComCon*         pSdoComCon;
 
 #if defined(WIN32) || defined(_WIN32)
@@ -1488,14 +1488,14 @@ static tOplkError serverInitReadByIndex(tSdoComCon* pSdoComCon_p, tAsySdoCom* pS
     subindex = ami_getUint8Le(&pSdoCom_p->m_le_abCommandData[2]);
 
     ret = obd_getAccessType(index, subindex, &accessType);
-    if(ret == kEplObdSubindexNotExist)
+    if(ret == kErrorObdSubindexNotExist)
     {   // subentry doesn't exist
         abortCode = SDO_AC_SUB_INDEX_NOT_EXIST;
         pSdoComCon_p->pData = (UINT8*)&abortCode;
         ret = serverSendFrame(pSdoComCon_p, index, subindex, kSdoComSendTypeAbort);
         return ret;
     }
-    else if(ret != kEplSuccessful)
+    else if(ret != kErrorOk)
     {   // entry doesn't exist
         abortCode = SDO_AC_OBJECT_NOT_EXIST;
         pSdoComCon_p->pData = (UINT8*)&abortCode;
@@ -1537,7 +1537,7 @@ static tOplkError serverInitReadByIndex(tSdoComCon* pSdoComCon_p, tAsySdoCom* pS
     pSdoComCon_p->transferredBytes = 0;
 
     ret = serverSendFrame(pSdoComCon_p, index, subindex, kSdoComSendTypeRes);
-    if(ret != kEplSuccessful)
+    if(ret != kErrorOk)
     {
         abortCode = SDO_AC_GENERAL_ERROR;
         pSdoComCon_p->pData = (UINT8*)&abortCode;
@@ -1566,7 +1566,7 @@ The function creates and sends a command layer frame from a SDO server.
 static tOplkError serverSendFrame(tSdoComCon* pSdoComCon_p, UINT index_p,
                                   UINT subIndex_p, tSdoComSendType sendType_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     UINT8           aFrame[SDO_MAX_FRAME_SIZE];
     tEplFrame*      pFrame;
     tAsySdoCom*     pCommandFrame;
@@ -1588,7 +1588,7 @@ static tOplkError serverSendFrame(tSdoComCon* pSdoComCon_p, UINT index_p,
 
         case kSdoComSendTypeReq:    // request frame to send
             // nothing to do for server -> error
-            return kEplSdoComInvalidSendType;
+            return kErrorSdoComInvalidSendType;
             break;
 
         case kSdoComSendTypeAckRes: // response without data to send
@@ -1607,7 +1607,7 @@ static tOplkError serverSendFrame(tSdoComCon* pSdoComCon_p, UINT index_p,
                 ret = obd_readEntryToLe(index_p, subIndex_p,
                                         &pCommandFrame->m_le_abCommandData[0],
                                         (tObdSize*)&pSdoComCon_p->transferSize);
-                if(ret != kEplSuccessful)
+                if(ret != kErrorOk)
                     return ret;
 
                 ami_setUint16Le(&pCommandFrame->m_le_wSegmentSize, (WORD) pSdoComCon_p->transferSize);
@@ -1708,7 +1708,7 @@ The function initializes a WriteByIndex SDO command.
 //------------------------------------------------------------------------------
 static tOplkError serverInitWriteByIndex(tSdoComCon* pSdoComCon_p, tAsySdoCom* pSdoCom_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     UINT            index;
     UINT            subindex;
     UINT            bytesToTransfer;
@@ -1743,7 +1743,7 @@ static tOplkError serverInitWriteByIndex(tSdoComCon* pSdoComCon_p, tAsySdoCom* p
     }
 
     ret = obd_getAccessType(index, subindex, &accessType);
-    if (ret == kEplObdSubindexNotExist)
+    if (ret == kErrorObdSubindexNotExist)
     {
         pSdoComCon_p->lastAbortCode = SDO_AC_SUB_INDEX_NOT_EXIST;
         // send abort
@@ -1752,7 +1752,7 @@ static tOplkError serverInitWriteByIndex(tSdoComCon* pSdoComCon_p, tAsySdoCom* p
         ret = serverSendFrame(pSdoComCon_p, index, subindex, kSdoComSendTypeAbort);*/
         goto Abort;
     }
-    else if(ret != kEplSuccessful)
+    else if(ret != kErrorOk)
     {   // entry doesn't exist
         pSdoComCon_p->lastAbortCode = SDO_AC_OBJECT_NOT_EXIST;
         // send abort
@@ -1793,28 +1793,28 @@ static tOplkError serverInitWriteByIndex(tSdoComCon* pSdoComCon_p, tAsySdoCom* p
         ret = obd_writeEntryFromLe(index, subindex, pSrcData, pSdoComCon_p->transferSize);
         switch (ret)
         {
-            case kEplSuccessful:
+            case kErrorOk:
                 break;
 
-            case kEplObdAccessViolation:
+            case kErrorObdAccessViolation:
                 pSdoComCon_p->lastAbortCode = SDO_AC_UNSUPPORTED_ACCESS;
                 // send abort
                 goto Abort;
                 break;
 
-            case kEplObdValueLengthError:
+            case kErrorObdValueLengthError:
                 pSdoComCon_p->lastAbortCode = SDO_AC_DATA_TYPE_LENGTH_NOT_MATCH;
                 // send abort
                 goto Abort;
                 break;
 
-            case kEplObdValueTooHigh:
+            case kErrorObdValueTooHigh:
                 pSdoComCon_p->lastAbortCode = SDO_AC_VALUE_RANGE_TOO_HIGH;
                 // send abort
                 goto Abort;
                 break;
 
-            case kEplObdValueTooLow:
+            case kErrorObdValueTooLow:
                 pSdoComCon_p->lastAbortCode = SDO_AC_VALUE_RANGE_TOO_LOW;
                 // send abort
                 goto Abort;
@@ -1903,7 +1903,7 @@ The function starts a SDO transfer and sends all further frames..
 //------------------------------------------------------------------------------
 static tOplkError clientSend(tSdoComCon* pSdoComCon_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     UINT8           aFrame[SDO_MAX_FRAME_SIZE];
     tEplFrame*      pFrame;
     tAsySdoCom*     pCommandFrame;
@@ -1982,7 +1982,7 @@ static tOplkError clientSend(tSdoComCon* pSdoComCon_p)
                 case kSdoServiceNIL:
                 default:
                     // invalid service requested
-                    return kEplSdoComInvalidServiceType;
+                    return kErrorSdoComInvalidServiceType;
             }
         }
         else
@@ -2045,7 +2045,7 @@ static tOplkError clientSend(tSdoComCon* pSdoComCon_p)
             break;
 
         default:
-            return kEplSdoComUnsupportedProt;
+            return kErrorSdoComUnsupportedProt;
     }
 
     return ret;
@@ -2065,7 +2065,7 @@ The function processes a received command layer frame on a SDO client.
 //------------------------------------------------------------------------------
 static tOplkError clientProcessFrame(tSdoComConHdl sdoComConHdl_p, tAsySdoCom* pSdoCom_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     UINT8               flags;
     UINT8               transactionId;
     UINT8               command;
@@ -2227,7 +2227,7 @@ The function sends an abort message on a SDO client.
 //------------------------------------------------------------------------------
 static tOplkError clientSendAbort(tSdoComCon* pSdoComCon_p, UINT32 abortCode_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     UINT8           aFrame[SDO_MAX_FRAME_SIZE];
     tEplFrame*      pFrame;
     tAsySdoCom*     pCommandFrame;
@@ -2261,16 +2261,16 @@ static tOplkError clientSendAbort(tSdoComCon* pSdoComCon_p, UINT32 abortCode_p)
         case kSdoTypeAsnd:
         case kSdoTypeUdp:
             ret = sdoseq_sendData(pSdoComCon_p->sdoSeqConHdl, sizeOfFrame, pFrame);
-            if (ret == kEplSdoSeqConnectionBusy)
+            if (ret == kErrorSdoSeqConnectionBusy)
             {
                 DEBUG_LVL_SDO_TRACE("%s tried to send abort 0x%lX while connection is already closed\n",
                     __func__, (ULONG)abortCode_p);
-                ret = kEplSuccessful;
+                ret = kErrorOk;
             }
             break;
 
         default:
-            ret = kEplSdoComUnsupportedProt;
+            ret = kErrorSdoComUnsupportedProt;
             break;
     }
     return ret;
@@ -2294,7 +2294,7 @@ function.
 static tOplkError transferFinished(tSdoComConHdl sdoComConHdl_p, tSdoComCon* pSdoComCon_p,
                                    tSdoComConState sdoComConState_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     tSdoFinishedCb  pfnTransferFinished;
     tSdoComFinished sdoComFinished;
 

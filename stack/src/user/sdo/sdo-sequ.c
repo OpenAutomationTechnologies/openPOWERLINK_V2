@@ -268,11 +268,11 @@ The function adds an instance of the SDO sequence layer.
 //------------------------------------------------------------------------------
 tOplkError sdoseq_addInstance(tSdoComReceiveCb pfnSdoComRecvCb_p, tSdoComConCb pfnSdoComConCb_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
 
     if(pfnSdoComRecvCb_p == NULL)
     {
-        return kEplSdoSeqMissCb;
+        return kErrorSdoSeqMissCb;
     }
     else
     {
@@ -281,7 +281,7 @@ tOplkError sdoseq_addInstance(tSdoComReceiveCb pfnSdoComRecvCb_p, tSdoComConCb p
 
     if(pfnSdoComConCb_p == NULL)
     {
-        return kEplSdoSeqMissCb;
+        return kErrorSdoSeqMissCb;
     }
     else
     {
@@ -303,13 +303,13 @@ tOplkError sdoseq_addInstance(tSdoComReceiveCb pfnSdoComRecvCb_p, tSdoComConCb p
     // init lower layers
 #if defined(CONFIG_INCLUDE_SDO_UDP)
     ret = sdoudp_addInstance(receiveCb);
-    if(ret != kEplSuccessful)
+    if(ret != kErrorOk)
         return ret;
 #endif
 
 #if defined(CONFIG_INCLUDE_SDO_ASND)
     ret = sdoasnd_addInstance(receiveCb);
-    if(ret != kEplSuccessful)
+    if(ret != kErrorOk)
         return ret;
 #endif
     sdoSeqInstance_l.sdoSeqTimeout = SDO_SEQ_DEFAULT_TIMEOUT;
@@ -329,7 +329,7 @@ The function deletes an instance of the SDO sequence layer.
 //------------------------------------------------------------------------------
 tOplkError sdoseq_delInstance(void)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     UINT                count;
     tSdoSeqCon*         pSdoSeqCon;
 
@@ -381,7 +381,7 @@ existing connection to the specified node.
 //------------------------------------------------------------------------------
 tOplkError sdoseq_initCon(tSdoSeqConHdl* pSdoSeqConHdl_p, UINT nodeId_p, tSdoType sdoType_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     UINT                count;
     UINT                freeCon;
     tSdoConHdl          conHandle = ~0U;
@@ -395,20 +395,20 @@ tOplkError sdoseq_initCon(tSdoSeqConHdl* pSdoSeqConHdl_p, UINT nodeId_p, tSdoTyp
         case kSdoTypeUdp:
 #if defined(CONFIG_INCLUDE_SDO_UDP)
             ret = sdoudp_initCon(&conHandle, nodeId_p);
-            if(ret != kEplSuccessful)
+            if(ret != kErrorOk)
                 return ret;
 #else
-            return kEplSdoSeqUnsupportedProt;
+            return kErrorSdoSeqUnsupportedProt;
 #endif
             break;
 
         case kSdoTypeAsnd:
 #if defined(CONFIG_INCLUDE_SDO_ASND)
             ret = sdoasnd_initCon(&conHandle, nodeId_p);
-            if(ret != kEplSuccessful)
+            if(ret != kErrorOk)
                 return ret;
 #else
-            return kEplSdoSeqUnsupportedProt;
+            return kErrorSdoSeqUnsupportedProt;
 #endif
             break;
 
@@ -416,7 +416,7 @@ tOplkError sdoseq_initCon(tSdoSeqConHdl* pSdoSeqConHdl_p, UINT nodeId_p, tSdoTyp
         case kSdoTypeAuto:
         case kSdoTypePdo:
         default:
-            return kEplSdoSeqUnsupportedProt;
+            return kErrorSdoSeqUnsupportedProt;
     }
 
     // find existing connection to the same node or find empty entry for connection
@@ -445,7 +445,7 @@ tOplkError sdoseq_initCon(tSdoSeqConHdl* pSdoSeqConHdl_p, UINT nodeId_p, tSdoTyp
                 case kSdoTypeUdp:
 #if defined(CONFIG_INCLUDE_SDO_UDP)
                     ret = sdoudp_delConnection(conHandle);
-                    if(ret != kEplSuccessful)
+                    if(ret != kErrorOk)
                         return ret;
 #endif
                     break;
@@ -453,7 +453,7 @@ tOplkError sdoseq_initCon(tSdoSeqConHdl* pSdoSeqConHdl_p, UINT nodeId_p, tSdoTyp
                 case kSdoTypeAsnd:
 #if defined(CONFIG_INCLUDE_SDO_ASND)
                     ret = sdoasnd_deleteCon(conHandle);
-                    if(ret != kEplSuccessful)
+                    if(ret != kErrorOk)
                         return ret;
 #endif
                     break;
@@ -462,10 +462,10 @@ tOplkError sdoseq_initCon(tSdoSeqConHdl* pSdoSeqConHdl_p, UINT nodeId_p, tSdoTyp
                 case kSdoTypeAuto:
                 case kSdoTypePdo:
                 default:
-                    return kEplSdoSeqUnsupportedProt;
+                    return kErrorSdoSeqUnsupportedProt;
             }
 
-            return kEplSdoSeqNoFreeHandle;
+            return kErrorSdoSeqNoFreeHandle;
         }
         else
         {   // free entry found
@@ -511,13 +511,13 @@ tOplkError sdoseq_sendData(tSdoSeqConHdl sdoSeqConHdl_p, UINT dataSize_p, tEplFr
     if(sdoSeqInstance_l.aSdoSeqCon[handle].sdoSeqState == kSdoSeqStateIdle )
     {
         // no connection with this handle
-        return kEplSdoSeqInvalidHdl;
+        return kErrorSdoSeqInvalidHdl;
     }
     else
     {
         if(sdoSeqInstance_l.aSdoSeqCon[handle].sdoSeqState != kSdoSeqStateConnected)
         {
-            return kEplSdoSeqConnectionBusy;
+            return kErrorSdoSeqConnectionBusy;
         }
     }
     ret = processState(handle, dataSize_p, pData_p, NULL, kSdoSeqEventFrameSend);
@@ -539,17 +539,17 @@ The function processes SDO events.
 //------------------------------------------------------------------------------
 tOplkError sdoseq_processEvent(tEplEvent* pEvent_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     tTimerEventArg   *  pTimerEventArg;
     tSdoSeqCon*         pSdoSeqCon;
     tTimerHdl           timerHdl;
     UINT                count;
 
     if(pEvent_p == NULL)
-        return kEplSdoSeqInvalidEvent;
+        return kErrorSdoSeqInvalidEvent;
 
     if(pEvent_p->m_EventType != kEplEventTypeTimer)
-        return kEplSdoSeqInvalidEvent;
+        return kErrorSdoSeqInvalidEvent;
 
     // get timer handle
     pTimerEventArg = (tTimerEventArg*)pEvent_p->m_pArg;
@@ -597,7 +597,7 @@ The function closes and deletes an exisiting sequence layer connection.
 //------------------------------------------------------------------------------
 tOplkError sdoseq_deleteCon(tSdoSeqConHdl sdoSeqConHdl_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     UINT            handle;
     tSdoSeqCon*     pSdoSeqCon;
 
@@ -605,7 +605,7 @@ tOplkError sdoseq_deleteCon(tSdoSeqConHdl sdoSeqConHdl_p)
 
     // check if handle invalid
     if(handle >= MAX_SDO_SEQ_CON)
-        return kEplSdoSeqInvalidHdl;
+        return kErrorSdoSeqInvalidHdl;
 
     pSdoSeqCon = &sdoSeqInstance_l.aSdoSeqCon[handle];    // get pointer to connection
     pSdoSeqCon->useCount--;
@@ -655,7 +655,7 @@ tOplkError sdoseq_setTimeout(UINT32 timeout_p)
 {
     // Adopt new SDO sequence layer timeout (truncated to an upper bound)
     sdoSeqInstance_l.sdoSeqTimeout = min(timeout_p, SDO_SEQU_MAX_TIMEOUT_MS);
-    return  kEplSuccessful;
+    return  kErrorOk;
 }
 
 //============================================================================//
@@ -681,7 +681,7 @@ The function processes the sequence layer state: kSdoSeqStateIdle
 static tOplkError processStateIdle(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSeqConHdl_p,
                                    tSdoSeqEvent event_p, tAsySdoSeq* pRecvFrame_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
 
     switch(event_p)
     {
@@ -690,7 +690,7 @@ static tOplkError processStateIdle(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSe
             pSdoSeqCon_p->recvSeqNum = 0x01;    // set sending scon to 1
             pSdoSeqCon_p->sendSeqNum = 0x00;    // set set send rcon to 0
             ret = sendFrame(pSdoSeqCon_p, 0, NULL, FALSE);
-            if(ret != kEplSuccessful)
+            if(ret != kErrorOk)
                 return ret;
 
             pSdoSeqCon_p->sdoSeqState = kSdoSeqStateInit1; // change state
@@ -713,8 +713,8 @@ static tOplkError processStateIdle(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSe
                 // create answer and send answer, set rcon to 1 (in send direction own scon)
                 pSdoSeqCon_p->recvSeqNum++;
                 ret = sendFrame(pSdoSeqCon_p, 0, NULL, FALSE);
-                if(ret != kEplSuccessful)
-                    return kEplSuccessful;
+                if(ret != kErrorOk)
+                    return kErrorOk;
 
                 pSdoSeqCon_p->sdoSeqState = kSdoSeqStateInit2; // change state to kSdoSeqStateInit2
 
@@ -762,7 +762,7 @@ The function processes the sequence layer state: kSdoSeqStateInit1
 static tOplkError processStateInit1(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSeqConHdl_p,
                                     tSdoSeqEvent event_p, tAsySdoSeq* pRecvFrame_p)
 {
-    tOplkError              ret = kEplSuccessful;
+    tOplkError              ret = kErrorOk;
 
     // TRACE("EplSdoAsySequ: StateInit1\n");
 
@@ -779,7 +779,7 @@ static tOplkError processStateInit1(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
 
                 pSdoSeqCon_p->recvSeqNum++;
                 ret = sendFrame(pSdoSeqCon_p, 0, NULL, FALSE);
-                if(ret != kEplSuccessful)
+                if(ret != kErrorOk)
                     return ret;
 
                 pSdoSeqCon_p->sdoSeqState = kSdoSeqStateInit3;
@@ -797,7 +797,7 @@ static tOplkError processStateInit1(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
                 // create answer and send answer - set rcon to 1 (in send direction own scon)
                 pSdoSeqCon_p->recvSeqNum++;
                 ret = sendFrame(pSdoSeqCon_p, 0, NULL, FALSE);
-                if(ret != kEplSuccessful)
+                if(ret != kErrorOk)
                     return ret;
 
                 pSdoSeqCon_p->sdoSeqState = kSdoSeqStateInit2;
@@ -866,7 +866,7 @@ The function processes the sequence layer state: kSdoSeqStateInit2
 static tOplkError processStateInit2(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSeqConHdl_p,
                                     tSdoSeqEvent event_p, tAsySdoSeq* pRecvFrame_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
 
     // TRACE("EplSdoAsySequ: StateInit2\n");
 
@@ -883,14 +883,14 @@ static tOplkError processStateInit2(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
 
                 pSdoSeqCon_p->recvSeqNum++;
                 ret = sendFrame(pSdoSeqCon_p, 0, NULL, FALSE);
-                if(ret != kEplSuccessful)
+                if(ret != kErrorOk)
                     return ret;
 
                 // change state to kSdoSeqStateConnected
                 pSdoSeqCon_p->sdoSeqState = kSdoSeqStateConnected;
 
                 ret = initHistory(pSdoSeqCon_p);
-                if (ret != kEplSuccessful)
+                if (ret != kErrorOk)
                     return ret;
 
                 ret = setTimer(pSdoSeqCon_p, sdoSeqInstance_l.sdoSeqTimeout);
@@ -907,7 +907,7 @@ static tOplkError processStateInit2(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
                 // create answer and send answer - set rcon to 1 (in send direction own scon)
                 pSdoSeqCon_p->recvSeqNum++;
                 ret = sendFrame(pSdoSeqCon_p, 0, NULL, FALSE);
-                if(ret != kEplSuccessful)
+                if(ret != kErrorOk)
                     return ret;
 
                 ret = setTimer(pSdoSeqCon_p, sdoSeqInstance_l.sdoSeqTimeout);
@@ -975,7 +975,7 @@ The function processes the sequence layer state: kSdoSeqStateInit3
 static tOplkError processStateInit3(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSeqConHdl_p,
                                     tSdoSeqEvent event_p, tAsySdoSeq* pRecvFrame_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
 
     switch(event_p)
     {
@@ -991,7 +991,7 @@ static tOplkError processStateInit3(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
                 pSdoSeqCon_p->sdoSeqState = kSdoSeqStateConnected;
 
                 ret = initHistory(pSdoSeqCon_p);
-                if(ret != kEplSuccessful)
+                if(ret != kErrorOk)
                     return ret;
 
                 ret = setTimer(pSdoSeqCon_p, sdoSeqInstance_l.sdoSeqTimeout);
@@ -1009,13 +1009,13 @@ static tOplkError processStateInit3(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
                 pSdoSeqCon_p->recvSeqNum++;
 
                 ret = sendFrame(pSdoSeqCon_p, 0, NULL, FALSE);
-                if (ret != kEplSuccessful)
+                if (ret != kErrorOk)
                     return ret;
 
                 pSdoSeqCon_p->sdoSeqState = kSdoSeqStateConnected;
 
                 ret = initHistory(pSdoSeqCon_p);
-                if (ret != kEplSuccessful)
+                if (ret != kErrorOk)
                     return ret;
 
                 ret = setTimer(pSdoSeqCon_p, sdoSeqInstance_l.sdoSeqTimeout);
@@ -1087,7 +1087,7 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
                                         tSdoSeqEvent event_p, tAsySdoSeq* pRecvFrame_p,
                                         UINT dataSize_p, tEplFrame* pData_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     UINT8               sendSeqNumCon;
     UINT                frameSize;
     tEplFrame*          pFrame;
@@ -1104,21 +1104,21 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
             {   // send ack, increment scon
                 // jba ?? pSdoSeqCon_p->recvSeqNum += 4;
                 ret = sendFrame(pSdoSeqCon_p, 0, NULL, FALSE);
-                if (ret != kEplSuccessful)
+                if (ret != kErrorOk)
                     return ret;
             }
             else
             {   // send dataframe, increment send sequence number
                 pSdoSeqCon_p->recvSeqNum += 4;
                 ret = sendFrame(pSdoSeqCon_p, dataSize_p, pData_p, TRUE);
-                if (ret == kEplSdoSeqRequestAckNeeded)
+                if (ret == kErrorSdoSeqRequestAckNeeded)
                 {   // request ack, change state to wait ack
                     pSdoSeqCon_p->sdoSeqState = kSdoSeqStateWaitAck;
-                    // set ret to kEplSuccessful, because no error
+                    // set ret to kErrorOk, because no error
                     // for higher layer
-                    ret = kEplSuccessful;
+                    ret = kErrorOk;
                 }
-                else if (ret != kEplSuccessful)
+                else if (ret != kErrorOk)
                 {
                     return ret;
                 }
@@ -1150,7 +1150,7 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
                     sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateTransferAbort);
                     // restart immediately with initialization request
                     DEBUG_LVL_SDO_TRACE("sdoSeq: Reinit immediately\n");
-                    ret = kEplRetry;
+                    ret = kErrorRetry;
                     break;
 
                 // Request Ack or Error Ack - possible contain data
@@ -1163,17 +1163,17 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
 
                         // error response (retransmission request) - resend frames from history
                         ret = readFromHistory(pSdoSeqCon_p, &pFrame, &frameSize, TRUE);
-                        if (ret != kEplSuccessful)
+                        if (ret != kErrorOk)
                             return ret;
 
                         while ((pFrame != NULL) && (frameSize != 0))
                         {
                             ret = sendToLowerLayer(pSdoSeqCon_p, frameSize, pFrame);
-                            if (ret != kEplSuccessful)
+                            if (ret != kErrorOk)
                                 return ret;
 
                             ret = readFromHistory(pSdoSeqCon_p, &pFrame, &frameSize, FALSE);
-                            if (ret != kEplSuccessful)
+                            if (ret != kErrorOk)
                                 return ret;
                         } // end of while((pabFrame != NULL)
                     }   // end of if (error response)
@@ -1206,7 +1206,7 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
                         ret = sendFrame(pSdoSeqCon_p, 0, NULL, FALSE);
                         // restore send sequence number
                         pSdoSeqCon_p->sendSeqNum = (pSdoSeqCon_p->sendSeqNum & SEQ_NUM_MASK) | 0x02;
-                        if (ret != kEplSuccessful)
+                        if (ret != kErrorOk)
                             return ret;
 
                         // break here, because a requested acknowledge was sent implicitly above
@@ -1218,7 +1218,7 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
                     {   // ack request received
                         // create ack with own scon = 2
                         ret = sendFrame(pSdoSeqCon_p, 0, NULL, FALSE);
-                        if (ret != kEplSuccessful)
+                        if (ret != kErrorOk)
                             return ret;
                     }
                     break;
@@ -1251,7 +1251,7 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
                 ret = setTimer(pSdoSeqCon_p, sdoSeqInstance_l.sdoSeqTimeout);
                 // read first frame from history
                 ret = readFromHistory(pSdoSeqCon_p, &pFrame, &frameSize, TRUE);
-                if (ret != kEplSuccessful)
+                if (ret != kErrorOk)
                     return ret;
 
                 if ((pFrame != NULL) && (frameSize != 0))
@@ -1261,7 +1261,7 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
                                    ami_getUint8Le( &pFrame->m_Data.m_Asnd.m_Payload.m_SdoSequenceFrame.m_le_bSendSeqNumCon) | 0x03);
 
                     ret = sendToLowerLayer(pSdoSeqCon_p, frameSize, pFrame);
-                    if (ret != kEplSuccessful)
+                    if (ret != kErrorOk)
                         return ret;
                 }
             }
@@ -1307,7 +1307,7 @@ static tOplkError processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sd
                                       tSdoSeqEvent event_p, tAsySdoSeq* pRecvFrame_p,
                                       UINT dataSize_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     UINT                frameSize;
     tEplFrame*          pFrame;
 
@@ -1336,7 +1336,7 @@ static tOplkError processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sd
                 timeru_deleteTimer(&pSdoSeqCon_p->timerHandle);
                 sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateTransferAbort);
                 // restart immediately with initialization request
-                ret = kEplRetry;
+                ret = kErrorRetry;
                 break;
 
             // normal frame
@@ -1376,7 +1376,7 @@ static tOplkError processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sd
                     else
                     {
                         ret = sendFrame(pSdoSeqCon_p, 0, NULL, FALSE);
-                        if (ret != kEplSuccessful)
+                        if (ret != kErrorOk)
                             return ret;
                     }
                 }
@@ -1387,7 +1387,7 @@ static tOplkError processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sd
                     while ((pFrame != NULL) && (frameSize != 0))
                     {
                         ret = sendToLowerLayer(pSdoSeqCon_p, frameSize, pFrame);
-                        if (ret != kEplSuccessful)
+                        if (ret != kErrorOk)
                             return ret;
                         // read next frame
                         ret = readFromHistory(pSdoSeqCon_p, &pFrame, &frameSize, FALSE);
@@ -1428,7 +1428,7 @@ The function processes the internal SDO sequence layer state machine.
 static tOplkError processState(UINT handle_p, UINT dataSize_p, tEplFrame* pData_p,
                                tAsySdoSeq* pRecvFrame_p, tSdoSeqEvent event_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     tSdoSeqCon*         pSdoSeqCon;
     tSdoSeqConHdl       sdoSeqConHdl;
 
@@ -1441,14 +1441,14 @@ static tOplkError processState(UINT handle_p, UINT dataSize_p, tEplFrame* pData_
 
     // check if handle invalid
     if((sdoSeqConHdl & ~SDO_SEQ_HANDLE_MASK) == SDO_SEQ_INVALID_HDL)
-        return kEplSdoSeqInvalidHdl;
+        return kErrorSdoSeqInvalidHdl;
 
     // get pointer to connection
     pSdoSeqCon = &sdoSeqInstance_l.aSdoSeqCon[handle_p];
 
     // check size
     if((pData_p == NULL) && (pRecvFrame_p == NULL) && (dataSize_p != 0))
-        return kEplSdoSeqInvalidFrame;
+        return kErrorSdoSeqInvalidFrame;
 
     // check state
     switch(pSdoSeqCon->sdoSeqState)
@@ -1550,7 +1550,7 @@ static tOplkError sendFrame(tSdoSeqCon* pSdoSeqCon_p, UINT dataSize_p,
     dataSize_p += SDO_SEQ_HEADER_SIZE;
 
     ret = sendToLowerLayer(pSdoSeqCon_p, dataSize_p, pFrame);
-    if ((ret == kEplSuccessful) && (fFrameInHistory_p != FALSE))
+    if ((ret == kErrorOk) && (fFrameInHistory_p != FALSE))
     {
         // set own scon to 2 if needed
         if ((pSdoSeqCon_p->recvSeqNum & 0x03) == 0x03)
@@ -1559,9 +1559,9 @@ static tOplkError sendFrame(tSdoSeqCon* pSdoSeqCon_p, UINT dataSize_p,
         }
         // save frame to history
         ret = addFrameToHistory(pSdoSeqCon_p, pFrame, dataSize_p);
-        if ((ret == kEplSdoSeqNoFreeHistory) || (freeEntries <= 1))
+        if ((ret == kErrorSdoSeqNoFreeHistory) || (freeEntries <= 1))
         {
-            ret = kEplSdoSeqRequestAckNeeded;       // request Ack needed
+            ret = kErrorSdoSeqRequestAckNeeded;       // request Ack needed
         }
     }
     return ret;
@@ -1595,7 +1595,7 @@ static tOplkError sendToLowerLayer(tSdoSeqCon* pSdoSeqCon_p, UINT dataSize_p,
 #if defined(CONFIG_INCLUDE_SDO_UDP)
             ret = sdoudp_sendData(pSdoSeqCon_p->conHandle, pFrame_p, dataSize_p);
 #else
-            ret = kEplSdoSeqUnsupportedProt;
+            ret = kErrorSdoSeqUnsupportedProt;
 #endif
             break;
 
@@ -1603,12 +1603,12 @@ static tOplkError sendToLowerLayer(tSdoSeqCon* pSdoSeqCon_p, UINT dataSize_p,
 #if defined(CONFIG_INCLUDE_SDO_ASND)
             ret = sdoasnd_sendData(pSdoSeqCon_p->conHandle, pFrame_p, dataSize_p);
 #else
-            ret = kEplSdoSeqUnsupportedProt;
+            ret = kErrorSdoSeqUnsupportedProt;
 #endif
             break;
 
         default:
-            ret =  kEplSdoSeqInvalidHdl;
+            ret =  kErrorSdoSeqInvalidHdl;
             break;
     }
 
@@ -1668,7 +1668,7 @@ static tOplkError receiveCb(tSdoConHdl conHdl_p, tAsySdoSeq* pSdoSeqData_p,
         {   // new connection
             if (freeEntry == MAX_SDO_SEQ_CON)
             {
-                ret = kEplSdoSeqNoFreeHandle;
+                ret = kErrorSdoSeqNoFreeHandle;
 
 #if defined(WIN32) || defined(_WIN32)
                 LeaveCriticalSection(sdoSeqInstance_l.pCriticalSectionReceive);
@@ -1690,12 +1690,12 @@ static tOplkError receiveCb(tSdoConHdl conHdl_p, tAsySdoSeq* pSdoSeqData_p,
 #if defined(WIN32) || defined(_WIN32)
         LeaveCriticalSection(sdoSeqInstance_l.pCriticalSectionReceive);
 #endif
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
             return ret;
 
         // call process function with pointer of frame and event kSdoSeqEventFrameRec
         ret = processState(count, dataSize_p, NULL, pSdoSeqData_p, kSdoSeqEventFrameRec);
-    } while (ret == kEplRetry);
+    } while (ret == kErrorRetry);
 
     return ret;
 }
@@ -1716,7 +1716,7 @@ static tOplkError initHistory(tSdoSeqCon* pSdoSeqCon_p)
     pSdoSeqCon_p->sdoSeqConHistory.freeEntries = SDO_HISTORY_SIZE;
     pSdoSeqCon_p->sdoSeqConHistory.ackIndex = 0;
     pSdoSeqCon_p->sdoSeqConHistory.writeIndex = 0;
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -1735,13 +1735,13 @@ The function adds a frame to the history buffer.
 static tOplkError addFrameToHistory(tSdoSeqCon* pSdoSeqCon_p, tEplFrame* pFrame_p,
                                     UINT size_p)
 {
-    tOplkError              ret = kEplSuccessful;
+    tOplkError              ret = kErrorOk;
     tSdoSeqConHistory*      pHistory;
 
     // add frame to history buffer
     // check size - SDO_SEQ_HISTORY_FRAME_SIZE includes the header size, but size_p does not!
     if(size_p > SDO_SEQ_HISTROY_FRAME_SIZE)
-        return kEplSdoSeqFrameSizeError;
+        return kErrorSdoSeqFrameSizeError;
 
     pHistory = &pSdoSeqCon_p->sdoSeqConHistory;      // save pointer to history
 
@@ -1760,7 +1760,7 @@ static tOplkError addFrameToHistory(tSdoSeqCon* pSdoSeqCon_p, tEplFrame* pFrame_
     }
     else
     {
-        ret = kEplSdoSeqNoFreeHistory;
+        ret = kErrorSdoSeqNoFreeHistory;
     }
 
     return ret;
@@ -1780,7 +1780,7 @@ The function deletes an acknowledged frame from the history buffer.
 //------------------------------------------------------------------------------
 static tOplkError deleteAckedFrameFromHistory(tSdoSeqCon* pSdoSeqCon_p, UINT8 recvSeqNumber_p)
 {
-    tOplkError              ret = kEplSuccessful;
+    tOplkError              ret = kErrorOk;
     tSdoSeqConHistory*      pHistory;
     UINT8                   ackIndex;
     UINT8                   currentSeqNum;
@@ -1842,7 +1842,7 @@ The function reads a frame from the history buffer.
 static tOplkError readFromHistory(tSdoSeqCon* pSdoSeqCon_p, tEplFrame** ppFrame_p,
                                   UINT* pSize_p, BOOL fInitRead_p)
 {
-    tOplkError              ret = kEplSuccessful;
+    tOplkError              ret = kErrorOk;
     tSdoSeqConHistory*      pHistory;
 
     // read one message from History

@@ -415,7 +415,7 @@ This function initializes the Ethernet driver.
 //------------------------------------------------------------------------------
 tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
     INT         result;
     INT         i;
 
@@ -437,7 +437,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     if (result != 0)
     {
         printk("%s pci_register_driver failed with %d\n", __FUNCTION__, result);
-        ret = kEplNoResource;
+        ret = kErrorNoResource;
         goto Exit;
     }
 
@@ -445,7 +445,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     {
         printk("%s pPciDev=NULL\n", __FUNCTION__);
         ret = edrv_shutdown();
-        ret = kEplNoResource;
+        ret = kErrorNoResource;
         goto Exit;
     }
 
@@ -480,7 +480,7 @@ tOplkError edrv_shutdown(void)
     printk("%s calling pci_unregister_driver()\n", __FUNCTION__);
     pci_unregister_driver (&edrvDriver_l);
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -498,7 +498,7 @@ This function sets a multicast entry into the Ethernet controller.
 //------------------------------------------------------------------------------
 tOplkError edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
     UINT32      data;
     INT         i;
 
@@ -516,7 +516,7 @@ tOplkError edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p)
     if (i == 16)
     {   // no free entry found
         printk("%s Implementation of Multicast Table Array support required\n", __FUNCTION__);
-        ret = kEplEdrvInitError;
+        ret = kErrorEdrvInit;
         goto Exit;
     }
     else
@@ -555,7 +555,7 @@ This function removes the multicast entry from the Ethernet controller.
 //------------------------------------------------------------------------------
 tOplkError edrv_clearRxMulticastMacAddr(UINT8* pMacAddr_p)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
     UINT32      data;
     INT         i;
     UINT32      addrLow;
@@ -617,7 +617,7 @@ tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
     UNUSED_PARAMETER(entryChanged_p);
     UNUSED_PARAMETER(changeFlags_p);
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -635,19 +635,19 @@ This function allocates a Tx buffer.
 //------------------------------------------------------------------------------
 tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
     UINT        i;
 
     if (pBuffer_p->maxBufferSize > EDRV_MAX_FRAME_SIZE)
     {
-        ret = kEplEdrvNoFreeBufEntry;
+        ret = kErrorEdrvNoFreeBufEntry;
         goto Exit;
     }
 
     if (edrvInstance_l.pTxBuf == NULL)
     {
         printk("%s Tx buffers currently not allocated\n", __FUNCTION__);
-        ret = kEplEdrvNoFreeBufEntry;
+        ret = kErrorEdrvNoFreeBufEntry;
         goto Exit;
     }
 
@@ -666,7 +666,7 @@ tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
     }
     if (i >= EDRV_MAX_TX_BUFFERS)
     {
-        ret = kEplEdrvNoFreeBufEntry;
+        ret = kErrorEdrvNoFreeBufEntry;
         goto Exit;
     }
 
@@ -698,7 +698,7 @@ tOplkError edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p)
         edrvInstance_l.afTxBufUsed[bufferNumber] = FALSE;
     }
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -716,7 +716,7 @@ This function sends the Tx buffer.
 //------------------------------------------------------------------------------
 tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     UINT            bufferNumber;
     tEdrvTxDesc*    pTxDesc;
 
@@ -725,14 +725,14 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
     if ((bufferNumber >= EDRV_MAX_TX_BUFFERS) ||
         (edrvInstance_l.afTxBufUsed[bufferNumber] == FALSE))
     {
-        ret = kEplEdrvBufNotExisting;
+        ret = kErrorEdrvBufNotExisting;
         goto Exit;
     }
 
     // one descriptor has to be left empty for distinction between full and empty
     if (((edrvInstance_l.tailTxDesc + 1) & EDRV_TX_DESC_MASK) == edrvInstance_l.headTxDesc)
     {
-        ret = kEplEdrvNoFreeTxDesc;
+        ret = kErrorEdrvNoFreeTxDesc;
         goto Exit;
     }
 
@@ -773,7 +773,7 @@ tOplkError edrv_setTxBufferReady(tEdrvTxBuffer* pBuffer_p)
 {
     UNUSED_PARAMETER(pBuffer_p);
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -793,7 +793,7 @@ tOplkError edrv_startTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
     UNUSED_PARAMETER(pBuffer_p);
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 #if EDRV_USE_DIAGNOSTICS != FALSE
@@ -1003,7 +1003,7 @@ This function releases a late release Rx buffer.
 //------------------------------------------------------------------------------
 tOplkError edrv_releaseRxBuffer(tEdrvRxBuffer* pRxBuffer_p)
 {
-    tOplkError ret = kEplEdrvInvalidRxBuf;
+    tOplkError ret = kErrorEdrvInvalidRxBuf;
 
     if (edrvInstance_l.rxBufFreeTop < (EDRV_MAX_RX_BUFFERS-1))
     {
@@ -1013,7 +1013,7 @@ tOplkError edrv_releaseRxBuffer(tEdrvRxBuffer* pRxBuffer_p)
         edrvInstance_l.apRxBufFree[++edrvInstance_l.rxBufFreeTop] = pRxBuffer_p->pBuffer;
         spin_unlock_irqrestore(&edrvInstance_l.spinLockRxBufRelease, flags);
 
-        ret = kEplSuccessful;
+        ret = kErrorOk;
     }
 
     return ret;
