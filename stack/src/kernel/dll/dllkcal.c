@@ -39,14 +39,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <dllcal.h>
+#include <common/dllcal.h>
 #include <kernel/dllkcal.h>
 #include <kernel/dllk.h>
 
 #include <kernel/eventk.h>
 
 #ifdef CONFIG_INCLUDE_NMT_MN
-#include <circbuffer.h>
+#include <common/circbuffer.h>
 #endif
 
 #if (EPL_DLL_PRES_CHAINING_MN != FALSE) && (CONFIG_DLLCAL_QUEUE == EPL_QUEUE_DIRECT)

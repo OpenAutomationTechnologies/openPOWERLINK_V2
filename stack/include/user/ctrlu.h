@@ -44,7 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <Epl.h>
 
-#include <ctrl.h>
+#include <common/ctrl.h>
 
 //------------------------------------------------------------------------------
 // const defines

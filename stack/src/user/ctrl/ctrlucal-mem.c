@@ -45,12 +45,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <Epl.h>
 #include <EplTarget.h>
-#include <ctrl.h>
-#include <ctrlcal.h>
-#include <ctrlcal-mem.h>
+#include <common/ctrl.h>
+#include <common/ctrlcal.h>
+#include <common/ctrlcal-mem.h>
 #include <user/ctrlucal.h>
 
-#include <target.h>
+#include <common/target.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //

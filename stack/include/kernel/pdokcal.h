@@ -42,7 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <EplInc.h>
 #include <event.h>
-#include <pdo.h>
+#include <common/pdo.h>
 
 //------------------------------------------------------------------------------
 // const defines

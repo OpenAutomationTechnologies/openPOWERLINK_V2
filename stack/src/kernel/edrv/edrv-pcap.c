@@ -49,7 +49,7 @@
 ****************************************************************************/
 
 #define _WINSOCKAPI_ // prevent windows.h from including winsock.h
-#include "edrv.h"
+#include <common/edrv.h>
 #include "pcap.h"
 //#include <windows.h>
 #include <iphlpapi.h>

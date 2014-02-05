@@ -49,7 +49,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Benchmark.h>
 #include <obd.h>
 
-#include <errhnd.h>
+#include <common/errhnd.h>
 #include <user/errhndu.h>
 
 #include "errhnducal.h"

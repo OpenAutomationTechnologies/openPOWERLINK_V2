@@ -44,7 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <dll.h>
 #include "event.h"
-#include <edrv.h>
+#include <common/edrv.h>
 
 
 //------------------------------------------------------------------------------

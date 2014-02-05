@@ -44,7 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <EplInc.h>
-#include <pdo.h>
+#include <common/pdo.h>
 
 #include <linux/slab.h>
 #include <linux/sched.h>

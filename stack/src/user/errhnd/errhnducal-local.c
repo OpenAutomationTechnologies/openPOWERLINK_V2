@@ -46,7 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <EplInc.h>
 
-#include <errhnd.h>
+#include <common/errhnd.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //

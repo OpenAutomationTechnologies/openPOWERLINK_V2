@@ -46,7 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <EplInc.h>
-#include <target.h>
+#include <common/target.h>
 
 #include "circbuf-arch.h"
 

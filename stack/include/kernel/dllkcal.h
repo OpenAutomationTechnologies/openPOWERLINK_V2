@@ -40,7 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <dll.h>
-#include <dllcal.h>
+#include <common/dllcal.h>
 #include <event.h>
 
 //------------------------------------------------------------------------------

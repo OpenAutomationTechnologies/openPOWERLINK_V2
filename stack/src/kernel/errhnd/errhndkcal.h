@@ -43,7 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <EplInc.h>
-#include <errhnd.h>
+#include <common/errhnd.h>
 
 //------------------------------------------------------------------------------
 // const defines

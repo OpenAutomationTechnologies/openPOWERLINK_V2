@@ -42,8 +42,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <unistd.h>
 
-#include <ctrl.h>
-#include <ctrlcal.h>
+#include <common/ctrl.h>
+#include <common/ctrlcal.h>
 #include <kernel/ctrlkcal.h>
 
 #include <hostiflib.h>
