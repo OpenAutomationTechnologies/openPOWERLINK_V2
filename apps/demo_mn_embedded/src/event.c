@@ -86,34 +86,34 @@ static BOOL*    pfGsOff_l = NULL;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError processStateChangeEvent(tEplApiEventType EventType_p,
-                                          tEplApiEventArg* pEventArg_p,
+static tOplkError processStateChangeEvent(tOplkApiEventType EventType_p,
+                                          tOplkApiEventArg* pEventArg_p,
                                           void GENERIC* pUserArg_p);
 
-static tOplkError processErrorWarningEvent(tEplApiEventType EventType_p,
-                                           tEplApiEventArg* pEventArg_p,
+static tOplkError processErrorWarningEvent(tOplkApiEventType EventType_p,
+                                           tOplkApiEventArg* pEventArg_p,
                                            void GENERIC* pUserArg_p);
 
-static tOplkError processHistoryEvent(tEplApiEventType EventType_p,
-                                      tEplApiEventArg* pEventArg_p,
+static tOplkError processHistoryEvent(tOplkApiEventType EventType_p,
+                                      tOplkApiEventArg* pEventArg_p,
                                       void GENERIC* pUserArg_p);
 
-static tOplkError processNodeEvent(tEplApiEventType EventType_p,
-                                   tEplApiEventArg* pEventArg_p,
+static tOplkError processNodeEvent(tOplkApiEventType EventType_p,
+                                   tOplkApiEventArg* pEventArg_p,
                                    void GENERIC* pUserArg_p);
 
 #ifdef CONFIG_INCLUDE_CFM
-static tOplkError processCfmProgressEvent(tEplApiEventType EventType_p,
-                                          tEplApiEventArg* pEventArg_p,
+static tOplkError processCfmProgressEvent(tOplkApiEventType EventType_p,
+                                          tOplkApiEventArg* pEventArg_p,
                                           void GENERIC* pUserArg_p);
 
-static tOplkError processCfmResultEvent(tEplApiEventType EventType_p,
-                                        tEplApiEventArg* pEventArg_p,
+static tOplkError processCfmResultEvent(tOplkApiEventType EventType_p,
+                                        tOplkApiEventArg* pEventArg_p,
                                         void GENERIC* pUserArg_p);
 #else
 static tOplkError setDefaultNodeAssignment(void);
-static tOplkError processSdoEvent(tEplApiEventType EventType_p,
-                                  tEplApiEventArg* pEventArg_p,
+static tOplkError processSdoEvent(tOplkApiEventType EventType_p,
+                                  tOplkApiEventArg* pEventArg_p,
                                   void GENERIC* pUserArg_p);
 #endif
 
@@ -153,7 +153,7 @@ The function implements the applications stack event handler.
 \ingroup module_demo_mn_console
 */
 //------------------------------------------------------------------------------
-tOplkError processEvents(tEplApiEventType EventType_p, tEplApiEventArg* pEventArg_p, void* pUserArg_p)
+tOplkError processEvents(tOplkApiEventType EventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p)
 {
     tOplkError          ret = kErrorOk;
 
@@ -162,40 +162,40 @@ tOplkError processEvents(tEplApiEventType EventType_p, tEplApiEventArg* pEventAr
     // check if NMT_GS_OFF is reached
     switch (EventType_p)
     {
-        case kEplApiEventNmtStateChange:
+        case kOplkApiEventNmtStateChange:
             ret = processStateChangeEvent(EventType_p, pEventArg_p, pUserArg_p);
             break;
 
-        case kEplApiEventCriticalError:
-        case kEplApiEventWarning:
+        case kOplkApiEventCriticalError:
+        case kOplkApiEventWarning:
             ret = processErrorWarningEvent(EventType_p, pEventArg_p, pUserArg_p);
             break;
 
-        case kEplApiEventHistoryEntry:
+        case kOplkApiEventHistoryEntry:
             ret = processHistoryEvent(EventType_p, pEventArg_p, pUserArg_p);
             break;
 
-        case kEplApiEventNode:
+        case kOplkApiEventNode:
             ret = processNodeEvent(EventType_p, pEventArg_p, pUserArg_p);
             break;
 
 #ifdef CONFIG_INCLUDE_CFM
-        case kEplApiEventCfmProgress:
+        case kOplkApiEventCfmProgress:
             ret = processCfmProgressEvent(EventType_p, pEventArg_p, pUserArg_p);
             break;
 
-        case kEplApiEventCfmResult:
+        case kOplkApiEventCfmResult:
             ret = processCfmResultEvent(EventType_p, pEventArg_p, pUserArg_p);
             break;
 #else
         // Configuration Manager is not available,
         // so process SDO events
-        case kEplApiEventSdo:
+        case kOplkApiEventSdo:
             ret = processSdoEvent(EventType_p, pEventArg_p, pUserArg_p);
             break;
 #endif
 
-        case kEplApiEventLed:
+        case kOplkApiEventLed:
             /* POWERLINK S/E LED needs to be changed */
             switch(pEventArg_p->m_Led.m_LedType)
             {
@@ -237,8 +237,8 @@ The function processes state change events.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError processStateChangeEvent(tEplApiEventType EventType_p,
-                                          tEplApiEventArg* pEventArg_p,
+static tOplkError processStateChangeEvent(tOplkApiEventType EventType_p,
+                                          tOplkApiEventArg* pEventArg_p,
                                           void GENERIC* pUserArg_p)
 {
     tOplkError                  ret = kErrorOk;
@@ -321,8 +321,8 @@ The function processes error and warning events.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError processErrorWarningEvent(tEplApiEventType EventType_p,
-                                           tEplApiEventArg* pEventArg_p,
+static tOplkError processErrorWarningEvent(tOplkApiEventType EventType_p,
+                                           tOplkApiEventArg* pEventArg_p,
                                            void GENERIC* pUserArg_p)
 {
     // error or warning occurred within the stack or the application
@@ -388,8 +388,8 @@ The function processes history events.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError processHistoryEvent(tEplApiEventType EventType_p,
-                                      tEplApiEventArg* pEventArg_p,
+static tOplkError processHistoryEvent(tOplkApiEventType EventType_p,
+                                      tOplkApiEventArg* pEventArg_p,
                                       void GENERIC* pUserArg_p)
 {
     tErrHistoryEntry*    pHistoryEntry = &pEventArg_p->m_ErrHistoryEntry;
@@ -427,11 +427,11 @@ The function processes node events.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError processNodeEvent(tEplApiEventType EventType_p,
-                                   tEplApiEventArg* pEventArg_p,
+static tOplkError processNodeEvent(tOplkApiEventType EventType_p,
+                                   tOplkApiEventArg* pEventArg_p,
                                    void GENERIC* pUserArg_p)
 {
-    tEplApiEventNode*   pNode = &pEventArg_p->m_Node;
+    tOplkApiEventNode*   pNode = &pEventArg_p->m_Node;
 
     UNUSED_PARAMETER(EventType_p);
     UNUSED_PARAMETER(pUserArg_p);
@@ -484,8 +484,8 @@ The function processes CFM progress events.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError processCfmProgressEvent(tEplApiEventType EventType_p,
-                                          tEplApiEventArg* pEventArg_p,
+static tOplkError processCfmProgressEvent(tOplkApiEventType EventType_p,
+                                          tOplkApiEventArg* pEventArg_p,
                                           void GENERIC* pUserArg_p)
 {
     tCfmEventCnProgress*     pCfmProgress = &pEventArg_p->m_CfmProgress;
@@ -528,11 +528,11 @@ The function processes CFM result events.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError processCfmResultEvent(tEplApiEventType EventType_p,
-                                        tEplApiEventArg* pEventArg_p,
+static tOplkError processCfmResultEvent(tOplkApiEventType EventType_p,
+                                        tOplkApiEventArg* pEventArg_p,
                                         void GENERIC* pUserArg_p)
 {
-    tEplApiEventCfmResult*       pCfmResult = &pEventArg_p->m_CfmResult;
+    tOplkApiEventCfmResult*       pCfmResult = &pEventArg_p->m_CfmResult;
 
     UNUSED_PARAMETER(EventType_p);
     UNUSED_PARAMETER(pUserArg_p);
@@ -578,8 +578,8 @@ The function processes SDO events.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError processSdoEvent(tEplApiEventType EventType_p,
-                                  tEplApiEventArg* pEventArg_p,
+static tOplkError processSdoEvent(tOplkApiEventType EventType_p,
+                                  tOplkApiEventArg* pEventArg_p,
                                   void GENERIC* pUserArg_p)
 {
     tEplSdoComFinished*       pSdo = &pEventArg_p->m_Sdo;

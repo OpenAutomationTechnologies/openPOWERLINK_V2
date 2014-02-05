@@ -66,7 +66,7 @@ EPLDLLEXPORT char* debugstr_getEventTypeStr(tEplEventType eventType_p);
 EPLDLLEXPORT char* debugstr_getEventSourceStr(tEplEventSource eventSrc_p);
 EPLDLLEXPORT char* debugstr_getEventSinkStr(tEplEventSink eventSink_p);
 EPLDLLEXPORT char* debugstr_getNmtStateStr(tNmtState nmtState_p);
-EPLDLLEXPORT char* debugstr_getApiEventStr(tEplApiEventType ApiEvent_p);
+EPLDLLEXPORT char* debugstr_getApiEventStr(tOplkApiEventType ApiEvent_p);
 EPLDLLEXPORT char* debugstr_getNmtNodeEventTypeStr(tNmtNodeEvent NodeEventType_p);
 EPLDLLEXPORT char* debugstr_getNmtBootEventTypeStr(tNmtBootEvent BootEventType_p);
 EPLDLLEXPORT char* debugstr_getSdoComConStateStr(tSdoComConState SdoComConState_p);

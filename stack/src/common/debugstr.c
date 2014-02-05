@@ -80,7 +80,7 @@ typedef struct
 
 typedef struct
 {
-    tEplApiEventType    apiEvent;
+    tOplkApiEventType    apiEvent;
     char*               sApiEvent;
 } tApiEventInfo;
 
@@ -281,18 +281,18 @@ static tNmtStateInfo nmtStateInfo_l[] =
 // text strings for API events
 static tApiEventInfo apiEventInfo_l[] =
 {
-    { kEplApiEventUserDef,          "User defined"                      },
-    { kEplApiEventNmtStateChange,   "NMT state change"                  },
-    { kEplApiEventCriticalError,    "CRITICAL error -> stack halted"    },
-    { kEplApiEventWarning,          "Warning"                           },
-    { kEplApiEventHistoryEntry,     "History entry"                     },
-    { kEplApiEventNode,             "Node event"                        },
-    { kEplApiEventBoot,             "Boot event"                        },
-    { kEplApiEventSdo,              "SDO event"                         },
-    { kEplApiEventObdAccess,        "OBD access"                        },
-    { kEplApiEventLed,              "LED event"                         },
-    { kEplApiEventCfmProgress,      "CFM progress"                      },
-    { kEplApiEventCfmResult,        "CFM result"                        },
+    { kOplkApiEventUserDef,          "User defined"                      },
+    { kOplkApiEventNmtStateChange,   "NMT state change"                  },
+    { kOplkApiEventCriticalError,    "CRITICAL error -> stack halted"    },
+    { kOplkApiEventWarning,          "Warning"                           },
+    { kOplkApiEventHistoryEntry,     "History entry"                     },
+    { kOplkApiEventNode,             "Node event"                        },
+    { kOplkApiEventBoot,             "Boot event"                        },
+    { kOplkApiEventSdo,              "SDO event"                         },
+    { kOplkApiEventObdAccess,        "OBD access"                        },
+    { kOplkApiEventLed,              "LED event"                         },
+    { kOplkApiEventCfmProgress,      "CFM progress"                      },
+    { kOplkApiEventCfmResult,        "CFM result"                        },
 };
 
 // text strings for values of type tOplkError
@@ -692,7 +692,7 @@ The function returns the string describing the specified API event.
 \ingroup module_debugstr
 */
 //------------------------------------------------------------------------------
-char* debugstr_getApiEventStr(tEplApiEventType ApiEvent_p)
+char* debugstr_getApiEventStr(tOplkApiEventType ApiEvent_p)
 {
     UINT        i;
 

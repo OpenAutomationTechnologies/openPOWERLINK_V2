@@ -125,7 +125,7 @@ oplk_execNmtCommand(kNmtEventSwReset).
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tOplkError oplk_init(tEplApiInitParam* pInitParam_p)
+tOplkError oplk_init(tOplkApiInitParam* pInitParam_p)
 {
     tOplkError          ret;
 
@@ -673,7 +673,7 @@ The function enables or disables the forwarding of received ASnd frames
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tOplkError oplk_setAsndForward(UINT8 serviceId_p, tEplApiAsndFilter filterType_p)
+tOplkError oplk_setAsndForward(UINT8 serviceId_p, tOplkApiAsndFilter filterType_p)
 {
     tOplkError          ret;
     tDllAsndFilter      dllFilter;
@@ -681,16 +681,16 @@ tOplkError oplk_setAsndForward(UINT8 serviceId_p, tEplApiAsndFilter filterType_p
     // Map API filter types to stack internal filter types
     switch(filterType_p)
     {
-        case kEplApiAsndFilterLocal:
+        case tOplkApiAsndFilterLocal:
             dllFilter = kDllAsndFilterLocal;
             break;
 
-        case kEplApiAsndFilterAny:
+        case tOplkApiAsndFilterAny:
             dllFilter = kDllAsndFilterAny;
             break;
 
         default:
-        case kEplApiAsndFilterNone:
+        case tOplkApiAsndFilterNone:
             dllFilter = kDllAsndFilterNone;
             break;
     }
@@ -705,7 +705,7 @@ tOplkError oplk_setAsndForward(UINT8 serviceId_p, tEplApiAsndFilter filterType_p
 \brief  Post user defined event
 
 The function posts user-defined events to event processing thread, i.e. calls
-user event callback function with event kEplApiEventUserDef. This function is
+user event callback function with event kOplkApiEventUserDef. This function is
 thread safe and is meant for synchronization.
 
 \param  pUserArg_p          User defined pointer.
@@ -919,10 +919,10 @@ SDO event to the application.
 static tOplkError cbSdoCon(tSdoComFinished* pSdoComFinished_p)
 {
     tOplkError          ret = kErrorOk;
-    tEplApiEventArg     eventArg;
+    tOplkApiEventArg     eventArg;
 
     eventArg.m_Sdo = *pSdoComFinished_p;
-    ret = ctrlu_callUserEventCallback(kEplApiEventSdo, &eventArg);
+    ret = ctrlu_callUserEventCallback(kOplkApiEventSdo, &eventArg);
     return ret;
 }
 #endif
@@ -943,8 +943,8 @@ static tOplkError cbReceivedAsnd(tFrameInfo *pFrameInfo_p)
 {
     tOplkError              ret = kErrorOk;
     UINT                    asndOffset;
-    tEplApiEventArg         apiEventArg;
-    tEplApiEventType        eventType;
+    tOplkApiEventArg         apiEventArg;
+    tOplkApiEventType        eventType;
 
     // Check for correct input
     asndOffset = offsetof(tPlkFrame, data.asnd);
@@ -957,7 +957,7 @@ static tOplkError cbReceivedAsnd(tFrameInfo *pFrameInfo_p)
     apiEventArg.m_RcvAsnd.m_pFrame = pFrameInfo_p->pFrame;
     apiEventArg.m_RcvAsnd.m_FrameSize = pFrameInfo_p->frameSize;
 
-    eventType = kEplApiEventReceivedAsnd;
+    eventType = kOplkApiEventReceivedAsnd;
     ret = ctrlu_callUserEventCallback(eventType, &apiEventArg);
     return ret;
 }

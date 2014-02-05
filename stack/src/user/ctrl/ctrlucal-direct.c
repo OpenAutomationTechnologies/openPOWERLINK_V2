@@ -58,7 +58,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // module global vars
 //------------------------------------------------------------------------------
-tEplApiInitParam    kernelInitParam_g;
+tOplkApiInitParam    kernelInitParam_g;
 
 //------------------------------------------------------------------------------
 // global function prototypes

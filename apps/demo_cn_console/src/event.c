@@ -81,12 +81,12 @@ static BOOL*    pfGsOff_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError processStateChangeEvent(tEplApiEventType EventType_p,
-                                          tEplApiEventArg* pEventArg_p,
+static tOplkError processStateChangeEvent(tOplkApiEventType EventType_p,
+                                          tOplkApiEventArg* pEventArg_p,
                                           void GENERIC* pUserArg_p);
 
-static tOplkError processErrorWarningEvent(tEplApiEventType EventType_p,
-                                           tEplApiEventArg* pEventArg_p,
+static tOplkError processErrorWarningEvent(tOplkApiEventType EventType_p,
+                                           tOplkApiEventArg* pEventArg_p,
                                            void GENERIC* pUserArg_p);
 
 //============================================================================//
@@ -125,8 +125,8 @@ The function implements the applications stack event handler.
 \ingroup module_demo_cn_console
 */
 //------------------------------------------------------------------------------
-tOplkError PUBLIC processEvents(tEplApiEventType EventType_p,
-                                tEplApiEventArg* pEventArg_p,
+tOplkError PUBLIC processEvents(tOplkApiEventType EventType_p,
+                                tOplkApiEventArg* pEventArg_p,
                                 void GENERIC* pUserArg_p)
 {
     tOplkError          ret = kErrorOk;
@@ -135,12 +135,12 @@ tOplkError PUBLIC processEvents(tEplApiEventType EventType_p,
 
     switch (EventType_p)
     {
-        case kEplApiEventNmtStateChange:
+        case kOplkApiEventNmtStateChange:
             ret = processStateChangeEvent(EventType_p, pEventArg_p, pUserArg_p);
             break;
 
-        case kEplApiEventCriticalError:
-        case kEplApiEventWarning:
+        case kOplkApiEventCriticalError:
+        case kOplkApiEventWarning:
             ret = processErrorWarningEvent(EventType_p, pEventArg_p, pUserArg_p);
             break;
 
@@ -169,8 +169,8 @@ The function processes state change events.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError processStateChangeEvent(tEplApiEventType EventType_p,
-                                          tEplApiEventArg* pEventArg_p,
+static tOplkError processStateChangeEvent(tOplkApiEventType EventType_p,
+                                          tOplkApiEventArg* pEventArg_p,
                                           void GENERIC* pUserArg_p)
 {
     tOplkError                  ret = kErrorOk;
@@ -234,8 +234,8 @@ The function processes error and warning events.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError processErrorWarningEvent(tEplApiEventType EventType_p,
-                                           tEplApiEventArg* pEventArg_p,
+static tOplkError processErrorWarningEvent(tOplkApiEventType EventType_p,
+                                           tOplkApiEventArg* pEventArg_p,
                                            void GENERIC* pUserArg_p)
 {
     // error or warning occurred within the stack or the application

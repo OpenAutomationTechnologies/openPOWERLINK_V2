@@ -79,7 +79,7 @@ tOplkError selectPcapDevice(char *pDevName_p);
 int getopt(int, char * const [], const char *);
 
 void initEvents (BOOL* pfGsOff_p);
-tOplkError PUBLIC processEvents(tEplApiEventType EventType_p, tEplApiEventArg* pEventArg_p, void GENERIC* pUserArg_p);
+tOplkError PUBLIC processEvents(tOplkApiEventType EventType_p, tOplkApiEventArg* pEventArg_p, void GENERIC* pUserArg_p);
 
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //
@@ -186,7 +186,7 @@ static tOplkError initPowerlink(UINT32 cycleLen_p, char *pszCdcFileName_p,
                                 const BYTE* macAddr_p)
 {
     tOplkError                  ret = kErrorOk;
-    static tEplApiInitParam     initParam;
+    static tOplkApiInitParam     initParam;
     char*                       sHostname = HOSTNAME;
     static char                 devName[128];
 

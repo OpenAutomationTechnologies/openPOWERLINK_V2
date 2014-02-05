@@ -67,7 +67,7 @@ public:
     static UINT defaultNodeId();
 
 private:
-    tEplApiInitParam    initParam;
+    tOplkApiInitParam    initParam;
 
     ProcessThread*      pProcessThread;
     DataInOutThread*    pDataInOutThread;

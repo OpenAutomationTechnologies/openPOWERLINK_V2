@@ -78,8 +78,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 typedef struct
 {
-    tEplApiProcessImage     inputImage;
-    tEplApiProcessImage     outputImage;
+    tOplkApiProcessImage     inputImage;
+    tOplkApiProcessImage     outputImage;
 } tApiProcessImageInstance;
 
 //------------------------------------------------------------------------------

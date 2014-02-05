@@ -83,7 +83,7 @@ static BOOL fGsOff_l;
 tOplkError selectPcapDevice(char *pDevName_p);
 #endif
 void initEvents (BOOL* pfGsOff_p);
-tOplkError processEvents(tEplApiEventType EventType_p, tEplApiEventArg* pEventArg_p, void GENERIC* pUserArg_p);
+tOplkError processEvents(tOplkApiEventType EventType_p, tOplkApiEventArg* pEventArg_p, void GENERIC* pUserArg_p);
 
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //
@@ -189,7 +189,7 @@ The function initializes the openPOWERLINK stack.
 static tOplkError initPowerlink(UINT32 cycleLen_p, const BYTE* macAddr_p, UINT32 nodeId_p)
 {
     tOplkError                  ret = kErrorOk;
-    static tEplApiInitParam     initParam;
+    static tOplkApiInitParam    initParam;
     char*                       sHostname = HOSTNAME;
     static char                 devName[128];
 
