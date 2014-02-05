@@ -48,7 +48,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/eventk.h>
 #include <kernel/dllk.h>
 
-#include <errhnd.h>
+#include <common/errhnd.h>
 #include <kernel/errhndk.h>
 
 #include "errhndkcal.h"

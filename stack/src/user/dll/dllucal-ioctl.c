@@ -40,7 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <dllcal.h>
+#include <common/dllcal.h>
 #include <user/ctrlucal.h>
 #include <powerlink-module.h>
 

@@ -45,7 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <EplInc.h>
 #include <Epl.h>
-#include <target.h>
+#include <common/target.h>
 #include <user/eventu.h>
 #include <user/eventucal.h>
 #include <user/eventucalintf.h>

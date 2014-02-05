@@ -43,7 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <EplInc.h>
 #include <event.h>
-#include <errhnd.h>
+#include <common/errhnd.h>
 #include "errhndkcal.h"
 
 #include <unistd.h>

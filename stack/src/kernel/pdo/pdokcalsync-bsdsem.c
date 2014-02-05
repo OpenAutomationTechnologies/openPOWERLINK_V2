@@ -48,7 +48,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <semaphore.h>
 
 #include <EplInc.h>
-#include <pdo.h>
+#include <common/pdo.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //

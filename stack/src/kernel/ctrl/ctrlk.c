@@ -51,7 +51,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/pdok.h>
 #include <kernel/eventkcal.h>
 
-#include <ctrl.h>
+#include <common/ctrl.h>
 #include <kernel/ctrlk.h>
 #include <kernel/ctrlkcal.h>
 

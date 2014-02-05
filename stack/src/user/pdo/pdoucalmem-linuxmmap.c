@@ -43,7 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <EplInc.h>
 
-#include <pdo.h>
+#include <common/pdo.h>
 #include <user/ctrlucal.h>
 
 #include <unistd.h>

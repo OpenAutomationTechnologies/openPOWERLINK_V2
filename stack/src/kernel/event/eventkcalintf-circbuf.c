@@ -46,7 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <kernel/eventkcal.h>
 
-#include <circbuffer.h>
+#include <common/circbuffer.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //

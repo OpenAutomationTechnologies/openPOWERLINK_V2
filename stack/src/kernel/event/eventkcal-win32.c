@@ -47,7 +47,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <kernel/eventkcal.h>
 #include <kernel/eventkcalintf.h>
-#include <circbuffer.h>
+#include <common/circbuffer.h>
 
 #include <Windows.h>
 

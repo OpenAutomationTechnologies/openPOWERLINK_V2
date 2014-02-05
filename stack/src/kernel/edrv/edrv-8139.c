@@ -52,7 +52,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <global.h>
 #include <EplInc.h>
-#include <edrv.h>
+#include <common/edrv.h>
 
 #include <linux/module.h>
 #include <linux/kernel.h>

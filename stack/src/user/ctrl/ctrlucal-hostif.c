@@ -44,8 +44,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <Epl.h>
 #include <EplTarget.h>
-#include <ctrl.h>
-#include <ctrlcal.h>
+#include <common/ctrl.h>
+#include <common/ctrlcal.h>
 #include <user/ctrlucal.h>
 
 #include <hostiflib.h>

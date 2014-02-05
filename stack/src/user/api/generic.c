@@ -54,7 +54,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/cfmu.h>
 #include <user/ctrlu.h>
 
-#include <target.h>
+#include <common/target.h>
 
 #if (CONFIG_OBD_USE_LOAD_CONCISEDCF != FALSE)
 #include "obdcdc.h"

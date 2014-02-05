@@ -44,10 +44,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Epl.h>
 #include <kernel/dllkfilter.h>
 
-#include <edrv.h>
+#include <common/edrv.h>
 #include <target/openmac.h>
 #include <omethlib.h>
-#include <target.h>
+#include <common/target.h>
 
 #include <Benchmark.h>
 #include <Debug.h>

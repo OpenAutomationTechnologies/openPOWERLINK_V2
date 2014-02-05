@@ -61,9 +61,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/eventucal.h>
 #include <EplTarget.h>
 
-#include <ctrl.h>
+#include <common/ctrl.h>
 #include <obd.h>
-#include <target.h>
+#include <common/target.h>
 
 #include <user/ctrlucal.h>
 

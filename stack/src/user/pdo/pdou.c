@@ -47,8 +47,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <sdoabortcodes.h>
 #include <obd.h>
-#include <pdo.h>
-#include <target.h>
+#include <common/pdo.h>
+#include <common/target.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //

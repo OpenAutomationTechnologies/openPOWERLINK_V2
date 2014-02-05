@@ -42,8 +42,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <stddef.h>
 
-#include <ctrl.h>
-#include <ctrlcal.h>
+#include <common/ctrl.h>
+#include <common/ctrlcal.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //

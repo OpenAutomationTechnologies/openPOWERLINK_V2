@@ -46,7 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <time.h>
 
 #include <EplInc.h>
-#include <pdo.h>
+#include <common/pdo.h>
 #include <user/pdoucal.h>
 #include <errno.h>
 //============================================================================//
