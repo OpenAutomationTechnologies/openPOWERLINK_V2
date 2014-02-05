@@ -203,9 +203,9 @@ typedef struct
 #endif
 
 #if EPL_TIMER_USE_HIGHRES != FALSE
-    tEplTimerHdl            timerHdlCycle;                  // used for EPL cycle monitoring on CN and generation on MN
+    tTimerHdl               timerHdlCycle;                  // used for EPL cycle monitoring on CN and generation on MN
 #if defined(CONFIG_INCLUDE_NMT_MN)
-    tEplTimerHdl            timerHdlResponse;               // used for CN response monitoring
+    tTimerHdl               timerHdlResponse;               // used for CN response monitoring
 #endif
 #endif
 
@@ -314,10 +314,10 @@ tDllkNodeInfo* dllk_getNodeInfo(UINT uiNodeId_p);
 #if defined(CONFIG_INCLUDE_NMT_MN)
 tOplkError dllk_cbCyclicError(tOplkError errorCode_p, tEdrvTxBuffer * pTxBuffer_p);
 tOplkError dllk_cbMnSyncHandler(void);
-tOplkError dllk_cbMnTimerCycle(tEplTimerEventArg* pEventArg_p);
+tOplkError dllk_cbMnTimerCycle(tTimerEventArg* pEventArg_p);
 #endif
 #if EPL_TIMER_USE_HIGHRES != FALSE
-tOplkError dllk_cbCnTimer(tEplTimerEventArg* pEventArg_p);
+tOplkError dllk_cbCnTimer(tTimerEventArg* pEventArg_p);
 #endif
 #if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
 tOplkError dllk_cbCnTimerSync(void);

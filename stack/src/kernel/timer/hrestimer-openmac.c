@@ -86,8 +86,8 @@ The structure contains all necessary information for a high-resolution timer.
 */
 typedef struct
 {
-    tEplTimerEventArg    eventArg;
-    tEplTimerkCallback   pfnCb;
+    tTimerEventArg       eventArg;
+    tTimerkCallback      pfnCb;
 } tTimerInfo;
 
 /**
@@ -206,8 +206,8 @@ discarded.
 \ingroup module_hrestimer
 */
 //------------------------------------------------------------------------------
-tOplkError hrestimer_modifyTimer(tEplTimerHdl* pTimerHdl_p, ULONGLONG time_p,
-                                 tEplTimerkCallback pfnCallback_p, ULONG argument_p,
+tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
+                                 tTimerkCallback pfnCallback_p, ULONG argument_p,
                                  BOOL fContinue_p)
 {
     tOplkError  ret = kEplSuccessful;
@@ -304,7 +304,7 @@ by its timer handle. After deleting the handle is reset to zero.
 \ingroup module_hrestimer
 */
 //------------------------------------------------------------------------------
-tOplkError hrestimer_deleteTimer(tEplTimerHdl* pTimerHdl_p)
+tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
 {
     tOplkError  ret = kEplSuccessful;
     UINT        index;

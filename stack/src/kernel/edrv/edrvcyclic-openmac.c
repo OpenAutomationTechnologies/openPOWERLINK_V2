@@ -113,7 +113,7 @@ typedef struct
     UINT                currrentTxBufferList;
     UINT                currentTxBufferEntry;
     UINT32              cycleLengthUs;
-    tEplTimerHdl        timerHdlCycle;
+    tTimerHdl           timerHdlCycle;
     tEdrvCyclicCbSync   pfnSyncCb;
     tEdrvCyclicCbError  pfnErrorCb;
     UINT32              nextCycleTime;
@@ -131,7 +131,7 @@ static tEdrvCyclicInstance instance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError timerHdlCycleCb(tEplTimerEventArg* pEventArg_p) SECTION_EDRVCYC_TIMER_CB;
+static tOplkError timerHdlCycleCb(tTimerEventArg* pEventArg_p) SECTION_EDRVCYC_TIMER_CB;
 static tOplkError processTxBufferList(void);
 static tOplkError processCycleViolation(UINT32 nextTimerIrqNs_p);
 
@@ -408,7 +408,7 @@ This function is called by the cyclic timer. It starts the next cycle.
 \return The function returns the allocated packet buffer's descriptor.
 */
 //------------------------------------------------------------------------------
-static tOplkError timerHdlCycleCb(tEplTimerEventArg* pEventArg_p)
+static tOplkError timerHdlCycleCb(tTimerEventArg* pEventArg_p)
 {
     tOplkError  ret = kEplSuccessful;
     UINT32      macTimeDiff;

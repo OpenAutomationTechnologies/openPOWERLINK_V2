@@ -259,7 +259,7 @@ tOplkError nmtk_process(tEplEvent* pEvent_p)
             break;
 
         case kEplEventTypeTimer:
-            nmtEvent = (tNmtEvent)((tEplTimerEventArg*)pEvent_p->m_pArg)->m_Arg.m_dwVal;
+            nmtEvent = (tNmtEvent)((tTimerEventArg*)pEvent_p->m_pArg)->m_Arg.m_dwVal;
             break;
 
         default:

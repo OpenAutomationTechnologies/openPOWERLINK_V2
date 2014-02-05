@@ -148,7 +148,7 @@ typedef struct
     UINT8                   recvSeqNum;         ///< Receive sequence number
     UINT8                   sendSeqNum;         ///< Send sequence number
     tSdoSeqConHistory       sdoSeqConHistory;   ///< Connection history buffer
-    tEplTimerHdl            timerHandle;        ///< Timer handle
+    tTimerHdl               timerHandle;        ///< Timer handle
     UINT                    retryCount;         ///< Retry counter
     UINT                    useCount;           ///< One sequence layer connection may be used by multiple command layer connections
 }tSdoSeqCon;
@@ -540,9 +540,9 @@ The function processes SDO events.
 tOplkError sdoseq_processEvent(tEplEvent* pEvent_p)
 {
     tOplkError          ret = kEplSuccessful;
-    tEplTimerEventArg*  pTimerEventArg;
+    tTimerEventArg   *  pTimerEventArg;
     tSdoSeqCon*         pSdoSeqCon;
-    tEplTimerHdl        timerHdl;
+    tTimerHdl           timerHdl;
     UINT                count;
 
     if(pEvent_p == NULL)
@@ -552,7 +552,7 @@ tOplkError sdoseq_processEvent(tEplEvent* pEvent_p)
         return kEplSdoSeqInvalidEvent;
 
     // get timer handle
-    pTimerEventArg = (tEplTimerEventArg*)pEvent_p->m_pArg;
+    pTimerEventArg = (tTimerEventArg*)pEvent_p->m_pArg;
     timerHdl = pTimerEventArg->m_TimerHdl;
     // get pointer to intern control structure of connection
     if (pTimerEventArg->m_Arg.m_pVal == NULL)
@@ -1922,7 +1922,7 @@ The function sets up a timer with the specified timeout for the connection.
 static tOplkError setTimer(tSdoSeqCon* pSdoSeqCon_p, ULONG timeout_p)
 {
     tOplkError          ret;
-    tEplTimerArg        timerArg;
+    tTimerArg           timerArg;
 
     timerArg.m_EventSink = kEplEventSinkSdoAsySeq;
     timerArg.m_Arg.m_pVal = pSdoSeqCon_p;

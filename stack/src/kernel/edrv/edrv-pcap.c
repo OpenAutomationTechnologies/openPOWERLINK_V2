@@ -783,8 +783,8 @@ static HANDLE EdrvGetTimerHandle(unsigned int uiIndex_p)
 
 typedef struct
 {
-    tEplTimerEventArg   m_EventArg;
-    tEplTimerkCallback  m_pfnCallback;
+    tTimerEventArg      m_EventArg;
+    tTimerkCallback     m_pfnCallback;
     LARGE_INTEGER       m_liDueTime;    // for continuous timers, otherwise 0
 
 } tEplTimerHighReskTimerInfo;
@@ -993,9 +993,9 @@ ULONG           ulCur = ~0UL;
 //
 //---------------------------------------------------------------------------
 
-tOplkError PUBLIC hrestimer_modifyTimer(tEplTimerHdl*     pTimerHdl_p,
+tOplkError PUBLIC hrestimer_modifyTimer(tTimerHdl*     pTimerHdl_p,
                                     unsigned long long  ullTimeNs_p,
-                                    tEplTimerkCallback  pfnCallback_p,
+                                    tTimerkCallback     pfnCallback_p,
                                     unsigned long       ulArgument_p,
                                     BOOL                fContinuously_p)
 {
@@ -1111,7 +1111,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-tOplkError PUBLIC hrestimer_deleteTimer(tEplTimerHdl*     pTimerHdl_p)
+tOplkError PUBLIC hrestimer_deleteTimer(tTimerHdl*     pTimerHdl_p)
 {
 tOplkError                  Ret = kEplSuccessful;
 unsigned int                uiIndex;

@@ -101,7 +101,7 @@ typedef enum
  */
 typedef struct
 {
-    tEplTimerHdl                timerHdlLedBlink;       ///< Timer for LED blinking
+    tTimerHdl                   timerHdlLedBlink;       ///< Timer for LED blinking
     UINT32                      timerArg;               ///< Argument for timer
     tLeduStateChangeCallback    pfnCbStateChange;       ///< Function pointer to state change function.
     tLeduMode                   statusLedMode;          ///< Mode of the status LED
@@ -291,10 +291,10 @@ The function implements the event handler of the LED module.
 tOplkError ledu_processEvent(tEplEvent* pEvent_p)
 {
     tOplkError          ret;
-    tEplTimerArg        timerArg;
+    tTimerArg           timerArg;
     UINT32              timeout = 0;
     BOOL                fLedOn = FALSE;
-    tEplTimerEventArg*  pTimerEventArg;
+    tTimerEventArg   *  pTimerEventArg;
 
     ret = kEplSuccessful;
 
@@ -302,7 +302,7 @@ tOplkError ledu_processEvent(tEplEvent* pEvent_p)
     {
         // timer event
         case kEplEventTypeTimer:
-            pTimerEventArg = (tEplTimerEventArg*)pEvent_p->m_pArg;
+            pTimerEventArg = (tTimerEventArg*)pEvent_p->m_pArg;
 
             if (pTimerEventArg->m_Arg.m_dwVal != leduInstance_g.timerArg)
             {   // zombie timer, ignore it
@@ -459,7 +459,7 @@ static tOplkError changeMode(tLeduMode newMode_p)
 {
     tOplkError      ret;
     tLeduMode       oldMode;
-    tEplTimerArg    timerArg;
+    tTimerArg       timerArg;
     UINT32          timeout;
     BOOL            fLedOn;
 

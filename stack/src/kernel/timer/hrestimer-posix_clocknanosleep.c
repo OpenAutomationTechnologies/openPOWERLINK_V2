@@ -101,8 +101,8 @@ The structure contains all necessary information for a high-resolution timer.
 */
 typedef struct
 {
-    tEplTimerEventArg   eventArg;           ///< Event argument
-    tEplTimerkCallback  pfnCallback;        ///< Pointer to timer callback function
+    tTimerEventArg      eventArg;           ///< Event argument
+    tTimerkCallback     pfnCallback;        ///< Pointer to timer callback function
     struct timespec     startTime;          ///< Timestamp of timer start
     ULONGLONG           time;               ///< Timer period in nanoseconds
     pthread_t           timerThreadId;      ///< Handle of timer thread
@@ -285,8 +285,8 @@ discarded.
 \ingroup module_hrestimer
 */
 //------------------------------------------------------------------------------
-tOplkError hrestimer_modifyTimer(tEplTimerHdl* pTimerHdl_p, ULONGLONG time_p,
-                                 tEplTimerkCallback pfnCallback_p, ULONG argument_p,
+tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
+                                 tTimerkCallback pfnCallback_p, ULONG argument_p,
                                  BOOL fContinue_p)
 {
     tOplkError              ret = kEplSuccessful;
@@ -372,7 +372,7 @@ by its timer handle. After deleting the handle is reset to zero.
 \ingroup module_hrestimer
 */
 //------------------------------------------------------------------------------
-tOplkError hrestimer_deleteTimer(tEplTimerHdl* pTimerHdl_p)
+tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
 {
     tOplkError              ret = kEplSuccessful;
     UINT                    index;
@@ -437,7 +437,7 @@ static void* timerThread(void *pArgument_p)
     tHresTimerInfo*             pTimerInfo;
     struct timespec             startTime, timeout;
     ULONGLONG                   period;
-    tEplTimerHdl                timerHdl;
+    tTimerHdl                   timerHdl;
 #ifdef HIGH_RESK_TIMER_LATENCY_DEBUG
     struct timespec             debugtime, curTime;
 #endif

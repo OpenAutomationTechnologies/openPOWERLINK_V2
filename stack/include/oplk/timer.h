@@ -54,9 +54,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // type for timer handle
 #if (TARGET_SYSTEM == _WIN32_)
-typedef ULONG_PTR tEplTimerHdl;
+typedef ULONG_PTR tTimerHdl;
 #else
-typedef ULONG tEplTimerHdl;
+typedef ULONG tTimerHdl;
 #endif
 
 typedef struct
@@ -67,18 +67,18 @@ typedef struct
         UINT32          m_dwVal;
         void*           m_pVal;
     } m_Arg;
-} tEplTimerArg;
+} tTimerArg;
 
 typedef struct
 {
-    tEplTimerHdl    m_TimerHdl;
+    tTimerHdl       m_TimerHdl;
     union
     {
         UINT32          m_dwVal;
         void*           m_pVal;
     } m_Arg;
-} tEplTimerEventArg;
+} tTimerEventArg;
 
-typedef tOplkError (*tEplTimerkCallback) (tEplTimerEventArg* pEventArg_p);
+typedef tOplkError (*tTimerkCallback) (tTimerEventArg* pEventArg_p);
 
 #endif /* _INC_timer_H_ */
