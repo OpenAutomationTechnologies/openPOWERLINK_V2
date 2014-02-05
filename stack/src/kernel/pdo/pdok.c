@@ -98,7 +98,7 @@ static tPdokInstance  pdokInstance_g;
 // local function prototypes
 //------------------------------------------------------------------------------
 static tOplkError cbProcessTpdo(tFrameInfo * pFrameInfo_p, BOOL fReadyFlag_p) SECTION_PDOK_PROCESS_TPDO_CB;
-static tOplkError copyTxPdo(tEplFrame* pFrame_p, UINT frameSize_p, BOOL fReadyFlag_p);
+static tOplkError copyTxPdo(tPlkFrame* pFrame_p, UINT frameSize_p, BOOL fReadyFlag_p);
 static void disablePdoChannels(tPdoChannel *pPdoChannel, UINT channelCnt);
 
 //============================================================================//
@@ -389,12 +389,12 @@ The function processes a received RxPDO.
 \ingroup module_pdok
 **/
 //------------------------------------------------------------------------------
-tOplkError pdok_processRxPdo(tEplFrame* pFrame_p, UINT frameSize_p)
+tOplkError pdok_processRxPdo(tPlkFrame* pFrame_p, UINT frameSize_p)
 {
     tOplkError          ret = kErrorOk;
     BYTE                frameData;
     UINT                nodeId;
-    tEplMsgType         msgType;
+    tMsgType         	msgType;
     tPdoChannel*        pPdoChannel;
     UINT                channelId;
 
@@ -576,12 +576,12 @@ This function copies a PDO into the specified frame.
 \return The function returns a tOplkError error code.
 **/
 //---------------------------------------------------------------------------
-static tOplkError copyTxPdo(tEplFrame* pFrame_p, UINT frameSize_p, BOOL fReadyFlag_p)
+static tOplkError copyTxPdo(tPlkFrame* pFrame_p, UINT frameSize_p, BOOL fReadyFlag_p)
 {
     tOplkError          ret = kErrorOk;
     BYTE                flag1;
     UINT                nodeId;
-    tEplMsgType         msgType;
+    tMsgType         	msgType;
     tPdoChannel*        pPdoChannel;
     UINT                channelId;
 

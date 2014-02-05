@@ -288,7 +288,7 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p)
     tObdSize            obdSize;
     UINT32              expConfTime = 0;
     UINT32              expConfDate = 0;
-    tEplIdentResponse*  pIdentResponse = NULL;
+    tIdentResponse*  	pIdentResponse = NULL;
     BOOL                fDoUpdate = FALSE;
 
     if ((nodeEvent_p != kNmtNodeEventCheckConf) && (nodeEvent_p != kNmtNodeEventUpdateConf))

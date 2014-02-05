@@ -133,7 +133,7 @@ void       dllk_regRpdoHandler(tDllkCbProcessRpdo pfnDllkCbProcessRpdo_p);
 void       dllk_regTpdoHandler(tDllkCbProcessTpdo pfnDllkCbProcessTpdo_p);
 tEplSyncCb dllk_regSyncHandler(tEplSyncCb pfnCbSync_p);
 #if DLL_DEFERRED_RXFRAME_RELEASE_ISOCHRONOUS != FALSE || DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS != FALSE
-tOplkError dllk_releaseRxFrame(tEplFrame* pFrame_p, UINT uiFrameSize_p);
+tOplkError dllk_releaseRxFrame(tPlkFrame* pFrame_p, UINT uiFrameSize_p);
 #endif
 
 #if EPL_NMT_MAX_NODE_ID > 0

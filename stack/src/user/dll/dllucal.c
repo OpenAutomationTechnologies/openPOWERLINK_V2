@@ -207,7 +207,7 @@ tOplkError dllucal_process(tEplEvent * pEvent_p)
 #if DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS == FALSE
         tFrameInfo   FrameInfo;
 
-        FrameInfo.pFrame = (tEplFrame*) pEvent_p->m_pArg;
+        FrameInfo.pFrame = (tPlkFrame*) pEvent_p->m_pArg;
         FrameInfo.frameSize = pEvent_p->m_uiSize;
         pFrameInfo = &FrameInfo;
 #else
@@ -583,7 +583,7 @@ static tOplkError SetAsndServiceIdFilter(tDllAsndServiceId serviceId_p,
 //------------------------------------------------------------------------------
 static tOplkError HandleRxAsndFrame(tFrameInfo *pFrameInfo_p)
 {
-    tEplMsgType     msgType;
+    tMsgType     	msgType;
     unsigned int    asndServiceId;
     tOplkError      ret = kErrorOk;
 #if DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS != FALSE
@@ -591,7 +591,7 @@ static tOplkError HandleRxAsndFrame(tFrameInfo *pFrameInfo_p)
     tEplEvent       event;
 #endif
 
-    msgType = (tEplMsgType)ami_getUint8Le(&pFrameInfo_p->pFrame->m_le_bMessageType);
+    msgType = (tMsgType)ami_getUint8Le(&pFrameInfo_p->pFrame->m_le_bMessageType);
     if (msgType != kEplMsgTypeAsnd)
     {
         ret = kErrorInvalidOperation;

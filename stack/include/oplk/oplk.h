@@ -136,7 +136,7 @@ typedef struct
 
 typedef struct
 {
-    tEplFrame           *m_pFrame;
+    tPlkFrame           *m_pFrame;
     size_t              m_FrameSize;
 }
 tEplApiEventRcvAsnd;
@@ -172,7 +172,7 @@ typedef union
     tEplApiEventLed         m_Led;
     tCfmEventCnProgress     m_CfmProgress;
     tEplApiEventCfmResult   m_CfmResult;
-    tEplErrHistoryEntry     m_ErrHistoryEntry;
+    tErrHistoryEntry     	m_ErrHistoryEntry;
     tEplApiEventRcvAsnd     m_RcvAsnd;
 } tEplApiEventArg;
 
@@ -332,14 +332,14 @@ EPLDLLEXPORT tOplkError oplk_freeSdoChannel(tSdoComConHdl sdoComConHdl_p);
 EPLDLLEXPORT tOplkError oplk_abortSdo(tSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p);
 EPLDLLEXPORT tOplkError oplk_readLocalObject(UINT index_p, UINT subindex_p, void* pDstData_p, UINT* pSize_p);
 EPLDLLEXPORT tOplkError oplk_writeLocalObject(UINT index_p, UINT subindex_p, void* pSrcData_p, UINT size_p);
-EPLDLLEXPORT tOplkError oplk_sendAsndFrame(UINT8 dstNodeId_p, tEplAsndFrame *pAsndFrame_p, size_t asndSize_p);
+EPLDLLEXPORT tOplkError oplk_sendAsndFrame(UINT8 dstNodeId_p, tAsndFrame *pAsndFrame_p, size_t asndSize_p);
 EPLDLLEXPORT tOplkError oplk_setAsndForward(UINT8 serviceId_p, tEplApiAsndFilter FilterType_p);
 EPLDLLEXPORT tOplkError oplk_postUserEvent(void* pUserArg_p);
 EPLDLLEXPORT tOplkError oplk_triggerMnStateChange(UINT nodeId_p, tNmtNodeCommand nodeCommand_p);
 EPLDLLEXPORT tOplkError oplk_setCdcBuffer(BYTE* pbCdc_p, UINT cdcSize_p);
 EPLDLLEXPORT tOplkError oplk_setCdcFilename(char* pszCdcFilename_p);
 EPLDLLEXPORT tOplkError oplk_process(void);
-EPLDLLEXPORT tOplkError oplk_getIdentResponse(UINT nodeId_p, tEplIdentResponse** ppIdentResponse_p);
+EPLDLLEXPORT tOplkError oplk_getIdentResponse(UINT nodeId_p, tIdentResponse** ppIdentResponse_p);
 EPLDLLEXPORT BOOL       oplk_checkKernelStack(void);
 EPLDLLEXPORT tOplkError oplk_waitSyncEvent(ULONG timeout_p);
 

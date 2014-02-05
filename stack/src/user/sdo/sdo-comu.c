@@ -831,7 +831,7 @@ static tOplkError processStateIdle(tSdoComConHdl sdoComConHdl_p, tSdoComConEvent
                     {
                         case kSdoServiceNIL:
                             // simply acknowlegde NIL command on sequence layer
-                            ret = sdoseq_sendData(pSdoComCon->sdoSeqConHdl, 0, (tEplFrame*)NULL);
+                            ret = sdoseq_sendData(pSdoComCon->sdoSeqConHdl, 0, (tPlkFrame*)NULL);
                             break;
 
                         case kSdoServiceReadByIndex:
@@ -1002,7 +1002,7 @@ static tOplkError processStateServerSegmTrans(tSdoComConHdl sdoComConHdl_p, tSdo
                     else
                     {
                         // send acknowledge without any Command layer data
-                        ret = sdoseq_sendData(pSdoComCon->sdoSeqConHdl, 0, (tEplFrame*)NULL);
+                        ret = sdoseq_sendData(pSdoComCon->sdoSeqConHdl, 0, (tPlkFrame*)NULL);
                     }
                 }
             }
@@ -1201,7 +1201,7 @@ static tOplkError processStateClientConnected(tSdoComConHdl sdoComConHdl_p, tSdo
                 if((flag & SDO_CMDL_FLAG_ABORT) != 0)
                 {
                     // send acknowledge without any Command layer data
-                    ret = sdoseq_sendData(pSdoComCon->sdoSeqConHdl, 0, (tEplFrame*)NULL);
+                    ret = sdoseq_sendData(pSdoComCon->sdoSeqConHdl, 0, (tPlkFrame*)NULL);
                     pSdoComCon->transactionId++;
                     pSdoComCon->lastAbortCode = ami_getUint32Le(&pRecvdCmdLayer_p->m_le_abCommandData[0]);
                     ret = transferFinished(sdoComConHdl_p, pSdoComCon, kEplSdoComTransferRxAborted);
@@ -1214,7 +1214,7 @@ static tOplkError processStateClientConnected(tSdoComConHdl sdoComConHdl_p, tSdo
                     if(pSdoComCon->transferSize == 0)
                     {
                         // send acknowledge without any Command layer data
-                        ret = sdoseq_sendData(pSdoComCon->sdoSeqConHdl, 0, (tEplFrame*)NULL);
+                        ret = sdoseq_sendData(pSdoComCon->sdoSeqConHdl, 0, (tPlkFrame*)NULL);
                         pSdoComCon->transactionId++;
                         pSdoComCon->lastAbortCode = 0;
                         ret = transferFinished(sdoComConHdl_p, pSdoComCon, kEplSdoComTransferFinished);
@@ -1319,7 +1319,7 @@ static tOplkError processStateClientSegmTransfer(tSdoComConHdl sdoComConHdl_p, t
                 if((flag & SDO_CMDL_FLAG_ABORT) != 0)
                 {
                     // send acknowledge without any Command layer data
-                    ret = sdoseq_sendData(pSdoComCon->sdoSeqConHdl, 0, (tEplFrame*)NULL);
+                    ret = sdoseq_sendData(pSdoComCon->sdoSeqConHdl, 0, (tPlkFrame*)NULL);
                     pSdoComCon->transactionId++;
                     pSdoComCon->sdoComState = kSdoComStateClientConnected;
                     pSdoComCon->lastAbortCode = ami_getUint32Le(&pRecvdCmdLayer_p->m_le_abCommandData[0]);
@@ -1333,7 +1333,7 @@ static tOplkError processStateClientSegmTransfer(tSdoComConHdl sdoComConHdl_p, t
                     if(pSdoComCon->transferSize == 0)
                     {
                         // send acknowledge without any Command layer data
-                        ret = sdoseq_sendData(pSdoComCon->sdoSeqConHdl, 0, (tEplFrame*)NULL);
+                        ret = sdoseq_sendData(pSdoComCon->sdoSeqConHdl, 0, (tPlkFrame*)NULL);
                         pSdoComCon->transactionId++;
                         pSdoComCon->sdoComState = kSdoComStateClientConnected;
                         pSdoComCon->lastAbortCode = 0;
@@ -1568,12 +1568,12 @@ static tOplkError serverSendFrame(tSdoComCon* pSdoComCon_p, UINT index_p,
 {
     tOplkError      ret = kErrorOk;
     UINT8           aFrame[SDO_MAX_FRAME_SIZE];
-    tEplFrame*      pFrame;
+    tPlkFrame *     pFrame;
     tAsySdoCom*     pCommandFrame;
     UINT            sizeOfFrame;
     UINT8           flag;
 
-    pFrame = (tEplFrame*)&aFrame[0];
+    pFrame = (tPlkFrame*)&aFrame[0];
     EPL_MEMSET(&aFrame[0], 0x00, sizeof(aFrame));
 
     // build generic part of frame - get pointer to command layer part of frame
@@ -1869,7 +1869,7 @@ static tOplkError serverInitWriteByIndex(tSdoComCon* pSdoComCon_p, tAsySdoCom* p
         (/*(UINT8*)*/pSdoComCon_p->pData) += bytesToTransfer;
 
         // send acknowledge without any Command layer data
-        ret = sdoseq_sendData(pSdoComCon_p->sdoSeqConHdl, 0, (tEplFrame*)NULL);
+        ret = sdoseq_sendData(pSdoComCon_p->sdoSeqConHdl, 0, (tPlkFrame*)NULL);
         return ret;
     }
 
@@ -1905,14 +1905,14 @@ static tOplkError clientSend(tSdoComCon* pSdoComCon_p)
 {
     tOplkError      ret = kErrorOk;
     UINT8           aFrame[SDO_MAX_FRAME_SIZE];
-    tEplFrame*      pFrame;
+    tPlkFrame *     pFrame;
     tAsySdoCom*     pCommandFrame;
     UINT            sizeOfFrame;
     UINT8           flags;
     UINT8*          pPayload;
     UINT            payloadSize;
 
-    pFrame = (tEplFrame*)&aFrame[0];
+    pFrame = (tPlkFrame*)&aFrame[0];
 
     EPL_MEMSET(&aFrame[0], 0x00, sizeof(aFrame));
 
@@ -2229,11 +2229,11 @@ static tOplkError clientSendAbort(tSdoComCon* pSdoComCon_p, UINT32 abortCode_p)
 {
     tOplkError      ret = kErrorOk;
     UINT8           aFrame[SDO_MAX_FRAME_SIZE];
-    tEplFrame*      pFrame;
+    tPlkFrame *     pFrame;
     tAsySdoCom*     pCommandFrame;
     UINT            sizeOfFrame;
 
-    pFrame = (tEplFrame*)&aFrame[0];
+    pFrame = (tPlkFrame*)&aFrame[0];
 
     EPL_MEMSET(&aFrame[0], 0x00, sizeof(aFrame));
 

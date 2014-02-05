@@ -100,7 +100,7 @@ tOplkError dllkcal_issueRequest(tDllReqServiceId service_p, UINT nodeId_p,
                                 BYTE soaFlag1_p);
 
 tOplkError dllkcal_getSoaRequest(tDllReqServiceId* pReqServiceId_p,
-                                 UINT* pNodeId_p, tEplSoaPayload* pSoaPayload_p) SECTION_DLLKCAL_GETSOAREQ;
+                                 UINT* pNodeId_p, tSoaPayload* pSoaPayload_p) SECTION_DLLKCAL_GETSOAREQ;
 
 tOplkError dllkcal_setAsyncPendingRequests(UINT nodeId_p, tDllAsyncReqPriority asyncReqPrio_p,
                                            UINT count_p);

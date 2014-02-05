@@ -1010,7 +1010,7 @@ static tOplkError processUserEvent(tEplEvent* pEvent_p)
 
         // Error history entry event
         case kEplEventTypeHistoryEntry:
-            if (pEvent_p->m_uiSize != sizeof(tEplErrHistoryEntry))
+            if (pEvent_p->m_uiSize != sizeof(tErrHistoryEntry))
             {
                 ret = kErrorEventWrongSize;
                 break;

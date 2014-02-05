@@ -129,7 +129,7 @@ The structure contains all information about a POWERLINK frame.
 typedef struct
 {
     UINT            frameSize;                      ///< Size of the frame
-    tEplFrame*      pFrame;                         ///< Pointer to the frame
+    tPlkFrame *     pFrame;                         ///< Pointer to the frame
 } tFrameInfo;
 
 /**

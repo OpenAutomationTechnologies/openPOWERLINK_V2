@@ -132,7 +132,7 @@ typedef struct
     UINT8                   m_le_bFlag2;                    ///< Offset 19: Flags: res
     tEplNetTime             m_le_NetTime;                   ///< Offset 20: supported if D_NMT_NetTimeIsRealTime_BOOL is set
     UINT64                  m_le_RelativeTime;              ///< Offset 28: in us (supported if D_NMT_RelativeTime_BOOL is set)
-} PACK_STRUCT tEplSocFrame;
+} PACK_STRUCT tSocFrame;
 
 typedef struct
 {
@@ -143,7 +143,7 @@ typedef struct
     UINT8                   m_le_bRes2;                     ///< Offset 21: reserved
     UINT16                  m_le_wSize;                     ///< Offset 22:
     UINT8                   m_le_abPayload[256];            ///< Offset 24: Payload
-} PACK_STRUCT tEplPreqFrame;
+} PACK_STRUCT tPreqFrame;
 
 typedef struct
 {
@@ -154,7 +154,7 @@ typedef struct
     UINT8                   m_le_bRes2;                     ///< Offset 21: reserved
     UINT16                  m_le_wSize;                     ///< Offset 22:
     UINT8                   m_le_abPayload[256];            ///< Offset 24: Payload
-} PACK_STRUCT tEplPresFrame;
+} PACK_STRUCT tPresFrame;
 
 typedef struct
 {
@@ -166,12 +166,12 @@ typedef struct
     UINT32                  m_le_dwSyncMnDelaySecond;
     UINT32                  m_le_dwPResFallBackTimeout;
     UINT8                   m_be_abDestMacAddress[6];
-} PACK_STRUCT tEplSyncRequest;
+} PACK_STRUCT tSyncRequest;
 
 typedef union
 {
-    tEplSyncRequest         m_SyncRequest;                  ///< Offset 23
-} tEplSoaPayload;
+    tSyncRequest            m_SyncRequest;                  ///< Offset 23
+} tSoaPayload;
 
 typedef struct
 {
@@ -181,8 +181,8 @@ typedef struct
     UINT8                   m_le_bReqServiceId;             ///< Offset 20:
     UINT8                   m_le_bReqServiceTarget;         ///< Offset 21:
     UINT8                   m_le_bEplVersion;               ///< Offset 22:
-    tEplSoaPayload          m_Payload;                      ///< Offset 23:
-} PACK_STRUCT tEplSoaFrame;
+    tSoaPayload             m_Payload;                      ///< Offset 23:
+} PACK_STRUCT tSoaFrame;
 
 typedef struct
 {
@@ -190,7 +190,7 @@ typedef struct
     UINT16                  m_wErrorCode;
     tEplNetTime             m_TimeStamp;
     UINT8                   m_abAddInfo[8];
-} PACK_STRUCT tEplErrHistoryEntry;
+} PACK_STRUCT tErrHistoryEntry;
 
 typedef struct
 {
@@ -199,8 +199,8 @@ typedef struct
     UINT8                   m_le_bNmtStatus;                ///< Offset 20: NMT state
     UINT8                   m_le_bRes1[3];
     UINT64                  m_le_qwStaticError;             ///< static error bit field
-    tEplErrHistoryEntry     m_le_aErrHistoryEntry[14];
-} PACK_STRUCT tEplStatusResponse;
+    tErrHistoryEntry        m_le_aErrHistoryEntry[14];
+} PACK_STRUCT tStatusResponse;
 
 typedef struct
 {
@@ -231,14 +231,14 @@ typedef struct
     UINT32                  m_le_dwDefaultGateway;
     UINT8                   m_le_sHostname[32];
     UINT8                   m_le_abVendorSpecificExt2[48];
-} PACK_STRUCT tEplIdentResponse;
+} PACK_STRUCT tIdentResponse;
 
 typedef struct
 {
     UINT8                   m_le_bNmtCommandId;             ///< Offset 18:
     UINT8                   m_le_bRes1;
     UINT8                   m_le_abNmtCommandData[32];
-} PACK_STRUCT tEplNmtCommandService;
+} PACK_STRUCT tNmtCommandService;
 
 typedef struct
 {
@@ -249,7 +249,7 @@ typedef struct
     UINT32                  m_le_dwSyncDelay;
     UINT32                  m_le_dwPResTimeFirst;
     UINT32                  m_le_dwPResTimeSecond;
-} PACK_STRUCT tEplSyncResponse;
+} PACK_STRUCT tSyncResponse;
 
 typedef struct
 {
@@ -266,10 +266,10 @@ typedef struct
 // asynchronous SDO Sequence Header
 typedef struct
 {
-    UINT8          m_le_bRecSeqNumCon;
-    UINT8          m_le_bSendSeqNumCon;
-    UINT8          m_le_abReserved[2];
-    tAsySdoCom     m_le_abSdoSeqPayload;
+    UINT8                   m_le_bRecSeqNumCon;
+    UINT8                   m_le_bSendSeqNumCon;
+    UINT8                   m_le_abReserved[2];
+    tAsySdoCom              m_le_abSdoSeqPayload;
 } PACK_STRUCT tAsySdoSeq;
 
 typedef struct
@@ -278,34 +278,34 @@ typedef struct
     UINT8                   m_le_bNmtCommandId;
     UINT8                   m_le_bTargetNodeId;
     UINT8                   m_le_abNmtCommandData[32];
-} PACK_STRUCT tEplNmtRequestService;
+} PACK_STRUCT tNmtRequestService;
 
 
 typedef union
 {
-    tEplStatusResponse      m_StatusResponse;               ///< Offset 18:
-    tEplIdentResponse       m_IdentResponse;
-    tEplNmtCommandService   m_NmtCommandService;
-    tEplNmtRequestService   m_NmtRequestService;
+    tStatusResponse         m_StatusResponse;               ///< Offset 18:
+    tIdentResponse          m_IdentResponse;
+    tNmtCommandService      m_NmtCommandService;
+    tNmtRequestService      m_NmtRequestService;
     tAsySdoSeq              m_SdoSequenceFrame;
-    tEplSyncResponse        m_SyncResponse;
+    tSyncResponse           m_SyncResponse;
     UINT8                   m_le_abPayload[256];
-} tEplAsndPayload;
+} tAsndPayload;
 
 typedef struct
 {
     UINT8                   m_le_bServiceId;                ///< Offset 17
-    tEplAsndPayload         m_Payload;                      ///< Offset 18
-} PACK_STRUCT tEplAsndFrame;
+    tAsndPayload            m_Payload;                      ///< Offset 18
+} PACK_STRUCT tAsndFrame;
 
 typedef union
 {
-    tEplSocFrame            m_Soc;                          ///< Offset 17
-    tEplPreqFrame           m_Preq;
-    tEplPresFrame           m_Pres;
-    tEplSoaFrame            m_Soa;
-    tEplAsndFrame           m_Asnd;
-} tEplFrameData;
+    tSocFrame               m_Soc;                          ///< Offset 17
+    tPreqFrame              m_Preq;
+    tPresFrame              m_Pres;
+    tSoaFrame               m_Soa;
+    tAsndFrame              m_Asnd;
+} tFrameData;
 
 typedef struct
 {
@@ -315,8 +315,8 @@ typedef struct
     UINT8                   m_le_bMessageType;              ///< Offset 14: EPL message type
     UINT8                   m_le_bDstNodeId;                ///< Offset 15: EPL node ID of the addressed nodes
     UINT8                   m_le_bSrcNodeId;                ///< Offset 16: EPL node ID of the transmitting node
-    tEplFrameData           m_Data;                         ///< Offset 17:
-} PACK_STRUCT tEplFrame;
+    tFrameData              m_Data;                         ///< Offset 17:
+} PACK_STRUCT tPlkFrame;
 
 // reset byte-align of structures
 #ifdef _MSC_VER
@@ -333,6 +333,6 @@ typedef enum
     kEplMsgTypeSoa    = 0x05,
     kEplMsgTypeAsnd   = 0x06,
     kEplMsgTypeAInv   = 0x0D,
-} tEplMsgType;
+} tMsgType;
 
 #endif /* _INC_oplk_frame_H_ */

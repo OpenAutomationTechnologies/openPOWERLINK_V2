@@ -63,7 +63,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tOplkError pdok_processRxPdo(tEplFrame* pFrame_p, UINT frameSize_p) SECTION_PDOK_PROCESS_RPDO;
+tOplkError pdok_processRxPdo(tPlkFrame* pFrame_p, UINT frameSize_p) SECTION_PDOK_PROCESS_RPDO;
 tOplkError pdok_init(void);
 tOplkError pdok_exit(void);
 tOplkError pdok_deAllocChannelMem(void);

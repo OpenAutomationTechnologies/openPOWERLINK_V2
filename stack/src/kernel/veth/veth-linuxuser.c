@@ -323,7 +323,7 @@ static void* vethRecvThread(void* pArg_p)
                     // replace src MAC address with MAC address of virtual ethernet interface
                     memcpy (&buffer[6], pInstance->macAdrs, ETHER_ADDR_LEN);
 
-                    frameInfo.pFrame = (tEplFrame *)buffer;
+                    frameInfo.pFrame = (tPlkFrame *)buffer;
                     frameInfo.frameSize = nread;
                     ret = dllkcal_sendAsyncFrame(&frameInfo, kDllAsyncReqPrioGeneric);
                     if (ret != kErrorOk)

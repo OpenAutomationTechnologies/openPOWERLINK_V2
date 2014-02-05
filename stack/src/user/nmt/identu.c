@@ -75,7 +75,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 typedef struct
 {
-    tEplIdentResponse*  apIdentResponse[254];    // the IdentResponse are managed dynamically
+    tIdentResponse*  apIdentResponse[254];    // the IdentResponse are managed dynamically
     tIdentuCbResponse   apfnCbResponse[254];
 } tIdentuInstance;
 
@@ -199,10 +199,10 @@ The function gets the IdentResponse for a specified node.
 \ingroup module_identu
 */
 //------------------------------------------------------------------------------
-tOplkError identu_getIdentResponse(UINT nodeId_p, tEplIdentResponse** ppIdentResponse_p)
+tOplkError identu_getIdentResponse(UINT nodeId_p, tIdentResponse** ppIdentResponse_p)
 {
     tOplkError          ret = kErrorOk;
-    tEplIdentResponse*  pIdentResponse;
+    tIdentResponse*  	pIdentResponse;
 
     // decrement node ID, because array is zero based
     nodeId_p--;
@@ -358,7 +358,7 @@ static tOplkError identu_cbIdentResponse(tFrameInfo* pFrameInfo_p)
         {   // IdentResponse received
             if (instance_g.apIdentResponse[index] == NULL)
             {   // memory for IdentResponse must be allocated
-                instance_g.apIdentResponse[index] = EPL_MALLOC(sizeof(tEplIdentResponse));
+                instance_g.apIdentResponse[index] = EPL_MALLOC(sizeof(tIdentResponse));
                 if (instance_g.apIdentResponse[index] == NULL)
                 {   // malloc failed
                     ret = pfnCbResponse(nodeId,
@@ -370,7 +370,7 @@ static tOplkError identu_cbIdentResponse(tFrameInfo* pFrameInfo_p)
             // copy IdentResponse to instance structure
             EPL_MEMCPY(instance_g.apIdentResponse[index],
                        &pFrameInfo_p->pFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse,
-                       sizeof(tEplIdentResponse));
+                       sizeof(tIdentResponse));
             ret = pfnCbResponse(nodeId, instance_g.apIdentResponse[index]);
         }
     }

@@ -72,14 +72,14 @@ typedef enum
     kEplEventTypeSync           = 0x05, ///< Sync event (e.g. SoC or anticipated SoC) (arg is pointer to nothing)
     kEplEventTypeTimer          = 0x06, ///< Timer event (arg is pointer to tTimerEventArg)
     kEplEventTypeHeartbeat      = 0x07, ///< Heartbeat event (arg is pointer to tEplHeartbeatEvent)
-    kEplEventTypeHistoryEntry   = 0x08, ///< Error history entry event (arg is pointer to the tEplErrHistoryEntry)
+    kEplEventTypeHistoryEntry   = 0x08, ///< Error history entry event (arg is pointer to the tErrHistoryEntry)
     kEplEventTypeDllkFlag1      = 0x09, ///< DLL kernel Flag 1 changed event (arg is pointer to nothing)
     kEplEventTypeDllkFillTx     = 0x0A, ///< DLL kernel fill TxBuffer event (arg is pointer to tDllAsyncReqPriority)
     kEplEventTypeDllkPresReady  = 0x0B, ///< DLL kernel PRes ready event (arg is pointer to nothing)
     kEplEventTypeError          = 0x0C, ///< Error event for API layer (arg is pointer to tEplEventError)
     kEplEventTypeNmtStateChange = 0x0D, ///< Indicate change of NMT-State (arg is pointer to tEventNmtStateChange)
     kEplEventTypeDllError       = 0x0E, ///< DLL error event for error handler (arg is pointer to tEplErrorHandlerkEvent)
-    kEplEventTypeAsndRx         = 0x0F, ///< received ASnd frame for DLL user module (arg is pointer to tEplFrame)
+    kEplEventTypeAsndRx         = 0x0F, ///< received ASnd frame for DLL user module (arg is pointer to tPlkFrame)
     kEplEventTypeDllkServFilter = 0x10, ///< configure ServiceIdFilter (arg is pointer to tEplDllCalServiceIdFilter)
     kEplEventTypeDllkIdentity   = 0x11, ///< configure Identity (arg is pointer to tDllIdentParam)
     kEplEventTypeDllkConfig     = 0x12, ///< configure ConfigParam (arg is pointer to tDllConfigParam)
@@ -88,7 +88,7 @@ typedef enum
     kEplEventTypeDllkDelNode    = 0x15, ///< remove node from isochronous phase (arg is pointer to tDllNodeOpParam)
     kEplEventTypeDllkConfigNode = 0x16, ///< configures parameters of node (arg is pointer to tDllNodeInfo)
     kEplEventTypeDllkStartReducedCycle = 0x17, ///< start reduced EPL cycle on MN (arg is pointer to nothing)
-    kEplEventTypeNmtMnuNmtCmdSent = 0x18, ///< NMT command was actually sent (arg is pointer to tEplFrame)
+    kEplEventTypeNmtMnuNmtCmdSent = 0x18, ///< NMT command was actually sent (arg is pointer to tPlkFrame)
     kEplEventTypeApiUserDef     = 0x19, ///< user-defined event (arg is user-defined pointer)
     kEplEventTypeDllkCycleFinish= 0x1A, ///< SoA sent, cycle finished (arg is pointer to nothing)
     kEplEventTypePdokAlloc      = 0x20, ///< alloc PDOs (arg is pointer to tEplPdoAllocationParam)
@@ -242,7 +242,7 @@ typedef struct
         tEplEventSource         m_EventSource;  ///< Argument from Eventk/u module (originating error source)
         tEplEventObdError       m_ObdError;     ///< Argument from Obd module
         tEplEventSink           m_EventSink;    ///< Argument from Eventk/u module on m_EplError == kErrorEventUnknownSink
-        //tEplErrHistoryEntry   m_HistoryEntry; ///< from Nmtk/u module
+        //tErrHistoryEntry   m_HistoryEntry; ///< from Nmtk/u module
     } m_Arg;
 } tEplEventError;
 

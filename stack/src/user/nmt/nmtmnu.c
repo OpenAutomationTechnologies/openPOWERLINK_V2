@@ -292,8 +292,8 @@ static tNmtMnuInstance   nmtMnuInstance_g;
 // local function prototypes
 //------------------------------------------------------------------------------
 static tOplkError cbNmtRequest(tFrameInfo * pFrameInfo_p);
-static tOplkError cbIdentResponse(UINT nodeId_p, tEplIdentResponse* pIdentResponse_p);
-static tOplkError cbStatusResponse(UINT nodeId_p, tEplStatusResponse* pStatusResponse_p);
+static tOplkError cbIdentResponse(UINT nodeId_p, tIdentResponse* pIdentResponse_p);
+static tOplkError cbStatusResponse(UINT nodeId_p, tStatusResponse* pStatusResponse_p);
 static tOplkError cbNodeAdded(UINT nodeId_p);
 static tOplkError checkNmtState(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p,
                                 tNmtState nodeNmtState_p, UINT16 errorCode_p,
@@ -317,11 +317,11 @@ static tOplkError prcShift(UINT nodeIdPrevShift_p);
 static tOplkError prcAdd(UINT nodeIdPrevAdd_p);
 static tOplkError prcVerify(UINT nodeId_p);
 
-static tOplkError prcCbSyncResMeasure(UINT, tEplSyncResponse*);
-static tOplkError prcCbSyncResShift(UINT, tEplSyncResponse*);
-static tOplkError prcCbSyncResAdd(UINT, tEplSyncResponse*);
-static tOplkError prcCbSyncResVerify(UINT, tEplSyncResponse*);
-static tOplkError prcCbSyncResNextAction(UINT, tEplSyncResponse*);
+static tOplkError prcCbSyncResMeasure(UINT, tSyncResponse*);
+static tOplkError prcCbSyncResShift(UINT, tSyncResponse*);
+static tOplkError prcCbSyncResAdd(UINT, tSyncResponse*);
+static tOplkError prcCbSyncResVerify(UINT, tSyncResponse*);
+static tOplkError prcCbSyncResNextAction(UINT, tSyncResponse*);
 
 static tOplkError prcCalcPResResponseTimeNs(UINT nodeId_p, UINT nodeIdPredNode_p,
                                             UINT32* pPResResponseTimeNs_p);
@@ -500,9 +500,9 @@ tOplkError nmtmnu_sendNmtCommandEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
                                    void* pNmtCommandData_p, UINT uiDataSize_p)
 {
     tOplkError          ret;
-    tFrameInfo       frameInfo;
+    tFrameInfo          frameInfo;
     UINT8               aBuffer[EPL_C_DLL_MINSIZE_NMTCMDEXT];
-    tEplFrame*          pFrame;
+    tPlkFrame *         pFrame;
     tDllNodeOpParam     nodeOpParam;
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
     tNmtMnuNodeInfo*    pNodeInfo;
@@ -605,7 +605,7 @@ tOplkError nmtmnu_sendNmtCommandEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
 #endif
 
     // build frame
-    pFrame = (tEplFrame*) aBuffer;
+    pFrame = (tPlkFrame*) aBuffer;
     EPL_MEMSET(pFrame, 0x00, sizeof(aBuffer));
     ami_setUint8Le(&pFrame->m_le_bDstNodeId, (UINT8) nodeId_p);
     ami_setUint8Le(&pFrame->m_Data.m_Asnd.m_le_bServiceId, (UINT8) kDllAsndNmtCommand);
@@ -1165,7 +1165,7 @@ tOplkError nmtmnu_processEvent(tEplEvent* pEvent_p)
 
         case kEplEventTypeNmtMnuNmtCmdSent:
             {
-                tEplFrame* pFrame = (tEplFrame*)pEvent_p->m_pArg;
+                tPlkFrame* pFrame = (tPlkFrame*)pEvent_p->m_pArg;
                 UINT                uiNodeId;
                 tNmtCommand         NmtCommand;
                 UINT8                bNmtState;
@@ -1412,7 +1412,7 @@ static tOplkError cbNmtRequest(tFrameInfo * pFrameInfo_p)
     tOplkError              ret = kErrorOk;
     UINT                    targetNodeId;
     tNmtCommand             nmtCommand;
-    tEplNmtRequestService*  pNmtRequestService;
+    tNmtRequestService*  	pNmtRequestService;
     UINT                    sourceNodeId;
 
     if ((pFrameInfo_p == NULL) || (pFrameInfo_p->pFrame == NULL))
@@ -1443,7 +1443,7 @@ The function implements the callback function for Ident responses
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError PUBLIC cbIdentResponse(UINT nodeId_p, tEplIdentResponse* pIdentResponse_p)
+static tOplkError PUBLIC cbIdentResponse(UINT nodeId_p, tIdentResponse* pIdentResponse_p)
 {
     tOplkError      ret = kErrorOk;
     tObdSize        obdSize;
@@ -1497,7 +1497,7 @@ The function implements the callback function for Status responses
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError PUBLIC cbStatusResponse(UINT nodeId_p, tEplStatusResponse* pStatusResponse_p)
+static tOplkError PUBLIC cbStatusResponse(UINT nodeId_p, tStatusResponse* pStatusResponse_p)
 {
     tOplkError      ret = kErrorOk;
 
@@ -3720,7 +3720,7 @@ of SyncReq which is used for measurement.
 //------------------------------------------------------------------------------
 static tOplkError PUBLIC prcCbSyncResMeasure(
                                   UINT                  nodeId_p,
-                                  tEplSyncResponse*     pSyncResponse_p)
+                                  tSyncResponse*     	pSyncResponse_p)
 {
     tOplkError          ret;
     UINT                nodeIdPredNode;
@@ -3861,7 +3861,7 @@ of SyncReq which is used for shifting.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError PUBLIC prcCbSyncResShift(UINT nodeId_p, tEplSyncResponse* pSyncResponse_p)
+static tOplkError PUBLIC prcCbSyncResShift(UINT nodeId_p, tSyncResponse* pSyncResponse_p)
 {
     tOplkError              ret;
     tNmtMnuNodeInfo*        pNodeInfo;
@@ -3998,7 +3998,7 @@ of SyncReq which is used for insertion.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError PUBLIC prcCbSyncResAdd(UINT nodeId_p, tEplSyncResponse* pSyncResponse_p)
+static tOplkError PUBLIC prcCbSyncResAdd(UINT nodeId_p, tSyncResponse* pSyncResponse_p)
 {
     tOplkError              ret;
     tNmtMnuNodeInfo*        pNodeInfo;
@@ -4083,7 +4083,7 @@ of SyncReq which is used for verification.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError prcCbSyncResVerify(UINT nodeId_p, tEplSyncResponse* pSyncResponse_p)
+static tOplkError prcCbSyncResVerify(UINT nodeId_p, tSyncResponse* pSyncResponse_p)
 {
     tOplkError              ret;
     tNmtMnuNodeInfo*        pNodeInfo;
@@ -4134,7 +4134,7 @@ node flags are evaluated.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError prcCbSyncResNextAction(UINT nodeId_p, tEplSyncResponse* pSyncResponse_p)
+static tOplkError prcCbSyncResNextAction(UINT nodeId_p, tSyncResponse* pSyncResponse_p)
 {
     tOplkError              ret;
     tNmtMnuNodeInfo*        pNodeInfo;
