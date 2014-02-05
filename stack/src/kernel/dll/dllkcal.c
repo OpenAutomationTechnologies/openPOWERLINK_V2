@@ -135,7 +135,7 @@ static BOOL getMnStatusRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_
 
 #if (EPL_DLL_PRES_CHAINING_MN != FALSE)
 static BOOL getMnSyncRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p,
-                             tEplSoaPayload* pSoaPayload_p);
+                             tSoaPayload* pSoaPayload_p);
 #endif
 #endif
 
@@ -786,7 +786,7 @@ DLL module.
 */
 //------------------------------------------------------------------------------
 tOplkError dllkcal_getSoaRequest(tDllReqServiceId* pReqServiceId_p,
-                                 UINT* pNodeId_p, tEplSoaPayload* pSoaPayload_p)
+                                 UINT* pNodeId_p, tSoaPayload* pSoaPayload_p)
 {
     tOplkError      ret = kErrorOk;
     UINT            count;
@@ -1114,7 +1114,7 @@ todo how to handle errors (ret != kErrorOk)? Is it sufficient that we
 */
 //------------------------------------------------------------------------------
 static BOOL getMnSyncRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p,
-                             tEplSoaPayload* pSoaPayload_p)
+                             tSoaPayload* pSoaPayload_p)
 {
     tOplkError          ret;
     ULONG               syncReqCount = 0;

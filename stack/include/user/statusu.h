@@ -51,7 +51,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-typedef tOplkError (*tStatusuCbResponse) (UINT nodeId_p, tEplStatusResponse* pStatusResponse_p);
+typedef tOplkError (*tStatusuCbResponse) (UINT nodeId_p, tStatusResponse* pStatusResponse_p);
 
 //------------------------------------------------------------------------------
 // function prototypes

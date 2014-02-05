@@ -54,7 +54,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-typedef tOplkError (*tSyncuCbResponse) (UINT nodeId_p, tEplSyncResponse* pSyncResponse_p);
+typedef tOplkError (*tSyncuCbResponse) (UINT nodeId_p, tSyncResponse* pSyncResponse_p);
 
 //------------------------------------------------------------------------------
 // function prototypes

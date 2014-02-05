@@ -247,9 +247,9 @@ void       dllk_processTransmittedSoa(tEdrvTxBuffer * pTxBuffer_p);
 tOplkError dllk_updateFrameIdentRes(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p);
 tOplkError dllk_updateFrameStatusRes(tEdrvTxBuffer* pTxBuffer_p, tNmtState NmtState_p);
 tOplkError dllk_updateFramePres(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p);
-tOplkError dllk_checkFrame(tEplFrame * pFrame_p, UINT frameSize_p);
+tOplkError dllk_checkFrame(tPlkFrame * pFrame_p, UINT frameSize_p);
 tOplkError dllk_createTxFrame(UINT* pHandle_p, UINT* pFrameSize_p,
-                              tEplMsgType msgType_p, tDllAsndServiceId serviceId_p);
+                              tMsgType msgType_p, tDllAsndServiceId serviceId_p);
 tOplkError dllk_deleteTxFrame(UINT handle_p);
 tOplkError dllk_processTpdo(tFrameInfo* pFrameInfo_p, BOOL fReadyFlag_p);
 #if defined(CONFIG_INCLUDE_NMT_MN)

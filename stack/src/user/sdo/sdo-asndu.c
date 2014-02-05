@@ -252,7 +252,7 @@ The function sends data via an existing SDO over ASnd connection.
 \ingroup module_sdo_asnd
 */
 //------------------------------------------------------------------------------
-tOplkError sdoasnd_sendData(tSdoConHdl sdoConHandle_p, tEplFrame* pSrcData_p, UINT32 dataSize_p)
+tOplkError sdoasnd_sendData(tSdoConHdl sdoConHandle_p, tPlkFrame* pSrcData_p, UINT32 dataSize_p)
 {
     tOplkError      ret;
     UINT            array;
@@ -342,7 +342,7 @@ tOplkError sdoAsndCb(tFrameInfo* pFrameInfo_p)
     UINT            nodeId;
     UINT            freeEntry = 0xFFFF;
     tSdoConHdl      sdoConHdl;
-    tEplFrame*      pFrame;
+    tPlkFrame *     pFrame;
 
     pFrame = pFrameInfo_p->pFrame;
     nodeId = ami_getUint8Le(&pFrame->m_le_bSrcNodeId);

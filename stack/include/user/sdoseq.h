@@ -68,7 +68,7 @@ tOplkError sdoseq_init(tSdoComReceiveCb pfnSdoComRecvCb_p, tSdoComConCb pfnSdoCo
 tOplkError sdoseq_addInstance (tSdoComReceiveCb pfnSdoComRecvCb_p, tSdoComConCb pfnSdoComConCb_p);
 tOplkError sdoseq_delInstance(void);
 tOplkError sdoseq_initCon(tSdoSeqConHdl* pSdoSeqConHdl_p, UINT nodeId_p, tSdoType sdoType_p);
-tOplkError sdoseq_sendData(tSdoSeqConHdl sdoSeqConHdl_p, UINT dataSize_p, tEplFrame* pData_p );
+tOplkError sdoseq_sendData(tSdoSeqConHdl sdoSeqConHdl_p, UINT dataSize_p, tPlkFrame* pData_p );
 tOplkError sdoseq_processEvent(tEplEvent* pEvent_p);
 tOplkError sdoseq_deleteCon(tSdoSeqConHdl sdoSeqConHdl_p);
 tOplkError sdoseq_setTimeout(UINT32 timeout_p);

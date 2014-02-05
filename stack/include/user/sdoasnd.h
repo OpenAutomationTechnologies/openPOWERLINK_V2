@@ -67,7 +67,7 @@ tOplkError sdoasnd_init(tSequLayerReceiveCb pfnReceiveCb_p);
 tOplkError sdoasnd_addInstance(tSequLayerReceiveCb pfnReceiveCb_p);
 tOplkError sdoasnd_delInstance(void);
 tOplkError sdoasnd_initCon(tSdoConHdl* pSdoConHandle_p, UINT targetNodeId_p);
-tOplkError sdoasnd_sendData(tSdoConHdl sdoConHandle_p, tEplFrame* pSrcData_p, UINT32 dataSize_p);
+tOplkError sdoasnd_sendData(tSdoConHdl sdoConHandle_p, tPlkFrame* pSrcData_p, UINT32 dataSize_p);
 tOplkError sdoasnd_deleteCon(tSdoConHdl sdoConHandle_p);
 
 #endif

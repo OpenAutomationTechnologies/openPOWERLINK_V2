@@ -589,7 +589,7 @@ The function processes the fill TX event.
 static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtState nmtState_p)
 {
     tOplkError      ret = kErrorOk;
-    tEplFrame*      pTxFrame;
+    tPlkFrame *     pTxFrame;
     tEdrvTxBuffer*  pTxBuffer;
     UINT            frameSize;
     UINT            frameCount;
@@ -631,7 +631,7 @@ static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtSta
             ret = dllkcal_getAsyncTxFrame(pTxBuffer->pBuffer, &frameSize, asyncReqPriority_p);
             if (ret == kErrorOk)
             {
-                pTxFrame = (tEplFrame *) pTxBuffer->pBuffer;
+                pTxFrame = (tPlkFrame *) pTxBuffer->pBuffer;
                 ret = dllk_checkFrame(pTxFrame, frameSize);
 
                 pTxBuffer->txFrameSize = frameSize;    // set buffer valid
@@ -876,7 +876,7 @@ The function processes the sync event on a CN.
 static tOplkError processSyncCn(tNmtState nmtState_p, BOOL fReadyFlag_p)
 {
     tOplkError          ret = kErrorOk;
-    tEplFrame*          pTxFrame;
+    tPlkFrame *         pTxFrame;
     tEdrvTxBuffer*      pTxBuffer;
     tFrameInfo          FrameInfo;
     UINT                nextTxBufferOffset = dllkInstance_g.curTxBufferOffsetCycle ^ 1;
@@ -885,7 +885,7 @@ static tOplkError processSyncCn(tNmtState nmtState_p, BOOL fReadyFlag_p)
     pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES + nextTxBufferOffset];
     if (pTxBuffer->pBuffer != NULL)
     {   // PRes does exist
-        pTxFrame = (tEplFrame *) pTxBuffer->pBuffer;
+        pTxFrame = (tPlkFrame *) pTxBuffer->pBuffer;
 
         if (nmtState_p != kNmtCsOperational)
             fReadyFlag_p = FALSE;
@@ -925,7 +925,7 @@ The function processes the sync event on a MN.
 static tOplkError processSyncMn(tNmtState nmtState_p, BOOL fReadyFlag_p)
 {
     tOplkError          ret = kErrorOk;
-    tEplFrame*          pTxFrame;
+    tPlkFrame *         pTxFrame;
     tEdrvTxBuffer*      pTxBuffer;
     UINT                index = 0;
     UINT32              nextTimeOffsetNs = 0;
@@ -933,7 +933,7 @@ static tOplkError processSyncMn(tNmtState nmtState_p, BOOL fReadyFlag_p)
 
     pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SOC + nextTxBufferOffset];
     pTxBuffer->timeOffsetNs = nextTimeOffsetNs;
-    pTxFrame = (tEplFrame *)pTxBuffer->pBuffer;
+    pTxFrame = (tPlkFrame *)pTxBuffer->pBuffer;
 
     // Set SoC relative time
     ami_setUint64Le( &pTxFrame->m_Data.m_Soc.m_le_RelativeTime, dllkInstance_g.relativeTime);
@@ -976,7 +976,7 @@ The function processes the PRes Ready event.
 static tOplkError processPresReady(tNmtState nmtState_p)
 {
     tOplkError          ret = kErrorOk;
-    tEplFrame*          pTxFrame;
+    tPlkFrame *         pTxFrame;
 
     // post PRes to transmit FIFO
     if (nmtState_p != kNmtCsBasicEthernet)
@@ -985,7 +985,7 @@ static tOplkError processPresReady(tNmtState nmtState_p)
         if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES +
                                      dllkInstance_g.curTxBufferOffsetCycle].pBuffer != NULL)
         {   // PRes does exist
-            pTxFrame = (tEplFrame *) dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES +
+            pTxFrame = (tPlkFrame *) dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES +
                                                               dllkInstance_g.curTxBufferOffsetCycle].pBuffer;
             // update frame (NMT state, RD, RS, PR, MS, EN flags)
             if (nmtState_p < kNmtCsPreOperational2)

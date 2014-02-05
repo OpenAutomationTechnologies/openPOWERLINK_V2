@@ -182,7 +182,7 @@ static tSdoSeqInstance   sdoSeqInstance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError processState(UINT handle_p, UINT dataSize_p, tEplFrame* pData_p,
+static tOplkError processState(UINT handle_p, UINT dataSize_p, tPlkFrame* pData_p,
                                tAsySdoSeq* pRecvFrame_p, tSdoSeqEvent event_p);
 
 static tOplkError processStateIdle(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSeqConHdl_p,
@@ -199,26 +199,26 @@ static tOplkError processStateInit3(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
 
 static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSeqConHdl_p,
                                         tSdoSeqEvent event_p, tAsySdoSeq* pRecvFrame_p,
-                                        UINT dataSize_p, tEplFrame* pData_p);
+                                        UINT dataSize_p, tPlkFrame* pData_p);
 
 static tOplkError processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSeqConHdl_p,
                                       tSdoSeqEvent event_p, tAsySdoSeq* pRecvFrame_p,
                                       UINT dataSize_p);
 
 static tOplkError sendFrame(tSdoSeqCon* pSdoSeqCon_p, UINT dataSize_p,
-                            tEplFrame* pData_p, BOOL fFrameInHistory_p);
+                            tPlkFrame* pData_p, BOOL fFrameInHistory_p);
 
-static tOplkError sendToLowerLayer(tSdoSeqCon* pSdoSeqCon_p, UINT dataSize_p, tEplFrame* pFrame_p);
+static tOplkError sendToLowerLayer(tSdoSeqCon* pSdoSeqCon_p, UINT dataSize_p, tPlkFrame* pFrame_p);
 
 static tOplkError receiveCb(tSdoConHdl conHdl_p, tAsySdoSeq* pSdoSeqData_p, UINT dataSize_p);
 
 static tOplkError initHistory(tSdoSeqCon* pSdoSeqCon_p);
 
-static tOplkError addFrameToHistory(tSdoSeqCon* pSdoSeqCon_p, tEplFrame* pFrame_p, UINT size_p);
+static tOplkError addFrameToHistory(tSdoSeqCon* pSdoSeqCon_p, tPlkFrame* pFrame_p, UINT size_p);
 
 static tOplkError deleteAckedFrameFromHistory(tSdoSeqCon* pSdoSeqCon_p, UINT8 recvSeqNumber_p);
 
-static tOplkError readFromHistory(tSdoSeqCon* pSdoSeqCon_p, tEplFrame** ppFrame_p,
+static tOplkError readFromHistory(tSdoSeqCon* pSdoSeqCon_p, tPlkFrame** ppFrame_p,
                                   UINT* pSize_p, BOOL fInitRead_p);
 
 static UINT       getFreeHistoryEntries(tSdoSeqCon* pSdoSeqCon_p);
@@ -500,7 +500,7 @@ The function sends data via an existing sequence layer connection.
 \ingroup module_sdo_seq
 */
 //------------------------------------------------------------------------------
-tOplkError sdoseq_sendData(tSdoSeqConHdl sdoSeqConHdl_p, UINT dataSize_p, tEplFrame* pData_p )
+tOplkError sdoseq_sendData(tSdoSeqConHdl sdoSeqConHdl_p, UINT dataSize_p, tPlkFrame* pData_p )
 {
     tOplkError      ret;
     UINT            handle;
@@ -1085,12 +1085,12 @@ The function processes the sequence layer state: kSdoSeqStateConnected
 //------------------------------------------------------------------------------
 static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSeqConHdl_p,
                                         tSdoSeqEvent event_p, tAsySdoSeq* pRecvFrame_p,
-                                        UINT dataSize_p, tEplFrame* pData_p)
+                                        UINT dataSize_p, tPlkFrame* pData_p)
 {
     tOplkError          ret = kErrorOk;
     UINT8               sendSeqNumCon;
     UINT                frameSize;
-    tEplFrame*          pFrame;
+    tPlkFrame *         pFrame;
     UINT                freeEntries;
 
     switch(event_p)
@@ -1309,7 +1309,7 @@ static tOplkError processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sd
 {
     tOplkError          ret = kErrorOk;
     UINT                frameSize;
-    tEplFrame*          pFrame;
+    tPlkFrame *         pFrame;
 
     DEBUG_LVL_SDO_TRACE("EplSdoAsySequ: StateWaitAck\n");
 
@@ -1425,7 +1425,7 @@ The function processes the internal SDO sequence layer state machine.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError processState(UINT handle_p, UINT dataSize_p, tEplFrame* pData_p,
+static tOplkError processState(UINT handle_p, UINT dataSize_p, tPlkFrame* pData_p,
                                tAsySdoSeq* pRecvFrame_p, tSdoSeqEvent event_p)
 {
     tOplkError          ret = kErrorOk;
@@ -1515,17 +1515,17 @@ with information from pSdoSeqCon_p.
 */
 //------------------------------------------------------------------------------
 static tOplkError sendFrame(tSdoSeqCon* pSdoSeqCon_p, UINT dataSize_p,
-                            tEplFrame* pData_p, BOOL fFrameInHistory_p)
+                            tPlkFrame* pData_p, BOOL fFrameInHistory_p)
 {
     tOplkError      ret;
     UINT8           aFrame[SDO_SEQ_FRAME_SIZE];
-    tEplFrame*      pFrame;
+    tPlkFrame *     pFrame;
     UINT            freeEntries = 0;
 
     if (pData_p == NULL)
     {   // set pointer to own frame
         EPL_MEMSET(&aFrame[0], 0x00, sizeof(aFrame));
-        pFrame = (tEplFrame*)&aFrame[0];
+        pFrame = (tPlkFrame*)&aFrame[0];
     }
     else
     {
@@ -1582,7 +1582,7 @@ The function sends an already created fram to the lower layer.
 */
 //------------------------------------------------------------------------------
 static tOplkError sendToLowerLayer(tSdoSeqCon* pSdoSeqCon_p, UINT dataSize_p,
-                                   tEplFrame* pFrame_p)
+                                   tPlkFrame* pFrame_p)
 {
     tOplkError      ret;
     tSdoConHdl      handle;
@@ -1732,7 +1732,7 @@ The function adds a frame to the history buffer.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError addFrameToHistory(tSdoSeqCon* pSdoSeqCon_p, tEplFrame* pFrame_p,
+static tOplkError addFrameToHistory(tSdoSeqCon* pSdoSeqCon_p, tPlkFrame* pFrame_p,
                                     UINT size_p)
 {
     tOplkError              ret = kErrorOk;
@@ -1748,7 +1748,7 @@ static tOplkError addFrameToHistory(tSdoSeqCon* pSdoSeqCon_p, tEplFrame* pFrame_
     // check if a free entry is available
     if(pHistory->freeEntries > 0)
     {   // write message in free entry
-        EPL_MEMCPY(&((tEplFrame*)pHistory->aHistoryFrame[pHistory->writeIndex])->m_le_bMessageType,
+        EPL_MEMCPY(&((tPlkFrame*)pHistory->aHistoryFrame[pHistory->writeIndex])->m_le_bMessageType,
                    &pFrame_p->m_le_bMessageType, size_p + ASND_HEADER_SIZE);
         pHistory->aFrameSize[pHistory->writeIndex] = size_p;
         pHistory->freeEntries--;
@@ -1796,7 +1796,7 @@ static tOplkError deleteAckedFrameFromHistory(tSdoSeqCon* pSdoSeqCon_p, UINT8 re
         ackIndex = pHistory->ackIndex;
         do
         {
-            currentSeqNum = (((tEplFrame*)pHistory->aHistoryFrame[ackIndex])->m_Data.m_Asnd.m_Payload.m_SdoSequenceFrame.m_le_bSendSeqNumCon & SEQ_NUM_MASK);
+            currentSeqNum = (((tPlkFrame*)pHistory->aHistoryFrame[ackIndex])->m_Data.m_Asnd.m_Payload.m_SdoSequenceFrame.m_le_bSendSeqNumCon & SEQ_NUM_MASK);
             if (((recvSeqNumber_p - currentSeqNum) & SEQ_NUM_MASK) < SDO_SEQ_NUM_THRESHOLD)
             {
                 pHistory->aFrameSize[ackIndex] = 0;
@@ -1839,7 +1839,7 @@ The function reads a frame from the history buffer.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError readFromHistory(tSdoSeqCon* pSdoSeqCon_p, tEplFrame** ppFrame_p,
+static tOplkError readFromHistory(tSdoSeqCon* pSdoSeqCon_p, tPlkFrame** ppFrame_p,
                                   UINT* pSize_p, BOOL fInitRead_p)
 {
     tOplkError              ret = kErrorOk;
@@ -1867,7 +1867,7 @@ static tOplkError readFromHistory(tSdoSeqCon* pSdoSeqCon_p, tEplFrame** ppFrame_
                              (WORD)pHistory->freeEntries, pHistory->aFrameSize[pHistory->readIndex]);
 
         // return pointer to stored frame
-        *ppFrame_p = (tEplFrame*)pHistory->aHistoryFrame[pHistory->readIndex];
+        *ppFrame_p = (tPlkFrame*)pHistory->aHistoryFrame[pHistory->readIndex];
         *pSize_p = pHistory->aFrameSize[pHistory->readIndex];   // save size
         pHistory->readIndex++;
         if(pHistory->readIndex == SDO_HISTORY_SIZE)

@@ -427,7 +427,7 @@ The function sends data on an existing connection.
 \ingroup module_sdo_udp
 */
 //------------------------------------------------------------------------------
-tOplkError sdoudp_sendData(tSdoConHdl sdoConHandle_p, tEplFrame* pSrcData_p, UINT32 dataSize_p)
+tOplkError sdoudp_sendData(tSdoConHdl sdoConHandle_p, tPlkFrame* pSrcData_p, UINT32 dataSize_p)
 {
     INT                 error;
     UINT                array;

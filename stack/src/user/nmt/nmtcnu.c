@@ -178,7 +178,7 @@ tOplkError nmtcnu_sendNmtRequest(UINT nodeId_p, tNmtCommand nmtCommand_p)
 {
     tOplkError      ret;
     tFrameInfo      nmtRequestFrameInfo;
-    tEplFrame       nmtRequestFrame;
+    tPlkFrame       nmtRequestFrame;
 
     ret = kErrorOk;
 
@@ -458,7 +458,7 @@ The function extracts the nmt command from the frame.
 static tNmtCommand getNmtCommand(tFrameInfo* pFrameInfo_p)
 {
     tNmtCommand          nmtCommand;
-    tEplNmtCommandService*  pNmtCommandService;
+    tNmtCommandService*  pNmtCommandService;
 
     pNmtCommandService = &pFrameInfo_p->pFrame->m_Data.m_Asnd.m_Payload.m_NmtCommandService;
     nmtCommand = (tNmtCommand)ami_getUint8Le(&pNmtCommandService->m_le_bNmtCommandId);

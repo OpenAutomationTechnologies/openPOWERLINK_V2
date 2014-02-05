@@ -181,9 +181,9 @@ tOplkError pdokcal_process(tEplEvent * pEvent_p)
                 pFrameInfo = (tFrameInfo *) pEvent_p->m_pArg;
                 Ret = pdok_processRxPdo(pFrameInfo->pFrame, pFrameInfo->frameSize);
 #else
-                tEplFrame*  pFrame;
+                tPlkFrame* pFrame;
 
-                pFrame = (tEplFrame *) pEvent_p->m_pArg;
+                pFrame = (tPlkFrame *) pEvent_p->m_pArg;
 
                 Ret = pdok_processRxPdo(pFrame, pEvent_p->m_uiSize);
 #endif

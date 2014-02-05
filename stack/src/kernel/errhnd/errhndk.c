@@ -109,7 +109,7 @@ static tOplkError postNmtEvent(tNmtEvent nmtEvent_p);
 static tOplkError generateHistoryEntry(UINT16 errorCode_p, tEplNetTime netTime_p);
 static tOplkError generateHistoryEntryNodeId(UINT16 errorCode_p, tEplNetTime netTime_p, UINT nodeId_p);
 static void       decrementCnCounters(void);
-static tOplkError postHistoryEntryEvent(tEplErrHistoryEntry* pHistoryEntry_p);
+static tOplkError postHistoryEntryEvent(tErrHistoryEntry* pHistoryEntry_p);
 static tOplkError handleDllErrors(tEplEvent *pEvent_p);
 
 #ifdef CONFIG_INCLUDE_NMT_MN
@@ -928,7 +928,7 @@ The function is used to post a history entry event to the API.
 \return Returns kErrorOk or error code
 */
 //------------------------------------------------------------------------------
-static tOplkError postHistoryEntryEvent(tEplErrHistoryEntry* pHistoryEntry_p)
+static tOplkError postHistoryEntryEvent(tErrHistoryEntry* pHistoryEntry_p)
 {
     tOplkError              ret;
     tEplEvent               event;
@@ -958,7 +958,7 @@ posting it to the API.
 static tOplkError generateHistoryEntry(UINT16 errorCode_p, tEplNetTime netTime_p)
 {
     tOplkError                  ret;
-    tEplErrHistoryEntry         historyEntry;
+    tErrHistoryEntry         	historyEntry;
 
     historyEntry.m_wEntryType = EPL_ERR_ENTRYTYPE_MODE_OCCURRED |
                                 EPL_ERR_ENTRYTYPE_PROF_EPL |
@@ -990,7 +990,7 @@ static tOplkError generateHistoryEntryNodeId(UINT16 errorCode_p,
                                 tEplNetTime netTime_p, UINT nodeId_p)
 {
     tOplkError                  ret;
-    tEplErrHistoryEntry         historyEntry;
+    tErrHistoryEntry         	historyEntry;
 
     historyEntry.m_wEntryType = EPL_ERR_ENTRYTYPE_MODE_OCCURRED |
                                 EPL_ERR_ENTRYTYPE_PROF_EPL |
@@ -1024,7 +1024,7 @@ static tOplkError generateHistoryEntryWithError(UINT16 errorCode_p,
                                 tEplNetTime netTime_p, UINT16 eplError_p)
 {
     tOplkError                  ret;
-    tEplErrHistoryEntry         historyEntry;
+    tErrHistoryEntry         	historyEntry;
 
     historyEntry.m_wEntryType = EPL_ERR_ENTRYTYPE_MODE_OCCURRED |
                                 EPL_ERR_ENTRYTYPE_PROF_EPL |

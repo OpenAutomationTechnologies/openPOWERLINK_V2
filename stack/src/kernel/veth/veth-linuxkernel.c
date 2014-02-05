@@ -271,7 +271,7 @@ static int veth_xmit(struct sk_buff *pSkb_p, struct net_device *pNetDevice_p)
     //save timestemp
     pNetDevice_p->trans_start = jiffies;
 
-    frameInfo.pFrame = (tEplFrame *)pSkb_p->data;
+    frameInfo.pFrame = (tPlkFrame *)pSkb_p->data;
     frameInfo.frameSize = pSkb_p->len;
 
     //call send fkt on DLL

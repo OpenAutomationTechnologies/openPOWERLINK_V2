@@ -372,7 +372,7 @@ static tOplkError processHistoryEvent(tEplApiEventType EventType_p,
                                       tEplApiEventArg* pEventArg_p,
                                       void GENERIC* pUserArg_p)
 {
-    tEplErrHistoryEntry*    pHistoryEntry = &pEventArg_p->m_ErrHistoryEntry;
+    tErrHistoryEntry*    pHistoryEntry = &pEventArg_p->m_ErrHistoryEntry;
 
     UNUSED_PARAMETER(EventType_p);
     UNUSED_PARAMETER(pUserArg_p);

@@ -466,7 +466,7 @@ The function releases the RX buffer for the specified RX frame in Edrv.
 \ingroup module_dllk
 */
 //------------------------------------------------------------------------------
-tOplkError dllk_releaseRxFrame(tEplFrame* pFrame_p, UINT frameSize_p)
+tOplkError dllk_releaseRxFrame(tPlkFrame* pFrame_p, UINT frameSize_p)
 {
     tOplkError      ret;
     tEdrvRxBuffer   rxBuffer;
@@ -1558,7 +1558,7 @@ tOplkError dllk_addNodeIsochronous(tDllkNodeInfo* pIntNodeInfo_p)
 {
     tOplkError          ret = kErrorOk;
     tDllkNodeInfo**     ppIntNodeInfo;
-    tEplFrame*          pTxFrame;
+    tPlkFrame *         pTxFrame;
 
     if (pIntNodeInfo_p->nodeId == dllkInstance_g.dllConfigParam.nodeId)
     {   // we shall send PRes ourself
@@ -1610,13 +1610,13 @@ tOplkError dllk_addNodeIsochronous(tDllkNodeInfo* pIntNodeInfo_p)
         {   // TxBuffer entry exists
             tEplEvent       event;
 
-            pTxFrame = (tEplFrame *) pIntNodeInfo_p->pPreqTxBuffer[0].pBuffer;
+            pTxFrame = (tPlkFrame *) pIntNodeInfo_p->pPreqTxBuffer[0].pBuffer;
             // set up destination MAC address
             EPL_MEMCPY(pTxFrame->m_be_abDstMac, pIntNodeInfo_p->aMacAddr, 6);
             // set destination node-ID in PReq
             ami_setUint8Le(&pTxFrame->m_le_bDstNodeId, (UINT8)pIntNodeInfo_p->nodeId);
             // do the same for second frame buffer
-            pTxFrame = (tEplFrame *) pIntNodeInfo_p->pPreqTxBuffer[1].pBuffer;
+            pTxFrame = (tPlkFrame *) pIntNodeInfo_p->pPreqTxBuffer[1].pBuffer;
             // set up destination MAC address
             EPL_MEMCPY(pTxFrame->m_be_abDstMac, pIntNodeInfo_p->aMacAddr, 6);
             // set destination node-ID in PReq
@@ -1670,7 +1670,7 @@ tOplkError dllk_deleteNodeIsochronous(tDllkNodeInfo* pIntNodeInfo_p)
 {
     tOplkError          ret = kErrorOk;
     tDllkNodeInfo**     ppIntNodeInfo;
-    tEplFrame*          pTxFrame;
+    tPlkFrame *         pTxFrame;
 
 #if EPL_DLL_PRES_CHAINING_MN != FALSE
     if (pIntNodeInfo_p->pPreqTxBuffer == NULL)
@@ -1697,14 +1697,14 @@ tOplkError dllk_deleteNodeIsochronous(tDllkNodeInfo* pIntNodeInfo_p)
     *ppIntNodeInfo = pIntNodeInfo_p->pNextNodeInfo;
     if (pIntNodeInfo_p->pPreqTxBuffer != NULL)
     {   // disable TPDO
-        pTxFrame = (tEplFrame *) pIntNodeInfo_p->pPreqTxBuffer[0].pBuffer;
+        pTxFrame = (tPlkFrame *) pIntNodeInfo_p->pPreqTxBuffer[0].pBuffer;
         if (pTxFrame != NULL)
         {   // frame does exist
             // update frame (disable RD in Flag1)
             ami_setUint8Le(&pTxFrame->m_Data.m_Preq.m_le_bFlag1, 0);
         }
 
-        pTxFrame = (tEplFrame *) pIntNodeInfo_p->pPreqTxBuffer[1].pBuffer;
+        pTxFrame = (tPlkFrame *) pIntNodeInfo_p->pPreqTxBuffer[1].pBuffer;
         if (pTxFrame != NULL)
         {   // frame does exist
             // update frame (disable RD in Flag1)
@@ -1728,7 +1728,7 @@ This function enables the PRes chaining mode.
 tOplkError dllk_presChainingEnable (void)
 {
     tOplkError      Ret = kErrorOk;
-    tEplFrame*      pTxFrameSyncRes;
+    tPlkFrame *     pTxFrameSyncRes;
 
     if (dllkInstance_g.fPrcEnabled == FALSE)
     {
@@ -1748,7 +1748,7 @@ tOplkError dllk_presChainingEnable (void)
             return Ret;
 
         dllkInstance_g.fPrcEnabled = TRUE;
-        pTxFrameSyncRes = (tEplFrame *) dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SYNCRES].pBuffer;
+        pTxFrameSyncRes = (tPlkFrame *) dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SYNCRES].pBuffer;
 
         ami_setUint32Le(&pTxFrameSyncRes->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncStatus,
                         ami_getUint32Le(&pTxFrameSyncRes->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncStatus)
@@ -1777,7 +1777,7 @@ This function disables the PRes chaining mode, thus restoring PReq/PRes mode.
 tOplkError dllk_presChainingDisable (void)
 {
     tOplkError      ret = kErrorOk;
-    tEplFrame*      pTxFrameSyncRes;
+    tPlkFrame *     pTxFrameSyncRes;
 
     if (dllkInstance_g.fPrcEnabled != FALSE)
     {   // relocate PReq filter from PResMN to PReq
@@ -1798,7 +1798,7 @@ tOplkError dllk_presChainingDisable (void)
         if (ret != kErrorOk)
             return ret;
 
-        pTxFrameSyncRes = (tEplFrame *) dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SYNCRES].pBuffer;
+        pTxFrameSyncRes = (tPlkFrame *) dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SYNCRES].pBuffer;
 
         ami_setUint32Le(&pTxFrameSyncRes->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncStatus,
                         ami_getUint32Le(&pTxFrameSyncRes->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncStatus)
@@ -1987,7 +1987,7 @@ tOplkError dllk_setupAsyncPhase(tNmtState nmtState_p, UINT nextTxBufferOffset_p,
         //is invitation allowed?
         if(fEnableInvitation == FALSE)
         {
-            tEplFrame *pTxFrame = (tEplFrame *)
+            tPlkFrame *pTxFrame = (tPlkFrame *)
                 dllkInstance_g.ppTxBufferList[soaIndex]->pBuffer;
 
             //reset invitation
@@ -2029,7 +2029,7 @@ tOplkError dllk_setupSyncPhase(tNmtState nmtState_p, BOOL fReadyFlag_p,
     BYTE*               pCnNodeId;
     UINT32              accFrameLenNs = 0;
     UINT                nextTimeOffsetNs = 0;
-    tEplFrame*          pTxFrame;
+    tPlkFrame *         pTxFrame;
     tEdrvTxBuffer*      pTxBuffer;
     tFrameInfo          FrameInfo;
     tDllkNodeInfo*      pIntNodeInfo;
@@ -2057,7 +2057,7 @@ tOplkError dllk_setupSyncPhase(tNmtState nmtState_p, BOOL fReadyFlag_p,
         pTxBuffer = &pIntNodeInfo->pPreqTxBuffer[nextTxBufferOffset_p];
         if ((pTxBuffer != NULL) && (pTxBuffer->pBuffer != NULL))
         {   // PReq does exist
-            pTxFrame = (tEplFrame *) pTxBuffer->pBuffer;
+            pTxFrame = (tPlkFrame *) pTxBuffer->pBuffer;
 
             flag1 = pIntNodeInfo->soaFlag1 & EPL_FRAME_FLAG1_EA;
 
