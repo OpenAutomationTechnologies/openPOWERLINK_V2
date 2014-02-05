@@ -389,34 +389,34 @@ SET(ARCH_LE_SOURCES
 ################################################################################
 
 SET(OPLK_HEADERS
-    ${OPLK_INCLUDE_DIR}/ami.h
-    ${OPLK_INCLUDE_DIR}/Benchmark.h
-    ${OPLK_INCLUDE_DIR}/cfm.h
-    ${OPLK_INCLUDE_DIR}/Debug.h
-    ${OPLK_INCLUDE_DIR}/dll.h
-    ${OPLK_INCLUDE_DIR}/Epl.h
-    ${OPLK_INCLUDE_DIR}/EplDef.h
-    ${OPLK_INCLUDE_DIR}/EplErrDef.h
-    ${OPLK_INCLUDE_DIR}/EplErrStr.h
-    ${OPLK_INCLUDE_DIR}/EplFrame.h
-    ${OPLK_INCLUDE_DIR}/EplInc.h
-    ${OPLK_INCLUDE_DIR}/EplTarget.h
-    ${OPLK_INCLUDE_DIR}/EplTimer.h
-    ${OPLK_INCLUDE_DIR}/EplVersion.h
-    ${OPLK_INCLUDE_DIR}/event.h
-    ${OPLK_INCLUDE_DIR}/ftracedebug.h
-    ${OPLK_INCLUDE_DIR}/global.h
-    ${OPLK_INCLUDE_DIR}/led.h
-    ${OPLK_INCLUDE_DIR}/nmt.h
-    ${OPLK_INCLUDE_DIR}/obd.h
-    ${OPLK_INCLUDE_DIR}/obdcdc.h
-    ${OPLK_INCLUDE_DIR}/obdmacro.h
-    ${OPLK_INCLUDE_DIR}/powerlink-module.h
-    ${OPLK_INCLUDE_DIR}/sdo.h
-    ${OPLK_INCLUDE_DIR}/sdoabortcodes.h
-    ${OPLK_INCLUDE_DIR}/section-default.h
-    ${OPLK_INCLUDE_DIR}/section-microblaze.h
-    ${OPLK_INCLUDE_DIR}/section-nios2.h
+    ${STACK_INCLUDE_DIR}/oplk/ami.h
+    ${STACK_INCLUDE_DIR}/oplk/Benchmark.h
+    ${STACK_INCLUDE_DIR}/oplk/cfm.h
+    ${STACK_INCLUDE_DIR}/oplk/Debug.h
+    ${STACK_INCLUDE_DIR}/oplk/dll.h
+    ${STACK_INCLUDE_DIR}/oplk/Epl.h
+    ${STACK_INCLUDE_DIR}/oplk/EplDef.h
+    ${STACK_INCLUDE_DIR}/oplk/EplErrDef.h
+    ${STACK_INCLUDE_DIR}/oplk/EplErrStr.h
+    ${STACK_INCLUDE_DIR}/oplk/EplFrame.h
+    ${STACK_INCLUDE_DIR}/oplk/EplInc.h
+    ${STACK_INCLUDE_DIR}/oplk/EplTarget.h
+    ${STACK_INCLUDE_DIR}/oplk/EplTimer.h
+    ${STACK_INCLUDE_DIR}/oplk/EplVersion.h
+    ${STACK_INCLUDE_DIR}/oplk/event.h
+    ${STACK_INCLUDE_DIR}/oplk/ftracedebug.h
+    ${STACK_INCLUDE_DIR}/oplk/global.h
+    ${STACK_INCLUDE_DIR}/oplk/led.h
+    ${STACK_INCLUDE_DIR}/oplk/nmt.h
+    ${STACK_INCLUDE_DIR}/oplk/obd.h
+    ${STACK_INCLUDE_DIR}/oplk/obdcdc.h
+    ${STACK_INCLUDE_DIR}/oplk/obdmacro.h
+    ${STACK_INCLUDE_DIR}/oplk/powerlink-module.h
+    ${STACK_INCLUDE_DIR}/oplk/sdo.h
+    ${STACK_INCLUDE_DIR}/oplk/sdoabortcodes.h
+    ${STACK_INCLUDE_DIR}/oplk/section-default.h
+    ${STACK_INCLUDE_DIR}/oplk/section-microblaze.h
+    ${STACK_INCLUDE_DIR}/oplk/section-nios2.h
     )
 
 SET(STACK_HEADERS

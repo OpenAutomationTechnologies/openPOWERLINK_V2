@@ -47,7 +47,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sys/stat.h>
 #include <semaphore.h>
 
-#include <EplInc.h>
+#include <oplk/EplInc.h>
 #include <common/pdo.h>
 
 //============================================================================//

@@ -39,9 +39,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <dll.h>
+#include <oplk/dll.h>
 #include <common/dllcal.h>
-#include <event.h>
+#include <oplk/event.h>
 
 //------------------------------------------------------------------------------
 // const defines

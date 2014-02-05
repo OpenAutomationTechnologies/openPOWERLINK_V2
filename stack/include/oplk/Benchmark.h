@@ -71,7 +71,7 @@
 #ifndef _BENCHMARK_H_
 #define _BENCHMARK_H_
 
-#include "global.h"
+#include <oplk/global.h>
 
 
 #if (TARGET_SYSTEM == _NO_OS_) && (DEV_SYSTEM == _DEV_GNU_CF548X_)

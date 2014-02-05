@@ -1,11 +1,10 @@
 /**
 ********************************************************************************
-\file   powerlink-module.h
+\file   obdcdc.h
 
-\brief  Header file for openPOWERLINK Linux kernel module
+\brief  Definitions for OBD CDC module
 
-This file contains the necessary definitions for using the openPOWERLINK
-Linux module.
+This file contains definitions for the OBD CDC module
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -36,67 +35,42 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_powerlink_module_H_
-#define _INC_powerlink_module_H_
+#ifndef _INC_obdcdc_H_
+#define _INC_obdcdc_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <dll.h>
-#include <common/dllcal.h>
+#include <oplk/EplInc.h>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define PLK_CLASS_NAME    "plk"
-#define PLK_DEV_NAME      "plk" // used for "/dev" and "/proc" entry
-#define PLK_DRV_NAME      "plk"
-#define PLK_DEV_FILE      "/dev/plk"
-#define PLK_IOC_MAGIC     '='
-
-//------------------------------------------------------------------------------
-//  Commands for <ioctl>
-//------------------------------------------------------------------------------
-#define PLK_CMD_CTRL_EXECUTE_CMD                _IOWR(PLK_IOC_MAGIC, 0, tCtrlCmd)
-#define PLK_CMD_CTRL_STORE_INITPARAM            _IOW (PLK_IOC_MAGIC, 1, tCtrlInitParam)
-#define PLK_CMD_CTRL_READ_INITPARAM             _IOR (PLK_IOC_MAGIC, 2, tCtrlInitParam)
-#define PLK_CMD_CTRL_GET_STATUS                 _IOR (PLK_IOC_MAGIC, 3, UINT16)
-#define PLK_CMD_CTRL_GET_HEARTBEAT              _IOR (PLK_IOC_MAGIC, 4, UINT16)
-#define PLK_CMD_POST_EVENT                      _IOW (PLK_IOC_MAGIC, 5, tEplEvent)
-#define PLK_CMD_GET_EVENT                       _IOR (PLK_IOC_MAGIC, 6, tEplEvent)
-#define PLK_CMD_DLLCAL_ASYNCSEND                _IO  (PLK_IOC_MAGIC, 7)
-#define PLK_CMD_ERRHND_WRITE                    _IOW (PLK_IOC_MAGIC, 8, tErrHndIoctl)
-#define PLK_CMD_ERRHND_READ                     _IOR (PLK_IOC_MAGIC, 9, tErrHndIoctl)
-#define PLK_CMD_PDO_SYNC                        _IO  (PLK_IOC_MAGIC, 10)
 
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-typedef struct
-{
-    tDllCalQueue            queue;
-    void*                   pData;
-    size_t                  size;
-} tIoctlDllCalAsync;
-
-typedef struct
-{
-    void*                   pData;
-    size_t                  size;
-} tIoctlBufInfo;
-
-typedef struct
-{
-    UINT32                  offset;
-    UINT32                  errVal;
-} tErrHndIoctl;
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#endif /* _INC_powerlink-module_H_ */
+tEplKernel obdcdc_init(void);
+void obdcdc_exit(void);
+void obdcdc_setFilename(char* pCdcFilename_p);
+void obdcdc_setBuffer(UINT8* pCdc_p, size_t cdcSize_p);
+tEplKernel obdcdc_loadCdc(void);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* _INC_obdcdc_H_ */
+
 
 
 

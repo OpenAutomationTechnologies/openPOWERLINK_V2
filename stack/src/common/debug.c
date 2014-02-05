@@ -40,9 +40,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include "Epl.h"
-#include "global.h"
-#include "nmt.h"
+#include <oplk/Epl.h>
+#include <oplk/global.h>
+#include <oplk/nmt.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //

@@ -43,8 +43,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include "user/nmtu.h"
-#include <dll.h>
-#include "EplFrame.h"
+#include <oplk/dll.h>
+#include <oplk/EplFrame.h>
 
 //------------------------------------------------------------------------------
 // const defines

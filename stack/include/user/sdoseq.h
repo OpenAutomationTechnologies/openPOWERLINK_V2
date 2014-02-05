@@ -42,10 +42,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 
-#include <sdo.h>
+#include <oplk/sdo.h>
 #include <user/sdoudp.h>
 #include <user/sdoasnd.h>
-#include <event.h>
+#include <oplk/event.h>
 #include <user/timeru.h>
 
 //------------------------------------------------------------------------------

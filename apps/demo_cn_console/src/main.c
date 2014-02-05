@@ -48,7 +48,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <Epl.h>
+#include <oplk/Epl.h>
 #include <stdio.h>
 #include <limits.h>
 
@@ -56,7 +56,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <system/system.h>
 #include <getopt/getopt.h>
 #include <console/console.h>
-#include <EplTarget.h>
+#include <oplk/EplTarget.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //

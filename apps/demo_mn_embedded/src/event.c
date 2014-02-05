@@ -43,8 +43,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <stdio.h>
 
-#include <Epl.h>
-#include <EplTarget.h>
+#include <oplk/Epl.h>
+#include <oplk/EplTarget.h>
 
 #include "event.h"
 #include <gpio.h>

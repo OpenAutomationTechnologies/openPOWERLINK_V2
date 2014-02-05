@@ -42,8 +42,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <EplInc.h>
-#include <obd.h>
+#include <oplk/EplInc.h>
+#include <oplk/obd.h>
 
 //------------------------------------------------------------------------------
 // const defines

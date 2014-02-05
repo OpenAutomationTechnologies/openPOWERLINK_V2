@@ -43,9 +43,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/pdok.h>
 #include <kernel/pdokcal.h>
 #include "kernel/eventk.h"
-#include <obd.h>
+#include <oplk/obd.h>
 #include <kernel/dllk.h>
-#include <Benchmark.h>
+#include <oplk/Benchmark.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //

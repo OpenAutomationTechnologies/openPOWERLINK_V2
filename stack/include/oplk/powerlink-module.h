@@ -1,13 +1,15 @@
 /**
 ********************************************************************************
-\file   ami.h
+\file   powerlink-module.h
 
-\brief  Definitions for the abstract memory interface (ami)
+\brief  Header file for openPOWERLINK Linux kernel module
 
+This file contains the necessary definitions for using the openPOWERLINK
+Linux module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -34,94 +36,67 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_ami_H_
-#define _INC_ami_H_
+#ifndef _INC_powerlink_module_H_
+#define _INC_powerlink_module_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-
-#include <EplInc.h>
+#include <oplk/dll.h>
+#include <common/dllcal.h>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+#define PLK_CLASS_NAME    "plk"
+#define PLK_DEV_NAME      "plk" // used for "/dev" and "/proc" entry
+#define PLK_DRV_NAME      "plk"
+#define PLK_DEV_FILE      "/dev/plk"
+#define PLK_IOC_MAGIC     '='
 
-// Conversion macros for datatype UINT8 (saves code size)
-#define ami_setUint8Be(pAddr_p, uint8Val_p) {*(UINT8 *)(pAddr_p) = (uint8Val_p);}
-#define ami_setUint8Le(pAddr_p, uint8Val_p) {*(UINT8 *)(pAddr_p) = (uint8Val_p);}
-
-#define ami_getUint8Be(pAddr_p) (*(UINT8 *)(pAddr_p))
-#define ami_getUint8Le(pAddr_p) (*(UINT8 *)(pAddr_p))
+//------------------------------------------------------------------------------
+//  Commands for <ioctl>
+//------------------------------------------------------------------------------
+#define PLK_CMD_CTRL_EXECUTE_CMD                _IOWR(PLK_IOC_MAGIC, 0, tCtrlCmd)
+#define PLK_CMD_CTRL_STORE_INITPARAM            _IOW (PLK_IOC_MAGIC, 1, tCtrlInitParam)
+#define PLK_CMD_CTRL_READ_INITPARAM             _IOR (PLK_IOC_MAGIC, 2, tCtrlInitParam)
+#define PLK_CMD_CTRL_GET_STATUS                 _IOR (PLK_IOC_MAGIC, 3, UINT16)
+#define PLK_CMD_CTRL_GET_HEARTBEAT              _IOR (PLK_IOC_MAGIC, 4, UINT16)
+#define PLK_CMD_POST_EVENT                      _IOW (PLK_IOC_MAGIC, 5, tEplEvent)
+#define PLK_CMD_GET_EVENT                       _IOR (PLK_IOC_MAGIC, 6, tEplEvent)
+#define PLK_CMD_DLLCAL_ASYNCSEND                _IO  (PLK_IOC_MAGIC, 7)
+#define PLK_CMD_ERRHND_WRITE                    _IOW (PLK_IOC_MAGIC, 8, tErrHndIoctl)
+#define PLK_CMD_ERRHND_READ                     _IOR (PLK_IOC_MAGIC, 9, tErrHndIoctl)
+#define PLK_CMD_PDO_SYNC                        _IO  (PLK_IOC_MAGIC, 10)
 
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
+typedef struct
+{
+    tDllCalQueue            queue;
+    void*                   pData;
+    size_t                  size;
+} tIoctlDllCalAsync;
+
+typedef struct
+{
+    void*                   pData;
+    size_t                  size;
+} tIoctlBufInfo;
+
+typedef struct
+{
+    UINT32                  offset;
+    UINT32                  errVal;
+} tErrHndIoctl;
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
 
-#ifdef __cplusplus
-    extern "C" {
-#endif
 
-// Conversion functions for datatype WORD
-void ami_setUint16Be(void* pAddr_p, UINT16 uint16Val_p);
-void ami_setUint16Le(void* pAddr_p, UINT16 uint16Val_p);
-
-UINT16 ami_getUint16Be(void* pAddr_p);
-UINT16 ami_getUint16Le(void* pAddr_p);
-
-// Conversion functions for datatype DWORD24
-void ami_setUint24Be(void* pAddr_p, UINT32 uint32Val_p);
-void ami_setUint24Le(void* pAddr_p, UINT32 uint32Val_p);
-
-UINT32 ami_getUint24Be(void* pAddr_p);
-UINT32 ami_getUint24Le(void* pAddr_p);
-
-// Conversion functions for datatype DWORD
-void ami_setUint32Be(void* pAddr_p, UINT32 uint32Val_p);
-void ami_setUint32Le(void* pAddr_p, UINT32 uint32Val_p);
-
-UINT32 ami_getUint32Be(void* pAddr_p);
-UINT32 ami_getUint32Le(void* pAddr_p);
-
-// Conversion functions for datatype QWORD40
-void ami_setUint40Be(void* pAddr_p, UINT64 uint64Val_p);
-void ami_setUint40Le(void* pAddr_p, UINT64 uint64Val_p);
-
-UINT64 ami_getUint40Be(void* pAddr_p);
-UINT64 ami_getUint40Le(void* pAddr_p);
-
-// Conversion functions for datatype QWORD48
-void ami_setUint48Be(void* pAddr_p, UINT64 uint64Val_p);
-void ami_setUint48Le(void* pAddr_p, UINT64 uint64Val_p);
-
-UINT64 ami_getUint48Be(void* pAddr_p);
-UINT64 ami_getUint48Le(void* pAddr_p);
-
-// Conversion functions for datatype QWORD56
-void ami_setUint56Be(void* pAddr_p, UINT64 uint64Val_p);
-void ami_setUint56Le(void* pAddr_p, UINT64 uint64Val_p);
-
-UINT64 ami_getUint56Be(void* pAddr_p);
-UINT64 ami_getUint56Le(void* pAddr_p);
-
-// Conversion functions for datatype QWORD
-void ami_setUint64Be(void* pAddr_p, UINT64 uint64Val_p);
-void ami_setUint64Le(void* pAddr_p, UINT64 uint64Val_p);
-
-UINT64 ami_getUint64Be(void* pAddr_p);
-UINT64 ami_getUint64Le(void* pAddr_p);
-
-// Conversion functions for type tTimeOfDay
-void ami_setTimeOfDay(void* pAddr_p, tTimeOfDay* pTimeOfDay_p);
-void ami_getTimeOfDay(void* pAddr_p, tTimeOfDay* pTimeOfDay_p);
-
-#ifdef __cplusplus
-    }
-#endif
+#endif /* _INC_powerlink-module_H_ */
 
 
-#endif /* _INC_ami_H_ */
+

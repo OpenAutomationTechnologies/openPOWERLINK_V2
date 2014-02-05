@@ -69,7 +69,7 @@
 #ifndef _DEBUG_H_
 #define _DEBUG_H_
 
-#include "global.h"
+#include <oplk/global.h>
 
 
 /***************************************************************************/
@@ -144,7 +144,7 @@
 //---------------------------------------------------------------------------
 // this macro defines a version string
 #define MAKE_VERSION_STRING(product,appname,verstr,author) \
-    "§prd§:" product ",§app§:" appname ",§ver§:" verstr ",§dat§:" __DATE__ ",§aut§:" author
+    "ï¿½prdï¿½:" product ",ï¿½appï¿½:" appname ",ï¿½verï¿½:" verstr ",ï¿½datï¿½:" __DATE__ ",ï¿½autï¿½:" author
 
 
 //---------------------------------------------------------------------------

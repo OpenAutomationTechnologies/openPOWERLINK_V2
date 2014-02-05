@@ -45,7 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <semaphore.h>
 #include <time.h>
 
-#include <EplInc.h>
+#include <oplk/EplInc.h>
 #include <common/pdo.h>
 #include <user/pdoucal.h>
 #include <errno.h>

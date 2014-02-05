@@ -43,9 +43,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <EplInc.h>
+#include <oplk/EplInc.h>
 #include <kernel/hrestimer.h>
-#include <Benchmark.h>
+#include <oplk/Benchmark.h>
 
 #include <linux/module.h>
 #include <linux/kernel.h>

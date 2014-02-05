@@ -43,7 +43,7 @@ ${OPLK_BASE_DIR}/apps/demo_mn_embedded/src/main.c \
 APP_INCLUDES="\
 ${OPLK_BASE_DIR}/apps/common/src/gpio \
 ${OPLK_BASE_DIR}/apps/common/src/lcd \
-${OPLK_BASE_DIR}/include \
+${OPLK_BASE_DIR}/stack/include \
 ${OPLK_BASE_DIR}/stack/proj/generic/liboplkmnapp-hostif \
 "
 

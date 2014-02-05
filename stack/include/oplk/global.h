@@ -320,12 +320,12 @@
             #undef  INLINE_FUNCTION_DEF
         #endif
 
-        #include <section-nios2.h>
+        #include <oplk/section-nios2.h>
     #endif
 
     #if (DEV_SYSTEM == _DEV_MICROBLAZE_BIG_ \
         || DEV_SYSTEM == _DEV_MICROBLAZE_LITTLE_)
-        #include <section-microblaze.h>
+        #include <oplk/section-microblaze.h>
     #endif
 
 // ------------------ WIN32 ---------------------------------------------
@@ -436,7 +436,7 @@
 
 #endif
 
-#include <section-default.h>
+#include <oplk/section-default.h>
 
 //---------------------------------------------------------------------------
 //  definitions of basic types

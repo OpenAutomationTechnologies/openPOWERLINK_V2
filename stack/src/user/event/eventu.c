@@ -48,8 +48,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/sdoseq.h>
 #include <user/dllucal.h>
 #include <user/ledu.h>
-#include <Benchmark.h>
-#include <Epl.h>
+#include <oplk/Benchmark.h>
+#include <oplk/Epl.h>
 
 #include "common/event/event.h"
 

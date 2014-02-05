@@ -52,7 +52,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <pthread.h>
 
-#include <powerlink-module.h>
+#include <oplk/powerlink-module.h>
 #include <sys/ioctl.h>
 
 #include <unistd.h> //sleep

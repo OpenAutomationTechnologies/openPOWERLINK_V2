@@ -41,8 +41,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <led.h>
-#include <nmt.h>
+#include <oplk/led.h>
+#include <oplk/nmt.h>
 #include <user/eventu.h>
 
 //------------------------------------------------------------------------------

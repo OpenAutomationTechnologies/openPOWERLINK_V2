@@ -42,7 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <QThread>
 
-#include <Epl.h>
+#include <oplk/Epl.h>
 #include "xap.h"
 
 //------------------------------------------------------------------------------

@@ -1,10 +1,10 @@
 /**
 ********************************************************************************
-\file   obdcdc.h
+\file   cfm.h
 
-\brief  Definitions for OBD CDC module
+\brief  General include file for configuration file manager (CFM)
 
-This file contains definitions for the OBD CDC module
+This file contains global definitions for the CFM module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -35,13 +35,14 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_obdcdc_H_
-#define _INC_obdcdc_H_
+#ifndef _INC_cfm_H_
+#define _INC_cfm_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <EplInc.h>
+#include <oplk/EplInc.h>
+#include <oplk/obd.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -51,6 +52,22 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // typedef
 //------------------------------------------------------------------------------
 
+/**
+* \brief Structure for CFM CN progress event
+*
+* This structure contains all information of the CFMs CN progress event.
+*/
+typedef struct
+{
+    UINT                nodeId;                 ///< Node ID of the CN
+    UINT                objectIndex;            ///< Index of object to be written
+    UINT                objectSubIndex;         ///< Subindex of object to be written
+    UINT32              sdoAbortCode;           ///< SDO abort code
+    tEplKernel          error;                  ///< Error which occured
+    UINT32              totalNumberOfBytes;     ///< Total number of bytes to transfer
+    UINT32              bytesDownloaded;        ///< Number of already downloaded bytes
+} tCfmEventCnProgress;
+
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
@@ -59,18 +76,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tEplKernel obdcdc_init(void);
-void obdcdc_exit(void);
-void obdcdc_setFilename(char* pCdcFilename_p);
-void obdcdc_setBuffer(UINT8* pCdc_p, size_t cdcSize_p);
-tEplKernel obdcdc_loadCdc(void);
+tEplKernel  cfmu_cbObdAccess(tObdCbParam MEM* pParam_p);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_obdcdc_H_ */
-
-
-
-
+#endif /* _INC_cfm_H_ */

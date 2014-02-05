@@ -43,9 +43,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #define _CRT_NONSTDC_NO_WARNINGS    // for MSVC 2005 or higher
 
-#include <EplInc.h>
-#include <obd.h>
-#include <obdcdc.h>
+#include <oplk/EplInc.h>
+#include <oplk/obd.h>
+#include <oplk/obdcdc.h>
 #include <user/eventu.h>
 
 #if (CONFIG_OBD_USE_LOAD_CONCISEDCF != FALSE)

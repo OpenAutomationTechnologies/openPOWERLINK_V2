@@ -40,7 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <Epl.h>
+#include <oplk/Epl.h>
 #include <kernel/dllk.h>
 #include <kernel/eventk.h>
 #include <kernel/nmtk.h>
@@ -59,16 +59,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/timeru.h>
 #include <user/cfmu.h>
 #include <user/eventucal.h>
-#include <EplTarget.h>
+#include <oplk/EplTarget.h>
 
 #include <common/ctrl.h>
-#include <obd.h>
+#include <oplk/obd.h>
 #include <common/target.h>
 
 #include <user/ctrlucal.h>
 
 #if (CONFIG_OBD_USE_LOAD_CONCISEDCF != FALSE)
-#include <obdcdc.h>
+#include <oplk/obdcdc.h>
 #endif
 
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE

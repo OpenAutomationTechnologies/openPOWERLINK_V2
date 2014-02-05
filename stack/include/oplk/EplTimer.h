@@ -72,8 +72,8 @@
 #ifndef _EPLTIMER_H_
 #define _EPLTIMER_H_
 
-#include "EplInc.h"
-#include "event.h"
+#include <oplk/EplInc.h>
+#include <oplk/event.h>
 
 
 //---------------------------------------------------------------------------
