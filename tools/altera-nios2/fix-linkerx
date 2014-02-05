@@ -1,8 +1,8 @@
 #!/bin/bash
-#
+# $ ./fix-linkerx [BSP_PATH]
 #workaround for linker.x issue
 
-LINKER_X_DIR=bsp
+LINKER_X_DIR=$1
 LINKER_X_FILE=linker.x
 LINKER_X_PATH=$LINKER_X_DIR/$LINKER_X_FILE
 

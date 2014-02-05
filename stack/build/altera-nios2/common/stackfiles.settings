@@ -1,0 +1,305 @@
+################################################################################
+#
+# Stack files settings for Altera Nios II
+#
+# Copyright (c 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#     * Redistributions of source code must retain the above copyright
+#       notice, this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above copyright
+#       notice, this list of conditions and the following disclaimer in the
+#       documentation and/or other materials provided with the distribution.
+#     * Neither the name of the copyright holders nor the
+#       names of its contributors may be used to endorse or promote products
+#       derived from this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+# DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION HOWEVER CAUSED AND
+# ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+################################################################################
+
+################################################################################
+# Common sources
+################################################################################
+
+COMMON_SOURCES="\
+${COMMON_SOURCE_DIR}/debug.c \
+${COMMON_SOURCE_DIR}/event/event.c \
+"
+
+COMMON_NOOS_SOURCES="\
+${CONTRIB_SOURCE_DIR}/trace/trace-printf.c \
+"
+
+COMMON_CAL_DIRECT_SOURCES="\
+${COMMON_SOURCE_DIR}/dll/dllcal-direct.c \
+"
+
+COMMON_CAL_HOSTIF_SOURCES="\
+${COMMON_SOURCE_DIR}/dll/dllcal-hostif.c \
+"
+
+################################################################################
+# Application library (User sources
+################################################################################
+
+################################################################################
+# MN specific sources
+
+USER_MN_SOURCES="\
+${USER_SOURCE_DIR}/obd/obdcdc.c \
+${USER_SOURCE_DIR}/api/processimage-cia302.c \
+${USER_SOURCE_DIR}/cfmu.c \
+"
+
+################################################################################
+# Generic sources
+
+USER_SOURCES="\
+${USER_SOURCE_DIR}/api/generic.c \
+${USER_SOURCE_DIR}/api/processimage.c \
+${USER_SOURCE_DIR}/obd/obd.c \
+${USER_SOURCE_DIR}/obd/obdcreate.c \
+${USER_SOURCE_DIR}/dll/dllucal.c \
+${USER_SOURCE_DIR}/event/eventu.c \
+${USER_SOURCE_DIR}/nmt/nmtu.c \
+${USER_SOURCE_DIR}/nmt/nmtcnu.c \
+${USER_SOURCE_DIR}/nmt/nmtmnu.c \
+${USER_SOURCE_DIR}/nmt/identu.c \
+${USER_SOURCE_DIR}/nmt/statusu.c \
+${USER_SOURCE_DIR}/nmt/syncu.c \
+${USER_SOURCE_DIR}/pdo/pdou.c \
+${USER_SOURCE_DIR}/pdo/pdoucal.c \
+${USER_SOURCE_DIR}/pdo/pdoucal-triplebufshm.c \
+${USER_SOURCE_DIR}/sdo/sdo-comu.c \
+${USER_SOURCE_DIR}/sdo/sdo-sequ.c \
+${USER_SOURCE_DIR}/sdo/sdo-asndu.c \
+${USER_SOURCE_DIR}/sdo/sdo-udpu.c \
+${USER_SOURCE_DIR}/errhnd/errhndu.c \
+${USER_SOURCE_DIR}/ctrl/ctrlu.c \
+${USER_SOURCE_DIR}/ledu.c \
+"
+
+################################################################################
+# User control CAL sources
+
+CTRL_UCAL_DIRECT_SOURCES="\
+${USER_SOURCE_DIR}/ctrl/ctrlucal-direct.c \
+"
+
+CTRL_UCAL_HOSTIF_SOURCES="\
+${USER_SOURCE_DIR}/ctrl/ctrlucal-hostif.c \
+"
+
+################################################################################
+# User DLL CAL sources
+
+DLL_UCAL_CIRCBUF_SOURCES="\
+${USER_SOURCE_DIR}/dll/dllucal-circbuf.c \
+"
+
+################################################################################
+# User error handler CAL sources
+
+ERRHND_UCAL_LOCAL_SOURCES="\
+${USER_SOURCE_DIR}/errhnd/errhnducal-local.c \
+"
+
+ERRHND_UCAL_HOSTIF_SOURCES="\
+${USER_SOURCE_DIR}/errhnd/errhnducal-hostif.c \
+"
+
+################################################################################
+# User event CAL sources
+
+EVENT_UCAL_NOOSKERNEL_SOURCES="\
+${USER_SOURCE_DIR}/event/eventucalintf-circbuf.c \
+${USER_SOURCE_DIR}/event/eventucal-nooscircbuf.c \
+"
+
+EVENT_UCAL_NOOSHOSTIF_SOURCES="\
+${USER_SOURCE_DIR}/event/eventucalintf-hostif.c \
+${USER_SOURCE_DIR}/event/eventucal-nooshostif.c \
+"
+
+################################################################################
+# User PDO CAL sources
+
+PDO_UCAL_LOCAL_SOURCES="\
+${USER_SOURCE_DIR}/pdo/pdoucalmem-local.c \
+${USER_SOURCE_DIR}/pdo/pdoucalsync-null.c \
+"
+
+PDO_UCAL_HOSTIF_SOURCES="\
+${USER_SOURCE_DIR}/pdo/pdoucalmem-hostif.c \
+${USER_SOURCE_DIR}/pdo/pdoucalsync-hostif.c \
+"
+
+################################################################################
+# Driver library (Kernel sources
+################################################################################
+
+################################################################################
+# Generic driver library sources
+
+KERNEL_SOURCES="\
+${KERNEL_SOURCE_DIR}/dll/dllk.c \
+${KERNEL_SOURCE_DIR}/dll/dllkfilter.c \
+${KERNEL_SOURCE_DIR}/dll/dllkstatemachine.c \
+${KERNEL_SOURCE_DIR}/dll/dllkevent.c \
+${KERNEL_SOURCE_DIR}/dll/dllkframe.c \
+${KERNEL_SOURCE_DIR}/dll/dllkcal.c \
+${KERNEL_SOURCE_DIR}/event/eventk.c \
+${KERNEL_SOURCE_DIR}/nmt/nmtk.c \
+${KERNEL_SOURCE_DIR}/pdo/pdok.c \
+${KERNEL_SOURCE_DIR}/pdo/pdokcal.c \
+${KERNEL_SOURCE_DIR}/pdo/pdokcal-triplebufshm.c \
+${KERNEL_SOURCE_DIR}/errhnd/errhndk.c \
+${KERNEL_SOURCE_DIR}/ctrl/ctrlk.c \
+"
+
+################################################################################
+# Control DLL CAL sources
+
+CTRL_KCAL_DIRECT_SOURCES="\
+${KERNEL_SOURCE_DIR}/ctrl/ctrlkcal-direct.c \
+"
+
+CTRL_KCAL_HOSTIF_SOURCES="\
+${KERNEL_SOURCE_DIR}/ctrl/ctrlkcal-hostif.c \
+"
+
+################################################################################
+# Kernel DLL CAL sources
+
+DLL_KCAL_CIRCBUF_SOURCES="\
+${KERNEL_SOURCE_DIR}/dll/dllkcal-circbuf.c \
+"
+
+################################################################################
+# Kernel error handler CAL sources
+
+ERRHND_KCAL_LOCAL_SOURCES="\
+${KERNEL_SOURCE_DIR}/errhnd/errhndkcal-local.c \
+"
+
+ERRHND_KCAL_HOSTIF_SOURCES="\
+${KERNEL_SOURCE_DIR}/errhnd/errhndkcal-hostif.c \
+"
+
+################################################################################
+# Kernel event CAL sources
+
+EVENT_KCAL_NOOSKERNEL_SOURCES="\
+${KERNEL_SOURCE_DIR}/event/eventkcalintf-circbuf.c \
+${KERNEL_SOURCE_DIR}/event/eventkcal-nooscircbuf.c \
+"
+
+EVENT_KCAL_NOOSHOSTIF_SOURCES="\
+${KERNEL_SOURCE_DIR}/event/eventkcalintf-hostif.c \
+${KERNEL_SOURCE_DIR}/event/eventkcal-nooshostif.c \
+"
+
+################################################################################
+# Kernel PDO CAL sources
+
+PDO_KCAL_LOCAL_SOURCES="\
+${KERNEL_SOURCE_DIR}/pdo/pdokcalmem-local.c \
+${KERNEL_SOURCE_DIR}/pdo/pdokcalsync-null.c \
+"
+
+PDO_KCAL_HOSTIF_SOURCES="\
+${KERNEL_SOURCE_DIR}/pdo/pdokcalmem-hostif.c \
+${KERNEL_SOURCE_DIR}/pdo/pdokcalsync-hostif.c \
+"
+
+################################################################################
+# Kernel Ethernet
+
+HARDWARE_DRIVER_OPENMAC_SOURCES="\
+${KERNEL_SOURCE_DIR}/timer/timestamp-openmac.c \
+${KERNEL_SOURCE_DIR}/edrv/edrv-openmac.c \
+${HW_DRIVERS_DIR}/openmac/src/omethlib.c \
+${HW_DRIVERS_DIR}/openmac/src/omethlibint.c \
+"
+
+HARDWARE_DRIVER_OPENMAC_CN_SOURCES="\
+${KERNEL_SOURCE_DIR}/timer/synctimer-openmac.c \
+"
+
+HARDWARE_DRIVER_OPENMAC_MN_SOURCES="\
+${KERNEL_SOURCE_DIR}/timer/hrestimer-openmac.c \
+${KERNEL_SOURCE_DIR}/edrv/edrvcyclic-openmac.c \
+"
+
+################################################################################
+# User timer sources
+
+USER_TIMER_GENERIC_SOURCES="\
+${USER_SOURCE_DIR}/timer/timer-generic.c \
+"
+
+################################################################################
+# Circular buffer sources
+################################################################################
+
+CIRCBUF_NOOS_SOURCES="\
+${COMMON_SOURCE_DIR}/circbuf/circbuffer.c \
+${COMMON_SOURCE_DIR}/circbuf/circbuf-noos.c \
+"
+
+################################################################################
+# Host interface sources
+################################################################################
+
+HOSTIF_COMMON_SOURCES="\
+${HW_DRIVERS_DIR}/hostinterface/src/hostiflib.c \
+${HW_DRIVERS_DIR}/hostinterface/src/hostiflib_l.c \
+${HW_DRIVERS_DIR}/hostinterface/src/lfqueue.c \
+"
+
+HOSTIF_USER_SOURCES="\
+${HW_DRIVERS_DIR}/hostinterface/src/hostiflibint-host.c \
+"
+
+HOSTIF_KERNEL_SOURCES="\
+${HW_DRIVERS_DIR}/hostinterface/src/hostiflibint-pcp.c \
+"
+
+################################################################################
+# Target system specific sources
+################################################################################
+
+TARGET_NIOS2_SOURCES="\
+${ARCH_SOURCE_DIR}/altera_nios2/target-nios2.c \
+"
+
+TARGET_NIOS2_LOCAL_SOURCES="\
+${ARCH_SOURCE_DIR}/altera_nios2/lock-localnoos.c \
+"
+
+TARGET_NIOS2_DUAL_SOURCES="\
+${ARCH_SOURCE_DIR}/altera_nios2/lock-dualprocnoos.c \
+"
+
+TARGET_NIOS2_OPENMAC_SOURCES="\
+${ARCH_SOURCE_DIR}/altera_nios2/openmac-nios2.c \
+"
+
+################################################################################
+# Architecture specific sources
+################################################################################
+
+ARCH_LE_SOURCES="\
+${COMMON_SOURCE_DIR}/ami/amile.c \
+"
