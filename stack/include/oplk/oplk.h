@@ -59,10 +59,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 typedef enum
 {
-    kEplApiAsndFilterNone     = 0x00,
-    kEplApiAsndFilterLocal    = 0x01,  // receive only ASnd frames with local or broadcast node ID
-    kEplApiAsndFilterAny      = 0x02,  // receive any ASnd frame
-} tEplApiAsndFilter;
+    tOplkApiAsndFilterNone      = 0x00,
+    tOplkApiAsndFilterLocal     = 0x01,  // receive only ASnd frames with local or broadcast node ID
+    tOplkApiAsndFilterAny       = 0x02,  // receive any ASnd frame
+} tOplkApiAsndFilter;
 
 typedef struct
 {
@@ -71,8 +71,7 @@ typedef struct
     tNmtNodeEvent       m_NodeEvent;
     UINT16              m_wErrorCode;   // EPL error code if m_NodeEvent == kNmtNodeEventError
     BOOL                m_fMandatory;
-
-} tEplApiEventNode;
+} tOplkApiEventNode;
 
 
 typedef struct
@@ -80,66 +79,65 @@ typedef struct
     tNmtState           m_NmtState;     // local NMT state
     tNmtBootEvent       m_BootEvent;
     UINT16              m_wErrorCode;   // EPL error code if m_BootEvent == kNmtBootEventError
-} tEplApiEventBoot;
+} tOplkApiEventBoot;
 
 typedef struct
 {
     tLedType            m_LedType;      // type of the LED (e.g. Status or Error)
     BOOL                m_fOn;          // state of the LED (e.g. on or off)
-} tEplApiEventLed;
+} tOplkApiEventLed;
 
 typedef struct
 {
     UINT                m_uiNodeId;
     tNmtNodeCommand     m_NodeCommand;
-} tEplApiEventCfmResult;
+} tOplkApiEventCfmResult;
 
 typedef struct
 {
     tPlkFrame           *m_pFrame;
     size_t              m_FrameSize;
 }
-tEplApiEventRcvAsnd;
+tOplkApiEventRcvAsnd;
 
 typedef enum
 {
-    kEplApiEventUserDef        = 0x00,    // m_pUserArg
-    kEplApiEventNmtStateChange = 0x10,    // m_NmtStateChange
-    // kEplApiEventRequestNmt     = 0x11,    // m_bNmtCmd
-    kEplApiEventCriticalError  = 0x12,    // m_InternalError, Stack halted
-    kEplApiEventWarning        = 0x13,    // m_InternalError, Stack running
-    kEplApiEventHistoryEntry   = 0x14,    // m_ErrHistoryEntry
-    kEplApiEventNode           = 0x20,    // m_Node
-    kEplApiEventBoot           = 0x21,    // m_Boot
-    kEplApiEventSdo            = 0x62,    // m_Sdo
-    kEplApiEventObdAccess      = 0x69,    // m_ObdCbParam
-    kEplApiEventLed            = 0x70,    // m_Led
-    kEplApiEventCfmProgress    = 0x71,    // m_CfmProgress
-    kEplApiEventCfmResult      = 0x72,    // m_CfmResult
-    kEplApiEventReceivedAsnd   = 0x73,    // m_RcvAsnd
-} tEplApiEventType;
+    kOplkApiEventUserDef            = 0x00,    // m_pUserArg
+    kOplkApiEventNmtStateChange     = 0x10,    // m_NmtStateChange
+    kOplkApiEventCriticalError      = 0x12,    // m_InternalError, Stack halted
+    kOplkApiEventWarning            = 0x13,    // m_InternalError, Stack running
+    kOplkApiEventHistoryEntry       = 0x14,    // m_ErrHistoryEntry
+    kOplkApiEventNode               = 0x20,    // m_Node
+    kOplkApiEventBoot               = 0x21,    // m_Boot
+    kOplkApiEventSdo                = 0x62,    // m_Sdo
+    kOplkApiEventObdAccess          = 0x69,    // m_ObdCbParam
+    kOplkApiEventLed                = 0x70,    // m_Led
+    kOplkApiEventCfmProgress        = 0x71,    // m_CfmProgress
+    kOplkApiEventCfmResult          = 0x72,    // m_CfmResult
+    kOplkApiEventReceivedAsnd       = 0x73,    // m_RcvAsnd
+} tOplkApiEventType;
 
 
 typedef union
 {
-    void*                   m_pUserArg;
-    tEventNmtStateChange    m_NmtStateChange;
-    tEplEventError          m_InternalError;
-    tSdoComFinished         m_Sdo;
-    tObdCbParam             m_ObdCbParam;
-    tEplApiEventNode        m_Node;
-    tEplApiEventBoot        m_Boot;
-    tEplApiEventLed         m_Led;
-    tCfmEventCnProgress     m_CfmProgress;
-    tEplApiEventCfmResult   m_CfmResult;
-    tErrHistoryEntry        m_ErrHistoryEntry;
-    tEplApiEventRcvAsnd     m_RcvAsnd;
-} tEplApiEventArg;
+    void*                       m_pUserArg;
+    tEventNmtStateChange        m_NmtStateChange;
+    tEplEventError              m_InternalError;
+    tSdoComFinished             m_Sdo;
+    tObdCbParam                 m_ObdCbParam;
+    tOplkApiEventNode           m_Node;
+    tOplkApiEventBoot           m_Boot;
+    tOplkApiEventLed            m_Led;
+    tCfmEventCnProgress         m_CfmProgress;
+    tOplkApiEventCfmResult      m_CfmResult;
+    tErrHistoryEntry            m_ErrHistoryEntry;
+    tOplkApiEventRcvAsnd        m_RcvAsnd;
+} tOplkApiEventArg;
 
-typedef tOplkError (*tEplApiCbEvent) (
-    tEplApiEventType        EventType_p,   // IN: event type (enum)
-    tEplApiEventArg*        pEventArg_p,   // IN: event argument (union)
-    void GENERIC*           pUserArg_p);
+typedef tOplkError (*tOplkApiCbEvent) (
+    tOplkApiEventType   EventType_p,   // IN: event type (enum)
+    tOplkApiEventArg*   pEventArg_p,   // IN: event argument (union)
+    void*               pUserArg_p);
 
 typedef struct
 {
@@ -182,7 +180,7 @@ typedef struct
     char*               m_pszDevName;               // NMT_ManufactDevName_VS (0x1008/0 local OD)
     char*               m_pszHwVersion;             // NMT_ManufactHwVers_VS  (0x1009/0 local OD)
     char*               m_pszSwVersion;             // NMT_ManufactSwVers_VS  (0x100A/0 local OD)
-    tEplApiCbEvent      m_pfnCbEvent;
+    tOplkApiCbEvent      m_pfnCbEvent;
     void*               m_pEventUserArg;
     tEplSyncCb          m_pfnCbSync;
     tEplHwParam         m_HwParam;
@@ -190,21 +188,20 @@ typedef struct
     // synchronization trigger (AppCbSync, cycle preparation)
     UINT                m_uiSyncNodeId;     // after PRes from CN with this node-ID (0 = SoC, 255 = SoA)
     BOOL                m_fSyncOnPrcNode;   // TRUE: CN is PRes chained; FALSE: conventional CN (PReq/PRes)
-} tEplApiInitParam;
+} tOplkApiInitParam;
 
 typedef struct
 {
     void*          m_pImage;
     UINT           m_uiSize;
-} tEplApiProcessImage;
-
+} tOplkApiProcessImage;
 
 typedef struct
 {
     void*          m_pPart;
     UINT           m_uiOffset;
     UINT           m_uiSize;
-} tEplApiProcessImagePart;
+} tOplkApiProcessImagePart;
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -214,7 +211,7 @@ extern "C" {
 #endif
 
 // Generic API functions
-EPLDLLEXPORT tOplkError oplk_init(tEplApiInitParam* pInitParam_p);
+EPLDLLEXPORT tOplkError oplk_init(tOplkApiInitParam* pInitParam_p);
 EPLDLLEXPORT tOplkError oplk_shutdown(void);
 EPLDLLEXPORT tOplkError oplk_execNmtCommand(tNmtEvent NmtEvent_p);
 EPLDLLEXPORT tOplkError oplk_linkObject(UINT objIndex_p, void* pVar_p, UINT* pVarEntries_p,
@@ -230,7 +227,7 @@ EPLDLLEXPORT tOplkError oplk_abortSdo(tSdoComConHdl sdoComConHdl_p, UINT32 abort
 EPLDLLEXPORT tOplkError oplk_readLocalObject(UINT index_p, UINT subindex_p, void* pDstData_p, UINT* pSize_p);
 EPLDLLEXPORT tOplkError oplk_writeLocalObject(UINT index_p, UINT subindex_p, void* pSrcData_p, UINT size_p);
 EPLDLLEXPORT tOplkError oplk_sendAsndFrame(UINT8 dstNodeId_p, tAsndFrame *pAsndFrame_p, size_t asndSize_p);
-EPLDLLEXPORT tOplkError oplk_setAsndForward(UINT8 serviceId_p, tEplApiAsndFilter FilterType_p);
+EPLDLLEXPORT tOplkError oplk_setAsndForward(UINT8 serviceId_p, tOplkApiAsndFilter FilterType_p);
 EPLDLLEXPORT tOplkError oplk_postUserEvent(void* pUserArg_p);
 EPLDLLEXPORT tOplkError oplk_triggerMnStateChange(UINT nodeId_p, tNmtNodeCommand nodeCommand_p);
 EPLDLLEXPORT tOplkError oplk_setCdcBuffer(BYTE* pbCdc_p, UINT cdcSize_p);

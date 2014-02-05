@@ -195,7 +195,7 @@ The function initializes the openPOWERLINK stack.
 static tOplkError initPowerlink(tInstance* pInstance_p)
 {
     tOplkError                  ret = kErrorOk;
-    static tEplApiInitParam     initParam;
+    static tOplkApiInitParam     initParam;
     char*                       sHostname = HOSTNAME;
 
     PRINTF ("Initializing openPOWERLINK stack...\n");

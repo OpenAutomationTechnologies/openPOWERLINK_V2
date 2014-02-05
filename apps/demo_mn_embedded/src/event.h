@@ -60,8 +60,8 @@ extern "C" {
 #endif
 
 void initEvents(BOOL* pfGsOff_p);
-tOplkError processEvents(tEplApiEventType EventType_p,
-        tEplApiEventArg* pEventArg_p, void* pUserArg_p);
+tOplkError processEvents(tOplkApiEventType EventType_p,
+        tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
 
 #ifdef __cplusplus
 }

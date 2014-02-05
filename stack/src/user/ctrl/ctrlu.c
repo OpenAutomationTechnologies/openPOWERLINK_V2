@@ -108,7 +108,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 typedef struct
 {
     UINT16              lastHeartbeat;          ///< Last detected heartbeat
-    tEplApiInitParam    initParam;              ///< Stack initialization parameters
+    tOplkApiInitParam    initParam;              ///< Stack initialization parameters
 } tCtrluInstance;
 
 //------------------------------------------------------------------------------
@@ -119,11 +119,11 @@ static tCtrluInstance       ctrlInstance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError initNmtu(tEplApiInitParam* pInitParam_p);
-static tOplkError initObd(tEplApiInitParam* pInitParam_p);
-static tOplkError updateDllConfig(tEplApiInitParam* pInitParam_p, BOOL fUpdateIdentity_p);
+static tOplkError initNmtu(tOplkApiInitParam* pInitParam_p);
+static tOplkError initObd(tOplkApiInitParam* pInitParam_p);
+static tOplkError updateDllConfig(tOplkApiInitParam* pInitParam_p, BOOL fUpdateIdentity_p);
 static tOplkError updateSdoConfig();
-static tOplkError updateObd(tEplApiInitParam* pInitParam_p);
+static tOplkError updateObd(tOplkApiInitParam* pInitParam_p);
 
 static tOplkError processUserEvent(tEplEvent* pEplEvent_p);
 static tOplkError cbCnCheckEvent(tNmtEvent NmtEvent_p);
@@ -223,15 +223,15 @@ openPOWERLINK stack.
 \ingroup module_ctrlu
 */
 //------------------------------------------------------------------------------
-tOplkError ctrlu_initStack(tEplApiInitParam * pInitParam_p)
+tOplkError ctrlu_initStack(tOplkApiInitParam * pInitParam_p)
 {
     tOplkError              ret = kErrorOk;
     tCtrlInitParam          ctrlParam;
 
     // reset instance structure
-    EPL_MEMSET(&ctrlInstance_l.initParam, 0, sizeof (tEplApiInitParam));
+    EPL_MEMSET(&ctrlInstance_l.initParam, 0, sizeof (tOplkApiInitParam));
     EPL_MEMCPY(&ctrlInstance_l.initParam, pInitParam_p,
-               min(sizeof(tEplApiInitParam), (size_t)pInitParam_p->m_uiSizeOfStruct));
+               min(sizeof(tOplkApiInitParam), (size_t)pInitParam_p->m_uiSizeOfStruct));
 
     // check event callback function pointer
     if (ctrlInstance_l.initParam.m_pfnCbEvent == NULL)
@@ -482,7 +482,7 @@ The function calls the user event callback function
 \ingroup module_ctrlu
 */
 //------------------------------------------------------------------------------
-tOplkError ctrlu_callUserEventCallback(tEplApiEventType eventType_p, tEplApiEventArg* pEventArg_p)
+tOplkError ctrlu_callUserEventCallback(tOplkApiEventType eventType_p, tOplkApiEventArg* pEventArg_p)
 {
     tOplkError          ret = kErrorOk;
 
@@ -510,14 +510,14 @@ tOplkError ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
     tOplkError          ret = kErrorOk;
 
 #if (EPL_API_OBD_FORWARD_EVENT != FALSE)
-    tEplApiEventArg     eventArg;
+    tOplkApiEventArg     eventArg;
 
     // call user callback
     // must be disabled for EplApiLinuxKernel.c, because of reentrancy problem
     // for local OD access. This is not so bad as user callback function in
     // application does not use OD callbacks at the moment.
     eventArg.m_ObdCbParam = *pParam_p;
-    ret = ctrlu_callUserEventCallback(kEplApiEventObdAccess, &eventArg);
+    ret = ctrlu_callUserEventCallback(kOplkApiEventObdAccess, &eventArg);
     if (ret != kErrorOk)
     {   // do not do any further processing on this object
         if (ret == kErrorReject)
@@ -684,7 +684,7 @@ The function initializes the NMTU modules.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError initNmtu(tEplApiInitParam* pInitParam_p)
+static tOplkError initNmtu(tOplkApiInitParam* pInitParam_p)
 {
     tOplkError      Ret = kErrorOk;
 
@@ -753,7 +753,7 @@ The function initializes the object dictionary
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError initObd(tEplApiInitParam* pInitParam_p)
+static tOplkError initObd(tOplkApiInitParam* pInitParam_p)
 {
     tOplkError          ret = kErrorOk;
     tObdInitParam       ObdInitParam;
@@ -791,7 +791,7 @@ static tOplkError cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
 {
     tOplkError          ret = kErrorOk;
     BYTE                nmtState;
-    tEplApiEventArg     eventArg;
+    tOplkApiEventArg     eventArg;
 
     // save NMT state in OD
     nmtState = (UINT8) nmtStateChange_p.newNmtState;
@@ -953,7 +953,7 @@ static tOplkError cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
 
     // call user callback
     eventArg.m_NmtStateChange = nmtStateChange_p;
-    ret = ctrlu_callUserEventCallback(kEplApiEventNmtStateChange, &eventArg);
+    ret = ctrlu_callUserEventCallback(kOplkApiEventNmtStateChange, &eventArg);
 
     return ret;
 }
@@ -975,8 +975,8 @@ static tOplkError processUserEvent(tEplEvent* pEvent_p)
 {
     tOplkError          ret;
     tEplEventError*     pEventError;
-    tEplApiEventType    eventType;
-    tEplApiEventArg     apiEventArg;
+    tOplkApiEventType    eventType;
+    tOplkApiEventArg     apiEventArg;
 
     ret = kErrorOk;
 
@@ -991,19 +991,19 @@ static tOplkError processUserEvent(tEplEvent* pEvent_p)
                 case kEplEventSourceEventk:
                 case kEplEventSourceEventu:
                 case kEplEventSourceDllk:
-                    eventType = kEplApiEventCriticalError;
+                    eventType = kOplkApiEventCriticalError;
                     // halt the stack by entering NMT state Off
                     ret = nmtu_postNmtEvent(kNmtEventCriticalError);
                     break;
 
                 // the other errors are just warnings
                 default:
-                    eventType = kEplApiEventWarning;
+                    eventType = kOplkApiEventWarning;
                     break;
             }
 
             // call user callback
-            ret = ctrlu_callUserEventCallback(eventType, (tEplApiEventArg*)pEventError);
+            ret = ctrlu_callUserEventCallback(eventType, (tOplkApiEventArg*)pEventError);
             // discard error from callback function, because this could generate an endless loop
             ret = kErrorOk;
             break;
@@ -1015,13 +1015,13 @@ static tOplkError processUserEvent(tEplEvent* pEvent_p)
                 ret = kErrorEventWrongSize;
                 break;
             }
-            eventType = kEplApiEventHistoryEntry;
-            ret = ctrlu_callUserEventCallback(eventType, (tEplApiEventArg*)pEvent_p->m_pArg);
+            eventType = kOplkApiEventHistoryEntry;
+            ret = ctrlu_callUserEventCallback(eventType, (tOplkApiEventArg*)pEvent_p->m_pArg);
             break;
 
         // user-defined event
         case kEplEventTypeApiUserDef:
-            eventType = kEplApiEventUserDef;
+            eventType = kOplkApiEventUserDef;
             apiEventArg.m_pUserArg = *(void**)pEvent_p->m_pArg;
             ret = ctrlu_callUserEventCallback(eventType, &apiEventArg);
             break;
@@ -1047,7 +1047,7 @@ The function updates the DLL configuration.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError updateDllConfig(tEplApiInitParam* pInitParam_p, BOOL fUpdateIdentity_p)
+static tOplkError updateDllConfig(tOplkApiInitParam* pInitParam_p, BOOL fUpdateIdentity_p)
 {
     tOplkError          ret = kErrorOk;
     tDllConfigParam     dllConfigParam;
@@ -1261,7 +1261,7 @@ parameters.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError updateObd(tEplApiInitParam* pInitParam_p)
+static tOplkError updateObd(tOplkApiInitParam* pInitParam_p)
 {
     tOplkError          ret = kErrorOk;
     WORD                wTemp;
@@ -1432,7 +1432,7 @@ static tOplkError cbNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtStat
                               UINT16 errorCode_p, BOOL fMandatory_p)
 {
     tOplkError              ret;
-    tEplApiEventArg         eventArg;
+    tOplkApiEventArg         eventArg;
 
     ret = kErrorOk;
 
@@ -1443,7 +1443,7 @@ static tOplkError cbNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtStat
     eventArg.m_Node.m_wErrorCode = errorCode_p;
     eventArg.m_Node.m_fMandatory = fMandatory_p;
 
-    ret = ctrlu_callUserEventCallback(kEplApiEventNode, &eventArg);
+    ret = ctrlu_callUserEventCallback(kOplkApiEventNode, &eventArg);
     if (ret != kErrorOk)
         return ret;
 
@@ -1471,7 +1471,7 @@ static tOplkError cbBootEvent(tNmtBootEvent bootEvent_p, tNmtState nmtState_p,
                                     UINT16 errorCode_p)
 {
     tOplkError              ret;
-    tEplApiEventArg         eventArg;
+    tOplkApiEventArg         eventArg;
 
     ret = kErrorOk;
 
@@ -1480,7 +1480,7 @@ static tOplkError cbBootEvent(tNmtBootEvent bootEvent_p, tNmtState nmtState_p,
     eventArg.m_Boot.m_NmtState = nmtState_p;
     eventArg.m_Boot.m_wErrorCode = errorCode_p;
 
-    ret = ctrlu_callUserEventCallback(kEplApiEventBoot, &eventArg);
+    ret = ctrlu_callUserEventCallback(kOplkApiEventBoot, &eventArg);
     return ret;
 }
 
@@ -1500,7 +1500,7 @@ The function implements the callback function for LED change events.
 static tOplkError cbLedStateChange(tLedType ledType_p, BOOL fOn_p)
 {
     tOplkError              ret;
-    tEplApiEventArg         eventArg;
+    tOplkApiEventArg         eventArg;
 
     ret = kErrorOk;
 
@@ -1508,7 +1508,7 @@ static tOplkError cbLedStateChange(tLedType ledType_p, BOOL fOn_p)
     eventArg.m_Led.m_LedType = ledType_p;
     eventArg.m_Led.m_fOn = fOn_p;
 
-    ret = ctrlu_callUserEventCallback(kEplApiEventLed, &eventArg);
+    ret = ctrlu_callUserEventCallback(kOplkApiEventLed, &eventArg);
 
     return ret;
 }
@@ -1531,12 +1531,12 @@ The function implements the callback function for CFM progress events.
 static tOplkError cbCfmEventCnProgress(tCfmEventCnProgress* pEventCnProgress_p)
 {
     tOplkError              ret;
-    tEplApiEventArg         eventArg;
+    tOplkApiEventArg         eventArg;
 
     ret = kErrorOk;
 
     eventArg.m_CfmProgress = *pEventCnProgress_p;
-    ret = ctrlu_callUserEventCallback(kEplApiEventCfmProgress, &eventArg);
+    ret = ctrlu_callUserEventCallback(kOplkApiEventCfmProgress, &eventArg);
     return ret;
 }
 
@@ -1555,11 +1555,11 @@ The function implements the callback function for CFM result events.
 static tOplkError cbCfmEventCnResult(UINT nodeId_p, tNmtNodeCommand nodeCommand_p)
 {
     tOplkError              ret;
-    tEplApiEventArg         eventArg;
+    tOplkApiEventArg         eventArg;
 
     eventArg.m_CfmResult.m_uiNodeId = nodeId_p;
     eventArg.m_CfmResult.m_NodeCommand = nodeCommand_p;
-    ret = ctrlu_callUserEventCallback(kEplApiEventCfmResult, &eventArg);
+    ret = ctrlu_callUserEventCallback(kOplkApiEventCfmResult, &eventArg);
     if (ret != kErrorOk)
     {
         if (ret == kErrorReject)

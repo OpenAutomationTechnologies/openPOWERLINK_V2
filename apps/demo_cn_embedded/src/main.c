@@ -102,7 +102,7 @@ static tInstance instance_l;
 static tOplkError initPowerlink(tInstance* pInstance_p);
 static tOplkError loopMain(tInstance* pInstance_p);
 static void shutdownPowerlink(tInstance* pInstance_p);
-static tOplkError eventCbPowerlink(tEplApiEventType EventType_p, tEplApiEventArg* pEventArg_p, void* pUserArg_p);
+static tOplkError eventCbPowerlink(tOplkApiEventType EventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -186,7 +186,7 @@ The function initializes the openPOWERLINK stack.
 static tOplkError initPowerlink(tInstance* pInstance_p)
 {
     tOplkError                  ret = kErrorOk;
-    static tEplApiInitParam     initParam;
+    static tOplkApiInitParam    initParam;
 
     PRINTF("Initializing openPOWERLINK stack...\n");
 
@@ -317,7 +317,7 @@ The function implements the applications stack event handler.
 \ingroup module_demo_cn_embedded
 */
 //------------------------------------------------------------------------------
-static tOplkError eventCbPowerlink(tEplApiEventType EventType_p, tEplApiEventArg* pEventArg_p, void* pUserArg_p)
+static tOplkError eventCbPowerlink(tOplkApiEventType EventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p)
 {
     tOplkError  ret = kErrorOk;
 
@@ -325,7 +325,7 @@ static tOplkError eventCbPowerlink(tEplApiEventType EventType_p, tEplApiEventArg
 
     switch(EventType_p)
     {
-        case kEplApiEventNmtStateChange:
+        case kOplkApiEventNmtStateChange:
             lcd_printNmtState(pEventArg_p->m_NmtStateChange.newNmtState);
 
             switch(pEventArg_p->m_NmtStateChange.newNmtState)

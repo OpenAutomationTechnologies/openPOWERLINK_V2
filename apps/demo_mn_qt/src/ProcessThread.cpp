@@ -79,8 +79,8 @@ The function processes state change events.
 */
 //------------------------------------------------------------------------------
 
-tOplkError ProcessThread::appCbEvent(tEplApiEventType EventType_p,
-                                        tEplApiEventArg* pEventArg_p, void GENERIC* pUserArg_p)
+tOplkError ProcessThread::appCbEvent(tOplkApiEventType EventType_p,
+                                        tOplkApiEventArg* pEventArg_p, void GENERIC* pUserArg_p)
 {
     return pProcessThread_g->processEvent(EventType_p, pEventArg_p, pUserArg_p);
 }
@@ -260,7 +260,7 @@ The function returns the address of the event callback function.
 \return Returns the address of event callback function
 */
 //------------------------------------------------------------------------------
-tEplApiCbEvent ProcessThread::getEventCbFunc(void)
+tOplkApiCbEvent ProcessThread::getEventCbFunc(void)
 {
     return appCbEvent;
 }
@@ -276,42 +276,42 @@ AppCbEvent() implements the openPOWERLINKs event callback function.
 \param  pUserArg_p          User argument
 */
 //------------------------------------------------------------------------------
-tOplkError ProcessThread::processEvent(tEplApiEventType EventType_p,
-                      tEplApiEventArg* pEventArg_p, void GENERIC* pUserArg_p)
+tOplkError ProcessThread::processEvent(tOplkApiEventType EventType_p,
+                      tOplkApiEventArg* pEventArg_p, void GENERIC* pUserArg_p)
 {
     tOplkError  ret = kErrorOk;
 
     switch (EventType_p)
     {
-        case kEplApiEventNmtStateChange:
+        case kOplkApiEventNmtStateChange:
             ret = processStateChangeEvent(EventType_p, pEventArg_p, pUserArg_p);
             break;
 
-        case kEplApiEventCriticalError:
-        case kEplApiEventWarning:
+        case kOplkApiEventCriticalError:
+        case kOplkApiEventWarning:
             ret = processErrorWarningEvent(EventType_p, pEventArg_p, pUserArg_p);
             break;
 
-        case kEplApiEventHistoryEntry:
+        case kOplkApiEventHistoryEntry:
             ret = processHistoryEvent(EventType_p, pEventArg_p, pUserArg_p);
             break;
 
-        case kEplApiEventNode:
+        case kOplkApiEventNode:
             ret = processNodeEvent(EventType_p, pEventArg_p, pUserArg_p);
             break;
 
-        case kEplApiEventCfmProgress:
+        case kOplkApiEventCfmProgress:
             ret = processCfmProgressEvent(EventType_p, pEventArg_p, pUserArg_p);
             break;
 
-        case kEplApiEventCfmResult:
+        case kOplkApiEventCfmResult:
             ret = processCfmResultEvent(EventType_p, pEventArg_p, pUserArg_p);
             break;
 
 #if !defined(CONFIG_INCLUDE_CFM)
         // Configuration Manager is not available,
         // so process SDO events
-        case kEplApiEventSdo:
+        case kOplkApiEventSdo:
             ret = processSdoEvent(EventType_p, pEventArg_p, pUserArg_p);
             break;
 #endif
@@ -339,8 +339,8 @@ The function processes state change events.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError ProcessThread::processStateChangeEvent(tEplApiEventType EventType_p,
-                                          tEplApiEventArg* pEventArg_p,
+tOplkError ProcessThread::processStateChangeEvent(tOplkApiEventType EventType_p,
+                                          tOplkApiEventArg* pEventArg_p,
                                           void GENERIC* pUserArg_p)
 {
     tOplkError                  ret = kErrorOk;
@@ -458,8 +458,8 @@ The function processes error and warning events.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError ProcessThread::processErrorWarningEvent(tEplApiEventType EventType_p,
-                                           tEplApiEventArg* pEventArg_p,
+tOplkError ProcessThread::processErrorWarningEvent(tOplkApiEventType EventType_p,
+                                           tOplkApiEventArg* pEventArg_p,
                                            void GENERIC* pUserArg_p)
 {
     tEplEventError*         pInternalError = &pEventArg_p->m_InternalError;
@@ -510,8 +510,8 @@ The function processes history events.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError ProcessThread::processHistoryEvent(tEplApiEventType EventType_p,
-                                      tEplApiEventArg* pEventArg_p,
+tOplkError ProcessThread::processHistoryEvent(tOplkApiEventType EventType_p,
+                                      tOplkApiEventArg* pEventArg_p,
                                       void GENERIC* pUserArg_p)
 {
     tErrHistoryEntry*    pHistoryEntry = &pEventArg_p->m_ErrHistoryEntry;
@@ -547,11 +547,11 @@ The function processes node events.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError ProcessThread::processNodeEvent(tEplApiEventType EventType_p,
-                                   tEplApiEventArg* pEventArg_p,
+tOplkError ProcessThread::processNodeEvent(tOplkApiEventType EventType_p,
+                                   tOplkApiEventArg* pEventArg_p,
                                    void GENERIC* pUserArg_p)
 {
-    tEplApiEventNode*   pNode = &pEventArg_p->m_Node;
+    tOplkApiEventNode*   pNode = &pEventArg_p->m_Node;
     tOplkError          EplRet = kErrorOk;
 
     UNUSED_PARAMETER(EventType_p);
@@ -670,8 +670,8 @@ The function processes CFM progress events.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError ProcessThread::processCfmProgressEvent(tEplApiEventType EventType_p,
-                                          tEplApiEventArg* pEventArg_p,
+tOplkError ProcessThread::processCfmProgressEvent(tOplkApiEventType EventType_p,
+                                          tOplkApiEventArg* pEventArg_p,
                                           void GENERIC* pUserArg_p)
 {
     tCfmEventCnProgress*     pCfmProgress = &pEventArg_p->m_CfmProgress;
@@ -709,11 +709,11 @@ The function processes CFM result events.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError ProcessThread::processCfmResultEvent(tEplApiEventType EventType_p,
-                                        tEplApiEventArg* pEventArg_p,
+tOplkError ProcessThread::processCfmResultEvent(tOplkApiEventType EventType_p,
+                                        tOplkApiEventArg* pEventArg_p,
                                         void GENERIC* pUserArg_p)
 {
-    tEplApiEventCfmResult*       pCfmResult = &pEventArg_p->m_CfmResult;
+    tOplkApiEventCfmResult*       pCfmResult = &pEventArg_p->m_CfmResult;
 
     UNUSED_PARAMETER(EventType_p);
     UNUSED_PARAMETER(pUserArg_p);
@@ -758,8 +758,8 @@ The function processes SDO events.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError ProcessThread::processSdoEvent(tEplApiEventType EventType_p,
-                                  tEplApiEventArg* pEventArg_p,
+tOplkError ProcessThread::processSdoEvent(tOplkApiEventType EventType_p,
+                                  tOplkApiEventArg* pEventArg_p,
                                   void GENERIC* pUserArg_p)
 {
     tSdoComFinished*          pSdo = &pEventArg_p->m_Sdo;

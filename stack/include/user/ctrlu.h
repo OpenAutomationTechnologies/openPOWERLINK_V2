@@ -65,11 +65,11 @@ extern "C" {
 
 tOplkError ctrlu_init(void);
 void       ctrlu_exit(void);
-tOplkError ctrlu_initStack(tEplApiInitParam * pInitParam_p);
+tOplkError ctrlu_initStack(tOplkApiInitParam * pInitParam_p);
 tOplkError ctrlu_shutdownStack(void);
 tOplkError ctrlu_processStack(void);
 BOOL       ctrlu_checkKernelStack(void);
-tOplkError ctrlu_callUserEventCallback(tEplApiEventType eventType_p, tEplApiEventArg* pEventArg_p);
+tOplkError ctrlu_callUserEventCallback(tOplkApiEventType eventType_p, tOplkApiEventArg* pEventArg_p);
 tOplkError ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p);
 
 #ifdef __cplusplus
