@@ -42,7 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <oplk/oplkinc.h>
-#include <oplk/EplTimer.h>
+#include <oplk/timer.h>
 #include <user/eventu.h>
 
 //------------------------------------------------------------------------------
