@@ -116,7 +116,7 @@ The function implements the callback function to process a received frame.
 tEdrvReleaseRxBuffer dllk_processFrameReceived(tEdrvRxBuffer * pRxBuffer_p)
 {
     tEdrvReleaseRxBuffer    releaseRxBuffer = kEdrvReleaseRxBufferImmediately;
-    tOplkError              ret             = kEplSuccessful;
+    tOplkError              ret             = kErrorOk;
     tNmtState               nmtState;
     tNmtEvent               nmtEvent        = kNmtEventNoEvent;
     tEplEvent               event;
@@ -205,20 +205,20 @@ tEdrvReleaseRxBuffer dllk_processFrameReceived(tEdrvRxBuffer * pRxBuffer_p)
             }
             nmtEvent = kNmtEventDllCePreq;
             ret = processReceivedPreq(&frameInfo, nmtState, &releaseRxBuffer);
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
                 goto Exit;
             break;
 
         case kEplMsgTypePres:
             ret = processReceivedPres(&frameInfo, nmtState, &nmtEvent, &releaseRxBuffer);
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
                 goto Exit;
             break;
 
         case kEplMsgTypeSoc:
             nmtEvent = kNmtEventDllCeSoc;
             ret = processReceivedSoc(pRxBuffer_p, nmtState);
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
                 goto Exit;
             break;
 
@@ -226,7 +226,7 @@ tEdrvReleaseRxBuffer dllk_processFrameReceived(tEdrvRxBuffer * pRxBuffer_p)
         case kEplMsgTypeAInv:
             nmtEvent = kNmtEventDllCeAInv;
             ret = processReceivedSoa(pRxBuffer_p, nmtState);
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
                 goto Exit;
             break;
 #endif
@@ -234,14 +234,14 @@ tEdrvReleaseRxBuffer dllk_processFrameReceived(tEdrvRxBuffer * pRxBuffer_p)
         case kEplMsgTypeSoa:
             nmtEvent = kNmtEventDllCeSoa;
             ret = processReceivedSoa(pRxBuffer_p, nmtState);
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
                 goto Exit;
             break;
 
         case kEplMsgTypeAsnd:
             nmtEvent = kNmtEventDllCeAsnd;
             ret = processReceivedAsnd(&frameInfo, pRxBuffer_p, nmtState, &releaseRxBuffer);
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
                 goto Exit;
             break;
 
@@ -252,7 +252,7 @@ tEdrvReleaseRxBuffer dllk_processFrameReceived(tEdrvRxBuffer * pRxBuffer_p)
     if (nmtEvent != kNmtEventNoEvent)
     {   // event for DLL and NMT state machine generated
         ret = dllk_changeState(nmtEvent, nmtState);
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
             goto Exit;
 
         if (((nmtEvent != kNmtEventDllCeAsnd) && (nmtEvent != kNmtEventDllCeAInv)) &&
@@ -268,7 +268,7 @@ tEdrvReleaseRxBuffer dllk_processFrameReceived(tEdrvRxBuffer * pRxBuffer_p)
     }
 
 Exit:
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
     {
         UINT32      arg;
 
@@ -297,7 +297,7 @@ frame was transmitted.
 //------------------------------------------------------------------------------
 void dllk_processTransmittedNmtReq(tEdrvTxBuffer * pTxBuffer_p)
 {
-    tOplkError              ret = kEplSuccessful;
+    tOplkError              ret = kErrorOk;
     tEplEvent               event;
     tDllAsyncReqPriority    priority;
     tNmtState               nmtState;
@@ -332,7 +332,7 @@ void dllk_processTransmittedNmtReq(tEdrvTxBuffer * pTxBuffer_p)
             event.m_pArg = pTxFrame;
             //PRINTF("%s TxB=%p, TxF=%p, s=%u\n", __func__, pTxBuffer_p, event.m_pArg, event.m_uiSize);
             ret = eventk_postEvent(&event);
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
                 goto Exit;
         }
     }
@@ -350,11 +350,11 @@ void dllk_processTransmittedNmtReq(tEdrvTxBuffer * pTxBuffer_p)
     event.m_pArg = &priority;
     event.m_uiSize = sizeof(priority);
     ret = eventk_postEvent(&event);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
         goto Exit;
 
 Exit:
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
     {
         BENCHMARK_MOD_02_TOGGLE(7);
         arg = dllkInstance_g.dllState | (handle << 16);
@@ -379,7 +379,7 @@ POWERLINK frame was transmitted.
 //------------------------------------------------------------------------------
 void dllk_processTransmittedNonEpl(tEdrvTxBuffer * pTxBuffer_p)
 {
-    tOplkError              ret = kEplSuccessful;
+    tOplkError              ret = kErrorOk;
     tEplEvent               event;
     tDllAsyncReqPriority    priority;
     tNmtState               nmtState;
@@ -408,7 +408,7 @@ void dllk_processTransmittedNonEpl(tEdrvTxBuffer * pTxBuffer_p)
     ret = eventk_postEvent(&event);
 
 Exit:
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
     {
         BENCHMARK_MOD_02_TOGGLE(7);
         arg = dllkInstance_g.dllState | (handle << 16);
@@ -433,7 +433,7 @@ frame was transmitted.
 //------------------------------------------------------------------------------
 void dllk_processTransmittedSoc(tEdrvTxBuffer * pTxBuffer_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     tNmtState       nmtState;
     UINT            handle = DLLK_TXFRAME_SOC;
     UINT32          arg;
@@ -450,11 +450,11 @@ void dllk_processTransmittedSoc(tEdrvTxBuffer * pTxBuffer_p)
 
     // SoC frame sent
     ret = dllk_changeState(kNmtEventDllMeAsndTimeout, nmtState);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
         goto Exit;
 
 Exit:
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
     {
         BENCHMARK_MOD_02_TOGGLE(7);
         arg = dllkInstance_g.dllState | (handle << 16);
@@ -480,7 +480,7 @@ frame was transmitted.
 //------------------------------------------------------------------------------
 void dllk_processTransmittedSoa(tEdrvTxBuffer * pTxBuffer_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     tNmtState       nmtState;
     UINT            handle = DLLK_TXFRAME_SOA;
     UINT32          arg;
@@ -508,7 +508,7 @@ void dllk_processTransmittedSoa(tEdrvTxBuffer * pTxBuffer_p)
                 {   // StatusRes does exist
                     // send StatusRes
                     ret = edrv_sendTxBuffer(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_STATUSRES + dllkInstance_g.curTxBufferOffsetStatusRes]);
-                    if (ret != kEplSuccessful)
+                    if (ret != kErrorOk)
                         goto Exit;
                     TGT_DBG_SIGNAL_TRACE_POINT(8);
                 }
@@ -519,7 +519,7 @@ void dllk_processTransmittedSoa(tEdrvTxBuffer * pTxBuffer_p)
                 {   // IdentRes does exist
                     // send IdentRes
                     ret = edrv_sendTxBuffer(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_IDENTRES + dllkInstance_g.curTxBufferOffsetIdentRes]);
-                    if (ret != kEplSuccessful)
+                    if (ret != kErrorOk)
                         goto Exit;
                     TGT_DBG_SIGNAL_TRACE_POINT(7);
                 }
@@ -533,7 +533,7 @@ void dllk_processTransmittedSoa(tEdrvTxBuffer * pTxBuffer_p)
                     {
                         // send NmtRequest
                         ret = edrv_sendTxBuffer(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NMTREQ + dllkInstance_g.curTxBufferOffsetNmtReq]);
-                        if (ret != kEplSuccessful)
+                        if (ret != kErrorOk)
                             goto Exit;
                         dllkInstance_g.curTxBufferOffsetNmtReq ^= 1;
                     }
@@ -548,7 +548,7 @@ void dllk_processTransmittedSoa(tEdrvTxBuffer * pTxBuffer_p)
                     {
                         // send non-EPL frame
                         ret = edrv_sendTxBuffer(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONEPL + dllkInstance_g.curTxBufferOffsetNonEpl]);
-                        if (ret != kEplSuccessful)
+                        if (ret != kErrorOk)
                             goto Exit;
 
                         dllkInstance_g.curTxBufferOffsetNonEpl ^= 1;
@@ -572,12 +572,12 @@ void dllk_processTransmittedSoa(tEdrvTxBuffer * pTxBuffer_p)
         ret = hrestimer_modifyTimer(&dllkInstance_g.timerHdlCycle,
                                             dllkInstance_g.dllConfigParam.asyncSlotTimeout,
                                             dllk_cbMnTimerCycle, 0L, FALSE);
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
             goto Exit;
 
         // forward event to ErrorHandler and DLLk module
         ret = dllk_postEvent(kEplEventTypeDllkCycleFinish);
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
             goto Exit;
     }
 #endif
@@ -588,12 +588,12 @@ void dllk_processTransmittedSoa(tEdrvTxBuffer * pTxBuffer_p)
     {   // cyclic state is active, so preprocessing is necessary
         dllkInstance_g.fSyncProcessed = TRUE;
         ret = dllk_postEvent(kEplEventTypeSync);
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
             goto Exit;
     }
 
 Exit:
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
     {
         BENCHMARK_MOD_02_TOGGLE(7);
         arg = dllkInstance_g.dllState | (handle << 16);
@@ -618,7 +618,7 @@ The function updates a IdentResponse frame with the specified information.
 //------------------------------------------------------------------------------
 tOplkError dllk_updateFrameIdentRes(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     tEplFrame*      pTxFrame;
 
     pTxFrame = (tEplFrame *) pTxBuffer_p->pBuffer;
@@ -651,7 +651,7 @@ The function updates a StatusResponse frame with the specified information.
 //------------------------------------------------------------------------------
 tOplkError dllk_updateFrameStatusRes(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     tEplFrame*      pTxFrame;
 
     pTxFrame = (tEplFrame *) pTxBuffer_p->pBuffer;
@@ -685,7 +685,7 @@ The function updates a PRes frame with the specified information.
 //------------------------------------------------------------------------------
 tOplkError dllk_updateFramePres(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     tEplFrame*      pTxFrame;
     UINT8           flag1;
 
@@ -781,7 +781,7 @@ tOplkError dllk_checkFrame(tEplFrame * pFrame_p, UINT frameSize_p)
         }
     }
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 #if defined (CONFIG_INCLUDE_NMT_MN)
@@ -802,7 +802,7 @@ The function updates and transmits a SoA.
 //------------------------------------------------------------------------------
 tOplkError dllk_mnSendSoa(tNmtState nmtState_p, tDllState* pDllStateProposed_p, BOOL fEnableInvitation_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     tEdrvTxBuffer  *pTxBuffer = NULL;
 
     *pDllStateProposed_p = kDllMsNonCyclic;
@@ -811,7 +811,7 @@ tOplkError dllk_mnSendSoa(tNmtState nmtState_p, tDllState* pDllStateProposed_p, 
     if (pTxBuffer->pBuffer != NULL)
     {   // SoA does exist
         ret = dllk_updateFrameSoa(pTxBuffer, nmtState_p, fEnableInvitation_p, dllkInstance_g.curLastSoaReq);
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
             return ret;
 
         if (dllkInstance_g.aLastReqServiceId[dllkInstance_g.curLastSoaReq] != kDllReqServiceNo)
@@ -859,7 +859,7 @@ The function updates a SoA frame.
 tOplkError dllk_updateFrameSoa(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p,
                                BOOL fEnableInvitation_p, UINT8 curReq_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     tEplFrame*          pTxFrame;
     tDllkNodeInfo*      pNodeInfo;
 
@@ -882,7 +882,7 @@ tOplkError dllk_updateFrameSoa(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p,
         ret = dllkcal_getSoaRequest(&dllkInstance_g.aLastReqServiceId[curReq_p],
                                            &dllkInstance_g.aLastTargetNodeId[curReq_p],
                                            &pTxFrame->m_Data.m_Soa.m_Payload);
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
             return ret;
 
         if (dllkInstance_g.aLastReqServiceId[curReq_p] != kDllReqServiceNo)
@@ -895,7 +895,7 @@ tOplkError dllk_updateFrameSoa(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p,
             pNodeInfo = dllk_getNodeInfo(dllkInstance_g.aLastTargetNodeId[curReq_p]);
             if (pNodeInfo == NULL)
             {   // no node info structure available
-                ret = kEplDllNoNodeInfo;
+                ret = kErrorDllNoNodeInfo;
                 return ret;
             }
 
@@ -941,7 +941,7 @@ only for frames with registered AsndServiceIds (only kDllAsndFilterAny).
 //------------------------------------------------------------------------------
 tOplkError dllk_asyncFrameNotReceived(tDllReqServiceId reqServiceId_p, UINT nodeId_p)
 {
-    tOplkError      Ret = kEplSuccessful;
+    tOplkError      Ret = kErrorOk;
     BYTE            abBuffer[18];
     tEplFrame*      pFrame = (tEplFrame*) abBuffer;
     tFrameInfo      FrameInfo;
@@ -1000,7 +1000,7 @@ driver.
 tOplkError dllk_createTxFrame (UINT* pHandle_p, UINT* pFrameSize_p,
                                tEplMsgType msgType_p, tDllAsndServiceId serviceId_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     tEplFrame*      pTxFrame;
     UINT            handle = *pHandle_p;
     tEdrvTxBuffer*  pTxBuffer = NULL;
@@ -1032,7 +1032,7 @@ tOplkError dllk_createTxFrame (UINT* pHandle_p, UINT* pFrameSize_p,
 #endif
 
                 case kDllAsndNotDefined:
-                    ret = kEplDllInvalidParam;
+                    ret = kErrorDllInvalidParam;
                     goto Exit;
                     break;
 
@@ -1040,7 +1040,7 @@ tOplkError dllk_createTxFrame (UINT* pHandle_p, UINT* pFrameSize_p,
 #if (EPL_DLL_PRES_CHAINING_CN == FALSE) && (EPL_DLL_PRES_CHAINING_MN != FALSE)
                 case kDllAsndSyncResponse:
 #endif
-                    ret = kEplEdrvBufNotExisting;
+                    ret = kErrorEdrvBufNotExisting;
                     goto Exit;
                     break;
             }
@@ -1082,14 +1082,14 @@ tOplkError dllk_createTxFrame (UINT* pHandle_p, UINT* pFrameSize_p,
 
             if (pTxBuffer->pBuffer != NULL)
             {
-                ret = kEplEdrvNoFreeBufEntry;
+                ret = kErrorEdrvNoFreeBufEntry;
                 goto Exit;
             }
             break;
 
 #else
         default:
-            ret = kEplEdrvBufNotExisting;
+            ret = kErrorEdrvBufNotExisting;
             goto Exit;
             break;
 #endif
@@ -1103,7 +1103,7 @@ tOplkError dllk_createTxFrame (UINT* pHandle_p, UINT* pFrameSize_p,
         pTxBuffer = &dllkInstance_g.pTxBuffer[handle];
         if (pTxBuffer->pBuffer != NULL)
         {   // entry is not free
-            ret = kEplEdrvNoFreeBufEntry;
+            ret = kErrorEdrvNoFreeBufEntry;
             goto Exit;
         }
 
@@ -1111,7 +1111,7 @@ tOplkError dllk_createTxFrame (UINT* pHandle_p, UINT* pFrameSize_p,
         pTxBuffer->maxBufferSize = *pFrameSize_p;
 
         ret = edrv_allocTxBuffer(pTxBuffer);
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
         {   // error occurred while registering Tx frame
             goto Exit;
         }
@@ -1262,13 +1262,13 @@ driver.
 //------------------------------------------------------------------------------
 tOplkError dllk_deleteTxFrame (UINT handle_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     tEdrvTxBuffer*  pTxBuffer = NULL;
     UINT            nIndex = 0;
 
     if (handle_p >= dllkInstance_g.maxTxFrames)
     {   // handle is not valid
-        return kEplDllIllegalHdl;
+        return kErrorDllIllegalHdl;
     }
 
     for ( ; nIndex < 2; nIndex++, handle_p++)
@@ -1280,7 +1280,7 @@ tOplkError dllk_deleteTxFrame (UINT handle_p)
         pTxBuffer->txFrameSize = DLLK_BUFLEN_EMPTY;
 
         ret = edrv_freeTxBuffer(pTxBuffer);
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
         {   // error occurred while releasing Tx frame
             return ret;
         }
@@ -1306,7 +1306,7 @@ callback function (i.e. to the PDO module).
 //------------------------------------------------------------------------------
 tOplkError dllk_processTpdo(tFrameInfo * pFrameInfo_p, BOOL fReadyFlag_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
 
     if (dllkInstance_g.pfnCbProcessTpdo != NULL)
     {
@@ -1337,7 +1337,7 @@ The function processes a received PReq frame.
 static tOplkError processReceivedPreq(tFrameInfo* pFrameInfo_p, tNmtState nmtState_p,
                                       tEdrvReleaseRxBuffer* pReleaseRxBuffer_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     tEplFrame*      pFrame;
     BYTE            bFlag1;
 
@@ -1363,7 +1363,7 @@ static tOplkError processReceivedPreq(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
 #if (EPL_DLL_PRES_READY_AFTER_SOA != FALSE) || (EPL_DLL_PRES_READY_AFTER_SOC != FALSE)
             edrv_startTxBuffer(pTxBuffer);
 #else
-            if ((ret = edrv_sendTxBuffer(pTxBuffer)) != kEplSuccessful)
+            if ((ret = edrv_sendTxBuffer(pTxBuffer)) != kErrorOk)
                 goto Exit;
 #endif
         }
@@ -1402,12 +1402,12 @@ static tOplkError processReceivedPreq(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
 
             // forward PReq frame as RPDO to PDO module
             ret = forwardRpdo(pFrameInfo_p);
-            if (ret == kEplReject)
+            if (ret == kErrorReject)
             {
                 *pReleaseRxBuffer_p = kEdrvReleaseRxBufferLater;
-                ret = kEplSuccessful;
+                ret = kErrorOk;
             }
-            else if (ret != kEplSuccessful)
+            else if (ret != kErrorOk)
             {
                 goto Exit;
             }
@@ -1445,7 +1445,7 @@ The function processes a received PRes frame.
 static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtState_p,
                                       tNmtEvent* pNmtEvent_p, tEdrvReleaseRxBuffer* pReleaseRxBuffer_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     tEplFrame*      pFrame;
     UINT            nodeId;
 
@@ -1473,7 +1473,7 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
         pIntNodeInfo = dllk_getNodeInfo(nodeId);
         if (pIntNodeInfo == NULL)
         {   // no node info structure available
-            ret = kEplDllNoNodeInfo;
+            ret = kErrorDllNoNodeInfo;
             goto Exit;
         }
 #endif
@@ -1501,7 +1501,7 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
 
                 for (pCnNodeId-- ; nextNodeIndex > 0; nextNodeIndex--, pCnNodeId--)
                 {   // issue error for each CN in list between last and current
-                    if ((ret = dllk_issueLossOfPres(*pCnNodeId)) != kEplSuccessful)
+                    if ((ret = dllk_issueLossOfPres(*pCnNodeId)) != kErrorOk)
                         goto Exit;
                 }
 
@@ -1534,7 +1534,7 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
                 && (dllkInstance_g.dllConfigParam.fSyncOnPrcNode != FALSE))
             {
                 dllkInstance_g.fSyncProcessed = TRUE;
-                if ((ret = dllk_postEvent(kEplEventTypeSync)) != kEplSuccessful)
+                if ((ret = dllk_postEvent(kEplEventTypeSync)) != kErrorOk)
                     goto Exit;
             }
         }
@@ -1549,7 +1549,7 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
             && (nodeId > dllkInstance_g.dllConfigParam.syncNodeId))
         {
             dllkInstance_g.fSyncProcessed = TRUE;
-            if ((ret = dllk_postEvent(kEplEventTypeSync)) != kEplSuccessful)
+            if ((ret = dllk_postEvent(kEplEventTypeSync)) != kErrorOk)
                 goto Exit;
         }
 
@@ -1558,7 +1558,7 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
         ret = dllkcal_setAsyncPendingRequests(nodeId,
             ((tDllAsyncReqPriority) ((flag1 & EPL_FRAME_FLAG2_PR) >> EPL_FRAME_FLAG2_PR_SHIFT)),
             (flag1 & EPL_FRAME_FLAG2_RS));
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
             goto Exit;
 
         // check NMT state of CN
@@ -1591,7 +1591,7 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
                 event.m_pArg = &nodeOpParam;
             }
 
-            if ((ret = eventk_postEvent(&event)) != kEplSuccessful)
+            if ((ret = eventk_postEvent(&event)) != kErrorOk)
                 goto Exit;
 
             // save current NMT state of CN in internal node structure
@@ -1632,7 +1632,7 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
                 DllEvent.m_uiNodeId = nodeId;
                 DllEvent.m_NmtState = nmtState_p;
                 ret = errhndk_postError(&DllEvent);
-                if (ret != kEplSuccessful)
+                if (ret != kErrorOk)
                     goto Exit;
             }
             goto Exit;
@@ -1644,12 +1644,12 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
             ami_setUint8Le(&pFrame->m_Data.m_Pres.m_le_bFlag1, 0);
         }
         ret = forwardRpdo(pFrameInfo_p);
-        if (ret == kEplReject)
+        if (ret == kErrorReject)
         {
             *pReleaseRxBuffer_p = kEdrvReleaseRxBufferLater;
-            ret = kEplSuccessful;
+            ret = kErrorOk;
         }
-        else if (ret != kEplSuccessful)
+        else if (ret != kErrorOk)
         {
             goto Exit;
         }
@@ -1691,7 +1691,7 @@ The function processes a received SoC frame.
 //------------------------------------------------------------------------------
 static tOplkError processReceivedSoc(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtState_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
 #if EPL_DLL_PRES_READY_AFTER_SOC != FALSE
     tEdrvTxBuffer*  pTxBuffer = NULL;
 #endif
@@ -1712,7 +1712,7 @@ static tOplkError processReceivedSoc(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
     if (pTxBuffer->pBuffer != NULL)          // Does PRes exist?
     {   // PRes does exist -> mark PRes frame as ready for transmission
         ret = edrv_setTxBufferReady(pTxBuffer);
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
             return ret;
     }
 #endif
@@ -1722,11 +1722,11 @@ static tOplkError processReceivedSoc(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
 
 #if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_SOC)
         // trigger synchronous task
-        if ((ret = dllk_postEvent(kEplEventTypeSync)) != kEplSuccessful)
+        if ((ret = dllk_postEvent(kEplEventTypeSync)) != kErrorOk)
             return ret;
 #elif (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
         ret = synctimer_syncTriggerAtTimeStamp(pRxBuffer_p->rxTimeStamp);
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
             return ret;
 #endif
 
@@ -1763,7 +1763,7 @@ The function processes a received SoA frame.
 //------------------------------------------------------------------------------
 static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtState_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     tEplFrame*          pFrame;
 #if (EDRV_AUTO_RESPONSE == FALSE)
     tEdrvTxBuffer*      pTxBuffer = NULL;
@@ -1802,7 +1802,7 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
                 {   // StatusRes does exist
                     // send StatusRes
                     ret = edrv_sendTxBuffer(pTxBuffer);
-                    if (ret != kEplSuccessful)
+                    if (ret != kErrorOk)
                         goto Exit;
 
                     TGT_DBG_SIGNAL_TRACE_POINT(8);
@@ -1831,7 +1831,7 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
 
                     // signal update of StatusRes
                     ret = dllk_postEvent(kEplEventTypeDllkFlag1);
-                    if (ret != kEplSuccessful)
+                    if (ret != kErrorOk)
                         goto Exit;
 
                 }
@@ -1852,7 +1852,7 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
                 {   // IdentRes does exist
                     // send IdentRes
                     ret = edrv_sendTxBuffer(pTxBuffer);
-                    if (ret != kEplSuccessful)
+                    if (ret != kErrorOk)
                         goto Exit;
 
                     TGT_DBG_SIGNAL_TRACE_POINT(7);
@@ -1877,7 +1877,7 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
                     {
                         // send NmtRequest
                         ret = edrv_sendTxBuffer(pTxBuffer);
-                        if (ret != kEplSuccessful)
+                        if (ret != kErrorOk)
                             goto Exit;
 
                         // decrement RS in Flag 2
@@ -1932,7 +1932,7 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
                     ret = edrv_changeRxFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT,
                                            DLLK_FILTER_PREQ,
                                            EDRV_FILTER_CHANGE_AUTO_RESPONSE_DELAY);
-                    if (ret != kEplSuccessful)
+                    if (ret != kErrorOk)
                         goto Exit;
 
                     ami_setUint32Le(&pTxFrameSyncRes->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwPResTimeFirst,
@@ -1942,7 +1942,7 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
                                     | EPL_SYNC_PRES_TIME_FIRST_VALID);
                     // update SyncRes Tx buffer in Edrv
                     ret = edrv_updateTxBuffer(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SYNCRES]);
-                    if (ret != kEplSuccessful)
+                    if (ret != kErrorOk)
                         goto Exit;
                 }
 
@@ -1964,13 +1964,13 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
                     syncControl &= ~EPL_SYNC_PRES_MODE_SET;
 
                     ret = dllk_presChainingDisable();
-                    if (ret != kEplSuccessful)
+                    if (ret != kErrorOk)
                         goto Exit;
                 }
                 else if (syncControl & EPL_SYNC_PRES_MODE_SET)
                 {   // PRes Chaining is Enabled
                     ret = dllk_presChainingEnable();
-                    if (ret != kEplSuccessful)
+                    if (ret != kErrorOk)
                         goto Exit;
                 }
 
@@ -2006,7 +2006,7 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
                     {
                         // send non-EPL frame
                         ret = edrv_sendTxBuffer(pTxBuffer);
-                        if (ret != kEplSuccessful)
+                        if (ret != kErrorOk)
                             goto Exit;
 
                         // decrement RS in Flag 2
@@ -2053,7 +2053,7 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
     if (pTxBuffer == NULL)
     {   // signal process function readiness of PRes frame
         ret = postEvent(kEplEventTypeDllkPresReady);
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
             goto Exit;
     }
 #endif
@@ -2083,7 +2083,7 @@ The function processes a received ASnd frame.
 static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* pRxBuffer_p,
                                       tNmtState nmtState_p, tEdrvReleaseRxBuffer* pReleaseRxBuffer_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     tEplFrame*      pFrame;
     UINT            asndServiceId;
     UINT            nodeId;
@@ -2126,7 +2126,7 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
                     pIntNodeInfo = dllk_getNodeInfo(nodeId);
                     if (pIntNodeInfo == NULL)
                     {   // no node info structure available
-                        ret = kEplDllNoNodeInfo;
+                        ret = kErrorDllNoNodeInfo;
                         goto Exit;
                     }
                     else
@@ -2145,7 +2145,7 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
                 ret = dllkcal_setAsyncPendingRequests(nodeId,
                     ((tDllAsyncReqPriority) ((flag1 & EPL_FRAME_FLAG2_PR) >> EPL_FRAME_FLAG2_PR_SHIFT)),
                     (flag1 & EPL_FRAME_FLAG2_RS));
-                if (ret != kEplSuccessful)
+                if (ret != kErrorOk)
                     goto Exit;
                 break;
 
@@ -2187,7 +2187,7 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
 
             // update Tx buffer in Edrv
             ret = edrv_updateTxBuffer(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SYNCRES]);
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
                 goto Exit;
 
             // reset stored node ID
@@ -2199,12 +2199,12 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
         {   // ASnd service ID is registered
             // forward frame via async receive FIFO to userspace
             ret = dllkcal_asyncFrameReceived(pFrameInfo_p);
-            if(ret == kEplReject)
+            if(ret == kErrorReject)
             {
                 *pReleaseRxBuffer_p = kEdrvReleaseRxBufferLater;
-                ret = kEplSuccessful;
+                ret = kErrorOk;
             }
-            else if (ret != kEplSuccessful)
+            else if (ret != kErrorOk)
                 goto Exit;
         }
         else if (dllkInstance_g.aAsndFilter[asndServiceId] == kDllAsndFilterLocal)
@@ -2215,12 +2215,12 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
             {   // ASnd frame is intended for us
                 // forward frame via async receive FIFO to userspace
                 ret = dllkcal_asyncFrameReceived(pFrameInfo_p);
-                if(ret == kEplReject)
+                if(ret == kErrorReject)
                 {
                     *pReleaseRxBuffer_p = kEdrvReleaseRxBufferLater;
-                    ret = kEplSuccessful;
+                    ret = kErrorOk;
                 }
-                else if (ret != kEplSuccessful)
+                else if (ret != kErrorOk)
                     goto Exit;
             }
         }
@@ -2245,7 +2245,7 @@ NMT_CS_OPERATIONAL. The passed PDO needs to be valid.
 //------------------------------------------------------------------------------
 static tOplkError forwardRpdo(tFrameInfo * pFrameInfo_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
 
     if (dllkInstance_g.pfnCbProcessRpdo != NULL)
     {

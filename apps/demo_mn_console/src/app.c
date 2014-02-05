@@ -119,7 +119,7 @@ The function initializes the synchronous data application
 //------------------------------------------------------------------------------
 tOplkError initApp(void)
 {
-    tOplkError ret = kEplSuccessful;
+    tOplkError ret = kErrorOk;
     int        i;
 
     cnt_l = 0;
@@ -168,14 +168,14 @@ The function implements the synchronous data handler.
 //------------------------------------------------------------------------------
 tOplkError processSync(void)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     int                 i;
 
-    if (oplk_waitSyncEvent(100000) != kEplSuccessful)
+    if (oplk_waitSyncEvent(100000) != kErrorOk)
         return ret;
 
     ret = oplk_exchangeProcessImageOut();
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
         return ret;
 
     cnt_l++;
@@ -254,13 +254,13 @@ The function initializes the process image of the application.
 //------------------------------------------------------------------------------
 static tOplkError initProcessImage(void)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
 
     printf("Initializing process image...\n");
     printf("Size of input process image: %d\n", (UINT32)sizeof(PI_IN));
     printf("Size of output process image: %d\n", (UINT32)sizeof (PI_OUT));
     ret = oplk_allocProcessImage(sizeof(PI_IN), sizeof(PI_OUT));
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
     {
         return ret;
     }

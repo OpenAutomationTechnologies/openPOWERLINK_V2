@@ -114,7 +114,7 @@ running in Linux userspace.
 //------------------------------------------------------------------------------
 int  main (int argc, char **argv)
 {
-    tOplkError                  EplRet = kEplSuccessful;
+    tOplkError                  EplRet = kErrorOk;
     char                        cKey = 0;
     BOOL                        fExit;
 
@@ -167,7 +167,7 @@ int  main (int argc, char **argv)
     PRINTF("----------------------------------------------------\n");
 
     EplRet = ctrlk_init();
-    if (EplRet != kEplSuccessful)
+    if (EplRet != kErrorOk)
     {
         TRACE ("Could not initialize control module\n");
         goto Exit;

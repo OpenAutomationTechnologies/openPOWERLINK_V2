@@ -103,7 +103,7 @@ For the linux kernel mmap implementation nothing needs to be done.
 //------------------------------------------------------------------------------
 tOplkError pdokcal_openMem(void)
 {
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -122,7 +122,7 @@ For the linux kernel mmap implementation nothing needs to be done.
 //------------------------------------------------------------------------------
 tOplkError pdokcal_closeMem(void)
 {
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -146,10 +146,10 @@ tOplkError pdokcal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
     order = get_order(memSize_p);
     if ((*ppPdoMem_p = (BYTE*)__get_free_pages(GFP_KERNEL, order)) == NULL)
     {
-        return kEplNoResource;
+        return kErrorNoResource;
     }
     TRACE ("%s() Allocated memory for PDO at %p size:%d/%d\n", __func__, *ppPdoMem_p, memSize_p, order);
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -173,7 +173,7 @@ tOplkError pdokcal_freeMem(BYTE* pMem_p, size_t memSize_p)
 
     order = get_order(memSize_p);
     free_pages ((ULONG)pMem_p, order);
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //============================================================================//

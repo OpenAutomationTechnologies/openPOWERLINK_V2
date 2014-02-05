@@ -159,7 +159,7 @@ tOplkError timeru_addInstance(void)
 
     timeruInstance_l.pEntries = EPL_MALLOC(sizeof (tTimerEntry) * EPL_TIMERU_MAX_ENTRIES);
     if (timeruInstance_l.pEntries == NULL)
-        return kEplNoResource;
+        return kErrorNoResource;
 
     timeruInstance_l.pTimerListFirst = NULL;
 
@@ -187,15 +187,15 @@ tOplkError timeru_addInstance(void)
     if (timeruInstance_l.ahEvents[TIMERU_EVENT_WAKEUP] == NULL ||
         timeruInstance_l.ahEvents[TIMERU_EVENT_SHUTDOWN] == NULL)
     {
-        return kEplTimerThreadError;
+        return kErrorTimerThreadError;
     }
 
     timeruInstance_l.hProcessThread = CreateThread(NULL, 0, processThread, NULL, 0, NULL);
     if (timeruInstance_l.hProcessThread == NULL)
-        return kEplTimerThreadError;
+        return kErrorTimerThreadError;
 #endif
 
-    return kEplSuccessful;
+    return kErrorOk;
 
 }
 
@@ -232,7 +232,7 @@ tOplkError timeru_delInstance(void)
     timeruInstance_l.pTimerListFirst = NULL;
     timeruInstance_l.freeEntries = 0;
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -253,7 +253,7 @@ tOplkError timeru_process(void)
     UINT32              timeoutInMs;
     tEplEvent           event;
     tTimerEventArg      timerEventArg;
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
 
     enterCriticalSection(TIMERU_TIMER_LIST);
     // calculate elapsed time since start time
@@ -317,7 +317,7 @@ tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg a
 
     // check pointer to handle
     if(pTimerHdl_p == NULL)
-        return kEplTimerInvalidHandle;
+        return kErrorTimerInvalidHandle;
 
     // fetch entry from free timer list
     enterCriticalSection(TIMERU_FREE_LIST);
@@ -335,7 +335,7 @@ tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg a
 
     if (pNewEntry == NULL)
     {   // sorry, no free entry
-        return kEplTimerNoTimerCreated;
+        return kErrorTimerNoTimerCreated;
     }
 
     *pTimerHdl_p = (tTimerHdl) pNewEntry;
@@ -369,7 +369,7 @@ tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg a
     }
 #endif
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -393,7 +393,7 @@ tOplkError timeru_modifyTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerAr
     tOplkError      ret;
 
     ret = timeru_deleteTimer(pTimerHdl_p);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
         return ret;
 
     ret = timeru_setTimer(pTimerHdl_p, timeInMs_p, argument_p);
@@ -410,8 +410,8 @@ This function deletes an existing timer.
 \param  pTimerHdl_p     Pointer to timer handle of timer to delete.
 
 \return The function returns a tOplkError error code.
-\retval kEplTimerInvalidHandle  If an invalid timer handle was specified.
-\retval kEplSuccessful          If the timer is deleted.
+\retval kErrorTimerInvalidHandle  If an invalid timer handle was specified.
+\retval kErrorOk          If the timer is deleted.
 
 \ingroup module_timeru
 */
@@ -423,11 +423,11 @@ tOplkError timeru_deleteTimer(tTimerHdl* pTimerHdl_p)
 
     // check pointer to handle
     if(pTimerHdl_p == NULL)
-        return kEplTimerInvalidHandle;
+        return kErrorTimerInvalidHandle;
 
     // check handle itself, i.e. was the handle initialized before
     if (*pTimerHdl_p == 0)
-        return kEplSuccessful;
+        return kErrorOk;
 
     pTimerEntry = (tTimerEntry*) *pTimerHdl_p;
 
@@ -459,7 +459,7 @@ tOplkError timeru_deleteTimer(tTimerHdl* pTimerHdl_p)
 
     // set handle invalid
     *pTimerHdl_p = 0;
-    return kEplSuccessful;
+    return kErrorOk;
 
 }
 
@@ -556,7 +556,7 @@ static DWORD WINAPI processThread (LPVOID parameter_p)
     for (;;)
     {
         ret = timeru_process();
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
         {
             // Error
         }

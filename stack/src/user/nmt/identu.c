@@ -122,7 +122,7 @@ The function adds an ident module instance
 //------------------------------------------------------------------------------
 tOplkError identu_addInstance(void)
 {
-    tOplkError ret = kEplSuccessful;
+    tOplkError ret = kErrorOk;
 
     EPL_MEMSET(&instance_g, 0, sizeof(instance_g));
 
@@ -145,7 +145,7 @@ The function deletes an ident module instance
 //------------------------------------------------------------------------------
 tOplkError identu_delInstance(void)
     {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
 
     // deregister IdentResponse callback function
     dllucal_regAsndService(kDllAsndIdentResponse, NULL, kDllAsndFilterNone);
@@ -171,7 +171,7 @@ tOplkError identu_reset()
     tOplkError  ret;
     UINT        index;
 
-    ret = kEplSuccessful;
+    ret = kErrorOk;
     for (index = 0; index < tabentries(instance_g.apIdentResponse); index++)
     {
         if (instance_g.apIdentResponse[index] != NULL)
@@ -201,7 +201,7 @@ The function gets the IdentResponse for a specified node.
 //------------------------------------------------------------------------------
 tOplkError identu_getIdentResponse(UINT nodeId_p, tEplIdentResponse** ppIdentResponse_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     tEplIdentResponse*  pIdentResponse;
 
     // decrement node ID, because array is zero based
@@ -213,12 +213,12 @@ tOplkError identu_getIdentResponse(UINT nodeId_p, tEplIdentResponse** ppIdentRes
 
         // Check if ident response is valid, adjust return value otherwise
         if( NULL == pIdentResponse )
-            ret = kEplInvalidOperation;
+            ret = kErrorInvalidOperation;
     }
     else
     {   // invalid node ID specified
         *ppIdentResponse_p = NULL;
-        ret = kEplInvalidNodeId;
+        ret = kErrorInvalidNodeId;
     }
     return ret;
 
@@ -241,7 +241,7 @@ The function requests the IdentResponse for a specified node.
 //------------------------------------------------------------------------------
 tOplkError identu_requestIdentResponse(UINT nodeId_p, tIdentuCbResponse pfnCbResponse_p)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
 
 #if !defined(CONFIG_INCLUDE_NMT_MN)
     UNUSED_PARAMETER(pfnCbResponse_p);
@@ -262,7 +262,7 @@ tOplkError identu_requestIdentResponse(UINT nodeId_p, tIdentuCbResponse pfnCbRes
 #if defined(CONFIG_INCLUDE_NMT_MN)
         if (instance_g.apfnCbResponse[nodeId_p] != NULL)
         {   // request already issued (maybe by someone else)
-            ret = kEplInvalidOperation;
+            ret = kErrorInvalidOperation;
         }
         else
         {
@@ -270,12 +270,12 @@ tOplkError identu_requestIdentResponse(UINT nodeId_p, tIdentuCbResponse pfnCbRes
             ret = dllucal_issueRequest(kDllReqServiceIdent, (nodeId_p + 1), 0xFF);
         }
 #else
-        ret = kEplInvalidOperation;
+        ret = kErrorInvalidOperation;
 #endif
     }
     else
     {
-        ret = kEplInvalidNodeId;
+        ret = kErrorInvalidNodeId;
     }
     return ret;
 }
@@ -332,7 +332,7 @@ IdentResponse is received.
 //------------------------------------------------------------------------------
 static tOplkError identu_cbIdentResponse(tFrameInfo* pFrameInfo_p)
 {
-    tOplkError              ret = kEplSuccessful;
+    tOplkError              ret = kErrorOk;
     UINT                    nodeId;
     UINT                    index;
     tIdentuCbResponse       pfnCbResponse;

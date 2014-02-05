@@ -101,7 +101,7 @@ The function adds a DLL kernel module instance.
 //------------------------------------------------------------------------------
 tOplkError dllk_addInstance(tDllkInitParam* pInitParam_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     UINT            index;
     tEdrvInitParam  EdrvInitParam;
 
@@ -110,26 +110,26 @@ tOplkError dllk_addInstance(tDllkInitParam* pInitParam_p)
 
     //jba able to work without hresk?
 #if EPL_TIMER_USE_HIGHRES != FALSE
-    if ((ret = hrestimer_init()) != kEplSuccessful)
+    if ((ret = hrestimer_init()) != kErrorOk)
         return ret;
 #endif
 
 #if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
-    if ((ret = synctimer_addInstance()) != kEplSuccessful)
+    if ((ret = synctimer_addInstance()) != kErrorOk)
         return ret;
 
-    if ((ret = synctimer_registerHandler(dllk_cbCnTimerSync)) != kEplSuccessful)
+    if ((ret = synctimer_registerHandler(dllk_cbCnTimerSync)) != kErrorOk)
         return ret;
 
-    if ((ret = synctimer_registerLossOfSyncHandler(dllk_cbCnLossOfSync)) != kEplSuccessful)
+    if ((ret = synctimer_registerLossOfSyncHandler(dllk_cbCnLossOfSync)) != kErrorOk)
         return ret;
 
 #if EPL_DLL_PRES_CHAINING_CN != FALSE
-    if ((ret = synctimer_registerLossOfSyncHandler2(dllk_cbCnPresFallbackTimeout)) != kEplSuccessful)
+    if ((ret = synctimer_registerLossOfSyncHandler2(dllk_cbCnPresFallbackTimeout)) != kErrorOk)
         return ret;
 #endif
 
-   if ((ret = synctimer_setSyncShift(EPL_DLL_SOC_SYNC_SHIFT_US)) != kEplSuccessful)
+   if ((ret = synctimer_setSyncShift(EPL_DLL_SOC_SYNC_SHIFT_US)) != kErrorOk)
        return ret;
 #endif
 
@@ -153,7 +153,7 @@ tOplkError dllk_addInstance(tDllkInitParam* pInitParam_p)
     EdrvInitParam.hwParam = pInitParam_p->hwParam;
     EdrvInitParam.pfnRxHandler = dllk_processFrameReceived;
     //    EdrvInitParam.pfnTxHandler = EplDllkCbFrameTransmitted; //jba why commented out?
-    if ((ret = edrv_init(&EdrvInitParam)) != kEplSuccessful)
+    if ((ret = edrv_init(&EdrvInitParam)) != kErrorOk)
         return ret;
 
     // copy local MAC address from Ethernet driver back to local instance structure
@@ -168,10 +168,10 @@ tOplkError dllk_addInstance(tDllkInitParam* pInitParam_p)
     }
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
-    if ((ret = edrvcyclic_init()) != kEplSuccessful)
+    if ((ret = edrvcyclic_init()) != kErrorOk)
         return ret;
 
-    if ((ret = edrvcyclic_regErrorHandler(dllk_cbCyclicError)) != kEplSuccessful)
+    if ((ret = edrvcyclic_regErrorHandler(dllk_cbCyclicError)) != kErrorOk)
         return ret;
 #endif
 
@@ -191,7 +191,7 @@ The function deletes an DLL kernel module instance.
 //------------------------------------------------------------------------------
 tOplkError dllk_delInstance(void)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
 
     // reset state
     dllkInstance_g.dllState = kDllGsInit;
@@ -229,7 +229,7 @@ NMT_GS_COMMUNICATING will be entered.
 tOplkError dllk_config(tDllConfigParam * pDllConfigParam_p)
 {
     tNmtState       nmtState;
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
 
     nmtState = dllkInstance_g.nmtState;
 
@@ -294,7 +294,7 @@ tOplkError dllk_setIdentity(tDllIdentParam * pDllIdentParam_p)
         pDllIdentParam_p->sizeOfStruct : sizeof (tDllIdentParam)));
 
     // $$$ if IdentResponse frame exists update it
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -308,15 +308,15 @@ Ethernet driver).
                             interrupt context normally.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful              If handler is successfully registered.
-\retval kEplDllCbAsyncRegistered    If there is already a handler registered.
+\retval kErrorOk              If handler is successfully registered.
+\retval kErrorDllCbAsyncRegistered    If there is already a handler registered.
 
 \ingroup module_dllk
 */
 //------------------------------------------------------------------------------
 tOplkError dllk_regAsyncHandler(tEplDllkCbAsync pfnDllkCbAsync_p)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
 
     if (dllkInstance_g.pfnCbAsync == NULL)
     {   // no handler registered yet
@@ -324,7 +324,7 @@ tOplkError dllk_regAsyncHandler(tEplDllkCbAsync pfnDllkCbAsync_p)
     }
     else
     {   // handler already registered
-        ret = kEplDllCbAsyncRegistered;
+        ret = kErrorDllCbAsyncRegistered;
     }
     return ret;
 }
@@ -341,15 +341,15 @@ Ethernet driver).
                             it.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful              If handler is successfully deregistered.
-\retval kEplDllCbAsyncRegistered    If another handler is registered.
+\retval kErrorOk              If handler is successfully deregistered.
+\retval kErrorDllCbAsyncRegistered    If another handler is registered.
 
 \ingroup module_dllk
 */
 //------------------------------------------------------------------------------
 tOplkError dllk_deregAsyncHandler(tEplDllkCbAsync pfnDllkCbAsync_p)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
 
     if (dllkInstance_g.pfnCbAsync == pfnDllkCbAsync_p)
     {   // same handler is registered, deregister it
@@ -357,7 +357,7 @@ tOplkError dllk_deregAsyncHandler(tEplDllkCbAsync pfnDllkCbAsync_p)
     }
     else
     {   // wrong handler or no handler registered
-        ret = kEplDllCbAsyncRegistered;
+        ret = kErrorDllCbAsyncRegistered;
     }
     return ret;
 }
@@ -431,8 +431,8 @@ It registers C_DLL_MULTICAST_ASND in Ethernet driver if any AsndServiceId is ope
 \param  filter_p            Node ID filter.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful                  If filter was successfully set.
-\retval kEplDllInvalidAsndServiceId     If an invalid service ID was specified.
+\retval kErrorOk                  If filter was successfully set.
+\retval kErrorDllInvalidAsndServiceId     If an invalid service ID was specified.
 
 \ingroup module_dllk
 */
@@ -440,12 +440,12 @@ It registers C_DLL_MULTICAST_ASND in Ethernet driver if any AsndServiceId is ope
 tOplkError dllk_setAsndServiceIdFilter(tDllAsndServiceId serviceId_p,
                                        tDllAsndFilter filter_p)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
 
     if (serviceId_p < tabentries (dllkInstance_g.aAsndFilter))
         dllkInstance_g.aAsndFilter[serviceId_p] = filter_p;
     else
-        ret = kEplDllInvalidAsndServiceId;
+        ret = kErrorDllInvalidAsndServiceId;
 
     return ret;
 }
@@ -497,7 +497,7 @@ The function configures the specified node (e.g. payload limits and timeouts).
 //------------------------------------------------------------------------------
 tOplkError dllk_configNode(tDllNodeInfo * pNodeInfo_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     tDllkNodeInfo*      pIntNodeInfo;
     tNmtState           nmtState;
 
@@ -506,13 +506,13 @@ tOplkError dllk_configNode(tDllNodeInfo * pNodeInfo_p)
     if ((nmtState > kNmtGsResetConfiguration) &&
         (pNodeInfo_p->nodeId != dllkInstance_g.dllConfigParam.nodeId))
     {   // configuration updates are only allowed in reset states
-        return kEplInvalidOperation;
+        return kErrorInvalidOperation;
     }
 
     pIntNodeInfo = dllk_getNodeInfo(pNodeInfo_p->nodeId);
     if (pIntNodeInfo == NULL)
     {   // no node info structure available
-        return kEplDllNoNodeInfo;
+        return kErrorDllNoNodeInfo;
     }
 
     // copy node configuration
@@ -553,7 +553,7 @@ The function adds the specified node into the isochronous phase.
 //------------------------------------------------------------------------------
 tOplkError dllk_addNode(tDllNodeOpParam* pNodeOpParam_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     tDllkNodeInfo*      pIntNodeInfo;
     tNmtState           nmtState;
     BOOL                fUpdateEdrv = FALSE;
@@ -563,7 +563,7 @@ tOplkError dllk_addNode(tDllNodeOpParam* pNodeOpParam_p)
     pIntNodeInfo = dllk_getNodeInfo(pNodeOpParam_p->nodeId);
     if (pIntNodeInfo == NULL)
     {   // no node info structure available
-        return kEplDllNoNodeInfo;
+        return kErrorDllNoNodeInfo;
     }
 
     DLLK_DBG_POST_TRACE_VALUE(kEplEventTypeDllkAddNode, pNodeOpParam_p->nodeId, 0);
@@ -575,7 +575,7 @@ tOplkError dllk_addNode(tDllNodeOpParam* pNodeOpParam_p)
             if (nmtState >= kNmtMsNotActive)
                 ret = dllk_addNodeIsochronous(pIntNodeInfo);
             else
-                ret = kEplDllInvalidParam;
+                ret = kErrorDllInvalidParam;
             break;
 #endif
 
@@ -587,7 +587,7 @@ tOplkError dllk_addNode(tDllNodeOpParam* pNodeOpParam_p)
             break;
 
         default:
-            ret = kEplDllInvalidParam;
+            ret = kErrorDllInvalidParam;
             break;
     }
 
@@ -609,7 +609,7 @@ The function deletes the specified node from the isochronous phase.
 //------------------------------------------------------------------------------
 tOplkError dllk_deleteNode(tDllNodeOpParam* pNodeOpParam_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     tDllkNodeInfo*      pIntNodeInfo;
     tNmtState           nmtState;
     BOOL                fUpdateEdrv = FALSE;
@@ -635,7 +635,7 @@ tOplkError dllk_deleteNode(tDllNodeOpParam* pNodeOpParam_p)
                 break;
 
             default:
-                ret = kEplDllInvalidParam;
+                ret = kErrorDllInvalidParam;
                 break;
         }
         return ret;
@@ -644,7 +644,7 @@ tOplkError dllk_deleteNode(tDllNodeOpParam* pNodeOpParam_p)
     pIntNodeInfo = dllk_getNodeInfo(pNodeOpParam_p->nodeId);
     if (pIntNodeInfo == NULL)
     {   // no node info structure available
-        return kEplDllNoNodeInfo;
+        return kErrorDllNoNodeInfo;
     }
 
     DLLK_DBG_POST_TRACE_VALUE(kEplEventTypeDllkDelNode, pNodeOpParam_p->nodeId, 0);
@@ -656,7 +656,7 @@ tOplkError dllk_deleteNode(tDllNodeOpParam* pNodeOpParam_p)
             if (nmtState >= kNmtMsNotActive)
                 ret = dllk_deleteNodeIsochronous(pIntNodeInfo);
             else
-                ret = kEplDllInvalidParam;
+                ret = kErrorDllInvalidParam;
             break;
 
         case kDllNodeOpTypeSoftDelete:
@@ -672,7 +672,7 @@ tOplkError dllk_deleteNode(tDllNodeOpParam* pNodeOpParam_p)
             break;
 
         default:
-            ret = kEplDllInvalidParam;
+            ret = kErrorDllInvalidParam;
             break;
     }
 
@@ -692,8 +692,8 @@ The function sets Flag1 (for PReq and SoA) of the specified node.
 \param  soaFlag1_p          Flag1.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          If flag is successfully set.
-\retval kEplDllNoNodeInfo       If node is not found.
+\retval kErrorOk          If flag is successfully set.
+\retval kErrorDllNoNodeInfo       If node is not found.
 
 \ingroup module_dllk
 */
@@ -705,12 +705,12 @@ tOplkError dllk_setFlag1OfNode(UINT nodeId_p, UINT8 soaFlag1_p)
     pNodeInfo = dllk_getNodeInfo(nodeId_p);
     if (pNodeInfo == NULL)
     {   // no node info structure available
-        return kEplDllNoNodeInfo;
+        return kErrorDllNoNodeInfo;
     }
     // store flag1 in internal node info structure
     pNodeInfo->soaFlag1 = soaFlag1_p;
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -742,8 +742,8 @@ The function returns the MAC address of the specified node.
 \param  pCnMacAddress_p         Pointer to store MAC address.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          If MAC address is successfully read.
-\retval kEplDllNoNodeInfo       If node is not found.
+\retval kErrorOk          If MAC address is successfully read.
+\retval kErrorDllNoNodeInfo       If node is not found.
 
 \ingroup module_dllk
 */
@@ -755,11 +755,11 @@ tOplkError dllk_getCnMacAddress(UINT nodeId_p, BYTE* pCnMacAddress_p)
     pNodeInfo = dllk_getNodeInfo(nodeId_p);
     if (pNodeInfo == NULL)
     {   // no node info structure available
-        return kEplDllNoNodeInfo;
+        return kErrorDllNoNodeInfo;
     }
 
     EPL_MEMCPY(pCnMacAddress_p, pNodeInfo->aMacAddr, 6);
-    return kEplSuccessful;
+    return kErrorOk;
 }
 #endif
 
@@ -785,7 +785,7 @@ This function is called by the timer module. It triggers the SoC for a MN.
 //------------------------------------------------------------------------------
 tOplkError dllk_cbMnTimerCycle(tTimerEventArg* pEventArg_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     tNmtState       nmtState;
     UINT32          arg;
 
@@ -807,7 +807,7 @@ tOplkError dllk_cbMnTimerCycle(tTimerEventArg* pEventArg_p)
     ret = dllk_changeState(kNmtEventDllMeSocTrig, nmtState);
 
 Exit:
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
     {
         BENCHMARK_MOD_02_TOGGLE(7);
         arg = dllkInstance_g.dllState | (kNmtEventDllMeSocTrig << 8);
@@ -833,7 +833,7 @@ error occurred.
 //------------------------------------------------------------------------------
 tOplkError dllk_cbCyclicError(tOplkError errorCode_p, tEdrvTxBuffer * pTxBuffer_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     tNmtState       nmtState;
     UINT            handle = 0;
     UINT32          arg;
@@ -858,9 +858,9 @@ tOplkError dllk_cbCyclicError(tOplkError errorCode_p, tEdrvTxBuffer * pTxBuffer_
 
     switch (errorCode_p)
     {
-        case kEplEdrvCurTxListEmpty:
-        case kEplEdrvTxListNotFinishedYet:
-        case kEplEdrvNoFreeTxDesc:
+        case kErrorEdrvCurTxListEmpty:
+        case kErrorEdrvTxListNotFinishedYet:
+        case kErrorEdrvNoFreeTxDesc:
             dllEvent.m_ulDllErrorEvents = EPL_DLL_ERR_MN_CYCTIMEEXCEED;
             dllEvent.m_uiNodeId = handle;
             dllEvent.m_NmtState = nmtState;
@@ -893,7 +893,7 @@ event.
 //------------------------------------------------------------------------------
 tOplkError dllk_cbMnSyncHandler(void)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     tNmtState       nmtState;
     BYTE*           pbCnNodeId;
     UINT32          arg;
@@ -912,7 +912,7 @@ tOplkError dllk_cbMnSyncHandler(void)
     while (*pbCnNodeId != EPL_C_ADR_INVALID)
     {   // issue error for each CN in list which was not processed yet, i.e. PRes received
         ret = dllk_issueLossOfPres(*pbCnNodeId);
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
             goto Exit;
         pbCnNodeId++;
     }
@@ -929,7 +929,7 @@ tOplkError dllk_cbMnSyncHandler(void)
     ret = dllk_postEvent(kEplEventTypeDllkCycleFinish);
 
 Exit:
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
     {
         BENCHMARK_MOD_02_TOGGLE(7);
         arg = dllkInstance_g.dllState | (kNmtEventDllMeSocTrig << 8);
@@ -956,7 +956,7 @@ when it is running as CN node.
 //------------------------------------------------------------------------------
 tOplkError dllk_cbCnTimer(tTimerEventArg* pEventArg_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     tNmtState       nmtState;
     UINT32          arg;
 
@@ -974,17 +974,17 @@ tOplkError dllk_cbCnTimer(tTimerEventArg* pEventArg_p)
         goto Exit;
 
     ret = dllk_changeState(kNmtEventDllCeFrameTimeout, nmtState);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
         goto Exit;
 
     // restart the timer to detect further loss of SoC
     ret = hrestimer_modifyTimer(&dllkInstance_g.timerHdlCycle,
                dllkInstance_g.dllConfigParam.cycleLen, dllk_cbCnTimer, 0L, FALSE);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
         goto Exit;
 
 Exit:
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
     {
         BENCHMARK_MOD_02_TOGGLE(7);
         arg = dllkInstance_g.dllState | (kNmtEventDllCeFrameTimeout << 8);
@@ -1008,7 +1008,7 @@ This function is called by the timer sync module. It signals the sync event.
 //------------------------------------------------------------------------------
 tOplkError dllk_cbCnTimerSync(void)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
 
     // trigger synchronous task
     ret = dllk_postEvent(kEplEventTypeSync);
@@ -1027,7 +1027,7 @@ was lost.
 //------------------------------------------------------------------------------
 tOplkError dllk_cbCnLossOfSync(void)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     tNmtState       nmtState;
     UINT32          arg;
 
@@ -1041,11 +1041,11 @@ tOplkError dllk_cbCnLossOfSync(void)
         goto Exit;
 
     ret = dllk_changeState(kNmtEventDllCeFrameTimeout, nmtState);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
         goto Exit;
 
 Exit:
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
     {
         BENCHMARK_MOD_02_TOGGLE(7);
         arg = dllkInstance_g.dllState | (kNmtEventDllCeFrameTimeout << 8);
@@ -1073,7 +1073,7 @@ state and initializes all stuff that is needed for operation.
 //------------------------------------------------------------------------------
 tOplkError dllk_setupLocalNode(tNmtState nmtState_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     UINT            handle;
     UINT            frameSize;
     UINT8           aMulticastMac[6];
@@ -1099,20 +1099,20 @@ tOplkError dllk_setupLocalNode(tNmtState nmtState_p)
     // IdentResponse
     frameSize = EPL_C_DLL_MINSIZE_IDENTRES;
     ret = dllk_createTxFrame(&handle, &frameSize, kEplMsgTypeAsnd, kDllAsndIdentResponse);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
         return ret;
 
     // StatusResponse
     frameSize = EPL_C_DLL_MINSIZE_STATUSRES;
     ret = dllk_createTxFrame(&handle, &frameSize, kEplMsgTypeAsnd, kDllAsndStatusResponse);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
         return ret;
 
 #if EPL_DLL_PRES_CHAINING_CN != FALSE
     // SyncResponse
     frameSize = EPL_C_DLL_MINSIZE_SYNCRES;
     ret = dllk_createTxFrame(&handle, &frameSize, kEplMsgTypeAsnd, kDllAsndSyncResponse);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
         return ret;
 #endif
 
@@ -1123,7 +1123,7 @@ tOplkError dllk_setupLocalNode(tNmtState nmtState_p)
         // so take part in isochronous phase and register PRes frame
         frameSize = dllkInstance_g.dllConfigParam.presActPayloadLimit + EPL_FRAME_OFFSET_PDO_PAYLOAD;
         ret = dllk_createTxFrame(&handle, &frameSize, kEplMsgTypePres, kDllAsndNotDefined);
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
             return ret;
 
         // reset cycle counter
@@ -1137,7 +1137,7 @@ tOplkError dllk_setupLocalNode(tNmtState nmtState_p)
     // NMT request
     frameSize = EPL_C_IP_MAX_MTU;
     ret = dllk_createTxFrame(&handle, &frameSize, kEplMsgTypeAsnd, kDllAsndNmtRequest);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
         return ret;
     // mark Tx buffer as empty
     dllkInstance_g.pTxBuffer[handle].txFrameSize = DLLK_BUFLEN_EMPTY;
@@ -1149,7 +1149,7 @@ tOplkError dllk_setupLocalNode(tNmtState nmtState_p)
     // non-EPL frame
     frameSize = EPL_C_IP_MAX_MTU;
     ret = dllk_createTxFrame(&handle, &frameSize, kEplMsgTypeNonEpl, kDllAsndNotDefined);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
         return ret;
     // mark Tx buffer as empty
     dllkInstance_g.pTxBuffer[handle].txFrameSize = DLLK_BUFLEN_EMPTY;
@@ -1195,22 +1195,22 @@ tOplkError dllk_setupLocalNode(tNmtState nmtState_p)
 #if defined(CONFIG_INCLUDE_NMT_MN)
     if (nmtState_p >= kNmtMsNotActive)
     {
-        if ((ret = dllk_setupLocalNodeMn()) != kEplSuccessful)
+        if ((ret = dllk_setupLocalNodeMn()) != kErrorOk)
             return ret;
     }
     else
     {
-        if ((ret = dllk_setupLocalNodeCn()) != kEplSuccessful)
+        if ((ret = dllk_setupLocalNodeCn()) != kErrorOk)
             return ret;
     }
 #else
-    if ((ret = dllk_setupLocalNodeCn()) != kEplSuccessful)
+    if ((ret = dllk_setupLocalNodeCn()) != kErrorOk)
         return ret;
 #endif
 
     // clear all asynchronous buffers
     ret = dllkcal_clearAsyncBuffer();
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
         return ret;
 
     // set filters in Edrv
@@ -1231,7 +1231,7 @@ The function initializes the MN specific stuff of the local node.
 //------------------------------------------------------------------------------
 tOplkError dllk_setupLocalNodeMn(void)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     UINT            handle;
     UINT            index;
     UINT            frameSize;
@@ -1243,7 +1243,7 @@ tOplkError dllk_setupLocalNodeMn(void)
     // SoC
     frameSize = EPL_C_DLL_MINSIZE_SOC;
     ret = dllk_createTxFrame(&handle, &frameSize, kEplMsgTypeSoc, kDllAsndNotDefined);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
     {   // error occurred while registering Tx frame
         return ret;
     }
@@ -1254,7 +1254,7 @@ tOplkError dllk_setupLocalNodeMn(void)
     // SoA
     frameSize = EPL_C_DLL_MINSIZE_SOA;
     ret = dllk_createTxFrame(&handle, &frameSize, kEplMsgTypeSoa, kDllAsndNotDefined);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
     {   // error occurred while registering Tx frame
         return ret;
     }
@@ -1272,7 +1272,7 @@ tOplkError dllk_setupLocalNodeMn(void)
 
             frameSize = pIntNodeInfo->preqPayloadLimit + EPL_FRAME_OFFSET_PDO_PAYLOAD;
             ret = dllk_createTxFrame(&handle, &frameSize, kEplMsgTypePreq, kDllAsndNotDefined);
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
                 return ret;
             pIntNodeInfo->pPreqTxBuffer = &dllkInstance_g.pTxBuffer[handle];
         }
@@ -1282,18 +1282,18 @@ tOplkError dllk_setupLocalNodeMn(void)
     count += 5;   // SoC, PResMN, SoA, ASnd, NULL
     dllkInstance_g.ppTxBufferList = EPL_MALLOC(sizeof (tEdrvTxBuffer*) * count);
     if (dllkInstance_g.ppTxBufferList == NULL)
-        return kEplDllOutOfMemory;
+        return kErrorDllOutOfMemory;
 
     ret = edrvcyclic_setMaxTxBufferListSize(count);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
         return ret;
 
     ret = edrvcyclic_setCycleTime(dllkInstance_g.dllConfigParam.cycleLen);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
         return ret;
 
     ret = edrvcyclic_regSyncHandler(dllk_cbMnSyncHandler);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
         return ret;
 
     dllkInstance_g.frameTimeout = 1000LL * ((UINT64)dllkInstance_g.dllConfigParam.cycleLen);
@@ -1315,7 +1315,7 @@ The function initializes the MN specific stuff of the local node.
 //------------------------------------------------------------------------------
 tOplkError dllk_setupLocalNodeCn(void)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
 
 #if (EPL_DLL_PRES_FILTER_COUNT >= 0)
     UINT            handle;
@@ -1366,11 +1366,11 @@ tOplkError dllk_setupLocalNodeCn(void)
 
 #if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
     ret = synctimer_setCycleLen(dllkInstance_g.dllConfigParam.cycleLen);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
         return ret;
 
     ret = synctimer_setLossOfSyncTolerance(dllkInstance_g.dllConfigParam.lossOfFrameTolerance);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
         return ret;
 #endif
 
@@ -1396,7 +1396,7 @@ up all stuff for the local node.
 //------------------------------------------------------------------------------
 tOplkError dllk_cleanupLocalNode(tNmtState oldNmtState_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     BYTE            aMulticastMac[6];
 #if EPL_NMT_MAX_NODE_ID > 0
     UINT            index;
@@ -1419,51 +1419,51 @@ tOplkError dllk_cleanupLocalNode(tNmtState oldNmtState_p)
 
     // delete timer
 #if EPL_TIMER_USE_HIGHRES != FALSE
-    if ((ret = hrestimer_deleteTimer(&dllkInstance_g.timerHdlCycle)) != kEplSuccessful)
+    if ((ret = hrestimer_deleteTimer(&dllkInstance_g.timerHdlCycle)) != kErrorOk)
         return ret;
 #endif
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
-    if ((ret = edrvcyclic_stopCycle()) != kEplSuccessful)
+    if ((ret = edrvcyclic_stopCycle()) != kErrorOk)
         return ret;
 
-    if ((ret = edrvcyclic_regSyncHandler(NULL)) != kEplSuccessful)
+    if ((ret = edrvcyclic_regSyncHandler(NULL)) != kErrorOk)
         return ret;
 #endif
 
 #if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
-    if ((ret = synctimer_stopSync()) != kEplSuccessful)
+    if ((ret = synctimer_stopSync()) != kErrorOk)
         return ret;
 #endif
 
     // delete Tx frames
-    if ((ret = dllk_deleteTxFrame(DLLK_TXFRAME_IDENTRES)) != kEplSuccessful)
+    if ((ret = dllk_deleteTxFrame(DLLK_TXFRAME_IDENTRES)) != kErrorOk)
         return ret;
 
-    if ((ret = dllk_deleteTxFrame(DLLK_TXFRAME_STATUSRES)) != kEplSuccessful)
+    if ((ret = dllk_deleteTxFrame(DLLK_TXFRAME_STATUSRES)) != kErrorOk)
         return ret;
 
-    if ((ret = dllk_deleteTxFrame(DLLK_TXFRAME_PRES)) != kEplSuccessful)
+    if ((ret = dllk_deleteTxFrame(DLLK_TXFRAME_PRES)) != kErrorOk)
         return ret;
 
-    if ((ret = dllk_deleteTxFrame(DLLK_TXFRAME_NMTREQ)) != kEplSuccessful)
+    if ((ret = dllk_deleteTxFrame(DLLK_TXFRAME_NMTREQ)) != kErrorOk)
         return ret;
 
 #if EPL_DLL_PRES_CHAINING_CN != FALSE
-    if ((ret = dllk_deleteTxFrame(DLLK_TXFRAME_SYNCRES)) != kEplSuccessful)
+    if ((ret = dllk_deleteTxFrame(DLLK_TXFRAME_SYNCRES)) != kErrorOk)
         return ret;
 #endif
 
-    if ((ret = dllk_deleteTxFrame(DLLK_TXFRAME_NONEPL)) != kEplSuccessful)
+    if ((ret = dllk_deleteTxFrame(DLLK_TXFRAME_NONEPL)) != kErrorOk)
         return ret;
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
     if (oldNmtState_p >= kNmtMsNotActive)
     {   // local node was MN
-        if ((ret = dllk_deleteTxFrame(DLLK_TXFRAME_SOC)) != kEplSuccessful)
+        if ((ret = dllk_deleteTxFrame(DLLK_TXFRAME_SOC)) != kErrorOk)
             return ret;
 
-        if ((ret = dllk_deleteTxFrame(DLLK_TXFRAME_SOA)) != kEplSuccessful)
+        if ((ret = dllk_deleteTxFrame(DLLK_TXFRAME_SOA)) != kErrorOk)
             return ret;
 
         for (index = 0; index < tabentries (dllkInstance_g.aNodeInfo); index++)
@@ -1474,7 +1474,7 @@ tOplkError dllk_cleanupLocalNode(tNmtState oldNmtState_p)
                 dllkInstance_g.aNodeInfo[index].pPreqTxBuffer = NULL;
                 if (handle != DLLK_TXFRAME_PRES)
                 {
-                    if ((ret = dllk_deleteTxFrame(handle))  != kEplSuccessful)
+                    if ((ret = dllk_deleteTxFrame(handle))  != kErrorOk)
                         return ret;
                 }
             }
@@ -1556,7 +1556,7 @@ This function adds a node to the isochronous phase.
 //------------------------------------------------------------------------------
 tOplkError dllk_addNodeIsochronous(tDllkNodeInfo* pIntNodeInfo_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     tDllkNodeInfo**     ppIntNodeInfo;
     tEplFrame*          pTxFrame;
 
@@ -1627,14 +1627,14 @@ tOplkError dllk_addNodeIsochronous(tDllkNodeInfo* pIntNodeInfo_p)
             event.m_uiSize = sizeof (pIntNodeInfo_p->nodeId);
             event.m_pArg = &pIntNodeInfo_p->nodeId;
             ret = eventk_postEvent(&event);
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
                 goto Exit;
 
         }
 #if EPL_DLL_PRES_CHAINING_MN == FALSE
         else
         {   // TxBuffer for PReq does not exist
-            ret = kEplDllTxFrameInvalid;
+            ret = kErrorDllTxFrameInvalid;
             goto Exit;
         }
 #endif
@@ -1668,7 +1668,7 @@ This function removes a node from the isochronous phase.
 //------------------------------------------------------------------------------
 tOplkError dllk_deleteNodeIsochronous(tDllkNodeInfo* pIntNodeInfo_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     tDllkNodeInfo**     ppIntNodeInfo;
     tEplFrame*          pTxFrame;
 
@@ -1727,7 +1727,7 @@ This function enables the PRes chaining mode.
 //------------------------------------------------------------------------------
 tOplkError dllk_presChainingEnable (void)
 {
-    tOplkError      Ret = kEplSuccessful;
+    tOplkError      Ret = kErrorOk;
     tEplFrame*      pTxFrameSyncRes;
 
     if (dllkInstance_g.fPrcEnabled == FALSE)
@@ -1744,7 +1744,7 @@ tOplkError dllk_presChainingEnable (void)
 
         Ret = edrv_changeRxFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT, DLLK_FILTER_PREQ,
                                EDRV_FILTER_CHANGE_VALUE | EDRV_FILTER_CHANGE_AUTO_RESPONSE_DELAY);
-        if (Ret != kEplSuccessful)
+        if (Ret != kErrorOk)
             return Ret;
 
         dllkInstance_g.fPrcEnabled = TRUE;
@@ -1755,7 +1755,7 @@ tOplkError dllk_presChainingEnable (void)
                         | EPL_SYNC_PRES_MODE_SET);
         // update SyncRes Tx buffer in Edrv
         Ret = edrv_updateTxBuffer(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SYNCRES]);
-        if (Ret != kEplSuccessful)
+        if (Ret != kErrorOk)
             return Ret;
 
 #if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
@@ -1776,7 +1776,7 @@ This function disables the PRes chaining mode, thus restoring PReq/PRes mode.
 //------------------------------------------------------------------------------
 tOplkError dllk_presChainingDisable (void)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     tEplFrame*      pTxFrameSyncRes;
 
     if (dllkInstance_g.fPrcEnabled != FALSE)
@@ -1795,7 +1795,7 @@ tOplkError dllk_presChainingDisable (void)
 
         ret = edrv_changeRxFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT, DLLK_FILTER_PREQ,
                                EDRV_FILTER_CHANGE_VALUE | EDRV_FILTER_CHANGE_AUTO_RESPONSE_DELAY);
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
             return ret;
 
         pTxFrameSyncRes = (tEplFrame *) dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SYNCRES].pBuffer;
@@ -1805,7 +1805,7 @@ tOplkError dllk_presChainingDisable (void)
                         & ~EPL_SYNC_PRES_MODE_SET);
         // update SyncRes Tx buffer in Edrv
         ret = edrv_updateTxBuffer(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SYNCRES]);
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
             return ret;
 
 #if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
@@ -1828,7 +1828,7 @@ PResFallBackTimeout hat triggered.
 //------------------------------------------------------------------------------
 tOplkError dllk_cbCnPresFallbackTimeout(void)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     tNmtState       nmtState;
     UINT32          arg;
 
@@ -1842,7 +1842,7 @@ tOplkError dllk_cbCnPresFallbackTimeout(void)
     ret = dllk_presChainingDisable();
 
 Exit:
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
     {
 
         BENCHMARK_MOD_02_TOGGLE(7);
@@ -1877,7 +1877,7 @@ The function sets up the buffer structures for the asynchronous phase.
 tOplkError dllk_setupAsyncPhase(tNmtState nmtState_p, UINT nextTxBufferOffset_p,
                                 UINT32 nextTimeOffsetNs_p, UINT* pIndex_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     BOOL                fEnableInvitation;
     tEdrvTxBuffer*      pTxBuffer;
     UINT                soaIndex;
@@ -2025,7 +2025,7 @@ The function sets up the buffer structures for the synchronous phase.
 tOplkError dllk_setupSyncPhase(tNmtState nmtState_p, BOOL fReadyFlag_p,
                                UINT nextTxBufferOffset_p, UINT32* pNextTimeOffsetNs_p, UINT* pIndex_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     BYTE*               pCnNodeId;
     UINT32              accFrameLenNs = 0;
     UINT                nextTimeOffsetNs = 0;
@@ -2069,7 +2069,7 @@ tOplkError dllk_setupSyncPhase(tNmtState nmtState_p, BOOL fReadyFlag_p,
             FrameInfo.pFrame = pTxFrame;
             FrameInfo.frameSize = pTxBuffer->txFrameSize;
             ret = dllk_processTpdo(&FrameInfo, fReadyFlag_p);
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
                 return ret;
 
             pTxBuffer->timeOffsetNs = *pNextTimeOffsetNs_p;

@@ -136,14 +136,14 @@ The function adds a virtual Ethernet instance.
 //------------------------------------------------------------------------------
 tOplkError veth_addInstance(const UINT8 aSrcMac_p[6])
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     struct ifreq        ifr;
     int                 err;
 
     if((vethInstance_l.fd = open(TUN_DEV_NAME, O_RDWR)) < 0 )
     {
         DEBUG_LVL_VETH_TRACE("Error opening %s\n", TUN_DEV_NAME);
-        return kEplNoFreeInstance;
+        return kErrorNoFreeInstance;
     }
 
     memset(&ifr, 0, sizeof(ifr));
@@ -165,7 +165,7 @@ tOplkError veth_addInstance(const UINT8 aSrcMac_p[6])
     // start tap receive thread
     vethInstance_l.fStop = FALSE;
     if (pthread_create(&vethInstance_l.threadHandle, NULL, vethRecvThread, (void*)&vethInstance_l) != 0)
-        return kEplNoFreeInstance;
+        return kErrorNoFreeInstance;
 
     // register callback function in DLL
     ret = dllk_regAsyncHandler(veth_receiveFrame);
@@ -191,7 +191,7 @@ tOplkError veth_delInstance(void)
     pthread_join(vethInstance_l.threadHandle, NULL);
     close (vethInstance_l.fd);
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 
@@ -268,7 +268,7 @@ static tOplkError veth_receiveFrame(tFrameInfo * pFrameInfo_p)
     {
         DEBUG_LVL_VETH_TRACE("Error writing data to virtual Ethernet interface!\n");
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -288,7 +288,7 @@ static void* vethRecvThread(void* pArg_p)
     UINT8               buffer[ETHERMTU];
     UINT                nread;
     tFrameInfo          frameInfo;
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     tVethInstance*      pInstance = (tVethInstance*)pArg_p;
     fd_set              readFds;
     int                 result;
@@ -326,7 +326,7 @@ static void* vethRecvThread(void* pArg_p)
                     frameInfo.pFrame = (tEplFrame *)buffer;
                     frameInfo.frameSize = nread;
                     ret = dllkcal_sendAsyncFrame(&frameInfo, kDllAsyncReqPrioGeneric);
-                    if (ret != kEplSuccessful)
+                    if (ret != kErrorOk)
                     {
                         DEBUG_LVL_VETH_TRACE("veth_xmit: dllkcal_sendAsyncFrame returned 0x%02X\n", ret);
                     }

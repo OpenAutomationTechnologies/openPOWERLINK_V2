@@ -129,7 +129,7 @@ tOplkError PUBLIC processEvents(tEplApiEventType EventType_p,
                                 tEplApiEventArg* pEventArg_p,
                                 void GENERIC* pUserArg_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
 
     UNUSED_PARAMETER(pUserArg_p);
 
@@ -173,7 +173,7 @@ static tOplkError processStateChangeEvent(tEplApiEventType EventType_p,
                                           tEplApiEventArg* pEventArg_p,
                                           void GENERIC* pUserArg_p)
 {
-    tOplkError                  ret = kEplSuccessful;
+    tOplkError                  ret = kErrorOk;
     tEventNmtStateChange*       pNmtStateChange = &pEventArg_p->m_NmtStateChange;
 
     UNUSED_PARAMETER(EventType_p);
@@ -181,14 +181,14 @@ static tOplkError processStateChangeEvent(tEplApiEventType EventType_p,
 
     if (pfGsOff_l == NULL)
     {
-        return kEplGeneralError;
+        return kErrorGeneralError;
     }
 
     switch (pNmtStateChange->newNmtState)
     {
         case kNmtGsOff:
             // NMT state machine was shut down,
-            ret = kEplShutdown;
+            ret = kErrorShutdown;
 
             console_printlog("StateChangeEvent:kNmtGsOff originating event = 0x%X (%s)\n",
                      pNmtStateChange->nmtEvent,
@@ -285,7 +285,7 @@ static tOplkError processErrorWarningEvent(tEplApiEventType EventType_p,
             console_printlog("\n");
             break;
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 ///\}

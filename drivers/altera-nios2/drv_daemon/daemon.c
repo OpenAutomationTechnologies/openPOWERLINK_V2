@@ -125,7 +125,7 @@ int main (void)
         PRINTF("Initialization returned with \"%s\" (0x%X)\n",
                 debugstr_getRetValStr(Ret), Ret);
 
-        if(Ret != kEplSuccessful)
+        if(Ret != kErrorOk)
             break;
 
         bgtPlk();
@@ -161,7 +161,7 @@ static tOplkError initPlk (void)
 
     Ret = ctrlk_init();
 
-    if (Ret != kEplSuccessful)
+    if (Ret != kErrorOk)
     {
         printf ("Could not initialize control module\n");
         goto Exit;

@@ -110,9 +110,9 @@ The function initializes the generic Lcd instance.
 tOplkError lcd_init(void)
 {
     if(lcdl_init() != 0)
-        return kEplNoResource;
+        return kErrorNoResource;
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------

@@ -135,7 +135,7 @@ The function adds an instance of the SDO over ASnd module.
 //------------------------------------------------------------------------------
 tOplkError sdoasnd_addInstance(tSequLayerReceiveCb pfnReceiveCb_p)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
 
     EPL_MEMSET(&sdoAsndInstance_l, 0x00, sizeof(sdoAsndInstance_l));
 
@@ -145,7 +145,7 @@ tOplkError sdoasnd_addInstance(tSequLayerReceiveCb pfnReceiveCb_p)
     }
     else
     {
-        ret = kEplSdoUdpMissCb;
+        ret = kErrorSdoUdpMissCb;
     }
 
     ret = dllucal_regAsndService(kDllAsndSdo, sdoAsndCb, kDllAsndFilterLocal);
@@ -166,7 +166,7 @@ The function deletes an instance of the SDO over ASnd module.
 //------------------------------------------------------------------------------
 tOplkError sdoasnd_delInstance(void)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
 
     ret = dllucal_regAsndService(kDllAsndSdo, NULL, kDllAsndFilterNone);
 
@@ -195,11 +195,11 @@ tOplkError sdoasnd_initCon(tSdoConHdl* pSdoConHandle_p, UINT targetNodeId_p)
     UINT            freeCon;
     UINT*           pConnection;
 
-    ret = kEplSuccessful;
+    ret = kErrorOk;
 
     if ((targetNodeId_p == EPL_C_ADR_INVALID) || (targetNodeId_p >= EPL_C_ADR_BROADCAST))
     {
-        return kEplSdoAsndInvalidNodeId;
+        return kErrorSdoAsndInvalidNodeId;
     }
 
     // get free entry in control structure
@@ -225,7 +225,7 @@ tOplkError sdoasnd_initCon(tSdoConHdl* pSdoConHandle_p, UINT targetNodeId_p)
     if (freeCon == SDO_MAX_CONNECTION_ASND)
     {
         // no free connection
-        ret = kEplSdoAsndNoFreeHandle;
+        ret = kErrorSdoAsndNoFreeHandle;
     }
     else
     {
@@ -258,12 +258,12 @@ tOplkError sdoasnd_sendData(tSdoConHdl sdoConHandle_p, tEplFrame* pSrcData_p, UI
     UINT            array;
     tFrameInfo      frameInfo;
 
-    ret = kEplSuccessful;
+    ret = kErrorOk;
 
     array = (sdoConHandle_p & ~SDO_ASY_HANDLE_MASK);
 
     if(array > SDO_MAX_CONNECTION_ASND)
-        return kEplSdoAsndInvalidHandle;
+        return kErrorSdoAsndInvalidHandle;
 
     // fillout Asnd header
     // own node id not needed -> filled by DLL
@@ -278,9 +278,9 @@ tOplkError sdoasnd_sendData(tSdoConHdl sdoConHandle_p, tEplFrame* pSrcData_p, UI
     frameInfo.pFrame = pSrcData_p;
 
     ret = dllucal_sendAsyncFrame(&frameInfo, kDllAsyncReqPrioGeneric);
-    if (ret == kEplDllAsyncTxBufferFull)
+    if (ret == kErrorDllAsyncTxBufferFull)
     {   // ignore TxBufferFull errors
-        ret = kEplSuccessful;
+        ret = kErrorOk;
     }
 
     return ret;
@@ -304,12 +304,12 @@ tOplkError sdoasnd_deleteCon(tSdoConHdl sdoConHandle_p)
     tOplkError  ret;
     UINT        array;
 
-    ret = kEplSuccessful;
+    ret = kErrorOk;
 
     array = (sdoConHandle_p & ~SDO_ASY_HANDLE_MASK);
     if(array > SDO_MAX_CONNECTION_ASND)
     {
-        return kEplSdoAsndInvalidHandle;
+        return kErrorSdoAsndInvalidHandle;
     }
 
     // set target nodeId to 0
@@ -336,7 +336,7 @@ receiving ASnd frames.
 //------------------------------------------------------------------------------
 tOplkError sdoAsndCb(tFrameInfo* pFrameInfo_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     UINT            count;
     UINT*           pConnection;
     UINT            nodeId;

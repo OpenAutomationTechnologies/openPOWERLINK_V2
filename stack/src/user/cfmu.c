@@ -183,7 +183,7 @@ The function initializes the CFM module.
 tOplkError cfmu_init(tCfmCbEventCnProgress pfnCbEventCnProgress_p,
                      tCfmCbEventCnResult pfnCbEventCnResult_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     UINT            subindex;
     tVarParam       varParam;
 
@@ -201,14 +201,14 @@ tOplkError cfmu_init(tCfmCbEventCnProgress pfnCbEventCnProgress_p,
         varParam.subindex = subindex;
         varParam.validFlag = kVarValidAll;
         ret = obd_defineVar(&varParam);
-        if ((ret != kEplSuccessful) &&
-            (ret != kEplObdIndexNotExist) &&
-            (ret != kEplObdSubindexNotExist))
+        if ((ret != kErrorOk) &&
+            (ret != kErrorObdIndexNotExist) &&
+            (ret != kErrorObdSubindexNotExist))
         {
             return ret;
         }
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -259,7 +259,7 @@ tOplkError cfmu_exit(void)
         }
     }
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -273,8 +273,8 @@ CN if configuration data and time differs with local values.
 \param  nodeEvent_p     Node event to process.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful  Configuration is OK -> continue boot process for this CN.
-\retval kEplReject      Defer further processing until configuration process has finished
+\retval kErrorOk  Configuration is OK -> continue boot process for this CN.
+\retval kErrorReject      Defer further processing until configuration process has finished
 \retval other error     Major error occurred.
 
 \ingroup module_cfmu
@@ -282,7 +282,7 @@ CN if configuration data and time differs with local values.
 //------------------------------------------------------------------------------
 tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     static UINT32       leSignature;
     tCfmNodeInfo*       pNodeInfo = NULL;
     tObdSize            obdSize;
@@ -295,20 +295,20 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p)
         return ret;
 
     if ((pNodeInfo = allocNodeInfo(nodeId_p)) == NULL)
-        return kEplInvalidNodeId;
+        return kErrorInvalidNodeId;
 
     if (pNodeInfo->cfmState != kCfmStateIdle)
     {
         // send abort
         pNodeInfo->cfmState = kCfmStateInternalAbort;
         ret = sdocom_abortTransfer(pNodeInfo->sdoComConHdl, SDO_AC_DATA_NOT_TRANSF_DUE_LOCAL_CONTROL);
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
             return ret;
 
         // close connection
         ret = sdocom_undefineConnection(pNodeInfo->sdoComConHdl);
         pNodeInfo->sdoComConHdl = UINT_MAX;
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
         {
             DEBUG_LVL_CFM_TRACE("SDO Free Error!\n");
             return ret;
@@ -321,7 +321,7 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p)
     // (this allows the application to link its own memory to this object)
     pNodeInfo->pDataConciseDcf = obd_getObjectDataPtr(0x1F22, nodeId_p);
     if (pNodeInfo->pDataConciseDcf == NULL)
-        return kEplCfmNoConfigData;
+        return kErrorCfmNoConfigData;
 
     obdSize = obd_getDataSize(0x1F22, nodeId_p);
     pNodeInfo->bytesRemaining = (UINT32) obdSize;
@@ -332,9 +332,9 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p)
     pNodeInfo->eventCnProgress.bytesDownloaded = 0;
     if (obdSize < sizeof(UINT32))
     {
-        pNodeInfo->eventCnProgress.error = kEplCfmInvalidDcf;
+        pNodeInfo->eventCnProgress.error = kErrorCfmInvalidDcf;
         ret = callCbProgress(pNodeInfo);
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
             return ret;
         return pNodeInfo->eventCnProgress.error;
     }
@@ -346,22 +346,22 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p)
 
     if (pNodeInfo->entriesRemaining == 0)
     {
-        pNodeInfo->eventCnProgress.error = kEplCfmNoConfigData;
+        pNodeInfo->eventCnProgress.error = kErrorCfmNoConfigData;
         ret = callCbProgress(pNodeInfo);
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
             return ret;
     }
     else
     {
         obdSize = sizeof (expConfDate);
         ret = obd_readEntry(0x1F26, nodeId_p, &expConfDate, &obdSize);
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
         {
             DEBUG_LVL_CFM_TRACE("CN%x Error Reading 0x1F26 returns 0x%X\n", uiNodeId_p, ret);
         }
         obdSize = sizeof (expConfTime);
         ret = obd_readEntry(0x1F27, nodeId_p, &expConfTime, &obdSize);
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
         {
             DEBUG_LVL_CFM_TRACE("CN%x Error Reading 0x1F27 returns 0x%X\n", uiNodeId_p, ret);
         }
@@ -379,14 +379,14 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p)
         if (pIdentResponse == NULL)
         {
             DEBUG_LVL_CFM_TRACE("CN%x Ident Response is NULL\n", uiNodeId_p);
-            return kEplInvalidNodeId;
+            return kErrorInvalidNodeId;
         }
     }
 
 #if (EPL_CFM_CONFIGURE_CYCLE_LENGTH != FALSE)
     obdSize = sizeof(cfmInstance_g.leCycleLength);
     ret = obd_readEntryToLe(0x1006, 0x00, &cfmInstance_g.leCycleLength, &obdSize);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
     {   // local OD access failed
         DEBUG_LVL_CFM_TRACE("Local OBD read failed %d\n", ret);
         return ret;
@@ -404,7 +404,7 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p)
         DEBUG_LVL_CFM_TRACE("CN%x - Cfg Upto Date\n", nodeId_p);
 
         ret = downloadCycleLength(pNodeInfo);
-        if (ret == kEplReject)
+        if (ret == kErrorReject)
         {
             pNodeInfo->cfmState = kCfmStateUpToDate;
         }
@@ -413,9 +413,9 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p)
     {
         pNodeInfo->cfmState = kCfmStateDownload;
         ret = downloadObject(pNodeInfo);
-        if (ret == kEplSuccessful)
+        if (ret == kErrorOk)
         {   // SDO transfer started
-            ret = kEplReject;
+            ret = kErrorReject;
         }
     }
     else
@@ -433,9 +433,9 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p)
         pNodeInfo->eventCnProgress.objectIndex = 0x1011;
         pNodeInfo->eventCnProgress.objectSubIndex = 0x01;
         ret = sdoWriteObject(pNodeInfo, &leSignature, sizeof (leSignature));
-        if (ret == kEplSuccessful)
+        if (ret == kErrorOk)
         {   // SDO transfer started
-            ret = kEplReject;
+            ret = kErrorReject;
         }
         else
         {
@@ -491,7 +491,7 @@ The function implements the callback function which is called on OD accesses.
 //------------------------------------------------------------------------------
 tOplkError cfmu_cbObdAccess(tObdCbParam MEM* pParam_p)
 {
-    tOplkError              ret = kEplSuccessful;
+    tOplkError              ret = kErrorOk;
     tObdVStringDomain*      pMemVStringDomain;
     tCfmNodeInfo*           pNodeInfo = NULL;
     UINT8*                  pBuffer;
@@ -516,7 +516,7 @@ tOplkError cfmu_cbObdAccess(tObdCbParam MEM* pParam_p)
         if (pNodeInfo == NULL)
         {
             pParam_p->abortCode = SDO_AC_OUT_OF_MEMORY;
-            return kEplNoResource;
+            return kErrorNoResource;
         }
 
         pBuffer = pNodeInfo->pObdBufferConciseDcf;
@@ -529,7 +529,7 @@ tOplkError cfmu_cbObdAccess(tObdCbParam MEM* pParam_p)
         if (pBuffer == NULL)
         {
             pParam_p->abortCode = SDO_AC_OUT_OF_MEMORY;
-            return kEplNoResource;
+            return kErrorNoResource;
         }
         pNodeInfo->pObdBufferConciseDcf = pBuffer;
         pMemVStringDomain->pData = pBuffer;
@@ -590,7 +590,7 @@ The function calls the progress callback function of the specified node.
 //------------------------------------------------------------------------------
 static tOplkError callCbProgress(tCfmNodeInfo* pNodeInfo_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
 
     if (cfmInstance_g.pfnCbEventCnProgress != NULL)
     {
@@ -613,13 +613,13 @@ The function calls the result callback function of the specified node.
 //------------------------------------------------------------------------------
 static tOplkError finishConfig(tCfmNodeInfo* pNodeInfo_p, tNmtCommand nmtCommand_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
 
     if (pNodeInfo_p->sdoComConHdl != UINT_MAX)
     {
         ret = sdocom_undefineConnection(pNodeInfo_p->sdoComConHdl);
         pNodeInfo_p->sdoComConHdl = UINT_MAX;
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
         {
             DEBUG_LVL_CFM_TRACE("SDO Free Error!\n");
             return ret;
@@ -648,17 +648,17 @@ transfer is finished.
 //------------------------------------------------------------------------------
 static tOplkError cbSdoCon(tSdoComFinished* pSdoComFinished_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     tCfmNodeInfo*       pNodeInfo = pSdoComFinished_p->pUserArg;
     tNmtCommand         nmtCommand;
 
     if (pNodeInfo == NULL)
-        return kEplInvalidNodeId;
+        return kErrorInvalidNodeId;
 
     pNodeInfo->eventCnProgress.sdoAbortCode = pSdoComFinished_p->abortCode;
     pNodeInfo->eventCnProgress.bytesDownloaded += pSdoComFinished_p->transferredBytes;
 
-    if ((ret = callCbProgress(pNodeInfo)) != kEplSuccessful)
+    if ((ret = callCbProgress(pNodeInfo)) != kErrorOk)
         return ret;
 
     switch (pNodeInfo->cfmState)
@@ -699,10 +699,10 @@ static tOplkError cbSdoCon(tSdoComFinished* pSdoComFinished_p)
             break;
 
         case kCfmStateWaitStore:
-            if ((ret = downloadCycleLength(pNodeInfo)) == kEplReject)
+            if ((ret = downloadCycleLength(pNodeInfo)) == kErrorReject)
             {
                 pNodeInfo->cfmState = kCfmStateUpToDate;
-                ret = kEplSuccessful;
+                ret = kErrorOk;
             }
             else
             {
@@ -724,7 +724,7 @@ static tOplkError cbSdoCon(tSdoComFinished* pSdoComFinished_p)
 
 The function reads the specified entry from the OD of the specified node.
 If this node is a remote node, it performs a SDO transfer, which means this
-function returns kEplApiTaskDeferred and the application is informed via
+function returns kErrorApiTaskDeferred and the application is informed via
 the event callback function when the task is completed.
 
 \param  pNodeInfo_p     Node info of the node for which to download the cycle
@@ -735,16 +735,16 @@ the event callback function when the task is completed.
 //------------------------------------------------------------------------------
 static tOplkError downloadCycleLength(tCfmNodeInfo* pNodeInfo_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
 
 #if (EPL_CFM_CONFIGURE_CYCLE_LENGTH != FALSE)
     pNodeInfo_p->eventCnProgress.objectIndex = 0x1006;
     pNodeInfo_p->eventCnProgress.objectSubIndex = 0x00;
 
     ret = sdoWriteObject(pNodeInfo_p, &cfmInstance_g.leCycleLength, sizeof(UINT32));
-    if (ret == kEplSuccessful)
+    if (ret == kErrorOk)
     {   // SDO transfer started
-        ret = kEplReject;
+        ret = kErrorReject;
     }
     else
     {
@@ -770,7 +770,7 @@ node.
 //------------------------------------------------------------------------------
 static tOplkError downloadObject(tCfmNodeInfo* pNodeInfo_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     static UINT32       leSignature;
 
     // forward data pointer for last transfer
@@ -782,8 +782,8 @@ static tOplkError downloadObject(tCfmNodeInfo* pNodeInfo_p)
         if (pNodeInfo_p->bytesRemaining < EPL_CDC_OFFSET_DATA)
         {
             // not enough bytes left in ConciseDCF
-            pNodeInfo_p->eventCnProgress.error = kEplCfmInvalidDcf;
-            if ((ret = callCbProgress(pNodeInfo_p)) != kEplSuccessful)
+            pNodeInfo_p->eventCnProgress.error = kErrorCfmInvalidDcf;
+            if ((ret = callCbProgress(pNodeInfo_p)) != kErrorOk)
                 return ret;
             return finishConfig(pNodeInfo_p, kNmtNodeCommandConfErr);
         }
@@ -800,15 +800,15 @@ static tOplkError downloadObject(tCfmNodeInfo* pNodeInfo_p)
             (pNodeInfo_p->curDataSize == 0))
         {
             // not enough bytes left in ConciseDCF
-            pNodeInfo_p->eventCnProgress.error = kEplCfmInvalidDcf;
-            if ((ret = callCbProgress(pNodeInfo_p)) != kEplSuccessful)
+            pNodeInfo_p->eventCnProgress.error = kErrorCfmInvalidDcf;
+            if ((ret = callCbProgress(pNodeInfo_p)) != kErrorOk)
                 return ret;
             return finishConfig(pNodeInfo_p, kNmtNodeCommandConfErr);
         }
 
         pNodeInfo_p->entriesRemaining--;
         ret = sdoWriteObject(pNodeInfo_p, pNodeInfo_p->pDataConciseDcf, pNodeInfo_p->curDataSize);
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
             return ret;
     }
     else
@@ -821,16 +821,16 @@ static tOplkError downloadObject(tCfmNodeInfo* pNodeInfo_p)
             pNodeInfo_p->eventCnProgress.objectIndex = 0x1010;
             pNodeInfo_p->eventCnProgress.objectSubIndex = 0x01;
             ret = sdoWriteObject(pNodeInfo_p, &leSignature, sizeof (leSignature));
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
                 return ret;
         }
         else
         {
             ret = downloadCycleLength(pNodeInfo_p);
-            if (ret == kEplReject)
+            if (ret == kErrorReject)
             {
                 pNodeInfo_p->cfmState = kCfmStateUpToDate;
-                return kEplSuccessful;
+                return kErrorOk;
             }
             else
             {
@@ -858,11 +858,11 @@ The function writes the specified entry to the OD of the specified node.
 //------------------------------------------------------------------------------
 static tOplkError sdoWriteObject(tCfmNodeInfo* pNodeInfo_p, void* pLeSrcData_p, UINT size_p)
 {
-    tOplkError                  ret = kEplSuccessful;
+    tOplkError                  ret = kErrorOk;
     tSdoComTransParamByIndex    transParamByIndex;
 
     if ((pLeSrcData_p == NULL) || (size_p == 0))
-        return kEplApiInvalidParam;
+        return kErrorApiInvalidParam;
 
     if (pNodeInfo_p->sdoComConHdl == UINT_MAX)
     {
@@ -870,7 +870,7 @@ static tOplkError sdoWriteObject(tCfmNodeInfo* pNodeInfo_p, void* pLeSrcData_p, 
         ret = sdocom_defineConnection(&pNodeInfo_p->sdoComConHdl,
                                  pNodeInfo_p->eventCnProgress.nodeId,
                                  kSdoTypeAsnd);
-        if ((ret != kEplSuccessful) && (ret != kEplSdoComHandleExists))
+        if ((ret != kErrorOk) && (ret != kErrorSdoComHandleExists))
             return ret;
     }
 
@@ -884,20 +884,20 @@ static tOplkError sdoWriteObject(tCfmNodeInfo* pNodeInfo_p, void* pLeSrcData_p, 
     transParamByIndex.pUserArg = pNodeInfo_p;
 
     ret = sdocom_initTransferByIndex(&transParamByIndex);
-    if (ret == kEplSdoComHandleBusy)
+    if (ret == kErrorSdoComHandleBusy)
     {
         ret = sdocom_abortTransfer(pNodeInfo_p->sdoComConHdl, SDO_AC_DATA_NOT_TRANSF_DUE_LOCAL_CONTROL);
-        if (ret == kEplSuccessful)
+        if (ret == kErrorOk)
         {
             ret = sdocom_initTransferByIndex(&transParamByIndex);
         }
     }
-    else if (ret == kEplSdoSeqConnectionBusy)
+    else if (ret == kErrorSdoSeqConnectionBusy)
     {
         // close connection
         ret = sdocom_undefineConnection(pNodeInfo_p->sdoComConHdl);
         pNodeInfo_p->sdoComConHdl = UINT_MAX;
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
         {
             DEBUG_LVL_CFM_TRACE("SDO Free Error!\n");
             return ret;
@@ -907,7 +907,7 @@ static tOplkError sdoWriteObject(tCfmNodeInfo* pNodeInfo_p, void* pLeSrcData_p, 
         ret = sdocom_defineConnection(&pNodeInfo_p->sdoComConHdl,
                                  pNodeInfo_p->eventCnProgress.nodeId,
                                  kSdoTypeAsnd);
-        if ((ret != kEplSuccessful) && (ret != kEplSdoComHandleExists))
+        if ((ret != kErrorOk) && (ret != kErrorSdoComHandleExists))
             return ret;
 
         // retry transfer

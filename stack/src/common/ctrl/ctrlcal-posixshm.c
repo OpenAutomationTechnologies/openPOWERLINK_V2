@@ -113,13 +113,13 @@ tOplkError ctrlcal_init(UINT size_p)
     if ((fd_l = shm_open(CTRL_SHM_NAME, O_RDWR | O_CREAT, 0)) < 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s() shm_open failed!\n", __func__);
-        return kEplNoResource;
+        return kErrorNoResource;
     }
 
     if (fstat(fd_l, &stat) != 0)
     {
         close (fd_l);
-        return kEplNoResource;
+        return kErrorNoResource;
     }
 
     if (stat.st_size == 0)
@@ -129,7 +129,7 @@ tOplkError ctrlcal_init(UINT size_p)
             DEBUG_LVL_ERROR_TRACE("%s() ftruncate failed!\n", __func__);
             close (fd_l);
             shm_unlink(CTRL_SHM_NAME);
-            return kEplNoResource;
+            return kErrorNoResource;
         }
         fCreator_l = TRUE;
     }
@@ -141,7 +141,7 @@ tOplkError ctrlcal_init(UINT size_p)
         close (fd_l);
         if (fCreator_l)
             shm_unlink(CTRL_SHM_NAME);
-        return kEplNoResource;
+        return kErrorNoResource;
     }
 
     if (fCreator_l)
@@ -149,7 +149,7 @@ tOplkError ctrlcal_init(UINT size_p)
         EPL_MEMSET(pCtrlMem_l, 0, size_p);
     }
     size_l = size_p;
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -165,7 +165,7 @@ The function cleans up the control CAL module.
 //------------------------------------------------------------------------------
 tOplkError ctrlcal_exit (void)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
 
     if (pCtrlMem_l != NULL)
     {
@@ -223,10 +223,10 @@ tOplkError ctrlcal_readData(void* pDest_p, UINT offset_p, size_t length_p)
     if (pCtrlMem_l == NULL)
     {
         DEBUG_LVL_ERROR_TRACE ("%s() pCtrlMem_l == NULL!\n", __func__);
-        return kEplGeneralError;
+        return kErrorGeneralError;
     }
 
     EPL_MEMCPY(pDest_p, pCtrlMem_l + offset_p, length_p);
-    return kEplSuccessful;
+    return kErrorOk;
 }
 

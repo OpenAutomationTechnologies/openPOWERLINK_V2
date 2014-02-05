@@ -136,7 +136,7 @@ This function provides processing time for the CAL module.
 //------------------------------------------------------------------------------
 tOplkError ctrlucal_process (void)
 {
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -177,7 +177,7 @@ tOplkError ctrlucal_executeCmd(tCtrlCmdType cmd_p)
     }
 
     TRACE("%s() Timeout waiting for return!\n", __func__);
-    return kEplGeneralError;
+    return kErrorGeneralError;
 }
 
 
@@ -189,8 +189,8 @@ The function checks the state of the kernel stack. If it is already running
 it tries to shutdown.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful  If kernel stack is initialized
-\retval kEplNoResource  If kernel stack is not running or in wrong state
+\retval kErrorOk  If kernel stack is initialized
+\retval kErrorNoResource  If kernel stack is not running or in wrong state
 
 \ingroup module_ctrlucal
 */
@@ -204,7 +204,7 @@ tOplkError ctrlucal_checkKernelStack(void)
     if (getMagic() != CTRL_MAGIC)
     {
         TRACE ("Kernel daemon not running! Exiting...\n");
-        return kEplNoResource;
+        return kErrorNoResource;
     }
 
     kernelStatus = ctrlucal_getStatus();
@@ -212,15 +212,15 @@ tOplkError ctrlucal_checkKernelStack(void)
     switch(kernelStatus)
     {
         case kCtrlStatusReady:
-            ret = kEplSuccessful;
+            ret = kErrorOk;
             break;
 
         case kCtrlStatusRunning:
             /* try to shutdown kernel stack */
             ret = ctrlucal_executeCmd(kCtrlCleanupStack);
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
             {
-                ret = kEplNoResource;
+                ret = kErrorNoResource;
                 break;
             }
 
@@ -229,12 +229,12 @@ tOplkError ctrlucal_checkKernelStack(void)
             kernelStatus = ctrlucal_getStatus();
             if (kernelStatus != kCtrlStatusReady)
             {
-                ret = kEplNoResource;
+                ret = kErrorNoResource;
             }
             break;
 
         default:
-            ret = kEplNoResource;
+            ret = kErrorNoResource;
             break;
     }
 
@@ -257,7 +257,7 @@ UINT16 ctrlucal_getStatus(void)
     UINT16          status;
 
     if ((ctrlcal_readData(&status, offsetof(tCtrlBuf, status),
-                          sizeof(UINT16))) == kEplSuccessful)
+                          sizeof(UINT16))) == kErrorOk)
         return status;
     else
         return kCtrlStatusUnavailable;
@@ -279,7 +279,7 @@ UINT16 ctrlucal_getHeartbeat(void)
     UINT16      heartbeat;
 
     if ((ctrlcal_readData(&heartbeat, offsetof(tCtrlBuf, heartbeat),
-                                sizeof(UINT16))) == kEplSuccessful)
+                                sizeof(UINT16))) == kErrorOk)
         return heartbeat;
     else
         return 0;
@@ -312,7 +312,7 @@ The function reads the initialization parameter from the kernel stack.
 \param  pInitParam_p        Specifies where to store the read init parameters.
 
 \return The function returns a tOplkError error code. It returns always
-        kEplSuccessful!
+        kErrorOk!
 
 \ingroup module_ctrlucal
 */
@@ -345,7 +345,7 @@ UINT16 getMagic (void)
     UINT16          magic;
 
     if ((ctrlcal_readData(&magic, offsetof(tCtrlBuf, magic),
-                          sizeof(UINT16))) == kEplSuccessful)
+                          sizeof(UINT16))) == kErrorOk)
     {
         return magic;
     }

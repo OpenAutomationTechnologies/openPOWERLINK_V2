@@ -101,8 +101,8 @@ The function initializes the user layer CAL module of the error handler.
 \param  pLocalObjects_p         Pointer to local error objects
 
 \return     tOplkError
-\retval     kEplSuccessful      successful return
-\retval     kEplNoResource      ipcore instance not found
+\retval     kErrorOk      successful return
+\retval     kErrorNoResource      ipcore instance not found
 
 \ingroup module_errhnducal
 */
@@ -110,14 +110,14 @@ The function initializes the user layer CAL module of the error handler.
 tOplkError errhnducal_init (tErrHndObjects *pLocalObjects_p)
 {
     tHostifInstance pHostifInstance = hostif_getInstance(0);
-    tOplkError      Ret = kEplSuccessful;
+    tOplkError      Ret = kErrorOk;
     tHostifReturn   hostifRet;
     UINT8*          pBase;
     UINT            span;
 
     if(pHostifInstance == NULL)
     {
-        Ret = kEplNoResource;
+        Ret = kErrorNoResource;
         goto Exit;
     }
 
@@ -126,7 +126,7 @@ tOplkError errhnducal_init (tErrHndObjects *pLocalObjects_p)
 
     if(Ret != kHostifSuccessful)
     {
-        Ret = kEplNoResource;
+        Ret = kErrorNoResource;
         goto Exit;
     }
 
@@ -134,7 +134,7 @@ tOplkError errhnducal_init (tErrHndObjects *pLocalObjects_p)
     {
         DEBUG_LVL_ERROR_TRACE("%s: Error Handler Object Buffer too small\n",
                 __func__);
-        Ret = kEplNoResource;
+        Ret = kErrorNoResource;
         goto Exit;
     }
 
@@ -186,7 +186,7 @@ tOplkError errhnducal_writeErrorObject(UINT index_p, UINT subIndex_p, UINT32 *pP
 
     memcpy(pHostifMem_l + offset, (UINT8*)pParam_p, sizeof(UINT32));
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -214,7 +214,7 @@ tOplkError errhnducal_readErrorObject(UINT index_p, UINT subIndex_p, UINT32 * pP
 
     memcpy((UINT8*)pParam_p, pHostifMem_l + offset, sizeof(UINT32));
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 

@@ -143,7 +143,7 @@ tOplkError edrvcyclic_init(void)
     edrvcyclicInstance_l.diagnostics.spareCycleTimeMin   = 0xFFFFFFFF;
 #endif
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -166,7 +166,7 @@ tOplkError edrvcyclic_shutdown(void)
         edrvcyclicInstance_l.maxTxBufferCount = 0;
     }
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -184,7 +184,7 @@ This function determines the maxmimum size of the cyclic Tx buffer list.
 //------------------------------------------------------------------------------
 tOplkError edrvcyclic_setMaxTxBufferListSize(UINT maxListSize_p)
 {
-    tOplkError ret = kEplSuccessful;
+    tOplkError ret = kErrorOk;
 
     if (edrvcyclicInstance_l.maxTxBufferCount != maxListSize_p)
     {
@@ -198,7 +198,7 @@ tOplkError edrvcyclic_setMaxTxBufferListSize(UINT maxListSize_p)
         edrvcyclicInstance_l.ppTxBufferList = EPL_MALLOC(sizeof (*edrvcyclicInstance_l.ppTxBufferList) * maxListSize_p * 2);
         if (edrvcyclicInstance_l.ppTxBufferList == NULL)
         {
-            ret = kEplEdrvNoFreeBufEntry;
+            ret = kErrorEdrvNoFreeBufEntry;
         }
 
         edrvcyclicInstance_l.curTxBufferList = 0;
@@ -225,7 +225,7 @@ This function forwards the next cycle Tx buffer list to the cyclic Edrv.
 //------------------------------------------------------------------------------
 tOplkError edrvcyclic_setNextTxBufferList(tEdrvTxBuffer** ppTxBuffer_p, UINT txBufferCount_p)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
     UINT        nextTxBufferList;
 
     nextTxBufferList = edrvcyclicInstance_l.curTxBufferList ^ edrvcyclicInstance_l.maxTxBufferCount;
@@ -233,20 +233,20 @@ tOplkError edrvcyclic_setNextTxBufferList(tEdrvTxBuffer** ppTxBuffer_p, UINT txB
     // check if next list is free
     if (edrvcyclicInstance_l.ppTxBufferList[nextTxBufferList] != NULL)
     {
-        ret = kEplEdrvNextTxListNotEmpty;
+        ret = kErrorEdrvNextTxListNotEmpty;
         goto Exit;
     }
 
     if ((txBufferCount_p == 0) || (txBufferCount_p > edrvcyclicInstance_l.maxTxBufferCount))
     {
-        ret = kEplEdrvInvalidParam;
+        ret = kErrorEdrvInvalidParam;
         goto Exit;
     }
 
     // check if last entry in list equals a NULL pointer
     if (ppTxBuffer_p[txBufferCount_p - 1] != NULL)
     {
-        ret = kEplEdrvInvalidParam;
+        ret = kErrorEdrvInvalidParam;
         goto Exit;
     }
 
@@ -274,7 +274,7 @@ tOplkError edrvcyclic_setCycleTime(UINT32 cycleTimeUs_p)
 {
     edrvcyclicInstance_l.cycleTimeUs = cycleTimeUs_p;
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -290,11 +290,11 @@ This function starts the cycles.
 //------------------------------------------------------------------------------
 tOplkError edrvcyclic_startCycle(void)
 {
-    tOplkError ret = kEplSuccessful;
+    tOplkError ret = kErrorOk;
 
     if (edrvcyclicInstance_l.cycleTimeUs == 0)
     {
-        ret = kEplEdrvInvalidCycleLen;
+        ret = kErrorEdrvInvalidCycleLen;
         goto Exit;
     }
 
@@ -331,7 +331,7 @@ This function stops the cycles.
 //------------------------------------------------------------------------------
 tOplkError edrvcyclic_stopCycle(void)
 {
-    tOplkError ret = kEplSuccessful;
+    tOplkError ret = kErrorOk;
 
     ret = hrestimer_deleteTimer(&edrvcyclicInstance_l.timerHdlCycle);
     ret = hrestimer_deleteTimer(&edrvcyclicInstance_l.timerHdlSlot);
@@ -360,7 +360,7 @@ tOplkError edrvcyclic_regSyncHandler(tEdrvCyclicCbSync pfnCbSync_p)
 {
     edrvcyclicInstance_l.pfnSyncCb = pfnCbSync_p;
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -380,7 +380,7 @@ tOplkError edrvcyclic_regErrorHandler(tEdrvCyclicCbError pfnCbError_p)
 {
     edrvcyclicInstance_l.pfnErrorCb = pfnCbError_p;
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 
@@ -402,7 +402,7 @@ tOplkError edrvcyclic_getDiagnostics(tEdrvCyclicDiagnostics** ppDiagnostics_p)
 {
     *ppDiagnostics_p = &edrvcyclicInstance_l.diagnostics;
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 #endif
 
@@ -425,7 +425,7 @@ This function is called by the timer module. It starts the next cycle.
 //------------------------------------------------------------------------------
 static tOplkError timerHdlCycleCb(tTimerEventArg* pEventArg_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
 #if EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
     UINT32          cycleTime;
     UINT32          usedCycleTime;
@@ -445,7 +445,7 @@ static tOplkError timerHdlCycleCb(tTimerEventArg* pEventArg_p)
 
     if (edrvcyclicInstance_l.ppTxBufferList[edrvcyclicInstance_l.curTxBufferEntry] != NULL)
     {
-        ret = kEplEdrvTxListNotFinishedYet;
+        ret = kErrorEdrvTxListNotFinishedYet;
         goto Exit;
     }
 
@@ -457,12 +457,12 @@ static tOplkError timerHdlCycleCb(tTimerEventArg* pEventArg_p)
 
     if (edrvcyclicInstance_l.ppTxBufferList[edrvcyclicInstance_l.curTxBufferEntry] == NULL)
     {
-        ret = kEplEdrvCurTxListEmpty;
+        ret = kErrorEdrvCurTxListEmpty;
         goto Exit;
     }
 
     ret = processTxBufferList();
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
     {
         goto Exit;
     }
@@ -550,7 +550,7 @@ static tOplkError timerHdlCycleCb(tTimerEventArg* pEventArg_p)
 #endif
 
 Exit:
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
     {
         if (edrvcyclicInstance_l.pfnErrorCb != NULL)
         {
@@ -574,7 +574,7 @@ next frame.
 //------------------------------------------------------------------------------
 static tOplkError timerHdlSlotCb(tTimerEventArg* pEventArg_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     tEdrvTxBuffer*  pTxBuffer = NULL;
 
     if (pEventArg_p->timerHdl != edrvcyclicInstance_l.timerHdlSlot)
@@ -589,7 +589,7 @@ static tOplkError timerHdlSlotCb(tTimerEventArg* pEventArg_p)
 
     pTxBuffer = edrvcyclicInstance_l.ppTxBufferList[edrvcyclicInstance_l.curTxBufferEntry];
     ret = edrv_sendTxBuffer(pTxBuffer);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
     {
         goto Exit;
     }
@@ -599,7 +599,7 @@ static tOplkError timerHdlSlotCb(tTimerEventArg* pEventArg_p)
     ret = processTxBufferList();
 
 Exit:
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
     {
         if (edrvcyclicInstance_l.pfnErrorCb != NULL)
         {
@@ -620,7 +620,7 @@ This function processes the cycle Tx buffer list provided by dllk.
 //------------------------------------------------------------------------------
 static tOplkError processTxBufferList(void)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     tEdrvTxBuffer*  pTxBuffer;
 
     while ((pTxBuffer = edrvcyclicInstance_l.ppTxBufferList[edrvcyclicInstance_l.curTxBufferEntry]) != NULL)
@@ -628,7 +628,7 @@ static tOplkError processTxBufferList(void)
         if (pTxBuffer->timeOffsetNs == 0)
         {
             ret = edrv_sendTxBuffer(pTxBuffer);
-            if (ret != kEplSuccessful)
+            if (ret != kErrorOk)
             {
                 goto Exit;
             }
@@ -648,7 +648,7 @@ static tOplkError processTxBufferList(void)
     }
 
 Exit:
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
     {
         if (edrvcyclicInstance_l.pfnErrorCb != NULL)
         {

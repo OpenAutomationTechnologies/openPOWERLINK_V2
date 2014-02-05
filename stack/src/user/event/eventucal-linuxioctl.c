@@ -125,7 +125,7 @@ configuration it gets the function pointer interface of the used queue
 implementations and calls the appropriate init functions.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          If function executes correctly
+\retval kErrorOk          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventucal
@@ -133,7 +133,7 @@ implementations and calls the appropriate init functions.
 //------------------------------------------------------------------------------
 tOplkError eventucal_init(void)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     struct sched_param  schedParam;
 
     EPL_MEMSET(&instance_l, 0, sizeof(tEventuCalInstance));
@@ -165,7 +165,7 @@ The function cleans up the user event CAL module. For cleanup it calls the exit
 functions of the queue implementations for each used queue.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          If function executes correctly
+\retval kErrorOk          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventucal
@@ -186,7 +186,7 @@ tOplkError eventucal_exit (void)
         }
     }
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -200,7 +200,7 @@ queue post function is called.
 \param  pEvent_p                Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          If function executes correctly
+\retval kErrorOk          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventucal
@@ -222,7 +222,7 @@ queue post function is called.
 \param  pEvent_p                Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          If function executes correctly
+\retval kErrorOk          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventucal
@@ -262,7 +262,7 @@ queue post function is called.
 \param  pEvent_p                Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          If function executes correctly
+\retval kErrorOk          If function executes correctly
 \retval other error codes       If an error occurred
 */
 //------------------------------------------------------------------------------
@@ -277,9 +277,9 @@ static tOplkError postEvent(tEplEvent *pEvent_p)
 
     ioctlret = ioctl (instance_l.fd, PLK_CMD_POST_EVENT, pEvent_p);
     if (ioctlret != 0)
-        return kEplNoResource;
+        return kErrorNoResource;
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------

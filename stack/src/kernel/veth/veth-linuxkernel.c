@@ -153,7 +153,7 @@ tOplkError veth_addInstance(const UINT8 aSrcMac_p[6])
                                     ether_setup);
 
     if (pVEthNetDevice_g == NULL)
-        return kEplNoResource;
+        return kErrorNoResource;
 
     pVEthNetDevice_g->netdev_ops        = &epl_netdev_ops;
     pVEthNetDevice_g->watchdog_timeo    = VETH_TX_TIMEOUT;
@@ -168,7 +168,7 @@ tOplkError veth_addInstance(const UINT8 aSrcMac_p[6])
     else
         DEBUG_LVL_VETH_TRACE("veth_addInstance: Register VEth successfull...\n");
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -193,7 +193,7 @@ tOplkError veth_delInstance(void)
         pVEthNetDevice_g = NULL;
     }
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //============================================================================//
@@ -215,7 +215,7 @@ The function contains the open routine of the virtual Ethernet driver.
 //------------------------------------------------------------------------------
 static int veth_open(struct net_device *pNetDevice_p)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
 
     //open the device
     //start the interface queue for the network subsystem
@@ -262,7 +262,7 @@ The function contains the transmit function for the virtual Ethernet driver.
 //------------------------------------------------------------------------------
 static int veth_xmit(struct sk_buff *pSkb_p, struct net_device *pNetDevice_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     tFrameInfo      frameInfo;
 
     //transmit function
@@ -276,7 +276,7 @@ static int veth_xmit(struct sk_buff *pSkb_p, struct net_device *pNetDevice_p)
 
     //call send fkt on DLL
     ret = dllkcal_sendAsyncFrame(&frameInfo, kDllAsyncReqPrioGeneric);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
     {
         DEBUG_LVL_VETH_TRACE("veth_xmit: dllkcal_sendAsyncFrame returned 0x%02X\n", ret);
         netif_stop_queue(pNetDevice_p);
@@ -345,7 +345,7 @@ The function receives a frame from the virtual Ethernet interface.
 //------------------------------------------------------------------------------
 static tOplkError veth_receiveFrame(tFrameInfo * pFrameInfo_p)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
     struct net_device* pNetDevice = pVEthNetDevice_g;
     struct net_device_stats* pStats = netdev_priv(pNetDevice);
     struct sk_buff *pSkb;

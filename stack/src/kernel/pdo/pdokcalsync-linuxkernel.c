@@ -116,7 +116,7 @@ tOplkError pdokcal_initSync(void)
     init_waitqueue_head(&instance_l.syncWaitQueue);
     instance_l.fInitialized = TRUE;
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -151,7 +151,7 @@ tOplkError pdokcal_sendSyncEvent(void)
         instance_l.fSync = TRUE;
         wake_up_interruptible(&instance_l.syncWaitQueue);
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -171,15 +171,15 @@ tOplkError pdokcal_waitSyncEvent(void)
     int                 timeout = 1000 * HZ / 1000;
 
     if (!instance_l.fInitialized)
-        return kEplNoResource;
+        return kErrorNoResource;
 
     ret = wait_event_interruptible_timeout(instance_l.syncWaitQueue,
                                            instance_l.fSync == TRUE, timeout);
     if (ret == 0)
-        return kEplRetry;
+        return kErrorRetry;
 
     instance_l.fSync = FALSE;
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 
@@ -199,7 +199,7 @@ The function enables sync events
 tOplkError pdokcal_controlSync(BOOL fEnable_p)
 {
     UNUSED_PARAMETER(fEnable_p);
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //============================================================================//

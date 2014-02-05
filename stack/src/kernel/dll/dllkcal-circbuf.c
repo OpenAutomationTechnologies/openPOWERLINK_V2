@@ -145,14 +145,14 @@ Add an instance for TX packet forwarding in DLL CAL.
 \param  dllCalQueue_p           parameter that determines the queue
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          if function executes correctly
+\retval kErrorOk          if function executes correctly
 \retval other                   error
 */
 //------------------------------------------------------------------------------
 static tOplkError addInstance(tDllCalQueueInstance *ppDllCalQueue_p,
                               tDllCalQueue dllCalQueue_p)
 {
-    tOplkError                  ret = kEplSuccessful;
+    tOplkError                  ret = kErrorOk;
     tCircBufError               error = kCircBufOk;
     tDllCalCircBufInstance*     pDllCalCircBufInstance;
 
@@ -160,7 +160,7 @@ static tOplkError addInstance(tDllCalQueueInstance *ppDllCalQueue_p,
     if(pDllCalCircBufInstance == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s() malloc error!\n", __func__);
-        ret = kEplNoResource;
+        ret = kErrorNoResource;
         goto Exit;
     }
 
@@ -186,13 +186,13 @@ static tOplkError addInstance(tDllCalQueueInstance *ppDllCalQueue_p,
 
         default:
             DEBUG_LVL_ERROR_TRACE("%s() Invalid Queue!\n", __func__);
-            ret = kEplInvalidInstanceParam;
+            ret = kErrorInvalidInstanceParam;
             break;
     }
     if(error != kCircBufOk)
     {
         DEBUG_LVL_ERROR_TRACE("%s() circbuf_alloc error!\n", __func__);
-        ret = kEplNoResource;
+        ret = kErrorNoResource;
         goto Exit;
     }
     *ppDllCalQueue_p = (tDllCalQueueInstance*)pDllCalCircBufInstance;
@@ -210,7 +210,7 @@ Delete the DLL CAL instance.
 \param  pDllCalQueue_p          Pointer to DllCal Queue instance
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          if function executes correctly
+\retval kErrorOk          if function executes correctly
 \retval other                   error
 */
 //------------------------------------------------------------------------------
@@ -223,10 +223,10 @@ static tOplkError delInstance(tDllCalQueueInstance pDllCalQueue_p)
     error = circbuf_free(pDllCalCircBufInstance->pCircBufInstance);
     if(error != kCircBufOk)
     {
-        return kEplNoResource;
+        return kErrorNoResource;
     }
     EPL_FREE(pDllCalCircBufInstance);
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -241,21 +241,21 @@ Inserts a data block into the DLL CAL queue.
                                 insert
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          if function executes correctly
+\retval kErrorOk          if function executes correctly
 \retval other                   error
 */
 //------------------------------------------------------------------------------
 static tOplkError insertDataBlock (tDllCalQueueInstance pDllCalQueue_p,
                                    BYTE *pData_p, UINT *pDataSize_p)
 {
-    tOplkError                  ret = kEplSuccessful;
+    tOplkError                  ret = kErrorOk;
     tCircBufError               error;
     tDllCalCircBufInstance*     pDllCalCircBufInstance =
                                             (tDllCalCircBufInstance*)pDllCalQueue_p;
 
     if(pDllCalCircBufInstance == NULL)
     {
-        ret = kEplInvalidInstanceParam;
+        ret = kErrorInvalidInstanceParam;
         goto Exit;
     }
 
@@ -268,12 +268,12 @@ static tOplkError insertDataBlock (tDllCalQueueInstance pDllCalQueue_p,
 
         case kCircBufExceedDataSizeLimit:
         case kCircBufBufferFull:
-            ret = kEplDllAsyncTxBufferFull;
+            ret = kErrorDllAsyncTxBufferFull;
             break;
 
         case kCircBufInvalidArg:
         default:
-            ret = kEplNoResource;
+            ret = kErrorNoResource;
             break;
     }
 
@@ -293,14 +293,14 @@ Gets a data block from the DLL CAL queue.
                                 (will be replaced with actual data block size)
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          if function executes correctly
+\retval kErrorOk          if function executes correctly
 \retval other                   error
 */
 //------------------------------------------------------------------------------
 static tOplkError getDataBlock (tDllCalQueueInstance pDllCalQueue_p,
                                 BYTE *pData_p, UINT *pDataSize_p)
 {
-    tOplkError              ret = kEplSuccessful;
+    tOplkError              ret = kErrorOk;
     tCircBufError           error;
     tDllCalCircBufInstance* pDllCalCircBufInstance =
                                             (tDllCalCircBufInstance*)pDllCalQueue_p;
@@ -308,7 +308,7 @@ static tOplkError getDataBlock (tDllCalQueueInstance pDllCalQueue_p,
 
     if(pDllCalCircBufInstance == NULL)
     {
-        ret = kEplInvalidInstanceParam;
+        ret = kErrorInvalidInstanceParam;
         goto Exit;
     }
 
@@ -319,11 +319,11 @@ static tOplkError getDataBlock (tDllCalQueueInstance pDllCalQueue_p,
     {
         if(error == kCircBufNoReadableData)
         {
-            ret = kEplDllAsyncTxBufferEmpty;
+            ret = kErrorDllAsyncTxBufferEmpty;
         }
         else
         {
-            ret = kEplNoResource;
+            ret = kErrorNoResource;
         }
         goto Exit;
     }
@@ -344,7 +344,7 @@ Returns the data block counter.
 \param  pDataBlockCount_p       Pointer which returns the data block count
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          if function executes correctly
+\retval kErrorOk          if function executes correctly
 \retval other                   error
 */
 //------------------------------------------------------------------------------
@@ -355,10 +355,10 @@ static tOplkError getDataBlockCount(tDllCalQueueInstance pDllCalQueue_p,
                                         (tDllCalCircBufInstance*)pDllCalQueue_p;
 
     if(pDllCalCircBufInstance == NULL)
-        return kEplInvalidInstanceParam;
+        return kErrorInvalidInstanceParam;
 
     *pDataBlockCount_p = circbuf_getDataCount(pDllCalCircBufInstance->pCircBufInstance);
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -371,7 +371,7 @@ Resets the DLL CAL queue instance after a given timeout.
 \param  timeOutMs_p             Timeout before buffer reset is done
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          if function executes correctly
+\retval kErrorOk          if function executes correctly
 \retval other                   error
 */
 //------------------------------------------------------------------------------
@@ -383,10 +383,10 @@ static tOplkError resetDataBlockQueue(tDllCalQueueInstance pDllCalQueue_p,
     UNUSED_PARAMETER(timeOutMs_p);
 
     if(pDllCalCircBufInstance == NULL)
-        return kEplInvalidInstanceParam;
+        return kErrorInvalidInstanceParam;
 
     circbuf_reset(pDllCalCircBufInstance->pCircBufInstance);
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 

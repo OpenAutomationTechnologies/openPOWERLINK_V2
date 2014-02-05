@@ -188,7 +188,7 @@ This function initializes the Ethernet driver.
 //------------------------------------------------------------------------------
 tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
     INT         i;
 
     DEBUG_LVL_EDRV_TRACE("*** %s ***\n", __func__);
@@ -218,7 +218,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
 
     if (edrvInstance_l.pMacInst == NULL)
     {
-        ret = kEplNoResource;
+        ret = kErrorNoResource;
         DEBUG_LVL_ERROR_TRACE("%s() omethCreate failed\n", __func__);
         goto Exit;
     }
@@ -236,7 +236,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     if(edrvInstance_l.phyInstCount != OPENMAC_PHYCNT)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Not all phy are found as configured (%d)!\n", __func__, OPENMAC_PHYCNT);
-        ret = kEplNoResource;
+        ret = kErrorNoResource;
         goto Exit;
     }
 
@@ -244,7 +244,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     edrvInstance_l.pRxHookInst = omethHookCreate(edrvInstance_l.pMacInst, rxHook, 0); //last argument max. pending
     if (edrvInstance_l.pRxHookInst == NULL)
     {
-        ret = kEplNoResource;
+        ret = kErrorNoResource;
         goto Exit;
     }
 
@@ -254,13 +254,13 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     if(edrvInstance_l.pRxAsndHookInst == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Rx hook creation for Asnd frames failed!\n", __func__);
-        ret = kEplNoResource;
+        ret = kErrorNoResource;
         goto Exit;
     }
 #endif
 
     ret = initRxFilters();
-    if(ret != kEplSuccessful)
+    if(ret != kErrorOk)
         goto Exit;
 
     //moved following lines here, since omethHookCreate may change tx buffer base!
@@ -278,7 +278,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
 
     ret = openmac_isrReg(kOpenmacIrqTxRx, irqHandler, (void*)edrvInstance_l.pMacInst);
 
-    if(ret != kEplSuccessful)
+    if(ret != kErrorOk)
         goto Exit;
 
     //wait some time (phy may not be ready...)
@@ -345,11 +345,11 @@ tOplkError edrv_shutdown(void)
 
     if (omethDestroy(edrvInstance_l.pMacInst) != 0) {
         DEBUG_LVL_ERROR_TRACE("%s() Edrv Shutdown failed\n", __func__);
-        return kEplNoResource;
+        return kErrorNoResource;
     }
     DEBUG_LVL_EDRV_TRACE("Edrv Shutdown done\n");
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -367,12 +367,12 @@ This function allocates a Tx buffer.
 //------------------------------------------------------------------------------
 tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     ometh_packet_typ*   pPacket = NULL;
 
     if (pBuffer_p->maxBufferSize > EDRV_MAX_BUFFER_SIZE)
     {
-        ret = kEplEdrvNoFreeBufEntry;
+        ret = kErrorEdrvNoFreeBufEntry;
         goto Exit;
     }
 
@@ -392,7 +392,7 @@ tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
     if (pPacket == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Memory allocation error\n", __func__);
-        ret = kEplEdrvNoFreeBufEntry;
+        ret = kErrorEdrvNoFreeBufEntry;
         goto Exit;
     }
 
@@ -421,7 +421,7 @@ This function releases the Tx buffer.
 //------------------------------------------------------------------------------
 tOplkError edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
 #if (OPENMAC_PKTLOCTX != OPENMAC_PKTBUF_LOCAL)
     ometh_packet_typ*   pPacket = NULL;
 #endif
@@ -434,7 +434,7 @@ tOplkError edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p)
 
     if (pBuffer_p->pBuffer == NULL)
     {
-        ret = kEplEdrvInvalidParam;
+        ret = kErrorEdrvInvalidParam;
         goto Exit;
     }
 
@@ -467,13 +467,13 @@ This function updates the Tx buffer for use with auto-response filter.
 //------------------------------------------------------------------------------
 tOplkError edrv_updateTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
 #if EDRV_MAX_AUTO_RESPONSES > 0
     ometh_packet_typ*   pPacket = NULL;
 
     if (pBuffer_p->txBufferNumber.value >= EDRV_MAX_AUTO_RESPONSES)
     {
-        ret = kEplEdrvInvalidParam;
+        ret = kErrorEdrvInvalidParam;
         goto Exit;
     }
 
@@ -490,14 +490,14 @@ tOplkError edrv_updateTxBuffer(tEdrvTxBuffer* pBuffer_p)
     pPacket = omethResponseSet(edrvInstance_l.apRxFilterInst[pBuffer_p->txBufferNumber.value], pPacket);
     if (pPacket == OMETH_INVALID_PACKET)
     {
-        ret = kEplNoResource;
+        ret = kErrorNoResource;
         goto Exit;
     }
 
 Exit:
 #else
     //invalid call, since auto-resp is deactivated for MN support
-    ret = kEplEdrvInvalidParam;
+    ret = kErrorEdrvInvalidParam;
 #endif
     return ret;
 }
@@ -517,7 +517,7 @@ This function sends the Tx buffer.
 //------------------------------------------------------------------------------
 tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     ometh_packet_typ*   pPacket = NULL;
     ULONG               txLength;
 
@@ -538,7 +538,7 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
             if( (edrvInstance_l.txQueueWriteIndex - edrvInstance_l.txQueueReadIndex) >= EDRV_MAX_TX_BUF2)
             {
                 DEBUG_LVL_ERROR_TRACE("%s() Edrv 2nd TX queue is full\n", __func__);
-                ret = kEplEdrvNoFreeBufEntry;
+                ret = kErrorEdrvNoFreeBufEntry;
                 goto Exit;
             }
             else
@@ -548,12 +548,12 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
                 pTxqueue->timeOffsetAbs = pBuffer_p->timeOffsetAbs;
 
                 edrvInstance_l.txQueueWriteIndex++;
-                ret = kEplSuccessful;
+                ret = kErrorOk;
                 goto Exit; //packet will be sent!
             }
 #else
             DEBUG_LVL_ERROR_TRACE("%s() No TX descriptor available\n", __func__);
-            ret = kEplEdrvNoFreeBufEntry;
+            ret = kErrorEdrvNoFreeBufEntry;
             goto Exit;
 #endif
         }
@@ -570,17 +570,17 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
     if (txLength > 0)
     {
         edrvInstance_l.txPacketSent++;
-        ret = kEplSuccessful;
+        ret = kErrorOk;
     }
     else
     {
-        ret = kEplEdrvNoFreeBufEntry;
+        ret = kErrorEdrvNoFreeBufEntry;
     }
 
 #if EDRV_TIME_TRIG_TX != FALSE
 Exit:
 #endif
-    if( ret != kEplSuccessful )
+    if( ret != kErrorOk )
     {
         BENCHMARK_MOD_01_TOGGLE(7);
     }
@@ -610,13 +610,13 @@ If entryChanged_p is equal or larger \p count_p all Rx filters shall be changed.
 tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
         UINT entryChanged_p, UINT changeFlags_p)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
     UINT        index;
     UINT        entry;
 
     if (((count_p != 0) && (pFilter_p == NULL)) || (count_p >= EDRV_MAX_FILTERS))
     {
-        ret = kEplEdrvInvalidParam;
+        ret = kErrorEdrvInvalidParam;
         goto Exit;
     }
 
@@ -747,7 +747,7 @@ tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
 
                 if (pFilter_p[entryChanged_p].pTxBuffer == NULL)
                 {
-                    ret = kEplEdrvInvalidParam;
+                    ret = kErrorEdrvInvalidParam;
                     goto Exit;
                 }
                 delayNs = pFilter_p[entryChanged_p].pTxBuffer->timeOffsetNs;
@@ -800,7 +800,7 @@ tOplkError edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p)
 {
     UNUSED_PARAMETER(pMacAddr_p);
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -820,7 +820,7 @@ tOplkError edrv_clearRxMulticastMacAddr(UINT8* pMacAddr_p)
 {
     UNUSED_PARAMETER(pMacAddr_p);
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -840,7 +840,7 @@ tOplkError edrv_setTxBufferReady(tEdrvTxBuffer* pBuffer_p)
 {
     UNUSED_PARAMETER(pBuffer_p);
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -860,7 +860,7 @@ tOplkError edrv_startTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
     UNUSED_PARAMETER(pBuffer_p);
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -878,7 +878,7 @@ This function releases a late release Rx buffer.
 //------------------------------------------------------------------------------
 tOplkError  edrv_releaseRxBuffer (tEdrvRxBuffer* pRxBuffer_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     ometh_packet_typ*   pPacket = NULL;
 
     pPacket = GET_TYPE_BASE(ometh_packet_typ, data, pRxBuffer_p->pBuffer);
@@ -887,7 +887,7 @@ tOplkError  edrv_releaseRxBuffer (tEdrvRxBuffer* pRxBuffer_p)
     if(pPacket->length != 0)
         omethPacketFree(pPacket);
     else
-        ret = kEplEdrvInvalidRxBuf;
+        ret = kErrorEdrvInvalidRxBuf;
 
     return ret;
 }
@@ -953,7 +953,7 @@ This function initializes all Rx filters and disables them.
 //------------------------------------------------------------------------------
 static tOplkError initRxFilters(void)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     INT             i;
     UINT8           aMask[31];
     UINT8           aValue[31];
@@ -983,7 +983,7 @@ static tOplkError initRxFilters(void)
         if (edrvInstance_l.apRxFilterInst[i] == 0)
         {
             DEBUG_LVL_ERROR_TRACE("%s() Creating filter %d failed\n", __func__, i);
-            ret = kEplNoResource;
+            ret = kErrorNoResource;
             goto Exit;
         }
 
@@ -994,7 +994,7 @@ static tOplkError initRxFilters(void)
             // initialize the auto response for each filter ...
             if (omethResponseInit(edrvInstance_l.apRxFilterInst[i]) != 0)
             {
-                ret = kEplNoResource;
+                ret = kErrorNoResource;
                 goto Exit;
             }
 

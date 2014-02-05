@@ -107,7 +107,7 @@ is specified by eventQueue_p.
 \param  eventQueue_p            Event queue to initialize.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          If function executes correctly
+\retval kErrorOk          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventucal
@@ -124,15 +124,15 @@ tOplkError eventucal_initQueueHostif(tEventQueue eventQueue_p)
     tQueueReturn            lfqRet;
 
     if (eventQueue_p > kEventQueueNum)
-        return kEplInvalidInstanceParam;
+        return kErrorInvalidInstanceParam;
 
     if (instance_l[eventQueue_p] != NULL)
-        return kEplNoResource;
+        return kErrorNoResource;
 
     pHifInstance = hostif_getInstance(0);
 
     if(pHifInstance == NULL)
-        return kEplNoResource;
+        return kErrorNoResource;
 
     switch(eventQueue_p)
     {
@@ -147,7 +147,7 @@ tOplkError eventucal_initQueueHostif(tEventQueue eventQueue_p)
             break;
 
         default:
-            return kEplInvalidInstanceParam;
+            return kErrorInvalidInstanceParam;
     }
 
     hifRet = hostif_getBuf(pHifInstance, hifInstanceId, &pBufBase, &bufSize);
@@ -156,7 +156,7 @@ tOplkError eventucal_initQueueHostif(tEventQueue eventQueue_p)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Could not get buffer from host interface (%d)\n",
                 __func__, hifRet);
-        return kEplNoResource;
+        return kErrorNoResource;
     }
 
     lfqConfig.fAllocHeap = FALSE; // malloc done in hostif
@@ -169,10 +169,10 @@ tOplkError eventucal_initQueueHostif(tEventQueue eventQueue_p)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Queue create failed (%d)\n",
                 __func__, lfqRet);
-        return kEplNoResource;
+        return kErrorNoResource;
     }
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -185,7 +185,7 @@ specified by eventQueue_p.
 \param  eventQueue_p            Event queue to cleanup.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          If function executes correctly
+\retval kErrorOk          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventucal
@@ -194,10 +194,10 @@ specified by eventQueue_p.
 tOplkError eventucal_exitQueueHostif (tEventQueue eventQueue_p)
 {
     if (eventQueue_p > kEventQueueNum)
-        return kEplInvalidInstanceParam;
+        return kErrorInvalidInstanceParam;
 
     if (instance_l[eventQueue_p] == NULL)
-        return kEplSuccessful;
+        return kErrorOk;
 
     switch(eventQueue_p)
     {
@@ -207,13 +207,13 @@ tOplkError eventucal_exitQueueHostif (tEventQueue eventQueue_p)
             break;
 
         default:
-            return kEplInvalidInstanceParam;
+            return kErrorInvalidInstanceParam;
             break;
     }
 
     instance_l[eventQueue_p] = NULL;
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -226,7 +226,7 @@ This function posts an event to the specified hostif queue.
 \param  pEvent_p                Pointer to event
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          If function executes correctly
+\retval kErrorOk          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventucal
@@ -234,17 +234,17 @@ This function posts an event to the specified hostif queue.
 //------------------------------------------------------------------------------
 tOplkError eventucal_postEventHostif (tEventQueue eventQueue_p, tEplEvent *pEvent_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     tQueueReturn        lfqRet;
     DWORD               aPostBuffer[(sizeof(tEplEvent) + EPL_MAX_EVENT_ARG_SIZE)/4];
     BYTE*               pPostBuffer = (BYTE*)aPostBuffer;
     ULONG               dataSize;
 
     if (eventQueue_p > kEventQueueNum)
-        return kEplInvalidInstanceParam;
+        return kErrorInvalidInstanceParam;
 
     if (instance_l[eventQueue_p] == NULL)
-        return kEplInvalidInstanceParam;
+        return kErrorInvalidInstanceParam;
 
     // initialize data size to mandatory part
     dataSize = sizeof(tEplEvent);
@@ -263,7 +263,7 @@ tOplkError eventucal_postEventHostif (tEventQueue eventQueue_p, tEplEvent *pEven
     lfqRet = lfq_entryEnqueue(instance_l[eventQueue_p], pPostBuffer, dataSize);
     if(lfqRet != kQueueSuccessful)
     {
-        ret = kEplEventPostError;
+        ret = kErrorEventPostError;
         goto Exit;
     }
 
@@ -281,7 +281,7 @@ by calling the event handlers process function.
 \param  eventQueue_p            Event queue used for reading the event.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          if function executes correctly
+\retval kErrorOk          if function executes correctly
 \retval other                   error
 
 \ingroup module_eventucal
@@ -289,7 +289,7 @@ by calling the event handlers process function.
 //------------------------------------------------------------------------------
 tOplkError eventucal_processEventHostif(tEventQueue eventQueue_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     tQueueReturn        lfqRet;
     tEplEvent*          pEplEvent;
     WORD                dataSize = sizeof(tEplEvent) + EPL_MAX_EVENT_ARG_SIZE;
@@ -297,15 +297,15 @@ tOplkError eventucal_processEventHostif(tEventQueue eventQueue_p)
     BYTE*               pRxBuffer = (BYTE*)aRxBuffer;
 
     if (eventQueue_p > kEventQueueNum)
-        return kEplInvalidInstanceParam;
+        return kErrorInvalidInstanceParam;
 
     if (instance_l[eventQueue_p] == NULL)
-        return kEplInvalidInstanceParam;
+        return kErrorInvalidInstanceParam;
 
     lfqRet = lfq_entryDequeue(instance_l[eventQueue_p], pRxBuffer, &dataSize);
     if(lfqRet != kQueueSuccessful)
     {
-        eventu_postError(kEplEventSourceEventk, kEplEventReadError,
+        eventu_postError(kEplEventSourceEventk, kErrorEventReadError,
                          sizeof (lfqRet), &lfqRet);
         goto Exit;
     }
@@ -371,14 +371,14 @@ queue.
 tOplkError eventucal_setSignalingHostif(tEventQueue eventQueue_p, VOIDFUNCPTR pfnSignalCb_p)
 {
     if (eventQueue_p > kEventQueueNum)
-        return kEplInvalidInstanceParam;
+        return kErrorInvalidInstanceParam;
 
     if (instance_l[eventQueue_p] == NULL)
-        return kEplInvalidInstanceParam;
+        return kErrorInvalidInstanceParam;
 
     //TODO jz Implement async/event signaling in host interface
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //============================================================================//

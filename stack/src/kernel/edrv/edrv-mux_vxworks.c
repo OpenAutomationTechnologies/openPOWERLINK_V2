@@ -156,14 +156,14 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     NETBUF_CFG      bufCfgData;
     NETBUF_CL_DESC  clDescTblData;
 
-    ret = kEplSuccessful;
+    ret = kErrorOk;
 
     // clear instance structure
     EPL_MEMSET(&edrvInstance_l, 0, sizeof (edrvInstance_l));
 
     if (pEdrvInitParam_p->hwParam.m_pszDevName == NULL)
     {
-        ret = kEplEdrvInitError;
+        ret = kErrorEdrvInit;
         goto Exit;
     }
 
@@ -184,7 +184,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
 
     if ((edrvInstance_l.dataPoolId = netPoolCreate(&bufCfgData, NULL)) == NULL)
     {
-        ret = kEplEdrvInitError;
+        ret = kErrorEdrvInit;
         goto Exit;
     }
 
@@ -199,7 +199,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
                        muxError,
                        MUX_PROTO_PROMISC, "POWERLINK", &edrvInstance_l)) == NULL)
     {
-        ret = kEplEdrvInitError;
+        ret = kErrorEdrvInit;
         netPoolRelease(edrvInstance_l.dataPoolId, NET_REL_IN_CONTEXT);
         goto Exit;
     }
@@ -227,7 +227,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
                     semMCreate(SEM_Q_PRIORITY | SEM_INVERSION_SAFE)) == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s() couldn't init mutex\n", __func__);
-        ret = kEplEdrvInitError;
+        ret = kErrorEdrvInit;
         muxUnbind(edrvInstance_l.pCookie, MUX_PROTO_PROMISC,
                   (FUNCPTR)packetHandler);
         netPoolRelease(edrvInstance_l.dataPoolId, NET_REL_IN_CONTEXT);
@@ -237,7 +237,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     if ((edrvInstance_l.syncSem = semBCreate(SEM_Q_FIFO, SEM_EMPTY)) == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s() couldn't init semaphore\n", __func__);
-        ret = kEplEdrvInitError;
+        ret = kErrorEdrvInit;
         muxUnbind(edrvInstance_l.pCookie, MUX_PROTO_PROMISC,
                   (FUNCPTR)packetHandler);
         netPoolRelease(edrvInstance_l.dataPoolId, NET_REL_IN_CONTEXT);
@@ -248,7 +248,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     if ((edrvInstance_l.txWakeupSem = semCCreate(SEM_Q_FIFO, 0)) == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s() couldn't init semaphore\n", __func__);
-        ret = kEplEdrvInitError;
+        ret = kErrorEdrvInit;
         muxUnbind(edrvInstance_l.pCookie, MUX_PROTO_PROMISC,
                   (FUNCPTR)packetHandler);
         netPoolRelease(edrvInstance_l.dataPoolId, NET_REL_IN_CONTEXT);
@@ -313,7 +313,7 @@ tOplkError edrv_shutdown(void)
     // clear instance structure
     EPL_MEMSET(&edrvInstance_l, 0, sizeof (edrvInstance_l));
 
-    return kEplSuccessful; //assuming no problems with closing the handle
+    return kErrorOk; //assuming no problems with closing the handle
 }
 
 //------------------------------------------------------------------------------
@@ -331,13 +331,13 @@ This function sends the Tx buffer.
 //------------------------------------------------------------------------------
 tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
     INT         muxRet;
     M_BLK_ID    pPacket;
 
     if (pBuffer_p->txBufferNumber.pArg != NULL)
     {
-        ret = kEplInvalidOperation;
+        ret = kErrorInvalidOperation;
         goto Exit;
     }
 
@@ -372,7 +372,7 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
         /* as muxSend was not successful we still own the packet and have to
          * free it! */
         netMblkClChainFree(pPacket);
-        ret = kEplInvalidOperation;
+        ret = kErrorInvalidOperation;
     }
 
 #if EDRV_USE_DIAGNOSTICS != FALSE
@@ -401,11 +401,11 @@ This function allocates a Tx buffer.
 //------------------------------------------------------------------------------
 tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-    tOplkError ret = kEplSuccessful;
+    tOplkError ret = kErrorOk;
 
     if (pBuffer_p->maxBufferSize > EDRV_MAX_FRAME_SIZE)
     {
-        ret = kEplEdrvNoFreeBufEntry;
+        ret = kErrorEdrvNoFreeBufEntry;
         goto Exit;
     }
 
@@ -413,7 +413,7 @@ tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
     pBuffer_p->pBuffer = EPL_MALLOC(pBuffer_p->maxBufferSize);
     if (pBuffer_p->pBuffer == NULL)
     {
-        ret = kEplEdrvNoFreeBufEntry;
+        ret = kErrorEdrvNoFreeBufEntry;
         goto Exit;
     }
 
@@ -445,7 +445,7 @@ tOplkError edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p)
 
     EPL_FREE(pBuffer);
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -477,7 +477,7 @@ tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
     UNUSED_PARAMETER(entryChanged_p);
     UNUSED_PARAMETER(changeFlags_p);
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -498,9 +498,9 @@ tOplkError edrv_clearRxMulticastMacAddr(UINT8* pMacAddr_p)
     if (muxMCastAddrDel(edrvInstance_l.pCookie, (char *)pMacAddr_p) != OK)
     {
         DEBUG_LVL_EDRV_TRACE("error clearing multicast addresses\n");
-        return kEplEdrvInitError;
+        return kErrorEdrvInit;
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -521,9 +521,9 @@ tOplkError edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p)
     if (muxMCastAddrAdd(edrvInstance_l.pCookie, (char *)pMacAddr_p) != OK)
     {
         DEBUG_LVL_EDRV_TRACE("error adding multicast addresses\n");
-        return kEplEdrvInitError;
+        return kErrorEdrvInit;
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 #if EDRV_USE_DIAGNOSTICS != FALSE

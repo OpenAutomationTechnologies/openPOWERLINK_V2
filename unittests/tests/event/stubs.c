@@ -90,31 +90,31 @@ void  target_enableGlobalInterrupt(BYTE fEnable_p)
 tOplkError EplNmtkProcess(tEplEvent* pEvent_p)
 {
     UNUSED_PARAMETER(pEvent_p);
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 tOplkError EplDllkProcess(tEplEvent* pEvent_p)
 {
     UNUSED_PARAMETER(pEvent_p);
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 tOplkError dllkcal_process(tEplEvent* pEvent_p)
 {
     UNUSED_PARAMETER(pEvent_p);
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 tOplkError errhndk_process(tEplEvent* pEvent_p)
 {
     UNUSED_PARAMETER(pEvent_p);
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 tOplkError pdokcal_process(tEplEvent* pEvent_p)
 {
     UNUSED_PARAMETER(pEvent_p);
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 

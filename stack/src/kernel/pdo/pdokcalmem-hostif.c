@@ -113,7 +113,7 @@ tOplkError pdokcal_openMem(void)
     {
         DEBUG_LVL_ERROR_TRACE("%s() couldn't get Pcp hostif instance\n",
                 __func__);
-        return kEplNoResource;
+        return kErrorNoResource;
     }
 
     //jz abuse rpdo buffer for rpdo and tpdo! Merge also in ipcore!
@@ -123,10 +123,10 @@ tOplkError pdokcal_openMem(void)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Could not get buffer from host interface (%d)\n",
                 __func__, hifret);
-        return kEplNoResource;
+        return kErrorNoResource;
     }
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -145,7 +145,7 @@ tOplkError pdokcal_closeMem(void)
 {
     EPL_MEMSET(&limPdo_l, 0, sizeof(limPdo_l));
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -168,12 +168,12 @@ tOplkError pdokcal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
     {
         DEBUG_LVL_ERROR_TRACE("%s() out of memory (%d > %d)\n",
                 __func__, memSize_p, limPdo_l.span);
-        return kEplNoResource;
+        return kErrorNoResource;
     }
 
     *ppPdoMem_p = limPdo_l.pBase;
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -199,7 +199,7 @@ tOplkError pdokcal_freeMem(BYTE* pMem_p, size_t memSize_p)
     TRACE("%s() try to free address %p (%p)\n",
             __func__, pMem_p, limPdo_l.pBase);
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //============================================================================//

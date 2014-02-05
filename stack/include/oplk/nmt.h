@@ -193,7 +193,7 @@ typedef enum
     kNmtNodeEventCheckConf          = 0x02,     ///< application / Configuration Manager shall check and update configuration on CN
     kNmtNodeEventUpdateConf         = 0x03,     ///< application / Configuration Manager shall update configuration on CN (check was done by NmtMn module)
     kNmtNodeEventVerifyConf         = 0x04,     ///< application / Configuration Manager shall verify configuration of CN
-    kNmtNodeEventReadyToStart       = 0x05,     ///< issued if EPL_NMTST_NO_STARTNODE set, application must call EplNmtMnuSendNmtCommand(kEplNmtCmdStartNode) manually
+    kNmtNodeEventReadyToStart       = 0x05,     ///< issued if EPL_NMTST_NO_STARTNODE set, application must call EplNmtMnuSendNmtCommand(kErrorNmtCmdStartNode) manually
     kNmtNodeEventNmtState           = 0x06,
     kNmtNodeEventError              = 0x07,     ///< NMT error of CN
 } tNmtNodeEvent;

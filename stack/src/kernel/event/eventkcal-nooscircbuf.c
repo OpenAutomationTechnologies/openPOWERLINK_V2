@@ -109,7 +109,7 @@ static tEventkCalInstance   instance_l;             ///< Instance variable of ke
 The function initializes the kernel event CAL module on Linux.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          If function executes correctly
+\retval kErrorOk          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventkcal
@@ -119,16 +119,16 @@ tOplkError eventkcal_init (void)
 {
     EPL_MEMSET(&instance_l, 0, sizeof(tEventkCalInstance));
 
-    if (eventkcal_initQueueCircbuf(kEventQueueK2U) != kEplSuccessful)
+    if (eventkcal_initQueueCircbuf(kEventQueueK2U) != kErrorOk)
         goto Exit;
 
     instance_l.fInitialized = TRUE;
-    return kEplSuccessful;
+    return kErrorOk;
 
 Exit:
     eventkcal_exitQueueCircbuf(kEventQueueK2U);
 
-    return kEplNoResource;
+    return kErrorNoResource;
 }
 
 
@@ -140,7 +140,7 @@ The function cleans up the kernel event CAL module. For cleanup it calls the exi
 functions of the queue implementations for each used queue.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          If function executes correctly
+\retval kErrorOk          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventkcal
@@ -154,7 +154,7 @@ tOplkError eventkcal_exit (void)
     }
     instance_l.fInitialized = FALSE;
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -166,7 +166,7 @@ This function posts a event to the kernel queue.
 \param  pEvent_p                Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          If function executes correctly
+\retval kErrorOk          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventkcal
@@ -174,7 +174,7 @@ This function posts a event to the kernel queue.
 //------------------------------------------------------------------------------
 tOplkError eventkcal_postKernelEvent (tEplEvent *pEvent_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
 
     target_enableGlobalInterrupt(FALSE);
 
@@ -194,7 +194,7 @@ This function posts a event to the user queue.
 \param  pEvent_p                Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          If function executes correctly
+\retval kErrorOk          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventkcal
@@ -202,7 +202,7 @@ This function posts a event to the user queue.
 //------------------------------------------------------------------------------
 tOplkError eventkcal_postUserEvent (tEplEvent *pEvent_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
 
     ret = eventkcal_postEventCircbuf(kEventQueueK2U, pEvent_p);
 

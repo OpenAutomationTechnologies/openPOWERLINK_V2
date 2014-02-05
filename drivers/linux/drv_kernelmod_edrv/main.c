@@ -279,7 +279,7 @@ static int powerlinkOpen(struct inode* pDeviceFile_p, struct file* pInstance_p)
 
     init_timer(&heartbeatTimer_g);
 
-    if (ctrlk_init() != kEplSuccessful)
+    if (ctrlk_init() != kErrorOk)
     {
         return -EIO;
     }
@@ -423,7 +423,7 @@ static int  powerlinkIoctl (struct inode* dev, struct file* filp,
             break;
 
         case PLK_CMD_PDO_SYNC:
-            if ((oplRet = pdokcal_waitSyncEvent()) == kEplRetry)
+            if ((oplRet = pdokcal_waitSyncEvent()) == kErrorRetry)
                 ret = -ERESTARTSYS;
             else
                 ret = 0;

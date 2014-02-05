@@ -120,7 +120,7 @@ The function adds a user timer instance.
 //------------------------------------------------------------------------------
 tOplkError timeru_addInstance(void)
 {
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -136,7 +136,7 @@ The function deletes a user timer instance.
 //------------------------------------------------------------------------------
 tOplkError timeru_delInstance(void)
 {
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -155,7 +155,7 @@ whether a timer has expired.
 //------------------------------------------------------------------------------
 tOplkError timeru_process(void)
 {
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -176,16 +176,16 @@ corresponding timer handle.
 //------------------------------------------------------------------------------
 tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg argument_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     tTimeruData*        pData;
 
     // check pointer to handle
     if(pTimerHdl_p == NULL)
-        return kEplTimerInvalidHandle;
+        return kErrorTimerInvalidHandle;
 
     pData = (tTimeruData*) EPL_MALLOC(sizeof (tTimeruData));
     if (pData == NULL)
-        return kEplNoResource;
+        return kErrorNoResource;
 
     init_timer(&pData->timer);
     pData->timer.function = cbTimer;
@@ -217,12 +217,12 @@ it creates the timer and stores the new timer handle at \p pTimerHdl_p.
 //------------------------------------------------------------------------------
 tOplkError timeru_modifyTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg argument_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     tTimeruData*        pData;
 
     // check pointer to handle
     if(pTimerHdl_p == NULL)
-        return kEplTimerInvalidHandle;
+        return kErrorTimerInvalidHandle;
 
     // check handle itself, i.e. was the handle initialized before
     if (*pTimerHdl_p == 0)
@@ -231,7 +231,7 @@ tOplkError timeru_modifyTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerAr
     }
     pData = (tTimeruData*) *pTimerHdl_p;
     if ((tTimeruData*)pData->timer.data != pData)
-        return kEplTimerInvalidHandle;
+        return kErrorTimerInvalidHandle;
 
     mod_timer(&pData->timer, (jiffies + 1 + ((timeInMs_p * HZ) + 999) / 1000));
 
@@ -260,28 +260,28 @@ This function deletes an existing timer.
 \param  pTimerHdl_p     Pointer to timer handle of timer to delete.
 
 \return The function returns a tOplkError error code.
-\retval kEplTimerInvalidHandle  If an invalid timer handle was specified.
-\retval kEplSuccessful          If the timer is deleted.
+\retval kErrorTimerInvalidHandle  If an invalid timer handle was specified.
+\retval kErrorOk          If the timer is deleted.
 
 \ingroup module_timeru
 */
 //------------------------------------------------------------------------------
 tOplkError timeru_deleteTimer(tTimerHdl* pTimerHdl_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     tTimeruData*        pData;
 
     // check pointer to handle
     if(pTimerHdl_p == NULL)
-        return kEplTimerInvalidHandle;
+        return kErrorTimerInvalidHandle;
 
     // check handle itself, i.e. was the handle initialized before
     if (*pTimerHdl_p == 0)
-        return kEplSuccessful;
+        return kErrorOk;
 
     pData = (tTimeruData*) *pTimerHdl_p;
     if ((tTimeruData*)pData->timer.data != pData)
-        return kEplTimerInvalidHandle;
+        return kErrorTimerInvalidHandle;
 
     del_timer(&pData->timer);         // try to delete the timer
     kfree(pData);                       // free memory in any case
@@ -347,7 +347,7 @@ by the timer when it expires.
 //------------------------------------------------------------------------------
 static void cbTimer(ULONG parameter_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     tTimeruData*        pData;
     tEplEvent           event;
     tTimerEventArg      timerEventArg;

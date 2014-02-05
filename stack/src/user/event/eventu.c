@@ -143,7 +143,7 @@ the init function of it's CAL module.
 \param  pfnApiProcessEventCb_p  Function pointer to generic event callback function.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          If function executes correctly
+\retval kErrorOk          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventu
@@ -151,7 +151,7 @@ the init function of it's CAL module.
 //------------------------------------------------------------------------------
 tOplkError eventu_init(tEplProcessEventCb pfnApiProcessEventCb_p)
 {
-    tOplkError ret = kEplSuccessful;
+    tOplkError ret = kErrorOk;
 
     instance_l.pfnApiProcessEventCb = pfnApiProcessEventCb_p;
 
@@ -167,7 +167,7 @@ tOplkError eventu_init(tEplProcessEventCb pfnApiProcessEventCb_p)
 This function cleans up the user event module.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          If function executes correctly
+\retval kErrorOk          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventu
@@ -175,7 +175,7 @@ This function cleans up the user event module.
 //------------------------------------------------------------------------------
 tOplkError eventu_exit(void)
 {
-    tOplkError ret = kEplSuccessful;
+    tOplkError ret = kErrorOk;
 
     ret = eventucal_exit();
 
@@ -193,7 +193,7 @@ specific module
 \param  pEvent_p                Received event.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          If function executes correctly
+\retval kErrorOk          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventu
@@ -201,7 +201,7 @@ specific module
 //------------------------------------------------------------------------------
 tOplkError eventu_process (tEplEvent *pEvent_p)
 {
-    tOplkError              ret = kEplSuccessful;
+    tOplkError              ret = kErrorOk;
     tEplEventSource         eventSource;
     tEplProcessEventCb      pfnEventHandler;
     tEventDispatchEntry*    pDispatchEntry;
@@ -209,7 +209,7 @@ tOplkError eventu_process (tEplEvent *pEvent_p)
     pDispatchEntry = &eventDispatchTbl_l[0];
     ret = event_getHandlerForSink(&pDispatchEntry, pEvent_p->m_EventSink,
                                   &pfnEventHandler, &eventSource);
-    if (ret == kEplEventUnknownSink)
+    if (ret == kErrorEventUnknownSink)
     {
         // Unknown sink, provide error event to API layer
         eventu_postError(kEplEventSourceEventu, ret, sizeof(pEvent_p->m_EventSink),
@@ -220,7 +220,7 @@ tOplkError eventu_process (tEplEvent *pEvent_p)
         if (pfnEventHandler != NULL)
         {
             ret = pfnEventHandler(pEvent_p);
-            if ((ret != kEplSuccessful) && (ret != kEplShutdown))
+            if ((ret != kErrorOk) && (ret != kErrorShutdown))
             {
                 // forward error event to API layer
                 eventu_postError(kEplEventSourceEventu, ret,  sizeof(eventSource),
@@ -241,7 +241,7 @@ CAL module which distributes the event to the suitable event queue.
 \param  pEvent_p                Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          If function executes correctly
+\retval kErrorOk          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventu
@@ -249,7 +249,7 @@ CAL module which distributes the event to the suitable event queue.
 //------------------------------------------------------------------------------
 tOplkError eventu_postEvent (tEplEvent *pEvent_p)
 {
-    tOplkError ret = kEplSuccessful;
+    tOplkError ret = kErrorOk;
 
     // split event post to user internal and user to kernel
     switch(pEvent_p->m_EventSink)
@@ -277,7 +277,7 @@ tOplkError eventu_postEvent (tEplEvent *pEvent_p)
             break;
 
         default:
-            ret = kEplEventUnknownSink;
+            ret = kErrorEventUnknownSink;
             break;
     }
     return ret;
@@ -295,7 +295,7 @@ This function posts an error event to the API module.
 \param  pArg_p                  Error argument
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful          If function executes correctly
+\retval kErrorOk          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventu
@@ -308,7 +308,7 @@ tOplkError eventu_postError (tEplEventSource eventSource_p,  tOplkError error_p,
     tEplEventError      eventError;
     tEplEvent           event;
 
-    ret = kEplSuccessful;
+    ret = kErrorOk;
 
     // create argument
     eventError.m_EventSource = eventSource_p;
@@ -352,7 +352,7 @@ static tOplkError callApiEventCb (tEplEvent* pEvent_p)
     {
         return instance_l.pfnApiProcessEventCb(pEvent_p);
     }
-    return kEplEventPostError;
+    return kErrorEventPostError;
 }
 /// \}
 

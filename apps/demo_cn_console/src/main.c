@@ -134,7 +134,7 @@ This is the main function of the openPOWERLINK console MN demo application.
 //------------------------------------------------------------------------------
 int main (int argc, char **argv)
 {
-    tOplkError                  ret = kEplSuccessful;
+    tOplkError                  ret = kErrorOk;
     tOptions                    opts;
 
     getOptions (argc, argv, &opts);
@@ -152,10 +152,10 @@ int main (int argc, char **argv)
     printf("----------------------------------------------------\n");
 
     if ((ret = initPowerlink(CYCLE_LEN, aMacAddr_l, opts.nodeId))
-        != kEplSuccessful)
+        != kErrorOk)
         goto Exit;
 
-    if((ret = initApp()) != kEplSuccessful)
+    if((ret = initApp()) != kErrorOk)
         goto Exit;
 
     loopMain();
@@ -188,7 +188,7 @@ The function initializes the openPOWERLINK stack.
 //------------------------------------------------------------------------------
 static tOplkError initPowerlink(UINT32 cycleLen_p, const BYTE* macAddr_p, UINT32 nodeId_p)
 {
-    tOplkError                  ret = kEplSuccessful;
+    tOplkError                  ret = kErrorOk;
     static tEplApiInitParam     initParam;
     char*                       sHostname = HOSTNAME;
     static char                 devName[128];
@@ -251,13 +251,13 @@ static tOplkError initPowerlink(UINT32 cycleLen_p, const BYTE* macAddr_p, UINT32
 
     // initialize POWERLINK stack
     ret = oplk_init(&initParam);
-    if(ret != kEplSuccessful)
+    if(ret != kErrorOk)
     {
         printf("oplk_init() failed (Error:0x%x!\n", ret);
         return ret;
     }
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -273,7 +273,7 @@ This function implements the main loop of the demo application.
 //------------------------------------------------------------------------------
 static void loopMain(void)
 {
-    tOplkError              ret = kEplSuccessful;
+    tOplkError              ret = kErrorOk;
     char                    cKey = 0;
     BOOL                    fExit = FALSE;
 
@@ -287,7 +287,7 @@ static void loopMain(void)
 
     // start processing
     ret = oplk_execNmtCommand(kNmtEventSwReset);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
     {
         return;
     }
@@ -315,7 +315,7 @@ static void loopMain(void)
                 case 'r':
                 {
                     ret = oplk_execNmtCommand(kNmtEventSwReset);
-                    if (ret != kEplSuccessful)
+                    if (ret != kErrorOk)
                     {
                         fExit = TRUE;
                     }

@@ -125,10 +125,10 @@ tOplkError errhndu_init(void)
 {
     tOplkError      ret;
 
-    ret = kEplSuccessful;
+    ret = kErrorOk;
 
     ret = errhnducal_init(&instance_l.errorObjects);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
     {
         TRACE ("Couldn't init error handler CAL (%d)\n", ret);
         goto Exit;
@@ -136,7 +136,7 @@ tOplkError errhndu_init(void)
 
     // link counters to OD
     ret = linkErrorCounter(&instance_l.errorObjects.cnLossSoc, OID_DLL_CN_LOSSSOC_REC);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
     {
         goto Exit;
     }
@@ -145,34 +145,34 @@ tOplkError errhndu_init(void)
     // ignore return code, because object 0x1C0D is conditional
 
     ret = linkErrorCounter(&instance_l.errorObjects.cnCrcErr, OID_DLL_CN_CRCERROR_REC);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
     {
         goto Exit;
     }
 
 #ifdef CONFIG_INCLUDE_NMT_MN
     ret = linkErrorCounter(&instance_l.errorObjects.mnCrcErr, OID_DLL_MN_CRCERROR_REC);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
     {
         goto Exit;
     }
 
     ret = linkErrorCounter(&instance_l.errorObjects.mnCycTimeExceed,
                            OID_DLL_MN_CYCTIME_EXCEED_REC);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
     {
         goto Exit;
     }
 
     ret = linkMnCnLossPresErrors(&instance_l.errorObjects);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
     {
         goto Exit;
     }
 #endif
 
 Exit:
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
     {
         errhnducal_exit();
     }
@@ -193,7 +193,7 @@ The function shuts down the user error handler module.
 tOplkError errhndu_exit()
 {
     errhnducal_exit();
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -207,7 +207,7 @@ PreRead events.
 
 \param  pParam_p            OD callback parameter
 
-\return Returns always kEplSuccessful
+\return Returns always kErrorOk
 */
 //------------------------------------------------------------------------------
 tOplkError errhndu_cbObdAccess(tObdCbParam MEM* pParam_p)
@@ -246,7 +246,7 @@ tOplkError errhndu_cbObdAccess(tObdCbParam MEM* pParam_p)
         default:
             break;
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 #ifdef CONFIG_INCLUDE_NMT_MN
@@ -263,17 +263,17 @@ PreRead objects.
 
 \param  pParam_p            OD callback parameter
 
-\return Returns always kEplSuccessful
+\return Returns always kErrorOk
 
 \ingroup module_errhndu
 */
 //------------------------------------------------------------------------------
 tOplkError errhndu_mnCnLossPresCbObdAccess(tObdCbParam MEM* pParam_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
 
     if (pParam_p->subIndex == 0)
-        return kEplSuccessful;
+        return kErrorOk;
 
     switch (pParam_p->obdEvent)
     {
@@ -335,7 +335,7 @@ directory entry.
 //------------------------------------------------------------------------------
 static tOplkError linkErrorCounter(tErrorObject* pErrorCounter_p, UINT index_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     tVarParam       varParam;
 
     varParam.validFlag = kVarValidAll;
@@ -345,13 +345,13 @@ static tOplkError linkErrorCounter(tErrorObject* pErrorCounter_p, UINT index_p)
     varParam.pData = &(pErrorCounter_p->cumulativeCnt);
     varParam.subindex = 0x01;
     ret = obd_defineVar(&varParam);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
         return ret;
 
     varParam.pData = &(pErrorCounter_p->thresholdCnt);
     varParam.subindex = 0x02;
     ret = obd_defineVar(&varParam);
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
         return ret;
 
     varParam.pData = &(pErrorCounter_p->threshold);
@@ -373,29 +373,29 @@ dictionary.
                             object.
 
 \return Returns a tOplkError error code.
-\retval kEplSuccessful          If object exists
-\retval kEplObdIndexNotExist    IF index does not exist
+\retval kErrorOk          If object exists
+\retval kErrorObdIndexNotExist    IF index does not exist
 
 \ingroup module_errhndu
 */
 //------------------------------------------------------------------------------
 static tOplkError checkErrorObject(UINT index_p, BYTE *pEntries_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     tObdSize        entrySize;
     BYTE            indexEntries;
 
     entrySize = (tObdSize)  sizeof(indexEntries);
     ret = obd_readEntry ( index_p, 0x00, (void GENERIC*) &indexEntries, &entrySize );
 
-    if ((ret != kEplSuccessful) || (indexEntries == 0x00))
+    if ((ret != kErrorOk) || (indexEntries == 0x00))
     {
         // Object doesn't exist or invalid entry number
-        return kEplObdIndexNotExist;
+        return kErrorObdIndexNotExist;
     }
 
     *pEntries_p = indexEntries;
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -415,7 +415,7 @@ subindexes for each node ID.
 //------------------------------------------------------------------------------
 static tOplkError linkMnCnLossPresErrors(tErrHndObjects* pError_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     tVarParam       varParam;
     BYTE            indexEntries;
     BYTE            numObjs;
@@ -426,18 +426,18 @@ static tOplkError linkMnCnLossPresErrors(tErrHndObjects* pError_p)
      * of subindexes for threshold and counters.
      */
     ret = checkErrorObject(OID_DLL_MNCN_LOSSPRES_CUMCNT_AU32, &indexEntries);
-    if (ret != kEplSuccessful)
-        return kEplObdIndexNotExist;
+    if (ret != kErrorOk)
+        return kErrorObdIndexNotExist;
     numObjs = indexEntries;
 
     ret = checkErrorObject(OID_DLL_MNCN_LOSSPRES_THRCNT_AU32, &indexEntries);
-    if (ret != kEplSuccessful)
-        return kEplObdIndexNotExist;
+    if (ret != kErrorOk)
+        return kErrorObdIndexNotExist;
     numObjs = min(numObjs, indexEntries);
 
     ret = checkErrorObject(OID_DLL_MNCN_LOSSPRES_THRESHOLD_AU32, &indexEntries);
-    if (ret != kEplSuccessful)
-        return kEplObdIndexNotExist;
+    if (ret != kErrorOk)
+        return kErrorObdIndexNotExist;
     numObjs = min(numObjs, indexEntries);
 
     varParam.size = sizeof(UINT32);
@@ -451,21 +451,21 @@ static tOplkError linkMnCnLossPresErrors(tErrHndObjects* pError_p)
         varParam.index = OID_DLL_MNCN_LOSSPRES_CUMCNT_AU32;
         varParam.pData = &(pErrCnt->cumulativeCnt);
         ret = obd_defineVar(&varParam);
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
             break;
 
         // ThresholdCnt 1C08
         varParam.index = OID_DLL_MNCN_LOSSPRES_THRCNT_AU32;
         varParam.pData = &(pErrCnt->thresholdCnt);
         ret = obd_defineVar(&varParam);
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
             break;
 
         // Threshold 1C09
         varParam.index = OID_DLL_MNCN_LOSSPRES_THRESHOLD_AU32;
         varParam.pData = &(pErrCnt->threshold);
         ret = obd_defineVar(&varParam);
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
             break;
 
         pErrCnt++;

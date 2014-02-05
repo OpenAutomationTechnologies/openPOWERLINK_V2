@@ -98,7 +98,7 @@ The function initializes the PDO user CAL sync module
 tOplkError pdoucal_initSync(tEplSyncCb pfnSyncCb_p)
 {
     pfnSyncCb_l = pfnSyncCb_p;
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -123,15 +123,15 @@ The function waits for a sync event.
                         forever.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful      Successfully received sync event
-\retval kEplGeneralError    Error while waiting on sync event
+\retval kErrorOk      Successfully received sync event
+\retval kErrorGeneralError    Error while waiting on sync event
 */
 //------------------------------------------------------------------------------
 tOplkError pdoucal_waitSyncEvent(ULONG timeout_p)
 {
     UNUSED_PARAMETER(timeout_p);
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -149,7 +149,7 @@ tOplkError pdoucal_callSyncCb(void)
     {
         return pfnSyncCb_l();
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 

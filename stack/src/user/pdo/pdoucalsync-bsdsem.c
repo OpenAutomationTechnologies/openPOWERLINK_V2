@@ -109,9 +109,9 @@ tOplkError pdoucal_initSync(tEplSyncCb pfnSyncCb_p)
     if ((syncSem_l = sem_open(PDO_SYNC_BSDSEM, O_CREAT, S_IRWXG, 1)) == SEM_FAILED)
     {
         TRACE ("%s() creating sem failed!\n", __func__);
-        return kEplNoResource;
+        return kErrorNoResource;
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -136,8 +136,8 @@ The function waits for a sync event.
                         forever.
 
 \return The function returns a tOplkError error code.
-\retval kEplSuccessful      Successfully received sync event
-\retval kEplGeneralError    Error while waiting on sync event
+\retval kErrorOk      Successfully received sync event
+\retval kErrorGeneralError    Error while waiting on sync event
 */
 //------------------------------------------------------------------------------
 tOplkError pdoucal_waitSyncEvent(ULONG timeout_p)
@@ -168,9 +168,9 @@ tOplkError pdoucal_waitSyncEvent(ULONG timeout_p)
     }
 
     if (semRet == 0)
-        return kEplSuccessful;
+        return kErrorOk;
     else
-        return kEplGeneralError;
+        return kErrorGeneralError;
 }
 
 //============================================================================//

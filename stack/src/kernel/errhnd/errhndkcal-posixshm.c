@@ -104,7 +104,7 @@ static BOOL                     fCreator_l;
 
 The function initializes the user layer CAL module of the error handler.
 
-\return     Returns always kEplSuccessful
+\return     Returns always kErrorOk
 
 \ingroup module_errhndkcal
 */
@@ -114,18 +114,18 @@ tOplkError errhndkcal_init (void)
     struct stat             stat;
 
     if (pErrHndMem_l != NULL)
-        return kEplNoFreeInstance;
+        return kErrorNoFreeInstance;
 
     if ((fd_l = shm_open(ERRHND_SHM_NAME, O_RDWR | O_CREAT, 0)) < 0)
     {
         TRACE("%s() shm_open failed!\n", __func__);
-        return kEplNoResource;
+        return kErrorNoResource;
     }
 
     if (fstat(fd_l, &stat) != 0)
     {
         close (fd_l);
-        return kEplNoResource;
+        return kErrorNoResource;
     }
 
     if (stat.st_size == 0)
@@ -135,7 +135,7 @@ tOplkError errhndkcal_init (void)
             TRACE("%s() ftruncate failed!\n", __func__);
             close (fd_l);
             shm_unlink(ERRHND_SHM_NAME);
-            return kEplNoResource;
+            return kErrorNoResource;
         }
         fCreator_l = TRUE;
     }
@@ -147,14 +147,14 @@ tOplkError errhndkcal_init (void)
         close (fd_l);
         if (fCreator_l)
             shm_unlink(ERRHND_SHM_NAME);
-        return kEplNoResource;
+        return kErrorNoResource;
     }
 
     if (fCreator_l)
     {
         EPL_MEMSET(pErrHndMem_l, 0, sizeof(tErrHndObjects));
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------

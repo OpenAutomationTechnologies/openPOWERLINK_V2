@@ -128,7 +128,7 @@ This function initializes the Ethernet driver.
 //------------------------------------------------------------------------------
 tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
 {
-    tOplkError          ret = kEplSuccessful;
+    tOplkError          ret = kErrorOk;
     char                aErrorMessage[PCAP_ERRBUF_SIZE];
     struct sched_param  schedParam;
 
@@ -137,7 +137,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
 
     if (pEdrvInitParam_p->hwParam.m_pszDevName == NULL)
     {
-        ret = kEplEdrvInitError;
+        ret = kErrorEdrvInit;
         goto Exit;
     }
 
@@ -170,28 +170,28 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Error!! Can't open pcap: %s\n", __func__,
                                 aErrorMessage);
-        ret = kEplEdrvInitError;
+        ret = kErrorEdrvInit;
         goto Exit;
     }
 
     if (pcap_setdirection(edrvInstance_l.pPcap, PCAP_D_OUT) < 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s() couldn't set PCAP direction\n", __func__);
-        ret = kEplEdrvInitError;
+        ret = kErrorEdrvInit;
         goto Exit;
     }
 
     if (pthread_mutex_init(&edrvInstance_l.mutex, NULL) != 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s() couldn't init mutex\n", __func__);
-        ret = kEplEdrvInitError;
+        ret = kErrorEdrvInit;
         goto Exit;
     }
 
     if (sem_init(&edrvInstance_l.syncSem, 0, 0) != 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s() couldn't init semaphore\n", __func__);
-        ret = kEplEdrvInitError;
+        ret = kErrorEdrvInit;
         goto Exit;
     }
 
@@ -199,7 +199,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
                        workerThread,  &edrvInstance_l) != 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Couldn't create worker thread!\n", __func__);
-        ret = kEplEdrvInitError;
+        ret = kErrorEdrvInit;
         goto Exit;
     }
 
@@ -244,7 +244,7 @@ tOplkError edrv_shutdown(void)
     // clear instance structure
     EPL_MEMSET(&edrvInstance_l, 0, sizeof (edrvInstance_l));
 
-    return kEplSuccessful; //assuming no problems with closing the handle
+    return kErrorOk; //assuming no problems with closing the handle
 }
 
 //------------------------------------------------------------------------------
@@ -262,14 +262,14 @@ This function sends the Tx buffer.
 //------------------------------------------------------------------------------
 tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
     INT         pcapRet;
 
     FTRACE_MARKER("%s", __func__);
 
     if (pBuffer_p->txBufferNumber.pArg != NULL)
     {
-        ret = kEplInvalidOperation;
+        ret = kErrorInvalidOperation;
         goto Exit;
     }
 
@@ -303,7 +303,7 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
         {
             DEBUG_LVL_EDRV_TRACE("%s() pcap_sendpacket returned %d (%s)\n",
                     __func__, pcapRet, pcap_geterr(edrvInstance_l.pPcap));
-            ret = kEplInvalidOperation;
+            ret = kErrorInvalidOperation;
         }
     }
 
@@ -326,11 +326,11 @@ This function allocates a Tx buffer.
 //------------------------------------------------------------------------------
 tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-    tOplkError ret = kEplSuccessful;
+    tOplkError ret = kErrorOk;
 
     if (pBuffer_p->maxBufferSize > EDRV_MAX_FRAME_SIZE)
     {
-        ret = kEplEdrvNoFreeBufEntry;
+        ret = kErrorEdrvNoFreeBufEntry;
         goto Exit;
     }
 
@@ -338,7 +338,7 @@ tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
     pBuffer_p->pBuffer = EPL_MALLOC(pBuffer_p->maxBufferSize);
     if (pBuffer_p->pBuffer == NULL)
     {
-        ret = kEplEdrvNoFreeBufEntry;
+        ret = kErrorEdrvNoFreeBufEntry;
         goto Exit;
     }
 
@@ -370,7 +370,7 @@ tOplkError edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p)
 
     EPL_FREE(pBuffer);
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -402,7 +402,7 @@ tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
     UNUSED_PARAMETER(entryChanged_p);
     UNUSED_PARAMETER(changeFlags_p);
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -422,7 +422,7 @@ tOplkError edrv_clearRxMulticastMacAddr(UINT8* pMacAddr_p)
 {
     UNUSED_PARAMETER(pMacAddr_p);
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -442,7 +442,7 @@ tOplkError edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p)
 {
     UNUSED_PARAMETER(pMacAddr_p);
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //============================================================================//

@@ -117,7 +117,7 @@ tOplkError DataInOutThread::processSync(void)
     int                 i;
 
     ret = oplk_exchangeProcessImageOut();
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
     {
         return ret;
     }
@@ -197,7 +197,7 @@ tOplkError DataInOutThread::setupProcessImage()
     tOplkError          ret;
 
     ret = oplk_allocProcessImage(sizeof(PI_IN), sizeof(PI_OUT));
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
     {
         return ret;
     }
@@ -206,7 +206,7 @@ tOplkError DataInOutThread::setupProcessImage()
     pProcessImageOut_l = (PI_OUT *)oplk_getProcessImageOut();
 
     ret = oplk_setupProcessImage();
-    if (ret != kEplSuccessful)
+    if (ret != kErrorOk)
     {
         return ret;
     }
@@ -257,7 +257,7 @@ void DataInOutThread::run()
     {
         oplk_waitSyncEvent(0);
         ret = processSync();
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
         {
             return;
         }

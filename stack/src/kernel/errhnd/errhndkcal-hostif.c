@@ -97,21 +97,21 @@ static tErrHndObjects *pErrHnd_l;
 The function initializes the user layer CAL module of the error handler.
 
 \return     tOplkError
-\retval     kEplSuccessful      successful return
-\retval     kEplNoResource      ipcore instance not found
+\retval     kErrorOk      successful return
+\retval     kErrorNoResource      ipcore instance not found
 */
 //------------------------------------------------------------------------------
 tOplkError errhndkcal_init (void)
 {
     tHostifInstance pHostifInstance = hostif_getInstance(0);
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     tHostifReturn   hifRet;
     UINT8*          pBase;
     UINT            span;
 
     if(pHostifInstance == NULL)
     {
-        ret = kEplNoResource;
+        ret = kErrorNoResource;
         goto Exit;
     }
 
@@ -121,7 +121,7 @@ tOplkError errhndkcal_init (void)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Could not get buffer from host interface (%d)\n",
                 __func__, hifRet);
-        ret = kEplNoResource;
+        ret = kErrorNoResource;
         goto Exit;
     }
 
@@ -129,7 +129,7 @@ tOplkError errhndkcal_init (void)
     {
         DEBUG_LVL_ERROR_TRACE("%s: Error Handler Object Buffer too small\n",
                 __func__);
-        ret = kEplNoResource;
+        ret = kErrorNoResource;
         goto Exit;
     }
 

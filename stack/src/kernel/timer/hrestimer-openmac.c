@@ -143,7 +143,7 @@ The function adds an instance of the high-resolution timer module.
 //------------------------------------------------------------------------------
 tOplkError hrestimer_addInstance(void)
 {
-    tOplkError ret = kEplSuccessful;
+    tOplkError ret = kErrorOk;
 
     EPL_MEMSET(&instance_l, 0, sizeof (instance_l));
 
@@ -168,7 +168,7 @@ The function deletes an instance of the high-resolution timer module.
 //------------------------------------------------------------------------------
 tOplkError hrestimer_delInstance(void)
 {
-    tOplkError ret = kEplSuccessful;
+    tOplkError ret = kErrorOk;
 
     openmac_timerIrqDisable(HWTIMER_SYNC);
     openmac_timerSetCompareValue(HWTIMER_SYNC, 0);
@@ -210,7 +210,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
                                  tTimerkCallback pfnCallback_p, ULONG argument_p,
                                  BOOL fContinue_p)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
     UINT        index;
     tTimerInfo* pTimerInfo;
     UINT32      timeNs;
@@ -219,13 +219,13 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
     // check pointer to handle
     if (pTimerHdl_p == NULL)
     {
-        ret = kEplTimerInvalidHandle;
+        ret = kErrorTimerInvalidHandle;
         goto Exit;
     }
 
     if (fContinue_p != FALSE)
     {
-        ret = kEplTimerNoTimerCreated;
+        ret = kErrorTimerNoTimerCreated;
         goto Exit;
     }
 
@@ -234,7 +234,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
         index = 0;
         if (instance_l.timerInfo.pfnCb != NULL)
         {   // no free structure found
-            ret = kEplTimerNoTimerCreated;
+            ret = kErrorTimerNoTimerCreated;
             goto Exit;
         }
     }
@@ -243,7 +243,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
         index = (*pTimerHdl_p >> TIMERHDL_SHIFT) - 1;
         if (index >= TIMER_COUNT)
         {   // invalid handle
-            ret = kEplTimerInvalidHandle;
+            ret = kErrorTimerInvalidHandle;
             goto Exit;
         }
     }
@@ -306,14 +306,14 @@ by its timer handle. After deleting the handle is reset to zero.
 //------------------------------------------------------------------------------
 tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
 {
-    tOplkError  ret = kEplSuccessful;
+    tOplkError  ret = kErrorOk;
     UINT        index;
     tTimerInfo* pTimerInfo;
 
     // check pointer to handle
     if (pTimerHdl_p == NULL)
     {
-        ret = kEplTimerInvalidHandle;
+        ret = kErrorTimerInvalidHandle;
         goto Exit;
     }
 
@@ -328,7 +328,7 @@ tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
         index = (*pTimerHdl_p >> TIMERHDL_SHIFT) - 1;
         if (index >= TIMER_COUNT)
         {   // invalid handle
-            ret = kEplTimerInvalidHandle;
+            ret = kErrorTimerInvalidHandle;
             goto Exit;
         }
         if (pTimerInfo->eventArg.timerHdl != *pTimerHdl_p)

@@ -153,5 +153,5 @@ tOplkError obd_initObd(tObdInitParam MEM* pInitParam_p)
     #undef OBD_CREATE_INIT_SUBINDEX
 
 #endif // !defined(DOXYGEN_PARSER)
-    return kEplSuccessful;
+    return kErrorOk;
 }

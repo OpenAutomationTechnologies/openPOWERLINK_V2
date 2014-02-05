@@ -119,7 +119,7 @@ The function initializes the user layer CAL module of the error handler.
 
 \param  pLocalObjects_p         Pointer to local error objects
 
-\return Always returns kEplSuccessful
+\return Always returns kErrorOk
 
 \ingroup module_errhnducal
 */
@@ -127,13 +127,13 @@ The function initializes the user layer CAL module of the error handler.
 tOplkError errhnducal_init (tErrHndObjects *pLocalObjects_p)
 {
     if (fInitialized_l)
-        return kEplNoFreeInstance;
+        return kErrorNoFreeInstance;
 
     pLocalObjects_l = pLocalObjects_p;
     instance_l.fd = ctrlucal_getFd();
     fInitialized_l = TRUE;
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -181,9 +181,9 @@ tOplkError errhnducal_writeErrorObject(UINT index_p, UINT subIndex_p, UINT32 *pP
 
     ret = ioctl(instance_l.fd, PLK_CMD_ERRHND_WRITE, (ULONG)&errObj);
     if (ret != 0)
-        return kEplGeneralError;
+        return kErrorGeneralError;
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -216,11 +216,11 @@ tOplkError errhnducal_readErrorObject(UINT index_p, UINT subIndex_p, UINT32 *pPa
     ret = ioctl(instance_l.fd, PLK_CMD_ERRHND_READ, (ULONG)&errObj);
 
     if (ret != 0)
-        return kEplGeneralError;
+        return kErrorGeneralError;
 
     *pParam_p = errObj.errVal;
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 

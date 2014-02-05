@@ -114,7 +114,7 @@ descriptor of the kernel driver.
 tOplkError pdoucal_openMem(void)
 {
     fd_l = ctrlucal_getFd();
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -133,7 +133,7 @@ For the linux kernel mmap implementation nothing needs to be done.
 //------------------------------------------------------------------------------
 tOplkError pdoucal_closeMem(void)
 {
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -158,9 +158,9 @@ tOplkError pdoucal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
     {
         DEBUG_LVL_ERROR_TRACE ("%s() mmap failed!\n", __func__);
         *ppPdoMem_p = NULL;
-        return kEplNoResource;
+        return kErrorNoResource;
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -183,9 +183,9 @@ tOplkError pdoucal_freeMem(BYTE* pMem_p, size_t memSize_p)
     if(munmap(pMem_p, memSize_p) != 0)
     {
         DEBUG_LVL_ERROR_TRACE ("%s() munmap failed (%s)\n", __func__, strerror(errno));
-        return kEplGeneralError;
+        return kErrorGeneralError;
     }
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 

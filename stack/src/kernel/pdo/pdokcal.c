@@ -101,12 +101,12 @@ The function initializes the PDO user CAL module.
 //------------------------------------------------------------------------------
 tOplkError pdokcal_init(void)
 {
-    tOplkError      Ret = kEplSuccessful;
+    tOplkError      Ret = kErrorOk;
 
-    if ((Ret = pdokcal_openMem()) != kEplSuccessful)
+    if ((Ret = pdokcal_openMem()) != kErrorOk)
         return Ret;
 
-    if ((Ret = pdokcal_initSync()) != kEplSuccessful)
+    if ((Ret = pdokcal_initSync()) != kErrorOk)
         return Ret;
 
     dllk_regRpdoHandler(cbProcessRpdo);
@@ -129,7 +129,7 @@ tOplkError pdokcal_exit(void)
 {
     pdokcal_exitSync();
     pdokcal_closeMem();
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -145,7 +145,7 @@ tOplkError pdokcal_exit(void)
 //------------------------------------------------------------------------------
 tOplkError pdokcal_process(tEplEvent * pEvent_p)
 {
-    tOplkError                  Ret = kEplSuccessful;
+    tOplkError                  Ret = kErrorOk;
 
     switch (pEvent_p->m_EventType)
     {
@@ -195,7 +195,7 @@ tOplkError pdokcal_process(tEplEvent * pEvent_p)
             break;
 
         default:
-            Ret = kEplInvalidEvent;
+            Ret = kErrorInvalidEvent;
             break;
     }
     return Ret;
@@ -222,7 +222,7 @@ and NMT_CS_OPERATIONAL. The passed PDO needs not to be valid.
 //------------------------------------------------------------------------------
 static tOplkError cbProcessRpdo(tFrameInfo * pFrameInfo_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     tEplEvent       event;
 
     event.m_EventSink = kEplEventSinkPdokCal;
@@ -237,9 +237,9 @@ static tOplkError cbProcessRpdo(tFrameInfo * pFrameInfo_p)
 #endif
     ret = eventk_postEvent(&event);
 #if DLL_DEFERRED_RXFRAME_RELEASE_ISOCHRONOUS != FALSE
-    if (ret == kEplSuccessful)
+    if (ret == kErrorOk)
     {
-        ret = kEplReject; // Reject release of rx buffer
+        ret = kErrorReject; // Reject release of rx buffer
     }
 #endif
 

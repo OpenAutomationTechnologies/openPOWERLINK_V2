@@ -124,7 +124,7 @@ The function adds a sync module instance
 //------------------------------------------------------------------------------
 tOplkError syncu_addInstance(void)
 {
-    tOplkError ret = kEplSuccessful;
+    tOplkError ret = kErrorOk;
 
     EPL_MEMSET(&syncuInstance_g, 0, sizeof (syncuInstance_g));
     ret = dllucal_regAsndService(kDllAsndSyncResponse, syncu_cbSyncResponse,
@@ -166,7 +166,7 @@ The function resets a sync module instance
 tOplkError syncu_reset(void)
 {
     EPL_MEMSET(&syncuInstance_g, 0, sizeof (syncuInstance_g));
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -192,12 +192,12 @@ tOplkError  syncu_requestSyncResponse(tSyncuCbResponse pfnCbResponse_p,
     tOplkError      ret;
     UINT            nodeId;
 
-    ret = kEplSuccessful;
+    ret = kErrorOk;
     nodeId = pSyncRequestData_p->nodeId;
 
     if (nodeId == 0)
     {
-        return kEplInvalidNodeId;
+        return kErrorInvalidNodeId;
     }
 
     // decrement node ID, because array is zero based
@@ -206,7 +206,7 @@ tOplkError  syncu_requestSyncResponse(tSyncuCbResponse pfnCbResponse_p,
     {
         if (syncuInstance_g.apfnCbResponse[nodeId] != NULL)
         {   // request already issued (maybe by someone else)
-            ret = kEplNmtSyncReqRejected;
+            ret = kErrorNmtSyncReqRejected;
         }
         else
         {
@@ -216,7 +216,7 @@ tOplkError  syncu_requestSyncResponse(tSyncuCbResponse pfnCbResponse_p,
     }
     else
     {
-        ret = kEplInvalidNodeId;
+        ret = kErrorInvalidNodeId;
     }
 
     return ret;
@@ -250,7 +250,7 @@ static tOplkError syncu_cbSyncResponse(tFrameInfo * pFrameInfo_p)
     UINT                index;
     tSyncuCbResponse    pfnCbResponse;
 
-    ret = kEplSuccessful;
+    ret = kErrorOk;
 
     nodeId = ami_getUint8Le(&pFrameInfo_p->pFrame->m_le_bSrcNodeId);
     index  = nodeId - 1;

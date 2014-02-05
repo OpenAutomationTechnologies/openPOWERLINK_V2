@@ -98,7 +98,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OPLK_LOCK_T      LOCK_T
 #define OPLK_ATOMIC_INIT(base) \
                         if(target_initLock(&base->lock) != 0) \
-                            return kEplNoResource
+                            return kErrorNoResource
 #define OPLK_ATOMIC_EXCHANGE(address, newval, oldval) \
                         target_lock(); \
                         oldval = Xil_In8(address); \

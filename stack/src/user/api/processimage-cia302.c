@@ -127,7 +127,7 @@ The function sets up a process image according to the CiA profile 302_4.
 //------------------------------------------------------------------------------
 tOplkError oplk_setupProcessImage(void)
 {
-    tOplkError                  ret = kEplSuccessful;
+    tOplkError                  ret = kErrorOk;
     size_t                      i;
     tProcessImageLink*          pLink;
 
@@ -138,7 +138,7 @@ tOplkError oplk_setupProcessImage(void)
         ret = linkProcessImageRange(pLink->objIndexStart, pLink->objIndexEnd,
                                     pLink->offsetPI, pLink->fOutputPI,
                                     pLink->entrySize, pLink->subindexCountPerIndex);
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
             break;
     }
 
@@ -172,7 +172,7 @@ static tOplkError linkProcessImageRange(UINT objIndexStart_p, UINT objIndexEnd_p
                                         UINT offsetPI_p, BOOL fOutputPI_p,
                                         tObdSize entrySize_p, UINT subindexCountPerIndex_p)
 {
-    tOplkError      ret = kEplSuccessful;
+    tOplkError      ret = kErrorOk;
     UINT            varEntries;
 
     for (; objIndexStart_p <= objIndexEnd_p; objIndexStart_p++,
@@ -181,13 +181,13 @@ static tOplkError linkProcessImageRange(UINT objIndexStart_p, UINT objIndexEnd_p
         varEntries = subindexCountPerIndex_p;
         ret = oplk_linkProcessImageObject(objIndexStart_p, 1, offsetPI_p,
                                           fOutputPI_p, entrySize_p, &varEntries);
-        if (((ret == kEplSuccessful) && (varEntries < subindexCountPerIndex_p)) ||
-            (ret == kEplApiPISizeExceeded))
+        if (((ret == kErrorOk) && (varEntries < subindexCountPerIndex_p)) ||
+            (ret == kErrorApiPISizeExceeded))
         {
-            ret = kEplSuccessful;
+            ret = kErrorOk;
             break;
         }
-        if (ret != kEplSuccessful)
+        if (ret != kErrorOk)
         {
             TRACE("oplk_linkProcessImageObject returned: %xh for index %xh\n", ret, objIndexStart_p);
             break;
