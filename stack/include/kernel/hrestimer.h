@@ -62,17 +62,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tEplKernel hrestimer_init(void);
+tOplkError hrestimer_init(void);
 
-tEplKernel hrestimer_addInstance(void);
+tOplkError hrestimer_addInstance(void);
 
-tEplKernel hrestimer_delInstance(void);
+tOplkError hrestimer_delInstance(void);
 
-tEplKernel hrestimer_modifyTimer(tEplTimerHdl* pTimerHdl_p, ULONGLONG  time_p,
+tOplkError hrestimer_modifyTimer(tEplTimerHdl* pTimerHdl_p, ULONGLONG  time_p,
                                  tEplTimerkCallback pfnCallback_p, ULONG argument_p,
                                  BOOL fContinue_p) SECTION_HRTIMER_MODTIMER;
 
-tEplKernel hrestimer_deleteTimer(tEplTimerHdl* pTimerHdl_p);
+tOplkError hrestimer_deleteTimer(tEplTimerHdl* pTimerHdl_p);
 
 UINT32     timestamp_calcTimeDiff(tEplTgtTimeStamp* pTimeStampPrevious_p,
                                   tEplTgtTimeStamp* pTimeStampCurrent_p);

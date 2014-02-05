@@ -119,14 +119,14 @@ This function registers a callback for a specific interrupt source.
 \param  pfnIsrCb_p      Interrupt service routine callback
 \param  pArg_p          Argument given to the callback
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_openmac
 */
 //------------------------------------------------------------------------------
-tEplKernel openmac_isrReg(tOpenmacIrqSource irqSource_p, tOpenmacIrqCb pfnIsrCb_p, void* pArg_p)
+tOplkError openmac_isrReg(tOpenmacIrqSource irqSource_p, tOpenmacIrqCb pfnIsrCb_p, void* pArg_p)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
     UINT32      irqId;
     UINT32      irqMask;
     UINT32      intcMask;

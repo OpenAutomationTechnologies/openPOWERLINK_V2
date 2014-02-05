@@ -55,12 +55,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 The function initialize target specific stuff which is needed to run the
 openPOWERLINK stack.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel target_init(void)
+tOplkError target_init(void)
 {
-    tEplKernel  Ret  = kEplSuccessful;
+    tOplkError  Ret  = kEplSuccessful;
     sigset_t    mask;
 
     /*
@@ -81,12 +81,12 @@ tEplKernel target_init(void)
 
 The function cleans-up target specific stuff.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel target_cleanup(void)
+tOplkError target_cleanup(void)
 {
-    tEplKernel  Ret  = kEplSuccessful;
+    tOplkError  Ret  = kEplSuccessful;
     return Ret;
 }
 
@@ -149,14 +149,14 @@ interface.
 \param  subnetMask_p            Subnet mask to set for interface.
 \param  mtu_p                   MTU to set for interface.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-tEplKernel target_setIpAdrs(char* ifName_p, UINT32 ipAddress_p, UINT32 subnetMask_p, UINT16 mtu_p)
+tOplkError target_setIpAdrs(char* ifName_p, UINT32 ipAddress_p, UINT32 subnetMask_p, UINT16 mtu_p)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
     INT         iRet;
     char        sBufferIp[16];
     char        sBufferMask[16];
@@ -195,14 +195,14 @@ The function sets the default gateway of an Ethernet interface.
 
 \param  defaultGateway_p            Default gateway to set.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-tEplKernel target_setDefaultGateway(UINT32 defaultGateway_p)
+tOplkError target_setDefaultGateway(UINT32 defaultGateway_p)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
     INT         iRet;
     char        sBuffer[16];
     char        command[128];

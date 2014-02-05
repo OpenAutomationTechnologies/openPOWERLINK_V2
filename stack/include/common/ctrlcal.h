@@ -59,11 +59,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tEplKernel ctrlcal_init(UINT size_p);
-tEplKernel ctrlcal_exit(void);
+tOplkError ctrlcal_init(UINT size_p);
+tOplkError ctrlcal_exit(void);
 
 void       ctrlcal_writeData(UINT offset_p, void * pSrc_p, size_t length_p);
-tEplKernel ctrlcal_readData(void* pDest_p, UINT offset_p, size_t length_p);
+tOplkError ctrlcal_readData(void* pDest_p, UINT offset_p, size_t length_p);
 
 #ifdef __cplusplus
 }

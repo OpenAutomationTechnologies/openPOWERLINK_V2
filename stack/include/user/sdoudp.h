@@ -62,13 +62,13 @@ extern "C" {
 
 #if defined(CONFIG_INCLUDE_SDO_UDP)
 
-tEplKernel sdoudp_init(tSequLayerReceiveCb pfnReceiveCb_p);
-tEplKernel sdoudp_addInstance(tSequLayerReceiveCb pfnReceiveCb_p);
-tEplKernel sdoudp_delInstance(void);
-tEplKernel sdoudp_config(ULONG ipAddr_p, UINT port_p);
-tEplKernel sdoudp_initCon(tSdoConHdl* pSdoConHandle_p, UINT targetNodeId_p);
-tEplKernel sdoudp_sendData(tSdoConHdl SdoConHandle_p, tEplFrame* pSrcData_p, DWORD dwDataSize_p);
-tEplKernel sdoudp_delConnection(tSdoConHdl SdoConHandle_p);
+tOplkError sdoudp_init(tSequLayerReceiveCb pfnReceiveCb_p);
+tOplkError sdoudp_addInstance(tSequLayerReceiveCb pfnReceiveCb_p);
+tOplkError sdoudp_delInstance(void);
+tOplkError sdoudp_config(ULONG ipAddr_p, UINT port_p);
+tOplkError sdoudp_initCon(tSdoConHdl* pSdoConHandle_p, UINT targetNodeId_p);
+tOplkError sdoudp_sendData(tSdoConHdl SdoConHandle_p, tEplFrame* pSrcData_p, DWORD dwDataSize_p);
+tOplkError sdoudp_delConnection(tSdoConHdl SdoConHandle_p);
 
 #endif
 

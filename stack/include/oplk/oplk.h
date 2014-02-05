@@ -177,7 +177,7 @@ typedef union
 } tEplApiEventArg;
 
 
-typedef tEplKernel (PUBLIC ROM* tEplApiCbEvent) (
+typedef tOplkError (PUBLIC ROM* tEplApiCbEvent) (
     tEplApiEventType        EventType_p,   // IN: event type (enum)
     tEplApiEventArg*        pEventArg_p,   // IN: event argument (union)
     void GENERIC*           pUserArg_p);
@@ -317,44 +317,44 @@ typedef struct
 //------------------------------------------------------------------------------
 
 // Generic API functions
-EPLDLLEXPORT tEplKernel oplk_init(tEplApiInitParam* pInitParam_p);
-EPLDLLEXPORT tEplKernel oplk_shutdown(void);
-EPLDLLEXPORT tEplKernel oplk_execNmtCommand(tNmtEvent NmtEvent_p);
-EPLDLLEXPORT tEplKernel oplk_linkObject(UINT objIndex_p, void* pVar_p, UINT* pVarEntries_p,
+EPLDLLEXPORT tOplkError oplk_init(tEplApiInitParam* pInitParam_p);
+EPLDLLEXPORT tOplkError oplk_shutdown(void);
+EPLDLLEXPORT tOplkError oplk_execNmtCommand(tNmtEvent NmtEvent_p);
+EPLDLLEXPORT tOplkError oplk_linkObject(UINT objIndex_p, void* pVar_p, UINT* pVarEntries_p,
                                         tObdSize* pEntrySize_p, UINT firstSubindex_p);
-EPLDLLEXPORT tEplKernel oplk_readObject(tSdoComConHdl* pSdoComConHdl_p, UINT  nodeId_p, UINT index_p,
+EPLDLLEXPORT tOplkError oplk_readObject(tSdoComConHdl* pSdoComConHdl_p, UINT  nodeId_p, UINT index_p,
                                         UINT subindex_p, void* pDstData_le_p, UINT* pSize_p,
                                         tSdoType sdoType_p, void* pUserArg_p);
-EPLDLLEXPORT tEplKernel oplk_writeObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT index_p,
+EPLDLLEXPORT tOplkError oplk_writeObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT index_p,
                                          UINT subindex_p, void* pSrcData_le_p, UINT size_p,
                                          tSdoType sdoType_p, void* pUserArg_p);
-EPLDLLEXPORT tEplKernel oplk_freeSdoChannel(tSdoComConHdl sdoComConHdl_p);
-EPLDLLEXPORT tEplKernel oplk_abortSdo(tSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p);
-EPLDLLEXPORT tEplKernel oplk_readLocalObject(UINT index_p, UINT subindex_p, void* pDstData_p, UINT* pSize_p);
-EPLDLLEXPORT tEplKernel oplk_writeLocalObject(UINT index_p, UINT subindex_p, void* pSrcData_p, UINT size_p);
-EPLDLLEXPORT tEplKernel oplk_sendAsndFrame(UINT8 dstNodeId_p, tEplAsndFrame *pAsndFrame_p, size_t asndSize_p);
-EPLDLLEXPORT tEplKernel oplk_setAsndForward(UINT8 serviceId_p, tEplApiAsndFilter FilterType_p);
-EPLDLLEXPORT tEplKernel oplk_postUserEvent(void* pUserArg_p);
-EPLDLLEXPORT tEplKernel oplk_triggerMnStateChange(UINT nodeId_p, tNmtNodeCommand nodeCommand_p);
-EPLDLLEXPORT tEplKernel oplk_setCdcBuffer(BYTE* pbCdc_p, UINT cdcSize_p);
-EPLDLLEXPORT tEplKernel oplk_setCdcFilename(char* pszCdcFilename_p);
-EPLDLLEXPORT tEplKernel oplk_process(void);
-EPLDLLEXPORT tEplKernel oplk_getIdentResponse(UINT nodeId_p, tEplIdentResponse** ppIdentResponse_p);
+EPLDLLEXPORT tOplkError oplk_freeSdoChannel(tSdoComConHdl sdoComConHdl_p);
+EPLDLLEXPORT tOplkError oplk_abortSdo(tSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p);
+EPLDLLEXPORT tOplkError oplk_readLocalObject(UINT index_p, UINT subindex_p, void* pDstData_p, UINT* pSize_p);
+EPLDLLEXPORT tOplkError oplk_writeLocalObject(UINT index_p, UINT subindex_p, void* pSrcData_p, UINT size_p);
+EPLDLLEXPORT tOplkError oplk_sendAsndFrame(UINT8 dstNodeId_p, tEplAsndFrame *pAsndFrame_p, size_t asndSize_p);
+EPLDLLEXPORT tOplkError oplk_setAsndForward(UINT8 serviceId_p, tEplApiAsndFilter FilterType_p);
+EPLDLLEXPORT tOplkError oplk_postUserEvent(void* pUserArg_p);
+EPLDLLEXPORT tOplkError oplk_triggerMnStateChange(UINT nodeId_p, tNmtNodeCommand nodeCommand_p);
+EPLDLLEXPORT tOplkError oplk_setCdcBuffer(BYTE* pbCdc_p, UINT cdcSize_p);
+EPLDLLEXPORT tOplkError oplk_setCdcFilename(char* pszCdcFilename_p);
+EPLDLLEXPORT tOplkError oplk_process(void);
+EPLDLLEXPORT tOplkError oplk_getIdentResponse(UINT nodeId_p, tEplIdentResponse** ppIdentResponse_p);
 EPLDLLEXPORT BOOL       oplk_checkKernelStack(void);
-EPLDLLEXPORT tEplKernel oplk_waitSyncEvent(ULONG timeout_p);
+EPLDLLEXPORT tOplkError oplk_waitSyncEvent(ULONG timeout_p);
 
 // Process image API functions
-EPLDLLEXPORT tEplKernel oplk_allocProcessImage(UINT sizeProcessImageIn_p, UINT sizeProcessImageOut_p);
-EPLDLLEXPORT tEplKernel oplk_freeProcessImage(void);
-EPLDLLEXPORT tEplKernel oplk_linkProcessImageObject(UINT objIndex_p, UINT firstSubindex_p, UINT offsetPI_p,
+EPLDLLEXPORT tOplkError oplk_allocProcessImage(UINT sizeProcessImageIn_p, UINT sizeProcessImageOut_p);
+EPLDLLEXPORT tOplkError oplk_freeProcessImage(void);
+EPLDLLEXPORT tOplkError oplk_linkProcessImageObject(UINT objIndex_p, UINT firstSubindex_p, UINT offsetPI_p,
                                                     BOOL fOutputPI_p, tObdSize entrySize_p, UINT* pVarEntries_p);
-EPLDLLEXPORT tEplKernel oplk_exchangeProcessImageIn(void);
-EPLDLLEXPORT tEplKernel oplk_exchangeProcessImageOut(void);
+EPLDLLEXPORT tOplkError oplk_exchangeProcessImageIn(void);
+EPLDLLEXPORT tOplkError oplk_exchangeProcessImageOut(void);
 EPLDLLEXPORT void*      oplk_getProcessImageIn(void);
 EPLDLLEXPORT void*      oplk_getProcessImageOut(void);
 
 // objdict specific process image functions
-EPLDLLEXPORT tEplKernel oplk_setupProcessImage(void);
+EPLDLLEXPORT tOplkError oplk_setupProcessImage(void);
 
 #ifdef __cplusplus
     }

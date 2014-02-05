@@ -81,7 +81,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tEplKernel cbProcessRpdo(tFrameInfo * pFrameInfo_p) SECTION_PDOK_PROCESS_RPDO;
+static tOplkError cbProcessRpdo(tFrameInfo * pFrameInfo_p) SECTION_PDOK_PROCESS_RPDO;
 
 
 //============================================================================//
@@ -94,14 +94,14 @@ static tEplKernel cbProcessRpdo(tFrameInfo * pFrameInfo_p) SECTION_PDOK_PROCESS_
 
 The function initializes the PDO user CAL module.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdokcal_init(void)
+tOplkError pdokcal_init(void)
 {
-    tEplKernel      Ret = kEplSuccessful;
+    tOplkError      Ret = kEplSuccessful;
 
     if ((Ret = pdokcal_openMem()) != kEplSuccessful)
         return Ret;
@@ -120,12 +120,12 @@ tEplKernel pdokcal_init(void)
 
 The function deinitializes the PDO kernel CAL module.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdokcal_exit(void)
+tOplkError pdokcal_exit(void)
 {
     pdokcal_exitSync();
     pdokcal_closeMem();
@@ -138,14 +138,14 @@ tEplKernel pdokcal_exit(void)
 
 \param  pEvent_p                Pointer to event structure
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdokcal
 **/
 //------------------------------------------------------------------------------
-tEplKernel pdokcal_process(tEplEvent * pEvent_p)
+tOplkError pdokcal_process(tEplEvent * pEvent_p)
 {
-    tEplKernel                  Ret = kEplSuccessful;
+    tOplkError                  Ret = kEplSuccessful;
 
     switch (pEvent_p->m_EventType)
     {
@@ -217,12 +217,12 @@ and NMT_CS_OPERATIONAL. The passed PDO needs not to be valid.
 
 \param  pFrameInfo_p            pointer to frame info structure
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 **/
 //------------------------------------------------------------------------------
-static tEplKernel cbProcessRpdo(tFrameInfo * pFrameInfo_p)
+static tOplkError cbProcessRpdo(tFrameInfo * pFrameInfo_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     tEplEvent       event;
 
     event.m_EventSink = kEplEventSinkPdokCal;

@@ -158,7 +158,7 @@ static tEdrvInstance edrvInstance_l;
 // local function prototypes
 //------------------------------------------------------------------------------
 static ometh_config_typ getMacConfig(UINT adapter_p);
-static tEplKernel initRxFilters(void);
+static tOplkError initRxFilters(void);
 #if (OPENMAC_PKTLOCTX == OPENMAC_PKTBUF_LOCAL)
 static ometh_packet_typ* allocTxMsgBufferIntern(tEdrvTxBuffer* pBuffer_p);
 static void freeTxMsgBufferIntern(tEdrvTxBuffer* pBuffer_p);
@@ -181,14 +181,14 @@ This function initializes the Ethernet driver.
 
 \param  pEdrvInitParam_p    Edrv initialization parameters
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel edrv_init(tEdrvInitParam* pEdrvInitParam_p)
+tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
     INT         i;
 
     DEBUG_LVL_EDRV_TRACE("*** %s ***\n", __func__);
@@ -294,12 +294,12 @@ Exit:
 
 This function shuts down the Ethernet driver.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel edrv_shutdown(void)
+tOplkError edrv_shutdown(void)
 {
     omethStop(edrvInstance_l.pMacInst);
 
@@ -360,14 +360,14 @@ This function allocates a Tx buffer.
 
 \param  pBuffer_p           Tx buffer descriptor
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
+tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     ometh_packet_typ*   pPacket = NULL;
 
     if (pBuffer_p->maxBufferSize > EDRV_MAX_BUFFER_SIZE)
@@ -414,14 +414,14 @@ This function releases the Tx buffer.
 
 \param  pBuffer_p           Tx buffer descriptor
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p)
+tOplkError edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
 #if (OPENMAC_PKTLOCTX != OPENMAC_PKTBUF_LOCAL)
     ometh_packet_typ*   pPacket = NULL;
 #endif
@@ -460,14 +460,14 @@ This function updates the Tx buffer for use with auto-response filter.
 
 \param  pBuffer_p           Tx buffer descriptor
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel edrv_updateTxBuffer(tEdrvTxBuffer* pBuffer_p)
+tOplkError edrv_updateTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
 #if EDRV_MAX_AUTO_RESPONSES > 0
     ometh_packet_typ*   pPacket = NULL;
 
@@ -510,14 +510,14 @@ This function sends the Tx buffer.
 
 \param  pBuffer_p           Tx buffer descriptor
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
+tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     ometh_packet_typ*   pPacket = NULL;
     ULONG               txLength;
 
@@ -602,15 +602,15 @@ If entryChanged_p is equal or larger \p count_p all Rx filters shall be changed.
 \param  entryChanged_p      Index of Rx filter entry that shall be changed
 \param  changeFlags_p       Bit mask that selects the changing Rx filter property
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
+tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
         UINT entryChanged_p, UINT changeFlags_p)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
     UINT        index;
     UINT        entry;
 
@@ -791,12 +791,12 @@ This function sets a multicast entry into the Ethernet controller.
 
 \param  pMacAddr_p  Multicast address
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p)
+tOplkError edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p)
 {
     UNUSED_PARAMETER(pMacAddr_p);
 
@@ -811,12 +811,12 @@ This function removes the multicast entry from the Ethernet controller.
 
 \param  pMacAddr_p  Multicast address
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel edrv_clearRxMulticastMacAddr(UINT8* pMacAddr_p)
+tOplkError edrv_clearRxMulticastMacAddr(UINT8* pMacAddr_p)
 {
     UNUSED_PARAMETER(pMacAddr_p);
 
@@ -831,12 +831,12 @@ This function sets the Tx buffer buffer ready for transmission.
 
 \param  pBuffer_p   Tx buffer buffer descriptor
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel edrv_setTxBufferReady(tEdrvTxBuffer* pBuffer_p)
+tOplkError edrv_setTxBufferReady(tEdrvTxBuffer* pBuffer_p)
 {
     UNUSED_PARAMETER(pBuffer_p);
 
@@ -851,12 +851,12 @@ This function sends the Tx buffer marked as ready.
 
 \param  pBuffer_p   Tx buffer buffer descriptor
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel edrv_startTxBuffer(tEdrvTxBuffer* pBuffer_p)
+tOplkError edrv_startTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
     UNUSED_PARAMETER(pBuffer_p);
 
@@ -871,14 +871,14 @@ This function releases a late release Rx buffer.
 
 \param  pRxBuffer_p     Rx buffer to be released
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel  edrv_releaseRxBuffer (tEdrvRxBuffer* pRxBuffer_p)
+tOplkError  edrv_releaseRxBuffer (tEdrvRxBuffer* pRxBuffer_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     ometh_packet_typ*   pPacket = NULL;
 
     pPacket = GET_TYPE_BASE(ometh_packet_typ, data, pRxBuffer_p->pBuffer);
@@ -948,12 +948,12 @@ static ometh_config_typ getMacConfig(UINT adapter_p)
 
 This function initializes all Rx filters and disables them.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel initRxFilters(void)
+static tOplkError initRxFilters(void)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     INT             i;
     UINT8           aMask[31];
     UINT8           aValue[31];

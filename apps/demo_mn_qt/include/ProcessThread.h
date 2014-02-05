@@ -95,17 +95,17 @@ signals:
     void            printLog(const QString &strState_p);
 
 private:
-    static tEplKernel appCbEvent(tEplApiEventType EventType_p, tEplApiEventArg* pEventArg_p, void GENERIC* pUserArg_p);
+    static tOplkError appCbEvent(tEplApiEventType EventType_p, tEplApiEventArg* pEventArg_p, void GENERIC* pUserArg_p);
 
-    tEplKernel      processEvent(tEplApiEventType EventType_p, tEplApiEventArg* pEventArg_p, void GENERIC* pUserArg_p);
-    tEplKernel      processStateChangeEvent(tEplApiEventType EventType_p, tEplApiEventArg* pEventArg_p, void GENERIC* pUserArg_p);
-    tEplKernel      processErrorWarningEvent(tEplApiEventType EventType_p, tEplApiEventArg* pEventArg_p, void GENERIC* pUserArg_p);
-    tEplKernel      processSdoEvent(tEplApiEventType EventType_p, tEplApiEventArg* pEventArg_p, void GENERIC* pUserArg_p);
-    tEplKernel      processHistoryEvent(tEplApiEventType EventType_p, tEplApiEventArg* pEventArg_p, void GENERIC* pUserArg_p);
-    tEplKernel      processNodeEvent(tEplApiEventType EventType_p, tEplApiEventArg* pEventArg_p, void GENERIC* pUserArg_p);
-    tEplKernel      processCfmProgressEvent(tEplApiEventType EventType_p, tEplApiEventArg* pEventArg_p, void GENERIC* pUserArg_p);
-    tEplKernel      processCfmResultEvent(tEplApiEventType EventType_p, tEplApiEventArg* pEventArg_p, void GENERIC* pUserArg_p);
-    tEplKernel      setDefaultNodeAssignment(void);
+    tOplkError      processEvent(tEplApiEventType EventType_p, tEplApiEventArg* pEventArg_p, void GENERIC* pUserArg_p);
+    tOplkError      processStateChangeEvent(tEplApiEventType EventType_p, tEplApiEventArg* pEventArg_p, void GENERIC* pUserArg_p);
+    tOplkError      processErrorWarningEvent(tEplApiEventType EventType_p, tEplApiEventArg* pEventArg_p, void GENERIC* pUserArg_p);
+    tOplkError      processSdoEvent(tEplApiEventType EventType_p, tEplApiEventArg* pEventArg_p, void GENERIC* pUserArg_p);
+    tOplkError      processHistoryEvent(tEplApiEventType EventType_p, tEplApiEventArg* pEventArg_p, void GENERIC* pUserArg_p);
+    tOplkError      processNodeEvent(tEplApiEventType EventType_p, tEplApiEventArg* pEventArg_p, void GENERIC* pUserArg_p);
+    tOplkError      processCfmProgressEvent(tEplApiEventType EventType_p, tEplApiEventArg* pEventArg_p, void GENERIC* pUserArg_p);
+    tOplkError      processCfmResultEvent(tEplApiEventType EventType_p, tEplApiEventArg* pEventArg_p, void GENERIC* pUserArg_p);
+    tOplkError      setDefaultNodeAssignment(void);
 
     QMutex          Mutex;
     QWaitCondition  NmtStateOff;

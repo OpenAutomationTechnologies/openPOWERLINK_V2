@@ -363,16 +363,16 @@ typedef struct
 // local function prototypes
 //------------------------------------------------------------------------------
 static irqreturn_t edrvIrqHandler (INT irqNum_p, void* ppDevInstData_p);
-static tEplKernel individualAddressCmd(UINT opcode_p, UINT count_p);
-static tEplKernel configureCmd(UINT opcode_p, UINT count_p);
-static tEplKernel multicastCmd(UINT opcode_p, UINT count_p, UINT8* pMacAddr_p, UINT mode_p);
-static tEplKernel transmitCmd(UINT opcode_p, UINT count_p);
+static tOplkError individualAddressCmd(UINT opcode_p, UINT count_p);
+static tOplkError configureCmd(UINT opcode_p, UINT count_p);
+static tOplkError multicastCmd(UINT opcode_p, UINT count_p, UINT8* pMacAddr_p, UINT mode_p);
+static tOplkError transmitCmd(UINT opcode_p, UINT count_p);
 
 static void eepromDelay(void);
 static void checkEepromSize(void);
 static UINT16 readEeprom(UINT addr_p);
-static tEplKernel cmdDescWrite(UINT opcode_p, UINT count_p);
-static tEplKernel rxDescWrite(INT count_p);
+static tOplkError cmdDescWrite(UINT opcode_p, UINT count_p);
+static tOplkError rxDescWrite(INT count_p);
 static BOOL issueScbcmd(UINT16 cmd_p, UINT arg_p, UINT opcode_p);
 
 static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* pId_p);
@@ -444,14 +444,14 @@ This function initializes the Ethernet driver.
 
 \param  pEdrvInitParam_p    Edrv initialization parameters
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel edrv_init(tEdrvInitParam* pEdrvInitParam_p)
+tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
     INT         result;
     INT         i;
 
@@ -505,12 +505,12 @@ Exit:
 
 This function shuts down the Ethernet driver.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel edrv_shutdown(void)
+tOplkError edrv_shutdown(void)
 {
     // unregister PCI driver
     printk("%s calling pci_unregister_driver()\n", __FUNCTION__);
@@ -527,14 +527,14 @@ This function sets a multicast entry into the Ethernet controller.
 
 \param  pMacAddr_p  Multicast address
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p)
+tOplkError edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     struct sCmdBlock*   pCb;
     UINT8*              pCnt;
     int                 cbCnt = 0;
@@ -566,14 +566,14 @@ This function removes the multicast entry from the Ethernet controller.
 
 \param  pMacAddr_p  Multicast address
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel edrv_clearRxMulticastMacAddr(UINT8* pMacAddr_p)
+tOplkError edrv_clearRxMulticastMacAddr(UINT8* pMacAddr_p)
 {
-    tEplKernel ret = kEplSuccessful;
+    tOplkError ret = kEplSuccessful;
 
     ret = multicastCmd(OP_MULTICAST, 0, pMacAddr_p, MULTICAST_ADDR_REM);
 
@@ -596,12 +596,12 @@ If \p entryChanged_p is equal or larger count_p all Rx filters shall be changed.
 \param  entryChanged_p      Index of Rx filter entry that shall be changed
 \param  changeFlags_p       Bit mask that selects the changing Rx filter property
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
+tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
                                 UINT entryChanged_p, UINT changeFlags_p)
 {
     UNUSED_PARAMETER(pFilter_p);
@@ -620,14 +620,14 @@ This function allocates a Tx buffer.
 
 \param  pBuffer_p           Tx buffer descriptor
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
+tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
     UINT        i;
 
     if (pBuffer_p->maxBufferSize > EDRV_MAX_FRAME_SIZE)
@@ -675,12 +675,12 @@ This function releases the Tx buffer.
 
 \param  pBuffer_p           Tx buffer descriptor
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p)
+tOplkError edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
     UINT bufferNumber;
 
@@ -702,14 +702,14 @@ This function sends the Tx buffer.
 
 \param  pBuffer_p           Tx buffer descriptor
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
+tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     struct sCmdBlock*   pCmdBlock;
 
     if (((edrvInstance_l.tailTxDesc + 1) % MAX_CBS) == edrvInstance_l.headTxDesc)
@@ -918,12 +918,12 @@ This function issues an individual address command to insert the MAC address.
 \param  opcode_p    Opcode to be filled in the command block
 \param  count_p     Count value indicating which command block is to be filled
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel individualAddressCmd(UINT opcode_p, UINT count_p)
+static tOplkError individualAddressCmd(UINT opcode_p, UINT count_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     tCommandBlock*  pCmdBlock;
 
     //pointer to the Command Block specified by the count value
@@ -971,12 +971,12 @@ This function issues a configure command to the Ethernet controller.
 \param  opcode_p    Opcode to be filled in the command block
 \param  count_p     Count value indicating which command block is to be filled
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel configureCmd(UINT opcode_p, UINT count_p)
+static tOplkError configureCmd(UINT opcode_p, UINT count_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     tCommandBlock*  pCmdBlock;
 
     //pointer to the Command Block specified by the count_p value
@@ -1060,12 +1060,12 @@ This function issues a multicast command to the Ethernet controller.
 \param  mode_p      Index variable used for the position of the multicast MAC address
                     in the command block
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel multicastCmd(UINT opcode_p, UINT count_p, UINT8* pMacAddr_p, UINT mode_p)
+static tOplkError multicastCmd(UINT opcode_p, UINT count_p, UINT8* pMacAddr_p, UINT mode_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     struct sCmdBlock*   pCmdBlock;
     UINT8*              pByte;
     UINT16*             pByteCount;
@@ -1167,12 +1167,12 @@ This function issues a transmit command to the Ethernet controller
 \param  opcode_p    Opcode to be filled in the command block
 \param  count_p     Count value indicating which command block is to be filled
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel transmitCmd(UINT opcode_p, UINT count_p)
+static tOplkError transmitCmd(UINT opcode_p, UINT count_p)
 {
-    tEplKernel              ret = kEplSuccessful;
+    tOplkError              ret = kEplSuccessful;
     struct sCmdBlock*       pCmdBlock = NULL;
     struct sTxCmdBlock*     pTxCmdBlock;
     struct sTxDescCmdBlock* pTxDescCmdBlock;
@@ -1378,12 +1378,12 @@ This function issues a command to write to the Tx descriptors.
 \param  opcode_p    Opcode value indicating the command to be executed
 \param  count_p     Count value indicating which the descriptor number
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel cmdDescWrite(UINT opcode_p, UINT count_p)
+static tOplkError cmdDescWrite(UINT opcode_p, UINT count_p)
 {
-    tEplKernel ret = kEplSuccessful;
+    tOplkError ret = kEplSuccessful;
 
     switch (opcode_p)
     {
@@ -1419,13 +1419,13 @@ This function issues a command writing to the Rx descriptors.
 
 \param  count_p Count value indicating which Rx descriptor's status bits are cleared
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel rxDescWrite(INT count_p)
+static tOplkError rxDescWrite(INT count_p)
 {
     struct sRxDescCmdBlock* pRxDescCmdBlock;
-    tEplKernel              ret = kEplSuccessful;
+    tOplkError              ret = kEplSuccessful;
 
     //select the virtual address of the RX descriptor whose status bits are to be cleared
     pRxDescCmdBlock = (struct sRxDescCmdBlock *)((edrvInstance_l.pRfdVirtAdd) + (RFD_REQUIRED_SIZE * count_p));
@@ -1510,7 +1510,7 @@ This function initializes one PCI device.
 //------------------------------------------------------------------------------
 static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* pId_p)
 {
-    tEplKernel              ret = kEplSuccessful;
+    tOplkError              ret = kEplSuccessful;
     INT                     result = 0;
     INT                     loopCount;
     struct sCmdBlock*       pCmdBlock;

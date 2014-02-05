@@ -98,19 +98,19 @@ and the corresponding event source.
 \param  ppfnEventHandler_p  Pointer to store event handler function pointer.
 \param  pEventSource_p      Pointer to store the corresponding event source.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          If the event sink was found.
 \retval kEplEventUnknownSink    IF the event sink was not found.
 
 \ingroup module_event
 */
 //------------------------------------------------------------------------------
-tEplKernel event_getHandlerForSink(tEventDispatchEntry** ppDispatchEntry_p,
+tOplkError event_getHandlerForSink(tEventDispatchEntry** ppDispatchEntry_p,
                                    tEplEventSink sink_p,
                                    tEplProcessEventCb* ppfnEventHandler_p,
                                    tEplEventSource* pEventSource_p)
 {
-    tEplKernel              ret = kEplEventUnknownSink;
+    tOplkError              ret = kEplEventUnknownSink;
 
     while ((*ppDispatchEntry_p)->sink != kEplEventSinkInvalid)
     {

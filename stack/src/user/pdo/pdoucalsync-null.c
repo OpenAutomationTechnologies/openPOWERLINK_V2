@@ -92,10 +92,10 @@ The function initializes the PDO user CAL sync module
 
 \param  pfnSyncCb_p             function that is called in case of sync event
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel pdoucal_initSync(tEplSyncCb pfnSyncCb_p)
+tOplkError pdoucal_initSync(tEplSyncCb pfnSyncCb_p)
 {
     pfnSyncCb_l = pfnSyncCb_p;
     return kEplSuccessful;
@@ -122,12 +122,12 @@ The function waits for a sync event.
 \param  timeout_p       Specifies a timeout in microseconds. If 0 it waits
                         forever.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful      Successfully received sync event
 \retval kEplGeneralError    Error while waiting on sync event
 */
 //------------------------------------------------------------------------------
-tEplKernel pdoucal_waitSyncEvent(ULONG timeout_p)
+tOplkError pdoucal_waitSyncEvent(ULONG timeout_p)
 {
     UNUSED_PARAMETER(timeout_p);
 
@@ -140,10 +140,10 @@ tEplKernel pdoucal_waitSyncEvent(ULONG timeout_p)
 
 The function calls the registered sync callback function
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel pdoucal_callSyncCb(void)
+tOplkError pdoucal_callSyncCb(void)
 {
     if (pfnSyncCb_l != NULL)
     {

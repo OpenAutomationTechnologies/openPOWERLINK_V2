@@ -79,19 +79,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tEplKernel processNmtStateChange(tNmtState newNmtState_p, tNmtState OldNmtState_p);
-static tEplKernel processNmtEvent(tEplEvent * pEvent_p);
-static tEplKernel processCycleFinish(tNmtState nmtState_p) SECTION_DLLK_PROCESS_CYCFIN;
-static tEplKernel processSync(tNmtState nmtState_p) SECTION_DLLK_PROCESS_SYNC;
-static tEplKernel processSyncCn(tNmtState nmtState_p, BOOL fReadyFlag_p) SECTION_DLLK_PROCESS_SYNC;
+static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState OldNmtState_p);
+static tOplkError processNmtEvent(tEplEvent * pEvent_p);
+static tOplkError processCycleFinish(tNmtState nmtState_p) SECTION_DLLK_PROCESS_CYCFIN;
+static tOplkError processSync(tNmtState nmtState_p) SECTION_DLLK_PROCESS_SYNC;
+static tOplkError processSyncCn(tNmtState nmtState_p, BOOL fReadyFlag_p) SECTION_DLLK_PROCESS_SYNC;
 #if defined(CONFIG_INCLUDE_NMT_MN)
-static tEplKernel processSyncMn(tNmtState nmtState_p, BOOL fReadyFlag_p) SECTION_DLLK_PROCESS_SYNC;
-static tEplKernel processStartReducedCycle(void);
+static tOplkError processSyncMn(tNmtState nmtState_p, BOOL fReadyFlag_p) SECTION_DLLK_PROCESS_SYNC;
+static tOplkError processStartReducedCycle(void);
 #endif
 #if EPL_DLL_PRES_READY_AFTER_SOA != FALSE
-static tEplKernel processPresReady(tNmtState nmtState_p);
+static tOplkError processPresReady(tNmtState nmtState_p);
 #endif
-static tEplKernel processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtState nmtState_p);
+static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtState nmtState_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -106,14 +106,14 @@ interrupt context.
 
 \param  pEvent_p        Pointer to event which should be processed.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_dllk
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_process(tEplEvent* pEvent_p)
+tOplkError dllk_process(tEplEvent* pEvent_p)
 {
-    tEplKernel              ret = kEplSuccessful;
+    tOplkError              ret = kEplSuccessful;
     tEventNmtStateChange*   pNmtStateChange;
 
     switch (pEvent_p->m_EventType)
@@ -177,14 +177,14 @@ The function forwards a loss of PRes event to the error handler module.
 
 \param  nodeId_p            Node ID of CN from which no PRes fram was received.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_dllk
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_issueLossOfPres(UINT nodeId_p)
+tOplkError dllk_issueLossOfPres(UINT nodeId_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     tDllkNodeInfo*      pIntNodeInfo;
     tEplEvent           event;
     tDllNodeOpParam     nodeOpParam;
@@ -233,12 +233,12 @@ The function posts the specified event type to itself.
 
 \param  eventType_p             Event type to post.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_postEvent(tEplEventType eventType_p)
+tOplkError dllk_postEvent(tEplEventType eventType_p)
 {
-    tEplKernel              ret;
+    tOplkError              ret;
     tEplEvent               event;
 
     event.m_EventSink = kEplEventSinkDllk;
@@ -261,7 +261,7 @@ the sync function by sending the appropriate event.
 \return The function returns a pointer to the node Information of the node
 */
 //------------------------------------------------------------------------------
-tEplKernel controlPdokcalSync (BOOL fEnable_p)
+tOplkError controlPdokcalSync (BOOL fEnable_p)
 {
     tEplEvent event;
     BOOL fEnable = fEnable_p;
@@ -287,12 +287,12 @@ The function processes a NMT state change event.
 \param  newNmtState_p           New NMT state of the local node.
 \param  oldNmtState_p           Previous NMT state of the local node.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNmtState_p)
+static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNmtState_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 
     switch (newNmtState_p)
     {
@@ -541,12 +541,12 @@ The function processes a NMT event.
 
 \param  pEvent_p                Event to process.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processNmtEvent(tEplEvent * pEvent_p)
+static tOplkError processNmtEvent(tEplEvent * pEvent_p)
 {
-    tEplKernel      Ret = kEplSuccessful;
+    tOplkError      Ret = kEplSuccessful;
     tNmtEvent*      pNmtEvent;
     tNmtState       NmtState;
 
@@ -583,12 +583,12 @@ The function processes the fill TX event.
 \param  asyncReqPriority_p      Priority of asynchronous request.
 \param  nmtState_p              NMT state of local node.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtState nmtState_p)
+static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtState nmtState_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     tEplFrame*      pTxFrame;
     tEdrvTxBuffer*  pTxBuffer;
     UINT            frameSize;
@@ -762,12 +762,12 @@ The function processes a cycle finish event.
 
 \param  nmtState_p              NMT state of the node.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processCycleFinish(tNmtState nmtState_p)
+static tOplkError processCycleFinish(tNmtState nmtState_p)
 {
-    tEplKernel      ret = kEplReject;
+    tOplkError      ret = kEplReject;
     tEdrvTxBuffer*  pTxBuffer;
 
     switch (dllkInstance_g.updateTxFrame)
@@ -824,12 +824,12 @@ The function processes the sync event.
 
 \param  nmtState_p              NMT state of the node.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processSync(tNmtState nmtState_p)
+static tOplkError processSync(tNmtState nmtState_p)
 {
-    tEplKernel      ret = kEplReject;
+    tOplkError      ret = kEplReject;
     BOOL            fReadyFlag = FALSE;
 
     if (dllkInstance_g.pfnCbSync != NULL)
@@ -870,12 +870,12 @@ The function processes the sync event on a CN.
 \param  nmtState_p              NMT state of the node.
 \param  fReadyFlag_p            Status of the ready flag.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processSyncCn(tNmtState nmtState_p, BOOL fReadyFlag_p)
+static tOplkError processSyncCn(tNmtState nmtState_p, BOOL fReadyFlag_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     tEplFrame*          pTxFrame;
     tEdrvTxBuffer*      pTxBuffer;
     tFrameInfo          FrameInfo;
@@ -919,12 +919,12 @@ The function processes the sync event on a MN.
 \param  nmtState_p              NMT state of the node.
 \param  fReadyFlag_p            Status of the ready flag.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processSyncMn(tNmtState nmtState_p, BOOL fReadyFlag_p)
+static tOplkError processSyncMn(tNmtState nmtState_p, BOOL fReadyFlag_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     tEplFrame*          pTxFrame;
     tEdrvTxBuffer*      pTxBuffer;
     UINT                index = 0;
@@ -970,12 +970,12 @@ The function processes the PRes Ready event.
 
 \param  nmtState_p              NMT state of local node.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processPresReady(tNmtState nmtState_p)
+static tOplkError processPresReady(tNmtState nmtState_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     tEplFrame*          pTxFrame;
 
     // post PRes to transmit FIFO
@@ -1017,12 +1017,12 @@ static tEplKernel processPresReady(tNmtState nmtState_p)
 
 The function processes the StartReducedCycle event.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processStartReducedCycle(void)
+static tOplkError processStartReducedCycle(void)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 
     // start the reduced cycle by programming the cycle timer
     // it is issued by NMT MN module, when PreOp1 is entered

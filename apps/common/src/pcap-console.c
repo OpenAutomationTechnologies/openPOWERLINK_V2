@@ -100,10 +100,10 @@ from a list of devices
 
 \param  pDevName_p              Pointer to store device name which should be used.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel selectPcapDevice(char *pDevName_p)
+tOplkError selectPcapDevice(char *pDevName_p)
 {
     char            sErr_Msg[ PCAP_ERRBUF_SIZE ];
     pcap_if_t *     alldevs;

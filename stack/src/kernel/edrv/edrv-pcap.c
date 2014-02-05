@@ -173,9 +173,9 @@ static DWORD WINAPI  EdrvWorkerThread(void *);
 //
 //---------------------------------------------------------------------------
 
-tEplKernel edrv_init(tEdrvInitParam *pEdrvInitParam_p)
+tOplkError edrv_init(tEdrvInitParam *pEdrvInitParam_p)
 {
-tEplKernel Ret;
+tOplkError Ret;
 DWORD dwThreadId;
 char sErr_Msg[ PCAP_ERRBUF_SIZE ];
 // variables for IPHLPAPI
@@ -345,7 +345,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-tEplKernel edrv_shutdown( void )
+tOplkError edrv_shutdown( void )
 {
     // signal shutdown to the thread
     SetEvent(EdrvInstance_l.m_ahHandle[EDRV_HANDLE_EVENT]);
@@ -383,9 +383,9 @@ tEplKernel edrv_shutdown( void )
 //
 //---------------------------------------------------------------------------
 
-tEplKernel edrv_sendTxBuffer(tEdrvTxBuffer *pBuffer_p)
+tOplkError edrv_sendTxBuffer(tEdrvTxBuffer *pBuffer_p)
 {
-tEplKernel  Ret = kEplSuccessful;
+tOplkError  Ret = kEplSuccessful;
 int         iRet;
 
 //    TRACE("%s: TxB=%p (%02X), last TxB=%p\n", __func__, pBuffer_p, (UINT)pBuffer_p->pBuffer[5], EdrvInstance_l.m_pTransmittedTxBufferLastEntry);
@@ -437,9 +437,9 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-tEplKernel edrv_allocTxBuffer(tEdrvTxBuffer * pBuffer_p)
+tOplkError edrv_allocTxBuffer(tEdrvTxBuffer * pBuffer_p)
 {
-tEplKernel Ret = kEplSuccessful;
+tOplkError Ret = kEplSuccessful;
 
     if (pBuffer_p->maxBufferSize > EDRV_MAX_FRAME_SIZE)
     {
@@ -478,7 +478,7 @@ Exit:
 //
 //---------------------------------------------------------------------------
 
-tEplKernel edrv_freeTxBuffer(tEdrvTxBuffer * pBuffer_p)
+tOplkError edrv_freeTxBuffer(tEdrvTxBuffer * pBuffer_p)
 {
 BYTE*   pbBuffer = pBuffer_p->pBuffer;
 
@@ -491,12 +491,12 @@ BYTE*   pbBuffer = pBuffer_p->pBuffer;
 }
 
 
-tEplKernel edrv_changeRxFilter(tEdrvFilter*    pFilter_p,
+tOplkError edrv_changeRxFilter(tEdrvFilter*    pFilter_p,
                             unsigned int    uiCount_p,
                             unsigned int    uiEntryChanged_p,
                             unsigned int    uiChangeFlags_p)
 {
-tEplKernel      Ret = kEplSuccessful;
+tOplkError      Ret = kEplSuccessful;
 
     UNUSED_PARAMETER(pFilter_p);
     UNUSED_PARAMETER(uiCount_p);
@@ -520,7 +520,7 @@ tEplKernel      Ret = kEplSuccessful;
 //
 //---------------------------------------------------------------------------
 
-tEplKernel edrv_clearRxMulticastMacAddr (BYTE * pbMacAddr_p)
+tOplkError edrv_clearRxMulticastMacAddr (BYTE * pbMacAddr_p)
 {
     UNUSED_PARAMETER(pbMacAddr_p);
 
@@ -542,7 +542,7 @@ tEplKernel edrv_clearRxMulticastMacAddr (BYTE * pbMacAddr_p)
 //
 //---------------------------------------------------------------------------
 
-tEplKernel edrv_setRxMulticastMacAddr   (BYTE * pbMacAddr_p)
+tOplkError edrv_setRxMulticastMacAddr   (BYTE * pbMacAddr_p)
 {
     UNUSED_PARAMETER(pbMacAddr_p);
 
@@ -839,15 +839,15 @@ NTSETTIMERRESOLUTION NtSetTimerResolution;
 //
 // Parameters:  void
 //
-// Return:      tEplKernel      = error code
+// Return:      tOplkError      = error code
 //
 // State:       not tested
 //
 //---------------------------------------------------------------------------
 
-tEplKernel PUBLIC hrestimer_init(void)
+tOplkError PUBLIC hrestimer_init(void)
 {
-tEplKernel  Ret;
+tOplkError  Ret;
 
     Ret = hrestimer_addInstance();
 
@@ -864,15 +864,15 @@ tEplKernel  Ret;
 //
 // Parameters:  void
 //
-// Return:      tEplKernel      = error code
+// Return:      tOplkError      = error code
 //
 // State:       not tested
 //
 //---------------------------------------------------------------------------
 
-tEplKernel PUBLIC hrestimer_addInstance(void)
+tOplkError PUBLIC hrestimer_addInstance(void)
 {
-tEplKernel      Ret = kEplSuccessful;
+tOplkError      Ret = kEplSuccessful;
 LONG            lRet = 0;
 ULONG           ulMin = ~0UL;
 ULONG           ulMax = ~0UL;
@@ -937,15 +937,15 @@ Exit:
 //
 // Parameters:  void
 //
-// Return:      tEplKernel      = error code
+// Return:      tOplkError      = error code
 //
 // State:       not tested
 //
 //---------------------------------------------------------------------------
 
-tEplKernel PUBLIC hrestimer_delInstance(void)
+tOplkError PUBLIC hrestimer_delInstance(void)
 {
-tEplKernel  Ret = kEplSuccessful;
+tOplkError  Ret = kEplSuccessful;
 LONG            lRet = 0;
 ULONG           ulCur = ~0UL;
 
@@ -987,19 +987,19 @@ ULONG           ulCur = ~0UL;
 //                                continuously;
 //                                otherwise, it is a oneshot timer.
 //
-// Return:      tEplKernel      = error code
+// Return:      tOplkError      = error code
 //
 // State:       not tested
 //
 //---------------------------------------------------------------------------
 
-tEplKernel PUBLIC hrestimer_modifyTimer(tEplTimerHdl*     pTimerHdl_p,
+tOplkError PUBLIC hrestimer_modifyTimer(tEplTimerHdl*     pTimerHdl_p,
                                     unsigned long long  ullTimeNs_p,
                                     tEplTimerkCallback  pfnCallback_p,
                                     unsigned long       ulArgument_p,
                                     BOOL                fContinuously_p)
 {
-tEplKernel                  Ret = kEplSuccessful;
+tOplkError                  Ret = kEplSuccessful;
 BOOL                        fRet;
 unsigned int                uiIndex;
 tEplTimerHighReskTimerInfo* pTimerInfo;
@@ -1105,15 +1105,15 @@ Exit:
 //
 // Parameters:  pTimerHdl_p     = pointer to timer handle
 //
-// Return:      tEplKernel      = error code
+// Return:      tOplkError      = error code
 //
 // State:       not tested
 //
 //---------------------------------------------------------------------------
 
-tEplKernel PUBLIC hrestimer_deleteTimer(tEplTimerHdl*     pTimerHdl_p)
+tOplkError PUBLIC hrestimer_deleteTimer(tEplTimerHdl*     pTimerHdl_p)
 {
-tEplKernel                  Ret = kEplSuccessful;
+tOplkError                  Ret = kEplSuccessful;
 unsigned int                uiIndex;
 tEplTimerHighReskTimerInfo* pTimerInfo;
 HANDLE                      hTimer;

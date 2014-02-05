@@ -59,11 +59,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tEplKernel obdcdc_init(void);
+tOplkError obdcdc_init(void);
 void obdcdc_exit(void);
 void obdcdc_setFilename(char* pCdcFilename_p);
 void obdcdc_setBuffer(UINT8* pCdc_p, size_t cdcSize_p);
-tEplKernel obdcdc_loadCdc(void);
+tOplkError obdcdc_loadCdc(void);
 
 #ifdef __cplusplus
 }

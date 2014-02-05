@@ -235,7 +235,7 @@ typedef enum
 
 typedef INT (*tProcessNodeEventFunc)(UINT nodeId_p, tNmtState nodeNmtState_p,
                                      tNmtState nmtState_p, UINT16 errorCode_p,
-                                     tEplKernel* pRet_p);
+                                     tOplkError* pRet_p);
 
 /**
 * \brief Node information structure
@@ -291,44 +291,44 @@ static tNmtMnuInstance   nmtMnuInstance_g;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tEplKernel cbNmtRequest(tFrameInfo * pFrameInfo_p);
-static tEplKernel cbIdentResponse(UINT nodeId_p, tEplIdentResponse* pIdentResponse_p);
-static tEplKernel cbStatusResponse(UINT nodeId_p, tEplStatusResponse* pStatusResponse_p);
-static tEplKernel cbNodeAdded(UINT nodeId_p);
-static tEplKernel checkNmtState(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p,
+static tOplkError cbNmtRequest(tFrameInfo * pFrameInfo_p);
+static tOplkError cbIdentResponse(UINT nodeId_p, tEplIdentResponse* pIdentResponse_p);
+static tOplkError cbStatusResponse(UINT nodeId_p, tEplStatusResponse* pStatusResponse_p);
+static tOplkError cbNodeAdded(UINT nodeId_p);
+static tOplkError checkNmtState(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p,
                                 tNmtState nodeNmtState_p, UINT16 errorCode_p,
                                 tNmtState localNmtState_p);
-static tEplKernel addNodeIsochronous(UINT nodeId_p);
-static tEplKernel startBootStep1(BOOL fNmtResetAllIssued_p);
-static tEplKernel startBootStep2(void);
-static tEplKernel startCheckCom(void);
-static tEplKernel nodeBootStep2(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p);
-static tEplKernel nodeCheckCom(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p);
-static tEplKernel startNodes(void);
-static tEplKernel doPreop1(tEventNmtStateChange nmtStateChange_p);
-static tEplKernel processInternalEvent(UINT nodeId_p, tNmtState nodeNmtState_p,
+static tOplkError addNodeIsochronous(UINT nodeId_p);
+static tOplkError startBootStep1(BOOL fNmtResetAllIssued_p);
+static tOplkError startBootStep2(void);
+static tOplkError startCheckCom(void);
+static tOplkError nodeBootStep2(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p);
+static tOplkError nodeCheckCom(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p);
+static tOplkError startNodes(void);
+static tOplkError doPreop1(tEventNmtStateChange nmtStateChange_p);
+static tOplkError processInternalEvent(UINT nodeId_p, tNmtState nodeNmtState_p,
                                        UINT16 errorCode_p, tNmtMnuIntNodeEvent nodeEvent_p);
-static tEplKernel reset(void);
+static tOplkError reset(void);
 
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
-static tEplKernel prcMeasure(void);
-static tEplKernel prcCalculate(UINT nodeIdFirstNode_p);
-static tEplKernel prcShift(UINT nodeIdPrevShift_p);
-static tEplKernel prcAdd(UINT nodeIdPrevAdd_p);
-static tEplKernel prcVerify(UINT nodeId_p);
+static tOplkError prcMeasure(void);
+static tOplkError prcCalculate(UINT nodeIdFirstNode_p);
+static tOplkError prcShift(UINT nodeIdPrevShift_p);
+static tOplkError prcAdd(UINT nodeIdPrevAdd_p);
+static tOplkError prcVerify(UINT nodeId_p);
 
-static tEplKernel prcCbSyncResMeasure(UINT, tEplSyncResponse*);
-static tEplKernel prcCbSyncResShift(UINT, tEplSyncResponse*);
-static tEplKernel prcCbSyncResAdd(UINT, tEplSyncResponse*);
-static tEplKernel prcCbSyncResVerify(UINT, tEplSyncResponse*);
-static tEplKernel prcCbSyncResNextAction(UINT, tEplSyncResponse*);
+static tOplkError prcCbSyncResMeasure(UINT, tEplSyncResponse*);
+static tOplkError prcCbSyncResShift(UINT, tEplSyncResponse*);
+static tOplkError prcCbSyncResAdd(UINT, tEplSyncResponse*);
+static tOplkError prcCbSyncResVerify(UINT, tEplSyncResponse*);
+static tOplkError prcCbSyncResNextAction(UINT, tEplSyncResponse*);
 
-static tEplKernel prcCalcPResResponseTimeNs(UINT nodeId_p, UINT nodeIdPredNode_p,
+static tOplkError prcCalcPResResponseTimeNs(UINT nodeId_p, UINT nodeIdPredNode_p,
                                             UINT32* pPResResponseTimeNs_p);
-static tEplKernel prcCalcPResChainingSlotTimeNs(UINT nodeIdLastNode_p,
+static tOplkError prcCalcPResChainingSlotTimeNs(UINT nodeIdLastNode_p,
                                                 UINT32* pPResChainingSlotTimeNs_p);
 
-static tEplKernel prcFindPredecessorNode(UINT nodeId_p);
+static tOplkError prcFindPredecessorNode(UINT nodeId_p);
 static void       prcSyncError(tNmtMnuNodeInfo* pNodeInfo_p);
 static void       prcSetFlagsNmtCommandReset(tNmtMnuNodeInfo* pNodeInfo_p,
                                              tNmtCommand nmtCommand_p);
@@ -336,35 +336,35 @@ static void       prcSetFlagsNmtCommandReset(tNmtMnuNodeInfo* pNodeInfo_p,
 
 /* internal node event handler functions */
 static INT processNodeEventNoIdentResponse (UINT nodeId_p, tNmtState nodeNmtState_p,
-                                            tNmtState nmtState_p, UINT16 errorCode_p, tEplKernel* pRet_p);
+                                            tNmtState nmtState_p, UINT16 errorCode_p, tOplkError* pRet_p);
 static INT processNodeEventIdentResponse   (UINT nodeId_p, tNmtState nodeNmtState_p,
-                                            tNmtState nmtState_p, UINT16 errorCode_p, tEplKernel* pRet_p);
+                                            tNmtState nmtState_p, UINT16 errorCode_p, tOplkError* pRet_p);
 static INT processNodeEventBoot            (UINT nodeId_p, tNmtState nodeNmtState_p,
-                                            tNmtState nmtState_p, UINT16 errorCode_p, tEplKernel* pRet_p);
+                                            tNmtState nmtState_p, UINT16 errorCode_p, tOplkError* pRet_p);
 static INT processNodeEventExecResetConf   (UINT nodeId_p, tNmtState nodeNmtState_p,
-                                            tNmtState nmtState_p, UINT16 errorCode_p, tEplKernel* pRet_p);
+                                            tNmtState nmtState_p, UINT16 errorCode_p, tOplkError* pRet_p);
 static INT processNodeEventExecResetNode   (UINT nodeId_p, tNmtState nodeNmtState_p,
-                                            tNmtState nmtState_p, UINT16 errorCode_p, tEplKernel* pRet_p);
+                                            tNmtState nmtState_p, UINT16 errorCode_p, tOplkError* pRet_p);
 static INT processNodeEventConfigured      (UINT nodeId_p, tNmtState nodeNmtState_p,
-                                            tNmtState nmtState_p, UINT16 errorCode_p, tEplKernel* pRet_p);
+                                            tNmtState nmtState_p, UINT16 errorCode_p, tOplkError* pRet_p);
 static INT processNodeEventNoStatusResponse(UINT nodeId_p, tNmtState nodeNmtState_p,
-                                            tNmtState nmtState_p, UINT16 errorCode_p, tEplKernel* pRet_p);
+                                            tNmtState nmtState_p, UINT16 errorCode_p, tOplkError* pRet_p);
 static INT processNodeEventStatusResponse  (UINT nodeId_p, tNmtState nodeNmtState_p,
-                                            tNmtState nmtState_p, UINT16 errorCode_p, tEplKernel* pRet_p);
+                                            tNmtState nmtState_p, UINT16 errorCode_p, tOplkError* pRet_p);
 static INT processNodeEventHeartbeat       (UINT nodeId_p, tNmtState nodeNmtState_p,
-                                            tNmtState nmtState_p, UINT16 errorCode_p, tEplKernel* pRet_p);
+                                            tNmtState nmtState_p, UINT16 errorCode_p, tOplkError* pRet_p);
 static INT processNodeEventNmtCmdSent      (UINT nodeId_p, tNmtState nodeNmtState_p,
-                                            tNmtState nmtState_p, UINT16 errorCode_p, tEplKernel* pRet_p);
+                                            tNmtState nmtState_p, UINT16 errorCode_p, tOplkError* pRet_p);
 static INT processNodeEventTimerIdentReq   (UINT nodeId_p, tNmtState nodeNmtState_p,
-                                            tNmtState nmtState_p, UINT16 errorCode_p, tEplKernel* pRet_p);
+                                            tNmtState nmtState_p, UINT16 errorCode_p, tOplkError* pRet_p);
 static INT processNodeEventTimerStatReq    (UINT nodeId_p, tNmtState nodeNmtState_p,
-                                            tNmtState nmtState_p, UINT16 errorCode_p, tEplKernel* pRet_p);
+                                            tNmtState nmtState_p, UINT16 errorCode_p, tOplkError* pRet_p);
 static INT processNodeEventTimerStateMon   (UINT nodeId_p, tNmtState nodeNmtState_p,
-                                            tNmtState nmtState_p, UINT16 errorCode_p, tEplKernel* pRet_p);
+                                            tNmtState nmtState_p, UINT16 errorCode_p, tOplkError* pRet_p);
 static INT processNodeEventTimerLonger     (UINT nodeId_p, tNmtState nodeNmtState_p,
-                                            tNmtState nmtState_p, UINT16 errorCode_p, tEplKernel* pRet_p);
+                                            tNmtState nmtState_p, UINT16 errorCode_p, tOplkError* pRet_p);
 static INT processNodeEventError           (UINT nodeId_p, tNmtState nodeNmtState_p,
-                                            tNmtState nmtState_p, UINT16 errorCode_p, tEplKernel* pRet_p);
+                                            tNmtState nmtState_p, UINT16 errorCode_p, tOplkError* pRet_p);
 
 //------------------------------------------------------------------------------
 // local vars
@@ -406,14 +406,14 @@ The function initializes an instance of the nmtmnu module
 \param  pfnCbNodeEvent_p        Pointer to node event callback function.
 \param  pfnCbBootEvent_p        Pointer to boot event callback function.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_nmtmnu
 */
 //------------------------------------------------------------------------------
-tEplKernel nmtmnu_init(tNmtMnuCbNodeEvent pfnCbNodeEvent_p, tNmtMnuCbBootEvent pfnCbBootEvent_p)
+tOplkError nmtmnu_init(tNmtMnuCbNodeEvent pfnCbNodeEvent_p, tNmtMnuCbBootEvent pfnCbBootEvent_p)
 {
-    tEplKernel ret;
+    tOplkError ret;
     ret = nmtmnu_addInstance(pfnCbNodeEvent_p, pfnCbBootEvent_p);
     return ret;
 }
@@ -427,15 +427,15 @@ The function adds a nmtmnu module instance.
 \param  pfnCbNodeEvent_p        Pointer to node event callback function.
 \param  pfnCbBootEvent_p        Pointer to boot event callback function.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_nmtmnu
 */
 //------------------------------------------------------------------------------
-tEplKernel nmtmnu_addInstance(tNmtMnuCbNodeEvent pfnCbNodeEvent_p,
+tOplkError nmtmnu_addInstance(tNmtMnuCbNodeEvent pfnCbNodeEvent_p,
                               tNmtMnuCbBootEvent pfnCbBootEvent_p)
 {
-    tEplKernel ret = kEplSuccessful;
+    tOplkError ret = kEplSuccessful;
 
     EPL_MEMSET(&nmtMnuInstance_g, 0, sizeof(nmtMnuInstance_g));
 
@@ -466,14 +466,14 @@ Exit:
 
 The function deletes an nmtmnu module instance.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_nmtmnu
 */
 //------------------------------------------------------------------------------
-tEplKernel nmtmnu_delInstance(void)
+tOplkError nmtmnu_delInstance(void)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
 
     dllucal_regAsndService(kDllAsndNmtRequest, NULL, kDllAsndFilterNone);
     ret = reset();
@@ -491,15 +491,15 @@ The function sends a extended NMT command.
 \param  pNmtCommandData_p   Pointer to additional NMT command data.
 \param  uiDataSize_p        Length of additional NMT command data.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_nmtmnu
 */
 //------------------------------------------------------------------------------
-tEplKernel nmtmnu_sendNmtCommandEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
+tOplkError nmtmnu_sendNmtCommandEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
                                    void* pNmtCommandData_p, UINT uiDataSize_p)
 {
-    tEplKernel          ret;
+    tOplkError          ret;
     tFrameInfo       frameInfo;
     UINT8               aBuffer[EPL_C_DLL_MINSIZE_NMTCMDEXT];
     tEplFrame*          pFrame;
@@ -702,12 +702,12 @@ The function sends a NMT command.
 \param  nodeId_p            Node ID to which the NMT command will be sent.
 \param  nmtCommand_p        NMT command to send.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_nmtmnu
 */
 //------------------------------------------------------------------------------
-tEplKernel nmtmnu_sendNmtCommand(UINT nodeId_p, tNmtCommand  nmtCommand_p)
+tOplkError nmtmnu_sendNmtCommand(UINT nodeId_p, tNmtCommand  nmtCommand_p)
 {
     return nmtmnu_sendNmtCommandEx(nodeId_p, nmtCommand_p, NULL, 0);
 }
@@ -722,14 +722,14 @@ also be applied to the local node.
 \param  nodeId_p            Node ID for which the NMT command will be requested.
 \param  nmtCommand_p        NMT command to request.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_nmtmnu
 */
 //------------------------------------------------------------------------------
-tEplKernel nmtmnu_requestNmtCommand(UINT nodeId_p, tNmtCommand  nmtCommand_p)
+tOplkError nmtmnu_requestNmtCommand(UINT nodeId_p, tNmtCommand  nmtCommand_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     tNmtState       nmtState;
 
     nmtState = nmtu_getNmtState();
@@ -851,14 +851,14 @@ to the specified node.
 \param  nodeId_p            Node ID to send the node command to.
 \param  nodeCommand_p       Node command to send.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_nmtmnu
 */
 //------------------------------------------------------------------------------
-tEplKernel nmtmnu_triggerStateChange(UINT nodeId_p, tNmtNodeCommand nodeCommand_p)
+tOplkError nmtmnu_triggerStateChange(UINT nodeId_p, tNmtNodeCommand nodeCommand_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     tNmtMnuNodeCmd      nodeCmd;
     tEplEvent           event;
 
@@ -885,14 +885,14 @@ The function implements the callback function for NMT state changes
 
 \param  nmtStateChange_p    The received NMT state change event.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_nmtmnu
 */
 //------------------------------------------------------------------------------
-tEplKernel nmtmnu_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
+tOplkError nmtmnu_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     UINT8           newMnNmtState;
 
     // Save new MN state in object 0x1F8E
@@ -1017,14 +1017,14 @@ This module will reject some NMT commands while MN.
 
 \param  nmtEvent_p      The received NMT event.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_nmtmnu
 */
 //------------------------------------------------------------------------------
-tEplKernel nmtmnu_cbCheckEvent(tNmtEvent nmtEvent_p)
+tOplkError nmtmnu_cbCheckEvent(tNmtEvent nmtEvent_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     UNUSED_PARAMETER(nmtEvent_p);
     return ret;
 }
@@ -1037,14 +1037,14 @@ The function implements the callback function for NMT events.
 
 \param  pEvent_p            Pointer to the received NMT event.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_nmtmnu
 */
 //------------------------------------------------------------------------------
-tEplKernel nmtmnu_processEvent(tEplEvent* pEvent_p)
+tOplkError nmtmnu_processEvent(tEplEvent* pEvent_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 
     // process event
     switch(pEvent_p->m_EventType)
@@ -1350,12 +1350,12 @@ The function returns diagnostic information.
 \param  pSignalSlaveCount_p     Pointer to store signal slave count.
 \param  pFlags_p                Pointer to store global flags.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_nmtmnu
 */
 //------------------------------------------------------------------------------
-tEplKernel nmtmnu_getDiagnosticInfo(UINT* pMandatorySlaveCount_p,
+tOplkError nmtmnu_getDiagnosticInfo(UINT* pMandatorySlaveCount_p,
                                     UINT* pSignalSlaveCount_p, UINT16* pFlags_p)
 {
     if ((pMandatorySlaveCount_p == NULL) || (pSignalSlaveCount_p == NULL) || (pFlags_p == NULL))
@@ -1377,12 +1377,12 @@ The function configures the PRes chaining parameters
 
 \param  pConfigParam_p          PRes chaining parameters.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_nmtmnu
 */
 //------------------------------------------------------------------------------
-tEplKernel nmtmnu_configPrc(tEplNmtMnuConfigParam* pConfigParam_p)
+tOplkError nmtmnu_configPrc(tEplNmtMnuConfigParam* pConfigParam_p)
 {
     nmtMnuInstance_g.prcPResTimeFirstCorrectionNs = pConfigParam_p->prcPResTimeFirstCorrectionNs;
     nmtMnuInstance_g.prcPResTimeFirstNegOffsetNs = pConfigParam_p->prcPResTimeFirstNegOffsetNs;
@@ -1404,12 +1404,12 @@ The function implements the callback function for NMT requests.
 
 \param  pFrameInfo_p        Pointer to NMT request frame information.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel cbNmtRequest(tFrameInfo * pFrameInfo_p)
+static tOplkError cbNmtRequest(tFrameInfo * pFrameInfo_p)
 {
-    tEplKernel              ret = kEplSuccessful;
+    tOplkError              ret = kEplSuccessful;
     UINT                    targetNodeId;
     tNmtCommand             nmtCommand;
     tEplNmtRequestService*  pNmtRequestService;
@@ -1440,12 +1440,12 @@ The function implements the callback function for Ident responses
 \param  pIdentResponse_p    Pointer to IdentResponse. It is NULL if node did
                             not answer.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel PUBLIC cbIdentResponse(UINT nodeId_p, tEplIdentResponse* pIdentResponse_p)
+static tOplkError PUBLIC cbIdentResponse(UINT nodeId_p, tEplIdentResponse* pIdentResponse_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     tObdSize        obdSize;
     UINT32          dwDevType;
     UINT16          errorCode;
@@ -1494,12 +1494,12 @@ The function implements the callback function for Status responses
 \param  pStatusResponse_p   Pointer to StatusResponse. It is NULL if node did
                             not answer.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel PUBLIC cbStatusResponse(UINT nodeId_p, tEplStatusResponse* pStatusResponse_p)
+static tOplkError PUBLIC cbStatusResponse(UINT nodeId_p, tEplStatusResponse* pStatusResponse_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 
     if (pStatusResponse_p == NULL)
     {   // node did not answer
@@ -1524,12 +1524,12 @@ called after the addressed node has been added in module dllk.
 
 \param  nodeId_p            Node ID for which the event was received.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel cbNodeAdded(UINT nodeId_p)
+static tOplkError cbNodeAdded(UINT nodeId_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     tNmtMnuNodeInfo*    pNodeInfo;
     tNmtState           nmtState;
 
@@ -1555,12 +1555,12 @@ The function adds the specified node into the isochronous phase
 
 \param  nodeId_p            Node ID which will be added.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel addNodeIsochronous(UINT nodeId_p)
+static tOplkError addNodeIsochronous(UINT nodeId_p)
 {
-    tEplKernel          ret;
+    tOplkError          ret;
 
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
     tNmtMnuNodeInfo* pNodeInfo;
@@ -1663,12 +1663,12 @@ The function starts the BootStep1.
 
 \param  fNmtResetAllIssued_p    Determines if all nodes should be reset.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel startBootStep1(BOOL fNmtResetAllIssued_p)
+static tOplkError startBootStep1(BOOL fNmtResetAllIssued_p)
 {
-    tEplKernel            ret = kEplSuccessful;
+    tOplkError            ret = kEplSuccessful;
     UINT                subIndex;
     UINT                localNodeId;
     UINT32                nodeCfg;
@@ -1757,17 +1757,17 @@ The function handles the PreOperational1 state of the MN.
 
 \param  nmtStateChange_p            The received NMT state change event.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel doPreop1(tEventNmtStateChange nmtStateChange_p)
+static tOplkError doPreop1(tEventNmtStateChange nmtStateChange_p)
 {
     UINT32          dwTimeout;
     tEplTimerArg    timerArg;
     tObdSize        obdSize;
     tEplEvent       event;
     BOOL            fNmtResetAllIssued = FALSE;
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 
     // reset IdentResponses and running IdentRequests and StatusRequests
     ret = identu_reset();
@@ -1845,12 +1845,12 @@ The function starts the BootStep2. This means checking if a node has reached
 PreOp2 and has been added to the isochronous phase. If this is met, the
 NMT command EnableReadyToOp is sent.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel startBootStep2(void)
+static tOplkError startBootStep2(void)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     UINT                index;
     tNmtMnuNodeInfo*    pNodeInfo;
     tObdSize            obdSize;
@@ -1937,12 +1937,12 @@ timeout.
 \param  nodeId_p        Node ID for which to start BootStep2.
 \param  pNodeInfo_p     Pointer to node info structure of node.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel nodeBootStep2(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p)
+static tOplkError nodeBootStep2(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     tEplTimerArg        timerArg;
     UINT8               bNmtState;
     tNmtState           nmtState;
@@ -1993,12 +1993,12 @@ Exit:
 
 The function starts CheckCommunication.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel startCheckCom(void)
+static tOplkError startCheckCom(void)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     UINT            index;
     tNmtMnuNodeInfo* pNodeInfo;
 
@@ -2054,12 +2054,12 @@ waits some time and if no error occured everything is OK.
 \param  nodeId_p        Node ID for which to start CheckCommunication.
 \param  pNodeInfo_p     Pointer to node info structure of node.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel nodeCheckCom(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p)
+static tOplkError nodeCheckCom(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     UINT32          nodeCfg;
     tEplTimerArg    timerArg;
 
@@ -2094,12 +2094,12 @@ static tEplKernel nodeCheckCom(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p)
 
 The function starts all nodes which are ReadyToOp and CheckCom did not fail.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel startNodes(void)
+static tOplkError startNodes(void)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     UINT            index;
     tNmtMnuNodeInfo* pNodeInfo;
 
@@ -2169,7 +2169,7 @@ The function processes the internal node event kNmtMnuIntNodeEventIdentResponse.
 */
 //------------------------------------------------------------------------------
 static INT processNodeEventIdentResponse(UINT nodeId_p, tNmtState nodeNmtState_p, tNmtState nmtState_p,
-                                         UINT16 errorCode_p, tEplKernel* pRet_p)
+                                         UINT16 errorCode_p, tOplkError* pRet_p)
 {
     UINT8               bNmtState;
     tNmtMnuNodeInfo*    pNodeInfo;
@@ -2297,7 +2297,7 @@ The function processes the internal node event kNmtMnuIntNodeEventBoot.
 */
 //------------------------------------------------------------------------------
 static INT processNodeEventBoot(UINT nodeId_p, tNmtState nodeNmtState_p, tNmtState nmtState_p,
-                                UINT16 errorCode_p, tEplKernel* pRet_p)
+                                UINT16 errorCode_p, tOplkError* pRet_p)
 {
     tNmtMnuNodeInfo*    pNodeInfo;
 
@@ -2379,7 +2379,7 @@ The function processes the internal node event kNmtMnuIntNodeEventConfigured.
 */
 //------------------------------------------------------------------------------
 static INT processNodeEventConfigured(UINT nodeId_p, tNmtState nodeNmtState_p, tNmtState nmtState_p,
-                                      UINT16 errorCode_p, tEplKernel* pRet_p)
+                                      UINT16 errorCode_p, tOplkError* pRet_p)
 {
     tNmtMnuNodeInfo*    pNodeInfo;
 
@@ -2428,7 +2428,7 @@ The function processes the internal node event kNmtMnuIntNodeEventNoIdentRespons
 */
 //------------------------------------------------------------------------------
 INT processNodeEventNoIdentResponse(UINT nodeId_p, tNmtState nodeNmtState_p, tNmtState nmtState_p,
-                                    UINT16 errorCode_p, tEplKernel* pRet_p)
+                                    UINT16 errorCode_p, tOplkError* pRet_p)
 {
     tEplTimerArg        timerArg;
     tNmtMnuNodeInfo*    pNodeInfo;
@@ -2499,7 +2499,7 @@ The function processes the internal node event kNmtMnuIntNodeEventStatusResponse
 */
 //------------------------------------------------------------------------------
 static INT processNodeEventStatusResponse(UINT nodeId_p, tNmtState nodeNmtState_p, tNmtState nmtState_p,
-                                   UINT16 errorCode_p, tEplKernel* pRet_p)
+                                   UINT16 errorCode_p, tOplkError* pRet_p)
 {
     tEplTimerArg        timerArg;
     tNmtMnuNodeInfo*    pNodeInfo;
@@ -2565,7 +2565,7 @@ The function processes the internal node event kNmtMnuIntNodeEventNoStatusRespon
 */
 //------------------------------------------------------------------------------
 static INT processNodeEventNoStatusResponse(UINT nodeId_p, tNmtState nodeNmtState_p, tNmtState nmtState_p,
-                                     UINT16 errorCode_p, tEplKernel* pRet_p)
+                                     UINT16 errorCode_p, tOplkError* pRet_p)
 {
     tNmtMnuNodeInfo*    pNodeInfo;
 
@@ -2596,7 +2596,7 @@ The function processes the internal node event kNmtMnuIntNodeEventError.
 */
 //------------------------------------------------------------------------------
 static INT processNodeEventError(UINT nodeId_p, tNmtState nodeNmtState_p, tNmtState nmtState_p,
-                                 UINT16 errorCode_p, tEplKernel* pRet_p)
+                                 UINT16 errorCode_p, tOplkError* pRet_p)
 {
     tNmtMnuNodeInfo*    pNodeInfo;
 
@@ -2637,7 +2637,7 @@ The function processes the internal node event kNmtMnuIntNodeEventExecResetNode.
 */
 //------------------------------------------------------------------------------
 static INT processNodeEventExecResetNode(UINT nodeId_p, tNmtState nodeNmtState_p, tNmtState nmtState_p,
-                                         UINT16 errorCode_p, tEplKernel* pRet_p)
+                                         UINT16 errorCode_p, tOplkError* pRet_p)
 {
     tNmtMnuNodeInfo*    pNodeInfo;
 
@@ -2679,7 +2679,7 @@ The function processes the internal node event kNmtMnuIntNodeEventExecResetConf.
 */
 //------------------------------------------------------------------------------
 static INT processNodeEventExecResetConf(UINT nodeId_p, tNmtState nodeNmtState_p, tNmtState nmtState_p,
-                                         UINT16 errorCode_p, tEplKernel* pRet_p)
+                                         UINT16 errorCode_p, tOplkError* pRet_p)
 {
     tNmtMnuNodeInfo*    pNodeInfo;
 
@@ -2724,7 +2724,7 @@ The function processes the internal node event kNmtMnuIntNodeEventHeartbeat.
 */
 //------------------------------------------------------------------------------
 static INT processNodeEventHeartbeat(UINT nodeId_p, tNmtState nodeNmtState_p, tNmtState nmtState_p,
-                                     UINT16 errorCode_p, tEplKernel* pRet_p)
+                                     UINT16 errorCode_p, tOplkError* pRet_p)
 {
     tNmtMnuNodeInfo*    pNodeInfo;
 
@@ -2755,7 +2755,7 @@ The function processes the internal node event kNmtMnuIntNodeEventTimerIdentReq.
 */
 //------------------------------------------------------------------------------
 static INT processNodeEventTimerIdentReq(UINT nodeId_p, tNmtState nodeNmtState_p, tNmtState nmtState_p,
-                                         UINT16 errorCode_p, tEplKernel* pRet_p)
+                                         UINT16 errorCode_p, tOplkError* pRet_p)
 {
     UNUSED_PARAMETER(errorCode_p);
     UNUSED_PARAMETER(nmtState_p);
@@ -2794,7 +2794,7 @@ The function processes the internal node event kNmtMnuIntNodeEventTimerStatReq.
 */
 //------------------------------------------------------------------------------
 static INT processNodeEventTimerStatReq(UINT nodeId_p, tNmtState nodeNmtState_p, tNmtState nmtState_p,
-                                        UINT16 errorCode_p, tEplKernel* pRet_p)
+                                        UINT16 errorCode_p, tOplkError* pRet_p)
 {
     UNUSED_PARAMETER(errorCode_p);
     UNUSED_PARAMETER(nodeNmtState_p);
@@ -2835,7 +2835,7 @@ The function processes the internal node event kNmtMnuIntNodeEventTimerStateMon.
 */
 //------------------------------------------------------------------------------
 static INT processNodeEventTimerStateMon(UINT nodeId_p, tNmtState nodeNmtState_p, tNmtState nmtState_p,
-                                         UINT16 errorCode_p, tEplKernel* pRet_p)
+                                         UINT16 errorCode_p, tOplkError* pRet_p)
 {
     tNmtMnuNodeInfo*    pNodeInfo;
 
@@ -2872,7 +2872,7 @@ The function processes the internal node event kNmtMnuIntNodeEventTimerLonger.
 */
 //------------------------------------------------------------------------------
 static INT processNodeEventTimerLonger(UINT nodeId_p, tNmtState nodeNmtState_p, tNmtState nmtState_p,
-                                       UINT16 errorCode_p, tEplKernel* pRet_p)
+                                       UINT16 errorCode_p, tOplkError* pRet_p)
 {
     tNmtMnuNodeInfo*    pNodeInfo;
 
@@ -2941,7 +2941,7 @@ The function processes the internal node event kNmtMnuIntNodeEventNmtCmdSent.
 */
 //------------------------------------------------------------------------------
 static INT processNodeEventNmtCmdSent(UINT nodeId_p, tNmtState nodeNmtState_p, tNmtState nmtState_p,
-                                      UINT16 errorCode_p, tEplKernel* pRet_p)
+                                      UINT16 errorCode_p, tOplkError* pRet_p)
 {
     UINT8               bNmtState;
     tEplTimerArg        timerArg;
@@ -2991,13 +2991,13 @@ The function processes internal node events.
 \param  errorCode_p         Error codes.
 \param  nodeEvent_p         Occurred events.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processInternalEvent(UINT nodeId_p, tNmtState nodeNmtState_p,
+static tOplkError processInternalEvent(UINT nodeId_p, tNmtState nodeNmtState_p,
                                        UINT16 errorCode_p, tNmtMnuIntNodeEvent nodeEvent_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     tNmtState           nmtState;
 
     nmtState = nmtu_getNmtState();
@@ -3114,15 +3114,15 @@ It manipulates the nodeState in the internal node info structure.
 \param  errorCode_p         Error codes.
 \param  localNmtState_p     The local NMT state.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel checkNmtState(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p,
+static tOplkError checkNmtState(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p,
                                 tNmtState nodeNmtState_p, UINT16 errorCode_p,
                                 tNmtState localNmtState_p)
 {
-    tEplKernel      ret = kEplSuccessful;
-    tEplKernel      retUpdate = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
+    tOplkError      retUpdate = kEplSuccessful;
     tObdSize        obdSize;
     UINT8           nodeNmtState;
     UINT8           bExpNmtState;
@@ -3311,12 +3311,12 @@ Exit:
 
 The function resets the internal structures, e.g. timers.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel reset(void)
+static tOplkError reset(void)
 {
-    tEplKernel  ret;
+    tOplkError  ret;
     UINT        index;
 
     ret = timeru_deleteTimer(&nmtMnuInstance_g.timerHdlNmtState);
@@ -3340,12 +3340,12 @@ static tEplKernel reset(void)
 
 The function performs the measure phase of a PRC node insertion
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel prcMeasure(void)
+static tOplkError prcMeasure(void)
 {
-    tEplKernel          ret;
+    tOplkError          ret;
     UINT                nodeId;
     tNmtMnuNodeInfo*    pNodeInfo;
     BOOL                fSyncReqSentToPredNode;
@@ -3468,12 +3468,12 @@ Time (MN).
 \param  nodeIdFirstNode_p       Node ID of the first (lowest node ID) of nodes
                                 whose addition is in progress.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel prcCalculate(UINT nodeIdFirstNode_p)
+static tOplkError prcCalculate(UINT nodeIdFirstNode_p)
 {
-    tEplKernel          ret;
+    tOplkError          ret;
     UINT                nodeId;
     tNmtMnuNodeInfo*    pNodeInfo;
     UINT                nodeIdPredNode;
@@ -3544,13 +3544,13 @@ The function calculates the PRes Response Time of the specified node.
 \param  nodeIdPredNode_p        Node ID of the predecessor node.
 \param  pPResResponseTimeNs_p   Pointer to store calculated time.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel prcCalcPResResponseTimeNs(UINT nodeId_p, UINT nodeIdPredNode_p,
+static tOplkError prcCalcPResResponseTimeNs(UINT nodeId_p, UINT nodeIdPredNode_p,
                                             UINT32* pPResResponseTimeNs_p)
 {
-    tEplKernel              ret;
+    tOplkError              ret;
     UINT16                  pResPayloadLimitPredNode;
     tNmtMnuNodeInfo*        pNodeInfoPredNode;
     tObdSize                obdSize;
@@ -3615,13 +3615,13 @@ The function calculates the PRes chaining slot time.
 \param  nodeIdLastNode_p            Node ID of the last node.
 \param  pPResChainingSlotTimeNs_p   Pointer to store calculated time.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel prcCalcPResChainingSlotTimeNs(UINT nodeIdLastNode_p,
+static tOplkError prcCalcPResChainingSlotTimeNs(UINT nodeIdLastNode_p,
                                                 UINT32* pPResChainingSlotTimeNs_p)
 {
-    tEplKernel      ret;
+    tOplkError      ret;
     UINT16          pResActPayloadLimit;
     UINT16          cnPReqPayloadLastNode;
     UINT32          cnResTimeoutLastNodeNs;
@@ -3715,14 +3715,14 @@ of SyncReq which is used for measurement.
 \param  nodeId_p          Node ID of the node.
 \param  pSyncResponse_p   Pointer to SyncResponse frame.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel PUBLIC prcCbSyncResMeasure(
+static tOplkError PUBLIC prcCbSyncResMeasure(
                                   UINT                  nodeId_p,
                                   tEplSyncResponse*     pSyncResponse_p)
 {
-    tEplKernel          ret;
+    tOplkError          ret;
     UINT                nodeIdPredNode;
     tNmtMnuNodeInfo*    pNodeInfo;
     UINT32              syncNodeNumber;
@@ -3792,12 +3792,12 @@ The function performs the shift phase for PRC node insertion.
 
 \param  nodeIdPrevShift_p   Node ID of previously shifted node.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel prcShift(UINT nodeIdPrevShift_p)
+static tOplkError prcShift(UINT nodeIdPrevShift_p)
 {
-    tEplKernel          ret;
+    tOplkError          ret;
     UINT                nodeId;
     tNmtMnuNodeInfo*    pNodeInfo;
     tDllSyncRequest     syncRequestData;
@@ -3858,12 +3858,12 @@ of SyncReq which is used for shifting.
 \param  nodeId_p            Node ID of node.
 \param  pSyncResponse_p     Pointer to received SyncRes frame.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel PUBLIC prcCbSyncResShift(UINT nodeId_p, tEplSyncResponse* pSyncResponse_p)
+static tOplkError PUBLIC prcCbSyncResShift(UINT nodeId_p, tEplSyncResponse* pSyncResponse_p)
 {
-    tEplKernel              ret;
+    tOplkError              ret;
     tNmtMnuNodeInfo*        pNodeInfo;
 
     pNodeInfo = NMTMNU_GET_NODEINFO(nodeId_p);
@@ -3896,12 +3896,12 @@ The function performs the add phase of a PRC node insertion.
 
 \param  nodeIdPrevAdd_p     Node ID of previously added node.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel prcAdd(UINT nodeIdPrevAdd_p)
+static tOplkError prcAdd(UINT nodeIdPrevAdd_p)
 {
-    tEplKernel          ret;
+    tOplkError          ret;
     tObdSize            obdSize;
     UINT32              cycleLenUs;
     UINT32              cNLossOfSocToleranceNs;
@@ -3995,12 +3995,12 @@ of SyncReq which is used for insertion.
 \param  nodeId_p            Node ID of node.
 \param  pSyncResponse_p     Pointer to received SyncRes frame.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel PUBLIC prcCbSyncResAdd(UINT nodeId_p, tEplSyncResponse* pSyncResponse_p)
+static tOplkError PUBLIC prcCbSyncResAdd(UINT nodeId_p, tEplSyncResponse* pSyncResponse_p)
 {
-    tEplKernel              ret;
+    tOplkError              ret;
     tNmtMnuNodeInfo*        pNodeInfo;
 
     pNodeInfo = NMTMNU_GET_NODEINFO(nodeId_p);
@@ -4042,12 +4042,12 @@ The function performs a verify for the phase shift and phase add.
 
 \param  nodeId_p     Node ID of node..
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel prcVerify(UINT nodeId_p)
+static tOplkError prcVerify(UINT nodeId_p)
 {
-    tEplKernel              ret;
+    tOplkError              ret;
     tNmtMnuNodeInfo*        pNodeInfo;
     tDllSyncRequest         syncReqData;
     UINT                    size;
@@ -4080,12 +4080,12 @@ of SyncReq which is used for verification.
 \param  nodeId_p            Node ID of node.
 \param  pSyncResponse_p     Pointer to received SyncRes frame.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel prcCbSyncResVerify(UINT nodeId_p, tEplSyncResponse* pSyncResponse_p)
+static tOplkError prcCbSyncResVerify(UINT nodeId_p, tEplSyncResponse* pSyncResponse_p)
 {
-    tEplKernel              ret;
+    tOplkError              ret;
     tNmtMnuNodeInfo*        pNodeInfo;
     UINT32                  pResTimeFirstNs;
 
@@ -4131,12 +4131,12 @@ node flags are evaluated.
 \param  nodeId_p            Node ID of node.
 \param  pSyncResponse_p     Pointer to received SyncRes frame.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel prcCbSyncResNextAction(UINT nodeId_p, tEplSyncResponse* pSyncResponse_p)
+static tOplkError prcCbSyncResNextAction(UINT nodeId_p, tEplSyncResponse* pSyncResponse_p)
 {
-    tEplKernel              ret;
+    tOplkError              ret;
     tNmtMnuNodeInfo*        pNodeInfo;
     tNmtCommand             nmtCommand;
 

@@ -69,40 +69,40 @@ typedef struct
 extern "C" {
 #endif
 
-tEplKernel dllkcal_init(void);
+tOplkError dllkcal_init(void);
 
-tEplKernel dllkcal_exit(void);
+tOplkError dllkcal_exit(void);
 
-tEplKernel dllkcal_getAsyncTxCount(tDllAsyncReqPriority* pPriority_p,
+tOplkError dllkcal_getAsyncTxCount(tDllAsyncReqPriority* pPriority_p,
                                    UINT *pCount_p);
 
-tEplKernel dllkcal_getAsyncTxFrame(void* pFrame_p, UINT* pFrameSize_p,
+tOplkError dllkcal_getAsyncTxFrame(void* pFrame_p, UINT* pFrameSize_p,
                                    tDllAsyncReqPriority priority_p);
 
 // only frames with registered AsndServiceIds are passed to CAL
-tEplKernel dllkcal_asyncFrameReceived(tFrameInfo* pFrameInfo_p);
+tOplkError dllkcal_asyncFrameReceived(tFrameInfo* pFrameInfo_p);
 
-tEplKernel dllkcal_sendAsyncFrame(tFrameInfo* pFrameInfo_p, tDllAsyncReqPriority priority_p);
+tOplkError dllkcal_sendAsyncFrame(tFrameInfo* pFrameInfo_p, tDllAsyncReqPriority priority_p);
 
-tEplKernel dllkcal_writeAsyncFrame(tFrameInfo* pFrameInfo_p, tDllCalQueue dllQueue);
+tOplkError dllkcal_writeAsyncFrame(tFrameInfo* pFrameInfo_p, tDllCalQueue dllQueue);
 
-tEplKernel dllkcal_clearAsyncBuffer(void);
+tOplkError dllkcal_clearAsyncBuffer(void);
 
-tEplKernel dllkcal_getStatistics(tDllkCalStatistics** ppStatistics);
+tOplkError dllkcal_getStatistics(tDllkCalStatistics** ppStatistics);
 
-tEplKernel dllkcal_process(tEplEvent* pEvent_p);
+tOplkError dllkcal_process(tEplEvent* pEvent_p);
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
 
-tEplKernel dllkcal_clearAsyncQueues(void);
+tOplkError dllkcal_clearAsyncQueues(void);
 
-tEplKernel dllkcal_issueRequest(tDllReqServiceId service_p, UINT nodeId_p,
+tOplkError dllkcal_issueRequest(tDllReqServiceId service_p, UINT nodeId_p,
                                 BYTE soaFlag1_p);
 
-tEplKernel dllkcal_getSoaRequest(tDllReqServiceId* pReqServiceId_p,
+tOplkError dllkcal_getSoaRequest(tDllReqServiceId* pReqServiceId_p,
                                  UINT* pNodeId_p, tEplSoaPayload* pSoaPayload_p) SECTION_DLLKCAL_GETSOAREQ;
 
-tEplKernel dllkcal_setAsyncPendingRequests(UINT nodeId_p, tDllAsyncReqPriority asyncReqPrio_p,
+tOplkError dllkcal_setAsyncPendingRequests(UINT nodeId_p, tDllAsyncReqPriority asyncReqPrio_p,
                                            UINT count_p);
 
 #endif

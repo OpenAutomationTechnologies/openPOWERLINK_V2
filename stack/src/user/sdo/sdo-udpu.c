@@ -153,12 +153,12 @@ The function initializes the SDO over UDP module.
 
 \param  pfnReceiveCb_p          Pointer to SDO sequence layer receive callback function.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_sdo_udp
 */
 //------------------------------------------------------------------------------
-tEplKernel sdoudp_init(tSequLayerReceiveCb pfnReceiveCb_p)
+tOplkError sdoudp_init(tSequLayerReceiveCb pfnReceiveCb_p)
 {
     return sdoudp_addInstance(pfnReceiveCb_p);
 }
@@ -171,14 +171,14 @@ The function adds an instance of a SDO over UDP module.
 
 \param  pfnReceiveCb_p          Pointer to SDO sequence layer receive callback function.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_sdo_udp
 */
 //------------------------------------------------------------------------------
-tEplKernel sdoudp_addInstance(tSequLayerReceiveCb pfnReceiveCb_p)
+tOplkError sdoudp_addInstance(tSequLayerReceiveCb pfnReceiveCb_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
 
 #if (TARGET_SYSTEM == _WIN32_)
     int                 error;
@@ -220,14 +220,14 @@ tEplKernel sdoudp_addInstance(tSequLayerReceiveCb pfnReceiveCb_p)
 The function deletes an instance of a SDO over UDP module. It deletes the created
 sockets and deletes the listener thread.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_sdo_udp
 */
 //------------------------------------------------------------------------------
-tEplKernel sdoudp_delInstance(void)
+tOplkError sdoudp_delInstance(void)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 
 #if (TARGET_SYSTEM == _WIN32_)
     BOOL                fTermError;
@@ -270,14 +270,14 @@ NMT_ResetConfiguration.
 \param  ipAddr_p            IP address to configure.
 \param  port_p              Port to configure
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_sdo_udp
 */
 //------------------------------------------------------------------------------
-tEplKernel sdoudp_config(ULONG ipAddr_p, UINT port_p)
+tOplkError sdoudp_config(ULONG ipAddr_p, UINT port_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     struct sockaddr_in  addr;
     INT                 error;
 
@@ -362,14 +362,14 @@ The function initializes a new connection.
 \param  pSdoConHandle_p           Pointer for the new connection handle.
 \param  targetNodeId_p            Node ID of the target.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_sdo_udp
 */
 //------------------------------------------------------------------------------
-tEplKernel sdoudp_initCon(tSdoConHdl* pSdoConHandle_p, UINT targetNodeId_p)
+tOplkError sdoudp_initCon(tSdoConHdl* pSdoConHandle_p, UINT targetNodeId_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     UINT                count;
     UINT                freeCon;
     tSdoUdpCon*         pSdoUdpCon;
@@ -422,12 +422,12 @@ The function sends data on an existing connection.
 \param  pSrcData_p              Pointer to data which should be sent.
 \param  dataSize_p              Size of data to send
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_sdo_udp
 */
 //------------------------------------------------------------------------------
-tEplKernel sdoudp_sendData(tSdoConHdl sdoConHandle_p, tEplFrame* pSrcData_p, UINT32 dataSize_p)
+tOplkError sdoudp_sendData(tSdoConHdl sdoConHandle_p, tEplFrame* pSrcData_p, UINT32 dataSize_p)
 {
     INT                 error;
     UINT                array;
@@ -471,14 +471,14 @@ The function deletes an existing connection.
 
 \param  sdoConHandle_p          Connection handle to use for data transfer.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_sdo_udp
 */
 //------------------------------------------------------------------------------
-tEplKernel sdoudp_delConnection(tSdoConHdl sdoConHandle_p)
+tOplkError sdoudp_delConnection(tSdoConHdl sdoConHandle_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     UINT            array;
 
     array = (sdoConHandle_p & ~SDO_ASY_HANDLE_MASK);
@@ -507,12 +507,12 @@ The function receives data from the UDP socket.
 
 \param  pInstance_p           Pointer to SDO instance.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 void receiveFromSocket(tSdoUdpInstance* pInstance_p)
 {
-    tEplKernel          ret;
+    tOplkError          ret;
     struct sockaddr_in  remoteAddr;
     INT                 error;
     INT                 count;

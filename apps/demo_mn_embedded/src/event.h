@@ -60,7 +60,7 @@ extern "C" {
 #endif
 
 void initEvents(BOOL* pfGsOff_p);
-tEplKernel processEvents(tEplApiEventType EventType_p,
+tOplkError processEvents(tEplApiEventType EventType_p,
         tEplApiEventArg* pEventArg_p, void* pUserArg_p);
 
 #ifdef __cplusplus

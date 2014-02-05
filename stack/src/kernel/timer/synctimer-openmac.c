@@ -140,7 +140,7 @@ static tTimerInstance   instance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tEplKernel ctrlDoSyncAdjustment(UINT32 timeStamp_p);
+static tOplkError ctrlDoSyncAdjustment(UINT32 timeStamp_p);
 static void  ctrlSetConfiguredTimeDiff(UINT32 configuredTimeDiff_p);
 static void  ctrlUpdateLossOfSyncTolerance(void);
 static UINT32 ctrlGetNextAbsoluteTime(UINT timerHdl_p, UINT32 currentTime_p);
@@ -157,12 +157,12 @@ static void ctrlAddActualTimeDiff(UINT32 actualTimeDiff_p);
 static void ctrlCalcMeanTimeDiff(void);
 static void ctrlUpdateRejectThreshold(void);
 
-static tEplKernel drvModifyTimerAbs(UINT timerHdl_p, UINT32 absoluteTime_p);
+static tOplkError drvModifyTimerAbs(UINT timerHdl_p, UINT32 absoluteTime_p);
 
-static tEplKernel drvModifyTimerRel(UINT timerHdl_p, INT timeAdjustment_p,
+static tOplkError drvModifyTimerRel(UINT timerHdl_p, INT timeAdjustment_p,
                                     UINT32* pAbsoluteTime_p, BOOL* pfAbsoluteTimeAlreadySet_p);
 
-static tEplKernel drvDeleteTimer(UINT timerHdl_p);
+static tOplkError drvDeleteTimer(UINT timerHdl_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -174,14 +174,14 @@ static tEplKernel drvDeleteTimer(UINT timerHdl_p);
 
 This function initializes the Synchronization timer module.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_synctimer
 */
 //------------------------------------------------------------------------------
-tEplKernel synctimer_addInstance(void)
+tOplkError synctimer_addInstance(void)
 {
-    tEplKernel ret = kEplSuccessful;
+    tOplkError ret = kEplSuccessful;
 
     EPL_MEMSET(&instance_l, 0, sizeof (instance_l));
 
@@ -203,14 +203,14 @@ tEplKernel synctimer_addInstance(void)
 
 This function deletes the Synchronization timer module.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_synctimer
 */
 //------------------------------------------------------------------------------
-tEplKernel synctimer_delInstance(void)
+tOplkError synctimer_delInstance(void)
 {
-    tEplKernel ret = kEplSuccessful;
+    tOplkError ret = kEplSuccessful;
 
     openmac_timerIrqDisable(HWTIMER_SYNC);
     openmac_timerSetCompareValue(HWTIMER_SYNC, 0);
@@ -235,14 +235,14 @@ This function registers the synchronization handler callback.
 
 \param  pfnSyncCb_p     Synchronization callback
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_synctimer
 */
 //------------------------------------------------------------------------------
-tEplKernel synctimer_registerHandler(tSyncTimerCbSync pfnSyncCb_p)
+tOplkError synctimer_registerHandler(tSyncTimerCbSync pfnSyncCb_p)
 {
-    tEplKernel ret = kEplSuccessful;
+    tOplkError ret = kEplSuccessful;
 
     instance_l.pfnSyncCb = pfnSyncCb_p;
 
@@ -257,14 +257,14 @@ This function registers the loss of synchronization handler callback.
 
 \param  pfnLossOfSyncCb_p   Loss of synchronization callback
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_synctimer
 */
 //------------------------------------------------------------------------------
-tEplKernel synctimer_registerLossOfSyncHandler(tSyncTimerCbLossOfSync pfnLossOfSyncCb_p)
+tOplkError synctimer_registerLossOfSyncHandler(tSyncTimerCbLossOfSync pfnLossOfSyncCb_p)
 {
-    tEplKernel ret = kEplSuccessful;
+    tOplkError ret = kEplSuccessful;
 
     instance_l.pfnLossOfSyncCb = pfnLossOfSyncCb_p;
 
@@ -280,14 +280,14 @@ This function registers the second synchronization handler callback.
 
 \param  pfnLossOfSync2Cb_p  Second synchronization callback
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_synctimer
 */
 //------------------------------------------------------------------------------
-tEplKernel synctimer_registerLossOfSyncHandler2(tSyncTimerCbLossOfSync pfnLossOfSync2Cb_p)
+tOplkError synctimer_registerLossOfSyncHandler2(tSyncTimerCbLossOfSync pfnLossOfSync2Cb_p)
 {
-    tEplKernel ret = kEplSuccessful;
+    tOplkError ret = kEplSuccessful;
 
     instance_l.pfnLossOfSync2Cb = pfnLossOfSync2Cb_p;
 
@@ -303,14 +303,14 @@ This function sets the negative time shift.
 
 \param  advanceShift_p      Time shift in microseconds
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_synctimer
 */
 //------------------------------------------------------------------------------
-tEplKernel synctimer_setSyncShift(UINT32 advanceShift_p)
+tOplkError synctimer_setSyncShift(UINT32 advanceShift_p)
 {
-    tEplKernel ret = kEplSuccessful;
+    tOplkError ret = kEplSuccessful;
 
     instance_l.advanceShift = OMETH_US_2_TICKS(advanceShift_p);
 
@@ -325,14 +325,14 @@ This function sets the cycle time.
 
 \param  cycleLen_p      Cycle time in mircroseconds
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_synctimer
 */
 //------------------------------------------------------------------------------
-tEplKernel synctimer_setCycleLen(UINT32 cycleLen_p)
+tOplkError synctimer_setCycleLen(UINT32 cycleLen_p)
 {
-    tEplKernel ret = kEplSuccessful;
+    tOplkError ret = kEplSuccessful;
 
     ctrlSetConfiguredTimeDiff(OMETH_US_2_TICKS(cycleLen_p));
 
@@ -347,14 +347,14 @@ This function sets the loss of synchronization tolerance.
 
 \param  lossOfSyncTolerance_p   Loss of sync tolerance in nanoseconds
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_synctimer
 */
 //------------------------------------------------------------------------------
-tEplKernel synctimer_setLossOfSyncTolerance(UINT32 lossOfSyncTolerance_p)
+tOplkError synctimer_setLossOfSyncTolerance(UINT32 lossOfSyncTolerance_p)
 {
-    tEplKernel ret = kEplSuccessful;
+    tOplkError ret = kEplSuccessful;
 
     instance_l.lossOfSyncTolerance = lossOfSyncTolerance_p;
 
@@ -372,14 +372,14 @@ This function sets the loss of synchronization tolerance.
 
 \param  lossOfSyncTolerance2_p      Second loss of sync tolerance in nanoseconds
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_synctimer
 */
 //------------------------------------------------------------------------------
-tEplKernel synctimer_setLossOfSyncTolerance2(UINT32 lossOfSyncTolerance2_p)
+tOplkError synctimer_setLossOfSyncTolerance2(UINT32 lossOfSyncTolerance2_p)
 {
-    tEplKernel ret = kEplSuccessful;
+    tOplkError ret = kEplSuccessful;
 
     instance_l.lossOfSyncTolerance2 = lossOfSyncTolerance2_p;
 
@@ -405,14 +405,14 @@ This function sets the synchronization time trigger at a specific time stamp.
 
 \param  pTimeStamp_p    Time stamp when the sync module should trigger
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_synctimer
 */
 //------------------------------------------------------------------------------
-tEplKernel synctimer_syncTriggerAtTimeStamp(tEplTgtTimeStamp* pTimeStamp_p)
+tOplkError synctimer_syncTriggerAtTimeStamp(tEplTgtTimeStamp* pTimeStamp_p)
 {
-    tEplKernel ret = kEplSuccessful;
+    tOplkError ret = kEplSuccessful;
 
     ret = drvModifyTimerAbs(TIMER_HDL_LOSSOFSYNC,
                                       (pTimeStamp_p->timeStamp + instance_l.lossOfSyncTimeout));
@@ -445,14 +445,14 @@ Exit:
 
 This function stops the module.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_synctimer
 */
 //------------------------------------------------------------------------------
-tEplKernel synctimer_stopSync(void)
+tOplkError synctimer_stopSync(void)
 {
-    tEplKernel ret = kEplSuccessful;
+    tOplkError ret = kEplSuccessful;
 
     instance_l.fRun = FALSE;
 
@@ -477,7 +477,7 @@ This function enables the external sync interrupt of 2nd CMP timer
 \param  pulseWidth_p        Pulse width of external sync interrupt in nanoseconds.
                             If 0 external sync int is just toggled.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_synctimer
 */
@@ -496,7 +496,7 @@ void synctimer_enableExtSyncIrq(UINT32 syncIntCycle_p, UINT32 pulseWidth_p)
 
 This function disables the external sync interrupt of 2nd CMP timer
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_synctimer
 */
@@ -524,12 +524,12 @@ This function adjusts the synchronization mechanism with a filter.
 
 \param  timeStamp_p     New sync time stamp
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel ctrlDoSyncAdjustment(UINT32 timeStamp_p)
+static tOplkError ctrlDoSyncAdjustment(UINT32 timeStamp_p)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
     UINT32      actualTimeDiff;
     INT         deviation;
     BOOL        fCurrentSyncModified = FALSE;
@@ -729,12 +729,12 @@ This function modifies the timer's absolute timer value.
 \param  timerHdl_p      Timer handle
 \param  absoluteTime_p  Absolute time value
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel drvModifyTimerAbs(UINT timerHdl_p, UINT32 absoluteTime_p)
+static tOplkError drvModifyTimerAbs(UINT timerHdl_p, UINT32 absoluteTime_p)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
     tTimerInfo* pTimerInfo;
 
     if (timerHdl_p >= TIMER_COUNT)
@@ -764,13 +764,13 @@ This function modifies the timer's realtive timer value.
 \param  pAbsoluteTime_p             Pointer to the timer's absolute time
 \param  pfAbsoluteTimeAlreadySet_p  Some weird flag
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel drvModifyTimerRel(UINT timerHdl_p, INT timeAdjustment_p,
+static tOplkError drvModifyTimerRel(UINT timerHdl_p, INT timeAdjustment_p,
         UINT32* pAbsoluteTime_p, BOOL* pfAbsoluteTimeAlreadySet_p)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
     tTimerInfo* pTimerInfo;
 
     if (timerHdl_p >= TIMER_COUNT)
@@ -808,12 +808,12 @@ This function deletes the timer handle.
 
 \param  timerHdl_p  Timer handle
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel drvDeleteTimer(UINT timerHdl_p)
+static tOplkError drvDeleteTimer(UINT timerHdl_p)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
     tTimerInfo* pTimerInfo;
 
     if (timerHdl_p >= TIMER_COUNT)

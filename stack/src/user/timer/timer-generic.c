@@ -129,12 +129,12 @@ static DWORD WINAPI processThread (LPVOID parameter_p);
 
 The function initializes the user timer module.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_timeru
 */
 //------------------------------------------------------------------------------
-tEplKernel timeru_init(void)
+tOplkError timeru_init(void)
 {
     return timeru_addInstance();
 }
@@ -145,12 +145,12 @@ tEplKernel timeru_init(void)
 
 The function adds a user timer instance.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_timeru
 */
 //------------------------------------------------------------------------------
-tEplKernel timeru_addInstance(void)
+tOplkError timeru_addInstance(void)
 {
     int             nIdx;
 
@@ -205,12 +205,12 @@ tEplKernel timeru_addInstance(void)
 
 The function deletes a user timer instance.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_timeru
 */
 //------------------------------------------------------------------------------
-tEplKernel timeru_delInstance(void)
+tOplkError timeru_delInstance(void)
 {
 #if (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_ )
     SetEvent(timeruInstance_l.ahEvents[TIMERU_EVENT_SHUTDOWN]);
@@ -242,18 +242,18 @@ tEplKernel timeru_delInstance(void)
 This function must be called repeatedly from within the application. It checks
 whether a timer has expired.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_timeru
 */
 //------------------------------------------------------------------------------
-tEplKernel timeru_process(void)
+tOplkError timeru_process(void)
 {
     tTimerEntry*        pTimerEntry;
     UINT32              timeoutInMs;
     tEplEvent           event;
     tEplTimerEventArg   timerEventArg;
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
 
     enterCriticalSection(TIMERU_TIMER_LIST);
     // calculate elapsed time since start time
@@ -305,12 +305,12 @@ corresponding timer handle.
 \param  timeInMs_p      Timeout in milliseconds.
 \param  argument_p      User definable argument for timer.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_timeru
 */
 //------------------------------------------------------------------------------
-tEplKernel timeru_setTimer(tEplTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tEplTimerArg argument_p)
+tOplkError timeru_setTimer(tEplTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tEplTimerArg argument_p)
 {
     tTimerEntry*    pNewEntry;
     tTimerEntry**   ppEntry;
@@ -383,14 +383,14 @@ it creates the timer and stores the new timer handle at \p pTimerHdl_p.
 \param  timeInMs_p      Timeout in milliseconds.
 \param  argument_p      User definable argument for timer.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_timeru
 */
 //------------------------------------------------------------------------------
-tEplKernel timeru_modifyTimer(tEplTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tEplTimerArg argument_p)
+tOplkError timeru_modifyTimer(tEplTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tEplTimerArg argument_p)
 {
-    tEplKernel      ret;
+    tOplkError      ret;
 
     ret = timeru_deleteTimer(pTimerHdl_p);
     if (ret != kEplSuccessful)
@@ -409,14 +409,14 @@ This function deletes an existing timer.
 
 \param  pTimerHdl_p     Pointer to timer handle of timer to delete.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplTimerInvalidHandle  If an invalid timer handle was specified.
 \retval kEplSuccessful          If the timer is deleted.
 
 \ingroup module_timeru
 */
 //------------------------------------------------------------------------------
-tEplKernel timeru_deleteTimer(tEplTimerHdl* pTimerHdl_p)
+tOplkError timeru_deleteTimer(tEplTimerHdl* pTimerHdl_p)
 {
     tTimerEntry*    pTimerEntry;
     tTimerEntry**   ppEntry;
@@ -549,7 +549,7 @@ static DWORD WINAPI processThread (LPVOID parameter_p)
     tTimerEntry*    pTimerEntry;
     UINT32          timeoutInMs;
     UINT32          waitResult;
-    tEplKernel      ret;
+    tOplkError      ret;
 
     UNUSED_PARAMETER(parameter_p);
 

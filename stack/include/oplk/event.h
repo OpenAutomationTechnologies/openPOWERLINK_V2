@@ -234,7 +234,7 @@ The structure defines an error event.
 typedef struct
 {
     tEplEventSource     m_EventSource;          ///< Module which posted this error event
-    tEplKernel          m_EplError;             ///< Error which occurred
+    tOplkError          m_EplError;             ///< Error which occurred
     union
     {
         BYTE                    m_bArg;         ///< BYTE argument
@@ -257,15 +257,15 @@ typedef struct
     ULONG               m_ulDllErrorEvents;     ///< EPL_DLL_ERR_*
     UINT                m_uiNodeId;             ///< Node ID
     tNmtState           m_NmtState;             ///< NMT state
-    tEplKernel          m_EplError;             ///< Error code
+    tOplkError          m_EplError;             ///< Error code
 } tErrHndkEvent;
 
 /**
 \brief  callback function to get informed about sync event
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
-typedef tEplKernel (*tEplSyncCb) (void);
+typedef tOplkError (*tEplSyncCb) (void);
 
 /**
 \brief callback for event post
@@ -275,9 +275,9 @@ e.g. EplEventkCal -> EplEventkProcess
 
 \param pEplEvent_p          Pointer to event which should be processed.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
-typedef tEplKernel (*tEplProcessEventCb) (tEplEvent* pEplEvent_p);
+typedef tOplkError (*tEplProcessEventCb) (tEplEvent* pEplEvent_p);
 
 /**
 \brief callback for event error post
@@ -290,9 +290,9 @@ e.g. EplEventkCal -> eventk_postError
 \param  argSize_p           Size of argument.
 \param  pArg_p              Pointer to argument.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
-typedef tEplKernel (*tEplPostErrorEventCb) (tEplEventSource EventSource_p, tEplKernel eplError_p, UINT argSize_p, void *pArg_p);
+typedef tOplkError (*tEplPostErrorEventCb) (tEplEventSource EventSource_p, tOplkError eplError_p, UINT argSize_p, void *pArg_p);
 
 /**
 \brief  event dispatch entry

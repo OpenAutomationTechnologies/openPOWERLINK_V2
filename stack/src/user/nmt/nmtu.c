@@ -89,17 +89,17 @@ static tNmtuInstance        nmtuInstance_g;
 // local function prototypes
 //------------------------------------------------------------------------------
 #if EPL_NMT_MAX_NODE_ID > 0
-static tEplKernel configureDll(void);
+static tOplkError configureDll(void);
 #endif
 
-static BOOL processGeneralStateChange(tNmtState newNmtState, tEplKernel* pRet_p);
-static BOOL processCnStateChange(tNmtState newNmtState, tEplKernel* pRet_p);
+static BOOL processGeneralStateChange(tNmtState newNmtState, tOplkError* pRet_p);
+static BOOL processCnStateChange(tNmtState newNmtState, tOplkError* pRet_p);
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
-static BOOL processMnStateChange(tNmtState newNmtState, tEplKernel* pRet_p);
+static BOOL processMnStateChange(tNmtState newNmtState, tOplkError* pRet_p);
 #endif
 
-static tEplKernel setupNmtTimerEvent(UINT32 timeout_p, tNmtEvent event_p);
+static tOplkError setupNmtTimerEvent(UINT32 timeout_p, tNmtEvent event_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -111,12 +111,12 @@ static tEplKernel setupNmtTimerEvent(UINT32 timeout_p, tNmtEvent event_p);
 
 The function initializes an instance of the NMT user module
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_nmtu
 */
 //------------------------------------------------------------------------------
-tEplKernel nmtu_init(void)
+tOplkError nmtu_init(void)
 {
     return nmtu_addInstance();
 }
@@ -127,12 +127,12 @@ tEplKernel nmtu_init(void)
 
 The function adds a NMT user module instance
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_nmtu
 */
 //------------------------------------------------------------------------------
-tEplKernel nmtu_addInstance(void)
+tOplkError nmtu_addInstance(void)
 {
     nmtuInstance_g.pfnNmtChangeCb = NULL;
     return kEplSuccessful;
@@ -144,14 +144,14 @@ tEplKernel nmtu_addInstance(void)
 
 The function deletes a NMT user module instance
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_nmtu
 */
 //------------------------------------------------------------------------------
-tEplKernel nmtu_delInstance(void)
+tOplkError nmtu_delInstance(void)
 {
-    tEplKernel ret = kEplSuccessful;
+    tOplkError ret = kEplSuccessful;
 
     nmtuInstance_g.pfnNmtChangeCb = NULL;
     ret = timeru_deleteTimer(&nmtuInstance_g.timerHdl);
@@ -167,14 +167,14 @@ The function posts a NMT event for the NMT kernel module.
 
 \param  nmtEvent_p      NMT event to post.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_nmtu
 */
 //------------------------------------------------------------------------------
-tEplKernel nmtu_postNmtEvent(tNmtEvent nmtEvent_p)
+tOplkError nmtu_postNmtEvent(tNmtEvent nmtEvent_p)
 {
-    tEplKernel  ret;
+    tOplkError  ret;
     tEplEvent   event;
 
     event.m_EventSink = kEplEventSinkNmtk;
@@ -213,14 +213,14 @@ The function processes events sent to the NMT user module.
 
 \param  pEvent_p            Pointer to event which should be processed.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_nmtu
 */
 //------------------------------------------------------------------------------
-tEplKernel nmtu_processEvent(tEplEvent* pEvent_p)
+tOplkError nmtu_processEvent(tEplEvent* pEvent_p)
 {
-    tEplKernel                  ret = kEplSuccessful;
+    tOplkError                  ret = kEplSuccessful;
     tEventNmtStateChange*       pNmtStateChange;
 
     switch(pEvent_p->m_EventType)
@@ -279,12 +279,12 @@ The function registers a callback function for NMT state change events.
 
 \param  pfnNmtStateChangeCb_p      Pointer to callback function
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_nmtu
 */
 //------------------------------------------------------------------------------
-tEplKernel nmtu_registerStateChangeCb(tNmtuStateChangeCallback pfnNmtStateChangeCb_p)
+tOplkError nmtu_registerStateChangeCb(tNmtuStateChangeCallback pfnNmtStateChangeCb_p)
 {
     nmtuInstance_g.pfnNmtChangeCb = pfnNmtStateChangeCb_p;
     return kEplSuccessful;
@@ -305,14 +305,14 @@ tEplKernel nmtu_registerStateChangeCb(tNmtuStateChangeCallback pfnNmtStateChange
 The function configured PReq/PRes payload limits an PRes timeouts in the DLL
 for each active node in object 0x1F81.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_nmtu
 */
 //------------------------------------------------------------------------------
-static tEplKernel configureDll(void)
+static tOplkError configureDll(void)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     UINT32          nodeCfg;
     tObdSize        obdSize;
     tDllNodeInfo    dllNodeInfo;
@@ -400,15 +400,15 @@ static tEplKernel configureDll(void)
 The function processes a state change to a general NMT state.
 
 \param  newNmtState_p           New NMT state.
-\param  pRet_p                  Pointer to store tEplKernel return value.
+\param  pRet_p                  Pointer to store tOplkError return value.
 
 \return The function returns \b TRUE if a state was found or \b FALSE if the
         state was not found.
 */
 //------------------------------------------------------------------------------
-static BOOL processGeneralStateChange(tNmtState newNmtState_p, tEplKernel* pRet_p)
+static BOOL processGeneralStateChange(tNmtState newNmtState_p, tOplkError* pRet_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     UINT                nodeId;
     BOOL                fHandled = TRUE;
 
@@ -479,15 +479,15 @@ static BOOL processGeneralStateChange(tNmtState newNmtState_p, tEplKernel* pRet_
 The function processes a state change to a MN NMT state.
 
 \param  newNmtState_p           New NMT state.
-\param  pRet_p                  Pointer to store tEplKernel return value.
+\param  pRet_p                  Pointer to store tOplkError return value.
 
 \return The function returns \b TRUE if a state was found or \b FALSE if the
         state was not found.
 */
 //------------------------------------------------------------------------------
-static BOOL processMnStateChange(tNmtState newNmtState_p, tEplKernel* pRet_p)
+static BOOL processMnStateChange(tNmtState newNmtState_p, tOplkError* pRet_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     BOOL                fHandled = TRUE;
     UINT32              waitTime;
     UINT32              startUp;
@@ -580,15 +580,15 @@ static BOOL processMnStateChange(tNmtState newNmtState_p, tEplKernel* pRet_p)
 The function processes a state change to a CN NMT state.
 
 \param  newNmtState_p           New NMT state.
-\param  pRet_p                  Pointer to store tEplKernel return value.
+\param  pRet_p                  Pointer to store tOplkError return value.
 
 \return The function returns \b TRUE if a state was found or \b FALSE if the
         state was not found.
 */
 //------------------------------------------------------------------------------
-static BOOL processCnStateChange(tNmtState newNmtState_p, tEplKernel* pRet_p)
+static BOOL processCnStateChange(tNmtState newNmtState_p, tOplkError* pRet_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     BOOL                fHandled = TRUE;
     UINT32              basicEthernetTimeout;
     tObdSize            obdSize;
@@ -655,12 +655,12 @@ The function sets up a timer which posts a NMT Event.
 \param  timeout_p           Timeout to set in microseconds.
 \param  event_p             Event to post after timeout.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel setupNmtTimerEvent(UINT32 timeout_p, tNmtEvent event_p)
+static tOplkError setupNmtTimerEvent(UINT32 timeout_p, tNmtEvent event_p)
 {
-    tEplKernel      ret;
+    tOplkError      ret;
     tEplTimerArg    timerArg;
 
     timeout_p = timeout_p / 1000; // convert us into ms

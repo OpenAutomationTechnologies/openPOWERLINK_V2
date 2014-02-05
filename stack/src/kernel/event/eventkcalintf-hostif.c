@@ -102,14 +102,14 @@ is specified by eventQueue_p.
 
 \param  eventQueue_p            Event queue to initialize.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tEplKernel eventkcal_initQueueHostif(tEventQueue eventQueue_p)
+tOplkError eventkcal_initQueueHostif(tEventQueue eventQueue_p)
 {
     tHostifInstance         pHifInstance;
     tHostifReturn           hifRet;
@@ -178,14 +178,14 @@ specified by eventQueue_p.
 
 \param  eventQueue_p            Event queue to cleanup.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tEplKernel eventkcal_exitQueueHostif (tEventQueue eventQueue_p)
+tOplkError eventkcal_exitQueueHostif (tEventQueue eventQueue_p)
 {
     if (eventQueue_p > kEventQueueNum)
         return kEplInvalidInstanceParam;
@@ -219,16 +219,16 @@ This function posts an event to the specified host interface queue.
 \param  eventQueue_p            Event queue to which the event should be posted.
 \param  pEvent_p                Event to be posted.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tEplKernel eventkcal_postEventHostif (tEventQueue eventQueue_p, tEplEvent *pEvent_p)
+tOplkError eventkcal_postEventHostif (tEventQueue eventQueue_p, tEplEvent *pEvent_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     tQueueReturn        lfqRet;
     DWORD               aPostBuffer[(sizeof(tEplEvent) + EPL_MAX_EVENT_ARG_SIZE)/4];
     BYTE*               pPostBuffer = (BYTE*)aPostBuffer;
@@ -275,16 +275,16 @@ by calling the event handlers process function.
 
 \param  eventQueue_p            Event queue used for reading the event.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tEplKernel eventkcal_processEventHostif(tEventQueue eventQueue_p)
+tOplkError eventkcal_processEventHostif(tEventQueue eventQueue_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     tQueueReturn        lfqRet;
     tEplEvent*          pEplEvent;
     WORD                dataSize = sizeof(tEplEvent) + EPL_MAX_EVENT_ARG_SIZE;
@@ -364,7 +364,7 @@ queue.
 */
 //------------------------------------------------------------------------------
 
-tEplKernel eventkcal_setSignalingHostif(tEventQueue eventQueue_p, VOIDFUNCPTR pfnSignalCb_p)
+tOplkError eventkcal_setSignalingHostif(tEventQueue eventQueue_p, VOIDFUNCPTR pfnSignalCb_p)
 {
     if (eventQueue_p > kEventQueueNum)
         return kEplInvalidInstanceParam;

@@ -114,7 +114,7 @@ running in Linux userspace.
 //------------------------------------------------------------------------------
 int  main (int argc, char **argv)
 {
-    tEplKernel                  EplRet = kEplSuccessful;
+    tOplkError                  EplRet = kEplSuccessful;
     char                        cKey = 0;
     BOOL                        fExit;
 

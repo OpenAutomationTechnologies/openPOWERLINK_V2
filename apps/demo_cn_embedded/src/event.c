@@ -85,11 +85,11 @@ static tEventCb pfnEventCb_l = NULL;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tEplKernel processStateChangeEvent(tEplApiEventType EventType_p,
+static tOplkError processStateChangeEvent(tEplApiEventType EventType_p,
                                           tEplApiEventArg* pEventArg_p,
                                           void GENERIC* pUserArg_p);
 
-static tEplKernel processErrorWarningEvent(tEplApiEventType EventType_p,
+static tOplkError processErrorWarningEvent(tEplApiEventType EventType_p,
                                            tEplApiEventArg* pEventArg_p,
                                            void GENERIC* pUserArg_p);
 
@@ -124,16 +124,16 @@ The function implements the applications stack event handler.
 \param  pEventArg_p         Pointer to union which describes the event in detail
 \param  pUserArg_p          User specific argument
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_demo_cn_embedded
 */
 //------------------------------------------------------------------------------
-tEplKernel PUBLIC processEvents(tEplApiEventType EventType_p,
+tOplkError PUBLIC processEvents(tEplApiEventType EventType_p,
                                 tEplApiEventArg* pEventArg_p,
                                 void GENERIC* pUserArg_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
 
     UNUSED_PARAMETER(pUserArg_p);
 
@@ -192,10 +192,10 @@ The function processes state change events.
 \param  pEventArg_p         Pointer to union which describes the event in detail
 \param  pUserArg_p          User specific argument
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processStateChangeEvent(tEplApiEventType EventType_p,
+static tOplkError processStateChangeEvent(tEplApiEventType EventType_p,
                                           tEplApiEventArg* pEventArg_p,
                                           void GENERIC* pUserArg_p)
 {
@@ -222,10 +222,10 @@ The function processes error and warning events.
 \param  pEventArg_p         Pointer to union which describes the event in detail
 \param  pUserArg_p          User specific argument
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processErrorWarningEvent(tEplApiEventType EventType_p,
+static tOplkError processErrorWarningEvent(tEplApiEventType EventType_p,
                                            tEplApiEventArg* pEventArg_p,
                                            void GENERIC* pUserArg_p)
 {

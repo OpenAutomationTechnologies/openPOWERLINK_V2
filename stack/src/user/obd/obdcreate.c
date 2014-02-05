@@ -111,12 +111,12 @@ The function initializes the object dictionary data structures.
 
 \param  pInitParam_p            Pointer to OD initialization parameters.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tEplKernel obd_initObd(tObdInitParam MEM* pInitParam_p)
+tOplkError obd_initObd(tObdInitParam MEM* pInitParam_p)
 {
 // Doxygen is confused by the inclusion of objdict.h in this function, therefore
 // we exclude the function body from parsing by doxygen!

@@ -79,15 +79,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tEplKernel processReceivedPreq(tFrameInfo* pFrameInfo_p, tNmtState nmtState_p,
+static tOplkError processReceivedPreq(tFrameInfo* pFrameInfo_p, tNmtState nmtState_p,
                                       tEdrvReleaseRxBuffer* pReleaseRxBuffer_p);
-static tEplKernel processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtState_p,
+static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtState_p,
                                       tNmtEvent* pNmtEvent_p, tEdrvReleaseRxBuffer* pReleaseRxBuffer_p);
-static tEplKernel processReceivedSoc(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtState_p);
-static tEplKernel processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtState_p);
-static tEplKernel processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* pRxBuffer_p,
+static tOplkError processReceivedSoc(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtState_p);
+static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtState_p);
+static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* pRxBuffer_p,
                                       tNmtState nmtState_p, tEdrvReleaseRxBuffer* pReleaseRxBuffer_p);
-static tEplKernel forwardRpdo(tFrameInfo * pFrameInfo_p);
+static tOplkError forwardRpdo(tFrameInfo * pFrameInfo_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -116,7 +116,7 @@ The function implements the callback function to process a received frame.
 tEdrvReleaseRxBuffer dllk_processFrameReceived(tEdrvRxBuffer * pRxBuffer_p)
 {
     tEdrvReleaseRxBuffer    releaseRxBuffer = kEdrvReleaseRxBufferImmediately;
-    tEplKernel              ret             = kEplSuccessful;
+    tOplkError              ret             = kEplSuccessful;
     tNmtState               nmtState;
     tNmtEvent               nmtEvent        = kNmtEventNoEvent;
     tEplEvent               event;
@@ -292,12 +292,12 @@ frame was transmitted.
 
 \param  pTxBuffer_p         Pointer to TxBuffer structure of transmitted frame.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 void dllk_processTransmittedNmtReq(tEdrvTxBuffer * pTxBuffer_p)
 {
-    tEplKernel              ret = kEplSuccessful;
+    tOplkError              ret = kEplSuccessful;
     tEplEvent               event;
     tDllAsyncReqPriority    priority;
     tNmtState               nmtState;
@@ -374,12 +374,12 @@ POWERLINK frame was transmitted.
 
 \param  pTxBuffer_p         Pointer to TxBuffer structure of transmitted frame.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 void dllk_processTransmittedNonEpl(tEdrvTxBuffer * pTxBuffer_p)
 {
-    tEplKernel              ret = kEplSuccessful;
+    tOplkError              ret = kEplSuccessful;
     tEplEvent               event;
     tDllAsyncReqPriority    priority;
     tNmtState               nmtState;
@@ -428,12 +428,12 @@ frame was transmitted.
 
 \param  pTxBuffer_p         Pointer to TxBuffer structure of transmitted frame.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 void dllk_processTransmittedSoc(tEdrvTxBuffer * pTxBuffer_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     tNmtState       nmtState;
     UINT            handle = DLLK_TXFRAME_SOC;
     UINT32          arg;
@@ -475,12 +475,12 @@ frame was transmitted.
 
 \param  pTxBuffer_p         Pointer to TxBuffer structure of transmitted frame.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 void dllk_processTransmittedSoa(tEdrvTxBuffer * pTxBuffer_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     tNmtState       nmtState;
     UINT            handle = DLLK_TXFRAME_SOA;
     UINT32          arg;
@@ -613,12 +613,12 @@ The function updates a IdentResponse frame with the specified information.
 \param  pTxBuffer_p         Pointer to TX buffer of frame.
 \param  nmtState_p          NMT state of node.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_updateFrameIdentRes(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p)
+tOplkError dllk_updateFrameIdentRes(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     tEplFrame*      pTxFrame;
 
     pTxFrame = (tEplFrame *) pTxBuffer_p->pBuffer;
@@ -646,12 +646,12 @@ The function updates a StatusResponse frame with the specified information.
 \param  pTxBuffer_p         Pointer to TX buffer of frame.
 \param  nmtState_p          NMT state of node.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_updateFrameStatusRes(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p)
+tOplkError dllk_updateFrameStatusRes(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     tEplFrame*      pTxFrame;
 
     pTxFrame = (tEplFrame *) pTxBuffer_p->pBuffer;
@@ -680,12 +680,12 @@ The function updates a PRes frame with the specified information.
 \param  pTxBuffer_p         Pointer to TX buffer of frame.
 \param  nmtState_p          NMT state of node.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_updateFramePres(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p)
+tOplkError dllk_updateFramePres(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     tEplFrame*      pTxFrame;
     UINT8           flag1;
 
@@ -732,10 +732,10 @@ The function checks a frame and sets the missing information.
 \param  pFrame_p            Pointer to frame.
 \param  frameSize_p         Size of the frame
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_checkFrame(tEplFrame * pFrame_p, UINT frameSize_p)
+tOplkError dllk_checkFrame(tEplFrame * pFrame_p, UINT frameSize_p)
 {
     tEplMsgType     MsgType;
     UINT16          etherType;
@@ -797,12 +797,12 @@ The function updates and transmits a SoA.
                                 will be disabled for EPL_C_DLL_PREOP1_START_CYCLES
                                 SoAs.^
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_mnSendSoa(tNmtState nmtState_p, tDllState* pDllStateProposed_p, BOOL fEnableInvitation_p)
+tOplkError dllk_mnSendSoa(tNmtState nmtState_p, tDllState* pDllStateProposed_p, BOOL fEnableInvitation_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     tEdrvTxBuffer  *pTxBuffer = NULL;
 
     *pDllStateProposed_p = kDllMsNonCyclic;
@@ -853,13 +853,13 @@ The function updates a SoA frame.
                                 SoAs
 \param  curReq_p                Index of current request.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_updateFrameSoa(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p,
+tOplkError dllk_updateFrameSoa(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p,
                                BOOL fEnableInvitation_p, UINT8 curReq_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     tEplFrame*          pTxFrame;
     tDllkNodeInfo*      pNodeInfo;
 
@@ -936,12 +936,12 @@ only for frames with registered AsndServiceIds (only kDllAsndFilterAny).
 \param  nodeId_p        Node ID.
 
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_asyncFrameNotReceived(tDllReqServiceId reqServiceId_p, UINT nodeId_p)
+tOplkError dllk_asyncFrameNotReceived(tDllReqServiceId reqServiceId_p, UINT nodeId_p)
 {
-    tEplKernel      Ret = kEplSuccessful;
+    tOplkError      Ret = kEplSuccessful;
     BYTE            abBuffer[18];
     tEplFrame*      pFrame = (tEplFrame*) abBuffer;
     tFrameInfo      FrameInfo;
@@ -994,13 +994,13 @@ driver.
 \param  serviceId_p         The service ID in case of an ASnd frame. Otherwise
                             kDllAsndNotDefined.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_createTxFrame (UINT* pHandle_p, UINT* pFrameSize_p,
+tOplkError dllk_createTxFrame (UINT* pHandle_p, UINT* pFrameSize_p,
                                tEplMsgType msgType_p, tDllAsndServiceId serviceId_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     tEplFrame*      pTxFrame;
     UINT            handle = *pHandle_p;
     tEdrvTxBuffer*  pTxBuffer = NULL;
@@ -1257,12 +1257,12 @@ driver.
 
 \param  handle_p            Handle to the frame buffer.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_deleteTxFrame (UINT handle_p)
+tOplkError dllk_deleteTxFrame (UINT handle_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     tEdrvTxBuffer*  pTxBuffer = NULL;
     UINT            nIndex = 0;
 
@@ -1301,12 +1301,12 @@ callback function (i.e. to the PDO module).
 \param  pFrameInfo_p        Pointer to frame information.
 \param  fReadyFlag_p        Ready flag.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_processTpdo(tFrameInfo * pFrameInfo_p, BOOL fReadyFlag_p)
+tOplkError dllk_processTpdo(tFrameInfo * pFrameInfo_p, BOOL fReadyFlag_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 
     if (dllkInstance_g.pfnCbProcessTpdo != NULL)
     {
@@ -1331,13 +1331,13 @@ The function processes a received PReq frame.
                             set this flag to determine if the RxBuffer could be
                             released immediately.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processReceivedPreq(tFrameInfo* pFrameInfo_p, tNmtState nmtState_p,
+static tOplkError processReceivedPreq(tFrameInfo* pFrameInfo_p, tNmtState nmtState_p,
                                       tEdrvReleaseRxBuffer* pReleaseRxBuffer_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     tEplFrame*      pFrame;
     BYTE            bFlag1;
 
@@ -1439,13 +1439,13 @@ The function processes a received PRes frame.
                             set this flag to determine if the RxBuffer could be
                             released immediately.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtState_p,
+static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtState_p,
                                       tNmtEvent* pNmtEvent_p, tEdrvReleaseRxBuffer* pReleaseRxBuffer_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     tEplFrame*      pFrame;
     UINT            nodeId;
 
@@ -1686,12 +1686,12 @@ The function processes a received SoC frame.
 \param  pRxBuffer_p         Pointer to RxBuffer structure of received frame.
 \param  nmtState_p          NMT state of the local node.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processReceivedSoc(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtState_p)
+static tOplkError processReceivedSoc(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtState_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 #if EPL_DLL_PRES_READY_AFTER_SOC != FALSE
     tEdrvTxBuffer*  pTxBuffer = NULL;
 #endif
@@ -1758,12 +1758,12 @@ The function processes a received SoA frame.
 \param  pRxBuffer_p         Pointer to RxBuffer structure of received frame.
 \param  nmtState_p          NMT state of the local node.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtState_p)
+static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtState_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     tEplFrame*          pFrame;
 #if (EDRV_AUTO_RESPONSE == FALSE)
     tEdrvTxBuffer*      pTxBuffer = NULL;
@@ -2077,13 +2077,13 @@ The function processes a received ASnd frame.
                             set this flag to determine if the RxBuffer could be
                             released immediately.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* pRxBuffer_p,
+static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* pRxBuffer_p,
                                       tNmtState nmtState_p, tEdrvReleaseRxBuffer* pReleaseRxBuffer_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     tEplFrame*      pFrame;
     UINT            asndServiceId;
     UINT            nodeId;
@@ -2240,12 +2240,12 @@ NMT_CS_OPERATIONAL. The passed PDO needs to be valid.
 
 \param  pFrameInfo_p        Pointer to frame information.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel forwardRpdo(tFrameInfo * pFrameInfo_p)
+static tOplkError forwardRpdo(tFrameInfo * pFrameInfo_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 
     if (dllkInstance_g.pfnCbProcessRpdo != NULL)
     {

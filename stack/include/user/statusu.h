@@ -51,7 +51,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-typedef tEplKernel (*tStatusuCbResponse) (UINT nodeId_p, tEplStatusResponse* pStatusResponse_p);
+typedef tOplkError (*tStatusuCbResponse) (UINT nodeId_p, tEplStatusResponse* pStatusResponse_p);
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -61,11 +61,11 @@ typedef tEplKernel (*tStatusuCbResponse) (UINT nodeId_p, tEplStatusResponse* pSt
 extern "C" {
 #endif
 
-tEplKernel statusu_init(void);
-tEplKernel statusu_addInstance(void);
-tEplKernel statusu_delInstance(void);
-tEplKernel statusu_reset(void);
-tEplKernel statusu_requestStatusResponse(UINT nodeId_p, tStatusuCbResponse pfnCbResponse_p);
+tOplkError statusu_init(void);
+tOplkError statusu_addInstance(void);
+tOplkError statusu_delInstance(void);
+tOplkError statusu_reset(void);
+tOplkError statusu_requestStatusResponse(UINT nodeId_p, tStatusuCbResponse pfnCbResponse_p);
 
 #ifdef __cplusplus
 }

@@ -145,14 +145,14 @@ This function initializes the Ethernet driver.
 
 \param  pEdrvInitParam_p    Edrv initialization parameters
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel edrv_init(tEdrvInitParam* pEdrvInitParam_p)
+tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
 {
-    tEplKernel      ret;
+    tOplkError      ret;
     NETBUF_CFG      bufCfgData;
     NETBUF_CL_DESC  clDescTblData;
 
@@ -288,12 +288,12 @@ Exit:
 
 This function shuts down the Ethernet driver.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel edrv_shutdown(void)
+tOplkError edrv_shutdown(void)
 {
     // signal shutdown to the thread
     muxUnbind(edrvInstance_l.pCookie, MUX_PROTO_PROMISC,
@@ -324,14 +324,14 @@ This function sends the Tx buffer.
 
 \param  pBuffer_p           Tx buffer descriptor
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
+tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
     INT         muxRet;
     M_BLK_ID    pPacket;
 
@@ -394,14 +394,14 @@ This function allocates a Tx buffer.
 
 \param  pBuffer_p           Tx buffer descriptor
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
+tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-    tEplKernel ret = kEplSuccessful;
+    tOplkError ret = kEplSuccessful;
 
     if (pBuffer_p->maxBufferSize > EDRV_MAX_FRAME_SIZE)
     {
@@ -431,12 +431,12 @@ This function releases the Tx buffer.
 
 \param  pBuffer_p           Tx buffer descriptor
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p)
+tOplkError edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
     UINT8* pBuffer = pBuffer_p->pBuffer;
 
@@ -464,12 +464,12 @@ If \p entryChanged_p is equal or larger count_p all Rx filters shall be changed.
 \param  entryChanged_p      Index of Rx filter entry that shall be changed
 \param  changeFlags_p       Bit mask that selects the changing Rx filter property
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
+tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
                                 UINT entryChanged_p, UINT changeFlags_p)
 {
     UNUSED_PARAMETER(pFilter_p);
@@ -488,12 +488,12 @@ This function removes the multicast entry from the Ethernet controller.
 
 \param  pMacAddr_p  Multicast address
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel edrv_clearRxMulticastMacAddr(UINT8* pMacAddr_p)
+tOplkError edrv_clearRxMulticastMacAddr(UINT8* pMacAddr_p)
 {
     if (muxMCastAddrDel(edrvInstance_l.pCookie, (char *)pMacAddr_p) != OK)
     {
@@ -511,12 +511,12 @@ This function sets a multicast entry into the Ethernet controller.
 
 \param  pMacAddr_p  Multicast address
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p)
+tOplkError edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p)
 {
     if (muxMCastAddrAdd(edrvInstance_l.pCookie, (char *)pMacAddr_p) != OK)
     {

@@ -373,7 +373,7 @@ static int  powerlinkIoctl (struct inode* dev, struct file* filp,
 #endif
 {
     int             ret;
-    tEplKernel      oplRet;
+    tOplkError      oplRet;
 
     //DEBUG_LVL_ALWAYS_TRACE("PLK: + powerlinkIoctl (cmd=%d type=%d)...\n", _IOC_NR(cmd), _IOC_TYPE(cmd));
     ret = -EINVAL;
@@ -526,7 +526,7 @@ module using the ioctl interface..
 static int executeCmd(unsigned long arg)
 {
     tCtrlCmd        ctrlCmd;
-    tEplKernel      ret;
+    tOplkError      ret;
     UINT16          status;
 
     if(copy_from_user(&ctrlCmd, (const void __user *)arg, sizeof(tCtrlCmd)))

@@ -109,36 +109,36 @@ static tPdouInstance  pdouInstance_g;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tEplKernel   setupRxPdoChannelTables(BYTE abChannelIdToPdoIdRx_p[EPL_D_PDO_RPDOChannels_U16],
+static tOplkError   setupRxPdoChannelTables(BYTE abChannelIdToPdoIdRx_p[EPL_D_PDO_RPDOChannels_U16],
                                           UINT* pCountChannelIdRx_p);
-static tEplKernel   setupTxPdoChannelTables(BYTE abChannelIdToPdoIdTx_p[EPL_D_PDO_TPDOChannels_U16],
+static tOplkError   setupTxPdoChannelTables(BYTE abChannelIdToPdoIdTx_p[EPL_D_PDO_TPDOChannels_U16],
                                           UINT* pCountChannelIdTx_p);
-static tEplKernel   allocatePdoChannels(tPdoAllocationParam* pAllocationParam_p);
-static tEplKernel   freePdoChannels(void);
-static tEplKernel   configureAllPdos(void);
-static tEplKernel   checkAndConfigurePdos(UINT16 mappParamIndex_p, UINT channelCount_p,
+static tOplkError   allocatePdoChannels(tPdoAllocationParam* pAllocationParam_p);
+static tOplkError   freePdoChannels(void);
+static tOplkError   configureAllPdos(void);
+static tOplkError   checkAndConfigurePdos(UINT16 mappParamIndex_p, UINT channelCount_p,
                                           BYTE *pChannelToPdoTable_p, UINT32 *pAbortCode_p);
-static tEplKernel   checkAndConfigurePdo(UINT16 mappParamIndex_p, BYTE  mappObjectCount_p,
+static tOplkError   checkAndConfigurePdo(UINT16 mappParamIndex_p, BYTE  mappObjectCount_p,
                                          UINT32* pAbortCode_p);
-static tEplKernel   checkPdoValidity(UINT mappParamIndex_p, UINT32* pAbortCode_p);
+static tOplkError   checkPdoValidity(UINT mappParamIndex_p, UINT32* pAbortCode_p);
 static void         decodeObjectMapping(QWORD objectMapping_p, UINT* pIndex_p,
                                 UINT* pSubIndex_p, UINT* pBitOffset_p,
                                 UINT* pBitSize_p);
-static tEplKernel   checkAndSetObjectMapping(QWORD objectMapping_p, tObdAccess neededAccessType_p,
+static tOplkError   checkAndSetObjectMapping(QWORD objectMapping_p, tObdAccess neededAccessType_p,
                                      tPdoMappObject* pMappObject_p,
                                      DWORD* pAbortCode_p, UINT* pPdoSize_p);
-static tEplKernel   setupMappingObjects(tPdoMappObject* pMappObject_p,
+static tOplkError   setupMappingObjects(tPdoMappObject* pMappObject_p,
                                       UINT mappParamIndex_p, BYTE mappObjectCount_p,
                                       UINT16  maxPdoSize_p, UINT32* pAbortCode_p,
                                       UINT* pCalcPdoSize_p, UINT* pCount_p);
-static tEplKernel   configurePdoChannel(tPdoChannelConf* pChannelConf_p);
-static tEplKernel   getMaxPdoSize(BYTE nodeId_p, BOOL fTxPdo_p,
+static tOplkError   configurePdoChannel(tPdoChannelConf* pChannelConf_p);
+static tOplkError   getMaxPdoSize(BYTE nodeId_p, BOOL fTxPdo_p,
                          UINT16 *pMaxPdoSize_p, UINT32* pAbortCode_p);
-static tEplKernel   getPdoChannelId(UINT pdoId_p, BOOL fTxPdo_p, UINT *pChannelId_p);
+static tOplkError   getPdoChannelId(UINT pdoId_p, BOOL fTxPdo_p, UINT *pChannelId_p);
 static UINT         calcPdoMemSize(tPdoChannelSetup* pPdoChannels_p, size_t* pRxPdoMemSize_p,
                                    size_t* pTxPdoMemSize_p);
-static tEplKernel   copyVarToPdo(BYTE* pPayload_p, tPdoMappObject* pMappObject_p);
-static tEplKernel   copyVarFromPdo(BYTE* pPayload_p, tPdoMappObject* pMappObject_p);
+static tOplkError   copyVarToPdo(BYTE* pPayload_p, tPdoMappObject* pMappObject_p);
+static tOplkError   copyVarFromPdo(BYTE* pPayload_p, tPdoMappObject* pMappObject_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -152,12 +152,12 @@ The function initializes the PDO user module.
 
 \param  pfnSyncCb_p             function that is called in case of sync event
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdou
 **/
 //------------------------------------------------------------------------------
-tEplKernel pdou_init(tEplSyncCb pfnSyncCb_p)
+tOplkError pdou_init(tEplSyncCb pfnSyncCb_p)
 {
     EPL_MEMSET(&pdouInstance_g, 0, sizeof(pdouInstance_g));
     pdouInstance_g.fAllocated = FALSE;
@@ -172,12 +172,12 @@ tEplKernel pdou_init(tEplSyncCb pfnSyncCb_p)
 
 The function cleans up the PDO user module.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdou
 **/
 //------------------------------------------------------------------------------
-tEplKernel pdou_exit(void)
+tOplkError pdou_exit(void)
 {
     pdouInstance_g.fRunning = FALSE;
     freePdoChannels();
@@ -194,14 +194,14 @@ changes.
 
 \param  nmtStateChange_p         NMT state change event.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdou
 **/
 //------------------------------------------------------------------------------
-tEplKernel pdou_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
+tOplkError pdou_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 
     switch (nmtStateChange_p.newNmtState)
     {
@@ -245,14 +245,14 @@ is accessed which belongs to the PDO module.
 
 \param  pParam_p                OBD parameter
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdou
 **/
 //------------------------------------------------------------------------------
-tEplKernel PUBLIC pdou_cbObdAccess(tObdCbParam MEM* pParam_p)
+tOplkError PUBLIC pdou_cbObdAccess(tObdCbParam MEM* pParam_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     UINT                indexType;
     BYTE                mappObjectCount;
     UINT                curPdoSize;
@@ -334,14 +334,14 @@ tEplKernel PUBLIC pdou_cbObdAccess(tObdCbParam MEM* pParam_p)
 
 The function copies RXPDOs into the process image
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdou
 */
 //------------------------------------------------------------------------------
-tEplKernel pdou_copyRxPdoToPi (void)
+tOplkError pdou_copyRxPdoToPi (void)
 {
-    tEplKernel          Ret;
+    tOplkError          Ret;
     UINT                mappObjectCount;
     tPdoChannel*        pPdoChannel;
     tPdoMappObject*     pMappObject;
@@ -392,14 +392,14 @@ tEplKernel pdou_copyRxPdoToPi (void)
 
 The function copies the TXPDOs from the process image into the PDO buffers.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdou
 */
 //------------------------------------------------------------------------------
-tEplKernel pdou_copyTxPdoFromPi (void)
+tOplkError pdou_copyTxPdoFromPi (void)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     UINT                mappObjectCount;
     tPdoChannel*        pPdoChannel;
     tPdoMappObject*     pMappObject;
@@ -468,16 +468,16 @@ memory to store the mapping information.
                                     mapping
 \param  pCountChannelIdRx_p         Pointer to store number of RX channels
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \internal
 **/
 //------------------------------------------------------------------------------
-static tEplKernel setupRxPdoChannelTables(
+static tOplkError setupRxPdoChannelTables(
                        BYTE abChannelIdToPdoIdRx_p[EPL_D_PDO_RPDOChannels_U16],
                        UINT* pCountChannelIdRx_p)
 {
-    tEplKernel              ret = kEplSuccessful;
+    tOplkError              ret = kEplSuccessful;
     tObdSize                obdSize;
     BYTE                    nodeId;
     UINT                    pdoId;
@@ -541,14 +541,14 @@ memory to store the mapping information.
                                     mapping
 \param  pCountChannelIdTx_p         Pointer to store number of TX channels
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 **/
 //------------------------------------------------------------------------------
-static tEplKernel setupTxPdoChannelTables(
+static tOplkError setupTxPdoChannelTables(
                         BYTE abChannelIdToPdoIdTx_p[EPL_D_PDO_TPDOChannels_U16],
                         UINT* pCountChannelIdTx_p)
 {
-    tEplKernel              ret = kEplSuccessful;
+    tOplkError              ret = kEplSuccessful;
     tObdSize                obdSize;
     BYTE                    bNodeId;
     UINT                    pdoId;
@@ -610,12 +610,12 @@ This function allocates memory for PDOs channels
 
 \param  pAllocationParam_p      Pointer to allocation parameters.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 **/
 //------------------------------------------------------------------------------
-static tEplKernel allocatePdoChannels(tPdoAllocationParam* pAllocationParam_p)
+static tOplkError allocatePdoChannels(tPdoAllocationParam* pAllocationParam_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     UINT            index;
 
     if (pdouInstance_g.pdoChannels.allocation.rxPdoChannelCount != pAllocationParam_p->rxPdoChannelCount)
@@ -719,12 +719,12 @@ Exit:
 
 This function frees memory of PDOs channels
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 **/
 //------------------------------------------------------------------------------
-static tEplKernel freePdoChannels(void)
+static tOplkError freePdoChannels(void)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 
     if (pdouInstance_g.pdoChannels.pRxPdoChannel != NULL)
     {
@@ -760,12 +760,12 @@ static tEplKernel freePdoChannels(void)
 
 The function configures the whole PDO mapping information in the Pdok module.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel configureAllPdos(void)
+static tOplkError configureAllPdos(void)
 {
-    tEplKernel              ret = kEplSuccessful;
+    tOplkError              ret = kEplSuccessful;
     BYTE                    aChannelIdToPdoIdRx[EPL_D_PDO_RPDOChannels_U16];
     BYTE                    aChannelIdToPdoIdTx[EPL_D_PDO_TPDOChannels_U16];
     tPdoAllocationParam     allocParam;
@@ -825,13 +825,13 @@ The functions checks and configures all PDOs for a single direction.
 \param  pChannelToPdoTable_p    Pointer to channel-PDO table.
 \param  pAbortCode_p            Pointer to store the abort code.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel checkAndConfigurePdos(UINT16 mappParamIndex_p, UINT channelCount_p,
+static tOplkError checkAndConfigurePdos(UINT16 mappParamIndex_p, UINT channelCount_p,
                                         BYTE *pChannelToPdoTable_p, UINT32 *pAbortCode_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     UINT                index;
     tObdSize            obdSize;
     BYTE                mappObjectCount;
@@ -865,13 +865,13 @@ The function checks and configures a specified PDO.
 \param  mappObjectCount_p           Number of mapped objects.
 \param  pAbortCode_p                Pointer to store abort code
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel checkAndConfigurePdo(UINT16 mappParamIndex_p,
+static tOplkError checkAndConfigurePdo(UINT16 mappParamIndex_p,
                                        BYTE  mappObjectCount_p, UINT32* pAbortCode_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     UINT16              pdoId;
     UINT16              commParamIndex;
     tObdSize            obdSize;
@@ -990,12 +990,12 @@ The function configures the specified PDO channel.
 
 \param  pChannelConf_p              PDO channel configuration
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 **/
 //------------------------------------------------------------------------------
-static tEplKernel configurePdoChannel(tPdoChannelConf* pChannelConf_p)
+static tOplkError configurePdoChannel(tPdoChannelConf* pChannelConf_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     tPdoChannel*        pDestPdoChannel;
 
     if (pdouInstance_g.fAllocated != FALSE)
@@ -1029,13 +1029,13 @@ read.
 \param  pMaxPdoSize_p           Pointer to store maximum PDO size.
 \param  pAbortCode_p            Pointer to store abort code.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel getMaxPdoSize(BYTE nodeId_p, BOOL fTxPdo_p,
+static tOplkError getMaxPdoSize(BYTE nodeId_p, BOOL fTxPdo_p,
                          UINT16 *pMaxPdoSize_p, UINT32* pAbortCode_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     tObdSize            obdSize;
     WORD                maxPdoSize;
     UINT                payloadLimitIndex;
@@ -1096,12 +1096,12 @@ The function converts RPDO-ID (i.e. lower part of object index) to channel IDs.
 \param  fTxPdo_p                    TRUE for TXPDO or FALSE for RXPDO.
 \param  pChannelId_p                Pointer to store channel ID.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 **/
 //------------------------------------------------------------------------------
-static tEplKernel getPdoChannelId(UINT pdoId_p, BOOL fTxPdo_p, UINT *pChannelId_p)
+static tOplkError getPdoChannelId(UINT pdoId_p, BOOL fTxPdo_p, UINT *pChannelId_p)
 {
-    tEplKernel          Ret = kEplSuccessful;
+    tOplkError          Ret = kEplSuccessful;
 
     if (fTxPdo_p)
     {
@@ -1131,12 +1131,12 @@ configured or if the mapping of this POD is disabled.
 \param  mappParamIndex_p            Object index of mapping parameter.
 \param  pAbortCode_p                Pointer to store SDO abort code.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel checkPdoValidity(UINT mappParamIndex_p, UINT32* pAbortCode_p)
+static tOplkError checkPdoValidity(UINT mappParamIndex_p, UINT32* pAbortCode_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     tObdSize            obdSize;
     BYTE                mappObjectCount;
 
@@ -1178,15 +1178,15 @@ static tEplKernel checkPdoValidity(UINT mappParamIndex_p, UINT32* pAbortCode_p)
                                     (offset + size) in [byte];
                                     0 if mapping failed
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel checkAndSetObjectMapping(QWORD objectMapping_p,
+static tOplkError checkAndSetObjectMapping(QWORD objectMapping_p,
                                    tObdAccess neededAccessType_p,
                                    tPdoMappObject* pMappObject_p,
                                    DWORD* pAbortCode_p, UINT* pPdoSize_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     tObdSize            obdSize;
     UINT                index;
     UINT                subIndex;
@@ -1322,15 +1322,15 @@ The function sets up the mapping objects of a PDO channel.
 \param  pCalcPdoSize_p          Pointer to store the calculated PDO size.
 \param  pCount_p                Pointer to store number of mapped objects.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel setupMappingObjects(tPdoMappObject* pMappObject_p,
+static tOplkError setupMappingObjects(tPdoMappObject* pMappObject_p,
                                       UINT mappParamIndex_p, BYTE mappObjectCount_p,
                                       UINT16  maxPdoSize_p, UINT32* pAbortCode_p,
                                       UINT* pCalcPdoSize_p, UINT* pCount_p)
 {
-    tEplKernel          ret;
+    tOplkError          ret;
     tObdSize            obdSize;
     QWORD               objectMapping;
     UINT                count;
@@ -1429,12 +1429,12 @@ payload.
 \param  pPayload_p          Pointer to PDO payload in destination frame.
 \param  pMappObject_p       Pointer to mapping object.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 **/
 //------------------------------------------------------------------------------
-static tEplKernel copyVarToPdo(BYTE* pPayload_p, tPdoMappObject* pMappObject_p)
+static tOplkError copyVarToPdo(BYTE* pPayload_p, tPdoMappObject* pMappObject_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     UINT            byteOffset;
     void*           pVar;
 
@@ -1527,12 +1527,12 @@ payload.
 \param  pPayload_p                  Pointer to PDO payload in destination frame.
 \param  pMappObject_p               Pointer to mapping object.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 **/
 //------------------------------------------------------------------------------
-static tEplKernel copyVarFromPdo(BYTE* pPayload_p, tPdoMappObject* pMappObject_p)
+static tOplkError copyVarFromPdo(BYTE* pPayload_p, tPdoMappObject* pMappObject_p)
 {
-    tEplKernel      Ret = kEplSuccessful;
+    tOplkError      Ret = kEplSuccessful;
     UINT            byteOffset;
     void*           pVar;
 

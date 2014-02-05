@@ -110,7 +110,7 @@ static tVethInstance        vethInstance_l;
 // local function prototypes
 //------------------------------------------------------------------------------
 static void getMacAdrs(UINT8* pMac_p);
-static tEplKernel veth_receiveFrame(tFrameInfo * pFrameInfo_p);
+static tOplkError veth_receiveFrame(tFrameInfo * pFrameInfo_p);
 static void* vethRecvThread(void* pArg_p);
 
 //------------------------------------------------------------------------------
@@ -129,14 +129,14 @@ The function adds a virtual Ethernet instance.
 
 \param  aSrcMac_p       MAC address to set for virtual Ethernet interface.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_veth
 */
 //------------------------------------------------------------------------------
-tEplKernel veth_addInstance(const UINT8 aSrcMac_p[6])
+tOplkError veth_addInstance(const UINT8 aSrcMac_p[6])
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     struct ifreq        ifr;
     int                 err;
 
@@ -179,12 +179,12 @@ tEplKernel veth_addInstance(const UINT8 aSrcMac_p[6])
 
 The function deletes a virtual ethernet instance.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_veth
 */
 //------------------------------------------------------------------------------
-tEplKernel veth_delInstance(void)
+tOplkError veth_delInstance(void)
 {
     // stop receive thread by setting its stop flag
     vethInstance_l.fStop = TRUE;
@@ -249,10 +249,10 @@ The function receives a frame from the virtual Ethernet interface.
 
 \param  pFrameInfo_p        Pointer to frame information of received frame.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel veth_receiveFrame(tFrameInfo * pFrameInfo_p)
+static tOplkError veth_receiveFrame(tFrameInfo * pFrameInfo_p)
 {
     UINT            nwrite;
 
@@ -280,7 +280,7 @@ to be used as a thread which does a blocking read in a while loop.
 
 \param  pArg_p        Thread argument. Pointer to virtual ethernet instance.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 static void* vethRecvThread(void* pArg_p)
@@ -288,7 +288,7 @@ static void* vethRecvThread(void* pArg_p)
     UINT8               buffer[ETHERMTU];
     UINT                nread;
     tFrameInfo          frameInfo;
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     tVethInstance*      pInstance = (tVethInstance*)pArg_p;
     fd_set              readFds;
     int                 result;

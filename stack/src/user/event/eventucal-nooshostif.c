@@ -102,14 +102,14 @@ static tEventuCalArchInstance       instance_l;             ///< Instance variab
 The function initializes the architecture specific stuff of the user event
 CAL module.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-tEplKernel eventucal_init (void)
+tOplkError eventucal_init (void)
 {
     EPL_MEMSET(&instance_l, 0, sizeof(tEventuCalArchInstance));
 
@@ -136,14 +136,14 @@ Exit:
 The function cleans up the kernel event CAL module. For cleanup it calls the exit
 functions of the queue implementations for each used queue.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-tEplKernel eventucal_exit (void)
+tOplkError eventucal_exit (void)
 {
     if (instance_l.fInitialized == TRUE)
     {
@@ -166,16 +166,16 @@ queue post function is called.
 
 \param  pEvent_p                Event to be posted.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-tEplKernel eventucal_postKernelEvent (tEplEvent *pEvent_p)
+tOplkError eventucal_postKernelEvent (tEplEvent *pEvent_p)
 {
-    tEplKernel      ret;
+    tOplkError      ret;
 
     ret = eventucal_postEventHostif(kEventQueueU2K, pEvent_p);
     return ret;
@@ -191,16 +191,16 @@ queue post function is called.
 
 \param  pEvent_p                Event to be posted.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-tEplKernel eventucal_postUserEvent (tEplEvent *pEvent_p)
+tOplkError eventucal_postUserEvent (tEplEvent *pEvent_p)
 {
-    tEplKernel      ret;
+    tOplkError      ret;
 
     ret = eventu_process(pEvent_p);
     return ret;

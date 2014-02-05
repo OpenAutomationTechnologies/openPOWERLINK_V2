@@ -88,7 +88,7 @@ static tNmtCnuInstance   nmtCnuInstance_g;
 //------------------------------------------------------------------------------
 static tNmtCommand   getNmtCommand(tFrameInfo * pFrameInfo_p);
 static BOOL             checkNodeIdList(BYTE* pbNmtCommandDate_p);
-static tEplKernel       commandCb(tFrameInfo * pFrameInfo_p);
+static tOplkError       commandCb(tFrameInfo * pFrameInfo_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -102,12 +102,12 @@ The function initializes an instance of the nmtcnu module
 
 \param  nodeId_p                Node ID of the local node
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_nmtcnu
 */
 //------------------------------------------------------------------------------
-tEplKernel nmtcnu_init(UINT nodeId_p)
+tOplkError nmtcnu_init(UINT nodeId_p)
 {
     return nmtcnu_addInstance(nodeId_p);
 }
@@ -120,14 +120,14 @@ The function adds a nmtcnu module instance.
 
 \param  nodeId_p                Node ID of the local node
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_nmtcnu
 */
 //------------------------------------------------------------------------------
-tEplKernel nmtcnu_addInstance(UINT nodeId_p)
+tOplkError nmtcnu_addInstance(UINT nodeId_p)
 {
-    tEplKernel ret = kEplSuccessful;
+    tOplkError ret = kEplSuccessful;
 
     EPL_MEMSET(&nmtCnuInstance_g, 0, sizeof (nmtCnuInstance_g));
 
@@ -145,14 +145,14 @@ tEplKernel nmtcnu_addInstance(UINT nodeId_p)
 
 The function deletes an nmtcnu module instance.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_nmtcnu
 */
 //------------------------------------------------------------------------------
-tEplKernel nmtcnu_delInstance(void)
+tOplkError nmtcnu_delInstance(void)
 {
-    tEplKernel ret = kEplSuccessful;
+    tOplkError ret = kEplSuccessful;
 
     // deregister callback function from DLL
     ret = dllucal_regAsndService(kDllAsndNmtCommand, NULL, kDllAsndFilterNone);
@@ -169,14 +169,14 @@ The function is used to send a NMT-Request to the MN.
 \param  nodeId_p            Node ID of the local node.
 \param  nmtCommand_p        NMT command to request from MN.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_nmtcnu
 */
 //------------------------------------------------------------------------------
-tEplKernel nmtcnu_sendNmtRequest(UINT nodeId_p, tNmtCommand nmtCommand_p)
+tOplkError nmtcnu_sendNmtRequest(UINT nodeId_p, tNmtCommand nmtCommand_p)
 {
-    tEplKernel      ret;
+    tOplkError      ret;
     tFrameInfo      nmtRequestFrameInfo;
     tEplFrame       nmtRequestFrame;
 
@@ -214,12 +214,12 @@ NMT-Change-State-Event.
 
 \param  pfnNmtCheckEventCb_p        Pointer to check event callback function.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_nmtcnu
 */
 //------------------------------------------------------------------------------
-tEplKernel nmtcnu_registerCheckEventCb(tNmtuCheckEventCallback pfnNmtCheckEventCb_p)
+tOplkError nmtcnu_registerCheckEventCb(tNmtuCheckEventCallback pfnNmtCheckEventCb_p)
 {
     nmtCnuInstance_g.pfnCheckEventCb = pfnNmtCheckEventCb_p;
     return kEplSuccessful;
@@ -239,12 +239,12 @@ The function processes NMT commands.
 
 \param  pFrameInfo_p        Pointer to frame containing the NMT command
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel commandCb(tFrameInfo* pFrameInfo_p)
+static tOplkError commandCb(tFrameInfo* pFrameInfo_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     tNmtCommand     nmtCommand;
     BOOL            fNodeIdInList;
     tNmtEvent       nmtEvent = kNmtEventNoEvent;

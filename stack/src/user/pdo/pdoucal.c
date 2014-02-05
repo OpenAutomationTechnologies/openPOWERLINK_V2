@@ -91,14 +91,14 @@ The function initializes the PDO user CAL module.
 
 \param  pfnSyncCb_p             function that is called in case of sync event
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdoucal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdoucal_init(tEplSyncCb pfnSyncCb_p)
+tOplkError pdoucal_init(tEplSyncCb pfnSyncCb_p)
 {
-    tEplKernel      ret;
+    tOplkError      ret;
 
     if ((ret = pdoucal_openMem()) != kEplSuccessful)
         return ret;
@@ -112,12 +112,12 @@ tEplKernel pdoucal_init(tEplSyncCb pfnSyncCb_p)
 
 The function cleans up the PDO user CAL module.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdoucal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdoucal_exit(void)
+tOplkError pdoucal_exit(void)
 {
     pdoucal_closeMem();
     pdoucal_exitSync();
@@ -134,14 +134,14 @@ in the Pdok module by sending the appropriate event to Pdok.
 \param  pAllocationParam_p      Allocation parameters containing info
                                 needed for memory allocation.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdoucal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdoucal_postPdokChannelAlloc(tPdoAllocationParam* pAllocationParam_p)
+tOplkError pdoucal_postPdokChannelAlloc(tPdoAllocationParam* pAllocationParam_p)
 {
-    tEplKernel  Ret = kEplSuccessful;
+    tOplkError  Ret = kEplSuccessful;
     tEplEvent   Event;
 
     Event.m_EventSink = kEplEventSinkPdokCal;
@@ -163,14 +163,14 @@ kEplEventTypePdokConfig to the kernel PDO module.
 
 \param  pChannelConf_p          PDO channel configuration.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdoucal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdoucal_postConfigureChannel(tPdoChannelConf* pChannelConf_p)
+tOplkError pdoucal_postConfigureChannel(tPdoChannelConf* pChannelConf_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     tEplEvent       Event;
 
     Event.m_EventSink = kEplEventSinkPdokCal;
@@ -192,14 +192,14 @@ a kEplEventTypePdokSetupPdoBuf event.
 \param  rxPdoMemSize_p          Size of RX PDO buffers.
 \param  txPdoMemSize_p          Size of TX PDO buffers.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdoucal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdoucal_postSetupPdoBuffers(size_t rxPdoMemSize_p, size_t txPdoMemSize_p)
+tOplkError pdoucal_postSetupPdoBuffers(size_t rxPdoMemSize_p, size_t txPdoMemSize_p)
 {
-    tEplKernel      Ret = kEplSuccessful;
+    tOplkError      Ret = kEplSuccessful;
     tEplEvent       Event;
     tPdoMemSize     pdoMemSize;
 

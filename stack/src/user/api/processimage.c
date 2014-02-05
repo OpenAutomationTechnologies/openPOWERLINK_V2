@@ -104,14 +104,14 @@ The function allocates the input and output process images
 \param  sizeProcessImageIn_p          Size for input process image
 \param  sizeProcessImageOut_p         Size for output process image
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tEplKernel oplk_allocProcessImage(UINT sizeProcessImageIn_p, UINT sizeProcessImageOut_p)
+tOplkError oplk_allocProcessImage(UINT sizeProcessImageIn_p, UINT sizeProcessImageOut_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 
     TRACE("%s(): Alloc(%u, %u)\n", __func__, sizeProcessImageIn_p,
                                    sizeProcessImageOut_p);
@@ -152,15 +152,15 @@ Exit:
 
 The function frees the allocated process images
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
 
-tEplKernel oplk_freeProcessImage(void)
+tOplkError oplk_freeProcessImage(void)
 {
-    tEplKernel      Ret = kEplSuccessful;
+    tOplkError      Ret = kEplSuccessful;
 
     if ((instance_l.inputImage.m_pImage == NULL) &&
         (instance_l.outputImage.m_pImage == NULL))
@@ -199,16 +199,16 @@ The function links an object in the OD into a location in the process image.
                                 actual number of process variables which were
                                 linked to the object dictionary.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tEplKernel oplk_linkProcessImageObject(UINT objIndex_p, UINT firstSubindex_p,
+tOplkError oplk_linkProcessImageObject(UINT objIndex_p, UINT firstSubindex_p,
                                        UINT offsetPI_p, BOOL fOutputPI_p,
                                        tObdSize entrySize_p, UINT* pVarEntries_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     void*           pVar;
 
     if (pVarEntries_p == NULL)
@@ -253,14 +253,14 @@ tEplKernel oplk_linkProcessImageObject(UINT objIndex_p, UINT firstSubindex_p,
 
 The function exchanges the input process image.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tEplKernel oplk_exchangeProcessImageIn(void)
+tOplkError oplk_exchangeProcessImageIn(void)
 {
-    tEplKernel      ret;
+    tOplkError      ret;
 
     if (instance_l.inputImage.m_pImage != NULL)
         ret = pdou_copyTxPdoFromPi();
@@ -276,14 +276,14 @@ tEplKernel oplk_exchangeProcessImageIn(void)
 
 The function exchanges the output process image.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tEplKernel oplk_exchangeProcessImageOut(void)
+tOplkError oplk_exchangeProcessImageOut(void)
 {
-    tEplKernel      ret;
+    tOplkError      ret;
 
     if (instance_l.outputImage.m_pImage != NULL)
         ret = pdou_copyRxPdoToPi();

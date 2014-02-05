@@ -95,15 +95,15 @@ The function initializes the kernel control CAL module. It initializes the
 control memory block and the underlaying CAL module used for implementing
 the memory block access functions.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_ctrlkcal
 */
 //------------------------------------------------------------------------------
-tEplKernel ctrlkcal_init (void)
+tOplkError ctrlkcal_init (void)
 {
     tCtrlBuf        ctrl;
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 
     if ((ret = ctrlcal_init(sizeof(tCtrlBuf))) != kEplSuccessful)
         return kEplNoResource;
@@ -141,12 +141,12 @@ void ctrlkcal_exit (void)
 
 This function provides processing time for the CAL module.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_ctrlkcal
 */
 //------------------------------------------------------------------------------
-tEplKernel ctrlkcal_process (void)
+tOplkError ctrlkcal_process (void)
 {
     return kEplSuccessful;
 }
@@ -160,12 +160,12 @@ block to execute a kernel control function.
 
 \param  pCmd_p            The command to be executed.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_ctrlkcal
 */
 //------------------------------------------------------------------------------
-tEplKernel ctrlkcal_getCmd (tCtrlCmdType *pCmd_p)
+tOplkError ctrlkcal_getCmd (tCtrlCmdType *pCmd_p)
 {
     return ctrlcal_readData(pCmd_p, offsetof(tCtrlBuf, ctrlCmd), sizeof(tCtrlCmd));
 }
@@ -253,12 +253,12 @@ The function reads the initialization parameter from the user stack.
 
 \param  pInitParam_p        Specifies where to store the read init parameters.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_ctrlkcal
 */
 //------------------------------------------------------------------------------
-tEplKernel ctrlkcal_readInitParam(tCtrlInitParam* pInitParam_p)
+tOplkError ctrlkcal_readInitParam(tCtrlInitParam* pInitParam_p)
 {
     return ctrlcal_readData(pInitParam_p, offsetof(tCtrlBuf, initParam),
                             sizeof(tCtrlInitParam));

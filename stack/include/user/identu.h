@@ -52,7 +52,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-typedef tEplKernel (*tIdentuCbResponse) (UINT nodeId_p, tEplIdentResponse* pIdentResponse_p);
+typedef tOplkError (*tIdentuCbResponse) (UINT nodeId_p, tEplIdentResponse* pIdentResponse_p);
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -62,12 +62,12 @@ typedef tEplKernel (*tIdentuCbResponse) (UINT nodeId_p, tEplIdentResponse* pIden
 extern "C" {
 #endif
 
-tEplKernel identu_init(void);
-tEplKernel identu_addInstance(void);
-tEplKernel identu_delInstance(void);
-tEplKernel identu_reset(void);
-tEplKernel identu_getIdentResponse(UINT nodeId_p, tEplIdentResponse** ppIdentResponse_p);
-tEplKernel identu_requestIdentResponse(UINT nodeId_p, tIdentuCbResponse pfnCbResponse_p);
+tOplkError identu_init(void);
+tOplkError identu_addInstance(void);
+tOplkError identu_delInstance(void);
+tOplkError identu_reset(void);
+tOplkError identu_getIdentResponse(UINT nodeId_p, tEplIdentResponse** ppIdentResponse_p);
+tOplkError identu_requestIdentResponse(UINT nodeId_p, tIdentuCbResponse pfnCbResponse_p);
 UINT32     identu_getRunningRequests(void);
 
 #ifdef __cplusplus

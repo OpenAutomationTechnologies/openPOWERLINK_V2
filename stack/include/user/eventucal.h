@@ -65,10 +65,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tEplKernel eventucal_init (void);
-tEplKernel eventucal_exit (void);
-tEplKernel eventucal_postKernelEvent (tEplEvent *pEvent_p);
-tEplKernel eventucal_postUserEvent(tEplEvent *pEvent_p);
+tOplkError eventucal_init (void);
+tOplkError eventucal_exit (void);
+tOplkError eventucal_postKernelEvent (tEplEvent *pEvent_p);
+tOplkError eventucal_postUserEvent(tEplEvent *pEvent_p);
 void       eventucal_process(void);
 
 #ifdef __cplusplus

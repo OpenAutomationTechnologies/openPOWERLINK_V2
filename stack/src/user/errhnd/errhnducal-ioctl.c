@@ -124,7 +124,7 @@ The function initializes the user layer CAL module of the error handler.
 \ingroup module_errhnducal
 */
 //------------------------------------------------------------------------------
-tEplKernel errhnducal_init (tErrHndObjects *pLocalObjects_p)
+tOplkError errhnducal_init (tErrHndObjects *pLocalObjects_p)
 {
     if (fInitialized_l)
         return kEplNoFreeInstance;
@@ -163,12 +163,12 @@ by user and kernel modules.
 \param  subIndex_p          Subindex of object
 \param  pParam_p            Pointer to object in error handlers memory space
 
-\return Returns a tEplKernel error code.
+\return Returns a tOplkError error code.
 
 \ingroup module_errhnducal
 */
 //------------------------------------------------------------------------------
-tEplKernel errhnducal_writeErrorObject(UINT index_p, UINT subIndex_p, UINT32 *pParam_p)
+tOplkError errhnducal_writeErrorObject(UINT index_p, UINT subIndex_p, UINT32 *pParam_p)
 {
     int             ret;
     tErrHndIoctl    errObj;
@@ -197,12 +197,12 @@ by user and kernel modules.
 \param  subIndex_p          Subindex of object
 \param  pParam_p            Pointer to object in error handlers memory space
 
-\return Returns a tEplKernel error code.
+\return Returns a tOplkError error code.
 
 \ingroup module_errhnducal
 */
 //------------------------------------------------------------------------------
-tEplKernel errhnducal_readErrorObject(UINT index_p, UINT subIndex_p, UINT32 *pParam_p)
+tOplkError errhnducal_readErrorObject(UINT index_p, UINT subIndex_p, UINT32 *pParam_p)
 {
     int             ret;
     tErrHndIoctl    errObj;

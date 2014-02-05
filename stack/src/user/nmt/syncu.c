@@ -89,7 +89,7 @@ static tSyncuInstance   syncuInstance_g;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tEplKernel syncu_cbSyncResponse(tFrameInfo * pFrameInfo_p);
+static tOplkError syncu_cbSyncResponse(tFrameInfo * pFrameInfo_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -101,12 +101,12 @@ static tEplKernel syncu_cbSyncResponse(tFrameInfo * pFrameInfo_p);
 
 The function initializes an instance of the sync module
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_syncu
 */
 //------------------------------------------------------------------------------
-tEplKernel syncu_init(void)
+tOplkError syncu_init(void)
 {
     return syncu_addInstance();
 }
@@ -117,14 +117,14 @@ tEplKernel syncu_init(void)
 
 The function adds a sync module instance
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_syncu
 */
 //------------------------------------------------------------------------------
-tEplKernel syncu_addInstance(void)
+tOplkError syncu_addInstance(void)
 {
-    tEplKernel ret = kEplSuccessful;
+    tOplkError ret = kEplSuccessful;
 
     EPL_MEMSET(&syncuInstance_g, 0, sizeof (syncuInstance_g));
     ret = dllucal_regAsndService(kDllAsndSyncResponse, syncu_cbSyncResponse,
@@ -139,14 +139,14 @@ tEplKernel syncu_addInstance(void)
 
 The function deletes a sync module instance
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_syncu
 */
 //------------------------------------------------------------------------------
-tEplKernel syncu_delInstance(void)
+tOplkError syncu_delInstance(void)
 {
-    tEplKernel  ret;
+    tOplkError  ret;
 
     ret = dllucal_regAsndService(kDllAsndSyncResponse, NULL, kDllAsndFilterNone);
     return ret;
@@ -158,12 +158,12 @@ tEplKernel syncu_delInstance(void)
 
 The function resets a sync module instance
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_syncu
 */
 //------------------------------------------------------------------------------
-tEplKernel syncu_reset(void)
+tOplkError syncu_reset(void)
 {
     EPL_MEMSET(&syncuInstance_g, 0, sizeof (syncuInstance_g));
     return kEplSuccessful;
@@ -180,16 +180,16 @@ The function requests the SyncResponse for a specified node.
 \param  pSyncRequestData_p  Pointer to SyncRequest data structure
 \param  size_p              Size of the SyncRequest structure.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_syncu
 */
 //------------------------------------------------------------------------------
-tEplKernel  syncu_requestSyncResponse(tSyncuCbResponse pfnCbResponse_p,
+tOplkError  syncu_requestSyncResponse(tSyncuCbResponse pfnCbResponse_p,
                                       tDllSyncRequest* pSyncRequestData_p,
                                       UINT size_p)
 {
-    tEplKernel      ret;
+    tOplkError      ret;
     UINT            nodeId;
 
     ret = kEplSuccessful;
@@ -238,14 +238,14 @@ SyncResponse is received.
 \param  pFrameInfo_p            Pointer to frame information structure describing
                                 the received SyncResponse frame.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_identu
 */
 //------------------------------------------------------------------------------
-static tEplKernel syncu_cbSyncResponse(tFrameInfo * pFrameInfo_p)
+static tOplkError syncu_cbSyncResponse(tFrameInfo * pFrameInfo_p)
 {
-    tEplKernel          ret;
+    tOplkError          ret;
     UINT                nodeId;
     UINT                index;
     tSyncuCbResponse    pfnCbResponse;

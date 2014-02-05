@@ -63,14 +63,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tEplKernel pdok_processRxPdo(tEplFrame* pFrame_p, UINT frameSize_p) SECTION_PDOK_PROCESS_RPDO;
-tEplKernel pdok_init(void);
-tEplKernel pdok_exit(void);
-tEplKernel pdok_deAllocChannelMem(void);
-tEplKernel pdok_allocChannelMem(tPdoAllocationParam* pAllocationParam_p);
-tEplKernel pdok_configureChannel(tPdoChannelConf* pChannelConf_p);
-tEplKernel pdok_setupPdoBuffers(size_t rxPdoMemSize_p, size_t txPdoMemSize_p);
-tEplKernel pdok_sendSyncEvent(void);
+tOplkError pdok_processRxPdo(tEplFrame* pFrame_p, UINT frameSize_p) SECTION_PDOK_PROCESS_RPDO;
+tOplkError pdok_init(void);
+tOplkError pdok_exit(void);
+tOplkError pdok_deAllocChannelMem(void);
+tOplkError pdok_allocChannelMem(tPdoAllocationParam* pAllocationParam_p);
+tOplkError pdok_configureChannel(tPdoChannelConf* pChannelConf_p);
+tOplkError pdok_setupPdoBuffers(size_t rxPdoMemSize_p, size_t txPdoMemSize_p);
+tOplkError pdok_sendSyncEvent(void);
 
 #ifdef __cplusplus
 }

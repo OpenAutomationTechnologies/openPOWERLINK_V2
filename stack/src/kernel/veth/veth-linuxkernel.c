@@ -112,7 +112,7 @@ static int veth_close(struct net_device *pNetDevice_p);
 static int veth_xmit(struct sk_buff *pSkb_p, struct net_device *pNetDevice_p);
 static struct net_device_stats* veth_getStats(struct net_device *pNetDevice_p);
 static void veth_timeout(struct net_device *pNetDevice_p);
-static tEplKernel veth_receiveFrame(tFrameInfo * pFrameInfo_p);
+static tOplkError veth_receiveFrame(tFrameInfo * pFrameInfo_p);
 
 //------------------------------------------------------------------------------
 // local vars
@@ -141,12 +141,12 @@ The function adds a virtual Ethernet instance.
 
 \param  aSrcMac_p       MAC address to set for virtual Ethernet interface.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_veth
 */
 //------------------------------------------------------------------------------
-tEplKernel veth_addInstance(const UINT8 aSrcMac_p[6])
+tOplkError veth_addInstance(const UINT8 aSrcMac_p[6])
 {
     // allocate net device structure with priv pointing to stats structure
     pVEthNetDevice_g = alloc_netdev(sizeof (struct net_device_stats), EPL_VETH_NAME,
@@ -177,12 +177,12 @@ tEplKernel veth_addInstance(const UINT8 aSrcMac_p[6])
 
 The function deletes a virtual ethernet instance.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_veth
 */
 //------------------------------------------------------------------------------
-tEplKernel veth_delInstance(void)
+tOplkError veth_delInstance(void)
 {
     if (pVEthNetDevice_g != NULL)
     {
@@ -215,7 +215,7 @@ The function contains the open routine of the virtual Ethernet driver.
 //------------------------------------------------------------------------------
 static int veth_open(struct net_device *pNetDevice_p)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
 
     //open the device
     //start the interface queue for the network subsystem
@@ -262,7 +262,7 @@ The function contains the transmit function for the virtual Ethernet driver.
 //------------------------------------------------------------------------------
 static int veth_xmit(struct sk_buff *pSkb_p, struct net_device *pNetDevice_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     tFrameInfo      frameInfo;
 
     //transmit function
@@ -340,12 +340,12 @@ The function receives a frame from the virtual Ethernet interface.
 
 \param  pFrameInfo_p        Pointer to frame information of received frame.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel veth_receiveFrame(tFrameInfo * pFrameInfo_p)
+static tOplkError veth_receiveFrame(tFrameInfo * pFrameInfo_p)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
     struct net_device* pNetDevice = pVEthNetDevice_g;
     struct net_device_stats* pStats = netdev_priv(pNetDevice);
     struct sk_buff *pSkb;

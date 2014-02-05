@@ -183,35 +183,35 @@ static tSdoComInstance sdoComInstance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tEplKernel receiveCb (tSdoSeqConHdl sdoSeqConHdl_p, tAsySdoCom* pSdoCom_p, UINT dataSize_p);
-static tEplKernel conStateChangeCb (tSdoSeqConHdl sdoSeqConHdl_p, tAsySdoConState sdoConnectionState_p);
-static tEplKernel searchConnection(tSdoSeqConHdl sdoSeqConHdl_p, tSdoComConEvent sdoComConEvent_p, tAsySdoCom* pSdoCom_p);
-static tEplKernel processState(tSdoComConHdl sdoComConHdl_p, tSdoComConEvent SdoComConEvent_p,
+static tOplkError receiveCb (tSdoSeqConHdl sdoSeqConHdl_p, tAsySdoCom* pSdoCom_p, UINT dataSize_p);
+static tOplkError conStateChangeCb (tSdoSeqConHdl sdoSeqConHdl_p, tAsySdoConState sdoConnectionState_p);
+static tOplkError searchConnection(tSdoSeqConHdl sdoSeqConHdl_p, tSdoComConEvent sdoComConEvent_p, tAsySdoCom* pSdoCom_p);
+static tOplkError processState(tSdoComConHdl sdoComConHdl_p, tSdoComConEvent SdoComConEvent_p,
                                tAsySdoCom* pSdoCom_p);
-static tEplKernel processStateIdle(tSdoComConHdl sdoComConHdl_p, tSdoComConEvent sdoComConEvent_p,
+static tOplkError processStateIdle(tSdoComConHdl sdoComConHdl_p, tSdoComConEvent sdoComConEvent_p,
                             tAsySdoCom* pRecvdCmdLayer_p);
-static tEplKernel processStateServerSegmTrans(tSdoComConHdl sdoComConHdl_p, tSdoComConEvent sdoComConEvent_p,
+static tOplkError processStateServerSegmTrans(tSdoComConHdl sdoComConHdl_p, tSdoComConEvent sdoComConEvent_p,
                                               tAsySdoCom* pRecvdCmdLayer_p);
-static tEplKernel processStateClientWaitInit(tSdoComConHdl sdoComConHdl_p, tSdoComConEvent sdoComConEvent_p,
+static tOplkError processStateClientWaitInit(tSdoComConHdl sdoComConHdl_p, tSdoComConEvent sdoComConEvent_p,
                                              tAsySdoCom* pRecvdCmdLayer_p);
-static tEplKernel processStateClientConnected(tSdoComConHdl sdoComConHdl_p, tSdoComConEvent sdoComConEvent_p,
+static tOplkError processStateClientConnected(tSdoComConHdl sdoComConHdl_p, tSdoComConEvent sdoComConEvent_p,
                                               tAsySdoCom* pRecvdCmdLayer_p);
-static tEplKernel processStateClientSegmTransfer(tSdoComConHdl sdoComConHdl_p, tSdoComConEvent sdoComConEvent_p,
+static tOplkError processStateClientSegmTransfer(tSdoComConHdl sdoComConHdl_p, tSdoComConEvent sdoComConEvent_p,
                                                  tAsySdoCom* pRecvdCmdLayer_p);
-static tEplKernel transferFinished(tSdoComConHdl sdoComConHdl_p, tSdoComCon* pSdoComCon_p,
+static tOplkError transferFinished(tSdoComConHdl sdoComConHdl_p, tSdoComCon* pSdoComCon_p,
                                    tSdoComConState sdoComConState_p);
 
 #if defined (CONFIG_INCLUDE_SDOS)
-static tEplKernel serverInitReadByIndex(tSdoComCon* pSdoComCon_p, tAsySdoCom* pSdoCom_p);
-static tEplKernel serverSendFrame(tSdoComCon* pSdoComCon_p, UINT index_p,
+static tOplkError serverInitReadByIndex(tSdoComCon* pSdoComCon_p, tAsySdoCom* pSdoCom_p);
+static tOplkError serverSendFrame(tSdoComCon* pSdoComCon_p, UINT index_p,
                                   UINT subIndex_p, tSdoComSendType sendType_p);
-static tEplKernel serverInitWriteByIndex(tSdoComCon* pSdoComCon_p, tAsySdoCom* pSdoCom_p);
+static tOplkError serverInitWriteByIndex(tSdoComCon* pSdoComCon_p, tAsySdoCom* pSdoCom_p);
 #endif
 
 #if defined(CONFIG_INCLUDE_SDOC)
-static tEplKernel clientSend(tSdoComCon* pSdoComCon_p);
-static tEplKernel clientProcessFrame(tSdoComConHdl sdoComConHdl_p, tAsySdoCom* pSdoCom_p);
-static tEplKernel clientSendAbort(tSdoComCon* pSdoComCon_p, UINT32 abortCode_p);
+static tOplkError clientSend(tSdoComCon* pSdoComCon_p);
+static tOplkError clientProcessFrame(tSdoComConHdl sdoComConHdl_p, tAsySdoCom* pSdoCom_p);
+static tOplkError clientSendAbort(tSdoComCon* pSdoComCon_p, UINT32 abortCode_p);
 #endif
 
 //============================================================================//
@@ -224,12 +224,12 @@ static tEplKernel clientSendAbort(tSdoComCon* pSdoComCon_p, UINT32 abortCode_p);
 
 The function initializes the command layer module.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_sdo_com
 */
 //------------------------------------------------------------------------------
-tEplKernel sdocom_init(void)
+tOplkError sdocom_init(void)
 {
     return sdocom_addInstance();
 }
@@ -240,14 +240,14 @@ tEplKernel sdocom_init(void)
 
 The function adds an instance of the command layer module.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_sdo_com
 */
 //------------------------------------------------------------------------------
-tEplKernel sdocom_addInstance(void)
+tOplkError sdocom_addInstance(void)
 {
-    tEplKernel ret = kEplSuccessful;
+    tOplkError ret = kEplSuccessful;
 
     EPL_MEMSET(&sdoComInstance_l, 0x00, sizeof(sdoComInstance_l));
 
@@ -268,14 +268,14 @@ tEplKernel sdocom_addInstance(void)
 
 The function deletes an instance of the command layer module.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_sdo_com
 */
 //------------------------------------------------------------------------------
-tEplKernel sdocom_delInstance(void)
+tOplkError sdocom_delInstance(void)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
 
 #if defined(WIN32) || defined(_WIN32)
     DeleteCriticalSection(sdoComInstance_l.pCriticalSection);
@@ -301,15 +301,15 @@ pSdoComConHdl_p.
 \param  protType_p              The protocol type to use for the connection
                                 (UDP and ASnd is supported)
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_sdo_com
 */
 //------------------------------------------------------------------------------
-tEplKernel sdocom_defineConnection(tSdoComConHdl* pSdoComConHdl_p, UINT targetNodeId_p,
+tOplkError sdocom_defineConnection(tSdoComConHdl* pSdoComConHdl_p, UINT targetNodeId_p,
                                    tSdoType protType_p)
 {
-    tEplKernel      ret;
+    tOplkError      ret;
     UINT            count;
     UINT            freeHdl;
     tSdoComCon*     pSdoComCon;
@@ -381,14 +381,14 @@ The function initializes a "transfer by index" operation for a connection.
 
 \param  pSdoComTransParam_p     Pointer to transfer command parameters
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_sdo_com
 */
 //------------------------------------------------------------------------------
-tEplKernel sdocom_initTransferByIndex(tSdoComTransParamByIndex* pSdoComTransParam_p)
+tOplkError sdocom_initTransferByIndex(tSdoComTransParamByIndex* pSdoComTransParam_p)
 {
-    tEplKernel      ret;
+    tOplkError      ret;
     tSdoComCon*     pSdoComCon;
 
     if ((pSdoComTransParam_p->subindex >= 0xFF) || (pSdoComTransParam_p->index == 0) ||
@@ -446,14 +446,14 @@ The function deletes a SDO command layer connection to another node.
 
 \param  sdoComConHdl_p          Handle of the connection to delete.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_sdo_com
 */
 //------------------------------------------------------------------------------
-tEplKernel sdocom_undefineConnection(tSdoComConHdl sdoComConHdl_p)
+tOplkError sdocom_undefineConnection(tSdoComConHdl sdoComConHdl_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     tSdoComCon*         pSdoComCon;
 
     if(sdoComConHdl_p >= MAX_SDO_COM_CON)
@@ -495,14 +495,14 @@ The function returns the state of a command layer connection.
 \param  sdoComConHdl_p          Handle of the command layer connection.
 \param  pSdoComFinished_p       Pointer to store connection information.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_sdo_com
 */
 //------------------------------------------------------------------------------
-tEplKernel sdocom_getState(tSdoComConHdl sdoComConHdl_p, tSdoComFinished* pSdoComFinished_p)
+tOplkError sdocom_getState(tSdoComConHdl sdoComConHdl_p, tSdoComFinished* pSdoComFinished_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     tSdoComCon*         pSdoComCon;
 
     if(sdoComConHdl_p >= MAX_SDO_COM_CON)
@@ -593,14 +593,14 @@ The function aborts an SDO transfer.
 \param  sdoComConHdl_p          Handle of the connection to abort.
 \param  abortCode_p             The abort code to use.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_sdo_com
 */
 //------------------------------------------------------------------------------
-tEplKernel sdocom_abortTransfer(tSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p)
+tOplkError sdocom_abortTransfer(tSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p)
 {
-    tEplKernel      ret;
+    tOplkError      ret;
     tSdoComCon*     pSdoComCon;
 
     if(sdoComConHdl_p >= MAX_SDO_COM_CON)
@@ -637,12 +637,12 @@ SOD sequence layer when new data is received.
 \param  pSdoCom_p               Pointer to received command layer data.
 \param  dataSize_p              Size of the received data.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel receiveCb (tSdoSeqConHdl sdoSeqConHdl_p, tAsySdoCom* pSdoCom_p, UINT dataSize_p)
+static tOplkError receiveCb (tSdoSeqConHdl sdoSeqConHdl_p, tAsySdoCom* pSdoCom_p, UINT dataSize_p)
 {
-    tEplKernel       ret;
+    tOplkError       ret;
 
     UNUSED_PARAMETER(dataSize_p);
 
@@ -663,13 +663,13 @@ of the connection.
 \param  sdoSeqConHdl_p          Handle of the SDO sequence layer connection.
 \param  sdoConnectionState_p    SDO connection state.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel conStateChangeCb (tSdoSeqConHdl sdoSeqConHdl_p,
+static tOplkError conStateChangeCb (tSdoSeqConHdl sdoSeqConHdl_p,
                                     tAsySdoConState sdoConnectionState_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     tSdoComConEvent     sdoComConEvent = kSdoComConEventSendFirst;
 
     switch(sdoConnectionState_p)
@@ -732,13 +732,13 @@ The function searches for a SDO sequence layer connection.
 \param  sdoComConEvent_p        Event to process for found connection.
 \param  pSdoCom_p               Pointer to received command layer data.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel searchConnection(tSdoSeqConHdl sdoSeqConHdl_p, tSdoComConEvent sdoComConEvent_p,
+static tOplkError searchConnection(tSdoSeqConHdl sdoSeqConHdl_p, tSdoComConEvent sdoComConEvent_p,
                                    tAsySdoCom* pSdoCom_p)
 {
-    tEplKernel          ret;
+    tOplkError          ret;
     tSdoComCon*         pSdoComCon;
     tSdoComConHdl       hdlCount;
     tSdoComConHdl       hdlFree;
@@ -793,13 +793,13 @@ The function processes the SDO command handler state: kSdoComStateIdle
 \param  sdoComConEvent_p        Event to process.
 \param  pRecvdCmdLayer_p        SDO command layer part of received frame.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processStateIdle(tSdoComConHdl sdoComConHdl_p, tSdoComConEvent sdoComConEvent_p,
+static tOplkError processStateIdle(tSdoComConHdl sdoComConHdl_p, tSdoComConEvent sdoComConEvent_p,
                                    tAsySdoCom* pRecvdCmdLayer_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     tSdoComCon*         pSdoComCon;
 
 #if defined(CONFIG_INCLUDE_SDOS)
@@ -907,13 +907,13 @@ The function processes the SDO command handler state: kSdoComStateServerSegmTran
 \param  sdoComConEvent_p        Event to process.
 \param  pRecvdCmdLayer_p        SDO command layer part of received frame.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processStateServerSegmTrans(tSdoComConHdl sdoComConHdl_p, tSdoComConEvent sdoComConEvent_p,
+static tOplkError processStateServerSegmTrans(tSdoComConHdl sdoComConHdl_p, tSdoComConEvent sdoComConEvent_p,
                                               tAsySdoCom* pRecvdCmdLayer_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     UINT                size;
     UINT8               flag;
     tSdoComCon*         pSdoComCon;
@@ -1039,13 +1039,13 @@ The function processes the SDO command handler state: processStateClientWaitInit
 \param  sdoComConEvent_p        Event to process.
 \param  pRecvdCmdLayer_p        SDO command layer part of received frame.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processStateClientWaitInit(tSdoComConHdl sdoComConHdl_p, tSdoComConEvent sdoComConEvent_p,
+static tOplkError processStateClientWaitInit(tSdoComConHdl sdoComConHdl_p, tSdoComConEvent sdoComConEvent_p,
                                              tAsySdoCom* pRecvdCmdLayer_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     tSdoComCon*         pSdoComCon;
 
     UNUSED_PARAMETER(pRecvdCmdLayer_p);
@@ -1152,14 +1152,14 @@ The function processes the SDO command handler state: kSdoComStateClientConnecte
 \param  sdoComConEvent_p        Event to process.
 \param  pRecvdCmdLayer_p        SDO command layer part of received frame.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processStateClientConnected(tSdoComConHdl sdoComConHdl_p, tSdoComConEvent sdoComConEvent_p,
+static tOplkError processStateClientConnected(tSdoComConHdl sdoComConHdl_p, tSdoComConEvent sdoComConEvent_p,
                                               tAsySdoCom* pRecvdCmdLayer_p)
 {
 
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     UINT8               flag;
     tSdoComCon*         pSdoComCon;
 
@@ -1278,13 +1278,13 @@ The function processes the SDO command handler state: kSdoComStateClientSegmTran
 \param  sdoComConEvent_p        Event to process.
 \param  pRecvdCmdLayer_p        SDO command layer part of received frame.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processStateClientSegmTransfer(tSdoComConHdl sdoComConHdl_p, tSdoComConEvent sdoComConEvent_p,
+static tOplkError processStateClientSegmTransfer(tSdoComConHdl sdoComConHdl_p, tSdoComConEvent sdoComConEvent_p,
                                                  tAsySdoCom* pRecvdCmdLayer_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     UINT8               flag;
     tSdoComCon*         pSdoComCon;
 
@@ -1397,13 +1397,13 @@ on the state the command layer event is processed.
 \param  sdoComConEvent_p        Event to process.
 \param  pRecvdCmdLayer_p        SDO command layer part of received frame.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processState(tSdoComConHdl sdoComConHdl_p, tSdoComConEvent sdoComConEvent_p,
+static tOplkError processState(tSdoComConHdl sdoComConHdl_p, tSdoComConEvent sdoComConEvent_p,
                                tAsySdoCom* pRecvdCmdLayer_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     tSdoComCon*         pSdoComCon;
 
 #if defined(WIN32) || defined(_WIN32)
@@ -1468,12 +1468,12 @@ The function initializes a ReadByIndex SDO command.
 \param  pSdoComCon_p            Pointer to SDO command layer connection structure.
 \param  pSdoCom_p               Pointer to received command layer data.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel serverInitReadByIndex(tSdoComCon* pSdoComCon_p, tAsySdoCom* pSdoCom_p)
+static tOplkError serverInitReadByIndex(tSdoComCon* pSdoComCon_p, tAsySdoCom* pSdoCom_p)
 {
-    tEplKernel      ret;
+    tOplkError      ret;
     UINT            index;
     UINT            subindex;
     tObdSize        entrySize;
@@ -1560,13 +1560,13 @@ The function creates and sends a command layer frame from a SDO server.
                                 transfer. (Ignored otherwise)
 \param  sendType_p              Type of data to send.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel serverSendFrame(tSdoComCon* pSdoComCon_p, UINT index_p,
+static tOplkError serverSendFrame(tSdoComCon* pSdoComCon_p, UINT index_p,
                                   UINT subIndex_p, tSdoComSendType sendType_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     UINT8           aFrame[SDO_MAX_FRAME_SIZE];
     tEplFrame*      pFrame;
     tAsySdoCom*     pCommandFrame;
@@ -1703,12 +1703,12 @@ The function initializes a WriteByIndex SDO command.
 \param  pSdoComCon_p            Pointer to SDO command layer connection structure.
 \param  pSdoCom_p               Pointer to received command layer data.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel serverInitWriteByIndex(tSdoComCon* pSdoComCon_p, tAsySdoCom* pSdoCom_p)
+static tOplkError serverInitWriteByIndex(tSdoComCon* pSdoComCon_p, tAsySdoCom* pSdoCom_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     UINT            index;
     UINT            subindex;
     UINT            bytesToTransfer;
@@ -1898,12 +1898,12 @@ The function starts a SDO transfer and sends all further frames..
 
 \param  pSdoComCon_p            Pointer to SDO command layer connection structure.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel clientSend(tSdoComCon* pSdoComCon_p)
+static tOplkError clientSend(tSdoComCon* pSdoComCon_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     UINT8           aFrame[SDO_MAX_FRAME_SIZE];
     tEplFrame*      pFrame;
     tAsySdoCom*     pCommandFrame;
@@ -2060,12 +2060,12 @@ The function processes a received command layer frame on a SDO client.
 \param  sdoComConHdl_p          Handle of sequence layer connection.
 \param  pSdoCom_p               Pointer to received frame.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel clientProcessFrame(tSdoComConHdl sdoComConHdl_p, tAsySdoCom* pSdoCom_p)
+static tOplkError clientProcessFrame(tSdoComConHdl sdoComConHdl_p, tAsySdoCom* pSdoCom_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     UINT8               flags;
     UINT8               transactionId;
     UINT8               command;
@@ -2222,12 +2222,12 @@ The function sends an abort message on a SDO client.
 \param  pSdoComCon_p            Pointer to SDO command layer connection structure.
 \param  abortCode_p             Abort code to send.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel clientSendAbort(tSdoComCon* pSdoComCon_p, UINT32 abortCode_p)
+static tOplkError clientSendAbort(tSdoComCon* pSdoComCon_p, UINT32 abortCode_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     UINT8           aFrame[SDO_MAX_FRAME_SIZE];
     tEplFrame*      pFrame;
     tAsySdoCom*     pCommandFrame;
@@ -2288,13 +2288,13 @@ function.
 \param  pSdoComCon_p            Pointer to SDO command layer connection structure.
 \param  sdoComConState_p        Connection state of the SDO transfer.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel transferFinished(tSdoComConHdl sdoComConHdl_p, tSdoComCon* pSdoComCon_p,
+static tOplkError transferFinished(tSdoComConHdl sdoComConHdl_p, tSdoComCon* pSdoComCon_p,
                                    tSdoComConState sdoComConState_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     tSdoFinishedCb  pfnTransferFinished;
     tSdoComFinished sdoComFinished;
 

@@ -53,7 +53,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-typedef tEplKernel (*tLeduStateChangeCallback) (tLedType ledType_p, BOOL fOn_p);
+typedef tOplkError (*tLeduStateChangeCallback) (tLedType ledType_p, BOOL fOn_p);
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -63,11 +63,11 @@ typedef tEplKernel (*tLeduStateChangeCallback) (tLedType ledType_p, BOOL fOn_p);
 extern "C" {
 #endif
 
-tEplKernel ledu_init(tLeduStateChangeCallback pfnCbStateChange_p);
-tEplKernel ledu_addInstance(tLeduStateChangeCallback pfnCbStateChange_p);
-tEplKernel ledu_exit(void);
-tEplKernel ledu_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p);
-tEplKernel ledu_processEvent(tEplEvent* pEplEvent_p);
+tOplkError ledu_init(tLeduStateChangeCallback pfnCbStateChange_p);
+tOplkError ledu_addInstance(tLeduStateChangeCallback pfnCbStateChange_p);
+tOplkError ledu_exit(void);
+tOplkError ledu_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p);
+tOplkError ledu_processEvent(tEplEvent* pEplEvent_p);
 
 #ifdef __cplusplus
 }

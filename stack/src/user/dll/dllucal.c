@@ -98,9 +98,9 @@ static tDlluCalInstance     instance_l;
 // local function prototypes
 //------------------------------------------------------------------------------
 
-static tEplKernel SetAsndServiceIdFilter(tDllAsndServiceId ServiceId_p,
+static tOplkError SetAsndServiceIdFilter(tDllAsndServiceId ServiceId_p,
                                          tDllAsndFilter Filter_p);
-static tEplKernel HandleRxAsndFrame(tFrameInfo* pFrameInfo_p);
+static tOplkError HandleRxAsndFrame(tFrameInfo* pFrameInfo_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -112,14 +112,14 @@ static tEplKernel HandleRxAsndFrame(tFrameInfo* pFrameInfo_p);
 
 This function initializes the user DLL CAL module.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_dllucal
 */
 //------------------------------------------------------------------------------
-tEplKernel dllucal_init(void)
+tOplkError dllucal_init(void)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 
     // reset instance structure
     EPL_MEMSET(&instance_l, 0, sizeof (instance_l));
@@ -164,14 +164,14 @@ Exit:
 
 This function cleans up the user DLL CAL module
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_dllucal
 */
 //------------------------------------------------------------------------------
-tEplKernel dllucal_exit(void)
+tOplkError dllucal_exit(void)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 
     instance_l.pTxNmtFuncs->pfnDelInstance(instance_l.dllCalQueueTxNmt);
     instance_l.pTxGenFuncs->pfnDelInstance(instance_l.dllCalQueueTxGen);
@@ -192,14 +192,14 @@ The function processes an asynchronous frame event
 
 \param  pEvent_p               Event to process
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_dllucal
 */
 //------------------------------------------------------------------------------
-tEplKernel dllucal_process(tEplEvent * pEvent_p)
+tOplkError dllucal_process(tEplEvent * pEvent_p)
 {
-    tEplKernel   ret = kEplSuccessful;
+    tOplkError   ret = kEplSuccessful;
     tFrameInfo   *pFrameInfo = NULL;
 
     if (pEvent_p->m_EventType == kEplEventTypeAsndRx)
@@ -230,14 +230,14 @@ This function posts a DLL configuration event to the kernel DLL CAL module
 
 \param  pDllConfigParam_p       Pointer to the DLL configuration parameters
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_dllucal
 */
 //------------------------------------------------------------------------------
-tEplKernel dllucal_config(tDllConfigParam * pDllConfigParam_p)
+tOplkError dllucal_config(tDllConfigParam * pDllConfigParam_p)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
     tEplEvent   event;
 
     event.m_EventSink = kEplEventSinkDllkCal;
@@ -258,14 +258,14 @@ configure the identity of a local node for IdentResponse.
 
 \param  pDllIdentParam_p        Pointer to ident parameters
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_dllucal
 */
 //------------------------------------------------------------------------------
-tEplKernel dllucal_setIdentity(tDllIdentParam * pDllIdentParam_p)
+tOplkError dllucal_setIdentity(tDllIdentParam * pDllIdentParam_p)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
     tEplEvent   event;
 
     event.m_EventSink = kEplEventSinkDllkCal;
@@ -287,16 +287,16 @@ ID with the specified node ID filter.
 \param  pfnDlluCbAsnd_p         Pointer to callback function.
 \param  filter_p                Node filter ID.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_dllucal
 */
 //------------------------------------------------------------------------------
-tEplKernel dllucal_regAsndService(tDllAsndServiceId serviceId_p,
+tOplkError dllucal_regAsndService(tDllAsndServiceId serviceId_p,
                                     tEplDlluCbAsnd pfnDlluCbAsnd_p,
                                     tDllAsndFilter filter_p)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
 
     if (serviceId_p < tabentries (instance_l.apfnDlluCbAsnd))
     {
@@ -328,15 +328,15 @@ This function sends an asynchronous fram with the specified priority.
                                 includes the ethernet header (14 bytes).
 \param  priority_p              Priority for sending this frame.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_dllucal
 */
 //------------------------------------------------------------------------------
-tEplKernel dllucal_sendAsyncFrame(tFrameInfo * pFrameInfo_p,
+tOplkError dllucal_sendAsyncFrame(tFrameInfo * pFrameInfo_p,
                                   tDllAsyncReqPriority priority_p)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
     tEplEvent   event;
 
     switch (priority_p)
@@ -384,15 +384,15 @@ This function issues a StatusRequest or an IdentRequest to the specified node.
 \param  soaFlag1_p              Flag1 for this node (transmit in SoA and PReq).
                                 If 0xff this flag is ignored.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_dllucal
 */
 //------------------------------------------------------------------------------
-tEplKernel dllucal_issueRequest(tDllReqServiceId service_p, UINT nodeId_p,
+tOplkError dllucal_issueRequest(tDllReqServiceId service_p, UINT nodeId_p,
                                 BYTE soaFlag1_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     tEplEvent           event;
     tDllCalIssueRequest issueReq;
 
@@ -429,15 +429,15 @@ This function issues a SyncRequest or an IdentRequest to the specified node.
 \param  pSyncRequest_p          Pointer to sync request structure.
 \param  size_p                  Size of sync request structure.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_dllucal
 */
 //------------------------------------------------------------------------------
 #if EPL_DLL_PRES_CHAINING_MN != FALSE
-tEplKernel dllucal_issueSyncRequest(tDllSyncRequest* pSyncRequest_p, UINT size_p)
+tOplkError dllucal_issueSyncRequest(tDllSyncRequest* pSyncRequest_p, UINT size_p)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
 
     ret = instance_l.pTxSyncFuncs->pfnInsertDataBlock(instance_l.dllCalQueueTxSync,
                                                       (BYTE*)pSyncRequest_p, &size_p);
@@ -457,14 +457,14 @@ kEplEventTypeDllkConfigNode event to the kernel DLL CAL module.
 
 \param  pNodeInfo_p             Pointer to node info structure.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_dllucal
 */
 //------------------------------------------------------------------------------
-tEplKernel dllucal_configNode(tDllNodeInfo* pNodeInfo_p)
+tOplkError dllucal_configNode(tDllNodeInfo* pNodeInfo_p)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
     tEplEvent   event;
 
     event.m_EventSink = kEplEventSinkDllkCal;
@@ -487,14 +487,14 @@ kEplEventTypeDllkAddNode event to the kernel DLL CAL module.
 
 \param  pNodeOpParam_p          Pointer to node info structure
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_dllucal
 */
 //------------------------------------------------------------------------------
-tEplKernel dllucal_addNode(tDllNodeOpParam* pNodeOpParam_p)
+tOplkError dllucal_addNode(tDllNodeOpParam* pNodeOpParam_p)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
     tEplEvent   event;
 
     event.m_EventSink = kEplEventSinkDllkCal;
@@ -516,14 +516,14 @@ a kEplEventTypeDllkDelNode event to the kernel DLL CAL module.
 
 \param  pNodeOpParam_p          Pointer to node	info structure
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_dllucal
 */
 //------------------------------------------------------------------------------
-tEplKernel dllucal_deleteNode(tDllNodeOpParam* pNodeOpParam_p)
+tOplkError dllucal_deleteNode(tDllNodeOpParam* pNodeOpParam_p)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
     tEplEvent   event;
 
     event.m_EventSink = kEplEventSinkDllkCal;
@@ -551,13 +551,13 @@ The function forwards a filter event to the kernel DLL CAL module.
 \param  serviceId_p             ASnd Service ID to forward.
 \param  filter_p                Node ID filter to forward.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel SetAsndServiceIdFilter(tDllAsndServiceId serviceId_p,
+static tOplkError SetAsndServiceIdFilter(tDllAsndServiceId serviceId_p,
                                          tDllAsndFilter filter_p)
 {
-    tEplKernel                  ret = kEplSuccessful;
+    tOplkError                  ret = kEplSuccessful;
     tEplEvent                   event;
     tDllCalAsndServiceIdFilter  servFilter;
 
@@ -578,16 +578,16 @@ static tEplKernel SetAsndServiceIdFilter(tDllAsndServiceId serviceId_p,
 
 \param  pFrameInfo_p             Pointer to the frame information structure
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel HandleRxAsndFrame(tFrameInfo *pFrameInfo_p)
+static tOplkError HandleRxAsndFrame(tFrameInfo *pFrameInfo_p)
 {
     tEplMsgType     msgType;
     unsigned int    asndServiceId;
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 #if DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS != FALSE
-    tEplKernel      eventRet;
+    tOplkError      eventRet;
     tEplEvent       event;
 #endif
 

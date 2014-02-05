@@ -100,7 +100,7 @@ static PI_OUT*              pProcessImageOut_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tEplKernel initProcessImage(void);
+static tOplkError initProcessImage(void);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -112,14 +112,14 @@ static tEplKernel initProcessImage(void);
 
 The function initializes the synchronous data application
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_demo_mn_console
 */
 //------------------------------------------------------------------------------
-tEplKernel initApp(void)
+tOplkError initApp(void)
 {
-    tEplKernel ret = kEplSuccessful;
+    tOplkError ret = kEplSuccessful;
     int        i;
 
     cnt_l = 0;
@@ -145,7 +145,7 @@ tEplKernel initApp(void)
 
 The function shut's down the synchronous data application
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_demo_mn_console
 */
@@ -161,14 +161,14 @@ void shutdownApp (void)
 
 The function implements the synchronous data handler.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_demo_mn_console
 */
 //------------------------------------------------------------------------------
-tEplKernel processSync(void)
+tOplkError processSync(void)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     int                 i;
 
     ret = oplk_exchangeProcessImageOut();
@@ -264,12 +264,12 @@ tEplKernel processSync(void)
 
 The function initializes the process image of the application.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel initProcessImage(void)
+static tOplkError initProcessImage(void)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 
     PRINTF("Initializing process image...\n");
     PRINTF("Size of input process image: %d\n", (UINT32)sizeof(PI_IN));

@@ -102,12 +102,12 @@ starting of the stack.
 
 For the Posix shared-memory implementation it opens the shared memory segment.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdoucal_openMem(void)
+tOplkError pdoucal_openMem(void)
 {
     if ((fd_l = shm_open(PDO_SHMEM_NAME, O_RDWR, 0)) < 0)
     {
@@ -126,12 +126,12 @@ shutdown.
 
 For the Posix shared-memory implementation it unlinks the shared memory segment.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdoucal_closeMem(void)
+tOplkError pdoucal_closeMem(void)
 {
     shm_unlink(PDO_SHMEM_NAME);
     return kEplSuccessful;
@@ -146,12 +146,12 @@ The function allocates shared memory for the user needed to transfer the PDOs.
 \param  memSize_p               Size of PDO memory
 \param  ppPdoMem_p              Pointer to store the PDO memory pointer.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdoucal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
+tOplkError pdoucal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
 {
     *ppPdoMem_p = mmap(NULL, memSize_p, PROT_READ | PROT_WRITE, MAP_SHARED,
                      fd_l, 0);
@@ -174,12 +174,12 @@ transfering the PDOs.
 \param  pMem_p                  Pointer to the shared memory segment.
 \param  memSize_p               Size of PDO memory
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdoucal_freeMem(BYTE* pMem_p, size_t memSize_p)
+tOplkError pdoucal_freeMem(BYTE* pMem_p, size_t memSize_p)
 {
     if(munmap(pMem_p, memSize_p) != 0)
     {

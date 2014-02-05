@@ -104,12 +104,12 @@ static tPdokCalSyncInstance     instance_l;             ///< Instance variable o
 
 The function initializes the kernel PDO CAL sync module.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdokcal_initSync(void)
+tOplkError pdokcal_initSync(void)
 {
     EPL_MEMSET(&instance_l, 0, sizeof(tPdokCalSyncInstance));
 
@@ -139,12 +139,12 @@ void pdokcal_exitSync(void)
 
 The function sends a sync event
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdokcal_sendSyncEvent(void)
+tOplkError pdokcal_sendSyncEvent(void)
 {
     if (instance_l.fInitialized)
     {
@@ -160,12 +160,12 @@ tEplKernel pdokcal_sendSyncEvent(void)
 
 The function waits for a sync event
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdokcal_waitSyncEvent(void)
+tOplkError pdokcal_waitSyncEvent(void)
 {
     int                 ret;
     int                 timeout = 1000 * HZ / 1000;
@@ -191,12 +191,12 @@ The function enables sync events
 
 \param  fEnable_p               enable/disable sync event
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdokcal_controlSync(BOOL fEnable_p)
+tOplkError pdokcal_controlSync(BOOL fEnable_p)
 {
     UNUSED_PARAMETER(fEnable_p);
     return kEplSuccessful;

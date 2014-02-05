@@ -182,48 +182,48 @@ static tSdoSeqInstance   sdoSeqInstance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tEplKernel processState(UINT handle_p, UINT dataSize_p, tEplFrame* pData_p,
+static tOplkError processState(UINT handle_p, UINT dataSize_p, tEplFrame* pData_p,
                                tAsySdoSeq* pRecvFrame_p, tSdoSeqEvent event_p);
 
-static tEplKernel processStateIdle(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSeqConHdl_p,
+static tOplkError processStateIdle(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSeqConHdl_p,
                                    tSdoSeqEvent event_p, tAsySdoSeq* pRecvFrame_p);
 
-static tEplKernel processStateInit1(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSeqConHdl_p,
+static tOplkError processStateInit1(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSeqConHdl_p,
                                     tSdoSeqEvent event_p, tAsySdoSeq* pRecvFrame_p);
 
-static tEplKernel processStateInit2(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSeqConHdl_p,
+static tOplkError processStateInit2(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSeqConHdl_p,
                                     tSdoSeqEvent event_p, tAsySdoSeq* pRecvFrame_p);
 
-static tEplKernel processStateInit3(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSeqConHdl_p,
+static tOplkError processStateInit3(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSeqConHdl_p,
                                     tSdoSeqEvent event_p, tAsySdoSeq* pRecvFrame_p);
 
-static tEplKernel processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSeqConHdl_p,
+static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSeqConHdl_p,
                                         tSdoSeqEvent event_p, tAsySdoSeq* pRecvFrame_p,
                                         UINT dataSize_p, tEplFrame* pData_p);
 
-static tEplKernel processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSeqConHdl_p,
+static tOplkError processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSeqConHdl_p,
                                       tSdoSeqEvent event_p, tAsySdoSeq* pRecvFrame_p,
                                       UINT dataSize_p);
 
-static tEplKernel sendFrame(tSdoSeqCon* pSdoSeqCon_p, UINT dataSize_p,
+static tOplkError sendFrame(tSdoSeqCon* pSdoSeqCon_p, UINT dataSize_p,
                             tEplFrame* pData_p, BOOL fFrameInHistory_p);
 
-static tEplKernel sendToLowerLayer(tSdoSeqCon* pSdoSeqCon_p, UINT dataSize_p, tEplFrame* pFrame_p);
+static tOplkError sendToLowerLayer(tSdoSeqCon* pSdoSeqCon_p, UINT dataSize_p, tEplFrame* pFrame_p);
 
-static tEplKernel receiveCb(tSdoConHdl conHdl_p, tAsySdoSeq* pSdoSeqData_p, UINT dataSize_p);
+static tOplkError receiveCb(tSdoConHdl conHdl_p, tAsySdoSeq* pSdoSeqData_p, UINT dataSize_p);
 
-static tEplKernel initHistory(tSdoSeqCon* pSdoSeqCon_p);
+static tOplkError initHistory(tSdoSeqCon* pSdoSeqCon_p);
 
-static tEplKernel addFrameToHistory(tSdoSeqCon* pSdoSeqCon_p, tEplFrame* pFrame_p, UINT size_p);
+static tOplkError addFrameToHistory(tSdoSeqCon* pSdoSeqCon_p, tEplFrame* pFrame_p, UINT size_p);
 
-static tEplKernel deleteAckedFrameFromHistory(tSdoSeqCon* pSdoSeqCon_p, UINT8 recvSeqNumber_p);
+static tOplkError deleteAckedFrameFromHistory(tSdoSeqCon* pSdoSeqCon_p, UINT8 recvSeqNumber_p);
 
-static tEplKernel readFromHistory(tSdoSeqCon* pSdoSeqCon_p, tEplFrame** ppFrame_p,
+static tOplkError readFromHistory(tSdoSeqCon* pSdoSeqCon_p, tEplFrame** ppFrame_p,
                                   UINT* pSize_p, BOOL fInitRead_p);
 
 static UINT       getFreeHistoryEntries(tSdoSeqCon* pSdoSeqCon_p);
 
-static tEplKernel setTimer(tSdoSeqCon* pSdoSeqCon_p, ULONG timeout_p);
+static tOplkError setTimer(tSdoSeqCon* pSdoSeqCon_p, ULONG timeout_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -240,12 +240,12 @@ The function initializes the SDO sequence layer
 \param  pfnSdoComConCb_p        Pointer to callback function that informs command
                                 layer about connection state.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_sdo_seq
 */
 //------------------------------------------------------------------------------
-tEplKernel sdoseq_init(tSdoComReceiveCb pfnSdoComRecvCb_p, tSdoComConCb pfnSdoComConCb_p)
+tOplkError sdoseq_init(tSdoComReceiveCb pfnSdoComRecvCb_p, tSdoComConCb pfnSdoComConCb_p)
 {
     return sdoseq_addInstance(pfnSdoComRecvCb_p, pfnSdoComConCb_p);
 }
@@ -261,14 +261,14 @@ The function adds an instance of the SDO sequence layer.
 \param  pfnSdoComConCb_p        Pointer to callback function that informs command
                                 layer about connection state.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_sdo_seq
 */
 //------------------------------------------------------------------------------
-tEplKernel sdoseq_addInstance(tSdoComReceiveCb pfnSdoComRecvCb_p, tSdoComConCb pfnSdoComConCb_p)
+tOplkError sdoseq_addInstance(tSdoComReceiveCb pfnSdoComRecvCb_p, tSdoComConCb pfnSdoComConCb_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 
     if(pfnSdoComRecvCb_p == NULL)
     {
@@ -322,14 +322,14 @@ tEplKernel sdoseq_addInstance(tSdoComReceiveCb pfnSdoComRecvCb_p, tSdoComConCb p
 
 The function deletes an instance of the SDO sequence layer.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_sdo_seq
 */
 //------------------------------------------------------------------------------
-tEplKernel sdoseq_delInstance(void)
+tOplkError sdoseq_delInstance(void)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     UINT                count;
     tSdoSeqCon*         pSdoSeqCon;
 
@@ -374,14 +374,14 @@ existing connection to the specified node.
 \param  nodeId_p                Node ID of the target to connect to.
 \param  sdoType_p               Type of the SDO connection.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_sdo_seq
 */
 //------------------------------------------------------------------------------
-tEplKernel sdoseq_initCon(tSdoSeqConHdl* pSdoSeqConHdl_p, UINT nodeId_p, tSdoType sdoType_p)
+tOplkError sdoseq_initCon(tSdoSeqConHdl* pSdoSeqConHdl_p, UINT nodeId_p, tSdoType sdoType_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     UINT                count;
     UINT                freeCon;
     tSdoConHdl          conHandle = ~0U;
@@ -495,14 +495,14 @@ The function sends data via an existing sequence layer connection.
                                 the sequence layer payload (without headers!).
 \param  pData_p                 Pointer to the data to be sent.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_sdo_seq
 */
 //------------------------------------------------------------------------------
-tEplKernel sdoseq_sendData(tSdoSeqConHdl sdoSeqConHdl_p, UINT dataSize_p, tEplFrame* pData_p )
+tOplkError sdoseq_sendData(tSdoSeqConHdl sdoSeqConHdl_p, UINT dataSize_p, tEplFrame* pData_p )
 {
-    tEplKernel      ret;
+    tOplkError      ret;
     UINT            handle;
 
     handle = (sdoSeqConHdl_p & ~SDO_SEQ_HANDLE_MASK);
@@ -532,14 +532,14 @@ The function processes SDO events.
 
 \param  pEvent_p                Event to process.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_sdo_seq
 */
 //------------------------------------------------------------------------------
-tEplKernel sdoseq_processEvent(tEplEvent* pEvent_p)
+tOplkError sdoseq_processEvent(tEplEvent* pEvent_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     tEplTimerEventArg*  pTimerEventArg;
     tSdoSeqCon*         pSdoSeqCon;
     tEplTimerHdl        timerHdl;
@@ -590,14 +590,14 @@ The function closes and deletes an exisiting sequence layer connection.
 \param  sdoSeqConHdl_p          Connection handle of sequence layer connection
                                 to delete.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_sdo_seq
 */
 //------------------------------------------------------------------------------
-tEplKernel sdoseq_deleteCon(tSdoSeqConHdl sdoSeqConHdl_p)
+tOplkError sdoseq_deleteCon(tSdoSeqConHdl sdoSeqConHdl_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     UINT            handle;
     tSdoSeqCon*     pSdoSeqCon;
 
@@ -646,12 +646,12 @@ The function sets the sequence layer timeout.
 
 \param  timeout_p           Timeout to set in milliseconds.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_sdo_seq
 */
 //------------------------------------------------------------------------------
-tEplKernel sdoseq_setTimeout(UINT32 timeout_p)
+tOplkError sdoseq_setTimeout(UINT32 timeout_p)
 {
     // Adopt new SDO sequence layer timeout (truncated to an upper bound)
     sdoSeqInstance_l.sdoSeqTimeout = min(timeout_p, SDO_SEQU_MAX_TIMEOUT_MS);
@@ -675,13 +675,13 @@ The function processes the sequence layer state: kSdoSeqStateIdle
 \param  event_p             Event to be processed.
 \param  pRecvFrame_p        Pointer to received frame (can be NULL).
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processStateIdle(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSeqConHdl_p,
+static tOplkError processStateIdle(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSeqConHdl_p,
                                    tSdoSeqEvent event_p, tAsySdoSeq* pRecvFrame_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 
     switch(event_p)
     {
@@ -756,13 +756,13 @@ The function processes the sequence layer state: kSdoSeqStateInit1
 \param  event_p             Event to be processed.
 \param  pRecvFrame_p        Pointer to received frame (can be NULL).
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processStateInit1(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSeqConHdl_p,
+static tOplkError processStateInit1(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSeqConHdl_p,
                                     tSdoSeqEvent event_p, tAsySdoSeq* pRecvFrame_p)
 {
-    tEplKernel              ret = kEplSuccessful;
+    tOplkError              ret = kEplSuccessful;
 
     // TRACE("EplSdoAsySequ: StateInit1\n");
 
@@ -860,13 +860,13 @@ The function processes the sequence layer state: kSdoSeqStateInit2
 \param  event_p             Event to be processed.
 \param  pRecvFrame_p        Pointer to received frame (can be NULL).
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processStateInit2(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSeqConHdl_p,
+static tOplkError processStateInit2(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSeqConHdl_p,
                                     tSdoSeqEvent event_p, tAsySdoSeq* pRecvFrame_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
 
     // TRACE("EplSdoAsySequ: StateInit2\n");
 
@@ -969,13 +969,13 @@ The function processes the sequence layer state: kSdoSeqStateInit3
 \param  event_p             Event to be processed.
 \param  pRecvFrame_p        Pointer to received frame (can be NULL).
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processStateInit3(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSeqConHdl_p,
+static tOplkError processStateInit3(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSeqConHdl_p,
                                     tSdoSeqEvent event_p, tAsySdoSeq* pRecvFrame_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
 
     switch(event_p)
     {
@@ -1080,14 +1080,14 @@ The function processes the sequence layer state: kSdoSeqStateConnected
                             without headers!
 \param  pData_p             Pointer to frame to be sent (can be NULL).
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSeqConHdl_p,
+static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSeqConHdl_p,
                                         tSdoSeqEvent event_p, tAsySdoSeq* pRecvFrame_p,
                                         UINT dataSize_p, tEplFrame* pData_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     UINT8               sendSeqNumCon;
     UINT                frameSize;
     tEplFrame*          pFrame;
@@ -1300,14 +1300,14 @@ The function processes the sequence layer state: kSdoSeqStateWaitAck
 \param  dataSize_p          Size of frame to be sent. Contains only the payload
                             without headers!
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSeqConHdl_p,
+static tOplkError processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSeqConHdl_p,
                                       tSdoSeqEvent event_p, tAsySdoSeq* pRecvFrame_p,
                                       UINT dataSize_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     UINT                frameSize;
     tEplFrame*          pFrame;
 
@@ -1422,13 +1422,13 @@ The function processes the internal SDO sequence layer state machine.
 \param  pRecvFrame_p        Pointer to received frame.
 \param  event_p             Event to be processed.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processState(UINT handle_p, UINT dataSize_p, tEplFrame* pData_p,
+static tOplkError processState(UINT handle_p, UINT dataSize_p, tEplFrame* pData_p,
                                tAsySdoSeq* pRecvFrame_p, tSdoSeqEvent event_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     tSdoSeqCon*         pSdoSeqCon;
     tSdoSeqConHdl       sdoSeqConHdl;
 
@@ -1511,13 +1511,13 @@ with information from pSdoSeqCon_p.
 \param  pData_p             Pointer to frame to be sent (can be NULL).
 \param  fFrameInHistory_p   If true, the frame is saved into the history buffer.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel sendFrame(tSdoSeqCon* pSdoSeqCon_p, UINT dataSize_p,
+static tOplkError sendFrame(tSdoSeqCon* pSdoSeqCon_p, UINT dataSize_p,
                             tEplFrame* pData_p, BOOL fFrameInHistory_p)
 {
-    tEplKernel      ret;
+    tOplkError      ret;
     UINT8           aFrame[SDO_SEQ_FRAME_SIZE];
     tEplFrame*      pFrame;
     UINT            freeEntries = 0;
@@ -1578,13 +1578,13 @@ The function sends an already created fram to the lower layer.
                             without headers!
 \param  pFrame_p             Pointer to frame to be sent (can be NULL).
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel sendToLowerLayer(tSdoSeqCon* pSdoSeqCon_p, UINT dataSize_p,
+static tOplkError sendToLowerLayer(tSdoSeqCon* pSdoSeqCon_p, UINT dataSize_p,
                                    tEplFrame* pFrame_p)
 {
-    tEplKernel      ret;
+    tOplkError      ret;
     tSdoConHdl      handle;
 
     handle = pSdoSeqCon_p->conHandle & SDO_ASY_HANDLE_MASK;
@@ -1626,13 +1626,13 @@ frames from the lower layer.
 \param  pSdoSeqData_p       Pointer to information structure of received frame.
 \param  dataSize_p          Size of received frame.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel receiveCb(tSdoConHdl conHdl_p, tAsySdoSeq* pSdoSeqData_p,
+static tOplkError receiveCb(tSdoConHdl conHdl_p, tAsySdoSeq* pSdoSeqData_p,
                             UINT dataSize_p)
 {
-    tEplKernel          ret;
+    tOplkError          ret;
     UINT                count;
     UINT                freeEntry;
     tSdoSeqCon*         pSdoSeqCon;
@@ -1708,10 +1708,10 @@ The function initializes the history buffer of a SDO connection.
 
 \param  pSdoSeqCon_p        Pointer to connection control structure.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel initHistory(tSdoSeqCon* pSdoSeqCon_p)
+static tOplkError initHistory(tSdoSeqCon* pSdoSeqCon_p)
 {
     pSdoSeqCon_p->sdoSeqConHistory.freeEntries = SDO_HISTORY_SIZE;
     pSdoSeqCon_p->sdoSeqConHistory.ackIndex = 0;
@@ -1729,13 +1729,13 @@ The function adds a frame to the history buffer.
 \param  pFrame_p            Pointer to frame to be stored in history buffer.
 \param  size_p              Size of frame (without headers).
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel addFrameToHistory(tSdoSeqCon* pSdoSeqCon_p, tEplFrame* pFrame_p,
+static tOplkError addFrameToHistory(tSdoSeqCon* pSdoSeqCon_p, tEplFrame* pFrame_p,
                                     UINT size_p)
 {
-    tEplKernel              ret = kEplSuccessful;
+    tOplkError              ret = kEplSuccessful;
     tSdoSeqConHistory*      pHistory;
 
     // add frame to history buffer
@@ -1775,12 +1775,12 @@ The function deletes an acknowledged frame from the history buffer.
 \param  pSdoSeqCon_p        Pointer to connection control structure.
 \param  recvSeqNumber_p     Receive sequence number of frame to delete.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel deleteAckedFrameFromHistory(tSdoSeqCon* pSdoSeqCon_p, UINT8 recvSeqNumber_p)
+static tOplkError deleteAckedFrameFromHistory(tSdoSeqCon* pSdoSeqCon_p, UINT8 recvSeqNumber_p)
 {
-    tEplKernel              ret = kEplSuccessful;
+    tOplkError              ret = kEplSuccessful;
     tSdoSeqConHistory*      pHistory;
     UINT8                   ackIndex;
     UINT8                   currentSeqNum;
@@ -1836,13 +1836,13 @@ The function reads a frame from the history buffer.
 \param  fInitRead_p         Indicates the start of a retransmission. IF TRUE,
                             it returns the last, not acknowledged frame.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel readFromHistory(tSdoSeqCon* pSdoSeqCon_p, tEplFrame** ppFrame_p,
+static tOplkError readFromHistory(tSdoSeqCon* pSdoSeqCon_p, tEplFrame** ppFrame_p,
                                   UINT* pSize_p, BOOL fInitRead_p)
 {
-    tEplKernel              ret = kEplSuccessful;
+    tOplkError              ret = kEplSuccessful;
     tSdoSeqConHistory*      pHistory;
 
     // read one message from History
@@ -1916,12 +1916,12 @@ The function sets up a timer with the specified timeout for the connection.
 \param  pSdoSeqCon_p        Pointer to connection control structure.
 \param  timeout_p           Timeout to set in milliseconds.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel setTimer(tSdoSeqCon* pSdoSeqCon_p, ULONG timeout_p)
+static tOplkError setTimer(tSdoSeqCon* pSdoSeqCon_p, ULONG timeout_p)
 {
-    tEplKernel          ret;
+    tOplkError          ret;
     tEplTimerArg        timerArg;
 
     timerArg.m_EventSink = kEplEventSinkSdoAsySeq;

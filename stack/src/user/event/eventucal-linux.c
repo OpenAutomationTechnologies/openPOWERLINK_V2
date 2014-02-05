@@ -123,14 +123,14 @@ static void signalKernelEvent(void);
 The function initializes the architecture specific stuff of the user event
 CAL module.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-tEplKernel eventucal_init (void)
+tOplkError eventucal_init (void)
 {
     struct sched_param  schedParam;
 
@@ -189,14 +189,14 @@ Exit:
 The function cleans up the kernel event CAL module. For cleanup it calls the exit
 functions of the queue implementations for each used queue.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-tEplKernel eventucal_exit (void)
+tOplkError eventucal_exit (void)
 {
     UINT            i = 0;
 
@@ -235,16 +235,16 @@ queue post function is called.
 
 \param  pEvent_p                Event to be posted.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-tEplKernel eventucal_postKernelEvent (tEplEvent *pEvent_p)
+tOplkError eventucal_postKernelEvent (tEplEvent *pEvent_p)
 {
-    tEplKernel      ret;
+    tOplkError      ret;
     /*TRACE("U2K type:%s(%d) sink:%s(%d) size:%d!\n",
                    debugstr_getEventTypeStr(pEvent_p->m_EventType), pEvent_p->m_EventType,
                    debugstr_getEventSinkStr(pEvent_p->m_EventSink), pEvent_p->m_EventSink,
@@ -263,16 +263,16 @@ queue post function is called.
 
 \param  pEvent_p                Event to be posted.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-tEplKernel eventucal_postUserEvent (tEplEvent *pEvent_p)
+tOplkError eventucal_postUserEvent (tEplEvent *pEvent_p)
 {
-    tEplKernel      ret;
+    tOplkError      ret;
 
     /*TRACE("UINT  type:%s(%d) sink:%s(%d) size:%d!\n",
                    debugstr_getEventTypeStr(pEvent_p->m_EventType), pEvent_p->m_EventType,

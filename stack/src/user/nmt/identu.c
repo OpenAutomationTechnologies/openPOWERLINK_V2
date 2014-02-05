@@ -87,7 +87,7 @@ static tIdentuInstance   instance_g;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tEplKernel   identu_cbIdentResponse(tFrameInfo * pFrameInfo_p);
+static tOplkError   identu_cbIdentResponse(tFrameInfo * pFrameInfo_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -99,12 +99,12 @@ static tEplKernel   identu_cbIdentResponse(tFrameInfo * pFrameInfo_p);
 
 The function initializes an instance of the ident module
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_identu
 */
 //------------------------------------------------------------------------------
-tEplKernel identu_init(void)
+tOplkError identu_init(void)
 {
     return identu_addInstance();
 }
@@ -115,14 +115,14 @@ tEplKernel identu_init(void)
 
 The function adds an ident module instance
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_identu
 */
 //------------------------------------------------------------------------------
-tEplKernel identu_addInstance(void)
+tOplkError identu_addInstance(void)
 {
-    tEplKernel ret = kEplSuccessful;
+    tOplkError ret = kEplSuccessful;
 
     EPL_MEMSET(&instance_g, 0, sizeof(instance_g));
 
@@ -138,14 +138,14 @@ tEplKernel identu_addInstance(void)
 
 The function deletes an ident module instance
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_identu
 */
 //------------------------------------------------------------------------------
-tEplKernel identu_delInstance(void)
+tOplkError identu_delInstance(void)
     {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
 
     // deregister IdentResponse callback function
     dllucal_regAsndService(kDllAsndIdentResponse, NULL, kDllAsndFilterNone);
@@ -161,14 +161,14 @@ tEplKernel identu_delInstance(void)
 
 The function resets an ident module instance
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_identu
 */
 //------------------------------------------------------------------------------
-tEplKernel identu_reset()
+tOplkError identu_reset()
 {
-    tEplKernel  ret;
+    tOplkError  ret;
     UINT        index;
 
     ret = kEplSuccessful;
@@ -194,14 +194,14 @@ The function gets the IdentResponse for a specified node.
 \param  ppIdentResponse_p   Pointer to store IdentResponse. NULL, if no IdentResponse
                             is available
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_identu
 */
 //------------------------------------------------------------------------------
-tEplKernel identu_getIdentResponse(UINT nodeId_p, tEplIdentResponse** ppIdentResponse_p)
+tOplkError identu_getIdentResponse(UINT nodeId_p, tEplIdentResponse** ppIdentResponse_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     tEplIdentResponse*  pIdentResponse;
 
     // decrement node ID, because array is zero based
@@ -234,14 +234,14 @@ The function requests the IdentResponse for a specified node.
 \param  pfnCbResponse_p     Function pointer to callback function which will
                             be called if IdentResponse is received
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_identu
 */
 //------------------------------------------------------------------------------
-tEplKernel identu_requestIdentResponse(UINT nodeId_p, tIdentuCbResponse pfnCbResponse_p)
+tOplkError identu_requestIdentResponse(UINT nodeId_p, tIdentuCbResponse pfnCbResponse_p)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
 
 #if !defined(CONFIG_INCLUDE_NMT_MN)
     UNUSED_PARAMETER(pfnCbResponse_p);
@@ -325,14 +325,14 @@ IdentResponse is received.
 \param  pFrameInfo_p            Pointer to frame information structure describing
                                 the received IdentResponse frame.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_identu
 */
 //------------------------------------------------------------------------------
-static tEplKernel identu_cbIdentResponse(tFrameInfo* pFrameInfo_p)
+static tOplkError identu_cbIdentResponse(tFrameInfo* pFrameInfo_p)
 {
-    tEplKernel              ret = kEplSuccessful;
+    tOplkError              ret = kEplSuccessful;
     UINT                    nodeId;
     UINT                    index;
     tIdentuCbResponse       pfnCbResponse;

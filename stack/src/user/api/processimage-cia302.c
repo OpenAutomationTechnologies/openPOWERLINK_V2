@@ -106,7 +106,7 @@ tProcessImageLink processImageLink_l[] =
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tEplKernel linkProcessImageRange(UINT objIndexStart_p, UINT objIndexEnd_p,
+static tOplkError linkProcessImageRange(UINT objIndexStart_p, UINT objIndexEnd_p,
                                         UINT offsetPI_p, BOOL fOutputPI_p, tObdSize entrySize_p,
                                         UINT subindexCountPerIndex_p);
 
@@ -120,14 +120,14 @@ static tEplKernel linkProcessImageRange(UINT objIndexStart_p, UINT objIndexEnd_p
 
 The function sets up a process image according to the CiA profile 302_4.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tEplKernel oplk_setupProcessImage(void)
+tOplkError oplk_setupProcessImage(void)
 {
-    tEplKernel                  ret = kEplSuccessful;
+    tOplkError                  ret = kEplSuccessful;
     size_t                      i;
     tProcessImageLink*          pLink;
 
@@ -165,14 +165,14 @@ The function links a range of variables to the object dictionary.
 \param  entrySize_p         The size of one process variable.
 \param  subindexCountPerIndex_p Number of subindexes per index to be linked.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel linkProcessImageRange(UINT objIndexStart_p, UINT objIndexEnd_p,
+static tOplkError linkProcessImageRange(UINT objIndexStart_p, UINT objIndexEnd_p,
                                         UINT offsetPI_p, BOOL fOutputPI_p,
                                         tObdSize entrySize_p, UINT subindexCountPerIndex_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     UINT            varEntries;
 
     for (; objIndexStart_p <= objIndexEnd_p; objIndexStart_p++,

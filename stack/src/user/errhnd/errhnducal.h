@@ -60,10 +60,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tEplKernel errhnducal_init (tErrHndObjects *pLocalObjects_p);
+tOplkError errhnducal_init (tErrHndObjects *pLocalObjects_p);
 void errhnducal_exit (void);
-tEplKernel errhnducal_writeErrorObject(UINT index_p, UINT subIndex_p, UINT32 *pParam_p);
-tEplKernel errhnducal_readErrorObject(UINT index_p, UINT subIndex_p, UINT32 *pParam_p);
+tOplkError errhnducal_writeErrorObject(UINT index_p, UINT subIndex_p, UINT32 *pParam_p);
+tOplkError errhnducal_readErrorObject(UINT index_p, UINT subIndex_p, UINT32 *pParam_p);
 
 #ifdef __cplusplus
 }

@@ -108,12 +108,12 @@ static void memInitParamFreeDynBuff (void);
 
 The function initializes the user control CAL module.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_ctrlucal
 */
 //------------------------------------------------------------------------------
-tEplKernel ctrlucal_init(void)
+tOplkError ctrlucal_init(void)
 {
     tHostifReturn hifRet;
     tHostifConfig hifConfig;
@@ -179,12 +179,12 @@ void ctrlucal_exit (void)
 
 This function provides processing time for the CAL module.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_ctrlucal
 */
 //------------------------------------------------------------------------------
-tEplKernel ctrlucal_process (void)
+tOplkError ctrlucal_process (void)
 {
     tHostifReturn hifRet;
 
@@ -212,12 +212,12 @@ The function executes a control command in the kernel stack.
 
 \param  cmd_p            Command to execute
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_ctrlucal
 */
 //------------------------------------------------------------------------------
-tEplKernel ctrlucal_executeCmd(tCtrlCmdType cmd_p)
+tOplkError ctrlucal_executeCmd(tCtrlCmdType cmd_p)
 {
     tHostifReturn hifret;
     tHostifCommand hifcmd = (tHostifCommand)cmd_p;
@@ -258,16 +258,16 @@ tEplKernel ctrlucal_executeCmd(tCtrlCmdType cmd_p)
 The function checks the state of the kernel stack. If it is already running
 it tries to shutdown.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful  If kernel stack is initialized
 \retval kEplNoResource  If kernel stack is not running or in wrong state
 
 \ingroup module_ctrlucal
 */
 //------------------------------------------------------------------------------
-tEplKernel ctrlucal_checkKernelStack(void)
+tOplkError ctrlucal_checkKernelStack(void)
 {
-    tEplKernel ret;
+    tOplkError ret;
     UINT16 kernelStatus;
     BOOL fExit =FALSE;
     int timeout = 0;
@@ -390,13 +390,13 @@ The function reads the initialization parameter from the kernel stack.
 
 \param  pInitParam_p        Specifies where to store the read init parameters.
 
-\return The function returns a tEplKernel error code. It returns always
+\return The function returns a tOplkError error code. It returns always
         kEplSuccessful!
 
 \ingroup module_ctrlucal
 */
 //------------------------------------------------------------------------------
-tEplKernel ctrlucal_readInitParam(tCtrlInitParam* pInitParam_p)
+tOplkError ctrlucal_readInitParam(tCtrlInitParam* pInitParam_p)
 {
     UINT8* pSrc = memInitParamGetDynBuff();
 

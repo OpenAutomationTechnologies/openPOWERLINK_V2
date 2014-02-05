@@ -75,11 +75,11 @@ The function processes state change events.
 \param  pEventArg_p         Pointer to union which describes the event in detail
 \param  pUserArg_p          User specific argument
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 
-tEplKernel ProcessThread::appCbEvent(tEplApiEventType EventType_p,
+tOplkError ProcessThread::appCbEvent(tEplApiEventType EventType_p,
                                         tEplApiEventArg* pEventArg_p, void GENERIC* pUserArg_p)
 {
     return pProcessThread_g->processEvent(EventType_p, pEventArg_p, pUserArg_p);
@@ -115,7 +115,7 @@ run() implements the starting point for the event thread.
 //------------------------------------------------------------------------------
 void ProcessThread::run()
 {
-    tEplKernel          EplRet;
+    tOplkError          EplRet;
 
     // start process function
     EplRet = oplk_process();
@@ -276,10 +276,10 @@ AppCbEvent() implements the openPOWERLINKs event callback function.
 \param  pUserArg_p          User argument
 */
 //------------------------------------------------------------------------------
-tEplKernel ProcessThread::processEvent(tEplApiEventType EventType_p,
+tOplkError ProcessThread::processEvent(tEplApiEventType EventType_p,
                       tEplApiEventArg* pEventArg_p, void GENERIC* pUserArg_p)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
 
     switch (EventType_p)
     {
@@ -336,14 +336,14 @@ The function processes state change events.
 \param  pEventArg_p         Pointer to union which describes the event in detail
 \param  pUserArg_p          User specific argument
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel ProcessThread::processStateChangeEvent(tEplApiEventType EventType_p,
+tOplkError ProcessThread::processStateChangeEvent(tEplApiEventType EventType_p,
                                           tEplApiEventArg* pEventArg_p,
                                           void GENERIC* pUserArg_p)
 {
-    tEplKernel                  ret = kEplSuccessful;
+    tOplkError                  ret = kEplSuccessful;
     tEventNmtStateChange*       pNmtStateChange = &pEventArg_p->m_NmtStateChange;
 #if !defined(CONFIG_INCLUDE_CFM)
     UINT                        varLen;
@@ -455,10 +455,10 @@ The function processes error and warning events.
 \param  pEventArg_p         Pointer to union which describes the event in detail
 \param  pUserArg_p          User specific argument
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel ProcessThread::processErrorWarningEvent(tEplApiEventType EventType_p,
+tOplkError ProcessThread::processErrorWarningEvent(tEplApiEventType EventType_p,
                                            tEplApiEventArg* pEventArg_p,
                                            void GENERIC* pUserArg_p)
 {
@@ -507,10 +507,10 @@ The function processes history events.
 \param  pEventArg_p         Pointer to union which describes the event in detail
 \param  pUserArg_p          User specific argument
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel ProcessThread::processHistoryEvent(tEplApiEventType EventType_p,
+tOplkError ProcessThread::processHistoryEvent(tEplApiEventType EventType_p,
                                       tEplApiEventArg* pEventArg_p,
                                       void GENERIC* pUserArg_p)
 {
@@ -544,15 +544,15 @@ The function processes node events.
 \param  pEventArg_p         Pointer to union which describes the event in detail
 \param  pUserArg_p          User specific argument
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel ProcessThread::processNodeEvent(tEplApiEventType EventType_p,
+tOplkError ProcessThread::processNodeEvent(tEplApiEventType EventType_p,
                                    tEplApiEventArg* pEventArg_p,
                                    void GENERIC* pUserArg_p)
 {
     tEplApiEventNode*   pNode = &pEventArg_p->m_Node;
-    tEplKernel          EplRet = kEplSuccessful;
+    tOplkError          EplRet = kEplSuccessful;
 
     UNUSED_PARAMETER(EventType_p);
     UNUSED_PARAMETER(pUserArg_p);
@@ -667,10 +667,10 @@ The function processes CFM progress events.
 \param  pEventArg_p         Pointer to union which describes the event in detail
 \param  pUserArg_p          User specific argument
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel ProcessThread::processCfmProgressEvent(tEplApiEventType EventType_p,
+tOplkError ProcessThread::processCfmProgressEvent(tEplApiEventType EventType_p,
                                           tEplApiEventArg* pEventArg_p,
                                           void GENERIC* pUserArg_p)
 {
@@ -706,10 +706,10 @@ The function processes CFM result events.
 \param  pEventArg_p         Pointer to union which describes the event in detail
 \param  pUserArg_p          User specific argument
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel ProcessThread::processCfmResultEvent(tEplApiEventType EventType_p,
+tOplkError ProcessThread::processCfmResultEvent(tEplApiEventType EventType_p,
                                         tEplApiEventArg* pEventArg_p,
                                         void GENERIC* pUserArg_p)
 {
@@ -755,15 +755,15 @@ The function processes SDO events.
 \param  pEventArg_p         Pointer to union which describes the event in detail
 \param  pUserArg_p          User specific argument
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel ProcessThread::processSdoEvent(tEplApiEventType EventType_p,
+tOplkError ProcessThread::processSdoEvent(tEplApiEventType EventType_p,
                                   tEplApiEventArg* pEventArg_p,
                                   void GENERIC* pUserArg_p)
 {
     tSdoComFinished*          pSdo = &pEventArg_p->m_Sdo;
-    tEplKernel                ret = kEplSuccessful;
+    tOplkError                ret = kEplSuccessful;
 
     UNUSED_PARAMETER(EventType_p);
     UNUSED_PARAMETER(pUserArg_p);
@@ -791,12 +791,12 @@ tEplKernel ProcessThread::processSdoEvent(tEplApiEventType EventType_p,
 Set default node assignment in object dictionary if configuration manager is
 not available.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel ProcessThread::setDefaultNodeAssignment(void)
+tOplkError ProcessThread::setDefaultNodeAssignment(void)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
     DWORD       nodeAssignment;
 
     nodeAssignment = (EPL_NODEASSIGN_NODE_IS_CN | EPL_NODEASSIGN_NODE_EXISTS);    // 0x00000003L

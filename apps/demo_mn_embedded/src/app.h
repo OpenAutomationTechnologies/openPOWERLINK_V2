@@ -59,9 +59,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tEplKernel initApp(void);
+tOplkError initApp(void);
 void shutdownApp (void);
-tEplKernel PUBLIC processSync(void);
+tOplkError PUBLIC processSync(void);
 
 #ifdef __cplusplus
 }

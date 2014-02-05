@@ -115,16 +115,16 @@ static void signalUserEvent(void);
 
 The function initializes the kernel event CAL module on Windows.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tEplKernel eventkcal_init (void)
+tOplkError eventkcal_init (void)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 
     EPL_MEMSET(&instance_l, 0, sizeof(tEventkCalInstance));
 
@@ -181,14 +181,14 @@ Exit:
 The function cleans up the kernel event CAL module. For cleanup it calls the exit
 functions of the queue implementations for each used queue.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tEplKernel eventkcal_exit (void)
+tOplkError eventkcal_exit (void)
 {
     if (instance_l.fInitialized == TRUE)
     {
@@ -216,16 +216,16 @@ This function posts a event to the kernel queue.
 
 \param  pEvent_p                Event to be posted.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tEplKernel eventkcal_postKernelEvent (tEplEvent *pEvent_p)
+tOplkError eventkcal_postKernelEvent (tEplEvent *pEvent_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 
     ret = eventkcal_postEventCircbuf(kEventQueueKInt, pEvent_p);
 
@@ -240,16 +240,16 @@ This function posts a event to the user queue.
 
 \param  pEvent_p                Event to be posted.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tEplKernel eventkcal_postUserEvent (tEplEvent *pEvent_p)
+tOplkError eventkcal_postUserEvent (tEplEvent *pEvent_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 
     ret = eventkcal_postEventCircbuf(kEventQueueK2U, pEvent_p);
 

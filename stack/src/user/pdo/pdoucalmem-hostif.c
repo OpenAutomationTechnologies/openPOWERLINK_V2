@@ -102,12 +102,12 @@ static tLimInstance         limPdo_l;
 The function performs all actions needed to setup the shared memory at
 starting of the stack.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdoucal_openMem(void)
+tOplkError pdoucal_openMem(void)
 {
     tHostifReturn hifret;
     tHostifInstance pInstance = hostif_getInstance(0);
@@ -139,12 +139,12 @@ tEplKernel pdoucal_openMem(void)
 The function performs all actions needed to cleanup the shared memory at
 shutdown.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdoucal_closeMem(void)
+tOplkError pdoucal_closeMem(void)
 {
     EPL_MEMSET(&limPdo_l, 0, sizeof(limPdo_l));
 
@@ -160,12 +160,12 @@ The function allocates shared memory for the kernel needed to transfer the PDOs.
 \param  memSize_p               Size of PDO memory
 \param  ppPdoMem_p              Pointer to store the PDO memory pointer.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdoucal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
+tOplkError pdoucal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
 {
     if(memSize_p > limPdo_l.span)
     {
@@ -189,12 +189,12 @@ transfering the PDOs.
 \param  pMem_p                  Pointer to the shared memory segment.
 \param  memSize_p               Size of PDO memory
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdoucal_freeMem(BYTE* pMem_p, size_t memSize_p)
+tOplkError pdoucal_freeMem(BYTE* pMem_p, size_t memSize_p)
 {
     UNUSED_PARAMETER(pMem_p);
     UNUSED_PARAMETER(memSize_p);

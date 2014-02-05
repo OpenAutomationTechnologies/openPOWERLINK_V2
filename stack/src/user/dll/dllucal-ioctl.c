@@ -98,9 +98,9 @@ typedef struct
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tEplKernel addInstance(tDllCalQueueInstance* ppDllCalQueue_p, tDllCalQueue DllCalQueue_p);
-static tEplKernel delInstance(tDllCalQueueInstance pDllCalQueue_p);
-static tEplKernel insertDataBlock(tDllCalQueueInstance pDllCalQueue_p, BYTE *pData_p, UINT* pDataSize_p);
+static tOplkError addInstance(tDllCalQueueInstance* ppDllCalQueue_p, tDllCalQueue DllCalQueue_p);
+static tOplkError delInstance(tDllCalQueueInstance pDllCalQueue_p);
+static tOplkError insertDataBlock(tDllCalQueueInstance pDllCalQueue_p, BYTE *pData_p, UINT* pDataSize_p);
 
 /* define external function interface */
 static tDllCalFuncIntf funcintf_l =
@@ -147,15 +147,15 @@ Add an instance for TX packet forwarding in DLL CAL.
 \param  ppDllCalQueue_p         double-pointer to DllCal Queue instance
 \param  dllCalQueue_p           parameter that determines the queue
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 */
 //------------------------------------------------------------------------------
-static tEplKernel addInstance(tDllCalQueueInstance *ppDllCalQueue_p,
+static tOplkError addInstance(tDllCalQueueInstance *ppDllCalQueue_p,
                               tDllCalQueue dllCalQueue_p)
 {
-    tEplKernel                  ret = kEplSuccessful;
+    tOplkError                  ret = kEplSuccessful;
     tDllCalIoctlInstance*       pInstance;
 
     pInstance = (tDllCalIoctlInstance *) EPL_MALLOC(sizeof(tDllCalIoctlInstance));
@@ -183,12 +183,12 @@ Delete the DLL CAL instance.
 
 \param  pDllCalQueue_p          Pointer to DllCal Queue instance
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 */
 //------------------------------------------------------------------------------
-static tEplKernel delInstance(tDllCalQueueInstance pDllCalQueue_p)
+static tOplkError delInstance(tDllCalQueueInstance pDllCalQueue_p)
 {
     tDllCalIoctlInstance*     pInstance = (tDllCalIoctlInstance*)pDllCalQueue_p;
 
@@ -207,15 +207,15 @@ Inserts a data block into the DLL CAL queue.
 \param  pDataSize_p             Pointer to the size of the data block to be
                                 insert
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 */
 //------------------------------------------------------------------------------
-static tEplKernel insertDataBlock (tDllCalQueueInstance pDllCalQueue_p,
+static tOplkError insertDataBlock (tDllCalQueueInstance pDllCalQueue_p,
                                    BYTE *pData_p, UINT *pDataSize_p)
 {
-    tEplKernel                      ret = kEplSuccessful;
+    tOplkError                      ret = kEplSuccessful;
     tDllCalIoctlInstance*           pInstance =
                                             (tDllCalIoctlInstance*)pDllCalQueue_p;
     tIoctlDllCalAsync               ioctlAsyncFrame;

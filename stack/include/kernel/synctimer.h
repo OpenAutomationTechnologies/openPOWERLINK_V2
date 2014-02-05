@@ -52,8 +52,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-typedef tEplKernel (*tSyncTimerCbSync) (void);
-typedef tEplKernel (*tSyncTimerCbLossOfSync) (void);
+typedef tOplkError (*tSyncTimerCbSync) (void);
+typedef tOplkError (*tSyncTimerCbLossOfSync) (void);
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -63,17 +63,17 @@ typedef tEplKernel (*tSyncTimerCbLossOfSync) (void);
 extern "C" {
 #endif
 
-tEplKernel synctimer_addInstance(void);
-tEplKernel synctimer_delInstance(void);
-tEplKernel synctimer_registerHandler(tSyncTimerCbSync pfnTimerSynckCbSync_p);
-tEplKernel synctimer_registerLossOfSyncHandler(tSyncTimerCbLossOfSync pfnTimerSynckCbLossOfSync_p);
-tEplKernel synctimer_registerLossOfSyncHandler2(tSyncTimerCbLossOfSync pfnTimerSynckCbLossOfSync2_p);
-tEplKernel synctimer_setSyncShift(UINT32 advanceShift_p);
-tEplKernel synctimer_setCycleLen(UINT32 cycleLen_p);
-tEplKernel synctimer_setLossOfSyncTolerance(UINT32 lossOfSyncTolerance_p);
-tEplKernel synctimer_setLossOfSyncTolerance2(UINT32 lossOfSyncTolerance2_p);
-tEplKernel synctimer_syncTriggerAtTimeStamp(tEplTgtTimeStamp* pTimeStamp_p);
-tEplKernel synctimer_stopSync(void);
+tOplkError synctimer_addInstance(void);
+tOplkError synctimer_delInstance(void);
+tOplkError synctimer_registerHandler(tSyncTimerCbSync pfnTimerSynckCbSync_p);
+tOplkError synctimer_registerLossOfSyncHandler(tSyncTimerCbLossOfSync pfnTimerSynckCbLossOfSync_p);
+tOplkError synctimer_registerLossOfSyncHandler2(tSyncTimerCbLossOfSync pfnTimerSynckCbLossOfSync2_p);
+tOplkError synctimer_setSyncShift(UINT32 advanceShift_p);
+tOplkError synctimer_setCycleLen(UINT32 cycleLen_p);
+tOplkError synctimer_setLossOfSyncTolerance(UINT32 lossOfSyncTolerance_p);
+tOplkError synctimer_setLossOfSyncTolerance2(UINT32 lossOfSyncTolerance2_p);
+tOplkError synctimer_syncTriggerAtTimeStamp(tEplTgtTimeStamp* pTimeStamp_p);
+tOplkError synctimer_stopSync(void);
 void       synctimer_enableExtSyncIrq(UINT32 syncIntCycle_p, UINT32 pulseWidth_p);
 void       synctimer_disableExtSyncIrq(void);
 

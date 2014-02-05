@@ -63,12 +63,12 @@ extern "C" {
 
 #if defined(CONFIG_INCLUDE_SDO_ASND)
 
-tEplKernel sdoasnd_init(tSequLayerReceiveCb pfnReceiveCb_p);
-tEplKernel sdoasnd_addInstance(tSequLayerReceiveCb pfnReceiveCb_p);
-tEplKernel sdoasnd_delInstance(void);
-tEplKernel sdoasnd_initCon(tSdoConHdl* pSdoConHandle_p, UINT targetNodeId_p);
-tEplKernel sdoasnd_sendData(tSdoConHdl sdoConHandle_p, tEplFrame* pSrcData_p, UINT32 dataSize_p);
-tEplKernel sdoasnd_deleteCon(tSdoConHdl sdoConHandle_p);
+tOplkError sdoasnd_init(tSequLayerReceiveCb pfnReceiveCb_p);
+tOplkError sdoasnd_addInstance(tSequLayerReceiveCb pfnReceiveCb_p);
+tOplkError sdoasnd_delInstance(void);
+tOplkError sdoasnd_initCon(tSdoConHdl* pSdoConHandle_p, UINT targetNodeId_p);
+tOplkError sdoasnd_sendData(tSdoConHdl sdoConHandle_p, tEplFrame* pSrcData_p, UINT32 dataSize_p);
+tOplkError sdoasnd_deleteCon(tSdoConHdl sdoConHandle_p);
 
 #endif
 

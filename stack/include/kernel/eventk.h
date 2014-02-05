@@ -61,15 +61,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tEplKernel eventk_init(void);
+tOplkError eventk_init(void);
 
-tEplKernel eventk_exit(void);
+tOplkError eventk_exit(void);
 
-tEplKernel eventk_process(tEplEvent * pEvent_p) SECTION_EVENTK_PROCESS;
+tOplkError eventk_process(tEplEvent * pEvent_p) SECTION_EVENTK_PROCESS;
 
-tEplKernel eventk_postEvent(tEplEvent * pEvent_p) SECTION_EVENTK_POST;
+tOplkError eventk_postEvent(tEplEvent * pEvent_p) SECTION_EVENTK_POST;
 
-tEplKernel eventk_postError(tEplEventSource eventSource_p, tEplKernel eplError_p,
+tOplkError eventk_postError(tEplEventSource eventSource_p, tOplkError eplError_p,
                                    UINT argSize_p, void* pArg_p);
 
 #ifdef __cplusplus

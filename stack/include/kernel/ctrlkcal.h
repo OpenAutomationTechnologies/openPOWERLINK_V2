@@ -61,15 +61,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tEplKernel ctrlkcal_init (void);
+tOplkError ctrlkcal_init (void);
 void       ctrlkcal_exit (void);
-tEplKernel ctrlkcal_process (void);
-tEplKernel ctrlkcal_getCmd (tCtrlCmdType *pCmd_p);
+tOplkError ctrlkcal_process (void);
+tOplkError ctrlkcal_getCmd (tCtrlCmdType *pCmd_p);
 void       ctrlkcal_sendReturn(UINT16 retval_p);
 void       ctrlkcal_setStatus (UINT16 status_p);
 UINT16     ctrlkcal_getStatus (void);
 void       ctrlkcal_updateHeartbeat (UINT16 heartbeat_p);
-tEplKernel ctrlkcal_readInitParam(tCtrlInitParam* pInitParam_p);
+tOplkError ctrlkcal_readInitParam(tCtrlInitParam* pInitParam_p);
 void       ctrlkcal_storeInitParam(tCtrlInitParam* pInitParam_p);
 
 #ifdef __cplusplus

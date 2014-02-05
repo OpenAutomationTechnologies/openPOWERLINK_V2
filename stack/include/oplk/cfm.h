@@ -63,7 +63,7 @@ typedef struct
     UINT                objectIndex;            ///< Index of object to be written
     UINT                objectSubIndex;         ///< Subindex of object to be written
     UINT32              sdoAbortCode;           ///< SDO abort code
-    tEplKernel          error;                  ///< Error which occured
+    tOplkError          error;                  ///< Error which occured
     UINT32              totalNumberOfBytes;     ///< Total number of bytes to transfer
     UINT32              bytesDownloaded;        ///< Number of already downloaded bytes
 } tCfmEventCnProgress;
@@ -76,7 +76,7 @@ typedef struct
 extern "C" {
 #endif
 
-tEplKernel  cfmu_cbObdAccess(tObdCbParam MEM* pParam_p);
+tOplkError  cfmu_cbObdAccess(tObdCbParam MEM* pParam_p);
 
 #ifdef __cplusplus
 }

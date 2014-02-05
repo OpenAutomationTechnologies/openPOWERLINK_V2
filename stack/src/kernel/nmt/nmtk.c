@@ -108,7 +108,7 @@ typedef enum
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
-typedef tEplKernel (*tNmtkStateFunc)(tNmtEvent nmtEvent_p);
+typedef tOplkError (*tNmtkStateFunc)(tNmtEvent nmtEvent_p);
 
 typedef struct
 {
@@ -134,28 +134,28 @@ tNmtkInstance               nmtkInstance_g;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tEplKernel doStateGsOff(tNmtEvent nmtEvent_p);
-static tEplKernel doStateGsInitialising(tNmtEvent nmtEvent_p);
-static tEplKernel doStateGsResetApplication(tNmtEvent nmtEvent_p);
-static tEplKernel doStateGsResetCommunication(tNmtEvent nmtEvent_p);
-static tEplKernel doStateGsResetConfiguration(tNmtEvent nmtEvent_p);
+static tOplkError doStateGsOff(tNmtEvent nmtEvent_p);
+static tOplkError doStateGsInitialising(tNmtEvent nmtEvent_p);
+static tOplkError doStateGsResetApplication(tNmtEvent nmtEvent_p);
+static tOplkError doStateGsResetCommunication(tNmtEvent nmtEvent_p);
+static tOplkError doStateGsResetConfiguration(tNmtEvent nmtEvent_p);
 
-static tEplKernel doStateMsNotActive(tNmtEvent nmtEvent_p);
+static tOplkError doStateMsNotActive(tNmtEvent nmtEvent_p);
 #if defined(CONFIG_INCLUDE_NMT_MN)
-static tEplKernel doStateMsPreOperational1(tNmtEvent nmtEvent_p);
-static tEplKernel doStateMsPreOperational2(tNmtEvent nmtEvent_p);
-static tEplKernel doStateMsReadyToOperate(tNmtEvent nmtEvent_p);
-static tEplKernel doStateMsOperational(tNmtEvent nmtEvent_p);
-static tEplKernel doStateMsBasicEthernet(tNmtEvent nmtEvent_p);
+static tOplkError doStateMsPreOperational1(tNmtEvent nmtEvent_p);
+static tOplkError doStateMsPreOperational2(tNmtEvent nmtEvent_p);
+static tOplkError doStateMsReadyToOperate(tNmtEvent nmtEvent_p);
+static tOplkError doStateMsOperational(tNmtEvent nmtEvent_p);
+static tOplkError doStateMsBasicEthernet(tNmtEvent nmtEvent_p);
 #endif
 
-static tEplKernel doStateCsNotActive(tNmtEvent nmtEvent_p);
-static tEplKernel doStateCsBasicEthernet(tNmtEvent nmtEvent_p);
-static tEplKernel doStateCsPreOperational1(tNmtEvent nmtEvent_p);
-static tEplKernel doStateCsPreOperational2(tNmtEvent nmtEvent_p);
-static tEplKernel doStateCsReadyToOperate(tNmtEvent nmtEvent_p);
-static tEplKernel doStateCsOperational(tNmtEvent nmtEvent_p);
-static tEplKernel doStateCsStopped(tNmtEvent nmtEvent_p);
+static tOplkError doStateCsNotActive(tNmtEvent nmtEvent_p);
+static tOplkError doStateCsBasicEthernet(tNmtEvent nmtEvent_p);
+static tOplkError doStateCsPreOperational1(tNmtEvent nmtEvent_p);
+static tOplkError doStateCsPreOperational2(tNmtEvent nmtEvent_p);
+static tOplkError doStateCsReadyToOperate(tNmtEvent nmtEvent_p);
+static tOplkError doStateCsOperational(tNmtEvent nmtEvent_p);
+static tOplkError doStateCsStopped(tNmtEvent nmtEvent_p);
 
 //------------------------------------------------------------------------------
 // local vars
@@ -194,12 +194,12 @@ tNmtkStateTable             nmtkStates_g[] =
 
 The function initializes an instance of the NMT kernel module
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_nmtk
 */
 //------------------------------------------------------------------------------
-tEplKernel nmtk_init(void)
+tOplkError nmtk_init(void)
 {
     // initialize intern vaiables
     nmtkInstance_g.stateIndex = kNmtkGsOff;
@@ -218,12 +218,12 @@ tEplKernel nmtk_init(void)
 
 The function deletes the NMT kernel module instance
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_nmtk
 */
 //------------------------------------------------------------------------------
-tEplKernel nmtk_delInstance(void)
+tOplkError nmtk_delInstance(void)
 {
     nmtkInstance_g.stateIndex = kNmtkGsOff;
     return kEplSuccessful;
@@ -237,14 +237,14 @@ The function processes NMT kernel events. It implements the NMT state machine.
 
 \param  pEvent_p        Event to process.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_nmtk
 */
 //------------------------------------------------------------------------------
-tEplKernel nmtk_process(tEplEvent* pEvent_p)
+tOplkError nmtk_process(tEplEvent* pEvent_p)
 {
-    tEplKernel              ret;
+    tOplkError              ret;
     tNmtkStateIndexes       oldState;
     tNmtEvent               nmtEvent;
     tEplEvent               event;
@@ -318,10 +318,10 @@ The function processes the NMT state GS_OFF.
 
 \param  nmtEvent_p      NMT event to be processed.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel doStateGsOff(tNmtEvent nmtEvent_p)
+static tOplkError doStateGsOff(tNmtEvent nmtEvent_p)
 {
     if (nmtEvent_p == kNmtEventSwReset)
     {   // NMT_GT8, NMT_GT1 -> new state kNmtGsInitialising
@@ -339,10 +339,10 @@ In this state the first init of the hardware will be done.
 
 \param  nmtEvent_p      NMT event to be processed.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel doStateGsInitialising(tNmtEvent nmtEvent_p)
+static tOplkError doStateGsInitialising(tNmtEvent nmtEvent_p)
 {
     switch(nmtEvent_p)
     {
@@ -376,10 +376,10 @@ and the standardised device profile area is done.
 
 \param  nmtEvent_p      NMT event to be processed.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel doStateGsResetApplication(tNmtEvent nmtEvent_p)
+static tOplkError doStateGsResetApplication(tNmtEvent nmtEvent_p)
 {
     switch(nmtEvent_p)
     {
@@ -420,10 +420,10 @@ In this state the initialization of the communication profile area is done.
 
 \param  nmtEvent_p      NMT event to be processed.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel doStateGsResetCommunication(tNmtEvent nmtEvent_p)
+static tOplkError doStateGsResetCommunication(tNmtEvent nmtEvent_p)
 {
     switch(nmtEvent_p)
     {
@@ -469,10 +469,10 @@ In this state we build the configuration with infos from OD.
 
 \param  nmtEvent_p      NMT event to be processed.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel doStateGsResetConfiguration(tNmtEvent nmtEvent_p)
+static tOplkError doStateGsResetConfiguration(tNmtEvent nmtEvent_p)
 {
     // reset flags
     nmtkInstance_g.fEnableReadyToOperate = FALSE;
@@ -540,10 +540,10 @@ In this state the node listens for EPL-Frames and checks timeout.
 
 \param  nmtEvent_p      NMT event to be processed.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel doStateCsNotActive(tNmtEvent nmtEvent_p)
+static tOplkError doStateCsNotActive(tNmtEvent nmtEvent_p)
 {
     switch(nmtEvent_p)
     {
@@ -607,10 +607,10 @@ In this state the node processes only async frames.
 
 \param  nmtEvent_p      NMT event to be processed.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel doStateCsPreOperational1(tNmtEvent nmtEvent_p)
+static tOplkError doStateCsPreOperational1(tNmtEvent nmtEvent_p)
 {
     switch(nmtEvent_p)
     {
@@ -667,10 +667,10 @@ In this state the node processes isochronous and asynchronous frames.
 
 \param  nmtEvent_p      NMT event to be processed.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel doStateCsPreOperational2(tNmtEvent nmtEvent_p)
+static tOplkError doStateCsPreOperational2(tNmtEvent nmtEvent_p)
 {
     switch(nmtEvent_p)
     {
@@ -769,10 +769,10 @@ In this state the node should be configured and application is ready.
 
 \param  nmtEvent_p      NMT event to be processed.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel doStateCsReadyToOperate(tNmtEvent nmtEvent_p)
+static tOplkError doStateCsReadyToOperate(tNmtEvent nmtEvent_p)
 {
     switch(nmtEvent_p)
     {
@@ -840,10 +840,10 @@ This is the normal working state of a CN.
 
 \param  nmtEvent_p      NMT event to be processed.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel doStateCsOperational(tNmtEvent nmtEvent_p)
+static tOplkError doStateCsOperational(tNmtEvent nmtEvent_p)
 {
     switch(nmtEvent_p)
     {
@@ -912,10 +912,10 @@ frames.
 
 \param  nmtEvent_p      NMT event to be processed.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel doStateCsStopped(tNmtEvent nmtEvent_p)
+static tOplkError doStateCsStopped(tNmtEvent nmtEvent_p)
 {
     switch(nmtEvent_p)
     {
@@ -979,10 +979,10 @@ communication.
 
 \param  nmtEvent_p      NMT event to be processed.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel doStateCsBasicEthernet(tNmtEvent nmtEvent_p)
+static tOplkError doStateCsBasicEthernet(tNmtEvent nmtEvent_p)
 {
     switch(nmtEvent_p)
     {
@@ -1047,10 +1047,10 @@ the node goes to the next state.
 
 \param  nmtEvent_p      NMT event to be processed.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel doStateMsNotActive(tNmtEvent nmtEvent_p)
+static tOplkError doStateMsNotActive(tNmtEvent nmtEvent_p)
 {
 
 #if !defined(CONFIG_INCLUDE_NMT_MN)
@@ -1141,10 +1141,10 @@ In this state the MN processes the reduced POWERLINK cycle.
 
 \param  nmtEvent_p      NMT event to be processed.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel doStateMsPreOperational1(tNmtEvent nmtEvent_p)
+static tOplkError doStateMsPreOperational1(tNmtEvent nmtEvent_p)
 {
     switch(nmtEvent_p)
     {
@@ -1235,10 +1235,10 @@ In this state the MN processes the full POWERLINK cycle.
 
 \param  nmtEvent_p      NMT event to be processed.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel doStateMsPreOperational2(tNmtEvent nmtEvent_p)
+static tOplkError doStateMsPreOperational2(tNmtEvent nmtEvent_p)
 {
     switch(nmtEvent_p)
     {
@@ -1308,10 +1308,10 @@ POWERLINK cycle.
 
 \param  nmtEvent_p      NMT event to be processed.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel doStateMsReadyToOperate(tNmtEvent nmtEvent_p)
+static tOplkError doStateMsReadyToOperate(tNmtEvent nmtEvent_p)
 {
     switch(nmtEvent_p)
     {
@@ -1379,10 +1379,10 @@ This is the normal working state of a MN.
 
 \param  nmtEvent_p      NMT event to be processed.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel doStateMsOperational(tNmtEvent nmtEvent_p)
+static tOplkError doStateMsOperational(tNmtEvent nmtEvent_p)
 {
     switch(nmtEvent_p)
     {
@@ -1446,10 +1446,10 @@ In this state the MN processes normal ethernet traffic.
 
 \param  nmtEvent_p      NMT event to be processed.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel doStateMsBasicEthernet(tNmtEvent nmtEvent_p)
+tOplkError doStateMsBasicEthernet(tNmtEvent nmtEvent_p)
 {
     switch(nmtEvent_p)
     {

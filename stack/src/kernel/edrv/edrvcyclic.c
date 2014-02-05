@@ -113,9 +113,9 @@ static tEdrvcyclicInstance edrvcyclicInstance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tEplKernel timerHdlCycleCb(tEplTimerEventArg* pEventArg_p);
-static tEplKernel timerHdlSlotCb(tEplTimerEventArg* pEventArg_p);
-static tEplKernel processTxBufferList(void);
+static tOplkError timerHdlCycleCb(tEplTimerEventArg* pEventArg_p);
+static tOplkError timerHdlSlotCb(tEplTimerEventArg* pEventArg_p);
+static tOplkError processTxBufferList(void);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -127,12 +127,12 @@ static tEplKernel processTxBufferList(void);
 
 This function initializes the cyclic Ethernet driver.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel edrvcyclic_init(void)
+tOplkError edrvcyclic_init(void)
 {
     // clear instance structure
     EPL_MEMSET(&edrvcyclicInstance_l, 0, sizeof (edrvcyclicInstance_l));
@@ -152,12 +152,12 @@ tEplKernel edrvcyclic_init(void)
 
 This function shuts down the cyclic Ethernet driver.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel edrvcyclic_shutdown(void)
+tOplkError edrvcyclic_shutdown(void)
 {
     if (edrvcyclicInstance_l.ppTxBufferList != NULL)
     {
@@ -177,14 +177,14 @@ This function determines the maxmimum size of the cyclic Tx buffer list.
 
 \param  maxListSize_p   Maximum Tx buffer list size
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel edrvcyclic_setMaxTxBufferListSize(UINT maxListSize_p)
+tOplkError edrvcyclic_setMaxTxBufferListSize(UINT maxListSize_p)
 {
-    tEplKernel ret = kEplSuccessful;
+    tOplkError ret = kEplSuccessful;
 
     if (edrvcyclicInstance_l.maxTxBufferCount != maxListSize_p)
     {
@@ -218,14 +218,14 @@ This function forwards the next cycle Tx buffer list to the cyclic Edrv.
 \param  ppTxBuffer_p        Pointer to next cycle Tx buffer list
 \param  txBufferCount_p     Tx buffer list count
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel edrvcyclic_setNextTxBufferList(tEdrvTxBuffer** ppTxBuffer_p, UINT txBufferCount_p)
+tOplkError edrvcyclic_setNextTxBufferList(tEdrvTxBuffer** ppTxBuffer_p, UINT txBufferCount_p)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
     UINT        nextTxBufferList;
 
     nextTxBufferList = edrvcyclicInstance_l.curTxBufferList ^ edrvcyclicInstance_l.maxTxBufferCount;
@@ -265,12 +265,12 @@ This function sets the cycle time controlled by the cyclic Edrv.
 
 \param  cycleTimeUs_p   Cycle time [us]
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel edrvcyclic_setCycleTime(UINT32 cycleTimeUs_p)
+tOplkError edrvcyclic_setCycleTime(UINT32 cycleTimeUs_p)
 {
     edrvcyclicInstance_l.cycleTimeUs = cycleTimeUs_p;
 
@@ -283,14 +283,14 @@ tEplKernel edrvcyclic_setCycleTime(UINT32 cycleTimeUs_p)
 
 This function starts the cycles.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel edrvcyclic_startCycle(void)
+tOplkError edrvcyclic_startCycle(void)
 {
-    tEplKernel ret = kEplSuccessful;
+    tOplkError ret = kEplSuccessful;
 
     if (edrvcyclicInstance_l.cycleTimeUs == 0)
     {
@@ -324,14 +324,14 @@ Exit:
 
 This function stops the cycles.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel edrvcyclic_stopCycle(void)
+tOplkError edrvcyclic_stopCycle(void)
 {
-    tEplKernel ret = kEplSuccessful;
+    tOplkError ret = kEplSuccessful;
 
     ret = hrestimer_deleteTimer(&edrvcyclicInstance_l.timerHdlCycle);
     ret = hrestimer_deleteTimer(&edrvcyclicInstance_l.timerHdlSlot);
@@ -351,12 +351,12 @@ This function registers the synchronization callback.
 
 \param  pfnCbSync_p     Function pointer called at the configured synchronisation point
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel edrvcyclic_regSyncHandler(tEdrvCyclicCbSync pfnCbSync_p)
+tOplkError edrvcyclic_regSyncHandler(tEdrvCyclicCbSync pfnCbSync_p)
 {
     edrvcyclicInstance_l.pfnSyncCb = pfnCbSync_p;
 
@@ -371,12 +371,12 @@ This function registers the error callback.
 
 \param  pfnCbError_p    Function pointer called in case of a cycle processing error
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel edrvcyclic_regErrorHandler(tEdrvCyclicCbError pfnCbError_p)
+tOplkError edrvcyclic_regErrorHandler(tEdrvCyclicCbError pfnCbError_p)
 {
     edrvcyclicInstance_l.pfnErrorCb = pfnCbError_p;
 
@@ -393,12 +393,12 @@ This function returns diagnostic information provided by the cyclic Edrv.
 
 \param  ppDiagnostics_p     Pointer to store the pointer to the diagnostic information
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tEplKernel edrvcyclic_getDiagnostics(tEdrvCyclicDiagnostics** ppDiagnostics_p)
+tOplkError edrvcyclic_getDiagnostics(tEdrvCyclicDiagnostics** ppDiagnostics_p)
 {
     *ppDiagnostics_p = &edrvcyclicInstance_l.diagnostics;
 
@@ -420,12 +420,12 @@ This function is called by the timer module. It starts the next cycle.
 
 \param  pEventArg_p     Timer event argument
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel timerHdlCycleCb(tEplTimerEventArg* pEventArg_p)
+static tOplkError timerHdlCycleCb(tEplTimerEventArg* pEventArg_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 #if EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
     UINT32          cycleTime;
     UINT32          usedCycleTime;
@@ -569,12 +569,12 @@ next frame.
 
 \param  pEventArg_p     Timer event argument
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel timerHdlSlotCb(tEplTimerEventArg* pEventArg_p)
+static tOplkError timerHdlSlotCb(tEplTimerEventArg* pEventArg_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     tEdrvTxBuffer*  pTxBuffer = NULL;
 
     if (pEventArg_p->m_TimerHdl != edrvcyclicInstance_l.timerHdlSlot)
@@ -615,12 +615,12 @@ Exit:
 
 This function processes the cycle Tx buffer list provided by dllk.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processTxBufferList(void)
+static tOplkError processTxBufferList(void)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     tEdrvTxBuffer*  pTxBuffer;
 
     while ((pTxBuffer = edrvcyclicInstance_l.ppTxBufferList[edrvcyclicInstance_l.curTxBufferEntry]) != NULL)

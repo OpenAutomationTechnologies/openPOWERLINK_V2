@@ -122,8 +122,8 @@ static tLeduInstance   leduInstance_g;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tEplKernel callStateChanged(tLedType LedType_p, BOOL fOn_p);
-static tEplKernel changeMode(tLeduMode NewMode_p);
+static tOplkError callStateChanged(tLedType LedType_p, BOOL fOn_p);
+static tOplkError changeMode(tLeduMode NewMode_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -138,12 +138,12 @@ The function initializes the user LED module.
 \param  pfnCbStateChange_p      Pointer to callback function for LED state
                                 changes.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_ledu
 */
 //------------------------------------------------------------------------------
-tEplKernel ledu_init(tLeduStateChangeCallback pfnCbStateChange_p)
+tOplkError ledu_init(tLeduStateChangeCallback pfnCbStateChange_p)
 {
     EPL_MEMSET(&leduInstance_g, 0, sizeof(tLeduInstance));
     leduInstance_g.pfnCbStateChange = pfnCbStateChange_p;
@@ -157,14 +157,14 @@ tEplKernel ledu_init(tLeduStateChangeCallback pfnCbStateChange_p)
 
 The function deinitializes the user LED module.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_ledu
 */
 //------------------------------------------------------------------------------
-tEplKernel ledu_exit(void)
+tOplkError ledu_exit(void)
 {
-    tEplKernel ret = kEplSuccessful;
+    tOplkError ret = kEplSuccessful;
 
     ret = timeru_deleteTimer(&leduInstance_g.timerHdlLedBlink);
     EPL_MEMSET(&leduInstance_g, 0, sizeof(tLeduInstance));
@@ -181,14 +181,14 @@ changes.
 
 \param  nmtStateChange_p    NMT state change event.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_ledu
 */
 //------------------------------------------------------------------------------
-tEplKernel ledu_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
+tOplkError ledu_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 
     // activate status LED according to NMT state
     switch (nmtStateChange_p.newNmtState)
@@ -283,14 +283,14 @@ The function implements the event handler of the LED module.
 
 \param  pEvent_p        Event to process.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_ledu
 */
 //------------------------------------------------------------------------------
-tEplKernel ledu_processEvent(tEplEvent* pEvent_p)
+tOplkError ledu_processEvent(tEplEvent* pEvent_p)
 {
-    tEplKernel          ret;
+    tOplkError          ret;
     tEplTimerArg        timerArg;
     UINT32              timeout = 0;
     BOOL                fLedOn = FALSE;
@@ -430,12 +430,12 @@ The function calls the registered state change function
 \param  ledType_p           The type of LED.
 \param  fOn_p               The state of the LED.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel callStateChanged(tLedType ledType_p, BOOL fOn_p)
+static tOplkError callStateChanged(tLedType ledType_p, BOOL fOn_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 
     if (leduInstance_g.pfnCbStateChange != NULL)
     {
@@ -452,12 +452,12 @@ The function changes the LED mode.
 
 \param  newMode_p           The new mode to set.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel changeMode(tLeduMode newMode_p)
+static tOplkError changeMode(tLeduMode newMode_p)
 {
-    tEplKernel      ret;
+    tOplkError      ret;
     tLeduMode       oldMode;
     tEplTimerArg    timerArg;
     UINT32          timeout;

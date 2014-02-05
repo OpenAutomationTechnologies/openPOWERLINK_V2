@@ -101,12 +101,12 @@ starting of the stack.
 
 For the Posix shared-memory implementation it opens the shared memory segment.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdokcal_openMem(void)
+tOplkError pdokcal_openMem(void)
 {
     if ((fd_l = shm_open(PDO_SHMEM_NAME, O_RDWR | O_CREAT, 0)) == -1)
     {
@@ -124,12 +124,12 @@ shutdown.
 
 For the Posix shared-memory implementation it unlinks the shared memory segment.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdokcal_closeMem(void)
+tOplkError pdokcal_closeMem(void)
 {
     shm_unlink(PDO_SHMEM_NAME);
     return kEplSuccessful;
@@ -144,12 +144,12 @@ The function allocates shared memory for the kernel needed to transfer the PDOs.
 \param  memSize_p               Size of PDO memory
 \param  ppPdoMem_p              Pointer to store the PDO memory pointer.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdokcal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
+tOplkError pdokcal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
 {
     TRACE ("%s()\n", __func__);
     if (ftruncate(fd_l, memSize_p) < 0)
@@ -177,12 +177,12 @@ transfering the PDOs.
 \param  pMem_p                  Pointer to the shared memory segment.
 \param  memSize_p               Size of PDO memory
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdokcal_freeMem(BYTE* pMem_p, size_t memSize_p)
+tOplkError pdokcal_freeMem(BYTE* pMem_p, size_t memSize_p)
 {
     TRACE ("%s()\n", __func__);
 

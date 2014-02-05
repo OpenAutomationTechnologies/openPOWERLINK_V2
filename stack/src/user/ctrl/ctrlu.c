@@ -119,32 +119,32 @@ static tCtrluInstance       ctrlInstance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tEplKernel initNmtu(tEplApiInitParam* pInitParam_p);
-static tEplKernel initObd(tEplApiInitParam* pInitParam_p);
-static tEplKernel updateDllConfig(tEplApiInitParam* pInitParam_p, BOOL fUpdateIdentity_p);
-static tEplKernel updateSdoConfig();
-static tEplKernel updateObd(tEplApiInitParam* pInitParam_p);
+static tOplkError initNmtu(tEplApiInitParam* pInitParam_p);
+static tOplkError initObd(tEplApiInitParam* pInitParam_p);
+static tOplkError updateDllConfig(tEplApiInitParam* pInitParam_p, BOOL fUpdateIdentity_p);
+static tOplkError updateSdoConfig();
+static tOplkError updateObd(tEplApiInitParam* pInitParam_p);
 
-static tEplKernel processUserEvent(tEplEvent* pEplEvent_p);
-static tEplKernel cbCnCheckEvent(tNmtEvent NmtEvent_p);
-static tEplKernel cbNmtStateChange(tEventNmtStateChange nmtStateChange_p);
+static tOplkError processUserEvent(tEplEvent* pEplEvent_p);
+static tOplkError cbCnCheckEvent(tNmtEvent NmtEvent_p);
+static tOplkError cbNmtStateChange(tEventNmtStateChange nmtStateChange_p);
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
-static tEplKernel cbNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p,
+static tOplkError cbNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p,
                                     tNmtState nmtState_p, UINT16 errorCode_p,
                                     BOOL fMandatory_p);
 #endif
 
-static tEplKernel cbBootEvent(tNmtBootEvent BootEvent_p, tNmtState NmtState_p,
+static tOplkError cbBootEvent(tNmtBootEvent BootEvent_p, tNmtState NmtState_p,
                                     UINT16 errorCode_p);
 
 #if defined(CONFIG_INCLUDE_LEDU)
-static tEplKernel cbLedStateChange(tLedType LedType_p, BOOL fOn_p);
+static tOplkError cbLedStateChange(tLedType LedType_p, BOOL fOn_p);
 #endif
 
 #if defined(CONFIG_INCLUDE_CFM)
-static tEplKernel cbCfmEventCnProgress(tCfmEventCnProgress* pEventCnProgress_p);
-static tEplKernel cbCfmEventCnResult(unsigned int uiNodeId_p, tNmtNodeCommand NodeCommand_p);
+static tOplkError cbCfmEventCnProgress(tCfmEventCnProgress* pEventCnProgress_p);
+static tOplkError cbCfmEventCnResult(unsigned int uiNodeId_p, tNmtNodeCommand NodeCommand_p);
 #endif
 
 //============================================================================//
@@ -157,14 +157,14 @@ static tEplKernel cbCfmEventCnResult(unsigned int uiNodeId_p, tNmtNodeCommand No
 
 The function initializes the user control module.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_ctrlu
 */
 //------------------------------------------------------------------------------
-tEplKernel ctrlu_init(void)
+tOplkError ctrlu_init(void)
 {
-    tEplKernel          ret;
+    tOplkError          ret;
 
     TRACE ("Initialize ctrl module ...\n");
 
@@ -193,7 +193,7 @@ Exit:
 
 The function cleans up the user control module.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_ctrlu
 */
@@ -218,14 +218,14 @@ openPOWERLINK stack.
 \param  pInitParam_p            Pointer to the initialization parameters
                                 provided by the application.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_ctrlu
 */
 //------------------------------------------------------------------------------
-tEplKernel ctrlu_initStack(tEplApiInitParam * pInitParam_p)
+tOplkError ctrlu_initStack(tEplApiInitParam * pInitParam_p)
 {
-    tEplKernel              ret = kEplSuccessful;
+    tOplkError              ret = kEplSuccessful;
     tCtrlInitParam          ctrlParam;
 
     // reset instance structure
@@ -337,14 +337,14 @@ Exit:
 The function shuts down the openPOWERLINK stack. I cleans up all user modules
 and the kernel modules by using the kernel control module.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_ctrlu
 */
 //------------------------------------------------------------------------------
-tEplKernel ctrlu_shutdownStack(void)
+tOplkError ctrlu_shutdownStack(void)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 
     ret = eventu_exit();
     TRACE("eventu_exit():  0x%X\n", ret);
@@ -419,14 +419,14 @@ tEplKernel ctrlu_shutdownStack(void)
 This function provides processing timing to several tasks in the openPOWERLINK
 stack.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_ctrlu
 */
 //------------------------------------------------------------------------------
-tEplKernel ctrlu_processStack(void)
+tOplkError ctrlu_processStack(void)
 {
-    tEplKernel Ret = kEplSuccessful;
+    tOplkError Ret = kEplSuccessful;
 
     eventucal_process();
 
@@ -477,14 +477,14 @@ The function calls the user event callback function
 \param  eventType_p         Event type to send.
 \param  pEventArg_p         Event argument to send.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_ctrlu
 */
 //------------------------------------------------------------------------------
-tEplKernel ctrlu_callUserEventCallback(tEplApiEventType eventType_p, tEplApiEventArg* pEventArg_p)
+tOplkError ctrlu_callUserEventCallback(tEplApiEventType eventType_p, tEplApiEventArg* pEventArg_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
 
     ret = ctrlInstance_l.initParam.m_pfnCbEvent(eventType_p, pEventArg_p,
                                                 ctrlInstance_l.initParam.m_pEventUserArg);
@@ -500,14 +500,14 @@ actions for system objects.
 
 \param      pParam_p        OBD callback parameter.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_ctrlu
 */
 //------------------------------------------------------------------------------
-tEplKernel ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
+tOplkError ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
 
 #if (EPL_API_OBD_FORWARD_EVENT != FALSE)
     tEplApiEventArg     eventArg;
@@ -681,12 +681,12 @@ The function initializes the NMTU modules.
 
 \param  pInitParam_p        Pointer to init parameters.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel initNmtu(tEplApiInitParam* pInitParam_p)
+static tOplkError initNmtu(tEplApiInitParam* pInitParam_p)
 {
-    tEplKernel      Ret = kEplSuccessful;
+    tOplkError      Ret = kEplSuccessful;
 
     // initialize EplNmtCnu module
     TRACE ("Initialize NMT_CN module...\n");
@@ -750,12 +750,12 @@ The function initializes the object dictionary
 
 \param  pInitParam_p        Pointer to init parameters.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel initObd(tEplApiInitParam* pInitParam_p)
+static tOplkError initObd(tEplApiInitParam* pInitParam_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     tObdInitParam       ObdInitParam;
 
     UNUSED_PARAMETER(pInitParam_p);
@@ -784,12 +784,12 @@ The function implements the callback function for node events.
 
 \param  nmtStateChange_p        NMT state change event.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
+static tOplkError cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     BYTE                nmtState;
     tEplApiEventArg     eventArg;
 
@@ -968,12 +968,12 @@ by calling the event callback function.
 
 \param  pEvent_p             Event to process.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processUserEvent(tEplEvent* pEvent_p)
+static tOplkError processUserEvent(tEplEvent* pEvent_p)
 {
-    tEplKernel          ret;
+    tOplkError          ret;
     tEplEventError*     pEventError;
     tEplApiEventType    eventType;
     tEplApiEventArg     apiEventArg;
@@ -1044,12 +1044,12 @@ The function updates the DLL configuration.
 \param  pInitParam_p        Pointer to the stack initialization parameters.
 \param  fUpdateIdentity_p   Flag determines if identity will also be updated.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel updateDllConfig(tEplApiInitParam* pInitParam_p, BOOL fUpdateIdentity_p)
+static tOplkError updateDllConfig(tEplApiInitParam* pInitParam_p, BOOL fUpdateIdentity_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     tDllConfigParam     dllConfigParam;
     tDllIdentParam      dllIdentParam;
     tObdSize            obdSize;
@@ -1231,12 +1231,12 @@ static tEplKernel updateDllConfig(tEplApiInitParam* pInitParam_p, BOOL fUpdateId
 
 The function updates the SDO configuration from the object dictionary.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel updateSdoConfig(void)
+static tOplkError updateSdoConfig(void)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     tObdSize            obdSize;
     DWORD               sdoSequTimeout;
 
@@ -1258,12 +1258,12 @@ parameters.
 
 \param  pInitParam_p        Pointer to the stack initialization parameters.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel updateObd(tEplApiInitParam* pInitParam_p)
+static tOplkError updateObd(tEplApiInitParam* pInitParam_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     WORD                wTemp;
     BYTE                bTemp;
 
@@ -1425,13 +1425,13 @@ The function implements the callback function for node events.
 \param  errorCode_p     Contains the error code for the node event kNmtNodeEventError
 \param  fMandatory_p    Flag determines if the CN is mandatory.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel cbNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtState nmtState_p,
+static tOplkError cbNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtState nmtState_p,
                               UINT16 errorCode_p, BOOL fMandatory_p)
 {
-    tEplKernel              ret;
+    tOplkError              ret;
     tEplApiEventArg         eventArg;
 
     ret = kEplSuccessful;
@@ -1464,13 +1464,13 @@ The function implements the callback function for node events.
 \param  nmtState_p      Current local NMT state.
 \param  errorCode_p     Contains the error code for the node event kNmtBootEventError
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel cbBootEvent(tNmtBootEvent bootEvent_p, tNmtState nmtState_p,
+static tOplkError cbBootEvent(tNmtBootEvent bootEvent_p, tNmtState nmtState_p,
                                     UINT16 errorCode_p)
 {
-    tEplKernel              ret;
+    tOplkError              ret;
     tEplApiEventArg         eventArg;
 
     ret = kEplSuccessful;
@@ -1494,12 +1494,12 @@ The function implements the callback function for LED change events.
 \param  ledType_p       Type of LED.
 \param  fOn_p           State of LED. TRUE = on, FALSE = off
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel cbLedStateChange(tLedType ledType_p, BOOL fOn_p)
+static tOplkError cbLedStateChange(tLedType ledType_p, BOOL fOn_p)
 {
-    tEplKernel              ret;
+    tOplkError              ret;
     tEplApiEventArg         eventArg;
 
     ret = kEplSuccessful;
@@ -1525,12 +1525,12 @@ The function implements the callback function for CFM progress events.
 \param  pEventCnProgress_p         Pointer to structure with additional
                                    information.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel cbCfmEventCnProgress(tCfmEventCnProgress* pEventCnProgress_p)
+static tOplkError cbCfmEventCnProgress(tCfmEventCnProgress* pEventCnProgress_p)
 {
-    tEplKernel              ret;
+    tOplkError              ret;
     tEplApiEventArg         eventArg;
 
     ret = kEplSuccessful;
@@ -1549,12 +1549,12 @@ The function implements the callback function for CFM result events.
 \param  nodeId_p                Node ID of CN.
 \param  nodeCommand_p           NMT command which shall be executed.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel cbCfmEventCnResult(UINT nodeId_p, tNmtNodeCommand nodeCommand_p)
+static tOplkError cbCfmEventCnResult(UINT nodeId_p, tNmtNodeCommand nodeCommand_p)
 {
-    tEplKernel              ret;
+    tOplkError              ret;
     tEplApiEventArg         eventArg;
 
     eventArg.m_CfmResult.m_uiNodeId = nodeId_p;
@@ -1579,12 +1579,12 @@ The function posts boot event directly to API layer.
 
 \param  nmtEvent_p              NMT event to check.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel cbCnCheckEvent(tNmtEvent nmtEvent_p)
+static tOplkError cbCnCheckEvent(tNmtEvent nmtEvent_p)
 {
-    tEplKernel              ret = kEplSuccessful;
+    tOplkError              ret = kEplSuccessful;
     tNmtState               nmtState;
 
     switch (nmtEvent_p)

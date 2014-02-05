@@ -354,7 +354,7 @@ typedef struct
 } tObdCbParam;
 
 // define type for callback function: pParam_p points to tObdCbParam
-typedef tEplKernel (ROM* tObdCallback) (tObdCbParam MEM* pParam_p);
+typedef tOplkError (ROM* tObdCallback) (tObdCbParam MEM* pParam_p);
 
 /**
 \brief Structure for subindices
@@ -418,8 +418,8 @@ typedef struct
     tObdSize            objSize;
 } tObdCbStoreParam;
 
-typedef tEplKernel (ROM* tInitTabEntryCallback) (void MEM* pTabEntry_p, UINT uiObjIndex_p);
-typedef tEplKernel (ROM* tObdStoreLoadCallback) (tObdCbStoreParam MEM* pCbStoreParam_p);
+typedef tOplkError (ROM* tInitTabEntryCallback) (void MEM* pTabEntry_p, UINT uiObjIndex_p);
+typedef tOplkError (ROM* tObdStoreLoadCallback) (tObdCbStoreParam MEM* pCbStoreParam_p);
 
 /**
 \brief Enumeration for Node ID setting types
@@ -441,29 +441,29 @@ typedef enum
 extern "C" {
 #endif
 
-tEplKernel  obd_init(tObdInitParam MEM* pInitParam_p);
-tEplKernel  obd_deleteInstance(void);
-tEplKernel  obd_writeEntry(UINT index_p, UINT subIndex_p, void* pSrcData_p, tObdSize size_p);
-tEplKernel  obd_readEntry(UINT index_p, UINT subIndex_p, void* pDstData_p, tObdSize *pSize_p);
-tEplKernel  obd_accessOdPart(tObdPart obdPart_p, tObdDir direction_p);
-tEplKernel  obd_defineVar(tVarParam MEM* pVarParam_p);
+tOplkError  obd_init(tObdInitParam MEM* pInitParam_p);
+tOplkError  obd_deleteInstance(void);
+tOplkError  obd_writeEntry(UINT index_p, UINT subIndex_p, void* pSrcData_p, tObdSize size_p);
+tOplkError  obd_readEntry(UINT index_p, UINT subIndex_p, void* pDstData_p, tObdSize *pSize_p);
+tOplkError  obd_accessOdPart(tObdPart obdPart_p, tObdDir direction_p);
+tOplkError  obd_defineVar(tVarParam MEM* pVarParam_p);
 void*       obd_getObjectDataPtr(UINT index_p, UINT subIndex_p);
-tEplKernel  obd_registerUserOd(tObdEntryPtr pUserOd_p);
+tOplkError  obd_registerUserOd(tObdEntryPtr pUserOd_p);
 void        obd_initVarEntry(tObdVarEntry MEM* pVarEntry_p, tObdType type_p, tObdSize obdSize_p);
 tObdSize    obd_getDataSize(UINT index_p, UINT subIndex_p);
 UINT        obd_getNodeId(void);
-tEplKernel  obd_setNodeId(UINT nodeId_p, tObdNodeIdType nodeIdType_p);
-tEplKernel  obd_isNumerical(UINT index_p, UINT subIndex_p, BOOL* pfEntryNumerical_p);
-tEplKernel  obd_getType(UINT index_p, UINT subIndex_p, tObdType* pType_p);
-tEplKernel  obd_writeEntryFromLe(UINT index_p, UINT subIndex_p, void* pSrcData_p, tObdSize size_p);
-tEplKernel  obd_readEntryToLe(UINT index_p, UINT subIndex_p, void* pDstData_p, tObdSize* pSize_p);
-tEplKernel  obd_getAccessType(UINT index_p, UINT subIndex_p, tObdAccess* pAccessType_p);
-tEplKernel  obd_searchVarEntry(UINT index_p, UINT subindex_p, tObdVarEntry MEM** ppVarEntry_p);
+tOplkError  obd_setNodeId(UINT nodeId_p, tObdNodeIdType nodeIdType_p);
+tOplkError  obd_isNumerical(UINT index_p, UINT subIndex_p, BOOL* pfEntryNumerical_p);
+tOplkError  obd_getType(UINT index_p, UINT subIndex_p, tObdType* pType_p);
+tOplkError  obd_writeEntryFromLe(UINT index_p, UINT subIndex_p, void* pSrcData_p, tObdSize size_p);
+tOplkError  obd_readEntryToLe(UINT index_p, UINT subIndex_p, void* pDstData_p, tObdSize* pSize_p);
+tOplkError  obd_getAccessType(UINT index_p, UINT subIndex_p, tObdAccess* pAccessType_p);
+tOplkError  obd_searchVarEntry(UINT index_p, UINT subindex_p, tObdVarEntry MEM** ppVarEntry_p);
 
-tEplKernel  obd_initObd(tObdInitParam MEM* pInitParam_p);
+tOplkError  obd_initObd(tObdInitParam MEM* pInitParam_p);
 
 #if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
-tEplKernel  obd_storeLoadObjCallback(tObdStoreLoadCallback pfnCallback_p);
+tOplkError  obd_storeLoadObjCallback(tObdStoreLoadCallback pfnCallback_p);
 #endif
 
 #ifdef __cplusplus

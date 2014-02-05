@@ -105,17 +105,17 @@ static tErrHndkInstance instance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tEplKernel postNmtEvent(tNmtEvent nmtEvent_p);
-static tEplKernel generateHistoryEntry(UINT16 errorCode_p, tEplNetTime netTime_p);
-static tEplKernel generateHistoryEntryNodeId(UINT16 errorCode_p, tEplNetTime netTime_p, UINT nodeId_p);
+static tOplkError postNmtEvent(tNmtEvent nmtEvent_p);
+static tOplkError generateHistoryEntry(UINT16 errorCode_p, tEplNetTime netTime_p);
+static tOplkError generateHistoryEntryNodeId(UINT16 errorCode_p, tEplNetTime netTime_p, UINT nodeId_p);
 static void       decrementCnCounters(void);
-static tEplKernel postHistoryEntryEvent(tEplErrHistoryEntry* pHistoryEntry_p);
-static tEplKernel handleDllErrors(tEplEvent *pEvent_p);
+static tOplkError postHistoryEntryEvent(tEplErrHistoryEntry* pHistoryEntry_p);
+static tOplkError handleDllErrors(tEplEvent *pEvent_p);
 
 #ifdef CONFIG_INCLUDE_NMT_MN
-static tEplKernel decrementMnCounters(void);
-static tEplKernel postHeartbeatEvent(UINT nodeId_p, tNmtState state_p, UINT16 errorCode_p);
-static tEplKernel generateHistoryEntryWithError(UINT16 errorCode_p, tEplNetTime netTime_p, UINT16 eplError_p);
+static tOplkError decrementMnCounters(void);
+static tOplkError postHeartbeatEvent(UINT nodeId_p, tNmtState state_p, UINT16 errorCode_p);
+static tOplkError generateHistoryEntryWithError(UINT16 errorCode_p, tEplNetTime netTime_p, UINT16 eplError_p);
 #endif
 
 //============================================================================//
@@ -129,14 +129,14 @@ static tEplKernel generateHistoryEntryWithError(UINT16 errorCode_p, tEplNetTime 
 
 The function initializes the kernel error handler module.
 
-\return Returns a tEplKernel error code.
+\return Returns a tOplkError error code.
 
 \ingroup module_errhndk
 */
 //------------------------------------------------------------------------------
-tEplKernel errhndk_init(void)
+tOplkError errhndk_init(void)
 {
-    tEplKernel      ret;
+    tOplkError      ret;
 
     ret = kEplSuccessful;
     instance_l.dllErrorEvents = 0;
@@ -156,7 +156,7 @@ The function shuts down the kernel error handler module.
 \ingroup module_errhndk
 */
 //------------------------------------------------------------------------------
-tEplKernel errhndk_exit()
+tOplkError errhndk_exit()
 {
     errhndkcal_exit();
     return kEplSuccessful;
@@ -171,16 +171,16 @@ It will be called by the DLL.
 
 \param  pEvent_p            Pointer to error event which should be processed
 
-\return Returns a tEplKernel error code
+\return Returns a tOplkError error code
 \retval kEplSuccessful      Event was successfully handled
 \retval kEplInvalidEvent    An invalid event was supplied
 
 \ingroup module_errhndk
 */
 //------------------------------------------------------------------------------
-tEplKernel errhndk_process(tEplEvent* pEvent_p)
+tOplkError errhndk_process(tEplEvent* pEvent_p)
 {
-    tEplKernel              ret;
+    tOplkError              ret;
 
     ret = kEplSuccessful;
 
@@ -212,7 +212,7 @@ of each cycle.
 \ingroup module_errhndk
 */
 //------------------------------------------------------------------------------
-tEplKernel errhndk_decrementCounters(BOOL fMN_p)
+tOplkError errhndk_decrementCounters(BOOL fMN_p)
 {
 #ifdef CONFIG_INCLUDE_NMT_MN
     if (fMN_p != FALSE)
@@ -248,9 +248,9 @@ to other modules which need to post error events to the error handler.
 \ingroup module_errhndk
 */
 //------------------------------------------------------------------------------
-tEplKernel errhndk_postError(tErrHndkEvent* pErrEvent_p)
+tOplkError errhndk_postError(tErrHndkEvent* pErrEvent_p)
 {
-    tEplKernel              Ret;
+    tOplkError              Ret;
     tEplEvent               Event;
 
     Event.m_EventSink = kEplEventSinkErrk;
@@ -278,7 +278,7 @@ The function resets the error flag for the specified CN.
 */
 //------------------------------------------------------------------------------
 
-tEplKernel errhndk_resetCnError(UINT nodeId_p)
+tOplkError errhndk_resetCnError(UINT nodeId_p)
 {
     UINT                    nodeIdx;
 
@@ -309,7 +309,7 @@ The function decrements the error counters used by a MN node.
 \return Returns kEplSuccessful or error code
 */
 //------------------------------------------------------------------------------
-static tEplKernel decrementMnCounters(void)
+static tOplkError decrementMnCounters(void)
 {
     BYTE*           pCnNodeId;
     UINT            nodeIdx;
@@ -416,9 +416,9 @@ to the NMT.
 \return Returns kEplSuccessful or error code
 */
 //------------------------------------------------------------------------------
-static tEplKernel handleCnLossSoc(tEplEvent *pEvent_p)
+static tOplkError handleCnLossSoc(tEplEvent *pEvent_p)
 {
-    tEplKernel              ret = kEplSuccessful;
+    tOplkError              ret = kEplSuccessful;
     tErrHndkEvent*          pErrorHandlerEvent = (tErrHndkEvent*)pEvent_p->m_pArg;
     UINT32                   threshold, thresholdCnt, cumulativeCnt;
 
@@ -467,9 +467,9 @@ to the NMT.
 \return Returns kEplSuccessful or error code
 */
 //------------------------------------------------------------------------------
-static tEplKernel handleCnLossPreq(tEplEvent *pEvent_p)
+static tOplkError handleCnLossPreq(tEplEvent *pEvent_p)
 {
-    tEplKernel              ret;
+    tOplkError              ret;
     tErrHndkEvent*          pErrorHandlerEvent = (tErrHndkEvent*)pEvent_p->m_pArg;
     UINT32                  threshold, thresholdCnt, cumulativeCnt;
 
@@ -544,9 +544,9 @@ to the NMT.
 \return Returns kEplSuccessful or error code
 */
 //------------------------------------------------------------------------------
-static tEplKernel handleCnCrc(tEplEvent *pEvent_p)
+static tOplkError handleCnCrc(tEplEvent *pEvent_p)
 {
-    tEplKernel              ret;
+    tOplkError              ret;
     tErrHndkEvent*          pErrorHandlerEvent = (tErrHndkEvent*)pEvent_p->m_pArg;
     UINT32                  threshold, thresholdCnt, cumulativeCnt;
 
@@ -595,9 +595,9 @@ is removed from the isochronous phase.
 \return Returns kEplSuccessful or error code
 */
 //------------------------------------------------------------------------------
-static tEplKernel handleInvalidFormat(tEplEvent *pEvent_p)
+static tOplkError handleInvalidFormat(tEplEvent *pEvent_p)
 {
-    tEplKernel              ret;
+    tOplkError              ret;
     tErrHndkEvent*          pErrorHandlerEvent = (tErrHndkEvent*)pEvent_p->m_pArg;
 
     // check if invalid format error occurred (only direct reaction)
@@ -658,9 +658,9 @@ to the NMT.
 \return Returns kEplSuccessful or error code
 */
 //------------------------------------------------------------------------------
-static tEplKernel handleMnCrc(tEplEvent *pEvent_p)
+static tOplkError handleMnCrc(tEplEvent *pEvent_p)
 {
-    tEplKernel              ret;
+    tOplkError              ret;
     tErrHndkEvent*          pErrorHandlerEvent = (tErrHndkEvent*)pEvent_p->m_pArg;
     UINT32                  threshold, thresholdCnt, cumulativeCnt;
 
@@ -703,9 +703,9 @@ appropriate error counters and generates a history entry.
 \return Returns kEplSuccessful or error code
 */
 //------------------------------------------------------------------------------
-static tEplKernel handleMnCycTimeExceed(tEplEvent *pEvent_p)
+static tOplkError handleMnCycTimeExceed(tEplEvent *pEvent_p)
 {
-    tEplKernel              ret = kEplSuccessful;
+    tOplkError              ret = kEplSuccessful;
     tErrHndkEvent*          pErrorHandlerEvent =
                             (tErrHndkEvent*)pEvent_p->m_pArg;
     UINT32                  threshold, thresholdCnt, cumulativeCnt;
@@ -765,9 +765,9 @@ count is reached the CN will be removed from the isochronous phase.
 \return Returns kEplSuccessful or error code
 */
 //------------------------------------------------------------------------------
-static tEplKernel handleMnCnLossPres(tEplEvent *pEvent_p)
+static tOplkError handleMnCnLossPres(tEplEvent *pEvent_p)
 {
-    tEplKernel              ret;
+    tOplkError              ret;
     UINT                    nodeIdx;
     tDllNodeOpParam         nodeOpParam;
     tErrHndkEvent*          pErrorHandlerEvent = (tErrHndkEvent*)pEvent_p->m_pArg;
@@ -844,9 +844,9 @@ different error handling functions to update the error counters.
 \return Returns kEplSuccessful or error code
 */
 //------------------------------------------------------------------------------
-static tEplKernel handleDllErrors(tEplEvent *pEvent_p)
+static tOplkError handleDllErrors(tEplEvent *pEvent_p)
 {
-    tEplKernel              ret = kEplSuccessful;
+    tOplkError              ret = kEplSuccessful;
 
     // check the different error events
     ret = handleCnLossSoc(pEvent_p);
@@ -898,10 +898,10 @@ The function is used to post a heartbeat event to the NMT.
 \return Returns kEplSuccessful or error code
 */
 //------------------------------------------------------------------------------
-static tEplKernel postHeartbeatEvent(UINT nodeId_p, tNmtState state_p,
+static tOplkError postHeartbeatEvent(UINT nodeId_p, tNmtState state_p,
                                     UINT16 errorCode_p)
 {
-    tEplKernel              ret;
+    tOplkError              ret;
     tHeartbeatEvent         heartbeatEvent;
     tEplEvent               event;
 
@@ -928,9 +928,9 @@ The function is used to post a history entry event to the API.
 \return Returns kEplSuccessful or error code
 */
 //------------------------------------------------------------------------------
-static tEplKernel postHistoryEntryEvent(tEplErrHistoryEntry* pHistoryEntry_p)
+static tOplkError postHistoryEntryEvent(tEplErrHistoryEntry* pHistoryEntry_p)
 {
-    tEplKernel              ret;
+    tOplkError              ret;
     tEplEvent               event;
 
     event.m_EventSink = kEplEventSinkApi;
@@ -955,9 +955,9 @@ posting it to the API.
 \return Returns kEplSuccessful or error code
 */
 //------------------------------------------------------------------------------
-static tEplKernel generateHistoryEntry(UINT16 errorCode_p, tEplNetTime netTime_p)
+static tOplkError generateHistoryEntry(UINT16 errorCode_p, tEplNetTime netTime_p)
 {
-    tEplKernel                  ret;
+    tOplkError                  ret;
     tEplErrHistoryEntry         historyEntry;
 
     historyEntry.m_wEntryType = EPL_ERR_ENTRYTYPE_MODE_OCCURRED |
@@ -986,10 +986,10 @@ by setting up a history entry event and posting it to the API.
 \return Returns kEplSuccessful or error code
 */
 //------------------------------------------------------------------------------
-static tEplKernel generateHistoryEntryNodeId(UINT16 errorCode_p,
+static tOplkError generateHistoryEntryNodeId(UINT16 errorCode_p,
                                 tEplNetTime netTime_p, UINT nodeId_p)
 {
-    tEplKernel                  ret;
+    tOplkError                  ret;
     tEplErrHistoryEntry         historyEntry;
 
     historyEntry.m_wEntryType = EPL_ERR_ENTRYTYPE_MODE_OCCURRED |
@@ -1020,10 +1020,10 @@ API.
 \return Returns kEplSuccessful or error code
 */
 //------------------------------------------------------------------------------
-static tEplKernel generateHistoryEntryWithError(UINT16 errorCode_p,
+static tOplkError generateHistoryEntryWithError(UINT16 errorCode_p,
                                 tEplNetTime netTime_p, UINT16 eplError_p)
 {
-    tEplKernel                  ret;
+    tOplkError                  ret;
     tEplErrHistoryEntry         historyEntry;
 
     historyEntry.m_wEntryType = EPL_ERR_ENTRYTYPE_MODE_OCCURRED |
@@ -1050,9 +1050,9 @@ The function posts a NMT event to the NMT.
 \return Returns kEplSuccessful or error code
 */
 //------------------------------------------------------------------------------
-static tEplKernel postNmtEvent(tNmtEvent nmtEvent_p)
+static tOplkError postNmtEvent(tNmtEvent nmtEvent_p)
 {
-    tEplKernel                  ret;
+    tOplkError                  ret;
     tNmtEvent                   nmtEvent;
     tEplEvent                   event;
 

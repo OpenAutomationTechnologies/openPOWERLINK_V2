@@ -99,11 +99,11 @@ static tErrHnduInstance        instance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tEplKernel linkErrorCounter(tErrorObject* pErrorCounter_p, UINT index_p);
+static tOplkError linkErrorCounter(tErrorObject* pErrorCounter_p, UINT index_p);
 
 #ifdef CONFIG_INCLUDE_NMT_MN
-static tEplKernel checkErrorObject(UINT index_p, BYTE *pEntries_p);
-static tEplKernel linkMnCnLossPresErrors(tErrHndObjects* pError_p);
+static tOplkError checkErrorObject(UINT index_p, BYTE *pEntries_p);
+static tOplkError linkMnCnLossPresErrors(tErrHndObjects* pError_p);
 #endif
 
 //============================================================================//
@@ -116,14 +116,14 @@ static tEplKernel linkMnCnLossPresErrors(tErrHndObjects* pError_p);
 
 The function initializes the user error handler module.
 
-\return Returns a tEplKernel error code.
+\return Returns a tOplkError error code.
 
 \ingroup module_errhndu
 */
 //------------------------------------------------------------------------------
-tEplKernel errhndu_init(void)
+tOplkError errhndu_init(void)
 {
-    tEplKernel      ret;
+    tOplkError      ret;
 
     ret = kEplSuccessful;
 
@@ -185,12 +185,12 @@ Exit:
 
 The function shuts down the user error handler module.
 
-\return Returns a tEplKernel error code.
+\return Returns a tOplkError error code.
 
 \ingroup module_errhndu
 */
 //------------------------------------------------------------------------------
-tEplKernel errhndu_exit()
+tOplkError errhndu_exit()
 {
     errhnducal_exit();
     return kEplSuccessful;
@@ -210,7 +210,7 @@ PreRead events.
 \return Returns always kEplSuccessful
 */
 //------------------------------------------------------------------------------
-tEplKernel errhndu_cbObdAccess(tObdCbParam MEM* pParam_p)
+tOplkError errhndu_cbObdAccess(tObdCbParam MEM* pParam_p)
 {
     switch (pParam_p->obdEvent)
     {
@@ -268,9 +268,9 @@ PreRead objects.
 \ingroup module_errhndu
 */
 //------------------------------------------------------------------------------
-tEplKernel errhndu_mnCnLossPresCbObdAccess(tObdCbParam MEM* pParam_p)
+tOplkError errhndu_mnCnLossPresCbObdAccess(tObdCbParam MEM* pParam_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
 
     if (pParam_p->subIndex == 0)
         return kEplSuccessful;
@@ -328,14 +328,14 @@ directory entry.
 \param  pErrorCounter_p     Pointer to error counter structure
 \param  index_p             OD index
 
-\return Returns a tEplKernel error code.
+\return Returns a tOplkError error code.
 
 \ingroup module_errhndu
 */
 //------------------------------------------------------------------------------
-static tEplKernel linkErrorCounter(tErrorObject* pErrorCounter_p, UINT index_p)
+static tOplkError linkErrorCounter(tErrorObject* pErrorCounter_p, UINT index_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     tVarParam       varParam;
 
     varParam.validFlag = kVarValidAll;
@@ -372,16 +372,16 @@ dictionary.
 \param  pEntries_p          Pointer to store the number of entries of this
                             object.
 
-\return Returns a tEplKernel error code.
+\return Returns a tOplkError error code.
 \retval kEplSuccessful          If object exists
 \retval kEplObdIndexNotExist    IF index does not exist
 
 \ingroup module_errhndu
 */
 //------------------------------------------------------------------------------
-static tEplKernel checkErrorObject(UINT index_p, BYTE *pEntries_p)
+static tOplkError checkErrorObject(UINT index_p, BYTE *pEntries_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     tObdSize        entrySize;
     BYTE            indexEntries;
 
@@ -408,14 +408,14 @@ subindexes for each node ID.
 
 \param  pError_p            Pointer to error handler object data.
 
-\return Returns a tEplKernel error code.
+\return Returns a tOplkError error code.
 
 \ingroup module_errhndu
 */
 //------------------------------------------------------------------------------
-static tEplKernel linkMnCnLossPresErrors(tErrHndObjects* pError_p)
+static tOplkError linkMnCnLossPresErrors(tErrHndObjects* pError_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     tVarParam       varParam;
     BYTE            indexEntries;
     BYTE            numObjs;
