@@ -77,7 +77,7 @@ typedef struct
 {
     tNmtState                       localNmtState;
     tNmtuStateChangeCallback        pfnNmtChangeCb;
-    tEplTimerHdl                    timerHdl;
+    tTimerHdl                       timerHdl;
 } tNmtuInstance;
 
 //------------------------------------------------------------------------------
@@ -661,7 +661,7 @@ The function sets up a timer which posts a NMT Event.
 static tOplkError setupNmtTimerEvent(UINT32 timeout_p, tNmtEvent event_p)
 {
     tOplkError      ret;
-    tEplTimerArg    timerArg;
+    tTimerArg       timerArg;
 
     timeout_p = timeout_p / 1000; // convert us into ms
     if (timeout_p == 0)  // timer was below one ms -> set one ms

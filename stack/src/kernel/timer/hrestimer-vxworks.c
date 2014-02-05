@@ -100,8 +100,8 @@
 *******************************************************************************/
 typedef struct
 {
-    tEplTimerEventArg   m_EventArg;
-    tEplTimerkCallback  m_pfnCallback;  ///< pointer to timer callback function
+    tTimerEventArg      m_EventArg;
+    tTimerkCallback     m_pfnCallback;  ///< pointer to timer callback function
     struct timespec     m_timeout;
     timer_t             m_timer;
 } tEplTimerHighReskTimerInfo;
@@ -241,9 +241,9 @@ tOplkError PUBLIC hrestimer_delInstance(void)
 //
 // Return:      tOplkError      = error code
 //---------------------------------------------------------------------------
-tOplkError PUBLIC hrestimer_modifyTimer(tEplTimerHdl*     pTimerHdl_p,
+tOplkError PUBLIC hrestimer_modifyTimer(tTimerHdl*     pTimerHdl_p,
                                     ULONGLONG           ullTimeNs_p,
-                                    tEplTimerkCallback  pfnCallback_p,
+                                    tTimerkCallback  pfnCallback_p,
                                     ULONG               ulArgument_p,
                                     BOOL                fContinuously_p)
 {
@@ -379,7 +379,7 @@ Exit:
 //
 // State:       not tested
 //---------------------------------------------------------------------------
-tOplkError PUBLIC hrestimer_deleteTimer(tEplTimerHdl* pTimerHdl_p)
+tOplkError PUBLIC hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
 {
     tOplkError                  Ret = kEplSuccessful;
     UINT                        uiIndex;

@@ -75,7 +75,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 typedef struct
 {
     struct timer_list   timer;
-    tEplTimerArg        timerArgument;
+    tTimerArg           timerArgument;
 } tTimeruData;
 
 //------------------------------------------------------------------------------
@@ -174,7 +174,7 @@ corresponding timer handle.
 \ingroup module_timeru
 */
 //------------------------------------------------------------------------------
-tOplkError timeru_setTimer(tEplTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tEplTimerArg argument_p)
+tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg argument_p)
 {
     tOplkError          ret = kEplSuccessful;
     tTimeruData*        pData;
@@ -192,10 +192,10 @@ tOplkError timeru_setTimer(tEplTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tEplTime
     pData->timer.data = (unsigned long) pData;
     pData->timer.expires = jiffies + 1 + ((timeInMs_p * HZ) + 999) / 1000;
 
-    EPL_MEMCPY(&pData->timerArgument, &argument_p, sizeof(tEplTimerArg));
+    EPL_MEMCPY(&pData->timerArgument, &argument_p, sizeof(tTimerArg));
 
     add_timer(&pData->timer);
-    *pTimerHdl_p = (tEplTimerHdl) pData;
+    *pTimerHdl_p = (tTimerHdl) pData;
     return ret;
 }
 
@@ -215,7 +215,7 @@ it creates the timer and stores the new timer handle at \p pTimerHdl_p.
 \ingroup module_timeru
 */
 //------------------------------------------------------------------------------
-tOplkError timeru_modifyTimer(tEplTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tEplTimerArg argument_p)
+tOplkError timeru_modifyTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg argument_p)
 {
     tOplkError          ret = kEplSuccessful;
     tTimeruData*        pData;
@@ -240,7 +240,7 @@ tOplkError timeru_modifyTimer(tEplTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tEplT
     // won't use the new TimerArg and
     // therefore the old timer cannot be distinguished from the new one.
     // But if the new timer is too fast, it may get lost.
-    EPL_MEMCPY(&pData->timerArgument, &argument_p, sizeof(tEplTimerArg));
+    EPL_MEMCPY(&pData->timerArgument, &argument_p, sizeof(tTimerArg));
 
     // check if timer is really running
     if (timer_pending(&pData->timer) == 0)
@@ -266,7 +266,7 @@ This function deletes an existing timer.
 \ingroup module_timeru
 */
 //------------------------------------------------------------------------------
-tOplkError timeru_deleteTimer(tEplTimerHdl* pTimerHdl_p)
+tOplkError timeru_deleteTimer(tTimerHdl* pTimerHdl_p)
 {
     tOplkError          ret = kEplSuccessful;
     tTimeruData*        pData;
@@ -303,7 +303,7 @@ This function checks if a timer is active (is running).
 \ingroup module_timeru
 */
 //------------------------------------------------------------------------------
-BOOL timeru_isActive(tEplTimerHdl timerHdl_p)
+BOOL timeru_isActive(tTimerHdl timerHdl_p)
 {
     BOOL                fActive = FALSE;
     tTimeruData*        pData;
@@ -350,12 +350,12 @@ static void cbTimer(ULONG parameter_p)
     tOplkError          ret = kEplSuccessful;
     tTimeruData*        pData;
     tEplEvent           event;
-    tEplTimerEventArg   timerEventArg;
+    tTimerEventArg      timerEventArg;
 
     pData = (tTimeruData*) parameter_p;
 
     // call event function
-    timerEventArg.m_TimerHdl = (tEplTimerHdl)pData;
+    timerEventArg.m_TimerHdl = (tTimerHdl)pData;
     EPL_MEMCPY(&timerEventArg.m_Arg, &pData->timerArgument.m_Arg, sizeof (timerEventArg.m_Arg));
 
     event.m_EventSink = pData->timerArgument.m_EventSink;

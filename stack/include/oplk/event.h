@@ -70,7 +70,7 @@ typedef enum
     kEplEventTypePdoTx          = 0x03, ///< PDO frame transmitted event (PRes/PReq) (arg is pointer to tFrameInfo)
     kEplEventTypePdoSoa         = 0x04, ///< SoA frame received event (isochronous phase completed) (arg is pointer to nothing)
     kEplEventTypeSync           = 0x05, ///< Sync event (e.g. SoC or anticipated SoC) (arg is pointer to nothing)
-    kEplEventTypeTimer          = 0x06, ///< Timer event (arg is pointer to tEplTimerEventArg)
+    kEplEventTypeTimer          = 0x06, ///< Timer event (arg is pointer to tTimerEventArg)
     kEplEventTypeHeartbeat      = 0x07, ///< Heartbeat event (arg is pointer to tEplHeartbeatEvent)
     kEplEventTypeHistoryEntry   = 0x08, ///< Error history entry event (arg is pointer to the tEplErrHistoryEntry)
     kEplEventTypeDllkFlag1      = 0x09, ///< DLL kernel Flag 1 changed event (arg is pointer to nothing)

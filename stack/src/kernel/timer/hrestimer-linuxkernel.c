@@ -116,8 +116,8 @@ The structure provides information for a high-resolution timer.
 */
 typedef struct
 {
-    tEplTimerEventArg    eventArg;          ///< Argument for timer event
-    tEplTimerkCallback   pfnCallback;       ///< Timer callback function
+    tTimerEventArg       eventArg;          ///< Argument for timer event
+    tTimerkCallback      pfnCallback;       ///< Timer callback function
     struct hrtimer       timer;             ///< hrtimer structure of the timer
     BOOL                 fContinuously;     ///< Determines if it is a continuous or one-shot timer
     ULONGLONG            period;            ///< The timer period
@@ -266,8 +266,8 @@ discarded.
 \ingroup module_hrestimer
 */
 //------------------------------------------------------------------------------
-tOplkError hrestimer_modifyTimer(tEplTimerHdl* pTimerHdl_p, ULONGLONG time_p,
-                                 tEplTimerkCallback pfnCallback_p, ULONG argument_p,
+tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
+                                 tTimerkCallback pfnCallback_p, ULONG argument_p,
                                  BOOL fContinue_p)
 {
     tOplkError              ret = kEplSuccessful;
@@ -349,7 +349,7 @@ by its timer handle. After deleting the handle is reset to zero.
 \ingroup module_hrestimer
 */
 //------------------------------------------------------------------------------
-tOplkError hrestimer_deleteTimer(tEplTimerHdl* pTimerHdl_p)
+tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
 {
     tOplkError              ret = kEplSuccessful;
     UINT                    index;
@@ -422,7 +422,7 @@ enum hrtimer_restart timerCallback (struct hrtimer* pTimer_p)
 {
     UINT                    index;
     tHresTimerInfo*         pTimerInfo;
-    tEplTimerHdl            orgTimerHdl;
+    tTimerHdl               orgTimerHdl;
     enum hrtimer_restart    ret;
 
     BENCHMARK_MOD_24_SET(4);

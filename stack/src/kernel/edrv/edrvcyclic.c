@@ -93,8 +93,8 @@ typedef struct
     UINT                    curTxBufferList;
     UINT                    curTxBufferEntry;
     UINT32                  cycleTimeUs;
-    tEplTimerHdl            timerHdlCycle;
-    tEplTimerHdl            timerHdlSlot;
+    tTimerHdl               timerHdlCycle;
+    tTimerHdl               timerHdlSlot;
     tEdrvCyclicCbSync       pfnSyncCb;
     tEdrvCyclicCbError      pfnErrorCb;
 #if EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
@@ -113,8 +113,8 @@ static tEdrvcyclicInstance edrvcyclicInstance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError timerHdlCycleCb(tEplTimerEventArg* pEventArg_p);
-static tOplkError timerHdlSlotCb(tEplTimerEventArg* pEventArg_p);
+static tOplkError timerHdlCycleCb(tTimerEventArg* pEventArg_p);
+static tOplkError timerHdlSlotCb(tTimerEventArg* pEventArg_p);
 static tOplkError processTxBufferList(void);
 
 //============================================================================//
@@ -423,7 +423,7 @@ This function is called by the timer module. It starts the next cycle.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError timerHdlCycleCb(tEplTimerEventArg* pEventArg_p)
+static tOplkError timerHdlCycleCb(tTimerEventArg* pEventArg_p)
 {
     tOplkError      ret = kEplSuccessful;
 #if EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
@@ -572,7 +572,7 @@ next frame.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError timerHdlSlotCb(tEplTimerEventArg* pEventArg_p)
+static tOplkError timerHdlSlotCb(tTimerEventArg* pEventArg_p)
 {
     tOplkError      ret = kEplSuccessful;
     tEdrvTxBuffer*  pTxBuffer = NULL;

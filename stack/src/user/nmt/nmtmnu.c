@@ -244,8 +244,8 @@ typedef INT (*tProcessNodeEventFunc)(UINT nodeId_p, tNmtState nodeNmtState_p,
 */
 typedef struct
 {
-    tEplTimerHdl        timerHdlStatReq;        ///< Timer to delay StatusRequests and IdentRequests
-    tEplTimerHdl        timerHdlLonger;         ///< 2nd timer for NMT command EnableReadyToOp and CheckCommunication
+    tTimerHdl           timerHdlStatReq;        ///< Timer to delay StatusRequests and IdentRequests
+    tTimerHdl           timerHdlLonger;         ///< 2nd timer for NMT command EnableReadyToOp and CheckCommunication
     tNmtMnuNodeState    nodeState;              ///< Internal node state (kind of sub state of NMT state)
     UINT32              nodeCfg;                ///< Subindex from 0x1F81
     UINT16              flags;                  ///< Node flags (see node flag defines)
@@ -264,7 +264,7 @@ typedef struct
 typedef struct
 {
     tNmtMnuNodeInfo     aNodeInfo[EPL_NMT_MAX_NODE_ID];  ///< Information about CNs
-    tEplTimerHdl        timerHdlNmtState;       ///< Timeout for stay in NMT state
+    tTimerHdl           timerHdlNmtState;       ///< Timeout for stay in NMT state
     UINT                mandatorySlaveCount;    ///< Count of found mandatory CNs
     UINT                signalSlaveCount;       ///< Count of CNs which are not identified
     ULONG               statusRequestDelay;     ///< In [ms] (object 0x1006 * EPL_C_NMT_STATREQ_CYCLE)
@@ -1052,7 +1052,7 @@ tOplkError nmtmnu_processEvent(tEplEvent* pEvent_p)
         // timer event
         case kEplEventTypeTimer:
             {
-                tEplTimerEventArg*  pTimerEventArg = (tEplTimerEventArg*)pEvent_p->m_pArg;
+                tTimerEventArg*  pTimerEventArg = (tTimerEventArg*)pEvent_p->m_pArg;
                 UINT                nodeId;
 
                 nodeId = (UINT) (pTimerEventArg->m_Arg.m_dwVal & NMTMNU_TIMERARG_NODE_MASK);
@@ -1763,7 +1763,7 @@ The function handles the PreOperational1 state of the MN.
 static tOplkError doPreop1(tEventNmtStateChange nmtStateChange_p)
 {
     UINT32          dwTimeout;
-    tEplTimerArg    timerArg;
+    tTimerArg       timerArg;
     tObdSize        obdSize;
     tEplEvent       event;
     BOOL            fNmtResetAllIssued = FALSE;
@@ -1879,7 +1879,7 @@ static tOplkError startBootStep2(void)
 
         if (expNmtState == kNmtCsPreOperational1)
         {
-            tEplTimerArg    timerArg;
+            tTimerArg       timerArg;
 
             // The change to PreOp2 is an implicit NMT command.
             // Unexpected NMT states of the nodes are ignored until
@@ -1943,7 +1943,7 @@ timeout.
 static tOplkError nodeBootStep2(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p)
 {
     tOplkError          ret = kEplSuccessful;
-    tEplTimerArg        timerArg;
+    tTimerArg           timerArg;
     UINT8               bNmtState;
     tNmtState           nmtState;
     tObdSize            obdSize;
@@ -2061,7 +2061,7 @@ static tOplkError nodeCheckCom(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p)
 {
     tOplkError      ret = kEplSuccessful;
     UINT32          nodeCfg;
-    tEplTimerArg    timerArg;
+    tTimerArg       timerArg;
 
     nodeCfg = pNodeInfo_p->nodeCfg;
     if (((nodeCfg & EPL_NODEASSIGN_ASYNCONLY_NODE) == 0) &&
@@ -2204,7 +2204,7 @@ static INT processNodeEventIdentResponse(UINT nodeId_p, tNmtState nodeNmtState_p
         bNmtState = (UINT8) (kNmtCsPreOperational2 & 0xFF);
         if (nodeNmtState_p == kNmtCsPreOperational1)
         {   // The CN did not yet switch to PreOp2
-            tEplTimerArg timerArg;
+            tTimerArg    timerArg;
 
             // Set NMT state change flag and ignore unexpected NMT states
             // until the state monitor timer is elapsed.
@@ -2430,7 +2430,7 @@ The function processes the internal node event kNmtMnuIntNodeEventNoIdentRespons
 INT processNodeEventNoIdentResponse(UINT nodeId_p, tNmtState nodeNmtState_p, tNmtState nmtState_p,
                                     UINT16 errorCode_p, tOplkError* pRet_p)
 {
-    tEplTimerArg        timerArg;
+    tTimerArg           timerArg;
     tNmtMnuNodeInfo*    pNodeInfo;
 
     pNodeInfo = NMTMNU_GET_NODEINFO(nodeId_p);
@@ -2501,7 +2501,7 @@ The function processes the internal node event kNmtMnuIntNodeEventStatusResponse
 static INT processNodeEventStatusResponse(UINT nodeId_p, tNmtState nodeNmtState_p, tNmtState nmtState_p,
                                    UINT16 errorCode_p, tOplkError* pRet_p)
 {
-    tEplTimerArg        timerArg;
+    tTimerArg           timerArg;
     tNmtMnuNodeInfo*    pNodeInfo;
 
     pNodeInfo = NMTMNU_GET_NODEINFO(nodeId_p);
@@ -2944,7 +2944,7 @@ static INT processNodeEventNmtCmdSent(UINT nodeId_p, tNmtState nodeNmtState_p, t
                                       UINT16 errorCode_p, tOplkError* pRet_p)
 {
     UINT8               bNmtState;
-    tEplTimerArg        timerArg;
+    tTimerArg           timerArg;
     tNmtMnuNodeInfo*    pNodeInfo;
 
     UNUSED_PARAMETER(errorCode_p);

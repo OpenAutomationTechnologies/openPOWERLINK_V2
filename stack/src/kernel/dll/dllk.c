@@ -783,7 +783,7 @@ This function is called by the timer module. It triggers the SoC for a MN.
 \return The function returns a pointer to the node Information of the node
 */
 //------------------------------------------------------------------------------
-tOplkError dllk_cbMnTimerCycle(tEplTimerEventArg* pEventArg_p)
+tOplkError dllk_cbMnTimerCycle(tTimerEventArg* pEventArg_p)
 {
     tOplkError      ret = kEplSuccessful;
     tNmtState       nmtState;
@@ -954,7 +954,7 @@ when it is running as CN node.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError dllk_cbCnTimer(tEplTimerEventArg* pEventArg_p)
+tOplkError dllk_cbCnTimer(tTimerEventArg* pEventArg_p)
 {
     tOplkError      ret = kEplSuccessful;
     tNmtState       nmtState;

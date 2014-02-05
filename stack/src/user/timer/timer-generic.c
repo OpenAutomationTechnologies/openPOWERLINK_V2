@@ -83,7 +83,7 @@ typedef struct _tTimerEntry
 {
     struct _tTimerEntry*    pNext;            // this must be the first element
     DWORD                   timeoutInMs;      // timeout in [ms]
-    tEplTimerArg            timerArg;
+    tTimerArg               timerArg;
 } tTimerEntry;
 
 typedef struct
@@ -252,7 +252,7 @@ tOplkError timeru_process(void)
     tTimerEntry*        pTimerEntry;
     UINT32              timeoutInMs;
     tEplEvent           event;
-    tEplTimerEventArg   timerEventArg;
+    tTimerEventArg      timerEventArg;
     tOplkError          ret = kEplSuccessful;
 
     enterCriticalSection(TIMERU_TIMER_LIST);
@@ -279,7 +279,7 @@ tOplkError timeru_process(void)
     if (pTimerEntry != NULL)
     {
         // call event function
-        timerEventArg.m_TimerHdl = (tEplTimerHdl) pTimerEntry;
+        timerEventArg.m_TimerHdl = (tTimerHdl) pTimerEntry;
         EPL_MEMCPY(&timerEventArg.m_Arg, &pTimerEntry->timerArg.m_Arg, sizeof(timerEventArg.m_Arg));
 
         event.m_EventSink = pTimerEntry->timerArg.m_EventSink;
@@ -310,7 +310,7 @@ corresponding timer handle.
 \ingroup module_timeru
 */
 //------------------------------------------------------------------------------
-tOplkError timeru_setTimer(tEplTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tEplTimerArg argument_p)
+tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg argument_p)
 {
     tTimerEntry*    pNewEntry;
     tTimerEntry**   ppEntry;
@@ -338,8 +338,8 @@ tOplkError timeru_setTimer(tEplTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tEplTime
         return kEplTimerNoTimerCreated;
     }
 
-    *pTimerHdl_p = (tEplTimerHdl) pNewEntry;
-    EPL_MEMCPY(&pNewEntry->timerArg, &argument_p, sizeof(tEplTimerArg));
+    *pTimerHdl_p = (tTimerHdl) pNewEntry;
+    EPL_MEMCPY(&pNewEntry->timerArg, &argument_p, sizeof(tTimerArg));
 
     // insert timer entry in timer list
     enterCriticalSection(TIMERU_TIMER_LIST);
@@ -388,7 +388,7 @@ it creates the timer and stores the new timer handle at \p pTimerHdl_p.
 \ingroup module_timeru
 */
 //------------------------------------------------------------------------------
-tOplkError timeru_modifyTimer(tEplTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tEplTimerArg argument_p)
+tOplkError timeru_modifyTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg argument_p)
 {
     tOplkError      ret;
 
@@ -416,7 +416,7 @@ This function deletes an existing timer.
 \ingroup module_timeru
 */
 //------------------------------------------------------------------------------
-tOplkError timeru_deleteTimer(tEplTimerHdl* pTimerHdl_p)
+tOplkError timeru_deleteTimer(tTimerHdl* pTimerHdl_p)
 {
     tTimerEntry*    pTimerEntry;
     tTimerEntry**   ppEntry;
