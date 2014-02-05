@@ -401,7 +401,7 @@ SET(OPLK_HEADERS
     ${STACK_INCLUDE_DIR}/oplk/frame.h
     ${STACK_INCLUDE_DIR}/oplk/oplkinc.h
     ${STACK_INCLUDE_DIR}/oplk/targetsystem.h
-    ${STACK_INCLUDE_DIR}/oplk/EplTimer.h
+    ${STACK_INCLUDE_DIR}/oplk/timer.h
     ${STACK_INCLUDE_DIR}/oplk/version.h
     ${STACK_INCLUDE_DIR}/oplk/event.h
     ${STACK_INCLUDE_DIR}/oplk/ftracedebug.h
