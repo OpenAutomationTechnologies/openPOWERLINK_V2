@@ -62,9 +62,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tEplKernel nmtk_init(void);
-tEplKernel nmtk_delInstance(void);
-tEplKernel nmtk_process(tEplEvent * pEvent_p);
+tOplkError nmtk_init(void);
+tOplkError nmtk_delInstance(void);
+tOplkError nmtk_process(tEplEvent * pEvent_p);
 
 #ifdef __cplusplus
 }

@@ -75,10 +75,10 @@ public:
     void acknowledge();
     void inChanged(int input_p, int usedNodeId_p);
     void outChanged(int led_p, int usedNodeId_p);
-    tEplKernel setupProcessImage();
+    tOplkError setupProcessImage();
     tEplSyncCb getSyncCbFunc();
-    tEplKernel processSync(void);
-    static tEplKernel AppCbSync(void);
+    tOplkError processSync(void);
+    static tOplkError AppCbSync(void);
 
 signals:
     void processImageInChanged(int data_p, int nodeId_p);

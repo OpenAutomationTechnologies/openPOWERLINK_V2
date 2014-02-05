@@ -106,12 +106,12 @@ starting of the stack.
 For the linux kernel driver shared memory acces we need to get the device
 descriptor of the kernel driver.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdoucal_openMem(void)
+tOplkError pdoucal_openMem(void)
 {
     fd_l = ctrlucal_getFd();
     return kEplSuccessful;
@@ -126,12 +126,12 @@ shutdown.
 
 For the linux kernel mmap implementation nothing needs to be done.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdoucal_closeMem(void)
+tOplkError pdoucal_closeMem(void)
 {
     return kEplSuccessful;
 }
@@ -145,12 +145,12 @@ The function allocates shared memory for the user needed to transfer the PDOs.
 \param  memSize_p               Size of PDO memory.
 \param  ppPdoMem_p              Pointer to store the PDO memory pointer.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdoucal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
+tOplkError pdoucal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
 {
     *ppPdoMem_p = mmap(NULL, memSize_p, PROT_READ | PROT_WRITE, MAP_SHARED,
                      fd_l, 0);
@@ -173,12 +173,12 @@ transfering the PDOs.
 \param  pMem_p                  Pointer to the shared memory segment.
 \param  memSize_p               Size of PDO memory
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdoucal_freeMem(BYTE* pMem_p, size_t memSize_p)
+tOplkError pdoucal_freeMem(BYTE* pMem_p, size_t memSize_p)
 {
     if(munmap(pMem_p, memSize_p) != 0)
     {

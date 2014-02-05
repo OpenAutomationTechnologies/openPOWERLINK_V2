@@ -55,7 +55,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-typedef tEplKernel (* tEplDllkCbAsync) (tFrameInfo * pFrameInfo_p);
+typedef tOplkError (* tEplDllkCbAsync) (tFrameInfo * pFrameInfo_p);
 
 typedef struct
 {
@@ -96,8 +96,8 @@ typedef struct
 } tDllkPrcCycleTiming;
 
 // callback function for frame processing
-typedef tEplKernel (*tDllkCbProcessRpdo) (tFrameInfo * pFrameInfo_p);
-typedef tEplKernel (*tDllkCbProcessTpdo) (tFrameInfo * pFrameInfo_p, BOOL fReadyFlag_p);
+typedef tOplkError (*tDllkCbProcessRpdo) (tFrameInfo * pFrameInfo_p);
+typedef tOplkError (*tDllkCbProcessTpdo) (tFrameInfo * pFrameInfo_p, BOOL fReadyFlag_p);
 
 typedef enum
 {
@@ -121,33 +121,33 @@ typedef enum
 extern "C" {
 #endif
 
-tEplKernel dllk_addInstance(tDllkInitParam* pInitParam_p);
-tEplKernel dllk_delInstance(void);
-tEplKernel dllk_config(tDllConfigParam * pDllConfigParam_p);
-tEplKernel dllk_setIdentity(tDllIdentParam * pDllIdentParam_p);
-tEplKernel dllk_process(tEplEvent * pEvent_p) SECTION_DLLK_PROCESS;
-tEplKernel dllk_regAsyncHandler(tEplDllkCbAsync pfnDllkCbAsync_p);
-tEplKernel dllk_deregAsyncHandler(tEplDllkCbAsync pfnDllkCbAsync_p);
-tEplKernel dllk_setAsndServiceIdFilter(tDllAsndServiceId ServiceId_p, tDllAsndFilter Filter_p);
+tOplkError dllk_addInstance(tDllkInitParam* pInitParam_p);
+tOplkError dllk_delInstance(void);
+tOplkError dllk_config(tDllConfigParam * pDllConfigParam_p);
+tOplkError dllk_setIdentity(tDllIdentParam * pDllIdentParam_p);
+tOplkError dllk_process(tEplEvent * pEvent_p) SECTION_DLLK_PROCESS;
+tOplkError dllk_regAsyncHandler(tEplDllkCbAsync pfnDllkCbAsync_p);
+tOplkError dllk_deregAsyncHandler(tEplDllkCbAsync pfnDllkCbAsync_p);
+tOplkError dllk_setAsndServiceIdFilter(tDllAsndServiceId ServiceId_p, tDllAsndFilter Filter_p);
 void       dllk_regRpdoHandler(tDllkCbProcessRpdo pfnDllkCbProcessRpdo_p);
 void       dllk_regTpdoHandler(tDllkCbProcessTpdo pfnDllkCbProcessTpdo_p);
 tEplSyncCb dllk_regSyncHandler(tEplSyncCb pfnCbSync_p);
 #if DLL_DEFERRED_RXFRAME_RELEASE_ISOCHRONOUS != FALSE || DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS != FALSE
-tEplKernel dllk_releaseRxFrame(tEplFrame* pFrame_p, UINT uiFrameSize_p);
+tOplkError dllk_releaseRxFrame(tEplFrame* pFrame_p, UINT uiFrameSize_p);
 #endif
 
 #if EPL_NMT_MAX_NODE_ID > 0
-tEplKernel dllk_configNode(tDllNodeInfo* pNodeInfo_p);
-tEplKernel dllk_addNode(tDllNodeOpParam* pNodeOpParam_p);
-tEplKernel dllk_deleteNode(tDllNodeOpParam* pNodeOpParam_p);
+tOplkError dllk_configNode(tDllNodeInfo* pNodeInfo_p);
+tOplkError dllk_addNode(tDllNodeOpParam* pNodeOpParam_p);
+tOplkError dllk_deleteNode(tDllNodeOpParam* pNodeOpParam_p);
 #endif // EPL_NMT_MAX_NODE_ID > 0
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
-tEplKernel dllk_setFlag1OfNode(UINT nodeId_p, UINT8 soaFlag1_p);
+tOplkError dllk_setFlag1OfNode(UINT nodeId_p, UINT8 soaFlag1_p);
 void       dllk_getCurrentCnNodeIdList(BYTE** ppbCnNodeIdList_p);
 
 #if EPL_DLL_PRES_CHAINING_MN != FALSE
-tEplKernel dllk_getCnMacAddress(UINT nodeId_p, UINT8* pCnMacAddress_p);
+tOplkError dllk_getCnMacAddress(UINT nodeId_p, UINT8* pCnMacAddress_p);
 #endif
 
 #endif

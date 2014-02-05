@@ -52,10 +52,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 The function initialize target specific stuff which is needed to run the
 openPOWERLINK stack.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel target_init(void)
+tOplkError target_init(void)
 {
     return kEplSuccessful;
 }
@@ -66,10 +66,10 @@ tEplKernel target_init(void)
 
 The function cleans-up target specific stuff.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel target_cleanup(void)
+tOplkError target_cleanup(void)
 {
     return kEplSuccessful;
 }

@@ -60,8 +60,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tEplKernel veth_addInstance(const UINT8 aSrcMac_p[6]);
-tEplKernel veth_delInstance(void);
+tOplkError veth_addInstance(const UINT8 aSrcMac_p[6]);
+tOplkError veth_delInstance(void);
 
 #ifdef __cplusplus
 }

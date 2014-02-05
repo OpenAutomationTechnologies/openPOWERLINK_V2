@@ -244,28 +244,28 @@ void       dllk_processTransmittedNonEpl(tEdrvTxBuffer * pTxBuffer_p);
 void       dllk_processTransmittedSoc(tEdrvTxBuffer * pTxBuffer_p);
 void       dllk_processTransmittedSoa(tEdrvTxBuffer * pTxBuffer_p);
 #endif
-tEplKernel dllk_updateFrameIdentRes(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p);
-tEplKernel dllk_updateFrameStatusRes(tEdrvTxBuffer* pTxBuffer_p, tNmtState NmtState_p);
-tEplKernel dllk_updateFramePres(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p);
-tEplKernel dllk_checkFrame(tEplFrame * pFrame_p, UINT frameSize_p);
-tEplKernel dllk_createTxFrame(UINT* pHandle_p, UINT* pFrameSize_p,
+tOplkError dllk_updateFrameIdentRes(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p);
+tOplkError dllk_updateFrameStatusRes(tEdrvTxBuffer* pTxBuffer_p, tNmtState NmtState_p);
+tOplkError dllk_updateFramePres(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p);
+tOplkError dllk_checkFrame(tEplFrame * pFrame_p, UINT frameSize_p);
+tOplkError dllk_createTxFrame(UINT* pHandle_p, UINT* pFrameSize_p,
                               tEplMsgType msgType_p, tDllAsndServiceId serviceId_p);
-tEplKernel dllk_deleteTxFrame(UINT handle_p);
-tEplKernel dllk_processTpdo(tFrameInfo* pFrameInfo_p, BOOL fReadyFlag_p);
+tOplkError dllk_deleteTxFrame(UINT handle_p);
+tOplkError dllk_processTpdo(tFrameInfo* pFrameInfo_p, BOOL fReadyFlag_p);
 #if defined(CONFIG_INCLUDE_NMT_MN)
-tEplKernel dllk_mnSendSoa(tNmtState nmtState_p, tDllState* pDllStateProposed_p,
+tOplkError dllk_mnSendSoa(tNmtState nmtState_p, tDllState* pDllStateProposed_p,
                           BOOL fEnableInvitation_p);
-tEplKernel dllk_updateFrameSoa(tEdrvTxBuffer* pTxBuffer_p, tNmtState NmtState_p,
+tOplkError dllk_updateFrameSoa(tEdrvTxBuffer* pTxBuffer_p, tNmtState NmtState_p,
                                BOOL fEnableInvitation_p, BYTE curReq_p);
-tEplKernel dllk_asyncFrameNotReceived(tDllReqServiceId reqServiceId_p, UINT nodeId_p);
+tOplkError dllk_asyncFrameNotReceived(tDllReqServiceId reqServiceId_p, UINT nodeId_p);
 #endif
 
 //------------------------------------------------------------------------------
 /* event functions (dllkevent.c) */
-tEplKernel dllk_postEvent(tEplEventType EventType_p);
-tEplKernel controlPdokcalSync(BOOL fEnable_p);
+tOplkError dllk_postEvent(tEplEventType EventType_p);
+tOplkError controlPdokcalSync(BOOL fEnable_p);
 #if defined(CONFIG_INCLUDE_NMT_MN)
-tEplKernel dllk_issueLossOfPres(UINT nodeId_p);
+tOplkError dllk_issueLossOfPres(UINT nodeId_p);
 #endif
 
 //------------------------------------------------------------------------------
@@ -283,26 +283,26 @@ void       dllk_setupSoaUnspecReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, t
 void       dllk_setupPresFilter(tEdrvFilter* pFilter_p, BOOL fEnable_p);
 void       dllk_setupPreqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer *pBuffer_p, UINT8* pMacAdrs_p);
 #if EPL_NMT_MAX_NODE_ID > 0
-tEplKernel dllk_addNodeFilter(tDllkNodeInfo* pIntNodeInfo_p, tDllNodeOpType NodeOpType_p, BOOL fUpdateEdrv_p);
-tEplKernel dllk_deleteNodeFilter(tDllkNodeInfo* pIntNodeInfo_p, tDllNodeOpType nodeOpType_p, BOOL fUpdateEdrv_p);
+tOplkError dllk_addNodeFilter(tDllkNodeInfo* pIntNodeInfo_p, tDllNodeOpType NodeOpType_p, BOOL fUpdateEdrv_p);
+tOplkError dllk_deleteNodeFilter(tDllkNodeInfo* pIntNodeInfo_p, tDllNodeOpType nodeOpType_p, BOOL fUpdateEdrv_p);
 #endif
 
 //------------------------------------------------------------------------------
 /* DLL state machine functions (dllkstatemachine.c) */
-tEplKernel dllk_changeState(tNmtEvent nmtEvent_p, tNmtState nmtState_p);
+tOplkError dllk_changeState(tNmtEvent nmtEvent_p, tNmtState nmtState_p);
 
 //------------------------------------------------------------------------------
 /* node functions */
-tEplKernel dllk_cleanupLocalNode(tNmtState oldNmtState_p);
-tEplKernel dllk_setupLocalNode(tNmtState nmtState_p);
-tEplKernel dllk_setupLocalNodeCn(void);
+tOplkError dllk_cleanupLocalNode(tNmtState oldNmtState_p);
+tOplkError dllk_setupLocalNode(tNmtState nmtState_p);
+tOplkError dllk_setupLocalNodeCn(void);
 #if defined(CONFIG_INCLUDE_NMT_MN)
-tEplKernel dllk_setupLocalNodeMn(void);
-tEplKernel dllk_addNodeIsochronous(tDllkNodeInfo* pIntNodeInfo_p);
-tEplKernel dllk_deleteNodeIsochronous(tDllkNodeInfo* pIntNodeInfo_p);
-tEplKernel dllk_setupAsyncPhase(tNmtState nmtState_p, UINT nextTxBufferOffset_p,
+tOplkError dllk_setupLocalNodeMn(void);
+tOplkError dllk_addNodeIsochronous(tDllkNodeInfo* pIntNodeInfo_p);
+tOplkError dllk_deleteNodeIsochronous(tDllkNodeInfo* pIntNodeInfo_p);
+tOplkError dllk_setupAsyncPhase(tNmtState nmtState_p, UINT nextTxBufferOffset_p,
                                 UINT32 nextTimeOffsetNs_p, UINT* pIndex_p) SECTION_DLLK_PROCESS_SYNC;
-tEplKernel dllk_setupSyncPhase(tNmtState nmtState_p, BOOL fReadyFlag_p, UINT nextTxBufferOffset_p,
+tOplkError dllk_setupSyncPhase(tNmtState nmtState_p, BOOL fReadyFlag_p, UINT nextTxBufferOffset_p,
                                UINT32* pNextTimeOffsetNs_p, UINT* pIndex_p) SECTION_DLLK_PROCESS_SYNC;
 #endif
 #if EPL_NMT_MAX_NODE_ID > 0
@@ -312,25 +312,25 @@ tDllkNodeInfo* dllk_getNodeInfo(UINT uiNodeId_p);
 //------------------------------------------------------------------------------
 /* Cycle/Sync Callback functions */
 #if defined(CONFIG_INCLUDE_NMT_MN)
-tEplKernel dllk_cbCyclicError(tEplKernel errorCode_p, tEdrvTxBuffer * pTxBuffer_p);
-tEplKernel dllk_cbMnSyncHandler(void);
-tEplKernel dllk_cbMnTimerCycle(tEplTimerEventArg* pEventArg_p);
+tOplkError dllk_cbCyclicError(tOplkError errorCode_p, tEdrvTxBuffer * pTxBuffer_p);
+tOplkError dllk_cbMnSyncHandler(void);
+tOplkError dllk_cbMnTimerCycle(tEplTimerEventArg* pEventArg_p);
 #endif
 #if EPL_TIMER_USE_HIGHRES != FALSE
-tEplKernel dllk_cbCnTimer(tEplTimerEventArg* pEventArg_p);
+tOplkError dllk_cbCnTimer(tEplTimerEventArg* pEventArg_p);
 #endif
 #if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
-tEplKernel dllk_cbCnTimerSync(void);
-tEplKernel dllk_cbCnLossOfSync(void);
+tOplkError dllk_cbCnTimerSync(void);
+tOplkError dllk_cbCnLossOfSync(void);
 #endif
 
 //------------------------------------------------------------------------------
 /* PRes Chaining functions */
 #if EPL_DLL_PRES_CHAINING_CN == TRUE
-tEplKernel dllk_presChainingEnable (void);
-tEplKernel dllk_presChainingDisable (void);
+tOplkError dllk_presChainingEnable (void);
+tOplkError dllk_presChainingDisable (void);
 #if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
-tEplKernel dllk_cbCnPresFallbackTimeout(void);
+tOplkError dllk_cbCnPresFallbackTimeout(void);
 #endif
 #endif
 

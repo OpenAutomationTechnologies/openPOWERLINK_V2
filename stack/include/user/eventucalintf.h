@@ -66,20 +66,20 @@ extern "C" {
 #endif
 
 /* hostif event interface */
-tEplKernel eventucal_initQueueHostif(tEventQueue eventQueue_p);
-tEplKernel eventucal_exitQueueHostif(tEventQueue eventQueue_p);
-tEplKernel eventucal_postEventHostif(tEventQueue eventQueue_p, tEplEvent *pEvent_p);
-tEplKernel eventucal_processEventHostif(tEventQueue eventQueue_p);
+tOplkError eventucal_initQueueHostif(tEventQueue eventQueue_p);
+tOplkError eventucal_exitQueueHostif(tEventQueue eventQueue_p);
+tOplkError eventucal_postEventHostif(tEventQueue eventQueue_p, tEplEvent *pEvent_p);
+tOplkError eventucal_processEventHostif(tEventQueue eventQueue_p);
 UINT       eventucal_getEventCountHostif(tEventQueue eventQueue_p);
-tEplKernel eventucal_setSignalingHostif(tEventQueue eventQueue_p, VOIDFUNCPTR pfnSignalCb_p);
+tOplkError eventucal_setSignalingHostif(tEventQueue eventQueue_p, VOIDFUNCPTR pfnSignalCb_p);
 
 /* circular buffer event interface */
-tEplKernel eventucal_initQueueCircbuf(tEventQueue eventQueue_p);
-tEplKernel eventucal_exitQueueCircbuf(tEventQueue eventQueue_p);
-tEplKernel eventucal_postEventCircbuf(tEventQueue eventQueue_p, tEplEvent *pEvent_p);
-tEplKernel eventucal_processEventCircbuf(tEventQueue eventQueue_p);
+tOplkError eventucal_initQueueCircbuf(tEventQueue eventQueue_p);
+tOplkError eventucal_exitQueueCircbuf(tEventQueue eventQueue_p);
+tOplkError eventucal_postEventCircbuf(tEventQueue eventQueue_p, tEplEvent *pEvent_p);
+tOplkError eventucal_processEventCircbuf(tEventQueue eventQueue_p);
 UINT       eventucal_getEventCountCircbuf(tEventQueue eventQueue_p);
-tEplKernel eventucal_setSignalingCircbuf(tEventQueue eventQueue_p, VOIDFUNCPTR pfnSignalCb_p);
+tOplkError eventucal_setSignalingCircbuf(tEventQueue eventQueue_p, VOIDFUNCPTR pfnSignalCb_p);
 
 
 #ifdef __cplusplus

@@ -121,12 +121,12 @@ typedef void* tDllCalQueueInstance;
 
 typedef struct
 {
-    tEplKernel (* pfnAddInstance)(tDllCalQueueInstance* ppDllCalQueue_p, tDllCalQueue DllCalQueue_p);
-    tEplKernel (* pfnDelInstance)(tDllCalQueueInstance pDllCalQueue_p);
-    tEplKernel (* pfnInsertDataBlock)(tDllCalQueueInstance pDllCalQueue_p, BYTE *pData_p, UINT* pDataSize_p);
-    tEplKernel (* pfnGetDataBlock)(tDllCalQueueInstance pDllCalQueue_p, BYTE *pData_p, UINT* pDataSize_p);
-    tEplKernel (* pfnGetDataBlockCount)(tDllCalQueueInstance pDllCalQueue_p, ULONG* pDataBlockCount_p);
-    tEplKernel (* pfnResetDataBlockQueue)(tDllCalQueueInstance pDllCalQueue_p, ULONG timeOutMs_p);
+    tOplkError (* pfnAddInstance)(tDllCalQueueInstance* ppDllCalQueue_p, tDllCalQueue DllCalQueue_p);
+    tOplkError (* pfnDelInstance)(tDllCalQueueInstance pDllCalQueue_p);
+    tOplkError (* pfnInsertDataBlock)(tDllCalQueueInstance pDllCalQueue_p, BYTE *pData_p, UINT* pDataSize_p);
+    tOplkError (* pfnGetDataBlock)(tDllCalQueueInstance pDllCalQueue_p, BYTE *pData_p, UINT* pDataSize_p);
+    tOplkError (* pfnGetDataBlockCount)(tDllCalQueueInstance pDllCalQueue_p, ULONG* pDataBlockCount_p);
+    tOplkError (* pfnResetDataBlockQueue)(tDllCalQueueInstance pDllCalQueue_p, ULONG timeOutMs_p);
 } tDllCalFuncIntf;
 
 //------------------------------------------------------------------------------

@@ -154,11 +154,11 @@ static tCfmInstance             cfmInstance_g;
 //------------------------------------------------------------------------------
 
 static tCfmNodeInfo* allocNodeInfo(UINT nodeId_p);
-static tEplKernel callCbProgress(tCfmNodeInfo* pNodeInfo_p);
-static tEplKernel downloadCycleLength(tCfmNodeInfo* pNodeInfo_p);
-static tEplKernel downloadObject(tCfmNodeInfo* pNodeInfo_p);
-static tEplKernel sdoWriteObject(tCfmNodeInfo* pNodeInfo_p, void* pLeSrcData_p, UINT size_p);
-static tEplKernel cbSdoCon(tSdoComFinished* pSdoComFinished_p);
+static tOplkError callCbProgress(tCfmNodeInfo* pNodeInfo_p);
+static tOplkError downloadCycleLength(tCfmNodeInfo* pNodeInfo_p);
+static tOplkError downloadObject(tCfmNodeInfo* pNodeInfo_p);
+static tOplkError sdoWriteObject(tCfmNodeInfo* pNodeInfo_p, void* pLeSrcData_p, UINT size_p);
+static tOplkError cbSdoCon(tSdoComFinished* pSdoComFinished_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -175,15 +175,15 @@ The function initializes the CFM module.
 \param  pfnCbEventCnResult_p          Pointer to callback function for CN result
                                     events.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_cfmu
 */
 //------------------------------------------------------------------------------
-tEplKernel cfmu_init(tCfmCbEventCnProgress pfnCbEventCnProgress_p,
+tOplkError cfmu_init(tCfmCbEventCnProgress pfnCbEventCnProgress_p,
                      tCfmCbEventCnResult pfnCbEventCnResult_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     UINT            subindex;
     tVarParam       varParam;
 
@@ -217,12 +217,12 @@ tEplKernel cfmu_init(tCfmCbEventCnProgress pfnCbEventCnProgress_p,
 
 The function deinitializes the CFM module.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_cfmu
 */
 //------------------------------------------------------------------------------
-tEplKernel cfmu_exit(void)
+tOplkError cfmu_exit(void)
 {
     UINT                nodeId;
     tVarParam           varParam;
@@ -272,7 +272,7 @@ CN if configuration data and time differs with local values.
 \param  nodeId_p        Node ID of node to configure.
 \param  nodeEvent_p     Node event to process.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful  Configuration is OK -> continue boot process for this CN.
 \retval kEplReject      Defer further processing until configuration process has finished
 \retval other error     Major error occurred.
@@ -280,9 +280,9 @@ CN if configuration data and time differs with local values.
 \ingroup module_cfmu
 */
 //------------------------------------------------------------------------------
-tEplKernel cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p)
+tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     static UINT32       leSignature;
     tCfmNodeInfo*       pNodeInfo = NULL;
     tObdSize            obdSize;
@@ -484,14 +484,14 @@ The function implements the callback function which is called on OD accesses.
 
 \param  pParam_p        OD callback parameter.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_cfmu
 */
 //------------------------------------------------------------------------------
-tEplKernel cfmu_cbObdAccess(tObdCbParam MEM* pParam_p)
+tOplkError cfmu_cbObdAccess(tObdCbParam MEM* pParam_p)
 {
-    tEplKernel              ret = kEplSuccessful;
+    tOplkError              ret = kEplSuccessful;
     tObdVStringDomain*      pMemVStringDomain;
     tCfmNodeInfo*           pNodeInfo = NULL;
     UINT8*                  pBuffer;
@@ -585,12 +585,12 @@ The function calls the progress callback function of the specified node.
 \param  pNodeInfo_p     Node info of the node to call the progress callback
                         function.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel callCbProgress(tCfmNodeInfo* pNodeInfo_p)
+static tOplkError callCbProgress(tCfmNodeInfo* pNodeInfo_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 
     if (cfmInstance_g.pfnCbEventCnProgress != NULL)
     {
@@ -608,12 +608,12 @@ The function calls the result callback function of the specified node.
 \param  pNodeInfo_p     Node info of the node to call the result callback function.
 \param  nmtCommand_p    NMT command to execute in the result callback function.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel finishConfig(tCfmNodeInfo* pNodeInfo_p, tNmtCommand nmtCommand_p)
+static tOplkError finishConfig(tCfmNodeInfo* pNodeInfo_p, tNmtCommand nmtCommand_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 
     if (pNodeInfo_p->sdoComConHdl != UINT_MAX)
     {
@@ -643,12 +643,12 @@ transfer is finished.
 
 \param  pSdoComFinished_p   Pointer to SDO COM finished structure.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel cbSdoCon(tSdoComFinished* pSdoComFinished_p)
+static tOplkError cbSdoCon(tSdoComFinished* pSdoComFinished_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     tCfmNodeInfo*       pNodeInfo = pSdoComFinished_p->pUserArg;
     tNmtCommand         nmtCommand;
 
@@ -730,12 +730,12 @@ the event callback function when the task is completed.
 \param  pNodeInfo_p     Node info of the node for which to download the cycle
                         length.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel downloadCycleLength(tCfmNodeInfo* pNodeInfo_p)
+static tOplkError downloadCycleLength(tCfmNodeInfo* pNodeInfo_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 
 #if (EPL_CFM_CONFIGURE_CYCLE_LENGTH != FALSE)
     pNodeInfo_p->eventCnProgress.objectIndex = 0x1006;
@@ -765,12 +765,12 @@ node.
 \param  pNodeInfo_p     Node info of the node for which to download the next
                         object.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel downloadObject(tCfmNodeInfo* pNodeInfo_p)
+static tOplkError downloadObject(tCfmNodeInfo* pNodeInfo_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     static UINT32       leSignature;
 
     // forward data pointer for last transfer
@@ -853,12 +853,12 @@ The function writes the specified entry to the OD of the specified node.
 \param  pLeSrcData_p    Pointer to data in little endian byte order.
 \param  size_p          Size of data.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel sdoWriteObject(tCfmNodeInfo* pNodeInfo_p, void* pLeSrcData_p, UINT size_p)
+static tOplkError sdoWriteObject(tCfmNodeInfo* pNodeInfo_p, void* pLeSrcData_p, UINT size_p)
 {
-    tEplKernel                  ret = kEplSuccessful;
+    tOplkError                  ret = kEplSuccessful;
     tSdoComTransParamByIndex    transParamByIndex;
 
     if ((pLeSrcData_p == NULL) || (size_p == 0))

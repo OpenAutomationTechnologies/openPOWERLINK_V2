@@ -98,7 +98,7 @@ typedef enum
 extern "C" {
 #endif
 
-tEplKernel openmac_isrReg(tOpenmacIrqSource irqSource_p, tOpenmacIrqCb pfnIsrCb_p, void* pArg_p);
+tOplkError openmac_isrReg(tOpenmacIrqSource irqSource_p, tOpenmacIrqCb pfnIsrCb_p, void* pArg_p);
 
 UINT8* openmac_memUncached(UINT8* pMem_p, UINT size_p);
 UINT8* openmac_uncachedMalloc(UINT size_p);

@@ -59,14 +59,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tEplKernel lcd_init(void);
+tOplkError lcd_init(void);
 void lcd_exit(void);
 
 void lcd_clear(void);
 void lcd_printText(char* sText_p, UINT line_p);
 void lcd_printNmtState(tNmtState nmtState_p);
 void lcd_printNodeId (WORD wNodeId_p);
-void lcd_printError (tEplKernel error_p);
+void lcd_printError (tOplkError error_p);
 
 #ifdef __cplusplus
 }

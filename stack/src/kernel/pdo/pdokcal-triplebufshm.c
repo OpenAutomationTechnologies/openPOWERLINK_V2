@@ -122,12 +122,12 @@ The function initializes the memory needed to transfer PDOs.
 \param  rxPdoMemSize_p      Size of RX PDO buffers.
 \param  txPdoMemSize_p      Size of TX PDO buffers.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdokcal_initPdoMem(tPdoChannelSetup* pPdoChannels, size_t rxPdoMemSize_p,
+tOplkError pdokcal_initPdoMem(tPdoChannelSetup* pPdoChannels, size_t rxPdoMemSize_p,
                               size_t txPdoMemSize_p)
 {
     size_t  pdoMemSize;
@@ -197,7 +197,7 @@ The function writes a received RXPDO into the PDO memory range.
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdokcal_writeRxPdo(UINT channelId_p, BYTE *pPayload_p, UINT16 pdoSize_p)
+tOplkError pdokcal_writeRxPdo(UINT channelId_p, BYTE *pPayload_p, UINT16 pdoSize_p)
 {
     BYTE*           pPdo;
     OPLK_ATOMIC_T   temp;
@@ -235,7 +235,7 @@ The function reads a TXPDO to be sent from the PDO memory range.
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdokcal_readTxPdo(UINT channelId_p, BYTE* pPayload_p, UINT16 pdoSize_p)
+tOplkError pdokcal_readTxPdo(UINT channelId_p, BYTE* pPayload_p, UINT16 pdoSize_p)
 {
     BYTE*           pPdo;
     OPLK_ATOMIC_T   readBuf;

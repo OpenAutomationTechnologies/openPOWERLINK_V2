@@ -60,11 +60,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tEplKernel target_init(void);
-tEplKernel target_cleanup(void);
+tOplkError target_init(void);
+tOplkError target_cleanup(void);
 void       target_msleep(UINT32 milliSeconds_p);
-tEplKernel target_setIpAdrs(char* ifName_p, UINT32 ipAddress_p, UINT32 subnetMask_p, UINT16 mtu_p);
-tEplKernel target_setDefaultGateway(UINT32 defaultGateway_p);
+tOplkError target_setIpAdrs(char* ifName_p, UINT32 ipAddress_p, UINT32 subnetMask_p, UINT16 mtu_p);
+tOplkError target_setDefaultGateway(UINT32 defaultGateway_p);
 ULONGLONG  target_getCurrentTimestamp(void);
 void       target_enableGlobalInterrupt(BYTE fEnable_p);
 UINT32     target_getTickCount(void);

@@ -62,7 +62,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // global function prototypes
 //------------------------------------------------------------------------------
-extern tEplKernel pdoucal_callSyncCb(void);
+extern tOplkError pdoucal_callSyncCb(void);
 
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //
@@ -94,12 +94,12 @@ extern tEplKernel pdoucal_callSyncCb(void);
 
 The function initializes the kernel PDO CAL sync module.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdokcal_initSync(void)
+tOplkError pdokcal_initSync(void)
 {
     return kEplSuccessful;
 }
@@ -124,12 +124,12 @@ void pdokcal_exitSync(void)
 
 The function sends a sync event
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdokcal_sendSyncEvent(void)
+tOplkError pdokcal_sendSyncEvent(void)
 {
     return pdoucal_callSyncCb();
 }
@@ -142,12 +142,12 @@ The function enables sync events
 
 \param  fEnable_p               enable/disable sync event
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdokcal_controlSync(BOOL fEnable_p)
+tOplkError pdokcal_controlSync(BOOL fEnable_p)
 {
     UNUSED_PARAMETER(fEnable_p);
     return kEplSuccessful;

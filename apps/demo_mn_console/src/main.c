@@ -73,13 +73,13 @@ static BOOL fGsOff_l;
 // global function prototypes
 //------------------------------------------------------------------------------
 #if defined(CONFIG_USE_PCAP)
-tEplKernel selectPcapDevice(char *pDevName_p);
+tOplkError selectPcapDevice(char *pDevName_p);
 #endif
 
 int getopt(int, char * const [], const char *);
 
 void initEvents (BOOL* pfGsOff_p);
-tEplKernel PUBLIC processEvents(tEplApiEventType EventType_p, tEplApiEventArg* pEventArg_p, void GENERIC* pUserArg_p);
+tOplkError PUBLIC processEvents(tEplApiEventType EventType_p, tEplApiEventArg* pEventArg_p, void GENERIC* pUserArg_p);
 
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //
@@ -106,7 +106,7 @@ typedef struct
 // local function prototypes
 //------------------------------------------------------------------------------
 static int getOptions(int argc_p, char **argv_p, tOptions* pOpts_p);
-static tEplKernel initPowerlink(UINT32 cycleLen_p, char *pszCdcFileName_p,
+static tOplkError initPowerlink(UINT32 cycleLen_p, char *pszCdcFileName_p,
                                 const BYTE* macAddr_p);
 static void loopMain(void);
 static void shutdownPowerlink(void);
@@ -131,7 +131,7 @@ This is the main function of the openPOWERLINK console MN demo application.
 //------------------------------------------------------------------------------
 int main(int argc, char **argv)
 {
-    tEplKernel                  ret = kEplSuccessful;
+    tOplkError                  ret = kEplSuccessful;
     tOptions                    opts;
 
     getOptions(argc, argv, &opts);
@@ -179,13 +179,13 @@ The function initializes the openPOWERLINK stack.
 \param  cycleLen_p              Length of POWERLINK cycle.
 \param  macAddr_p               MAC address to use for POWERLINK interface.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel initPowerlink(UINT32 cycleLen_p, char *pszCdcFileName_p,
+static tOplkError initPowerlink(UINT32 cycleLen_p, char *pszCdcFileName_p,
                                 const BYTE* macAddr_p)
 {
-    tEplKernel                  ret = kEplSuccessful;
+    tOplkError                  ret = kEplSuccessful;
     static tEplApiInitParam     initParam;
     char*                       sHostname = HOSTNAME;
     static char                 devName[128];
@@ -275,7 +275,7 @@ This function implements the main loop of the demo application.
 //------------------------------------------------------------------------------
 static void loopMain(void)
 {
-    tEplKernel              ret = kEplSuccessful;
+    tOplkError              ret = kEplSuccessful;
     char                    cKey = 0;
     BOOL                    fExit = FALSE;
 

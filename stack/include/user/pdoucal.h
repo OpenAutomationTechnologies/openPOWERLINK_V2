@@ -60,32 +60,32 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tEplKernel pdoucal_init(tEplSyncCb pfnSyncCb_p);
-tEplKernel pdoucal_exit(void);
+tOplkError pdoucal_init(tEplSyncCb pfnSyncCb_p);
+tOplkError pdoucal_exit(void);
 
-tEplKernel pdoucal_postPdokChannelAlloc(tPdoAllocationParam* pAllocationParam_p);
-tEplKernel pdoucal_postConfigureChannel(tPdoChannelConf* pChannelConf_p);
-tEplKernel pdoucal_postSetupPdoBuffers(size_t rxPdoMemSize_p, size_t txPdoMemSize_p);
+tOplkError pdoucal_postPdokChannelAlloc(tPdoAllocationParam* pAllocationParam_p);
+tOplkError pdoucal_postConfigureChannel(tPdoChannelConf* pChannelConf_p);
+tOplkError pdoucal_postSetupPdoBuffers(size_t rxPdoMemSize_p, size_t txPdoMemSize_p);
 
 // PDO memory functions
-tEplKernel pdoucal_openMem(void);
-tEplKernel pdoucal_closeMem(void);
-tEplKernel pdoucal_allocateMem(size_t memSize_p, BYTE** pPdoMem_p);
-tEplKernel pdoucal_freeMem(BYTE* pMem_p, size_t memSize_p);
+tOplkError pdoucal_openMem(void);
+tOplkError pdoucal_closeMem(void);
+tOplkError pdoucal_allocateMem(size_t memSize_p, BYTE** pPdoMem_p);
+tOplkError pdoucal_freeMem(BYTE* pMem_p, size_t memSize_p);
 
 //PDO buffer functions
-tEplKernel pdoucal_initPdoMem(tPdoChannelSetup* pPdoChannels_p, size_t rxPdoMemSize_p,
+tOplkError pdoucal_initPdoMem(tPdoChannelSetup* pPdoChannels_p, size_t rxPdoMemSize_p,
                               size_t txPdoMemSize_p);
 void       pdoucal_cleanupPdoMem(void);
 BYTE*      pdoucal_getTxPdoAdrs(UINT channelId_p);
-tEplKernel pdoucal_setTxPdo(UINT channelId_p, BYTE* pPdo_p,  WORD pdoSize_p);
-tEplKernel pdoucal_getRxPdo(BYTE** ppPdo_p, UINT channelId_p, WORD pdoSize_p);
+tOplkError pdoucal_setTxPdo(UINT channelId_p, BYTE* pPdo_p,  WORD pdoSize_p);
+tOplkError pdoucal_getRxPdo(BYTE** ppPdo_p, UINT channelId_p, WORD pdoSize_p);
 
 // PDO sync functions
-tEplKernel pdoucal_initSync(tEplSyncCb pfnSyncCb_p);
+tOplkError pdoucal_initSync(tEplSyncCb pfnSyncCb_p);
 void       pdoucal_exitSync(void);
-tEplKernel pdoucal_waitSyncEvent(ULONG timeout_p);
-tEplKernel pdoucal_callSyncCb(void);
+tOplkError pdoucal_waitSyncEvent(ULONG timeout_p);
+tOplkError pdoucal_callSyncCb(void);
 
 #ifdef __cplusplus
 }

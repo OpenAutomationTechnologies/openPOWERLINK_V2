@@ -98,7 +98,7 @@ The function sets up an ASnd filter in the Edrv filter structure.
 
 \param  pFilter_p       Pointer to Edrv filte structure.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 void dllk_setupAsndFilter(tEdrvFilter* pFilter_p)
@@ -116,7 +116,7 @@ The function sets up an SoC filter in the Edrv filter structure.
 
 \param  pFilter_p       Pointer to Edrv filte structure.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 void dllk_setupSocFilter(tEdrvFilter* pFilter_p)
@@ -134,7 +134,7 @@ The function sets up an SoA filter in the Edrv filter structure.
 
 \param  pFilter_p       Pointer to Edrv filte structure.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 void dllk_setupSoaFilter(tEdrvFilter* pFilter_p)
@@ -154,7 +154,7 @@ The function sets up an IdentReq SoA filter in the Edrv filter structure.
 \param  nodeId_p        Node ID for which to set the filter.
 \param  pBuffer_p       Pointer to TX buffer.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 void dllk_setupSoaIdentReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer *pBuffer_p)
@@ -188,7 +188,7 @@ The function sets up an StatusReq SoA filter in the Edrv filter structure.
 \param  nodeId_p        Node ID for which to set the filter.
 \param  pBuffer_p       Pointer to TX buffer.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 void dllk_setupSoaStatusReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer *pBuffer_p)
@@ -222,7 +222,7 @@ The function sets up an NmtReq SoA filter in the Edrv filter structure.
 \param  nodeId_p        Node ID for which to set the filter.
 \param  pBuffer_p       Pointer to TX buffer.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 void dllk_setupSoaNmtReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer *pBuffer_p)
@@ -258,7 +258,7 @@ The function sets up an SyncReq SoA filter in the Edrv filter structure.
 \param  nodeId_p        Node ID for which to set the filter.
 \param  pBuffer_p       Pointer to TX buffer.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 void dllk_setupSoaSyncReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer *pBuffer_p)
@@ -293,7 +293,7 @@ The function sets up an Unspecific SoA filter in the Edrv filter structure.
 \param  nodeId_p        Node ID for which to set the filter.
 \param  pBuffer_p       Pointer to TX buffer.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 void dllk_setupSoaUnspecReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer *pBuffer_p)
@@ -326,7 +326,7 @@ The function sets up a PRes filter in the Edrv filter structure.
 \param  pFilter_p       Pointer to Edrv filte structure.
 \param  fEnable_p       Flag determines if filter is enabled or disabled.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 void dllk_setupPresFilter(tEdrvFilter* pFilter_p, BOOL fEnable_p)
@@ -351,7 +351,7 @@ The function sets up an PReq filter in the Edrv filter structure.
 \param  pBuffer_p       Pointer to TX buffer.
 \param  pMacAdrs_p      Pointer to mac address of node.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 void dllk_setupPreqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer *pBuffer_p, UINT8* pMacAdrs_p)
@@ -384,10 +384,10 @@ This function adds a PRes filter for the specified node.
 \return The function returns a pointer to the node Information of the node
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_addNodeFilter(tDllkNodeInfo* pIntNodeInfo_p, tDllNodeOpType nodeOpType_p,
+tOplkError dllk_addNodeFilter(tDllkNodeInfo* pIntNodeInfo_p, tDllNodeOpType nodeOpType_p,
                               BOOL fUpdateEdrv_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     UINT8           presFilterFlags = 0;
 
     switch (nodeOpType_p)
@@ -460,10 +460,10 @@ This function deletes a PRes filter for the specified node.
 \return The function returns a pointer to the node Information of the node
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_deleteNodeFilter(tDllkNodeInfo* pIntNodeInfo_p, tDllNodeOpType nodeOpType_p,
+tOplkError dllk_deleteNodeFilter(tDllkNodeInfo* pIntNodeInfo_p, tDllNodeOpType nodeOpType_p,
                                  BOOL fUpdateEdrv_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     BYTE            bPresFilterFlags = 0;
 
     switch (nodeOpType_p)

@@ -94,12 +94,12 @@ UINT16              status_g;
 The function initializes the kernel control CAL module. For the direct call
 implementation nothing has to be done!
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_ctrlkcal
 */
 //------------------------------------------------------------------------------
-tEplKernel ctrlkcal_init (void)
+tOplkError ctrlkcal_init (void)
 {
     status_g = kCtrlStatusReady;
     return kEplSuccessful;
@@ -127,12 +127,12 @@ void ctrlkcal_exit (void)
 
 This function provides processing time for the CAL module.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_ctrlkcal
 */
 //------------------------------------------------------------------------------
-tEplKernel ctrlkcal_process (void)
+tOplkError ctrlkcal_process (void)
 {
     return kEplSuccessful;
 }
@@ -150,12 +150,12 @@ block to execute a kernel control function.
 
 \param  pCmd_p            The command to be executed.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_ctrlkcal
 */
 //------------------------------------------------------------------------------
-tEplKernel ctrlkcal_getCmd (tCtrlCmdType *pCmd_p)
+tOplkError ctrlkcal_getCmd (tCtrlCmdType *pCmd_p)
 {
     UNUSED_PARAMETER(pCmd_p);
     return kEplSuccessful;
@@ -257,13 +257,13 @@ The function reads the initialization parameter from the user stack.
 
 \param  pInitParam_p        Specifies where to store the read init parameters.
 
-\return The function returns a tEplKernel error code. It returns always
+\return The function returns a tOplkError error code. It returns always
         kEplSuccessful!
 
 \ingroup module_ctrlkcal
 */
 //------------------------------------------------------------------------------
-tEplKernel ctrlkcal_readInitParam(tCtrlInitParam* pInitParam_p)
+tOplkError ctrlkcal_readInitParam(tCtrlInitParam* pInitParam_p)
 {
     EPL_MEMCPY(pInitParam_p, &kernelInitParam_g, sizeof(tCtrlInitParam));
     return kEplSuccessful;

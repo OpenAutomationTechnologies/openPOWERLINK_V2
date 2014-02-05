@@ -153,12 +153,12 @@ enum hrtimer_restart timerCallback(struct hrtimer* pTimer_p);
 
 The function initializes the high-resolution timer module
 
-\return Returns a tEplKernel error code.
+\return Returns a tOplkError error code.
 
 \ingroup module_hrestimer
 */
 //------------------------------------------------------------------------------
-tEplKernel hrestimer_init(void)
+tOplkError hrestimer_init(void)
 {
     return hrestimer_addInstance();
 }
@@ -169,14 +169,14 @@ tEplKernel hrestimer_init(void)
 
 The function adds an instance of the high-resolution timer module
 
-\return Returns a tEplKernel error code.
+\return Returns a tOplkError error code.
 
 \ingroup module_hrestimer
 */
 //------------------------------------------------------------------------------
-tEplKernel hrestimer_addInstance(void)
+tOplkError hrestimer_addInstance(void)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     UINT            index;
 
     EPL_MEMSET(&hresTimerInstance_l, 0, sizeof (hresTimerInstance_l));
@@ -215,15 +215,15 @@ tEplKernel hrestimer_addInstance(void)
 
 The function deletes an instance of the high-resolution timer module
 
-\return Returns a tEplKernel error code.
+\return Returns a tOplkError error code.
 
 \ingroup module_hrestimer
 */
 //------------------------------------------------------------------------------
-tEplKernel hrestimer_delInstance(void)
+tOplkError hrestimer_delInstance(void)
 {
     tHresTimerInfo*         pTimerInfo;
-    tEplKernel              ret = kEplSuccessful;
+    tOplkError              ret = kEplSuccessful;
     UINT                    index;
 
     for (index = 0; index < TIMER_COUNT; index++)
@@ -261,16 +261,16 @@ discarded.
 \param  fContinue_p     If TRUE, callback function will be called continuously.
                         Otherwise, it is a one-shot timer.
 
-\return Returns a tEplKernel error code.
+\return Returns a tOplkError error code.
 
 \ingroup module_hrestimer
 */
 //------------------------------------------------------------------------------
-tEplKernel hrestimer_modifyTimer(tEplTimerHdl* pTimerHdl_p, ULONGLONG time_p,
+tOplkError hrestimer_modifyTimer(tEplTimerHdl* pTimerHdl_p, ULONGLONG time_p,
                                  tEplTimerkCallback pfnCallback_p, ULONG argument_p,
                                  BOOL fContinue_p)
 {
-    tEplKernel              ret = kEplSuccessful;
+    tOplkError              ret = kEplSuccessful;
     UINT                    index;
     tHresTimerInfo*         pTimerInfo;
     ktime_t                 relTime;
@@ -344,14 +344,14 @@ by its timer handle. After deleting the handle is reset to zero.
 
 \param  pTimerHdl_p     Pointer to timer handle.
 
-\return Returns a tEplKernel error code.
+\return Returns a tOplkError error code.
 
 \ingroup module_hrestimer
 */
 //------------------------------------------------------------------------------
-tEplKernel hrestimer_deleteTimer(tEplTimerHdl* pTimerHdl_p)
+tOplkError hrestimer_deleteTimer(tEplTimerHdl* pTimerHdl_p)
 {
-    tEplKernel              ret = kEplSuccessful;
+    tOplkError              ret = kEplSuccessful;
     UINT                    index;
     tHresTimerInfo*         pTimerInfo;
 

@@ -72,7 +72,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // local types
 //------------------------------------------------------------------------------
 
-typedef tEplKernel (*tDllkStateFunc)(tNmtState, tNmtEvent, tErrHndkEvent*);
+typedef tOplkError (*tDllkStateFunc)(tNmtState, tNmtEvent, tErrHndkEvent*);
 
 typedef struct
 {
@@ -89,29 +89,29 @@ typedef struct
 // local function prototypes
 //------------------------------------------------------------------------------
 #if defined(CONFIG_INCLUDE_NMT_MN)
-static tEplKernel processNmtMsPreop1(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
+static tOplkError processNmtMsPreop1(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
                                      tErrHndkEvent* pDllEvent_p);
-static tEplKernel processNmtMsFullCycle(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
+static tOplkError processNmtMsFullCycle(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
                                         tErrHndkEvent* pDllEvent_p);
 #endif
 
-static tEplKernel processCsFullCycleDllWaitPreq(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
+static tOplkError processCsFullCycleDllWaitPreq(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
                                                 tErrHndkEvent* pDllEvent_p);
-static tEplKernel processCsFullCycleDllWaitSoc(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
+static tOplkError processCsFullCycleDllWaitSoc(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
                                                tErrHndkEvent* pDllEvent_p);
-static tEplKernel processCsFullCycleDllWaitSoa(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
+static tOplkError processCsFullCycleDllWaitSoa(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
                                                tErrHndkEvent* pDllEvent_p);
-static tEplKernel processCsFullCycleDllGsInit(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
+static tOplkError processCsFullCycleDllGsInit(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
                                               tErrHndkEvent* pDllEvent_p);
 
 
-static tEplKernel processCsStoppedDllWaitPreq(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
+static tOplkError processCsStoppedDllWaitPreq(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
                                               tErrHndkEvent* pDllEvent_p);
-static tEplKernel processCsStoppedDllWaitSoc(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
+static tOplkError processCsStoppedDllWaitSoc(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
                                              tErrHndkEvent* pDllEvent_p);
-static tEplKernel processCsStoppedDllWaitSoa(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
+static tOplkError processCsStoppedDllWaitSoa(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
                                              tErrHndkEvent* pDllEvent_p);
-static tEplKernel processCsStoppedDllGsInit(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
+static tOplkError processCsStoppedDllGsInit(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
                                             tErrHndkEvent* pDllEvent_p);
 
 //------------------------------------------------------------------------------
@@ -155,12 +155,12 @@ changes the DLL state depending on the NMT state and the received event.
 \param  nmtEvent_p              Event to handle.
 \param  nmtState_p              Current NMT state.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_changeState(tNmtEvent nmtEvent_p, tNmtState nmtState_p)
+tOplkError dllk_changeState(tNmtEvent nmtEvent_p, tNmtState nmtState_p)
 {
-    tEplKernel              ret = kEplSuccessful;
+    tOplkError              ret = kEplSuccessful;
     tErrHndkEvent           dllEvent;
 
     dllEvent.m_ulDllErrorEvents = 0;
@@ -252,13 +252,13 @@ The function handles DLL state changes in NMT state MsPreoperational1
 \param  nmtState_p              Current NMT state.
 \param  pDllEvent_p             DLL error event.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processNmtMsPreop1(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
+static tOplkError processNmtMsPreop1(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
                                      tErrHndkEvent* pDllEvent_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     tDllState       DummyDllState;
 
     UNUSED_PARAMETER(pDllEvent_p);
@@ -318,13 +318,13 @@ MsPreOperational2, MsReadyToOperate and MsOperational.
 \param  nmtState_p              Current NMT state.
 \param  pDllEvent_p             DLL error event.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processNmtMsFullCycle(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
+static tOplkError processNmtMsFullCycle(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
                                         tErrHndkEvent* pDllEvent_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
 
     UNUSED_PARAMETER(nmtState_p);
 
@@ -401,10 +401,10 @@ state WaitPreq.
 \param  nmtState_p              Current NMT state.
 \param  pDllEvent_p             DLL error event.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processCsFullCycleDllWaitPreq(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
+static tOplkError processCsFullCycleDllWaitPreq(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
                                                 tErrHndkEvent* pDllEvent_p)
 {
     switch (nmtEvent_p)
@@ -485,10 +485,10 @@ state WaitSoC.
 \param  nmtState_p              Current NMT state.
 \param  pDllEvent_p             DLL error event.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processCsFullCycleDllWaitSoc(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
+static tOplkError processCsFullCycleDllWaitSoc(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
                                                tErrHndkEvent* pDllEvent_p)
 {
     switch (nmtEvent_p)
@@ -536,10 +536,10 @@ state WaitSoA.
 \param  nmtState_p              Current NMT state.
 \param  pDllEvent_p             DLL error event.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processCsFullCycleDllWaitSoa(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
+static tOplkError processCsFullCycleDllWaitSoa(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
                                                tErrHndkEvent* pDllEvent_p)
 {
     switch (nmtEvent_p)
@@ -596,10 +596,10 @@ state GsInit.
 \param  nmtState_p              Current NMT state.
 \param  pDllEvent_p             DLL error event.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processCsFullCycleDllGsInit(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
+static tOplkError processCsFullCycleDllGsInit(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
                                               tErrHndkEvent* pDllEvent_p)
 {
     UNUSED_PARAMETER(nmtState_p);
@@ -623,10 +623,10 @@ state WaitPReq.
 \param  nmtState_p              Current NMT state.
 \param  pDllEvent_p             DLL error event.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processCsStoppedDllWaitPreq(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
+static tOplkError processCsStoppedDllWaitPreq(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
                                               tErrHndkEvent* pDllEvent_p)
 {
     UNUSED_PARAMETER(nmtState_p);
@@ -674,10 +674,10 @@ state WaitSoC.
 \param  nmtState_p              Current NMT state.
 \param  pDllEvent_p             DLL error event.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processCsStoppedDllWaitSoc(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
+static tOplkError processCsStoppedDllWaitSoc(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
                                              tErrHndkEvent* pDllEvent_p)
 {
     UNUSED_PARAMETER(nmtState_p);
@@ -718,10 +718,10 @@ state WaitSoA.
 \param  nmtState_p              Current NMT state.
 \param  pDllEvent_p             DLL error event.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processCsStoppedDllWaitSoa(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
+static tOplkError processCsStoppedDllWaitSoa(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
                                              tErrHndkEvent* pDllEvent_p)
 {
     UNUSED_PARAMETER(nmtState_p);
@@ -778,10 +778,10 @@ state GsInit.
 \param  nmtState_p              Current NMT state.
 \param  pDllEvent_p             DLL error event.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processCsStoppedDllGsInit(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
+static tOplkError processCsStoppedDllGsInit(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
                                             tErrHndkEvent* pDllEvent_p)
 {
     UNUSED_PARAMETER(nmtState_p);

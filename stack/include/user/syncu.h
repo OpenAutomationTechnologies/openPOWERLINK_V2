@@ -54,7 +54,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-typedef tEplKernel (*tSyncuCbResponse) (UINT nodeId_p, tEplSyncResponse* pSyncResponse_p);
+typedef tOplkError (*tSyncuCbResponse) (UINT nodeId_p, tEplSyncResponse* pSyncResponse_p);
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -64,11 +64,11 @@ typedef tEplKernel (*tSyncuCbResponse) (UINT nodeId_p, tEplSyncResponse* pSyncRe
 extern "C" {
 #endif
 
-tEplKernel syncu_init(void);
-tEplKernel syncu_addInstance(void);
-tEplKernel syncu_delInstance(void);
-tEplKernel syncu_reset(void);
-tEplKernel syncu_requestSyncResponse(tSyncuCbResponse pfnCbResponse_p,
+tOplkError syncu_init(void);
+tOplkError syncu_addInstance(void);
+tOplkError syncu_delInstance(void);
+tOplkError syncu_reset(void);
+tOplkError syncu_requestSyncResponse(tSyncuCbResponse pfnCbResponse_p,
                                      tDllSyncRequest* pSyncRequestData_p,
                                      UINT size_p);
 

@@ -81,33 +81,33 @@ static BOOL*    pfGsOff_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tEplKernel processStateChangeEvent(tEplApiEventType EventType_p,
+static tOplkError processStateChangeEvent(tEplApiEventType EventType_p,
                                           tEplApiEventArg* pEventArg_p,
                                           void GENERIC* pUserArg_p);
 
-static tEplKernel processErrorWarningEvent(tEplApiEventType EventType_p,
+static tOplkError processErrorWarningEvent(tEplApiEventType EventType_p,
                                            tEplApiEventArg* pEventArg_p,
                                            void GENERIC* pUserArg_p);
 
-static tEplKernel processHistoryEvent(tEplApiEventType EventType_p,
+static tOplkError processHistoryEvent(tEplApiEventType EventType_p,
                                       tEplApiEventArg* pEventArg_p,
                                       void GENERIC* pUserArg_p);
 
-static tEplKernel processNodeEvent(tEplApiEventType EventType_p,
+static tOplkError processNodeEvent(tEplApiEventType EventType_p,
                                    tEplApiEventArg* pEventArg_p,
                                    void GENERIC* pUserArg_p);
 
 #ifdef CONFIG_INCLUDE_CFM
-static tEplKernel processCfmProgressEvent(tEplApiEventType EventType_p,
+static tOplkError processCfmProgressEvent(tEplApiEventType EventType_p,
                                           tEplApiEventArg* pEventArg_p,
                                           void GENERIC* pUserArg_p);
 
-static tEplKernel processCfmResultEvent(tEplApiEventType EventType_p,
+static tOplkError processCfmResultEvent(tEplApiEventType EventType_p,
                                         tEplApiEventArg* pEventArg_p,
                                         void GENERIC* pUserArg_p);
 #else
-static tEplKernel setDefaultNodeAssignment(void);
-static tEplKernel processSdoEvent(tEplApiEventType EventType_p,
+static tOplkError setDefaultNodeAssignment(void);
+static tOplkError processSdoEvent(tEplApiEventType EventType_p,
                                   tEplApiEventArg* pEventArg_p,
                                   void GENERIC* pUserArg_p);
 #endif
@@ -145,16 +145,16 @@ The function implements the applications stack event handler.
 \param  pEventArg_p         Pointer to union which describes the event in detail
 \param  pUserArg_p          User specific argument
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_demo_mn_console
 */
 //------------------------------------------------------------------------------
-tEplKernel PUBLIC processEvents(tEplApiEventType EventType_p,
+tOplkError PUBLIC processEvents(tEplApiEventType EventType_p,
                                 tEplApiEventArg* pEventArg_p,
                                 void GENERIC* pUserArg_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
 
     UNUSED_PARAMETER(pUserArg_p);
 
@@ -216,14 +216,14 @@ The function processes state change events.
 \param  pEventArg_p         Pointer to union which describes the event in detail
 \param  pUserArg_p          User specific argument
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processStateChangeEvent(tEplApiEventType EventType_p,
+static tOplkError processStateChangeEvent(tEplApiEventType EventType_p,
                                           tEplApiEventArg* pEventArg_p,
                                           void GENERIC* pUserArg_p)
 {
-    tEplKernel                  ret = kEplSuccessful;
+    tOplkError                  ret = kEplSuccessful;
     tEventNmtStateChange*       pNmtStateChange = &pEventArg_p->m_NmtStateChange;
 
     UNUSED_PARAMETER(EventType_p);
@@ -298,10 +298,10 @@ The function processes error and warning events.
 \param  pEventArg_p         Pointer to union which describes the event in detail
 \param  pUserArg_p          User specific argument
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processErrorWarningEvent(tEplApiEventType EventType_p,
+static tOplkError processErrorWarningEvent(tEplApiEventType EventType_p,
                                            tEplApiEventArg* pEventArg_p,
                                            void GENERIC* pUserArg_p)
 {
@@ -365,10 +365,10 @@ The function processes history events.
 \param  pEventArg_p         Pointer to union which describes the event in detail
 \param  pUserArg_p          User specific argument
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processHistoryEvent(tEplApiEventType EventType_p,
+static tOplkError processHistoryEvent(tEplApiEventType EventType_p,
                                       tEplApiEventArg* pEventArg_p,
                                       void GENERIC* pUserArg_p)
 {
@@ -404,10 +404,10 @@ The function processes node events.
 \param  pEventArg_p         Pointer to union which describes the event in detail
 \param  pUserArg_p          User specific argument
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processNodeEvent(tEplApiEventType EventType_p,
+static tOplkError processNodeEvent(tEplApiEventType EventType_p,
                                    tEplApiEventArg* pEventArg_p,
                                    void GENERIC* pUserArg_p)
 {
@@ -461,10 +461,10 @@ The function processes CFM progress events.
 \param  pEventArg_p         Pointer to union which describes the event in detail
 \param  pUserArg_p          User specific argument
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processCfmProgressEvent(tEplApiEventType EventType_p,
+static tOplkError processCfmProgressEvent(tEplApiEventType EventType_p,
                                           tEplApiEventArg* pEventArg_p,
                                           void GENERIC* pUserArg_p)
 {
@@ -505,10 +505,10 @@ The function processes CFM result events.
 \param  pEventArg_p         Pointer to union which describes the event in detail
 \param  pUserArg_p          User specific argument
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processCfmResultEvent(tEplApiEventType EventType_p,
+static tOplkError processCfmResultEvent(tEplApiEventType EventType_p,
                                         tEplApiEventArg* pEventArg_p,
                                         void GENERIC* pUserArg_p)
 {
@@ -555,15 +555,15 @@ The function processes SDO events.
 \param  pEventArg_p         Pointer to union which describes the event in detail
 \param  pUserArg_p          User specific argument
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processSdoEvent(tEplApiEventType EventType_p,
+static tOplkError processSdoEvent(tEplApiEventType EventType_p,
                                   tEplApiEventArg* pEventArg_p,
                                   void GENERIC* pUserArg_p)
 {
     tSdoComFinished*          pSdo = &pEventArg_p->m_Sdo;
-    tEplKernel                ret = kEplSuccessful;
+    tOplkError                ret = kEplSuccessful;
 
     UNUSED_PARAMETER(EventType_p);
     UNUSED_PARAMETER(pUserArg_p);
@@ -592,12 +592,12 @@ static tEplKernel processSdoEvent(tEplApiEventType EventType_p,
 Set default node assignment in object dictionary if configuration manager is
 not available.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel setDefaultNodeAssignment(void)
+static tOplkError setDefaultNodeAssignment(void)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
     DWORD       nodeAssignment;
 
     nodeAssignment = (EPL_NODEASSIGN_NODE_IS_CN | EPL_NODEASSIGN_NODE_EXISTS);    // 0x00000003L

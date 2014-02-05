@@ -93,7 +93,7 @@ static tSdoAsndInstance  sdoAsndInstance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-tEplKernel sdoAsndCb(tFrameInfo * pFrameInfo_p);
+tOplkError sdoAsndCb(tFrameInfo * pFrameInfo_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -107,14 +107,14 @@ The function initializes a first instance of the SDO over ASnd module.
 
 \param  pfnReceiveCb_p          Pointer to SDO sequence layer callback function.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_sdo_asnd
 */
 //------------------------------------------------------------------------------
-tEplKernel sdoasnd_init(tSequLayerReceiveCb pfnReceiveCb_p)
+tOplkError sdoasnd_init(tSequLayerReceiveCb pfnReceiveCb_p)
 {
-    tEplKernel  ret;
+    tOplkError  ret;
 
     ret = sdoasnd_addInstance(pfnReceiveCb_p);
     return ret;
@@ -128,14 +128,14 @@ The function adds an instance of the SDO over ASnd module.
 
 \param  pfnReceiveCb_p          Pointer to SDO sequence layer callback function.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_sdo_asnd
 */
 //------------------------------------------------------------------------------
-tEplKernel sdoasnd_addInstance(tSequLayerReceiveCb pfnReceiveCb_p)
+tOplkError sdoasnd_addInstance(tSequLayerReceiveCb pfnReceiveCb_p)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
 
     EPL_MEMSET(&sdoAsndInstance_l, 0x00, sizeof(sdoAsndInstance_l));
 
@@ -159,14 +159,14 @@ tEplKernel sdoasnd_addInstance(tSequLayerReceiveCb pfnReceiveCb_p)
 
 The function deletes an instance of the SDO over ASnd module.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_sdo_asnd
 */
 //------------------------------------------------------------------------------
-tEplKernel sdoasnd_delInstance(void)
+tOplkError sdoasnd_delInstance(void)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
 
     ret = dllucal_regAsndService(kDllAsndSdo, NULL, kDllAsndFilterNone);
 
@@ -183,14 +183,14 @@ The function initializes a SDO over ASnd connection to a node.
                                 new connection.
 \param  targetNodeId_p          Node ID of the target to connect to.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_sdo_asnd
 */
 //------------------------------------------------------------------------------
-tEplKernel sdoasnd_initCon(tSdoConHdl* pSdoConHandle_p, UINT targetNodeId_p)
+tOplkError sdoasnd_initCon(tSdoConHdl* pSdoConHandle_p, UINT targetNodeId_p)
 {
-    tEplKernel      ret;
+    tOplkError      ret;
     UINT            count;
     UINT            freeCon;
     UINT*           pConnection;
@@ -247,14 +247,14 @@ The function sends data via an existing SDO over ASnd connection.
 \param  pSrcData_p              Pointer to data which shall be sent.
 \param  dataSize_p              Size of data to be sent.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_sdo_asnd
 */
 //------------------------------------------------------------------------------
-tEplKernel sdoasnd_sendData(tSdoConHdl sdoConHandle_p, tEplFrame* pSrcData_p, UINT32 dataSize_p)
+tOplkError sdoasnd_sendData(tSdoConHdl sdoConHandle_p, tEplFrame* pSrcData_p, UINT32 dataSize_p)
 {
-    tEplKernel      ret;
+    tOplkError      ret;
     UINT            array;
     tFrameInfo      frameInfo;
 
@@ -294,14 +294,14 @@ The function deletes an existing SDO over ASnd connection.
 
 \param  sdoConHandle_p          Connection handle of the connection to delete.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_sdo_asnd
 */
 //------------------------------------------------------------------------------
-tEplKernel sdoasnd_deleteCon(tSdoConHdl sdoConHandle_p)
+tOplkError sdoasnd_deleteCon(tSdoConHdl sdoConHandle_p)
 {
-    tEplKernel  ret;
+    tOplkError  ret;
     UINT        array;
 
     ret = kEplSuccessful;
@@ -331,12 +331,12 @@ receiving ASnd frames.
 
 \param  pFrameInfo_p        Pointer to received frame.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel sdoAsndCb(tFrameInfo* pFrameInfo_p)
+tOplkError sdoAsndCb(tFrameInfo* pFrameInfo_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     UINT            count;
     UINT*           pConnection;
     UINT            nodeId;

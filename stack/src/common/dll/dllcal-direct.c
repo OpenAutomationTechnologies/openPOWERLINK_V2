@@ -95,12 +95,12 @@ static tDllCalDirectInstance* pDllCalQueueHead_l = NULL; ///< pointer to the hea
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tEplKernel addInstance(tDllCalQueueInstance* ppDllCalQueue_p, tDllCalQueue DllCalQueue_p);
-static tEplKernel delInstance(tDllCalQueueInstance pDllCalQueue_p);
-static tEplKernel insertDataBlock(tDllCalQueueInstance pDllCalQueue_p, BYTE *pData_p, UINT* pDataSize_p);
-static tEplKernel getDataBlock(tDllCalQueueInstance pDllCalQueue_p, BYTE *pData_p, UINT* pDataSize_p);
-static tEplKernel getDataBlockCount(tDllCalQueueInstance pDllCalQueue_p, ULONG* pDataBlockCount_p);
-static tEplKernel resetDataBlockQueue(tDllCalQueueInstance pDllCalQueue_p, ULONG timeOutMs_p);
+static tOplkError addInstance(tDllCalQueueInstance* ppDllCalQueue_p, tDllCalQueue DllCalQueue_p);
+static tOplkError delInstance(tDllCalQueueInstance pDllCalQueue_p);
+static tOplkError insertDataBlock(tDllCalQueueInstance pDllCalQueue_p, BYTE *pData_p, UINT* pDataSize_p);
+static tOplkError getDataBlock(tDllCalQueueInstance pDllCalQueue_p, BYTE *pData_p, UINT* pDataSize_p);
+static tOplkError getDataBlockCount(tDllCalQueueInstance pDllCalQueue_p, ULONG* pDataBlockCount_p);
+static tOplkError resetDataBlockQueue(tDllCalQueueInstance pDllCalQueue_p, ULONG timeOutMs_p);
 
 /* define external function interface */
 static tDllCalFuncIntf funcintf_l =
@@ -147,15 +147,15 @@ Add a direct call instance for TX packet forwarding in DLL CAL
 \param  ppDllCalQueue_p         Double-pointer to DllCal Queue instance
 \param  dllCalQueue_p           Parameter that determines the queue
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 */
 //------------------------------------------------------------------------------
-static tEplKernel addInstance (tDllCalQueueInstance *ppDllCalQueue_p,
+static tOplkError addInstance (tDllCalQueueInstance *ppDllCalQueue_p,
                                tDllCalQueue dllCalQueue_p)
 {
-    tEplKernel                  ret = kEplSuccessful;
+    tOplkError                  ret = kEplSuccessful;
     tDllCalDirectInstance*      pSearch;
     tDllCalDirectInstance*      pDllCalDirectInstance;
     BOOL                        fInstanceFound;
@@ -237,12 +237,12 @@ Delete the direct call instance.
 
 \param  pDllCalQueue_p          Pointer to DllCal Queue instance
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 */
 //------------------------------------------------------------------------------
-static tEplKernel delInstance (tDllCalQueueInstance pDllCalQueue_p)
+static tOplkError delInstance (tDllCalQueueInstance pDllCalQueue_p)
 {
     tDllCalDirectInstance*      pDllCalDirectInstance =
                                     (tDllCalDirectInstance*)pDllCalQueue_p;
@@ -302,15 +302,15 @@ any type (e.g. TX packet).
 \param  pDataSize_p             Pointer to the size of the data block to be
                                 inserted.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 */
 //------------------------------------------------------------------------------
-static tEplKernel insertDataBlock (tDllCalQueueInstance pDllCalQueue_p,
+static tOplkError insertDataBlock (tDllCalQueueInstance pDllCalQueue_p,
                                    BYTE *pData_p, UINT *pDataSize_p)
 {
-    tEplKernel                  ret = kEplSuccessful;
+    tOplkError                  ret = kEplSuccessful;
     tDllCalDirectInstance*      pDllCalDirectInstance =
                                     (tDllCalDirectInstance*)pDllCalQueue_p;
 
@@ -351,15 +351,15 @@ type (e.g. TX packet).
 \param  pDataSize_p             Pointer to the size of the data buffer
                                 (will be replaced with actual data block size)
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 */
 //------------------------------------------------------------------------------
-static tEplKernel getDataBlock (tDllCalQueueInstance pDllCalQueue_p,
+static tOplkError getDataBlock (tDllCalQueueInstance pDllCalQueue_p,
                                 BYTE *pData_p, UINT *pDataSize_p)
 {
-    tEplKernel                  ret = kEplSuccessful;
+    tOplkError                  ret = kEplSuccessful;
     tDllCalDirectInstance*      pDllCalDirectInstance =
                                     (tDllCalDirectInstance*)pDllCalQueue_p;
 
@@ -406,12 +406,12 @@ Returns the data block counter.
 \param  pDllCalQueue_p          Pointer to DllCal Queue instance
 \param  pDataBlockCount_p       Pointer which returns the data block count
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 */
 //------------------------------------------------------------------------------
-static tEplKernel getDataBlockCount (tDllCalQueueInstance pDllCalQueue_p,
+static tOplkError getDataBlockCount (tDllCalQueueInstance pDllCalQueue_p,
                                      ULONG* pDataBlockCount_p)
 {
     tDllCalDirectInstance*  pDllCalDirectInstance =
@@ -444,12 +444,12 @@ Resets the direct call instance
 \param  pDllCalQueue_p          Pointer to DllCal Queue instance
 \param  timeOutMs_p             Timeout in milliseconds.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 */
 //------------------------------------------------------------------------------
-static tEplKernel resetDataBlockQueue (tDllCalQueueInstance pDllCalQueue_p,
+static tOplkError resetDataBlockQueue (tDllCalQueueInstance pDllCalQueue_p,
                                        ULONG timeOutMs_p)
 {
     tDllCalDirectInstance*  pDllCalDirectInstance =

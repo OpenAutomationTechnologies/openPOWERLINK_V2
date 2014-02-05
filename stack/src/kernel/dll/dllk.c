@@ -94,14 +94,14 @@ The function adds a DLL kernel module instance.
 
 \param  pInitParam_p            Initialization parameters for DLL.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_dllk
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_addInstance(tDllkInitParam* pInitParam_p)
+tOplkError dllk_addInstance(tDllkInitParam* pInitParam_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     UINT            index;
     tEdrvInitParam  EdrvInitParam;
 
@@ -184,14 +184,14 @@ tEplKernel dllk_addInstance(tDllkInitParam* pInitParam_p)
 
 The function deletes an DLL kernel module instance.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_dllk
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_delInstance(void)
+tOplkError dllk_delInstance(void)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 
     // reset state
     dllkInstance_g.dllState = kDllGsInit;
@@ -221,15 +221,15 @@ NMT_GS_COMMUNICATING will be entered.
 
 \param  pDllConfigParam_p       Pointer to configuration parameters.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_dllk
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_config(tDllConfigParam * pDllConfigParam_p)
+tOplkError dllk_config(tDllConfigParam * pDllConfigParam_p)
 {
     tNmtState       nmtState;
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 
     nmtState = dllkInstance_g.nmtState;
 
@@ -282,12 +282,12 @@ case of hostname change).
 
 \param  pDllIdentParam_p    Pointer to identity parameters.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_dllk
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_setIdentity(tDllIdentParam * pDllIdentParam_p)
+tOplkError dllk_setIdentity(tDllIdentParam * pDllIdentParam_p)
 {
     EPL_MEMCPY (&dllkInstance_g.dllIdentParam, pDllIdentParam_p,
         (pDllIdentParam_p->sizeOfStruct < sizeof (tDllIdentParam) ?
@@ -307,16 +307,16 @@ Ethernet driver).
 \param  pfnDllkCbAsync_p    Pointer to callback function which will be called in
                             interrupt context normally.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful              If handler is successfully registered.
 \retval kEplDllCbAsyncRegistered    If there is already a handler registered.
 
 \ingroup module_dllk
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_regAsyncHandler(tEplDllkCbAsync pfnDllkCbAsync_p)
+tOplkError dllk_regAsyncHandler(tEplDllkCbAsync pfnDllkCbAsync_p)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
 
     if (dllkInstance_g.pfnCbAsync == NULL)
     {   // no handler registered yet
@@ -340,16 +340,16 @@ Ethernet driver).
                             this function was registered before deregistering
                             it.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful              If handler is successfully deregistered.
 \retval kEplDllCbAsyncRegistered    If another handler is registered.
 
 \ingroup module_dllk
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_deregAsyncHandler(tEplDllkCbAsync pfnDllkCbAsync_p)
+tOplkError dllk_deregAsyncHandler(tEplDllkCbAsync pfnDllkCbAsync_p)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
 
     if (dllkInstance_g.pfnCbAsync == pfnDllkCbAsync_p)
     {   // same handler is registered, deregister it
@@ -430,17 +430,17 @@ It registers C_DLL_MULTICAST_ASND in Ethernet driver if any AsndServiceId is ope
 \param  serviceId_p         ASnd service ID.
 \param  filter_p            Node ID filter.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful                  If filter was successfully set.
 \retval kEplDllInvalidAsndServiceId     If an invalid service ID was specified.
 
 \ingroup module_dllk
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_setAsndServiceIdFilter(tDllAsndServiceId serviceId_p,
+tOplkError dllk_setAsndServiceIdFilter(tDllAsndServiceId serviceId_p,
                                        tDllAsndFilter filter_p)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
 
     if (serviceId_p < tabentries (dllkInstance_g.aAsndFilter))
         dllkInstance_g.aAsndFilter[serviceId_p] = filter_p;
@@ -461,14 +461,14 @@ The function releases the RX buffer for the specified RX frame in Edrv.
 \param  pFrame_p                Pointer to frame.
 \param  frameSize_p             Size of frame.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_dllk
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_releaseRxFrame(tEplFrame* pFrame_p, UINT frameSize_p)
+tOplkError dllk_releaseRxFrame(tEplFrame* pFrame_p, UINT frameSize_p)
 {
-    tEplKernel      ret;
+    tOplkError      ret;
     tEdrvRxBuffer   rxBuffer;
 
     rxBuffer.pBuffer   = (UINT8*)pFrame_p;
@@ -490,14 +490,14 @@ The function configures the specified node (e.g. payload limits and timeouts).
 
 \param  pNodeInfo_p             Pointer to node information.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_dllk
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_configNode(tDllNodeInfo * pNodeInfo_p)
+tOplkError dllk_configNode(tDllNodeInfo * pNodeInfo_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     tDllkNodeInfo*      pIntNodeInfo;
     tNmtState           nmtState;
 
@@ -546,14 +546,14 @@ The function adds the specified node into the isochronous phase.
 
 \param  pNodeOpParam_p      Pointer to node operation parameters.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_dllk
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_addNode(tDllNodeOpParam* pNodeOpParam_p)
+tOplkError dllk_addNode(tDllNodeOpParam* pNodeOpParam_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     tDllkNodeInfo*      pIntNodeInfo;
     tNmtState           nmtState;
     BOOL                fUpdateEdrv = FALSE;
@@ -602,14 +602,14 @@ The function deletes the specified node from the isochronous phase.
 
 \param  pNodeOpParam_p      Pointer to node operation parameters.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_dllk
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_deleteNode(tDllNodeOpParam* pNodeOpParam_p)
+tOplkError dllk_deleteNode(tDllNodeOpParam* pNodeOpParam_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     tDllkNodeInfo*      pIntNodeInfo;
     tNmtState           nmtState;
     BOOL                fUpdateEdrv = FALSE;
@@ -691,14 +691,14 @@ The function sets Flag1 (for PReq and SoA) of the specified node.
 \param  nodeId_p            Node ID to set the flag.
 \param  soaFlag1_p          Flag1.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          If flag is successfully set.
 \retval kEplDllNoNodeInfo       If node is not found.
 
 \ingroup module_dllk
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_setFlag1OfNode(UINT nodeId_p, UINT8 soaFlag1_p)
+tOplkError dllk_setFlag1OfNode(UINT nodeId_p, UINT8 soaFlag1_p)
 {
     tDllkNodeInfo*   pNodeInfo;
 
@@ -741,14 +741,14 @@ The function returns the MAC address of the specified node.
 \param  nodeId_p                Node ID from which to get MAC address.
 \param  pCnMacAddress_p         Pointer to store MAC address.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          If MAC address is successfully read.
 \retval kEplDllNoNodeInfo       If node is not found.
 
 \ingroup module_dllk
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_getCnMacAddress(UINT nodeId_p, BYTE* pCnMacAddress_p)
+tOplkError dllk_getCnMacAddress(UINT nodeId_p, BYTE* pCnMacAddress_p)
 {
     tDllkNodeInfo*   pNodeInfo;
 
@@ -783,9 +783,9 @@ This function is called by the timer module. It triggers the SoC for a MN.
 \return The function returns a pointer to the node Information of the node
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_cbMnTimerCycle(tEplTimerEventArg* pEventArg_p)
+tOplkError dllk_cbMnTimerCycle(tEplTimerEventArg* pEventArg_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     tNmtState       nmtState;
     UINT32          arg;
 
@@ -828,12 +828,12 @@ error occurred.
 \param  errorCode_p         Error to signal.
 \param  pTxBuffer_p         Pointer to TxBuffer structure of transmitted frame.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_cbCyclicError(tEplKernel errorCode_p, tEdrvTxBuffer * pTxBuffer_p)
+tOplkError dllk_cbCyclicError(tOplkError errorCode_p, tEdrvTxBuffer * pTxBuffer_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     tNmtState       nmtState;
     UINT            handle = 0;
     UINT32          arg;
@@ -891,9 +891,9 @@ event.
 \return The function returns a pointer to the node Information of the node
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_cbMnSyncHandler(void)
+tOplkError dllk_cbMnSyncHandler(void)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     tNmtState       nmtState;
     BYTE*           pbCnNodeId;
     UINT32          arg;
@@ -951,12 +951,12 @@ when it is running as CN node.
 
 \param  pEventArg_p         Pointer to timer event argument.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_cbCnTimer(tEplTimerEventArg* pEventArg_p)
+tOplkError dllk_cbCnTimer(tEplTimerEventArg* pEventArg_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     tNmtState       nmtState;
     UINT32          arg;
 
@@ -1003,12 +1003,12 @@ Exit:
 
 This function is called by the timer sync module. It signals the sync event.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_cbCnTimerSync(void)
+tOplkError dllk_cbCnTimerSync(void)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 
     // trigger synchronous task
     ret = dllk_postEvent(kEplEventTypeSync);
@@ -1022,12 +1022,12 @@ tEplKernel dllk_cbCnTimerSync(void)
 This function is called by the timer sync module. It signals that one Sync/SoC
 was lost.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_cbCnLossOfSync(void)
+tOplkError dllk_cbCnLossOfSync(void)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     tNmtState       nmtState;
     UINT32          arg;
 
@@ -1068,12 +1068,12 @@ state and initializes all stuff that is needed for operation.
 \param  nmtState_p              NMT state of the node. Could be kNmtMsNotActive
                                 or kNmtCsNotActive
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_setupLocalNode(tNmtState nmtState_p)
+tOplkError dllk_setupLocalNode(tNmtState nmtState_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     UINT            handle;
     UINT            frameSize;
     UINT8           aMulticastMac[6];
@@ -1226,12 +1226,12 @@ tEplKernel dllk_setupLocalNode(tNmtState nmtState_p)
 
 The function initializes the MN specific stuff of the local node.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_setupLocalNodeMn(void)
+tOplkError dllk_setupLocalNodeMn(void)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     UINT            handle;
     UINT            index;
     UINT            frameSize;
@@ -1310,12 +1310,12 @@ tEplKernel dllk_setupLocalNodeMn(void)
 
 The function initializes the MN specific stuff of the local node.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_setupLocalNodeCn(void)
+tOplkError dllk_setupLocalNodeCn(void)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 
 #if (EPL_DLL_PRES_FILTER_COUNT >= 0)
     UINT            handle;
@@ -1391,12 +1391,12 @@ up all stuff for the local node.
 
 \param  oldNmtState_p           Previous NMT state of the local node.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_cleanupLocalNode(tNmtState oldNmtState_p)
+tOplkError dllk_cleanupLocalNode(tNmtState oldNmtState_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     BYTE            aMulticastMac[6];
 #if EPL_NMT_MAX_NODE_ID > 0
     UINT            index;
@@ -1554,9 +1554,9 @@ This function adds a node to the isochronous phase.
 \return The function returns a pointer to the node Information of the node
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_addNodeIsochronous(tDllkNodeInfo* pIntNodeInfo_p)
+tOplkError dllk_addNodeIsochronous(tDllkNodeInfo* pIntNodeInfo_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     tDllkNodeInfo**     ppIntNodeInfo;
     tEplFrame*          pTxFrame;
 
@@ -1666,9 +1666,9 @@ This function removes a node from the isochronous phase.
 \return The function returns a pointer to the node Information of the node
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_deleteNodeIsochronous(tDllkNodeInfo* pIntNodeInfo_p)
+tOplkError dllk_deleteNodeIsochronous(tDllkNodeInfo* pIntNodeInfo_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     tDllkNodeInfo**     ppIntNodeInfo;
     tEplFrame*          pTxFrame;
 
@@ -1725,9 +1725,9 @@ This function enables the PRes chaining mode.
 \return The function returns a pointer to the node Information of the node
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_presChainingEnable (void)
+tOplkError dllk_presChainingEnable (void)
 {
-    tEplKernel      Ret = kEplSuccessful;
+    tOplkError      Ret = kEplSuccessful;
     tEplFrame*      pTxFrameSyncRes;
 
     if (dllkInstance_g.fPrcEnabled == FALSE)
@@ -1774,9 +1774,9 @@ This function disables the PRes chaining mode, thus restoring PReq/PRes mode.
 \return The function returns a pointer to the node Information of the node
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_presChainingDisable (void)
+tOplkError dllk_presChainingDisable (void)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     tEplFrame*      pTxFrameSyncRes;
 
     if (dllkInstance_g.fPrcEnabled != FALSE)
@@ -1826,9 +1826,9 @@ PResFallBackTimeout hat triggered.
 \return The function returns a pointer to the node Information of the node
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_cbCnPresFallbackTimeout(void)
+tOplkError dllk_cbCnPresFallbackTimeout(void)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     tNmtState       nmtState;
     UINT32          arg;
 
@@ -1871,13 +1871,13 @@ The function sets up the buffer structures for the asynchronous phase.
 \param  pIndex_p                Pointer to next index in TX buffer list.
                                 Will be updated in function
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_setupAsyncPhase(tNmtState nmtState_p, UINT nextTxBufferOffset_p,
+tOplkError dllk_setupAsyncPhase(tNmtState nmtState_p, UINT nextTxBufferOffset_p,
                                 UINT32 nextTimeOffsetNs_p, UINT* pIndex_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     BOOL                fEnableInvitation;
     tEdrvTxBuffer*      pTxBuffer;
     UINT                soaIndex;
@@ -2019,13 +2019,13 @@ The function sets up the buffer structures for the synchronous phase.
 \param  pIndex_p                Pointer to next index in TX buffer list.
                                 Will be updated in function
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel dllk_setupSyncPhase(tNmtState nmtState_p, BOOL fReadyFlag_p,
+tOplkError dllk_setupSyncPhase(tNmtState nmtState_p, BOOL fReadyFlag_p,
                                UINT nextTxBufferOffset_p, UINT32* pNextTimeOffsetNs_p, UINT* pIndex_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     BYTE*               pCnNodeId;
     UINT32              accFrameLenNs = 0;
     UINT                nextTimeOffsetNs = 0;

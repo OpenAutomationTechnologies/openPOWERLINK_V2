@@ -79,6 +79,6 @@ typedef struct
     } m_Arg;
 } tEplTimerEventArg;
 
-typedef tEplKernel (*tEplTimerkCallback) (tEplTimerEventArg* pEventArg_p);
+typedef tOplkError (*tEplTimerkCallback) (tEplTimerEventArg* pEventArg_p);
 
 #endif /* _INC_timer_H_ */

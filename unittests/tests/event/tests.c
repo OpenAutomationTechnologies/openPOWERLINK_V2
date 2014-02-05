@@ -75,8 +75,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tEplKernel processHandler1(tEplEvent* pEvent_p);
-static tEplKernel processHandler2(tEplEvent* pEvent_p);
+static tOplkError processHandler1(tEplEvent* pEvent_p);
+static tOplkError processHandler2(tEplEvent* pEvent_p);
 
 //------------------------------------------------------------------------------
 // local vars
@@ -100,7 +100,7 @@ static tEventDispatchEntry tstEventDispatchTbl_l[] =
 //------------------------------------------------------------------------------
 void test_getHandlerForSink_FirstExist(void)
 {
-    tEplKernel              ret = kEplIllegalInstance;
+    tOplkError              ret = kEplIllegalInstance;
     tEplEventSource         eventSource = kEplEventSourceInvalid;
     tEplProcessEventCb      pfnEventHandler = NULL;
     tEventDispatchEntry*    pDispatchEntry;
@@ -124,7 +124,7 @@ void test_getHandlerForSink_FirstExist(void)
 //------------------------------------------------------------------------------
 void test_getHandlerForSink_FurtherExist(void)
 {
-    tEplKernel              ret = kEplIllegalInstance;
+    tOplkError              ret = kEplIllegalInstance;
     tEplEventSource         eventSource = kEplEventSourceInvalid;
     tEplProcessEventCb      pfnEventHandler = NULL;
     tEventDispatchEntry*    pDispatchEntry;
@@ -150,7 +150,7 @@ void test_getHandlerForSink_FurtherExist(void)
 //------------------------------------------------------------------------------
 void test_getHandlerForSink_NotExist(void)
 {
-    tEplKernel              ret = kEplIllegalInstance;
+    tOplkError              ret = kEplIllegalInstance;
     tEplEventSource         eventSource = kEplEventSourceInvalid;
     tEplProcessEventCb      pfnEventHandler = NULL;
     tEventDispatchEntry*    pDispatchEntry;
@@ -204,7 +204,7 @@ void test_eventk_process(void)
 \brief  Dummy process handler function
 */
 //------------------------------------------------------------------------------
-static tEplKernel processHandler1(tEplEvent* pEvent_p)
+static tOplkError processHandler1(tEplEvent* pEvent_p)
 {
     UNUSED_PARAMETER(pEvent_p);
     return kEplSuccessful;
@@ -215,7 +215,7 @@ static tEplKernel processHandler1(tEplEvent* pEvent_p)
 \brief  Dummy process handler function
 */
 //------------------------------------------------------------------------------
-static tEplKernel processHandler2(tEplEvent* pEvent_p)
+static tOplkError processHandler2(tEplEvent* pEvent_p)
 {
     UNUSED_PARAMETER(pEvent_p);
     return kEplSuccessful;

@@ -60,15 +60,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tEplKernel ctrlucal_init (void);
+tOplkError ctrlucal_init (void);
 void       ctrlucal_exit (void);
-tEplKernel ctrlucal_process (void);
+tOplkError ctrlucal_process (void);
 UINT16     ctrlucal_getStatus (void);
 UINT16     ctrlucal_getHeartbeat (void);
-tEplKernel ctrlucal_executeCmd(tCtrlCmdType cmd_p);
-tEplKernel ctrlucal_checkKernelStack(void);
+tOplkError ctrlucal_executeCmd(tCtrlCmdType cmd_p);
+tOplkError ctrlucal_checkKernelStack(void);
 void       ctrlucal_storeInitParam(tCtrlInitParam* pInitParam_p);
-tEplKernel ctrlucal_readInitParam(tCtrlInitParam* pInitParam_p);
+tOplkError ctrlucal_readInitParam(tCtrlInitParam* pInitParam_p);
 int        ctrlucal_getFd(void);
 
 #ifdef __cplusplus

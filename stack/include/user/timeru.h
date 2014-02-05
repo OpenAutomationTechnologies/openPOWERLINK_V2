@@ -52,13 +52,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tEplKernel timeru_init(void);
-tEplKernel timeru_addInstance(void);
-tEplKernel timeru_delInstance(void);
-tEplKernel timeru_process(void);
-tEplKernel timeru_setTimer(tEplTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tEplTimerArg argument_p);
-tEplKernel timeru_modifyTimer(tEplTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tEplTimerArg argument_p);
-tEplKernel timeru_deleteTimer(tEplTimerHdl* pTimerHdl_p);
+tOplkError timeru_init(void);
+tOplkError timeru_addInstance(void);
+tOplkError timeru_delInstance(void);
+tOplkError timeru_process(void);
+tOplkError timeru_setTimer(tEplTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tEplTimerArg argument_p);
+tOplkError timeru_modifyTimer(tEplTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tEplTimerArg argument_p);
+tOplkError timeru_deleteTimer(tEplTimerHdl* pTimerHdl_p);
 BOOL       timeru_isActive(tEplTimerHdl timerHdl_p);
 
 #ifdef __cplusplus

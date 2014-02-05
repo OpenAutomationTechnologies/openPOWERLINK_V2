@@ -66,7 +66,7 @@ static PI_OUT* pProcessImageOut_l;
 //            S T A T I C   M E M B E R   F U N C T I O N S                   //
 //============================================================================//
 
-tEplKernel DataInOutThread::AppCbSync(void)
+tOplkError DataInOutThread::AppCbSync(void)
 {
     return pDataInOutThread_g->processSync();
 }
@@ -108,12 +108,12 @@ DataInOutThread::DataInOutThread()
 The function implements the handling of synchronous data. It will be called
 from the stack at the synchronisation time.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel DataInOutThread::processSync(void)
+tOplkError DataInOutThread::processSync(void)
 {
-    tEplKernel          ret;
+    tOplkError          ret;
     int                 i;
 
     ret = oplk_exchangeProcessImageOut();
@@ -189,12 +189,12 @@ tEplKernel DataInOutThread::processSync(void)
 
 The function sets up the process image used by the application.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel DataInOutThread::setupProcessImage()
+tOplkError DataInOutThread::setupProcessImage()
 {
-    tEplKernel          ret;
+    tOplkError          ret;
 
     ret = oplk_allocProcessImage(sizeof(PI_IN), sizeof(PI_OUT));
     if (ret != kEplSuccessful)
@@ -251,7 +251,7 @@ The function implements the starting point for the data input/output thread.
 //------------------------------------------------------------------------------
 void DataInOutThread::run()
 {
-    tEplKernel  ret;
+    tOplkError  ret;
 
     for (;;)
     {

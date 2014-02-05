@@ -86,7 +86,7 @@ typedef struct
 
 typedef struct
 {
-    tEplKernel          key;
+    tOplkError          key;
     char*               sName;
 } tRetValInfo;
 
@@ -295,7 +295,7 @@ static tApiEventInfo apiEventInfo_l[] =
     { kEplApiEventCfmResult,        "CFM result"                        },
 };
 
-// text strings for values of type tEplKernel
+// text strings for values of type tOplkError
 static tRetValInfo retValInfo_l[] =
 {
     /* area for generic errors 0x0000 - 0x000F */
@@ -785,16 +785,16 @@ char* debugstr_getSdoComConStateStr(tSdoComConState SdoComConState_p)
 /**
 \brief  Return the string of the specified SDO command connection state
 
-The function returns the string describing the given entry of type tEplKernel.
+The function returns the string describing the given entry of type tOplkError.
 
-\param  EplKernel_p         tEplKernel value to print
+\param  EplKernel_p         tOplkError value to print
 
-\return The function returns a string describing the specified tEplKernel type.
+\return The function returns a string describing the specified tOplkError type.
 
 \ingroup module_debugstr
 */
 //------------------------------------------------------------------------------
-char* debugstr_getRetValStr(tEplKernel EplKernel_p)
+char* debugstr_getRetValStr(tOplkError EplKernel_p)
 {
     UINT        i;
 

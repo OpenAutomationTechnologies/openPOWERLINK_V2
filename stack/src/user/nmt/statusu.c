@@ -85,7 +85,7 @@ static tStatusuInstance   instance_g;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tEplKernel statusu_cbStatusResponse(tFrameInfo * pFrameInfo_p);
+static tOplkError statusu_cbStatusResponse(tFrameInfo * pFrameInfo_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -97,14 +97,14 @@ static tEplKernel statusu_cbStatusResponse(tFrameInfo * pFrameInfo_p);
 
 The function initializes an instance of the status module
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_statusu
 */
 //------------------------------------------------------------------------------
-tEplKernel statusu_init(void)
+tOplkError statusu_init(void)
 {
-    tEplKernel  ret;
+    tOplkError  ret;
 
     ret = statusu_addInstance();
 
@@ -117,14 +117,14 @@ tEplKernel statusu_init(void)
 
 The function adds an status module instance
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_statusu
 */
 //------------------------------------------------------------------------------
-tEplKernel statusu_addInstance(void)
+tOplkError statusu_addInstance(void)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
 
     EPL_MEMSET(&instance_g, 0, sizeof (instance_g));
 
@@ -142,14 +142,14 @@ tEplKernel statusu_addInstance(void)
 
 The function deletes an status module instance
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_statusu
 */
 //------------------------------------------------------------------------------
-tEplKernel statusu_delInstance(void)
+tOplkError statusu_delInstance(void)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
 
     // deregister StatusResponse callback function
     ret = dllucal_regAsndService(kDllAsndStatusResponse, NULL, kDllAsndFilterNone);
@@ -162,12 +162,12 @@ tEplKernel statusu_delInstance(void)
 
 The function resets an status module instance
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_statusu
 */
 //------------------------------------------------------------------------------
-tEplKernel statusu_reset(void)
+tOplkError statusu_reset(void)
 {
     // reset instance structure
     EPL_MEMSET(&instance_g, 0, sizeof(instance_g));
@@ -185,14 +185,14 @@ The function requests the StatusResponse for a specified node.
 \param  pfnCbResponse_p     Function pointer to callback function which will
                             be called if StatusResponse is received
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_statusu
 */
 //------------------------------------------------------------------------------
-tEplKernel statusu_requestStatusResponse(UINT nodeId_p, tStatusuCbResponse pfnCbResponse_p)
+tOplkError statusu_requestStatusResponse(UINT nodeId_p, tStatusuCbResponse pfnCbResponse_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
 
 #if !defined(CONFIG_INCLUDE_NMT_MN)
     UNUSED_PARAMETER(pfnCbResponse_p);
@@ -248,14 +248,14 @@ StatusResponse is received.
 \param  pFrameInfo_p            Pointer to frame information structure describing
                                 the received StatusResponse frame.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_statusu
 */
 //------------------------------------------------------------------------------
-static tEplKernel statusu_cbStatusResponse(tFrameInfo * pFrameInfo_p)
+static tOplkError statusu_cbStatusResponse(tFrameInfo * pFrameInfo_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     UINT                nodeId;
     UINT                index;
     tStatusuCbResponse  pfnCbResponse;

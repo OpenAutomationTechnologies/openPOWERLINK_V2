@@ -53,11 +53,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // typedef
 //------------------------------------------------------------------------------
 
-typedef tEplKernel (*tNmtMnuCbNodeEvent) (UINT nodeId_p, tNmtNodeEvent NodeEvent_p,
+typedef tOplkError (*tNmtMnuCbNodeEvent) (UINT nodeId_p, tNmtNodeEvent NodeEvent_p,
                                           tNmtState NmtState_p, UINT16 wErrorCode_p,
                                           BOOL fMandatory_p);
 
-typedef tEplKernel (*tNmtMnuCbBootEvent) (tNmtBootEvent BootEvent_p,
+typedef tOplkError (*tNmtMnuCbBootEvent) (tNmtBootEvent BootEvent_p,
                                           tNmtState NmtState_p, UINT16 wErrorCode_p);
 
 typedef struct
@@ -76,20 +76,20 @@ extern "C" {
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
 
-tEplKernel nmtmnu_init(tNmtMnuCbNodeEvent pfnCbNodeEvent_p, tNmtMnuCbBootEvent pfnCbBootEvent_p);
-tEplKernel nmtmnu_addInstance(tNmtMnuCbNodeEvent pfnCbNodeEvent_p, tNmtMnuCbBootEvent pfnCbBootEvent_p);
-tEplKernel nmtmnu_delInstance(void);
-tEplKernel nmtmnu_processEvent(tEplEvent* pEvent_p);
-tEplKernel nmtmnu_sendNmtCommand(UINT nodeId_p, tNmtCommand  nmtCommand_p);
-tEplKernel nmtmnu_requestNmtCommand(UINT nodeId_p, tNmtCommand nmtCommand_p);
-tEplKernel nmtmnu_triggerStateChange(UINT nodeId_p, tNmtNodeCommand nodeCommand_p);
-tEplKernel nmtmnu_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p);
-tEplKernel nmtmnu_cbCheckEvent(tNmtEvent NmtEvent_p);
-tEplKernel nmtmnu_getDiagnosticInfo(UINT* pMandatorySlaveCount_p, UINT* pSignalSlaveCount_p,
+tOplkError nmtmnu_init(tNmtMnuCbNodeEvent pfnCbNodeEvent_p, tNmtMnuCbBootEvent pfnCbBootEvent_p);
+tOplkError nmtmnu_addInstance(tNmtMnuCbNodeEvent pfnCbNodeEvent_p, tNmtMnuCbBootEvent pfnCbBootEvent_p);
+tOplkError nmtmnu_delInstance(void);
+tOplkError nmtmnu_processEvent(tEplEvent* pEvent_p);
+tOplkError nmtmnu_sendNmtCommand(UINT nodeId_p, tNmtCommand  nmtCommand_p);
+tOplkError nmtmnu_requestNmtCommand(UINT nodeId_p, tNmtCommand nmtCommand_p);
+tOplkError nmtmnu_triggerStateChange(UINT nodeId_p, tNmtNodeCommand nodeCommand_p);
+tOplkError nmtmnu_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p);
+tOplkError nmtmnu_cbCheckEvent(tNmtEvent NmtEvent_p);
+tOplkError nmtmnu_getDiagnosticInfo(UINT* pMandatorySlaveCount_p, UINT* pSignalSlaveCount_p,
                                     UINT16* pflags_p);
 
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
-tEplKernel nmtmnu_configPrc(tEplNmtMnuConfigParam* pConfigParam_p);
+tOplkError nmtmnu_configPrc(tEplNmtMnuConfigParam* pConfigParam_p);
 #endif
 
 #endif

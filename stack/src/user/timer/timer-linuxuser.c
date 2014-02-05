@@ -123,12 +123,12 @@ static tTimeruData* getNextTimer(void);
 
 The function initializes the user timer module.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_timeru
 */
 //------------------------------------------------------------------------------
-tEplKernel timeru_init(void)
+tOplkError timeru_init(void)
 {
     return timeru_addInstance();
 }
@@ -139,12 +139,12 @@ tEplKernel timeru_init(void)
 
 The function adds a user timer instance.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_timeru
 */
 //------------------------------------------------------------------------------
-tEplKernel timeru_addInstance(void)
+tOplkError timeru_addInstance(void)
 {
     struct sched_param          schedParam;
     INT                         retVal;
@@ -186,12 +186,12 @@ tEplKernel timeru_addInstance(void)
 
 The function deletes a user timer instance.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_timeru
 */
 //------------------------------------------------------------------------------
-tEplKernel timeru_delInstance(void)
+tOplkError timeru_delInstance(void)
 {
     tTimeruData*     pTimer;
 
@@ -228,12 +228,12 @@ whether a timer has expired.
 
 \note The function is not used in the Linux userspace implementation!
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_timeru
 */
 //------------------------------------------------------------------------------
-tEplKernel timeru_process(void)
+tOplkError timeru_process(void)
 {
     return kEplSuccessful;
 }
@@ -249,12 +249,12 @@ corresponding timer handle.
 \param  timeInMs_p      Timeout in milliseconds.
 \param  argument_p      User definable argument for timer.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_timeru
 */
 //------------------------------------------------------------------------------
-tEplKernel timeru_setTimer(tEplTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tEplTimerArg argument_p)
+tOplkError timeru_setTimer(tEplTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tEplTimerArg argument_p)
 {
     tTimeruData*        pData;
     struct itimerspec   relTime;
@@ -320,12 +320,12 @@ it creates the timer and stores the new timer handle at \p pTimerHdl_p.
 \param  timeInMs_p      Timeout in milliseconds.
 \param  argument_p      User definable argument for timer.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_timeru
 */
 //------------------------------------------------------------------------------
-tEplKernel timeru_modifyTimer(tEplTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tEplTimerArg argument_p)
+tOplkError timeru_modifyTimer(tEplTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tEplTimerArg argument_p)
 {
     tTimeruData*        pData;
     struct itimerspec   relTime, curTime;
@@ -380,14 +380,14 @@ This function deletes an existing timer.
 
 \param  pTimerHdl_p     Pointer to timer handle of timer to delete.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplTimerInvalidHandle  If an invalid timer handle was specified.
 \retval kEplSuccessful          If the timer is deleted.
 
 \ingroup module_timeru
 */
 //------------------------------------------------------------------------------
-tEplKernel timeru_deleteTimer(tEplTimerHdl* pTimerHdl_p)
+tOplkError timeru_deleteTimer(tEplTimerHdl* pTimerHdl_p)
 {
     tTimeruData*        pData;
 

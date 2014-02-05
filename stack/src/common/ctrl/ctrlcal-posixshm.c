@@ -101,12 +101,12 @@ The function initializes the control CAL module.
 
 \param  size_p      The size of the memory control block.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_ctrlcal
 */
 //------------------------------------------------------------------------------
-tEplKernel ctrlcal_init(UINT size_p)
+tOplkError ctrlcal_init(UINT size_p)
 {
     struct stat             stat;
 
@@ -158,14 +158,14 @@ tEplKernel ctrlcal_init(UINT size_p)
 
 The function cleans up the control CAL module.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_ctrlcal
 */
 //------------------------------------------------------------------------------
-tEplKernel ctrlcal_exit (void)
+tOplkError ctrlcal_exit (void)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 
     if (pCtrlMem_l != NULL)
     {
@@ -213,12 +213,12 @@ The function reads data from the control block.
 \param  offset_p            Offset in memory block from which to read.
 \param  length_p            The length of the data to be read.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_ctrlcal
 */
 //------------------------------------------------------------------------------
-tEplKernel ctrlcal_readData(void* pDest_p, UINT offset_p, size_t length_p)
+tOplkError ctrlcal_readData(void* pDest_p, UINT offset_p, size_t length_p)
 {
     if (pCtrlMem_l == NULL)
     {

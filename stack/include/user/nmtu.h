@@ -99,8 +99,8 @@ typedef enum
     kNmtCmdInvalidService            = 0xFF
 } tNmtCommand;
 
-typedef tEplKernel (*tNmtuStateChangeCallback) (tEventNmtStateChange  NmtStateChange_p);
-typedef tEplKernel (*tNmtuCheckEventCallback) (tNmtEvent  NmtEvent_p);
+typedef tOplkError (*tNmtuStateChangeCallback) (tEventNmtStateChange  NmtStateChange_p);
+typedef tOplkError (*tNmtuCheckEventCallback) (tNmtEvent  NmtEvent_p);
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -110,13 +110,13 @@ typedef tEplKernel (*tNmtuCheckEventCallback) (tNmtEvent  NmtEvent_p);
 extern "C" {
 #endif
 
-tEplKernel      nmtu_init(void);
-tEplKernel      nmtu_addInstance(void);
-tEplKernel      nmtu_delInstance(void);
-tEplKernel      nmtu_postNmtEvent(tNmtEvent nmtEvent_p);
+tOplkError      nmtu_init(void);
+tOplkError      nmtu_addInstance(void);
+tOplkError      nmtu_delInstance(void);
+tOplkError      nmtu_postNmtEvent(tNmtEvent nmtEvent_p);
 tNmtState       nmtu_getNmtState(void);
-tEplKernel      nmtu_processEvent(tEplEvent* pEvent_p);
-tEplKernel      nmtu_registerStateChangeCb(tNmtuStateChangeCallback pfnNmtStateChangeCb_p);
+tOplkError      nmtu_processEvent(tEplEvent* pEvent_p);
+tOplkError      nmtu_registerStateChangeCb(tNmtuStateChangeCallback pfnNmtStateChangeCb_p);
 
 #ifdef __cplusplus
 }

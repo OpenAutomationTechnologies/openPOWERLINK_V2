@@ -97,8 +97,8 @@ static tPdokInstance  pdokInstance_g;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tEplKernel cbProcessTpdo(tFrameInfo * pFrameInfo_p, BOOL fReadyFlag_p) SECTION_PDOK_PROCESS_TPDO_CB;
-static tEplKernel copyTxPdo(tEplFrame* pFrame_p, UINT frameSize_p, BOOL fReadyFlag_p);
+static tOplkError cbProcessTpdo(tFrameInfo * pFrameInfo_p, BOOL fReadyFlag_p) SECTION_PDOK_PROCESS_TPDO_CB;
+static tOplkError copyTxPdo(tEplFrame* pFrame_p, UINT frameSize_p, BOOL fReadyFlag_p);
 static void disablePdoChannels(tPdoChannel *pPdoChannel, UINT channelCnt);
 
 //============================================================================//
@@ -111,14 +111,14 @@ static void disablePdoChannels(tPdoChannel *pPdoChannel, UINT channelCnt);
 
 The function initializes the PDO kernel module.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdok
 **/
 //------------------------------------------------------------------------------
-tEplKernel pdok_init(void)
+tOplkError pdok_init(void)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 
     EPL_MEMSET(&pdokInstance_g, 0, sizeof(pdokInstance_g));
 
@@ -138,12 +138,12 @@ tEplKernel pdok_init(void)
 
 The function cleans up the PDO kernel module.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdok
 **/
 //------------------------------------------------------------------------------
-tEplKernel pdok_exit(void)
+tOplkError pdok_exit(void)
 {
     pdokInstance_g.fRunning = FALSE;
     dllk_regTpdoHandler(NULL);
@@ -159,14 +159,14 @@ tEplKernel pdok_exit(void)
 
 This function deallocates memory for PDOs.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdok
 **/
 //------------------------------------------------------------------------------
-tEplKernel pdok_deAllocChannelMem(void)
+tOplkError pdok_deAllocChannelMem(void)
 {
-    tEplKernel      Ret = kEplSuccessful;
+    tOplkError      Ret = kEplSuccessful;
 
 #if EPL_NMT_MAX_NODE_ID > 0
     tDllNodeOpParam     NodeOpParam;
@@ -177,7 +177,7 @@ tEplKernel pdok_deAllocChannelMem(void)
     if (Ret != kEplSuccessful)
     {
         DEBUG_LVL_PDO_TRACE("%s() EplDllkDeleteNode failed (%s)\n",
-                             __func__, EplGetEplKernelStr(Ret));
+                             __func__, EplGetOplkErrorStr(Ret));
         return Ret;
     }
 #endif // EPL_NMT_MAX_NODE_ID > 0
@@ -215,14 +215,14 @@ This function allocates memory for the PDO channels
 
 \param  pAllocationParam_p      Pointer to allocation parameters.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdok
 **/
 //------------------------------------------------------------------------------
-tEplKernel pdok_allocChannelMem(tPdoAllocationParam* pAllocationParam_p)
+tOplkError pdok_allocChannelMem(tPdoAllocationParam* pAllocationParam_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 
 #if EPL_NMT_MAX_NODE_ID > 0
     tDllNodeOpParam     nodeOpParam;
@@ -299,14 +299,14 @@ Exit:
 
 \param  pChannelConf_p          PDO channel configuration
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdok
 **/
 //------------------------------------------------------------------------------
-tEplKernel pdok_configureChannel(tPdoChannelConf* pChannelConf_p)
+tOplkError pdok_configureChannel(tPdoChannelConf* pChannelConf_p)
 {
-    tEplKernel          Ret = kEplSuccessful;
+    tOplkError          Ret = kEplSuccessful;
     tPdoChannel*        pDestPdoChannel;
 
     if (pChannelConf_p->fTx == FALSE)
@@ -384,14 +384,14 @@ The function processes a received RxPDO.
 \param  pFrame_p                Pointer to frame to be decoded
 \param  frameSize_p             Size of frame to be encoded
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdok
 **/
 //------------------------------------------------------------------------------
-tEplKernel pdok_processRxPdo(tEplFrame* pFrame_p, UINT frameSize_p)
+tOplkError pdok_processRxPdo(tEplFrame* pFrame_p, UINT frameSize_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     BYTE                frameData;
     UINT                nodeId;
     tEplMsgType         msgType;
@@ -479,14 +479,14 @@ The function sets up the memory used to store PDO frames.
 \param  rxPdoMemSize_p      Size of RX PDO buffers.
 \param  txPdoMemSize_p      Size of TX PDO buffers.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdok
 */
 //------------------------------------------------------------------------------
-tEplKernel pdok_setupPdoBuffers(size_t rxPdoMemSize_p, size_t txPdoMemSize_p)
+tOplkError pdok_setupPdoBuffers(size_t rxPdoMemSize_p, size_t txPdoMemSize_p)
 {
-    tEplKernel              ret;
+    tOplkError              ret;
 
     ret = pdokcal_initPdoMem(&pdokInstance_g.pdoChannels, rxPdoMemSize_p,
                              txPdoMemSize_p);
@@ -504,12 +504,12 @@ tEplKernel pdok_setupPdoBuffers(size_t rxPdoMemSize_p, size_t txPdoMemSize_p)
 
 The function sends a sync event.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdok
 */
 //------------------------------------------------------------------------------
-tEplKernel pdok_sendSyncEvent(void)
+tOplkError pdok_sendSyncEvent(void)
 {
     pdokcal_sendSyncEvent();
     return kEplSuccessful;
@@ -531,12 +531,12 @@ in NMT_CS_PRE_OPERATIONAL_2, NMT_CS_READY_TO_OPERATE and NMT_CS_OPERATIONAL.
 \param  pFrameInfo_p                Pointer to frame info structure
 \param  fReadyFlag_p                State of RD flag which shall be set in TPDO
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 **/
 //------------------------------------------------------------------------------
-static tEplKernel cbProcessTpdo(tFrameInfo * pFrameInfo_p, BOOL fReadyFlag_p)
+static tOplkError cbProcessTpdo(tFrameInfo * pFrameInfo_p, BOOL fReadyFlag_p)
 {
-    tEplKernel      Ret = kEplSuccessful;
+    tOplkError      Ret = kEplSuccessful;
     Ret = copyTxPdo(pFrameInfo_p->pFrame, pFrameInfo_p->frameSize, fReadyFlag_p);
     return Ret;
 }
@@ -573,12 +573,12 @@ This function copies a PDO into the specified frame.
 \param  frameSize_p             Size of frame.
 \param  fReadyFlag_p
 //
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 **/
 //---------------------------------------------------------------------------
-static tEplKernel copyTxPdo(tEplFrame* pFrame_p, UINT frameSize_p, BOOL fReadyFlag_p)
+static tOplkError copyTxPdo(tEplFrame* pFrame_p, UINT frameSize_p, BOOL fReadyFlag_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     BYTE                flag1;
     UINT                nodeId;
     tEplMsgType         msgType;

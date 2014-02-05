@@ -170,10 +170,10 @@ static tObdCdcInstance         cdcInstance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tEplKernel processCdc(tObdCdcInfo* pCdcInfo_p);
-static tEplKernel loadNextBuffer(tObdCdcInfo* pCdcInfo_p, size_t bufferSize);
-static tEplKernel loadCdcBuffer(UINT8* pCdc_p, size_t cdcSize_p);
-static tEplKernel loadCdcFile(char* pCdcFilename_p);
+static tOplkError processCdc(tObdCdcInfo* pCdcInfo_p);
+static tOplkError loadNextBuffer(tObdCdcInfo* pCdcInfo_p, size_t bufferSize);
+static tOplkError loadCdcBuffer(UINT8* pCdc_p, size_t cdcSize_p);
+static tOplkError loadCdcFile(char* pCdcFilename_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -185,12 +185,12 @@ static tEplKernel loadCdcFile(char* pCdcFilename_p);
 
 The function initializes the OBD CDC module.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tEplKernel obdcdc_init(void)
+tOplkError obdcdc_init(void)
 {
     cdcInstance_l.pCdcFilename = NULL;
     cdcInstance_l.pCdcBuffer = NULL;
@@ -257,14 +257,14 @@ The function loads the concise device configuration (CDC) and writes the
 contents into the object dictionary. Depending on the CDC type either a CDC
 file is parsed and loaded or a CDC buffer is parsed and loaded.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tEplKernel obdcdc_loadCdc(void)
+tOplkError obdcdc_loadCdc(void)
 {
-    tEplKernel          ret;
+    tOplkError          ret;
 
     if (cdcInstance_l.pCdcBuffer != NULL)
     {
@@ -300,12 +300,12 @@ buffer and writes its contents into the OD.
 
 \param  pCdcFilename_p  The filename of the CDC file to load.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel loadCdcFile(char* pCdcFilename_p)
+static tOplkError loadCdcFile(char* pCdcFilename_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     tObdCdcInfo     cdcInfo;
     UINT32          error;
 
@@ -347,12 +347,12 @@ buffer and writes the contents into the OD.
                         definition.
 \param  cdcSize_p       Size of the buffer.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel loadCdcBuffer(UINT8* pCdc_p, size_t cdcSize_p)
+static tOplkError loadCdcBuffer(UINT8* pCdc_p, size_t cdcSize_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     tObdCdcInfo     cdcInfo;
 
     EPL_MEMSET(&cdcInfo, 0, sizeof(tObdCdcInfo));
@@ -382,12 +382,12 @@ OD.
 
 \param  pCdcInfo_p      Pointer to the CDC information.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel processCdc(tObdCdcInfo* pCdcInfo_p)
+static tOplkError processCdc(tObdCdcInfo* pCdcInfo_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     UINT32          entriesRemaining;
     UINT            objectIndex;
     UINT            objectSubIndex;
@@ -450,12 +450,12 @@ The function loads the next buffer from the CDC
 \param  pCdcInfo_p      Pointer to the CDC information.
 \param  bufferSize      Size of the buffer.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel loadNextBuffer(tObdCdcInfo* pCdcInfo_p, size_t bufferSize)
+static tOplkError loadNextBuffer(tObdCdcInfo* pCdcInfo_p, size_t bufferSize)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
     int         readSize;
     UINT8*      pBuffer;
 

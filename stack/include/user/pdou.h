@@ -60,20 +60,20 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tEplKernel pdou_init(tEplSyncCb pfnSyncCb_p);
+tOplkError pdou_init(tEplSyncCb pfnSyncCb_p);
 
-tEplKernel pdou_exit(void);
+tOplkError pdou_exit(void);
 
 #if defined(CONFIG_INCLUDE_PDO)
-EPLDLLEXPORT tEplKernel PUBLIC pdou_cbObdAccess(tObdCbParam MEM* pParam_p);
+EPLDLLEXPORT tOplkError PUBLIC pdou_cbObdAccess(tObdCbParam MEM* pParam_p);
 #else
 #define pdou_cbObdAccess        NULL
 #endif
 
-tEplKernel PUBLIC pdou_cbNmtStateChange(tEventNmtStateChange NmtStateChange_p);
+tOplkError PUBLIC pdou_cbNmtStateChange(tEventNmtStateChange NmtStateChange_p);
 
-tEplKernel pdou_copyRxPdoToPi (void);
-tEplKernel pdou_copyTxPdoFromPi (void);
+tOplkError pdou_copyRxPdoToPi (void);
+tOplkError pdou_copyTxPdoFromPi (void);
 
 #ifdef __cplusplus
 }

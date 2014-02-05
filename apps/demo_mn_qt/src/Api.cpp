@@ -126,7 +126,7 @@ Constructs a POWERLINK Api object.
 Api::Api(MainWindow *pMainWindow_p, UINT nodeId_p, QString devName_p)
 {
     const char*         sHostname = HOSTNAME;
-    tEplKernel          ret;
+    tOplkError          ret;
     State*              pState;
     Output*             pOutput;
     Input*              pInput;
@@ -277,7 +277,7 @@ Destructs a POWERLINK object.
 *******************************************************************************/
 Api::~Api()
 {
-    tEplKernel          ret;
+    tOplkError          ret;
 
     ret = oplk_execNmtCommand(kNmtEventSwitchOff);
     pProcessThread->waitForNmtStateOff();

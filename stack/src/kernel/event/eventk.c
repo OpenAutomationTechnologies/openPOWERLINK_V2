@@ -87,7 +87,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tEplKernel handleNmtEventinDll(tEplEvent* pEvent_p);
+static tOplkError handleNmtEventinDll(tEplEvent* pEvent_p);
 
 //------------------------------------------------------------------------------
 // local vars
@@ -123,16 +123,16 @@ static tEventDispatchEntry eventDispatchTbl_l[] =
 The function initializes the kernel event module. It is also responsible to call
 the init function of it's CAL module.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventk
 */
 //------------------------------------------------------------------------------
-tEplKernel eventk_init (void)
+tOplkError eventk_init (void)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
 
     ret = eventkcal_init();
 
@@ -145,16 +145,16 @@ tEplKernel eventk_init (void)
 
 This function cleans up the kernel event module.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventk
 */
 //------------------------------------------------------------------------------
-tEplKernel eventk_exit (void)
+tOplkError eventk_exit (void)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 
     ret = eventkcal_exit();
 
@@ -171,16 +171,16 @@ specific module.
 
 \param  pEvent_p                Received event.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventk
 */
 //------------------------------------------------------------------------------
-tEplKernel eventk_process (tEplEvent *pEvent_p)
+tOplkError eventk_process (tEplEvent *pEvent_p)
 {
-    tEplKernel              ret = kEplSuccessful;
+    tOplkError              ret = kEplSuccessful;
     tEplEventSource         eventSource;
     tEplProcessEventCb      pfnEventHandler;
     BOOL                    fStop = FALSE;
@@ -236,16 +236,16 @@ CAL module which distributes the event to the suitable event queue.
 
 \param  pEvent_p                Event to be posted.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventk
 */
 //------------------------------------------------------------------------------
-tEplKernel eventk_postEvent (tEplEvent *pEvent_p)
+tOplkError eventk_postEvent (tEplEvent *pEvent_p)
 {
-    tEplKernel ret = kEplSuccessful;
+    tOplkError ret = kEplSuccessful;
 
     switch(pEvent_p->m_EventSink)
     {
@@ -288,17 +288,17 @@ This function posts an error event to the API module.
 \param  argSize_p               Size of error argument
 \param  pArg_p                  Error argument
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventk
 */
 //------------------------------------------------------------------------------
-tEplKernel eventk_postError (tEplEventSource eventSource_p, tEplKernel eplError_p,
+tOplkError eventk_postError (tEplEventSource eventSource_p, tOplkError eplError_p,
                              UINT argSize_p, void *pArg_p)
 {
-    tEplKernel          ret;
+    tOplkError          ret;
     tEplEventError      eventError;
     tEplEvent           eplEvent;
 
@@ -337,14 +337,14 @@ the DLLk module.
 
 \param  pEvent_p                Event to process.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
 */
 //------------------------------------------------------------------------------
-static tEplKernel handleNmtEventinDll(tEplEvent* pEvent_p)
+static tOplkError handleNmtEventinDll(tEplEvent* pEvent_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
 
     BENCHMARK_MOD_27_RESET(0);
 

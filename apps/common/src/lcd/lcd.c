@@ -104,10 +104,10 @@ const char aStrNmtState_l[10][LCD_COLUMN+1] = {
 
 The function initializes the generic Lcd instance.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tEplKernel lcd_init(void)
+tOplkError lcd_init(void)
 {
     if(lcdl_init() != 0)
         return kEplNoResource;
@@ -248,7 +248,7 @@ The function prints the provided error code to the second line of the display.
 \param  error_p     error code
 */
 //------------------------------------------------------------------------------
-void lcd_printError (tEplKernel error_p)
+void lcd_printError (tOplkError error_p)
 {
     char TextError[LCD_COLUMN+1];
 

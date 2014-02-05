@@ -85,7 +85,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tEplKernel initPlk (void);
+static tOplkError initPlk (void);
 static void shtdPlk (void);
 static void bgtPlk (void);
 
@@ -106,7 +106,7 @@ Calls the POWERLINK initialization and background task
 //------------------------------------------------------------------------------
 int main (void)
 {
-    tEplKernel Ret;
+    tOplkError Ret;
 
     alt_icache_flush_all();
     alt_dcache_flush_all();
@@ -152,12 +152,12 @@ int main (void)
 
 This function initializes the communication stack and configures objects.
 
-\return This function returns tEplKernel error codes.
+\return This function returns tOplkError error codes.
 */
 //------------------------------------------------------------------------------
-static tEplKernel initPlk (void)
+static tOplkError initPlk (void)
 {
-    tEplKernel Ret;
+    tOplkError Ret;
 
     Ret = ctrlk_init();
 

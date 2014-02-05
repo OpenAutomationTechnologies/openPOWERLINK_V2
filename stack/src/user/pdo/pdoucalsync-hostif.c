@@ -96,12 +96,12 @@ The function initializes the PDO user CAL sync module
 
 \param  pfnSyncCb_p             function that is called in case of sync event
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdoucal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdoucal_initSync(tEplSyncCb pfnSyncCb_p)
+tOplkError pdoucal_initSync(tEplSyncCb pfnSyncCb_p)
 {
     tHostifReturn hifRet;
     tHostifInstance pHifInstance = hostif_getInstance(0);
@@ -156,12 +156,12 @@ The function waits for a sync event.
 \param  timeout_p       Specifies a timeout in microseconds. If 0 it waits
                         forever.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful      Successfully received sync event
 \retval kEplGeneralError    Error while waiting on sync event
 */
 //------------------------------------------------------------------------------
-tEplKernel pdoucal_waitSyncEvent(ULONG timeout_p)
+tOplkError pdoucal_waitSyncEvent(ULONG timeout_p)
 {
     UNUSED_PARAMETER(timeout_p);
     return kEplSuccessful;

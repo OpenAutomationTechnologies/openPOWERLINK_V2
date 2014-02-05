@@ -99,10 +99,10 @@ static tInstance instance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tEplKernel initPowerlink(tInstance* pInstance_p);
-static tEplKernel loopMain(tInstance* pInstance_p);
+static tOplkError initPowerlink(tInstance* pInstance_p);
+static tOplkError loopMain(tInstance* pInstance_p);
 static void shutdownPowerlink(tInstance* pInstance_p);
-static tEplKernel eventCbPowerlink(tEplApiEventType EventType_p, tEplApiEventArg* pEventArg_p, void* pUserArg_p);
+static tOplkError eventCbPowerlink(tEplApiEventType EventType_p, tEplApiEventArg* pEventArg_p, void* pUserArg_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -121,7 +121,7 @@ This is the main function of the openPOWERLINK embedded CN demo application.
 //------------------------------------------------------------------------------
 int main (void)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
     const UINT8 aMacAddr[] = {MAC_ADDR};
     UINT8       nodeid;
 
@@ -180,12 +180,12 @@ The function initializes the openPOWERLINK stack.
 
 \param  pInstance_p             Pointer to demo instance
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel initPowerlink(tInstance* pInstance_p)
+static tOplkError initPowerlink(tInstance* pInstance_p)
 {
-    tEplKernel                  ret = kEplSuccessful;
+    tOplkError                  ret = kEplSuccessful;
     static tEplApiInitParam     initParam;
 
     PRINTF("Initializing openPOWERLINK stack...\n");
@@ -250,12 +250,12 @@ This function implements the main loop of the demo application.
 
 \param  pInstance_p             Pointer to demo instance
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel loopMain(tInstance* pInstance_p)
+static tOplkError loopMain(tInstance* pInstance_p)
 {
-    tEplKernel ret = kEplSuccessful;
+    tOplkError ret = kEplSuccessful;
 
     // start processing
     if((ret = oplk_execNmtCommand(kNmtEventSwReset)) != kEplSuccessful)
@@ -312,14 +312,14 @@ The function implements the applications stack event handler.
 \param  pEventArg_p         Pointer to union which describes the event in detail
 \param  pUserArg_p          User specific argument
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_demo_cn_embedded
 */
 //------------------------------------------------------------------------------
-static tEplKernel eventCbPowerlink(tEplApiEventType EventType_p, tEplApiEventArg* pEventArg_p, void* pUserArg_p)
+static tOplkError eventCbPowerlink(tEplApiEventType EventType_p, tEplApiEventArg* pEventArg_p, void* pUserArg_p)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
 
     UNUSED_PARAMETER(pUserArg_p);
 

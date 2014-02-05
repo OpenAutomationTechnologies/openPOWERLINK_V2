@@ -96,15 +96,15 @@ static tErrHndObjects *pErrHnd_l;
 
 The function initializes the user layer CAL module of the error handler.
 
-\return     tEplKernel
+\return     tOplkError
 \retval     kEplSuccessful      successful return
 \retval     kEplNoResource      ipcore instance not found
 */
 //------------------------------------------------------------------------------
-tEplKernel errhndkcal_init (void)
+tOplkError errhndkcal_init (void)
 {
     tHostifInstance pHostifInstance = hostif_getInstance(0);
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     tHostifReturn   hifRet;
     UINT8*          pBase;
     UINT            span;

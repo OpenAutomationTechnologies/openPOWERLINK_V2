@@ -142,11 +142,11 @@ static tEplTimerHighReskInstance    EplTimerHighReskInstance_l;
 //
 // Parameters:  void
 //
-// Return:      tEplKernel      = error code
+// Return:      tOplkError      = error code
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC hrestimer_init(void)
+tOplkError PUBLIC hrestimer_init(void)
 {
-    tEplKernel  Ret;
+    tOplkError  Ret;
 
     Ret = hrestimer_addInstance();
 
@@ -160,11 +160,11 @@ tEplKernel PUBLIC hrestimer_init(void)
 //
 // Parameters:  void
 //
-// Return:      tEplKernel      = error code
+// Return:      tOplkError      = error code
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC hrestimer_addInstance(void)
+tOplkError PUBLIC hrestimer_addInstance(void)
 {
-    tEplKernel                   Ret;
+    tOplkError                   Ret;
     UINT                         uiIndex;
     tEplTimerHighReskTimerInfo*  pTimerInfo;
     tHrtimerSig                  sig;
@@ -201,12 +201,12 @@ Exit:
 //
 // Parameters:  void
 //
-// Return:      tEplKernel      = error code
+// Return:      tOplkError      = error code
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC hrestimer_delInstance(void)
+tOplkError PUBLIC hrestimer_delInstance(void)
 {
     tEplTimerHighReskTimerInfo* pTimerInfo;
-    tEplKernel                  Ret;
+    tOplkError                  Ret;
     UINT                        uiIndex;
 
     Ret = kEplSuccessful;
@@ -239,15 +239,15 @@ tEplKernel PUBLIC hrestimer_delInstance(void)
 //                                continuously;
 //                                otherwise, it is a oneshot timer.
 //
-// Return:      tEplKernel      = error code
+// Return:      tOplkError      = error code
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC hrestimer_modifyTimer(tEplTimerHdl*     pTimerHdl_p,
+tOplkError PUBLIC hrestimer_modifyTimer(tEplTimerHdl*     pTimerHdl_p,
                                     ULONGLONG           ullTimeNs_p,
                                     tEplTimerkCallback  pfnCallback_p,
                                     ULONG               ulArgument_p,
                                     BOOL                fContinuously_p)
 {
-    tEplKernel                   Ret;
+    tOplkError                   Ret;
     UINT                         uiIndex;
     tEplTimerHighReskTimerInfo*  pTimerInfo;
     struct itimerspec            RelTime;
@@ -375,13 +375,13 @@ Exit:
 //
 // Parameters:  pTimerHdl_p     = pointer to timer handle
 //
-// Return:      tEplKernel      = error code
+// Return:      tOplkError      = error code
 //
 // State:       not tested
 //---------------------------------------------------------------------------
-tEplKernel PUBLIC hrestimer_deleteTimer(tEplTimerHdl* pTimerHdl_p)
+tOplkError PUBLIC hrestimer_deleteTimer(tEplTimerHdl* pTimerHdl_p)
 {
-    tEplKernel                  Ret = kEplSuccessful;
+    tOplkError                  Ret = kEplSuccessful;
     UINT                        uiIndex;
     tEplTimerHighReskTimerInfo* pTimerInfo;
     struct itimerspec           RelTime;

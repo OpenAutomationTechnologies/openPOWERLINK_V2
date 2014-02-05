@@ -101,7 +101,7 @@ The function initializes the user layer CAL module of the error handler.
 \ingroup module_errhndkcal
 */
 //------------------------------------------------------------------------------
-tEplKernel errhndkcal_init (void)
+tOplkError errhndkcal_init (void)
 {
     return kEplSuccessful;
 }

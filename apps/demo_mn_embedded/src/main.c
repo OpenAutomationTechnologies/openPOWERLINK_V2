@@ -107,8 +107,8 @@ static tInstance instance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tEplKernel initPowerlink(tInstance* pInstance_p);
-static tEplKernel loopMain(tInstance* pInstance_p);
+static tOplkError initPowerlink(tInstance* pInstance_p);
+static tOplkError loopMain(tInstance* pInstance_p);
 static void shutdownPowerlink(tInstance* pInstance_p);
 
 //============================================================================//
@@ -128,7 +128,7 @@ This is the main function of the openPOWERLINK console MN demo application.
 //------------------------------------------------------------------------------
 int main(void)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
     const UINT8 aMacAddr[] = {MAC_ADDR};
     UINT8       nodeid;
 
@@ -189,12 +189,12 @@ The function initializes the openPOWERLINK stack.
 
 \param  pInstance_p             Pointer to demo instance
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel initPowerlink(tInstance* pInstance_p)
+static tOplkError initPowerlink(tInstance* pInstance_p)
 {
-    tEplKernel                  ret = kEplSuccessful;
+    tOplkError                  ret = kEplSuccessful;
     static tEplApiInitParam     initParam;
     char*                       sHostname = HOSTNAME;
 
@@ -267,12 +267,12 @@ This function implements the main loop of the demo application.
 
 \param  pInstance_p             Pointer to demo instance
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel loopMain(tInstance* pInstance_p)
+static tOplkError loopMain(tInstance* pInstance_p)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
     UINT        checkStack = 0;
 
     // start processing

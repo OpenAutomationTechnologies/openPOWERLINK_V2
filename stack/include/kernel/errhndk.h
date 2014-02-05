@@ -82,22 +82,22 @@ extern "C" {
 #endif
 
 // init function
-tEplKernel errhndk_init(void);
+tOplkError errhndk_init(void);
 
 // delete instance
-tEplKernel errhndk_exit(void);
+tOplkError errhndk_exit(void);
 
 // processes error events
-tEplKernel errhndk_process(tEplEvent* pEvent_p);
+tOplkError errhndk_process(tEplEvent* pEvent_p);
 
 // posts error events
-tEplKernel errhndk_postError(tErrHndkEvent* pDllEvent_p);
+tOplkError errhndk_postError(tErrHndkEvent* pDllEvent_p);
 
 // cycle finished (decrement threshold counters)
-tEplKernel errhndk_decrementCounters(BOOL fMN_p) SECTION_ERRHNDK_DECRCNTERS;
+tOplkError errhndk_decrementCounters(BOOL fMN_p) SECTION_ERRHNDK_DECRCNTERS;
 
 // reset error flag for the specified CN
-tEplKernel errhndk_resetCnError(UINT nodeId_p);
+tOplkError errhndk_resetCnError(UINT nodeId_p);
 
 
 #ifdef __cplusplus

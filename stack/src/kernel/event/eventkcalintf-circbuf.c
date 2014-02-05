@@ -99,14 +99,14 @@ is specified by eventQueue_p.
 
 \param  eventQueue_p            Event queue to initialize.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tEplKernel eventkcal_initQueueCircbuf(tEventQueue eventQueue_p)
+tOplkError eventkcal_initQueueCircbuf(tEventQueue eventQueue_p)
 {
     tCircBufError           circError = kCircBufOk;
 
@@ -182,14 +182,14 @@ specified by eventQueue_p.
 
 \param  eventQueue_p            Event queue to cleanup.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tEplKernel eventkcal_exitQueueCircbuf (tEventQueue eventQueue_p)
+tOplkError eventkcal_exitQueueCircbuf (tEventQueue eventQueue_p)
 {
     if (eventQueue_p > kEventQueueNum)
         return kEplInvalidInstanceParam;
@@ -213,16 +213,16 @@ This function posts an event to the provided queue instance.
 \param  eventQueue_p            Event queue to which the event should be posted.
 \param  pEvent_p                Event to be posted.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tEplKernel eventkcal_postEventCircbuf (tEventQueue eventQueue_p, tEplEvent *pEvent_p)
+tOplkError eventkcal_postEventCircbuf (tEventQueue eventQueue_p, tEplEvent *pEvent_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     tCircBufError       circError;
 
     if (eventQueue_p > kEventQueueNum)
@@ -263,18 +263,18 @@ by calling the event handlers process function.
 
 \param  eventQueue_p            Event queue used for reading the event.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tEplKernel eventkcal_processEventCircbuf(tEventQueue eventQueue_p)
+tOplkError eventkcal_processEventCircbuf(tEventQueue eventQueue_p)
 {
     tEplEvent*          pEplEvent;
     tCircBufError       error;
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     size_t              readSize;
     tCircBufInstance*   pCircBufInstance;
 
@@ -335,14 +335,14 @@ at pDataBuffer_p.
 \param  pDataBuffer_p           Pointer to store event.
 \param  pReadSize_p             Pointer to store length of event.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          if function executes correctly
 \retval other                   error
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tEplKernel eventkcal_getEventCircbuf(tEventQueue eventQueue_p, BYTE* pDataBuffer_p,
+tOplkError eventkcal_getEventCircbuf(tEventQueue eventQueue_p, BYTE* pDataBuffer_p,
                                      size_t* pReadSize_p)
 {
     tCircBufError       error;
@@ -425,7 +425,7 @@ queue.
 */
 //------------------------------------------------------------------------------
 
-tEplKernel eventkcal_setSignalingCircbuf(tEventQueue eventQueue_p, VOIDFUNCPTR pfnSignalCb_p)
+tOplkError eventkcal_setSignalingCircbuf(tEventQueue eventQueue_p, VOIDFUNCPTR pfnSignalCb_p)
 {
     if (eventQueue_p > kEventQueueNum)
         return kEplInvalidInstanceParam;

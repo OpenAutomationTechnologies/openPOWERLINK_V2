@@ -100,17 +100,17 @@ The function initializes the user layer CAL module of the error handler.
 
 \param  pLocalObjects_p         Pointer to local error objects
 
-\return     tEplKernel
+\return     tOplkError
 \retval     kEplSuccessful      successful return
 \retval     kEplNoResource      ipcore instance not found
 
 \ingroup module_errhnducal
 */
 //------------------------------------------------------------------------------
-tEplKernel errhnducal_init (tErrHndObjects *pLocalObjects_p)
+tOplkError errhnducal_init (tErrHndObjects *pLocalObjects_p)
 {
     tHostifInstance pHostifInstance = hostif_getInstance(0);
-    tEplKernel      Ret = kEplSuccessful;
+    tOplkError      Ret = kEplSuccessful;
     tHostifReturn   hostifRet;
     UINT8*          pBase;
     UINT            span;
@@ -175,7 +175,7 @@ by user and kernel modules.
 \ingroup module_errhnducal
 */
 //------------------------------------------------------------------------------
-tEplKernel errhnducal_writeErrorObject(UINT index_p, UINT subIndex_p, UINT32 *pParam_p)
+tOplkError errhnducal_writeErrorObject(UINT index_p, UINT subIndex_p, UINT32 *pParam_p)
 {
     UINT    offset;
 
@@ -203,7 +203,7 @@ by user and kernel modules.
 \ingroup module_errhnducal
 */
 //------------------------------------------------------------------------------
-tEplKernel errhnducal_readErrorObject(UINT index_p, UINT subIndex_p, UINT32 * pParam_p)
+tOplkError errhnducal_readErrorObject(UINT index_p, UINT subIndex_p, UINT32 * pParam_p)
 {
     UINT    offset;
 

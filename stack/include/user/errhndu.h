@@ -61,14 +61,14 @@ extern "C" {
 #endif
 
 // init function
-tEplKernel errhndu_init(void);
+tOplkError errhndu_init(void);
 
 // delete instance
-tEplKernel errhndu_exit(void);
+tOplkError errhndu_exit(void);
 
 // object callback functions
-tEplKernel errhndu_cbObdAccess(tObdCbParam MEM* pParam_p);
-tEplKernel errhndu_mnCnLossPresCbObdAccess(tObdCbParam MEM* pParam_p);
+tOplkError errhndu_cbObdAccess(tObdCbParam MEM* pParam_p);
+tOplkError errhndu_mnCnLossPresCbObdAccess(tObdCbParam MEM* pParam_p);
 
 #ifdef __cplusplus
 }

@@ -98,12 +98,12 @@ static sem_t*           syncSem_l;
 
 The function initializes the kernel PDO CAL sync module.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdokcal_initSync(void)
+tOplkError pdokcal_initSync(void)
 {
     if ((syncSem_l = sem_open(PDO_SYNC_BSDSEM, O_CREAT, S_IRWXG, 1)) == SEM_FAILED)
     {
@@ -133,12 +133,12 @@ void pdokcal_exitSync(void)
 
 The function sends a sync event
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdokcal_sendSyncEvent(void)
+tOplkError pdokcal_sendSyncEvent(void)
 {
     sem_post(syncSem_l);
     return kEplSuccessful;
@@ -152,12 +152,12 @@ The function enables sync events
 
 \param  fEnable_p               enable/disable sync event
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tEplKernel pdokcal_controlSync(BOOL fEnable_p)
+tOplkError pdokcal_controlSync(BOOL fEnable_p)
 {
     UNUSED_PARAMETER(fEnable_p);
     return kEplSuccessful;

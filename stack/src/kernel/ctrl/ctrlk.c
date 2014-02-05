@@ -105,8 +105,8 @@ static tCtrlkInstance   instance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tEplKernel initStack(void);
-static tEplKernel shutdownStack(void);
+static tOplkError initStack(void);
+static tOplkError shutdownStack(void);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -118,14 +118,14 @@ static tEplKernel shutdownStack(void);
 
 The function initializes the kernel control module.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_ctrlk
 */
 //------------------------------------------------------------------------------
-tEplKernel ctrlk_init(void)
+tOplkError ctrlk_init(void)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 
     if ((ret = ctrlkcal_init()) != kEplSuccessful)
     {
@@ -173,8 +173,8 @@ commands from the user part of the stack and executes them.
 //------------------------------------------------------------------------------
 BOOL ctrlk_process(void)
 {
-    tEplKernel          ret = kEplSuccessful;
-    tEplKernel          fRet;
+    tOplkError          ret = kEplSuccessful;
+    tOplkError          fRet;
     UINT16              status;
     tCtrlCmdType        cmd = kCtrlNone;
     BOOL                fExit = FALSE;
@@ -220,15 +220,15 @@ pointer to the status and exit flag is not NULL the appropriate data is stored.
 \param  pStatus_p           Pointer to store the kernel stack status. (if not NULL)
 \param  pfExit_p            Pointer to store the exit flag. (if not NULL)
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_ctrlk
 */
 //------------------------------------------------------------------------------
-tEplKernel ctrlk_executeCmd(tCtrlCmdType cmd_p, tEplKernel* pRet_p, UINT16* pStatus_p,
+tOplkError ctrlk_executeCmd(tCtrlCmdType cmd_p, tOplkError* pRet_p, UINT16* pStatus_p,
                             BOOL* pfExit_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     UINT16              status;
     BOOL                fExit;
 
@@ -323,12 +323,12 @@ UINT16 ctrlk_getHeartbeat(void)
 
 The function initializes the kernel stack modules.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel initStack(void)
+static tOplkError initStack(void)
 {
-    tEplKernel          ret;
+    tOplkError          ret;
     tDllkInitParam      dllkInitParam;
 
     ctrlkcal_readInitParam(&instance_l.initParam);
@@ -382,7 +382,7 @@ The function cleans up the kernel stack modules
 \return Returns always kEplSuccessful
 */
 //------------------------------------------------------------------------------
-static tEplKernel shutdownStack(void)
+static tOplkError shutdownStack(void)
 {
 
 #if defined(CONFIG_INCLUDE_VETH)

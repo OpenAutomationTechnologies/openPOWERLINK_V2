@@ -95,7 +95,7 @@ typedef struct
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tEplKernel callApiEventCb (tEplEvent* pEvent_p);
+static tOplkError callApiEventCb (tEplEvent* pEvent_p);
 
 //------------------------------------------------------------------------------
 // local vars
@@ -142,16 +142,16 @@ the init function of it's CAL module.
 
 \param  pfnApiProcessEventCb_p  Function pointer to generic event callback function.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventu
 */
 //------------------------------------------------------------------------------
-tEplKernel eventu_init(tEplProcessEventCb pfnApiProcessEventCb_p)
+tOplkError eventu_init(tEplProcessEventCb pfnApiProcessEventCb_p)
 {
-    tEplKernel ret = kEplSuccessful;
+    tOplkError ret = kEplSuccessful;
 
     instance_l.pfnApiProcessEventCb = pfnApiProcessEventCb_p;
 
@@ -166,16 +166,16 @@ tEplKernel eventu_init(tEplProcessEventCb pfnApiProcessEventCb_p)
 
 This function cleans up the user event module.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventu
 */
 //------------------------------------------------------------------------------
-tEplKernel eventu_exit(void)
+tOplkError eventu_exit(void)
 {
-    tEplKernel ret = kEplSuccessful;
+    tOplkError ret = kEplSuccessful;
 
     ret = eventucal_exit();
 
@@ -192,16 +192,16 @@ specific module
 
 \param  pEvent_p                Received event.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventu
 */
 //------------------------------------------------------------------------------
-tEplKernel eventu_process (tEplEvent *pEvent_p)
+tOplkError eventu_process (tEplEvent *pEvent_p)
 {
-    tEplKernel              ret = kEplSuccessful;
+    tOplkError              ret = kEplSuccessful;
     tEplEventSource         eventSource;
     tEplProcessEventCb      pfnEventHandler;
     tEventDispatchEntry*    pDispatchEntry;
@@ -240,16 +240,16 @@ CAL module which distributes the event to the suitable event queue.
 
 \param  pEvent_p                Event to be posted.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventu
 */
 //------------------------------------------------------------------------------
-tEplKernel eventu_postEvent (tEplEvent *pEvent_p)
+tOplkError eventu_postEvent (tEplEvent *pEvent_p)
 {
-    tEplKernel ret = kEplSuccessful;
+    tOplkError ret = kEplSuccessful;
 
     // split event post to user internal and user to kernel
     switch(pEvent_p->m_EventSink)
@@ -294,17 +294,17 @@ This function posts an error event to the API module.
 \param  argSize_p               Size of error argument
 \param  pArg_p                  Error argument
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
 
 \ingroup module_eventu
 */
 //------------------------------------------------------------------------------
-tEplKernel eventu_postError (tEplEventSource eventSource_p,  tEplKernel error_p,
+tOplkError eventu_postError (tEplEventSource eventSource_p,  tOplkError error_p,
                              UINT argSize_p, void* pArg_p)
 {
-    tEplKernel          ret;
+    tOplkError          ret;
     tEplEventError      eventError;
     tEplEvent           event;
 
@@ -343,10 +343,10 @@ an API event callback was registered and calls it.
 
 \param  pEvent_p            Pointer to event.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel callApiEventCb (tEplEvent* pEvent_p)
+static tOplkError callApiEventCb (tEplEvent* pEvent_p)
 {
     if (instance_l.pfnApiProcessEventCb != NULL)
     {

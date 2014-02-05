@@ -70,7 +70,7 @@ EPLDLLEXPORT char* debugstr_getApiEventStr(tEplApiEventType ApiEvent_p);
 EPLDLLEXPORT char* debugstr_getNmtNodeEventTypeStr(tNmtNodeEvent NodeEventType_p);
 EPLDLLEXPORT char* debugstr_getNmtBootEventTypeStr(tNmtBootEvent BootEventType_p);
 EPLDLLEXPORT char* debugstr_getSdoComConStateStr(tSdoComConState SdoComConState_p);
-EPLDLLEXPORT char* debugstr_getRetValStr(tEplKernel EplKernel_p);
+EPLDLLEXPORT char* debugstr_getRetValStr(tOplkError EplKernel_p);
 EPLDLLEXPORT char* debugstr_getEmergErrCodeStr(UINT16 EmergErrCode_p);
 
 #ifdef __cplusplus

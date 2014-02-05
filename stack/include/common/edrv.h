@@ -111,10 +111,10 @@ typedef tEdrvReleaseRxBuffer (*tEdrvRxHandler)(tEdrvRxBuffer* pRxBuffer_p);
 typedef void (*tEdrvTxHandler)(tEdrvTxBuffer* pTxBuffer_p);
 
 /// Callback function pointer for Edrv cyclic sync
-typedef tEplKernel (*tEdrvCyclicCbSync)(void);
+typedef tOplkError (*tEdrvCyclicCbSync)(void);
 
 /// Callback function pointer for Edrv cyclic error
-typedef tEplKernel (*tEdrvCyclicCbError)(tEplKernel errorCode_p, tEdrvTxBuffer* pTxBuffer_p);
+typedef tOplkError (*tEdrvCyclicCbError)(tOplkError errorCode_p, tEdrvTxBuffer* pTxBuffer_p);
 
 /**
 \brief Enumeration for Rx buffer transfer state
@@ -233,30 +233,30 @@ typedef struct
 extern "C" {
 #endif
 
-tEplKernel edrv_init(tEdrvInitParam* pEdrvInitParam_p);
-tEplKernel edrv_shutdown(void);
-tEplKernel edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p);
-tEplKernel edrv_clearRxMulticastMacAddr(UINT8* pMacAddr_p);
-tEplKernel edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p);
-tEplKernel edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p);
-tEplKernel edrv_updateTxBuffer(tEdrvTxBuffer* pBuffer_p);
-tEplKernel edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p);
-tEplKernel edrv_setTxBufferReady(tEdrvTxBuffer* pBuffer_p);
-tEplKernel edrv_startTxBuffer(tEdrvTxBuffer* pBuffer_p);
-tEplKernel edrv_releaseRxBuffer(tEdrvRxBuffer* pBuffer_p);
-tEplKernel edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p, UINT entryChanged_p, UINT changeFlags_p);
+tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p);
+tOplkError edrv_shutdown(void);
+tOplkError edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p);
+tOplkError edrv_clearRxMulticastMacAddr(UINT8* pMacAddr_p);
+tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p);
+tOplkError edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p);
+tOplkError edrv_updateTxBuffer(tEdrvTxBuffer* pBuffer_p);
+tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p);
+tOplkError edrv_setTxBufferReady(tEdrvTxBuffer* pBuffer_p);
+tOplkError edrv_startTxBuffer(tEdrvTxBuffer* pBuffer_p);
+tOplkError edrv_releaseRxBuffer(tEdrvRxBuffer* pBuffer_p);
+tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p, UINT entryChanged_p, UINT changeFlags_p);
 int edrv_getDiagnostics(char* pBuffer_p, INT size_p);
 
-tEplKernel edrvcyclic_init(void);
-tEplKernel edrvcyclic_shutdown(void);
-tEplKernel edrvcyclic_setCycleTime(UINT32 cycleTimeUs_p);
-tEplKernel edrvcyclic_startCycle(void);
-tEplKernel edrvcyclic_stopCycle(void);
-tEplKernel edrvcyclic_setMaxTxBufferListSize(UINT maxListSize_p);
-tEplKernel edrvcyclic_setNextTxBufferList(tEdrvTxBuffer** ppTxBuffer_p, UINT txBufferCount_p);
-tEplKernel edrvcyclic_regSyncHandler(tEdrvCyclicCbSync pfnEdrvCyclicCbSync_p);
-tEplKernel edrvcyclic_regErrorHandler(tEdrvCyclicCbError pfnEdrvCyclicCbError_p);
-tEplKernel edrvcyclic_getDiagnostics(tEdrvCyclicDiagnostics** ppDiagnostics_p);
+tOplkError edrvcyclic_init(void);
+tOplkError edrvcyclic_shutdown(void);
+tOplkError edrvcyclic_setCycleTime(UINT32 cycleTimeUs_p);
+tOplkError edrvcyclic_startCycle(void);
+tOplkError edrvcyclic_stopCycle(void);
+tOplkError edrvcyclic_setMaxTxBufferListSize(UINT maxListSize_p);
+tOplkError edrvcyclic_setNextTxBufferList(tEdrvTxBuffer** ppTxBuffer_p, UINT txBufferCount_p);
+tOplkError edrvcyclic_regSyncHandler(tEdrvCyclicCbSync pfnEdrvCyclicCbSync_p);
+tOplkError edrvcyclic_regErrorHandler(tEdrvCyclicCbError pfnEdrvCyclicCbError_p);
+tOplkError edrvcyclic_getDiagnostics(tEdrvCyclicDiagnostics** ppDiagnostics_p);
 
 #ifdef __cplusplus
 }

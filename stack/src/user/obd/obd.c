@@ -99,10 +99,10 @@ static tObdInstance                 obdInstance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tEplKernel   writeEntryPre(UINT uiIndex_p, UINT subIndex_p, void* pSrcData_p, void** ppDstData_p,
+static tOplkError   writeEntryPre(UINT uiIndex_p, UINT subIndex_p, void* pSrcData_p, void** ppDstData_p,
                                   tObdSize size_p, tObdEntryPtr* ppObdEntry_p, tObdSubEntryPtr* ppSubEntry_p,
                                   tObdCbParam MEM* pCbParam_p, tObdSize* pObdSize_p);
-static tEplKernel   writeEntryPost(tObdEntryPtr pObdEntry_p, tObdSubEntryPtr pSubEntry_p,
+static tOplkError   writeEntryPost(tObdEntryPtr pObdEntry_p, tObdSubEntryPtr pSubEntry_p,
                                    tObdCbParam MEM* pCbParam_p, void* pSrcData_p,
                                    void* pDstData_p, tObdSize obdSize_p);
 static tObdSize     getDataSize(tObdSubEntryPtr pSubIndexEntry_p);
@@ -111,32 +111,32 @@ static tObdSize     getDomainSize(tObdSubEntryPtr pSubIndexEntry_p);
 static tObdSize     getVstringSize(tObdSubEntryPtr pSubIndexEntry_p);
 static tObdSize     getOstringSize(tObdSubEntryPtr pSubIndexEntry_p);
 static tObdSize     getObjectSize(tObdSubEntryPtr pSubIndexEntry_p);
-static tEplKernel   getVarEntry(tObdSubEntryPtr pSubIndexEntry_p, tObdVarEntry MEM** ppVarEntry_p);
-static tEplKernel   getEntry(UINT index_p, UINT subIndex_p, tObdEntryPtr* ppObdEntry_p,
+static tOplkError   getVarEntry(tObdSubEntryPtr pSubIndexEntry_p, tObdVarEntry MEM** ppVarEntry_p);
+static tOplkError   getEntry(UINT index_p, UINT subIndex_p, tObdEntryPtr* ppObdEntry_p,
                              tObdSubEntryPtr* ppObdSubEntry_p);
 static CONST void*  getObjectDefaultPtr (tObdSubEntryPtr pSubIndexEntry_p);
 static void MEM*    getObjectCurrentPtr (tObdSubEntryPtr pSubIndexEntry_p);
 static void*        getObjectDataPtr(tObdSubEntryPtr pSubIndexEntry_p);
 static tObdEntryPtr searchIndex(tObdEntryPtr pObdEntry_p, UINT index_p);
-static tEplKernel   getIndex(tObdInitParam MEM* pInitParam_p, UINT index_p, tObdEntryPtr* ppObdEntry_p);
-static tEplKernel   getSubindex(tObdEntryPtr pObdEntry_p, UINT subIndex_p, tObdSubEntryPtr* ppObdSubEntry_p);
-static tEplKernel   accessOdPartition(tObdPart currentOdPart_p, tObdEntryPtr pObdEnty_p, tObdDir direction_p);
+static tOplkError   getIndex(tObdInitParam MEM* pInitParam_p, UINT index_p, tObdEntryPtr* ppObdEntry_p);
+static tOplkError   getSubindex(tObdEntryPtr pObdEntry_p, UINT subIndex_p, tObdSubEntryPtr* ppObdSubEntry_p);
+static tOplkError   accessOdPartition(tObdPart currentOdPart_p, tObdEntryPtr pObdEnty_p, tObdDir direction_p);
 static void         copyObjectData(void MEM* pDstData_p, CONST void* pSrcData_p, tObdSize objSize_p,
                                    tObdType objType_p);
-static tEplKernel   callObjectCallback(tObdCallback pfnCallback_p, tObdCbParam MEM* pCbParam_p);
-static tEplKernel   callPostDefault(void *pData_p, tObdEntryPtr pObdEntry_p, tObdSubEntryPtr pObdSubEntry_p);
-static tEplKernel   isNumerical(tObdSubEntryPtr pObdSubEntry_p, BOOL* pfEntryNumerical_p);
+static tOplkError   callObjectCallback(tObdCallback pfnCallback_p, tObdCbParam MEM* pCbParam_p);
+static tOplkError   callPostDefault(void *pData_p, tObdEntryPtr pObdEntry_p, tObdSubEntryPtr pObdSubEntry_p);
+static tOplkError   isNumerical(tObdSubEntryPtr pObdSubEntry_p, BOOL* pfEntryNumerical_p);
 
 #if (CONFIG_OBD_CHECK_OBJECT_RANGE != FALSE)
-static tEplKernel   checkObjectRange(tObdSubEntryPtr pSubIndexEntry_p, void * pData_p);
+static tOplkError   checkObjectRange(tObdSubEntryPtr pSubIndexEntry_p, void * pData_p);
 #endif
 
 #if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
-static tEplKernel   prepareStoreRestore(tObdDir direction_p, tObdCbStoreParam MEM* pCbStore_p);
-static tEplKernel   cleanupStoreRestore(tObdDir direction_p, tObdCbStoreParam MEM* pCbStore_p)
-static tEplKernel   doStoreRestore(tObdAccess access_p, tObdCbStoreParam MEM* pCbStore_p,
+static tOplkError   prepareStoreRestore(tObdDir direction_p, tObdCbStoreParam MEM* pCbStore_p);
+static tOplkError   cleanupStoreRestore(tObdDir direction_p, tObdCbStoreParam MEM* pCbStore_p)
+static tOplkError   doStoreRestore(tObdAccess access_p, tObdCbStoreParam MEM* pCbStore_p,
                                    void MEM * pObjData_p, tObdSize objSize_p);
-static tEplKernel   callStoreCallback(tObdCbStoreParam MEM* pCbStoreParam_p);
+static tOplkError   callStoreCallback(tObdCbStoreParam MEM* pCbStoreParam_p);
 #endif // (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
 
 //------------------------------------------------------------------------------
@@ -187,14 +187,14 @@ The function initializes the OD module.
 
 \param  pInitParam_p            Pointer to OD initialization parameters.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tEplKernel obd_init(tObdInitParam MEM* pInitParam_p)
+tOplkError obd_init(tObdInitParam MEM* pInitParam_p)
 {
-    tEplKernel      ret;
+    tOplkError      ret;
 
     if (pInitParam_p == NULL)
         return kEplSuccessful;
@@ -217,12 +217,12 @@ tEplKernel obd_init(tObdInitParam MEM* pInitParam_p)
 
 The function deinitializes the OD module.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tEplKernel obd_deleteInstance(void)
+tOplkError obd_deleteInstance(void)
 {
     return kEplSuccessful;
 }
@@ -239,14 +239,14 @@ character.
 \param      pSrcData_p      Pointer to data which should be written.
 \param      size_p          Size of data to write.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tEplKernel obd_writeEntry(UINT index_p, UINT subIndex_p, void* pSrcData_p, tObdSize size_p)
+tOplkError obd_writeEntry(UINT index_p, UINT subIndex_p, void* pSrcData_p, tObdSize size_p)
 {
-    tEplKernel              ret;
+    tOplkError              ret;
     tObdEntryPtr            pObdEntry;
     tObdSubEntryPtr         pSubEntry;
     tObdCbParam MEM         cbParam;
@@ -276,14 +276,14 @@ transfers.
 \param      pSize_p         Pointer to size of buffer. The real data size will
                             be written to this location.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tEplKernel obd_readEntry(UINT index_p, UINT subIndex_p, void* pDstData_p, tObdSize* pSize_p)
+tOplkError obd_readEntry(UINT index_p, UINT subIndex_p, void* pDstData_p, tObdSize* pSize_p)
 {
-    tEplKernel                      ret;
+    tOplkError                      ret;
     tObdEntryPtr                    pObdEntry;
     tObdSubEntryPtr                 pSubEntry;
     tObdCbParam  MEM                cbParam;
@@ -348,14 +348,14 @@ restores default values of one part of OD
 \param      obdPart_p
 \param      direction_p
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tEplKernel obd_accessOdPart (tObdPart obdPart_p, tObdDir direction_p)
+tOplkError obd_accessOdPart (tObdPart obdPart_p, tObdDir direction_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     BOOL            fPartFount;
     tObdEntryPtr    pObdEntry;
 
@@ -413,14 +413,14 @@ The function defines an OD variable.
 
 \param  pVarParam_p             Pointer to the object variable structure.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tEplKernel obd_defineVar (tVarParam MEM* pVarParam_p)
+tOplkError obd_defineVar (tVarParam MEM* pVarParam_p)
 {
-    tEplKernel              ret;
+    tOplkError              ret;
     tObdVarEntry MEM*       pVarEntry;
     tVarParamValid          varValid;
     tObdSubEntryPtr         pSubIndexEntry;
@@ -482,7 +482,7 @@ constant object it returns the default pointer.
 //------------------------------------------------------------------------------
 void* obd_getObjectDataPtr(UINT index_p, UINT subIndex_p)
  {
-    tEplKernel          ret;
+    tOplkError          ret;
     void *              pData;
     tObdEntryPtr        pObdEntry;
     tObdSubEntryPtr     pObdSubEntry;
@@ -514,12 +514,12 @@ The function registers an user object dictionary.
 
 \param  pUserOd_p            Pointer to user OD.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tEplKernel obd_registerUserOd (tObdEntryPtr pUserOd_p)
+tOplkError obd_registerUserOd (tObdEntryPtr pUserOd_p)
 {
     obdInitParam_l.m_pUserPart = pUserOd_p;
     return kEplSuccessful;
@@ -577,7 +577,7 @@ string length without terminating null-character.
 //------------------------------------------------------------------------------
 tObdSize obd_getDataSize(UINT index_p, UINT subIndex_p)
 {
-    tEplKernel          ret;
+    tOplkError          ret;
     tObdSize            obdSize;
     tObdEntryPtr        pObdEntry;
     tObdSubEntryPtr     pObdSubEntry;
@@ -613,7 +613,7 @@ The function gets the node ID which is stored in object 0x1F93.
 //------------------------------------------------------------------------------
 UINT obd_getNodeId(void)
 {
-    tEplKernel      ret;
+    tOplkError      ret;
     tObdSize        obdSize;
     UINT8           nodeId;
 
@@ -636,14 +636,14 @@ The function sets the node ID in object 0x1F93.
 \param  nodeId_p            Node ID to set.
 \param  nodeIdType_p        Node ID setting type.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tEplKernel obd_setNodeId(UINT nodeId_p, tObdNodeIdType nodeIdType_p)
+tOplkError obd_setNodeId(UINT nodeId_p, tObdNodeIdType nodeIdType_p)
 {
-    tEplKernel  ret;
+    tOplkError  ret;
     tObdSize    obdSize;
     UINT8       fHwBool;
     UINT8       nodeId;
@@ -694,14 +694,14 @@ The function checks if a entry is numerical or not.
 \param  pfEntryNumerical_p      Pointer to store result. TRUE if entry is numerical,
                                 FALSE if entry is not numerical.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tEplKernel obd_isNumerical(UINT index_p, UINT subIndex_p, BOOL* pfEntryNumerical_p)
+tOplkError obd_isNumerical(UINT index_p, UINT subIndex_p, BOOL* pfEntryNumerical_p)
 {
-    tEplKernel          ret;
+    tOplkError          ret;
     tObdEntryPtr        pObdEntry;
     tObdSubEntryPtr     pObdSubEntry;
 
@@ -728,14 +728,14 @@ The function returns the data type of the specified entry.
 \param  subIndex_p              Sub-index of object to check.
 \param  pType_p                 Pointer to store the type of the entry.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tEplKernel obd_getType(UINT index_p, UINT subIndex_p, tObdType* pType_p)
+tOplkError obd_getType(UINT index_p, UINT subIndex_p, tObdType* pType_p)
 {
-    tEplKernel          ret;
+    tOplkError          ret;
     tObdEntryPtr        pObdEntry;
     tObdSubEntryPtr     pObdSubEntry;
 
@@ -769,15 +769,15 @@ not set. The attribute is only checked up for SDO transfer.
                                 stores the number of read bytes at this
                                 location.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tEplKernel obd_readEntryToLe (UINT index_p, UINT subIndex_p, void* pDstData_p,
+tOplkError obd_readEntryToLe (UINT index_p, UINT subIndex_p, void* pDstData_p,
                               tObdSize* pSize_p)
 {
-    tEplKernel                      ret;
+    tOplkError                      ret;
     tObdEntryPtr                    pObdEntry;
     tObdSubEntryPtr                 pSubEntry;
     tObdCbParam  MEM                cbParam;
@@ -899,15 +899,15 @@ be performed. Strings are stored with added '\0' character.
 \param  pSrcData_p              Pointer to the data which should be written.
 \param  size_p                  Size of the data to be written.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tEplKernel obd_writeEntryFromLe (UINT index_p, UINT subIndex_p, void* pSrcData_p,
+tOplkError obd_writeEntryFromLe (UINT index_p, UINT subIndex_p, void* pSrcData_p,
                                  tObdSize size_p)
 {
-    tEplKernel              ret;
+    tOplkError              ret;
     tObdEntryPtr            pObdEntry;
     tObdSubEntryPtr         pSubEntry;
     tObdCbParam MEM         cbParam;
@@ -991,14 +991,14 @@ The function gets the access type of the entry.
 \param  subIndex_p              Sub-index of object.
 \param  pAccessType_p           Pointer to store the access type.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tEplKernel obd_getAccessType(UINT index_p, UINT subIndex_p, tObdAccess* pAccessType_p)
+tOplkError obd_getAccessType(UINT index_p, UINT subIndex_p, tObdAccess* pAccessType_p)
 {
-    tEplKernel          ret;
+    tOplkError          ret;
     tObdEntryPtr        pObdEntry;
     tObdSubEntryPtr     pObdSubEntry;
 
@@ -1024,14 +1024,14 @@ The function gets the VarEntry structure of an object.
 \param  subIndex_p              Sub-index of object.
 \param  ppVarEntry_p            Pointer to store pointer to the VarEntry structure.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tEplKernel obd_searchVarEntry(UINT index_p, UINT subIndex_p, tObdVarEntry MEM** ppVarEntry_p)
+tOplkError obd_searchVarEntry(UINT index_p, UINT subIndex_p, tObdVarEntry MEM** ppVarEntry_p)
 {
-    tEplKernel           ret;
+    tOplkError           ret;
     tObdSubEntryPtr      pSubIndexEntry;
 
     ret = getEntry (index_p, subIndex_p, NULL, &pSubIndexEntry);
@@ -1050,13 +1050,13 @@ The function sets the callback function for the load/store command.
 
 \param  pfnCallback_p           Pointer to the callback function.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
 #if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
-tEplKernel obd_storeLoadObjCallback (tObdStoreLoadCallback pfnCallback_p)
+tOplkError obd_storeLoadObjCallback (tObdStoreLoadCallback pfnCallback_p)
 {
     // set new address of callback function
     pfnStoreLoadObjectCb_l = pfnCallback_p;
@@ -1087,15 +1087,15 @@ added '\0' character.
 \param  pCbParam_p              Points to the callback parameter structure.
 \param  pObdSize_p              Pointer to store size of the object.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel writeEntryPre (UINT index_p, UINT subIndex_p, void* pSrcData_p,
+static tOplkError writeEntryPre (UINT index_p, UINT subIndex_p, void* pSrcData_p,
                                  void** ppDstData_p, tObdSize size_p, tObdEntryPtr* ppObdEntry_p,
                                  tObdSubEntryPtr* ppSubEntry_p, tObdCbParam MEM* pCbParam_p,
                                  tObdSize*  pObdSize_p)
 {
-    tEplKernel              ret;
+    tOplkError              ret;
     tObdEntryPtr            pObdEntry;
     tObdSubEntryPtr         pSubEntry;
     tObdAccess              access;
@@ -1242,14 +1242,14 @@ added '\0' character.
 \param  pDstData_p             Pointer where to store the data.
 \param  obdSize_p              The Size of the object.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel writeEntryPost(tObdEntryPtr pObdEntry_p, tObdSubEntryPtr pSubEntry_p,
+static tOplkError writeEntryPost(tObdEntryPtr pObdEntry_p, tObdSubEntryPtr pSubEntry_p,
                                  tObdCbParam MEM* pCbParam_p, void* pSrcData_p,
                                  void* pDstData_p, tObdSize obdSize_p)
 {
-    tEplKernel              ret;
+    tOplkError              ret;
 
     // caller converted the source value to platform byte order
     // now the range of the value may be checked
@@ -1294,7 +1294,7 @@ the string length without the terminating null-character.
 
 \param  pSubIndexEntry_p        Pointer to the sub-index entry of the object.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 static tObdSize getDataSize(tObdSubEntryPtr pSubIndexEntry_p)
@@ -1375,7 +1375,7 @@ static tObdSize getDomainSize(tObdSubEntryPtr pSubIndexEntry_p)
 {
     tObdSize                dataSize = 0;
     tObdVarEntry MEM*       pVarEntry = NULL;
-    tEplKernel              ret;
+    tOplkError              ret;
 
     ret = getVarEntry(pSubIndexEntry_p, &pVarEntry);
     if ((ret == kEplSuccessful) && (pVarEntry != NULL))
@@ -1502,12 +1502,12 @@ The function returns the variable entry of an object.
 \param  pSubIndexEntry_p        Pointer to sub-index entry.
 \param  ppVarEntry_p            Pointer to store VarEntry pointer of object.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel getVarEntry (tObdSubEntryPtr pSubIndexEntry_p, tObdVarEntry MEM** ppVarEntry_p)
+static tOplkError getVarEntry (tObdSubEntryPtr pSubIndexEntry_p, tObdVarEntry MEM** ppVarEntry_p)
 {
-    tEplKernel ret = kEplObdVarEntryNotExist;
+    tOplkError ret = kEplObdVarEntryNotExist;
 
     // check VAR-Flag - only this object points to variables
     if ((pSubIndexEntry_p->access & kObdAccVar) != 0)
@@ -1537,15 +1537,15 @@ The function gets the entries of an object in the OD.
 \param  ppObdEntry_p            Pointer to store object entry pointer.
 \param  ppObdSubEntry_p         Pointer to store sub-index entry pointer.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel getEntry(UINT index_p, UINT subIndex_p, tObdEntryPtr* ppObdEntry_p,
+static tOplkError getEntry(UINT index_p, UINT subIndex_p, tObdEntryPtr* ppObdEntry_p,
                            tObdSubEntryPtr* ppObdSubEntry_p)
 {
     tObdEntryPtr            pObdEntry;
     tObdCbParam MEM         cbParam;
-    tEplKernel              ret;
+    tOplkError              ret;
 
     ret = getIndex (&obdInstance_l.initParam, index_p, &pObdEntry);
     if (ret != kEplSuccessful)
@@ -1756,10 +1756,10 @@ The function searches for an index entry in the OD.
 \param  index_p             Index to search.
 \param  ppObdEntry_p        Pointer to store OD entry.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel getIndex(tObdInitParam MEM* pInitParam_p, UINT index_p,
+static tOplkError getIndex(tObdInitParam MEM* pInitParam_p, UINT index_p,
                                  tObdEntryPtr* ppObdEntry_p)
 {
     tObdEntryPtr    pObdEntry;
@@ -1854,10 +1854,10 @@ The function searches for an sub-index entry in the OD.
 \param  subIndex_p          Sub-index to search.
 \param  ppObdSubEntry_p     Pointer to store sub-index entry.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel getSubindex(tObdEntryPtr pObdEntry_p, UINT subIndex_p,
+static tOplkError getSubindex(tObdEntryPtr pObdEntry_p, UINT subIndex_p,
                                     tObdSubEntryPtr* ppObdSubEntry_p)
 {
     tObdSubEntryPtr     pSubEntry;
@@ -1908,10 +1908,10 @@ The functions runs a job in an OD partition.
 \param  pObdEntry_p             Pointer to OD entry.
 \param  direction_p             Determines which job should be done.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel accessOdPartition (tObdPart currentOdPart_p, tObdEntryPtr pObdEntry_p,
+static tOplkError accessOdPartition (tObdPart currentOdPart_p, tObdEntryPtr pObdEntry_p,
                                       tObdDir direction_p)
 {
     tObdSubEntryPtr             pSubIndex;
@@ -1920,7 +1920,7 @@ static tEplKernel accessOdPartition (tObdPart currentOdPart_p, tObdEntryPtr pObd
     void MEM*                   pDstData;
     CONST void*                 pDefault;
     tObdSize                    ObjSize;
-    tEplKernel                  Ret = kEplSuccessful;
+    tOplkError                  Ret = kEplSuccessful;
     tObdVarEntry MEM*           pVarEntry = NULL;
 
 #if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
@@ -2073,7 +2073,7 @@ The functions copies object data.
 \param  objSize_p               Size of data to copy.
 \param  objType_p               Type of object.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 static void copyObjectData (void MEM* pDstData_p, CONST void* pSrcData_p,
@@ -2120,12 +2120,12 @@ The function calls the callback function of an object.
 \param  pfnCallback_p           Pointer to the callback function.
 \param  pCbParam_p              Pointer to callback function parameter structure.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel callObjectCallback(tObdCallback pfnCallback_p, tObdCbParam MEM* pCbParam_p)
+static tOplkError callObjectCallback(tObdCallback pfnCallback_p, tObdCbParam MEM* pCbParam_p)
 {
-    tEplKernel           ret = kEplSuccessful;
+    tOplkError           ret = kEplSuccessful;
     tObdCallback MEM     pfnCallback;
 
     if (pfnCallback_p != NULL)
@@ -2146,13 +2146,13 @@ The functions calls the callback function of the post callback event.
 \param  pObdEntry_p             Pointer to index entry of object.
 \param  pObdSubEntry_p          Pointer to sub-index entry of object.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel callPostDefault(void* pData_p, tObdEntryPtr pObdEntry_p,
+static tOplkError callPostDefault(void* pData_p, tObdEntryPtr pObdEntry_p,
                                   tObdSubEntryPtr pObdSubEntry_p)
 {
-    tEplKernel          ret;
+    tOplkError          ret;
     tObdCbParam         cbParam;
 
     cbParam.index    = pObdEntry_p->index;
@@ -2173,13 +2173,13 @@ The functions checks if an object is a numerical object.
 \param  pfEntryNumerical_p      Pointer to store flag. TRUE if it is numerical,
                                 FALSE otherwise.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel isNumerical(tObdSubEntryPtr pObdSubEntry_p,
+static tOplkError isNumerical(tObdSubEntryPtr pObdSubEntry_p,
                                     BOOL* pfEntryNumerical_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
 
     // get Type
     if((pObdSubEntry_p->type == kObdTypeVString) ||
@@ -2208,12 +2208,12 @@ ObjType is unequal to kObdTypeInt8 or kObdTypeUInt8!
 \param  pSubIndexEntry_p    Pointer to the sub-index entry structure of the object.
 \param  pData_p             Pointer to the data to be checked.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel checkObjectRange (tObdSubEntryPtr pSubIndexEntry_p, void* pData_p)
+static tOplkError checkObjectRange (tObdSubEntryPtr pSubIndexEntry_p, void* pData_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     const void*         pRangeData;
 
     // check if data range has to be checked
@@ -2400,12 +2400,12 @@ The functions prepares a store/restore command.
 \param  direction_p             OD command direction.
 \param  pCbStore_p              Pointer to store callback parameters.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel prepareStoreRestore(tObdDir direction_p, tObdCbStoreParam MEM* pCbStore_p)
+static tOplkError prepareStoreRestore(tObdDir direction_p, tObdCbStoreParam MEM* pCbStore_p)
 {
-    tEplKernel          ret;
+    tOplkError          ret;
 
     if (direction_p == kObdDirLoad)
     {
@@ -2441,12 +2441,12 @@ The functions cleans up a store/restore command.
 \param  direction_p             OD command direction.
 \param  pCbStore_p              Pointer to store callback parameters.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel cleanupStoreRestore(tObdDir direction_p, tObdCbStoreParam MEM* pCbStore_p)
+static tOplkError cleanupStoreRestore(tObdDir direction_p, tObdCbStoreParam MEM* pCbStore_p)
 {
-    tEplKernel          ret;
+    tOplkError          ret;
 
     if (direction_p == kObdDirOBKCheck)
     {
@@ -2485,13 +2485,13 @@ The functions executes a store/restore command.
 \param  pObjData_p              Pointer to object data.
 \param  objSize_p               Size of object.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel doStoreRestore(tObdAccess access_p, tObdCbStoreParam MEM* pCbStore_p,
+static tOplkError doStoreRestore(tObdAccess access_p, tObdCbStoreParam MEM* pCbStore_p,
                           void MEM * pObjData_p, tObdSize objSize_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
 
     // when attribute kObdAccStore is set, then call callback function
     if ((access_p & kObdAccStore) != 0)
@@ -2514,12 +2514,12 @@ The functions calls the store callback function.
 
 \param  pCbStoreParam_p         Pointer to callback function parameters.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel callStoreCallback(tObdCbStoreParam MEM* pCbStoreParam_p)
+static tOplkError callStoreCallback(tObdCbStoreParam MEM* pCbStoreParam_p)
 {
-    tEplKernel ret = kEplSuccessful;
+    tOplkError ret = kEplSuccessful;
 
     if (pfnStoreLoadObjectCb_l != NULL)
     {

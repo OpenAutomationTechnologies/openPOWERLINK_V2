@@ -87,31 +87,31 @@ void  target_enableGlobalInterrupt(BYTE fEnable_p)
     UNUSED_PARAMETER(fEnable_p);
 }
 
-tEplKernel EplNmtkProcess(tEplEvent* pEvent_p)
+tOplkError EplNmtkProcess(tEplEvent* pEvent_p)
 {
     UNUSED_PARAMETER(pEvent_p);
     return kEplSuccessful;
 }
 
-tEplKernel EplDllkProcess(tEplEvent* pEvent_p)
+tOplkError EplDllkProcess(tEplEvent* pEvent_p)
 {
     UNUSED_PARAMETER(pEvent_p);
     return kEplSuccessful;
 }
 
-tEplKernel dllkcal_process(tEplEvent* pEvent_p)
+tOplkError dllkcal_process(tEplEvent* pEvent_p)
 {
     UNUSED_PARAMETER(pEvent_p);
     return kEplSuccessful;
 }
 
-tEplKernel errhndk_process(tEplEvent* pEvent_p)
+tOplkError errhndk_process(tEplEvent* pEvent_p)
 {
     UNUSED_PARAMETER(pEvent_p);
     return kEplSuccessful;
 }
 
-tEplKernel pdokcal_process(tEplEvent* pEvent_p)
+tOplkError pdokcal_process(tEplEvent* pEvent_p)
 {
     UNUSED_PARAMETER(pEvent_p);
     return kEplSuccessful;

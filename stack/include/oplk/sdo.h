@@ -83,13 +83,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 typedef UINT tSdoConHdl;
 
 /// Callback function pointer for Protocol Abstraction Layer to call asynchronous SDO Sequence Layer
-typedef tEplKernel (*tSequLayerReceiveCb)(tSdoConHdl ConHdl_p, tAsySdoSeq* pSdoSeqData_p, UINT uiDataSize_p);
+typedef tOplkError (*tSequLayerReceiveCb)(tSdoConHdl ConHdl_p, tAsySdoSeq* pSdoSeqData_p, UINT uiDataSize_p);
 
 /// Data type for handle between asynchronous SDO Sequence Layer and SDO Command layer
 typedef UINT tSdoSeqConHdl;
 
 /// Callback function pointer for asynchronous SDO Sequence Layer to call SDO Command layer for received data
-typedef tEplKernel (*tSdoComReceiveCb)(tSdoSeqConHdl SdoSeqConHdl_p, tAsySdoCom* pAsySdoCom_p, UINT uiDataSize_p);
+typedef tOplkError (*tSdoComReceiveCb)(tSdoSeqConHdl SdoSeqConHdl_p, tAsySdoCom* pAsySdoCom_p, UINT uiDataSize_p);
 
 /**
 \brief Enumeration lists valid SDO connection states
@@ -108,7 +108,7 @@ typedef enum
 }tAsySdoConState;
 
 /// callback function pointer for asynchronous SDO sequence layer to call SDO command layer for connection status
-typedef tEplKernel (*tSdoComConCb)(tSdoSeqConHdl SdoSeqConHdl_p, tAsySdoConState AsySdoConState_p);
+typedef tOplkError (*tSdoComConCb)(tSdoSeqConHdl SdoSeqConHdl_p, tAsySdoConState AsySdoConState_p);
 
 /// Data type for handle between SDO command layer and application
 typedef UINT tSdoComConHdl;
@@ -209,7 +209,7 @@ typedef struct
 
 
 /// callback function pointer to inform application about connection
-typedef tEplKernel (*tSdoFinishedCb)(tSdoComFinished* pSdoComFinished_p);
+typedef tOplkError (*tSdoFinishedCb)(tSdoComFinished* pSdoComFinished_p);
 
 /**
 \brief Structure for initializing Read/Write by Index SDO transfer

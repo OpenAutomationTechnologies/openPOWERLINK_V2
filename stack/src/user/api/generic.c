@@ -99,9 +99,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 #if defined(CONFIG_INCLUDE_SDOC)
-static tEplKernel cbSdoCon(tSdoComFinished* pSdoComFinished_p);
+static tOplkError cbSdoCon(tSdoComFinished* pSdoComFinished_p);
 #endif
-static tEplKernel cbReceivedAsnd(tFrameInfo *pFrameInfo_p);
+static tOplkError cbReceivedAsnd(tFrameInfo *pFrameInfo_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -119,15 +119,15 @@ oplk_execNmtCommand(kNmtEventSwReset).
 \param  pInitParam_p            Pointer to the init parameters. The init
                                 parameters must be set by the application.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          Stack was successfully initialized.
 
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tEplKernel oplk_init(tEplApiInitParam* pInitParam_p)
+tOplkError oplk_init(tEplApiInitParam* pInitParam_p)
 {
-    tEplKernel          ret;
+    tOplkError          ret;
 
     target_init();
 
@@ -148,15 +148,15 @@ The function shuts down the openPOWERLINK stack. Before shutting down the stack
 it should be stopped by sending the NMT command kNmtEventSwitchOff. The command
 can be sent by calling oplk_execNmtCommand(kNmtEventSwitchOff);
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          Stack was successfully shut down.
 
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tEplKernel oplk_shutdown(void)
+tOplkError oplk_shutdown(void)
 {
-    tEplKernel          ret;
+    tOplkError          ret;
 
     ret = ctrlu_shutdownStack();
     ctrlu_exit();
@@ -176,14 +176,14 @@ is actually executed.
 
 \param  nmtEvent_p              NMT command to send.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tEplKernel oplk_execNmtCommand(tNmtEvent nmtEvent_p)
+tOplkError oplk_execNmtCommand(tNmtEvent nmtEvent_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 
     ret = nmtu_postNmtEvent(nmtEvent_p);
     return ret;
@@ -208,7 +208,7 @@ in the object dictionary (OD).
                             all linked entries at this location.
 \param  firstSubindex_p     Specifies the first subindex to be linked.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          The variables are successfully linked to the
                                 object dictionary.
 \retval kEplObdIndexNotExist    The object index does not exist in the object
@@ -219,7 +219,7 @@ in the object dictionary (OD).
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tEplKernel oplk_linkObject(UINT objIndex_p, void* pVar_p, UINT* pVarEntries_p,
+tOplkError oplk_linkObject(UINT objIndex_p, void* pVar_p, UINT* pVarEntries_p,
                            tObdSize* pEntrySize_p, UINT firstSubindex_p)
 {
     UINT8           varEntries;
@@ -230,7 +230,7 @@ tEplKernel oplk_linkObject(UINT objIndex_p, void* pVar_p, UINT* pVarEntries_p,
     tObdSize        entrySize;
     tObdSize        usedSize;
 
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 
     if ((pVar_p == NULL) || (pVarEntries_p == NULL) || (*pVarEntries_p == 0) || (pEntrySize_p == NULL))
         return kEplApiInvalidParam;
@@ -328,16 +328,16 @@ event callback function when the task is completed.
 \param  pUserArg_p          User defined argument which will be passed to the
                             event callback function.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tEplKernel oplk_readObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT index_p,
+tOplkError oplk_readObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT index_p,
                            UINT subindex_p, void* pDstData_le_p, UINT* pSize_p,
                            tSdoType sdoType_p, void* pUserArg_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     tObdSize        obdSize;
 
     if ((index_p == 0) || (pDstData_le_p == NULL) || (pSize_p == NULL) || (*pSize_p == 0))
@@ -414,16 +414,16 @@ event callback function when the task is completed.
 \param  pUserArg_p          User defined argument which will be passed to the
                             event callback function.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tEplKernel oplk_writeObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT index_p,
+tOplkError oplk_writeObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT index_p,
                             UINT subindex_p, void* pSrcData_le_p, UINT size_p,
                             tSdoType sdoType_p, void* pUserArg_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 
     if ((index_p == 0) || (pSrcData_le_p == NULL) || (size_p == 0))
         return kEplApiInvalidParam;
@@ -487,14 +487,14 @@ callback function when the last SDO transfer to a remote node has completed.
 
 \param  sdoComConHdl_p      The SDO connection handle.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tEplKernel oplk_freeSdoChannel(tSdoComConHdl sdoComConHdl_p)
+tOplkError oplk_freeSdoChannel(tSdoComConHdl sdoComConHdl_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 
 #if defined(CONFIG_INCLUDE_SDOC)
 
@@ -525,14 +525,14 @@ The function aborts the running SDO transfer on the specified SDO channel.
 \param  abortCode_p         The abort code which shall be sent to the remote
                             node.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tEplKernel oplk_abortSdo(tSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p)
+tOplkError oplk_abortSdo(tSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 
 #if defined(CONFIG_INCLUDE_SDOC)
 
@@ -566,15 +566,15 @@ The function reads the specified entry from the local object dictionary.
 \param  pSize_p             Pointer to the size of the buffer. The function
                             stores the size of the object at this location.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tEplKernel oplk_readLocalObject(UINT index_p, UINT subindex_p, void* pDstData_p,
+tOplkError oplk_readLocalObject(UINT index_p, UINT subindex_p, void* pDstData_p,
                                 UINT* pSize_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     tObdSize        obdSize;
 
     obdSize = (tObdSize)*pSize_p;
@@ -596,12 +596,12 @@ The function writes the specified entry to the local object dictionary.
                             order.
 \param  size_p              Size of the data to write.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tEplKernel oplk_writeLocalObject(UINT index_p, UINT subindex_p, void* pSrcData_p,
+tOplkError oplk_writeLocalObject(UINT index_p, UINT subindex_p, void* pSrcData_p,
                                         UINT size_p)
 {
     return obd_writeEntry(index_p, subindex_p, pSrcData_p, (tObdSize)size_p);
@@ -618,15 +618,15 @@ The function sends a generic ASnd frame.
 \param  asndSize_p          Size of ASnd frame to send. The size contains the
                             service ID and the payload.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tEplKernel oplk_sendAsndFrame(UINT8 dstNodeId_p, tEplAsndFrame *pAsndFrame_p,
+tOplkError oplk_sendAsndFrame(UINT8 dstNodeId_p, tEplAsndFrame *pAsndFrame_p,
                               size_t asndSize_p)
 {
-    tEplKernel      ret;
+    tOplkError      ret;
     tFrameInfo      frameInfo;
     BYTE            buffer[EPL_C_DLL_MAX_ASYNC_MTU];
 
@@ -668,14 +668,14 @@ The function enables or disables the forwarding of received ASnd frames
 \param  filterType_p        Specifies which types of ASnd frames should be
                             received. Could be none, unicast or all frames.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tEplKernel oplk_setAsndForward(UINT8 serviceId_p, tEplApiAsndFilter filterType_p)
+tOplkError oplk_setAsndForward(UINT8 serviceId_p, tEplApiAsndFilter filterType_p)
 {
-    tEplKernel          ret;
+    tOplkError          ret;
     tDllAsndFilter      dllFilter;
 
     // Map API filter types to stack internal filter types
@@ -710,14 +710,14 @@ thread safe and is meant for synchronization.
 
 \param  pUserArg_p          User defined pointer.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tEplKernel oplk_postUserEvent(void* pUserArg_p)
+tOplkError oplk_postUserEvent(void* pUserArg_p)
 {
-    tEplKernel  ret;
+    tOplkError  ret;
     tEplEvent   event;
 
     event.m_EventSink = kEplEventSinkApi;
@@ -742,12 +742,12 @@ for the specified node.
 \param  nodeId_p            The Node ID for which the node command will be executed.
 \param  nodeCommand_p       The Node command to execute.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tEplKernel oplk_triggerMnStateChange(UINT nodeId_p, tNmtNodeCommand nodeCommand_p)
+tOplkError oplk_triggerMnStateChange(UINT nodeId_p, tNmtNodeCommand nodeCommand_p)
 {
 #if defined(CONFIG_INCLUDE_NMT_MN)
     return nmtmnu_triggerStateChange(nodeId_p, nodeCommand_p);
@@ -769,12 +769,12 @@ the stack to read the configuration.
 \param  pCdc_p          Pointer to the concise device description.
 \param  cdcSize_p       Size of the concise device description
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tEplKernel oplk_setCdcBuffer(BYTE* pCdc_p, UINT cdcSize_p)
+tOplkError oplk_setCdcBuffer(BYTE* pCdc_p, UINT cdcSize_p)
 {
 #if (CONFIG_OBD_USE_LOAD_CONCISEDCF != FALSE)
     obdcdc_setBuffer(pCdc_p, cdcSize_p);
@@ -797,12 +797,12 @@ the stack to read the configuration.
 \param  pCdcFilename_p  Filename to be used for reading the concise device
                         description.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tEplKernel oplk_setCdcFilename(char* pCdcFilename_p)
+tOplkError oplk_setCdcFilename(char* pCdcFilename_p)
 {
 #if (CONFIG_OBD_USE_LOAD_CONCISEDCF != FALSE)
     obdcdc_setFilename(pCdcFilename_p);
@@ -821,12 +821,12 @@ tEplKernel oplk_setCdcFilename(char* pCdcFilename_p)
 The process function is used in single threaded environment e.g. without any OS.
 It gives processing time to several tasks in the openPOWERLINK stack.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tEplKernel oplk_process(void)
+tOplkError oplk_process(void)
 {
     return ctrlu_processStack();
 }
@@ -857,12 +857,12 @@ The function waits for a sync event.
 
 \param  timeout_p       Time to wait for event
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tEplKernel oplk_waitSyncEvent(ULONG timeout_p)
+tOplkError oplk_waitSyncEvent(ULONG timeout_p)
 {
     return pdoucal_waitSyncEvent(timeout_p);
 }
@@ -877,12 +877,12 @@ The function returns the stored IdentResponse frame of the specified node.
 \param  ppIdentResponse_p   Pointer to store the address of the IdentResponse
                             frame.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tEplKernel oplk_getIdentResponse(UINT nodeId_p, tEplIdentResponse** ppIdentResponse_p)
+tOplkError oplk_getIdentResponse(UINT nodeId_p, tEplIdentResponse** ppIdentResponse_p)
 {
 #if defined(CONFIG_INCLUDE_NMT_MN)
     return identu_getIdentResponse(nodeId_p, ppIdentResponse_p);
@@ -912,13 +912,13 @@ SDO event to the application.
 
 \param  pSdoComFinished_p   SDO parameter.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 #if defined(CONFIG_INCLUDE_SDOC)
-static tEplKernel cbSdoCon(tSdoComFinished* pSdoComFinished_p)
+static tOplkError cbSdoCon(tSdoComFinished* pSdoComFinished_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     tEplApiEventArg     eventArg;
 
     eventArg.m_Sdo = *pSdoComFinished_p;
@@ -936,12 +936,12 @@ Frames will be forwarded to the application by sending a user event.
 
 \param  pFrameInfo_p   Pointer to information about the received frame.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tEplKernel cbReceivedAsnd(tFrameInfo *pFrameInfo_p)
+static tOplkError cbReceivedAsnd(tFrameInfo *pFrameInfo_p)
 {
-    tEplKernel              ret = kEplSuccessful;
+    tOplkError              ret = kEplSuccessful;
     UINT                    asndOffset;
     tEplApiEventArg         apiEventArg;
     tEplApiEventType        eventType;

@@ -88,12 +88,12 @@ The function initializes the kernel event CAL module. Depending on the
 configuration it gets the function pointer interface of the used queue
 implementations and calls the appropriate init functions.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
 */
 //------------------------------------------------------------------------------
-tEplKernel eventkcal_init (void)
+tOplkError eventkcal_init (void)
 {
     return kEplSuccessful;
 }
@@ -105,12 +105,12 @@ tEplKernel eventkcal_init (void)
 The function cleans up the kernel event CAL module. For cleanup it calls the exit
 functions of the queue implementations for each used queue.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
 */
 //------------------------------------------------------------------------------
-tEplKernel eventkcal_exit (void)
+tOplkError eventkcal_exit (void)
 {
     return kEplSuccessful;
 }
@@ -125,14 +125,14 @@ queue post function is called.
 
 \param  pEvent_p                Event to be posted.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
 */
 //------------------------------------------------------------------------------
-tEplKernel eventkcal_postEvent (tEplEvent *pEvent_p)
+tOplkError eventkcal_postEvent (tEplEvent *pEvent_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 
     // split event post to user internal and user to kernel
     switch(pEvent_p->m_EventSink)
@@ -176,14 +176,14 @@ This is the event receive function for events posted to the kernel layer.
 
 \param  pEvent_p                Received event to be processed.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 \retval kEplSuccessful          If function executes correctly
 \retval other error codes       If an error occurred
 */
 //------------------------------------------------------------------------------
-tEplKernel eventkcal_rxHandler (tEplEvent *pEvent_p)
+tOplkError eventkcal_rxHandler (tEplEvent *pEvent_p)
 {
-    tEplKernel ret = kEplSuccessful;
+    tOplkError ret = kEplSuccessful;
 
     ret = eventk_process(pEvent_p);
 

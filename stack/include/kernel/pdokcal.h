@@ -59,31 +59,31 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tEplKernel pdokcal_init(void);
-tEplKernel pdokcal_exit(void);
-tEplKernel pdokcal_process(tEplEvent * pEvent_p) SECTION_PDOKCAL_PROCESS;
+tOplkError pdokcal_init(void);
+tOplkError pdokcal_exit(void);
+tOplkError pdokcal_process(tEplEvent * pEvent_p) SECTION_PDOKCAL_PROCESS;
 
 // PDO memory functions
-tEplKernel pdokcal_openMem(void);
-tEplKernel pdokcal_closeMem(void);
-tEplKernel pdokcal_allocateMem(size_t memSize_p, BYTE** pPdoMem_p);
-tEplKernel pdokcal_freeMem(BYTE* pMem_p, size_t memSize_p);
+tOplkError pdokcal_openMem(void);
+tOplkError pdokcal_closeMem(void);
+tOplkError pdokcal_allocateMem(size_t memSize_p, BYTE** pPdoMem_p);
+tOplkError pdokcal_freeMem(BYTE* pMem_p, size_t memSize_p);
 
 // PDO buffer functions
-tEplKernel pdokcal_initPdoMem(tPdoChannelSetup* pPdoChannels, size_t rxPdoMemSize_p,
+tOplkError pdokcal_initPdoMem(tPdoChannelSetup* pPdoChannels, size_t rxPdoMemSize_p,
                               size_t txPdoMemSize_p);
 void       pdokcal_cleanupPdoMem(void);
 BYTE*      pdokcal_getPdoMemRegion(void);
-tEplKernel pdokcal_writeRxPdo(UINT channelId_p, BYTE *pPayload_p, UINT16 pdoSize_p) SECTION_PDOKCAL_WRITE_RPDO;
-tEplKernel pdokcal_readTxPdo(UINT channelId_p, BYTE* pPayload_p, UINT16 pdoSize_p) SECTION_PDOKCAL_READ_TPDO;
+tOplkError pdokcal_writeRxPdo(UINT channelId_p, BYTE *pPayload_p, UINT16 pdoSize_p) SECTION_PDOKCAL_WRITE_RPDO;
+tOplkError pdokcal_readTxPdo(UINT channelId_p, BYTE* pPayload_p, UINT16 pdoSize_p) SECTION_PDOKCAL_READ_TPDO;
 BYTE*      pdokcal_getPdoPointer(BOOL fTxPdo_p, UINT offset_p, UINT16 pdoSize_p);
 
 // PDO sync functions
-tEplKernel pdokcal_initSync(void);
+tOplkError pdokcal_initSync(void);
 void       pdokcal_exitSync(void);
-tEplKernel pdokcal_controlSync(BOOL fEnable_p);
-tEplKernel pdokcal_waitSyncEvent(void);
-tEplKernel pdokcal_sendSyncEvent(void);
+tOplkError pdokcal_controlSync(BOOL fEnable_p);
+tOplkError pdokcal_waitSyncEvent(void);
+tOplkError pdokcal_sendSyncEvent(void);
 
 #ifdef __cplusplus
 }

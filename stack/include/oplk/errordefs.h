@@ -265,6 +265,6 @@ typedef enum
 
     // area until 0x07FF is reserved
     // area for user application from 0x0800 to 0x7FFF
-} tEplKernel;
+} tOplkError;
 
 #endif /* _INC_oplk_errordefs_H_ */

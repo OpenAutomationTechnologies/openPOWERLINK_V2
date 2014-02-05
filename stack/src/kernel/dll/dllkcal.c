@@ -149,14 +149,14 @@ static BOOL getMnSyncRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p,
 
 This function initializes the kernel DLL CAL module.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_dllkcal
 */
 //------------------------------------------------------------------------------
-tEplKernel dllkcal_init(void)
+tOplkError dllkcal_init(void)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 #ifdef CONFIG_INCLUDE_NMT_MN
     tCircBufError   circErr;
 #endif
@@ -240,14 +240,14 @@ Exit:
 
 This function cleans up the kernel DLL CAL module.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_dllkcal
 */
 //------------------------------------------------------------------------------
-tEplKernel dllkcal_exit(void)
+tOplkError dllkcal_exit(void)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 
 #ifdef CONFIG_INCLUDE_NMT_MN
     circbuf_free(instance_l.pQueueCnRequestGen);
@@ -276,14 +276,14 @@ This function is the event handler of the kernel DLL CAL module.
 
 \param  pEvent_p                Pointer to event to be processed.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_dllkcal
 */
 //------------------------------------------------------------------------------
-tEplKernel dllkcal_process(tEplEvent* pEvent_p)
+tOplkError dllkcal_process(tEplEvent* pEvent_p)
 {
-    tEplKernel                  ret = kEplSuccessful;
+    tOplkError                  ret = kEplSuccessful;
     tDllCalAsndServiceIdFilter* pServFilter;
     tDllIdentParam*             pIdentParam;
     tDllConfigParam*            pConfigParam;
@@ -376,15 +376,15 @@ This function returns the count of TX frames of the FIFO with highest priority.
 \param  pPriority_p				Pointer to store the FIFO type.
 \param  pCount_p                Pointer to store the number of TX frames.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_dllkcal
 */
 //------------------------------------------------------------------------------
-tEplKernel dllkcal_getAsyncTxCount(tDllAsyncReqPriority* pPriority_p,
+tOplkError dllkcal_getAsyncTxCount(tDllAsyncReqPriority* pPriority_p,
                                    UINT* pCount_p)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
     ULONG       frameCount;
 
     ret = instance_l.pTxNmtFuncs->pfnGetDataBlockCount(instance_l.dllCalQueueTxNmt,
@@ -436,15 +436,15 @@ The function return TX frames form the specified FIFO.
                                 rewritten with actual size of frame.
 \param  priority_p              Priority of the FIFO.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_dllkcal
 */
 //------------------------------------------------------------------------------
-tEplKernel dllkcal_getAsyncTxFrame(void* pFrame_p, UINT* pFrameSize_p,
+tOplkError dllkcal_getAsyncTxFrame(void* pFrame_p, UINT* pFrameSize_p,
                                    tDllAsyncReqPriority priority_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
 
     switch (priority_p)
     {
@@ -473,14 +473,14 @@ only for frames with registered AsndServiceIds.
 
 \param  pFrameInfo_p            Pointer to frame info of received frame
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_dllkcal
 */
 //------------------------------------------------------------------------------
-tEplKernel dllkcal_asyncFrameReceived(tFrameInfo* pFrameInfo_p)
+tOplkError dllkcal_asyncFrameReceived(tFrameInfo* pFrameInfo_p)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
     tEplEvent   event;
 
     event.m_EventSink = kEplEventSinkDlluCal;
@@ -519,15 +519,15 @@ priority.
 \param  pFrameInfo_p            Pointer to frame info structure
 \param  priority_p              Priority to send frame with
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_dllkcal
 */
 //------------------------------------------------------------------------------
-tEplKernel dllkcal_sendAsyncFrame(tFrameInfo* pFrameInfo_p,
+tOplkError dllkcal_sendAsyncFrame(tFrameInfo* pFrameInfo_p,
                                   tDllAsyncReqPriority priority_p)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
     tEplEvent   event;
 
     switch (priority_p)
@@ -573,14 +573,14 @@ The function writes the given frame into the specified dll CAL queue.
 \param  pFrameInfo_p            Pointer to frame info structure
 \param  dllQueue                DllCal Queue to use
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_dllkcal
 */
 //------------------------------------------------------------------------------
-tEplKernel dllkcal_writeAsyncFrame(tFrameInfo* pFrameInfo_p, tDllCalQueue dllQueue)
+tOplkError dllkcal_writeAsyncFrame(tFrameInfo* pFrameInfo_p, tDllCalQueue dllQueue)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
 
     switch (dllQueue)
     {
@@ -618,14 +618,14 @@ tEplKernel dllkcal_writeAsyncFrame(tFrameInfo* pFrameInfo_p, tDllCalQueue dllQue
 
 The function clear the asynchronous transmit buffers.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_dllkcal
 */
 //------------------------------------------------------------------------------
-tEplKernel dllkcal_clearAsyncBuffer(void)
+tOplkError dllkcal_clearAsyncBuffer(void)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
 
     //ret is ignored
     ret = instance_l.pTxNmtFuncs->pfnResetDataBlockQueue(
@@ -643,15 +643,15 @@ tEplKernel dllkcal_clearAsyncBuffer(void)
 
 The function clears the asynchronous transmit queues.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_dllkcal
 */
 //------------------------------------------------------------------------------
 #if defined(CONFIG_INCLUDE_NMT_MN)
-tEplKernel dllkcal_clearAsyncQueues(void)
+tOplkError dllkcal_clearAsyncQueues(void)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
 
 #if EPL_DLL_PRES_CHAINING_MN != FALSE
     //ret is ignored
@@ -679,14 +679,14 @@ The function returns statistics of the asynchronous queues
 
 \param  ppStatistics		    Pointer to store statistics pointer.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_dllkcal
 */
 //------------------------------------------------------------------------------
-tEplKernel dllkcal_getStatistics(tDllkCalStatistics** ppStatistics)
+tOplkError dllkcal_getStatistics(tDllkCalStatistics** ppStatistics)
 {
-    tEplKernel  ret = kEplSuccessful;
+    tOplkError  ret = kEplSuccessful;
 
     //ret is ignored
     ret = instance_l.pTxNmtFuncs->pfnGetDataBlockCount(instance_l.dllCalQueueTxNmt,
@@ -713,15 +713,15 @@ The function issues a StatusRequest or an IdentRequest to the specified node.
 \param  soaFlag1_p              Flag1 for this node (transmit in SoA and PReq).
                                 If 0xFF this flag is ignored.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_dllkcal
 */
 //------------------------------------------------------------------------------
-tEplKernel dllkcal_issueRequest(tDllReqServiceId service_p, UINT nodeId_p,
+tOplkError dllkcal_issueRequest(tDllReqServiceId service_p, UINT nodeId_p,
                                   BYTE soaFlag1_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     tCircBufError   err;
 
     if (soaFlag1_p != 0xFF)
@@ -780,15 +780,15 @@ DLL module.
                                 addressed.
 \param  pSoaPayload_p           Pointer to SoA payload.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_dllkcal
 */
 //------------------------------------------------------------------------------
-tEplKernel dllkcal_getSoaRequest(tDllReqServiceId* pReqServiceId_p,
+tOplkError dllkcal_getSoaRequest(tDllReqServiceId* pReqServiceId_p,
                                  UINT* pNodeId_p, tEplSoaPayload* pSoaPayload_p)
 {
-    tEplKernel      ret = kEplSuccessful;
+    tOplkError      ret = kEplSuccessful;
     UINT            count;
 
 #if EPL_DLL_PRES_CHAINING_MN == FALSE
@@ -849,16 +849,16 @@ This will add the node to the asynchronous request scheduler.
 \param  asyncReqPrio_p          The asynchronous request priority.
 \param  count_p                 The count of asynchronous frames.
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 
 \ingroup module_dllkcal
 */
 //------------------------------------------------------------------------------
-tEplKernel dllkcal_setAsyncPendingRequests(UINT nodeId_p,
+tOplkError dllkcal_setAsyncPendingRequests(UINT nodeId_p,
                                            tDllAsyncReqPriority asyncReqPrio_p,
                                            UINT count_p)
 {
-    tEplKernel          ret = kEplSuccessful;
+    tOplkError          ret = kEplSuccessful;
     tCircBufError       err;
     UINT*               pLocalRequestCnt;
     tCircBufInstance*   pTargetQueue;
@@ -1116,7 +1116,7 @@ todo how to handle errors (ret != kEplSuccessful)? Is it sufficient that we
 static BOOL getMnSyncRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p,
                              tEplSoaPayload* pSoaPayload_p)
 {
-    tEplKernel          ret;
+    tOplkError          ret;
     ULONG               syncReqCount = 0;
     UINT                syncReqSize = 0;
     tDllSyncRequest     syncRequest;

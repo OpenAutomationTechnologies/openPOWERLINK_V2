@@ -52,8 +52,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-typedef tEplKernel (*tCfmCbEventCnProgress) (tCfmEventCnProgress* pEventCnProgress_p);
-typedef tEplKernel (*tCfmCbEventCnResult) (UINT nodeId_p, tNmtNodeCommand nodeCommand_p);
+typedef tOplkError (*tCfmCbEventCnProgress) (tCfmEventCnProgress* pEventCnProgress_p);
+typedef tOplkError (*tCfmCbEventCnResult) (UINT nodeId_p, tNmtNodeCommand nodeCommand_p);
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -63,9 +63,9 @@ typedef tEplKernel (*tCfmCbEventCnResult) (UINT nodeId_p, tNmtNodeCommand nodeCo
 extern "C" {
 #endif
 
-tEplKernel  cfmu_init(tCfmCbEventCnProgress pfnCbEventCnProgress_p, tCfmCbEventCnResult pfnCbEventCnResult_p);
-tEplKernel  cfmu_exit(void);
-tEplKernel  cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p);
+tOplkError  cfmu_init(tCfmCbEventCnProgress pfnCbEventCnProgress_p, tCfmCbEventCnResult pfnCbEventCnResult_p);
+tOplkError  cfmu_exit(void);
+tOplkError  cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p);
 BOOL        cfmu_isSdoRunning(UINT nodeId_p);
 
 #ifdef __cplusplus
