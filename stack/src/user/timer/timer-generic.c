@@ -279,10 +279,10 @@ tOplkError timeru_process(void)
     if (pTimerEntry != NULL)
     {
         // call event function
-        timerEventArg.m_TimerHdl = (tTimerHdl) pTimerEntry;
+        timerEventArg.timerHdl = (tTimerHdl) pTimerEntry;
         EPL_MEMCPY(&timerEventArg.m_Arg, &pTimerEntry->timerArg.m_Arg, sizeof(timerEventArg.m_Arg));
 
-        event.m_EventSink = pTimerEntry->timerArg.m_EventSink;
+        event.m_EventSink = pTimerEntry->timerArg.eventSink;
         event.m_EventType = kEplEventTypeTimer;
         EPL_MEMSET(&event.m_NetTime, 0x00, sizeof(tEplNetTime));
         event.m_pArg = &timerEventArg;

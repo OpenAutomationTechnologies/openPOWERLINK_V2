@@ -215,7 +215,7 @@ tOplkError PUBLIC hrestimer_delInstance(void)
     {
         pTimerInfo = &EplTimerHighReskInstance_l.m_aTimerInfo[uiIndex];
         hrtimer_delete(pTimerInfo->m_timer);
-        pTimerInfo->m_EventArg.m_TimerHdl = 0;
+        pTimerInfo->m_EventArg.timerHdl = 0;
         pTimerInfo->m_pfnCallback = NULL;
     }
 
@@ -269,7 +269,7 @@ tOplkError PUBLIC hrestimer_modifyTimer(tTimerHdl*     pTimerHdl_p,
         pTimerInfo = &EplTimerHighReskInstance_l.m_aTimerInfo[0];
         for (uiIndex = 0; uiIndex < TIMER_COUNT; uiIndex++, pTimerInfo++)
         {
-            if (pTimerInfo->m_EventArg.m_TimerHdl == 0)
+            if (pTimerInfo->m_EventArg.timerHdl == 0)
             {   // free structure found
                 break;
             }
@@ -282,7 +282,7 @@ tOplkError PUBLIC hrestimer_modifyTimer(tTimerHdl*     pTimerHdl_p,
             goto Exit;
         }
 
-        pTimerInfo->m_EventArg.m_TimerHdl = HDL_INIT(uiIndex);
+        pTimerInfo->m_EventArg.timerHdl = HDL_INIT(uiIndex);
     }
     else
     {
@@ -319,17 +319,17 @@ tOplkError PUBLIC hrestimer_modifyTimer(tTimerHdl*     pTimerHdl_p,
      * (if timer expires right after this statement, the user
      * would detect an unknown timer handle and discard it)
      */
-    pTimerInfo->m_EventArg.m_TimerHdl = HDL_INC(pTimerInfo->m_EventArg.m_TimerHdl);
-    *pTimerHdl_p = pTimerInfo->m_EventArg.m_TimerHdl;
+    pTimerInfo->m_EventArg.timerHdl = HDL_INC(pTimerInfo->m_EventArg.timerHdl);
+    *pTimerHdl_p = pTimerInfo->m_EventArg.timerHdl;
 
     /* initialize timer info */
-    pTimerInfo->m_EventArg.m_Arg.m_dwVal = ulArgument_p;
+    pTimerInfo->m_EventArg.m_Arg.value = ulArgument_p;
     pTimerInfo->m_pfnCallback      = pfnCallback_p;
     hrtimer_setCallback(pTimerInfo->m_timer, (void *)pTimerInfo->m_pfnCallback,
                         (void*)&pTimerInfo->m_EventArg);
 
     /*logMsg("set TCB: %p(%p)\n", (int)pTimerInfo->m_pfnCallback,
-                                (int)pTimerInfo->m_EventArg.m_Arg.m_dwVal, 0, 0, 0, 0);*/
+                                (int)pTimerInfo->m_EventArg.m_Arg.value, 0, 0, 0, 0);*/
 
 
     if (ullTimeNs_p >= 1000000000L)
@@ -355,7 +355,7 @@ tOplkError PUBLIC hrestimer_modifyTimer(tTimerHdl*     pTimerHdl_p,
     }
 #if 0
     DEBUG_LVL_TIMERH_TRACE("hrestimer_modifyTimer() timer=%lx ",
-            pTimerInfo->m_EventArg.m_TimerHdl);
+            pTimerInfo->m_EventArg.timerHdl);
     DEBUG_LVL_TIMERH_TRACE("        timeout=%ld:%ld/%ld:%ld\n",
            RelTime.it_value.tv_sec, RelTime.it_value.tv_nsec,
            RelTime.it_interval.tv_sec, RelTime.it_interval.tv_nsec);
@@ -409,7 +409,7 @@ tOplkError PUBLIC hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
             goto Exit;
         }
         pTimerInfo = &EplTimerHighReskInstance_l.m_aTimerInfo[uiIndex];
-        if (pTimerInfo->m_EventArg.m_TimerHdl != *pTimerHdl_p)
+        if (pTimerInfo->m_EventArg.timerHdl != *pTimerHdl_p)
         {   // invalid handle
             goto Exit;
         }
@@ -421,7 +421,7 @@ tOplkError PUBLIC hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
     hrtimer_settime(pTimerInfo->m_timer, 0, &RelTime, NULL);
 
     *pTimerHdl_p = 0;
-    pTimerInfo->m_EventArg.m_TimerHdl = 0;
+    pTimerInfo->m_EventArg.timerHdl = 0;
     pTimerInfo->m_pfnCallback = NULL;
     hrtimer_setCallback(pTimerInfo->m_timer, (void*)pTimerInfo->m_pfnCallback, 0);
 

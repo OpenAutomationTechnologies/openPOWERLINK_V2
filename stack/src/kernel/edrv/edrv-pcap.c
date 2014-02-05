@@ -1041,7 +1041,7 @@ LARGE_INTEGER               liDueTime;
         }
         pTimerInfo = &EplTimerHighReskInstance_l.m_aTimerInfo[uiIndex];
         // d.k.: assume that this info structure is the correct one
-/*        if ((pTimerInfo->m_EventArg.m_TimerHdl != *pTimerHdl_p)
+/*        if ((pTimerInfo->m_EventArg.timerHdl != *pTimerHdl_p)
             && (pTimerInfo->m_pfnCallback == NULL))
         {   // invalid handle
             Ret = kEplTimerInvalidHandle;
@@ -1051,7 +1051,7 @@ LARGE_INTEGER               liDueTime;
 
     // increment timer handle (if timer expires right after this statement,
     // the user would detect an unknown timer handle and discard it)
-    pTimerInfo->m_EventArg.m_TimerHdl = ((pTimerInfo->m_EventArg.m_TimerHdl + 1) & TIMERHDL_MASK)
+    pTimerInfo->m_EventArg.timerHdl = ((pTimerInfo->m_EventArg.timerHdl + 1) & TIMERHDL_MASK)
                                         | ((uiIndex + 1) << TIMERHDL_SHIFT);
 
 
@@ -1074,10 +1074,10 @@ LARGE_INTEGER               liDueTime;
 //        lPeriodMs = 0;
     }
 
-    pTimerInfo->m_EventArg.m_Arg.m_dwVal = ulArgument_p;
+    pTimerInfo->m_EventArg.m_Arg.value = ulArgument_p;
     pTimerInfo->m_pfnCallback = pfnCallback_p;
 
-    *pTimerHdl_p = pTimerInfo->m_EventArg.m_TimerHdl;
+    *pTimerHdl_p = pTimerInfo->m_EventArg.timerHdl;
 
     // configure timer
     hTimer = EdrvGetTimerHandle(uiIndex);
@@ -1138,7 +1138,7 @@ HANDLE                      hTimer;
             goto Exit;
         }
         pTimerInfo = &EplTimerHighReskInstance_l.m_aTimerInfo[uiIndex];
-        if (pTimerInfo->m_EventArg.m_TimerHdl != *pTimerHdl_p)
+        if (pTimerInfo->m_EventArg.timerHdl != *pTimerHdl_p)
         {   // invalid handle
             goto Exit;
         }

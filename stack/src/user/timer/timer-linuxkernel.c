@@ -355,10 +355,10 @@ static void cbTimer(ULONG parameter_p)
     pData = (tTimeruData*) parameter_p;
 
     // call event function
-    timerEventArg.m_TimerHdl = (tTimerHdl)pData;
+    timerEventArg.timerHdl = (tTimerHdl)pData;
     EPL_MEMCPY(&timerEventArg.m_Arg, &pData->timerArgument.m_Arg, sizeof (timerEventArg.m_Arg));
 
-    event.m_EventSink = pData->timerArgument.m_EventSink;
+    event.m_EventSink = pData->timerArgument.eventSink;
     event.m_EventType = kEplEventTypeTimer;
     EPL_MEMSET(&event.m_NetTime, 0x00, sizeof(tEplNetTime));
     event.m_pArg = &timerEventArg;

@@ -220,7 +220,7 @@ tOplkError hrestimer_delInstance(void)
     {
         pTimerInfo = &hresTimerInstance_l.aTimerInfo[index];
         timer_delete(pTimerInfo->timer);
-        pTimerInfo->eventArg.m_TimerHdl = 0;
+        pTimerInfo->eventArg.timerHdl = 0;
         pTimerInfo->pfnCallback = NULL;
     }
 
@@ -282,7 +282,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
         pTimerInfo = &hresTimerInstance_l.aTimerInfo[0];
         for (index = 0; index < TIMER_COUNT; index++, pTimerInfo++)
         {
-            if (pTimerInfo->eventArg.m_TimerHdl == 0)
+            if (pTimerInfo->eventArg.timerHdl == 0)
             {   // free structure found
                 break;
             }
@@ -292,7 +292,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
             DEBUG_LVL_ERROR_TRACE("%s() Invalid timer index:%d\n", __func__, index);
             return kEplTimerNoTimerCreated;
         }
-        pTimerInfo->eventArg.m_TimerHdl = HDL_INIT(index);
+        pTimerInfo->eventArg.timerHdl = HDL_INIT(index);
     }
     else
     {
@@ -320,11 +320,11 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
     /* increment timer handle
      * (if timer expires right after this statement, the user
      * would detect an unknown timer handle and discard it) */
-    pTimerInfo->eventArg.m_TimerHdl = HDL_INC(pTimerInfo->eventArg.m_TimerHdl);
-    *pTimerHdl_p = pTimerInfo->eventArg.m_TimerHdl;
+    pTimerInfo->eventArg.timerHdl = HDL_INC(pTimerInfo->eventArg.timerHdl);
+    *pTimerHdl_p = pTimerInfo->eventArg.timerHdl;
 
     /* initialize timer info */
-    pTimerInfo->eventArg.m_Arg.m_dwVal = argument_p;
+    pTimerInfo->eventArg.m_Arg.value = argument_p;
     pTimerInfo->pfnCallback      = pfnCallback_p;
 
     if (time_p >= 1000000000L)
@@ -350,7 +350,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
     }
 
     DEBUG_LVL_TIMERH_TRACE("%s() timer:%lx timeout=%ld:%ld\n", __func__,
-                            pTimerInfo->eventArg.m_TimerHdl,
+                            pTimerInfo->eventArg.timerHdl,
                             RelTime.it_value.tv_sec, RelTime.it_value.tv_nsec);
 
     timer_settime(pTimerInfo->timer, 0, &RelTime, NULL);
@@ -396,7 +396,7 @@ tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
             return kEplTimerInvalidHandle;
         }
         pTimerInfo = &hresTimerInstance_l.aTimerInfo[index];
-        if (pTimerInfo->eventArg.m_TimerHdl != *pTimerHdl_p)
+        if (pTimerInfo->eventArg.timerHdl != *pTimerHdl_p)
         {   // invalid handle
             return ret;
         }
@@ -408,7 +408,7 @@ tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
     timer_settime(pTimerInfo->timer, 0, &relTime, NULL);
 
     *pTimerHdl_p = 0;
-    pTimerInfo->eventArg.m_TimerHdl = 0;
+    pTimerInfo->eventArg.timerHdl = 0;
     pTimerInfo->pfnCallback = NULL;
 
     return ret;

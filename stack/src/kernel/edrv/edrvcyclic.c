@@ -433,7 +433,7 @@ static tOplkError timerHdlCycleCb(tTimerEventArg* pEventArg_p)
     ULONGLONG       startNewCycleTimeStamp;
 #endif
 
-    if (pEventArg_p->m_TimerHdl != edrvcyclicInstance_l.timerHdlCycle)
+    if (pEventArg_p->timerHdl != edrvcyclicInstance_l.timerHdlCycle)
     {   // zombie callback
         // just exit
         goto Exit;
@@ -577,7 +577,7 @@ static tOplkError timerHdlSlotCb(tTimerEventArg* pEventArg_p)
     tOplkError      ret = kEplSuccessful;
     tEdrvTxBuffer*  pTxBuffer = NULL;
 
-    if (pEventArg_p->m_TimerHdl != edrvcyclicInstance_l.timerHdlSlot)
+    if (pEventArg_p->timerHdl != edrvcyclicInstance_l.timerHdlSlot)
     {   // zombie callback
         // just exit
         goto Exit;
