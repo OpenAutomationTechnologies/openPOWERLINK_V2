@@ -33,7 +33,7 @@
 ################################################################################
 
 COMMON_SOURCES="\
-${COMMON_SOURCE_DIR}/debug.c \
+${COMMON_SOURCE_DIR}/debugstr.c \
 ${COMMON_SOURCE_DIR}/event/event.c \
 "
 

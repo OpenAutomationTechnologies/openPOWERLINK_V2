@@ -42,7 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <oplk/EplInc.h>
 #include <oplk/Epl.h>
-
+#include <oplk/debugstr.h>
 
 #include <kernel/eventkcal.h>
 
@@ -315,8 +315,8 @@ tEplKernel eventkcal_processEventCircbuf(tEventQueue eventQueue_p)
         pEplEvent->m_pArg = NULL;
 
     /*TRACE("Process Kernel  type:%s(%d) sink:%s(%d) size:%d!\n",
-           EplGetEventTypeStr(pEplEvent->m_EventType), pEplEvent->m_EventType,
-           EplGetEventSinkStr(pEplEvent->m_EventSink), pEplEvent->m_EventSink,
+           debugstr_getEventTypeStr(pEplEvent->m_EventType), pEplEvent->m_EventType,
+           debugstr_getEventSinkStr(pEplEvent->m_EventSink), pEplEvent->m_EventSink,
            pEplEvent->m_uiSize);*/
 
     ret = eventk_process(pEplEvent);

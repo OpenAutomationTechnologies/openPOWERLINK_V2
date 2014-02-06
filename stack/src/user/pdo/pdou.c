@@ -42,6 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <oplk/Epl.h>
 #include <oplk/EplInc.h>
+#include <oplk/debugstr.h>
 #include <user/pdoucal.h>
 #include <user/pdou.h>
 
@@ -1300,7 +1301,7 @@ static tEplKernel checkAndSetObjectMapping(QWORD objectMapping_p,
     *pPdoSize_p = (bitOffset >> 3) + byteSize;
 
 Exit:
-    //TRACE("%s() = %s\n", __func__, EplGetEplKernelStr(ret));
+    //TRACE("%s() = %s\n", __func__, debugstr_getRetValStr(ret));
     return ret;
 }
 

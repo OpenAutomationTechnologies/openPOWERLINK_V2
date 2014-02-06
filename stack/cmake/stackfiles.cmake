@@ -33,7 +33,7 @@
 ################################################################################
 
 SET(COMMON_SOURCES
-    ${COMMON_SOURCE_DIR}/debug.c
+    ${COMMON_SOURCE_DIR}/debugstr.c
     ${COMMON_SOURCE_DIR}/event/event.c
     )
 
@@ -393,11 +393,11 @@ SET(OPLK_HEADERS
     ${STACK_INCLUDE_DIR}/oplk/benchmark.h
     ${STACK_INCLUDE_DIR}/oplk/cfm.h
     ${STACK_INCLUDE_DIR}/oplk/debug.h
+    ${STACK_INCLUDE_DIR}/oplk/debugstr.h
     ${STACK_INCLUDE_DIR}/oplk/dll.h
     ${STACK_INCLUDE_DIR}/oplk/Epl.h
     ${STACK_INCLUDE_DIR}/oplk/EplDef.h
     ${STACK_INCLUDE_DIR}/oplk/EplErrDef.h
-    ${STACK_INCLUDE_DIR}/oplk/EplErrStr.h
     ${STACK_INCLUDE_DIR}/oplk/frame.h
     ${STACK_INCLUDE_DIR}/oplk/EplInc.h
     ${STACK_INCLUDE_DIR}/oplk/EplTarget.h

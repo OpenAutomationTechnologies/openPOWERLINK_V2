@@ -181,7 +181,7 @@ SET(MODULE_SOURCE_FILES
     ${KERNEL_SOURCE_DIR}/timer/hrestimer-linuxkernel.c
     ${COMMON_SOURCE_DIR}/circbuf/circbuffer.c
     ${COMMON_SOURCE_DIR}/circbuf/circbuf-linuxkernel.c
-    ${COMMON_SOURCE_DIR}/debug.c
+    ${COMMON_SOURCE_DIR}/debugstr.c
     )
 
 IF(CMAKE_SYSTEM_PROCESSOR MATCHES x86*)

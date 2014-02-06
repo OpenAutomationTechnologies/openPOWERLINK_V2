@@ -44,6 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <oplk/EplInc.h>
 #include <oplk/Epl.h>
+#include <oplk/debugstr.h>
 
 #include <kernel/eventkcal.h>
 #include <kernel/eventkcalintf.h>
@@ -248,8 +249,8 @@ tEplKernel eventkcal_postUserEvent (tEplEvent *pEvent_p)
     tEplKernel      ret = kEplSuccessful;
 
     /*TRACE("K2U  type:%s(%d) sink:%s(%d) size:%d!\n",
-           EplGetEventTypeStr(pEvent_p->m_EventType), pEvent_p->m_EventType,
-           EplGetEventSinkStr(pEvent_p->m_EventSink), pEvent_p->m_EventSink,
+           debugstr_getEventTypeStr(pEvent_p->m_EventType), pEvent_p->m_EventType,
+           debugstr_getEventSinkStr(pEvent_p->m_EventSink), pEvent_p->m_EventSink,
            pEvent_p->m_uiSize);*/
 
     ret = eventkcal_postEventCircbuf(kEventQueueK2U, pEvent_p);
@@ -279,8 +280,8 @@ tEplKernel eventkcal_postKernelEvent (tEplEvent *pEvent_p)
     tEplKernel      ret = kEplSuccessful;
 
     /*TRACE("KINT  type:%s(%d) sink:%s(%d) size:%d!\n",
-           EplGetEventTypeStr(pEvent_p->m_EventType), pEvent_p->m_EventType,
-           EplGetEventSinkStr(pEvent_p->m_EventSink), pEvent_p->m_EventSink,
+           debugstr_getEventTypeStr(pEvent_p->m_EventType), pEvent_p->m_EventType,
+           debugstr_getEventSinkStr(pEvent_p->m_EventSink), pEvent_p->m_EventSink,
            pEvent_p->m_uiSize);*/
 
     ret = eventkcal_postEventCircbuf(kEventQueueKInt, pEvent_p);
@@ -354,8 +355,8 @@ int eventkcal_postEventFromUser(unsigned long arg)
         case kEplEventSinkPdokCal:
         case kEplEventSinkErrk:
             /*TRACE("U2K  type:%s(%d) sink:%s(%d) size:%d!\n",
-                   EplGetEventTypeStr(event.m_EventType), event.m_EventType,
-                   EplGetEventSinkStr(event.m_EventSink), event.m_EventSink,
+                   debugstr_getEventTypeStr(event.m_EventType), event.m_EventType,
+                   debugstr_getEventSinkStr(event.m_EventSink), event.m_EventSink,
                    event.m_uiSize);*/
             ret = eventkcal_postEventCircbuf(kEventQueueU2K, &event);
             break;
@@ -368,8 +369,8 @@ int eventkcal_postEventFromUser(unsigned long arg)
         case kEplEventSinkErru:
         case kEplEventSinkLedu:
             /*TRACE("UINT type:%s(%d) sink:%s(%d) size:%d!\n",
-                   EplGetEventTypeStr(event.m_EventType), event.m_EventType,
-                   EplGetEventSinkStr(event.m_EventSink), event.m_EventSink,
+                   debugstr_getEventTypeStr(event.m_EventType), event.m_EventType,
+                   debugstr_getEventSinkStr(event.m_EventSink), event.m_EventSink,
                    event.m_uiSize);*/
             ret = eventkcal_postEventCircbuf(kEventQueueUInt, &event);
             break;
