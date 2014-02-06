@@ -258,9 +258,9 @@ static tOplkError veth_receiveFrame(tFrameInfo * pFrameInfo_p)
 
     // replace the mac address of the POWERLINK Ethernet interface with virtual
     // ethernet MAC address before forwarding it into the virtual ethernet interface
-    if (memcmp (pFrameInfo_p->pFrame->m_be_abDstMac, vethInstance_l.macAdrs, ETHER_ADDR_LEN) == 0)
+    if (memcmp (pFrameInfo_p->pFrame->aDstMac, vethInstance_l.macAdrs, ETHER_ADDR_LEN) == 0)
     {
-        memcpy (pFrameInfo_p->pFrame->m_be_abDstMac, vethInstance_l.tapMacAdrs, ETHER_ADDR_LEN);
+        memcpy (pFrameInfo_p->pFrame->aDstMac, vethInstance_l.tapMacAdrs, ETHER_ADDR_LEN);
     }
 
     nwrite = write(vethInstance_l.fd, pFrameInfo_p->pFrame, pFrameInfo_p->frameSize);

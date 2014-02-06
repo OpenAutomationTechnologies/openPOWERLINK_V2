@@ -163,7 +163,7 @@ void dllk_setupSoaIdentReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxB
     ami_setUint48Be   (&pFilter_p->aFilterMask[0],     EPL_DLL_MACADDR_MASK);
     ami_setUint16Be      (&pFilter_p->aFilterValue[12],   EPL_C_DLL_ETHERTYPE_EPL);
     ami_setUint16Be      (&pFilter_p->aFilterMask[12],    0xFFFF);
-    ami_setUint8Be      (&pFilter_p->aFilterValue[14],   kEplMsgTypeSoa);
+    ami_setUint8Be      (&pFilter_p->aFilterValue[14],   kMsgTypeSoa);
 #if defined(CONFIG_INCLUDE_MASND)
     // Ignore bit4 of message type to react on both Asnd and AInv frames
     ami_setUint8Be      (&pFilter_p->aFilterMask[14],    0xF7);
@@ -197,7 +197,7 @@ void dllk_setupSoaStatusReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTx
     ami_setUint48Be   (&pFilter_p->aFilterMask[0],     EPL_DLL_MACADDR_MASK);
     ami_setUint16Be      (&pFilter_p->aFilterValue[12],   EPL_C_DLL_ETHERTYPE_EPL);
     ami_setUint16Be      (&pFilter_p->aFilterMask[12],    0xFFFF);
-    ami_setUint8Be      (&pFilter_p->aFilterValue[14],   kEplMsgTypeSoa);
+    ami_setUint8Be      (&pFilter_p->aFilterValue[14],   kMsgTypeSoa);
 #if defined(CONFIG_INCLUDE_MASND)
     // Ignore bit4 of message type to react on both Asnd and AInv frames
     ami_setUint8Be      (&pFilter_p->aFilterMask[14],    0xF7);
@@ -231,7 +231,7 @@ void dllk_setupSoaNmtReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuf
     ami_setUint48Be   (&pFilter_p->aFilterMask[0],     EPL_DLL_MACADDR_MASK);
     ami_setUint16Be      (&pFilter_p->aFilterValue[12],   EPL_C_DLL_ETHERTYPE_EPL);
     ami_setUint16Be      (&pFilter_p->aFilterMask[12],    0xFFFF);
-    ami_setUint8Be      (&pFilter_p->aFilterValue[14],   kEplMsgTypeSoa);
+    ami_setUint8Be      (&pFilter_p->aFilterValue[14],   kMsgTypeSoa);
 #if defined(CONFIG_INCLUDE_MASND)
     // Ignore bit4 of message type to react on both Asnd and AInv frames
     ami_setUint8Be      (&pFilter_p->aFilterMask[14],    0xF7);
@@ -267,7 +267,7 @@ void dllk_setupSoaSyncReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBu
     ami_setUint48Be   (&pFilter_p->aFilterMask[0],     EPL_DLL_MACADDR_MASK);
     ami_setUint16Be      (&pFilter_p->aFilterValue[12],   EPL_C_DLL_ETHERTYPE_EPL);
     ami_setUint16Be      (&pFilter_p->aFilterMask[12],    0xFFFF);
-    ami_setUint8Be      (&pFilter_p->aFilterValue[14],   kEplMsgTypeSoa);
+    ami_setUint8Be      (&pFilter_p->aFilterValue[14],   kMsgTypeSoa);
 #if defined(CONFIG_INCLUDE_MASND)
     // Ignore bit4 of message type to react on both Asnd and AInv frames
     ami_setUint8Be      (&pFilter_p->aFilterMask[14],    0xF7);
@@ -302,7 +302,7 @@ void dllk_setupSoaUnspecReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTx
     ami_setUint48Be   (&pFilter_p->aFilterMask[0],     EPL_DLL_MACADDR_MASK);
     ami_setUint16Be      (&pFilter_p->aFilterValue[12],   EPL_C_DLL_ETHERTYPE_EPL);
     ami_setUint16Be      (&pFilter_p->aFilterMask[12],    0xFFFF);
-    ami_setUint8Be      (&pFilter_p->aFilterValue[14],   kEplMsgTypeSoa);
+    ami_setUint8Be      (&pFilter_p->aFilterValue[14],   kMsgTypeSoa);
 #if defined(CONFIG_INCLUDE_MASND)
     // Ignore bit4 of message type to react on both Asnd and AInv frames
     ami_setUint8Be      (&pFilter_p->aFilterMask[14],    0xF7);
@@ -335,7 +335,7 @@ void dllk_setupPresFilter(tEdrvFilter* pFilter_p, BOOL fEnable_p)
     ami_setUint48Be   (&pFilter_p->aFilterMask[0],     EPL_DLL_MACADDR_MASK);
     ami_setUint16Be      (&pFilter_p->aFilterValue[12],   EPL_C_DLL_ETHERTYPE_EPL);
     ami_setUint16Be      (&pFilter_p->aFilterMask[12],    0xFFFF);
-    ami_setUint8Be      (&pFilter_p->aFilterValue[14],   kEplMsgTypePres);
+    ami_setUint8Be      (&pFilter_p->aFilterValue[14],   kMsgTypePres);
     ami_setUint8Be      (&pFilter_p->aFilterMask[14],    0xFF);
     pFilter_p->fEnable = fEnable_p;
 }
@@ -360,7 +360,7 @@ void dllk_setupPreqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer *
     ami_setUint48Be   (&pFilter_p->aFilterMask[0],     EPL_DLL_MACADDR_MASK);
     ami_setUint16Be      (&pFilter_p->aFilterValue[12],   EPL_C_DLL_ETHERTYPE_EPL);
     ami_setUint16Be      (&pFilter_p->aFilterMask[12],    0xFFFF);
-    ami_setUint8Be      (&pFilter_p->aFilterValue[14],   kEplMsgTypePreq);
+    ami_setUint8Be      (&pFilter_p->aFilterValue[14],   kMsgTypePreq);
     ami_setUint8Be      (&pFilter_p->aFilterMask[14],    0xFF);
     ami_setUint8Be      (&pFilter_p->aFilterValue[15],   (UINT8)nodeId_p);
     ami_setUint8Be      (&pFilter_p->aFilterMask[15],    0xFF);

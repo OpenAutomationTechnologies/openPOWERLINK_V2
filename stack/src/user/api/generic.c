@@ -631,24 +631,24 @@ tOplkError oplk_sendAsndFrame(UINT8 dstNodeId_p, tAsndFrame *pAsndFrame_p,
     BYTE            buffer[EPL_C_DLL_MAX_ASYNC_MTU];
 
     // Calculate size of frame (Asnd data + header)
-    frameInfo.frameSize = asndSize_p + offsetof(tPlkFrame, m_Data);
+    frameInfo.frameSize = asndSize_p + offsetof(tPlkFrame, data);
 
     // Check for correct input
     if ((pAsndFrame_p == NULL) || (frameInfo.frameSize >= sizeof(buffer)))
         return  kErrorReject;
 
     // Calculate size of frame (Asnd data + header)
-    frameInfo.frameSize = asndSize_p + offsetof(tPlkFrame, m_Data);
+    frameInfo.frameSize = asndSize_p + offsetof(tPlkFrame, data);
     frameInfo.pFrame = (tPlkFrame *)buffer;
 
     // Copy Asnd data
     EPL_MEMSET(frameInfo.pFrame, 0x00, frameInfo.frameSize);
-    EPL_MEMCPY(&frameInfo.pFrame->m_Data.m_Asnd, pAsndFrame_p, asndSize_p);
+    EPL_MEMCPY(&frameInfo.pFrame->data.asnd, pAsndFrame_p, asndSize_p);
 
     // Fill in additional data (SrcNodeId is filled by DLL if it is set to 0)
-    ami_setUint8Le(&frameInfo.pFrame->m_le_bMessageType, (UINT8) kEplMsgTypeAsnd);
-    ami_setUint8Le(&frameInfo.pFrame->m_le_bDstNodeId, (UINT8) dstNodeId_p );
-    ami_setUint8Le(&frameInfo.pFrame->m_le_bSrcNodeId, (UINT8) 0);
+    ami_setUint8Le(&frameInfo.pFrame->messageType, (UINT8) kMsgTypeAsnd);
+    ami_setUint8Le(&frameInfo.pFrame->dstNodeId, (UINT8) dstNodeId_p );
+    ami_setUint8Le(&frameInfo.pFrame->srcNodeId, (UINT8) 0);
 
     // Request frame transmission
     ret = dllucal_sendAsyncFrame(&frameInfo, kDllAsyncReqPrioGeneric);
@@ -947,7 +947,7 @@ static tOplkError cbReceivedAsnd(tFrameInfo *pFrameInfo_p)
     tEplApiEventType        eventType;
 
     // Check for correct input
-    asndOffset = offsetof(tPlkFrame, m_Data.m_Asnd);
+    asndOffset = offsetof(tPlkFrame, data.asnd);
 
     if ((pFrameInfo_p->frameSize <= asndOffset + 1) ||
         (pFrameInfo_p->frameSize > EPL_C_DLL_MAX_ASYNC_MTU))

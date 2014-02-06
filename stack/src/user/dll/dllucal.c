@@ -591,14 +591,14 @@ static tOplkError HandleRxAsndFrame(tFrameInfo *pFrameInfo_p)
     tEplEvent       event;
 #endif
 
-    msgType = (tMsgType)ami_getUint8Le(&pFrameInfo_p->pFrame->m_le_bMessageType);
-    if (msgType != kEplMsgTypeAsnd)
+    msgType = (tMsgType)ami_getUint8Le(&pFrameInfo_p->pFrame->messageType);
+    if (msgType != kMsgTypeAsnd)
     {
         ret = kErrorInvalidOperation;
         goto Exit;
     }
 
-    asndServiceId = (unsigned int) ami_getUint8Le(&pFrameInfo_p->pFrame->m_Data.m_Asnd.m_le_bServiceId);
+    asndServiceId = (unsigned int) ami_getUint8Le(&pFrameInfo_p->pFrame->data.asnd.serviceId);
     if (asndServiceId < DLL_MAX_ASND_SERVICE_ID)
     {   // ASnd service ID is valid
         if (instance_l.apfnDlluCbAsnd[asndServiceId] != NULL)
