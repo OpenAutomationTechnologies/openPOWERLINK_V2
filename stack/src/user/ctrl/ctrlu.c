@@ -1505,8 +1505,8 @@ static tOplkError cbLedStateChange(tLedType ledType_p, BOOL fOn_p)
     ret = kErrorOk;
 
     // call user callback
-    eventArg.m_Led.m_LedType = ledType_p;
-    eventArg.m_Led.m_fOn = fOn_p;
+    eventArg.m_Led.ledType = ledType_p;
+    eventArg.m_Led.fOn = fOn_p;
 
     ret = ctrlu_callUserEventCallback(kOplkApiEventLed, &eventArg);
 

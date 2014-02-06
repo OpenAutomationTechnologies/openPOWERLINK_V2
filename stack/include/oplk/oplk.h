@@ -92,10 +92,18 @@ typedef struct
     UINT16                      errorCode;      ///< Contains an error code if bootEvent == \ref kNmtBootEventError
 } tOplkApiEventBoot;
 
+
+/**
+\brief LED Event
+
+This structure specifies a LED event. It contains change events for the POWERLINK
+status and error LED. It allows the application to change the status and error
+LEDs on the device according to the specification.
+*/
 typedef struct
 {
-    tLedType            m_LedType;      // type of the LED (e.g. Status or Error)
-    BOOL                m_fOn;          // state of the LED (e.g. on or off)
+    tLedType                    ledType;        ///< Determines the type of the LED
+    BOOL                        fOn;            ///< The state of the LED
 } tOplkApiEventLed;
 
 typedef struct
