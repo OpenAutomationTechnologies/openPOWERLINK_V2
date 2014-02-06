@@ -678,9 +678,8 @@ WARN_LOGFILE           =
 # with spaces.
 
 INPUT                  = ../../stack/src \
-                         ../../include \
+                         ../../stack/include \
                          ../../objdicts \
-                         ../../contrib/hostif \
                          calmodules.txt \
                          usermodules.txt \
                          kernelmodules.txt \
