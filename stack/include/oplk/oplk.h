@@ -106,10 +106,19 @@ typedef struct
     BOOL                        fOn;            ///< The state of the LED
 } tOplkApiEventLed;
 
+/**
+\brief CFM Result Event
+
+The structure describes the CFM result event. This includes the normal progress
+but also errors which occurred during the configuration process.
+
+\note It is only valid for a MN.
+*/
 typedef struct
 {
-    UINT                m_uiNodeId;
-    tNmtNodeCommand     m_NodeCommand;
+    UINT                        nodeId;         ///< Node ID of the CN which created the event
+    tNmtNodeCommand             nodeCommand;    ///< Node command which will be issued to the CN as result of the configuration process. See \ref tNmtNodeCommand
+
 } tOplkApiEventCfmResult;
 
 typedef struct

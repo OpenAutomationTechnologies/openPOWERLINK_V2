@@ -517,27 +517,27 @@ static tOplkError processCfmResultEvent(tOplkApiEventType EventType_p,
     UNUSED_PARAMETER(EventType_p);
     UNUSED_PARAMETER(pUserArg_p);
 
-    switch (pCfmResult->m_NodeCommand)
+    switch (pCfmResult->nodeCommand)
     {
         case kNmtNodeCommandConfOk:
-            console_printlog("CFM Result: (Node=%d, ConfOk)\n", pCfmResult->m_uiNodeId);
+            console_printlog("CFM Result: (Node=%d, ConfOk)\n", pCfmResult->nodeId);
             break;
 
         case kNmtNodeCommandConfErr:
-            console_printlog("CFM Result: (Node=%d, ConfErr)\n", pCfmResult->m_uiNodeId);
+            console_printlog("CFM Result: (Node=%d, ConfErr)\n", pCfmResult->nodeId);
             break;
 
         case kNmtNodeCommandConfReset:
-            console_printlog("CFM Result: (Node=%d, ConfReset)\n", pCfmResult->m_uiNodeId);
+            console_printlog("CFM Result: (Node=%d, ConfReset)\n", pCfmResult->nodeId);
             break;
 
         case kNmtNodeCommandConfRestored:
-            console_printlog("CFM Result: (Node=%d, ConfRestored)\n", pCfmResult->m_uiNodeId);
+            console_printlog("CFM Result: (Node=%d, ConfRestored)\n", pCfmResult->nodeId);
             break;
 
         default:
-            console_printlog("CFM Result: (Node=%d, CfmResult=0x%X)\n", pCfmResult->m_uiNodeId,
-                                                                pCfmResult->m_NodeCommand);
+            console_printlog("CFM Result: (Node=%d, CfmResult=0x%X)\n", pCfmResult->nodeId,
+                                                                pCfmResult->nodeCommand);
             break;
     }
     return kErrorOk;

@@ -718,28 +718,28 @@ tOplkError ProcessThread::processCfmResultEvent(tOplkApiEventType EventType_p,
     UNUSED_PARAMETER(EventType_p);
     UNUSED_PARAMETER(pUserArg_p);
 
-    switch (pCfmResult->m_NodeCommand)
+    switch (pCfmResult->nodeCommand)
     {
         case kNmtNodeCommandConfOk:
-            sigPrintLog(QString("CFM Result: (Node=%1, ConfOk)").arg(pCfmResult->m_uiNodeId, 0, 10));
+            sigPrintLog(QString("CFM Result: (Node=%1, ConfOk)").arg(pCfmResult->nodeId, 0, 10));
             break;
 
         case kNmtNodeCommandConfErr:
-            sigPrintLog(QString("CFM Result: (Node=%1, ConfErr)").arg(pCfmResult->m_uiNodeId, 0, 10));
+            sigPrintLog(QString("CFM Result: (Node=%1, ConfErr)").arg(pCfmResult->nodeId, 0, 10));
             break;
 
         case kNmtNodeCommandConfReset:
-            sigPrintLog(QString("CFM Result: (Node=%1, ConfReset)").arg(pCfmResult->m_uiNodeId, 0, 10));
+            sigPrintLog(QString("CFM Result: (Node=%1, ConfReset)").arg(pCfmResult->nodeId, 0, 10));
             break;
 
         case kNmtNodeCommandConfRestored:
-            sigPrintLog(QString("CFM Result: (Node=%1, ConfRestored)").arg(pCfmResult->m_uiNodeId, 0, 10));
+            sigPrintLog(QString("CFM Result: (Node=%1, ConfRestored)").arg(pCfmResult->nodeId, 0, 10));
             break;
 
         default:
             sigPrintLog(QString("CFM Result: (Node=%d, CfmResult=0x%X)")
-                    .arg(pCfmResult->m_uiNodeId, 0, 10)
-                    .arg(pCfmResult->m_NodeCommand, 4, 16, QLatin1Char('0')));
+                    .arg(pCfmResult->nodeId, 0, 10)
+                    .arg(pCfmResult->nodeCommand, 4, 16, QLatin1Char('0')));
             break;
     }
     return kErrorOk;
