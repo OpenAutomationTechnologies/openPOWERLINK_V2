@@ -646,7 +646,7 @@ static tEplKernel receiveCb (tSdoSeqConHdl sdoSeqConHdl_p, tAsySdoCom* pSdoCom_p
     UNUSED_PARAMETER(dataSize_p);
 
     ret = searchConnection(sdoSeqConHdl_p, kSdoComConEventRec, pSdoCom_p);
-    EPL_DBGLVL_SDO_TRACE("receiveCb SdoSeqConHdl: 0x%X, First Byte of pSdoCom_p: 0x%02X, dataSize_p: 0x%04X\n",
+    DEBUG_LVL_SDO_TRACE("receiveCb SdoSeqConHdl: 0x%X, First Byte of pSdoCom_p: 0x%02X, dataSize_p: 0x%04X\n",
                          sdoSeqConHdl_p, (WORD)pSdoCom_p->m_le_abCommandData[0], dataSize_p);
     return ret;
 }
@@ -674,43 +674,43 @@ static tEplKernel conStateChangeCb (tSdoSeqConHdl sdoSeqConHdl_p,
     switch(sdoConnectionState_p)
     {
         case kAsySdoConStateConnected:
-            EPL_DBGLVL_SDO_TRACE("Connection established\n");
+            DEBUG_LVL_SDO_TRACE("Connection established\n");
             sdoComConEvent = kSdoComConEventConEstablished;
             // start transmission if needed
             break;
 
         case kAsySdoConStateInitError:
-            EPL_DBGLVL_SDO_TRACE("Error during initialisation\n");
+            DEBUG_LVL_SDO_TRACE("Error during initialisation\n");
             sdoComConEvent = kSdoComConEventInitError;
             // inform app about error and close sequence layer handle
             break;
 
         case kAsySdoConStateConClosed:
-            EPL_DBGLVL_SDO_TRACE("Connection closed\n");
+            DEBUG_LVL_SDO_TRACE("Connection closed\n");
             sdoComConEvent = kSdoComConEventConClosed;
             // close sequence layer handle
             break;
 
         case kAsySdoConStateAckReceived:
-            EPL_DBGLVL_SDO_TRACE("Acknowledge received\n");
+            DEBUG_LVL_SDO_TRACE("Acknowledge received\n");
             sdoComConEvent = kSdoComConEventAckReceived;
             // continue transmission
             break;
 
         case kAsySdoConStateFrameSended:
-            EPL_DBGLVL_SDO_TRACE("One Frame sent\n");
+            DEBUG_LVL_SDO_TRACE("One Frame sent\n");
             sdoComConEvent = kSdoComConEventFrameSended;
             // to continue transmission
             break;
 
         case kAsySdoConStateTimeout:
-            EPL_DBGLVL_SDO_TRACE("Timeout\n");
+            DEBUG_LVL_SDO_TRACE("Timeout\n");
             sdoComConEvent = kSdoComConEventTimeout;
             // close sequence layer handle
             break;
 
         case kAsySdoConStateTransferAbort:
-            EPL_DBGLVL_SDO_TRACE("Transfer aborted\n");
+            DEBUG_LVL_SDO_TRACE("Transfer aborted\n");
             sdoComConEvent = kSdoComConEventTransferAbort;
             // inform higher layer if necessary,
             // but do not close sequence layer handle
@@ -1407,7 +1407,7 @@ static tEplKernel processState(tSdoComConHdl sdoComConHdl_p, tSdoComConEvent sdo
 
 #if defined(WIN32) || defined(_WIN32)
     EnterCriticalSection(sdoComInstance_l.pCriticalSection);
-    EPL_DBGLVL_SDO_TRACE("\n\tEnterCiticalSection processState\n\n");
+    DEBUG_LVL_SDO_TRACE("\n\tEnterCiticalSection processState\n\n");
 #endif
 
     // get pointer to control structure
@@ -1450,7 +1450,7 @@ static tEplKernel processState(tSdoComConHdl sdoComConHdl_p, tSdoComConEvent sdo
     }
 
 #if defined(WIN32) || defined(_WIN32)
-    EPL_DBGLVL_SDO_TRACE("\n\tLeaveCriticalSection processState\n\n");
+    DEBUG_LVL_SDO_TRACE("\n\tLeaveCriticalSection processState\n\n");
     LeaveCriticalSection(sdoComInstance_l.pCriticalSection);
 #endif
     return ret;
@@ -1687,7 +1687,7 @@ static tEplKernel serverSendFrame(tSdoComCon* pSdoComCon_p, UINT index_p,
 
             sizeOfFrame += sizeof(UINT32);
             ret = sdoseq_sendData(pSdoComCon_p->sdoSeqConHdl, sizeOfFrame, pFrame);
-            DEBUG_LVL_25_TRACE("ERROR: SDO Aborted!\n");
+            DEBUG_LVL_SDO_TRACE("ERROR: SDO Aborted!\n");
             break;
     }
     return ret;
@@ -2262,7 +2262,7 @@ static tEplKernel clientSendAbort(tSdoComCon* pSdoComCon_p, UINT32 abortCode_p)
             ret = sdoseq_sendData(pSdoComCon_p->sdoSeqConHdl, sizeOfFrame, pFrame);
             if (ret == kEplSdoSeqConnectionBusy)
             {
-                DEBUG_LVL_25_TRACE("%s tried to send abort 0x%lX while connection is already closed\n",
+                DEBUG_LVL_SDO_TRACE("%s tried to send abort 0x%lX while connection is already closed\n",
                     __func__, (ULONG)abortCode_p);
                 ret = kEplSuccessful;
             }

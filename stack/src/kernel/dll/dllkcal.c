@@ -173,7 +173,7 @@ tEplKernel dllkcal_init(void)
                                                  kDllCalQueueTxNmt);
     if(ret != kEplSuccessful)
     {
-        EPL_DBGLVL_ERROR_TRACE ("%s() TxNmt failed\n", __func__);
+        DEBUG_LVL_ERROR_TRACE ("%s() TxNmt failed\n", __func__);
         goto Exit;
     }
 
@@ -181,7 +181,7 @@ tEplKernel dllkcal_init(void)
                                                  kDllCalQueueTxGen);
     if(ret != kEplSuccessful)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() TxGen failed\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() TxGen failed\n", __func__);
         goto Exit;
     }
 
@@ -190,7 +190,7 @@ tEplKernel dllkcal_init(void)
                                                   kDllCalQueueTxSync);
     if(ret != kEplSuccessful)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() TxSync failed\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() TxSync failed\n", __func__);
         goto Exit;
     }
 #endif
@@ -200,7 +200,7 @@ tEplKernel dllkcal_init(void)
             &instance_l.pQueueCnRequestNmt);
     if(circErr != kCircBufOk)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() Allocate CIRCBUF_ASYNC_SCHED_NMT failed\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() Allocate CIRCBUF_ASYNC_SCHED_NMT failed\n", __func__);
         goto Exit;
     }
 
@@ -208,7 +208,7 @@ tEplKernel dllkcal_init(void)
             &instance_l.pQueueCnRequestGen);
     if(circErr != kCircBufOk)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() Allocate CIRCBUF_ASYNC_SCHED_GEN failed\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() Allocate CIRCBUF_ASYNC_SCHED_GEN failed\n", __func__);
         goto Exit;
     }
 
@@ -216,7 +216,7 @@ tEplKernel dllkcal_init(void)
             &instance_l.pQueueIdentReq);
     if(circErr != kCircBufOk)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() Allocate CIRCBUF_DLLCAL_CN_REQ_IDENT failed\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() Allocate CIRCBUF_DLLCAL_CN_REQ_IDENT failed\n", __func__);
         goto Exit;
     }
 
@@ -224,7 +224,7 @@ tEplKernel dllkcal_init(void)
             &instance_l.pQueueStatusReq);
     if(circErr != kCircBufOk)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() Allocate CIRCBUF_DLLCAL_CN_REQ_STATUS failed\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() Allocate CIRCBUF_DLLCAL_CN_REQ_STATUS failed\n", __func__);
         goto Exit;
     }
 #endif

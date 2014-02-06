@@ -200,12 +200,12 @@ static  int __init powerlinkInit (void)
 {
     int  err;
 
-    EPL_DBGLVL_ALWAYS_TRACE("PLK: powerlinkInit()  Driver build: %s / %s\n", __DATE__, __TIME__);
+    DEBUG_LVL_ALWAYS_TRACE("PLK: powerlinkInit()  Driver build: %s / %s\n", __DATE__, __TIME__);
     plkDev_g = 0;
     atomic_set(&openCount_g, 0);
 
     if ((err = alloc_chrdev_region(&plkDev_g, plkMinor_g, plkNrDevs_g, PLK_DRV_NAME)) < 0) {
-        EPL_DBGLVL_ERROR_TRACE ("PLK: Failing allocating major number\n");
+        DEBUG_LVL_ERROR_TRACE ("PLK: Failing allocating major number\n");
         return err;
     }
 
@@ -213,13 +213,13 @@ static  int __init powerlinkInit (void)
     TRACE("Allocated major number: %d\n", plkMajor_g);
 
     if ((plkClass_g = class_create(THIS_MODULE, PLK_DRV_NAME)) == NULL) {
-        EPL_DBGLVL_ERROR_TRACE("class_create() failed!\n");
+        DEBUG_LVL_ERROR_TRACE("class_create() failed!\n");
         unregister_chrdev_region(plkDev_g, plkNrDevs_g);
         return -1;
     }
 
     if (device_create(plkClass_g, NULL, plkDev_g, NULL, PLK_DRV_NAME) == NULL) {
-        EPL_DBGLVL_ERROR_TRACE("device_create() failed!\n");
+        DEBUG_LVL_ERROR_TRACE("device_create() failed!\n");
         class_destroy(plkClass_g);
         unregister_chrdev_region(plkDev_g, plkNrDevs_g);
         return -1;
@@ -227,7 +227,7 @@ static  int __init powerlinkInit (void)
 
     cdev_init(&plkCdev_g, &powerlinkFileOps_g);
     if ((err = cdev_add(&plkCdev_g, plkDev_g, 1)) == -1) {
-        EPL_DBGLVL_ERROR_TRACE("cdev_add() failed!\n");
+        DEBUG_LVL_ERROR_TRACE("cdev_add() failed!\n");
         device_destroy(plkClass_g, plkDev_g);
         class_destroy(plkClass_g);
         unregister_chrdev_region(plkDev_g, plkNrDevs_g);
@@ -248,14 +248,14 @@ The function implements openPOWERLINK kernel module exit function.
 //------------------------------------------------------------------------------
 static void  __exit  powerlinkExit (void)
 {
-    EPL_DBGLVL_ALWAYS_TRACE("PLK: powerlinkExit...\n");
+    DEBUG_LVL_ALWAYS_TRACE("PLK: powerlinkExit...\n");
 
     cdev_del(&plkCdev_g);
     device_destroy(plkClass_g, plkDev_g);
     class_destroy(plkClass_g);
     unregister_chrdev_region(plkDev_g, plkNrDevs_g);
 
-    EPL_DBGLVL_ALWAYS_TRACE("PLK: Driver '%s' removed.\n", PLK_DRV_NAME);
+    DEBUG_LVL_ALWAYS_TRACE("PLK: Driver '%s' removed.\n", PLK_DRV_NAME);
 }
 
 //------------------------------------------------------------------------------
@@ -269,7 +269,7 @@ The function implements openPOWERLINK kernel module open function.
 //------------------------------------------------------------------------------
 static int powerlinkOpen(struct inode* pDeviceFile_p, struct file* pInstance_p)
 {
-    EPL_DBGLVL_ALWAYS_TRACE("PLK: + powerlinkOpen...\n");
+    DEBUG_LVL_ALWAYS_TRACE("PLK: + powerlinkOpen...\n");
 
     if (atomic_inc_return(&openCount_g) > 1)
     {
@@ -286,7 +286,7 @@ static int powerlinkOpen(struct inode* pDeviceFile_p, struct file* pInstance_p)
 
     startHeartbeatTimer(20);
 
-    EPL_DBGLVL_ALWAYS_TRACE("PLK: + powerlinkOpen - OK\n");
+    DEBUG_LVL_ALWAYS_TRACE("PLK: + powerlinkOpen - OK\n");
 
     return 0;
 }
@@ -302,12 +302,12 @@ The function implements openPOWERLINK kernel module close function.
 //------------------------------------------------------------------------------
 static int  powerlinkRelease (struct inode* pDeviceFile_p, struct file* pInstance_p)
 {
-    EPL_DBGLVL_ALWAYS_TRACE("PLK: + powerlinkRelease...\n");
+    DEBUG_LVL_ALWAYS_TRACE("PLK: + powerlinkRelease...\n");
 
     stopHeartbeatTimer();
     ctrlk_exit();
     atomic_dec(&openCount_g);
-    EPL_DBGLVL_ALWAYS_TRACE("PLK: + powerlinkRelease - OK\n");
+    DEBUG_LVL_ALWAYS_TRACE("PLK: + powerlinkRelease - OK\n");
     return 0;
 }
 
@@ -325,10 +325,10 @@ static ssize_t  powerlinkRead(struct file* pInstance_p, char* pDstBuff_p,
 {
     int  ret;
 
-    EPL_DBGLVL_ALWAYS_TRACE("PLK: + powerlinkRead...\n");
-    EPL_DBGLVL_ALWAYS_TRACE("PLK:   Sorry, this operation isn't supported.\n");
+    DEBUG_LVL_ALWAYS_TRACE("PLK: + powerlinkRead...\n");
+    DEBUG_LVL_ALWAYS_TRACE("PLK:   Sorry, this operation isn't supported.\n");
     ret = -EINVAL;
-    EPL_DBGLVL_ALWAYS_TRACE("PLK: - powerlinkRead (iRet=%d)\n", ret);
+    DEBUG_LVL_ALWAYS_TRACE("PLK: - powerlinkRead (iRet=%d)\n", ret);
     return ret;
 
 }
@@ -348,10 +348,10 @@ static ssize_t  powerlinkWrite(struct file* pInstance_p, const char* pSrcBuff_p,
 {
     int  ret;
 
-    EPL_DBGLVL_ALWAYS_TRACE("PLK: + powerlinkWrite...\n");
-    EPL_DBGLVL_ALWAYS_TRACE("PLK:   Sorry, this operation isn't supported.\n");
+    DEBUG_LVL_ALWAYS_TRACE("PLK: + powerlinkWrite...\n");
+    DEBUG_LVL_ALWAYS_TRACE("PLK:   Sorry, this operation isn't supported.\n");
     ret = -EINVAL;
-    EPL_DBGLVL_ALWAYS_TRACE("PLK: - powerlinkWrite (iRet=%d)\n", ret);
+    DEBUG_LVL_ALWAYS_TRACE("PLK: - powerlinkWrite (iRet=%d)\n", ret);
     return ret;
 }
 
@@ -375,7 +375,7 @@ static int  powerlinkIoctl (struct inode* dev, struct file* filp,
     int             ret;
     tEplKernel      oplRet;
 
-    //EPL_DBGLVL_ALWAYS_TRACE("PLK: + powerlinkIoctl (cmd=%d type=%d)...\n", _IOC_NR(cmd), _IOC_TYPE(cmd));
+    //DEBUG_LVL_ALWAYS_TRACE("PLK: + powerlinkIoctl (cmd=%d type=%d)...\n", _IOC_NR(cmd), _IOC_TYPE(cmd));
     ret = -EINVAL;
 
     // Add some checks for valid commands here
@@ -430,7 +430,7 @@ static int  powerlinkIoctl (struct inode* dev, struct file* filp,
             break;
 
         default:
-            EPL_DBGLVL_ERROR_TRACE ("PLK: - Invalid cmd (cmd=%d type=%d)\n", _IOC_NR(cmd), _IOC_TYPE(cmd));
+            DEBUG_LVL_ERROR_TRACE ("PLK: - Invalid cmd (cmd=%d type=%d)\n", _IOC_NR(cmd), _IOC_TYPE(cmd));
             ret = -ENOTTY;
             break;
     }
@@ -453,7 +453,7 @@ static int powerlinkMmap(struct file *filp, struct vm_area_struct *vma)
 {
     BYTE*       pPdoMem;
 
-    EPL_DBGLVL_ALWAYS_TRACE("%s() vma: vm_start:%lX vm_end:%lX vm_pgoff:%lX\n",
+    DEBUG_LVL_ALWAYS_TRACE("%s() vma: vm_start:%lX vm_end:%lX vm_pgoff:%lX\n",
           __func__, vma->vm_start, vma->vm_end, vma->vm_pgoff);
 
     vma->vm_flags |= VM_RESERVED;
@@ -461,14 +461,14 @@ static int powerlinkMmap(struct file *filp, struct vm_area_struct *vma)
 
     if ((pPdoMem = pdokcal_getPdoMemRegion()) == NULL)
     {
-        EPL_DBGLVL_ERROR_TRACE ("%s() no pdo memory allocated!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE ("%s() no pdo memory allocated!\n", __func__);
         return -ENOMEM;
     }
 
     if (remap_pfn_range(vma, vma->vm_start, (__pa(pPdoMem) >> PAGE_SHIFT),
                     vma->vm_end - vma->vm_start, vma->vm_page_prot))
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() remap_pfn_range failed\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() remap_pfn_range failed\n", __func__);
         return -EAGAIN;
     }
 
@@ -488,7 +488,7 @@ The function implements openPOWERLINK kernel module VMA open function.
 //------------------------------------------------------------------------------
 static void powerlinkVmaOpen(struct vm_area_struct *vma)
 {
-    EPL_DBGLVL_ALWAYS_TRACE("%s() vma: vm_start:%lX vm_end:%lX vm_pgoff:%lX\n",
+    DEBUG_LVL_ALWAYS_TRACE("%s() vma: vm_start:%lX vm_end:%lX vm_pgoff:%lX\n",
           __func__, vma->vm_start, vma->vm_end, vma->vm_pgoff);
 }
 
@@ -503,7 +503,7 @@ The function implements openPOWERLINK kernel module VMA close function.
 //------------------------------------------------------------------------------
 static void powerlinkVmaClose(struct vm_area_struct *vma)
 {
-    EPL_DBGLVL_ALWAYS_TRACE("%s() vma: vm_start:%lX vm_end:%lX vm_pgoff:%lX\n",
+    DEBUG_LVL_ALWAYS_TRACE("%s() vma: vm_start:%lX vm_end:%lX vm_pgoff:%lX\n",
           __func__, vma->vm_start, vma->vm_end, vma->vm_pgoff);
 }
 

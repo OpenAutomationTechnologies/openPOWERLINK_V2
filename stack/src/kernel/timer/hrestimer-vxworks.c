@@ -258,7 +258,7 @@ tEplKernel PUBLIC hrestimer_modifyTimer(tEplTimerHdl*     pTimerHdl_p,
     // check pointer to handle
     if(pTimerHdl_p == NULL)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() Invalid timer handle\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() Invalid timer handle\n", __func__);
         Ret = kEplTimerInvalidHandle;
         goto Exit;
     }
@@ -276,7 +276,7 @@ tEplKernel PUBLIC hrestimer_modifyTimer(tEplTimerHdl*     pTimerHdl_p,
         }
         if (uiIndex >= TIMER_COUNT)
         {   // no free structure found
-            EPL_DBGLVL_ERROR_TRACE("%s() Invalid timer index:%d\n", __func__,
+            DEBUG_LVL_ERROR_TRACE("%s() Invalid timer index:%d\n", __func__,
                                     uiIndex);
             Ret = kEplTimerNoTimerCreated;
             goto Exit;
@@ -289,7 +289,7 @@ tEplKernel PUBLIC hrestimer_modifyTimer(tEplTimerHdl*     pTimerHdl_p,
         uiIndex = HDL_TO_IDX(*pTimerHdl_p);
         if (uiIndex >= TIMER_COUNT)
         {   // invalid handle
-            EPL_DBGLVL_ERROR_TRACE("%s() Invalid timer index:%d\n", __func__,
+            DEBUG_LVL_ERROR_TRACE("%s() Invalid timer index:%d\n", __func__,
                                     uiIndex);
             Ret = kEplTimerInvalidHandle;
             goto Exit;
@@ -354,9 +354,9 @@ tEplKernel PUBLIC hrestimer_modifyTimer(tEplTimerHdl*     pTimerHdl_p,
         RelTime.it_interval.tv_sec = 0;
     }
 #if 0
-    EPL_DBGLVL_TIMERH_TRACE("hrestimer_modifyTimer() timer=%lx ",
+    DEBUG_LVL_TIMERH_TRACE("hrestimer_modifyTimer() timer=%lx ",
             pTimerInfo->m_EventArg.m_TimerHdl);
-    EPL_DBGLVL_TIMERH_TRACE("        timeout=%ld:%ld/%ld:%ld\n",
+    DEBUG_LVL_TIMERH_TRACE("        timeout=%ld:%ld/%ld:%ld\n",
            RelTime.it_value.tv_sec, RelTime.it_value.tv_nsec,
            RelTime.it_interval.tv_sec, RelTime.it_interval.tv_nsec);
 #endif
@@ -386,7 +386,7 @@ tEplKernel PUBLIC hrestimer_deleteTimer(tEplTimerHdl* pTimerHdl_p)
     tEplTimerHighReskTimerInfo* pTimerInfo;
     struct itimerspec           RelTime;
 
-    EPL_DBGLVL_TIMERH_TRACE("%s() Deleting timer:%lx\n", __func__,
+    DEBUG_LVL_TIMERH_TRACE("%s() Deleting timer:%lx\n", __func__,
                              *pTimerHdl_p);
 
     // check pointer to handle

@@ -220,7 +220,7 @@ static tEplKernel addInstance(tDllCalQueueInstance *ppDllCalQueue_p,
 
     if(hifRet != kHostifSuccessful)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() Could not get buffer from host interface (%d)\n",
+        DEBUG_LVL_ERROR_TRACE("%s() Could not get buffer from host interface (%d)\n",
                 __func__, hifRet);
         ret = kEplNoResource;
         goto Exit;
@@ -234,7 +234,7 @@ static tEplKernel addInstance(tDllCalQueueInstance *ppDllCalQueue_p,
 
     if(lfqRet != kQueueSuccessful)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() Queue create failed (%d)\n",
+        DEBUG_LVL_ERROR_TRACE("%s() Queue create failed (%d)\n",
                 __func__, lfqRet);
         ret = kEplNoResource;
         goto Exit;
@@ -319,7 +319,7 @@ static tEplKernel insertDataBlock (tDllCalQueueInstance pDllCalQueue_p,
             break;
 
         default:
-            EPL_DBGLVL_ERROR_TRACE("%s() Insert queue failed (0x%X)\n", __func__, lfqRet);
+            DEBUG_LVL_ERROR_TRACE("%s() Insert queue failed (0x%X)\n", __func__, lfqRet);
             ret = kEplNoResource;
             break;
     }
@@ -368,7 +368,7 @@ static tEplKernel getDataBlock (tDllCalQueueInstance pDllCalQueue_p,
         }
         else
         {
-            EPL_DBGLVL_ERROR_TRACE("%s() Extract queue failed (0x%X)\n", __func__, lfqRet);
+            DEBUG_LVL_ERROR_TRACE("%s() Extract queue failed (0x%X)\n", __func__, lfqRet);
             ret = kEplNoResource;
         }
 
@@ -415,7 +415,7 @@ static tEplKernel getDataBlockCount(tDllCalQueueInstance pDllCalQueue_p,
 
     if(lfqRet != kQueueSuccessful)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() Getting queue count failed (0x%X)\n", __func__, lfqRet);
+        DEBUG_LVL_ERROR_TRACE("%s() Getting queue count failed (0x%X)\n", __func__, lfqRet);
         ret = kEplNoResource;
     }
 
@@ -455,7 +455,7 @@ static tEplKernel resetDataBlockQueue(tDllCalQueueInstance pDllCalQueue_p,
     lfqRet = lfq_reset(pDllCalInstance->pQueueInstance);
     if(lfqRet != kQueueSuccessful)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() Resetting queue failed (0x%X)\n", __func__, lfqRet);
+        DEBUG_LVL_ERROR_TRACE("%s() Resetting queue failed (0x%X)\n", __func__, lfqRet);
         ret = kEplNoResource;
     }
 

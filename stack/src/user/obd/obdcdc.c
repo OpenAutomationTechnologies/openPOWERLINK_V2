@@ -412,11 +412,11 @@ static tEplKernel processCdc(tObdCdcInfo* pCdcInfo_p)
         objectSubIndex = ami_getUint8Le(&pCdcInfo_p->pCurBuffer[EPL_CDC_OFFSET_SUBINDEX]);
         curDataSize = (size_t)ami_getUint32Le(&pCdcInfo_p->pCurBuffer[EPL_CDC_OFFSET_SIZE]);
 
-        EPL_DBGLVL_OBD_TRACE("%s: Reading object 0x%04X/%u with size %u from CDC\n",
+        DEBUG_LVL_OBD_TRACE("%s: Reading object 0x%04X/%u with size %u from CDC\n",
                              __func__, objectIndex, objectSubIndex, curDataSize);
         if ((ret = loadNextBuffer(pCdcInfo_p, curDataSize)) != kEplSuccessful)
         {
-            EPL_DBGLVL_OBD_TRACE("%s: Reading the corresponding data from CDC failed with 0x%02X\n", __func__, ret);
+            DEBUG_LVL_OBD_TRACE("%s: Reading the corresponding data from CDC failed with 0x%02X\n", __func__, ret);
             return ret;
         }
 
@@ -429,7 +429,7 @@ static tEplKernel processCdc(tObdCdcInfo* pCdcInfo_p)
             obdError.m_uiIndex = objectIndex;
             obdError.m_uiSubIndex = objectSubIndex;
 
-            EPL_DBGLVL_OBD_TRACE("%s: Writing object 0x%04X/%u to local OBD failed with 0x%02X\n",
+            DEBUG_LVL_OBD_TRACE("%s: Writing object 0x%04X/%u to local OBD failed with 0x%02X\n",
                                  __func__, objectIndex, objectSubIndex, ret);
             ret = eventu_postError(kEplEventSourceObdu, ret, sizeof(tEplEventObdError), &obdError);
             if (ret != kEplSuccessful)

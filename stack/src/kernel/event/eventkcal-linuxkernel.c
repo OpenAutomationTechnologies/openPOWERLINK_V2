@@ -429,7 +429,7 @@ int eventkcal_getEventForUser(unsigned long arg)
         error = eventkcal_getEventCircbuf(kEventQueueK2U, instance_l.aK2URxBuffer, &readSize);
         if(error != kEplSuccessful)
         {
-            EPL_DBGLVL_ERROR_TRACE ("%s() Error reading K2U events %d!\n", __func__, error);
+            DEBUG_LVL_ERROR_TRACE ("%s() Error reading K2U events %d!\n", __func__, error);
             return -EIO;
         }
 
@@ -449,7 +449,7 @@ int eventkcal_getEventForUser(unsigned long arg)
             error = eventkcal_getEventCircbuf(kEventQueueUInt, instance_l.aUintRxBuffer, &readSize);
             if(error != kEplSuccessful)
             {
-                EPL_DBGLVL_ERROR_TRACE ("%s() Error reading UINT events %d!\n", __func__, error);
+                DEBUG_LVL_ERROR_TRACE ("%s() Error reading UINT events %d!\n", __func__, error);
                 return -EIO;
             }
 

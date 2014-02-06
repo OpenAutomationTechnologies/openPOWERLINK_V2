@@ -112,7 +112,7 @@ tEplKernel ctrlcal_init(UINT size_p)
 
     if ((fd_l = shm_open(CTRL_SHM_NAME, O_RDWR | O_CREAT, 0)) < 0)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() shm_open failed!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() shm_open failed!\n", __func__);
         return kEplNoResource;
     }
 
@@ -126,7 +126,7 @@ tEplKernel ctrlcal_init(UINT size_p)
     {
         if (ftruncate(fd_l, size_p) == -1)
         {
-            EPL_DBGLVL_ERROR_TRACE("%s() ftruncate failed!\n", __func__);
+            DEBUG_LVL_ERROR_TRACE("%s() ftruncate failed!\n", __func__);
             close (fd_l);
             shm_unlink(CTRL_SHM_NAME);
             return kEplNoResource;
@@ -137,7 +137,7 @@ tEplKernel ctrlcal_init(UINT size_p)
     pCtrlMem_l = mmap(NULL, size_p, PROT_READ | PROT_WRITE, MAP_SHARED, fd_l, 0);
     if (pCtrlMem_l == MAP_FAILED)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() mmap header failed!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() mmap header failed!\n", __func__);
         close (fd_l);
         if (fCreator_l)
             shm_unlink(CTRL_SHM_NAME);
@@ -197,7 +197,7 @@ void ctrlcal_writeData(UINT offset_p, void* pSrc_p, size_t length_p)
 {
     if (pCtrlMem_l == NULL)
     {
-        EPL_DBGLVL_ERROR_TRACE ("%s() instance == NULL!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE ("%s() instance == NULL!\n", __func__);
         return;
     }
     EPL_MEMCPY(pCtrlMem_l + offset_p, pSrc_p, length_p);
@@ -222,7 +222,7 @@ tEplKernel ctrlcal_readData(void* pDest_p, UINT offset_p, size_t length_p)
 {
     if (pCtrlMem_l == NULL)
     {
-        EPL_DBGLVL_ERROR_TRACE ("%s() pCtrlMem_l == NULL!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE ("%s() pCtrlMem_l == NULL!\n", __func__);
         return kEplGeneralError;
     }
 

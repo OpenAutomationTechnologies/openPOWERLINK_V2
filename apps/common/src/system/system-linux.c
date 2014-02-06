@@ -121,12 +121,12 @@ int initSystem(void)
     /* adjust process priority */
     if (nice (-20) == -1)         // push nice level in case we have no RTPreempt
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() couldn't set nice value! (%s)\n", __func__, strerror(errno));
+        DEBUG_LVL_ERROR_TRACE("%s() couldn't set nice value! (%s)\n", __func__, strerror(errno));
     }
     schedParam.__sched_priority = MAIN_THREAD_PRIORITY;
     if (pthread_setschedparam(pthread_self(), SCHED_RR, &schedParam) != 0)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() couldn't set thread scheduling parameters! %d\n",
+        DEBUG_LVL_ERROR_TRACE("%s() couldn't set thread scheduling parameters! %d\n",
                 __func__, schedParam.__sched_priority);
     }
 

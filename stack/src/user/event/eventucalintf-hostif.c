@@ -154,7 +154,7 @@ tEplKernel eventucal_initQueueHostif(tEventQueue eventQueue_p)
 
     if(hifRet != kHostifSuccessful)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() Could not get buffer from host interface (%d)\n",
+        DEBUG_LVL_ERROR_TRACE("%s() Could not get buffer from host interface (%d)\n",
                 __func__, hifRet);
         return kEplNoResource;
     }
@@ -167,7 +167,7 @@ tEplKernel eventucal_initQueueHostif(tEventQueue eventQueue_p)
 
     if(lfqRet != kQueueSuccessful)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() Queue create failed (%d)\n",
+        DEBUG_LVL_ERROR_TRACE("%s() Queue create failed (%d)\n",
                 __func__, lfqRet);
         return kEplNoResource;
     }

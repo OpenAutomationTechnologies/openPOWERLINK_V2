@@ -132,7 +132,7 @@ tEplKernel errhnducal_init (tErrHndObjects *pLocalObjects_p)
 
     if(span < sizeof(tErrHndObjects))
     {
-        EPL_DBGLVL_ERROR_TRACE("%s: Error Handler Object Buffer too small\n",
+        DEBUG_LVL_ERROR_TRACE("%s: Error Handler Object Buffer too small\n",
                 __func__);
         Ret = kEplNoResource;
         goto Exit;

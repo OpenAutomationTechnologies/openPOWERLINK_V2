@@ -261,7 +261,7 @@ tEplKernel nmtu_processEvent(tEplEvent* pEvent_p)
             {   // application wants to change NMT state itself, it's OK
                 ret = kEplSuccessful;
             }
-            EPL_DBGLVL_NMTU_TRACE("EplNmtuProcessEvent(): NMT-State-Maschine announce change of NMT State\n");
+            DEBUG_LVL_NMTU_TRACE("EplNmtuProcessEvent(): NMT-State-Maschine announce change of NMT State\n");
             break;
 
         default:

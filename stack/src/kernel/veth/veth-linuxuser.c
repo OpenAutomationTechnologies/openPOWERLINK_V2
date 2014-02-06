@@ -142,7 +142,7 @@ tEplKernel veth_addInstance(const UINT8 aSrcMac_p[6])
 
     if((vethInstance_l.fd = open(TUN_DEV_NAME, O_RDWR)) < 0 )
     {
-        EPL_DBGLVL_VETH_TRACE("Error opening %s\n", TUN_DEV_NAME);
+        DEBUG_LVL_VETH_TRACE("Error opening %s\n", TUN_DEV_NAME);
         return kEplNoFreeInstance;
     }
 
@@ -152,7 +152,7 @@ tEplKernel veth_addInstance(const UINT8 aSrcMac_p[6])
 
     if ((err = ioctl(vethInstance_l.fd, TUNSETIFF, (void *)&ifr)) < 0)
     {
-        EPL_DBGLVL_VETH_TRACE("Error setting TUN IFF options\n");
+        DEBUG_LVL_VETH_TRACE("Error setting TUN IFF options\n");
         close(vethInstance_l.fd);
         return err;
     }
@@ -218,7 +218,7 @@ static void getMacAdrs(UINT8* pMac_p)
     sock = socket(AF_INET, SOCK_DGRAM, 0);
     if (sock < 0)
     {
-        EPL_DBGLVL_VETH_TRACE("%s: Cannot open udp socket for MAC reading: %s\n",
+        DEBUG_LVL_VETH_TRACE("%s: Cannot open udp socket for MAC reading: %s\n",
                               strerror(errno));
         return;
     }
@@ -228,10 +228,10 @@ static void getMacAdrs(UINT8* pMac_p)
 
     if (ioctl(sock, SIOCGIFHWADDR, &ifr) < 0)
     {
-        EPL_DBGLVL_VETH_TRACE("Cannot get MAC adress: '%s' (%d)\n", strerror(errno), errno);
+        DEBUG_LVL_VETH_TRACE("Cannot get MAC adress: '%s' (%d)\n", strerror(errno), errno);
     }
 
-    EPL_DBGLVL_VETH_TRACE ("Get Mac addr %02x:%02x:%02x:%02x:%02x:%02x\n",
+    DEBUG_LVL_VETH_TRACE ("Get Mac addr %02x:%02x:%02x:%02x:%02x:%02x\n",
            ifr.ifr_hwaddr.sa_data[0], ifr.ifr_hwaddr.sa_data[1],
            ifr.ifr_hwaddr.sa_data[2], ifr.ifr_hwaddr.sa_data[3],
            ifr.ifr_hwaddr.sa_data[4], ifr.ifr_hwaddr.sa_data[5]);
@@ -266,7 +266,7 @@ static tEplKernel veth_receiveFrame(tFrameInfo * pFrameInfo_p)
     nwrite = write(vethInstance_l.fd, pFrameInfo_p->pFrame, pFrameInfo_p->frameSize);
     if (nwrite != pFrameInfo_p->frameSize)
     {
-        EPL_DBGLVL_VETH_TRACE("Error writing data to virtual Ethernet interface!\n");
+        DEBUG_LVL_VETH_TRACE("Error writing data to virtual Ethernet interface!\n");
     }
     return kEplSuccessful;
 }
@@ -306,19 +306,19 @@ static void* vethRecvThread(void* pArg_p)
         switch(result)
         {
             case 0:     // timeout
-                //EPL_DBGLVL_VETH_TRACE ("select timeout\n");
+                //DEBUG_LVL_VETH_TRACE ("select timeout\n");
                 break;
             case -1:    // error
-                EPL_DBGLVL_VETH_TRACE ("select error: %s\n", strerror(errno));
+                DEBUG_LVL_VETH_TRACE ("select error: %s\n", strerror(errno));
                 break;
             default:    // data from tun/tap ready for read
                 nread = read(pInstance->fd, buffer, ETHERMTU);
                 if (nread > 0)
                 {
-                    EPL_DBGLVL_VETH_TRACE("VETH:Read %d bytes from the tap interface\n", nread);
-                    EPL_DBGLVL_VETH_TRACE("SRC MAC: %02X:%02X:%02x:%02X:%02X:%02x\n",
+                    DEBUG_LVL_VETH_TRACE("VETH:Read %d bytes from the tap interface\n", nread);
+                    DEBUG_LVL_VETH_TRACE("SRC MAC: %02X:%02X:%02x:%02X:%02X:%02x\n",
                                           buffer[6], buffer[7], buffer[8], buffer[9], buffer[10], buffer[11]);
-                    EPL_DBGLVL_VETH_TRACE("DST MAC: %02X:%02X:%02x:%02X:%02X:%02x\n",
+                    DEBUG_LVL_VETH_TRACE("DST MAC: %02X:%02X:%02x:%02X:%02X:%02x\n",
                                           buffer[0], buffer[1], buffer[2], buffer[3], buffer[4], buffer[5]);
                     // replace src MAC address with MAC address of virtual ethernet interface
                     memcpy (&buffer[6], pInstance->macAdrs, ETHER_ADDR_LEN);
@@ -328,7 +328,7 @@ static void* vethRecvThread(void* pArg_p)
                     ret = dllkcal_sendAsyncFrame(&frameInfo, kDllAsyncReqPrioGeneric);
                     if (ret != kEplSuccessful)
                     {
-                        EPL_DBGLVL_VETH_TRACE("veth_xmit: dllkcal_sendAsyncFrame returned 0x%02X\n", ret);
+                        DEBUG_LVL_VETH_TRACE("veth_xmit: dllkcal_sendAsyncFrame returned 0x%02X\n", ret);
                     }
                 }
                 break;

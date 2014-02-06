@@ -149,7 +149,7 @@ tEplKernel eventucal_init(void)
     schedParam.__sched_priority = USER_EVENT_THREAD_PRIORITY;
     if (pthread_setschedparam(instance_l.threadId, SCHED_FIFO, &schedParam) != 0)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s(): couldn't set thread scheduling parameters! %d\n",
+        DEBUG_LVL_ERROR_TRACE("%s(): couldn't set thread scheduling parameters! %d\n",
                __func__, schedParam.__sched_priority);
     }
 

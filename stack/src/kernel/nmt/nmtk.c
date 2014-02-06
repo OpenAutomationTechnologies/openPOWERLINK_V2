@@ -278,7 +278,7 @@ tEplKernel nmtk_process(tEplEvent* pEvent_p)
     {
         EPL_NMTK_DBG_POST_TRACE_VALUE(nmtEvent, nmtkStates_g[oldState].nmtState,
                                       nmtkStates_g[nmtkInstance_g.stateIndex].nmtState);
-        EPL_DBGLVL_NMTK_TRACE("EplNmtkProcess(NMT-event = 0x%04X): New NMT-State = 0x%03X\n",
+        DEBUG_LVL_NMTK_TRACE("EplNmtkProcess(NMT-event = 0x%04X): New NMT-State = 0x%03X\n",
                               nmtEvent, nmtkStates_g[nmtkInstance_g.stateIndex].nmtState);
 
         nmtStateChange.newNmtState = nmtkStates_g[nmtkInstance_g.stateIndex].nmtState;

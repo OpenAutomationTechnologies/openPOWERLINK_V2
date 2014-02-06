@@ -187,7 +187,7 @@ tEplKernel edrv_init(tEdrvInitParam* pEdrvInitParam_p)
         goto Exit;
     }
 
-    EPL_DBGLVL_EDRV_TRACE("%s() Using interface %s%d\n", __func__,
+    DEBUG_LVL_EDRV_TRACE("%s() Using interface %s%d\n", __func__,
                            pEdrvInitParam_p->hwParam.m_pszDevName,
                            pEdrvInitParam_p->hwParam.m_uiDevNumber);
     /* Binding to Mux Device */
@@ -225,7 +225,7 @@ tEplKernel edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     if ((edrvInstance_l.mutex =
                     semMCreate(SEM_Q_PRIORITY | SEM_INVERSION_SAFE)) == NULL)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() couldn't init mutex\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() couldn't init mutex\n", __func__);
         ret = kEplEdrvInitError;
         muxUnbind(edrvInstance_l.pCookie, MUX_PROTO_PROMISC,
                   (FUNCPTR)packetHandler);
@@ -235,7 +235,7 @@ tEplKernel edrv_init(tEdrvInitParam* pEdrvInitParam_p)
 
     if ((edrvInstance_l.syncSem = semBCreate(SEM_Q_FIFO, SEM_EMPTY)) == NULL)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() couldn't init semaphore\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() couldn't init semaphore\n", __func__);
         ret = kEplEdrvInitError;
         muxUnbind(edrvInstance_l.pCookie, MUX_PROTO_PROMISC,
                   (FUNCPTR)packetHandler);
@@ -246,7 +246,7 @@ tEplKernel edrv_init(tEdrvInitParam* pEdrvInitParam_p)
 
     if ((edrvInstance_l.txWakeupSem = semCCreate(SEM_Q_FIFO, 0)) == NULL)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() couldn't init semaphore\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() couldn't init semaphore\n", __func__);
         ret = kEplEdrvInitError;
         muxUnbind(edrvInstance_l.pCookie, MUX_PROTO_PROMISC,
                   (FUNCPTR)packetHandler);
@@ -267,7 +267,7 @@ tEplKernel edrv_init(tEdrvInitParam* pEdrvInitParam_p)
                                              0, 0, 0, 0, 0, 0, 0, 0, 0))
                                 == ERROR)
     {
-        EPL_DBGLVL_ERROR_TRACE ("%s() Couldn't create TX handler task!\n",
+        DEBUG_LVL_ERROR_TRACE ("%s() Couldn't create TX handler task!\n",
                                  __func__);
         muxUnbind(edrvInstance_l.pCookie, MUX_PROTO_PROMISC,
                   (FUNCPTR)packetHandler);
@@ -358,7 +358,7 @@ tEplKernel edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
     if ((pPacket = netTupleGet (edrvInstance_l.dataPoolId, EDRV_MAX_MTU,
                                 M_WAIT, MT_HEADER, TRUE)) == NULL)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() Couldn't get tuple!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() Couldn't get tuple!\n", __func__);
         goto Exit;
     }
     pPacket->mBlkHdr.reserved = htons(0x88ab);
@@ -367,7 +367,7 @@ tEplKernel edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
     /* send packet out */
     if ((muxRet = muxSend(edrvInstance_l.pCookie, pPacket)) != OK)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() muxSend returned %d\n", __func__, muxRet);
+        DEBUG_LVL_ERROR_TRACE("%s() muxSend returned %d\n", __func__, muxRet);
         /* as muxSend was not successful we still own the packet and have to
          * free it! */
         netMblkClChainFree(pPacket);
@@ -496,7 +496,7 @@ tEplKernel edrv_clearRxMulticastMacAddr(UINT8* pMacAddr_p)
 {
     if (muxMCastAddrDel(edrvInstance_l.pCookie, (char *)pMacAddr_p) != OK)
     {
-        EPL_DBGLVL_EDRV_TRACE("error clearing multicast addresses\n");
+        DEBUG_LVL_EDRV_TRACE("error clearing multicast addresses\n");
         return kEplEdrvInitError;
     }
     return kEplSuccessful;
@@ -519,7 +519,7 @@ tEplKernel edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p)
 {
     if (muxMCastAddrAdd(edrvInstance_l.pCookie, (char *)pMacAddr_p) != OK)
     {
-        EPL_DBGLVL_EDRV_TRACE("error adding multicast addresses\n");
+        DEBUG_LVL_EDRV_TRACE("error adding multicast addresses\n");
         return kEplEdrvInitError;
     }
     return kEplSuccessful;
@@ -585,7 +585,7 @@ static BOOL packetHandler(void* pCookie_p, LONG type_p, M_BLK_ID pPkt_p,
     }
     else
     {   // self generated traffic
-        EPL_DBGLVL_EDRV_TRACE ("%s() self generated traffic!\n", __func__);
+        DEBUG_LVL_EDRV_TRACE ("%s() self generated traffic!\n", __func__);
     }
     return TRUE;
 }
@@ -607,7 +607,7 @@ static STATUS muxShutdown(void* pCookie_p, void* pNetCallbackId_p)
     UNUSED_PARAMETER(pCookie_p);
     UNUSED_PARAMETER(pNetCallbackId_p);
 
-    EPL_DBGLVL_EDRV_TRACE("muxShutdown()\n");
+    DEBUG_LVL_EDRV_TRACE("muxShutdown()\n");
     return OK;
 }
 
@@ -628,7 +628,7 @@ static STATUS muxRestart(void* pEnd_p, void* pNetCallbackId_p)
     UNUSED_PARAMETER(pEnd_p);
     UNUSED_PARAMETER(pNetCallbackId_p);
 
-    EPL_DBGLVL_EDRV_TRACE("muxRestart()\n");
+    DEBUG_LVL_EDRV_TRACE("muxRestart()\n");
     return OK;
 }
 
@@ -649,7 +649,7 @@ static void muxError(END_OBJ* pEnd_p, END_ERR* pError_p, void* pNetCallbackId_p)
     UNUSED_PARAMETER(pError_p);
     UNUSED_PARAMETER(pNetCallbackId_p);
 
-    EPL_DBGLVL_EDRV_TRACE("muxError()\n");
+    DEBUG_LVL_EDRV_TRACE("muxError()\n");
 }
 
 //------------------------------------------------------------------------------

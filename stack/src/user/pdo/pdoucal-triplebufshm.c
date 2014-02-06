@@ -129,7 +129,7 @@ tEplKernel pdoucal_initPdoMem(tPdoChannelSetup* pPdoChannels_p, size_t rxPdoMemS
     {
         if (pdoucal_allocateMem(memSize_l, (BYTE**)&pPdoMem_l) != kEplSuccessful)
         {
-            EPL_DBGLVL_ERROR_TRACE ("%s() Allocating PDO memory failed!\n", __func__);
+            DEBUG_LVL_ERROR_TRACE ("%s() Allocating PDO memory failed!\n", __func__);
             pPdoMem_l = NULL;
             return kEplNoResource;
         }
@@ -164,7 +164,7 @@ void pdoucal_cleanupPdoMem(void)
     {
         if (pdoucal_freeMem((BYTE *)pPdoMem_l, memSize_l) != kEplSuccessful)
         {
-            EPL_DBGLVL_ERROR_TRACE ("%s() Unmapping shared PDO mem failed\n", __func__);
+            DEBUG_LVL_ERROR_TRACE ("%s() Unmapping shared PDO mem failed\n", __func__);
         }
     }
 }

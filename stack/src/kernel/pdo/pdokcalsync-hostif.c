@@ -106,7 +106,7 @@ tEplKernel pdokcal_initSync(void)
 
     if(pHifInstance_l == NULL)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s: Could not find hostif instance!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s: Could not find hostif instance!\n", __func__);
         return kEplNoResource;
     }
 
@@ -126,7 +126,7 @@ void pdokcal_exitSync(void)
 {
     if(pHifInstance_l == NULL)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s: Could not find hostif instance!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s: Could not find hostif instance!\n", __func__);
         return;
     }
 
@@ -166,7 +166,7 @@ tEplKernel pdokcal_controlSync(BOOL fEnable_p)
 {
     if(pHifInstance_l == NULL)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s: Could not find hostif instance!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s: Could not find hostif instance!\n", __func__);
         return kEplNoResource;
     }
 
@@ -194,7 +194,7 @@ static tEplKernel enableSyncIrq(BOOL fEnable_p)
 
     if(hifRet != kHostifSuccessful)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s irq not possible (%d)!\n",
+        DEBUG_LVL_ERROR_TRACE("%s irq not possible (%d)!\n",
                    fEnable_p ? "enable" : "disable", hifRet);
         return kEplNoResource;
     }

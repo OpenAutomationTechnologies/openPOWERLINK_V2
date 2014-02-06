@@ -129,7 +129,7 @@ tEplKernel ctrlk_init(void)
 
     if ((ret = ctrlkcal_init()) != kEplSuccessful)
     {
-        EPL_DBGLVL_ERROR_TRACE("ctrlkcal_init failed!\n");
+        DEBUG_LVL_ERROR_TRACE("ctrlkcal_init failed!\n");
         goto ExitCleanup;
     }
 
@@ -181,7 +181,7 @@ BOOL ctrlk_process(void)
 
     if (ctrlkcal_getCmd(&cmd) != kEplSuccessful)
     {
-        EPL_DBGLVL_ERROR_TRACE ("%s: error getting command!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE ("%s: error getting command!\n", __func__);
         return FALSE;
     }
 
@@ -200,7 +200,7 @@ BOOL ctrlk_process(void)
     ret = ctrlkcal_process();
     if(ret != kEplSuccessful)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s: CAL process returned with 0x%X\n", __func__, ret);
+        DEBUG_LVL_ERROR_TRACE("%s: CAL process returned with 0x%X\n", __func__, ret);
         fExit = TRUE;
     }
 

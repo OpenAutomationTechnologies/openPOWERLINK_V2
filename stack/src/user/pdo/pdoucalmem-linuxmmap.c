@@ -156,7 +156,7 @@ tEplKernel pdoucal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
                      fd_l, 0);
     if (*ppPdoMem_p == MAP_FAILED)
     {
-        EPL_DBGLVL_ERROR_TRACE ("%s() mmap failed!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE ("%s() mmap failed!\n", __func__);
         *ppPdoMem_p = NULL;
         return kEplNoResource;
     }
@@ -182,7 +182,7 @@ tEplKernel pdoucal_freeMem(BYTE* pMem_p, size_t memSize_p)
 {
     if(munmap(pMem_p, memSize_p) != 0)
     {
-        EPL_DBGLVL_ERROR_TRACE ("%s() munmap failed (%s)\n", __func__, strerror(errno));
+        DEBUG_LVL_ERROR_TRACE ("%s() munmap failed (%s)\n", __func__, strerror(errno));
         return kEplGeneralError;
     }
     return kEplSuccessful;

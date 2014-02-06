@@ -156,14 +156,14 @@ tEplKernel timeru_addInstance(void)
 
     if (pthread_mutex_init(&timeruInstance_g.mutex, NULL) != 0)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() couldn't init mutex!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() couldn't init mutex!\n", __func__);
         return kEplNoResource;
     }
 
     if ((retVal = pthread_create(&timeruInstance_g.processThread, NULL,
                                  processThread,  &timeruInstance_g)) != 0)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() couldn't create timer thread! (%d)\n",
+        DEBUG_LVL_ERROR_TRACE("%s() couldn't create timer thread! (%d)\n",
                                 __func__, retVal);
         pthread_mutex_destroy(&timeruInstance_g.mutex);
         return kEplNoResource;
@@ -173,7 +173,7 @@ tEplKernel timeru_addInstance(void)
     if (pthread_setschedparam(timeruInstance_g.processThread, SCHED_RR,
                               &schedParam) != 0)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() couldn't set thread scheduling parameters!\n",
+        DEBUG_LVL_ERROR_TRACE("%s() couldn't set thread scheduling parameters!\n",
                                 __func__);
     }
 
@@ -197,11 +197,11 @@ tEplKernel timeru_delInstance(void)
 
     /* cancel thread */
     pthread_cancel(timeruInstance_g.processThread);
-    EPL_DBGLVL_TIMERU_TRACE("%s() Waiting for thread to exit...\n", __func__);
+    DEBUG_LVL_TIMERU_TRACE("%s() Waiting for thread to exit...\n", __func__);
 
     /* wait for thread to terminate */
     pthread_join(timeruInstance_g.processThread, NULL);
-    EPL_DBGLVL_TIMERU_TRACE("%s()Thread exited\n", __func__);
+    DEBUG_LVL_TIMERU_TRACE("%s()Thread exited\n", __func__);
 
     /* free up timer list */
     resetTimerList();
@@ -277,7 +277,7 @@ tEplKernel timeru_setTimer(tEplTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tEplTime
     sev.sigev_value.sival_ptr = &pData->timer;
     if (timer_create(CLOCK_MONOTONIC, &sev, &pData->timer) == -1)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() Error creating timer!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() Error creating timer!\n", __func__);
         EPL_FREE(pData);
         return kEplNoResource;
     }
@@ -293,7 +293,7 @@ tEplKernel timeru_setTimer(tEplTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tEplTime
         relTime.it_value.tv_nsec = timeInMs_p * 1000000;
     }
 
-    /*EPL_DBGLVL_TIMERU_TRACE("%s() Set timer: %p, timeInMs_p=%ld\n",
+    /*DEBUG_LVL_TIMERU_TRACE("%s() Set timer: %p, timeInMs_p=%ld\n",
                              __func__, (void *)pData, timeInMs_p); */
 
     relTime.it_interval.tv_sec = 0;
@@ -301,7 +301,7 @@ tEplKernel timeru_setTimer(tEplTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tEplTime
 
     if (timer_settime(pData->timer, 0, &relTime, &curTime) < 0)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() Error timer_settime!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() Error timer_settime!\n", __func__);
         return kEplTimerNoTimerCreated;
     }
 
@@ -351,14 +351,14 @@ tEplKernel timeru_modifyTimer(tEplTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tEplT
         relTime.it_value.tv_nsec = timeInMs_p * 1000000;
     }
 
-    /* EPL_DBGLVL_TIMERU_TRACE("%s() Modify timer:%08x timeInMs_p=%ld\n",
+    /* DEBUG_LVL_TIMERU_TRACE("%s() Modify timer:%08x timeInMs_p=%ld\n",
                              __func__, *pTimerHdl_p, timeInMs_p); */
 
     relTime.it_interval.tv_sec = 0;
     relTime.it_interval.tv_nsec = 0;
     if (timer_settime(pData->timer, 0, &relTime, &curTime) != 0)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() Error timer_settime!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() Error timer_settime!\n", __func__);
         return kEplTimerNoTimerCreated;
     }
 
@@ -475,7 +475,7 @@ static void* processThread(void *pArgument_p)
 
     UNUSED_PARAMETER(pArgument_p);
 
-    EPL_DBGLVL_TIMERU_TRACE("%s() ThreadId:%d\n", __func__, syscall(SYS_gettid));
+    DEBUG_LVL_TIMERU_TRACE("%s() ThreadId:%d\n", __func__, syscall(SYS_gettid));
 
     sigemptyset(&awaitedSignal);
     sigaddset(&awaitedSignal, SIGRTMIN);
@@ -492,7 +492,7 @@ static void* processThread(void *pArgument_p)
         }
     }
 
-    EPL_DBGLVL_TIMERU_TRACE("%s() Exiting!\n", __func__);
+    DEBUG_LVL_TIMERU_TRACE("%s() Exiting!\n", __func__);
     return NULL;
 }
 
