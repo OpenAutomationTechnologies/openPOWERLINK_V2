@@ -1557,8 +1557,8 @@ static tOplkError cbCfmEventCnResult(UINT nodeId_p, tNmtNodeCommand nodeCommand_
     tOplkError              ret;
     tOplkApiEventArg         eventArg;
 
-    eventArg.m_CfmResult.m_uiNodeId = nodeId_p;
-    eventArg.m_CfmResult.m_NodeCommand = nodeCommand_p;
+    eventArg.m_CfmResult.nodeId = nodeId_p;
+    eventArg.m_CfmResult.nodeCommand = nodeCommand_p;
     ret = ctrlu_callUserEventCallback(kOplkApiEventCfmResult, &eventArg);
     if (ret != kErrorOk)
     {
