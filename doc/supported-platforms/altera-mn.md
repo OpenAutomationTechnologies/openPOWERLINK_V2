@@ -5,12 +5,18 @@ openPOWERLINK MN on Altera Nios II {#page_platform_altera-mn}
 
 # Introduction {#sect_altera-mn_introduction}
 
-The Altera Nios II Managing Node uses the POWERLINK IP-Core,
-which consists of an optimized MAC for POWERLINK (openMAC) and
-a hub for daisy chaining several nodes.
-Additionally, the MN demos apply two separate processors named:
-- POWERLINK Communication Processor (Pcp)
-- Host Processor
+The POWERLINK MN on Altera FPGA implementation utilizes IP-Cores available in
+Altera Qsys and provided with the openPOWERLINK stack in the directory
+`hardware/ipcore`.
+
+The MN implementation uses the PCP (POWERLINK Communication Processor)
+and the host processor to execute the openPOWERLINK kernel and user layer.
+The soft-core processor Altera Nios II is instantiated as PCP and also as
+host processor.
+
+The Ethernet interface is built with the POWERLINK-optimized controller openMAC,
+which enables e.g. low SoC jitters. Additionally, a hub IP-Core is provided
+enabling daisy chained networks.
 
 The two processors are connected by the Host Interface IP-Core,
 which supports the following interface implementations:
@@ -19,20 +25,35 @@ which supports the following interface implementations:
 
 # Contents {#sect_altera-mn_contents}
 
-- FPGA designs with Nios II CPU, POWERLINK and Host Interface IP-Cores.
- - Pcp and Host in single FPGA
- - Pcp and Host in separate FPGAs
-- openCONFIGURATOR project for 10 CNs
+The following MN FPGA designs are available for the TERASIC DE2-115 INK board:
+- PCP and host design within a single FPGA (driver and application): \n
+    `hardware/boards/terasic-de2-115/mn-dual-hostif-gpio`
+- PCP design with parallel host interface (driver instance): \n
+    `hardware/boards/terasic-de2-115/mn-single-hostif-drv`
+- Host processor design with parallel host interface (application): \n
+    `hardware/boards/terasic-de2-115/mn-single-hostif-gpio`
+
+_Note that hardware designs can be ported easily to other platforms by reusing
+the Qsys subsystem instances in `hardware/ipcore/altera/qsys/mn_[pcp|host]`!_
+
+The software projects for the PCP and the host processor are split into
+`drivers` and `apps`:
+- PCP driver daemon: \n
+    `drivers/altera-nios2/drv_daemon`
+- Host "demo_mn_embedded": \n
+    `apps/demo_mn_embedded/build/altera-nios2`
 
 # Requirements {#sect_altera-mn_requirements}
 
 - Altera Quartus II v13.0 SP1 (Web Edition is also possible)
   - <https://www.altera.com/download/archives/arc-index.jsp>
   - <ftp://ftp.altera.com/outgoing/release/>
-- Experiences with this development environment is required.
+- Experience with this development environment is required.
 - Development Board TERASIC_DE2-115 (INK Board)
-- Optional: Second development Board TERASIC_DE2-115 (INK Board) if you want to run the separate FPGA demo.
-- Optional: 40-line ribbon cable to connect two INK boards via JP5 (length as short as possible).
+- Optional: Second development Board TERASIC_DE2-115 (INK Board)
+  if you want to run the separate FPGA demo.
+- Optional: 40-line ribbon cable to connect two INK boards via JP5
+  (length as short as possible).
 
 # Hardware Setup {#sect_altera-mn_hardware}
 
@@ -53,50 +74,59 @@ which supports the following interface implementations:
 
 # How to build the binaries {#sect_altera-mn_build}
 
-The Altera Quartus II projects are located in `fpga/boards/altera/TERASIC_DE2-115.`\n
-The subdirectories starting with `mn_` refer to designs for POWERLINK MN demos:
-- The single FPGA demo can be found in `mn_dual_nios2`.
-- The external host interface demo is implemented in `mn_par_host` and `mn_par_pcp`.
+The Altera Quartus II projects are located in
+`hardware/boards/[EVALBOARD]/quartus.`\n
+The subdirectories starting with `mn-` refer to designs for POWERLINK MN demos.
 
-The Altera Qsys subsystems `mn_pcp` and `mn_host` are located in `fpga/ipcore/altera/qsys`.\n
+Steps 1-5 can be carried out by executing `$ make all` in a
+"Nios II Command Shell".
 
-Steps 1-5 can be carried out by calling `$ ./create-this-fpga` in a "Nios II Command Shell".
-
-1. Open the Quartus project file `ink_de2-115.qpf` with Altera Quartus II according to the demo you want to use.
+1. Open the Quartus project file `*.qpf` with Altera Quartus II according to the
+   demo you want to use.
 2. Open Qsys via menu *Tools* -> *Qsys*.
-3. Open the Qsys file (`*.qsys`) in the demo's directory, change to *Generation* page and press the button *Generate* to generate the Nios II system.
+3. Open the Qsys file (`*.qsys`) in the demo's directory, change to
+   *Generation* page
+   and press the button *Generate* to generate the Nios II system.
 4. Close Qsys when the generation has finished (shown as information output).
-5. Start the compilation in the Quartus II window via menu *Processing* -> *Start Compilation*.
+5. Start the compilation in the Quartus II window via menu *Processing* ->
+   *Start Compilation*.
 6. Open "Nios II Command Shell"
-7. There are two software designs available in the openPOWERLINK subdirectory \n
-   `drivers/altera_nios2/mn_pcp` (for the Pcp) and \n
-   `apps/arch/altera_nios2/no_os/gnu/demo_mn_embedded (for the host)`. \n
-   Change to each of the directories and open the create-this-app.settings file.
-   Make sure that the SOPC_DIR variable is set to the board design of your choice. \n
-   If you want to run the single FPGA solution set `SOPC_DIR=../../../../../fpga/boards/altera/TERASIC_DE2-115/mn_dual_nios2/` \n
-   If you want to run the two FPGA demo set `SOPC_DIR=../../../../../fpga/boards/altera/TERASIC_DE2-115/mn_par_pcp/` for the Pcp and \n
-   `SOPC_DIR=../../../../../../fpga/boards/altera/TERASIC_DE2-115/mn_dual_nios2/` for the host.
-8. Run script *create-this-app* in `mn_pcp` and `demo_mn_embedded` to create the Makefile for application and BSP. \n
-   `$ ./create-this-app`
-9. Run make to build the ELF file after changing the sources. (The script create-this-app will do this automatically) \n
+7. Use the software design available in the openPOWERLINK subdirectory \n
+   `apps/demo_mn_embedded/build/altera-nios2` and \n
+   `drivers/altera-nios2/drv_daemon`. \n
+8. Run the scripts *create-this-drv* or *create-this-app* respectively
+   to create the Makefile for the driver daemon and the application demo. \n
+   `$ ./create-this-app` or `$ ./create-this-drv` \n
+   Note: The script uses the TERASIC DE2-115 dual MN demo by default
+   (`hardware/boards/terasic-de2-115/mn-dual-hostif-gpio/board.settings`).
+   If you want to change to another board, use the `--board` option: \n
+   `$ ./create-this-app --board [PATH-TO-BOARD]` or
+   `$ ./create-this-drv --board [PATH-TO-BOARD]` \n
+9. Run make to build the ELF file after changing the sources.\n
    `$ make`
-10. Rebuild the Makefile for `mn_pcp` and `demo_mn_embedded` also, if the Nios II Design was changed inside Qsys. \n
-    `$ ./create-this-app --rebuild`
+10. Rebuild the Makefile also if the Nios II Design was changed inside Qsys. \n
+    `$ ./create-this-app --rebuild` or `$ ./create-this-drv --rebuild`
+11. If you want to debug the demo, use the `--debug` option. \n
+    `$ ./create-this-app --debug` or `$ ./create-this-drv --debug`
+12. The script's help message can be printed with `--help`. \n
+    `$ ./create-this-app --help` or `$ ./create-this-drv --help`
 
 # How to run the demo {#sect_altera-mn_run}
 
 1. Program SOF file with Quartus II Programmer into FPGA.
-   It is located in the following subdirectory of openPOWERLINK main directory: \n
-   `fpga/boards/altera/TERASIC_DE2-115/mn_dual_nios2/*.sof` \n
-   or
-   `fpga/boards/altera/TERASIC_DE2-115/mn_par_pcp/*.sof` \n
-   and
-   `fpga/boards/altera/TERASIC_DE2-115/mn_par_host/*.sof` \n
-   Note that the command `$ make download-bits` in the "Nios II Command Shell" downloads
-   the SOF also!
+   It is located in the following subdirectory of openPOWERLINK main
+   directory: \n
+   `hardware/boards/terasic-de2-115/mn-dual-hostif-gpio/quartus/*.sof` \n
+   or \n
+   `hardware/boards/terasic-de2-115/mn-single-hostif-drv/quartus/*.sof` and \n
+   `hardware/boards/terasic-de2-115/mn-single-hostif-gpio/quartus/*.sof` \n
+   Note that the command `$ make download-bits` in the "Nios II Command Shell"
+   downloads the SOF also!
 2. Download the ELF file to the target:
-   Always follow the sequence by downloading the Pcp ELF file first, afterwards the host ELF. \n
-   For the two FPGA demos enter in both directories in the "Nios II Command Shell" \n
+   Always follow the sequence by downloading the PCP ELF file first,
+   afterwards the host ELF. \n
+   For the two FPGA demos enter in both directories in the "Nios II Command
+   Shell" \n
    `$ make download-elf` \n
 3. Enjoy the running POWERLINK network.
 
@@ -106,20 +136,27 @@ Requirement: Steps in the previous section *How to build the binary* are complet
 
 1. Start the Nios II Software Build Tools for Eclipse
 2. Select menu *File -> Import...*
-3. Select the import source *Nios II Software Build Tools Project* -> *Import Nios II Software Build Tools Project*
-4. Browse to `apps/arch/altera_nios2/no_os/gnu/demo_mn_embedded` (via the button *Browse...*)
+3. Select the import source *Nios II Software Build Tools Project* ->
+   *Import Nios II Software Build Tools Project*
+4. Browse to `apps/demo_mn_embedded/build/altera-nios2` (via the button
+   *Browse...*)
 5. Set the project name to `demo_mn_embedded`.
 6. Press the button *Finish*.
-7. Repeat steps 2-6 with path `drivers/altera_nios2/mn_pcp` and project name `mn_pcp`.
+7. Repeat steps 2-6 with path `drivers/altera-nios2/drv_daemon` and project name
+   `drv_daemon`.
 
 # How to write the program to local flash {#sect_altera-mn_flash}
 
-Requirement: Steps in the previous section *How to build the binary* are completed.
+Requirement: Steps in the previous section *How to build the binary* are
+             completed.
 
-1. After successfully building the design use the makefile to program the flash:\n
+1. After successfully building the design use the makefile to program the
+   flash:\n
    `$ make program-epcs`
 
 # Troubleshooting {#sect_altera-mn_trouble}
 
-1. It is advised to clean all generated files after switching from one demo to the other.
-2. Always download the Pcp ELF file before the host ELF file.
+1. It is advised to clean all generated files after switching from one demo to
+   the other.
+2. Always download the PCP ELF file before the host ELF file.
+3. In case of separated FPGA demo, download the PCP's design bitstream first.
