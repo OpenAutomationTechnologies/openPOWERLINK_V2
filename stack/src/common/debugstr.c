@@ -44,6 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplk/oplkinc.h>
 #include <oplk/oplk.h>
 #include <oplk/nmt.h>
+#include <oplk/debugstr.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
