@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   EplCfg.h
+\file   oplkcfg.h
 
 \brief  Configuration options for openPOWERLINK MN library
 
@@ -37,8 +37,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_eplcfg_H_
-#define _INC_eplcfg_H_
+#ifndef _INC_oplkcfg_H_
+#define _INC_oplkcfg_H_
 
 //==============================================================================
 // generic defines which for whole EPL Stack
@@ -64,10 +64,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // These macros define all modules which are included
 #define CONFIG_INCLUDE_NMT_MN
 #define CONFIG_INCLUDE_PDO
-#define CONFIG_INCLUDE_SDOS
-#define CONFIG_INCLUDE_SDOC
-#define CONFIG_INCLUDE_SDO_ASND
-#define CONFIG_INCLUDE_SDO_UDP
 #define CONFIG_INCLUDE_VETH
 #define CONFIG_INCLUDE_CFM
 
@@ -116,41 +112,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS   FALSE
 
 //==============================================================================
-// OBD specific defines
-//==============================================================================
-
-// switch this define to TRUE if Epl should compare object range
-// automaticly
-#define CONFIG_OBD_CHECK_OBJECT_RANGE               FALSE
-
-// set this define to TRUE if there are strings or domains in OD, which
-// may be changed in object size and/or object data pointer by its object
-// callback function (called event kObdEvWrStringDomain)
-#define CONFIG_OBD_USE_STRING_DOMAIN_IN_RAM         TRUE
-
-#define CONFIG_OBD_USE_LOAD_CONCISEDCF              TRUE
-#define CONFIG_OBD_DEF_CONCISEDCF_FILENAME          "mnobd.cdc"
-#define EPL_CFM_CONFIGURE_CYCLE_LENGTH              TRUE
-
-// Configure if the range from 0xA000 is used for mapping client objects.
-// openCONFIGURATOR uses this range for mapping objects.
-#define CONFIG_OBD_INCLUDE_A000_TO_DEVICE_PART      TRUE
-
-//==============================================================================
 // Timer module specific defines
 //==============================================================================
 
 // if TRUE the high resolution timer module will be used (must always be TRUE!)
 #define EPL_TIMER_USE_HIGHRES                       TRUE
 
-//==============================================================================
-// SDO module specific defines
-//==============================================================================
-
-// increase the number of SDO channels, because we are master
-#define SDO_MAX_CONNECTION_ASND                     100
-#define MAX_SDO_SEQ_CON                             100
-#define MAX_SDO_COM_CON                             100
-#define SDO_MAX_CONNECTION_UDP                      50
-
-#endif // _INC_eplcfg_H_
+#endif // _INC_oplkcfg_H_

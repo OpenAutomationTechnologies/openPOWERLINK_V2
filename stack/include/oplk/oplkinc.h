@@ -45,7 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <oplk/targetsystem.h>
 
-#include "EplCfg.h"                 // Stack configuration file
+#include "oplkcfg.h"                 // Stack configuration file
 
 #include <oplk/oplkdefs.h>
 #include <oplk/errordefs.h>

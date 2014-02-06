@@ -1,11 +1,10 @@
 /**
 ********************************************************************************
-\file   EplCfg.h
+\file   oplkcfg.h
 
-\brief  Configuration options for openPOWERLINK MN library
+\brief  Configuration options for openPOWERLINK kernel module
 
-This file contains the configuration options for the openPOWERLINK MN libary
-on Linux.
+This file contains the configuration options for the openPOWERLINK kernel module
 
 *******************************************************************************/
 
@@ -37,8 +36,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_eplcfg_H_
-#define _INC_eplcfg_H_
+#ifndef _INC_oplkcfg_H_
+#define _INC_oplkcfg_H_
 
 //==============================================================================
 // generic defines which for whole EPL Stack
@@ -55,11 +54,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #undef FTRACE_DEBUG
-
-/* assure that system priorities of hrtimer and net-rx kernel threads are set appropriate */
-#define EPL_THREAD_PRIORITY_HIGH                    75
-#define EPL_THREAD_PRIORITY_MEDIUM                  50
-#define EPL_THREAD_PRIORITY_LOW                     49
 
 // These macros define all modules which are included
 #define CONFIG_INCLUDE_NMT_MN
@@ -118,4 +112,4 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // if TRUE the high resolution timer module will be used (must always be TRUE!)
 #define EPL_TIMER_USE_HIGHRES                       TRUE
 
-#endif // _INC_eplcfg_H_
+#endif // _INC_oplkcfg_H_

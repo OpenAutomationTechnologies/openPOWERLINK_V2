@@ -1,10 +1,11 @@
 /**
 ********************************************************************************
-\file   EplCfg.h
+\file   oplkcfg.h
 
 \brief  configuration file
 
 This header file configures the POWERLINK node.
+
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -35,8 +36,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
 
-#ifndef _INC_EPLCFG_H_
-#define _INC_EPLCFG_H_
+#ifndef _INC_oplkcfg_H_
+#define _INC_oplkcfg_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -63,12 +64,12 @@ The generic defines are valid for the whole openPOWERLINK stack.
 #define CONFIG_INCLUDE_SDOS
 #define CONFIG_INCLUDE_SDOC
 #define CONFIG_INCLUDE_SDO_ASND
+#define CONFIG_INCLUDE_LEDU
+#define CONFIG_INCLUDE_CFM
 
 #ifndef BENCHMARK_MODULES
 #define BENCHMARK_MODULES                   (0 \
-                                            | BENCHMARK_MOD_01 \
-                                            | BENCHMARK_MOD_02 \
-                                            | BENCHMARK_MOD_03 \
+                                            | BENCHMARK_MOD_32 \
                                             )
     ///< enable benchmark for specific stack modules
 #endif
@@ -87,30 +88,10 @@ The queue defines determine the stack's queues.
     ///< kernel-to-user queue implementation
 #define EPL_EVENT_U2K_QUEUE                 EPL_QUEUE_HOSTINTERFACE
     ///< user-to-kernel queue implementation
-#define EPL_EVENT_KINT_QUEUE                EPL_QUEUE_DIRECT
-    ///< kernel-internal queue implementation
+#define EPL_EVENT_UINT_QUEUE                EPL_QUEUE_DIRECT
+    ///< user-internal queue implementation
 #define CONFIG_DLLCAL_QUEUE                 EPL_QUEUE_HOSTINTERFACE
     ///< DLLCAL queue implementation
-/**@}*/
-
-/**
-\name Ethernet driver defines
-The Ethernet driver (Edrv) defines determine the stack's Ethernet module.
-Note: The settings are specific for MN with openMAC!
-*/
-/**@{*/
-#define EDRV_FAST_TXFRAMES                  FALSE
-    ///< fast TX support by Edrv
-#define EDRV_EARLY_RX_INT                   FALSE
-    ///< early RX interrupt support by Edrv
-#define EDRV_DMA_TX_HANDLER                 FALSE
-    ///< support TX handler call when DMA transfer finished
-#define EDRV_AUTO_RESPONSE                  FALSE
-    ///< support auto-response (e.g. openMAC)
-#define EDRV_TIME_TRIG_TX                   TRUE
-    ///< support time triggered transmission (e.g. openMAC)
-#define EDRVCYC_NEG_SHIFT_US                100U
-    ///< us (timer irq before next cycle)
 /**@}*/
 
 /**
@@ -118,25 +99,35 @@ Note: The settings are specific for MN with openMAC!
 The Data Link Layer (DLL) defines determine the POWERLINK DLL module.
 */
 /**@{*/
-#define EPL_DLL_PRES_READY_AFTER_SOC        FALSE
-    ///< support PRes packet ready after SoC (EDRV_FAST_TXFRAMES necessary)
-#define EPL_DLL_PRES_READY_AFTER_SOA        FALSE
-    ///< support PRes packet ready after SoA (EDRV_FAST_TXFRAMES necessary)
-#define EPL_DLL_PRES_FILTER_COUNT           3
-    ///< max. supported PRes packet filters (for specific nodes)
-#define DLL_DEFERRED_RXFRAME_RELEASE_ISOCHRONOUS    FALSE
-    ///< disable deferred RX frames if Edrv does not support it
 #define EPL_DLL_PRES_CHAINING_MN            TRUE
     ///< support PRes-Chaining (PRC) for MN
 /**@}*/
 
 /**
-\name Timer defines
-The timer defines determine the high resolution timer module.
+\name Object Dictionary defines
+The OBD defines determine the Object Dictionary.
 */
 /**@{*/
-#define EPL_TIMER_USE_HIGHRES               TRUE
-    ///< use high resolution timer
+    ///< enable OBD in kernel layer
+#define CONFIG_OBD_CHECK_OBJECT_RANGE              FALSE
+    ///< support automatic object range check
+#define CONFIG_OBD_USE_STRING_DOMAIN_IN_RAM        TRUE
+    ///< support variable subindex
+#define CONFIG_OBD_INCLUDE_A000_TO_DEVICE_PART     TRUE
+#define CONFIG_OBD_USE_LOAD_CONCISEDCF             TRUE
+/**@}*/
+
+/**
+\name Service Date Object defines
+The SDO defines determine the SDO stack configuration.
+*/
+/**@{*/
+#define SDO_MAX_CONNECTION_ASND             100
+    ///< max. supported ASND SDO connections
+#define MAX_SDO_SEQ_CON                     100
+    ///< max. supported SDO sequence connections
+#define MAX_SDO_COM_CON                     100
+    ///< max. supported SDO command connections
 /**@}*/
 
 //------------------------------------------------------------------------------
@@ -155,4 +146,4 @@ extern "C" {
 }
 #endif
 
-#endif /* _INC_EPLCFG_H_ */
+#endif /* _INC_oplkcfg_H_ */
