@@ -954,8 +954,8 @@ static tOplkError cbReceivedAsnd(tFrameInfo *pFrameInfo_p)
         return kErrorReject;
 
     // Forward received ASnd frame
-    apiEventArg.m_RcvAsnd.m_pFrame = pFrameInfo_p->pFrame;
-    apiEventArg.m_RcvAsnd.m_FrameSize = pFrameInfo_p->frameSize;
+    apiEventArg.m_RcvAsnd.pFrame = pFrameInfo_p->pFrame;
+    apiEventArg.m_RcvAsnd.frameSize = pFrameInfo_p->frameSize;
 
     eventType = kOplkApiEventReceivedAsnd;
     ret = ctrlu_callUserEventCallback(eventType, &apiEventArg);

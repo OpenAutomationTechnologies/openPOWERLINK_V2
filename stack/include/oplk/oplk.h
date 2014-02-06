@@ -121,10 +121,16 @@ typedef struct
 
 } tOplkApiEventCfmResult;
 
+/**
+\brief Received ASnd Event
+
+This structure specifies the event for received ASnd frames. It is used to inform
+the application about received ASnd frames.
+*/
 typedef struct
 {
-    tPlkFrame           *m_pFrame;
-    size_t              m_FrameSize;
+    tPlkFrame                   *pFrame;        ///< Pointer to the received ASnd frame
+    size_t                      frameSize;      ///< Size of the received ASnd frame
 }
 tOplkApiEventRcvAsnd;
 
