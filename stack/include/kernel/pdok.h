@@ -37,6 +37,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _INC_pdok_H_
 #define _INC_pdok_H_
 
+//---------------------------------------------------------------------------
+// includes
+//---------------------------------------------------------------------------
+#include <oplk/oplkinc.h>
 #include <common/pdo.h>
 #include <oplk/frame.h>
 #include <oplk/dll.h>

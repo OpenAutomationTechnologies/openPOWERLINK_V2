@@ -42,7 +42,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/Epl.h>
+#include <oplk/oplkinc.h>
+#include <oplk/oplk.h>
 
 #include <common/ctrl.h>
 

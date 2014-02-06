@@ -50,7 +50,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/Epl.h>            // function prototype of OD callback function
+#include <oplk/oplk.h>            // function prototype of OD callback function
 #include <oplk/obd.h>            // function prototypes of the EplOBD-Modul
 #include <user/pdou.h>      // function prototype of OD callback function
 #include <user/errhndu.h>   // function prototype of error handler od callback functions

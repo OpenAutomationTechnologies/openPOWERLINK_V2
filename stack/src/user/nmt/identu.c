@@ -40,8 +40,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include "user/identu.h"
-#include "user/dllucal.h"
+#include <oplk/ami.h>
+#include <user/identu.h>
+#include <user/dllucal.h>
 
 
 //============================================================================//

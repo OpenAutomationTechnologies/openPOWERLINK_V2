@@ -42,8 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <unistd.h>
 
-#include <oplk/Epl.h>
-#include <oplk/EplTarget.h>
+#include <oplk/oplk.h>
 #include <common/ctrl.h>
 #include <common/ctrlcal.h>
 #include <user/ctrlucal.h>

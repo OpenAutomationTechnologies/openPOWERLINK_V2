@@ -42,7 +42,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <user/timeru.h>
-#include <oplk/EplTarget.h>
 #include <common/target.h>
 
 //============================================================================//

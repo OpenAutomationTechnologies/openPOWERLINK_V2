@@ -41,8 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/Epl.h>
-#include <oplk/EplTarget.h>
+#include <oplk/oplk.h>
 
 #include <gpio.h>
 #include "app.h"

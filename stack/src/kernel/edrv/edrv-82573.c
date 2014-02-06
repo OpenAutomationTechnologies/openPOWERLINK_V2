@@ -51,8 +51,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/global.h>
-#include <oplk/EplInc.h>
+#include <oplk/oplkinc.h>
+#include <oplk/ami.h>
 #include <common/edrv.h>
 
 #include <linux/module.h>

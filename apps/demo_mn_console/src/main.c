@@ -42,12 +42,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/Epl.h>
+#include <oplk/oplk.h>
 #include <stdio.h>
 #include <getopt/getopt.h>
 #include <app.h>
 #include <system/system.h>
-#include <oplk/EplTarget.h>
 #include <console/console.h>
 #include <limits.h>
 

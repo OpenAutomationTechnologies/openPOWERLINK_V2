@@ -72,7 +72,7 @@
 #ifndef _EPL_API_H_
 #define _EPL_API_H_
 
-#include <oplk/EplInc.h>
+#include <oplk/oplkinc.h>
 #include <oplk/sdo.h>
 #include <oplk/obd.h>
 #include <oplk/led.h>

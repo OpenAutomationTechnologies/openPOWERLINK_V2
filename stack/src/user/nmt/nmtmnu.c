@@ -40,16 +40,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include "user/nmtmnu.h"
-#include "user/timeru.h"
-#include "user/identu.h"
-#include "user/statusu.h"
-#include "user/dllucal.h"
+#include <user/nmtmnu.h>
+#include <user/timeru.h>
+#include <user/identu.h>
+#include <user/statusu.h>
+#include <user/dllucal.h>
+#include <oplk/ami.h>
 #include <oplk/benchmark.h>
 #include <oplk/obd.h>
 
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
-#include "user/syncu.h"
+#include <user/syncu.h>
 #endif
 
 #if defined(CONFIG_INCLUDE_NMT_MN)

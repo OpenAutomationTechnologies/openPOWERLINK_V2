@@ -40,8 +40,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include "user/statusu.h"
-#include "user/dllucal.h"
+#include <oplk/ami.h>
+#include <user/statusu.h>
+#include <user/dllucal.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //

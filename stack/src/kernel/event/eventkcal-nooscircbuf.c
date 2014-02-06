@@ -43,8 +43,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/EplInc.h>
-#include <oplk/Epl.h>
+#include <oplk/oplkinc.h>
+#include <oplk/oplk.h>
 #include <common/target.h>
 
 #include <kernel/eventkcal.h>

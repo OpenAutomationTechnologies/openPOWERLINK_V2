@@ -48,7 +48,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <pthread.h>
 #include <signal.h>
 
-#include <oplk/Epl.h>
+#include <oplk/oplk.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //

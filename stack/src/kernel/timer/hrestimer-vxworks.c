@@ -62,7 +62,7 @@
 //=========================================================================//
 // Includes                                                                //
 //=========================================================================//
-#include <oplk/EplInc.h>
+#include <oplk/oplkinc.h>
 #include "kernel/hrestimer.h"
 #include <oplk/benchmark.h>
 

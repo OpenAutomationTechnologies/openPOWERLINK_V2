@@ -395,17 +395,17 @@ SET(OPLK_HEADERS
     ${STACK_INCLUDE_DIR}/oplk/debug.h
     ${STACK_INCLUDE_DIR}/oplk/debugstr.h
     ${STACK_INCLUDE_DIR}/oplk/dll.h
-    ${STACK_INCLUDE_DIR}/oplk/Epl.h
+    ${STACK_INCLUDE_DIR}/oplk/oplk.h
     ${STACK_INCLUDE_DIR}/oplk/oplkdefs.h
     ${STACK_INCLUDE_DIR}/oplk/errordefs.h
     ${STACK_INCLUDE_DIR}/oplk/frame.h
-    ${STACK_INCLUDE_DIR}/oplk/EplInc.h
-    ${STACK_INCLUDE_DIR}/oplk/EplTarget.h
+    ${STACK_INCLUDE_DIR}/oplk/oplkinc.h
+    ${STACK_INCLUDE_DIR}/oplk/targetsystem.h
     ${STACK_INCLUDE_DIR}/oplk/EplTimer.h
     ${STACK_INCLUDE_DIR}/oplk/version.h
     ${STACK_INCLUDE_DIR}/oplk/event.h
     ${STACK_INCLUDE_DIR}/oplk/ftracedebug.h
-    ${STACK_INCLUDE_DIR}/oplk/global.h
+    ${STACK_INCLUDE_DIR}/oplk/basictypes.h
     ${STACK_INCLUDE_DIR}/oplk/led.h
     ${STACK_INCLUDE_DIR}/oplk/nmt.h
     ${STACK_INCLUDE_DIR}/oplk/obd.h
@@ -417,6 +417,12 @@ SET(OPLK_HEADERS
     ${STACK_INCLUDE_DIR}/oplk/section-default.h
     ${STACK_INCLUDE_DIR}/oplk/section-microblaze.h
     ${STACK_INCLUDE_DIR}/oplk/section-nios2.h
+    ${STACK_INCLUDE_DIR}/oplk/targetdefs/nios2.h
+    ${STACK_INCLUDE_DIR}/oplk/targetdefs/microblaze.h
+    ${STACK_INCLUDE_DIR}/oplk/targetdefs/linux.h
+    ${STACK_INCLUDE_DIR}/oplk/targetdefs/windows.h
+    ${STACK_INCLUDE_DIR}/oplk/targetdefs/wince.h
+    ${STACK_INCLUDE_DIR}/oplk/targetdefs/vxworks.h
     )
 
 SET(STACK_HEADERS

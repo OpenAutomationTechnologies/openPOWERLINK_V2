@@ -43,11 +43,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <limits.h>
 
-#include <oplk/EplInc.h>
-#include <user/cfmu.h>
-#include <oplk/sdoabortcodes.h>
-#include <user/identu.h>
+#include <oplk/oplkinc.h>
+#include <oplk/ami.h>
 #include <oplk/obd.h>
+#include <user/cfmu.h>
+#include <user/identu.h>
 #include <user/sdocom.h>
 #include <user/nmtu.h>
 

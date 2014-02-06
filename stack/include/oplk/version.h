@@ -38,6 +38,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _INC_oplk_version_H_
 #define _INC_oplk_version_H_
 
+//------------------------------------------------------------------------------
+// includes
+//------------------------------------------------------------------------------
+#include <oplk/oplkinc.h>
+
 // NOTE:
 // All version macros should contain the same version number. But do not use
 // defines instead of the numbers. Because the macro EPL_STRING_VERSION() can not

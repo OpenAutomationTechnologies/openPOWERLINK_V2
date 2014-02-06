@@ -42,6 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <oplk/oplkinc.h>
 #include <oplk/dll.h>
 
 #if EPL_DLL_PRES_CHAINING_MN != FALSE

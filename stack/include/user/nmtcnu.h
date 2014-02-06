@@ -42,7 +42,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include "user/nmtu.h"
+#include <oplk/oplkinc.h>
+#include <user/nmtu.h>
 #include <oplk/dll.h>
 #include <oplk/frame.h>
 

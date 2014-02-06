@@ -40,7 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/Epl.h>
+#include <oplk/oplk.h>
 #include <kernel/dllk.h>
 #include <kernel/eventk.h>
 #include <kernel/nmtk.h>
@@ -59,7 +59,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/timeru.h>
 #include <user/cfmu.h>
 #include <user/eventucal.h>
-#include <oplk/EplTarget.h>
 
 #include <common/ctrl.h>
 #include <oplk/obd.h>

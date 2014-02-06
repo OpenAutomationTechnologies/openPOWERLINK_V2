@@ -72,7 +72,7 @@
 #ifndef _EPLTIMER_H_
 #define _EPLTIMER_H_
 
-#include <oplk/EplInc.h>
+#include <oplk/oplkinc.h>
 #include <oplk/event.h>
 
 

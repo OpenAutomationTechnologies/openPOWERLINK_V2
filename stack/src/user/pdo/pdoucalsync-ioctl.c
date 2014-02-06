@@ -45,7 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sys/ioctl.h>
 #include <time.h>
 
-#include <oplk/EplInc.h>
+#include <oplk/oplkinc.h>
 #include <common/pdo.h>
 #include <user/pdoucal.h>
 #include <user/ctrlucal.h>

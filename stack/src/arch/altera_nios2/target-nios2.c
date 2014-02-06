@@ -40,11 +40,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/global.h>
 #include <unistd.h>
 #include <sys/alt_irq.h>
 #include <sys/alt_alarm.h>
-#include <oplk/Epl.h>
+#include <oplk/oplkinc.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //

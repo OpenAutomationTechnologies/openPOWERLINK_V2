@@ -40,8 +40,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/EplInc.h>
+#include <oplk/oplkinc.h>
 #include <oplk/obd.h>
+#include <oplk/ami.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
