@@ -78,7 +78,6 @@
 #include <oplk/led.h>
 #include <oplk/cfm.h>
 #include <oplk/event.h>
-
 #include <stddef.h>
 
 //---------------------------------------------------------------------------
@@ -356,19 +355,6 @@ EPLDLLEXPORT void*      oplk_getProcessImageOut(void);
 
 // objdict specific process image functions
 EPLDLLEXPORT tEplKernel oplk_setupProcessImage(void);
-
-// functions for getting cleartext values of stack states and events
-EPLDLLEXPORT char* EplGetNmtEventStr(tNmtEvent nmtEvent_p);
-EPLDLLEXPORT char* EplGetEventTypeStr(tEplEventType eventType_p);
-EPLDLLEXPORT char* EplGetEventSourceStr(tEplEventSource eventSrc_p);
-EPLDLLEXPORT char* EplGetEventSinkStr(tEplEventSink eventSink_p);
-EPLDLLEXPORT char* EplGetNmtStateStr(tNmtState nmtState_p);
-EPLDLLEXPORT char* EplGetApiEventStr(tEplApiEventType ApiEvent_p);
-EPLDLLEXPORT char* EplGetNmtNodeEventTypeStr(tNmtNodeEvent NodeEventType_p);
-EPLDLLEXPORT char* EplGetNmtBootEventTypeStr(tNmtBootEvent BootEventType_p);
-EPLDLLEXPORT char* EplGetSdoComConStateStr(tSdoComConState SdoComConState_p);
-EPLDLLEXPORT char* EplGetEplKernelStr(tEplKernel EplKernel_p);
-EPLDLLEXPORT const char* EplGetEmergErrCodeStr( WORD EmergErrCode_p);
 
 #ifdef __cplusplus
     }

@@ -47,7 +47,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <altera_avalon_pio_regs.h>
 
 #include <oplk/Epl.h>
-#include <oplk/EplErrStr.h>
+#include <oplk/debugstr.h>
 #include <kernel/ctrlk.h>
 
 //============================================================================//
@@ -123,7 +123,7 @@ int main (void)
         Ret = initPlk();
 
         PRINTF("Initialization returned with \"%s\" (0x%X)\n",
-                EplErrStrGetMessage(Ret), Ret);
+                debugstr_getRetValStr(Ret), Ret);
 
         if(Ret != kEplSuccessful)
             break;

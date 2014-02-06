@@ -45,6 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <oplk/Epl.h>
 #include <oplk/EplTarget.h>
+#include <oplk/debugstr.h>
 
 #include "event.h"
 #include <gpio.h>
@@ -265,7 +266,7 @@ static tEplKernel processStateChangeEvent(tEplApiEventType EventType_p,
 
             PRINTF("StateChangeEvent:kNmtGsOff originating event = 0x%X (%s)\n",
                      pNmtStateChange->nmtEvent,
-                     EplGetNmtEventStr(pNmtStateChange->nmtEvent));
+                     debugstr_getNmtEventStr(pNmtStateChange->nmtEvent));
 
             // signal that stack is off
             *pfGsOff_l = FALSE;
@@ -278,14 +279,14 @@ static tEplKernel processStateChangeEvent(tEplApiEventType EventType_p,
             PRINTF("StateChangeEvent(0x%X) originating event = 0x%X (%s)\n",
                    pNmtStateChange->newNmtState,
                    pNmtStateChange->nmtEvent,
-                   EplGetNmtEventStr(pNmtStateChange->nmtEvent));
+                   debugstr_getNmtEventStr(pNmtStateChange->nmtEvent));
             break;
 
         case kNmtGsResetConfiguration:
             PRINTF("StateChangeEvent(0x%X) originating event = 0x%X (%s)\n",
                    pNmtStateChange->newNmtState,
                    pNmtStateChange->nmtEvent,
-                   EplGetNmtEventStr(pNmtStateChange->nmtEvent));
+                   debugstr_getNmtEventStr(pNmtStateChange->nmtEvent));
             break;
 
         case kNmtGsInitialising:
@@ -301,7 +302,7 @@ static tEplKernel processStateChangeEvent(tEplApiEventType EventType_p,
             PRINTF("StateChangeEvent(0x%X) originating event = 0x%X (%s)\n",
                    pNmtStateChange->newNmtState,
                    pNmtStateChange->nmtEvent,
-                   EplGetNmtEventStr(pNmtStateChange->nmtEvent));
+                   debugstr_getNmtEventStr(pNmtStateChange->nmtEvent));
             break;
     }
 
@@ -334,15 +335,15 @@ static tEplKernel processErrorWarningEvent(tEplApiEventType EventType_p,
     UNUSED_PARAMETER(pUserArg_p);
 
     PRINTF("Err/Warn: Source = %s (%02X) EplError = %s (0x%03X)\n",
-                EplGetEventSourceStr(pInternalError->m_EventSource),
+                debugstr_getEventSourceStr(pInternalError->m_EventSource),
                 pInternalError->m_EventSource,
-                EplGetEplKernelStr(pInternalError->m_EplError),
+                debugstr_getRetValStr(pInternalError->m_EplError),
                 pInternalError->m_EplError);
 
     FTRACE_MARKER("Err/Warn: Source = %s (%02X) EplError = %s (0x%03X)\n",
-                EplGetEventSourceStr(pInternalError->m_EventSource),
+                debugstr_getEventSourceStr(pInternalError->m_EventSource),
                 pInternalError->m_EventSource,
-                EplGetEplKernelStr(pInternalError->m_EplError),
+                debugstr_getRetValStr(pInternalError->m_EplError),
                 pInternalError->m_EplError);
 
     // check additional argument
@@ -353,11 +354,11 @@ static tEplKernel processErrorWarningEvent(tEplApiEventType EventType_p,
             // error occurred within event processing
             // either in kernel or in user part
             PRINTF(" OrgSource = %s %02X\n",
-                     EplGetEventSourceStr(pInternalError->m_Arg.m_EventSource),
+                     debugstr_getEventSourceStr(pInternalError->m_Arg.m_EventSource),
                      pInternalError->m_Arg.m_EventSource);
 
             FTRACE_MARKER(" OrgSource = %s %02X\n",
-                     EplGetEventSourceStr(pInternalError->m_Arg.m_EventSource),
+                     debugstr_getEventSourceStr(pInternalError->m_Arg.m_EventSource),
                      pInternalError->m_Arg.m_EventSource);
             break;
 
@@ -450,13 +451,13 @@ static tEplKernel processNodeEvent(tEplApiEventType EventType_p,
         case kNmtNodeEventNmtState:
             PRINTF("NodeEvent: (Node=%u, NmtState=%s)\n",
                      pNode->m_uiNodeId,
-                     EplGetNmtStateStr(pNode->m_NmtState));
+                     debugstr_getNmtStateStr(pNode->m_NmtState));
             break;
 
         case kNmtNodeEventError:
             PRINTF("NodeEvent: (Node=%u): Error=%s (0x%.4X)\n",
                     pNode->m_uiNodeId,
-                    EplGetEmergErrCodeStr(pNode->m_wErrorCode),
+                    debugstr_getEmergErrCodeStr(pNode->m_wErrorCode),
                     pNode->m_wErrorCode);
             break;
 

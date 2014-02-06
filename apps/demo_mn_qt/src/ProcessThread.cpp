@@ -48,6 +48,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ProcessThread.h>
 #include <console/console.h>
 
+#include <oplk/debugstr.h>
+
 //------------------------------------------------------------------------------
 // global variables
 //------------------------------------------------------------------------------
@@ -353,7 +355,7 @@ tEplKernel ProcessThread::processStateChangeEvent(tEplApiEventType EventType_p,
     UNUSED_PARAMETER(pUserArg_p);
 
     sigNmtState(pNmtStateChange->newNmtState);
-    string = EplGetNmtEventStr(pNmtStateChange->nmtEvent);
+    string = debugstr_getNmtEventStr(pNmtStateChange->nmtEvent);
 
     switch (pNmtStateChange->newNmtState)
     {
@@ -370,7 +372,7 @@ tEplKernel ProcessThread::processStateChangeEvent(tEplApiEventType EventType_p,
             sigPrintLog(QString("StateChangeEvent(0x%1) originating event = 0x%2 (%3)")
                      .arg(pNmtStateChange->newNmtState, 0, 16, QLatin1Char('0'))
                      .arg(pNmtStateChange->nmtEvent, 0, 16, QLatin1Char('0'))
-                     .arg(EplGetNmtEventStr(pNmtStateChange->nmtEvent)));
+                     .arg(debugstr_getNmtEventStr(pNmtStateChange->nmtEvent)));
             reachedNmtStateOff();
             break;
 
@@ -382,7 +384,7 @@ tEplKernel ProcessThread::processStateChangeEvent(tEplApiEventType EventType_p,
             sigPrintLog(QString("StateChangeEvent(0x%1) originating event = 0x%2 (%3)")
                      .arg(pNmtStateChange->newNmtState, 4, 16, QLatin1Char('0'))
                      .arg(pNmtStateChange->nmtEvent, 4, 16, QLatin1Char('0'))
-                     .arg(EplGetNmtEventStr(pNmtStateChange->nmtEvent)));
+                     .arg(debugstr_getNmtEventStr(pNmtStateChange->nmtEvent)));
             break;
 
         case kNmtGsResetConfiguration:
@@ -403,7 +405,7 @@ tEplKernel ProcessThread::processStateChangeEvent(tEplApiEventType EventType_p,
             sigPrintLog(QString("StateChangeEvent(0x%1) originating event = 0x%2 (%3)")
                      .arg(pNmtStateChange->newNmtState, 4, 16, QLatin1Char('0'))
                      .arg(pNmtStateChange->nmtEvent, 4, 16, QLatin1Char('0'))
-                     .arg(EplGetNmtEventStr(pNmtStateChange->nmtEvent)));
+                     .arg(debugstr_getNmtEventStr(pNmtStateChange->nmtEvent)));
             break;
 
         case kNmtCsNotActive:
@@ -421,7 +423,7 @@ tEplKernel ProcessThread::processStateChangeEvent(tEplApiEventType EventType_p,
             sigPrintLog(QString("StateChangeEvent(0x%1) originating event = 0x%2 (%3)")
                      .arg(pNmtStateChange->newNmtState, 4, 16, QLatin1Char('0'))
                      .arg(pNmtStateChange->nmtEvent, 4, 16, QLatin1Char('0'))
-                     .arg(EplGetNmtEventStr(pNmtStateChange->nmtEvent)));
+                     .arg(debugstr_getNmtEventStr(pNmtStateChange->nmtEvent)));
             sigEplStatus(1);
             break;
 
@@ -430,7 +432,7 @@ tEplKernel ProcessThread::processStateChangeEvent(tEplApiEventType EventType_p,
             sigPrintLog(QString("StateChangeEvent(0x%1) originating event = 0x%2 (%3)")
                      .arg(pNmtStateChange->newNmtState, 4, 16, QLatin1Char('0'))
                      .arg(pNmtStateChange->nmtEvent, 4, 16, QLatin1Char('0'))
-                     .arg(EplGetNmtEventStr(pNmtStateChange->nmtEvent)));
+                     .arg(debugstr_getNmtEventStr(pNmtStateChange->nmtEvent)));
             sigEplStatus(2);
             break;
 
@@ -466,9 +468,9 @@ tEplKernel ProcessThread::processErrorWarningEvent(tEplApiEventType EventType_p,
     UNUSED_PARAMETER(pUserArg_p);
 
     sigPrintLog(QString("Err/Warn: Source = %1 (0x%2) EplError = %3 (0x%4)")
-            .arg(EplGetEventSourceStr(pInternalError->m_EventSource))
+            .arg(debugstr_getEventSourceStr(pInternalError->m_EventSource))
             .arg(pInternalError->m_EventSource, 2, 16, QLatin1Char('0'))
-            .arg(EplGetEplKernelStr(pInternalError->m_EplError))
+            .arg(debugstr_getRetValStr(pInternalError->m_EplError))
             .arg(pInternalError->m_EplError, 3, 16, QLatin1Char('0')));
 
     switch (pInternalError->m_EventSource)
@@ -478,7 +480,7 @@ tEplKernel ProcessThread::processErrorWarningEvent(tEplApiEventType EventType_p,
             // error occurred within event processing
             // either in kernel or in user part
             sigPrintLog(QString(" OrgSource = %1 %2")
-                 .arg(EplGetEventSourceStr(pInternalError->m_Arg.m_EventSource))
+                 .arg(debugstr_getEventSourceStr(pInternalError->m_Arg.m_EventSource))
                  .arg(pInternalError->m_Arg.m_EventSource, 2, 16, QLatin1Char('0')));
             break;
 
@@ -645,7 +647,7 @@ tEplKernel ProcessThread::processNodeEvent(tEplApiEventType EventType_p,
             pProcessThread_g->sigNodeStatus(pEventArg_p->m_Node.m_uiNodeId, -1);
             sigPrintLog(QString("AppCbEvent (Node=%1): Error = %2 (0x%3)")
                     .arg(pEventArg_p->m_Node.m_uiNodeId, 0, 10)
-                    .arg(EplGetEmergErrCodeStr(pEventArg_p->m_Node.m_wErrorCode))
+                    .arg(debugstr_getEmergErrCodeStr(pEventArg_p->m_Node.m_wErrorCode))
                     .arg(pEventArg_p->m_Node.m_wErrorCode, 4, 16, QLatin1Char('0')));
             break;
 

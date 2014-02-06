@@ -1,17 +1,18 @@
-
 /**
 ********************************************************************************
-\file   debug.c
+\file   debugstr.c
 
-\brief  Additional openPOWERLINK debugging functions
+\brief  Debug String module
 
-This file contains additional openPOWERLINK debugging functions.
+This file implements the debug string module. It is used to convert a lot
+of openPOWERLINK enumerations and error codes into descriptive strings.
 
-\ingroup module_event
+\ingroup module_debugstr
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012-2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2010 E. Dumas
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -73,27 +74,27 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 typedef struct
 {
-    tNmtState           m_nmtState;
-    char                *m_sNmtState;
+    tNmtState           nmtState;
+    char*               sNmtState;
 } tNmtStateInfo;
 
 typedef struct
 {
-    tEplApiEventType    m_ApiEvent;
-    char                *m_sApiEvent;
+    tEplApiEventType    apiEvent;
+    char*               sApiEvent;
 } tApiEventInfo;
 
 typedef struct
 {
-    tEplKernel          m_Key;
-    char                *m_sName;
-} tEplDebugEplKernelInfo;
+    tEplKernel          key;
+    char*               sName;
+} tRetValInfo;
 
 typedef struct
 {
-    WORD                m_Key;
-    char                *m_sName;
-} tEplEmergErrCodeInfo;
+    UINT16              key;
+    char*               sName;
+} tEmergErrCodeInfo;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -103,10 +104,10 @@ typedef struct
 // local vars
 //------------------------------------------------------------------------------
 
-static char *eplInvalidStr_g = "INVALID";
+static char* invalidStr_l = "INVALID";
 
 // text strings for POWERLINK events
-static char *eplEvtStr_g[] =
+static char* nmtEventStr_l[] =
 {
     "NmtEventNoEvent",              //
     "NmtEventDllMePres",            //
@@ -158,7 +159,7 @@ static char *eplEvtStr_g[] =
 };
 
 // text strings for POWERLINK event sources
-static char    *eplEvtSrcStr_g[] =
+static char* eventSourceStr_l[] =
 {
     "0",                        // reserved
 
@@ -194,7 +195,7 @@ static char    *eplEvtSrcStr_g[] =
 };
 
 // text strings for POWERLINK event sinks
-static char * eplEvtSinkStr_g[] =
+static char* eventSinkStr_l[] =
 {
     "EventSinkSync",
     "EventSinkNmtk",
@@ -214,7 +215,7 @@ static char * eplEvtSinkStr_g[] =
 };
 
 // text strings for POWERLINK event types
-static char *eplEvtTypeStr_g[] =
+static char* eventTypeStr_l[] =
 {
     "0",                                // reserved
     "EventTypeNmtEvent",                // NMT event
@@ -255,7 +256,7 @@ static char *eplEvtTypeStr_g[] =
 };
 
 // text strings for POWERLINK states
-static tNmtStateInfo nmtStateInfo_g[] =
+static tNmtStateInfo nmtStateInfo_l[] =
 {
     { kNmtGsOff,                 "NmtGsOff"                  },
     { kNmtGsInitialising,        "NmtGsInitializing"         },
@@ -278,7 +279,7 @@ static tNmtStateInfo nmtStateInfo_g[] =
 };
 
 // text strings for API events
-static tApiEventInfo ApiEventInfo_g[] =
+static tApiEventInfo apiEventInfo_l[] =
 {
     { kEplApiEventUserDef,          "User defined"                      },
     { kEplApiEventNmtStateChange,   "NMT state change"                  },
@@ -295,149 +296,162 @@ static tApiEventInfo ApiEventInfo_g[] =
 };
 
 // text strings for values of type tEplKernel
-static tEplDebugEplKernelInfo EplKernelInfo_g[] =
+static tRetValInfo retValInfo_l[] =
 {
-    { kEplSuccessful,                   "kEplSuccessful"                },
-    { kEplIllegalInstance,              "kEplIllegalInstance"           },
-    { kEplInvalidInstanceParam,         "kEplInvalidInstanceParam"      },
-    { kEplNoFreeInstance,               "kEplNoFreeInstance"            },
-    { kEplWrongSignature,               "kEplWrongSignature"            },
-    { kEplInvalidOperation,             "kEplInvalidOperation"          },
-    { kEplInvalidNodeId,                "kEplInvalidNodeId"             },
-    { kEplNoResource,                   "kEplNoResource"                },
-    { kEplShutdown,                     "kEplShutdown"                  },
-    { kEplReject,                       "kEplReject"                    },
-    { kEplRetry,                        "kEplRetry"                     },
-    { kEplInvalidEvent,                 "kEplInvalidEvent"              },
+    /* area for generic errors 0x0000 - 0x000F */
+    { kEplSuccessful,               "no error/successful run"},
+    { kEplIllegalInstance,          "the called instance does not exist"},
+    { kEplInvalidInstanceParam,     "invalid instance parameter"},
+    { kEplNoFreeInstance,           "XxxAddInstance was called but no free instance is available"},
+    { kEplWrongSignature,           "wrong signature while writing to object 0x1010 or 0x1011"},
+    { kEplInvalidOperation,         "operation not allowed in this situation"},
+    { kEplInvalidNodeId,            "invalid NodeId was specified"},
+    { kEplNoResource,               "resource could not be created (Windows, PxROS, ...)"},
+    { kEplShutdown,                 "stack is shutting down"},
+    { kEplReject,                   "reject the subsequent command"},
+    { kEplRetry,                    "retry this command"},
+    { kEplInvalidEvent,             "invalid event was posted to process function"},
 
-    { kEplEdrvNoFreeTxDesc,             "kEplEdrvNoFreeTxDesc"          },
-    { kEplEdrvInvalidCycleLen,          "kEplEdrvInvalidCycleLen"       },
-    { kEplEdrvInitError,                "kEplEdrvInitError"             },
-    { kEplEdrvNoFreeBufEntry,           "kEplEdrvNoFreeBufEntry"        },
-    { kEplEdrvBufNotExisting,           "kEplEdrvBufNotExisting"        },
-    { kEplEdrvInvalidRxBuf,             "kEplEdrvInvalidRxBuf"          },
-    { kEplEdrvInvalidParam,             "kEplEdrvInvalidParam"          },
-    { kEplEdrvNextTxListNotEmpty,       "kEplEdrvNextTxListNotEmpty"    },
-    { kEplEdrvCurTxListEmpty,           "kEplEdrvCurTxListEmpty"        },
-    { kEplEdrvTxListNotFinishedYet,      "kEplEdrvTxListNotFinishedYet" },
+    /* area for EDRV module 0x0010 - 0x001F */
+    { kEplEdrvNoFreeTxDesc,         "no free Tx descriptor available"},
+    { kEplEdrvInvalidCycleLen,      "invalid cycle length (e.g. 0)"},
+    { kEplEdrvInitError,            "initialisation error"},
+    { kEplEdrvNoFreeBufEntry,       "no free entry in internal buffer table for Tx frames"},
+    { kEplEdrvBufNotExisting,       "specified Tx buffer does not exist"},
+    { kEplEdrvInvalidRxBuf,         "specified Rx buffer is invalid"},
+    { kEplEdrvInvalidParam,         "invalid parameter in function call"},
+    { kEplEdrvNextTxListNotEmpty,   "next Tx buffer list is not empty, i.e. still in use"},
+    { kEplEdrvCurTxListEmpty,       "current Tx buffer list is empty, i.e. DLL didn't provide one"},
+    { kEplEdrvTxListNotFinishedYet, "current Tx buffer list has not been finished yet, but new cycle has started"},
 
-    { kEplDllOutOfMemory,               "kEplDllOutOfMemory"            },
-    { kEplDllIllegalHdl,                "kEplDllIllegalHdl"             },
-    { kEplDllCbAsyncRegistered,         "kEplDllCbAsyncRegistered"      },
-    { kEplDllAsyncSyncReqFull,          "kEplDllAsyncSyncReqFull"       },
-    { kEplDllAsyncTxBufferEmpty,        "kEplDllAsyncTxBufferEmpty"     },
-    { kEplDllAsyncTxBufferFull,         "kEplDllAsyncTxBufferFull"      },
-    { kEplDllNoNodeInfo,                "kEplDllNoNodeInfo"             },
-    { kEplDllInvalidParam,              "kEplDllInvalidParam"           },
-    { kEplDllInvalidAsndServiceId,      "kEplDllInvalidAsndServiceId"   },
-    { kEplDllTxBufNotReady,             "kEplDllTxBufNotReady"          },
-    { kEplDllTxFrameInvalid,            "kEplDllTxFrameInvalid"         },
 
-    { kEplObdIllegalPart,               "kEplObdIllegalPart"            },
-    { kEplObdIndexNotExist,             "kEplObdIndexNotExist"          },
-    { kEplObdSubindexNotExist,          "kEplObdSubindexNotExist"       },
-    { kEplObdReadViolation,             "kEplObdReadViolation"          },
-    { kEplObdWriteViolation,            "kEplObdWriteViolation"         },
-    { kEplObdAccessViolation,           "kEplObdAccessViolation"        },
-    { kEplObdUnknownObjectType,         "kEplObdUnknownObjectType"      },
-    { kEplObdVarEntryNotExist,          "kEplObdVarEntryNotExist"       },
-    { kEplObdValueTooLow,               "kEplObdValueTooLow"            },
-    { kEplObdValueTooHigh,              "kEplObdValueTooHigh"           },
-    { kEplObdValueLengthError,          "kEplObdValueLengthError"       },
-    { kEplObdErrnoSet,                  "kEplObdErrnoSet"               },
-    { kEplObdInvalidDcf,                "kEplObdInvalidDcf"             },
-    { kEplObdOutOfMemory,               "kEplObdOutOfMemory"            },
-    { kEplObdNoConfigData,              "kEplObdNoConfigData"           },
+    /* area for DLL module 0x0020 - 0x002F */
+    { kEplDllOutOfMemory,           "out of memory"},
+    { kEplDllIllegalHdl,            "illegal handle for a TxFrame was passed"},
+    { kEplDllCbAsyncRegistered,     "handler for non-EPL frames was already registered before"},
+    { kEplDllAsyncSyncReqFull,      "buffer for SyncRequests is full"},
+    { kEplDllAsyncTxBufferEmpty,    "transmit buffer for asynchronous frames is empty"},
+    { kEplDllAsyncTxBufferFull,     "transmit buffer for asynchronous frames is full"},
+    { kEplDllNoNodeInfo,            "MN: too less space in the internal node info structure"},
+    { kEplDllInvalidParam,          "invalid parameters passed to function"},
+    { kEplDllInvalidAsndServiceId,  "invalid AsndServiceId specified"},
+    { kEplDllTxBufNotReady,         "TxBuffer (e.g. for PReq) is not ready yet"},
+    { kEplDllTxFrameInvalid,        "TxFrame (e.g. for PReq) is invalid or does not exist"},
 
-    { kEplNmtUnknownCommand,            "kEplNmtUnknownCommand"         },
-    { kEplNmtInvalidFramePointer,       "kEplNmtInvalidFramePointer"    },
-    { kEplNmtInvalidEvent,              "kEplNmtInvalidEvent"           },
-    { kEplNmtInvalidState,              "kEplNmtInvalidState"           },
-    { kEplNmtInvalidParam,              "kEplNmtInvalidParam"           },
-    { kEplNmtSyncReqRejected,           "kEplNmtSyncReqRejected"        },
+    /* area for OBD module 0x0030 - 0x003F */
+    { kEplObdIllegalPart,           "unknown OD part"},
+    { kEplObdIndexNotExist,         "object index does not exist in OD"},
+    { kEplObdSubindexNotExist,      "subindex does not exist in object index"},
+    { kEplObdReadViolation,         "read access to a write-only object"},
+    { kEplObdWriteViolation,        "write access to a read-only object"},
+    { kEplObdAccessViolation,       "access not allowed"},
+    { kEplObdUnknownObjectType,     "object type not defined/known"},
+    { kEplObdVarEntryNotExist,      "object does not contain VarEntry structure"},
+    { kEplObdValueTooLow,           "value to write to an object is too low"},
+    { kEplObdValueTooHigh,          "value to write to an object is too high"},
+    { kEplObdValueLengthError,      "value to write is to long or to short"},
+    { kEplObdErrnoSet,              "file I/O error occurred and errno is set"},
+    { kEplObdInvalidDcf,            "device configuration file (CDC) is not valid"},
+    { kEplObdOutOfMemory,           "out of memory"},
+    { kEplObdNoConfigData,          "no configuration data present (CDC is empty)"},
 
-    { kEplSdoUdpMissCb,                 "kEplSdoUdpMissCb"              },
-    { kEplSdoUdpNoSocket,               "kEplSdoUdpNoSocket"            },
-    { kEplSdoUdpSocketError,            "kEplSdoUdpSocketError"         },
-    { kEplSdoUdpThreadError,            "kEplSdoUdpThreadError"         },
-    { kEplSdoUdpNoFreeHandle,           "kEplSdoUdpNoFreeHandle"        },
-    { kEplSdoUdpSendError,              "kEplSdoUdpSendError"           },
-    { kEplSdoUdpInvalidHdl,             "kEplSdoUdpInvalidHdl"          },
 
-    { kEplSdoSeqMissCb,                 "kEplSdoSeqMissCb"              },
-    { kEplSdoSeqNoFreeHandle,           "kEplSdoSeqNoFreeHandle"        },
-    { kEplSdoSeqInvalidHdl,             "kEplSdoSeqInvalidHdl"          },
-    { kEplSdoSeqUnsupportedProt,        "kEplSdoSeqUnsupportedProt"     },
-    { kEplSdoSeqNoFreeHistory,          "kEplSdoSeqNoFreeHistory"       },
-    { kEplSdoSeqFrameSizeError,         "kEplSdoSeqFrameSizeError"      },
-    { kEplSdoSeqRequestAckNeeded,       "kEplSdoSeqRequestAckNeeded"    },
+    /* area for NMT module 0x0040 - 0x004F */
+    { kEplNmtUnknownCommand,        "unknown NMT command"},
+    { kEplNmtInvalidFramePointer,   "pointer to the frame is not valid"},
+    { kEplNmtInvalidEvent,          "invalid event send to NMT-modul"},
+    { kEplNmtInvalidState,          "unknown state in NMT-State-Maschine"},
+    { kEplNmtInvalidParam,          "invalid parameters specified"},
+    { kEplNmtSyncReqRejected,       "SyncReq could not be issued"},
 
-    { kEplSdoSeqInvalidFrame,           "kEplSdoSeqInvalidFrame"        },
-    { kEplSdoSeqConnectionBusy,         "kEplSdoSeqConnectionBusy"      },
-    { kEplSdoSeqInvalidEvent,           "kEplSdoSeqInvalidEvent"        },
+    /* area for SDO/UDP module 0x0050 - 0x005F */
+    { kEplSdoUdpMissCb,             "missing callback-function pointer during init of module"},
+    { kEplSdoUdpNoSocket,           "error during init of socket"},
+    { kEplSdoUdpSocketError,        "error during usage of socket"},
+    { kEplSdoUdpThreadError,        "error during start of listen thread"},
+    { kEplSdoUdpNoFreeHandle,       "no free connection handle for Udp"},
+    { kEplSdoUdpSendError,          "Error during send of frame"},
+    { kEplSdoUdpInvalidHdl,         "the connection handle is invalid"},
 
-    { kEplSdoComUnsupportedProt,        "kEplSdoComUnsupportedProt"     },
-    { kEplSdoComNoFreeHandle,           "kEplSdoComNoFreeHandle"        },
-    { kEplSdoComInvalidServiceType,     "kEplSdoComInvalidServiceType"  },
-    { kEplSdoComInvalidHandle,          "kEplSdoComInvalidHandle"       },
-    { kEplSdoComInvalidSendType,        "kEplSdoComInvalidSendType"     },
-    { kEplSdoComNotResponsible,         "kEplSdoComNotResponsible"      },
-    { kEplSdoComHandleExists,           "kEplSdoComHandleExists"        },
-    { kEplSdoComHandleBusy,             "kEplSdoComHandleBusy"          },
-    { kEplSdoComInvalidParam,           "kEplSdoComInvalidParam"        },
+    /* area for SDO Sequence layer module 0x0060 - 0x006F */
+    { kEplSdoSeqMissCb,             "no callback-function assign"},
+    { kEplSdoSeqNoFreeHandle,       "no free handle for connection"},
+    { kEplSdoSeqInvalidHdl,         "invalid handle in SDO sequence layer"},
+    { kEplSdoSeqUnsupportedProt,    "unsupported Protocol selected"},
+    { kEplSdoSeqNoFreeHistory,      "no free entry in history"},
+    { kEplSdoSeqFrameSizeError,     "the size of the frames is not correct"},
+    { kEplSdoSeqRequestAckNeeded,   "indicates that the history buffer is full and a ack request is needed"},
+    { kEplSdoSeqInvalidFrame,       "frame not valid"},
+    { kEplSdoSeqConnectionBusy,     "connection is busy -> retry later"},
+    { kEplSdoSeqInvalidEvent,       "invalid event received"},
 
-    { kEplEventUnknownSink,             "kEplEventUnknownSink"          },
-    { kEplEventPostError,               "kEplEventPostError"            },
-    { kEplEventReadError,               "kEplEventReadError"            },
-    { kEplEventWrongSize,               "kEplEventWrongSize"            },
+    /* area for SDO Command Layer Module 0x0070 - 0x007F */
+    { kEplSdoComUnsupportedProt,    "unsupported Protocol selected"},
+    { kEplSdoComNoFreeHandle,       "no free handle for connection"},
+    { kEplSdoComInvalidServiceType, "invalid SDO service type specified"},
+    { kEplSdoComInvalidHandle,      "handle invalid"},
+    { kEplSdoComInvalidSendType,    "the stated to of frame to send is not possible"},
+    { kEplSdoComNotResponsible,     "internal error: command layer handle is not responsible for this event from sequence layer"},
+    { kEplSdoComHandleExists,       "handle to same node already exists"},
+    { kEplSdoComHandleBusy,         "transfer via this handle is already running"},
+    { kEplSdoComInvalidParam,       "invalid parameters passed to function"},
 
-    { kEplTimerInvalidHandle,           "kEplTimerInvalidHandle"        },
-    { kEplTimerNoTimerCreated,          "kEplTimerNoTimerCreated"       },
-    { kEplTimerThreadError,             "kEplTimerThreadError"          },
+    /* area for EPL Event-Modul 0x0080 - 0x008F */
+    { kEplEventUnknownSink,         "unknown sink for event"},
+    { kEplEventPostError,           "error during post of event"},
+    { kEplEventReadError,           "error during reading of event from queue"},
+    { kEplEventWrongSize,           "event arg has wrong size"},
 
-    { kEplSdoAsndInvalidNodeId,         "kEplSdoAsndInvalidNodeId"      },
-    { kEplSdoAsndNoFreeHandle,          "kEplSdoAsndNoFreeHandle"       },
-    { kEplSdoAsndInvalidHandle,         "kEplSdoAsndInvalidHandle"      },
+    /* area for EPL Timer Modul 0x0090 - 0x009F */
+    { kEplTimerInvalidHandle,       "invalid handle for timer"},
+    { kEplTimerNoTimerCreated,      "no timer was created caused by an error"},
+    { kEplTimerThreadError,         "process thread could not be created"},
 
-    { kEplPdoNotExist,                  "kEplPdoNotExist"               },
-    { kEplPdoLengthExceeded,            "kEplPdoLengthExceeded"         },
-    { kEplPdoGranularityMismatch,       "kEplPdoGranularityMismatch"    },
-    { kEplPdoInitError,                 "kEplPdoInitError"              },
-    { kEplPdoConfWhileEnabled,          "kEplPdoConfWhileEnabled"       },
-    { kEplPdoErrorMapp,                 "kEplPdoErrorMapp"              },
-    { kEplPdoVarNotFound,               "kEplPdoVarNotFound"            },
-    { kEplPdoVarNotMappable,            "kEplPdoVarNotMappable"         },
+    /* area for EPL SDO/Asnd Module 0x00A0 - 0x0AF */
+    { kEplSdoAsndInvalidNodeId,     "node id is invalid"},
+    { kEplSdoAsndNoFreeHandle,      "no free handle for connection"},
+    { kEplSdoAsndInvalidHandle,     "handle for connection is invalid"},
 
-    { kEplPdoSizeMismatch,              "kEplPdoSizeMismatch"           },
-    { kEplPdoTooManyTxPdos,             "kEplPdoTooManyTxPdos"          },
-    { kEplPdoInvalidObjIndex,           "kEplPdoInvalidObjIndex"        },
-    { kEplPdoTooManyPdos,               "kEplPdoTooManyPdos"            },
+    /* area for PDO module 0x00B0 - 0x00BF  */
+    { kEplPdoNotExist,              "selected PDO does not exist"},
+    { kEplPdoLengthExceeded,        "length of PDO mapping exceeds the current payload limit"},
+    { kEplPdoGranularityMismatch,   "configured PDO granularity is not equal to supported granularity"},
+    { kEplPdoInitError,             "error during initialisation of PDO module"},
+    { kEplPdoConfWhileEnabled,      "PDO configuration cannot be changed while it is enabled"},
+    { kEplPdoErrorMapp,             "invalid PDO mapping"},
+    { kEplPdoVarNotFound,           "the referenced object in a PDO mapping does not exist"},
+    { kEplPdoVarNotMappable,        "the referenced object in a PDO mapping is not mappable"},
+    { kEplPdoSizeMismatch,          "bit size of object mapping is larger than the object size"},
+    { kEplPdoTooManyTxPdos,         "there exits more than one TPDO on CN"},
+    { kEplPdoInvalidObjIndex,       "invalid object index used for PDO mapping or communication parameter"},
+    { kEplPdoTooManyPdos,           "there exit to many PDOs"},
 
-    { kEplCfmConfigError,               "kEplCfmConfigError"            },
-    { kEplCfmSdocTimeOutError,          "kEplCfmSdocTimeOutError"       },
-    { kEplCfmInvalidDcf,                "kEplCfmInvalidDcf"             },
-    { kEplCfmUnsupportedDcf,            "kEplCfmUnsupportedDcf"         },
-    { kEplCfmConfigWithErrors,          "kEplCfmConfigWithErrors"       },
-    { kEplCfmNoFreeConfig,              "kEplCfmNoFreeConfig"           },
-    { kEplCfmNoConfigData,              "kEplCfmNoConfigData"           },
-    { kEplCfmUnsuppDatatypeDcf,         "kEplCfmUnsuppDatatypeDcf"      },
+    /* Configuration manager module 0x00C0 - 0x00CF */
+    { kEplCfmConfigError,           "error in configuration manager"},
+    { kEplCfmSdocTimeOutError,      "error in configuration manager, Sdo timeout"},
+    { kEplCfmInvalidDcf,            "device configuration file (CDC) is not valid"},
+    { kEplCfmUnsupportedDcf,        "unsupported DCF format"},
+    { kEplCfmConfigWithErrors,      "configuration finished with errors"},
+    { kEplCfmNoFreeConfig,          "no free configuration entry"},
+    { kEplCfmNoConfigData,          "no configuration data present"},
+    { kEplCfmUnsuppDatatypeDcf,     "unsupported datatype found in dcf -> this entry was not configured"},
 
-    { kEplApiTaskDeferred,              "kEplApiTaskDeferred"           },
-    { kEplApiInvalidParam,              "kEplApiInvalidParam"           },
-    { kEplApiNoObdInitRam,              "kEplApiNoObdInitRam"           },
-    { kEplApiSdoBusyIntern,             "kEplApiSdoBusyIntern"          },
-    { kEplApiPIAlreadyAllocated,        "kEplApiPIAlreadyAllocated"     },
-    { kEplApiPIOutOfMemory,             "kEplApiPIOutOfMemory"          },
-    { kEplApiPISizeExceeded,            "kEplApiPISizeExceeded"         },
-    { kEplApiPINotAllocated,            "kEplApiPINotAllocated"         },
-    { kEplApiPIJobQueueFull,            "kEplApiPIJobQueueFull"         },
-    { kEplApiPIJobQueueEmpty,           "kEplApiPIJobQueueEmpty"        },
-    { kEplApiPIInvalidJobSize,          "kEplApiPIInvalidJobSize"       },
-    { kEplApiPIInvalidPIPointer,        "kEplApiPIInvalidPIPointer"     },
-    { kEplApiPINonBlockingNotSupp,      "kEplApiPINonBlockingNotSupp"   },
+    { kEplApiTaskDeferred,          "EPL performs task in background and informs the application (or vice-versa), when it is finished"},
+    { kEplApiInvalidParam,          "passed invalid parameters to a function (e.g. invalid node id)"},
+    { kEplApiNoObdInitRam,          "no function pointer for ObdInitRam supplied"},
+    { kEplApiSdoBusyIntern,         "the SDO channel to this node is internally used by the stack (e.g. the CFM) and currently not available for the application."},
+    { kEplApiPIAlreadyAllocated,    "process image is already allocated"},
+    { kEplApiPIOutOfMemory,         "process image: out of memory"},
+    { kEplApiPISizeExceeded,        "process image: variable linking or copy job exceeds the size of the PI"},
+    { kEplApiPINotAllocated,        "process image is not allocated"},
+    { kEplApiPIJobQueueFull,        "process image: job queue is full"},
+    { kEplApiPIJobQueueEmpty,       "process image: job queue is empty"},
+    { kEplApiPIInvalidJobSize,      "process image: invalid job size"},
+    { kEplApiPIInvalidPIPointer,    "process image: pointer to application's process image is invalid"},
+    { kEplApiPINonBlockingNotSupp,  "process image: non-blocking copy jobs are not supported on this target"},
 };
 
-static const tEplEmergErrCodeInfo   EplEmergErrCodeInfo_g[] =
+static const tEmergErrCodeInfo   emergErrCodeInfo_l[] =
 {
     { EPL_E_NO_ERROR,                    "EPL_E_NO_ERROR"               },
 
@@ -550,18 +564,18 @@ The function returns the string describing the specified event.
 
 \return The function returns a string describing the specified event.
 
-\ingroup module_debug
+\ingroup module_debugstr
 */
 //------------------------------------------------------------------------------
-char* EplGetNmtEventStr(tNmtEvent nmtEvent_p)
+char* debugstr_getNmtEventStr(tNmtEvent nmtEvent_p)
 {
-    if (nmtEvent_p >= tabentries(eplEvtStr_g))
+    if (nmtEvent_p >= tabentries(nmtEventStr_l))
     {
-        return eplInvalidStr_g;
+        return invalidStr_l;
     }
     else
     {
-        return eplEvtStr_g[nmtEvent_p];
+        return nmtEventStr_l[nmtEvent_p];
     }
 }
 
@@ -575,18 +589,18 @@ The function returns the string describing the specified event source.
 
 \return The function returns a string describing the specified event source.
 
-\ingroup module_debug
+\ingroup module_debugstr
 */
 //------------------------------------------------------------------------------
-char* EplGetEventSourceStr(tEplEventSource eventSrc_p)
+char* debugstr_getEventSourceStr(tEplEventSource eventSrc_p)
 {
-    if (eventSrc_p >= tabentries(eplEvtSrcStr_g))
+    if (eventSrc_p >= tabentries(eventSourceStr_l))
     {
-        return eplInvalidStr_g;
+        return invalidStr_l;
     }
     else
     {
-        return eplEvtSrcStr_g[eventSrc_p];
+        return eventSourceStr_l[eventSrc_p];
     }
 }
 
@@ -600,18 +614,18 @@ The function returns the string describing the specified event sink.
 
 \return The function returns a string describing the specified event sink.
 
-\ingroup module_debug
+\ingroup module_debugstr
 */
 //------------------------------------------------------------------------------
-char* EplGetEventSinkStr(tEplEventSink eventSink_p)
+char* debugstr_getEventSinkStr(tEplEventSink eventSink_p)
 {
-    if (eventSink_p >= tabentries(eplEvtSinkStr_g))
+    if (eventSink_p >= tabentries(eventSinkStr_l))
     {
-        return eplInvalidStr_g;
+        return invalidStr_l;
     }
     else
     {
-        return eplEvtSinkStr_g[eventSink_p];
+        return eventSinkStr_l[eventSink_p];
     }
 }
 
@@ -628,15 +642,15 @@ The function returns the string describing the specified event type.
 \ingroup module_debug
 */
 //------------------------------------------------------------------------------
-char* EplGetEventTypeStr(tEplEventType eventType_p)
+char* debugstr_getEventTypeStr(tEplEventType eventType_p)
 {
-    if (eventType_p >= tabentries(eplEvtTypeStr_g))
+    if (eventType_p >= tabentries(eventTypeStr_l))
     {
-        return eplInvalidStr_g;
+        return invalidStr_l;
     }
     else
     {
-        return eplEvtTypeStr_g[eventType_p];
+        return eventTypeStr_l[eventType_p];
     }
 }
 
@@ -650,19 +664,19 @@ The function returns the string describing the specified NMT state.
 
 \return The function returns a string describing the specified NMT state.
 
-\ingroup module_debug
+\ingroup module_debugstr
 */
 //------------------------------------------------------------------------------
-char* EplGetNmtStateStr(tNmtState nmtState_p)
+char* debugstr_getNmtStateStr(tNmtState nmtState_p)
 {
     unsigned int         i;
 
-    for (i = 0; i < tabentries(nmtStateInfo_g); i++)
+    for (i = 0; i < tabentries(nmtStateInfo_l); i++)
     {
-        if (nmtStateInfo_g[i].m_nmtState == nmtState_p)
-            return (nmtStateInfo_g[i].m_sNmtState);
+        if (nmtStateInfo_l[i].nmtState == nmtState_p)
+            return (nmtStateInfo_l[i].sNmtState);
     }
-    return eplInvalidStr_g;
+    return invalidStr_l;
 }
 
 //------------------------------------------------------------------------------
@@ -675,19 +689,19 @@ The function returns the string describing the specified API event.
 
 \return The function returns a string describing the specified API event.
 
-\ingroup module_debug
+\ingroup module_debugstr
 */
 //------------------------------------------------------------------------------
-char* EplGetApiEventStr(tEplApiEventType ApiEvent_p)
+char* debugstr_getApiEventStr(tEplApiEventType ApiEvent_p)
 {
     UINT        i;
 
-    for (i = 0; i < tabentries(ApiEventInfo_g); i++)
+    for (i = 0; i < tabentries(apiEventInfo_l); i++)
     {
-        if (ApiEventInfo_g[i].m_ApiEvent == ApiEvent_p)
-            return (ApiEventInfo_g[i].m_sApiEvent);
+        if (apiEventInfo_l[i].apiEvent == ApiEvent_p)
+            return (apiEventInfo_l[i].sApiEvent);
     }
-    return eplInvalidStr_g;
+    return invalidStr_l;
 }
 
 //------------------------------------------------------------------------------
@@ -700,14 +714,14 @@ The function returns the string describing the specified NMT node event.
 
 \return The function returns a string describing the specified NMT node event.
 
-\ingroup module_debug
+\ingroup module_debugstr
 */
 //------------------------------------------------------------------------------
-char* EplGetNmtNodeEventTypeStr(tNmtNodeEvent NodeEventType_p )
+char* debugstr_getNmtNodeEventTypeStr(tNmtNodeEvent NodeEventType_p )
 {
     if( NodeEventType_p >= tabentries(EplNmtNodeEvtTypeStr_g) )
     {
-        return  eplInvalidStr_g;
+        return  invalidStr_l;
     }
     else
     {
@@ -725,14 +739,14 @@ The function returns the string describing the specified NMT boot event.
 
 \return The function returns a string describing the specified NMT boot event.
 
-\ingroup module_debug
+\ingroup module_debugstr
 */
 //------------------------------------------------------------------------------
-char* EplGetNmtBootEventTypeStr(tNmtBootEvent BootEventType_p )
+char* debugstr_getNmtBootEventTypeStr(tNmtBootEvent BootEventType_p )
 {
     if( BootEventType_p >= tabentries(EplNmtBootEvtTypeStr_g) )
     {
-        return  eplInvalidStr_g;
+        return  invalidStr_l;
     }
     else
     {
@@ -752,14 +766,14 @@ state.
 \return The function returns a string describing the specified SDO command
 connection state.
 
-\ingroup module_debug
+\ingroup module_debugstr
 */
 //------------------------------------------------------------------------------
-char* EplGetSdoComConStateStr(tSdoComConState SdoComConState_p )
+char* debugstr_getSdoComConStateStr(tSdoComConState SdoComConState_p)
 {
     if( SdoComConState_p >= tabentries(EplSdoComConStateStr_g) )
     {
-        return  eplInvalidStr_g;
+        return  invalidStr_l;
     }
     else
     {
@@ -777,19 +791,19 @@ The function returns the string describing the given entry of type tEplKernel.
 
 \return The function returns a string describing the specified tEplKernel type.
 
-\ingroup module_debug
+\ingroup module_debugstr
 */
 //------------------------------------------------------------------------------
-char* EplGetEplKernelStr(tEplKernel EplKernel_p)
+char* debugstr_getRetValStr(tEplKernel EplKernel_p)
 {
     UINT        i;
 
-    for (i = 0; i < tabentries(EplKernelInfo_g); i++)
+    for (i = 0; i < tabentries(retValInfo_l); i++)
     {
-        if (EplKernelInfo_g[i].m_Key == EplKernel_p)
-            return (EplKernelInfo_g[i].m_sName);
+        if (retValInfo_l[i].key == EplKernel_p)
+            return (retValInfo_l[i].sName);
     }
-    return eplInvalidStr_g;
+    return invalidStr_l;
 }
 
 //------------------------------------------------------------------------------
@@ -803,19 +817,19 @@ The function returns the string describing the specified emergency error code.
 \return The function returns a string describing the specified emergency error
 code.
 
-\ingroup module_debug
+\ingroup module_debugstr
 */
 //------------------------------------------------------------------------------
-const char* EplGetEmergErrCodeStr(WORD EmergErrCode_p)
+char* debugstr_getEmergErrCodeStr(UINT16 emergErrCode_p)
 {
 
     UINT        i;
 
-    for (i = 0; i < tabentries(EplEmergErrCodeInfo_g); i++)
+    for (i = 0; i < tabentries(emergErrCodeInfo_l); i++)
     {
-        if (EplEmergErrCodeInfo_g[i].m_Key == EmergErrCode_p)
-            return (EplEmergErrCodeInfo_g[i].m_sName);
+        if (emergErrCodeInfo_l[i].key == emergErrCode_p)
+            return (emergErrCodeInfo_l[i].sName);
     }
-    return eplInvalidStr_g;
+    return invalidStr_l;
 }
 

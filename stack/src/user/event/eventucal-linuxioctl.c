@@ -46,7 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-
+#include <oplk/debugstr.h>
 #include <user/eventucal.h>
 #include <common/target.h>
 
@@ -271,8 +271,8 @@ static tEplKernel postEvent(tEplEvent *pEvent_p)
     int             ioctlret;
 
     /*TRACE("%s() Event type:%s(%d) sink:%s(%d) size:%d!\n", __func__,
-           EplGetEventTypeStr(pEvent_p->m_EventType), pEvent_p->m_EventType,
-           EplGetEventSinkStr(pEvent_p->m_EventSink), pEvent_p->m_EventSink,
+           debugstr_getEventTypeStr(pEvent_p->m_EventType), pEvent_p->m_EventType,
+           debugstr_getEventSinkStr(pEvent_p->m_EventSink), pEvent_p->m_EventSink,
            pEvent_p->m_uiSize);*/
 
     ioctlret = ioctl (instance_l.fd, PLK_CMD_POST_EVENT, pEvent_p);
@@ -308,8 +308,8 @@ static void *eventThread (void * arg_p)
         if (ret == 0)
         {
             /*TRACE ("%s() User: got event type:%d(%s) sink:%d(%s)\n", __func__,
-                    pEvent->m_EventType, EplGetEventTypeStr(pEvent->m_EventType),
-                    pEvent->m_EventSink, EplGetEventSinkStr(pEvent->m_EventSink));*/
+                    pEvent->m_EventType, debugstr_getEventTypeStr(pEvent->m_EventType),
+                    pEvent->m_EventSink, debugstr_getEventSinkStr(pEvent->m_EventSink));*/
             if (pEvent->m_uiSize != 0)
                 pEvent->m_pArg = (char *)pEvent + sizeof(tEplEvent);
 

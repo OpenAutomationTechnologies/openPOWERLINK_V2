@@ -45,6 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <oplk/EplInc.h>
 #include <oplk/Epl.h>
+#include <oplk/debugstr.h>
 #include <common/target.h>
 #include <user/eventu.h>
 #include <user/eventucal.h>
@@ -179,8 +180,8 @@ tEplKernel eventucal_postKernelEvent (tEplEvent *pEvent_p)
 {
     tEplKernel      ret;
     /*TRACE("U2K type:%s(%d) sink:%s(%d) size:%d!\n",
-                   EplGetEventTypeStr(pEvent_p->m_EventType), pEvent_p->m_EventType,
-                   EplGetEventSinkStr(pEvent_p->m_EventSink), pEvent_p->m_EventSink,
+                   debugstr_getEventTypeStr(pEvent_p->m_EventType), pEvent_p->m_EventType,
+                   debugstr_getEventSinkStr(pEvent_p->m_EventSink), pEvent_p->m_EventSink,
                    pEvent_p->m_uiSize);*/
 
     target_enableGlobalInterrupt(FALSE);
@@ -214,8 +215,8 @@ tEplKernel eventucal_postUserEvent (tEplEvent *pEvent_p)
     tEplKernel      ret;
 
     /*TRACE("UINT  type:%s(%d) sink:%s(%d) size:%d!\n",
-                   EplGetEventTypeStr(pEvent_p->m_EventType), pEvent_p->m_EventType,
-                   EplGetEventSinkStr(pEvent_p->m_EventSink), pEvent_p->m_EventSink,
+                   debugstr_getEventTypeStr(pEvent_p->m_EventType), pEvent_p->m_EventType,
+                   debugstr_getEventSinkStr(pEvent_p->m_EventSink), pEvent_p->m_EventSink,
                    pEvent_p->m_uiSize);*/
     ret = eventu_process(pEvent_p);
 
