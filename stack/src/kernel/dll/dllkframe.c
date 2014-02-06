@@ -140,8 +140,8 @@ tEdrvReleaseRxBuffer dllk_processFrameReceived(tEdrvRxBuffer * pRxBuffer_p)
         {
             tEdrvTxBuffer*  pTxBuffer = NULL;
 
-            msgType = (tMsgType)ami_getUint8Le(&pFrame->m_le_bMessageType);
-            if (msgType == kEplMsgTypePreq)
+            msgType = (tMsgType)ami_getUint8Le(&pFrame->messageType);
+            if (msgType == kMsgTypePreq)
             {
                 if (dllkInstance_g.dllState == kDllCsWaitPreq)
                 {   // PReq expected and actually received
@@ -156,12 +156,12 @@ tEdrvReleaseRxBuffer dllk_processFrameReceived(tEdrvRxBuffer * pRxBuffer_p)
 #else
                     pTxFrame = (tPlkFrame *) pTxBuffer->pBuffer;
                     // update frame (NMT state, RD, RS, PR, MS, EN flags)
-                    ami_setUint8Le(&pTxFrame->m_Data.m_Pres.m_le_bNmtStatus, (BYTE) nmtState);
-                    ami_setUint8Le(&pTxFrame->m_Data.m_Pres.m_le_bFlag2, dllkInstance_g.flag2);
+                    ami_setUint8Le(&pTxFrame->data.pres.nmtStatus, (BYTE) nmtState);
+                    ami_setUint8Le(&pTxFrame->data.pres.flag2, dllkInstance_g.flag2);
                     if (nmtState != kNmtCsOperational)
                     {   // mark PDO as invalid in NMT state Op
                         // $$$ reset only RD flag; set other flags appropriately
-                        ami_setUint8Le(&pTxFrame->m_Data.m_Pres.m_le_bFlag1, 0);
+                        ami_setUint8Le(&pTxFrame->data.pres.flag1, 0);
                     }
                     // $$$ make function that updates Pres, StatusRes
                     // send PRes frame
@@ -185,9 +185,9 @@ tEdrvReleaseRxBuffer dllk_processFrameReceived(tEdrvRxBuffer * pRxBuffer_p)
     frameInfo.pFrame = pFrame;
     frameInfo.frameSize = pRxBuffer_p->rxFrameSize;
 
-    if (ami_getUint16Be(&pFrame->m_be_wEtherType) != EPL_C_DLL_ETHERTYPE_EPL)
+    if (ami_getUint16Be(&pFrame->etherType) != EPL_C_DLL_ETHERTYPE_EPL)
     {   // non-EPL frame
-        //TRACE("cbFrameReceived: pfnCbAsync=0x%p SrcMAC=0x%llx\n", dllkInstance_g.pfnCbAsync, ami_getUint48Be(pFrame->m_be_abSrcMac));
+        //TRACE("cbFrameReceived: pfnCbAsync=0x%p SrcMAC=0x%llx\n", dllkInstance_g.pfnCbAsync, ami_getUint48Be(pFrame->aSrcMac));
         if (dllkInstance_g.pfnCbAsync != NULL)
         {   // handler for async frames is registered
             dllkInstance_g.pfnCbAsync(&frameInfo);
@@ -195,11 +195,11 @@ tEdrvReleaseRxBuffer dllk_processFrameReceived(tEdrvRxBuffer * pRxBuffer_p)
         goto Exit;
     }
 
-    msgType = (tMsgType)ami_getUint8Le(&pFrame->m_le_bMessageType);
+    msgType = (tMsgType)ami_getUint8Le(&pFrame->messageType);
     switch (msgType)
     {
-        case kEplMsgTypePreq:
-            if (ami_getUint8Le(&pFrame->m_le_bDstNodeId) != dllkInstance_g.dllConfigParam.nodeId)
+        case kMsgTypePreq:
+            if (ami_getUint8Le(&pFrame->dstNodeId) != dllkInstance_g.dllConfigParam.nodeId)
             {   // this PReq is not intended for us
                 goto Exit;
             }
@@ -209,13 +209,13 @@ tEdrvReleaseRxBuffer dllk_processFrameReceived(tEdrvRxBuffer * pRxBuffer_p)
                 goto Exit;
             break;
 
-        case kEplMsgTypePres:
+        case kMsgTypePres:
             ret = processReceivedPres(&frameInfo, nmtState, &nmtEvent, &releaseRxBuffer);
             if (ret != kErrorOk)
                 goto Exit;
             break;
 
-        case kEplMsgTypeSoc:
+        case kMsgTypeSoc:
             nmtEvent = kNmtEventDllCeSoc;
             ret = processReceivedSoc(pRxBuffer_p, nmtState);
             if (ret != kErrorOk)
@@ -223,7 +223,7 @@ tEdrvReleaseRxBuffer dllk_processFrameReceived(tEdrvRxBuffer * pRxBuffer_p)
             break;
 
 #if defined(CONFIG_INCLUDE_MASND)
-        case kEplMsgTypeAInv:
+        case kMsgTypeAInv:
             nmtEvent = kNmtEventDllCeAInv;
             ret = processReceivedSoa(pRxBuffer_p, nmtState);
             if (ret != kErrorOk)
@@ -231,14 +231,14 @@ tEdrvReleaseRxBuffer dllk_processFrameReceived(tEdrvRxBuffer * pRxBuffer_p)
             break;
 #endif
 
-        case kEplMsgTypeSoa:
+        case kMsgTypeSoa:
             nmtEvent = kNmtEventDllCeSoa;
             ret = processReceivedSoa(pRxBuffer_p, nmtState);
             if (ret != kErrorOk)
                 goto Exit;
             break;
 
-        case kEplMsgTypeAsnd:
+        case kMsgTypeAsnd:
             nmtEvent = kNmtEventDllCeAsnd;
             ret = processReceivedAsnd(&frameInfo, pRxBuffer_p, nmtState, &releaseRxBuffer);
             if (ret != kErrorOk)
@@ -323,8 +323,8 @@ void dllk_processTransmittedNmtReq(tEdrvTxBuffer * pTxBuffer_p)
         // actually sent, to start the timer for monitoring
         // the NMT state change.
         pTxFrame = (tPlkFrame *) pTxBuffer_p->pBuffer;
-        if ((ami_getUint8Le(&pTxFrame->m_le_bMessageType) == (UINT8) kEplMsgTypeAsnd) &&
-            (ami_getUint8Le(&pTxFrame->m_Data.m_Asnd.m_le_bServiceId) == (UINT8) kDllAsndNmtCommand))
+        if ((ami_getUint8Le(&pTxFrame->messageType) == (UINT8) kMsgTypeAsnd) &&
+            (ami_getUint8Le(&pTxFrame->data.asnd.serviceId) == (UINT8) kDllAsndNmtCommand))
         {   // post event directly to NmtMnu module
             event.m_EventSink = kEplEventSinkNmtMnu;
             event.m_EventType = kEplEventTypeNmtMnuNmtCmdSent;
@@ -624,8 +624,8 @@ tOplkError dllk_updateFrameIdentRes(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtSta
     pTxFrame = (tPlkFrame *) pTxBuffer_p->pBuffer;
 
     // update frame (NMT state, RD, RS, PR flags)
-    ami_setUint8Le(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_bNmtStatus, (UINT8)nmtState_p);
-    ami_setUint8Le(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_bFlag2, dllkInstance_g.flag2);
+    ami_setUint8Le(&pTxFrame->data.asnd.payload.identResponse.nmtStatus, (UINT8)nmtState_p);
+    ami_setUint8Le(&pTxFrame->data.asnd.payload.identResponse.flag2, dllkInstance_g.flag2);
 
 #if (EDRV_AUTO_RESPONSE != FALSE)
     if (nmtState_p < kNmtMsNotActive)
@@ -657,9 +657,9 @@ tOplkError dllk_updateFrameStatusRes(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtSt
     pTxFrame = (tPlkFrame *) pTxBuffer_p->pBuffer;
 
     // update frame (NMT state, RD, RS, PR, EC, EN flags)
-    ami_setUint8Le(&pTxFrame->m_Data.m_Asnd.m_Payload.m_StatusResponse.m_le_bNmtStatus, (UINT8)nmtState_p);
-    ami_setUint8Le(&pTxFrame->m_Data.m_Asnd.m_Payload.m_StatusResponse.m_le_bFlag2, dllkInstance_g.flag2);
-    ami_setUint8Le(&pTxFrame->m_Data.m_Asnd.m_Payload.m_StatusResponse.m_le_bFlag1, dllkInstance_g.flag1);
+    ami_setUint8Le(&pTxFrame->data.asnd.payload.statusResponse.nmtStatus, (UINT8)nmtState_p);
+    ami_setUint8Le(&pTxFrame->data.asnd.payload.statusResponse.flag2, dllkInstance_g.flag2);
+    ami_setUint8Le(&pTxFrame->data.asnd.payload.statusResponse.flag1, dllkInstance_g.flag1);
 
 #if (EDRV_AUTO_RESPONSE != FALSE)
     if (nmtState_p < kNmtMsNotActive)
@@ -692,11 +692,11 @@ tOplkError dllk_updateFramePres(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p
     pTxFrame = (tPlkFrame *) pTxBuffer_p->pBuffer;
 
     // update frame (NMT state, RD, RS, PR, MS, EN flags)
-    ami_setUint8Le(&pTxFrame->m_Data.m_Pres.m_le_bNmtStatus, (BYTE) nmtState_p);
-    ami_setUint8Le(&pTxFrame->m_Data.m_Pres.m_le_bFlag2, dllkInstance_g.flag2);
+    ami_setUint8Le(&pTxFrame->data.pres.nmtStatus, (BYTE) nmtState_p);
+    ami_setUint8Le(&pTxFrame->data.pres.flag2, dllkInstance_g.flag2);
 
     // get RD flag
-    flag1 = ami_getUint8Le(&pTxFrame->m_Data.m_Pres.m_le_bFlag1) & EPL_FRAME_FLAG1_RD;
+    flag1 = ami_getUint8Le(&pTxFrame->data.pres.flag1) & EPL_FRAME_FLAG1_RD;
 
     if ( (dllkInstance_g.dllConfigParam.multipleCycleCnt > 0) &&
          (dllkInstance_g.mnFlag1 & EPL_FRAME_FLAG1_MS) ) // MS flag set in PReq
@@ -711,7 +711,7 @@ tOplkError dllk_updateFramePres(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p
     {   // mark PDO as invalid in all NMT states but OPERATIONAL - reset only RD flag
         flag1 &= ~EPL_FRAME_FLAG1_RD;
     }
-    ami_setUint8Le(&pTxFrame->m_Data.m_Pres.m_le_bFlag1, flag1);        // update frame (flag1)
+    ami_setUint8Le(&pTxFrame->data.pres.flag1, flag1);        // update frame (flag1)
 
 #if (EDRV_AUTO_RESPONSE != FALSE)
 //    if (NmtState_p < kNmtMsNotActive)
@@ -745,38 +745,38 @@ tOplkError dllk_checkFrame(tPlkFrame * pFrame_p, UINT frameSize_p)
     if (pFrame_p != NULL)
     {
         // check SrcMAC
-        if (ami_getUint48Be(pFrame_p->m_be_abSrcMac) == 0)
+        if (ami_getUint48Be(pFrame_p->aSrcMac) == 0)
         {
             // source MAC address
-            EPL_MEMCPY(&pFrame_p->m_be_abSrcMac[0], &dllkInstance_g.aLocalMac[0], 6);
+            EPL_MEMCPY(&pFrame_p->aSrcMac[0], &dllkInstance_g.aLocalMac[0], 6);
         }
 
         // check ethertype
-        etherType = ami_getUint16Be(&pFrame_p->m_be_wEtherType);
+        etherType = ami_getUint16Be(&pFrame_p->etherType);
         if (etherType == 0)
         {
             // assume EPL frame
             etherType = EPL_C_DLL_ETHERTYPE_EPL;
-            ami_setUint16Be(&pFrame_p->m_be_wEtherType, etherType);
+            ami_setUint16Be(&pFrame_p->etherType, etherType);
         }
 
         if (etherType == EPL_C_DLL_ETHERTYPE_EPL)
         {
             // source node ID
-            ami_setUint8Le(&pFrame_p->m_le_bSrcNodeId, (BYTE) dllkInstance_g.dllConfigParam.nodeId);
+            ami_setUint8Le(&pFrame_p->srcNodeId, (BYTE) dllkInstance_g.dllConfigParam.nodeId);
 
             // check message type
-            MsgType = ami_getUint8Le(&pFrame_p->m_le_bMessageType);
+            MsgType = ami_getUint8Le(&pFrame_p->messageType);
             if (MsgType == 0)
             {
-                MsgType = kEplMsgTypeAsnd;
-                ami_setUint8Le(&pFrame_p->m_le_bMessageType, (BYTE) MsgType);
+                MsgType = kMsgTypeAsnd;
+                ami_setUint8Le(&pFrame_p->messageType, (BYTE) MsgType);
             }
 
-            if (MsgType == kEplMsgTypeAsnd)
+            if (MsgType == kMsgTypeAsnd)
             {
                 // destination MAC address
-                ami_setUint48Be(&pFrame_p->m_be_abDstMac[0], EPL_C_DLL_MULTICAST_ASND);
+                ami_setUint48Be(&pFrame_p->aDstMac[0], EPL_C_DLL_MULTICAST_ASND);
             }
         }
     }
@@ -881,7 +881,7 @@ tOplkError dllk_updateFrameSoa(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p,
         }
         ret = dllkcal_getSoaRequest(&dllkInstance_g.aLastReqServiceId[curReq_p],
                                            &dllkInstance_g.aLastTargetNodeId[curReq_p],
-                                           &pTxFrame->m_Data.m_Soa.m_Payload);
+                                           &pTxFrame->data.soa.payload);
         if (ret != kErrorOk)
             return ret;
 
@@ -900,7 +900,7 @@ tOplkError dllk_updateFrameSoa(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p,
             }
 
             // update frame (EA, ER flags)
-            ami_setUint8Le(&pTxFrame->m_Data.m_Soa.m_le_bFlag1,
+            ami_setUint8Le(&pTxFrame->data.soa.flag1,
                 pNodeInfo->soaFlag1 & (EPL_FRAME_FLAG1_EA | EPL_FRAME_FLAG1_ER));
         }
         else
@@ -915,12 +915,12 @@ tOplkError dllk_updateFrameSoa(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p,
     }
 
     // update frame (target)
-    ami_setUint8Le(&pTxFrame->m_Data.m_Soa.m_le_bReqServiceId,
+    ami_setUint8Le(&pTxFrame->data.soa.reqServiceId,
                    (UINT8) dllkInstance_g.aLastReqServiceId[curReq_p]);
-    ami_setUint8Le(&pTxFrame->m_Data.m_Soa.m_le_bReqServiceTarget,
+    ami_setUint8Le(&pTxFrame->data.soa.reqServiceTarget,
                    (UINT8) dllkInstance_g.aLastTargetNodeId[curReq_p]);
     // update frame (NMT state)
-    ami_setUint8Le(&pTxFrame->m_Data.m_Soa.m_le_bNmtStatus, (BYTE) nmtState_p);
+    ami_setUint8Le(&pTxFrame->data.soa.nmtStatus, (BYTE) nmtState_p);
 
     return ret;
 }
@@ -957,9 +957,9 @@ tOplkError dllk_asyncFrameNotReceived(tDllReqServiceId reqServiceId_p, UINT node
             // ASnd service registered?
             if (dllkInstance_g.aAsndFilter[reqServiceId_p] == kDllAsndFilterAny)
             {   // ASnd service ID is registered
-                ami_setUint8Le(&pFrame->m_le_bSrcNodeId, (BYTE) nodeId_p);
-                ami_setUint8Le(&pFrame->m_le_bMessageType, (BYTE) kEplMsgTypeAsnd);
-                ami_setUint8Le(&pFrame->m_Data.m_Asnd.m_le_bServiceId, (BYTE) reqServiceId_p);
+                ami_setUint8Le(&pFrame->srcNodeId, (BYTE) nodeId_p);
+                ami_setUint8Le(&pFrame->messageType, (BYTE) kMsgTypeAsnd);
+                ami_setUint8Le(&pFrame->data.asnd.serviceId, (BYTE) reqServiceId_p);
 
                 FrameInfo.pFrame = pFrame;
                 FrameInfo.frameSize = 18;   // empty non existing ASnd frame
@@ -1008,7 +1008,7 @@ tOplkError dllk_createTxFrame (UINT* pHandle_p, UINT* pFrameSize_p,
 
     switch (msgType_p)
     {
-        case kEplMsgTypeAsnd:
+        case kMsgTypeAsnd:
             // search for fixed Tx buffers
             switch (serviceId_p)
             {
@@ -1046,24 +1046,24 @@ tOplkError dllk_createTxFrame (UINT* pHandle_p, UINT* pFrameSize_p,
             }
             break;
 
-        case kEplMsgTypeNonEpl:
+        case kMsgTypeNonPowerlink:
             handle = DLLK_TXFRAME_NONEPL;
             break;
 
-        case kEplMsgTypePres:
+        case kMsgTypePres:
             handle = DLLK_TXFRAME_PRES;
             break;
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
-        case kEplMsgTypeSoc:
+        case kMsgTypeSoc:
             handle = DLLK_TXFRAME_SOC;
             break;
 
-        case kEplMsgTypeSoa:
+        case kMsgTypeSoa:
             handle = DLLK_TXFRAME_SOA;
             break;
 
-        case kEplMsgTypePreq:
+        case kMsgTypePreq:
           // look for free entry
             if ((handle < DLLK_TXFRAME_PREQ) || (handle >= dllkInstance_g.maxTxFrames))
             {   // start with first PReq buffer
@@ -1124,83 +1124,83 @@ tOplkError dllk_createTxFrame (UINT* pHandle_p, UINT* pFrameSize_p,
         EPL_MEMSET(pTxBuffer->pBuffer, 0, pTxBuffer->maxBufferSize);
         pTxFrame = (tPlkFrame *) pTxBuffer->pBuffer;
 
-        if (msgType_p != kEplMsgTypeNonEpl)
+        if (msgType_p != kMsgTypeNonPowerlink)
         {   // fill out Frame only if it is an EPL frame
-            ami_setUint16Be(&pTxFrame->m_be_wEtherType, EPL_C_DLL_ETHERTYPE_EPL);
-            ami_setUint8Le(&pTxFrame->m_le_bSrcNodeId, (BYTE) dllkInstance_g.dllConfigParam.nodeId);
-            EPL_MEMCPY(&pTxFrame->m_be_abSrcMac[0], &dllkInstance_g.aLocalMac[0], 6);
+            ami_setUint16Be(&pTxFrame->etherType, EPL_C_DLL_ETHERTYPE_EPL);
+            ami_setUint8Le(&pTxFrame->srcNodeId, (BYTE) dllkInstance_g.dllConfigParam.nodeId);
+            EPL_MEMCPY(&pTxFrame->aSrcMac[0], &dllkInstance_g.aLocalMac[0], 6);
             switch (msgType_p)
             {
-                case kEplMsgTypeAsnd:
+                case kMsgTypeAsnd:
                     // destination MAC address
-                    ami_setUint48Be(&pTxFrame->m_be_abDstMac[0], EPL_C_DLL_MULTICAST_ASND);
+                    ami_setUint48Be(&pTxFrame->aDstMac[0], EPL_C_DLL_MULTICAST_ASND);
                     // destination node ID
                     switch (serviceId_p)
                     {
                         case kDllAsndIdentResponse:
-                            ami_setUint8Le(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_bEplProfileVersion,
+                            ami_setUint8Le(&pTxFrame->data.asnd.payload.identResponse.powerlinkProfileVersion,
                                            (UINT8) EPL_SPEC_VERSION);
-                            ami_setUint32Le(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwFeatureFlags,
+                            ami_setUint32Le(&pTxFrame->data.asnd.payload.identResponse.featureFlagsLe,
                                             dllkInstance_g.dllConfigParam.featureFlags);
-                            ami_setUint16Le(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_wMtu,
+                            ami_setUint16Le(&pTxFrame->data.asnd.payload.identResponse.mtuLe,
                                            (UINT16) dllkInstance_g.dllConfigParam.asyncMtu);
-                            ami_setUint16Le(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_wPollInSize,
+                            ami_setUint16Le(&pTxFrame->data.asnd.payload.identResponse.pollInSizeLe,
                                            (UINT16)dllkInstance_g.dllConfigParam.preqActPayloadLimit);
-                            ami_setUint16Le(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_wPollOutSize,
+                            ami_setUint16Le(&pTxFrame->data.asnd.payload.identResponse.pollOutSizeLe,
                                            (UINT16)dllkInstance_g.dllConfigParam.presActPayloadLimit);
-                            ami_setUint32Le(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwResponseTime,
+                            ami_setUint32Le(&pTxFrame->data.asnd.payload.identResponse.responseTimeLe,
                                             dllkInstance_g.dllConfigParam.presMaxLatency);
-                            ami_setUint32Le(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwDeviceType,
+                            ami_setUint32Le(&pTxFrame->data.asnd.payload.identResponse.deviceTypeLe,
                                             dllkInstance_g.dllIdentParam.deviceType);
-                            ami_setUint32Le(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwVendorId,
+                            ami_setUint32Le(&pTxFrame->data.asnd.payload.identResponse.vendorIdLe,
                                             dllkInstance_g.dllIdentParam.vendorId);
-                            ami_setUint32Le(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwProductCode,
+                            ami_setUint32Le(&pTxFrame->data.asnd.payload.identResponse.productCodeLe,
                                             dllkInstance_g.dllIdentParam.productCode);
-                            ami_setUint32Le(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwRevisionNumber,
+                            ami_setUint32Le(&pTxFrame->data.asnd.payload.identResponse.revisionNumberLe,
                                             dllkInstance_g.dllIdentParam.revisionNumber);
-                            ami_setUint32Le(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwSerialNumber,
+                            ami_setUint32Le(&pTxFrame->data.asnd.payload.identResponse.serialNumberLe,
                                             dllkInstance_g.dllIdentParam.serialNumber);
-                            ami_setUint64Le(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_qwVendorSpecificExt1,
+                            ami_setUint64Le(&pTxFrame->data.asnd.payload.identResponse.vendorSpecificExt1Le,
                                               dllkInstance_g.dllIdentParam.vendorSpecificExt1);
-                            ami_setUint32Le(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwVerifyConfigurationDate,
+                            ami_setUint32Le(&pTxFrame->data.asnd.payload.identResponse.verifyConfigurationDateLe,
                                             dllkInstance_g.dllIdentParam.verifyConfigurationDate);
-                            ami_setUint32Le(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwVerifyConfigurationTime,
+                            ami_setUint32Le(&pTxFrame->data.asnd.payload.identResponse.verifyConfigurationTimeLe,
                                             dllkInstance_g.dllIdentParam.verifyConfigurationTime);
-                            ami_setUint32Le(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwApplicationSwDate,
+                            ami_setUint32Le(&pTxFrame->data.asnd.payload.identResponse.applicationSwDateLe,
                                             dllkInstance_g.dllIdentParam.applicationSwDate);
-                            ami_setUint32Le(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwApplicationSwTime,
+                            ami_setUint32Le(&pTxFrame->data.asnd.payload.identResponse.applicationSwTimeLe,
                                             dllkInstance_g.dllIdentParam.applicationSwTime);
-                            ami_setUint32Le(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwIpAddress,
+                            ami_setUint32Le(&pTxFrame->data.asnd.payload.identResponse.ipAddressLe,
                                             dllkInstance_g.dllIdentParam.ipAddress);
-                            ami_setUint32Le(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwSubnetMask,
+                            ami_setUint32Le(&pTxFrame->data.asnd.payload.identResponse.subnetMaskLe,
                                             dllkInstance_g.dllIdentParam.subnetMask);
-                            ami_setUint32Le(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_dwDefaultGateway,
+                            ami_setUint32Le(&pTxFrame->data.asnd.payload.identResponse.defaultGatewayLe,
                                             dllkInstance_g.dllIdentParam.defaultGateway);
-                            EPL_MEMCPY(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_sHostname[0],
+                            EPL_MEMCPY(&pTxFrame->data.asnd.payload.identResponse.sHostName[0],
                                        &dllkInstance_g.dllIdentParam.sHostname[0],
                                        sizeof (dllkInstance_g.dllIdentParam.sHostname));
-                            EPL_MEMCPY(&pTxFrame->m_Data.m_Asnd.m_Payload.m_IdentResponse.m_le_abVendorSpecificExt2[0],
+                            EPL_MEMCPY(&pTxFrame->data.asnd.payload.identResponse.aVendorSpecificExt2[0],
                                        &dllkInstance_g.dllIdentParam.aVendorSpecificExt2[0],
                                        sizeof (dllkInstance_g.dllIdentParam.aVendorSpecificExt2));
                             // fall-through
 
                         case kDllAsndStatusResponse:
                             // IdentResponses and StatusResponses are Broadcast
-                            ami_setUint8Le(&pTxFrame->m_le_bDstNodeId, (BYTE) EPL_C_ADR_BROADCAST);
+                            ami_setUint8Le(&pTxFrame->dstNodeId, (BYTE) EPL_C_ADR_BROADCAST);
                             break;
 
 #if EPL_DLL_PRES_CHAINING_CN != FALSE
                         case kDllAsndSyncResponse:
                             // SyncRes destination node ID is MN node ID
-                            ami_setUint8Le(&pTxFrame->m_le_bDstNodeId, (BYTE) EPL_C_ADR_MN_DEF_NODE_ID);
-                            ami_setUint32Le(&pTxFrame->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwLatency,
+                            ami_setUint8Le(&pTxFrame->dstNodeId, (BYTE) EPL_C_ADR_MN_DEF_NODE_ID);
+                            ami_setUint32Le(&pTxFrame->data.asnd.payload.syncResponse.latencyLe,
                                             dllkInstance_g.dllConfigParam.syncResLatency);
                             // SyncStatus: PResMode disabled / PResTimeFirst and PResTimeSecond invalid
-                            // ami_setUint32Le(&pTxFrame->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncStatus, 0);
+                            // ami_setUint32Le(&pTxFrame->data.asnd.payload.syncResponse.syncStatusLe, 0);
                             // init SyncNodeNumber
-                            // ami_setUint32Le(&pTxFrame->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncNodeNumber, 0);
+                            // ami_setUint32Le(&pTxFrame->data.asnd.payload.syncResponse.syncNodeNumberLe, 0);
                             // init SyncDelay
-                            // ami_setUint32Le(&pTxFrame->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncDelay, 0);
+                            // ami_setUint32Le(&pTxFrame->data.asnd.payload.syncResponse.syncDelayLe, 0);
                             break;
 #endif
 
@@ -1209,27 +1209,27 @@ tOplkError dllk_createTxFrame (UINT* pHandle_p, UINT* pFrameSize_p,
                     }
 
                     // ASnd Service ID
-                    ami_setUint8Le(&pTxFrame->m_Data.m_Asnd.m_le_bServiceId, serviceId_p);
+                    ami_setUint8Le(&pTxFrame->data.asnd.serviceId, serviceId_p);
                     break;
 
-                case kEplMsgTypePres:
-                    ami_setUint48Be(&pTxFrame->m_be_abDstMac[0], EPL_C_DLL_MULTICAST_PRES);
-                    ami_setUint8Le(&pTxFrame->m_le_bDstNodeId, (BYTE) EPL_C_ADR_BROADCAST);
+                case kMsgTypePres:
+                    ami_setUint48Be(&pTxFrame->aDstMac[0], EPL_C_DLL_MULTICAST_PRES);
+                    ami_setUint8Le(&pTxFrame->dstNodeId, (BYTE) EPL_C_ADR_BROADCAST);
                     break;
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
-                case kEplMsgTypeSoc:
-                    ami_setUint48Be(&pTxFrame->m_be_abDstMac[0], EPL_C_DLL_MULTICAST_SOC);
-                    ami_setUint8Le(&pTxFrame->m_le_bDstNodeId, (BYTE) EPL_C_ADR_BROADCAST);
+                case kMsgTypeSoc:
+                    ami_setUint48Be(&pTxFrame->aDstMac[0], EPL_C_DLL_MULTICAST_SOC);
+                    ami_setUint8Le(&pTxFrame->dstNodeId, (BYTE) EPL_C_ADR_BROADCAST);
                     break;
 
-                case kEplMsgTypeSoa:
-                    ami_setUint48Be(&pTxFrame->m_be_abDstMac[0], EPL_C_DLL_MULTICAST_SOA);
-                    ami_setUint8Le(&pTxFrame->m_le_bDstNodeId, (BYTE) EPL_C_ADR_BROADCAST);
-                    ami_setUint8Le(&pTxFrame->m_Data.m_Soa.m_le_bEplVersion, (BYTE) EPL_SPEC_VERSION);
+                case kMsgTypeSoa:
+                    ami_setUint48Be(&pTxFrame->aDstMac[0], EPL_C_DLL_MULTICAST_SOA);
+                    ami_setUint8Le(&pTxFrame->dstNodeId, (BYTE) EPL_C_ADR_BROADCAST);
+                    ami_setUint8Le(&pTxFrame->data.soa.powerlinkVersion, (BYTE) EPL_SPEC_VERSION);
                     break;
 
-                case kEplMsgTypePreq:
+                case kMsgTypePreq:
                     break;
 #endif
 
@@ -1238,7 +1238,7 @@ tOplkError dllk_createTxFrame (UINT* pHandle_p, UINT* pFrameSize_p,
             }
 
             // EPL message type
-            ami_setUint8Le(&pTxFrame->m_le_bMessageType, (BYTE) msgType_p);
+            ami_setUint8Le(&pTxFrame->messageType, (BYTE) msgType_p);
         }
     }
 
@@ -1371,7 +1371,7 @@ static tOplkError processReceivedPreq(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
 #endif
 
         // update only EA and MS flag
-        bFlag1 = ami_getUint8Le(&pFrame->m_Data.m_Preq.m_le_bFlag1);
+        bFlag1 = ami_getUint8Le(&pFrame->data.preq.flag1);
 
         dllkInstance_g.mnFlag1 = (dllkInstance_g.mnFlag1 &
                                   ~(EPL_FRAME_FLAG1_EA | EPL_FRAME_FLAG1_MS)) |             // preserve all flags except EA and MS
@@ -1384,17 +1384,17 @@ static tOplkError processReceivedPreq(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
             if (nmtState_p != kNmtCsOperational)
             {
                 // reset RD flag and all other flags, but that does not matter, because they were processed above
-                ami_setUint8Le(&pFrame->m_Data.m_Preq.m_le_bFlag1, 0);
+                ami_setUint8Le(&pFrame->data.preq.flag1, 0);
             }
 
             // compares real frame size and PDO size
-            if (((UINT) (ami_getUint16Le(&pFrame->m_Data.m_Preq.m_le_wSize) + EPL_FRAME_OFFSET_PDO_PAYLOAD) > pFrameInfo_p->frameSize) ||
+            if (((UINT) (ami_getUint16Le(&pFrame->data.preq.sizeLe) + EPL_FRAME_OFFSET_PDO_PAYLOAD) > pFrameInfo_p->frameSize) ||
                          (pFrameInfo_p->frameSize > (dllkInstance_g.dllConfigParam.preqActPayloadLimit + EPL_FRAME_OFFSET_PDO_PAYLOAD)))
             {   // format error
                 tErrHndkEvent  dllEvent;
 
                 dllEvent.m_ulDllErrorEvents = EPL_DLL_ERR_INVALID_FORMAT;
-                dllEvent.m_uiNodeId = ami_getUint8Le(&pFrame->m_le_bSrcNodeId);
+                dllEvent.m_uiNodeId = ami_getUint8Le(&pFrame->srcNodeId);
                 dllEvent.m_NmtState = nmtState_p;
                 errhndk_postError(&dllEvent);
                 goto Exit;
@@ -1454,7 +1454,7 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
 #endif
 
     pFrame = pFrameInfo_p->pFrame;
-    nodeId = ami_getUint8Le(&pFrame->m_le_bSrcNodeId);
+    nodeId = ami_getUint8Le(&pFrame->srcNodeId);
 
 #if EPL_DLL_PRES_CHAINING_CN != FALSE
     if ((dllkInstance_g.fPrcEnabled != FALSE) && (nodeId == EPL_C_ADR_MN_DEF_NODE_ID))
@@ -1554,7 +1554,7 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
         }
 
         // forward Flag2 to asynchronous scheduler
-        flag1 = ami_getUint8Le(&pFrame->m_Data.m_Asnd.m_Payload.m_StatusResponse.m_le_bFlag2);
+        flag1 = ami_getUint8Le(&pFrame->data.asnd.payload.statusResponse.flag2);
         ret = dllkcal_setAsyncPendingRequests(nodeId,
             ((tDllAsyncReqPriority) ((flag1 & EPL_FRAME_FLAG2_PR) >> EPL_FRAME_FLAG2_PR_SHIFT)),
             (flag1 & EPL_FRAME_FLAG2_RS));
@@ -1563,7 +1563,7 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
 
         // check NMT state of CN
         heartbeatEvent.errorCode = EPL_E_NO_ERROR;
-        heartbeatEvent.nmtState = (tNmtState) (ami_getUint8Le(&pFrame->m_Data.m_Pres.m_le_bNmtStatus) | NMT_TYPE_CS);
+        heartbeatEvent.nmtState = (tNmtState) (ami_getUint8Le(&pFrame->data.pres.nmtStatus) | NMT_TYPE_CS);
 
         if (pIntNodeInfo->nmtState != heartbeatEvent.nmtState)
         {   // NMT state of CN has changed -> post event to NmtMnu module
@@ -1610,7 +1610,7 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
     if (( nmtState_p != kNmtCsPreOperational2) && (nmtState_p != kNmtMsPreOperational2))
     {   // inform PDO module only in ReadyToOp and Op
         // compare real frame size and PDO size?
-        WORD wPresPayloadSize = ami_getUint16Le(&pFrame->m_Data.m_Pres.m_le_wSize);
+        WORD wPresPayloadSize = ami_getUint16Le(&pFrame->data.pres.sizeLe);
 
         if (((UINT) (wPresPayloadSize + EPL_FRAME_OFFSET_PDO_PAYLOAD) > pFrameInfo_p->frameSize)
 #if EPL_NMT_MAX_NODE_ID > 0
@@ -1641,7 +1641,7 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
             && (nmtState_p != kNmtMsOperational))
         {
             // reset RD flag and all other flags, but that does not matter, because they were processed above
-            ami_setUint8Le(&pFrame->m_Data.m_Pres.m_le_bFlag1, 0);
+            ami_setUint8Le(&pFrame->data.pres.flag1, 0);
         }
         ret = forwardRpdo(pFrameInfo_p);
         if (ret == kErrorReject)
@@ -1785,12 +1785,12 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
     }
 
     // check TargetNodeId
-    nodeId = ami_getUint8Le(&pFrame->m_Data.m_Soa.m_le_bReqServiceTarget);
+    nodeId = ami_getUint8Le(&pFrame->data.soa.reqServiceTarget);
     if (nodeId == dllkInstance_g.dllConfigParam.nodeId)
     {   // local node is the target of the current request
 
         // check ServiceId
-        reqServiceId = (tDllReqServiceId) ami_getUint8Le(&pFrame->m_Data.m_Soa.m_le_bReqServiceId);
+        reqServiceId = (tDllReqServiceId) ami_getUint8Le(&pFrame->data.soa.reqServiceId);
         switch (reqServiceId)
         {
             case kDllReqServiceStatus:
@@ -1814,7 +1814,7 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
 #endif
 
                 // update error signaling
-                flag1 = ami_getUint8Le(&pFrame->m_Data.m_Soa.m_le_bFlag1);
+                flag1 = ami_getUint8Le(&pFrame->data.soa.flag1);
                 if (((flag1 ^ dllkInstance_g.mnFlag1) & EPL_FRAME_FLAG1_ER) != 0)
                 {   // exception reset flag was changed by MN
                     // assume same state for EC in next cycle (clear all other bits)
@@ -1911,17 +1911,17 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
                 tDllkPrcCycleTiming  PrcCycleTiming;
 
                 pTxFrameSyncRes = (tPlkFrame *) dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SYNCRES].pBuffer;
-                syncControl = ami_getUint32Le(&pFrame->m_Data.m_Soa.m_Payload.m_SyncRequest.m_le_dwSyncControl);
+                syncControl = ami_getUint32Le(&pFrame->data.soa.payload.syncRequest.syncControlLe);
                 if (syncControl & EPL_SYNC_DEST_MAC_ADDRESS_VALID)
                 {
-                    if (EPL_MEMCMP(&pFrame->m_Data.m_Soa.m_Payload.m_SyncRequest.m_be_abDestMacAddress,
+                    if (EPL_MEMCMP(&pFrame->data.soa.payload.syncRequest.aDestMacAddress,
                                    &dllkInstance_g.aLocalMac, 6) != 0)
                     {   // DestMacAddress valid but unequal to own MAC address -> SyncReq is ignored
                         goto Exit;
                     }
                 }
 
-                PrcCycleTiming.pResTimeFirstNs = ami_getUint32Le(&pFrame->m_Data.m_Soa.m_Payload.m_SyncRequest.m_le_dwPResTimeFirst);
+                PrcCycleTiming.pResTimeFirstNs = ami_getUint32Le(&pFrame->data.soa.payload.syncRequest.presTimeFirstLe);
 
                 if ((syncControl & EPL_SYNC_PRES_TIME_FIRST_VALID) &&
                     (dllkInstance_g.prcPResTimeFirst != PrcCycleTiming.pResTimeFirstNs))
@@ -1935,10 +1935,10 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
                     if (ret != kErrorOk)
                         goto Exit;
 
-                    ami_setUint32Le(&pTxFrameSyncRes->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwPResTimeFirst,
+                    ami_setUint32Le(&pTxFrameSyncRes->data.asnd.payload.syncResponse.presTimeFirstLe,
                                     PrcCycleTiming.pResTimeFirstNs);
-                    ami_setUint32Le(&pTxFrameSyncRes->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncStatus,
-                                    ami_getUint32Le(&pTxFrameSyncRes->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncStatus)
+                    ami_setUint32Le(&pTxFrameSyncRes->data.asnd.payload.syncResponse.syncStatusLe,
+                                    ami_getUint32Le(&pTxFrameSyncRes->data.asnd.payload.syncResponse.syncStatusLe)
                                     | EPL_SYNC_PRES_TIME_FIRST_VALID);
                     // update SyncRes Tx buffer in Edrv
                     ret = edrv_updateTxBuffer(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SYNCRES]);
@@ -1948,7 +1948,7 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
 
                 if (syncControl & EPL_SYNC_PRES_FALL_BACK_TIMEOUT_VALID)
                 {
-                    dllkInstance_g.prcPResFallBackTimeout = ami_getUint32Le(&pFrame->m_Data.m_Soa.m_Payload.m_SyncRequest.m_le_dwPResFallBackTimeout);
+                    dllkInstance_g.prcPResFallBackTimeout = ami_getUint32Le(&pFrame->data.soa.payload.syncRequest.presFallBackTimeoutLe);
 
 #if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
                     if (dllkInstance_g.fPrcEnabled != FALSE)
@@ -1983,9 +1983,9 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
 
                 if (PrcCycleTiming.syncControl != 0)
                 {
-                    PrcCycleTiming.pResTimeSecondNs = ami_getUint32Le(&pFrame->m_Data.m_Soa.m_Payload.m_SyncRequest.m_le_dwPResTimeSecond);
-                    PrcCycleTiming.syncMNDelayFirstNs = ami_getUint32Le(&pFrame->m_Data.m_Soa.m_Payload.m_SyncRequest.m_le_dwSyncMnDelayFirst);
-                    PrcCycleTiming.syncMNDelaySecondNs = ami_getUint32Le(&pFrame->m_Data.m_Soa.m_Payload.m_SyncRequest.m_le_dwSyncMnDelaySecond);
+                    PrcCycleTiming.pResTimeSecondNs = ami_getUint32Le(&pFrame->data.soa.payload.syncRequest.presTimeSecondLe);
+                    PrcCycleTiming.syncMNDelayFirstNs = ami_getUint32Le(&pFrame->data.soa.payload.syncRequest.syncMnDelayFirstLe);
+                    PrcCycleTiming.syncMNDelaySecondNs = ami_getUint32Le(&pFrame->data.soa.payload.syncRequest.syncMnDelaySecondLe);
                     // $$$ m.u.: CbUpdatePrcCycleTiming
                 }
 #endif
@@ -2040,7 +2040,7 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
     else
     {   // other node is the target of the current request
         // check ServiceId
-        reqServiceId = (tDllReqServiceId) ami_getUint8Le(&pFrame->m_Data.m_Soa.m_le_bReqServiceId);
+        reqServiceId = (tDllReqServiceId) ami_getUint8Le(&pFrame->data.soa.reqServiceId);
         if (reqServiceId == kDllReqServiceSync)
         {   // SyncRequest -> store node ID and TimeStamp
             dllkInstance_g.syncReqPrevNodeId = nodeId;
@@ -2100,7 +2100,7 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
     pFrame = pFrameInfo_p->pFrame;
 
     // ASnd service registered?
-    asndServiceId = (UINT)ami_getUint8Le(&pFrame->m_Data.m_Asnd.m_le_bServiceId);
+    asndServiceId = (UINT)ami_getUint8Le(&pFrame->data.asnd.serviceId);
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
     if (dllkInstance_g.dllState >= kDllMsNonCyclic)
@@ -2112,7 +2112,7 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
 #if (EPL_DLL_PRES_CHAINING_MN != FALSE)
             case kDllAsndSyncResponse:
 #endif
-                nodeId = ami_getUint8Le(&pFrame->m_le_bSrcNodeId);
+                nodeId = ami_getUint8Le(&pFrame->srcNodeId);
                 if ((dllkInstance_g.aLastReqServiceId[dllkInstance_g.curLastSoaReq] == ((tDllReqServiceId) asndServiceId)) &&
                     (nodeId == dllkInstance_g.aLastTargetNodeId[dllkInstance_g.curLastSoaReq]))
                 {   // mark request as responded
@@ -2131,7 +2131,7 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
                     }
                     else
                     {
-                        EPL_MEMCPY(pIntNodeInfo->aMacAddr, pFrame->m_be_abSrcMac, 6);
+                        EPL_MEMCPY(pIntNodeInfo->aMacAddr, pFrame->aSrcMac, 6);
                     }
                 }
 #if (EPL_DLL_PRES_CHAINING_MN != FALSE)
@@ -2141,7 +2141,7 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
                 }
 #endif
                 // forward Flag2 to asynchronous scheduler
-                flag1 = ami_getUint8Le(&pFrame->m_Data.m_Asnd.m_Payload.m_StatusResponse.m_le_bFlag2);
+                flag1 = ami_getUint8Le(&pFrame->data.asnd.payload.statusResponse.flag2);
                 ret = dllkcal_setAsyncPendingRequests(nodeId,
                     ((tDllAsyncReqPriority) ((flag1 & EPL_FRAME_FLAG2_PR) >> EPL_FRAME_FLAG2_PR_SHIFT)),
                     (flag1 & EPL_FRAME_FLAG2_RS));
@@ -2164,7 +2164,7 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
             tPlkFrame* pTxFrameSyncRes;
 
             pTxFrameSyncRes = (tPlkFrame *) dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SYNCRES].pBuffer;
-            nodeId = (UINT) ami_getUint8Le(&pFrame->m_le_bSrcNodeId);
+            nodeId = (UINT) ami_getUint8Le(&pFrame->srcNodeId);
 
             if (nodeId == dllkInstance_g.syncReqPrevNodeId)
             {
@@ -2175,14 +2175,14 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
                                                      (EPL_C_DLL_T_MIN_FRAME + EPL_C_DLL_T_PREAMBLE);
 
                 // update SyncRes frame (SyncDelay and SyncNodeNumber)
-                ami_setUint32Le(&pTxFrameSyncRes->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncDelay, syncDelayNs);
-                ami_setUint32Le(&pTxFrameSyncRes->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncNodeNumber, (UINT32) nodeId);
+                ami_setUint32Le(&pTxFrameSyncRes->data.asnd.payload.syncResponse.syncDelayLe, syncDelayNs);
+                ami_setUint32Le(&pTxFrameSyncRes->data.asnd.payload.syncResponse.syncNodeNumberLe, (UINT32) nodeId);
                 // $$$ m.u.: CbUpdateRelativeLatencyDiff
             }
             else
             {
-                ami_setUint32Le(&pTxFrameSyncRes->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncDelay, 0);
-                ami_setUint32Le(&pTxFrameSyncRes->m_Data.m_Asnd.m_Payload.m_SyncResponse.m_le_dwSyncNodeNumber, (UINT32) 0);
+                ami_setUint32Le(&pTxFrameSyncRes->data.asnd.payload.syncResponse.syncDelayLe, 0);
+                ami_setUint32Le(&pTxFrameSyncRes->data.asnd.payload.syncResponse.syncNodeNumberLe, (UINT32) 0);
             }
 
             // update Tx buffer in Edrv
@@ -2210,7 +2210,7 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
         else if (dllkInstance_g.aAsndFilter[asndServiceId] == kDllAsndFilterLocal)
         {   // ASnd service ID is registered, but only local node ID or broadcasts
             // shall be forwarded
-            nodeId = ami_getUint8Le(&pFrame->m_le_bDstNodeId);
+            nodeId = ami_getUint8Le(&pFrame->dstNodeId);
             if ((nodeId == dllkInstance_g.dllConfigParam.nodeId) || (nodeId == EPL_C_ADR_BROADCAST))
             {   // ASnd frame is intended for us
                 // forward frame via async receive FIFO to userspace

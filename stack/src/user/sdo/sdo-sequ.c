@@ -700,16 +700,16 @@ static tOplkError processStateIdle(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSe
         // init con from extern, check rcon and scon -> send answer
         case kSdoSeqEventFrameRec:
             DEBUG_LVL_SDO_TRACE("%s scon=%u rcon=%u\n", __func__,
-                               pRecvFrame_p->m_le_bSendSeqNumCon,
-                               pRecvFrame_p->m_le_bRecSeqNumCon);
+                               pRecvFrame_p->sendSeqNumCon,
+                               pRecvFrame_p->recvSeqNumCon);
 
             // check if scon == 1 and rcon == 0
-            if(((pRecvFrame_p->m_le_bRecSeqNumCon & SDO_CON_MASK) == 0x00) &&
-               ((pRecvFrame_p->m_le_bSendSeqNumCon & SDO_CON_MASK) == 0x01))
+            if(((pRecvFrame_p->recvSeqNumCon & SDO_CON_MASK) == 0x00) &&
+               ((pRecvFrame_p->sendSeqNumCon & SDO_CON_MASK) == 0x01))
             {
                 // save sequence numbers
-                pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bRecSeqNumCon);
-                pSdoSeqCon_p->sendSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bSendSeqNumCon);
+                pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->recvSeqNumCon);
+                pSdoSeqCon_p->sendSeqNum = ami_getUint8Le(&pRecvFrame_p->sendSeqNumCon);
                 // create answer and send answer, set rcon to 1 (in send direction own scon)
                 pSdoSeqCon_p->recvSeqNum++;
                 ret = sendFrame(pSdoSeqCon_p, 0, NULL, FALSE);
@@ -724,11 +724,11 @@ static tOplkError processStateIdle(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSe
             {   // error -> close - delete timer
                 timeru_deleteTimer(&pSdoSeqCon_p->timerHandle);
 
-                if (((pRecvFrame_p->m_le_bRecSeqNumCon & SDO_CON_MASK) != 0x00) ||
-                    ((pRecvFrame_p->m_le_bSendSeqNumCon & SDO_CON_MASK) != 0x00))
+                if (((pRecvFrame_p->recvSeqNumCon & SDO_CON_MASK) != 0x00) ||
+                    ((pRecvFrame_p->sendSeqNumCon & SDO_CON_MASK) != 0x00))
                 {   // d.k. only answer with close message if the message sent was not a close message
-                    pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bRecSeqNumCon);
-                    pSdoSeqCon_p->sendSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bSendSeqNumCon);
+                    pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->recvSeqNumCon);
+                    pSdoSeqCon_p->sendSeqNum = ami_getUint8Le(&pRecvFrame_p->sendSeqNumCon);
                     // set rcon and scon to 0
                     pSdoSeqCon_p->sendSeqNum &= SEQ_NUM_MASK;
                     pSdoSeqCon_p->recvSeqNum &= SEQ_NUM_MASK;
@@ -771,11 +771,11 @@ static tOplkError processStateInit1(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
         // frame received
         case kSdoSeqEventFrameRec:
             // check scon == 1 and rcon == 1
-            if(((pRecvFrame_p->m_le_bRecSeqNumCon & SDO_CON_MASK) == 0x01) &&
-               ((pRecvFrame_p->m_le_bSendSeqNumCon & SDO_CON_MASK) == 0x01))
+            if(((pRecvFrame_p->recvSeqNumCon & SDO_CON_MASK) == 0x01) &&
+               ((pRecvFrame_p->sendSeqNumCon & SDO_CON_MASK) == 0x01))
             {   // create answer own scon = 2 - save sequence numbers
-                pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bRecSeqNumCon);
-                pSdoSeqCon_p->sendSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bSendSeqNumCon);
+                pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->recvSeqNumCon);
+                pSdoSeqCon_p->sendSeqNum = ami_getUint8Le(&pRecvFrame_p->sendSeqNumCon);
 
                 pSdoSeqCon_p->recvSeqNum++;
                 ret = sendFrame(pSdoSeqCon_p, 0, NULL, FALSE);
@@ -788,12 +788,12 @@ static tOplkError processStateInit1(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
 
             }
             // check if scon == 1 and rcon == 0, i.e. other side wants me to be server
-            else if(((pRecvFrame_p->m_le_bRecSeqNumCon & SDO_CON_MASK) == 0x00) &&
-                    ((pRecvFrame_p->m_le_bSendSeqNumCon & SDO_CON_MASK) == 0x01))
+            else if(((pRecvFrame_p->recvSeqNumCon & SDO_CON_MASK) == 0x00) &&
+                    ((pRecvFrame_p->sendSeqNumCon & SDO_CON_MASK) == 0x01))
             {
                 // save sequence numbers
-                pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bRecSeqNumCon);
-                pSdoSeqCon_p->sendSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bSendSeqNumCon);
+                pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->recvSeqNumCon);
+                pSdoSeqCon_p->sendSeqNum = ami_getUint8Le(&pRecvFrame_p->sendSeqNumCon);
                 // create answer and send answer - set rcon to 1 (in send direction own scon)
                 pSdoSeqCon_p->recvSeqNum++;
                 ret = sendFrame(pSdoSeqCon_p, 0, NULL, FALSE);
@@ -810,12 +810,12 @@ static tOplkError processStateInit1(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
 
                 timeru_deleteTimer(&pSdoSeqCon_p->timerHandle);
 
-                if (((pRecvFrame_p->m_le_bRecSeqNumCon & SDO_CON_MASK) != 0x00) ||
-                    ((pRecvFrame_p->m_le_bSendSeqNumCon & SDO_CON_MASK) != 0x00))
+                if (((pRecvFrame_p->recvSeqNumCon & SDO_CON_MASK) != 0x00) ||
+                    ((pRecvFrame_p->sendSeqNumCon & SDO_CON_MASK) != 0x00))
                 {   // d.k. only answer with close message if the message sent was not a close message
                     // save sequence numbers
-                    pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bRecSeqNumCon);
-                    pSdoSeqCon_p->sendSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bSendSeqNumCon);
+                    pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->recvSeqNumCon);
+                    pSdoSeqCon_p->sendSeqNum = ami_getUint8Le(&pRecvFrame_p->sendSeqNumCon);
                     // set rcon and scon to 0
                     pSdoSeqCon_p->sendSeqNum &= SEQ_NUM_MASK;
                     pSdoSeqCon_p->recvSeqNum &= SEQ_NUM_MASK;
@@ -875,11 +875,11 @@ static tOplkError processStateInit2(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
         // frame received
         case kSdoSeqEventFrameRec:
             // check scon == 2 and rcon == 1
-            if(((pRecvFrame_p->m_le_bRecSeqNumCon & SDO_CON_MASK) == 0x01) &&
-               ((pRecvFrame_p->m_le_bSendSeqNumCon & SDO_CON_MASK) == 0x02))
+            if(((pRecvFrame_p->recvSeqNumCon & SDO_CON_MASK) == 0x01) &&
+               ((pRecvFrame_p->sendSeqNumCon & SDO_CON_MASK) == 0x02))
             {   // create answer own rcon = 2 - save sequence numbers
-                pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bRecSeqNumCon);
-                pSdoSeqCon_p->sendSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bSendSeqNumCon);
+                pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->recvSeqNumCon);
+                pSdoSeqCon_p->sendSeqNum = ami_getUint8Le(&pRecvFrame_p->sendSeqNumCon);
 
                 pSdoSeqCon_p->recvSeqNum++;
                 ret = sendFrame(pSdoSeqCon_p, 0, NULL, FALSE);
@@ -899,11 +899,11 @@ static tOplkError processStateInit2(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
 
             }
             // check scon == 1 and rcon == 1, i.e. other side wants me to initiate the connection
-            else if(((pRecvFrame_p->m_le_bRecSeqNumCon & SDO_CON_MASK) == 0x01) &&
-                    ((pRecvFrame_p->m_le_bSendSeqNumCon & SDO_CON_MASK) == 0x01))
+            else if(((pRecvFrame_p->recvSeqNumCon & SDO_CON_MASK) == 0x01) &&
+                    ((pRecvFrame_p->sendSeqNumCon & SDO_CON_MASK) == 0x01))
             {
-                pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bRecSeqNumCon);
-                pSdoSeqCon_p->sendSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bSendSeqNumCon);
+                pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->recvSeqNumCon);
+                pSdoSeqCon_p->sendSeqNum = ami_getUint8Le(&pRecvFrame_p->sendSeqNumCon);
                 // create answer and send answer - set rcon to 1 (in send direction own scon)
                 pSdoSeqCon_p->recvSeqNum++;
                 ret = sendFrame(pSdoSeqCon_p, 0, NULL, FALSE);
@@ -921,12 +921,12 @@ static tOplkError processStateInit2(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
 
                 timeru_deleteTimer(&pSdoSeqCon_p->timerHandle);
 
-                if (((pRecvFrame_p->m_le_bRecSeqNumCon & SDO_CON_MASK) != 0x00) ||
-                    ((pRecvFrame_p->m_le_bSendSeqNumCon & SDO_CON_MASK) != 0x00))
+                if (((pRecvFrame_p->recvSeqNumCon & SDO_CON_MASK) != 0x00) ||
+                    ((pRecvFrame_p->sendSeqNumCon & SDO_CON_MASK) != 0x00))
                 {   // d.k. only answer with close message if the message sent was not a close message
                     // save sequence numbers
-                    pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bRecSeqNumCon);
-                    pSdoSeqCon_p->sendSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bSendSeqNumCon);
+                    pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->recvSeqNumCon);
+                    pSdoSeqCon_p->sendSeqNum = ami_getUint8Le(&pRecvFrame_p->sendSeqNumCon);
                     // set rcon and scon to 0
                     pSdoSeqCon_p->sendSeqNum &= SEQ_NUM_MASK;
                     pSdoSeqCon_p->recvSeqNum &= SEQ_NUM_MASK;
@@ -982,11 +982,11 @@ static tOplkError processStateInit3(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
         // frame received
         case kSdoSeqEventFrameRec:
             // check scon == 2 and rcon == 2
-            if(((pRecvFrame_p->m_le_bRecSeqNumCon & SDO_CON_MASK) == 0x02) &&
-               ((pRecvFrame_p->m_le_bSendSeqNumCon & SDO_CON_MASK) == 0x02))
+            if(((pRecvFrame_p->recvSeqNumCon & SDO_CON_MASK) == 0x02) &&
+               ((pRecvFrame_p->sendSeqNumCon & SDO_CON_MASK) == 0x02))
             {
-                pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bRecSeqNumCon);
-                pSdoSeqCon_p->sendSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bSendSeqNumCon);
+                pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->recvSeqNumCon);
+                pSdoSeqCon_p->sendSeqNum = ami_getUint8Le(&pRecvFrame_p->sendSeqNumCon);
 
                 pSdoSeqCon_p->sdoSeqState = kSdoSeqStateConnected;
 
@@ -1000,11 +1000,11 @@ static tOplkError processStateInit3(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
 
             }
             // check scon == 2 and rcon == 1
-            else if(((pRecvFrame_p->m_le_bRecSeqNumCon & SDO_CON_MASK) == 0x01) &&
-                    ((pRecvFrame_p->m_le_bSendSeqNumCon & SDO_CON_MASK) == 0x02))
+            else if(((pRecvFrame_p->recvSeqNumCon & SDO_CON_MASK) == 0x01) &&
+                    ((pRecvFrame_p->sendSeqNumCon & SDO_CON_MASK) == 0x02))
             {   // create answer own rcon = 2 - save sequence numbers
-                pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bRecSeqNumCon);
-                pSdoSeqCon_p->sendSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bSendSeqNumCon);
+                pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->recvSeqNumCon);
+                pSdoSeqCon_p->sendSeqNum = ami_getUint8Le(&pRecvFrame_p->sendSeqNumCon);
 
                 pSdoSeqCon_p->recvSeqNum++;
 
@@ -1029,12 +1029,12 @@ static tOplkError processStateInit3(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
 
                 timeru_deleteTimer(&pSdoSeqCon_p->timerHandle);
 
-                if (((pRecvFrame_p->m_le_bRecSeqNumCon & SDO_CON_MASK) != 0x00) ||
-                    ((pRecvFrame_p->m_le_bSendSeqNumCon & SDO_CON_MASK) != 0x00))
+                if (((pRecvFrame_p->recvSeqNumCon & SDO_CON_MASK) != 0x00) ||
+                    ((pRecvFrame_p->sendSeqNumCon & SDO_CON_MASK) != 0x00))
                 {   // d.k. only answer with close message if the message sent was not a close message
                     // save sequence numbers
-                    pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bRecSeqNumCon);
-                    pSdoSeqCon_p->sendSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bSendSeqNumCon);
+                    pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->recvSeqNumCon);
+                    pSdoSeqCon_p->sendSeqNum = ami_getUint8Le(&pRecvFrame_p->sendSeqNumCon);
                     // set rcon and scon to 0
                     pSdoSeqCon_p->sendSeqNum &= SEQ_NUM_MASK;
                     pSdoSeqCon_p->recvSeqNum &= SEQ_NUM_MASK;
@@ -1131,7 +1131,7 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
 
         // frame received
         case kSdoSeqEventFrameRec:
-            sendSeqNumCon = ami_getUint8Le(&pRecvFrame_p->m_le_bSendSeqNumCon);
+            sendSeqNumCon = ami_getUint8Le(&pRecvFrame_p->sendSeqNumCon);
 
             ret = setTimer(pSdoSeqCon_p, sdoSeqInstance_l.sdoSeqTimeout);
 
@@ -1157,7 +1157,7 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
                 case 3:
                 // normal frame
                 case 2:
-                    if ((ami_getUint8Le(&pRecvFrame_p->m_le_bRecSeqNumCon) & SDO_CON_MASK) == 3)
+                    if ((ami_getUint8Le(&pRecvFrame_p->recvSeqNumCon) & SDO_CON_MASK) == 3)
                     {
                         // TRACE("sdoseq: error response received\n");
 
@@ -1187,7 +1187,7 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
                         if(dataSize_p > SDO_SEQ_HEADER_SIZE)
                         {
                             sdoSeqInstance_l.pfnSdoComRecvCb(sdoSeqConHdl_p,
-                                                ((tAsySdoCom*) &pRecvFrame_p->m_le_abSdoSeqPayload),
+                                                ((tAsySdoCom*) &pRecvFrame_p->sdoSeqPayload),
                                                 (dataSize_p - SDO_SEQ_HEADER_SIZE));
 
                             sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateFrameSended);
@@ -1257,8 +1257,8 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
                 if ((pFrame != NULL) && (frameSize != 0))
                 {
                     // set ack request in scon
-                    ami_setUint8Le(&pFrame->m_Data.m_Asnd.m_Payload.m_SdoSequenceFrame.m_le_bSendSeqNumCon,
-                                   ami_getUint8Le( &pFrame->m_Data.m_Asnd.m_Payload.m_SdoSequenceFrame.m_le_bSendSeqNumCon) | 0x03);
+                    ami_setUint8Le(&pFrame->data.asnd.payload.sdoSequenceFrame.sendSeqNumCon,
+                                   ami_getUint8Le( &pFrame->data.asnd.payload.sdoSequenceFrame.sendSeqNumCon) | 0x03);
 
                     ret = sendToLowerLayer(pSdoSeqCon_p, frameSize, pFrame);
                     if (ret != kErrorOk)
@@ -1319,7 +1319,7 @@ static tOplkError processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sd
     if (event_p == kSdoSeqEventFrameRec)
     {
         // check rcon
-        switch (pRecvFrame_p->m_le_bRecSeqNumCon & SDO_CON_MASK)
+        switch (pRecvFrame_p->recvSeqNumCon & SDO_CON_MASK)
         {
             // close from other node
             case 0:
@@ -1348,7 +1348,7 @@ static tOplkError processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sd
                 if(dataSize_p > SDO_SEQ_HEADER_SIZE)
                 {
                     sdoSeqInstance_l.pfnSdoComRecvCb(sdoSeqConHdl_p,
-                                        ((tAsySdoCom*) &pRecvFrame_p->m_le_abSdoSeqPayload),
+                                        ((tAsySdoCom*) &pRecvFrame_p->sdoSeqPayload),
                                         (dataSize_p - SDO_SEQ_HEADER_SIZE));
                 }
                 break;
@@ -1358,18 +1358,18 @@ static tOplkError processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sd
                 // -> change to state kSdoSeqStateConnected
                 pSdoSeqCon_p->sdoSeqState = kSdoSeqStateConnected;
 
-                if(pRecvFrame_p->m_le_bRecSeqNumCon == pSdoSeqCon_p->recvSeqNum )
+                if(pRecvFrame_p->recvSeqNumCon == pSdoSeqCon_p->recvSeqNum )
                 {   // ack request -> send ack
                     // save sequence numbers
-                    pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bRecSeqNumCon);
-                    pSdoSeqCon_p->sendSeqNum = ami_getUint8Le(&pRecvFrame_p->m_le_bSendSeqNumCon);
+                    pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->recvSeqNumCon);
+                    pSdoSeqCon_p->sendSeqNum = ami_getUint8Le(&pRecvFrame_p->sendSeqNumCon);
                     // create answer own rcon = 2
                     pSdoSeqCon_p->recvSeqNum--;
                     // check if ack or data-frame
                     if(dataSize_p > SDO_SEQ_HEADER_SIZE)
                     {
                         sdoSeqInstance_l.pfnSdoComRecvCb(sdoSeqConHdl_p,
-                                                         ((tAsySdoCom*) &pRecvFrame_p->m_le_abSdoSeqPayload),
+                                                         ((tAsySdoCom*) &pRecvFrame_p->sdoSeqPayload),
                                                          (dataSize_p - SDO_SEQ_HEADER_SIZE));
                         sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateFrameSended);
                     }
@@ -1543,10 +1543,10 @@ static tOplkError sendFrame(tSdoSeqCon* pSdoSeqCon_p, UINT dataSize_p,
     }
 
     // filling header informations
-    ami_setUint8Le( &pFrame->m_Data.m_Asnd.m_le_bServiceId, 0x05);
-    ami_setUint8Le( &pFrame->m_Data.m_Asnd.m_Payload.m_SdoSequenceFrame.m_le_abReserved,0x00);
-    ami_setUint8Le( &pFrame->m_Data.m_Asnd.m_Payload.m_SdoSequenceFrame.m_le_bRecSeqNumCon, pSdoSeqCon_p->sendSeqNum);
-    ami_setUint8Le( &pFrame->m_Data.m_Asnd.m_Payload.m_SdoSequenceFrame.m_le_bSendSeqNumCon, pSdoSeqCon_p->recvSeqNum);
+    ami_setUint8Le( &pFrame->data.asnd.serviceId, 0x05);
+    ami_setUint8Le( &pFrame->data.asnd.payload.sdoSequenceFrame.aReserved,0x00);
+    ami_setUint8Le( &pFrame->data.asnd.payload.sdoSequenceFrame.recvSeqNumCon, pSdoSeqCon_p->sendSeqNum);
+    ami_setUint8Le( &pFrame->data.asnd.payload.sdoSequenceFrame.sendSeqNumCon, pSdoSeqCon_p->recvSeqNum);
     dataSize_p += SDO_SEQ_HEADER_SIZE;
 
     ret = sendToLowerLayer(pSdoSeqCon_p, dataSize_p, pFrame);
@@ -1685,7 +1685,7 @@ static tOplkError receiveCb(tSdoConHdl conHdl_p, tAsySdoSeq* pSdoSeqData_p,
         }
 
         // call history ack function
-        ret = deleteAckedFrameFromHistory(pSdoSeqCon, (ami_getUint8Le(&pSdoSeqData_p->m_le_bRecSeqNumCon) & SEQ_NUM_MASK));
+        ret = deleteAckedFrameFromHistory(pSdoSeqCon, (ami_getUint8Le(&pSdoSeqData_p->recvSeqNumCon) & SEQ_NUM_MASK));
 
 #if defined(WIN32) || defined(_WIN32)
         LeaveCriticalSection(sdoSeqInstance_l.pCriticalSectionReceive);
@@ -1748,8 +1748,8 @@ static tOplkError addFrameToHistory(tSdoSeqCon* pSdoSeqCon_p, tPlkFrame* pFrame_
     // check if a free entry is available
     if(pHistory->freeEntries > 0)
     {   // write message in free entry
-        EPL_MEMCPY(&((tPlkFrame*)pHistory->aHistoryFrame[pHistory->writeIndex])->m_le_bMessageType,
-                   &pFrame_p->m_le_bMessageType, size_p + ASND_HEADER_SIZE);
+        EPL_MEMCPY(&((tPlkFrame*)pHistory->aHistoryFrame[pHistory->writeIndex])->messageType,
+                   &pFrame_p->messageType, size_p + ASND_HEADER_SIZE);
         pHistory->aFrameSize[pHistory->writeIndex] = size_p;
         pHistory->freeEntries--;
         pHistory->writeIndex++;
@@ -1796,7 +1796,7 @@ static tOplkError deleteAckedFrameFromHistory(tSdoSeqCon* pSdoSeqCon_p, UINT8 re
         ackIndex = pHistory->ackIndex;
         do
         {
-            currentSeqNum = (((tPlkFrame*)pHistory->aHistoryFrame[ackIndex])->m_Data.m_Asnd.m_Payload.m_SdoSequenceFrame.m_le_bSendSeqNumCon & SEQ_NUM_MASK);
+            currentSeqNum = (((tPlkFrame*)pHistory->aHistoryFrame[ackIndex])->data.asnd.payload.sdoSequenceFrame.sendSeqNumCon & SEQ_NUM_MASK);
             if (((recvSeqNumber_p - currentSeqNum) & SEQ_NUM_MASK) < SDO_SEQ_NUM_THRESHOLD)
             {
                 pHistory->aFrameSize[ackIndex] = 0;

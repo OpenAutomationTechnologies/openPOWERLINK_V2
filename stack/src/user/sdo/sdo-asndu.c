@@ -267,11 +267,11 @@ tOplkError sdoasnd_sendData(tSdoConHdl sdoConHandle_p, tPlkFrame* pSrcData_p, UI
 
     // fillout Asnd header
     // own node id not needed -> filled by DLL
-    ami_setUint8Le(&pSrcData_p->m_le_bMessageType, (BYTE)kEplMsgTypeAsnd);  // ASnd == 0x06
-    ami_setUint8Le(&pSrcData_p->m_le_bDstNodeId, (BYTE)sdoAsndInstance_l.aSdoAsndConnection[array]);
-    ami_setUint8Le(&pSrcData_p->m_le_bSrcNodeId, 0x00);                     // set source-nodeid (filled by DLL 0)
+    ami_setUint8Le(&pSrcData_p->messageType, (BYTE)kMsgTypeAsnd);  // ASnd == 0x06
+    ami_setUint8Le(&pSrcData_p->dstNodeId, (BYTE)sdoAsndInstance_l.aSdoAsndConnection[array]);
+    ami_setUint8Le(&pSrcData_p->srcNodeId, 0x00);                     // set source-nodeid (filled by DLL 0)
     // calc size (add Ethernet and ASnd header size)
-    dataSize_p += (UINT32) ((UINT8*)&pSrcData_p->m_Data.m_Asnd.m_Payload.m_SdoSequenceFrame - (UINT8*)pSrcData_p);
+    dataSize_p += (UINT32) ((UINT8*)&pSrcData_p->data.asnd.payload.sdoSequenceFrame - (UINT8*)pSrcData_p);
 
     // send function of DLL
     frameInfo.frameSize = dataSize_p;
@@ -345,7 +345,7 @@ tOplkError sdoAsndCb(tFrameInfo* pFrameInfo_p)
     tPlkFrame *     pFrame;
 
     pFrame = pFrameInfo_p->pFrame;
-    nodeId = ami_getUint8Le(&pFrame->m_le_bSrcNodeId);
+    nodeId = ami_getUint8Le(&pFrame->srcNodeId);
 
     // search corresponding entry in control structure
     count = 0;
@@ -380,7 +380,7 @@ tOplkError sdoAsndCb(tFrameInfo* pFrameInfo_p)
     }
 
     sdoConHdl = (count | SDO_ASND_HANDLE);
-    sdoAsndInstance_l.pfnSdoAsySeqCb(sdoConHdl, &pFrame->m_Data.m_Asnd.m_Payload.m_SdoSequenceFrame,
+    sdoAsndInstance_l.pfnSdoAsySeqCb(sdoConHdl, &pFrame->data.asnd.payload.sdoSequenceFrame,
                                      (pFrameInfo_p->frameSize - 18));
     return ret;
 }

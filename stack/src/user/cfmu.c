@@ -395,8 +395,8 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p)
 
     if ((pNodeInfo->entriesRemaining == 0) ||
         ((nodeEvent_p != kNmtNodeEventUpdateConf) && (fDoUpdate == FALSE) &&
-         ((ami_getUint32Le(&pIdentResponse->m_le_dwVerifyConfigurationDate) == expConfDate) &&
-          (ami_getUint32Le(&pIdentResponse->m_le_dwVerifyConfigurationTime) == expConfTime))))
+         ((ami_getUint32Le(&pIdentResponse->verifyConfigurationDateLe) == expConfDate) &&
+          (ami_getUint32Le(&pIdentResponse->verifyConfigurationTimeLe) == expConfTime))))
     {
         pNodeInfo->cfmState = kCfmStateIdle;
 
@@ -427,8 +427,8 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p)
         //Restore Default Parameters
         DEBUG_LVL_CFM_TRACE("CN%x - Cfg Mismatch | MN Expects: %lx-%lx ", nodeId_p, expConfDate, expConfTime);
         DEBUG_LVL_CFM_TRACE("CN Has: %lx-%lx. Restoring Default...\n",
-                             ami_getUint32Le(&pIdentResponse->m_le_dwVerifyConfigurationDate),
-                             ami_getUint32Le(&pIdentResponse->m_le_dwVerifyConfigurationTime));
+                             ami_getUint32Le(&pIdentResponse->verifyConfigurationDateLe),
+                             ami_getUint32Le(&pIdentResponse->verifyConfigurationTimeLe));
 
         pNodeInfo->eventCnProgress.objectIndex = 0x1011;
         pNodeInfo->eventCnProgress.objectSubIndex = 0x01;

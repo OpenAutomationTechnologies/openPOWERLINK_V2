@@ -232,7 +232,7 @@ static tOplkError cbProcessRpdo(tFrameInfo * pFrameInfo_p)
     event.m_pArg      = pFrameInfo_p;
 #else
     // limit copied data to size of PDO (because from some CNs the frame is larger than necessary)
-    event.m_uiSize = ami_getUint16Le(&pFrameInfo_p->pFrame->m_Data.m_Pres.m_le_wSize) + EPL_FRAME_OFFSET_PDO_PAYLOAD; // pFrameInfo_p->frameSize;
+    event.m_uiSize = ami_getUint16Le(&pFrameInfo_p->pFrame->data.pres.sizeLe) + EPL_FRAME_OFFSET_PDO_PAYLOAD; // pFrameInfo_p->frameSize;
     event.m_pArg = pFrameInfo_p->pFrame;
 #endif
     ret = eventk_postEvent(&event);

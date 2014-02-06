@@ -960,13 +960,13 @@ static tOplkError generateHistoryEntry(UINT16 errorCode_p, tEplNetTime netTime_p
     tOplkError                  ret;
     tErrHistoryEntry         	historyEntry;
 
-    historyEntry.m_wEntryType = EPL_ERR_ENTRYTYPE_MODE_OCCURRED |
+    historyEntry.entryType = EPL_ERR_ENTRYTYPE_MODE_OCCURRED |
                                 EPL_ERR_ENTRYTYPE_PROF_EPL |
                                 EPL_ERR_ENTRYTYPE_HISTORY;
 
-    historyEntry.m_wErrorCode = errorCode_p;
-    historyEntry.m_TimeStamp = netTime_p;
-    memset (historyEntry.m_abAddInfo, 0, sizeof(historyEntry.m_abAddInfo));
+    historyEntry.errorCode = errorCode_p;
+    historyEntry.timeStamp = netTime_p;
+    memset (historyEntry.aAddInfo, 0, sizeof(historyEntry.aAddInfo));
 
     ret = postHistoryEntryEvent(&historyEntry);
     return ret;
@@ -992,13 +992,13 @@ static tOplkError generateHistoryEntryNodeId(UINT16 errorCode_p,
     tOplkError                  ret;
     tErrHistoryEntry         	historyEntry;
 
-    historyEntry.m_wEntryType = EPL_ERR_ENTRYTYPE_MODE_OCCURRED |
+    historyEntry.entryType = EPL_ERR_ENTRYTYPE_MODE_OCCURRED |
                                 EPL_ERR_ENTRYTYPE_PROF_EPL |
                                 EPL_ERR_ENTRYTYPE_HISTORY;
 
-    historyEntry.m_wErrorCode = errorCode_p;
-    historyEntry.m_TimeStamp = netTime_p;
-    ami_setUint8Le(&historyEntry.m_abAddInfo[0], (BYTE)nodeId_p);
+    historyEntry.errorCode = errorCode_p;
+    historyEntry.timeStamp = netTime_p;
+    ami_setUint8Le(&historyEntry.aAddInfo[0], (BYTE)nodeId_p);
 
     ret = postHistoryEntryEvent(&historyEntry);
     return ret;
@@ -1026,13 +1026,13 @@ static tOplkError generateHistoryEntryWithError(UINT16 errorCode_p,
     tOplkError                  ret;
     tErrHistoryEntry         	historyEntry;
 
-    historyEntry.m_wEntryType = EPL_ERR_ENTRYTYPE_MODE_OCCURRED |
+    historyEntry.entryType = EPL_ERR_ENTRYTYPE_MODE_OCCURRED |
                                 EPL_ERR_ENTRYTYPE_PROF_EPL |
                                 EPL_ERR_ENTRYTYPE_HISTORY;
 
-    historyEntry.m_wErrorCode = errorCode_p;
-    historyEntry.m_TimeStamp = netTime_p;
-    ami_setUint16Le(&historyEntry.m_abAddInfo[0], (UINT16)eplError_p);
+    historyEntry.errorCode = errorCode_p;
+    historyEntry.timeStamp = netTime_p;
+    ami_setUint16Le(&historyEntry.aAddInfo[0], (UINT16)eplError_p);
 
     ret = postHistoryEntryEvent(&historyEntry);
     return ret;

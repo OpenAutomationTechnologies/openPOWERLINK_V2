@@ -648,7 +648,7 @@ static tOplkError receiveCb (tSdoSeqConHdl sdoSeqConHdl_p, tAsySdoCom* pSdoCom_p
 
     ret = searchConnection(sdoSeqConHdl_p, kSdoComConEventRec, pSdoCom_p);
     DEBUG_LVL_SDO_TRACE("receiveCb SdoSeqConHdl: 0x%X, First Byte of pSdoCom_p: 0x%02X, dataSize_p: 0x%04X\n",
-                         sdoSeqConHdl_p, (WORD)pSdoCom_p->m_le_abCommandData[0], dataSize_p);
+                         sdoSeqConHdl_p, (WORD)pSdoCom_p->aCommandData[0], dataSize_p);
     return ret;
 }
 
@@ -821,13 +821,13 @@ static tOplkError processStateIdle(tSdoComConHdl sdoComConHdl_p, tSdoComConEvent
         case kSdoComConEventRec: // int con for server
 #if defined(CONFIG_INCLUDE_SDOS)
             // check if init of an transfer and no SDO abort
-            if ((pRecvdCmdLayer_p->m_le_bFlags & SDO_CMDL_FLAG_RESPONSE) == 0)
+            if ((pRecvdCmdLayer_p->flags & SDO_CMDL_FLAG_RESPONSE) == 0)
             {   // SDO request
-                if ((pRecvdCmdLayer_p->m_le_bFlags & SDO_CMDL_FLAG_ABORT) == 0)
+                if ((pRecvdCmdLayer_p->flags & SDO_CMDL_FLAG_ABORT) == 0)
                 {   // no SDO abort, save tansaction id
-                    pSdoComCon->transactionId = ami_getUint8Le(&pRecvdCmdLayer_p->m_le_bTransactionId);
+                    pSdoComCon->transactionId = ami_getUint8Le(&pRecvdCmdLayer_p->transactionId);
 
-                    switch(pRecvdCmdLayer_p->m_le_bCommandId)
+                    switch(pRecvdCmdLayer_p->commandId)
                     {
                         case kSdoServiceNIL:
                             // simply acknowlegde NIL command on sequence layer
@@ -942,10 +942,10 @@ static tOplkError processStateServerSegmTrans(tSdoComConHdl sdoComConHdl_p, tSdo
         // process next frame
         case kSdoComConEventRec:
             // check if the frame is a SDO response and has the right transaction ID
-            flag = ami_getUint8Le(&pRecvdCmdLayer_p->m_le_bFlags);
+            flag = ami_getUint8Le(&pRecvdCmdLayer_p->flags);
 
             if (((flag & SDO_CMDL_FLAG_RESPONSE) == 0) &&
-                (ami_getUint8Le(&pRecvdCmdLayer_p->m_le_bTransactionId) == pSdoComCon->transactionId))
+                (ami_getUint8Le(&pRecvdCmdLayer_p->transactionId) == pSdoComCon->transactionId))
             {
                 // check if it is a abort
                 if ((flag & SDO_CMDL_FLAG_ABORT) != 0)
@@ -961,7 +961,7 @@ static tOplkError processStateServerSegmTrans(tSdoComConHdl sdoComConHdl_p, tSdo
                 // check if it is a write
                 if (pSdoComCon->sdoServiceType == kSdoServiceWriteByIndex)
                 {
-                    size = ami_getUint16Le(&pRecvdCmdLayer_p->m_le_wSegmentSize);
+                    size = ami_getUint16Le(&pRecvdCmdLayer_p->segmentSizeLe);
                     if (size > pSdoComCon->transferSize)
                     {
                         pSdoComCon->lastAbortCode = SDO_AC_DATA_TYPE_LENGTH_TOO_HIGH;
@@ -970,14 +970,14 @@ static tOplkError processStateServerSegmTrans(tSdoComConHdl sdoComConHdl_p, tSdo
                     }
                     if (pSdoComCon->lastAbortCode == 0)
                     {
-                        EPL_MEMCPY(pSdoComCon->pData, &pRecvdCmdLayer_p->m_le_abCommandData[0], size);
+                        EPL_MEMCPY(pSdoComCon->pData, &pRecvdCmdLayer_p->aCommandData[0], size);
                         (pSdoComCon->pData) += size;
                     }
                     pSdoComCon->transferredBytes += size;
                     pSdoComCon->transferSize -= size;
 
                     // check end of transfer
-                    if((pRecvdCmdLayer_p->m_le_bFlags & SDO_CMDL_FLAG_SEGM_MASK) == SDO_CMDL_FLAG_SEGMCOMPL)
+                    if((pRecvdCmdLayer_p->flags & SDO_CMDL_FLAG_SEGM_MASK) == SDO_CMDL_FLAG_SEGMCOMPL)
                     {   // transfer ready
                         pSdoComCon->transferSize = 0;
 
@@ -1194,16 +1194,16 @@ static tOplkError processStateClientConnected(tSdoComConHdl sdoComConHdl_p, tSdo
 
         case kSdoComConEventRec:
             // check if the frame is a SDO response and has the right transaction ID
-            flag = ami_getUint8Le(&pRecvdCmdLayer_p->m_le_bFlags);
+            flag = ami_getUint8Le(&pRecvdCmdLayer_p->flags);
             if (((flag & SDO_CMDL_FLAG_RESPONSE) != 0) &&
-                 (ami_getUint8Le(&pRecvdCmdLayer_p->m_le_bTransactionId) == pSdoComCon->transactionId))
+                 (ami_getUint8Le(&pRecvdCmdLayer_p->transactionId) == pSdoComCon->transactionId))
             {
                 if((flag & SDO_CMDL_FLAG_ABORT) != 0)
                 {
                     // send acknowledge without any Command layer data
                     ret = sdoseq_sendData(pSdoComCon->sdoSeqConHdl, 0, (tPlkFrame*)NULL);
                     pSdoComCon->transactionId++;
-                    pSdoComCon->lastAbortCode = ami_getUint32Le(&pRecvdCmdLayer_p->m_le_abCommandData[0]);
+                    pSdoComCon->lastAbortCode = ami_getUint32Le(&pRecvdCmdLayer_p->aCommandData[0]);
                     ret = transferFinished(sdoComConHdl_p, pSdoComCon, kEplSdoComTransferRxAborted);
                     return ret;
                 }
@@ -1312,9 +1312,9 @@ static tOplkError processStateClientSegmTransfer(tSdoComConHdl sdoComConHdl_p, t
 
         case kSdoComConEventRec:
             // check if the frame is a response
-            flag = ami_getUint8Le(&pRecvdCmdLayer_p->m_le_bFlags);
+            flag = ami_getUint8Le(&pRecvdCmdLayer_p->flags);
             if (((flag & SDO_CMDL_FLAG_RESPONSE) != 0) &&
-                (ami_getUint8Le(&pRecvdCmdLayer_p->m_le_bTransactionId) == pSdoComCon->transactionId))
+                (ami_getUint8Le(&pRecvdCmdLayer_p->transactionId) == pSdoComCon->transactionId))
             {
                 if((flag & SDO_CMDL_FLAG_ABORT) != 0)
                 {
@@ -1322,7 +1322,7 @@ static tOplkError processStateClientSegmTransfer(tSdoComConHdl sdoComConHdl_p, t
                     ret = sdoseq_sendData(pSdoComCon->sdoSeqConHdl, 0, (tPlkFrame*)NULL);
                     pSdoComCon->transactionId++;
                     pSdoComCon->sdoComState = kSdoComStateClientConnected;
-                    pSdoComCon->lastAbortCode = ami_getUint32Le(&pRecvdCmdLayer_p->m_le_abCommandData[0]);
+                    pSdoComCon->lastAbortCode = ami_getUint32Le(&pRecvdCmdLayer_p->aCommandData[0]);
                     ret = transferFinished(sdoComConHdl_p, pSdoComCon, kEplSdoComTransferRxAborted);
                     return ret;
                 }
@@ -1484,8 +1484,8 @@ static tOplkError serverInitReadByIndex(tSdoComCon* pSdoComCon_p, tAsySdoCom* pS
 
     // An init of a read could not be a segmented transfer -> no variable part of header
 
-    index = ami_getUint16Le(&pSdoCom_p->m_le_abCommandData[0]);
-    subindex = ami_getUint8Le(&pSdoCom_p->m_le_abCommandData[2]);
+    index = ami_getUint16Le(&pSdoCom_p->aCommandData[0]);
+    subindex = ami_getUint8Le(&pSdoCom_p->aCommandData[2]);
 
     ret = obd_getAccessType(index, subindex, &accessType);
     if(ret == kErrorObdSubindexNotExist)
@@ -1577,9 +1577,9 @@ static tOplkError serverSendFrame(tSdoComCon* pSdoComCon_p, UINT index_p,
     EPL_MEMSET(&aFrame[0], 0x00, sizeof(aFrame));
 
     // build generic part of frame - get pointer to command layer part of frame
-    pCommandFrame = &pFrame->m_Data.m_Asnd.m_Payload.m_SdoSequenceFrame.m_le_abSdoSeqPayload;
-    ami_setUint8Le(&pCommandFrame->m_le_bCommandId, pSdoComCon_p->sdoServiceType);
-    ami_setUint8Le(&pCommandFrame->m_le_bTransactionId, pSdoComCon_p->transactionId);
+    pCommandFrame = &pFrame->data.asnd.payload.sdoSequenceFrame.sdoSeqPayload;
+    ami_setUint8Le(&pCommandFrame->commandId, pSdoComCon_p->sdoServiceType);
+    ami_setUint8Le(&pCommandFrame->transactionId, pSdoComCon_p->transactionId);
 
     sizeOfFrame = SDO_CMDL_HDR_FIXED_SIZE;
 
@@ -1592,25 +1592,25 @@ static tOplkError serverSendFrame(tSdoComCon* pSdoComCon_p, UINT index_p,
             break;
 
         case kSdoComSendTypeAckRes: // response without data to send
-            ami_setUint8Le(&pCommandFrame->m_le_bFlags,  SDO_CMDL_FLAG_RESPONSE);
+            ami_setUint8Le(&pCommandFrame->flags,  SDO_CMDL_FLAG_RESPONSE);
             ret = sdoseq_sendData(pSdoComCon_p->sdoSeqConHdl, sizeOfFrame, pFrame);
             break;
 
         case kSdoComSendTypeRes:    // response frame to send
-            flag = ami_getUint8Le( &pCommandFrame->m_le_bFlags);
+            flag = ami_getUint8Le( &pCommandFrame->flags);
             flag |= SDO_CMDL_FLAG_RESPONSE;
-            ami_setUint8Le(&pCommandFrame->m_le_bFlags,  flag);
+            ami_setUint8Le(&pCommandFrame->flags,  flag);
 
             if(pSdoComCon_p->sdoTransferType == kSdoTransExpedited)
             {   // Expedited transfer
                 // copy data in frame
                 ret = obd_readEntryToLe(index_p, subIndex_p,
-                                        &pCommandFrame->m_le_abCommandData[0],
+                                        &pCommandFrame->aCommandData[0],
                                         (tObdSize*)&pSdoComCon_p->transferSize);
                 if(ret != kErrorOk)
                     return ret;
 
-                ami_setUint16Le(&pCommandFrame->m_le_wSegmentSize, (WORD) pSdoComCon_p->transferSize);
+                ami_setUint16Le(&pCommandFrame->segmentSizeLe, (WORD) pSdoComCon_p->transferSize);
                 sizeOfFrame += pSdoComCon_p->transferSize;
                 pSdoComCon_p->transferredBytes += pSdoComCon_p->transferSize;
                 pSdoComCon_p->transferSize = 0;
@@ -1623,33 +1623,33 @@ static tOplkError serverSendFrame(tSdoComCon* pSdoComCon_p, UINT index_p,
                 // distinguish between init, segment and complete
                 if(pSdoComCon_p->transferredBytes == 0)
                 {   // init
-                    flag = ami_getUint8Le( &pCommandFrame->m_le_bFlags);
+                    flag = ami_getUint8Le( &pCommandFrame->flags);
                     flag |= SDO_CMDL_FLAG_SEGMINIT;
-                    ami_setUint8Le(&pCommandFrame->m_le_bFlags,  flag);
+                    ami_setUint8Le(&pCommandFrame->flags,  flag);
                     // init data size in variable header, which includes itself
-                    ami_setUint32Le(&pCommandFrame->m_le_abCommandData[0], pSdoComCon_p->transferSize + SDO_CMDL_HDR_VAR_SIZE);
-                    EPL_MEMCPY(&pCommandFrame->m_le_abCommandData[SDO_CMDL_HDR_VAR_SIZE],pSdoComCon_p->pData, (SDO_MAX_SEGMENT_SIZE - SDO_CMDL_HDR_VAR_SIZE));
+                    ami_setUint32Le(&pCommandFrame->aCommandData[0], pSdoComCon_p->transferSize + SDO_CMDL_HDR_VAR_SIZE);
+                    EPL_MEMCPY(&pCommandFrame->aCommandData[SDO_CMDL_HDR_VAR_SIZE],pSdoComCon_p->pData, (SDO_MAX_SEGMENT_SIZE - SDO_CMDL_HDR_VAR_SIZE));
 
                     pSdoComCon_p->transferSize -= (SDO_MAX_SEGMENT_SIZE - SDO_CMDL_HDR_VAR_SIZE);
                     pSdoComCon_p->transferredBytes += (SDO_MAX_SEGMENT_SIZE - SDO_CMDL_HDR_VAR_SIZE);
                     pSdoComCon_p->pData +=(SDO_MAX_SEGMENT_SIZE - SDO_CMDL_HDR_VAR_SIZE);
 
-                    ami_setUint16Le(&pCommandFrame->m_le_wSegmentSize, SDO_MAX_SEGMENT_SIZE);
+                    ami_setUint16Le(&pCommandFrame->segmentSizeLe, SDO_MAX_SEGMENT_SIZE);
 
                     sizeOfFrame += SDO_MAX_SEGMENT_SIZE;
                     ret = sdoseq_sendData(pSdoComCon_p->sdoSeqConHdl, sizeOfFrame, pFrame);
                 }
                 else if((pSdoComCon_p->transferredBytes > 0) &&(pSdoComCon_p->transferSize > SDO_MAX_SEGMENT_SIZE))
                 {   // segment
-                    flag = ami_getUint8Le( &pCommandFrame->m_le_bFlags);
+                    flag = ami_getUint8Le( &pCommandFrame->flags);
                     flag |= SDO_CMDL_FLAG_SEGMENTED;
-                    ami_setUint8Le(&pCommandFrame->m_le_bFlags,  flag);
+                    ami_setUint8Le(&pCommandFrame->flags,  flag);
 
-                    EPL_MEMCPY(&pCommandFrame->m_le_abCommandData[0],pSdoComCon_p->pData, SDO_MAX_SEGMENT_SIZE);
+                    EPL_MEMCPY(&pCommandFrame->aCommandData[0],pSdoComCon_p->pData, SDO_MAX_SEGMENT_SIZE);
                     pSdoComCon_p->transferSize -= SDO_MAX_SEGMENT_SIZE;
                     pSdoComCon_p->transferredBytes += SDO_MAX_SEGMENT_SIZE;
                     pSdoComCon_p->pData +=SDO_MAX_SEGMENT_SIZE;
-                    ami_setUint16Le(&pCommandFrame->m_le_wSegmentSize,SDO_MAX_SEGMENT_SIZE);
+                    ami_setUint16Le(&pCommandFrame->segmentSizeLe,SDO_MAX_SEGMENT_SIZE);
 
                     sizeOfFrame += SDO_MAX_SEGMENT_SIZE;
                     ret = sdoseq_sendData(pSdoComCon_p->sdoSeqConHdl, sizeOfFrame, pFrame);
@@ -1660,13 +1660,13 @@ static tOplkError serverSendFrame(tSdoComCon* pSdoComCon_p, UINT index_p,
                         return ret;
 
                     // complete
-                    flag = ami_getUint8Le( &pCommandFrame->m_le_bFlags);
+                    flag = ami_getUint8Le( &pCommandFrame->flags);
                     flag |= SDO_CMDL_FLAG_SEGMCOMPL;
-                    ami_setUint8Le(&pCommandFrame->m_le_bFlags,  flag);
-                    EPL_MEMCPY(&pCommandFrame->m_le_abCommandData[0],pSdoComCon_p->pData, pSdoComCon_p->transferSize);
+                    ami_setUint8Le(&pCommandFrame->flags,  flag);
+                    EPL_MEMCPY(&pCommandFrame->aCommandData[0],pSdoComCon_p->pData, pSdoComCon_p->transferSize);
                     pSdoComCon_p->transferredBytes += pSdoComCon_p->transferSize;
                     pSdoComCon_p->pData +=pSdoComCon_p->transferSize;
-                    ami_setUint16Le(&pCommandFrame->m_le_wSegmentSize, (WORD) pSdoComCon_p->transferSize);
+                    ami_setUint16Le(&pCommandFrame->segmentSizeLe, (WORD) pSdoComCon_p->transferSize);
 
                     sizeOfFrame += pSdoComCon_p->transferSize;
                     pSdoComCon_p->transferSize = 0;
@@ -1676,13 +1676,13 @@ static tOplkError serverSendFrame(tSdoComCon* pSdoComCon_p, UINT index_p,
             break;
 
         case kSdoComSendTypeAbort:
-            flag = ami_getUint8Le( &pCommandFrame->m_le_bFlags);
+            flag = ami_getUint8Le( &pCommandFrame->flags);
             flag |= (SDO_CMDL_FLAG_RESPONSE | SDO_CMDL_FLAG_ABORT);
-            ami_setUint8Le(&pCommandFrame->m_le_bFlags,  flag);
+            ami_setUint8Le(&pCommandFrame->flags,  flag);
 
             // copy abort code to frame
-            ami_setUint32Le(&pCommandFrame->m_le_abCommandData[0], *((UINT32*)pSdoComCon_p->pData));
-            ami_setUint16Le(&pCommandFrame->m_le_wSegmentSize, sizeof(UINT32));
+            ami_setUint32Le(&pCommandFrame->aCommandData[0], *((UINT32*)pSdoComCon_p->pData));
+            ami_setUint16Le(&pCommandFrame->segmentSizeLe, sizeof(UINT32));
             pSdoComCon_p->transferredBytes = sizeof(UINT32);
             pSdoComCon_p->transferSize = 0;
 
@@ -1719,22 +1719,22 @@ static tOplkError serverInitWriteByIndex(tSdoComCon* pSdoComCon_p, tAsySdoCom* p
     // An init of a write -> variable part of header possible
 
     // check if expedited or segmented transfer
-    if ((pSdoCom_p->m_le_bFlags & SDO_CMDL_FLAG_SEGM_MASK) == SDO_CMDL_FLAG_SEGMINIT)
+    if ((pSdoCom_p->flags & SDO_CMDL_FLAG_SEGM_MASK) == SDO_CMDL_FLAG_SEGMINIT)
     {
         pSdoComCon_p->sdoTransferType = kSdoTransSegmented;
-        index = ami_getUint16Le(&pSdoCom_p->m_le_abCommandData[SDO_CMDL_HDR_VAR_SIZE]);
-        subindex = ami_getUint8Le(&pSdoCom_p->m_le_abCommandData[SDO_CMDL_HDR_VAR_SIZE + 2]);
-        pSrcData = &pSdoCom_p->m_le_abCommandData[SDO_CMDL_HDR_VAR_SIZE + SDO_CMDL_HDR_WRITEBYINDEX_SIZE];
-        pSdoComCon_p->transferSize = ami_getUint32Le(&pSdoCom_p->m_le_abCommandData[0]);
+        index = ami_getUint16Le(&pSdoCom_p->aCommandData[SDO_CMDL_HDR_VAR_SIZE]);
+        subindex = ami_getUint8Le(&pSdoCom_p->aCommandData[SDO_CMDL_HDR_VAR_SIZE + 2]);
+        pSrcData = &pSdoCom_p->aCommandData[SDO_CMDL_HDR_VAR_SIZE + SDO_CMDL_HDR_WRITEBYINDEX_SIZE];
+        pSdoComCon_p->transferSize = ami_getUint32Le(&pSdoCom_p->aCommandData[0]);
         pSdoComCon_p->transferSize -= (SDO_CMDL_HDR_VAR_SIZE + SDO_CMDL_HDR_WRITEBYINDEX_SIZE);
     }
-    else if ((pSdoCom_p->m_le_bFlags & SDO_CMDL_FLAG_SEGM_MASK) == SDO_CMDL_FLAG_EXPEDITED)
+    else if ((pSdoCom_p->flags & SDO_CMDL_FLAG_SEGM_MASK) == SDO_CMDL_FLAG_EXPEDITED)
     {
         pSdoComCon_p->sdoTransferType = kSdoTransExpedited;
-        index = ami_getUint16Le(&pSdoCom_p->m_le_abCommandData[0]);
-        subindex = ami_getUint8Le(&pSdoCom_p->m_le_abCommandData[2]);
-        pSrcData = &pSdoCom_p->m_le_abCommandData[SDO_CMDL_HDR_WRITEBYINDEX_SIZE];
-        pSdoComCon_p->transferSize = ami_getUint16Le(&pSdoCom_p->m_le_wSegmentSize);
+        index = ami_getUint16Le(&pSdoCom_p->aCommandData[0]);
+        subindex = ami_getUint8Le(&pSdoCom_p->aCommandData[2]);
+        pSrcData = &pSdoCom_p->aCommandData[SDO_CMDL_HDR_WRITEBYINDEX_SIZE];
+        pSdoComCon_p->transferSize = ami_getUint16Le(&pSdoCom_p->segmentSizeLe);
         pSdoComCon_p->transferSize -= SDO_CMDL_HDR_WRITEBYINDEX_SIZE;
     }
     else
@@ -1850,7 +1850,7 @@ static tOplkError serverInitWriteByIndex(tSdoComCon* pSdoComCon_p, tAsySdoCom* p
             goto Abort;
         }
 
-        bytesToTransfer = ami_getUint16Le(&pSdoCom_p->m_le_wSegmentSize);
+        bytesToTransfer = ami_getUint16Le(&pSdoCom_p->segmentSizeLe);
         bytesToTransfer -= (SDO_CMDL_HDR_FIXED_SIZE + SDO_CMDL_HDR_VAR_SIZE + SDO_CMDL_HDR_WRITEBYINDEX_SIZE);
         pSdoComCon_p->pData = obd_getObjectDataPtr(index, subindex);    // get pointer to object entry
         if(pSdoComCon_p->pData == NULL)
@@ -1917,9 +1917,9 @@ static tOplkError clientSend(tSdoComCon* pSdoComCon_p)
     EPL_MEMSET(&aFrame[0], 0x00, sizeof(aFrame));
 
     // build generic part of frame
-    pCommandFrame = &pFrame->m_Data.m_Asnd.m_Payload.m_SdoSequenceFrame.m_le_abSdoSeqPayload;
-    ami_setUint8Le( &pCommandFrame->m_le_bCommandId, pSdoComCon_p->sdoServiceType);
-    ami_setUint8Le( &pCommandFrame->m_le_bTransactionId, pSdoComCon_p->transactionId);
+    pCommandFrame = &pFrame->data.asnd.payload.sdoSequenceFrame.sdoSeqPayload;
+    ami_setUint8Le( &pCommandFrame->commandId, pSdoComCon_p->sdoServiceType);
+    ami_setUint8Le( &pCommandFrame->transactionId, pSdoComCon_p->transactionId);
     sizeOfFrame = SDO_CMDL_HDR_FIXED_SIZE;
 
     // check if first frame to send -> command header needed
@@ -1934,8 +1934,8 @@ static tOplkError clientSend(tSdoComCon* pSdoComCon_p)
                 case kSdoServiceReadByIndex:
                     // first frame of read access always expedited
                     pSdoComCon_p->sdoTransferType = kSdoTransExpedited;
-                    pPayload = &pCommandFrame->m_le_abCommandData[0];
-                    ami_setUint16Le(&pCommandFrame->m_le_wSegmentSize, SDO_CMDL_HDR_READBYINDEX_SIZE);
+                    pPayload = &pCommandFrame->aCommandData[0];
+                    ami_setUint16Le(&pCommandFrame->segmentSizeLe, SDO_CMDL_HDR_READBYINDEX_SIZE);
                     ami_setUint16Le(pPayload, (WORD)pSdoComCon_p->targetIndex);
                     pPayload += 2;
                     ami_setUint8Le(pPayload, (UINT8)pSdoComCon_p->targetSubIndex);
@@ -1947,11 +1947,11 @@ static tOplkError clientSend(tSdoComCon* pSdoComCon_p)
                     if(pSdoComCon_p->transferSize > (SDO_MAX_SEGMENT_SIZE - SDO_CMDL_HDR_WRITEBYINDEX_SIZE))
                     {   // segmented transfer -> variable part of header needed
                         pSdoComCon_p->sdoTransferType = kSdoTransSegmented;
-                        ami_setUint32Le(&pCommandFrame->m_le_abCommandData[0], pSdoComCon_p->transferSize + SDO_CMDL_HDR_FIXED_SIZE);
-                        pPayload = &pCommandFrame->m_le_abCommandData[SDO_CMDL_HDR_VAR_SIZE];
-                        ami_setUint16Le( &pCommandFrame->m_le_wSegmentSize, SDO_MAX_SEGMENT_SIZE);
+                        ami_setUint32Le(&pCommandFrame->aCommandData[0], pSdoComCon_p->transferSize + SDO_CMDL_HDR_FIXED_SIZE);
+                        pPayload = &pCommandFrame->aCommandData[SDO_CMDL_HDR_VAR_SIZE];
+                        ami_setUint16Le( &pCommandFrame->segmentSizeLe, SDO_MAX_SEGMENT_SIZE);
                         flags = SDO_CMDL_FLAG_SEGMINIT;
-                        ami_setUint8Le( &pCommandFrame->m_le_bFlags, flags);
+                        ami_setUint8Le( &pCommandFrame->flags, flags);
                         ami_setUint16Le(pPayload, (WORD) pSdoComCon_p->targetIndex);
                         pPayload += 2;
                         ami_setUint8Le(pPayload, (UINT8)pSdoComCon_p->targetSubIndex);
@@ -1966,14 +1966,14 @@ static tOplkError clientSend(tSdoComCon* pSdoComCon_p)
                     else
                     {   // expedited transfer
                         pSdoComCon_p->sdoTransferType = kSdoTransExpedited;
-                        pPayload = &pCommandFrame->m_le_abCommandData[0];
+                        pPayload = &pCommandFrame->aCommandData[0];
                         ami_setUint16Le(pPayload, (WORD) pSdoComCon_p->targetIndex);
                         pPayload += 2;
                         ami_setUint8Le(pPayload, (UINT8)pSdoComCon_p->targetSubIndex);
                         pPayload += 2;      // + 2 -> one byte for sub index and one byte reserved
                         EPL_MEMCPY(pPayload, pSdoComCon_p->pData,  pSdoComCon_p->transferSize);
                         sizeOfFrame += (pSdoComCon_p->transferSize + SDO_CMDL_HDR_WRITEBYINDEX_SIZE);
-                        ami_setUint16Le(&pCommandFrame->m_le_wSegmentSize, (WORD)(pSdoComCon_p->transferSize + SDO_CMDL_HDR_WRITEBYINDEX_SIZE));
+                        ami_setUint16Le(&pCommandFrame->segmentSizeLe, (WORD)(pSdoComCon_p->transferSize + SDO_CMDL_HDR_WRITEBYINDEX_SIZE));
                         pSdoComCon_p->transferredBytes = pSdoComCon_p->transferSize;
                         pSdoComCon_p->transferSize = 0;
                     }
@@ -1996,10 +1996,10 @@ static tOplkError clientSend(tSdoComCon* pSdoComCon_p)
                     {
                         if(pSdoComCon_p->transferSize > SDO_MAX_SEGMENT_SIZE)
                         {   // next segment
-                            pPayload = &pCommandFrame->m_le_abCommandData[0];
-                            ami_setUint16Le( &pCommandFrame->m_le_wSegmentSize, SDO_MAX_SEGMENT_SIZE);
+                            pPayload = &pCommandFrame->aCommandData[0];
+                            ami_setUint16Le( &pCommandFrame->segmentSizeLe, SDO_MAX_SEGMENT_SIZE);
                             flags = SDO_CMDL_FLAG_SEGMENTED;
-                            ami_setUint8Le( &pCommandFrame->m_le_bFlags, flags);
+                            ami_setUint8Le( &pCommandFrame->flags, flags);
                             EPL_MEMCPY( pPayload,pSdoComCon_p->pData,  SDO_MAX_SEGMENT_SIZE);
                             pSdoComCon_p->pData += SDO_MAX_SEGMENT_SIZE;
                             pSdoComCon_p->transferSize -= SDO_MAX_SEGMENT_SIZE;
@@ -2008,10 +2008,10 @@ static tOplkError clientSend(tSdoComCon* pSdoComCon_p)
                         }
                         else
                         {   // end of transfer
-                            pPayload = &pCommandFrame->m_le_abCommandData[0];
-                            ami_setUint16Le( &pCommandFrame->m_le_wSegmentSize, (WORD) pSdoComCon_p->transferSize);
+                            pPayload = &pCommandFrame->aCommandData[0];
+                            ami_setUint16Le( &pCommandFrame->segmentSizeLe, (WORD) pSdoComCon_p->transferSize);
                             flags = SDO_CMDL_FLAG_SEGMCOMPL;
-                            ami_setUint8Le( &pCommandFrame->m_le_bFlags, flags);
+                            ami_setUint8Le( &pCommandFrame->flags, flags);
                             EPL_MEMCPY( pPayload,pSdoComCon_p->pData,  pSdoComCon_p->transferSize);
                             pSdoComCon_p->pData += pSdoComCon_p->transferSize;
                             sizeOfFrame += pSdoComCon_p->transferSize;
@@ -2077,7 +2077,7 @@ static tOplkError clientProcessFrame(tSdoComConHdl sdoComConHdl_p, tAsySdoCom* p
     // get pointer to control structure
     pSdoComCon = &sdoComInstance_l.sdoComCon[sdoComConHdl_p];
 
-    transactionId = ami_getUint8Le(&pSdoCom_p->m_le_bTransactionId);
+    transactionId = ami_getUint8Le(&pSdoCom_p->transactionId);
     if(pSdoComCon->transactionId != transactionId)
     {
         // if running transfer
@@ -2090,7 +2090,7 @@ static tOplkError clientProcessFrame(tSdoComConHdl sdoComConHdl_p, tAsySdoCom* p
     }
     else
     {   // check if correct command
-        command = ami_getUint8Le(&pSdoCom_p->m_le_bCommandId);
+        command = ami_getUint8Le(&pSdoCom_p->commandId);
         if(pSdoComCon->sdoServiceType != command)
         {
             // incorrect command
@@ -2112,13 +2112,13 @@ static tOplkError clientProcessFrame(tSdoComConHdl sdoComConHdl_p, tAsySdoCom* p
                     break;
 
                 case kSdoServiceReadByIndex:
-                    flags = ami_getUint8Le(&pSdoCom_p->m_le_bFlags);
+                    flags = ami_getUint8Le(&pSdoCom_p->flags);
                     flags &= SDO_CMDL_FLAG_SEGM_MASK;
                     switch (flags)
                     {
                         case SDO_CMDL_FLAG_EXPEDITED:
                             // check size of buffer
-                            segmentSize = ami_getUint16Le(&pSdoCom_p->m_le_wSegmentSize);
+                            segmentSize = ami_getUint16Le(&pSdoCom_p->segmentSizeLe);
                             if (segmentSize > pSdoComCon->transferSize)
                             {   // buffer provided by the application is too small -> copy only a part
                                 dataSize = pSdoComCon->transferSize;
@@ -2128,7 +2128,7 @@ static tOplkError clientProcessFrame(tSdoComConHdl sdoComConHdl_p, tAsySdoCom* p
                                 dataSize = segmentSize;
                             }
 
-                            EPL_MEMCPY(pSdoComCon->pData, &pSdoCom_p->m_le_abCommandData[0], dataSize);
+                            EPL_MEMCPY(pSdoComCon->pData, &pSdoCom_p->aCommandData[0], dataSize);
                             pSdoComCon->transferSize = 0;
                             pSdoComCon->transferredBytes = dataSize;
                             break;
@@ -2136,7 +2136,7 @@ static tOplkError clientProcessFrame(tSdoComConHdl sdoComConHdl_p, tAsySdoCom* p
 
                         case SDO_CMDL_FLAG_SEGMINIT:
                             // get total size of transfer including the header
-                            transferSize = ami_getUint32Le(&pSdoCom_p->m_le_abCommandData[0]);
+                            transferSize = ami_getUint32Le(&pSdoCom_p->aCommandData[0]);
                             transferSize -= SDO_CMDL_HDR_VAR_SIZE;
                             if (transferSize <= pSdoComCon->transferSize)
                             {   // buffer fits
@@ -2152,9 +2152,9 @@ static tOplkError clientProcessFrame(tSdoComConHdl sdoComConHdl_p, tAsySdoCom* p
 
                             // get segment size
                             // check size of buffer
-                            segmentSize = ami_getUint16Le(&pSdoCom_p->m_le_wSegmentSize);
+                            segmentSize = ami_getUint16Le(&pSdoCom_p->segmentSizeLe);
                             segmentSize -= SDO_CMDL_HDR_VAR_SIZE;
-                            EPL_MEMCPY(pSdoComCon->pData, &pSdoCom_p->m_le_abCommandData[SDO_CMDL_HDR_VAR_SIZE], segmentSize);
+                            EPL_MEMCPY(pSdoComCon->pData, &pSdoCom_p->aCommandData[SDO_CMDL_HDR_VAR_SIZE], segmentSize);
 
                             // correct counter an pointer
                             pSdoComCon->pData += segmentSize;
@@ -2166,7 +2166,7 @@ static tOplkError clientProcessFrame(tSdoComConHdl sdoComConHdl_p, tAsySdoCom* p
                         case SDO_CMDL_FLAG_SEGMENTED:
                             // get segment size
                             // check size of buffer
-                            segmentSize = ami_getUint16Le(&pSdoCom_p->m_le_wSegmentSize);
+                            segmentSize = ami_getUint16Le(&pSdoCom_p->segmentSizeLe);
                             // check if data to copy fit to buffer
                             if (segmentSize > pSdoComCon->transferSize)
                             {   // segment too large -> send abort
@@ -2175,7 +2175,7 @@ static tOplkError clientProcessFrame(tSdoComConHdl sdoComConHdl_p, tAsySdoCom* p
                                 ret = transferFinished(sdoComConHdl_p, pSdoComCon, kEplSdoComTransferTxAborted);
                                 return ret;
                             }
-                            EPL_MEMCPY(pSdoComCon->pData, &pSdoCom_p->m_le_abCommandData[0], segmentSize);
+                            EPL_MEMCPY(pSdoComCon->pData, &pSdoCom_p->aCommandData[0], segmentSize);
                             pSdoComCon->pData += segmentSize;
                             pSdoComCon->transferredBytes += segmentSize;
                             pSdoComCon->transferSize -= segmentSize;
@@ -2184,7 +2184,7 @@ static tOplkError clientProcessFrame(tSdoComConHdl sdoComConHdl_p, tAsySdoCom* p
                         case SDO_CMDL_FLAG_SEGMCOMPL:
                             // get segment size
                             // check size of buffer
-                            segmentSize = ami_getUint16Le(&pSdoCom_p->m_le_wSegmentSize);
+                            segmentSize = ami_getUint16Le(&pSdoCom_p->segmentSizeLe);
                             // check if data to copy fit to buffer
                             if(segmentSize > pSdoComCon->transferSize)
                             {   // segment too large -> send abort
@@ -2193,7 +2193,7 @@ static tOplkError clientProcessFrame(tSdoComConHdl sdoComConHdl_p, tAsySdoCom* p
                                 ret = transferFinished(sdoComConHdl_p, pSdoComCon, kEplSdoComTransferTxAborted);
                                 return ret;
                             }
-                            EPL_MEMCPY(pSdoComCon->pData, &pSdoCom_p->m_le_abCommandData[0], segmentSize);
+                            EPL_MEMCPY(pSdoComCon->pData, &pSdoCom_p->aCommandData[0], segmentSize);
                             pSdoComCon->pData += segmentSize;
                             pSdoComCon->transferredBytes += segmentSize;
                             pSdoComCon->transferSize  = 0;
@@ -2238,15 +2238,15 @@ static tOplkError clientSendAbort(tSdoComCon* pSdoComCon_p, UINT32 abortCode_p)
     EPL_MEMSET(&aFrame[0], 0x00, sizeof(aFrame));
 
     // build generic part of frame
-    pCommandFrame = &pFrame->m_Data.m_Asnd.m_Payload.m_SdoSequenceFrame.m_le_abSdoSeqPayload;
-    ami_setUint8Le( &pCommandFrame->m_le_bCommandId, pSdoComCon_p->sdoServiceType);
-    ami_setUint8Le( &pCommandFrame->m_le_bTransactionId, pSdoComCon_p->transactionId);
+    pCommandFrame = &pFrame->data.asnd.payload.sdoSequenceFrame.sdoSeqPayload;
+    ami_setUint8Le( &pCommandFrame->commandId, pSdoComCon_p->sdoServiceType);
+    ami_setUint8Le( &pCommandFrame->transactionId, pSdoComCon_p->transactionId);
 
     sizeOfFrame = SDO_CMDL_HDR_FIXED_SIZE;
-    pCommandFrame->m_le_bFlags |= SDO_CMDL_FLAG_ABORT;
+    pCommandFrame->flags |= SDO_CMDL_FLAG_ABORT;
 
-    ami_setUint32Le(&pCommandFrame->m_le_abCommandData[0], abortCode_p);
-    ami_setUint16Le(&pCommandFrame->m_le_wSegmentSize, sizeof(UINT32));
+    ami_setUint32Le(&pCommandFrame->aCommandData[0], abortCode_p);
+    ami_setUint16Le(&pCommandFrame->segmentSizeLe, sizeof(UINT32));
 
     pSdoComCon_p->transferredBytes = sizeof(UINT32);
     pSdoComCon_p->transferSize = 0;

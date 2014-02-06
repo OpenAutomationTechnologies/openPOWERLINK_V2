@@ -607,13 +607,13 @@ tOplkError nmtmnu_sendNmtCommandEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
     // build frame
     pFrame = (tPlkFrame*) aBuffer;
     EPL_MEMSET(pFrame, 0x00, sizeof(aBuffer));
-    ami_setUint8Le(&pFrame->m_le_bDstNodeId, (UINT8) nodeId_p);
-    ami_setUint8Le(&pFrame->m_Data.m_Asnd.m_le_bServiceId, (UINT8) kDllAsndNmtCommand);
-    ami_setUint8Le(&pFrame->m_Data.m_Asnd.m_Payload.m_NmtCommandService.m_le_bNmtCommandId,
+    ami_setUint8Le(&pFrame->dstNodeId, (UINT8) nodeId_p);
+    ami_setUint8Le(&pFrame->data.asnd.serviceId, (UINT8) kDllAsndNmtCommand);
+    ami_setUint8Le(&pFrame->data.asnd.payload.nmtCommandService.nmtCommandId,
         (UINT8)nmtCommand_p);
     if ((pNmtCommandData_p != NULL) && (uiDataSize_p > 0))
     {   // copy command data to frame
-        EPL_MEMCPY(&pFrame->m_Data.m_Asnd.m_Payload.m_NmtCommandService.m_le_abNmtCommandData[0], pNmtCommandData_p, uiDataSize_p);
+        EPL_MEMCPY(&pFrame->data.asnd.payload.nmtCommandService.aNmtCommandData[0], pNmtCommandData_p, uiDataSize_p);
     }
 
     // build info structure
@@ -1176,8 +1176,8 @@ tOplkError nmtmnu_processEvent(tEplEvent* pEvent_p)
                     break;
                 }
 
-                uiNodeId = ami_getUint8Le(&pFrame->m_le_bDstNodeId);
-                NmtCommand = (tNmtCommand) ami_getUint8Le(&pFrame->m_Data.m_Asnd.m_Payload.m_NmtCommandService.m_le_bNmtCommandId);
+                uiNodeId = ami_getUint8Le(&pFrame->dstNodeId);
+                NmtCommand = (tNmtCommand) ami_getUint8Le(&pFrame->data.asnd.payload.nmtCommandService.nmtCommandId);
 
                 switch (NmtCommand)
                 {
@@ -1418,13 +1418,13 @@ static tOplkError cbNmtRequest(tFrameInfo * pFrameInfo_p)
     if ((pFrameInfo_p == NULL) || (pFrameInfo_p->pFrame == NULL))
         return kErrorNmtInvalidFramePointer;
 
-    pNmtRequestService = &pFrameInfo_p->pFrame->m_Data.m_Asnd.m_Payload.m_NmtRequestService;
-    nmtCommand = (tNmtCommand)ami_getUint8Le(&pNmtRequestService->m_le_bNmtCommandId);
-    targetNodeId = ami_getUint8Le(&pNmtRequestService->m_le_bTargetNodeId);
+    pNmtRequestService = &pFrameInfo_p->pFrame->data.asnd.payload.nmtRequestService;
+    nmtCommand = (tNmtCommand)ami_getUint8Le(&pNmtRequestService->nmtCommandId);
+    targetNodeId = ami_getUint8Le(&pNmtRequestService->targetNodeId);
     ret = nmtmnu_requestNmtCommand(targetNodeId, nmtCommand);
     if (ret != kErrorOk)
     {   // error -> reply with kNmtCmdInvalidService
-        sourceNodeId = ami_getUint8Le(&pFrameInfo_p->pFrame->m_le_bSrcNodeId);
+        sourceNodeId = ami_getUint8Le(&pFrameInfo_p->pFrame->srcNodeId);
         ret = nmtmnu_sendNmtCommand(sourceNodeId, kNmtCmdInvalidService);
     }
     return ret;
@@ -1459,7 +1459,7 @@ static tOplkError PUBLIC cbIdentResponse(UINT nodeId_p, tIdentResponse* pIdentRe
     else
     {   // node answered IdentRequest
         errorCode = EPL_E_NO_ERROR;
-        nmtState = (tNmtState)(ami_getUint8Le(&pIdentResponse_p->m_le_bNmtStatus) | NMT_TYPE_CS);
+        nmtState = (tNmtState)(ami_getUint8Le(&pIdentResponse_p->nmtStatus) | NMT_TYPE_CS);
 
         // check IdentResponse $$$ move to ProcessIntern, because this function may be called also if CN
 
@@ -1471,7 +1471,7 @@ static tOplkError PUBLIC cbIdentResponse(UINT nodeId_p, tIdentResponse* pIdentRe
 
         if (dwDevType != 0L)
         {   // actually compare it with DeviceType from IdentResponse
-            if (ami_getUint32Le(&pIdentResponse_p->m_le_dwDeviceType) != dwDevType)
+            if (ami_getUint32Le(&pIdentResponse_p->deviceTypeLe) != dwDevType)
             {   // wrong DeviceType
                 nmtState = kNmtCsNotActive;
                 errorCode = EPL_E_NMT_BPO1_DEVICE_TYPE;
@@ -1509,7 +1509,7 @@ static tOplkError PUBLIC cbStatusResponse(UINT nodeId_p, tStatusResponse* pStatu
     else
     {   // node answered StatusRequest
         ret = processInternalEvent(nodeId_p,
-                                   (tNmtState)(ami_getUint8Le(&pStatusResponse_p->m_le_bNmtStatus) | NMT_TYPE_CS),
+                                   (tNmtState)(ami_getUint8Le(&pStatusResponse_p->nmtStatus) | NMT_TYPE_CS),
                                    EPL_E_NO_ERROR, kNmtMnuIntNodeEventStatusResponse);
     }
     return ret;
@@ -3741,7 +3741,7 @@ static tOplkError PUBLIC prcCbSyncResMeasure(
     }
 
     nodeIdPredNode = prcFindPredecessorNode(nodeId_p);
-    syncNodeNumber = ami_getUint32Le(&pSyncResponse_p->m_le_dwSyncNodeNumber);
+    syncNodeNumber = ami_getUint32Le(&pSyncResponse_p->syncNodeNumberLe);
 
     if (syncNodeNumber != nodeIdPredNode)
     {   // SyncNodeNumber does not match predecessor node
@@ -3749,7 +3749,7 @@ static tOplkError PUBLIC prcCbSyncResMeasure(
         goto Exit;
     }
 
-    pNodeInfo->relPropagationDelayNs = ami_getUint32Le(&pSyncResponse_p->m_le_dwSyncDelay);
+    pNodeInfo->relPropagationDelayNs = ami_getUint32Le(&pSyncResponse_p->syncDelayLe);
 
     // If a previous SyncRes frame was not usable,
     // the Sync Error flag is cleared as this one is OK
@@ -4097,7 +4097,7 @@ static tOplkError prcCbSyncResVerify(UINT nodeId_p, tSyncResponse* pSyncResponse
         goto Exit;
     }
 
-    pResTimeFirstNs = ami_getUint32Le(&pSyncResponse_p->m_le_dwPResTimeFirst);
+    pResTimeFirstNs = ami_getUint32Le(&pSyncResponse_p->presTimeFirstLe);
 
     if (pResTimeFirstNs != pNodeInfo->pResTimeFirstNs)
     {   // Configuration of PRes Response Time was not successful

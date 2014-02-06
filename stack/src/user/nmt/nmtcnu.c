@@ -183,17 +183,17 @@ tOplkError nmtcnu_sendNmtRequest(UINT nodeId_p, tNmtCommand nmtCommand_p)
     ret = kErrorOk;
 
     // build frame
-    EPL_MEMSET(&nmtRequestFrame.m_be_abDstMac[0], 0x00, sizeof(nmtRequestFrame.m_be_abDstMac)); // set by DLL
-    EPL_MEMSET(&nmtRequestFrame.m_be_abSrcMac[0], 0x00, sizeof(nmtRequestFrame.m_be_abSrcMac)); // set by DLL
-    ami_setUint16Be(&nmtRequestFrame.m_be_wEtherType, EPL_C_DLL_ETHERTYPE_EPL);
-    ami_setUint8Le(&nmtRequestFrame.m_le_bDstNodeId, (BYTE) EPL_C_ADR_MN_DEF_NODE_ID); // node id of the MN
-    ami_setUint8Le(&nmtRequestFrame.m_le_bMessageType, (BYTE)kEplMsgTypeAsnd);
-    ami_setUint8Le(&nmtRequestFrame.m_Data.m_Asnd.m_le_bServiceId, (BYTE) kDllAsndNmtRequest);
-    ami_setUint8Le(&nmtRequestFrame.m_Data.m_Asnd.m_Payload.m_NmtRequestService.m_le_bNmtCommandId,
+    EPL_MEMSET(&nmtRequestFrame.aDstMac[0], 0x00, sizeof(nmtRequestFrame.aDstMac)); // set by DLL
+    EPL_MEMSET(&nmtRequestFrame.aSrcMac[0], 0x00, sizeof(nmtRequestFrame.aSrcMac)); // set by DLL
+    ami_setUint16Be(&nmtRequestFrame.etherType, EPL_C_DLL_ETHERTYPE_EPL);
+    ami_setUint8Le(&nmtRequestFrame.dstNodeId, (BYTE) EPL_C_ADR_MN_DEF_NODE_ID); // node id of the MN
+    ami_setUint8Le(&nmtRequestFrame.messageType, (BYTE)kMsgTypeAsnd);
+    ami_setUint8Le(&nmtRequestFrame.data.asnd.serviceId, (BYTE) kDllAsndNmtRequest);
+    ami_setUint8Le(&nmtRequestFrame.data.asnd.payload.nmtRequestService.nmtCommandId,
         (BYTE)nmtCommand_p);
-    ami_setUint8Le(&nmtRequestFrame.m_Data.m_Asnd.m_Payload.m_NmtRequestService.m_le_bTargetNodeId,
+    ami_setUint8Le(&nmtRequestFrame.data.asnd.payload.nmtRequestService.targetNodeId,
         (BYTE)nodeId_p); // target for the nmt command
-    EPL_MEMSET(&nmtRequestFrame.m_Data.m_Asnd.m_Payload.m_NmtRequestService.m_le_abNmtCommandData[0], 0x00, sizeof(nmtRequestFrame.m_Data.m_Asnd.m_Payload.m_NmtRequestService.m_le_abNmtCommandData));
+    EPL_MEMSET(&nmtRequestFrame.data.asnd.payload.nmtRequestService.aNmtCommandData[0], 0x00, sizeof(nmtRequestFrame.data.asnd.payload.nmtRequestService.aNmtCommandData));
 
     // build info-structure
     nmtRequestFrameInfo.pFrame = &nmtRequestFrame;
@@ -293,7 +293,7 @@ static tOplkError commandCb(tFrameInfo* pFrameInfo_p)
         // extended NMT state commands
         case kNmtCmdStartNodeEx:
             // check if own nodeid is in EPL node list
-            fNodeIdInList = checkNodeIdList(&(pFrameInfo_p->pFrame->m_Data.m_Asnd.m_Payload.m_NmtCommandService.m_le_abNmtCommandData[0]));
+            fNodeIdInList = checkNodeIdList(&(pFrameInfo_p->pFrame->data.asnd.payload.nmtCommandService.aNmtCommandData[0]));
             if(fNodeIdInList != FALSE)
             {   // own nodeid in list
                 // send event to process command
@@ -303,7 +303,7 @@ static tOplkError commandCb(tFrameInfo* pFrameInfo_p)
 
         case kNmtCmdStopNodeEx:
             // check if own nodeid is in EPL node list
-            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->pFrame->m_Data.m_Asnd.m_Payload.m_NmtCommandService.m_le_abNmtCommandData[0]);
+            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->pFrame->data.asnd.payload.nmtCommandService.aNmtCommandData[0]);
             if(fNodeIdInList != FALSE)
             {   // own nodeid in list
                 // send event to process command
@@ -313,7 +313,7 @@ static tOplkError commandCb(tFrameInfo* pFrameInfo_p)
 
         case kNmtCmdEnterPreOperational2Ex:
             // check if own nodeid is in EPL node list
-            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->pFrame->m_Data.m_Asnd.m_Payload.m_NmtCommandService.m_le_abNmtCommandData[0]);
+            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->pFrame->data.asnd.payload.nmtCommandService.aNmtCommandData[0]);
             if(fNodeIdInList != FALSE)
             {   // own nodeid in list
                 // send event to process command
@@ -323,7 +323,7 @@ static tOplkError commandCb(tFrameInfo* pFrameInfo_p)
 
         case kNmtCmdEnableReadyToOperateEx:
             // check if own nodeid is in EPL node list
-            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->pFrame->m_Data.m_Asnd.m_Payload.m_NmtCommandService.m_le_abNmtCommandData[0]);
+            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->pFrame->data.asnd.payload.nmtCommandService.aNmtCommandData[0]);
             if(fNodeIdInList != FALSE)
             {   // own nodeid in list
                 // send event to process command
@@ -333,7 +333,7 @@ static tOplkError commandCb(tFrameInfo* pFrameInfo_p)
 
         case kNmtCmdResetNodeEx:
             // check if own nodeid is in EPL node list
-            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->pFrame->m_Data.m_Asnd.m_Payload.m_NmtCommandService.m_le_abNmtCommandData[0]);
+            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->pFrame->data.asnd.payload.nmtCommandService.aNmtCommandData[0]);
             if(fNodeIdInList != FALSE)
             {   // own nodeid in list
                 // send event to process command
@@ -343,7 +343,7 @@ static tOplkError commandCb(tFrameInfo* pFrameInfo_p)
 
         case kNmtCmdResetCommunicationEx:
             // check if own nodeid is in EPL node list
-            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->pFrame->m_Data.m_Asnd.m_Payload.m_NmtCommandService.m_le_abNmtCommandData[0]);
+            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->pFrame->data.asnd.payload.nmtCommandService.aNmtCommandData[0]);
             if(fNodeIdInList != FALSE)
             {   // own nodeid in list
                 // send event to process command
@@ -353,7 +353,7 @@ static tOplkError commandCb(tFrameInfo* pFrameInfo_p)
 
         case kNmtCmdResetConfigurationEx:
             // check if own nodeid is in EPL node list
-            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->pFrame->m_Data.m_Asnd.m_Payload.m_NmtCommandService.m_le_abNmtCommandData[0]);
+            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->pFrame->data.asnd.payload.nmtCommandService.aNmtCommandData[0]);
             if(fNodeIdInList != FALSE)
             {   // own nodeid in list
                 // send event to process command
@@ -363,7 +363,7 @@ static tOplkError commandCb(tFrameInfo* pFrameInfo_p)
 
         case kNmtCmdSwResetEx:
             // check if own nodeid is in EPL node list
-            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->pFrame->m_Data.m_Asnd.m_Payload.m_NmtCommandService.m_le_abNmtCommandData[0]);
+            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->pFrame->data.asnd.payload.nmtCommandService.aNmtCommandData[0]);
             if(fNodeIdInList != FALSE)
             {   // own nodeid in list
                 // send event to process command
@@ -460,8 +460,8 @@ static tNmtCommand getNmtCommand(tFrameInfo* pFrameInfo_p)
     tNmtCommand          nmtCommand;
     tNmtCommandService*  pNmtCommandService;
 
-    pNmtCommandService = &pFrameInfo_p->pFrame->m_Data.m_Asnd.m_Payload.m_NmtCommandService;
-    nmtCommand = (tNmtCommand)ami_getUint8Le(&pNmtCommandService->m_le_bNmtCommandId);
+    pNmtCommandService = &pFrameInfo_p->pFrame->data.asnd.payload.nmtCommandService;
+    nmtCommand = (tNmtCommand)ami_getUint8Le(&pNmtCommandService->nmtCommandId);
 
     return nmtCommand;
 }

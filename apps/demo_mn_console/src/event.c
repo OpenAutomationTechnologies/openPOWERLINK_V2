@@ -378,18 +378,18 @@ static tOplkError processHistoryEvent(tEplApiEventType EventType_p,
     UNUSED_PARAMETER(pUserArg_p);
 
     console_printlog("HistoryEntry: Type=0x%04X Code=0x%04X (0x%02X %02X %02X %02X %02X %02X %02X %02X)\n",
-             pHistoryEntry->m_wEntryType, pHistoryEntry->m_wErrorCode,
-            (WORD)pHistoryEntry->m_abAddInfo[0], (WORD)pHistoryEntry->m_abAddInfo[1],
-            (WORD)pHistoryEntry->m_abAddInfo[2], (WORD)pHistoryEntry->m_abAddInfo[3],
-            (WORD)pHistoryEntry->m_abAddInfo[4], (WORD)pHistoryEntry->m_abAddInfo[5],
-            (WORD)pHistoryEntry->m_abAddInfo[6], (WORD)pHistoryEntry->m_abAddInfo[7]);
+             pHistoryEntry->entryType, pHistoryEntry->errorCode,
+            (WORD)pHistoryEntry->aAddInfo[0], (WORD)pHistoryEntry->aAddInfo[1],
+            (WORD)pHistoryEntry->aAddInfo[2], (WORD)pHistoryEntry->aAddInfo[3],
+            (WORD)pHistoryEntry->aAddInfo[4], (WORD)pHistoryEntry->aAddInfo[5],
+            (WORD)pHistoryEntry->aAddInfo[6], (WORD)pHistoryEntry->aAddInfo[7]);
 
     FTRACE_MARKER("HistoryEntry: Type=0x%04X Code=0x%04X (0x%02X %02X %02X %02X %02X %02X %02X %02X)\n",
-            pHistoryEntry->m_wEntryType, pHistoryEntry->m_wErrorCode,
-            (WORD)pHistoryEntry->m_abAddInfo[0], (WORD)pHistoryEntry->m_abAddInfo[1],
-            (WORD)pHistoryEntry->m_abAddInfo[2], (WORD)pHistoryEntry->m_abAddInfo[3],
-            (WORD)pHistoryEntry->m_abAddInfo[4], (WORD)pHistoryEntry->m_abAddInfo[5],
-            (WORD)pHistoryEntry->m_abAddInfo[6], (WORD)pHistoryEntry->m_abAddInfo[7]);
+            pHistoryEntry->entryType, pHistoryEntry->errorCode,
+            (WORD)pHistoryEntry->aAddInfo[0], (WORD)pHistoryEntry->aAddInfo[1],
+            (WORD)pHistoryEntry->aAddInfo[2], (WORD)pHistoryEntry->aAddInfo[3],
+            (WORD)pHistoryEntry->aAddInfo[4], (WORD)pHistoryEntry->aAddInfo[5],
+            (WORD)pHistoryEntry->aAddInfo[6], (WORD)pHistoryEntry->aAddInfo[7]);
 
     return kErrorOk;
 }

@@ -1143,7 +1143,7 @@ static BOOL getMnSyncRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p,
 
         if (syncReqSize > memberoffs(tDllSyncRequest, syncControl))
         {
-            ami_setUint32Le(&pSoaPayload_p->m_SyncRequest.m_le_dwSyncControl,
+            ami_setUint32Le(&pSoaPayload_p->syncRequest.syncControlLe,
                             syncRequest.syncControl);
             if ((syncRequest.syncControl & EPL_SYNC_PRES_MODE_SET) != 0)
             {
@@ -1168,19 +1168,19 @@ static BOOL getMnSyncRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p,
         }
         if (syncReqSize > memberoffs(tDllSyncRequest, pResTimeFirst))
         {
-            ami_setUint32Le(&pSoaPayload_p->m_SyncRequest.m_le_dwPResTimeFirst,
+            ami_setUint32Le(&pSoaPayload_p->syncRequest.presTimeFirstLe,
                             syncRequest.pResTimeFirst);
         }
         if (syncReqSize > memberoffs(tDllSyncRequest, pResFallBackTimeout))
         {
-            ami_setUint32Le(&pSoaPayload_p->m_SyncRequest.m_le_dwPResFallBackTimeout,
+            ami_setUint32Le(&pSoaPayload_p->syncRequest.presFallBackTimeoutLe,
                             syncRequest.pResFallBackTimeout);
         }
 
         if ((syncRequest.syncControl & EPL_SYNC_DEST_MAC_ADDRESS_VALID) != 0)
         {
             ret = dllk_getCnMacAddress(syncRequest.nodeId,
-                            &pSoaPayload_p->m_SyncRequest.m_be_abDestMacAddress[0]);
+                            &pSoaPayload_p->syncRequest.aDestMacAddress[0]);
             if (ret != kErrorOk)
             {
                 return TRUE;

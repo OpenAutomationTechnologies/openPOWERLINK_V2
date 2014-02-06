@@ -520,16 +520,16 @@ tOplkError ProcessThread::processHistoryEvent(tEplApiEventType EventType_p,
     UNUSED_PARAMETER(pUserArg_p);
 
     sigPrintLog(QString("HistoryEntry: Type=0x%1 Code=0x%2 (0x%3 %4 %5 %6 %7 %8 %9 %10)")
-            .arg(pHistoryEntry->m_wEntryType, 4, 16, QLatin1Char('0'))
-            .arg(pHistoryEntry->m_wErrorCode, 4, 16, QLatin1Char('0'))
-            .arg((WORD)pHistoryEntry->m_abAddInfo[0], 2, 16, QLatin1Char('0'))
-            .arg((WORD)pHistoryEntry->m_abAddInfo[1], 2, 16, QLatin1Char('0'))
-            .arg((WORD)pHistoryEntry->m_abAddInfo[2], 2, 16, QLatin1Char('0'))
-            .arg((WORD)pHistoryEntry->m_abAddInfo[3], 2, 16, QLatin1Char('0'))
-            .arg((WORD)pHistoryEntry->m_abAddInfo[4], 2, 16, QLatin1Char('0'))
-            .arg((WORD)pHistoryEntry->m_abAddInfo[5], 2, 16, QLatin1Char('0'))
-            .arg((WORD)pHistoryEntry->m_abAddInfo[6], 2, 16, QLatin1Char('0'))
-            .arg((WORD)pHistoryEntry->m_abAddInfo[7], 2, 16, QLatin1Char('0')));
+            .arg(pHistoryEntry->entryType, 4, 16, QLatin1Char('0'))
+            .arg(pHistoryEntry->errorCode, 4, 16, QLatin1Char('0'))
+            .arg((WORD)pHistoryEntry->aAddInfo[0], 2, 16, QLatin1Char('0'))
+            .arg((WORD)pHistoryEntry->aAddInfo[1], 2, 16, QLatin1Char('0'))
+            .arg((WORD)pHistoryEntry->aAddInfo[2], 2, 16, QLatin1Char('0'))
+            .arg((WORD)pHistoryEntry->aAddInfo[3], 2, 16, QLatin1Char('0'))
+            .arg((WORD)pHistoryEntry->aAddInfo[4], 2, 16, QLatin1Char('0'))
+            .arg((WORD)pHistoryEntry->aAddInfo[5], 2, 16, QLatin1Char('0'))
+            .arg((WORD)pHistoryEntry->aAddInfo[6], 2, 16, QLatin1Char('0'))
+            .arg((WORD)pHistoryEntry->aAddInfo[7], 2, 16, QLatin1Char('0')));
 
     return kErrorOk;
 }

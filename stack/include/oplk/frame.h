@@ -127,195 +127,195 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 typedef struct
 {
-    UINT8                   m_le_bRes1;                     ///< Offset 17: reserved
-    UINT8                   m_le_bFlag1;                    ///< Offset 18: Flags: MC, PS
-    UINT8                   m_le_bFlag2;                    ///< Offset 19: Flags: res
-    tEplNetTime             m_le_NetTime;                   ///< Offset 20: supported if D_NMT_NetTimeIsRealTime_BOOL is set
-    UINT64                  m_le_RelativeTime;              ///< Offset 28: in us (supported if D_NMT_RelativeTime_BOOL is set)
+    UINT8                   reserved1;                      ///< Offset 17: reserved
+    UINT8                   flag1;                          ///< Offset 18: Flags: MC, PS
+    UINT8                   flag2;                          ///< Offset 19: Flags: res
+    tEplNetTime             netTimeLe;                      ///< Offset 20: supported if D_NMT_NetTimeIsRealTime_BOOL is set
+    UINT64                  relativeTimeLe;                 ///< Offset 28: in us (supported if D_NMT_RelativeTime_BOOL is set)
 } PACK_STRUCT tSocFrame;
 
 typedef struct
 {
-    UINT8                   m_le_bRes1;                     ///< Offset 17: reserved
-    UINT8                   m_le_bFlag1;                    ///< Offset 18: Flags: MS, EA, RD
-    UINT8                   m_le_bFlag2;                    ///< Offset 19: Flags: res
-    UINT8                   m_le_bPdoVersion;               ///< Offset 20: PDO Version
-    UINT8                   m_le_bRes2;                     ///< Offset 21: reserved
-    UINT16                  m_le_wSize;                     ///< Offset 22:
-    UINT8                   m_le_abPayload[256];            ///< Offset 24: Payload
+    UINT8                   reserved1;                      ///< Offset 17: reserved
+    UINT8                   flag1;                          ///< Offset 18: Flags: MS, EA, RD
+    UINT8                   flag2;                          ///< Offset 19: Flags: res
+    UINT8                   pdoVersion;                     ///< Offset 20: PDO Version
+    UINT8                   reserved2;                      ///< Offset 21: reserved
+    UINT16                  sizeLe;                         ///< Offset 22:
+    UINT8                   aPayload[256];                  ///< Offset 24: Payload
 } PACK_STRUCT tPreqFrame;
 
 typedef struct
 {
-    UINT8                   m_le_bNmtStatus;                ///< Offset 17: NMT state
-    UINT8                   m_le_bFlag1;                    ///< Offset 18: Flags: MS, EN, RD
-    UINT8                   m_le_bFlag2;                    ///< Offset 19: Flags: PR, RS
-    UINT8                   m_le_bPdoVersion;               ///< Offset 20:
-    UINT8                   m_le_bRes2;                     ///< Offset 21: reserved
-    UINT16                  m_le_wSize;                     ///< Offset 22:
-    UINT8                   m_le_abPayload[256];            ///< Offset 24: Payload
+    UINT8                   nmtStatus;                      ///< Offset 17: NMT state
+    UINT8                   flag1;                          ///< Offset 18: Flags: MS, EN, RD
+    UINT8                   flag2;                          ///< Offset 19: Flags: PR, RS
+    UINT8                   pdoVersion;                     ///< Offset 20:
+    UINT8                   reserved2;                      ///< Offset 21: reserved
+    UINT16                  sizeLe;                         ///< Offset 22:
+    UINT8                   aPayload[256];                  ///< Offset 24: Payload
 } PACK_STRUCT tPresFrame;
 
 typedef struct
 {
-    UINT8                   m_le_bReserved;                 ///< Offset 23:
-    UINT32                  m_le_dwSyncControl;
-    UINT32                  m_le_dwPResTimeFirst;
-    UINT32                  m_le_dwPResTimeSecond;
-    UINT32                  m_le_dwSyncMnDelayFirst;
-    UINT32                  m_le_dwSyncMnDelaySecond;
-    UINT32                  m_le_dwPResFallBackTimeout;
-    UINT8                   m_be_abDestMacAddress[6];
+    UINT8                   reserved;                       ///< Offset 23:
+    UINT32                  syncControlLe;
+    UINT32                  presTimeFirstLe;
+    UINT32                  presTimeSecondLe;
+    UINT32                  syncMnDelayFirstLe;
+    UINT32                  syncMnDelaySecondLe;
+    UINT32                  presFallBackTimeoutLe;
+    UINT8                   aDestMacAddress[6];
 } PACK_STRUCT tSyncRequest;
 
 typedef union
 {
-    tSyncRequest            m_SyncRequest;                  ///< Offset 23
+    tSyncRequest            syncRequest;                    ///< Offset 23
 } tSoaPayload;
 
 typedef struct
 {
-    UINT8                   m_le_bNmtStatus;                ///< Offset 17:NMT state
-    UINT8                   m_le_bFlag1;                    ///< Offset 18: Flags: EA, ER
-    UINT8                   m_le_bFlag2;                    ///< Offset 19: Flags: res
-    UINT8                   m_le_bReqServiceId;             ///< Offset 20:
-    UINT8                   m_le_bReqServiceTarget;         ///< Offset 21:
-    UINT8                   m_le_bEplVersion;               ///< Offset 22:
-    tSoaPayload             m_Payload;                      ///< Offset 23:
+    UINT8                   nmtStatus;                      ///< Offset 17:NMT state
+    UINT8                   flag1;                          ///< Offset 18: Flags: EA, ER
+    UINT8                   flag2;                          ///< Offset 19: Flags: res
+    UINT8                   reqServiceId;                   ///< Offset 20:
+    UINT8                   reqServiceTarget;               ///< Offset 21:
+    UINT8                   powerlinkVersion;               ///< Offset 22:
+    tSoaPayload             payload;                        ///< Offset 23:
 } PACK_STRUCT tSoaFrame;
 
 typedef struct
 {
-    UINT16                  m_wEntryType;
-    UINT16                  m_wErrorCode;
-    tEplNetTime             m_TimeStamp;
-    UINT8                   m_abAddInfo[8];
+    UINT16                  entryType;
+    UINT16                  errorCode;
+    tEplNetTime             timeStamp;
+    UINT8                   aAddInfo[8];
 } PACK_STRUCT tErrHistoryEntry;
 
 typedef struct
 {
-    UINT8                   m_le_bFlag1;                    ///< Offset 18: Flags: EN, EC
-    UINT8                   m_le_bFlag2;                    ///< Offset 19: Flags: PR, RS
-    UINT8                   m_le_bNmtStatus;                ///< Offset 20: NMT state
-    UINT8                   m_le_bRes1[3];
-    UINT64                  m_le_qwStaticError;             ///< static error bit field
-    tErrHistoryEntry        m_le_aErrHistoryEntry[14];
+    UINT8                   flag1;                          ///< Offset 18: Flags: EN, EC
+    UINT8                   flag2;                          ///< Offset 19: Flags: PR, RS
+    UINT8                   nmtStatus;                      ///< Offset 20: NMT state
+    UINT8                   reserved1[3];
+    UINT64                  staticErrorLe;                  ///< static error bit field
+    tErrHistoryEntry        aErrorHistoryEntry[14];
 } PACK_STRUCT tStatusResponse;
 
 typedef struct
 {
-    UINT8                   m_le_bFlag1;                    ///< Offset 18: Flags: res
-    UINT8                   m_le_bFlag2;                    ///< Flags: PR, RS
-    UINT8                   m_le_bNmtStatus;                ///< NMT state
-    UINT8                   m_le_bIdentRespFlags;           ///< Flags: FW
-    UINT8                   m_le_bEplProfileVersion;
-    UINT8                   m_le_bRes1;
-    UINT32                  m_le_dwFeatureFlags;            ///< NMT_FeatureFlags_U32
-    UINT16                  m_le_wMtu;                      ///< NMT_CycleTiming_REC.AsyncMTU_U16: C_IP_MIN_MTU - C_IP_MAX_MTU
-    UINT16                  m_le_wPollInSize;               ///< NMT_CycleTiming_REC.PReqActPayload_U16
-    UINT16                  m_le_wPollOutSize;              ///< NMT_CycleTiming_REC.PResActPayload_U16
-    UINT32                  m_le_dwResponseTime;            ///< NMT_CycleTiming_REC.PResMaxLatency_U32
-    UINT16                  m_le_wRes2;
-    UINT32                  m_le_dwDeviceType;              ///< NMT_DeviceType_U32
-    UINT32                  m_le_dwVendorId;                ///< NMT_IdentityObject_REC.VendorId_U32
-    UINT32                  m_le_dwProductCode;             ///< NMT_IdentityObject_REC.ProductCode_U32
-    UINT32                  m_le_dwRevisionNumber;          ///< NMT_IdentityObject_REC.RevisionNo_U32
-    UINT32                  m_le_dwSerialNumber;            ///< NMT_IdentityObject_REC.SerialNo_U32
-    UINT64                  m_le_qwVendorSpecificExt1;
-    UINT32                  m_le_dwVerifyConfigurationDate; ///< CFM_VerifyConfiguration_REC.ConfDate_U32
-    UINT32                  m_le_dwVerifyConfigurationTime; ///< CFM_VerifyConfiguration_REC.ConfTime_U32
-    UINT32                  m_le_dwApplicationSwDate;       ///< PDL_LocVerApplSw_REC.ApplSwDate_U32 on programmable device or date portion of NMT_ManufactSwVers_VS on non-programmable device
-    UINT32                  m_le_dwApplicationSwTime;       ///< PDL_LocVerApplSw_REC.ApplSwTime_U32 on programmable device or time portion of NMT_ManufactSwVers_VS on non-programmable device
-    UINT32                  m_le_dwIpAddress;
-    UINT32                  m_le_dwSubnetMask;
-    UINT32                  m_le_dwDefaultGateway;
-    UINT8                   m_le_sHostname[32];
-    UINT8                   m_le_abVendorSpecificExt2[48];
+    UINT8                   flag1;                          ///< Offset 18: Flags: res
+    UINT8                   flag2;                          ///< Flags: PR, RS
+    UINT8                   nmtStatus;                      ///< NMT state
+    UINT8                   identResponseFlags;             ///< Flags: FW
+    UINT8                   powerlinkProfileVersion;
+    UINT8                   reserved1;
+    UINT32                  featureFlagsLe;                 ///< NMT_FeatureFlags_U32
+    UINT16                  mtuLe;                          ///< NMT_CycleTiming_REC.AsyncMTU_U16: C_IP_MIN_MTU - C_IP_MAX_MTU
+    UINT16                  pollInSizeLe;                   ///< NMT_CycleTiming_REC.PReqActPayload_U16
+    UINT16                  pollOutSizeLe;                  ///< NMT_CycleTiming_REC.PResActPayload_U16
+    UINT32                  responseTimeLe;                 ///< NMT_CycleTiming_REC.PResMaxLatency_U32
+    UINT16                  reserved2;
+    UINT32                  deviceTypeLe;                   ///< NMT_DeviceType_U32
+    UINT32                  vendorIdLe;                     ///< NMT_IdentityObject_REC.VendorId_U32
+    UINT32                  productCodeLe;                  ///< NMT_IdentityObject_REC.ProductCode_U32
+    UINT32                  revisionNumberLe;               ///< NMT_IdentityObject_REC.RevisionNo_U32
+    UINT32                  serialNumberLe;                 ///< NMT_IdentityObject_REC.SerialNo_U32
+    UINT64                  vendorSpecificExt1Le;
+    UINT32                  verifyConfigurationDateLe;      ///< CFM_VerifyConfiguration_REC.ConfDate_U32
+    UINT32                  verifyConfigurationTimeLe;      ///< CFM_VerifyConfiguration_REC.ConfTime_U32
+    UINT32                  applicationSwDateLe;            ///< PDL_LocVerApplSw_REC.ApplSwDate_U32 on programmable device or date portion of NMT_ManufactSwVers_VS on non-programmable device
+    UINT32                  applicationSwTimeLe;            ///< PDL_LocVerApplSw_REC.ApplSwTime_U32 on programmable device or time portion of NMT_ManufactSwVers_VS on non-programmable device
+    UINT32                  ipAddressLe;
+    UINT32                  subnetMaskLe;
+    UINT32                  defaultGatewayLe;
+    UINT8                   sHostName[32];
+    UINT8                   aVendorSpecificExt2[48];
 } PACK_STRUCT tIdentResponse;
 
 typedef struct
 {
-    UINT8                   m_le_bNmtCommandId;             ///< Offset 18:
-    UINT8                   m_le_bRes1;
-    UINT8                   m_le_abNmtCommandData[32];
+    UINT8                   nmtCommandId;                   ///< Offset 18:
+    UINT8                   reserved1;
+    UINT8                   aNmtCommandData[32];
 } PACK_STRUCT tNmtCommandService;
 
 typedef struct
 {
-    UINT16                  m_le_wReserved;                 ///< Offset 18:
-    UINT32                  m_le_dwSyncStatus;
-    UINT32                  m_le_dwLatency;
-    UINT32                  m_le_dwSyncNodeNumber;
-    UINT32                  m_le_dwSyncDelay;
-    UINT32                  m_le_dwPResTimeFirst;
-    UINT32                  m_le_dwPResTimeSecond;
+    UINT16                  reserved;                       ///< Offset 18:
+    UINT32                  syncStatusLe;
+    UINT32                  latencyLe;
+    UINT32                  syncNodeNumberLe;
+    UINT32                  syncDelayLe;
+    UINT32                  presTimeFirstLe;
+    UINT32                  presTimeSecondLe;
 } PACK_STRUCT tSyncResponse;
 
 typedef struct
 {
-    UINT8                   m_le_bReserved;
-    UINT8                   m_le_bTransactionId;
-    UINT8                   m_le_bFlags;
-    UINT8                   m_le_bCommandId;
-    UINT16                  m_le_wSegmentSize;
-    UINT16                  m_le_wReserved;
-    UINT8                   m_le_abCommandData[8];          // just reserve a minimum number of bytes as a placeholder
+    UINT8                   reserved1;
+    UINT8                   transactionId;
+    UINT8                   flags;
+    UINT8                   commandId;
+    UINT16                  segmentSizeLe;
+    UINT16                  reserved2;
+    UINT8                   aCommandData[8];                // just reserve a minimum number of bytes as a placeholder
 }PACK_STRUCT tAsySdoCom;
 
 
 // asynchronous SDO Sequence Header
 typedef struct
 {
-    UINT8                   m_le_bRecSeqNumCon;
-    UINT8                   m_le_bSendSeqNumCon;
-    UINT8                   m_le_abReserved[2];
-    tAsySdoCom              m_le_abSdoSeqPayload;
+    UINT8                   recvSeqNumCon;
+    UINT8                   sendSeqNumCon;
+    UINT8                   aReserved[2];
+    tAsySdoCom              sdoSeqPayload;
 } PACK_STRUCT tAsySdoSeq;
 
 typedef struct
 {
     // Offset 18
-    UINT8                   m_le_bNmtCommandId;
-    UINT8                   m_le_bTargetNodeId;
-    UINT8                   m_le_abNmtCommandData[32];
+    UINT8                   nmtCommandId;
+    UINT8                   targetNodeId;
+    UINT8                   aNmtCommandData[32];
 } PACK_STRUCT tNmtRequestService;
 
 
 typedef union
 {
-    tStatusResponse         m_StatusResponse;               ///< Offset 18:
-    tIdentResponse          m_IdentResponse;
-    tNmtCommandService      m_NmtCommandService;
-    tNmtRequestService      m_NmtRequestService;
-    tAsySdoSeq              m_SdoSequenceFrame;
-    tSyncResponse           m_SyncResponse;
-    UINT8                   m_le_abPayload[256];
+    tStatusResponse         statusResponse;                 ///< Offset 18:
+    tIdentResponse          identResponse;
+    tNmtCommandService      nmtCommandService;
+    tNmtRequestService      nmtRequestService;
+    tAsySdoSeq              sdoSequenceFrame;
+    tSyncResponse           syncResponse;
+    UINT8                   aPayload[256];
 } tAsndPayload;
 
 typedef struct
 {
-    UINT8                   m_le_bServiceId;                ///< Offset 17
-    tAsndPayload            m_Payload;                      ///< Offset 18
+    UINT8                   serviceId;                      ///< Offset 17
+    tAsndPayload            payload;                        ///< Offset 18
 } PACK_STRUCT tAsndFrame;
 
 typedef union
 {
-    tSocFrame               m_Soc;                          ///< Offset 17
-    tPreqFrame              m_Preq;
-    tPresFrame              m_Pres;
-    tSoaFrame               m_Soa;
-    tAsndFrame              m_Asnd;
+    tSocFrame               soc;                            ///< Offset 17
+    tPreqFrame              preq;
+    tPresFrame              pres;
+    tSoaFrame               soa;
+    tAsndFrame              asnd;
 } tFrameData;
 
 typedef struct
 {
-    UINT8                   m_be_abDstMac[6];               ///< Offset 0: MAC address of the addressed nodes
-    UINT8                   m_be_abSrcMac[6];               ///< Offset 6: MAC address of the transmitting node
-    UINT16                  m_be_wEtherType;                ///< Offset 12: Ethernet message type (big endian)
-    UINT8                   m_le_bMessageType;              ///< Offset 14: EPL message type
-    UINT8                   m_le_bDstNodeId;                ///< Offset 15: EPL node ID of the addressed nodes
-    UINT8                   m_le_bSrcNodeId;                ///< Offset 16: EPL node ID of the transmitting node
-    tFrameData              m_Data;                         ///< Offset 17:
+    UINT8                   aDstMac[6];                     ///< Offset 0: MAC address of the addressed nodes
+    UINT8                   aSrcMac[6];                     ///< Offset 6: MAC address of the transmitting node
+    UINT16                  etherType;                      ///< Offset 12: Ethernet message type (big endian)
+    UINT8                   messageType;                    ///< Offset 14: EPL message type
+    UINT8                   dstNodeId;                      ///< Offset 15: EPL node ID of the addressed nodes
+    UINT8                   srcNodeId;                      ///< Offset 16: EPL node ID of the transmitting node
+    tFrameData              data;                           ///< Offset 17:
 } PACK_STRUCT tPlkFrame;
 
 // reset byte-align of structures
@@ -326,13 +326,13 @@ typedef struct
 
 typedef enum
 {
-    kEplMsgTypeNonEpl = 0x00,
-    kEplMsgTypeSoc    = 0x01,
-    kEplMsgTypePreq   = 0x03,
-    kEplMsgTypePres   = 0x04,
-    kEplMsgTypeSoa    = 0x05,
-    kEplMsgTypeAsnd   = 0x06,
-    kEplMsgTypeAInv   = 0x0D,
+    kMsgTypeNonPowerlink        = 0x00,
+    kMsgTypeSoc                 = 0x01,
+    kMsgTypePreq                = 0x03,
+    kMsgTypePres                = 0x04,
+    kMsgTypeSoa                 = 0x05,
+    kMsgTypeAsnd                = 0x06,
+    kMsgTypeAInv                = 0x0D,
 } tMsgType;
 
 #endif /* _INC_oplk_frame_H_ */
