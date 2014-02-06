@@ -417,31 +417,31 @@ static tOplkError processNodeEvent(tOplkApiEventType EventType_p,
     UNUSED_PARAMETER(pUserArg_p);
 
     // check additional argument
-    switch (pNode->m_NodeEvent)
+    switch (pNode->nodeEvent)
     {
         case kNmtNodeEventCheckConf:
-            console_printlog("NodeEvent: (Node=%u, CheckConf)\n", pNode->m_uiNodeId);
+            console_printlog("NodeEvent: (Node=%u, CheckConf)\n", pNode->nodeId);
             break;
 
         case kNmtNodeEventUpdateConf:
-            console_printlog("NodeEvent: (Node=%u, UpdateConf)\n", pNode->m_uiNodeId);
+            console_printlog("NodeEvent: (Node=%u, UpdateConf)\n", pNode->nodeId);
             break;
 
         case kNmtNodeEventNmtState:
             console_printlog("NodeEvent: (Node=%u, NmtState=%s)\n",
-                     pNode->m_uiNodeId,
-                     debugstr_getNmtStateStr(pNode->m_NmtState));
+                     pNode->nodeId,
+                     debugstr_getNmtStateStr(pNode->nmtState));
             break;
 
         case kNmtNodeEventError:
             console_printlog("NodeEvent: (Node=%u): Error=%s (0x%.4X)\n",
-                    pNode->m_uiNodeId,
-                    debugstr_getEmergErrCodeStr(pNode->m_wErrorCode),
-                    pNode->m_wErrorCode);
+                    pNode->nodeId,
+                    debugstr_getEmergErrCodeStr(pNode->errorCode),
+                    pNode->errorCode);
             break;
 
         case kNmtNodeEventFound:
-            console_printlog("NodeEvent: (Node=%u, Found)\n", pNode->m_uiNodeId);
+            console_printlog("NodeEvent: (Node=%u, Found)\n", pNode->nodeId);
             break;
 
         default:
