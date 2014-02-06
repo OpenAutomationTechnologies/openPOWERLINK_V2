@@ -64,15 +64,20 @@ typedef enum
     tOplkApiAsndFilterAny       = 0x02,  // receive any ASnd frame
 } tOplkApiAsndFilter;
 
+/**
+\brief Node Event
+
+The following structure specifies a node event on a MN. The application will be
+informed with this event if the state of the specified node has changed.
+*/
 typedef struct
 {
-    UINT                m_uiNodeId;
-    tNmtState           m_NmtState;
-    tNmtNodeEvent       m_NodeEvent;
-    UINT16              m_wErrorCode;   // EPL error code if m_NodeEvent == kNmtNodeEventError
-    BOOL                m_fMandatory;
+    UINT                        nodeId;         ///< Node ID of the node that changed the state
+    tNmtState                   nmtState;       ///< The NMT state of the CN
+    tNmtNodeEvent               nodeEvent;      ///< The event that happens at the node
+    UINT16                      errorCode;      ///< This variable contains an error code if nodeEvent == \ref kNmtNodeEventError
+    BOOL                        fMandatory;     ///< Determines if it is a mandatory node (TRUE) or an optional node (FALSE)
 } tOplkApiEventNode;
-
 
 typedef struct
 {

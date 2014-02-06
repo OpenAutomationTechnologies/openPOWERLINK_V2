@@ -557,9 +557,9 @@ tOplkError ProcessThread::processNodeEvent(tOplkApiEventType EventType_p,
     UNUSED_PARAMETER(EventType_p);
     UNUSED_PARAMETER(pUserArg_p);
     // printf("AppCbEvent(Node): NodeId=%u Event=0x%02X\n",
-    //       pEventArg_p->m_Node.m_uiNodeId, pEventArg_p->m_Node.m_NodeEvent);
+    //       pEventArg_p->m_Node.m_uiNodeId, pEventArg_p->m_Node.nodeEvent);
     // check additional argument
-    switch (pEventArg_p->m_Node.m_NodeEvent)
+    switch (pEventArg_p->m_Node.nodeEvent)
     {
         case kNmtNodeEventCheckConf:
 #if !defined(CONFIG_INCLUDE_CFM)
@@ -568,7 +568,7 @@ tOplkError ProcessThread::processNodeEvent(tOplkApiEventType EventType_p,
             tSdoComConHdl SdoComConHdl;
 
             // update object 0x1006 on CN
-            EplRet = oplk_writeObject(&SdoComConHdl, pEventArg_p->m_Node.m_uiNodeId,
+            EplRet = oplk_writeObject(&SdoComConHdl, pEventArg_p->m_Node.nodeId,
                                        0x1006, 0x00, &cycleLen_g, 4,
                                        kSdoTypeAsnd, NULL);
             if (EplRet == kErrorApiTaskDeferred)
@@ -585,7 +585,7 @@ tOplkError ProcessThread::processNodeEvent(tOplkApiEventType EventType_p,
                 EplRet = oplk_freeSdoChannel(SdoComConHdl);
                 SdoComConHdl = 0;
 
-                EplRet = oplk_writeObject(&SdoComConHdl, pEventArg_p->m_Node.m_uiNodeId,
+                EplRet = oplk_writeObject(&SdoComConHdl, pEventArg_p->m_Node.nodeId,
                                            0x1006, 0x00, &cycleLen_g, 4,
                                            kSdoTypeAsnd, NULL);
                 if (EplRet == kErrorApiTaskDeferred)
@@ -600,20 +600,20 @@ tOplkError ProcessThread::processNodeEvent(tOplkApiEventType EventType_p,
 #endif
 
             sigPrintLog(QString("Node Event: (Node=%2, CheckConf)")
-                        .arg(pEventArg_p->m_Node.m_uiNodeId, 0, 10));
+                        .arg(pEventArg_p->m_Node.nodeId, 0, 10));
             break;
 
         case kNmtNodeEventUpdateConf:
             sigPrintLog(QString("Node Event: (Node=%1, UpdateConf)")
-                        .arg(pEventArg_p->m_Node.m_uiNodeId, 0, 10));
+                        .arg(pEventArg_p->m_Node.nodeId, 0, 10));
             break;
 
         case kNmtNodeEventFound:
-            pProcessThread_g->sigNodeAppeared(pEventArg_p->m_Node.m_uiNodeId);
+            pProcessThread_g->sigNodeAppeared(pEventArg_p->m_Node.nodeId);
             break;
 
         case kNmtNodeEventNmtState:
-            switch (pEventArg_p->m_Node.m_NmtState)
+            switch (pEventArg_p->m_Node.nmtState)
             {
                 case kNmtGsOff:
                 case kNmtGsInitialising:
@@ -621,34 +621,34 @@ tOplkError ProcessThread::processNodeEvent(tOplkApiEventType EventType_p,
                 case kNmtGsResetCommunication:
                 case kNmtGsResetConfiguration:
                 case kNmtCsNotActive:
-                    pProcessThread_g->sigNodeDisappeared(pEventArg_p->m_Node.m_uiNodeId);
+                    pProcessThread_g->sigNodeDisappeared(pEventArg_p->m_Node.nodeId);
                     break;
 
                 case kNmtCsPreOperational1:
                 case kNmtCsPreOperational2:
                 case kNmtCsReadyToOperate:
-                    pProcessThread_g->sigNodeAppeared(pEventArg_p->m_Node.m_uiNodeId);
-                    pProcessThread_g->sigNodeStatus(pEventArg_p->m_Node.m_uiNodeId, 1);
+                    pProcessThread_g->sigNodeAppeared(pEventArg_p->m_Node.nodeId);
+                    pProcessThread_g->sigNodeStatus(pEventArg_p->m_Node.nodeId, 1);
                     break;
 
                 case kNmtCsOperational:
-                    pProcessThread_g->sigNodeStatus(pEventArg_p->m_Node.m_uiNodeId, 2);
+                    pProcessThread_g->sigNodeStatus(pEventArg_p->m_Node.nodeId, 2);
                     break;
 
                 case kNmtCsBasicEthernet:
                 case kNmtCsStopped:
                 default:
-                    pProcessThread_g->sigNodeStatus(pEventArg_p->m_Node.m_uiNodeId, -1);
+                    pProcessThread_g->sigNodeStatus(pEventArg_p->m_Node.nodeId, -1);
                     break;
             }
             break;
 
         case kNmtNodeEventError:
-            pProcessThread_g->sigNodeStatus(pEventArg_p->m_Node.m_uiNodeId, -1);
+            pProcessThread_g->sigNodeStatus(pEventArg_p->m_Node.nodeId, -1);
             sigPrintLog(QString("AppCbEvent (Node=%1): Error = %2 (0x%3)")
-                    .arg(pEventArg_p->m_Node.m_uiNodeId, 0, 10)
-                    .arg(debugstr_getEmergErrCodeStr(pEventArg_p->m_Node.m_wErrorCode))
-                    .arg(pEventArg_p->m_Node.m_wErrorCode, 4, 16, QLatin1Char('0')));
+                    .arg(pEventArg_p->m_Node.nodeId, 0, 10)
+                    .arg(debugstr_getEmergErrCodeStr(pEventArg_p->m_Node.errorCode))
+                    .arg(pEventArg_p->m_Node.errorCode, 4, 16, QLatin1Char('0')));
             break;
 
         default:

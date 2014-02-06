@@ -1437,11 +1437,11 @@ static tOplkError cbNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtStat
     ret = kErrorOk;
 
     // call user callback
-    eventArg.m_Node.m_uiNodeId = nodeId_p;
-    eventArg.m_Node.m_NodeEvent = nodeEvent_p;
-    eventArg.m_Node.m_NmtState = nmtState_p;
-    eventArg.m_Node.m_wErrorCode = errorCode_p;
-    eventArg.m_Node.m_fMandatory = fMandatory_p;
+    eventArg.m_Node.nodeId = nodeId_p;
+    eventArg.m_Node.nodeEvent = nodeEvent_p;
+    eventArg.m_Node.nmtState = nmtState_p;
+    eventArg.m_Node.errorCode = errorCode_p;
+    eventArg.m_Node.fMandatory = fMandatory_p;
 
     ret = ctrlu_callUserEventCallback(kOplkApiEventNode, &eventArg);
     if (ret != kErrorOk)

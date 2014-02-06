@@ -437,31 +437,31 @@ static tOplkError processNodeEvent(tOplkApiEventType EventType_p,
     UNUSED_PARAMETER(pUserArg_p);
 
     // check additional argument
-    switch (pNode->m_NodeEvent)
+    switch (pNode->nodeEvent)
     {
         case kNmtNodeEventCheckConf:
-            PRINTF("NodeEvent: (Node=%u, CheckConf)\n", pNode->m_uiNodeId);
+            PRINTF("NodeEvent: (Node=%u, CheckConf)\n", pNode->nodeId);
             break;
 
         case kNmtNodeEventUpdateConf:
-            PRINTF("NodeEvent: (Node=%u, UpdateConf)\n", pNode->m_uiNodeId);
+            PRINTF("NodeEvent: (Node=%u, UpdateConf)\n", pNode->nodeId);
             break;
 
         case kNmtNodeEventNmtState:
             PRINTF("NodeEvent: (Node=%u, NmtState=%s)\n",
-                     pNode->m_uiNodeId,
-                     debugstr_getNmtStateStr(pNode->m_NmtState));
+                     pNode->nodeId,
+                     debugstr_getNmtStateStr(pNode->nmtState));
             break;
 
         case kNmtNodeEventError:
             PRINTF("NodeEvent: (Node=%u): Error=%s (0x%.4X)\n",
-                    pNode->m_uiNodeId,
-                    debugstr_getEmergErrCodeStr(pNode->m_wErrorCode),
-                    pNode->m_wErrorCode);
+                    pNode->nodeId,
+                    debugstr_getEmergErrCodeStr(pNode->errorCode),
+                    pNode->errorCode);
             break;
 
         case kNmtNodeEventFound:
-            PRINTF("NodeEvent: (Node=%u, Found)\n", pNode->m_uiNodeId);
+            PRINTF("NodeEvent: (Node=%u, Found)\n", pNode->nodeId);
             break;
 
         default:
