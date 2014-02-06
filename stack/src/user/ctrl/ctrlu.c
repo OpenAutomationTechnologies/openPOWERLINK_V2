@@ -1476,9 +1476,9 @@ static tOplkError cbBootEvent(tNmtBootEvent bootEvent_p, tNmtState nmtState_p,
     ret = kErrorOk;
 
     // call user callback
-    eventArg.m_Boot.m_BootEvent = bootEvent_p;
-    eventArg.m_Boot.m_NmtState = nmtState_p;
-    eventArg.m_Boot.m_wErrorCode = errorCode_p;
+    eventArg.m_Boot.bootEvent = bootEvent_p;
+    eventArg.m_Boot.nmtState = nmtState_p;
+    eventArg.m_Boot.errorCode = errorCode_p;
 
     ret = ctrlu_callUserEventCallback(kOplkApiEventBoot, &eventArg);
     return ret;

@@ -79,11 +79,17 @@ typedef struct
     BOOL                        fMandatory;     ///< Determines if it is a mandatory node (TRUE) or an optional node (FALSE)
 } tOplkApiEventNode;
 
+/**
+\brief Boot Event
+
+The following structure specifies a boot event. It is used to inform the application
+about events concerning the entire boot-up process of the MN.
+*/
 typedef struct
 {
-    tNmtState           m_NmtState;     // local NMT state
-    tNmtBootEvent       m_BootEvent;
-    UINT16              m_wErrorCode;   // EPL error code if m_BootEvent == kNmtBootEventError
+    tNmtState                   nmtState;       ///< NMT state of the local node
+    tNmtBootEvent               bootEvent;      ///< Boot event that occured
+    UINT16                      errorCode;      ///< Contains an error code if bootEvent == \ref kNmtBootEventError
 } tOplkApiEventBoot;
 
 typedef struct
