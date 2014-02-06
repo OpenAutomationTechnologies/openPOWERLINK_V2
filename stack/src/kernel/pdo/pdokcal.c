@@ -40,10 +40,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include "kernel/pdokcal.h"
+#include <oplk/ami.h>
+#include <kernel/pdokcal.h>
 #include <kernel/pdok.h>
-#include "kernel/dllk.h"
-#include "kernel/eventk.h"
+#include <kernel/dllk.h>
+#include <kernel/eventk.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //

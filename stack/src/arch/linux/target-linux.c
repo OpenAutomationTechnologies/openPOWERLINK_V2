@@ -42,7 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <unistd.h>
 #include <fcntl.h>
 #include <signal.h>
-#include <oplk/Epl.h>
+#include <oplk/oplk.h>
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //

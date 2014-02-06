@@ -39,7 +39,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _INC_veth_H_
 #define _INC_veth_H_
 
-#include <oplk/EplInc.h>
+//------------------------------------------------------------------------------
+// includes
+//------------------------------------------------------------------------------
+#include <oplk/oplkinc.h>
 
 //------------------------------------------------------------------------------
 // const defines

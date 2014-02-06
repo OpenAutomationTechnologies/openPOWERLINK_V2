@@ -41,7 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-
+#include <oplk/oplkinc.h>
 #include <oplk/sdo.h>
 #include <user/sdoudp.h>
 #include <user/sdoasnd.h>

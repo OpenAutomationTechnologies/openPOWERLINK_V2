@@ -46,7 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <unistd.h>
 #include <altera_avalon_pio_regs.h>
 
-#include <oplk/Epl.h>
+#include <oplk/oplk.h>
 #include <oplk/debugstr.h>
 #include <kernel/ctrlk.h>
 

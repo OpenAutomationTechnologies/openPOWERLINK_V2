@@ -53,7 +53,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <asm/page.h>
 #include <asm/atomic.h>
 
-#include <oplk/Epl.h>
+#include <oplk/oplk.h>
 #include <oplk/powerlink-module.h>
 
 #include <common/ctrl.h>

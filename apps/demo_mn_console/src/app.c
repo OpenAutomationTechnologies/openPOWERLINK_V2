@@ -43,7 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/Epl.h>
+#include <oplk/oplk.h>
 #include "app.h"
 #include "xap.h"
 

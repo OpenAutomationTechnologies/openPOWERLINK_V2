@@ -41,8 +41,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/Epl.h>
-#include <oplk/global.h>
+#include <oplk/oplkinc.h>
+#include <oplk/oplk.h>
 #include <oplk/nmt.h>
 
 //============================================================================//

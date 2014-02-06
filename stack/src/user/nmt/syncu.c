@@ -41,8 +41,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include "user/syncu.h"
-#include "user/dllucal.h"
+#include <oplk/ami.h>
+#include <user/syncu.h>
+#include <user/dllucal.h>
 
 #if EPL_DLL_PRES_CHAINING_MN != FALSE
 

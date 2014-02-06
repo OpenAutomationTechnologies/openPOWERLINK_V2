@@ -47,7 +47,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdarg.h>
 #include <unistd.h>
 
-#include <oplk/EplInc.h>
+#include <oplk/oplkinc.h>
 
 #ifdef  FTRACE_DEBUG
 

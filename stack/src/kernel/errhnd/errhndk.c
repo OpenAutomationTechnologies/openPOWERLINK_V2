@@ -45,6 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplk/nmt.h>
 #include <oplk/benchmark.h>
 #include <oplk/obd.h>
+#include <oplk/ami.h>
 #include <kernel/eventk.h>
 #include <kernel/dllk.h>
 

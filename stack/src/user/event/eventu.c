@@ -49,7 +49,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/dllucal.h>
 #include <user/ledu.h>
 #include <oplk/benchmark.h>
-#include <oplk/Epl.h>
+#include <oplk/oplk.h>
 
 #include "common/event/event.h"
 

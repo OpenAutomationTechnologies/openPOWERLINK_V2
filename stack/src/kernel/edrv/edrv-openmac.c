@@ -40,8 +40,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/global.h>
-#include <oplk/Epl.h>
+#include <oplk/oplk.h>
+#include <oplk/ami.h>
 #include <kernel/dllkfilter.h>
 
 #include <common/edrv.h>

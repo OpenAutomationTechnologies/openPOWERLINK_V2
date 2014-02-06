@@ -40,7 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/EplInc.h>
+#include <oplk/oplkinc.h>
 #include <user/timeru.h>
 
 #include <semLib.h>

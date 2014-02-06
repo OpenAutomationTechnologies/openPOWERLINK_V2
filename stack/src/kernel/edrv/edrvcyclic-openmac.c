@@ -41,8 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/global.h>
-#include <oplk/Epl.h>
+#include <oplk/oplkinc.h>
 #include <kernel/hrestimer.h>
 
 #include <common/edrv.h>
