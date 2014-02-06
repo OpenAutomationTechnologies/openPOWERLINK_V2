@@ -1,10 +1,11 @@
 /**
 ********************************************************************************
-\file   EplCfg.h
+\file   oplkcfg.h
 
-\brief  Configuration options for openPOWERLINK kernel module
+\brief  Configuration options for openPOWERLINK CN library
 
-This file contains the configuration options for the openPOWERLINK kernel module
+This file contains the configuration options for the openPOWERLINK CN libary
+on Linux.
 
 *******************************************************************************/
 
@@ -36,8 +37,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_eplcfg_H_
-#define _INC_eplcfg_H_
+#ifndef _INC_oplkcfg_H_
+#define _INC_oplkcfg_H_
 
 //==============================================================================
 // generic defines which for whole EPL Stack
@@ -55,14 +56,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #undef FTRACE_DEBUG
 
+/* assure that system priorities of hrtimer and net-rx kernel threads are set appropriate */
+#define EPL_THREAD_PRIORITY_HIGH                    75
+#define EPL_THREAD_PRIORITY_MEDIUM                  50
+#define EPL_THREAD_PRIORITY_LOW                     49
+
 // These macros define all modules which are included
-#define CONFIG_INCLUDE_NMT_MN
 #define CONFIG_INCLUDE_PDO
-#define CONFIG_INCLUDE_VETH
-#define CONFIG_INCLUDE_CFM
+#define CONFIG_INCLUDE_SDOS
+#define CONFIG_INCLUDE_SDOC
+#define CONFIG_INCLUDE_SDO_ASND
 
 #define CONFIG_DLLCAL_QUEUE                         EPL_QUEUE_CIRCBUF
-
 
 //==============================================================================
 // Ethernet driver (Edrv) specific defines
@@ -93,10 +98,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EPL_DLL_PRES_READY_AFTER_SOA                FALSE
 
 // activate PResChaining support on MN
-#define EPL_DLL_PRES_CHAINING_MN                    TRUE
+#define EPL_DLL_PRES_CHAINING_MN                    FALSE
 
 // CN supports PRes Chaining
 #define EPL_DLL_PRES_CHAINING_CN                    FALSE
+
+// negative time shift of isochronous task in relation to SoC
+#define EPL_DLL_SOC_SYNC_SHIFT_US                   150
 
 // time when CN processing the isochronous task (sync callback of application and cycle preparation)
 #define EPL_DLL_PROCESS_SYNC                        EPL_DLL_PROCESS_SYNC_ON_SOC
@@ -106,10 +114,27 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS   FALSE
 
 //==============================================================================
+// OBD specific defines
+//==============================================================================
+
+// switch this define to TRUE if Epl should compare object range
+// automaticly
+#define CONFIG_OBD_CHECK_OBJECT_RANGE               FALSE
+
+// set this define to TRUE if there are strings or domains in OD, which
+// may be changed in object size and/or object data pointer by its object
+// callback function (called event kObdEvWrStringDomain)
+#define CONFIG_OBD_USE_STRING_DOMAIN_IN_RAM         TRUE
+
+//==============================================================================
 // Timer module specific defines
 //==============================================================================
 
 // if TRUE the high resolution timer module will be used (must always be TRUE!)
 #define EPL_TIMER_USE_HIGHRES                       TRUE
 
-#endif // _INC_eplcfg_H_
+//==============================================================================
+// SDO module specific defines
+//==============================================================================
+
+#endif // _INC_oplkcfg_H_

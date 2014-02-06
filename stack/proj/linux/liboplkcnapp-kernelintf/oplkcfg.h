@@ -1,10 +1,10 @@
 /**
 ********************************************************************************
-\file   EplCfg.h
+\file   oplkcfg.h
 
-\brief  Configuration options for openPOWERLINK MN application library
+\brief  Configuration options for openPOWERLINK CN application library
 
-This file contains the configuration options for the openPOWERLINK MN
+This file contains the configuration options for the openPOWERLINK CN
 application libary on Linux which is using the kernelspace interface.
 
 *******************************************************************************/
@@ -37,41 +37,37 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_eplcfg_H_
-#define _INC_eplcfg_H_
+#ifndef _INC_oplkcfg_H_
+#define _INC_oplkcfg_H_
 
 //==============================================================================
 // generic defines which for whole EPL Stack
 //==============================================================================
 
 #ifndef BENCHMARK_MODULES
-#define BENCHMARK_MODULES                               0 //0xEE800042L
+#define BENCHMARK_MODULES                           0 //0xEE800042L
 #endif
 
 // Default debug level:
 // Only debug traces of these modules will be compiled which flags are set in define DEF_DEBUG_LVL.
 #ifndef DEF_DEBUG_LVL
-#define DEF_DEBUG_LVL                                   (0xC00000000L)
+#define DEF_DEBUG_LVL                               (0xC00000000L)
 #endif
 
 #undef FTRACE_DEBUG
 
 /* assure that system priorities of hrtimer and net-rx kernel threads are set appropriate */
-#define EPL_THREAD_PRIORITY_HIGH                        75
-#define EPL_THREAD_PRIORITY_MEDIUM                      50
-#define EPL_THREAD_PRIORITY_LOW                         49
+#define EPL_THREAD_PRIORITY_HIGH                    75
+#define EPL_THREAD_PRIORITY_MEDIUM                  50
+#define EPL_THREAD_PRIORITY_LOW                     49
 
 // These macros defines all modules which are included
-#define CONFIG_INCLUDE_NMT_MN
 #define CONFIG_INCLUDE_PDO
 #define CONFIG_INCLUDE_SDOS
 #define CONFIG_INCLUDE_SDOC
 #define CONFIG_INCLUDE_SDO_ASND
-#define CONFIG_INCLUDE_SDO_UDP
-#define CONFIG_INCLUDE_VETH
-#define CONFIG_INCLUDE_CFM
 
-#define CONFIG_DLLCAL_QUEUE                             EPL_QUEUE_IOCTL
+#define CONFIG_DLLCAL_QUEUE                         EPL_QUEUE_IOCTL
 
 //==============================================================================
 // Data Link Layer (DLL) specific defines
@@ -103,14 +99,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // callback function (called event kObdEvWrStringDomain)
 #define CONFIG_OBD_USE_STRING_DOMAIN_IN_RAM             TRUE
 
-#define CONFIG_OBD_USE_LOAD_CONCISEDCF                  TRUE
-#define CONFIG_OBD_DEF_CONCISEDCF_FILENAME              "mnobd.cdc"
-#define EPL_CFM_CONFIGURE_CYCLE_LENGTH                  TRUE
-
-// Configure if the range from 0xA000 is used for mapping client objects.
-// openCONFIGURATOR uses this range for mapping objects.
-#define CONFIG_OBD_INCLUDE_A000_TO_DEVICE_PART          TRUE
-
 //==============================================================================
 // Timer module specific defines
 //==============================================================================
@@ -122,10 +110,4 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // SDO module specific defines
 //==============================================================================
 
-// increase the number of SDO channels, because we are master
-#define SDO_MAX_CONNECTION_ASND                         100
-#define MAX_SDO_SEQ_CON                                 100
-#define MAX_SDO_COM_CON                                 100
-#define SDO_MAX_CONNECTION_UDP                          50
-
-#endif // _INC_eplcfg_H_
+#endif // _INC_oplkcfg_H_

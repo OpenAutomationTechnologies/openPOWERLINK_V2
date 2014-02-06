@@ -1,10 +1,10 @@
 /**
 ********************************************************************************
-\file   EplCfg.h
+\file   oplkcfg.h
 
-\brief  Configuration options for openPOWERLINK CN library
+\brief  Configuration options for openPOWERLINK MN library
 
-This file contains the configuration options for the openPOWERLINK CN libary
+This file contains the configuration options for the openPOWERLINK MN libary
 on Linux.
 
 *******************************************************************************/
@@ -37,8 +37,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_eplcfg_H_
-#define _INC_eplcfg_H_
+#ifndef _INC_oplkcfg_H_
+#define _INC_oplkcfg_H_
 
 //==============================================================================
 // generic defines which for whole EPL Stack
@@ -57,12 +57,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #undef FTRACE_DEBUG
 
 // These macros define all modules which are included
+#define CONFIG_INCLUDE_NMT_MN
 #define CONFIG_INCLUDE_PDO
 #define CONFIG_INCLUDE_SDOS
 #define CONFIG_INCLUDE_SDOC
 #define CONFIG_INCLUDE_SDO_ASND
+#define CONFIG_INCLUDE_CFM
 
 #define CONFIG_DLLCAL_QUEUE                         EPL_QUEUE_CIRCBUF
+
 
 //==============================================================================
 // Ethernet driver (Edrv) specific defines
@@ -93,13 +96,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EPL_DLL_PRES_READY_AFTER_SOA                FALSE
 
 // activate PResChaining support on MN
-#define EPL_DLL_PRES_CHAINING_MN                    FALSE
+#define EPL_DLL_PRES_CHAINING_MN                    TRUE
 
 // CN supports PRes Chaining
 #define EPL_DLL_PRES_CHAINING_CN                    FALSE
-
-// negative time shift of isochronous task in relation to SoC
-#define EPL_DLL_SOC_SYNC_SHIFT_US                   150
 
 // time when CN processing the isochronous task (sync callback of application and cycle preparation)
 #define EPL_DLL_PROCESS_SYNC                        EPL_DLL_PROCESS_SYNC_ON_SOC
@@ -121,6 +121,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // callback function (called event kObdEvWrStringDomain)
 #define CONFIG_OBD_USE_STRING_DOMAIN_IN_RAM         TRUE
 
+#define CONFIG_OBD_USE_LOAD_CONCISEDCF              TRUE
+#define CONFIG_OBD_DEF_CONCISEDCF_FILENAME          "mnobd.cdc"
+#define EPL_CFM_CONFIGURE_CYCLE_LENGTH              TRUE
+
+// Configure if the range from 0xA000 is used for mapping client objects.
+// openCONFIGURATOR uses this range for mapping objects.
+#define CONFIG_OBD_INCLUDE_A000_TO_DEVICE_PART      TRUE
+
 //==============================================================================
 // Timer module specific defines
 //==============================================================================
@@ -132,4 +140,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // SDO module specific defines
 //==============================================================================
 
-#endif // _INC_eplcfg_H_
+// increase the number of SDO channels, because we are master
+#define SDO_MAX_CONNECTION_ASND                     100
+#define MAX_SDO_SEQ_CON                             100
+#define MAX_SDO_COM_CON                             100
+#define SDO_MAX_CONNECTION_UDP                      50
+
+#endif // _INC_oplkcfg_H_

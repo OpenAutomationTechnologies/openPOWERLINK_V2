@@ -1,11 +1,11 @@
 /**
 ********************************************************************************
-\file   EplCfg.h
+\file   oplkcfg.h
 
 \brief  Configuration options for openPOWERLINK CN application library
 
 This file contains the configuration options for the openPOWERLINK CN
-application libary on Linux which is using the kernelspace interface.
+application libary on Linux which is using the userspace interface.
 
 *******************************************************************************/
 
@@ -37,8 +37,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_eplcfg_H_
-#define _INC_eplcfg_H_
+#ifndef _INC_oplkcfg_H_
+#define _INC_oplkcfg_H_
 
 //==============================================================================
 // generic defines which for whole EPL Stack
@@ -67,7 +67,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CONFIG_INCLUDE_SDOC
 #define CONFIG_INCLUDE_SDO_ASND
 
-#define CONFIG_DLLCAL_QUEUE                         EPL_QUEUE_IOCTL
+#define CONFIG_DLLCAL_QUEUE                         EPL_QUEUE_CIRCBUF
 
 //==============================================================================
 // Data Link Layer (DLL) specific defines
@@ -110,4 +110,4 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // SDO module specific defines
 //==============================================================================
 
-#endif // _INC_eplcfg_H_
+#endif // _INC_oplkcfg_H_

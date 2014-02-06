@@ -89,10 +89,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #if (EDRV_AUTO_RESPONSE == FALSE && EDRV_TIME_TRIG_TX == FALSE)
-    #error "Please enable EDRV_AUTO_RESPONSE in EplCfg.h to use openMAC for CN!"
+    #error "Please enable EDRV_AUTO_RESPONSE in oplkcfg.h to use openMAC for CN!"
 #endif
 #if (EDRV_AUTO_RESPONSE != FALSE && EDRV_TIME_TRIG_TX != FALSE)
-#error "Please disable EDRV_AUTO_RESPONSE in EplCfg.h to use openMAC for MN!"
+#error "Please disable EDRV_AUTO_RESPONSE in oplkcfg.h to use openMAC for MN!"
 #endif
 
 #if (defined(EDRV_2NDTXQUEUE) && EDRV_TIME_TRIG_TX == FALSE)
