@@ -568,7 +568,7 @@ tOplkError ProcessThread::processNodeEvent(tEplApiEventType EventType_p,
             tSdoComConHdl SdoComConHdl;
 
             // update object 0x1006 on CN
-            EplRet = EplApiWriteObject(&SdoComConHdl, pEventArg_p->m_Node.m_uiNodeId,
+            EplRet = oplk_writeObject(&SdoComConHdl, pEventArg_p->m_Node.m_uiNodeId,
                                        0x1006, 0x00, &cycleLen_g, 4,
                                        kSdoTypeAsnd, NULL);
             if (EplRet == kErrorApiTaskDeferred)
@@ -582,10 +582,10 @@ tOplkError ProcessThread::processNodeEvent(tEplApiEventType EventType_p,
             else
             {   // error occured
 
-                EplRet = EplApiFreeSdoChannel(SdoComConHdl);
+                EplRet = oplk_freeSdoChannel(SdoComConHdl);
                 SdoComConHdl = 0;
 
-                EplRet = EplApiWriteObject(&SdoComConHdl, pEventArg_p->m_Node.m_uiNodeId,
+                EplRet = oplk_writeObject(&SdoComConHdl, pEventArg_p->m_Node.m_uiNodeId,
                                            0x1006, 0x00, &cycleLen_g, 4,
                                            kSdoTypeAsnd, NULL);
                 if (EplRet == kErrorApiTaskDeferred)
