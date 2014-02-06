@@ -120,7 +120,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     }
 #endif
 
-#if defined(_WINDLL)
+#if defined(_DLL)
 #define EPLDLLEXPORT extern __declspec(dllexport)
 #else
 #define EPLDLLEXPORT

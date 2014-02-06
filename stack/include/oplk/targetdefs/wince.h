@@ -100,7 +100,7 @@ void trace (const char* fmt, ...);
 
 #endif
 
-#if defined(_WINDLL)
+#if defined(_DLL)
 #define EPLDLLEXPORT extern __declspec(dllexport)
 #else
 #define EPLDLLEXPORT
