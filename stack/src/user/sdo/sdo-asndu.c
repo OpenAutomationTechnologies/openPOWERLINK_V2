@@ -373,7 +373,7 @@ tEplKernel sdoAsndCb(tFrameInfo* pFrameInfo_p)
         }
         else
         {
-            EPL_DBGLVL_SDO_TRACE("%s(): no free handle\n", __func__);
+            DEBUG_LVL_SDO_TRACE("%s(): no free handle\n", __func__);
             return ret;
         }
     }

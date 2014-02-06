@@ -191,12 +191,12 @@ tEplKernel edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     tEplKernel  ret = kEplSuccessful;
     INT         i;
 
-    EPL_DBGLVL_EDRV_TRACE("*** %s ***\n", __func__);
-    EPL_DBGLVL_EDRV_TRACE(" PHY_NUM = %d\n", OPENMAC_PHYCNT);
-    EPL_DBGLVL_EDRV_TRACE(" MAX_RX_BUFFERS = %d\n", EDRV_MAX_RX_BUFFERS);
-    EPL_DBGLVL_EDRV_TRACE(" PKTLOCTX = %d\n", OPENMAC_PKTLOCTX);
-    EPL_DBGLVL_EDRV_TRACE(" PKTLOCRX = %d\n", OPENMAC_PKTLOCRX);
-    EPL_DBGLVL_EDRV_TRACE(" PKTBUFSIZE = %d byte\n", OPENMAC_PKTBUFSIZE);
+    DEBUG_LVL_EDRV_TRACE("*** %s ***\n", __func__);
+    DEBUG_LVL_EDRV_TRACE(" PHY_NUM = %d\n", OPENMAC_PHYCNT);
+    DEBUG_LVL_EDRV_TRACE(" MAX_RX_BUFFERS = %d\n", EDRV_MAX_RX_BUFFERS);
+    DEBUG_LVL_EDRV_TRACE(" PKTLOCTX = %d\n", OPENMAC_PKTLOCTX);
+    DEBUG_LVL_EDRV_TRACE(" PKTLOCRX = %d\n", OPENMAC_PKTLOCRX);
+    DEBUG_LVL_EDRV_TRACE(" PKTBUFSIZE = %d byte\n", OPENMAC_PKTBUFSIZE);
 
     EPL_MEMSET(&edrvInstance_l, 0, sizeof(edrvInstance_l));
 
@@ -274,7 +274,7 @@ tEplKernel edrv_init(tEdrvInitParam* pEdrvInitParam_p)
 #endif
 
     omethStart(edrvInstance_l.pMacInst, TRUE);
-    EPL_DBGLVL_EDRV_TRACE(" OPENMAC started\n");
+    DEBUG_LVL_EDRV_TRACE(" OPENMAC started\n");
 
     ret = openmac_isrReg(kOpenmacIrqTxRx, irqHandler, (void*)edrvInstance_l.pMacInst);
 
@@ -318,20 +318,20 @@ tEplKernel edrv_shutdown(void)
         }
         else
         {
-            EPL_DBGLVL_EDRV_TRACE(" --- omethStatistics ---\n");
-            EPL_DBGLVL_EDRV_TRACE(" ----  RX           ----\n");
-            EPL_DBGLVL_EDRV_TRACE("  CRC ERROR = %i\n", (INT)pMacStat->rxCrcError);
-            EPL_DBGLVL_EDRV_TRACE("  HOOK DISABLED = %i\n", (INT)pMacStat->rxHookDisabled);
-            EPL_DBGLVL_EDRV_TRACE("  HOOK OVERFLOW = %i\n", (INT)pMacStat->rxHookOverflow);
-            EPL_DBGLVL_EDRV_TRACE("  LOST = %i\n", (INT)pMacStat->rxLost);
-            EPL_DBGLVL_EDRV_TRACE("  OK = %i\n", (INT)pMacStat->rxOk);
-            EPL_DBGLVL_EDRV_TRACE("  OVERSIZE = %i\n", (INT)pMacStat->rxOversize);
-            EPL_DBGLVL_EDRV_TRACE(" ----  TX           ----\n");
-            EPL_DBGLVL_EDRV_TRACE("  COLLISION = %i\n", (INT)pMacStat->txCollision);
-            EPL_DBGLVL_EDRV_TRACE("  DONE = %i\n", (INT)pMacStat->txDone[0]);
-            EPL_DBGLVL_EDRV_TRACE("  SPURIOUS IRQ = %i\n", (INT)pMacStat->txSpuriousInt);
+            DEBUG_LVL_EDRV_TRACE(" --- omethStatistics ---\n");
+            DEBUG_LVL_EDRV_TRACE(" ----  RX           ----\n");
+            DEBUG_LVL_EDRV_TRACE("  CRC ERROR = %i\n", (INT)pMacStat->rxCrcError);
+            DEBUG_LVL_EDRV_TRACE("  HOOK DISABLED = %i\n", (INT)pMacStat->rxHookDisabled);
+            DEBUG_LVL_EDRV_TRACE("  HOOK OVERFLOW = %i\n", (INT)pMacStat->rxHookOverflow);
+            DEBUG_LVL_EDRV_TRACE("  LOST = %i\n", (INT)pMacStat->rxLost);
+            DEBUG_LVL_EDRV_TRACE("  OK = %i\n", (INT)pMacStat->rxOk);
+            DEBUG_LVL_EDRV_TRACE("  OVERSIZE = %i\n", (INT)pMacStat->rxOversize);
+            DEBUG_LVL_EDRV_TRACE(" ----  TX           ----\n");
+            DEBUG_LVL_EDRV_TRACE("  COLLISION = %i\n", (INT)pMacStat->txCollision);
+            DEBUG_LVL_EDRV_TRACE("  DONE = %i\n", (INT)pMacStat->txDone[0]);
+            DEBUG_LVL_EDRV_TRACE("  SPURIOUS IRQ = %i\n", (INT)pMacStat->txSpuriousInt);
         }
-        EPL_DBGLVL_EDRV_TRACE("\n");
+        DEBUG_LVL_EDRV_TRACE("\n");
     }
 
 #if OPENMAC_DMAOBSERV != 0
@@ -347,7 +347,7 @@ tEplKernel edrv_shutdown(void)
         DEBUG_LVL_ERROR_TRACE("%s() Edrv Shutdown failed\n", __func__);
         return kEplNoResource;
     }
-    EPL_DBGLVL_EDRV_TRACE("Edrv Shutdown done\n");
+    DEBUG_LVL_EDRV_TRACE("Edrv Shutdown done\n");
 
     return kEplSuccessful;
 }
@@ -385,7 +385,7 @@ tEplKernel edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
 #if (OPENMAC_PKTLOCTX == OPENMAC_PKTBUF_LOCAL)
     pPacket = allocTxMsgBufferIntern(pBuffer_p);
 #else
-    EPL_DBGLVL_EDRV_TRACE("%s() allocate %i bytes\n", __func__, (INT)(pBuffer_p->maxBufferSize + sizeof(pPacket->length)));
+    DEBUG_LVL_EDRV_TRACE("%s() allocate %i bytes\n", __func__, (INT)(pBuffer_p->maxBufferSize + sizeof(pPacket->length)));
     pPacket = (ometh_packet_typ*)openmac_uncachedMalloc(pBuffer_p->maxBufferSize + sizeof(pPacket->length));
 #endif
 
@@ -1065,8 +1065,8 @@ static ometh_packet_typ* allocTxMsgBufferIntern(tEdrvTxBuffer* pBuffer_p)
     edrvInstance_l.txBufferCount++;
     edrvInstance_l.usedMemorySpace += bufferSize;
 
-    EPL_DBGLVL_EDRV_TRACE("%s() Add buffer @ 0x%08X with size %4d byte ", __func__, pPacket, bufferSize);
-    EPL_DBGLVL_EDRV_TRACE("(Used memory %4d byte %2d buffers)\n", edrvInstance_l.usedMemorySpace, edrvInstance_l.txBufferCount);
+    DEBUG_LVL_EDRV_TRACE("%s() Add buffer @ 0x%08X with size %4d byte ", __func__, pPacket, bufferSize);
+    DEBUG_LVL_EDRV_TRACE("(Used memory %4d byte %2d buffers)\n", edrvInstance_l.usedMemorySpace, edrvInstance_l.txBufferCount);
 
     return pPacket;
 }
@@ -1094,8 +1094,8 @@ static void freeTxMsgBufferIntern(tEdrvTxBuffer* pBuffer_p)
     edrvInstance_l.txBufferCount--;
     edrvInstance_l.usedMemorySpace -= bufferSize;
 
-    EPL_DBGLVL_EDRV_TRACE("%s() Remove buffer with size %4d byte ", __func__, bufferSize);
-    EPL_DBGLVL_EDRV_TRACE("(Used memory %4d byte %2d buffers)\n", edrvInstance_l.usedMemorySpace, edrvInstance_l.txBufferCount);
+    DEBUG_LVL_EDRV_TRACE("%s() Remove buffer with size %4d byte ", __func__, bufferSize);
+    DEBUG_LVL_EDRV_TRACE("(Used memory %4d byte %2d buffers)\n", edrvInstance_l.usedMemorySpace, edrvInstance_l.txBufferCount);
 }
 #endif /* OPENMAC_PKTLOCTX == OPENMAC_PKTBUF_LOCAL */
 

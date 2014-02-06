@@ -347,7 +347,7 @@ tEplKernel pdou_copyRxPdoToPi (void)
 
     if (!pdouInstance_g.fRunning)
     {
-        EPL_DBGLVL_PDO_TRACE ("%s() PDO channels not running!\n", __func__);
+        DEBUG_LVL_PDO_TRACE ("%s() PDO channels not running!\n", __func__);
         return kEplSuccessful;
     }
 
@@ -880,7 +880,7 @@ static tEplKernel checkAndConfigurePdo(UINT16 mappParamIndex_p,
     UINT                calcPdoSize;
     UINT                count;
 
-    EPL_DBGLVL_PDO_TRACE ("%s() mappParamIndex:%04x mappObjectCount:%d\n",
+    DEBUG_LVL_PDO_TRACE ("%s() mappParamIndex:%04x mappObjectCount:%d\n",
                           __func__, mappParamIndex_p, mappObjectCount_p);
 
     pdoId = mappParamIndex_p & PDOU_PDO_ID_MASK;
@@ -890,7 +890,7 @@ static tEplKernel checkAndConfigurePdo(UINT16 mappParamIndex_p,
     if ((!fTxPdo && (mappObjectCount_p > EPL_D_PDO_RPDOChannelObjects_U8)) ||
         (fTxPdo && (mappObjectCount_p > EPL_D_PDO_TPDOChannelObjects_U8)))
     {
-        EPL_DBGLVL_ERROR_TRACE ("%s() %d exceeds object!\n",
+        DEBUG_LVL_ERROR_TRACE ("%s() %d exceeds object!\n",
                                 __func__, mappObjectCount_p);
         *pAbortCode_p = SDO_AC_VALUE_RANGE_EXCEEDED;
         ret = kEplObdValueTooHigh;
@@ -901,7 +901,7 @@ static tEplKernel checkAndConfigurePdo(UINT16 mappParamIndex_p,
     ret = getPdoChannelId(pdoId, fTxPdo, &pdoChannelConf.channelId);
     if (ret != kEplSuccessful)
     {
-        EPL_DBGLVL_ERROR_TRACE ("%s() error get channelID!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE ("%s() error get channelID!\n", __func__);
         *pAbortCode_p = SDO_AC_GENERAL_ERROR;
         ret = kEplPdoInvalidObjIndex;
         goto Exit;

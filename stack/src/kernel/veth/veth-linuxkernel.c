@@ -164,9 +164,9 @@ tEplKernel veth_addInstance(const UINT8 aSrcMac_p[6])
 
     //register VEth to the network subsystem
     if (register_netdev(pVEthNetDevice_g))
-        EPL_DBGLVL_VETH_TRACE("veth_addInstance: Could not register VEth...\n");
+        DEBUG_LVL_VETH_TRACE("veth_addInstance: Could not register VEth...\n");
     else
-        EPL_DBGLVL_VETH_TRACE("veth_addInstance: Register VEth successfull...\n");
+        DEBUG_LVL_VETH_TRACE("veth_addInstance: Register VEth successfull...\n");
 
     return kEplSuccessful;
 }
@@ -224,7 +224,7 @@ static int veth_open(struct net_device *pNetDevice_p)
     // register callback function in DLL
     ret = dllk_regAsyncHandler(veth_receiveFrame);
 
-    EPL_DBGLVL_VETH_TRACE("veth_open: EplDllkRegAsyncHandler returned 0x%02X\n", ret);
+    DEBUG_LVL_VETH_TRACE("veth_open: EplDllkRegAsyncHandler returned 0x%02X\n", ret);
     return 0;
 }
 
@@ -241,7 +241,7 @@ The function contains the close routine of the virtual Ethernet driver.
 //------------------------------------------------------------------------------
 static int veth_close(struct net_device *pNetDevice_p)
 {
-    EPL_DBGLVL_VETH_TRACE("VEthClose\n");
+    DEBUG_LVL_VETH_TRACE("VEthClose\n");
 
     dllk_deregAsyncHandler(veth_receiveFrame);
     netif_stop_queue(pNetDevice_p);     //stop the interface queue for the network subsystem
@@ -278,13 +278,13 @@ static int veth_xmit(struct sk_buff *pSkb_p, struct net_device *pNetDevice_p)
     ret = dllkcal_sendAsyncFrame(&frameInfo, kDllAsyncReqPrioGeneric);
     if (ret != kEplSuccessful)
     {
-        EPL_DBGLVL_VETH_TRACE("veth_xmit: dllkcal_sendAsyncFrame returned 0x%02X\n", ret);
+        DEBUG_LVL_VETH_TRACE("veth_xmit: dllkcal_sendAsyncFrame returned 0x%02X\n", ret);
         netif_stop_queue(pNetDevice_p);
         goto Exit;
     }
     else
     {
-        EPL_DBGLVL_VETH_TRACE("veth_xmit: frame passed to DLL\n");
+        DEBUG_LVL_VETH_TRACE("veth_xmit: frame passed to DLL\n");
         dev_kfree_skb(pSkb_p);
 
         //set stats for the device
@@ -309,7 +309,7 @@ The function gets the statistics of the interface.
 //------------------------------------------------------------------------------
 static struct net_device_stats* veth_getStats(struct net_device *pNetDevice_p)
 {
-    EPL_DBGLVL_VETH_TRACE("veth_getStats\n");
+    DEBUG_LVL_VETH_TRACE("veth_getStats\n");
     return netdev_priv(pNetDevice_p);
 }
 
@@ -324,7 +324,7 @@ The function provides the TX timeout entry point of the driver.
 //------------------------------------------------------------------------------
 static void veth_timeout(struct net_device *pNetDevice_p)
 {
-    EPL_DBGLVL_VETH_TRACE("veth_timeout(\n");
+    DEBUG_LVL_VETH_TRACE("veth_timeout(\n");
     // $$$ d.k.: move to extra function, which is called by DLL when new space is available in TxFifo
     if (netif_queue_stopped (pNetDevice_p))
     {
@@ -350,7 +350,7 @@ static tEplKernel veth_receiveFrame(tFrameInfo * pFrameInfo_p)
     struct net_device_stats* pStats = netdev_priv(pNetDevice);
     struct sk_buff *pSkb;
 
-    EPL_DBGLVL_VETH_TRACE("veth_receiveFrame: FrameSize=%u\n", pFrameInfo_p->frameSize);
+    DEBUG_LVL_VETH_TRACE("veth_receiveFrame: FrameSize=%u\n", pFrameInfo_p->frameSize);
 
     if ((pSkb = dev_alloc_skb(pFrameInfo_p->frameSize + 2)) == NULL)
     {
@@ -368,7 +368,7 @@ static tEplKernel veth_receiveFrame(tFrameInfo * pFrameInfo_p)
 
     netif_rx(pSkb);         // call netif_rx with skb
 
-    EPL_DBGLVL_VETH_TRACE("veth_receiveFrame: SrcMAC=0x%llx\n", ami_getUint48Be(pFrameInfo_p->pFrame->m_be_abSrcMac));
+    DEBUG_LVL_VETH_TRACE("veth_receiveFrame: SrcMAC=0x%llx\n", ami_getUint48Be(pFrameInfo_p->pFrame->m_be_abSrcMac));
 
     // update receive statistics
     pStats->rx_packets++;

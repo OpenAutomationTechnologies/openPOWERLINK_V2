@@ -148,7 +148,7 @@ tEplKernel eventkcal_initQueueHostif(tEventQueue eventQueue_p)
 
     if(hifRet != kHostifSuccessful)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() Could not get buffer from host interface (%d)\n",
+        DEBUG_LVL_ERROR_TRACE("%s() Could not get buffer from host interface (%d)\n",
                 __func__, hifRet);
         return kEplNoResource;
     }
@@ -161,7 +161,7 @@ tEplKernel eventkcal_initQueueHostif(tEventQueue eventQueue_p)
 
     if(lfqRet != kQueueSuccessful)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() Queue create failed (%d)\n",
+        DEBUG_LVL_ERROR_TRACE("%s() Queue create failed (%d)\n",
                 __func__, lfqRet);
         return kEplNoResource;
     }
@@ -257,7 +257,7 @@ tEplKernel eventkcal_postEventHostif (tEventQueue eventQueue_p, tEplEvent *pEven
     lfqRet = lfq_entryEnqueue(instance_l[eventQueue_p], pPostBuffer, dataSize);
     if(lfqRet != kQueueSuccessful)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() Setting event to queue failed (0x%X)\n", __func__, lfqRet);
+        DEBUG_LVL_ERROR_TRACE("%s() Setting event to queue failed (0x%X)\n", __func__, lfqRet);
         ret = kEplEventPostError;
         goto Exit;
     }
@@ -300,7 +300,7 @@ tEplKernel eventkcal_processEventHostif(tEventQueue eventQueue_p)
     lfqRet = lfq_entryDequeue(instance_l[eventQueue_p], pRxBuffer, &dataSize);
     if(lfqRet != kQueueSuccessful)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() Getting event from queue failed (0x%X)\n", __func__, lfqRet);
+        DEBUG_LVL_ERROR_TRACE("%s() Getting event from queue failed (0x%X)\n", __func__, lfqRet);
         eventk_postError(kEplEventSourceEventk, kEplEventReadError,
                          sizeof (lfqRet), &lfqRet);
         goto Exit;

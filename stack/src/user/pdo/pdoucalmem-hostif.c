@@ -114,7 +114,7 @@ tEplKernel pdoucal_openMem(void)
 
     if(pInstance == NULL)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() couldn't get Pcp hostif instance\n",
+        DEBUG_LVL_ERROR_TRACE("%s() couldn't get Pcp hostif instance\n",
                 __func__);
         return kEplNoResource;
     }
@@ -124,7 +124,7 @@ tEplKernel pdoucal_openMem(void)
 
     if(hifret != kHostifSuccessful)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() Could not get buffer from host interface (%d)\n",
+        DEBUG_LVL_ERROR_TRACE("%s() Could not get buffer from host interface (%d)\n",
                 __func__, hifret);
         return kEplNoResource;
     }
@@ -169,7 +169,7 @@ tEplKernel pdoucal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
 {
     if(memSize_p > limPdo_l.span)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() out of memory (%d > %d)\n",
+        DEBUG_LVL_ERROR_TRACE("%s() out of memory (%d > %d)\n",
                 __func__, memSize_p, limPdo_l.span);
         return kEplNoResource;
     }

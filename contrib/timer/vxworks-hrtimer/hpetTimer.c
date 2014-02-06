@@ -213,7 +213,7 @@ int timerdev_init(void)
      * nanoseconds */
     ullCalcFactor_l = (FSEC_PER_NSEC << 32) / uiHpetPeriod_l;
 
-    EPL_DBGLVL_TIMERH_TRACE ("%s() calcFactor_g = %lu hpetPeriodHigh_g = %lu\n",
+    DEBUG_LVL_TIMERH_TRACE ("%s() calcFactor_g = %lu hpetPeriodHigh_g = %lu\n",
                __func__, ullCalcFactor_l, ullHpetPeriodHigh_l);
 
     /* reset timer */
@@ -227,7 +227,7 @@ int timerdev_init(void)
     /* setup interrupt handler */
     if (intConnect (INUM_TO_IVEC(HPET_INT_LVL), hpet_irq, 0) == ERROR)
     {
-        EPL_DBGLVL_ERROR_TRACE ("%s() Couldn't connect PCI interrupt\n", __func__);
+        DEBUG_LVL_ERROR_TRACE ("%s() Couldn't connect PCI interrupt\n", __func__);
         return kHrtimerReturnError;
     }
 
@@ -301,7 +301,7 @@ void timerdev_arm(unsigned long long ullDiffTimeout_p)
 
     hpet_writel(HPET_OFF_TIM_CMP(2), uiNewCounter);
 
-    EPL_DBGLVL_TIMERH_TRACE ("%s() -> setup hpet %lu counter:%08x -> %08x\n",
+    DEBUG_LVL_TIMERH_TRACE ("%s() -> setup hpet %lu counter:%08x -> %08x\n",
                __func__, ullDiffTimeout_p, uiCounter, uiNewCounter);
 
     /* enable timer interrupt */

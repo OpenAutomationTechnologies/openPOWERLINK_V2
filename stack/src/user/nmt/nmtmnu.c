@@ -626,7 +626,7 @@ tEplKernel nmtmnu_sendNmtCommandEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
         goto Exit;
     }
 
-    EPL_DBGLVL_NMTMN_TRACE("NMTCmd(%02X->%02X)\n", NmtCommand_p, nodeId_p);
+    DEBUG_LVL_NMTMN_TRACE("NMTCmd(%02X->%02X)\n", NmtCommand_p, nodeId_p);
 
 #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
     if (pNodeInfo->nodeCfg & EPL_NODEASSIGN_PRES_CHAINING)
@@ -2760,7 +2760,7 @@ static INT processNodeEventTimerIdentReq(UINT nodeId_p, tNmtState nodeNmtState_p
     UNUSED_PARAMETER(nmtState_p);
     UNUSED_PARAMETER(nodeNmtState_p);
 
-    EPL_DBGLVL_NMTMN_TRACE("TimerStatReq->IdentReq(%02X)\n", nodeId_p);
+    DEBUG_LVL_NMTMN_TRACE("TimerStatReq->IdentReq(%02X)\n", nodeId_p);
     // trigger IdentRequest again
     *pRet_p = identu_requestIdentResponse(nodeId_p, cbIdentResponse);
     if (*pRet_p != kEplSuccessful)
@@ -2799,7 +2799,7 @@ static INT processNodeEventTimerStatReq(UINT nodeId_p, tNmtState nodeNmtState_p,
     UNUSED_PARAMETER(nodeNmtState_p);
     UNUSED_PARAMETER(nmtState_p);
 
-    EPL_DBGLVL_NMTMN_TRACE("TimerStatReq->StatReq(%02X)\n", nodeId_p);
+    DEBUG_LVL_NMTMN_TRACE("TimerStatReq->StatReq(%02X)\n", nodeId_p);
     // request next StatusResponse
     *pRet_p = statusu_requestStatusResponse(nodeId_p, cbStatusResponse);
     if (*pRet_p != kEplSuccessful)

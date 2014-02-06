@@ -159,7 +159,7 @@ static tEplKernel addInstance(tDllCalQueueInstance *ppDllCalQueue_p,
     pDllCalCircBufInstance = (tDllCalCircBufInstance *) EPL_MALLOC(sizeof(tDllCalCircBufInstance));
     if(pDllCalCircBufInstance == NULL)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() malloc error!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() malloc error!\n", __func__);
         ret = kEplNoResource;
         goto Exit;
     }
@@ -185,13 +185,13 @@ static tEplKernel addInstance(tDllCalQueueInstance *ppDllCalQueue_p,
             break;
 
         default:
-            EPL_DBGLVL_ERROR_TRACE("%s() Invalid Queue!\n", __func__);
+            DEBUG_LVL_ERROR_TRACE("%s() Invalid Queue!\n", __func__);
             ret = kEplInvalidInstanceParam;
             break;
     }
     if(error != kCircBufOk)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() circbuf_alloc error!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() circbuf_alloc error!\n", __func__);
         ret = kEplNoResource;
         goto Exit;
     }

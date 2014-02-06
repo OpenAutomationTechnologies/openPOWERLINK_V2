@@ -261,7 +261,7 @@ tEplKernel timeru_setTimer(tEplTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tEplTime
     pData = (tTimeruData*) EPL_MALLOC(sizeof (tTimeruData));
     if (pData == NULL)
     {
-        EPL_DBGLVL_ERROR_TRACE("error allocating user timer memory!\n");
+        DEBUG_LVL_ERROR_TRACE("error allocating user timer memory!\n");
         return kEplNoResource;
     }
 
@@ -275,7 +275,7 @@ tEplKernel timeru_setTimer(tEplTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tEplTime
 
     if (hrtimer_create(CLOCK_MONOTONIC, &sig, &pData->timer) != 0)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() Error hrtimer_create!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() Error hrtimer_create!\n", __func__);
         return kEplNoResource;
     }
 
@@ -293,12 +293,12 @@ tEplKernel timeru_setTimer(tEplTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tEplTime
     relTime.it_interval.tv_sec = 0;
     relTime.it_interval.tv_nsec = 0;
 
-    EPL_DBGLVL_TIMERU_TRACE("%s() Set timer:%08x timeInMs_p=%ld\n",
+    DEBUG_LVL_TIMERU_TRACE("%s() Set timer:%08x timeInMs_p=%ld\n",
                              __func__, *pData, timeInMs_p);
 
     if (hrtimer_settime(pData->timer, 0, &relTime, NULL) < 0)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() Error hrtimer_settime!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() Error hrtimer_settime!\n", __func__);
         return kEplTimerNoTimerCreated;
     }
 
@@ -350,7 +350,7 @@ tEplKernel timeru_modifyTimer(tEplTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tEplT
         relTime.it_value.tv_nsec = timeInMs_p * 1000000;
     }
 
-    EPL_DBGLVL_TIMERU_TRACE("%s() Modify timer:%08x timeInMs_p=%ld\n",
+    DEBUG_LVL_TIMERU_TRACE("%s() Modify timer:%08x timeInMs_p=%ld\n",
                              __func__, *pTimerHdl_p, timeInMs_p);
 
     relTime.it_interval.tv_sec = 0;
@@ -358,7 +358,7 @@ tEplKernel timeru_modifyTimer(tEplTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tEplT
 
     if (hrtimer_settime(pData->timer, 0, &relTime, NULL) != 0)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() Error timer_settime!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() Error timer_settime!\n", __func__);
         return kEplTimerNoTimerCreated;
     }
 

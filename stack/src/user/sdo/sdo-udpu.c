@@ -321,7 +321,7 @@ tEplKernel sdoudp_config(ULONG ipAddr_p, UINT port_p)
     if (sdoUdpInstance_l.udpSocket == INVALID_SOCKET)
     {
         ret = kEplSdoUdpNoSocket;
-        EPL_DBGLVL_SDO_TRACE("sdoudp_config: socket() failed\n");
+        DEBUG_LVL_SDO_TRACE("sdoudp_config: socket() failed\n");
         return ret;
     }
 
@@ -332,7 +332,7 @@ tEplKernel sdoudp_config(ULONG ipAddr_p, UINT port_p)
     error = bind(sdoUdpInstance_l.udpSocket, (struct sockaddr*)&addr, sizeof(addr));
     if (error < 0)
     {
-        EPL_DBGLVL_SDO_TRACE("sdoudp_config: bind() finished with %i\n", error);
+        DEBUG_LVL_SDO_TRACE("sdoudp_config: bind() finished with %i\n", error);
         return kEplSdoUdpNoSocket;
     }
 
@@ -456,7 +456,7 @@ tEplKernel sdoudp_sendData(tSdoConHdl sdoConHandle_p, tEplFrame* pSrcData_p, UIN
                     dataSize_p, 0, (struct sockaddr*)&addr, sizeof(struct sockaddr_in));
     if(error < 0)
     {
-        EPL_DBGLVL_SDO_TRACE("sdoudp_sendData: sendto() finished with %i\n", iError);
+        DEBUG_LVL_SDO_TRACE("sdoudp_sendData: sendto() finished with %i\n", iError);
         return kEplSdoUdpSendError;
     }
     return kEplSuccessful;
@@ -569,14 +569,14 @@ void receiveFromSocket(tSdoUdpInstance* pInstance_p)
                 ret = pInstance_p->pfnSdoAsySeqCb(sdoConHdl, (tAsySdoSeq*)&aBuffer[4], (error - 4));
                 if (ret != kEplSuccessful)
                 {
-                    EPL_DBGLVL_ERROR_TRACE("%s new con: ip=%lX, port=%u, Ret=0x%X\n", __func__,
+                    DEBUG_LVL_ERROR_TRACE("%s new con: ip=%lX, port=%u, Ret=0x%X\n", __func__,
                           (ULONG) ntohl(pInstance_p->aSdoAbsUdpConnection[freeEntry].ipAddr),
                           ntohs((USHORT) pInstance_p->aSdoAbsUdpConnection[freeEntry].port), ret);
                 }
             }
             else
             {
-                EPL_DBGLVL_ERROR_TRACE("Error in EplSdoUdpThread() no free handle\n");
+                DEBUG_LVL_ERROR_TRACE("Error in EplSdoUdpThread() no free handle\n");
 #if (TARGET_SYSTEM == _WIN32_)
                 LeaveCriticalSection(sdoUdpInstance_l.pCriticalSection);
 #endif
@@ -594,7 +594,7 @@ LeaveCriticalSection(sdoUdpInstance_l.pCriticalSection);
             ret = pInstance_p->pfnSdoAsySeqCb(sdoConHdl, (tAsySdoSeq*)&aBuffer[4], (error - 4));
             if (ret != kEplSuccessful)
             {
-                EPL_DBGLVL_ERROR_TRACE("%s known con: ip=%lX, port=%u, Ret=0x%X\n", __func__,
+                DEBUG_LVL_ERROR_TRACE("%s known con: ip=%lX, port=%u, Ret=0x%X\n", __func__,
                       (ULONG) ntohl(pInstance_p->aSdoAbsUdpConnection[count].ipAddr),
                       ntohs((USHORT) pInstance_p->aSdoAbsUdpConnection[count].port), ret);
             }
@@ -637,11 +637,11 @@ static tThreadResult sdoUdpThread(tThreadArg pArg_p)
         switch(result)
         {
             case 0:     // timeout
-                //EPL_DBGLVL_SDO_TRACE ("select timeout\n");
+                //DEBUG_LVL_SDO_TRACE ("select timeout\n");
                 break;
 
             case -1:    // error
-                EPL_DBGLVL_SDO_TRACE ("select error: %s\n", strerror(errno));
+                DEBUG_LVL_SDO_TRACE ("select error: %s\n", strerror(errno));
                 break;
 
             default:    // data available

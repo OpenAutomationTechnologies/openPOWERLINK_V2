@@ -173,7 +173,7 @@ tEplKernel ctrlu_init(void)
 
     if ((ret = ctrlucal_init()) != kEplSuccessful)
     {
-        EPL_DBGLVL_ERROR_TRACE ("Could not initialize ctrlucal\n");
+        DEBUG_LVL_ERROR_TRACE ("Could not initialize ctrlucal\n");
         goto Exit;
     }
 

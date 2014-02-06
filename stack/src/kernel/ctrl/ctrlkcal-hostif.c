@@ -139,7 +139,7 @@ tEplKernel ctrlkcal_init (void)
     return kEplSuccessful;
 
 Cleanup:
-    EPL_DBGLVL_ERROR_TRACE ("Could not initialize Host Interface (0x%X)\n", hifRet);
+    DEBUG_LVL_ERROR_TRACE ("Could not initialize Host Interface (0x%X)\n", hifRet);
     ctrlkcal_exit();
     return kEplNoResource;
 }
@@ -163,7 +163,7 @@ void ctrlkcal_exit (void)
 
     hifRet = hostif_delete(instance_l.hifInstance);
     if(hifRet != kHostifSuccessful)
-        EPL_DBGLVL_ERROR_TRACE("Could not delete Host Inetrface (0x%X)\n", hifRet);
+        DEBUG_LVL_ERROR_TRACE("Could not delete Host Inetrface (0x%X)\n", hifRet);
 }
 
 //------------------------------------------------------------------------------

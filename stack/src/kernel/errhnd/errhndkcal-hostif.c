@@ -119,7 +119,7 @@ tEplKernel errhndkcal_init (void)
 
     if(hifRet != kHostifSuccessful)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() Could not get buffer from host interface (%d)\n",
+        DEBUG_LVL_ERROR_TRACE("%s() Could not get buffer from host interface (%d)\n",
                 __func__, hifRet);
         ret = kEplNoResource;
         goto Exit;
@@ -127,7 +127,7 @@ tEplKernel errhndkcal_init (void)
 
     if(span < sizeof(tErrHndObjects))
     {
-        EPL_DBGLVL_ERROR_TRACE("%s: Error Handler Object Buffer too small\n",
+        DEBUG_LVL_ERROR_TRACE("%s: Error Handler Object Buffer too small\n",
                 __func__);
         ret = kEplNoResource;
         goto Exit;

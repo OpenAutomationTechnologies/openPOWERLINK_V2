@@ -178,7 +178,7 @@ tEplKernel ctrlucal_executeCmd(tCtrlCmdType cmd_p)
 
     if ((ret = ioctl (fd_l, PLK_CMD_CTRL_EXECUTE_CMD, &ctrlCmd)) != 0)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() ioctl error %d\n", __func__, ret);
+        DEBUG_LVL_ERROR_TRACE("%s() ioctl error %d\n", __func__, ret);
         return kEplGeneralError;
     }
 
@@ -258,7 +258,7 @@ UINT16 ctrlucal_getStatus(void)
 
     if ((ret = ioctl (fd_l, PLK_CMD_CTRL_GET_STATUS, &status)) != 0)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() ioctl error %d\n", __func__, ret);
+        DEBUG_LVL_ERROR_TRACE("%s() ioctl error %d\n", __func__, ret);
         return kCtrlStatusUnavailable;
     }
     return status;
@@ -306,7 +306,7 @@ void ctrlucal_storeInitParam(tCtrlInitParam* pInitParam_p)
 
     if ((ret = ioctl (fd_l, PLK_CMD_CTRL_STORE_INITPARAM, pInitParam_p)) != 0)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() ioctl error %d\n", __func__, ret);
+        DEBUG_LVL_ERROR_TRACE("%s() ioctl error %d\n", __func__, ret);
     }
 
 }
@@ -331,7 +331,7 @@ tEplKernel ctrlucal_readInitParam(tCtrlInitParam* pInitParam_p)
 
     if ((ret = ioctl (fd_l, PLK_CMD_CTRL_READ_INITPARAM, pInitParam_p)) != 0)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() ioctl error %d\n", __func__, ret);
+        DEBUG_LVL_ERROR_TRACE("%s() ioctl error %d\n", __func__, ret);
         return kEplGeneralError;
     }
     return kEplSuccessful;

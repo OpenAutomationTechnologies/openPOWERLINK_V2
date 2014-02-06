@@ -175,7 +175,7 @@ tEplKernel pdok_deAllocChannelMem(void)
     Ret = dllk_deleteNode(&NodeOpParam);
     if (Ret != kEplSuccessful)
     {
-        EPL_DBGLVL_PDO_TRACE("%s() EplDllkDeleteNode failed (%s)\n",
+        DEBUG_LVL_PDO_TRACE("%s() EplDllkDeleteNode failed (%s)\n",
                              __func__, EplGetEplKernelStr(Ret));
         return Ret;
     }

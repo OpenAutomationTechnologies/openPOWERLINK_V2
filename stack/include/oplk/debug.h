@@ -1,153 +1,86 @@
-/****************************************************************************
+/**
+********************************************************************************
+\file   debug.h
 
-  (c) SYSTEC electronic GmbH, D-07973 Greiz, August-Bebel-Str. 29
-      www.systec-electronic.com
+\brief  Definitions for debugging
 
-  Project:      openPOWERLINK
+The file contains definitions used the debugging.
+*******************************************************************************/
 
-  Description:  Debug interface
+/*------------------------------------------------------------------------------
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2013, SYSTEC electronic GmbH
+All rights reserved.
 
-  License:
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the copyright holders nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions
-    are met:
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+------------------------------------------------------------------------------*/
 
-    1. Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
+#ifndef _INC_oplk_debug_H_
+#define _INC_oplk_debug_H_
 
-    2. Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
-
-    3. Neither the name of SYSTEC electronic GmbH nor the names of its
-       contributors may be used to endorse or promote products derived
-       from this software without prior written permission. For written
-       permission, please contact info@systec-electronic.com.
-
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-    COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-    POSSIBILITY OF SUCH DAMAGE.
-
-    Severability Clause:
-
-        If a provision of this License is or becomes illegal, invalid or
-        unenforceable in any jurisdiction, that shall not affect:
-        1. the validity or enforceability in that jurisdiction of any other
-           provision of this License; or
-        2. the validity or enforceability in other jurisdictions of that or
-           any other provision of this License.
-
-  -------------------------------------------------------------------------
-
-                $RCSfile$
-
-                $Author$
-
-                $Revision$  $Date$
-
-                $State$
-
-                Build Environment:
-                    ...
-
-  -------------------------------------------------------------------------
-
-  Revision History:
-
-****************************************************************************/
-
-#ifndef _DEBUG_H_
-#define _DEBUG_H_
-
+//------------------------------------------------------------------------------
+// includes
+//------------------------------------------------------------------------------
 #include <oplk/global.h>
 
+//------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
 
-/***************************************************************************/
-/*                                                                         */
-/*                                                                         */
-/*          G L O B A L   D E F I N I T I O N S                            */
-/*                                                                         */
-/*                                                                         */
-/***************************************************************************/
-
-//---------------------------------------------------------------------------
-// global const defines
-//---------------------------------------------------------------------------
-
+//------------------------------------------------------------------------------
 // These definitions are important for level-debug traces.
 // A macro DEBUG_GLB_LVL defines the current debug-level using following bis.
 // If the corresponding bit is set then trace message will be printed out
 // (only if NDEBUG is not defined). The upper debug-levels are reserved for
 // the debug-levels ALWAYS, ERROR and ASSERT.
-#define DEBUG_LVL_01                    0x00000001
-#define DEBUG_LVL_02                    0x00000002
-#define DEBUG_LVL_03                    0x00000004
-#define DEBUG_LVL_04                    0x00000008
-#define DEBUG_LVL_05                    0x00000010
-#define DEBUG_LVL_06                    0x00000020
-#define DEBUG_LVL_07                    0x00000040
-#define DEBUG_LVL_08                    0x00000080
-#define DEBUG_LVL_09                    0x00000100
-#define DEBUG_LVL_10                    0x00000200
-#define DEBUG_LVL_11                    0x00000400
-#define DEBUG_LVL_12                    0x00000800
-#define DEBUG_LVL_13                    0x00001000
-#define DEBUG_LVL_14                    0x00002000
-#define DEBUG_LVL_15                    0x00004000
-#define DEBUG_LVL_16                    0x00008000
-#define DEBUG_LVL_17                    0x00010000
-#define DEBUG_LVL_18                    0x00020000
-#define DEBUG_LVL_19                    0x00040000
-#define DEBUG_LVL_20                    0x00080000
-#define DEBUG_LVL_21                    0x00100000
-#define DEBUG_LVL_22                    0x00200000
-#define DEBUG_LVL_23                    0x00400000
-#define DEBUG_LVL_24                    0x00800000
-#define DEBUG_LVL_25                    0x01000000
-#define DEBUG_LVL_26                    0x02000000
-#define DEBUG_LVL_27                    0x04000000
-#define DEBUG_LVL_28                    0x08000000
-#define DEBUG_LVL_29                    0x10000000
+#define DEBUG_LVL_EDRV                  0x00000001
+#define DEBUG_LVL_DLL                   0x00000002
+#define DEBUG_LVL_OBD                   0x00000004
+#define DEBUG_LVL_NMTK                  0x00000008
+#define DEBUG_LVL_NMTCN                 0x00000010
+#define DEBUG_LVL_NMTU                  0x00000020
+#define DEBUG_LVL_NMTMN                 0x00000040
+#define DEBUG_LVL_CFM                   0x00000080
+#define DEBUG_LVL_TIMERU                0x00000100
+#define DEBUG_LVL_TIMERH                0x00000200
+
+#define DEBUG_LVL_PDO                   0x00800000
+#define DEBUG_LVL_SDO                   0x01000000
+#define DEBUG_LVL_VETH                  0x02000000
+#define DEBUG_LVL_EVENTK                0x04000000
+#define DEBUG_LVL_EVENTU                0x08000000
+
 #define DEBUG_LVL_ASSERT                0x20000000
 #define DEBUG_LVL_ERROR                 0x40000000
 #define DEBUG_LVL_ALWAYS                0x80000000
 
-
-//---------------------------------------------------------------------------
-// global types
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-// global vars
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-// global function prototypes
-//---------------------------------------------------------------------------
-
-//---------------------------------------------------------------------------
-// global macros
-//---------------------------------------------------------------------------
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // this macro defines a version string
 #define MAKE_VERSION_STRING(product,appname,verstr,author) \
-    "�prd�:" product ",�app�:" appname ",�ver�:" verstr ",�dat�:" __DATE__ ",�aut�:" author
+    "$prd$:" product ",$app$:" appname ",$ver$:" verstr ",$dat$:" __DATE__ ",$aut$:" author
 
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // this macro defines a build info string (e.g. for using in printf())
 #define DEBUG_MAKE_BUILD_INFO(prefix,product,prodid,descr,verstr,author) "\n" \
     prefix "***************************************************\n" \
@@ -158,328 +91,235 @@
     prefix "Version:   " verstr                               "\n" \
     prefix "***************************************************\n\n"
 
-
 //---------------------------------------------------------------------------
 // The default debug-level is: ERROR and ALWAYS.
 // You can define an other debug-level in project settings.
 #ifndef DEF_DEBUG_LVL
-    #define DEF_DEBUG_LVL                   (DEBUG_LVL_ALWAYS | DEBUG_LVL_ERROR)
-#endif
-#ifndef DEBUG_GLB_LVL
-    #define DEBUG_GLB_LVL                 (DEF_DEBUG_LVL)
+#define DEF_DEBUG_LVL                   (DEBUG_LVL_ALWAYS | DEBUG_LVL_ERROR)
 #endif
 
+#ifndef DEBUG_GLB_LVL
+#define DEBUG_GLB_LVL                   (DEF_DEBUG_LVL)
+#endif
 
 //---------------------------------------------------------------------------
 #if (DEV_SYSTEM == _DEV_WIN32_) && defined (TRACE_MSG)
 
-    // For WIN32 the macro DEBUG_TRACE can be defined as function call TraceLvl()
-    // or as macro TRACE().
-    //
-    // Here the parameter 'lvl' can be used with more than one
-    // debug-level (using OR).
-    //
-    // Example: DEBUG_TRACE(DEBUG_LVL_30 | DEBUG_LVL_02, "Hello %d", bCount);
+// For WIN32 the macro DEBUG_TRACE can be defined as function call TraceLvl()
+// or as macro TRACE().
+// Here the parameter 'lvl' can be used with more than one
+// debug-level (using OR).
+// Example: DEBUG_TRACE(DEBUG_LVL_30 | DEBUG_LVL_02, "Hello %d", bCount);
 
-    #define DEBUG_TRACE(lvl,...)             TraceLvl((lvl),__VA_ARGS__)
-    #define DEBUG_GLB_LVL                     dwDebugLevel_g
+#define DEBUG_TRACE(lvl,...)                TraceLvl((lvl),__VA_ARGS__)
+#define DEBUG_GLB_LVL                       debugLevel_g
 
 #else
 
-    // At microcontrollers we do reduce the memory usage by deleting DEBUG_TRACE-lines
-    // (compiler does delete the lines).
-    //
-    // Here the parameter 'lvl' can only be used with one debug-level.
-    //
-    // Example: DEBUG_TRACE(DEBUG_LVL_ERROR, "error code %d", dwRet);
+// At microcontrollers we do reduce the memory usage by deleting DEBUG_TRACE-lines
+// (compiler does delete the lines).
+// Here the parameter 'lvl' can only be used with one debug-level.
+// Example: DEBUG_TRACE(DEBUG_LVL_ERROR, "error code %d", dwRet);
 
-    #if (DEBUG_GLB_LVL & DEBUG_LVL_ALWAYS)
-        #define DEBUG_LVL_ALWAYS_TRACE(...)                TRACE(__VA_ARGS__)
-    #else
-        #define DEBUG_LVL_ALWAYS_TRACE(...)
-    #endif
+#if (DEBUG_GLB_LVL & DEBUG_LVL_ALWAYS)
+#define DEBUG_LVL_ALWAYS_TRACE(...)                TRACE(__VA_ARGS__)
+#else
+#define DEBUG_LVL_ALWAYS_TRACE(...)
+#endif
 
-    #if (DEBUG_GLB_LVL & DEBUG_LVL_ERROR)
-        #define DEBUG_LVL_ERROR_TRACE(...)                 TRACE(__VA_ARGS__)
-    #else
-        #define DEBUG_LVL_ERROR_TRACE(...)
-    #endif
+#if (DEBUG_GLB_LVL & DEBUG_LVL_ERROR)
+#define DEBUG_LVL_ERROR_TRACE(...)                 TRACE(__VA_ARGS__)
+#else
+#define DEBUG_LVL_ERROR_TRACE(...)
+#endif
 
-    #if (DEBUG_GLB_LVL & DEBUG_LVL_ASSERT)
-        #define DEBUG_LVL_ASSERT_TRACE(...)                TRACE(__VA_ARGS__)
-    #else
-        #define DEBUG_LVL_ASSERT_TRACE(...)
-    #endif
+#if (DEBUG_GLB_LVL & DEBUG_LVL_ASSERT)
+#define DEBUG_LVL_ASSERT_TRACE(...)                TRACE(__VA_ARGS__)
+#else
+#define DEBUG_LVL_ASSERT_TRACE(...)
+#endif
 
-    #if (DEBUG_GLB_LVL & DEBUG_LVL_29)
-        #define DEBUG_LVL_29_TRACE(...)                    TRACE(__VA_ARGS__)
-    #else
-        #define DEBUG_LVL_29_TRACE(...)
-    #endif
+#if (DEBUG_GLB_LVL & DEBUG_LVL_EVENTU)
+#define DEBUG_LVL_EVENTU_TRACE(...)                TRACE(__VA_ARGS__)
+#else
+#define DEBUG_LVL_EVENUT_TRACE(...)
+#endif
 
-    #if (DEBUG_GLB_LVL & DEBUG_LVL_28)
-        #define DEBUG_LVL_28_TRACE(...)                    TRACE(__VA_ARGS__)
-    #else
-        #define DEBUG_LVL_28_TRACE(...)
-    #endif
+#if (DEBUG_GLB_LVL & DEBUG_LVL_EVENTK)
+#define DEBUG_LVL_EVENTK_TRACE(...)                TRACE(__VA_ARGS__)
+#else
+#define DEBUG_LVL_EVENTK_TRACE(...)
+#endif
 
-    #if (DEBUG_GLB_LVL & DEBUG_LVL_27)
-        #define DEBUG_LVL_27_TRACE(...)                    TRACE(__VA_ARGS__)
-    #else
-        #define DEBUG_LVL_27_TRACE(...)
-    #endif
+#if (DEBUG_GLB_LVL & DEBUG_LVL_VETH)
+#define DEBUG_LVL_VETH_TRACE(...)                  TRACE(__VA_ARGS__)
+#else
+#define DEBUG_LVL_VETH_TRACE(...)
+#endif
 
-    #if (DEBUG_GLB_LVL & DEBUG_LVL_26)
-        #define DEBUG_LVL_26_TRACE(...)                    TRACE(__VA_ARGS__)
-    #else
-        #define DEBUG_LVL_26_TRACE(...)
-    #endif
+#if (DEBUG_GLB_LVL & DEBUG_LVL_SDO)
+#define DEBUG_LVL_SDO_TRACE(...)                   TRACE(__VA_ARGS__)
+#else
+#define DEBUG_LVL_SDO_TRACE(...)
+#endif
 
-    #if (DEBUG_GLB_LVL & DEBUG_LVL_25)
-        #define DEBUG_LVL_25_TRACE(...)                    TRACE(__VA_ARGS__)
-    #else
-        #define DEBUG_LVL_25_TRACE(...)
-    #endif
+#if (DEBUG_GLB_LVL & DEBUG_LVL_PDO)
+#define DEBUG_LVL_PDO_TRACE(...)                   TRACE(__VA_ARGS__)
+#else
+#define DEBUG_LVL_PDO_TRACE(...)
+#endif
 
-    #if (DEBUG_GLB_LVL & DEBUG_LVL_24)
-        #define DEBUG_LVL_24_TRACE(...)                    TRACE(__VA_ARGS__)
-    #else
-        #define DEBUG_LVL_24_TRACE(...)
-    #endif
+#if (DEBUG_GLB_LVL & DEBUG_LVL_TIMERH)
+#define DEBUG_LVL_TIMERH_TRACE(...)                TRACE(__VA_ARGS__)
+#else
+#define DEBUG_LVL_TIMERH_TRACE(...)
+#endif
 
-    #if (DEBUG_GLB_LVL & DEBUG_LVL_23)
-        #define DEBUG_LVL_23_TRACE(...)                    TRACE(__VA_ARGS__)
-    #else
-        #define DEBUG_LVL_23_TRACE(...)
-    #endif
+#if (DEBUG_GLB_LVL & DEBUG_LVL_TIMERU)
+#define DEBUG_LVL_TIMERU_TRACE(...)                TRACE(__VA_ARGS__)
+#else
+#define DEBUG_LVL_TIMERU_TRACE(...)
+#endif
 
-    #if (DEBUG_GLB_LVL & DEBUG_LVL_22)
-        #define DEBUG_LVL_22_TRACE(...)                    TRACE(__VA_ARGS__)
-    #else
-        #define DEBUG_LVL_22_TRACE(...)
-    #endif
+#if (DEBUG_GLB_LVL & DEBUG_LVL_CFM)
+#define DEBUG_LVL_CFM_TRACE(...)                   TRACE(__VA_ARGS__)
+#else
+#define DEBUG_LVL_CFM_TRACE(...)
+#endif
 
-    #if (DEBUG_GLB_LVL & DEBUG_LVL_21)
-        #define DEBUG_LVL_21_TRACE(...)                    TRACE(__VA_ARGS__)
-    #else
-        #define DEBUG_LVL_21_TRACE(...)
-    #endif
+#if (DEBUG_GLB_LVL & DEBUG_LVL_NMTMN)
+#define DEBUG_LVL_NMTMN_TRACE(...)                 TRACE(__VA_ARGS__)
+#else
+#define DEBUG_LVL_NMTMN_TRACE(...)
+#endif
 
-    #if (DEBUG_GLB_LVL & DEBUG_LVL_20)
-        #define DEBUG_LVL_20_TRACE(...)                    TRACE(__VA_ARGS__)
-    #else
-        #define DEBUG_LVL_20_TRACE(...)
-    #endif
+#if (DEBUG_GLB_LVL & DEBUG_LVL_NMTU)
+#define DEBUG_LVL_NMTU_TRACE(...)                  TRACE(__VA_ARGS__)
+#else
+#define DEBUG_LVL_NMTU_TRACE(...)
+#endif
 
-    #if (DEBUG_GLB_LVL & DEBUG_LVL_19)
-        #define DEBUG_LVL_19_TRACE(...)                    TRACE(__VA_ARGS__)
-    #else
-        #define DEBUG_LVL_19_TRACE(...)
-    #endif
+#if (DEBUG_GLB_LVL & DEBUG_LVL_NMTCN)
+#define DEBUG_LVL_NMTCN_TRACE(...)                 TRACE(__VA_ARGS__)
+#else
+#define DEBUG_LVL_NMTCN_TRACE(...)
+#endif
 
-    #if (DEBUG_GLB_LVL & DEBUG_LVL_18)
-        #define DEBUG_LVL_18_TRACE(...)                    TRACE(__VA_ARGS__)
-    #else
-        #define DEBUG_LVL_18_TRACE(...)
-    #endif
+#if (DEBUG_GLB_LVL & DEBUG_LVL_NMTK)
+#define DEBUG_LVL_NMTK_TRACE(...)                  TRACE(__VA_ARGS__)
+#else
+#define DEBUG_LVL_NMTK_TRACE(...)
+#endif
 
-    #if (DEBUG_GLB_LVL & DEBUG_LVL_17)
-        #define DEBUG_LVL_17_TRACE(...)                    TRACE(__VA_ARGS__)
-    #else
-        #define DEBUG_LVL_17_TRACE(...)
-    #endif
+#if (DEBUG_GLB_LVL & DEBUG_LVL_OBD)
+#define DEBUG_LVL_OBD_TRACE(...)                   TRACE(__VA_ARGS__)
+#else
+#define DEBUG_LVL_OBD_TRACE(...)
+#endif
 
-    #if (DEBUG_GLB_LVL & DEBUG_LVL_16)
-        #define DEBUG_LVL_16_TRACE(...)                    TRACE(__VA_ARGS__)
-    #else
-        #define DEBUG_LVL_16_TRACE(...)
-    #endif
+#if (DEBUG_GLB_LVL & DEBUG_LVL_DLL)
+#define DEBUG_LVL_DLL_TRACE(...)                   TRACE(__VA_ARGS__)
+#else
+#define DEBUG_LVL_DLL_TRACE(...)
+#endif
 
-    #if (DEBUG_GLB_LVL & DEBUG_LVL_15)
-        #define DEBUG_LVL_15_TRACE(...)                    TRACE(__VA_ARGS__)
-    #else
-        #define DEBUG_LVL_15_TRACE(...)
-    #endif
+#if (DEBUG_GLB_LVL & DEBUG_LVL_EDRV)
+#define DEBUG_LVL_EDRV_TRACE(...)                  TRACE(__VA_ARGS__)
+#else
+#define DEBUG_LVL_EDRV_TRACE(...)
+#endif
 
-    #if (DEBUG_GLB_LVL & DEBUG_LVL_14)
-        #define DEBUG_LVL_14_TRACE(...)                    TRACE(__VA_ARGS__)
-    #else
-        #define DEBUG_LVL_14_TRACE(...)
-    #endif
-
-    #if (DEBUG_GLB_LVL & DEBUG_LVL_13)
-        #define DEBUG_LVL_13_TRACE(...)                    TRACE(__VA_ARGS__)
-    #else
-        #define DEBUG_LVL_13_TRACE(...)
-    #endif
-
-    #if (DEBUG_GLB_LVL & DEBUG_LVL_12)
-        #define DEBUG_LVL_12_TRACE(...)                    TRACE(__VA_ARGS__)
-    #else
-        #define DEBUG_LVL_12_TRACE(...)
-    #endif
-
-    #if (DEBUG_GLB_LVL & DEBUG_LVL_11)
-        #define DEBUG_LVL_11_TRACE(...)                    TRACE(__VA_ARGS__)
-    #else
-        #define DEBUG_LVL_11_TRACE(...)
-    #endif
-
-    #if (DEBUG_GLB_LVL & DEBUG_LVL_10)
-        #define DEBUG_LVL_10_TRACE(...)                    TRACE(__VA_ARGS__)
-    #else
-        #define DEBUG_LVL_10_TRACE(...)
-    #endif
-
-    #if (DEBUG_GLB_LVL & DEBUG_LVL_09)
-        #define DEBUG_LVL_09_TRACE(...)                    TRACE(__VA_ARGS__)
-    #else
-        #define DEBUG_LVL_09_TRACE(...)
-    #endif
-
-    #if (DEBUG_GLB_LVL & DEBUG_LVL_08)
-        #define DEBUG_LVL_08_TRACE(...)                    TRACE(__VA_ARGS__)
-    #else
-        #define DEBUG_LVL_08_TRACE(...)
-    #endif
-
-    #if (DEBUG_GLB_LVL & DEBUG_LVL_07)
-        #define DEBUG_LVL_07_TRACE(...)                    TRACE(__VA_ARGS__)
-    #else
-        #define DEBUG_LVL_07_TRACE(...)
-    #endif
-
-    #if (DEBUG_GLB_LVL & DEBUG_LVL_06)
-        #define DEBUG_LVL_06_TRACE(...)                    TRACE(__VA_ARGS__)
-    #else
-        #define DEBUG_LVL_06_TRACE(...)
-    #endif
-
-    #if (DEBUG_GLB_LVL & DEBUG_LVL_05)
-        #define DEBUG_LVL_05_TRACE(...)                    TRACE(__VA_ARGS__)
-    #else
-        #define DEBUG_LVL_05_TRACE(...)
-    #endif
-
-    #if (DEBUG_GLB_LVL & DEBUG_LVL_04)
-        #define DEBUG_LVL_04_TRACE(...)                    TRACE(__VA_ARGS__)
-    #else
-        #define DEBUG_LVL_04_TRACE(...)
-    #endif
-
-    #if (DEBUG_GLB_LVL & DEBUG_LVL_03)
-        #define DEBUG_LVL_03_TRACE(...)                    TRACE(__VA_ARGS__)
-    #else
-        #define DEBUG_LVL_03_TRACE(...)
-    #endif
-
-    #if (DEBUG_GLB_LVL & DEBUG_LVL_02)
-        #define DEBUG_LVL_02_TRACE(...)                    TRACE(__VA_ARGS__)
-    #else
-        #define DEBUG_LVL_02_TRACE(...)
-    #endif
-
-    #if (DEBUG_GLB_LVL & DEBUG_LVL_01)
-        #define DEBUG_LVL_01_TRACE(...)                    TRACE(__VA_ARGS__)
-    #else
-        #define DEBUG_LVL_01_TRACE(...)
-    #endif
-
-    #define DEBUG_TRACE(lvl,...)                           lvl##_TRACE(__VA_ARGS__)
+#define DEBUG_TRACE(lvl,...)                       lvl##_TRACE(__VA_ARGS__)
 
 #endif
 
-
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // The macro DEBUG_DUMP_DATA() can be used with the same debug-levels to dump
 // out data bytes. Function DumpData() has to be included.
 // NOTE: DUMP_DATA has to be defined in project settings.
 #if (!defined (NDEBUG) && defined (DUMP_DATA)) || (DEV_SYSTEM == _DEV_WIN32_)
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
-    #ifdef __cplusplus
-    extern "C"
-    {
-    #endif
+void DumpData (char* szStr_p, UINT8* pData_p, UINT16 size_p);
 
-        void DumpData (char* szStr_p, BYTE MEM* pbData_p, WORD wSize_p);
+#ifdef __cplusplus
+}
+#endif
 
-    #ifdef __cplusplus
-    } // von extern "C"
-    #endif
-
-    #define DEBUG_DUMP_DATA(lvl,str,ptr,siz)    if ((DEBUG_GLB_LVL & (lvl))==(lvl)) \
-                                                    DumpData (str, (BYTE MEM*) (ptr), (WORD) (siz));
-
+#define DEBUG_DUMP_DATA(lvl,str,ptr,siz) \
+    if ((DEBUG_GLB_LVL & (lvl))==(lvl)) \
+        DumpData (str, (UINT8*)(ptr), (UINT16)(siz));
 #else
-
-    #define DEBUG_DUMP_DATA(lvl,str,ptr,siz)
-
+#define DEBUG_DUMP_DATA(lvl,str,ptr,siz)
 #endif
 
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // The macro DEBUG_ASSERT() can be used to print out an error string if the
-// parametered expresion does not result TRUE.
+// parametered expression does not result TRUE.
 // NOTE: If DEBUG_KEEP_ASSERT is defined, then DEBUG_ASSERT-line will not be
 //       deleted from compiler (in release version too).
 #if !defined (NDEBUG) || defined (DEBUG_KEEP_ASSERT)
 
-    #if (DEV_SYSTEM == _DEV_WIN32_)
+#if (DEV_SYSTEM == _DEV_WIN32_)
+// For WIN32 process will be killed after closing message box.
+#define DEBUG_ASSERT(expr,str) \
+    if (!(expr ) && ((DEBUG_GLB_LVL & DEBUG_LVL_ASSERT)!=0)) \
+    { \
+        MessageBox (NULL, "Assertion failed: line " __LINE__ " file " __FILE__ "\n    -> " str "\n"); \
+        ExitProcess (-1); \
+    }
 
-        // For WIN32 process will be killed after closing message box.
-
-        #define DEBUG_ASSERT(expr,str)         if (!(expr ) && ((DEBUG_GLB_LVL & DEBUG_LVL_ASSERT)!=0)) { \
-                                                    MessageBox (NULL, \
-                                                        "Assertion failed: line " __LINE__ " file " __FILE__ \
-                                                        "\n    -> " str "\n"); \
-                                                    ExitProcess (-1); }
-
-        #define DEBUG_ASSERT1(expr,str,p1)      if (!(expr ) && ((DEBUG_GLB_LVL & DEBUG_LVL_ASSERT)!=0)) { \
-                                                    MessageBox (NULL, \
-                                                        "Assertion failed: line " __LINE__ " file " __FILE__ \
-                                                        "\n    -> " str "\n"); \
-                                                    ExitProcess (-1); }
-
-    #else
-
-        // For microcontrollers process will be stopped using endless loop.
-
-        #define DEBUG_ASSERT0(expr,str)         if (!(expr )) { \
-                                                    DEBUG_LVL_ASSERT_TRACE ( \
-                                                        "Assertion failed: line %d file '%s'\n" \
-                                                        "    -> '%s'\n", __LINE__, __FILE__, str); \
-                                                    while (1); }
-
-        #define DEBUG_ASSERT1(expr,str,p1)      if (!(expr )) { \
-                                                    DEBUG_LVL_ASSERT_TRACE ( \
-                                                        "Assertion failed: line %d file '%s'\n" \
-                                                        "    -> '%s'\n" \
-                                                        "    -> 0x%08lX\n", __LINE__, __FILE__, str, (DWORD) p1); \
-                                                    while (1); }
-
-    #endif
+#define DEBUG_ASSERT1(expr,str,p1) \
+    if (!(expr ) && ((DEBUG_GLB_LVL & DEBUG_LVL_ASSERT)!=0)) \
+    { \
+        MessageBox (NULL, "Assertion failed: line " __LINE__ " file " __FILE__ "\n    -> " str "\n"); \
+        ExitProcess (-1); \
+    }
 
 #else
 
-    #define DEBUG_ASSERT0(expr,str)
-    #define DEBUG_ASSERT1(expr,str,p1)
+// For microcontrollers process will be stopped using endless loop.
+#define DEBUG_ASSERT0(expr,str) \
+    if (!(expr )) \
+    { \
+        DEBUG_LVL_ASSERT_TRACE ("Assertion failed: line %d file '%s'\n" \
+                                "    -> '%s'\n", __LINE__, __FILE__, str); \
+        while (1); \
+    }
+
+#define DEBUG_ASSERT1(expr,str,p1) \
+    if (!(expr )) \
+    { \
+    DEBUG_LVL_ASSERT_TRACE ("Assertion failed: line %d file '%s'\n" \
+                            "    -> '%s'\n" \
+                            "    -> 0x%08lX\n", __LINE__, __FILE__, str, (DWORD) p1); \
+    while (1); \
+    }
+
+#endif
+
+#else
+
+#define DEBUG_ASSERT0(expr,str)
+#define DEBUG_ASSERT1(expr,str,p1)
 
 #endif
 
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // The macro DEBUG_ONLY() implements code, if NDEBUG is not defined.
 #if !defined (DEBUG_ONLY)
-    #if !defined (NDEBUG)
 
-        #define DEBUG_ONLY(expr)    expr
-
-    #else
-
-        #define DEBUG_ONLY(expr)
-
-    #endif
+#if !defined (NDEBUG)
+#define DEBUG_ONLY(expr)    expr
+#else
+#define DEBUG_ONLY(expr)
 #endif
 
+#endif
 
-#endif // _DEBUG_H_
+#endif /* _INC_oplk_debug_H_ */

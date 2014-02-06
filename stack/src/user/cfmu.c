@@ -310,7 +310,7 @@ tEplKernel cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p)
         pNodeInfo->sdoComConHdl = UINT_MAX;
         if (ret != kEplSuccessful)
         {
-            EPL_DBGLVL_CFM_TRACE("SDO Free Error!\n");
+            DEBUG_LVL_CFM_TRACE("SDO Free Error!\n");
             return ret;
         }
     }
@@ -357,13 +357,13 @@ tEplKernel cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p)
         ret = obd_readEntry(0x1F26, nodeId_p, &expConfDate, &obdSize);
         if (ret != kEplSuccessful)
         {
-            EPL_DBGLVL_CFM_TRACE("CN%x Error Reading 0x1F26 returns 0x%X\n", uiNodeId_p, ret);
+            DEBUG_LVL_CFM_TRACE("CN%x Error Reading 0x1F26 returns 0x%X\n", uiNodeId_p, ret);
         }
         obdSize = sizeof (expConfTime);
         ret = obd_readEntry(0x1F27, nodeId_p, &expConfTime, &obdSize);
         if (ret != kEplSuccessful)
         {
-            EPL_DBGLVL_CFM_TRACE("CN%x Error Reading 0x1F27 returns 0x%X\n", uiNodeId_p, ret);
+            DEBUG_LVL_CFM_TRACE("CN%x Error Reading 0x1F27 returns 0x%X\n", uiNodeId_p, ret);
         }
         if ((expConfDate != 0) || (expConfTime != 0))
         {   // store configuration in CN at the end of the download,
@@ -378,7 +378,7 @@ tEplKernel cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p)
         identu_getIdentResponse(nodeId_p, &pIdentResponse);
         if (pIdentResponse == NULL)
         {
-            EPL_DBGLVL_CFM_TRACE("CN%x Ident Response is NULL\n", uiNodeId_p);
+            DEBUG_LVL_CFM_TRACE("CN%x Ident Response is NULL\n", uiNodeId_p);
             return kEplInvalidNodeId;
         }
     }
@@ -388,7 +388,7 @@ tEplKernel cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p)
     ret = obd_readEntryToLe(0x1006, 0x00, &cfmInstance_g.leCycleLength, &obdSize);
     if (ret != kEplSuccessful)
     {   // local OD access failed
-        EPL_DBGLVL_CFM_TRACE("Local OBD read failed %d\n", ret);
+        DEBUG_LVL_CFM_TRACE("Local OBD read failed %d\n", ret);
         return ret;
     }
 #endif
@@ -401,7 +401,7 @@ tEplKernel cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p)
         pNodeInfo->cfmState = kCfmStateIdle;
 
         // current version is already available on the CN, no need to write new values, we can continue
-        EPL_DBGLVL_CFM_TRACE("CN%x - Cfg Upto Date\n", nodeId_p);
+        DEBUG_LVL_CFM_TRACE("CN%x - Cfg Upto Date\n", nodeId_p);
 
         ret = downloadCycleLength(pNodeInfo);
         if (ret == kEplReject)
@@ -425,8 +425,8 @@ tEplKernel cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p)
         pNodeInfo->eventCnProgress.totalNumberOfBytes += sizeof(leSignature);
         ami_setUint32Le(&leSignature, 0x64616F6C);
         //Restore Default Parameters
-        EPL_DBGLVL_CFM_TRACE("CN%x - Cfg Mismatch | MN Expects: %lx-%lx ", nodeId_p, expConfDate, expConfTime);
-        EPL_DBGLVL_CFM_TRACE("CN Has: %lx-%lx. Restoring Default...\n",
+        DEBUG_LVL_CFM_TRACE("CN%x - Cfg Mismatch | MN Expects: %lx-%lx ", nodeId_p, expConfDate, expConfTime);
+        DEBUG_LVL_CFM_TRACE("CN Has: %lx-%lx. Restoring Default...\n",
                              ami_getUint32Le(&pIdentResponse->m_le_dwVerifyConfigurationDate),
                              ami_getUint32Le(&pIdentResponse->m_le_dwVerifyConfigurationTime));
 
@@ -440,7 +440,7 @@ tEplKernel cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p)
         else
         {
             // error occurred
-            EPL_DBGLVL_CFM_TRACE("CfmCbEvent(Node): sdoWriteObject() returned 0x%02X\n", Ret);
+            DEBUG_LVL_CFM_TRACE("CfmCbEvent(Node): sdoWriteObject() returned 0x%02X\n", Ret);
         }
     }
     return ret;
@@ -621,7 +621,7 @@ static tEplKernel finishConfig(tCfmNodeInfo* pNodeInfo_p, tNmtCommand nmtCommand
         pNodeInfo_p->sdoComConHdl = UINT_MAX;
         if (ret != kEplSuccessful)
         {
-            EPL_DBGLVL_CFM_TRACE("SDO Free Error!\n");
+            DEBUG_LVL_CFM_TRACE("SDO Free Error!\n");
             return ret;
         }
     }
@@ -686,7 +686,7 @@ static tEplKernel cbSdoCon(tSdoComFinished* pSdoComFinished_p)
         case kCfmStateWaitRestore:
             if (pSdoComFinished_p->sdoComConState == kEplSdoComTransferFinished)
             {   // configuration successfully restored
-                EPL_DBGLVL_CFM_TRACE("\nCN%x - Restore Complete. Resetting Node...\n", pNodeInfo->eventCnProgress.m_uiNodeId);
+                DEBUG_LVL_CFM_TRACE("\nCN%x - Restore Complete. Resetting Node...\n", pNodeInfo->eventCnProgress.m_uiNodeId);
                 // send NMT command reset node to activate the original configuration
                 ret = finishConfig(pNodeInfo, kNmtNodeCommandConfRestored);
             }
@@ -748,7 +748,7 @@ static tEplKernel downloadCycleLength(tCfmNodeInfo* pNodeInfo_p)
     }
     else
     {
-        EPL_DBGLVL_CFM_TRACE("CN%x Writing 0x1006 returns 0x%X\n", pNodeInfo_p->eventCnProgress.nodeId, ret);
+        DEBUG_LVL_CFM_TRACE("CN%x Writing 0x1006 returns 0x%X\n", pNodeInfo_p->eventCnProgress.nodeId, ret);
     }
 #endif
 
@@ -899,7 +899,7 @@ static tEplKernel sdoWriteObject(tCfmNodeInfo* pNodeInfo_p, void* pLeSrcData_p, 
         pNodeInfo_p->sdoComConHdl = UINT_MAX;
         if (ret != kEplSuccessful)
         {
-            EPL_DBGLVL_CFM_TRACE("SDO Free Error!\n");
+            DEBUG_LVL_CFM_TRACE("SDO Free Error!\n");
             return ret;
         }
 

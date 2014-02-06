@@ -122,7 +122,7 @@ tEplKernel errhnducal_init (tErrHndObjects *pLocalObjects_p)
 
     if ((fd_l = shm_open(ERRHND_SHM_NAME, O_RDWR | O_CREAT, 0)) < 0)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() shm_open failed!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() shm_open failed!\n", __func__);
         return kEplNoResource;
     }
 
@@ -136,7 +136,7 @@ tEplKernel errhnducal_init (tErrHndObjects *pLocalObjects_p)
     {
         if (ftruncate(fd_l, sizeof(tErrHndObjects)) == -1)
         {
-            EPL_DBGLVL_ERROR_TRACE("%s() ftruncate failed!\n", __func__);
+            DEBUG_LVL_ERROR_TRACE("%s() ftruncate failed!\n", __func__);
             close (fd_l);
             shm_unlink(ERRHND_SHM_NAME);
             return kEplNoResource;
@@ -147,7 +147,7 @@ tEplKernel errhnducal_init (tErrHndObjects *pLocalObjects_p)
     pErrHndMem_l = mmap(NULL, sizeof(tErrHndObjects), PROT_READ | PROT_WRITE, MAP_SHARED, fd_l, 0);
     if (pErrHndMem_l == MAP_FAILED)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() mmap error handler objects failed!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() mmap error handler objects failed!\n", __func__);
         close (fd_l);
         if (fCreator_l)
             shm_unlink(ERRHND_SHM_NAME);

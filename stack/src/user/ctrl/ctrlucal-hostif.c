@@ -132,7 +132,7 @@ tEplKernel ctrlucal_init(void)
     hifRet = hostif_create(&hifConfig, &instance_l.hifInstance);
     if(hifRet != kHostifSuccessful)
     {
-        EPL_DBGLVL_ERROR_TRACE ("Could not initialize Host Interface (0x%X)\n", hifRet);
+        DEBUG_LVL_ERROR_TRACE ("Could not initialize Host Interface (0x%X)\n", hifRet);
         return kEplNoResource;
     }
 
@@ -142,7 +142,7 @@ tEplKernel ctrlucal_init(void)
     hifRet = hostif_irqMasterEnable(instance_l.hifInstance, instance_l.fIrqMasterEnable);
     if(hifRet != kHostifSuccessful)
     {
-        EPL_DBGLVL_ERROR_TRACE ("Could not disable Master Irq (0x%X)\n", hifRet);
+        DEBUG_LVL_ERROR_TRACE ("Could not disable Master Irq (0x%X)\n", hifRet);
         return kEplNoResource;
     }
 
@@ -167,11 +167,11 @@ void ctrlucal_exit (void)
 
     hifRet = hostif_irqMasterEnable(instance_l.hifInstance, instance_l.fIrqMasterEnable);
     if(hifRet != kHostifSuccessful)
-        EPL_DBGLVL_ERROR_TRACE ("Could not disable Master Irq (0x%X)\n", hifRet);
+        DEBUG_LVL_ERROR_TRACE ("Could not disable Master Irq (0x%X)\n", hifRet);
 
     hifRet = hostif_delete(instance_l.hifInstance);
     if(hifRet != kHostifSuccessful)
-        EPL_DBGLVL_ERROR_TRACE("Could not delete Host Inetrface (0x%X)\n", hifRet);
+        DEBUG_LVL_ERROR_TRACE("Could not delete Host Inetrface (0x%X)\n", hifRet);
 }
 
 //------------------------------------------------------------------------------
@@ -197,7 +197,7 @@ tEplKernel ctrlucal_process (void)
         hifRet = hostif_irqMasterEnable(instance_l.hifInstance, instance_l.fIrqMasterEnable);
         if(hifRet != kHostifSuccessful)
         {
-            EPL_DBGLVL_ERROR_TRACE ("Could not enable Master Irq (0x%X)\n", hifRet);
+            DEBUG_LVL_ERROR_TRACE ("Could not enable Master Irq (0x%X)\n", hifRet);
             return kEplNoResource;
         }
     }
@@ -429,7 +429,7 @@ static UINT8* memInitParamGetDynBuff (void)
     hifret = hostif_dynBufAcquire(instance_l.hifInstance, (UINT32)pBase, &instance_l.dynBufInst, &pDynBufBase);
     if(hifret != kHostifSuccessful)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s() Acquire dynamic buffer failed (0x%X)\n", __func__, hifret);
+        DEBUG_LVL_ERROR_TRACE("%s() Acquire dynamic buffer failed (0x%X)\n", __func__, hifret);
         return NULL;
     }
 
@@ -443,5 +443,5 @@ static void memInitParamFreeDynBuff (void)
     hifret = hostif_dynBufFree(instance_l.hifInstance, instance_l.dynBufInst);
 
     if(hifret != kHostifSuccessful)
-        EPL_DBGLVL_ERROR_TRACE("%s: hostif error = 0x%X\n", __func__, hifret);
+        DEBUG_LVL_ERROR_TRACE("%s: hostif error = 0x%X\n", __func__, hifret);
 }

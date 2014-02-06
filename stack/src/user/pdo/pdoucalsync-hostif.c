@@ -108,14 +108,14 @@ tEplKernel pdoucal_initSync(tEplSyncCb pfnSyncCb_p)
 
     if(pHifInstance == NULL)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s: Could not find hostif instance!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s: Could not find hostif instance!\n", __func__);
         return kEplNoResource;
     }
 
     hifRet = hostif_irqRegHdl(pHifInstance, kHostifIrqSrcSync, hostifIrqSyncCb);
     if(hifRet != kHostifSuccessful)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s: Enable irq not possible!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s: Enable irq not possible!\n", __func__);
         return kEplNoResource;
     }
 
@@ -138,13 +138,13 @@ void pdoucal_exitSync(void)
 
     if(pHifInstance == NULL)
     {
-        EPL_DBGLVL_ERROR_TRACE("%s: Could not find hostif instance!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s: Could not find hostif instance!\n", __func__);
         return;
     }
 
     hifRet = hostif_irqRegHdl(pHifInstance, kHostifIrqSrcSync, NULL);
     if(hifRet != kHostifSuccessful)
-        EPL_DBGLVL_ERROR_TRACE("%s: Disable irq not possible (%d)!\n", __func__, hifRet);
+        DEBUG_LVL_ERROR_TRACE("%s: Disable irq not possible (%d)!\n", __func__, hifRet);
 }
 
 //------------------------------------------------------------------------------

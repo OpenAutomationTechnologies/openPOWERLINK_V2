@@ -698,7 +698,7 @@ static tEplKernel processStateIdle(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSe
 
         // init con from extern, check rcon and scon -> send answer
         case kSdoSeqEventFrameRec:
-            DEBUG_LVL_25_TRACE("%s scon=%u rcon=%u\n", __func__,
+            DEBUG_LVL_SDO_TRACE("%s scon=%u rcon=%u\n", __func__,
                                pRecvFrame_p->m_le_bSendSeqNumCon,
                                pRecvFrame_p->m_le_bRecSeqNumCon);
 
@@ -1148,7 +1148,7 @@ static tEplKernel processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
                     timeru_deleteTimer(&pSdoSeqCon_p->timerHandle);
                     sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateTransferAbort);
                     // restart immediately with initialization request
-                    DEBUG_LVL_25_TRACE("sdoSeq: Reinit immediately\n");
+                    DEBUG_LVL_SDO_TRACE("sdoSeq: Reinit immediately\n");
                     ret = kEplRetry;
                     break;
 
@@ -1310,7 +1310,7 @@ static tEplKernel processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sd
     UINT                frameSize;
     tEplFrame*          pFrame;
 
-    DEBUG_LVL_25_TRACE("EplSdoAsySequ: StateWaitAck\n");
+    DEBUG_LVL_SDO_TRACE("EplSdoAsySequ: StateWaitAck\n");
 
     ret = setTimer(pSdoSeqCon_p, sdoSeqInstance_l.sdoSeqTimeout);
 
@@ -1486,7 +1486,7 @@ static tEplKernel processState(UINT handle_p, UINT dataSize_p, tEplFrame* pData_
 
         // unknown state
         default:
-            EPL_DBGLVL_SDO_TRACE("Error: Unknown State in processState\n");
+            DEBUG_LVL_SDO_TRACE("Error: Unknown State in processState\n");
             break;
     }// end of switch(pSdoSeqCon_p->sdoSeqState)
 
@@ -1645,7 +1645,7 @@ static tEplKernel receiveCb(tSdoConHdl conHdl_p, tAsySdoSeq* pSdoSeqData_p,
         EnterCriticalSection(sdoSeqInstance_l.pCriticalSectionReceive);
 #endif
 
-        EPL_DBGLVL_SDO_TRACE("Handle: 0x%x , First Databyte 0x%x\n", conHdl_p, ((BYTE*)pSdoSeqData_p)[0]);
+        DEBUG_LVL_SDO_TRACE("Handle: 0x%x , First Databyte 0x%x\n", conHdl_p, ((BYTE*)pSdoSeqData_p)[0]);
 
         // search control structure for this connection
         pSdoSeqCon = &sdoSeqInstance_l.aSdoSeqCon[count];
@@ -1859,10 +1859,10 @@ static tEplKernel readFromHistory(tSdoSeqCon* pSdoSeqCon_p, tEplFrame** ppFrame_
     if ((pHistory->freeEntries < SDO_HISTORY_SIZE) &&
         (pHistory->writeIndex != pHistory->readIndex))
     {
-        EPL_DBGLVL_SDO_TRACE("readFromHistory(): init = %d, read = %u, write = %u, ack = %u",
+        DEBUG_LVL_SDO_TRACE("readFromHistory(): init = %d, read = %u, write = %u, ack = %u",
                              (int) fInitRead_p, (WORD)pHistory->readIndex,
                              (WORD)pHistory->writeIndex, (WORD)pHistory->ackIndex);
-        EPL_DBGLVL_SDO_TRACE(", free entries = %u, next frame size = %u\n",
+        DEBUG_LVL_SDO_TRACE(", free entries = %u, next frame size = %u\n",
                              (WORD)pHistory->freeEntries, pHistory->aFrameSize[pHistory->readIndex]);
 
         // return pointer to stored frame
@@ -1876,7 +1876,7 @@ static tEplKernel readFromHistory(tSdoSeqCon* pSdoSeqCon_p, tEplFrame** ppFrame_
     }
     else
     {
-        EPL_DBGLVL_SDO_TRACE("readFromHistory(): read = %u, ack = %u, free entries = %u, no frame\n",
+        DEBUG_LVL_SDO_TRACE("readFromHistory(): read = %u, ack = %u, free entries = %u, no frame\n",
                              (WORD)pHistory->readIndex, (WORD)pHistory->ackIndex, (WORD)pHistory->freeEntries);
 
         // no more frames to send - return null pointer
