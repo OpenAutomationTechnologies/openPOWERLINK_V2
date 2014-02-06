@@ -150,14 +150,14 @@ tOplkError PUBLIC processEvents(tOplkApiEventType EventType_p,
 
         case kOplkApiEventLed:
             /* POWERLINK S/E LED needs to be changed */
-            switch(pEventArg_p->m_Led.m_LedType)
+            switch(pEventArg_p->m_Led.ledType)
             {
                 case kLedTypeStatus:
-                    gpio_setStatusLed(pEventArg_p->m_Led.m_fOn);
+                    gpio_setStatusLed(pEventArg_p->m_Led.fOn);
                     break;
 
                 case kLedTypeError:
-                    gpio_setErrorLed(pEventArg_p->m_Led.m_fOn);
+                    gpio_setErrorLed(pEventArg_p->m_Led.fOn);
                     break;
 
                 default:
