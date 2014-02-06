@@ -134,21 +134,81 @@ typedef struct
 }
 tOplkApiEventRcvAsnd;
 
+/**
+\brief Application event types
+
+This enumeration specifies the valid application events which could be
+sent by the openPOWERLINK stack.
+*/
 typedef enum
 {
-    kOplkApiEventUserDef            = 0x00,    // m_pUserArg
-    kOplkApiEventNmtStateChange     = 0x10,    // m_NmtStateChange
-    kOplkApiEventCriticalError      = 0x12,    // m_InternalError, Stack halted
-    kOplkApiEventWarning            = 0x13,    // m_InternalError, Stack running
-    kOplkApiEventHistoryEntry       = 0x14,    // m_ErrHistoryEntry
-    kOplkApiEventNode               = 0x20,    // m_Node
-    kOplkApiEventBoot               = 0x21,    // m_Boot
-    kOplkApiEventSdo                = 0x62,    // m_Sdo
-    kOplkApiEventObdAccess          = 0x69,    // m_ObdCbParam
-    kOplkApiEventLed                = 0x70,    // m_Led
-    kOplkApiEventCfmProgress        = 0x71,    // m_CfmProgress
-    kOplkApiEventCfmResult          = 0x72,    // m_CfmResult
-    kOplkApiEventReceivedAsnd       = 0x73,    // m_RcvAsnd
+    /** User defined event. It is issued for sending user-defined events. It
+    can be used for e.g. synchronization purposes. The event argument contains
+    a pointer to the user specific argument. */
+    kOplkApiEventUserDef            = 0x00,
+
+    /** NMT state change event. If \ref kErrorReject is returned the subsequent
+    NMT state will not be entered. In this case the application is in charge of
+    executing the appropriate NMT commands. The event argument contains a NMT
+    state change event \ref tEventNmtStateChange .*/
+    kOplkApiEventNmtStateChange     = 0x10,
+
+    /** Critical error event. When this event occurs the NMT state machine will
+    be switched off with NMT event \ref kNmtEventCriticalError. The application
+    may restart the NMT state machine afterwards, but it is unlikely that the
+    openPOWERLINK stack will run stable, because this critical error or the
+    source of it often is a configuration error and not a run-time error. The
+    event argument contains an error event (\ref tEplEventError). */
+    kOplkApiEventCriticalError      = 0x12,
+
+    /** Warning event. The warning may be a run-time error, which should be
+    logged into an error log for further diagnostics. In any case the openPOWERLINK
+    stack proceeds. The event argument contains an error event. (\ref tEplEventError) */
+    kOplkApiEventWarning            = 0x13,
+
+    /** New error history event. The event argument contains an error history
+    entry (\ref tErrHistoryEntry). */
+    kOplkApiEventHistoryEntry       = 0x14,
+
+    /** Node event on MN. The state of the specified CN has changed. The event
+    argument contains the node event information(\ref tOplkApiEventNode). */
+    kOplkApiEventNode               = 0x20,
+
+    /** Boot event on MN. The MN reached the specified state in the boot-up
+    process. The event argument contains the boot event information
+    (\ref tOplkApiEventBoot).*/
+    kOplkApiEventBoot               = 0x21,
+
+    /** SDO transfer finished. This event informs about a finished SDO transfer.
+    The event argument contains the SDO command layer information
+    (\ref tSdoComFinished). */
+    kOplkApiEventSdo                = 0x62,
+
+    /** Object dictionary access. This event informs about an access of the
+    object dictionary. The event argument contains a OBD callback parameter
+    (\ref tObdCbParam). */
+    kOplkApiEventObdAccess          = 0x69,
+
+    /** Status and error LED event. The event allows the application to perform
+    the signaling of the POWERLINK LEDs according to the application. The event
+    argument contains a LED event (\ref kOplkApiEventLed). */
+    kOplkApiEventLed                = 0x70,
+
+    /** CFM progress event. This event informs the application about the progress
+    of the configuration of a specific CN. The event argument contains the CN
+    progress information (\ref tCfmEventCnProgress). */
+    kOplkApiEventCfmProgress        = 0x71,
+
+    /** CFM result event. This event informs the application about the result
+    of the configuration of a specific CN. The event argument contains the
+    CFM result information (\ref tOplkApiEventCfmResult). */
+    kOplkApiEventCfmResult          = 0x72,
+
+    /** Received ASnd event. This event informs the application about a received
+    ASnd frame. This event is forwarded only if the application has enabled
+    the forwarding of ASnd frames by oplk_setAsndForward(). The event argument
+    contains information on the received ASnd frame (\ref tOplkApiEventRcvAsnd). */
+    kOplkApiEventReceivedAsnd       = 0x73,
 } tOplkApiEventType;
 
 
