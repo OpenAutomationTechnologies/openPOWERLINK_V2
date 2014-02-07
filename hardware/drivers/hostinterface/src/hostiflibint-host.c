@@ -119,7 +119,7 @@ tHostifReturn hostif_createInt (tHostif* pHostif_p)
     tHostifReturn       ret = kHostifSuccessful;
     UINT32              pcpAddr;
     tHostifInitParam*   pInitParam;
-    int                 i;
+    UINT                i;
 
     // Busy wait for enabled bridge
     while(getBridgeEnabled(pHostif_p) == FALSE)
@@ -411,8 +411,7 @@ Exit:
 
 \param  pInstance_p             Host interface instance
 \param  pcpBaseAddr_p           Address in pcp memory space
-\param  pInstId_p               Returns dynamic buffer instance being acquired (needed for freeing)
-\param  ppBufBase_p             Addresse to acquired memory
+\param  ppBufBase_p             Address to acquired memory
 
 \return The function returns a tHostifReturn error code.
 \retval kHostifSuccessful       Dynamic buffer acquired ppDynBufBase_p valid.
@@ -424,13 +423,13 @@ Exit:
 */
 //------------------------------------------------------------------------------
 tHostifReturn hostif_dynBufAcquire (tHostifInstance pInstance_p, UINT32 pcpBaseAddr_p,
-        tHostifInstanceId* pInstId_p, UINT8** ppBufBase_p)
+        UINT8** ppBufBase_p)
 {
     tHostifReturn ret;
-    tHostif *pHostif = (tHostif*)pInstance_p;
-    int i;
+    tHostif*      pHostif = (tHostif*)pInstance_p;
+    UINT          i;
 
-    if(pInstance_p == NULL || pInstId_p == NULL || ppBufBase_p == NULL)
+    if(pInstance_p == NULL || ppBufBase_p == NULL)
     {
         ret = kHostifInvalidParameter;
         goto Exit;
@@ -456,9 +455,6 @@ tHostifReturn hostif_dynBufAcquire (tHostifInstance pInstance_p, UINT32 pcpBaseA
             // Get dynamic buffer address
             *ppBufBase_p = pHostif->aBufMap[i].pBase;
 
-            // Return used dynamic buffer instance
-            *pInstId_p = (tHostifInstanceId)i;
-
             ret = kHostifSuccessful;
             break;
         }
@@ -473,7 +469,7 @@ Exit:
 \brief  This function frees a dynamic buffer acquired by the host
 
 \param  pInstance_p             Host interface instance
-\param  instId_p                Dynamic buffer to be freed
+\param  pBufBase_p              Address to acquired memory being freed
 
 \return The function returns a tHostifReturn error code.
 \retval kHostifSuccessful       Dynamic buffer freed
@@ -483,20 +479,32 @@ Exit:
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-tHostifReturn hostif_dynBufFree (tHostifInstance pInstance_p, tHostifInstanceId instId_p)
+tHostifReturn hostif_dynBufFree (tHostifInstance pInstance_p, UINT8* pBufBase_p)
 {
     tHostifReturn ret = kHostifSuccessful;
-    tHostif *pHostif = (tHostif*)pInstance_p;
+    tHostif*      pHostif = (tHostif*)pInstance_p;
+    UINT          i;
 
-    if(pInstance_p == NULL || !(instId_p < HOSTIF_DYNBUF_COUNT))
+    if(pInstance_p == NULL)
     {
         ret = kHostifInvalidParameter;
         goto Exit;
     }
 
-    pHostif->apDynBuf[instId_p] = NULL;
+    for(i=0; i<HOSTIF_DYNBUF_COUNT; i++)
+    {
+        if(pHostif->aBufMap[i].pBase == pBufBase_p)
+        {
+            // Found dynamic buffer, free it
+            pHostif->apDynBuf[i] = NULL;
 
-    hostif_writeDynBufHost(pHostif->pBase, (UINT8)instId_p, 0);
+            ret = kHostifSuccessful;
+            break;
+        }
+    }
+
+    if(ret == kHostifSuccessful)
+        hostif_writeDynBufHost(pHostif->pBase, (UINT8)i, 0);
 
 Exit:
     return ret;

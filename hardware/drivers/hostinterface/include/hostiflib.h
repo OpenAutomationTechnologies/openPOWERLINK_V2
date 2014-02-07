@@ -209,8 +209,8 @@ tHostifReturn hostif_setHeartbeat (tHostifInstance pInstance_p, UINT16 heartbeat
 tHostifReturn hostif_getHeartbeat (tHostifInstance pInstance_p, UINT16* pHeartbeat_p);
 
 tHostifReturn hostif_dynBufAcquire (tHostifInstance pInstance_p, UINT32 pcpBaseAddr_p,
-        tHostifInstanceId* pInstId_p, UINT8** ppBufBase_p);
-tHostifReturn hostif_dynBufFree (tHostifInstance pInstance_p, tHostifInstanceId instId_p);
+        UINT8** ppBufBase_p);
+tHostifReturn hostif_dynBufFree (tHostifInstance pInstance_p, UINT8* pBufBase_p);
 
 tHostifReturn hostif_getBuf (tHostifInstance pInstance_p, tHostifInstanceId instId_p,
         UINT8** ppBufBase_p, UINT* pBufSize_p);

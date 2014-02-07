@@ -95,8 +95,8 @@ static tCtrluCalInstance instance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static UINT8* memInitParamGetDynBuff (void);
-static void memInitParamFreeDynBuff (void);
+static UINT8* getDynBuff(UINT32 pcpBase_p);
+static void freeDynBuff(UINT8* pDynBufBase_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -374,12 +374,23 @@ can be accessed by the kernel stack.
 //------------------------------------------------------------------------------
 void ctrlucal_storeInitParam(tCtrlInitParam* pInitParam_p)
 {
-    UINT8* pDst = memInitParamGetDynBuff();
+    tHostifReturn   hifret;
+    UINT8*          pInitBase;
+    UINT8*          pDst;
+
+    hifret = hostif_getInitParam(instance_l.hifInstance, &pInitBase);
+    if(hifret != kHostifSuccessful)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() Getting init base failed (0x%X)!\n", __func__, hifret);
+        return;
+    }
+
+    pDst = getDynBuff((UINT32)pInitBase);
 
     if(pDst != NULL)
         OPLK_MEMCPY(pDst, pInitParam_p, sizeof(tCtrlInitParam));
 
-    memInitParamFreeDynBuff();
+    freeDynBuff(pDst);
 }
 
 //------------------------------------------------------------------------------
@@ -398,49 +409,85 @@ The function reads the initialization parameter from the kernel stack.
 //------------------------------------------------------------------------------
 tOplkError ctrlucal_readInitParam(tCtrlInitParam* pInitParam_p)
 {
-    UINT8* pSrc = memInitParamGetDynBuff();
+    tOplkError      ret = kErrorOk;
+    tHostifReturn   hifret;
+    UINT8*          pInitBase;
+    UINT8*          pSrc;
+
+    hifret = hostif_getInitParam(instance_l.hifInstance, &pInitBase);
+    if(hifret != kHostifSuccessful)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() Getting init base failed (0x%X)!\n", __func__, hifret);
+        ret = kErrorNoResource;
+        goto Exit;
+    }
+
+    pSrc = getDynBuff((UINT32)pInitBase);
 
     if(pSrc == NULL)
         return kErrorNoResource;
 
     OPLK_MEMCPY(pInitParam_p, pSrc, sizeof(tCtrlInitParam));
 
-    memInitParamFreeDynBuff();
+    freeDynBuff(pSrc);
 
-    return kErrorOk;
+Exit:
+    return ret;
 }
 
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+/// \name Private Functions
+/// \{
 
-static UINT8* memInitParamGetDynBuff (void)
+//------------------------------------------------------------------------------
+/**
+\brief  Get a dynamic buffer
+
+This function sets a dynamic buffer to the provided Pcp memory buffer.
+
+\param  pcpBase_p       Address to buffer in Pcp's memory environment
+
+\return The function returns the acquired dynamic buffer.
+\retval NULL    The dynamic buffer allocation failed.
+*/
+//------------------------------------------------------------------------------
+static UINT8* getDynBuff(UINT32 pcpBase_p)
 {
     tHostifReturn hifret;
-    UINT8*  pBase;
-    UINT8*  pDynBufBase;
+    UINT8* pDynBufBase;
 
-    hifret = hostif_getInitParam(instance_l.hifInstance, &pBase);
-    if(hifret != kHostifSuccessful)
-        return NULL;
-
-    hifret = hostif_dynBufAcquire(instance_l.hifInstance, (UINT32)pBase, &instance_l.dynBufInst, &pDynBufBase);
+    hifret = hostif_dynBufAcquire(instance_l.hifInstance, pcpBase_p, &pDynBufBase);
     if(hifret != kHostifSuccessful)
     {
-        DEBUG_LVL_ERROR_TRACE("%s() Acquire dynamic buffer failed (0x%X)\n", __func__, hifret);
-        return NULL;
+        DEBUG_LVL_ERROR_TRACE("%s() Acquiring dynamic buffer failed (0x%X)!\n", __func__, hifret);
+        pDynBufBase = NULL;
     }
 
     return (UINT8*)pDynBufBase;
 }
 
-static void memInitParamFreeDynBuff (void)
+//------------------------------------------------------------------------------
+/**
+\brief  Free a dynamic buffer
+
+This function frees a dynamic buffer previously acquired.
+
+\param  pDynBufBase_p   Address to buffer in Pcp's memory environment
+*/
+//------------------------------------------------------------------------------
+static void freeDynBuff(UINT8* pDynBufBase_p)
 {
     tHostifReturn hifret;
 
-    hifret = hostif_dynBufFree(instance_l.hifInstance, instance_l.dynBufInst);
+    hifret = hostif_dynBufFree(instance_l.hifInstance, pDynBufBase_p);
 
     if(hifret != kHostifSuccessful)
-        DEBUG_LVL_ERROR_TRACE("%s: hostif error = 0x%X\n", __func__, hifret);
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() Freeing dynamic buffer failed (0x%X)", __func__, hifret);
+    }
 }
+
+///\}
