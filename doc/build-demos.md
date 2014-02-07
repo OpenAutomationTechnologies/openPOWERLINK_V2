@@ -33,6 +33,21 @@ __NOTE:__ You can also generate a Visual Studio Solution and compile the
 libraries in Visual Studio. Please refer to the CMAKE documentation for
 generating Visual Studio solution files.
 
+## Building for target Microblaze {#sect_build_demos_build_microblaze}
+
+Follow the steps below to cross compile your demo application for Microblaze:
+* Open a shell where the Xilinx ISE 14.7 Toolchain is configured.
+  - On a Windows host platform open the `ISE Design Suite [64,32] Bit Command
+    Prompt`.
+  - On a Linux host platform execute the script `<ISE_ROOT_DIR>/settings[32,64].sh>`
+    to configure your current shell.
+
+* Creating the executable
+
+      > cd <openPOWERLINK_dir>/apps/<demo_dir>/build/xilinx-microblaze
+      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=[Debug,Release]
+      > make all
+      > make install
 
 # Configuration Options {#sect_build_demos_options}
 
@@ -95,3 +110,20 @@ generating Visual Studio solution files.
 
     The openPOWERLINK kernel part will be directly linked to the user part and
     application. WinPCAP will be used as Ethernet driver.
+
+## Microblaze Specific Options  {#sect_build_demos_microblaze_options}
+
+- **CFG_HW_LIB_DIR**
+
+  Path to the hardware platform install directory your application should refer to.
+  (e.g: `<openPOWERLINK_DIR>/hardware/lib/generic/microblaze/<BOARD_NAME>/<DEMO_NAME>`)
+
+- **CFG_BUILD_KERNEL_STACK**
+
+  Determines how to build the kernel stack. The following option is available and
+  automatically (implicitely) pre-selected:
+
+  - __Link to Application__
+
+    The openPOWERLINK kernel part will be directly linked to the user part and
+    application. (Single processor demo)

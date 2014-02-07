@@ -59,6 +59,32 @@ __NOTE:__ You can also generate a Visual Studio Solution and compile the
 libraries in Visual Studio. Please refer to the CMAKE documentation for
 generating Visual Studio solution files.
 
+## Microblaze {#sect_build_stack_build_microblaze}
+
+Follow the steps below to build the stack library on your host platform:
+* Open a shell where the Xilinx ISE 14.7 Toolchain is configured.
+  - On a Windows host platform open the `ISE Design Suite [64,32] Bit Command
+    Prompt`.
+  - On a Linux host platform execute the script `<ISE_ROOT_DIR>/settings[32,64].sh>`
+    to configure your current shell.
+
+* Creating debug libraries
+
+      > cd <openPOWERLINK_directory>\stack\build\xilinx-microblaze
+      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Debug
+      > make all
+      > make install
+
+* Creating release libraries
+
+      > cd <openPOWERLINK_directory>\stack\build\xilinx-microblaze
+      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Release
+      > make all
+      > make install
+
+The default library installation path is:
+`<openPOWERLINK_DIR>/stack/lib/generic/microblaze/<BOARD_NAME>/<DEMO_NAME>`
+
 # Configuration Options {#sect_build_stack_options}
 
 If you would like to change the configuration options you have to provide
@@ -157,3 +183,15 @@ the configuration options on the command line (-DCFG_XXX=XXX) or
   Compile complete openPOWERLINK CN library. The library contains an Ethernet
   driver which is using the WinPCAP library for accessing the network. It is
   configured to contain only CN functionality.
+
+## Microblaze Configuration Options
+
+- **CFG_COMPILE_LIB_CN**
+
+  Compile complete openPOWERLINK CN library. The library consists of the user and
+  kernel parts of the stack. It is configured to contain only CN functionality.
+  - __CFG_COMPILE_LIB_CN_HW_LIB_DIR__
+
+    Specify the path to the hardware platform the CN library should refer to.
+    The path to the hardware platform should point to the export folder of the hardware
+    project. (e.g: `<openPOWERLINK_DIR>/hardware/lib/generic/microblaze/<BOARD_NAME>/<DEMO_NAME>`)

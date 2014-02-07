@@ -69,6 +69,8 @@ the appropriate cross toolchain file when calling cmake.
 
 The following build steps are necessary to build an openPOWERLINK solution:
 
+* [Build the hardware platform](\ref page_build_hardware)
+  (This step is only necessary for embedded targets)
 * [Build the openPOWERLINK stack libraries](\ref page_build_stack)
 * [Build the necessary openPOWERLINK drivers](\ref page_build_drivers)
 * [Build your application (or a delivered demo application)](\ref page_build_demos)

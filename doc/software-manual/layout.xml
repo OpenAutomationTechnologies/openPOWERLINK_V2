@@ -12,12 +12,13 @@
         <tab type="user" url="\ref page_build_stack" title="Building Stack Libraries"/>
         <tab type="user" url="\ref page_build_drivers" title="Building Drivers"/>
         <tab type="user" url="\ref page_build_demos" title="Building Demo Applications"/>
+        <tab type="user" url="\ref page_build_hardware" title="Building Hardware Platforms"/>
       </tab>
       <tab type="usergroup" title="Supported Platforms" url="\ref page_platforms">
           <tab type="user" url="\ref page_platform_linux" title="Linux"/>
           <tab type="user" url="\ref page_platform_windows" title="Windows"/>
           <tab type="user" url="\ref page_platform_vxworks" title="VxWorks"/>
-          <tab type="user" url="\ref page_platform_xilinx" title="Xilinx"/>
+          <tab type="user" url="\ref page_platform_xilinx" title="Xilinx Microblaze"/>
           <tab type="user" url="\ref page_platform_altera-mn" title="Altera(MN)"/>
           <tab type="user" url="\ref page_platform_altera-cn" title="Altera(CN)"/>
       </tab>

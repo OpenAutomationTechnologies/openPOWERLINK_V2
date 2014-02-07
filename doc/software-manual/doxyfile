@@ -694,6 +694,7 @@ INPUT                  = ../../stack/src \
                          ../build-stack.md \
                          ../build-drivers.md \
                          ../build-demos.md \
+                         ../build-hardware.md \
                          ../porting-guide.md \
                          ../coding-guide.md \
                          ../directories.md \
