@@ -212,20 +212,27 @@ typedef enum
 } tOplkApiEventType;
 
 
+/**
+\brief Event argument
+
+This union specifies all data that can be specified as an event argument.
+Depending on the event type (\ref tOplkApiEventType) the according member of
+this union is used.
+*/
 typedef union
 {
-    void*                       m_pUserArg;
-    tEventNmtStateChange        m_NmtStateChange;
-    tEplEventError              m_InternalError;
-    tSdoComFinished             m_Sdo;
-    tObdCbParam                 m_ObdCbParam;
-    tOplkApiEventNode           m_Node;
-    tOplkApiEventBoot           m_Boot;
-    tOplkApiEventLed            m_Led;
-    tCfmEventCnProgress         m_CfmProgress;
-    tOplkApiEventCfmResult      m_CfmResult;
-    tErrHistoryEntry            m_ErrHistoryEntry;
-    tOplkApiEventRcvAsnd        m_RcvAsnd;
+    void*                       pUserArg;           ///< User argument (\ref kOplkApiEventUserDef)
+    tEventNmtStateChange        nmtStateChange;     ///< NMT state change information (\ref kOplkApiEventNmtStateChange)
+    tEplEventError              internalError;      ///< Internal stack error (\ref kOplkApiEventCriticalError, \ref kOplkApiEventWarning)
+    tSdoComFinished             sdoInfo;            ///< SDO information (\ref kOplkApiEventSdo)
+    tObdCbParam                 obdCbParam;         ///< OBD callback parameter (\ref kOplkApiEventObdAccess)
+    tOplkApiEventNode           nodeEvent;          ///< Node event information (\ref kOplkApiEventNode)
+    tOplkApiEventBoot           bootEvent;          ///< Boot event information (\ref kOplkApiEventBoot)
+    tOplkApiEventLed            ledEvent;           ///< LED event information (\ref kOplkApiEventLed)
+    tCfmEventCnProgress         cfmProgress;        ///< CFM progress information (\ref kOplkApiEventCfmProgress)
+    tOplkApiEventCfmResult      cfmResult;          ///< CFM result information (\ref kOplkApiEventCfmResult)
+    tErrHistoryEntry            errorHistoryEntry;  ///< Error history entry (\ref kOplkApiEventHistoryEntry)
+    tOplkApiEventRcvAsnd        receivedAsnd;       ///< Received ASnd frame information (\ref kOplkApiEventReceivedAsnd)
 } tOplkApiEventArg;
 
 typedef tOplkError (*tOplkApiCbEvent) (

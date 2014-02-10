@@ -921,7 +921,7 @@ static tOplkError cbSdoCon(tSdoComFinished* pSdoComFinished_p)
     tOplkError          ret = kErrorOk;
     tOplkApiEventArg     eventArg;
 
-    eventArg.m_Sdo = *pSdoComFinished_p;
+    eventArg.sdoInfo = *pSdoComFinished_p;
     ret = ctrlu_callUserEventCallback(kOplkApiEventSdo, &eventArg);
     return ret;
 }
@@ -954,8 +954,8 @@ static tOplkError cbReceivedAsnd(tFrameInfo *pFrameInfo_p)
         return kErrorReject;
 
     // Forward received ASnd frame
-    apiEventArg.m_RcvAsnd.pFrame = pFrameInfo_p->pFrame;
-    apiEventArg.m_RcvAsnd.frameSize = pFrameInfo_p->frameSize;
+    apiEventArg.receivedAsnd.pFrame = pFrameInfo_p->pFrame;
+    apiEventArg.receivedAsnd.frameSize = pFrameInfo_p->frameSize;
 
     eventType = kOplkApiEventReceivedAsnd;
     ret = ctrlu_callUserEventCallback(eventType, &apiEventArg);

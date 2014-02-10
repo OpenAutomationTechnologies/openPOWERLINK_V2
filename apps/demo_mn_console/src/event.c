@@ -224,7 +224,7 @@ static tOplkError processStateChangeEvent(tOplkApiEventType EventType_p,
                                           void GENERIC* pUserArg_p)
 {
     tOplkError                  ret = kErrorOk;
-    tEventNmtStateChange*       pNmtStateChange = &pEventArg_p->m_NmtStateChange;
+    tEventNmtStateChange*       pNmtStateChange = &pEventArg_p->nmtStateChange;
 
     UNUSED_PARAMETER(EventType_p);
     UNUSED_PARAMETER(pUserArg_p);
@@ -308,7 +308,7 @@ static tOplkError processErrorWarningEvent(tOplkApiEventType EventType_p,
     // error or warning occurred within the stack or the application
     // on error the API layer stops the NMT state machine
 
-    tEplEventError*         pInternalError = &pEventArg_p->m_InternalError;
+    tEplEventError*         pInternalError = &pEventArg_p->internalError;
 
     UNUSED_PARAMETER(EventType_p);
     UNUSED_PARAMETER(pUserArg_p);
@@ -372,7 +372,7 @@ static tOplkError processHistoryEvent(tOplkApiEventType EventType_p,
                                       tOplkApiEventArg* pEventArg_p,
                                       void GENERIC* pUserArg_p)
 {
-    tErrHistoryEntry*    pHistoryEntry = &pEventArg_p->m_ErrHistoryEntry;
+    tErrHistoryEntry*    pHistoryEntry = &pEventArg_p->errorHistoryEntry;
 
     UNUSED_PARAMETER(EventType_p);
     UNUSED_PARAMETER(pUserArg_p);
@@ -411,7 +411,7 @@ static tOplkError processNodeEvent(tOplkApiEventType EventType_p,
                                    tOplkApiEventArg* pEventArg_p,
                                    void GENERIC* pUserArg_p)
 {
-    tOplkApiEventNode*   pNode = &pEventArg_p->m_Node;
+    tOplkApiEventNode*   pNode = &pEventArg_p->nodeEvent;
 
     UNUSED_PARAMETER(EventType_p);
     UNUSED_PARAMETER(pUserArg_p);
@@ -468,7 +468,7 @@ static tOplkError processCfmProgressEvent(tOplkApiEventType EventType_p,
                                           tOplkApiEventArg* pEventArg_p,
                                           void GENERIC* pUserArg_p)
 {
-    tCfmEventCnProgress*     pCfmProgress = &pEventArg_p->m_CfmProgress;
+    tCfmEventCnProgress*     pCfmProgress = &pEventArg_p->cfmProgress;
 
     UNUSED_PARAMETER(EventType_p);
     UNUSED_PARAMETER(pUserArg_p);
@@ -512,7 +512,7 @@ static tOplkError processCfmResultEvent(tOplkApiEventType EventType_p,
                                         tOplkApiEventArg* pEventArg_p,
                                         void GENERIC* pUserArg_p)
 {
-    tOplkApiEventCfmResult*       pCfmResult = &pEventArg_p->m_CfmResult;
+    tOplkApiEventCfmResult*       pCfmResult = &pEventArg_p->cfmResult;
 
     UNUSED_PARAMETER(EventType_p);
     UNUSED_PARAMETER(pUserArg_p);
@@ -562,7 +562,7 @@ static tOplkError processSdoEvent(tOplkApiEventType EventType_p,
                                   tOplkApiEventArg* pEventArg_p,
                                   void GENERIC* pUserArg_p)
 {
-    tSdoComFinished*          pSdo = &pEventArg_p->m_Sdo;
+    tSdoComFinished*          pSdo = &pEventArg_p->sdoInfo;
     tOplkError                ret = kErrorOk;
 
     UNUSED_PARAMETER(EventType_p);

@@ -150,14 +150,14 @@ tOplkError PUBLIC processEvents(tOplkApiEventType EventType_p,
 
         case kOplkApiEventLed:
             /* POWERLINK S/E LED needs to be changed */
-            switch(pEventArg_p->m_Led.ledType)
+            switch(pEventArg_p->ledEvent.ledType)
             {
                 case kLedTypeStatus:
-                    gpio_setStatusLed(pEventArg_p->m_Led.fOn);
+                    gpio_setStatusLed(pEventArg_p->ledEvent.fOn);
                     break;
 
                 case kLedTypeError:
-                    gpio_setErrorLed(pEventArg_p->m_Led.fOn);
+                    gpio_setErrorLed(pEventArg_p->ledEvent.fOn);
                     break;
 
                 default:
@@ -199,7 +199,7 @@ static tOplkError processStateChangeEvent(tOplkApiEventType EventType_p,
                                           tOplkApiEventArg* pEventArg_p,
                                           void GENERIC* pUserArg_p)
 {
-    tEventNmtStateChange*       pNmtStateChange = &pEventArg_p->m_NmtStateChange;
+    tEventNmtStateChange*       pNmtStateChange = &pEventArg_p->nmtStateChange;
 
     UNUSED_PARAMETER(EventType_p);
     UNUSED_PARAMETER(pUserArg_p);
@@ -232,7 +232,7 @@ static tOplkError processErrorWarningEvent(tOplkApiEventType EventType_p,
     // error or warning occurred within the stack or the application
     // on error the API layer stops the NMT state machine
 
-    tEplEventError*         pInternalError = &pEventArg_p->m_InternalError;
+    tEplEventError*         pInternalError = &pEventArg_p->internalError;
 
     UNUSED_PARAMETER(EventType_p);
     UNUSED_PARAMETER(pUserArg_p);

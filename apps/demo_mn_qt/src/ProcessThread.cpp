@@ -344,7 +344,7 @@ tOplkError ProcessThread::processStateChangeEvent(tOplkApiEventType EventType_p,
                                           void GENERIC* pUserArg_p)
 {
     tOplkError                  ret = kErrorOk;
-    tEventNmtStateChange*       pNmtStateChange = &pEventArg_p->m_NmtStateChange;
+    tEventNmtStateChange*       pNmtStateChange = &pEventArg_p->nmtStateChange;
 #if !defined(CONFIG_INCLUDE_CFM)
     UINT                        varLen;
 #endif
@@ -462,7 +462,7 @@ tOplkError ProcessThread::processErrorWarningEvent(tOplkApiEventType EventType_p
                                            tOplkApiEventArg* pEventArg_p,
                                            void GENERIC* pUserArg_p)
 {
-    tEplEventError*         pInternalError = &pEventArg_p->m_InternalError;
+    tEplEventError*         pInternalError = &pEventArg_p->internalError;
 
     UNUSED_PARAMETER(EventType_p);
     UNUSED_PARAMETER(pUserArg_p);
@@ -514,7 +514,7 @@ tOplkError ProcessThread::processHistoryEvent(tOplkApiEventType EventType_p,
                                       tOplkApiEventArg* pEventArg_p,
                                       void GENERIC* pUserArg_p)
 {
-    tErrHistoryEntry*    pHistoryEntry = &pEventArg_p->m_ErrHistoryEntry;
+    tErrHistoryEntry*    pHistoryEntry = &pEventArg_p->errorHistoryEntry;
 
     UNUSED_PARAMETER(EventType_p);
     UNUSED_PARAMETER(pUserArg_p);
@@ -551,15 +551,15 @@ tOplkError ProcessThread::processNodeEvent(tOplkApiEventType EventType_p,
                                    tOplkApiEventArg* pEventArg_p,
                                    void GENERIC* pUserArg_p)
 {
-    tOplkApiEventNode*   pNode = &pEventArg_p->m_Node;
+    tOplkApiEventNode*   pNode = &pEventArg_p->nodeEvent;
     tOplkError          EplRet = kErrorOk;
 
     UNUSED_PARAMETER(EventType_p);
     UNUSED_PARAMETER(pUserArg_p);
     // printf("AppCbEvent(Node): NodeId=%u Event=0x%02X\n",
-    //       pEventArg_p->m_Node.m_uiNodeId, pEventArg_p->m_Node.nodeEvent);
+    //       pEventArg_p->nodeEvent.m_uiNodeId, pEventArg_p->nodeEvent.nodeEvent);
     // check additional argument
-    switch (pEventArg_p->m_Node.nodeEvent)
+    switch (pEventArg_p->nodeEvent.nodeEvent)
     {
         case kNmtNodeEventCheckConf:
 #if !defined(CONFIG_INCLUDE_CFM)
@@ -568,7 +568,7 @@ tOplkError ProcessThread::processNodeEvent(tOplkApiEventType EventType_p,
             tSdoComConHdl SdoComConHdl;
 
             // update object 0x1006 on CN
-            EplRet = oplk_writeObject(&SdoComConHdl, pEventArg_p->m_Node.nodeId,
+            EplRet = oplk_writeObject(&SdoComConHdl, pEventArg_p->nodeEvent.nodeId,
                                        0x1006, 0x00, &cycleLen_g, 4,
                                        kSdoTypeAsnd, NULL);
             if (EplRet == kErrorApiTaskDeferred)
@@ -585,7 +585,7 @@ tOplkError ProcessThread::processNodeEvent(tOplkApiEventType EventType_p,
                 EplRet = oplk_freeSdoChannel(SdoComConHdl);
                 SdoComConHdl = 0;
 
-                EplRet = oplk_writeObject(&SdoComConHdl, pEventArg_p->m_Node.nodeId,
+                EplRet = oplk_writeObject(&SdoComConHdl, pEventArg_p->nodeEvent.nodeId,
                                            0x1006, 0x00, &cycleLen_g, 4,
                                            kSdoTypeAsnd, NULL);
                 if (EplRet == kErrorApiTaskDeferred)
@@ -600,20 +600,20 @@ tOplkError ProcessThread::processNodeEvent(tOplkApiEventType EventType_p,
 #endif
 
             sigPrintLog(QString("Node Event: (Node=%2, CheckConf)")
-                        .arg(pEventArg_p->m_Node.nodeId, 0, 10));
+                        .arg(pEventArg_p->nodeEvent.nodeId, 0, 10));
             break;
 
         case kNmtNodeEventUpdateConf:
             sigPrintLog(QString("Node Event: (Node=%1, UpdateConf)")
-                        .arg(pEventArg_p->m_Node.nodeId, 0, 10));
+                        .arg(pEventArg_p->nodeEvent.nodeId, 0, 10));
             break;
 
         case kNmtNodeEventFound:
-            pProcessThread_g->sigNodeAppeared(pEventArg_p->m_Node.nodeId);
+            pProcessThread_g->sigNodeAppeared(pEventArg_p->nodeEvent.nodeId);
             break;
 
         case kNmtNodeEventNmtState:
-            switch (pEventArg_p->m_Node.nmtState)
+            switch (pEventArg_p->nodeEvent.nmtState)
             {
                 case kNmtGsOff:
                 case kNmtGsInitialising:
@@ -621,34 +621,34 @@ tOplkError ProcessThread::processNodeEvent(tOplkApiEventType EventType_p,
                 case kNmtGsResetCommunication:
                 case kNmtGsResetConfiguration:
                 case kNmtCsNotActive:
-                    pProcessThread_g->sigNodeDisappeared(pEventArg_p->m_Node.nodeId);
+                    pProcessThread_g->sigNodeDisappeared(pEventArg_p->nodeEvent.nodeId);
                     break;
 
                 case kNmtCsPreOperational1:
                 case kNmtCsPreOperational2:
                 case kNmtCsReadyToOperate:
-                    pProcessThread_g->sigNodeAppeared(pEventArg_p->m_Node.nodeId);
-                    pProcessThread_g->sigNodeStatus(pEventArg_p->m_Node.nodeId, 1);
+                    pProcessThread_g->sigNodeAppeared(pEventArg_p->nodeEvent.nodeId);
+                    pProcessThread_g->sigNodeStatus(pEventArg_p->nodeEvent.nodeId, 1);
                     break;
 
                 case kNmtCsOperational:
-                    pProcessThread_g->sigNodeStatus(pEventArg_p->m_Node.nodeId, 2);
+                    pProcessThread_g->sigNodeStatus(pEventArg_p->nodeEvent.nodeId, 2);
                     break;
 
                 case kNmtCsBasicEthernet:
                 case kNmtCsStopped:
                 default:
-                    pProcessThread_g->sigNodeStatus(pEventArg_p->m_Node.nodeId, -1);
+                    pProcessThread_g->sigNodeStatus(pEventArg_p->nodeEvent.nodeId, -1);
                     break;
             }
             break;
 
         case kNmtNodeEventError:
-            pProcessThread_g->sigNodeStatus(pEventArg_p->m_Node.nodeId, -1);
+            pProcessThread_g->sigNodeStatus(pEventArg_p->nodeEvent.nodeId, -1);
             sigPrintLog(QString("AppCbEvent (Node=%1): Error = %2 (0x%3)")
-                    .arg(pEventArg_p->m_Node.nodeId, 0, 10)
-                    .arg(debugstr_getEmergErrCodeStr(pEventArg_p->m_Node.errorCode))
-                    .arg(pEventArg_p->m_Node.errorCode, 4, 16, QLatin1Char('0')));
+                    .arg(pEventArg_p->nodeEvent.nodeId, 0, 10)
+                    .arg(debugstr_getEmergErrCodeStr(pEventArg_p->nodeEvent.errorCode))
+                    .arg(pEventArg_p->nodeEvent.errorCode, 4, 16, QLatin1Char('0')));
             break;
 
         default:
@@ -674,7 +674,7 @@ tOplkError ProcessThread::processCfmProgressEvent(tOplkApiEventType EventType_p,
                                           tOplkApiEventArg* pEventArg_p,
                                           void GENERIC* pUserArg_p)
 {
-    tCfmEventCnProgress*     pCfmProgress = &pEventArg_p->m_CfmProgress;
+    tCfmEventCnProgress*     pCfmProgress = &pEventArg_p->cfmProgress;
 
     UNUSED_PARAMETER(EventType_p);
     UNUSED_PARAMETER(pUserArg_p);
@@ -713,7 +713,7 @@ tOplkError ProcessThread::processCfmResultEvent(tOplkApiEventType EventType_p,
                                         tOplkApiEventArg* pEventArg_p,
                                         void GENERIC* pUserArg_p)
 {
-    tOplkApiEventCfmResult*       pCfmResult = &pEventArg_p->m_CfmResult;
+    tOplkApiEventCfmResult*       pCfmResult = &pEventArg_p->cfmResult;
 
     UNUSED_PARAMETER(EventType_p);
     UNUSED_PARAMETER(pUserArg_p);
@@ -762,7 +762,7 @@ tOplkError ProcessThread::processSdoEvent(tOplkApiEventType EventType_p,
                                   tOplkApiEventArg* pEventArg_p,
                                   void GENERIC* pUserArg_p)
 {
-    tSdoComFinished*          pSdo = &pEventArg_p->m_Sdo;
+    tSdoComFinished*          pSdo = &pEventArg_p->sdoInfo;
     tOplkError                ret = kErrorOk;
 
     UNUSED_PARAMETER(EventType_p);
