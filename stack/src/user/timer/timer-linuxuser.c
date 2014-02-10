@@ -510,7 +510,7 @@ by the timer when it expires.
 static void cbTimer(ULONG parameter_p)
 {
     tTimeruData*        pData;
-    tEplEvent           event;
+    tEvent              event;
     tTimerEventArg      timerEventArg;
 
     pData = (tTimeruData*) parameter_p;

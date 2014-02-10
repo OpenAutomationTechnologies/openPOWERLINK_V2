@@ -72,7 +72,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // local types
 //------------------------------------------------------------------------------
 
-typedef tOplkError (*tDllkStateFunc)(tNmtState, tNmtEvent, tErrHndkEvent*);
+typedef tOplkError (*tDllkStateFunc)(tNmtState, tNmtEvent, tEventDllError*);
 
 typedef struct
 {
@@ -90,29 +90,29 @@ typedef struct
 //------------------------------------------------------------------------------
 #if defined(CONFIG_INCLUDE_NMT_MN)
 static tOplkError processNmtMsPreop1(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
-                                     tErrHndkEvent* pDllEvent_p);
+                                     tEventDllError* pDllEvent_p);
 static tOplkError processNmtMsFullCycle(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
-                                        tErrHndkEvent* pDllEvent_p);
+                                        tEventDllError* pDllEvent_p);
 #endif
 
 static tOplkError processCsFullCycleDllWaitPreq(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
-                                                tErrHndkEvent* pDllEvent_p);
+                                                tEventDllError* pDllEvent_p);
 static tOplkError processCsFullCycleDllWaitSoc(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
-                                               tErrHndkEvent* pDllEvent_p);
+                                               tEventDllError* pDllEvent_p);
 static tOplkError processCsFullCycleDllWaitSoa(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
-                                               tErrHndkEvent* pDllEvent_p);
+                                               tEventDllError* pDllEvent_p);
 static tOplkError processCsFullCycleDllGsInit(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
-                                              tErrHndkEvent* pDllEvent_p);
+                                              tEventDllError* pDllEvent_p);
 
 
 static tOplkError processCsStoppedDllWaitPreq(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
-                                              tErrHndkEvent* pDllEvent_p);
+                                              tEventDllError* pDllEvent_p);
 static tOplkError processCsStoppedDllWaitSoc(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
-                                             tErrHndkEvent* pDllEvent_p);
+                                             tEventDllError* pDllEvent_p);
 static tOplkError processCsStoppedDllWaitSoa(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
-                                             tErrHndkEvent* pDllEvent_p);
+                                             tEventDllError* pDllEvent_p);
 static tOplkError processCsStoppedDllGsInit(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
-                                            tErrHndkEvent* pDllEvent_p);
+                                            tEventDllError* pDllEvent_p);
 
 //------------------------------------------------------------------------------
 // local vars
@@ -161,7 +161,7 @@ changes the DLL state depending on the NMT state and the received event.
 tOplkError dllk_changeState(tNmtEvent nmtEvent_p, tNmtState nmtState_p)
 {
     tOplkError              ret = kErrorOk;
-    tErrHndkEvent           dllEvent;
+    tEventDllError          dllEvent;
 
     dllEvent.m_ulDllErrorEvents = 0;
     dllEvent.m_uiNodeId = 0;
@@ -256,7 +256,7 @@ The function handles DLL state changes in NMT state MsPreoperational1
 */
 //------------------------------------------------------------------------------
 static tOplkError processNmtMsPreop1(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
-                                     tErrHndkEvent* pDllEvent_p)
+                                     tEventDllError* pDllEvent_p)
 {
     tOplkError      ret = kErrorOk;
     tDllState       DummyDllState;
@@ -322,7 +322,7 @@ MsPreOperational2, MsReadyToOperate and MsOperational.
 */
 //------------------------------------------------------------------------------
 static tOplkError processNmtMsFullCycle(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
-                                        tErrHndkEvent* pDllEvent_p)
+                                        tEventDllError* pDllEvent_p)
 {
     tOplkError          ret = kErrorOk;
 
@@ -405,7 +405,7 @@ state WaitPreq.
 */
 //------------------------------------------------------------------------------
 static tOplkError processCsFullCycleDllWaitPreq(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
-                                                tErrHndkEvent* pDllEvent_p)
+                                                tEventDllError* pDllEvent_p)
 {
     switch (nmtEvent_p)
     {
@@ -489,7 +489,7 @@ state WaitSoC.
 */
 //------------------------------------------------------------------------------
 static tOplkError processCsFullCycleDllWaitSoc(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
-                                               tErrHndkEvent* pDllEvent_p)
+                                               tEventDllError* pDllEvent_p)
 {
     switch (nmtEvent_p)
     {
@@ -540,7 +540,7 @@ state WaitSoA.
 */
 //------------------------------------------------------------------------------
 static tOplkError processCsFullCycleDllWaitSoa(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
-                                               tErrHndkEvent* pDllEvent_p)
+                                               tEventDllError* pDllEvent_p)
 {
     switch (nmtEvent_p)
     {
@@ -600,7 +600,7 @@ state GsInit.
 */
 //------------------------------------------------------------------------------
 static tOplkError processCsFullCycleDllGsInit(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
-                                              tErrHndkEvent* pDllEvent_p)
+                                              tEventDllError* pDllEvent_p)
 {
     UNUSED_PARAMETER(nmtState_p);
     UNUSED_PARAMETER(nmtEvent_p);
@@ -627,7 +627,7 @@ state WaitPReq.
 */
 //------------------------------------------------------------------------------
 static tOplkError processCsStoppedDllWaitPreq(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
-                                              tErrHndkEvent* pDllEvent_p)
+                                              tEventDllError* pDllEvent_p)
 {
     UNUSED_PARAMETER(nmtState_p);
 
@@ -678,7 +678,7 @@ state WaitSoC.
 */
 //------------------------------------------------------------------------------
 static tOplkError processCsStoppedDllWaitSoc(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
-                                             tErrHndkEvent* pDllEvent_p)
+                                             tEventDllError* pDllEvent_p)
 {
     UNUSED_PARAMETER(nmtState_p);
 
@@ -722,7 +722,7 @@ state WaitSoA.
 */
 //------------------------------------------------------------------------------
 static tOplkError processCsStoppedDllWaitSoa(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
-                                             tErrHndkEvent* pDllEvent_p)
+                                             tEventDllError* pDllEvent_p)
 {
     UNUSED_PARAMETER(nmtState_p);
 
@@ -782,7 +782,7 @@ state GsInit.
 */
 //------------------------------------------------------------------------------
 static tOplkError processCsStoppedDllGsInit(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
-                                            tErrHndkEvent* pDllEvent_p)
+                                            tEventDllError* pDllEvent_p)
 {
     UNUSED_PARAMETER(nmtState_p);
     UNUSED_PARAMETER(nmtEvent_p);

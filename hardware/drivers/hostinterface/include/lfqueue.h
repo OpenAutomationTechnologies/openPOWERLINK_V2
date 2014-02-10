@@ -49,7 +49,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 #define QUEUE_MAX_ENTRIES   32768U
-#define QUEUE_MAX_PAYLOAD   (2048U + 24U)   ///< sizeof(tEplEvent) + ARG
+#define QUEUE_MAX_PAYLOAD   (2048U + 24U)   ///< sizeof(tEvent) + ARG
 
 #define QUEUE_MAGIC         0x1234
 

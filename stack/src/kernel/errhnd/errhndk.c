@@ -110,7 +110,7 @@ static tOplkError generateHistoryEntry(UINT16 errorCode_p, tEplNetTime netTime_p
 static tOplkError generateHistoryEntryNodeId(UINT16 errorCode_p, tEplNetTime netTime_p, UINT nodeId_p);
 static void       decrementCnCounters(void);
 static tOplkError postHistoryEntryEvent(tErrHistoryEntry* pHistoryEntry_p);
-static tOplkError handleDllErrors(tEplEvent *pEvent_p);
+static tOplkError handleDllErrors(tEvent *pEvent_p);
 
 #ifdef CONFIG_INCLUDE_NMT_MN
 static tOplkError decrementMnCounters(void);
@@ -178,7 +178,7 @@ It will be called by the DLL.
 \ingroup module_errhndk
 */
 //------------------------------------------------------------------------------
-tOplkError errhndk_process(tEplEvent* pEvent_p)
+tOplkError errhndk_process(tEvent* pEvent_p)
 {
     tOplkError              ret;
 
@@ -248,14 +248,14 @@ to other modules which need to post error events to the error handler.
 \ingroup module_errhndk
 */
 //------------------------------------------------------------------------------
-tOplkError errhndk_postError(tErrHndkEvent* pErrEvent_p)
+tOplkError errhndk_postError(tEventDllError* pErrEvent_p)
 {
     tOplkError              Ret;
-    tEplEvent               Event;
+    tEvent                  Event;
 
     Event.m_EventSink = kEplEventSinkErrk;
     Event.m_EventType = kEplEventTypeDllError;
-    Event.m_uiSize = sizeof (tErrHndkEvent);
+    Event.m_uiSize = sizeof (tEventDllError);
     Event.m_pArg = pErrEvent_p;
     Ret = eventk_postEvent(&Event);
 
@@ -416,11 +416,11 @@ to the NMT.
 \return Returns kErrorOk or error code
 */
 //------------------------------------------------------------------------------
-static tOplkError handleCnLossSoc(tEplEvent *pEvent_p)
+static tOplkError handleCnLossSoc(tEvent *pEvent_p)
 {
     tOplkError              ret = kErrorOk;
-    tErrHndkEvent*          pErrorHandlerEvent = (tErrHndkEvent*)pEvent_p->m_pArg;
-    UINT32                   threshold, thresholdCnt, cumulativeCnt;
+    tEventDllError*         pErrorHandlerEvent = (tEventDllError*)pEvent_p->m_pArg;
+    UINT32                  threshold, thresholdCnt, cumulativeCnt;
 
     // Check if loss of SoC event occurred
     if ((pErrorHandlerEvent->m_ulDllErrorEvents & EPL_DLL_ERR_CN_LOSS_SOC) == 0)
@@ -467,10 +467,10 @@ to the NMT.
 \return Returns kErrorOk or error code
 */
 //------------------------------------------------------------------------------
-static tOplkError handleCnLossPreq(tEplEvent *pEvent_p)
+static tOplkError handleCnLossPreq(tEvent *pEvent_p)
 {
     tOplkError              ret;
-    tErrHndkEvent*          pErrorHandlerEvent = (tErrHndkEvent*)pEvent_p->m_pArg;
+    tEventDllError*         pErrorHandlerEvent = (tEventDllError*)pEvent_p->m_pArg;
     UINT32                  threshold, thresholdCnt, cumulativeCnt;
 
     // check if loss of PReq event occurred
@@ -515,9 +515,9 @@ appropriate error counter will be decremented.
 \return Returns kErrorOk or error code
 */
 //------------------------------------------------------------------------------
-static void handleCorrectPreq(tEplEvent *pEvent_p)
+static void handleCorrectPreq(tEvent *pEvent_p)
 {
-    tErrHndkEvent*          pErrorHandlerEvent = (tErrHndkEvent*)pEvent_p->m_pArg;
+    tEventDllError*         pErrorHandlerEvent = (tEventDllError*)pEvent_p->m_pArg;
     UINT32                  thresholdCnt;
 
     errhndkcal_getLossPreqThresholdCnt(&thresholdCnt);
@@ -544,10 +544,10 @@ to the NMT.
 \return Returns kErrorOk or error code
 */
 //------------------------------------------------------------------------------
-static tOplkError handleCnCrc(tEplEvent *pEvent_p)
+static tOplkError handleCnCrc(tEvent *pEvent_p)
 {
     tOplkError              ret;
-    tErrHndkEvent*          pErrorHandlerEvent = (tErrHndkEvent*)pEvent_p->m_pArg;
+    tEventDllError*         pErrorHandlerEvent = (tEventDllError*)pEvent_p->m_pArg;
     UINT32                  threshold, thresholdCnt, cumulativeCnt;
 
     // Check if CRC error event occurred
@@ -595,10 +595,10 @@ is removed from the isochronous phase.
 \return Returns kErrorOk or error code
 */
 //------------------------------------------------------------------------------
-static tOplkError handleInvalidFormat(tEplEvent *pEvent_p)
+static tOplkError handleInvalidFormat(tEvent *pEvent_p)
 {
     tOplkError              ret;
-    tErrHndkEvent*          pErrorHandlerEvent = (tErrHndkEvent*)pEvent_p->m_pArg;
+    tEventDllError*         pErrorHandlerEvent = (tEventDllError*)pEvent_p->m_pArg;
 
     // check if invalid format error occurred (only direct reaction)
     if ((pErrorHandlerEvent->m_ulDllErrorEvents & EPL_DLL_ERR_INVALID_FORMAT) == 0)
@@ -658,10 +658,10 @@ to the NMT.
 \return Returns kErrorOk or error code
 */
 //------------------------------------------------------------------------------
-static tOplkError handleMnCrc(tEplEvent *pEvent_p)
+static tOplkError handleMnCrc(tEvent *pEvent_p)
 {
     tOplkError              ret;
-    tErrHndkEvent*          pErrorHandlerEvent = (tErrHndkEvent*)pEvent_p->m_pArg;
+    tEventDllError*         pErrorHandlerEvent = (tEventDllError*)pEvent_p->m_pArg;
     UINT32                  threshold, thresholdCnt, cumulativeCnt;
 
     // check if CRC error event occurred
@@ -703,11 +703,11 @@ appropriate error counters and generates a history entry.
 \return Returns kErrorOk or error code
 */
 //------------------------------------------------------------------------------
-static tOplkError handleMnCycTimeExceed(tEplEvent *pEvent_p)
+static tOplkError handleMnCycTimeExceed(tEvent *pEvent_p)
 {
     tOplkError              ret = kErrorOk;
-    tErrHndkEvent*          pErrorHandlerEvent =
-                            (tErrHndkEvent*)pEvent_p->m_pArg;
+    tEventDllError*         pErrorHandlerEvent =
+                            (tEventDllError*)pEvent_p->m_pArg;
     UINT32                  threshold, thresholdCnt, cumulativeCnt;
 
     // check if cycle time exceeded event occurred
@@ -765,12 +765,12 @@ count is reached the CN will be removed from the isochronous phase.
 \return Returns kErrorOk or error code
 */
 //------------------------------------------------------------------------------
-static tOplkError handleMnCnLossPres(tEplEvent *pEvent_p)
+static tOplkError handleMnCnLossPres(tEvent *pEvent_p)
 {
     tOplkError              ret;
     UINT                    nodeIdx;
     tDllNodeOpParam         nodeOpParam;
-    tErrHndkEvent*          pErrorHandlerEvent = (tErrHndkEvent*)pEvent_p->m_pArg;
+    tEventDllError*         pErrorHandlerEvent = (tEventDllError*)pEvent_p->m_pArg;
     UINT32                  threshold, thresholdCnt, cumulativeCnt;
 
     if ((pErrorHandlerEvent->m_ulDllErrorEvents & EPL_DLL_ERR_MN_CN_LOSS_PRES) == 0)
@@ -844,7 +844,7 @@ different error handling functions to update the error counters.
 \return Returns kErrorOk or error code
 */
 //------------------------------------------------------------------------------
-static tOplkError handleDllErrors(tEplEvent *pEvent_p)
+static tOplkError handleDllErrors(tEvent *pEvent_p)
 {
     tOplkError              ret = kErrorOk;
 
@@ -903,7 +903,7 @@ static tOplkError postHeartbeatEvent(UINT nodeId_p, tNmtState state_p,
 {
     tOplkError              ret;
     tHeartbeatEvent         heartbeatEvent;
-    tEplEvent               event;
+    tEvent                  event;
 
     heartbeatEvent.nodeId = nodeId_p;
     heartbeatEvent.nmtState = state_p;
@@ -931,7 +931,7 @@ The function is used to post a history entry event to the API.
 static tOplkError postHistoryEntryEvent(tErrHistoryEntry* pHistoryEntry_p)
 {
     tOplkError              ret;
-    tEplEvent               event;
+    tEvent                  event;
 
     event.m_EventSink = kEplEventSinkApi;
     event.m_EventType = kEplEventTypeHistoryEntry;
@@ -1054,7 +1054,7 @@ static tOplkError postNmtEvent(tNmtEvent nmtEvent_p)
 {
     tOplkError                  ret;
     tNmtEvent                   nmtEvent;
-    tEplEvent                   event;
+    tEvent                      event;
 
     nmtEvent = nmtEvent_p;
     event.m_EventSink = kEplEventSinkNmtk;

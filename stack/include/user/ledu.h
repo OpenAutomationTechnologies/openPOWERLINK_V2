@@ -67,7 +67,7 @@ tOplkError ledu_init(tLeduStateChangeCallback pfnCbStateChange_p);
 tOplkError ledu_addInstance(tLeduStateChangeCallback pfnCbStateChange_p);
 tOplkError ledu_exit(void);
 tOplkError ledu_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p);
-tOplkError ledu_processEvent(tEplEvent* pEplEvent_p);
+tOplkError ledu_processEvent(tEvent* pEplEvent_p);
 
 #ifdef __cplusplus
 }

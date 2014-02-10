@@ -537,7 +537,7 @@ The function processes SDO events.
 \ingroup module_sdo_seq
 */
 //------------------------------------------------------------------------------
-tOplkError sdoseq_processEvent(tEplEvent* pEvent_p)
+tOplkError sdoseq_processEvent(tEvent* pEvent_p)
 {
     tOplkError          ret = kErrorOk;
     tTimerEventArg   *  pTimerEventArg;

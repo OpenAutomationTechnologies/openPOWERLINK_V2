@@ -177,7 +177,7 @@ queue post function is called.
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-tOplkError eventucal_postKernelEvent (tEplEvent *pEvent_p)
+tOplkError eventucal_postKernelEvent (tEvent *pEvent_p)
 {
     tOplkError      ret;
     /*TRACE("U2K type:%s(%d) sink:%s(%d) size:%d!\n",
@@ -211,7 +211,7 @@ queue post function is called.
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-tOplkError eventucal_postUserEvent (tEplEvent *pEvent_p)
+tOplkError eventucal_postUserEvent (tEvent *pEvent_p)
 {
     tOplkError      ret;
 

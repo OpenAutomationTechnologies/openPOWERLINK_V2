@@ -425,14 +425,14 @@ static tOplkError processCdc(tObdCdcInfo* pCdcInfo_p)
                                      (tObdSize) curDataSize);
         if (ret != kErrorOk)
         {
-            tEplEventObdError       obdError;
+            tEventObdError          obdError;
 
             obdError.m_uiIndex = objectIndex;
             obdError.m_uiSubIndex = objectSubIndex;
 
             DEBUG_LVL_OBD_TRACE("%s: Writing object 0x%04X/%u to local OBD failed with 0x%02X\n",
                                  __func__, objectIndex, objectSubIndex, ret);
-            ret = eventu_postError(kEplEventSourceObdu, ret, sizeof(tEplEventObdError), &obdError);
+            ret = eventu_postError(kEplEventSourceObdu, ret, sizeof(tEventObdError), &obdError);
             if (ret != kErrorOk)
                 return ret;
         }

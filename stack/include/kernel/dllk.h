@@ -125,13 +125,13 @@ tOplkError dllk_addInstance(tDllkInitParam* pInitParam_p);
 tOplkError dllk_delInstance(void);
 tOplkError dllk_config(tDllConfigParam * pDllConfigParam_p);
 tOplkError dllk_setIdentity(tDllIdentParam * pDllIdentParam_p);
-tOplkError dllk_process(tEplEvent * pEvent_p) SECTION_DLLK_PROCESS;
+tOplkError dllk_process(tEvent * pEvent_p) SECTION_DLLK_PROCESS;
 tOplkError dllk_regAsyncHandler(tEplDllkCbAsync pfnDllkCbAsync_p);
 tOplkError dllk_deregAsyncHandler(tEplDllkCbAsync pfnDllkCbAsync_p);
 tOplkError dllk_setAsndServiceIdFilter(tDllAsndServiceId ServiceId_p, tDllAsndFilter Filter_p);
 void       dllk_regRpdoHandler(tDllkCbProcessRpdo pfnDllkCbProcessRpdo_p);
 void       dllk_regTpdoHandler(tDllkCbProcessTpdo pfnDllkCbProcessTpdo_p);
-tEplSyncCb dllk_regSyncHandler(tEplSyncCb pfnCbSync_p);
+tSyncCb dllk_regSyncHandler(tSyncCb pfnCbSync_p);
 #if DLL_DEFERRED_RXFRAME_RELEASE_ISOCHRONOUS != FALSE || DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS != FALSE
 tOplkError dllk_releaseRxFrame(tPlkFrame* pFrame_p, UINT uiFrameSize_p);
 #endif

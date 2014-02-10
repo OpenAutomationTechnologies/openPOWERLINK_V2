@@ -197,7 +197,7 @@ The function processes an asynchronous frame event
 \ingroup module_dllucal
 */
 //------------------------------------------------------------------------------
-tOplkError dllucal_process(tEplEvent * pEvent_p)
+tOplkError dllucal_process(tEvent * pEvent_p)
 {
     tOplkError   ret = kErrorOk;
     tFrameInfo   *pFrameInfo = NULL;
@@ -238,7 +238,7 @@ This function posts a DLL configuration event to the kernel DLL CAL module
 tOplkError dllucal_config(tDllConfigParam * pDllConfigParam_p)
 {
     tOplkError  ret = kErrorOk;
-    tEplEvent   event;
+    tEvent      event;
 
     event.m_EventSink = kEplEventSinkDllkCal;
     event.m_EventType = kEplEventTypeDllkConfig;
@@ -266,7 +266,7 @@ configure the identity of a local node for IdentResponse.
 tOplkError dllucal_setIdentity(tDllIdentParam * pDllIdentParam_p)
 {
     tOplkError  ret = kErrorOk;
-    tEplEvent   event;
+    tEvent      event;
 
     event.m_EventSink = kEplEventSinkDllkCal;
     event.m_EventType = kEplEventTypeDllkIdentity;
@@ -337,7 +337,7 @@ tOplkError dllucal_sendAsyncFrame(tFrameInfo * pFrameInfo_p,
                                   tDllAsyncReqPriority priority_p)
 {
     tOplkError  ret = kErrorOk;
-    tEplEvent   event;
+    tEvent      event;
 
     switch (priority_p)
     {
@@ -393,7 +393,7 @@ tOplkError dllucal_issueRequest(tDllReqServiceId service_p, UINT nodeId_p,
                                 BYTE soaFlag1_p)
 {
     tOplkError          ret = kErrorOk;
-    tEplEvent           event;
+    tEvent              event;
     tDllCalIssueRequest issueReq;
 
     // add node to appropriate request queue
@@ -465,7 +465,7 @@ kEplEventTypeDllkConfigNode event to the kernel DLL CAL module.
 tOplkError dllucal_configNode(tDllNodeInfo* pNodeInfo_p)
 {
     tOplkError  ret = kErrorOk;
-    tEplEvent   event;
+    tEvent      event;
 
     event.m_EventSink = kEplEventSinkDllkCal;
     event.m_EventType = kEplEventTypeDllkConfigNode;
@@ -495,7 +495,7 @@ kEplEventTypeDllkAddNode event to the kernel DLL CAL module.
 tOplkError dllucal_addNode(tDllNodeOpParam* pNodeOpParam_p)
 {
     tOplkError  ret = kErrorOk;
-    tEplEvent   event;
+    tEvent      event;
 
     event.m_EventSink = kEplEventSinkDllkCal;
     event.m_EventType = kEplEventTypeDllkAddNode;
@@ -524,7 +524,7 @@ a kEplEventTypeDllkDelNode event to the kernel DLL CAL module.
 tOplkError dllucal_deleteNode(tDllNodeOpParam* pNodeOpParam_p)
 {
     tOplkError  ret = kErrorOk;
-    tEplEvent   event;
+    tEvent      event;
 
     event.m_EventSink = kEplEventSinkDllkCal;
     event.m_EventType = kEplEventTypeDllkDelNode;
@@ -558,7 +558,7 @@ static tOplkError SetAsndServiceIdFilter(tDllAsndServiceId serviceId_p,
                                          tDllAsndFilter filter_p)
 {
     tOplkError                  ret = kErrorOk;
-    tEplEvent                   event;
+    tEvent                      event;
     tDllCalAsndServiceIdFilter  servFilter;
 
     event.m_EventSink = kEplEventSinkDllkCal;
@@ -588,7 +588,7 @@ static tOplkError HandleRxAsndFrame(tFrameInfo *pFrameInfo_p)
     tOplkError      ret = kErrorOk;
 #if DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS != FALSE
     tOplkError      eventRet;
-    tEplEvent       event;
+    tEvent          event;
 #endif
 
     msgType = (tMsgType)ami_getUint8Le(&pFrameInfo_p->pFrame->messageType);

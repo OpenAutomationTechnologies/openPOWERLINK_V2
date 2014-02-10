@@ -157,7 +157,7 @@ The function initializes the PDO user module.
 \ingroup module_pdou
 **/
 //------------------------------------------------------------------------------
-tOplkError pdou_init(tEplSyncCb pfnSyncCb_p)
+tOplkError pdou_init(tSyncCb pfnSyncCb_p)
 {
     EPL_MEMSET(&pdouInstance_g, 0, sizeof(pdouInstance_g));
     pdouInstance_g.fAllocated = FALSE;

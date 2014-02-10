@@ -77,7 +77,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static tEplSyncCb pfnSyncCb_l = NULL;
+static tSyncCb pfnSyncCb_l = NULL;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -101,7 +101,7 @@ The function initializes the PDO user CAL sync module
 \ingroup module_pdoucal
 */
 //------------------------------------------------------------------------------
-tOplkError pdoucal_initSync(tEplSyncCb pfnSyncCb_p)
+tOplkError pdoucal_initSync(tSyncCb pfnSyncCb_p)
 {
     tHostifReturn hifRet;
     tHostifInstance pHifInstance = hostif_getInstance(0);

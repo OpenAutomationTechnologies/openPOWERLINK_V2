@@ -134,7 +134,7 @@ The function starts the thread used for synchronous data handling.
 \ingroup module_app_common
 */
 //------------------------------------------------------------------------------
-void startSyncThread(tEplSyncCb pfnSync_p)
+void startSyncThread(tSyncCb pfnSync_p)
 {
     UNUSED_PARAMETER(pfnSync_p);
 }

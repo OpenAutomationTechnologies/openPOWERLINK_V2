@@ -88,10 +88,10 @@ tOplkError errhndk_init(void);
 tOplkError errhndk_exit(void);
 
 // processes error events
-tOplkError errhndk_process(tEplEvent* pEvent_p);
+tOplkError errhndk_process(tEvent* pEvent_p);
 
 // posts error events
-tOplkError errhndk_postError(tErrHndkEvent* pDllEvent_p);
+tOplkError errhndk_postError(tEventDllError* pDllEvent_p);
 
 // cycle finished (decrement threshold counters)
 tOplkError errhndk_decrementCounters(BOOL fMN_p) SECTION_ERRHNDK_DECRCNTERS;

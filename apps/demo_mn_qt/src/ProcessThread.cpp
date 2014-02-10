@@ -462,7 +462,7 @@ tOplkError ProcessThread::processErrorWarningEvent(tOplkApiEventType EventType_p
                                            tOplkApiEventArg* pEventArg_p,
                                            void GENERIC* pUserArg_p)
 {
-    tEplEventError*         pInternalError = &pEventArg_p->internalError;
+    tEventError*            pInternalError = &pEventArg_p->internalError;
 
     UNUSED_PARAMETER(EventType_p);
     UNUSED_PARAMETER(pUserArg_p);

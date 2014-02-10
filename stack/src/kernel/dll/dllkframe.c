@@ -119,7 +119,7 @@ tEdrvReleaseRxBuffer dllk_processFrameReceived(tEdrvRxBuffer * pRxBuffer_p)
     tOplkError              ret             = kErrorOk;
     tNmtState               nmtState;
     tNmtEvent               nmtEvent        = kNmtEventNoEvent;
-    tEplEvent               event;
+    tEvent                  event;
     tPlkFrame *             pFrame;
     tFrameInfo              frameInfo;
     tMsgType             	msgType;
@@ -298,7 +298,7 @@ frame was transmitted.
 void dllk_processTransmittedNmtReq(tEdrvTxBuffer * pTxBuffer_p)
 {
     tOplkError              ret = kErrorOk;
-    tEplEvent               event;
+    tEvent                  event;
     tDllAsyncReqPriority    priority;
     tNmtState               nmtState;
     UINT                    handle = DLLK_TXFRAME_NMTREQ;
@@ -380,7 +380,7 @@ POWERLINK frame was transmitted.
 void dllk_processTransmittedNonEpl(tEdrvTxBuffer * pTxBuffer_p)
 {
     tOplkError              ret = kErrorOk;
-    tEplEvent               event;
+    tEvent                  event;
     tDllAsyncReqPriority    priority;
     tNmtState               nmtState;
     UINT                    handle = DLLK_TXFRAME_NONEPL;
@@ -1391,7 +1391,7 @@ static tOplkError processReceivedPreq(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
             if (((UINT) (ami_getUint16Le(&pFrame->data.preq.sizeLe) + EPL_FRAME_OFFSET_PDO_PAYLOAD) > pFrameInfo_p->frameSize) ||
                          (pFrameInfo_p->frameSize > (dllkInstance_g.dllConfigParam.preqActPayloadLimit + EPL_FRAME_OFFSET_PDO_PAYLOAD)))
             {   // format error
-                tErrHndkEvent  dllEvent;
+                tEventDllError  dllEvent;
 
                 dllEvent.m_ulDllErrorEvents = EPL_DLL_ERR_INVALID_FORMAT;
                 dllEvent.m_uiNodeId = ami_getUint8Le(&pFrame->srcNodeId);
@@ -1567,7 +1567,7 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
 
         if (pIntNodeInfo->nmtState != heartbeatEvent.nmtState)
         {   // NMT state of CN has changed -> post event to NmtMnu module
-            tEplEvent   event;
+            tEvent      event;
 
             if (pIntNodeInfo->fSoftDelete == FALSE)
             {   // normal isochronous CN
@@ -1621,7 +1621,7 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
 #endif
             )
         {   // format error
-        tErrHndkEvent  DllEvent;
+        tEventDllError  DllEvent;
 
 #if EPL_NMT_MAX_NODE_ID > 0
             if (pIntNodeInfo->presPayloadLimit > 0)

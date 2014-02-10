@@ -80,7 +80,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // local vars
 //------------------------------------------------------------------------------
 static tCircBufInstance*        instance_l[kEventQueueNum];
-static BYTE                     aRxBuffer_l[kEventQueueNum][sizeof(tEplEvent) + EPL_MAX_EVENT_ARG_SIZE];
+static BYTE                     aRxBuffer_l[kEventQueueNum][sizeof(tEvent) + EPL_MAX_EVENT_ARG_SIZE];
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -220,7 +220,7 @@ This function posts an event to the provided queue instance.
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tOplkError eventkcal_postEventCircbuf (tEventQueue eventQueue_p, tEplEvent *pEvent_p)
+tOplkError eventkcal_postEventCircbuf (tEventQueue eventQueue_p, tEvent *pEvent_p)
 {
     tOplkError          ret = kErrorOk;
     tCircBufError       circError;
@@ -240,11 +240,11 @@ tOplkError eventkcal_postEventCircbuf (tEventQueue eventQueue_p, tEplEvent *pEve
     /*TRACE("%s() Event:%d Sink:%d\n", __func__, pEvent_p->m_EventType, pEvent_p->m_EventSink);*/
     if (pEvent_p->m_uiSize == 0)
     {
-        circError = circbuf_writeData(instance_l[eventQueue_p], pEvent_p, sizeof(tEplEvent));
+        circError = circbuf_writeData(instance_l[eventQueue_p], pEvent_p, sizeof(tEvent));
     }
     else
     {
-        circError = circbuf_writeMultipleData(instance_l[eventQueue_p], pEvent_p, sizeof(tEplEvent),
+        circError = circbuf_writeMultipleData(instance_l[eventQueue_p], pEvent_p, sizeof(tEvent),
                                         pEvent_p->m_pArg, (ULONG)pEvent_p->m_uiSize);
     }
     if(circError != kCircBufOk)
@@ -272,7 +272,7 @@ by calling the event handlers process function.
 //------------------------------------------------------------------------------
 tOplkError eventkcal_processEventCircbuf(tEventQueue eventQueue_p)
 {
-    tEplEvent*          pEplEvent;
+    tEvent*             pEplEvent;
     tCircBufError       error;
     tOplkError          ret = kErrorOk;
     size_t              readSize;
@@ -295,7 +295,7 @@ tOplkError eventkcal_processEventCircbuf(tEventQueue eventQueue_p)
     pCircBufInstance = instance_l[eventQueue_p];
 
     error = circbuf_readData(pCircBufInstance, aRxBuffer_l[eventQueue_p],
-                             sizeof(tEplEvent) + EPL_MAX_EVENT_ARG_SIZE, &readSize);
+                             sizeof(tEvent) + EPL_MAX_EVENT_ARG_SIZE, &readSize);
     if(error != kCircBufOk)
     {
         if (error == kCircBufNoReadableData)
@@ -306,11 +306,11 @@ tOplkError eventkcal_processEventCircbuf(tEventQueue eventQueue_p)
 
         return kErrorGeneralError;
     }
-    pEplEvent = (tEplEvent *) aRxBuffer_l[eventQueue_p];
-    pEplEvent->m_uiSize = (readSize - sizeof(tEplEvent));
+    pEplEvent = (tEvent *) aRxBuffer_l[eventQueue_p];
+    pEplEvent->m_uiSize = (readSize - sizeof(tEvent));
 
     if(pEplEvent->m_uiSize > 0)
-        pEplEvent->m_pArg = &aRxBuffer_l[eventQueue_p][sizeof(tEplEvent)];
+        pEplEvent->m_pArg = &aRxBuffer_l[eventQueue_p][sizeof(tEvent)];
     else
         pEplEvent->m_pArg = NULL;
 
@@ -363,7 +363,7 @@ tOplkError eventkcal_getEventCircbuf(tEventQueue eventQueue_p, BYTE* pDataBuffer
     pCircBufInstance = instance_l[eventQueue_p];
 
     error = circbuf_readData(pCircBufInstance, pDataBuffer_p,
-                             sizeof(tEplEvent) + EPL_MAX_EVENT_ARG_SIZE, pReadSize_p);
+                             sizeof(tEvent) + EPL_MAX_EVENT_ARG_SIZE, pReadSize_p);
     if(error != kCircBufOk)
     {
         if (error == kCircBufNoReadableData)

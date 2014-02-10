@@ -76,7 +76,7 @@ public:
     void inChanged(int input_p, int usedNodeId_p);
     void outChanged(int led_p, int usedNodeId_p);
     tOplkError setupProcessImage();
-    tEplSyncCb getSyncCbFunc();
+    tSyncCb getSyncCbFunc();
     tOplkError processSync(void);
     static tOplkError AppCbSync(void);
 

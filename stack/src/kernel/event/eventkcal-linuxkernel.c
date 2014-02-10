@@ -104,8 +104,8 @@ typedef struct
     atomic_t                kernelEventCount;
     BOOL                    fThreadIsRunning;
     BOOL                    fInitialized;
-    BYTE                    aUintRxBuffer[sizeof(tEplEvent) + EPL_MAX_EVENT_ARG_SIZE];
-    BYTE                    aK2URxBuffer[sizeof(tEplEvent) + EPL_MAX_EVENT_ARG_SIZE];
+    BYTE                    aUintRxBuffer[sizeof(tEvent) + EPL_MAX_EVENT_ARG_SIZE];
+    BYTE                    aK2URxBuffer[sizeof(tEvent) + EPL_MAX_EVENT_ARG_SIZE];
 } tEventkCalInstance;
 
 //------------------------------------------------------------------------------
@@ -244,7 +244,7 @@ queue post function is called.
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tOplkError eventkcal_postUserEvent (tEplEvent *pEvent_p)
+tOplkError eventkcal_postUserEvent (tEvent *pEvent_p)
 {
     tOplkError      ret = kErrorOk;
 
@@ -275,7 +275,7 @@ queue post function is called.
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tOplkError eventkcal_postKernelEvent (tEplEvent *pEvent_p)
+tOplkError eventkcal_postKernelEvent (tEvent *pEvent_p)
 {
     tOplkError      ret = kErrorOk;
 
@@ -318,14 +318,14 @@ This function posts a event from the user layer to a queue.
 int eventkcal_postEventFromUser(unsigned long arg)
 {
     tOplkError      ret = kErrorOk;
-    tEplEvent       event;
+    tEvent          event;
     char            *pArg = NULL;
     int             order = 0;
 
     if (!instance_l.fInitialized)
         return -EIO;
 
-    if (copy_from_user(&event, (const void __user *)arg, sizeof(tEplEvent)))
+    if (copy_from_user(&event, (const void __user *)arg, sizeof(tEvent)))
         return -EFAULT;
 
     if (event.m_uiSize != 0)

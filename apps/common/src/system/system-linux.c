@@ -83,7 +83,7 @@ static BOOL    fTermSignalReceived_g = FALSE;
 //------------------------------------------------------------------------------
 typedef struct
 {
-    tEplSyncCb      pfnSyncCb;
+    tSyncCb         pfnSyncCb;
 } tSyncThreadInstance;
 
 //------------------------------------------------------------------------------
@@ -186,7 +186,7 @@ The function starts the thread used for synchronous data handling.
 \ingroup module_app_common
 */
 //------------------------------------------------------------------------------
-void startSyncThread(tEplSyncCb pfnSync_p)
+void startSyncThread(tSyncCb pfnSync_p)
 {
     syncThreadInstance_l.pfnSyncCb = pfnSync_p;
 

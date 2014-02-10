@@ -94,7 +94,7 @@ dev_t                   plkDev_g;
 struct class            *plkClass_g;
 struct cdev             plkCdev_g;
 struct timer_list       heartbeatTimer_g;
-tEplEvent               event_g;
+tEvent                  event_g;
 BOOL                    fEvent_g;
 atomic_t                openCount_g;
 

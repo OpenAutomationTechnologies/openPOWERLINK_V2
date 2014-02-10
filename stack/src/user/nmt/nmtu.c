@@ -175,7 +175,7 @@ The function posts a NMT event for the NMT kernel module.
 tOplkError nmtu_postNmtEvent(tNmtEvent nmtEvent_p)
 {
     tOplkError  ret;
-    tEplEvent   event;
+    tEvent      event;
 
     event.m_EventSink = kEplEventSinkNmtk;
     event.m_NetTime.m_dwNanoSec = 0;
@@ -218,7 +218,7 @@ The function processes events sent to the NMT user module.
 \ingroup module_nmtu
 */
 //------------------------------------------------------------------------------
-tOplkError nmtu_processEvent(tEplEvent* pEvent_p)
+tOplkError nmtu_processEvent(tEvent* pEvent_p)
 {
     tOplkError                  ret = kErrorOk;
     tEventNmtStateChange*       pNmtStateChange;

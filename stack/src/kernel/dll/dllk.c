@@ -376,9 +376,9 @@ The function registers the handler for SYNC events.
 \ingroup module_dllk
 */
 //------------------------------------------------------------------------------
-tEplSyncCb dllk_regSyncHandler(tEplSyncCb pfnCbSync_p)
+tSyncCb dllk_regSyncHandler(tSyncCb pfnCbSync_p)
 {
-    tEplSyncCb  pfnCbOld;
+    tSyncCb  pfnCbOld;
 
     pfnCbOld = dllkInstance_g.pfnCbSync;
     dllkInstance_g.pfnCbSync = pfnCbSync_p;
@@ -837,7 +837,7 @@ tOplkError dllk_cbCyclicError(tOplkError errorCode_p, tEdrvTxBuffer * pTxBuffer_
     tNmtState       nmtState;
     UINT            handle = 0;
     UINT32          arg;
-    tErrHndkEvent   dllEvent;
+    tEventDllError  dllEvent;
 
     TGT_DLLK_DECLARE_FLAGS;
 
@@ -1608,7 +1608,7 @@ tOplkError dllk_addNodeIsochronous(tDllkNodeInfo* pIntNodeInfo_p)
 
         if (pIntNodeInfo_p->pPreqTxBuffer != NULL)
         {   // TxBuffer entry exists
-            tEplEvent       event;
+            tEvent          event;
 
             pTxFrame = (tPlkFrame *) pIntNodeInfo_p->pPreqTxBuffer[0].pBuffer;
             // set up destination MAC address

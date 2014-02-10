@@ -115,7 +115,7 @@ tOplkError      nmtu_addInstance(void);
 tOplkError      nmtu_delInstance(void);
 tOplkError      nmtu_postNmtEvent(tNmtEvent nmtEvent_p);
 tNmtState       nmtu_getNmtState(void);
-tOplkError      nmtu_processEvent(tEplEvent* pEvent_p);
+tOplkError      nmtu_processEvent(tEvent* pEvent_p);
 tOplkError      nmtu_registerStateChangeCb(tNmtuStateChangeCallback pfnNmtStateChangeCb_p);
 
 #ifdef __cplusplus

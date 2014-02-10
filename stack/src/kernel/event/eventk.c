@@ -87,7 +87,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError handleNmtEventinDll(tEplEvent* pEvent_p);
+static tOplkError handleNmtEventinDll(tEvent* pEvent_p);
 
 //------------------------------------------------------------------------------
 // local vars
@@ -178,11 +178,11 @@ specific module.
 \ingroup module_eventk
 */
 //------------------------------------------------------------------------------
-tOplkError eventk_process (tEplEvent *pEvent_p)
+tOplkError eventk_process (tEvent *pEvent_p)
 {
     tOplkError              ret = kErrorOk;
-    tEplEventSource         eventSource;
-    tEplProcessEventCb      pfnEventHandler;
+    tEventSource            eventSource;
+    tProcessEventCb         pfnEventHandler;
     BOOL                    fStop = FALSE;
     BOOL                    fAlreadyHandled = FALSE;
     tEventDispatchEntry*    pDispatchEntry;
@@ -243,7 +243,7 @@ CAL module which distributes the event to the suitable event queue.
 \ingroup module_eventk
 */
 //------------------------------------------------------------------------------
-tOplkError eventk_postEvent (tEplEvent *pEvent_p)
+tOplkError eventk_postEvent (tEvent *pEvent_p)
 {
     tOplkError ret = kErrorOk;
 
@@ -295,12 +295,12 @@ This function posts an error event to the API module.
 \ingroup module_eventk
 */
 //------------------------------------------------------------------------------
-tOplkError eventk_postError (tEplEventSource eventSource_p, tOplkError eplError_p,
+tOplkError eventk_postError (tEventSource eventSource_p, tOplkError eplError_p,
                              UINT argSize_p, void *pArg_p)
 {
     tOplkError          ret;
-    tEplEventError      eventError;
-    tEplEvent           eplEvent;
+    tEventError         eventError;
+    tEvent              eplEvent;
 
     ret = kErrorOk;
 
@@ -314,7 +314,7 @@ tOplkError eventk_postError (tEplEventSource eventSource_p, tOplkError eplError_
     eplEvent.m_EventType = kEplEventTypeError;
     eplEvent.m_EventSink = kEplEventSinkApi;
     EPL_MEMSET(&eplEvent.m_NetTime, 0x00, sizeof(eplEvent.m_NetTime));
-    eplEvent.m_uiSize = (memberoffs (tEplEventError, m_Arg) + argSize_p);
+    eplEvent.m_uiSize = (memberoffs (tEventError, m_Arg) + argSize_p);
     eplEvent.m_pArg = &eventError;
 
     ret = eventk_postEvent(&eplEvent);
@@ -342,7 +342,7 @@ the DLLk module.
 \retval other error codes       If an error occurred
 */
 //------------------------------------------------------------------------------
-static tOplkError handleNmtEventinDll(tEplEvent* pEvent_p)
+static tOplkError handleNmtEventinDll(tEvent* pEvent_p)
 {
     tOplkError          ret = kErrorOk;
 

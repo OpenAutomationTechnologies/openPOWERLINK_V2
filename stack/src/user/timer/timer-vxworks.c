@@ -465,7 +465,7 @@ static void cbTimer(ULONG parameter_p)
 {
     tOplkError          ret = kErrorOk;
     tTimeruData*        pData;
-    tEplEvent           event;
+    tEvent              event;
     tTimerEventArg      timerEventArg;
 
     pData = (tTimeruData*) parameter_p;

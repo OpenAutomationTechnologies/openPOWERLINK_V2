@@ -102,7 +102,7 @@ The function initializes the PDO user CAL sync module
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError pdoucal_initSync(tEplSyncCb pfnSyncCb_p)
+tOplkError pdoucal_initSync(tSyncCb pfnSyncCb_p)
 {
     UNUSED_PARAMETER(pfnSyncCb_p);
 

@@ -171,7 +171,7 @@ typedef struct
     tDllkCbProcessRpdo      pfnCbProcessRpdo;
     tDllkCbProcessTpdo      pfnCbProcessTpdo;
     tEplDllkCbAsync         pfnCbAsync;
-    tEplSyncCb              pfnCbSync;
+    tSyncCb                 pfnCbSync;
     tDllAsndFilter          aAsndFilter[DLL_MAX_ASND_SERVICE_ID];
     tEdrvFilter             aFilter[DLLK_FILTER_COUNT];
 #if EPL_NMT_MAX_NODE_ID > 0
@@ -262,7 +262,7 @@ tOplkError dllk_asyncFrameNotReceived(tDllReqServiceId reqServiceId_p, UINT node
 
 //------------------------------------------------------------------------------
 /* event functions (dllkevent.c) */
-tOplkError dllk_postEvent(tEplEventType EventType_p);
+tOplkError dllk_postEvent(tEventType EventType_p);
 tOplkError controlPdokcalSync(BOOL fEnable_p);
 #if defined(CONFIG_INCLUDE_NMT_MN)
 tOplkError dllk_issueLossOfPres(UINT nodeId_p);

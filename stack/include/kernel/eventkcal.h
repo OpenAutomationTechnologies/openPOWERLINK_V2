@@ -67,9 +67,9 @@ extern "C" {
 
 tOplkError eventkcal_init (void);
 tOplkError eventkcal_exit (void);
-tOplkError eventkcal_postUserEvent (tEplEvent *pEvent_p) SECTION_EVENTKCAL_POST;
-tOplkError eventkcal_postKernelEvent (tEplEvent *pEvent_p) SECTION_EVENTKCAL_POST;
-tOplkError eventkcal_rxHandler (tEplEvent *pEvent_p);
+tOplkError eventkcal_postUserEvent (tEvent *pEvent_p) SECTION_EVENTKCAL_POST;
+tOplkError eventkcal_postKernelEvent (tEvent *pEvent_p) SECTION_EVENTKCAL_POST;
+tOplkError eventkcal_rxHandler (tEvent *pEvent_p);
 void       eventkcal_process(void);
 
 /* functions used in eventkcal-linuxkernel.c */

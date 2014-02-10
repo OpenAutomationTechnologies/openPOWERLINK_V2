@@ -89,13 +89,13 @@ The user event instance holds the Api process callback function pointer.
 */
 typedef struct
 {
-    tEplProcessEventCb      pfnApiProcessEventCb;  ///< Callback for generic api events
+    tProcessEventCb         pfnApiProcessEventCb;  ///< Callback for generic api events
 } tEventuInstance;
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError callApiEventCb (tEplEvent* pEvent_p);
+static tOplkError callApiEventCb (tEvent* pEvent_p);
 
 //------------------------------------------------------------------------------
 // local vars
@@ -149,7 +149,7 @@ the init function of it's CAL module.
 \ingroup module_eventu
 */
 //------------------------------------------------------------------------------
-tOplkError eventu_init(tEplProcessEventCb pfnApiProcessEventCb_p)
+tOplkError eventu_init(tProcessEventCb pfnApiProcessEventCb_p)
 {
     tOplkError ret = kErrorOk;
 
@@ -199,11 +199,11 @@ specific module
 \ingroup module_eventu
 */
 //------------------------------------------------------------------------------
-tOplkError eventu_process (tEplEvent *pEvent_p)
+tOplkError eventu_process (tEvent *pEvent_p)
 {
     tOplkError              ret = kErrorOk;
-    tEplEventSource         eventSource;
-    tEplProcessEventCb      pfnEventHandler;
+    tEventSource            eventSource;
+    tProcessEventCb         pfnEventHandler;
     tEventDispatchEntry*    pDispatchEntry;
 
     pDispatchEntry = &eventDispatchTbl_l[0];
@@ -247,7 +247,7 @@ CAL module which distributes the event to the suitable event queue.
 \ingroup module_eventu
 */
 //------------------------------------------------------------------------------
-tOplkError eventu_postEvent (tEplEvent *pEvent_p)
+tOplkError eventu_postEvent (tEvent *pEvent_p)
 {
     tOplkError ret = kErrorOk;
 
@@ -301,12 +301,12 @@ This function posts an error event to the API module.
 \ingroup module_eventu
 */
 //------------------------------------------------------------------------------
-tOplkError eventu_postError (tEplEventSource eventSource_p,  tOplkError error_p,
+tOplkError eventu_postError (tEventSource eventSource_p,  tOplkError error_p,
                              UINT argSize_p, void* pArg_p)
 {
     tOplkError          ret;
-    tEplEventError      eventError;
-    tEplEvent           event;
+    tEventError         eventError;
+    tEvent              event;
 
     ret = kErrorOk;
 
@@ -320,7 +320,7 @@ tOplkError eventu_postError (tEplEventSource eventSource_p,  tOplkError error_p,
     event.m_EventType = kEplEventTypeError;
     event.m_EventSink = kEplEventSinkApi;
     EPL_MEMSET(&event.m_NetTime, 0x00, sizeof(event.m_NetTime));
-    event.m_uiSize = (memberoffs (tEplEventError, m_Arg) + argSize_p);
+    event.m_uiSize = (memberoffs (tEventError, m_Arg) + argSize_p);
     event.m_pArg = &eventError;
 
     ret = eventu_postEvent(&event);
@@ -346,7 +346,7 @@ an API event callback was registered and calls it.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError callApiEventCb (tEplEvent* pEvent_p)
+static tOplkError callApiEventCb (tEvent* pEvent_p)
 {
     if (instance_l.pfnApiProcessEventCb != NULL)
     {

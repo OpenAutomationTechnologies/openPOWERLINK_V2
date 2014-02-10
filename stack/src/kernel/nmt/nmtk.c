@@ -242,12 +242,12 @@ The function processes NMT kernel events. It implements the NMT state machine.
 \ingroup module_nmtk
 */
 //------------------------------------------------------------------------------
-tOplkError nmtk_process(tEplEvent* pEvent_p)
+tOplkError nmtk_process(tEvent* pEvent_p)
 {
     tOplkError              ret;
     tNmtkStateIndexes       oldState;
     tNmtEvent               nmtEvent;
-    tEplEvent               event;
+    tEvent                  event;
     tEventNmtStateChange    nmtStateChange;
 
     ret = kErrorOk;
