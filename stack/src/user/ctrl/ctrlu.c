@@ -516,7 +516,7 @@ tOplkError ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
     // must be disabled for EplApiLinuxKernel.c, because of reentrancy problem
     // for local OD access. This is not so bad as user callback function in
     // application does not use OD callbacks at the moment.
-    eventArg.m_ObdCbParam = *pParam_p;
+    eventArg.obdCbParam = *pParam_p;
     ret = ctrlu_callUserEventCallback(kOplkApiEventObdAccess, &eventArg);
     if (ret != kErrorOk)
     {   // do not do any further processing on this object
@@ -952,7 +952,7 @@ static tOplkError cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
 #endif
 
     // call user callback
-    eventArg.m_NmtStateChange = nmtStateChange_p;
+    eventArg.nmtStateChange = nmtStateChange_p;
     ret = ctrlu_callUserEventCallback(kOplkApiEventNmtStateChange, &eventArg);
 
     return ret;
@@ -1022,7 +1022,7 @@ static tOplkError processUserEvent(tEplEvent* pEvent_p)
         // user-defined event
         case kEplEventTypeApiUserDef:
             eventType = kOplkApiEventUserDef;
-            apiEventArg.m_pUserArg = *(void**)pEvent_p->m_pArg;
+            apiEventArg.pUserArg = *(void**)pEvent_p->m_pArg;
             ret = ctrlu_callUserEventCallback(eventType, &apiEventArg);
             break;
 
@@ -1437,11 +1437,11 @@ static tOplkError cbNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtStat
     ret = kErrorOk;
 
     // call user callback
-    eventArg.m_Node.nodeId = nodeId_p;
-    eventArg.m_Node.nodeEvent = nodeEvent_p;
-    eventArg.m_Node.nmtState = nmtState_p;
-    eventArg.m_Node.errorCode = errorCode_p;
-    eventArg.m_Node.fMandatory = fMandatory_p;
+    eventArg.nodeEvent.nodeId = nodeId_p;
+    eventArg.nodeEvent.nodeEvent = nodeEvent_p;
+    eventArg.nodeEvent.nmtState = nmtState_p;
+    eventArg.nodeEvent.errorCode = errorCode_p;
+    eventArg.nodeEvent.fMandatory = fMandatory_p;
 
     ret = ctrlu_callUserEventCallback(kOplkApiEventNode, &eventArg);
     if (ret != kErrorOk)
@@ -1476,9 +1476,9 @@ static tOplkError cbBootEvent(tNmtBootEvent bootEvent_p, tNmtState nmtState_p,
     ret = kErrorOk;
 
     // call user callback
-    eventArg.m_Boot.bootEvent = bootEvent_p;
-    eventArg.m_Boot.nmtState = nmtState_p;
-    eventArg.m_Boot.errorCode = errorCode_p;
+    eventArg.bootEvent.bootEvent = bootEvent_p;
+    eventArg.bootEvent.nmtState = nmtState_p;
+    eventArg.bootEvent.errorCode = errorCode_p;
 
     ret = ctrlu_callUserEventCallback(kOplkApiEventBoot, &eventArg);
     return ret;
@@ -1505,8 +1505,8 @@ static tOplkError cbLedStateChange(tLedType ledType_p, BOOL fOn_p)
     ret = kErrorOk;
 
     // call user callback
-    eventArg.m_Led.ledType = ledType_p;
-    eventArg.m_Led.fOn = fOn_p;
+    eventArg.ledEvent.ledType = ledType_p;
+    eventArg.ledEvent.fOn = fOn_p;
 
     ret = ctrlu_callUserEventCallback(kOplkApiEventLed, &eventArg);
 
@@ -1535,7 +1535,7 @@ static tOplkError cbCfmEventCnProgress(tCfmEventCnProgress* pEventCnProgress_p)
 
     ret = kErrorOk;
 
-    eventArg.m_CfmProgress = *pEventCnProgress_p;
+    eventArg.cfmProgress = *pEventCnProgress_p;
     ret = ctrlu_callUserEventCallback(kOplkApiEventCfmProgress, &eventArg);
     return ret;
 }
@@ -1557,8 +1557,8 @@ static tOplkError cbCfmEventCnResult(UINT nodeId_p, tNmtNodeCommand nodeCommand_
     tOplkError              ret;
     tOplkApiEventArg         eventArg;
 
-    eventArg.m_CfmResult.nodeId = nodeId_p;
-    eventArg.m_CfmResult.nodeCommand = nodeCommand_p;
+    eventArg.cfmResult.nodeId = nodeId_p;
+    eventArg.cfmResult.nodeCommand = nodeCommand_p;
     ret = ctrlu_callUserEventCallback(kOplkApiEventCfmResult, &eventArg);
     if (ret != kErrorOk)
     {

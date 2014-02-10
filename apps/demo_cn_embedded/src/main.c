@@ -326,9 +326,9 @@ static tOplkError eventCbPowerlink(tOplkApiEventType EventType_p, tOplkApiEventA
     switch(EventType_p)
     {
         case kOplkApiEventNmtStateChange:
-            lcd_printNmtState(pEventArg_p->m_NmtStateChange.newNmtState);
+            lcd_printNmtState(pEventArg_p->nmtStateChange.newNmtState);
 
-            switch(pEventArg_p->m_NmtStateChange.newNmtState)
+            switch(pEventArg_p->nmtStateChange.newNmtState)
             {
                 case kNmtGsOff:
                     // NMT state machine was shut down
