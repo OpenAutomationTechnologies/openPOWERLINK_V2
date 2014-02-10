@@ -83,6 +83,7 @@ fi
 # Let's source the board.settings (null.settings before)
 BOARD_SETTINGS_FILE=${BOARD_PATH}/board.settings
 CFG_APP_CPU_NAME=
+CFG_JTAG_CABLE=
 if [ -f ${BOARD_SETTINGS_FILE} ]; then
     source ${BOARD_SETTINGS_FILE}
 else
@@ -175,6 +176,13 @@ for i in ${APP_INCLUDES}
 do
     APP_GEN_ARGS+="--inc-dir ${i} "
 done
+
+# Add JTAG cable from board.settings
+if [ -n "${CFG_JTAG_CABLE}" ];
+then
+    APP_GEN_ARGS+="--set DOWNLOAD_CABLE=${CFG_JTAG_CABLE} "
+    echo "INFO: Set JTAG Cable to ${CFG_JTAG_CABLE}."
+fi
 
 # And add stack library
 LIB_STACK_DIR=$(find ${OUT_PATH} -type d -name "liboplk*")
