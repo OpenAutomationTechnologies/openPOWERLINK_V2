@@ -156,7 +156,7 @@ then
 fi
 
 DRV_GEN_ARGS="\
---app-dir ${DRV_PATH} \
+--app-dir ${OUT_PATH} \
 --bsp-dir ${BSP_PATH} \
 --elf-name ${DRV_NAME}.elf \
 --src-files ${DRV_SOURCES} \
@@ -189,6 +189,6 @@ if [ ${RET} -ne 0 ]; then
 fi
 
 chmod +x ${OPLK_BASE_DIR}/tools/altera-nios2/fix-app-makefile
-${OPLK_BASE_DIR}/tools/altera-nios2/fix-app-makefile ${DRV_PATH}/Makefile
+${OPLK_BASE_DIR}/tools/altera-nios2/fix-app-makefile ${OUT_PATH}/Makefile
 
 exit 0
