@@ -281,7 +281,7 @@ This function is the event handler of the kernel DLL CAL module.
 \ingroup module_dllkcal
 */
 //------------------------------------------------------------------------------
-tOplkError dllkcal_process(tEplEvent* pEvent_p)
+tOplkError dllkcal_process(tEvent* pEvent_p)
 {
     tOplkError                  ret = kErrorOk;
     tDllCalAsndServiceIdFilter* pServFilter;
@@ -481,7 +481,7 @@ only for frames with registered AsndServiceIds.
 tOplkError dllkcal_asyncFrameReceived(tFrameInfo* pFrameInfo_p)
 {
     tOplkError  ret = kErrorOk;
-    tEplEvent   event;
+    tEvent      event;
 
     event.m_EventSink = kEplEventSinkDlluCal;
     event.m_EventType = kEplEventTypeAsndRx;
@@ -528,7 +528,7 @@ tOplkError dllkcal_sendAsyncFrame(tFrameInfo* pFrameInfo_p,
                                   tDllAsyncReqPriority priority_p)
 {
     tOplkError  ret = kErrorOk;
-    tEplEvent   event;
+    tEvent      event;
 
     switch (priority_p)
     {

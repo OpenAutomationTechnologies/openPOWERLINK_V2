@@ -143,7 +143,7 @@ tOplkError pdokcal_exit(void)
 \ingroup module_pdokcal
 **/
 //------------------------------------------------------------------------------
-tOplkError pdokcal_process(tEplEvent * pEvent_p)
+tOplkError pdokcal_process(tEvent * pEvent_p)
 {
     tOplkError                  Ret = kErrorOk;
 
@@ -223,7 +223,7 @@ and NMT_CS_OPERATIONAL. The passed PDO needs not to be valid.
 static tOplkError cbProcessRpdo(tFrameInfo * pFrameInfo_p)
 {
     tOplkError      ret = kErrorOk;
-    tEplEvent       event;
+    tEvent          event;
 
     event.m_EventSink = kEplEventSinkPdokCal;
     event.m_EventType = kEplEventTypePdoRx;

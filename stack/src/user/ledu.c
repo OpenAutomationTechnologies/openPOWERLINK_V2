@@ -288,7 +288,7 @@ The function implements the event handler of the LED module.
 \ingroup module_ledu
 */
 //------------------------------------------------------------------------------
-tOplkError ledu_processEvent(tEplEvent* pEvent_p)
+tOplkError ledu_processEvent(tEvent* pEvent_p)
 {
     tOplkError          ret;
     tTimerArg           timerArg;

@@ -80,7 +80,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // local function prototypes
 //------------------------------------------------------------------------------
 static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState OldNmtState_p);
-static tOplkError processNmtEvent(tEplEvent * pEvent_p);
+static tOplkError processNmtEvent(tEvent * pEvent_p);
 static tOplkError processCycleFinish(tNmtState nmtState_p) SECTION_DLLK_PROCESS_CYCFIN;
 static tOplkError processSync(tNmtState nmtState_p) SECTION_DLLK_PROCESS_SYNC;
 static tOplkError processSyncCn(tNmtState nmtState_p, BOOL fReadyFlag_p) SECTION_DLLK_PROCESS_SYNC;
@@ -111,7 +111,7 @@ interrupt context.
 \ingroup module_dllk
 */
 //------------------------------------------------------------------------------
-tOplkError dllk_process(tEplEvent* pEvent_p)
+tOplkError dllk_process(tEvent* pEvent_p)
 {
     tOplkError              ret = kErrorOk;
     tEventNmtStateChange*   pNmtStateChange;
@@ -186,7 +186,7 @@ tOplkError dllk_issueLossOfPres(UINT nodeId_p)
 {
     tOplkError          ret = kErrorOk;
     tDllkNodeInfo*      pIntNodeInfo;
-    tEplEvent           event;
+    tEvent              event;
     tDllNodeOpParam     nodeOpParam;
 
     pIntNodeInfo = dllk_getNodeInfo(nodeId_p);
@@ -194,7 +194,7 @@ tOplkError dllk_issueLossOfPres(UINT nodeId_p)
     {
         if (pIntNodeInfo->fSoftDelete == FALSE)
         {   // normal isochronous CN
-            tErrHndkEvent  dllEvent;
+            tEventDllError  dllEvent;
 
             dllEvent.m_ulDllErrorEvents = EPL_DLL_ERR_MN_CN_LOSS_PRES;
             dllEvent.m_uiNodeId = pIntNodeInfo->nodeId;
@@ -236,10 +236,10 @@ The function posts the specified event type to itself.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError dllk_postEvent(tEplEventType eventType_p)
+tOplkError dllk_postEvent(tEventType eventType_p)
 {
     tOplkError              ret;
-    tEplEvent               event;
+    tEvent                  event;
 
     event.m_EventSink = kEplEventSinkDllk;
     event.m_EventType = eventType_p;
@@ -263,7 +263,7 @@ the sync function by sending the appropriate event.
 //------------------------------------------------------------------------------
 tOplkError controlPdokcalSync (BOOL fEnable_p)
 {
-    tEplEvent event;
+    tEvent event;
     BOOL fEnable = fEnable_p;
 
     event.m_EventSink = kEplEventSinkPdokCal;
@@ -544,7 +544,7 @@ The function processes a NMT event.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError processNmtEvent(tEplEvent * pEvent_p)
+static tOplkError processNmtEvent(tEvent * pEvent_p)
 {
     tOplkError      Ret = kErrorOk;
     tNmtEvent*      pNmtEvent;

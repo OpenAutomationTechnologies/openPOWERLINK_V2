@@ -74,7 +74,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static tEplSyncCb   pfnSyncCb_l;
+static tSyncCb      pfnSyncCb_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -95,7 +95,7 @@ The function initializes the PDO user CAL sync module
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError pdoucal_initSync(tEplSyncCb pfnSyncCb_p)
+tOplkError pdoucal_initSync(tSyncCb pfnSyncCb_p)
 {
     pfnSyncCb_l = pfnSyncCb_p;
     return kErrorOk;

@@ -592,7 +592,7 @@ The function returns the string describing the specified event source.
 \ingroup module_debugstr
 */
 //------------------------------------------------------------------------------
-char* debugstr_getEventSourceStr(tEplEventSource eventSrc_p)
+char* debugstr_getEventSourceStr(tEventSource eventSrc_p)
 {
     if (eventSrc_p >= tabentries(eventSourceStr_l))
     {
@@ -617,7 +617,7 @@ The function returns the string describing the specified event sink.
 \ingroup module_debugstr
 */
 //------------------------------------------------------------------------------
-char* debugstr_getEventSinkStr(tEplEventSink eventSink_p)
+char* debugstr_getEventSinkStr(tEventSink eventSink_p)
 {
     if (eventSink_p >= tabentries(eventSinkStr_l))
     {
@@ -642,7 +642,7 @@ The function returns the string describing the specified event type.
 \ingroup module_debug
 */
 //------------------------------------------------------------------------------
-char* debugstr_getEventTypeStr(tEplEventType eventType_p)
+char* debugstr_getEventTypeStr(tEventType eventType_p)
 {
     if (eventType_p >= tabentries(eventTypeStr_l))
     {

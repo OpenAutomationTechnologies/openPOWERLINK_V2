@@ -860,7 +860,7 @@ tOplkError nmtmnu_triggerStateChange(UINT nodeId_p, tNmtNodeCommand nodeCommand_
 {
     tOplkError          ret = kErrorOk;
     tNmtMnuNodeCmd      nodeCmd;
-    tEplEvent           event;
+    tEvent              event;
 
     if ((nodeId_p == 0) || (nodeId_p >= EPL_C_ADR_BROADCAST))
         return kErrorInvalidNodeId;
@@ -1042,7 +1042,7 @@ The function implements the callback function for NMT events.
 \ingroup module_nmtmnu
 */
 //------------------------------------------------------------------------------
-tOplkError nmtmnu_processEvent(tEplEvent* pEvent_p)
+tOplkError nmtmnu_processEvent(tEvent* pEvent_p)
 {
     tOplkError      ret = kErrorOk;
 
@@ -1765,7 +1765,7 @@ static tOplkError doPreop1(tEventNmtStateChange nmtStateChange_p)
     UINT32          dwTimeout;
     tTimerArg       timerArg;
     tObdSize        obdSize;
-    tEplEvent       event;
+    tEvent          event;
     BOOL            fNmtResetAllIssued = FALSE;
     tOplkError      ret = kErrorOk;
 

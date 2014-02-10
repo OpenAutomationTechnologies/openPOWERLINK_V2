@@ -60,7 +60,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tOplkError pdou_init(tEplSyncCb pfnSyncCb_p);
+tOplkError pdou_init(tSyncCb pfnSyncCb_p);
 
 tOplkError pdou_exit(void);
 

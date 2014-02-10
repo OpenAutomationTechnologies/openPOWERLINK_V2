@@ -61,7 +61,7 @@ typedef ULONG tTimerHdl;
 
 typedef struct
 {
-    tEplEventSink       eventSink;
+    tEventSink          eventSink;
     union
     {
         UINT32          value;

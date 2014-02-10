@@ -125,7 +125,7 @@ static tOplkError updateDllConfig(tOplkApiInitParam* pInitParam_p, BOOL fUpdateI
 static tOplkError updateSdoConfig();
 static tOplkError updateObd(tOplkApiInitParam* pInitParam_p);
 
-static tOplkError processUserEvent(tEplEvent* pEplEvent_p);
+static tOplkError processUserEvent(tEvent* pEplEvent_p);
 static tOplkError cbCnCheckEvent(tNmtEvent NmtEvent_p);
 static tOplkError cbNmtStateChange(tEventNmtStateChange nmtStateChange_p);
 
@@ -971,10 +971,10 @@ by calling the event callback function.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError processUserEvent(tEplEvent* pEvent_p)
+static tOplkError processUserEvent(tEvent* pEvent_p)
 {
     tOplkError          ret;
-    tEplEventError*     pEventError;
+    tEventError*        pEventError;
     tOplkApiEventType    eventType;
     tOplkApiEventArg     apiEventArg;
 
@@ -984,7 +984,7 @@ static tOplkError processUserEvent(tEplEvent* pEvent_p)
     {
         // error event
         case kEplEventTypeError:
-            pEventError = (tEplEventError*) pEvent_p->m_pArg;
+            pEventError = (tEventError*) pEvent_p->m_pArg;
             switch (pEventError->m_EventSource)
             {
                 // treat the errors from the following sources as critical

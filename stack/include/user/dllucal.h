@@ -74,7 +74,7 @@ tOplkError dllucal_regAsndService(tDllAsndServiceId ServiceId_p,
 
 tOplkError dllucal_sendAsyncFrame(tFrameInfo * pFrameInfo, tDllAsyncReqPriority Priority_p);
 
-tOplkError dllucal_process(tEplEvent * pEvent_p);
+tOplkError dllucal_process(tEvent * pEvent_p);
 
 
 #if EPL_NMT_MAX_NODE_ID > 0

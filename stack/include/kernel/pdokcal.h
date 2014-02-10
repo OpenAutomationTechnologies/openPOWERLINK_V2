@@ -61,7 +61,7 @@ extern "C" {
 
 tOplkError pdokcal_init(void);
 tOplkError pdokcal_exit(void);
-tOplkError pdokcal_process(tEplEvent * pEvent_p) SECTION_PDOKCAL_PROCESS;
+tOplkError pdokcal_process(tEvent * pEvent_p) SECTION_PDOKCAL_PROCESS;
 
 // PDO memory functions
 tOplkError pdokcal_openMem(void);

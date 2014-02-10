@@ -158,12 +158,12 @@ typedef enum
     may restart the NMT state machine afterwards, but it is unlikely that the
     openPOWERLINK stack will run stable, because this critical error or the
     source of it often is a configuration error and not a run-time error. The
-    event argument contains an error event (\ref tEplEventError). */
+    event argument contains an error event (\ref tEventError). */
     kOplkApiEventCriticalError      = 0x12,
 
     /** Warning event. The warning may be a run-time error, which should be
     logged into an error log for further diagnostics. In any case the openPOWERLINK
-    stack proceeds. The event argument contains an error event. (\ref tEplEventError) */
+    stack proceeds. The event argument contains an error event. (\ref tEventError) */
     kOplkApiEventWarning            = 0x13,
 
     /** New error history event. The event argument contains an error history
@@ -223,7 +223,7 @@ typedef union
 {
     void*                       pUserArg;           ///< User argument (\ref kOplkApiEventUserDef)
     tEventNmtStateChange        nmtStateChange;     ///< NMT state change information (\ref kOplkApiEventNmtStateChange)
-    tEplEventError              internalError;      ///< Internal stack error (\ref kOplkApiEventCriticalError, \ref kOplkApiEventWarning)
+    tEventError                 internalError;      ///< Internal stack error (\ref kOplkApiEventCriticalError, \ref kOplkApiEventWarning)
     tSdoComFinished             sdoInfo;            ///< SDO information (\ref kOplkApiEventSdo)
     tObdCbParam                 obdCbParam;         ///< OBD callback parameter (\ref kOplkApiEventObdAccess)
     tOplkApiEventNode           nodeEvent;          ///< Node event information (\ref kOplkApiEventNode)
@@ -302,7 +302,7 @@ typedef struct
     char*               pSwVersion;                 ///< Pointer to manufacturer software version (0x100A.0: NMT_ManufactSwVers_VS) Const!
     tOplkApiCbEvent     pfnCbEvent;                 ///< Pointer to the applications event handling function.
     void*               pEventUserArg;              ///< Pointer to a user argument that is supplied to the event callback function (\ref tOplkApiCbEvent)
-    tEplSyncCb          pfnCbSync;                  ///< Pointer to the application sync callback function.
+    tSyncCb             pfnCbSync;                  ///< Pointer to the application sync callback function.
                                                     /**< It is normally used only for non-threaded systems.
                                                          If the application processes synchronous data by a separate thread it must be initialized with NULL! */
     tEplHwParam         hwParam;                    ///< The hardware parameters of the node

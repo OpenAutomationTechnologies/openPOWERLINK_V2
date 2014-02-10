@@ -64,7 +64,7 @@ extern "C" {
 
 tOplkError nmtk_init(void);
 tOplkError nmtk_delInstance(void);
-tOplkError nmtk_process(tEplEvent * pEvent_p);
+tOplkError nmtk_process(tEvent * pEvent_p);
 
 #ifdef __cplusplus
 }

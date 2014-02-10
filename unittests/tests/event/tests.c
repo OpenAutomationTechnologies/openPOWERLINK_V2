@@ -75,8 +75,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError processHandler1(tEplEvent* pEvent_p);
-static tOplkError processHandler2(tEplEvent* pEvent_p);
+static tOplkError processHandler1(tEvent* pEvent_p);
+static tOplkError processHandler2(tEvent* pEvent_p);
 
 //------------------------------------------------------------------------------
 // local vars
@@ -101,8 +101,8 @@ static tEventDispatchEntry tstEventDispatchTbl_l[] =
 void test_getHandlerForSink_FirstExist(void)
 {
     tOplkError              ret = kErrorIllegalInstance;
-    tEplEventSource         eventSource = kEplEventSourceInvalid;
-    tEplProcessEventCb      pfnEventHandler = NULL;
+    tEventSource            eventSource = kEplEventSourceInvalid;
+    tProcessEventCb         pfnEventHandler = NULL;
     tEventDispatchEntry*    pDispatchEntry;
 
     /* test search of existing entry */
@@ -125,8 +125,8 @@ void test_getHandlerForSink_FirstExist(void)
 void test_getHandlerForSink_FurtherExist(void)
 {
     tOplkError              ret = kErrorIllegalInstance;
-    tEplEventSource         eventSource = kEplEventSourceInvalid;
-    tEplProcessEventCb      pfnEventHandler = NULL;
+    tEventSource            eventSource = kEplEventSourceInvalid;
+    tProcessEventCb         pfnEventHandler = NULL;
     tEventDispatchEntry*    pDispatchEntry;
 
     /* test search of existing entry */
@@ -151,8 +151,8 @@ void test_getHandlerForSink_FurtherExist(void)
 void test_getHandlerForSink_NotExist(void)
 {
     tOplkError              ret = kErrorIllegalInstance;
-    tEplEventSource         eventSource = kEplEventSourceInvalid;
-    tEplProcessEventCb      pfnEventHandler = NULL;
+    tEventSource            eventSource = kEplEventSourceInvalid;
+    tProcessEventCb         pfnEventHandler = NULL;
     tEventDispatchEntry*    pDispatchEntry;
 
     /* test search of existing entry */
@@ -173,7 +173,7 @@ void test_getHandlerForSink_NotExist(void)
 //------------------------------------------------------------------------------
 void test_eventk_process(void)
 {
-    tEplEvent       event;
+    tEvent          event;
 
     event.m_EventSink = kEplEventSinkDllk;
     CU_ASSERT_EQUAL(eventk_process(&event), kErrorOk);
@@ -204,7 +204,7 @@ void test_eventk_process(void)
 \brief  Dummy process handler function
 */
 //------------------------------------------------------------------------------
-static tOplkError processHandler1(tEplEvent* pEvent_p)
+static tOplkError processHandler1(tEvent* pEvent_p)
 {
     UNUSED_PARAMETER(pEvent_p);
     return kErrorOk;
@@ -215,7 +215,7 @@ static tOplkError processHandler1(tEplEvent* pEvent_p)
 \brief  Dummy process handler function
 */
 //------------------------------------------------------------------------------
-static tOplkError processHandler2(tEplEvent* pEvent_p)
+static tOplkError processHandler2(tEvent* pEvent_p)
 {
     UNUSED_PARAMETER(pEvent_p);
     return kErrorOk;

@@ -67,7 +67,7 @@ extern "C" {
 /* host interface buffer event interface */
 tOplkError eventkcal_initQueueHostif(tEventQueue eventQueue_p);
 tOplkError eventkcal_exitQueueHostif (tEventQueue eventQueue_p);
-tOplkError eventkcal_postEventHostif (tEventQueue eventQueue_p, tEplEvent *pEvent_p) SECTION_EVENTKCAL_HOSTIF_POST;
+tOplkError eventkcal_postEventHostif (tEventQueue eventQueue_p, tEvent *pEvent_p) SECTION_EVENTKCAL_HOSTIF_POST;
 tOplkError eventkcal_processEventHostif(tEventQueue eventQueue_p) SECTION_EVENTKCAL_HOSTIF_PROCESS;
 tOplkError eventkcal_getEventHostif(tEventQueue eventQueue_p, BYTE* pDataBuffer_p, size_t* pReadSize_p);
 UINT       eventkcal_getEventCountHostif(tEventQueue eventQueue_p);
@@ -76,7 +76,7 @@ tOplkError eventkcal_setSignalingHostif(tEventQueue eventQueue_p, VOIDFUNCPTR pf
 /* circular buffer event interface */
 tOplkError eventkcal_initQueueCircbuf(tEventQueue eventQueue_p);
 tOplkError eventkcal_exitQueueCircbuf (tEventQueue eventQueue_p);
-tOplkError eventkcal_postEventCircbuf (tEventQueue eventQueue_p, tEplEvent *pEvent_p);
+tOplkError eventkcal_postEventCircbuf (tEventQueue eventQueue_p, tEvent *pEvent_p);
 tOplkError eventkcal_processEventCircbuf(tEventQueue eventQueue_p);
 tOplkError eventkcal_getEventCircbuf(tEventQueue eventQueue_p, BYTE* pDataBuffer_p, size_t* pReadSize_p);
 UINT       eventkcal_getEventCountCircbuf(tEventQueue eventQueue_p);

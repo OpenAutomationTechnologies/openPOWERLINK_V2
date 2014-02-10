@@ -226,11 +226,11 @@ This function posts an event to the specified host interface queue.
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tOplkError eventkcal_postEventHostif (tEventQueue eventQueue_p, tEplEvent *pEvent_p)
+tOplkError eventkcal_postEventHostif (tEventQueue eventQueue_p, tEvent *pEvent_p)
 {
     tOplkError          ret = kErrorOk;
     tQueueReturn        lfqRet;
-    DWORD               aPostBuffer[(sizeof(tEplEvent) + EPL_MAX_EVENT_ARG_SIZE)/4];
+    DWORD               aPostBuffer[(sizeof(tEvent) + EPL_MAX_EVENT_ARG_SIZE)/4];
     BYTE*               pPostBuffer = (BYTE*)aPostBuffer;
     ULONG               dataSize;
 
@@ -241,7 +241,7 @@ tOplkError eventkcal_postEventHostif (tEventQueue eventQueue_p, tEplEvent *pEven
         return kErrorInvalidInstanceParam;
 
     // initialize data size to mandatory part
-    dataSize = sizeof(tEplEvent);
+    dataSize = sizeof(tEvent);
 
     // copy event into post buffer
     EPL_MEMCPY(pPostBuffer, pEvent_p, dataSize);
@@ -286,9 +286,9 @@ tOplkError eventkcal_processEventHostif(tEventQueue eventQueue_p)
 {
     tOplkError          ret = kErrorOk;
     tQueueReturn        lfqRet;
-    tEplEvent*          pEplEvent;
-    WORD                dataSize = sizeof(tEplEvent) + EPL_MAX_EVENT_ARG_SIZE;
-    DWORD               aRxBuffer[(sizeof(tEplEvent) + EPL_MAX_EVENT_ARG_SIZE)/4];
+    tEvent*             pEplEvent;
+    WORD                dataSize = sizeof(tEvent) + EPL_MAX_EVENT_ARG_SIZE;
+    DWORD               aRxBuffer[(sizeof(tEvent) + EPL_MAX_EVENT_ARG_SIZE)/4];
     BYTE*               pRxBuffer = (BYTE*)aRxBuffer;
 
     if (eventQueue_p > kEventQueueNum)
@@ -306,10 +306,10 @@ tOplkError eventkcal_processEventHostif(tEventQueue eventQueue_p)
         goto Exit;
     }
 
-    pEplEvent = (tEplEvent *) pRxBuffer;
-    pEplEvent->m_uiSize = (UINT)dataSize - sizeof(tEplEvent);
+    pEplEvent = (tEvent *) pRxBuffer;
+    pEplEvent->m_uiSize = (UINT)dataSize - sizeof(tEvent);
     if(pEplEvent->m_uiSize > 0)
-        pEplEvent->m_pArg = &pRxBuffer[sizeof(tEplEvent)];
+        pEplEvent->m_pArg = &pRxBuffer[sizeof(tEvent)];
     else
         pEplEvent->m_pArg = NULL;
 

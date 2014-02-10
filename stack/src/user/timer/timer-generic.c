@@ -251,7 +251,7 @@ tOplkError timeru_process(void)
 {
     tTimerEntry*        pTimerEntry;
     UINT32              timeoutInMs;
-    tEplEvent           event;
+    tEvent              event;
     tTimerEventArg      timerEventArg;
     tOplkError          ret = kErrorOk;
 

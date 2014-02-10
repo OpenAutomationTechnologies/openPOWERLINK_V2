@@ -178,7 +178,7 @@ This function posts a event to the kernel queue.
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tOplkError eventkcal_postKernelEvent (tEplEvent *pEvent_p)
+tOplkError eventkcal_postKernelEvent (tEvent *pEvent_p)
 {
     tOplkError      ret = kErrorOk;
 
@@ -206,7 +206,7 @@ This function posts a event to the user queue.
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tOplkError eventkcal_postUserEvent (tEplEvent *pEvent_p)
+tOplkError eventkcal_postUserEvent (tEvent *pEvent_p)
 {
     tOplkError      ret = kErrorOk;
 

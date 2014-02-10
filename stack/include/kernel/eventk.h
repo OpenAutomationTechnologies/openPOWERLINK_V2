@@ -65,11 +65,11 @@ tOplkError eventk_init(void);
 
 tOplkError eventk_exit(void);
 
-tOplkError eventk_process(tEplEvent * pEvent_p) SECTION_EVENTK_PROCESS;
+tOplkError eventk_process(tEvent * pEvent_p) SECTION_EVENTK_PROCESS;
 
-tOplkError eventk_postEvent(tEplEvent * pEvent_p) SECTION_EVENTK_POST;
+tOplkError eventk_postEvent(tEvent * pEvent_p) SECTION_EVENTK_POST;
 
-tOplkError eventk_postError(tEplEventSource eventSource_p, tOplkError eplError_p,
+tOplkError eventk_postError(tEventSource eventSource_p, tOplkError eplError_p,
                                    UINT argSize_p, void* pArg_p);
 
 #ifdef __cplusplus

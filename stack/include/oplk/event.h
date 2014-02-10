@@ -1,16 +1,15 @@
 /**
 ********************************************************************************
-\file   include/event.h
+\file   oplk/event.h
 
 \brief  Header file for event module
 
 This file contains definitions for the event module.
-
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -76,7 +75,7 @@ typedef enum
     kEplEventTypeDllkFlag1      = 0x09, ///< DLL kernel Flag 1 changed event (arg is pointer to nothing)
     kEplEventTypeDllkFillTx     = 0x0A, ///< DLL kernel fill TxBuffer event (arg is pointer to tDllAsyncReqPriority)
     kEplEventTypeDllkPresReady  = 0x0B, ///< DLL kernel PRes ready event (arg is pointer to nothing)
-    kEplEventTypeError          = 0x0C, ///< Error event for API layer (arg is pointer to tEplEventError)
+    kEplEventTypeError          = 0x0C, ///< Error event for API layer (arg is pointer to tEventError)
     kEplEventTypeNmtStateChange = 0x0D, ///< Indicate change of NMT-State (arg is pointer to tEventNmtStateChange)
     kEplEventTypeDllError       = 0x0E, ///< DLL error event for error handler (arg is pointer to tEplErrorHandlerkEvent)
     kEplEventTypeAsndRx         = 0x0F, ///< received ASnd frame for DLL user module (arg is pointer to tPlkFrame)
@@ -99,9 +98,7 @@ typedef enum
     kEplEventTypePdokSetupPdoBuf = 0x25,  ///< dealloc PDOs
     kEplEventTypePdokControlSync = 0x26, ///< enable/disable the pdokcal sync trigger (arg is pointer to BOOL)
     kEplEventTypeReleaseRxFrame = 0x27, ///< Free receive buffer (arg is pointer to the buffer to release)
-
-} tEplEventType;
-
+} tEventType;
 
 /**
 \brief  Valid sinks for an event
@@ -127,7 +124,7 @@ typedef enum
     kEplEventSinkApi            = 0x0F, ///< events for API module
 
     kEplEventSinkInvalid        = 0xFF  ///< Identifies an invalid sink
-} tEplEventSink;
+} tEventSink;
 
 /**
 \brief  Valid sources for an event
@@ -164,7 +161,7 @@ typedef enum
     kEplEventSourceErru         = 0x1F, ///< Events from User Error handler module
 
     kEplEventSourceInvalid      = 0xFF  ///< Identifies an invalid event source
-} tEplEventSource;
+} tEventSource;
 
 /**
 \brief Enumerator for Queue
@@ -182,7 +179,6 @@ typedef enum
     kEventQueueNum              = 0x04  ///< maximum number of queues
 } tEventQueue;
 
-
 /**
 \brief  structure for events
 
@@ -191,27 +187,12 @@ The structure defines an openPOWERLINK event.
 */
 typedef struct
 {
-    tEplEventType       m_EventType /*:28*/;    ///< Type of this event
-    tEplEventSink       m_EventSink /*:4*/;     ///< Sink of this event
+    tEventType          m_EventType /*:28*/;    ///< Type of this event
+    tEventSink          m_EventSink /*:4*/;     ///< Sink of this event
     tEplNetTime         m_NetTime;              ///< Timestamp of the event
     UINT                m_uiSize;               ///< Size of the event argument
     void*               m_pArg;                 ///< Argument of the event
-} tEplEvent;
-
-
-/**
-\brief  short structure for events
-
-The structure defines an openPOWERLINK event without its argument.
-(element order must not be changed!)
-*/
-typedef struct
-{
-    tEplEventType       m_EventType /*:28*/;    ///< Type of this event
-    tEplEventSink       m_EventSink /*:4*/;     ///< Sink of this event
-    tEplNetTime         m_NetTime;              ///< Timestamp of the event
-} tEplEventShort;
-
+} tEvent;
 
 /**
 \brief  structure for OBD error information
@@ -223,8 +204,7 @@ typedef struct
 {
     UINT                m_uiIndex;
     UINT                m_uiSubIndex;
-} tEplEventObdError;
-
+} tEventObdError;
 
 /**
 \brief  structure for error events
@@ -233,19 +213,18 @@ The structure defines an error event.
 */
 typedef struct
 {
-    tEplEventSource     m_EventSource;          ///< Module which posted this error event
+    tEventSource        m_EventSource;          ///< Module which posted this error event
     tOplkError          m_EplError;             ///< Error which occurred
     union
     {
         BYTE                    m_bArg;         ///< BYTE argument
         UINT32                  m_dwArg;        ///< UINT32 argument
-        tEplEventSource         m_EventSource;  ///< Argument from Eventk/u module (originating error source)
-        tEplEventObdError       m_ObdError;     ///< Argument from Obd module
-        tEplEventSink           m_EventSink;    ///< Argument from Eventk/u module on m_EplError == kErrorEventUnknownSink
+        tEventSource            m_EventSource;  ///< Argument from Eventk/u module (originating error source)
+        tEventObdError          m_ObdError;     ///< Argument from Obd module
+        tEventSink              m_EventSink;    ///< Argument from Eventk/u module on m_EplError == kErrorEventUnknownSink
         //tErrHistoryEntry   m_HistoryEntry; ///< from Nmtk/u module
     } m_Arg;
-} tEplEventError;
-
+} tEventError;
 
 /**
 \brief  structure for DLL error events
@@ -258,14 +237,14 @@ typedef struct
     UINT                m_uiNodeId;             ///< Node ID
     tNmtState           m_NmtState;             ///< NMT state
     tOplkError          m_EplError;             ///< Error code
-} tErrHndkEvent;
+} tEventDllError;
 
 /**
 \brief  callback function to get informed about sync event
 
 \return The function returns a tOplkError error code.
 */
-typedef tOplkError (*tEplSyncCb) (void);
+typedef tOplkError (*tSyncCb) (void);
 
 /**
 \brief callback for event post
@@ -277,7 +256,7 @@ e.g. EplEventkCal -> EplEventkProcess
 
 \return The function returns a tOplkError error code.
 */
-typedef tOplkError (*tEplProcessEventCb) (tEplEvent* pEplEvent_p);
+typedef tOplkError (*tProcessEventCb) (tEvent* pEplEvent_p);
 
 /**
 \brief callback for event error post
@@ -292,7 +271,7 @@ e.g. EplEventkCal -> eventk_postError
 
 \return The function returns a tOplkError error code.
 */
-typedef tOplkError (*tEplPostErrorEventCb) (tEplEventSource EventSource_p, tOplkError eplError_p, UINT argSize_p, void *pArg_p);
+typedef tOplkError (*tPostErrorEventCb) (tEventSource EventSource_p, tOplkError eplError_p, UINT argSize_p, void *pArg_p);
 
 /**
 \brief  event dispatch entry
@@ -303,9 +282,9 @@ event sink.
  */
 typedef struct
 {
-    tEplEventSink       sink;               ///< Event sink
-    tEplEventSource     source;             ///< Corresponding event source
-    tEplProcessEventCb  pfnEventHandler;    ///< Event handler responsible for this sink
+    tEventSink          sink;               ///< Event sink
+    tEventSource        source;             ///< Corresponding event source
+    tProcessEventCb  pfnEventHandler;    ///< Event handler responsible for this sink
 } tEventDispatchEntry;
 
 /**

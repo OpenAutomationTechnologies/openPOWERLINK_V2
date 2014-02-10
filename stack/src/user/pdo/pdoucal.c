@@ -96,7 +96,7 @@ The function initializes the PDO user CAL module.
 \ingroup module_pdoucal
 */
 //------------------------------------------------------------------------------
-tOplkError pdoucal_init(tEplSyncCb pfnSyncCb_p)
+tOplkError pdoucal_init(tSyncCb pfnSyncCb_p)
 {
     tOplkError      ret;
 
@@ -142,7 +142,7 @@ in the Pdok module by sending the appropriate event to Pdok.
 tOplkError pdoucal_postPdokChannelAlloc(tPdoAllocationParam* pAllocationParam_p)
 {
     tOplkError  Ret = kErrorOk;
-    tEplEvent   Event;
+    tEvent      Event;
 
     Event.m_EventSink = kEplEventSinkPdokCal;
     Event.m_EventType = kEplEventTypePdokAlloc;
@@ -171,7 +171,7 @@ kEplEventTypePdokConfig to the kernel PDO module.
 tOplkError pdoucal_postConfigureChannel(tPdoChannelConf* pChannelConf_p)
 {
     tOplkError      ret = kErrorOk;
-    tEplEvent       Event;
+    tEvent          Event;
 
     Event.m_EventSink = kEplEventSinkPdokCal;
     Event.m_EventType = kEplEventTypePdokConfig;
@@ -200,7 +200,7 @@ a kEplEventTypePdokSetupPdoBuf event.
 tOplkError pdoucal_postSetupPdoBuffers(size_t rxPdoMemSize_p, size_t txPdoMemSize_p)
 {
     tOplkError      Ret = kErrorOk;
-    tEplEvent       Event;
+    tEvent          Event;
     tPdoMemSize     pdoMemSize;
 
     pdoMemSize.rxPdoMemSize = rxPdoMemSize_p;

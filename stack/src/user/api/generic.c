@@ -718,7 +718,7 @@ thread safe and is meant for synchronization.
 tOplkError oplk_postUserEvent(void* pUserArg_p)
 {
     tOplkError  ret;
-    tEplEvent   event;
+    tEvent      event;
 
     event.m_EventSink = kEplEventSinkApi;
     event.m_NetTime.m_dwNanoSec = 0;

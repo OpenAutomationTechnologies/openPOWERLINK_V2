@@ -79,7 +79,7 @@ extern "C" {
 tOplkError nmtmnu_init(tNmtMnuCbNodeEvent pfnCbNodeEvent_p, tNmtMnuCbBootEvent pfnCbBootEvent_p);
 tOplkError nmtmnu_addInstance(tNmtMnuCbNodeEvent pfnCbNodeEvent_p, tNmtMnuCbBootEvent pfnCbBootEvent_p);
 tOplkError nmtmnu_delInstance(void);
-tOplkError nmtmnu_processEvent(tEplEvent* pEvent_p);
+tOplkError nmtmnu_processEvent(tEvent* pEvent_p);
 tOplkError nmtmnu_sendNmtCommand(UINT nodeId_p, tNmtCommand  nmtCommand_p);
 tOplkError nmtmnu_requestNmtCommand(UINT nodeId_p, tNmtCommand nmtCommand_p);
 tOplkError nmtmnu_triggerStateChange(UINT nodeId_p, tNmtNodeCommand nodeCommand_p);

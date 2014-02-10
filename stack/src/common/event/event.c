@@ -106,9 +106,9 @@ and the corresponding event source.
 */
 //------------------------------------------------------------------------------
 tOplkError event_getHandlerForSink(tEventDispatchEntry** ppDispatchEntry_p,
-                                   tEplEventSink sink_p,
-                                   tEplProcessEventCb* ppfnEventHandler_p,
-                                   tEplEventSource* pEventSource_p)
+                                   tEventSink sink_p,
+                                   tProcessEventCb* ppfnEventHandler_p,
+                                   tEventSource* pEventSource_p)
 {
     tOplkError              ret = kErrorEventUnknownSink;
 

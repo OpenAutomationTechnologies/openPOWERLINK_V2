@@ -90,7 +90,7 @@ tOplkError dllkcal_clearAsyncBuffer(void);
 
 tOplkError dllkcal_getStatistics(tDllkCalStatistics** ppStatistics);
 
-tOplkError dllkcal_process(tEplEvent* pEvent_p);
+tOplkError dllkcal_process(tEvent* pEvent_p);
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
 

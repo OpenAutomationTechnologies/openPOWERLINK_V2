@@ -67,7 +67,7 @@ BOOL system_getTermSignalState();
 void msleep (unsigned int milliSecond_p);
 
 #if defined(CONFIG_USE_SYNCTHREAD)
-void startSyncThread(tEplSyncCb pfnSync_p);
+void startSyncThread(tSyncCb pfnSync_p);
 #endif
 
 #ifdef __cplusplus

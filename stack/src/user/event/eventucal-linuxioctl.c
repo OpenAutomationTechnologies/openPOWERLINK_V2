@@ -110,7 +110,7 @@ static tEventuCalInstance    instance_l;
 // local function prototypes
 //------------------------------------------------------------------------------
 static void *eventThread (void * arg_p);
-static tOplkError postEvent(tEplEvent *pEvent_p);
+static tOplkError postEvent(tEvent *pEvent_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -206,7 +206,7 @@ queue post function is called.
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-tOplkError eventucal_postUserEvent(tEplEvent *pEvent_p)
+tOplkError eventucal_postUserEvent(tEvent *pEvent_p)
 {
     return postEvent(pEvent_p);
 }
@@ -228,7 +228,7 @@ queue post function is called.
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-tOplkError eventucal_postKernelEvent(tEplEvent *pEvent_p)
+tOplkError eventucal_postKernelEvent(tEvent *pEvent_p)
 {
     return postEvent(pEvent_p);
 }
@@ -266,7 +266,7 @@ queue post function is called.
 \retval other error codes       If an error occurred
 */
 //------------------------------------------------------------------------------
-static tOplkError postEvent(tEplEvent *pEvent_p)
+static tOplkError postEvent(tEvent *pEvent_p)
 {
     int             ioctlret;
 
@@ -294,13 +294,13 @@ This function implements the event thread.
 //------------------------------------------------------------------------------
 static void *eventThread (void * arg_p)
 {
-    tEplEvent*  pEvent;
+    tEvent*  pEvent;
     int         ret;
-    char        eventBuf[sizeof(tEplEvent) + EPL_MAX_EVENT_ARG_SIZE];
+    char        eventBuf[sizeof(tEvent) + EPL_MAX_EVENT_ARG_SIZE];
 
     UNUSED_PARAMETER(arg_p);
 
-    pEvent = (tEplEvent*)eventBuf;
+    pEvent = (tEvent*)eventBuf;
 
     while (!instance_l.fStopThread)
     {
@@ -311,7 +311,7 @@ static void *eventThread (void * arg_p)
                     pEvent->m_EventType, debugstr_getEventTypeStr(pEvent->m_EventType),
                     pEvent->m_EventSink, debugstr_getEventSinkStr(pEvent->m_EventSink));*/
             if (pEvent->m_uiSize != 0)
-                pEvent->m_pArg = (char *)pEvent + sizeof(tEplEvent);
+                pEvent->m_pArg = (char *)pEvent + sizeof(tEvent);
 
             ret = eventu_process(pEvent);
         }

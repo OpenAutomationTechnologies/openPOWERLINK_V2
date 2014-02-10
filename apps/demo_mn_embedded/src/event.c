@@ -328,7 +328,7 @@ static tOplkError processErrorWarningEvent(tOplkApiEventType EventType_p,
     // error or warning occurred within the stack or the application
     // on error the API layer stops the NMT state machine
 
-    tEplEventError*         pInternalError = &pEventArg_p->internalError;
+    tEventError*            pInternalError = &pEventArg_p->internalError;
 
     UNUSED_PARAMETER(EventType_p);
     UNUSED_PARAMETER(pUserArg_p);

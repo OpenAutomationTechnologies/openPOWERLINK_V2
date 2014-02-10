@@ -130,7 +130,7 @@ queue post function is called.
 \retval other error codes       If an error occurred
 */
 //------------------------------------------------------------------------------
-tOplkError eventkcal_postEvent (tEplEvent *pEvent_p)
+tOplkError eventkcal_postEvent (tEvent *pEvent_p)
 {
     tOplkError      ret = kErrorOk;
 
@@ -181,7 +181,7 @@ This is the event receive function for events posted to the kernel layer.
 \retval other error codes       If an error occurred
 */
 //------------------------------------------------------------------------------
-tOplkError eventkcal_rxHandler (tEplEvent *pEvent_p)
+tOplkError eventkcal_rxHandler (tEvent *pEvent_p)
 {
     tOplkError ret = kErrorOk;
 

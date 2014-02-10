@@ -274,7 +274,7 @@ The function returns the address of the synchronous data callback function.
 \return address of synchronous data callback function
 */
 //------------------------------------------------------------------------------
-tEplSyncCb DataInOutThread::getSyncCbFunc()
+tSyncCb DataInOutThread::getSyncCbFunc()
 {
     return AppCbSync;
 }

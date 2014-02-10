@@ -58,9 +58,9 @@ extern "C" {
 #endif
 
 tOplkError event_getHandlerForSink(tEventDispatchEntry** ppDispatchEntry_p,
-                                   tEplEventSink sink_p,
-                                   tEplProcessEventCb* ppfnEventHandler_p,
-                                   tEplEventSource* pEventSource_p) SECTION_EVENT_GET_HDL_FOR_SINK;
+                                   tEventSink sink_p,
+                                   tProcessEventCb* ppfnEventHandler_p,
+                                   tEventSource* pEventSource_p) SECTION_EVENT_GET_HDL_FOR_SINK;
 
 #ifdef __cplusplus
 }

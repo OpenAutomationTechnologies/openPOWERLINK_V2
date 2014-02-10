@@ -60,7 +60,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tOplkError pdoucal_init(tEplSyncCb pfnSyncCb_p);
+tOplkError pdoucal_init(tSyncCb pfnSyncCb_p);
 tOplkError pdoucal_exit(void);
 
 tOplkError pdoucal_postPdokChannelAlloc(tPdoAllocationParam* pAllocationParam_p);
@@ -82,7 +82,7 @@ tOplkError pdoucal_setTxPdo(UINT channelId_p, BYTE* pPdo_p,  WORD pdoSize_p);
 tOplkError pdoucal_getRxPdo(BYTE** ppPdo_p, UINT channelId_p, WORD pdoSize_p);
 
 // PDO sync functions
-tOplkError pdoucal_initSync(tEplSyncCb pfnSyncCb_p);
+tOplkError pdoucal_initSync(tSyncCb pfnSyncCb_p);
 void       pdoucal_exitSync(void);
 tOplkError pdoucal_waitSyncEvent(ULONG timeout_p);
 tOplkError pdoucal_callSyncCb(void);
