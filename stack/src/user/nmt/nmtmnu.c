@@ -141,7 +141,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     pNodeInfo_p->flags = ((pNodeInfo_p->flags + NMTMNU_NODE_FLAG_INC_STATREQ) &         \
                           NMTMNU_NODE_FLAG_COUNT_STATREQ) |                             \
                           (pNodeInfo_p->flags & ~NMTMNU_NODE_FLAG_COUNT_STATREQ);       \
-    timerArg_p.m_Arg.value = NMTMNU_TIMERARG_STATREQ | nodeId_p  |                    \
+    timerArg_p.argument.value = NMTMNU_TIMERARG_STATREQ | nodeId_p  |                    \
                                (pNodeInfo_p->flags & NMTMNU_NODE_FLAG_COUNT_STATREQ);   \
     timerArg_p.eventSink  = kEventSinkNmtMnu;
 
@@ -149,7 +149,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     pNodeInfo_p->flags = ((pNodeInfo_p->flags + NMTMNU_NODE_FLAG_INC_STATREQ) &         \
                           NMTMNU_NODE_FLAG_COUNT_STATREQ) |                             \
                           (pNodeInfo_p->flags & ~NMTMNU_NODE_FLAG_COUNT_STATREQ);       \
-    timerArg_p.m_Arg.value = NMTMNU_TIMERARG_IDENTREQ | nodeId_p |                    \
+    timerArg_p.argument.value = NMTMNU_TIMERARG_IDENTREQ | nodeId_p |                    \
                                (pNodeInfo_p->flags & NMTMNU_NODE_FLAG_COUNT_STATREQ);   \
     timerArg_p.eventSink = kEventSinkNmtMnu;
 
@@ -157,7 +157,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     pNodeInfo_p->flags = ((pNodeInfo_p->flags + NMTMNU_NODE_FLAG_INC_LONGER) &          \
                           NMTMNU_NODE_FLAG_COUNT_LONGER) |                              \
                           (pNodeInfo_p->flags & ~NMTMNU_NODE_FLAG_COUNT_LONGER);        \
-    timerArg_p.m_Arg.value = NMTMNU_TIMERARG_LONGER | nodeId_p |                      \
+    timerArg_p.argument.value = NMTMNU_TIMERARG_LONGER | nodeId_p |                      \
                                (pNodeInfo_p->flags & NMTMNU_NODE_FLAG_COUNT_LONGER);    \
     timerArg_p.eventSink = kEventSinkNmtMnu;
 
@@ -165,7 +165,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     pNodeInfo_p->flags = ((pNodeInfo_p->flags + NMTMNU_NODE_FLAG_INC_STATREQ) &         \
                           NMTMNU_NODE_FLAG_COUNT_STATREQ) |                             \
                           (pNodeInfo_p->flags & ~NMTMNU_NODE_FLAG_COUNT_STATREQ);       \
-    timerArg_p.m_Arg.value = NMTMNU_TIMERARG_STATE_MON | nodeId_p |                   \
+    timerArg_p.argument.value = NMTMNU_TIMERARG_STATE_MON | nodeId_p |                   \
                                (pNodeInfo_p->flags & NMTMNU_NODE_FLAG_COUNT_STATREQ);   \
     timerArg_p.eventSink = kEventSinkNmtMnu;
 
@@ -1055,7 +1055,7 @@ tOplkError nmtmnu_processEvent(tEvent* pEvent_p)
                 tTimerEventArg*  pTimerEventArg = (tTimerEventArg*)pEvent_p->pEventArg;
                 UINT                nodeId;
 
-                nodeId = (UINT) (pTimerEventArg->m_Arg.value & NMTMNU_TIMERARG_NODE_MASK);
+                nodeId = (UINT) (pTimerEventArg->argument.value & NMTMNU_TIMERARG_NODE_MASK);
                 if (nodeId != 0)
                 {
                     tObdSize             ObdSize;
@@ -1068,10 +1068,10 @@ tOplkError nmtmnu_processEvent(tEvent* pEvent_p)
                     if (ret != kErrorOk)
                         break;
 
-                    if ((pTimerEventArg->m_Arg.value & NMTMNU_TIMERARG_IDENTREQ) != 0L)
+                    if ((pTimerEventArg->argument.value & NMTMNU_TIMERARG_IDENTREQ) != 0L)
                     {
                         if ((UINT32)(pNodeInfo->flags & NMTMNU_NODE_FLAG_COUNT_STATREQ) !=
-                            (pTimerEventArg->m_Arg.value & NMTMNU_TIMERARG_COUNT_SR))
+                            (pTimerEventArg->argument.value & NMTMNU_TIMERARG_COUNT_SR))
                         {   // this is an old (already deleted or modified) timer
                             // but not the current timer
                             // so discard it
@@ -1083,15 +1083,15 @@ tOplkError nmtmnu_processEvent(tEvent* pEvent_p)
                         /*NMTMNU_DBG_POST_TRACE_VALUE(kNmtMnuIntNodeEventTimerIdentReq, uiNodeId,
                                                         ((pNodeInfo->nodeState << 8) | 0x80
                                                          | ((pNodeInfo->flags & NMTMNU_NODE_FLAG_COUNT_STATREQ) >> 6)
-                                                         | ((pTimerEventArg->m_Arg.value & NMTMNU_TIMERARG_COUNT_SR) >> 8)));*/
+                                                         | ((pTimerEventArg->argument.value & NMTMNU_TIMERARG_COUNT_SR) >> 8)));*/
                         ret = processInternalEvent(nodeId, (tNmtState) (bNmtState | NMT_TYPE_CS),
                                                    EPL_E_NO_ERROR, kNmtMnuIntNodeEventTimerIdentReq);
                     }
 
-                    else if ((pTimerEventArg->m_Arg.value & NMTMNU_TIMERARG_STATREQ) != 0L)
+                    else if ((pTimerEventArg->argument.value & NMTMNU_TIMERARG_STATREQ) != 0L)
                     {
                         if ((UINT32)(pNodeInfo->flags & NMTMNU_NODE_FLAG_COUNT_STATREQ)
-                            != (pTimerEventArg->m_Arg.value & NMTMNU_TIMERARG_COUNT_SR))
+                            != (pTimerEventArg->argument.value & NMTMNU_TIMERARG_COUNT_SR))
                         {   // this is an old (already deleted or modified) timer
                             // but not the current timer
                             // so discard it
@@ -1103,15 +1103,15 @@ tOplkError nmtmnu_processEvent(tEvent* pEvent_p)
                         /* NMTMNU_DBG_POST_TRACE_VALUE(kNmtMnuIntNodeEventTimerStatReq, uiNodeId,
                                                         ((pNodeInfo->nodeState << 8) | 0x80
                                                          | ((pNodeInfo->flags & NMTMNU_NODE_FLAG_COUNT_STATREQ) >> 6)
-                                                         | ((pTimerEventArg->m_Arg.value & NMTMNU_TIMERARG_COUNT_SR) >> 8))); */
+                                                         | ((pTimerEventArg->argument.value & NMTMNU_TIMERARG_COUNT_SR) >> 8))); */
                         ret = processInternalEvent(nodeId, (tNmtState) (bNmtState | NMT_TYPE_CS),
                                                    EPL_E_NO_ERROR, kNmtMnuIntNodeEventTimerStatReq);
                     }
 
-                    else if ((pTimerEventArg->m_Arg.value & NMTMNU_TIMERARG_STATE_MON) != 0L)
+                    else if ((pTimerEventArg->argument.value & NMTMNU_TIMERARG_STATE_MON) != 0L)
                     {
                         if ((UINT32)(pNodeInfo->flags & NMTMNU_NODE_FLAG_COUNT_STATREQ)
-                            != (pTimerEventArg->m_Arg.value & NMTMNU_TIMERARG_COUNT_SR))
+                            != (pTimerEventArg->argument.value & NMTMNU_TIMERARG_COUNT_SR))
                         {   // this is an old (already deleted or modified) timer
                             // but not the current timer
                             // so discard it
@@ -1123,15 +1123,15 @@ tOplkError nmtmnu_processEvent(tEvent* pEvent_p)
                         /* NMTMNU_DBG_POST_TRACE_VALUE(kNmtMnuIntNodeEventTimerStatReq, uiNodeId,
                                                         ((pNodeInfo->nodeState << 8) | 0x80
                                                          | ((pNodeInfo->flags & NMTMNU_NODE_FLAG_COUNT_STATREQ) >> 6)
-                                                         | ((pTimerEventArg->m_Arg.value & NMTMNU_TIMERARG_COUNT_SR) >> 8))); */
+                                                         | ((pTimerEventArg->argument.value & NMTMNU_TIMERARG_COUNT_SR) >> 8))); */
                         ret = processInternalEvent(nodeId, (tNmtState) (bNmtState | NMT_TYPE_CS),
                                                    EPL_E_NO_ERROR, kNmtMnuIntNodeEventTimerStateMon);
                     }
 
-                    else if ((pTimerEventArg->m_Arg.value & NMTMNU_TIMERARG_LONGER) != 0L)
+                    else if ((pTimerEventArg->argument.value & NMTMNU_TIMERARG_LONGER) != 0L)
                     {
                         if ((UINT32)(pNodeInfo->flags & NMTMNU_NODE_FLAG_COUNT_LONGER)
-                            != (pTimerEventArg->m_Arg.value & NMTMNU_TIMERARG_COUNT_LO))
+                            != (pTimerEventArg->argument.value & NMTMNU_TIMERARG_COUNT_LO))
                         {   // this is an old (already deleted or modified) timer
                             // but not the current timer
                             // so discard it
@@ -1143,7 +1143,7 @@ tOplkError nmtmnu_processEvent(tEvent* pEvent_p)
                         /* NMTMNU_DBG_POST_TRACE_VALUE(kNmtMnuIntNodeEventTimerLonger, uiNodeId,
                                                         ((pNodeInfo->nodeState << 8) | 0x80
                                                          | ((pNodeInfo->flags & NMTMNU_NODE_FLAG_COUNT_LONGER) >> 6)
-                                                         | ((pTimerEventArg->m_Arg.value & NMTMNU_TIMERARG_COUNT_LO) >> 8))); */
+                                                         | ((pTimerEventArg->argument.value & NMTMNU_TIMERARG_COUNT_LO) >> 8))); */
                         ret = processInternalEvent(nodeId, (tNmtState) (bNmtState | NMT_TYPE_CS),
                                                    EPL_E_NO_ERROR, kNmtMnuIntNodeEventTimerLonger);
                     }
@@ -1831,7 +1831,7 @@ static tOplkError doPreop1(tEventNmtStateChange nmtStateChange_p)
             dwTimeout = 1L; // at least 1 ms
         }
         timerArg.eventSink = kEventSinkNmtMnu;
-        timerArg.m_Arg.value = 0;
+        timerArg.argument.value = 0;
         ret = timeru_modifyTimer(&nmtMnuInstance_g.timerHdlNmtState, dwTimeout, timerArg);
     }
     return ret;
@@ -2470,7 +2470,7 @@ INT processNodeEventNoIdentResponse(UINT nodeId_p, tNmtState nodeNmtState_p, tNm
         /* NMTMNU_DBG_POST_TRACE_VALUE(kNmtMnuIntNodeEventNoIdentResponse, nodeId_p,
                                           ((pNodeInfo->nodeState << 8) | 0x80
                                            | ((pNodeInfo->flags & NMTMNU_NODE_FLAG_COUNT_STATREQ) >> 6)
-                                           | ((TimerArg.m_Arg.value & NMTMNU_TIMERARG_COUNT_SR) >> 8)));*/
+                                           | ((TimerArg.argument.value & NMTMNU_TIMERARG_COUNT_SR) >> 8)));*/
         *pRet_p = timeru_modifyTimer(&pNodeInfo->timerHdlStatReq,
                                      nmtMnuInstance_g.statusRequestDelay, timerArg);
     }
@@ -2541,7 +2541,7 @@ static INT processNodeEventStatusResponse(UINT nodeId_p, tNmtState nodeNmtState_
         /*NMTMNU_DBG_POST_TRACE_VALUE(kNmtMnuIntNodeEventStatusResponse, nodeId_p,
                                         ((pNodeInfo->nodeState << 8) | 0x80
                                          | ((pNodeInfo->flags & NMTMNU_NODE_FLAG_COUNT_STATREQ) >> 6)
-                                         | ((TimerArg.m_Arg.value & NMTMNU_TIMERARG_COUNT_SR) >> 8)));*/
+                                         | ((TimerArg.argument.value & NMTMNU_TIMERARG_COUNT_SR) >> 8)));*/
         *pRet_p = timeru_modifyTimer(&pNodeInfo->timerHdlStatReq,
                                      nmtMnuInstance_g.statusRequestDelay, timerArg);
     }

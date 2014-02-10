@@ -319,7 +319,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
             time_p = TIMER_MIN_VAL_SINGLE;
     }
 
-    pTimerInfo->eventArg.m_Arg.value = argument_p;
+    pTimerInfo->eventArg.argument.value = argument_p;
     pTimerInfo->pfnCallback      = pfnCallback_p;
     pTimerInfo->fContinuously    = fContinue_p;
     pTimerInfo->period        = time_p;

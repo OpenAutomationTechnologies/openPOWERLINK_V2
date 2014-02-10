@@ -347,7 +347,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
     *pTimerHdl_p = pTimerInfo->eventArg.timerHdl;
 
     /* initialize timer info */
-    pTimerInfo->eventArg.m_Arg.value = argument_p;
+    pTimerInfo->eventArg.argument.value = argument_p;
     pTimerInfo->pfnCallback      = pfnCallback_p;
     pTimerInfo->fContinue    = fContinue_p;
     pTimerInfo->time          = time_p;

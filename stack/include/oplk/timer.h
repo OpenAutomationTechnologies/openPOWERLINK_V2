@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   timer.h
+\file   oplk/timer.h
 
 \brief  Generic definitions for timer modules
 
@@ -35,8 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_timer_H_
-#define _INC_timer_H_
+#ifndef _INC_oplk_timer_H_
+#define _INC_oplk_timer_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -59,26 +59,47 @@ typedef ULONG_PTR tTimerHdl;
 typedef ULONG tTimerHdl;
 #endif
 
+/**
+\brief  Structure for timer arguments
+
+The structure defines the arguments for a timer. It is used to setup a timer.
+*/
 typedef struct
 {
-    tEventSink          eventSink;
+    tEventSink          eventSink;      ///< The sink to send the event when the timer expires
     union
     {
-        UINT32          value;
-        void*           pValue;
-    } m_Arg;
+        UINT32          value;          ///< Timer argument supplied as UINT32
+        void*           pValue;         ///< Timer argument supplied as void*
+    } argument;                         ///< The timer argument to be sent in the timer event
 } tTimerArg;
 
+
+/**
+\brief  Structure for timer event arguments
+
+The structure defines a timer event argument. It provides information about
+the timer to the sink the event is sent to.
+*/
 typedef struct
 {
-    tTimerHdl           timerHdl;
+    tTimerHdl           timerHdl;       ///< Delivers the handle of the expired timer
     union
     {
-        UINT32          value;
-        void*           pValue;
-    } m_Arg;
+        UINT32          value;          ///< Timer argument supplied as UINT32
+        void*           pValue;         ///< Timer argument supplied as void*
+    } argument;                         ///< The timer argument the timer was initialized with.
 } tTimerEventArg;
 
+/**
+\brief Type for timer callback function pointers
+
+This type defines a function pointer to a timer callback function.
+
+\param pEventArg_p       Pointer to timer event argument
+
+\return The function returns a tOplkError error code.
+*/
 typedef tOplkError (*tTimerkCallback) (tTimerEventArg* pEventArg_p);
 
 #endif /* _INC_timer_H_ */
