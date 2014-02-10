@@ -235,11 +235,18 @@ typedef union
     tOplkApiEventRcvAsnd        receivedAsnd;       ///< Received ASnd frame information (\ref kOplkApiEventReceivedAsnd)
 } tOplkApiEventArg;
 
-typedef tOplkError (*tOplkApiCbEvent) (
-    tOplkApiEventType   EventType_p,   // IN: event type (enum)
-    tOplkApiEventArg*   pEventArg_p,   // IN: event argument (union)
-    void*               pUserArg_p);
+/**
+\brief Type for API event callback function pointer
 
+This type defines a function pointer to an API event callback function.
+
+\param eventType_p  The type of the event
+\param pEventArg_p  Pointer to the event argument
+\param pUserArg_p   Pointer to the user defined argument
+
+\return The function returns a tOplkError error code
+*/
+typedef tOplkError (*tOplkApiCbEvent)(tOplkApiEventType eventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
 
 /**
 \brief openPOWERLINK initialization parameters
@@ -304,18 +311,16 @@ typedef struct
     BOOL                fSyncOnPrcNode;             ///< If it is TRUE, Sync on PRes chained CN; FALSE: conventional CN (PReq/PRes)
 } tOplkApiInitParam;
 
-typedef struct
-{
-    void*          m_pImage;
-    UINT           m_uiSize;
-} tOplkApiProcessImage;
+/**
+\brief  Process image information structure
 
+This structure provides information about a process image.
+*/
 typedef struct
 {
-    void*          m_pPart;
-    UINT           m_uiOffset;
-    UINT           m_uiSize;
-} tOplkApiProcessImagePart;
+    void*          pImage;                          ///< Pointer to the process image
+    UINT           imageSize;                       ///< Size of the process image
+} tOplkApiProcessImage;
 
 //------------------------------------------------------------------------------
 // function prototypes
