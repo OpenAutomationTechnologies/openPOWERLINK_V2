@@ -116,45 +116,45 @@ tOplkError dllk_process(tEvent* pEvent_p)
     tOplkError              ret = kErrorOk;
     tEventNmtStateChange*   pNmtStateChange;
 
-    switch (pEvent_p->m_EventType)
+    switch (pEvent_p->eventType)
     {
-        case kEplEventTypeNmtStateChange:
-            pNmtStateChange = (tEventNmtStateChange*) pEvent_p->m_pArg;
+        case kEventTypeNmtStateChange:
+            pNmtStateChange = (tEventNmtStateChange*) pEvent_p->pEventArg;
             ret = processNmtStateChange(pNmtStateChange->newNmtState,
                                         pNmtStateChange->oldNmtState);
             break;
 
-        case kEplEventTypeNmtEvent:
+        case kEventTypeNmtEvent:
             ret = processNmtEvent(pEvent_p);
             break;
 
-        case kEplEventTypeDllkFillTx:
-            ret = processFillTx(*((tDllAsyncReqPriority*)pEvent_p->m_pArg),
+        case kEventTypeDllkFillTx:
+            ret = processFillTx(*((tDllAsyncReqPriority*)pEvent_p->pEventArg),
                                 dllkInstance_g.nmtState);
             break;
 
-        case kEplEventTypeDllkFlag1:
+        case kEventTypeDllkFlag1:
             // trigger update of StatusRes on SoA, because Flag 1 was changed
             if (dllkInstance_g.updateTxFrame == DLLK_UPDATE_NONE)
                 dllkInstance_g.updateTxFrame = DLLK_UPDATE_STATUS;
             break;
 
-        case kEplEventTypeDllkCycleFinish:
+        case kEventTypeDllkCycleFinish:
             ret = processCycleFinish(dllkInstance_g.nmtState);
             break;
 
-        case kEplEventTypeSync:
+        case kEventTypeSync:
             ret = processSync(dllkInstance_g.nmtState);
             break;
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
-        case kEplEventTypeDllkStartReducedCycle:
+        case kEventTypeDllkStartReducedCycle:
             ret = processStartReducedCycle();
             break;
 #endif
 
 #if EPL_DLL_PRES_READY_AFTER_SOA != FALSE
-        case kEplEventTypeDllkPresReady:
+        case kEventTypeDllkPresReady:
             ret = processPresReady(dllkInstance_g.nmtState);
             break;
 #endif
@@ -196,8 +196,8 @@ tOplkError dllk_issueLossOfPres(UINT nodeId_p)
         {   // normal isochronous CN
             tEventDllError  dllEvent;
 
-            dllEvent.m_ulDllErrorEvents = EPL_DLL_ERR_MN_CN_LOSS_PRES;
-            dllEvent.m_uiNodeId = pIntNodeInfo->nodeId;
+            dllEvent.dllErrorEvents = EPL_DLL_ERR_MN_CN_LOSS_PRES;
+            dllEvent.nodeId = pIntNodeInfo->nodeId;
             ret = errhndk_postError(&dllEvent);
             if (ret != kErrorOk)
                 return ret;
@@ -207,11 +207,11 @@ tOplkError dllk_issueLossOfPres(UINT nodeId_p)
             nodeOpParam.opNodeType = kDllNodeOpTypeIsochronous;
             nodeOpParam.nodeId = pIntNodeInfo->nodeId;
 
-            event.m_EventSink = kEplEventSinkDllkCal;
-            event.m_EventType = kEplEventTypeDllkDelNode;
-            // $$$ d.k. set Event.m_NetTime to current time
-            event.m_uiSize = sizeof (nodeOpParam);
-            event.m_pArg = &nodeOpParam;
+            event.eventSink = kEventSinkDllkCal;
+            event.eventType = kEventTypeDllkDelNode;
+            // $$$ d.k. set Event.netTime to current time
+            event.eventArgSize = sizeof (nodeOpParam);
+            event.pEventArg = &nodeOpParam;
             eventk_postEvent(&event);
         }
     }
@@ -241,10 +241,10 @@ tOplkError dllk_postEvent(tEventType eventType_p)
     tOplkError              ret;
     tEvent                  event;
 
-    event.m_EventSink = kEplEventSinkDllk;
-    event.m_EventType = eventType_p;
-    event.m_uiSize = 0;
-    event.m_pArg = NULL;
+    event.eventSink = kEventSinkDllk;
+    event.eventType = eventType_p;
+    event.eventArgSize = 0;
+    event.pEventArg = NULL;
     ret = eventk_postEvent(&event);
     return ret;
 }
@@ -266,10 +266,10 @@ tOplkError controlPdokcalSync (BOOL fEnable_p)
     tEvent event;
     BOOL fEnable = fEnable_p;
 
-    event.m_EventSink = kEplEventSinkPdokCal;
-    event.m_EventType = kEplEventTypePdokControlSync;
-    event.m_pArg = &fEnable;
-    event.m_uiSize = sizeof(fEnable);
+    event.eventSink = kEventSinkPdokCal;
+    event.eventType = kEventTypePdokControlSync;
+    event.pEventArg = &fEnable;
+    event.eventArgSize = sizeof(fEnable);
 
     return eventk_postEvent(&event);
 }
@@ -550,7 +550,7 @@ static tOplkError processNmtEvent(tEvent * pEvent_p)
     tNmtEvent*      pNmtEvent;
     tNmtState       NmtState;
 
-    pNmtEvent = (tNmtEvent*) pEvent_p->m_pArg;
+    pNmtEvent = (tNmtEvent*) pEvent_p->pEventArg;
 
     switch (*pNmtEvent)
     {

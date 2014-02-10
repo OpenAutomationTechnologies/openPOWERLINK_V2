@@ -548,11 +548,11 @@ tOplkError sdoseq_processEvent(tEvent* pEvent_p)
     if(pEvent_p == NULL)
         return kErrorSdoSeqInvalidEvent;
 
-    if(pEvent_p->m_EventType != kEplEventTypeTimer)
+    if(pEvent_p->eventType != kEventTypeTimer)
         return kErrorSdoSeqInvalidEvent;
 
     // get timer handle
-    pTimerEventArg = (tTimerEventArg*)pEvent_p->m_pArg;
+    pTimerEventArg = (tTimerEventArg*)pEvent_p->pEventArg;
     timerHdl = pTimerEventArg->timerHdl;
     // get pointer to intern control structure of connection
     if (pTimerEventArg->m_Arg.pValue == NULL)
@@ -1924,7 +1924,7 @@ static tOplkError setTimer(tSdoSeqCon* pSdoSeqCon_p, ULONG timeout_p)
     tOplkError          ret;
     tTimerArg           timerArg;
 
-    timerArg.eventSink = kEplEventSinkSdoAsySeq;
+    timerArg.eventSink = kEventSinkSdoAsySeq;
     timerArg.m_Arg.pValue = pSdoSeqCon_p;
 
     if(pSdoSeqCon_p->timerHandle == 0)

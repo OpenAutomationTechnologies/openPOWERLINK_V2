@@ -980,17 +980,17 @@ static tOplkError processUserEvent(tEvent* pEvent_p)
 
     ret = kErrorOk;
 
-    switch(pEvent_p->m_EventType)
+    switch(pEvent_p->eventType)
     {
         // error event
-        case kEplEventTypeError:
-            pEventError = (tEventError*) pEvent_p->m_pArg;
-            switch (pEventError->m_EventSource)
+        case kEventTypeError:
+            pEventError = (tEventError*) pEvent_p->pEventArg;
+            switch (pEventError->eventSource)
             {
                 // treat the errors from the following sources as critical
-                case kEplEventSourceEventk:
-                case kEplEventSourceEventu:
-                case kEplEventSourceDllk:
+                case kEventSourceEventk:
+                case kEventSourceEventu:
+                case kEventSourceDllk:
                     eventType = kOplkApiEventCriticalError;
                     // halt the stack by entering NMT state Off
                     ret = nmtu_postNmtEvent(kNmtEventCriticalError);
@@ -1009,20 +1009,20 @@ static tOplkError processUserEvent(tEvent* pEvent_p)
             break;
 
         // Error history entry event
-        case kEplEventTypeHistoryEntry:
-            if (pEvent_p->m_uiSize != sizeof(tErrHistoryEntry))
+        case kEventTypeHistoryEntry:
+            if (pEvent_p->eventArgSize != sizeof(tErrHistoryEntry))
             {
                 ret = kErrorEventWrongSize;
                 break;
             }
             eventType = kOplkApiEventHistoryEntry;
-            ret = ctrlu_callUserEventCallback(eventType, (tOplkApiEventArg*)pEvent_p->m_pArg);
+            ret = ctrlu_callUserEventCallback(eventType, (tOplkApiEventArg*)pEvent_p->pEventArg);
             break;
 
         // user-defined event
-        case kEplEventTypeApiUserDef:
+        case kEventTypeApiUserDef:
             eventType = kOplkApiEventUserDef;
-            apiEventArg.pUserArg = *(void**)pEvent_p->m_pArg;
+            apiEventArg.pUserArg = *(void**)pEvent_p->pEventArg;
             ret = ctrlu_callUserEventCallback(eventType, &apiEventArg);
             break;
 

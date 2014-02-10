@@ -181,9 +181,9 @@ tOplkError eventucal_postKernelEvent (tEvent *pEvent_p)
 {
     tOplkError      ret;
     /*TRACE("U2K type:%s(%d) sink:%s(%d) size:%d!\n",
-                   debugstr_getEventTypeStr(pEvent_p->m_EventType), pEvent_p->m_EventType,
-                   debugstr_getEventSinkStr(pEvent_p->m_EventSink), pEvent_p->m_EventSink,
-                   pEvent_p->m_uiSize);*/
+                   debugstr_getEventTypeStr(pEvent_p->eventType), pEvent_p->eventType,
+                   debugstr_getEventSinkStr(pEvent_p->eventSink), pEvent_p->eventSink,
+                   pEvent_p->eventArgSize);*/
 
     target_enableGlobalInterrupt(FALSE);
 
@@ -216,9 +216,9 @@ tOplkError eventucal_postUserEvent (tEvent *pEvent_p)
     tOplkError      ret;
 
     /*TRACE("UINT  type:%s(%d) sink:%s(%d) size:%d!\n",
-                   debugstr_getEventTypeStr(pEvent_p->m_EventType), pEvent_p->m_EventType,
-                   debugstr_getEventSinkStr(pEvent_p->m_EventSink), pEvent_p->m_EventSink,
-                   pEvent_p->m_uiSize);*/
+                   debugstr_getEventTypeStr(pEvent_p->eventType), pEvent_p->eventType,
+                   debugstr_getEventSinkStr(pEvent_p->eventSink), pEvent_p->eventSink,
+                   pEvent_p->eventArgSize);*/
     ret = eventu_process(pEvent_p);
 
     return ret;

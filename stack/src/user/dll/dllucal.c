@@ -202,16 +202,16 @@ tOplkError dllucal_process(tEvent * pEvent_p)
     tOplkError   ret = kErrorOk;
     tFrameInfo   *pFrameInfo = NULL;
 
-    if (pEvent_p->m_EventType == kEplEventTypeAsndRx)
+    if (pEvent_p->eventType == kEventTypeAsndRx)
     {
 #if DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS == FALSE
         tFrameInfo   FrameInfo;
 
-        FrameInfo.pFrame = (tPlkFrame*) pEvent_p->m_pArg;
-        FrameInfo.frameSize = pEvent_p->m_uiSize;
+        FrameInfo.pFrame = (tPlkFrame*) pEvent_p->pEventArg;
+        FrameInfo.frameSize = pEvent_p->eventArgSize;
         pFrameInfo = &FrameInfo;
 #else
-        pFrameInfo = (tFrameInfo*) pEvent_p->m_pArg;
+        pFrameInfo = (tFrameInfo*) pEvent_p->pEventArg;
 #endif
 
         ret = HandleRxAsndFrame(pFrameInfo);
@@ -240,10 +240,10 @@ tOplkError dllucal_config(tDllConfigParam * pDllConfigParam_p)
     tOplkError  ret = kErrorOk;
     tEvent      event;
 
-    event.m_EventSink = kEplEventSinkDllkCal;
-    event.m_EventType = kEplEventTypeDllkConfig;
-    event.m_pArg = pDllConfigParam_p;
-    event.m_uiSize = sizeof (*pDllConfigParam_p);
+    event.eventSink = kEventSinkDllkCal;
+    event.eventType = kEventTypeDllkConfig;
+    event.pEventArg = pDllConfigParam_p;
+    event.eventArgSize = sizeof (*pDllConfigParam_p);
     ret = eventu_postEvent(&event);
 
     return ret;
@@ -268,10 +268,10 @@ tOplkError dllucal_setIdentity(tDllIdentParam * pDllIdentParam_p)
     tOplkError  ret = kErrorOk;
     tEvent      event;
 
-    event.m_EventSink = kEplEventSinkDllkCal;
-    event.m_EventType = kEplEventTypeDllkIdentity;
-    event.m_pArg = pDllIdentParam_p;
-    event.m_uiSize = sizeof (*pDllIdentParam_p);
+    event.eventSink = kEventSinkDllkCal;
+    event.eventType = kEventTypeDllkIdentity;
+    event.pEventArg = pDllIdentParam_p;
+    event.eventArgSize = sizeof (*pDllIdentParam_p);
     ret = eventu_postEvent(&event);
     return ret;
 }
@@ -362,11 +362,11 @@ tOplkError dllucal_sendAsyncFrame(tFrameInfo * pFrameInfo_p,
     }
 
     // post event to DLL
-    event.m_EventSink = kEplEventSinkDllk;
-    event.m_EventType = kEplEventTypeDllkFillTx;
-    EPL_MEMSET(&event.m_NetTime, 0x00, sizeof(event.m_NetTime));
-    event.m_pArg = &priority_p;
-    event.m_uiSize = sizeof(priority_p);
+    event.eventSink = kEventSinkDllk;
+    event.eventType = kEventTypeDllkFillTx;
+    EPL_MEMSET(&event.netTime, 0x00, sizeof(event.netTime));
+    event.pEventArg = &priority_p;
+    event.eventArgSize = sizeof(priority_p);
     ret = eventu_postEvent(&event);
 Exit:
     return ret;
@@ -401,13 +401,13 @@ tOplkError dllucal_issueRequest(tDllReqServiceId service_p, UINT nodeId_p,
     {
         case kDllReqServiceIdent:
         case kDllReqServiceStatus:
-            event.m_EventSink = kEplEventSinkDllkCal;
-            event.m_EventType = kEplEventTypeDllkIssueReq;
+            event.eventSink = kEventSinkDllkCal;
+            event.eventType = kEventTypeDllkIssueReq;
             issueReq.service = service_p;
             issueReq.nodeId = nodeId_p;
             issueReq.soaFlag1 = soaFlag1_p;
-            event.m_pArg = &issueReq;
-            event.m_uiSize = sizeof (issueReq);
+            event.pEventArg = &issueReq;
+            event.eventArgSize = sizeof (issueReq);
             ret = eventu_postEvent(&event);
             break;
 
@@ -453,7 +453,7 @@ tOplkError dllucal_issueSyncRequest(tDllSyncRequest* pSyncRequest_p, UINT size_p
 \brief  Configure the specified node
 
 The function configures the specified node by sending a
-kEplEventTypeDllkConfigNode event to the kernel DLL CAL module.
+kEventTypeDllkConfigNode event to the kernel DLL CAL module.
 
 \param  pNodeInfo_p             Pointer to node info structure.
 
@@ -467,10 +467,10 @@ tOplkError dllucal_configNode(tDllNodeInfo* pNodeInfo_p)
     tOplkError  ret = kErrorOk;
     tEvent      event;
 
-    event.m_EventSink = kEplEventSinkDllkCal;
-    event.m_EventType = kEplEventTypeDllkConfigNode;
-    event.m_pArg = pNodeInfo_p;
-    event.m_uiSize = sizeof (*pNodeInfo_p);
+    event.eventSink = kEventSinkDllkCal;
+    event.eventType = kEventTypeDllkConfigNode;
+    event.pEventArg = pNodeInfo_p;
+    event.eventArgSize = sizeof (*pNodeInfo_p);
 
     ret = eventu_postEvent(&event);
 
@@ -483,7 +483,7 @@ tOplkError dllucal_configNode(tDllNodeInfo* pNodeInfo_p)
 \brief  Add a node to the isochronous phase
 
 The function adds a node to the isonchronous phase by sending a
-kEplEventTypeDllkAddNode event to the kernel DLL CAL module.
+kEventTypeDllkAddNode event to the kernel DLL CAL module.
 
 \param  pNodeOpParam_p          Pointer to node info structure
 
@@ -497,10 +497,10 @@ tOplkError dllucal_addNode(tDllNodeOpParam* pNodeOpParam_p)
     tOplkError  ret = kErrorOk;
     tEvent      event;
 
-    event.m_EventSink = kEplEventSinkDllkCal;
-    event.m_EventType = kEplEventTypeDllkAddNode;
-    event.m_pArg = pNodeOpParam_p;
-    event.m_uiSize = sizeof (*pNodeOpParam_p);
+    event.eventSink = kEventSinkDllkCal;
+    event.eventType = kEventTypeDllkAddNode;
+    event.pEventArg = pNodeOpParam_p;
+    event.eventArgSize = sizeof (*pNodeOpParam_p);
 
     ret = eventu_postEvent(&event);
 
@@ -512,7 +512,7 @@ tOplkError dllucal_addNode(tDllNodeOpParam* pNodeOpParam_p)
 \brief  Remove a node from the isochronous phase
 
 The function removes the specified node from the isochronous phase by sending
-a kEplEventTypeDllkDelNode event to the kernel DLL CAL module.
+a kEventTypeDllkDelNode event to the kernel DLL CAL module.
 
 \param  pNodeOpParam_p          Pointer to node	info structure
 
@@ -526,10 +526,10 @@ tOplkError dllucal_deleteNode(tDllNodeOpParam* pNodeOpParam_p)
     tOplkError  ret = kErrorOk;
     tEvent      event;
 
-    event.m_EventSink = kEplEventSinkDllkCal;
-    event.m_EventType = kEplEventTypeDllkDelNode;
-    event.m_pArg = pNodeOpParam_p;
-    event.m_uiSize = sizeof (*pNodeOpParam_p);
+    event.eventSink = kEventSinkDllkCal;
+    event.eventType = kEventTypeDllkDelNode;
+    event.pEventArg = pNodeOpParam_p;
+    event.eventArgSize = sizeof (*pNodeOpParam_p);
 
     ret = eventu_postEvent(&event);
 
@@ -561,12 +561,12 @@ static tOplkError SetAsndServiceIdFilter(tDllAsndServiceId serviceId_p,
     tEvent                      event;
     tDllCalAsndServiceIdFilter  servFilter;
 
-    event.m_EventSink = kEplEventSinkDllkCal;
-    event.m_EventType = kEplEventTypeDllkServFilter;
+    event.eventSink = kEventSinkDllkCal;
+    event.eventType = kEventTypeDllkServFilter;
     servFilter.serviceId = serviceId_p;
     servFilter.filter = filter_p;
-    event.m_pArg = &servFilter;
-    event.m_uiSize = sizeof (servFilter);
+    event.pEventArg = &servFilter;
+    event.eventArgSize = sizeof (servFilter);
     ret = eventu_postEvent(&event);
 
     return ret;
@@ -610,10 +610,10 @@ static tOplkError HandleRxAsndFrame(tFrameInfo *pFrameInfo_p)
 Exit:
 #if DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS != FALSE
     // call free function for Asnd frame
-    event.m_EventSink = kEplEventSinkDllkCal;
-    event.m_EventType = kEplEventTypeReleaseRxFrame;
-    event.m_uiSize    = sizeof(tFrameInfo);
-    event.m_pArg      = pFrameInfo_p;
+    event.eventSink = kEventSinkDllkCal;
+    event.eventType = kEventTypeReleaseRxFrame;
+    event.eventArgSize    = sizeof(tFrameInfo);
+    event.pEventArg      = pFrameInfo_p;
 
     eventRet = eventu_postEvent(&event);
 

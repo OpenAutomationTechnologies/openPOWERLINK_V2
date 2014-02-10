@@ -259,10 +259,10 @@ tEdrvReleaseRxBuffer dllk_processFrameReceived(tEdrvRxBuffer * pRxBuffer_p)
             ((nmtState <= kNmtCsPreOperational1) || (nmtEvent != kNmtEventDllCePres)))
         {   // NMT state machine is not interested in ASnd frames and PRes frames when not CsNotActive or CsPreOp1
             // inform NMT module
-            event.m_EventSink = kEplEventSinkNmtk;
-            event.m_EventType = kEplEventTypeNmtEvent;
-            event.m_uiSize = sizeof (nmtEvent);
-            event.m_pArg = &nmtEvent;
+            event.eventSink = kEventSinkNmtk;
+            event.eventType = kEventTypeNmtEvent;
+            event.eventArgSize = sizeof (nmtEvent);
+            event.pEventArg = &nmtEvent;
             ret = eventk_postEvent(&event);
         }
     }
@@ -275,7 +275,7 @@ Exit:
         BENCHMARK_MOD_02_TOGGLE(7);
         arg = dllkInstance_g.dllState | (nmtEvent << 8);
         // Error event for API layer
-        ret = eventk_postError(kEplEventSourceDllk, ret, sizeof(arg), &arg);
+        ret = eventk_postError(kEventSourceDllk, ret, sizeof(arg), &arg);
     }
     BENCHMARK_MOD_02_RESET(3);
     TGT_DLLK_LEAVE_CRITICAL_SECTION()
@@ -326,11 +326,11 @@ void dllk_processTransmittedNmtReq(tEdrvTxBuffer * pTxBuffer_p)
         if ((ami_getUint8Le(&pTxFrame->messageType) == (UINT8) kMsgTypeAsnd) &&
             (ami_getUint8Le(&pTxFrame->data.asnd.serviceId) == (UINT8) kDllAsndNmtCommand))
         {   // post event directly to NmtMnu module
-            event.m_EventSink = kEplEventSinkNmtMnu;
-            event.m_EventType = kEplEventTypeNmtMnuNmtCmdSent;
-            event.m_uiSize = pTxBuffer_p->txFrameSize;
-            event.m_pArg = pTxFrame;
-            //PRINTF("%s TxB=%p, TxF=%p, s=%u\n", __func__, pTxBuffer_p, event.m_pArg, event.m_uiSize);
+            event.eventSink = kEventSinkNmtMnu;
+            event.eventType = kEventTypeNmtMnuNmtCmdSent;
+            event.eventArgSize = pTxBuffer_p->txFrameSize;
+            event.pEventArg = pTxFrame;
+            //PRINTF("%s TxB=%p, TxF=%p, s=%u\n", __func__, pTxBuffer_p, event.pEventArg, event.eventArgSize);
             ret = eventk_postEvent(&event);
             if (ret != kErrorOk)
                 goto Exit;
@@ -344,11 +344,11 @@ void dllk_processTransmittedNmtReq(tEdrvTxBuffer * pTxBuffer_p)
 
     // post event to DLL
     priority = kDllAsyncReqPrioNmt;
-    event.m_EventSink = kEplEventSinkDllk;
-    event.m_EventType = kEplEventTypeDllkFillTx;
-    EPL_MEMSET(&event.m_NetTime, 0x00, sizeof(event.m_NetTime));
-    event.m_pArg = &priority;
-    event.m_uiSize = sizeof(priority);
+    event.eventSink = kEventSinkDllk;
+    event.eventType = kEventTypeDllkFillTx;
+    EPL_MEMSET(&event.netTime, 0x00, sizeof(event.netTime));
+    event.pEventArg = &priority;
+    event.eventArgSize = sizeof(priority);
     ret = eventk_postEvent(&event);
     if (ret != kErrorOk)
         goto Exit;
@@ -358,7 +358,7 @@ Exit:
     {
         BENCHMARK_MOD_02_TOGGLE(7);
         arg = dllkInstance_g.dllState | (handle << 16);
-        ret = eventk_postError(kEplEventSourceDllk, ret, sizeof(arg), &arg);
+        ret = eventk_postError(kEventSourceDllk, ret, sizeof(arg), &arg);
     }
 
     TGT_DLLK_LEAVE_CRITICAL_SECTION()
@@ -400,11 +400,11 @@ void dllk_processTransmittedNonEpl(tEdrvTxBuffer * pTxBuffer_p)
 
     // post event to DLL
     priority = kDllAsyncReqPrioGeneric;
-    event.m_EventSink = kEplEventSinkDllk;
-    event.m_EventType = kEplEventTypeDllkFillTx;
-    EPL_MEMSET(&event.m_NetTime, 0x00, sizeof(event.m_NetTime));
-    event.m_pArg = &priority;
-    event.m_uiSize = sizeof(priority);
+    event.eventSink = kEventSinkDllk;
+    event.eventType = kEventTypeDllkFillTx;
+    EPL_MEMSET(&event.netTime, 0x00, sizeof(event.netTime));
+    event.pEventArg = &priority;
+    event.eventArgSize = sizeof(priority);
     ret = eventk_postEvent(&event);
 
 Exit:
@@ -412,7 +412,7 @@ Exit:
     {
         BENCHMARK_MOD_02_TOGGLE(7);
         arg = dllkInstance_g.dllState | (handle << 16);
-        ret = eventk_postError(kEplEventSourceDllk, ret, sizeof(arg), &arg);
+        ret = eventk_postError(kEventSourceDllk, ret, sizeof(arg), &arg);
     }
     TGT_DLLK_LEAVE_CRITICAL_SECTION()
     return;
@@ -458,7 +458,7 @@ Exit:
     {
         BENCHMARK_MOD_02_TOGGLE(7);
         arg = dllkInstance_g.dllState | (handle << 16);
-        ret = eventk_postError(kEplEventSourceDllk, ret, sizeof(arg), &arg);
+        ret = eventk_postError(kEventSourceDllk, ret, sizeof(arg), &arg);
     }
     TGT_DLLK_LEAVE_CRITICAL_SECTION()
     return;
@@ -576,7 +576,7 @@ void dllk_processTransmittedSoa(tEdrvTxBuffer * pTxBuffer_p)
             goto Exit;
 
         // forward event to ErrorHandler and DLLk module
-        ret = dllk_postEvent(kEplEventTypeDllkCycleFinish);
+        ret = dllk_postEvent(kEventTypeDllkCycleFinish);
         if (ret != kErrorOk)
             goto Exit;
     }
@@ -587,7 +587,7 @@ void dllk_processTransmittedSoa(tEdrvTxBuffer * pTxBuffer_p)
         (dllkInstance_g.fSyncProcessed == FALSE))
     {   // cyclic state is active, so preprocessing is necessary
         dllkInstance_g.fSyncProcessed = TRUE;
-        ret = dllk_postEvent(kEplEventTypeSync);
+        ret = dllk_postEvent(kEventTypeSync);
         if (ret != kErrorOk)
             goto Exit;
     }
@@ -597,7 +597,7 @@ Exit:
     {
         BENCHMARK_MOD_02_TOGGLE(7);
         arg = dllkInstance_g.dllState | (handle << 16);
-        ret = eventk_postError(kEplEventSourceDllk, ret, sizeof(arg), &arg);
+        ret = eventk_postError(kEventSourceDllk, ret, sizeof(arg), &arg);
     }
     TGT_DLLK_LEAVE_CRITICAL_SECTION()
     return;
@@ -1393,9 +1393,9 @@ static tOplkError processReceivedPreq(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
             {   // format error
                 tEventDllError  dllEvent;
 
-                dllEvent.m_ulDllErrorEvents = EPL_DLL_ERR_INVALID_FORMAT;
-                dllEvent.m_uiNodeId = ami_getUint8Le(&pFrame->srcNodeId);
-                dllEvent.m_NmtState = nmtState_p;
+                dllEvent.dllErrorEvents = EPL_DLL_ERR_INVALID_FORMAT;
+                dllEvent.nodeId = ami_getUint8Le(&pFrame->srcNodeId);
+                dllEvent.nmtState = nmtState_p;
                 errhndk_postError(&dllEvent);
                 goto Exit;
             }
@@ -1534,7 +1534,7 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
                 && (dllkInstance_g.dllConfigParam.fSyncOnPrcNode != FALSE))
             {
                 dllkInstance_g.fSyncProcessed = TRUE;
-                if ((ret = dllk_postEvent(kEplEventTypeSync)) != kErrorOk)
+                if ((ret = dllk_postEvent(kEventTypeSync)) != kErrorOk)
                     goto Exit;
             }
         }
@@ -1549,7 +1549,7 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
             && (nodeId > dllkInstance_g.dllConfigParam.syncNodeId))
         {
             dllkInstance_g.fSyncProcessed = TRUE;
-            if ((ret = dllk_postEvent(kEplEventTypeSync)) != kErrorOk)
+            if ((ret = dllk_postEvent(kEventTypeSync)) != kErrorOk)
                 goto Exit;
         }
 
@@ -1572,10 +1572,10 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
             if (pIntNodeInfo->fSoftDelete == FALSE)
             {   // normal isochronous CN
                 heartbeatEvent.nodeId = nodeId;
-                event.m_EventSink = kEplEventSinkNmtMnu;
-                event.m_EventType = kEplEventTypeHeartbeat;
-                event.m_uiSize = sizeof (heartbeatEvent);
-                event.m_pArg = &heartbeatEvent;
+                event.eventSink = kEventSinkNmtMnu;
+                event.eventType = kEventTypeHeartbeat;
+                event.eventArgSize = sizeof (heartbeatEvent);
+                event.pEventArg = &heartbeatEvent;
             }
             else
             {   // CN shall be deleted softly, so remove it now, without issuing any error
@@ -1584,11 +1584,11 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
                 nodeOpParam.opNodeType = kDllNodeOpTypeIsochronous;
                 nodeOpParam.nodeId = pIntNodeInfo->nodeId;
 
-                event.m_EventSink = kEplEventSinkDllkCal;
-                event.m_EventType = kEplEventTypeDllkDelNode;
-                // $$$ d.k. set Event.m_NetTime to current time
-                event.m_uiSize = sizeof (nodeOpParam);
-                event.m_pArg = &nodeOpParam;
+                event.eventSink = kEventSinkDllkCal;
+                event.eventType = kEventTypeDllkDelNode;
+                // $$$ d.k. set Event.netTime to current time
+                event.eventArgSize = sizeof (nodeOpParam);
+                event.pEventArg = &nodeOpParam;
             }
 
             if ((ret = eventk_postEvent(&event)) != kErrorOk)
@@ -1628,9 +1628,9 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
 #endif
             {   // This PRes frame was expected, but it is too large
                 // otherwise it will be silently ignored
-                DllEvent.m_ulDllErrorEvents = EPL_DLL_ERR_INVALID_FORMAT;
-                DllEvent.m_uiNodeId = nodeId;
-                DllEvent.m_NmtState = nmtState_p;
+                DllEvent.dllErrorEvents = EPL_DLL_ERR_INVALID_FORMAT;
+                DllEvent.nodeId = nodeId;
+                DllEvent.nmtState = nmtState_p;
                 ret = errhndk_postError(&DllEvent);
                 if (ret != kErrorOk)
                     goto Exit;
@@ -1668,7 +1668,7 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
             (nodeId == dllkInstance_g.dllConfigParam.syncNodeId))
         {
             dllkInstance_g.fSyncProcessed = TRUE;
-            ret = dllk_postEvent(kEplEventTypeSync);
+            ret = dllk_postEvent(kEventTypeSync);
         }
     }
 #endif
@@ -1722,7 +1722,7 @@ static tOplkError processReceivedSoc(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
 
 #if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_SOC)
         // trigger synchronous task
-        if ((ret = dllk_postEvent(kEplEventTypeSync)) != kErrorOk)
+        if ((ret = dllk_postEvent(kEventTypeSync)) != kErrorOk)
             return ret;
 #elif (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
         ret = synctimer_syncTriggerAtTimeStamp(pRxBuffer_p->rxTimeStamp);
@@ -1830,7 +1830,7 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
                     }
 
                     // signal update of StatusRes
-                    ret = dllk_postEvent(kEplEventTypeDllkFlag1);
+                    ret = dllk_postEvent(kEventTypeDllkFlag1);
                     if (ret != kErrorOk)
                         goto Exit;
 
@@ -2052,7 +2052,7 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
 #if EPL_DLL_PRES_READY_AFTER_SOA != FALSE
     if (pTxBuffer == NULL)
     {   // signal process function readiness of PRes frame
-        ret = postEvent(kEplEventTypeDllkPresReady);
+        ret = postEvent(kEventTypeDllkPresReady);
         if (ret != kErrorOk)
             goto Exit;
     }

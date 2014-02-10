@@ -249,9 +249,9 @@ tOplkError eventkcal_postUserEvent (tEvent *pEvent_p)
     tOplkError      ret = kErrorOk;
 
     /*TRACE("K2U  type:%s(%d) sink:%s(%d) size:%d!\n",
-           debugstr_getEventTypeStr(pEvent_p->m_EventType), pEvent_p->m_EventType,
-           debugstr_getEventSinkStr(pEvent_p->m_EventSink), pEvent_p->m_EventSink,
-           pEvent_p->m_uiSize);*/
+           debugstr_getEventTypeStr(pEvent_p->eventType), pEvent_p->eventType,
+           debugstr_getEventSinkStr(pEvent_p->eventSink), pEvent_p->eventSink,
+           pEvent_p->eventArgSize);*/
 
     ret = eventkcal_postEventCircbuf(kEventQueueK2U, pEvent_p);
 
@@ -280,9 +280,9 @@ tOplkError eventkcal_postKernelEvent (tEvent *pEvent_p)
     tOplkError      ret = kErrorOk;
 
     /*TRACE("KINT  type:%s(%d) sink:%s(%d) size:%d!\n",
-           debugstr_getEventTypeStr(pEvent_p->m_EventType), pEvent_p->m_EventType,
-           debugstr_getEventSinkStr(pEvent_p->m_EventSink), pEvent_p->m_EventSink,
-           pEvent_p->m_uiSize);*/
+           debugstr_getEventTypeStr(pEvent_p->eventType), pEvent_p->eventType,
+           debugstr_getEventSinkStr(pEvent_p->eventSink), pEvent_p->eventSink,
+           pEvent_p->eventArgSize);*/
 
     ret = eventkcal_postEventCircbuf(kEventQueueKInt, pEvent_p);
 
@@ -328,50 +328,50 @@ int eventkcal_postEventFromUser(unsigned long arg)
     if (copy_from_user(&event, (const void __user *)arg, sizeof(tEvent)))
         return -EFAULT;
 
-    if (event.m_uiSize != 0)
+    if (event.eventArgSize != 0)
     {
-        order = get_order(event.m_uiSize);
+        order = get_order(event.eventArgSize);
         pArg = (BYTE *)__get_free_pages(GFP_KERNEL, order);
 
         if (!pArg)
             return -EIO;
 
-        //TRACE("%s() allocated %d Bytes at %p\n", __func__, event.m_uiSize, pArg);
-        if (copy_from_user(pArg, (const void __user *)event.m_pArg, event.m_uiSize))
+        //TRACE("%s() allocated %d Bytes at %p\n", __func__, event.eventArgSize, pArg);
+        if (copy_from_user(pArg, (const void __user *)event.pEventArg, event.eventArgSize))
         {
             free_pages((ULONG)pArg, order);
             return -EFAULT;
         }
-        event.m_pArg = pArg;
+        event.pEventArg = pArg;
     }
 
-    switch(event.m_EventSink)
+    switch(event.eventSink)
     {
-        case kEplEventSinkSync:
-        case kEplEventSinkNmtk:
-        case kEplEventSinkDllk:
-        case kEplEventSinkDllkCal:
-        case kEplEventSinkPdok:
-        case kEplEventSinkPdokCal:
-        case kEplEventSinkErrk:
+        case kEventSinkSync:
+        case kEventSinkNmtk:
+        case kEventSinkDllk:
+        case kEventSinkDllkCal:
+        case kEventSinkPdok:
+        case kEventSinkPdokCal:
+        case kEventSinkErrk:
             /*TRACE("U2K  type:%s(%d) sink:%s(%d) size:%d!\n",
-                   debugstr_getEventTypeStr(event.m_EventType), event.m_EventType,
-                   debugstr_getEventSinkStr(event.m_EventSink), event.m_EventSink,
-                   event.m_uiSize);*/
+                   debugstr_getEventTypeStr(event.eventType), event.eventType,
+                   debugstr_getEventSinkStr(event.eventSink), event.eventSink,
+                   event.eventArgSize);*/
             ret = eventkcal_postEventCircbuf(kEventQueueU2K, &event);
             break;
 
-        case kEplEventSinkNmtMnu:
-        case kEplEventSinkNmtu:
-        case kEplEventSinkSdoAsySeq:
-        case kEplEventSinkApi:
-        case kEplEventSinkDlluCal:
-        case kEplEventSinkErru:
-        case kEplEventSinkLedu:
+        case kEventSinkNmtMnu:
+        case kEventSinkNmtu:
+        case kEventSinkSdoAsySeq:
+        case kEventSinkApi:
+        case kEventSinkDlluCal:
+        case kEventSinkErru:
+        case kEventSinkLedu:
             /*TRACE("UINT type:%s(%d) sink:%s(%d) size:%d!\n",
-                   debugstr_getEventTypeStr(event.m_EventType), event.m_EventType,
-                   debugstr_getEventSinkStr(event.m_EventSink), event.m_EventSink,
-                   event.m_uiSize);*/
+                   debugstr_getEventTypeStr(event.eventType), event.eventType,
+                   debugstr_getEventSinkStr(event.eventSink), event.eventSink,
+                   event.eventArgSize);*/
             ret = eventkcal_postEventCircbuf(kEventQueueUInt, &event);
             break;
 
@@ -380,7 +380,7 @@ int eventkcal_postEventFromUser(unsigned long arg)
             break;
     }
 
-    if (event.m_uiSize != 0)
+    if (event.eventArgSize != 0)
         free_pages((ULONG)pArg, order);
 
     return 0;

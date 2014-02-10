@@ -247,38 +247,38 @@ static tOplkError processErrorWarningEvent(tOplkApiEventType EventType_p,
     UNUSED_PARAMETER(pUserArg_p);
 
     console_printlog("Err/Warn: Source = %s (%02X) EplError = %s (0x%03X)\n",
-                debugstr_getEventSourceStr(pInternalError->m_EventSource),
-                pInternalError->m_EventSource,
-                debugstr_getRetValStr(pInternalError->m_EplError),
-                pInternalError->m_EplError);
+                debugstr_getEventSourceStr(pInternalError->eventSource),
+                pInternalError->eventSource,
+                debugstr_getRetValStr(pInternalError->oplkError),
+                pInternalError->oplkError);
 
     FTRACE_MARKER("Err/Warn: Source = %s (%02X) EplError = %s (0x%03X)\n",
-                debugstr_getEventSourceStr(pInternalError->m_EventSource),
-                pInternalError->m_EventSource,
-                debugstr_getRetValStr(pInternalError->m_EplError),
-                pInternalError->m_EplError);
+                debugstr_getEventSourceStr(pInternalError->eventSource),
+                pInternalError->eventSource,
+                debugstr_getRetValStr(pInternalError->oplkError),
+                pInternalError->oplkError);
 
     // check additional argument
-    switch (pInternalError->m_EventSource)
+    switch (pInternalError->eventSource)
     {
-        case kEplEventSourceEventk:
-        case kEplEventSourceEventu:
+        case kEventSourceEventk:
+        case kEventSourceEventu:
             // error occurred within event processing
             // either in kernel or in user part
             console_printlog(" OrgSource = %s %02X\n",
-                     debugstr_getEventSourceStr(pInternalError->m_Arg.m_EventSource),
-                     pInternalError->m_Arg.m_EventSource);
+                     debugstr_getEventSourceStr(pInternalError->errorArg.eventSource),
+                     pInternalError->errorArg.eventSource);
 
             FTRACE_MARKER(" OrgSource = %s %02X\n",
-                     debugstr_getEventSourceStr(pInternalError->m_Arg.m_EventSource),
-                     pInternalError->m_Arg.m_EventSource);
+                     debugstr_getEventSourceStr(pInternalError->errorArg.eventSource),
+                     pInternalError->errorArg.eventSource);
             break;
 
-        case kEplEventSourceDllk:
+        case kEventSourceDllk:
             // error occurred within the data link layer (e.g. interrupt processing)
             // the DWORD argument contains the DLL state and the NMT event
-            console_printlog(" val = %X\n", pInternalError->m_Arg.m_dwArg);
-            FTRACE_MARKER(" val = %X\n", pInternalError->m_Arg.m_dwArg);
+            console_printlog(" val = %X\n", pInternalError->errorArg.uintArg);
+            FTRACE_MARKER(" val = %X\n", pInternalError->errorArg.uintArg);
             break;
 
         default:

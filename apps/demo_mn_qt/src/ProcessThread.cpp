@@ -468,26 +468,26 @@ tOplkError ProcessThread::processErrorWarningEvent(tOplkApiEventType EventType_p
     UNUSED_PARAMETER(pUserArg_p);
 
     sigPrintLog(QString("Err/Warn: Source = %1 (0x%2) EplError = %3 (0x%4)")
-            .arg(debugstr_getEventSourceStr(pInternalError->m_EventSource))
-            .arg(pInternalError->m_EventSource, 2, 16, QLatin1Char('0'))
-            .arg(debugstr_getRetValStr(pInternalError->m_EplError))
-            .arg(pInternalError->m_EplError, 3, 16, QLatin1Char('0')));
+            .arg(debugstr_getEventSourceStr(pInternalError->eventSource))
+            .arg(pInternalError->eventSource, 2, 16, QLatin1Char('0'))
+            .arg(debugstr_getRetValStr(pInternalError->oplkError))
+            .arg(pInternalError->oplkError, 3, 16, QLatin1Char('0')));
 
-    switch (pInternalError->m_EventSource)
+    switch (pInternalError->eventSource)
     {
-        case kEplEventSourceEventk:
-        case kEplEventSourceEventu:
+        case kEventSourceEventk:
+        case kEventSourceEventu:
             // error occurred within event processing
             // either in kernel or in user part
             sigPrintLog(QString(" OrgSource = %1 %2")
-                 .arg(debugstr_getEventSourceStr(pInternalError->m_Arg.m_EventSource))
-                 .arg(pInternalError->m_Arg.m_EventSource, 2, 16, QLatin1Char('0')));
+                 .arg(debugstr_getEventSourceStr(pInternalError->errorArg.eventSource))
+                 .arg(pInternalError->errorArg.eventSource, 2, 16, QLatin1Char('0')));
             break;
 
-        case kEplEventSourceDllk:
+        case kEventSourceDllk:
             // error occurred within the data link layer (e.g. interrupt processing)
             // the DWORD argument contains the DLL state and the NMT event
-            sigPrintLog(QString(" val = %1").arg(pInternalError->m_Arg.m_dwArg, 0, 16));
+            sigPrintLog(QString(" val = %1").arg(pInternalError->errorArg.uintArg, 0, 16));
             break;
 
         default:

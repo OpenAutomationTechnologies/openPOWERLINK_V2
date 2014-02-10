@@ -686,7 +686,7 @@ static tOplkError cbSdoCon(tSdoComFinished* pSdoComFinished_p)
         case kCfmStateWaitRestore:
             if (pSdoComFinished_p->sdoComConState == kEplSdoComTransferFinished)
             {   // configuration successfully restored
-                DEBUG_LVL_CFM_TRACE("\nCN%x - Restore Complete. Resetting Node...\n", pNodeInfo->eventCnProgress.m_uiNodeId);
+                DEBUG_LVL_CFM_TRACE("\nCN%x - Restore Complete. Resetting Node...\n", pNodeInfo->eventCnProgress.nodeId);
                 // send NMT command reset node to activate the original configuration
                 ret = finishConfig(pNodeInfo, kNmtNodeCommandConfRestored);
             }

@@ -184,9 +184,9 @@ tOplkError errhndk_process(tEvent* pEvent_p)
 
     ret = kErrorOk;
 
-    switch(pEvent_p->m_EventType)
+    switch(pEvent_p->eventType)
     {
-        case kEplEventTypeDllError:
+        case kEventTypeDllError:
             ret = handleDllErrors(pEvent_p);
             break;
 
@@ -253,10 +253,10 @@ tOplkError errhndk_postError(tEventDllError* pErrEvent_p)
     tOplkError              Ret;
     tEvent                  Event;
 
-    Event.m_EventSink = kEplEventSinkErrk;
-    Event.m_EventType = kEplEventTypeDllError;
-    Event.m_uiSize = sizeof (tEventDllError);
-    Event.m_pArg = pErrEvent_p;
+    Event.eventSink = kEventSinkErrk;
+    Event.eventType = kEventTypeDllError;
+    Event.eventArgSize = sizeof (tEventDllError);
+    Event.pEventArg = pErrEvent_p;
     Ret = eventk_postEvent(&Event);
 
     return Ret;
@@ -419,11 +419,11 @@ to the NMT.
 static tOplkError handleCnLossSoc(tEvent *pEvent_p)
 {
     tOplkError              ret = kErrorOk;
-    tEventDllError*         pErrorHandlerEvent = (tEventDllError*)pEvent_p->m_pArg;
+    tEventDllError*         pErrorHandlerEvent = (tEventDllError*)pEvent_p->pEventArg;
     UINT32                  threshold, thresholdCnt, cumulativeCnt;
 
     // Check if loss of SoC event occurred
-    if ((pErrorHandlerEvent->m_ulDllErrorEvents & EPL_DLL_ERR_CN_LOSS_SOC) == 0)
+    if ((pErrorHandlerEvent->dllErrorEvents & EPL_DLL_ERR_CN_LOSS_SOC) == 0)
         return kErrorOk;
 
     errhndkcal_getCnLossSocError(&cumulativeCnt, &thresholdCnt, &threshold);
@@ -436,7 +436,7 @@ static tOplkError handleCnLossSoc(tEvent *pEvent_p)
 
         if (thresholdCnt >= threshold)
         {
-            generateHistoryEntry(EPL_E_DLL_LOSS_SOC_TH, pEvent_p->m_NetTime);
+            generateHistoryEntry(EPL_E_DLL_LOSS_SOC_TH, pEvent_p->netTime);
             if (ret != kErrorOk)
             {
                 errhndkcal_setCnLossSocCounters(cumulativeCnt, thresholdCnt);
@@ -470,11 +470,11 @@ to the NMT.
 static tOplkError handleCnLossPreq(tEvent *pEvent_p)
 {
     tOplkError              ret;
-    tEventDllError*         pErrorHandlerEvent = (tEventDllError*)pEvent_p->m_pArg;
+    tEventDllError*         pErrorHandlerEvent = (tEventDllError*)pEvent_p->pEventArg;
     UINT32                  threshold, thresholdCnt, cumulativeCnt;
 
     // check if loss of PReq event occurred
-    if ((pErrorHandlerEvent->m_ulDllErrorEvents & EPL_DLL_ERR_CN_LOSS_PREQ) == 0)
+    if ((pErrorHandlerEvent->dllErrorEvents & EPL_DLL_ERR_CN_LOSS_PREQ) == 0)
         return kErrorOk;
 
     errhndkcal_getCnLossPreqError(&cumulativeCnt, &thresholdCnt, &threshold);
@@ -487,7 +487,7 @@ static tOplkError handleCnLossPreq(tEvent *pEvent_p)
 
         if (thresholdCnt >= threshold)
         {
-            ret = generateHistoryEntry(EPL_E_DLL_LOSS_PREQ_TH, pEvent_p->m_NetTime);
+            ret = generateHistoryEntry(EPL_E_DLL_LOSS_PREQ_TH, pEvent_p->netTime);
             if (ret != kErrorOk)
             {
                 errhndkcal_setCnLossPreqCounters(cumulativeCnt, thresholdCnt);
@@ -517,13 +517,13 @@ appropriate error counter will be decremented.
 //------------------------------------------------------------------------------
 static void handleCorrectPreq(tEvent *pEvent_p)
 {
-    tEventDllError*         pErrorHandlerEvent = (tEventDllError*)pEvent_p->m_pArg;
+    tEventDllError*         pErrorHandlerEvent = (tEventDllError*)pEvent_p->pEventArg;
     UINT32                  thresholdCnt;
 
     errhndkcal_getLossPreqThresholdCnt(&thresholdCnt);
 
     if ((thresholdCnt == 0) ||
-        ((pErrorHandlerEvent->m_ulDllErrorEvents & EPL_DLL_ERR_CN_RECVD_PREQ) == 0))
+        ((pErrorHandlerEvent->dllErrorEvents & EPL_DLL_ERR_CN_RECVD_PREQ) == 0))
         return;
 
     // PReq correctly received
@@ -547,11 +547,11 @@ to the NMT.
 static tOplkError handleCnCrc(tEvent *pEvent_p)
 {
     tOplkError              ret;
-    tEventDllError*         pErrorHandlerEvent = (tEventDllError*)pEvent_p->m_pArg;
+    tEventDllError*         pErrorHandlerEvent = (tEventDllError*)pEvent_p->pEventArg;
     UINT32                  threshold, thresholdCnt, cumulativeCnt;
 
     // Check if CRC error event occurred
-    if ((pErrorHandlerEvent->m_ulDllErrorEvents & EPL_DLL_ERR_CN_CRC) == 0)
+    if ((pErrorHandlerEvent->dllErrorEvents & EPL_DLL_ERR_CN_CRC) == 0)
         return kErrorOk;
 
     errhndkcal_getCnCrcError(&cumulativeCnt, &thresholdCnt, &threshold);
@@ -564,7 +564,7 @@ static tOplkError handleCnCrc(tEvent *pEvent_p)
 
         if (thresholdCnt >= threshold)
         {
-            ret = generateHistoryEntry(EPL_E_DLL_CRC_TH, pEvent_p->m_NetTime);
+            ret = generateHistoryEntry(EPL_E_DLL_CRC_TH, pEvent_p->netTime);
             if (ret != kErrorOk)
             {
                 errhndkcal_setCnLossPreqCounters(cumulativeCnt, thresholdCnt);
@@ -598,35 +598,35 @@ is removed from the isochronous phase.
 static tOplkError handleInvalidFormat(tEvent *pEvent_p)
 {
     tOplkError              ret;
-    tEventDllError*         pErrorHandlerEvent = (tEventDllError*)pEvent_p->m_pArg;
+    tEventDllError*         pErrorHandlerEvent = (tEventDllError*)pEvent_p->pEventArg;
 
     // check if invalid format error occurred (only direct reaction)
-    if ((pErrorHandlerEvent->m_ulDllErrorEvents & EPL_DLL_ERR_INVALID_FORMAT) == 0)
+    if ((pErrorHandlerEvent->dllErrorEvents & EPL_DLL_ERR_INVALID_FORMAT) == 0)
         return kErrorOk;
 
     ret = generateHistoryEntryNodeId(EPL_E_DLL_INVALID_FORMAT,
-                                     pEvent_p->m_NetTime,
-                                     pErrorHandlerEvent->m_uiNodeId);
+                                     pEvent_p->netTime,
+                                     pErrorHandlerEvent->nodeId);
     if (ret != kErrorOk)
         return ret;
 
     BENCHMARK_MOD_02_TOGGLE(7);
 
 #ifdef CONFIG_INCLUDE_NMT_MN
-    if (pErrorHandlerEvent->m_NmtState >= kNmtMsNotActive)
+    if (pErrorHandlerEvent->nmtState >= kNmtMsNotActive)
     {   // MN is active
-        if (pErrorHandlerEvent->m_uiNodeId != 0)
+        if (pErrorHandlerEvent->nodeId != 0)
         {
             tDllNodeOpParam     NodeOpParam;
 
             NodeOpParam.opNodeType = kDllNodeOpTypeIsochronous;
-            NodeOpParam.nodeId =pErrorHandlerEvent->m_uiNodeId;
+            NodeOpParam.nodeId =pErrorHandlerEvent->nodeId;
             // remove node from isochronous phase
             dllk_deleteNode(&NodeOpParam);
 
             // inform NmtMnu module about state change, which shall send
             // NMT command ResetNode to this CN
-            postHeartbeatEvent(pErrorHandlerEvent->m_uiNodeId,
+            postHeartbeatEvent(pErrorHandlerEvent->nodeId,
                                kNmtCsNotActive,
                                EPL_E_DLL_INVALID_FORMAT);
         }
@@ -661,11 +661,11 @@ to the NMT.
 static tOplkError handleMnCrc(tEvent *pEvent_p)
 {
     tOplkError              ret;
-    tEventDllError*         pErrorHandlerEvent = (tEventDllError*)pEvent_p->m_pArg;
+    tEventDllError*         pErrorHandlerEvent = (tEventDllError*)pEvent_p->pEventArg;
     UINT32                  threshold, thresholdCnt, cumulativeCnt;
 
     // check if CRC error event occurred
-    if ((pErrorHandlerEvent->m_ulDllErrorEvents & EPL_DLL_ERR_MN_CRC) == 0)
+    if ((pErrorHandlerEvent->dllErrorEvents & EPL_DLL_ERR_MN_CRC) == 0)
         return kErrorOk;
 
     errhndkcal_getMnCrcError(&cumulativeCnt, &thresholdCnt, &threshold);
@@ -677,7 +677,7 @@ static tOplkError handleMnCrc(tEvent *pEvent_p)
         thresholdCnt += 8;
         if (thresholdCnt >= threshold)
         {
-            ret = generateHistoryEntry(EPL_E_DLL_CRC_TH, pEvent_p->m_NetTime);
+            ret = generateHistoryEntry(EPL_E_DLL_CRC_TH, pEvent_p->netTime);
             if (ret != kErrorOk)
             {
                 errhndkcal_setMnCrcCounters(cumulativeCnt, thresholdCnt);
@@ -707,11 +707,11 @@ static tOplkError handleMnCycTimeExceed(tEvent *pEvent_p)
 {
     tOplkError              ret = kErrorOk;
     tEventDllError*         pErrorHandlerEvent =
-                            (tEventDllError*)pEvent_p->m_pArg;
+                            (tEventDllError*)pEvent_p->pEventArg;
     UINT32                  threshold, thresholdCnt, cumulativeCnt;
 
     // check if cycle time exceeded event occurred
-    if ((pErrorHandlerEvent->m_ulDllErrorEvents & EPL_DLL_ERR_MN_CYCTIMEEXCEED) == 0)
+    if ((pErrorHandlerEvent->dllErrorEvents & EPL_DLL_ERR_MN_CYCTIMEEXCEED) == 0)
         return kErrorOk;
 
     errhndkcal_getMnCycTimeExceedError(&cumulativeCnt, &thresholdCnt,
@@ -726,8 +726,8 @@ static tOplkError handleMnCycTimeExceed(tEvent *pEvent_p)
         if (thresholdCnt >= threshold)
         {
             ret = generateHistoryEntryWithError(EPL_E_DLL_CYCLE_EXCEED_TH,
-                                               pEvent_p->m_NetTime,
-                                               pErrorHandlerEvent->m_EplError);
+                                               pEvent_p->netTime,
+                                               pErrorHandlerEvent->oplkError);
             if (ret != kErrorOk)
             {
                 errhndkcal_setMnCycTimeExceedCounters(thresholdCnt, cumulativeCnt);
@@ -738,8 +738,8 @@ static tOplkError handleMnCycTimeExceed(tEvent *pEvent_p)
         else
         {
             ret = generateHistoryEntryWithError(EPL_E_DLL_CYCLE_EXCEED,
-                                               pEvent_p->m_NetTime,
-                                               pErrorHandlerEvent->m_EplError);
+                                               pEvent_p->netTime,
+                                               pErrorHandlerEvent->oplkError);
             if (ret != kErrorOk)
             {
                 errhndkcal_setMnCycTimeExceedCounters(cumulativeCnt, thresholdCnt);
@@ -770,13 +770,13 @@ static tOplkError handleMnCnLossPres(tEvent *pEvent_p)
     tOplkError              ret;
     UINT                    nodeIdx;
     tDllNodeOpParam         nodeOpParam;
-    tEventDllError*         pErrorHandlerEvent = (tEventDllError*)pEvent_p->m_pArg;
+    tEventDllError*         pErrorHandlerEvent = (tEventDllError*)pEvent_p->pEventArg;
     UINT32                  threshold, thresholdCnt, cumulativeCnt;
 
-    if ((pErrorHandlerEvent->m_ulDllErrorEvents & EPL_DLL_ERR_MN_CN_LOSS_PRES) == 0)
+    if ((pErrorHandlerEvent->dllErrorEvents & EPL_DLL_ERR_MN_CN_LOSS_PRES) == 0)
         return kErrorOk;
 
-    nodeIdx = pErrorHandlerEvent->m_uiNodeId - 1;
+    nodeIdx = pErrorHandlerEvent->nodeId - 1;
 
     //if (nodeIdx >= tabentries(pErrorObjects_p->m_adwMnCnLossPresCumCnt))
     //    return kErrorOk;
@@ -801,8 +801,8 @@ static tOplkError handleMnCnLossPres(tEvent *pEvent_p)
                             ERRORHANDLERK_CN_LOSS_PRES_EVENT_THR;
 
             ret = generateHistoryEntryNodeId(EPL_E_DLL_LOSS_PRES_TH,
-                                             pEvent_p->m_NetTime,
-                                             pErrorHandlerEvent->m_uiNodeId);
+                                             pEvent_p->netTime,
+                                             pErrorHandlerEvent->nodeId);
             if (ret != kErrorOk)
             {
                 errhndkcal_setMnCnLossPresCounters(nodeIdx, cumulativeCnt,
@@ -812,12 +812,12 @@ static tOplkError handleMnCnLossPres(tEvent *pEvent_p)
 
             // remove node from isochronous phase
             nodeOpParam.opNodeType = kDllNodeOpTypeIsochronous;
-            nodeOpParam.nodeId = pErrorHandlerEvent->m_uiNodeId;
+            nodeOpParam.nodeId = pErrorHandlerEvent->nodeId;
             ret = dllk_deleteNode(&nodeOpParam);
 
             // inform NmtMnu module about state change, which shall send
             // NMT command ResetNode to this CN
-            postHeartbeatEvent(pErrorHandlerEvent->m_uiNodeId, kNmtCsNotActive,
+            postHeartbeatEvent(pErrorHandlerEvent->nodeId, kNmtCsNotActive,
                                EPL_E_DLL_LOSS_PRES_TH);
         }
         else
@@ -908,10 +908,10 @@ static tOplkError postHeartbeatEvent(UINT nodeId_p, tNmtState state_p,
     heartbeatEvent.nodeId = nodeId_p;
     heartbeatEvent.nmtState = state_p;
     heartbeatEvent.errorCode = errorCode_p;
-    event.m_EventSink = kEplEventSinkNmtMnu;
-    event.m_EventType = kEplEventTypeHeartbeat;
-    event.m_uiSize = sizeof (heartbeatEvent);
-    event.m_pArg = &heartbeatEvent;
+    event.eventSink = kEventSinkNmtMnu;
+    event.eventType = kEventTypeHeartbeat;
+    event.eventArgSize = sizeof (heartbeatEvent);
+    event.pEventArg = &heartbeatEvent;
     ret = eventk_postEvent(&event);
     return ret;
 }
@@ -933,10 +933,10 @@ static tOplkError postHistoryEntryEvent(tErrHistoryEntry* pHistoryEntry_p)
     tOplkError              ret;
     tEvent                  event;
 
-    event.m_EventSink = kEplEventSinkApi;
-    event.m_EventType = kEplEventTypeHistoryEntry;
-    event.m_uiSize = sizeof (*pHistoryEntry_p);
-    event.m_pArg = pHistoryEntry_p;
+    event.eventSink = kEventSinkApi;
+    event.eventType = kEventTypeHistoryEntry;
+    event.eventArgSize = sizeof (*pHistoryEntry_p);
+    event.pEventArg = pHistoryEntry_p;
     ret = eventk_postEvent(&event);
 
     return ret;
@@ -1057,10 +1057,10 @@ static tOplkError postNmtEvent(tNmtEvent nmtEvent_p)
     tEvent                      event;
 
     nmtEvent = nmtEvent_p;
-    event.m_EventSink = kEplEventSinkNmtk;
-    event.m_EventType = kEplEventTypeNmtEvent;
-    event.m_pArg = &nmtEvent;
-    event.m_uiSize = sizeof (nmtEvent);
+    event.eventSink = kEventSinkNmtk;
+    event.eventType = kEventTypeNmtEvent;
+    event.pEventArg = &nmtEvent;
+    event.eventArgSize = sizeof (nmtEvent);
     ret = eventk_postEvent(&event);
     return ret;
 }

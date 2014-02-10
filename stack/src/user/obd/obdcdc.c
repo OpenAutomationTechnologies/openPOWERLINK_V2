@@ -315,7 +315,7 @@ static tOplkError loadCdcFile(char* pCdcFilename_p)
     if (!IS_FD_VALID(cdcInfo.handle.fdCdcFile))
     {   // error occurred
         errno = (UINT32)errno;
-        ret = eventu_postError(kEplEventSourceObdu, kErrorObdErrnoSet, sizeof(UINT32), &error);
+        ret = eventu_postError(kEventSourceObdu, kErrorObdErrnoSet, sizeof(UINT32), &error);
         return ret;
     }
 
@@ -360,7 +360,7 @@ static tOplkError loadCdcBuffer(UINT8* pCdc_p, size_t cdcSize_p)
     cdcInfo.handle.pNextBuffer = pCdc_p;
     if (cdcInfo.handle.pNextBuffer == NULL)
     {   // error occurred
-        ret = eventu_postError(kEplEventSourceObdu, kErrorObdInvalidDcf, 0, NULL);
+        ret = eventu_postError(kEventSourceObdu, kErrorObdInvalidDcf, 0, NULL);
         goto Exit;
     }
 
@@ -400,7 +400,7 @@ static tOplkError processCdc(tObdCdcInfo* pCdcInfo_p)
 
     if (entriesRemaining == 0)
     {
-        ret = eventu_postError(kEplEventSourceObdu, kErrorObdNoConfigData, 0, NULL);
+        ret = eventu_postError(kEventSourceObdu, kErrorObdNoConfigData, 0, NULL);
         return ret;
     }
 
@@ -427,12 +427,12 @@ static tOplkError processCdc(tObdCdcInfo* pCdcInfo_p)
         {
             tEventObdError          obdError;
 
-            obdError.m_uiIndex = objectIndex;
-            obdError.m_uiSubIndex = objectSubIndex;
+            obdError.index = objectIndex;
+            obdError.subIndex = objectSubIndex;
 
             DEBUG_LVL_OBD_TRACE("%s: Writing object 0x%04X/%u to local OBD failed with 0x%02X\n",
                                  __func__, objectIndex, objectSubIndex, ret);
-            ret = eventu_postError(kEplEventSourceObdu, ret, sizeof(tEventObdError), &obdError);
+            ret = eventu_postError(kEventSourceObdu, ret, sizeof(tEventObdError), &obdError);
             if (ret != kErrorOk)
                 return ret;
         }
@@ -473,7 +473,7 @@ static tOplkError loadNextBuffer(tObdCdcInfo* pCdcInfo_p, size_t bufferSize)
                 pCdcInfo_p->pCurBuffer = EPL_MALLOC(bufferSize);
                 if (pCdcInfo_p->pCurBuffer == NULL)
                 {
-                    ret = eventu_postError(kEplEventSourceObdu, kErrorObdOutOfMemory, 0, NULL);
+                    ret = eventu_postError(kEventSourceObdu, kErrorObdOutOfMemory, 0, NULL);
                     if (ret != kErrorOk)
                         return ret;
                     return kErrorReject;
@@ -486,7 +486,7 @@ static tOplkError loadNextBuffer(tObdCdcInfo* pCdcInfo_p, size_t bufferSize)
                 readSize = read(pCdcInfo_p->handle.fdCdcFile, pBuffer, bufferSize);
                 if (readSize <= 0)
                 {
-                    ret = eventu_postError(kEplEventSourceObdu, kErrorObdInvalidDcf, 0, NULL);
+                    ret = eventu_postError(kEventSourceObdu, kErrorObdInvalidDcf, 0, NULL);
                     if (ret != kErrorOk)
                         return ret;
                     return kErrorReject;
@@ -501,7 +501,7 @@ static tOplkError loadNextBuffer(tObdCdcInfo* pCdcInfo_p, size_t bufferSize)
         case kEplObdCdcTypeBuffer:
             if (pCdcInfo_p->bufferSize < bufferSize)
             {
-                ret = eventu_postError(kEplEventSourceObdu, kErrorObdInvalidDcf, 0, NULL);
+                ret = eventu_postError(kEventSourceObdu, kErrorObdInvalidDcf, 0, NULL);
                 if (ret != kErrorOk)
                     return ret;
                 return kErrorReject;

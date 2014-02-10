@@ -91,7 +91,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     #define TGT_DBG_POST_TRACE_VALUE(v)
 #endif
 #define NMTMNU_DBG_POST_TRACE_VALUE(Event_p, uiNodeId_p, wErrorCode_p) \
-    TGT_DBG_POST_TRACE_VALUE((kEplEventSinkNmtMnu << 28) | (Event_p << 24) \
+    TGT_DBG_POST_TRACE_VALUE((kEventSinkNmtMnu << 28) | (Event_p << 24) \
                              | (uiNodeId_p << 16) | wErrorCode_p)
 
 // defines for flags in node info structure
@@ -143,7 +143,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                           (pNodeInfo_p->flags & ~NMTMNU_NODE_FLAG_COUNT_STATREQ);       \
     timerArg_p.m_Arg.value = NMTMNU_TIMERARG_STATREQ | nodeId_p  |                    \
                                (pNodeInfo_p->flags & NMTMNU_NODE_FLAG_COUNT_STATREQ);   \
-    timerArg_p.eventSink  = kEplEventSinkNmtMnu;
+    timerArg_p.eventSink  = kEventSinkNmtMnu;
 
 #define NMTMNU_SET_FLAGS_TIMERARG_IDENTREQ(pNodeInfo_p, nodeId_p, timerArg_p)           \
     pNodeInfo_p->flags = ((pNodeInfo_p->flags + NMTMNU_NODE_FLAG_INC_STATREQ) &         \
@@ -151,7 +151,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                           (pNodeInfo_p->flags & ~NMTMNU_NODE_FLAG_COUNT_STATREQ);       \
     timerArg_p.m_Arg.value = NMTMNU_TIMERARG_IDENTREQ | nodeId_p |                    \
                                (pNodeInfo_p->flags & NMTMNU_NODE_FLAG_COUNT_STATREQ);   \
-    timerArg_p.eventSink = kEplEventSinkNmtMnu;
+    timerArg_p.eventSink = kEventSinkNmtMnu;
 
 #define NMTMNU_SET_FLAGS_TIMERARG_LONGER(pNodeInfo_p, nodeId_p, timerArg_p)             \
     pNodeInfo_p->flags = ((pNodeInfo_p->flags + NMTMNU_NODE_FLAG_INC_LONGER) &          \
@@ -159,7 +159,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                           (pNodeInfo_p->flags & ~NMTMNU_NODE_FLAG_COUNT_LONGER);        \
     timerArg_p.m_Arg.value = NMTMNU_TIMERARG_LONGER | nodeId_p |                      \
                                (pNodeInfo_p->flags & NMTMNU_NODE_FLAG_COUNT_LONGER);    \
-    timerArg_p.eventSink = kEplEventSinkNmtMnu;
+    timerArg_p.eventSink = kEventSinkNmtMnu;
 
 #define NMTMNU_SET_FLAGS_TIMERARG_STATE_MON(pNodeInfo_p, nodeId_p, timerArg_p)          \
     pNodeInfo_p->flags = ((pNodeInfo_p->flags + NMTMNU_NODE_FLAG_INC_STATREQ) &         \
@@ -167,7 +167,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                           (pNodeInfo_p->flags & ~NMTMNU_NODE_FLAG_COUNT_STATREQ);       \
     timerArg_p.m_Arg.value = NMTMNU_TIMERARG_STATE_MON | nodeId_p |                   \
                                (pNodeInfo_p->flags & NMTMNU_NODE_FLAG_COUNT_STATREQ);   \
-    timerArg_p.eventSink = kEplEventSinkNmtMnu;
+    timerArg_p.eventSink = kEventSinkNmtMnu;
 
 // defines for global flags
 #define NMTMNU_FLAG_HALTED                      0x0001  // boot process is halted
@@ -667,7 +667,7 @@ tOplkError nmtmnu_sendNmtCommandEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
     // The expected node state will be updated when the NMT command
     // was actually sent.
     // See functions processInternalEvent(kNmtMnuIntNodeEventNmtCmdSent),
-    // EplNmtMnuProcessEvent(kEplEventTypeNmtMnuNmtCmdSent).
+    // EplNmtMnuProcessEvent(kEventTypeNmtMnuNmtCmdSent).
 
     // remove CN from isochronous phase;
     // This must be done here and not when NMT command is actually sent
@@ -867,11 +867,11 @@ tOplkError nmtmnu_triggerStateChange(UINT nodeId_p, tNmtNodeCommand nodeCommand_
 
     nodeCmd.nodeCommand = nodeCommand_p;
     nodeCmd.nodeId = nodeId_p;
-    event.m_EventSink = kEplEventSinkNmtMnu;
-    event.m_EventType = kEplEventTypeNmtMnuNodeCmd;
-    EPL_MEMSET(&event.m_NetTime, 0x00, sizeof(event.m_NetTime));
-    event.m_pArg = &nodeCmd;
-    event.m_uiSize = sizeof (nodeCmd);
+    event.eventSink = kEventSinkNmtMnu;
+    event.eventType = kEventTypeNmtMnuNodeCmd;
+    EPL_MEMSET(&event.netTime, 0x00, sizeof(event.netTime));
+    event.pEventArg = &nodeCmd;
+    event.eventArgSize = sizeof (nodeCmd);
     ret = eventu_postEvent(&event);
 
     return ret;
@@ -1047,12 +1047,12 @@ tOplkError nmtmnu_processEvent(tEvent* pEvent_p)
     tOplkError      ret = kErrorOk;
 
     // process event
-    switch(pEvent_p->m_EventType)
+    switch(pEvent_p->eventType)
     {
         // timer event
-        case kEplEventTypeTimer:
+        case kEventTypeTimer:
             {
-                tTimerEventArg*  pTimerEventArg = (tTimerEventArg*)pEvent_p->m_pArg;
+                tTimerEventArg*  pTimerEventArg = (tTimerEventArg*)pEvent_p->pEventArg;
                 UINT                nodeId;
 
                 nodeId = (UINT) (pTimerEventArg->m_Arg.value & NMTMNU_TIMERARG_NODE_MASK);
@@ -1155,24 +1155,24 @@ tOplkError nmtmnu_processEvent(tEvent* pEvent_p)
             }
             break;
 
-        case kEplEventTypeHeartbeat:
+        case kEventTypeHeartbeat:
             {
-                tHeartbeatEvent* pHeartbeatEvent = (tHeartbeatEvent*)pEvent_p->m_pArg;
+                tHeartbeatEvent* pHeartbeatEvent = (tHeartbeatEvent*)pEvent_p->pEventArg;
                 ret = processInternalEvent(pHeartbeatEvent->nodeId, pHeartbeatEvent->nmtState,
                                            pHeartbeatEvent->errorCode, kNmtMnuIntNodeEventHeartbeat);
             }
             break;
 
-        case kEplEventTypeNmtMnuNmtCmdSent:
+        case kEventTypeNmtMnuNmtCmdSent:
             {
-                tPlkFrame* pFrame = (tPlkFrame*)pEvent_p->m_pArg;
+                tPlkFrame* pFrame = (tPlkFrame*)pEvent_p->pEventArg;
                 UINT                uiNodeId;
                 tNmtCommand         NmtCommand;
                 UINT8                bNmtState;
 
-                if (pEvent_p->m_uiSize < EPL_C_DLL_MINSIZE_NMTCMD)
+                if (pEvent_p->eventArgSize < EPL_C_DLL_MINSIZE_NMTCMD)
                 {
-                    ret = eventu_postError(kEplEventSourceNmtMnu, kErrorNmtInvalidFramePointer, sizeof (pEvent_p->m_uiSize), &pEvent_p->m_uiSize);
+                    ret = eventu_postError(kEventSourceNmtMnu, kErrorNmtInvalidFramePointer, sizeof (pEvent_p->eventArgSize), &pEvent_p->eventArgSize);
                     break;
                 }
 
@@ -1268,9 +1268,9 @@ tOplkError nmtmnu_processEvent(tEvent* pEvent_p)
             }
             break;
 
-        case kEplEventTypeNmtMnuNodeCmd:
+        case kEventTypeNmtMnuNodeCmd:
             {
-                tNmtMnuNodeCmd*      pNodeCmd = (tNmtMnuNodeCmd*)pEvent_p->m_pArg;
+                tNmtMnuNodeCmd*      pNodeCmd = (tNmtMnuNodeCmd*)pEvent_p->pEventArg;
                 tNmtMnuIntNodeEvent  NodeEvent;
                 tObdSize             ObdSize;
                 UINT8                    bNmtState;
@@ -1323,10 +1323,10 @@ tOplkError nmtmnu_processEvent(tEvent* pEvent_p)
             }
             break;
 
-        case kEplEventTypeNmtMnuNodeAdded:
+        case kEventTypeNmtMnuNodeAdded:
             {
                 UINT        nodeId;
-                nodeId = *((UINT*) pEvent_p->m_pArg);
+                nodeId = *((UINT*) pEvent_p->pEventArg);
                 ret = cbNodeAdded(nodeId);
             }
             break;
@@ -1785,11 +1785,11 @@ static tOplkError doPreop1(tEventNmtStateChange nmtStateChange_p)
 
     // inform DLL about NMT state change,
     // so that it can clear the asynchronous queues and start the reduced cycle
-    event.m_EventSink = kEplEventSinkDllk;
-    event.m_EventType = kEplEventTypeDllkStartReducedCycle;
-    EPL_MEMSET(&event.m_NetTime, 0x00, sizeof(event.m_NetTime));
-    event.m_pArg = NULL;
-    event.m_uiSize = 0;
+    event.eventSink = kEventSinkDllk;
+    event.eventType = kEventTypeDllkStartReducedCycle;
+    EPL_MEMSET(&event.netTime, 0x00, sizeof(event.netTime));
+    event.pEventArg = NULL;
+    event.eventArgSize = 0;
     ret = eventu_postEvent(&event);
     if (ret != kErrorOk)
         return ret;
@@ -1830,7 +1830,7 @@ static tOplkError doPreop1(tEventNmtStateChange nmtStateChange_p)
         {
             dwTimeout = 1L; // at least 1 ms
         }
-        timerArg.eventSink = kEplEventSinkNmtMnu;
+        timerArg.eventSink = kEventSinkNmtMnu;
         timerArg.m_Arg.value = 0;
         ret = timeru_modifyTimer(&nmtMnuInstance_g.timerHdlNmtState, dwTimeout, timerArg);
     }

@@ -253,11 +253,11 @@ tOplkError eventucal_postEventHostif (tEventQueue eventQueue_p, tEvent *pEvent_p
     EPL_MEMCPY(pPostBuffer, pEvent_p, dataSize);
 
     // copy argument data if present
-    if(pEvent_p->m_pArg != NULL)
+    if(pEvent_p->pEventArg != NULL)
     {
-        EPL_MEMCPY(&pPostBuffer[dataSize], pEvent_p->m_pArg, pEvent_p->m_uiSize);
+        EPL_MEMCPY(&pPostBuffer[dataSize], pEvent_p->pEventArg, pEvent_p->eventArgSize);
         // add optional argument data size
-        dataSize += pEvent_p->m_uiSize;
+        dataSize += pEvent_p->eventArgSize;
     }
 
     lfqRet = lfq_entryEnqueue(instance_l[eventQueue_p], pPostBuffer, dataSize);
@@ -305,17 +305,17 @@ tOplkError eventucal_processEventHostif(tEventQueue eventQueue_p)
     lfqRet = lfq_entryDequeue(instance_l[eventQueue_p], pRxBuffer, &dataSize);
     if(lfqRet != kQueueSuccessful)
     {
-        eventu_postError(kEplEventSourceEventk, kErrorEventReadError,
+        eventu_postError(kEventSourceEventk, kErrorEventReadError,
                          sizeof (lfqRet), &lfqRet);
         goto Exit;
     }
 
     pEplEvent = (tEvent *) pRxBuffer;
-    pEplEvent->m_uiSize = (UINT)dataSize - sizeof(tEvent);
-    if(pEplEvent->m_uiSize > 0)
-        pEplEvent->m_pArg = &pRxBuffer[sizeof(tEvent)];
+    pEplEvent->eventArgSize = (UINT)dataSize - sizeof(tEvent);
+    if(pEplEvent->eventArgSize > 0)
+        pEplEvent->pEventArg = &pRxBuffer[sizeof(tEvent)];
     else
-        pEplEvent->m_pArg = NULL;
+        pEplEvent->pEventArg = NULL;
 
     ret = eventu_process(pEplEvent);
 

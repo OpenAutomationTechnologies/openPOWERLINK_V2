@@ -101,15 +101,15 @@ event sinks.
 */
 static tEventDispatchEntry eventDispatchTbl_l[] =
 {
-    { kEplEventSinkNmtk,        kEplEventSourceNmtk,        nmtk_process },
-    { kEplEventSinkNmtk,        kEplEventSourceDllk,        handleNmtEventinDll },
-    { kEplEventSinkDllk,        kEplEventSourceDllk,        dllk_process },
-    { kEplEventSinkDllkCal,     kEplEventSourceDllk,        dllkcal_process },
-    { kEplEventSinkErrk,        kEplEventSourceErrk,        errhndk_process },
+    { kEventSinkNmtk,        kEventSourceNmtk,        nmtk_process },
+    { kEventSinkNmtk,        kEventSourceDllk,        handleNmtEventinDll },
+    { kEventSinkDllk,        kEventSourceDllk,        dllk_process },
+    { kEventSinkDllkCal,     kEventSourceDllk,        dllkcal_process },
+    { kEventSinkErrk,        kEventSourceErrk,        errhndk_process },
 #if defined(CONFIG_INCLUDE_PDO)
-    { kEplEventSinkPdokCal,     kEplEventSourcePdok,        pdokcal_process },
+    { kEventSinkPdokCal,     kEventSourcePdok,        pdokcal_process },
 #endif
-    { kEplEventSinkInvalid,     kEplEventSourceInvalid,     NULL }
+    { kEventSinkInvalid,     kEventSourceInvalid,     NULL }
 };
 
 //============================================================================//
@@ -190,16 +190,16 @@ tOplkError eventk_process (tEvent *pEvent_p)
     pDispatchEntry = &eventDispatchTbl_l[0];
     while (!fStop)
     {
-        ret = event_getHandlerForSink(&pDispatchEntry, pEvent_p->m_EventSink,
+        ret = event_getHandlerForSink(&pDispatchEntry, pEvent_p->eventSink,
                                       &pfnEventHandler, &eventSource);
         if (ret == kErrorEventUnknownSink)
         {
                 if (!fAlreadyHandled)
                 {
                     // Unknown sink, provide error event to API layer
-                    eventk_postError(kEplEventSourceEventk, ret,
-                                     sizeof(pEvent_p->m_EventSink),
-                                     &pEvent_p->m_EventSink);
+                    eventk_postError(kEventSourceEventk, ret,
+                                     sizeof(pEvent_p->eventSink),
+                                     &pEvent_p->eventSink);
                 }
                 else
                 {
@@ -215,7 +215,7 @@ tOplkError eventk_process (tEvent *pEvent_p)
                 if ((ret != kErrorOk) && (ret != kErrorShutdown))
                 {
                     // forward error event to API layer
-                    eventk_postError(kEplEventSourceEventk, ret,
+                    eventk_postError(kEventSourceEventk, ret,
                                      sizeof(eventSource),
                                       &eventSource);
                 }
@@ -247,25 +247,25 @@ tOplkError eventk_postEvent (tEvent *pEvent_p)
 {
     tOplkError ret = kErrorOk;
 
-    switch(pEvent_p->m_EventSink)
+    switch(pEvent_p->eventSink)
     {
-        case kEplEventSinkNmtMnu:
-        case kEplEventSinkNmtu:
-        case kEplEventSinkSdoAsySeq:
-        case kEplEventSinkApi:
-        case kEplEventSinkDlluCal:
-        case kEplEventSinkErru:
-        case kEplEventSinkLedu:
+        case kEventSinkNmtMnu:
+        case kEventSinkNmtu:
+        case kEventSinkSdoAsySeq:
+        case kEventSinkApi:
+        case kEventSinkDlluCal:
+        case kEventSinkErru:
+        case kEventSinkLedu:
             ret = eventkcal_postUserEvent(pEvent_p);
             break;
 
-        case kEplEventSinkSync:
-        case kEplEventSinkNmtk:
-        case kEplEventSinkDllk:
-        case kEplEventSinkDllkCal:
-        case kEplEventSinkPdok:
-        case kEplEventSinkPdokCal:
-        case kEplEventSinkErrk:
+        case kEventSinkSync:
+        case kEventSinkNmtk:
+        case kEventSinkDllk:
+        case kEventSinkDllkCal:
+        case kEventSinkPdok:
+        case kEventSinkPdokCal:
+        case kEventSinkErrk:
             ret = eventkcal_postKernelEvent(pEvent_p);
             break;
 
@@ -305,17 +305,17 @@ tOplkError eventk_postError (tEventSource eventSource_p, tOplkError eplError_p,
     ret = kErrorOk;
 
     // create argument
-    eventError.m_EventSource = eventSource_p;
-    eventError.m_EplError = eplError_p;
-    argSize_p = (UINT) min ((size_t) argSize_p, sizeof (eventError.m_Arg));
-    EPL_MEMCPY(&eventError.m_Arg, pArg_p, argSize_p);
+    eventError.eventSource = eventSource_p;
+    eventError.oplkError = eplError_p;
+    argSize_p = (UINT) min ((size_t) argSize_p, sizeof (eventError.errorArg));
+    EPL_MEMCPY(&eventError.errorArg, pArg_p, argSize_p);
 
     // create event
-    eplEvent.m_EventType = kEplEventTypeError;
-    eplEvent.m_EventSink = kEplEventSinkApi;
-    EPL_MEMSET(&eplEvent.m_NetTime, 0x00, sizeof(eplEvent.m_NetTime));
-    eplEvent.m_uiSize = (memberoffs (tEventError, m_Arg) + argSize_p);
-    eplEvent.m_pArg = &eventError;
+    eplEvent.eventType = kEventTypeError;
+    eplEvent.eventSink = kEventSinkApi;
+    EPL_MEMSET(&eplEvent.netTime, 0x00, sizeof(eplEvent.netTime));
+    eplEvent.eventArgSize = (memberoffs (tEventError, errorArg) + argSize_p);
+    eplEvent.pEventArg = &eventError;
 
     ret = eventk_postEvent(&eplEvent);
 
@@ -348,8 +348,8 @@ static tOplkError handleNmtEventinDll(tEvent* pEvent_p)
 
     BENCHMARK_MOD_27_RESET(0);
 
-    if ((pEvent_p->m_EventType == kEplEventTypeNmtEvent) &&
-        (*((tNmtEvent*)pEvent_p->m_pArg) == kNmtEventDllCeSoa))
+    if ((pEvent_p->eventType == kEventTypeNmtEvent) &&
+        (*((tNmtEvent*)pEvent_p->pEventArg) == kNmtEventDllCeSoa))
     {
         BENCHMARK_MOD_27_SET(0);
         // forward SoA event to DLLk module for cycle preprocessing

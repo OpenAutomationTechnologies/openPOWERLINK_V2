@@ -271,9 +271,9 @@ static tOplkError postEvent(tEvent *pEvent_p)
     int             ioctlret;
 
     /*TRACE("%s() Event type:%s(%d) sink:%s(%d) size:%d!\n", __func__,
-           debugstr_getEventTypeStr(pEvent_p->m_EventType), pEvent_p->m_EventType,
-           debugstr_getEventSinkStr(pEvent_p->m_EventSink), pEvent_p->m_EventSink,
-           pEvent_p->m_uiSize);*/
+           debugstr_getEventTypeStr(pEvent_p->eventType), pEvent_p->eventType,
+           debugstr_getEventSinkStr(pEvent_p->eventSink), pEvent_p->eventSink,
+           pEvent_p->eventArgSize);*/
 
     ioctlret = ioctl (instance_l.fd, PLK_CMD_POST_EVENT, pEvent_p);
     if (ioctlret != 0)
@@ -308,10 +308,10 @@ static void *eventThread (void * arg_p)
         if (ret == 0)
         {
             /*TRACE ("%s() User: got event type:%d(%s) sink:%d(%s)\n", __func__,
-                    pEvent->m_EventType, debugstr_getEventTypeStr(pEvent->m_EventType),
-                    pEvent->m_EventSink, debugstr_getEventSinkStr(pEvent->m_EventSink));*/
-            if (pEvent->m_uiSize != 0)
-                pEvent->m_pArg = (char *)pEvent + sizeof(tEvent);
+                    pEvent->eventType, debugstr_getEventTypeStr(pEvent->eventType),
+                    pEvent->eventSink, debugstr_getEventSinkStr(pEvent->eventSink));*/
+            if (pEvent->eventArgSize != 0)
+                pEvent->pEventArg = (char *)pEvent + sizeof(tEvent);
 
             ret = eventu_process(pEvent);
         }
