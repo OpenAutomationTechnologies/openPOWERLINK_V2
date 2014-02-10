@@ -260,7 +260,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
 
     *pTimerHdl_p = pTimerInfo->eventArg.timerHdl;
 
-    pTimerInfo->eventArg.m_Arg.value = argument_p;
+    pTimerInfo->eventArg.argument.value = argument_p;
     pTimerInfo->pfnCb = pfnCallback_p;
 
     // calculate counter

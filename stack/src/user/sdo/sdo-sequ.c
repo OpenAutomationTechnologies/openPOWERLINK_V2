@@ -555,10 +555,10 @@ tOplkError sdoseq_processEvent(tEvent* pEvent_p)
     pTimerEventArg = (tTimerEventArg*)pEvent_p->pEventArg;
     timerHdl = pTimerEventArg->timerHdl;
     // get pointer to intern control structure of connection
-    if (pTimerEventArg->m_Arg.pValue == NULL)
+    if (pTimerEventArg->argument.pValue == NULL)
         return ret;
 
-    pSdoSeqCon = (tSdoSeqCon*)pTimerEventArg->m_Arg.pValue;
+    pSdoSeqCon = (tSdoSeqCon*)pTimerEventArg->argument.pValue;
     // check if time is current
     if(timerHdl != pSdoSeqCon->timerHandle)
     {
@@ -1925,7 +1925,7 @@ static tOplkError setTimer(tSdoSeqCon* pSdoSeqCon_p, ULONG timeout_p)
     tTimerArg           timerArg;
 
     timerArg.eventSink = kEventSinkSdoAsySeq;
-    timerArg.m_Arg.pValue = pSdoSeqCon_p;
+    timerArg.argument.pValue = pSdoSeqCon_p;
 
     if(pSdoSeqCon_p->timerHandle == 0)
     {   // create new timer

@@ -280,7 +280,7 @@ tOplkError timeru_process(void)
     {
         // call event function
         timerEventArg.timerHdl = (tTimerHdl) pTimerEntry;
-        EPL_MEMCPY(&timerEventArg.m_Arg, &pTimerEntry->timerArg.m_Arg, sizeof(timerEventArg.m_Arg));
+        EPL_MEMCPY(&timerEventArg.argument, &pTimerEntry->timerArg.argument, sizeof(timerEventArg.argument));
 
         event.eventSink = pTimerEntry->timerArg.eventSink;
         event.eventType = kEventTypeTimer;

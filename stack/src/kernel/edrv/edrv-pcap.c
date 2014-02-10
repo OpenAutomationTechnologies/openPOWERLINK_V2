@@ -1074,7 +1074,7 @@ LARGE_INTEGER               liDueTime;
 //        lPeriodMs = 0;
     }
 
-    pTimerInfo->m_EventArg.m_Arg.value = ulArgument_p;
+    pTimerInfo->m_EventArg.argument.value = ulArgument_p;
     pTimerInfo->m_pfnCallback = pfnCallback_p;
 
     *pTimerHdl_p = pTimerInfo->m_EventArg.timerHdl;

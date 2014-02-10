@@ -472,7 +472,7 @@ static void cbTimer(ULONG parameter_p)
 
     // call event function
     timerEventArg.timerHdl = (tTimerHdl)pData;
-    EPL_MEMCPY(&timerEventArg.m_Arg, &pData->timerArg.m_Arg, sizeof(timerEventArg.m_Arg));
+    EPL_MEMCPY(&timerEventArg.argument, &pData->timerArg.argument, sizeof(timerEventArg.argument));
 
     event.eventSink = pData->timerArg.eventSink;
     event.eventType = kEventTypeTimer;

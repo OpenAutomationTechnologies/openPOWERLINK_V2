@@ -323,13 +323,13 @@ tOplkError PUBLIC hrestimer_modifyTimer(tTimerHdl*     pTimerHdl_p,
     *pTimerHdl_p = pTimerInfo->m_EventArg.timerHdl;
 
     /* initialize timer info */
-    pTimerInfo->m_EventArg.m_Arg.value = ulArgument_p;
+    pTimerInfo->m_EventArg.argument.value = ulArgument_p;
     pTimerInfo->m_pfnCallback      = pfnCallback_p;
     hrtimer_setCallback(pTimerInfo->m_timer, (void *)pTimerInfo->m_pfnCallback,
                         (void*)&pTimerInfo->m_EventArg);
 
     /*logMsg("set TCB: %p(%p)\n", (int)pTimerInfo->m_pfnCallback,
-                                (int)pTimerInfo->m_EventArg.m_Arg.value, 0, 0, 0, 0);*/
+                                (int)pTimerInfo->m_EventArg.argument.value, 0, 0, 0, 0);*/
 
 
     if (ullTimeNs_p >= 1000000000L)
