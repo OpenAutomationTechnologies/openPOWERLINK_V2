@@ -557,7 +557,7 @@ tOplkError ProcessThread::processNodeEvent(tOplkApiEventType EventType_p,
     UNUSED_PARAMETER(EventType_p);
     UNUSED_PARAMETER(pUserArg_p);
     // printf("AppCbEvent(Node): NodeId=%u Event=0x%02X\n",
-    //       pEventArg_p->nodeEvent.m_uiNodeId, pEventArg_p->nodeEvent.nodeEvent);
+    //       pEventArg_p->nodeEvent.nodeId, pEventArg_p->nodeEvent.nodeEvent);
     // check additional argument
     switch (pEventArg_p->nodeEvent.nodeEvent)
     {
