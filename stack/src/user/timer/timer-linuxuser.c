@@ -520,11 +520,11 @@ static void cbTimer(ULONG parameter_p)
     EPL_MEMCPY(&timerEventArg.m_Arg, &pData->timerArgument.m_Arg,
                sizeof(timerEventArg.m_Arg));
 
-    event.m_EventSink = pData->timerArgument.eventSink;
-    event.m_EventType = kEplEventTypeTimer;
-    EPL_MEMSET(&event.m_NetTime, 0x00, sizeof(tEplNetTime));
-    event.m_pArg = &timerEventArg;
-    event.m_uiSize = sizeof(timerEventArg);
+    event.eventSink = pData->timerArgument.eventSink;
+    event.eventType = kEventTypeTimer;
+    EPL_MEMSET(&event.netTime, 0x00, sizeof(tEplNetTime));
+    event.pEventArg = &timerEventArg;
+    event.eventArgSize = sizeof(timerEventArg);
 
     eventu_postEvent(&event);
 }

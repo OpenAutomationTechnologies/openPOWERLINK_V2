@@ -83,10 +83,10 @@ static tOplkError processHandler2(tEvent* pEvent_p);
 //------------------------------------------------------------------------------
 static tEventDispatchEntry tstEventDispatchTbl_l[] =
 {
-    { kEplEventSinkNmtu,        kEplEventSourceNmtu,        processHandler1 },
-    { kEplEventSinkNmtu,        kEplEventSourceNmtMnu,      processHandler2 },
-    { kEplEventSinkNmtMnu,      kEplEventSourceNmtMnu,      processHandler2 },
-    { kEplEventSinkInvalid,     kEplEventSourceInvalid,     NULL }
+    { kEventSinkNmtu,        kEventSourceNmtu,        processHandler1 },
+    { kEventSinkNmtu,        kEventSourceNmtMnu,      processHandler2 },
+    { kEventSinkNmtMnu,      kEventSourceNmtMnu,      processHandler2 },
+    { kEventSinkInvalid,     kEventSourceInvalid,     NULL }
 };
 
 //============================================================================//
@@ -101,18 +101,18 @@ static tEventDispatchEntry tstEventDispatchTbl_l[] =
 void test_getHandlerForSink_FirstExist(void)
 {
     tOplkError              ret = kErrorIllegalInstance;
-    tEventSource            eventSource = kEplEventSourceInvalid;
+    tEventSource            eventSource = kEventSourceInvalid;
     tProcessEventCb         pfnEventHandler = NULL;
     tEventDispatchEntry*    pDispatchEntry;
 
     /* test search of existing entry */
     pDispatchEntry = &tstEventDispatchTbl_l[0];
-    ret = event_getHandlerForSink(&pDispatchEntry, kEplEventSinkNmtu,
+    ret = event_getHandlerForSink(&pDispatchEntry, kEventSinkNmtu,
                                   &pfnEventHandler, &eventSource);
 
     CU_ASSERT_EQUAL(ret, kErrorOk);
     CU_ASSERT_EQUAL(pfnEventHandler, processHandler1);
-    CU_ASSERT_EQUAL(eventSource, kEplEventSourceNmtu);
+    CU_ASSERT_EQUAL(eventSource, kEventSourceNmtu);
     CU_ASSERT_EQUAL(pDispatchEntry, &tstEventDispatchTbl_l[1]);
 }
 
@@ -125,21 +125,21 @@ void test_getHandlerForSink_FirstExist(void)
 void test_getHandlerForSink_FurtherExist(void)
 {
     tOplkError              ret = kErrorIllegalInstance;
-    tEventSource            eventSource = kEplEventSourceInvalid;
+    tEventSource            eventSource = kEventSourceInvalid;
     tProcessEventCb         pfnEventHandler = NULL;
     tEventDispatchEntry*    pDispatchEntry;
 
     /* test search of existing entry */
     pDispatchEntry = &tstEventDispatchTbl_l[0];
-    event_getHandlerForSink(&pDispatchEntry, kEplEventSinkNmtu,
+    event_getHandlerForSink(&pDispatchEntry, kEventSinkNmtu,
                                   &pfnEventHandler, &eventSource);
 
-    ret = event_getHandlerForSink(&pDispatchEntry, kEplEventSinkNmtu,
+    ret = event_getHandlerForSink(&pDispatchEntry, kEventSinkNmtu,
                                   &pfnEventHandler, &eventSource);
 
     CU_ASSERT_EQUAL(ret, kErrorOk);
     CU_ASSERT_EQUAL(pfnEventHandler, processHandler2);
-    CU_ASSERT_EQUAL(eventSource, kEplEventSourceNmtMnu);
+    CU_ASSERT_EQUAL(eventSource, kEventSourceNmtMnu);
     CU_ASSERT_EQUAL(pDispatchEntry, &tstEventDispatchTbl_l[2]);
 }
 
@@ -151,18 +151,18 @@ void test_getHandlerForSink_FurtherExist(void)
 void test_getHandlerForSink_NotExist(void)
 {
     tOplkError              ret = kErrorIllegalInstance;
-    tEventSource            eventSource = kEplEventSourceInvalid;
+    tEventSource            eventSource = kEventSourceInvalid;
     tProcessEventCb         pfnEventHandler = NULL;
     tEventDispatchEntry*    pDispatchEntry;
 
     /* test search of existing entry */
     pDispatchEntry = &tstEventDispatchTbl_l[0];
-    ret = event_getHandlerForSink(&pDispatchEntry, kEplEventSinkDllk,
+    ret = event_getHandlerForSink(&pDispatchEntry, kEventSinkDllk,
                                   &pfnEventHandler, &eventSource);
 
     CU_ASSERT_EQUAL(ret, kErrorEventUnknownSink);
     CU_ASSERT_EQUAL(pfnEventHandler, NULL);
-    CU_ASSERT_EQUAL(eventSource, kEplEventSourceInvalid);
+    CU_ASSERT_EQUAL(eventSource, kEventSourceInvalid);
 }
 
 
@@ -175,22 +175,22 @@ void test_eventk_process(void)
 {
     tEvent          event;
 
-    event.m_EventSink = kEplEventSinkDllk;
+    event.eventSink = kEventSinkDllk;
     CU_ASSERT_EQUAL(eventk_process(&event), kErrorOk);
 
-    event.m_EventSink = kEplEventSinkDllkCal;
+    event.eventSink = kEventSinkDllkCal;
     CU_ASSERT_EQUAL(eventk_process(&event), kErrorOk);
 
-    event.m_EventSink = kEplEventSinkNmtk;
+    event.eventSink = kEventSinkNmtk;
     CU_ASSERT_EQUAL(eventk_process(&event), kErrorOk);
 
-    event.m_EventSink = kEplEventSinkErrk;
+    event.eventSink = kEventSinkErrk;
     CU_ASSERT_EQUAL(eventk_process(&event), kErrorOk);
 
-    event.m_EventSink = kEplEventSinkPdokCal;
+    event.eventSink = kEventSinkPdokCal;
     CU_ASSERT_EQUAL(eventk_process(&event), kErrorOk);
 
-    event.m_EventSink = kEplEventSinkPdok;
+    event.eventSink = kEventSinkPdok;
     CU_ASSERT_EQUAL(eventk_process(&event), kErrorEventUnknownSink);
 
 }

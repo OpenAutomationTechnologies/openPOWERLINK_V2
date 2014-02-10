@@ -177,12 +177,12 @@ tOplkError nmtu_postNmtEvent(tNmtEvent nmtEvent_p)
     tOplkError  ret;
     tEvent      event;
 
-    event.m_EventSink = kEplEventSinkNmtk;
-    event.m_NetTime.m_dwNanoSec = 0;
-    event.m_NetTime.m_dwSec = 0;
-    event.m_EventType = kEplEventTypeNmtEvent;
-    event.m_pArg = &nmtEvent_p;
-    event.m_uiSize = sizeof(nmtEvent_p);
+    event.eventSink = kEventSinkNmtk;
+    event.netTime.m_dwNanoSec = 0;
+    event.netTime.m_dwSec = 0;
+    event.eventType = kEventTypeNmtEvent;
+    event.pEventArg = &nmtEvent_p;
+    event.eventArgSize = sizeof(nmtEvent_p);
 
     ret = eventu_postEvent(&event);
 
@@ -223,12 +223,12 @@ tOplkError nmtu_processEvent(tEvent* pEvent_p)
     tOplkError                  ret = kErrorOk;
     tEventNmtStateChange*       pNmtStateChange;
 
-    switch(pEvent_p->m_EventType)
+    switch(pEvent_p->eventType)
     {
         // state change of NMT-Module
-        case kEplEventTypeNmtStateChange:
+        case kEventTypeNmtStateChange:
             ret = timeru_deleteTimer(&nmtuInstance_g.timerHdl);
-            pNmtStateChange = (tEventNmtStateChange*)pEvent_p->m_pArg;
+            pNmtStateChange = (tEventNmtStateChange*)pEvent_p->pEventArg;
             nmtuInstance_g.localNmtState = pNmtStateChange->newNmtState;
 
             // call cb-functions to inform higher layer
@@ -666,7 +666,7 @@ static tOplkError setupNmtTimerEvent(UINT32 timeout_p, tNmtEvent event_p)
     timeout_p = timeout_p / 1000; // convert us into ms
     if (timeout_p == 0)  // timer was below one ms -> set one ms
         timeout_p = 1;
-    timerArg.eventSink = kEplEventSinkNmtk;
+    timerArg.eventSink = kEventSinkNmtk;
     timerArg.m_Arg.value = (UINT32) event_p;
     ret = timeru_modifyTimer(&nmtuInstance_g.timerHdl, (ULONG)timeout_p, timerArg);
     return  ret;

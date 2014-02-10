@@ -163,10 +163,10 @@ tOplkError dllk_changeState(tNmtEvent nmtEvent_p, tNmtState nmtState_p)
     tOplkError              ret = kErrorOk;
     tEventDllError          dllEvent;
 
-    dllEvent.m_ulDllErrorEvents = 0;
-    dllEvent.m_uiNodeId = 0;
-    dllEvent.m_NmtState = nmtState_p;
-    dllEvent.m_EplError = kErrorOk;
+    dllEvent.dllErrorEvents = 0;
+    dllEvent.nodeId = 0;
+    dllEvent.nmtState = nmtState_p;
+    dllEvent.oplkError = kErrorOk;
 
     switch (nmtState_p)
     {
@@ -228,7 +228,7 @@ tOplkError dllk_changeState(tNmtEvent nmtEvent_p, tNmtState nmtState_p)
             break;
     }
 
-    if (dllEvent.m_ulDllErrorEvents != 0)
+    if (dllEvent.dllErrorEvents != 0)
     {   // error event set -> post it to error handler
         ret = errhndk_postError(&dllEvent);
     }
@@ -358,14 +358,14 @@ static tOplkError processNmtMsFullCycle(tNmtState nmtState_p, tNmtEvent nmtEvent
 
                     // forward dummy SoA event to DLLk, ErrorHandler and PDO module
                     // to trigger preparation of first cycle
-                    ret = dllk_postEvent(kEplEventTypeSync);
+                    ret = dllk_postEvent(kEventTypeSync);
                     if (ret != kErrorOk)
                         return ret;
                     break;
 
                 default:
                     // wrong DLL state / cycle time exceeded
-                    pDllEvent_p->m_ulDllErrorEvents |= EPL_DLL_ERR_MN_CYCTIMEEXCEED;
+                    pDllEvent_p->dllErrorEvents |= EPL_DLL_ERR_MN_CYCTIMEEXCEED;
                     dllkInstance_g.dllState = kDllMsWaitSocTrig;
                     break;
             }
@@ -411,7 +411,7 @@ static tOplkError processCsFullCycleDllWaitPreq(tNmtState nmtState_p, tNmtEvent 
     {
         case kNmtEventDllCePreq:                // DLL_CT2
             // enter DLL_CS_WAIT_SOA
-            pDllEvent_p->m_ulDllErrorEvents |= EPL_DLL_ERR_CN_RECVD_PREQ;
+            pDllEvent_p->dllErrorEvents |= EPL_DLL_ERR_CN_RECVD_PREQ;
             dllkInstance_g.dllState = kDllCsWaitSoa;
             break;
 
@@ -427,7 +427,7 @@ static tOplkError processCsFullCycleDllWaitPreq(tNmtState nmtState_p, tNmtEvent 
             }
 
             // report DLL_CEV_LOSS_SOC and DLL_CEV_LOSS_SOA
-            pDllEvent_p->m_ulDllErrorEvents |= EPL_DLL_ERR_CN_LOSS_SOA | EPL_DLL_ERR_CN_LOSS_SOC;
+            pDllEvent_p->dllErrorEvents |= EPL_DLL_ERR_CN_LOSS_SOA | EPL_DLL_ERR_CN_LOSS_SOC;
 
             // enter DLL_CS_WAIT_SOC
             dllkInstance_g.dllState = kDllCsWaitSoc;
@@ -440,7 +440,7 @@ static tOplkError processCsFullCycleDllWaitPreq(tNmtState nmtState_p, tNmtEvent 
                 if ((dllkInstance_g.cycleCount == 0)  &&
                     (nmtState_p >= kNmtCsReadyToOperate))
                 {
-                    pDllEvent_p->m_ulDllErrorEvents |= EPL_DLL_ERR_CN_LOSS_PREQ | EPL_DLL_ERR_CN_LOSS_SOA;
+                    pDllEvent_p->dllErrorEvents |= EPL_DLL_ERR_CN_LOSS_PREQ | EPL_DLL_ERR_CN_LOSS_SOA;
                 }
 
                 // enter DLL_CS_WAIT_SOC
@@ -453,7 +453,7 @@ static tOplkError processCsFullCycleDllWaitPreq(tNmtState nmtState_p, tNmtEvent 
             // and if >= NMT_CS_READY_TO_OPERATE
             if ((dllkInstance_g.cycleCount == 0) && (nmtState_p >= kNmtCsReadyToOperate))
             {   // report DLL_CEV_LOSS_OF_PREQ
-                pDllEvent_p->m_ulDllErrorEvents |= EPL_DLL_ERR_CN_LOSS_PREQ;
+                pDllEvent_p->dllErrorEvents |= EPL_DLL_ERR_CN_LOSS_PREQ;
             }
             // enter DLL_CS_WAIT_SOC
             dllkInstance_g.dllState = kDllCsWaitSoc;
@@ -462,7 +462,7 @@ static tOplkError processCsFullCycleDllWaitPreq(tNmtState nmtState_p, tNmtEvent 
         case kNmtEventDllCeSoc:                 // DLL_CT7
         case kNmtEventDllCeAsnd:
             // report DLL_CEV_LOSS_SOA
-            pDllEvent_p->m_ulDllErrorEvents |= EPL_DLL_ERR_CN_LOSS_SOA;
+            pDllEvent_p->dllErrorEvents |= EPL_DLL_ERR_CN_LOSS_SOA;
             //fall through
 
         case kNmtEventDllCePres:
@@ -515,7 +515,7 @@ static tOplkError processCsFullCycleDllWaitSoc(tNmtState nmtState_p, tNmtEvent n
         case kNmtEventDllCePreq:
         case kNmtEventDllCeSoa:
             // report DLL_CEV_LOSS_SOC
-            pDllEvent_p->m_ulDllErrorEvents |= EPL_DLL_ERR_CN_LOSS_SOC;
+            pDllEvent_p->dllErrorEvents |= EPL_DLL_ERR_CN_LOSS_SOC;
 
         case kNmtEventDllCeAsnd:
         default:
@@ -559,7 +559,7 @@ static tOplkError processCsFullCycleDllWaitSoa(tNmtState nmtState_p, tNmtEvent n
 
         case kNmtEventDllCePreq:
             // report DLL_CEV_LOSS_SOC and DLL_CEV_LOSS_SOA
-            pDllEvent_p->m_ulDllErrorEvents |= EPL_DLL_ERR_CN_LOSS_SOA | EPL_DLL_ERR_CN_LOSS_SOC;
+            pDllEvent_p->dllErrorEvents |= EPL_DLL_ERR_CN_LOSS_SOA | EPL_DLL_ERR_CN_LOSS_SOC;
 
         case kNmtEventDllCeSoa:
             // enter DLL_CS_WAIT_SOC
@@ -568,14 +568,14 @@ static tOplkError processCsFullCycleDllWaitSoa(tNmtState nmtState_p, tNmtEvent n
 
         case kNmtEventDllCeSoc:             // DLL_CT9
             // report DLL_CEV_LOSS_SOA
-            pDllEvent_p->m_ulDllErrorEvents |= EPL_DLL_ERR_CN_LOSS_SOA;
+            pDllEvent_p->dllErrorEvents |= EPL_DLL_ERR_CN_LOSS_SOA;
             // enter DLL_CS_WAIT_PREQ
             dllkInstance_g.dllState = kDllCsWaitPreq;
             break;
 
         case kNmtEventDllCeAsnd:            // DLL_CT10
             // report DLL_CEV_LOSS_SOA
-            pDllEvent_p->m_ulDllErrorEvents |= EPL_DLL_ERR_CN_LOSS_SOA;
+            pDllEvent_p->dllErrorEvents |= EPL_DLL_ERR_CN_LOSS_SOA;
 
         case kNmtEventDllCePres:
         default:
@@ -640,7 +640,7 @@ static tOplkError processCsStoppedDllWaitPreq(tNmtState nmtState_p, tNmtEvent nm
 
         case kNmtEventDllCeFrameTimeout:    // DLL_CT8
             // report DLL_CEV_LOSS_SOC and DLL_CEV_LOSS_SOA
-            pDllEvent_p->m_ulDllErrorEvents |= EPL_DLL_ERR_CN_LOSS_SOA | EPL_DLL_ERR_CN_LOSS_SOC;
+            pDllEvent_p->dllErrorEvents |= EPL_DLL_ERR_CN_LOSS_SOA | EPL_DLL_ERR_CN_LOSS_SOC;
             //fall through
 
         case kNmtEventDllCeSoa:
@@ -652,7 +652,7 @@ static tOplkError processCsStoppedDllWaitPreq(tNmtState nmtState_p, tNmtEvent nm
         case kNmtEventDllCeSoc:             // DLL_CT7
         case kNmtEventDllCeAsnd:
             // report DLL_CEV_LOSS_SOA
-            pDllEvent_p->m_ulDllErrorEvents |= EPL_DLL_ERR_CN_LOSS_SOA;
+            pDllEvent_p->dllErrorEvents |= EPL_DLL_ERR_CN_LOSS_SOA;
             //fall through
 
         case kNmtEventDllCePres:
@@ -694,7 +694,7 @@ static tOplkError processCsStoppedDllWaitSoc(tNmtState nmtState_p, tNmtEvent nmt
         case kNmtEventDllCeSoa:
         case kNmtEventDllCeFrameTimeout:
             // report DLL_CEV_LOSS_SOC
-            pDllEvent_p->m_ulDllErrorEvents |= EPL_DLL_ERR_CN_LOSS_SOC;
+            pDllEvent_p->dllErrorEvents |= EPL_DLL_ERR_CN_LOSS_SOC;
             //fall through
 #if defined(CONFIG_INCLUDE_MASND)
         case kNmtEventDllCeAInv:
@@ -730,13 +730,13 @@ static tOplkError processCsStoppedDllWaitSoa(tNmtState nmtState_p, tNmtEvent nmt
     {
         case kNmtEventDllCeFrameTimeout:            // DLL_CT3
             // report DLL_CEV_LOSS_SOC and DLL_CEV_LOSS_SOA
-            pDllEvent_p->m_ulDllErrorEvents |= EPL_DLL_ERR_CN_LOSS_SOA | EPL_DLL_ERR_CN_LOSS_SOC;
+            pDllEvent_p->dllErrorEvents |= EPL_DLL_ERR_CN_LOSS_SOA | EPL_DLL_ERR_CN_LOSS_SOC;
             // fall through
 
 #if defined(CONFIG_INCLUDE_MASND)
         case kNmtEventDllCeAInv:
             //  report EPL_DLL_ERR_CN_LOSS_SOA
-            pDllEvent_p->m_ulDllErrorEvents |= EPL_DLL_ERR_CN_LOSS_SOA;
+            pDllEvent_p->dllErrorEvents |= EPL_DLL_ERR_CN_LOSS_SOA;
 #endif
 
         case kNmtEventDllCeSoa:
@@ -746,13 +746,13 @@ static tOplkError processCsStoppedDllWaitSoa(tNmtState nmtState_p, tNmtEvent nmt
 
         case kNmtEventDllCeSoc:                     // DLL_CT9
             // report DLL_CEV_LOSS_SOA
-            pDllEvent_p->m_ulDllErrorEvents |= EPL_DLL_ERR_CN_LOSS_SOA;
+            pDllEvent_p->dllErrorEvents |= EPL_DLL_ERR_CN_LOSS_SOA;
             // remain in DLL_CS_WAIT_SOA
             break;
 
         case kNmtEventDllCeAsnd:                    // DLL_CT10
             // report DLL_CEV_LOSS_SOA
-            pDllEvent_p->m_ulDllErrorEvents |= EPL_DLL_ERR_CN_LOSS_SOA;
+            pDllEvent_p->dllErrorEvents |= EPL_DLL_ERR_CN_LOSS_SOA;
             // fall through
 
         case kNmtEventDllCePreq:

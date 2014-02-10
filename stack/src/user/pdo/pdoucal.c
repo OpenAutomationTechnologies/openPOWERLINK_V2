@@ -144,10 +144,10 @@ tOplkError pdoucal_postPdokChannelAlloc(tPdoAllocationParam* pAllocationParam_p)
     tOplkError  Ret = kErrorOk;
     tEvent      Event;
 
-    Event.m_EventSink = kEplEventSinkPdokCal;
-    Event.m_EventType = kEplEventTypePdokAlloc;
-    Event.m_pArg = pAllocationParam_p;
-    Event.m_uiSize = sizeof (*pAllocationParam_p);
+    Event.eventSink = kEventSinkPdokCal;
+    Event.eventType = kEventTypePdokAlloc;
+    Event.pEventArg = pAllocationParam_p;
+    Event.eventArgSize = sizeof (*pAllocationParam_p);
 
     Ret = eventu_postEvent(&Event);
 
@@ -159,7 +159,7 @@ tOplkError pdoucal_postPdokChannelAlloc(tPdoAllocationParam* pAllocationParam_p)
 \brief  Send channel configuration to kernel PDO module
 
 The function configures the specified PDO channel in the kernel by sending a
-kEplEventTypePdokConfig to the kernel PDO module.
+kEventTypePdokConfig to the kernel PDO module.
 
 \param  pChannelConf_p          PDO channel configuration.
 
@@ -173,10 +173,10 @@ tOplkError pdoucal_postConfigureChannel(tPdoChannelConf* pChannelConf_p)
     tOplkError      ret = kErrorOk;
     tEvent          Event;
 
-    Event.m_EventSink = kEplEventSinkPdokCal;
-    Event.m_EventType = kEplEventTypePdokConfig;
-    Event.m_pArg = pChannelConf_p;
-    Event.m_uiSize = sizeof(tPdoChannelConf);
+    Event.eventSink = kEventSinkPdokCal;
+    Event.eventType = kEventTypePdokConfig;
+    Event.pEventArg = pChannelConf_p;
+    Event.eventArgSize = sizeof(tPdoChannelConf);
     ret = eventu_postEvent(&Event);
 
     return ret;
@@ -187,7 +187,7 @@ tOplkError pdoucal_postConfigureChannel(tPdoChannelConf* pChannelConf_p)
 \brief  Send PDO buffer setup to kernel PDO module
 
 The function sends the PDO buffer setup to the kernel PDO module by posting
-a kEplEventTypePdokSetupPdoBuf event.
+a kEventTypePdokSetupPdoBuf event.
 
 \param  rxPdoMemSize_p          Size of RX PDO buffers.
 \param  txPdoMemSize_p          Size of TX PDO buffers.
@@ -205,10 +205,10 @@ tOplkError pdoucal_postSetupPdoBuffers(size_t rxPdoMemSize_p, size_t txPdoMemSiz
 
     pdoMemSize.rxPdoMemSize = rxPdoMemSize_p;
     pdoMemSize.txPdoMemSize = txPdoMemSize_p;
-    Event.m_EventSink = kEplEventSinkPdokCal;
-    Event.m_EventType = kEplEventTypePdokSetupPdoBuf;
-    Event.m_pArg = &pdoMemSize;
-    Event.m_uiSize = sizeof(tPdoMemSize);
+    Event.eventSink = kEventSinkPdokCal;
+    Event.eventType = kEventTypePdokSetupPdoBuf;
+    Event.pEventArg = &pdoMemSize;
+    Event.eventArgSize = sizeof(tPdoMemSize);
     Ret = eventu_postEvent(&Event);
 
     return Ret;

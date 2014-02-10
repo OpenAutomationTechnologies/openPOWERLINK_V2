@@ -252,7 +252,7 @@ tOplkError dllk_config(tDllConfigParam * pDllConfigParam_p)
 
     if (nmtState < kNmtMsNotActive)
     {   // CN or NMT reset states are active, so we can calculate the frame timeout.
-        // MN calculates on kEplEventTypeDllkCreate, its own frame timeout.
+        // MN calculates on kEventTypeDllkCreate, its own frame timeout.
         if ((dllkInstance_g.dllConfigParam.cycleLen != 0) &&
             (dllkInstance_g.dllConfigParam.lossOfFrameTolerance != 0))
         {   // monitor EPL cycle, calculate frame timeout
@@ -566,7 +566,7 @@ tOplkError dllk_addNode(tDllNodeOpParam* pNodeOpParam_p)
         return kErrorDllNoNodeInfo;
     }
 
-    DLLK_DBG_POST_TRACE_VALUE(kEplEventTypeDllkAddNode, pNodeOpParam_p->nodeId, 0);
+    DLLK_DBG_POST_TRACE_VALUE(kEventTypeDllkAddNode, pNodeOpParam_p->nodeId, 0);
 
     switch (pNodeOpParam_p->opNodeType)
     {
@@ -647,7 +647,7 @@ tOplkError dllk_deleteNode(tDllNodeOpParam* pNodeOpParam_p)
         return kErrorDllNoNodeInfo;
     }
 
-    DLLK_DBG_POST_TRACE_VALUE(kEplEventTypeDllkDelNode, pNodeOpParam_p->nodeId, 0);
+    DLLK_DBG_POST_TRACE_VALUE(kEventTypeDllkDelNode, pNodeOpParam_p->nodeId, 0);
 
     switch (pNodeOpParam_p->opNodeType)
     {
@@ -812,7 +812,7 @@ Exit:
         BENCHMARK_MOD_02_TOGGLE(7);
         arg = dllkInstance_g.dllState | (kNmtEventDllMeSocTrig << 8);
         // Error event for API layer
-        ret = eventk_postError(kEplEventSourceDllk, ret, sizeof(arg), &arg);
+        ret = eventk_postError(kEventSourceDllk, ret, sizeof(arg), &arg);
     }
     TGT_DLLK_LEAVE_CRITICAL_SECTION();
     return ret;
@@ -861,17 +861,17 @@ tOplkError dllk_cbCyclicError(tOplkError errorCode_p, tEdrvTxBuffer * pTxBuffer_
         case kErrorEdrvCurTxListEmpty:
         case kErrorEdrvTxListNotFinishedYet:
         case kErrorEdrvNoFreeTxDesc:
-            dllEvent.m_ulDllErrorEvents = EPL_DLL_ERR_MN_CYCTIMEEXCEED;
-            dllEvent.m_uiNodeId = handle;
-            dllEvent.m_NmtState = nmtState;
-            dllEvent.m_EplError = errorCode_p;
+            dllEvent.dllErrorEvents = EPL_DLL_ERR_MN_CYCTIMEEXCEED;
+            dllEvent.nodeId = handle;
+            dllEvent.nmtState = nmtState;
+            dllEvent.oplkError = errorCode_p;
             ret = errhndk_postError(&dllEvent);
             break;
 
         default:
             arg = dllkInstance_g.dllState | (handle << 16);
             // Error event for API layer
-            ret = eventk_postError(kEplEventSourceDllk, errorCode_p, sizeof(arg), &arg);
+            ret = eventk_postError(kEventSourceDllk, errorCode_p, sizeof(arg), &arg);
             break;
     }
 
@@ -926,7 +926,7 @@ tOplkError dllk_cbMnSyncHandler(void)
     dllkInstance_g.curTxBufferOffsetCycle ^= 1;
     dllkInstance_g.curNodeIndex = 0;
 
-    ret = dllk_postEvent(kEplEventTypeDllkCycleFinish);
+    ret = dllk_postEvent(kEventTypeDllkCycleFinish);
 
 Exit:
     if (ret != kErrorOk)
@@ -934,7 +934,7 @@ Exit:
         BENCHMARK_MOD_02_TOGGLE(7);
         arg = dllkInstance_g.dllState | (kNmtEventDllMeSocTrig << 8);
         // Error event for API layer
-        ret = eventk_postError(kEplEventSourceDllk, ret, sizeof(arg), &arg);
+        ret = eventk_postError(kEventSourceDllk, ret, sizeof(arg), &arg);
     }
     TGT_DLLK_LEAVE_CRITICAL_SECTION();
     return ret;
@@ -989,7 +989,7 @@ Exit:
         BENCHMARK_MOD_02_TOGGLE(7);
         arg = dllkInstance_g.dllState | (kNmtEventDllCeFrameTimeout << 8);
         // Error event for API layer
-        ret = eventk_postError(kEplEventSourceDllk, ret, sizeof(arg), &arg);
+        ret = eventk_postError(kEventSourceDllk, ret, sizeof(arg), &arg);
     }
     TGT_DLLK_LEAVE_CRITICAL_SECTION();
     return ret;
@@ -1011,7 +1011,7 @@ tOplkError dllk_cbCnTimerSync(void)
     tOplkError      ret = kErrorOk;
 
     // trigger synchronous task
-    ret = dllk_postEvent(kEplEventTypeSync);
+    ret = dllk_postEvent(kEventTypeSync);
     return ret;
 }
 
@@ -1050,7 +1050,7 @@ Exit:
         BENCHMARK_MOD_02_TOGGLE(7);
         arg = dllkInstance_g.dllState | (kNmtEventDllCeFrameTimeout << 8);
         // Error event for API layer
-        ret = eventk_postError(kEplEventSourceDllk, ret, sizeof(arg), &arg);
+        ret = eventk_postError(kEventSourceDllk, ret, sizeof(arg), &arg);
     }
     TGT_DLLK_LEAVE_CRITICAL_SECTION();
     return ret;
@@ -1622,10 +1622,10 @@ tOplkError dllk_addNodeIsochronous(tDllkNodeInfo* pIntNodeInfo_p)
             // set destination node-ID in PReq
             ami_setUint8Le(&pTxFrame->dstNodeId, (UINT8) pIntNodeInfo_p->nodeId);
 
-            event.m_EventSink = kEplEventSinkNmtMnu;
-            event.m_EventType = kEplEventTypeNmtMnuNodeAdded;
-            event.m_uiSize = sizeof (pIntNodeInfo_p->nodeId);
-            event.m_pArg = &pIntNodeInfo_p->nodeId;
+            event.eventSink = kEventSinkNmtMnu;
+            event.eventType = kEventTypeNmtMnuNodeAdded;
+            event.eventArgSize = sizeof (pIntNodeInfo_p->nodeId);
+            event.pEventArg = &pIntNodeInfo_p->nodeId;
             ret = eventk_postEvent(&event);
             if (ret != kErrorOk)
                 goto Exit;
@@ -1848,7 +1848,7 @@ Exit:
         BENCHMARK_MOD_02_TOGGLE(7);
         arg = dllkInstance_g.dllState | (kNmtEventDllCeFrameTimeout << 8);
         // Error event for API layer
-        ret = eventk_postError(kEplEventSourceDllk, ret, sizeof(arg), &arg);
+        ret = eventk_postError(kEventSourceDllk, ret, sizeof(arg), &arg);
     }
 
     TGT_DLLK_LEAVE_CRITICAL_SECTION();

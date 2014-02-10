@@ -135,27 +135,27 @@ tOplkError eventkcal_postEvent (tEvent *pEvent_p)
     tOplkError      ret = kErrorOk;
 
     // split event post to user internal and user to kernel
-    switch(pEvent_p->m_EventSink)
+    switch(pEvent_p->eventSink)
     {
         // user layer modules
-        case kEplEventSinkNmtMnu:
-        case kEplEventSinkNmtu:
-        case kEplEventSinkSdoAsySeq:
-        case kEplEventSinkApi:
-        case kEplEventSinkDlluCal:
-        case kEplEventSinkErru:
-        case kEplEventSinkLedu:
+        case kEventSinkNmtMnu:
+        case kEventSinkNmtu:
+        case kEventSinkSdoAsySeq:
+        case kEventSinkApi:
+        case kEventSinkDlluCal:
+        case kEventSinkErru:
+        case kEventSinkLedu:
             ret = kErrorOk;
             break;
 
         // kernel layer modules
-        case kEplEventSinkSync:
-        case kEplEventSinkNmtk:
-        case kEplEventSinkDllk:
-        case kEplEventSinkDllkCal:
-        case kEplEventSinkPdok:
-        case kEplEventSinkPdokCal:
-        case kEplEventSinkErrk:
+        case kEventSinkSync:
+        case kEventSinkNmtk:
+        case kEventSinkDllk:
+        case kEventSinkDllkCal:
+        case kEventSinkPdok:
+        case kEventSinkPdokCal:
+        case kEventSinkErrk:
             ret = kErrorOk;
             break;
 

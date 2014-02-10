@@ -237,15 +237,15 @@ tOplkError eventkcal_postEventCircbuf (tEventQueue eventQueue_p, tEvent *pEvent_
         return kErrorInvalidInstanceParam;
     }
 
-    /*TRACE("%s() Event:%d Sink:%d\n", __func__, pEvent_p->m_EventType, pEvent_p->m_EventSink);*/
-    if (pEvent_p->m_uiSize == 0)
+    /*TRACE("%s() Event:%d Sink:%d\n", __func__, pEvent_p->eventType, pEvent_p->eventSink);*/
+    if (pEvent_p->eventArgSize == 0)
     {
         circError = circbuf_writeData(instance_l[eventQueue_p], pEvent_p, sizeof(tEvent));
     }
     else
     {
         circError = circbuf_writeMultipleData(instance_l[eventQueue_p], pEvent_p, sizeof(tEvent),
-                                        pEvent_p->m_pArg, (ULONG)pEvent_p->m_uiSize);
+                                        pEvent_p->pEventArg, (ULONG)pEvent_p->eventArgSize);
     }
     if(circError != kCircBufOk)
     {
@@ -301,23 +301,23 @@ tOplkError eventkcal_processEventCircbuf(tEventQueue eventQueue_p)
         if (error == kCircBufNoReadableData)
             return kErrorOk;
 
-        eventk_postError(kEplEventSourceEventk, kErrorEventReadError,
+        eventk_postError(kEventSourceEventk, kErrorEventReadError,
                          sizeof(tCircBufError), &error);
 
         return kErrorGeneralError;
     }
     pEplEvent = (tEvent *) aRxBuffer_l[eventQueue_p];
-    pEplEvent->m_uiSize = (readSize - sizeof(tEvent));
+    pEplEvent->eventArgSize = (readSize - sizeof(tEvent));
 
-    if(pEplEvent->m_uiSize > 0)
-        pEplEvent->m_pArg = &aRxBuffer_l[eventQueue_p][sizeof(tEvent)];
+    if(pEplEvent->eventArgSize > 0)
+        pEplEvent->pEventArg = &aRxBuffer_l[eventQueue_p][sizeof(tEvent)];
     else
-        pEplEvent->m_pArg = NULL;
+        pEplEvent->pEventArg = NULL;
 
     /*TRACE("Process Kernel  type:%s(%d) sink:%s(%d) size:%d!\n",
-           debugstr_getEventTypeStr(pEplEvent->m_EventType), pEplEvent->m_EventType,
-           debugstr_getEventSinkStr(pEplEvent->m_EventSink), pEplEvent->m_EventSink,
-           pEplEvent->m_uiSize);*/
+           debugstr_getEventTypeStr(pEplEvent->eventType), pEplEvent->eventType,
+           debugstr_getEventSinkStr(pEplEvent->eventSink), pEplEvent->eventSink,
+           pEplEvent->eventArgSize);*/
 
     ret = eventk_process(pEplEvent);
     return ret;
@@ -369,7 +369,7 @@ tOplkError eventkcal_getEventCircbuf(tEventQueue eventQueue_p, BYTE* pDataBuffer
         if (error == kCircBufNoReadableData)
             return kErrorOk;
 
-        eventk_postError(kEplEventSourceEventk, kErrorEventReadError,
+        eventk_postError(kEventSourceEventk, kErrorEventReadError,
                          sizeof(tCircBufError), &error);
 
         return kErrorGeneralError;

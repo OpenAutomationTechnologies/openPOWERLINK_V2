@@ -112,7 +112,7 @@ tOplkError event_getHandlerForSink(tEventDispatchEntry** ppDispatchEntry_p,
 {
     tOplkError              ret = kErrorEventUnknownSink;
 
-    while ((*ppDispatchEntry_p)->sink != kEplEventSinkInvalid)
+    while ((*ppDispatchEntry_p)->sink != kEventSinkInvalid)
     {
         if (sink_p == (*ppDispatchEntry_p)->sink)
         {

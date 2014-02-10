@@ -35,8 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_event_H_
-#define _INC_event_H_
+#ifndef _INC_oplk_event_H_
+#define _INC_oplk_event_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -64,40 +64,40 @@ This enumeration defines all valid event types.
 */
 typedef enum
 {
-    kEplEventTypeNmtEvent       = 0x01, ///< NMT event (arg is pointer to tNmtEvent)
-    kEplEventTypePdoRx          = 0x02, ///< PDO frame received event (PRes/PReq) (arg is pointer to tFrameInfo)
-    kEplEventTypePdoTx          = 0x03, ///< PDO frame transmitted event (PRes/PReq) (arg is pointer to tFrameInfo)
-    kEplEventTypePdoSoa         = 0x04, ///< SoA frame received event (isochronous phase completed) (arg is pointer to nothing)
-    kEplEventTypeSync           = 0x05, ///< Sync event (e.g. SoC or anticipated SoC) (arg is pointer to nothing)
-    kEplEventTypeTimer          = 0x06, ///< Timer event (arg is pointer to tTimerEventArg)
-    kEplEventTypeHeartbeat      = 0x07, ///< Heartbeat event (arg is pointer to tEplHeartbeatEvent)
-    kEplEventTypeHistoryEntry   = 0x08, ///< Error history entry event (arg is pointer to the tErrHistoryEntry)
-    kEplEventTypeDllkFlag1      = 0x09, ///< DLL kernel Flag 1 changed event (arg is pointer to nothing)
-    kEplEventTypeDllkFillTx     = 0x0A, ///< DLL kernel fill TxBuffer event (arg is pointer to tDllAsyncReqPriority)
-    kEplEventTypeDllkPresReady  = 0x0B, ///< DLL kernel PRes ready event (arg is pointer to nothing)
-    kEplEventTypeError          = 0x0C, ///< Error event for API layer (arg is pointer to tEventError)
-    kEplEventTypeNmtStateChange = 0x0D, ///< Indicate change of NMT-State (arg is pointer to tEventNmtStateChange)
-    kEplEventTypeDllError       = 0x0E, ///< DLL error event for error handler (arg is pointer to tEplErrorHandlerkEvent)
-    kEplEventTypeAsndRx         = 0x0F, ///< received ASnd frame for DLL user module (arg is pointer to tPlkFrame)
-    kEplEventTypeDllkServFilter = 0x10, ///< configure ServiceIdFilter (arg is pointer to tEplDllCalServiceIdFilter)
-    kEplEventTypeDllkIdentity   = 0x11, ///< configure Identity (arg is pointer to tDllIdentParam)
-    kEplEventTypeDllkConfig     = 0x12, ///< configure ConfigParam (arg is pointer to tDllConfigParam)
-    kEplEventTypeDllkIssueReq   = 0x13, ///< issue Ident/Status request (arg is pointer to tEplDllCalIssueRequest)
-    kEplEventTypeDllkAddNode    = 0x14, ///< add node to isochronous phase (arg is pointer to tDllNodeOpParam)
-    kEplEventTypeDllkDelNode    = 0x15, ///< remove node from isochronous phase (arg is pointer to tDllNodeOpParam)
-    kEplEventTypeDllkConfigNode = 0x16, ///< configures parameters of node (arg is pointer to tDllNodeInfo)
-    kEplEventTypeDllkStartReducedCycle = 0x17, ///< start reduced EPL cycle on MN (arg is pointer to nothing)
-    kEplEventTypeNmtMnuNmtCmdSent = 0x18, ///< NMT command was actually sent (arg is pointer to tPlkFrame)
-    kEplEventTypeApiUserDef     = 0x19, ///< user-defined event (arg is user-defined pointer)
-    kEplEventTypeDllkCycleFinish= 0x1A, ///< SoA sent, cycle finished (arg is pointer to nothing)
-    kEplEventTypePdokAlloc      = 0x20, ///< alloc PDOs (arg is pointer to tEplPdoAllocationParam)
-    kEplEventTypePdokConfig     = 0x21, ///< configure PDO channel (arg is pointer to tEplPdoChannelConf)
-    kEplEventTypeNmtMnuNodeCmd  = 0x22, ///< trigger NMT node command (arg is pointer to tEplNmtMnuNodeCmd)
-    kEplEventTypeGw309AsciiReq  = 0x23, ///< GW309ASCII request (arg is pointer to pointer of tEplGw309AsciiRequest)
-    kEplEventTypeNmtMnuNodeAdded = 0x24, ///< node was added to isochronous phase by DLL (arg is pointer to unsigned int containing the node-ID)
-    kEplEventTypePdokSetupPdoBuf = 0x25,  ///< dealloc PDOs
-    kEplEventTypePdokControlSync = 0x26, ///< enable/disable the pdokcal sync trigger (arg is pointer to BOOL)
-    kEplEventTypeReleaseRxFrame = 0x27, ///< Free receive buffer (arg is pointer to the buffer to release)
+    kEventTypeNmtEvent              = 0x01,     ///< NMT event (arg is pointer to tNmtEvent)
+    kEventTypePdoRx                 = 0x02,     ///< PDO frame received event (PRes/PReq) (arg is pointer to tFrameInfo)
+    kEventTypePdoTx                 = 0x03,     ///< PDO frame transmitted event (PRes/PReq) (arg is pointer to tFrameInfo)
+    kEventTypePdoSoa                = 0x04,     ///< SoA frame received event (isochronous phase completed) (arg is pointer to nothing)
+    kEventTypeSync                  = 0x05,     ///< Sync event (e.g. SoC or anticipated SoC) (arg is pointer to nothing)
+    kEventTypeTimer                 = 0x06,     ///< Timer event (arg is pointer to tTimerEventArg)
+    kEventTypeHeartbeat             = 0x07,     ///< Heartbeat event (arg is pointer to tEplHeartbeatEvent)
+    kEventTypeHistoryEntry          = 0x08,     ///< Error history entry event (arg is pointer to the tErrHistoryEntry)
+    kEventTypeDllkFlag1             = 0x09,     ///< DLL kernel Flag 1 changed event (arg is pointer to nothing)
+    kEventTypeDllkFillTx            = 0x0A,     ///< DLL kernel fill TxBuffer event (arg is pointer to tDllAsyncReqPriority)
+    kEventTypeDllkPresReady         = 0x0B,     ///< DLL kernel PRes ready event (arg is pointer to nothing)
+    kEventTypeError                 = 0x0C,     ///< Error event for API layer (arg is pointer to tEventError)
+    kEventTypeNmtStateChange        = 0x0D,     ///< Indicate change of NMT-State (arg is pointer to tEventNmtStateChange)
+    kEventTypeDllError              = 0x0E,     ///< DLL error event for error handler (arg is pointer to tEplErrorHandlerkEvent)
+    kEventTypeAsndRx                = 0x0F,     ///< received ASnd frame for DLL user module (arg is pointer to tPlkFrame)
+    kEventTypeDllkServFilter        = 0x10,     ///< configure ServiceIdFilter (arg is pointer to tEplDllCalServiceIdFilter)
+    kEventTypeDllkIdentity          = 0x11,     ///< configure Identity (arg is pointer to tDllIdentParam)
+    kEventTypeDllkConfig            = 0x12,     ///< configure ConfigParam (arg is pointer to tDllConfigParam)
+    kEventTypeDllkIssueReq          = 0x13,     ///< issue Ident/Status request (arg is pointer to tEplDllCalIssueRequest)
+    kEventTypeDllkAddNode           = 0x14,     ///< add node to isochronous phase (arg is pointer to tDllNodeOpParam)
+    kEventTypeDllkDelNode           = 0x15,     ///< remove node from isochronous phase (arg is pointer to tDllNodeOpParam)
+    kEventTypeDllkConfigNode        = 0x16,     ///< configures parameters of node (arg is pointer to tDllNodeInfo)
+    kEventTypeDllkStartReducedCycle = 0x17,     ///< start reduced EPL cycle on MN (arg is pointer to nothing)
+    kEventTypeNmtMnuNmtCmdSent      = 0x18,     ///< NMT command was actually sent (arg is pointer to tPlkFrame)
+    kEventTypeApiUserDef            = 0x19,     ///< user-defined event (arg is user-defined pointer)
+    kEventTypeDllkCycleFinish       = 0x1A,     ///< SoA sent, cycle finished (arg is pointer to nothing)
+    kEventTypePdokAlloc             = 0x20,     ///< alloc PDOs (arg is pointer to tEplPdoAllocationParam)
+    kEventTypePdokConfig            = 0x21,     ///< configure PDO channel (arg is pointer to tEplPdoChannelConf)
+    kEventTypeNmtMnuNodeCmd         = 0x22,     ///< trigger NMT node command (arg is pointer to tEplNmtMnuNodeCmd)
+    kEventTypeGw309AsciiReq         = 0x23,     ///< GW309ASCII request (arg is pointer to pointer of tEplGw309AsciiRequest)
+    kEventTypeNmtMnuNodeAdded       = 0x24,     ///< node was added to isochronous phase by DLL (arg is pointer to unsigned int containing the node-ID)
+    kEventTypePdokSetupPdoBuf       = 0x25,     ///< dealloc PDOs
+    kEventTypePdokControlSync       = 0x26,     ///< enable/disable the pdokcal sync trigger (arg is pointer to BOOL)
+    kEventTypeReleaseRxFrame        = 0x27,     ///< Free receive buffer (arg is pointer to the buffer to release)
 } tEventType;
 
 /**
@@ -107,23 +107,23 @@ This enumeration defines all valid event sinks.
 */
 typedef enum
 {
-    kEplEventSinkSync           = 0x00, ///< Sync event for application or kernel EPL module
-    kEplEventSinkNmtk           = 0x01, ///< events for Nmtk module
-    kEplEventSinkDllk           = 0x02, ///< events for Dllk module
-    kEplEventSinkDlluCal        = 0x03, ///< events for DlluCal module
-    kEplEventSinkDllkCal        = 0x04, ///< events for DllkCal module
-    kEplEventSinkPdok           = 0x05, ///< events for Pdok module
-    kEplEventSinkNmtu           = 0x06, ///< events for Nmtu module
-    kEplEventSinkErrk           = 0x07, ///< events for Error handler module
-    kEplEventSinkErru           = 0x08, ///< events for Error signaling module
-    kEplEventSinkSdoAsySeq      = 0x09, ///< events for asyncronous SDO Sequence Layer module
-    kEplEventSinkNmtMnu         = 0x0A, ///< events for NmtMnu module
-    kEplEventSinkLedu           = 0x0B, ///< events for Ledu module
-    kEplEventSinkPdokCal        = 0x0C, ///< events for PdokCal module
-    kEplEventSinkGw309Ascii     = 0x0E, ///< events for GW309ASCII module
-    kEplEventSinkApi            = 0x0F, ///< events for API module
+    kEventSinkSync                  = 0x00,     ///< Sync event for application or kernel EPL module
+    kEventSinkNmtk                  = 0x01,     ///< events for Nmtk module
+    kEventSinkDllk                  = 0x02,     ///< events for Dllk module
+    kEventSinkDlluCal               = 0x03,     ///< events for DlluCal module
+    kEventSinkDllkCal               = 0x04,     ///< events for DllkCal module
+    kEventSinkPdok                  = 0x05,     ///< events for Pdok module
+    kEventSinkNmtu                  = 0x06,     ///< events for Nmtu module
+    kEventSinkErrk                  = 0x07,     ///< events for Error handler module
+    kEventSinkErru                  = 0x08,     ///< events for Error signaling module
+    kEventSinkSdoAsySeq             = 0x09,     ///< events for asyncronous SDO Sequence Layer module
+    kEventSinkNmtMnu                = 0x0A,     ///< events for NmtMnu module
+    kEventSinkLedu                  = 0x0B,     ///< events for Ledu module
+    kEventSinkPdokCal               = 0x0C,     ///< events for PdokCal module
+    kEventSinkGw309Ascii            = 0x0E,     ///< events for GW309ASCII module
+    kEventSinkApi                   = 0x0F,     ///< events for API module
 
-    kEplEventSinkInvalid        = 0xFF  ///< Identifies an invalid sink
+    kEventSinkInvalid               = 0xFF      ///< Identifies an invalid sink
 } tEventSink;
 
 /**
@@ -134,33 +134,33 @@ This enumeration defines all valid event sources.
 
 typedef enum
 {
-    kEplEventSourceDllk         = 0x01, ///< Events from Dllk module
-    kEplEventSourceNmtk         = 0x02, ///< Events from Nmtk module
-    kEplEventSourceObdk         = 0x03, ///< Events from Obdk module
-    kEplEventSourcePdok         = 0x04, ///< Events from Pdok module
-    kEplEventSourceTimerk       = 0x05, ///< Events from Timerk module
-    kEplEventSourceEventk       = 0x06, ///< Events from Eventk module
-    kEplEventSourceSyncCb       = 0x07, ///< Events from sync-Cb
-    kEplEventSourceErrk         = 0x08, ///< Events from kernel error handler module
+    kEventSourceDllk                = 0x01,     ///< Events from Dllk module
+    kEventSourceNmtk                = 0x02,     ///< Events from Nmtk module
+    kEventSourceObdk                = 0x03,     ///< Events from Obdk module
+    kEventSourcePdok                = 0x04,     ///< Events from Pdok module
+    kEventSourceTimerk              = 0x05,     ///< Events from Timerk module
+    kEventSourceEventk              = 0x06,     ///< Events from Eventk module
+    kEventSourceSyncCb              = 0x07,     ///< Events from sync-Cb
+    kEventSourceErrk                = 0x08,     ///< Events from kernel error handler module
 
-    kEplEventSourceDllu         = 0x10, ///< Events from Dllu module
-    kEplEventSourceNmtu         = 0x11, ///< Events from Nmtu module
-    kEplEventSourceNmtCnu       = 0x12, ///< Events from NmtCnu module
-    kEplEventSourceNmtMnu       = 0x13, ///< Events from NmtMnu module
-    kEplEventSourceObdu         = 0x14, ///< Events from Obdu module
-    kEplEventSourceSdoUdp       = 0x15, ///< Events from Sdo/Udp module
-    kEplEventSourceSdoAsnd      = 0x16, ///< Events from Sdo/Asnd module
-    kEplEventSourceSdoAsySeq    = 0x17, ///< Events from Sdo asynchronous Sequence Layer module
-    kEplEventSourceSdoCom       = 0x18, ///< Events from Sdo command layer module
-    kEplEventSourceTimeru       = 0x19, ///< Events from Timeru module
-    kEplEventSourceCfgMau       = 0x1A, ///< Events from CfgMau module
-    kEplEventSourceEventu       = 0x1B, ///< Events from Eventu module
-    kEplEventSourceEplApi       = 0x1C, ///< Events from Api module
-    kEplEventSourceLedu         = 0x1D, ///< Events from Ledu module
-    kEplEventSourceGw309Ascii   = 0x1E, ///< Events from GW309ASCII module
-    kEplEventSourceErru         = 0x1F, ///< Events from User Error handler module
+    kEventSourceDllu                = 0x10,     ///< Events from Dllu module
+    kEventSourceNmtu                = 0x11,     ///< Events from Nmtu module
+    kEventSourceNmtCnu              = 0x12,     ///< Events from NmtCnu module
+    kEventSourceNmtMnu              = 0x13,     ///< Events from NmtMnu module
+    kEventSourceObdu                = 0x14,     ///< Events from Obdu module
+    kEventSourceSdoUdp              = 0x15,     ///< Events from Sdo/Udp module
+    kEventSourceSdoAsnd             = 0x16,     ///< Events from Sdo/Asnd module
+    kEventSourceSdoAsySeq           = 0x17,     ///< Events from Sdo asynchronous Sequence Layer module
+    kEventSourceSdoCom              = 0x18,     ///< Events from Sdo command layer module
+    kEventSourceTimeru              = 0x19,     ///< Events from Timeru module
+    kEventSourceCfgMau              = 0x1A,     ///< Events from CfgMau module
+    kEventSourceEventu              = 0x1B,     ///< Events from Eventu module
+    kEventSourceEplApi              = 0x1C,     ///< Events from Api module
+    kEventSourceLedu                = 0x1D,     ///< Events from Ledu module
+    kEventSourceGw309Ascii          = 0x1E,     ///< Events from GW309ASCII module
+    kEventSourceErru                = 0x1F,     ///< Events from User Error handler module
 
-    kEplEventSourceInvalid      = 0xFF  ///< Identifies an invalid event source
+    kEventSourceInvalid             = 0xFF      ///< Identifies an invalid event source
 } tEventSource;
 
 /**
@@ -172,82 +172,81 @@ layer queues (kernel-to-user or user-to-kernel) and layer-internal queues
 */
 typedef enum
 {
-    kEventQueueK2U              = 0x00, ///< kernel-to-user queue
-    kEventQueueKInt             = 0x01, ///< kernel-internal queue
-    kEventQueueU2K              = 0x02, ///< user-to-kernel queue
-    kEventQueueUInt             = 0x03, ///< user-internal queue
-    kEventQueueNum              = 0x04  ///< maximum number of queues
+    kEventQueueK2U                  = 0x00,     ///< kernel-to-user queue
+    kEventQueueKInt                 = 0x01,     ///< kernel-internal queue
+    kEventQueueU2K                  = 0x02,     ///< user-to-kernel queue
+    kEventQueueUInt                 = 0x03,     ///< user-internal queue
+    kEventQueueNum                  = 0x04      ///< maximum number of queues
 } tEventQueue;
 
 /**
-\brief  structure for events
+\brief  Structure for events
 
 The structure defines an openPOWERLINK event.
 (element order must not be changed!)
 */
 typedef struct
 {
-    tEventType          m_EventType /*:28*/;    ///< Type of this event
-    tEventSink          m_EventSink /*:4*/;     ///< Sink of this event
-    tEplNetTime         m_NetTime;              ///< Timestamp of the event
-    UINT                m_uiSize;               ///< Size of the event argument
-    void*               m_pArg;                 ///< Argument of the event
+    tEventType          eventType;              ///< Type of this event
+    tEventSink          eventSink;              ///< Sink of this event
+    tEplNetTime         netTime;                ///< Timestamp of the event
+    UINT                eventArgSize;           ///< Size of the event argument
+    void*               pEventArg;              ///< Pointer to event argument
 } tEvent;
 
 /**
-\brief  structure for OBD error information
+\brief  Structure for OBD error information
 
 The structure defines the error event information provided
 by the obd module.
 */
 typedef struct
 {
-    UINT                m_uiIndex;
-    UINT                m_uiSubIndex;
+    UINT                index;                  ///< Index of object
+    UINT                subIndex;               ///< Sub index of object
 } tEventObdError;
 
 /**
-\brief  structure for error events
+\brief  Structure for error events
 
 The structure defines an error event.
 */
 typedef struct
 {
-    tEventSource        m_EventSource;          ///< Module which posted this error event
-    tOplkError          m_EplError;             ///< Error which occurred
+    tEventSource        eventSource;            ///< Module which posted this error event
+    tOplkError          oplkError;              ///< Error which occurred
     union
     {
-        BYTE                    m_bArg;         ///< BYTE argument
-        UINT32                  m_dwArg;        ///< UINT32 argument
-        tEventSource            m_EventSource;  ///< Argument from Eventk/u module (originating error source)
-        tEventObdError          m_ObdError;     ///< Argument from Obd module
-        tEventSink              m_EventSink;    ///< Argument from Eventk/u module on m_EplError == kErrorEventUnknownSink
-        //tErrHistoryEntry   m_HistoryEntry; ///< from Nmtk/u module
-    } m_Arg;
+        BYTE                    byteArg;        ///< BYTE argument
+        UINT32                  uintArg;        ///< UINT32 argument
+        tEventSource            eventSource;    ///< Argument from Eventk/u module (originating error source)
+        tEventObdError          obdError;       ///< Argument from Obd module
+        tEventSink              eventSink;      ///< Argument from Eventk/u module on oplkError == kErrorEventUnknownSink
+    } errorArg;
 } tEventError;
 
 /**
-\brief  structure for DLL error events
+\brief  Structure for DLL error events
 
 The structure defines an DLL error event.
 */
 typedef struct
 {
-    ULONG               m_ulDllErrorEvents;     ///< EPL_DLL_ERR_*
-    UINT                m_uiNodeId;             ///< Node ID
-    tNmtState           m_NmtState;             ///< NMT state
-    tOplkError          m_EplError;             ///< Error code
+    ULONG               dllErrorEvents;         ///< Contains the DLL error (EPL_DLL_ERR_*)
+    UINT                nodeId;                 ///< Node ID
+    tNmtState           nmtState;               ///< NMT state
+    tOplkError          oplkError;              ///< openPOWERLINK error code
 } tEventDllError;
 
 /**
-\brief  callback function to get informed about sync event
+\brief  Callback function to get informed about sync event
 
 \return The function returns a tOplkError error code.
 */
 typedef tOplkError (*tSyncCb) (void);
 
 /**
-\brief callback for event post
+\brief Callback for event post
 
 This callback is used to call event processing over the module boundaries.
 e.g. EplEventkCal -> EplEventkProcess
@@ -256,10 +255,10 @@ e.g. EplEventkCal -> EplEventkProcess
 
 \return The function returns a tOplkError error code.
 */
-typedef tOplkError (*tProcessEventCb) (tEvent* pEplEvent_p);
+typedef tOplkError (*tProcessEventCb) (tEvent* pEvent_p);
 
 /**
-\brief callback for event error post
+\brief Callback for event error post
 
 This callback is used to call error event posting over the module boundaries.
 e.g. EplEventkCal -> eventk_postError
@@ -271,10 +270,10 @@ e.g. EplEventkCal -> eventk_postError
 
 \return The function returns a tOplkError error code.
 */
-typedef tOplkError (*tPostErrorEventCb) (tEventSource EventSource_p, tOplkError eplError_p, UINT argSize_p, void *pArg_p);
+typedef tOplkError (*tPostErrorEventCb) (tEventSource eventSource_p, tOplkError oplkError_p, UINT argSize_p, void *pArg_p);
 
 /**
-\brief  event dispatch entry
+\brief  Event dispatch entry
 
 The following struct specifies the entry for an event dispatch table.
 The table is used to store the appropriate event handlers for a specific
@@ -284,7 +283,7 @@ typedef struct
 {
     tEventSink          sink;               ///< Event sink
     tEventSource        source;             ///< Corresponding event source
-    tProcessEventCb  pfnEventHandler;    ///< Event handler responsible for this sink
+    tProcessEventCb     pfnEventHandler;    ///< Event handler responsible for this sink
 } tEventDispatchEntry;
 
 /**
@@ -296,18 +295,6 @@ SHB)
 */
 typedef void* tEventQueueInstPtr;
 
-//------------------------------------------------------------------------------
-// function prototypes
-//------------------------------------------------------------------------------
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* _INC_event_H_ */
+#endif /* _INC_oplk_event_H_ */
 
 

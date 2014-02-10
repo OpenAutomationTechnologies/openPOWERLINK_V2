@@ -63,7 +63,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #define EPL_NMTK_DBG_POST_TRACE_VALUE(nmtEvent_p, oldNmtState_p, newNmtState_p) \
-    TGT_DBG_POST_TRACE_VALUE((kEplEventSinkNmtk << 28) | ((mtEvent_p) << 16) \
+    TGT_DBG_POST_TRACE_VALUE((kEventSinkNmtk << 28) | ((mtEvent_p) << 16) \
                              | (((oldNmtState_p) & 0xFF) << 8) \
                              | ((newNmtState_p) & 0xFF))
 
@@ -252,14 +252,14 @@ tOplkError nmtk_process(tEvent* pEvent_p)
 
     ret = kErrorOk;
 
-    switch(pEvent_p->m_EventType)
+    switch(pEvent_p->eventType)
     {
-        case kEplEventTypeNmtEvent:
-            nmtEvent = *((tNmtEvent*)pEvent_p->m_pArg);
+        case kEventTypeNmtEvent:
+            nmtEvent = *((tNmtEvent*)pEvent_p->pEventArg);
             break;
 
-        case kEplEventTypeTimer:
-            nmtEvent = (tNmtEvent)((tTimerEventArg*)pEvent_p->m_pArg)->m_Arg.value;
+        case kEventTypeTimer:
+            nmtEvent = (tNmtEvent)((tTimerEventArg*)pEvent_p->pEventArg)->m_Arg.value;
             break;
 
         default:
@@ -284,19 +284,19 @@ tOplkError nmtk_process(tEvent* pEvent_p)
         nmtStateChange.newNmtState = nmtkStates_g[nmtkInstance_g.stateIndex].nmtState;
         nmtStateChange.oldNmtState = nmtkStates_g[oldState].nmtState;
         nmtStateChange.nmtEvent = nmtEvent;
-        event.m_EventType = kEplEventTypeNmtStateChange;
-        EPL_MEMSET(&event.m_NetTime, 0x00, sizeof(event.m_NetTime));
-        event.m_pArg = &nmtStateChange;
-        event.m_uiSize = sizeof(nmtStateChange);
+        event.eventType = kEventTypeNmtStateChange;
+        EPL_MEMSET(&event.netTime, 0x00, sizeof(event.netTime));
+        event.pEventArg = &nmtStateChange;
+        event.eventArgSize = sizeof(nmtStateChange);
 
         // inform DLLk module about state change
-        event.m_EventSink = kEplEventSinkDllk;
+        event.eventSink = kEventSinkDllk;
         ret = dllk_process(&event);
         if (ret != kErrorOk)
            return ret;
 
         // inform higher layer about state change
-        event.m_EventSink = kEplEventSinkNmtu;
+        event.eventSink = kEventSinkNmtu;
         ret = eventk_postEvent(&event);
     }
 

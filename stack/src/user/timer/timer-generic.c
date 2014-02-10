@@ -282,11 +282,11 @@ tOplkError timeru_process(void)
         timerEventArg.timerHdl = (tTimerHdl) pTimerEntry;
         EPL_MEMCPY(&timerEventArg.m_Arg, &pTimerEntry->timerArg.m_Arg, sizeof(timerEventArg.m_Arg));
 
-        event.m_EventSink = pTimerEntry->timerArg.eventSink;
-        event.m_EventType = kEplEventTypeTimer;
-        EPL_MEMSET(&event.m_NetTime, 0x00, sizeof(tEplNetTime));
-        event.m_pArg = &timerEventArg;
-        event.m_uiSize = sizeof(timerEventArg);
+        event.eventSink = pTimerEntry->timerArg.eventSink;
+        event.eventType = kEventTypeTimer;
+        EPL_MEMSET(&event.netTime, 0x00, sizeof(tEplNetTime));
+        event.pEventArg = &timerEventArg;
+        event.eventArgSize = sizeof(timerEventArg);
 
         ret = eventu_postEvent(&event);
     }

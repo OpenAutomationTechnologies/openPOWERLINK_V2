@@ -301,60 +301,60 @@ tOplkError dllkcal_process(tEvent* pEvent_p)
     tFrameInfo* pFrameInfo;
 #endif
 
-    switch (pEvent_p->m_EventType)
+    switch (pEvent_p->eventType)
     {
-        case kEplEventTypeDllkServFilter:
-            pServFilter = (tDllCalAsndServiceIdFilter*) pEvent_p->m_pArg;
+        case kEventTypeDllkServFilter:
+            pServFilter = (tDllCalAsndServiceIdFilter*) pEvent_p->pEventArg;
             ret = dllk_setAsndServiceIdFilter(pServFilter->serviceId,
                                                 pServFilter->filter);
             break;
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
-        case kEplEventTypeDllkIssueReq:
-            pIssueReq = (tDllCalIssueRequest*) pEvent_p->m_pArg;
+        case kEventTypeDllkIssueReq:
+            pIssueReq = (tDllCalIssueRequest*) pEvent_p->pEventArg;
             ret = dllkcal_issueRequest(pIssueReq->service, pIssueReq->nodeId,
                                        pIssueReq->soaFlag1);
             break;
 #endif
 
 #if EPL_NMT_MAX_NODE_ID > 0
-        case kEplEventTypeDllkConfigNode:
-            pNodeInfo = (tDllNodeInfo*) pEvent_p->m_pArg;
+        case kEventTypeDllkConfigNode:
+            pNodeInfo = (tDllNodeInfo*) pEvent_p->pEventArg;
             ret = dllk_configNode(pNodeInfo);
             break;
 
-        case kEplEventTypeDllkAddNode:
-            pNodeOpParam = (tDllNodeOpParam*) pEvent_p->m_pArg;
+        case kEventTypeDllkAddNode:
+            pNodeOpParam = (tDllNodeOpParam*) pEvent_p->pEventArg;
             ret = dllk_addNode(pNodeOpParam);
             break;
 
-        case kEplEventTypeDllkDelNode:
-            pNodeOpParam = (tDllNodeOpParam*) pEvent_p->m_pArg;
+        case kEventTypeDllkDelNode:
+            pNodeOpParam = (tDllNodeOpParam*) pEvent_p->pEventArg;
             ret = dllk_deleteNode(pNodeOpParam);
             break;
 #endif // EPL_NMT_MAX_NODE_ID > 0
 
-        case kEplEventTypeDllkIdentity:
-            pIdentParam = (tDllIdentParam*) pEvent_p->m_pArg;
-            if (pIdentParam->sizeOfStruct > pEvent_p->m_uiSize)
+        case kEventTypeDllkIdentity:
+            pIdentParam = (tDllIdentParam*) pEvent_p->pEventArg;
+            if (pIdentParam->sizeOfStruct > pEvent_p->eventArgSize)
             {
-                pIdentParam->sizeOfStruct = pEvent_p->m_uiSize;
+                pIdentParam->sizeOfStruct = pEvent_p->eventArgSize;
             }
             ret = dllk_setIdentity(pIdentParam);
             break;
 
-        case kEplEventTypeDllkConfig:
-            pConfigParam = (tDllConfigParam*) pEvent_p->m_pArg;
-            if (pConfigParam->sizeOfStruct > pEvent_p->m_uiSize)
+        case kEventTypeDllkConfig:
+            pConfigParam = (tDllConfigParam*) pEvent_p->pEventArg;
+            if (pConfigParam->sizeOfStruct > pEvent_p->eventArgSize)
             {
-                pConfigParam->sizeOfStruct = pEvent_p->m_uiSize;
+                pConfigParam->sizeOfStruct = pEvent_p->eventArgSize;
             }
             ret = dllk_config(pConfigParam);
             break;
 
 #if DLL_DEFERRED_RXFRAME_RELEASE_ISOCHRONOUS != FALSE || DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS != FALSE
-        case kEplEventTypeReleaseRxFrame:
-            pFrameInfo = (tFrameInfo*)pEvent_p->m_pArg;
+        case kEventTypeReleaseRxFrame:
+            pFrameInfo = (tFrameInfo*)pEvent_p->pEventArg;
             ret = dllk_releaseRxFrame(pFrameInfo->pFrame, pFrameInfo->frameSize);
             break;
 #endif
@@ -483,14 +483,14 @@ tOplkError dllkcal_asyncFrameReceived(tFrameInfo* pFrameInfo_p)
     tOplkError  ret = kErrorOk;
     tEvent      event;
 
-    event.m_EventSink = kEplEventSinkDlluCal;
-    event.m_EventType = kEplEventTypeAsndRx;
+    event.eventSink = kEventSinkDlluCal;
+    event.eventType = kEventTypeAsndRx;
 #if DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS == FALSE
-    event.m_pArg = pFrameInfo_p->pFrame;
-    event.m_uiSize = pFrameInfo_p->frameSize;
+    event.pEventArg = pFrameInfo_p->pFrame;
+    event.eventArgSize = pFrameInfo_p->frameSize;
 #else
-    event.m_pArg = pFrameInfo_p;
-    event.m_uiSize = sizeof(tFrameInfo);
+    event.pEventArg = pFrameInfo_p;
+    event.eventArgSize = sizeof(tFrameInfo);
 #endif
 
     ret = eventk_postEvent(&event);
@@ -553,11 +553,11 @@ tOplkError dllkcal_sendAsyncFrame(tFrameInfo* pFrameInfo_p,
     }
 
     // post event to DLL
-    event.m_EventSink = kEplEventSinkDllk;
-    event.m_EventType = kEplEventTypeDllkFillTx;
-    EPL_MEMSET(&event.m_NetTime, 0x00, sizeof(event.m_NetTime));
-    event.m_pArg = &priority_p;
-    event.m_uiSize = sizeof(priority_p);
+    event.eventSink = kEventSinkDllk;
+    event.eventType = kEventTypeDllkFillTx;
+    EPL_MEMSET(&event.netTime, 0x00, sizeof(event.netTime));
+    event.pEventArg = &priority_p;
+    event.eventArgSize = sizeof(priority_p);
     ret = eventk_postEvent(&event);
 
 Exit:

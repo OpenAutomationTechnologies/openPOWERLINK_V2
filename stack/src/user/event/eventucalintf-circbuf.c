@@ -276,19 +276,19 @@ tOplkError eventucal_processEventCircbuf(tEventQueue eventQueue_p)
         if (error == kCircBufNoReadableData)
             return kErrorOk;
 
-        eventu_postError(kEplEventSourceEventk, kErrorEventReadError,
+        eventu_postError(kEventSourceEventk, kErrorEventReadError,
                          sizeof(tCircBufError), &error);
 
         return kErrorGeneralError;
     }
 
     pEplEvent = (tEvent *) aRxBuffer;
-    pEplEvent->m_uiSize = (readSize - sizeof(tEvent));
+    pEplEvent->eventArgSize = (readSize - sizeof(tEvent));
 
-    if(pEplEvent->m_uiSize > 0)
-        pEplEvent->m_pArg = &aRxBuffer[sizeof(tEvent)];
+    if(pEplEvent->eventArgSize > 0)
+        pEplEvent->pEventArg = &aRxBuffer[sizeof(tEvent)];
     else
-        pEplEvent->m_pArg = NULL;
+        pEplEvent->pEventArg = NULL;
 
     ret = eventu_process(pEplEvent);
     return ret;
@@ -371,16 +371,16 @@ static tOplkError postEvent (tCircBufInstance* pCircBufInstance_p, tEvent *pEven
 {
     tOplkError          ret = kErrorOk;
     tCircBufError       circError;
-    //TRACE("%s() Event:%d Sink:%d\n", __func__, pEvent_p->m_EventType, pEvent_p->m_EventSink);
+    //TRACE("%s() Event:%d Sink:%d\n", __func__, pEvent_p->eventType, pEvent_p->eventSink);
 
-    if (pEvent_p->m_uiSize == 0)
+    if (pEvent_p->eventArgSize == 0)
     {
         circError = circbuf_writeData(pCircBufInstance_p, pEvent_p, sizeof(tEvent));
     }
     else
     {
         circError = circbuf_writeMultipleData(pCircBufInstance_p, pEvent_p, sizeof(tEvent),
-                                        pEvent_p->m_pArg, (ULONG)pEvent_p->m_uiSize);
+                                        pEvent_p->pEventArg, (ULONG)pEvent_p->eventArgSize);
     }
     if(circError != kCircBufOk)
     {

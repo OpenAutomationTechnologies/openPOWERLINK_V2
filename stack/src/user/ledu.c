@@ -298,11 +298,11 @@ tOplkError ledu_processEvent(tEvent* pEvent_p)
 
     ret = kErrorOk;
 
-    switch(pEvent_p->m_EventType)
+    switch(pEvent_p->eventType)
     {
         // timer event
-        case kEplEventTypeTimer:
-            pTimerEventArg = (tTimerEventArg*)pEvent_p->m_pArg;
+        case kEventTypeTimer:
+            pTimerEventArg = (tTimerEventArg*)pEvent_p->pEventArg;
 
             if (pTimerEventArg->m_Arg.value != leduInstance_g.timerArg)
             {   // zombie timer, ignore it
@@ -395,7 +395,7 @@ tOplkError ledu_processEvent(tEvent* pEvent_p)
             }
 
             // create new timer
-            timerArg.eventSink = kEplEventSinkLedu;
+            timerArg.eventSink = kEventSinkLedu;
             leduInstance_g.timerArg++;
             timerArg.m_Arg.value = leduInstance_g.timerArg;
             ret = timeru_modifyTimer(&leduInstance_g.timerHdlLedBlink, timeout, timerArg);
@@ -513,7 +513,7 @@ static tOplkError changeMode(tLeduMode newMode_p)
         }
 
         // create new timer
-        timerArg.eventSink = kEplEventSinkLedu;
+        timerArg.eventSink = kEventSinkLedu;
         leduInstance_g.timerArg++;
         timerArg.m_Arg.value = leduInstance_g.timerArg;
         ret = timeru_modifyTimer(&leduInstance_g.timerHdlLedBlink,

@@ -110,22 +110,22 @@ event sinks.
 */
 static tEventDispatchEntry eventDispatchTbl_l[] =
 {
-    { kEplEventSinkNmtu,        kEplEventSourceNmtu,        nmtu_processEvent },
+    { kEventSinkNmtu,        kEventSourceNmtu,        nmtu_processEvent },
 #if defined (CONFIG_INCLUDE_NMT_MN)
-    { kEplEventSinkNmtMnu,      kEplEventSourceNmtMnu,      nmtmnu_processEvent },
+    { kEventSinkNmtMnu,      kEventSourceNmtMnu,      nmtmnu_processEvent },
 #endif
 #if defined (CONFIG_INCLUDE_SDOC) || defined(CONFIG_INCLUDE_SDOS)
-    { kEplEventSinkSdoAsySeq,   kEplEventSourceSdoAsySeq,   sdoseq_processEvent },
+    { kEventSinkSdoAsySeq,   kEventSourceSdoAsySeq,   sdoseq_processEvent },
 #endif
 #if defined (CONFIG_INCLUDE_LEDU)
-    { kEplEventSinkLedu,        kEplEventSourceLedu,        ledu_processEvent },
+    { kEventSinkLedu,        kEventSourceLedu,        ledu_processEvent },
 #else
-    { kEplEventSinkLedu,        kEplEventSourceLedu,        NULL },
+    { kEventSinkLedu,        kEventSourceLedu,        NULL },
 #endif
-    { kEplEventSinkDlluCal,     kEplEventSourceDllu,        dllucal_process },
-    { kEplEventSinkErru,        kEplEventSourceErru,        NULL },
-    { kEplEventSinkApi,         kEplEventSourceEplApi,      callApiEventCb },
-    { kEplEventSinkInvalid,     kEplEventSourceInvalid,     NULL }
+    { kEventSinkDlluCal,     kEventSourceDllu,        dllucal_process },
+    { kEventSinkErru,        kEventSourceErru,        NULL },
+    { kEventSinkApi,         kEventSourceEplApi,      callApiEventCb },
+    { kEventSinkInvalid,     kEventSourceInvalid,     NULL }
 };
 
 
@@ -207,13 +207,13 @@ tOplkError eventu_process (tEvent *pEvent_p)
     tEventDispatchEntry*    pDispatchEntry;
 
     pDispatchEntry = &eventDispatchTbl_l[0];
-    ret = event_getHandlerForSink(&pDispatchEntry, pEvent_p->m_EventSink,
+    ret = event_getHandlerForSink(&pDispatchEntry, pEvent_p->eventSink,
                                   &pfnEventHandler, &eventSource);
     if (ret == kErrorEventUnknownSink)
     {
         // Unknown sink, provide error event to API layer
-        eventu_postError(kEplEventSourceEventu, ret, sizeof(pEvent_p->m_EventSink),
-                        &pEvent_p->m_EventSink);
+        eventu_postError(kEventSourceEventu, ret, sizeof(pEvent_p->eventSink),
+                        &pEvent_p->eventSink);
     }
     else
     {
@@ -223,7 +223,7 @@ tOplkError eventu_process (tEvent *pEvent_p)
             if ((ret != kErrorOk) && (ret != kErrorShutdown))
             {
                 // forward error event to API layer
-                eventu_postError(kEplEventSourceEventu, ret,  sizeof(eventSource),
+                eventu_postError(kEventSourceEventu, ret,  sizeof(eventSource),
                                 &eventSource);
             }
         }
@@ -252,27 +252,27 @@ tOplkError eventu_postEvent (tEvent *pEvent_p)
     tOplkError ret = kErrorOk;
 
     // split event post to user internal and user to kernel
-    switch(pEvent_p->m_EventSink)
+    switch(pEvent_p->eventSink)
     {
         // kernel layer modules
-        case kEplEventSinkSync:
-        case kEplEventSinkNmtk:
-        case kEplEventSinkDllk:
-        case kEplEventSinkDllkCal:
-        case kEplEventSinkPdok:
-        case kEplEventSinkPdokCal:
-        case kEplEventSinkErrk:
+        case kEventSinkSync:
+        case kEventSinkNmtk:
+        case kEventSinkDllk:
+        case kEventSinkDllkCal:
+        case kEventSinkPdok:
+        case kEventSinkPdokCal:
+        case kEventSinkErrk:
             ret = eventucal_postKernelEvent(pEvent_p);
             break;
 
         // user layer modules
-        case kEplEventSinkNmtMnu:
-        case kEplEventSinkNmtu:
-        case kEplEventSinkSdoAsySeq:
-        case kEplEventSinkApi:
-        case kEplEventSinkDlluCal:
-        case kEplEventSinkErru:
-        case kEplEventSinkLedu:
+        case kEventSinkNmtMnu:
+        case kEventSinkNmtu:
+        case kEventSinkSdoAsySeq:
+        case kEventSinkApi:
+        case kEventSinkDlluCal:
+        case kEventSinkErru:
+        case kEventSinkLedu:
             ret = eventucal_postUserEvent(pEvent_p);
             break;
 
@@ -311,17 +311,17 @@ tOplkError eventu_postError (tEventSource eventSource_p,  tOplkError error_p,
     ret = kErrorOk;
 
     // create argument
-    eventError.m_EventSource = eventSource_p;
-    eventError.m_EplError = error_p;
-    argSize_p = (UINT) min ((size_t) argSize_p, sizeof (eventError.m_Arg));
-    EPL_MEMCPY(&eventError.m_Arg, pArg_p, argSize_p);
+    eventError.eventSource = eventSource_p;
+    eventError.oplkError = error_p;
+    argSize_p = (UINT) min ((size_t) argSize_p, sizeof (eventError.errorArg));
+    EPL_MEMCPY(&eventError.errorArg, pArg_p, argSize_p);
 
     // create event
-    event.m_EventType = kEplEventTypeError;
-    event.m_EventSink = kEplEventSinkApi;
-    EPL_MEMSET(&event.m_NetTime, 0x00, sizeof(event.m_NetTime));
-    event.m_uiSize = (memberoffs (tEventError, m_Arg) + argSize_p);
-    event.m_pArg = &eventError;
+    event.eventType = kEventTypeError;
+    event.eventSink = kEventSinkApi;
+    EPL_MEMSET(&event.netTime, 0x00, sizeof(event.netTime));
+    event.eventArgSize = (memberoffs (tEventError, errorArg) + argSize_p);
+    event.pEventArg = &eventError;
 
     ret = eventu_postEvent(&event);
 
