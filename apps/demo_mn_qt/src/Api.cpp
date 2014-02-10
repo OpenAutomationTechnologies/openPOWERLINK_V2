@@ -178,53 +178,53 @@ Api::Api(MainWindow *pMainWindow_p, UINT nodeId_p, QString devName_p)
                      pInput, SLOT(setLeds(int, int)));
 
     EPL_MEMSET(&initParam, 0, sizeof (initParam));
-    initParam.m_uiSizeOfStruct = sizeof (initParam);
+    initParam.sizeOfInitParam = sizeof (initParam);
 
-    initParam.m_uiNodeId = nodeId_p;
-    initParam.m_dwIpAddress = (IP_ADDR & 0xFFFFFF00) | initParam.m_uiNodeId;
+    initParam.nodeId = nodeId_p;
+    initParam.ipAddress = (IP_ADDR & 0xFFFFFF00) | initParam.nodeId;
 
-    initParam.m_fAsyncOnly = FALSE;
+    initParam.fAsyncOnly = FALSE;
 
-    initParam.m_dwFeatureFlags = UINT_MAX;
-    initParam.m_dwCycleLen = CYCLE_LEN;           // required for error detection
-    initParam.m_uiIsochrTxMaxPayload = 256;       // const
-    initParam.m_uiIsochrRxMaxPayload = 256;       // const
-    initParam.m_dwPresMaxLatency = 50000;         // const; only required for IdentRes
-    initParam.m_uiPreqActPayloadLimit = 36;       // required for initialisation (+28 bytes)
-    initParam.m_uiPresActPayloadLimit = 36;       // required for initialisation of Pres frame (+28 bytes)
-    initParam.m_dwAsndMaxLatency = 150000;        // const; only required for IdentRes
-    initParam.m_uiMultiplCycleCnt = 0;            // required for error detection
-    initParam.m_uiAsyncMtu = 1500;                // required to set up max frame size
-    initParam.m_uiPrescaler = 2;                  // required for sync
-    initParam.m_dwLossOfFrameTolerance = 500000;
-    initParam.m_dwAsyncSlotTimeout = 3000000;
-    initParam.m_dwWaitSocPreq = 150000;
-    initParam.m_dwDeviceType = UINT_MAX;          // NMT_DeviceType_U32
-    initParam.m_dwVendorId = UINT_MAX;            // NMT_IdentityObject_REC.VendorId_U32
-    initParam.m_dwProductCode = UINT_MAX;         // NMT_IdentityObject_REC.ProductCode_U32
-    initParam.m_dwRevisionNumber = UINT_MAX;      // NMT_IdentityObject_REC.RevisionNo_U32
-    initParam.m_dwSerialNumber = UINT_MAX;        // NMT_IdentityObject_REC.SerialNo_U32
+    initParam.featureFlags = UINT_MAX;
+    initParam.cycleLen = CYCLE_LEN;           // required for error detection
+    initParam.isochrTxMaxPayload = 256;       // const
+    initParam.isochrRxMaxPayload = 256;       // const
+    initParam.presMaxLatency = 50000;         // const; only required for IdentRes
+    initParam.preqActPayloadLimit = 36;       // required for initialisation (+28 bytes)
+    initParam.presActPayloadLimit = 36;       // required for initialisation of Pres frame (+28 bytes)
+    initParam.asndMaxLatency = 150000;        // const; only required for IdentRes
+    initParam.multiplCylceCnt = 0;            // required for error detection
+    initParam.asyncMtu = 1500;                // required to set up max frame size
+    initParam.prescaler = 2;                  // required for sync
+    initParam.lossOfFrameTolerance = 500000;
+    initParam.asyncSlotTimeout = 3000000;
+    initParam.waitSocPreq = 150000;
+    initParam.deviceType = UINT_MAX;          // NMT_DeviceType_U32
+    initParam.vendorId = UINT_MAX;            // NMT_IdentityObject_REC.VendorId_U32
+    initParam.productCode = UINT_MAX;         // NMT_IdentityObject_REC.ProductCode_U32
+    initParam.revisionNumber = UINT_MAX;      // NMT_IdentityObject_REC.RevisionNo_U32
+    initParam.serialNumber = UINT_MAX;        // NMT_IdentityObject_REC.SerialNo_U32
 
-    initParam.m_dwSubnetMask = SUBNET_MASK;
-    initParam.m_dwDefaultGateway = 0;
-    EPL_MEMCPY(initParam.m_sHostname, sHostname, sizeof(initParam.m_sHostname));
-    initParam.m_uiSyncNodeId = EPL_C_ADR_SYNC_ON_SOA;
-    initParam.m_fSyncOnPrcNode = FALSE;
+    initParam.subnetMask = SUBNET_MASK;
+    initParam.defaultGateway = 0;
+    EPL_MEMCPY(initParam.sHostname, sHostname, sizeof(initParam.sHostname));
+    initParam.syncNodeId = EPL_C_ADR_SYNC_ON_SOA;
+    initParam.fSyncOnPrcNode = FALSE;
 
     // set callback functions
-    initParam.m_pfnCbEvent = pProcessThread->getEventCbFunc();
+    initParam.pfnCbEvent = pProcessThread->getEventCbFunc();
 
     /* write 00:00:00:00:00:00 to MAC address, so that the driver uses the real hardware address */
-    EPL_MEMCPY(initParam.m_abMacAddress, abMacAddr, sizeof (initParam.m_abMacAddress));
+    EPL_MEMCPY(initParam.aMacAddress, abMacAddr, sizeof (initParam.aMacAddress));
 
     // Copy the selected interface string to a local variable
     strcpy(devName_g, devName_p.toStdString().c_str());
-    initParam.m_HwParam.m_pszDevName = devName_g;
+    initParam.hwParam.m_pszDevName = devName_g;
 
 #if defined(CONFIG_KERNELSTACK_DIRECTLINK)
-    initParam.m_pfnCbSync = pDataInOutThread->getSyncCbFunc();
+    initParam.pfnCbSync = pDataInOutThread->getSyncCbFunc();
 #else
-    initParam.m_pfnCbSync  =    NULL;
+    initParam.pfnCbSync  =    NULL;
 #endif
 
     // init EPL

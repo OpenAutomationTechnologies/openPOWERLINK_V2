@@ -240,55 +240,68 @@ typedef tOplkError (*tOplkApiCbEvent) (
     tOplkApiEventArg*   pEventArg_p,   // IN: event argument (union)
     void*               pUserArg_p);
 
+
+/**
+\brief openPOWERLINK initialization parameters
+
+The structure defines the openPOWERLINK initialization parameters. The openPOWERLINK
+stack will be initialized with this parameters when oplk_init() is called. Most
+of the parameters will be stored in the object dictionary. Some of these objects
+are constant (read-only) objects and the initialization parameters are the only way of
+setting their values. Writable objects could be overwritten later at the boot-up
+process. This could be done by reading an CDC file for a MN or by configuration
+of a CN from a MN with SDO transfers.
+
+\note The elements of the parameter structure must be specified in platform
+byte order!
+*/
 typedef struct
 {
-    UINT                m_uiSizeOfStruct;
-    BOOL                m_fAsyncOnly;               // do not need to register PRes
-    UINT                m_uiNodeId;                 // local node ID
-    BYTE                m_abMacAddress[6];          // local MAC address
-    UINT32              m_dwFeatureFlags;           // 0x1F82: NMT_FeatureFlags_U32
-    UINT32              m_dwCycleLen;               // Cycle Length (0x1006: NMT_CycleLen_U32) in [us] - required for error detection
-    // 0x1F98: NMT_CycleTiming_REC
-    UINT                m_uiIsochrTxMaxPayload;     // 0x1F98.1: IsochrTxMaxPayload_U16 - const
-    UINT                m_uiIsochrRxMaxPayload;     // 0x1F98.2: IsochrRxMaxPayload_U16 - const
-    UINT32              m_dwPresMaxLatency;         // 0x1F98.3: PResMaxLatency_U32 - const in [ns], only required for IdentRes
-    UINT                m_uiPreqActPayloadLimit;    // 0x1F98.4: PReqActPayloadLimit_U16 - required for initialisation (+28 bytes)
-    UINT                m_uiPresActPayloadLimit;    // 0x1F98.5: PResActPayloadLimit_U16 - required for initialisation of Pres frame (+28 bytes)
-    UINT32              m_dwAsndMaxLatency;         // 0x1F98.6: ASndMaxLatency_U32 - const in [ns], only required for IdentRes
-    UINT                m_uiMultiplCycleCnt;        // 0x1F98.7: MultiplCycleCnt_U8 - required for error detection
-    UINT                m_uiAsyncMtu;               // 0x1F98.8: AsyncMTU_U16 - required to set up max frame size
-    UINT                m_uiPrescaler;              // 0x1F98.9: Prescaler_U16 - required for sync
-    UINT32              m_dwLossOfFrameTolerance;   // 0x1C14: DLL_LossOfFrameTolerance_U32 in [ns]
-    // 0x1F8A: NMT_MNCycleTiming_REC
-    UINT32              m_dwWaitSocPreq;            // 0x1F8A.1: WaitSoCPReq_U32 in [ns] - required on MN
-    UINT32              m_dwAsyncSlotTimeout;       // 0x1F8A.2: AsyncSlotTimeout_U32 in [ns] - required on MN
-
-    UINT32              m_dwDeviceType;             // NMT_DeviceType_U32
-    UINT32              m_dwVendorId;               // NMT_IdentityObject_REC.VendorId_U32
-    UINT32              m_dwProductCode;            // NMT_IdentityObject_REC.ProductCode_U32
-    UINT32              m_dwRevisionNumber;         // NMT_IdentityObject_REC.RevisionNo_U32
-    UINT32              m_dwSerialNumber;           // NMT_IdentityObject_REC.SerialNo_U32
-    UINT64              m_qwVendorSpecificExt1;
-    UINT32              m_dwVerifyConfigurationDate;// CFM_VerifyConfiguration_REC.ConfDate_U32
-    UINT32              m_dwVerifyConfigurationTime;// CFM_VerifyConfiguration_REC.ConfTime_U32
-    UINT32              m_dwApplicationSwDate;      // PDL_LocVerApplSw_REC.ApplSwDate_U32 on programmable device or date portion of NMT_ManufactSwVers_VS on non-programmable device
-    UINT32              m_dwApplicationSwTime;      // PDL_LocVerApplSw_REC.ApplSwTime_U32 on programmable device or time portion of NMT_ManufactSwVers_VS on non-programmable device
-    UINT32              m_dwIpAddress;
-    UINT32              m_dwSubnetMask;
-    UINT32              m_dwDefaultGateway;
-    UINT8               m_sHostname[32];
-    UINT8               m_abVendorSpecificExt2[48];
-    char*               m_pszDevName;               // NMT_ManufactDevName_VS (0x1008/0 local OD)
-    char*               m_pszHwVersion;             // NMT_ManufactHwVers_VS  (0x1009/0 local OD)
-    char*               m_pszSwVersion;             // NMT_ManufactSwVers_VS  (0x100A/0 local OD)
-    tOplkApiCbEvent      m_pfnCbEvent;
-    void*               m_pEventUserArg;
-    tEplSyncCb          m_pfnCbSync;
-    tEplHwParam         m_HwParam;
-    UINT32              m_dwSyncResLatency;        // constant response latency for SyncRes in [ns]
-    // synchronization trigger (AppCbSync, cycle preparation)
-    UINT                m_uiSyncNodeId;     // after PRes from CN with this node-ID (0 = SoC, 255 = SoA)
-    BOOL                m_fSyncOnPrcNode;   // TRUE: CN is PRes chained; FALSE: conventional CN (PReq/PRes)
+    UINT                sizeOfInitParam;            ///< This field contains the size of the initialization parameter structure.
+    BOOL                fAsyncOnly;                 ///< Determines if this node is an async-only node. If TRUE the node communicates only asynchronously.
+    UINT                nodeId;                     ///< The node ID of this node.
+    BYTE                aMacAddress[6];             ///< The MAC address of this node.
+    UINT32              featureFlags;               ///< The POWERLINK feature flags of this node (0x1F82: NMT_FeatureFlags_U32)
+    UINT32              cycleLen;                   ///< The cycle Length (0x1006: NMT_CycleLen_U32) in [us]
+    UINT                isochrTxMaxPayload;         ///< Maximum isochronous transmit payload (0x1F98.1: IsochrTxMaxPayload_U16) Const!
+    UINT                isochrRxMaxPayload;         ///< Maximum isochronous receive payload (0x1F98.2: IsochrRxMaxPayload_U16) Const!
+    UINT32              presMaxLatency;             ///< Maximum PRes latency in ns (0x1F98.3: PResMaxLatency_U32) Read-only!
+    UINT                preqActPayloadLimit;        ///< Actual PReq payload limit (0x1F98.4: PReqActPayloadLimit_U16)
+    UINT                presActPayloadLimit;        ///< Actual PRes payload limit (0x1F98.5: PResActPayloadLimit_U16)
+    UINT32              asndMaxLatency;             ///< Maximum ASnd latency in ns (0x1F98.6: ASndMaxLatency_U32) Const!
+    UINT                multiplCylceCnt;            ///< Multiplexed cycle count (0x1F98.7: MultiplCycleCnt_U8)
+    UINT                asyncMtu;                   ///< Asynchronous MTU (0x1F98.8: AsyncMTU_U16)
+    UINT                prescaler;                  ///< SoC prescaler (0x1F98.9: Prescaler_U16)
+    UINT32              lossOfFrameTolerance;       ///< Loss of frame tolerance in ns (0x1C14: DLL_LossOfFrameTolerance_U32)
+    UINT32              waitSocPreq;                ///< Wait time for first PReq in ns (0x1F8A.1: WaitSoCPReq_U32) Only for MN!
+    UINT32              asyncSlotTimeout;           ///< Asynchronous slot timeout in ns (0x1F8A.2: AsyncSlotTimeout_U32) Only for MN!
+    UINT32              deviceType;                 ///< The device type of this node (0x1000.0: NMT_DeviceType_U32) Const!
+    UINT32              vendorId;                   ///< The vendor ID of this node (0x1018.1: NMT_IdentityObject_REC.VendorId_U32) Const!
+    UINT32              productCode;                ///< The product code of this node (0x1018.2: NMT_IdentityObject_REC.ProductCode_U32) Const!
+    UINT32              revisionNumber;             ///< The revision number of this node (0x1018.3: NMT_IdentityObject_REC.RevisionNo_U32) Const!
+    UINT32              serialNumber;               ///< The serial number of this node (0x1018.4: NMT_IdentityObject_REC.SerialNo_U32) Const!
+    UINT64              vendorSpecificExt1;         ///< Vendor specific extensions 1 listed in the IdentResponse frame
+    UINT32              verifyConfigurationDate;    ///< Local configuration date (0x1020.1 CFM_VerifyConfiguration_REC.ConfDate_U32)
+    UINT32              verifyConfigurationTime;    ///< Local configuration time (0x1020.2 CFM_VerifyConfiguration_REC.ConfTime_U32)
+    UINT32              applicationSwDate;          ///< Local program Date (0x1F52.1 PDL_LocVerApplSw_REC.ApplSwDate_U32)
+    UINT32              applicationSwTime;          ///< Local program Time (0x1F52.2 PDL_LocVerApplSw_REC.ApplSwTime_U32)
+    UINT32              ipAddress;                  ///< IP address of the node
+    UINT32              subnetMask;                 ///< Subnet mask of the node
+    UINT32              defaultGateway;             ///< Default gateway used by this node
+    UINT8               sHostname[32];              ///< DNS host name of the node (maximum length: 32 characters!)
+    UINT8               aVendorSpecificExt2[48];    ///< Vendor specific extensions 2 listed in the IdentResponse frame
+    char*               pDevName;                   ///< Pointer to manufacturer device name (0x1008.0: NMT_ManufactDevName_VS) Const!
+    char*               pHwVersion;                 ///< Pointer to manufacturer hardware version (0x1009.0: NMT_ManufactHwVers_VS) Const!
+    char*               pSwVersion;                 ///< Pointer to manufacturer software version (0x100A.0: NMT_ManufactSwVers_VS) Const!
+    tOplkApiCbEvent     pfnCbEvent;                 ///< Pointer to the applications event handling function.
+    void*               pEventUserArg;              ///< Pointer to a user argument that is supplied to the event callback function (\ref tOplkApiCbEvent)
+    tEplSyncCb          pfnCbSync;                  ///< Pointer to the application sync callback function.
+                                                    /**< It is normally used only for non-threaded systems.
+                                                         If the application processes synchronous data by a separate thread it must be initialized with NULL! */
+    tEplHwParam         hwParam;                    ///< The hardware parameters of the node
+    UINT32              syncResLatency;             ///< Constant response latency for SyncRes in ns
+    UINT                syncNodeId;                 ///< Specifies the synchronization point for the MN. The synchronization take place after a PRes from a CN with this node-ID (0 = SoC, 255 = SoA)
+    BOOL                fSyncOnPrcNode;             ///< If it is TRUE, Sync on PRes chained CN; FALSE: conventional CN (PReq/PRes)
 } tOplkApiInitParam;
 
 typedef struct

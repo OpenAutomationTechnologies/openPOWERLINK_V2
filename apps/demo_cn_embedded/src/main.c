@@ -191,44 +191,44 @@ static tOplkError initPowerlink(tInstance* pInstance_p)
     PRINTF("Initializing openPOWERLINK stack...\n");
 
     EPL_MEMSET(&initParam, 0, sizeof(initParam));
-    initParam.m_uiSizeOfStruct = sizeof(initParam);
+    initParam.sizeOfInitParam = sizeof(initParam);
 
-    initParam.m_uiNodeId = pInstance_p->nodeId;
-    initParam.m_dwIpAddress = (0xFFFFFF00 & IP_ADDR) | initParam.m_uiNodeId;
+    initParam.nodeId = pInstance_p->nodeId;
+    initParam.ipAddress = (0xFFFFFF00 & IP_ADDR) | initParam.nodeId;
 
-    EPL_MEMCPY(initParam.m_abMacAddress, pInstance_p->aMacAddr, sizeof(initParam.m_abMacAddress));
+    EPL_MEMCPY(initParam.aMacAddress, pInstance_p->aMacAddr, sizeof(initParam.aMacAddress));
 
-    initParam.m_fAsyncOnly = FALSE;
+    initParam.fAsyncOnly = FALSE;
 
-    initParam.m_dwFeatureFlags            = -1;
-    initParam.m_dwCycleLen                = pInstance_p->cycleLen;  // required for error detection
-    initParam.m_uiIsochrTxMaxPayload      = 40;                     // const
-    initParam.m_uiIsochrRxMaxPayload      = 1490;                   // const
-    initParam.m_dwPresMaxLatency          = 2000;                   // const; only required for IdentRes
-    initParam.m_dwAsndMaxLatency          = 2000;                   // const; only required for IdentRes
-    initParam.m_uiPreqActPayloadLimit     = 36;                     // required for initialization (+28 bytes)
-    initParam.m_uiPresActPayloadLimit     = 40;                     // required for initialization of Pres frame (+28 bytes)
-    initParam.m_uiMultiplCycleCnt         = 0;                      // required for error detection
-    initParam.m_uiAsyncMtu                = 300;                    // required to set up max frame size
-    initParam.m_uiPrescaler               = 2;                      // required for sync
-    initParam.m_dwLossOfFrameTolerance    = 100000;
-    initParam.m_dwAsyncSlotTimeout        = 3000000;
-    initParam.m_dwWaitSocPreq             = 0;
-    initParam.m_dwDeviceType              = -1;               // NMT_DeviceType_U32
-    initParam.m_dwVendorId                = -1;               // NMT_IdentityObject_REC.VendorId_U32
-    initParam.m_dwProductCode             = -1;               // NMT_IdentityObject_REC.ProductCode_U32
-    initParam.m_dwRevisionNumber          = -1;               // NMT_IdentityObject_REC.RevisionNo_U32
-    initParam.m_dwSerialNumber            = -1;               // NMT_IdentityObject_REC.SerialNo_U32
-    initParam.m_dwApplicationSwDate       = 0;
-    initParam.m_dwApplicationSwTime       = 0;
-    initParam.m_dwSubnetMask              = SUBNET_MASK;
-    initParam.m_dwDefaultGateway          = 0;
-    initParam.m_uiSyncNodeId              = EPL_C_ADR_SYNC_ON_SOC;
-    initParam.m_fSyncOnPrcNode            = FALSE;
+    initParam.featureFlags            = -1;
+    initParam.cycleLen                = pInstance_p->cycleLen;  // required for error detection
+    initParam.isochrTxMaxPayload      = 40;                     // const
+    initParam.isochrRxMaxPayload      = 1490;                   // const
+    initParam.presMaxLatency          = 2000;                   // const; only required for IdentRes
+    initParam.asndMaxLatency          = 2000;                   // const; only required for IdentRes
+    initParam.preqActPayloadLimit     = 36;                     // required for initialization (+28 bytes)
+    initParam.presActPayloadLimit     = 40;                     // required for initialization of Pres frame (+28 bytes)
+    initParam.multiplCylceCnt         = 0;                      // required for error detection
+    initParam.asyncMtu                = 300;                    // required to set up max frame size
+    initParam.prescaler               = 2;                      // required for sync
+    initParam.lossOfFrameTolerance    = 100000;
+    initParam.asyncSlotTimeout        = 3000000;
+    initParam.waitSocPreq             = 0;
+    initParam.deviceType              = -1;               // NMT_DeviceType_U32
+    initParam.vendorId                = -1;               // NMT_IdentityObject_REC.VendorId_U32
+    initParam.productCode             = -1;               // NMT_IdentityObject_REC.ProductCode_U32
+    initParam.revisionNumber          = -1;               // NMT_IdentityObject_REC.RevisionNo_U32
+    initParam.serialNumber            = -1;               // NMT_IdentityObject_REC.SerialNo_U32
+    initParam.applicationSwDate       = 0;
+    initParam.applicationSwTime       = 0;
+    initParam.subnetMask              = SUBNET_MASK;
+    initParam.defaultGateway          = 0;
+    initParam.syncNodeId              = EPL_C_ADR_SYNC_ON_SOC;
+    initParam.fSyncOnPrcNode            = FALSE;
 
     // set callback functions
-    initParam.m_pfnCbEvent = processEvents;
-    initParam.m_pfnCbSync  = processSync;
+    initParam.pfnCbEvent = processEvents;
+    initParam.pfnCbSync  = processSync;
 
     // initialize POWERLINK stack
     ret = oplk_init(&initParam);

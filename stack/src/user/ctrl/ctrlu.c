@@ -231,10 +231,10 @@ tOplkError ctrlu_initStack(tOplkApiInitParam * pInitParam_p)
     // reset instance structure
     EPL_MEMSET(&ctrlInstance_l.initParam, 0, sizeof (tOplkApiInitParam));
     EPL_MEMCPY(&ctrlInstance_l.initParam, pInitParam_p,
-               min(sizeof(tOplkApiInitParam), (size_t)pInitParam_p->m_uiSizeOfStruct));
+               min(sizeof(tOplkApiInitParam), (size_t)pInitParam_p->sizeOfInitParam));
 
     // check event callback function pointer
-    if (ctrlInstance_l.initParam.m_pfnCbEvent == NULL)
+    if (ctrlInstance_l.initParam.pfnCbEvent == NULL)
     {   // application must always have an event callback function
         ret = kErrorApiInvalidParam;
         goto Exit;
@@ -244,9 +244,9 @@ tOplkError ctrlu_initStack(tOplkApiInitParam * pInitParam_p)
         goto Exit;
 
     TRACE ("Initializing kernel modules ...\n");
-    EPL_MEMCPY (ctrlParam.aMacAddress, ctrlInstance_l.initParam.m_abMacAddress, 6);
-    strncpy(ctrlParam.szEthDevName, ctrlInstance_l.initParam.m_HwParam.m_pszDevName, 127);
-    ctrlParam.ethDevNumber = ctrlInstance_l.initParam.m_HwParam.m_uiDevNumber;
+    EPL_MEMCPY (ctrlParam.aMacAddress, ctrlInstance_l.initParam.aMacAddress, 6);
+    strncpy(ctrlParam.szEthDevName, ctrlInstance_l.initParam.hwParam.m_pszDevName, 127);
+    ctrlParam.ethDevNumber = ctrlInstance_l.initParam.hwParam.m_uiDevNumber;
     ctrlucal_storeInitParam(&ctrlParam);
 
     if ((ret = ctrlucal_executeCmd(kCtrlInitStack)) != kErrorOk)
@@ -259,7 +259,7 @@ tOplkError ctrlu_initStack(tOplkApiInitParam * pInitParam_p)
         goto Exit;
     }
 
-    EPL_MEMCPY (ctrlInstance_l.initParam.m_abMacAddress, ctrlParam.aMacAddress, 6);
+    EPL_MEMCPY (ctrlInstance_l.initParam.aMacAddress, ctrlParam.aMacAddress, 6);
 
     TRACE ("Initialize Eventu module...\n");
     if ((ret = eventu_init(processUserEvent)) != kErrorOk)
@@ -285,7 +285,7 @@ tOplkError ctrlu_initStack(tOplkApiInitParam * pInitParam_p)
 
 #if defined(CONFIG_INCLUDE_PDO)
     TRACE ("Initialize Pdou module...\n");
-    ret = pdou_init(ctrlInstance_l.initParam.m_pfnCbSync);
+    ret = pdou_init(ctrlInstance_l.initParam.pfnCbSync);
     if (ret != kErrorOk)
     {
         goto Exit;
@@ -486,8 +486,8 @@ tOplkError ctrlu_callUserEventCallback(tOplkApiEventType eventType_p, tOplkApiEv
 {
     tOplkError          ret = kErrorOk;
 
-    ret = ctrlInstance_l.initParam.m_pfnCbEvent(eventType_p, pEventArg_p,
-                                                ctrlInstance_l.initParam.m_pEventUserArg);
+    ret = ctrlInstance_l.initParam.pfnCbEvent(eventType_p, pEventArg_p,
+                                                ctrlInstance_l.initParam.pEventUserArg);
     return ret;
 }
 
@@ -690,7 +690,7 @@ static tOplkError initNmtu(tOplkApiInitParam* pInitParam_p)
 
     // initialize EplNmtCnu module
     TRACE ("Initialize NMT_CN module...\n");
-    Ret = nmtcnu_addInstance(pInitParam_p->m_uiNodeId);
+    Ret = nmtcnu_addInstance(pInitParam_p->nodeId);
     if (Ret != kErrorOk)
         goto Exit;
 
@@ -811,7 +811,7 @@ static tOplkError cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
 #if 0
 #if defined(CONFIG_INCLUDE_SDO_UDP)
             // configure SDO via UDP (i.e. bind it to the EPL ethernet interface)
-            ret = sdoudp_config(stackInstance_l.m_InitParam.m_dwIpAddress, EPL_C_SDO_EPL_PORT);
+            ret = sdoudp_config(stackInstance_l.m_InitParam.ipAddress, EPL_C_SDO_EPL_PORT);
             if (ret != kErrorOk)
                 return ret;
 #endif
@@ -1071,7 +1071,7 @@ static tOplkError updateDllConfig(tOplkApiInitParam* pInitParam_p, BOOL fUpdateI
         return ret;
 
     // d.k. There is no dependence between FeatureFlags and async-only CN
-    dllConfigParam.fAsyncOnly = pInitParam_p->m_fAsyncOnly;
+    dllConfigParam.fAsyncOnly = pInitParam_p->fAsyncOnly;
 
     // 0x1C14: DLL_LossOfFrameTolerance_U32 in [ns]
     obdSize = 4;
@@ -1138,11 +1138,11 @@ static tOplkError updateDllConfig(tOplkApiInitParam* pInitParam_p, BOOL fUpdateI
 #endif
 
 #if EPL_DLL_PRES_CHAINING_CN != FALSE
-    dllConfigParam.syncResLatency = pInitParam_p->m_dwSyncResLatency;
+    dllConfigParam.syncResLatency = pInitParam_p->syncResLatency;
 #endif
 
-    dllConfigParam.fSyncOnPrcNode = pInitParam_p->m_fSyncOnPrcNode;
-    dllConfigParam.syncNodeId = pInitParam_p->m_uiSyncNodeId;
+    dllConfigParam.fSyncOnPrcNode = pInitParam_p->fSyncOnPrcNode;
+    dllConfigParam.syncNodeId = pInitParam_p->syncNodeId;
 
     dllConfigParam.sizeOfStruct = sizeof (dllConfigParam);
     if ((ret = dllucal_config(&dllConfigParam)) != kErrorOk)
@@ -1173,15 +1173,15 @@ static tOplkError updateDllConfig(tOplkApiInitParam* pInitParam_p, BOOL fUpdateI
         if ((ret = obd_readEntry(0x1018, 4, &dllIdentParam.serialNumber, &obdSize)) != kErrorOk)
             return ret;
 
-        dllIdentParam.ipAddress = pInitParam_p->m_dwIpAddress;
-        dllIdentParam.subnetMask = pInitParam_p->m_dwSubnetMask;
+        dllIdentParam.ipAddress = pInitParam_p->ipAddress;
+        dllIdentParam.subnetMask = pInitParam_p->subnetMask;
 
         obdSize = sizeof (dllIdentParam.defaultGateway);
         ret = obd_readEntry(0x1E40, 5, &dllIdentParam.defaultGateway, &obdSize);
         if (ret != kErrorOk)
         {   // NWL_IpAddrTable_Xh_REC.DefaultGateway_IPAD seams to not exist,
             // so use the one supplied in the init parameter
-            dllIdentParam.defaultGateway = pInitParam_p->m_dwDefaultGateway;
+            dllIdentParam.defaultGateway = pInitParam_p->defaultGateway;
         }
 
 #if defined(CONFIG_INCLUDE_VETH)
@@ -1199,7 +1199,7 @@ static tOplkError updateDllConfig(tOplkApiInitParam* pInitParam_p, BOOL fUpdateI
         if ((ret = obd_readEntry(0x1F9A, 0, &dllIdentParam.sHostname[0], &obdSize)) != kErrorOk)
         {   // NMT_HostName_VSTR seams to not exist,
             // so use the one supplied in the init parameter
-            EPL_MEMCPY(dllIdentParam.sHostname, pInitParam_p->m_sHostname, sizeof(dllIdentParam.sHostname));
+            EPL_MEMCPY(dllIdentParam.sHostname, pInitParam_p->sHostname, sizeof(dllIdentParam.sHostname));
         }
 
         obdSize = 4;
@@ -1210,12 +1210,12 @@ static tOplkError updateDllConfig(tOplkApiInitParam* pInitParam_p, BOOL fUpdateI
         obd_readEntry(0x1020, 2, &dllIdentParam.verifyConfigurationTime, &obdSize);
         // ignore any error, because this object is optional
 
-        dllIdentParam.applicationSwDate = pInitParam_p->m_dwApplicationSwDate;
-        dllIdentParam.applicationSwTime = pInitParam_p->m_dwApplicationSwTime;
+        dllIdentParam.applicationSwDate = pInitParam_p->applicationSwDate;
+        dllIdentParam.applicationSwTime = pInitParam_p->applicationSwTime;
 
-        dllIdentParam.vendorSpecificExt1 = pInitParam_p->m_qwVendorSpecificExt1;
+        dllIdentParam.vendorSpecificExt1 = pInitParam_p->vendorSpecificExt1;
 
-        EPL_MEMCPY(&dllIdentParam.aVendorSpecificExt2[0], &pInitParam_p->m_abVendorSpecificExt2[0],
+        EPL_MEMCPY(&dllIdentParam.aVendorSpecificExt2[0], &pInitParam_p->aVendorSpecificExt2[0],
                    sizeof(dllIdentParam.aVendorSpecificExt2));
 
         dllIdentParam.sizeOfStruct = sizeof (dllIdentParam);
@@ -1268,144 +1268,144 @@ static tOplkError updateObd(tOplkApiInitParam* pInitParam_p)
     BYTE                bTemp;
 
     // set node id in OD
-    ret = obd_setNodeId(pInitParam_p->m_uiNodeId,    // node id
+    ret = obd_setNodeId(pInitParam_p->nodeId,    // node id
                             kObdNodeIdHardware); // set by hardware
     if (ret != kErrorOk)
         return ret;
 
-    if (pInitParam_p->m_dwCycleLen != UINT_MAX)
+    if (pInitParam_p->cycleLen != UINT_MAX)
     {
-        obd_writeEntry(0x1006, 0, &pInitParam_p->m_dwCycleLen, 4);
+        obd_writeEntry(0x1006, 0, &pInitParam_p->cycleLen, 4);
     }
 
-    if (pInitParam_p->m_dwLossOfFrameTolerance != UINT_MAX)
+    if (pInitParam_p->lossOfFrameTolerance != UINT_MAX)
     {
-        obd_writeEntry(0x1C14, 0, &pInitParam_p->m_dwLossOfFrameTolerance, 4);
+        obd_writeEntry(0x1C14, 0, &pInitParam_p->lossOfFrameTolerance, 4);
     }
 
     // d.k. There is no dependance between FeatureFlags and async-only CN.
-    if (pInitParam_p->m_dwFeatureFlags != UINT_MAX)
+    if (pInitParam_p->featureFlags != UINT_MAX)
     {
-        obd_writeEntry(0x1F82, 0, &pInitParam_p->m_dwFeatureFlags, 4);
+        obd_writeEntry(0x1F82, 0, &pInitParam_p->featureFlags, 4);
     }
 
-    wTemp = (WORD) pInitParam_p->m_uiIsochrTxMaxPayload;
+    wTemp = (WORD) pInitParam_p->isochrTxMaxPayload;
     obd_writeEntry(0x1F98, 1, &wTemp, 2);
 
-    wTemp = (WORD) pInitParam_p->m_uiIsochrRxMaxPayload;
+    wTemp = (WORD) pInitParam_p->isochrRxMaxPayload;
     obd_writeEntry(0x1F98, 2, &wTemp, 2);
 
-    obd_writeEntry(0x1F98, 3, &pInitParam_p->m_dwPresMaxLatency, 4);
+    obd_writeEntry(0x1F98, 3, &pInitParam_p->presMaxLatency, 4);
 
-    if (pInitParam_p->m_uiPreqActPayloadLimit <= EPL_C_DLL_ISOCHR_MAX_PAYL)
+    if (pInitParam_p->preqActPayloadLimit <= EPL_C_DLL_ISOCHR_MAX_PAYL)
     {
-        wTemp = (WORD) pInitParam_p->m_uiPreqActPayloadLimit;
+        wTemp = (WORD) pInitParam_p->preqActPayloadLimit;
         obd_writeEntry(0x1F98, 4, &wTemp, 2);
     }
 
-    if (pInitParam_p->m_uiPresActPayloadLimit <= EPL_C_DLL_ISOCHR_MAX_PAYL)
+    if (pInitParam_p->presActPayloadLimit <= EPL_C_DLL_ISOCHR_MAX_PAYL)
     {
-        wTemp = (WORD) pInitParam_p->m_uiPresActPayloadLimit;
+        wTemp = (WORD) pInitParam_p->presActPayloadLimit;
         obd_writeEntry(0x1F98, 5, &wTemp, 2);
     }
 
-    obd_writeEntry(0x1F98, 6, &pInitParam_p->m_dwAsndMaxLatency, 4);
+    obd_writeEntry(0x1F98, 6, &pInitParam_p->asndMaxLatency, 4);
 
-    if (pInitParam_p->m_uiMultiplCycleCnt <= 0xFF)
+    if (pInitParam_p->multiplCylceCnt <= 0xFF)
     {
-        bTemp = (BYTE) pInitParam_p->m_uiMultiplCycleCnt;
+        bTemp = (BYTE) pInitParam_p->multiplCylceCnt;
         obd_writeEntry(0x1F98, 7, &bTemp, 1);
     }
 
-    if (pInitParam_p->m_uiAsyncMtu <= EPL_C_DLL_MAX_ASYNC_MTU)
+    if (pInitParam_p->asyncMtu <= EPL_C_DLL_MAX_ASYNC_MTU)
     {
-        wTemp = (WORD) pInitParam_p->m_uiAsyncMtu;
+        wTemp = (WORD) pInitParam_p->asyncMtu;
         obd_writeEntry(0x1F98, 8, &wTemp, 2);
     }
 
-    if (pInitParam_p->m_uiPrescaler <= 1000)
+    if (pInitParam_p->prescaler <= 1000)
     {
-        wTemp = (WORD) pInitParam_p->m_uiPrescaler;
+        wTemp = (WORD) pInitParam_p->prescaler;
         obd_writeEntry(0x1F98, 9, &wTemp, 2);
     }
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
-    if (pInitParam_p->m_dwWaitSocPreq != UINT_MAX)
+    if (pInitParam_p->waitSocPreq != UINT_MAX)
     {
-        obd_writeEntry(0x1F8A, 1, &pInitParam_p->m_dwWaitSocPreq, 4);
+        obd_writeEntry(0x1F8A, 1, &pInitParam_p->waitSocPreq, 4);
     }
 
-    if ((pInitParam_p->m_dwAsyncSlotTimeout != 0) && (pInitParam_p->m_dwAsyncSlotTimeout != UINT_MAX))
+    if ((pInitParam_p->asyncSlotTimeout != 0) && (pInitParam_p->asyncSlotTimeout != UINT_MAX))
     {
-        obd_writeEntry(0x1F8A, 2, &pInitParam_p->m_dwAsyncSlotTimeout, 4);
+        obd_writeEntry(0x1F8A, 2, &pInitParam_p->asyncSlotTimeout, 4);
     }
 #endif
 
     // configure Identity
-    if (pInitParam_p->m_dwDeviceType != UINT_MAX)
+    if (pInitParam_p->deviceType != UINT_MAX)
     {
-        obd_writeEntry(0x1000, 0, &pInitParam_p->m_dwDeviceType, 4);
+        obd_writeEntry(0x1000, 0, &pInitParam_p->deviceType, 4);
     }
 
-    if (pInitParam_p->m_dwVendorId != UINT_MAX)
+    if (pInitParam_p->vendorId != UINT_MAX)
     {
-        obd_writeEntry(0x1018, 1, &pInitParam_p->m_dwVendorId, 4);
+        obd_writeEntry(0x1018, 1, &pInitParam_p->vendorId, 4);
     }
 
-    if (pInitParam_p->m_dwProductCode != UINT_MAX)
+    if (pInitParam_p->productCode != UINT_MAX)
     {
-        obd_writeEntry(0x1018, 2, &pInitParam_p->m_dwProductCode, 4);
+        obd_writeEntry(0x1018, 2, &pInitParam_p->productCode, 4);
     }
 
-    if (pInitParam_p->m_dwRevisionNumber != UINT_MAX)
+    if (pInitParam_p->revisionNumber != UINT_MAX)
     {
-        obd_writeEntry(0x1018, 3, &pInitParam_p->m_dwRevisionNumber, 4);
+        obd_writeEntry(0x1018, 3, &pInitParam_p->revisionNumber, 4);
     }
 
-    if (pInitParam_p->m_dwSerialNumber != UINT_MAX)
+    if (pInitParam_p->serialNumber != UINT_MAX)
     {
-        obd_writeEntry(0x1018, 4, &pInitParam_p->m_dwSerialNumber, 4);
+        obd_writeEntry(0x1018, 4, &pInitParam_p->serialNumber, 4);
     }
 
-    if (pInitParam_p->m_pszDevName != NULL)
+    if (pInitParam_p->pDevName != NULL)
     {
         // write Device Name (0x1008)
-        obd_writeEntry (0x1008, 0, (void GENERIC*) pInitParam_p->m_pszDevName,
-                          (tObdSize) strlen(pInitParam_p->m_pszDevName));
+        obd_writeEntry (0x1008, 0, (void GENERIC*) pInitParam_p->pDevName,
+                          (tObdSize) strlen(pInitParam_p->pDevName));
     }
 
-    if (pInitParam_p->m_pszHwVersion != NULL)
+    if (pInitParam_p->pHwVersion != NULL)
     {
         // write Hardware version (0x1009)
-        obd_writeEntry (0x1009, 0, (void GENERIC*) pInitParam_p->m_pszHwVersion,
-                          (tObdSize) strlen(pInitParam_p->m_pszHwVersion));
+        obd_writeEntry (0x1009, 0, (void GENERIC*) pInitParam_p->pHwVersion,
+                          (tObdSize) strlen(pInitParam_p->pHwVersion));
     }
 
-    if (pInitParam_p->m_pszSwVersion != NULL)
+    if (pInitParam_p->pSwVersion != NULL)
     {
         // write Software version (0x100A)
-        obd_writeEntry (0x100A, 0, (void GENERIC*) pInitParam_p->m_pszSwVersion,
-                          (tObdSize) strlen(pInitParam_p->m_pszSwVersion));
+        obd_writeEntry (0x100A, 0, (void GENERIC*) pInitParam_p->pSwVersion,
+                          (tObdSize) strlen(pInitParam_p->pSwVersion));
     }
 
 #if defined(CONFIG_INCLUDE_VETH)
     // write NMT_HostName_VSTR (0x1F9A)
-    obd_writeEntry (0x1F9A, 0, (void GENERIC*) &pInitParam_p->m_sHostname[0],
-                      sizeof (pInitParam_p->m_sHostname));
+    obd_writeEntry (0x1F9A, 0, (void GENERIC*) &pInitParam_p->sHostname[0],
+                      sizeof (pInitParam_p->sHostname));
 
     //TRACE("%s: write NMT_HostName_VSTR %d\n", __func__, Ret);
 
     // write NWL_IpAddrTable_Xh_REC.Addr_IPAD (0x1E40/2)
-    obd_writeEntry (0x1E40, 2, (void GENERIC*) &pInitParam_p->m_dwIpAddress,
-                      sizeof (pInitParam_p->m_dwIpAddress));
+    obd_writeEntry (0x1E40, 2, (void GENERIC*) &pInitParam_p->ipAddress,
+                      sizeof (pInitParam_p->ipAddress));
 
     // write NWL_IpAddrTable_Xh_REC.NetMask_IPAD (0x1E40/3)
-    obd_writeEntry (0x1E40, 3, (void GENERIC*) &pInitParam_p->m_dwSubnetMask,
-                      sizeof (pInitParam_p->m_dwSubnetMask));
+    obd_writeEntry (0x1E40, 3, (void GENERIC*) &pInitParam_p->subnetMask,
+                      sizeof (pInitParam_p->subnetMask));
 
     // write NWL_IpAddrTable_Xh_REC.DefaultGateway_IPAD (0x1E40/5)
-    obd_writeEntry (0x1E40, 5, (void GENERIC*) &pInitParam_p->m_dwDefaultGateway,
-                      sizeof (pInitParam_p->m_dwDefaultGateway));
+    obd_writeEntry (0x1E40, 5, (void GENERIC*) &pInitParam_p->defaultGateway,
+                      sizeof (pInitParam_p->defaultGateway));
 #endif
 
     // ignore return code
