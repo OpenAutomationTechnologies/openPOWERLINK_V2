@@ -57,3 +57,6 @@ CFG_OPENMAC=1
 CFG_HOSTINTERFACE=1
 # Type of POWERLINK node supported by this platform
 CFG_NODE=MN
+
+# JTAG Cable
+CFG_JTAG_CABLE="USB-Blaster [USB-0]"
