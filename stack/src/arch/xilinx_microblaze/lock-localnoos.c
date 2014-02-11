@@ -42,7 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include "lock.h"
 
-#include <EplInc.h>
+#include <oplk/oplkinc.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
