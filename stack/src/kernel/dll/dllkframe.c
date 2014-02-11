@@ -1393,7 +1393,7 @@ static tOplkError processReceivedPreq(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
             {   // format error
                 tEventDllError  dllEvent;
 
-                dllEvent.dllErrorEvents = EPL_DLL_ERR_INVALID_FORMAT;
+                dllEvent.dllErrorEvents = DLL_ERR_INVALID_FORMAT;
                 dllEvent.nodeId = ami_getUint8Le(&pFrame->srcNodeId);
                 dllEvent.nmtState = nmtState_p;
                 errhndk_postError(&dllEvent);
@@ -1628,7 +1628,7 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
 #endif
             {   // This PRes frame was expected, but it is too large
                 // otherwise it will be silently ignored
-                DllEvent.dllErrorEvents = EPL_DLL_ERR_INVALID_FORMAT;
+                DllEvent.dllErrorEvents = DLL_ERR_INVALID_FORMAT;
                 DllEvent.nodeId = nodeId;
                 DllEvent.nmtState = nmtState_p;
                 ret = errhndk_postError(&DllEvent);
