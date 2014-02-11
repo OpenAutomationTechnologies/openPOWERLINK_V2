@@ -196,7 +196,7 @@ tOplkError dllk_issueLossOfPres(UINT nodeId_p)
         {   // normal isochronous CN
             tEventDllError  dllEvent;
 
-            dllEvent.dllErrorEvents = EPL_DLL_ERR_MN_CN_LOSS_PRES;
+            dllEvent.dllErrorEvents = DLL_ERR_MN_CN_LOSS_PRES;
             dllEvent.nodeId = pIntNodeInfo->nodeId;
             ret = errhndk_postError(&dllEvent);
             if (ret != kErrorOk)

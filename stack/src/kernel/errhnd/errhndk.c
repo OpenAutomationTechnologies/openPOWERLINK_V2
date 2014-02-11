@@ -346,7 +346,7 @@ static tOplkError decrementMnCounters(void)
         pCnNodeId++;
     }
 
-    if ((instance_l.dllErrorEvents & EPL_DLL_ERR_MN_CRC) == 0)
+    if ((instance_l.dllErrorEvents & DLL_ERR_MN_CRC) == 0)
     {   // decrement CRC threshold counter, because it didn't occur last cycle
         errhndkcal_getMnCrcThresholdCnt(&thresholdCnt);
         if (thresholdCnt > 0)
@@ -356,7 +356,7 @@ static tOplkError decrementMnCounters(void)
         }
     }
 
-    if ((instance_l.dllErrorEvents & EPL_DLL_ERR_MN_CYCTIMEEXCEED) == 0)
+    if ((instance_l.dllErrorEvents & DLL_ERR_MN_CYCTIMEEXCEED) == 0)
     {   // decrement cycle exceed threshold counter, because it didn't occur last cycle
         errhndkcal_getMnCycTimeExceedThresholdCnt(&thresholdCnt);
         if (thresholdCnt > 0)
@@ -382,7 +382,7 @@ static void decrementCnCounters(void)
 {
     UINT32           thresholdCnt;
 
-    if ((instance_l.dllErrorEvents & EPL_DLL_ERR_CN_LOSS_SOC) == 0)
+    if ((instance_l.dllErrorEvents & DLL_ERR_CN_LOSS_SOC) == 0)
     {   // decrement loss of SoC threshold counter, because it didn't occur last cycle
         errhndkcal_getLossSocThresholdCnt(&thresholdCnt);
         if (thresholdCnt > 0)
@@ -392,7 +392,7 @@ static void decrementCnCounters(void)
         }
     }
 
-    if ((instance_l.dllErrorEvents & EPL_DLL_ERR_CN_CRC) == 0)
+    if ((instance_l.dllErrorEvents & DLL_ERR_CN_CRC) == 0)
     {   // decrement CRC threshold counter, because it didn't occur last cycle
         errhndkcal_getCnCrcThresholdCnt(&thresholdCnt);
         if (thresholdCnt > 0)
@@ -423,7 +423,7 @@ static tOplkError handleCnLossSoc(tEvent *pEvent_p)
     UINT32                  threshold, thresholdCnt, cumulativeCnt;
 
     // Check if loss of SoC event occurred
-    if ((pErrorHandlerEvent->dllErrorEvents & EPL_DLL_ERR_CN_LOSS_SOC) == 0)
+    if ((pErrorHandlerEvent->dllErrorEvents & DLL_ERR_CN_LOSS_SOC) == 0)
         return kErrorOk;
 
     errhndkcal_getCnLossSocError(&cumulativeCnt, &thresholdCnt, &threshold);
@@ -447,7 +447,7 @@ static tOplkError handleCnLossSoc(tEvent *pEvent_p)
 
             postNmtEvent(kNmtEventNmtCycleError);
         }
-        instance_l.dllErrorEvents |= EPL_DLL_ERR_CN_LOSS_SOC;
+        instance_l.dllErrorEvents |= DLL_ERR_CN_LOSS_SOC;
     }
 
     errhndkcal_setCnLossSocCounters(cumulativeCnt, thresholdCnt);
@@ -474,7 +474,7 @@ static tOplkError handleCnLossPreq(tEvent *pEvent_p)
     UINT32                  threshold, thresholdCnt, cumulativeCnt;
 
     // check if loss of PReq event occurred
-    if ((pErrorHandlerEvent->dllErrorEvents & EPL_DLL_ERR_CN_LOSS_PREQ) == 0)
+    if ((pErrorHandlerEvent->dllErrorEvents & DLL_ERR_CN_LOSS_PREQ) == 0)
         return kErrorOk;
 
     errhndkcal_getCnLossPreqError(&cumulativeCnt, &thresholdCnt, &threshold);
@@ -523,7 +523,7 @@ static void handleCorrectPreq(tEvent *pEvent_p)
     errhndkcal_getLossPreqThresholdCnt(&thresholdCnt);
 
     if ((thresholdCnt == 0) ||
-        ((pErrorHandlerEvent->dllErrorEvents & EPL_DLL_ERR_CN_RECVD_PREQ) == 0))
+        ((pErrorHandlerEvent->dllErrorEvents & DLL_ERR_CN_RECVD_PREQ) == 0))
         return;
 
     // PReq correctly received
@@ -551,7 +551,7 @@ static tOplkError handleCnCrc(tEvent *pEvent_p)
     UINT32                  threshold, thresholdCnt, cumulativeCnt;
 
     // Check if CRC error event occurred
-    if ((pErrorHandlerEvent->dllErrorEvents & EPL_DLL_ERR_CN_CRC) == 0)
+    if ((pErrorHandlerEvent->dllErrorEvents & DLL_ERR_CN_CRC) == 0)
         return kErrorOk;
 
     errhndkcal_getCnCrcError(&cumulativeCnt, &thresholdCnt, &threshold);
@@ -575,7 +575,7 @@ static tOplkError handleCnCrc(tEvent *pEvent_p)
 
             postNmtEvent(kNmtEventNmtCycleError);
         }
-        instance_l.dllErrorEvents |= EPL_DLL_ERR_CN_CRC;
+        instance_l.dllErrorEvents |= DLL_ERR_CN_CRC;
     }
 
     errhndkcal_setCnLossPreqCounters(cumulativeCnt, thresholdCnt);
@@ -601,7 +601,7 @@ static tOplkError handleInvalidFormat(tEvent *pEvent_p)
     tEventDllError*         pErrorHandlerEvent = (tEventDllError*)pEvent_p->pEventArg;
 
     // check if invalid format error occurred (only direct reaction)
-    if ((pErrorHandlerEvent->dllErrorEvents & EPL_DLL_ERR_INVALID_FORMAT) == 0)
+    if ((pErrorHandlerEvent->dllErrorEvents & DLL_ERR_INVALID_FORMAT) == 0)
         return kErrorOk;
 
     ret = generateHistoryEntryNodeId(EPL_E_DLL_INVALID_FORMAT,
@@ -665,7 +665,7 @@ static tOplkError handleMnCrc(tEvent *pEvent_p)
     UINT32                  threshold, thresholdCnt, cumulativeCnt;
 
     // check if CRC error event occurred
-    if ((pErrorHandlerEvent->dllErrorEvents & EPL_DLL_ERR_MN_CRC) == 0)
+    if ((pErrorHandlerEvent->dllErrorEvents & DLL_ERR_MN_CRC) == 0)
         return kErrorOk;
 
     errhndkcal_getMnCrcError(&cumulativeCnt, &thresholdCnt, &threshold);
@@ -685,7 +685,7 @@ static tOplkError handleMnCrc(tEvent *pEvent_p)
             }
             postNmtEvent(kNmtEventNmtCycleError);
         }
-        instance_l.dllErrorEvents |= EPL_DLL_ERR_MN_CRC;
+        instance_l.dllErrorEvents |= DLL_ERR_MN_CRC;
     }
     errhndkcal_setMnCrcCounters(cumulativeCnt, thresholdCnt);
     return kErrorOk;
@@ -711,7 +711,7 @@ static tOplkError handleMnCycTimeExceed(tEvent *pEvent_p)
     UINT32                  threshold, thresholdCnt, cumulativeCnt;
 
     // check if cycle time exceeded event occurred
-    if ((pErrorHandlerEvent->dllErrorEvents & EPL_DLL_ERR_MN_CYCTIMEEXCEED) == 0)
+    if ((pErrorHandlerEvent->dllErrorEvents & DLL_ERR_MN_CYCTIMEEXCEED) == 0)
         return kErrorOk;
 
     errhndkcal_getMnCycTimeExceedError(&cumulativeCnt, &thresholdCnt,
@@ -746,7 +746,7 @@ static tOplkError handleMnCycTimeExceed(tEvent *pEvent_p)
                 return ret;
             }
         }
-        instance_l.dllErrorEvents |= EPL_DLL_ERR_MN_CYCTIMEEXCEED;
+        instance_l.dllErrorEvents |= DLL_ERR_MN_CYCTIMEEXCEED;
     }
     errhndkcal_setMnCycTimeExceedCounters(cumulativeCnt, thresholdCnt);
     return ret;
@@ -773,7 +773,7 @@ static tOplkError handleMnCnLossPres(tEvent *pEvent_p)
     tEventDllError*         pErrorHandlerEvent = (tEventDllError*)pEvent_p->pEventArg;
     UINT32                  threshold, thresholdCnt, cumulativeCnt;
 
-    if ((pErrorHandlerEvent->dllErrorEvents & EPL_DLL_ERR_MN_CN_LOSS_PRES) == 0)
+    if ((pErrorHandlerEvent->dllErrorEvents & DLL_ERR_MN_CN_LOSS_PRES) == 0)
         return kErrorOk;
 
     nodeIdx = pErrorHandlerEvent->nodeId - 1;

@@ -861,7 +861,7 @@ tOplkError dllk_cbCyclicError(tOplkError errorCode_p, tEdrvTxBuffer * pTxBuffer_
         case kErrorEdrvCurTxListEmpty:
         case kErrorEdrvTxListNotFinishedYet:
         case kErrorEdrvNoFreeTxDesc:
-            dllEvent.dllErrorEvents = EPL_DLL_ERR_MN_CYCTIMEEXCEED;
+            dllEvent.dllErrorEvents = DLL_ERR_MN_CYCTIMEEXCEED;
             dllEvent.nodeId = handle;
             dllEvent.nmtState = nmtState;
             dllEvent.oplkError = errorCode_p;
