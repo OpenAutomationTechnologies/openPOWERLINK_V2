@@ -190,7 +190,7 @@ DWORD dwRetVal = 0;
     // clear instance structure
     EPL_MEMSET(&EdrvInstance_l, 0, sizeof (EdrvInstance_l));
 
-    if (pEdrvInitParam_p->hwParam.m_pszDevName == NULL)
+    if (pEdrvInitParam_p->hwParam.pDevName == NULL)
     {
         Ret = kErrorEdrvInit;
         goto Exit;
@@ -229,7 +229,7 @@ DWORD dwRetVal = 0;
         {
             if (pAdapter->Type == MIB_IF_TYPE_ETHERNET)
             {
-                if (strstr(pEdrvInitParam_p->hwParam.m_pszDevName, pAdapter->AdapterName) != NULL)
+                if (strstr(pEdrvInitParam_p->hwParam.pDevName, pAdapter->AdapterName) != NULL)
                 {   // corresponding adapter found
                     EPL_MEMCPY(pEdrvInitParam_p->aMacAddr, pAdapter->Address,
                         min(pAdapter->AddressLength, sizeof (pEdrvInitParam_p->aMacAddr)));
@@ -254,7 +254,7 @@ DWORD dwRetVal = 0;
 
 
     EdrvInstance_l.m_pPcap = pcap_open_live (
-                        pEdrvInitParam_p->hwParam.m_pszDevName,
+                        pEdrvInitParam_p->hwParam.pDevName,
                         65535,  // snaplen
                         1,      // promiscuous mode
                         1,      // milli seconds read timeout

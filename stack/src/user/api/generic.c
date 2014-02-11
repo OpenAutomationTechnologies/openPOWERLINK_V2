@@ -721,8 +721,8 @@ tOplkError oplk_postUserEvent(void* pUserArg_p)
     tEvent      event;
 
     event.eventSink = kEventSinkApi;
-    event.netTime.m_dwNanoSec = 0;
-    event.netTime.m_dwSec = 0;
+    event.netTime.nsec = 0;
+    event.netTime.sec = 0;
     event.eventType = kEventTypeApiUserDef;
     event.pEventArg = &pUserArg_p;
     event.eventArgSize = sizeof(pUserArg_p);

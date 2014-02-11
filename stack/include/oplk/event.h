@@ -189,7 +189,7 @@ typedef struct
 {
     tEventType          eventType;              ///< Type of this event
     tEventSink          eventSink;              ///< Sink of this event
-    tEplNetTime         netTime;                ///< Timestamp of the event
+    tNetTime            netTime;                ///< Timestamp of the event
     UINT                eventArgSize;           ///< Size of the event argument
     void*               pEventArg;              ///< Pointer to event argument
 } tEvent;

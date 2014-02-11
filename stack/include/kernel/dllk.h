@@ -60,7 +60,7 @@ typedef tOplkError (* tEplDllkCbAsync) (tFrameInfo * pFrameInfo_p);
 typedef struct
 {
     UINT8               aLocalMac[6];
-    tEplHwParam         hwParam;
+    tHwParam            hwParam;
 } tDllkInitParam;
 
 // forward declaration

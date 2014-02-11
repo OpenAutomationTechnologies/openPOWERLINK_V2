@@ -74,8 +74,8 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG  time_p,
 
 tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p);
 
-UINT32     timestamp_calcTimeDiff(tEplTgtTimeStamp* pTimeStampPrevious_p,
-                                  tEplTgtTimeStamp* pTimeStampCurrent_p);
+UINT32     timestamp_calcTimeDiff(tTimestamp* pTimeStampPrevious_p,
+                                  tTimestamp* pTimeStampCurrent_p);
 
 #ifdef __cplusplus
 }

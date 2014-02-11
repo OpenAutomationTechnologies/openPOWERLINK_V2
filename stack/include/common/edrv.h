@@ -167,7 +167,7 @@ struct sEdrvRxBuffer
     tEdrvBufferInFrame  bufferInFrame;  ///< Position of Rx buffer in a frame
     UINT                rxFrameSize;    ///< Size of Rx frame (without CRC)
     UINT8*              pBuffer;        ///< Pointer to the Rx buffer
-    tEplTgtTimeStamp*   rxTimeStamp;    ///< Pointer to Rx time stamp
+    tTimestamp*         rxTimeStamp;    ///< Pointer to Rx time stamp
 };
 
 /**
@@ -179,7 +179,7 @@ typedef struct
 {
     UINT8           aMacAddr[6];    ///< The Ethernet controllers MAC address
     tEdrvRxHandler  pfnRxHandler;   ///< Rx frame callback function pointer
-    tEplHwParam     hwParam;        ///< Hardware parameter
+    tHwParam        hwParam;        ///< Hardware parameter
 } tEdrvInitParam;
 
 /**

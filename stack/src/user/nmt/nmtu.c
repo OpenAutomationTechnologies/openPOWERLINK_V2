@@ -178,8 +178,8 @@ tOplkError nmtu_postNmtEvent(tNmtEvent nmtEvent_p)
     tEvent      event;
 
     event.eventSink = kEventSinkNmtk;
-    event.netTime.m_dwNanoSec = 0;
-    event.netTime.m_dwSec = 0;
+    event.netTime.nsec = 0;
+    event.netTime.sec = 0;
     event.eventType = kEventTypeNmtEvent;
     event.pEventArg = &nmtEvent_p;
     event.eventArgSize = sizeof(nmtEvent_p);

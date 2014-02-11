@@ -719,8 +719,8 @@ Sets the time of day (canOPEN timestamp) to memory in little endian
 //------------------------------------------------------------------------------
 void ami_setTimeOfDay(void* pAddr_p, tTimeOfDay* pTimeOfDay_p)
 {
-    ami_setUint32Le(((UINT8 *) pAddr_p), pTimeOfDay_p->m_dwMs & 0x0FFFFFFF);
-    ami_setUint16Le(((UINT8 *) pAddr_p) + 4, pTimeOfDay_p->m_wDays);
+    ami_setUint32Le(((UINT8 *) pAddr_p), pTimeOfDay_p->msec & 0x0FFFFFFF);
+    ami_setUint16Le(((UINT8 *) pAddr_p) + 4, pTimeOfDay_p->days);
 }
 
 //------------------------------------------------------------------------------
@@ -737,6 +737,6 @@ Get the time of day (canOPEN timestamp) from memory in little endian
 //------------------------------------------------------------------------------
 void ami_getTimeOfDay(void* pAddr_p, tTimeOfDay* pTimeOfDay_p)
 {
-    pTimeOfDay_p->m_dwMs = ami_getUint32Le(((UINT8 *) pAddr_p)) & 0x0FFFFFFF;
-    pTimeOfDay_p->m_wDays = ami_getUint16Le(((UINT8 *) pAddr_p) + 4);
+    pTimeOfDay_p->msec = ami_getUint32Le(((UINT8 *) pAddr_p)) & 0x0FFFFFFF;
+    pTimeOfDay_p->days = ami_getUint16Le(((UINT8 *) pAddr_p) + 4);
 }

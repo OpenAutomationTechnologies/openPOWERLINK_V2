@@ -219,7 +219,7 @@ Api::Api(MainWindow *pMainWindow_p, UINT nodeId_p, QString devName_p)
 
     // Copy the selected interface string to a local variable
     strcpy(devName_g, devName_p.toStdString().c_str());
-    initParam.hwParam.m_pszDevName = devName_g;
+    initParam.hwParam.pDevName = devName_g;
 
 #if defined(CONFIG_KERNELSTACK_DIRECTLINK)
     initParam.pfnCbSync = pDataInOutThread->getSyncCbFunc();

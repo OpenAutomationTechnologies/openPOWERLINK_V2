@@ -130,7 +130,7 @@ typedef struct
     UINT8                   reserved1;                      ///< Offset 17: reserved
     UINT8                   flag1;                          ///< Offset 18: Flags: MC, PS
     UINT8                   flag2;                          ///< Offset 19: Flags: res
-    tEplNetTime             netTimeLe;                      ///< Offset 20: supported if D_NMT_NetTimeIsRealTime_BOOL is set
+    tNetTime                netTimeLe;                      ///< Offset 20: supported if D_NMT_NetTimeIsRealTime_BOOL is set
     UINT64                  relativeTimeLe;                 ///< Offset 28: in us (supported if D_NMT_RelativeTime_BOOL is set)
 } PACK_STRUCT tSocFrame;
 
@@ -188,7 +188,7 @@ typedef struct
 {
     UINT16                  entryType;
     UINT16                  errorCode;
-    tEplNetTime             timeStamp;
+    tNetTime                timeStamp;
     UINT8                   aAddInfo[8];
 } PACK_STRUCT tErrHistoryEntry;
 

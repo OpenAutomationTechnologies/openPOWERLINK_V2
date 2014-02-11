@@ -1201,7 +1201,7 @@ static INT rxHook(void* pArg_p, ometh_packet_typ* pPacket_p, OMETH_BUF_FREE_FCT*
     INT                     ret;
     tEdrvRxBuffer           rxBuffer;
     tEdrvReleaseRxBuffer    releaseRxBuffer;
-    tEplTgtTimeStamp        timeStamp;
+    tTimestamp              timeStamp;
 #if EDRV_MAX_AUTO_RESPONSES > 0
     UINT                    txRespIndex = (UINT)pArg_p;
 #endif

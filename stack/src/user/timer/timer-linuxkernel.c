@@ -360,7 +360,7 @@ static void cbTimer(ULONG parameter_p)
 
     event.eventSink = pData->timerArgument.eventSink;
     event.eventType = kEventTypeTimer;
-    EPL_MEMSET(&event.netTime, 0x00, sizeof(tEplNetTime));
+    EPL_MEMSET(&event.netTime, 0x00, sizeof(tNetTime));
     event.pEventArg = &timerEventArg;
     event.eventArgSize = sizeof(timerEventArg);
 
