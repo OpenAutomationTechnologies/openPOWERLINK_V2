@@ -1592,7 +1592,7 @@ static tOplkError cbCnCheckEvent(tNmtEvent nmtEvent_p)
         case kNmtEventEnableReadyToOperate:
             nmtState = nmtu_getNmtState();
             // inform application
-            ret = cbBootEvent(kNmtBootEventEnableReadyToOp, nmtState, EPL_E_NO_ERROR);
+            ret = cbBootEvent(kNmtBootEventEnableReadyToOp, nmtState, E_NO_ERROR);
             break;
 
         default:

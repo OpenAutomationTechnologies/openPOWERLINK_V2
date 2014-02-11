@@ -48,59 +48,59 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //------------------------------------------------------------------------------
 // Emergency error codes
-#define EPL_E_NO_ERROR                          0x0000
+#define E_NO_ERROR                          0x0000
 // 0xFxxx manufacturer specific error codes
-#define EPL_E_NMT_NO_IDENT_RES                  0xF001
-#define EPL_E_NMT_NO_STATUS_RES                 0xF002
+#define E_NMT_NO_IDENT_RES                  0xF001
+#define E_NMT_NO_STATUS_RES                 0xF002
 
 // 0x816x HW errors
-#define EPL_E_DLL_BAD_PHYS_MODE                 0x8161
-#define EPL_E_DLL_COLLISION                     0x8162
-#define EPL_E_DLL_COLLISION_TH                  0x8163
-#define EPL_E_DLL_CRC_TH                        0x8164
-#define EPL_E_DLL_LOSS_OF_LINK                  0x8165
-#define EPL_E_DLL_MAC_BUFFER                    0x8166
+#define E_DLL_BAD_PHYS_MODE                 0x8161
+#define E_DLL_COLLISION                     0x8162
+#define E_DLL_COLLISION_TH                  0x8163
+#define E_DLL_CRC_TH                        0x8164
+#define E_DLL_LOSS_OF_LINK                  0x8165
+#define E_DLL_MAC_BUFFER                    0x8166
 // 0x82xx Protocol errors
-#define EPL_E_DLL_ADDRESS_CONFLICT              0x8201
-#define EPL_E_DLL_MULTIPLE_MN                   0x8202
+#define E_DLL_ADDRESS_CONFLICT              0x8201
+#define E_DLL_MULTIPLE_MN                   0x8202
 // 0x821x Frame size errors
-#define EPL_E_PDO_SHORT_RX                      0x8210
-#define EPL_E_PDO_MAP_VERS                      0x8211
-#define EPL_E_NMT_ASND_MTU_DIF                  0x8212
-#define EPL_E_NMT_ASND_MTU_LIM                  0x8213
-#define EPL_E_NMT_ASND_TX_LIM                   0x8214
+#define E_PDO_SHORT_RX                      0x8210
+#define E_PDO_MAP_VERS                      0x8211
+#define E_NMT_ASND_MTU_DIF                  0x8212
+#define E_NMT_ASND_MTU_LIM                  0x8213
+#define E_NMT_ASND_TX_LIM                   0x8214
 // 0x823x Timing errors
-#define EPL_E_NMT_CYCLE_LEN                     0x8231
-#define EPL_E_DLL_CYCLE_EXCEED                  0x8232
-#define EPL_E_DLL_CYCLE_EXCEED_TH               0x8233
-#define EPL_E_NMT_IDLE_LIM                      0x8234
-#define EPL_E_DLL_JITTER_TH                     0x8235
-#define EPL_E_DLL_LATE_PRES_TH                  0x8236
-#define EPL_E_NMT_PREQ_CN                       0x8237
-#define EPL_E_NMT_PREQ_LIM                      0x8238
-#define EPL_E_NMT_PRES_CN                       0x8239
-#define EPL_E_NMT_PRES_RX_LIM                   0x823A
-#define EPL_E_NMT_PRES_TX_LIM                   0x823B
+#define E_NMT_CYCLE_LEN                     0x8231
+#define E_DLL_CYCLE_EXCEED                  0x8232
+#define E_DLL_CYCLE_EXCEED_TH               0x8233
+#define E_NMT_IDLE_LIM                      0x8234
+#define E_DLL_JITTER_TH                     0x8235
+#define E_DLL_LATE_PRES_TH                  0x8236
+#define E_NMT_PREQ_CN                       0x8237
+#define E_NMT_PREQ_LIM                      0x8238
+#define E_NMT_PRES_CN                       0x8239
+#define E_NMT_PRES_RX_LIM                   0x823A
+#define E_NMT_PRES_TX_LIM                   0x823B
 // 0x824x Frame errors
-#define EPL_E_DLL_INVALID_FORMAT                0x8241
-#define EPL_E_DLL_LOSS_PREQ_TH                  0x8242
-#define EPL_E_DLL_LOSS_PRES_TH                  0x8243
-#define EPL_E_DLL_LOSS_SOA_TH                   0x8244
-#define EPL_E_DLL_LOSS_SOC_TH                   0x8245
+#define E_DLL_INVALID_FORMAT                0x8241
+#define E_DLL_LOSS_PREQ_TH                  0x8242
+#define E_DLL_LOSS_PRES_TH                  0x8243
+#define E_DLL_LOSS_SOA_TH                   0x8244
+#define E_DLL_LOSS_SOC_TH                   0x8245
 // 0x84xx BootUp Errors
-#define EPL_E_NMT_BA1                           0x8410  // other MN in MsNotActive active
-#define EPL_E_NMT_BA1_NO_MN_SUPPORT             0x8411  // MN is not supported
-#define EPL_E_NMT_BPO1                          0x8420  // mandatory CN was not found or failed in BootStep1
-#define EPL_E_NMT_BPO1_GET_IDENT                0x8421  // IdentRes was not received
-#define EPL_E_NMT_BPO1_DEVICE_TYPE              0x8422  // wrong device type
-#define EPL_E_NMT_BPO1_VENDOR_ID                0x8423  // wrong vendor ID
-#define EPL_E_NMT_BPO1_PRODUCT_CODE             0x8424  // wrong product code
-#define EPL_E_NMT_BPO1_REVISION_NO              0x8425  // wrong revision number
-#define EPL_E_NMT_BPO1_SERIAL_NO                0x8426  // wrong serial number
-#define EPL_E_NMT_BPO1_CF_VERIFY                0x8428  // verification of configuration failed
-#define EPL_E_NMT_BPO2                          0x8430  // mandatory CN failed in BootStep2
-#define EPL_E_NMT_BRO                           0x8440  // CheckCommunication failed for mandatory CN
-#define EPL_E_NMT_WRONG_STATE                   0x8480  // mandatory CN has wrong NMT state
+#define E_NMT_BA1                           0x8410  // other MN in MsNotActive active
+#define E_NMT_BA1_NO_MN_SUPPORT             0x8411  // MN is not supported
+#define E_NMT_BPO1                          0x8420  // mandatory CN was not found or failed in BootStep1
+#define E_NMT_BPO1_GET_IDENT                0x8421  // IdentRes was not received
+#define E_NMT_BPO1_DEVICE_TYPE              0x8422  // wrong device type
+#define E_NMT_BPO1_VENDOR_ID                0x8423  // wrong vendor ID
+#define E_NMT_BPO1_PRODUCT_CODE             0x8424  // wrong product code
+#define E_NMT_BPO1_REVISION_NO              0x8425  // wrong revision number
+#define E_NMT_BPO1_SERIAL_NO                0x8426  // wrong serial number
+#define E_NMT_BPO1_CF_VERIFY                0x8428  // verification of configuration failed
+#define E_NMT_BPO2                          0x8430  // mandatory CN failed in BootStep2
+#define E_NMT_BRO                           0x8440  // CheckCommunication failed for mandatory CN
+#define E_NMT_WRONG_STATE                   0x8480  // mandatory CN has wrong NMT state
 
 
 //------------------------------------------------------------------------------

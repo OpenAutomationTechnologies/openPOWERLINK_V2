@@ -1085,7 +1085,7 @@ tOplkError nmtmnu_processEvent(tEvent* pEvent_p)
                                                          | ((pNodeInfo->flags & NMTMNU_NODE_FLAG_COUNT_STATREQ) >> 6)
                                                          | ((pTimerEventArg->argument.value & NMTMNU_TIMERARG_COUNT_SR) >> 8)));*/
                         ret = processInternalEvent(nodeId, (tNmtState) (bNmtState | NMT_TYPE_CS),
-                                                   EPL_E_NO_ERROR, kNmtMnuIntNodeEventTimerIdentReq);
+                                                   E_NO_ERROR, kNmtMnuIntNodeEventTimerIdentReq);
                     }
 
                     else if ((pTimerEventArg->argument.value & NMTMNU_TIMERARG_STATREQ) != 0L)
@@ -1105,7 +1105,7 @@ tOplkError nmtmnu_processEvent(tEvent* pEvent_p)
                                                          | ((pNodeInfo->flags & NMTMNU_NODE_FLAG_COUNT_STATREQ) >> 6)
                                                          | ((pTimerEventArg->argument.value & NMTMNU_TIMERARG_COUNT_SR) >> 8))); */
                         ret = processInternalEvent(nodeId, (tNmtState) (bNmtState | NMT_TYPE_CS),
-                                                   EPL_E_NO_ERROR, kNmtMnuIntNodeEventTimerStatReq);
+                                                   E_NO_ERROR, kNmtMnuIntNodeEventTimerStatReq);
                     }
 
                     else if ((pTimerEventArg->argument.value & NMTMNU_TIMERARG_STATE_MON) != 0L)
@@ -1125,7 +1125,7 @@ tOplkError nmtmnu_processEvent(tEvent* pEvent_p)
                                                          | ((pNodeInfo->flags & NMTMNU_NODE_FLAG_COUNT_STATREQ) >> 6)
                                                          | ((pTimerEventArg->argument.value & NMTMNU_TIMERARG_COUNT_SR) >> 8))); */
                         ret = processInternalEvent(nodeId, (tNmtState) (bNmtState | NMT_TYPE_CS),
-                                                   EPL_E_NO_ERROR, kNmtMnuIntNodeEventTimerStateMon);
+                                                   E_NO_ERROR, kNmtMnuIntNodeEventTimerStateMon);
                     }
 
                     else if ((pTimerEventArg->argument.value & NMTMNU_TIMERARG_LONGER) != 0L)
@@ -1145,7 +1145,7 @@ tOplkError nmtmnu_processEvent(tEvent* pEvent_p)
                                                          | ((pNodeInfo->flags & NMTMNU_NODE_FLAG_COUNT_LONGER) >> 6)
                                                          | ((pTimerEventArg->argument.value & NMTMNU_TIMERARG_COUNT_LO) >> 8))); */
                         ret = processInternalEvent(nodeId, (tNmtState) (bNmtState | NMT_TYPE_CS),
-                                                   EPL_E_NO_ERROR, kNmtMnuIntNodeEventTimerLonger);
+                                                   E_NO_ERROR, kNmtMnuIntNodeEventTimerLonger);
                     }
 
                 }
@@ -1274,7 +1274,7 @@ tOplkError nmtmnu_processEvent(tEvent* pEvent_p)
                 tNmtMnuIntNodeEvent  NodeEvent;
                 tObdSize             ObdSize;
                 UINT8                    bNmtState;
-                UINT16                    wErrorCode = EPL_E_NO_ERROR;
+                UINT16                    wErrorCode = E_NO_ERROR;
 
                 if ((pNodeCmd->nodeId == 0) || (pNodeCmd->nodeId >= EPL_C_ADR_BROADCAST))
                 {
@@ -1294,7 +1294,7 @@ tOplkError nmtmnu_processEvent(tEvent* pEvent_p)
 
                     case kNmtNodeCommandConfErr:
                         NodeEvent = kNmtMnuIntNodeEventError;
-                        wErrorCode = EPL_E_NMT_BPO1_CF_VERIFY;
+                        wErrorCode = E_NMT_BPO1_CF_VERIFY;
                         break;
 
                     case kNmtNodeCommandConfRestored:
@@ -1453,12 +1453,12 @@ static tOplkError PUBLIC cbIdentResponse(UINT nodeId_p, tIdentResponse* pIdentRe
 
     if (pIdentResponse_p == NULL)
     {   // node did not answer
-        ret = processInternalEvent(nodeId_p, kNmtCsNotActive, EPL_E_NMT_NO_IDENT_RES, // was EPL_E_NO_ERROR
+        ret = processInternalEvent(nodeId_p, kNmtCsNotActive, E_NMT_NO_IDENT_RES, // was E_NO_ERROR
                                    kNmtMnuIntNodeEventNoIdentResponse);
     }
     else
     {   // node answered IdentRequest
-        errorCode = EPL_E_NO_ERROR;
+        errorCode = E_NO_ERROR;
         nmtState = (tNmtState)(ami_getUint8Le(&pIdentResponse_p->nmtStatus) | NMT_TYPE_CS);
 
         // check IdentResponse $$$ move to ProcessIntern, because this function may be called also if CN
@@ -1474,7 +1474,7 @@ static tOplkError PUBLIC cbIdentResponse(UINT nodeId_p, tIdentResponse* pIdentRe
             if (ami_getUint32Le(&pIdentResponse_p->deviceTypeLe) != dwDevType)
             {   // wrong DeviceType
                 nmtState = kNmtCsNotActive;
-                errorCode = EPL_E_NMT_BPO1_DEVICE_TYPE;
+                errorCode = E_NMT_BPO1_DEVICE_TYPE;
             }
         }
         ret = processInternalEvent(nodeId_p, nmtState, errorCode,
@@ -1503,14 +1503,14 @@ static tOplkError PUBLIC cbStatusResponse(UINT nodeId_p, tStatusResponse* pStatu
 
     if (pStatusResponse_p == NULL)
     {   // node did not answer
-        ret = processInternalEvent(nodeId_p, kNmtCsNotActive, EPL_E_NMT_NO_STATUS_RES, // was EPL_E_NO_ERROR
+        ret = processInternalEvent(nodeId_p, kNmtCsNotActive, E_NMT_NO_STATUS_RES, // was E_NO_ERROR
                                    kNmtMnuIntNodeEventNoStatusResponse);
     }
     else
     {   // node answered StatusRequest
         ret = processInternalEvent(nodeId_p,
                                    (tNmtState)(ami_getUint8Le(&pStatusResponse_p->nmtStatus) | NMT_TYPE_CS),
-                                   EPL_E_NO_ERROR, kNmtMnuIntNodeEventStatusResponse);
+                                   E_NO_ERROR, kNmtMnuIntNodeEventStatusResponse);
     }
     return ret;
 }
@@ -2258,7 +2258,7 @@ static INT processNodeEventIdentResponse(UINT nodeId_p, tNmtState nodeNmtState_p
     {
         // inform application
         *pRet_p = nmtMnuInstance_g.pfnCbNodeEvent(nodeId_p, kNmtNodeEventFound,
-                                              nodeNmtState_p, EPL_E_NO_ERROR,
+                                              nodeNmtState_p, E_NO_ERROR,
                                               (pNodeInfo->nodeCfg & EPL_NODEASSIGN_MANDATORY_CN) != 0);
         if (*pRet_p == kErrorReject)
         {   // interrupt boot process on user request
@@ -2313,7 +2313,7 @@ static INT processNodeEventBoot(UINT nodeId_p, tNmtState nodeNmtState_p, tNmtSta
         // check/start configuration
         // inform application
         *pRet_p = nmtMnuInstance_g.pfnCbNodeEvent(nodeId_p, kNmtNodeEventCheckConf,
-                                              nodeNmtState_p, EPL_E_NO_ERROR,
+                                              nodeNmtState_p, E_NO_ERROR,
                                               (pNodeInfo->nodeCfg & EPL_NODEASSIGN_MANDATORY_CN) != 0);
         if (*pRet_p == kErrorReject)
         {   // interrupt boot process on user request
@@ -2334,7 +2334,7 @@ static INT processNodeEventBoot(UINT nodeId_p, tNmtState nodeNmtState_p, tNmtSta
         // check/start configuration
         // inform application
         *pRet_p = nmtMnuInstance_g.pfnCbNodeEvent(nodeId_p, kNmtNodeEventUpdateConf,
-                                              nodeNmtState_p, EPL_E_NO_ERROR,
+                                              nodeNmtState_p, E_NO_ERROR,
                                               (pNodeInfo->nodeCfg & EPL_NODEASSIGN_MANDATORY_CN) != 0);
         if (*pRet_p == kErrorReject)
         {   // interrupt boot process on user request
@@ -2886,7 +2886,7 @@ static INT processNodeEventTimerLonger(UINT nodeId_p, tNmtState nodeNmtState_p, 
         case kNmtMnuNodeStateConfigured:
             // node should be ReadyToOp but it is not
             // check NMT state which shall be intentionally wrong, so that ERROR_TREATMENT will be started
-            *pRet_p = checkNmtState(nodeId_p, pNodeInfo, kNmtCsNotActive, EPL_E_NMT_BPO2, nmtState_p);
+            *pRet_p = checkNmtState(nodeId_p, pNodeInfo, kNmtCsNotActive, E_NMT_BPO2, nmtState_p);
             if (*pRet_p == kErrorReject)
                 *pRet_p = kErrorOk;
             break;
@@ -3020,7 +3020,7 @@ static tOplkError processInternalEvent(UINT nodeId_p, tNmtState nodeNmtState_p,
                     nmtMnuInstance_g.flags |= NMTMNU_FLAG_APP_INFORMED;
                     // inform application
                     ret = nmtMnuInstance_g.pfnCbBootEvent(kNmtBootEventBootStep1Finish,
-                                                          nmtState, EPL_E_NO_ERROR);
+                                                          nmtState, E_NO_ERROR);
                     if (ret != kErrorOk)
                     {
                         if (ret == kErrorReject)
@@ -3040,7 +3040,7 @@ static tOplkError processInternalEvent(UINT nodeId_p, tNmtState nodeNmtState_p,
                     nmtMnuInstance_g.flags |= NMTMNU_FLAG_APP_INFORMED;
                     // inform application
                     ret = nmtMnuInstance_g.pfnCbBootEvent(kNmtBootEventBootStep2Finish,
-                                                          nmtState, EPL_E_NO_ERROR);
+                                                          nmtState, E_NO_ERROR);
                     if (ret != kErrorOk)
                     {
                         if (ret == kErrorReject)
@@ -3060,7 +3060,7 @@ static tOplkError processInternalEvent(UINT nodeId_p, tNmtState nodeNmtState_p,
                     nmtMnuInstance_g.flags |= NMTMNU_FLAG_APP_INFORMED;
                     // inform application
                     ret = nmtMnuInstance_g.pfnCbBootEvent(kNmtBootEventCheckComFinish,
-                                                          nmtState, EPL_E_NO_ERROR);
+                                                          nmtState, E_NO_ERROR);
                     if (ret != kErrorOk)
                     {
                         if (ret == kErrorReject)
@@ -3080,7 +3080,7 @@ static tOplkError processInternalEvent(UINT nodeId_p, tNmtState nodeNmtState_p,
                     nmtMnuInstance_g.flags |= NMTMNU_FLAG_APP_INFORMED;
                     // inform application
                     ret = nmtMnuInstance_g.pfnCbBootEvent(kNmtBootEventOperational,
-                                                          nmtState, EPL_E_NO_ERROR);
+                                                          nmtState, E_NO_ERROR);
                     if (ret != kErrorOk)
                     {
                         if (ret == kErrorReject)
@@ -3238,7 +3238,7 @@ static tOplkError checkNmtState(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p,
                 // other errors like LOSS_PRES_TH are still processed
                 goto Exit;
             }
-            errorCode_p = EPL_E_NMT_WRONG_STATE;
+            errorCode_p = E_NMT_WRONG_STATE;
         }
 
         if ((pNodeInfo_p->flags & NMTMNU_NODE_FLAG_NOT_SCANNED) != 0)

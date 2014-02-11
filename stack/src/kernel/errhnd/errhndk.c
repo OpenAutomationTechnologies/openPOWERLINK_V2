@@ -436,7 +436,7 @@ static tOplkError handleCnLossSoc(tEvent *pEvent_p)
 
         if (thresholdCnt >= threshold)
         {
-            generateHistoryEntry(EPL_E_DLL_LOSS_SOC_TH, pEvent_p->netTime);
+            generateHistoryEntry(E_DLL_LOSS_SOC_TH, pEvent_p->netTime);
             if (ret != kErrorOk)
             {
                 errhndkcal_setCnLossSocCounters(cumulativeCnt, thresholdCnt);
@@ -487,7 +487,7 @@ static tOplkError handleCnLossPreq(tEvent *pEvent_p)
 
         if (thresholdCnt >= threshold)
         {
-            ret = generateHistoryEntry(EPL_E_DLL_LOSS_PREQ_TH, pEvent_p->netTime);
+            ret = generateHistoryEntry(E_DLL_LOSS_PREQ_TH, pEvent_p->netTime);
             if (ret != kErrorOk)
             {
                 errhndkcal_setCnLossPreqCounters(cumulativeCnt, thresholdCnt);
@@ -564,7 +564,7 @@ static tOplkError handleCnCrc(tEvent *pEvent_p)
 
         if (thresholdCnt >= threshold)
         {
-            ret = generateHistoryEntry(EPL_E_DLL_CRC_TH, pEvent_p->netTime);
+            ret = generateHistoryEntry(E_DLL_CRC_TH, pEvent_p->netTime);
             if (ret != kErrorOk)
             {
                 errhndkcal_setCnLossPreqCounters(cumulativeCnt, thresholdCnt);
@@ -604,7 +604,7 @@ static tOplkError handleInvalidFormat(tEvent *pEvent_p)
     if ((pErrorHandlerEvent->dllErrorEvents & DLL_ERR_INVALID_FORMAT) == 0)
         return kErrorOk;
 
-    ret = generateHistoryEntryNodeId(EPL_E_DLL_INVALID_FORMAT,
+    ret = generateHistoryEntryNodeId(E_DLL_INVALID_FORMAT,
                                      pEvent_p->netTime,
                                      pErrorHandlerEvent->nodeId);
     if (ret != kErrorOk)
@@ -628,7 +628,7 @@ static tOplkError handleInvalidFormat(tEvent *pEvent_p)
             // NMT command ResetNode to this CN
             postHeartbeatEvent(pErrorHandlerEvent->nodeId,
                                kNmtCsNotActive,
-                               EPL_E_DLL_INVALID_FORMAT);
+                               E_DLL_INVALID_FORMAT);
         }
         // $$$ and else should lead to InternComError
     }
@@ -677,7 +677,7 @@ static tOplkError handleMnCrc(tEvent *pEvent_p)
         thresholdCnt += 8;
         if (thresholdCnt >= threshold)
         {
-            ret = generateHistoryEntry(EPL_E_DLL_CRC_TH, pEvent_p->netTime);
+            ret = generateHistoryEntry(E_DLL_CRC_TH, pEvent_p->netTime);
             if (ret != kErrorOk)
             {
                 errhndkcal_setMnCrcCounters(cumulativeCnt, thresholdCnt);
@@ -725,7 +725,7 @@ static tOplkError handleMnCycTimeExceed(tEvent *pEvent_p)
         thresholdCnt += 8;
         if (thresholdCnt >= threshold)
         {
-            ret = generateHistoryEntryWithError(EPL_E_DLL_CYCLE_EXCEED_TH,
+            ret = generateHistoryEntryWithError(E_DLL_CYCLE_EXCEED_TH,
                                                pEvent_p->netTime,
                                                pErrorHandlerEvent->oplkError);
             if (ret != kErrorOk)
@@ -737,7 +737,7 @@ static tOplkError handleMnCycTimeExceed(tEvent *pEvent_p)
         }
         else
         {
-            ret = generateHistoryEntryWithError(EPL_E_DLL_CYCLE_EXCEED,
+            ret = generateHistoryEntryWithError(E_DLL_CYCLE_EXCEED,
                                                pEvent_p->netTime,
                                                pErrorHandlerEvent->oplkError);
             if (ret != kErrorOk)
@@ -800,7 +800,7 @@ static tOplkError handleMnCnLossPres(tEvent *pEvent_p)
             instance_l.aMnCnLossPresEvent[nodeIdx] =
                             ERRORHANDLERK_CN_LOSS_PRES_EVENT_THR;
 
-            ret = generateHistoryEntryNodeId(EPL_E_DLL_LOSS_PRES_TH,
+            ret = generateHistoryEntryNodeId(E_DLL_LOSS_PRES_TH,
                                              pEvent_p->netTime,
                                              pErrorHandlerEvent->nodeId);
             if (ret != kErrorOk)
@@ -818,7 +818,7 @@ static tOplkError handleMnCnLossPres(tEvent *pEvent_p)
             // inform NmtMnu module about state change, which shall send
             // NMT command ResetNode to this CN
             postHeartbeatEvent(pErrorHandlerEvent->nodeId, kNmtCsNotActive,
-                               EPL_E_DLL_LOSS_PRES_TH);
+                               E_DLL_LOSS_PRES_TH);
         }
         else
         {
