@@ -68,7 +68,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
         // Object 100Ah: NMT_ManufactSwVers_VS
         OBD_BEGIN_INDEX_RAM(0x100A, 0x01, NULL)
-           OBD_SUBINDEX_RAM_VSTRING(0x100A, 0x00, kObdAccR, software_version, OBD_MAX_STRING_SIZE, EPL_PRODUCT_NAME" "EPL_PRODUCT_VERSION)
+           OBD_SUBINDEX_RAM_VSTRING(0x100A, 0x00, kObdAccR, software_version, OBD_MAX_STRING_SIZE, EPL_PRODUCT_NAME" "PLK_PRODUCT_VERSION)
         OBD_END_INDEX(0x100A)
 
         // Object 1018h: NMT_IdentityObject_REC
@@ -76,7 +76,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             OBD_SUBINDEX_RAM_VAR(0x1018, 0x00, kObdTypeUInt8, kObdAccConst, tObdUnsigned8, NumberOfEntries, 0x04)
             OBD_SUBINDEX_RAM_VAR(0x1018, 0x01, kObdTypeUInt32, kObdAccR, tObdUnsigned32, VendorId_U32, 0x00000000)
             OBD_SUBINDEX_RAM_VAR(0x1018, 0x02, kObdTypeUInt32, kObdAccR, tObdUnsigned32, ProductCode_U32, 0x00000000)
-            OBD_SUBINDEX_RAM_VAR(0x1018, 0x03, kObdTypeUInt32, kObdAccR, tObdUnsigned32, RevisionNo_U32, EPL_DEFINED_OBJ1018_VERSION)
+            OBD_SUBINDEX_RAM_VAR(0x1018, 0x03, kObdTypeUInt32, kObdAccR, tObdUnsigned32, RevisionNo_U32, PLK_DEFINED_OBJ1018_VERSION)
             OBD_SUBINDEX_RAM_VAR(0x1018, 0x04, kObdTypeUInt32, kObdAccR, tObdUnsigned32, SerialNo_U32, 0x00000000)
         OBD_END_INDEX(0x1018)
 
@@ -103,9 +103,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             OBD_SUBINDEX_RAM_VAR(0x1030, 0x09, kObdTypeBool, kObdAccRW, tObdBoolean, Valid_BOOL, 0x1)
         OBD_END_INDEX(0x1030)
 
-#if ((EPL_DLL_PRES_CHAINING_CN != FALSE) && (EPL_NMT_MAX_NODE_ID > 0))
+#if ((CONFIG_DLL_PRES_CHAINING_CN != FALSE) && (NMT_MAX_NODE_ID > 0))
         // Object 1050h: NMT_RelativeLatencyDiff_AU32
-        OBD_RAM_INDEX_RAM_ARRAY(0x1050, EPL_NMT_MAX_NODE_ID, NULL, kObdTypeUInt32, kObdAccR, tObdUnsigned32, NMT_RelativeLatencyDiff_AU32, 0)
+        OBD_RAM_INDEX_RAM_ARRAY(0x1050, NMT_MAX_NODE_ID, NULL, kObdTypeUInt32, kObdAccR, tObdUnsigned32, NMT_RelativeLatencyDiff_AU32, 0)
 #endif
 
         // Object 1300h: SDO_SequLayerTimeout_U32 in [ms]

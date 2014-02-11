@@ -59,7 +59,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "kernel/dllktgt.h"
 
-#if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
+#if (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER)
 #include <kernel/synctimer.h>
 #endif
 
@@ -79,16 +79,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #error "DLLK: EPL_DLL_PRES_READY_AFTER_* is enabled, but not EDRV_FAST_TXFRAMES."
 #endif
 
-#if defined(CONFIG_INCLUDE_NMT_MN) && (EPL_DLL_PRES_FILTER_COUNT == 0)
-#error "MN support needs EPL_DLL_PRES_FILTER_COUNT != 0"
+#if defined(CONFIG_INCLUDE_NMT_MN) && (DLL_PRES_FILTER_COUNT == 0)
+#error "MN support needs DLL_PRES_FILTER_COUNT != 0"
 #endif
 
-#if (EPL_DLL_PRES_CHAINING_CN != FALSE) && (EDRV_AUTO_RESPONSE_DELAY == FALSE)
+#if (CONFIG_DLL_PRES_CHAINING_CN != FALSE) && (EDRV_AUTO_RESPONSE_DELAY == FALSE)
 #error "Ethernet driver support for auto-response delay is required for PRes Chaining."
 #endif
 
-#if (EPL_DLL_PRES_CHAINING_CN != FALSE) && (EPL_DLL_PROCESS_SYNC != EPL_DLL_PROCESS_SYNC_ON_TIMER)
-#error "PRes Chaining CN support requires EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER."
+#if (CONFIG_DLL_PRES_CHAINING_CN != FALSE) && (CONFIG_DLL_PROCESS_SYNC != DLL_PROCESS_SYNC_ON_TIMER)
+#error "PRes Chaining CN support requires CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER."
 #endif
 
 //------------------------------------------------------------------------------
@@ -115,7 +115,7 @@ void  TgtDbgPostTraceValue (DWORD dwTraceValue_p);
 #define DLLK_TXFRAME_STATUSRES      2   // StatusResponse on CN / MN
 #define DLLK_TXFRAME_NMTREQ         4   // NMT Request from FIFO on CN / MN
 
-#if EPL_DLL_PRES_CHAINING_CN != FALSE
+#if CONFIG_DLL_PRES_CHAINING_CN != FALSE
 #define DLLK_TXFRAME_SYNCRES      6   // SyncResponse on CN
 #define DLLK_TXFRAME_NONEPL       8   // non-EPL frame from FIFO on CN / MN
 #else
@@ -128,7 +128,7 @@ void  TgtDbgPostTraceValue (DWORD dwTraceValue_p);
   #define DLLK_TXFRAME_SOC          (DLLK_TXFRAME_PRES + 2)   // SoC on MN
   #define DLLK_TXFRAME_SOA          (DLLK_TXFRAME_SOC + 2)    // SoA on MN
   #define DLLK_TXFRAME_PREQ         (DLLK_TXFRAME_SOA + 2)    // PReq on MN
-  #define DLLK_TXFRAME_COUNT        (DLLK_TXFRAME_PREQ + (2 * (EPL_D_NMT_MaxCNNumber_U8 + 2)))
+  #define DLLK_TXFRAME_COUNT        (DLLK_TXFRAME_PREQ + (2 * (D_NMT_MaxCNNumber_U8 + 2)))
                                     // on MN: 7 + MaxPReq of regular CNs + 1 Diag + 1 Router
 #else
   #define DLLK_TXFRAME_COUNT        (DLLK_TXFRAME_PRES + 2)
@@ -174,21 +174,21 @@ typedef struct
     tSyncCb                 pfnCbSync;
     tDllAsndFilter          aAsndFilter[DLL_MAX_ASND_SERVICE_ID];
     tEdrvFilter             aFilter[DLLK_FILTER_COUNT];
-#if EPL_NMT_MAX_NODE_ID > 0
-    tDllkNodeInfo           aNodeInfo[EPL_NMT_MAX_NODE_ID];
+#if NMT_MAX_NODE_ID > 0
+    tDllkNodeInfo           aNodeInfo[NMT_MAX_NODE_ID];
 #endif
     UINT8                   curTxBufferOffsetIdentRes;
     UINT8                   curTxBufferOffsetStatusRes;
     UINT8                   curTxBufferOffsetNmtReq;
     UINT8                   curTxBufferOffsetNonEpl;
     UINT8                   curTxBufferOffsetCycle;         // PRes, SoC, SoA, PReq
-#if EPL_DLL_PRES_CHAINING_CN != FALSE
+#if CONFIG_DLL_PRES_CHAINING_CN != FALSE
     UINT8                   curTxBufferOffsetSyncRes;
 #endif
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
     tDllkNodeInfo*          pFirstNodeInfo;
-    UINT8                   aCnNodeIdList[2][EPL_NMT_MAX_NODE_ID];
+    UINT8                   aCnNodeIdList[2][NMT_MAX_NODE_ID];
     UINT8                   curNodeIndex;
     tEdrvTxBuffer**         ppTxBufferList;
     UINT8                   syncLastSoaReq;
@@ -196,7 +196,7 @@ typedef struct
     UINT                    aLastTargetNodeId[DLLK_SOAREQ_COUNT];
     UINT8                   curLastSoaReq;
     BOOL                    fSyncProcessed;
-#if EPL_DLL_PRES_CHAINING_MN != FALSE
+#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
     BOOL                    fPrcSlotFinished;
     tDllkNodeInfo*          pFirstPrcNodeInfo;
 #endif
@@ -212,7 +212,7 @@ typedef struct
     UINT                    cycleCount;                     // cycle counter (needed for multiplexed cycle support)
     UINT64                  frameTimeout;                   // frame timeout (cycle length + loss of frame tolerance)
 
-#if EPL_DLL_PRES_CHAINING_CN != FALSE
+#if CONFIG_DLL_PRES_CHAINING_CN != FALSE
     UINT                    syncReqPrevNodeId;
     tTimestamp              syncReqPrevTimeStamp;
     BOOL                    fPrcEnabled;
@@ -276,13 +276,13 @@ void       dllk_setupSoaFilter(tEdrvFilter* pFilter_p);
 void       dllk_setupSoaIdentReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer *pBuffer_p);
 void       dllk_setupSoaStatusReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer *pBuffer_p);
 void       dllk_setupSoaNmtReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer *pBuffer_p);
-#if EPL_DLL_PRES_CHAINING_CN != FALSE
+#if CONFIG_DLL_PRES_CHAINING_CN != FALSE
 void       dllk_setupSoaSyncReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer *pBuffer_p);
 #endif
 void       dllk_setupSoaUnspecReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer *pBuffer_p);
 void       dllk_setupPresFilter(tEdrvFilter* pFilter_p, BOOL fEnable_p);
 void       dllk_setupPreqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer *pBuffer_p, UINT8* pMacAdrs_p);
-#if EPL_NMT_MAX_NODE_ID > 0
+#if NMT_MAX_NODE_ID > 0
 tOplkError dllk_addNodeFilter(tDllkNodeInfo* pIntNodeInfo_p, tDllNodeOpType NodeOpType_p, BOOL fUpdateEdrv_p);
 tOplkError dllk_deleteNodeFilter(tDllkNodeInfo* pIntNodeInfo_p, tDllNodeOpType nodeOpType_p, BOOL fUpdateEdrv_p);
 #endif
@@ -305,7 +305,7 @@ tOplkError dllk_setupAsyncPhase(tNmtState nmtState_p, UINT nextTxBufferOffset_p,
 tOplkError dllk_setupSyncPhase(tNmtState nmtState_p, BOOL fReadyFlag_p, UINT nextTxBufferOffset_p,
                                UINT32* pNextTimeOffsetNs_p, UINT* pIndex_p) SECTION_DLLK_PROCESS_SYNC;
 #endif
-#if EPL_NMT_MAX_NODE_ID > 0
+#if NMT_MAX_NODE_ID > 0
 tDllkNodeInfo* dllk_getNodeInfo(UINT uiNodeId_p);
 #endif
 
@@ -319,17 +319,17 @@ tOplkError dllk_cbMnTimerCycle(tTimerEventArg* pEventArg_p);
 #if EPL_TIMER_USE_HIGHRES != FALSE
 tOplkError dllk_cbCnTimer(tTimerEventArg* pEventArg_p);
 #endif
-#if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
+#if (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER)
 tOplkError dllk_cbCnTimerSync(void);
 tOplkError dllk_cbCnLossOfSync(void);
 #endif
 
 //------------------------------------------------------------------------------
 /* PRes Chaining functions */
-#if EPL_DLL_PRES_CHAINING_CN == TRUE
+#if CONFIG_DLL_PRES_CHAINING_CN == TRUE
 tOplkError dllk_presChainingEnable (void);
 tOplkError dllk_presChainingDisable (void);
-#if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
+#if (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER)
 tOplkError dllk_cbCnPresFallbackTimeout(void);
 #endif
 #endif

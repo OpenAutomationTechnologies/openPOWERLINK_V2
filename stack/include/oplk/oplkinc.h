@@ -44,10 +44,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <oplk/targetsystem.h>
-
-#include "oplkcfg.h"                 // Stack configuration file
-
 #include <oplk/oplkdefs.h>
+
+#include <oplkcfg.h>                 // Stack configuration file
+#include <oplk/defaultcfg.h>
+
 #include <oplk/errordefs.h>
 #include <oplk/featureflags.h>
 #include <oplk/version.h>

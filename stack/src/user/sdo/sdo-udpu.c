@@ -288,7 +288,7 @@ tOplkError sdoudp_config(ULONG ipAddr_p, UINT port_p)
 
     if (port_p == 0)
     {
-        port_p = EPL_C_SDO_EPL_PORT;  // set UDP port to default port number
+        port_p = C_SDO_EPL_PORT;  // set UDP port to default port number
     }
     else if (port_p > 65535)
     {
@@ -403,7 +403,7 @@ tOplkError sdoudp_initCon(tSdoConHdl* pSdoConHandle_p, UINT targetNodeId_p)
     {
         pSdoUdpCon = &sdoUdpInstance_l.aSdoAbsUdpConnection[freeCon];
         // save infos for connection
-        pSdoUdpCon->port = htons(EPL_C_SDO_EPL_PORT);
+        pSdoUdpCon->port = htons(C_SDO_EPL_PORT);
         pSdoUdpCon->ipAddr = htonl(0xC0A86400 | targetNodeId_p);   // 192.168.100.uiTargetNodeId_p
 
         // set handle

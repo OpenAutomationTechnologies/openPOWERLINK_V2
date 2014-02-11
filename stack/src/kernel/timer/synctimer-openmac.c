@@ -56,8 +56,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 
-#ifndef EPL_TIMER_SYNC_SECOND_LOSS_OF_SYNC
-#define EPL_TIMER_SYNC_SECOND_LOSS_OF_SYNC      FALSE
+#ifndef TIMER_SYNC_SECOND_LOSS_OF_SYNC
+#define TIMER_SYNC_SECOND_LOSS_OF_SYNC      FALSE
 #endif
 
 //------------------------------------------------------------------------------
@@ -78,7 +78,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define TIMER_HDL_SYNC          0
 #define TIMER_HDL_LOSSOFSYNC    1
 #define TIMER_HDL_INVALID       0xFF
-#if (EPL_TIMER_SYNC_SECOND_LOSS_OF_SYNC != FALSE)
+#if (TIMER_SYNC_SECOND_LOSS_OF_SYNC != FALSE)
 #define TIMER_HDL_LOSSOFSYNC2   2
 #define TIMER_COUNT             3
 #else
@@ -108,7 +108,7 @@ typedef struct
     UINT32                      lossOfSyncTolerance;
     tSyncTimerCbLossOfSync      pfnLossOfSyncCb;
     UINT32                      lossOfSyncTimeout;
-#if (EPL_TIMER_SYNC_SECOND_LOSS_OF_SYNC != FALSE)
+#if (TIMER_SYNC_SECOND_LOSS_OF_SYNC != FALSE)
     UINT32                      lossOfSyncTolerance2;
     tSyncTimerCbLossOfSync      pfnLossOfSync2Cb;
     UINT32                      lossOfSyncTimeout2;
@@ -271,7 +271,7 @@ tOplkError synctimer_registerLossOfSyncHandler(tSyncTimerCbLossOfSync pfnLossOfS
     return ret;
 }
 
-#if (EPL_TIMER_SYNC_SECOND_LOSS_OF_SYNC != FALSE)
+#if (TIMER_SYNC_SECOND_LOSS_OF_SYNC != FALSE)
 //------------------------------------------------------------------------------
 /**
 \brief  Synchronization timer register second synchronization handler
@@ -363,7 +363,7 @@ tOplkError synctimer_setLossOfSyncTolerance(UINT32 lossOfSyncTolerance_p)
     return ret;
 }
 
-#if (EPL_TIMER_SYNC_SECOND_LOSS_OF_SYNC != FALSE)
+#if (TIMER_SYNC_SECOND_LOSS_OF_SYNC != FALSE)
 //------------------------------------------------------------------------------
 /**
 \brief  Synchronization timer second loss of synchronization setter
@@ -421,7 +421,7 @@ tOplkError synctimer_syncTriggerAtTimeStamp(tTimestamp* pTimeStamp_p)
         goto Exit;
     }
 
-#if (EPL_TIMER_SYNC_SECOND_LOSS_OF_SYNC != FALSE)
+#if (TIMER_SYNC_SECOND_LOSS_OF_SYNC != FALSE)
     if (instance_l.lossOfSyncTimeout2 > 0)
     {
         ret = drvModifyTimerAbs(TIMER_HDL_LOSSOFSYNC2,
@@ -458,7 +458,7 @@ tOplkError synctimer_stopSync(void)
 
     ret = drvDeleteTimer(TIMER_HDL_SYNC);
     ret = drvDeleteTimer(TIMER_HDL_LOSSOFSYNC);
-#if (EPL_TIMER_SYNC_SECOND_LOSS_OF_SYNC != FALSE)
+#if (TIMER_SYNC_SECOND_LOSS_OF_SYNC != FALSE)
     ret = drvDeleteTimer(TIMER_HDL_LOSSOFSYNC2);
 #endif
 
@@ -1016,7 +1016,7 @@ static void drvInterruptHandler(void* pArg_p)
                 }
                 break;
             }
-#if (EPL_TIMER_SYNC_SECOND_LOSS_OF_SYNC != FALSE)
+#if (TIMER_SYNC_SECOND_LOSS_OF_SYNC != FALSE)
             case TIMER_HDL_LOSSOFSYNC2:
             {
                 if (instance_l.pfnLossOfSync2Cb != NULL)

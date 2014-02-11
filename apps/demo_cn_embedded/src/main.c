@@ -223,7 +223,7 @@ static tOplkError initPowerlink(tInstance* pInstance_p)
     initParam.applicationSwTime       = 0;
     initParam.subnetMask              = SUBNET_MASK;
     initParam.defaultGateway          = 0;
-    initParam.syncNodeId              = EPL_C_ADR_SYNC_ON_SOC;
+    initParam.syncNodeId              = C_ADR_SYNC_ON_SOC;
     initParam.fSyncOnPrcNode            = FALSE;
 
     // set callback functions

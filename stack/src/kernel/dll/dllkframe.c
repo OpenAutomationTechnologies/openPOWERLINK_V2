@@ -185,7 +185,7 @@ tEdrvReleaseRxBuffer dllk_processFrameReceived(tEdrvRxBuffer * pRxBuffer_p)
     frameInfo.pFrame = pFrame;
     frameInfo.frameSize = pRxBuffer_p->rxFrameSize;
 
-    if (ami_getUint16Be(&pFrame->etherType) != EPL_C_DLL_ETHERTYPE_EPL)
+    if (ami_getUint16Be(&pFrame->etherType) != C_DLL_ETHERTYPE_EPL)
     {   // non-EPL frame
         //TRACE("cbFrameReceived: pfnCbAsync=0x%p SrcMAC=0x%llx\n", dllkInstance_g.pfnCbAsync, ami_getUint48Be(pFrame->aSrcMac));
         if (dllkInstance_g.pfnCbAsync != NULL)
@@ -583,7 +583,7 @@ void dllk_processTransmittedSoa(tEdrvTxBuffer * pTxBuffer_p)
 #endif
 
     if ((dllkInstance_g.dllState > kDllMsNonCyclic) &&
-        (dllkInstance_g.dllConfigParam.syncNodeId > EPL_C_ADR_SYNC_ON_SOC) &&
+        (dllkInstance_g.dllConfigParam.syncNodeId > C_ADR_SYNC_ON_SOC) &&
         (dllkInstance_g.fSyncProcessed == FALSE))
     {   // cyclic state is active, so preprocessing is necessary
         dllkInstance_g.fSyncProcessed = TRUE;
@@ -756,11 +756,11 @@ tOplkError dllk_checkFrame(tPlkFrame * pFrame_p, UINT frameSize_p)
         if (etherType == 0)
         {
             // assume EPL frame
-            etherType = EPL_C_DLL_ETHERTYPE_EPL;
+            etherType = C_DLL_ETHERTYPE_EPL;
             ami_setUint16Be(&pFrame_p->etherType, etherType);
         }
 
-        if (etherType == EPL_C_DLL_ETHERTYPE_EPL)
+        if (etherType == C_DLL_ETHERTYPE_EPL)
         {
             // source node ID
             ami_setUint8Le(&pFrame_p->srcNodeId, (BYTE) dllkInstance_g.dllConfigParam.nodeId);
@@ -776,7 +776,7 @@ tOplkError dllk_checkFrame(tPlkFrame * pFrame_p, UINT frameSize_p)
             if (MsgType == kMsgTypeAsnd)
             {
                 // destination MAC address
-                ami_setUint48Be(&pFrame_p->aDstMac[0], EPL_C_DLL_MULTICAST_ASND);
+                ami_setUint48Be(&pFrame_p->aDstMac[0], C_DLL_MULTICAST_ASND);
             }
         }
     }
@@ -794,7 +794,7 @@ The function updates and transmits a SoA.
 \param  nmtState_p              Current NMT state.
 \param  pDllStateProposed_p     Proposed DLL state.
 \param  fEnableInvitation_p     Enable invitation for asynchronous phase. It
-                                will be disabled for EPL_C_DLL_PREOP1_START_CYCLES
+                                will be disabled for C_DLL_PREOP1_START_CYCLES
                                 SoAs.^
 
 \return The function returns a tOplkError error code.
@@ -849,7 +849,7 @@ The function updates a SoA frame.
 \param  pTxBuffer_p             Pointer to TX buffer of frame.
 \param  nmtState_p              NMT state of the local node.
 \param  fEnableInvitation_p     Enable the invitation for asynchronous phase.
-                                It will be disabled for the first EPL_C_DLL_PREOP1_START_CYCLES
+                                It will be disabled for the first C_DLL_PREOP1_START_CYCLES
                                 SoAs
 \param  curReq_p                Index of current request.
 
@@ -887,7 +887,7 @@ tOplkError dllk_updateFrameSoa(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p,
 
         if (dllkInstance_g.aLastReqServiceId[curReq_p] != kDllReqServiceNo)
         {   // asynchronous phase will be assigned to one node
-            if (dllkInstance_g.aLastTargetNodeId[curReq_p] == EPL_C_ADR_INVALID)
+            if (dllkInstance_g.aLastTargetNodeId[curReq_p] == C_ADR_INVALID)
             {   // exchange invalid node ID with local node ID
                 dllkInstance_g.aLastTargetNodeId[curReq_p] = dllkInstance_g.dllConfigParam.nodeId;
             }
@@ -905,13 +905,13 @@ tOplkError dllk_updateFrameSoa(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p,
         }
         else
         {   // no assignment of asynchronous phase
-            dllkInstance_g.aLastTargetNodeId[curReq_p] = EPL_C_ADR_INVALID;
+            dllkInstance_g.aLastTargetNodeId[curReq_p] = C_ADR_INVALID;
         }
     }
     else
     {   // invite nobody
         dllkInstance_g.aLastReqServiceId[curReq_p] = kDllReqServiceNo;
-        dllkInstance_g.aLastTargetNodeId[curReq_p] = EPL_C_ADR_INVALID;
+        dllkInstance_g.aLastTargetNodeId[curReq_p] = C_ADR_INVALID;
     }
 
     // update frame (target)
@@ -951,7 +951,7 @@ tOplkError dllk_asyncFrameNotReceived(tDllReqServiceId reqServiceId_p, UINT node
     {
         case kDllReqServiceIdent:
         case kDllReqServiceStatus:
-#if (EPL_DLL_PRES_CHAINING_MN != FALSE)
+#if (CONFIG_DLL_PRES_CHAINING_MN != FALSE)
         case kDllReqServiceSync:
 #endif
             // ASnd service registered?
@@ -1025,7 +1025,7 @@ tOplkError dllk_createTxFrame (UINT* pHandle_p, UINT* pFrameSize_p,
                     handle = DLLK_TXFRAME_NMTREQ;
                     break;
 
-#if EPL_DLL_PRES_CHAINING_CN != FALSE
+#if CONFIG_DLL_PRES_CHAINING_CN != FALSE
                 case kDllAsndSyncResponse:
                     handle = DLLK_TXFRAME_SYNCRES;
                     break;
@@ -1037,7 +1037,7 @@ tOplkError dllk_createTxFrame (UINT* pHandle_p, UINT* pFrameSize_p,
                     break;
 
                 case kDllAsndSdo:
-#if (EPL_DLL_PRES_CHAINING_CN == FALSE) && (EPL_DLL_PRES_CHAINING_MN != FALSE)
+#if (CONFIG_DLL_PRES_CHAINING_CN == FALSE) && (CONFIG_DLL_PRES_CHAINING_MN != FALSE)
                 case kDllAsndSyncResponse:
 #endif
                     ret = kErrorEdrvBufNotExisting;
@@ -1126,20 +1126,20 @@ tOplkError dllk_createTxFrame (UINT* pHandle_p, UINT* pFrameSize_p,
 
         if (msgType_p != kMsgTypeNonPowerlink)
         {   // fill out Frame only if it is an EPL frame
-            ami_setUint16Be(&pTxFrame->etherType, EPL_C_DLL_ETHERTYPE_EPL);
+            ami_setUint16Be(&pTxFrame->etherType, C_DLL_ETHERTYPE_EPL);
             ami_setUint8Le(&pTxFrame->srcNodeId, (BYTE) dllkInstance_g.dllConfigParam.nodeId);
             OPLK_MEMCPY(&pTxFrame->aSrcMac[0], &dllkInstance_g.aLocalMac[0], 6);
             switch (msgType_p)
             {
                 case kMsgTypeAsnd:
                     // destination MAC address
-                    ami_setUint48Be(&pTxFrame->aDstMac[0], EPL_C_DLL_MULTICAST_ASND);
+                    ami_setUint48Be(&pTxFrame->aDstMac[0], C_DLL_MULTICAST_ASND);
                     // destination node ID
                     switch (serviceId_p)
                     {
                         case kDllAsndIdentResponse:
                             ami_setUint8Le(&pTxFrame->data.asnd.payload.identResponse.powerlinkProfileVersion,
-                                           (UINT8) EPL_SPEC_VERSION);
+                                           (UINT8) PLK_SPEC_VERSION);
                             ami_setUint32Le(&pTxFrame->data.asnd.payload.identResponse.featureFlagsLe,
                                             dllkInstance_g.dllConfigParam.featureFlags);
                             ami_setUint16Le(&pTxFrame->data.asnd.payload.identResponse.mtuLe,
@@ -1186,13 +1186,13 @@ tOplkError dllk_createTxFrame (UINT* pHandle_p, UINT* pFrameSize_p,
 
                         case kDllAsndStatusResponse:
                             // IdentResponses and StatusResponses are Broadcast
-                            ami_setUint8Le(&pTxFrame->dstNodeId, (BYTE) EPL_C_ADR_BROADCAST);
+                            ami_setUint8Le(&pTxFrame->dstNodeId, (BYTE) C_ADR_BROADCAST);
                             break;
 
-#if EPL_DLL_PRES_CHAINING_CN != FALSE
+#if CONFIG_DLL_PRES_CHAINING_CN != FALSE
                         case kDllAsndSyncResponse:
                             // SyncRes destination node ID is MN node ID
-                            ami_setUint8Le(&pTxFrame->dstNodeId, (BYTE) EPL_C_ADR_MN_DEF_NODE_ID);
+                            ami_setUint8Le(&pTxFrame->dstNodeId, (BYTE) C_ADR_MN_DEF_NODE_ID);
                             ami_setUint32Le(&pTxFrame->data.asnd.payload.syncResponse.latencyLe,
                                             dllkInstance_g.dllConfigParam.syncResLatency);
                             // SyncStatus: PResMode disabled / PResTimeFirst and PResTimeSecond invalid
@@ -1213,20 +1213,20 @@ tOplkError dllk_createTxFrame (UINT* pHandle_p, UINT* pFrameSize_p,
                     break;
 
                 case kMsgTypePres:
-                    ami_setUint48Be(&pTxFrame->aDstMac[0], EPL_C_DLL_MULTICAST_PRES);
-                    ami_setUint8Le(&pTxFrame->dstNodeId, (BYTE) EPL_C_ADR_BROADCAST);
+                    ami_setUint48Be(&pTxFrame->aDstMac[0], C_DLL_MULTICAST_PRES);
+                    ami_setUint8Le(&pTxFrame->dstNodeId, (BYTE) C_ADR_BROADCAST);
                     break;
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
                 case kMsgTypeSoc:
-                    ami_setUint48Be(&pTxFrame->aDstMac[0], EPL_C_DLL_MULTICAST_SOC);
-                    ami_setUint8Le(&pTxFrame->dstNodeId, (BYTE) EPL_C_ADR_BROADCAST);
+                    ami_setUint48Be(&pTxFrame->aDstMac[0], C_DLL_MULTICAST_SOC);
+                    ami_setUint8Le(&pTxFrame->dstNodeId, (BYTE) C_ADR_BROADCAST);
                     break;
 
                 case kMsgTypeSoa:
-                    ami_setUint48Be(&pTxFrame->aDstMac[0], EPL_C_DLL_MULTICAST_SOA);
-                    ami_setUint8Le(&pTxFrame->dstNodeId, (BYTE) EPL_C_ADR_BROADCAST);
-                    ami_setUint8Le(&pTxFrame->data.soa.powerlinkVersion, (BYTE) EPL_SPEC_VERSION);
+                    ami_setUint48Be(&pTxFrame->aDstMac[0], C_DLL_MULTICAST_SOA);
+                    ami_setUint8Le(&pTxFrame->dstNodeId, (BYTE) C_ADR_BROADCAST);
+                    ami_setUint8Le(&pTxFrame->data.soa.powerlinkVersion, (BYTE) PLK_SPEC_VERSION);
                     break;
 
                 case kMsgTypePreq:
@@ -1449,15 +1449,15 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
     tPlkFrame *     pFrame;
     UINT            nodeId;
 
-#if EPL_NMT_MAX_NODE_ID > 0
+#if NMT_MAX_NODE_ID > 0
     tDllkNodeInfo*  pIntNodeInfo = NULL;
 #endif
 
     pFrame = pFrameInfo_p->pFrame;
     nodeId = ami_getUint8Le(&pFrame->srcNodeId);
 
-#if EPL_DLL_PRES_CHAINING_CN != FALSE
-    if ((dllkInstance_g.fPrcEnabled != FALSE) && (nodeId == EPL_C_ADR_MN_DEF_NODE_ID))
+#if CONFIG_DLL_PRES_CHAINING_CN != FALSE
+    if ((dllkInstance_g.fPrcEnabled != FALSE) && (nodeId == C_ADR_MN_DEF_NODE_ID))
     {   // handle PResMN as PReq for PRes Chaining
         *pNmtEvent_p = kNmtEventDllCePreq;
     }
@@ -1469,7 +1469,7 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
 
     if ((nmtState_p >= kNmtCsPreOperational2) && (nmtState_p <= kNmtCsOperational))
     {   // process PRes frames only in PreOp2, ReadyToOp and Op of CN
-#if EPL_NMT_MAX_NODE_ID > 0
+#if NMT_MAX_NODE_ID > 0
         pIntNodeInfo = dllk_getNodeInfo(nodeId);
         if (pIntNodeInfo == NULL)
         {   // no node info structure available
@@ -1488,11 +1488,11 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
         BYTE                nextNodeIndex = dllkInstance_g.curNodeIndex;
         BYTE*               pCnNodeId = &dllkInstance_g.aCnNodeIdList[dllkInstance_g.curTxBufferOffsetCycle][nextNodeIndex];
 
-#if EPL_DLL_PRES_CHAINING_MN != FALSE
+#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
         BOOL    fPrcSlotFinished = FALSE;
 #endif
 
-        while (*pCnNodeId != EPL_C_ADR_INVALID)
+        while (*pCnNodeId != C_ADR_INVALID)
         {
             if (*pCnNodeId == nodeId)
             {   // CN found in list
@@ -1509,8 +1509,8 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
 
                 break;
             }
-#if EPL_DLL_PRES_CHAINING_MN != FALSE
-            else if (*pCnNodeId == EPL_C_ADR_BROADCAST)
+#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
+            else if (*pCnNodeId == C_ADR_BROADCAST)
             {   // PRC slot finished
                 fPrcSlotFinished = TRUE;
             }
@@ -1524,12 +1524,12 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
             goto Exit;
         }
 
-#if EPL_DLL_PRES_CHAINING_MN != FALSE
+#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
         if (fPrcSlotFinished != FALSE)
         {
             dllkInstance_g.fPrcSlotFinished = TRUE;
 
-            if ((dllkInstance_g.dllConfigParam.syncNodeId > EPL_C_ADR_SYNC_ON_SOC)
+            if ((dllkInstance_g.dllConfigParam.syncNodeId > C_ADR_SYNC_ON_SOC)
                 && (dllkInstance_g.fSyncProcessed == FALSE)
                 && (dllkInstance_g.dllConfigParam.fSyncOnPrcNode != FALSE))
             {
@@ -1541,9 +1541,9 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
         else
 #endif
 
-        if ((dllkInstance_g.dllConfigParam.syncNodeId > EPL_C_ADR_SYNC_ON_SOC)
+        if ((dllkInstance_g.dllConfigParam.syncNodeId > C_ADR_SYNC_ON_SOC)
             && (dllkInstance_g.fSyncProcessed == FALSE)
-#if EPL_DLL_PRES_CHAINING_MN != FALSE
+#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
             && (dllkInstance_g.dllConfigParam.fSyncOnPrcNode != dllkInstance_g.fPrcSlotFinished)
 #endif
             && (nodeId > dllkInstance_g.dllConfigParam.syncNodeId))
@@ -1613,7 +1613,7 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
         WORD wPresPayloadSize = ami_getUint16Le(&pFrame->data.pres.sizeLe);
 
         if (((UINT) (wPresPayloadSize + PLK_FRAME_OFFSET_PDO_PAYLOAD) > pFrameInfo_p->frameSize)
-#if EPL_NMT_MAX_NODE_ID > 0
+#if NMT_MAX_NODE_ID > 0
             || (wPresPayloadSize > pIntNodeInfo->presPayloadLimit)
             || ((nmtState_p >= kNmtMsNotActive)
                 && (pFrameInfo_p->frameSize >
@@ -1623,7 +1623,7 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
         {   // format error
         tEventDllError  DllEvent;
 
-#if EPL_NMT_MAX_NODE_ID > 0
+#if NMT_MAX_NODE_ID > 0
             if (pIntNodeInfo->presPayloadLimit > 0)
 #endif
             {   // This PRes frame was expected, but it is too large
@@ -1658,11 +1658,11 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
     if ((dllkInstance_g.dllState > kDllMsNonCyclic) &&
-        (dllkInstance_g.dllConfigParam.syncNodeId > EPL_C_ADR_SYNC_ON_SOC) &&
+        (dllkInstance_g.dllConfigParam.syncNodeId > C_ADR_SYNC_ON_SOC) &&
         (dllkInstance_g.fSyncProcessed == FALSE))
     {   // check if Sync event needs to be triggered
         if (
-#if EPL_DLL_PRES_CHAINING_MN != FALSE
+#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
             (dllkInstance_g.dllConfigParam.fSyncOnPrcNode != dllkInstance_g.fPrcSlotFinished) &&
 #endif
             (nodeId == dllkInstance_g.dllConfigParam.syncNodeId))
@@ -1696,7 +1696,7 @@ static tOplkError processReceivedSoc(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
     tEdrvTxBuffer*  pTxBuffer = NULL;
 #endif
 
-#if (EPL_DLL_PROCESS_SYNC != EPL_DLL_PROCESS_SYNC_ON_TIMER)
+#if (CONFIG_DLL_PROCESS_SYNC != DLL_PROCESS_SYNC_ON_TIMER)
     UNUSED_PARAMETER(pRxBuffer_p);
 #endif
 
@@ -1720,11 +1720,11 @@ static tOplkError processReceivedSoc(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
     if (nmtState_p >= kNmtCsStopped)
     {   // SoC frames only in Stopped, PreOp2, ReadyToOp and Operational
 
-#if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_SOC)
+#if (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_SOC)
         // trigger synchronous task
         if ((ret = dllk_postEvent(kEventTypeSync)) != kErrorOk)
             return ret;
-#elif (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
+#elif (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER)
         ret = synctimer_syncTriggerAtTimeStamp(pRxBuffer_p->rxTimeStamp);
         if (ret != kErrorOk)
             return ret;
@@ -1901,11 +1901,11 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
                 goto Exit;
                 break;
 
-#if (EPL_DLL_PRES_CHAINING_CN != FALSE) || (EPL_DLL_PRES_CHAINING_MN != FALSE)
+#if (CONFIG_DLL_PRES_CHAINING_CN != FALSE) || (CONFIG_DLL_PRES_CHAINING_MN != FALSE)
             case kDllReqServiceSync:
                 {
                 // SyncRequest
-#if EPL_DLL_PRES_CHAINING_CN != FALSE
+#if CONFIG_DLL_PRES_CHAINING_CN != FALSE
                 UINT32      syncControl;
                 tPlkFrame* pTxFrameSyncRes;
                 tDllkPrcCycleTiming  PrcCycleTiming;
@@ -1950,7 +1950,7 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
                 {
                     dllkInstance_g.prcPResFallBackTimeout = ami_getUint32Le(&pFrame->data.soa.payload.syncRequest.presFallBackTimeoutLe);
 
-#if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
+#if (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER)
                     if (dllkInstance_g.fPrcEnabled != FALSE)
                     {
                         ret = synctimer_setLossOfSyncTolerance2(dllkInstance_g.prcPResFallBackTimeout);
@@ -2036,7 +2036,7 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
         }
     }
 
-#if EPL_DLL_PRES_CHAINING_CN != FALSE
+#if CONFIG_DLL_PRES_CHAINING_CN != FALSE
     else
     {   // other node is the target of the current request
         // check ServiceId
@@ -2093,7 +2093,7 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
 #endif
 
     UNUSED_PARAMETER(nmtState_p);
-#if EPL_DLL_PRES_CHAINING_CN == FALSE
+#if CONFIG_DLL_PRES_CHAINING_CN == FALSE
     UNUSED_PARAMETER(pRxBuffer_p);
 #endif
 
@@ -2109,7 +2109,7 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
         {
             case kDllAsndStatusResponse:
             case kDllAsndIdentResponse:
-#if (EPL_DLL_PRES_CHAINING_MN != FALSE)
+#if (CONFIG_DLL_PRES_CHAINING_MN != FALSE)
             case kDllAsndSyncResponse:
 #endif
                 nodeId = ami_getUint8Le(&pFrame->srcNodeId);
@@ -2134,7 +2134,7 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
                         OPLK_MEMCPY(pIntNodeInfo->aMacAddr, pFrame->aSrcMac, 6);
                     }
                 }
-#if (EPL_DLL_PRES_CHAINING_MN != FALSE)
+#if (CONFIG_DLL_PRES_CHAINING_MN != FALSE)
                 else if (((tDllAsndServiceId) asndServiceId) == kDllAsndSyncResponse)
                 {
                     break;
@@ -2158,7 +2158,7 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
     if (asndServiceId < DLL_MAX_ASND_SERVICE_ID)
     {   // ASnd service ID is valid
 
-#if EPL_DLL_PRES_CHAINING_CN != FALSE
+#if CONFIG_DLL_PRES_CHAINING_CN != FALSE
         if (asndServiceId == kDllAsndSyncResponse)
         {
             tPlkFrame* pTxFrameSyncRes;
@@ -2172,7 +2172,7 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
                 syncDelayNs = timestamp_calcTimeDiff(&dllkInstance_g.syncReqPrevTimeStamp,
                                                      pRxBuffer_p->rxTimeStamp) -
                                                      // Transmission time for SyncReq frame
-                                                     (EPL_C_DLL_T_MIN_FRAME + EPL_C_DLL_T_PREAMBLE);
+                                                     (C_DLL_T_MIN_FRAME + C_DLL_T_PREAMBLE);
 
                 // update SyncRes frame (SyncDelay and SyncNodeNumber)
                 ami_setUint32Le(&pTxFrameSyncRes->data.asnd.payload.syncResponse.syncDelayLe, syncDelayNs);
@@ -2211,7 +2211,7 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
         {   // ASnd service ID is registered, but only local node ID or broadcasts
             // shall be forwarded
             nodeId = ami_getUint8Le(&pFrame->dstNodeId);
-            if ((nodeId == dllkInstance_g.dllConfigParam.nodeId) || (nodeId == EPL_C_ADR_BROADCAST))
+            if ((nodeId == dllkInstance_g.dllConfigParam.nodeId) || (nodeId == C_ADR_BROADCAST))
             {   // ASnd frame is intended for us
                 // forward frame via async receive FIFO to userspace
                 ret = dllkcal_asyncFrameReceived(pFrameInfo_p);

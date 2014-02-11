@@ -109,9 +109,9 @@ static tPdouInstance  pdouInstance_g;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError   setupRxPdoChannelTables(BYTE abChannelIdToPdoIdRx_p[EPL_D_PDO_RPDOChannels_U16],
+static tOplkError   setupRxPdoChannelTables(BYTE abChannelIdToPdoIdRx_p[D_PDO_RPDOChannels_U16],
                                           UINT* pCountChannelIdRx_p);
-static tOplkError   setupTxPdoChannelTables(BYTE abChannelIdToPdoIdTx_p[EPL_D_PDO_TPDOChannels_U16],
+static tOplkError   setupTxPdoChannelTables(BYTE abChannelIdToPdoIdTx_p[D_PDO_TPDOChannels_U16],
                                           UINT* pCountChannelIdTx_p);
 static tOplkError   allocatePdoChannels(tPdoAllocationParam* pAllocationParam_p);
 static tOplkError   freePdoChannels(void);
@@ -370,7 +370,7 @@ tOplkError pdou_copyRxPdoToPi (void)
         //TRACE ("%s() Channel:%d Node:%d pPdo:%p\n", __func__, channelId, pPdoChannel->nodeId, pPdo);
 
         for (mappObjectCount = pPdoChannel->mappObjectCount,
-             pMappObject = pdouInstance_g.paRxObject + (channelId * EPL_D_PDO_RPDOChannelObjects_U8);
+             pMappObject = pdouInstance_g.paRxObject + (channelId * D_PDO_RPDOChannelObjects_U8);
              mappObjectCount > 0;
              mappObjectCount--, pMappObject++)
         {
@@ -428,7 +428,7 @@ tOplkError pdou_copyTxPdoFromPi (void)
         //TRACE ("%s() pPdo: %p\n", __func__, pPdo);
 
         for (mappObjectCount = pPdoChannel->mappObjectCount,
-             pMappObject = pdouInstance_g.paTxObject + (channelId * EPL_D_PDO_TPDOChannelObjects_U8);
+             pMappObject = pdouInstance_g.paTxObject + (channelId * D_PDO_TPDOChannelObjects_U8);
              mappObjectCount > 0;
              mappObjectCount--, pMappObject++)
         {
@@ -474,7 +474,7 @@ memory to store the mapping information.
 **/
 //------------------------------------------------------------------------------
 static tOplkError setupRxPdoChannelTables(
-                       BYTE abChannelIdToPdoIdRx_p[EPL_D_PDO_RPDOChannels_U16],
+                       BYTE abChannelIdToPdoIdRx_p[D_PDO_RPDOChannels_U16],
                        UINT* pCountChannelIdRx_p)
 {
     tOplkError              ret = kErrorOk;
@@ -507,7 +507,7 @@ static tOplkError setupRxPdoChannelTables(
 
             case kErrorOk:
                 channelCount++;
-                if (channelCount > EPL_D_PDO_RPDOChannels_U16)
+                if (channelCount > D_PDO_RPDOChannels_U16)
                     return kErrorPdoTooManyPdos;
 
                 pdouInstance_g.aPdoIdToChannelIdRx[pdoId] = (BYTE) channelCount - 1;
@@ -545,7 +545,7 @@ memory to store the mapping information.
 **/
 //------------------------------------------------------------------------------
 static tOplkError setupTxPdoChannelTables(
-                        BYTE abChannelIdToPdoIdTx_p[EPL_D_PDO_TPDOChannels_U16],
+                        BYTE abChannelIdToPdoIdTx_p[D_PDO_TPDOChannels_U16],
                         UINT* pCountChannelIdTx_p)
 {
     tOplkError              ret = kErrorOk;
@@ -582,7 +582,7 @@ static tOplkError setupTxPdoChannelTables(
 
             case kErrorOk:
                 channelCount ++;
-                if (channelCount > EPL_D_PDO_TPDOChannels_U16)
+                if (channelCount > D_PDO_TPDOChannels_U16)
                     return kErrorPdoTooManyTxPdos;
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
@@ -647,7 +647,7 @@ static tOplkError allocatePdoChannels(tPdoAllocationParam* pAllocationParam_p)
             pdouInstance_g.paRxObject =
                     OPLK_MALLOC(sizeof(tPdoMappObject)
                                * pAllocationParam_p->rxPdoChannelCount
-                               * EPL_D_PDO_RPDOChannelObjects_U8);
+                               * D_PDO_RPDOChannelObjects_U8);
 
             if (pdouInstance_g.paRxObject == NULL)
             {
@@ -693,7 +693,7 @@ static tOplkError allocatePdoChannels(tPdoAllocationParam* pAllocationParam_p)
             pdouInstance_g.paTxObject =
                     OPLK_MALLOC(sizeof(tPdoMappObject)
                                * pAllocationParam_p->txPdoChannelCount
-                               * EPL_D_PDO_TPDOChannelObjects_U8);
+                               * D_PDO_TPDOChannelObjects_U8);
             if (pdouInstance_g.paTxObject == NULL)
             {
                 ret = kErrorPdoInitError;
@@ -766,8 +766,8 @@ The function configures the whole PDO mapping information in the Pdok module.
 static tOplkError configureAllPdos(void)
 {
     tOplkError              ret = kErrorOk;
-    BYTE                    aChannelIdToPdoIdRx[EPL_D_PDO_RPDOChannels_U16];
-    BYTE                    aChannelIdToPdoIdTx[EPL_D_PDO_TPDOChannels_U16];
+    BYTE                    aChannelIdToPdoIdRx[D_PDO_RPDOChannels_U16];
+    BYTE                    aChannelIdToPdoIdTx[D_PDO_TPDOChannels_U16];
     tPdoAllocationParam     allocParam;
     DWORD                   dwAbortCode = 0;
     size_t                  txPdoMemSize;
@@ -890,8 +890,8 @@ static tOplkError checkAndConfigurePdo(UINT16 mappParamIndex_p,
     commParamIndex = ~PDOU_OBD_IDX_MAPP_PARAM & mappParamIndex_p;
     fTxPdo = (mappParamIndex_p >= PDOU_OBD_IDX_TX_MAPP_PARAM) ? TRUE : FALSE;
 
-    if ((!fTxPdo && (mappObjectCount_p > EPL_D_PDO_RPDOChannelObjects_U8)) ||
-        (fTxPdo && (mappObjectCount_p > EPL_D_PDO_TPDOChannelObjects_U8)))
+    if ((!fTxPdo && (mappObjectCount_p > D_PDO_RPDOChannelObjects_U8)) ||
+        (fTxPdo && (mappObjectCount_p > D_PDO_TPDOChannelObjects_U8)))
     {
         DEBUG_LVL_ERROR_TRACE ("%s() %d exceeds object!\n",
                                 __func__, mappObjectCount_p);
@@ -956,10 +956,10 @@ static tOplkError checkAndConfigurePdo(UINT16 mappParamIndex_p,
 
     if (fTxPdo)
         pMappObject = &pdouInstance_g.paTxObject[pdoChannelConf.channelId *
-                                                 EPL_D_PDO_TPDOChannelObjects_U8];
+                                                 D_PDO_TPDOChannelObjects_U8];
     else
         pMappObject = &pdouInstance_g.paRxObject[pdoChannelConf.channelId *
-                                                 EPL_D_PDO_RPDOChannelObjects_U8];
+                                                 D_PDO_RPDOChannelObjects_U8];
 
     ret = setupMappingObjects(pMappObject, mappParamIndex_p, mappObjectCount_p,
                               maxPdoSize, pAbortCode_p, &calcPdoSize, &count);

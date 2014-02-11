@@ -231,7 +231,7 @@ void lcd_printNodeId (WORD wNodeId_p)
     char TextNodeID[LCD_COLUMN+1];
 
     sprintf(TextNodeID, "NodeID=0x%02X (%s)", wNodeId_p,
-            (wNodeId_p == EPL_C_ADR_MN_DEF_NODE_ID) ? "MN" : "CN");
+            (wNodeId_p == C_ADR_MN_DEF_NODE_ID) ? "MN" : "CN");
 
     if(lcdl_changeToLine(1) != 0)
         return;

@@ -136,17 +136,17 @@ tSyncCb dllk_regSyncHandler(tSyncCb pfnCbSync_p);
 tOplkError dllk_releaseRxFrame(tPlkFrame* pFrame_p, UINT uiFrameSize_p);
 #endif
 
-#if EPL_NMT_MAX_NODE_ID > 0
+#if NMT_MAX_NODE_ID > 0
 tOplkError dllk_configNode(tDllNodeInfo* pNodeInfo_p);
 tOplkError dllk_addNode(tDllNodeOpParam* pNodeOpParam_p);
 tOplkError dllk_deleteNode(tDllNodeOpParam* pNodeOpParam_p);
-#endif // EPL_NMT_MAX_NODE_ID > 0
+#endif // NMT_MAX_NODE_ID > 0
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
 tOplkError dllk_setFlag1OfNode(UINT nodeId_p, UINT8 soaFlag1_p);
 void       dllk_getCurrentCnNodeIdList(BYTE** ppbCnNodeIdList_p);
 
-#if EPL_DLL_PRES_CHAINING_MN != FALSE
+#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
 tOplkError dllk_getCnMacAddress(UINT nodeId_p, UINT8* pCnMacAddress_p);
 #endif
 

@@ -99,9 +99,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EDRVCYC_NEGSHFT_FLT_SPAN    8U
 
 //define necessary for calculating correct TX time (EplDef.h - THX!)
-#define EDRVCYC_BYTETIME_NS     (EPL_C_DLL_T_BITTIME * 8U)
-#define EDRVCYC_IPG_NS          EPL_C_DLL_T_IFG
-#define EDRVCYC_PREAMB_SIZE     (EPL_C_DLL_T_PREAMBLE / EPL_C_DLL_T_BITTIME / 8U)
+#define EDRVCYC_BYTETIME_NS     (C_DLL_T_BITTIME * 8U)
+#define EDRVCYC_IPG_NS          C_DLL_T_IFG
+#define EDRVCYC_PREAMB_SIZE     (C_DLL_T_PREAMBLE / C_DLL_T_BITTIME / 8U)
 
 //------------------------------------------------------------------------------
 // local types

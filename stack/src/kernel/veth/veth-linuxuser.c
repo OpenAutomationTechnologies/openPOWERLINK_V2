@@ -148,7 +148,7 @@ tOplkError veth_addInstance(const UINT8 aSrcMac_p[6])
 
     memset(&ifr, 0, sizeof(ifr));
     ifr.ifr_flags = IFF_TAP | IFF_NO_PI;
-    strncpy(ifr.ifr_name, EPL_VETH_NAME, IFNAMSIZ);
+    strncpy(ifr.ifr_name, PLK_VETH_NAME, IFNAMSIZ);
 
     if ((err = ioctl(vethInstance_l.fd, TUNSETIFF, (void *)&ifr)) < 0)
     {

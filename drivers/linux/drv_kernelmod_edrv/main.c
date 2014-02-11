@@ -640,7 +640,7 @@ static int sendAsyncFrame(unsigned long arg)
     tFrameInfo          frameInfo;
     int                 order;
 
-    order = get_order(EPL_C_DLL_MAX_ASYNC_MTU);
+    order = get_order(C_DLL_MAX_ASYNC_MTU);
     pBuf = (BYTE *)__get_free_pages(GFP_KERNEL, order);
 
     if (copy_from_user(&asyncFrameInfo, (const void __user *)arg, sizeof(tIoctlDllCalAsync)))

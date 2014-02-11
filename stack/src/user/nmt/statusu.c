@@ -274,7 +274,7 @@ static tOplkError statusu_cbStatusResponse(tFrameInfo * pFrameInfo_p)
         // reset callback function pointer so that caller may issue next request
         instance_g.apfnCbResponse[index] = NULL;
 
-        if (pFrameInfo_p->frameSize < EPL_C_DLL_MINSIZE_STATUSRES)
+        if (pFrameInfo_p->frameSize < C_DLL_MINSIZE_STATUSRES)
         {   // StatusResponse not received or it has invalid size
             ret = pfnCbResponse(nodeId, NULL);
         }

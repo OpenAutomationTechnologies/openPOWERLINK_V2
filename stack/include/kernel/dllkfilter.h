@@ -47,7 +47,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DLLK_FILTER_SOA_IDREQ           1
 #define DLLK_FILTER_SOA_STATREQ         2
 #define DLLK_FILTER_SOA_NMTREQ          3
-#if EPL_DLL_PRES_CHAINING_CN != FALSE
+#if CONFIG_DLL_PRES_CHAINING_CN != FALSE
   #define DLLK_FILTER_SOA_SYNCREQ       4
   #define DLLK_FILTER_SOA_NONEPL        5
 #else
@@ -59,10 +59,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DLLK_FILTER_ASND                (DLLK_FILTER_SOC + 1)
 #define DLLK_FILTER_PRES                (DLLK_FILTER_ASND + 1)
 
-#if EPL_DLL_PRES_FILTER_COUNT < 0
+#if DLL_PRES_FILTER_COUNT < 0
   #define DLLK_FILTER_COUNT             (DLLK_FILTER_PRES + 1)
 #else
-  #define DLLK_FILTER_COUNT             (DLLK_FILTER_PRES + EPL_DLL_PRES_FILTER_COUNT)
+  #define DLLK_FILTER_COUNT             (DLLK_FILTER_PRES + DLL_PRES_FILTER_COUNT)
 #endif
 
 //------------------------------------------------------------------------------

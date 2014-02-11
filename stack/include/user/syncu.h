@@ -45,7 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplk/oplkinc.h>
 #include <oplk/dll.h>
 
-#if EPL_DLL_PRES_CHAINING_MN != FALSE
+#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
 
 //------------------------------------------------------------------------------
 // const defines
@@ -76,7 +76,7 @@ tOplkError syncu_requestSyncResponse(tSyncuCbResponse pfnCbResponse_p,
 }
 #endif
 
-#endif // EPL_DLL_PRES_CHAINING_MN != FALSE
+#endif // CONFIG_DLL_PRES_CHAINING_MN != FALSE
 
 #endif  /* _INC_syncu_H_ */
 

@@ -293,9 +293,9 @@ static tOplkError processNmtMsPreop1(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
 
             // go ahead and send SoA
             ret = dllk_mnSendSoa(nmtState_p, &DummyDllState,
-                                 (dllkInstance_g.cycleCount >= EPL_C_DLL_PREOP1_START_CYCLES));
+                                 (dllkInstance_g.cycleCount >= C_DLL_PREOP1_START_CYCLES));
 
-            // increment cycle counter to detect if EPL_C_DLL_PREOP1_START_CYCLES empty cycles are elapsed
+            // increment cycle counter to detect if C_DLL_PREOP1_START_CYCLES empty cycles are elapsed
             dllkInstance_g.cycleCount++;
             ret = kErrorOk;
             // reprogramming of timer will be done in CbFrameTransmitted()

@@ -149,7 +149,7 @@ The function adds a virtual Ethernet instance.
 tOplkError veth_addInstance(const UINT8 aSrcMac_p[6])
 {
     // allocate net device structure with priv pointing to stats structure
-    pVEthNetDevice_g = alloc_netdev(sizeof (struct net_device_stats), EPL_VETH_NAME,
+    pVEthNetDevice_g = alloc_netdev(sizeof (struct net_device_stats), PLK_VETH_NAME,
                                     ether_setup);
 
     if (pVEthNetDevice_g == NULL)

@@ -114,7 +114,7 @@ tOplkError dllk_addInstance(tDllkInitParam* pInitParam_p)
         return ret;
 #endif
 
-#if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
+#if (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER)
     if ((ret = synctimer_addInstance()) != kErrorOk)
         return ret;
 
@@ -124,12 +124,12 @@ tOplkError dllk_addInstance(tDllkInitParam* pInitParam_p)
     if ((ret = synctimer_registerLossOfSyncHandler(dllk_cbCnLossOfSync)) != kErrorOk)
         return ret;
 
-#if EPL_DLL_PRES_CHAINING_CN != FALSE
+#if CONFIG_DLL_PRES_CHAINING_CN != FALSE
     if ((ret = synctimer_registerLossOfSyncHandler2(dllk_cbCnPresFallbackTimeout)) != kErrorOk)
         return ret;
 #endif
 
-   if ((ret = synctimer_setSyncShift(EPL_DLL_SOC_SYNC_SHIFT_US)) != kErrorOk)
+   if ((ret = synctimer_setSyncShift(CONFIG_DLL_SOC_SYNC_SHIFT_US)) != kErrorOk)
        return ret;
 #endif
 
@@ -140,7 +140,7 @@ tOplkError dllk_addInstance(tDllkInitParam* pInitParam_p)
     dllkInstance_g.maxTxFrames = sizeof (aDllkTxBuffer_l) / sizeof (tEdrvTxBuffer);
     dllkInstance_g.dllState = kDllGsInit;               // initialize state
 
-#if EPL_NMT_MAX_NODE_ID > 0
+#if NMT_MAX_NODE_ID > 0
     // set up node info structure
     for (index = 0; index < tabentries (dllkInstance_g.aNodeInfo); index++)
     {
@@ -200,7 +200,7 @@ tOplkError dllk_delInstance(void)
     ret = edrvcyclic_shutdown();
 #endif
 
-#if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
+#if (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER)
     ret = synctimer_delInstance();
 #endif
 
@@ -238,7 +238,7 @@ tOplkError dllk_config(tDllConfigParam * pDllConfigParam_p)
         // because all other parameters are "valid on reset".
         dllkInstance_g.dllConfigParam.lossOfFrameTolerance = pDllConfigParam_p->lossOfFrameTolerance;
 
-#if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
+#if (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER)
         ret = synctimer_setLossOfSyncTolerance(pDllConfigParam_p->lossOfFrameTolerance);
 #endif
     }
@@ -481,7 +481,7 @@ tOplkError dllk_releaseRxFrame(tPlkFrame* pFrame_p, UINT frameSize_p)
 #endif
 
 
-#if EPL_NMT_MAX_NODE_ID > 0
+#if NMT_MAX_NODE_ID > 0
 //------------------------------------------------------------------------------
 /**
 \brief  Configure the specified node
@@ -617,7 +617,7 @@ tOplkError dllk_deleteNode(tDllNodeOpParam* pNodeOpParam_p)
 
     nmtState = dllkInstance_g.nmtState;
 
-    if (pNodeOpParam_p->nodeId == EPL_C_ADR_BROADCAST)
+    if (pNodeOpParam_p->nodeId == C_ADR_BROADCAST)
     {
         switch (pNodeOpParam_p->opNodeType)
         {
@@ -679,7 +679,7 @@ tOplkError dllk_deleteNode(tDllNodeOpParam* pNodeOpParam_p)
     return ret;
 }
 
-#endif // EPL_NMT_MAX_NODE_ID > 0
+#endif // NMT_MAX_NODE_ID > 0
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
 //------------------------------------------------------------------------------
@@ -731,7 +731,7 @@ void dllk_getCurrentCnNodeIdList(BYTE** ppbCnNodeIdList_p)
     *ppbCnNodeIdList_p = &dllkInstance_g.aCnNodeIdList[dllkInstance_g.curTxBufferOffsetCycle ^ 1][0];
 }
 
-#if (EPL_DLL_PRES_CHAINING_MN == TRUE)
+#if (CONFIG_DLL_PRES_CHAINING_MN == TRUE)
 //------------------------------------------------------------------------------
 /**
 \brief  Get MAC address of the specified node
@@ -909,7 +909,7 @@ tOplkError dllk_cbMnSyncHandler(void)
     // do cycle finish which has to be done inside the callback function triggered by interrupt
     pbCnNodeId = &dllkInstance_g.aCnNodeIdList[dllkInstance_g.curTxBufferOffsetCycle][dllkInstance_g.curNodeIndex];
 
-    while (*pbCnNodeId != EPL_C_ADR_INVALID)
+    while (*pbCnNodeId != C_ADR_INVALID)
     {   // issue error for each CN in list which was not processed yet, i.e. PRes received
         ret = dllk_issueLossOfPres(*pbCnNodeId);
         if (ret != kErrorOk)
@@ -918,7 +918,7 @@ tOplkError dllk_cbMnSyncHandler(void)
     }
 
     dllkInstance_g.fSyncProcessed = FALSE;
-#if EPL_DLL_PRES_CHAINING_MN != FALSE
+#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
     dllkInstance_g.fPrcSlotFinished = FALSE;
 #endif
 
@@ -996,7 +996,7 @@ Exit:
 }
 #endif
 
-#if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
+#if (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER)
 //------------------------------------------------------------------------------
 /**
 \brief  CN Sync Timer callback function
@@ -1089,7 +1089,7 @@ tOplkError dllk_setupLocalNode(tNmtState nmtState_p)
 #if defined(CONFIG_INCLUDE_NMT_MN)
     // initialize linked node list
     dllkInstance_g.pFirstNodeInfo = NULL;
-#if EPL_DLL_PRES_CHAINING_MN != FALSE
+#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
     dllkInstance_g.pFirstPrcNodeInfo = NULL;
 #endif
 #endif
@@ -1097,20 +1097,20 @@ tOplkError dllk_setupLocalNode(tNmtState nmtState_p)
     /*-----------------------------------------------------------------------*/
     /* register TxFrames in Edrv */
     // IdentResponse
-    frameSize = EPL_C_DLL_MINSIZE_IDENTRES;
+    frameSize = C_DLL_MINSIZE_IDENTRES;
     ret = dllk_createTxFrame(&handle, &frameSize, kMsgTypeAsnd, kDllAsndIdentResponse);
     if (ret != kErrorOk)
         return ret;
 
     // StatusResponse
-    frameSize = EPL_C_DLL_MINSIZE_STATUSRES;
+    frameSize = C_DLL_MINSIZE_STATUSRES;
     ret = dllk_createTxFrame(&handle, &frameSize, kMsgTypeAsnd, kDllAsndStatusResponse);
     if (ret != kErrorOk)
         return ret;
 
-#if EPL_DLL_PRES_CHAINING_CN != FALSE
+#if CONFIG_DLL_PRES_CHAINING_CN != FALSE
     // SyncResponse
-    frameSize = EPL_C_DLL_MINSIZE_SYNCRES;
+    frameSize = C_DLL_MINSIZE_SYNCRES;
     ret = dllk_createTxFrame(&handle, &frameSize, kMsgTypeAsnd, kDllAsndSyncResponse);
     if (ret != kErrorOk)
         return ret;
@@ -1135,7 +1135,7 @@ tOplkError dllk_setupLocalNode(tNmtState nmtState_p)
     }
 
     // NMT request
-    frameSize = EPL_C_IP_MAX_MTU;
+    frameSize = C_IP_MAX_MTU;
     ret = dllk_createTxFrame(&handle, &frameSize, kMsgTypeAsnd, kDllAsndNmtRequest);
     if (ret != kErrorOk)
         return ret;
@@ -1147,7 +1147,7 @@ tOplkError dllk_setupLocalNode(tNmtState nmtState_p)
     dllkInstance_g.pTxBuffer[handle].pfnTxHandler = dllk_processTransmittedNmtReq;
 
     // non-EPL frame
-    frameSize = EPL_C_IP_MAX_MTU;
+    frameSize = C_IP_MAX_MTU;
     ret = dllk_createTxFrame(&handle, &frameSize, kMsgTypeNonPowerlink, kDllAsndNotDefined);
     if (ret != kErrorOk)
         return ret;
@@ -1173,7 +1173,7 @@ tOplkError dllk_setupLocalNode(tNmtState nmtState_p)
     dllk_setupSoaNmtReqFilter(&dllkInstance_g.aFilter[DLLK_FILTER_SOA_NMTREQ],
                                  dllkInstance_g.dllConfigParam.nodeId,
                                  &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NMTREQ]);
-#if EPL_DLL_PRES_CHAINING_CN != FALSE
+#if CONFIG_DLL_PRES_CHAINING_CN != FALSE
     dllk_setupSoaSyncReqFilter(&dllkInstance_g.aFilter[DLLK_FILTER_SOA_SYNCREQ],
                                  dllkInstance_g.dllConfigParam.nodeId,
                                  &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SYNCRES]);
@@ -1183,13 +1183,13 @@ tOplkError dllk_setupLocalNode(tNmtState nmtState_p)
                                  &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONEPL]);
 
     // register multicast MACs in ethernet driver
-    ami_setUint48Be(&aMulticastMac[0], EPL_C_DLL_MULTICAST_SOC);
+    ami_setUint48Be(&aMulticastMac[0], C_DLL_MULTICAST_SOC);
     ret = edrv_setRxMulticastMacAddr(aMulticastMac);
-    ami_setUint48Be(&aMulticastMac[0], EPL_C_DLL_MULTICAST_SOA);
+    ami_setUint48Be(&aMulticastMac[0], C_DLL_MULTICAST_SOA);
     ret = edrv_setRxMulticastMacAddr(aMulticastMac);
-    ami_setUint48Be(&aMulticastMac[0], EPL_C_DLL_MULTICAST_PRES);
+    ami_setUint48Be(&aMulticastMac[0], C_DLL_MULTICAST_PRES);
     ret = edrv_setRxMulticastMacAddr(aMulticastMac);
-    ami_setUint48Be(&aMulticastMac[0], EPL_C_DLL_MULTICAST_ASND);
+    ami_setUint48Be(&aMulticastMac[0], C_DLL_MULTICAST_ASND);
     ret = edrv_setRxMulticastMacAddr(aMulticastMac);
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
@@ -1241,7 +1241,7 @@ tOplkError dllk_setupLocalNodeMn(void)
     /*-------------------------------------------------------------------*/
     /* register TxFrames in Edrv */
     // SoC
-    frameSize = EPL_C_DLL_MINSIZE_SOC;
+    frameSize = C_DLL_MINSIZE_SOC;
     ret = dllk_createTxFrame(&handle, &frameSize, kMsgTypeSoc, kDllAsndNotDefined);
     if (ret != kErrorOk)
     {   // error occurred while registering Tx frame
@@ -1252,7 +1252,7 @@ tOplkError dllk_setupLocalNodeMn(void)
     dllkInstance_g.pTxBuffer[handle].pfnTxHandler = dllk_processTransmittedSoc;
 
     // SoA
-    frameSize = EPL_C_DLL_MINSIZE_SOA;
+    frameSize = C_DLL_MINSIZE_SOA;
     ret = dllk_createTxFrame(&handle, &frameSize, kMsgTypeSoa, kDllAsndNotDefined);
     if (ret != kErrorOk)
     {   // error occurred while registering Tx frame
@@ -1317,10 +1317,10 @@ tOplkError dllk_setupLocalNodeCn(void)
 {
     tOplkError      ret = kErrorOk;
 
-#if (EPL_DLL_PRES_FILTER_COUNT >= 0)
+#if (DLL_PRES_FILTER_COUNT >= 0)
     UINT            handle;
 
-#if (EPL_NMT_MAX_NODE_ID > 0)
+#if (NMT_MAX_NODE_ID > 0)
     UINT            index;
     tDllkNodeInfo*  pIntNodeInfo;
 #endif
@@ -1332,7 +1332,7 @@ tOplkError dllk_setupLocalNodeCn(void)
                          &dllkInstance_g.aLocalMac[0]);
 
     // setup PRes filter
-#if EPL_DLL_PRES_FILTER_COUNT < 0
+#if DLL_PRES_FILTER_COUNT < 0
     if (dllkInstance_g.usedPresFilterCount > 0)
         dllk_setupPresFilter(&dllkInstance_g.aFilter[DLLK_FILTER_PRES], TRUE);
     else
@@ -1346,7 +1346,7 @@ tOplkError dllk_setupLocalNodeCn(void)
     }
 
     handle = DLLK_FILTER_PRES;
-#if EPL_NMT_MAX_NODE_ID > 0
+#if NMT_MAX_NODE_ID > 0
     for (index = 0, pIntNodeInfo = &dllkInstance_g.aNodeInfo[0];
          index < tabentries (dllkInstance_g.aNodeInfo);
          index++, pIntNodeInfo++)
@@ -1364,7 +1364,7 @@ tOplkError dllk_setupLocalNodeCn(void)
 #endif
 #endif
 
-#if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
+#if (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER)
     ret = synctimer_setCycleLen(dllkInstance_g.dllConfigParam.cycleLen);
     if (ret != kErrorOk)
         return ret;
@@ -1374,7 +1374,7 @@ tOplkError dllk_setupLocalNodeCn(void)
         return ret;
 #endif
 
-#if EPL_DLL_PRES_CHAINING_CN != FALSE
+#if CONFIG_DLL_PRES_CHAINING_CN != FALSE
     dllkInstance_g.fPrcEnabled = FALSE;
     dllkInstance_g.syncReqPrevNodeId = 0;
 #endif
@@ -1398,7 +1398,7 @@ tOplkError dllk_cleanupLocalNode(tNmtState oldNmtState_p)
 {
     tOplkError      ret = kErrorOk;
     BYTE            aMulticastMac[6];
-#if EPL_NMT_MAX_NODE_ID > 0
+#if NMT_MAX_NODE_ID > 0
     UINT            index;
 #endif
 
@@ -1431,7 +1431,7 @@ tOplkError dllk_cleanupLocalNode(tNmtState oldNmtState_p)
         return ret;
 #endif
 
-#if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
+#if (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER)
     if ((ret = synctimer_stopSync()) != kErrorOk)
         return ret;
 #endif
@@ -1449,7 +1449,7 @@ tOplkError dllk_cleanupLocalNode(tNmtState oldNmtState_p)
     if ((ret = dllk_deleteTxFrame(DLLK_TXFRAME_NMTREQ)) != kErrorOk)
         return ret;
 
-#if EPL_DLL_PRES_CHAINING_CN != FALSE
+#if CONFIG_DLL_PRES_CHAINING_CN != FALSE
     if ((ret = dllk_deleteTxFrame(DLLK_TXFRAME_SYNCRES)) != kErrorOk)
         return ret;
 #endif
@@ -1494,7 +1494,7 @@ tOplkError dllk_cleanupLocalNode(tNmtState oldNmtState_p)
     }
 #else
     // must be CN because MN part is not compiled!
-#if EPL_NMT_MAX_NODE_ID > 0
+#if NMT_MAX_NODE_ID > 0
     for (index = 0; index < tabentries (dllkInstance_g.aNodeInfo); index++)
     {
         // disable PRes for this node
@@ -1505,19 +1505,19 @@ tOplkError dllk_cleanupLocalNode(tNmtState oldNmtState_p)
 #endif
 
     // deregister multicast MACs in ethernet driver
-    ami_setUint48Be(&aMulticastMac[0], EPL_C_DLL_MULTICAST_SOC);
+    ami_setUint48Be(&aMulticastMac[0], C_DLL_MULTICAST_SOC);
     ret = edrv_clearRxMulticastMacAddr(aMulticastMac);
-    ami_setUint48Be(&aMulticastMac[0], EPL_C_DLL_MULTICAST_SOA);
+    ami_setUint48Be(&aMulticastMac[0], C_DLL_MULTICAST_SOA);
     ret = edrv_clearRxMulticastMacAddr(aMulticastMac);
-    ami_setUint48Be(&aMulticastMac[0], EPL_C_DLL_MULTICAST_PRES);
+    ami_setUint48Be(&aMulticastMac[0], C_DLL_MULTICAST_PRES);
     ret = edrv_clearRxMulticastMacAddr(aMulticastMac);
-    ami_setUint48Be(&aMulticastMac[0], EPL_C_DLL_MULTICAST_ASND);
+    ami_setUint48Be(&aMulticastMac[0], C_DLL_MULTICAST_ASND);
     ret = edrv_clearRxMulticastMacAddr(aMulticastMac);
 
     return ret;
 }
 
-#if EPL_NMT_MAX_NODE_ID > 0
+#if NMT_MAX_NODE_ID > 0
 //------------------------------------------------------------------------------
 /**
 \brief  Get node info of specified node
@@ -1539,7 +1539,7 @@ tDllkNodeInfo* dllk_getNodeInfo(UINT nodeId_p)
     else
         return &dllkInstance_g.aNodeInfo[nodeId_p];
 }
-#endif // EPL_NMT_MAX_NODE_ID > 0
+#endif // NMT_MAX_NODE_ID > 0
 
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
@@ -1582,7 +1582,7 @@ tOplkError dllk_addNodeIsochronous(tDllkNodeInfo* pIntNodeInfo_p)
     else
     {   // normal CN shall be added to isochronous phase
         // insert node into list in ascending order
-#if EPL_DLL_PRES_CHAINING_MN != FALSE
+#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
         if (pIntNodeInfo_p->pPreqTxBuffer == NULL)
         {
             ppIntNodeInfo = &dllkInstance_g.pFirstPrcNodeInfo;
@@ -1631,7 +1631,7 @@ tOplkError dllk_addNodeIsochronous(tDllkNodeInfo* pIntNodeInfo_p)
                 goto Exit;
 
         }
-#if EPL_DLL_PRES_CHAINING_MN == FALSE
+#if CONFIG_DLL_PRES_CHAINING_MN == FALSE
         else
         {   // TxBuffer for PReq does not exist
             ret = kErrorDllTxFrameInvalid;
@@ -1672,7 +1672,7 @@ tOplkError dllk_deleteNodeIsochronous(tDllkNodeInfo* pIntNodeInfo_p)
     tDllkNodeInfo**     ppIntNodeInfo;
     tPlkFrame *         pTxFrame;
 
-#if EPL_DLL_PRES_CHAINING_MN != FALSE
+#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
     if (pIntNodeInfo_p->pPreqTxBuffer == NULL)
     {
         ppIntNodeInfo = &dllkInstance_g.pFirstPrcNodeInfo;
@@ -1715,7 +1715,7 @@ tOplkError dllk_deleteNodeIsochronous(tDllkNodeInfo* pIntNodeInfo_p)
 }
 #endif
 
-#if EPL_DLL_PRES_CHAINING_CN != FALSE
+#if CONFIG_DLL_PRES_CHAINING_CN != FALSE
 //------------------------------------------------------------------------------
 /**
 \brief  Enable PRes chaining mode
@@ -1734,11 +1734,11 @@ tOplkError dllk_presChainingEnable (void)
     {
         // relocate PReq filter to PResMN
         ami_setUint48Be(&dllkInstance_g.aFilter[DLLK_FILTER_PREQ].aFilterValue[0],
-                          EPL_C_DLL_MULTICAST_PRES);
+                          C_DLL_MULTICAST_PRES);
         ami_setUint8Be(&dllkInstance_g.aFilter[DLLK_FILTER_PREQ].aFilterValue[14],
                        kMsgTypePres);
         ami_setUint8Be(&dllkInstance_g.aFilter[DLLK_FILTER_PREQ].aFilterValue[15],
-                       EPL_C_ADR_BROADCAST); // Set Destination Node ID to C_ADR_BROADCAST
+                       C_ADR_BROADCAST); // Set Destination Node ID to C_ADR_BROADCAST
 
         dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES].timeOffsetNs = dllkInstance_g.prcPResTimeFirst;
 
@@ -1758,7 +1758,7 @@ tOplkError dllk_presChainingEnable (void)
         if (Ret != kErrorOk)
             return Ret;
 
-#if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
+#if (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER)
         Ret = synctimer_setLossOfSyncTolerance2(dllkInstance_g.prcPResFallBackTimeout);
 #endif
     }
@@ -1808,14 +1808,14 @@ tOplkError dllk_presChainingDisable (void)
         if (ret != kErrorOk)
             return ret;
 
-#if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
+#if (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER)
         ret = synctimer_setLossOfSyncTolerance2(0);
 #endif
     }
     return ret;
 }
 
-#if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
+#if (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER)
 //------------------------------------------------------------------------------
 /**
 \brief  Callback function for PResFallBackTimeout
@@ -1856,7 +1856,7 @@ Exit:
 }
 #endif
 
-#endif // #if EPL_DLL_PRES_CHAINING_CN != FALSE
+#endif // #if CONFIG_DLL_PRES_CHAINING_CN != FALSE
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
 //------------------------------------------------------------------------------
@@ -1892,7 +1892,7 @@ tOplkError dllk_setupAsyncPhase(tNmtState nmtState_p, UINT nextTxBufferOffset_p,
     }
 
     // $$$ d.k. fEnableInvitation_p = ((NmtState_p != kNmtMsPreOperational1) ||
-    //             (dllkInstance_g.cycleCount >= EPL_C_DLL_PREOP1_START_CYCLES))
+    //             (dllkInstance_g.cycleCount >= C_DLL_PREOP1_START_CYCLES))
     //          currently, processSync is not called in PreOp1
     ret = dllk_updateFrameSoa(pTxBuffer, nmtState_p, TRUE, dllkInstance_g.syncLastSoaReq);
     dllkInstance_g.ppTxBufferList[*pIndex_p] = pTxBuffer;
@@ -1994,7 +1994,7 @@ tOplkError dllk_setupAsyncPhase(tNmtState nmtState_p, UINT nextTxBufferOffset_p,
             ami_setUint8Le(&pTxFrame->data.soa.reqServiceId,
                     kDllReqServiceNo);
             ami_setUint8Le(&pTxFrame->data.soa.reqServiceTarget,
-                    EPL_C_ADR_INVALID);
+                    C_ADR_INVALID);
         }
         else
         {
@@ -2039,11 +2039,11 @@ tOplkError dllk_setupSyncPhase(tNmtState nmtState_p, BOOL fReadyFlag_p,
     if (dllkInstance_g.dllConfigParam.waitSocPreq != 0)
     {
         *pNextTimeOffsetNs_p = dllkInstance_g.dllConfigParam.waitSocPreq
-                            + EPL_C_DLL_T_PREAMBLE + EPL_C_DLL_T_MIN_FRAME + EPL_C_DLL_T_IFG;
+                            + C_DLL_T_PREAMBLE + C_DLL_T_MIN_FRAME + C_DLL_T_IFG;
     }
     else
     {
-        accFrameLenNs = EPL_C_DLL_T_PREAMBLE + EPL_C_DLL_T_MIN_FRAME + EPL_C_DLL_T_IFG;
+        accFrameLenNs = C_DLL_T_PREAMBLE + C_DLL_T_MIN_FRAME + C_DLL_T_IFG;
     }
 
     pCnNodeId = &dllkInstance_g.aCnNodeIdList[nextTxBufferOffset_p][0];
@@ -2081,7 +2081,7 @@ tOplkError dllk_setupSyncPhase(tNmtState nmtState_p, BOOL fReadyFlag_p,
                 // update NMT state
                 ami_setUint8Le(&pTxFrame->data.pres.nmtStatus, (BYTE) nmtState_p);
 
-#if EPL_DLL_PRES_CHAINING_MN != FALSE
+#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
                 *pNextTimeOffsetNs_p = pIntNodeInfo->presTimeoutNs;
                 {
                     tDllkNodeInfo*   pIntPrcNodeInfo;
@@ -2095,7 +2095,7 @@ tOplkError dllk_setupSyncPhase(tNmtState nmtState_p, BOOL fReadyFlag_p,
                         pIntPrcNodeInfo = pIntPrcNodeInfo->pNextNodeInfo;
                     }
 
-                    *pCnNodeId = EPL_C_ADR_BROADCAST;    // mark this entry as PRC slot finished
+                    *pCnNodeId = C_ADR_BROADCAST;    // mark this entry as PRC slot finished
                     pCnNodeId++;
                 }
 #else
@@ -2112,8 +2112,8 @@ tOplkError dllk_setupSyncPhase(tNmtState nmtState_p, BOOL fReadyFlag_p,
 
             if (nextTimeOffsetNs == 0)
             {   // add SoC frame length
-                accFrameLenNs += EPL_C_DLL_T_PREAMBLE +
-                                 (pTxBuffer->txFrameSize * EPL_C_DLL_T_BITTIME) + EPL_C_DLL_T_IFG;
+                accFrameLenNs += C_DLL_T_PREAMBLE +
+                                 (pTxBuffer->txFrameSize * C_DLL_T_BITTIME) + C_DLL_T_IFG;
             }
             else
             {
@@ -2124,7 +2124,7 @@ tOplkError dllk_setupSyncPhase(tNmtState nmtState_p, BOOL fReadyFlag_p,
 
         pIntNodeInfo = pIntNodeInfo->pNextNodeInfo;
     }
-    *pCnNodeId = EPL_C_ADR_INVALID;    // mark last entry in node-ID list
+    *pCnNodeId = C_ADR_INVALID;    // mark last entry in node-ID list
 
     return ret;
 }

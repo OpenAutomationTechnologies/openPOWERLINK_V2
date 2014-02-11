@@ -41,11 +41,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
 
 // NOTE:
 // All version macros should contain the same version number. But do not use
-// defines instead of the numbers. Because the macro EPL_STRING_VERSION() can not
+// defines instead of the numbers. Because the macro PLK_STRING_VERSION() can not
 // convert a define to a string.
 //
 // Format: maj.min.build
@@ -53,14 +52,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //             min        = minor version (will be set to 0 if major version will be incremented)
 //                 build  = current build (will be set to 0 if minor version will be incremented)
 //
-#define EPL_DEFINED_STACK_VERSION   EPL_STACK_VERSION   (2, 0, 0)
-#define EPL_DEFINED_OBJ1018_VERSION EPL_OBJ1018_VERSION (2, 0, 0)
-#define EPL_DEFINED_STRING_VERSION  EPL_STRING_VERSION  (2, 0, 0, "b1")
+#define PLK_DEFINED_STACK_VERSION   PLK_STACK_VERSION   (2, 0, 0)
+#define PLK_DEFINED_OBJ1018_VERSION PLK_OBJ1018_VERSION (2, 0, 0)
+#define PLK_DEFINED_STRING_VERSION  PLK_STRING_VERSION  (2, 0, 0, "b1")
 
 
 // -----------------------------------------------------------------------------
 #define EPL_PRODUCT_NAME            "EPL V2"
-#define EPL_PRODUCT_VERSION         EPL_DEFINED_STRING_VERSION
+#define PLK_PRODUCT_VERSION         PLK_DEFINED_STRING_VERSION
 #define EPL_PRODUCT_MANUFACTURER    "SYS TEC electronic GmbH"
 
 #define EPL_PRODUCT_KEY             "SO-1083"

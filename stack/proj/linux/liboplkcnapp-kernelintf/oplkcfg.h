@@ -67,7 +67,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CONFIG_INCLUDE_SDOC
 #define CONFIG_INCLUDE_SDO_ASND
 
-#define CONFIG_DLLCAL_QUEUE                         EPL_QUEUE_IOCTL
+#define CONFIG_DLLCAL_QUEUE                             IOCTL_QUEUE
 
 //==============================================================================
 // Data Link Layer (DLL) specific defines
@@ -75,11 +75,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // activate PResChaining support on MN
 // NOTE: Ensure that this setting is equally configured in user and kernel layer!!
-#define EPL_DLL_PRES_CHAINING_MN                        TRUE
+#define CONFIG_DLL_PRES_CHAINING_MN                     TRUE
 
 // CN supports PRes Chaining
 // NOTE: Ensure that this setting is equally configured in user and kernel layer!!
-#define EPL_DLL_PRES_CHAINING_CN                        FALSE
+#define CONFIG_DLL_PRES_CHAINING_CN                     FALSE
 
 // Disable deferred release of rx-buffers until EdrvPcap supports it
 // NOTE: Ensure that these setting is equally configured in user and kernel layer!!

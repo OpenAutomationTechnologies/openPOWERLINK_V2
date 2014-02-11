@@ -64,7 +64,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CONFIG_INCLUDE_SDO_ASND
 #define CONFIG_INCLUDE_LEDU
 
-#define CONFIG_DLLCAL_QUEUE                         EPL_QUEUE_DIRECT
+#define CONFIG_DLLCAL_QUEUE                         DIRECT_QUEUE
 
 //==============================================================================
 // Ethernet driver (Edrv) specific defines
@@ -109,16 +109,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EPL_DLL_PRES_READY_AFTER_SOA                FALSE
 
 // maximum count of Rx filter entries for PRes frames
-#define EPL_DLL_PRES_FILTER_COUNT                   3
+#define DLL_PRES_FILTER_COUNT                   3
 
 
-#define EPL_DLL_PROCESS_SYNC                        EPL_DLL_PROCESS_SYNC_ON_TIMER
+#define CONFIG_DLL_PROCESS_SYNC                     DLL_PROCESS_SYNC_ON_TIMER
 
 // negative time shift of isochronous task in relation to SoC
-#define EPL_DLL_SOC_SYNC_SHIFT_US                   150
+#define CONFIG_DLL_SOC_SYNC_SHIFT_US                150
 
 // CN supports PRes Chaining
-#define EPL_DLL_PRES_CHAINING_CN                    TRUE
+#define CONFIG_DLL_PRES_CHAINING_CN                 TRUE
 
 // Disable/Enable late release
 #define DLL_DEFERRED_RXFRAME_RELEASE_ISOCHRONOUS    FALSE

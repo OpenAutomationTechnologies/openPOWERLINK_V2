@@ -88,7 +88,7 @@ tOplkError nmtmnu_cbCheckEvent(tNmtEvent NmtEvent_p);
 tOplkError nmtmnu_getDiagnosticInfo(UINT* pMandatorySlaveCount_p, UINT* pSignalSlaveCount_p,
                                     UINT16* pflags_p);
 
-#if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
+#if NMTMNU_PRES_CHAINING_MN != FALSE
 tOplkError nmtmnu_configPrc(tEplNmtMnuConfigParam* pConfigParam_p);
 #endif
 

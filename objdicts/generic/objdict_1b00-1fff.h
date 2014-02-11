@@ -77,9 +77,9 @@ area from 0x1B00 - 0x1FFF.
 #endif
 
 #if defined(CONFIG_INCLUDE_CFM)
-        OBD_RAM_INDEX_RAM_VARARRAY_NOINIT(0x1F22, EPL_NMT_MAX_NODE_ID, cfmu_cbObdAccess, kObdTypeDomain, kObdAccSRW, Domain, CFM_ConciseDcfList_ADOM)
-        OBD_RAM_INDEX_RAM_ARRAY(0x1F26, EPL_NMT_MAX_NODE_ID, NULL, kObdTypeUInt32, kObdAccSRW, tObdUnsigned32, CFM_ExpConfDateList_AU32, 0)
-        OBD_RAM_INDEX_RAM_ARRAY(0x1F27, EPL_NMT_MAX_NODE_ID, NULL, kObdTypeUInt32, kObdAccSRW, tObdUnsigned32, CFM_ExpConfTimeList_AU32, 0)
+        OBD_RAM_INDEX_RAM_VARARRAY_NOINIT(0x1F22, NMT_MAX_NODE_ID, cfmu_cbObdAccess, kObdTypeDomain, kObdAccSRW, Domain, CFM_ConciseDcfList_ADOM)
+        OBD_RAM_INDEX_RAM_ARRAY(0x1F26, NMT_MAX_NODE_ID, NULL, kObdTypeUInt32, kObdAccSRW, tObdUnsigned32, CFM_ExpConfDateList_AU32, 0)
+        OBD_RAM_INDEX_RAM_ARRAY(0x1F27, NMT_MAX_NODE_ID, NULL, kObdTypeUInt32, kObdAccSRW, tObdUnsigned32, CFM_ExpConfTimeList_AU32, 0)
 #endif
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
@@ -89,9 +89,9 @@ area from 0x1B00 - 0x1FFF.
         OBD_END_INDEX(0x1F80)
 #endif
 
-#if EPL_NMT_MAX_NODE_ID > 0
+#if NMT_MAX_NODE_ID > 0
         // Object 1F81h: NMT_NodeAssignment_AU32
-        OBD_RAM_INDEX_RAM_ARRAY(0x1F81, EPL_NMT_MAX_NODE_ID, NULL, kObdTypeUInt32, kObdAccSRW, tObdUnsigned32, NMT_NodeAssignment_AU32, 0)
+        OBD_RAM_INDEX_RAM_ARRAY(0x1F81, NMT_MAX_NODE_ID, NULL, kObdTypeUInt32, kObdAccSRW, tObdUnsigned32, NMT_NodeAssignment_AU32, 0)
 #endif
 
         // Object 1F82h: NMT_FeatureFlags_U32
@@ -134,9 +134,9 @@ area from 0x1B00 - 0x1FFF.
             OBD_SUBINDEX_RAM_VAR(0x1F8C, 0x00, kObdTypeUInt8, (kObdAccR | kObdAccPdo), tObdUnsigned8, NMT_CurrNMTState_U8, 0x1C)
         OBD_END_INDEX(0x1F8C)
 
-#if EPL_NMT_MAX_NODE_ID > 0
+#if NMT_MAX_NODE_ID > 0
         // Object 1F8Dh: NMT_PResPayloadLimitList_AU16
-        OBD_RAM_INDEX_RAM_ARRAY(0x1F8D, EPL_NMT_MAX_NODE_ID, NULL, kObdTypeUInt16, kObdAccSRW, tObdUnsigned16, NMT_PResPayloadLimitList_AU16, 36)
+        OBD_RAM_INDEX_RAM_ARRAY(0x1F8D, NMT_MAX_NODE_ID, NULL, kObdTypeUInt16, kObdAccSRW, tObdUnsigned16, NMT_PResPayloadLimitList_AU16, 36)
 #endif
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
@@ -158,7 +158,7 @@ area from 0x1B00 - 0x1FFF.
         OBD_END_INDEX(0x1F93)
 
         // Object 1F98h: NMT_CycleTiming_REC
-#if EPL_DLL_PRES_CHAINING_CN == FALSE
+#if CONFIG_DLL_PRES_CHAINING_CN == FALSE
         OBD_BEGIN_INDEX_RAM(0x1F98, 0x09, NULL)
             OBD_SUBINDEX_RAM_VAR(0x1F98, 0x00, kObdTypeUInt8, kObdAccConst, tObdUnsigned8, NumberOfEntries, 0x08)
 #else
@@ -172,9 +172,9 @@ area from 0x1B00 - 0x1FFF.
             OBD_SUBINDEX_RAM_VAR(0x1F98, 0x05, kObdTypeUInt16, kObdAccSRW, tObdUnsigned16, PResActPayloadLimit_U16, 36)
             OBD_SUBINDEX_RAM_VAR(0x1F98, 0x06, kObdTypeUInt32, kObdAccR, tObdUnsigned32, ASndMaxLatency_U32, 0x00)     // in [ns]
             OBD_SUBINDEX_RAM_VAR(0x1F98, 0x07, kObdTypeUInt8, kObdAccSRW, tObdUnsigned8, MultiplCycleCnt_U8, 0x00)
-            OBD_SUBINDEX_RAM_VAR(0x1F98, 0x08, kObdTypeUInt16, kObdAccSRW, tObdUnsigned16, AsyncMTU_U16, EPL_C_DLL_MIN_ASYNC_MTU)
+            OBD_SUBINDEX_RAM_VAR(0x1F98, 0x08, kObdTypeUInt16, kObdAccSRW, tObdUnsigned16, AsyncMTU_U16, C_DLL_MIN_ASYNC_MTU)
 //            OBD_SUBINDEX_RAM_VAR(0x1F98, 0x09, kObdTypeUInt16, kObdAccRW, tObdUnsigned16, Prescaler_U16, 0x02)
-#if EPL_DLL_PRES_CHAINING_CN != FALSE
+#if CONFIG_DLL_PRES_CHAINING_CN != FALSE
             OBD_SUBINDEX_RAM_VAR(0x1F98, 0x0A, kObdTypeUInt8, kObdAccR, tObdUnsigned8, PResMode_U8, 0x00)
             OBD_SUBINDEX_RAM_VAR(0x1F98, 0x0B, kObdTypeUInt32, kObdAccR, tObdUnsigned32, PResTimeFirst_U32, 0x00)      // in [ns]
             OBD_SUBINDEX_RAM_VAR(0x1F98, 0x0C, kObdTypeUInt32, kObdAccR, tObdUnsigned32, PResTimeSecond_U32, 0x00)     // in [ns]

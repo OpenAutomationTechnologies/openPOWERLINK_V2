@@ -64,7 +64,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CONFIG_INCLUDE_SDO_ASND
 #define CONFIG_INCLUDE_CFM
 
-#define CONFIG_DLLCAL_QUEUE                         EPL_QUEUE_CIRCBUF
+#define CONFIG_DLLCAL_QUEUE                         CIRCBUF_QUEUE
 
 
 //==============================================================================
@@ -96,13 +96,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EPL_DLL_PRES_READY_AFTER_SOA                FALSE
 
 // activate PResChaining support on MN
-#define EPL_DLL_PRES_CHAINING_MN                    TRUE
+#define CONFIG_DLL_PRES_CHAINING_MN                 TRUE
 
 // CN supports PRes Chaining
-#define EPL_DLL_PRES_CHAINING_CN                    FALSE
+#define CONFIG_DLL_PRES_CHAINING_CN                 FALSE
 
 // time when CN processing the isochronous task (sync callback of application and cycle preparation)
-#define EPL_DLL_PROCESS_SYNC                        EPL_DLL_PROCESS_SYNC_ON_SOC
+#define CONFIG_DLL_PROCESS_SYNC                        DLL_PROCESS_SYNC_ON_SOC
 
 // Disable deferred release of rx-buffers until EdrvPcap supports it
 #define DLL_DEFERRED_RXFRAME_RELEASE_ISOCHRONOUS    FALSE
