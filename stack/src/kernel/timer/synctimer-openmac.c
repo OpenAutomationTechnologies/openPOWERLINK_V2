@@ -410,7 +410,7 @@ This function sets the synchronization time trigger at a specific time stamp.
 \ingroup module_synctimer
 */
 //------------------------------------------------------------------------------
-tOplkError synctimer_syncTriggerAtTimeStamp(tEplTgtTimeStamp* pTimeStamp_p)
+tOplkError synctimer_syncTriggerAtTimeStamp(tTimestamp* pTimeStamp_p)
 {
     tOplkError ret = kErrorOk;
 

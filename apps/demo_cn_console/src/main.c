@@ -203,7 +203,7 @@ static tOplkError initPowerlink(UINT32 cycleLen_p, const BYTE* macAddr_p, UINT32
     initParam.sizeOfInitParam = sizeof (initParam);
 
     // pass selected device name to Edrv
-    initParam.hwParam.m_pszDevName = devName;
+    initParam.hwParam.pDevName = devName;
     initParam.nodeId = nodeId_p;
     initParam.ipAddress = (0xFFFFFF00 & IP_ADDR) | initParam.nodeId;
 

@@ -340,8 +340,8 @@ static tOplkError initStack(void)
         return ret;
 
     EPL_MEMCPY(dllkInitParam.aLocalMac, instance_l.initParam.aMacAddress, 6);
-    dllkInitParam.hwParam.m_pszDevName = instance_l.initParam.szEthDevName;
-    dllkInitParam.hwParam.m_uiDevNumber = instance_l.initParam.ethDevNumber;
+    dllkInitParam.hwParam.pDevName = instance_l.initParam.szEthDevName;
+    dllkInitParam.hwParam.devNum = instance_l.initParam.ethDevNumber;
 
     ret = dllk_addInstance(&dllkInitParam);
     if (ret != kErrorOk)

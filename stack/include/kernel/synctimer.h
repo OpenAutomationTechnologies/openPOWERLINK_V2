@@ -72,7 +72,7 @@ tOplkError synctimer_setSyncShift(UINT32 advanceShift_p);
 tOplkError synctimer_setCycleLen(UINT32 cycleLen_p);
 tOplkError synctimer_setLossOfSyncTolerance(UINT32 lossOfSyncTolerance_p);
 tOplkError synctimer_setLossOfSyncTolerance2(UINT32 lossOfSyncTolerance2_p);
-tOplkError synctimer_syncTriggerAtTimeStamp(tEplTgtTimeStamp* pTimeStamp_p);
+tOplkError synctimer_syncTriggerAtTimeStamp(tTimestamp* pTimeStamp_p);
 tOplkError synctimer_stopSync(void);
 void       synctimer_enableExtSyncIrq(UINT32 syncIntCycle_p, UINT32 pulseWidth_p);
 void       synctimer_disableExtSyncIrq(void);

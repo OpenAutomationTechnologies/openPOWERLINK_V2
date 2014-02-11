@@ -98,8 +98,8 @@ the result in nanoseconds.
 \ingroup module_timestamp
 */
 //------------------------------------------------------------------------------
-UINT32 timestamp_calcTimeDiff(tEplTgtTimeStamp* pTimeStampPrevious_p,
-                              tEplTgtTimeStamp* pTimeStampCurrent_p)
+UINT32 timestamp_calcTimeDiff(tTimestamp* pTimeStampPrevious_p,
+                              tTimestamp* pTimeStampCurrent_p)
 {
     UINT32 timeDiffTicks;
 

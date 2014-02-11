@@ -135,7 +135,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     // clear instance structure
     EPL_MEMSET(&edrvInstance_l, 0, sizeof (edrvInstance_l));
 
-    if (pEdrvInitParam_p->hwParam.m_pszDevName == NULL)
+    if (pEdrvInitParam_p->hwParam.pDevName == NULL)
     {
         ret = kErrorEdrvInit;
         goto Exit;
@@ -151,7 +151,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
         (pEdrvInitParam_p->aMacAddr[4] == 0) &&
         (pEdrvInitParam_p->aMacAddr[5] == 0)  )
     {   // read MAC address from controller
-        getMacAdrs(pEdrvInitParam_p->hwParam.m_pszDevName,
+        getMacAdrs(pEdrvInitParam_p->hwParam.pDevName,
                    pEdrvInitParam_p->aMacAddr);
     }
 
@@ -159,7 +159,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     edrvInstance_l.initParam = *pEdrvInitParam_p;
 
     edrvInstance_l.pPcap = pcap_open_live (
-                        edrvInstance_l.initParam.hwParam.m_pszDevName,
+                        edrvInstance_l.initParam.hwParam.pDevName,
                         65535,  // snaplen
                         1,      // promiscuous mode
                         1,      // milli seconds read timeout
@@ -273,7 +273,7 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
         goto Exit;
     }
 
-    if (getLinkStatus(edrvInstance_l.initParam.hwParam.m_pszDevName) == FALSE)
+    if (getLinkStatus(edrvInstance_l.initParam.hwParam.pDevName) == FALSE)
     {
         /* there's no link! We pretend that packet is sent and immediately call
          * tx handler! Otherwise the stack would hang! */
@@ -556,7 +556,7 @@ static void* workerThread(void* pArgument_p)
     DEBUG_LVL_EDRV_TRACE("%s(): ThreadId:%ld\n", __func__, syscall(SYS_gettid));
 
     pInstance->pPcapThread =
-        pcap_open_live (pInstance->initParam.hwParam.m_pszDevName,
+        pcap_open_live (pInstance->initParam.hwParam.pDevName,
                            65535,  // snaplen
                            1,      // promiscuous mode
                            1,      // milli seconds read timeout

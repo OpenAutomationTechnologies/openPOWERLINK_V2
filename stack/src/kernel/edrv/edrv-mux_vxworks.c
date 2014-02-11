@@ -161,7 +161,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     // clear instance structure
     EPL_MEMSET(&edrvInstance_l, 0, sizeof (edrvInstance_l));
 
-    if (pEdrvInitParam_p->hwParam.m_pszDevName == NULL)
+    if (pEdrvInitParam_p->hwParam.pDevName == NULL)
     {
         ret = kErrorEdrvInit;
         goto Exit;
@@ -189,12 +189,12 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     }
 
     DEBUG_LVL_EDRV_TRACE("%s() Using interface %s%d\n", __func__,
-                           pEdrvInitParam_p->hwParam.m_pszDevName,
-                           pEdrvInitParam_p->hwParam.m_uiDevNumber);
+                           pEdrvInitParam_p->hwParam.pDevName,
+                           pEdrvInitParam_p->hwParam.devNum);
     /* Binding to Mux Device */
     if ((edrvInstance_l.pCookie =
-               muxBind(pEdrvInitParam_p->hwParam.m_pszDevName,
-                       pEdrvInitParam_p->hwParam.m_uiDevNumber,
+               muxBind(pEdrvInitParam_p->hwParam.pDevName,
+                       pEdrvInitParam_p->hwParam.devNum,
                        packetHandler, muxShutdown, muxRestart,
                        muxError,
                        MUX_PROTO_PROMISC, "POWERLINK", &edrvInstance_l)) == NULL)
@@ -215,7 +215,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
         (pEdrvInitParam_p->aMacAddr[5] == 0)  )
     {   // read MAC address from controller
         getMacAddr(edrvInstance_l.pCookie,
-                       pEdrvInitParam_p->hwParam.m_pszDevName,
+                       pEdrvInitParam_p->hwParam.pDevName,
                        pEdrvInitParam_p->aMacAddr);
     }
 

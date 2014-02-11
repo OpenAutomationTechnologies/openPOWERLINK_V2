@@ -305,7 +305,7 @@ typedef struct
     tSyncCb             pfnCbSync;                  ///< Pointer to the application sync callback function.
                                                     /**< It is normally used only for non-threaded systems.
                                                          If the application processes synchronous data by a separate thread it must be initialized with NULL! */
-    tEplHwParam         hwParam;                    ///< The hardware parameters of the node
+    tHwParam            hwParam;                    ///< The hardware parameters of the node
     UINT32              syncResLatency;             ///< Constant response latency for SyncRes in ns
     UINT                syncNodeId;                 ///< Specifies the synchronization point for the MN. The synchronization take place after a PRes from a CN with this node-ID (0 = SoC, 255 = SoA)
     BOOL                fSyncOnPrcNode;             ///< If it is TRUE, Sync on PRes chained CN; FALSE: conventional CN (PReq/PRes)

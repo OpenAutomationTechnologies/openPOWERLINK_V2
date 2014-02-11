@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   oplkinc.h
+\file   oplk/oplkinc.h
 
 \brief  Standard include file
 
@@ -37,8 +37,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_oplk_EplInc_H_
-#define _INC_oplk_EplInc_H_
+#ifndef _INC_oplk_oplkinc_H_
+#define _INC_oplk_oplkinc_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -142,37 +142,52 @@ void trace (const char *fmt, ...);
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-// IEEE 1588 conforming net time structure
+
+/**
+\brief  IEEE 1588 conforming net time structure
+
+The structure defines a IEEE 1588 conforming net time.
+*/
 typedef struct
 {
-    UINT32                  m_dwSec;
-    UINT32                  m_dwNanoSec;
-} tEplNetTime;
+    UINT32              sec;        ///< Seconds
+    UINT32              nsec;       ///< Nanoseconds
+} tNetTime;
 
-// Hardware parameter structure
+/**
+\brief Hardware parameter structure
+
+The following structure specifies the hardware parameters of an openPOWERLINK
+Ethernet controller.
+*/
 typedef struct
 {
-    UINT                    m_uiDevNumber;  // device number for selecting Ethernet controller
-    const char*             m_pszDevName;   // device name (valid if non-null)
-} tEplHwParam;
+    UINT                devNum;     ///< Device number of the used Ethernet controller
+    const char*         pDevName;   ///< Device name of the Ethernet controller (valid if non-null)
+} tHwParam;
 
-// user argument union
-typedef union
+/**
+\brief Timestamp structure
+
+The following structure defines a timestamp value use to store target specific
+timestamps.
+*/
+typedef struct
 {
-    UINT                    m_uiValue;
-    void*                   m_pValue;
-} tEplUserArg;
-
-typedef struct {
-    TIME_STAMP_T            timeStamp;
-} tEplTgtTimeStamp;
+    TIME_STAMP_T        timeStamp;      ///< The timestamp.
+} tTimestamp;
 
 
+/**
+\brief Time of day structure
+
+The following structure defines a CANopen time-of-day format.
+*/
 #ifndef _TIME_OF_DAY_DEFINED_
 typedef struct
 {
-    ULONG       m_dwMs;
-    USHORT      m_wDays;
+    ULONG               msec;           ///< Milliseconds after midnight
+    USHORT              days;           ///< Days since January the 1st, 1984
 } tTimeOfDay;
 
 #define _TIME_OF_DAY_DEFINED_
@@ -208,6 +223,6 @@ typedef struct
                 }                                                       \
         }
 
-#endif /* _INC_oplk_EplInc_H_ */
+#endif /* _INC_oplk_oplkinc_H_ */
 
 

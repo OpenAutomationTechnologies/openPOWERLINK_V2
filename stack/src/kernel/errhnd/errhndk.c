@@ -106,8 +106,8 @@ static tErrHndkInstance instance_l;
 // local function prototypes
 //------------------------------------------------------------------------------
 static tOplkError postNmtEvent(tNmtEvent nmtEvent_p);
-static tOplkError generateHistoryEntry(UINT16 errorCode_p, tEplNetTime netTime_p);
-static tOplkError generateHistoryEntryNodeId(UINT16 errorCode_p, tEplNetTime netTime_p, UINT nodeId_p);
+static tOplkError generateHistoryEntry(UINT16 errorCode_p, tNetTime netTime_p);
+static tOplkError generateHistoryEntryNodeId(UINT16 errorCode_p, tNetTime netTime_p, UINT nodeId_p);
 static void       decrementCnCounters(void);
 static tOplkError postHistoryEntryEvent(tErrHistoryEntry* pHistoryEntry_p);
 static tOplkError handleDllErrors(tEvent *pEvent_p);
@@ -115,7 +115,7 @@ static tOplkError handleDllErrors(tEvent *pEvent_p);
 #ifdef CONFIG_INCLUDE_NMT_MN
 static tOplkError decrementMnCounters(void);
 static tOplkError postHeartbeatEvent(UINT nodeId_p, tNmtState state_p, UINT16 errorCode_p);
-static tOplkError generateHistoryEntryWithError(UINT16 errorCode_p, tEplNetTime netTime_p, UINT16 eplError_p);
+static tOplkError generateHistoryEntryWithError(UINT16 errorCode_p, tNetTime netTime_p, UINT16 eplError_p);
 #endif
 
 //============================================================================//
@@ -955,7 +955,7 @@ posting it to the API.
 \return Returns kErrorOk or error code
 */
 //------------------------------------------------------------------------------
-static tOplkError generateHistoryEntry(UINT16 errorCode_p, tEplNetTime netTime_p)
+static tOplkError generateHistoryEntry(UINT16 errorCode_p, tNetTime netTime_p)
 {
     tOplkError                  ret;
     tErrHistoryEntry         	historyEntry;
@@ -987,7 +987,7 @@ by setting up a history entry event and posting it to the API.
 */
 //------------------------------------------------------------------------------
 static tOplkError generateHistoryEntryNodeId(UINT16 errorCode_p,
-                                tEplNetTime netTime_p, UINT nodeId_p)
+                                tNetTime netTime_p, UINT nodeId_p)
 {
     tOplkError                  ret;
     tErrHistoryEntry         	historyEntry;
@@ -1021,7 +1021,7 @@ API.
 */
 //------------------------------------------------------------------------------
 static tOplkError generateHistoryEntryWithError(UINT16 errorCode_p,
-                                tEplNetTime netTime_p, UINT16 eplError_p)
+                                tNetTime netTime_p, UINT16 eplError_p)
 {
     tOplkError                  ret;
     tErrHistoryEntry         	historyEntry;
