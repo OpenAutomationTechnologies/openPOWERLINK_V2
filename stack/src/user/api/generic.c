@@ -642,8 +642,8 @@ tOplkError oplk_sendAsndFrame(UINT8 dstNodeId_p, tAsndFrame *pAsndFrame_p,
     frameInfo.pFrame = (tPlkFrame *)buffer;
 
     // Copy Asnd data
-    EPL_MEMSET(frameInfo.pFrame, 0x00, frameInfo.frameSize);
-    EPL_MEMCPY(&frameInfo.pFrame->data.asnd, pAsndFrame_p, asndSize_p);
+    OPLK_MEMSET(frameInfo.pFrame, 0x00, frameInfo.frameSize);
+    OPLK_MEMCPY(&frameInfo.pFrame->data.asnd, pAsndFrame_p, asndSize_p);
 
     // Fill in additional data (SrcNodeId is filled by DLL if it is set to 0)
     ami_setUint8Le(&frameInfo.pFrame->messageType, (UINT8) kMsgTypeAsnd);

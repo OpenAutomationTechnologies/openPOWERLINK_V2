@@ -121,7 +121,7 @@ CAL module.
 //------------------------------------------------------------------------------
 tOplkError eventucal_init (void)
 {
-    EPL_MEMSET(&instance_l, 0, sizeof(tEventuCalInstance));
+    OPLK_MEMSET(&instance_l, 0, sizeof(tEventuCalInstance));
 
     if (eventucal_initQueueCircbuf(kEventQueueK2U) != kErrorOk)
         goto Exit;

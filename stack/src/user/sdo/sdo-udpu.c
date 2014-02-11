@@ -185,7 +185,7 @@ tOplkError sdoudp_addInstance(tSequLayerReceiveCb pfnReceiveCb_p)
     WSADATA             wsa;
 #endif
 
-    EPL_MEMSET(&sdoUdpInstance_l, 0x00, sizeof(sdoUdpInstance_l));
+    OPLK_MEMSET(&sdoUdpInstance_l, 0x00, sizeof(sdoUdpInstance_l));
 
     if (pfnReceiveCb_p != NULL)
     {

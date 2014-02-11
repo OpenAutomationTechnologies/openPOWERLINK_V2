@@ -141,7 +141,7 @@ tOplkError pdokcal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
 {
     TRACE ("%s()\n", __func__);
 
-    pdokcalmem_pPdo_g = EPL_MALLOC(memSize_p);
+    pdokcalmem_pPdo_g = OPLK_MALLOC(memSize_p);
     if (pdokcalmem_pPdo_g == NULL)
     {
         TRACE ("%s() malloc failed!}n", __func__);
@@ -174,7 +174,7 @@ tOplkError pdokcal_freeMem(BYTE* pMem_p, size_t memSize_p)
     UNUSED_PARAMETER(memSize_p);
 
     TRACE ("%s()\n", __func__);
-    EPL_FREE(pMem_p);
+    OPLK_FREE(pMem_p);
     return kErrorOk;
 }
 

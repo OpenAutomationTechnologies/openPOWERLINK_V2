@@ -116,13 +116,13 @@ tCircBufInstance* circbuf_createInstance(UINT8 id_p)
     tCircBufArchInstance*       pArch;
     TCHAR                       mutexName[MAX_PATH];
 
-    if ((pInstance = EPL_MALLOC(sizeof(tCircBufInstance) +
+    if ((pInstance = OPLK_MALLOC(sizeof(tCircBufInstance) +
                                 sizeof(tCircBufArchInstance))) == NULL)
     {
         TRACE("%s() malloc failed!\n", __func__);
         return NULL;
     }
-    EPL_MEMSET(pInstance, 0, sizeof(tCircBufInstance) + sizeof(tCircBufArchInstance));
+    OPLK_MEMSET(pInstance, 0, sizeof(tCircBufInstance) + sizeof(tCircBufArchInstance));
     pInstance->pCircBufArchInstance = (BYTE*)pInstance + sizeof(tCircBufInstance);
     pInstance->bufferId = id_p;
 
@@ -132,7 +132,7 @@ tCircBufInstance* circbuf_createInstance(UINT8 id_p)
     if ((pArch->lockMutex = CreateMutex (NULL, FALSE, mutexName)) == NULL)
     {
         TRACE("%s() creating mutex failed!\n", __func__);
-        EPL_FREE(pInstance);
+        OPLK_FREE(pInstance);
         return NULL;
     }
 
@@ -155,7 +155,7 @@ void circbuf_freeInstance(tCircBufInstance* pInstance_p)
     tCircBufArchInstance* pArch = (tCircBufArchInstance*)pInstance_p->pCircBufArchInstance;
 
     CloseHandle(pArch->lockMutex);
-    EPL_FREE(pInstance_p);
+    OPLK_FREE(pInstance_p);
 }
 
 //------------------------------------------------------------------------------
@@ -181,7 +181,7 @@ tCircBufError circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t size_p)
 
     size = size_p + sizeof(tCircBufHeader);
 
-    pInstance_p->pCircBufHeader = EPL_MALLOC(size);
+    pInstance_p->pCircBufHeader = OPLK_MALLOC(size);
     if (pInstance_p->pCircBufHeader == NULL)
     {
         TRACE("%s() malloc failed!\n", __func__);
@@ -209,7 +209,7 @@ The function frees the allocated memory used by the circular buffer.
 //------------------------------------------------------------------------------
 void circbuf_freeBuffer(tCircBufInstance* pInstance_p)
 {
-    EPL_FREE(pInstance_p->pCircBufHeader);
+    OPLK_FREE(pInstance_p->pCircBufHeader);
 }
 
 //------------------------------------------------------------------------------

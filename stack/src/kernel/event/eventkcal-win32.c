@@ -126,7 +126,7 @@ tOplkError eventkcal_init (void)
 {
     tOplkError      ret = kErrorOk;
 
-    EPL_MEMSET(&instance_l, 0, sizeof(tEventkCalInstance));
+    OPLK_MEMSET(&instance_l, 0, sizeof(tEventkCalInstance));
 
     if ((instance_l.semUserData = CreateSemaphore(NULL, 0, 100, "Local\\semUserEvent")) == NULL)
         goto Exit;

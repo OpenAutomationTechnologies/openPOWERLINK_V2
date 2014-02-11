@@ -339,7 +339,7 @@ static tOplkError initStack(void)
     if ((ret = nmtk_init()) != kErrorOk)
         return ret;
 
-    EPL_MEMCPY(dllkInitParam.aLocalMac, instance_l.initParam.aMacAddress, 6);
+    OPLK_MEMCPY(dllkInitParam.aLocalMac, instance_l.initParam.aMacAddress, 6);
     dllkInitParam.hwParam.pDevName = instance_l.initParam.szEthDevName;
     dllkInitParam.hwParam.devNum = instance_l.initParam.ethDevNumber;
 
@@ -348,7 +348,7 @@ static tOplkError initStack(void)
         return ret;
 
     // copy MAC address back to instance structure
-    EPL_MEMCPY(instance_l.initParam.aMacAddress, dllkInitParam.aLocalMac, 6);
+    OPLK_MEMCPY(instance_l.initParam.aMacAddress, dllkInitParam.aLocalMac, 6);
     ctrlkcal_storeInitParam(&instance_l.initParam);
 
     dllk_regSyncHandler(pdok_sendSyncEvent);

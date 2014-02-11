@@ -356,7 +356,7 @@ The function sets up an PReq filter in the Edrv filter structure.
 //------------------------------------------------------------------------------
 void dllk_setupPreqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer *pBuffer_p, UINT8* pMacAdrs_p)
 {
-    EPL_MEMCPY(&pFilter_p->aFilterValue[0], pMacAdrs_p, 6);
+    OPLK_MEMCPY(&pFilter_p->aFilterValue[0], pMacAdrs_p, 6);
     ami_setUint48Be   (&pFilter_p->aFilterMask[0],     EPL_DLL_MACADDR_MASK);
     ami_setUint16Be      (&pFilter_p->aFilterValue[12],   EPL_C_DLL_ETHERTYPE_EPL);
     ami_setUint16Be      (&pFilter_p->aFilterMask[12],    0xFFFF);

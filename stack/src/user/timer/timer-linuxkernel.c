@@ -183,7 +183,7 @@ tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg a
     if(pTimerHdl_p == NULL)
         return kErrorTimerInvalidHandle;
 
-    pData = (tTimeruData*) EPL_MALLOC(sizeof (tTimeruData));
+    pData = (tTimeruData*) OPLK_MALLOC(sizeof (tTimeruData));
     if (pData == NULL)
         return kErrorNoResource;
 
@@ -192,7 +192,7 @@ tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg a
     pData->timer.data = (unsigned long) pData;
     pData->timer.expires = jiffies + 1 + ((timeInMs_p * HZ) + 999) / 1000;
 
-    EPL_MEMCPY(&pData->timerArgument, &argument_p, sizeof(tTimerArg));
+    OPLK_MEMCPY(&pData->timerArgument, &argument_p, sizeof(tTimerArg));
 
     add_timer(&pData->timer);
     *pTimerHdl_p = (tTimerHdl) pData;
@@ -240,7 +240,7 @@ tOplkError timeru_modifyTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerAr
     // won't use the new TimerArg and
     // therefore the old timer cannot be distinguished from the new one.
     // But if the new timer is too fast, it may get lost.
-    EPL_MEMCPY(&pData->timerArgument, &argument_p, sizeof(tTimerArg));
+    OPLK_MEMCPY(&pData->timerArgument, &argument_p, sizeof(tTimerArg));
 
     // check if timer is really running
     if (timer_pending(&pData->timer) == 0)
@@ -356,11 +356,11 @@ static void cbTimer(ULONG parameter_p)
 
     // call event function
     timerEventArg.timerHdl = (tTimerHdl)pData;
-    EPL_MEMCPY(&timerEventArg.argument, &pData->timerArgument.argument, sizeof (timerEventArg.argument));
+    OPLK_MEMCPY(&timerEventArg.argument, &pData->timerArgument.argument, sizeof (timerEventArg.argument));
 
     event.eventSink = pData->timerArgument.eventSink;
     event.eventType = kEventTypeTimer;
-    EPL_MEMSET(&event.netTime, 0x00, sizeof(tNetTime));
+    OPLK_MEMSET(&event.netTime, 0x00, sizeof(tNetTime));
     event.pEventArg = &timerEventArg;
     event.eventArgSize = sizeof(timerEventArg);
 

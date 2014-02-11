@@ -94,8 +94,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define UNUSED_PARAMETER(par)   (void)par
 
 #ifdef __KERNEL__
-#define EPL_MALLOC(siz)             kmalloc(siz, GFP_KERNEL)
-#define EPL_FREE(ptr)               kfree(ptr)
+#define OPLK_MALLOC(siz)            kmalloc(siz, GFP_KERNEL)
+#define OPLK_FREE(ptr)              kfree(ptr)
 #endif
 
 #ifdef __KERNEL__

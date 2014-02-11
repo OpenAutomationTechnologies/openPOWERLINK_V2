@@ -118,9 +118,9 @@ tOplkError ctrlucal_init(void)
     tHostifReturn hifRet;
     tHostifConfig hifConfig;
 
-    EPL_MEMSET(&instance_l, 0, sizeof(instance_l));
+    OPLK_MEMSET(&instance_l, 0, sizeof(instance_l));
 
-    EPL_MEMSET(&hifConfig, 0, sizeof(hifConfig));
+    OPLK_MEMSET(&hifConfig, 0, sizeof(hifConfig));
 
     hifConfig.instanceNum = 0;
     hifConfig.pBase = (UINT8*)HOSTIF_BASE; //FIXME: Get it from somewhere else?
@@ -377,7 +377,7 @@ void ctrlucal_storeInitParam(tCtrlInitParam* pInitParam_p)
     UINT8* pDst = memInitParamGetDynBuff();
 
     if(pDst != NULL)
-        EPL_MEMCPY(pDst, pInitParam_p, sizeof(tCtrlInitParam));
+        OPLK_MEMCPY(pDst, pInitParam_p, sizeof(tCtrlInitParam));
 
     memInitParamFreeDynBuff();
 }
@@ -403,7 +403,7 @@ tOplkError ctrlucal_readInitParam(tCtrlInitParam* pInitParam_p)
     if(pSrc == NULL)
         return kErrorNoResource;
 
-    EPL_MEMCPY(pInitParam_p, pSrc, sizeof(tCtrlInitParam));
+    OPLK_MEMCPY(pInitParam_p, pSrc, sizeof(tCtrlInitParam));
 
     memInitParamFreeDynBuff();
 

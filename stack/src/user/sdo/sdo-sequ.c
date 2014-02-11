@@ -288,7 +288,7 @@ tOplkError sdoseq_addInstance(tSdoComReceiveCb pfnSdoComRecvCb_p, tSdoComConCb p
         sdoSeqInstance_l.pfnSdoComConCb = pfnSdoComConCb_p;
     }
 
-    EPL_MEMSET(&sdoSeqInstance_l.aSdoSeqCon[0], 0x00, sizeof(sdoSeqInstance_l.aSdoSeqCon));
+    OPLK_MEMSET(&sdoSeqInstance_l.aSdoSeqCon[0], 0x00, sizeof(sdoSeqInstance_l.aSdoSeqCon));
 
 #if defined(WIN32) || defined(_WIN32)
     // create critical section for process function
@@ -350,7 +350,7 @@ tOplkError sdoseq_delInstance(void)
     // delete critical section for process function
     DeleteCriticalSection(sdoSeqInstance_l.pCriticalSection);
 #endif
-    EPL_MEMSET(&sdoSeqInstance_l, 0x00, sizeof(sdoSeqInstance_l));
+    OPLK_MEMSET(&sdoSeqInstance_l, 0x00, sizeof(sdoSeqInstance_l));
 
 #if defined(CONFIG_INCLUDE_SDO_UDP)
     ret = sdoudp_delInstance();
@@ -631,7 +631,7 @@ tOplkError sdoseq_deleteCon(tSdoSeqConHdl sdoSeqConHdl_p)
         timeru_deleteTimer(&pSdoSeqCon->timerHandle);
 
         // cleanup control structure
-        EPL_MEMSET(pSdoSeqCon, 0x00, sizeof(tSdoSeqCon));
+        OPLK_MEMSET(pSdoSeqCon, 0x00, sizeof(tSdoSeqCon));
         pSdoSeqCon->sdoSeqConHistory.freeEntries = SDO_HISTORY_SIZE;
     }
 
@@ -1524,7 +1524,7 @@ static tOplkError sendFrame(tSdoSeqCon* pSdoSeqCon_p, UINT dataSize_p,
 
     if (pData_p == NULL)
     {   // set pointer to own frame
-        EPL_MEMSET(&aFrame[0], 0x00, sizeof(aFrame));
+        OPLK_MEMSET(&aFrame[0], 0x00, sizeof(aFrame));
         pFrame = (tPlkFrame*)&aFrame[0];
     }
     else
@@ -1748,7 +1748,7 @@ static tOplkError addFrameToHistory(tSdoSeqCon* pSdoSeqCon_p, tPlkFrame* pFrame_
     // check if a free entry is available
     if(pHistory->freeEntries > 0)
     {   // write message in free entry
-        EPL_MEMCPY(&((tPlkFrame*)pHistory->aHistoryFrame[pHistory->writeIndex])->messageType,
+        OPLK_MEMCPY(&((tPlkFrame*)pHistory->aHistoryFrame[pHistory->writeIndex])->messageType,
                    &pFrame_p->messageType, size_p + ASND_HEADER_SIZE);
         pHistory->aFrameSize[pHistory->writeIndex] = size_p;
         pHistory->freeEntries--;

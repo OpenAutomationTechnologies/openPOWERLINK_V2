@@ -118,11 +118,11 @@ tCircBufInstance* circbuf_createInstance(UINT8 id_p)
     tCircBufInstance*           pInstance;
     tCircBufArchInstance*       pArch;
 
-    if ((pInstance = EPL_MALLOC(sizeof(tCircBufInstance) +
+    if ((pInstance = OPLK_MALLOC(sizeof(tCircBufInstance) +
                                 sizeof(tCircBufArchInstance))) == NULL)
         return NULL;
 
-    EPL_MEMSET(pInstance, 0, sizeof(tCircBufInstance) + sizeof(tCircBufArchInstance));
+    OPLK_MEMSET(pInstance, 0, sizeof(tCircBufInstance) + sizeof(tCircBufArchInstance));
     pInstance->pCircBufArchInstance = (BYTE*)pInstance + sizeof(tCircBufInstance);
     pInstance->bufferId = id_p;
 
@@ -145,7 +145,7 @@ The function frees the allocated memory used by the circular buffer instance.
 //------------------------------------------------------------------------------
 void circbuf_freeInstance(tCircBufInstance* pInstance_p)
 {
-    EPL_FREE(pInstance_p);
+    OPLK_FREE(pInstance_p);
 }
 
 //------------------------------------------------------------------------------
@@ -164,13 +164,13 @@ The function allocates the memory needed for the circular buffer.
 //------------------------------------------------------------------------------
 tCircBufError circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t size_p)
 {
-    if ((pInstance_p->pCircBufHeader = EPL_MALLOC(sizeof(tCircBufHeader))) == NULL)
+    if ((pInstance_p->pCircBufHeader = OPLK_MALLOC(sizeof(tCircBufHeader))) == NULL)
     {
         return kCircBufNoResource;
     }
-    if ((pInstance_p->pCircBuf = EPL_MALLOC(size_p)) == NULL)
+    if ((pInstance_p->pCircBuf = OPLK_MALLOC(size_p)) == NULL)
     {
-        EPL_FREE(pInstance_p->pCircBufHeader);
+        OPLK_FREE(pInstance_p->pCircBufHeader);
         return kCircBufNoResource;
     }
     return kCircBufOk;
@@ -189,8 +189,8 @@ The function frees the allocated memory used by the circular buffer.
 //------------------------------------------------------------------------------
 void circbuf_freeBuffer(tCircBufInstance* pInstance_p)
 {
-    EPL_FREE(pInstance_p->pCircBuf);
-    EPL_FREE(pInstance_p->pCircBufHeader);
+    OPLK_FREE(pInstance_p->pCircBuf);
+    OPLK_FREE(pInstance_p->pCircBufHeader);
 }
 
 //------------------------------------------------------------------------------

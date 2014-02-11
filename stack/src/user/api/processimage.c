@@ -122,7 +122,7 @@ tOplkError oplk_allocProcessImage(UINT sizeProcessImageIn_p, UINT sizeProcessIma
         goto Exit;
     }
 
-    instance_l.inputImage.pImage = EPL_MALLOC(sizeProcessImageIn_p);
+    instance_l.inputImage.pImage = OPLK_MALLOC(sizeProcessImageIn_p);
     if (instance_l.inputImage.pImage == NULL)
     {
         ret = kErrorApiPIOutOfMemory;
@@ -130,7 +130,7 @@ tOplkError oplk_allocProcessImage(UINT sizeProcessImageIn_p, UINT sizeProcessIma
     }
     instance_l.inputImage.imageSize = sizeProcessImageIn_p;
 
-    instance_l.outputImage.pImage = EPL_MALLOC(sizeProcessImageOut_p);
+    instance_l.outputImage.pImage = OPLK_MALLOC(sizeProcessImageOut_p);
     if (instance_l.outputImage.pImage == NULL)
     {
         ret = kErrorApiPIOutOfMemory;
@@ -171,9 +171,9 @@ tOplkError oplk_freeProcessImage(void)
     instance_l.inputImage.imageSize = 0;
     instance_l.outputImage.imageSize = 0;
 
-    EPL_FREE(instance_l.inputImage.pImage);
+    OPLK_FREE(instance_l.inputImage.pImage);
     instance_l.inputImage.pImage = NULL;
-    EPL_FREE(instance_l.outputImage.pImage);
+    OPLK_FREE(instance_l.outputImage.pImage);
     instance_l.outputImage.pImage = NULL;
 
 Exit:

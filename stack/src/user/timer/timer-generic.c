@@ -155,9 +155,9 @@ tOplkError timeru_addInstance(void)
     int             nIdx;
 
     // reset instance structure
-    EPL_MEMSET(&timeruInstance_l, 0, sizeof (timeruInstance_l));
+    OPLK_MEMSET(&timeruInstance_l, 0, sizeof (timeruInstance_l));
 
-    timeruInstance_l.pEntries = EPL_MALLOC(sizeof (tTimerEntry) * EPL_TIMERU_MAX_ENTRIES);
+    timeruInstance_l.pEntries = OPLK_MALLOC(sizeof (tTimerEntry) * EPL_TIMERU_MAX_ENTRIES);
     if (timeruInstance_l.pEntries == NULL)
         return kErrorNoResource;
 
@@ -225,7 +225,7 @@ tOplkError timeru_delInstance(void)
     DeleteCriticalSection(&timeruInstance_l.aCriticalSections[TIMERU_FREE_LIST]);
 #endif
 
-    EPL_FREE(timeruInstance_l.pEntries);
+    OPLK_FREE(timeruInstance_l.pEntries);
 
     timeruInstance_l.pEntries = NULL;
     timeruInstance_l.pFreeListFirst = NULL;
@@ -280,11 +280,11 @@ tOplkError timeru_process(void)
     {
         // call event function
         timerEventArg.timerHdl = (tTimerHdl) pTimerEntry;
-        EPL_MEMCPY(&timerEventArg.argument, &pTimerEntry->timerArg.argument, sizeof(timerEventArg.argument));
+        OPLK_MEMCPY(&timerEventArg.argument, &pTimerEntry->timerArg.argument, sizeof(timerEventArg.argument));
 
         event.eventSink = pTimerEntry->timerArg.eventSink;
         event.eventType = kEventTypeTimer;
-        EPL_MEMSET(&event.netTime, 0x00, sizeof(tNetTime));
+        OPLK_MEMSET(&event.netTime, 0x00, sizeof(tNetTime));
         event.pEventArg = &timerEventArg;
         event.eventArgSize = sizeof(timerEventArg);
 
@@ -339,7 +339,7 @@ tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg a
     }
 
     *pTimerHdl_p = (tTimerHdl) pNewEntry;
-    EPL_MEMCPY(&pNewEntry->timerArg, &argument_p, sizeof(tTimerArg));
+    OPLK_MEMCPY(&pNewEntry->timerArg, &argument_p, sizeof(tTimerArg));
 
     // insert timer entry in timer list
     enterCriticalSection(TIMERU_TIMER_LIST);

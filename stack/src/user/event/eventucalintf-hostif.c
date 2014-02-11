@@ -250,12 +250,12 @@ tOplkError eventucal_postEventHostif (tEventQueue eventQueue_p, tEvent *pEvent_p
     dataSize = sizeof(tEvent);
 
     // copy event into post buffer
-    EPL_MEMCPY(pPostBuffer, pEvent_p, dataSize);
+    OPLK_MEMCPY(pPostBuffer, pEvent_p, dataSize);
 
     // copy argument data if present
     if(pEvent_p->pEventArg != NULL)
     {
-        EPL_MEMCPY(&pPostBuffer[dataSize], pEvent_p->pEventArg, pEvent_p->eventArgSize);
+        OPLK_MEMCPY(&pPostBuffer[dataSize], pEvent_p->pEventArg, pEvent_p->eventArgSize);
         // add optional argument data size
         dataSize += pEvent_p->eventArgSize;
     }

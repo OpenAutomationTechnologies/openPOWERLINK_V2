@@ -346,7 +346,7 @@ void dllk_processTransmittedNmtReq(tEdrvTxBuffer * pTxBuffer_p)
     priority = kDllAsyncReqPrioNmt;
     event.eventSink = kEventSinkDllk;
     event.eventType = kEventTypeDllkFillTx;
-    EPL_MEMSET(&event.netTime, 0x00, sizeof(event.netTime));
+    OPLK_MEMSET(&event.netTime, 0x00, sizeof(event.netTime));
     event.pEventArg = &priority;
     event.eventArgSize = sizeof(priority);
     ret = eventk_postEvent(&event);
@@ -402,7 +402,7 @@ void dllk_processTransmittedNonEpl(tEdrvTxBuffer * pTxBuffer_p)
     priority = kDllAsyncReqPrioGeneric;
     event.eventSink = kEventSinkDllk;
     event.eventType = kEventTypeDllkFillTx;
-    EPL_MEMSET(&event.netTime, 0x00, sizeof(event.netTime));
+    OPLK_MEMSET(&event.netTime, 0x00, sizeof(event.netTime));
     event.pEventArg = &priority;
     event.eventArgSize = sizeof(priority);
     ret = eventk_postEvent(&event);
@@ -748,7 +748,7 @@ tOplkError dllk_checkFrame(tPlkFrame * pFrame_p, UINT frameSize_p)
         if (ami_getUint48Be(pFrame_p->aSrcMac) == 0)
         {
             // source MAC address
-            EPL_MEMCPY(&pFrame_p->aSrcMac[0], &dllkInstance_g.aLocalMac[0], 6);
+            OPLK_MEMCPY(&pFrame_p->aSrcMac[0], &dllkInstance_g.aLocalMac[0], 6);
         }
 
         // check ethertype
@@ -1121,14 +1121,14 @@ tOplkError dllk_createTxFrame (UINT* pHandle_p, UINT* pFrameSize_p,
         // initialize time offset
         pTxBuffer->timeOffsetNs = 0;
         // fill whole frame with 0
-        EPL_MEMSET(pTxBuffer->pBuffer, 0, pTxBuffer->maxBufferSize);
+        OPLK_MEMSET(pTxBuffer->pBuffer, 0, pTxBuffer->maxBufferSize);
         pTxFrame = (tPlkFrame *) pTxBuffer->pBuffer;
 
         if (msgType_p != kMsgTypeNonPowerlink)
         {   // fill out Frame only if it is an EPL frame
             ami_setUint16Be(&pTxFrame->etherType, EPL_C_DLL_ETHERTYPE_EPL);
             ami_setUint8Le(&pTxFrame->srcNodeId, (BYTE) dllkInstance_g.dllConfigParam.nodeId);
-            EPL_MEMCPY(&pTxFrame->aSrcMac[0], &dllkInstance_g.aLocalMac[0], 6);
+            OPLK_MEMCPY(&pTxFrame->aSrcMac[0], &dllkInstance_g.aLocalMac[0], 6);
             switch (msgType_p)
             {
                 case kMsgTypeAsnd:
@@ -1176,10 +1176,10 @@ tOplkError dllk_createTxFrame (UINT* pHandle_p, UINT* pFrameSize_p,
                                             dllkInstance_g.dllIdentParam.subnetMask);
                             ami_setUint32Le(&pTxFrame->data.asnd.payload.identResponse.defaultGatewayLe,
                                             dllkInstance_g.dllIdentParam.defaultGateway);
-                            EPL_MEMCPY(&pTxFrame->data.asnd.payload.identResponse.sHostName[0],
+                            OPLK_MEMCPY(&pTxFrame->data.asnd.payload.identResponse.sHostName[0],
                                        &dllkInstance_g.dllIdentParam.sHostname[0],
                                        sizeof (dllkInstance_g.dllIdentParam.sHostname));
-                            EPL_MEMCPY(&pTxFrame->data.asnd.payload.identResponse.aVendorSpecificExt2[0],
+                            OPLK_MEMCPY(&pTxFrame->data.asnd.payload.identResponse.aVendorSpecificExt2[0],
                                        &dllkInstance_g.dllIdentParam.aVendorSpecificExt2[0],
                                        sizeof (dllkInstance_g.dllIdentParam.aVendorSpecificExt2));
                             // fall-through
@@ -1914,7 +1914,7 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
                 syncControl = ami_getUint32Le(&pFrame->data.soa.payload.syncRequest.syncControlLe);
                 if (syncControl & EPL_SYNC_DEST_MAC_ADDRESS_VALID)
                 {
-                    if (EPL_MEMCMP(&pFrame->data.soa.payload.syncRequest.aDestMacAddress,
+                    if (OPLK_MEMCMP(&pFrame->data.soa.payload.syncRequest.aDestMacAddress,
                                    &dllkInstance_g.aLocalMac, 6) != 0)
                     {   // DestMacAddress valid but unequal to own MAC address -> SyncReq is ignored
                         goto Exit;
@@ -2131,7 +2131,7 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
                     }
                     else
                     {
-                        EPL_MEMCPY(pIntNodeInfo->aMacAddr, pFrame->aSrcMac, 6);
+                        OPLK_MEMCPY(pIntNodeInfo->aMacAddr, pFrame->aSrcMac, 6);
                     }
                 }
 #if (EPL_DLL_PRES_CHAINING_MN != FALSE)

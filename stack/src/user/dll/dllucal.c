@@ -122,7 +122,7 @@ tOplkError dllucal_init(void)
     tOplkError      ret = kErrorOk;
 
     // reset instance structure
-    EPL_MEMSET(&instance_l, 0, sizeof (instance_l));
+    OPLK_MEMSET(&instance_l, 0, sizeof (instance_l));
 
     instance_l.pTxNmtFuncs = GET_DLLUCAL_INTERFACE();
     instance_l.pTxGenFuncs = GET_DLLUCAL_INTERFACE();
@@ -179,7 +179,7 @@ tOplkError dllucal_exit(void)
     instance_l.pTxSyncFuncs->pfnDelInstance(instance_l.dllCalQueueTxSync);
 #endif
     // reset instance structure
-    EPL_MEMSET(&instance_l, 0, sizeof (instance_l));
+    OPLK_MEMSET(&instance_l, 0, sizeof (instance_l));
 
     return ret;
 }
@@ -364,7 +364,7 @@ tOplkError dllucal_sendAsyncFrame(tFrameInfo * pFrameInfo_p,
     // post event to DLL
     event.eventSink = kEventSinkDllk;
     event.eventType = kEventTypeDllkFillTx;
-    EPL_MEMSET(&event.netTime, 0x00, sizeof(event.netTime));
+    OPLK_MEMSET(&event.netTime, 0x00, sizeof(event.netTime));
     event.pEventArg = &priority_p;
     event.eventArgSize = sizeof(priority_p);
     ret = eventu_postEvent(&event);

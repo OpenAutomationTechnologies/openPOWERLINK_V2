@@ -61,23 +61,23 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 //  Set default definitions if not already set in target specific section
 
-#ifndef EPL_MEMCPY
-#define EPL_MEMCPY(dst,src,siz)     memcpy((dst),(src),(siz))
+#ifndef OPLK_MEMCPY
+#define OPLK_MEMCPY(dst,src,siz)    memcpy((dst),(src),(siz))
 #endif
 
-#ifndef EPL_MEMSET
-#define EPL_MEMSET(dst,val,siz)     memset((dst),(val),(siz))
+#ifndef OPLK_MEMSET
+#define OPLK_MEMSET(dst,val,siz)    memset((dst),(val),(siz))
 #endif
 
-#ifndef EPL_MEMCMP
-#define EPL_MEMCMP(src1,src2,siz)   memcmp((src1),(src2),(siz))
+#ifndef OPLK_MEMCMP
+#define OPLK_MEMCMP(src1,src2,siz)  memcmp((src1),(src2),(siz))
 #endif
-#ifndef EPL_MALLOC
-#define EPL_MALLOC(siz)             malloc(siz)
+#ifndef OPLK_MALLOC
+#define OPLK_MALLOC(siz)            malloc(siz)
 #endif
 
-#ifndef EPL_FREE
-#define EPL_FREE(ptr)               free(ptr)
+#ifndef OPLK_FREE
+#define OPLK_FREE(ptr)              free(ptr)
 #endif
 
 #ifndef OPLK_ATOMIC_INIT

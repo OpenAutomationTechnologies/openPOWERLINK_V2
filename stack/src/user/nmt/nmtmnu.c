@@ -437,7 +437,7 @@ tOplkError nmtmnu_addInstance(tNmtMnuCbNodeEvent pfnCbNodeEvent_p,
 {
     tOplkError ret = kErrorOk;
 
-    EPL_MEMSET(&nmtMnuInstance_g, 0, sizeof(nmtMnuInstance_g));
+    OPLK_MEMSET(&nmtMnuInstance_g, 0, sizeof(nmtMnuInstance_g));
 
     if ((pfnCbNodeEvent_p == NULL) || (pfnCbBootEvent_p == NULL))
     {
@@ -606,14 +606,14 @@ tOplkError nmtmnu_sendNmtCommandEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
 
     // build frame
     pFrame = (tPlkFrame*) aBuffer;
-    EPL_MEMSET(pFrame, 0x00, sizeof(aBuffer));
+    OPLK_MEMSET(pFrame, 0x00, sizeof(aBuffer));
     ami_setUint8Le(&pFrame->dstNodeId, (UINT8) nodeId_p);
     ami_setUint8Le(&pFrame->data.asnd.serviceId, (UINT8) kDllAsndNmtCommand);
     ami_setUint8Le(&pFrame->data.asnd.payload.nmtCommandService.nmtCommandId,
         (UINT8)nmtCommand_p);
     if ((pNmtCommandData_p != NULL) && (uiDataSize_p > 0))
     {   // copy command data to frame
-        EPL_MEMCPY(&pFrame->data.asnd.payload.nmtCommandService.aNmtCommandData[0], pNmtCommandData_p, uiDataSize_p);
+        OPLK_MEMCPY(&pFrame->data.asnd.payload.nmtCommandService.aNmtCommandData[0], pNmtCommandData_p, uiDataSize_p);
     }
 
     // build info structure
@@ -869,7 +869,7 @@ tOplkError nmtmnu_triggerStateChange(UINT nodeId_p, tNmtNodeCommand nodeCommand_
     nodeCmd.nodeId = nodeId_p;
     event.eventSink = kEventSinkNmtMnu;
     event.eventType = kEventTypeNmtMnuNodeCmd;
-    EPL_MEMSET(&event.netTime, 0x00, sizeof(event.netTime));
+    OPLK_MEMSET(&event.netTime, 0x00, sizeof(event.netTime));
     event.pEventArg = &nodeCmd;
     event.eventArgSize = sizeof (nodeCmd);
     ret = eventu_postEvent(&event);
@@ -1787,7 +1787,7 @@ static tOplkError doPreop1(tEventNmtStateChange nmtStateChange_p)
     // so that it can clear the asynchronous queues and start the reduced cycle
     event.eventSink = kEventSinkDllk;
     event.eventType = kEventTypeDllkStartReducedCycle;
-    EPL_MEMSET(&event.netTime, 0x00, sizeof(event.netTime));
+    OPLK_MEMSET(&event.netTime, 0x00, sizeof(event.netTime));
     event.pEventArg = NULL;
     event.eventArgSize = 0;
     ret = eventu_postEvent(&event);
@@ -3520,7 +3520,7 @@ static tOplkError prcCalculate(UINT nodeIdFirstNode_p)
     {
         tDllNodeInfo    dllNodeInfo;
 
-        EPL_MEMSET(&dllNodeInfo, 0, sizeof(tDllNodeInfo));
+        OPLK_MEMSET(&dllNodeInfo, 0, sizeof(tDllNodeInfo));
         nmtMnuInstance_g.prcPResMnTimeoutNs = pResMnTimeoutNs;
         dllNodeInfo.presTimeoutNs = pResMnTimeoutNs;
         dllNodeInfo.nodeId = EPL_C_ADR_MN_DEF_NODE_ID;

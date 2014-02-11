@@ -188,7 +188,7 @@ DWORD dwRetVal = 0;
 
 
     // clear instance structure
-    EPL_MEMSET(&EdrvInstance_l, 0, sizeof (EdrvInstance_l));
+    OPLK_MEMSET(&EdrvInstance_l, 0, sizeof (EdrvInstance_l));
 
     if (pEdrvInitParam_p->hwParam.pDevName == NULL)
     {
@@ -198,7 +198,7 @@ DWORD dwRetVal = 0;
 
     // search for the corresponding MAC address via IPHLPAPI
     ulOutBufLen = sizeof (IP_ADAPTER_INFO);
-    pAdapterInfo = (IP_ADAPTER_INFO *) EPL_MALLOC(sizeof (IP_ADAPTER_INFO));
+    pAdapterInfo = (IP_ADAPTER_INFO *) OPLK_MALLOC(sizeof (IP_ADAPTER_INFO));
     if (pAdapterInfo == NULL)
     {
         printf("Error allocating memory needed to call GetAdaptersinfo\n");
@@ -211,8 +211,8 @@ DWORD dwRetVal = 0;
     dwRetVal = GetAdaptersInfo(pAdapterInfo, &ulOutBufLen);
     if (dwRetVal == ERROR_BUFFER_OVERFLOW)
     {
-        EPL_FREE(pAdapterInfo);
-        pAdapterInfo = (IP_ADAPTER_INFO *) EPL_MALLOC(ulOutBufLen);
+        OPLK_FREE(pAdapterInfo);
+        pAdapterInfo = (IP_ADAPTER_INFO *) OPLK_MALLOC(ulOutBufLen);
         if (pAdapterInfo == NULL)
         {
             printf("Error allocating memory needed to call GetAdaptersinfo\n");
@@ -231,7 +231,7 @@ DWORD dwRetVal = 0;
             {
                 if (strstr(pEdrvInitParam_p->hwParam.pDevName, pAdapter->AdapterName) != NULL)
                 {   // corresponding adapter found
-                    EPL_MEMCPY(pEdrvInitParam_p->aMacAddr, pAdapter->Address,
+                    OPLK_MEMCPY(pEdrvInitParam_p->aMacAddr, pAdapter->Address,
                         min(pAdapter->AddressLength, sizeof (pEdrvInitParam_p->aMacAddr)));
                     break;
                 }
@@ -246,7 +246,7 @@ DWORD dwRetVal = 0;
     }
     if (pAdapterInfo)
     {
-        EPL_FREE(pAdapterInfo);
+        OPLK_FREE(pAdapterInfo);
     }
 
     // save the init data (with updated MAC address)
@@ -363,7 +363,7 @@ tOplkError edrv_shutdown( void )
     DeleteCriticalSection(&EdrvInstance_l.m_CriticalSection);
 
     // clear instance structure
-    EPL_MEMSET(&EdrvInstance_l, 0, sizeof (EdrvInstance_l));
+    OPLK_MEMSET(&EdrvInstance_l, 0, sizeof (EdrvInstance_l));
 
     return kErrorOk; //assuming no problems with closing the handle
 }
@@ -448,7 +448,7 @@ tOplkError Ret = kErrorOk;
     }
 
     // allocate buffer with malloc
-    pBuffer_p->pBuffer = EPL_MALLOC(pBuffer_p->maxBufferSize);
+    pBuffer_p->pBuffer = OPLK_MALLOC(pBuffer_p->maxBufferSize);
     if (pBuffer_p->pBuffer == NULL)
     {
         Ret = kErrorEdrvNoFreeBufEntry;
@@ -485,7 +485,7 @@ BYTE*   pbBuffer = pBuffer_p->pBuffer;
     // mark buffer as free, before actually freeing it
     pBuffer_p->pBuffer = NULL;
 
-    EPL_FREE(pbBuffer);
+    OPLK_FREE(pbBuffer);
 
     return kErrorOk;
 }
@@ -879,7 +879,7 @@ ULONG           ulMax = ~0UL;
 ULONG           ulCur = ~0UL;
 
 
-    EPL_MEMSET(&EplTimerHighReskInstance_l, 0, sizeof (EplTimerHighReskInstance_l));
+    OPLK_MEMSET(&EplTimerHighReskInstance_l, 0, sizeof (EplTimerHighReskInstance_l));
 
 
     // load NTDLL.DLL

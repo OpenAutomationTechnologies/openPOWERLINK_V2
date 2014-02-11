@@ -159,7 +159,7 @@ The function initializes the PDO user module.
 //------------------------------------------------------------------------------
 tOplkError pdou_init(tSyncCb pfnSyncCb_p)
 {
-    EPL_MEMSET(&pdouInstance_g, 0, sizeof(pdouInstance_g));
+    OPLK_MEMSET(&pdouInstance_g, 0, sizeof(pdouInstance_g));
     pdouInstance_g.fAllocated = FALSE;
     pdouInstance_g.fRunning = FALSE;
 
@@ -486,7 +486,7 @@ static tOplkError setupRxPdoChannelTables(
 
     channelCount = 0;
 
-    EPL_MEMSET(pdouInstance_g.aPdoIdToChannelIdRx, 0,
+    OPLK_MEMSET(pdouInstance_g.aPdoIdToChannelIdRx, 0,
                sizeof (pdouInstance_g.aPdoIdToChannelIdRx));
 
     // Loops through RX Mapping objects (0x1400)
@@ -558,7 +558,7 @@ static tOplkError setupTxPdoChannelTables(
     channelCount = 0;
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
-    EPL_MEMSET(pdouInstance_g.aPdoIdToChannelIdTx, 0,
+    OPLK_MEMSET(pdouInstance_g.aPdoIdToChannelIdTx, 0,
                sizeof (pdouInstance_g.aPdoIdToChannelIdTx));
 #endif
 
@@ -623,20 +623,20 @@ static tOplkError allocatePdoChannels(tPdoAllocationParam* pAllocationParam_p)
         pdouInstance_g.pdoChannels.allocation.rxPdoChannelCount = pAllocationParam_p->rxPdoChannelCount;
         if (pdouInstance_g.pdoChannels.pRxPdoChannel != NULL)
         {
-            EPL_FREE(pdouInstance_g.pdoChannels.pRxPdoChannel);
+            OPLK_FREE(pdouInstance_g.pdoChannels.pRxPdoChannel);
             pdouInstance_g.pdoChannels.pRxPdoChannel = NULL;
         }
 
         if (pdouInstance_g.paRxObject != NULL)
         {
-            EPL_FREE(pdouInstance_g.paRxObject);
+            OPLK_FREE(pdouInstance_g.paRxObject);
             pdouInstance_g.paRxObject = NULL;
         }
 
         if (pAllocationParam_p->rxPdoChannelCount > 0)
         {
             pdouInstance_g.pdoChannels.pRxPdoChannel =
-                  EPL_MALLOC(sizeof(tPdoChannel) * pAllocationParam_p->rxPdoChannelCount);
+                  OPLK_MALLOC(sizeof(tPdoChannel) * pAllocationParam_p->rxPdoChannelCount);
 
             if (pdouInstance_g.pdoChannels.pRxPdoChannel == NULL)
             {
@@ -645,7 +645,7 @@ static tOplkError allocatePdoChannels(tPdoAllocationParam* pAllocationParam_p)
             }
 
             pdouInstance_g.paRxObject =
-                    EPL_MALLOC(sizeof(tPdoMappObject)
+                    OPLK_MALLOC(sizeof(tPdoMappObject)
                                * pAllocationParam_p->rxPdoChannelCount
                                * EPL_D_PDO_RPDOChannelObjects_U8);
 
@@ -670,20 +670,20 @@ static tOplkError allocatePdoChannels(tPdoAllocationParam* pAllocationParam_p)
         pdouInstance_g.pdoChannels.allocation.txPdoChannelCount = pAllocationParam_p->txPdoChannelCount;
         if (pdouInstance_g.pdoChannels.pTxPdoChannel != NULL)
         {
-            EPL_FREE(pdouInstance_g.pdoChannels.pTxPdoChannel);
+            OPLK_FREE(pdouInstance_g.pdoChannels.pTxPdoChannel);
             pdouInstance_g.pdoChannels.pTxPdoChannel = NULL;
         }
 
         if (pdouInstance_g.paTxObject != NULL)
         {
-            EPL_FREE(pdouInstance_g.paTxObject);
+            OPLK_FREE(pdouInstance_g.paTxObject);
             pdouInstance_g.paTxObject = NULL;
         }
 
         if (pAllocationParam_p->txPdoChannelCount > 0)
         {
             pdouInstance_g.pdoChannels.pTxPdoChannel =
-                    EPL_MALLOC(sizeof(tPdoChannel) * pAllocationParam_p->txPdoChannelCount);
+                    OPLK_MALLOC(sizeof(tPdoChannel) * pAllocationParam_p->txPdoChannelCount);
             if (pdouInstance_g.pdoChannels.pTxPdoChannel == NULL)
             {
                 ret = kErrorPdoInitError;
@@ -691,7 +691,7 @@ static tOplkError allocatePdoChannels(tPdoAllocationParam* pAllocationParam_p)
             }
 
             pdouInstance_g.paTxObject =
-                    EPL_MALLOC(sizeof(tPdoMappObject)
+                    OPLK_MALLOC(sizeof(tPdoMappObject)
                                * pAllocationParam_p->txPdoChannelCount
                                * EPL_D_PDO_TPDOChannelObjects_U8);
             if (pdouInstance_g.paTxObject == NULL)
@@ -728,25 +728,25 @@ static tOplkError freePdoChannels(void)
 
     if (pdouInstance_g.pdoChannels.pRxPdoChannel != NULL)
     {
-        EPL_FREE(pdouInstance_g.pdoChannels.pRxPdoChannel);
+        OPLK_FREE(pdouInstance_g.pdoChannels.pRxPdoChannel);
         pdouInstance_g.pdoChannels.pRxPdoChannel = NULL;
     }
 
     if (pdouInstance_g.paRxObject != NULL)
     {
-        EPL_FREE(pdouInstance_g.paRxObject);
+        OPLK_FREE(pdouInstance_g.paRxObject);
         pdouInstance_g.paRxObject = NULL;
     }
 
     if (pdouInstance_g.pdoChannels.pTxPdoChannel != NULL)
     {
-        EPL_FREE(pdouInstance_g.pdoChannels.pTxPdoChannel);
+        OPLK_FREE(pdouInstance_g.pdoChannels.pTxPdoChannel);
         pdouInstance_g.pdoChannels.pTxPdoChannel = NULL;
     }
 
     if (pdouInstance_g.paTxObject != NULL)
     {
-        EPL_FREE(pdouInstance_g.paTxObject);
+        OPLK_FREE(pdouInstance_g.paTxObject);
         pdouInstance_g.paTxObject = NULL;
     }
 
@@ -1006,7 +1006,7 @@ static tOplkError configurePdoChannel(tPdoChannelConf* pChannelConf_p)
             pDestPdoChannel = &pdouInstance_g.pdoChannels.pRxPdoChannel[pChannelConf_p->channelId];
 
         // Setup user channel configuration
-        EPL_MEMCPY(pDestPdoChannel, &pChannelConf_p->pdoChannel, sizeof (tPdoChannel));
+        OPLK_MEMCPY(pDestPdoChannel, &pChannelConf_p->pdoChannel, sizeof (tPdoChannel));
 
         // TRACE ("postConfigureChannel: TX:%d channel:%d size:%d\n",
         //        pChannelConf_p->fTx, pChannelConf_p->channelId, pChannelConf_p->pdoChannel.pdoSize);
@@ -1451,7 +1451,7 @@ static tOplkError copyVarToPdo(BYTE* pPayload_p, tPdoMappObject* pMappObject_p)
         case kObdTypeDomain:
         default:
             // read value from object
-            EPL_MEMCPY (pPayload_p, pVar, PDO_MAPPOBJECT_GET_BYTESIZE(pMappObject_p));
+            OPLK_MEMCPY (pPayload_p, pVar, PDO_MAPPOBJECT_GET_BYTESIZE(pMappObject_p));
             break;
 
         //-----------------------------------------------
@@ -1549,7 +1549,7 @@ static tOplkError copyVarFromPdo(BYTE* pPayload_p, tPdoMappObject* pMappObject_p
         case kObdTypeDomain:
         default:
             // read value from object
-            EPL_MEMCPY (pVar, pPayload_p, PDO_MAPPOBJECT_GET_BYTESIZE(pMappObject_p));
+            OPLK_MEMCPY (pVar, pPayload_p, PDO_MAPPOBJECT_GET_BYTESIZE(pMappObject_p));
             break;
 
         //-----------------------------------------------

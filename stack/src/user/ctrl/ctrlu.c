@@ -229,8 +229,8 @@ tOplkError ctrlu_initStack(tOplkApiInitParam * pInitParam_p)
     tCtrlInitParam          ctrlParam;
 
     // reset instance structure
-    EPL_MEMSET(&ctrlInstance_l.initParam, 0, sizeof (tOplkApiInitParam));
-    EPL_MEMCPY(&ctrlInstance_l.initParam, pInitParam_p,
+    OPLK_MEMSET(&ctrlInstance_l.initParam, 0, sizeof (tOplkApiInitParam));
+    OPLK_MEMCPY(&ctrlInstance_l.initParam, pInitParam_p,
                min(sizeof(tOplkApiInitParam), (size_t)pInitParam_p->sizeOfInitParam));
 
     // check event callback function pointer
@@ -244,7 +244,7 @@ tOplkError ctrlu_initStack(tOplkApiInitParam * pInitParam_p)
         goto Exit;
 
     TRACE ("Initializing kernel modules ...\n");
-    EPL_MEMCPY (ctrlParam.aMacAddress, ctrlInstance_l.initParam.aMacAddress, 6);
+    OPLK_MEMCPY (ctrlParam.aMacAddress, ctrlInstance_l.initParam.aMacAddress, 6);
     strncpy(ctrlParam.szEthDevName, ctrlInstance_l.initParam.hwParam.pDevName, 127);
     ctrlParam.ethDevNumber = ctrlInstance_l.initParam.hwParam.devNum;
     ctrlucal_storeInitParam(&ctrlParam);
@@ -259,7 +259,7 @@ tOplkError ctrlu_initStack(tOplkApiInitParam * pInitParam_p)
         goto Exit;
     }
 
-    EPL_MEMCPY (ctrlInstance_l.initParam.aMacAddress, ctrlParam.aMacAddress, 6);
+    OPLK_MEMCPY (ctrlInstance_l.initParam.aMacAddress, ctrlParam.aMacAddress, 6);
 
     TRACE ("Initialize Eventu module...\n");
     if ((ret = eventu_init(processUserEvent)) != kErrorOk)
@@ -1057,7 +1057,7 @@ static tOplkError updateDllConfig(tOplkApiInitParam* pInitParam_p, BOOL fUpdateI
     UINT8               bTemp;
 
     // configure Dll
-    EPL_MEMSET(&dllConfigParam, 0, sizeof(dllConfigParam));
+    OPLK_MEMSET(&dllConfigParam, 0, sizeof(dllConfigParam));
     dllConfigParam.nodeId = obd_getNodeId();
 
     // Cycle Length (0x1006: NMT_CycleLen_U32) in [us]
@@ -1151,7 +1151,7 @@ static tOplkError updateDllConfig(tOplkApiInitParam* pInitParam_p, BOOL fUpdateI
     if (fUpdateIdentity_p != FALSE)
     {
         // configure Identity
-        EPL_MEMSET(&dllIdentParam, 0, sizeof (dllIdentParam));
+        OPLK_MEMSET(&dllIdentParam, 0, sizeof (dllIdentParam));
 
         obdSize = 4;
         if ((ret = obd_readEntry(0x1000, 0, &dllIdentParam.deviceType, &obdSize)) != kErrorOk)
@@ -1199,7 +1199,7 @@ static tOplkError updateDllConfig(tOplkApiInitParam* pInitParam_p, BOOL fUpdateI
         if ((ret = obd_readEntry(0x1F9A, 0, &dllIdentParam.sHostname[0], &obdSize)) != kErrorOk)
         {   // NMT_HostName_VSTR seams to not exist,
             // so use the one supplied in the init parameter
-            EPL_MEMCPY(dllIdentParam.sHostname, pInitParam_p->sHostname, sizeof(dllIdentParam.sHostname));
+            OPLK_MEMCPY(dllIdentParam.sHostname, pInitParam_p->sHostname, sizeof(dllIdentParam.sHostname));
         }
 
         obdSize = 4;
@@ -1215,7 +1215,7 @@ static tOplkError updateDllConfig(tOplkApiInitParam* pInitParam_p, BOOL fUpdateI
 
         dllIdentParam.vendorSpecificExt1 = pInitParam_p->vendorSpecificExt1;
 
-        EPL_MEMCPY(&dllIdentParam.aVendorSpecificExt2[0], &pInitParam_p->aVendorSpecificExt2[0],
+        OPLK_MEMCPY(&dllIdentParam.aVendorSpecificExt2[0], &pInitParam_p->aVendorSpecificExt2[0],
                    sizeof(dllIdentParam.aVendorSpecificExt2));
 
         dllIdentParam.sizeOfStruct = sizeof (dllIdentParam);

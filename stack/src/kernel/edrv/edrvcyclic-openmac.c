@@ -153,7 +153,7 @@ This function initializes the cyclic Ethernet driver.
 tOplkError edrvcyclic_init(void)
 {
     // clear instance structure
-    EPL_MEMSET(&instance_l, 0, sizeof (instance_l));
+    OPLK_MEMSET(&instance_l, 0, sizeof (instance_l));
 
     return kErrorOk;
 }
@@ -173,7 +173,7 @@ tOplkError edrvcyclic_shutdown(void)
 {
     if (instance_l.apTxBufferList != NULL)
     {
-        EPL_FREE(instance_l.apTxBufferList);
+        OPLK_FREE(instance_l.apTxBufferList);
         instance_l.apTxBufferList = NULL;
         instance_l.maxTxBufferCount = 0;
     }
@@ -203,11 +203,11 @@ tOplkError edrvcyclic_setMaxTxBufferListSize(UINT maxListSize_p)
         instance_l.maxTxBufferCount = maxListSize_p;
         if (instance_l.apTxBufferList != NULL)
         {
-            EPL_FREE(instance_l.apTxBufferList);
+            OPLK_FREE(instance_l.apTxBufferList);
             instance_l.apTxBufferList = NULL;
         }
 
-        instance_l.apTxBufferList = EPL_MALLOC(sizeof (*instance_l.apTxBufferList) * maxListSize_p * 2);
+        instance_l.apTxBufferList = OPLK_MALLOC(sizeof (*instance_l.apTxBufferList) * maxListSize_p * 2);
         if (instance_l.apTxBufferList == NULL)
         {
             ret = kErrorEdrvNoFreeBufEntry;
@@ -215,7 +215,7 @@ tOplkError edrvcyclic_setMaxTxBufferListSize(UINT maxListSize_p)
 
         instance_l.currrentTxBufferList = 0;
 
-        EPL_MEMSET(instance_l.apTxBufferList, 0, sizeof (*instance_l.apTxBufferList) * maxListSize_p * 2);
+        OPLK_MEMSET(instance_l.apTxBufferList, 0, sizeof (*instance_l.apTxBufferList) * maxListSize_p * 2);
     }
 
     return ret;
@@ -262,7 +262,7 @@ tOplkError edrvcyclic_setNextTxBufferList(tEdrvTxBuffer** ppTxBuffer_p, UINT txB
         goto Exit;
     }
 
-    EPL_MEMCPY(&instance_l.apTxBufferList[nextTxBufferList], ppTxBuffer_p, sizeof (*ppTxBuffer_p) * txBufferCount_p);
+    OPLK_MEMCPY(&instance_l.apTxBufferList[nextTxBufferList], ppTxBuffer_p, sizeof (*ppTxBuffer_p) * txBufferCount_p);
 
 Exit:
     return ret;
@@ -323,7 +323,7 @@ tOplkError edrvcyclic_startCycle(void)
     // clear Tx buffer list
     instance_l.currrentTxBufferList = 0;
     instance_l.currentTxBufferEntry = 0;
-    EPL_MEMSET(instance_l.apTxBufferList, 0, sizeof (*instance_l.apTxBufferList) * instance_l.maxTxBufferCount * 2);
+    OPLK_MEMSET(instance_l.apTxBufferList, 0, sizeof (*instance_l.apTxBufferList) * instance_l.maxTxBufferCount * 2);
 
     ret = hrestimer_modifyTimer(&instance_l.timerHdlCycle,
             instance_l.cycleLengthUs * 1000ULL, timerHdlCycleCb, 0L, FALSE);

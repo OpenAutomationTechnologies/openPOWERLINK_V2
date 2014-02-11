@@ -146,7 +146,7 @@ shutdown.
 //------------------------------------------------------------------------------
 tOplkError pdoucal_closeMem(void)
 {
-    EPL_MEMSET(&limPdo_l, 0, sizeof(limPdo_l));
+    OPLK_MEMSET(&limPdo_l, 0, sizeof(limPdo_l));
 
     return kErrorOk;
 }

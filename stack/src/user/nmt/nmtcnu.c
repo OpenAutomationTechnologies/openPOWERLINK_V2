@@ -129,7 +129,7 @@ tOplkError nmtcnu_addInstance(UINT nodeId_p)
 {
     tOplkError ret = kErrorOk;
 
-    EPL_MEMSET(&nmtCnuInstance_g, 0, sizeof (nmtCnuInstance_g));
+    OPLK_MEMSET(&nmtCnuInstance_g, 0, sizeof (nmtCnuInstance_g));
 
     nmtCnuInstance_g.nodeId = nodeId_p;
 
@@ -183,8 +183,8 @@ tOplkError nmtcnu_sendNmtRequest(UINT nodeId_p, tNmtCommand nmtCommand_p)
     ret = kErrorOk;
 
     // build frame
-    EPL_MEMSET(&nmtRequestFrame.aDstMac[0], 0x00, sizeof(nmtRequestFrame.aDstMac)); // set by DLL
-    EPL_MEMSET(&nmtRequestFrame.aSrcMac[0], 0x00, sizeof(nmtRequestFrame.aSrcMac)); // set by DLL
+    OPLK_MEMSET(&nmtRequestFrame.aDstMac[0], 0x00, sizeof(nmtRequestFrame.aDstMac)); // set by DLL
+    OPLK_MEMSET(&nmtRequestFrame.aSrcMac[0], 0x00, sizeof(nmtRequestFrame.aSrcMac)); // set by DLL
     ami_setUint16Be(&nmtRequestFrame.etherType, EPL_C_DLL_ETHERTYPE_EPL);
     ami_setUint8Le(&nmtRequestFrame.dstNodeId, (BYTE) EPL_C_ADR_MN_DEF_NODE_ID); // node id of the MN
     ami_setUint8Le(&nmtRequestFrame.messageType, (BYTE)kMsgTypeAsnd);
@@ -193,7 +193,7 @@ tOplkError nmtcnu_sendNmtRequest(UINT nodeId_p, tNmtCommand nmtCommand_p)
         (BYTE)nmtCommand_p);
     ami_setUint8Le(&nmtRequestFrame.data.asnd.payload.nmtRequestService.targetNodeId,
         (BYTE)nodeId_p); // target for the nmt command
-    EPL_MEMSET(&nmtRequestFrame.data.asnd.payload.nmtRequestService.aNmtCommandData[0], 0x00, sizeof(nmtRequestFrame.data.asnd.payload.nmtRequestService.aNmtCommandData));
+    OPLK_MEMSET(&nmtRequestFrame.data.asnd.payload.nmtRequestService.aNmtCommandData[0], 0x00, sizeof(nmtRequestFrame.data.asnd.payload.nmtRequestService.aNmtCommandData));
 
     // build info-structure
     nmtRequestFrameInfo.pFrame = &nmtRequestFrame;

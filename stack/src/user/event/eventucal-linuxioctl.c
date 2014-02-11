@@ -136,7 +136,7 @@ tOplkError eventucal_init(void)
     tOplkError          ret = kErrorOk;
     struct sched_param  schedParam;
 
-    EPL_MEMSET(&instance_l, 0, sizeof(tEventuCalInstance));
+    OPLK_MEMSET(&instance_l, 0, sizeof(tEventuCalInstance));
 
     instance_l.fd = ctrlucal_getFd();
     instance_l.fStopThread = FALSE;

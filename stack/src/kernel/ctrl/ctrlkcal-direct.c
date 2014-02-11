@@ -236,7 +236,7 @@ parameters modified in the kernel stack.
 //------------------------------------------------------------------------------
 void ctrlkcal_storeInitParam(tCtrlInitParam* pInitParam_p)
 {
-    EPL_MEMCPY(&kernelInitParam_g, pInitParam_p, sizeof(tCtrlInitParam));
+    OPLK_MEMCPY(&kernelInitParam_g, pInitParam_p, sizeof(tCtrlInitParam));
 }
 
 //------------------------------------------------------------------------------
@@ -255,7 +255,7 @@ The function reads the initialization parameter from the user stack.
 //------------------------------------------------------------------------------
 tOplkError ctrlkcal_readInitParam(tCtrlInitParam* pInitParam_p)
 {
-    EPL_MEMCPY(pInitParam_p, &kernelInitParam_g, sizeof(tCtrlInitParam));
+    OPLK_MEMCPY(pInitParam_p, &kernelInitParam_g, sizeof(tCtrlInitParam));
     return kErrorOk;
 }
 

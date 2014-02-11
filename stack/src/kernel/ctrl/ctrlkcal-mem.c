@@ -108,7 +108,7 @@ tOplkError ctrlkcal_init (void)
     if ((ret = ctrlcal_init(sizeof(tCtrlBuf))) != kErrorOk)
         return kErrorNoResource;
 
-    EPL_MEMSET(&ctrl, 0, sizeof(tCtrlBuf));
+    OPLK_MEMSET(&ctrl, 0, sizeof(tCtrlBuf));
     ctrl.magic = CTRL_MAGIC;
     ctrl.status = kCtrlStatusReady;
     ctrlcal_writeData(0, &ctrl, sizeof(tCtrlBuf));
@@ -130,7 +130,7 @@ void ctrlkcal_exit (void)
 {
     tCtrlBuf        ctrl;
 
-    EPL_MEMSET(&ctrl, 0, sizeof(tCtrlBuf));
+    OPLK_MEMSET(&ctrl, 0, sizeof(tCtrlBuf));
     ctrlcal_writeData(0, &ctrl, sizeof(tCtrlBuf));
     ctrlcal_exit();
 }

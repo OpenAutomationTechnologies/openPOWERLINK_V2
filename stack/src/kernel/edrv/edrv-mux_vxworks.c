@@ -159,7 +159,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     ret = kErrorOk;
 
     // clear instance structure
-    EPL_MEMSET(&edrvInstance_l, 0, sizeof (edrvInstance_l));
+    OPLK_MEMSET(&edrvInstance_l, 0, sizeof (edrvInstance_l));
 
     if (pEdrvInitParam_p->hwParam.pDevName == NULL)
     {
@@ -311,7 +311,7 @@ tOplkError edrv_shutdown(void)
     semDelete(edrvInstance_l.txWakeupSem);
 
     // clear instance structure
-    EPL_MEMSET(&edrvInstance_l, 0, sizeof (edrvInstance_l));
+    OPLK_MEMSET(&edrvInstance_l, 0, sizeof (edrvInstance_l));
 
     return kErrorOk; //assuming no problems with closing the handle
 }
@@ -410,7 +410,7 @@ tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
     }
 
     // allocate buffer with malloc
-    pBuffer_p->pBuffer = EPL_MALLOC(pBuffer_p->maxBufferSize);
+    pBuffer_p->pBuffer = OPLK_MALLOC(pBuffer_p->maxBufferSize);
     if (pBuffer_p->pBuffer == NULL)
     {
         ret = kErrorEdrvNoFreeBufEntry;
@@ -443,7 +443,7 @@ tOplkError edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p)
     // mark buffer as free, before actually freeing it
     pBuffer_p->pBuffer = NULL;
 
-    EPL_FREE(pBuffer);
+    OPLK_FREE(pBuffer);
 
     return kErrorOk;
 }
@@ -749,7 +749,7 @@ static void getMacAddr(PROTO_COOKIE pCookie_p, char* pIfName_p, UINT8* pMacAddr_
     UNUSED_PARAMETER(pIfName_p);
 
     muxIoctl(pCookie_p, EIOCGADDR, aData);
-    EPL_MEMCPY(pMacAddr_p, aData, 6);
+    OPLK_MEMCPY(pMacAddr_p, aData, 6);
 }
 
 ///\}

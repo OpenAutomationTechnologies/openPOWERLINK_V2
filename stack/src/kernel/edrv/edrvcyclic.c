@@ -135,7 +135,7 @@ This function initializes the cyclic Ethernet driver.
 tOplkError edrvcyclic_init(void)
 {
     // clear instance structure
-    EPL_MEMSET(&edrvcyclicInstance_l, 0, sizeof (edrvcyclicInstance_l));
+    OPLK_MEMSET(&edrvcyclicInstance_l, 0, sizeof (edrvcyclicInstance_l));
 
 #if EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
     edrvcyclicInstance_l.diagnostics.cycleTimeMin        = 0xFFFFFFFF;
@@ -161,7 +161,7 @@ tOplkError edrvcyclic_shutdown(void)
 {
     if (edrvcyclicInstance_l.ppTxBufferList != NULL)
     {
-        EPL_FREE(edrvcyclicInstance_l.ppTxBufferList);
+        OPLK_FREE(edrvcyclicInstance_l.ppTxBufferList);
         edrvcyclicInstance_l.ppTxBufferList = NULL;
         edrvcyclicInstance_l.maxTxBufferCount = 0;
     }
@@ -191,11 +191,11 @@ tOplkError edrvcyclic_setMaxTxBufferListSize(UINT maxListSize_p)
         edrvcyclicInstance_l.maxTxBufferCount = maxListSize_p;
         if (edrvcyclicInstance_l.ppTxBufferList != NULL)
         {
-            EPL_FREE(edrvcyclicInstance_l.ppTxBufferList);
+            OPLK_FREE(edrvcyclicInstance_l.ppTxBufferList);
             edrvcyclicInstance_l.ppTxBufferList = NULL;
         }
 
-        edrvcyclicInstance_l.ppTxBufferList = EPL_MALLOC(sizeof (*edrvcyclicInstance_l.ppTxBufferList) * maxListSize_p * 2);
+        edrvcyclicInstance_l.ppTxBufferList = OPLK_MALLOC(sizeof (*edrvcyclicInstance_l.ppTxBufferList) * maxListSize_p * 2);
         if (edrvcyclicInstance_l.ppTxBufferList == NULL)
         {
             ret = kErrorEdrvNoFreeBufEntry;
@@ -203,7 +203,7 @@ tOplkError edrvcyclic_setMaxTxBufferListSize(UINT maxListSize_p)
 
         edrvcyclicInstance_l.curTxBufferList = 0;
 
-        EPL_MEMSET(edrvcyclicInstance_l.ppTxBufferList, 0, sizeof (*edrvcyclicInstance_l.ppTxBufferList) * maxListSize_p * 2);
+        OPLK_MEMSET(edrvcyclicInstance_l.ppTxBufferList, 0, sizeof (*edrvcyclicInstance_l.ppTxBufferList) * maxListSize_p * 2);
     }
 
     return ret;
@@ -250,7 +250,7 @@ tOplkError edrvcyclic_setNextTxBufferList(tEdrvTxBuffer** ppTxBuffer_p, UINT txB
         goto Exit;
     }
 
-    EPL_MEMCPY(&edrvcyclicInstance_l.ppTxBufferList[nextTxBufferList], ppTxBuffer_p,
+    OPLK_MEMCPY(&edrvcyclicInstance_l.ppTxBufferList[nextTxBufferList], ppTxBuffer_p,
                 sizeof (*ppTxBuffer_p) * txBufferCount_p);
 
 Exit:
@@ -301,7 +301,7 @@ tOplkError edrvcyclic_startCycle(void)
     // clear Tx buffer list
     edrvcyclicInstance_l.curTxBufferList = 0;
     edrvcyclicInstance_l.curTxBufferEntry = 0;
-    EPL_MEMSET(edrvcyclicInstance_l.ppTxBufferList, 0,
+    OPLK_MEMSET(edrvcyclicInstance_l.ppTxBufferList, 0,
         sizeof (*edrvcyclicInstance_l.ppTxBufferList) * edrvcyclicInstance_l.maxTxBufferCount * 2);
 
     ret = hrestimer_modifyTimer(&edrvcyclicInstance_l.timerHdlCycle,

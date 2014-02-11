@@ -146,7 +146,7 @@ tOplkError ctrlcal_init(UINT size_p)
 
     if (fCreator_l)
     {
-        EPL_MEMSET(pCtrlMem_l, 0, size_p);
+        OPLK_MEMSET(pCtrlMem_l, 0, size_p);
     }
     size_l = size_p;
     return kErrorOk;
@@ -200,7 +200,7 @@ void ctrlcal_writeData(UINT offset_p, void* pSrc_p, size_t length_p)
         DEBUG_LVL_ERROR_TRACE ("%s() instance == NULL!\n", __func__);
         return;
     }
-    EPL_MEMCPY(pCtrlMem_l + offset_p, pSrc_p, length_p);
+    OPLK_MEMCPY(pCtrlMem_l + offset_p, pSrc_p, length_p);
 }
 
 //------------------------------------------------------------------------------
@@ -226,7 +226,7 @@ tOplkError ctrlcal_readData(void* pDest_p, UINT offset_p, size_t length_p)
         return kErrorGeneralError;
     }
 
-    EPL_MEMCPY(pDest_p, pCtrlMem_l + offset_p, length_p);
+    OPLK_MEMCPY(pDest_p, pCtrlMem_l + offset_p, length_p);
     return kErrorOk;
 }
 

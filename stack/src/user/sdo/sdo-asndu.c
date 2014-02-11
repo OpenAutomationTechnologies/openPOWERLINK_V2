@@ -137,7 +137,7 @@ tOplkError sdoasnd_addInstance(tSequLayerReceiveCb pfnReceiveCb_p)
 {
     tOplkError  ret = kErrorOk;
 
-    EPL_MEMSET(&sdoAsndInstance_l, 0x00, sizeof(sdoAsndInstance_l));
+    OPLK_MEMSET(&sdoAsndInstance_l, 0x00, sizeof(sdoAsndInstance_l));
 
     if (pfnReceiveCb_p != NULL)
     {

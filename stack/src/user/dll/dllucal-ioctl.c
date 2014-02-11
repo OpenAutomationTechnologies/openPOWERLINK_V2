@@ -158,7 +158,7 @@ static tOplkError addInstance(tDllCalQueueInstance *ppDllCalQueue_p,
     tOplkError                  ret = kErrorOk;
     tDllCalIoctlInstance*       pInstance;
 
-    pInstance = (tDllCalIoctlInstance *) EPL_MALLOC(sizeof(tDllCalIoctlInstance));
+    pInstance = (tDllCalIoctlInstance *) OPLK_MALLOC(sizeof(tDllCalIoctlInstance));
     if(pInstance == NULL)
     {
         ret = kErrorNoResource;
@@ -192,7 +192,7 @@ static tOplkError delInstance(tDllCalQueueInstance pDllCalQueue_p)
 {
     tDllCalIoctlInstance*     pInstance = (tDllCalIoctlInstance*)pDllCalQueue_p;
 
-    EPL_FREE(pInstance);
+    OPLK_FREE(pInstance);
     return kErrorOk;
 }
 

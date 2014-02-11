@@ -309,7 +309,7 @@ static tOplkError loadCdcFile(char* pCdcFilename_p)
     tObdCdcInfo     cdcInfo;
     UINT32          error;
 
-    EPL_MEMSET(&cdcInfo, 0, sizeof(tObdCdcInfo));
+    OPLK_MEMSET(&cdcInfo, 0, sizeof(tObdCdcInfo));
     cdcInfo.type = kEplObdCdcTypeFile;
     cdcInfo.handle.fdCdcFile = open(pCdcFilename_p, O_RDONLY | O_BINARY, 0666);
     if (!IS_FD_VALID(cdcInfo.handle.fdCdcFile))
@@ -326,7 +326,7 @@ static tOplkError loadCdcFile(char* pCdcFilename_p)
 
     if (cdcInfo.pCurBuffer != NULL)
     {
-        EPL_FREE(cdcInfo.pCurBuffer);
+        OPLK_FREE(cdcInfo.pCurBuffer);
         cdcInfo.pCurBuffer = NULL;
         cdcInfo.bufferSize = 0;
     }
@@ -355,7 +355,7 @@ static tOplkError loadCdcBuffer(UINT8* pCdc_p, size_t cdcSize_p)
     tOplkError      ret = kErrorOk;
     tObdCdcInfo     cdcInfo;
 
-    EPL_MEMSET(&cdcInfo, 0, sizeof(tObdCdcInfo));
+    OPLK_MEMSET(&cdcInfo, 0, sizeof(tObdCdcInfo));
     cdcInfo.type = kEplObdCdcTypeBuffer;
     cdcInfo.handle.pNextBuffer = pCdc_p;
     if (cdcInfo.handle.pNextBuffer == NULL)
@@ -466,11 +466,11 @@ static tOplkError loadNextBuffer(tObdCdcInfo* pCdcInfo_p, size_t bufferSize)
             {
                 if (pCdcInfo_p->pCurBuffer != NULL)
                 {
-                    EPL_FREE(pCdcInfo_p->pCurBuffer);
+                    OPLK_FREE(pCdcInfo_p->pCurBuffer);
                     pCdcInfo_p->pCurBuffer = NULL;
                     pCdcInfo_p->bufferSize = 0;
                 }
-                pCdcInfo_p->pCurBuffer = EPL_MALLOC(bufferSize);
+                pCdcInfo_p->pCurBuffer = OPLK_MALLOC(bufferSize);
                 if (pCdcInfo_p->pCurBuffer == NULL)
                 {
                     ret = eventu_postError(kEventSourceObdu, kErrorObdOutOfMemory, 0, NULL);

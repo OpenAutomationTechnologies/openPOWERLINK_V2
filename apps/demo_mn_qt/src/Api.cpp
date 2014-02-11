@@ -177,7 +177,7 @@ Api::Api(MainWindow *pMainWindow_p, UINT nodeId_p, QString devName_p)
     QObject::connect(pDataInOutThread, SIGNAL(processImageInChanged(int, int)),
                      pInput, SLOT(setLeds(int, int)));
 
-    EPL_MEMSET(&initParam, 0, sizeof (initParam));
+    OPLK_MEMSET(&initParam, 0, sizeof (initParam));
     initParam.sizeOfInitParam = sizeof (initParam);
 
     initParam.nodeId = nodeId_p;
@@ -207,7 +207,7 @@ Api::Api(MainWindow *pMainWindow_p, UINT nodeId_p, QString devName_p)
 
     initParam.subnetMask = SUBNET_MASK;
     initParam.defaultGateway = 0;
-    EPL_MEMCPY(initParam.sHostname, sHostname, sizeof(initParam.sHostname));
+    OPLK_MEMCPY(initParam.sHostname, sHostname, sizeof(initParam.sHostname));
     initParam.syncNodeId = EPL_C_ADR_SYNC_ON_SOA;
     initParam.fSyncOnPrcNode = FALSE;
 
@@ -215,7 +215,7 @@ Api::Api(MainWindow *pMainWindow_p, UINT nodeId_p, QString devName_p)
     initParam.pfnCbEvent = pProcessThread->getEventCbFunc();
 
     /* write 00:00:00:00:00:00 to MAC address, so that the driver uses the real hardware address */
-    EPL_MEMCPY(initParam.aMacAddress, abMacAddr, sizeof (initParam.aMacAddress));
+    OPLK_MEMCPY(initParam.aMacAddress, abMacAddr, sizeof (initParam.aMacAddress));
 
     // Copy the selected interface string to a local variable
     strcpy(devName_g, devName_p.toStdString().c_str());

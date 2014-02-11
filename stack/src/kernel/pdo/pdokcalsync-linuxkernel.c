@@ -111,7 +111,7 @@ The function initializes the kernel PDO CAL sync module.
 //------------------------------------------------------------------------------
 tOplkError pdokcal_initSync(void)
 {
-    EPL_MEMSET(&instance_l, 0, sizeof(tPdokCalSyncInstance));
+    OPLK_MEMSET(&instance_l, 0, sizeof(tPdokCalSyncInstance));
 
     init_waitqueue_head(&instance_l.syncWaitQueue);
     instance_l.fInitialized = TRUE;

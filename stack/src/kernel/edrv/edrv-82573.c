@@ -420,13 +420,13 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     INT         i;
 
     // clear instance structure
-    EPL_MEMSET(&edrvInstance_l, 0, sizeof (edrvInstance_l));
+    OPLK_MEMSET(&edrvInstance_l, 0, sizeof (edrvInstance_l));
 
     // save the init data
     edrvInstance_l.initParam = *pEdrvInitParam_p;
 
     // clear driver structure
-    EPL_MEMSET(&edrvDriver_l, 0, sizeof (edrvDriver_l));
+    OPLK_MEMSET(&edrvDriver_l, 0, sizeof (edrvDriver_l));
     edrvDriver_l.name         = DRV_NAME,
     edrvDriver_l.id_table     = aEdrvPciTbl_l,
     edrvDriver_l.probe        = initOnePciDev,
@@ -450,7 +450,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     }
 
     // local MAC address might have been changed in initOnePciDev
-    EPL_MEMCPY(pEdrvInitParam_p->aMacAddr, edrvInstance_l.initParam.aMacAddr, 6);
+    OPLK_MEMCPY(pEdrvInitParam_p->aMacAddr, edrvInstance_l.initParam.aMacAddr, 6);
 
     printk("%s local MAC = ", __FUNCTION__);
     for (i = 0; i < 6; i++)
@@ -1632,7 +1632,7 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
     EDRV_REGDW_WRITE(EDRV_REGDW_RCTL, EDRV_REGDW_RCTL_DEF);
 
     // initialize Tx descriptors
-    EPL_MEMSET(edrvInstance_l.apTxBuffer, 0, sizeof (edrvInstance_l.apTxBuffer));
+    OPLK_MEMSET(edrvInstance_l.apTxBuffer, 0, sizeof (edrvInstance_l.apTxBuffer));
     EDRV_REGDW_WRITE(EDRV_REGDW_TXDCTL, EDRV_REGDW_TXDCTL_DEF);
     descAddress = edrvInstance_l.pTxDescDma;
     EDRV_REGDW_WRITE(EDRV_REGDW_TDBAL, (descAddress & 0xFFFFFFFF));

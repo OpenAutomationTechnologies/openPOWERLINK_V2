@@ -285,7 +285,7 @@ tOplkError nmtk_process(tEvent* pEvent_p)
         nmtStateChange.oldNmtState = nmtkStates_g[oldState].nmtState;
         nmtStateChange.nmtEvent = nmtEvent;
         event.eventType = kEventTypeNmtStateChange;
-        EPL_MEMSET(&event.netTime, 0x00, sizeof(event.netTime));
+        OPLK_MEMSET(&event.netTime, 0x00, sizeof(event.netTime));
         event.pEventArg = &nmtStateChange;
         event.eventArgSize = sizeof(nmtStateChange);
 

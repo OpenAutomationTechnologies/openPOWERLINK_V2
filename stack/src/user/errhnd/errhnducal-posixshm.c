@@ -156,7 +156,7 @@ tOplkError errhnducal_init (tErrHndObjects *pLocalObjects_p)
 
     if (fCreator_l)
     {
-        EPL_MEMSET(pErrHndMem_l, 0, sizeof(tErrHndObjects));
+        OPLK_MEMSET(pErrHndMem_l, 0, sizeof(tErrHndObjects));
     }
     return kErrorOk;
 }

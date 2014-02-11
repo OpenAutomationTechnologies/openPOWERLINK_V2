@@ -162,7 +162,7 @@ tOplkError dllkcal_init(void)
 #endif
 
     // reset instance structure
-    EPL_MEMSET(&instance_l, 0, sizeof (instance_l));
+    OPLK_MEMSET(&instance_l, 0, sizeof (instance_l));
 
     instance_l.pTxNmtFuncs = GET_DLLKCAL_INTERFACE();
     instance_l.pTxGenFuncs = GET_DLLKCAL_INTERFACE();
@@ -263,7 +263,7 @@ tOplkError dllkcal_exit(void)
 #endif
 
     // reset instance structure
-    EPL_MEMSET(&instance_l, 0, sizeof (instance_l));
+    OPLK_MEMSET(&instance_l, 0, sizeof (instance_l));
 
     return ret;
 }
@@ -555,7 +555,7 @@ tOplkError dllkcal_sendAsyncFrame(tFrameInfo* pFrameInfo_p,
     // post event to DLL
     event.eventSink = kEventSinkDllk;
     event.eventType = kEventTypeDllkFillTx;
-    EPL_MEMSET(&event.netTime, 0x00, sizeof(event.netTime));
+    OPLK_MEMSET(&event.netTime, 0x00, sizeof(event.netTime));
     event.pEventArg = &priority_p;
     event.eventArgSize = sizeof(priority_p);
     ret = eventk_postEvent(&event);
