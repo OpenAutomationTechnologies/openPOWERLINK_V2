@@ -88,7 +88,7 @@ static tNmtuInstance        nmtuInstance_g;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-#if EPL_NMT_MAX_NODE_ID > 0
+#if NMT_MAX_NODE_ID > 0
 static tOplkError configureDll(void);
 #endif
 
@@ -296,7 +296,7 @@ tOplkError nmtu_registerStateChangeCb(tNmtuStateChangeCallback pfnNmtStateChange
 /// \name Private Functions
 /// \{
 
-#if EPL_NMT_MAX_NODE_ID > 0
+#if NMT_MAX_NODE_ID > 0
 
 //------------------------------------------------------------------------------
 /**
@@ -344,7 +344,7 @@ static tOplkError configureDll(void)
             return ret;
         }
 
-        if ((nodeCfg & (EPL_NODEASSIGN_NODE_EXISTS | EPL_NODEASSIGN_ASYNCONLY_NODE)) == EPL_NODEASSIGN_NODE_EXISTS)
+        if ((nodeCfg & (NMT_NODEASSIGN_NODE_EXISTS | NMT_NODEASSIGN_ASYNCONLY_NODE)) == NMT_NODEASSIGN_NODE_EXISTS)
         {   // node exists and runs in isochronous phase
             dllNodeInfo.nodeId = index;
 
@@ -360,11 +360,11 @@ static tOplkError configureDll(void)
             }
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
-            if ((nodeCfg & (EPL_NODEASSIGN_NODE_IS_CN
-#if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
-                            | EPL_NODEASSIGN_PRES_CHAINING
+            if ((nodeCfg & (NMT_NODEASSIGN_NODE_IS_CN
+#if NMTMNU_PRES_CHAINING_MN != FALSE
+                            | NMT_NODEASSIGN_PRES_CHAINING
 #endif
-                    )) == EPL_NODEASSIGN_NODE_IS_CN)
+                    )) == NMT_NODEASSIGN_NODE_IS_CN)
             {   // node is CN
                 obdSize = sizeof (dllNodeInfo.preqPayloadLimit);
                 ret = obd_readEntry(0x1F8B, index, &dllNodeInfo.preqPayloadLimit, &obdSize);
@@ -391,7 +391,7 @@ static tOplkError configureDll(void)
 
     return ret;
 }
-#endif // EPL_NMT_MAX_NODE_ID > 0
+#endif // NMT_MAX_NODE_ID > 0
 
 //------------------------------------------------------------------------------
 /**
@@ -436,19 +436,19 @@ static BOOL processGeneralStateChange(tNmtState newNmtState_p, tOplkError* pRet_
 
         // build the configuration with infos from OD
         case kNmtGsResetConfiguration:
-#if EPL_NMT_MAX_NODE_ID > 0
+#if NMT_MAX_NODE_ID > 0
             // configure the DLL (PReq/PRes payload limits and PRes timeout)
             ret = configureDll();
             if (ret != kErrorOk)
             {
                 break;
             }
-#endif // EPL_NMT_MAX_NODE_ID > 0
+#endif // NMT_MAX_NODE_ID > 0
 
             // get node ID from OD
             nodeId = obd_getNodeId();
             //check node ID if not should be master or slave
-            if (nodeId == EPL_C_ADR_MN_DEF_NODE_ID)
+            if (nodeId == C_ADR_MN_DEF_NODE_ID)
             {   // node shall be MN
 #if defined(CONFIG_INCLUDE_NMT_MN)
                 ret = nmtu_postNmtEvent(kNmtEventEnterMsNotActive);
@@ -505,7 +505,7 @@ static BOOL processMnStateChange(tNmtState newNmtState_p, tOplkError* pRet_p)
             if(ret != kErrorOk)
                 break;
 
-            if((startUp & EPL_NMTST_BASICETHERNET) == 0)
+            if((startUp & NMT_STARTUP_BASICETHERNET) == 0)
             {   // NMT_StartUp_U32.Bit13 == 0 -> new state PreOperational1
                 timerEvent = kNmtEventTimerMsPreOp1;
             }

@@ -350,7 +350,7 @@ static tOplkError identu_cbIdentResponse(tFrameInfo* pFrameInfo_p)
         if (pfnCbResponse == NULL)
             goto Exit;
 
-        if (pFrameInfo_p->frameSize < EPL_C_DLL_MINSIZE_IDENTRES)
+        if (pFrameInfo_p->frameSize < C_DLL_MINSIZE_IDENTRES)
         {   // IdentResponse not received or it has invalid size
             ret = pfnCbResponse(nodeId, NULL);
         }

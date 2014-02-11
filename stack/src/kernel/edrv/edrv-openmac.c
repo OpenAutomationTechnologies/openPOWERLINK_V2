@@ -671,11 +671,11 @@ tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
                     {   // auto-response delay is set
                         UINT32 delayAfterIfgNs;
 
-                        if (delayNs < EPL_C_DLL_T_IFG)
+                        if (delayNs < C_DLL_T_IFG)
                         {   // set delay to a minimum of IFG
-                            delayNs = EPL_C_DLL_T_IFG;
+                            delayNs = C_DLL_T_IFG;
                         }
-                        delayAfterIfgNs = delayNs - EPL_C_DLL_T_IFG;
+                        delayAfterIfgNs = delayNs - C_DLL_T_IFG;
                         omethResponseTime(edrvInstance_l.apRxFilterInst[entry],
                                           OMETH_NS_2_TICKS(delayAfterIfgNs));
                     }
@@ -761,11 +761,11 @@ tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
                 {   // auto-response delay is set
                     UINT32 delayAfterIfgNs;
 
-                    if (delayNs < EPL_C_DLL_T_IFG)
+                    if (delayNs < C_DLL_T_IFG)
                     {   // set delay to a minimum of IFG
-                        delayNs = EPL_C_DLL_T_IFG;
+                        delayNs = C_DLL_T_IFG;
                     }
-                    delayAfterIfgNs = delayNs - EPL_C_DLL_T_IFG;
+                    delayAfterIfgNs = delayNs - C_DLL_T_IFG;
                     omethResponseTime(edrvInstance_l.apRxFilterInst[entryChanged_p],
                                       OMETH_NS_2_TICKS(delayAfterIfgNs));
                 }

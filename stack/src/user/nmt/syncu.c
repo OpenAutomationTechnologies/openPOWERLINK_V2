@@ -45,7 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/syncu.h>
 #include <user/dllucal.h>
 
-#if EPL_DLL_PRES_CHAINING_MN != FALSE
+#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
 
 
 //============================================================================//
@@ -266,7 +266,7 @@ static tOplkError syncu_cbSyncResponse(tFrameInfo * pFrameInfo_p)
         // reset callback function pointer so that caller may issue next request
         syncuInstance_g.apfnCbResponse[index] = NULL;
 
-        if (pFrameInfo_p->frameSize < EPL_C_DLL_MINSIZE_SYNCRES)
+        if (pFrameInfo_p->frameSize < C_DLL_MINSIZE_SYNCRES)
         {   // SyncResponse not received or it has invalid size
             ret = pfnCbResponse(nodeId, NULL);
         }
@@ -280,7 +280,7 @@ static tOplkError syncu_cbSyncResponse(tFrameInfo * pFrameInfo_p)
 
 ///\}
 
-#endif // EPL_DLL_PRES_CHAINING_MN != FALSE
+#endif // CONFIG_DLL_PRES_CHAINING_MN != FALSE
 
 
 

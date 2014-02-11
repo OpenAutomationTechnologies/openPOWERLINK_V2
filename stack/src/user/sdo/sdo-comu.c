@@ -314,7 +314,7 @@ tOplkError sdocom_defineConnection(tSdoComConHdl* pSdoComConHdl_p, UINT targetNo
     UINT            freeHdl;
     tSdoComCon*     pSdoComCon;
 
-    if((targetNodeId_p == EPL_C_ADR_INVALID) || (targetNodeId_p >= EPL_C_ADR_BROADCAST))
+    if((targetNodeId_p == C_ADR_INVALID) || (targetNodeId_p >= C_ADR_BROADCAST))
         ret = kErrorInvalidNodeId;
 
     // search free control structure
@@ -560,7 +560,7 @@ The function returns the node ID of the remote node of a connection.
 
 \param  sdoComConHdl_p          Handle of connection.
 
-\return The function returns the node ID of the remote node or EPL_C_ADR_INVALID
+\return The function returns the node ID of the remote node or C_ADR_INVALID
         on error.
 
 \ingroup module_sdo_com
@@ -568,7 +568,7 @@ The function returns the node ID of the remote node of a connection.
 //------------------------------------------------------------------------------
 UINT sdocom_getNodeId(tSdoComConHdl sdoComConHdl_p)
 {
-    UINT            nodeId = EPL_C_ADR_INVALID;
+    UINT            nodeId = C_ADR_INVALID;
     tSdoComCon*     pSdoComCon;
 
     if(sdoComConHdl_p >= MAX_SDO_COM_CON)

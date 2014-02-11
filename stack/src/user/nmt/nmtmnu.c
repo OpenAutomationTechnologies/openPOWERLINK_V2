@@ -49,7 +49,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplk/benchmark.h>
 #include <oplk/obd.h>
 
-#if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
+#if NMTMNU_PRES_CHAINING_MN != FALSE
 #include <user/syncu.h>
 #endif
 
@@ -105,7 +105,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define NMTMNU_NODE_FLAG_INC_STATREQ            0x0100  // increment for StatusRequest timer handle
 #define NMTMNU_NODE_FLAG_INC_LONGER             0x0400  // increment for longer timeouts timer handle
 
-#if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
+#if NMTMNU_PRES_CHAINING_MN != FALSE
 #define NMTMNU_NODE_FLAG_PRC_ADD_SCHEDULED      0x0001
 #define NMTMNU_NODE_FLAG_PRC_ADD_IN_PROGRESS    0x0002
 #define NMTMNU_NODE_FLAG_PRC_ADD_SYNCREQ_SENT   0x0004  // Covers time between SyncReq and SyncRes for addition
@@ -173,7 +173,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define NMTMNU_FLAG_HALTED                      0x0001  // boot process is halted
 #define NMTMNU_FLAG_APP_INFORMED                0x0002  // application was informed about possible NMT state change
 #define NMTMNU_FLAG_USER_RESET                  0x0004  // NMT reset issued by user / diagnostic node
-#if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
+#if NMTMNU_PRES_CHAINING_MN != FALSE
 #define NMTMNU_FLAG_PRC_ADD_SCHEDULED           0x0008  // at least one node is scheduled
                                                         // for addition to isochronous phase
 #define NMTMNU_FLAG_PRC_ADD_IN_PROGRESS         0x0010  // add-PRC-node process is in progress
@@ -249,7 +249,7 @@ typedef struct
     tNmtMnuNodeState    nodeState;              ///< Internal node state (kind of sub state of NMT state)
     UINT32              nodeCfg;                ///< Subindex from 0x1F81
     UINT16              flags;                  ///< Node flags (see node flag defines)
-#if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
+#if NMTMNU_PRES_CHAINING_MN != FALSE
     UINT16              prcFlags;               ///< PRC specific node flags
     UINT32              relPropagationDelayNs;  ///< Propagation delay in nanoseconds
     UINT32              pResTimeFirstNs;        ///< PRes time
@@ -263,18 +263,18 @@ typedef struct
 */
 typedef struct
 {
-    tNmtMnuNodeInfo     aNodeInfo[EPL_NMT_MAX_NODE_ID];  ///< Information about CNs
+    tNmtMnuNodeInfo     aNodeInfo[NMT_MAX_NODE_ID];  ///< Information about CNs
     tTimerHdl           timerHdlNmtState;       ///< Timeout for stay in NMT state
     UINT                mandatorySlaveCount;    ///< Count of found mandatory CNs
     UINT                signalSlaveCount;       ///< Count of CNs which are not identified
-    ULONG               statusRequestDelay;     ///< In [ms] (object 0x1006 * EPL_C_NMT_STATREQ_CYCLE)
+    ULONG               statusRequestDelay;     ///< In [ms] (object 0x1006 * C_NMT_STATREQ_CYCLE)
     ULONG               timeoutReadyToOp;       ///< In [ms] (object 0x1F89/4)
     ULONG               timeoutCheckCom;        ///< In [ms] (object 0x1006 * MultiplexedCycleCount)
     UINT16              flags;                  ///< Global flags
     UINT32              nmtStartup;             ///< Object 0x1F80 NMT_StartUp_U32
     tNmtMnuCbNodeEvent  pfnCbNodeEvent;         ///< Callback function for node events
     tNmtMnuCbBootEvent  pfnCbBootEvent;         ///< Callback function for boot events
-#if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
+#if NMTMNU_PRES_CHAINING_MN != FALSE
     UINT32              prcPResMnTimeoutNs;             ///< to be commented!
     UINT32              prcPResTimeFirstCorrectionNs;   ///< to be commented!
     UINT32              prcPResTimeFirstNegOffsetNs;    ///< to be commented!
@@ -310,7 +310,7 @@ static tOplkError processInternalEvent(UINT nodeId_p, tNmtState nodeNmtState_p,
                                        UINT16 errorCode_p, tNmtMnuIntNodeEvent nodeEvent_p);
 static tOplkError reset(void);
 
-#if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
+#if NMTMNU_PRES_CHAINING_MN != FALSE
 static tOplkError prcMeasure(void);
 static tOplkError prcCalculate(UINT nodeIdFirstNode_p);
 static tOplkError prcShift(UINT nodeIdPrevShift_p);
@@ -451,7 +451,7 @@ tOplkError nmtmnu_addInstance(tNmtMnuCbNodeEvent pfnCbNodeEvent_p,
     // register NmtMnResponse callback function
     ret = dllucal_regAsndService(kDllAsndNmtRequest, cbNmtRequest, kDllAsndFilterLocal);
 
-#if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
+#if NMTMNU_PRES_CHAINING_MN != FALSE
     nmtMnuInstance_g.prcPResTimeFirstCorrectionNs =  50;
     nmtMnuInstance_g.prcPResTimeFirstNegOffsetNs  = 500;
 #endif
@@ -501,23 +501,23 @@ tOplkError nmtmnu_sendNmtCommandEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
 {
     tOplkError          ret;
     tFrameInfo          frameInfo;
-    UINT8               aBuffer[EPL_C_DLL_MINSIZE_NMTCMDEXT];
+    UINT8               aBuffer[C_DLL_MINSIZE_NMTCMDEXT];
     tPlkFrame *         pFrame;
     tDllNodeOpParam     nodeOpParam;
-#if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
+#if NMTMNU_PRES_CHAINING_MN != FALSE
     tNmtMnuNodeInfo*    pNodeInfo;
 #endif
 
     ret = kErrorOk;
 
-    if ((nodeId_p == 0) || (nodeId_p > EPL_C_ADR_BROADCAST))
+    if ((nodeId_p == 0) || (nodeId_p > C_ADR_BROADCAST))
     {   // invalid node ID specified
         ret = kErrorInvalidNodeId;
         goto Exit;
     }
 
     if ((pNmtCommandData_p != NULL) &&
-        (uiDataSize_p > (EPL_C_DLL_MINSIZE_NMTCMDEXT - EPL_C_DLL_MINSIZE_NMTCMD)))
+        (uiDataSize_p > (C_DLL_MINSIZE_NMTCMDEXT - C_DLL_MINSIZE_NMTCMD)))
     {
         ret = kErrorNmtInvalidParam;
         goto Exit;
@@ -527,10 +527,10 @@ tOplkError nmtmnu_sendNmtCommandEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
     //          prohibited state transitions. The CN should not perform these
     //          transitions, but the expected NMT state will be changed and never fullfilled.
 
-#if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
+#if NMTMNU_PRES_CHAINING_MN != FALSE
     pNodeInfo = NMTMNU_GET_NODEINFO(nodeId_p);
 
-    if (pNodeInfo->nodeCfg & EPL_NODEASSIGN_PRES_CHAINING)
+    if (pNodeInfo->nodeCfg & NMT_NODEASSIGN_PRES_CHAINING)
     {   // Node is a PRes Chaining node
         switch (nmtCommand_p)
         {
@@ -629,8 +629,8 @@ tOplkError nmtmnu_sendNmtCommandEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
 
     DEBUG_LVL_NMTMN_TRACE("NMTCmd(%02X->%02X)\n", NmtCommand_p, nodeId_p);
 
-#if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
-    if (pNodeInfo->nodeCfg & EPL_NODEASSIGN_PRES_CHAINING)
+#if NMTMNU_PRES_CHAINING_MN != FALSE
+    if (pNodeInfo->nodeCfg & NMT_NODEASSIGN_PRES_CHAINING)
     {   // Node is a PRes Chaining node
         // The following action (delete node) is only necessary for non-PRC nodes
         goto Exit;
@@ -672,7 +672,7 @@ tOplkError nmtmnu_sendNmtCommandEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
     // remove CN from isochronous phase;
     // This must be done here and not when NMT command is actually sent
     // because it will be too late and may cause unwanted errors
-    if (nodeId_p != EPL_C_ADR_BROADCAST)
+    if (nodeId_p != C_ADR_BROADCAST)
     {
         nodeOpParam.nodeId = nodeId_p;
         ret = dllucal_deleteNode(&nodeOpParam);
@@ -681,7 +681,7 @@ tOplkError nmtmnu_sendNmtCommandEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
     {   // do it for all active CNs
         for (nodeId_p = 1; nodeId_p <= tabentries(nmtMnuInstance_g.aNodeInfo); nodeId_p++)
         {
-            if ((NMTMNU_GET_NODEINFO(nodeId_p)->nodeCfg & (EPL_NODEASSIGN_NODE_IS_CN | EPL_NODEASSIGN_NODE_EXISTS)) != 0)
+            if ((NMTMNU_GET_NODEINFO(nodeId_p)->nodeCfg & (NMT_NODEASSIGN_NODE_IS_CN | NMT_NODEASSIGN_NODE_EXISTS)) != 0)
             {
                 nodeOpParam.nodeId = nodeId_p;
                 ret = dllucal_deleteNode(&nodeOpParam);
@@ -739,16 +739,16 @@ tOplkError nmtmnu_requestNmtCommand(UINT nodeId_p, tNmtCommand  nmtCommand_p)
         goto Exit;
     }
 
-    if (nodeId_p > EPL_C_ADR_BROADCAST)
+    if (nodeId_p > C_ADR_BROADCAST)
     {
         ret = kErrorInvalidNodeId;
         goto Exit;
     }
 
     if (nodeId_p == 0x00)
-        nodeId_p = EPL_C_ADR_MN_DEF_NODE_ID;
+        nodeId_p = C_ADR_MN_DEF_NODE_ID;
 
-    if (nodeId_p == EPL_C_ADR_MN_DEF_NODE_ID)
+    if (nodeId_p == C_ADR_MN_DEF_NODE_ID)
     {   // apply command to local node-ID
         switch (nmtCommand_p)
         {
@@ -766,7 +766,7 @@ tOplkError nmtmnu_requestNmtCommand(UINT nodeId_p, tNmtCommand  nmtCommand_p)
             case kNmtCmdResetCommunication:
             case kNmtCmdResetConfiguration:
             case kNmtCmdSwReset:
-                nodeId_p = EPL_C_ADR_BROADCAST;
+                nodeId_p = C_ADR_BROADCAST;
                 break;
 
             case kNmtCmdInvalidService:
@@ -776,7 +776,7 @@ tOplkError nmtmnu_requestNmtCommand(UINT nodeId_p, tNmtCommand  nmtCommand_p)
         }
     }
 
-    if (nodeId_p != EPL_C_ADR_BROADCAST)
+    if (nodeId_p != C_ADR_BROADCAST)
     {   // apply command to remote node-ID, but not broadcast
         tNmtMnuNodeInfo* pNodeInfo;
 
@@ -787,8 +787,8 @@ tOplkError nmtmnu_requestNmtCommand(UINT nodeId_p, tNmtCommand  nmtCommand_p)
                 // issue request for remote node
                 // if it is a non-existing node or no identrequest is running
                 if (((pNodeInfo->nodeCfg &
-                      (EPL_NODEASSIGN_NODE_IS_CN | EPL_NODEASSIGN_NODE_EXISTS))
-                       != (EPL_NODEASSIGN_NODE_IS_CN | EPL_NODEASSIGN_NODE_EXISTS)) ||
+                      (NMT_NODEASSIGN_NODE_IS_CN | NMT_NODEASSIGN_NODE_EXISTS))
+                       != (NMT_NODEASSIGN_NODE_IS_CN | NMT_NODEASSIGN_NODE_EXISTS)) ||
                     ((pNodeInfo->nodeState != kNmtMnuNodeStateResetConf) &&
                      (pNodeInfo->nodeState != kNmtMnuNodeStateConfRestored) &&
                      (pNodeInfo->nodeState != kNmtMnuNodeStateUnknown)))
@@ -801,9 +801,9 @@ tOplkError nmtmnu_requestNmtCommand(UINT nodeId_p, tNmtCommand  nmtCommand_p)
                 // issue request for remote node
                 // if it is a non-existing node or operational and not async-only
                 if (((pNodeInfo->nodeCfg &
-                     (EPL_NODEASSIGN_NODE_IS_CN | EPL_NODEASSIGN_NODE_EXISTS))
-                      != (EPL_NODEASSIGN_NODE_IS_CN | EPL_NODEASSIGN_NODE_EXISTS)) ||
-                    (((pNodeInfo->nodeCfg & EPL_NODEASSIGN_ASYNCONLY_NODE) == 0) &&
+                     (NMT_NODEASSIGN_NODE_IS_CN | NMT_NODEASSIGN_NODE_EXISTS))
+                      != (NMT_NODEASSIGN_NODE_IS_CN | NMT_NODEASSIGN_NODE_EXISTS)) ||
+                    (((pNodeInfo->nodeCfg & NMT_NODEASSIGN_ASYNCONLY_NODE) == 0) &&
                       (pNodeInfo->nodeState == kNmtMnuNodeStateOperational)))
                 {
                     ret = statusu_requestStatusResponse(nodeId_p, NULL);
@@ -821,7 +821,7 @@ tOplkError nmtmnu_requestNmtCommand(UINT nodeId_p, tNmtCommand  nmtCommand_p)
         case kNmtCmdResetCommunication:
         case kNmtCmdResetConfiguration:
         case kNmtCmdSwReset:
-            if (nodeId_p == EPL_C_ADR_BROADCAST)
+            if (nodeId_p == C_ADR_BROADCAST)
             {   // memorize that this is a user requested reset
                 nmtMnuInstance_g.flags |= NMTMNU_FLAG_USER_RESET;
             }
@@ -862,7 +862,7 @@ tOplkError nmtmnu_triggerStateChange(UINT nodeId_p, tNmtNodeCommand nodeCommand_
     tNmtMnuNodeCmd      nodeCmd;
     tEvent              event;
 
-    if ((nodeId_p == 0) || (nodeId_p >= EPL_C_ADR_BROADCAST))
+    if ((nodeId_p == 0) || (nodeId_p >= C_ADR_BROADCAST))
         return kErrorInvalidNodeId;
 
     nodeCmd.nodeCommand = nodeCommand_p;
@@ -916,7 +916,7 @@ tOplkError nmtmnu_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
                 if (ret != kErrorOk)
                     break;
 
-                // compute StatusReqDelay = object 0x1006 * EPL_C_NMT_STATREQ_CYCLE
+                // compute StatusReqDelay = object 0x1006 * C_NMT_STATREQ_CYCLE
                 obdSize = sizeof (dwTimeout);
                 ret = obd_readEntry(0x1006, 0, &dwTimeout, &obdSize);
                 if (ret != kErrorOk)
@@ -924,14 +924,14 @@ tOplkError nmtmnu_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
 
                 if (dwTimeout != 0L)
                 {
-                    nmtMnuInstance_g.statusRequestDelay = dwTimeout * EPL_C_NMT_STATREQ_CYCLE / 1000L;
+                    nmtMnuInstance_g.statusRequestDelay = dwTimeout * C_NMT_STATREQ_CYCLE / 1000L;
                     if (nmtMnuInstance_g.statusRequestDelay == 0L)
                     {
                         nmtMnuInstance_g.statusRequestDelay = 1L;    // at least 1 ms
                     }
 
                     // $$$ fetch and use MultiplexedCycleCount from OD
-                    nmtMnuInstance_g.timeoutCheckCom = dwTimeout * EPL_C_NMT_STATREQ_CYCLE / 1000L;
+                    nmtMnuInstance_g.timeoutCheckCom = dwTimeout * C_NMT_STATREQ_CYCLE / 1000L;
                     if (nmtMnuInstance_g.timeoutCheckCom == 0L)
                     {
                         nmtMnuInstance_g.timeoutCheckCom = 1L;    // at least 1 ms
@@ -1170,7 +1170,7 @@ tOplkError nmtmnu_processEvent(tEvent* pEvent_p)
                 tNmtCommand         NmtCommand;
                 UINT8                bNmtState;
 
-                if (pEvent_p->eventArgSize < EPL_C_DLL_MINSIZE_NMTCMD)
+                if (pEvent_p->eventArgSize < C_DLL_MINSIZE_NMTCMD)
                 {
                     ret = eventu_postError(kEventSourceNmtMnu, kErrorNmtInvalidFramePointer, sizeof (pEvent_p->eventArgSize), &pEvent_p->eventArgSize);
                     break;
@@ -1195,7 +1195,7 @@ tOplkError nmtmnu_processEvent(tEvent* pEvent_p)
 
                     case kNmtCmdEnableReadyToOperate:
                         // d.k. do not change expected node state, because of DS 1.0.0 7.3.1.2.1 Plain NMT State Command
-                        //      and because node may not change NMT state within EPL_C_NMT_STATE_TOLERANCE
+                        //      and because node may not change NMT state within C_NMT_STATE_TOLERANCE
                         bNmtState = (UINT8) (kNmtCsPreOperational2 & 0xFF);
                         break;
 
@@ -1213,7 +1213,7 @@ tOplkError nmtmnu_processEvent(tEvent* pEvent_p)
                 }
 
                 // process as internal event which update expected NMT state in OD
-                if (uiNodeId != EPL_C_ADR_BROADCAST)
+                if (uiNodeId != C_ADR_BROADCAST)
                 {
                     ret = processInternalEvent(uiNodeId,
                                                         (tNmtState) (bNmtState | NMT_TYPE_CS),
@@ -1225,7 +1225,7 @@ tOplkError nmtmnu_processEvent(tEvent* pEvent_p)
                 {   // process internal event for all active nodes (except myself)
                     for (uiNodeId = 1; uiNodeId <= tabentries(nmtMnuInstance_g.aNodeInfo); uiNodeId++)
                     {
-                        if ((NMTMNU_GET_NODEINFO(uiNodeId)->nodeCfg & (EPL_NODEASSIGN_NODE_IS_CN | EPL_NODEASSIGN_NODE_EXISTS)) != 0)
+                        if ((NMTMNU_GET_NODEINFO(uiNodeId)->nodeCfg & (NMT_NODEASSIGN_NODE_IS_CN | NMT_NODEASSIGN_NODE_EXISTS)) != 0)
                         {
                             ret = processInternalEvent(uiNodeId, (tNmtState) (bNmtState | NMT_TYPE_CS),
                                                        0, kNmtMnuIntNodeEventNmtCmdSent);
@@ -1276,7 +1276,7 @@ tOplkError nmtmnu_processEvent(tEvent* pEvent_p)
                 UINT8                    bNmtState;
                 UINT16                    wErrorCode = E_NO_ERROR;
 
-                if ((pNodeCmd->nodeId == 0) || (pNodeCmd->nodeId >= EPL_C_ADR_BROADCAST))
+                if ((pNodeCmd->nodeId == 0) || (pNodeCmd->nodeId >= C_ADR_BROADCAST))
                 {
                     ret = kErrorInvalidNodeId;
                     goto Exit;
@@ -1368,7 +1368,7 @@ tOplkError nmtmnu_getDiagnosticInfo(UINT* pMandatorySlaveCount_p,
     return kErrorOk;
 }
 
-#if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
+#if NMTMNU_PRES_CHAINING_MN != FALSE
 //------------------------------------------------------------------------------
 /**
 \brief  Configure PRes chaining parameters
@@ -1562,12 +1562,12 @@ static tOplkError addNodeIsochronous(UINT nodeId_p)
 {
     tOplkError          ret;
 
-#if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
+#if NMTMNU_PRES_CHAINING_MN != FALSE
     tNmtMnuNodeInfo* pNodeInfo;
 
     ret = kErrorOk;
 
-    if (nodeId_p != EPL_C_ADR_INVALID)
+    if (nodeId_p != C_ADR_INVALID)
     {
         pNodeInfo = NMTMNU_GET_NODEINFO(nodeId_p);
         if (pNodeInfo == NULL)
@@ -1581,7 +1581,7 @@ static tOplkError addNodeIsochronous(UINT nodeId_p)
         pNodeInfo->pResTimeFirstNs = 0;
         pNodeInfo->relPropagationDelayNs = 0;
 
-        if ((pNodeInfo->nodeCfg & EPL_NODEASSIGN_PRES_CHAINING) == 0)
+        if ((pNodeInfo->nodeCfg & NMT_NODEASSIGN_PRES_CHAINING) == 0)
 #endif
 
         {   // node is added as PReq/PRes node
@@ -1592,7 +1592,7 @@ static tOplkError addNodeIsochronous(UINT nodeId_p)
             ret = dllucal_addNode(&NodeOpParam);
             goto Exit;
         }
-#if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
+#if NMTMNU_PRES_CHAINING_MN != FALSE
         else
         {   // node is a PRC node
 
@@ -1696,25 +1696,25 @@ static tOplkError startBootStep1(BOOL fNmtResetAllIssued_p)
             // reset flags "not scanned" and "isochronous"
             pNodeInfo->flags &= ~(NMTMNU_NODE_FLAG_ISOCHRON | NMTMNU_NODE_FLAG_NOT_SCANNED);
 
-#if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
+#if NMTMNU_PRES_CHAINING_MN != FALSE
             // Reset all PRC flags and PRC related values
             pNodeInfo->prcFlags = 0;
             pNodeInfo->pResTimeFirstNs = 0;
             pNodeInfo->relPropagationDelayNs = 0;
 #endif
 
-            if (subIndex == EPL_C_ADR_DIAG_DEF_NODE_ID)
+            if (subIndex == C_ADR_DIAG_DEF_NODE_ID)
             {   // diagnostic node must be scanned by MN in any case
-                nodeCfg |= (EPL_NODEASSIGN_NODE_IS_CN | EPL_NODEASSIGN_NODE_EXISTS);
+                nodeCfg |= (NMT_NODEASSIGN_NODE_IS_CN | NMT_NODEASSIGN_NODE_EXISTS);
                 // and it must be isochronously accessed
-                nodeCfg &= ~EPL_NODEASSIGN_ASYNCONLY_NODE;
+                nodeCfg &= ~NMT_NODEASSIGN_ASYNCONLY_NODE;
             }
 
             // save node config in local node info structure
             pNodeInfo->nodeCfg = nodeCfg;
             pNodeInfo->nodeState = kNmtMnuNodeStateUnknown;
 
-            if ((nodeCfg & (EPL_NODEASSIGN_NODE_IS_CN | EPL_NODEASSIGN_NODE_EXISTS)) != 0)
+            if ((nodeCfg & (NMT_NODEASSIGN_NODE_IS_CN | NMT_NODEASSIGN_NODE_EXISTS)) != 0)
             {   // node is configured as CN
                 if (fNmtResetAllIssued_p == FALSE)
                 {
@@ -1729,7 +1729,7 @@ static tOplkError startBootStep1(BOOL fNmtResetAllIssued_p)
                 nmtMnuInstance_g.signalSlaveCount++;
                 // signal slave counter shall be decremented if IdentRequest was sent once to a CN
 
-                if ((nodeCfg & EPL_NODEASSIGN_MANDATORY_CN) != 0)
+                if ((nodeCfg & NMT_NODEASSIGN_MANDATORY_CN) != 0)
                 {   // node is a mandatory CN
                     nmtMnuInstance_g.mandatorySlaveCount++;
                     // mandatory slave counter shall be decremented if mandatory CN was configured successfully
@@ -1738,7 +1738,7 @@ static tOplkError startBootStep1(BOOL fNmtResetAllIssued_p)
         }
         else
         {   // subindex of MN
-            if ((nodeCfg & (EPL_NODEASSIGN_MN_PRES | EPL_NODEASSIGN_NODE_EXISTS)) != 0)
+            if ((nodeCfg & (NMT_NODEASSIGN_MN_PRES | NMT_NODEASSIGN_NODE_EXISTS)) != 0)
             {   // MN shall send PRes
                 ret = addNodeIsochronous(localNodeId);
             }
@@ -1772,7 +1772,7 @@ static tOplkError doPreop1(tEventNmtStateChange nmtStateChange_p)
     // reset IdentResponses and running IdentRequests and StatusRequests
     ret = identu_reset();
     ret = statusu_reset();
-#if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
+#if NMTMNU_PRES_CHAINING_MN != FALSE
     ret = syncu_reset();
 #endif
 
@@ -1802,9 +1802,9 @@ static tOplkError doPreop1(tEventNmtStateChange nmtStateChange_p)
         ((nmtMnuInstance_g.flags & NMTMNU_FLAG_USER_RESET) == 0))
     {
         BENCHMARK_MOD_07_TOGGLE(7);
-        NMTMNU_DBG_POST_TRACE_VALUE(0, EPL_C_ADR_BROADCAST, kNmtCmdResetNode);
+        NMTMNU_DBG_POST_TRACE_VALUE(0, C_ADR_BROADCAST, kNmtCmdResetNode);
 
-        ret = nmtmnu_sendNmtCommand(EPL_C_ADR_BROADCAST, kNmtCmdResetNode);
+        ret = nmtmnu_sendNmtCommand(C_ADR_BROADCAST, kNmtCmdResetNode);
         if (ret != kErrorOk)
             return ret;
 
@@ -1909,7 +1909,7 @@ static tOplkError startBootStep2(void)
                 nmtMnuInstance_g.signalSlaveCount++;
                 // signal slave counter shall be decremented if StatusRequest was sent once to a CN
 
-                if ((pNodeInfo->nodeCfg & EPL_NODEASSIGN_MANDATORY_CN) != 0)
+                if ((pNodeInfo->nodeCfg & NMT_NODEASSIGN_MANDATORY_CN) != 0)
                 {   // node is a mandatory CN
                     nmtMnuInstance_g.mandatorySlaveCount++;
                 }
@@ -1948,7 +1948,7 @@ static tOplkError nodeBootStep2(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p)
     tNmtState           nmtState;
     tObdSize            obdSize;
 
-    if (pNodeInfo_p->nodeCfg & EPL_NODEASSIGN_ASYNCONLY_NODE)
+    if (pNodeInfo_p->nodeCfg & NMT_NODEASSIGN_ASYNCONLY_NODE)
     {   // node is async-only
         // read object 0x1F8E NMT_MNNodeCurrState_AU8
         obdSize = 1;
@@ -2019,7 +2019,7 @@ static tOplkError startCheckCom(void)
                 if (ret == kErrorReject)
                 {   // timer was started
                     // wait until it expires
-                    if ((pNodeInfo->nodeCfg & EPL_NODEASSIGN_MANDATORY_CN) != 0)
+                    if ((pNodeInfo->nodeCfg & NMT_NODEASSIGN_MANDATORY_CN) != 0)
                     {   // node is a mandatory CN
                         nmtMnuInstance_g.mandatorySlaveCount++;
                     }
@@ -2064,7 +2064,7 @@ static tOplkError nodeCheckCom(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p)
     tTimerArg       timerArg;
 
     nodeCfg = pNodeInfo_p->nodeCfg;
-    if (((nodeCfg & EPL_NODEASSIGN_ASYNCONLY_NODE) == 0) &&
+    if (((nodeCfg & NMT_NODEASSIGN_ASYNCONLY_NODE) == 0) &&
         (nmtMnuInstance_g.timeoutCheckCom != 0L))
     {   // CN is not async-only and timeout for CheckCom was set
 
@@ -2116,7 +2116,7 @@ static tOplkError startNodes(void)
         {
             if (pNodeInfo->nodeState == kNmtMnuNodeStateComChecked)
             {
-                if ((nmtMnuInstance_g.nmtStartup & EPL_NMTST_STARTALLNODES) == 0)
+                if ((nmtMnuInstance_g.nmtStartup & NMT_STARTUP_STARTALLNODES) == 0)
                 {
                     NMTMNU_DBG_POST_TRACE_VALUE(0, index, kNmtCmdStartNode);
                     ret = nmtmnu_sendNmtCommand(index, kNmtCmdStartNode);
@@ -2124,7 +2124,7 @@ static tOplkError startNodes(void)
                         goto Exit;
                 }
 
-                if ((pNodeInfo->nodeCfg & EPL_NODEASSIGN_MANDATORY_CN) != 0)
+                if ((pNodeInfo->nodeCfg & NMT_NODEASSIGN_MANDATORY_CN) != 0)
                 {   // node is a mandatory CN
                     nmtMnuInstance_g.mandatorySlaveCount++;
                 }
@@ -2138,12 +2138,12 @@ static tOplkError startNodes(void)
             }
         }
 
-        // $$$ inform application if EPL_NMTST_NO_STARTNODE is set
+        // $$$ inform application if NMT_STARTUP_NO_STARTNODE is set
 
-        if ((nmtMnuInstance_g.nmtStartup & EPL_NMTST_STARTALLNODES) != 0)
+        if ((nmtMnuInstance_g.nmtStartup & NMT_STARTUP_STARTALLNODES) != 0)
         {
-            NMTMNU_DBG_POST_TRACE_VALUE(0, EPL_C_ADR_BROADCAST, kNmtCmdStartNode);
-            ret = nmtmnu_sendNmtCommand(EPL_C_ADR_BROADCAST, kNmtCmdStartNode);
+            NMTMNU_DBG_POST_TRACE_VALUE(0, C_ADR_BROADCAST, kNmtCmdStartNode);
+            ret = nmtmnu_sendNmtCommand(C_ADR_BROADCAST, kNmtCmdStartNode);
             if (ret != kErrorOk)
                 goto Exit;
         }
@@ -2259,7 +2259,7 @@ static INT processNodeEventIdentResponse(UINT nodeId_p, tNmtState nodeNmtState_p
         // inform application
         *pRet_p = nmtMnuInstance_g.pfnCbNodeEvent(nodeId_p, kNmtNodeEventFound,
                                               nodeNmtState_p, E_NO_ERROR,
-                                              (pNodeInfo->nodeCfg & EPL_NODEASSIGN_MANDATORY_CN) != 0);
+                                              (pNodeInfo->nodeCfg & NMT_NODEASSIGN_MANDATORY_CN) != 0);
         if (*pRet_p == kErrorReject)
         {   // interrupt boot process on user request
             NMTMNU_DBG_POST_TRACE_VALUE(kNmtMnuIntNodeEventIdentResponse, nodeId_p,
@@ -2314,7 +2314,7 @@ static INT processNodeEventBoot(UINT nodeId_p, tNmtState nodeNmtState_p, tNmtSta
         // inform application
         *pRet_p = nmtMnuInstance_g.pfnCbNodeEvent(nodeId_p, kNmtNodeEventCheckConf,
                                               nodeNmtState_p, E_NO_ERROR,
-                                              (pNodeInfo->nodeCfg & EPL_NODEASSIGN_MANDATORY_CN) != 0);
+                                              (pNodeInfo->nodeCfg & NMT_NODEASSIGN_MANDATORY_CN) != 0);
         if (*pRet_p == kErrorReject)
         {   // interrupt boot process on user request
             NMTMNU_DBG_POST_TRACE_VALUE(kNmtMnuIntNodeEventBoot, nodeId_p,
@@ -2335,7 +2335,7 @@ static INT processNodeEventBoot(UINT nodeId_p, tNmtState nodeNmtState_p, tNmtSta
         // inform application
         *pRet_p = nmtMnuInstance_g.pfnCbNodeEvent(nodeId_p, kNmtNodeEventUpdateConf,
                                               nodeNmtState_p, E_NO_ERROR,
-                                              (pNodeInfo->nodeCfg & EPL_NODEASSIGN_MANDATORY_CN) != 0);
+                                              (pNodeInfo->nodeCfg & NMT_NODEASSIGN_MANDATORY_CN) != 0);
         if (*pRet_p == kErrorReject)
         {   // interrupt boot process on user request
             NMTMNU_DBG_POST_TRACE_VALUE(kNmtMnuIntNodeEventBoot, nodeId_p,
@@ -2398,7 +2398,7 @@ static INT processNodeEventConfigured(UINT nodeId_p, tNmtState nodeNmtState_p, t
     pNodeInfo->nodeState = kNmtMnuNodeStateConfigured;
     if (nmtState_p == kNmtMsPreOperational1)
     {
-        if ((pNodeInfo->nodeCfg & EPL_NODEASSIGN_MANDATORY_CN) != 0)
+        if ((pNodeInfo->nodeCfg & NMT_NODEASSIGN_MANDATORY_CN) != 0)
         {   // decrement mandatory CN counter
             nmtMnuInstance_g.mandatorySlaveCount--;
         }
@@ -2902,7 +2902,7 @@ static INT processNodeEventTimerLonger(UINT nodeId_p, tNmtState nodeNmtState_p, 
                 pNodeInfo->flags &= ~NMTMNU_NODE_FLAG_NOT_SCANNED;
             }
 
-            if ((pNodeInfo->nodeCfg & EPL_NODEASSIGN_MANDATORY_CN) != 0)
+            if ((pNodeInfo->nodeCfg & NMT_NODEASSIGN_MANDATORY_CN) != 0)
             {
                 // decrement mandatory slave counter
                 nmtMnuInstance_g.mandatorySlaveCount--;
@@ -3165,7 +3165,7 @@ static tOplkError checkNmtState(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p,
         {   // CN switched to PreOp2
             pNodeInfo_p->flags |= NMTMNU_NODE_FLAG_PREOP2_REACHED;
 
-            if (pNodeInfo_p->nodeCfg & EPL_NODEASSIGN_ASYNCONLY_NODE)
+            if (pNodeInfo_p->nodeCfg & NMT_NODEASSIGN_ASYNCONLY_NODE)
             {
                 if ((pNodeInfo_p->nodeState == kNmtMnuNodeStateConfigured) &&
                     (localNmtState_p >= kNmtMsPreOperational2))
@@ -3195,7 +3195,7 @@ static tOplkError checkNmtState(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p,
         if (ret != kErrorOk)
             goto Exit;
 
-        if ((pNodeInfo_p->nodeCfg & EPL_NODEASSIGN_MANDATORY_CN) != 0)
+        if ((pNodeInfo_p->nodeCfg & NMT_NODEASSIGN_MANDATORY_CN) != 0)
         {   // node is a mandatory CN -> decrement counter
             nmtMnuInstance_g.mandatorySlaveCount--;
         }
@@ -3221,7 +3221,7 @@ static tOplkError checkNmtState(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p,
     {   // CN switched to OPERATIONAL
         pNodeInfo_p->nodeState = kNmtMnuNodeStateOperational;
 
-        if ((pNodeInfo_p->nodeCfg & EPL_NODEASSIGN_MANDATORY_CN) != 0)
+        if ((pNodeInfo_p->nodeCfg & NMT_NODEASSIGN_MANDATORY_CN) != 0)
         {   // node is a mandatory CN -> decrement counter
             nmtMnuInstance_g.mandatorySlaveCount--;
         }
@@ -3256,7 +3256,7 @@ static tOplkError checkNmtState(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p,
         // $$$ start ERROR_TREATMENT and inform application
         ret = nmtMnuInstance_g.pfnCbNodeEvent(nodeId_p, kNmtNodeEventError,
                                               nodeNmtState_p, errorCode_p,
-                                              (pNodeInfo_p->nodeCfg & EPL_NODEASSIGN_MANDATORY_CN) != 0);
+                                              (pNodeInfo_p->nodeCfg & NMT_NODEASSIGN_MANDATORY_CN) != 0);
         if (ret != kErrorOk)
             goto ExitButUpdate;
 
@@ -3293,7 +3293,7 @@ ExitButUpdate:
         }
         retUpdate = nmtMnuInstance_g.pfnCbNodeEvent(nodeId_p, kNmtNodeEventNmtState,
                                                     nodeNmtState_p, errorCode_p,
-                                                    (pNodeInfo_p->nodeCfg & EPL_NODEASSIGN_MANDATORY_CN) != 0);
+                                                    (pNodeInfo_p->nodeCfg & NMT_NODEASSIGN_MANDATORY_CN) != 0);
         if (retUpdate != kErrorOk)
         {
             ret = retUpdate;
@@ -3326,14 +3326,14 @@ static tOplkError reset(void)
         ret = timeru_deleteTimer(&NMTMNU_GET_NODEINFO(index)->timerHdlLonger);
     }
 
-#if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
+#if NMTMNU_PRES_CHAINING_MN != FALSE
     nmtMnuInstance_g.prcPResMnTimeoutNs = 0;
 #endif
     return ret;
 }
 
 
-#if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
+#if NMTMNU_PRES_CHAINING_MN != FALSE
 //------------------------------------------------------------------------------
 /**
 \brief  Perform measure phase of PRC node insertion
@@ -3356,9 +3356,9 @@ static tOplkError prcMeasure(void)
     ret = kErrorOk;
 
     fSyncReqSentToPredNode = FALSE;
-    nodeIdPredNode       = EPL_C_ADR_INVALID;
-    nodeIdPrevSyncReq    = EPL_C_ADR_INVALID;
-    nodeIdFirstNode      = EPL_C_ADR_INVALID;
+    nodeIdPredNode       = C_ADR_INVALID;
+    nodeIdPrevSyncReq    = C_ADR_INVALID;
+    nodeIdFirstNode      = C_ADR_INVALID;
 
     for (nodeId = 1; nodeId < 254; nodeId++)
     {
@@ -3366,11 +3366,11 @@ static tOplkError prcMeasure(void)
         if (pNodeInfo == NULL)
             continue;
 
-        if (   (pNodeInfo->nodeCfg & EPL_NODEASSIGN_PRES_CHAINING)
+        if (   (pNodeInfo->nodeCfg & NMT_NODEASSIGN_PRES_CHAINING)
             && (   (pNodeInfo->flags & NMTMNU_NODE_FLAG_ISOCHRON)
                 || (pNodeInfo->prcFlags & NMTMNU_NODE_FLAG_PRC_ADD_IN_PROGRESS)))
         {
-            if (nodeIdFirstNode == EPL_C_ADR_INVALID)
+            if (nodeIdFirstNode == C_ADR_INVALID)
             {
                 if (pNodeInfo->prcFlags & NMTMNU_NODE_FLAG_PRC_ADD_IN_PROGRESS)
                 {   // First add-in-progress node found
@@ -3386,9 +3386,9 @@ static tOplkError prcMeasure(void)
             // Start processing with the first add-in-progress node
             if (pNodeInfo->relPropagationDelayNs == 0)
             {
-                if (nodeIdPredNode == EPL_C_ADR_INVALID)
+                if (nodeIdPredNode == C_ADR_INVALID)
                 {   // No predecessor node in isochronous phase
-                    pNodeInfo->relPropagationDelayNs = EPL_C_DLL_T_IFG;
+                    pNodeInfo->relPropagationDelayNs = C_DLL_T_IFG;
                     // No SyncReq needs to be send
                 }
                 else
@@ -3431,21 +3431,21 @@ static tOplkError prcMeasure(void)
         }
     }
 
-    if (nodeIdPrevSyncReq != EPL_C_ADR_INVALID)
+    if (nodeIdPrevSyncReq != C_ADR_INVALID)
     {   // At least one SyncReq has been sent
         pNodeInfo = NMTMNU_GET_NODEINFO(nodeIdPrevSyncReq);
         pNodeInfo->prcFlags |= NMTMNU_NODE_FLAG_PRC_CALL_MEASURE;
     }
     else
     {   // No SyncReq has been sent
-        if (nodeIdFirstNode == EPL_C_ADR_INVALID)
+        if (nodeIdFirstNode == C_ADR_INVALID)
         {   // No add-in-progress node has been found. This might happen
             // due to reset-node NMT commands which were issued
             // between the first and the second measure scan.
             nmtMnuInstance_g.flags &= ~NMTMNU_FLAG_PRC_ADD_IN_PROGRESS;
 
             // A new insertion process can be started
-            ret = addNodeIsochronous(EPL_C_ADR_INVALID);
+            ret = addNodeIsochronous(C_ADR_INVALID);
         }
         else
         {
@@ -3480,19 +3480,19 @@ static tOplkError prcCalculate(UINT nodeIdFirstNode_p)
     UINT32              pResResponseTimeNs;
     UINT32              pResMnTimeoutNs;
 
-    if ((nodeIdFirstNode_p == EPL_C_ADR_INVALID) || (nodeIdFirstNode_p >= EPL_C_ADR_BROADCAST))
+    if ((nodeIdFirstNode_p == C_ADR_INVALID) || (nodeIdFirstNode_p >= C_ADR_BROADCAST))
     {   // invalid node ID specified
         return kErrorInvalidNodeId;
     }
 
-    nodeIdPredNode = EPL_C_ADR_INVALID;
+    nodeIdPredNode = C_ADR_INVALID;
     for (nodeId = nodeIdFirstNode_p; nodeId < 254; nodeId++)
     {
         pNodeInfo = NMTMNU_GET_NODEINFO(nodeId);
         if (pNodeInfo == NULL)
             continue;
 
-        if ((pNodeInfo->nodeCfg & EPL_NODEASSIGN_PRES_CHAINING) &&
+        if ((pNodeInfo->nodeCfg & NMT_NODEASSIGN_PRES_CHAINING) &&
              ((pNodeInfo->flags & NMTMNU_NODE_FLAG_ISOCHRON) ||
               (pNodeInfo->prcFlags & NMTMNU_NODE_FLAG_PRC_ADD_IN_PROGRESS)))
         {
@@ -3523,13 +3523,13 @@ static tOplkError prcCalculate(UINT nodeIdFirstNode_p)
         OPLK_MEMSET(&dllNodeInfo, 0, sizeof(tDllNodeInfo));
         nmtMnuInstance_g.prcPResMnTimeoutNs = pResMnTimeoutNs;
         dllNodeInfo.presTimeoutNs = pResMnTimeoutNs;
-        dllNodeInfo.nodeId = EPL_C_ADR_MN_DEF_NODE_ID;
+        dllNodeInfo.nodeId = C_ADR_MN_DEF_NODE_ID;
         ret = dllucal_configNode(&dllNodeInfo);
         if (ret != kErrorOk)
             goto Exit;
     }
     // enter next phase
-    ret = prcShift(EPL_C_ADR_INVALID);
+    ret = prcShift(C_ADR_INVALID);
 Exit:
     return ret;
 }
@@ -3557,11 +3557,11 @@ static tOplkError prcCalcPResResponseTimeNs(UINT nodeId_p, UINT nodeIdPredNode_p
 
     ret = kErrorOk;
 
-    if (nodeIdPredNode_p == EPL_C_ADR_INVALID)
+    if (nodeIdPredNode_p == C_ADR_INVALID)
     {   // no predecessor node passed
         nodeIdPredNode_p = prcFindPredecessorNode(nodeId_p);
 
-        if (nodeIdPredNode_p == EPL_C_ADR_INVALID)
+        if (nodeIdPredNode_p == C_ADR_INVALID)
         {   // no predecessor node found
             // PRes Response Time of first PRC node is defined to 0
             *pPResResponseTimeNs_p = 0;
@@ -3581,10 +3581,10 @@ static tOplkError prcCalcPResResponseTimeNs(UINT nodeId_p, UINT nodeIdPredNode_p
           // PRes Response Time of predecessor node
           pNodeInfoPredNode->pResTimeFirstNs +
           // Transmission time for PRes frame of predecessor node
-          (8 * EPL_C_DLL_T_BITTIME * (pResPayloadLimitPredNode +
-                                      EPL_C_DLL_T_EPL_PDO_HEADER +
-                                      EPL_C_DLL_T_ETH2_WRAPPER) +
-           EPL_C_DLL_T_PREAMBLE) +
+          (8 * C_DLL_T_BITTIME * (pResPayloadLimitPredNode +
+                                      C_DLL_T_EPL_PDO_HEADER +
+                                      C_DLL_T_ETH2_WRAPPER) +
+           C_DLL_T_PREAMBLE) +
           // Relative propragation delay from predecessor node to addressed node
           NMTMNU_GET_NODEINFO(nodeId_p)->relPropagationDelayNs +
           // Time correction (hub jitter and part of measurement inaccuracy)
@@ -3648,10 +3648,10 @@ static tOplkError prcCalcPResChainingSlotTimeNs(UINT nodeIdLastNode_p,
 
     *pPResChainingSlotTimeNs_p =
           // Transmission time for PResMN frame
-          (8 * EPL_C_DLL_T_BITTIME * (pResActPayloadLimit +
-                                      EPL_C_DLL_T_EPL_PDO_HEADER +
-                                      EPL_C_DLL_T_ETH2_WRAPPER) +
-           EPL_C_DLL_T_PREAMBLE) +
+          (8 * C_DLL_T_BITTIME * (pResActPayloadLimit +
+                                      C_DLL_T_EPL_PDO_HEADER +
+                                      C_DLL_T_ETH2_WRAPPER) +
+           C_DLL_T_PREAMBLE) +
           // PRes Response Time of last node
           NMTMNU_GET_NODEINFO(nodeIdLastNode_p)->pResTimeFirstNs +
           // Relative propagation delay from last node to MN
@@ -3659,10 +3659,10 @@ static tOplkError prcCalcPResChainingSlotTimeNs(UINT nodeIdLastNode_p,
           // of the last node is used.
           cnResTimeoutLastNodeNs -
           // Transmission time for PReq frame of last node
-          (8 * EPL_C_DLL_T_BITTIME * (cnPReqPayloadLastNode
-                                      + EPL_C_DLL_T_EPL_PDO_HEADER
-                                      + EPL_C_DLL_T_ETH2_WRAPPER) +
-             EPL_C_DLL_T_PREAMBLE) +
+          (8 * C_DLL_T_BITTIME * (cnPReqPayloadLastNode
+                                      + C_DLL_T_EPL_PDO_HEADER
+                                      + C_DLL_T_ETH2_WRAPPER) +
+             C_DLL_T_PREAMBLE) +
           // Time correction (hub jitter and part of measurement inaccuracy)
          nmtMnuInstance_g.prcPResTimeFirstCorrectionNs;
 
@@ -3681,7 +3681,7 @@ addition is in progress.
 \param  nodeId_p            Node ID of the processed node.
 
 \return The function returns the node ID of the predecessor node or
-        EPL_C_ADR_INVALID if no node was found.
+        C_ADR_INVALID if no node was found.
 */
 //------------------------------------------------------------------------------
 static UINT prcFindPredecessorNode(UINT nodeId_p)
@@ -3695,7 +3695,7 @@ static UINT prcFindPredecessorNode(UINT nodeId_p)
         if (pNodeInfo == NULL)
             continue;
 
-        if ((pNodeInfo->nodeCfg & EPL_NODEASSIGN_PRES_CHAINING) &&
+        if ((pNodeInfo->nodeCfg & NMT_NODEASSIGN_PRES_CHAINING) &&
             ((pNodeInfo->flags & NMTMNU_NODE_FLAG_ISOCHRON) ||
              (pNodeInfo->prcFlags & NMTMNU_NODE_FLAG_PRC_ADD_IN_PROGRESS)))
         {
@@ -3804,7 +3804,7 @@ static tOplkError prcShift(UINT nodeIdPrevShift_p)
     UINT                size;
 
     ret = kErrorOk;
-    if (nodeIdPrevShift_p == EPL_C_ADR_INVALID)
+    if (nodeIdPrevShift_p == C_ADR_INVALID)
         nodeIdPrevShift_p = 254;
 
     // The search starts with the previous shift node
@@ -3816,7 +3816,7 @@ static tOplkError prcShift(UINT nodeIdPrevShift_p)
         if (pNodeInfo == NULL)
             continue;
 
-        if ((pNodeInfo->nodeCfg & EPL_NODEASSIGN_PRES_CHAINING) &&
+        if ((pNodeInfo->nodeCfg & NMT_NODEASSIGN_PRES_CHAINING) &&
             ((pNodeInfo->flags & NMTMNU_NODE_FLAG_ISOCHRON) ||
              (pNodeInfo->prcFlags & NMTMNU_NODE_FLAG_PRC_ADD_IN_PROGRESS)))
         {
@@ -3829,7 +3829,7 @@ static tOplkError prcShift(UINT nodeIdPrevShift_p)
     if (nodeId == 0)
     {   // No node requires shifting
         // Enter next phase
-        ret = prcAdd(EPL_C_ADR_INVALID);
+        ret = prcAdd(C_ADR_INVALID);
         goto Exit;
     }
 
@@ -3953,7 +3953,7 @@ static tOplkError prcAdd(UINT nodeIdPrevAdd_p)
             syncReqNum++;
             pNodeInfoLastSyncReq = pNodeInfo;
 
-            if (syncReqNum == EPL_NMTMNU_PRC_NODE_ADD_MAX_NUM)
+            if (syncReqNum == NMTMNU_PRC_NODE_ADD_MAX_NUM)
                 break;
         }
     }
@@ -3964,7 +3964,7 @@ static tOplkError prcAdd(UINT nodeIdPrevAdd_p)
     }
     else
     {   // No nodes need to be added to the isochronous phase
-        if (nodeIdPrevAdd_p != EPL_C_ADR_INVALID)
+        if (nodeIdPrevAdd_p != C_ADR_INVALID)
         {
             pNodeInfo = NMTMNU_GET_NODEINFO(nodeIdPrevAdd_p);
             if (pNodeInfo->prcFlags & NMTMNU_NODE_FLAG_PRC_VERIFY)
@@ -3979,7 +3979,7 @@ static tOplkError prcAdd(UINT nodeIdPrevAdd_p)
         nmtMnuInstance_g.flags &= ~NMTMNU_FLAG_PRC_ADD_IN_PROGRESS;
 
         // A new insertion process can be started
-        ret = addNodeIsochronous(EPL_C_ADR_INVALID);
+        ret = addNodeIsochronous(C_ADR_INVALID);
     }
 Exit:
     return ret;
@@ -4297,7 +4297,7 @@ static void prcSetFlagsNmtCommandReset(tNmtMnuNodeInfo* pNodeInfo_p,
     return;
 }
 
-#endif // #if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
+#endif // #if NMTMNU_PRES_CHAINING_MN != FALSE
 
 #endif // #if defined(CONFIG_INCLUDE_NMT_MN)
 

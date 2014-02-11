@@ -89,7 +89,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define IP_ADDR     0xc0a86401          // 192.168.100.1
 #define SUBNET_MASK 0xFFFFFF00          // 255.255.255.0
 #define HOSTNAME    "openPOWERLINK Stack    "
-#define IF_ETH      EPL_VETH_NAME
+#define IF_ETH      PLK_VETH_NAME
 
 #define CYCLE_LEN   5000                /* org val 5000 */
 
@@ -208,7 +208,7 @@ Api::Api(MainWindow *pMainWindow_p, UINT nodeId_p, QString devName_p)
     initParam.subnetMask = SUBNET_MASK;
     initParam.defaultGateway = 0;
     OPLK_MEMCPY(initParam.sHostname, sHostname, sizeof(initParam.sHostname));
-    initParam.syncNodeId = EPL_C_ADR_SYNC_ON_SOA;
+    initParam.syncNodeId = C_ADR_SYNC_ON_SOA;
     initParam.fSyncOnPrcNode = FALSE;
 
     // set callback functions

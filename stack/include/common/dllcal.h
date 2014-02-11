@@ -64,16 +64,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 /* setup interface getting function for DLLCAL queue */
-#if (CONFIG_DLLCAL_QUEUE == EPL_QUEUE_DIRECT)
+#if (CONFIG_DLLCAL_QUEUE == DIRECT_QUEUE)
 #define GET_DLLKCAL_INTERFACE dllcaldirect_getInterface
 #define GET_DLLUCAL_INTERFACE dllcaldirect_getInterface
-#elif (CONFIG_DLLCAL_QUEUE == EPL_QUEUE_HOSTINTERFACE)
+#elif (CONFIG_DLLCAL_QUEUE == HOSTINTERFACE_QUEUE)
 #define GET_DLLKCAL_INTERFACE dllcalhostif_getInterface
 #define GET_DLLUCAL_INTERFACE dllcalhostif_getInterface
-#elif (CONFIG_DLLCAL_QUEUE == EPL_QUEUE_IOCTL)
+#elif (CONFIG_DLLCAL_QUEUE == IOCTL_QUEUE)
 #define GET_DLLKCAL_INTERFACE dllcalioctl_getInterface
 #define GET_DLLUCAL_INTERFACE dllcalioctl_getInterface
-#elif (CONFIG_DLLCAL_QUEUE == EPL_QUEUE_CIRCBUF)
+#elif (CONFIG_DLLCAL_QUEUE == CIRCBUF_QUEUE)
 #define GET_DLLKCAL_INTERFACE dllkcalcircbuf_getInterface
 #define GET_DLLUCAL_INTERFACE dllucalcircbuf_getInterface
 #else

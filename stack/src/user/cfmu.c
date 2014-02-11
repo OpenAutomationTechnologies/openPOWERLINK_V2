@@ -135,7 +135,7 @@ The following structure defines the instance of the configuration manager.
 */
 typedef struct
 {
-    tCfmNodeInfo*           apNodeInfo[EPL_NMT_MAX_NODE_ID];
+    tCfmNodeInfo*           apNodeInfo[NMT_MAX_NODE_ID];
     UINT32                  leDomainSizeNull;
 #if (EPL_CFM_CONFIGURE_CYCLE_LENGTH != FALSE)
     UINT32                  leCycleLength;
@@ -196,7 +196,7 @@ tOplkError cfmu_init(tCfmCbEventCnProgress pfnCbEventCnProgress_p,
     varParam.pData = &cfmInstance_g.leDomainSizeNull;
     varParam.size = sizeof(cfmInstance_g.leDomainSizeNull);
     varParam.index = 0x1F22;    // CFM_ConciseDcfList_ADOM
-    for (subindex = 1; subindex <= EPL_NMT_MAX_NODE_ID; subindex++)
+    for (subindex = 1; subindex <= NMT_MAX_NODE_ID; subindex++)
     {
         varParam.subindex = subindex;
         varParam.validFlag = kVarValidAll;
@@ -233,7 +233,7 @@ tOplkError cfmu_exit(void)
     varParam.pData = NULL;
     varParam.size = 0;
     varParam.index = 0x1F22;    //CFM_ConciseDcfList_ADOM
-    for (nodeId = 1; nodeId <= EPL_NMT_MAX_NODE_ID; nodeId++)
+    for (nodeId = 1; nodeId <= NMT_MAX_NODE_ID; nodeId++)
     {
         pNodeInfo = CFM_GET_NODEINFO(nodeId);
         if (pNodeInfo != NULL)
@@ -463,7 +463,7 @@ BOOL cfmu_isSdoRunning(UINT nodeId_p)
 {
     tCfmNodeInfo*       pNodeInfo = NULL;
 
-    if ((nodeId_p == 0) || (nodeId_p > EPL_NMT_MAX_NODE_ID))
+    if ((nodeId_p == 0) || (nodeId_p > NMT_MAX_NODE_ID))
         return FALSE;
 
     pNodeInfo = CFM_GET_NODEINFO(nodeId_p);
@@ -560,7 +560,7 @@ static tCfmNodeInfo* allocNodeInfo(UINT nodeId_p)
 {
     tCfmNodeInfo*   pNodeInfo = NULL;
 
-    if ((nodeId_p == 0) || (nodeId_p > EPL_NMT_MAX_NODE_ID))
+    if ((nodeId_p == 0) || (nodeId_p > NMT_MAX_NODE_ID))
         return NULL;
 
     pNodeInfo = CFM_GET_NODEINFO(nodeId_p);
@@ -779,7 +779,7 @@ static tOplkError downloadObject(tCfmNodeInfo* pNodeInfo_p)
 
     if (pNodeInfo_p->entriesRemaining > 0)
     {
-        if (pNodeInfo_p->bytesRemaining < EPL_CDC_OFFSET_DATA)
+        if (pNodeInfo_p->bytesRemaining < CDC_OFFSET_DATA)
         {
             // not enough bytes left in ConciseDCF
             pNodeInfo_p->eventCnProgress.error = kErrorCfmInvalidDcf;
@@ -789,12 +789,12 @@ static tOplkError downloadObject(tCfmNodeInfo* pNodeInfo_p)
         }
 
         // fetch next item from ConciseDCF
-        pNodeInfo_p->eventCnProgress.objectIndex = ami_getUint16Le(&pNodeInfo_p->pDataConciseDcf[EPL_CDC_OFFSET_INDEX]);
-        pNodeInfo_p->eventCnProgress.objectSubIndex = ami_getUint8Le(&pNodeInfo_p->pDataConciseDcf[EPL_CDC_OFFSET_SUBINDEX]);
-        pNodeInfo_p->curDataSize = (UINT) ami_getUint32Le(&pNodeInfo_p->pDataConciseDcf[EPL_CDC_OFFSET_SIZE]);
-        pNodeInfo_p->pDataConciseDcf += EPL_CDC_OFFSET_DATA;
-        pNodeInfo_p->bytesRemaining -= EPL_CDC_OFFSET_DATA;
-        pNodeInfo_p->eventCnProgress.bytesDownloaded += EPL_CDC_OFFSET_DATA;
+        pNodeInfo_p->eventCnProgress.objectIndex = ami_getUint16Le(&pNodeInfo_p->pDataConciseDcf[CDC_OFFSET_INDEX]);
+        pNodeInfo_p->eventCnProgress.objectSubIndex = ami_getUint8Le(&pNodeInfo_p->pDataConciseDcf[CDC_OFFSET_SUBINDEX]);
+        pNodeInfo_p->curDataSize = (UINT) ami_getUint32Le(&pNodeInfo_p->pDataConciseDcf[CDC_OFFSET_SIZE]);
+        pNodeInfo_p->pDataConciseDcf += CDC_OFFSET_DATA;
+        pNodeInfo_p->bytesRemaining -= CDC_OFFSET_DATA;
+        pNodeInfo_p->eventCnProgress.bytesDownloaded += CDC_OFFSET_DATA;
 
         if ((pNodeInfo_p->bytesRemaining < pNodeInfo_p->curDataSize) ||
             (pNodeInfo_p->curDataSize == 0))

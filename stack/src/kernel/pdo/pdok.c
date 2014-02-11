@@ -168,11 +168,11 @@ tOplkError pdok_deAllocChannelMem(void)
 {
     tOplkError      Ret = kErrorOk;
 
-#if EPL_NMT_MAX_NODE_ID > 0
+#if NMT_MAX_NODE_ID > 0
     tDllNodeOpParam     NodeOpParam;
 
     NodeOpParam.opNodeType = kDllNodeOpTypeFilterPdo;
-    NodeOpParam.nodeId = EPL_C_ADR_BROADCAST;
+    NodeOpParam.nodeId = C_ADR_BROADCAST;
     Ret = dllk_deleteNode(&NodeOpParam);
     if (Ret != kErrorOk)
     {
@@ -180,7 +180,7 @@ tOplkError pdok_deAllocChannelMem(void)
                              __func__, EplGetOplkErrorStr(Ret));
         return Ret;
     }
-#endif // EPL_NMT_MAX_NODE_ID > 0
+#endif // NMT_MAX_NODE_ID > 0
 
 
     // deallocate mem for RX PDO channels
@@ -224,17 +224,17 @@ tOplkError pdok_allocChannelMem(tPdoAllocationParam* pAllocationParam_p)
 {
     tOplkError      ret = kErrorOk;
 
-#if EPL_NMT_MAX_NODE_ID > 0
+#if NMT_MAX_NODE_ID > 0
     tDllNodeOpParam     nodeOpParam;
 
     nodeOpParam.opNodeType = kDllNodeOpTypeFilterPdo;
-    nodeOpParam.nodeId = EPL_C_ADR_BROADCAST;
+    nodeOpParam.nodeId = C_ADR_BROADCAST;
     ret = dllk_deleteNode(&nodeOpParam);
     if (ret != kErrorOk)
     {
         goto Exit;
     }
-#endif // EPL_NMT_MAX_NODE_ID > 0
+#endif // NMT_MAX_NODE_ID > 0
 
     if (pdokInstance_g.pdoChannels.allocation.rxPdoChannelCount != pAllocationParam_p->rxPdoChannelCount)
     {   // allocation should be changed
@@ -311,7 +311,7 @@ tOplkError pdok_configureChannel(tPdoChannelConf* pChannelConf_p)
 
     if (pChannelConf_p->fTx == FALSE)
     {   // RPDO
-#if EPL_NMT_MAX_NODE_ID > 0
+#if NMT_MAX_NODE_ID > 0
         tDllNodeOpParam     NodeOpParam;
         NodeOpParam.opNodeType = kDllNodeOpTypeFilterPdo;
 #endif
@@ -324,7 +324,7 @@ tOplkError pdok_configureChannel(tPdoChannelConf* pChannelConf_p)
 
         pDestPdoChannel = &pdokInstance_g.pdoChannels.pRxPdoChannel[pChannelConf_p->channelId];
 
-#if EPL_NMT_MAX_NODE_ID > 0
+#if NMT_MAX_NODE_ID > 0
         if ((pDestPdoChannel->nodeId != PDO_INVALID_NODE_ID)
             && (pDestPdoChannel->nodeId != PDO_PREQ_NODE_ID))
         {   // disable old PRes filter in DLL
@@ -335,13 +335,13 @@ tOplkError pdok_configureChannel(tPdoChannelConf* pChannelConf_p)
                 goto Exit;
             }
         }
-#endif // EPL_NMT_MAX_NODE_ID > 0
+#endif // NMT_MAX_NODE_ID > 0
 
         // copy channel configuration to local structure
         OPLK_MEMCPY(pDestPdoChannel, &pChannelConf_p->pdoChannel,
                    sizeof (pChannelConf_p->pdoChannel));
 
-#if EPL_NMT_MAX_NODE_ID > 0
+#if NMT_MAX_NODE_ID > 0
         if ((pDestPdoChannel->nodeId != PDO_INVALID_NODE_ID)
             && (pDestPdoChannel->nodeId != PDO_PREQ_NODE_ID))
         {   // enable new PRes filter in DLL
@@ -352,7 +352,7 @@ tOplkError pdok_configureChannel(tPdoChannelConf* pChannelConf_p)
                 goto Exit;
             }
         }
-#endif // EPL_NMT_MAX_NODE_ID > 0
+#endif // NMT_MAX_NODE_ID > 0
 
     }
     else

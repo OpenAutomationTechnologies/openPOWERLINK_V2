@@ -318,7 +318,7 @@ static tOplkError decrementMnCounters(void)
     dllk_getCurrentCnNodeIdList(&pCnNodeId);
 
     // iterate through node info structure list
-    while (*pCnNodeId != EPL_C_ADR_INVALID)
+    while (*pCnNodeId != C_ADR_INVALID)
     {
         nodeIdx = *pCnNodeId - 1;
         if (nodeIdx < NUM_DLL_MNCN_LOSSPRES_OBJS)

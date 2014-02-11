@@ -628,7 +628,7 @@ tOplkError oplk_sendAsndFrame(UINT8 dstNodeId_p, tAsndFrame *pAsndFrame_p,
 {
     tOplkError      ret;
     tFrameInfo      frameInfo;
-    BYTE            buffer[EPL_C_DLL_MAX_ASYNC_MTU];
+    BYTE            buffer[C_DLL_MAX_ASYNC_MTU];
 
     // Calculate size of frame (Asnd data + header)
     frameInfo.frameSize = asndSize_p + offsetof(tPlkFrame, data);
@@ -950,7 +950,7 @@ static tOplkError cbReceivedAsnd(tFrameInfo *pFrameInfo_p)
     asndOffset = offsetof(tPlkFrame, data.asnd);
 
     if ((pFrameInfo_p->frameSize <= asndOffset + 1) ||
-        (pFrameInfo_p->frameSize > EPL_C_DLL_MAX_ASYNC_MTU))
+        (pFrameInfo_p->frameSize > C_DLL_MAX_ASYNC_MTU))
         return kErrorReject;
 
     // Forward received ASnd frame

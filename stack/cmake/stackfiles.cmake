@@ -397,6 +397,7 @@ SET(OPLK_HEADERS
     ${STACK_INCLUDE_DIR}/oplk/dll.h
     ${STACK_INCLUDE_DIR}/oplk/oplk.h
     ${STACK_INCLUDE_DIR}/oplk/oplkdefs.h
+    ${STACK_INCLUDE_DIR}/oplk/defaultcfg.h
     ${STACK_INCLUDE_DIR}/oplk/errordefs.h
     ${STACK_INCLUDE_DIR}/oplk/frame.h
     ${STACK_INCLUDE_DIR}/oplk/oplkinc.h

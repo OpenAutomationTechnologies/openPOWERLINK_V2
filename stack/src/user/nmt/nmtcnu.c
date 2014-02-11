@@ -185,8 +185,8 @@ tOplkError nmtcnu_sendNmtRequest(UINT nodeId_p, tNmtCommand nmtCommand_p)
     // build frame
     OPLK_MEMSET(&nmtRequestFrame.aDstMac[0], 0x00, sizeof(nmtRequestFrame.aDstMac)); // set by DLL
     OPLK_MEMSET(&nmtRequestFrame.aSrcMac[0], 0x00, sizeof(nmtRequestFrame.aSrcMac)); // set by DLL
-    ami_setUint16Be(&nmtRequestFrame.etherType, EPL_C_DLL_ETHERTYPE_EPL);
-    ami_setUint8Le(&nmtRequestFrame.dstNodeId, (BYTE) EPL_C_ADR_MN_DEF_NODE_ID); // node id of the MN
+    ami_setUint16Be(&nmtRequestFrame.etherType, C_DLL_ETHERTYPE_EPL);
+    ami_setUint8Le(&nmtRequestFrame.dstNodeId, (BYTE) C_ADR_MN_DEF_NODE_ID); // node id of the MN
     ami_setUint8Le(&nmtRequestFrame.messageType, (BYTE)kMsgTypeAsnd);
     ami_setUint8Le(&nmtRequestFrame.data.asnd.serviceId, (BYTE) kDllAsndNmtRequest);
     ami_setUint8Le(&nmtRequestFrame.data.asnd.payload.nmtRequestService.nmtCommandId,
@@ -197,7 +197,7 @@ tOplkError nmtcnu_sendNmtRequest(UINT nodeId_p, tNmtCommand nmtCommand_p)
 
     // build info-structure
     nmtRequestFrameInfo.pFrame = &nmtRequestFrame;
-    nmtRequestFrameInfo.frameSize = EPL_C_DLL_MINSIZE_NMTREQ; // sizeof(nmtRequestFrame);
+    nmtRequestFrameInfo.frameSize = C_DLL_MINSIZE_NMTREQ; // sizeof(nmtRequestFrame);
 
     // send NMT-Request
     ret = dllucal_sendAsyncFrame(&nmtRequestFrameInfo, kDllAsyncReqPrioNmt);

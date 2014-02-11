@@ -406,12 +406,12 @@ static tOplkError processCdc(tObdCdcInfo* pCdcInfo_p)
 
     for ( ; entriesRemaining != 0; entriesRemaining--)
     {
-        if ((ret = loadNextBuffer(pCdcInfo_p, EPL_CDC_OFFSET_DATA))  != kErrorOk)
+        if ((ret = loadNextBuffer(pCdcInfo_p, CDC_OFFSET_DATA))  != kErrorOk)
             return ret;
 
-        objectIndex = ami_getUint16Le(&pCdcInfo_p->pCurBuffer[EPL_CDC_OFFSET_INDEX]);
-        objectSubIndex = ami_getUint8Le(&pCdcInfo_p->pCurBuffer[EPL_CDC_OFFSET_SUBINDEX]);
-        curDataSize = (size_t)ami_getUint32Le(&pCdcInfo_p->pCurBuffer[EPL_CDC_OFFSET_SIZE]);
+        objectIndex = ami_getUint16Le(&pCdcInfo_p->pCurBuffer[CDC_OFFSET_INDEX]);
+        objectSubIndex = ami_getUint8Le(&pCdcInfo_p->pCurBuffer[CDC_OFFSET_SUBINDEX]);
+        curDataSize = (size_t)ami_getUint32Le(&pCdcInfo_p->pCurBuffer[CDC_OFFSET_SIZE]);
 
         DEBUG_LVL_OBD_TRACE("%s: Reading object 0x%04X/%u with size %u from CDC\n",
                              __func__, objectIndex, objectSubIndex, curDataSize);

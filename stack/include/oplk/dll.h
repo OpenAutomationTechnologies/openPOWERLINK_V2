@@ -50,7 +50,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 #ifndef DLL_MAX_ASND_SERVICE_ID
-#define DLL_MAX_ASND_SERVICE_ID (EPL_C_DLL_MAX_ASND_SERVICE_IDS + 1)
+#define DLL_MAX_ASND_SERVICE_ID (C_DLL_MAX_ASND_SERVICE_IDS + 1)
 #endif
 
 //------------------------------------------------------------------------------
@@ -70,7 +70,7 @@ typedef enum
     kDllAsndNmtRequest       = 0x03,
     kDllAsndNmtCommand       = 0x04,
     kDllAsndSdo              = 0x05,
-#if (EPL_DLL_PRES_CHAINING_CN != FALSE) || (EPL_DLL_PRES_CHAINING_MN != FALSE)
+#if (CONFIG_DLL_PRES_CHAINING_CN != FALSE) || (CONFIG_DLL_PRES_CHAINING_MN != FALSE)
     kDllAsndSyncResponse     = 0x06
 #endif
 } tDllAsndServiceId;
@@ -98,7 +98,7 @@ typedef enum
     kDllReqServiceIdent      = 0x01,
     kDllReqServiceStatus     = 0x02,
     kDllReqServiceNmtRequest = 0x03,
-#if (EPL_DLL_PRES_CHAINING_CN != FALSE) || (EPL_DLL_PRES_CHAINING_MN != FALSE)
+#if (CONFIG_DLL_PRES_CHAINING_CN != FALSE) || (CONFIG_DLL_PRES_CHAINING_MN != FALSE)
     kDllReqServiceSync       = 0x06,
 #endif
     kDllReqServiceUnspecified= 0xFF,
@@ -229,7 +229,7 @@ typedef struct
     tDllNodeOpType      opNodeType;         ///< Node operation type
 } tDllNodeOpParam;
 
-#if EPL_DLL_PRES_CHAINING_MN != FALSE
+#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
 /**
 \brief Structure for DLL Node Operation Parameters
 

@@ -50,7 +50,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <common/circbuffer.h>
 #endif
 
-#if (EPL_DLL_PRES_CHAINING_MN != FALSE) && (CONFIG_DLLCAL_QUEUE == EPL_QUEUE_DIRECT)
+#if (CONFIG_DLL_PRES_CHAINING_MN != FALSE) && (CONFIG_DLLCAL_QUEUE == DIRECT_QUEUE)
 #error "DLLCal module does not support direct calls with PRC MN"
 #endif
 
@@ -78,7 +78,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#if EPL_DLL_PRES_CHAINING_MN != FALSE
+#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
 #define EPL_DLLKCAL_MAX_QUEUES  6   // CnGenReq, CnNmtReq, {MnGenReq, MnNmtReq}, MnIdentReq, MnStatusReq, SyncReq
 #else
 #define EPL_DLLKCAL_MAX_QUEUES  5   // CnGenReq, CnNmtReq, {MnGenReq, MnNmtReq}, MnIdentReq, MnStatusReq
@@ -94,7 +94,7 @@ typedef struct
     tDllCalFuncIntf*        pTxNmtFuncs;
     tDllCalFuncIntf*        pTxGenFuncs;
 
-#if defined(CONFIG_INCLUDE_NMT_MN) && (EPL_DLL_PRES_CHAINING_MN != FALSE)
+#if defined(CONFIG_INCLUDE_NMT_MN) && (CONFIG_DLL_PRES_CHAINING_MN != FALSE)
     tDllCalQueueInstance    dllCalQueueTxSync;      ///< Dll Cal Queue instance for Sync Request
     tDllCalFuncIntf*        pTxSyncFuncs;
 #endif
@@ -133,7 +133,7 @@ static BOOL getMnGenNmtRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_
 static BOOL getMnIdentRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p);
 static BOOL getMnStatusRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p);
 
-#if (EPL_DLL_PRES_CHAINING_MN != FALSE)
+#if (CONFIG_DLL_PRES_CHAINING_MN != FALSE)
 static BOOL getMnSyncRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p,
                              tSoaPayload* pSoaPayload_p);
 #endif
@@ -166,7 +166,7 @@ tOplkError dllkcal_init(void)
 
     instance_l.pTxNmtFuncs = GET_DLLKCAL_INTERFACE();
     instance_l.pTxGenFuncs = GET_DLLKCAL_INTERFACE();
-#if EPL_DLL_PRES_CHAINING_MN != FALSE
+#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
     instance_l.pTxSyncFuncs = GET_DLLKCAL_INTERFACE();
 #endif
 
@@ -186,7 +186,7 @@ tOplkError dllkcal_init(void)
         goto Exit;
     }
 
-#if EPL_DLL_PRES_CHAINING_MN != FALSE
+#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
     ret = instance_l.pTxSyncFuncs->pfnAddInstance(&instance_l.dllCalQueueTxSync,
                                                   kDllCalQueueTxSync);
     if(ret != kErrorOk)
@@ -258,7 +258,7 @@ tOplkError dllkcal_exit(void)
 
     instance_l.pTxNmtFuncs->pfnDelInstance(instance_l.dllCalQueueTxNmt);
     instance_l.pTxGenFuncs->pfnDelInstance(instance_l.dllCalQueueTxGen);
-#if EPL_DLL_PRES_CHAINING_MN != FALSE
+#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
     instance_l.pTxSyncFuncs->pfnDelInstance(instance_l.dllCalQueueTxSync);
 #endif
 
@@ -292,7 +292,7 @@ tOplkError dllkcal_process(tEvent* pEvent_p)
     tDllCalIssueRequest*        pIssueReq;
 #endif
 
-#if EPL_NMT_MAX_NODE_ID > 0
+#if NMT_MAX_NODE_ID > 0
     tDllNodeInfo*               pNodeInfo;
     tDllNodeOpParam*            pNodeOpParam;
 #endif
@@ -317,7 +317,7 @@ tOplkError dllkcal_process(tEvent* pEvent_p)
             break;
 #endif
 
-#if EPL_NMT_MAX_NODE_ID > 0
+#if NMT_MAX_NODE_ID > 0
         case kEventTypeDllkConfigNode:
             pNodeInfo = (tDllNodeInfo*) pEvent_p->pEventArg;
             ret = dllk_configNode(pNodeInfo);
@@ -332,7 +332,7 @@ tOplkError dllkcal_process(tEvent* pEvent_p)
             pNodeOpParam = (tDllNodeOpParam*) pEvent_p->pEventArg;
             ret = dllk_deleteNode(pNodeOpParam);
             break;
-#endif // EPL_NMT_MAX_NODE_ID > 0
+#endif // NMT_MAX_NODE_ID > 0
 
         case kEventTypeDllkIdentity:
             pIdentParam = (tDllIdentParam*) pEvent_p->pEventArg;
@@ -597,7 +597,7 @@ tOplkError dllkcal_writeAsyncFrame(tFrameInfo* pFrameInfo_p, tDllCalQueue dllQue
                                         (BYTE*)pFrameInfo_p->pFrame,
                                         &(pFrameInfo_p->frameSize));
             break;
-#if EPL_DLL_PRES_CHAINING_MN != FALSE
+#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
         case kDllCalQueueTxSync:   // sync request priority
             ret = instance_l.pTxGenFuncs->pfnInsertDataBlock(
                                         instance_l.dllCalQueueTxSync,
@@ -653,7 +653,7 @@ tOplkError dllkcal_clearAsyncQueues(void)
 {
     tOplkError  ret = kErrorOk;
 
-#if EPL_DLL_PRES_CHAINING_MN != FALSE
+#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
     //ret is ignored
     ret = instance_l.pTxSyncFuncs->pfnResetDataBlockQueue(
                                     instance_l.dllCalQueueTxSync, 1000);
@@ -776,7 +776,7 @@ DLL module.
                                 emptry. The function store the next request at
                                 this location.
 \param  pNodeId_p               Pointer to store the node ID of the next request.
-                                EPL_C_ADR_INVALID is stored if request is self
+                                C_ADR_INVALID is stored if request is self
                                 addressed.
 \param  pSoaPayload_p           Pointer to SoA payload.
 
@@ -791,7 +791,7 @@ tOplkError dllkcal_getSoaRequest(tDllReqServiceId* pReqServiceId_p,
     tOplkError      ret = kErrorOk;
     UINT            count;
 
-#if EPL_DLL_PRES_CHAINING_MN == FALSE
+#if CONFIG_DLL_PRES_CHAINING_MN == FALSE
     UNUSED_PARAMETER(pSoaPayload_p);
 #endif
 
@@ -824,7 +824,7 @@ tOplkError dllkcal_getSoaRequest(tDllReqServiceId* pReqServiceId_p,
                     goto Exit;
                 break;
 
-#if EPL_DLL_PRES_CHAINING_MN != FALSE
+#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
             case 5:
                 if (getMnSyncRequest(pReqServiceId_p, pNodeId_p, pSoaPayload_p)
                                 == TRUE)
@@ -1012,7 +1012,7 @@ static BOOL getMnGenNmtRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_
     instance_l.nextRequestQueue = 3;
     if (*pReqServiceId_p != kDllReqServiceNo)
     {
-        *pNodeId_p = EPL_C_ADR_INVALID;   // DLLk must exchange this with the actual node ID
+        *pNodeId_p = C_ADR_INVALID;   // DLLk must exchange this with the actual node ID
         return TRUE;
     }
     return FALSE;
@@ -1073,7 +1073,7 @@ static BOOL getMnStatusRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_
     tCircBufError   err;
     UINT            rxNodeId;
     size_t          size = sizeof(rxNodeId);
-#if EPL_DLL_PRES_CHAINING_MN != FALSE
+#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
     // next queue will be MnSyncReq queue
     instance_l.nextRequestQueue = 5;
 #else
@@ -1093,7 +1093,7 @@ static BOOL getMnStatusRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_
 
 
 
-#if EPL_DLL_PRES_CHAINING_MN != FALSE
+#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
 //------------------------------------------------------------------------------
 /**
 \brief  Get MN Sync request

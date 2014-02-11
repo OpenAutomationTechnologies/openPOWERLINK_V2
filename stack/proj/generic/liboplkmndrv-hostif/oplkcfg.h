@@ -83,13 +83,13 @@ The generic defines are valid for the whole openPOWERLINK stack.
 The queue defines determine the stack's queues.
 */
 /**@{*/
-#define EPL_EVENT_K2U_QUEUE                 EPL_QUEUE_HOSTINTERFACE
+#define EPL_EVENT_K2U_QUEUE                 HOSTINTERFACE_QUEUE
     ///< kernel-to-user queue implementation
-#define EPL_EVENT_U2K_QUEUE                 EPL_QUEUE_HOSTINTERFACE
+#define EPL_EVENT_U2K_QUEUE                 HOSTINTERFACE_QUEUE
     ///< user-to-kernel queue implementation
-#define EPL_EVENT_KINT_QUEUE                EPL_QUEUE_DIRECT
+#define EPL_EVENT_KINT_QUEUE                DIRECT_QUEUE
     ///< kernel-internal queue implementation
-#define CONFIG_DLLCAL_QUEUE                 EPL_QUEUE_HOSTINTERFACE
+#define CONFIG_DLLCAL_QUEUE                 HOSTINTERFACE_QUEUE
     ///< DLLCAL queue implementation
 /**@}*/
 
@@ -122,11 +122,11 @@ The Data Link Layer (DLL) defines determine the POWERLINK DLL module.
     ///< support PRes packet ready after SoC (EDRV_FAST_TXFRAMES necessary)
 #define EPL_DLL_PRES_READY_AFTER_SOA        FALSE
     ///< support PRes packet ready after SoA (EDRV_FAST_TXFRAMES necessary)
-#define EPL_DLL_PRES_FILTER_COUNT           3
+#define DLL_PRES_FILTER_COUNT           3
     ///< max. supported PRes packet filters (for specific nodes)
 #define DLL_DEFERRED_RXFRAME_RELEASE_ISOCHRONOUS    FALSE
     ///< disable deferred RX frames if Edrv does not support it
-#define EPL_DLL_PRES_CHAINING_MN            TRUE
+#define CONFIG_DLL_PRES_CHAINING_MN            TRUE
     ///< support PRes-Chaining (PRC) for MN
 /**@}*/
 

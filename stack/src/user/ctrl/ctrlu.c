@@ -70,7 +70,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplk/obdcdc.h>
 #endif
 
-#if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
+#if NMTMNU_PRES_CHAINING_MN != FALSE
 #include <user/syncu.h>
 #endif
 
@@ -374,7 +374,7 @@ tOplkError ctrlu_shutdownStack(void)
     ret = statusu_delInstance();
     TRACE("statusu_delInstance():  0x%X\n", ret);
 
-#if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
+#if NMTMNU_PRES_CHAINING_MN != FALSE
     ret = syncu_delInstance();
 #endif
 
@@ -509,7 +509,7 @@ tOplkError ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
 {
     tOplkError          ret = kErrorOk;
 
-#if (EPL_API_OBD_FORWARD_EVENT != FALSE)
+#if (API_OBD_FORWARD_EVENT != FALSE)
     tOplkApiEventArg     eventArg;
 
     // call user callback
@@ -728,7 +728,7 @@ static tOplkError initNmtu(tOplkApiInitParam* pInitParam_p)
     if (Ret != kErrorOk)
         goto Exit;
 
-#if EPL_NMTMNU_PRES_CHAINING_MN != FALSE
+#if NMTMNU_PRES_CHAINING_MN != FALSE
     // initialize syncu module
     TRACE ("Initialize Syncu module...\n");
     Ret = syncu_init();
@@ -811,7 +811,7 @@ static tOplkError cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
 #if 0
 #if defined(CONFIG_INCLUDE_SDO_UDP)
             // configure SDO via UDP (i.e. bind it to the EPL ethernet interface)
-            ret = sdoudp_config(stackInstance_l.m_InitParam.ipAddress, EPL_C_SDO_EPL_PORT);
+            ret = sdoudp_config(stackInstance_l.m_InitParam.ipAddress, C_SDO_EPL_PORT);
             if (ret != kErrorOk)
                 return ret;
 #endif
@@ -1137,7 +1137,7 @@ static tOplkError updateDllConfig(tOplkApiInitParam* pInitParam_p, BOOL fUpdateI
     obd_readEntry(0x1F8A, 2, &dllConfigParam.asyncSlotTimeout, &obdSize);
 #endif
 
-#if EPL_DLL_PRES_CHAINING_CN != FALSE
+#if CONFIG_DLL_PRES_CHAINING_CN != FALSE
     dllConfigParam.syncResLatency = pInitParam_p->syncResLatency;
 #endif
 
@@ -1186,7 +1186,7 @@ static tOplkError updateDllConfig(tOplkApiInitParam* pInitParam_p, BOOL fUpdateI
 
 #if defined(CONFIG_INCLUDE_VETH)
         // configure Virtual Ethernet Driver
-        ret = target_setIpAdrs(EPL_VETH_NAME, dllIdentParam.ipAddress, dllIdentParam.subnetMask, (UINT16)dllConfigParam.asyncMtu);
+        ret = target_setIpAdrs(PLK_VETH_NAME, dllIdentParam.ipAddress, dllIdentParam.subnetMask, (UINT16)dllConfigParam.asyncMtu);
         if(ret != kErrorOk)
             return ret;
 
@@ -1297,13 +1297,13 @@ static tOplkError updateObd(tOplkApiInitParam* pInitParam_p)
 
     obd_writeEntry(0x1F98, 3, &pInitParam_p->presMaxLatency, 4);
 
-    if (pInitParam_p->preqActPayloadLimit <= EPL_C_DLL_ISOCHR_MAX_PAYL)
+    if (pInitParam_p->preqActPayloadLimit <= C_DLL_ISOCHR_MAX_PAYL)
     {
         wTemp = (WORD) pInitParam_p->preqActPayloadLimit;
         obd_writeEntry(0x1F98, 4, &wTemp, 2);
     }
 
-    if (pInitParam_p->presActPayloadLimit <= EPL_C_DLL_ISOCHR_MAX_PAYL)
+    if (pInitParam_p->presActPayloadLimit <= C_DLL_ISOCHR_MAX_PAYL)
     {
         wTemp = (WORD) pInitParam_p->presActPayloadLimit;
         obd_writeEntry(0x1F98, 5, &wTemp, 2);
@@ -1317,7 +1317,7 @@ static tOplkError updateObd(tOplkApiInitParam* pInitParam_p)
         obd_writeEntry(0x1F98, 7, &bTemp, 1);
     }
 
-    if (pInitParam_p->asyncMtu <= EPL_C_DLL_MAX_ASYNC_MTU)
+    if (pInitParam_p->asyncMtu <= C_DLL_MAX_ASYNC_MTU)
     {
         wTemp = (WORD) pInitParam_p->asyncMtu;
         obd_writeEntry(0x1F98, 8, &wTemp, 2);

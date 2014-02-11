@@ -77,7 +77,7 @@ tOplkError dllucal_sendAsyncFrame(tFrameInfo * pFrameInfo, tDllAsyncReqPriority 
 tOplkError dllucal_process(tEvent * pEvent_p);
 
 
-#if EPL_NMT_MAX_NODE_ID > 0
+#if NMT_MAX_NODE_ID > 0
 
 tOplkError dllucal_configNode(tDllNodeInfo* pNodeInfo_p);
 
@@ -91,7 +91,7 @@ tOplkError dllucal_deleteNode(tDllNodeOpParam* pNodeOpParam_p);
 
 tOplkError dllucal_issueRequest(tDllReqServiceId Service_p, unsigned int uiNodeId_p, BYTE bSoaFlag1_p);
 
-#if EPL_DLL_PRES_CHAINING_MN != FALSE
+#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
 tOplkError dllucal_issueSyncRequest(tDllSyncRequest* pSyncRequest_p, unsigned int uiSize_p);
 #endif
 

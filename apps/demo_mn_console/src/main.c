@@ -232,7 +232,7 @@ static tOplkError initPowerlink(UINT32 cycleLen_p, char *pszCdcFileName_p,
     initParam.subnetMask              = SUBNET_MASK;
     initParam.defaultGateway          = 0;
     OPLK_MEMCPY(initParam.sHostname, sHostname, sizeof(initParam.sHostname));
-    initParam.syncNodeId              = EPL_C_ADR_SYNC_ON_SOA;
+    initParam.syncNodeId              = C_ADR_SYNC_ON_SOA;
     initParam.fSyncOnPrcNode            = FALSE;
 
     // set callback functions

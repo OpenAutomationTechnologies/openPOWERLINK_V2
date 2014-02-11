@@ -69,11 +69,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define SEQ_NUM_MASK                0xFC
 
 // size for send buffer and history
-#define SDO_MAX_FRAME_SIZE          EPL_C_IP_MIN_MTU
+#define SDO_MAX_FRAME_SIZE          C_IP_MIN_MTU
 // size for receive frame
 // -> needed because SND-Kit sends up to 1518 Byte
 //    without Sdo-Command: Maximum Segment Size
-#define SDO_MAX_REC_FRAME_SIZE      EPL_C_IP_MAX_MTU
+#define SDO_MAX_REC_FRAME_SIZE      C_IP_MAX_MTU
 
 //------------------------------------------------------------------------------
 // Type definitions

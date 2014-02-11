@@ -95,7 +95,7 @@ typedef struct
 
     UINT                    freeEntries;
     UINT                    minFreeEntries;   // minimum number of free entries
-                                              // used to check if EPL_TIMERU_MAX_ENTRIES is large enough
+                                              // used to check if TIMERU_MAX_ENTRIES is large enough
 #if (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_ )
     CRITICAL_SECTION        aCriticalSections[2];
     HANDLE                  hProcessThread;
@@ -157,22 +157,22 @@ tOplkError timeru_addInstance(void)
     // reset instance structure
     OPLK_MEMSET(&timeruInstance_l, 0, sizeof (timeruInstance_l));
 
-    timeruInstance_l.pEntries = OPLK_MALLOC(sizeof (tTimerEntry) * EPL_TIMERU_MAX_ENTRIES);
+    timeruInstance_l.pEntries = OPLK_MALLOC(sizeof (tTimerEntry) * TIMERU_MAX_ENTRIES);
     if (timeruInstance_l.pEntries == NULL)
         return kErrorNoResource;
 
     timeruInstance_l.pTimerListFirst = NULL;
 
     // fill free timer list
-    for (nIdx = 0; nIdx < EPL_TIMERU_MAX_ENTRIES-1; nIdx++)
+    for (nIdx = 0; nIdx < TIMERU_MAX_ENTRIES-1; nIdx++)
     {
         timeruInstance_l.pEntries[nIdx].pNext = &timeruInstance_l.pEntries[nIdx+1];
     }
-    timeruInstance_l.pEntries[EPL_TIMERU_MAX_ENTRIES-1].pNext = NULL;
+    timeruInstance_l.pEntries[TIMERU_MAX_ENTRIES-1].pNext = NULL;
 
     timeruInstance_l.pFreeListFirst = timeruInstance_l.pEntries;
-    timeruInstance_l.freeEntries = EPL_TIMERU_MAX_ENTRIES;
-    timeruInstance_l.minFreeEntries = EPL_TIMERU_MAX_ENTRIES;
+    timeruInstance_l.freeEntries = TIMERU_MAX_ENTRIES;
+    timeruInstance_l.minFreeEntries = TIMERU_MAX_ENTRIES;
 
     // set start time to a value which is in any case less or equal than getTickCount()
     // -> the only solution = 0

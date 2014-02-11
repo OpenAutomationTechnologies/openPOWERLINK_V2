@@ -622,7 +622,7 @@ UINT obd_getNodeId(void)
     ret = obd_readEntry(OBD_NODE_ID_INDEX, OBD_NODE_ID_SUBINDEX, &nodeId, &obdSize);
     if(ret != kErrorOk)
     {
-        nodeId = EPL_C_ADR_INVALID;
+        nodeId = C_ADR_INVALID;
     }
     return (UINT) nodeId;
 }
@@ -648,7 +648,7 @@ tOplkError obd_setNodeId(UINT nodeId_p, tObdNodeIdType nodeIdType_p)
     UINT8       fHwBool;
     UINT8       nodeId;
 
-    if(nodeId_p == EPL_C_ADR_INVALID)
+    if(nodeId_p == C_ADR_INVALID)
         return kErrorInvalidNodeId;
 
     nodeId = (UINT8)nodeId_p;

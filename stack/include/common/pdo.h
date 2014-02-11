@@ -191,8 +191,8 @@ typedef struct
 {
     UINT16              valid;
     size_t              pdoMemSize;
-    tPdoBufferInfo      rxChannelInfo[EPL_D_PDO_RPDOChannels_U16];
-    tPdoBufferInfo      txChannelInfo[EPL_D_PDO_TPDOChannels_U16];
+    tPdoBufferInfo      rxChannelInfo[D_PDO_RPDOChannels_U16];
+    tPdoBufferInfo      txChannelInfo[D_PDO_TPDOChannels_U16];
 #ifdef OPLK_LOCK_T
     OPLK_LOCK_T         lock;
 #endif

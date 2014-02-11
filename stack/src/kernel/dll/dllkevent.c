@@ -341,12 +341,12 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
             if ((ret = controlPdokcalSync(FALSE)) != kErrorOk)
                 return ret;
 
-#if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_TIMER)
+#if (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER)
             if ((ret = synctimer_stopSync()) != kErrorOk)
                 return ret;
 #endif
 
-#if EPL_DLL_PRES_CHAINING_CN != FALSE
+#if CONFIG_DLL_PRES_CHAINING_CN != FALSE
             if ((ret = dllk_presChainingDisable()) != kErrorOk)
                 return ret;
 #endif
@@ -378,7 +378,7 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
             if (ret != kErrorOk)
                 return ret;
 
-#if EPL_DLL_PRES_CHAINING_CN != FALSE
+#if CONFIG_DLL_PRES_CHAINING_CN != FALSE
             // enable SyncReq Rx filter
             dllkInstance_g.aFilter[DLLK_FILTER_SOA_SYNCREQ].fEnable = TRUE;
             ret = edrv_changeRxFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT,
@@ -557,7 +557,7 @@ static tOplkError processNmtEvent(tEvent * pEvent_p)
         case kNmtEventDllCeSoa:
             // do preprocessing for next cycle
             NmtState = dllkInstance_g.nmtState;
-#if (EPL_DLL_PROCESS_SYNC == EPL_DLL_PROCESS_SYNC_ON_SOA)
+#if (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_SOA)
             if (dllkInstance_g.dllState != kDllGsInit)
             {   // cyclic state is active, so preprocessing is necessary
                 Ret = processSync(NmtState);
@@ -806,7 +806,7 @@ static tOplkError processCycleFinish(tNmtState nmtState_p)
 #if defined(CONFIG_INCLUDE_NMT_MN)
     if (dllkInstance_g.dllState > kDllMsNonCyclic)
     {
-        if (dllkInstance_g.dllConfigParam.syncNodeId == EPL_C_ADR_SYNC_ON_SOC)
+        if (dllkInstance_g.dllConfigParam.syncNodeId == C_ADR_SYNC_ON_SOC)
         {   // cyclic state is active, so preprocessing is necessary
             ret = processSync(nmtState_p);
         }
@@ -1031,7 +1031,7 @@ static tOplkError processStartReducedCycle(void)
     ret = dllkcal_clearAsyncQueues();
 
     // reset cycle counter (every time a SoA is triggered in PreOp1 the counter is incremented
-    // and when it reaches EPL_C_DLL_PREOP1_START_CYCLES the SoA may contain invitations)
+    // and when it reaches C_DLL_PREOP1_START_CYCLES the SoA may contain invitations)
     dllkInstance_g.cycleCount = 0;
 
     // remove any CN from isochronous phase
@@ -1042,7 +1042,7 @@ static tOplkError processStartReducedCycle(void)
             goto Exit;
     }
 
-#if EPL_DLL_PRES_CHAINING_MN != FALSE
+#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
     while (dllkInstance_g.pFirstPrcNodeInfo != NULL)
     {
         ret = dllk_deleteNodeIsochronous(dllkInstance_g.pFirstPrcNodeInfo);

@@ -48,7 +48,7 @@ OBD_BEGIN ()
         // Object 1600h: PDO_RxMappParam_00h_AU64
         OBD_BEGIN_INDEX_RAM(0x1600, 0x03, pdou_CbObdAccess)
             OBD_SUBINDEX_RAM_VAR(0x1600, 0x00, kObdTypeUInt8, kObdAccRW, tObdUnsigned8, NumberOfEntries, 0x01)
-#if ((EPL_API_PROCESS_IMAGE_SIZE_IN > 0) || (EPL_API_PROCESS_IMAGE_SIZE_OUT > 0))
+#if ((API_PROCESS_IMAGE_SIZE_IN > 0) || (API_PROCESS_IMAGE_SIZE_OUT > 0))
             OBD_SUBINDEX_RAM_VAR(0x1600, 0x01, kObdTypeUInt64, kObdAccRW, tObdUnsigned64, ObjectMapping, 0x0008000000012000LL)
 #else
             OBD_SUBINDEX_RAM_VAR(0x1600, 0x01, kObdTypeUInt64, kObdAccRW, tObdUnsigned64, ObjectMapping, 0x0008000000016200LL)
@@ -122,7 +122,7 @@ OBD_BEGIN ()
         // Object 1A00h: PDO_TxMappParam_00h_AU64
         OBD_BEGIN_INDEX_RAM(0x1A00, 0x03, pdou_CbObdAccess)
             OBD_SUBINDEX_RAM_VAR(0x1A00, 0x00, kObdTypeUInt8, kObdAccRW, tObdUnsigned8, NumberOfEntries, 0x01)
-#if ((EPL_API_PROCESS_IMAGE_SIZE_IN > 0) || (EPL_API_PROCESS_IMAGE_SIZE_OUT > 0))
+#if ((API_PROCESS_IMAGE_SIZE_IN > 0) || (API_PROCESS_IMAGE_SIZE_OUT > 0))
             OBD_SUBINDEX_RAM_VAR(0x1A00, 0x01, kObdTypeUInt64, kObdAccRW, tObdUnsigned64, ObjectMapping, 0x0008000000012030LL)
 #else
             OBD_SUBINDEX_RAM_VAR(0x1A00, 0x01, kObdTypeUInt64, kObdAccRW, tObdUnsigned64, ObjectMapping, 0x0008000000016000LL)
@@ -163,27 +163,27 @@ OBD_BEGIN ()
 
     OBD_BEGIN_PART_MANUFACTURER ()
 
-#if EPL_API_PROCESS_IMAGE_SIZE_IN > 0
+#if API_PROCESS_IMAGE_SIZE_IN > 0
         // static input process image
-        OBD_RAM_INDEX_RAM_VARARRAY (0x2000, (EPL_API_PROCESS_IMAGE_SIZE_IN), NULL, kObdTypeUInt8, kObdAccVPRW, tObdUnsigned8, BYTE_Merker, 0x00)
-        OBD_RAM_INDEX_RAM_VARARRAY (0x2001, (EPL_API_PROCESS_IMAGE_SIZE_IN), NULL, kObdTypeInt8, kObdAccVPRW, tObdInteger8, SHORT_Merker, 0x00)
-        OBD_RAM_INDEX_RAM_VARARRAY (0x2010, (EPL_API_PROCESS_IMAGE_SIZE_IN / 2), NULL, kObdTypeUInt16, kObdAccVPRW, tObdUnsigned16, WORD_Merker, 0)
-        OBD_RAM_INDEX_RAM_VARARRAY (0x2011, (EPL_API_PROCESS_IMAGE_SIZE_IN / 2), NULL, kObdTypeInt16, kObdAccVPRW, tObdInteger16, INT_Merker, 0)
-        OBD_RAM_INDEX_RAM_VARARRAY (0x2020, (EPL_API_PROCESS_IMAGE_SIZE_IN / 4), NULL, kObdTypeUInt32, kObdAccVPRW, tObdUnsigned32, DWORD_Merker, 0)
-        OBD_RAM_INDEX_RAM_VARARRAY (0x2021, (EPL_API_PROCESS_IMAGE_SIZE_IN / 4), NULL, kObdTypeInt32, kObdAccVPRW, tObdInteger32, LINT_Merker, 0)
+        OBD_RAM_INDEX_RAM_VARARRAY (0x2000, (API_PROCESS_IMAGE_SIZE_IN), NULL, kObdTypeUInt8, kObdAccVPRW, tObdUnsigned8, BYTE_Merker, 0x00)
+        OBD_RAM_INDEX_RAM_VARARRAY (0x2001, (API_PROCESS_IMAGE_SIZE_IN), NULL, kObdTypeInt8, kObdAccVPRW, tObdInteger8, SHORT_Merker, 0x00)
+        OBD_RAM_INDEX_RAM_VARARRAY (0x2010, (API_PROCESS_IMAGE_SIZE_IN / 2), NULL, kObdTypeUInt16, kObdAccVPRW, tObdUnsigned16, WORD_Merker, 0)
+        OBD_RAM_INDEX_RAM_VARARRAY (0x2011, (API_PROCESS_IMAGE_SIZE_IN / 2), NULL, kObdTypeInt16, kObdAccVPRW, tObdInteger16, INT_Merker, 0)
+        OBD_RAM_INDEX_RAM_VARARRAY (0x2020, (API_PROCESS_IMAGE_SIZE_IN / 4), NULL, kObdTypeUInt32, kObdAccVPRW, tObdUnsigned32, DWORD_Merker, 0)
+        OBD_RAM_INDEX_RAM_VARARRAY (0x2021, (API_PROCESS_IMAGE_SIZE_IN / 4), NULL, kObdTypeInt32, kObdAccVPRW, tObdInteger32, LINT_Merker, 0)
 #endif
 
-#if EPL_API_PROCESS_IMAGE_SIZE_OUT > 0
+#if API_PROCESS_IMAGE_SIZE_OUT > 0
         // static output process image
-        OBD_RAM_INDEX_RAM_VARARRAY (0x2030, (EPL_API_PROCESS_IMAGE_SIZE_OUT), NULL, kObdTypeUInt8, kObdAccVPR, tObdUnsigned8, BYTE_Merker, 0x00)
-        OBD_RAM_INDEX_RAM_VARARRAY (0x2031, (EPL_API_PROCESS_IMAGE_SIZE_OUT), NULL, kObdTypeInt8, kObdAccVPR, tObdInteger8, SHORT_Merker, 0x00)
-        OBD_RAM_INDEX_RAM_VARARRAY (0x2040, (EPL_API_PROCESS_IMAGE_SIZE_OUT / 2), NULL, kObdTypeUInt16, kObdAccVPR, tObdUnsigned16, WORD_Merker, 0)
-        OBD_RAM_INDEX_RAM_VARARRAY (0x2041, (EPL_API_PROCESS_IMAGE_SIZE_OUT / 2), NULL, kObdTypeInt16, kObdAccVPR, tObdInteger16, INT_Merker, 0)
-        OBD_RAM_INDEX_RAM_VARARRAY (0x2050, (EPL_API_PROCESS_IMAGE_SIZE_OUT / 4), NULL, kObdTypeUInt32, kObdAccVPR, tObdUnsigned32, DWORD_Merker, 0)
-        OBD_RAM_INDEX_RAM_VARARRAY (0x2051, (EPL_API_PROCESS_IMAGE_SIZE_OUT / 4), NULL, kObdTypeInt32, kObdAccVPR, tObdInteger32, LINT_Merker, 0)
+        OBD_RAM_INDEX_RAM_VARARRAY (0x2030, (API_PROCESS_IMAGE_SIZE_OUT), NULL, kObdTypeUInt8, kObdAccVPR, tObdUnsigned8, BYTE_Merker, 0x00)
+        OBD_RAM_INDEX_RAM_VARARRAY (0x2031, (API_PROCESS_IMAGE_SIZE_OUT), NULL, kObdTypeInt8, kObdAccVPR, tObdInteger8, SHORT_Merker, 0x00)
+        OBD_RAM_INDEX_RAM_VARARRAY (0x2040, (API_PROCESS_IMAGE_SIZE_OUT / 2), NULL, kObdTypeUInt16, kObdAccVPR, tObdUnsigned16, WORD_Merker, 0)
+        OBD_RAM_INDEX_RAM_VARARRAY (0x2041, (API_PROCESS_IMAGE_SIZE_OUT / 2), NULL, kObdTypeInt16, kObdAccVPR, tObdInteger16, INT_Merker, 0)
+        OBD_RAM_INDEX_RAM_VARARRAY (0x2050, (API_PROCESS_IMAGE_SIZE_OUT / 4), NULL, kObdTypeUInt32, kObdAccVPR, tObdUnsigned32, DWORD_Merker, 0)
+        OBD_RAM_INDEX_RAM_VARARRAY (0x2051, (API_PROCESS_IMAGE_SIZE_OUT / 4), NULL, kObdTypeInt32, kObdAccVPR, tObdInteger32, LINT_Merker, 0)
 #endif
 
-#if (!((EPL_API_PROCESS_IMAGE_SIZE_IN > 0) || (EPL_API_PROCESS_IMAGE_SIZE_OUT > 0))) \
+#if (!((API_PROCESS_IMAGE_SIZE_IN > 0) || (API_PROCESS_IMAGE_SIZE_OUT > 0))) \
     && defined(CONFIG_INCLUDE_NMT_MN)
         // process image is not enabled but master is enabled
 
@@ -204,7 +204,7 @@ OBD_BEGIN ()
 
     OBD_BEGIN_PART_DEVICE ()
 
-#if !((EPL_API_PROCESS_IMAGE_SIZE_IN > 0) || (EPL_API_PROCESS_IMAGE_SIZE_OUT > 0))
+#if !((API_PROCESS_IMAGE_SIZE_IN > 0) || (API_PROCESS_IMAGE_SIZE_OUT > 0))
         OBD_BEGIN_INDEX_RAM(0x6000, 0x02, NULL)
             OBD_SUBINDEX_RAM_VAR(0x6000, 0x00, kObdTypeUInt8, kObdAccConst, tObdUnsigned8, number_of_entries, 0x1)
             OBD_SUBINDEX_RAM_USERDEF(0x6000, 0x01, kObdTypeUInt8, kObdAccVPR, tObdUnsigned8, Sendb1, 0x0)

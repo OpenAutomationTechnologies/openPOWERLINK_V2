@@ -84,13 +84,13 @@ The generic defines are valid for the whole openPOWERLINK stack.
 The queue defines determine the stack's queues.
 */
 /**@{*/
-#define EPL_EVENT_K2U_QUEUE                 EPL_QUEUE_HOSTINTERFACE
+#define EPL_EVENT_K2U_QUEUE                 HOSTINTERFACE_QUEUE
     ///< kernel-to-user queue implementation
-#define EPL_EVENT_U2K_QUEUE                 EPL_QUEUE_HOSTINTERFACE
+#define EPL_EVENT_U2K_QUEUE                 HOSTINTERFACE_QUEUE
     ///< user-to-kernel queue implementation
-#define EPL_EVENT_UINT_QUEUE                EPL_QUEUE_DIRECT
+#define EPL_EVENT_UINT_QUEUE                DIRECT_QUEUE
     ///< user-internal queue implementation
-#define CONFIG_DLLCAL_QUEUE                 EPL_QUEUE_HOSTINTERFACE
+#define CONFIG_DLLCAL_QUEUE                 HOSTINTERFACE_QUEUE
     ///< DLLCAL queue implementation
 /**@}*/
 
@@ -99,7 +99,7 @@ The queue defines determine the stack's queues.
 The Data Link Layer (DLL) defines determine the POWERLINK DLL module.
 */
 /**@{*/
-#define EPL_DLL_PRES_CHAINING_MN            TRUE
+#define CONFIG_DLL_PRES_CHAINING_MN            TRUE
     ///< support PRes-Chaining (PRC) for MN
 /**@}*/
 
