@@ -183,7 +183,7 @@ tOplkError synctimer_addInstance(void)
 {
     tOplkError ret = kErrorOk;
 
-    EPL_MEMSET(&instance_l, 0, sizeof (instance_l));
+    OPLK_MEMSET(&instance_l, 0, sizeof (instance_l));
 
     openmac_timerIrqDisable(HWTIMER_SYNC);
     openmac_timerSetCompareValue(HWTIMER_SYNC, 0);
@@ -221,7 +221,7 @@ tOplkError synctimer_delInstance(void)
 
     openmac_isrReg(kOpenmacIrqSync, NULL, NULL);
 
-    EPL_MEMSET(&instance_l, 0, sizeof (instance_l));
+    OPLK_MEMSET(&instance_l, 0, sizeof (instance_l));
 
     return ret;
 

@@ -134,7 +134,7 @@ tOplkError eventucal_init (void)
 {
     struct sched_param  schedParam;
 
-    EPL_MEMSET(&instance_l, 0, sizeof(tEventuCalInstance));
+    OPLK_MEMSET(&instance_l, 0, sizeof(tEventuCalInstance));
 
     if ((instance_l.semUserData = sem_open("/semUserEvent", O_RDWR)) == SEM_FAILED)
         goto Exit;

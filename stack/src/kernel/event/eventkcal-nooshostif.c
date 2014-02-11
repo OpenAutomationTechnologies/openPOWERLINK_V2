@@ -118,7 +118,7 @@ The function initializes the kernel event CAL module.
 //------------------------------------------------------------------------------
 tOplkError eventkcal_init (void)
 {
-    EPL_MEMSET(&instance_l, 0, sizeof(tEventkCalInstance));
+    OPLK_MEMSET(&instance_l, 0, sizeof(tEventkCalInstance));
 
     if (eventkcal_initQueueHostif(kEventQueueU2K) != kErrorOk)
         goto Exit;

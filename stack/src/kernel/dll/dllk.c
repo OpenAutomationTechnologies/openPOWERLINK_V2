@@ -106,7 +106,7 @@ tOplkError dllk_addInstance(tDllkInitParam* pInitParam_p)
     tEdrvInitParam  EdrvInitParam;
 
     // reset instance structure
-    EPL_MEMSET(&dllkInstance_g, 0, sizeof (dllkInstance_g));
+    OPLK_MEMSET(&dllkInstance_g, 0, sizeof (dllkInstance_g));
 
     //jba able to work without hresk?
 #if EPL_TIMER_USE_HIGHRES != FALSE
@@ -149,7 +149,7 @@ tOplkError dllk_addInstance(tDllkInitParam* pInitParam_p)
 #endif
 
     // initialize Edrv
-    EPL_MEMCPY(EdrvInitParam.aMacAddr, pInitParam_p->aLocalMac, 6);
+    OPLK_MEMCPY(EdrvInitParam.aMacAddr, pInitParam_p->aLocalMac, 6);
     EdrvInitParam.hwParam = pInitParam_p->hwParam;
     EdrvInitParam.pfnRxHandler = dllk_processFrameReceived;
     //    EdrvInitParam.pfnTxHandler = EplDllkCbFrameTransmitted; //jba why commented out?
@@ -158,8 +158,8 @@ tOplkError dllk_addInstance(tDllkInitParam* pInitParam_p)
 
     // copy local MAC address from Ethernet driver back to local instance structure
     // because Ethernet driver may have read it from controller EEPROM
-    EPL_MEMCPY(dllkInstance_g.aLocalMac, EdrvInitParam.aMacAddr, 6);
-    EPL_MEMCPY(pInitParam_p->aLocalMac, EdrvInitParam.aMacAddr, 6);
+    OPLK_MEMCPY(dllkInstance_g.aLocalMac, EdrvInitParam.aMacAddr, 6);
+    OPLK_MEMCPY(pInitParam_p->aLocalMac, EdrvInitParam.aMacAddr, 6);
 
     // initialize TxBuffer array
     for (index = 0; index < dllkInstance_g.maxTxFrames; index++)
@@ -245,7 +245,7 @@ tOplkError dllk_config(tDllConfigParam * pDllConfigParam_p)
     else
     {   // copy entire configuration to local storage,
         // because we are in state DLL_GS_INIT
-        EPL_MEMCPY (&dllkInstance_g.dllConfigParam, pDllConfigParam_p,
+        OPLK_MEMCPY (&dllkInstance_g.dllConfigParam, pDllConfigParam_p,
             (pDllConfigParam_p->sizeOfStruct < sizeof (tDllConfigParam) ?
             pDllConfigParam_p->sizeOfStruct : sizeof (tDllConfigParam)));
     }
@@ -289,7 +289,7 @@ case of hostname change).
 //------------------------------------------------------------------------------
 tOplkError dllk_setIdentity(tDllIdentParam * pDllIdentParam_p)
 {
-    EPL_MEMCPY (&dllkInstance_g.dllIdentParam, pDllIdentParam_p,
+    OPLK_MEMCPY (&dllkInstance_g.dllIdentParam, pDllIdentParam_p,
         (pDllIdentParam_p->sizeOfStruct < sizeof (tDllIdentParam) ?
         pDllIdentParam_p->sizeOfStruct : sizeof (tDllIdentParam)));
 
@@ -758,7 +758,7 @@ tOplkError dllk_getCnMacAddress(UINT nodeId_p, BYTE* pCnMacAddress_p)
         return kErrorDllNoNodeInfo;
     }
 
-    EPL_MEMCPY(pCnMacAddress_p, pNodeInfo->aMacAddr, 6);
+    OPLK_MEMCPY(pCnMacAddress_p, pNodeInfo->aMacAddr, 6);
     return kErrorOk;
 }
 #endif
@@ -1160,7 +1160,7 @@ tOplkError dllk_setupLocalNode(tNmtState nmtState_p)
 
     /*------------------------------------------------------------------------*/
     /* setup filter structure for Edrv */
-    EPL_MEMSET(dllkInstance_g.aFilter, 0, sizeof (dllkInstance_g.aFilter));
+    OPLK_MEMSET(dllkInstance_g.aFilter, 0, sizeof (dllkInstance_g.aFilter));
     dllk_setupAsndFilter(&dllkInstance_g.aFilter[DLLK_FILTER_ASND]);
     dllk_setupSocFilter(&dllkInstance_g.aFilter[DLLK_FILTER_SOC]);
     dllk_setupSoaFilter(&dllkInstance_g.aFilter[DLLK_FILTER_SOA]);
@@ -1280,7 +1280,7 @@ tOplkError dllk_setupLocalNodeMn(void)
 
     // alloc TxBuffer pointer list
     count += 5;   // SoC, PResMN, SoA, ASnd, NULL
-    dllkInstance_g.ppTxBufferList = EPL_MALLOC(sizeof (tEdrvTxBuffer*) * count);
+    dllkInstance_g.ppTxBufferList = OPLK_MALLOC(sizeof (tEdrvTxBuffer*) * count);
     if (dllkInstance_g.ppTxBufferList == NULL)
         return kErrorDllOutOfMemory;
 
@@ -1413,7 +1413,7 @@ tOplkError dllk_cleanupLocalNode(tNmtState oldNmtState_p)
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
     // destroy all data structures
-    EPL_FREE(dllkInstance_g.ppTxBufferList);
+    OPLK_FREE(dllkInstance_g.ppTxBufferList);
     dllkInstance_g.ppTxBufferList = NULL;
 #endif
 
@@ -1612,13 +1612,13 @@ tOplkError dllk_addNodeIsochronous(tDllkNodeInfo* pIntNodeInfo_p)
 
             pTxFrame = (tPlkFrame *) pIntNodeInfo_p->pPreqTxBuffer[0].pBuffer;
             // set up destination MAC address
-            EPL_MEMCPY(pTxFrame->aDstMac, pIntNodeInfo_p->aMacAddr, 6);
+            OPLK_MEMCPY(pTxFrame->aDstMac, pIntNodeInfo_p->aMacAddr, 6);
             // set destination node-ID in PReq
             ami_setUint8Le(&pTxFrame->dstNodeId, (UINT8)pIntNodeInfo_p->nodeId);
             // do the same for second frame buffer
             pTxFrame = (tPlkFrame *) pIntNodeInfo_p->pPreqTxBuffer[1].pBuffer;
             // set up destination MAC address
-            EPL_MEMCPY(pTxFrame->aDstMac, pIntNodeInfo_p->aMacAddr, 6);
+            OPLK_MEMCPY(pTxFrame->aDstMac, pIntNodeInfo_p->aMacAddr, 6);
             // set destination node-ID in PReq
             ami_setUint8Le(&pTxFrame->dstNodeId, (UINT8) pIntNodeInfo_p->nodeId);
 
@@ -1781,7 +1781,7 @@ tOplkError dllk_presChainingDisable (void)
 
     if (dllkInstance_g.fPrcEnabled != FALSE)
     {   // relocate PReq filter from PResMN to PReq
-        EPL_MEMCPY(&dllkInstance_g.aFilter[DLLK_FILTER_PREQ].aFilterValue[0],
+        OPLK_MEMCPY(&dllkInstance_g.aFilter[DLLK_FILTER_PREQ].aFilterValue[0],
                    &dllkInstance_g.aLocalMac[0], 6);
         ami_setUint8Be(&dllkInstance_g.aFilter[DLLK_FILTER_PREQ].aFilterValue[14],
                        kMsgTypePreq);

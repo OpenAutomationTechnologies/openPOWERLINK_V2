@@ -188,7 +188,7 @@ static tOplkError addInstance (tDllCalQueueInstance *ppDllCalQueue_p,
     {
         //create new instance
         pDllCalDirectInstance =
-             (tDllCalDirectInstance *)EPL_MALLOC(sizeof(tDllCalDirectInstance));
+             (tDllCalDirectInstance *)OPLK_MALLOC(sizeof(tDllCalDirectInstance));
 
         if(pDllCalDirectInstance == NULL)
         {
@@ -284,7 +284,7 @@ static tOplkError delInstance (tDllCalQueueInstance pDllCalQueue_p)
         }
 
         //free found member instance
-        EPL_FREE(pSearch);
+        OPLK_FREE(pSearch);
     }
 
     return kErrorOk;
@@ -330,7 +330,7 @@ static tOplkError insertDataBlock (tDllCalQueueInstance pDllCalQueue_p,
     //mark buffer that it is being filled
     pDllCalDirectInstance->frameSize = EPL_DLLCALDIRECT_TXBUF_FILLING;
 
-    EPL_MEMCPY(pDllCalDirectInstance->aFrameBuffer, pData_p, *pDataSize_p);
+    OPLK_MEMCPY(pDllCalDirectInstance->aFrameBuffer, pData_p, *pDataSize_p);
 
     //mark buffer that it is filled, with the size of the frame
     pDllCalDirectInstance->frameSize = *pDataSize_p;
@@ -384,7 +384,7 @@ static tOplkError getDataBlock (tDllCalQueueInstance pDllCalQueue_p,
         goto Exit;
     }
 
-    EPL_MEMCPY(pData_p, pDllCalDirectInstance->aFrameBuffer,
+    OPLK_MEMCPY(pData_p, pDllCalDirectInstance->aFrameBuffer,
             pDllCalDirectInstance->frameSize);
 
     //return frame size

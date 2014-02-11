@@ -156,7 +156,7 @@ static tOplkError addInstance(tDllCalQueueInstance *ppDllCalQueue_p,
     tCircBufError               error = kCircBufOk;
     tDllCalCircBufInstance*     pDllCalCircBufInstance;
 
-    pDllCalCircBufInstance = (tDllCalCircBufInstance *) EPL_MALLOC(sizeof(tDllCalCircBufInstance));
+    pDllCalCircBufInstance = (tDllCalCircBufInstance *) OPLK_MALLOC(sizeof(tDllCalCircBufInstance));
     if(pDllCalCircBufInstance == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s() malloc error!\n", __func__);
@@ -225,7 +225,7 @@ static tOplkError delInstance(tDllCalQueueInstance pDllCalQueue_p)
     {
         return kErrorNoResource;
     }
-    EPL_FREE(pDllCalCircBufInstance);
+    OPLK_FREE(pDllCalCircBufInstance);
     return kErrorOk;
 }
 

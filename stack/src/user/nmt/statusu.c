@@ -126,7 +126,7 @@ tOplkError statusu_addInstance(void)
 {
     tOplkError  ret = kErrorOk;
 
-    EPL_MEMSET(&instance_g, 0, sizeof (instance_g));
+    OPLK_MEMSET(&instance_g, 0, sizeof (instance_g));
 
     // register StatusResponse callback function
     ret = dllucal_regAsndService(kDllAsndStatusResponse, statusu_cbStatusResponse,
@@ -170,7 +170,7 @@ The function resets an status module instance
 tOplkError statusu_reset(void)
 {
     // reset instance structure
-    EPL_MEMSET(&instance_g, 0, sizeof(instance_g));
+    OPLK_MEMSET(&instance_g, 0, sizeof(instance_g));
 
     return kErrorOk;
 }

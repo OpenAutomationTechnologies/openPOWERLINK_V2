@@ -131,7 +131,7 @@ int main (void)
     nodeid = gpio_getNodeid();
 
     // initialize instance
-    EPL_MEMSET(&instance_l, 0, sizeof(instance_l));
+    OPLK_MEMSET(&instance_l, 0, sizeof(instance_l));
 
     instance_l.cycleLen     = CYCLE_LEN;
     instance_l.nodeId       = (nodeid != 0) ? nodeid : NODEID;
@@ -139,7 +139,7 @@ int main (void)
     instance_l.fGsOff       = FALSE;
 
     // set mac address (last byte is set to node ID)
-    EPL_MEMCPY(instance_l.aMacAddr, aMacAddr, sizeof(aMacAddr));
+    OPLK_MEMCPY(instance_l.aMacAddr, aMacAddr, sizeof(aMacAddr));
     instance_l.aMacAddr[5]  = instance_l.nodeId;
 
     initEvents(&eventCbPowerlink);
@@ -190,13 +190,13 @@ static tOplkError initPowerlink(tInstance* pInstance_p)
 
     PRINTF("Initializing openPOWERLINK stack...\n");
 
-    EPL_MEMSET(&initParam, 0, sizeof(initParam));
+    OPLK_MEMSET(&initParam, 0, sizeof(initParam));
     initParam.sizeOfInitParam = sizeof(initParam);
 
     initParam.nodeId = pInstance_p->nodeId;
     initParam.ipAddress = (0xFFFFFF00 & IP_ADDR) | initParam.nodeId;
 
-    EPL_MEMCPY(initParam.aMacAddress, pInstance_p->aMacAddr, sizeof(initParam.aMacAddress));
+    OPLK_MEMCPY(initParam.aMacAddress, pInstance_p->aMacAddr, sizeof(initParam.aMacAddress));
 
     initParam.fAsyncOnly = FALSE;
 

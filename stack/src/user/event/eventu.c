@@ -314,12 +314,12 @@ tOplkError eventu_postError (tEventSource eventSource_p,  tOplkError error_p,
     eventError.eventSource = eventSource_p;
     eventError.oplkError = error_p;
     argSize_p = (UINT) min ((size_t) argSize_p, sizeof (eventError.errorArg));
-    EPL_MEMCPY(&eventError.errorArg, pArg_p, argSize_p);
+    OPLK_MEMCPY(&eventError.errorArg, pArg_p, argSize_p);
 
     // create event
     event.eventType = kEventTypeError;
     event.eventSink = kEventSinkApi;
-    EPL_MEMSET(&event.netTime, 0x00, sizeof(event.netTime));
+    OPLK_MEMSET(&event.netTime, 0x00, sizeof(event.netTime));
     event.eventArgSize = (memberoffs (tEventError, errorArg) + argSize_p);
     event.pEventArg = &eventError;
 

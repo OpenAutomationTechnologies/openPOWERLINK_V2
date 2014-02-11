@@ -132,7 +132,7 @@ tOplkError eventkcal_init (void)
 {
     struct sched_param  schedParam;
 
-    EPL_MEMSET(&instance_l, 0, sizeof(tEventkCalInstance));
+    OPLK_MEMSET(&instance_l, 0, sizeof(tEventkCalInstance));
 
     if ((instance_l.semUserData = sem_open("/semUserEvent", O_CREAT | O_RDWR, S_IRWXG, 0)) == SEM_FAILED)
         goto Exit;

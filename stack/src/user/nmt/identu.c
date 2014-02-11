@@ -124,7 +124,7 @@ tOplkError identu_addInstance(void)
 {
     tOplkError ret = kErrorOk;
 
-    EPL_MEMSET(&instance_g, 0, sizeof(instance_g));
+    OPLK_MEMSET(&instance_g, 0, sizeof(instance_g));
 
     // register IdentResponse callback function
     ret = dllucal_regAsndService(kDllAsndIdentResponse, identu_cbIdentResponse,
@@ -176,10 +176,10 @@ tOplkError identu_reset()
     {
         if (instance_g.apIdentResponse[index] != NULL)
         {
-            EPL_FREE(instance_g.apIdentResponse[index]);
+            OPLK_FREE(instance_g.apIdentResponse[index]);
         }
     }
-    EPL_MEMSET(&instance_g, 0, sizeof (tIdentuInstance));
+    OPLK_MEMSET(&instance_g, 0, sizeof (tIdentuInstance));
 
     return ret;
 }
@@ -358,7 +358,7 @@ static tOplkError identu_cbIdentResponse(tFrameInfo* pFrameInfo_p)
         {   // IdentResponse received
             if (instance_g.apIdentResponse[index] == NULL)
             {   // memory for IdentResponse must be allocated
-                instance_g.apIdentResponse[index] = EPL_MALLOC(sizeof(tIdentResponse));
+                instance_g.apIdentResponse[index] = OPLK_MALLOC(sizeof(tIdentResponse));
                 if (instance_g.apIdentResponse[index] == NULL)
                 {   // malloc failed
                     ret = pfnCbResponse(nodeId,
@@ -368,7 +368,7 @@ static tOplkError identu_cbIdentResponse(tFrameInfo* pFrameInfo_p)
             }
 
             // copy IdentResponse to instance structure
-            EPL_MEMCPY(instance_g.apIdentResponse[index],
+            OPLK_MEMCPY(instance_g.apIdentResponse[index],
                        &pFrameInfo_p->pFrame->data.asnd.payload.identResponse,
                        sizeof(tIdentResponse));
             ret = pfnCbResponse(nodeId, instance_g.apIdentResponse[index]);

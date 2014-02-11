@@ -116,9 +116,9 @@ tOplkError ctrlkcal_init (void)
     tHostifReturn hifRet;
     tHostifConfig hifConfig;
 
-    EPL_MEMSET(&instance_l, 0, sizeof(instance_l));
+    OPLK_MEMSET(&instance_l, 0, sizeof(instance_l));
 
-    EPL_MEMSET(&hifConfig, 0, sizeof(hifConfig));
+    OPLK_MEMSET(&hifConfig, 0, sizeof(hifConfig));
 
     hifConfig.instanceNum = 0;
     hifConfig.pBase = (UINT8*)HOSTIF_BASE;
@@ -303,7 +303,7 @@ parameters modified in the kernel stack.
 void ctrlkcal_storeInitParam(tCtrlInitParam* pInitParam_p)
 {
     if(instance_l.pInitParamBase != NULL)
-        EPL_MEMCPY(instance_l.pInitParamBase, pInitParam_p, sizeof(tCtrlInitParam));
+        OPLK_MEMCPY(instance_l.pInitParamBase, pInitParam_p, sizeof(tCtrlInitParam));
 }
 
 //------------------------------------------------------------------------------
@@ -324,7 +324,7 @@ tOplkError ctrlkcal_readInitParam(tCtrlInitParam* pInitParam_p)
     if(instance_l.pInitParamBase == NULL)
         return kErrorNoResource;
 
-    EPL_MEMCPY(pInitParam_p, instance_l.pInitParamBase, sizeof(tCtrlInitParam));
+    OPLK_MEMCPY(pInitParam_p, instance_l.pInitParamBase, sizeof(tCtrlInitParam));
 
     return kErrorOk;
 }

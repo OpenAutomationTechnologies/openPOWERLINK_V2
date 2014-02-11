@@ -152,7 +152,7 @@ tCircBufError circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t size_p)
 
     size = size_p + sizeof(tCircBufHeader);
 
-    pInstance_p->pCircBufHeader = EPL_MALLOC(size);
+    pInstance_p->pCircBufHeader = OPLK_MALLOC(size);
     if (pInstance_p->pCircBufHeader == NULL)
     {
         TRACE("%s() malloc failed!\n", __func__);
@@ -177,7 +177,7 @@ The function frees the allocated memory used by the circular buffer.
 //------------------------------------------------------------------------------
 void circbuf_freeBuffer(tCircBufInstance* pInstance_p)
 {
-    EPL_FREE(pInstance_p->pCircBufHeader);
+    OPLK_FREE(pInstance_p->pCircBufHeader);
 }
 
 //------------------------------------------------------------------------------

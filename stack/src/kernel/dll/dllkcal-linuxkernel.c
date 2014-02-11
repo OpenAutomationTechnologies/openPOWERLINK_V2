@@ -160,7 +160,7 @@ static tOplkError addInstance(tDllCalQueueInstance* ppDllCalQueue_p,
     tCircBufError               circError = kCircBufOk;
     tDllCalCircbufInstance*     pDllCalCircbufInstance;
 
-    pDllCalCircbufInstance = (tDllCalCircbufInstance *)EPL_MALLOC(sizeof(tDllCalCircbufInstance));
+    pDllCalCircbufInstance = (tDllCalCircbufInstance *)OPLK_MALLOC(sizeof(tDllCalCircbufInstance));
     if(pDllCalCircbufInstance == NULL)
     {
         ret = kErrorNoResource;
@@ -228,7 +228,7 @@ static tOplkError delInstance(tDllCalQueueInstance pDllCalQueue_p)
     {
         return kErrorNoResource;
     }
-    EPL_FREE(pDllCalCircbufInstance);
+    OPLK_FREE(pDllCalCircbufInstance);
     return kErrorOk;
 }
 

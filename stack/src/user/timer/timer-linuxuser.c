@@ -208,7 +208,7 @@ tOplkError timeru_delInstance(void)
     while ((pTimer = getNextTimer()) != NULL)
     {
         removeTimer(pTimer);
-        EPL_FREE(pTimer);
+        OPLK_FREE(pTimer);
     }
 
     pthread_mutex_destroy(&timeruInstance_g.mutex);
@@ -264,11 +264,11 @@ tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg a
     if(pTimerHdl_p == NULL)
         return kErrorTimerInvalidHandle;
 
-    pData = (tTimeruData*) EPL_MALLOC(sizeof (tTimeruData));
+    pData = (tTimeruData*) OPLK_MALLOC(sizeof (tTimeruData));
     if (pData == NULL)
         return kErrorNoResource;
 
-    EPL_MEMCPY(&pData->timerArgument, &argument_p, sizeof(tTimerArg));
+    OPLK_MEMCPY(&pData->timerArgument, &argument_p, sizeof(tTimerArg));
 
     addTimer(pData);
 
@@ -278,7 +278,7 @@ tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg a
     if (timer_create(CLOCK_MONOTONIC, &sev, &pData->timer) == -1)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Error creating timer!\n", __func__);
-        EPL_FREE(pData);
+        OPLK_FREE(pData);
         return kErrorNoResource;
     }
 
@@ -367,7 +367,7 @@ tOplkError timeru_modifyTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerAr
     // won't use the new TimerArg and
     // therefore the old timer cannot be distinguished from the new one.
     // But if the new timer is too fast, it may get lost.
-    EPL_MEMCPY(&pData->timerArgument, &argument_p, sizeof(tTimerArg));
+    OPLK_MEMCPY(&pData->timerArgument, &argument_p, sizeof(tTimerArg));
 
     return kErrorOk;
 }
@@ -403,7 +403,7 @@ tOplkError timeru_deleteTimer(tTimerHdl* pTimerHdl_p)
 
     timer_delete (pData->timer);
     removeTimer(pData);
-    EPL_FREE(pData);
+    OPLK_FREE(pData);
 
     // uninitialize handle
     *pTimerHdl_p = 0;
@@ -517,12 +517,12 @@ static void cbTimer(ULONG parameter_p)
 
     // call event function
     timerEventArg.timerHdl = (tTimerHdl)pData;
-    EPL_MEMCPY(&timerEventArg.argument, &pData->timerArgument.argument,
+    OPLK_MEMCPY(&timerEventArg.argument, &pData->timerArgument.argument,
                sizeof(timerEventArg.argument));
 
     event.eventSink = pData->timerArgument.eventSink;
     event.eventType = kEventTypeTimer;
-    EPL_MEMSET(&event.netTime, 0x00, sizeof(tNetTime));
+    OPLK_MEMSET(&event.netTime, 0x00, sizeof(tNetTime));
     event.pEventArg = &timerEventArg;
     event.eventArgSize = sizeof(timerEventArg);
 

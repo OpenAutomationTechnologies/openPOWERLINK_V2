@@ -249,7 +249,7 @@ tOplkError sdocom_addInstance(void)
 {
     tOplkError ret = kErrorOk;
 
-    EPL_MEMSET(&sdoComInstance_l, 0x00, sizeof(sdoComInstance_l));
+    OPLK_MEMSET(&sdoComInstance_l, 0x00, sizeof(sdoComInstance_l));
 
     ret = sdoseq_addInstance(receiveCb, conStateChangeCb);
     if(ret != kErrorOk)
@@ -482,7 +482,7 @@ tOplkError sdocom_undefineConnection(tSdoComConHdl sdoComConHdl_p)
         }
     }
 
-    EPL_MEMSET(pSdoComCon, 0x00, sizeof(tSdoComCon));
+    OPLK_MEMSET(pSdoComCon, 0x00, sizeof(tSdoComCon));
     return ret;
 }
 
@@ -886,7 +886,7 @@ static tOplkError processStateIdle(tSdoComConHdl sdoComConHdl_p, tSdoComConEvent
         case kSdoComConEventTimeout:
         case kSdoComConEventConClosed:
             ret = sdoseq_deleteCon(pSdoComCon->sdoSeqConHdl);
-            EPL_MEMSET(pSdoComCon, 0x00, sizeof(tSdoComCon));
+            OPLK_MEMSET(pSdoComCon, 0x00, sizeof(tSdoComCon));
             break;
 
         default:
@@ -970,7 +970,7 @@ static tOplkError processStateServerSegmTrans(tSdoComConHdl sdoComConHdl_p, tSdo
                     }
                     if (pSdoComCon->lastAbortCode == 0)
                     {
-                        EPL_MEMCPY(pSdoComCon->pData, &pRecvdCmdLayer_p->aCommandData[0], size);
+                        OPLK_MEMCPY(pSdoComCon->pData, &pRecvdCmdLayer_p->aCommandData[0], size);
                         (pSdoComCon->pData) += size;
                     }
                     pSdoComCon->transferredBytes += size;
@@ -1018,7 +1018,7 @@ static tOplkError processStateServerSegmTrans(tSdoComConHdl sdoComConHdl_p, tSdo
         case kSdoComConEventTimeout:
         case kSdoComConEventConClosed:
             ret = sdoseq_deleteCon(pSdoComCon->sdoSeqConHdl);
-            EPL_MEMSET(pSdoComCon, 0x00, sizeof(tSdoComCon));
+            OPLK_MEMSET(pSdoComCon, 0x00, sizeof(tSdoComCon));
             break;
 
         default:
@@ -1574,7 +1574,7 @@ static tOplkError serverSendFrame(tSdoComCon* pSdoComCon_p, UINT index_p,
     UINT8           flag;
 
     pFrame = (tPlkFrame*)&aFrame[0];
-    EPL_MEMSET(&aFrame[0], 0x00, sizeof(aFrame));
+    OPLK_MEMSET(&aFrame[0], 0x00, sizeof(aFrame));
 
     // build generic part of frame - get pointer to command layer part of frame
     pCommandFrame = &pFrame->data.asnd.payload.sdoSequenceFrame.sdoSeqPayload;
@@ -1628,7 +1628,7 @@ static tOplkError serverSendFrame(tSdoComCon* pSdoComCon_p, UINT index_p,
                     ami_setUint8Le(&pCommandFrame->flags,  flag);
                     // init data size in variable header, which includes itself
                     ami_setUint32Le(&pCommandFrame->aCommandData[0], pSdoComCon_p->transferSize + SDO_CMDL_HDR_VAR_SIZE);
-                    EPL_MEMCPY(&pCommandFrame->aCommandData[SDO_CMDL_HDR_VAR_SIZE],pSdoComCon_p->pData, (SDO_MAX_SEGMENT_SIZE - SDO_CMDL_HDR_VAR_SIZE));
+                    OPLK_MEMCPY(&pCommandFrame->aCommandData[SDO_CMDL_HDR_VAR_SIZE],pSdoComCon_p->pData, (SDO_MAX_SEGMENT_SIZE - SDO_CMDL_HDR_VAR_SIZE));
 
                     pSdoComCon_p->transferSize -= (SDO_MAX_SEGMENT_SIZE - SDO_CMDL_HDR_VAR_SIZE);
                     pSdoComCon_p->transferredBytes += (SDO_MAX_SEGMENT_SIZE - SDO_CMDL_HDR_VAR_SIZE);
@@ -1645,7 +1645,7 @@ static tOplkError serverSendFrame(tSdoComCon* pSdoComCon_p, UINT index_p,
                     flag |= SDO_CMDL_FLAG_SEGMENTED;
                     ami_setUint8Le(&pCommandFrame->flags,  flag);
 
-                    EPL_MEMCPY(&pCommandFrame->aCommandData[0],pSdoComCon_p->pData, SDO_MAX_SEGMENT_SIZE);
+                    OPLK_MEMCPY(&pCommandFrame->aCommandData[0],pSdoComCon_p->pData, SDO_MAX_SEGMENT_SIZE);
                     pSdoComCon_p->transferSize -= SDO_MAX_SEGMENT_SIZE;
                     pSdoComCon_p->transferredBytes += SDO_MAX_SEGMENT_SIZE;
                     pSdoComCon_p->pData +=SDO_MAX_SEGMENT_SIZE;
@@ -1663,7 +1663,7 @@ static tOplkError serverSendFrame(tSdoComCon* pSdoComCon_p, UINT index_p,
                     flag = ami_getUint8Le( &pCommandFrame->flags);
                     flag |= SDO_CMDL_FLAG_SEGMCOMPL;
                     ami_setUint8Le(&pCommandFrame->flags,  flag);
-                    EPL_MEMCPY(&pCommandFrame->aCommandData[0],pSdoComCon_p->pData, pSdoComCon_p->transferSize);
+                    OPLK_MEMCPY(&pCommandFrame->aCommandData[0],pSdoComCon_p->pData, pSdoComCon_p->transferSize);
                     pSdoComCon_p->transferredBytes += pSdoComCon_p->transferSize;
                     pSdoComCon_p->pData +=pSdoComCon_p->transferSize;
                     ami_setUint16Le(&pCommandFrame->segmentSizeLe, (WORD) pSdoComCon_p->transferSize);
@@ -1863,7 +1863,7 @@ static tOplkError serverInitWriteByIndex(tSdoComCon* pSdoComCon_p, tAsySdoCom* p
             goto Abort;
         }
 
-        EPL_MEMCPY(pSdoComCon_p->pData, pSrcData, bytesToTransfer);
+        OPLK_MEMCPY(pSdoComCon_p->pData, pSrcData, bytesToTransfer);
         pSdoComCon_p->transferredBytes = bytesToTransfer;
         pSdoComCon_p->transferSize -= bytesToTransfer;
         (/*(UINT8*)*/pSdoComCon_p->pData) += bytesToTransfer;
@@ -1914,7 +1914,7 @@ static tOplkError clientSend(tSdoComCon* pSdoComCon_p)
 
     pFrame = (tPlkFrame*)&aFrame[0];
 
-    EPL_MEMSET(&aFrame[0], 0x00, sizeof(aFrame));
+    OPLK_MEMSET(&aFrame[0], 0x00, sizeof(aFrame));
 
     // build generic part of frame
     pCommandFrame = &pFrame->data.asnd.payload.sdoSequenceFrame.sdoSeqPayload;
@@ -1958,7 +1958,7 @@ static tOplkError clientSend(tSdoComCon* pSdoComCon_p)
                         pPayload += 2;      // on byte for reserved
                         sizeOfFrame += SDO_MAX_SEGMENT_SIZE;
                         payloadSize = SDO_MAX_SEGMENT_SIZE - (SDO_CMDL_HDR_VAR_SIZE + SDO_CMDL_HDR_WRITEBYINDEX_SIZE);
-                        EPL_MEMCPY(pPayload, pSdoComCon_p->pData, payloadSize);
+                        OPLK_MEMCPY(pPayload, pSdoComCon_p->pData, payloadSize);
                         pSdoComCon_p->pData += payloadSize;
                         pSdoComCon_p->transferSize -= payloadSize;
                         pSdoComCon_p->transferredBytes = payloadSize;
@@ -1971,7 +1971,7 @@ static tOplkError clientSend(tSdoComCon* pSdoComCon_p)
                         pPayload += 2;
                         ami_setUint8Le(pPayload, (UINT8)pSdoComCon_p->targetSubIndex);
                         pPayload += 2;      // + 2 -> one byte for sub index and one byte reserved
-                        EPL_MEMCPY(pPayload, pSdoComCon_p->pData,  pSdoComCon_p->transferSize);
+                        OPLK_MEMCPY(pPayload, pSdoComCon_p->pData,  pSdoComCon_p->transferSize);
                         sizeOfFrame += (pSdoComCon_p->transferSize + SDO_CMDL_HDR_WRITEBYINDEX_SIZE);
                         ami_setUint16Le(&pCommandFrame->segmentSizeLe, (WORD)(pSdoComCon_p->transferSize + SDO_CMDL_HDR_WRITEBYINDEX_SIZE));
                         pSdoComCon_p->transferredBytes = pSdoComCon_p->transferSize;
@@ -2000,7 +2000,7 @@ static tOplkError clientSend(tSdoComCon* pSdoComCon_p)
                             ami_setUint16Le( &pCommandFrame->segmentSizeLe, SDO_MAX_SEGMENT_SIZE);
                             flags = SDO_CMDL_FLAG_SEGMENTED;
                             ami_setUint8Le( &pCommandFrame->flags, flags);
-                            EPL_MEMCPY( pPayload,pSdoComCon_p->pData,  SDO_MAX_SEGMENT_SIZE);
+                            OPLK_MEMCPY( pPayload,pSdoComCon_p->pData,  SDO_MAX_SEGMENT_SIZE);
                             pSdoComCon_p->pData += SDO_MAX_SEGMENT_SIZE;
                             pSdoComCon_p->transferSize -= SDO_MAX_SEGMENT_SIZE;
                             pSdoComCon_p->transferredBytes += SDO_MAX_SEGMENT_SIZE;
@@ -2012,7 +2012,7 @@ static tOplkError clientSend(tSdoComCon* pSdoComCon_p)
                             ami_setUint16Le( &pCommandFrame->segmentSizeLe, (WORD) pSdoComCon_p->transferSize);
                             flags = SDO_CMDL_FLAG_SEGMCOMPL;
                             ami_setUint8Le( &pCommandFrame->flags, flags);
-                            EPL_MEMCPY( pPayload,pSdoComCon_p->pData,  pSdoComCon_p->transferSize);
+                            OPLK_MEMCPY( pPayload,pSdoComCon_p->pData,  pSdoComCon_p->transferSize);
                             pSdoComCon_p->pData += pSdoComCon_p->transferSize;
                             sizeOfFrame += pSdoComCon_p->transferSize;
                             pSdoComCon_p->transferSize = 0;
@@ -2128,7 +2128,7 @@ static tOplkError clientProcessFrame(tSdoComConHdl sdoComConHdl_p, tAsySdoCom* p
                                 dataSize = segmentSize;
                             }
 
-                            EPL_MEMCPY(pSdoComCon->pData, &pSdoCom_p->aCommandData[0], dataSize);
+                            OPLK_MEMCPY(pSdoComCon->pData, &pSdoCom_p->aCommandData[0], dataSize);
                             pSdoComCon->transferSize = 0;
                             pSdoComCon->transferredBytes = dataSize;
                             break;
@@ -2154,7 +2154,7 @@ static tOplkError clientProcessFrame(tSdoComConHdl sdoComConHdl_p, tAsySdoCom* p
                             // check size of buffer
                             segmentSize = ami_getUint16Le(&pSdoCom_p->segmentSizeLe);
                             segmentSize -= SDO_CMDL_HDR_VAR_SIZE;
-                            EPL_MEMCPY(pSdoComCon->pData, &pSdoCom_p->aCommandData[SDO_CMDL_HDR_VAR_SIZE], segmentSize);
+                            OPLK_MEMCPY(pSdoComCon->pData, &pSdoCom_p->aCommandData[SDO_CMDL_HDR_VAR_SIZE], segmentSize);
 
                             // correct counter an pointer
                             pSdoComCon->pData += segmentSize;
@@ -2175,7 +2175,7 @@ static tOplkError clientProcessFrame(tSdoComConHdl sdoComConHdl_p, tAsySdoCom* p
                                 ret = transferFinished(sdoComConHdl_p, pSdoComCon, kEplSdoComTransferTxAborted);
                                 return ret;
                             }
-                            EPL_MEMCPY(pSdoComCon->pData, &pSdoCom_p->aCommandData[0], segmentSize);
+                            OPLK_MEMCPY(pSdoComCon->pData, &pSdoCom_p->aCommandData[0], segmentSize);
                             pSdoComCon->pData += segmentSize;
                             pSdoComCon->transferredBytes += segmentSize;
                             pSdoComCon->transferSize -= segmentSize;
@@ -2193,7 +2193,7 @@ static tOplkError clientProcessFrame(tSdoComConHdl sdoComConHdl_p, tAsySdoCom* p
                                 ret = transferFinished(sdoComConHdl_p, pSdoComCon, kEplSdoComTransferTxAborted);
                                 return ret;
                             }
-                            EPL_MEMCPY(pSdoComCon->pData, &pSdoCom_p->aCommandData[0], segmentSize);
+                            OPLK_MEMCPY(pSdoComCon->pData, &pSdoCom_p->aCommandData[0], segmentSize);
                             pSdoComCon->pData += segmentSize;
                             pSdoComCon->transferredBytes += segmentSize;
                             pSdoComCon->transferSize  = 0;
@@ -2235,7 +2235,7 @@ static tOplkError clientSendAbort(tSdoComCon* pSdoComCon_p, UINT32 abortCode_p)
 
     pFrame = (tPlkFrame*)&aFrame[0];
 
-    EPL_MEMSET(&aFrame[0], 0x00, sizeof(aFrame));
+    OPLK_MEMSET(&aFrame[0], 0x00, sizeof(aFrame));
 
     // build generic part of frame
     pCommandFrame = &pFrame->data.asnd.payload.sdoSequenceFrame.sdoSeqPayload;

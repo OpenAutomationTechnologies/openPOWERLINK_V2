@@ -145,7 +145,7 @@ The function initializes the user LED module.
 //------------------------------------------------------------------------------
 tOplkError ledu_init(tLeduStateChangeCallback pfnCbStateChange_p)
 {
-    EPL_MEMSET(&leduInstance_g, 0, sizeof(tLeduInstance));
+    OPLK_MEMSET(&leduInstance_g, 0, sizeof(tLeduInstance));
     leduInstance_g.pfnCbStateChange = pfnCbStateChange_p;
 
     return kErrorOk;
@@ -167,7 +167,7 @@ tOplkError ledu_exit(void)
     tOplkError ret = kErrorOk;
 
     ret = timeru_deleteTimer(&leduInstance_g.timerHdlLedBlink);
-    EPL_MEMSET(&leduInstance_g, 0, sizeof(tLeduInstance));
+    OPLK_MEMSET(&leduInstance_g, 0, sizeof(tLeduInstance));
 
     return ret;
 }

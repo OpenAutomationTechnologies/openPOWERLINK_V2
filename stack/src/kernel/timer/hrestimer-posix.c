@@ -165,7 +165,7 @@ tOplkError hrestimer_addInstance(void)
     tHresTimerInfo*         pTimerInfo;
     struct sigevent         sev;
 
-    EPL_MEMSET(&hresTimerInstance_l, 0, sizeof (hresTimerInstance_l));
+    OPLK_MEMSET(&hresTimerInstance_l, 0, sizeof (hresTimerInstance_l));
 
     /* Initialize timer threads for all usable timers. */
     for (index = 0; index < TIMER_COUNT; index++)

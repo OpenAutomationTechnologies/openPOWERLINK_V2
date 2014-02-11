@@ -142,7 +142,7 @@ implementations and calls the appropriate init functions.
 //------------------------------------------------------------------------------
 tOplkError eventkcal_init (void)
 {
-    EPL_MEMSET(&instance_l, 0, sizeof(tEventkCalInstance));
+    OPLK_MEMSET(&instance_l, 0, sizeof(tEventkCalInstance));
 
     init_waitqueue_head(&instance_l.kernelWaitQueue);
     init_waitqueue_head(&instance_l.userWaitQueue);

@@ -198,7 +198,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     DEBUG_LVL_EDRV_TRACE(" PKTLOCRX = %d\n", OPENMAC_PKTLOCRX);
     DEBUG_LVL_EDRV_TRACE(" PKTBUFSIZE = %d byte\n", OPENMAC_PKTBUFSIZE);
 
-    EPL_MEMSET(&edrvInstance_l, 0, sizeof(edrvInstance_l));
+    OPLK_MEMSET(&edrvInstance_l, 0, sizeof(edrvInstance_l));
 
     edrvInstance_l.initParam = *pEdrvInitParam_p;
 
@@ -913,7 +913,7 @@ static ometh_config_typ getMacConfig(UINT adapter_p)
 {
     ometh_config_typ config;
 
-    EPL_MEMSET(&config, 0, sizeof(config));
+    OPLK_MEMSET(&config, 0, sizeof(config));
 
     config.adapter = adapter_p;
     config.macType = OMETH_MAC_TYPE_01;
@@ -960,9 +960,9 @@ static tOplkError initRxFilters(void)
     OMETH_HOOK_H    pHook;
 
     // initialize the filters, so that they won't match any normal Ethernet frame
-    EPL_MEMSET(aMask, 0, sizeof(aMask));
-    EPL_MEMSET(aMask, 0xFF, 6);
-    EPL_MEMSET(aValue, 0, sizeof(aValue));
+    OPLK_MEMSET(aMask, 0, sizeof(aMask));
+    OPLK_MEMSET(aMask, 0xFF, 6);
+    OPLK_MEMSET(aValue, 0, sizeof(aValue));
 
     for (i = 0; i < EDRV_MAX_FILTERS; i++)
     {
@@ -1056,7 +1056,7 @@ static ometh_packet_typ* allocTxMsgBufferIntern(tEdrvTxBuffer* pBuffer_p)
     }
 
     // Set allocated buffer to zeros
-    EPL_MEMSET((void*)pPacket, 0, bufferSize);
+    OPLK_MEMSET((void*)pPacket, 0, bufferSize);
 
     // Calculate next buffer address for next allocation
     edrvInstance_l.pNextBufferBase = (void*)((UINT32)pPacket + bufferSize);

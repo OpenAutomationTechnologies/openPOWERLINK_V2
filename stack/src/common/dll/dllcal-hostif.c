@@ -165,7 +165,7 @@ static tOplkError addInstance(tDllCalQueueInstance *ppDllCalQueue_p,
     tQueueConfig                lfqConfig;
     tQueueReturn                lfqRet;
 
-    pDllCalInstance = (tDllCalHifInstance *) EPL_MALLOC(sizeof(tDllCalHifInstance));
+    pDllCalInstance = (tDllCalHifInstance *) OPLK_MALLOC(sizeof(tDllCalHifInstance));
 
     if(pDllCalInstance == NULL)
     {
@@ -271,7 +271,7 @@ static tOplkError delInstance(tDllCalQueueInstance pDllCalQueue_p)
     }
 
     //free dllcal hif instance
-    EPL_FREE(pDllCalInstance);
+    OPLK_FREE(pDllCalInstance);
 
     return kErrorOk;
 }

@@ -196,7 +196,7 @@ static tOplkError initPowerlink(UINT32 cycleLen_p, char *pszCdcFileName_p,
     selectPcapDevice(devName);
 #endif
 
-    EPL_MEMSET(&initParam, 0, sizeof (initParam));
+    OPLK_MEMSET(&initParam, 0, sizeof (initParam));
     initParam.sizeOfInitParam = sizeof (initParam);
 
     // pass selected device name to Edrv
@@ -205,7 +205,7 @@ static tOplkError initPowerlink(UINT32 cycleLen_p, char *pszCdcFileName_p,
     initParam.ipAddress = (0xFFFFFF00 & IP_ADDR) | initParam.nodeId;
 
     /* write 00:00:00:00:00:00 to MAC address, so that the driver uses the real hardware address */
-    EPL_MEMCPY(initParam.aMacAddress, macAddr_p, sizeof (initParam.aMacAddress));
+    OPLK_MEMCPY(initParam.aMacAddress, macAddr_p, sizeof (initParam.aMacAddress));
 
     initParam.fAsyncOnly = FALSE;
 
@@ -231,7 +231,7 @@ static tOplkError initPowerlink(UINT32 cycleLen_p, char *pszCdcFileName_p,
 
     initParam.subnetMask              = SUBNET_MASK;
     initParam.defaultGateway          = 0;
-    EPL_MEMCPY(initParam.sHostname, sHostname, sizeof(initParam.sHostname));
+    OPLK_MEMCPY(initParam.sHostname, sHostname, sizeof(initParam.sHostname));
     initParam.syncNodeId              = EPL_C_ADR_SYNC_ON_SOA;
     initParam.fSyncOnPrcNode            = FALSE;
 

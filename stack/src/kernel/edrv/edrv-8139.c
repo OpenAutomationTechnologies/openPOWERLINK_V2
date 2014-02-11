@@ -344,7 +344,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     INT         i;
 
     // clear instance structure
-    EPL_MEMSET(&edrvInstance_l, 0, sizeof (edrvInstance_l));
+    OPLK_MEMSET(&edrvInstance_l, 0, sizeof (edrvInstance_l));
 
     // save the init data
     edrvInstance_l.initParam = *pEdrvInitParam_p;
@@ -353,7 +353,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     // 2008-11-24 d.k. because pci_unregister_driver() doesn't do it correctly;
     //      one example: kobject_set_name() frees edrvDriver_l.driver.kobj.name,
     //      but does not set this pointer to NULL.
-    EPL_MEMSET(&edrvDriver_l, 0, sizeof (edrvDriver_l));
+    OPLK_MEMSET(&edrvDriver_l, 0, sizeof (edrvDriver_l));
     edrvDriver_l.name         = DRV_NAME,
     edrvDriver_l.id_table     = aEdrvPciTbl_l,
     edrvDriver_l.probe        = initOnePciDev,
@@ -647,7 +647,7 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
     // pad with zeros if necessary, because controller does not do it
     if (pBuffer_p->txFrameSize < EDRV_MIN_ETH_SIZE)
     {
-        EPL_MEMSET(pBuffer_p->pBuffer + pBuffer_p->txFrameSize, 0, EDRV_MIN_ETH_SIZE - pBuffer_p->txFrameSize);
+        OPLK_MEMSET(pBuffer_p->pBuffer + pBuffer_p->txFrameSize, 0, EDRV_MIN_ETH_SIZE - pBuffer_p->txFrameSize);
         pBuffer_p->txFrameSize = EDRV_MIN_ETH_SIZE;
     }
 

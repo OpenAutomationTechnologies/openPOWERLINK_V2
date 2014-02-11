@@ -119,13 +119,13 @@ tCircBufInstance* circbuf_createInstance(UINT8 id_p)
     tCircBufArchInstance*       pArch;
     char                        semName[16];
 
-    if ((pInstance = EPL_MALLOC(sizeof(tCircBufInstance) +
+    if ((pInstance = OPLK_MALLOC(sizeof(tCircBufInstance) +
                                 sizeof(tCircBufArchInstance))) == NULL)
     {
         TRACE("%s() malloc failed!\n", __func__);
         return NULL;
     }
-    EPL_MEMSET(pInstance, 0, sizeof(tCircBufInstance) + sizeof(tCircBufArchInstance));
+    OPLK_MEMSET(pInstance, 0, sizeof(tCircBufInstance) + sizeof(tCircBufArchInstance));
     pInstance->pCircBufArchInstance = (BYTE*)pInstance + sizeof(tCircBufInstance);
     pInstance->bufferId = id_p;
 
@@ -135,7 +135,7 @@ tCircBufInstance* circbuf_createInstance(UINT8 id_p)
     if ((pArch->lockSem =  sem_open(semName, O_CREAT, S_IRWXG, 1)) == SEM_FAILED)
     {
         TRACE("%s() open sem failed!\n", __func__);
-        EPL_FREE(pInstance);
+        OPLK_FREE(pInstance);
         return NULL;
     }
 
@@ -158,7 +158,7 @@ void circbuf_freeInstance(tCircBufInstance* pInstance_p)
     tCircBufArchInstance* pArch = (tCircBufArchInstance*)pInstance_p->pCircBufArchInstance;
 
     sem_close(pArch->lockSem);
-    EPL_FREE(pInstance_p);
+    OPLK_FREE(pInstance_p);
 }
 
 //------------------------------------------------------------------------------

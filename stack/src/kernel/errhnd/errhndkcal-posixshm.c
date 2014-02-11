@@ -152,7 +152,7 @@ tOplkError errhndkcal_init (void)
 
     if (fCreator_l)
     {
-        EPL_MEMSET(pErrHndMem_l, 0, sizeof(tErrHndObjects));
+        OPLK_MEMSET(pErrHndMem_l, 0, sizeof(tErrHndObjects));
     }
     return kErrorOk;
 }

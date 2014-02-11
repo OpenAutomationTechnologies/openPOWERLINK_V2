@@ -171,7 +171,7 @@ tOplkError PUBLIC hrestimer_addInstance(void)
 
     Ret = kErrorOk;
 
-    EPL_MEMSET(&EplTimerHighReskInstance_l, 0, sizeof (EplTimerHighReskInstance_l));
+    OPLK_MEMSET(&EplTimerHighReskInstance_l, 0, sizeof (EplTimerHighReskInstance_l));
 
     /* Initialize timer threads for all usable timers. */
     for (uiIndex = 0; uiIndex < TIMER_COUNT; uiIndex++)

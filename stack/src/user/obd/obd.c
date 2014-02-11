@@ -199,7 +199,7 @@ tOplkError obd_init(tObdInitParam MEM* pInitParam_p)
     if (pInitParam_p == NULL)
         return kErrorOk;
 
-    EPL_MEMCPY (&obdInstance_l.initParam, pInitParam_p, sizeof (tObdInitParam));
+    OPLK_MEMCPY (&obdInstance_l.initParam, pInitParam_p, sizeof (tObdInitParam));
 
     // clear callback function for command LOAD and STORE
     obdInstance_l.pfnStoreLoadObjectCb = NULL;
@@ -319,7 +319,7 @@ tOplkError obd_readEntry(UINT index_p, UINT subIndex_p, void* pDstData_p, tObdSi
         return kErrorObdValueLengthError;
 
     // read value from object
-    EPL_MEMCPY (pDstData_p, pSrcData, obdSize);
+    OPLK_MEMCPY (pDstData_p, pSrcData, obdSize);
     if (pSubEntry->type == kObdTypeVString)
     {
         if (*pSize_p > obdSize)
@@ -814,7 +814,7 @@ tOplkError obd_readEntryToLe (UINT index_p, UINT subIndex_p, void* pDstData_p,
         case kObdTypeOString:
         case kObdTypeDomain:
         default:
-            EPL_MEMCPY (pDstData_p, pSrcData, obdSize);
+            OPLK_MEMCPY (pDstData_p, pSrcData, obdSize);
             if (pSubEntry->type == kObdTypeVString)
             {
                 if (*pSize_p > obdSize)
@@ -1270,7 +1270,7 @@ static tOplkError writeEntryPost(tObdEntryPtr pObdEntry_p, tObdSubEntryPtr pSubE
         return ret;
 
     // copy object data to OBD
-    EPL_MEMCPY (pDstData_p, pSrcData_p, obdSize_p);
+    OPLK_MEMCPY (pDstData_p, pSrcData_p, obdSize_p);
 
     if (pSubEntry_p->type == kObdTypeVString)
     {
@@ -2102,7 +2102,7 @@ static void copyObjectData (void MEM* pDstData_p, CONST void* pSrcData_p,
 
         if (pSrcData_p != NULL)
         {
-            EPL_MEMCPY (pDstData_p, pSrcData_p, objSize_p);
+            OPLK_MEMCPY (pDstData_p, pSrcData_p, objSize_p);
             if (objType_p == kObdTypeVString)
             {
                 ((char MEM*) pDstData_p)[StrSize] = '\0';

@@ -234,7 +234,7 @@ can be accessed by the kernel stack.
 //------------------------------------------------------------------------------
 void ctrlucal_storeInitParam(tCtrlInitParam* pInitParam_p)
 {
-    EPL_MEMCPY(&kernelInitParam_g, pInitParam_p, sizeof(tCtrlInitParam));
+    OPLK_MEMCPY(&kernelInitParam_g, pInitParam_p, sizeof(tCtrlInitParam));
 }
 
 //------------------------------------------------------------------------------
@@ -253,7 +253,7 @@ The function reads the initialization parameter from the kernel stack.
 //------------------------------------------------------------------------------
 tOplkError ctrlucal_readInitParam(tCtrlInitParam* pInitParam_p)
 {
-    EPL_MEMCPY(pInitParam_p, &kernelInitParam_g, sizeof(tCtrlInitParam));
+    OPLK_MEMCPY(pInitParam_p, &kernelInitParam_g, sizeof(tCtrlInitParam));
     return kErrorOk;
 }
 

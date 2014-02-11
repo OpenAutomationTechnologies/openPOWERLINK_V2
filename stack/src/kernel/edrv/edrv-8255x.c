@@ -456,13 +456,13 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     INT         i;
 
     // clear instance structure
-    EPL_MEMSET(&edrvInstance_l, 0, sizeof (edrvInstance_l));
+    OPLK_MEMSET(&edrvInstance_l, 0, sizeof (edrvInstance_l));
 
     // save the init data
     edrvInstance_l.initParam = *pEdrvInitParam_p;
 
     // clear driver structure
-    EPL_MEMSET(&edrvDriver_l, 0, sizeof (edrvDriver_l));
+    OPLK_MEMSET(&edrvDriver_l, 0, sizeof (edrvDriver_l));
     edrvDriver_l.name = DRV_NAME,
     edrvDriver_l.id_table = aEdrvPciTbl_l,
     edrvDriver_l.probe = initOnePciDev,
@@ -486,7 +486,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     }
 
     // local MAC address might have been changed in initOnePciDev
-    EPL_MEMCPY(pEdrvInitParam_p->aMacAddr, edrvInstance_l.initParam.aMacAddr, 6);
+    OPLK_MEMCPY(pEdrvInitParam_p->aMacAddr, edrvInstance_l.initParam.aMacAddr, 6);
 
     printk("%s local MAC = ", __FUNCTION__);
     for (i = 0; i < 6; i++)
@@ -1097,7 +1097,7 @@ static tOplkError multicastCmd(UINT opcode_p, UINT count_p, UINT8* pMacAddr_p, U
         //fill the multicast entry in the corresponding section of
         //the descriptor according to the u32Index value
         pByte += multicastAddrCnt;
-        EPL_MEMCPY(pByte, pMacAddr_p, MAC_ADDRESS_LEN);
+        OPLK_MEMCPY(pByte, pMacAddr_p, MAC_ADDRESS_LEN);
     }
     else if(MULTICAST_ADDR_REM == mode_p)
     {
@@ -1107,14 +1107,14 @@ static tOplkError multicastCmd(UINT opcode_p, UINT count_p, UINT8* pMacAddr_p, U
         // search for the mac address to be removed from multicast address
         for(multicastAddrLoop = 0; multicastAddrLoop < multicastAddrCnt ; multicastAddrLoop += MAC_ADDRESS_LEN)
         {
-            if(0 == EPL_MEMCMP(pByte, pMacAddr_p, MAC_ADDRESS_LEN))
+            if(0 == OPLK_MEMCMP(pByte, pMacAddr_p, MAC_ADDRESS_LEN))
             {
                 // entry found reduce the count and remove that entry from the descriptor
                 edrvInstance_l.multicastAddrByteCnt -= MAC_ADDRESS_LEN;
                 *pByteCount = edrvInstance_l.multicastAddrByteCnt;
 
                 if( 0 != ( multicastAddrCnt - (multicastAddrLoop + MAC_ADDRESS_LEN) ))
-                    EPL_MEMCPY(pByte, pByte+MAC_ADDRESS_LEN, ( multicastAddrCnt - (multicastAddrLoop + MAC_ADDRESS_LEN) ) );
+                    OPLK_MEMCPY(pByte, pByte+MAC_ADDRESS_LEN, ( multicastAddrCnt - (multicastAddrLoop + MAC_ADDRESS_LEN) ) );
 
                     memCmpref = 1;
 

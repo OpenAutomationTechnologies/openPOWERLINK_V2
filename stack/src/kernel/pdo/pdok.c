@@ -120,7 +120,7 @@ tOplkError pdok_init(void)
 {
     tOplkError      ret = kErrorOk;
 
-    EPL_MEMSET(&pdokInstance_g, 0, sizeof(pdokInstance_g));
+    OPLK_MEMSET(&pdokInstance_g, 0, sizeof(pdokInstance_g));
 
     if ((ret = pdokcal_init()) != kErrorOk)
     {
@@ -189,7 +189,7 @@ tOplkError pdok_deAllocChannelMem(void)
         pdokInstance_g.pdoChannels.allocation.rxPdoChannelCount = 0;
         if (pdokInstance_g.pdoChannels.pRxPdoChannel != NULL)
         {
-            EPL_FREE(pdokInstance_g.pdoChannels.pRxPdoChannel);
+            OPLK_FREE(pdokInstance_g.pdoChannels.pRxPdoChannel);
             pdokInstance_g.pdoChannels.pRxPdoChannel = NULL;
         }
     }
@@ -199,7 +199,7 @@ tOplkError pdok_deAllocChannelMem(void)
         pdokInstance_g.pdoChannels.allocation.txPdoChannelCount = 0;
         if (pdokInstance_g.pdoChannels.pTxPdoChannel != NULL)
         {
-            EPL_FREE(pdokInstance_g.pdoChannels.pTxPdoChannel);
+            OPLK_FREE(pdokInstance_g.pdoChannels.pTxPdoChannel);
             pdokInstance_g.pdoChannels.pTxPdoChannel = NULL;
         }
     }
@@ -241,14 +241,14 @@ tOplkError pdok_allocChannelMem(tPdoAllocationParam* pAllocationParam_p)
         pdokInstance_g.pdoChannels.allocation.rxPdoChannelCount =  pAllocationParam_p->rxPdoChannelCount;
         if (pdokInstance_g.pdoChannels.pRxPdoChannel != NULL)
         {
-            EPL_FREE(pdokInstance_g.pdoChannels.pRxPdoChannel);
+            OPLK_FREE(pdokInstance_g.pdoChannels.pRxPdoChannel);
             pdokInstance_g.pdoChannels.pRxPdoChannel = NULL;
         }
 
         if (pAllocationParam_p->rxPdoChannelCount > 0)
         {
             pdokInstance_g.pdoChannels.pRxPdoChannel =
-                            EPL_MALLOC(sizeof (*pdokInstance_g.pdoChannels.pRxPdoChannel) *
+                            OPLK_MALLOC(sizeof (*pdokInstance_g.pdoChannels.pRxPdoChannel) *
                                        pAllocationParam_p->rxPdoChannelCount);
 
             if (pdokInstance_g.pdoChannels.pRxPdoChannel == NULL)
@@ -268,14 +268,14 @@ tOplkError pdok_allocChannelMem(tPdoAllocationParam* pAllocationParam_p)
         pdokInstance_g.pdoChannels.allocation.txPdoChannelCount = pAllocationParam_p->txPdoChannelCount;
         if (pdokInstance_g.pdoChannels.pTxPdoChannel != NULL)
         {
-            EPL_FREE(pdokInstance_g.pdoChannels.pTxPdoChannel);
+            OPLK_FREE(pdokInstance_g.pdoChannels.pTxPdoChannel);
             pdokInstance_g.pdoChannels.pTxPdoChannel = NULL;
         }
 
         if (pAllocationParam_p->txPdoChannelCount > 0)
         {
             pdokInstance_g.pdoChannels.pTxPdoChannel =
-                    EPL_MALLOC(sizeof (*pdokInstance_g.pdoChannels.pTxPdoChannel) *
+                    OPLK_MALLOC(sizeof (*pdokInstance_g.pdoChannels.pTxPdoChannel) *
                                pAllocationParam_p->txPdoChannelCount);
 
             if (pdokInstance_g.pdoChannels.pTxPdoChannel == NULL)
@@ -338,7 +338,7 @@ tOplkError pdok_configureChannel(tPdoChannelConf* pChannelConf_p)
 #endif // EPL_NMT_MAX_NODE_ID > 0
 
         // copy channel configuration to local structure
-        EPL_MEMCPY(pDestPdoChannel, &pChannelConf_p->pdoChannel,
+        OPLK_MEMCPY(pDestPdoChannel, &pChannelConf_p->pdoChannel,
                    sizeof (pChannelConf_p->pdoChannel));
 
 #if EPL_NMT_MAX_NODE_ID > 0
@@ -366,7 +366,7 @@ tOplkError pdok_configureChannel(tPdoChannelConf* pChannelConf_p)
         pDestPdoChannel = &pdokInstance_g.pdoChannels.pTxPdoChannel[pChannelConf_p->channelId];
 
         // copy channel to local structure
-        EPL_MEMCPY(&pdokInstance_g.pdoChannels.pTxPdoChannel[pChannelConf_p->channelId],
+        OPLK_MEMCPY(&pdokInstance_g.pdoChannels.pTxPdoChannel[pChannelConf_p->channelId],
                    &pChannelConf_p->pdoChannel, sizeof (pChannelConf_p->pdoChannel));
     }
 

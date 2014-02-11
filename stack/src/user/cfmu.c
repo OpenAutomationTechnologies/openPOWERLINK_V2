@@ -187,7 +187,7 @@ tOplkError cfmu_init(tCfmCbEventCnProgress pfnCbEventCnProgress_p,
     UINT            subindex;
     tVarParam       varParam;
 
-    EPL_MEMSET(&cfmInstance_g, 0, sizeof(tCfmInstance));
+    OPLK_MEMSET(&cfmInstance_g, 0, sizeof(tCfmInstance));
 
     cfmInstance_g.pfnCbEventCnProgress = pfnCbEventCnProgress_p;
     cfmInstance_g.pfnCbEventCnResult = pfnCbEventCnResult_p;
@@ -251,10 +251,10 @@ tOplkError cfmu_exit(void)
                 obd_defineVar(&varParam);
                 // ignore return code, because buffer has to be freed anyway
 
-                EPL_FREE(pBuffer);
+                OPLK_FREE(pBuffer);
                 pNodeInfo->pObdBufferConciseDcf = NULL;
             }
-            EPL_FREE(pNodeInfo);
+            OPLK_FREE(pNodeInfo);
             CFM_GET_NODEINFO(nodeId) = NULL;
         }
     }
@@ -522,10 +522,10 @@ tOplkError cfmu_cbObdAccess(tObdCbParam MEM* pParam_p)
         pBuffer = pNodeInfo->pObdBufferConciseDcf;
         if (pBuffer != NULL)
         {
-            EPL_FREE(pBuffer);
+            OPLK_FREE(pBuffer);
             pNodeInfo->pObdBufferConciseDcf = NULL;
         }
-        pBuffer = EPL_MALLOC(pMemVStringDomain->downloadSize);
+        pBuffer = OPLK_MALLOC(pMemVStringDomain->downloadSize);
         if (pBuffer == NULL)
         {
             pParam_p->abortCode = SDO_AC_OUT_OF_MEMORY;
@@ -567,8 +567,8 @@ static tCfmNodeInfo* allocNodeInfo(UINT nodeId_p)
     if (pNodeInfo != NULL)
         return pNodeInfo;
 
-    pNodeInfo = EPL_MALLOC(sizeof(tCfmNodeInfo));
-    EPL_MEMSET(pNodeInfo, 0, sizeof(tCfmNodeInfo));
+    pNodeInfo = OPLK_MALLOC(sizeof(tCfmNodeInfo));
+    OPLK_MEMSET(pNodeInfo, 0, sizeof(tCfmNodeInfo));
     pNodeInfo->eventCnProgress.nodeId = nodeId_p;
     pNodeInfo->sdoComConHdl = UINT_MAX;
 

@@ -129,7 +129,7 @@ tOplkError obd_initObd(tObdInitParam MEM* pInitParam_p)
     if (pInitParam != NULL)
     {
         // at first delete all parameters (all pointers will be set zu NULL)
-        EPL_MEMSET (pInitParam, 0, sizeof (tObdInitParam));
+        OPLK_MEMSET (pInitParam, 0, sizeof (tObdInitParam));
 
         #define OBD_CREATE_INIT_FUNCTION
         {

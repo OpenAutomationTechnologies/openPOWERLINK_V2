@@ -126,7 +126,7 @@ tOplkError syncu_addInstance(void)
 {
     tOplkError ret = kErrorOk;
 
-    EPL_MEMSET(&syncuInstance_g, 0, sizeof (syncuInstance_g));
+    OPLK_MEMSET(&syncuInstance_g, 0, sizeof (syncuInstance_g));
     ret = dllucal_regAsndService(kDllAsndSyncResponse, syncu_cbSyncResponse,
                                  kDllAsndFilterAny);
 
@@ -165,7 +165,7 @@ The function resets a sync module instance
 //------------------------------------------------------------------------------
 tOplkError syncu_reset(void)
 {
-    EPL_MEMSET(&syncuInstance_g, 0, sizeof (syncuInstance_g));
+    OPLK_MEMSET(&syncuInstance_g, 0, sizeof (syncuInstance_g));
     return kErrorOk;
 }
 
