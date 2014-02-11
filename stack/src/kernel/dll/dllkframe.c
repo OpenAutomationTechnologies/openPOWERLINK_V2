@@ -1562,7 +1562,7 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
             goto Exit;
 
         // check NMT state of CN
-        heartbeatEvent.errorCode = EPL_E_NO_ERROR;
+        heartbeatEvent.errorCode = E_NO_ERROR;
         heartbeatEvent.nmtState = (tNmtState) (ami_getUint8Le(&pFrame->data.pres.nmtStatus) | NMT_TYPE_CS);
 
         if (pIntNodeInfo->nmtState != heartbeatEvent.nmtState)
