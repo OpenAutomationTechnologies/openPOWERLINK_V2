@@ -133,6 +133,17 @@ typedef struct
 } tFrameInfo;
 
 /**
+\brief Struct for not received Asnd events
+
+This struct provides information about the unreceived Asnd frame.
+*/
+typedef struct
+{
+    BYTE    nodeId;         ///< Source node ID of missed Asnd frame
+    BYTE    serviceId;      ///< Service ID of missed Asnd frame
+} tDllAsndNotRx;
+
+/**
 \brief Structure for DLL configuration
 
 The structure contains all information which is needed for initialization of

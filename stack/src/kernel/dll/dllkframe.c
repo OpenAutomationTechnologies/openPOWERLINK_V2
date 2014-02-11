@@ -942,9 +942,8 @@ only for frames with registered AsndServiceIds (only kDllAsndFilterAny).
 tOplkError dllk_asyncFrameNotReceived(tDllReqServiceId reqServiceId_p, UINT nodeId_p)
 {
     tOplkError      Ret = kErrorOk;
-    BYTE            abBuffer[18];
-    tPlkFrame *     pFrame = (tPlkFrame *) abBuffer;
-    tFrameInfo      FrameInfo;
+    tDllAsndNotRx   asndNotRx;
+    tEvent          event;
 
     // check if previous SoA invitation was not answered
     switch (reqServiceId_p)
@@ -957,14 +956,16 @@ tOplkError dllk_asyncFrameNotReceived(tDllReqServiceId reqServiceId_p, UINT node
             // ASnd service registered?
             if (dllkInstance_g.aAsndFilter[reqServiceId_p] == kDllAsndFilterAny)
             {   // ASnd service ID is registered
-                ami_setUint8Le(&pFrame->srcNodeId, (BYTE) nodeId_p);
-                ami_setUint8Le(&pFrame->messageType, (BYTE) kMsgTypeAsnd);
-                ami_setUint8Le(&pFrame->data.asnd.serviceId, (BYTE) reqServiceId_p);
+                asndNotRx.nodeId = (BYTE)nodeId_p;
+                asndNotRx.serviceId = (BYTE)reqServiceId_p;
 
-                FrameInfo.pFrame = pFrame;
-                FrameInfo.frameSize = 18;   // empty non existing ASnd frame
-                // forward frame via async receive FIFO to userspace
-                Ret = dllkcal_asyncFrameReceived(&FrameInfo);
+                event.eventSink = kEventSinkDlluCal;
+                event.eventType = kEventTypeAsndNotRx;
+                event.pEventArg = (void*)&asndNotRx;
+                event.eventArgSize = sizeof(tDllAsndNotRx);
+
+                // Post event with dummy frame
+                Ret = eventk_postEvent(&event);
             }
             break;
 

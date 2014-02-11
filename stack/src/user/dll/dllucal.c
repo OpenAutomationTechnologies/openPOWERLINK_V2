@@ -70,6 +70,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+#define DLLUCAL_NOTRX_FRAME_SIZE    18  ///< Size of not received frame dummy
 
 //------------------------------------------------------------------------------
 // local types
@@ -101,6 +102,7 @@ static tDlluCalInstance     instance_l;
 static tOplkError SetAsndServiceIdFilter(tDllAsndServiceId ServiceId_p,
                                          tDllAsndFilter Filter_p);
 static tOplkError HandleRxAsndFrame(tFrameInfo* pFrameInfo_p);
+static tOplkError HandleNotRxAsndFrame(tDllAsndNotRx* pAsndNotRx_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -199,25 +201,35 @@ The function processes an asynchronous frame event
 //------------------------------------------------------------------------------
 tOplkError dllucal_process(tEvent * pEvent_p)
 {
-    tOplkError   ret = kErrorOk;
-    tFrameInfo   *pFrameInfo = NULL;
-
-    if (pEvent_p->eventType == kEventTypeAsndRx)
-    {
+    tOplkError      ret = kErrorOk;
+    tFrameInfo*     pFrameInfo = NULL;
+    tDllAsndNotRx*  pAsndNotRx = NULL;
 #if DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS == FALSE
-        tFrameInfo   FrameInfo;
-
-        FrameInfo.pFrame = (tPlkFrame*) pEvent_p->pEventArg;
-        FrameInfo.frameSize = pEvent_p->eventArgSize;
-        pFrameInfo = &FrameInfo;
-#else
-        pFrameInfo = (tFrameInfo*) pEvent_p->pEventArg;
+    tFrameInfo      FrameInfo;
 #endif
 
-        ret = HandleRxAsndFrame(pFrameInfo);
+    switch(pEvent_p->eventType)
+    {
+        case kEventTypeAsndRx:
+#if DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS == FALSE
+            FrameInfo.pFrame = (tPlkFrame*) pEvent_p->pEventArg;
+            FrameInfo.frameSize = pEvent_p->eventArgSize;
+            pFrameInfo = &FrameInfo;
+#else
+            pFrameInfo = (tFrameInfo*) pEvent_p->pEventArg;
+#endif
+            ret = HandleRxAsndFrame(pFrameInfo);
+            break;
+
+        case kEventTypeAsndNotRx:
+            pAsndNotRx = (tDllAsndNotRx*)pEvent_p->pEventArg;
+            ret = HandleNotRxAsndFrame(pAsndNotRx);
+            break;
+
+        default:
+            ret = kErrorInvalidEvent;
+            break;
     }
-    else
-        ret = kErrorInvalidEvent;
 
     return ret;
 }
@@ -623,6 +635,42 @@ Exit:
         ret = eventRet;
     }
 #endif
+
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Forward unreceived Asnd frame to desired user space module
+
+\param  pAsndNotRx_p             Pointer to the frame information structure
+
+\return The function returns a tEplKernel error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError HandleNotRxAsndFrame(tDllAsndNotRx* pAsndNotRx_p)
+{
+    tOplkError  ret = kErrorOk;
+    BYTE        aBuffer[DLLUCAL_NOTRX_FRAME_SIZE];
+    tPlkFrame*  pFrame = (tPlkFrame*)aBuffer;
+    tFrameInfo  frameInfo;
+    UINT        asndServiceId;
+
+    ami_setUint8Le(&pFrame->srcNodeId, pAsndNotRx_p->nodeId);
+    ami_setUint8Le(&pFrame->messageType, (BYTE)kMsgTypeAsnd);
+    ami_setUint8Le(&pFrame->data.asnd.serviceId, pAsndNotRx_p->serviceId);
+
+    frameInfo.frameSize = DLLUCAL_NOTRX_FRAME_SIZE;
+    frameInfo.pFrame = pFrame;
+
+    asndServiceId = (UINT) ami_getUint8Le(&pFrame->data.asnd.serviceId);
+    if (asndServiceId < DLL_MAX_ASND_SERVICE_ID)
+    {   // ASnd service ID is valid
+        if (instance_l.apfnDlluCbAsnd[asndServiceId] != NULL)
+        {   // handler was registered
+            ret = instance_l.apfnDlluCbAsnd[asndServiceId](&frameInfo);
+        }
+    }
 
     return ret;
 }
