@@ -1145,7 +1145,7 @@ static BOOL getMnSyncRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p,
         {
             ami_setUint32Le(&pSoaPayload_p->syncRequest.syncControlLe,
                             syncRequest.syncControl);
-            if ((syncRequest.syncControl & EPL_SYNC_PRES_MODE_SET) != 0)
+            if ((syncRequest.syncControl & PLK_SYNC_PRES_MODE_SET) != 0)
             {
                 nodeOpParam.opNodeType = kDllNodeOpTypeIsochronous;
                 nodeOpParam.nodeId = syncRequest.nodeId;
@@ -1155,7 +1155,7 @@ static BOOL getMnSyncRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p,
                     return TRUE;
                 }
             }
-            if ((syncRequest.syncControl & EPL_SYNC_PRES_MODE_RESET) != 0)
+            if ((syncRequest.syncControl & PLK_SYNC_PRES_MODE_RESET) != 0)
             {
                 nodeOpParam.opNodeType = kDllNodeOpTypeIsochronous;
                 nodeOpParam.nodeId = syncRequest.nodeId;
@@ -1177,7 +1177,7 @@ static BOOL getMnSyncRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p,
                             syncRequest.pResFallBackTimeout);
         }
 
-        if ((syncRequest.syncControl & EPL_SYNC_DEST_MAC_ADDRESS_VALID) != 0)
+        if ((syncRequest.syncControl & PLK_SYNC_DEST_MAC_ADDRESS_VALID) != 0)
         {
             ret = dllk_getCnMacAddress(syncRequest.nodeId,
                             &pSoaPayload_p->syncRequest.aDestMacAddress[0]);

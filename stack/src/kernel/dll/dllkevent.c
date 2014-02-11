@@ -301,7 +301,7 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
             dllkInstance_g.relativeTime  = 0;
             // set EC flag in Flag 1, so the MN can detect a reboot and
             // will initialize the Error Signaling.
-            dllkInstance_g.flag1 = EPL_FRAME_FLAG1_EC;
+            dllkInstance_g.flag1 = PLK_FRAME_FLAG1_EC;
             dllkInstance_g.nmtState = newNmtState_p;
             if (oldNmtState_p > kNmtGsResetConfiguration)
             {
@@ -740,8 +740,8 @@ static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtSta
         }
         if (frameCount > 0)
         {
-            dllkInstance_g.flag2 = (UINT8) (((asyncReqPriority_p << EPL_FRAME_FLAG2_PR_SHIFT) &
-                                             EPL_FRAME_FLAG2_PR) | (frameCount & EPL_FRAME_FLAG2_RS));
+            dllkInstance_g.flag2 = (UINT8) (((asyncReqPriority_p << PLK_FRAME_FLAG2_PR_SHIFT) &
+                                             PLK_FRAME_FLAG2_PR) | (frameCount & PLK_FRAME_FLAG2_RS));
         }
         else
         {

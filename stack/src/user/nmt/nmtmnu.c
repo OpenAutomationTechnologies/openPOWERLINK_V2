@@ -558,8 +558,8 @@ tOplkError nmtmnu_sendNmtCommandEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
 
                     // Disable PRes Chaining
                     SyncReqData.nodeId      = nodeId_p;
-                    SyncReqData.syncControl = EPL_SYNC_PRES_MODE_RESET |
-                                                  EPL_SYNC_DEST_MAC_ADDRESS_VALID;
+                    SyncReqData.syncControl = PLK_SYNC_PRES_MODE_RESET |
+                                                  PLK_SYNC_DEST_MAC_ADDRESS_VALID;
                     size = sizeof(UINT) + sizeof(UINT32);
 
                     ret = syncu_requestSyncResponse(prcCbSyncResNextAction, &SyncReqData, size);
@@ -3396,7 +3396,7 @@ static tOplkError prcMeasure(void)
                 tDllSyncRequest    SyncRequestData;
                 UINT               uiSize;
 
-                    SyncRequestData.syncControl = EPL_SYNC_DEST_MAC_ADDRESS_VALID;
+                    SyncRequestData.syncControl = PLK_SYNC_DEST_MAC_ADDRESS_VALID;
                     uiSize = sizeof(UINT) + sizeof(UINT32);
 
                     if (fSyncReqSentToPredNode == FALSE)
@@ -3838,8 +3838,8 @@ static tOplkError prcShift(UINT nodeIdPrevShift_p)
 
     // Send SyncReq
     syncRequestData.nodeId        = nodeId;
-    syncRequestData.syncControl   = EPL_SYNC_PRES_TIME_FIRST_VALID |
-                                        EPL_SYNC_DEST_MAC_ADDRESS_VALID;
+    syncRequestData.syncControl   = PLK_SYNC_PRES_TIME_FIRST_VALID |
+                                        PLK_SYNC_DEST_MAC_ADDRESS_VALID;
     syncRequestData.pResTimeFirst = pNodeInfo->pResTimeFirstNs;
     size = sizeof(UINT) + 2*sizeof(UINT32);
     ret = syncu_requestSyncResponse(prcCbSyncResShift, &syncRequestData, size);
@@ -3913,10 +3913,10 @@ static tOplkError prcAdd(UINT nodeIdPrevAdd_p)
 
     ret = kErrorOk;
     // prepare SyncReq
-    syncReqData.syncControl = EPL_SYNC_PRES_MODE_SET |
-                                  EPL_SYNC_PRES_TIME_FIRST_VALID |
-                                  EPL_SYNC_PRES_FALL_BACK_TIMEOUT_VALID |
-                                  EPL_SYNC_DEST_MAC_ADDRESS_VALID;
+    syncReqData.syncControl = PLK_SYNC_PRES_MODE_SET |
+                                  PLK_SYNC_PRES_TIME_FIRST_VALID |
+                                  PLK_SYNC_PRES_FALL_BACK_TIMEOUT_VALID |
+                                  PLK_SYNC_DEST_MAC_ADDRESS_VALID;
 
     // read object 0x1006 NMT_CycleLen_U32
     obdSize = sizeof(UINT32);
@@ -4058,7 +4058,7 @@ static tOplkError prcVerify(UINT nodeId_p)
     if (pNodeInfo->flags & NMTMNU_NODE_FLAG_ISOCHRON)
     {
         syncReqData.nodeId      = nodeId_p;
-        syncReqData.syncControl = EPL_SYNC_DEST_MAC_ADDRESS_VALID;
+        syncReqData.syncControl = PLK_SYNC_DEST_MAC_ADDRESS_VALID;
         size = sizeof(UINT) + sizeof(UINT32);
         ret = syncu_requestSyncResponse(prcCbSyncResVerify, &syncReqData, size);
     }
