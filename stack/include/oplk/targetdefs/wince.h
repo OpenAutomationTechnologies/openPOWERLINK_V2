@@ -101,9 +101,9 @@ void trace (const char* fmt, ...);
 #endif
 
 #if defined(_DLL)
-#define EPLDLLEXPORT extern __declspec(dllexport)
+#define OPLKDLLEXPORT extern __declspec(dllexport)
 #else
-#define EPLDLLEXPORT
+#define OPLKDLLEXPORT
 #endif
 
 #endif /* _INC_targetdefs_wince_H_ */

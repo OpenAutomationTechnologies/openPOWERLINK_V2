@@ -65,7 +65,7 @@ tOplkError pdou_init(tSyncCb pfnSyncCb_p);
 tOplkError pdou_exit(void);
 
 #if defined(CONFIG_INCLUDE_PDO)
-EPLDLLEXPORT tOplkError PUBLIC pdou_cbObdAccess(tObdCbParam MEM* pParam_p);
+OPLKDLLEXPORT tOplkError PUBLIC pdou_cbObdAccess(tObdCbParam MEM* pParam_p);
 #else
 #define pdou_cbObdAccess        NULL
 #endif
