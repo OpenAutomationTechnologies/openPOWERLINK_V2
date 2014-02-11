@@ -47,52 +47,52 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 // defines for EplFrame.m_wFlag
-#define EPL_FRAME_FLAG1_RD          0x01    // ready                                    (PReq, PRes)
-#define EPL_FRAME_FLAG1_ER          0x02    // exception reset (error signalling)       (SoA)
-#define EPL_FRAME_FLAG1_EA          0x04    // exception acknowledge (error signalling) (PReq, SoA)
-#define EPL_FRAME_FLAG1_EC          0x08    // exception clear (error signalling)       (StatusRes)
-#define EPL_FRAME_FLAG1_EN          0x10    // exception new (error signalling)         (PRes, StatusRes)
-#define EPL_FRAME_FLAG1_MS          0x20    // multiplexed slot                         (PReq)
-#define EPL_FRAME_FLAG1_PS          0x40    // prescaled slot                           (SoC)
-#define EPL_FRAME_FLAG1_MC          0x80    // multiplexed cycle completed              (SoC)
-#define EPL_FRAME_FLAG2_RS          0x07    // number of pending requests to send       (PRes, StatusRes, IdentRes)
-#define EPL_FRAME_FLAG2_PR          0x38    // priority of requested asynch. frame      (PRes, StatusRes, IdentRes)
-#define EPL_FRAME_FLAG2_PR_SHIFT    3       // shift of priority of requested asynch. frame
+#define PLK_FRAME_FLAG1_RD          0x01    // ready                                    (PReq, PRes)
+#define PLK_FRAME_FLAG1_ER          0x02    // exception reset (error signalling)       (SoA)
+#define PLK_FRAME_FLAG1_EA          0x04    // exception acknowledge (error signalling) (PReq, SoA)
+#define PLK_FRAME_FLAG1_EC          0x08    // exception clear (error signalling)       (StatusRes)
+#define PLK_FRAME_FLAG1_EN          0x10    // exception new (error signalling)         (PRes, StatusRes)
+#define PLK_FRAME_FLAG1_MS          0x20    // multiplexed slot                         (PReq)
+#define PLK_FRAME_FLAG1_PS          0x40    // prescaled slot                           (SoC)
+#define PLK_FRAME_FLAG1_MC          0x80    // multiplexed cycle completed              (SoC)
+#define PLK_FRAME_FLAG2_RS          0x07    // number of pending requests to send       (PRes, StatusRes, IdentRes)
+#define PLK_FRAME_FLAG2_PR          0x38    // priority of requested asynch. frame      (PRes, StatusRes, IdentRes)
+#define PLK_FRAME_FLAG2_PR_SHIFT    3       // shift of priority of requested asynch. frame
 
 // error history/status entry types
-#define EPL_ERR_ENTRYTYPE_STATUS        0x8000
-#define EPL_ERR_ENTRYTYPE_HISTORY       0x0000
-#define EPL_ERR_ENTRYTYPE_EMCY          0x4000
-#define EPL_ERR_ENTRYTYPE_MODE_ACTIVE   0x1000
-#define EPL_ERR_ENTRYTYPE_MODE_CLEARED  0x2000
-#define EPL_ERR_ENTRYTYPE_MODE_OCCURRED 0x3000
-#define EPL_ERR_ENTRYTYPE_MODE_MASK     0x3000
-#define EPL_ERR_ENTRYTYPE_PROF_VENDOR   0x0001
-#define EPL_ERR_ENTRYTYPE_PROF_EPL      0x0002
-#define EPL_ERR_ENTRYTYPE_PROF_MASK     0x0FFF
+#define ERR_ENTRYTYPE_STATUS        0x8000
+#define ERR_ENTRYTYPE_HISTORY       0x0000
+#define ERR_ENTRYTYPE_EMCY          0x4000
+#define ERR_ENTRYTYPE_MODE_ACTIVE   0x1000
+#define ERR_ENTRYTYPE_MODE_CLEARED  0x2000
+#define ERR_ENTRYTYPE_MODE_OCCURRED 0x3000
+#define ERR_ENTRYTYPE_MODE_MASK     0x3000
+#define ERR_ENTRYTYPE_PROF_VENDOR   0x0001
+#define ERR_ENTRYTYPE_PROF_EPL      0x0002
+#define ERR_ENTRYTYPE_PROF_MASK     0x0FFF
 
 // defines for EPL version / PDO version
-#define EPL_VERSION_SUB             0x0F  // sub version
-#define EPL_VERSION_MAIN            0xF0  // main version
+#define PLK_VERSION_SUB             0x0F  // sub version
+#define PLK_VERSION_MAIN            0xF0  // main version
 
 
-#define EPL_FRAME_OFFSET_DST_MAC        0
-#define EPL_FRAME_OFFSET_SRC_MAC        6
-#define EPL_FRAME_OFFSET_ETHER_TYPE     12
-#define EPL_FRAME_OFFSET_MSG_TYPE       14
-#define EPL_FRAME_OFFSET_DST_NODEID     15
-#define EPL_FRAME_OFFSET_SRC_NODEID     16
-#define EPL_FRAME_OFFSET_PDO_PAYLOAD    24
+#define PLK_FRAME_OFFSET_DST_MAC        0
+#define PLK_FRAME_OFFSET_SRC_MAC        6
+#define PLK_FRAME_OFFSET_ETHER_TYPE     12
+#define PLK_FRAME_OFFSET_MSG_TYPE       14
+#define PLK_FRAME_OFFSET_DST_NODEID     15
+#define PLK_FRAME_OFFSET_SRC_NODEID     16
+#define PLK_FRAME_OFFSET_PDO_PAYLOAD    24
 
 // defines for bit fields SyncControl and SyncStatus
-#define EPL_SYNC_PRES_TIME_FIRST_VALID          0x00000001
-#define EPL_SYNC_PRES_TIME_SECOND_VALID         0x00000002
-#define EPL_SYNC_SYNC_MN_DELAY_FIRST_VALID      0x00000004
-#define EPL_SYNC_SYNC_MN_DELAY_SECOND_VALID     0x00000008
-#define EPL_SYNC_PRES_FALL_BACK_TIMEOUT_VALID   0x00000010
-#define EPL_SYNC_DEST_MAC_ADDRESS_VALID         0x00000020
-#define EPL_SYNC_PRES_MODE_RESET                0x40000000
-#define EPL_SYNC_PRES_MODE_SET                  0x80000000
+#define PLK_SYNC_PRES_TIME_FIRST_VALID          0x00000001
+#define PLK_SYNC_PRES_TIME_SECOND_VALID         0x00000002
+#define PLK_SYNC_SYNC_MN_DELAY_FIRST_VALID      0x00000004
+#define PLK_SYNC_SYNC_MN_DELAY_SECOND_VALID     0x00000008
+#define PLK_SYNC_PRES_FALL_BACK_TIMEOUT_VALID   0x00000010
+#define PLK_SYNC_DEST_MAC_ADDRESS_VALID         0x00000020
+#define PLK_SYNC_PRES_MODE_RESET                0x40000000
+#define PLK_SYNC_PRES_MODE_SET                  0x80000000
 
 // defines for SDO command layer
 #define SDO_CMDL_HDR_FIXED_SIZE             8       // size of fixed header part

@@ -960,9 +960,9 @@ static tOplkError generateHistoryEntry(UINT16 errorCode_p, tNetTime netTime_p)
     tOplkError                  ret;
     tErrHistoryEntry         	historyEntry;
 
-    historyEntry.entryType = EPL_ERR_ENTRYTYPE_MODE_OCCURRED |
-                                EPL_ERR_ENTRYTYPE_PROF_EPL |
-                                EPL_ERR_ENTRYTYPE_HISTORY;
+    historyEntry.entryType = ERR_ENTRYTYPE_MODE_OCCURRED |
+                                ERR_ENTRYTYPE_PROF_EPL |
+                                ERR_ENTRYTYPE_HISTORY;
 
     historyEntry.errorCode = errorCode_p;
     historyEntry.timeStamp = netTime_p;
@@ -992,9 +992,9 @@ static tOplkError generateHistoryEntryNodeId(UINT16 errorCode_p,
     tOplkError                  ret;
     tErrHistoryEntry         	historyEntry;
 
-    historyEntry.entryType = EPL_ERR_ENTRYTYPE_MODE_OCCURRED |
-                                EPL_ERR_ENTRYTYPE_PROF_EPL |
-                                EPL_ERR_ENTRYTYPE_HISTORY;
+    historyEntry.entryType = ERR_ENTRYTYPE_MODE_OCCURRED |
+                                ERR_ENTRYTYPE_PROF_EPL |
+                                ERR_ENTRYTYPE_HISTORY;
 
     historyEntry.errorCode = errorCode_p;
     historyEntry.timeStamp = netTime_p;
@@ -1026,9 +1026,9 @@ static tOplkError generateHistoryEntryWithError(UINT16 errorCode_p,
     tOplkError                  ret;
     tErrHistoryEntry         	historyEntry;
 
-    historyEntry.entryType = EPL_ERR_ENTRYTYPE_MODE_OCCURRED |
-                                EPL_ERR_ENTRYTYPE_PROF_EPL |
-                                EPL_ERR_ENTRYTYPE_HISTORY;
+    historyEntry.entryType = ERR_ENTRYTYPE_MODE_OCCURRED |
+                                ERR_ENTRYTYPE_PROF_EPL |
+                                ERR_ENTRYTYPE_HISTORY;
 
     historyEntry.errorCode = errorCode_p;
     historyEntry.timeStamp = netTime_p;

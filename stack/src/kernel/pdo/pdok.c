@@ -400,7 +400,7 @@ tOplkError pdok_processRxPdo(tPlkFrame* pFrame_p, UINT frameSize_p)
 
     // check if received RPDO is valid
     frameData = ami_getUint8Le(&pFrame_p->data.pres.flag1);
-    if ((frameData & EPL_FRAME_FLAG1_RD) == 0)
+    if ((frameData & PLK_FRAME_FLAG1_RD) == 0)
     {   // RPDO invalid
         goto Exit;
     }
@@ -431,7 +431,7 @@ tOplkError pdok_processRxPdo(tPlkFrame* pFrame_p, UINT frameSize_p)
 
             // retrieve PDO version from frame
             frameData = ami_getUint8Le(&pFrame_p->data.pres.pdoVersion);
-            if ((pPdoChannel->mappingVersion & EPL_VERSION_MAIN) != (frameData & EPL_VERSION_MAIN))
+            if ((pPdoChannel->mappingVersion & PLK_VERSION_MAIN) != (frameData & PLK_VERSION_MAIN))
             {   // PDO versions do not match
                 // $$$ raise PDO error
                 // termiate processing of this RPDO
@@ -440,7 +440,7 @@ tOplkError pdok_processRxPdo(tPlkFrame* pFrame_p, UINT frameSize_p)
 
             // valid RPDO found
 
-            if ((unsigned int)(pPdoChannel->pdoSize + EPL_FRAME_OFFSET_PDO_PAYLOAD) > frameSize_p)
+            if ((unsigned int)(pPdoChannel->pdoSize + PLK_FRAME_OFFSET_PDO_PAYLOAD) > frameSize_p)
             {   // RPDO is too short
                 // $$$ raise PDO error, set Ret
                 goto Exit;
@@ -587,7 +587,7 @@ static tOplkError copyTxPdo(tPlkFrame* pFrame_p, UINT frameSize_p, BOOL fReadyFl
 
     // set TPDO invalid, so that only fully processed TPDOs are sent as valid
     flag1 = ami_getUint8Le(&pFrame_p->data.pres.flag1);
-    ami_setUint8Le(&pFrame_p->data.pres.flag1, (flag1 & ~EPL_FRAME_FLAG1_RD));
+    ami_setUint8Le(&pFrame_p->data.pres.flag1, (flag1 & ~PLK_FRAME_FLAG1_RD));
 
     // retrieve EPL message type
     msgType = ami_getUint8Le(&pFrame_p->messageType);
@@ -637,7 +637,7 @@ static tOplkError copyTxPdo(tPlkFrame* pFrame_p, UINT frameSize_p, BOOL fReadyFl
             if (fReadyFlag_p != FALSE)
             {
                 // set TPDO valid
-                ami_setUint8Le(&pFrame_p->data.pres.flag1, (flag1 | EPL_FRAME_FLAG1_RD));
+                ami_setUint8Le(&pFrame_p->data.pres.flag1, (flag1 | PLK_FRAME_FLAG1_RD));
             }
 
             // processing finished successfully
@@ -651,7 +651,7 @@ static tOplkError copyTxPdo(tPlkFrame* pFrame_p, UINT frameSize_p, BOOL fReadyFl
     if (fReadyFlag_p != FALSE)
     {
         // set TPDO valid even if TPDO size is 0
-        ami_setUint8Le(&pFrame_p->data.pres.flag1, (flag1 | EPL_FRAME_FLAG1_RD));
+        ami_setUint8Le(&pFrame_p->data.pres.flag1, (flag1 | PLK_FRAME_FLAG1_RD));
     }
 
 Exit:

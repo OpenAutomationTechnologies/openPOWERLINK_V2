@@ -1121,7 +1121,7 @@ tOplkError dllk_setupLocalNode(tNmtState nmtState_p)
         (dllkInstance_g.dllConfigParam.presActPayloadLimit >= 36))
     {   // it is not configured as async-only CN,
         // so take part in isochronous phase and register PRes frame
-        frameSize = dllkInstance_g.dllConfigParam.presActPayloadLimit + EPL_FRAME_OFFSET_PDO_PAYLOAD;
+        frameSize = dllkInstance_g.dllConfigParam.presActPayloadLimit + PLK_FRAME_OFFSET_PDO_PAYLOAD;
         ret = dllk_createTxFrame(&handle, &frameSize, kMsgTypePres, kDllAsndNotDefined);
         if (ret != kErrorOk)
             return ret;
@@ -1270,7 +1270,7 @@ tOplkError dllk_setupLocalNodeMn(void)
         {   // create PReq frame for this node
             count++;
 
-            frameSize = pIntNodeInfo->preqPayloadLimit + EPL_FRAME_OFFSET_PDO_PAYLOAD;
+            frameSize = pIntNodeInfo->preqPayloadLimit + PLK_FRAME_OFFSET_PDO_PAYLOAD;
             ret = dllk_createTxFrame(&handle, &frameSize, kMsgTypePreq, kDllAsndNotDefined);
             if (ret != kErrorOk)
                 return ret;
@@ -1752,7 +1752,7 @@ tOplkError dllk_presChainingEnable (void)
 
         ami_setUint32Le(&pTxFrameSyncRes->data.asnd.payload.syncResponse.syncStatusLe,
                         ami_getUint32Le(&pTxFrameSyncRes->data.asnd.payload.syncResponse.syncStatusLe)
-                        | EPL_SYNC_PRES_MODE_SET);
+                        | PLK_SYNC_PRES_MODE_SET);
         // update SyncRes Tx buffer in Edrv
         Ret = edrv_updateTxBuffer(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SYNCRES]);
         if (Ret != kErrorOk)
@@ -1802,7 +1802,7 @@ tOplkError dllk_presChainingDisable (void)
 
         ami_setUint32Le(&pTxFrameSyncRes->data.asnd.payload.syncResponse.syncStatusLe,
                         ami_getUint32Le(&pTxFrameSyncRes->data.asnd.payload.syncResponse.syncStatusLe)
-                        & ~EPL_SYNC_PRES_MODE_SET);
+                        & ~PLK_SYNC_PRES_MODE_SET);
         // update SyncRes Tx buffer in Edrv
         ret = edrv_updateTxBuffer(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SYNCRES]);
         if (ret != kErrorOk)
@@ -2059,9 +2059,9 @@ tOplkError dllk_setupSyncPhase(tNmtState nmtState_p, BOOL fReadyFlag_p,
         {   // PReq does exist
             pTxFrame = (tPlkFrame *) pTxBuffer->pBuffer;
 
-            flag1 = pIntNodeInfo->soaFlag1 & EPL_FRAME_FLAG1_EA;
+            flag1 = pIntNodeInfo->soaFlag1 & PLK_FRAME_FLAG1_EA;
 
-            // $$$ d.k. set EPL_FRAME_FLAG1_MS if necessary
+            // $$$ d.k. set PLK_FRAME_FLAG1_MS if necessary
             // update frame (Flag1)
             ami_setUint8Le(&pTxFrame->data.preq.flag1, flag1);
 

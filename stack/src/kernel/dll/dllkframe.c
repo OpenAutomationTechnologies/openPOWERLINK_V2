@@ -696,20 +696,20 @@ tOplkError dllk_updateFramePres(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p
     ami_setUint8Le(&pTxFrame->data.pres.flag2, dllkInstance_g.flag2);
 
     // get RD flag
-    flag1 = ami_getUint8Le(&pTxFrame->data.pres.flag1) & EPL_FRAME_FLAG1_RD;
+    flag1 = ami_getUint8Le(&pTxFrame->data.pres.flag1) & PLK_FRAME_FLAG1_RD;
 
     if ( (dllkInstance_g.dllConfigParam.multipleCycleCnt > 0) &&
-         (dllkInstance_g.mnFlag1 & EPL_FRAME_FLAG1_MS) ) // MS flag set in PReq
+         (dllkInstance_g.mnFlag1 & PLK_FRAME_FLAG1_MS) ) // MS flag set in PReq
     {   // set MS flag, because PRes will be sent multiplexed with other CNs
-        flag1 |= EPL_FRAME_FLAG1_MS;
+        flag1 |= PLK_FRAME_FLAG1_MS;
     }
 
     // add EN flag from Error signaling module
-    flag1 |= dllkInstance_g.flag1 & EPL_FRAME_FLAG1_EN;
+    flag1 |= dllkInstance_g.flag1 & PLK_FRAME_FLAG1_EN;
 
     if (nmtState_p != kNmtCsOperational)
     {   // mark PDO as invalid in all NMT states but OPERATIONAL - reset only RD flag
-        flag1 &= ~EPL_FRAME_FLAG1_RD;
+        flag1 &= ~PLK_FRAME_FLAG1_RD;
     }
     ami_setUint8Le(&pTxFrame->data.pres.flag1, flag1);        // update frame (flag1)
 
@@ -871,7 +871,7 @@ tOplkError dllk_updateFrameSoa(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p,
         {   // own queues are empty
             dllkInstance_g.aLastReqServiceId[curReq_p] = kDllReqServiceNo;
         }
-        else if (((tDllAsyncReqPriority) (dllkInstance_g.flag2 >> EPL_FRAME_FLAG2_PR_SHIFT)) == kDllAsyncReqPrioNmt)
+        else if (((tDllAsyncReqPriority) (dllkInstance_g.flag2 >> PLK_FRAME_FLAG2_PR_SHIFT)) == kDllAsyncReqPrioNmt)
         {   // frames in own NMT request queue available
             dllkInstance_g.aLastReqServiceId[curReq_p] = kDllReqServiceNmtRequest;
         }
@@ -901,7 +901,7 @@ tOplkError dllk_updateFrameSoa(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p,
 
             // update frame (EA, ER flags)
             ami_setUint8Le(&pTxFrame->data.soa.flag1,
-                pNodeInfo->soaFlag1 & (EPL_FRAME_FLAG1_EA | EPL_FRAME_FLAG1_ER));
+                pNodeInfo->soaFlag1 & (PLK_FRAME_FLAG1_EA | PLK_FRAME_FLAG1_ER));
         }
         else
         {   // no assignment of asynchronous phase
@@ -1374,8 +1374,8 @@ static tOplkError processReceivedPreq(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
         bFlag1 = ami_getUint8Le(&pFrame->data.preq.flag1);
 
         dllkInstance_g.mnFlag1 = (dllkInstance_g.mnFlag1 &
-                                  ~(EPL_FRAME_FLAG1_EA | EPL_FRAME_FLAG1_MS)) |             // preserve all flags except EA and MS
-                                  (bFlag1 & (EPL_FRAME_FLAG1_EA | EPL_FRAME_FLAG1_MS));     // set EA and MS flag
+                                  ~(PLK_FRAME_FLAG1_EA | PLK_FRAME_FLAG1_MS)) |             // preserve all flags except EA and MS
+                                  (bFlag1 & (PLK_FRAME_FLAG1_EA | PLK_FRAME_FLAG1_MS));     // set EA and MS flag
 
         // inform PDO module
 #if defined(CONFIG_INCLUDE_PDO)
@@ -1388,8 +1388,8 @@ static tOplkError processReceivedPreq(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
             }
 
             // compares real frame size and PDO size
-            if (((UINT) (ami_getUint16Le(&pFrame->data.preq.sizeLe) + EPL_FRAME_OFFSET_PDO_PAYLOAD) > pFrameInfo_p->frameSize) ||
-                         (pFrameInfo_p->frameSize > (dllkInstance_g.dllConfigParam.preqActPayloadLimit + EPL_FRAME_OFFSET_PDO_PAYLOAD)))
+            if (((UINT) (ami_getUint16Le(&pFrame->data.preq.sizeLe) + PLK_FRAME_OFFSET_PDO_PAYLOAD) > pFrameInfo_p->frameSize) ||
+                         (pFrameInfo_p->frameSize > (dllkInstance_g.dllConfigParam.preqActPayloadLimit + PLK_FRAME_OFFSET_PDO_PAYLOAD)))
             {   // format error
                 tEventDllError  dllEvent;
 
@@ -1556,8 +1556,8 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
         // forward Flag2 to asynchronous scheduler
         flag1 = ami_getUint8Le(&pFrame->data.asnd.payload.statusResponse.flag2);
         ret = dllkcal_setAsyncPendingRequests(nodeId,
-            ((tDllAsyncReqPriority) ((flag1 & EPL_FRAME_FLAG2_PR) >> EPL_FRAME_FLAG2_PR_SHIFT)),
-            (flag1 & EPL_FRAME_FLAG2_RS));
+            ((tDllAsyncReqPriority) ((flag1 & PLK_FRAME_FLAG2_PR) >> PLK_FRAME_FLAG2_PR_SHIFT)),
+            (flag1 & PLK_FRAME_FLAG2_RS));
         if (ret != kErrorOk)
             goto Exit;
 
@@ -1612,12 +1612,12 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
         // compare real frame size and PDO size?
         WORD wPresPayloadSize = ami_getUint16Le(&pFrame->data.pres.sizeLe);
 
-        if (((UINT) (wPresPayloadSize + EPL_FRAME_OFFSET_PDO_PAYLOAD) > pFrameInfo_p->frameSize)
+        if (((UINT) (wPresPayloadSize + PLK_FRAME_OFFSET_PDO_PAYLOAD) > pFrameInfo_p->frameSize)
 #if EPL_NMT_MAX_NODE_ID > 0
             || (wPresPayloadSize > pIntNodeInfo->presPayloadLimit)
             || ((nmtState_p >= kNmtMsNotActive)
                 && (pFrameInfo_p->frameSize >
-                    (UINT) (pIntNodeInfo->presPayloadLimit + EPL_FRAME_OFFSET_PDO_PAYLOAD)))
+                    (UINT) (pIntNodeInfo->presPayloadLimit + PLK_FRAME_OFFSET_PDO_PAYLOAD)))
 #endif
             )
         {   // format error
@@ -1815,13 +1815,13 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
 
                 // update error signaling
                 flag1 = ami_getUint8Le(&pFrame->data.soa.flag1);
-                if (((flag1 ^ dllkInstance_g.mnFlag1) & EPL_FRAME_FLAG1_ER) != 0)
+                if (((flag1 ^ dllkInstance_g.mnFlag1) & PLK_FRAME_FLAG1_ER) != 0)
                 {   // exception reset flag was changed by MN
                     // assume same state for EC in next cycle (clear all other bits)
-                    if ((flag1 & EPL_FRAME_FLAG1_ER) != 0)
+                    if ((flag1 & PLK_FRAME_FLAG1_ER) != 0)
                     {
                         // set EC and reset rest
-                        dllkInstance_g.flag1 = EPL_FRAME_FLAG1_EC;
+                        dllkInstance_g.flag1 = PLK_FRAME_FLAG1_EC;
                     }
                     else
                     {
@@ -1838,8 +1838,8 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
                 // update (only) EA and ER flag from MN for Status request response cycle
                 // $$$ d.k. only in PreOp1 and when async-only or not accessed isochronously
                 dllkInstance_g.mnFlag1 =
-                        (dllkInstance_g.mnFlag1 & ~(EPL_FRAME_FLAG1_EA | EPL_FRAME_FLAG1_ER)) // preserve all flags except EA and ER
-                        | (flag1 & (EPL_FRAME_FLAG1_EA | EPL_FRAME_FLAG1_ER));                     // set EA and ER flag
+                        (dllkInstance_g.mnFlag1 & ~(PLK_FRAME_FLAG1_EA | PLK_FRAME_FLAG1_ER)) // preserve all flags except EA and ER
+                        | (flag1 & (PLK_FRAME_FLAG1_EA | PLK_FRAME_FLAG1_ER));                     // set EA and ER flag
                 goto Exit;
                 break;
 
@@ -1883,7 +1883,7 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
                         // decrement RS in Flag 2
                         // The real update will be done later on event FillTx,
                         // but for now it assures that a quite good value gets via the SoA event into the next PRes.
-                        if ((dllkInstance_g.flag2 & EPL_FRAME_FLAG2_RS) != 0)
+                        if ((dllkInstance_g.flag2 & PLK_FRAME_FLAG2_RS) != 0)
                         {
                             dllkInstance_g.flag2--;
                         }
@@ -1912,7 +1912,7 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
 
                 pTxFrameSyncRes = (tPlkFrame *) dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SYNCRES].pBuffer;
                 syncControl = ami_getUint32Le(&pFrame->data.soa.payload.syncRequest.syncControlLe);
-                if (syncControl & EPL_SYNC_DEST_MAC_ADDRESS_VALID)
+                if (syncControl & PLK_SYNC_DEST_MAC_ADDRESS_VALID)
                 {
                     if (OPLK_MEMCMP(&pFrame->data.soa.payload.syncRequest.aDestMacAddress,
                                    &dllkInstance_g.aLocalMac, 6) != 0)
@@ -1923,7 +1923,7 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
 
                 PrcCycleTiming.pResTimeFirstNs = ami_getUint32Le(&pFrame->data.soa.payload.syncRequest.presTimeFirstLe);
 
-                if ((syncControl & EPL_SYNC_PRES_TIME_FIRST_VALID) &&
+                if ((syncControl & PLK_SYNC_PRES_TIME_FIRST_VALID) &&
                     (dllkInstance_g.prcPResTimeFirst != PrcCycleTiming.pResTimeFirstNs))
                 {
                     dllkInstance_g.prcPResTimeFirst = PrcCycleTiming.pResTimeFirstNs;
@@ -1939,14 +1939,14 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
                                     PrcCycleTiming.pResTimeFirstNs);
                     ami_setUint32Le(&pTxFrameSyncRes->data.asnd.payload.syncResponse.syncStatusLe,
                                     ami_getUint32Le(&pTxFrameSyncRes->data.asnd.payload.syncResponse.syncStatusLe)
-                                    | EPL_SYNC_PRES_TIME_FIRST_VALID);
+                                    | PLK_SYNC_PRES_TIME_FIRST_VALID);
                     // update SyncRes Tx buffer in Edrv
                     ret = edrv_updateTxBuffer(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SYNCRES]);
                     if (ret != kErrorOk)
                         goto Exit;
                 }
 
-                if (syncControl & EPL_SYNC_PRES_FALL_BACK_TIMEOUT_VALID)
+                if (syncControl & PLK_SYNC_PRES_FALL_BACK_TIMEOUT_VALID)
                 {
                     dllkInstance_g.prcPResFallBackTimeout = ami_getUint32Le(&pFrame->data.soa.payload.syncRequest.presFallBackTimeoutLe);
 
@@ -1958,28 +1958,28 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
 #endif
                 }
 
-                if (syncControl & EPL_SYNC_PRES_MODE_RESET)
+                if (syncControl & PLK_SYNC_PRES_MODE_RESET)
                 {
                     // PResModeReset overrules PResModeSet
-                    syncControl &= ~EPL_SYNC_PRES_MODE_SET;
+                    syncControl &= ~PLK_SYNC_PRES_MODE_SET;
 
                     ret = dllk_presChainingDisable();
                     if (ret != kErrorOk)
                         goto Exit;
                 }
-                else if (syncControl & EPL_SYNC_PRES_MODE_SET)
+                else if (syncControl & PLK_SYNC_PRES_MODE_SET)
                 {   // PRes Chaining is Enabled
                     ret = dllk_presChainingEnable();
                     if (ret != kErrorOk)
                         goto Exit;
                 }
 
-                PrcCycleTiming.syncControl = syncControl & (EPL_SYNC_PRES_TIME_FIRST_VALID
-                                                              | EPL_SYNC_PRES_TIME_SECOND_VALID
-                                                              | EPL_SYNC_SYNC_MN_DELAY_FIRST_VALID
-                                                              | EPL_SYNC_SYNC_MN_DELAY_SECOND_VALID
-                                                              | EPL_SYNC_PRES_MODE_RESET
-                                                              | EPL_SYNC_PRES_MODE_SET);
+                PrcCycleTiming.syncControl = syncControl & (PLK_SYNC_PRES_TIME_FIRST_VALID
+                                                              | PLK_SYNC_PRES_TIME_SECOND_VALID
+                                                              | PLK_SYNC_SYNC_MN_DELAY_FIRST_VALID
+                                                              | PLK_SYNC_SYNC_MN_DELAY_SECOND_VALID
+                                                              | PLK_SYNC_PRES_MODE_RESET
+                                                              | PLK_SYNC_PRES_MODE_SET);
 
                 if (PrcCycleTiming.syncControl != 0)
                 {
@@ -2012,7 +2012,7 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
                         // decrement RS in Flag 2
                         // The real update will be done later on event FillTx,
                         // but for now it assures that a quite good value gets via the SoA event into the next PRes.
-                        if ((dllkInstance_g.flag2 & EPL_FRAME_FLAG2_RS) != 0)
+                        if ((dllkInstance_g.flag2 & PLK_FRAME_FLAG2_RS) != 0)
                         {
                             dllkInstance_g.flag2--;
                         }
@@ -2143,8 +2143,8 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
                 // forward Flag2 to asynchronous scheduler
                 flag1 = ami_getUint8Le(&pFrame->data.asnd.payload.statusResponse.flag2);
                 ret = dllkcal_setAsyncPendingRequests(nodeId,
-                    ((tDllAsyncReqPriority) ((flag1 & EPL_FRAME_FLAG2_PR) >> EPL_FRAME_FLAG2_PR_SHIFT)),
-                    (flag1 & EPL_FRAME_FLAG2_RS));
+                    ((tDllAsyncReqPriority) ((flag1 & PLK_FRAME_FLAG2_PR) >> PLK_FRAME_FLAG2_PR_SHIFT)),
+                    (flag1 & PLK_FRAME_FLAG2_RS));
                 if (ret != kErrorOk)
                     goto Exit;
                 break;
