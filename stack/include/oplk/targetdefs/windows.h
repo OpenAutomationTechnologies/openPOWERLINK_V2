@@ -121,9 +121,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #if defined(_DLL)
-#define EPLDLLEXPORT extern __declspec(dllexport)
+#define OPLKDLLEXPORT extern __declspec(dllexport)
 #else
-#define EPLDLLEXPORT
+#define OPLKDLLEXPORT
 #endif
 
 #define OPLK_ATOMIC_T    ULONG

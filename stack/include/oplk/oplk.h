@@ -330,44 +330,44 @@ extern "C" {
 #endif
 
 // Generic API functions
-EPLDLLEXPORT tOplkError oplk_init(tOplkApiInitParam* pInitParam_p);
-EPLDLLEXPORT tOplkError oplk_shutdown(void);
-EPLDLLEXPORT tOplkError oplk_execNmtCommand(tNmtEvent NmtEvent_p);
-EPLDLLEXPORT tOplkError oplk_linkObject(UINT objIndex_p, void* pVar_p, UINT* pVarEntries_p,
+OPLKDLLEXPORT tOplkError oplk_init(tOplkApiInitParam* pInitParam_p);
+OPLKDLLEXPORT tOplkError oplk_shutdown(void);
+OPLKDLLEXPORT tOplkError oplk_execNmtCommand(tNmtEvent NmtEvent_p);
+OPLKDLLEXPORT tOplkError oplk_linkObject(UINT objIndex_p, void* pVar_p, UINT* pVarEntries_p,
                                         tObdSize* pEntrySize_p, UINT firstSubindex_p);
-EPLDLLEXPORT tOplkError oplk_readObject(tSdoComConHdl* pSdoComConHdl_p, UINT  nodeId_p, UINT index_p,
+OPLKDLLEXPORT tOplkError oplk_readObject(tSdoComConHdl* pSdoComConHdl_p, UINT  nodeId_p, UINT index_p,
                                         UINT subindex_p, void* pDstData_le_p, UINT* pSize_p,
                                         tSdoType sdoType_p, void* pUserArg_p);
-EPLDLLEXPORT tOplkError oplk_writeObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT index_p,
+OPLKDLLEXPORT tOplkError oplk_writeObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT index_p,
                                          UINT subindex_p, void* pSrcData_le_p, UINT size_p,
                                          tSdoType sdoType_p, void* pUserArg_p);
-EPLDLLEXPORT tOplkError oplk_freeSdoChannel(tSdoComConHdl sdoComConHdl_p);
-EPLDLLEXPORT tOplkError oplk_abortSdo(tSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p);
-EPLDLLEXPORT tOplkError oplk_readLocalObject(UINT index_p, UINT subindex_p, void* pDstData_p, UINT* pSize_p);
-EPLDLLEXPORT tOplkError oplk_writeLocalObject(UINT index_p, UINT subindex_p, void* pSrcData_p, UINT size_p);
-EPLDLLEXPORT tOplkError oplk_sendAsndFrame(UINT8 dstNodeId_p, tAsndFrame *pAsndFrame_p, size_t asndSize_p);
-EPLDLLEXPORT tOplkError oplk_setAsndForward(UINT8 serviceId_p, tOplkApiAsndFilter FilterType_p);
-EPLDLLEXPORT tOplkError oplk_postUserEvent(void* pUserArg_p);
-EPLDLLEXPORT tOplkError oplk_triggerMnStateChange(UINT nodeId_p, tNmtNodeCommand nodeCommand_p);
-EPLDLLEXPORT tOplkError oplk_setCdcBuffer(BYTE* pbCdc_p, UINT cdcSize_p);
-EPLDLLEXPORT tOplkError oplk_setCdcFilename(char* pszCdcFilename_p);
-EPLDLLEXPORT tOplkError oplk_process(void);
-EPLDLLEXPORT tOplkError oplk_getIdentResponse(UINT nodeId_p, tIdentResponse** ppIdentResponse_p);
-EPLDLLEXPORT BOOL       oplk_checkKernelStack(void);
-EPLDLLEXPORT tOplkError oplk_waitSyncEvent(ULONG timeout_p);
+OPLKDLLEXPORT tOplkError oplk_freeSdoChannel(tSdoComConHdl sdoComConHdl_p);
+OPLKDLLEXPORT tOplkError oplk_abortSdo(tSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p);
+OPLKDLLEXPORT tOplkError oplk_readLocalObject(UINT index_p, UINT subindex_p, void* pDstData_p, UINT* pSize_p);
+OPLKDLLEXPORT tOplkError oplk_writeLocalObject(UINT index_p, UINT subindex_p, void* pSrcData_p, UINT size_p);
+OPLKDLLEXPORT tOplkError oplk_sendAsndFrame(UINT8 dstNodeId_p, tAsndFrame *pAsndFrame_p, size_t asndSize_p);
+OPLKDLLEXPORT tOplkError oplk_setAsndForward(UINT8 serviceId_p, tOplkApiAsndFilter FilterType_p);
+OPLKDLLEXPORT tOplkError oplk_postUserEvent(void* pUserArg_p);
+OPLKDLLEXPORT tOplkError oplk_triggerMnStateChange(UINT nodeId_p, tNmtNodeCommand nodeCommand_p);
+OPLKDLLEXPORT tOplkError oplk_setCdcBuffer(BYTE* pbCdc_p, UINT cdcSize_p);
+OPLKDLLEXPORT tOplkError oplk_setCdcFilename(char* pszCdcFilename_p);
+OPLKDLLEXPORT tOplkError oplk_process(void);
+OPLKDLLEXPORT tOplkError oplk_getIdentResponse(UINT nodeId_p, tIdentResponse** ppIdentResponse_p);
+OPLKDLLEXPORT BOOL       oplk_checkKernelStack(void);
+OPLKDLLEXPORT tOplkError oplk_waitSyncEvent(ULONG timeout_p);
 
 // Process image API functions
-EPLDLLEXPORT tOplkError oplk_allocProcessImage(UINT sizeProcessImageIn_p, UINT sizeProcessImageOut_p);
-EPLDLLEXPORT tOplkError oplk_freeProcessImage(void);
-EPLDLLEXPORT tOplkError oplk_linkProcessImageObject(UINT objIndex_p, UINT firstSubindex_p, UINT offsetPI_p,
+OPLKDLLEXPORT tOplkError oplk_allocProcessImage(UINT sizeProcessImageIn_p, UINT sizeProcessImageOut_p);
+OPLKDLLEXPORT tOplkError oplk_freeProcessImage(void);
+OPLKDLLEXPORT tOplkError oplk_linkProcessImageObject(UINT objIndex_p, UINT firstSubindex_p, UINT offsetPI_p,
                                                     BOOL fOutputPI_p, tObdSize entrySize_p, UINT* pVarEntries_p);
-EPLDLLEXPORT tOplkError oplk_exchangeProcessImageIn(void);
-EPLDLLEXPORT tOplkError oplk_exchangeProcessImageOut(void);
-EPLDLLEXPORT void*      oplk_getProcessImageIn(void);
-EPLDLLEXPORT void*      oplk_getProcessImageOut(void);
+OPLKDLLEXPORT tOplkError oplk_exchangeProcessImageIn(void);
+OPLKDLLEXPORT tOplkError oplk_exchangeProcessImageOut(void);
+OPLKDLLEXPORT void*      oplk_getProcessImageIn(void);
+OPLKDLLEXPORT void*      oplk_getProcessImageOut(void);
 
 // objdict specific process image functions
-EPLDLLEXPORT tOplkError oplk_setupProcessImage(void);
+OPLKDLLEXPORT tOplkError oplk_setupProcessImage(void);
 
 #ifdef __cplusplus
 }

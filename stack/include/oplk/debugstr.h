@@ -61,17 +61,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-EPLDLLEXPORT char* debugstr_getNmtEventStr(tNmtEvent nmtEvent_p);
-EPLDLLEXPORT char* debugstr_getEventTypeStr(tEventType eventType_p);
-EPLDLLEXPORT char* debugstr_getEventSourceStr(tEventSource eventSrc_p);
-EPLDLLEXPORT char* debugstr_getEventSinkStr(tEventSink eventSink_p);
-EPLDLLEXPORT char* debugstr_getNmtStateStr(tNmtState nmtState_p);
-EPLDLLEXPORT char* debugstr_getApiEventStr(tOplkApiEventType ApiEvent_p);
-EPLDLLEXPORT char* debugstr_getNmtNodeEventTypeStr(tNmtNodeEvent NodeEventType_p);
-EPLDLLEXPORT char* debugstr_getNmtBootEventTypeStr(tNmtBootEvent BootEventType_p);
-EPLDLLEXPORT char* debugstr_getSdoComConStateStr(tSdoComConState SdoComConState_p);
-EPLDLLEXPORT char* debugstr_getRetValStr(tOplkError EplKernel_p);
-EPLDLLEXPORT char* debugstr_getEmergErrCodeStr(UINT16 EmergErrCode_p);
+OPLKDLLEXPORT char* debugstr_getNmtEventStr(tNmtEvent nmtEvent_p);
+OPLKDLLEXPORT char* debugstr_getEventTypeStr(tEventType eventType_p);
+OPLKDLLEXPORT char* debugstr_getEventSourceStr(tEventSource eventSrc_p);
+OPLKDLLEXPORT char* debugstr_getEventSinkStr(tEventSink eventSink_p);
+OPLKDLLEXPORT char* debugstr_getNmtStateStr(tNmtState nmtState_p);
+OPLKDLLEXPORT char* debugstr_getApiEventStr(tOplkApiEventType ApiEvent_p);
+OPLKDLLEXPORT char* debugstr_getNmtNodeEventTypeStr(tNmtNodeEvent NodeEventType_p);
+OPLKDLLEXPORT char* debugstr_getNmtBootEventTypeStr(tNmtBootEvent BootEventType_p);
+OPLKDLLEXPORT char* debugstr_getSdoComConStateStr(tSdoComConState SdoComConState_p);
+OPLKDLLEXPORT char* debugstr_getRetValStr(tOplkError EplKernel_p);
+OPLKDLLEXPORT char* debugstr_getEmergErrCodeStr(UINT16 EmergErrCode_p);
 
 #ifdef __cplusplus
 }
