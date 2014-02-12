@@ -5,6 +5,23 @@ Revision history of openPOWERLINK Protocol Stack {#page_revision_history}
 
 # Release 2 {#sect_revision_v2}
 
+## V2.0.0-b1 {#sect_revision_v2_0_0_b1}
+
+This is the first beta version of the openPOWERLINK release 2.0.0.
+
+- The file system is slightly restructured and cleaned up
+- Source Code is further refactored and cleaned up
+- Header files are clearly separated into internal and external files
+- The build system is separated for the stack, the hardware (fpga), the
+  drivers and the demo applications
+- Stack is compiled as static/dynamic libraries which will be linekd by all
+  applications
+- Support for CMake cross-compilation is added
+- Xilinx build uses CMake now
+- FPGA IP cores are updated
+- Documentation is improved
+- Stack configuration is simplified
+
 ## V2.0.0 pre1 {#sect_revision_v2_0_0_pre1}
 
 This is an early preview of the upcoming openPOWERLINK release 2.0.0.
