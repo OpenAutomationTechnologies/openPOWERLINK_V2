@@ -432,7 +432,6 @@ SET(STACK_HEADERS
     ${STACK_INCLUDE_DIR}/common/ctrlcal.h
     ${STACK_INCLUDE_DIR}/common/ctrlcal-mem.h
     ${STACK_INCLUDE_DIR}/common/dllcal.h
-    ${STACK_INCLUDE_DIR}/common/edrv.h
     ${STACK_INCLUDE_DIR}/common/errhnd.h
     ${STACK_INCLUDE_DIR}/common/pdo.h
     ${STACK_INCLUDE_DIR}/common/target.h
@@ -480,6 +479,7 @@ SET(KERNEL_HEADERS
     ${STACK_INCLUDE_DIR}/kernel/pdok.h
     ${STACK_INCLUDE_DIR}/kernel/pdokcal.h
     ${STACK_INCLUDE_DIR}/kernel/veth.h
+    ${STACK_INCLUDE_DIR}/kernel/edrv.h
     )
 
 SET(OBJDICT_HEADERS

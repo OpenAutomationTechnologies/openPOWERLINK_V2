@@ -44,7 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplk/oplkinc.h>
 #include <kernel/hrestimer.h>
 
-#include <common/edrv.h>
+#include <kernel/edrv.h>
 #include <target/openmac.h>
 #include <omethlib.h>
 
