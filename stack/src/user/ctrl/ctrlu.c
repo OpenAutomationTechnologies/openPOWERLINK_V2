@@ -108,7 +108,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 typedef struct
 {
     UINT16              lastHeartbeat;          ///< Last detected heartbeat
-    tOplkApiInitParam    initParam;              ///< Stack initialization parameters
+    tOplkApiInitParam   initParam;              ///< Stack initialization parameters
 } tCtrluInstance;
 
 //------------------------------------------------------------------------------
@@ -808,15 +808,12 @@ static tOplkError cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
 
         // first init of the hardware
         case kNmtGsInitialising:
-#if 0
 #if defined(CONFIG_INCLUDE_SDO_UDP)
             // configure SDO via UDP (i.e. bind it to the EPL ethernet interface)
-            ret = sdoudp_config(stackInstance_l.m_InitParam.ipAddress, C_SDO_EPL_PORT);
+            ret = sdoudp_config(ctrlInstance_l.initParam.ipAddress, C_SDO_EPL_PORT);
             if (ret != kErrorOk)
                 return ret;
 #endif
-#endif
-
             break;
 
         // init of the manufacturer-specific profile area and the
