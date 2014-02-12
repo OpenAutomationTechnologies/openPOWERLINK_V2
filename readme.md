@@ -44,6 +44,12 @@ The documentation of the latest stack version is also available online on the
 openPOWERLINK website: <http://openpowerlink.sourceforge.net/>
 
 
+## Support
+
+Support on openPOWERLINK is available via the online discussion forums:
+* [Discussion](http://sourceforge.net/p/openpowerlink/discussion/)
+
+
 ## Download
 
 openPOWERLINK can be downloaded from its SourceForge project site:
