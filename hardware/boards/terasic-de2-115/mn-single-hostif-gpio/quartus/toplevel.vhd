@@ -44,6 +44,9 @@
 library ieee;
 use ieee.std_logic_1164.all;
 
+library libcommon;
+use libcommon.global.all;
+
 entity toplevel is
     port (
         -- 50 MHZ CLK IN
@@ -74,7 +77,7 @@ entity toplevel is
         LCD_RS          : out std_logic;
         LCD_RW          : out std_logic;
         -- HOST Interface
-        HOSTIF_AD       : inout std_logic_vector(15 downto 0);
+        HOSTIF_AD       : inout std_logic_vector(16 downto 0);
         HOSTIF_BE       : out std_logic_vector(1 downto 0);
         HOSTIF_CS_n     : out std_logic;
         HOSTIF_WR_n     : out std_logic;
@@ -109,18 +112,20 @@ architecture rtl of toplevel is
             host_0_sdram_0_dqm                  : out   std_logic_vector(3 downto 0);
             host_0_sdram_0_ras_n                : out   std_logic;
             host_0_sdram_0_we_n                 : out   std_logic;
-            multiplexedadbus_0_cs               : out   std_logic;
-            multiplexedadbus_0_ad               : inout std_logic_vector(15 downto 0) := (others => 'X');
-            multiplexedadbus_0_be               : out   std_logic_vector(1 downto 0);
-            multiplexedadbus_0_ale              : out   std_logic;
-            multiplexedadbus_0_wr               : out   std_logic;
-            multiplexedadbus_0_rd               : out   std_logic;
-            multiplexedadbus_0_ack              : in    std_logic                     := 'X';
             host_0_irq_irq                      : in    std_logic                     := 'X';
             lcd_data                            : inout std_logic_vector(7 downto 0)  := (others => 'X');
             lcd_E                               : out   std_logic;
             lcd_RS                              : out   std_logic;
-            lcd_RW                              : out   std_logic
+            lcd_RW                              : out   std_logic;
+            prl0_oPrlMst_cs                     : out   std_logic;
+            prl0_iPrlMst_ad_i                   : in    std_logic_vector(16 downto 0) := (others => 'X');
+            prl0_oPrlMst_ad_o                   : out   std_logic_vector(16 downto 0);
+            prl0_oPrlMst_ad_oen                 : out   std_logic;
+            prl0_oPrlMst_be                     : out   std_logic_vector(1 downto 0);
+            prl0_oPrlMst_ale                    : out   std_logic;
+            prl0_oPrlMst_wr                     : out   std_logic;
+            prl0_oPrlMst_rd                     : out   std_logic;
+            prl0_iPrlMst_ack                    : in    std_logic                     := 'X'
         );
     end component mnSingleHostifGpio;
 
@@ -147,8 +152,11 @@ architecture rtl of toplevel is
     signal hostifRd     : std_logic;
     signal hostifAle    : std_logic;
     signal hostifAck    : std_logic;
-    signal hostifIrq    : std_logic;
+    signal hostifAd_i   : std_logic_vector(HOSTIF_AD'range);
+    signal hostifAd_o   : std_logic_vector(HOSTIF_AD'range);
+    signal hostifAd_oen : std_logic;
 
+    signal hostifIrq    : std_logic;
 begin
 
     LCD_ON      <= '1';
@@ -161,6 +169,11 @@ begin
     HOSTIF_RD_n     <= not hostifRd;
     HOSTIF_ALE_n    <= not hostifAle;
     hostifAck       <= not HOSTIF_ACK_n;
+
+    -- TRISTATE Buffer for AD bus
+    HOSTIF_AD <= hostifAd_o when hostifAd_oen = '1' else (others => 'Z');
+    hostifAd_i <= HOSTIF_AD;
+
     hostifIrq       <= not HOSTIF_IRQ_n;
 
     inst : component mnSingleHostifGpio
@@ -189,13 +202,16 @@ begin
             host_0_sdram_0_ras_n            => SDRAM_RAS_n,
             host_0_sdram_0_we_n             => SDRAM_WE_n,
 
-            multiplexedadbus_0_cs           => hostifCs,
-            multiplexedadbus_0_ad           => HOSTIF_AD,
-            multiplexedadbus_0_be           => HOSTIF_BE,
-            multiplexedadbus_0_ale          => hostifAle,
-            multiplexedadbus_0_wr           => hostifWr,
-            multiplexedadbus_0_rd           => hostifRd,
-            multiplexedadbus_0_ack          => hostifAck,
+            prl0_oPrlMst_cs                 => hostifCs,
+            prl0_iPrlMst_ad_i               => hostifAd_i,
+            prl0_oPrlMst_ad_o               => hostifAd_o,
+            prl0_oPrlMst_ad_oen             => hostifAd_oen,
+            prl0_oPrlMst_be                 => HOSTIF_BE,
+            prl0_oPrlMst_ale                => hostifAle,
+            prl0_oPrlMst_wr                 => hostifWr,
+            prl0_oPrlMst_rd                 => hostifRd,
+            prl0_iPrlMst_ack                => hostifAck,
+
             host_0_irq_irq                  => hostifIrq,
 
             lcd_data                        => LCD_DQ,

@@ -44,6 +44,9 @@
 library ieee;
 use ieee.std_logic_1164.all;
 
+library libcommon;
+use libcommon.global.all;
+
 entity toplevel is
     port (
         -- 50 MHZ CLK IN

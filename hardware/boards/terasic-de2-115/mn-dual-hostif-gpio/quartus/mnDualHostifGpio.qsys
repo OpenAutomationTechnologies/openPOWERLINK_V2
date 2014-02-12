@@ -19,6 +19,11 @@
          value = "2";
          type = "int";
       }
+      datum sopceditor_expanded
+      {
+         value = "0";
+         type = "boolean";
+      }
    }
    element clk25
    {
@@ -26,6 +31,11 @@
       {
          value = "0";
          type = "int";
+      }
+      datum sopceditor_expanded
+      {
+         value = "0";
+         type = "boolean";
       }
    }
    element clk50
@@ -37,7 +47,7 @@
       }
       datum sopceditor_expanded
       {
-         value = "1";
+         value = "0";
          type = "boolean";
       }
    }
@@ -260,10 +270,10 @@
  <parameter name="globalResetBus" value="false" />
  <parameter name="hdlLanguage" value="VERILOG" />
  <parameter name="maxAdditionalLatency" value="1" />
- <parameter name="projectName" value="ink_de2-115.qpf" />
+ <parameter name="projectName">mn-dual-hostif-gpio.qpf</parameter>
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1385479913538" />
+ <parameter name="timeStamp" value="1397034514180" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk50" internal="clk50.clk_in" type="clock" dir="end" />
@@ -323,25 +333,21 @@
  </module>
  <module
    kind="hostinterface"
-   version="0.0.4"
+   version="1.0.0"
    enabled="1"
    name="hostinterface_0">
   <parameter name="sys_uniqueId" value="0" />
-  <parameter name="gui_interfaceTyp" value="0" />
-  <parameter name="gui_parallelMltplx" value="0" />
-  <parameter name="gui_parallelDwidth" value="16" />
   <parameter name="gui_sizeDynBuf0" value="2" />
   <parameter name="gui_sizeDynBuf1" value="2" />
   <parameter name="gui_sizeErrorCnter" value="3108" />
-  <parameter name="gui_sizeTxNmtQ" value="2" />
-  <parameter name="gui_sizeTxGenQ" value="2" />
-  <parameter name="gui_sizeTxSyncQ" value="2" />
+  <parameter name="gui_sizeTxNmtQ" value="8" />
+  <parameter name="gui_sizeTxGenQ" value="8" />
+  <parameter name="gui_sizeTxSyncQ" value="8" />
   <parameter name="gui_sizeTxVethQ" value="2" />
-  <parameter name="gui_sizeRxVethQ" value="1" />
-  <parameter name="gui_sizeK2UQ" value="8" />
-  <parameter name="gui_sizeU2KQ" value="8" />
-  <parameter name="gui_sizeTpdo" value="1024" />
-  <parameter name="gui_sizeRpdo" value="10240" />
+  <parameter name="gui_sizeRxVethQ" value="2" />
+  <parameter name="gui_sizeK2UQ" value="16" />
+  <parameter name="gui_sizeU2KQ" value="16" />
+  <parameter name="gui_sizePdo" value="49152" />
   <parameter name="AUTO_C0_CLOCK_RATE" value="100000000" />
  </module>
  <module kind="clock_source" version="13.0" enabled="1" name="clk100">
@@ -507,6 +513,7 @@
   <parameter name="gui_tmrPulseEn" value="false" />
   <parameter name="gui_tmrPulseWdt" value="10" />
   <parameter name="gui_actEn" value="false" />
+  <parameter name="gui_sdcEn" value="true" />
   <parameter name="AUTO_DMACLK_CLOCK_RATE" value="100000000" />
   <parameter name="AUTO_PKTCLK_CLOCK_RATE" value="-1" />
  </module>

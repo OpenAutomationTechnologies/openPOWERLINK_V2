@@ -44,10 +44,13 @@
 library ieee;
 use ieee.std_logic_1164.all;
 
+library libcommon;
+use libcommon.global.all;
+
 entity toplevel is
     port (
         -- 50 MHZ CLK IN
-        EXT_CLK         : in  std_logic;
+        EXT_CLK         : in    std_logic;
         -- PHY Interfaces
         PHY_GXCLK       : out   std_logic_vector(1 downto 0);
         PHY_RXCLK       : in    std_logic_vector(1 downto 0);
@@ -62,26 +65,26 @@ entity toplevel is
         PHY_MDC         : out   std_logic_vector(1 downto 0);
         PHY_RESET_n     : out   std_logic_vector(1 downto 0);
         -- EPCS
-        EPCS_DCLK       : out  std_logic;
-        EPCS_SCE        : out  std_logic;
-        EPCS_SDO        : out  std_logic;
-        EPCS_DATA0      : in  std_logic;
+        EPCS_DCLK       : out   std_logic;
+        EPCS_SCE        : out   std_logic;
+        EPCS_SDO        : out   std_logic;
+        EPCS_DATA0      : in    std_logic;
         -- 2 MB SRAM
-        SRAM_CE_n       : out  std_logic;
-        SRAM_OE_n       : out  std_logic;
-        SRAM_WE_n       : out  std_logic;
-        SRAM_ADDR       : out  std_logic_vector(20 downto 1);
-        SRAM_BE_n       : out  std_logic_vector(1 downto 0);
-        SRAM_DQ         : inout  std_logic_vector(15 downto 0);
+        SRAM_CE_n       : out   std_logic;
+        SRAM_OE_n       : out   std_logic;
+        SRAM_WE_n       : out   std_logic;
+        SRAM_ADDR       : out   std_logic_vector(20 downto 1);
+        SRAM_BE_n       : out   std_logic_vector(1 downto 0);
+        SRAM_DQ         : inout std_logic_vector(15 downto 0);
         -- HOST Interface
-        HOSTIF_AD       : inout std_logic_vector(15 downto 0);
-        HOSTIF_BE       : in std_logic_vector(1 downto 0);
-        HOSTIF_CS_n     : in std_logic;
-        HOSTIF_WR_n     : in std_logic;
-        HOSTIF_RD_n     : in std_logic;
-        HOSTIF_ALE_n    : in std_logic;
-        HOSTIF_ACK_n    : out std_logic;
-        HOSTIF_IRQ_n    : out std_logic
+        HOSTIF_AD       : inout std_logic_vector(16 downto 0);
+        HOSTIF_BE       : in    std_logic_vector(1 downto 0);
+        HOSTIF_CS_n     : in    std_logic;
+        HOSTIF_WR_n     : in    std_logic;
+        HOSTIF_RD_n     : in    std_logic;
+        HOSTIF_ALE_n    : in    std_logic;
+        HOSTIF_ACK_n    : out   std_logic;
+        HOSTIF_IRQ_n    : out   std_logic
     );
 end toplevel;
 
@@ -117,13 +120,15 @@ architecture rtl of toplevel is
             epcs_flash_sdo                              : out   std_logic;
             epcs_flash_data0                            : in    std_logic                     := 'X';
             hostinterface_0_irqout_irq                  : out   std_logic;
-            hostinterface_0_parhost_chipselect          : in    std_logic                     := 'X';
-            hostinterface_0_parhost_read                : in    std_logic                     := 'X';
-            hostinterface_0_parhost_write               : in    std_logic                     := 'X';
-            hostinterface_0_parhost_addressLatchEnable  : in    std_logic                     := 'X';
-            hostinterface_0_parhost_acknowledge         : out   std_logic;
-            hostinterface_0_parhost_byteenable          : in    std_logic_vector(1 downto 0)  := (others => 'X');
-            hostinterface_0_parhost_addressData         : inout std_logic_vector(15 downto 0) := (others => 'X')
+            prl0_iPrlSlv_cs                             : in    std_logic                     := 'X';
+            prl0_iPrlSlv_rd                             : in    std_logic                     := 'X';
+            prl0_iPrlSlv_wr                             : in    std_logic                     := 'X';
+            prl0_iPrlSlv_ale                            : in    std_logic                     := 'X';
+            prl0_oPrlSlv_ack                            : out   std_logic;
+            prl0_iPrlSlv_be                             : in    std_logic_vector(1 downto 0)  := (others => 'X');
+            prl0_oPrlSlv_ad_o                           : out   std_logic_vector(16 downto 0);
+            prl0_iPrlSlv_ad_i                           : in    std_logic_vector(16 downto 0) := (others => 'X');
+            prl0_oPrlSlv_ad_oen                         : out   std_logic
         );
     end component mnSingleHostifDrv;
 
@@ -151,8 +156,11 @@ architecture rtl of toplevel is
     signal parHost_write                : std_logic;
     signal parHost_addressLatchEnable   : std_logic;
     signal parHost_acknowledge          : std_logic;
-    signal host_irq                     : std_logic;
+    signal parHost_ad_o                 : std_logic_vector(HOSTIF_AD'range);
+    signal parHost_ad_i                 : std_logic_vector(HOSTIF_AD'range);
+    signal parHost_ad_oen               : std_logic;
 
+    signal host_irq                     : std_logic;
 begin
 
     SRAM_ADDR <= sramAddr(SRAM_ADDR'range);
@@ -166,6 +174,10 @@ begin
     parHost_write               <= not HOSTIF_WR_n;
     parHost_read                <= not HOSTIF_RD_n;
     parHost_addressLatchEnable  <= not HOSTIF_ALE_n;
+
+    -- TRISTATE Buffer for AD bus
+    HOSTIF_AD <= parHost_ad_o when parHost_ad_oen = '1' else (others => 'Z');
+    parHost_ad_i <= HOSTIF_AD;
 
     inst : component mnSingleHostifDrv
         port map (
@@ -200,13 +212,16 @@ begin
             epcs_flash_data0                            => EPCS_DATA0,
 
             hostinterface_0_irqout_irq                  => host_irq,
-            hostinterface_0_parhost_chipselect          => parHost_chipselect,
-            hostinterface_0_parhost_read                => parHost_read,
-            hostinterface_0_parhost_write               => parHost_write,
-            hostinterface_0_parhost_addressLatchEnable  => parHost_addressLatchEnable,
-            hostinterface_0_parhost_acknowledge         => parHost_acknowledge,
-            hostinterface_0_parhost_byteenable          => HOSTIF_BE,
-            hostinterface_0_parhost_addressData         => HOSTIF_AD
+
+            prl0_iPrlSlv_cs                             => parHost_chipselect,
+            prl0_iPrlSlv_rd                             => parHost_read,
+            prl0_iPrlSlv_wr                             => parHost_write,
+            prl0_iPrlSlv_ale                            => parHost_addressLatchEnable,
+            prl0_oPrlSlv_ack                            => parHost_acknowledge,
+            prl0_iPrlSlv_be                             => HOSTIF_BE,
+            prl0_oPrlSlv_ad_o                           => parHost_ad_o,
+            prl0_iPrlSlv_ad_i                           => parHost_ad_i,
+            prl0_oPrlSlv_ad_oen                         => parHost_ad_oen
         );
 
     -- Pll Instance

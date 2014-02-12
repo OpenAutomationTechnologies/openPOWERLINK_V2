@@ -19,6 +19,11 @@
          value = "2";
          type = "int";
       }
+      datum sopceditor_expanded
+      {
+         value = "0";
+         type = "boolean";
+      }
    }
    element clk25
    {
@@ -26,6 +31,11 @@
       {
          value = "0";
          type = "int";
+      }
+      datum sopceditor_expanded
+      {
+         value = "0";
+         type = "boolean";
       }
    }
    element clk50
@@ -37,7 +47,7 @@
       }
       datum sopceditor_expanded
       {
-         value = "1";
+         value = "0";
          type = "boolean";
       }
    }
@@ -109,7 +119,7 @@
          type = "boolean";
       }
    }
-   element multiplexedAdbus_0
+   element prlMaster_0
    {
       datum _sortIndex
       {
@@ -168,10 +178,10 @@
  <parameter name="globalResetBus" value="false" />
  <parameter name="hdlLanguage" value="VERILOG" />
  <parameter name="maxAdditionalLatency" value="0" />
- <parameter name="projectName" value="ink_de2-115.qpf" />
+ <parameter name="projectName">mn-single-hostif-gpio.qpf</parameter>
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1381301590396" />
+ <parameter name="timeStamp" value="1394467216351" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk50" internal="clk50.clk_in" type="clock" dir="end" />
@@ -199,16 +209,12 @@
    type="conduit"
    dir="end" />
  <interface
-   name="multiplexedadbus_0"
-   internal="multiplexedAdbus_0.adbus"
-   type="conduit"
-   dir="end" />
- <interface
    name="host_0_irq"
    internal="host_0.irq_bridge_0_receiver_irq"
    type="interrupt"
    dir="start" />
  <interface name="lcd" internal="lcd.external" type="conduit" dir="end" />
+ <interface name="prl0" internal="prlMaster_0.prl0" type="conduit" dir="end" />
  <module kind="clock_source" version="13.0" enabled="1" name="clk50">
   <parameter name="clockFrequency" value="50000000" />
   <parameter name="clockFrequencyKnown" value="true" />
@@ -279,17 +285,16 @@
   <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone IV E" />
  </module>
  <module
-   kind="multiplexedAdbus"
-   version="0.0.1"
-   enabled="1"
-   name="multiplexedAdbus_0">
-  <parameter name="AUTO_CLOCK_CLOCK_RATE" value="100000000" />
- </module>
- <module
    kind="altera_avalon_lcd_16207"
    version="13.0.1.99.2"
    enabled="1"
    name="lcd" />
+ <module kind="prlMaster" version="1.0.0" enabled="1" name="prlMaster_0">
+  <parameter name="gui_enableMux" value="true" />
+  <parameter name="gui_dataWidth" value="16" />
+  <parameter name="gui_addrWidth" value="17" />
+  <parameter name="AUTO_C0_CLOCK_RATE" value="100000000" />
+ </module>
  <connection
    kind="reset"
    version="13.0"
@@ -412,35 +417,6 @@
   <parameter name="baseAddress" value="0x0810" />
   <parameter name="defaultConnection" value="false" />
  </connection>
- <connection
-   kind="clock"
-   version="13.0"
-   start="clk100.clk"
-   end="multiplexedAdbus_0.clock" />
- <connection
-   kind="avalon"
-   version="13.0"
-   start="host_0.fast_bridge"
-   end="multiplexedAdbus_0.s0">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0000" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk50.clk_reset"
-   end="multiplexedAdbus_0.reset" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk100.clk_reset"
-   end="multiplexedAdbus_0.reset" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk25.clk_reset"
-   end="multiplexedAdbus_0.reset" />
  <connection kind="clock" version="13.0" start="clk50.clk" end="lcd.clk" />
  <connection
    kind="avalon"
@@ -454,6 +430,31 @@
  <connection kind="reset" version="13.0" start="clk50.clk_reset" end="lcd.reset" />
  <connection kind="reset" version="13.0" start="clk100.clk_reset" end="lcd.reset" />
  <connection kind="reset" version="13.0" start="clk25.clk_reset" end="lcd.reset" />
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="host_0.fast_bridge"
+   end="prlMaster_0.s0">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection kind="clock" version="13.0" start="clk100.clk" end="prlMaster_0.c0" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk50.clk_reset"
+   end="prlMaster_0.r0" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk100.clk_reset"
+   end="prlMaster_0.r0" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk25.clk_reset"
+   end="prlMaster_0.r0" />
  <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
  <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="0" />
 </system>

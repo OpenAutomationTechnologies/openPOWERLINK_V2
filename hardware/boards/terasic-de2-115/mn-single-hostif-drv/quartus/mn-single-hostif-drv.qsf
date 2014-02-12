@@ -72,6 +72,9 @@ set_global_assignment -name RESERVE_DATA1_AFTER_CONFIGURATION           "USE AS 
 set_global_assignment -name RESERVE_FLASH_NCE_AFTER_CONFIGURATION       "USE AS REGULAR IO"
 set_global_assignment -name RESERVE_DCLK_AFTER_CONFIGURATION            "USE AS REGULAR IO"
 
+# Get ipcore library
+set_global_assignment -name QIP_FILE            ../../../../ipcore/altera/components/libcommon.qip
+
 # Design settings
 set_global_assignment -name TOP_LEVEL_ENTITY    toplevel
 set_global_assignment -name SDC_FILE            mnSingleHostifDrv.sdc
@@ -173,8 +176,6 @@ set_location_assignment PIN_AF20    -to HOSTIF_WR_n
 set_location_assignment PIN_AE20    -to HOSTIF_ALE_n
 set_location_assignment PIN_AH23    -to HOSTIF_ACK_n
 set_location_assignment PIN_AG26    -to HOSTIF_IRQ_n
-set_location_assignment PIN_AF25    -to HOSTIF_BE[0]
-set_location_assignment PIN_AC22    -to HOSTIF_BE[1]
 set_location_assignment PIN_AB22    -to HOSTIF_AD[0]
 set_location_assignment PIN_AC15    -to HOSTIF_AD[1]
 set_location_assignment PIN_AB21    -to HOSTIF_AD[2]
@@ -191,6 +192,9 @@ set_location_assignment PIN_AD19    -to HOSTIF_AD[12]
 set_location_assignment PIN_AF15    -to HOSTIF_AD[13]
 set_location_assignment PIN_AF24    -to HOSTIF_AD[14]
 set_location_assignment PIN_AE21    -to HOSTIF_AD[15]
+set_location_assignment PIN_AF25    -to HOSTIF_AD[16]
+set_location_assignment PIN_AD25    -to HOSTIF_BE[0]
+set_location_assignment PIN_AH25    -to HOSTIF_BE[1]
 
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to HOSTIF_CS_n
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to HOSTIF_RD_n

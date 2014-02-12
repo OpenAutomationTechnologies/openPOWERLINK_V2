@@ -44,6 +44,9 @@
 library ieee;
 use ieee.std_logic_1164.all;
 
+library libcommon;
+use libcommon.global.all;
+
 entity toplevel is
     port (
         -- 50 MHZ CLK IN
@@ -251,7 +254,7 @@ begin
         tmpHex <= hex((i+1)*4-1 downto i*4);
         sevenSegArray(i) <= tmpSev;
 
-        bcdTo7Seg0 : entity work.bcd2led
+        bcdTo7Seg0 : entity libcommon.bcd2led
             port map (
                 iBcdVal => tmpHex,
                 oLed    => open,
