@@ -50,7 +50,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/eventk.h>
 #include <kernel/errhndk.h>
 #include <oplk/nmt.h>
-#include <common/edrv.h>
+#include <kernel/edrv.h>
 #include <oplk/benchmark.h>
 
 #if EPL_TIMER_USE_HIGHRES != FALSE

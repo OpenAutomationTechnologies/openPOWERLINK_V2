@@ -45,7 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplk/oplkinc.h>
 #include <oplk/dll.h>
 #include <oplk/event.h>
-#include <common/edrv.h>
+#include <kernel/edrv.h>
 
 
 //------------------------------------------------------------------------------

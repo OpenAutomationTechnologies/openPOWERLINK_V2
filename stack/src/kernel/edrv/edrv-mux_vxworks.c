@@ -39,7 +39,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <common/edrv.h>
+#include <kernel/edrv.h>
 #include <oplk/ami.h>
 
 #include <unistd.h>
