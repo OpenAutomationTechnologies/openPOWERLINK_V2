@@ -427,15 +427,15 @@ SET(OPLK_HEADERS
     )
 
 SET(STACK_HEADERS
-    ${STACK_INCLUDE_DIR}/circbuffer.h
-    ${STACK_INCLUDE_DIR}/ctrl.h
-    ${STACK_INCLUDE_DIR}/ctrlcal.h
-    ${STACK_INCLUDE_DIR}/ctrlcal-mem.h
-    ${STACK_INCLUDE_DIR}/dllcal.h
-    ${STACK_INCLUDE_DIR}/edrv.h
-    ${STACK_INCLUDE_DIR}/errhnd.h
-    ${STACK_INCLUDE_DIR}/pdo.h
-    ${STACK_INCLUDE_DIR}/target.h
+    ${STACK_INCLUDE_DIR}/common/circbuffer.h
+    ${STACK_INCLUDE_DIR}/common/ctrl.h
+    ${STACK_INCLUDE_DIR}/common/ctrlcal.h
+    ${STACK_INCLUDE_DIR}/common/ctrlcal-mem.h
+    ${STACK_INCLUDE_DIR}/common/dllcal.h
+    ${STACK_INCLUDE_DIR}/common/edrv.h
+    ${STACK_INCLUDE_DIR}/common/errhnd.h
+    ${STACK_INCLUDE_DIR}/common/pdo.h
+    ${STACK_INCLUDE_DIR}/common/target.h
     )
 
 SET(USER_HEADERS
