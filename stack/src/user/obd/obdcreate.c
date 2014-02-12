@@ -141,7 +141,7 @@ tOplkError obd_initObd(tObdInitParam MEM* pInitParam_p)
 #if (defined (OBD_USER_OD) && (OBD_USER_OD != FALSE))
         {
             // to begin no user OD is defined
-            pInitParam_p->m_pUserPart = NULL;
+            pInitParam_p->pUserPart = NULL;
         }
 #endif
     }
