@@ -167,7 +167,7 @@ struct sEdrvRxBuffer
     tEdrvBufferInFrame  bufferInFrame;  ///< Position of Rx buffer in a frame
     UINT                rxFrameSize;    ///< Size of Rx frame (without CRC)
     UINT8*              pBuffer;        ///< Pointer to the Rx buffer
-    tTimestamp*         rxTimeStamp;    ///< Pointer to Rx time stamp
+    tTimestamp*         pRxTimeStamp;   ///< Pointer to Rx time stamp
 };
 
 /**
