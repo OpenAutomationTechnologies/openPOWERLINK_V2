@@ -19,15 +19,15 @@ generates Makefiles by default.
 
 * Creating debug libraries
 
-      > cd openPOWERLINK/stack/build
-      > cmake -DCMAKE_BUILD_TYPE=Debug ..
+      > cd openPOWERLINK/stack/build/linux
+      > cmake -DCMAKE_BUILD_TYPE=Debug ../..
       > make
       > make install
 
 * Creating release libraries
 
-      > cd openPOWERLINK/stack/build
-      > cmake -DCMAKE_BUILD_TYPE=Release ..
+      > cd openPOWERLINK/stack/build/linux
+      > cmake -DCMAKE_BUILD_TYPE=Release ../..
       > make
       > make install
 
@@ -41,19 +41,19 @@ Open a Visual Studio command line and enter the following commands:
 
 * Creating debug libraries
 
-      > cd <openPOWERLINK_directory>\stack\build
-      > cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Debug ..
+      > cd <openPOWERLINK_directory>\stack\build\windows
+      > cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Debug ..\..
       > nmake
       > nmake install
 
 * Creating release libraries
 
-      > cd <openPOWERLINK_directory>\stack\build
-      > cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release ..
+      > cd <openPOWERLINK_directory>\stack\build\windows
+      > cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release ..\..
       > nmake
       > nmake install
 
-The default library installation path is: `<openPOWERLINK_DIR>/lib/windows/<ARCH>`
+The default library installation path is: `<openPOWERLINK_DIR>\lib\windows\<ARCH>`
 
 __NOTE:__ You can also generate a Visual Studio Solution and compile the
 libraries in Visual Studio. Please refer to the CMAKE documentation for
