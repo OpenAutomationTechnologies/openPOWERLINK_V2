@@ -1725,7 +1725,7 @@ static tOplkError processReceivedSoc(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
         if ((ret = dllk_postEvent(kEventTypeSync)) != kErrorOk)
             return ret;
 #elif (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER)
-        ret = synctimer_syncTriggerAtTimeStamp(pRxBuffer_p->rxTimeStamp);
+        ret = synctimer_syncTriggerAtTimeStamp(pRxBuffer_p->pRxTimeStamp);
         if (ret != kErrorOk)
             return ret;
 #endif
@@ -2044,7 +2044,7 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
         if (reqServiceId == kDllReqServiceSync)
         {   // SyncRequest -> store node ID and TimeStamp
             dllkInstance_g.syncReqPrevNodeId = nodeId;
-            dllkInstance_g.syncReqPrevTimeStamp = *pRxBuffer_p->rxTimeStamp;
+            dllkInstance_g.syncReqPrevTimeStamp = *pRxBuffer_p->pRxTimeStamp;
         }
     }
 #endif
@@ -2170,7 +2170,7 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
             {
                 UINT32      syncDelayNs;
                 syncDelayNs = timestamp_calcTimeDiff(&dllkInstance_g.syncReqPrevTimeStamp,
-                                                     pRxBuffer_p->rxTimeStamp) -
+                                                     pRxBuffer_p->pRxTimeStamp) -
                                                      // Transmission time for SyncReq frame
                                                      (C_DLL_T_MIN_FRAME + C_DLL_T_PREAMBLE);
 

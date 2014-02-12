@@ -1211,7 +1211,7 @@ static INT rxHook(void* pArg_p, ometh_packet_typ* pPacket_p, OMETH_BUF_FREE_FCT*
     rxBuffer.pBuffer = (UINT8*) &pPacket_p->data;
     rxBuffer.rxFrameSize = pPacket_p->length;
     timeStamp.timeStamp = omethGetTimestamp(pPacket_p);
-    rxBuffer.rxTimeStamp = &timeStamp;
+    rxBuffer.pRxTimeStamp = &timeStamp;
 
     // Before handing over the Rx packet to the stack invalidate the packet's
     // memory range.
