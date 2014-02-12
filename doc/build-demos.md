@@ -24,8 +24,8 @@ library versions must be available.
 
 Open a Visual Studio command line and enter the following commands:
 
-      > cd <openPOWERLINK_dir>/apps/<demo_dir>/build/windows
-      > cmake -G"NMake Makefiles" ../..
+      > cd <openPOWERLINK_dir>\apps\<demo_dir>\build\windows
+      > cmake -G"NMake Makefiles" ..\..
       > nmake
       > nmake install
 
