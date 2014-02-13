@@ -70,6 +70,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define HWTIMER_SYNC            0   ///< Sync hardware timer
 #define HWTIMER_EXT_SYNC        1   ///< External sync hardware timer
 
+#if (OPENMAC_TIMERCNT > 1)
+#define TIMER_USE_EXT_SYNC_INT
+#endif
+
 // borrowed from omethlibint.h
 #define GET_TYPE_BASE(typ, element, ptr)    \
     ((typ*)( ((size_t)ptr) - (size_t)&((typ*)0)->element ))
