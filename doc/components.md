@@ -7,11 +7,8 @@ A POWERLINK node using the openPOWERLINK stack is composed of the
 following components:
 
 1. openPOWERLINK Stack Library
-
 2. openPOWERLINK Driver (*Required only if using a separate driver!*)
-
 3. Application
-
 
 # openPOWERLINK Stack Libraries {#sect_components_stacklib}
 
