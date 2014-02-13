@@ -7,7 +7,7 @@
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronik GmbH
 All rights reserved.
 
@@ -37,9 +37,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <windows.h>
 #include <stdio.h>
 #include <stdarg.h>
+
+#define _WIN32_WINNT 0x0501     // Windows version must be at least Windows XP
+#define WIN32_LEAN_AND_MEAN     // Do not use extended Win32 API functions
+#include <Windows.h>
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //

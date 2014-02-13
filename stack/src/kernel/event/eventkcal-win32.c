@@ -13,7 +13,7 @@ platform. It uses the circular buffer library for all event queues.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -48,8 +48,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/eventkcal.h>
 #include <kernel/eventkcalintf.h>
 #include <common/circbuffer.h>
-
-#include <Windows.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //

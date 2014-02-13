@@ -15,7 +15,7 @@ be used instead of special shared memory functions.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -47,8 +47,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplk/oplkinc.h>
 
 #include "circbuf-arch.h"
-
-#include <Windows.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //

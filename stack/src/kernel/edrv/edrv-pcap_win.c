@@ -40,12 +40,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#define _WINSOCKAPI_    // prevent windows.h from including winsock.h
-#define WPCAP           // include Windows pcap extensions
+#include <oplk/oplkinc.h>
 #include <kernel/edrv.h>
+
+#define WPCAP           // include Windows pcap extensions
 #include <pcap.h>
 #include <iphlpapi.h>
-#include <string.h>
 
 #include <kernel/hrestimer.h>
 
