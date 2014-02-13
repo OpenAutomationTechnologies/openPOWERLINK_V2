@@ -96,7 +96,7 @@ area from 0x1B00 - 0x1FFF.
 
         // Object 1F82h: NMT_FeatureFlags_U32
         OBD_BEGIN_INDEX_RAM(0x1F82, 0x01, NULL)
-            OBD_SUBINDEX_RAM_VAR(0x1F82, 0x00, kObdTypeUInt32, kObdAccR, tObdUnsigned32, NMT_FeatureFlags_U32, EPL_DEF_FEATURE_FLAGS)
+            OBD_SUBINDEX_RAM_VAR(0x1F82, 0x00, kObdTypeUInt32, kObdAccR, tObdUnsigned32, NMT_FeatureFlags_U32, PLK_DEF_FEATURE_FLAGS)
         OBD_END_INDEX(0x1F82)
 
         // Object 1F83h: NMT_EPLVersion_U8
