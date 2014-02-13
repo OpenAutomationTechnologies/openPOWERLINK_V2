@@ -61,7 +61,7 @@ extern "C" {
 
 tOplkError initApp(void);
 void shutdownApp (void);
-tOplkError PUBLIC processSync(void);
+tOplkError processSync(void);
 void printOutputs(void);
 void printInputs(void);
 void setupInputs(void);

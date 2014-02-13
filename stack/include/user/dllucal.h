@@ -50,7 +50,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-typedef tOplkError (PUBLIC * tEplDlluCbAsnd) (tFrameInfo * pFrameInfo_p);
+typedef tOplkError (*tEplDlluCbAsnd) (tFrameInfo* pFrameInfo_p);
 
 //------------------------------------------------------------------------------
 // function prototypes

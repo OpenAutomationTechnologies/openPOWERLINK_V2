@@ -83,7 +83,7 @@ static BOOL fGsOff_l;
 tOplkError selectPcapDevice(char *pDevName_p);
 #endif
 void initEvents (BOOL* pfGsOff_p);
-tOplkError processEvents(tOplkApiEventType EventType_p, tOplkApiEventArg* pEventArg_p, void GENERIC* pUserArg_p);
+tOplkError processEvents(tOplkApiEventType EventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
 
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //

@@ -65,12 +65,12 @@ tOplkError pdou_init(tSyncCb pfnSyncCb_p);
 tOplkError pdou_exit(void);
 
 #if defined(CONFIG_INCLUDE_PDO)
-OPLKDLLEXPORT tOplkError PUBLIC pdou_cbObdAccess(tObdCbParam MEM* pParam_p);
+OPLKDLLEXPORT tOplkError pdou_cbObdAccess(tObdCbParam MEM* pParam_p);
 #else
 #define pdou_cbObdAccess        NULL
 #endif
 
-tOplkError PUBLIC pdou_cbNmtStateChange(tEventNmtStateChange NmtStateChange_p);
+tOplkError pdou_cbNmtStateChange(tEventNmtStateChange NmtStateChange_p);
 
 tOplkError pdou_copyRxPdoToPi (void);
 tOplkError pdou_copyTxPdoFromPi (void);

@@ -82,8 +82,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // TracePoint support for realtime-debugging
 #ifdef _DBG_TRACE_POINTS_
-    void  PUBLIC  TgtDbgSignalTracePoint (UINT8 bTracePointNumber_p);
-    void  PUBLIC  TgtDbgPostTraceValue (UINT32 dwTraceValue_p);
+    void TgtDbgSignalTracePoint (UINT8 bTracePointNumber_p);
+    void TgtDbgPostTraceValue (UINT32 dwTraceValue_p);
     #define TGT_DBG_SIGNAL_TRACE_POINT(p)   TgtDbgSignalTracePoint(p)
     #define TGT_DBG_POST_TRACE_VALUE(v)     TgtDbgPostTraceValue(v)
 #else
@@ -1443,7 +1443,7 @@ The function implements the callback function for Ident responses
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError PUBLIC cbIdentResponse(UINT nodeId_p, tIdentResponse* pIdentResponse_p)
+static tOplkError cbIdentResponse(UINT nodeId_p, tIdentResponse* pIdentResponse_p)
 {
     tOplkError      ret = kErrorOk;
     tObdSize        obdSize;
@@ -1497,7 +1497,7 @@ The function implements the callback function for Status responses
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError PUBLIC cbStatusResponse(UINT nodeId_p, tStatusResponse* pStatusResponse_p)
+static tOplkError cbStatusResponse(UINT nodeId_p, tStatusResponse* pStatusResponse_p)
 {
     tOplkError      ret = kErrorOk;
 
@@ -3718,9 +3718,7 @@ of SyncReq which is used for measurement.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError PUBLIC prcCbSyncResMeasure(
-                                  UINT                  nodeId_p,
-                                  tSyncResponse*     	pSyncResponse_p)
+static tOplkError prcCbSyncResMeasure(UINT nodeId_p, tSyncResponse* pSyncResponse_p)
 {
     tOplkError          ret;
     UINT                nodeIdPredNode;
@@ -3861,7 +3859,7 @@ of SyncReq which is used for shifting.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError PUBLIC prcCbSyncResShift(UINT nodeId_p, tSyncResponse* pSyncResponse_p)
+static tOplkError prcCbSyncResShift(UINT nodeId_p, tSyncResponse* pSyncResponse_p)
 {
     tOplkError              ret;
     tNmtMnuNodeInfo*        pNodeInfo;
@@ -3998,7 +3996,7 @@ of SyncReq which is used for insertion.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError PUBLIC prcCbSyncResAdd(UINT nodeId_p, tSyncResponse* pSyncResponse_p)
+static tOplkError prcCbSyncResAdd(UINT nodeId_p, tSyncResponse* pSyncResponse_p)
 {
     tOplkError              ret;
     tNmtMnuNodeInfo*        pNodeInfo;
