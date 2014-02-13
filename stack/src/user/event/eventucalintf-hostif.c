@@ -236,7 +236,7 @@ tOplkError eventucal_postEventHostif (tEventQueue eventQueue_p, tEvent *pEvent_p
 {
     tOplkError          ret = kErrorOk;
     tQueueReturn        lfqRet;
-    DWORD               aPostBuffer[(sizeof(tEvent) + EPL_MAX_EVENT_ARG_SIZE)/4];
+    DWORD               aPostBuffer[(sizeof(tEvent) + MAX_EVENT_ARG_SIZE)/4];
     BYTE*               pPostBuffer = (BYTE*)aPostBuffer;
     ULONG               dataSize;
 
@@ -292,8 +292,8 @@ tOplkError eventucal_processEventHostif(tEventQueue eventQueue_p)
     tOplkError          ret = kErrorOk;
     tQueueReturn        lfqRet;
     tEvent*             pEplEvent;
-    WORD                dataSize = sizeof(tEvent) + EPL_MAX_EVENT_ARG_SIZE;
-    DWORD               aRxBuffer[(sizeof(tEvent) + EPL_MAX_EVENT_ARG_SIZE)/4];
+    WORD                dataSize = sizeof(tEvent) + MAX_EVENT_ARG_SIZE;
+    DWORD               aRxBuffer[(sizeof(tEvent) + MAX_EVENT_ARG_SIZE)/4];
     BYTE*               pRxBuffer = (BYTE*)aRxBuffer;
 
     if (eventQueue_p > kEventQueueNum)

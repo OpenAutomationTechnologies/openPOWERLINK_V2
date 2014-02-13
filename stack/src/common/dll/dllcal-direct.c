@@ -49,9 +49,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define EPL_DLLCALDIRECT_TXBUF_SIZE     C_IP_MAX_MTU    ///< TX buffer size
-#define EPL_DLLCALDIRECT_TXBUF_EMPTY    0                   ///< TX buffer marked as empty
-#define EPL_DLLCALDIRECT_TXBUF_FILLING  1                   ///< TX buffer makred as being filled
+#define DLLCALDIRECT_TXBUF_SIZE     C_IP_MAX_MTU        ///< TX buffer size
+#define DLLCALDIRECT_TXBUF_EMPTY    0                   ///< TX buffer marked as empty
+#define DLLCALDIRECT_TXBUF_FILLING  1                   ///< TX buffer makred as being filled
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -83,7 +83,7 @@ typedef struct sDllCalDirectInstance
 {
     tDllCalQueue        dllCalQueue;            ///< DLL CAL queue
     UINT                frameSize;              ///< size of frame in frame buffer (empty if zero)
-    BYTE                aFrameBuffer[EPL_DLLCALDIRECT_TXBUF_SIZE];   ///< frame buffer
+    BYTE                aFrameBuffer[DLLCALDIRECT_TXBUF_SIZE];   ///< frame buffer
     struct sDllCalDirectInstance *pNext;   ///< pointer to next instance in direct module
 } tDllCalDirectInstance;
 
@@ -214,7 +214,7 @@ static tOplkError addInstance (tDllCalQueueInstance *ppDllCalQueue_p,
         pDllCalDirectInstance->dllCalQueue = dllCalQueue_p;
 
         //reset TX buffer
-        pDllCalDirectInstance->frameSize = EPL_DLLCALDIRECT_TXBUF_EMPTY;
+        pDllCalDirectInstance->frameSize = DLLCALDIRECT_TXBUF_EMPTY;
     }
     else
     {
@@ -320,7 +320,7 @@ static tOplkError insertDataBlock (tDllCalQueueInstance pDllCalQueue_p,
         goto Exit;
     }
 
-    if(pDllCalDirectInstance->frameSize != EPL_DLLCALDIRECT_TXBUF_EMPTY)
+    if(pDllCalDirectInstance->frameSize != DLLCALDIRECT_TXBUF_EMPTY)
     {
         //TX buffer is not free
         ret = kErrorDllAsyncTxBufferFull;
@@ -328,7 +328,7 @@ static tOplkError insertDataBlock (tDllCalQueueInstance pDllCalQueue_p,
     }
 
     //mark buffer that it is being filled
-    pDllCalDirectInstance->frameSize = EPL_DLLCALDIRECT_TXBUF_FILLING;
+    pDllCalDirectInstance->frameSize = DLLCALDIRECT_TXBUF_FILLING;
 
     OPLK_MEMCPY(pDllCalDirectInstance->aFrameBuffer, pData_p, *pDataSize_p);
 
@@ -369,8 +369,8 @@ static tOplkError getDataBlock (tDllCalQueueInstance pDllCalQueue_p,
         goto Exit;
     }
 
-    if(pDllCalDirectInstance->frameSize == EPL_DLLCALDIRECT_TXBUF_EMPTY ||
-       pDllCalDirectInstance->frameSize == EPL_DLLCALDIRECT_TXBUF_FILLING)
+    if(pDllCalDirectInstance->frameSize == DLLCALDIRECT_TXBUF_EMPTY ||
+       pDllCalDirectInstance->frameSize == DLLCALDIRECT_TXBUF_FILLING)
     {
         //TX buffer is empty or not ready
         ret = kErrorDllAsyncTxBufferEmpty;
@@ -391,7 +391,7 @@ static tOplkError getDataBlock (tDllCalQueueInstance pDllCalQueue_p,
     *pDataSize_p = pDllCalDirectInstance->frameSize;
 
     //mark buffer is empty
-    pDllCalDirectInstance->frameSize = EPL_DLLCALDIRECT_TXBUF_EMPTY;
+    pDllCalDirectInstance->frameSize = DLLCALDIRECT_TXBUF_EMPTY;
 
 Exit:
     return ret;
@@ -422,8 +422,8 @@ static tOplkError getDataBlockCount (tDllCalQueueInstance pDllCalQueue_p,
         return kErrorInvalidInstanceParam;
     }
 
-    if(pDllCalDirectInstance->frameSize == EPL_DLLCALDIRECT_TXBUF_EMPTY ||
-       pDllCalDirectInstance->frameSize == EPL_DLLCALDIRECT_TXBUF_FILLING)
+    if(pDllCalDirectInstance->frameSize == DLLCALDIRECT_TXBUF_EMPTY ||
+       pDllCalDirectInstance->frameSize == DLLCALDIRECT_TXBUF_FILLING)
     {
         *pDataBlockCount_p = 0;
     }
@@ -463,7 +463,7 @@ static tOplkError resetDataBlockQueue (tDllCalQueueInstance pDllCalQueue_p,
     }
 
     //empty the buffer
-    pDllCalDirectInstance->frameSize = EPL_DLLCALDIRECT_TXBUF_EMPTY;
+    pDllCalDirectInstance->frameSize = DLLCALDIRECT_TXBUF_EMPTY;
 
     return kErrorOk;
 }

@@ -104,8 +104,8 @@ typedef struct
     atomic_t                kernelEventCount;
     BOOL                    fThreadIsRunning;
     BOOL                    fInitialized;
-    BYTE                    aUintRxBuffer[sizeof(tEvent) + EPL_MAX_EVENT_ARG_SIZE];
-    BYTE                    aK2URxBuffer[sizeof(tEvent) + EPL_MAX_EVENT_ARG_SIZE];
+    BYTE                    aUintRxBuffer[sizeof(tEvent) + MAX_EVENT_ARG_SIZE];
+    BYTE                    aK2URxBuffer[sizeof(tEvent) + MAX_EVENT_ARG_SIZE];
 } tEventkCalInstance;
 
 //------------------------------------------------------------------------------

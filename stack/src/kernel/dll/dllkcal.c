@@ -79,9 +79,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 #if CONFIG_DLL_PRES_CHAINING_MN != FALSE
-#define EPL_DLLKCAL_MAX_QUEUES  6   // CnGenReq, CnNmtReq, {MnGenReq, MnNmtReq}, MnIdentReq, MnStatusReq, SyncReq
+#define DLLKCAL_MAX_QUEUES  6   // CnGenReq, CnNmtReq, {MnGenReq, MnNmtReq}, MnIdentReq, MnStatusReq, SyncReq
 #else
-#define EPL_DLLKCAL_MAX_QUEUES  5   // CnGenReq, CnNmtReq, {MnGenReq, MnNmtReq}, MnIdentReq, MnStatusReq
+#define DLLKCAL_MAX_QUEUES  5   // CnGenReq, CnNmtReq, {MnGenReq, MnNmtReq}, MnIdentReq, MnStatusReq
 #endif
 
 //------------------------------------------------------------------------------
@@ -795,7 +795,7 @@ tOplkError dllkcal_getSoaRequest(tDllReqServiceId* pReqServiceId_p,
     UNUSED_PARAMETER(pSoaPayload_p);
 #endif
 
-    for (count = EPL_DLLKCAL_MAX_QUEUES; count > 0; count--)
+    for (count = DLLKCAL_MAX_QUEUES; count > 0; count--)
     {
         switch (instance_l.nextRequestQueue)
         {

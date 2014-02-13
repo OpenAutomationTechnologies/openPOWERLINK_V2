@@ -49,7 +49,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // define super-states and masks to identify a super-state
 #define NMT_GS_POWERED              0x0008  // super state
 #define NMT_GS_INITIALISATION       0x0009  // super state
-#define EPL_NMT_GS_COMMUNICATING    0x000C  // super state
+#define NMT_GS_COMMUNICATING        0x000C  // super state
 #define NMT_CS_PLKMODE              0x000D  // super state
 #define NMT_MS_PLKMODE              0x000D  // super state
 
