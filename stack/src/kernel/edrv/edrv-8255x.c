@@ -122,8 +122,8 @@ DAMAGE.
 //------------------------------------------------------------------------------
 // TracePoint support for realtime-debugging
 #ifdef _DBG_TRACE_POINTS_
-    void PUBLIC TgtDbgSignalTracePoint (UINT8 tracePointNumber_p);
-    void PUBLIC TgtDbgPostTraceValue (UINT32 traceValue_p);
+    void TgtDbgSignalTracePoint (UINT8 tracePointNumber_p);
+    void TgtDbgPostTraceValue (UINT32 traceValue_p);
 #define TGT_DBG_SIGNAL_TRACE_POINT(p) TgtDbgSignalTracePoint(p)
 #define TGT_DBG_POST_TRACE_VALUE(v) TgtDbgPostTraceValue(v)
 #else

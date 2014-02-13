@@ -83,33 +83,33 @@ static BOOL*    pfGsOff_l;
 //------------------------------------------------------------------------------
 static tOplkError processStateChangeEvent(tOplkApiEventType EventType_p,
                                           tOplkApiEventArg* pEventArg_p,
-                                          void GENERIC* pUserArg_p);
+                                          void* pUserArg_p);
 
 static tOplkError processErrorWarningEvent(tOplkApiEventType EventType_p,
                                            tOplkApiEventArg* pEventArg_p,
-                                           void GENERIC* pUserArg_p);
+                                           void* pUserArg_p);
 
 static tOplkError processHistoryEvent(tOplkApiEventType EventType_p,
                                       tOplkApiEventArg* pEventArg_p,
-                                      void GENERIC* pUserArg_p);
+                                      void* pUserArg_p);
 
 static tOplkError processNodeEvent(tOplkApiEventType EventType_p,
                                    tOplkApiEventArg* pEventArg_p,
-                                   void GENERIC* pUserArg_p);
+                                   void* pUserArg_p);
 
 #ifdef CONFIG_INCLUDE_CFM
 static tOplkError processCfmProgressEvent(tOplkApiEventType EventType_p,
                                           tOplkApiEventArg* pEventArg_p,
-                                          void GENERIC* pUserArg_p);
+                                          void* pUserArg_p);
 
 static tOplkError processCfmResultEvent(tOplkApiEventType EventType_p,
                                         tOplkApiEventArg* pEventArg_p,
-                                        void GENERIC* pUserArg_p);
+                                        void* pUserArg_p);
 #else
 static tOplkError setDefaultNodeAssignment(void);
 static tOplkError processSdoEvent(tOplkApiEventType EventType_p,
                                   tOplkApiEventArg* pEventArg_p,
-                                  void GENERIC* pUserArg_p);
+                                  void* pUserArg_p);
 #endif
 
 //============================================================================//
@@ -150,9 +150,9 @@ The function implements the applications stack event handler.
 \ingroup module_demo_mn_console
 */
 //------------------------------------------------------------------------------
-tOplkError PUBLIC processEvents(tOplkApiEventType EventType_p,
-                                tOplkApiEventArg* pEventArg_p,
-                                void GENERIC* pUserArg_p)
+tOplkError processEvents(tOplkApiEventType EventType_p,
+                         tOplkApiEventArg* pEventArg_p,
+                         void* pUserArg_p)
 {
     tOplkError          ret = kErrorOk;
 
@@ -221,7 +221,7 @@ The function processes state change events.
 //------------------------------------------------------------------------------
 static tOplkError processStateChangeEvent(tOplkApiEventType EventType_p,
                                           tOplkApiEventArg* pEventArg_p,
-                                          void GENERIC* pUserArg_p)
+                                          void* pUserArg_p)
 {
     tOplkError                  ret = kErrorOk;
     tEventNmtStateChange*       pNmtStateChange = &pEventArg_p->nmtStateChange;
@@ -303,7 +303,7 @@ The function processes error and warning events.
 //------------------------------------------------------------------------------
 static tOplkError processErrorWarningEvent(tOplkApiEventType EventType_p,
                                            tOplkApiEventArg* pEventArg_p,
-                                           void GENERIC* pUserArg_p)
+                                           void* pUserArg_p)
 {
     // error or warning occurred within the stack or the application
     // on error the API layer stops the NMT state machine
@@ -370,7 +370,7 @@ The function processes history events.
 //------------------------------------------------------------------------------
 static tOplkError processHistoryEvent(tOplkApiEventType EventType_p,
                                       tOplkApiEventArg* pEventArg_p,
-                                      void GENERIC* pUserArg_p)
+                                      void* pUserArg_p)
 {
     tErrHistoryEntry*    pHistoryEntry = &pEventArg_p->errorHistoryEntry;
 
@@ -409,7 +409,7 @@ The function processes node events.
 //------------------------------------------------------------------------------
 static tOplkError processNodeEvent(tOplkApiEventType EventType_p,
                                    tOplkApiEventArg* pEventArg_p,
-                                   void GENERIC* pUserArg_p)
+                                   void* pUserArg_p)
 {
     tOplkApiEventNode*   pNode = &pEventArg_p->nodeEvent;
 
@@ -466,7 +466,7 @@ The function processes CFM progress events.
 //------------------------------------------------------------------------------
 static tOplkError processCfmProgressEvent(tOplkApiEventType EventType_p,
                                           tOplkApiEventArg* pEventArg_p,
-                                          void GENERIC* pUserArg_p)
+                                          void* pUserArg_p)
 {
     tCfmEventCnProgress*     pCfmProgress = &pEventArg_p->cfmProgress;
 
@@ -510,7 +510,7 @@ The function processes CFM result events.
 //------------------------------------------------------------------------------
 static tOplkError processCfmResultEvent(tOplkApiEventType EventType_p,
                                         tOplkApiEventArg* pEventArg_p,
-                                        void GENERIC* pUserArg_p)
+                                        void* pUserArg_p)
 {
     tOplkApiEventCfmResult*       pCfmResult = &pEventArg_p->cfmResult;
 
@@ -560,7 +560,7 @@ The function processes SDO events.
 //------------------------------------------------------------------------------
 static tOplkError processSdoEvent(tOplkApiEventType EventType_p,
                                   tOplkApiEventArg* pEventArg_p,
-                                  void GENERIC* pUserArg_p)
+                                  void* pUserArg_p)
 {
     tSdoComFinished*          pSdo = &pEventArg_p->sdoInfo;
     tOplkError                ret = kErrorOk;

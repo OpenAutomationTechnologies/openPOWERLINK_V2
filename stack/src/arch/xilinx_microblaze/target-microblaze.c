@@ -158,7 +158,7 @@ This function obtains if the CPU is in interrupt context.
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-UINT8 PUBLIC EplTgtIsInterruptContext (void)
+UINT8 EplTgtIsInterruptContext (void)
 {
     // No real interrupt context check is performed.
     // This would be possible with a flag in the ISR, only.

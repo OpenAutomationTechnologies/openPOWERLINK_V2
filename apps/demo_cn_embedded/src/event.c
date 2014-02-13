@@ -87,11 +87,11 @@ static tEventCb pfnEventCb_l = NULL;
 //------------------------------------------------------------------------------
 static tOplkError processStateChangeEvent(tOplkApiEventType EventType_p,
                                           tOplkApiEventArg* pEventArg_p,
-                                          void GENERIC* pUserArg_p);
+                                          void* pUserArg_p);
 
 static tOplkError processErrorWarningEvent(tOplkApiEventType EventType_p,
                                            tOplkApiEventArg* pEventArg_p,
-                                           void GENERIC* pUserArg_p);
+                                           void* pUserArg_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -129,9 +129,9 @@ The function implements the applications stack event handler.
 \ingroup module_demo_cn_embedded
 */
 //------------------------------------------------------------------------------
-tOplkError PUBLIC processEvents(tOplkApiEventType EventType_p,
+tOplkError processEvents(tOplkApiEventType EventType_p,
                                 tOplkApiEventArg* pEventArg_p,
-                                void GENERIC* pUserArg_p)
+                                void* pUserArg_p)
 {
     tOplkError          ret = kErrorOk;
 
@@ -197,7 +197,7 @@ The function processes state change events.
 //------------------------------------------------------------------------------
 static tOplkError processStateChangeEvent(tOplkApiEventType EventType_p,
                                           tOplkApiEventArg* pEventArg_p,
-                                          void GENERIC* pUserArg_p)
+                                          void* pUserArg_p)
 {
     tEventNmtStateChange*       pNmtStateChange = &pEventArg_p->nmtStateChange;
 
@@ -227,7 +227,7 @@ The function processes error and warning events.
 //------------------------------------------------------------------------------
 static tOplkError processErrorWarningEvent(tOplkApiEventType EventType_p,
                                            tOplkApiEventArg* pEventArg_p,
-                                           void GENERIC* pUserArg_p)
+                                           void* pUserArg_p)
 {
     // error or warning occurred within the stack or the application
     // on error the API layer stops the NMT state machine

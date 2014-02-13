@@ -1369,41 +1369,41 @@ static tOplkError updateObd(tOplkApiInitParam* pInitParam_p)
     if (pInitParam_p->pDevName != NULL)
     {
         // write Device Name (0x1008)
-        obd_writeEntry (0x1008, 0, (void GENERIC*) pInitParam_p->pDevName,
+        obd_writeEntry (0x1008, 0, (void*)pInitParam_p->pDevName,
                           (tObdSize) strlen(pInitParam_p->pDevName));
     }
 
     if (pInitParam_p->pHwVersion != NULL)
     {
         // write Hardware version (0x1009)
-        obd_writeEntry (0x1009, 0, (void GENERIC*) pInitParam_p->pHwVersion,
+        obd_writeEntry (0x1009, 0, (void*)pInitParam_p->pHwVersion,
                           (tObdSize) strlen(pInitParam_p->pHwVersion));
     }
 
     if (pInitParam_p->pSwVersion != NULL)
     {
         // write Software version (0x100A)
-        obd_writeEntry (0x100A, 0, (void GENERIC*) pInitParam_p->pSwVersion,
+        obd_writeEntry (0x100A, 0, (void*)pInitParam_p->pSwVersion,
                           (tObdSize) strlen(pInitParam_p->pSwVersion));
     }
 
 #if defined(CONFIG_INCLUDE_VETH)
     // write NMT_HostName_VSTR (0x1F9A)
-    obd_writeEntry (0x1F9A, 0, (void GENERIC*) &pInitParam_p->sHostname[0],
+    obd_writeEntry (0x1F9A, 0, (void*)&pInitParam_p->sHostname[0],
                       sizeof (pInitParam_p->sHostname));
 
     //TRACE("%s: write NMT_HostName_VSTR %d\n", __func__, Ret);
 
     // write NWL_IpAddrTable_Xh_REC.Addr_IPAD (0x1E40/2)
-    obd_writeEntry (0x1E40, 2, (void GENERIC*) &pInitParam_p->ipAddress,
+    obd_writeEntry (0x1E40, 2, (void*)&pInitParam_p->ipAddress,
                       sizeof (pInitParam_p->ipAddress));
 
     // write NWL_IpAddrTable_Xh_REC.NetMask_IPAD (0x1E40/3)
-    obd_writeEntry (0x1E40, 3, (void GENERIC*) &pInitParam_p->subnetMask,
+    obd_writeEntry (0x1E40, 3, (void*)&pInitParam_p->subnetMask,
                       sizeof (pInitParam_p->subnetMask));
 
     // write NWL_IpAddrTable_Xh_REC.DefaultGateway_IPAD (0x1E40/5)
-    obd_writeEntry (0x1E40, 5, (void GENERIC*) &pInitParam_p->defaultGateway,
+    obd_writeEntry (0x1E40, 5, (void*)&pInitParam_p->defaultGateway,
                       sizeof (pInitParam_p->defaultGateway));
 #endif
 

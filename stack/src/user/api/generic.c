@@ -248,7 +248,7 @@ tOplkError oplk_linkObject(UINT objIndex_p, void* pVar_p, UINT* pVarEntries_p,
         // because user wants to link a variable to a subindex unequal 0x00
         // read number of entries
         entrySize = (tObdSize)sizeof(indexEntries);
-        ret = obd_readEntry (objIndex_p, 0x00, (void GENERIC*) &indexEntries, &entrySize );
+        ret = obd_readEntry (objIndex_p, 0x00, (void*) &indexEntries, &entrySize );
         if ((ret != kErrorOk) || (indexEntries == 0x00))
         {
             // Object doesn't exist or invalid entry number

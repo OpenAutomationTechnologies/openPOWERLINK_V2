@@ -386,7 +386,7 @@ static tOplkError checkErrorObject(UINT index_p, BYTE *pEntries_p)
     BYTE            indexEntries;
 
     entrySize = (tObdSize)  sizeof(indexEntries);
-    ret = obd_readEntry ( index_p, 0x00, (void GENERIC*) &indexEntries, &entrySize );
+    ret = obd_readEntry ( index_p, 0x00, (void*)&indexEntries, &entrySize );
 
     if ((ret != kErrorOk) || (indexEntries == 0x00))
     {
