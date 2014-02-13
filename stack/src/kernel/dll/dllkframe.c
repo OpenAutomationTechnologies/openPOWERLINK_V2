@@ -133,7 +133,7 @@ tEdrvReleaseRxBuffer dllk_processFrameReceived(tEdrvRxBuffer * pRxBuffer_p)
         goto Exit;
 
     pFrame = (tPlkFrame *) pRxBuffer_p->pBuffer;
-#if EDRV_EARLY_RX_INT != FALSE
+#if CONFIG_EDRV_EARLY_RX_INT != FALSE
     switch (pRxBuffer_p->bufferInFrame)
     {
         case kEdrvBufferFirstInFrame:
@@ -151,7 +151,7 @@ tEdrvReleaseRxBuffer dllk_processFrameReceived(tEdrvRxBuffer * pRxBuffer_p)
                     // $$$ What if Tx buffer is invalid?
                     pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES +
                                                           dllkInstance_g.curTxBufferOffsetCycle];
-#if (EPL_DLL_PRES_READY_AFTER_SOA != FALSE) || (EPL_DLL_PRES_READY_AFTER_SOC != FALSE)
+#if (CONFIG_DLL_PRES_READY_AFTER_SOA != FALSE) || (CONFIG_DLL_PRES_READY_AFTER_SOC != FALSE)
                     Ret = edrv_startTxBuffer(pTxBuffer);
 #else
                     pTxFrame = (tPlkFrame *) pTxBuffer->pBuffer;
@@ -565,7 +565,7 @@ void dllk_processTransmittedSoa(tEdrvTxBuffer * pTxBuffer_p)
     }
 
     // reprogram timer in PREOP1
-#if EPL_TIMER_USE_HIGHRES != FALSE
+#if CONFIG_TIMER_USE_HIGHRES != FALSE
     if ((dllkInstance_g.dllState == kDllMsNonCyclic) &&
         (dllkInstance_g.dllConfigParam.asyncSlotTimeout != 0))
     {
@@ -627,7 +627,7 @@ tOplkError dllk_updateFrameIdentRes(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtSta
     ami_setUint8Le(&pTxFrame->data.asnd.payload.identResponse.nmtStatus, (UINT8)nmtState_p);
     ami_setUint8Le(&pTxFrame->data.asnd.payload.identResponse.flag2, dllkInstance_g.flag2);
 
-#if (EDRV_AUTO_RESPONSE != FALSE)
+#if (CONFIG_EDRV_AUTO_RESPONSE != FALSE)
     if (nmtState_p < kNmtMsNotActive)
     {
         ret = edrv_updateTxBuffer(pTxBuffer_p);
@@ -661,7 +661,7 @@ tOplkError dllk_updateFrameStatusRes(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtSt
     ami_setUint8Le(&pTxFrame->data.asnd.payload.statusResponse.flag2, dllkInstance_g.flag2);
     ami_setUint8Le(&pTxFrame->data.asnd.payload.statusResponse.flag1, dllkInstance_g.flag1);
 
-#if (EDRV_AUTO_RESPONSE != FALSE)
+#if (CONFIG_EDRV_AUTO_RESPONSE != FALSE)
     if (nmtState_p < kNmtMsNotActive)
     {
         ret = edrv_updateTxBuffer(pTxBuffer_p);
@@ -713,7 +713,7 @@ tOplkError dllk_updateFramePres(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p
     }
     ami_setUint8Le(&pTxFrame->data.pres.flag1, flag1);        // update frame (flag1)
 
-#if (EDRV_AUTO_RESPONSE != FALSE)
+#if (CONFIG_EDRV_AUTO_RESPONSE != FALSE)
 //    if (NmtState_p < kNmtMsNotActive)
     {   // currently, this function is only called on CN
         ret = edrv_updateTxBuffer(pTxBuffer_p);
@@ -1349,11 +1349,11 @@ static tOplkError processReceivedPreq(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
         goto Exit;
     }
 
-#if EDRV_EARLY_RX_INT == FALSE
+#if CONFIG_EDRV_EARLY_RX_INT == FALSE
     if (nmtState_p >= kNmtCsPreOperational2)
     {   // respond to and process PReq frames only in PreOp2, ReadyToOp and Op
 
-#if (EDRV_AUTO_RESPONSE == FALSE)
+#if (CONFIG_EDRV_AUTO_RESPONSE == FALSE)
         tEdrvTxBuffer*  pTxBuffer = NULL;
 
         // Auto-response is disabled
@@ -1361,7 +1361,7 @@ static tOplkError processReceivedPreq(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
         pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES + dllkInstance_g.curTxBufferOffsetCycle];
         if (pTxBuffer->pBuffer != NULL)
         {   // PRes does exist -> send PRes frame
-#if (EPL_DLL_PRES_READY_AFTER_SOA != FALSE) || (EPL_DLL_PRES_READY_AFTER_SOC != FALSE)
+#if (CONFIG_DLL_PRES_READY_AFTER_SOA != FALSE) || (CONFIG_DLL_PRES_READY_AFTER_SOC != FALSE)
             edrv_startTxBuffer(pTxBuffer);
 #else
             if ((ret = edrv_sendTxBuffer(pTxBuffer)) != kErrorOk)
@@ -1415,7 +1415,7 @@ static tOplkError processReceivedPreq(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
         }
 #endif
 
-#if EDRV_EARLY_RX_INT == FALSE
+#if CONFIG_EDRV_EARLY_RX_INT == FALSE
         // $$$ inform emergency protocol handling (error signaling module) about flags
     }
 #endif
@@ -1693,7 +1693,7 @@ The function processes a received SoC frame.
 static tOplkError processReceivedSoc(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtState_p)
 {
     tOplkError      ret = kErrorOk;
-#if EPL_DLL_PRES_READY_AFTER_SOC != FALSE
+#if CONFIG_DLL_PRES_READY_AFTER_SOC != FALSE
     tEdrvTxBuffer*  pTxBuffer = NULL;
 #endif
 
@@ -1706,7 +1706,7 @@ static tOplkError processReceivedSoc(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
         return ret;
     }
 
-#if EPL_DLL_PRES_READY_AFTER_SOC != FALSE
+#if CONFIG_DLL_PRES_READY_AFTER_SOC != FALSE
     // post PRes to transmit FIFO of the ethernet controller, but don't start
     // transmission over bus
     pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES + dllkInstance_g.curTxBufferOffsetCycle];
@@ -1740,7 +1740,7 @@ static tOplkError processReceivedSoc(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
     }
 
     // reprogram timer
-#if EPL_TIMER_USE_HIGHRES != FALSE
+#if CONFIG_TIMER_USE_HIGHRES != FALSE
     if (dllkInstance_g.frameTimeout != 0)
     {
         hrestimer_modifyTimer(&dllkInstance_g.timerHdlCycle, dllkInstance_g.frameTimeout,
@@ -1766,7 +1766,7 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
 {
     tOplkError          ret = kErrorOk;
     tPlkFrame *         pFrame;
-#if (EDRV_AUTO_RESPONSE == FALSE)
+#if (CONFIG_EDRV_AUTO_RESPONSE == FALSE)
     tEdrvTxBuffer*      pTxBuffer = NULL;
 #endif
     tDllReqServiceId reqServiceId;
@@ -1796,7 +1796,7 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
         {
             case kDllReqServiceStatus:
                 // StatusRequest
-#if (EDRV_AUTO_RESPONSE == FALSE)
+#if (CONFIG_EDRV_AUTO_RESPONSE == FALSE)
                 // Auto-response is not available
                 pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_STATUSRES + dllkInstance_g.curTxBufferOffsetStatusRes];
                 if (pTxBuffer->pBuffer != NULL)
@@ -1846,7 +1846,7 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
 
             case kDllReqServiceIdent:
                // IdentRequest
-#if (EDRV_AUTO_RESPONSE == FALSE)
+#if (CONFIG_EDRV_AUTO_RESPONSE == FALSE)
                 // Auto-response is not available
                 pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_IDENTRES + dllkInstance_g.curTxBufferOffsetIdentRes];
                 if (pTxBuffer->pBuffer != NULL)
@@ -1868,7 +1868,7 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
 
             case kDllReqServiceNmtRequest:
                 // NmtRequest
-#if (EDRV_AUTO_RESPONSE == FALSE)
+#if (CONFIG_EDRV_AUTO_RESPONSE == FALSE)
                 // Auto-response is not available
                 pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NMTREQ + dllkInstance_g.curTxBufferOffsetNmtReq];
                 if (pTxBuffer->pBuffer != NULL)
@@ -1997,7 +1997,7 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
 
             case kDllReqServiceUnspecified:
                 // unspecified invite
-#if (EDRV_AUTO_RESPONSE == FALSE)
+#if (CONFIG_EDRV_AUTO_RESPONSE == FALSE)
                 // Auto-response is not available
                 pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONEPL + dllkInstance_g.curTxBufferOffsetNonEpl];
                 if (pTxBuffer->pBuffer != NULL)
@@ -2050,7 +2050,7 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
     }
 #endif
 
-#if EPL_DLL_PRES_READY_AFTER_SOA != FALSE
+#if CONFIG_DLL_PRES_READY_AFTER_SOA != FALSE
     if (pTxBuffer == NULL)
     {   // signal process function readiness of PRes frame
         ret = postEvent(kEventTypeDllkPresReady);

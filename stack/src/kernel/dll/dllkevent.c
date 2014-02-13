@@ -88,7 +88,7 @@ static tOplkError processSyncCn(tNmtState nmtState_p, BOOL fReadyFlag_p) SECTION
 static tOplkError processSyncMn(tNmtState nmtState_p, BOOL fReadyFlag_p) SECTION_DLLK_PROCESS_SYNC;
 static tOplkError processStartReducedCycle(void);
 #endif
-#if EPL_DLL_PRES_READY_AFTER_SOA != FALSE
+#if CONFIG_DLL_PRES_READY_AFTER_SOA != FALSE
 static tOplkError processPresReady(tNmtState nmtState_p);
 #endif
 static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtState nmtState_p);
@@ -153,7 +153,7 @@ tOplkError dllk_process(tEvent* pEvent_p)
             break;
 #endif
 
-#if EPL_DLL_PRES_READY_AFTER_SOA != FALSE
+#if CONFIG_DLL_PRES_READY_AFTER_SOA != FALSE
         case kEventTypeDllkPresReady:
             ret = processPresReady(dllkInstance_g.nmtState);
             break;
@@ -333,7 +333,7 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
 
         // node processes only async frames
         case kNmtCsPreOperational1:
-#if EPL_TIMER_USE_HIGHRES != FALSE
+#if CONFIG_TIMER_USE_HIGHRES != FALSE
             if ((ret = hrestimer_deleteTimer(&dllkInstance_g.timerHdlCycle)) != kErrorOk)
                 return ret;
 #endif
@@ -363,7 +363,7 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
                 return ret;
 
             // enable IdentRes and StatusRes
-#if (EDRV_AUTO_RESPONSE != FALSE)
+#if (CONFIG_EDRV_AUTO_RESPONSE != FALSE)
             // enable corresponding Rx filter
             dllkInstance_g.aFilter[DLLK_FILTER_SOA_STATREQ].fEnable = TRUE;
             ret = edrv_changeRxFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT,
@@ -400,7 +400,7 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
                 return ret;
 
             // enable PRes (for sudden changes to PreOp2)
-#if (EDRV_AUTO_RESPONSE != FALSE)
+#if (CONFIG_EDRV_AUTO_RESPONSE != FALSE)
             // enable corresponding Rx filter
             dllkInstance_g.aFilter[DLLK_FILTER_PREQ].fEnable = TRUE;
             dllkInstance_g.aFilter[DLLK_FILTER_PREQ].pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES];
@@ -417,7 +417,7 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
             dllkInstance_g.updateTxFrame = DLLK_UPDATE_BOTH;
 
             // enable PRes (necessary if coming from Stopped)
-#if (EDRV_AUTO_RESPONSE != FALSE)
+#if (CONFIG_EDRV_AUTO_RESPONSE != FALSE)
             // enable corresponding Rx filter
             dllkInstance_g.aFilter[DLLK_FILTER_PREQ].fEnable = TRUE;
             dllkInstance_g.aFilter[DLLK_FILTER_PREQ].pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES];
@@ -430,7 +430,7 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
 
 #if defined (CONFIG_INCLUDE_NMT_MN)
         case kNmtMsPreOperational1:
-#if EPL_TIMER_USE_HIGHRES != FALSE
+#if CONFIG_TIMER_USE_HIGHRES != FALSE
             ret = hrestimer_deleteTimer(&dllkInstance_g.timerHdlCycle);
             if (ret != kErrorOk)
                 return ret;
@@ -487,7 +487,7 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
             // signal update of IdentRes and StatusRes on SoA
             dllkInstance_g.updateTxFrame = DLLK_UPDATE_BOTH;
 
-#if (EDRV_AUTO_RESPONSE != FALSE)
+#if (CONFIG_EDRV_AUTO_RESPONSE != FALSE)
             // disable auto-response for PRes filter
             dllkInstance_g.aFilter[DLLK_FILTER_PREQ].pTxBuffer = NULL;
             ret = edrv_changeRxFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT,
@@ -594,7 +594,7 @@ static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtSta
     UINT            frameSize;
     UINT            frameCount;
     UINT            nextTxBufferOffset;
-#if (EDRV_AUTO_RESPONSE != FALSE)
+#if (CONFIG_EDRV_AUTO_RESPONSE != FALSE)
     UINT            filterEntry;
 #endif
 
@@ -605,7 +605,7 @@ static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtSta
         case kDllAsyncReqPrioNmt:    // NMT request priority
             nextTxBufferOffset = dllkInstance_g.curTxBufferOffsetNmtReq;
             pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NMTREQ + nextTxBufferOffset];
-#if (EDRV_AUTO_RESPONSE != FALSE)
+#if (CONFIG_EDRV_AUTO_RESPONSE != FALSE)
         filterEntry = DLLK_FILTER_SOA_NMTREQ;
 #endif
         break;
@@ -613,7 +613,7 @@ static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtSta
         default:    // generic priority
             nextTxBufferOffset = dllkInstance_g.curTxBufferOffsetNonEpl;
             pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONEPL + nextTxBufferOffset];
-#if (EDRV_AUTO_RESPONSE != FALSE)
+#if (CONFIG_EDRV_AUTO_RESPONSE != FALSE)
         filterEntry = DLLK_FILTER_SOA_NONEPL;
 #endif
         break;
@@ -636,7 +636,7 @@ static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtSta
 
                 pTxBuffer->txFrameSize = frameSize;    // set buffer valid
 
-#if (EDRV_AUTO_RESPONSE != FALSE)
+#if (CONFIG_EDRV_AUTO_RESPONSE != FALSE)
                 if ((nmtState_p & (NMT_TYPE_MASK | NMT_SUPERSTATE_MASK)) == (NMT_TYPE_CS | NMT_CS_PLKMODE))
                 {
                     ret = edrv_updateTxBuffer(pTxBuffer);
@@ -655,7 +655,7 @@ static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtSta
                 ret = kErrorOk;
                 pTxBuffer->txFrameSize = DLLK_BUFLEN_EMPTY;    // mark Tx buffer as empty
 
-#if (EDRV_AUTO_RESPONSE != FALSE)
+#if (CONFIG_EDRV_AUTO_RESPONSE != FALSE)
                 if ((nmtState_p & (NMT_TYPE_MASK | NMT_SUPERSTATE_MASK)) == (NMT_TYPE_CS | NMT_CS_PLKMODE))
                 {
                     // disable corresponding Rx filter
@@ -961,7 +961,7 @@ static tOplkError processSyncMn(tNmtState nmtState_p, BOOL fReadyFlag_p)
 }
 #endif
 
-#if EPL_DLL_PRES_READY_AFTER_SOA != FALSE
+#if CONFIG_DLL_PRES_READY_AFTER_SOA != FALSE
 //------------------------------------------------------------------------------
 /**
 \brief  Process PRes ready event
@@ -1055,7 +1055,7 @@ static tOplkError processStartReducedCycle(void)
     // hence changeState() will not ignore the next call
     dllkInstance_g.dllState = kDllMsNonCyclic;
 
-#if EPL_TIMER_USE_HIGHRES != FALSE
+#if CONFIG_TIMER_USE_HIGHRES != FALSE
     if (dllkInstance_g.dllConfigParam.asyncSlotTimeout != 0)
     {
         ret = hrestimer_modifyTimer(&dllkInstance_g.timerHdlCycle,

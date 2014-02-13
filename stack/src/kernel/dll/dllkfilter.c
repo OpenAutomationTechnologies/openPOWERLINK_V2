@@ -409,7 +409,7 @@ tOplkError dllk_addNodeFilter(tDllkNodeInfo* pIntNodeInfo_p, tDllNodeOpType node
     {
         if ((pIntNodeInfo_p->presFilterFlags & (DLLK_FILTER_FLAG_PDO | DLLK_FILTER_FLAG_HB)) == 0)
         {
-#if DLL_PRES_FILTER_COUNT < 0
+#if CONFIG_DLL_PRES_FILTER_COUNT < 0
             dllkInstance_g.usedPresFilterCount++;
             if (dllkInstance_g.usedPresFilterCount == 1)
             {
@@ -487,7 +487,7 @@ tOplkError dllk_deleteNodeFilter(tDllkNodeInfo* pIntNodeInfo_p, tDllNodeOpType n
     {
         if ((pIntNodeInfo_p->presFilterFlags & (DLLK_FILTER_FLAG_PDO | DLLK_FILTER_FLAG_HB)) == 0)
         {
-#if DLL_PRES_FILTER_COUNT < 0
+#if CONFIG_DLL_PRES_FILTER_COUNT < 0
             if (dllkInstance_g.usedPresFilterCount > 0)
                 dllkInstance_g.usedPresFilterCount--;
 

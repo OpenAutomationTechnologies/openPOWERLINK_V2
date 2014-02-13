@@ -170,17 +170,17 @@ static tOplkError addInstance(tDllCalQueueInstance *ppDllCalQueue_p,
     switch(pDllCalCircBufInstance->dllCalQueue)
     {
         case kDllCalQueueTxGen:
-            error = circbuf_alloc(CIRCBUF_DLLCAL_TXGEN, DLLCAL_BUFFER_SIZE_TX_GEN,
+            error = circbuf_alloc(CIRCBUF_DLLCAL_TXGEN, CONFIG_DLLCAL_BUFFER_SIZE_TX_GEN,
                                   &pDllCalCircBufInstance->pCircBufInstance);
             break;
 
         case kDllCalQueueTxNmt:
-            error = circbuf_alloc(CIRCBUF_DLLCAL_TXNMT, DLLCAL_BUFFER_SIZE_TX_NMT,
+            error = circbuf_alloc(CIRCBUF_DLLCAL_TXNMT, CONFIG_DLLCAL_BUFFER_SIZE_TX_NMT,
                                   &pDllCalCircBufInstance->pCircBufInstance);
             break;
 
         case kDllCalQueueTxSync:
-            error = circbuf_alloc(CIRCBUF_DLLCAL_TXSYNC, DLLCAL_BUFFER_SIZE_TX_SYNC,
+            error = circbuf_alloc(CIRCBUF_DLLCAL_TXSYNC, CONFIG_DLLCAL_BUFFER_SIZE_TX_SYNC,
                                   &pDllCalCircBufInstance->pCircBufInstance);
             break;
 

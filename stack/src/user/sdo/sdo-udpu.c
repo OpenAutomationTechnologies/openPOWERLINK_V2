@@ -63,8 +63,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#ifndef SDO_MAX_CONNECTION_UDP
-#define SDO_MAX_CONNECTION_UDP  5
+#ifndef CONFIG_SDO_MAX_CONNECTION_UDP
+#define CONFIG_SDO_MAX_CONNECTION_UDP  5
 #endif
 
 //------------------------------------------------------------------------------
@@ -117,7 +117,7 @@ typedef struct
 // instance table
 typedef struct
 {
-    tSdoUdpCon              aSdoAbsUdpConnection[SDO_MAX_CONNECTION_UDP];
+    tSdoUdpCon              aSdoAbsUdpConnection[CONFIG_SDO_MAX_CONNECTION_UDP];
     tSequLayerReceiveCb     pfnSdoAsySeqCb;
     SOCKET                  udpSocket;
 #if (TARGET_SYSTEM == _WIN32_)
@@ -376,10 +376,10 @@ tOplkError sdoudp_initCon(tSdoConHdl* pSdoConHandle_p, UINT targetNodeId_p)
 
     // get free entry in control structure
     count = 0;
-    freeCon = SDO_MAX_CONNECTION_UDP;
+    freeCon = CONFIG_SDO_MAX_CONNECTION_UDP;
     pSdoUdpCon = &sdoUdpInstance_l.aSdoAbsUdpConnection[0];
 
-    while (count < SDO_MAX_CONNECTION_UDP)
+    while (count < CONFIG_SDO_MAX_CONNECTION_UDP)
     {
         if ((pSdoUdpCon->ipAddr & htonl(0xFF)) == htonl(targetNodeId_p))
         {   // existing connection to target node found -> set handle
@@ -395,7 +395,7 @@ tOplkError sdoudp_initCon(tSdoConHdl* pSdoConHandle_p, UINT targetNodeId_p)
         pSdoUdpCon++;
     }
 
-    if (freeCon == SDO_MAX_CONNECTION_UDP)
+    if (freeCon == CONFIG_SDO_MAX_CONNECTION_UDP)
     {
         ret = kErrorSdoUdpNoFreeHandle;
     }
@@ -434,7 +434,7 @@ tOplkError sdoudp_sendData(tSdoConHdl sdoConHandle_p, tPlkFrame* pSrcData_p, UIN
     struct sockaddr_in  addr;
 
     array = (sdoConHandle_p & ~SDO_ASY_HANDLE_MASK);
-    if(array >= SDO_MAX_CONNECTION_UDP)
+    if(array >= CONFIG_SDO_MAX_CONNECTION_UDP)
         return kErrorSdoUdpInvalidHdl;
 
     ami_setUint8Le(&pSrcData_p->messageType, 0x06);   // set message type SDO
@@ -482,7 +482,7 @@ tOplkError sdoudp_delConnection(tSdoConHdl sdoConHandle_p)
     UINT            array;
 
     array = (sdoConHandle_p & ~SDO_ASY_HANDLE_MASK);
-    if(array >= SDO_MAX_CONNECTION_UDP)
+    if(array >= CONFIG_SDO_MAX_CONNECTION_UDP)
     {
         return kErrorSdoUdpInvalidHdl;
     }
@@ -533,7 +533,7 @@ void receiveFromSocket(tSdoUdpInstance* pInstance_p)
 #if (TARGET_SYSTEM == _WIN32_)
         EnterCriticalSection(sdoUdpInstance_l.pCriticalSection);
 #endif
-        while (count < SDO_MAX_CONNECTION_UDP)
+        while (count < CONFIG_SDO_MAX_CONNECTION_UDP)
         {
             // check if this connection is already known
             if((pInstance_p->aSdoAbsUdpConnection[count].ipAddr == remoteAddr.sin_addr.s_addr) &&
@@ -551,7 +551,7 @@ void receiveFromSocket(tSdoUdpInstance* pInstance_p)
             count++;
         }
 
-        if (count == SDO_MAX_CONNECTION_UDP)
+        if (count == CONFIG_SDO_MAX_CONNECTION_UDP)
         {
             // connection unknown -> see if there is a free handle
             if (freeEntry != 0xFFFF)

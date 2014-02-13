@@ -69,11 +69,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#if EPL_TIMER_USE_HIGHRES == FALSE
-#error "EdrvCyclic needs EPL_TIMER_USE_HIGHRES = TRUE"
+#if CONFIG_TIMER_USE_HIGHRES == FALSE
+#error "EdrvCyclic needs CONFIG_TIMER_USE_HIGHRES = TRUE"
 #endif
 
-#if EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
+#if CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
 #ifndef EDRV_CYCLIC_SAMPLE_TH_CYCLE_TIME_DIFF_US
 #define EDRV_CYCLIC_SAMPLE_TH_CYCLE_TIME_DIFF_US         50
 #endif
@@ -97,7 +97,7 @@ typedef struct
     tTimerHdl               timerHdlSlot;
     tEdrvCyclicCbSync       pfnSyncCb;
     tEdrvCyclicCbError      pfnErrorCb;
-#if EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
+#if CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
     UINT                    sampleCount;
     ULONGLONG               startCycleTimeStamp;
     ULONGLONG               lastSlotTimeStamp;
@@ -137,7 +137,7 @@ tOplkError edrvcyclic_init(void)
     // clear instance structure
     OPLK_MEMSET(&edrvcyclicInstance_l, 0, sizeof (edrvcyclicInstance_l));
 
-#if EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
+#if CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
     edrvcyclicInstance_l.diagnostics.cycleTimeMin        = 0xFFFFFFFF;
     edrvcyclicInstance_l.diagnostics.usedCycleTimeMin    = 0xFFFFFFFF;
     edrvcyclicInstance_l.diagnostics.spareCycleTimeMin   = 0xFFFFFFFF;
@@ -310,7 +310,7 @@ tOplkError edrvcyclic_startCycle(void)
         0L,
         TRUE);
 
-#if EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
+#if CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
     edrvcyclicInstance_l.lastSlotTimeStamp = 0;
 #endif
 
@@ -336,7 +336,7 @@ tOplkError edrvcyclic_stopCycle(void)
     ret = hrestimer_deleteTimer(&edrvcyclicInstance_l.timerHdlCycle);
     ret = hrestimer_deleteTimer(&edrvcyclicInstance_l.timerHdlSlot);
 
-#if EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
+#if CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
     edrvcyclicInstance_l.startCycleTimeStamp = 0;
 #endif
 
@@ -384,7 +384,7 @@ tOplkError edrvcyclic_regErrorHandler(tEdrvCyclicCbError pfnCbError_p)
 }
 
 
-#if EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
+#if CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
 //------------------------------------------------------------------------------
 /**
 \brief  Obtain diagnostic information
@@ -426,7 +426,7 @@ This function is called by the timer module. It starts the next cycle.
 static tOplkError timerHdlCycleCb(tTimerEventArg* pEventArg_p)
 {
     tOplkError      ret = kErrorOk;
-#if EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
+#if CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
     UINT32          cycleTime;
     UINT32          usedCycleTime;
     UINT32          spareCycleTime;
@@ -439,7 +439,7 @@ static tOplkError timerHdlCycleCb(tTimerEventArg* pEventArg_p)
         goto Exit;
     }
 
-#if EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
+#if CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
     startNewCycleTimeStamp = target_getCurrentTimestamp();
 #endif
 
@@ -472,7 +472,7 @@ static tOplkError timerHdlCycleCb(tTimerEventArg* pEventArg_p)
         ret = edrvcyclicInstance_l.pfnSyncCb();
     }
 
-#if EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
+#if CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
     if (edrvcyclicInstance_l.startCycleTimeStamp != 0)
     {
         // calculate time diffs of previous cycle
@@ -583,7 +583,7 @@ static tOplkError timerHdlSlotCb(tTimerEventArg* pEventArg_p)
         goto Exit;
     }
 
-#if EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
+#if CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
     edrvcyclicInstance_l.lastSlotTimeStamp = target_getCurrentTimestamp();
 #endif
 

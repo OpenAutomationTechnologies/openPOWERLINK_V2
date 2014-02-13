@@ -59,10 +59,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DLLK_FILTER_ASND                (DLLK_FILTER_SOC + 1)
 #define DLLK_FILTER_PRES                (DLLK_FILTER_ASND + 1)
 
-#if DLL_PRES_FILTER_COUNT < 0
+#if CONFIG_DLL_PRES_FILTER_COUNT < 0
   #define DLLK_FILTER_COUNT             (DLLK_FILTER_PRES + 1)
 #else
-  #define DLLK_FILTER_COUNT             (DLLK_FILTER_PRES + DLL_PRES_FILTER_COUNT)
+  #define DLLK_FILTER_COUNT             (DLLK_FILTER_PRES + CONFIG_DLL_PRES_FILTER_COUNT)
 #endif
 
 //------------------------------------------------------------------------------

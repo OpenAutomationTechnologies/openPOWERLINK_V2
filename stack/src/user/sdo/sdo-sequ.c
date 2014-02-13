@@ -56,8 +56,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #define SDO_HISTORY_SIZE            5
 
-#ifndef MAX_SDO_SEQ_CON
-#define MAX_SDO_SEQ_CON             5
+#ifndef CONFIG_SDO_MAX_CONNECTION_SEQ
+#define CONFIG_SDO_MAX_CONNECTION_SEQ             5
 #endif
 
 #define SDO_SEQ_DEFAULT_TIMEOUT     5000                    // in [ms] => 5 sec
@@ -160,7 +160,7 @@ This structure defines a SDO sequence layer instance.
 */
 typedef struct
 {
-    tSdoSeqCon              aSdoSeqCon[MAX_SDO_SEQ_CON];    ///< Array of sequence layer connections
+    tSdoSeqCon              aSdoSeqCon[CONFIG_SDO_MAX_CONNECTION_SEQ];    ///< Array of sequence layer connections
     tSdoComReceiveCb        pfnSdoComRecvCb;                ///< Pointer to receive callback function
     tSdoComConCb            pfnSdoComConCb;                 ///< Pointer to connection callback function
     UINT32                  sdoSeqTimeout;                  ///< Configured Sequence layer timeout
@@ -336,7 +336,7 @@ tOplkError sdoseq_delInstance(void)
     // delete timer of open connections
     count = 0;
     pSdoSeqCon = &sdoSeqInstance_l.aSdoSeqCon[0];
-    while(count < MAX_SDO_SEQ_CON)
+    while(count < CONFIG_SDO_MAX_CONNECTION_SEQ)
     {
         if (pSdoSeqCon->conHandle != 0)
         {
@@ -421,10 +421,10 @@ tOplkError sdoseq_initCon(tSdoSeqConHdl* pSdoSeqConHdl_p, UINT nodeId_p, tSdoTyp
 
     // find existing connection to the same node or find empty entry for connection
     count = 0;
-    freeCon = MAX_SDO_SEQ_CON;
+    freeCon = CONFIG_SDO_MAX_CONNECTION_SEQ;
     pSdoSeqCon = &sdoSeqInstance_l.aSdoSeqCon[0];
 
-    while (count < MAX_SDO_SEQ_CON)
+    while (count < CONFIG_SDO_MAX_CONNECTION_SEQ)
     {
         if (pSdoSeqCon->conHandle == conHandle)
             break;
@@ -436,9 +436,9 @@ tOplkError sdoseq_initCon(tSdoSeqConHdl* pSdoSeqConHdl_p, UINT nodeId_p, tSdoTyp
         pSdoSeqCon++;
     }
 
-    if (count == MAX_SDO_SEQ_CON)
+    if (count == CONFIG_SDO_MAX_CONNECTION_SEQ)
     {
-        if (freeCon == MAX_SDO_SEQ_CON)
+        if (freeCon == CONFIG_SDO_MAX_CONNECTION_SEQ)
         {   // no free entry found
             switch (sdoType_p)
             {
@@ -572,7 +572,7 @@ tOplkError sdoseq_processEvent(tEvent* pEvent_p)
     while((&sdoSeqInstance_l.aSdoSeqCon[count]) != pSdoSeqCon)
     {
         count++;
-        if(count > MAX_SDO_SEQ_CON)
+        if(count > CONFIG_SDO_MAX_CONNECTION_SEQ)
             return ret;
     }
 
@@ -604,7 +604,7 @@ tOplkError sdoseq_deleteCon(tSdoSeqConHdl sdoSeqConHdl_p)
     handle = (sdoSeqConHdl_p & ~SDO_SEQ_HANDLE_MASK);
 
     // check if handle invalid
-    if(handle >= MAX_SDO_SEQ_CON)
+    if(handle >= CONFIG_SDO_MAX_CONNECTION_SEQ)
         return kErrorSdoSeqInvalidHdl;
 
     pSdoSeqCon = &sdoSeqInstance_l.aSdoSeqCon[handle];    // get pointer to connection
@@ -1640,7 +1640,7 @@ static tOplkError receiveCb(tSdoConHdl conHdl_p, tAsySdoSeq* pSdoSeqData_p,
     do
     {
         count = 0;
-        freeEntry = MAX_SDO_SEQ_CON;
+        freeEntry = CONFIG_SDO_MAX_CONNECTION_SEQ;
 
 #if defined(WIN32) || defined(_WIN32)
         EnterCriticalSection(sdoSeqInstance_l.pCriticalSectionReceive);
@@ -1650,13 +1650,13 @@ static tOplkError receiveCb(tSdoConHdl conHdl_p, tAsySdoSeq* pSdoSeqData_p,
 
         // search control structure for this connection
         pSdoSeqCon = &sdoSeqInstance_l.aSdoSeqCon[count];
-        while (count < MAX_SDO_SEQ_CON)
+        while (count < CONFIG_SDO_MAX_CONNECTION_SEQ)
         {
             if (pSdoSeqCon->conHandle == conHdl_p)
             {
                 break;
             }
-            else if ((pSdoSeqCon->conHandle == 0) && (freeEntry == MAX_SDO_SEQ_CON))
+            else if ((pSdoSeqCon->conHandle == 0) && (freeEntry == CONFIG_SDO_MAX_CONNECTION_SEQ))
             {
                 freeEntry = count;   // free entry
             }
@@ -1664,9 +1664,9 @@ static tOplkError receiveCb(tSdoConHdl conHdl_p, tAsySdoSeq* pSdoSeqData_p,
             pSdoSeqCon++;
         }
 
-        if (count == MAX_SDO_SEQ_CON)
+        if (count == CONFIG_SDO_MAX_CONNECTION_SEQ)
         {   // new connection
-            if (freeEntry == MAX_SDO_SEQ_CON)
+            if (freeEntry == CONFIG_SDO_MAX_CONNECTION_SEQ)
             {
                 ret = kErrorSdoSeqNoFreeHandle;
 

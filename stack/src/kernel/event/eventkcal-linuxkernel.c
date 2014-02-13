@@ -64,10 +64,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define EVENT_SIZE_CIRCBUF_KERNEL_TO_USER   32768   // 32 kByte
-#define EVENT_SIZE_CIRCBUF_USER_TO_KERNEL   32768   // 32 kByte
-#define EVENT_SIZE_CIRCBUF_KERNEL_INTERNAL  32768   // 32 kByte
-#define EVENT_SIZE_CIRCBUF_USER_INTERNAL    32768   // 32 kByte
 
 //------------------------------------------------------------------------------
 // module global vars

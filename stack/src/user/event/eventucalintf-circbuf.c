@@ -125,7 +125,7 @@ tOplkError eventucal_initQueueCircbuf(tEventQueue eventQueue_p)
     switch(eventQueue_p)
     {
         case kEventQueueUInt:
-            circError = circbuf_alloc(CIRCBUF_USER_INTERNAL_QUEUE, EVENT_SIZE_CIRCBUF_USER_INTERNAL,
+            circError = circbuf_alloc(CIRCBUF_USER_INTERNAL_QUEUE, CONFIG_EVENT_SIZE_CIRCBUF_USER_INTERNAL,
                                       &instance_l[eventQueue_p]);
             if (circError != kCircBufOk)
             {

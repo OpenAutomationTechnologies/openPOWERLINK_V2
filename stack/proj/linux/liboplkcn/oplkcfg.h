@@ -57,9 +57,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #undef FTRACE_DEBUG
 
 /* assure that system priorities of hrtimer and net-rx kernel threads are set appropriate */
-#define EPL_THREAD_PRIORITY_HIGH                    75
-#define EPL_THREAD_PRIORITY_MEDIUM                  50
-#define EPL_THREAD_PRIORITY_LOW                     49
+#define CONFIG_THREAD_PRIORITY_HIGH                 75
+#define CONFIG_THREAD_PRIORITY_MEDIUM               50
+#define CONFIG_THREAD_PRIORITY_LOW                  49
 
 // These macros define all modules which are included
 #define CONFIG_INCLUDE_PDO
@@ -74,16 +74,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //==============================================================================
 
 // switch this define to TRUE if Edrv supports fast tx frames
-#define EDRV_FAST_TXFRAMES                          FALSE
+#define CONFIG_EDRV_FAST_TXFRAMES                   FALSE
 
 // switch this define to TRUE if Edrv supports early receive interrupts
-#define EDRV_EARLY_RX_INT                           FALSE
+#define CONFIG_EDRV_EARLY_RX_INT                    FALSE
 
 // switch this define to TRUE if Edrv supports auto delay responses
-#define EDRV_AUTO_RESPONSE_DELAY                    FALSE
+#define CONFIG_EDRV_AUTO_RESPONSE_DELAY             FALSE
 
 // switch this define to TRUE to include Edrv diagnostic functions
-#define EDRV_USE_DIAGNOSTICS                        FALSE
+#define CONFIG_EDRV_USE_DIAGNOSTICS                 FALSE
 
 //==============================================================================
 // Data Link Layer (DLL) specific defines
@@ -91,11 +91,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // switch this define to TRUE if Edrv supports fast tx frames
 // and DLL shall pass PRes as ready to Edrv after SoC
-#define EPL_DLL_PRES_READY_AFTER_SOC                FALSE
+#define CONFIG_DLL_PRES_READY_AFTER_SOC             FALSE
 
 // switch this define to TRUE if Edrv supports fast tx frames
 // and DLL shall pass PRes as ready to Edrv after SoA
-#define EPL_DLL_PRES_READY_AFTER_SOA                FALSE
+#define CONFIG_DLL_PRES_READY_AFTER_SOA             FALSE
 
 // activate PResChaining support on MN
 #define CONFIG_DLL_PRES_CHAINING_MN                 FALSE
@@ -110,8 +110,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CONFIG_DLL_PROCESS_SYNC                     DLL_PROCESS_SYNC_ON_SOC
 
 // Disable deferred release of rx-buffers until EdrvPcap supports it
-#define DLL_DEFERRED_RXFRAME_RELEASE_ISOCHRONOUS    FALSE
-#define DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS   FALSE
+#define CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC    FALSE
+#define CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC   FALSE
 
 //==============================================================================
 // OBD specific defines
@@ -131,7 +131,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //==============================================================================
 
 // if TRUE the high resolution timer module will be used (must always be TRUE!)
-#define EPL_TIMER_USE_HIGHRES                       TRUE
+#define CONFIG_TIMER_USE_HIGHRES                    TRUE
 
 //==============================================================================
 // SDO module specific defines

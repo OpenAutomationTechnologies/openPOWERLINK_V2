@@ -109,7 +109,7 @@ tOplkError dllk_addInstance(tDllkInitParam* pInitParam_p)
     OPLK_MEMSET(&dllkInstance_g, 0, sizeof (dllkInstance_g));
 
     //jba able to work without hresk?
-#if EPL_TIMER_USE_HIGHRES != FALSE
+#if CONFIG_TIMER_USE_HIGHRES != FALSE
     if ((ret = hrestimer_init()) != kErrorOk)
         return ret;
 #endif
@@ -204,7 +204,7 @@ tOplkError dllk_delInstance(void)
     ret = synctimer_delInstance();
 #endif
 
-#if EPL_TIMER_USE_HIGHRES != FALSE
+#if CONFIG_TIMER_USE_HIGHRES != FALSE
     ret = hrestimer_delInstance();
 #endif
 
@@ -451,7 +451,7 @@ tOplkError dllk_setAsndServiceIdFilter(tDllAsndServiceId serviceId_p,
 }
 
 
-#if DLL_DEFERRED_RXFRAME_RELEASE_ISOCHRONOUS != FALSE || DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS != FALSE
+#if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC != FALSE || CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC != FALSE
 //------------------------------------------------------------------------------
 /**
 \brief  Release RX buffer frame in Edrv
@@ -793,7 +793,7 @@ tOplkError dllk_cbMnTimerCycle(tTimerEventArg* pEventArg_p)
 
     TGT_DLLK_ENTER_CRITICAL_SECTION();
 
-#if EPL_TIMER_USE_HIGHRES != FALSE
+#if CONFIG_TIMER_USE_HIGHRES != FALSE
     if (pEventArg_p->timerHdl != dllkInstance_g.timerHdlCycle)
     {   // zombie callback - just exit
         goto Exit;
@@ -941,7 +941,7 @@ Exit:
 }
 #endif
 
-#if EPL_TIMER_USE_HIGHRES != FALSE
+#if CONFIG_TIMER_USE_HIGHRES != FALSE
 //------------------------------------------------------------------------------
 /**
 \brief  CN Timer callback function
@@ -1317,7 +1317,7 @@ tOplkError dllk_setupLocalNodeCn(void)
 {
     tOplkError      ret = kErrorOk;
 
-#if (DLL_PRES_FILTER_COUNT >= 0)
+#if (CONFIG_DLL_PRES_FILTER_COUNT >= 0)
     UINT            handle;
 
 #if (NMT_MAX_NODE_ID > 0)
@@ -1332,7 +1332,7 @@ tOplkError dllk_setupLocalNodeCn(void)
                          &dllkInstance_g.aLocalMac[0]);
 
     // setup PRes filter
-#if DLL_PRES_FILTER_COUNT < 0
+#if CONFIG_DLL_PRES_FILTER_COUNT < 0
     if (dllkInstance_g.usedPresFilterCount > 0)
         dllk_setupPresFilter(&dllkInstance_g.aFilter[DLLK_FILTER_PRES], TRUE);
     else
@@ -1418,7 +1418,7 @@ tOplkError dllk_cleanupLocalNode(tNmtState oldNmtState_p)
 #endif
 
     // delete timer
-#if EPL_TIMER_USE_HIGHRES != FALSE
+#if CONFIG_TIMER_USE_HIGHRES != FALSE
     if ((ret = hrestimer_deleteTimer(&dllkInstance_g.timerHdlCycle)) != kErrorOk)
         return ret;
 #endif

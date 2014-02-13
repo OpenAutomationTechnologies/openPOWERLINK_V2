@@ -204,14 +204,14 @@ tOplkError dllucal_process(tEvent * pEvent_p)
     tOplkError      ret = kErrorOk;
     tFrameInfo*     pFrameInfo = NULL;
     tDllAsndNotRx*  pAsndNotRx = NULL;
-#if DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS == FALSE
+#if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC == FALSE
     tFrameInfo      FrameInfo;
 #endif
 
     switch(pEvent_p->eventType)
     {
         case kEventTypeAsndRx:
-#if DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS == FALSE
+#if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC == FALSE
             FrameInfo.pFrame = (tPlkFrame*) pEvent_p->pEventArg;
             FrameInfo.frameSize = pEvent_p->eventArgSize;
             pFrameInfo = &FrameInfo;
@@ -598,7 +598,7 @@ static tOplkError HandleRxAsndFrame(tFrameInfo *pFrameInfo_p)
     tMsgType     	msgType;
     unsigned int    asndServiceId;
     tOplkError      ret = kErrorOk;
-#if DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS != FALSE
+#if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC != FALSE
     tOplkError      eventRet;
     tEvent          event;
 #endif
@@ -620,7 +620,7 @@ static tOplkError HandleRxAsndFrame(tFrameInfo *pFrameInfo_p)
     }
 
 Exit:
-#if DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS != FALSE
+#if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC != FALSE
     // call free function for Asnd frame
     event.eventSink = kEventSinkDllkCal;
     event.eventType = kEventTypeReleaseRxFrame;

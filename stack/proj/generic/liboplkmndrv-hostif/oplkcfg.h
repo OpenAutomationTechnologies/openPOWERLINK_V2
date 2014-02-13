@@ -88,17 +88,15 @@ The Ethernet driver (Edrv) defines determine the stack's Ethernet module.
 Note: The settings are specific for MN with openMAC!
 */
 /**@{*/
-#define EDRV_FAST_TXFRAMES                  FALSE
+#define CONFIG_EDRV_FAST_TXFRAMES           FALSE
     ///< fast TX support by Edrv
-#define EDRV_EARLY_RX_INT                   FALSE
-    ///< early RX interrupt support by Edrv
-#define EDRV_DMA_TX_HANDLER                 FALSE
+#define CONFIG_EDRV_EARLY_RX_INT            FALSE
     ///< support TX handler call when DMA transfer finished
-#define EDRV_AUTO_RESPONSE                  FALSE
+#define CONFIG_EDRV_AUTO_RESPONSE           FALSE
     ///< support auto-response (e.g. openMAC)
-#define EDRV_TIME_TRIG_TX                   TRUE
+#define CONFIG_EDRV_TIME_TRIG_TX            TRUE
     ///< support time triggered transmission (e.g. openMAC)
-#define EDRVCYC_NEG_SHIFT_US                100U
+#define CONFIG_EDRVCYC_NEG_SHIFT_US         100U
     ///< us (timer irq before next cycle)
 /**@}*/
 
@@ -107,13 +105,13 @@ Note: The settings are specific for MN with openMAC!
 The Data Link Layer (DLL) defines determine the POWERLINK DLL module.
 */
 /**@{*/
-#define EPL_DLL_PRES_READY_AFTER_SOC        FALSE
-    ///< support PRes packet ready after SoC (EDRV_FAST_TXFRAMES necessary)
-#define EPL_DLL_PRES_READY_AFTER_SOA        FALSE
-    ///< support PRes packet ready after SoA (EDRV_FAST_TXFRAMES necessary)
-#define DLL_PRES_FILTER_COUNT           3
+#define CONFIG_DLL_PRES_READY_AFTER_SOC        FALSE
+    ///< support PRes packet ready after SoC (CONFIG_EDRV_FAST_TXFRAMES necessary)
+#define CONFIG_DLL_PRES_READY_AFTER_SOA        FALSE
+    ///< support PRes packet ready after SoA (CONFIG_EDRV_FAST_TXFRAMES necessary)
+#define CONFIG_DLL_PRES_FILTER_COUNT           3
     ///< max. supported PRes packet filters (for specific nodes)
-#define DLL_DEFERRED_RXFRAME_RELEASE_ISOCHRONOUS    FALSE
+#define CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC    FALSE
     ///< disable deferred RX frames if Edrv does not support it
 #define CONFIG_DLL_PRES_CHAINING_MN            TRUE
     ///< support PRes-Chaining (PRC) for MN
@@ -124,7 +122,7 @@ The Data Link Layer (DLL) defines determine the POWERLINK DLL module.
 The timer defines determine the high resolution timer module.
 */
 /**@{*/
-#define EPL_TIMER_USE_HIGHRES               TRUE
+#define CONFIG_TIMER_USE_HIGHRES               TRUE
     ///< use high resolution timer
 /**@}*/
 

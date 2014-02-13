@@ -72,16 +72,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //==============================================================================
 
 // switch this define to TRUE if Edrv supports fast tx frames
-#define EDRV_FAST_TXFRAMES                          FALSE
+#define CONFIG_EDRV_FAST_TXFRAMES                   FALSE
 
 // switch this define to TRUE if Edrv supports early receive interrupts
-#define EDRV_EARLY_RX_INT                           FALSE
+#define CONFIG_EDRV_EARLY_RX_INT                    FALSE
 
 // switch this define to TRUE if Edrv supports auto delay responses
-#define EDRV_AUTO_RESPONSE_DELAY                    FALSE
+#define CONFIG_EDRV_AUTO_RESPONSE_DELAY             FALSE
 
 // switch this define to TRUE to include Edrv diagnostic functions
-#define EDRV_USE_DIAGNOSTICS                        FALSE
+#define CONFIG_EDRV_USE_DIAGNOSTICS                 FALSE
 
 //==============================================================================
 // Data Link Layer (DLL) specific defines
@@ -89,11 +89,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // switch this define to TRUE if Edrv supports fast tx frames
 // and DLL shall pass PRes as ready to Edrv after SoC
-#define EPL_DLL_PRES_READY_AFTER_SOC                FALSE
+#define CONFIG_DLL_PRES_READY_AFTER_SOC             FALSE
 
 // switch this define to TRUE if Edrv supports fast tx frames
 // and DLL shall pass PRes as ready to Edrv after SoA
-#define EPL_DLL_PRES_READY_AFTER_SOA                FALSE
+#define CONFIG_DLL_PRES_READY_AFTER_SOA             FALSE
 
 // activate PResChaining support on MN
 #define CONFIG_DLL_PRES_CHAINING_MN                 TRUE
@@ -102,11 +102,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CONFIG_DLL_PRES_CHAINING_CN                 FALSE
 
 // time when CN processing the isochronous task (sync callback of application and cycle preparation)
-#define CONFIG_DLL_PROCESS_SYNC                        DLL_PROCESS_SYNC_ON_SOC
+#define CONFIG_DLL_PROCESS_SYNC                     DLL_PROCESS_SYNC_ON_SOC
 
 // Disable deferred release of rx-buffers until EdrvPcap supports it
-#define DLL_DEFERRED_RXFRAME_RELEASE_ISOCHRONOUS    FALSE
-#define DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS   FALSE
+#define CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC    FALSE
+#define CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC   FALSE
 
 //==============================================================================
 // OBD specific defines
@@ -123,7 +123,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define CONFIG_OBD_USE_LOAD_CONCISEDCF              TRUE
 #define CONFIG_OBD_DEF_CONCISEDCF_FILENAME          "mnobd.cdc"
-#define EPL_CFM_CONFIGURE_CYCLE_LENGTH              TRUE
+#define CONFIG_CFM_CONFIGURE_CYCLE_LENGTH           TRUE
 
 // Configure if the range from 0xA000 is used for mapping client objects.
 // openCONFIGURATOR uses this range for mapping objects.
@@ -134,16 +134,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //==============================================================================
 
 // if TRUE the high resolution timer module will be used (must always be TRUE!)
-#define EPL_TIMER_USE_HIGHRES                       TRUE
+#define CONFIG_TIMER_USE_HIGHRES                    TRUE
 
 //==============================================================================
 // SDO module specific defines
 //==============================================================================
 
 // increase the number of SDO channels, because we are master
-#define SDO_MAX_CONNECTION_ASND                     100
-#define MAX_SDO_SEQ_CON                             100
-#define MAX_SDO_COM_CON                             100
-#define SDO_MAX_CONNECTION_UDP                      50
+#define CONFIG_SDO_MAX_CONNECTION_ASND              100
+#define CONFIG_SDO_MAX_CONNECTION_SEQ               100
+#define CONFIG_SDO_MAX_CONNECTION_COM               100
+#define CONFIG_SDO_MAX_CONNECTION_UDP               50
 
 #endif // _INC_oplkcfg_H_

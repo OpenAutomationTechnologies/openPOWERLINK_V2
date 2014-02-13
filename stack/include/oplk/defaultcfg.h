@@ -49,36 +49,36 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CONFIG_DLLCAL_QUEUE                             CIRCBUF_QUEUE       // Configuration of DLLCAL queue: uses circular buffer per default
 #endif
 
-#ifndef EVENT_SIZE_CIRCBUF_KERNEL_TO_USER
-#define EVENT_SIZE_CIRCBUF_KERNEL_TO_USER               32768               // Default size for kernel-to-user event queue
+#ifndef CONFIG_EVENT_SIZE_CIRCBUF_KERNEL_TO_USER
+#define CONFIG_EVENT_SIZE_CIRCBUF_KERNEL_TO_USER        32768               // Default size for kernel-to-user event queue
 #endif
 
-#ifndef EVENT_SIZE_CIRCBUF_USER_TO_KERNEL
-#define EVENT_SIZE_CIRCBUF_USER_TO_KERNEL               32768               // Default size for user-to-kernel event queue
+#ifndef CONFIG_EVENT_SIZE_CIRCBUF_USER_TO_KERNEL
+#define CONFIG_EVENT_SIZE_CIRCBUF_USER_TO_KERNEL        32768               // Default size for user-to-kernel event queue
 #endif
 
-#ifndef EVENT_SIZE_CIRCBUF_KERNEL_INTERNAL
-#define EVENT_SIZE_CIRCBUF_KERNEL_INTERNAL              32768               // Default size for kernel-internal event queue
+#ifndef CONFIG_EVENT_SIZE_CIRCBUF_KERNEL_INTERNAL
+#define CONFIG_EVENT_SIZE_CIRCBUF_KERNEL_INTERNAL       32768               // Default size for kernel-internal event queue
 #endif
 
-#ifndef EVENT_SIZE_CIRCBUF_USER_INTERNAL
-#define EVENT_SIZE_CIRCBUF_USER_INTERNAL                32768               // Default size for user-internal event queue
+#ifndef CONFIG_EVENT_SIZE_CIRCBUF_USER_INTERNAL
+#define CONFIG_EVENT_SIZE_CIRCBUF_USER_INTERNAL         32768               // Default size for user-internal event queue
 #endif
 
-#ifndef DLLCAL_SIZE_CIRCBUF_CN_REQ_NMT
-#define DLLCAL_SIZE_CIRCBUF_CN_REQ_NMT                  2048                // Default size for NMT request queue
+#ifndef CONFIG_DLLCAL_SIZE_CIRCBUF_CN_REQ_NMT
+#define CONFIG_DLLCAL_SIZE_CIRCBUF_CN_REQ_NMT           2048                // Default size for NMT request queue
 #endif
 
-#ifndef DLLCAL_SIZE_CIRCBUF_CN_REQ_GEN
-#define DLLCAL_SIZE_CIRCBUF_CN_REQ_GEN                  2048                // Default size for generic request queue
+#ifndef CONFIG_DLLCAL_SIZE_CIRCBUF_CN_REQ_GEN
+#define CONFIG_DLLCAL_SIZE_CIRCBUF_CN_REQ_GEN           2048                // Default size for generic request queue
 #endif
 
-#ifndef DLLCAL_SIZE_CIRCBUF_REQ_IDENT
-#define DLLCAL_SIZE_CIRCBUF_REQ_IDENT                   256                 // Default size for ident request queue
+#ifndef CONFIG_DLLCAL_SIZE_CIRCBUF_REQ_IDENT
+#define CONFIG_DLLCAL_SIZE_CIRCBUF_REQ_IDENT            256                 // Default size for ident request queue
 #endif
 
-#ifndef DLLCAL_SIZE_CIRCBUF_REQ_STATUS
-#define DLLCAL_SIZE_CIRCBUF_REQ_STATUS                  256                 // Default size for status request queue
+#ifndef CONFIG_DLLCAL_SIZE_CIRCBUF_REQ_STATUS
+#define CONFIG_DLLCAL_SIZE_CIRCBUF_REQ_STATUS           256                 // Default size for status request queue
 #endif
 
 #ifndef CONFIG_DLL_PRES_CHAINING_CN
@@ -96,12 +96,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 #endif
 
-#ifndef DLL_DEFERRED_RXFRAME_RELEASE_ISOCHRONOUS
-#define DLL_DEFERRED_RXFRAME_RELEASE_ISOCHRONOUS        TRUE
+#ifndef CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC
+#define CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC        TRUE
 #endif
 
-#ifndef DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS
-#define DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS       FALSE
+#ifndef CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC
+#define CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC       FALSE
 #endif
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
@@ -160,16 +160,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CONFIG_DLL_SOC_SYNC_SHIFT_US                    150                 // negative time shift of isochronous task in relation to SoC
 #endif
 
-#ifndef DLL_PRES_FILTER_COUNT
+#ifndef CONFIG_DLL_PRES_FILTER_COUNT
 #if defined(CONFIG_INCLUDE_NMT_MN)
-#define DLL_PRES_FILTER_COUNT                           -1                  // maximum count of Rx filter entries for PRes frames
+#define CONFIG_DLL_PRES_FILTER_COUNT                           -1                  // maximum count of Rx filter entries for PRes frames
 #else
-#define DLL_PRES_FILTER_COUNT                           0                   // maximum count of Rx filter entries for PRes frames
+#define CONFIG_DLL_PRES_FILTER_COUNT                           0                   // maximum count of Rx filter entries for PRes frames
 #endif
 #endif
 
 #ifndef NMT_MAX_NODE_ID
-#if defined(CONFIG_INCLUDE_NMT_MN) || (DLL_PRES_FILTER_COUNT != 0)
+#if defined(CONFIG_INCLUDE_NMT_MN) || (CONFIG_DLL_PRES_FILTER_COUNT != 0)
 #define NMT_MAX_NODE_ID                                 254                 // maximum node-ID with MN or cross-traffic support
 #else
 #define NMT_MAX_NODE_ID                                 0                   // maximum node-ID with MN or cross-traffic support
@@ -250,12 +250,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EDRV_FILTER_WITH_RX_HANDLER                     FALSE
 #endif
 
-#ifndef EDRV_AUTO_RESPONSE
-#define EDRV_AUTO_RESPONSE                              FALSE
+#ifndef CONFIG_EDRV_AUTO_RESPONSE
+#define CONFIG_EDRV_AUTO_RESPONSE                       FALSE
 #endif
 
-#ifndef EDRV_AUTO_RESPONSE_DELAY
-#define EDRV_AUTO_RESPONSE_DELAY                        FALSE
+#ifndef CONFIG_EDRV_AUTO_RESPONSE_DELAY
+#define CONFIG_EDRV_AUTO_RESPONSE_DELAY                 FALSE
 #endif
 
 #endif /* _INC_oplk_defaultcfg_H_ */

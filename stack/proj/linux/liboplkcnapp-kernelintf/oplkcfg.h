@@ -57,9 +57,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #undef FTRACE_DEBUG
 
 /* assure that system priorities of hrtimer and net-rx kernel threads are set appropriate */
-#define EPL_THREAD_PRIORITY_HIGH                    75
-#define EPL_THREAD_PRIORITY_MEDIUM                  50
-#define EPL_THREAD_PRIORITY_LOW                     49
+#define CONFIG_THREAD_PRIORITY_HIGH                    75
+#define CONFIG_THREAD_PRIORITY_MEDIUM                  50
+#define CONFIG_THREAD_PRIORITY_LOW                     49
 
 // These macros defines all modules which are included
 #define CONFIG_INCLUDE_PDO
@@ -83,8 +83,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // Disable deferred release of rx-buffers until EdrvPcap supports it
 // NOTE: Ensure that these setting is equally configured in user and kernel layer!!
-#define DLL_DEFERRED_RXFRAME_RELEASE_ISOCHRONOUS        FALSE
-#define DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS       FALSE
+#define CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC        FALSE
+#define CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC       FALSE
 
 //==============================================================================
 // OBD specific defines
@@ -104,7 +104,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //==============================================================================
 
 // if TRUE the high resolution timer module will be used
-#define EPL_TIMER_USE_HIGHRES                           TRUE
+#define CONFIG_TIMER_USE_HIGHRES                        TRUE
 
 //==============================================================================
 // SDO module specific defines

@@ -59,20 +59,20 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 
-#if EPL_TIMER_USE_HIGHRES == FALSE
-#error "EdrvCyclic needs EPL_TIMER_USE_HIGHRES = TRUE"
+#if CONFIG_TIMER_USE_HIGHRES == FALSE
+#error "EdrvCyclic needs CONFIG_TIMER_USE_HIGHRES = TRUE"
 #endif
 
 //define to shift timer interrupt before cycle
-#ifndef EDRVCYC_NEG_SHIFT_US
-#define EDRVCYC_NEG_SHIFT_US        100U //us (timer irq before next cycle)
+#ifndef CONFIG_EDRVCYC_NEG_SHIFT_US
+#define CONFIG_EDRVCYC_NEG_SHIFT_US        100U //us (timer irq before next cycle)
 #endif
 
-#if (EDRVCYC_NEG_SHIFT_US < 50U)
+#if (CONFIG_EDRVCYC_NEG_SHIFT_US < 50U)
 #error "Set EDRVCYC_NEG_SHIFT larger 50 us!"
 #endif
 
-#if EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
+#if CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
 #warning "EdrvCyclic Diagnostics is not supported by openMAC!"
 #endif
 
@@ -527,7 +527,7 @@ static tOplkError processTxBufferList(void)
     if(instance_l.fNextCycleTimeValid == FALSE)
     {
         //use current time + negative shift to set a valid next cycle
-        instance_l.nextCycleTime = macTimeFctCall + OMETH_US_2_TICKS(EDRVCYC_NEG_SHIFT_US);
+        instance_l.nextCycleTime = macTimeFctCall + OMETH_US_2_TICKS(CONFIG_EDRVCYC_NEG_SHIFT_US);
 
         //next timer IRQ correction
         nextTimerIrqNs -= OMETH_TICKS_2_NS(instance_l.txProcFilterResult);
@@ -547,7 +547,7 @@ static tOplkError processTxBufferList(void)
         {
             diffToNextSoc = macTimeFctCall - instance_l.nextCycleTime;
             diffToNextSocNs = OMETH_TICKS_2_NS(diffToNextSoc);
-            nextTimerIrqNs -= (EDRVCYC_NEG_SHIFT_US * 1000UL + diffToNextSocNs);
+            nextTimerIrqNs -= (CONFIG_EDRVCYC_NEG_SHIFT_US * 1000UL + diffToNextSocNs);
             ret = processCycleViolation(nextTimerIrqNs);
             goto CycleDone;
         }
@@ -557,20 +557,20 @@ static tOplkError processTxBufferList(void)
 
         diffToNextSocNs = OMETH_TICKS_2_NS(diffToNextSoc);
 
-        if(diffToNextSocNs > EDRVCYC_NEG_SHIFT_US * 1000UL)
+        if(diffToNextSocNs > CONFIG_EDRVCYC_NEG_SHIFT_US * 1000UL)
         {
             //time difference is larger negative shift
-            nextTimerIrqNs += (diffToNextSocNs - EDRVCYC_NEG_SHIFT_US * 1000UL);
+            nextTimerIrqNs += (diffToNextSocNs - CONFIG_EDRVCYC_NEG_SHIFT_US * 1000UL);
         }
         else if(diffToNextSocNs > EDRVCYC_MIN_SHIFT_US * 1000UL)
         {
             //time difference is shorter than negative shift but larger than minimum
-            nextTimerIrqNs -= (EDRVCYC_NEG_SHIFT_US * 1000UL - diffToNextSocNs);
+            nextTimerIrqNs -= (CONFIG_EDRVCYC_NEG_SHIFT_US * 1000UL - diffToNextSocNs);
         }
         else
         {
             //time difference is too short => cycle violation!
-            nextTimerIrqNs -= (EDRVCYC_NEG_SHIFT_US * 1000UL - diffToNextSocNs);
+            nextTimerIrqNs -= (CONFIG_EDRVCYC_NEG_SHIFT_US * 1000UL - diffToNextSocNs);
             ret = processCycleViolation(nextTimerIrqNs);
             goto CycleDone;
         }

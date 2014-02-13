@@ -79,23 +79,23 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //comment the following lines to disable feature
 //#define EDRV_2NDTXQUEUE    //use additional TX queue for MN
 
-#if (EDRV_AUTO_RESPONSE == FALSE)
+#if (CONFIG_EDRV_AUTO_RESPONSE == FALSE)
     #undef EDRV_MAX_AUTO_RESPONSES
     #define EDRV_MAX_AUTO_RESPONSES 0 //no auto-response used
 #endif
 
-#ifndef EDRV_TIME_TRIG_TX
-#define EDRV_TIME_TRIG_TX FALSE
+#ifndef CONFIG_EDRV_TIME_TRIG_TX
+#define CONFIG_EDRV_TIME_TRIG_TX FALSE
 #endif
 
-#if (EDRV_AUTO_RESPONSE == FALSE && EDRV_TIME_TRIG_TX == FALSE)
-    #error "Please enable EDRV_AUTO_RESPONSE in oplkcfg.h to use openMAC for CN!"
+#if (CONFIG_EDRV_AUTO_RESPONSE == FALSE && CONFIG_EDRV_TIME_TRIG_TX == FALSE)
+    #error "Please enable CONFIG_EDRV_AUTO_RESPONSE in oplkcfg.h to use openMAC for CN!"
 #endif
-#if (EDRV_AUTO_RESPONSE != FALSE && EDRV_TIME_TRIG_TX != FALSE)
-#error "Please disable EDRV_AUTO_RESPONSE in oplkcfg.h to use openMAC for MN!"
+#if (CONFIG_EDRV_AUTO_RESPONSE != FALSE && CONFIG_EDRV_TIME_TRIG_TX != FALSE)
+#error "Please disable CONFIG_EDRV_AUTO_RESPONSE in oplkcfg.h to use openMAC for MN!"
 #endif
 
-#if (defined(EDRV_2NDTXQUEUE) && EDRV_TIME_TRIG_TX == FALSE)
+#if (defined(EDRV_2NDTXQUEUE) && CONFIG_EDRV_TIME_TRIG_TX == FALSE)
     #undef EDRV_2NDTXQUEUE //2nd TX queue makes no sense here..
     #undef EDRV_MAX_TX_BUF2
 #endif
@@ -144,7 +144,7 @@ typedef struct
     INT                 txQueueWriteIndex;
     INT                 txQueueReadIndex;
 #endif
-#if DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS != FALSE
+#if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC != FALSE
     OMETH_HOOK_H        pRxAsndHookInst;
 #endif
 } tEdrvInstance;
@@ -248,9 +248,9 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
         goto Exit;
     }
 
-#if DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS != FALSE
+#if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC != FALSE
     // initialize Rx hook for Asnd frames with pending allowed
-    edrvInstance_l.pRxAsndHookInst = omethHookCreate(edrvInstance_l.pMacInst, rxHook, EDRV_ASND_DEFFERRED_RX_BUFFERS);
+    edrvInstance_l.pRxAsndHookInst = omethHookCreate(edrvInstance_l.pMacInst, rxHook, CONFIG_EDRV_ASND_DEFFERRED_RX_BUFFERS);
     if(edrvInstance_l.pRxAsndHookInst == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Rx hook creation for Asnd frames failed!\n", __func__);
@@ -524,7 +524,7 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
     pPacket = GET_TYPE_BASE(ometh_packet_typ, data, pBuffer_p->pBuffer);
 
     pPacket->length = pBuffer_p->txFrameSize;
-#if EDRV_TIME_TRIG_TX != FALSE
+#if CONFIG_EDRV_TIME_TRIG_TX != FALSE
     if( (pBuffer_p->timeOffsetAbs & 1) == 1)
     {
         //free tx descriptors available
@@ -563,7 +563,7 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
 #endif
         txLength = omethTransmitArg(edrvInstance_l.pMacInst, pPacket,
                             txAckCb, pBuffer_p);
-#if EDRV_TIME_TRIG_TX != FALSE
+#if CONFIG_EDRV_TIME_TRIG_TX != FALSE
     }
 #endif
 
@@ -577,7 +577,7 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
         ret = kErrorEdrvNoFreeBufEntry;
     }
 
-#if EDRV_TIME_TRIG_TX != FALSE
+#if CONFIG_EDRV_TIME_TRIG_TX != FALSE
 Exit:
 #endif
     if( ret != kErrorOk )
@@ -656,7 +656,7 @@ tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
                 edrv_updateTxBuffer(pFilter_p[entry].pTxBuffer);
                 omethResponseEnable(edrvInstance_l.apRxFilterInst[entry]);
 
-#if EDRV_AUTO_RESPONSE_DELAY != FALSE
+#if CONFIG_EDRV_AUTO_RESPONSE_DELAY != FALSE
                 {
                     UINT32 delayNs;
 
@@ -695,7 +695,7 @@ tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
 
         if (((changeFlags_p & (EDRV_FILTER_CHANGE_VALUE
                                  | EDRV_FILTER_CHANGE_MASK
-#if EDRV_AUTO_RESPONSE_DELAY != FALSE
+#if CONFIG_EDRV_AUTO_RESPONSE_DELAY != FALSE
                                  | EDRV_FILTER_CHANGE_AUTO_RESPONSE_DELAY
 #endif
                                  | EDRV_FILTER_CHANGE_AUTO_RESPONSE)) != 0)
@@ -740,7 +740,7 @@ tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
                 }
             }
 
-#if EDRV_AUTO_RESPONSE_DELAY != FALSE
+#if CONFIG_EDRV_AUTO_RESPONSE_DELAY != FALSE
             if ((changeFlags_p & EDRV_FILTER_CHANGE_AUTO_RESPONSE_DELAY) != 0)
             {   // filter auto-response delay has changed
                 UINT32 delayNs;
@@ -969,7 +969,7 @@ static tOplkError initRxFilters(void)
         // Assign filters to corresponding hooks
         switch(i)
         {
-#if DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS != FALSE
+#if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC != FALSE
             case DLLK_FILTER_ASND:
                 pHook = edrvInstance_l.pRxAsndHookInst;
                 break;
@@ -1123,7 +1123,7 @@ static void irqHandler (void* pArg_p)
     }
 #endif
 
-#if (defined(EDRV_2NDTXQUEUE) && (EDRV_TIME_TRIG_TX != FALSE))
+#if (defined(EDRV_2NDTXQUEUE) && (CONFIG_EDRV_TIME_TRIG_TX != FALSE))
     //observe additional TX queue and send packet if necessary
     while( (edrvInstance_l.txQueueWriteIndex - edrvInstance_l.txQueueReadIndex) &&
         (omethTransmitPending(edrvInstance_l.pMacInst) < 16U) )
