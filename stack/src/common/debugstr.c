@@ -813,7 +813,7 @@ char* debugstr_getRetValStr(tOplkError EplKernel_p)
 
 The function returns the string describing the specified emergency error code.
 
-\param  EmergErrCode_p       emergency error code value to print
+\param  emergErrCode_p       Emergency error code value to print
 
 \return The function returns a string describing the specified emergency error
 code.

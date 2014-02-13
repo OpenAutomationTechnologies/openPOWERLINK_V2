@@ -254,14 +254,14 @@ tOplkError target_cleanup(void)
 The function makes the calling thread sleep until the number of specified
 milliseconds have elapsed.
 
-\param  milliSecond_p       Number of milliseconds to sleep
+\param  milliSeconds_p      Number of milliseconds to sleep
 
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-void target_msleep (UINT32 milliSecond_p)
+void target_msleep (UINT32 milliSeconds_p)
 {
-    usleep(TGTCONIO_MS_IN_US(milliSecond_p));
+    usleep(TGTCONIO_MS_IN_US(milliSeconds_p));
 }
 
 //============================================================================//

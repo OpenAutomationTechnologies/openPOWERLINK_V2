@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   frame.h
+\file   oplk/frame.h
 
 \brief  Definitions for POWERLINK frames
 
@@ -124,7 +124,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #error you must byte-align these structures with the appropriate compiler directives
 #endif
 
-
 typedef struct
 {
     UINT8                   reserved1;                      ///< Offset 17: reserved
@@ -184,12 +183,17 @@ typedef struct
     tSoaPayload             payload;                        ///< Offset 23:
 } PACK_STRUCT tSoaFrame;
 
+/**
+\brief Structure for error history entries
+
+the following structure defines an error history entry.
+*/
 typedef struct
 {
-    UINT16                  entryType;
-    UINT16                  errorCode;
-    tNetTime                timeStamp;
-    UINT8                   aAddInfo[8];
+    UINT16                  entryType;                      ///< The type of the entry
+    UINT16                  errorCode;                      ///< The error code of the entry
+    tNetTime                timeStamp;                      ///< The timestamp when the error was added
+    UINT8                   aAddInfo[8];                    ///< Additional error information
 } PACK_STRUCT tErrHistoryEntry;
 
 typedef struct
