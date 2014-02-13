@@ -58,11 +58,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 // -----------------------------------------------------------------------------
-#define EPL_PRODUCT_NAME            "EPL V2"
+#define PLK_PRODUCT_NAME            "EPL V2"
 #define PLK_PRODUCT_VERSION         PLK_DEFINED_STRING_VERSION
-#define EPL_PRODUCT_MANUFACTURER    "SYS TEC electronic GmbH"
+#define PLK_PRODUCT_MANUFACTURER    "SYS TEC electronic GmbH"
 
-#define EPL_PRODUCT_KEY             "SO-1083"
-#define EPL_PRODUCT_DESCRIPTION     "openPOWERLINK Protocol Stack Source"
+#define PLK_PRODUCT_KEY             "SO-1083"
+#define PLK_PRODUCT_DESCRIPTION     "openPOWERLINK Protocol Stack Source"
 
 #endif /* _INC_oplk_version_H_ */
