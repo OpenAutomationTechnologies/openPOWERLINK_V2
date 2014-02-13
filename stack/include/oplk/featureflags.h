@@ -46,92 +46,92 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 
-// defines for EPL FeatureFlags
-#define EPL_FEATURE_ISOCHR          0x00000001
-#define EPL_FEATURE_SDO_UDP         0x00000002
-#define EPL_FEATURE_SDO_ASND        0x00000004
-#define EPL_FEATURE_SDO_PDO         0x00000008
-#define EPL_FEATURE_NMT_INFO        0x00000010
-#define EPL_FEATURE_NMT_EXT         0x00000020
-#define EPL_FEATURE_PDO_DYN         0x00000040
-#define EPL_FEATURE_NMT_UDP         0x00000080
-#define EPL_FEATURE_CFM             0x00000100
-#define EPL_FEATURE_DLL_MULTIPLEX   0x00000200  // CN specific
-#define EPL_FEATURE_NODEID_SW       0x00000400
-#define EPL_FEATURE_NMT_BASICETH    0x00000800  // MN specific
-#define EPL_FEATURE_RT1             0x00001000
-#define EPL_FEATURE_RT2             0x00002000
-#define EPL_FEATURE_PRES_CHAINING   0x00040000
+// defines for FeatureFlags
+#define PLK_FEATURE_ISOCHR                  0x00000001
+#define PLK_FEATURE_SDO_UDP                 0x00000002
+#define PLK_FEATURE_SDO_ASND                0x00000004
+#define PLK_FEATURE_SDO_PDO                 0x00000008
+#define PLK_FEATURE_NMT_INFO                0x00000010
+#define PLK_FEATURE_NMT_EXT                 0x00000020
+#define PLK_FEATURE_PDO_DYN                 0x00000040
+#define PLK_FEATURE_NMT_UDP                 0x00000080
+#define PLK_FEATURE_CFM                     0x00000100
+#define PLK_FEATURE_DLL_MULTIPLEX           0x00000200  // CN specific
+#define PLK_FEATURE_NODEID_SW               0x00000400
+#define PLK_FEATURE_NMT_BASICETH            0x00000800  // MN specific
+#define PLK_FEATURE_RT1                     0x00001000
+#define PLK_FEATURE_RT2                     0x00002000
+#define PLK_FEATURE_PRES_CHAINING           0x00040000
 
 
-// generate EPL NMT_FeatureFlags_U32
-#ifndef EPL_DEF_FEATURE_ISOCHR
-    #if defined(CONFIG_INCLUDE_PDO)
-        #define EPL_DEF_FEATURE_ISOCHR          (EPL_FEATURE_ISOCHR)
-    #else
-        #define EPL_DEF_FEATURE_ISOCHR          0
-    #endif
+// generate NMT_FeatureFlags_U32 depending on configuration values
+#ifndef PLK_DEF_FEATURE_ISOCHR
+#if defined(CONFIG_INCLUDE_PDO)
+#define PLK_DEF_FEATURE_ISOCHR              (PLK_FEATURE_ISOCHR)
+#else
+#define PLK_DEF_FEATURE_ISOCHR              0
+#endif
 #endif
 
-#ifndef EPL_DEF_FEATURE_SDO_ASND
-    #if defined(CONFIG_INCLUDE_SDO_ASND)
-        #define EPL_DEF_FEATURE_SDO_ASND        (EPL_FEATURE_SDO_ASND)
-    #else
-        #define EPL_DEF_FEATURE_SDO_ASND        0
-    #endif
+#ifndef PLK_DEF_FEATURE_SDO_ASND
+#if defined(CONFIG_INCLUDE_SDO_ASND)
+#define PLK_DEF_FEATURE_SDO_ASND            (PLK_FEATURE_SDO_ASND)
+#else
+#define PLK_DEF_FEATURE_SDO_ASND            0
+#endif
 #endif
 
-#ifndef EPL_DEF_FEATURE_SDO_UDP
-    #if defined(CONFIG_INCLUDE_SDO_UDP)
-        #define EPL_DEF_FEATURE_SDO_UDP         (EPL_FEATURE_SDO_UDP)
-    #else
-        #define EPL_DEF_FEATURE_SDO_UDP         0
-    #endif
+#ifndef PLK_DEF_FEATURE_SDO_UDP
+#if defined(CONFIG_INCLUDE_SDO_UDP)
+#define PLK_DEF_FEATURE_SDO_UDP             (PLK_FEATURE_SDO_UDP)
+#else
+#define PLK_DEF_FEATURE_SDO_UDP             0
+#endif
 #endif
 
-#ifndef EPL_DEF_FEATURE_SDO_PDO
-    #if defined(CONFIG_INCLUDE_SDO_PDO)
-        #define EPL_DEF_FEATURE_SDO_PDO         (EPL_FEATURE_SDO_PDO)
-    #else
-        #define EPL_DEF_FEATURE_SDO_PDO         0
-    #endif
+#ifndef PLK_DEF_FEATURE_SDO_PDO
+#if defined(CONFIG_INCLUDE_SDO_PDO)
+#define PLK_DEF_FEATURE_SDO_PDO             (PLK_FEATURE_SDO_PDO)
+#else
+#define PLK_DEF_FEATURE_SDO_PDO             0
+#endif
 #endif
 
-#ifndef EPL_DEF_FEATURE_PDO_DYN
-    #if defined(CONFIG_INCLUDE_PDO)
-        #define EPL_DEF_FEATURE_PDO_DYN         (EPL_FEATURE_PDO_DYN)
-    #else
-        #define EPL_DEF_FEATURE_PDO_DYN         0
-    #endif
+#ifndef PLK_DEF_FEATURE_PDO_DYN
+#if defined(CONFIG_INCLUDE_PDO)
+#define PLK_DEF_FEATURE_PDO_DYN             (PLK_FEATURE_PDO_DYN)
+#else
+#define PLK_DEF_FEATURE_PDO_DYN             0
+#endif
 #endif
 
-#ifndef EPL_DEF_FEATURE_CFM
-    #if defined(CONFIG_INCLUDE_CFM)
-        #define EPL_DEF_FEATURE_CFM           (EPL_FEATURE_CFM)
-    #else
-        #define EPL_DEF_FEATURE_CFM           0
-    #endif
+#ifndef PLK_DEF_FEATURE_CFM
+#if defined(CONFIG_INCLUDE_CFM)
+#define PLK_DEF_FEATURE_CFM                 (PLK_FEATURE_CFM)
+#else
+#define PLK_DEF_FEATURE_CFM                 0
+#endif
 #endif
 
-#ifndef EPL_DEF_FEATURE_DLL_MULTIPLEX
-    #define EPL_DEF_FEATURE_DLL_MULTIPLEX       (EPL_FEATURE_DLL_MULTIPLEX)
+#ifndef PLK_DEF_FEATURE_DLL_MULTIPLEX
+#define PLK_DEF_FEATURE_DLL_MULTIPLEX       (PLK_FEATURE_DLL_MULTIPLEX)
 #endif
 
-#ifndef EPL_DEF_FEATURE_PRES_CHAINING
-    #if CONFIG_DLL_PRES_CHAINING_CN != FALSE
-        #define EPL_DEF_FEATURE_PRES_CHAINING   (EPL_FEATURE_PRES_CHAINING)
-    #else
-        #define EPL_DEF_FEATURE_PRES_CHAINING   0
-    #endif
+#ifndef PLK_DEF_FEATURE_PRES_CHAINING
+#if CONFIG_DLL_PRES_CHAINING_CN != FALSE
+#define PLK_DEF_FEATURE_PRES_CHAINING       (PLK_FEATURE_PRES_CHAINING)
+#else
+#define PLK_DEF_FEATURE_PRES_CHAINING       0
+#endif
 #endif
 
-#define EPL_DEF_FEATURE_FLAGS                   (EPL_DEF_FEATURE_ISOCHR \
-                                                | EPL_DEF_FEATURE_SDO_ASND \
-                                                | EPL_DEF_FEATURE_SDO_UDP \
-                                                | EPL_DEF_FEATURE_SDO_PDO \
-                                                | EPL_DEF_FEATURE_PDO_DYN \
-                                                | EPL_DEF_FEATURE_CFM \
-                                                | EPL_DEF_FEATURE_DLL_MULTIPLEX \
-                                                | EPL_DEF_FEATURE_PRES_CHAINING)
+#define PLK_DEF_FEATURE_FLAGS (PLK_DEF_FEATURE_ISOCHR | \
+                               PLK_DEF_FEATURE_SDO_ASND | \
+                               PLK_DEF_FEATURE_SDO_UDP | \
+                               PLK_DEF_FEATURE_SDO_PDO | \
+                               PLK_DEF_FEATURE_PDO_DYN | \
+                               PLK_DEF_FEATURE_CFM | \
+                               PLK_DEF_FEATURE_DLL_MULTIPLEX | \
+                               PLK_DEF_FEATURE_PRES_CHAINING)
 
 #endif /* _INC_featureflags_H_ */
