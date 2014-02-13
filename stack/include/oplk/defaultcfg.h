@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   oplk/defaultconfig.h
+\file   oplk/defaultcfg.h
 
 \brief  Default configuration values
 

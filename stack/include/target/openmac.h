@@ -79,11 +79,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 typedef void (*tOpenmacIrqCb) (void* pArg_p);
 
+/**
+\brief openMAC IRQ sources
+*/
 typedef enum
 {
     kOpenmacIrqSync     = 0,    ///< Sync timer Irq
     kOpenmacIrqTxRx     = 1,    ///< Mac Irq (Tx and Rx)
-    kOpenmacIrqLast
+    kOpenmacIrqLast             ///< Dummy, count of valid interrupt sources
 } tOpenmacIrqSource;
 
 //------------------------------------------------------------------------------
