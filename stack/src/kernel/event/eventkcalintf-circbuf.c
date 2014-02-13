@@ -80,7 +80,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // local vars
 //------------------------------------------------------------------------------
 static tCircBufInstance*        instance_l[kEventQueueNum];
-static BYTE                     aRxBuffer_l[kEventQueueNum][sizeof(tEvent) + EPL_MAX_EVENT_ARG_SIZE];
+static BYTE                     aRxBuffer_l[kEventQueueNum][sizeof(tEvent) + MAX_EVENT_ARG_SIZE];
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -295,7 +295,7 @@ tOplkError eventkcal_processEventCircbuf(tEventQueue eventQueue_p)
     pCircBufInstance = instance_l[eventQueue_p];
 
     error = circbuf_readData(pCircBufInstance, aRxBuffer_l[eventQueue_p],
-                             sizeof(tEvent) + EPL_MAX_EVENT_ARG_SIZE, &readSize);
+                             sizeof(tEvent) + MAX_EVENT_ARG_SIZE, &readSize);
     if(error != kCircBufOk)
     {
         if (error == kCircBufNoReadableData)
@@ -363,7 +363,7 @@ tOplkError eventkcal_getEventCircbuf(tEventQueue eventQueue_p, BYTE* pDataBuffer
     pCircBufInstance = instance_l[eventQueue_p];
 
     error = circbuf_readData(pCircBufInstance, pDataBuffer_p,
-                             sizeof(tEvent) + EPL_MAX_EVENT_ARG_SIZE, pReadSize_p);
+                             sizeof(tEvent) + MAX_EVENT_ARG_SIZE, pReadSize_p);
     if(error != kCircBufOk)
     {
         if (error == kCircBufNoReadableData)

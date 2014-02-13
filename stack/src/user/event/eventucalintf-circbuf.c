@@ -259,7 +259,7 @@ tOplkError eventucal_processEventCircbuf(tEventQueue eventQueue_p)
     tOplkError          ret = kErrorOk;
     size_t              readSize;
     tCircBufInstance*   pCircBufInstance;
-    BYTE                aRxBuffer[sizeof(tEvent) + EPL_MAX_EVENT_ARG_SIZE];
+    BYTE                aRxBuffer[sizeof(tEvent) + MAX_EVENT_ARG_SIZE];
 
     if (eventQueue_p > kEventQueueNum)
         return kErrorInvalidInstanceParam;
@@ -270,7 +270,7 @@ tOplkError eventucal_processEventCircbuf(tEventQueue eventQueue_p)
     pCircBufInstance = instance_l[eventQueue_p];
 
     error = circbuf_readData(pCircBufInstance, aRxBuffer,
-                             sizeof(tEvent) + EPL_MAX_EVENT_ARG_SIZE, &readSize);
+                             sizeof(tEvent) + MAX_EVENT_ARG_SIZE, &readSize);
     if(error != kCircBufOk)
     {
         if (error == kCircBufNoReadableData)

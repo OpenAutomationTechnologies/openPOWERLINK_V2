@@ -49,8 +49,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 // max size of event argument
-#ifndef EPL_MAX_EVENT_ARG_SIZE
-#define EPL_MAX_EVENT_ARG_SIZE          2048
+#ifndef MAX_EVENT_ARG_SIZE
+#define MAX_EVENT_ARG_SIZE          2048
 #endif
 
 //------------------------------------------------------------------------------

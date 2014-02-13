@@ -52,11 +52,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 The generic defines are valid for the whole openPOWERLINK stack.
 */
 /**@{*/
-    ///< use delete instance functions
-#define USE_VAR64
-    ///< data type support higher 32 bit
-#define EPL_MAX_INSTANCES                   1
-    ///< number of EPL instances
 
 // These macros define all modules which are included
 #define CONFIG_INCLUDE_PDO
@@ -84,12 +79,6 @@ The generic defines are valid for the whole openPOWERLINK stack.
 The queue defines determine the stack's queues.
 */
 /**@{*/
-#define EPL_EVENT_K2U_QUEUE                 HOSTINTERFACE_QUEUE
-    ///< kernel-to-user queue implementation
-#define EPL_EVENT_U2K_QUEUE                 HOSTINTERFACE_QUEUE
-    ///< user-to-kernel queue implementation
-#define EPL_EVENT_UINT_QUEUE                DIRECT_QUEUE
-    ///< user-internal queue implementation
 #define CONFIG_DLLCAL_QUEUE                 HOSTINTERFACE_QUEUE
     ///< DLLCAL queue implementation
 /**@}*/

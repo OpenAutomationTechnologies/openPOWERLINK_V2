@@ -296,7 +296,7 @@ static void *eventThread (void * arg_p)
 {
     tEvent*  pEvent;
     int         ret;
-    char        eventBuf[sizeof(tEvent) + EPL_MAX_EVENT_ARG_SIZE];
+    char        eventBuf[sizeof(tEvent) + MAX_EVENT_ARG_SIZE];
 
     UNUSED_PARAMETER(arg_p);
 
