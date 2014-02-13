@@ -132,7 +132,7 @@ tOplkError dllk_setAsndServiceIdFilter(tDllAsndServiceId ServiceId_p, tDllAsndFi
 void       dllk_regRpdoHandler(tDllkCbProcessRpdo pfnDllkCbProcessRpdo_p);
 void       dllk_regTpdoHandler(tDllkCbProcessTpdo pfnDllkCbProcessTpdo_p);
 tSyncCb dllk_regSyncHandler(tSyncCb pfnCbSync_p);
-#if DLL_DEFERRED_RXFRAME_RELEASE_ISOCHRONOUS != FALSE || DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS != FALSE
+#if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC != FALSE || CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC != FALSE
 tOplkError dllk_releaseRxFrame(tPlkFrame* pFrame_p, UINT uiFrameSize_p);
 #endif
 

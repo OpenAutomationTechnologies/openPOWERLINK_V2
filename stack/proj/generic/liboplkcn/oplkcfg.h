@@ -40,8 +40,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _INC_oplkcfg_H_
 #define _INC_oplkcfg_H_
 
-
-
 //==============================================================================
 // generic defines which for whole EPL Stack
 //==============================================================================
@@ -71,29 +69,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //==============================================================================
 
 // switch this define to TRUE if Edrv supports fast tx frames
-#define EDRV_FAST_TXFRAMES                          FALSE
+#define CONFIG_EDRV_FAST_TXFRAMES                   FALSE
 
 // switch this define to TRUE if Edrv supports early receive interrupts
-#define EDRV_EARLY_RX_INT                           FALSE
-
-// enables setting of several port pins for benchmarking purposes
-#define EDRV_BENCHMARK                              FALSE
-
-// Call Tx handler (i.e. EplDllCbFrameTransmitted()) already if DMA has finished,
-// otherwise call the Tx handler if frame was actually transmitted over ethernet.
-#define EDRV_DMA_TX_HANDLER                         FALSE
-
-// number of used ethernet controller
-#define EDRV_USED_ETH_CTRL                          1
+#define CONFIG_EDRV_EARLY_RX_INT                    FALSE
 
 // openMAC supports auto-response
-#define EDRV_AUTO_RESPONSE                          TRUE
+#define CONFIG_EDRV_AUTO_RESPONSE                   TRUE
 
 // Number of deferred Rx buffers
-#define EDRV_ASND_DEFFERRED_RX_BUFFERS              6
+#define CONFIG_EDRV_ASND_DEFFERRED_RX_BUFFERS       6
 
 // openMAC supports auto-response delay
-#define EDRV_AUTO_RESPONSE_DELAY                    TRUE
+#define CONFIG_EDRV_AUTO_RESPONSE_DELAY             TRUE
 
 
 // =============================================================================
@@ -102,15 +90,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // switch this define to TRUE if Edrv supports fast tx frames
 // and DLL shall pass PRes as ready to Edrv after SoC
-#define EPL_DLL_PRES_READY_AFTER_SOC                FALSE
+#define CONFIG_DLL_PRES_READY_AFTER_SOC             FALSE
 
 // switch this define to TRUE if Edrv supports fast tx frames
 // and DLL shall pass PRes as ready to Edrv after SoA
-#define EPL_DLL_PRES_READY_AFTER_SOA                FALSE
+#define CONFIG_DLL_PRES_READY_AFTER_SOA             FALSE
 
 // maximum count of Rx filter entries for PRes frames
-#define DLL_PRES_FILTER_COUNT                   3
-
+#define CONFIG_DLL_PRES_FILTER_COUNT                3
 
 #define CONFIG_DLL_PROCESS_SYNC                     DLL_PROCESS_SYNC_ON_TIMER
 
@@ -121,25 +108,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CONFIG_DLL_PRES_CHAINING_CN                 TRUE
 
 // Disable/Enable late release
-#define DLL_DEFERRED_RXFRAME_RELEASE_ISOCHRONOUS    FALSE
-#define DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS   TRUE
-
-
+#define CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC    FALSE
+#define CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC   TRUE
 
 // Asynchronous transmit buffer for NMT frames in bytes
-#define DLLCAL_BUFFER_SIZE_TX_NMT                   4096
-
-// Asynchronous transmit buffer for generic Asnd frames in bytes
-#define DLLCAL_BUFFER_SIZE_TX_GEN_ASND              8192
-
-// Asynchronous transmit buffer for generic Ethernet frames in bytes
-#define DLLCAL_BUFFER_SIZE_TX_GEN_ETH               8192
+#define CONFIG_DLLCAL_BUFFER_SIZE_TX_NMT            4096
 
 // Asynchronous transmit buffer for sync response frames in bytes
-#define DLLCAL_BUFFER_SIZE_TX_SYNC                  4096
+#define CONFIG_DLLCAL_BUFFER_SIZE_TX_SYNC           4096
 
 // Size of kernel to user queue
-#define EVENT_SIZE_CIRCBUF_KERNEL_TO_USER           8192
+#define CONFIG_EVENT_SIZE_CIRCBUF_KERNEL_TO_USER    8192
 
 // =========================================================================
 // OBD specific defines
@@ -159,7 +138,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //==============================================================================
 
 // if TRUE the high resolution timer module will be used
-#define EPL_TIMER_USE_HIGHRES                       FALSE
+#define CONFIG_TIMER_USE_HIGHRES                    FALSE
 
 //==============================================================================
 // SDO module specific defines

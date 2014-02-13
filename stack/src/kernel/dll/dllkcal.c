@@ -197,7 +197,7 @@ tOplkError dllkcal_init(void)
 #endif
 
 #ifdef CONFIG_INCLUDE_NMT_MN
-    circErr = circbuf_alloc(CIRCBUF_DLLCAL_CN_REQ_NMT, DLLCAL_SIZE_CIRCBUF_CN_REQ_NMT,
+    circErr = circbuf_alloc(CIRCBUF_DLLCAL_CN_REQ_NMT, CONFIG_DLLCAL_SIZE_CIRCBUF_CN_REQ_NMT,
             &instance_l.pQueueCnRequestNmt);
     if(circErr != kCircBufOk)
     {
@@ -205,7 +205,7 @@ tOplkError dllkcal_init(void)
         goto Exit;
     }
 
-    circErr = circbuf_alloc(CIRCBUF_DLLCAL_CN_REQ_GEN, DLLCAL_SIZE_CIRCBUF_CN_REQ_GEN,
+    circErr = circbuf_alloc(CIRCBUF_DLLCAL_CN_REQ_GEN, CONFIG_DLLCAL_SIZE_CIRCBUF_CN_REQ_GEN,
             &instance_l.pQueueCnRequestGen);
     if(circErr != kCircBufOk)
     {
@@ -213,7 +213,7 @@ tOplkError dllkcal_init(void)
         goto Exit;
     }
 
-    circErr = circbuf_alloc(CIRCBUF_DLLCAL_CN_REQ_IDENT, DLLCAL_SIZE_CIRCBUF_REQ_IDENT,
+    circErr = circbuf_alloc(CIRCBUF_DLLCAL_CN_REQ_IDENT, CONFIG_DLLCAL_SIZE_CIRCBUF_REQ_IDENT,
             &instance_l.pQueueIdentReq);
     if(circErr != kCircBufOk)
     {
@@ -221,7 +221,7 @@ tOplkError dllkcal_init(void)
         goto Exit;
     }
 
-    circErr = circbuf_alloc(CIRCBUF_DLLCAL_CN_REQ_STATUS, DLLCAL_SIZE_CIRCBUF_REQ_STATUS,
+    circErr = circbuf_alloc(CIRCBUF_DLLCAL_CN_REQ_STATUS, CONFIG_DLLCAL_SIZE_CIRCBUF_REQ_STATUS,
             &instance_l.pQueueStatusReq);
     if(circErr != kCircBufOk)
     {
@@ -297,7 +297,7 @@ tOplkError dllkcal_process(tEvent* pEvent_p)
     tDllNodeOpParam*            pNodeOpParam;
 #endif
 
-#if DLL_DEFERRED_RXFRAME_RELEASE_ISOCHRONOUS != FALSE || DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS != FALSE
+#if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC != FALSE || CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC != FALSE
     tFrameInfo* pFrameInfo;
 #endif
 
@@ -352,7 +352,7 @@ tOplkError dllkcal_process(tEvent* pEvent_p)
             ret = dllk_config(pConfigParam);
             break;
 
-#if DLL_DEFERRED_RXFRAME_RELEASE_ISOCHRONOUS != FALSE || DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS != FALSE
+#if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC != FALSE || CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC != FALSE
         case kEventTypeReleaseRxFrame:
             pFrameInfo = (tFrameInfo*)pEvent_p->pEventArg;
             ret = dllk_releaseRxFrame(pFrameInfo->pFrame, pFrameInfo->frameSize);
@@ -485,7 +485,7 @@ tOplkError dllkcal_asyncFrameReceived(tFrameInfo* pFrameInfo_p)
 
     event.eventSink = kEventSinkDlluCal;
     event.eventType = kEventTypeAsndRx;
-#if DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS == FALSE
+#if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC == FALSE
     event.pEventArg = pFrameInfo_p->pFrame;
     event.eventArgSize = pFrameInfo_p->frameSize;
 #else
@@ -501,7 +501,7 @@ tOplkError dllkcal_asyncFrameReceived(tFrameInfo* pFrameInfo_p)
     else
     {
         instance_l.statistics.maxRxFrameCount++;
-#if DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS != FALSE
+#if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC != FALSE
         ret = kErrorReject; // Signalizes dllk to release buffer later
 #endif
     }

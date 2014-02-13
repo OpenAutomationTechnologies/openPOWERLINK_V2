@@ -53,8 +53,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 
-#ifndef SDO_MAX_CONNECTION_ASND
-#define SDO_MAX_CONNECTION_ASND     5
+#ifndef CONFIG_SDO_MAX_CONNECTION_ASND
+#define CONFIG_SDO_MAX_CONNECTION_ASND     5
 #endif
 
 //------------------------------------------------------------------------------
@@ -80,7 +80,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // instance table
 typedef struct
 {
-    UINT                aSdoAsndConnection[SDO_MAX_CONNECTION_ASND];
+    UINT                aSdoAsndConnection[CONFIG_SDO_MAX_CONNECTION_ASND];
     tSequLayerReceiveCb pfnSdoAsySeqCb;
 } tSdoAsndInstance;
 
@@ -204,9 +204,9 @@ tOplkError sdoasnd_initCon(tSdoConHdl* pSdoConHandle_p, UINT targetNodeId_p)
 
     // get free entry in control structure
     count = 0;
-    freeCon = SDO_MAX_CONNECTION_ASND;
+    freeCon = CONFIG_SDO_MAX_CONNECTION_ASND;
     pConnection = &sdoAsndInstance_l.aSdoAsndConnection[0];
-    while(count < SDO_MAX_CONNECTION_ASND)
+    while(count < CONFIG_SDO_MAX_CONNECTION_ASND)
     {
         if (*pConnection == targetNodeId_p)
         {   // existing connection to target node found
@@ -222,7 +222,7 @@ tOplkError sdoasnd_initCon(tSdoConHdl* pSdoConHandle_p, UINT targetNodeId_p)
         pConnection++;
     }
 
-    if (freeCon == SDO_MAX_CONNECTION_ASND)
+    if (freeCon == CONFIG_SDO_MAX_CONNECTION_ASND)
     {
         // no free connection
         ret = kErrorSdoAsndNoFreeHandle;
@@ -262,7 +262,7 @@ tOplkError sdoasnd_sendData(tSdoConHdl sdoConHandle_p, tPlkFrame* pSrcData_p, UI
 
     array = (sdoConHandle_p & ~SDO_ASY_HANDLE_MASK);
 
-    if(array > SDO_MAX_CONNECTION_ASND)
+    if(array > CONFIG_SDO_MAX_CONNECTION_ASND)
         return kErrorSdoAsndInvalidHandle;
 
     // fillout Asnd header
@@ -307,7 +307,7 @@ tOplkError sdoasnd_deleteCon(tSdoConHdl sdoConHandle_p)
     ret = kErrorOk;
 
     array = (sdoConHandle_p & ~SDO_ASY_HANDLE_MASK);
-    if(array > SDO_MAX_CONNECTION_ASND)
+    if(array > CONFIG_SDO_MAX_CONNECTION_ASND)
     {
         return kErrorSdoAsndInvalidHandle;
     }
@@ -350,7 +350,7 @@ tOplkError sdoAsndCb(tFrameInfo* pFrameInfo_p)
     // search corresponding entry in control structure
     count = 0;
     pConnection = &sdoAsndInstance_l.aSdoAsndConnection[0];
-    while (count < SDO_MAX_CONNECTION_ASND)
+    while (count < CONFIG_SDO_MAX_CONNECTION_ASND)
     {
         if (nodeId == *pConnection)
         {
@@ -364,7 +364,7 @@ tOplkError sdoAsndCb(tFrameInfo* pFrameInfo_p)
         pConnection++;
     }
 
-    if (count == SDO_MAX_CONNECTION_ASND)
+    if (count == CONFIG_SDO_MAX_CONNECTION_ASND)
     {
         if (freeEntry != 0xFFFF)
         {

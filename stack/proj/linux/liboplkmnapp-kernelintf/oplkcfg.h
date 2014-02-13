@@ -57,9 +57,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #undef FTRACE_DEBUG
 
 /* assure that system priorities of hrtimer and net-rx kernel threads are set appropriate */
-#define EPL_THREAD_PRIORITY_HIGH                        75
-#define EPL_THREAD_PRIORITY_MEDIUM                      50
-#define EPL_THREAD_PRIORITY_LOW                         49
+#define CONFIG_THREAD_PRIORITY_HIGH                     75
+#define CONFIG_THREAD_PRIORITY_MEDIUM                   50
+#define CONFIG_THREAD_PRIORITY_LOW                      49
 
 // These macros defines all modules which are included
 #define CONFIG_INCLUDE_NMT_MN
@@ -87,8 +87,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // Disable deferred release of rx-buffers until EdrvPcap supports it
 // NOTE: Ensure that these setting is equally configured in user and kernel layer!!
-#define DLL_DEFERRED_RXFRAME_RELEASE_ISOCHRONOUS        FALSE
-#define DLL_DEFERRED_RXFRAME_RELEASE_ASYNCHRONOUS       FALSE
+#define CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC        FALSE
+#define CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC       FALSE
 
 //==============================================================================
 // OBD specific defines
@@ -105,7 +105,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define CONFIG_OBD_USE_LOAD_CONCISEDCF                  TRUE
 #define CONFIG_OBD_DEF_CONCISEDCF_FILENAME              "mnobd.cdc"
-#define EPL_CFM_CONFIGURE_CYCLE_LENGTH                  TRUE
+#define CONFIG_CFM_CONFIGURE_CYCLE_LENGTH               TRUE
 
 // Configure if the range from 0xA000 is used for mapping client objects.
 // openCONFIGURATOR uses this range for mapping objects.
@@ -116,16 +116,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //==============================================================================
 
 // if TRUE the high resolution timer module will be used
-#define EPL_TIMER_USE_HIGHRES                           TRUE
+#define CONFIG_TIMER_USE_HIGHRES                        TRUE
 
 //==============================================================================
 // SDO module specific defines
 //==============================================================================
 
 // increase the number of SDO channels, because we are master
-#define SDO_MAX_CONNECTION_ASND                         100
-#define MAX_SDO_SEQ_CON                                 100
-#define MAX_SDO_COM_CON                                 100
-#define SDO_MAX_CONNECTION_UDP                          50
+#define CONFIG_SDO_MAX_CONNECTION_ASND                  100
+#define CONFIG_SDO_MAX_CONNECTION_SEQ                   100
+#define CONFIG_SDO_MAX_CONNECTION_COM                   100
+#define CONFIG_SDO_MAX_CONNECTION_UDP                   50
 
 #endif // _INC_oplkcfg_H_

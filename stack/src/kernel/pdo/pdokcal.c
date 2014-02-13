@@ -176,7 +176,7 @@ tOplkError pdokcal_process(tEvent * pEvent_p)
 
         case kEventTypePdoRx:
             {
-#if DLL_DEFERRED_RXFRAME_RELEASE_ISOCHRONOUS != FALSE
+#if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC != FALSE
                 tFrameInfo*  pFrameInfo;
                 pFrameInfo = (tFrameInfo *) pEvent_p->pEventArg;
                 Ret = pdok_processRxPdo(pFrameInfo->pFrame, pFrameInfo->frameSize);
@@ -227,7 +227,7 @@ static tOplkError cbProcessRpdo(tFrameInfo * pFrameInfo_p)
 
     event.eventSink = kEventSinkPdokCal;
     event.eventType = kEventTypePdoRx;
-#if DLL_DEFERRED_RXFRAME_RELEASE_ISOCHRONOUS != FALSE
+#if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC != FALSE
     event.eventArgSize    = sizeof(tFrameInfo);
     event.pEventArg      = pFrameInfo_p;
 #else
@@ -236,7 +236,7 @@ static tOplkError cbProcessRpdo(tFrameInfo * pFrameInfo_p)
     event.pEventArg = pFrameInfo_p->pFrame;
 #endif
     ret = eventk_postEvent(&event);
-#if DLL_DEFERRED_RXFRAME_RELEASE_ISOCHRONOUS != FALSE
+#if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC != FALSE
     if (ret == kErrorOk)
     {
         ret = kErrorReject; // Reject release of rx buffer

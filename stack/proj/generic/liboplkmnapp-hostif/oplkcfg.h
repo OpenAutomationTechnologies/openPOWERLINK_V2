@@ -111,11 +111,11 @@ The OBD defines determine the Object Dictionary.
 The SDO defines determine the SDO stack configuration.
 */
 /**@{*/
-#define SDO_MAX_CONNECTION_ASND             100
+#define CONFIG_SDO_MAX_CONNECTION_ASND             100
     ///< max. supported ASND SDO connections
-#define MAX_SDO_SEQ_CON                     100
+#define CONFIG_SDO_MAX_CONNECTION_SEQ              100
     ///< max. supported SDO sequence connections
-#define MAX_SDO_COM_CON                     100
+#define CONFIG_SDO_MAX_CONNECTION_COM              100
     ///< max. supported SDO command connections
 /**@}*/
 

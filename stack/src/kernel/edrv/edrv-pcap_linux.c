@@ -203,7 +203,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
         goto Exit;
     }
 
-    schedParam.__sched_priority = EPL_THREAD_PRIORITY_MEDIUM;
+    schedParam.__sched_priority = CONFIG_THREAD_PRIORITY_MEDIUM;
     if (pthread_setschedparam(edrvInstance_l.hThread, SCHED_FIFO, &schedParam) != 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s() couldn't set thread scheduling parameters!\n",

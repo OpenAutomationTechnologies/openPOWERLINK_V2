@@ -125,7 +125,7 @@ tOplkError eventkcal_initQueueCircbuf(tEventQueue eventQueue_p)
     switch(eventQueue_p)
     {
         case kEventQueueKInt:
-            circError = circbuf_alloc(CIRCBUF_KERNEL_INTERNAL_QUEUE, EVENT_SIZE_CIRCBUF_KERNEL_INTERNAL,
+            circError = circbuf_alloc(CIRCBUF_KERNEL_INTERNAL_QUEUE, CONFIG_EVENT_SIZE_CIRCBUF_KERNEL_INTERNAL,
                                       &instance_l[eventQueue_p]);
             if (circError != kCircBufOk)
             {
@@ -135,7 +135,7 @@ tOplkError eventkcal_initQueueCircbuf(tEventQueue eventQueue_p)
             break;
 
         case kEventQueueU2K:
-            circError = circbuf_alloc(CIRCBUF_USER_TO_KERNEL_QUEUE, EVENT_SIZE_CIRCBUF_USER_TO_KERNEL,
+            circError = circbuf_alloc(CIRCBUF_USER_TO_KERNEL_QUEUE, CONFIG_EVENT_SIZE_CIRCBUF_USER_TO_KERNEL,
                                       &instance_l[eventQueue_p]);
             if (circError != kCircBufOk)
             {
@@ -146,7 +146,7 @@ tOplkError eventkcal_initQueueCircbuf(tEventQueue eventQueue_p)
             break;
 
         case kEventQueueK2U:
-            circError = circbuf_alloc(CIRCBUF_KERNEL_TO_USER_QUEUE, EVENT_SIZE_CIRCBUF_KERNEL_TO_USER,
+            circError = circbuf_alloc(CIRCBUF_KERNEL_TO_USER_QUEUE, CONFIG_EVENT_SIZE_CIRCBUF_KERNEL_TO_USER,
                                       &instance_l[eventQueue_p]);
             if (circError != kCircBufOk)
             {
@@ -156,7 +156,7 @@ tOplkError eventkcal_initQueueCircbuf(tEventQueue eventQueue_p)
             break;
 
         case kEventQueueUInt:
-            circError = circbuf_alloc(CIRCBUF_USER_INTERNAL_QUEUE, EVENT_SIZE_CIRCBUF_USER_INTERNAL,
+            circError = circbuf_alloc(CIRCBUF_USER_INTERNAL_QUEUE, CONFIG_EVENT_SIZE_CIRCBUF_USER_INTERNAL,
                                       &instance_l[eventQueue_p]);
             if (circError != kCircBufOk)
             {

@@ -66,8 +66,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#ifndef EPL_CFM_CONFIGURE_CYCLE_LENGTH
-#define EPL_CFM_CONFIGURE_CYCLE_LENGTH  FALSE
+#ifndef CONFIG_CFM_CONFIGURE_CYCLE_LENGTH
+#define CONFIG_CFM_CONFIGURE_CYCLE_LENGTH  FALSE
 #endif
 
 // return pointer to node info structure for specified node ID
@@ -137,7 +137,7 @@ typedef struct
 {
     tCfmNodeInfo*           apNodeInfo[NMT_MAX_NODE_ID];
     UINT32                  leDomainSizeNull;
-#if (EPL_CFM_CONFIGURE_CYCLE_LENGTH != FALSE)
+#if (CONFIG_CFM_CONFIGURE_CYCLE_LENGTH != FALSE)
     UINT32                  leCycleLength;
 #endif
     tCfmCbEventCnProgress   pfnCbEventCnProgress;
@@ -326,7 +326,7 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p)
     obdSize = obd_getDataSize(0x1F22, nodeId_p);
     pNodeInfo->bytesRemaining = (UINT32) obdSize;
     pNodeInfo->eventCnProgress.totalNumberOfBytes = pNodeInfo->bytesRemaining;
-#if (EPL_CFM_CONFIGURE_CYCLE_LENGTH != FALSE)
+#if (CONFIG_CFM_CONFIGURE_CYCLE_LENGTH != FALSE)
     pNodeInfo->eventCnProgress.totalNumberOfBytes += sizeof (UINT32);
 #endif
     pNodeInfo->eventCnProgress.bytesDownloaded = 0;
@@ -383,7 +383,7 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p)
         }
     }
 
-#if (EPL_CFM_CONFIGURE_CYCLE_LENGTH != FALSE)
+#if (CONFIG_CFM_CONFIGURE_CYCLE_LENGTH != FALSE)
     obdSize = sizeof(cfmInstance_g.leCycleLength);
     ret = obd_readEntryToLe(0x1006, 0x00, &cfmInstance_g.leCycleLength, &obdSize);
     if (ret != kErrorOk)
@@ -737,7 +737,7 @@ static tOplkError downloadCycleLength(tCfmNodeInfo* pNodeInfo_p)
 {
     tOplkError      ret = kErrorOk;
 
-#if (EPL_CFM_CONFIGURE_CYCLE_LENGTH != FALSE)
+#if (CONFIG_CFM_CONFIGURE_CYCLE_LENGTH != FALSE)
     pNodeInfo_p->eventCnProgress.objectIndex = 0x1006;
     pNodeInfo_p->eventCnProgress.objectSubIndex = 0x00;
 

@@ -169,7 +169,7 @@ tOplkError timeru_addInstance(void)
         return kErrorNoResource;
     }
 
-    schedParam.__sched_priority = EPL_THREAD_PRIORITY_LOW;
+    schedParam.__sched_priority = CONFIG_THREAD_PRIORITY_LOW;
     if (pthread_setschedparam(timeruInstance_g.processThread, SCHED_RR,
                               &schedParam) != 0)
     {

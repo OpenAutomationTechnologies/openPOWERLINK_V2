@@ -353,7 +353,7 @@ typedef struct
 
     tEdrvInitParam      initParam;
 
-#if EDRV_USE_DIAGNOSTICS != FALSE
+#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
     ULONGLONG           interruptCount;
     INT                 rxBufFreeMin;
     UINT                rxCount[EDRV_SAMPLE_NUM];
@@ -796,7 +796,7 @@ tOplkError edrv_startTxBuffer(tEdrvTxBuffer* pBuffer_p)
     return kErrorOk;
 }
 
-#if EDRV_USE_DIAGNOSTICS != FALSE
+#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
 //------------------------------------------------------------------------------
 /**
 \brief  Get Edrv module diagnostics
@@ -1057,7 +1057,7 @@ static irqreturn_t edrvIrqHandler (INT irqNum_p, void* ppDevInstData_p)
         EDRV_REGDW_WRITE(EDRV_REGDW_ICR, status);
     }
 
-#if EDRV_USE_DIAGNOSTICS != FALSE
+#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
     edrvInstance_l.interruptCount++;
     edrvInstance_l.rxCount[edrvInstance_l.pos] = 0;
     edrvInstance_l.txCount[edrvInstance_l.pos] = 0;
@@ -1093,7 +1093,7 @@ static irqreturn_t edrvIrqHandler (INT irqNum_p, void* ppDevInstData_p)
                 UINT8                   rxStatus;
                 UINT8                   rxError;
 
-#if EDRV_USE_DIAGNOSTICS != FALSE
+#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
                 edrvInstance_l.rxCount[edrvInstance_l.pos]++;
 #endif
 
@@ -1148,7 +1148,7 @@ static irqreturn_t edrvIrqHandler (INT irqNum_p, void* ppDevInstData_p)
                                 UINT8*      pRxBufInDescPrev;
                                 ULONG       flags;
 
-#if EDRV_USE_DIAGNOSTICS != FALSE
+#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
                                 if (edrvInstance_l.rxBufFreeTop < edrvInstance_l.rxBufFreeMin)
                                 {
                                     edrvInstance_l.rxBufFreeMin = edrvInstance_l.rxBufFreeTop;
@@ -1180,7 +1180,7 @@ static irqreturn_t edrvIrqHandler (INT irqNum_p, void* ppDevInstData_p)
                             else
                             {
                                 // $$$ How to signal no free RxBuffers left?
-#if EDRV_USE_DIAGNOSTICS != FALSE
+#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
                                 edrvInstance_l.rxBufFreeMin = -1;
 #endif
                             }
@@ -1206,7 +1206,7 @@ static irqreturn_t edrvIrqHandler (INT irqNum_p, void* ppDevInstData_p)
                 tEdrvTxBuffer*  pTxBuffer;
                 UINT32          txStatus;
 
-#if EDRV_USE_DIAGNOSTICS != FALSE
+#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
                 edrvInstance_l.txCount[edrvInstance_l.pos]++;
 #endif
 
@@ -1289,7 +1289,7 @@ static irqreturn_t edrvIrqHandler (INT irqNum_p, void* ppDevInstData_p)
         }
     }
 
-#if EDRV_USE_DIAGNOSTICS != FALSE
+#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
     edrvInstance_l.pos++;
     if (edrvInstance_l.pos == EDRV_SAMPLE_NUM)
     {
@@ -1554,7 +1554,7 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
     }
 
     edrvInstance_l.rxBufFreeTop = EDRV_MAX_RX_BUFFERS - EDRV_MAX_RX_DESCS - 1;
-#if EDRV_USE_DIAGNOSTICS != FALSE
+#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
     edrvInstance_l.rxBufFreeMin = EDRV_MAX_RX_BUFFERS - EDRV_MAX_RX_DESCS;
 #endif
 

@@ -46,16 +46,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 
-#ifndef DLLCAL_BUFFER_SIZE_TX_NMT
-#define DLLCAL_BUFFER_SIZE_TX_NMT   32767
+#ifndef CONFIG_DLLCAL_BUFFER_SIZE_TX_NMT
+#define CONFIG_DLLCAL_BUFFER_SIZE_TX_NMT   32767
 #endif
 
-#ifndef DLLCAL_BUFFER_SIZE_TX_GEN
-#define DLLCAL_BUFFER_SIZE_TX_GEN   32767
+#ifndef CONFIG_DLLCAL_BUFFER_SIZE_TX_GEN
+#define CONFIG_DLLCAL_BUFFER_SIZE_TX_GEN   32767
 #endif
 
-#ifndef DLLCAL_BUFFER_SIZE_TX_SYNC
-#define DLLCAL_BUFFER_SIZE_TX_SYNC  8192
+#ifndef CONFIG_DLLCAL_BUFFER_SIZE_TX_SYNC
+#define CONFIG_DLLCAL_BUFFER_SIZE_TX_SYNC  8192
 #endif
 
 /* setup interface getting function for DLLCAL queue */

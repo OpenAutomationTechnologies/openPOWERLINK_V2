@@ -1637,7 +1637,7 @@ PREDEFINED             = CONFIG_INCLUDE_NMT_MN \
                          CONFIG_DLL_PRES_CHAINING_MN:=1 \
                          CONFIG_DLL_PRES_CHAINING_CN:=1 \
                          NMT_MAX_NODE_ID:=255 \
-                         EPL_TIMER_USE_HIGHRES:=1 \
+                         CONFIG_TIMER_USE_HIGHRES:=1 \
                          OBD_DEFINE_MACRO \
                          PACK_STRUCT= \
                          DOXYGEN_PARSER

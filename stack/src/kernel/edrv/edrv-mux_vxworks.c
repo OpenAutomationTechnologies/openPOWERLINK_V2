@@ -62,7 +62,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <net/if.h>
 
-#if EDRV_USE_DIAGNOSTICS != FALSE
+#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
 #include "hrtimerLib.h"
 #endif
 
@@ -109,7 +109,7 @@ typedef struct
     SEM_ID              txWakeupSem;
     BOOL                fStopTxTask;
 
-#if EDRV_USE_DIAGNOSTICS != FALSE
+#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
     struct timespec     txSendTime;
     struct timespec     txCbTime;
     struct timespec     maxTxLatency;
@@ -375,7 +375,7 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
         ret = kErrorInvalidOperation;
     }
 
-#if EDRV_USE_DIAGNOSTICS != FALSE
+#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
      hrtimer_clock_gettime(0, &edrvInstance_l.txSendTime);
 #endif
 
@@ -526,7 +526,7 @@ tOplkError edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p)
     return kErrorOk;
 }
 
-#if EDRV_USE_DIAGNOSTICS != FALSE
+#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
 //------------------------------------------------------------------------------
 /**
 \brief  Show Ethernet driver information
@@ -668,7 +668,7 @@ static INT txTask(INT arg_p)
 {
     tEdrvInstance*  pInstance = (tEdrvInstance*) arg_p;
     STATUS          result;
-#if EDRV_USE_DIAGNOSTICS != FALSE
+#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
     struct timespec txLatency;
 #endif
 
@@ -680,7 +680,7 @@ static INT txTask(INT arg_p)
             break;
         }
 
-#if EDRV_USE_DIAGNOSTICS != FALSE
+#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
         hrtimer_clock_gettime(0, &edrvInstance_l.txCbTime);
         txLatency = hrtimer_subTimespec(edrvInstance_l.txCbTime,
                                          edrvInstance_l.txSendTime);

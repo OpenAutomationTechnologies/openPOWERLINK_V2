@@ -53,7 +53,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/edrv.h>
 #include <oplk/benchmark.h>
 
-#if EPL_TIMER_USE_HIGHRES != FALSE
+#if CONFIG_TIMER_USE_HIGHRES != FALSE
 #include <kernel/hrestimer.h>
 #endif
 
@@ -67,23 +67,23 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // check for correct compilation options
 //------------------------------------------------------------------------------
-#if (EPL_DLL_PRES_READY_AFTER_SOA != FALSE) && (EPL_DLL_PRES_READY_AFTER_SOC != FALSE)
-#error "DLLK: select only one of EPL_DLL_PRES_READY_AFTER_SOA and EPL_DLL_PRES_READY_AFTER_SOC."
+#if (CONFIG_DLL_PRES_READY_AFTER_SOA != FALSE) && (CONFIG_DLL_PRES_READY_AFTER_SOC != FALSE)
+#error "DLLK: select only one of CONFIG_DLL_PRES_READY_AFTER_SOA and CONFIG_DLL_PRES_READY_AFTER_SOC."
 #endif
 
-#if ((EPL_DLL_PRES_READY_AFTER_SOA != FALSE) || (EPL_DLL_PRES_READY_AFTER_SOC != FALSE)) &&  defined(CONFIG_INCLUDE_NMT_MN)
+#if ((CONFIG_DLL_PRES_READY_AFTER_SOA != FALSE) || (CONFIG_DLL_PRES_READY_AFTER_SOC != FALSE)) &&  defined(CONFIG_INCLUDE_NMT_MN)
 #error "DLLK: currently, EPL_DLL_PRES_READY_AFTER_* is not supported if EPL_MODULE_NMT_MN is enabled."
 #endif
 
-#if (EDRV_FAST_TXFRAMES == FALSE) && ((EPL_DLL_PRES_READY_AFTER_SOA != FALSE) || (EPL_DLL_PRES_READY_AFTER_SOC != FALSE))
-#error "DLLK: EPL_DLL_PRES_READY_AFTER_* is enabled, but not EDRV_FAST_TXFRAMES."
+#if (CONFIG_EDRV_FAST_TXFRAMES == FALSE) && ((CONFIG_DLL_PRES_READY_AFTER_SOA != FALSE) || (CONFIG_DLL_PRES_READY_AFTER_SOC != FALSE))
+#error "DLLK: EPL_DLL_PRES_READY_AFTER_* is enabled, but not CONFIG_EDRV_FAST_TXFRAMES."
 #endif
 
-#if defined(CONFIG_INCLUDE_NMT_MN) && (DLL_PRES_FILTER_COUNT == 0)
-#error "MN support needs DLL_PRES_FILTER_COUNT != 0"
+#if defined(CONFIG_INCLUDE_NMT_MN) && (CONFIG_DLL_PRES_FILTER_COUNT == 0)
+#error "MN support needs CONFIG_DLL_PRES_FILTER_COUNT != 0"
 #endif
 
-#if (CONFIG_DLL_PRES_CHAINING_CN != FALSE) && (EDRV_AUTO_RESPONSE_DELAY == FALSE)
+#if (CONFIG_DLL_PRES_CHAINING_CN != FALSE) && (CONFIG_EDRV_AUTO_RESPONSE_DELAY == FALSE)
 #error "Ethernet driver support for auto-response delay is required for PRes Chaining."
 #endif
 
@@ -202,7 +202,7 @@ typedef struct
 #endif
 #endif
 
-#if EPL_TIMER_USE_HIGHRES != FALSE
+#if CONFIG_TIMER_USE_HIGHRES != FALSE
     tTimerHdl               timerHdlCycle;                  // used for EPL cycle monitoring on CN and generation on MN
 #if defined(CONFIG_INCLUDE_NMT_MN)
     tTimerHdl               timerHdlResponse;               // used for CN response monitoring
@@ -316,7 +316,7 @@ tOplkError dllk_cbCyclicError(tOplkError errorCode_p, tEdrvTxBuffer * pTxBuffer_
 tOplkError dllk_cbMnSyncHandler(void);
 tOplkError dllk_cbMnTimerCycle(tTimerEventArg* pEventArg_p);
 #endif
-#if EPL_TIMER_USE_HIGHRES != FALSE
+#if CONFIG_TIMER_USE_HIGHRES != FALSE
 tOplkError dllk_cbCnTimer(tTimerEventArg* pEventArg_p);
 #endif
 #if (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER)

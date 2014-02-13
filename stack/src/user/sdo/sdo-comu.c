@@ -55,8 +55,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 
-#ifndef MAX_SDO_COM_CON
-#define MAX_SDO_COM_CON         5
+#ifndef CONFIG_SDO_MAX_CONNECTION_COM
+#define CONFIG_SDO_MAX_CONNECTION_COM         5
 #endif
 
 //------------------------------------------------------------------------------
@@ -168,7 +168,7 @@ This structure describes a SDO command layer instance
 */
 typedef struct
 {
-    tSdoComCon          sdoComCon[MAX_SDO_COM_CON]; ///< Array to store command layer connections
+    tSdoComCon          sdoComCon[CONFIG_SDO_MAX_CONNECTION_COM]; ///< Array to store command layer connections
 #if defined(WIN32) || defined(_WIN32)
     LPCRITICAL_SECTION  pCriticalSection;
     CRITICAL_SECTION    criticalSection;
@@ -320,8 +320,8 @@ tOplkError sdocom_defineConnection(tSdoComConHdl* pSdoComConHdl_p, UINT targetNo
     // search free control structure
     pSdoComCon = &sdoComInstance_l.sdoComCon[0];
     count = 0;
-    freeHdl = MAX_SDO_COM_CON;
-    while (count < MAX_SDO_COM_CON)
+    freeHdl = CONFIG_SDO_MAX_CONNECTION_COM;
+    while (count < CONFIG_SDO_MAX_CONNECTION_COM)
     {
         if (pSdoComCon->sdoSeqConHdl == 0)
         {   // free entry
@@ -336,7 +336,7 @@ tOplkError sdocom_defineConnection(tSdoComConHdl* pSdoComConHdl_p, UINT targetNo
         pSdoComCon++;
     }
 
-    if (freeHdl == MAX_SDO_COM_CON)
+    if (freeHdl == CONFIG_SDO_MAX_CONNECTION_COM)
     {
         return kErrorSdoComNoFreeHandle;
     }
@@ -396,7 +396,7 @@ tOplkError sdocom_initTransferByIndex(tSdoComTransParamByIndex* pSdoComTransPara
         (pSdoComTransParam_p->dataSize == 0))
         return kErrorSdoComInvalidParam;
 
-    if(pSdoComTransParam_p->sdoComConHdl >= MAX_SDO_COM_CON)
+    if(pSdoComTransParam_p->sdoComConHdl >= CONFIG_SDO_MAX_CONNECTION_COM)
         return kErrorSdoComInvalidHandle;
 
     // get pointer to control structure of connection
@@ -456,7 +456,7 @@ tOplkError sdocom_undefineConnection(tSdoComConHdl sdoComConHdl_p)
     tOplkError          ret = kErrorOk;
     tSdoComCon*         pSdoComCon;
 
-    if(sdoComConHdl_p >= MAX_SDO_COM_CON)
+    if(sdoComConHdl_p >= CONFIG_SDO_MAX_CONNECTION_COM)
         return kErrorSdoComInvalidHandle;
 
     // get pointer to control structure
@@ -505,7 +505,7 @@ tOplkError sdocom_getState(tSdoComConHdl sdoComConHdl_p, tSdoComFinished* pSdoCo
     tOplkError          ret = kErrorOk;
     tSdoComCon*         pSdoComCon;
 
-    if(sdoComConHdl_p >= MAX_SDO_COM_CON)
+    if(sdoComConHdl_p >= CONFIG_SDO_MAX_CONNECTION_COM)
         return kErrorSdoComInvalidHandle;
 
     // get pointer to control structure
@@ -571,7 +571,7 @@ UINT sdocom_getNodeId(tSdoComConHdl sdoComConHdl_p)
     UINT            nodeId = C_ADR_INVALID;
     tSdoComCon*     pSdoComCon;
 
-    if(sdoComConHdl_p >= MAX_SDO_COM_CON)
+    if(sdoComConHdl_p >= CONFIG_SDO_MAX_CONNECTION_COM)
         return nodeId;
 
     // get pointer to control structure
@@ -603,7 +603,7 @@ tOplkError sdocom_abortTransfer(tSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p
     tOplkError      ret;
     tSdoComCon*     pSdoComCon;
 
-    if(sdoComConHdl_p >= MAX_SDO_COM_CON)
+    if(sdoComConHdl_p >= CONFIG_SDO_MAX_CONNECTION_COM)
         return kErrorSdoComInvalidHandle;
 
     // get pointer to control structure of connection
@@ -749,7 +749,7 @@ static tOplkError searchConnection(tSdoSeqConHdl sdoSeqConHdl_p, tSdoComConEvent
     pSdoComCon = &sdoComInstance_l.sdoComCon[0];
     hdlCount = 0;
     hdlFree = 0xFFFF;
-    while (hdlCount < MAX_SDO_COM_CON)
+    while (hdlCount < CONFIG_SDO_MAX_CONNECTION_COM)
     {
         if (pSdoComCon->sdoSeqConHdl == sdoSeqConHdl_p)
         {   // matching command layer handle found

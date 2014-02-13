@@ -462,7 +462,7 @@ tOplkError pdok_processRxPdo(tPlkFrame* pFrame_p, UINT frameSize_p)
     }
 
 Exit:
-#if DLL_DEFERRED_RXFRAME_RELEASE_ISOCHRONOUS != FALSE
+#if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC != FALSE
     dllk_releaseRxFrame(pFrame_p, frameSize_p);
     // $$$ return value?
 #endif
