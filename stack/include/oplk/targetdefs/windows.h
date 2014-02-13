@@ -38,19 +38,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _INC_targetdefs_windows_H_
 #define _INC_targetdefs_windows_H_
 
-
-#define _WIN32_WINDOWS 0x0401
-#define _WIN32_WINNT   0x0501
-
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 #include <stdlib.h>
 #include <stdio.h>
-
 #include <string.h>
+
+#define _WIN32_WINNT 0x0501     // Windows version must be at least Windows XP
+#define WIN32_LEAN_AND_MEAN     // Do not use extended Win32 API functions
 #include <Windows.h>
-#include <process.h>
 
 #include <oplk/basictypes.h>
 
