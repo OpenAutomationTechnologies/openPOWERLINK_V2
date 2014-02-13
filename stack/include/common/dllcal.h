@@ -45,11 +45,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-/*
-#ifndef EPL_DLLCAL_BUFFER_SIZE_RX
-#define EPL_DLLCAL_BUFFER_SIZE_RX  32767
-#endif
-*/
 
 #ifndef DLLCAL_BUFFER_SIZE_TX_NMT
 #define DLLCAL_BUFFER_SIZE_TX_NMT   32767
@@ -121,12 +116,12 @@ typedef void* tDllCalQueueInstance;
 
 typedef struct
 {
-    tOplkError (* pfnAddInstance)(tDllCalQueueInstance* ppDllCalQueue_p, tDllCalQueue DllCalQueue_p);
-    tOplkError (* pfnDelInstance)(tDllCalQueueInstance pDllCalQueue_p);
-    tOplkError (* pfnInsertDataBlock)(tDllCalQueueInstance pDllCalQueue_p, BYTE *pData_p, UINT* pDataSize_p);
-    tOplkError (* pfnGetDataBlock)(tDllCalQueueInstance pDllCalQueue_p, BYTE *pData_p, UINT* pDataSize_p);
-    tOplkError (* pfnGetDataBlockCount)(tDllCalQueueInstance pDllCalQueue_p, ULONG* pDataBlockCount_p);
-    tOplkError (* pfnResetDataBlockQueue)(tDllCalQueueInstance pDllCalQueue_p, ULONG timeOutMs_p);
+    tOplkError (*pfnAddInstance)(tDllCalQueueInstance* ppDllCalQueue_p, tDllCalQueue DllCalQueue_p);
+    tOplkError (*pfnDelInstance)(tDllCalQueueInstance pDllCalQueue_p);
+    tOplkError (*pfnInsertDataBlock)(tDllCalQueueInstance pDllCalQueue_p, UINT8* pData_p, UINT* pDataSize_p);
+    tOplkError (*pfnGetDataBlock)(tDllCalQueueInstance pDllCalQueue_p, UINT8* pData_p, UINT* pDataSize_p);
+    tOplkError (*pfnGetDataBlockCount)(tDllCalQueueInstance pDllCalQueue_p, ULONG* pDataBlockCount_p);
+    tOplkError (*pfnResetDataBlockQueue)(tDllCalQueueInstance pDllCalQueue_p, ULONG timeOutMs_p);
 } tDllCalFuncIntf;
 
 //------------------------------------------------------------------------------
