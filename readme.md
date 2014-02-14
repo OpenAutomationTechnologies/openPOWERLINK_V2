@@ -47,6 +47,7 @@ openPOWERLINK website: <http://openpowerlink.sourceforge.net/>
 ## Support
 
 Support on openPOWERLINK is available via the online discussion forums:
+
 * [Discussion](http://sourceforge.net/p/openpowerlink/discussion/)
 
 
@@ -61,17 +62,17 @@ openPOWERLINK/V2.0.0/openPOWERLINK-V2.0.0-b1.zip/download)
 ## Contributors
 
 (c) SYSTEC electronic GmbH,
-    August-Bebel-Str. 29,
-    D-07973 Greiz,
-    http://www.systec-electronic.com
+    Am Windrad 2,
+    D-08468 Heinsdorfergrund,
+    <http://www.systec-electronic.com>
 
 (c) Bernecker + Rainer Industrie Elektronik Ges.m.b.H.,
     B&R Strasse 1,
     A-5142 Eggelsberg,
-    http://www.br-automation.com
+    <http://www.br-automation.com>
 
 (c) Kalycito Infotech Private Limited,
-    http://www.kalycito.com
+    <http://www.kalycito.com>
 
 
 ## Links and References
@@ -81,4 +82,4 @@ openPOWERLINK/V2.0.0/openPOWERLINK-V2.0.0-b1.zip/download)
 - openCONFIGURATOR project website:
   <http://sourceforge.net/projects/openconf>
 - Ethernet POWERLINK Standardization Group:
-  http://www.ethernet-powerlink.org
+  <http://www.ethernet-powerlink.org>
