@@ -61,6 +61,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define PLK_FEATURE_NMT_BASICETH            0x00000800  // MN specific
 #define PLK_FEATURE_RT1                     0x00001000
 #define PLK_FEATURE_RT2                     0x00002000
+#define PLK_FEATURE_MASND                   0x00010000
 #define PLK_FEATURE_PRES_CHAINING           0x00040000
 
 
@@ -117,6 +118,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define PLK_DEF_FEATURE_DLL_MULTIPLEX       (PLK_FEATURE_DLL_MULTIPLEX)
 #endif
 
+#ifndef PLK_DEF_FEATURE_MASND
+#if defined(CONFIG_INCLUDE_MASND)
+#define PLK_DEF_FEATURE_MASND               (PLK_FEATURE_MASND)
+#else
+#define PLK_DEF_FEATURE_MASND               0
+#endif
+#endif
+
+
 #ifndef PLK_DEF_FEATURE_PRES_CHAINING
 #if CONFIG_DLL_PRES_CHAINING_CN != FALSE
 #define PLK_DEF_FEATURE_PRES_CHAINING       (PLK_FEATURE_PRES_CHAINING)
@@ -132,6 +142,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                                PLK_DEF_FEATURE_PDO_DYN | \
                                PLK_DEF_FEATURE_CFM | \
                                PLK_DEF_FEATURE_DLL_MULTIPLEX | \
+                               PLK_DEF_FEATURE_MASND | \
                                PLK_DEF_FEATURE_PRES_CHAINING)
 
 #endif /* _INC_featureflags_H_ */
