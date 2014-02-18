@@ -40,7 +40,6 @@
         <tab type="filelist" visible="yes" title="" intro=""/>
         <tab type="globals" visible="yes" title="" intro=""/>
       </tab>
-      <tab type="examples" visible="yes" title="" intro=""/>
     </tab>
     <tab type="usergroup" title="Contribute">
         <tab type="user" url="\ref page_porting-guide" title="Porting openPOWERLINK"/>
