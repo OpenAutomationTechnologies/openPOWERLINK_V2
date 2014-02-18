@@ -154,6 +154,9 @@ fi
 if [ -n "${DEBUG}" ];
 then
     DRV_OPT_LEVEL=-O0
+    DEBUG_MODE=_DEBUG
+else
+    DEBUG_MODE=NDEBUG
 fi
 
 DRV_GEN_ARGS="\
@@ -162,7 +165,7 @@ DRV_GEN_ARGS="\
 --elf-name ${DRV_NAME}.elf \
 --src-files ${DRV_SOURCES} \
 --set APP_CFLAGS_OPTIMIZATION ${DRV_OPT_LEVEL} \
---set CFLAGS=${CFLAGS} \
+--set CFLAGS=${CFLAGS} -D${DEBUG_MODE} \
 --set OBJDUMP_INCLUDE_SOURCE 1 \
 --set CREATE_OBJDUMP 0 \
 --set QSYS_SUB_CPU ${CFG_DRV_PROC_NAME} \

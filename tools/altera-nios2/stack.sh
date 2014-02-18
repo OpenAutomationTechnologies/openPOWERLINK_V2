@@ -142,8 +142,10 @@ LIB_INCLUDES+=" ${CFG_LIB_INCLUDES}"
 
 if [ -n "${DEBUG}" ]; then
     LIB_OPT_LEVEL=-O0
+    DEBUG_MODE=_DEBUG
 else
     LIB_OPT_LEVEL=${CFG_LIB_OPT_LEVEL}
+    DEBUG_MODE=NDEBUG
 fi
 
 OUT_PATH+=/lib${LIB_NAME}
@@ -151,7 +153,7 @@ OUT_PATH+=/lib${LIB_NAME}
 LIB_GEN_ARGS="--lib-name ${LIB_NAME} --lib-dir ${OUT_PATH} \
 --bsp-dir ${BSP_PATH} \
 --src-files ${LIB_SOURCES} \
---set CFLAGS=${CFLAGS} ${CFG_LIB_CFLAGS} \
+--set CFLAGS=${CFLAGS} ${CFG_LIB_CFLAGS} -D${DEBUG_MODE} \
 --set LIB_CFLAGS_OPTIMIZATION=${LIB_OPT_LEVEL} \
 ${CFG_LIB_ARGS} \
 "
