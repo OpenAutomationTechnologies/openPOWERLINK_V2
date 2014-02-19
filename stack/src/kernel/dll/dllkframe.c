@@ -1088,12 +1088,12 @@ tOplkError dllk_createTxFrame (UINT* pHandle_p, UINT* pFrameSize_p,
             }
             break;
 
-#else
+#endif
+
         default:
             ret = kErrorEdrvBufNotExisting;
             goto Exit;
             break;
-#endif
     }
 
     *pHandle_p = handle;
