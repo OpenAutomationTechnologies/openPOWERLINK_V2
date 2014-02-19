@@ -109,8 +109,10 @@ LIB_SOURCES=
 LIB_INCLUDES=
 CFG_LIB_CFLAGS=
 CFG_LIB_ARGS=
+CFG_TCI_MEM_NAME=
 if [ "${CPU_NAME}" == "${CFG_APP_CPU_NAME}" ]; then
     # The bsp's cpu matches to the app part
+    CFG_TCI_MEM_NAME=${CFG_APP_TCI_MEM_NAME}
     if [ "${CFG_NODE}" == "CN" ] && [ -n "${CFG_OPENMAC}" ]; then
         LIB_NAME=oplkcn
         LIB_SOURCES=${HW_PATH}/../common/drivers/openmac/omethlib_phycfg.c
@@ -120,6 +122,7 @@ if [ "${CPU_NAME}" == "${CFG_APP_CPU_NAME}" ]; then
     fi
 elif [ "${CPU_NAME}" == "${CFG_DRV_CPU_NAME}" ]; then
     # The bsp's cpu matches to the drv part
+    CFG_TCI_MEM_NAME=${CFG_DRV_TCI_MEM_NAME}
     if [ "${CFG_NODE}" == "MN" ] && [ -n "${CFG_OPENMAC}" ] && [ -n "${CFG_HOSTINTERFACE}" ]; then
         LIB_NAME=oplkmndrv-hostif
         LIB_SOURCES=${HW_PATH}/../common/drivers/openmac/omethlib_phycfg.c
@@ -127,6 +130,14 @@ elif [ "${CPU_NAME}" == "${CFG_DRV_CPU_NAME}" ]; then
 else
     echo "ERROR: Please specify CFG_XXX_CPU_NAME in board.settings!"
     exit 1
+fi
+
+# Set TCI memory size
+TCI_MEM_SIZE=$(nios2-bsp-query-settings --settings ${BSP_PATH}/settings.bsp \
+                            --cmd puts [get_addr_span ${CFG_TCI_MEM_NAME}])
+
+if [ -z "$TCI_MEM_SIZE" ]; then
+    TCI_MEM_SIZE=0
 fi
 
 # Let's source the stack library settings file
@@ -153,7 +164,8 @@ OUT_PATH+=/lib${LIB_NAME}
 LIB_GEN_ARGS="--lib-name ${LIB_NAME} --lib-dir ${OUT_PATH} \
 --bsp-dir ${BSP_PATH} \
 --src-files ${LIB_SOURCES} \
---set CFLAGS=${CFLAGS} ${CFG_LIB_CFLAGS} -D${DEBUG_MODE} \
+--set CFLAGS=${CFLAGS} ${CFG_LIB_CFLAGS} -D${DEBUG_MODE} -DCONFIG_${CFG_NODE} \
+-DALT_TCIMEM_SIZE=${TCI_MEM_SIZE} \
 --set LIB_CFLAGS_OPTIMIZATION=${LIB_OPT_LEVEL} \
 ${CFG_LIB_ARGS} \
 "

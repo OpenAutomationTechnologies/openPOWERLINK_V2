@@ -50,7 +50,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     #define ALT_TCIMEM_SIZE                     0
 #endif
 
-#define ALT_INTERNAL_RAM    __attribute__((section(".tc_i_mem_pcp")))
+#define ALT_INTERNAL_RAM    __attribute__((section(".tc_i_mem")))
 
 #ifdef NDEBUG
 #ifdef CONFIG_MN
