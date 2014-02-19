@@ -39,6 +39,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <stddef.h>
+
 #include <oplk/ami.h>
 #include <common/dllcal.h>
 #include <kernel/dllkcal.h>
@@ -1141,7 +1143,7 @@ static BOOL getMnSyncRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p,
             return TRUE;
         }
 
-        if (syncReqSize > memberoffs(tDllSyncRequest, syncControl))
+        if (syncReqSize > offsetof(tDllSyncRequest, syncControl))
         {
             ami_setUint32Le(&pSoaPayload_p->syncRequest.syncControlLe,
                             syncRequest.syncControl);
@@ -1166,12 +1168,12 @@ static BOOL getMnSyncRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p,
                 }
             }
         }
-        if (syncReqSize > memberoffs(tDllSyncRequest, pResTimeFirst))
+        if (syncReqSize > offsetof(tDllSyncRequest, pResTimeFirst))
         {
             ami_setUint32Le(&pSoaPayload_p->syncRequest.presTimeFirstLe,
                             syncRequest.pResTimeFirst);
         }
-        if (syncReqSize > memberoffs(tDllSyncRequest, pResFallBackTimeout))
+        if (syncReqSize > offsetof(tDllSyncRequest, pResFallBackTimeout))
         {
             ami_setUint32Le(&pSoaPayload_p->syncRequest.presFallBackTimeoutLe,
                             syncRequest.pResFallBackTimeout);

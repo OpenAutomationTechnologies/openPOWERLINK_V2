@@ -41,6 +41,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <stddef.h>
+
 #include <user/eventu.h>
 #include <user/eventucal.h>
 #include <user/nmtu.h>
@@ -320,7 +322,7 @@ tOplkError eventu_postError (tEventSource eventSource_p,  tOplkError error_p,
     event.eventType = kEventTypeError;
     event.eventSink = kEventSinkApi;
     OPLK_MEMSET(&event.netTime, 0x00, sizeof(event.netTime));
-    event.eventArgSize = (memberoffs (tEventError, errorArg) + argSize_p);
+    event.eventArgSize = offsetof(tEventError, errorArg) + argSize_p;
     event.pEventArg = &eventError;
 
     ret = eventu_postEvent(&event);
