@@ -201,10 +201,6 @@ typedef struct
 #define tabentries(aVar_p)  (sizeof(aVar_p)/sizeof(*(aVar_p)))
 #endif
 
-#ifndef memberoffs
-#define memberoffs(base_type, member_name)  (size_t)&(((base_type *)0)->member_name)
-#endif
-
 #ifndef min
 #define min(a,b)            (((a) < (b)) ? (a) : (b))
 #endif

@@ -41,6 +41,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <stddef.h>
+
 #include <kernel/eventk.h>
 #include <kernel/eventkcal.h>
 #include <kernel/nmtk.h>
@@ -314,7 +316,7 @@ tOplkError eventk_postError (tEventSource eventSource_p, tOplkError eplError_p,
     eplEvent.eventType = kEventTypeError;
     eplEvent.eventSink = kEventSinkApi;
     OPLK_MEMSET(&eplEvent.netTime, 0x00, sizeof(eplEvent.netTime));
-    eplEvent.eventArgSize = (memberoffs (tEventError, errorArg) + argSize_p);
+    eplEvent.eventArgSize = offsetof(tEventError, errorArg) + argSize_p;
     eplEvent.pEventArg = &eventError;
 
     ret = eventk_postEvent(&eplEvent);
