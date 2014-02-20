@@ -139,6 +139,7 @@ tOplkError dllk_addInstance(tDllkInitParam* pInitParam_p)
     dllkInstance_g.pTxBuffer = aDllkTxBuffer_l;
     dllkInstance_g.maxTxFrames = sizeof (aDllkTxBuffer_l) / sizeof (tEdrvTxBuffer);
     dllkInstance_g.dllState = kDllGsInit;               // initialize state
+    dllkInstance_g.pCurrentErrStatusBuffer = NULL;
 
 #if NMT_MAX_NODE_ID > 0
     // set up node info structure
@@ -1202,9 +1203,13 @@ tOplkError dllk_setupLocalNode(tNmtState nmtState_p)
     {
         if ((ret = dllk_setupLocalNodeCn()) != kErrorOk)
             return ret;
+        if ((ret = errsigk_createErrStatusBuffers(&dllkInstance_g.pCurrentErrStatusBuffer)) != kErrorOk)
+            return ret;
     }
 #else
     if ((ret = dllk_setupLocalNodeCn()) != kErrorOk)
+        return ret;
+    if ((ret = errsigk_createErrStatusBuffers(&dllkInstance_g.pCurrentErrStatusBuffer)) != kErrorOk)
         return ret;
 #endif
 
@@ -1513,6 +1518,18 @@ tOplkError dllk_cleanupLocalNode(tNmtState oldNmtState_p)
     ret = edrv_clearRxMulticastMacAddr(aMulticastMac);
     ami_setUint48Be(&aMulticastMac[0], C_DLL_MULTICAST_ASND);
     ret = edrv_clearRxMulticastMacAddr(aMulticastMac);
+
+
+#if defined(CONFIG_INCLUDE_NMT_MN)
+    if (oldNmtState_p < kNmtMsNotActive)
+    {
+        if ((ret = errsigk_cleanErrStatusBuffers(&dllkInstance_g.pCurrentErrStatusBuffer)) != kErrorOk)
+            return ret;
+    }
+#else
+    if ((ret = errsigk_cleanErrStatusBuffers(&dllkInstance_g.pCurrentErrStatusBuffer)) != kErrorOk)
+            return ret;
+#endif
 
     return ret;
 }

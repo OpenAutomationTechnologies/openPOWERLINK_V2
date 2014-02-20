@@ -200,6 +200,7 @@ SET(KERNEL_SOURCES
     ${KERNEL_SOURCE_DIR}/pdo/pdokcal.c
     ${KERNEL_SOURCE_DIR}/pdo/pdokcal-triplebufshm.c
     ${KERNEL_SOURCE_DIR}/errhnd/errhndk.c
+    ${KERNEL_SOURCE_DIR}/errhnd/errsigk.c
     ${KERNEL_SOURCE_DIR}/ctrl/ctrlk.c
     )
 
@@ -473,6 +474,7 @@ SET(KERNEL_HEADERS
     ${STACK_INCLUDE_DIR}/kernel/hrestimer.h
     ${STACK_INCLUDE_DIR}/kernel/synctimer.h
     ${STACK_INCLUDE_DIR}/kernel/errhndk.h
+    ${STACK_INCLUDE_DIR}/kernel/errsigk.h
     ${STACK_INCLUDE_DIR}/kernel/eventk.h
     ${STACK_INCLUDE_DIR}/kernel/eventkcal.h
     ${STACK_INCLUDE_DIR}/kernel/eventkcalintf.h

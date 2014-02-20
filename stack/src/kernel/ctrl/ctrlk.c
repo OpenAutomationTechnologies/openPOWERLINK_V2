@@ -50,6 +50,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/pdokcal.h>
 #include <kernel/pdok.h>
 #include <kernel/eventkcal.h>
+#include <kernel/errsigk.h>
 
 #include <common/ctrl.h>
 #include <kernel/ctrlk.h>
@@ -369,6 +370,7 @@ static tOplkError initStack(void)
 #endif
 
     ret = errhndk_init();
+    ret = errsigk_init();
 
     return ret;
 }
@@ -401,6 +403,7 @@ static tOplkError shutdownStack(void)
 
     eventk_exit();
     errhndk_exit();
+    errsigk_exit();
 
     return kErrorOk;
 }
