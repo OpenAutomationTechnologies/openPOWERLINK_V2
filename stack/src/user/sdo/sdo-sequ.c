@@ -1355,11 +1355,12 @@ static tOplkError processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sd
 
             // Request Ack or Error Ack
             case 3:
-                // -> change to state kSdoSeqStateConnected
-                pSdoSeqCon_p->sdoSeqState = kSdoSeqStateConnected;
+                if(pRecvFrame_p->recvSeqNumCon == pSdoSeqCon_p->recvSeqNum)
+                {
+                    // -> change to state kSdoSeqStateConnected
+                    pSdoSeqCon_p->sdoSeqState = kSdoSeqStateConnected;
 
-                if(pRecvFrame_p->recvSeqNumCon == pSdoSeqCon_p->recvSeqNum )
-                {   // ack request -> send ack
+                    // ack request -> send ack
                     // save sequence numbers
                     pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->recvSeqNumCon);
                     pSdoSeqCon_p->sendSeqNum = ami_getUint8Le(&pRecvFrame_p->sendSeqNumCon);
