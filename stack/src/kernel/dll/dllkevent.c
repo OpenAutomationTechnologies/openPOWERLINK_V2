@@ -939,6 +939,9 @@ static tOplkError processSyncMn(tNmtState nmtState_p, BOOL fReadyFlag_p)
     ami_setUint64Le( &pTxFrame->data.soc.relativeTimeLe, dllkInstance_g.relativeTime);
     dllkInstance_g.relativeTime += dllkInstance_g.dllConfigParam.cycleLen;
 
+    // Update SOC Prescaler Flag
+    ami_setUint8Le( &pTxFrame->data.soc.flag1, dllkInstance_g.mnFlag1 & (PLK_FRAME_FLAG1_PS | PLK_FRAME_FLAG1_MC));
+
     if (dllkInstance_g.ppTxBufferList == NULL)
         return ret;
 
