@@ -937,6 +937,7 @@ static tOplkError processSyncMn(tNmtState nmtState_p, BOOL fReadyFlag_p)
 
     // Set SoC relative time
     ami_setUint64Le( &pTxFrame->data.soc.relativeTimeLe, dllkInstance_g.relativeTime);
+    ami_setUint8Le( &pTxFrame->data.soc.flag1, dllkInstance_g.mnFlag1 & (PLK_FRAME_FLAG1_PS | PLK_FRAME_FLAG1_MC));
     dllkInstance_g.relativeTime += dllkInstance_g.dllConfigParam.cycleLen;
 
     if (dllkInstance_g.ppTxBufferList == NULL)
