@@ -2015,8 +2015,8 @@ static tOplkError clientSend(tSdoComCon* pSdoComCon_p)
                             OPLK_MEMCPY( pPayload,pSdoComCon_p->pData,  pSdoComCon_p->transferSize);
                             pSdoComCon_p->pData += pSdoComCon_p->transferSize;
                             sizeOfFrame += pSdoComCon_p->transferSize;
-                            pSdoComCon_p->transferSize = 0;
                             pSdoComCon_p->transferredBytes += pSdoComCon_p->transferSize;
+                            pSdoComCon_p->transferSize = 0;
                         }
                     }
                     else
