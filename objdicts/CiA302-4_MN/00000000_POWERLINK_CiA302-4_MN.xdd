@@ -22,8 +22,8 @@
       fileCreator="SYSTEC electronic GmbH"
       fileCreationDate="2009-09-18"
       fileCreationTime="15:50:00+01:00"
-      fileModificationDate="2012-09-26"
-      fileModificationTime="15:20:00+02:00"
+      fileModificationDate="2014-02-20"
+      fileModificationTime="10:10:00+01:00"
       fileModifiedBy="Bernecker+Rainer Industrie-Elektronik Ges.m.b.H."
       fileVersion="01.00"
       supportedLanguages="en">
@@ -70,8 +70,8 @@
       fileCreator="SYSTEC electronic GmbH"
       fileCreationDate="2009-09-18"
       fileCreationTime="15:50:00+01:00"
-      fileModificationDate="2012-09-26"
-      fileModificationTime="15:20:00+02:00"
+      fileModificationDate="2014-02-20"
+      fileModificationTime="10:10:00+01:00"
       fileModifiedBy="Bernecker+Rainer Industrie-Elektronik Ges.m.b.H."
       fileVersion="01.00"
       supportedLanguages="en">
@@ -9656,12 +9656,16 @@
           <dynamicChannel accessType="readOnly" addressOffset="0000" bitAlignment="0" dataType="0006" maxNumber="2032" startIndex="A100" endIndex="A107"/>
           <dynamicChannel accessType="readOnly" addressOffset="0000" bitAlignment="0" dataType="0004" maxNumber="1016" startIndex="A1C0" endIndex="A1C3"/>
           <dynamicChannel accessType="readOnly" addressOffset="0000" bitAlignment="0" dataType="0007" maxNumber="1016" startIndex="A200" endIndex="A203"/>
+          <dynamicChannel accessType="readOnly" addressOffset="0000" bitAlignment="0" dataType="0015" maxNumber="508" startIndex="A400" endIndex="A401"/>
+          <dynamicChannel accessType="readOnly" addressOffset="0000" bitAlignment="0" dataType="001B" maxNumber="508" startIndex="A440" endIndex="A441"/>
           <dynamicChannel accessType="readWriteOutput" addressOffset="0000" bitAlignment="0" dataType="0002" maxNumber="4064" startIndex="A480" endIndex="A48F"/>
           <dynamicChannel accessType="readWriteOutput" addressOffset="0000" bitAlignment="0" dataType="0005" maxNumber="4064" startIndex="A4C0" endIndex="A4CF"/>
           <dynamicChannel accessType="readWriteOutput" addressOffset="0000" bitAlignment="0" dataType="0003" maxNumber="2032" startIndex="A540" endIndex="A547"/>
           <dynamicChannel accessType="readWriteOutput" addressOffset="0000" bitAlignment="0" dataType="0006" maxNumber="2032" startIndex="A580" endIndex="A587"/>
           <dynamicChannel accessType="readWriteOutput" addressOffset="0000" bitAlignment="0" dataType="0004" maxNumber="1016" startIndex="A640" endIndex="A643"/>
           <dynamicChannel accessType="readWriteOutput" addressOffset="0000" bitAlignment="0" dataType="0007" maxNumber="1016" startIndex="A680" endIndex="A683"/>
+          <dynamicChannel accessType="readWriteOutput" addressOffset="0000" bitAlignment="0" dataType="0015" maxNumber="508" startIndex="A880" endIndex="A881"/>
+          <dynamicChannel accessType="readWriteOutput" addressOffset="0000" bitAlignment="0" dataType="001B" maxNumber="508" startIndex="A8C0" endIndex="A8C1"/>
         </dynamicChannels>
       </ApplicationLayers>
       <TransportLayers/>
@@ -9689,22 +9693,22 @@
           PDOSelfReceipt="false"
         />
         <MNFeatures
-          NMTSimpleBoot="false" 
-          NMTMNSoC2PReq="0" 
+          NMTSimpleBoot="false"
+          NMTMNSoC2PReq="0"
           NMTMNPRes2PReq="0"
-          NMTMNPRes2PRes="0" 
-          NMTMNPResTx2SoA="0" 
+          NMTMNPRes2PRes="0"
+          NMTMNPResTx2SoA="0"
           NMTMNPResRx2SoA="0"
           NMTMNSoA2ASndTx="0"
-          NMTMNASnd2SoC="0" 
+          NMTMNASnd2SoC="0"
           NMTNetTime="false"
           NMTRelativeTime="true"
           DLLMNFeatureMultiplex="false"
           DLLMNPResChaining="true"
-          PDOTPDOChannels="40" 
+          PDOTPDOChannels="40"
         />
         <CNFeatures
-          DLLCNFeatureMultiplex="true" 
+          DLLCNFeatureMultiplex="true"
           DLLCNPResChaining="true"
           NMTCNSoC2PReq="0"
         />

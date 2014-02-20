@@ -11,7 +11,7 @@ for the CiA profile 302-4.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -95,12 +95,16 @@ tProcessImageLink processImageLink_l[] =
     { 0xA100,   0xA107,     0,      FALSE,      2,      PI_SUBINDEX_COUNT },
     { 0xA1C0,   0xA1C3,     0,      FALSE,      4,      PI_SUBINDEX_COUNT },
     { 0xA200,   0xA203,     0,      FALSE,      4,      PI_SUBINDEX_COUNT },
+    { 0xA400,   0xA401,     0,      FALSE,      8,      PI_SUBINDEX_COUNT },
+    { 0xA440,   0xA441,     0,      FALSE,      8,      PI_SUBINDEX_COUNT },
     { 0xA480,   0xA48F,     0,      TRUE,       1,      PI_SUBINDEX_COUNT },
     { 0xA4C0,   0xA4CF,     0,      TRUE,       1,      PI_SUBINDEX_COUNT },
     { 0xA540,   0xA547,     0,      TRUE,       2,      PI_SUBINDEX_COUNT },
     { 0xA580,   0xA587,     0,      TRUE,       2,      PI_SUBINDEX_COUNT },
     { 0xA640,   0xA643,     0,      TRUE,       4,      PI_SUBINDEX_COUNT },
     { 0xA680,   0xA683,     0,      TRUE,       4,      PI_SUBINDEX_COUNT },
+    { 0xA880,   0xA881,     0,      TRUE,       8,      PI_SUBINDEX_COUNT },
+    { 0xA8C0,   0xA8C1,     0,      TRUE,       8,      PI_SUBINDEX_COUNT }
 };
 
 //------------------------------------------------------------------------------
