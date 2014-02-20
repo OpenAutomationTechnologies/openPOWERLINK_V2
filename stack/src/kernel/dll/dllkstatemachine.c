@@ -372,6 +372,16 @@ static tOplkError processNmtMsFullCycle(tNmtState nmtState_p, tNmtEvent nmtEvent
             break;
 
         case kNmtEventDllMeAsndTimeout:
+
+            // SoC has been sent, update the prescaleCycleCount
+            if (dllkInstance_g.dllConfigParam.prescaler > 0)
+            {
+                if(++dllkInstance_g.prescaleCycleCount == dllkInstance_g.dllConfigParam.prescaler)
+                {
+                    dllkInstance_g.prescaleCycleCount = 0;
+                    dllkInstance_g.mnFlag1 ^= PLK_FRAME_FLAG1_PS;
+                }
+            }
             // SoC has been sent, so ASnd should have been received
             // report if SoA was correctly answered
             ret = dllk_asyncFrameNotReceived(dllkInstance_g.aLastReqServiceId[dllkInstance_g.curLastSoaReq],
