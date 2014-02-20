@@ -9,7 +9,7 @@ device profile.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -6272,6 +6272,14 @@ OBD_BEGIN ()
 
         OBD_RAM_INDEX_RAM_VARARRAY (0xA203, (252), NULL, kObdTypeUInt32, kObdAccVPR, tObdUnsigned32, PI_Input_U32, 0x00000000)
 
+        OBD_RAM_INDEX_RAM_VARARRAY (0xA400, (252), NULL, kObdTypeInt64, kObdAccVPR, tObdInteger64, PI_Input_I64, 0x0000000000000000LL)
+
+        OBD_RAM_INDEX_RAM_VARARRAY (0xA401, (252), NULL, kObdTypeInt64, kObdAccVPR, tObdInteger64, PI_Input_I64, 0x0000000000000000LL)
+
+        OBD_RAM_INDEX_RAM_VARARRAY (0xA440, (252), NULL, kObdTypeUInt64, kObdAccVPR, tObdUnsigned64, PI_Input_U64, 0x0000000000000000LL)
+
+        OBD_RAM_INDEX_RAM_VARARRAY (0xA441, (252), NULL, kObdTypeUInt64, kObdAccVPR, tObdUnsigned64, PI_Input_U64, 0x0000000000000000LL)
+
 
         // static output process image (from network point of view)
 
@@ -6386,6 +6394,14 @@ OBD_BEGIN ()
         OBD_RAM_INDEX_RAM_VARARRAY (0xA682, (252), NULL, kObdTypeUInt32, kObdAccVPRW, tObdUnsigned32, PI_Output_U32, 0x00000000)
 
         OBD_RAM_INDEX_RAM_VARARRAY (0xA683, (252), NULL, kObdTypeUInt32, kObdAccVPRW, tObdUnsigned32, PI_Output_U32, 0x00000000)
+
+        OBD_RAM_INDEX_RAM_VARARRAY (0xA880, (252), NULL, kObdTypeInt64, kObdAccVPRW, tObdInteger64, PI_Output_I64, 0x0000000000000000LL)
+
+        OBD_RAM_INDEX_RAM_VARARRAY (0xA881, (252), NULL, kObdTypeInt64, kObdAccVPRW, tObdInteger64, PI_Output_I64, 0x0000000000000000LL)
+
+        OBD_RAM_INDEX_RAM_VARARRAY (0xA8C0, (252), NULL, kObdTypeUInt64, kObdAccVPRW, tObdUnsigned64, PI_Output_U64, 0x0000000000000000LL)
+
+        OBD_RAM_INDEX_RAM_VARARRAY (0xA8C1, (252), NULL, kObdTypeUInt64, kObdAccVPRW, tObdUnsigned64, PI_Output_U64, 0x0000000000000000LL)
 
     OBD_END_PART ()
 
