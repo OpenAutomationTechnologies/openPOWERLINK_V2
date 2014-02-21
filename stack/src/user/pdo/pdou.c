@@ -11,7 +11,7 @@ This file contains the implementation of the user PDO module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -1040,6 +1040,7 @@ static tOplkError getMaxPdoSize(BYTE nodeId_p, BOOL fTxPdo_p,
     WORD                maxPdoSize;
     UINT                payloadLimitIndex;
     UINT                payloadLimitSubIndex;
+    UINT8               subIndexCount;
 
     // Get right payload limit object depending on 1) MN/CN 2) RPDO/TPDO
     if (fTxPdo_p)
@@ -1053,6 +1054,18 @@ static tOplkError getMaxPdoSize(BYTE nodeId_p, BOOL fTxPdo_p,
         {
             payloadLimitIndex = 0x1F8B;   // NMT_MNPReqPayloadLimitList_AU16
             payloadLimitSubIndex = nodeId_p;
+            obdSize = sizeof (subIndexCount);
+            ret = obd_readEntry(payloadLimitIndex, 0, &subIndexCount, &obdSize);
+            if (ret != kErrorOk)
+            {   // other fatal error occurred
+                *pAbortCode_p = SDO_AC_GENERAL_ERROR;
+                return ret;
+            }
+            if (subIndexCount < payloadLimitSubIndex)
+            {   // sub-index is not valid
+                *pAbortCode_p = SDO_AC_GEN_PARAM_INCOMPATIBILITY;
+                return kErrorPdoLengthExceeded;
+            }
         }
     }
     else
@@ -1066,6 +1079,18 @@ static tOplkError getMaxPdoSize(BYTE nodeId_p, BOOL fTxPdo_p,
         {
             payloadLimitIndex = 0x1F8D;   // NMT_PResPayloadLimitList_AU16
             payloadLimitSubIndex = nodeId_p;
+            obdSize = sizeof(subIndexCount);
+            ret = obd_readEntry(payloadLimitIndex, 0, &subIndexCount, &obdSize);
+            if (ret != kErrorOk)
+             {   // other fatal error occurred
+                 *pAbortCode_p = SDO_AC_GENERAL_ERROR;
+                 return ret;
+             }
+             if (subIndexCount < payloadLimitSubIndex)
+             {   // sub-index is not valid
+                 *pAbortCode_p = SDO_AC_GEN_PARAM_INCOMPATIBILITY;
+                 return kErrorPdoLengthExceeded;
+             }
         }
     }
 
