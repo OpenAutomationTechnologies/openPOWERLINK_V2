@@ -195,6 +195,11 @@ area from 0x1B00 - 0x1FFF.
         OBD_END_INDEX(0x1F9A)
 #endif
 
+#if NMT_MAX_NODE_ID > 0
+        // Object 1F9Bh: NMT_MultiplCycleAssign_AU8
+        OBD_RAM_INDEX_RAM_ARRAY_ALT(0x1F9B, NMT_MAX_NODE_ID, NULL, kObdTypeUInt8, kObdAccSRW, tObdUnsigned8, NMT_MultiplCycleAssign_AU8, 0)
+#endif
+
         // Object 1F9Eh: NMT_ResetCmd_U8
         OBD_BEGIN_INDEX_RAM(0x1F9E, 0x01, ctrlu_cbObdAccess)
             OBD_SUBINDEX_RAM_VAR(0x1F9E, 0x00, kObdTypeUInt8, kObdAccRW, tObdUnsigned8, NMT_ResetCmd_U8, 0xFF)
