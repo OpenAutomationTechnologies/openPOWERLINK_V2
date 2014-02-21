@@ -1382,6 +1382,8 @@ static tOplkError processReceivedPreq(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
 #if defined(CONFIG_INCLUDE_PDO)
         if (nmtState_p >= kNmtCsReadyToOperate)
         {   // inform PDO module only in ReadyToOp and Op
+            UINT16 preqPayloadSize = ami_getUint16Le(&pFrame->data.preq.sizeLe);
+
             if (nmtState_p != kNmtCsOperational)
             {
                 // reset RD flag and all other flags, but that does not matter, because they were processed above
@@ -1389,8 +1391,8 @@ static tOplkError processReceivedPreq(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
             }
 
             // compares real frame size and PDO size
-            if (((UINT) (ami_getUint16Le(&pFrame->data.preq.sizeLe) + PLK_FRAME_OFFSET_PDO_PAYLOAD) > pFrameInfo_p->frameSize) ||
-                         (pFrameInfo_p->frameSize > (dllkInstance_g.dllConfigParam.preqActPayloadLimit + PLK_FRAME_OFFSET_PDO_PAYLOAD)))
+            if (((UINT) (preqPayloadSize + PLK_FRAME_OFFSET_PDO_PAYLOAD) > pFrameInfo_p->frameSize) ||
+                        (preqPayloadSize > dllkInstance_g.dllConfigParam.preqActPayloadLimit))
             {   // format error
                 tEventDllError  dllEvent;
 
