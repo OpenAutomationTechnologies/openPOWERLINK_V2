@@ -11,7 +11,7 @@ This file contains the implementation of the NMT MNU module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -1668,21 +1668,34 @@ The function starts the BootStep1.
 //------------------------------------------------------------------------------
 static tOplkError startBootStep1(BOOL fNmtResetAllIssued_p)
 {
-    tOplkError            ret = kErrorOk;
+    tOplkError          ret = kErrorOk;
     UINT                subIndex;
     UINT                localNodeId;
-    UINT32                nodeCfg;
+    UINT32              nodeCfg;
     tObdSize            obdSize;
     tNmtMnuNodeInfo*    pNodeInfo;
+    UINT8               count;
 
     // $$$ d.k.: save current time for 0x1F89/2 MNTimeoutPreOp1_U32
+
+    // read number of nodes from object 0x1F81/0
+    obdSize = sizeof(count);
+    ret = obd_readEntry(0x1F81, 0, &count, &obdSize);
+    if (ret != kErrorOk)
+        return ret;
+    if (count > tabentries(nmtMnuInstance_g.aNodeInfo))
+    {
+        count = tabentries(nmtMnuInstance_g.aNodeInfo);
+    }
 
     // start network scan
     nmtMnuInstance_g.mandatorySlaveCount = 0;
     nmtMnuInstance_g.signalSlaveCount = 0;
     // check 0x1F81
     localNodeId = obd_getNodeId();
-    for (subIndex = 1; subIndex <= 254; subIndex++)
+
+    pNodeInfo = nmtMnuInstance_g.aNodeInfo;
+    for (subIndex = 1; subIndex <= count; subIndex++, pNodeInfo++)
     {
         obdSize = 4;
         ret = obd_readEntry(0x1F81, subIndex, &nodeCfg, &obdSize);
@@ -1691,8 +1704,6 @@ static tOplkError startBootStep1(BOOL fNmtResetAllIssued_p)
 
         if (subIndex != localNodeId)
         {
-            pNodeInfo = NMTMNU_GET_NODEINFO(subIndex);
-
             // reset flags "not scanned" and "isochronous"
             pNodeInfo->flags &= ~(NMTMNU_NODE_FLAG_ISOCHRON | NMTMNU_NODE_FLAG_NOT_SCANNED);
 
@@ -1743,6 +1754,11 @@ static tOplkError startBootStep1(BOOL fNmtResetAllIssued_p)
                 ret = addNodeIsochronous(localNodeId);
             }
         }
+    }
+
+    for (; subIndex <= tabentries(nmtMnuInstance_g.aNodeInfo); subIndex++, pNodeInfo++)
+    {   // clear node structure of unused entries
+        OPLK_MEMSET(pNodeInfo, 0, sizeof(*pNodeInfo));
     }
 
 Exit:
