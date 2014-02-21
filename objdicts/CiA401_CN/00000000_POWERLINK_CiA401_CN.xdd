@@ -78,8 +78,8 @@
       fileCreator="Bernecker+Rainer Industrie-Elektronik Ges.m.b.H."
       fileCreationDate="2011-04-01"
       fileCreationTime="10:00:00+02:00"
-      fileModificationDate="2012-02-15"
-      fileModificationTime="14:00:00+01:00"
+      fileModificationDate="2012-02-21"
+      fileModificationTime="13:00:00+01:00"
       fileModifiedBy="Bernecker+Rainer Industrie-Elektronik Ges.m.b.H."
       fileVersion="01.00"
       supportedLanguages="en">
@@ -126,8 +126,8 @@
       fileCreator="Bernecker+Rainer Industrie-Elektronik Ges.m.b.H."
       fileCreationDate="2011-04-01"
       fileCreationTime="10:00:00+02:00"
-      fileModificationDate="2012-02-15"
-      fileModificationTime="14:00:00+01:00"
+      fileModificationDate="2012-02-21"
+      fileModificationTime="13:00:00+01:00"
       fileModifiedBy="Bernecker+Rainer Industrie-Elektronik Ges.m.b.H."
       fileVersion="01.00"
       supportedLanguages="en">
@@ -1201,6 +1201,263 @@
             <SubObject subIndex="0E" name="SyncMNDelaySecond_U32" objectType="7" dataType="0007" accessType="ro" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1F99" name="NMT_CNBasicEthernetTimeout_U32" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="5000000"/>
+          <Object index="1F9B" name="NMT_MultiplCycleAssign_AU8" objectType="8" dataType="0005">
+            <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="254"/>
+            <SubObject subIndex="01" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="02" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="03" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="04" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="05" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="06" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="07" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="08" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="09" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="0A" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="0B" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="0C" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="0D" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="0E" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="0F" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="10" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="11" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="12" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="13" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="14" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="15" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="16" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="17" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="18" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="19" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="1A" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="1B" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="1C" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="1D" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="1E" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="1F" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="20" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="21" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="22" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="23" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="24" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="25" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="26" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="27" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="28" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="29" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="2A" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="2B" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="2C" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="2D" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="2E" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="2F" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="30" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="31" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="32" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="33" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="34" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="35" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="36" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="37" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="38" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="39" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="3A" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="3B" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="3C" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="3D" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="3E" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="3F" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="40" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="41" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="42" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="43" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="44" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="45" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="46" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="47" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="48" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="49" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="4A" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="4B" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="4C" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="4D" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="4E" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="4F" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="50" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="51" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="52" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="53" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="54" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="55" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="56" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="57" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="58" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="59" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="5A" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="5B" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="5C" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="5D" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="5E" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="5F" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="60" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="61" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="62" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="63" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="64" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="65" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="66" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="67" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="68" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="69" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="6A" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="6B" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="6C" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="6D" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="6E" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="6F" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="70" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="71" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="72" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="73" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="74" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="75" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="76" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="77" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="78" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="79" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="7A" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="7B" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="7C" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="7D" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="7E" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="7F" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="80" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="81" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="82" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="83" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="84" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="85" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="86" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="87" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="88" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="89" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="8A" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="8B" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="8C" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="8D" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="8E" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="8F" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="90" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="91" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="92" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="93" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="94" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="95" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="96" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="97" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="98" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="99" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="9A" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="9B" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="9C" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="9D" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="9E" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="9F" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="A0" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="A1" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="A2" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="A3" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="A4" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="A5" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="A6" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="A7" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="A8" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="A9" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="AA" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="AB" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="AC" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="AD" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="AE" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="AF" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="B0" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="B1" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="B2" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="B3" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="B4" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="B5" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="B6" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="B7" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="B8" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="B9" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="BA" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="BB" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="BC" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="BD" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="BE" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="BF" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="C0" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="C1" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="C2" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="C3" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="C4" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="C5" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="C6" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="C7" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="C8" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="C9" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="CA" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="CB" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="CC" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="CD" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="CE" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="CF" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="D0" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="D1" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="D2" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="D3" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="D4" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="D5" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="D6" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="D7" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="D8" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="D9" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="DA" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="DB" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="DC" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="DD" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="DE" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="DF" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="E0" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="E1" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="E2" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="E3" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="E4" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="E5" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="E6" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="E7" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="E8" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="E9" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="EA" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="EB" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="EC" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="ED" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="EE" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="EF" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="F0" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="F1" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="F2" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="F3" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="F4" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="F5" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="F6" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="F7" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="F8" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="F9" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="FA" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="FB" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="FC" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="FD" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="FE" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+          </Object>
           <Object index="1F9E" name="NMT_ResetCmd_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="255"/>
 
           <!-- Manufacturer Specific Profile Area (0x2000 - 0x5FFF): may freely be used by the device manufacturer -->
