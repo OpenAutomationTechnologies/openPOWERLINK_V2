@@ -2084,13 +2084,15 @@ The function processes a received ASnd frame.
 static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* pRxBuffer_p,
                                       tNmtState nmtState_p, tEdrvReleaseRxBuffer* pReleaseRxBuffer_p)
 {
-    tOplkError      ret = kErrorOk;
-    tPlkFrame *     pFrame;
-    UINT            asndServiceId;
-    UINT            nodeId;
+    tOplkError       ret = kErrorOk;
+    tPlkFrame *      pFrame;
+    UINT             asndServiceId;
+    UINT             nodeId;
+    tDllkNodeInfo*   pIntNodeInfo;
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
     UINT8           flag1;
+    UINT8           flag2;
 #endif
 
     UNUSED_PARAMETER(nmtState_p);
@@ -2114,6 +2116,8 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
             case kDllAsndSyncResponse:
 #endif
                 nodeId = ami_getUint8Le(&pFrame->srcNodeId);
+                pIntNodeInfo = dllk_getNodeInfo(nodeId);
+
                 if ((dllkInstance_g.aLastReqServiceId[dllkInstance_g.curLastSoaReq] == ((tDllReqServiceId) asndServiceId)) &&
                     (nodeId == dllkInstance_g.aLastTargetNodeId[dllkInstance_g.curLastSoaReq]))
                 {   // mark request as responded
@@ -2122,9 +2126,7 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
 
                 if (((tDllAsndServiceId) asndServiceId) == kDllAsndIdentResponse)
                 {   // memorize MAC address of CN for PReq
-                    tDllkNodeInfo*   pIntNodeInfo;
 
-                    pIntNodeInfo = dllk_getNodeInfo(nodeId);
                     if (pIntNodeInfo == NULL)
                     {   // no node info structure available
                         ret = kErrorDllNoNodeInfo;
@@ -2139,6 +2141,76 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
                 else if (((tDllAsndServiceId) asndServiceId) == kDllAsndSyncResponse)
                 {
                     break;
+                }
+                else if (((tDllAsndServiceId) asndServiceId) == kDllAsndStatusResponse)
+                {
+                    if (pIntNodeInfo == NULL )
+                    { // no node info structure available
+                        ret = kErrorDllNoNodeInfo;
+                        goto Exit;
+                    }
+                    else
+                    {
+                        BOOL                sendRequest = FALSE;
+                        tEvent              event;
+                        tDllCalIssueRequest issueReq;
+
+                        // extract flag1 for error signaling
+                        flag2 = ami_getUint8Le(&pFrame->data.asnd.payload.statusResponse.flag1);
+
+                        if (!(flag2 & PLK_FRAME_FLAG1_EC) == !(pIntNodeInfo->soaFlag1 & PLK_FRAME_FLAG1_ER))
+                        {
+
+                            if ((pIntNodeInfo->soaFlag1 & PLK_FRAME_FLAG1_ER))
+                            {
+                                // wait for one cycle to update the EC bit
+                                pIntNodeInfo->errSigCount = 0;
+                                sendRequest = TRUE;
+                            }
+                            else
+                            {
+                                pIntNodeInfo->errSigCount = 1;
+                            }
+                            pIntNodeInfo->soaFlag1 &= ~PLK_FRAME_FLAG1_ER;
+                        }
+                        else
+                        {
+                            if (!pIntNodeInfo->errSigCount)
+                            {
+                                if ((pIntNodeInfo->soaFlag1 & PLK_FRAME_FLAG1_ER))
+                                {
+                                    pIntNodeInfo->errSigCount = 0;
+                                    sendRequest = TRUE;
+                                }
+                                else
+                                {
+                                    pIntNodeInfo->errSigCount = 1;
+
+                                }
+                                pIntNodeInfo->soaFlag1 &= ~PLK_FRAME_FLAG1_ER;
+
+                            }
+                            else
+                            {
+                                // initializing failed on CN
+                                pIntNodeInfo->soaFlag1 |= PLK_FRAME_FLAG1_ER;
+                                sendRequest = TRUE;
+                            }
+
+                        }
+
+                        if (sendRequest)
+                        {
+                            event.eventSink = kEventSinkDllkCal;
+                            event.eventType = kEventTypeDllkIssueReq;
+                            issueReq.service = kDllReqServiceStatus;
+                            issueReq.nodeId = pIntNodeInfo->nodeId;
+                            issueReq.soaFlag1 = pIntNodeInfo->soaFlag1;
+                            event.pEventArg = &issueReq;
+                            event.eventArgSize = sizeof(tDllCalIssueRequest);
+                            ret = eventk_postEvent(&event);
+                        }
+                    }
                 }
 #endif
                 // forward Flag2 to asynchronous scheduler
