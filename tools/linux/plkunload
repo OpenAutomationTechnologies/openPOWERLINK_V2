@@ -6,7 +6,7 @@
 # \brief Script to unload openPOWERLINK kernel module
 #
 # Copyright (c) 2013, SYSTEC electronik GmbH
-# Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -86,19 +86,20 @@ while read line; do
     driver=`echo $line | cut -f3 -d","`
 
     if echo "$module" | grep -q "$device" ; then
-        lspci=`lspci | grep "${devname}"`
-        pciid=$(lspci | grep "${devname}" | awk "{printf \"0000:\"\$1}")
-        if [ ! -z "$lspci" ]; then
-            let i=i+1
-            echo "$i) $lspci"
-            if [ -z $devs ] ; then
-                devs="$pciid"
-                drivers="$driver"
-            else
-                devs="$devs,$pciid"
-                drivers="$drivers,$driver"
-            fi
-        fi
+        while read lspci ; do
+                if [ ! -z "$lspci" ]; then
+                    let i=i+1
+                    pciid=$(echo $lspci | awk "{printf \"0000:\"\$1}")
+                    echo "$i) $lspci"
+                    if [ -z $devs ] ; then
+                        devs="$pciid"
+                        drivers="$driver"
+                    else
+                        devs="$devs,$pciid"
+                        drivers="$drivers,$driver"
+                    fi
+                fi
+        done < <(lspci | grep "${devname}")
     fi
 done < devices.txt
 
@@ -109,7 +110,6 @@ elif [ $i -eq 1 ]; then
 elif [ $i -eq 0 ] ; then
     echo "No valid network interface controller specified!"
     usage
-    
 fi
 
 pciid=`echo $devs | cut -f$num -d","`
