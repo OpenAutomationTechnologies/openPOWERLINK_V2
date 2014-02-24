@@ -271,6 +271,7 @@ CN if configuration data and time differs with local values.
 
 \param  nodeId_p        Node ID of node to configure.
 \param  nodeEvent_p     Node event to process.
+\param  nmtState_p      NMT state of the node.
 
 \return The function returns a tOplkError error code.
 \retval kErrorOk  Configuration is OK -> continue boot process for this CN.
@@ -280,7 +281,7 @@ CN if configuration data and time differs with local values.
 \ingroup module_cfmu
 */
 //------------------------------------------------------------------------------
-tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p)
+tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtState nmtState_p)
 {
     tOplkError          ret = kErrorOk;
     static UINT32       leSignature;
@@ -290,6 +291,8 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p)
     UINT32              expConfDate = 0;
     tIdentResponse*  	pIdentResponse = NULL;
     BOOL                fDoUpdate = FALSE;
+
+    UNUSED_PARAMETER(nmtState_p);
 
     if ((nodeEvent_p != kNmtNodeEventCheckConf) && (nodeEvent_p != kNmtNodeEventUpdateConf))
         return ret;

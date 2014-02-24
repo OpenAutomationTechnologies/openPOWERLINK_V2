@@ -1447,7 +1447,7 @@ static tOplkError cbNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtStat
         return ret;
 
 #if defined(CONFIG_INCLUDE_CFM)
-    ret = cfmu_processNodeEvent(nodeId_p, nodeEvent_p);
+    ret = cfmu_processNodeEvent(nodeId_p, nodeEvent_p, nmtState_p);
 #endif
     return ret;
 }

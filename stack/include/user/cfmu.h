@@ -65,7 +65,7 @@ extern "C" {
 
 tOplkError  cfmu_init(tCfmCbEventCnProgress pfnCbEventCnProgress_p, tCfmCbEventCnResult pfnCbEventCnResult_p);
 tOplkError  cfmu_exit(void);
-tOplkError  cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p);
+tOplkError  cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtState nmtState_p);
 BOOL        cfmu_isSdoRunning(UINT nodeId_p);
 
 #ifdef __cplusplus
