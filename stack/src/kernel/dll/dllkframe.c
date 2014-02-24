@@ -40,6 +40,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <stddef.h>
+
 #include <oplk/ami.h>
 #include "dllk-internal.h"
 
@@ -728,6 +730,7 @@ tOplkError dllk_updateFramePres(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p
 \brief  Check frame
 
 The function checks a frame and sets the missing information.
+It sets fields in the Ethernet and POWERLINK header parts.
 
 \param  pFrame_p            Pointer to frame.
 \param  frameSize_p         Size of the frame
@@ -737,12 +740,12 @@ The function checks a frame and sets the missing information.
 //------------------------------------------------------------------------------
 tOplkError dllk_checkFrame(tPlkFrame * pFrame_p, UINT frameSize_p)
 {
-    tMsgType     	MsgType;
+    tOplkError      ret = kErrorOk;
+    tMsgType        MsgType;
     UINT16          etherType;
 
-    UNUSED_PARAMETER(frameSize_p);
-
-    if (pFrame_p != NULL)
+    // Check if accessed memory is valid before accessing it!
+    if (pFrame_p != NULL && frameSize_p > offsetof(tPlkFrame, srcNodeId))
     {
         // check SrcMAC
         if (ami_getUint48Be(pFrame_p->aSrcMac) == 0)
@@ -780,8 +783,10 @@ tOplkError dllk_checkFrame(tPlkFrame * pFrame_p, UINT frameSize_p)
             }
         }
     }
+    else
+        ret = kErrorDllTxFrameInvalid;
 
-    return kErrorOk;
+    return ret;
 }
 
 #if defined (CONFIG_INCLUDE_NMT_MN)
