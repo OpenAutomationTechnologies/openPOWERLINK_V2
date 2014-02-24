@@ -53,7 +53,7 @@ SET(CFG_PCP_NAME pcp)
 SET(CFG_CPU_VERSION "v8.50.c")
 
 # Microblaze has enabled multiplier
-OPTION(CFG_MICROBLAZE_HW_MULT "Microblaze has enabled hardware multiplier" OFF)
+OPTION(CFG_MICROBLAZE_HW_MULT "Microblaze has enabled hardware multiplier" ON)
 MARK_AS_ADVANCED(CFG_MICROBLAZE_HW_MULT)
 
 # Microblaze has enabled divider
