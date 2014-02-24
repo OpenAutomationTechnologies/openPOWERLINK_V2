@@ -98,7 +98,7 @@ The OBD defines determine the Object Dictionary.
 */
 /**@{*/
     ///< enable OBD in kernel layer
-#define CONFIG_OBD_CHECK_OBJECT_RANGE              FALSE
+#define CONFIG_OBD_CHECK_OBJECT_RANGE              TRUE
     ///< support automatic object range check
 #define CONFIG_OBD_USE_STRING_DOMAIN_IN_RAM        TRUE
     ///< support variable subindex
