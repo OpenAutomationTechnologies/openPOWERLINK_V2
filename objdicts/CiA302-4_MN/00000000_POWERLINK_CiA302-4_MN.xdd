@@ -457,202 +457,202 @@
           <Object index="1300" name="SDO_SequLayerTimeout_U32" objectType="7" PDOmapping="no" accessType="rw" dataType="0007"  lowLimit="100" defaultValue="5000" />
           <Object index="1400" name="PDO_RxCommParam_00h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1401" name="PDO_RxCommParam_01h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1402" name="PDO_RxCommParam_02h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1403" name="PDO_RxCommParam_03h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1404" name="PDO_RxCommParam_04h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1405" name="PDO_RxCommParam_05h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1406" name="PDO_RxCommParam_06h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1407" name="PDO_RxCommParam_07h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1408" name="PDO_RxCommParam_08h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1409" name="PDO_RxCommParam_09h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="140A" name="PDO_RxCommParam_0Ah_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="140B" name="PDO_RxCommParam_0Bh_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="140C" name="PDO_RxCommParam_0Ch_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="140D" name="PDO_RxCommParam_0Dh_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="140E" name="PDO_RxCommParam_0Eh_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="140F" name="PDO_RxCommParam_0Fh_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1410" name="PDO_RxCommParam_10h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1411" name="PDO_RxCommParam_11h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1412" name="PDO_RxCommParam_12h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1413" name="PDO_RxCommParam_13h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1414" name="PDO_RxCommParam_14h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1415" name="PDO_RxCommParam_15h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1416" name="PDO_RxCommParam_16h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1417" name="PDO_RxCommParam_17h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1418" name="PDO_RxCommParam_18h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1419" name="PDO_RxCommParam_19h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="141A" name="PDO_RxCommParam_1Ah_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="141B" name="PDO_RxCommParam_1Bh_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="141C" name="PDO_RxCommParam_1Ch_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="141D" name="PDO_RxCommParam_1Dh_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="141E" name="PDO_RxCommParam_1Eh_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="141F" name="PDO_RxCommParam_1Fh_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1420" name="PDO_RxCommParam_20h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1421" name="PDO_RxCommParam_21h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1422" name="PDO_RxCommParam_22h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1423" name="PDO_RxCommParam_23h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1424" name="PDO_RxCommParam_24h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1425" name="PDO_RxCommParam_25h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1426" name="PDO_RxCommParam_26h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1427" name="PDO_RxCommParam_27h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1600" name="PDO_RxMappParam_00h_AU64" objectType="8">
@@ -3337,202 +3337,202 @@
           </Object>
           <Object index="1800" name="PDO_TxCommParam_00h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1801" name="PDO_TxCommParam_01h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1802" name="PDO_TxCommParam_02h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1803" name="PDO_TxCommParam_03h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1804" name="PDO_TxCommParam_04h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1805" name="PDO_TxCommParam_05h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1806" name="PDO_TxCommParam_06h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1807" name="PDO_TxCommParam_07h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1808" name="PDO_TxCommParam_08h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1809" name="PDO_TxCommParam_09h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="180A" name="PDO_TxCommParam_0Ah_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="180B" name="PDO_TxCommParam_0Bh_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="180C" name="PDO_TxCommParam_0Ch_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="180D" name="PDO_TxCommParam_0Dh_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="180E" name="PDO_TxCommParam_0Eh_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="180F" name="PDO_TxCommParam_0Fh_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1810" name="PDO_TxCommParam_10h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1811" name="PDO_TxCommParam_11h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1812" name="PDO_TxCommParam_12h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1813" name="PDO_TxCommParam_130h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1814" name="PDO_TxCommParam_14h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1815" name="PDO_TxCommParam_15h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1816" name="PDO_TxCommParam_16h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1817" name="PDO_TxCommParam_17h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1818" name="PDO_TxCommParam_18h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1819" name="PDO_TxCommParam_19h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="181A" name="PDO_TxCommParam_1Ah_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="181B" name="PDO_TxCommParam_1Bh_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="181C" name="PDO_TxCommParam_1Ch_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="181D" name="PDO_TxCommParam_1Dh_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="181E" name="PDO_TxCommParam_1Eh_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="181F" name="PDO_TxCommParam_1Fh_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1820" name="PDO_TxCommParam_20h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1821" name="PDO_TxCommParam_21h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1822" name="PDO_TxCommParam_22h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1823" name="PDO_TxCommParam_23h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1824" name="PDO_TxCommParam_24h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1825" name="PDO_TxCommParam_25h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1826" name="PDO_TxCommParam_26h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1827" name="PDO_TxCommParam_27h_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="2"/>
-            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" highLimit="254" defaultValue="0"/>
             <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1A00" name="PDO_TxMappParam_00h_AU64" objectType="8">
