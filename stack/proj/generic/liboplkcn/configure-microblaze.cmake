@@ -29,12 +29,10 @@
 ################################################################################
 
 ################################################################################
-# Include demo specific settings file
-IF(EXISTS "${CFG_COMPILE_LIB_CN_HW_LIB_DIR}/settings.cmake")
-    INCLUDE(${CFG_COMPILE_LIB_CN_HW_LIB_DIR}/settings.cmake)
-ELSE()
-    MESSAGE(FATAL_ERROR "Settings file for demo ${CFG_COMPILE_LIB_CN_HW_LIB_DIR} does not exist!")
-ENDIF()
+# Include board specific settings file
+INCLUDE(setmicroblazeboardconfig)
+
+SET_BOARD_CONFIGURATION(${CFG_COMPILE_LIB_CN_HW_LIB_DIR})
 
 ################################################################################
 # Set paths

@@ -90,10 +90,8 @@ FOREACH(BOARD_DIR IN ITEMS ${BOARD_DIRS})
         ENDIF()
 
         IF(DEMO_${DEMO_TARGET_NAME})
-            # Get null settings
-            INCLUDE(cmake/null-settings.cmake)
-            # Get settings file of demo to add
-            INCLUDE(${BOARD_DIR}/${EXAMPLE_NAME}/cmake/settings.cmake)
+            # Include board specific settings file
+            SET_BOARD_CONFIGURATION(${BOARD_DIR}/${EXAMPLE_NAME}/cmake)
 
             CONFIGURE_FILE(cmake/BoardsCMakeLists.cmake.in ${BOARD_DIR}/${EXAMPLE_NAME}/CMakeLists.txt COPYONLY)
             ADD_SUBDIRECTORY(${BOARD_DIR}/${EXAMPLE_NAME})

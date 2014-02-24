@@ -1,6 +1,7 @@
 ################################################################################
 #
-# CMake global settings file for target Xilinx Microblaze
+# CMake macro for setting the board managing the configuration of the current
+# selected board.
 #
 # Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
@@ -28,8 +29,39 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
+MACRO(SET_BOARD_CONFIGURATION PATH_TO_CONFIGURATION)
+
 ###############################################################################
-# Handle Microblaze settings
+# Unset all old configurations
+UNSET(CFG_DEMO_NAME)
+UNSET(CFG_DEMO_BOARD_NAME)
+UNSET(CFG_DEMO_BUS_SYSTEM)
+
+UNSET(CFG_PCP_TCIMEM_NAME)
+
+UNSET(CFG_PCP_NAME)
+UNSET(CFG_HOST_NAME)
+
+UNSET(CFG_CPU_VERSION)
+
+UNSET(CFG_MICROBLAZE_HW_MULT)
+UNSET(CFG_MICROBLAZE_HW_DIV)
+UNSET(CFG_MICROBLAZE_PAT_COMP)
+UNSET(CFG_MICROBLAZE_BARREL_SHIFT)
+UNSET(CFG_MICROBLAZE_REORDER)
+
+UNSET(CFG_HOSTIF_ENABLE)
+
+###############################################################################
+# Include new configuration file
+IF(EXISTS "${PATH_TO_CONFIGURATION}/settings.cmake")
+    INCLUDE(${PATH_TO_CONFIGURATION}/settings.cmake)
+ELSE()
+    MESSAGE(FATAL_ERROR "Settings file for demo ${PATH_TO_CONFIGURATION} does not exist!")
+ENDIF()
+
+###############################################################################
+# Set CFLAGS variable depending on current board
 IF(CFG_DEMO_BUS_SYSTEM MATCHES plb)
     SET(XIL_CFLAGS "${XIL_CFLAGS} -mbig-endian")
     SET(XIL_PLAT_ENDIAN -mbig-endian)
@@ -67,3 +99,5 @@ IF (CFG_MICROBLAZE_REORDER)
 ELSE ()
     SET(XIL_CFLAGS "${XIL_CFLAGS} -mno-xl-reorder")
 ENDIF()
+
+ENDMACRO(SET_BOARD_CONFIGURATION)
