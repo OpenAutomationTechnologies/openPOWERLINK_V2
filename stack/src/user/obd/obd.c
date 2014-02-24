@@ -2217,13 +2217,13 @@ static tOplkError checkObjectRange (tObdSubEntryPtr pSubIndexEntry_p, void* pDat
     const void*         pRangeData;
 
     // check if data range has to be checked
-    if ((pSubIndexEntry_p->m_Access & kObdAccRange) == 0)
+    if ((pSubIndexEntry_p->access & kObdAccRange) == 0)
         return ret;
 
-    pRangeData = pSubIndexEntry_p->m_pDefault;    // get address of default data
+    pRangeData = pSubIndexEntry_p->pDefault;    // get address of default data
 
     // jump to called object type
-    switch ((tObdType) pSubIndexEntry_p->m_Type)
+    switch ((tObdType) pSubIndexEntry_p->type)
     {
         // ObdType kObdTypeBool will not be checked because there are only
         // two possible values 0 or 1.
@@ -2332,14 +2332,14 @@ static tOplkError checkObjectRange (tObdSubEntryPtr pSubIndexEntry_p, void* pDat
         case kObdTypeInt48:
         case kObdTypeInt56:
         case kObdTypeInt64:
-            pRangeData = ((signed UINT64 *) pRangeData) + 1;            // switch to lower limit
-            if (*((signed UINT64 *) pData_p) < *((signed UINT64 *) pRangeData))
+            pRangeData = ((tObdInteger64 *) pRangeData) + 1;            // switch to lower limit
+            if (*((tObdInteger64 *) pData_p) < *((tObdInteger64 *) pRangeData))
             {
                 ret = kErrorObdValueTooLow;
                 break;
             }
-            pRangeData = ((signed UINT64 *) pRangeData) + 1;             // switch to higher limit
-            if (*((signed UINT64 *) pData_p) > *((signed UINT64 *) pRangeData))
+            pRangeData = ((tObdInteger64 *) pRangeData) + 1;             // switch to higher limit
+            if (*((tObdInteger64 *) pData_p) > *((tObdInteger64 *) pRangeData))
             {
                 ret = kErrorObdValueTooHigh;
             }
@@ -2349,14 +2349,14 @@ static tOplkError checkObjectRange (tObdSubEntryPtr pSubIndexEntry_p, void* pDat
         case kObdTypeUInt48:
         case kObdTypeUInt56:
         case kObdTypeUInt64:
-            pRangeData = ((unsigned UINT64 *) pRangeData) + 1;           // switch to lower limit
-            if (*((unsigned UINT64 *) pData_p) < *((unsigned UINT64 *) pRangeData))
+            pRangeData = ((tObdUnsigned64 *) pRangeData) + 1;           // switch to lower limit
+            if (*((tObdUnsigned64 *) pData_p) < *((tObdUnsigned64 *) pRangeData))
             {
                 ret = kErrorObdValueTooLow;
                 break;
             }
-            pRangeData = ((unsigned QWORD *) pRangeData) + 1;            // switch to higher limit
-            if (*((unsigned QWORD *) pData_p) > *((unsigned QWORD *) pRangeData))
+            pRangeData = ((tObdUnsigned64 *) pRangeData) + 1;            // switch to higher limit
+            if (*((tObdUnsigned64 *) pData_p) > *((tObdUnsigned64 *) pRangeData))
             {
                 ret = kErrorObdValueTooHigh;
             }
