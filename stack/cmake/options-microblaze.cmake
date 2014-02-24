@@ -33,7 +33,6 @@ MESSAGE(STATUS "Adding CMake configuration options for Microblaze")
 ################################################################################
 # Handle includes
 SET(CMAKE_MODULE_PATH "${OPLK_BASE_DIR}/cmake" ${CMAKE_MODULE_PATH})
-INCLUDE(global-microblaze)
 INCLUDE(geneclipsefilelist)
 INCLUDE(geneclipseincludelist)
 

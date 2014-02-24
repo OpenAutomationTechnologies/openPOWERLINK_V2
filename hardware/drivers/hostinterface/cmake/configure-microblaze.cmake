@@ -29,12 +29,6 @@
 ################################################################################
 
 ################################################################################
-# Handle includes
-
-# Include target specific global configuration file
-INCLUDE( ${OPLK_BASE_DIR}/cmake/configure-microblaze.cmake )
-
-################################################################################
 # Set architecture specific sources and include directories
 
 SET( LIB_ARCH_SRCS "" )

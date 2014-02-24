@@ -31,21 +31,18 @@
 ################################################################################
 # Handle includes
 SET(CMAKE_MODULE_PATH "${OPLK_ROOT_DIR}/cmake" ${CMAKE_MODULE_PATH})
-INCLUDE(global-microblaze)
 INCLUDE(geneclipsefilelist)
 INCLUDE(geneclipseincludelist)
+INCLUDE(setmicroblazeboardconfig)
 
 ################################################################################
 # Path to the hardware library folder of your board example
 SET(CFG_HW_LIB_DIR ${OPLK_ROOT_DIR}/hardware/lib/${SYSTEM_NAME_DIR}/${SYSTEM_PROCESSOR_DIR}/avnet-s6plkeb/cn-single-gpio
         CACHE PATH "Path to the hardware library folder of your demo application")
 
-# Include demo specific settings file
-IF(EXISTS "${CFG_HW_LIB_DIR}/settings.cmake")
-    INCLUDE(${CFG_HW_LIB_DIR}/settings.cmake)
-ELSE()
-    MESSAGE(FATAL_ERROR "Settings file (settings.cmake) in folder ${CFG_HW_LIB_DIR} does not exist!")
-ENDIF()
+################################################################################
+# Include board specific settings file
+SET_BOARD_CONFIGURATION(${CFG_HW_LIB_DIR})
 
 ################################################################################
 # Set variables
