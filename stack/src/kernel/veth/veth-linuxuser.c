@@ -146,7 +146,7 @@ tOplkError veth_addInstance(const UINT8 aSrcMac_p[6])
         return kErrorNoFreeInstance;
     }
 
-    memset(&ifr, 0, sizeof(ifr));
+    OPLK_MEMSET(&ifr, 0, sizeof(ifr));
     ifr.ifr_flags = IFF_TAP | IFF_NO_PI;
     strncpy(ifr.ifr_name, PLK_VETH_NAME, IFNAMSIZ);
 
@@ -159,7 +159,7 @@ tOplkError veth_addInstance(const UINT8 aSrcMac_p[6])
 
     // save MAC address of TAP device and ethernet device to be able to
     // exchange them
-    memcpy (vethInstance_l.macAdrs, aSrcMac_p, 6);
+    OPLK_MEMCPY (vethInstance_l.macAdrs, aSrcMac_p, 6);
     getMacAdrs(vethInstance_l.tapMacAdrs);
 
     // start tap receive thread
@@ -223,7 +223,7 @@ static void getMacAdrs(UINT8* pMac_p)
         return;
     }
 
-    memset(&ifr, 0, sizeof(struct ifreq));
+    OPLK_MEMSET(&ifr, 0, sizeof(struct ifreq));
     strncpy(ifr.ifr_name, "plk", IFNAMSIZ);
 
     if (ioctl(sock, SIOCGIFHWADDR, &ifr) < 0)
@@ -238,7 +238,7 @@ static void getMacAdrs(UINT8* pMac_p)
 
     close(sock);
 
-    memcpy (pMac_p, &ifr.ifr_hwaddr.sa_data[0], ETHER_ADDR_LEN);
+    OPLK_MEMCPY (pMac_p, &ifr.ifr_hwaddr.sa_data[0], ETHER_ADDR_LEN);
 }
 
 //------------------------------------------------------------------------------
@@ -258,9 +258,9 @@ static tOplkError veth_receiveFrame(tFrameInfo * pFrameInfo_p)
 
     // replace the mac address of the POWERLINK Ethernet interface with virtual
     // ethernet MAC address before forwarding it into the virtual ethernet interface
-    if (memcmp (pFrameInfo_p->pFrame->aDstMac, vethInstance_l.macAdrs, ETHER_ADDR_LEN) == 0)
+    if (OPLK_MEMCMP (pFrameInfo_p->pFrame->aDstMac, vethInstance_l.macAdrs, ETHER_ADDR_LEN) == 0)
     {
-        memcpy (pFrameInfo_p->pFrame->aDstMac, vethInstance_l.tapMacAdrs, ETHER_ADDR_LEN);
+        OPLK_MEMCPY (pFrameInfo_p->pFrame->aDstMac, vethInstance_l.tapMacAdrs, ETHER_ADDR_LEN);
     }
 
     nwrite = write(vethInstance_l.fd, pFrameInfo_p->pFrame, pFrameInfo_p->frameSize);
@@ -321,7 +321,7 @@ static void* vethRecvThread(void* pArg_p)
                     DEBUG_LVL_VETH_TRACE("DST MAC: %02X:%02X:%02x:%02X:%02X:%02x\n",
                                           buffer[0], buffer[1], buffer[2], buffer[3], buffer[4], buffer[5]);
                     // replace src MAC address with MAC address of virtual ethernet interface
-                    memcpy (&buffer[6], pInstance->macAdrs, ETHER_ADDR_LEN);
+                    OPLK_MEMCPY (&buffer[6], pInstance->macAdrs, ETHER_ADDR_LEN);
 
                     frameInfo.pFrame = (tPlkFrame *)buffer;
                     frameInfo.frameSize = nread;

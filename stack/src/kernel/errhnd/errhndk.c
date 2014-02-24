@@ -966,7 +966,7 @@ static tOplkError generateHistoryEntry(UINT16 errorCode_p, tNetTime netTime_p)
 
     historyEntry.errorCode = errorCode_p;
     historyEntry.timeStamp = netTime_p;
-    memset (historyEntry.aAddInfo, 0, sizeof(historyEntry.aAddInfo));
+    OPLK_MEMSET(historyEntry.aAddInfo, 0, sizeof(historyEntry.aAddInfo));
 
     ret = postHistoryEntryEvent(&historyEntry);
     return ret;

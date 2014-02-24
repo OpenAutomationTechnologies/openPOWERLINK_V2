@@ -363,7 +363,7 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
         goto Exit;
     }
     pPacket->mBlkHdr.reserved = htons(0x88ab);
-    memcpy(pPacket->mBlkHdr.mData, pBuffer_p->pBuffer, pBuffer_p->txFrameSize);
+    OPLK_MEMCPY(pPacket->mBlkHdr.mData, pBuffer_p->pBuffer, pBuffer_p->txFrameSize);
     pPacket->mBlkHdr.mLen = pBuffer_p->txFrameSize;
     /* send packet out */
     if ((muxRet = muxSend(edrvInstance_l.pCookie, pPacket)) != OK)
@@ -574,7 +574,7 @@ static BOOL packetHandler(void* pCookie_p, LONG type_p, M_BLK_ID pPkt_p,
     UNUSED_PARAMETER(pCookie_p);
     UNUSED_PARAMETER(type_p);
 
-    if (memcmp(pPkt_p->mBlkHdr.mData + pLLHInfo_p->srcAddrOffset,
+    if (OPLK_MEMCMP(pPkt_p->mBlkHdr.mData + pLLHInfo_p->srcAddrOffset,
                pInstance->initParam.aMacAddr, 6 ) != 0)
     {
         rxBuffer.bufferInFrame    = kEdrvBufferLastInFrame;

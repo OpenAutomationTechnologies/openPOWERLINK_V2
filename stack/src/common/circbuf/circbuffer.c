@@ -304,7 +304,7 @@ tCircBufError circbuf_writeData (tCircBufInstance* pInstance_p, const void* pDat
     {
         *(UINT32 *)(pCircBuf + pHeader->writeOffset) = size_p;
 
-        memcpy (pCircBuf + pHeader->writeOffset + sizeof(UINT32),
+        OPLK_MEMCPY (pCircBuf + pHeader->writeOffset + sizeof(UINT32),
                 pData_p, size_p);
         if (pHeader->writeOffset + fullBlockSize == pHeader->bufferSize)
             pHeader->writeOffset = 0;
@@ -316,9 +316,9 @@ tCircBufError circbuf_writeData (tCircBufInstance* pInstance_p, const void* pDat
         *(UINT32 *)(pCircBuf + pHeader->writeOffset) = size_p;
         chunkSize = pHeader->bufferSize - pHeader->writeOffset - sizeof(UINT32);
 
-        memcpy (pCircBuf + pHeader->writeOffset + sizeof(UINT32),
+        OPLK_MEMCPY (pCircBuf + pHeader->writeOffset + sizeof(UINT32),
                 pData_p, chunkSize);
-        memcpy (pCircBuf, (UINT8*)pData_p + chunkSize, size_p - chunkSize);
+        OPLK_MEMCPY (pCircBuf, (UINT8*)pData_p + chunkSize, size_p - chunkSize);
         pHeader->writeOffset = blockSize - chunkSize;
     }
     pHeader->freeSize -= fullBlockSize;
@@ -383,9 +383,9 @@ tCircBufError circbuf_writeMultipleData(tCircBufInstance* pInstance_p,
     {
         *(UINT32 *)(pCircBuf + pHeader->writeOffset) = size_p + size2_p;
 
-        memcpy (pCircBuf + pHeader->writeOffset + sizeof(UINT32),
+        OPLK_MEMCPY (pCircBuf + pHeader->writeOffset + sizeof(UINT32),
                 pData_p, size_p);
-        memcpy (pCircBuf + pHeader->writeOffset + sizeof(UINT32) + size_p,
+        OPLK_MEMCPY (pCircBuf + pHeader->writeOffset + sizeof(UINT32) + size_p,
                 pData2_p, size2_p);
         if (pHeader->writeOffset + fullBlockSize == pHeader->bufferSize)
             pHeader->writeOffset = 0;
@@ -399,20 +399,20 @@ tCircBufError circbuf_writeMultipleData(tCircBufInstance* pInstance_p,
         chunkSize = pHeader->bufferSize - pHeader->writeOffset - sizeof(UINT32);
         if (size_p <= chunkSize)
         {
-            memcpy (pCircBuf + pHeader->writeOffset + sizeof(UINT32),
+            OPLK_MEMCPY (pCircBuf + pHeader->writeOffset + sizeof(UINT32),
                     pData_p, size_p);
             partSize = chunkSize - size_p;
-            memcpy (pCircBuf + pHeader->writeOffset + size_p + sizeof(UINT32),
+            OPLK_MEMCPY (pCircBuf + pHeader->writeOffset + size_p + sizeof(UINT32),
                     pData2_p, partSize);
-            memcpy (pCircBuf, (UINT8*)pData2_p + partSize, size2_p - partSize);
+            OPLK_MEMCPY (pCircBuf, (UINT8*)pData2_p + partSize, size2_p - partSize);
         }
         else
         {
             partSize = size_p - chunkSize;
-            memcpy (pCircBuf + pHeader->writeOffset + sizeof(UINT32),
+            OPLK_MEMCPY (pCircBuf + pHeader->writeOffset + sizeof(UINT32),
                     pData_p, chunkSize);
-            memcpy (pCircBuf, (UINT8*)pData_p + chunkSize, partSize);
-            memcpy (pCircBuf + partSize, pData2_p, size2_p);
+            OPLK_MEMCPY (pCircBuf, (UINT8*)pData_p + chunkSize, partSize);
+            OPLK_MEMCPY (pCircBuf + partSize, pData2_p, size2_p);
         }
         pHeader->writeOffset = blockSize - chunkSize;
 
@@ -473,7 +473,7 @@ tCircBufError circbuf_readData(tCircBufInstance* pInstance_p, void* pData_p,
 
     if (pHeader->readOffset + fullBlockSize <= pHeader->bufferSize)
     {
-        memcpy (pData_p, pCircBuf + pHeader->readOffset + sizeof(UINT32),
+        OPLK_MEMCPY (pData_p, pCircBuf + pHeader->readOffset + sizeof(UINT32),
                 dataSize);
         if (pHeader->readOffset + fullBlockSize == pHeader->bufferSize)
             pHeader->readOffset = 0;
@@ -483,9 +483,9 @@ tCircBufError circbuf_readData(tCircBufInstance* pInstance_p, void* pData_p,
     else
     {
         chunkSize = pHeader->bufferSize - pHeader->readOffset - sizeof(UINT32);
-        memcpy (pData_p, pCircBuf + pHeader->readOffset + sizeof(UINT32),
+        OPLK_MEMCPY (pData_p, pCircBuf + pHeader->readOffset + sizeof(UINT32),
                 chunkSize);
-        memcpy ((UINT8*)pData_p + chunkSize, pCircBuf, dataSize - chunkSize);
+        OPLK_MEMCPY ((UINT8*)pData_p + chunkSize, pCircBuf, dataSize - chunkSize);
         pHeader->readOffset = blockSize - chunkSize;
     }
     pHeader->freeSize += fullBlockSize;

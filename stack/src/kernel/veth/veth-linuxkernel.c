@@ -160,7 +160,7 @@ tOplkError veth_addInstance(const UINT8 aSrcMac_p[6])
     pVEthNetDevice_g->destructor        = free_netdev;
 
     // copy own MAC address to net device structure
-    memcpy(pVEthNetDevice_g->dev_addr, aSrcMac_p, 6);
+    OPLK_MEMCPY(pVEthNetDevice_g->dev_addr, aSrcMac_p, 6);
 
     //register VEth to the network subsystem
     if (register_netdev(pVEthNetDevice_g))
@@ -361,7 +361,7 @@ static tOplkError veth_receiveFrame(tFrameInfo * pFrameInfo_p)
 
     skb_reserve(pSkb, 2);
 
-    memcpy((void *)skb_put(pSkb, pFrameInfo_p->frameSize), pFrameInfo_p->pFrame, pFrameInfo_p->frameSize);
+    OPLK_MEMCPY((void *)skb_put(pSkb, pFrameInfo_p->frameSize), pFrameInfo_p->pFrame, pFrameInfo_p->frameSize);
 
     pSkb->protocol = eth_type_trans(pSkb, pNetDevice);
     pSkb->ip_summed = CHECKSUM_UNNECESSARY;

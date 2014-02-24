@@ -151,7 +151,7 @@ tOplkError pdokcal_initPdoMem(tPdoChannelSetup* pPdoChannels, size_t rxPdoMemSiz
            pPdoMem_l, pdoMemRegionSize_l,
            pTripleBuf_l[0], pTripleBuf_l[1], pTripleBuf_l[2]);
 
-    memset (pPdoMem_l, 0, pdoMemRegionSize_l);
+    OPLK_MEMSET(pPdoMem_l, 0, pdoMemRegionSize_l);
     setupPdoMemInfo(pPdoChannels, pPdoMem_l);
 
     OPLK_ATOMIC_INIT(pPdoMem_l);
@@ -206,7 +206,7 @@ tOplkError pdokcal_writeRxPdo(UINT channelId_p, BYTE *pPayload_p, UINT16 pdoSize
            pPdoMem_l->rxChannelInfo[channelId_p].channelOffset;
     //TRACE ("%s() chan:%d wi:%d\n", __func__, channelId_p, pPdoMem_l->rxChannelInfo[channelId_p].writeBuf);
 
-    memcpy(pPdo, pPayload_p, pdoSize_p);
+    OPLK_MEMCPY(pPdo, pPayload_p, pdoSize_p);
 
     temp = pPdoMem_l->rxChannelInfo[channelId_p].writeBuf;
     OPLK_ATOMIC_EXCHANGE(&pPdoMem_l->rxChannelInfo[channelId_p].cleanBuf,
@@ -255,7 +255,7 @@ tOplkError pdokcal_readTxPdo(UINT channelId_p, BYTE* pPayload_p, UINT16 pdoSize_
     pPdo =  pTripleBuf_l[pPdoMem_l->txChannelInfo[channelId_p].readBuf] +
             pPdoMem_l->txChannelInfo[channelId_p].channelOffset;
 
-    memcpy (pPayload_p, pPdo, pdoSize_p);
+    OPLK_MEMCPY (pPayload_p, pPdo, pdoSize_p);
 
     return kErrorOk;
 }
