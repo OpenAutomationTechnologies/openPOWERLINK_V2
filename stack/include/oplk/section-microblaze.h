@@ -48,16 +48,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define XIL_INTERNAL_RAM    __attribute__((section(".local_memory")))
 
-#ifdef XIL_PLK_MN
+#ifdef NDEBUG
+#ifdef CONFIG_MN
+    /* TODO:
+     * Implement MN on Xilinx!
+     */
+#endif //CONFIG_MN
 
-#else
+#ifdef CONFIG_CN
     /* TODO:
      * Find optimal setting again due to revised stack design!
      */
-#if (defined(XIL_NO_OPT_LEVEL) || defined(XIL_OPT_LEVEL_1) || \
-    defined(XIL_OPT_LEVEL_2)   || defined(XIL_OPT_LEVEL_3) || \
-    defined(XIL_OPT_LEVEL_SIZE)                               )
-
     #define SECTION_PDOK_PROCESS_TPDO_CB    XIL_INTERNAL_RAM
     #define SECTION_PDOK_COPY_TPDO          XIL_INTERNAL_RAM
     #define SECTION_PDOK_PROCESS_RPDO       XIL_INTERNAL_RAM
@@ -68,13 +69,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     #define SECTION_EDRVOPENMAC_RX_HOOK     XIL_INTERNAL_RAM
     #define SECTION_EDRVOPENMAC_IRQ_HDL     XIL_INTERNAL_RAM
     #define SECTION_MAIN_APP_CB_SYNC        XIL_INTERNAL_RAM
-
-#endif
-
-#if (defined(XIL_OPT_LEVEL_3) || defined(XIL_OPT_LEVEL_SIZE))
     #define SECTION_DLLK_FRAME_RCVD_CB      XIL_INTERNAL_RAM
-#endif
-#endif
+
+#endif //CONFIG_CN
+
+#endif // NDEBUG
 
 //------------------------------------------------------------------------------
 // typedef

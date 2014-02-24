@@ -81,6 +81,9 @@ INCLUDE_DIRECTORIES(
 # set flags of the openPOWERLINK library
 ADD_DEFINITIONS("-Wall -Wextra -pedantic -std=c99")
 
+# set macro to change mapping to internal memory
+ADD_DEFINITIONS(-DCONFIG_CN)
+
 ################################################################################
 # Handle target specific functions
 IF(${CMAKE_SYSTEM_NAME} STREQUAL "Generic" AND ${CMAKE_SYSTEM_PROCESSOR} STREQUAL "Microblaze")
