@@ -103,8 +103,10 @@ The function sets up an ASnd filter in the Edrv filter structure.
 //------------------------------------------------------------------------------
 void dllk_setupAsndFilter(tEdrvFilter* pFilter_p)
 {
-    ami_setUint48Be(&pFilter_p->aFilterValue[0], C_DLL_MULTICAST_ASND);
-    ami_setUint48Be(&pFilter_p->aFilterMask[0],  C_DLL_MACADDR_MASK);
+    ami_setUint16Be(&pFilter_p->aFilterValue[12], C_DLL_ETHERTYPE_EPL);
+    ami_setUint16Be(&pFilter_p->aFilterMask[12],  0xFFFF);
+    ami_setUint8Be(&pFilter_p->aFilterValue[14], kMsgTypeAsnd);
+    ami_setUint8Be(&pFilter_p->aFilterMask[14], 0xFF);
     pFilter_p->fEnable = TRUE;
 }
 
