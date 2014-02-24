@@ -1443,7 +1443,8 @@ static tOplkError cbNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtStat
     eventArg.nodeEvent.fMandatory = fMandatory_p;
 
     ret = ctrlu_callUserEventCallback(kOplkApiEventNode, &eventArg);
-    if (ret != kErrorOk)
+    if (((nodeEvent_p == kNmtNodeEventCheckConf) || (nodeEvent_p == kNmtNodeEventUpdateConf)) &&
+        (ret != kErrorOk))
         return ret;
 
 #if defined(CONFIG_INCLUDE_CFM)
