@@ -99,7 +99,6 @@ typedef enum
 */
 typedef enum
 {
-    kObdCmdNothing          = 0x00,
     kObdCmdOpenWrite        = 0x01,
     kObdCmdWriteObj         = 0x02,
     kObdCmdCloseWrite       = 0x03,
@@ -107,7 +106,6 @@ typedef enum
     kObdCmdReadObj          = 0x05,
     kObdCmdCloseRead        = 0x06,
     kObdCmdClear            = 0x07,
-    kObdCmdUnknown          = 0xFF
 }tObdCommand;
 
 /**
