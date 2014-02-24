@@ -49,21 +49,21 @@ OBD_BEGIN ()
         // Object 1400h: PDO_RxCommParam_00h_REC
         OBD_BEGIN_INDEX_RAM(0x1400, 0x03, pdou_cbObdAccess)
             OBD_SUBINDEX_RAM_VAR(0x1400, 0x00, kObdTypeUInt8, kObdAccConst, tObdUnsigned8, NumberOfEntries, 0x02)
-            OBD_SUBINDEX_RAM_VAR(0x1400, 0x01, kObdTypeUInt8, kObdAccRW, tObdUnsigned8, NodeID_U8, 0x00)
+            OBD_SUBINDEX_RAM_VAR_RG(0x1400, 0x01, kObdTypeUInt8, kObdAccGRW, tObdUnsigned8, NodeID_U8, 0x00, 0, 254)
             OBD_SUBINDEX_RAM_VAR(0x1400, 0x02, kObdTypeUInt8, kObdAccRW, tObdUnsigned8, MappingVersion_U8, 0x00)
         OBD_END_INDEX(0x1400)
 
         // Object 1401h: PDO_RxCommParam_01h_REC
         OBD_BEGIN_INDEX_RAM(0x1401, 0x03, pdou_cbObdAccess)
             OBD_SUBINDEX_RAM_VAR(0x1401, 0x00, kObdTypeUInt8, kObdAccConst, tObdUnsigned8, NumberOfEntries, 0x02)
-            OBD_SUBINDEX_RAM_VAR(0x1401, 0x01, kObdTypeUInt8, kObdAccRW, tObdUnsigned8, NodeID_U8, 0x00)
+            OBD_SUBINDEX_RAM_VAR_RG(0x1401, 0x01, kObdTypeUInt8, kObdAccGRW, tObdUnsigned8, NodeID_U8, 0x00, 0, 254)
             OBD_SUBINDEX_RAM_VAR(0x1401, 0x02, kObdTypeUInt8, kObdAccRW, tObdUnsigned8, MappingVersion_U8, 0x00)
         OBD_END_INDEX(0x1401)
 
         // Object 1402h: PDO_RxCommParam_02h_REC
         OBD_BEGIN_INDEX_RAM(0x1402, 0x03, pdou_cbObdAccess)
             OBD_SUBINDEX_RAM_VAR(0x1402, 0x00, kObdTypeUInt8, kObdAccConst, tObdUnsigned8, NumberOfEntries, 0x02)
-            OBD_SUBINDEX_RAM_VAR(0x1402, 0x01, kObdTypeUInt8, kObdAccRW, tObdUnsigned8, NodeID_U8, 0x00)
+            OBD_SUBINDEX_RAM_VAR_RG(0x1402, 0x01, kObdTypeUInt8, kObdAccGRW, tObdUnsigned8, NodeID_U8, 0x00, 0, 254)
             OBD_SUBINDEX_RAM_VAR(0x1402, 0x02, kObdTypeUInt8, kObdAccRW, tObdUnsigned8, MappingVersion_U8, 0x00)
         OBD_END_INDEX(0x1402)
 
@@ -160,7 +160,7 @@ OBD_BEGIN ()
         // Object 1800h: PDO_TxCommParam_00h_REC
         OBD_BEGIN_INDEX_RAM(0x1800, 0x03, pdou_cbObdAccess)
             OBD_SUBINDEX_RAM_VAR(0x1800, 0x00, kObdTypeUInt8, kObdAccConst, tObdUnsigned8, NumberOfEntries, 0x02)
-            OBD_SUBINDEX_RAM_VAR(0x1800, 0x01, kObdTypeUInt8, kObdAccRW, tObdUnsigned8, NodeID_U8, 0x00)
+            OBD_SUBINDEX_RAM_VAR_RG(0x1800, 0x01, kObdTypeUInt8, kObdAccGRW, tObdUnsigned8, NodeID_U8, 0x00, 0, 254)
             OBD_SUBINDEX_RAM_VAR(0x1800, 0x02, kObdTypeUInt8, kObdAccRW, tObdUnsigned8, MappingVersion_U8, 0x00)
         OBD_END_INDEX(0x1800)
 
