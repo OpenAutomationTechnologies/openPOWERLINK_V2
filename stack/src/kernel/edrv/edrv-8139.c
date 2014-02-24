@@ -402,10 +402,17 @@ This function shuts down the Ethernet driver.
 //------------------------------------------------------------------------------
 tOplkError edrv_shutdown(void)
 {
-    // unregister PCI driver
-    printk("%s calling pci_unregister_driver()\n", __FUNCTION__);
-    pci_unregister_driver (&edrvDriver_l);
-
+    if(edrvDriver_l.name != NULL)
+    {
+        printk("%s calling pci_unregister_driver()\n", __FUNCTION__);
+        pci_unregister_driver (&edrvDriver_l);
+        // clear driver structure
+        OPLK_MEMSET(&edrvDriver_l, 0, sizeof (edrvDriver_l));
+    }
+    else
+    {
+        printk("%s pci driver for openPOWERLINK already unregisted\n", __FUNCTION__);
+    }
     return kErrorOk;
 }
 
