@@ -25,7 +25,7 @@
 					<folderInfo id="xilinx.gnu.mb.staticlib.debug.1440680424." name="/" resourcePath="">
 						<toolChain id="xilinx.gnu.mb.static.debug.toolchain.2071244847" name="Xilinx MicroBlaze GNU Toolchain" superClass="xilinx.gnu.mb.static.debug.toolchain">
 							<targetPlatform binaryParser="com.xilinx.sdk.managedbuilder.XELF.mb" id="xilinx.mb.lib.target.gnu.base.debug.1545599149" isAbstract="false" name="Debug Platform" superClass="xilinx.mb.lib.target.gnu.base.debug"/>
-							<builder arguments="VERBOSE=1" buildPath="${workspace_loc:/@PROJECT_NAME@}" command="make" id="xilinx.gnu.mb.toolchain.builder.staticlib.debug.1704991724" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="GNU make" superClass="xilinx.gnu.mb.toolchain.builder.staticlib.debug"/>
+							<builder arguments="VERBOSE=1" buildPath="${workspace_loc:/@PROJECT_NAME@}" command="make" id="xilinx.gnu.mb.toolchain.builder.staticlib.debug.1704991724" incrementalBuildTarget="install" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="GNU make" superClass="xilinx.gnu.mb.toolchain.builder.staticlib.debug"/>
 							<tool id="xilinx.gnu.mb.c.toolchain.assembler.staticlib.debug.1044112168" name="MicroBlaze gcc assembler" superClass="xilinx.gnu.mb.c.toolchain.assembler.staticlib.debug">
 								<inputType id="xilinx.gnu.assembler.input.2025195955" superClass="xilinx.gnu.assembler.input"/>
 							</tool>
