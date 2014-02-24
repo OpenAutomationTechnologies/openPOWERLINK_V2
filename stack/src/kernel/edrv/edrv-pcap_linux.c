@@ -467,7 +467,7 @@ static void packetHandler(u_char* pParam_p, const struct pcap_pkthdr* pHeader_p,
     tEdrvInstance*  pInstance = (tEdrvInstance*) pParam_p;
     tEdrvRxBuffer   rxBuffer;
 
-    if (memcmp (pPktData_p + 6, pInstance->initParam.aMacAddr, 6 ) != 0)
+    if (OPLK_MEMCMP (pPktData_p + 6, pInstance->initParam.aMacAddr, 6 ) != 0)
     {   // filter out self generated traffic
         rxBuffer.bufferInFrame = kEdrvBufferLastInFrame;
         rxBuffer.rxFrameSize = pHeader_p->caplen;
@@ -486,7 +486,7 @@ static void packetHandler(u_char* pParam_p, const struct pcap_pkthdr* pHeader_p,
 
             if (pTxBuffer->pBuffer != NULL)
             {
-                if (memcmp(pPktData_p, pTxBuffer->pBuffer, 6) == 0)
+                if (OPLK_MEMCMP(pPktData_p, pTxBuffer->pBuffer, 6) == 0)
                 {
                     pthread_mutex_lock(&pInstance->mutex);
                     pInstance->pTransmittedTxBufferFirstEntry =
@@ -649,7 +649,7 @@ static INT getLinkStatus(const char* pIfName_p)
 
     fd = socket(AF_INET, SOCK_DGRAM, 0);
 
-    memset(&ethreq, 0, sizeof(ethreq));
+    OPLK_MEMSET(&ethreq, 0, sizeof(ethreq));
 
     /* set the name of the interface we wish to check */
     strncpy(ethreq.ifr_name, pIfName_p, IFNAMSIZ);

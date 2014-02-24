@@ -495,7 +495,7 @@ static void packetHandler(u_char* pParam_p, const struct pcap_pkthdr* pHeader_p,
     tEdrvInstance*  pInstance = (tEdrvInstance*) pParam_p;
     tEdrvRxBuffer   RxBuffer;
 
-    if (memcmp(pPktData_p + 6, pInstance->initParam.aMacAddr, 6 ) != 0)
+    if (OPLK_MEMCMP(pPktData_p + 6, pInstance->initParam.aMacAddr, 6 ) != 0)
     {   // filter out self generated traffic
         RxBuffer.bufferInFrame = kEdrvBufferLastInFrame;
         RxBuffer.rxFrameSize = pHeader_p->caplen;
@@ -513,7 +513,7 @@ static void packetHandler(u_char* pParam_p, const struct pcap_pkthdr* pHeader_p,
 
             if (pTxBuffer->pBuffer != NULL)
             {
-                if (memcmp(pPktData_p, pTxBuffer->pBuffer, 6) == 0)
+                if (OPLK_MEMCMP(pPktData_p, pTxBuffer->pBuffer, 6) == 0)
                 {
                     EnterCriticalSection(&edrInstance_l.criticalSection);
                     pInstance->pTransmittedTxBufferFirstEntry = pInstance->pTransmittedTxBufferFirstEntry->txBufferNumber.pArg;

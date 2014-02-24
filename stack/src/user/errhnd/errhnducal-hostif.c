@@ -184,7 +184,7 @@ tOplkError errhnducal_writeErrorObject(UINT index_p, UINT subIndex_p, UINT32 *pP
 
     offset = (char *)pParam_p - (char *)pLocalObjects_l;
 
-    memcpy(pHostifMem_l + offset, (UINT8*)pParam_p, sizeof(UINT32));
+    OPLK_MEMCPY(pHostifMem_l + offset, (UINT8*)pParam_p, sizeof(UINT32));
 
     return kErrorOk;
 }
@@ -212,7 +212,7 @@ tOplkError errhnducal_readErrorObject(UINT index_p, UINT subIndex_p, UINT32 * pP
 
     offset = (char *)pParam_p - (char *)pLocalObjects_l;
 
-    memcpy((UINT8*)pParam_p, pHostifMem_l + offset, sizeof(UINT32));
+    OPLK_MEMCPY((UINT8*)pParam_p, pHostifMem_l + offset, sizeof(UINT32));
 
     return kErrorOk;
 }
