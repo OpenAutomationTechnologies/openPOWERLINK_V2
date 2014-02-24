@@ -94,9 +94,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // OBD specific defines
 //==============================================================================
 
-// switch this define to TRUE if Epl should compare object range
-// automaticly
-#define CONFIG_OBD_CHECK_OBJECT_RANGE                   FALSE
+// Switch this define to TRUE if the stack should check the object ranges
+#define CONFIG_OBD_CHECK_OBJECT_RANGE                   TRUE
 
 // set this define to TRUE if there are strings or domains in OD, which
 // may be changed in object size and/or object data pointer by its object
