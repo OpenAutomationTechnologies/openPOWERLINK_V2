@@ -292,9 +292,10 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtS
     tIdentResponse*  	pIdentResponse = NULL;
     BOOL                fDoUpdate = FALSE;
 
-    UNUSED_PARAMETER(nmtState_p);
-
-    if ((nodeEvent_p != kNmtNodeEventCheckConf) && (nodeEvent_p != kNmtNodeEventUpdateConf))
+    if ((nodeEvent_p != kNmtNodeEventCheckConf) &&
+        (nodeEvent_p != kNmtNodeEventUpdateConf) &&
+        (nodeEvent_p != kNmtNodeEventFound) &&
+        ((nodeEvent_p != kNmtNodeEventNmtState) || (nmtState_p != kNmtCsNotActive)))
         return ret;
 
     if ((pNodeInfo = allocNodeInfo(nodeId_p)) == NULL)
@@ -316,6 +317,12 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtS
             DEBUG_LVL_CFM_TRACE("SDO Free Error!\n");
             return ret;
         }
+    }
+
+    if ((nodeEvent_p == kNmtNodeEventFound) ||
+        ((nodeEvent_p == kNmtNodeEventNmtState) && (nmtState_p == kNmtCsNotActive)))
+    {   // just close SDO connection in case of IdentResponse or loss of connection
+        return ret;
     }
 
     pNodeInfo->curDataSize = 0;
