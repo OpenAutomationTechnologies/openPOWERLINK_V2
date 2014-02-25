@@ -110,6 +110,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
         // Object 1300h: SDO_SequLayerTimeout_U32 in [ms]
         OBD_BEGIN_INDEX_RAM(0x1300, 0x01, NULL)
-            OBD_SUBINDEX_RAM_VAR(0x1300, 0x00, kObdTypeUInt32, kObdAccSRW, tObdUnsigned32, SDO_SequLayerTimeout_U32, 5000)
+            OBD_SUBINDEX_RAM_VAR_RG(0x1300, 0x00, kObdTypeUInt32, kObdAccSGRW, tObdUnsigned32, SDO_SequLayerTimeout_U32, 5000, 100, 0xFFFFFFFF)
         OBD_END_INDEX(0x1300)
 
