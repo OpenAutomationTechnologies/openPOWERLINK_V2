@@ -44,9 +44,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplk/ami.h>
 #include <kernel/pdok.h>
 #include <kernel/pdokcal.h>
-#include "kernel/eventk.h"
+#include <kernel/eventk.h>
 #include <kernel/dllk.h>
 #include <oplk/benchmark.h>
+#include <oplk/debugstr.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -176,8 +177,8 @@ tOplkError pdok_deAllocChannelMem(void)
     Ret = dllk_deleteNode(&NodeOpParam);
     if (Ret != kErrorOk)
     {
-        DEBUG_LVL_PDO_TRACE("%s() EplDllkDeleteNode failed (%s)\n",
-                             __func__, EplGetOplkErrorStr(Ret));
+        DEBUG_LVL_PDO_TRACE("%s() dllk_deleteNode failed (%s)\n",
+                             __func__, debugstr_getRetValStr(Ret));
         return Ret;
     }
 #endif // NMT_MAX_NODE_ID > 0

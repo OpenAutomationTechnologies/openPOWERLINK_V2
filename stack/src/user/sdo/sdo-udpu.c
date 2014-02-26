@@ -54,6 +54,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <pthread.h>
 #endif
 
+#include <errno.h>
+
 #if defined(CONFIG_INCLUDE_SDO_UDP)
 
 //============================================================================//
@@ -457,7 +459,7 @@ tOplkError sdoudp_sendData(tSdoConHdl sdoConHandle_p, tPlkFrame* pSrcData_p, UIN
                     dataSize_p, 0, (struct sockaddr*)&addr, sizeof(struct sockaddr_in));
     if(error < 0)
     {
-        DEBUG_LVL_SDO_TRACE("sdoudp_sendData: sendto() finished with %i\n", iError);
+        DEBUG_LVL_SDO_TRACE("sdoudp_sendData: sendto() finished with %i\n", error);
         return kErrorSdoUdpSendError;
     }
     return kErrorOk;
