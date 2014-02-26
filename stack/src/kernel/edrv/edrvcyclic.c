@@ -83,6 +83,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 #endif
 
+#if (EDRV_USE_TTTX == TRUE)
+#define EDRV_SHIFT                                      150000ULL
+#endif
+
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
@@ -97,6 +101,10 @@ typedef struct
     tTimerHdl               timerHdlSlot;
     tEdrvCyclicCbSync       pfnSyncCb;
     tEdrvCyclicCbError      pfnErrorCb;
+#if (EDRV_USE_TTTX == TRUE)
+    ULONGLONG               nextCycleTime;
+    BOOL                    fNextCycleValid;
+#endif
 #if CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
     UINT                    sampleCount;
     ULONGLONG               startCycleTimeStamp;
@@ -114,7 +122,9 @@ static tEdrvcyclicInstance edrvcyclicInstance_l;
 // local function prototypes
 //------------------------------------------------------------------------------
 static tOplkError timerHdlCycleCb(tTimerEventArg* pEventArg_p);
+#if (EDRV_USE_TTTX != TRUE)
 static tOplkError timerHdlSlotCb(tTimerEventArg* pEventArg_p);
+#endif
 static tOplkError processTxBufferList(void);
 
 //============================================================================//
@@ -306,9 +316,11 @@ tOplkError edrvcyclic_startCycle(void)
 
     ret = hrestimer_modifyTimer(&edrvcyclicInstance_l.timerHdlCycle,
                                 edrvcyclicInstance_l.cycleTimeUs * 1000ULL,
-                                timerHdlCycleCb,
-                                0L,
-                                TRUE);
+                                timerHdlCycleCb, 0L, TRUE);
+
+#if (EDRV_USE_TTTX == TRUE)
+    edrvcyclicInstance_l.fNextCycleValid = FALSE;
+#endif
 
 #if CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
     edrvcyclicInstance_l.lastSlotTimeStamp = 0;
@@ -334,7 +346,9 @@ tOplkError edrvcyclic_stopCycle(void)
     tOplkError ret = kErrorOk;
 
     ret = hrestimer_deleteTimer(&edrvcyclicInstance_l.timerHdlCycle);
+#if (EDRV_USE_TTTX == FALSE)
     ret = hrestimer_deleteTimer(&edrvcyclicInstance_l.timerHdlSlot);
+#endif
 
 #if CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
     edrvcyclicInstance_l.startCycleTimeStamp = 0;
@@ -557,9 +571,15 @@ Exit:
             ret = edrvcyclicInstance_l.pfnErrorCb(ret, NULL);
         }
     }
+
+#if (EDRV_USE_TTTX == TRUE)
+    edrvcyclicInstance_l.nextCycleTime += (edrvcyclicInstance_l.cycleTimeUs * 1000ULL);
+#endif
+
     return ret;
 }
 
+#if (EDRV_USE_TTTX != TRUE)
 //------------------------------------------------------------------------------
 /**
 \brief  Slot timer callback
@@ -608,6 +628,7 @@ Exit:
     }
     return ret;
 }
+#endif
 
 //------------------------------------------------------------------------------
 /**
@@ -620,8 +641,72 @@ This function processes the cycle Tx buffer list provided by dllk.
 //------------------------------------------------------------------------------
 static tOplkError processTxBufferList(void)
 {
-    tOplkError      ret = kErrorOk;
-    tEdrvTxBuffer*  pTxBuffer;
+    tOplkError          ret = kErrorOk;
+    tEdrvTxBuffer*      pTxBuffer = NULL;
+#if (EDRV_USE_TTTX == TRUE)
+    BOOL                fFirstPacket = TRUE;
+    ULONGLONG           launchTime;
+    ULONGLONG           cycleMin;
+    ULONGLONG           cycleMax;
+    ULONGLONG           currentMacTime = 0;
+#endif
+
+#if (EDRV_USE_TTTX == TRUE)
+
+    edrv_getMacTime(&currentMacTime);
+    if(!edrvcyclicInstance_l.fNextCycleValid)
+    {
+        edrvcyclicInstance_l.nextCycleTime = currentMacTime + EDRV_SHIFT;
+        launchTime = edrvcyclicInstance_l.nextCycleTime;
+        edrvcyclicInstance_l.fNextCycleValid = TRUE;
+    }
+    else
+    {
+        launchTime = edrvcyclicInstance_l.nextCycleTime;
+        if(currentMacTime > (launchTime))
+        {
+            ret = kErrorEdrvTxListNotFinishedYet;
+            goto Exit;
+        }
+    }
+
+    cycleMin = launchTime;
+    cycleMax = launchTime + (edrvcyclicInstance_l.cycleTimeUs * 1000ULL);
+
+    while ((pTxBuffer = edrvcyclicInstance_l.ppTxBufferList[edrvcyclicInstance_l.curTxBufferEntry]) != NULL)
+    {
+        if(pTxBuffer == NULL)
+        {
+            ret = kErrorEdrvBufNotExisting;
+            goto Exit;
+        }
+
+        if(fFirstPacket)
+        {
+            pTxBuffer->launchTime = launchTime ;
+            fFirstPacket = FALSE;
+        }
+        else
+        {
+            launchTime = launchTime + (UINT64)pTxBuffer->timeOffsetNs;
+            pTxBuffer->launchTime = launchTime;
+        }
+
+        if((pTxBuffer->launchTime - cycleMin) >  (cycleMax - cycleMin))
+        {
+            ret = kErrorEdrvTxListNotFinishedYet;
+            goto Exit;
+        }
+
+        ret = edrv_sendTxBuffer(pTxBuffer);
+        if (ret != kErrorOk)
+            goto Exit;
+
+        pTxBuffer->launchTime = 0;
+        edrvcyclicInstance_l.curTxBufferEntry++;
+    }
+
+#else
 
     while ((pTxBuffer = edrvcyclicInstance_l.ppTxBufferList[edrvcyclicInstance_l.curTxBufferEntry]) != NULL)
     {
@@ -646,6 +731,7 @@ static tOplkError processTxBufferList(void)
 
         edrvcyclicInstance_l.curTxBufferEntry++;
     }
+#endif
 
 Exit:
     if (ret != kErrorOk)

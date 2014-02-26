@@ -43,6 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <oplk/oplkinc.h>
 #include <oplk/frame.h>
+#include <oplk/timer.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -87,6 +88,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EDRV_CYCLIC_SAMPLE_NUM                  501
 #endif
 
+#ifndef EDRV_USE_TTTX
+#define EDRV_USE_TTTX                           FALSE
+#endif
+
 //------------------------------------------------------------------------------
 // Type definitions
 //------------------------------------------------------------------------------
@@ -115,6 +120,9 @@ typedef tOplkError (*tEdrvCyclicCbSync)(void);
 
 /// Callback function pointer for Edrv cyclic error
 typedef tOplkError (*tEdrvCyclicCbError)(tOplkError errorCode_p, tEdrvTxBuffer* pTxBuffer_p);
+
+/// Callback function pointer for hres timer callback function
+typedef void (*tHresCallback)(tTimerHdl* pTimerHdl_p);
 
 /**
 \brief Enumeration for Rx buffer transfer state
@@ -151,6 +159,7 @@ struct sEdrvTxBuffer
     UINT                txFrameSize;    ///< Size of Tx frame (without CRC)
     UINT32              timeOffsetNs;   ///< Tx delay to a previously sent frame [ns]
     UINT32              timeOffsetAbs;  ///< Absolute Tx time [ticks]
+    UINT64              launchTime;     ///< Launch time of frame [ns]
     tEdrvTxHandler      pfnTxHandler;   ///< Tx callback function
     tEdrvTxBufferNumber txBufferNumber; ///< Edrv Tx buffer number
     UINT8*              pBuffer;        ///< Pointer to the Tx buffer
@@ -257,6 +266,10 @@ tOplkError edrvcyclic_setNextTxBufferList(tEdrvTxBuffer** ppTxBuffer_p, UINT txB
 tOplkError edrvcyclic_regSyncHandler(tEdrvCyclicCbSync pfnEdrvCyclicCbSync_p);
 tOplkError edrvcyclic_regErrorHandler(tEdrvCyclicCbError pfnEdrvCyclicCbError_p);
 tOplkError edrvcyclic_getDiagnostics(tEdrvCyclicDiagnostics** ppDiagnostics_p);
+
+#if EDRV_USE_TTTX == TRUE
+tOplkError edrv_getMacTime(UINT64* pCurtime_p);
+#endif
 
 #ifdef __cplusplus
 }
