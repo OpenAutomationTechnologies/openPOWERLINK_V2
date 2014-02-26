@@ -627,7 +627,7 @@ tOplkError nmtmnu_sendNmtCommandEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
         goto Exit;
     }
 
-    DEBUG_LVL_NMTMN_TRACE("NMTCmd(%02X->%02X)\n", NmtCommand_p, nodeId_p);
+    DEBUG_LVL_NMTMN_TRACE("NMTCmd(%02X->%02X)\n", nmtCommand_p, nodeId_p);
 
 #if NMTMNU_PRES_CHAINING_MN != FALSE
     if (pNodeInfo->nodeCfg & NMT_NODEASSIGN_PRES_CHAINING)

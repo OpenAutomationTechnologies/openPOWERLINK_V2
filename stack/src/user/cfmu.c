@@ -367,13 +367,13 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtS
         ret = obd_readEntry(0x1F26, nodeId_p, &expConfDate, &obdSize);
         if (ret != kErrorOk)
         {
-            DEBUG_LVL_CFM_TRACE("CN%x Error Reading 0x1F26 returns 0x%X\n", uiNodeId_p, ret);
+            DEBUG_LVL_CFM_TRACE("CN%x Error Reading 0x1F26 returns 0x%X\n", nodeId_p, ret);
         }
         obdSize = sizeof (expConfTime);
         ret = obd_readEntry(0x1F27, nodeId_p, &expConfTime, &obdSize);
         if (ret != kErrorOk)
         {
-            DEBUG_LVL_CFM_TRACE("CN%x Error Reading 0x1F27 returns 0x%X\n", uiNodeId_p, ret);
+            DEBUG_LVL_CFM_TRACE("CN%x Error Reading 0x1F27 returns 0x%X\n", nodeId_p, ret);
         }
         if ((expConfDate != 0) || (expConfTime != 0))
         {   // store configuration in CN at the end of the download,
@@ -388,7 +388,7 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtS
         identu_getIdentResponse(nodeId_p, &pIdentResponse);
         if (pIdentResponse == NULL)
         {
-            DEBUG_LVL_CFM_TRACE("CN%x Ident Response is NULL\n", uiNodeId_p);
+            DEBUG_LVL_CFM_TRACE("CN%x Ident Response is NULL\n", nodeId_p);
             return kErrorInvalidNodeId;
         }
     }
@@ -450,7 +450,7 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtS
         else
         {
             // error occurred
-            DEBUG_LVL_CFM_TRACE("CfmCbEvent(Node): sdoWriteObject() returned 0x%02X\n", Ret);
+            DEBUG_LVL_CFM_TRACE("CfmCbEvent(Node): sdoWriteObject() returned 0x%02X\n", ret);
         }
     }
     return ret;
