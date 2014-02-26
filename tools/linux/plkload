@@ -136,7 +136,9 @@ if [ ! -f  `dirname $0`/$module ] ; then
     exit 1
 fi
 
-module=`basename $module .ko`
+moduleId=`basename $module .ko`
+# strip off last two characters (mn/cn)
+moduleId=${moduleId:0:${#moduleId}-2}
 
 ###############################################################################
 #
@@ -149,7 +151,7 @@ while read line; do
     devname=`echo $line | cut -f2 -d","`
     driver=`echo $line | cut -f3 -d","`
 
-    if echo "$module" | grep -q "$device" ; then
+    if echo "$moduleId" | grep -q "$device" ; then
         while read lspci ; do
                 if [ ! -z "$lspci" ]; then
                     let i=i+1
@@ -194,7 +196,7 @@ echo "Loading POWERLINK module ..."
 
 # invoke insmod with all arguments we got
 # and use a pathname, as insmod doesn't look in . by default
-/sbin/insmod `dirname $0`/$module.ko $*
+/sbin/insmod `dirname $0`/$module $*
 
 if [ "$?" -ne "0" ] ; then
     echo " Loading of POWERLINK module failed"

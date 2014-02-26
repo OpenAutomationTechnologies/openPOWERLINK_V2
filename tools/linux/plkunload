@@ -72,7 +72,9 @@ echo removing module $module
 rm -f /etc/udev/rules.d/50-openPOWERLINK.rules
 udevadm control --reload-rules
 
-module=`basename $module .ko`
+moduleId=`basename $module .ko`
+# strip off last two characters (mn/cn)
+moduleId=${moduleId:0:${#moduleId}-2}
 
 ###############################################################################
 #
@@ -85,7 +87,7 @@ while read line; do
     devname=`echo $line | cut -f2 -d","`
     driver=`echo $line | cut -f3 -d","`
 
-    if echo "$module" | grep -q "$device" ; then
+    if echo "$moduleId" | grep -q "$device" ; then
         while read lspci ; do
                 if [ ! -z "$lspci" ]; then
                     let i=i+1
