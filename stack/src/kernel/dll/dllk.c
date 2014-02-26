@@ -251,6 +251,10 @@ tOplkError dllk_config(tDllConfigParam* pDllConfigParam_p)
         OPLK_MEMCPY (&dllkInstance_g.dllConfigParam, pDllConfigParam_p,
             (pDllConfigParam_p->sizeOfStruct < sizeof(tDllConfigParam) ?
             pDllConfigParam_p->sizeOfStruct : sizeof(tDllConfigParam)));
+#if (EDRV_USE_TTTX == TRUE)
+        // Time triggered sending requires sync on SOC
+        dllkInstance_g.dllConfigParam.syncNodeId = C_ADR_SYNC_ON_SOC;
+#endif
     }
 
     if (nmtState < kNmtMsNotActive)
