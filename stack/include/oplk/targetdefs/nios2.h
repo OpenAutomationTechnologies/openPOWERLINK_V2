@@ -90,8 +90,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                             return kErrorNoResource
 #define OPLK_ATOMIC_EXCHANGE(address, newval, oldval) \
                         target_lock(); \
-                        oldval = IORD(address, 0); \
-                        IOWR(address, 0, newval); \
+                        oldval = IORD_8DIRECT(address, 0); \
+                        IOWR_8DIRECT(address, 0, newval); \
                         target_unlock()
 
 #endif /* _INC_targetdefs_nios2_H_ */
