@@ -52,6 +52,12 @@ UNSET(CFG_MICROBLAZE_REORDER)
 
 UNSET(CFG_HOSTIF_ENABLE)
 
+UNSET(CFG_PROMGEN_FLAGS)
+UNSET(CFG_PROMGEN_TYPE)
+UNSET(CFG_PROMGEN_PREFIX)
+
+UNSET(CFG_PCUBLAZE_PARAMS)
+
 ###############################################################################
 # Include new configuration file
 IF(EXISTS "${PATH_TO_CONFIGURATION}/settings.cmake")

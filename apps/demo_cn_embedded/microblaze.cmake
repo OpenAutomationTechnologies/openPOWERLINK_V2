@@ -34,7 +34,7 @@ IF(CFG_KERNEL_STACK_DIRECTLINK)
     SET(XIL_BSP_DIR ${CFG_HW_LIB_DIR}/bsp${CFG_PCP_NAME}/${CFG_PCP_NAME})
     FILE(COPY ${CFG_HW_LIB_DIR}/bsp${CFG_PCP_NAME}/lscript.ld DESTINATION ${PROJECT_BINARY_DIR})
     SET(LSSCRIPT ${PROJECT_BINARY_DIR}/lscript.ld)
-    SET(DEMO_CPU_NAME ${CFG_PCP_NAME})      # On direct link the CPU name is PCP
+    SET(EXECUTABLE_CPU_NAME ${CFG_PCP_NAME})      # On direct link the CPU name is PCP
 ELSE ()
     MESSAGE(FATAL_ERROR "Only CFG_KERNEL_STACK_DIRECTLINK is currently implemented on Microblaze!")
 ENDIF()

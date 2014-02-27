@@ -71,3 +71,12 @@ MARK_AS_ADVANCED(CFG_MICROBLAZE_BARREL_SHIFT)
 # Microblaze has enabled the byte swapping instruction
 OPTION(CFG_MICROBLAZE_REORDER "Microblaze has enabled the byte swapping instruction" OFF)
 MARK_AS_ADVANCED(CFG_MICROBLAZE_REORDER)
+
+
+#################################################################################
+# F L A S H   I M A G E
+SET(CFG_PROMGEN_FLAGS "-w -p mcs -c FF")
+SET(CFG_PROMGEN_TYPE "-s 8192 -u 0000")
+SET(CFG_PROMGEN_PREFIX "-spi")
+
+SET(CFG_PCUBLAZE_PARAMS "--format mcs --swap off")

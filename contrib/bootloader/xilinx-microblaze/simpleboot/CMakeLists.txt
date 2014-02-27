@@ -1,6 +1,6 @@
 ################################################################################
 #
-# CMake file of CiA 401 CN embedded demo application
+# CMake file of the bootloader simpleboot
 #
 # Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
@@ -28,72 +28,76 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
+CMAKE_MINIMUM_REQUIRED (VERSION 2.8.0)
+
 ################################################################################
 # Setup project and generic options
+PROJECT(simpleboot C)
 
-PROJECT(demo_cn_embedded C)
-MESSAGE(STATUS "Configuring ${PROJECT_NAME}")
+ENABLE_LANGUAGE(ASM-ATT)
+SET(CMAKE_ASM-ATT_FLAGS_INIT "")
 
-IF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    # ensure working support of VS.NET 2010
-    CMAKE_MINIMUM_REQUIRED (VERSION 2.8.4)
-ELSE ()
-    CMAKE_MINIMUM_REQUIRED (VERSION 2.8.0)
-ENDIF()
-
-INCLUDE(../common/cmake/options.cmake)
+MESSAGE(STATUS "CMAKE_SYSTEM_NAME is ${CMAKE_SYSTEM_NAME}")
+MESSAGE(STATUS "CMAKE_SYSTEM_PROCESSOR is ${CMAKE_SYSTEM_PROCESSOR}")
 
 ################################################################################
-# Setup project files and definitions
+# Set variables
+STRING(TOLOWER "${CMAKE_SYSTEM_NAME}" SYSTEM_NAME_DIR)
+STRING(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" SYSTEM_PROCESSOR_DIR)
 
-SET(OBJDICT CiA401_CN)              # Set object dictionary to use
-FIND_OPLK_LIBRARY("cn")
+SET(OPLK_BASE_DIR ${PROJECT_SOURCE_DIR}/../../../../)
+SET(TOOLS_DIR ${OPLK_BASE_DIR}/tools)
 
-# Set generic sources and include directories for this demo
-SET(DEMO_SOURCES
-    ${DEMO_SOURCE_DIR}/main.c
-    ${DEMO_SOURCE_DIR}/app.c
-    ${DEMO_SOURCE_DIR}/event.c
-    ${COMMON_SOURCE_DIR}/lcd/lcd.c
-    )
+SET(CMAKE_CONFIGURATION_TYPES "None;Debug;Release;RelWithDebInfo;MinSizeRel"
+    CACHE INTERNAL "Available Build Configurations" FORCE)
 
-INCLUDE_DIRECTORIES(
-                    ${DEMO_SOURCE_DIR}
-                    ${COMMON_SOURCE_DIR}/lcd
+IF(NOT CMAKE_BUILD_TYPE)
+    SET(CMAKE_BUILD_TYPE Release CACHE STRING
+        "Choose the type of build"
+        FORCE)
+    SET_PROPERTY(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "None;Debug;Release;RelWithDebInfo;MinSizeRel")
+ENDIF()
+
+################################################################################
+# Set sources of the bootloader
+SET(BOOT_C_SRCS
+    ${PROJECT_SOURCE_DIR}/src/main.c
+    ${PROJECT_SOURCE_DIR}/src/spi.c
+    ${PROJECT_SOURCE_DIR}/src/util.c
+   )
+
+SET(BOOT_ASM_SRCS
+    ${PROJECT_SOURCE_DIR}/src/crt3.s
+    ${PROJECT_SOURCE_DIR}/src/crtinit.s
+    ${PROJECT_SOURCE_DIR}/src/init.s
+   )
+
+################################################################################
+# Set includes of the bootloader
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src
                    )
 
-################################################################################
-# Setup the architecture specific definitions
-
-IF(CMAKE_SYSTEM_NAME STREQUAL "Generic" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "Microblaze")
-    include(microblaze.cmake)
+IF((CMAKE_SYSTEM_NAME STREQUAL "Generic") AND (CMAKE_SYSTEM_PROCESSOR STREQUAL "Microblaze"))
+    INCLUDE(configure-microblaze.cmake)
 ELSE()
-    MESSAGE(FATAL_ERROR "System ${CMAKE_SYSTEM_NAME} with processor ${CMAKE_SYSTEM_PROCESSOR} is not supported!")
+    MESSAGE(FATAL_ERROR "unecpected: simpleboot only ported to target CMAKE_SYSTEM_PROCESSOR = Microblaze!")
 ENDIF()
 
-SET(EXECUTABLE_NAME "${PROJECT_NAME}${ARCH_EXE_SUFFIX}")
-
-################################################################################
-# Setup compile definitions depending on configuration
-
-IF(CFG_KERNEL_STACK_DIRECTLINK)
-    ADD_DEFINITIONS(-DCONFIG_KERNELSTACK_DIRECTLINK)
-ENDIF(CFG_KERNEL_STACK_DIRECTLINK)
+SET(EXECUTABLE_NAME ${ARCH_EXECUTABLE_NAME})
 
 ################################################################################
 # Set the executable
-ADD_EXECUTABLE(${EXECUTABLE_NAME} ${DEMO_SOURCES} ${DEMO_ARCH_SOURCES})
-SET_PROPERTY(TARGET ${EXECUTABLE_NAME}
-             PROPERTY COMPILE_DEFINITIONS_DEBUG DEBUG;DEF_DEBUG_LVL=${CFG_DEBUG_LVL})
+ADD_EXECUTABLE(${EXECUTABLE_NAME} ${BOOT_C_SRCS} ${BOOT_ASM_SRCS})
 
-SET_PROPERTY(TARGET ${EXECUTABLE_NAME}
-             PROPERTY LINK_FLAGS ${ARCH_LINKER_FLAGS})
+# Set flags to source files
+SET(CFLAGS "-Wall -Wextra -pedantic -std=c99")
 
-################################################################################
-# Libraries to link
+SET_SOURCE_FILES_PROPERTIES(${BOOT_C_SRCS} PROPERTIES COMPILE_FLAGS "${CFLAGS} ${ARCH_CFLAGS}")
+SET_SOURCE_FILES_PROPERTIES(${BOOT_ASM_SRCS} PROPERTIES COMPILE_FLAGS ${ARCH_ASMFLAGS})
 
-TARGET_LINK_LIBRARIES(${EXECUTABLE_NAME} optimized ${OPLKLIB} debug ${OPLKLIB_DEBUG})
-TARGET_LINK_LIBRARIES(${EXECUTABLE_NAME} ${ARCH_LIBRARIES})
+SET_TARGET_PROPERTIES(${EXECUTABLE_NAME} PROPERTIES LINK_FLAGS ${ARCH_LINKERFLAGS})
+
+TARGET_LINK_LIBRARIES(${EXECUTABLE_NAME} ${ARCH_LIBS})
 
 ################################################################################
 # Post Build targets
@@ -103,8 +107,8 @@ ENDIF()
 
 ################################################################################
 # Add additional clean files
-SET_DIRECTORY_PROPERTIES( PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${ADD_CLEAN_FILES}" )
+SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${ADD_CLEAN_FILES}")
 
 ################################################################################
 # Installation rules
-INSTALL(TARGETS ${EXECUTABLE_NAME} RUNTIME DESTINATION ${CFG_DEMO_BOARD_NAME}/${CFG_DEMO_NAME})
+INSTALL(TARGETS ${EXECUTABLE_NAME} RUNTIME DESTINATION ${ARCH_INSTALL_POSTFIX})

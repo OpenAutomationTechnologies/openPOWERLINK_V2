@@ -43,16 +43,26 @@ SET(XIL_XPS_DEMO_DIR ${CFG_DEMO_DIR}/xps)
 ##############################################################################
 # Demo post build action
 ADD_CUSTOM_COMMAND(
-    TARGET ${DEMO_NAME}
+    TARGET ${EXECUTABLE_NAME}
     POST_BUILD
-    COMMAND mb-size ${DEMO_NAME} | tee "${DEMO_NAME}.size"
-    COMMAND elfcheck ${DEMO_NAME} -hw ${XIL_HW_SPEC}/system.xml -pe ${DEMO_CPU_NAME} | tee "${DEMO_NAME}.elfcheck"
-    COMMAND data2mem -bd ${DEMO_NAME} -d -o m ${DEMO_NAME}.mem
+    COMMAND mb-size ${EXECUTABLE_NAME} | tee "${PROJECT_NAME}.size"
+    COMMAND elfcheck ${EXECUTABLE_NAME} -hw ${XIL_HW_SPEC}/system.xml -pe ${EXECUTABLE_CPU_NAME} | tee "${PROJECT_NAME}.elfcheck"
+    COMMAND data2mem -bd ${EXECUTABLE_NAME} -d -o m ${PROJECT_NAME}.mem
 )
 
 SET_DIRECTORY_PROPERTIES(PROPERTIES
-                         ADDITIONAL_MAKE_CLEAN_FILES "${DEMO_NAME}.elf;${DEMO_NAME}.size;${DEMO_NAME}.elfcheck;${DEMO_NAME}.mem;${DEMO_NAME}.tmp;${DEMO_NAME}.map"
+                         ADDITIONAL_MAKE_CLEAN_FILES "${EXECUTABLE_NAME};${PROJECT_NAME}.size;${PROJECT_NAME}.elfcheck;${PROJECT_NAME}.mem;${PROJECT_NAME}.map"
                         )
+################################################################################
+# Set list of additional make clean files
+SET(ADD_CLEAN_FILES ${ADD_CLEAN_FILES}
+                    ${EXECUTABLE_NAME}
+                    ${PROJECT_NAME}.size
+                    ${PROJECT_NAME}.elfcheck
+                    ${PROJECT_NAME}.mem
+                    ${PROJECT_NAME}.tmp
+                    ${PROJECT_NAME}.map
+   )
 
 ##############################################################################
 # Add targets for the download of the bitstream
@@ -75,13 +85,17 @@ ENDIF()
 IF(NOT ${XIL_MB_XMD} STREQUAL "XIL_MB_XMD-NOTFOUND")
     ADD_CUSTOM_TARGET(
             download-elf
-            COMMAND ${XIL_MB_XMD} -hw ${XIL_HW_SPEC}/system.xml -tcl ${XIL_TOOLS_DIR}/xmd-downloadelf.tcl ${DEMO_NAME} ${XIL_VERIFY_ELF}
+            COMMAND ${XIL_MB_XMD} -hw ${XIL_HW_SPEC}/system.xml -tcl ${XIL_TOOLS_DIR}/xmd-downloadelf.tcl ${EXECUTABLE_NAME} ${XIL_VERIFY_ELF}
     )
 ENDIF()
 
 ################################################################################
 # Set architecture specific installation files
-INSTALL(FILES ${XIL_TOOLS_DIR}/xmd-downloadelf.tcl ${XIL_HW_SPEC}/download.bit ${XIL_HW_SPEC}/download.cmd ${XIL_HW_SPEC}/system.xml
+INSTALL(FILES ${XIL_TOOLS_DIR}/xmd-downloadelf.tcl
+              ${XIL_HW_SPEC}/download.bit
+              ${XIL_HW_SPEC}/download.cmd
+              ${XIL_HW_SPEC}/system.xml
+              ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.mem
         DESTINATION ${ARCH_INSTALL_POSTFIX}
        )
 INSTALL(PROGRAMS ${XIL_TOOLS_DIR}/elfdownload.make
