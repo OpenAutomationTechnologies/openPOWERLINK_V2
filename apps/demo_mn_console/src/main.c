@@ -57,10 +57,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define CYCLE_LEN   UINT_MAX
-#define NODEID      0xF0                //=> MN
-#define IP_ADDR     0xc0a86401          // 192.168.100.1
-#define SUBNET_MASK 0xFFFFFF00          // 255.255.255.0
+#define CYCLE_LEN         UINT_MAX
+#define NODEID            0xF0                //=> MN
+#define IP_ADDR           0xc0a86401          // 192.168.100.1
+#define SUBNET_MASK       0xFFFFFF00          // 255.255.255.0
+#define DEFAULT_GATEWAY   0xC0A864FE          // 192.168.100.C_ADR_RT1_DEF_NODE_ID
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -228,7 +229,7 @@ static tOplkError initPowerlink(UINT32 cycleLen_p, char *pszCdcFileName_p,
     initParam.serialNumber            = UINT_MAX;         // NMT_IdentityObject_REC.SerialNo_U32
 
     initParam.subnetMask              = SUBNET_MASK;
-    initParam.defaultGateway          = 0;
+    initParam.defaultGateway          = DEFAULT_GATEWAY;
     sprintf((char*)initParam.sHostname, "%02x-%08x", initParam.nodeId, initParam.vendorId);
     initParam.syncNodeId              = C_ADR_SYNC_ON_SOA;
     initParam.fSyncOnPrcNode            = FALSE;

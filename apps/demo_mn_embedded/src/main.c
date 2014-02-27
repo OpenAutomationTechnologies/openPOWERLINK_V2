@@ -61,6 +61,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define NODEID                  0xF0                //=> MN
 #define IP_ADDR                 0xc0a86401          // 192.168.100.1
 #define SUBNET_MASK             0xFFFFFF00          // 255.255.255.0
+#define DEFAULT_GATEWAY         0xC0A864FE          // 192.168.100.C_ADR_RT1_DEF_NODE_ID
 #define MAC_ADDR                0x00, 0x12, 0x34, 0x56, 0x78, NODEID
 #define CHECK_KERNEL_TIMEOUT    100000
 
@@ -229,7 +230,7 @@ static tOplkError initPowerlink(tInstance* pInstance_p)
     initParam.serialNumber            = -1;                     // NMT_IdentityObject_REC.SerialNo_U32
 
     initParam.subnetMask              = SUBNET_MASK;
-    initParam.defaultGateway          = 0;
+    initParam.defaultGateway          = DEFAULT_GATEWAY;
     sprintf((char*)initParam.sHostname, "%02x-%08x", initParam.nodeId, initParam.vendorId);
     initParam.syncNodeId              = C_ADR_SYNC_ON_SOC;
     initParam.fSyncOnPrcNode            = FALSE;

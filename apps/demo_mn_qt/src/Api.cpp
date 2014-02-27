@@ -85,10 +85,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define NODEID      0xF0                // MN
-#define IP_ADDR     0xc0a86401          // 192.168.100.1
-#define SUBNET_MASK 0xFFFFFF00          // 255.255.255.0
-#define IF_ETH      PLK_VETH_NAME
+#define NODEID            0xF0                // MN
+#define IP_ADDR           0xc0a86401          // 192.168.100.1
+#define SUBNET_MASK       0xFFFFFF00          // 255.255.255.0
+#define DEFAULT_GATEWAY   0xC0A864FE          // 192.168.100.C_ADR_RT1_DEF_NODE_ID
+#define IF_ETH            PLK_VETH_NAME
 
 #define CYCLE_LEN   5000                /* org val 5000 */
 
@@ -204,7 +205,7 @@ Api::Api(MainWindow *pMainWindow_p, UINT nodeId_p, QString devName_p)
     initParam.serialNumber = UINT_MAX;        // NMT_IdentityObject_REC.SerialNo_U32
 
     initParam.subnetMask = SUBNET_MASK;
-    initParam.defaultGateway = 0;
+    initParam.defaultGateway = DEFAULT_GATEWAY;
     sprintf((char*)initParam.sHostname, "%02x-%08x", initParam.nodeId, initParam.vendorId);
     initParam.syncNodeId = C_ADR_SYNC_ON_SOA;
     initParam.fSyncOnPrcNode = FALSE;
