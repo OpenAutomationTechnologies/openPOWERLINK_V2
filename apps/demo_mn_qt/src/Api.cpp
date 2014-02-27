@@ -88,7 +88,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define NODEID      0xF0                // MN
 #define IP_ADDR     0xc0a86401          // 192.168.100.1
 #define SUBNET_MASK 0xFFFFFF00          // 255.255.255.0
-#define HOSTNAME    "openPOWERLINK Stack    "
 #define IF_ETH      PLK_VETH_NAME
 
 #define CYCLE_LEN   5000                /* org val 5000 */
@@ -125,7 +124,6 @@ Constructs a POWERLINK Api object.
 //------------------------------------------------------------------------------
 Api::Api(MainWindow *pMainWindow_p, UINT nodeId_p, QString devName_p)
 {
-    const char*         sHostname = HOSTNAME;
     tOplkError          ret;
     State*              pState;
     Output*             pOutput;
@@ -207,7 +205,7 @@ Api::Api(MainWindow *pMainWindow_p, UINT nodeId_p, QString devName_p)
 
     initParam.subnetMask = SUBNET_MASK;
     initParam.defaultGateway = 0;
-    OPLK_MEMCPY(initParam.sHostname, sHostname, sizeof(initParam.sHostname));
+    sprintf((char*)initParam.sHostname, "%02x-%08x", initParam.nodeId, initParam.vendorId);
     initParam.syncNodeId = C_ADR_SYNC_ON_SOA;
     initParam.fSyncOnPrcNode = FALSE;
 
