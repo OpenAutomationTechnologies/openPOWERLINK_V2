@@ -41,7 +41,8 @@ VERIFY_ELF=false
 XMD=xmd
 XMD_SCRIPT=xmd-downloadelf.tcl
 IMPACT=impact
-IMPACT_SCRIPT=download.cmd
+IMPACT_DOW_SCRIPT=download.cmd
+IMPACT_PROG_SCRIPT=program-prom.cmd
 
 ELF_NAME= $(wildcard *.elf)
 
@@ -65,12 +66,23 @@ header:
 all: download-bits download-elf
 
 ####################################################
-# D O W N L O A D
+# D O W N L O A D   E L F
 ####################################################
 .PHONY: download-bits
 download-bits:
-	$(IMPACT) -batch $(IMPACT_SCRIPT)
+	$(IMPACT) -batch $(IMPACT_DOW_SCRIPT)
 
 .PHONY: download-elf
 download-elf:
 	$(XMD) -hw system.xml -tcl $(XMD_SCRIPT) $(ELF_NAME) $(VERIFY_ELF)
+
+####################################################
+# P R O G   P R O M
+####################################################
+ifeq ($(ELF_NAME),simpleboot.elf)
+
+.PHONY: prog-flash
+prog-flash:
+	$(IMPACT) -batch $(IMPACT_PROG_SCRIPT)
+
+endif
