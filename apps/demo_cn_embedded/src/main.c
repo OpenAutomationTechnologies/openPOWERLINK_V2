@@ -57,11 +57,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define CYCLE_LEN   1000        ///< lenght of the cycle [us]
-#define NODEID      1           ///< This node id is overwritten when the dip switches are != 0!
-#define IP_ADDR     0xc0a86401  ///< 192.168.100.1
-#define SUBNET_MASK 0xFFFFFF00  ///< 255.255.255.0
-#define MAC_ADDR    0x00, 0x12, 0x34, 0x56, 0x78, NODEID
+#define CYCLE_LEN         1000        ///< lenght of the cycle [us]
+#define NODEID            1           ///< This node id is overwritten when the dip switches are != 0!
+#define IP_ADDR           0xc0a86401  ///< 192.168.100.1
+#define SUBNET_MASK       0xFFFFFF00  ///< 255.255.255.0
+#define DEFAULT_GATEWAY   0xC0A864FE          // 192.168.100.C_ADR_RT1_DEF_NODE_ID
+#define MAC_ADDR          0x00, 0x12, 0x34, 0x56, 0x78, NODEID
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -222,7 +223,7 @@ static tOplkError initPowerlink(tInstance* pInstance_p)
     initParam.applicationSwDate       = 0;
     initParam.applicationSwTime       = 0;
     initParam.subnetMask              = SUBNET_MASK;
-    initParam.defaultGateway          = 0;
+    initParam.defaultGateway          = DEFAULT_GATEWAY;
     sprintf((char*)initParam.sHostname, "%02x-%08x", initParam.nodeId, initParam.vendorId);
     initParam.syncNodeId              = C_ADR_SYNC_ON_SOC;
     initParam.fSyncOnPrcNode            = FALSE;
