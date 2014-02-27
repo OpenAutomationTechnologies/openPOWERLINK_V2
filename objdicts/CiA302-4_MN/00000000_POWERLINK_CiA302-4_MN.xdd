@@ -9635,7 +9635,7 @@
             <SubObject subIndex="0E" name="SyncMNDelaySecond_U32" objectType="7" dataType="0007" accessType="ro" PDOmapping="no" defaultValue="0"/>
           </Object>
           <Object index="1F99" name="NMT_CNBasicEthernetTimeout_U32" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="5000000"/>
-          <Object index="1F9A" name="NMT_HostName_VSTR" objectType="7" dataType="0009" accessType="ro" PDOmapping="no"/>
+          <Object index="1F9A" name="NMT_HostName_VSTR" objectType="7" dataType="0009" accessType="rw" PDOmapping="no"/>
           <Object index="1F9B" name="NMT_MultiplCycleAssign_AU8" objectType="8" dataType="0005">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="254"/>
             <SubObject subIndex="01" name="CycleNo" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>

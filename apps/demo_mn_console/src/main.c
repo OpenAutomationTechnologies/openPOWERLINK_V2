@@ -61,7 +61,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define NODEID      0xF0                //=> MN
 #define IP_ADDR     0xc0a86401          // 192.168.100.1
 #define SUBNET_MASK 0xFFFFFF00          // 255.255.255.0
-#define HOSTNAME    "openPOWERLINK Stack    "
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -187,7 +186,6 @@ static tOplkError initPowerlink(UINT32 cycleLen_p, char *pszCdcFileName_p,
 {
     tOplkError                  ret = kErrorOk;
     static tOplkApiInitParam     initParam;
-    char*                       sHostname = HOSTNAME;
     static char                 devName[128];
 
     printf ("Initializing openPOWERLINK stack...\n");
@@ -231,7 +229,7 @@ static tOplkError initPowerlink(UINT32 cycleLen_p, char *pszCdcFileName_p,
 
     initParam.subnetMask              = SUBNET_MASK;
     initParam.defaultGateway          = 0;
-    OPLK_MEMCPY(initParam.sHostname, sHostname, sizeof(initParam.sHostname));
+    sprintf((char*)initParam.sHostname, "%02x-%08x", initParam.nodeId, initParam.vendorId);
     initParam.syncNodeId              = C_ADR_SYNC_ON_SOA;
     initParam.fSyncOnPrcNode            = FALSE;
 

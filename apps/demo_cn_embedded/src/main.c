@@ -223,6 +223,7 @@ static tOplkError initPowerlink(tInstance* pInstance_p)
     initParam.applicationSwTime       = 0;
     initParam.subnetMask              = SUBNET_MASK;
     initParam.defaultGateway          = 0;
+    sprintf((char*)initParam.sHostname, "%02x-%08x", initParam.nodeId, initParam.vendorId);
     initParam.syncNodeId              = C_ADR_SYNC_ON_SOC;
     initParam.fSyncOnPrcNode            = FALSE;
 

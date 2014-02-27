@@ -189,9 +189,9 @@ area from 0x1B00 - 0x1FFF.
         OBD_END_INDEX(0x1F99)
 
 #if defined(CONFIG_INCLUDE_VETH)
-        // Object 1F9Ah: NMT_HostName_VS
+        // Object 1F9Ah: NMT_HostName_VSTR
         OBD_BEGIN_INDEX_RAM(0x1F9A, 0x01, NULL)
-           OBD_SUBINDEX_RAM_VSTRING(0x1F9A, 0x00, kObdAccR, host_name, 33, "")
+           OBD_SUBINDEX_RAM_VSTRING(0x1F9A, 0x00, kObdAccSRW, NMT_HostName_VSTR, 34, "")
         OBD_END_INDEX(0x1F9A)
 #endif
 
