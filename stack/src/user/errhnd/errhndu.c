@@ -214,8 +214,13 @@ tOplkError errhndu_cbObdAccess(tObdCbParam MEM* pParam_p)
 {
     switch (pParam_p->obdEvent)
     {
-        case kObdEvPostWrite:
         case kObdEvPostDefault:
+            if(pParam_p->subIndex == SUBIDX_DLL_ERROR_CUM_CNT)
+            {
+                break;
+            }
+            // fall through!
+        case kObdEvPostWrite:
             switch (pParam_p->subIndex)
             {
                 // only cumulative counter and threshold will be written by
@@ -277,8 +282,13 @@ tOplkError errhndu_mnCnLossPresCbObdAccess(tObdCbParam MEM* pParam_p)
 
     switch (pParam_p->obdEvent)
     {
-        case kObdEvPostWrite:
         case kObdEvPostDefault:
+            if(pParam_p->index == OID_DLL_MNCN_LOSSPRES_CUMCNT_AU32)
+            {
+                break;
+            }
+            // fall through!
+        case kObdEvPostWrite:
             switch (pParam_p->index)
             {
                 // only cumulative counter and threshold will be written by
