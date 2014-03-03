@@ -164,7 +164,7 @@ typedef struct
     UINT32              asndMaxLatency;             ///< 0x1F98.6: ASndMaxLatency_U32 in [ns], only required for IdentRes
     UINT                multipleCycleCnt;           ///< 0x1F98.7: MultiplCycleCnt_U8, required for error detection
     UINT                asyncMtu;                   ///< 0x1F98.8: AsyncMTU_U16, required to set up max frame size
-    // $$$ 0x1F98.9: Prescaler_U16
+    UINT                prescaler;                  ///< 0x1F98.9: Prescaler_U16, configures the toggle rate of the SoC PS flag
     // $$$ Multiplexed Slot
     UINT32              lossOfFrameTolerance;       ///< 0x1C14: DLL_LossOfFrameTolerance_U32 in [ns]
     UINT32              waitSocPreq;                ///< 0x1F8A.1: WaitSoCPReq_U32 in [ns]
