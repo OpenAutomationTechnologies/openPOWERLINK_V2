@@ -119,11 +119,14 @@ tCircBufError circbuf_free(tCircBufInstance* pInstance_p);
 tCircBufError circbuf_connect(UINT8 id_p, tCircBufInstance** ppInstance_p);
 tCircBufError circbuf_disconnect(tCircBufInstance* pInstance_p);
 void          circbuf_reset(tCircBufInstance* pInstance_p);
-tCircBufError circbuf_writeData(tCircBufInstance* pInstance_p, const void* pData_p, size_t size_p);
+tCircBufError circbuf_writeData(tCircBufInstance* pInstance_p, const void* pData_p, size_t size_p)
+                                SECTION_CIRCBUF_WRITE_DATA;
 tCircBufError circbuf_writeMultipleData(tCircBufInstance* pInstance_p, const void* pData_p, size_t size_p,
-                                        const void* pData2_p, size_t size2_p);
+                                        const void* pData2_p, size_t size2_p)
+                                        SECTION_CIRCBUF_WRITE_MULT_DATA;
 tCircBufError circbuf_readData(tCircBufInstance* pInstance_p, void* pData_p,
-                               size_t size_p, size_t* pDataBlockSize_p);
+                               size_t size_p, size_t* pDataBlockSize_p)
+                               SECTION_CIRCBUF_READ_DATA;
 UINT32        circbuf_getDataCount(tCircBufInstance* pInstance_p);
 tCircBufError circBuf_setSignaling(tCircBufInstance* pInstance_p, VOIDFUNCPTR pfnSigCb_p);
 

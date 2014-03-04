@@ -66,7 +66,7 @@ void       target_msleep(UINT32 milliSeconds_p);
 tOplkError target_setIpAdrs(char* ifName_p, UINT32 ipAddress_p, UINT32 subnetMask_p, UINT16 mtu_p);
 tOplkError target_setDefaultGateway(UINT32 defaultGateway_p);
 ULONGLONG  target_getCurrentTimestamp(void);
-void       target_enableGlobalInterrupt(BYTE fEnable_p);
+void       target_enableGlobalInterrupt(BYTE fEnable_p) SECTION_TARGET_GLOBAL_INT;
 UINT32     target_getTickCount(void);
 
 #ifdef __cplusplus

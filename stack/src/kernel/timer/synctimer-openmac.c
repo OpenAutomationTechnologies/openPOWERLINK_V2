@@ -152,8 +152,8 @@ static void drvCalcExtSyncIrqValue(void);
 
 static void drvInterruptHandler(void* pArg_p);
 
-static UINT drvFindShortestTimer(void);
-static void drvConfigureShortestTimer(void);
+static UINT drvFindShortestTimer(void) SECTION_SYNCTIMER_FINDTIMER;
+static void drvConfigureShortestTimer(void) SECTION_SYNCTIMER_CONFTIMER;
 static void ctrlAddActualTimeDiff(UINT32 actualTimeDiff_p);
 static void ctrlCalcMeanTimeDiff(void);
 static void ctrlUpdateRejectThreshold(void);

@@ -47,6 +47,21 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 // By default, no function placement in special memory
+    #ifndef SECTION_CIRCBUF_WRITE_DATA
+        #define SECTION_CIRCBUF_WRITE_DATA
+    #endif
+    #ifndef SECTION_CIRCBUF_WRITE_MULT_DATA
+        #define SECTION_CIRCBUF_WRITE_MULT_DATA
+    #endif
+    #ifndef SECTION_CIRCBUF_READ_DATA
+        #define SECTION_CIRCBUF_READ_DATA
+    #endif
+    #ifndef SECTION_CIRCBUF_LOCK
+        #define SECTION_CIRCBUF_LOCK
+    #endif
+    #ifndef SECTION_CIRCBUF_UNLOCK
+        #define SECTION_CIRCBUF_UNLOCK
+    #endif
     #ifndef SECTION_DLLK_FRAME_RCVD_CB
         #define SECTION_DLLK_FRAME_RCVD_CB
     #endif
@@ -77,17 +92,20 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     #ifndef SECTION_EVENTKCAL_POST
         #define SECTION_EVENTKCAL_POST
     #endif
-    #ifndef SECTION_EVENTKCAL_HOSTIF_POST
-        #define SECTION_EVENTKCAL_HOSTIF_POST
-    #endif
-    #ifndef SECTION_EVENTKCAL_HOSTIF_PROCESS
-        #define SECTION_EVENTKCAL_HOSTIF_PROCESS
+    #ifndef SECTION_EVENTKCAL_CIRCBUF_POST
+        #define SECTION_EVENTKCAL_CIRCBUF_POST
     #endif
     #ifndef SECTION_OMETHLIB_RX_IRQ_HDL
         #define SECTION_OMETHLIB_RX_IRQ_HDL
     #endif
     #ifndef SECTION_OMETHLIB_TX_IRQ_HDL
         #define SECTION_OMETHLIB_TX_IRQ_HDL
+    #endif
+    #ifndef SECTION_OMETHLIB_RXTX_IRQ_MUX
+        #define SECTION_OMETHLIB_RXTX_IRQ_MUX
+    #endif
+    #ifndef SECTION_OMETHLIB_TX_TIME
+        #define SECTION_OMETHLIB_TX_TIME
     #endif
     #ifndef SECTION_EDRVOPENMAC_RX_HOOK
         #define SECTION_EDRVOPENMAC_RX_HOOK
@@ -104,6 +122,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     #ifndef SECTION_HRTIMER_MODTIMER
         #define SECTION_HRTIMER_MODTIMER
     #endif
+    #ifndef SECTION_SYNCTIMER_FINDTIMER
+        #define SECTION_SYNCTIMER_FINDTIMER
+    #endif
+    #ifndef SECTION_SYNCTIMER_CONFTIMER
+        #define SECTION_SYNCTIMER_CONFTIMER
+    #endif
     #ifndef SECTION_DLLK_PROCESS
         #define SECTION_DLLK_PROCESS
     #endif
@@ -113,8 +137,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     #ifndef SECTION_DLLK_PROCESS_SYNC
         #define SECTION_DLLK_PROCESS_SYNC
     #endif
+    #ifndef SECTION_DLLK_CHANGE_STATE
+        #define SECTION_DLLK_CHANGE_STATE
+    #endif
+    #ifndef SECTION_DLLKCAL_ASYNCRX
+        #define SECTION_DLLKCAL_ASYNCRX
+    #endif
     #ifndef SECTION_DLLKCAL_GETSOAREQ
         #define SECTION_DLLKCAL_GETSOAREQ
+    #endif
+    #ifndef SECTION_DLLKCAL_GETPENREQ
+        #define SECTION_DLLKCAL_GETPENREQ
     #endif
     #ifndef SECTION_ERRHNDK_DECRCNTERS
         #define SECTION_ERRHNDK_DECRCNTERS
@@ -125,8 +158,32 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     #ifndef SECTION_ERRHNDKCAL_SETMNCNT
         #define SECTION_ERRHNDKCAL_SETMNCNT
     #endif
-    #ifndef SECTION_MAIN_APP_CB_SYNC
-        #define SECTION_MAIN_APP_CB_SYNC
+    #ifndef SECTION_DLLK_FRAME_UPDATE_SOA
+        #define SECTION_DLLK_FRAME_UPDATE_SOA
+    #endif
+    #ifndef SECTION_DLLK_FRAME_ASYNC_NRX
+        #define SECTION_DLLK_FRAME_ASYNC_NRX
+    #endif
+    #ifndef SECTION_DLLK_PROCESS_TX_SOA
+        #define SECTION_DLLK_PROCESS_TX_SOA
+    #endif
+    #ifndef SECTION_DLLK_PROCESS_TX_SOC
+        #define SECTION_DLLK_PROCESS_TX_SOC
+    #endif
+    #ifndef SECTION_DLLK_PROCESS_TX_NMT
+        #define SECTION_DLLK_PROCESS_TX_NMT
+    #endif
+    #ifndef SECTION_DLLK_PROCESS_TX_NPLK
+        #define SECTION_DLLK_PROCESS_TX_NPLK
+    #endif
+    #ifndef SECTION_EDRVCYC_SET_NEXT_TX
+        #define SECTION_EDRVCYC_SET_NEXT_TX
+    #endif
+    #ifndef SECTION_DLLK_MN_SYNC_CB
+        #define SECTION_DLLK_MN_SYNC_CB
+    #endif
+    #ifndef SECTION_TARGET_GLOBAL_INT
+        #define SECTION_TARGET_GLOBAL_INT
     #endif
 
 //------------------------------------------------------------------------------

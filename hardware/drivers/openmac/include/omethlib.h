@@ -1099,7 +1099,7 @@ unsigned long        omethTransmitTime
  OMETH_BUF_FREE_FCT_ARG    *pFct,        /* function ptr to sent-ack-function            */
  void                    *arg,        /* argument which will be passed to free function */
  unsigned long            time        /* timestamp                                    */
-);
+) SECTION_OMETHLIB_TX_TIME;
 
 /*****************************************************************************
 *
@@ -1237,7 +1237,7 @@ ometh_stat_typ    *omethStatistics
 void            omethRxIrqHandler
 (
  OMETH_H        hEth        /* handle of ethernet driver, see omethCreate() */
-);
+) SECTION_OMETHLIB_RX_IRQ_HDL;
 
 /*****************************************************************************
 *
@@ -1257,7 +1257,7 @@ void            omethRxIrqHandler
 void            omethTxIrqHandler
 (
  OMETH_H        hEth        /* handle of ethernet driver, see omethCreate() */
-);
+) SECTION_OMETHLIB_TX_IRQ_HDL;
 
 /*****************************************************************************
 *
@@ -1294,7 +1294,7 @@ void            omethTxIrqHandlerMux
 void            omethRxTxIrqHandlerMux
 (
  void
-);
+) SECTION_OMETHLIB_RXTX_IRQ_MUX;
 
 /*****************************************************************************
 *

@@ -77,6 +77,11 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     #define OMETH_UNCACHED_MALLOC(size)        alt_uncached_malloc(size)
     #define OMETH_UNCACHED_FREE(ptr)           alt_uncached_free(ptr)
 
+    //---------------------------------------------------------
+    // include section header file for special functions in
+    // tightly-coupled memory
+    #include <oplk/section-nios2.h>
+
 #elif defined(__MICROBLAZE__)
 
 #include <xparameters.h>
@@ -96,6 +101,11 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     #define OMETH_UNCACHED_MALLOC(size)     malloc(size)
     #define OMETH_UNCACHED_FREE(ptr)        free(ptr)
 
+    //---------------------------------------------------------
+    // include section header file for special functions in
+    // local memory
+    #include <oplk/section-microblaze.h>
+
 #else
     #error "Host CPU is unknown, set OMETH_HW_MODE and OMETH_MAKE_NONCACHABLE!"
     #define OMETH_HW_MODE                    0
@@ -103,5 +113,10 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     #define OMETH_UNCACHED_MALLOC(size)     malloc(size)
     #define OMETH_UNCACHED_FREE(ptr)        free(ptr)
 #endif
+
+    //---------------------------------------------------------
+    // include section header file with null macros
+    #include <oplk/section-default.h>
+
 #endif
 

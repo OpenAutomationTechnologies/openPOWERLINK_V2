@@ -65,8 +65,8 @@ tCircBufError     circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t size
 void              circbuf_freeBuffer(tCircBufInstance* pInstance_p);
 tCircBufError     circbuf_connectBuffer(tCircBufInstance* pInstance_p);
 void              circbuf_disconnectBuffer(tCircBufInstance* pInstance_p);
-void              circbuf_lock(tCircBufInstance* pInstance_p);
-void              circbuf_unlock(tCircBufInstance* pInstance_p);
+void              circbuf_lock(tCircBufInstance* pInstance_p) SECTION_CIRCBUF_LOCK;
+void              circbuf_unlock(tCircBufInstance* pInstance_p) SECTION_CIRCBUF_UNLOCK;
 
 #ifdef __cplusplus
 }

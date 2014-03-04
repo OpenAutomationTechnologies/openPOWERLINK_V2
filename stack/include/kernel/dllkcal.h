@@ -80,7 +80,7 @@ tOplkError dllkcal_getAsyncTxFrame(void* pFrame_p, UINT* pFrameSize_p,
                                    tDllAsyncReqPriority priority_p);
 
 // only frames with registered AsndServiceIds are passed to CAL
-tOplkError dllkcal_asyncFrameReceived(tFrameInfo* pFrameInfo_p);
+tOplkError dllkcal_asyncFrameReceived(tFrameInfo* pFrameInfo_p) SECTION_DLLKCAL_ASYNCRX;
 
 tOplkError dllkcal_sendAsyncFrame(tFrameInfo* pFrameInfo_p, tDllAsyncReqPriority priority_p);
 
@@ -103,7 +103,7 @@ tOplkError dllkcal_getSoaRequest(tDllReqServiceId* pReqServiceId_p,
                                  UINT* pNodeId_p, tSoaPayload* pSoaPayload_p) SECTION_DLLKCAL_GETSOAREQ;
 
 tOplkError dllkcal_setAsyncPendingRequests(UINT nodeId_p, tDllAsyncReqPriority asyncReqPrio_p,
-                                           UINT count_p);
+                                           UINT count_p) SECTION_DLLKCAL_GETPENREQ;
 
 #endif
 

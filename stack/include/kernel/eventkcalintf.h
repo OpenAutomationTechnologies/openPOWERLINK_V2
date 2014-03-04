@@ -67,7 +67,7 @@ extern "C" {
 /* circular buffer event interface */
 tOplkError eventkcal_initQueueCircbuf(tEventQueue eventQueue_p);
 tOplkError eventkcal_exitQueueCircbuf(tEventQueue eventQueue_p);
-tOplkError eventkcal_postEventCircbuf(tEventQueue eventQueue_p, tEvent* pEvent_p);
+tOplkError eventkcal_postEventCircbuf(tEventQueue eventQueue_p, tEvent* pEvent_p) SECTION_EVENTKCAL_CIRCBUF_POST;
 tOplkError eventkcal_processEventCircbuf(tEventQueue eventQueue_p);
 tOplkError eventkcal_getEventCircbuf(tEventQueue eventQueue_p, BYTE* pDataBuffer_p, size_t* pReadSize_p);
 UINT       eventkcal_getEventCountCircbuf(tEventQueue eventQueue_p);
