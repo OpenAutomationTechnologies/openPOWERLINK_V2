@@ -1110,6 +1110,7 @@ This function is invoked by the Ethernet controller interrupt.
 //------------------------------------------------------------------------------
 static void irqHandler(void* pArg_p)
 {
+    BENCHMARK_MOD_01_SET(1);
 #if OPENMAC_DMAOBSERV != 0
     UINT16 dmaObservVal = openmac_getDmaObserver(0);
     //read DMA observer feature
@@ -1155,6 +1156,8 @@ static void irqHandler(void* pArg_p)
 #endif
 
     omethRxTxIrqHandlerMux();
+
+    BENCHMARK_MOD_01_RESET(1);
 }
 
 //------------------------------------------------------------------------------
