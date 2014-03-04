@@ -50,7 +50,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define HOSTIF_IRQ_MASTER_ENABLE  0x0001    ///< enabled the IRQ master
 
 #define HOSTIF_DYNBUF_COUNT       2         ///< number of supported dynamic buffers
-#define HOSTIF_BUF_COUNT          10        ///< number of supported buffers
+#define HOSTIF_BUF_COUNT          9         ///< number of supported buffers
 
 #define HOSTIF_STCTRL_SPAN        2048      ///< size of status control register
 

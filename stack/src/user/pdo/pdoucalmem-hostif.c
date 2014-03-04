@@ -119,8 +119,7 @@ tOplkError pdoucal_openMem(void)
         return kErrorNoResource;
     }
 
-    //jz abuse rpdo buffer for rpdo and tpdo! Merge also in ipcore!
-    hifret = hostif_getBuf(pInstance, kHostifInstIdRpdo, &limPdo_l.pBase, &limPdo_l.span);
+    hifret = hostif_getBuf(pInstance, kHostifInstIdPdo, &limPdo_l.pBase, &limPdo_l.span);
 
     if (hifret != kHostifSuccessful)
     {
