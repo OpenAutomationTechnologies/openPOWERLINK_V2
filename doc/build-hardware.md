@@ -40,21 +40,21 @@ hardware near drivers for the target Xilinx Microblaze.
    After this command CMake will search for available hardware platforms and
    report all found platforms by the following messages:
 
-       Found hardware platform: DEMO_S6PLKEB_CN-SINGLE_GPIO set to OFF!
+       Found hardware platform: DEMO_S6PLKEB_CN_SINGLE_GPIO set to OFF!
        Found hardware platform: DEMO_[BOARD_NAME]_[DEMO_NAME] set to OFF!
 
 * Building all hardware platforms with all driver libraries set to debug
 
-      > cmake ../.. -DCMAKE_BUILD_TYPE=Debug -DDEMO_S6PLKEB_CN-SINGLE_GPIO=ON -DDEMO_[BOARD_NAME]_[DEMO_NAME]=ON
+      > cmake ../.. -DCMAKE_BUILD_TYPE=Debug -DDEMO_S6PLKEB_CN_SINGLE_GPIO=ON -DDEMO_[BOARD_NAME]_[DEMO_NAME]=ON
       > make
       > make install
 
-   This will build the hardware platform for the demos `DEMO_S6PLKEB_CN-SINGLE_GPIO`
+   This will build the hardware platform for the demos `DEMO_S6PLKEB_CN_SINGLE_GPIO`
    and `DEMO_[BOARD_NAME]_[DEMO_NAME]`.
 
 * Building all hardware platforms with all driver libraries set to release
 
-      > cmake ../.. -DCMAKE_BUILD_TYPE=Release -DDEMO_S6PLKEB_CN-SINGLE_GPIO=ON -DDEMO_[BOARD_NAME]_[DEMO_NAME]=ON
+      > cmake ../.. -DCMAKE_BUILD_TYPE=Release -DDEMO_S6PLKEB_CN_SINGLE_GPIO=ON -DDEMO_[BOARD_NAME]_[DEMO_NAME]=ON
       > make
       > make install
 
