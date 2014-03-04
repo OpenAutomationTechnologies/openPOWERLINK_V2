@@ -80,9 +80,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 /**
-\brief Kernel event CAL instance type
+\brief User event CAL instance type
 
-The structure contains all necessary information needed by the kernel event
+The structure contains all necessary information needed by the user event
 CAL module.
 */
 typedef struct
@@ -97,7 +97,7 @@ typedef struct
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-tEventuCalInstance          instance_l;             ///< Instance variable of kernel event CAL module
+tEventuCalInstance          instance_l;             ///< Instance variable of user event CAL module
 
 //------------------------------------------------------------------------------
 // local function prototypes
