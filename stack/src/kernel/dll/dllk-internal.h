@@ -49,6 +49,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/dllkfilter.h>
 #include <kernel/eventk.h>
 #include <kernel/errhndk.h>
+#include <kernel/errsigk.h>
 #include <oplk/nmt.h>
 #include <kernel/edrv.h>
 #include <oplk/benchmark.h>
@@ -159,6 +160,7 @@ typedef struct
     UINT64                  relativeTime;
     UINT8                   aLocalMac[6];
     tEdrvTxBuffer*          pTxBuffer;                      // Buffers for Tx-Frames
+    tErrSigkBuffer*         pCurrentErrStatusBuffer;        // Buffer for the current status entry for error signaling
     UINT                    maxTxFrames;
     UINT8                   flag1;                          // Flag 1 with EN, EC for PRes, StatusRes
     UINT8                   mnFlag1;                        // Flag 1 with MS, EA, ER from PReq, SoA of MN
