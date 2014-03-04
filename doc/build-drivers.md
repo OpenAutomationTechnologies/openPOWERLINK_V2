@@ -21,7 +21,7 @@ They must be compiled and installed to be able to compile the userspace daemon.
 To build the userspace daemon (e.g. for an MN):
 
       > cd <openPOWERLINK_dir>/drivers/linux/drv_daemon_pcap/build
-      > cmake -DCFG_OPLK_MN=TRUE ../..
+      > cmake -DCFG_OPLK_MN=TRUE ..
       > make
       > make install
 
@@ -35,7 +35,7 @@ __CFG_KERNEL_DIR__.
 To build the kernel driver (e.g. for a MN using the Intel 82573 network interface):
 
       > cd <openPOWERLINK_dir>/drivers/linux/drv_kernelmod_edrv/build
-      > cmake -DCONFIG_OPLK_MN=TRUE -DCONFIG_POWERLINK_EDRV=82573 ../..
+      > cmake -DCFG_OPLK_MN=TRUE -DCFG_POWERLINK_EDRV=82573 ..
       > make
       > make install
 
