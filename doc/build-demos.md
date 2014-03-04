@@ -45,7 +45,7 @@ Follow the steps below to cross compile your demo application for Microblaze:
 * Creating the executable
 
       > cd <openPOWERLINK_dir>/apps/<demo_dir>/build/xilinx-microblaze
-      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=[Debug,Release]
+      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=[Debug,Release]
       > make all
       > make install
 
