@@ -103,6 +103,8 @@ The function initializes the user layer CAL module of the error handler.
 //------------------------------------------------------------------------------
 tOplkError errhndkcal_init (void)
 {
+    OPLK_MEMSET(&errhndk_errorObjects_g, 0, sizeof(tErrHndObjects));
+
     return kErrorOk;
 }
 
