@@ -133,6 +133,8 @@ tOplkError errhndkcal_init (void)
         goto Exit;
     }
 
+    OPLK_MEMSET(pBase, 0, span);
+
     pErrHnd_l = (tErrHndObjects*)pBase;
 
 Exit:
