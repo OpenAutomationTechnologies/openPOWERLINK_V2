@@ -172,10 +172,10 @@ area from 0x1B00 - 0x1FFF.
             OBD_SUBINDEX_RAM_VAR(0x1F98, 0x05, kObdTypeUInt16, kObdAccSRW, tObdUnsigned16, PResActPayloadLimit_U16, 36)
             OBD_SUBINDEX_RAM_VAR(0x1F98, 0x06, kObdTypeUInt32, kObdAccR, tObdUnsigned32, ASndMaxLatency_U32, 0x00)     // in [ns]
             OBD_SUBINDEX_RAM_VAR(0x1F98, 0x07, kObdTypeUInt8, kObdAccSRW, tObdUnsigned8, MultiplCycleCnt_U8, 0x00)
-            OBD_SUBINDEX_RAM_VAR(0x1F98, 0x08, kObdTypeUInt16, kObdAccSRW, tObdUnsigned16, AsyncMTU_U16, C_DLL_MIN_ASYNC_MTU)
+            OBD_SUBINDEX_RAM_VAR_RG(0x1F98, 0x08, kObdTypeUInt16, kObdAccSGRW, tObdUnsigned16, AsyncMTU_U16, C_DLL_MIN_ASYNC_MTU, C_DLL_MIN_ASYNC_MTU, C_DLL_MAX_ASYNC_MTU)
             OBD_SUBINDEX_RAM_VAR_RG(0x1F98, 0x09, kObdTypeUInt16, kObdAccSRW, tObdUnsigned16, Prescaler_U16, 0x02, 0, 1000)
 #if CONFIG_DLL_PRES_CHAINING_CN != FALSE
-            OBD_SUBINDEX_RAM_VAR(0x1F98, 0x0A, kObdTypeUInt8, kObdAccR, tObdUnsigned8, PResMode_U8, 0x00)
+            OBD_SUBINDEX_RAM_VAR_RG(0x1F98, 0x0A, kObdTypeUInt8, kObdAccGR, tObdUnsigned8, PResMode_U8, 0x00, 0x00, 0x01)
             OBD_SUBINDEX_RAM_VAR(0x1F98, 0x0B, kObdTypeUInt32, kObdAccR, tObdUnsigned32, PResTimeFirst_U32, 0x00)      // in [ns]
             OBD_SUBINDEX_RAM_VAR(0x1F98, 0x0C, kObdTypeUInt32, kObdAccR, tObdUnsigned32, PResTimeSecond_U32, 0x00)     // in [ns]
             OBD_SUBINDEX_RAM_VAR(0x1F98, 0x0D, kObdTypeUInt32, kObdAccR, tObdUnsigned32, SyncMNDelayFirst_U32, 0x00)   // in [ns]
