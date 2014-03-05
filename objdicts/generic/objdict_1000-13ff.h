@@ -99,7 +99,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             OBD_SUBINDEX_RAM_OSTRING(0x1030, 0x05, kObdAccR,  InterfacePhysAddress_OSTR, 0x06)
             OBD_SUBINDEX_RAM_VSTRING(0x1030, 0x06, kObdAccR,  InterfaceName_VSTR, 0x20 ,"Interface 1")
             OBD_SUBINDEX_RAM_VAR(0x1030, 0x07, kObdTypeUInt8, kObdAccR, tObdUnsigned8, InterfaceOperStatus_U8, 0x1)
-            OBD_SUBINDEX_RAM_VAR(0x1030, 0x08, kObdTypeUInt8, kObdAccRW, tObdUnsigned8, InterfaceAdminState_U8, 0x1)
+            OBD_SUBINDEX_RAM_VAR_RG(0x1030, 0x08, kObdTypeUInt8, kObdAccGRW, tObdUnsigned8, InterfaceAdminState_U8, 0x1, 0x0, 0x1)
             OBD_SUBINDEX_RAM_VAR(0x1030, 0x09, kObdTypeBool, kObdAccRW, tObdBoolean, Valid_BOOL, 0x1)
         OBD_END_INDEX(0x1030)
 
