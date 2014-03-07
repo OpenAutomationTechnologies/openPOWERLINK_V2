@@ -9,7 +9,7 @@
 --! Additionally several memory spaces can be configured (compilation).
 -------------------------------------------------------------------------------
 --
---    (c) B&R, 2012
+--    (c) B&R, 2014
 --
 --    Redistribution and use in source and binary forms, with or without
 --    modification, are permitted provided that the following conditions
@@ -47,8 +47,14 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 --! need reduce or operation
 use ieee.std_logic_misc.OR_REDUCE;
---! use global library
-use work.global.all;
+
+--! Common library
+library libcommon;
+--! Use common library global package
+use libcommon.global.all;
+
+--! Work library
+library work;
 --! use host interface package for specific types
 use work.hostInterfacePkg.all;
 
@@ -179,7 +185,7 @@ begin
     end process;
 
     --! Get rising edge of request signaling
-    reqEdge : entity work.edgedetector
+    reqEdge : entity libcommon.edgedetector
         port map (
             iArst       => iRst,
             iClk        => iClk,
@@ -193,7 +199,7 @@ begin
     inAddrStore <= bridgeRequest_rising;
 
     --! Generate the request acknowledge signal
-    reqAck : entity work.cnt
+    reqAck : entity libcommon.cnt
         generic map (
             gCntWidth   => logDualis(cBridgeCycleDelay+1),
             gTcntVal    => cBridgeCycleDelay
@@ -209,7 +215,7 @@ begin
 
     --! Generate Address Decoders
     genAddressDecoder : for i in 0 to gAddressSpaceCount-1 generate
-        insAddressDecoder : entity work.addrDecode
+        insAddressDecoder : entity libcommon.addrDecode
         generic map (
             gAddrWidth  => inAddrReg'length,
             gBaseAddr   => to_integer(unsigned(gBaseAddressArray(i)(inAddrReg'range))),
@@ -223,7 +229,7 @@ begin
     end generate;
 
     --! Convert one hot from address decoder to binary
-    insBinaryEncoder : entity work.binaryEncoder
+    insBinaryEncoder : entity libcommon.binaryEncoder
     generic map (
         gDataWidth => gAddressSpaceCount
     )
@@ -233,7 +239,7 @@ begin
     );
 
     --! select static base address in lut file
-    insLutFile : entity work.lutFile
+    insLutFile : entity libcommon.lutFile
     generic map (
         gLutCount       => gAddressSpaceCount,
         gLutWidth       => cArrayStd32ElementSize,
@@ -264,7 +270,7 @@ begin
         signal dynamicOffset_unreg : std_logic_vector(dynamicOffset'range);
     begin
         --! select dynamic base address in register file
-        insRegFile : entity work.registerFile
+        insRegFile : entity libcommon.registerFile
         generic map (
             gRegCount => gAddressSpaceCount
         )
@@ -295,7 +301,7 @@ begin
         BASESETACK : oBaseSetAck <= iBaseSetWrite or iBaseSetRead;
     end generate REGFILE;
 
-    DPRAM : if gUseMemBlock /= 0 generate
+    genDPRAM : if gUseMemBlock /= 0 generate
         -- Clip dpr word width to values of power 2 (e.g. 8, 16, 32)
         constant cDprWordWidth  : natural := 2**logDualis(iBaseSetData'length);
         constant cDprAddrWidth  : natural := logDualis(gAddressSpaceCount);
@@ -368,7 +374,7 @@ begin
         BASESETACK : oBaseSetAck <= dprPortA.write or dprPortA_readAck;
 
         --! Generate the read acknowledge signal
-        rdAck : entity work.cnt
+        rdAck : entity libcommon.cnt
             generic map (
                 gCntWidth   => logDualis(cDprReadDel+1),
                 gTcntVal    => cDprReadDel
@@ -381,7 +387,7 @@ begin
                 oCnt    => open,
                 oTcnt   => dprPortA_readAck
             );
-    end generate DPRAM;
+    end generate genDPRAM;
 
     -- calculate translated address offset in dynamic space
     translateAddress <= std_logic_vector(

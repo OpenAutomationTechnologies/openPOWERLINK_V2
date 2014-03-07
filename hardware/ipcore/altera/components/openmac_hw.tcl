@@ -2,7 +2,7 @@
 # openmac_hw.tcl
 # -----------------------------------------------------------------------------
 #
-#    (c) B&R, 2013
+#    (c) B&R, 2014
 #
 #    Redistribution and use in source and binary forms, with or without
 #    modification, are permitted provided that the following conditions
@@ -144,13 +144,13 @@ set_parameter_property gui_extraSmi    DESCRIPTION     "Set this option to TRUE 
                                                         If all connected Phys share the same SMI, set the option to FALSE."
 set_parameter_property gui_txBufLoc    DESCRIPTION     "Select the Tx buffer location to LOCAL or EXTERNAL. The LOCAL configuration allocates the Tx buffers in BRAM resources -
                                                         this configuration is preferred if the external memory is having a dynamic access latency.
-                                                        The EXTERNAL configuration inserts an AXI master to fetch Tx frames from external memory -
+                                                        The EXTERNAL configuration inserts an Avalon master to fetch Tx frames from external memory -
                                                         this configuration requires a fast memory connection."
 set_parameter_property gui_txBufSize   DESCRIPTION     "Set the LOCAL Tx buffer size in KiB. Note that this setting affects the BRAM resource utilization!"
 set_parameter_property gui_txBurstSize DESCRIPTION     "Set the number of words transferred in each burst if the Tx buffer location is EXTERNAL."
 set_parameter_property gui_rxBufLoc    DESCRIPTION     "Select the Rx buffer location to LOCAL or EXTERNAL. The LOCAL configuration allocates the Rx buffers in BRAM resources -
                                                         this configuration is preferred if enough BRAM resources are available.
-                                                        The EXTERNAL configuration inserts an AXI master to transfer Rx frames to external memory -
+                                                        The EXTERNAL configuration inserts an Avalon master to transfer Rx frames to external memory -
                                                         this configuration is preferred to save BRAM resources."
 set_parameter_property gui_rxBufSize   DESCRIPTION     "Set the LOCAL Rx buffer size in KiB. Note that this setting affects the BRAM resource utilization!"
 set_parameter_property gui_rxBurstSize DESCRIPTION     "Set the number of words transferred in each burst if the Rx buffer location is EXTERNAL."
@@ -224,18 +224,12 @@ proc fileset_callback { entityName } {
     set dir_root        ../..
     set dir_common      ${dir_root}/common
     set dir_altera      ${dir_root}/altera
-    set path_lib        lib/src
     set path_openmac    openmac/src
     set path_fifo       fifo/src
+    set path_memory     memory/src
 
-    add_fileset_file "global.vhd"                     VHDL PATH "${dir_common}/${path_lib}/global.vhd"
-    add_fileset_file "addrDecodeRtl.vhd"              VHDL PATH "${dir_common}/${path_lib}/addrDecodeRtl.vhd"
-    add_fileset_file "cntRtl.vhd"                     VHDL PATH "${dir_common}/${path_lib}/cntRtl.vhd"
-    add_fileset_file "dpRam-e.vhd"                    VHDL PATH "${dir_common}/${path_lib}/dpRam-e.vhd"
-    add_fileset_file "dpRamSplx-e.vhd"                VHDL PATH "${dir_common}/${path_lib}/dpRamSplx-e.vhd"
-    add_fileset_file "edgedetectorRtl.vhd"            VHDL PATH "${dir_common}/${path_lib}/edgedetectorRtl.vhd"
-    add_fileset_file "synchronizerRtl.vhd"            VHDL PATH "${dir_common}/${path_lib}/synchronizerRtl.vhd"
-    add_fileset_file "syncTog-rtl-ea.vhd"             VHDL PATH "${dir_common}/${path_lib}/syncTog-rtl-ea.vhd"
+    add_fileset_file "dpRam-e.vhd"                    VHDL PATH "${dir_common}/${path_memory}/dpRam-e.vhd"
+    add_fileset_file "dpRamSplx-e.vhd"                VHDL PATH "${dir_common}/${path_memory}/dpRamSplx-e.vhd"
     add_fileset_file "asyncFifo-e.vhd"                VHDL PATH "${dir_common}/${path_fifo}/asyncFifo-e.vhd"
     add_fileset_file "openmacPkg-p.vhd"               VHDL PATH "${dir_common}/${path_openmac}/openmacPkg-p.vhd"
     add_fileset_file "dma_handler.vhd"                VHDL PATH "${dir_common}/${path_openmac}/dma_handler.vhd"
@@ -249,8 +243,8 @@ proc fileset_callback { entityName } {
     add_fileset_file "convRmiiToMii-rtl-ea.vhd"       VHDL PATH "${dir_common}/${path_openmac}/convRmiiToMii-rtl-ea.vhd"
     add_fileset_file "openmac-rtl-ea.vhd"             VHDL PATH "${dir_common}/${path_openmac}/openmac-rtl-ea.vhd"
     add_fileset_file "openmacTop-rtl-ea.vhd"          VHDL PATH "${dir_common}/${path_openmac}/openmacTop-rtl-ea.vhd"
-    add_fileset_file "dpRam-rtl-a.vhd"                VHDL PATH "${dir_altera}/${path_lib}/dpRam-rtl-a.vhd"
-    add_fileset_file "dpRamSplx-rtl-a.vhd"            VHDL PATH "${dir_altera}/${path_lib}/dpRamSplx-rtl-a.vhd"
+    add_fileset_file "dpRam-rtl-a.vhd"                VHDL PATH "${dir_altera}/${path_memory}/dpRam-rtl-a.vhd"
+    add_fileset_file "dpRamSplx-rtl-a.vhd"            VHDL PATH "${dir_altera}/${path_memory}/dpRamSplx-rtl-a.vhd"
     add_fileset_file "asyncFifo-syn-a.vhd"            VHDL PATH "${dir_altera}/${path_fifo}/asyncFifo-syn-a.vhd"
     add_fileset_file "alteraOpenmacTop-rtl-ea.vhd"    VHDL PATH "${dir_altera}/${path_openmac}/alteraOpenmacTop-rtl-ea.vhd"
 

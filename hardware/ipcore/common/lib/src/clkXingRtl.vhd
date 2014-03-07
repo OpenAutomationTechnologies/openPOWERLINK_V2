@@ -7,7 +7,7 @@
 --
 -------------------------------------------------------------------------------
 --
---    (c) B&R, 2013
+--    (c) B&R, 2014
 --
 --    Redistribution and use in source and binary forms, with or without
 --    modification, are permitted provided that the following conditions
@@ -46,8 +46,10 @@ use ieee.numeric_std.all;
 --! need reduce or operation
 use ieee.std_logic_misc.OR_REDUCE;
 
-library work;
-use work.global.all;
+--! Common library
+library libcommon;
+--! Use common library global package
+use libcommon.global.all;
 
 entity clkXing is
     generic (
@@ -85,7 +87,7 @@ begin
     -- WELCOME TO SLOW CLOCK DOMAIN --
     genThoseCs : for i in slowCs'range generate
     begin
-        theSyncCs : entity work.synchronizer
+        theSyncCs : entity libcommon.synchronizer
             generic map (
                 gStages => 2,
                 gInit   => cInactivated
@@ -131,7 +133,7 @@ begin
     oSlowCs <= slowCs when wr = '1' or rd = '1' else (others => '0');
     oSlowRNW <= rd;
 
-    theWriteEdge : entity work.edgedetector
+    theWriteEdge : entity libcommon.edgedetector
         port map (
             iArst       => iArst,
             iClk        => iSlowClk,
@@ -142,7 +144,7 @@ begin
             oAny        => open
         );
 
-    theReadEdge : entity work.edgedetector
+    theReadEdge : entity libcommon.edgedetector
         port map (
             iArst       => iArst,
             iClk        => iSlowClk,
@@ -153,7 +155,7 @@ begin
             oAny        => open
         );
 
-    theSyncRnw : entity work.synchronizer
+    theSyncRnw : entity libcommon.synchronizer
         generic map (
             gStages => 2,
             gInit   => cInactivated
@@ -165,7 +167,7 @@ begin
             oSync   => slowRnw
         );
 
-    theSyncAnyAck : entity work.syncTog
+    theSyncAnyAck : entity libcommon.syncTog
         generic map (
             gStages => 2,
             gInit   => cInactivated
@@ -190,7 +192,7 @@ begin
         end if;
     end process;
 
-    theSyncWrAck : entity work.syncTog
+    theSyncWrAck : entity libcommon.syncTog
         generic map (
             gStages => 2,
             gInit   => cInactivated
@@ -206,7 +208,7 @@ begin
 
     oFastWrAck <= fastWrAck;
 
-    theSyncRdAck : entity work.syncTog
+    theSyncRdAck : entity libcommon.syncTog
         generic map (
             gStages => 2,
             gInit   => cInactivated
@@ -224,7 +226,7 @@ begin
 
     genThoseRdq : for i in readRegister'range generate
     begin
-        theSyncRdq : entity work.synchronizer
+        theSyncRdq : entity libcommon.synchronizer
             generic map (
                 gStages => 2,
                 gInit   => cInactivated

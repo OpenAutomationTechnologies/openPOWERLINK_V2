@@ -8,7 +8,7 @@
 --
 -------------------------------------------------------------------------------
 --
---    (c) B&R, 2013
+--    (c) B&R, 2014
 --
 --    Redistribution and use in source and binary forms, with or without
 --    modification, are permitted provided that the following conditions
@@ -44,8 +44,11 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
---! use global library
-use work.global.all;
+
+--! Common library
+library libcommon;
+--! Use common library global package
+use libcommon.global.all;
 
 entity cnt is
     generic (

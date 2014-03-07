@@ -1,14 +1,15 @@
 -------------------------------------------------------------------------------
---! @file dpRamSplxNbe-e.vhd
+--! @file dpRamSplxNbe-a.vhd
 --
---! @brief Simplex Dual Port Ram without byteenables entity
+--! @brief Simplex Dual Port Ram without byteenables
 --
---! @details This is the Simplex DPRAM without byteenables entity.
+--! @details This is the Simplex DPRAM without byteenables for Xilinx platforms.
 --!          The DPRAM has one write and one read port only.
+--!          Timing as follows [clk-cycles]: write=0 / read=1
 --
 -------------------------------------------------------------------------------
 --
---    (c) B&R, 2013
+--    (c) B&R, 2014
 --
 --    Redistribution and use in source and binary forms, with or without
 --    modification, are permitted provided that the following conditions
@@ -45,40 +46,54 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-library work;
---! use global library
-use work.global.all;
+--! Common library
+library libcommon;
+--! Use common library global package
+use libcommon.global.all;
 
-entity dpRamSplxNbe is
-    generic (
-        --! Word width [bit]
-        gWordWidth      : natural := 16;
-        --! Number of words
-        gNumberOfWords  : natural := 1024;
-        --! Word width [bit]
-        --! Initialization file
-        gInitFile       : string := "UNUSED"
-    );
-    port (
-        -- PORT A
-        --! Clock of port A
-        iClk_A          : in std_logic;
-        --! Enable of port A
-        iEnable_A       : in std_logic;
-        --! Write enable of port A
-        iWriteEnable_A  : in std_logic;
-        --! Address of port A
-        iAddress_A      : in std_logic_vector(logDualis(gNumberOfWords)-1 downto 0);
-        --! Writedata of port A
-        iWritedata_A    : in std_logic_vector(gWordWidth-1 downto 0);
-        -- PORT B
-        --! Clock of port B
-        iClk_B          : in std_logic;
-        --! Enable of port B
-        iEnable_B       : in std_logic;
-        --! Address of port B
-        iAddress_B      : in std_logic_vector(logDualis(gNumberOfWords)-1 downto 0);
-        --! Readdata of port B
-        oReaddata_B     : out std_logic_vector(gWordWidth-1 downto 0)
-    );
-end dpRamSplxNbe;
+architecture rtl of dpRamSplxNbe is
+    --! Address width (used to generate size depending on address width)
+    constant cAddrWidth : natural := iAddress_A'length;
+    --! RAM size
+    constant cRamSize   : natural := 2**cAddrWidth;
+
+    --! Type for data port
+    subtype tDataPort is std_logic_vector(gWordWidth-1 downto 0);
+    --! RAM type with given size
+    type tRam is array (cRamSize-1 downto 0) of tDataPort;
+
+    --! Shared variable to model and synthesize a DPR
+    shared variable vDpram : tRam := (others => (others => cInactivated));
+
+    --! Port B readport
+    signal readdataB    : tDataPort;
+begin
+    -- assign readdata to ports
+    oReaddata_B <= readdataB;
+
+    --! This process describes port A of the DPRAM. The write process considers
+    --! iWriteEnable_A.
+    PORTA : process(iClk_A)
+    begin
+        if rising_edge(iClk_A) then
+            if iEnable_A = cActivated then
+                if iWriteEnable_A = cActivated then
+                    -- write byte to DPRAM
+                    vDpram(to_integer(unsigned(iAddress_A))) := iWritedata_A;
+                end if; --writeenable
+            end if; --enable
+        end if;
+    end process PORTA;
+
+    --! This process describes port B of the DPRAM. The read process is done
+    --! with every rising iClk_B edge.
+    PORTB : process(iClk_B)
+    begin
+        if rising_edge(iClk_B) then
+            if iEnable_B = cActivated then
+                -- read word from DPRAM
+                readdataB <= vDpram(to_integer(unsigned(iAddress_B)));
+            end if; --enable
+        end if;
+    end process PORTB;
+end architecture rtl;

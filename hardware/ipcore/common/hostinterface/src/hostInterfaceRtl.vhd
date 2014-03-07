@@ -8,7 +8,7 @@
 --
 -------------------------------------------------------------------------------
 --
---    (c) B&R, 2012
+--    (c) B&R, 2014
 --
 --    Redistribution and use in source and binary forms, with or without
 --    modification, are permitted provided that the following conditions
@@ -44,8 +44,14 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
---! use global library
-use work.global.all;
+
+--! Common library
+library libcommon;
+--! Use common library global package
+use libcommon.global.all;
+
+--! Work library
+library work;
 --! use host interface package for specific types
 use work.hostInterfacePkg.all;
 
@@ -82,12 +88,12 @@ entity hostInterface is
         gBaseK2UQ           : natural := 16#07000#;
         --! Base address User-to-Kernel Queue
         gBaseU2KQ           : natural := 16#09000#;
-        --! Base address Tpdo
-        gBaseTpdo           : natural := 16#0B000#;
-        --! Base address Rpdo
-        gBaseRpdo           : natural := 16#0E000#;
-        --! Base address Reserved (-1 = high address of Rpdo)
-        gBaseRes            : natural := 16#14000#
+        --! Base address Pdo
+        gBasePdo            : natural := 16#0B000#;
+        --! Base address Reserved (-1 = high address of Pdo)
+        gBaseRes            : natural := 16#0E000#;
+        --! Host address width
+        gHostAddrWidth      : natural := 16
     );
     port (
         --! Clock Source input
@@ -96,7 +102,7 @@ entity hostInterface is
         iRst                    : in std_logic;
         -- Memory Mapped Slave for Host
         --! MM slave host address
-        iHostAddress            : in std_logic_vector(16 downto 2);
+        iHostAddress            : in std_logic_vector(gHostAddrWidth-1 downto 2);
         --! MM slave host byteenable
         iHostByteenable         : in std_logic_vector(3 downto 0);
         --! MM slave host read
@@ -144,13 +150,7 @@ entity hostInterface is
         --! External sync source
         iIrqExtSync             : in std_logic;
         --! Interrupt output signal
-        oIrq                    : out std_logic;
-        --! Node Id
-        iNodeId                 : in std_logic_vector(7 downto 0);
-        --! POWERLINK Error LED
-        oPlkLedError            : out std_logic;
-        --! POWERLINK Status LED
-        oPlkLedStatus           : out std_logic
+        oIrq                    : out std_logic
     );
 end hostInterface;
 
@@ -169,8 +169,7 @@ architecture Rtl of hostInterface is
         std_logic_vector(to_unsigned(gBaseRxVetQ,   cArrayStd32ElementSize)),
         std_logic_vector(to_unsigned(gBaseK2UQ,     cArrayStd32ElementSize)),
         std_logic_vector(to_unsigned(gBaseU2KQ,     cArrayStd32ElementSize)),
-        std_logic_vector(to_unsigned(gBaseTpdo,     cArrayStd32ElementSize)),
-        std_logic_vector(to_unsigned(gBaseRpdo,     cArrayStd32ElementSize)),
+        std_logic_vector(to_unsigned(gBasePdo,      cArrayStd32ElementSize)),
         std_logic_vector(to_unsigned(gBaseRes,      cArrayStd32ElementSize))
     );
     --! Base address array count
@@ -210,8 +209,6 @@ architecture Rtl of hostInterface is
     signal bridgeEnable             : std_logic;
     --! Bridge address is valid
     signal bridgeAddrValid          : std_logic;
-    --! LED from status/control registers
-    signal statCtrlLed              : std_logic_vector(1 downto 0);
     --! The magic bridge outputs the dword address
     signal hostBridgeAddress_dword  : std_logic_vector(oHostBridgeAddress'length-1 downto 2);
     --! Bridge transfer done strobe
@@ -266,6 +263,9 @@ architecture Rtl of hostInterface is
     --! external sync signal detected any edge
     signal extSync_any      : std_logic;
 begin
+    assert (2**gHostAddrWidth-1 >= gBaseRes-1)
+    report "The host side high address cannot be addressed! Increase gHostAddrWidth generic!"
+    severity failure;
 
     -- select status/control registers if host address is below 2 kB
     statCtrlSel <=  cActivated when iHostAddress < cBaseAddressArray(0)(iHostAddress'range) else
@@ -287,9 +287,10 @@ begin
 
     -- host waitrequest from status/control, bridge or invalid
     oHostWaitrequest <= statCtrlWaitrequest when statCtrlSel = cActivated else
+                        not (iHostWrite or iHostRead) when invalidSel = cActivated else
                         cInactivated when bridgeEnable = cInactivated else
                         not bridgeTfDone when bridgeSel = cActivated else
-                        not invalidSel;
+                        cActivated;
 
     -- host readdata from status/control or bridge
     oHostReaddata <=    bridgeReaddata when bridgeSel = cActivated else
@@ -367,7 +368,7 @@ begin
     end process;
 
     --! The synchronizer which protects us from crazy effects!
-    theSynchronizer : entity work.synchronizer
+    theSynchronizer : entity libcommon.synchronizer
     generic map (
         gStages => 2,
         gInit   => cInactivated
@@ -380,7 +381,7 @@ begin
     );
 
     --! The Edge Detector for external sync
-    theExtSyncEdgeDet : entity work.edgedetector
+    theExtSyncEdgeDet : entity libcommon.edgedetector
     port map (
         iArst       => iRst,
         iClk        => iClk,
@@ -477,13 +478,7 @@ begin
         iIrqPending             => irqSourcePending,
         oExtSyncEnable          => extSyncEnable,
         oExtSyncConfig          => extSyncConfig,
-        iNodeId                 => iNodeId,
-        oPLed                   => statCtrlLed,
         oBridgeEnable           => bridgeEnable
     );
-
-    oPlkLedStatus <= statCtrlLed(0);
-
-    oPlkLedError <= statCtrlLed(1);
 
 end Rtl;

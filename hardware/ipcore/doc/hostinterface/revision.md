@@ -1,14 +1,25 @@
 Revision {#revision}
 ========
 
+- [TASK] Update license header
+- [TASK] Cleanup AXI ipcore code
+- [FEATURE] Enable AXI master supporting higher clock frequency
+- [FIX] Remove nodeid and led GPIOs of host interface
+- [TASK] Revise host interface documentation
+- [FEATURE] Enable configurable address width of host interface ipcore
+- [TASK] Remove parallel interface from host interface ipcore
+- [FEATURE] Add axi host interface toplevel
+- [FIX] Remove TODO for sensitivity list
+- [FIX] Fix wrong oHostWaitrequest generation for invalid Address
+- [FIX] Fix address based read operation on status and Control register
+- [TASK] Merge Tpdo and Rpdo memory buffer in Altera host interface
+- [TASK] Merge Tpdo and Rpdo memory buffer in host interface
+- [FIX] Avoid possible conflicts with dpram entity name
+- [FEATURE] Create libraries for common vhdl sources
+- [TASK] Move DPRAM components in memory subdirectory
 - [TASK] Set ipcore versions to 1.0.0
-- [FEATURE] Split hostiflib into Pcp and Host specific
-- [TASK] Cleanup host interface driver
 - [FIX] Set correct path for testbenches using bus master
 - [TASK] Revise simulation handling
-- [TASK] Update host interface driver
-- [FIX] Make driver sw independent
-- [TASK] Rename ipcore drivers directory
 - [TASK] Add revision to host interface documentation
 - [TASK] Relocate host interface documentation
 - [FIX] Fix max and min function of global.vhd

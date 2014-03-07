@@ -67,6 +67,18 @@ proc createRegisterTiming { lst_reg hubPorts dir virtClk tmax tmin} {
     }
 }
 
+# Checks if the provided register(s) exist(s).
+# Returns number of found registers.
+proc checkRegExist { reg } {
+    set cnt 0
+
+    foreach_in_collection reg [get_registers ${reg} -nowarn] {
+        incr cnt
+    }
+
+    return ${cnt}
+}
+
 ###############################################################################
 # PCB delay (FPGA <--> PHY(s)) [ns]
 set tpcb            0.1
@@ -94,6 +106,7 @@ set tmpVirtClk          virt_phy_clk
 # HIERARCHY
 set instOpenMacTop  *alteraOpenmacTop
 set instSmi         ${instOpenMacTop}*phyMgmt
+set instDmaMaster   ${instOpenMacTop}*master_handler
 
 ###############################################################################
 # REGISTERS
@@ -165,3 +178,18 @@ set_false_path -from [get_registers ${reg_smiClk}] -to [get_ports *]
 
 ## Phy reset
 set_false_path -from [get_registers  ${reg_phyRst}] -to [get_ports *]
+
+## MAC DMA to MASTER HANDLER path
+if {[checkRegExist ${instDmaMaster}*tx_rd_cnt[*]] != 0} {
+    set_false_path -from * -to [get_registers ${instDmaMaster}*tx_rd_cnt[*]]
+    set_false_path -from * -to [get_registers ${instDmaMaster}*tx_cnt[*]]
+}
+
+if {[checkRegExist ${instDmaMaster}*rx_cnt[*]] != 0} {
+    set_false_path -from * -to [get_registers ${instDmaMaster}*rx_cnt[*]]
+}
+
+## SYNCHRONIZER
+if {[checkRegExist ${instOpenMacTop}*synchronizer*metaReg[*]] != 0} {
+    set_false_path -from [get_registers *] -to [get_registers ${instOpenMacTop}*synchronizer*metaReg[*]]
+}

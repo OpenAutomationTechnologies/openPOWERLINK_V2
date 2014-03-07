@@ -2,7 +2,7 @@
 -- Entity : openMAC_DMAmaster
 -------------------------------------------------------------------------------
 --
---    (c) B&R, 2012
+--    (c) B&R, 2014
 --
 --    Redistribution and use in source and binary forms, with or without
 --    modification, are permitted provided that the following conditions
@@ -42,8 +42,10 @@ use ieee.std_logic_unsigned.all;
 use ieee.math_real.log2;
 use ieee.math_real.ceil;
 
-library work;
-use work.global.all;
+--! Common library
+library libcommon;
+--! Use common library global package
+use libcommon.global.all;
 
 entity openMAC_DMAmaster is
   generic(
@@ -328,7 +330,7 @@ rx_wr_clk <= dma_clk;
 
 tx_wr_clk <= m_clk;
 
-    sync1 : entity work.syncTog
+    sync1 : entity libcommon.syncTog
         generic map (
             gStages => 2,
             gInit   => cInactivated
@@ -342,7 +344,7 @@ tx_wr_clk <= m_clk;
             oDst_data   => m_mac_tx_off
         );
 
-    sync2 : entity work.syncTog
+    sync2 : entity libcommon.syncTog
         generic map (
             gStages => 2,
             gInit   => cInactivated
@@ -439,7 +441,7 @@ end generate gen16bitFifo;
 
 genRxAddrSync : if gen_rx_fifo_g generate
 begin
-    sync4 : entity work.syncTog
+    sync4 : entity libcommon.syncTog
         generic map (
             gStages => 2,
             gInit   => cInactivated
@@ -456,7 +458,7 @@ end generate genRxAddrSync;
 
 genTxAddrSync : if gen_tx_fifo_g generate
 begin
-    sync5 : entity work.syncTog
+    sync5 : entity libcommon.syncTog
         generic map (
             gStages => 2,
             gInit   => cInactivated
@@ -470,7 +472,7 @@ begin
             oDst_data   => m_dma_new_addr_rd
         );
 
-    sync6 : entity work.syncTog
+    sync6 : entity libcommon.syncTog
         generic map (
             gStages => 2,
             gInit   => cInactivated

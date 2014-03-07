@@ -1,0 +1,44 @@
+Revision (6c37475ec70bf2ffb6746e22ac0eee8e39f46571 / V1.0.0)
+
+- [TASK] Update license header
+- [FIX] Fix log dualis function in global.vhd
+- [FEATURE] Create libraries for common vhdl sources
+- [TASK] Move DPRAM components in memory subdirectory
+- [FIX] Set correct path for testbenches using bus master
+- [TASK] Revise simulation handling
+- [TASK] Remove POWERLINK IP-Core
+- [FIX] Add simplex DPRAM implementation for Xilinx platform
+- [FIX] Fix max and min function of global.vhd
+- [TASK] Revise clock Xing testbench
+- [FEATURE] Add Xilinx openMAC component
+- [FEATURE] Add openMAC Qsys component
+- [FEATURE] Add synchronizer with toggle transfer
+- [FIX] Add register to edge detector to cut combinational path
+- [FIX] Fix byteenable width of simplex DPRAM
+- [FEATURE] Add logic reduce operation into global package
+- [TASK] Add global constants for true and false
+- [FEATURE] Add simplex DPRAM library component
+- [FIX] Add enable port to DPRAM library components
+- [TASK] Update DPRAM library component
+- [TASK] Add possibility to add vsim and vcom arguments to simulation script
+- [FEATURE] Implement bcd to seven segment led decoder
+- [FEATURE] Add byte and word swapping functions to global.vhd
+- [TASK] Revise register file testbench to be self-testing
+- [FIX] Adapt stimuli files for revised bus master
+- [TASK] Omit base and high decode of address decoder
+- [TASK] Add dpram entity and behavioural architecture
+- [FEATURE] Add terminal counter
+- [TASK] Relocated triple buffer logic to pdi subdir
+- [TASK] Add clean synchronizer
+- [TASK] Add clean edgedetector
+- [FEATURE] Add n-width shift register
+- [TASK] Revise simulation scripts
+- [FEATURE] Implement new triple buffer logic
+- [FEATURE] Implement new address decoder
+- [TASK] Cleanup of binary encoder and add testbench
+- [TASK] Source file cleanup
+- [TASK] Change boolean generics of powerlink.vhd to integer - 1
+- [FIX] HOSTIF: Dynamic buffer address write works with 16 bit host interface
+- [TASK] HOSTIF: Cleanup source code according to coding styles
+- [TASK] X: Add clock-x-ing to AXI_POWERLINK MAC_REG
+- [TASK] repo cleanup

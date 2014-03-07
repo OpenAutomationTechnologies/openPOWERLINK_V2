@@ -7,7 +7,7 @@
 --!          Example: MII PHY <--> RMII-to-MII converter <--> RMII MAC
 -------------------------------------------------------------------------------
 --
---    (c) B&R, 2013
+--    (c) B&R, 2014
 --
 --    Redistribution and use in source and binary forms, with or without
 --    modification, are permitted provided that the following conditions
@@ -44,9 +44,13 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+--! Common library
+library libcommon;
+--! Use common library global package
+use libcommon.global.all;
+
+--! Work library
 library work;
---! use global library
-use work.global.all;
 --! use openmac package
 use work.openmacPkg.all;
 
@@ -82,12 +86,11 @@ begin
         --fifo size must not be larger than 2**5
         constant FIFO_NIBBLES_LOG2 : integer := 5;
 
-        signal fifo_half, fifo_full, fifo_empty, fifo_valid, txEnable_reg, fifo_wrempty : std_logic;
+        signal fifo_half, fifo_full, fifo_empty, fifo_valid, txEnable_reg : std_logic;
         signal fifo_wr, fifo_rd : std_logic;
         signal fifo_din : std_logic_vector(NIBBLE_SIZE-1 downto 0);
         signal fifo_dout, txData_reg : std_logic_vector(NIBBLE_SIZE-1 downto 0);
         signal fifo_rdUsedWord : std_logic_vector (FIFO_NIBBLES_LOG2-1 downto 0);
-        signal fifo_wrUsedWord : std_logic_vector (FIFO_NIBBLES_LOG2-1 downto 0);
         --necessary for clr fifo
         signal aclr, rTxEn_l : std_logic;
 
@@ -160,9 +163,9 @@ begin
                 iWrClk      => iClk,
                 iWrReq      => fifo_wr,
                 iWrData     => fifo_din,
-                oWrEmpty    => fifo_wrempty,
+                oWrEmpty    => open,
                 oWrFull     => fifo_full,
-                oWrUsedw    => fifo_wrUsedWord,
+                oWrUsedw    => open,
                 iRdClk      => iMiiTxClk,
                 iRdReq      => fifo_rd,
                 oRdData     => fifo_dout,
@@ -195,7 +198,7 @@ begin
         --fifo size must not be larger than 2**5
         constant FIFO_NIBBLES_LOG2 : integer := 5;
 
-        signal fifo_half, fifo_full, fifo_empty, fifo_valid : std_logic;
+        signal fifo_half, fifo_empty, fifo_valid : std_logic;
         signal rxDataValid_reg, fifo_rd : std_logic;
         signal rxError_reg : std_logic;
         signal fifo_wr : std_logic;
@@ -279,8 +282,8 @@ begin
                 iWrReq      => fifo_wr,
                 iWrData     => rxData_reg,
                 oWrEmpty    => open,
-                oWrFull     => fifo_full,
-                oWrUsedw    => fifo_wrUsedWord,
+                oWrFull     => open,
+                oWrUsedw    => open,
                 iRdClk      => iClk,
                 iRdReq      => fifo_rd,
                 oRdData     => fifo_dout,

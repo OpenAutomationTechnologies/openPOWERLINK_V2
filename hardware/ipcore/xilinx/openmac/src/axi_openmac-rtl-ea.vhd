@@ -6,7 +6,7 @@
 --! @details This is the openMAC toplevel for Xilinx platform with AXI.
 -------------------------------------------------------------------------------
 --
---    (c) B&R, 2013
+--    (c) B&R, 2014
 --
 --    Redistribution and use in source and binary forms, with or without
 --    modification, are permitted provided that the following conditions
@@ -43,9 +43,13 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+--! Common library
+library libcommon;
+--! Use common library global package
+use libcommon.global.all;
+
+--! Work library
 library work;
---! use global library
-use work.global.all;
 --! use openmac package
 use work.openmacPkg.all;
 
@@ -56,14 +60,17 @@ use proc_common_v3_00_a.ipif_pkg.all;
 
 --! AXI Lite IPIF library
 library axi_lite_ipif_v1_01_a;
+--! Use AXI lite ipif
 use axi_lite_ipif_v1_01_a.axi_lite_ipif;
 
 --! AXI Master Burst library
 library axi_master_burst_v1_00_a;
+--! Use AXI master burst
 use axi_master_burst_v1_00_a.axi_master_burst;
 
---! Unisim library used for ODDR2 instance.
+--! Unisim library
 library unisim;
+--! Use ODDR2 instance primitive
 use unisim.vcomponents.oddr2;
 
 entity axi_openmac is
@@ -1133,7 +1140,7 @@ begin
 
     --! The clock Xing ipcore transfers the signals in the AXI clock domain to
     --! the iClk50 domain.
-    THEMACREG_CLKXING : entity work.clkXing
+    THEMACREG_CLKXING : entity libcommon.clkXing
         generic map (
             gCsNum      => xing_macReg.fast.cs'length,
             gDataWidth  => xing_macReg.fast.readdata'length

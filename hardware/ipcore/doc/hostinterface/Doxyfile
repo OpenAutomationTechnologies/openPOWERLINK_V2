@@ -672,19 +672,20 @@ INPUT                  = mainpage.txt \
                          ../../common/hostinterface/src/hostInterfaceRtl.vhd \
                          ../../common/hostinterface/src/dynamicBridgeRtl.vhd \
                          ../../common/hostinterface/src/irqGenRtl.vhd \
-                         ../../common/hostinterface/src/parallelInterfaceRtl.vhd \
                          ../../common/hostinterface/src/statusControlRegRtl.vhd \
                          ../../common/lib/src/addrDecodeRtl.vhd \
                          ../../common/lib/src/binaryEncoderRtl.vhd \
                          ../../common/lib/src/cntRtl.vhd \
-                         ../../common/lib/src/dpRam-e.vhd \
+                         ../../common/memory/src/dpRam-e.vhd \
                          ../../common/lib/src/edgedetectorRtl.vhd \
                          ../../common/lib/src/global.vhd \
                          ../../common/lib/src/lutFileRtl.vhd \
                          ../../common/lib/src/registerFileRtl.vhd \
                          ../../common/lib/src/synchronizerRtl.vhd \
                          ../../altera/hostinterface/src/alteraHostInterfaceRtl.vhd \
-                         ../../altera/lib/src/dpRam-rtl-a.vhd
+                         ../../altera/memory/src/dpRam-rtl-a.vhd \
+                         ../../xilinx/hostinterface/src/axi_hostinterface-rtl-ea.vhd \
+                         ../../xilinx/memory/src/dpRam-rtl-a.vhd
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding, which is

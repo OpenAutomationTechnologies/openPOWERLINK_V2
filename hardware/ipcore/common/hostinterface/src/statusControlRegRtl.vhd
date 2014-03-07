@@ -8,7 +8,7 @@
 --
 -------------------------------------------------------------------------------
 --
---    (c) B&R, 2012
+--    (c) B&R, 2014
 --
 --    Redistribution and use in source and binary forms, with or without
 --    modification, are permitted provided that the following conditions
@@ -44,8 +44,14 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
---! use global library
-use work.global.all;
+
+--! Common library
+library libcommon;
+--! Use common library global package
+use libcommon.global.all;
+
+--! Work library
+library work;
 --! use host interface package for specific types
 use work.hostInterfacePkg.all;
 
@@ -137,10 +143,6 @@ entity statusControlReg is
         --! external sync source config
         oExtSyncConfig      : out std_logic_vector(cExtSyncEdgeConfigWidth-1 downto 0);
         -- miscellaneous
-        --! Node Id
-        iNodeId             : in std_logic_vector(cByte-1 downto 0);
-        --! LED
-        oPLed               : out std_logic_vector(1 downto 0);
         --! bridge activates
         oBridgeEnable       : out std_logic
         );
@@ -166,10 +168,6 @@ architecture Rtl of statusControlReg is
     constant cBaseError             : natural :=    16#0208#;
     --! heart beat
     constant cBaseHeartBeat         : natural :=    16#020A#;
-    --! node id in base
-    constant cBaseNodeIdIn          : natural :=    16#020C#;
-    --! led control base
-    constant cBaseLedControl        : natural :=    16#0210#;
     --! irq enable base
     constant cBaseIrqEnable         : natural :=    16#0300#;
     --! irq pending base
@@ -187,10 +185,6 @@ architecture Rtl of statusControlReg is
     --! base reserved
     constant cBaseReserved          : natural :=    16#0500#;
 
-    --! LED count
-    constant cLedCount              : natural range 1 to 16 := 2;
-    --! General Purpose Inputs
-
     --! type base registers (stored content)
     type tRegisterInfo is record
         --magic
@@ -206,7 +200,6 @@ architecture Rtl of statusControlReg is
         state           : std_logic_vector(cWord-1 downto 0);
         error           : std_logic_vector(cWord-1 downto 0);
         heartBeat       : std_logic_vector(cWord-1 downto 0);
-        led             : std_logic_vector(cLedCount-1 downto 0);
     end record;
 
     --! type synchronization register (stored content)
@@ -237,8 +230,7 @@ architecture Rtl of statusControlReg is
         command         => (others => cInactivated),
         state           => (others => cInactivated),
         error           => (others => cInactivated),
-        heartBeat       => (others => cInactivated),
-        led             => (others => cInactivated)
+        heartBeat       => (others => cInactivated)
     );
 
     --! synchronization register
@@ -296,7 +288,6 @@ begin
     oIrqSourceEnable    <= regSynchron.irqSrcEnableHost and regSynchron.irqSrcEnablePcp;
     oExtSyncEnable      <= regSynchron.syncConfig(0);
     oExtSyncConfig      <= regSynchron.syncConfig(2 downto 1);
-    oPLed               <= regControl.led;
     oBridgeEnable       <= regControl.bridgeEnable;
 
     -- pcp overrules host!
@@ -318,14 +309,15 @@ begin
     --! register access
     regAcc : process (
         iHostWrite,
+        iHostRead,
         iHostByteenable,
         iHostAddress,
         iHostWritedata,
         iPcpWrite,
+        iPcpRead,
         iPcpByteenable,
         iPcpAddress,
         iPcpWritedata,
-        iNodeId,
         regInfo,
         regControl,
         regSynchron,
@@ -408,23 +400,6 @@ begin
 
                 --heartbeat and error are RO
 
-            when cBaseNodeIdIn =>
-                oHostReaddata(iNodeId'length-1 downto 0) <= iNodeId;
-
-                --node id are RO
-
-            when cBaseLedControl =>
-                oHostReaddata(cLedCount-1 downto 0) <= regControl.led;
-
-                if iHostWrite = cActivated then
-                    for i in cWord-1 downto 0 loop
-                        if iHostByteenable(i/cByte) = cActivated and
-                            i < cLedCount then
-                            regControl_next.led(i) <= iHostWritedata(i);
-                        end if;
-                    end loop;
-                end if;
-
             when cBaseIrqPending | cBaseIrqEnable =>
                 oHostReaddata(cWord+gIrqSourceCount downto cWord) <= iIrqPending;
 
@@ -475,8 +450,13 @@ begin
                     if iHostWrite = cActivated then
                         hostBaseSetData     <= iHostWritedata(hostBaseSetData'range);
                         hostBaseSetWrite    <= cActivated;
-                    else
+                        hostBaseSetRead     <= cInactivated;
+                    elsif iHostRead = cActivated then
                         hostBaseSetRead     <= cActivated;
+                        hostBaseSetWrite    <= cInactivated;
+                    else
+                        hostBaseSetWrite    <= cInactivated;
+                        hostBaseSetRead     <= cInactivated;
                     end if;
                 end if;
 
@@ -565,12 +545,6 @@ begin
                     end loop;
                 end if;
 
-            when cBaseNodeIdIn =>
-                oPcpReaddata(iNodeId'length-1 downto 0) <= iNodeId;
-
-            when cBaseLedControl =>
-                oPcpReaddata(cLedCount-1 downto 0) <= regControl.led;
-
             when cBaseIrqPending | cBaseIrqEnable =>
                 oPcpReaddata(cWord+gIrqSourceCount downto cWord) <= iIrqPending;
                 oPcpReaddata(gIrqSourceCount downto 0) <= regSynchron.irqSrcEnablePcp;
@@ -609,8 +583,13 @@ begin
                     if iPcpWrite = cActivated then
                         pcpBaseSetData  <= iPcpWritedata(pcpBaseSetData'range);
                         pcpBaseSetWrite <= cActivated;
-                    else
+                        pcpBaseSetRead <= cInactivated;
+                    elsif iPcpRead = cActivated then
                         pcpBaseSetRead <= cActivated;
+                        pcpBaseSetWrite <= cInactivated;
+                    else
+                        pcpBaseSetRead <= cInactivated;
+                        pcpBaseSetWrite <= cInactivated;
                     end if;
                 end if;
 

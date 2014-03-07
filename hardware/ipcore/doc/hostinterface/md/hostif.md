@@ -19,7 +19,6 @@ flexibility of data exchanges between host and POWERLINK communication processor
 * MMU functionality controlled by the host (dynamicBridge)
 * Synchronization interface with interrupt throttling (irqGen)
 * Generic SOC interconnect interface
-* External parallel memory mapped slave interface (parallelInterface)
 * Modular design architecture
 * Portable to any platform
 * Configuration by top-level generics
@@ -35,8 +34,7 @@ soft core in an application. Subsequently the synchronization generator is speci
 ## Typical System integration
 The primary usage of the host interface is to connect a hosting processor
 to an FPGA with an embedded system. The host requires sharing any kind of data
-with the soft cores in the FPGA through a parallel in-terface for
-high data throughput and low latency.
+with the soft cores in the FPGA through a parallel interface for high data throughput and low latency.
 The following figure shows a typical system architecture including a host MCU and
 an FPGA with soft cores. The host has access through the host interface
 to the on-chip memory (RAM) and also to the external memory controller (EMC and SRAM).
@@ -146,92 +144,3 @@ about the openPOWERLINK stack archiecture.
 ## Status-/Control-Registers {#sec-statusctrl}
 
 The Status-/Control-Register definition can be found [here](\ref hostif_sc).
-
-# Timing Specification {#sec-timingspec}
-
-## Generic SOC interconnect interface {#sec-timingavalon}
-The interconnect interface complies to the
-[Altera Avalon Interface Specifications](http://www.altera.com/literature/manual/mnl_avalon_spec.pdf).
-
-## External parallel memory mapped slave interface {#sec-timingext}
-*Note that the following timing specification defines cycles and no timing values.*
-*In order to get the timing values the clock period of
-parallelInterface.iClk must be used!*
-
-### Multiplexed Address-/Data-Bus {#sec-timingmux}
-
-#### Read access {#MUX_READ_ACCESS}
-
-* Assert CS
-* Assert ALE and valid address on AD
-* Hold ALE for two cycles
-* After ALE deassertion hold valid address on AD for at lease three cycles
-* Set AD to high-Z
-* Assert RD and set valid BE
-* Wait for ACK assertion
-* ACK is held for two cycles
-* Valid readdata is held for three cycles
-* Deassert RD and BE
-* Deassert CS
-
-<p><img src="../wavedrom/hostif_mplx_rd.svg" alt="Read access"></p>
-
-#### Write access {#MUX_WRITE_ACCESS}
-
-* Assert CS
-* Assert ALE and valid address on AD
-* Hold ALE for two cycles
-* After ALE deassertion hold valid address on AD for at lease three cycles
-* Set AD to valid writedata
-* Assert WR and set valid BE
-* Wait for ACK assertion
-* ACK is held for two cycles
-* Deassert WR, BE and writedata
-* Deassert CS
-
-<p><img src="../wavedrom/hostif_mplx_wr.svg" alt="Write access"></p>
-
-#### Read with following write access {#sec-timingmuxrdwr}
-Refer to [Read access](#MUX_READ_ACCESS) and [Write access](#MUX_WRITE_ACCESS) for details.\n
-It is allowed holding CS asserted for multiple transfers.\n
-
-**NOTE:**\n
-It is recommended waiting **two cycles** after read accesses!\n
-It is recommended waiting **one cycle** after write accesses!\n
-
-<p><img src="../wavedrom/hostif_mplx_rd-wr.svg" alt="Read-Write access"></p>
-
-### Demultiplexed Address-/Data-Bus {#sec-timingdemux}
-
-#### Read access {#DEMUX_READ_ACCESS}
-
-* Assert CS
-* Assert RD and set valid BE and address
-* Wait for ACK assertion
-* ACK is held for two cycles
-* Valid readdata is held for three cycles
-* Deassert RD, BE and address
-* Deassert CS
-
-<p><img src="../wavedrom/hostif_rd.svg" alt="Read access"></p>
-
-#### Write access {#DEMUX_WRITE_ACCESS}
-
-* Assert CS
-* Assert WR and set valid BE, address and writedata
-* Wait for ACK assertion
-* ACK is held for two cycles
-* Deassert WR, BE, address and writedata
-* Deassert CS
-
-<p><img src="../wavedrom/hostif_wr.svg" alt="Write access"></p>
-
-#### Read with following write access {#sec-timingdemuxrdwr}
-Refer to [Read access](#DEMUX_READ_ACCESS) and [Write access](#DEMUX_WRITE_ACCESS) for details.\n
-It is allowed holding CS asserted for multiple transfers.\n
-
-**NOTE:**\n
-It is recommended waiting **two cycles** after read accesses!\n
-It is recommended waiting **one cycle** after write accesses!\n
-
-<p><img src="../wavedrom/hostif_rd-wr.svg" alt="Read-Write access"></p>

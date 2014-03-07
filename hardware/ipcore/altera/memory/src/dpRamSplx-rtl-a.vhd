@@ -1,15 +1,16 @@
--------------------------------------------------------------------------------
---! @file dpRamSplxNbe-a.vhd
+--! @file dpRamSplx-rtl-a.vhd
 --
---! @brief Simplex Dual Port Ram without byteenables
+--! @brief Simplex Dual Port Ram Register Transfer Level Architecture
 --
---! @details This is the Simplex DPRAM without byteenables for Xilinx platforms.
---!          The DPRAM has one write and one read port only.
+--! @details This is the Simplex DPRAM intended for synthesis on Altera
+--!          platforms only.
 --!          Timing as follows [clk-cycles]: write=0 / read=1
 --
 -------------------------------------------------------------------------------
+-- Architecture : rtl
+-------------------------------------------------------------------------------
 --
---    (c) B&R, 2013
+--    (c) B&R, 2014
 --
 --    Redistribution and use in source and binary forms, with or without
 --    modification, are permitted provided that the following conditions
@@ -41,59 +42,40 @@
 --    POSSIBILITY OF SUCH DAMAGE.
 --
 -------------------------------------------------------------------------------
-
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-library work;
---! use global library
-use work.global.all;
+--! use altera_mf library
+library altera_mf;
+use altera_mf.altera_mf_components.all;
 
-architecture rtl of dpRamSplxNbe is
-    --! Address width (used to generate size depending on address width)
-    constant cAddrWidth : natural := iAddress_A'length;
-    --! RAM size
-    constant cRamSize   : natural := 2**cAddrWidth;
-
-    --! Type for data port
-    subtype tDataPort is std_logic_vector(gWordWidth-1 downto 0);
-    --! RAM type with given size
-    type tRam is array (cRamSize-1 downto 0) of tDataPort;
-
-    --! Shared variable to model and synthesize a DPR
-    shared variable vDpram : tRam := (others => (others => cInactivated));
-
-    --! Port B readport
-    signal readdataB    : tDataPort;
+architecture rtl of dpRamSplx is
 begin
-    -- assign readdata to ports
-    oReaddata_B <= readdataB;
-
-    --! This process describes port A of the DPRAM. The write process considers
-    --! iWriteEnable_A.
-    PORTA : process(iClk_A)
-    begin
-        if rising_edge(iClk_A) then
-            if iEnable_A = cActivated then
-                if iWriteEnable_A = cActivated then
-                    -- write byte to DPRAM
-                    vDpram(to_integer(unsigned(iAddress_A))) := iWritedata_A;
-                end if; --writeenable
-            end if; --enable
-        end if;
-    end process PORTA;
-
-    --! This process describes port B of the DPRAM. The read process is done
-    --! with every rising iClk_B edge.
-    PORTB : process(iClk_B)
-    begin
-        if rising_edge(iClk_B) then
-            if iEnable_B = cActivated then
-                -- read word from DPRAM
-                readdataB <= vDpram(to_integer(unsigned(iAddress_B)));
-            end if; --enable
-        end if;
-    end process PORTB;
+    altsyncram_component : altsyncram
+        generic map (
+            operation_mode          => "DUAL_PORT",
+            intended_device_family  => "Cyclone IV",
+            init_file               => gInitFile,
+            numwords_a              => gNumberOfWordsA,
+            numwords_b              => gNumberOfWordsB,
+            widthad_a               => logDualis(gNumberOfWordsA),
+            widthad_b               => logDualis(gNumberOfWordsB),
+            width_a                 => gWordWidthA,
+            width_b                 => gWordWidthB,
+            width_byteena_a         => gByteenableWidthA,
+            width_byteena_b         => gByteenableWidthA
+        )
+        port map (
+            clock0      => iClk_A,
+            clocken0    => iEnable_A,
+            wren_a      => iWriteEnable_A,
+            address_a   => iAddress_A,
+            byteena_a   => iByteenable_A,
+            data_a      => iWritedata_A,
+            clock1      => iClk_B,
+            clocken1    => iEnable_B,
+            address_b   => iAddress_B,
+            q_b         => oReaddata_B
+        );
 end architecture rtl;
-

@@ -7,7 +7,7 @@
 --!          target clock domain with toggling signal levels.
 -------------------------------------------------------------------------------
 --
---    (c) B&R, 2013
+--    (c) B&R, 2014
 --
 --    Redistribution and use in source and binary forms, with or without
 --    modification, are permitted provided that the following conditions
@@ -44,8 +44,10 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-library work;
-use work.global.all;
+--! Common library
+library libcommon;
+--! Use common library global package
+use libcommon.global.all;
 
 entity syncTog is
     generic (
@@ -84,7 +86,7 @@ begin
     oDst_data <= dstPulse;
 
     --! This is the first edge detector generating a single pulse.
-    FIRST_EDGE : entity work.edgedetector
+    FIRST_EDGE : entity libcommon.edgedetector
         port map (
             iArst       => iSrc_rst,
             iClk        => iSrc_clk,
@@ -110,7 +112,7 @@ begin
 
     --! This synchronizer transfers the metaToggle to the destination clock
     --! domain.
-    SYNC : entity work.synchronizer
+    SYNC : entity libcommon.synchronizer
         generic map (
             gStages => gStages,
             gInit   => gInit
@@ -123,7 +125,7 @@ begin
         );
 
     --! The second edge detector detects any edge of the synchronized toggle.
-    SECOND_EDGE : entity work.edgedetector
+    SECOND_EDGE : entity libcommon.edgedetector
         port map (
             iArst       => iDst_rst,
             iClk        => iDst_clk,

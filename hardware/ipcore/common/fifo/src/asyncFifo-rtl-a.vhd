@@ -8,7 +8,7 @@
 --
 -------------------------------------------------------------------------------
 --
---    (c) B&R, 2013
+--    (c) B&R, 2014
 --
 --    Redistribution and use in source and binary forms, with or without
 --    modification, are permitted provided that the following conditions
@@ -45,9 +45,10 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-library work;
---! use global library
-use work.global.all;
+--! Common library
+library libcommon;
+--! Use common library global package
+use libcommon.global.all;
 
 architecture rtl of asyncFifo is
     --! Address width
@@ -214,7 +215,7 @@ begin
     --! This generate block instantiates multiple synchrinizers to transfer
     --! the write and read pointers to the opposite clock domains.
     GEN_POINTERSYNC : for i in cAddrWidth downto 0 generate
-        WRITESYNC : entity work.synchronizer
+        WRITESYNC : entity libcommon.synchronizer
             generic map (
                 gStages => gSyncStages,
                 gInit   => cInactivated
@@ -226,7 +227,7 @@ begin
                 oSync   => inst_writeSync.dout(i)
             );
 
-        READSYNC : entity work.synchronizer
+        READSYNC : entity libcommon.synchronizer
             generic map (
                 gStages => gSyncStages,
                 gInit   => cInactivated

@@ -5,7 +5,7 @@
 #
 # -----------------------------------------------------------------------------
 #
-#    (c) B&R, 2012
+#    (c) B&R, 2014
 #
 #    Redistribution and use in source and binary forms, with or without
 #    modification, are permitted provided that the following conditions
@@ -38,7 +38,22 @@
 #
 # -----------------------------------------------------------------------------
 
+# -----------------------------------------------------------------------------
+# PACKAGES
+# -----------------------------------------------------------------------------
+# Insert local packages.
+source "../../common/util/tcl/ipcoreUtil.tcl"
+source "../../altera/components/tcl/qsysUtil.tcl"
+source "../../common/openmac/tcl/openmac.tcl"
+
+# Use QSYS version 12.0
 package require -exact qsys 12.0
+
+# Use package ipcoreUtil for general functions...
+package require ipcoreUtil 0.0.1
+
+# Use package qsysUtil for Qsys helpers...
+package require qsysUtil 0.0.1
 
 # -----------------------------------------------------------------------------
 # module
@@ -65,23 +80,14 @@ set_module_property ICON_PATH "img/br.png"
 add_fileset QUARTUS_SYNTH QUARTUS_SYNTH         fileset_callback
 set_fileset_property QUARTUS_SYNTH              TOP_LEVEL alteraHostInterface
 set_fileset_property QUARTUS_SYNTH              ENABLE_RELATIVE_INCLUDE_PATHS false
-add_fileset_file "dpRam-e.vhd"                  VHDL PATH "../../common/lib/src/dpRam-e.vhd"
-add_fileset_file "dpRam-rtl-a.vhd"              VHDL PATH "../../altera/lib/src/dpRam-rtl-a.vhd"
-add_fileset_file "addrDecodeRtl.vhd"            VHDL PATH "../../common/lib/src/addrDecodeRtl.vhd"
-add_fileset_file "binaryEncoderRtl.vhd"         VHDL PATH "../../common/lib/src/binaryEncoderRtl.vhd"
-add_fileset_file "cntRtl.vhd"                   VHDL PATH "../../common/lib/src/cntRtl.vhd"
-add_fileset_file "edgedetectorRtl.vhd"          VHDL PATH "../../common/lib/src/edgedetectorRtl.vhd"
-add_fileset_file "lutFileRtl.vhd"               VHDL PATH "../../common/lib/src/lutFileRtl.vhd"
-add_fileset_file "synchronizerRtl.vhd"          VHDL PATH "../../common/lib/src/synchronizerRtl.vhd"
-add_fileset_file "registerFileRtl.vhd"          VHDL PATH "../../common/lib/src/registerFileRtl.vhd"
+add_fileset_file "dpRam-e.vhd"                  VHDL PATH "../../common/memory/src/dpRam-e.vhd"
+add_fileset_file "dpRam-rtl-a.vhd"              VHDL PATH "../../altera/memory/src/dpRam-rtl-a.vhd"
 add_fileset_file "alteraHostInterfaceRtl.vhd"   VHDL PATH "../../altera/hostinterface/src/alteraHostInterfaceRtl.vhd"
 add_fileset_file "hostInterfacePkg.vhd"         VHDL PATH "../../common/hostinterface/src/hostInterfacePkg.vhd"
 add_fileset_file "hostInterfaceRtl.vhd"         VHDL PATH "../../common/hostinterface/src/hostInterfaceRtl.vhd"
 add_fileset_file "irqGenRtl.vhd"                VHDL PATH "../../common/hostinterface/src/irqGenRtl.vhd"
 add_fileset_file "dynamicBridgeRtl.vhd"         VHDL PATH "../../common/hostinterface/src/dynamicBridgeRtl.vhd"
 add_fileset_file "statusControlRegRtl.vhd"      VHDL PATH "../../common/hostinterface/src/statusControlRegRtl.vhd"
-add_fileset_file "parallelInterfaceRtl.vhd"     VHDL PATH "../../common/hostinterface/src/parallelInterfaceRtl.vhd"
-add_fileset_file "global.vhd"                   VHDL PATH "../../common/lib/src/global.vhd"
 
 
 # -----------------------------------------------------------------------------
@@ -209,23 +215,14 @@ set_parameter_property  gBaseU2KQ           AFFECTS_ELABORATION FALSE
 set_parameter_property  gBaseU2KQ           VISIBLE             FALSE
 set_parameter_property  gBaseU2KQ           DISPLAY_HINT        "HEXADECIMAL"
 
-add_parameter           gBaseTpdo           NATURAL             45056
-set_parameter_property  gBaseTpdo           DEFAULT_VALUE       45056
-set_parameter_property  gBaseTpdo           TYPE                NATURAL
-set_parameter_property  gBaseTpdo           DERIVED             TRUE
-set_parameter_property  gBaseTpdo           HDL_PARAMETER       TRUE
-set_parameter_property  gBaseTpdo           AFFECTS_ELABORATION FALSE
-set_parameter_property  gBaseTpdo           VISIBLE             FALSE
-set_parameter_property  gBaseTpdo           DISPLAY_HINT        "HEXADECIMAL"
-
-add_parameter           gBaseRpdo           NATURAL             57344
-set_parameter_property  gBaseRpdo           DEFAULT_VALUE       57344
-set_parameter_property  gBaseRpdo           TYPE                NATURAL
-set_parameter_property  gBaseRpdo           DERIVED             TRUE
-set_parameter_property  gBaseRpdo           HDL_PARAMETER       TRUE
-set_parameter_property  gBaseRpdo           AFFECTS_ELABORATION FALSE
-set_parameter_property  gBaseRpdo           VISIBLE             FALSE
-set_parameter_property  gBaseRpdo           DISPLAY_HINT        "HEXADECIMAL"
+add_parameter           gBasePdo            NATURAL             45056
+set_parameter_property  gBasePdo            DEFAULT_VALUE       45056
+set_parameter_property  gBasePdo            TYPE                NATURAL
+set_parameter_property  gBasePdo            DERIVED             TRUE
+set_parameter_property  gBasePdo            HDL_PARAMETER       TRUE
+set_parameter_property  gBasePdo            AFFECTS_ELABORATION FALSE
+set_parameter_property  gBasePdo            VISIBLE             FALSE
+set_parameter_property  gBasePdo            DISPLAY_HINT        "HEXADECIMAL"
 
 add_parameter           gBaseRes            NATURAL             81920
 set_parameter_property  gBaseRes            DEFAULT_VALUE       81920
@@ -236,29 +233,13 @@ set_parameter_property  gBaseRes            AFFECTS_ELABORATION FALSE
 set_parameter_property  gBaseRes            VISIBLE             FALSE
 set_parameter_property  gBaseRes            DISPLAY_HINT        "HEXADECIMAL"
 
-add_parameter           gHostIfType         NATURAL             0
-set_parameter_property  gHostIfType         DEFAULT_VALUE       0
-set_parameter_property  gHostIfType         TYPE                NATURAL
-set_parameter_property  gHostIfType         DERIVED             TRUE
-set_parameter_property  gHostIfType         HDL_PARAMETER       TRUE
-set_parameter_property  gHostIfType         AFFECTS_ELABORATION FALSE
-set_parameter_property  gHostIfType         VISIBLE             FALSE
-
-add_parameter           gParallelDataWidth  NATURAL             32
-set_parameter_property  gParallelDataWidth  DEFAULT_VALUE       32
-set_parameter_property  gParallelDataWidth  TYPE                NATURAL
-set_parameter_property  gParallelDataWidth  DERIVED             TRUE
-set_parameter_property  gParallelDataWidth  HDL_PARAMETER       TRUE
-set_parameter_property  gParallelDataWidth  AFFECTS_ELABORATION FALSE
-set_parameter_property  gParallelDataWidth  VISIBLE             FALSE
-
-add_parameter           gParallelMultiplex  NATURAL             0
-set_parameter_property  gParallelMultiplex  DEFAULT_VALUE       0
-set_parameter_property  gParallelMultiplex  TYPE                NATURAL
-set_parameter_property  gParallelMultiplex  DERIVED             TRUE
-set_parameter_property  gParallelMultiplex  HDL_PARAMETER       TRUE
-set_parameter_property  gParallelMultiplex  AFFECTS_ELABORATION FALSE
-set_parameter_property  gParallelMultiplex  VISIBLE             FALSE
+add_parameter           gHostAddrWidth      NATURAL             16
+set_parameter_property  gHostAddrWidth      DEFAULT_VALUE       16
+set_parameter_property  gHostAddrWidth      TYPE                NATURAL
+set_parameter_property  gHostAddrWidth      DERIVED             TRUE
+set_parameter_property  gHostAddrWidth      HDL_PARAMETER       TRUE
+set_parameter_property  gHostAddrWidth      AFFECTS_ELABORATION FALSE
+set_parameter_property  gHostAddrWidth      VISIBLE             FALSE
 
 # -----------------------------------------------------------------------------
 # System Info parameters
@@ -276,27 +257,6 @@ set_parameter_property  sys_uniqueId        VISIBLE             FALSE
 # -----------------------------------------------------------------------------
 # GUI parameters
 # -----------------------------------------------------------------------------
-add_parameter           gui_interfaceTyp    NATURAL             0
-set_parameter_property  gui_interfaceTyp    DEFAULT_VALUE       0
-set_parameter_property  gui_interfaceTyp    TYPE                NATURAL
-set_parameter_property  gui_interfaceTyp    DISPLAY_NAME        "Host Interface Configuration"
-set_parameter_property  gui_interfaceTyp    ALLOWED_RANGES      {0:Avalon 1:Parallel}
-set_parameter_property  gui_interfaceTyp    DISPLAY_HINT        RADIO
-
-add_parameter           gui_parallelMltplx  NATURAL             0
-set_parameter_property  gui_parallelMltplx  DEFAULT_VALUE       0
-set_parameter_property  gui_parallelMltplx  TYPE                NATURAL
-set_parameter_property  gui_parallelMltplx  DISPLAY_NAME        "Address-/Data-Bus Multiplexing"
-set_parameter_property  gui_parallelMltplx  ALLOWED_RANGES      {0:Demultiplexed 1:Multiplexed}
-set_parameter_property  gui_parallelMltplx  DISPLAY_HINT        RADIO
-
-add_parameter           gui_parallelDwidth  NATURAL             16
-set_parameter_property  gui_parallelDwidth  DEFAULT_VALUE       16
-set_parameter_property  gui_parallelDwidth  TYPE                NATURAL
-set_parameter_property  gui_parallelDwidth  DISPLAY_NAME        "Data Width"
-set_parameter_property  gui_parallelDwidth  ALLOWED_RANGES      {16 32}
-set_parameter_property  gui_parallelDwidth  UNITS               "Bits"
-
 add_parameter           gui_sizeDynBuf0     NATURAL             2
 set_parameter_property  gui_sizeDynBuf0     DEFAULT_VALUE       2
 set_parameter_property  gui_sizeDynBuf0     TYPE                NATURAL
@@ -367,17 +327,11 @@ set_parameter_property  gui_sizeU2KQ        DISPLAY_NAME        "User-to-Kernel 
 set_parameter_property  gui_sizeU2KQ        UNITS               "Kilobytes"
 set_parameter_property  gui_sizeU2KQ        ALLOWED_RANGES      {1 2 4 8 16 32 64}
 
-add_parameter           gui_sizeTpdo        NATURAL             12288
-set_parameter_property  gui_sizeTpdo        DEFAULT_VALUE       12288
-set_parameter_property  gui_sizeTpdo        TYPE                NATURAL
-set_parameter_property  gui_sizeTpdo        DISPLAY_NAME        "Transmit Process Data Objects (TPDO)"
-set_parameter_property  gui_sizeTpdo        UNITS               "Bytes"
-
-add_parameter           gui_sizeRpdo        NATURAL             24576
-set_parameter_property  gui_sizeRpdo        DEFAULT_VALUE       24576
-set_parameter_property  gui_sizeRpdo        TYPE                NATURAL
-set_parameter_property  gui_sizeRpdo        DISPLAY_NAME        "Receive Process Data Objects (RPDO)"
-set_parameter_property  gui_sizeRpdo        UNITS               "Bytes"
+add_parameter           gui_sizePdo         NATURAL             36864
+set_parameter_property  gui_sizePdo         DEFAULT_VALUE       36864
+set_parameter_property  gui_sizePdo         TYPE                NATURAL
+set_parameter_property  gui_sizePdo         DISPLAY_NAME        "Process Data Objects (PDO)"
+set_parameter_property  gui_sizePdo         UNITS               "Bytes"
 
 add_parameter           gui_sizeTotal       NATURAL             49152
 set_parameter_property  gui_sizeTotal       DEFAULT_VALUE       49152
@@ -399,13 +353,6 @@ set_parameter_property  gui_baseAddrTblVal  DISPLAY_HINT        "HEXADECIMAL"
 # -----------------------------------------------------------------------------
 # GUI configuration
 # -----------------------------------------------------------------------------
-add_display_item        "" "General"                            GROUP TAB
-add_display_item        "General"           gui_interfaceTyp    PARAMETER
-add_display_item        "General"           "Avalon"            GROUP
-add_display_item        "General"           "Parallel Interface" GROUP
-add_display_item        "Parallel Interface" gui_parallelDwidth PARAMETER
-add_display_item        "Parallel Interface" gui_parallelMltplx PARAMETER
-
 add_display_item        "" "Buffer Configuration"               GROUP TAB
 add_display_item        "Buffer Configuration" "Queues"         GROUP
 add_display_item        "Buffer Configuration" "Pdo"            GROUP
@@ -420,8 +367,7 @@ add_display_item        "Queues"            gui_sizeTxVethQ     PARAMETER
 add_display_item        "Queues"            gui_sizeRxVethQ     PARAMETER
 add_display_item        "Queues"            gui_sizeK2UQ        PARAMETER
 add_display_item        "Queues"            gui_sizeU2KQ        PARAMETER
-add_display_item        "Pdo"               gui_sizeTpdo        PARAMETER
-add_display_item        "Pdo"               gui_sizeRpdo        PARAMETER
+add_display_item        "Pdo"               gui_sizePdo         PARAMETER
 
 add_display_item        "" "Information"                        GROUP TAB
 add_display_item        "Information"       "Memory Map"        GROUP
@@ -436,47 +382,12 @@ add_display_item        baseAddrTbl         gui_baseAddrTblVal  PARAMETER
 
 proc fileset_callback { entityName } {
     send_message INFO "Generating entity $entityName"
-
-    set ifCfg [get_interfaceConfiguration]
-
-    switch $ifCfg {
-        0 {
-            # Avalon Interface selected
-            # -> no sdc file required!
-        }
-        1 {
-            # Parallel Interface selected
-            switch [get_parallelInterfaceConfiguration] {
-                0 {
-                    # asynchronous
-                    add_fileset_file "hostinterface/hostinterface-async.sdc" SDC PATH "sdc/hostinterface-async.sdc"
-                }
-                1 {
-                    # synchronous
-                    send_message ERROR "Synchronous Parallel Interface not yet supported!"
-                    #TODO: add sdc file if sync parallel interface is selected
-                }
-                default {
-
-                }
-            }
-        }
-        default {
-
-        }
-    }
 }
 
 proc elaboration_callback {} {
-
-    #control GUI
-    display_parallelInterface
-
     #generate HDL generics and C macros
     generate_version
     generate_memory_mapping
-    generate_hostInterface
-
 }
 
 # -----------------------------------------------------------------------------
@@ -485,68 +396,9 @@ proc elaboration_callback {} {
 
 # -----------------------------------------------------------------------------
 # display control
-proc display_parallelInterface {} {
-    set_display_item_property "Avalon" VISIBLE FALSE
-    set_display_item_property "Parallel Interface" VISIBLE FALSE
-
-    set ifCfg [get_interfaceConfiguration]
-
-    switch $ifCfg {
-        0 {
-            set_display_item_property "Avalon" VISIBLE TRUE
-        }
-        1 {
-            set_display_item_property "Parallel Interface" VISIBLE TRUE
-        }
-        default {
-
-        }
-    }
-}
 
 # -----------------------------------------------------------------------------
 # generate
-proc generate_hostInterface {} {
-    set interfaceConfig [get_interfaceConfiguration]
-    set hdlNameList [list "gHostIfType"]
-    set hdlParamList [list $interfaceConfig]
-
-    # check if Avalon or parallel interface is selected
-    if {$interfaceConfig == 0} {
-        #enable Avalon host
-        set_interface_property host ENABLED TRUE
-
-        #disable parallel host
-        set_interface_property parHost ENABLED FALSE
-
-    } else {
-        #enable parallel host
-        set_interface_property parHost ENABLED TRUE
-
-        #disable Avalon host
-        set_interface_property host ENABLED FALSE
-
-        #terminate multiplex signals
-        set interfaceMultiplex [get_interfaceParallelMultiplex]
-
-        if {$interfaceMultiplex == 0} {
-            #terminate multiplex signals since not in use
-            set_port_property coe_parHost_addressLatchEnable termination true
-            set_port_property coe_parHost_addressData termination true
-        } else {
-            #terminate demultiplex signals since not in use
-            set_port_property coe_parHost_address termination true
-            set_port_property coe_parHost_data termination true
-        }
-
-        #set HDL generics
-        set hdlNameList [concat $hdlNameList "gParallelDataWidth" "gParallelMultiplex"]
-        set hdlParamList [concat $hdlParamList [get_interfaceParallelDwidth] $interfaceMultiplex]
-    }
-
-    set_list_hdl $hdlNameList $hdlParamList
-}
-
 proc generate_version {} {
     set listVersionParam [list "gVersionMajor" "gVersionMinor" "gVersionRevision" "gVersionCount"]
     set listVersionCmacro [list "VERSION_MAJOR" "VERSION_MINOR" "VERSION_REVISION" "VERSION_COUNT"]
@@ -560,12 +412,12 @@ proc generate_version {} {
 }
 
 proc generate_memory_mapping {} {
-    set listSizeGuiParam [list "gui_sizeDynBuf0" "gui_sizeDynBuf1" "gui_sizeErrorCnter" "gui_sizeTxNmtQ" "gui_sizeTxGenQ" "gui_sizeTxSyncQ" "gui_sizeTxVethQ" "gui_sizeRxVethQ" "gui_sizeK2UQ" "gui_sizeU2KQ" "gui_sizeTpdo" "gui_sizeRpdo"]
+    set listSizeGuiParam [list "gui_sizeDynBuf0" "gui_sizeDynBuf1" "gui_sizeErrorCnter" "gui_sizeTxNmtQ" "gui_sizeTxGenQ" "gui_sizeTxSyncQ" "gui_sizeTxVethQ" "gui_sizeRxVethQ" "gui_sizeK2UQ" "gui_sizeU2KQ" "gui_sizePdo"]
     set queueHeaderSize 16
-    set listSizeGuiHeaders [list 0 0 0 $queueHeaderSize $queueHeaderSize $queueHeaderSize $queueHeaderSize $queueHeaderSize $queueHeaderSize $queueHeaderSize 0 0]
-    set listSizeCmacro [list "SIZE_DYNBUF0" "SIZE_DYNBUF1" "SIZE_ERRORCOUNTER" "SIZE_TXNMTQ" "SIZE_TXGENQ" "SIZE_TXSYNCQ" "SIZE_TXVETHQ" "SIZE_RXVETHQ" "SIZE_K2UQ" "SIZE_U2KQ" "SIZE_TPDO" "SIZE_RPDO"]
-    set listBaseCmacro [list "BASE_DYNBUF0" "BASE_DYNBUF1" "BASE_ERRORCOUNTER" "BASE_TXNMTQ" "BASE_TXGENQ" "BASE_TXSYNCQ" "BASE_TXVETHQ" "BASE_RXVETHQ" "BASE_K2UQ" "BASE_U2KQ" "BASE_TPDO" "BASE_RPDO"]
-    set listBaseParam [list "gBaseDynBuf0" "gBaseDynBuf1" "gBaseErrCntr" "gBaseTxNmtQ" "gBaseTxGenQ" "gBaseTxSynQ" "gBaseTxVetQ" "gBaseRxVetQ" "gBaseK2UQ" "gBaseU2KQ" "gBaseTpdo" "gBaseRpdo" "gBaseRes"]
+    set listSizeGuiHeaders [list 0 0 0 $queueHeaderSize $queueHeaderSize $queueHeaderSize $queueHeaderSize $queueHeaderSize $queueHeaderSize $queueHeaderSize 0]
+    set listSizeCmacro [list "SIZE_DYNBUF0" "SIZE_DYNBUF1" "SIZE_ERRORCOUNTER" "SIZE_TXNMTQ" "SIZE_TXGENQ" "SIZE_TXSYNCQ" "SIZE_TXVETHQ" "SIZE_RXVETHQ" "SIZE_K2UQ" "SIZE_U2KQ" "SIZE_PDO"]
+    set listBaseCmacro [list "BASE_DYNBUF0" "BASE_DYNBUF1" "BASE_ERRORCOUNTER" "BASE_TXNMTQ" "BASE_TXGENQ" "BASE_TXSYNCQ" "BASE_TXVETHQ" "BASE_RXVETHQ" "BASE_K2UQ" "BASE_U2KQ" "BASE_PDO"]
+    set listBaseParam [list "gBaseDynBuf0" "gBaseDynBuf1" "gBaseErrCntr" "gBaseTxNmtQ" "gBaseTxGenQ" "gBaseTxSynQ" "gBaseTxVetQ" "gBaseRxVetQ" "gBaseK2UQ" "gBaseU2KQ" "gBasePdo" "gBaseRes"]
     set statusControlBase 0
     set statusControlSize 2048
     set memorySpanKb 128
@@ -591,19 +443,10 @@ proc generate_memory_mapping {} {
 
     set_parameter_value gui_sizeTotal $memorySpan
 
-    #test memory mapping
-    set ret [check_memory_mapping $listBase $memorySpanKb]
+    #calculate required address width of host log2(size-1)
+    set hostAddrWidth [ipcoreUtil::logDualis [expr ${memorySpan} - 1 ] ]
 
-    switch $ret {
-        "SUCCESSFUL" { }
-        "EXCEED" {
-            send_message Error "The buffer size settings exceed the $memorySpanKb Kilobyte span!"
-        }
-        default {
-            send_message Warning "check_memory_mapping returned $ret"
-        }
-    }
-
+    set_parameter_value gHostAddrWidth $hostAddrWidth
     set_list_hdl $listBaseParam $listBase
 
     set_list_cmacro $listBaseCmacro $listBase
@@ -681,97 +524,6 @@ proc get_required_memory_span { listBase } {
     return [lindex $listBase end]
 }
 
-proc check_memory_mapping { listBase memorySpanKb } {
-    set memorySpan [expr $memorySpanKb * 1024]
-    set ret "SUCCESSFUL"
-
-    set lastListBase [get_required_memory_span $listBase]
-
-    if {$lastListBase <= $memorySpan}  {
-
-    } else {
-        set ret "EXCEED"
-    }
-
-    return $ret
-}
-
-# functions for reading/checking GUI parameters
-proc get_interfaceConfiguration { } {
-    set param "gui_interfaceTyp"
-    set val [get_parameter_value $param]
-
-    switch $val  {
-        0 {
-        #Avalon
-        }
-        1 {
-        #Parallel
-        }
-        default {
-            send_message Error "Set [get_parameter_property $param DISPLAY_NAME]"
-        }
-    }
-
-    return $val
-}
-
-proc get_parallelInterfaceConfiguration { } {
-    #Note: This procedure returns always 0 (asynchronous), since no GUI configuration
-    #      is implemented!
-    set param ""
-    set val 0
-
-    switch $val {
-        0 {
-        # asynchronous configuration
-        }
-        1 {
-        # synchronous configuration
-        }
-        default {
-        }
-    }
-
-    return $val
-}
-
-proc get_interfaceParallelDwidth { } {
-    set param "gui_parallelDwidth"
-    set val [get_parameter_value $param]
-
-    switch $val  {
-        16 {
-        }
-        32 {
-        }
-        default {
-            send_message Error "Set [get_parameter_property $param DISPLAY_NAME]"
-        }
-    }
-
-    return $val
-}
-
-proc get_interfaceParallelMultiplex { } {
-    set param "gui_parallelMltplx"
-    set val [get_parameter_value $param]
-
-    switch $val  {
-        0 {
-        #Demultiplexed
-        }
-        1 {
-        #Multiplexed
-        }
-        default {
-            send_message Error "Set [get_parameter_property $param DISPLAY_NAME]"
-        }
-    }
-
-    return $val
-}
-
 # utilities
 proc set_list_hdl { listParam listValue } {
     foreach param $listParam value $listValue {
@@ -831,9 +583,9 @@ set_interface_property host readWaitTime 1
 set_interface_property host setupTime 0
 set_interface_property host timingUnits Cycles
 set_interface_property host writeWaitTime 0
-set_interface_property host ENABLED FALSE
+set_interface_property host ENABLED true
 
-add_interface_port host avs_host_address address Input 15
+add_interface_port host avs_host_address address Input gHostAddrWidth-2
 add_interface_port host avs_host_byteenable byteenable Input 4
 add_interface_port host avs_host_read read Input 1
 add_interface_port host avs_host_readdata readdata Output 32
@@ -926,17 +678,3 @@ set_interface_property irqOut associatedReset r0
 set_interface_property irqOut ENABLED true
 
 add_interface_port irqOut ins_irqOut_irq irq Output 1
-
-
-# connection point parallel host interface
-add_interface parHost conduit end
-set_interface_property parHost ENABLED false
-add_interface_port parHost coe_parHost_chipselect export Input 1
-add_interface_port parHost coe_parHost_read export Input 1
-add_interface_port parHost coe_parHost_write export Input 1
-add_interface_port parHost coe_parHost_addressLatchEnable export Input 1
-add_interface_port parHost coe_parHost_acknowledge export Output 1
-add_interface_port parHost coe_parHost_byteenable export Input gParallelDataWidth/8
-add_interface_port parHost coe_parHost_address export Input 16
-add_interface_port parHost coe_parHost_data export Bidir gParallelDataWidth
-add_interface_port parHost coe_parHost_addressData export Bidir gParallelDataWidth

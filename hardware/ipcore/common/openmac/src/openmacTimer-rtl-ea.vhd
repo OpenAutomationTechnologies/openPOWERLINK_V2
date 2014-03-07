@@ -7,7 +7,7 @@
 --!          time and generating interrupts.
 -------------------------------------------------------------------------------
 --
---    (c) B&R, 2013
+--    (c) B&R, 2014
 --
 --    Redistribution and use in source and binary forms, with or without
 --    modification, are permitted provided that the following conditions
@@ -44,9 +44,13 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+--! Common library
+library libcommon;
+--! Use common library global package
+use libcommon.global.all;
+
+--! Work library
 library work;
---! use global library
-use work.global.all;
 --! use openmac package
 use work.openmacPkg.all;
 
@@ -94,7 +98,7 @@ architecture rtl of openmacTimer is
     signal toggle_s             : std_logic;
 begin
     oIrq <= irq_s;
-    oToggle <= toggle_s;
+    oToggle <= toggle_s when gMacTimer_2ndTimer = TRUE else cInactivated;
 
     --! This process generates the interrupt and toggle signals and handles the
     --! register writes.

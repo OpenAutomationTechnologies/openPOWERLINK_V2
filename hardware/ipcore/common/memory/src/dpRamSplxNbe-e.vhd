@@ -1,13 +1,14 @@
 -------------------------------------------------------------------------------
---! @file dpRam-e.vhd
+--! @file dpRamSplxNbe-e.vhd
 --
---! @brief Dual Port Ram Entity
+--! @brief Simplex Dual Port Ram without byteenables entity
 --
---! @details This is the DPRAM entity
+--! @details This is the Simplex DPRAM without byteenables entity.
+--!          The DPRAM has one write and one read port only.
 --
 -------------------------------------------------------------------------------
 --
---    (c) B&R, 2013
+--    (c) B&R, 2014
 --
 --    Redistribution and use in source and binary forms, with or without
 --    modification, are permitted provided that the following conditions
@@ -44,15 +45,18 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
---! use global library
-use work.global.all;
+--! Common library
+library libcommon;
+--! Use common library global package
+use libcommon.global.all;
 
-entity dpRam is
+entity dpRamSplxNbe is
     generic (
-        --! Data width [bit]
-        gWordWidth      : natural := 32;
+        --! Word width [bit]
+        gWordWidth      : natural := 16;
         --! Number of words
         gNumberOfWords  : natural := 1024;
+        --! Word width [bit]
         --! Initialization file
         gInitFile       : string := "UNUSED"
     );
@@ -66,26 +70,16 @@ entity dpRam is
         iWriteEnable_A  : in std_logic;
         --! Address of port A
         iAddress_A      : in std_logic_vector(logDualis(gNumberOfWords)-1 downto 0);
-        --! Byteenable of port A
-        iByteenable_A   : in std_logic_vector(gWordWidth/8-1 downto 0);
         --! Writedata of port A
         iWritedata_A    : in std_logic_vector(gWordWidth-1 downto 0);
-        --! Readdata of port A
-        oReaddata_A     : out std_logic_vector(gWordWidth-1 downto 0);
         -- PORT B
         --! Clock of port B
         iClk_B          : in std_logic;
         --! Enable of port B
         iEnable_B       : in std_logic;
-        --! Write enable of port B
-        iWriteEnable_B  : in std_logic;
-        --! Byteenable of port B
-        iByteenable_B   : in std_logic_vector(gWordWidth/8-1 downto 0);
         --! Address of port B
         iAddress_B      : in std_logic_vector(logDualis(gNumberOfWords)-1 downto 0);
-        --! Writedata of port B
-        iWritedata_B    : in std_logic_vector(gWordWidth-1 downto 0);
         --! Readdata of port B
         oReaddata_B     : out std_logic_vector(gWordWidth-1 downto 0)
     );
-end dpRam;
+end dpRamSplxNbe;

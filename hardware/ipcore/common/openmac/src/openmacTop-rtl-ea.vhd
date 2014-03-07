@@ -7,7 +7,7 @@
 --!          Additional components are provided for packet buffer storage.
 -------------------------------------------------------------------------------
 --
---    (c) B&R, 2013
+--    (c) B&R, 2014
 --
 --    Redistribution and use in source and binary forms, with or without
 --    modification, are permitted provided that the following conditions
@@ -44,9 +44,13 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+--! Common library
+library libcommon;
+--! Use common library global package
+use libcommon.global.all;
+
+--! Work library
 library work;
---! use global library
-use work.global.all;
 --! use openmac package
 use work.openmacPkg.all;
 
@@ -264,6 +268,18 @@ architecture rtl of openmacTop is
     constant cPhyPortLow    : natural := cHubIntPort+1;
     --! Highest index of Phy port
     constant cPhyPortHigh   : natural := gPhyPortCount+1;
+
+    --! Enable packet buffer interface
+    constant cEnablePacketBuffer    : boolean := (
+        gPacketBufferLocRx = cPktBufLocal or gPacketBufferLocTx = cPktBufLocal
+    );
+    --! Enable dma interface
+    constant cEnableDma             : boolean := (
+        gPacketBufferLocRx = cPktBufExtern or gPacketBufferLocTx = cPktBufExtern
+    );
+
+    --! Fixed openMAC DMA address width
+    constant cDmaAddrWidth  : natural := 32;
     ---------------------------------------------------------------------------
     -- Component types
     ---------------------------------------------------------------------------
@@ -287,7 +303,7 @@ architecture rtl of openmacTop is
         dma_acknowledge     : std_logic;
         dma_requestOverflow : std_logic;
         dma_readLength      : std_logic_vector(11 downto 0);
-        dma_address         : std_logic_vector(gDmaAddrWidth-1 downto 1);
+        dma_address         : std_logic_vector(cDmaAddrWidth-1 downto 1);
         dma_writedata       : std_logic_vector(15 downto 0);
         dma_readdata        : std_logic_vector(15 downto 0);
         rmii                : tRmii;
@@ -489,31 +505,26 @@ architecture rtl of openmacTop is
     -- Interrupt signals
     ---------------------------------------------------------------------------
     --! Interrupt table vector
-    signal irqTable         : tMacRegIrqTable; --aliases are used to assign it
-    --! Alias for MAC Tx Interrupt
-    alias irqTable_macTx    : std_logic is irqTable(cMacRegIrqTable_macTx);
-    --! Alias for MAC Rx Interrupt
-    alias irqTable_macRx    : std_logic is irqTable(cMacRegIrqTable_macRx);
+    signal irqTable : tMacRegIrqTable;
 
     ---------------------------------------------------------------------------
     -- DMA error signals
     ---------------------------------------------------------------------------
     --! DMA error table
-    signal dmaErrorTable        : tMacDmaErrorTable; --aliases are used to assign it
-    --! Alias for DMA read error
-    alias dmaErrorTable_read    : std_logic is dmaErrorTable(cMacDmaErrorTable_read);
-    --! Alias for DMA write error
-    alias dmaErrorTable_write   : std_logic is dmaErrorTable(cMacDmaErrorTable_write);
+    signal dmaErrorTable : tMacDmaErrorTable;
 
     ---------------------------------------------------------------------------
     -- RMII registers for latching input and output path (improves timing)
     ---------------------------------------------------------------------------
     --! Rmii Rx paths
-    signal rmiiRxPath_reg       : tRmiiPathArray(gPhyPortCount-1 downto 0);
+    signal rmiiRxPath_reg       : tRmiiPathArray(gPhyPortCount-1 downto 0)
+                                    := (others => cRmiiPathInit); -- avoid warnings
     --! Rmii Rx error paths
-    signal rmiiRxPathError_reg  : std_logic_vector(gPhyPortCount-1 downto 0);
+    signal rmiiRxPathError_reg  : std_logic_vector(gPhyPortCount-1 downto 0)
+                                    := (others => cInactivated); -- avoid warnings
     --! Rmii Tx paths
-    signal rmiiTxPath_reg       : tRmiiPathArray(gPhyPortCount-1 downto 0);
+    signal rmiiTxPath_reg       : tRmiiPathArray(gPhyPortCount-1 downto 0)
+                                    := (others => cRmiiPathInit); -- avoid warnings
 
     ---------------------------------------------------------------------------
     -- MII signals
@@ -599,31 +610,43 @@ begin
         oMacTimer_readdata      <= inst_openmacTimer.readdata;
         oMacTimer_waitrequest   <= not(ack_macTimer.write or ack_macTimer.read);
 
-        oPktBuf_readdata        <= inst_pktBuffer.host.readdata;
-        oPktBuf_waitrequest     <= not(ack_pktBuf.write or ack_pktBuf.read);
+        oPktBuf_readdata    <=  inst_pktBuffer.host.readdata when cEnablePacketBuffer else
+                                (others => cInactivated);
 
-        oDma_address        <= inst_dmaMaster.master.address;
-        oDma_burstcount     <= inst_dmaMaster.master.burstcount;
-        oDma_burstcounter   <= inst_dmaMaster.master.burstcounter;
-        oDma_byteenable     <= inst_dmaMaster.master.byteenable;
-        oDma_read           <= inst_dmaMaster.master.read;
-        oDma_write          <= inst_dmaMaster.master.write;
-        oDma_writedata      <= inst_dmaMaster.master.writedata;
+        oPktBuf_waitrequest <=  not(ack_pktBuf.write or ack_pktBuf.read) when cEnablePacketBuffer else
+                                cActivated;
+
+        oDma_address        <=  inst_dmaMaster.master.address when cEnableDma else
+                                (others => cInactivated);
+        oDma_burstcount     <=  inst_dmaMaster.master.burstcount when cEnableDma else
+                                (others => cInactivated);
+        oDma_burstcounter   <=  inst_dmaMaster.master.burstcounter when cEnableDma else
+                                (others => cInactivated);
+        oDma_byteenable     <=  inst_dmaMaster.master.byteenable when cEnableDma else
+                                (others => cInactivated);
+        oDma_read           <=  inst_dmaMaster.master.read when cEnableDma else
+                                cInactivated;
+        oDma_write          <=  inst_dmaMaster.master.write when cEnableDma else
+                                cInactivated;
+        oDma_writedata      <=  inst_dmaMaster.master.writedata when cEnableDma else
+                                (others => cInactivated);
 
         oMacTimer_interrupt <= inst_openmacTimer.interrupt;
         oMacTx_interrupt    <= not inst_openmac.nTxInterrupt;
         oMacRx_interrupt    <= not inst_openmac.nRxInterrupt;
 
-        oRmii_Tx <= rmiiTxPath_reg;
-
-        oMii_Tx <= miiTxPath;
+        oRmii_Tx    <=  rmiiTxPath_reg when gPhyPortType = cPhyPortRmii else
+                        (others => cRmiiPathInit);
+        oMii_Tx     <=  miiTxPath when gPhyPortType = cPhyPortMii else
+                        (others => cMiiPathInit);
 
         oSmi_clk            <= (others => inst_phyMgmt.smiClk);
         oSmi_data_out       <= (others => inst_phyMgmt.smiDataOut);
         oSmi_data_outEnable <= inst_phyMgmt.smiDataOutEnable;
         onPhy_reset         <= (others => inst_phyMgmt.nPhyReset);
 
-        oActivity <= inst_activity.activity;
+        oActivity <=    inst_activity.activity when gEnableActivity = cTrue else
+                        cInactivated;
 
         ASSIGNMACTIMER : process (
             inst_openmacTimer
@@ -756,8 +779,11 @@ begin
         );
 
         -- Assign interrupts to irq Table
-        irqTable_macRx <= not inst_openmac.nRxInterrupt;
-        irqTable_macTx <= not inst_openmac.nTxInterrupt;
+        irqTable <= (
+            cMacRegIrqTable_macRx   => not inst_openmac.nRxInterrupt,
+            cMacRegIrqTable_macTx   => not inst_openmac.nTxInterrupt,
+            others                  => cInactivated
+        );
 
         -----------------------------------------------------------------------
         -- The phy management
@@ -896,7 +922,10 @@ begin
             vDmaAddrDword_tmp   := vDmaAddrWord_tmp(vDmaAddrDword_tmp'range); -- only assigned LEFT downto 2
 
             -- Packet buffer address is for 32 bit (dwords)
-            inst_pktBuffer.dma.address <= vDmaAddrDword_tmp(inst_pktBuffer.dma.address'range);
+            inst_pktBuffer.dma.address  <= std_logic_vector(resize(
+                                                unsigned(vDmaAddrDword_tmp),
+                                                inst_pktBuffer.dma.address'length)
+                                            );
 
             -- DMA writes words, so duplicate words to packet buffer
             inst_pktBuffer.dma.writedata <= inst_openmac.dma_writedata & inst_openmac.dma_writedata;
@@ -939,7 +968,10 @@ begin
         inst_dmaMaster.dma.reqRead          <= inst_openmac.dma_request and inst_openmac.nDma_write;
         inst_dmaMaster.dma.reqOverflow      <= inst_openmac.dma_requestOverflow;
         inst_dmaMaster.dma.readLength       <= inst_openmac.dma_readLength;
-        inst_dmaMaster.dma.address          <= inst_openmac.dma_address;
+        inst_dmaMaster.dma.address          <= std_logic_vector(resize(
+                                                    unsigned(inst_openmac.dma_address),
+                                                    inst_dmaMaster.dma.address'length)
+                                                );
         inst_dmaMaster.dma.writedata        <= inst_openmac.dma_writedata;
         inst_dmaMaster.master.clk           <= iDmaClk;
         inst_dmaMaster.master.rst           <= iDmaRst;
@@ -950,8 +982,11 @@ begin
         inst_dmaMaster.mac_txOff            <= inst_openmac.dma_readDone;
 
         -- Assign DMA error table
-        dmaErrorTable_read  <= inst_dmaMaster.dma.readError;
-        dmaErrorTable_write <= inst_dmaMaster.dma.writeError;
+        dmaErrorTable <= (
+            cMacDmaErrorTable_read  => inst_dmaMaster.dma.readError,
+            cMacDmaErrorTable_write => inst_dmaMaster.dma.writeError,
+            others                  => cInactivated
+        );
 
         -----------------------------------------------------------------------
         -- The activity generator
@@ -970,7 +1005,7 @@ begin
     --! dynamic response delay.
     THEOPENMAC : entity work.openmac
         generic map (
-            gDmaHighAddr    => gDmaAddrWidth-1,
+            gDmaHighAddr    => cDmaAddrWidth-1,
             gTimerEnable    => TRUE,
             gTimerTrigTx    => TRUE,
             gAutoTxDel      => TRUE
@@ -1051,7 +1086,7 @@ begin
     ---------------------------------------------------------------------------
     --! Generate address decoders for MAC REG memory map.
     GENMACREG_ADDRDEC : for i in cMemMapTable'range generate
-        THEADDRDEC : entity work.addrDecode
+        THEADDRDEC : entity libcommon.addrDecode
             generic map (
                 gAddrWidth  => iMacReg_address'length,
                 gBaseAddr   => cMemMapTable(i).base,
@@ -1135,7 +1170,7 @@ begin
 
         --! Generate ack delay for writes.
         GENWR_ACKDELAY : if cMemAccessDelayTable(i).write > 0 generate
-            THE_CNT : entity work.cnt
+            THE_CNT : entity libcommon.cnt
                 generic map (
                     gCntWidth   => logDualis(cMemAccessDelayTable(i).write + 1),
                     gTcntVal    => cMemAccessDelayTable(i).write
@@ -1156,7 +1191,7 @@ begin
 
         --! Generate ack delay for reads.
         GENRD_ACKDELAY : if cMemAccessDelayTable(i).read > 0 generate
-            THE_CNT : entity work.cnt
+            THE_CNT : entity libcommon.cnt
                 generic map (
                     gCntWidth   => logDualis(cMemAccessDelayTable(i).read + 1),
                     gTcntVal    => cMemAccessDelayTable(i).read

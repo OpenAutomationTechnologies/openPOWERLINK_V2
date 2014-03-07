@@ -1,16 +1,13 @@
---! @file dpRamSplx-rtl-a.vhd
+-------------------------------------------------------------------------------
+--! @file dpRam-e.vhd
 --
---! @brief Simplex Dual Port Ram Register Transfer Level Architecture
+--! @brief Dual Port Ram Entity
 --
---! @details This is the Simplex DPRAM intended for synthesis on Altera
---!          platforms only.
---!          Timing as follows [clk-cycles]: write=0 / read=1
+--! @details This is the DPRAM entity
 --
 -------------------------------------------------------------------------------
--- Architecture : rtl
--------------------------------------------------------------------------------
 --
---    (c) B&R, 2013
+--    (c) B&R, 2014
 --
 --    Redistribution and use in source and binary forms, with or without
 --    modification, are permitted provided that the following conditions
@@ -42,40 +39,55 @@
 --    POSSIBILITY OF SUCH DAMAGE.
 --
 -------------------------------------------------------------------------------
+
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
---! use altera_mf library
-library altera_mf;
-use altera_mf.altera_mf_components.all;
+--! Common library
+library libcommon;
+--! Use common library global package
+use libcommon.global.all;
 
-architecture rtl of dpRamSplx is
-begin
-    altsyncram_component : altsyncram
-        generic map (
-            operation_mode          => "DUAL_PORT",
-            intended_device_family  => "Cyclone IV",
-            init_file               => gInitFile,
-            numwords_a              => gNumberOfWordsA,
-            numwords_b              => gNumberOfWordsB,
-            widthad_a               => logDualis(gNumberOfWordsA),
-            widthad_b               => logDualis(gNumberOfWordsB),
-            width_a                 => gWordWidthA,
-            width_b                 => gWordWidthB,
-            width_byteena_a         => gByteenableWidthA,
-            width_byteena_b         => gByteenableWidthA
-        )
-        port map (
-            clock0      => iClk_A,
-            clocken0    => iEnable_A,
-            wren_a      => iWriteEnable_A,
-            address_a   => iAddress_A,
-            byteena_a   => iByteenable_A,
-            data_a      => iWritedata_A,
-            clock1      => iClk_B,
-            clocken1    => iEnable_B,
-            address_b   => iAddress_B,
-            q_b         => oReaddata_B
-        );
-end architecture rtl;
+entity dpRam is
+    generic (
+        --! Data width [bit]
+        gWordWidth      : natural := 32;
+        --! Number of words
+        gNumberOfWords  : natural := 1024;
+        --! Initialization file
+        gInitFile       : string := "UNUSED"
+    );
+    port (
+        -- PORT A
+        --! Clock of port A
+        iClk_A          : in std_logic;
+        --! Enable of port A
+        iEnable_A       : in std_logic;
+        --! Write enable of port A
+        iWriteEnable_A  : in std_logic;
+        --! Address of port A
+        iAddress_A      : in std_logic_vector(logDualis(gNumberOfWords)-1 downto 0);
+        --! Byteenable of port A
+        iByteenable_A   : in std_logic_vector(gWordWidth/8-1 downto 0);
+        --! Writedata of port A
+        iWritedata_A    : in std_logic_vector(gWordWidth-1 downto 0);
+        --! Readdata of port A
+        oReaddata_A     : out std_logic_vector(gWordWidth-1 downto 0);
+        -- PORT B
+        --! Clock of port B
+        iClk_B          : in std_logic;
+        --! Enable of port B
+        iEnable_B       : in std_logic;
+        --! Write enable of port B
+        iWriteEnable_B  : in std_logic;
+        --! Byteenable of port B
+        iByteenable_B   : in std_logic_vector(gWordWidth/8-1 downto 0);
+        --! Address of port B
+        iAddress_B      : in std_logic_vector(logDualis(gNumberOfWords)-1 downto 0);
+        --! Writedata of port B
+        iWritedata_B    : in std_logic_vector(gWordWidth-1 downto 0);
+        --! Readdata of port B
+        oReaddata_B     : out std_logic_vector(gWordWidth-1 downto 0)
+    );
+end dpRam;

@@ -670,8 +670,8 @@ INPUT                  = mainpage.txt \
                          ../../common/lib/src/global.vhd \
                          ../../common/lib/src/addrDecodeRtl.vhd \
                          ../../common/lib/src/cntRtl.vhd \
-                         ../../common/lib/src/dpRam-e.vhd \
-                         ../../common/lib/src/dpRamSplx-e.vhd \
+                         ../../common/memory/src/dpRam-e.vhd \
+                         ../../common/memory/src/dpRamSplx-e.vhd \
                          ../../common/lib/src/edgedetectorRtl.vhd \
                          ../../common/lib/src/synchronizerRtl.vhd \
                          ../../common/lib/src/syncTog-rtl-ea.vhd \
@@ -692,13 +692,13 @@ INPUT                  = mainpage.txt \
                          ../../common/openmac/src/convRmiiToMii-rtl-ea.vhd \
                          ../../common/openmac/src/openmac-rtl-ea.vhd \
                          ../../common/openmac/src/openmacTop-rtl-ea.vhd \
-                         ../../altera/lib/src/dpRam-rtl-a.vhd \
-                         ../../altera/lib/src/dpRamSplx-rtl-a.vhd \
+                         ../../altera/memory/src/dpRam-rtl-a.vhd \
+                         ../../altera/memory/src/dpRamSplx-rtl-a.vhd \
                          ../../altera/fifo/src/asyncFifo-syn-a.vhd \
                          ../../altera/openmac/src/alteraOpenmacTop-rtl-ea.vhd \
-                         ../../xilinx/lib/src/dpRam-rtl-a.vhd \
-                         ../../xilinx/lib/src/dpRamSplx-rtl-a.vhd \
-                         ../../xilinx/lib/src/dpRamSplxNbe-rtl-a.vhd \
+                         ../../xilinx/memory/src/dpRam-rtl-a.vhd \
+                         ../../xilinx/memory/src/dpRamSplx-rtl-a.vhd \
+                         ../../xilinx/memory/src/dpRamSplxNbe-rtl-a.vhd \
                          ../../xilinx/openmac/src/ipifMasterHandler-rtl-ea.vhd \
                          ../../xilinx/openmac/src/axi_openmac-rtl-ea.vhd
 

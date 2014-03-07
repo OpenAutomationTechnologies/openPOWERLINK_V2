@@ -1,14 +1,16 @@
 Revision {#revision}
 ========
 
+- [FIX] Fix openMAC DMA address width
+- [TASK] Update license header
+- [FIX] Fix synthesis warnings in openMAC components
+- [FEATURE] Create libraries for common vhdl sources
+- [TASK] Move DPRAM components in memory subdirectory
 - [TASK] Set ipcore versions to 1.0.0
 - [TASK] Revise simulation handling
-- [TASK] Create omethlib documentation
 - [FIX] Fix openHUB doxygen documentation
 - [FEATURE] Add openMAC doxygen documentation
 - [TASK] Refactor openMAC core
-- [FIX] Make driver sw independent
-- [TASK] Rename ipcore drivers directory
 - [FIX] Add select strobe for write decoding to openMAC timer
 - [TASK] Remove POWERLINK IP-Core
 - [FIX] Add simplex DPRAM implementation for Xilinx platform
