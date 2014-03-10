@@ -149,6 +149,7 @@ int main (int argc, char **argv)
 
     printf("----------------------------------------------------\n");
     printf("openPOWERLINK console CN DEMO application\n");
+    printf("using openPOWERLINK Stack: %s\n", PLK_DEFINED_STRING_VERSION);
     printf("----------------------------------------------------\n");
 
     if ((ret = initPowerlink(CYCLE_LEN, aMacAddr_l, opts.nodeId))
