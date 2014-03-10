@@ -114,6 +114,9 @@ static tOplkError processCsStoppedDllWaitSoa(tNmtState nmtState_p, tNmtEvent nmt
 static tOplkError processCsStoppedDllGsInit(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
                                             tEventDllError* pDllEvent_p);
 
+static BOOL triggerLossOfSocEvent(void);
+static BOOL triggerLossOfSocEventOnFrameTimeout(void);
+
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
@@ -436,8 +439,11 @@ static tOplkError processCsFullCycleDllWaitPreq(tNmtState nmtState_p, tNmtEvent 
                 break;
             }
 
-            // report DLL_CEV_LOSS_SOC and DLL_CEV_LOSS_SOA
-            pDllEvent_p->dllErrorEvents |= DLL_ERR_CN_LOSS_SOA | DLL_ERR_CN_LOSS_SOC;
+            if(triggerLossOfSocEventOnFrameTimeout())
+                pDllEvent_p->dllErrorEvents |= DLL_ERR_CN_LOSS_SOC;
+
+            // report DLL_CEV_LOSS_SOA
+            pDllEvent_p->dllErrorEvents |= DLL_ERR_CN_LOSS_SOA;
 
             // enter DLL_CS_WAIT_SOC
             dllkInstance_g.dllState = kDllCsWaitSoc;
@@ -507,6 +513,10 @@ static tOplkError processCsFullCycleDllWaitSoc(tNmtState nmtState_p, tNmtEvent n
             // start of cycle and isochronous phase
             // enter DLL_CS_WAIT_PREQ
             dllkInstance_g.dllState = kDllCsWaitPreq;
+
+            // Valid Soc arrived -> Reset report flags!
+            dllkInstance_g.lossSocStatus.fLossReported = FALSE;
+            dllkInstance_g.lossSocStatus.fTimeoutOccurred = FALSE;
             break;
 
 //          case kNmtEventDllCePres: // jba why commented out
@@ -520,12 +530,15 @@ static tOplkError processCsFullCycleDllWaitSoc(tNmtState nmtState_p, tNmtEvent n
                 // SoC back to PreOp2.
                 break;
             }
-            // fall through
 
+            if(triggerLossOfSocEventOnFrameTimeout())
+                pDllEvent_p->dllErrorEvents |= DLL_ERR_CN_LOSS_SOC;
+
+            break;
         case kNmtEventDllCePreq:
         case kNmtEventDllCeSoa:
-            // report DLL_CEV_LOSS_SOC
-            pDllEvent_p->dllErrorEvents |= DLL_ERR_CN_LOSS_SOC;
+            if(triggerLossOfSocEvent())
+                pDllEvent_p->dllErrorEvents |= DLL_ERR_CN_LOSS_SOC;
 
         case kNmtEventDllCeAsnd:
         default:
@@ -565,11 +578,20 @@ static tOplkError processCsFullCycleDllWaitSoa(tNmtState nmtState_p, tNmtEvent n
                 // SoC back to PreOp2.
                 break;
             }
-            // fall through
 
+            if(triggerLossOfSocEventOnFrameTimeout())
+                pDllEvent_p->dllErrorEvents |= DLL_ERR_CN_LOSS_SOC;
+
+            pDllEvent_p->dllErrorEvents |= DLL_ERR_CN_LOSS_SOA;
+
+            dllkInstance_g.dllState = kDllCsWaitSoc;
+            break;
         case kNmtEventDllCePreq:
-            // report DLL_CEV_LOSS_SOC and DLL_CEV_LOSS_SOA
-            pDllEvent_p->dllErrorEvents |= DLL_ERR_CN_LOSS_SOA | DLL_ERR_CN_LOSS_SOC;
+            if(triggerLossOfSocEvent())
+                pDllEvent_p->dllErrorEvents |= DLL_ERR_CN_LOSS_SOC;
+
+            // report DLL_CEV_LOSS_SOA
+            pDllEvent_p->dllErrorEvents |= DLL_ERR_CN_LOSS_SOA;
 
         case kNmtEventDllCeSoa:
             // enter DLL_CS_WAIT_SOC
@@ -649,8 +671,11 @@ static tOplkError processCsStoppedDllWaitPreq(tNmtState nmtState_p, tNmtEvent nm
             break;
 
         case kNmtEventDllCeFrameTimeout:    // DLL_CT8
-            // report DLL_CEV_LOSS_SOC and DLL_CEV_LOSS_SOA
-            pDllEvent_p->dllErrorEvents |= DLL_ERR_CN_LOSS_SOA | DLL_ERR_CN_LOSS_SOC;
+            if(triggerLossOfSocEventOnFrameTimeout())
+                pDllEvent_p->dllErrorEvents |= DLL_ERR_CN_LOSS_SOC;
+
+            // report DLL_CEV_LOSS_SOA
+            pDllEvent_p->dllErrorEvents |= DLL_ERR_CN_LOSS_SOA;
             //fall through
 
         case kNmtEventDllCeSoa:
@@ -702,9 +727,14 @@ static tOplkError processCsStoppedDllWaitSoc(tNmtState nmtState_p, tNmtEvent nmt
 //          case kNmtEventDllCePres: //jba why commented out?
         case kNmtEventDllCePreq:            // DLL_CT4
         case kNmtEventDllCeSoa:
+            if(triggerLossOfSocEvent())
+                pDllEvent_p->dllErrorEvents |= DLL_ERR_CN_LOSS_SOC;
+
+            break;
         case kNmtEventDllCeFrameTimeout:
-            // report DLL_CEV_LOSS_SOC
-            pDllEvent_p->dllErrorEvents |= DLL_ERR_CN_LOSS_SOC;
+            if(triggerLossOfSocEventOnFrameTimeout())
+                pDllEvent_p->dllErrorEvents |= DLL_ERR_CN_LOSS_SOC;
+
             //fall through
 #if defined(CONFIG_INCLUDE_MASND)
         case kNmtEventDllCeAInv:
@@ -739,8 +769,11 @@ static tOplkError processCsStoppedDllWaitSoa(tNmtState nmtState_p, tNmtEvent nmt
     switch (nmtEvent_p)
     {
         case kNmtEventDllCeFrameTimeout:            // DLL_CT3
-            // report DLL_CEV_LOSS_SOC and DLL_CEV_LOSS_SOA
-            pDllEvent_p->dllErrorEvents |= DLL_ERR_CN_LOSS_SOA | DLL_ERR_CN_LOSS_SOC;
+            if(triggerLossOfSocEventOnFrameTimeout())
+                pDllEvent_p->dllErrorEvents |= DLL_ERR_CN_LOSS_SOC;
+
+            // report DLL_CEV_LOSS_SOA
+            pDllEvent_p->dllErrorEvents |= DLL_ERR_CN_LOSS_SOA;
             // fall through
 
 #if defined(CONFIG_INCLUDE_MASND)
@@ -801,6 +834,77 @@ static tOplkError processCsStoppedDllGsInit(tNmtState nmtState_p, tNmtEvent nmtE
     // enter DLL_CS_WAIT_PREQ
     dllkInstance_g.dllState = kDllCsWaitSoa;
     return kErrorOk;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Check if the loss of SoC event shall be triggered
+
+The loss of SoC event shall only be reported once per cycle to the error
+handler. This functions checks if the event was already reported in this
+cycle.
+
+\return The return indicates if a loss of SoC event shall be triggered
+\retval TRUE       Trigger error event
+\retval FALSE      Error event already reported in this cycle
+
+*/
+//------------------------------------------------------------------------------
+static BOOL triggerLossOfSocEvent(void)
+{
+    BOOL fTriggerEvent = FALSE;
+
+    if(!dllkInstance_g.lossSocStatus.fLossReported)
+    {
+        dllkInstance_g.lossSocStatus.fLossReported = TRUE;
+
+        fTriggerEvent = TRUE;
+    }
+
+    return fTriggerEvent;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Check if the loss of SoC event shall be triggered on a frame timeout
+
+The loss of SoC event shall only be reported once per cycle to the error
+handler. This functions checks if the event was already reported in this
+cycle in case of a frame timeout. Contrary to the logical checks for
+loss of SoC detection the frame timeout always occurs for a lost SoC.
+Therefore the timeout event is used to detect multiple loss of SoC after each
+other.
+
+\return The return indicates if a loss of SoC event shall be triggered
+\retval TRUE       Trigger error event
+\retval FALSE      Error event already reported in this cycle
+
+*/
+//------------------------------------------------------------------------------
+static BOOL triggerLossOfSocEventOnFrameTimeout(void)
+{
+    BOOL fTriggerEvent = FALSE;
+
+    if(!dllkInstance_g.lossSocStatus.fLossReported)
+    {
+        dllkInstance_g.lossSocStatus.fLossReported = TRUE;
+        dllkInstance_g.lossSocStatus.fTimeoutOccurred = TRUE;
+
+        // Loss of Soc will be reported and can be marked as so!
+        fTriggerEvent = TRUE;
+    }
+    else
+    {
+        if(dllkInstance_g.lossSocStatus.fTimeoutOccurred)
+        {
+            // Loss and timeout already reported -> Second SoC lost
+            fTriggerEvent = TRUE;
+        }
+
+        dllkInstance_g.lossSocStatus.fTimeoutOccurred = TRUE;
+    }
+
+    return fTriggerEvent;
 }
 
 ///\}
