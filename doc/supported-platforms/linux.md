@@ -207,12 +207,12 @@ For example:
 Start the kernel stack using the Intel 82573 network controller:
 
     > cd <kernel_module_installation_dir>
-    > sudo ./plkload oplkmn82573.ko
+    > sudo ./plkload oplk82573mn.ko
 
 To unload the kernel module:
 
     > cd <kernel_module_installation_dir>
-    > sudo ./plkunload oplkmn82573.ko
+    > sudo ./plkunload oplk82573mn.ko
 
 ## Starting the Userspace Daemon
 
