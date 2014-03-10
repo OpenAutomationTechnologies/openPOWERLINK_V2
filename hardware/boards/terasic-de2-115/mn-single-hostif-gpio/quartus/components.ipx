@@ -2,5 +2,4 @@
 <library>
     <path path="../../../../ipcore/altera/components.ipx" />
     <path path="../../../../ipcore/altera/qsys/mn_host.qsys"/>
-    <path path="../ipcore/multiplexedAdbus_hw.tcl"/>
 </library>
