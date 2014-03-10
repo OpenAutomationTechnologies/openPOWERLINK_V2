@@ -153,6 +153,19 @@ void  TgtDbgPostTraceValue (DWORD dwTraceValue_p);
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
+
+/**
+ * \brief Structure for handling the report of a loss of SoC to the error handler
+ *
+ * A loss of SoC shall be reported only once per cycle to the error handler.
+ * This structure controls the status of the reported errors in each cycle.
+ */
+typedef struct
+{
+    BOOL      fLossReported;        ///< A loss of SoC was already reported in this cycle
+    BOOL      fTimeoutOccurred;     ///< The sync interrupt occurred after a report of a loss of SoC
+} tDllLossSocStatus;
+
 typedef struct
 {
     tNmtState               nmtState;
@@ -212,6 +225,8 @@ typedef struct
     UINT                    prescaleCycleCount;             // cycle counter for toggling PS bit in MN SOC
     UINT                    cycleCount;                     // cycle counter (needed for multiplexed cycle support)
     UINT64                  frameTimeout;                   // frame timeout (cycle length + loss of frame tolerance)
+
+    tDllLossSocStatus       lossSocStatus;
 
 #if CONFIG_DLL_PRES_CHAINING_CN != FALSE
     UINT                    syncReqPrevNodeId;
