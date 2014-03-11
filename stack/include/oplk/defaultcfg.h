@@ -237,6 +237,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define PLK_VETH_NAME                                   "plk"               // name of net device in Linux
 #endif
 
+#ifndef CONFIG_VETH_SET_DEFAULT_GATEWAY
+#define CONFIG_VETH_SET_DEFAULT_GATEWAY                 FALSE
+#endif
+
 // rough approximation of max. number of timer entries for module EplTimeruGeneric
 #ifndef TIMERU_MAX_ENTRIES
 #if defined(CONFIG_INCLUDE_NMT_MN)

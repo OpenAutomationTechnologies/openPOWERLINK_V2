@@ -1194,9 +1194,12 @@ static tOplkError updateDllConfig(tOplkApiInitParam* pInitParam_p, BOOL fUpdateI
         if(ret != kErrorOk)
             return ret;
 
+#if (CONFIG_VETH_SET_DEFAULT_GATEWAY == TRUE)
         ret = target_setDefaultGateway(dllIdentParam.defaultGateway);
         if(ret != kErrorOk)
             return ret;
+#endif
+
 #endif
 
         obdSize = sizeof (dllIdentParam.sHostname);

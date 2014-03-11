@@ -71,7 +71,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CONFIG_INCLUDE_VETH
 #define CONFIG_INCLUDE_CFM
 
-#define CONFIG_DLLCAL_QUEUE                 CIRCBUF_QUEUE
+#define CONFIG_DLLCAL_QUEUE                             CIRCBUF_QUEUE
+
+#define CONFIG_VETH_SET_DEFAULT_GATEWAY                 FALSE
 
 //==============================================================================
 // Data Link Layer (DLL) specific defines

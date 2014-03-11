@@ -69,7 +69,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define CONFIG_DLLCAL_QUEUE                         CIRCBUF_QUEUE
 
-
 //==============================================================================
 // Ethernet driver (Edrv) specific defines
 //==============================================================================

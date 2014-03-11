@@ -65,6 +65,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define CONFIG_DLLCAL_QUEUE                         DIRECT_QUEUE
 
+#define CONFIG_VETH_SET_DEFAULT_GATEWAY             FALSE
+
 //==============================================================================
 // Ethernet driver (Edrv) specific defines
 //==============================================================================
