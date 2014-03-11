@@ -69,6 +69,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define CONFIG_DLLCAL_QUEUE                             IOCTL_QUEUE
 
+#define CONFIG_VETH_SET_DEFAULT_GATEWAY                 FALSE
+
 //==============================================================================
 // Data Link Layer (DLL) specific defines
 //==============================================================================

@@ -83,6 +83,8 @@ The queue defines determine the stack's queues.
     ///< DLLCAL queue implementation
 /**@}*/
 
+#define CONFIG_VETH_SET_DEFAULT_GATEWAY        FALSE
+
 /**
 \name Data Link Layer defines
 The Data Link Layer (DLL) defines determine the POWERLINK DLL module.
