@@ -67,7 +67,7 @@ smart: smart.log
 # Executable Configuration
 ###################################################################
 
-QSYS_ARGS = --synthesis=VHDL
+QSYS_ARGS = --synthesis=VERILOG
 MAP_ARGS =
 FIT_ARGS =
 ASM_ARGS =
