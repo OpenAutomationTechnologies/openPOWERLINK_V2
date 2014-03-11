@@ -3,6 +3,7 @@
 # ------------------------------------------------------------------------------
 
 source ../../common/timing/sram.sdc
+source ../../common/timing/sdram.sdc
 source ../../common/timing/jtag.sdc
 
 # ------------------------------------------------------------------------------
@@ -15,6 +16,7 @@ set ext_clk     EXT_CLK
 set clk50       pllInst|altpll_component|auto_generated|pll1|clk[0]
 set clk100      pllInst|altpll_component|auto_generated|pll1|clk[1]
 set clk25       pllInst|altpll_component|auto_generated|pll1|clk[2]
+set clk100_p    pllInst|altpll_component|auto_generated|pll1|clk[3]
 
 derive_pll_clocks -create_base_clocks
 derive_clock_uncertainty
@@ -23,6 +25,11 @@ derive_clock_uncertainty
 # SRAM definitions
 
 timing_sram $clk100
+
+# ------------------------------------------------------------------------------
+# SDRAM definitions
+
+timing_sdram $clk100_p $clk100
 
 # ------------------------------------------------------------------------------
 # JTAG definitions

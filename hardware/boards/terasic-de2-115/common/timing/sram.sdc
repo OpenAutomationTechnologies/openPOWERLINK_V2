@@ -57,8 +57,5 @@ proc timing_sram { clkSRAM } {
     set_multicycle_path -from [get_clocks CLKSRAM_virt] -to [get_clocks ${clkSRAM}] -setup -end 2
     set_multicycle_path -from [get_clocks CLKSRAM_virt] -to [get_clocks ${clkSRAM}] -hold -end 1
 
-    # Define clock group
-    set_clock_groups -asynchronous -group [format "%s %s" ${clkSRAM} CLKSRAM_virt]
-
     return 0
 }
