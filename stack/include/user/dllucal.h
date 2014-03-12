@@ -90,10 +90,7 @@ tOplkError dllucal_deleteNode(tDllNodeOpParam* pNodeOpParam_p);
 #if defined(CONFIG_INCLUDE_NMT_MN)
 
 tOplkError dllucal_issueRequest(tDllReqServiceId Service_p, unsigned int uiNodeId_p, BYTE bSoaFlag1_p);
-
-#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
 tOplkError dllucal_issueSyncRequest(tDllSyncRequest* pSyncRequest_p, unsigned int uiSize_p);
-#endif
 
 #endif
 

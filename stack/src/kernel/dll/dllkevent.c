@@ -1047,14 +1047,12 @@ static tOplkError processStartReducedCycle(void)
             goto Exit;
     }
 
-#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
     while (dllkInstance_g.pFirstPrcNodeInfo != NULL)
     {
         ret = dllk_deleteNodeIsochronous(dllkInstance_g.pFirstPrcNodeInfo);
         if (ret != kErrorOk)
             goto Exit;
     }
-#endif
 
     // change state to NonCyclic,
     // hence changeState() will not ignore the next call

@@ -100,9 +100,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // and DLL shall pass PRes as ready to Edrv after SoA
 #define CONFIG_DLL_PRES_READY_AFTER_SOA             FALSE
 
-// activate PResChaining support on MN
-#define CONFIG_DLL_PRES_CHAINING_MN                 FALSE
-
 // CN supports PRes Chaining
 #define CONFIG_DLL_PRES_CHAINING_CN                 FALSE
 

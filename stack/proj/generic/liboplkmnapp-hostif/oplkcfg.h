@@ -86,15 +86,6 @@ The queue defines determine the stack's queues.
 #define CONFIG_VETH_SET_DEFAULT_GATEWAY        FALSE
 
 /**
-\name Data Link Layer defines
-The Data Link Layer (DLL) defines determine the POWERLINK DLL module.
-*/
-/**@{*/
-#define CONFIG_DLL_PRES_CHAINING_MN            TRUE
-    ///< support PRes-Chaining (PRC) for MN
-/**@}*/
-
-/**
 \name Object Dictionary defines
 The OBD defines determine the Object Dictionary.
 */

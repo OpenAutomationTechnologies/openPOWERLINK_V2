@@ -955,9 +955,7 @@ tOplkError dllk_asyncFrameNotReceived(tDllReqServiceId reqServiceId_p, UINT node
     {
         case kDllReqServiceIdent:
         case kDllReqServiceStatus:
-#if (CONFIG_DLL_PRES_CHAINING_MN != FALSE)
         case kDllReqServiceSync:
-#endif
             // ASnd service registered?
             if (dllkInstance_g.aAsndFilter[reqServiceId_p] == kDllAsndFilterAny)
             {   // ASnd service ID is registered
@@ -1043,7 +1041,7 @@ tOplkError dllk_createTxFrame (UINT* pHandle_p, UINT* pFrameSize_p,
                     break;
 
                 case kDllAsndSdo:
-#if (CONFIG_DLL_PRES_CHAINING_CN == FALSE) && (CONFIG_DLL_PRES_CHAINING_MN != FALSE)
+#if (CONFIG_DLL_PRES_CHAINING_CN == FALSE) && defined(CONFIG_INCLUDE_NMT_MN)
                 case kDllAsndSyncResponse:
 #endif
                     ret = kErrorEdrvBufNotExisting;
@@ -1495,10 +1493,7 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
         BYTE                flag1;
         BYTE                nextNodeIndex = dllkInstance_g.curNodeIndex;
         BYTE*               pCnNodeId = &dllkInstance_g.aCnNodeIdList[dllkInstance_g.curTxBufferOffsetCycle][nextNodeIndex];
-
-#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
         BOOL    fPrcSlotFinished = FALSE;
-#endif
 
         while (*pCnNodeId != C_ADR_INVALID)
         {
@@ -1517,12 +1512,11 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
 
                 break;
             }
-#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
             else if (*pCnNodeId == C_ADR_BROADCAST)
             {   // PRC slot finished
                 fPrcSlotFinished = TRUE;
             }
-#endif
+
             pCnNodeId++;
             nextNodeIndex++;
         }
@@ -1532,7 +1526,6 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
             goto Exit;
         }
 
-#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
         if (fPrcSlotFinished != FALSE)
         {
             dllkInstance_g.fPrcSlotFinished = TRUE;
@@ -1547,13 +1540,10 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
             }
         }
         else
-#endif
 
         if ((dllkInstance_g.dllConfigParam.syncNodeId > C_ADR_SYNC_ON_SOC)
             && (dllkInstance_g.fSyncProcessed == FALSE)
-#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
             && (dllkInstance_g.dllConfigParam.fSyncOnPrcNode != dllkInstance_g.fPrcSlotFinished)
-#endif
             && (nodeId > dllkInstance_g.dllConfigParam.syncNodeId))
         {
             dllkInstance_g.fSyncProcessed = TRUE;
@@ -1669,10 +1659,7 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
         (dllkInstance_g.dllConfigParam.syncNodeId > C_ADR_SYNC_ON_SOC) &&
         (dllkInstance_g.fSyncProcessed == FALSE))
     {   // check if Sync event needs to be triggered
-        if (
-#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
-            (dllkInstance_g.dllConfigParam.fSyncOnPrcNode != dllkInstance_g.fPrcSlotFinished) &&
-#endif
+        if ((dllkInstance_g.dllConfigParam.fSyncOnPrcNode != dllkInstance_g.fPrcSlotFinished) &&
             (nodeId == dllkInstance_g.dllConfigParam.syncNodeId))
         {
             dllkInstance_g.fSyncProcessed = TRUE;
@@ -1909,7 +1896,7 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
                 goto Exit;
                 break;
 
-#if (CONFIG_DLL_PRES_CHAINING_CN != FALSE) || (CONFIG_DLL_PRES_CHAINING_MN != FALSE)
+#if (CONFIG_DLL_PRES_CHAINING_CN != FALSE) || defined(CONFIG_INCLUDE_NMT_MN)
             case kDllReqServiceSync:
                 {
                 // SyncRequest
@@ -2117,9 +2104,7 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
         {
             case kDllAsndStatusResponse:
             case kDllAsndIdentResponse:
-#if (CONFIG_DLL_PRES_CHAINING_MN != FALSE)
             case kDllAsndSyncResponse:
-#endif
                 nodeId = ami_getUint8Le(&pFrame->srcNodeId);
                 if ((dllkInstance_g.aLastReqServiceId[dllkInstance_g.curLastSoaReq] == ((tDllReqServiceId) asndServiceId)) &&
                     (nodeId == dllkInstance_g.aLastTargetNodeId[dllkInstance_g.curLastSoaReq]))
@@ -2142,12 +2127,11 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
                         OPLK_MEMCPY(pIntNodeInfo->aMacAddr, pFrame->aSrcMac, 6);
                     }
                 }
-#if (CONFIG_DLL_PRES_CHAINING_MN != FALSE)
                 else if (((tDllAsndServiceId) asndServiceId) == kDllAsndSyncResponse)
                 {
                     break;
                 }
-#endif
+
                 // forward Flag2 to asynchronous scheduler
                 flag1 = ami_getUint8Le(&pFrame->data.asnd.payload.statusResponse.flag2);
                 ret = dllkcal_setAsyncPendingRequests(nodeId,

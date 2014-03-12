@@ -75,10 +75,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Data Link Layer (DLL) specific defines
 //==============================================================================
 
-// activate PResChaining support on MN
-// NOTE: Ensure that this setting is equally configured in user and kernel layer!!
-#define CONFIG_DLL_PRES_CHAINING_MN                     TRUE
-
 // CN supports PRes Chaining
 // NOTE: Ensure that this setting is equally configured in user and kernel layer!!
 #define CONFIG_DLL_PRES_CHAINING_CN                     FALSE

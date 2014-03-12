@@ -85,17 +85,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CONFIG_DLL_PRES_CHAINING_CN                     FALSE
 #endif
 
-#ifndef CONFIG_DLL_PRES_CHAINING_MN
-#define CONFIG_DLL_PRES_CHAINING_MN                     FALSE
-#else
-
-// disable PRC MN support if NMT MN module is not activated
-#if !defined(CONFIG_INCLUDE_NMT_MN)
-#undef CONFIG_DLL_PRES_CHAINING_MN
-#define CONFIG_DLL_PRES_CHAINING_MN                     FALSE
-#endif
-#endif
-
 #ifndef CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC
 #define CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC        TRUE
 #endif
@@ -178,10 +167,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef D_NMT_MaxCNNumber_U8
 #define D_NMT_MaxCNNumber_U8                            239                 // maximum number of supported regular CNs in the Node ID range 1 .. 239
-#endif
-
-#ifndef NMTMNU_PRES_CHAINING_MN
-#define NMTMNU_PRES_CHAINING_MN                         CONFIG_DLL_PRES_CHAINING_MN
 #endif
 
 #ifndef NMTMNU_PRC_NODE_ADD_MAX_NUM

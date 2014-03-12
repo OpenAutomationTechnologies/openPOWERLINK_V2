@@ -70,7 +70,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplk/obdcdc.h>
 #endif
 
-#if NMTMNU_PRES_CHAINING_MN != FALSE
+#if defined(CONFIG_INCLUDE_NMT_MN)
 #include <user/syncu.h>
 #endif
 
@@ -374,10 +374,7 @@ tOplkError ctrlu_shutdownStack(void)
     ret = statusu_delInstance();
     TRACE("statusu_delInstance():  0x%X\n", ret);
 
-#if NMTMNU_PRES_CHAINING_MN != FALSE
     ret = syncu_delInstance();
-#endif
-
 #endif
 
     ret = nmtcnu_delInstance();
@@ -728,13 +725,11 @@ static tOplkError initNmtu(tOplkApiInitParam* pInitParam_p)
     if (Ret != kErrorOk)
         goto Exit;
 
-#if NMTMNU_PRES_CHAINING_MN != FALSE
     // initialize syncu module
     TRACE ("Initialize Syncu module...\n");
     Ret = syncu_init();
     if (Ret != kErrorOk)
         goto Exit;
-#endif
 
 #endif
 

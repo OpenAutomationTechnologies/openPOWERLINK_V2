@@ -145,11 +145,7 @@ tOplkError dllk_deleteNode(tDllNodeOpParam* pNodeOpParam_p);
 #if defined(CONFIG_INCLUDE_NMT_MN)
 tOplkError dllk_setFlag1OfNode(UINT nodeId_p, UINT8 soaFlag1_p);
 void       dllk_getCurrentCnNodeIdList(BYTE** ppbCnNodeIdList_p);
-
-#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
 tOplkError dllk_getCnMacAddress(UINT nodeId_p, UINT8* pCnMacAddress_p);
-#endif
-
 #endif
 
 #ifdef __cplusplus

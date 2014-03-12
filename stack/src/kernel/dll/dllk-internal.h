@@ -209,10 +209,8 @@ typedef struct
     UINT                    aLastTargetNodeId[DLLK_SOAREQ_COUNT];
     UINT8                   curLastSoaReq;
     BOOL                    fSyncProcessed;
-#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
     BOOL                    fPrcSlotFinished;
     tDllkNodeInfo*          pFirstPrcNodeInfo;
-#endif
 #endif
 
 #if CONFIG_TIMER_USE_HIGHRES != FALSE

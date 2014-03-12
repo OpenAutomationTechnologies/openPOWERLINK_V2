@@ -48,10 +48,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplk/ami.h>
 #include <oplk/benchmark.h>
 #include <oplk/obd.h>
-
-#if NMTMNU_PRES_CHAINING_MN != FALSE
 #include <user/syncu.h>
-#endif
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
 
@@ -105,7 +102,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define NMTMNU_NODE_FLAG_INC_STATREQ            0x0100  // increment for StatusRequest timer handle
 #define NMTMNU_NODE_FLAG_INC_LONGER             0x0400  // increment for longer timeouts timer handle
 
-#if NMTMNU_PRES_CHAINING_MN != FALSE
 #define NMTMNU_NODE_FLAG_PRC_ADD_SCHEDULED      0x0001
 #define NMTMNU_NODE_FLAG_PRC_ADD_IN_PROGRESS    0x0002
 #define NMTMNU_NODE_FLAG_PRC_ADD_SYNCREQ_SENT   0x0004  // Covers time between SyncReq and SyncRes for addition
@@ -125,7 +121,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define NMTMNU_NODE_FLAG_PRC_RESET_CONF         0x4000
 #define NMTMNU_NODE_FLAG_PRC_RESET_SW           0x5000
 #define NMTMNU_NODE_FLAG_PRC_RESET_MASK         0x7000
-#endif
 
 // defines for timer arguments to draw a distinction between several events
 #define NMTMNU_TIMERARG_NODE_MASK               0x000000FFL // mask that contains the node-ID
@@ -173,11 +168,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define NMTMNU_FLAG_HALTED                      0x0001  // boot process is halted
 #define NMTMNU_FLAG_APP_INFORMED                0x0002  // application was informed about possible NMT state change
 #define NMTMNU_FLAG_USER_RESET                  0x0004  // NMT reset issued by user / diagnostic node
-#if NMTMNU_PRES_CHAINING_MN != FALSE
 #define NMTMNU_FLAG_PRC_ADD_SCHEDULED           0x0008  // at least one node is scheduled
                                                         // for addition to isochronous phase
 #define NMTMNU_FLAG_PRC_ADD_IN_PROGRESS         0x0010  // add-PRC-node process is in progress
-#endif
 
 // return pointer to node info structure for specified node ID
 // d.k. may be replaced by special (hash) function if node ID array is smaller than 254
@@ -249,11 +242,9 @@ typedef struct
     tNmtMnuNodeState    nodeState;              ///< Internal node state (kind of sub state of NMT state)
     UINT32              nodeCfg;                ///< Subindex from 0x1F81
     UINT16              flags;                  ///< Node flags (see node flag defines)
-#if NMTMNU_PRES_CHAINING_MN != FALSE
     UINT16              prcFlags;               ///< PRC specific node flags
     UINT32              relPropagationDelayNs;  ///< Propagation delay in nanoseconds
     UINT32              pResTimeFirstNs;        ///< PRes time
-#endif
 } tNmtMnuNodeInfo;
 
 /**
@@ -274,11 +265,9 @@ typedef struct
     UINT32              nmtStartup;             ///< Object 0x1F80 NMT_StartUp_U32
     tNmtMnuCbNodeEvent  pfnCbNodeEvent;         ///< Callback function for node events
     tNmtMnuCbBootEvent  pfnCbBootEvent;         ///< Callback function for boot events
-#if NMTMNU_PRES_CHAINING_MN != FALSE
     UINT32              prcPResMnTimeoutNs;             ///< to be commented!
     UINT32              prcPResTimeFirstCorrectionNs;   ///< to be commented!
     UINT32              prcPResTimeFirstNegOffsetNs;    ///< to be commented!
-#endif
 } tNmtMnuInstance;
 
 //------------------------------------------------------------------------------
@@ -310,7 +299,6 @@ static tOplkError processInternalEvent(UINT nodeId_p, tNmtState nodeNmtState_p,
                                        UINT16 errorCode_p, tNmtMnuIntNodeEvent nodeEvent_p);
 static tOplkError reset(void);
 
-#if NMTMNU_PRES_CHAINING_MN != FALSE
 static tOplkError prcMeasure(void);
 static tOplkError prcCalculate(UINT nodeIdFirstNode_p);
 static tOplkError prcShift(UINT nodeIdPrevShift_p);
@@ -332,7 +320,6 @@ static tOplkError prcFindPredecessorNode(UINT nodeId_p);
 static void       prcSyncError(tNmtMnuNodeInfo* pNodeInfo_p);
 static void       prcSetFlagsNmtCommandReset(tNmtMnuNodeInfo* pNodeInfo_p,
                                              tNmtCommand nmtCommand_p);
-#endif
 
 /* internal node event handler functions */
 static INT processNodeEventNoIdentResponse (UINT nodeId_p, tNmtState nodeNmtState_p,
@@ -451,10 +438,8 @@ tOplkError nmtmnu_addInstance(tNmtMnuCbNodeEvent pfnCbNodeEvent_p,
     // register NmtMnResponse callback function
     ret = dllucal_regAsndService(kDllAsndNmtRequest, cbNmtRequest, kDllAsndFilterLocal);
 
-#if NMTMNU_PRES_CHAINING_MN != FALSE
     nmtMnuInstance_g.prcPResTimeFirstCorrectionNs =  50;
     nmtMnuInstance_g.prcPResTimeFirstNegOffsetNs  = 500;
-#endif
 
 Exit:
     return ret;
@@ -504,9 +489,7 @@ tOplkError nmtmnu_sendNmtCommandEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
     UINT8               aBuffer[C_DLL_MINSIZE_NMTCMDEXT];
     tPlkFrame *         pFrame;
     tDllNodeOpParam     nodeOpParam;
-#if NMTMNU_PRES_CHAINING_MN != FALSE
     tNmtMnuNodeInfo*    pNodeInfo;
-#endif
 
     ret = kErrorOk;
 
@@ -527,7 +510,6 @@ tOplkError nmtmnu_sendNmtCommandEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
     //          prohibited state transitions. The CN should not perform these
     //          transitions, but the expected NMT state will be changed and never fullfilled.
 
-#if NMTMNU_PRES_CHAINING_MN != FALSE
     pNodeInfo = NMTMNU_GET_NODEINFO(nodeId_p);
 
     if (pNodeInfo->nodeCfg & NMT_NODEASSIGN_PRES_CHAINING)
@@ -602,7 +584,6 @@ tOplkError nmtmnu_sendNmtCommandEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
                 break;
         }
     }
-#endif
 
     // build frame
     pFrame = (tPlkFrame*) aBuffer;
@@ -629,13 +610,11 @@ tOplkError nmtmnu_sendNmtCommandEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
 
     DEBUG_LVL_NMTMN_TRACE("NMTCmd(%02X->%02X)\n", nmtCommand_p, nodeId_p);
 
-#if NMTMNU_PRES_CHAINING_MN != FALSE
     if (pNodeInfo->nodeCfg & NMT_NODEASSIGN_PRES_CHAINING)
     {   // Node is a PRes Chaining node
         // The following action (delete node) is only necessary for non-PRC nodes
         goto Exit;
     }
-#endif
 
     switch (nmtCommand_p)
     {
@@ -1368,7 +1347,6 @@ tOplkError nmtmnu_getDiagnosticInfo(UINT* pMandatorySlaveCount_p,
     return kErrorOk;
 }
 
-#if NMTMNU_PRES_CHAINING_MN != FALSE
 //------------------------------------------------------------------------------
 /**
 \brief  Configure PRes chaining parameters
@@ -1388,7 +1366,6 @@ tOplkError nmtmnu_configPrc(tEplNmtMnuConfigParam* pConfigParam_p)
     nmtMnuInstance_g.prcPResTimeFirstNegOffsetNs = pConfigParam_p->prcPResTimeFirstNegOffsetNs;
     return kErrorOk;
 }
-#endif
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
@@ -1561,8 +1538,6 @@ The function adds the specified node into the isochronous phase
 static tOplkError addNodeIsochronous(UINT nodeId_p)
 {
     tOplkError          ret;
-
-#if NMTMNU_PRES_CHAINING_MN != FALSE
     tNmtMnuNodeInfo* pNodeInfo;
 
     ret = kErrorOk;
@@ -1582,7 +1557,6 @@ static tOplkError addNodeIsochronous(UINT nodeId_p)
         pNodeInfo->relPropagationDelayNs = 0;
 
         if ((pNodeInfo->nodeCfg & NMT_NODEASSIGN_PRES_CHAINING) == 0)
-#endif
 
         {   // node is added as PReq/PRes node
         tDllNodeOpParam     NodeOpParam;
@@ -1592,7 +1566,6 @@ static tOplkError addNodeIsochronous(UINT nodeId_p)
             ret = dllucal_addNode(&NodeOpParam);
             goto Exit;
         }
-#if NMTMNU_PRES_CHAINING_MN != FALSE
         else
         {   // node is a PRC node
 
@@ -1649,7 +1622,6 @@ static tOplkError addNodeIsochronous(UINT nodeId_p)
             ret = prcMeasure();
         }
     }
-#endif
 
 Exit:
     return ret;
@@ -1707,12 +1679,10 @@ static tOplkError startBootStep1(BOOL fNmtResetAllIssued_p)
             // reset flags "not scanned" and "isochronous"
             pNodeInfo->flags &= ~(NMTMNU_NODE_FLAG_ISOCHRON | NMTMNU_NODE_FLAG_NOT_SCANNED);
 
-#if NMTMNU_PRES_CHAINING_MN != FALSE
             // Reset all PRC flags and PRC related values
             pNodeInfo->prcFlags = 0;
             pNodeInfo->pResTimeFirstNs = 0;
             pNodeInfo->relPropagationDelayNs = 0;
-#endif
 
             if (subIndex == C_ADR_DIAG_DEF_NODE_ID)
             {   // diagnostic node must be scanned by MN in any case
@@ -1788,9 +1758,7 @@ static tOplkError doPreop1(tEventNmtStateChange nmtStateChange_p)
     // reset IdentResponses and running IdentRequests and StatusRequests
     ret = identu_reset();
     ret = statusu_reset();
-#if NMTMNU_PRES_CHAINING_MN != FALSE
     ret = syncu_reset();
-#endif
 
     // reset timers
     ret = reset();
@@ -3342,14 +3310,11 @@ static tOplkError reset(void)
         ret = timeru_deleteTimer(&NMTMNU_GET_NODEINFO(index)->timerHdlLonger);
     }
 
-#if NMTMNU_PRES_CHAINING_MN != FALSE
     nmtMnuInstance_g.prcPResMnTimeoutNs = 0;
-#endif
+
     return ret;
 }
 
-
-#if NMTMNU_PRES_CHAINING_MN != FALSE
 //------------------------------------------------------------------------------
 /**
 \brief  Perform measure phase of PRC node insertion
@@ -4310,9 +4275,6 @@ static void prcSetFlagsNmtCommandReset(tNmtMnuNodeInfo* pNodeInfo_p,
 
     return;
 }
-
-#endif // #if NMTMNU_PRES_CHAINING_MN != FALSE
-
 #endif // #if defined(CONFIG_INCLUDE_NMT_MN)
 
 ///\}
