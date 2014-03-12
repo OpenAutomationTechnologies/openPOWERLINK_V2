@@ -12,7 +12,7 @@ It implements time-triggered transmission of frames necessary for MN.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -195,7 +195,7 @@ tOplkError edrvcyclic_setMaxTxBufferListSize(UINT maxListSize_p)
             edrvcyclicInstance_l.ppTxBufferList = NULL;
         }
 
-        edrvcyclicInstance_l.ppTxBufferList = OPLK_MALLOC(sizeof (*edrvcyclicInstance_l.ppTxBufferList) * maxListSize_p * 2);
+        edrvcyclicInstance_l.ppTxBufferList = OPLK_MALLOC(sizeof(*edrvcyclicInstance_l.ppTxBufferList) * maxListSize_p * 2);
         if (edrvcyclicInstance_l.ppTxBufferList == NULL)
         {
             ret = kErrorEdrvNoFreeBufEntry;
@@ -203,7 +203,7 @@ tOplkError edrvcyclic_setMaxTxBufferListSize(UINT maxListSize_p)
 
         edrvcyclicInstance_l.curTxBufferList = 0;
 
-        OPLK_MEMSET(edrvcyclicInstance_l.ppTxBufferList, 0, sizeof (*edrvcyclicInstance_l.ppTxBufferList) * maxListSize_p * 2);
+        OPLK_MEMSET(edrvcyclicInstance_l.ppTxBufferList, 0, sizeof(*edrvcyclicInstance_l.ppTxBufferList) * maxListSize_p * 2);
     }
 
     return ret;
@@ -251,7 +251,7 @@ tOplkError edrvcyclic_setNextTxBufferList(tEdrvTxBuffer** ppTxBuffer_p, UINT txB
     }
 
     OPLK_MEMCPY(&edrvcyclicInstance_l.ppTxBufferList[nextTxBufferList], ppTxBuffer_p,
-                sizeof (*ppTxBuffer_p) * txBufferCount_p);
+                sizeof(*ppTxBuffer_p) * txBufferCount_p);
 
 Exit:
     return ret;
@@ -302,13 +302,13 @@ tOplkError edrvcyclic_startCycle(void)
     edrvcyclicInstance_l.curTxBufferList = 0;
     edrvcyclicInstance_l.curTxBufferEntry = 0;
     OPLK_MEMSET(edrvcyclicInstance_l.ppTxBufferList, 0,
-        sizeof (*edrvcyclicInstance_l.ppTxBufferList) * edrvcyclicInstance_l.maxTxBufferCount * 2);
+                sizeof(*edrvcyclicInstance_l.ppTxBufferList) * edrvcyclicInstance_l.maxTxBufferCount * 2);
 
     ret = hrestimer_modifyTimer(&edrvcyclicInstance_l.timerHdlCycle,
-        edrvcyclicInstance_l.cycleTimeUs * 1000ULL,
-        timerHdlCycleCb,
-        0L,
-        TRUE);
+                                edrvcyclicInstance_l.cycleTimeUs * 1000ULL,
+                                timerHdlCycleCb,
+                                0L,
+                                TRUE);
 
 #if CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
     edrvcyclicInstance_l.lastSlotTimeStamp = 0;
@@ -476,7 +476,7 @@ static tOplkError timerHdlCycleCb(tTimerEventArg* pEventArg_p)
     if (edrvcyclicInstance_l.startCycleTimeStamp != 0)
     {
         // calculate time diffs of previous cycle
-        cycleTime      = (UINT32) (startNewCycleTimeStamp - edrvcyclicInstance_l.startCycleTimeStamp);
+        cycleTime = (UINT32)(startNewCycleTimeStamp - edrvcyclicInstance_l.startCycleTimeStamp);
         if (edrvcyclicInstance_l.diagnostics.cycleTimeMin > cycleTime)
         {
             edrvcyclicInstance_l.diagnostics.cycleTimeMin = cycleTime;
@@ -488,8 +488,8 @@ static tOplkError timerHdlCycleCb(tTimerEventArg* pEventArg_p)
 
         if (edrvcyclicInstance_l.lastSlotTimeStamp != 0)
         {
-            usedCycleTime  = (UINT32) (edrvcyclicInstance_l.lastSlotTimeStamp - edrvcyclicInstance_l.startCycleTimeStamp);
-            spareCycleTime = (UINT32) (startNewCycleTimeStamp - edrvcyclicInstance_l.lastSlotTimeStamp);
+            usedCycleTime  = (UINT32)(edrvcyclicInstance_l.lastSlotTimeStamp - edrvcyclicInstance_l.startCycleTimeStamp);
+            spareCycleTime = (UINT32)(startNewCycleTimeStamp - edrvcyclicInstance_l.lastSlotTimeStamp);
 
             if (edrvcyclicInstance_l.diagnostics.usedCycleTimeMin > usedCycleTime)
             {
@@ -520,9 +520,9 @@ static tOplkError timerHdlCycleCb(tTimerEventArg* pEventArg_p)
         edrvcyclicInstance_l.diagnostics.cycleCount++;
 
         // sample previous cycle if deviations exceed threshold
-        if (    (edrvcyclicInstance_l.diagnostics.sampleNum == 0) || /* sample first cycle for start time */
-                (abs(cycleTime - edrvcyclicInstance_l.cycleTimeUs * 1000) > EDRV_CYCLIC_SAMPLE_TH_CYCLE_TIME_DIFF_US * 1000) ||
-                (spareCycleTime < EDRV_CYCLIC_SAMPLE_TH_SPARE_TIME_US * 1000))
+        if ((edrvcyclicInstance_l.diagnostics.sampleNum == 0) || /* sample first cycle for start time */
+            (abs(cycleTime - edrvcyclicInstance_l.cycleTimeUs * 1000) > EDRV_CYCLIC_SAMPLE_TH_CYCLE_TIME_DIFF_US * 1000) ||
+            (spareCycleTime < EDRV_CYCLIC_SAMPLE_TH_SPARE_TIME_US * 1000))
         {
         UINT uiSampleNo = edrvcyclicInstance_l.sampleCount;
 
@@ -636,10 +636,10 @@ static tOplkError processTxBufferList(void)
         else
         {
             ret = hrestimer_modifyTimer(&edrvcyclicInstance_l.timerHdlSlot,
-                pTxBuffer->timeOffsetNs,
-                timerHdlSlotCb,
-                0L,
-                FALSE);
+                                        pTxBuffer->timeOffsetNs,
+                                        timerHdlSlotCb,
+                                        0L,
+                                        FALSE);
 
             break;
         }
@@ -659,3 +659,4 @@ Exit:
 }
 
 ///\}
+

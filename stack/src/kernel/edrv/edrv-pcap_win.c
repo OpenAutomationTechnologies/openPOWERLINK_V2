@@ -71,7 +71,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // global function prototypes
 //------------------------------------------------------------------------------
-void hresTimerCb (UINT index_p);
+void hresTimerCb(UINT index_p);
 
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //
@@ -105,7 +105,7 @@ static tEdrvInstance edrInstance_l;
 // local function prototypes
 //------------------------------------------------------------------------------
 static void packetHandler(u_char* pParam_p, const struct pcap_pkthdr* pHeader_p, const u_char* pPktData_p);
-static UINT32 WINAPI edrvWorkerThread(void *);
+static UINT32 WINAPI edrvWorkerThread(void*);
 
 //------------------------------------------------------------------------------
 /**
@@ -120,11 +120,11 @@ This function initializes the Ethernet driver.
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_init(tEdrvInitParam *pEdrvInitParam_p)
+tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
 {
     tOplkError          ret = kErrorOk;
     UINT32              threadId;
-    char                sErr_Msg[ PCAP_ERRBUF_SIZE ];
+    char                sErr_Msg[PCAP_ERRBUF_SIZE];
     // variables for IPHLPAPI
     ULONG               outBufLen;
     PIP_ADAPTER_INFO    pAdapterInfo;
@@ -132,14 +132,14 @@ tOplkError edrv_init(tEdrvInitParam *pEdrvInitParam_p)
     UINT32              retVal = 0;
 
     // clear instance structure
-    OPLK_MEMSET(&edrInstance_l, 0, sizeof (edrInstance_l));
+    OPLK_MEMSET(&edrInstance_l, 0, sizeof(edrInstance_l));
 
     if (pEdrvInitParam_p->hwParam.pDevName == NULL)
         return kErrorEdrvInit;
 
     // search for the corresponding MAC address via IPHLPAPI
-    outBufLen = sizeof (IP_ADAPTER_INFO);
-    pAdapterInfo = (IP_ADAPTER_INFO *) OPLK_MALLOC(sizeof (IP_ADAPTER_INFO));
+    outBufLen = sizeof(IP_ADAPTER_INFO);
+    pAdapterInfo = (IP_ADAPTER_INFO*)OPLK_MALLOC(sizeof(IP_ADAPTER_INFO));
     if (pAdapterInfo == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("Error allocating memory needed to call GetAdaptersinfo\n");
@@ -152,7 +152,7 @@ tOplkError edrv_init(tEdrvInitParam *pEdrvInitParam_p)
     if (retVal == ERROR_BUFFER_OVERFLOW)
     {
         OPLK_FREE(pAdapterInfo);
-        pAdapterInfo = (IP_ADAPTER_INFO *) OPLK_MALLOC(outBufLen);
+        pAdapterInfo = (IP_ADAPTER_INFO*)OPLK_MALLOC(outBufLen);
         if (pAdapterInfo == NULL)
         {
             DEBUG_LVL_ERROR_TRACE("Error allocating memory needed to call GetAdaptersinfo\n");
@@ -171,7 +171,7 @@ tOplkError edrv_init(tEdrvInitParam *pEdrvInitParam_p)
                 if (strstr(pEdrvInitParam_p->hwParam.pDevName, pAdapter->AdapterName) != NULL)
                 {   // corresponding adapter found
                     OPLK_MEMCPY(pEdrvInitParam_p->aMacAddr, pAdapter->Address,
-                        min(pAdapter->AddressLength, sizeof (pEdrvInitParam_p->aMacAddr)));
+                                min(pAdapter->AddressLength, sizeof(pEdrvInitParam_p->aMacAddr)));
                     break;
                 }
             }
@@ -189,7 +189,7 @@ tOplkError edrv_init(tEdrvInitParam *pEdrvInitParam_p)
     // save the init data (with updated MAC address)
     edrInstance_l.initParam = *pEdrvInitParam_p;
     edrInstance_l.pcap = pcap_open_live(pEdrvInitParam_p->hwParam.pDevName,
-                                         65535, 1, 1, sErr_Msg);
+                                        65535, 1, 1, sErr_Msg);
     if (edrInstance_l.pcap == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("Error!! Can't open pcap: %s\n", sErr_Msg);
@@ -249,7 +249,7 @@ This function shuts down the Ethernet driver.
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_shutdown( void )
+tOplkError edrv_shutdown(void)
 {
     // signal shutdown to the thread
     SetEvent(edrInstance_l.aHandle[EDRV_HANDLE_EVENT]);
@@ -285,7 +285,7 @@ This function sends the Tx buffer.
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_sendTxBuffer(tEdrvTxBuffer *pBuffer_p)
+tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
     tOplkError  ret = kErrorOk;
     int         iRet;
@@ -310,7 +310,7 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer *pBuffer_p)
     }
     LeaveCriticalSection(&edrInstance_l.criticalSection);
 
-    iRet = pcap_sendpacket(edrInstance_l.pcap, pBuffer_p->pBuffer, (int) pBuffer_p->txFrameSize);
+    iRet = pcap_sendpacket(edrInstance_l.pcap, pBuffer_p->pBuffer, (int)pBuffer_p->txFrameSize);
     if  (iRet != 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s pcap_sendpacket returned %d (%s)\n", __func__, iRet, pcap_geterr(edrInstance_l.pcap));
@@ -332,7 +332,7 @@ This function allocates a Tx buffer.
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_allocTxBuffer(tEdrvTxBuffer * pBuffer_p)
+tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
     tOplkError ret = kErrorOk;
 
@@ -365,9 +365,9 @@ This function releases the Tx buffer.
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_freeTxBuffer(tEdrvTxBuffer * pBuffer_p)
+tOplkError edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-    BYTE*   pbBuffer = pBuffer_p->pBuffer;
+    BYTE* pbBuffer = pBuffer_p->pBuffer;
 
     // mark buffer as free, before actually freeing it
     pBuffer_p->pBuffer = NULL;
@@ -492,14 +492,14 @@ This function is the packet handler forwarding the frames to the dllk.
 //------------------------------------------------------------------------------
 static void packetHandler(u_char* pParam_p, const struct pcap_pkthdr* pHeader_p, const u_char* pPktData_p)
 {
-    tEdrvInstance*  pInstance = (tEdrvInstance*) pParam_p;
+    tEdrvInstance*  pInstance = (tEdrvInstance*)pParam_p;
     tEdrvRxBuffer   RxBuffer;
 
     if (OPLK_MEMCMP(pPktData_p + 6, pInstance->initParam.aMacAddr, 6 ) != 0)
     {   // filter out self generated traffic
         RxBuffer.bufferInFrame = kEdrvBufferLastInFrame;
         RxBuffer.rxFrameSize = pHeader_p->caplen;
-        RxBuffer.pBuffer = (BYTE*) pPktData_p;
+        RxBuffer.pBuffer = (BYTE*)pPktData_p;
 
         pInstance->initParam.pfnRxHandler(&RxBuffer);
     }
@@ -561,7 +561,7 @@ pcap and timer events.
 \return The function returns a thread return code
 */
 //------------------------------------------------------------------------------
-static UINT32 WINAPI edrvWorkerThread(void *pArgument_p)
+static UINT32 WINAPI edrvWorkerThread(void* pArgument_p)
 {
     tEdrvInstance*  pInstance = pArgument_p;
     int             pcapRet;

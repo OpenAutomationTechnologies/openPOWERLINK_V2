@@ -10,7 +10,7 @@ This file contains the implementation of the Linux Pcap Ethernet driver
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, Kalycito Infotech Private Limited
 All rights reserved.
 
@@ -133,7 +133,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     struct sched_param  schedParam;
 
     // clear instance structure
-    OPLK_MEMSET(&edrvInstance_l, 0, sizeof (edrvInstance_l));
+    OPLK_MEMSET(&edrvInstance_l, 0, sizeof(edrvInstance_l));
 
     if (pEdrvInitParam_p->hwParam.pDevName == NULL)
     {
@@ -142,7 +142,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     }
 
     /* if no MAC address was specified read MAC address of used
-     * ethernet interface
+     * Ethernet interface
      */
     if ((pEdrvInitParam_p->aMacAddr[0] == 0) &&
         (pEdrvInitParam_p->aMacAddr[1] == 0) &&
@@ -158,7 +158,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     // save the init data (with updated MAC address)
     edrvInstance_l.initParam = *pEdrvInitParam_p;
 
-    edrvInstance_l.pPcap = pcap_open_live (
+    edrvInstance_l.pPcap = pcap_open_live(
                         edrvInstance_l.initParam.hwParam.pDevName,
                         65535,  // snaplen
                         1,      // promiscuous mode
@@ -166,7 +166,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
                         aErrorMessage
                     );
 
-    if ( edrvInstance_l.pPcap == NULL )
+    if (edrvInstance_l.pPcap == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Error!! Can't open pcap: %s\n", __func__,
                                 aErrorMessage);
@@ -235,14 +235,14 @@ tOplkError edrv_shutdown(void)
     pcap_breakloop(edrvInstance_l.pPcapThread);
 
     // wait for thread to terminate
-    pthread_join (edrvInstance_l.hThread, NULL);
+    pthread_join(edrvInstance_l.hThread, NULL);
 
     pcap_close(edrvInstance_l.pPcap);
 
     pthread_mutex_destroy(&edrvInstance_l.mutex);
 
     // clear instance structure
-    OPLK_MEMSET(&edrvInstance_l, 0, sizeof (edrvInstance_l));
+    OPLK_MEMSET(&edrvInstance_l, 0, sizeof(edrvInstance_l));
 
     return kErrorOk; //assuming no problems with closing the handle
 }
@@ -298,7 +298,7 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
         pthread_mutex_unlock(&edrvInstance_l.mutex);
 
         pcapRet = pcap_sendpacket(edrvInstance_l.pPcap, pBuffer_p->pBuffer,
-                               (INT) pBuffer_p->txFrameSize);
+                                  (INT)pBuffer_p->txFrameSize);
         if  (pcapRet != 0)
         {
             DEBUG_LVL_EDRV_TRACE("%s() pcap_sendpacket returned %d (%s)\n",
@@ -395,7 +395,7 @@ If \p entryChanged_p is equal or larger count_p all Rx filters shall be changed.
 */
 //------------------------------------------------------------------------------
 tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
-                                UINT entryChanged_p, UINT changeFlags_p)
+                               UINT entryChanged_p, UINT changeFlags_p)
 {
     UNUSED_PARAMETER(pFilter_p);
     UNUSED_PARAMETER(count_p);
@@ -464,14 +464,14 @@ This function is the packet handler forwarding the frames to the dllk.
 //------------------------------------------------------------------------------
 static void packetHandler(u_char* pParam_p, const struct pcap_pkthdr* pHeader_p, const u_char* pPktData_p)
 {
-    tEdrvInstance*  pInstance = (tEdrvInstance*) pParam_p;
+    tEdrvInstance*  pInstance = (tEdrvInstance*)pParam_p;
     tEdrvRxBuffer   rxBuffer;
 
     if (OPLK_MEMCMP (pPktData_p + 6, pInstance->initParam.aMacAddr, 6 ) != 0)
     {   // filter out self generated traffic
         rxBuffer.bufferInFrame = kEdrvBufferLastInFrame;
         rxBuffer.rxFrameSize = pHeader_p->caplen;
-        rxBuffer.pBuffer = (UINT8*) pPktData_p;
+        rxBuffer.pBuffer = (UINT8*)pPktData_p;
 
         FTRACE_MARKER("%s RX", __func__);
         pInstance->initParam.pfnRxHandler(&rxBuffer);
@@ -515,7 +515,7 @@ static void packetHandler(u_char* pParam_p, const struct pcap_pkthdr* pHeader_p,
                         (UINT)pPktData_p[4],
                         (UINT)pPktData_p[5]);
                     TRACE("   current TxB %p: DstMAC=%02X%02X%02X%02X%02X%02X\n",
-                        (void *)pTxBuffer,
+                        (void*)pTxBuffer,
                         (UINT)pTxBuffer->pBuffer[0],
                         (UINT)pTxBuffer->pBuffer[1],
                         (UINT)pTxBuffer->pBuffer[2],
@@ -550,17 +550,17 @@ DLL are mutual exclusive.
 static void* workerThread(void* pArgument_p)
 {
     INT             pcapRet;
-    tEdrvInstance*  pInstance = (tEdrvInstance *)pArgument_p;
+    tEdrvInstance*  pInstance = (tEdrvInstance*)pArgument_p;
     char            aErrorMessage[PCAP_ERRBUF_SIZE];
 
     DEBUG_LVL_EDRV_TRACE("%s(): ThreadId:%ld\n", __func__, syscall(SYS_gettid));
 
     pInstance->pPcapThread =
-        pcap_open_live (pInstance->initParam.hwParam.pDevName,
-                           65535,  // snaplen
-                           1,      // promiscuous mode
-                           1,      // milli seconds read timeout
-                           aErrorMessage);
+        pcap_open_live(pInstance->initParam.hwParam.pDevName,
+                       65535,  // snaplen
+                       1,      // promiscuous mode
+                       1,      // milli seconds read timeout
+                       aErrorMessage);
 
    if (pInstance->pPcapThread == NULL)
    {
@@ -577,9 +577,9 @@ static void* workerThread(void* pArgument_p)
    /* signal that thread is successfully started */
    sem_post(&pInstance->syncSem);
 
-   pcapRet  = pcap_loop (pInstance->pPcapThread, -1, packetHandler, (u_char*)pInstance);
+   pcapRet = pcap_loop(pInstance->pPcapThread, -1, packetHandler, (u_char*)pInstance);
 
-   switch( pcapRet )
+   switch (pcapRet)
    {
        case 0:
            DEBUG_LVL_ERROR_TRACE("%s(): pcap_loop ended because 'cnt' is exhausted.\n", __func__);
@@ -672,3 +672,4 @@ static INT getLinkStatus(const char* pIfName_p)
 }
 
 ///\}
+

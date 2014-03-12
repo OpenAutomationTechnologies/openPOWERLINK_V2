@@ -18,6 +18,7 @@ Developer Manual.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, Kalycito Infotech Private Limited
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -362,7 +363,7 @@ typedef struct
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static irqreturn_t edrvIrqHandler (INT irqNum_p, void* ppDevInstData_p);
+static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p);
 static tOplkError individualAddressCmd(UINT opcode_p, UINT count_p);
 static tOplkError configureCmd(UINT opcode_p, UINT count_p);
 static tOplkError multicastCmd(UINT opcode_p, UINT count_p, UINT8* pMacAddr_p, UINT mode_p);
@@ -456,20 +457,20 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     INT         i;
 
     // clear instance structure
-    OPLK_MEMSET(&edrvInstance_l, 0, sizeof (edrvInstance_l));
+    OPLK_MEMSET(&edrvInstance_l, 0, sizeof(edrvInstance_l));
 
     // save the init data
     edrvInstance_l.initParam = *pEdrvInitParam_p;
 
     // clear driver structure
-    OPLK_MEMSET(&edrvDriver_l, 0, sizeof (edrvDriver_l));
+    OPLK_MEMSET(&edrvDriver_l, 0, sizeof(edrvDriver_l));
     edrvDriver_l.name = DRV_NAME,
     edrvDriver_l.id_table = aEdrvPciTbl_l,
     edrvDriver_l.probe = initOnePciDev,
     edrvDriver_l.remove = removeOnePciDev,
 
     // register PCI driver
-    result = pci_register_driver (&edrvDriver_l);
+    result = pci_register_driver(&edrvDriver_l);
     if (result != 0)
     {
         printk("%s pci_register_driver failed with %d\n", __FUNCTION__, result);
@@ -515,9 +516,9 @@ tOplkError edrv_shutdown(void)
     if(edrvDriver_l.name != NULL)
     {
         printk("%s calling pci_unregister_driver()\n", __FUNCTION__);
-        pci_unregister_driver (&edrvDriver_l);
+        pci_unregister_driver(&edrvDriver_l);
         // clear driver structure
-        OPLK_MEMSET(&edrvDriver_l, 0, sizeof (edrvDriver_l));
+        OPLK_MEMSET(&edrvDriver_l, 0, sizeof(edrvDriver_l));
     }
     else
     {
@@ -551,13 +552,13 @@ tOplkError edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p)
     {
         fIsFirstEntry = TRUE;
         //pointer to the Command Block specified by the count value
-        pCb = (struct sCmdBlock *)(edrvInstance_l.pCbVirtAdd + (CB_REQUIRED_SIZE * cbCnt));
+        pCb = (struct sCmdBlock*)(edrvInstance_l.pCbVirtAdd + (CB_REQUIRED_SIZE * cbCnt));
 
         //set the byte count (number of mac addresses * 6 bytes per mac address)
         //in the corresponding section of the descriptor to zero
         edrvInstance_l.multicastAddrByteCnt = 0;
-        pCnt = (UINT8 *)&pCb[1];
-        *(UINT16 *)pCnt = edrvInstance_l.multicastAddrByteCnt;
+        pCnt = (UINT8*)&pCb[1];
+        *(UINT16*)pCnt = edrvInstance_l.multicastAddrByteCnt;
     }
 
     ret = multicastCmd(OP_MULTICAST, cbCnt, pMacAddr_p, MULTICAST_ADDR_ADD);
@@ -609,7 +610,7 @@ If \p entryChanged_p is equal or larger count_p all Rx filters shall be changed.
 */
 //------------------------------------------------------------------------------
 tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
-                                UINT entryChanged_p, UINT changeFlags_p)
+                               UINT entryChanged_p, UINT changeFlags_p)
 {
     UNUSED_PARAMETER(pFilter_p);
     UNUSED_PARAMETER(count_p);
@@ -725,7 +726,7 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
             goto Exit;
     }
 
-    pCmdBlock = (struct sCmdBlock *)((edrvInstance_l.pCbVirtAdd) + (CB_REQUIRED_SIZE * edrvInstance_l.tailTxDesc));
+    pCmdBlock = (struct sCmdBlock*)((edrvInstance_l.pCbVirtAdd) + (CB_REQUIRED_SIZE * edrvInstance_l.tailTxDesc));
 
     // array to store virtual address of pTxBuffer
     edrvInstance_l.aCbVirtAddrBuf[edrvInstance_l.tailTxDesc] = (ULONG)pBuffer_p;
@@ -743,13 +744,13 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
 
     if(0 == edrvInstance_l.tailTxDesc)
     {
-        cmdDescWrite(OP_TX, (MAX_CBS-1));
-        issueScbcmd(SC_CUC_START, (edrvInstance_l.cbDmaHandle) + (CB_REQUIRED_SIZE * (MAX_CBS-1)),OP_TX);
+        cmdDescWrite(OP_TX, (MAX_CBS - 1));
+        issueScbcmd(SC_CUC_START, (edrvInstance_l.cbDmaHandle) + (CB_REQUIRED_SIZE * (MAX_CBS - 1)), OP_TX);
     }
     else
     {
     cmdDescWrite(OP_TX, (edrvInstance_l.tailTxDesc - 1));
-    issueScbcmd(SC_CUC_START, edrvInstance_l.cbDmaHandle + (CB_REQUIRED_SIZE * (edrvInstance_l.tailTxDesc - 1)),OP_TX);
+    issueScbcmd(SC_CUC_START, edrvInstance_l.cbDmaHandle + (CB_REQUIRED_SIZE * (edrvInstance_l.tailTxDesc - 1)), OP_TX);
     }
 
     Exit:
@@ -774,7 +775,7 @@ This function is the interrupt service routine for the Ethernet driver.
 \return The function returns an IRQ handled code.
 */
 //------------------------------------------------------------------------------
-static irqreturn_t edrvIrqHandler (INT irqNum_p, void* ppDevInstData_p)
+static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
 {
     INT                     handled;
     UINT16                  state;
@@ -790,7 +791,7 @@ static irqreturn_t edrvIrqHandler (INT irqNum_p, void* ppDevInstData_p)
     handled = IRQ_HANDLED;
     state = ioread16(edrvInstance_l.pIoAddr + SCBSTAT);
 
-    if(((state & 0xFF00) == 0x0000) || ((state & 0xFF00) == 0xFF00))
+    if (((state & 0xFF00) == 0x0000) || ((state & 0xFF00) == 0xFF00))
     {
         handled = IRQ_NONE;
         goto Exit;
@@ -816,7 +817,7 @@ static irqreturn_t edrvIrqHandler (INT irqNum_p, void* ppDevInstData_p)
         do
         {
             // Process receive descriptors
-            pRxDescCmdBlock = (struct sRxDescCmdBlock *)((edrvInstance_l.pRfdVirtAdd) + (RFD_REQUIRED_SIZE * edrvInstance_l.headRxDesc));
+            pRxDescCmdBlock = (struct sRxDescCmdBlock*)((edrvInstance_l.pRfdVirtAdd) + (RFD_REQUIRED_SIZE * edrvInstance_l.headRxDesc));
 
             while (pRxDescCmdBlock->cmdStat & CS_C)
             { // Rx frame available
@@ -834,7 +835,9 @@ static irqreturn_t edrvIrqHandler (INT irqNum_p, void* ppDevInstData_p)
                     // so we can use the RX byte count from the RFD as it is
                     RxBuffer.rxFrameSize = (pRxDescCmdBlock->size) & RFD_COUNT;
 
-                    RxBuffer.pBuffer = ((edrvInstance_l.pRfdVirtAdd + (RFD_REQUIRED_SIZE * edrvInstance_l.headRxDesc))+(sizeof(struct sRxDescCmdBlock)));
+                    RxBuffer.pBuffer = ((edrvInstance_l.pRfdVirtAdd + 
+                                        (RFD_REQUIRED_SIZE * edrvInstance_l.headRxDesc)) +
+                                        (sizeof(struct sRxDescCmdBlock)));
 
                     // Call Rx handler of Data link layer
 
@@ -845,7 +848,7 @@ static irqreturn_t edrvIrqHandler (INT irqNum_p, void* ppDevInstData_p)
                 // so that it is available for use the next time
                 rxDescWrite(edrvInstance_l.headRxDesc);
                 edrvInstance_l.headRxDesc = ((edrvInstance_l.headRxDesc + 1) % MAX_RFDS);
-                pRxDescCmdBlock = (struct sRxDescCmdBlock *)((edrvInstance_l.pRfdVirtAdd) + (RFD_REQUIRED_SIZE * edrvInstance_l.tailRxDesc));
+                pRxDescCmdBlock = (struct sRxDescCmdBlock*)((edrvInstance_l.pRfdVirtAdd) + (RFD_REQUIRED_SIZE * edrvInstance_l.tailRxDesc));
                 pRxDescCmdBlock->cmdStat = 0x00000000;
                 if (0 == edrvInstance_l.headRxDesc)
                 {
@@ -855,12 +858,12 @@ static irqreturn_t edrvIrqHandler (INT irqNum_p, void* ppDevInstData_p)
                 {
                     edrvInstance_l.tailRxDesc = edrvInstance_l.headRxDesc - 1;
                 }
-                pRxDescCmdBlock = (struct sRxDescCmdBlock *)((edrvInstance_l.pRfdVirtAdd) + (RFD_REQUIRED_SIZE * edrvInstance_l.tailRxDesc));
+                pRxDescCmdBlock = (struct sRxDescCmdBlock*)((edrvInstance_l.pRfdVirtAdd) + (RFD_REQUIRED_SIZE * edrvInstance_l.tailRxDesc));
                 pRxDescCmdBlock->cmdStat = CS_S;
-                pRxDescCmdBlock = (struct sRxDescCmdBlock *)(edrvInstance_l.pRfdVirtAdd + (RFD_REQUIRED_SIZE * edrvInstance_l.headRxDesc));
+                pRxDescCmdBlock = (struct sRxDescCmdBlock*)(edrvInstance_l.pRfdVirtAdd + (RFD_REQUIRED_SIZE * edrvInstance_l.headRxDesc));
             }// closing RX while loop
 
-            pCmdBlock = (struct sCmdBlock *)((edrvInstance_l.pCbVirtAdd) + (CB_REQUIRED_SIZE * edrvInstance_l.headTxDesc));
+            pCmdBlock = (struct sCmdBlock*)((edrvInstance_l.pCbVirtAdd) + (CB_REQUIRED_SIZE * edrvInstance_l.headTxDesc));
 
             if(pCmdBlock->cmdStat & CS_C)
             {
@@ -870,9 +873,9 @@ static irqreturn_t edrvIrqHandler (INT irqNum_p, void* ppDevInstData_p)
 
                 // retrieve the address of the pTxBuffer pointer
                 // that was received in edrv_sendTxBuffer
-                pTxBuffer = (tEdrvTxBuffer *)edrvInstance_l.aCbVirtAddrBuf[edrvInstance_l.headTxDesc];
+                pTxBuffer = (tEdrvTxBuffer*)edrvInstance_l.aCbVirtAddrBuf[edrvInstance_l.headTxDesc];
 
-                pDmaBuffer = (tEdrvTxBuffer *)edrvInstance_l.aCbDmaAddrBuf[edrvInstance_l.headTxDesc];
+                pDmaBuffer = (tEdrvTxBuffer*)edrvInstance_l.aCbDmaAddrBuf[edrvInstance_l.headTxDesc];
 
                 edrvInstance_l.aCbVirtAddrBuf[edrvInstance_l.headTxDesc] = 0;
 
@@ -906,9 +909,9 @@ static irqreturn_t edrvIrqHandler (INT irqNum_p, void* ppDevInstData_p)
             }//Closing if C bit set in the CB
             else
             {
-                    break;
+                break;
             }
-        }while (edrvInstance_l.headTxDesc != edrvInstance_l.tailTxDesc);
+        } while (edrvInstance_l.headTxDesc != edrvInstance_l.tailTxDesc);
 
     }// close if(TX/RX interrupt)
 
@@ -934,30 +937,30 @@ static tOplkError individualAddressCmd(UINT opcode_p, UINT count_p)
     tCommandBlock*  pCmdBlock;
 
     //pointer to the Command Block specified by the count value
-    pCmdBlock = (tCommandBlock *)(edrvInstance_l.pCbVirtAdd + (CB_REQUIRED_SIZE * count_p));
+    pCmdBlock = (tCommandBlock*)(edrvInstance_l.pCbVirtAdd + (CB_REQUIRED_SIZE * count_p));
 
     //fill the individual address command to be executed
-    pCmdBlock->stateCmd = CS_EL | (opcode_p<<CS_OP_SHIFT); //0x80010000
+    pCmdBlock->stateCmd = CS_EL | (opcode_p << CS_OP_SHIFT); //0x80010000
 
     //The MAC address bytes used below have been read from the EEPROM
 
     //MAC ADDRESS (BYTE4<<24) | (BYTE3<<16) | (BYTE2<<8) | (BYTE1<<0)
     pCmdBlock->value1 = edrvInstance_l.initParam.aMacAddr[0] |
-                            edrvInstance_l.initParam.aMacAddr[1] << 8 |
-                            edrvInstance_l.initParam.aMacAddr[2] << 16 |
-                            edrvInstance_l.initParam.aMacAddr[3] << 24;
+                        edrvInstance_l.initParam.aMacAddr[1] << 8 |
+                        edrvInstance_l.initParam.aMacAddr[2] << 16 |
+                        edrvInstance_l.initParam.aMacAddr[3] << 24;
 
     //MAC ADDRESS (BYTE6<<8) | (BYTE5<<0)
     pCmdBlock->value2 = edrvInstance_l.initParam.aMacAddr[4] |
-                                            edrvInstance_l.initParam.aMacAddr[5] << 8;
+                        edrvInstance_l.initParam.aMacAddr[5] << 8;
 
     //start command issued to execute the individual address setup
     issueScbcmd(SC_CUC_START, edrvInstance_l.cbDmaHandle, OP_ADDRSETUP);
 
     //wait for command to complete successfully
-    while((pCmdBlock->stateCmd & CS_C)==0);
+    while ((pCmdBlock->stateCmd & CS_C) == 0);
 
-    if(pCmdBlock->stateCmd & CS_OK)
+    if (pCmdBlock->stateCmd & CS_OK)
     {
         ret = kErrorOk;
     }
@@ -987,7 +990,7 @@ static tOplkError configureCmd(UINT opcode_p, UINT count_p)
     tCommandBlock*  pCmdBlock;
 
     //pointer to the Command Block specified by the count_p value
-    pCmdBlock = (tCommandBlock *)(edrvInstance_l.pCbVirtAdd + (CB_REQUIRED_SIZE * count_p));
+    pCmdBlock = (tCommandBlock*)(edrvInstance_l.pCbVirtAdd + (CB_REQUIRED_SIZE * count_p));
 
     //fill the configure command to be executed
     pCmdBlock->stateCmd = CS_EL | (opcode_p << CS_OP_SHIFT); //0x80020000
@@ -997,14 +1000,14 @@ static tOplkError configureCmd(UINT opcode_p, UINT count_p)
     //Byte1 - Default Value
     //Byte2 - Default Value
     //Byte3 - Default Value
-    pCmdBlock->value1 = (0X00<<24) | (0X00<<16) | (0X08<<8) | (0X10<<0); //0x00000810
+    pCmdBlock->value1 = (0X00 << 24) | (0X00 << 16) | (0X08 << 8) | (0X10 << 0); //0x00000810
 
     //Byte4 - Default Value
     //Byte5 - Default Value
     //Byte6 - Default Value for 82559
     //Byte7 - Default Value for 82559
     //(Byte7<<24) | (Byte6<<16) | (Byte5<<8) | (Byte4<<0)
-    pCmdBlock->value2 = (0X00<<24) | (0X30<<16) | (0X00<<8) | (0X00<<0); //0x00300000
+    pCmdBlock->value2 = (0X00 << 24) | (0X30 << 16) | (0X00 << 8) | (0X00 << 0); //0x00300000
 
     //Byte8 - Bit0 set for 82559, Bit0 cleared to enable link operation, Rest of the
     // bits are default values for 82559
@@ -1013,14 +1016,14 @@ static tOplkError configureCmd(UINT opcode_p, UINT count_p)
     // disabled, other bits default for 82559
     //Byte11 - Default value for 82559
     //(Byte11<<24) | (Byte10<<16) | (Byte9<<8) | (Byte8<<0)
-    pCmdBlock->value3 = (0X00<<24) | (0X2E<<16) | (0X00<<8) | (0X01<<0); //0x002E0001
+    pCmdBlock->value3 = (0X00 << 24) | (0X2E << 16) | (0X00 << 8) | (0X01 << 0); //0x002E0001
 
     //Byte12 - Interframe spacing - default value, other bits default value for 82559
     //Byte13 - Default Value for 82559
     //Byte14 - Default Value for 82559
     //Byte15 - Bit0 cleared to disable promiscuous mode, other bits default value for 82559
     //(Byte15<<24) | (Byte14<<16) | (Byte13<<8) | (Byte12<<0)
-    pCmdBlock->value4 = (0XC8<<24) | (0XF2<<16) | (0X00<<8) | (0X61<<0); //0xC8F20061
+    pCmdBlock->value4 = (0XC8 << 24) | (0XF2 << 16) | (0X00 << 8) | (0X61 << 0); //0xC8F20061
 
     //NOTE: the following configuration bytes not yet configured
     //Byte16 - Default Value
@@ -1041,9 +1044,9 @@ static tOplkError configureCmd(UINT opcode_p, UINT count_p)
     issueScbcmd(SC_CUC_START, edrvInstance_l.cbDmaHandle, OP_CONFIGURE);
 
     //wait for command to complete successfully
-    while((pCmdBlock->stateCmd & CS_C) == 0);
+    while ((pCmdBlock->stateCmd & CS_C) == 0);
 
-    if(pCmdBlock->stateCmd & CS_OK)
+    if (pCmdBlock->stateCmd & CS_OK)
     {
         ret = kErrorOk;
     }
@@ -1081,17 +1084,17 @@ static tOplkError multicastCmd(UINT opcode_p, UINT count_p, UINT8* pMacAddr_p, U
     UINT                memCmpref = 0;
 
     //pointer to the Command Block specified by the count_p value
-    pCmdBlock = (struct sCmdBlock *)(edrvInstance_l.pCbVirtAdd + (CB_REQUIRED_SIZE * count_p));
+    pCmdBlock = (struct sCmdBlock*)(edrvInstance_l.pCbVirtAdd + (CB_REQUIRED_SIZE * count_p));
 
     //fill the multicast command to be executed
     pCmdBlock->cmdStat = CS_EL | (opcode_p << CS_OP_SHIFT); //0x80030000
 
-    pByte = (UINT8 *)&pCmdBlock[1];
+    pByte = (UINT8*)&pCmdBlock[1];
     //point the address where the byte count_p for multicast entries to be stored
-    pByteCount = (UINT16 *)pByte;
+    pByteCount = (UINT16*)pByte;
     multicastAddrCnt = edrvInstance_l.multicastAddrByteCnt;
     //move the pointr to first multicast entry
-    pByte += (sizeof (UINT16));
+    pByte += (sizeof(UINT16));
 
     if(MULTICAST_ADDR_ADD == mode_p)
     {
@@ -1112,19 +1115,18 @@ static tOplkError multicastCmd(UINT opcode_p, UINT count_p, UINT8* pMacAddr_p, U
         //in the corresponding section of the descriptor
 
         // search for the mac address to be removed from multicast address
-        for(multicastAddrLoop = 0; multicastAddrLoop < multicastAddrCnt ; multicastAddrLoop += MAC_ADDRESS_LEN)
+        for (multicastAddrLoop = 0; multicastAddrLoop < multicastAddrCnt ; multicastAddrLoop += MAC_ADDRESS_LEN)
         {
-            if(0 == OPLK_MEMCMP(pByte, pMacAddr_p, MAC_ADDRESS_LEN))
+            if (OPLK_MEMCMP(pByte, pMacAddr_p, MAC_ADDRESS_LEN) == 0)
             {
                 // entry found reduce the count and remove that entry from the descriptor
                 edrvInstance_l.multicastAddrByteCnt -= MAC_ADDRESS_LEN;
                 *pByteCount = edrvInstance_l.multicastAddrByteCnt;
 
-                if( 0 != ( multicastAddrCnt - (multicastAddrLoop + MAC_ADDRESS_LEN) ))
-                    OPLK_MEMCPY(pByte, pByte+MAC_ADDRESS_LEN, ( multicastAddrCnt - (multicastAddrLoop + MAC_ADDRESS_LEN) ) );
+                if ((multicastAddrCnt - (multicastAddrLoop + MAC_ADDRESS_LEN)) != 0)
+                    OPLK_MEMCPY(pByte, pByte+MAC_ADDRESS_LEN, (multicastAddrCnt - (multicastAddrLoop + MAC_ADDRESS_LEN)));
 
-                    memCmpref = 1;
-
+                memCmpref = 1;
                 break;
             }
             else
@@ -1134,10 +1136,10 @@ static tOplkError multicastCmd(UINT opcode_p, UINT count_p, UINT8* pMacAddr_p, U
             pByte += MAC_ADDRESS_LEN;
         }
 
-        if(0 == memCmpref)
+        if(memCmpref == 0)
         {
-                ret = kErrorOk;
-                goto Exit;
+            ret = kErrorOk;
+            goto Exit;
         }
     }
     else
@@ -1150,9 +1152,10 @@ static tOplkError multicastCmd(UINT opcode_p, UINT count_p, UINT8* pMacAddr_p, U
     issueScbcmd(SC_CUC_START, edrvInstance_l.cbDmaHandle, opcode_p);
 
     //wait for command to complete successfully
-    while((pCmdBlock->cmdStat & CS_C)==0);
+    while ((pCmdBlock->cmdStat & CS_C) == 0)
+        ;
 
-    if(pCmdBlock->cmdStat & CS_OK)
+    if (pCmdBlock->cmdStat & CS_OK)
     {
         ret = kErrorOk;
     }
@@ -1188,27 +1191,27 @@ static tOplkError transmitCmd(UINT opcode_p, UINT count_p)
     tEdrvTxBuffer*          pTxBuffer = NULL;
     UINT                    temp;
 
-    pTxBuffer = (tEdrvTxBuffer *)edrvInstance_l.aCbVirtAddrBuf[count_p];
+    pTxBuffer = (tEdrvTxBuffer*)edrvInstance_l.aCbVirtAddrBuf[count_p];
     //pointer to the Command Block specified by the count_p value
-    pCmdBlock = (struct sCmdBlock *)(edrvInstance_l.pCbVirtAdd + (CB_REQUIRED_SIZE * count_p));
+    pCmdBlock = (struct sCmdBlock*)(edrvInstance_l.pCbVirtAdd + (CB_REQUIRED_SIZE * count_p));
     //physical address corresponding to the virtual address of the Command Block specified above
     cbpDma = (edrvInstance_l.cbDmaHandle + (CB_REQUIRED_SIZE * count_p));
 
-    pByte = (UINT8 *)&pCmdBlock[1];
+    pByte = (UINT8*)&pCmdBlock[1];
 
-    pTxCmdBlock = (struct sTxCmdBlock *)pByte;
-    pTxDescCmdBlock = (struct sTxDescCmdBlock *)&pTxCmdBlock[1];
+    pTxCmdBlock = (struct sTxCmdBlock*)pByte;
+    pTxDescCmdBlock = (struct sTxDescCmdBlock*)&pTxCmdBlock[1];
     //fill the length of the buffer to be transmitted and indicate that it is the end of the frame
     pTxDescCmdBlock->tbdSize = TBD_EL | (pTxBuffer->txFrameSize);
     //fill the physical address of the buffer to be transmitted
     pTxDescCmdBlock->tbdAddr = edrvInstance_l.aCbDmaAddrBuf[count_p];
     //fill the status bits and the end of frame indication bit in the TCB Control section
-    pTxCmdBlock->tcbCtrl = (0X01<<TCB_TBDNUM_SHIFT)
-                        | (0X01<<TCB_TXTHR_SHIFT)
-                        | TCB_EOF; //0x01018000
+    pTxCmdBlock->tcbCtrl = (0X01 << TCB_TBDNUM_SHIFT)
+                            | (0X01 << TCB_TXTHR_SHIFT)
+                            | TCB_EOF; //0x01018000
 
     //fill in the physical address of the buffer descriptor in the TX descriptor's TCB address section
-    temp = cbpDma + sizeof (struct sCmdBlock) + sizeof (struct sTxCmdBlock);
+    temp = cbpDma + sizeof(struct sCmdBlock) + sizeof(struct sTxCmdBlock);
     pTxCmdBlock->tcbTbdPtr = temp;
 
     /* make command block */
@@ -1252,8 +1255,8 @@ This function verifies the EEPROM's size.
 static void checkEepromSize(void)
 {
     INT     loopCount;
-    UINT8    chipselect;
-    UINT8    di; //FIXME: Give me a meaningful name, now!
+    UINT8   chipselect;
+    UINT8   di; //FIXME: Give me a meaningful name, now!
 
     /* enable eeprom interface register */
     chipselect = EC_EECS;
@@ -1277,7 +1280,8 @@ static void checkEepromSize(void)
 
     /* How many address bits required until eeprom responds with 0 */
     loopCount = 0;
-    do {
+    do 
+    {
         iowrite8(chipselect, edrvInstance_l.pIoAddr + EECTRL);
 
         iowrite8(chipselect | EC_EESK, edrvInstance_l.pIoAddr + EECTRL);
@@ -1286,7 +1290,7 @@ static void checkEepromSize(void)
         iowrite8(chipselect, edrvInstance_l.pIoAddr + EECTRL);
         eepromDelay();
         loopCount++;
-    } while ((ioread8(edrvInstance_l.pIoAddr + EECTRL) & EC_EEDO) && loopCount < 8 );
+    } while ((ioread8(edrvInstance_l.pIoAddr + EECTRL) & EC_EEDO) && loopCount < 8);
     /* save the result */
 
     edrvInstance_l.eepromAddrBits = loopCount;
@@ -1327,7 +1331,7 @@ static UINT16 readEeprom(UINT addr_p)
 
     if (addr_p >= (1 << edrvInstance_l.eepromAddrBits))
     {
-        return (0);
+        return 0;
     }
 
     /* make command bits */
@@ -1336,7 +1340,7 @@ static UINT16 readEeprom(UINT addr_p)
     /* enable eeprom interface register */
     chipselect = EC_EECS;
 
-    iowrite8(chipselect , edrvInstance_l.pIoAddr + EECTRL);
+    iowrite8(chipselect, edrvInstance_l.pIoAddr + EECTRL);
 
     eepromDelay();
 
@@ -1373,7 +1377,7 @@ static UINT16 readEeprom(UINT addr_p)
     iowrite8(0, edrvInstance_l.pIoAddr + EECTRL);
     eepromDelay();
 
-    return (ret);
+    return ret;
 }
 
 //------------------------------------------------------------------------------
@@ -1435,14 +1439,14 @@ static tOplkError rxDescWrite(INT count_p)
     tOplkError              ret = kErrorOk;
 
     //select the virtual address of the RX descriptor whose status bits are to be cleared
-    pRxDescCmdBlock = (struct sRxDescCmdBlock *)((edrvInstance_l.pRfdVirtAdd) + (RFD_REQUIRED_SIZE * count_p));
+    pRxDescCmdBlock = (struct sRxDescCmdBlock*)((edrvInstance_l.pRfdVirtAdd) + (RFD_REQUIRED_SIZE * count_p));
 
     //clear the status bits of the selected RX descriptor
     pRxDescCmdBlock->cmdStat = 0x00000000;
 
     //clear the status bits in the Size field of the RX descriptor
     pRxDescCmdBlock->size = (((RFD_REQUIRED_SIZE - sizeof (struct sRxDescCmdBlock)))
-                   << RFD_SIZE_SHIFT) & RFD_SIZE;
+                             << RFD_SIZE_SHIFT) & RFD_SIZE;
 
     return ret;
 }
@@ -1467,16 +1471,17 @@ static BOOL issueScbcmd(UINT16 cmd_p, UINT arg_p, UINT opcode_p)
     static UINT16   prevCmd = 0;
 
     // this code section used for waiting till the previous cmd has been accepted
-    while (ioread8(edrvInstance_l.pIoAddr + SCBCMD) & (SC_CUC | SC_RUC));
+    while (ioread8(edrvInstance_l.pIoAddr + SCBCMD) & (SC_CUC | SC_RUC))
+        ;
 
-    if(OP_TX == opcode_p)
+    if (opcode_p == OP_TX)
     {
         state = ioread16(edrvInstance_l.pIoAddr + SCBSTAT);
-        while((state & SS_CNA) == 0 && (curStatusFirstTime == 1))
+        while ((state & SS_CNA) == 0 && (curStatusFirstTime == 1))
         {
             state = ioread16(edrvInstance_l.pIoAddr + SCBSTAT);
         }
-        if(curStatusFirstTime < 1 )
+        if (curStatusFirstTime < 1)
         {
             curStatusFirstTime++;
         }
@@ -1577,7 +1582,7 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
     }
 
     // enable PCI busmaster
-    pci_set_master (pPciDev_p);
+    pci_set_master(pPciDev_p);
 
     // reset chip code - start
     /* clear pending interrupts */
@@ -1606,17 +1611,17 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
     iowrite8(0, edrvInstance_l.pIoAddr + FCTRL);
 
     // issue commands to scb to load the cu and ru base addresses - start
-     issueScbcmd(SC_CUC_LOADBASE, 0, 0);
-     issueScbcmd(SC_RUC_LOADBASE, 0, 0);
+    issueScbcmd(SC_CUC_LOADBASE, 0, 0);
+    issueScbcmd(SC_RUC_LOADBASE, 0, 0);
 
-     result = pci_set_dma_mask(pPciDev_p, DMA_BIT_MASK(32));
-     if (result != 0)
-     {
-         result = -ENOMEM;
-         goto ExitFail;
-     }
+    result = pci_set_dma_mask(pPciDev_p, DMA_BIT_MASK(32));
+    if (result != 0)
+    {
+        result = -ENOMEM;
+        goto ExitFail;
+    }
 
-     edrvInstance_l.pCbVirtAdd = pci_alloc_consistent(pPciDev_p, CB_REQUIRED_SIZE * MAX_CBS, &(edrvInstance_l.cbDmaHandle));
+    edrvInstance_l.pCbVirtAdd = pci_alloc_consistent(pPciDev_p, CB_REQUIRED_SIZE * MAX_CBS, &(edrvInstance_l.cbDmaHandle));
     if (edrvInstance_l.pCbVirtAdd == NULL)
     {
         result = -ENOMEM;
@@ -1626,8 +1631,8 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
     // fill CBs for which memory has been allocated - start
     for(loopCount = 0; loopCount < MAX_CBS; loopCount++)
     {
-        pCmdBlock = (struct sCmdBlock *)((edrvInstance_l.pCbVirtAdd) + (CB_REQUIRED_SIZE * loopCount));
-        if(loopCount == (MAX_CBS-1))
+        pCmdBlock = (struct sCmdBlock*)((edrvInstance_l.pCbVirtAdd) + (CB_REQUIRED_SIZE * loopCount));
+        if (loopCount == (MAX_CBS - 1))
         {
             pCmdBlock->cmdStat = 0x00000000;
             pCmdBlock->link = edrvInstance_l.cbDmaHandle;
@@ -1635,7 +1640,7 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
         else
         {
             pCmdBlock->cmdStat = 0x00000000;
-            pCmdBlock->link = edrvInstance_l.cbDmaHandle + (CB_REQUIRED_SIZE * (loopCount+1));
+            pCmdBlock->link = edrvInstance_l.cbDmaHandle + (CB_REQUIRED_SIZE * (loopCount + 1));
         }
     }
     // fill CBs for which memory has been allocated - end
@@ -1650,29 +1655,29 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
     // allocate memory for RFDs - end
 
     // fill RFDs for which memory has been allocated - start
-    for(loopCount = 0; loopCount < MAX_RFDS; loopCount++)
+    for (loopCount = 0; loopCount < MAX_RFDS; loopCount++)
     {
-        pRxDescCmdBlock = (struct sRxDescCmdBlock *)((edrvInstance_l.pRfdVirtAdd) + (RFD_REQUIRED_SIZE * loopCount));
-        if(loopCount == (MAX_RFDS-1))
+        pRxDescCmdBlock = (struct sRxDescCmdBlock*)((edrvInstance_l.pRfdVirtAdd) + (RFD_REQUIRED_SIZE * loopCount));
+        if (loopCount == (MAX_RFDS - 1))
         {
             pRxDescCmdBlock->cmdStat = 0x00000000;
-            pRxDescCmdBlock->size = (((RFD_REQUIRED_SIZE - sizeof (struct sRxDescCmdBlock)))
-                                                                            << RFD_SIZE_SHIFT) & RFD_SIZE;
+            pRxDescCmdBlock->size = (((RFD_REQUIRED_SIZE - sizeof(struct sRxDescCmdBlock)))
+                                     << RFD_SIZE_SHIFT) & RFD_SIZE;
             pRxDescCmdBlock->link = edrvInstance_l.rfdDmaAdd;
         }
         else
         {
             pRxDescCmdBlock->cmdStat = 0x00000000;
-            pRxDescCmdBlock->size = (((RFD_REQUIRED_SIZE - sizeof (struct sRxDescCmdBlock)))
-                            << RFD_SIZE_SHIFT) & RFD_SIZE;
-            pRxDescCmdBlock->link = edrvInstance_l.rfdDmaAdd + (RFD_REQUIRED_SIZE * (loopCount+1));
+            pRxDescCmdBlock->size = (((RFD_REQUIRED_SIZE - sizeof(struct sRxDescCmdBlock)))
+                                     << RFD_SIZE_SHIFT) & RFD_SIZE;
+            pRxDescCmdBlock->link = edrvInstance_l.rfdDmaAdd + (RFD_REQUIRED_SIZE * (loopCount + 1));
         }
     }
 
     // fill RFDs for which memory has been allocated - end
 
     ret = cmdDescWrite(OP_ADDRSETUP, 0);
-    if(ret != kErrorOk)
+    if (ret != kErrorOk)
     {
         result = -EIO;
         goto Exit;
@@ -1701,7 +1706,7 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
     printk("%s allocate buffers\n", __FUNCTION__);
     // allocate tx-buffers
     edrvInstance_l.pTxBuf = pci_alloc_consistent(pPciDev_p, EDRV_TX_BUFFER_SIZE,
-                    &edrvInstance_l.pTxBufDma);
+                                                 &edrvInstance_l.pTxBufDma);
     if (edrvInstance_l.pTxBuf == NULL)
     {
         result = -ENOMEM;
@@ -1736,15 +1741,15 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
 
         for (loopCount = 0; loopCount < 6; loopCount += 2)
         {
-            value = readEeprom(loopCount/2);
+            value = readEeprom(loopCount / 2);
             edrvInstance_l.initParam.aMacAddr[loopCount] = (UINT8)value;
             edrvInstance_l.initParam.aMacAddr[loopCount+1] = (UINT8)(value >> 8);
         }
     }
 
     edrvInstance_l.headRxDesc = 0;
-    edrvInstance_l.tailRxDesc = MAX_RFDS-1;
-    pRxDescCmdBlock = (struct sRxDescCmdBlock *)((edrvInstance_l.pRfdVirtAdd) + (RFD_REQUIRED_SIZE * edrvInstance_l.tailRxDesc));
+    edrvInstance_l.tailRxDesc = MAX_RFDS - 1;
+    pRxDescCmdBlock = (struct sRxDescCmdBlock*)((edrvInstance_l.pRfdVirtAdd) + (RFD_REQUIRED_SIZE * edrvInstance_l.tailRxDesc));
     pRxDescCmdBlock->cmdStat = CS_S;
 
     //Enable the receiver
@@ -1791,14 +1796,14 @@ static void removeOnePciDev(struct pci_dev* pPciDev_p)
 
     // free buffers
 
-    if(edrvInstance_l.pCbVirtAdd != NULL)
+    if (edrvInstance_l.pCbVirtAdd != NULL)
     {
         pci_free_consistent(pPciDev_p, CB_REQUIRED_SIZE * MAX_CBS, edrvInstance_l.pCbVirtAdd, edrvInstance_l.cbDmaHandle);
         edrvInstance_l.pCbVirtAdd = NULL;
     }
 
     // sRxDescCmdBlock memory free in edrvremoveone - start
-    if(edrvInstance_l.pRfdVirtAdd != NULL)
+    if (edrvInstance_l.pRfdVirtAdd != NULL)
     {
         pci_free_consistent(pPciDev_p, RFD_REQUIRED_SIZE * MAX_RFDS, edrvInstance_l.pRfdVirtAdd, edrvInstance_l.rfdDmaAdd);
         edrvInstance_l.pRfdVirtAdd = NULL;
@@ -1808,7 +1813,7 @@ static void removeOnePciDev(struct pci_dev* pPciDev_p)
     if (edrvInstance_l.pTxBuf != NULL)
     {
         pci_free_consistent(pPciDev_p, EDRV_TX_BUFFER_SIZE,
-                                 edrvInstance_l.pTxBuf, edrvInstance_l.pTxBufDma);
+                            edrvInstance_l.pTxBuf, edrvInstance_l.pTxBufDma);
         edrvInstance_l.pTxBuf = NULL;
     }
 
@@ -1832,3 +1837,4 @@ Exit:
 }
 
 ///\}
+
