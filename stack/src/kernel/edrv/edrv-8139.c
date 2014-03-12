@@ -22,6 +22,7 @@ number of the buffer.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -344,7 +345,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     INT         i;
 
     // clear instance structure
-    OPLK_MEMSET(&edrvInstance_l, 0, sizeof (edrvInstance_l));
+    OPLK_MEMSET(&edrvInstance_l, 0, sizeof(edrvInstance_l));
 
     // save the init data
     edrvInstance_l.initParam = *pEdrvInitParam_p;
@@ -353,14 +354,14 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     // 2008-11-24 d.k. because pci_unregister_driver() doesn't do it correctly;
     //      one example: kobject_set_name() frees edrvDriver_l.driver.kobj.name,
     //      but does not set this pointer to NULL.
-    OPLK_MEMSET(&edrvDriver_l, 0, sizeof (edrvDriver_l));
+    OPLK_MEMSET(&edrvDriver_l, 0, sizeof(edrvDriver_l));
     edrvDriver_l.name         = DRV_NAME,
     edrvDriver_l.id_table     = aEdrvPciTbl_l,
     edrvDriver_l.probe        = initOnePciDev,
     edrvDriver_l.remove       = removeOnePciDev,
 
     // register PCI driver
-    result = pci_register_driver (&edrvDriver_l);
+    result = pci_register_driver(&edrvDriver_l);
     if (result != 0)
     {
         printk("%s pci_register_driver failed with %d\n", __FUNCTION__, result);
@@ -405,9 +406,9 @@ tOplkError edrv_shutdown(void)
     if(edrvDriver_l.name != NULL)
     {
         printk("%s calling pci_unregister_driver()\n", __FUNCTION__);
-        pci_unregister_driver (&edrvDriver_l);
+        pci_unregister_driver(&edrvDriver_l);
         // clear driver structure
-        OPLK_MEMSET(&edrvDriver_l, 0, sizeof (edrvDriver_l));
+        OPLK_MEMSET(&edrvDriver_l, 0, sizeof(edrvDriver_l));
     }
     else
     {
@@ -435,7 +436,7 @@ tOplkError edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p)
     UINT32      data;
     UINT8       hash;
 
-    hash = calcHash (pMacAddr_p);
+    hash = calcHash(pMacAddr_p);
 
     if (hash > 31)
     {
@@ -472,7 +473,7 @@ tOplkError edrv_clearRxMulticastMacAddr(UINT8* pMacAddr_p)
     UINT32      data;
     UINT8       hash;
 
-    hash = calcHash (pMacAddr_p);
+    hash = calcHash(pMacAddr_p);
 
     if (hash > 31)
     {
@@ -512,7 +513,7 @@ If \p entryChanged_p is equal or larger count_p all Rx filters shall be changed.
 */
 //------------------------------------------------------------------------------
 tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
-                                UINT entryChanged_p, UINT changeFlags_p)
+                               UINT entryChanged_p, UINT changeFlags_p)
 {
     UNUSED_PARAMETER(pFilter_p);
     UNUSED_PARAMETER(count_p);
@@ -914,7 +915,7 @@ static irqreturn_t edrvIrqHandler (INT irqNum_p, void* ppDevInstData_p)
             }
 
             // calulate new offset (UINT32 aligned)
-            curRx = (WORD) ((curRx + length + sizeof (rxStatus) + 3) & ~0x3);
+            curRx = (WORD)((curRx + length + sizeof(rxStatus) + 3) & ~0x3);
             EDRV_TRACE_CAPR(curRx - 0x10);
             EDRV_REGW_WRITE(EDRV_REGW_CAPR, curRx - 0x10);
 
@@ -1010,7 +1011,7 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
     }
 
     printk("%s ioremap\n", __FUNCTION__);
-    edrvInstance_l.pIoAddr = ioremap (pci_resource_start(pPciDev_p, 1), pci_resource_len(pPciDev_p, 1));
+    edrvInstance_l.pIoAddr = ioremap(pci_resource_start(pPciDev_p, 1), pci_resource_len(pPciDev_p, 1));
     if (edrvInstance_l.pIoAddr == NULL)
     {   // remap of controller's register space failed
         result = -EIO;
@@ -1019,7 +1020,7 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
 
     // enable PCI busmaster
     printk("%s enable busmaster\n", __FUNCTION__);
-    pci_set_master (pPciDev_p);
+    pci_set_master(pPciDev_p);
 
     // reset controller
     printk("%s reset controller\n", __FUNCTION__);
@@ -1043,7 +1044,7 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
         ((temp & EDRV_REGDW_TCR_VER_MASK) != EDRV_REGDW_TCR_VER_B) &&
         ((temp & EDRV_REGDW_TCR_VER_MASK) != EDRV_REGDW_TCR_VER_CP))
     {   // unsupported chip
-        printk("%s Unsupported chip! TCR = 0x%08lX\n", __FUNCTION__, (ULONG) temp);
+        printk("%s Unsupported chip! TCR = 0x%08lX\n", __FUNCTION__, (ULONG)temp);
         result = -ENODEV;
         goto Exit;
     }
@@ -1072,7 +1073,7 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
     // allocate buffers
     printk("%s allocate buffers\n", __FUNCTION__);
     edrvInstance_l.pTxBuf = pci_alloc_consistent(pPciDev_p, EDRV_TX_BUFFER_SIZE,
-                     &edrvInstance_l.pTxBufDma);
+                                                 &edrvInstance_l.pTxBufDma);
     if (edrvInstance_l.pTxBuf == NULL)
     {
         result = -ENOMEM;
@@ -1080,7 +1081,7 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
     }
 
     edrvInstance_l.pRxBuf = pci_alloc_consistent(pPciDev_p, EDRV_RX_BUFFER_SIZE,
-                     &edrvInstance_l.pRxBufDma);
+                                                 &edrvInstance_l.pRxBufDma);
     if (edrvInstance_l.pRxBuf == NULL)
     {
         result = -ENOMEM;
@@ -1089,7 +1090,7 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
 
     // reset pointers for Tx buffers
     printk("%s reset pointers fo Tx buffers\n", __FUNCTION__);
-    for(index=0; index < EDRV_MAX_TX_DESCS; index++)
+    for (index = 0; index < EDRV_MAX_TX_DESCS; index++)
     {
         EDRV_REGDW_WRITE(EDRV_REGDW_TSAD(index), 0);
         temp = EDRV_REGDW_READ(EDRV_REGDW_TSAD(index));
@@ -1173,14 +1174,14 @@ static void removeOnePciDev(struct pci_dev* pPciDev_p)
     if (edrvInstance_l.pTxBuf != NULL)
     {
         pci_free_consistent(pPciDev_p, EDRV_TX_BUFFER_SIZE,
-                     edrvInstance_l.pTxBuf, edrvInstance_l.pTxBufDma);
+                            edrvInstance_l.pTxBuf, edrvInstance_l.pTxBufDma);
         edrvInstance_l.pTxBuf = NULL;
     }
 
     if (edrvInstance_l.pRxBuf != NULL)
     {
         pci_free_consistent(pPciDev_p, EDRV_RX_BUFFER_SIZE,
-                     edrvInstance_l.pRxBuf, edrvInstance_l.pRxBufDma);
+                            edrvInstance_l.pRxBuf, edrvInstance_l.pRxBufDma);
         edrvInstance_l.pRxBuf = NULL;
     }
 
@@ -1248,3 +1249,4 @@ static UINT8 calcHash (UINT8* pMacAddr_p)
 }
 
 ///\}
+

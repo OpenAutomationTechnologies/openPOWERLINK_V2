@@ -12,7 +12,7 @@ It implements time-triggered transmission of frames necessary for MN.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -98,7 +98,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //define for negative shift filter
 #define EDRVCYC_NEGSHFT_FLT_SPAN    8U
 
-//define necessary for calculating correct TX time (EplDef.h - THX!)
+//define necessary for calculating correct TX time (oplkdefs.h - THX!)
 #define EDRVCYC_BYTETIME_NS     (C_DLL_T_BITTIME * 8U)
 #define EDRVCYC_IPG_NS          C_DLL_T_IFG
 #define EDRVCYC_PREAMB_SIZE     (C_DLL_T_PREAMBLE / C_DLL_T_BITTIME / 8U)
@@ -153,7 +153,7 @@ This function initializes the cyclic Ethernet driver.
 tOplkError edrvcyclic_init(void)
 {
     // clear instance structure
-    OPLK_MEMSET(&instance_l, 0, sizeof (instance_l));
+    OPLK_MEMSET(&instance_l, 0, sizeof(instance_l));
 
     return kErrorOk;
 }
@@ -207,7 +207,7 @@ tOplkError edrvcyclic_setMaxTxBufferListSize(UINT maxListSize_p)
             instance_l.apTxBufferList = NULL;
         }
 
-        instance_l.apTxBufferList = OPLK_MALLOC(sizeof (*instance_l.apTxBufferList) * maxListSize_p * 2);
+        instance_l.apTxBufferList = OPLK_MALLOC(sizeof(*instance_l.apTxBufferList) * maxListSize_p * 2);
         if (instance_l.apTxBufferList == NULL)
         {
             ret = kErrorEdrvNoFreeBufEntry;
@@ -215,7 +215,7 @@ tOplkError edrvcyclic_setMaxTxBufferListSize(UINT maxListSize_p)
 
         instance_l.currrentTxBufferList = 0;
 
-        OPLK_MEMSET(instance_l.apTxBufferList, 0, sizeof (*instance_l.apTxBufferList) * maxListSize_p * 2);
+        OPLK_MEMSET(instance_l.apTxBufferList, 0, sizeof(*instance_l.apTxBufferList) * maxListSize_p * 2);
     }
 
     return ret;
@@ -262,7 +262,7 @@ tOplkError edrvcyclic_setNextTxBufferList(tEdrvTxBuffer** ppTxBuffer_p, UINT txB
         goto Exit;
     }
 
-    OPLK_MEMCPY(&instance_l.apTxBufferList[nextTxBufferList], ppTxBuffer_p, sizeof (*ppTxBuffer_p) * txBufferCount_p);
+    OPLK_MEMCPY(&instance_l.apTxBufferList[nextTxBufferList], ppTxBuffer_p, sizeof(*ppTxBuffer_p) * txBufferCount_p);
 
 Exit:
     return ret;
@@ -314,7 +314,7 @@ tOplkError edrvcyclic_startCycle(void)
     instance_l.txProcFilterResult = OMETH_US_2_TICKS(EDRVCYC_POS_SHIFT_US);
 
     //initialize the filter
-    for(i=0; i<EDRVCYC_NEGSHFT_FLT_SPAN; i++)
+    for(i = 0; i < EDRVCYC_NEGSHFT_FLT_SPAN; i++)
     {
         instance_l.aTxProcFilter[i] = OMETH_US_2_TICKS(EDRVCYC_POS_SHIFT_US);
     }
@@ -323,7 +323,7 @@ tOplkError edrvcyclic_startCycle(void)
     // clear Tx buffer list
     instance_l.currrentTxBufferList = 0;
     instance_l.currentTxBufferEntry = 0;
-    OPLK_MEMSET(instance_l.apTxBufferList, 0, sizeof (*instance_l.apTxBufferList) * instance_l.maxTxBufferCount * 2);
+    OPLK_MEMSET(instance_l.apTxBufferList, 0, sizeof(*instance_l.apTxBufferList) * instance_l.maxTxBufferCount * 2);
 
     ret = hrestimer_modifyTimer(&instance_l.timerHdlCycle,
             instance_l.cycleLengthUs * 1000ULL, timerHdlCycleCb, 0L, FALSE);
@@ -405,7 +405,7 @@ This function is called by the cyclic timer. It starts the next cycle.
 
 \param  pEventArg_p     Timer event argument
 
-\return The function returns the allocated packet buffer's descriptor.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 static tOplkError timerHdlCycleCb(tTimerEventArg* pEventArg_p)
@@ -465,14 +465,14 @@ static tOplkError timerHdlCycleCb(tTimerEventArg* pEventArg_p)
 
     // increment filter index for next entry
     instance_l.txProcFilterIndex++;
-    if( instance_l.txProcFilterIndex >= EDRVCYC_NEGSHFT_FLT_SPAN )
+    if (instance_l.txProcFilterIndex >= EDRVCYC_NEGSHFT_FLT_SPAN)
     {
         instance_l.txProcFilterIndex = 0;
     }
 
     // sum all entries
     filterAccumulate = 0U;
-    for(i=0; i<EDRVCYC_NEGSHFT_FLT_SPAN; i++)
+    for(i = 0; i < EDRVCYC_NEGSHFT_FLT_SPAN; i++)
     {
         filterAccumulate += instance_l.aTxProcFilter[i];
     }
@@ -509,7 +509,7 @@ Exit:
 This function processes the provided Tx buffer list. It forwards the Tx buffer
 descriptors to the Ethernet driver.
 
-\return The function returns the allocated packet buffer's descriptor.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 static tOplkError processTxBufferList(void)
@@ -524,7 +524,7 @@ static tOplkError processTxBufferList(void)
     UINT32          nextOffsetNs = 0; //next earliest tx time
     UINT32          nextTimerIrqNs = instance_l.cycleLengthUs * 1000UL; //time of next timer irq
 
-    if(instance_l.fNextCycleTimeValid == FALSE)
+    if (instance_l.fNextCycleTimeValid == FALSE)
     {
         //use current time + negative shift to set a valid next cycle
         instance_l.nextCycleTime = macTimeFctCall + OMETH_US_2_TICKS(CONFIG_EDRVCYC_NEG_SHIFT_US);
@@ -543,7 +543,7 @@ static tOplkError processTxBufferList(void)
 
         diffToNextSoc = instance_l.nextCycleTime - macTimeFctCall;
 
-        if(diffToNextSoc & 0x80000000UL)
+        if (diffToNextSoc & 0x80000000UL)
         {
             diffToNextSoc = macTimeFctCall - instance_l.nextCycleTime;
             diffToNextSocNs = OMETH_TICKS_2_NS(diffToNextSoc);
@@ -557,12 +557,12 @@ static tOplkError processTxBufferList(void)
 
         diffToNextSocNs = OMETH_TICKS_2_NS(diffToNextSoc);
 
-        if(diffToNextSocNs > CONFIG_EDRVCYC_NEG_SHIFT_US * 1000UL)
+        if (diffToNextSocNs > CONFIG_EDRVCYC_NEG_SHIFT_US * 1000UL)
         {
             //time difference is larger negative shift
             nextTimerIrqNs += (diffToNextSocNs - CONFIG_EDRVCYC_NEG_SHIFT_US * 1000UL);
         }
-        else if(diffToNextSocNs > EDRVCYC_MIN_SHIFT_US * 1000UL)
+        else if (diffToNextSocNs > EDRVCYC_MIN_SHIFT_US * 1000UL)
         {
             //time difference is shorter than negative shift but larger than minimum
             nextTimerIrqNs -= (CONFIG_EDRVCYC_NEG_SHIFT_US * 1000UL - diffToNextSocNs);
@@ -585,11 +585,11 @@ static tOplkError processTxBufferList(void)
     cycleMax = instance_l.nextCycleTime + OMETH_US_2_TICKS(instance_l.cycleLengthUs); //maximum limit
 
     //loop through TX buffer list
-    while((pTxBuffer = instance_l.apTxBufferList[instance_l.currentTxBufferEntry]) != NULL)
+    while ((pTxBuffer = instance_l.apTxBufferList[instance_l.currentTxBufferEntry]) != NULL)
     {
         //compare TX buffer time offset with next offset (considers IPG and last packet length)
         //note: otherwise openMAC is confused if time-trig TX starts within other time-trig TX!
-        if(fFirstPkt == FALSE && nextOffsetNs > pTxBuffer->timeOffsetNs)
+        if (fFirstPkt == FALSE && nextOffsetNs > pTxBuffer->timeOffsetNs)
         {
             absoluteTime += OMETH_NS_2_TICKS(nextOffsetNs); //accumulate offset
         }
@@ -601,7 +601,7 @@ static tOplkError processTxBufferList(void)
         fFirstPkt = FALSE; //first packet is surely out...
 
         //verify if packet TX start time is within cycle window
-        if( (absoluteTime - cycleMin) > (cycleMax - cycleMin) )
+        if ((absoluteTime - cycleMin) > (cycleMax - cycleMin))
         {
             //packet is outside of the window
             ret = processCycleViolation(nextTimerIrqNs);
@@ -627,7 +627,7 @@ static tOplkError processTxBufferList(void)
             UINT32 udwLength = pTxBuffer->txFrameSize;
 
             //consider padding!
-            if( udwLength < 60UL )
+            if (udwLength < 60UL)
             {
                 udwLength = 60UL;
             }
@@ -642,9 +642,9 @@ static tOplkError processTxBufferList(void)
 
     //set up next timer interrupt
     ret = hrestimer_modifyTimer(&instance_l.timerHdlCycle, nextTimerIrqNs,
-            timerHdlCycleCb, 0L, FALSE);
+                                timerHdlCycleCb, 0L, FALSE);
 
-    if(ret != kErrorOk)
+    if (ret != kErrorOk)
     {
         PRINTF("%s: hrestimer_modifyTimer ret=0x%X\n", __func__, ret);
         goto Exit;
@@ -676,7 +676,7 @@ static tOplkError processCycleViolation(UINT32 nextTimerIrqNs_p)
 
     //set up next timer interrupt
     ret = hrestimer_modifyTimer(&instance_l.timerHdlCycle, nextTimerIrqNs_p,
-            timerHdlCycleCb, 0L, FALSE);
+                                timerHdlCycleCb, 0L, FALSE);
 
     if (ret != kErrorOk)
     {
@@ -691,3 +691,4 @@ Exit:
 }
 
 ///\}
+

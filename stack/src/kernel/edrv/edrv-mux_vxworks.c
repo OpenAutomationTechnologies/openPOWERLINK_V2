@@ -10,7 +10,7 @@ This file contains the implementation of the VxWorks MUX Ethernet driver.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -159,7 +159,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     ret = kErrorOk;
 
     // clear instance structure
-    OPLK_MEMSET(&edrvInstance_l, 0, sizeof (edrvInstance_l));
+    OPLK_MEMSET(&edrvInstance_l, 0, sizeof(edrvInstance_l));
 
     if (pEdrvInitParam_p->hwParam.pDevName == NULL)
     {
@@ -215,8 +215,8 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
         (pEdrvInitParam_p->aMacAddr[5] == 0)  )
     {   // read MAC address from controller
         getMacAddr(edrvInstance_l.pCookie,
-                       pEdrvInitParam_p->hwParam.pDevName,
-                       pEdrvInitParam_p->aMacAddr);
+                   pEdrvInitParam_p->hwParam.pDevName,
+                   pEdrvInitParam_p->aMacAddr);
     }
 
     // save the init data (with updated MAC address)
@@ -301,8 +301,8 @@ tOplkError edrv_shutdown(void)
 
     /* stop TX handler task */
     edrvInstance_l.fStopTxTask = TRUE;
-    semGive (edrvInstance_l.txWakeupSem);
-    taskDelay (sysClkRateGet() / 10);
+    semGive(edrvInstance_l.txWakeupSem);
+    taskDelay(sysClkRateGet() / 10);
 
     netPoolRelease(edrvInstance_l.dataPoolId, NET_REL_IN_CONTEXT);
 
@@ -311,7 +311,7 @@ tOplkError edrv_shutdown(void)
     semDelete(edrvInstance_l.txWakeupSem);
 
     // clear instance structure
-    OPLK_MEMSET(&edrvInstance_l, 0, sizeof (edrvInstance_l));
+    OPLK_MEMSET(&edrvInstance_l, 0, sizeof(edrvInstance_l));
 
     return kErrorOk; //assuming no problems with closing the handle
 }
@@ -356,8 +356,8 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
     semGive(edrvInstance_l.mutex);
 
     /* generate packet */
-    if ((pPacket = netTupleGet (edrvInstance_l.dataPoolId, EDRV_MAX_MTU,
-                                M_WAIT, MT_HEADER, TRUE)) == NULL)
+    if ((pPacket = netTupleGet(edrvInstance_l.dataPoolId, EDRV_MAX_MTU,
+                               M_WAIT, MT_HEADER, TRUE)) == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Couldn't get tuple!\n", __func__);
         goto Exit;
@@ -470,7 +470,7 @@ If \p entryChanged_p is equal or larger count_p all Rx filters shall be changed.
 */
 //------------------------------------------------------------------------------
 tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
-                                UINT entryChanged_p, UINT changeFlags_p)
+                               UINT entryChanged_p, UINT changeFlags_p)
 {
     UNUSED_PARAMETER(pFilter_p);
     UNUSED_PARAMETER(count_p);
@@ -495,7 +495,7 @@ This function removes the multicast entry from the Ethernet controller.
 //------------------------------------------------------------------------------
 tOplkError edrv_clearRxMulticastMacAddr(UINT8* pMacAddr_p)
 {
-    if (muxMCastAddrDel(edrvInstance_l.pCookie, (char *)pMacAddr_p) != OK)
+    if (muxMCastAddrDel(edrvInstance_l.pCookie, (char*)pMacAddr_p) != OK)
     {
         DEBUG_LVL_EDRV_TRACE("error clearing multicast addresses\n");
         return kErrorEdrvInit;
@@ -518,7 +518,7 @@ This function sets a multicast entry into the Ethernet controller.
 //------------------------------------------------------------------------------
 tOplkError edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p)
 {
-    if (muxMCastAddrAdd(edrvInstance_l.pCookie, (char *)pMacAddr_p) != OK)
+    if (muxMCastAddrAdd(edrvInstance_l.pCookie, (char*)pMacAddr_p) != OK)
     {
         DEBUG_LVL_EDRV_TRACE("error adding multicast addresses\n");
         return kErrorEdrvInit;
@@ -575,9 +575,9 @@ static BOOL packetHandler(void* pCookie_p, LONG type_p, M_BLK_ID pPkt_p,
     UNUSED_PARAMETER(type_p);
 
     if (OPLK_MEMCMP(pPkt_p->mBlkHdr.mData + pLLHInfo_p->srcAddrOffset,
-               pInstance->initParam.aMacAddr, 6 ) != 0)
+                    pInstance->initParam.aMacAddr, 6 ) != 0)
     {
-        rxBuffer.bufferInFrame    = kEdrvBufferLastInFrame;
+        rxBuffer.bufferInFrame = kEdrvBufferLastInFrame;
         rxBuffer.rxFrameSize = netMblkToBufCopy(pPkt_p, aBuffer, NULL);
         rxBuffer.pBuffer = (unsigned char*)aBuffer;
 
@@ -683,7 +683,7 @@ static INT txTask(INT arg_p)
 #if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
         hrtimer_clock_gettime(0, &edrvInstance_l.txCbTime);
         txLatency = hrtimer_subTimespec(edrvInstance_l.txCbTime,
-                                         edrvInstance_l.txSendTime);
+                                        edrvInstance_l.txSendTime);
         if (hrtimer_compareTimespec(&txLatency, &edrvInstance_l.maxTxLatency) > 0)
         {
             edrvInstance_l.maxTxLatency = txLatency;
@@ -753,3 +753,4 @@ static void getMacAddr(PROTO_COOKIE pCookie_p, char* pIfName_p, UINT8* pMacAddr_
 }
 
 ///\}
+
