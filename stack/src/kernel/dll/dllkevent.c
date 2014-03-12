@@ -10,7 +10,7 @@ This file contains the event handling functions of the kernel DLL module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -80,7 +80,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // local function prototypes
 //------------------------------------------------------------------------------
 static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState OldNmtState_p);
-static tOplkError processNmtEvent(tEvent * pEvent_p);
+static tOplkError processNmtEvent(tEvent* pEvent_p);
 static tOplkError processCycleFinish(tNmtState nmtState_p) SECTION_DLLK_PROCESS_CYCFIN;
 static tOplkError processSync(tNmtState nmtState_p) SECTION_DLLK_PROCESS_SYNC;
 static tOplkError processSyncCn(tNmtState nmtState_p, BOOL fReadyFlag_p) SECTION_DLLK_PROCESS_SYNC;
@@ -119,7 +119,7 @@ tOplkError dllk_process(tEvent* pEvent_p)
     switch (pEvent_p->eventType)
     {
         case kEventTypeNmtStateChange:
-            pNmtStateChange = (tEventNmtStateChange*) pEvent_p->pEventArg;
+            pNmtStateChange = (tEventNmtStateChange*)pEvent_p->pEventArg;
             ret = processNmtStateChange(pNmtStateChange->newNmtState,
                                         pNmtStateChange->oldNmtState);
             break;
@@ -175,7 +175,8 @@ tOplkError dllk_process(tEvent* pEvent_p)
 
 The function forwards a loss of PRes event to the error handler module.
 
-\param  nodeId_p            Node ID of CN from which no PRes fram was received.
+\param  nodeId_p            Node ID of CN from which no PRes frame has been
+                            received.
 
 \return The function returns a tOplkError error code.
 
@@ -203,14 +204,14 @@ tOplkError dllk_issueLossOfPres(UINT nodeId_p)
                 return ret;
         }
         else
-        {   // CN shall be deleted softly, so remove it now, without issuing any error
+        {   // CN shall be deleted softly, so remove it now without issuing any error
             nodeOpParam.opNodeType = kDllNodeOpTypeIsochronous;
             nodeOpParam.nodeId = pIntNodeInfo->nodeId;
 
             event.eventSink = kEventSinkDllkCal;
             event.eventType = kEventTypeDllkDelNode;
             // $$$ d.k. set Event.netTime to current time
-            event.eventArgSize = sizeof (nodeOpParam);
+            event.eventArgSize = sizeof(nodeOpParam);
             event.pEventArg = &nodeOpParam;
             eventk_postEvent(&event);
         }
@@ -258,10 +259,10 @@ the sync function by sending the appropriate event.
 
 \param  fEnable_p       Flag determines if sync should be enabled or disabled.
 
-\return The function returns a pointer to the node Information of the node
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError controlPdokcalSync (BOOL fEnable_p)
+tOplkError controlPdokcalSync(BOOL fEnable_p)
 {
     tEvent event;
     BOOL fEnable = fEnable_p;
@@ -298,7 +299,7 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
     {
         case kNmtGsOff:
         case kNmtGsInitialising:
-            dllkInstance_g.relativeTime  = 0;
+            dllkInstance_g.relativeTime = 0;
             // set EC flag in Flag 1, so the MN can detect a reboot and
             // will initialize the Error Signaling.
             dllkInstance_g.flag1 = PLK_FRAME_FLAG1_EC;
@@ -321,7 +322,7 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
             }
             break;
 
-        // node listens for EPL-Frames and check timeout
+        // node listens for POWERLINK frames and check timeout
         case kNmtMsNotActive:
         case kNmtCsNotActive:
             if (oldNmtState_p <= kNmtGsResetConfiguration)
@@ -337,7 +338,7 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
             if ((ret = hrestimer_deleteTimer(&dllkInstance_g.timerHdlCycle)) != kErrorOk)
                 return ret;
 #endif
-            /// deactivate sync generation
+            // deactivate sync generation
             if ((ret = controlPdokcalSync(FALSE)) != kErrorOk)
                 return ret;
 
@@ -510,7 +511,7 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
                 return ret;
             break;
 
-        // no EPL cycle -> normal ethernet communication
+        // no POWERLINK cycle -> normal ethernet communication
         case kNmtMsBasicEthernet:
         case kNmtCsBasicEthernet:
             // Fill Async Tx Buffer, because state BasicEthernet was entered
@@ -544,13 +545,13 @@ The function processes a NMT event.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError processNmtEvent(tEvent * pEvent_p)
+static tOplkError processNmtEvent(tEvent* pEvent_p)
 {
     tOplkError      Ret = kErrorOk;
     tNmtEvent*      pNmtEvent;
     tNmtState       NmtState;
 
-    pNmtEvent = (tNmtEvent*) pEvent_p->pEventArg;
+    pNmtEvent = (tNmtEvent*)pEvent_p->pEventArg;
 
     switch (*pNmtEvent)
     {
@@ -606,21 +607,21 @@ static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtSta
             nextTxBufferOffset = dllkInstance_g.curTxBufferOffsetNmtReq;
             pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NMTREQ + nextTxBufferOffset];
 #if (CONFIG_EDRV_AUTO_RESPONSE != FALSE)
-        filterEntry = DLLK_FILTER_SOA_NMTREQ;
+            filterEntry = DLLK_FILTER_SOA_NMTREQ;
 #endif
-        break;
+            break;
 
         default:    // generic priority
             nextTxBufferOffset = dllkInstance_g.curTxBufferOffsetNonEpl;
             pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONEPL + nextTxBufferOffset];
 #if (CONFIG_EDRV_AUTO_RESPONSE != FALSE)
-        filterEntry = DLLK_FILTER_SOA_NONEPL;
+            filterEntry = DLLK_FILTER_SOA_NONEPL;
 #endif
-        break;
+            break;
     }
 
     if (pTxBuffer->pBuffer != NULL)
-    {   // NmtRequest or non-EPL frame does exist
+    {   // NmtRequest or non-POWERLINK frame does exist
         // check if frame is empty and not being filled
         if (pTxBuffer->txFrameSize == DLLK_BUFLEN_EMPTY)
         {
@@ -631,7 +632,7 @@ static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtSta
             ret = dllkcal_getAsyncTxFrame(pTxBuffer->pBuffer, &frameSize, asyncReqPriority_p);
             if (ret == kErrorOk)
             {
-                pTxFrame = (tPlkFrame *) pTxBuffer->pBuffer;
+                pTxFrame = (tPlkFrame*)pTxBuffer->pBuffer;
                 ret = dllk_checkFrame(pTxFrame, frameSize);
                 if(ret != kErrorOk)
                     goto Exit;
@@ -729,7 +730,7 @@ static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtSta
             }
             else if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONEPL +
                                               dllkInstance_g.curTxBufferOffsetNonEpl].txFrameSize > DLLK_BUFLEN_EMPTY)
-            {   // non-EPL Tx buffer contains a frame
+            {   // non-POWERLINK Tx buffer contains a frame
                 // use NMT request FIFO, because of higher priority
                 // add one more frame
                 frameCount++;
@@ -742,7 +743,7 @@ static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtSta
         }
         if (frameCount > 0)
         {
-            dllkInstance_g.flag2 = (UINT8) (((asyncReqPriority_p << PLK_FRAME_FLAG2_PR_SHIFT) &
+            dllkInstance_g.flag2 = (UINT8)(((asyncReqPriority_p << PLK_FRAME_FLAG2_PR_SHIFT) &
                                              PLK_FRAME_FLAG2_PR) | (frameCount & PLK_FRAME_FLAG2_RS));
         }
         else
@@ -856,7 +857,7 @@ static tOplkError processSync(tNmtState nmtState_p)
         ret = processSyncCn(nmtState_p, fReadyFlag);
     }
 #else
-    // local could only be CN as MN part is not compiled in
+    // local can only be CN as MN part is not compiled in
     ret = processSyncCn(nmtState_p, fReadyFlag);
 #endif
 
@@ -887,7 +888,7 @@ static tOplkError processSyncCn(tNmtState nmtState_p, BOOL fReadyFlag_p)
     pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES + nextTxBufferOffset];
     if (pTxBuffer->pBuffer != NULL)
     {   // PRes does exist
-        pTxFrame = (tPlkFrame *) pTxBuffer->pBuffer;
+        pTxFrame = (tPlkFrame*)pTxBuffer->pBuffer;
 
         if (nmtState_p != kNmtCsOperational)
             fReadyFlag_p = FALSE;
@@ -935,14 +936,14 @@ static tOplkError processSyncMn(tNmtState nmtState_p, BOOL fReadyFlag_p)
 
     pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SOC + nextTxBufferOffset];
     pTxBuffer->timeOffsetNs = nextTimeOffsetNs;
-    pTxFrame = (tPlkFrame *)pTxBuffer->pBuffer;
+    pTxFrame = (tPlkFrame*)pTxBuffer->pBuffer;
 
     // Set SoC relative time
-    ami_setUint64Le( &pTxFrame->data.soc.relativeTimeLe, dllkInstance_g.relativeTime);
+    ami_setUint64Le(&pTxFrame->data.soc.relativeTimeLe, dllkInstance_g.relativeTime);
     dllkInstance_g.relativeTime += dllkInstance_g.dllConfigParam.cycleLen;
 
     // Update SOC Prescaler Flag
-    ami_setUint8Le( &pTxFrame->data.soc.flag1, dllkInstance_g.mnFlag1 & (PLK_FRAME_FLAG1_PS | PLK_FRAME_FLAG1_MC));
+    ami_setUint8Le(&pTxFrame->data.soc.flag1, dllkInstance_g.mnFlag1 & (PLK_FRAME_FLAG1_PS | PLK_FRAME_FLAG1_MC));
 
     if (dllkInstance_g.ppTxBufferList == NULL)
         return ret;
@@ -981,7 +982,7 @@ The function processes the PRes Ready event.
 static tOplkError processPresReady(tNmtState nmtState_p)
 {
     tOplkError          ret = kErrorOk;
-    tPlkFrame *         pTxFrame;
+    tPlkFrame*          pTxFrame;
 
     // post PRes to transmit FIFO
     if (nmtState_p != kNmtCsBasicEthernet)
@@ -990,15 +991,15 @@ static tOplkError processPresReady(tNmtState nmtState_p)
         if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES +
                                      dllkInstance_g.curTxBufferOffsetCycle].pBuffer != NULL)
         {   // PRes does exist
-            pTxFrame = (tPlkFrame *) dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES +
-                                                              dllkInstance_g.curTxBufferOffsetCycle].pBuffer;
+            pTxFrame = (tPlkFrame*)dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES +
+                                                            dllkInstance_g.curTxBufferOffsetCycle].pBuffer;
             // update frame (NMT state, RD, RS, PR, MS, EN flags)
             if (nmtState_p < kNmtCsPreOperational2)
             {   // NMT state is not PreOp2, ReadyToOp or Op
                 // fake NMT state PreOp2, because PRes will be sent only in PreOp2 or greater
                 nmtState_p = kNmtCsPreOperational2;
             }
-            ami_setUint8Le(&pTxFrame->data.pres.nmtStatus, (UINT8) nmtState_p);
+            ami_setUint8Le(&pTxFrame->data.pres.nmtStatus, (UINT8)nmtState_p);
             ami_setUint8Le(&pTxFrame->data.pres.flag2, dllkInstance_g.flag2);
             if (nmtState_p != kNmtCsOperational)
             {   // mark PDO as invalid in all NMT state but Op
@@ -1062,8 +1063,8 @@ static tOplkError processStartReducedCycle(void)
     if (dllkInstance_g.dllConfigParam.asyncSlotTimeout != 0)
     {
         ret = hrestimer_modifyTimer(&dllkInstance_g.timerHdlCycle,
-                                            dllkInstance_g.dllConfigParam.asyncSlotTimeout,
-                                            dllk_cbMnTimerCycle, 0L, FALSE);
+                                    dllkInstance_g.dllConfigParam.asyncSlotTimeout,
+                                    dllk_cbMnTimerCycle, 0L, FALSE);
     }
 #endif
 

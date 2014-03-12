@@ -11,7 +11,7 @@ This file contains the functions to setup the edrv filter structures.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -98,13 +98,12 @@ The function sets up an ASnd filter in the Edrv filter structure.
 
 \param  pFilter_p       Pointer to Edrv filte structure.
 
-\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 void dllk_setupAsndFilter(tEdrvFilter* pFilter_p)
 {
     ami_setUint16Be(&pFilter_p->aFilterValue[12], C_DLL_ETHERTYPE_EPL);
-    ami_setUint16Be(&pFilter_p->aFilterMask[12],  0xFFFF);
+    ami_setUint16Be(&pFilter_p->aFilterMask[12], 0xFFFF);
     ami_setUint8Be(&pFilter_p->aFilterValue[14], kMsgTypeAsnd);
     ami_setUint8Be(&pFilter_p->aFilterMask[14], 0xFF);
     pFilter_p->fEnable = TRUE;
@@ -118,7 +117,6 @@ The function sets up an SoC filter in the Edrv filter structure.
 
 \param  pFilter_p       Pointer to Edrv filte structure.
 
-\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 void dllk_setupSocFilter(tEdrvFilter* pFilter_p)
@@ -136,7 +134,6 @@ The function sets up an SoA filter in the Edrv filter structure.
 
 \param  pFilter_p       Pointer to Edrv filte structure.
 
-\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 void dllk_setupSoaFilter(tEdrvFilter* pFilter_p)
@@ -156,26 +153,25 @@ The function sets up an IdentReq SoA filter in the Edrv filter structure.
 \param  nodeId_p        Node ID for which to set the filter.
 \param  pBuffer_p       Pointer to TX buffer.
 
-\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-void dllk_setupSoaIdentReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer *pBuffer_p)
+void dllk_setupSoaIdentReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer* pBuffer_p)
 {
-    ami_setUint48Be   (&pFilter_p->aFilterValue[0],    C_DLL_MULTICAST_SOA);
-    ami_setUint48Be   (&pFilter_p->aFilterMask[0],     C_DLL_MACADDR_MASK);
-    ami_setUint16Be      (&pFilter_p->aFilterValue[12],   C_DLL_ETHERTYPE_EPL);
-    ami_setUint16Be      (&pFilter_p->aFilterMask[12],    0xFFFF);
-    ami_setUint8Be      (&pFilter_p->aFilterValue[14],   kMsgTypeSoa);
+    ami_setUint48Be(&pFilter_p->aFilterValue[0], C_DLL_MULTICAST_SOA);
+    ami_setUint48Be(&pFilter_p->aFilterMask[0], C_DLL_MACADDR_MASK);
+    ami_setUint16Be(&pFilter_p->aFilterValue[12], C_DLL_ETHERTYPE_EPL);
+    ami_setUint16Be(&pFilter_p->aFilterMask[12], 0xFFFF);
+    ami_setUint8Be(&pFilter_p->aFilterValue[14], kMsgTypeSoa);
 #if defined(CONFIG_INCLUDE_MASND)
     // Ignore bit4 of message type to react on both Asnd and AInv frames
-    ami_setUint8Be      (&pFilter_p->aFilterMask[14],    0xF7);
+    ami_setUint8Be(&pFilter_p->aFilterMask[14], 0xF7);
 #else
-    ami_setUint8Be      (&pFilter_p->aFilterMask[14],    0xFF);
+    ami_setUint8Be(&pFilter_p->aFilterMask[14], 0xFF);
 #endif
-    ami_setUint8Be      (&pFilter_p->aFilterValue[20],   kDllReqServiceIdent);
-    ami_setUint8Be      (&pFilter_p->aFilterMask[20],    0xFF);
-    ami_setUint8Be      (&pFilter_p->aFilterValue[21],   (UINT8)nodeId_p);
-    ami_setUint8Be      (&pFilter_p->aFilterMask[21],    0xFF);
+    ami_setUint8Be(&pFilter_p->aFilterValue[20], kDllReqServiceIdent);
+    ami_setUint8Be(&pFilter_p->aFilterMask[20], 0xFF);
+    ami_setUint8Be(&pFilter_p->aFilterValue[21], (UINT8)nodeId_p);
+    ami_setUint8Be(&pFilter_p->aFilterMask[21], 0xFF);
     pFilter_p->pTxBuffer = pBuffer_p;
     pFilter_p->fEnable = FALSE;
 }
@@ -190,26 +186,25 @@ The function sets up an StatusReq SoA filter in the Edrv filter structure.
 \param  nodeId_p        Node ID for which to set the filter.
 \param  pBuffer_p       Pointer to TX buffer.
 
-\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-void dllk_setupSoaStatusReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer *pBuffer_p)
+void dllk_setupSoaStatusReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer* pBuffer_p)
 {
-    ami_setUint48Be   (&pFilter_p->aFilterValue[0],    C_DLL_MULTICAST_SOA);
-    ami_setUint48Be   (&pFilter_p->aFilterMask[0],     C_DLL_MACADDR_MASK);
-    ami_setUint16Be      (&pFilter_p->aFilterValue[12],   C_DLL_ETHERTYPE_EPL);
-    ami_setUint16Be      (&pFilter_p->aFilterMask[12],    0xFFFF);
-    ami_setUint8Be      (&pFilter_p->aFilterValue[14],   kMsgTypeSoa);
+    ami_setUint48Be(&pFilter_p->aFilterValue[0], C_DLL_MULTICAST_SOA);
+    ami_setUint48Be(&pFilter_p->aFilterMask[0], C_DLL_MACADDR_MASK);
+    ami_setUint16Be(&pFilter_p->aFilterValue[12], C_DLL_ETHERTYPE_EPL);
+    ami_setUint16Be(&pFilter_p->aFilterMask[12], 0xFFFF);
+    ami_setUint8Be(&pFilter_p->aFilterValue[14], kMsgTypeSoa);
 #if defined(CONFIG_INCLUDE_MASND)
     // Ignore bit4 of message type to react on both Asnd and AInv frames
-    ami_setUint8Be      (&pFilter_p->aFilterMask[14],    0xF7);
+    ami_setUint8Be(&pFilter_p->aFilterMask[14], 0xF7);
 #else
-    ami_setUint8Be      (&pFilter_p->aFilterMask[14],    0xFF);
+    ami_setUint8Be(&pFilter_p->aFilterMask[14], 0xFF);
 #endif
-    ami_setUint8Be      (&pFilter_p->aFilterValue[20],   kDllReqServiceStatus);
-    ami_setUint8Be      (&pFilter_p->aFilterMask[20],    0xFF);
-    ami_setUint8Be      (&pFilter_p->aFilterValue[21],   (UINT8)nodeId_p);
-    ami_setUint8Be      (&pFilter_p->aFilterMask[21],    0xFF);
+    ami_setUint8Be(&pFilter_p->aFilterValue[20], kDllReqServiceStatus);
+    ami_setUint8Be(&pFilter_p->aFilterMask[20], 0xFF);
+    ami_setUint8Be(&pFilter_p->aFilterValue[21], (UINT8)nodeId_p);
+    ami_setUint8Be(&pFilter_p->aFilterMask[21], 0xFF);
     pFilter_p->pTxBuffer = pBuffer_p;
     pFilter_p->fEnable = FALSE;
 }
@@ -224,26 +219,25 @@ The function sets up an NmtReq SoA filter in the Edrv filter structure.
 \param  nodeId_p        Node ID for which to set the filter.
 \param  pBuffer_p       Pointer to TX buffer.
 
-\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-void dllk_setupSoaNmtReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer *pBuffer_p)
+void dllk_setupSoaNmtReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer* pBuffer_p)
 {
-    ami_setUint48Be   (&pFilter_p->aFilterValue[0],    C_DLL_MULTICAST_SOA);
-    ami_setUint48Be   (&pFilter_p->aFilterMask[0],     C_DLL_MACADDR_MASK);
-    ami_setUint16Be      (&pFilter_p->aFilterValue[12],   C_DLL_ETHERTYPE_EPL);
-    ami_setUint16Be      (&pFilter_p->aFilterMask[12],    0xFFFF);
-    ami_setUint8Be      (&pFilter_p->aFilterValue[14],   kMsgTypeSoa);
+    ami_setUint48Be(&pFilter_p->aFilterValue[0], C_DLL_MULTICAST_SOA);
+    ami_setUint48Be(&pFilter_p->aFilterMask[0], C_DLL_MACADDR_MASK);
+    ami_setUint16Be(&pFilter_p->aFilterValue[12], C_DLL_ETHERTYPE_EPL);
+    ami_setUint16Be(&pFilter_p->aFilterMask[12], 0xFFFF);
+    ami_setUint8Be(&pFilter_p->aFilterValue[14], kMsgTypeSoa);
 #if defined(CONFIG_INCLUDE_MASND)
     // Ignore bit4 of message type to react on both Asnd and AInv frames
-    ami_setUint8Be      (&pFilter_p->aFilterMask[14],    0xF7);
+    ami_setUint8Be(&pFilter_p->aFilterMask[14], 0xF7);
 #else
-    ami_setUint8Be      (&pFilter_p->aFilterMask[14],    0xFF);
+    ami_setUint8Be(&pFilter_p->aFilterMask[14], 0xFF);
 #endif
-    ami_setUint8Be      (&pFilter_p->aFilterValue[20],   kDllReqServiceNmtRequest);
-    ami_setUint8Be      (&pFilter_p->aFilterMask[20],    0xFF);
-    ami_setUint8Be      (&pFilter_p->aFilterValue[21],   (UINT8)nodeId_p);
-    ami_setUint8Be      (&pFilter_p->aFilterMask[21],    0xFF);
+    ami_setUint8Be(&pFilter_p->aFilterValue[20], kDllReqServiceNmtRequest);
+    ami_setUint8Be(&pFilter_p->aFilterMask[20], 0xFF);
+    ami_setUint8Be(&pFilter_p->aFilterValue[21], (UINT8)nodeId_p);
+    ami_setUint8Be(&pFilter_p->aFilterMask[21], 0xFF);
     pFilter_p->pTxBuffer = pBuffer_p;
     pFilter_p->fEnable = FALSE;
 }
@@ -260,26 +254,25 @@ The function sets up an SyncReq SoA filter in the Edrv filter structure.
 \param  nodeId_p        Node ID for which to set the filter.
 \param  pBuffer_p       Pointer to TX buffer.
 
-\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-void dllk_setupSoaSyncReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer *pBuffer_p)
+void dllk_setupSoaSyncReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer* pBuffer_p)
 {
-    ami_setUint48Be   (&pFilter_p->aFilterValue[0],    C_DLL_MULTICAST_SOA);
-    ami_setUint48Be   (&pFilter_p->aFilterMask[0],     C_DLL_MACADDR_MASK);
-    ami_setUint16Be      (&pFilter_p->aFilterValue[12],   C_DLL_ETHERTYPE_EPL);
-    ami_setUint16Be      (&pFilter_p->aFilterMask[12],    0xFFFF);
-    ami_setUint8Be      (&pFilter_p->aFilterValue[14],   kMsgTypeSoa);
+    ami_setUint48Be(&pFilter_p->aFilterValue[0], C_DLL_MULTICAST_SOA);
+    ami_setUint48Be(&pFilter_p->aFilterMask[0], C_DLL_MACADDR_MASK);
+    ami_setUint16Be(&pFilter_p->aFilterValue[12], C_DLL_ETHERTYPE_EPL);
+    ami_setUint16Be(&pFilter_p->aFilterMask[12], 0xFFFF);
+    ami_setUint8Be(&pFilter_p->aFilterValue[14], kMsgTypeSoa);
 #if defined(CONFIG_INCLUDE_MASND)
     // Ignore bit4 of message type to react on both Asnd and AInv frames
-    ami_setUint8Be      (&pFilter_p->aFilterMask[14],    0xF7);
+    ami_setUint8Be(&pFilter_p->aFilterMask[14], 0xF7);
 #else
-    ami_setUint8Be      (&pFilter_p->aFilterMask[14],    0xFF);
+    ami_setUint8Be(&pFilter_p->aFilterMask[14], 0xFF);
 #endif
-    ami_setUint8Be      (&pFilter_p->aFilterValue[20],   kDllReqServiceSync);
-    ami_setUint8Be      (&pFilter_p->aFilterMask[20],    0xFF);
-    ami_setUint8Be      (&pFilter_p->aFilterValue[21],   (UINT8)nodeId_p);
-    ami_setUint8Be      (&pFilter_p->aFilterMask[21],    0xFF);
+    ami_setUint8Be(&pFilter_p->aFilterValue[20], kDllReqServiceSync);
+    ami_setUint8Be(&pFilter_p->aFilterMask[20], 0xFF);
+    ami_setUint8Be(&pFilter_p->aFilterValue[21], (UINT8)nodeId_p);
+    ami_setUint8Be(&pFilter_p->aFilterMask[21], 0xFF);
     pFilter_p->pTxBuffer = pBuffer_p;
     pFilter_p->fEnable = FALSE;
 }
@@ -295,26 +288,25 @@ The function sets up an Unspecific SoA filter in the Edrv filter structure.
 \param  nodeId_p        Node ID for which to set the filter.
 \param  pBuffer_p       Pointer to TX buffer.
 
-\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-void dllk_setupSoaUnspecReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer *pBuffer_p)
+void dllk_setupSoaUnspecReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer* pBuffer_p)
 {
-    ami_setUint48Be   (&pFilter_p->aFilterValue[0],    C_DLL_MULTICAST_SOA);
-    ami_setUint48Be   (&pFilter_p->aFilterMask[0],     C_DLL_MACADDR_MASK);
-    ami_setUint16Be      (&pFilter_p->aFilterValue[12],   C_DLL_ETHERTYPE_EPL);
-    ami_setUint16Be      (&pFilter_p->aFilterMask[12],    0xFFFF);
-    ami_setUint8Be      (&pFilter_p->aFilterValue[14],   kMsgTypeSoa);
+    ami_setUint48Be(&pFilter_p->aFilterValue[0], C_DLL_MULTICAST_SOA);
+    ami_setUint48Be(&pFilter_p->aFilterMask[0], C_DLL_MACADDR_MASK);
+    ami_setUint16Be(&pFilter_p->aFilterValue[12], C_DLL_ETHERTYPE_EPL);
+    ami_setUint16Be(&pFilter_p->aFilterMask[12], 0xFFFF);
+    ami_setUint8Be(&pFilter_p->aFilterValue[14], kMsgTypeSoa);
 #if defined(CONFIG_INCLUDE_MASND)
     // Ignore bit4 of message type to react on both Asnd and AInv frames
-    ami_setUint8Be      (&pFilter_p->aFilterMask[14],    0xF7);
+    ami_setUint8Be(&pFilter_p->aFilterMask[14], 0xF7);
 #else
-    ami_setUint8Be      (&pFilter_p->aFilterMask[14],    0xFF);
+    ami_setUint8Be(&pFilter_p->aFilterMask[14], 0xFF);
 #endif
-    ami_setUint8Be      (&pFilter_p->aFilterValue[20],   kDllReqServiceUnspecified);
-    ami_setUint8Be      (&pFilter_p->aFilterMask[20],    0xFF);
-    ami_setUint8Be      (&pFilter_p->aFilterValue[21],   (UINT8)nodeId_p);
-    ami_setUint8Be      (&pFilter_p->aFilterMask[21],    0xFF);
+    ami_setUint8Be(&pFilter_p->aFilterValue[20], kDllReqServiceUnspecified);
+    ami_setUint8Be(&pFilter_p->aFilterMask[20], 0xFF);
+    ami_setUint8Be(&pFilter_p->aFilterValue[21], (UINT8)nodeId_p);
+    ami_setUint8Be(&pFilter_p->aFilterMask[21], 0xFF);
     pFilter_p->pTxBuffer = pBuffer_p;
     pFilter_p->fEnable = FALSE;
 }
@@ -328,17 +320,16 @@ The function sets up a PRes filter in the Edrv filter structure.
 \param  pFilter_p       Pointer to Edrv filte structure.
 \param  fEnable_p       Flag determines if filter is enabled or disabled.
 
-\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 void dllk_setupPresFilter(tEdrvFilter* pFilter_p, BOOL fEnable_p)
 {
-    ami_setUint48Be   (&pFilter_p->aFilterValue[0],    C_DLL_MULTICAST_PRES);
-    ami_setUint48Be   (&pFilter_p->aFilterMask[0],     C_DLL_MACADDR_MASK);
-    ami_setUint16Be      (&pFilter_p->aFilterValue[12],   C_DLL_ETHERTYPE_EPL);
-    ami_setUint16Be      (&pFilter_p->aFilterMask[12],    0xFFFF);
-    ami_setUint8Be      (&pFilter_p->aFilterValue[14],   kMsgTypePres);
-    ami_setUint8Be      (&pFilter_p->aFilterMask[14],    0xFF);
+    ami_setUint48Be(&pFilter_p->aFilterValue[0], C_DLL_MULTICAST_PRES);
+    ami_setUint48Be(&pFilter_p->aFilterMask[0], C_DLL_MACADDR_MASK);
+    ami_setUint16Be(&pFilter_p->aFilterValue[12], C_DLL_ETHERTYPE_EPL);
+    ami_setUint16Be(&pFilter_p->aFilterMask[12], 0xFFFF);
+    ami_setUint8Be(&pFilter_p->aFilterValue[14], kMsgTypePres);
+    ami_setUint8Be(&pFilter_p->aFilterMask[14], 0xFF);
     pFilter_p->fEnable = fEnable_p;
 }
 
@@ -353,21 +344,20 @@ The function sets up an PReq filter in the Edrv filter structure.
 \param  pBuffer_p       Pointer to TX buffer.
 \param  pMacAdrs_p      Pointer to mac address of node.
 
-\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-void dllk_setupPreqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer *pBuffer_p, UINT8* pMacAdrs_p)
+void dllk_setupPreqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer* pBuffer_p, UINT8* pMacAdrs_p)
 {
     OPLK_MEMCPY(&pFilter_p->aFilterValue[0], pMacAdrs_p, 6);
-    ami_setUint48Be   (&pFilter_p->aFilterMask[0],     C_DLL_MACADDR_MASK);
-    ami_setUint16Be      (&pFilter_p->aFilterValue[12],   C_DLL_ETHERTYPE_EPL);
-    ami_setUint16Be      (&pFilter_p->aFilterMask[12],    0xFFFF);
-    ami_setUint8Be      (&pFilter_p->aFilterValue[14],   kMsgTypePreq);
-    ami_setUint8Be      (&pFilter_p->aFilterMask[14],    0xFF);
-    ami_setUint8Be      (&pFilter_p->aFilterValue[15],   (UINT8)nodeId_p);
-    ami_setUint8Be      (&pFilter_p->aFilterMask[15],    0xFF);
-    ami_setUint8Be      (&pFilter_p->aFilterValue[16],   C_ADR_MN_DEF_NODE_ID);
-    ami_setUint8Be      (&pFilter_p->aFilterMask[16],    0xFF);
+    ami_setUint48Be(&pFilter_p->aFilterMask[0], C_DLL_MACADDR_MASK);
+    ami_setUint16Be(&pFilter_p->aFilterValue[12], C_DLL_ETHERTYPE_EPL);
+    ami_setUint16Be(&pFilter_p->aFilterMask[12], 0xFFFF);
+    ami_setUint8Be(&pFilter_p->aFilterValue[14], kMsgTypePreq);
+    ami_setUint8Be(&pFilter_p->aFilterMask[14], 0xFF);
+    ami_setUint8Be(&pFilter_p->aFilterValue[15], (UINT8)nodeId_p);
+    ami_setUint8Be(&pFilter_p->aFilterMask[15], 0xFF);
+    ami_setUint8Be(&pFilter_p->aFilterValue[16], C_ADR_MN_DEF_NODE_ID);
+    ami_setUint8Be(&pFilter_p->aFilterMask[16], 0xFF);
     pFilter_p->pTxBuffer = pBuffer_p;
     pFilter_p->fEnable = FALSE;
 }
@@ -383,7 +373,7 @@ This function adds a PRes filter for the specified node.
 \param  nodeOpType_p        Type of PRes filter.
 \param  fUpdateEdrv_p       Flag determines if Edrv Filter should be updated.
 
-\return The function returns a pointer to the node Information of the node
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 tOplkError dllk_addNodeFilter(tDllkNodeInfo* pIntNodeInfo_p, tDllNodeOpType nodeOpType_p,
@@ -424,7 +414,8 @@ tOplkError dllk_addNodeFilter(tDllkNodeInfo* pIntNodeInfo_p, tDllNodeOpType node
             }
 
 #else
-            UINT        handle;
+            UINT handle;
+
             for (handle = DLLK_FILTER_PRES; handle < DLLK_FILTER_COUNT; handle++)
             {
                 if (ami_getUint8Le(&dllkInstance_g.aFilter[handle].aFilterValue[16]) == C_ADR_INVALID)
@@ -459,7 +450,7 @@ This function deletes a PRes filter for the specified node.
 \param  nodeOpType_p        Type of PRes filter.
 \param  fUpdateEdrv_p       Flag determines if Edrv Filter should be updated.
 
-\return The function returns a pointer to the node Information of the node
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 tOplkError dllk_deleteNodeFilter(tDllkNodeInfo* pIntNodeInfo_p, tDllNodeOpType nodeOpType_p,
@@ -504,7 +495,7 @@ tOplkError dllk_deleteNodeFilter(tDllkNodeInfo* pIntNodeInfo_p, tDllNodeOpType n
             }
 
 #else
-            UINT        handle;
+            UINT handle;
 
             for (handle = DLLK_FILTER_PRES; handle < DLLK_FILTER_COUNT; handle++)
             {
@@ -534,10 +525,4 @@ Exit:
 //----------------------------------------------------------------------------//
 
 ///\}
-
-
-
-
-
-
 

@@ -10,7 +10,7 @@ This file contains the definitions for the DLL kernel module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -55,7 +55,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-typedef tOplkError (* tEplDllkCbAsync) (tFrameInfo * pFrameInfo_p);
+typedef tOplkError (*tEplDllkCbAsync)(tFrameInfo* pFrameInfo_p);
 
 typedef struct
 {
@@ -96,8 +96,8 @@ typedef struct
 } tDllkPrcCycleTiming;
 
 // callback function for frame processing
-typedef tOplkError (*tDllkCbProcessRpdo) (tFrameInfo * pFrameInfo_p);
-typedef tOplkError (*tDllkCbProcessTpdo) (tFrameInfo * pFrameInfo_p, BOOL fReadyFlag_p);
+typedef tOplkError (*tDllkCbProcessRpdo)(tFrameInfo* pFrameInfo_p);
+typedef tOplkError (*tDllkCbProcessTpdo)(tFrameInfo* pFrameInfo_p, BOOL fReadyFlag_p);
 
 typedef enum
 {
@@ -123,9 +123,9 @@ extern "C" {
 
 tOplkError dllk_addInstance(tDllkInitParam* pInitParam_p);
 tOplkError dllk_delInstance(void);
-tOplkError dllk_config(tDllConfigParam * pDllConfigParam_p);
-tOplkError dllk_setIdentity(tDllIdentParam * pDllIdentParam_p);
-tOplkError dllk_process(tEvent * pEvent_p) SECTION_DLLK_PROCESS;
+tOplkError dllk_config(tDllConfigParam* pDllConfigParam_p);
+tOplkError dllk_setIdentity(tDllIdentParam* pDllIdentParam_p);
+tOplkError dllk_process(tEvent* pEvent_p) SECTION_DLLK_PROCESS;
 tOplkError dllk_regAsyncHandler(tEplDllkCbAsync pfnDllkCbAsync_p);
 tOplkError dllk_deregAsyncHandler(tEplDllkCbAsync pfnDllkCbAsync_p);
 tOplkError dllk_setAsndServiceIdFilter(tDllAsndServiceId ServiceId_p, tDllAsndFilter Filter_p);

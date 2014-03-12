@@ -11,7 +11,7 @@ This file contains the implementation of the DLL kernel module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -133,7 +133,7 @@ tOplkError dllk_addInstance(tDllkInitParam* pInitParam_p)
        return ret;
 #endif
 
-    // if dynamic memory allocation available allocate instance structure
+    // if dynamic memory allocation available, allocate instance structure
 
     // initialize and link pointers in instance structure to frame tables
     dllkInstance_g.pTxBuffer = aDllkTxBuffer_l;
@@ -142,7 +142,7 @@ tOplkError dllk_addInstance(tDllkInitParam* pInitParam_p)
 
 #if NMT_MAX_NODE_ID > 0
     // set up node info structure
-    for (index = 0; index < tabentries (dllkInstance_g.aNodeInfo); index++)
+    for (index = 0; index < tabentries(dllkInstance_g.aNodeInfo); index++)
     {
         dllkInstance_g.aNodeInfo[index].nodeId = index + 1;
     }
@@ -182,7 +182,7 @@ tOplkError dllk_addInstance(tDllkInitParam* pInitParam_p)
 /**
 \brief  Delete DLL kernel module instance
 
-The function deletes an DLL kernel module instance.
+The function deletes a DLL kernel module instance.
 
 \return The function returns a tOplkError error code.
 
@@ -226,7 +226,7 @@ NMT_GS_COMMUNICATING will be entered.
 \ingroup module_dllk
 */
 //------------------------------------------------------------------------------
-tOplkError dllk_config(tDllConfigParam * pDllConfigParam_p)
+tOplkError dllk_config(tDllConfigParam* pDllConfigParam_p)
 {
     tNmtState       nmtState;
     tOplkError      ret = kErrorOk;
@@ -246,16 +246,16 @@ tOplkError dllk_config(tDllConfigParam * pDllConfigParam_p)
     {   // copy entire configuration to local storage,
         // because we are in state DLL_GS_INIT
         OPLK_MEMCPY (&dllkInstance_g.dllConfigParam, pDllConfigParam_p,
-            (pDllConfigParam_p->sizeOfStruct < sizeof (tDllConfigParam) ?
-            pDllConfigParam_p->sizeOfStruct : sizeof (tDllConfigParam)));
+            (pDllConfigParam_p->sizeOfStruct < sizeof(tDllConfigParam) ?
+            pDllConfigParam_p->sizeOfStruct : sizeof(tDllConfigParam)));
     }
 
     if (nmtState < kNmtMsNotActive)
     {   // CN or NMT reset states are active, so we can calculate the frame timeout.
-        // MN calculates on kEventTypeDllkCreate, its own frame timeout.
+        // MN calculates its own frame timeout on kEventTypeDllkCreate.
         if ((dllkInstance_g.dllConfigParam.cycleLen != 0) &&
             (dllkInstance_g.dllConfigParam.lossOfFrameTolerance != 0))
-        {   // monitor EPL cycle, calculate frame timeout
+        {   // monitor POWERLINK cycle, calculate frame timeout
             dllkInstance_g.frameTimeout = (1000LL * ((UINT64)dllkInstance_g.dllConfigParam.cycleLen)) +
                 ((UINT64)dllkInstance_g.dllConfigParam.lossOfFrameTolerance);
         }
@@ -267,7 +267,7 @@ tOplkError dllk_config(tDllConfigParam * pDllConfigParam_p)
 
     if (dllkInstance_g.dllConfigParam.fAsyncOnly != FALSE)
     {   // it is configured as async-only CN
-        // disable multiplexed cycle, that cycleCount will not be incremented spuriously on SoC
+        // disable multiplexed cycle, so that cycleCount will not be incremented spuriously on SoC
         dllkInstance_g.dllConfigParam.multipleCycleCnt = 0;
     }
     return ret;
@@ -287,13 +287,13 @@ case of hostname change).
 \ingroup module_dllk
 */
 //------------------------------------------------------------------------------
-tOplkError dllk_setIdentity(tDllIdentParam * pDllIdentParam_p)
+tOplkError dllk_setIdentity(tDllIdentParam* pDllIdentParam_p)
 {
     OPLK_MEMCPY (&dllkInstance_g.dllIdentParam, pDllIdentParam_p,
         (pDllIdentParam_p->sizeOfStruct < sizeof (tDllIdentParam) ?
         pDllIdentParam_p->sizeOfStruct : sizeof (tDllIdentParam)));
 
-    // $$$ if IdentResponse frame exists update it
+    // $$$ if IdentResponse frame exists, update it
     return kErrorOk;
 }
 
@@ -308,8 +308,8 @@ Ethernet driver).
                             interrupt context normally.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk              If handler is successfully registered.
-\retval kErrorDllCbAsyncRegistered    If there is already a handler registered.
+\retval kErrorOk                      Handler is successfully registered.
+\retval kErrorDllCbAsyncRegistered    There is already a handler registered.
 
 \ingroup module_dllk
 */
@@ -326,23 +326,24 @@ tOplkError dllk_regAsyncHandler(tEplDllkCbAsync pfnDllkCbAsync_p)
     {   // handler already registered
         ret = kErrorDllCbAsyncRegistered;
     }
+
     return ret;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Deregister handler for non-POWERLINK frames
+\brief  De-register handler for non-POWERLINK frames
 
-The function deregisters the handler for non-POWERLINK frames (used by Virtual
+The function de-registers the handler for non-POWERLINK frames (used by Virtual
 Ethernet driver).
 
 \param  pfnDllkCbAsync_p    Pointer to callback function. It will be checked if
-                            this function was registered before deregistering
+                            this function was registered before de-registering
                             it.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk              If handler is successfully deregistered.
-\retval kErrorDllCbAsyncRegistered    If another handler is registered.
+\retval kErrorOk                      Handler is successfully deregistered.
+\retval kErrorDllCbAsyncRegistered    Another handler is registered.
 
 \ingroup module_dllk
 */
@@ -359,6 +360,7 @@ tOplkError dllk_deregAsyncHandler(tEplDllkCbAsync pfnDllkCbAsync_p)
     {   // wrong handler or no handler registered
         ret = kErrorDllCbAsyncRegistered;
     }
+
     return ret;
 }
 
@@ -382,6 +384,7 @@ tSyncCb dllk_regSyncHandler(tSyncCb pfnCbSync_p)
 
     pfnCbOld = dllkInstance_g.pfnCbSync;
     dllkInstance_g.pfnCbSync = pfnCbSync_p;
+
     return pfnCbOld;
 }
 
@@ -431,8 +434,8 @@ It registers C_DLL_MULTICAST_ASND in Ethernet driver if any AsndServiceId is ope
 \param  filter_p            Node ID filter.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                  If filter was successfully set.
-\retval kErrorDllInvalidAsndServiceId     If an invalid service ID was specified.
+\retval kErrorOk                          Filter was successfully set.
+\retval kErrorDllInvalidAsndServiceId     An invalid service ID was specified.
 
 \ingroup module_dllk
 */
@@ -442,7 +445,7 @@ tOplkError dllk_setAsndServiceIdFilter(tDllAsndServiceId serviceId_p,
 {
     tOplkError  ret = kErrorOk;
 
-    if (serviceId_p < tabentries (dllkInstance_g.aAsndFilter))
+    if (serviceId_p < tabentries(dllkInstance_g.aAsndFilter))
         dllkInstance_g.aAsndFilter[serviceId_p] = filter_p;
     else
         ret = kErrorDllInvalidAsndServiceId;
@@ -471,7 +474,7 @@ tOplkError dllk_releaseRxFrame(tPlkFrame* pFrame_p, UINT frameSize_p)
     tOplkError      ret;
     tEdrvRxBuffer   rxBuffer;
 
-    rxBuffer.pBuffer   = (UINT8*)pFrame_p;
+    rxBuffer.pBuffer = (UINT8*)pFrame_p;
     rxBuffer.rxFrameSize = frameSize_p;
 
     ret = edrv_releaseRxBuffer(&rxBuffer);
@@ -495,7 +498,7 @@ The function configures the specified node (e.g. payload limits and timeouts).
 \ingroup module_dllk
 */
 //------------------------------------------------------------------------------
-tOplkError dllk_configNode(tDllNodeInfo * pNodeInfo_p)
+tOplkError dllk_configNode(tDllNodeInfo* pNodeInfo_p)
 {
     tOplkError          ret = kErrorOk;
     tDllkNodeInfo*      pIntNodeInfo;
@@ -627,7 +630,7 @@ tOplkError dllk_deleteNode(tDllNodeOpParam* pNodeOpParam_p)
                     fUpdateEdrv = TRUE;
 
                 for (index = 0, pIntNodeInfo = &dllkInstance_g.aNodeInfo[0];
-                     index < tabentries (dllkInstance_g.aNodeInfo);
+                     index < tabentries(dllkInstance_g.aNodeInfo);
                      index++, pIntNodeInfo++)
                 {
                     ret = dllk_deleteNodeFilter(pIntNodeInfo, pNodeOpParam_p->opNodeType, fUpdateEdrv);
@@ -692,8 +695,8 @@ The function sets Flag1 (for PReq and SoA) of the specified node.
 \param  soaFlag1_p          Flag1.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If flag is successfully set.
-\retval kErrorDllNoNodeInfo       If node is not found.
+\retval kErrorOk                  Flag is successfully set.
+\retval kErrorDllNoNodeInfo       Node is not found.
 
 \ingroup module_dllk
 */
@@ -717,8 +720,8 @@ tOplkError dllk_setFlag1OfNode(UINT nodeId_p, UINT8 soaFlag1_p)
 /**
 \brief  Get current CN node list
 
-The function returns the first info structure of first node in isochronous phase.
-It is only useful for kernel error handler module.
+The function returns the first info structure of the first node in the isochronous
+phase. It is only useful for the kernel error handler module.
 
 \param  ppbCnNodeIdList_p       Pointer to array of bytes with node-ID list.
                                 Array is terminated by value 0.
@@ -741,8 +744,8 @@ The function returns the MAC address of the specified node.
 \param  pCnMacAddress_p         Pointer to store MAC address.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If MAC address is successfully read.
-\retval kErrorDllNoNodeInfo       If node is not found.
+\retval kErrorOk                  MAC address is successfully read.
+\retval kErrorDllNoNodeInfo       Node is not found.
 
 \ingroup module_dllk
 */
@@ -774,11 +777,11 @@ tOplkError dllk_getCnMacAddress(UINT nodeId_p, BYTE* pCnMacAddress_p)
 /**
 \brief  MN timer callback function
 
-This function is called by the timer module. It triggers the SoC for a MN.
+This function is called by the timer module. It triggers the SoC for an MN.
 
 \param  pEventArg_p         Pointer to timer event argument.
 
-\return The function returns a pointer to the node Information of the node
+\return The function returns a pointer to the node Information of the node.
 */
 //------------------------------------------------------------------------------
 tOplkError dllk_cbMnTimerCycle(tTimerEventArg* pEventArg_p)
@@ -829,7 +832,7 @@ error occurred.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError dllk_cbCyclicError(tOplkError errorCode_p, tEdrvTxBuffer * pTxBuffer_p)
+tOplkError dllk_cbCyclicError(tOplkError errorCode_p, tEdrvTxBuffer* pTxBuffer_p)
 {
     tOplkError      ret = kErrorOk;
     tNmtState       nmtState;
@@ -849,7 +852,7 @@ tOplkError dllk_cbCyclicError(tOplkError errorCode_p, tEdrvTxBuffer * pTxBuffer_
 
     if (pTxBuffer_p != NULL)
     {
-        handle = (UINT) (pTxBuffer_p - dllkInstance_g.pTxBuffer);
+        handle = (UINT)(pTxBuffer_p - dllkInstance_g.pTxBuffer);
     }
 
     BENCHMARK_MOD_02_TOGGLE(7);
@@ -883,10 +886,10 @@ Exit:
 /**
 \brief  MN sync callback function
 
-This function is called by the ethernet driver module. It triggers the sync
+This function is called by the Ethernet driver module. It triggers the sync
 event.
 
-\return The function returns a pointer to the node Information of the node
+\return The function returns a pointer to the node information of the node.
 */
 //------------------------------------------------------------------------------
 tOplkError dllk_cbMnSyncHandler(void)
@@ -940,10 +943,10 @@ Exit:
 #if CONFIG_TIMER_USE_HIGHRES != FALSE
 //------------------------------------------------------------------------------
 /**
-\brief  CN Timer callback function
+\brief  CN timer callback function
 
 This function is called by the timer module. It monitors the POWERLINK cycle
-when it is running as CN node.
+when running as CN.
 
 \param  pEventArg_p         Pointer to timer event argument.
 
@@ -995,7 +998,7 @@ Exit:
 #if (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER)
 //------------------------------------------------------------------------------
 /**
-\brief  CN Sync Timer callback function
+\brief  CN sync timer callback function
 
 This function is called by the timer sync module. It signals the sync event.
 
@@ -1275,7 +1278,7 @@ tOplkError dllk_setupLocalNodeMn(void)
 
     // alloc TxBuffer pointer list
     count += 5;   // SoC, PResMN, SoA, ASnd, NULL
-    dllkInstance_g.ppTxBufferList = OPLK_MALLOC(sizeof (tEdrvTxBuffer*) * count);
+    dllkInstance_g.ppTxBufferList = OPLK_MALLOC(sizeof(tEdrvTxBuffer*) * count);
     if (dllkInstance_g.ppTxBufferList == NULL)
         return kErrorDllOutOfMemory;
 
@@ -1379,7 +1382,7 @@ tOplkError dllk_setupLocalNodeCn(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Cleanup the local node
+\brief  Clean up the local node
 
 The function is called if the node falls back into a reset state. It cleans
 up all stuff for the local node.
@@ -1465,11 +1468,11 @@ tOplkError dllk_cleanupLocalNode(tNmtState oldNmtState_p)
         {
             if (dllkInstance_g.aNodeInfo[index].pPreqTxBuffer != NULL)
             {
-                handle = (UINT) (dllkInstance_g.aNodeInfo[index].pPreqTxBuffer - dllkInstance_g.pTxBuffer);
+                handle = (UINT)(dllkInstance_g.aNodeInfo[index].pPreqTxBuffer - dllkInstance_g.pTxBuffer);
                 dllkInstance_g.aNodeInfo[index].pPreqTxBuffer = NULL;
                 if (handle != DLLK_TXFRAME_PRES)
                 {
-                    if ((ret = dllk_deleteTxFrame(handle))  != kErrorOk)
+                    if ((ret = dllk_deleteTxFrame(handle)) != kErrorOk)
                         return ret;
                 }
             }
@@ -1480,7 +1483,7 @@ tOplkError dllk_cleanupLocalNode(tNmtState oldNmtState_p)
     }
     else
     {   // local node was CN
-        for (index = 0; index < tabentries (dllkInstance_g.aNodeInfo); index++)
+        for (index = 0; index < tabentries(dllkInstance_g.aNodeInfo); index++)
         {
             // disable PReq and PRes for this node
             dllkInstance_g.aNodeInfo[index].presPayloadLimit = 0;
@@ -1488,9 +1491,9 @@ tOplkError dllk_cleanupLocalNode(tNmtState oldNmtState_p)
         }
     }
 #else
-    // must be CN because MN part is not compiled!
+    // must be CN, because MN part is not compiled!
 #if NMT_MAX_NODE_ID > 0
-    for (index = 0; index < tabentries (dllkInstance_g.aNodeInfo); index++)
+    for (index = 0; index < tabentries(dllkInstance_g.aNodeInfo); index++)
     {
         // disable PRes for this node
         dllkInstance_g.aNodeInfo[index].presPayloadLimit = 0;
@@ -1499,7 +1502,7 @@ tOplkError dllk_cleanupLocalNode(tNmtState oldNmtState_p)
 
 #endif
 
-    // deregister multicast MACs in ethernet driver
+    // de-register multicast MACs in Ethernet driver
     ami_setUint48Be(&aMulticastMac[0], C_DLL_MULTICAST_SOC);
     ret = edrv_clearRxMulticastMacAddr(aMulticastMac);
     ami_setUint48Be(&aMulticastMac[0], C_DLL_MULTICAST_SOA);
@@ -1521,7 +1524,7 @@ This function returns the node info structure of the specified node.
 
 \param  nodeId_p            Node ID of node for which to get info.
 
-\return The function returns a pointer to the node Information of the node
+\return The function returns a pointer to the node information of the node.
 */
 //------------------------------------------------------------------------------
 tDllkNodeInfo* dllk_getNodeInfo(UINT nodeId_p)
@@ -1529,7 +1532,7 @@ tDllkNodeInfo* dllk_getNodeInfo(UINT nodeId_p)
     // $$$ d.k.: use hash algorithm to retrieve the appropriate node info structure
     //           if size of array is less than 254.
     nodeId_p--;   // node ID starts at 1 but array at 0
-    if (nodeId_p >= tabentries (dllkInstance_g.aNodeInfo))
+    if (nodeId_p >= tabentries(dllkInstance_g.aNodeInfo))
         return NULL;
     else
         return &dllkInstance_g.aNodeInfo[nodeId_p];
@@ -1546,7 +1549,7 @@ This function adds a node to the isochronous phase.
 
 \param  pIntNodeInfo_p      Pointer to internal node info structure.
 
-\return The function returns a pointer to the node Information of the node
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 tOplkError dllk_addNodeIsochronous(tDllkNodeInfo* pIntNodeInfo_p)
@@ -1603,7 +1606,7 @@ tOplkError dllk_addNodeIsochronous(tDllkNodeInfo* pIntNodeInfo_p)
         {   // TxBuffer entry exists
             tEvent          event;
 
-            pTxFrame = (tPlkFrame *) pIntNodeInfo_p->pPreqTxBuffer[0].pBuffer;
+            pTxFrame = (tPlkFrame*)pIntNodeInfo_p->pPreqTxBuffer[0].pBuffer;
             // set up destination MAC address
             OPLK_MEMCPY(pTxFrame->aDstMac, pIntNodeInfo_p->aMacAddr, 6);
             // set destination node-ID in PReq
@@ -1617,7 +1620,7 @@ tOplkError dllk_addNodeIsochronous(tDllkNodeInfo* pIntNodeInfo_p)
 
             event.eventSink = kEventSinkNmtMnu;
             event.eventType = kEventTypeNmtMnuNodeAdded;
-            event.eventArgSize = sizeof (pIntNodeInfo_p->nodeId);
+            event.eventArgSize = sizeof(pIntNodeInfo_p->nodeId);
             event.pEventArg = &pIntNodeInfo_p->nodeId;
             ret = eventk_postEvent(&event);
             if (ret != kErrorOk)
@@ -1649,7 +1652,7 @@ This function removes a node from the isochronous phase.
 
 \param  pIntNodeInfo_p      Pointer to internal node info structure.
 
-\return The function returns a pointer to the node Information of the node
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 tOplkError dllk_deleteNodeIsochronous(tDllkNodeInfo* pIntNodeInfo_p)
@@ -1681,7 +1684,7 @@ tOplkError dllk_deleteNodeIsochronous(tDllkNodeInfo* pIntNodeInfo_p)
     *ppIntNodeInfo = pIntNodeInfo_p->pNextNodeInfo;
     if (pIntNodeInfo_p->pPreqTxBuffer != NULL)
     {   // disable TPDO
-        pTxFrame = (tPlkFrame *) pIntNodeInfo_p->pPreqTxBuffer[0].pBuffer;
+        pTxFrame = (tPlkFrame*)pIntNodeInfo_p->pPreqTxBuffer[0].pBuffer;
         if (pTxFrame != NULL)
         {   // frame does exist
             // update frame (disable RD in Flag1)
@@ -1706,10 +1709,10 @@ tOplkError dllk_deleteNodeIsochronous(tDllkNodeInfo* pIntNodeInfo_p)
 
 This function enables the PRes chaining mode.
 
-\return The function returns a pointer to the node Information of the node
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError dllk_presChainingEnable (void)
+tOplkError dllk_presChainingEnable(void)
 {
     tOplkError      Ret = kErrorOk;
     tPlkFrame *     pTxFrameSyncRes;
@@ -1755,10 +1758,10 @@ tOplkError dllk_presChainingEnable (void)
 
 This function disables the PRes chaining mode, thus restoring PReq/PRes mode.
 
-\return The function returns a pointer to the node Information of the node
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError dllk_presChainingDisable (void)
+tOplkError dllk_presChainingDisable(void)
 {
     tOplkError      ret = kErrorOk;
     tPlkFrame *     pTxFrameSyncRes;
@@ -1778,11 +1781,11 @@ tOplkError dllk_presChainingDisable (void)
         dllkInstance_g.fPrcEnabled = FALSE;
 
         ret = edrv_changeRxFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT, DLLK_FILTER_PREQ,
-                               EDRV_FILTER_CHANGE_VALUE | EDRV_FILTER_CHANGE_AUTO_RESPONSE_DELAY);
+                                  EDRV_FILTER_CHANGE_VALUE | EDRV_FILTER_CHANGE_AUTO_RESPONSE_DELAY);
         if (ret != kErrorOk)
             return ret;
 
-        pTxFrameSyncRes = (tPlkFrame *) dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SYNCRES].pBuffer;
+        pTxFrameSyncRes = (tPlkFrame*)dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SYNCRES].pBuffer;
 
         ami_setUint32Le(&pTxFrameSyncRes->data.asnd.payload.syncResponse.syncStatusLe,
                         ami_getUint32Le(&pTxFrameSyncRes->data.asnd.payload.syncResponse.syncStatusLe)
@@ -1807,7 +1810,7 @@ tOplkError dllk_presChainingDisable (void)
 This function is called by the timer sync module. It signals that the
 PResFallBackTimeout hat triggered.
 
-\return The function returns a pointer to the node Information of the node
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 tOplkError dllk_cbCnPresFallbackTimeout(void)
@@ -1853,7 +1856,7 @@ The function sets up the buffer structures for the asynchronous phase.
 \param  nextTxBufferOffset_p    Next txBuffer offset.
 \param  nextTimeOffsetNs_p      Next time offset in cycle (in ns).
 \param  pIndex_p                Pointer to next index in TX buffer list.
-                                Will be updated in function
+                                Will be updated in the function.
 
 \return The function returns a tOplkError error code.
 */
@@ -1950,7 +1953,7 @@ tOplkError dllk_setupAsyncPhase(tNmtState nmtState_p, UINT nextTxBufferOffset_p,
                 pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONEPL +
                                                       dllkInstance_g.curTxBufferOffsetNonEpl];
                 if (pTxBuffer->pBuffer != NULL)
-                {   // non-EPL frame does exist
+                {   // non-POWERLINK frame does exist
                     // check if frame is not empty and not being filled
                     if (pTxBuffer->txFrameSize > DLLK_BUFLEN_FILLING)
                     {
@@ -1971,7 +1974,7 @@ tOplkError dllk_setupAsyncPhase(tNmtState nmtState_p, UINT nextTxBufferOffset_p,
         //is invitation allowed?
         if(fEnableInvitation == FALSE)
         {
-            tPlkFrame *pTxFrame = (tPlkFrame *)
+            tPlkFrame *pTxFrame = (tPlkFrame*)
                 dllkInstance_g.ppTxBufferList[soaIndex]->pBuffer;
 
             //reset invitation
@@ -2001,7 +2004,7 @@ The function sets up the buffer structures for the synchronous phase.
 \param  pNextTimeOffsetNs_p     Pointer to next time offset in cycle (in ns).
                                 Will be updated in function.
 \param  pIndex_p                Pointer to next index in TX buffer list.
-                                Will be updated in function
+                                Will be updated in the function.
 
 \return The function returns a tOplkError error code.
 */
@@ -2041,7 +2044,7 @@ tOplkError dllk_setupSyncPhase(tNmtState nmtState_p, BOOL fReadyFlag_p,
         pTxBuffer = &pIntNodeInfo->pPreqTxBuffer[nextTxBufferOffset_p];
         if ((pTxBuffer != NULL) && (pTxBuffer->pBuffer != NULL))
         {   // PReq does exist
-            pTxFrame = (tPlkFrame *) pTxBuffer->pBuffer;
+            pTxFrame = (tPlkFrame*)pTxBuffer->pBuffer;
 
             flag1 = pIntNodeInfo->soaFlag1 & PLK_FRAME_FLAG1_EA;
 
@@ -2072,7 +2075,7 @@ tOplkError dllk_setupSyncPhase(tNmtState nmtState_p, BOOL fReadyFlag_p,
                     pIntPrcNodeInfo = dllkInstance_g.pFirstPrcNodeInfo;
                     while (pIntPrcNodeInfo != NULL)
                     {
-                        *pCnNodeId = (BYTE) pIntPrcNodeInfo->nodeId;
+                        *pCnNodeId = (BYTE)pIntPrcNodeInfo->nodeId;
                         pCnNodeId++;
                         *pNextTimeOffsetNs_p = pIntNodeInfo->presTimeoutNs;
                         pIntPrcNodeInfo = pIntPrcNodeInfo->pNextNodeInfo;
@@ -2084,7 +2087,7 @@ tOplkError dllk_setupSyncPhase(tNmtState nmtState_p, BOOL fReadyFlag_p,
             }
             else
             {   // PReq to CN
-                *pCnNodeId = (BYTE) pIntNodeInfo->nodeId;
+                *pCnNodeId = (BYTE)pIntNodeInfo->nodeId;
                 pCnNodeId++;
                 *pNextTimeOffsetNs_p = pIntNodeInfo->presTimeoutNs;
             }
@@ -2110,3 +2113,4 @@ tOplkError dllk_setupSyncPhase(tNmtState nmtState_p, BOOL fReadyFlag_p,
 #endif
 
 ///\}
+
