@@ -731,7 +731,6 @@ void dllk_getCurrentCnNodeIdList(BYTE** ppbCnNodeIdList_p)
     *ppbCnNodeIdList_p = &dllkInstance_g.aCnNodeIdList[dllkInstance_g.curTxBufferOffsetCycle ^ 1][0];
 }
 
-#if (CONFIG_DLL_PRES_CHAINING_MN == TRUE)
 //------------------------------------------------------------------------------
 /**
 \brief  Get MAC address of the specified node
@@ -761,7 +760,6 @@ tOplkError dllk_getCnMacAddress(UINT nodeId_p, BYTE* pCnMacAddress_p)
     OPLK_MEMCPY(pCnMacAddress_p, pNodeInfo->aMacAddr, 6);
     return kErrorOk;
 }
-#endif
 
 #endif
 
@@ -918,9 +916,7 @@ tOplkError dllk_cbMnSyncHandler(void)
     }
 
     dllkInstance_g.fSyncProcessed = FALSE;
-#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
     dllkInstance_g.fPrcSlotFinished = FALSE;
-#endif
 
     // switch to next cycle
     dllkInstance_g.curTxBufferOffsetCycle ^= 1;
@@ -1089,9 +1085,7 @@ tOplkError dllk_setupLocalNode(tNmtState nmtState_p)
 #if defined(CONFIG_INCLUDE_NMT_MN)
     // initialize linked node list
     dllkInstance_g.pFirstNodeInfo = NULL;
-#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
     dllkInstance_g.pFirstPrcNodeInfo = NULL;
-#endif
 #endif
 
     /*-----------------------------------------------------------------------*/
@@ -1583,13 +1577,11 @@ tOplkError dllk_addNodeIsochronous(tDllkNodeInfo* pIntNodeInfo_p)
     else
     {   // normal CN shall be added to isochronous phase
         // insert node into list in ascending order
-#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
         if (pIntNodeInfo_p->pPreqTxBuffer == NULL)
         {
             ppIntNodeInfo = &dllkInstance_g.pFirstPrcNodeInfo;
         }
         else
-#endif
         {
             ppIntNodeInfo = &dllkInstance_g.pFirstNodeInfo;
         }
@@ -1632,13 +1624,6 @@ tOplkError dllk_addNodeIsochronous(tDllkNodeInfo* pIntNodeInfo_p)
                 goto Exit;
 
         }
-#if CONFIG_DLL_PRES_CHAINING_MN == FALSE
-        else
-        {   // TxBuffer for PReq does not exist
-            ret = kErrorDllTxFrameInvalid;
-            goto Exit;
-        }
-#endif
 
         ret = errhndk_resetCnError(pIntNodeInfo_p->nodeId);
     }
@@ -1673,13 +1658,11 @@ tOplkError dllk_deleteNodeIsochronous(tDllkNodeInfo* pIntNodeInfo_p)
     tDllkNodeInfo**     ppIntNodeInfo;
     tPlkFrame *         pTxFrame;
 
-#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
     if (pIntNodeInfo_p->pPreqTxBuffer == NULL)
     {
         ppIntNodeInfo = &dllkInstance_g.pFirstPrcNodeInfo;
     }
     else
-#endif
     {
         ppIntNodeInfo = &dllkInstance_g.pFirstNodeInfo;
     }
@@ -2082,7 +2065,6 @@ tOplkError dllk_setupSyncPhase(tNmtState nmtState_p, BOOL fReadyFlag_p,
                 // update NMT state
                 ami_setUint8Le(&pTxFrame->data.pres.nmtStatus, (BYTE) nmtState_p);
 
-#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
                 *pNextTimeOffsetNs_p = pIntNodeInfo->presTimeoutNs;
                 {
                     tDllkNodeInfo*   pIntPrcNodeInfo;
@@ -2099,10 +2081,6 @@ tOplkError dllk_setupSyncPhase(tNmtState nmtState_p, BOOL fReadyFlag_p,
                     *pCnNodeId = C_ADR_BROADCAST;    // mark this entry as PRC slot finished
                     pCnNodeId++;
                 }
-#else
-                *pNextTimeOffsetNs_p = 0;
-#endif
-
             }
             else
             {   // PReq to CN

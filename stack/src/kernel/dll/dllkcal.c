@@ -52,7 +52,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <common/circbuffer.h>
 #endif
 
-#if (CONFIG_DLL_PRES_CHAINING_MN != FALSE) && (CONFIG_DLLCAL_QUEUE == DIRECT_QUEUE)
+#if defined(CONFIG_INCLUDE_NMT_MN) && (CONFIG_DLLCAL_QUEUE == DIRECT_QUEUE)
 #error "DLLCal module does not support direct calls with PRC MN"
 #endif
 
@@ -80,7 +80,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
+#if defined(CONFIG_INCLUDE_NMT_MN)
 #define DLLKCAL_MAX_QUEUES  6   // CnGenReq, CnNmtReq, {MnGenReq, MnNmtReq}, MnIdentReq, MnStatusReq, SyncReq
 #else
 #define DLLKCAL_MAX_QUEUES  5   // CnGenReq, CnNmtReq, {MnGenReq, MnNmtReq}, MnIdentReq, MnStatusReq
@@ -96,7 +96,7 @@ typedef struct
     tDllCalFuncIntf*        pTxNmtFuncs;
     tDllCalFuncIntf*        pTxGenFuncs;
 
-#if defined(CONFIG_INCLUDE_NMT_MN) && (CONFIG_DLL_PRES_CHAINING_MN != FALSE)
+#if defined(CONFIG_INCLUDE_NMT_MN)
     tDllCalQueueInstance    dllCalQueueTxSync;      ///< Dll Cal Queue instance for Sync Request
     tDllCalFuncIntf*        pTxSyncFuncs;
 #endif
@@ -134,11 +134,8 @@ static BOOL getCnNmtRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p);
 static BOOL getMnGenNmtRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p);
 static BOOL getMnIdentRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p);
 static BOOL getMnStatusRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p);
-
-#if (CONFIG_DLL_PRES_CHAINING_MN != FALSE)
 static BOOL getMnSyncRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p,
                              tSoaPayload* pSoaPayload_p);
-#endif
 #endif
 
 //============================================================================//
@@ -159,7 +156,7 @@ This function initializes the kernel DLL CAL module.
 tOplkError dllkcal_init(void)
 {
     tOplkError      ret = kErrorOk;
-#ifdef CONFIG_INCLUDE_NMT_MN
+#if defined(CONFIG_INCLUDE_NMT_MN)
     tCircBufError   circErr;
 #endif
 
@@ -168,7 +165,7 @@ tOplkError dllkcal_init(void)
 
     instance_l.pTxNmtFuncs = GET_DLLKCAL_INTERFACE();
     instance_l.pTxGenFuncs = GET_DLLKCAL_INTERFACE();
-#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
+#if defined(CONFIG_INCLUDE_NMT_MN)
     instance_l.pTxSyncFuncs = GET_DLLKCAL_INTERFACE();
 #endif
 
@@ -188,7 +185,7 @@ tOplkError dllkcal_init(void)
         goto Exit;
     }
 
-#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
+#if defined(CONFIG_INCLUDE_NMT_MN)
     ret = instance_l.pTxSyncFuncs->pfnAddInstance(&instance_l.dllCalQueueTxSync,
                                                   kDllCalQueueTxSync);
     if(ret != kErrorOk)
@@ -196,9 +193,6 @@ tOplkError dllkcal_init(void)
         DEBUG_LVL_ERROR_TRACE("%s() TxSync failed\n", __func__);
         goto Exit;
     }
-#endif
-
-#ifdef CONFIG_INCLUDE_NMT_MN
     circErr = circbuf_alloc(CIRCBUF_DLLCAL_CN_REQ_NMT, CONFIG_DLLCAL_SIZE_CIRCBUF_CN_REQ_NMT,
             &instance_l.pQueueCnRequestNmt);
     if(circErr != kCircBufOk)
@@ -260,7 +254,7 @@ tOplkError dllkcal_exit(void)
 
     instance_l.pTxNmtFuncs->pfnDelInstance(instance_l.dllCalQueueTxNmt);
     instance_l.pTxGenFuncs->pfnDelInstance(instance_l.dllCalQueueTxGen);
-#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
+#if defined(CONFIG_INCLUDE_NMT_MN)
     instance_l.pTxSyncFuncs->pfnDelInstance(instance_l.dllCalQueueTxSync);
 #endif
 
@@ -599,7 +593,7 @@ tOplkError dllkcal_writeAsyncFrame(tFrameInfo* pFrameInfo_p, tDllCalQueue dllQue
                                         (BYTE*)pFrameInfo_p->pFrame,
                                         &(pFrameInfo_p->frameSize));
             break;
-#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
+#if defined(CONFIG_INCLUDE_NMT_MN)
         case kDllCalQueueTxSync:   // sync request priority
             ret = instance_l.pTxGenFuncs->pfnInsertDataBlock(
                                         instance_l.dllCalQueueTxSync,
@@ -655,11 +649,9 @@ tOplkError dllkcal_clearAsyncQueues(void)
 {
     tOplkError  ret = kErrorOk;
 
-#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
     //ret is ignored
     ret = instance_l.pTxSyncFuncs->pfnResetDataBlockQueue(
                                     instance_l.dllCalQueueTxSync, 1000);
-#endif
 
     // clear MN asynchronous queues
     instance_l.nextRequestQueue = 0;
@@ -793,10 +785,6 @@ tOplkError dllkcal_getSoaRequest(tDllReqServiceId* pReqServiceId_p,
     tOplkError      ret = kErrorOk;
     UINT            count;
 
-#if CONFIG_DLL_PRES_CHAINING_MN == FALSE
-    UNUSED_PARAMETER(pSoaPayload_p);
-#endif
-
     for (count = DLLKCAL_MAX_QUEUES; count > 0; count--)
     {
         switch (instance_l.nextRequestQueue)
@@ -826,13 +814,11 @@ tOplkError dllkcal_getSoaRequest(tDllReqServiceId* pReqServiceId_p,
                     goto Exit;
                 break;
 
-#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
             case 5:
                 if (getMnSyncRequest(pReqServiceId_p, pNodeId_p, pSoaPayload_p)
                                 == TRUE)
                     goto Exit;
                 break;
-#endif
         }
     }
 
@@ -1075,13 +1061,9 @@ static BOOL getMnStatusRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_
     tCircBufError   err;
     UINT            rxNodeId;
     size_t          size = sizeof(rxNodeId);
-#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
+
     // next queue will be MnSyncReq queue
     instance_l.nextRequestQueue = 5;
-#else
-    // next queue will be CnGenReq queue
-    instance_l.nextRequestQueue = 0;
-#endif
     err = circbuf_readData(instance_l.pQueueStatusReq, &rxNodeId, size, &size);
 
     if(err == kCircBufOk)
@@ -1093,9 +1075,6 @@ static BOOL getMnStatusRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_
     return FALSE;
 }
 
-
-
-#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
 //------------------------------------------------------------------------------
 /**
 \brief  Get MN Sync request
@@ -1195,6 +1174,5 @@ static BOOL getMnSyncRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p,
     }
     return FALSE;
 }
-#endif
 
 #endif

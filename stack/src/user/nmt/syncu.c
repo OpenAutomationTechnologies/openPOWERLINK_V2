@@ -45,8 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/syncu.h>
 #include <user/dllucal.h>
 
-#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
-
+#if defined(CONFIG_INCLUDE_NMT_MN)
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -280,7 +279,6 @@ static tOplkError syncu_cbSyncResponse(tFrameInfo * pFrameInfo_p)
 
 ///\}
 
-#endif // CONFIG_DLL_PRES_CHAINING_MN != FALSE
-
+#endif
 
 

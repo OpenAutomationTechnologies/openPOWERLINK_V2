@@ -70,7 +70,7 @@ typedef enum
     kDllAsndNmtRequest       = 0x03,
     kDllAsndNmtCommand       = 0x04,
     kDllAsndSdo              = 0x05,
-#if (CONFIG_DLL_PRES_CHAINING_CN != FALSE) || (CONFIG_DLL_PRES_CHAINING_MN != FALSE)
+#if ((CONFIG_DLL_PRES_CHAINING_CN != FALSE) || defined(CONFIG_INCLUDE_NMT_MN))
     kDllAsndSyncResponse     = 0x06
 #endif
 } tDllAsndServiceId;
@@ -98,7 +98,7 @@ typedef enum
     kDllReqServiceIdent      = 0x01,
     kDllReqServiceStatus     = 0x02,
     kDllReqServiceNmtRequest = 0x03,
-#if (CONFIG_DLL_PRES_CHAINING_CN != FALSE) || (CONFIG_DLL_PRES_CHAINING_MN != FALSE)
+#if (CONFIG_DLL_PRES_CHAINING_CN != FALSE) || defined(CONFIG_INCLUDE_NMT_MN)
     kDllReqServiceSync       = 0x06,
 #endif
     kDllReqServiceUnspecified= 0xFF,
@@ -240,7 +240,6 @@ typedef struct
     tDllNodeOpType      opNodeType;         ///< Node operation type
 } tDllNodeOpParam;
 
-#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
 /**
 \brief Structure for DLL Node Operation Parameters
 
@@ -253,7 +252,6 @@ typedef struct
     UINT32              pResTimeFirst;
     UINT32              pResFallBackTimeout;
 } tDllSyncRequest;
-#endif
 
 //------------------------------------------------------------------------------
 // function prototypes

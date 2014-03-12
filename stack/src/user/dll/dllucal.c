@@ -51,7 +51,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#if (CONFIG_DLL_PRES_CHAINING_MN != FALSE) && (CONFIG_DLLCAL_QUEUE == DIRECT_QUEUE)
+#if defined(CONFIG_INCLUDE_NMT_MN) && (CONFIG_DLLCAL_QUEUE == DIRECT_QUEUE)
 #error "DLLCal module does not support direct calls with PRC MN"
 #endif
 
@@ -80,7 +80,7 @@ typedef struct
     tEplDlluCbAsnd           apfnDlluCbAsnd[DLL_MAX_ASND_SERVICE_ID];
     tDllCalQueueInstance     dllCalQueueTxNmt;          ///< Dll Cal Queue instance for NMT priority
     tDllCalQueueInstance     dllCalQueueTxGen;          ///< Dll Cal Queue instance for Generic priority
-#if defined(CONFIG_INCLUDE_NMT_MN)  && (CONFIG_DLL_PRES_CHAINING_MN != FALSE)
+#if defined(CONFIG_INCLUDE_NMT_MN)
     tDllCalQueueInstance     dllCalQueueTxSync;         ///< Dll Cal Queue instance for Sync Request
     tDllCalFuncIntf*         pTxSyncFuncs;
 #endif
@@ -128,7 +128,7 @@ tOplkError dllucal_init(void)
 
     instance_l.pTxNmtFuncs = GET_DLLUCAL_INTERFACE();
     instance_l.pTxGenFuncs = GET_DLLUCAL_INTERFACE();
-#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
+#if defined(CONFIG_INCLUDE_NMT_MN)
     instance_l.pTxSyncFuncs = GET_DLLUCAL_INTERFACE();
 #endif
 
@@ -146,10 +146,9 @@ tOplkError dllucal_init(void)
         goto Exit;
     }
 
-#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
+#if defined(CONFIG_INCLUDE_NMT_MN)
     ret = instance_l.pTxSyncFuncs->pfnAddInstance(&instance_l.dllCalQueueTxSync,
                                                   kDllCalQueueTxSync);
-
     if(ret != kErrorOk)
     {
         goto Exit;
@@ -177,7 +176,7 @@ tOplkError dllucal_exit(void)
 
     instance_l.pTxNmtFuncs->pfnDelInstance(instance_l.dllCalQueueTxNmt);
     instance_l.pTxGenFuncs->pfnDelInstance(instance_l.dllCalQueueTxGen);
-#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
+#if defined(CONFIG_INCLUDE_NMT_MN)
     instance_l.pTxSyncFuncs->pfnDelInstance(instance_l.dllCalQueueTxSync);
 #endif
     // reset instance structure
@@ -446,7 +445,6 @@ This function issues a SyncRequest or an IdentRequest to the specified node.
 \ingroup module_dllucal
 */
 //------------------------------------------------------------------------------
-#if CONFIG_DLL_PRES_CHAINING_MN != FALSE
 tOplkError dllucal_issueSyncRequest(tDllSyncRequest* pSyncRequest_p, UINT size_p)
 {
     tOplkError  ret = kErrorOk;
@@ -455,7 +453,6 @@ tOplkError dllucal_issueSyncRequest(tDllSyncRequest* pSyncRequest_p, UINT size_p
                                                       (BYTE*)pSyncRequest_p, &size_p);
     return ret;
 }
-#endif
 #endif
 
 
