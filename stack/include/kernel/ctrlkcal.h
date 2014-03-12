@@ -9,7 +9,7 @@ This file contains the definitions for the kernel ctrl CAL module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <oplk/oplkinc.h>
-
 #include <common/ctrl.h>
 
 //------------------------------------------------------------------------------
@@ -61,14 +60,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tOplkError ctrlkcal_init (void);
-void       ctrlkcal_exit (void);
-tOplkError ctrlkcal_process (void);
-tOplkError ctrlkcal_getCmd (tCtrlCmdType *pCmd_p);
+tOplkError ctrlkcal_init(void);
+void       ctrlkcal_exit(void);
+tOplkError ctrlkcal_process(void);
+tOplkError ctrlkcal_getCmd(tCtrlCmdType* pCmd_p);
 void       ctrlkcal_sendReturn(UINT16 retval_p);
-void       ctrlkcal_setStatus (UINT16 status_p);
-UINT16     ctrlkcal_getStatus (void);
-void       ctrlkcal_updateHeartbeat (UINT16 heartbeat_p);
+void       ctrlkcal_setStatus(UINT16 status_p);
+UINT16     ctrlkcal_getStatus(void);
+void       ctrlkcal_updateHeartbeat(UINT16 heartbeat_p);
 tOplkError ctrlkcal_readInitParam(tCtrlInitParam* pInitParam_p);
 void       ctrlkcal_storeInitParam(tCtrlInitParam* pInitParam_p);
 

@@ -11,7 +11,7 @@ the host interface ipcore.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -111,7 +111,7 @@ the memory block access functions.
 \ingroup module_ctrlkcal
 */
 //------------------------------------------------------------------------------
-tOplkError ctrlkcal_init (void)
+tOplkError ctrlkcal_init(void)
 {
     tHostifReturn hifRet;
     tHostifConfig hifConfig;
@@ -146,7 +146,7 @@ Cleanup:
 
 //------------------------------------------------------------------------------
 /**
-\brief  Cleanup kernel control CAL module
+\brief  Clean up kernel control CAL module
 
 The function cleans up the kernel control CAL module. It resets the control
 memory block and cleans up the underlying CAL module used for implementing
@@ -155,7 +155,7 @@ the memory block access functions.
 \ingroup module_ctrlkcal
 */
 //------------------------------------------------------------------------------
-void ctrlkcal_exit (void)
+void ctrlkcal_exit(void)
 {
     tHostifReturn hifRet;
 
@@ -177,7 +177,7 @@ This function provides processing time for the CAL module.
 \ingroup module_ctrlkcal
 */
 //------------------------------------------------------------------------------
-tOplkError ctrlkcal_process (void)
+tOplkError ctrlkcal_process(void)
 {
     return kErrorOk;
 }
@@ -196,7 +196,7 @@ block to execute a kernel control function.
 \ingroup module_ctrlkcal
 */
 //------------------------------------------------------------------------------
-tOplkError ctrlkcal_getCmd (tCtrlCmdType *pCmd_p)
+tOplkError ctrlkcal_getCmd(tCtrlCmdType* pCmd_p)
 {
     tHostifReturn hifret;
     tHostifCommand hifcmd;
@@ -219,13 +219,13 @@ tOplkError ctrlkcal_getCmd (tCtrlCmdType *pCmd_p)
 
 The function reads a control command stored by the user in the control memory
 block to execute a kernel control function.
-The function resets the control command, which informs the user layer that the
+The function resets the control command which informs the user layer that the
 command was complete.
 
 \ingroup module_ctrlkcal
 */
 //------------------------------------------------------------------------------
-void ctrlkcal_rstCmd (void)
+void ctrlkcal_rstCmd(void)
 {
     hostif_setCommand(instance_l.hifInstance, 0);
 }
@@ -262,7 +262,7 @@ The function stores the status of the kernel stack in the control memory block.
 \ingroup module_ctrlkcal
 */
 //------------------------------------------------------------------------------
-void ctrlkcal_setStatus (UINT16 status_p)
+void ctrlkcal_setStatus(UINT16 status_p)
 {
     tHostifState hifsta = (tHostifState)status_p;
 
@@ -273,7 +273,7 @@ void ctrlkcal_setStatus (UINT16 status_p)
 /**
 \brief  Update the heartbeat counter
 
-The function updates it's heartbeat counter in the control memory block which
+The function updates its heartbeat counter in the control memory block which
 can be used by the user stack to detect if the kernel stack is still running.
 
 \param  heartbeat_p         Heartbeat counter to store in the control memory
@@ -281,7 +281,7 @@ can be used by the user stack to detect if the kernel stack is still running.
 \ingroup module_ctrlkcal
 */
 //------------------------------------------------------------------------------
-void ctrlkcal_updateHeartbeat (UINT16 heartbeat_p)
+void ctrlkcal_updateHeartbeat(UINT16 heartbeat_p)
 {
     hostif_setHeartbeat(instance_l.hifInstance, heartbeat_p);
 }
@@ -332,3 +332,4 @@ tOplkError ctrlkcal_readInitParam(tCtrlInitParam* pInitParam_p)
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+

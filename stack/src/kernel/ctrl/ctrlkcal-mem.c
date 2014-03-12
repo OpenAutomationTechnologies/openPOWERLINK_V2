@@ -2,7 +2,7 @@
 ********************************************************************************
 \file   ctrlkcal-mem.c
 
-\brief  Kernel control CAL module ussing a shared memory block
+\brief  Kernel control CAL module using a shared memory block
 
 This file contains an implementation of the kernel control CAL module which uses
 a shared memory block for communication with the user layer.
@@ -11,7 +11,7 @@ a shared memory block for communication with the user layer.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -100,7 +100,7 @@ the memory block access functions.
 \ingroup module_ctrlkcal
 */
 //------------------------------------------------------------------------------
-tOplkError ctrlkcal_init (void)
+tOplkError ctrlkcal_init(void)
 {
     tCtrlBuf        ctrl;
     tOplkError      ret = kErrorOk;
@@ -117,7 +117,7 @@ tOplkError ctrlkcal_init (void)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Cleanup kernel control CAL module
+\brief  Clean up kernel control CAL module
 
 The function cleans up the kernel control CAL module. It resets the control
 memory block and cleans up the underlaying CAL module used for implementing
@@ -126,7 +126,7 @@ the memory block access functions.
 \ingroup module_ctrlkcal
 */
 //------------------------------------------------------------------------------
-void ctrlkcal_exit (void)
+void ctrlkcal_exit(void)
 {
     tCtrlBuf        ctrl;
 
@@ -203,7 +203,7 @@ The function stores the status of the kernel stack in the control memory block.
 \ingroup module_ctrlkcal
 */
 //------------------------------------------------------------------------------
-void ctrlkcal_setStatus (UINT16 status_p)
+void ctrlkcal_setStatus(UINT16 status_p)
 {
     ctrlcal_writeData(offsetof(tCtrlBuf, status), &status_p, sizeof(UINT16));
 }
@@ -212,7 +212,7 @@ void ctrlkcal_setStatus (UINT16 status_p)
 /**
 \brief  Update the heartbeat counter
 
-The function updates it's heartbeat counter in the control memory block which
+The function updates its heartbeat counter in the control memory block which
 can be used by the user stack to detect if the kernel stack is still running.
 
 \param  heartbeat_p         Heartbeat counter to store in the control memory
@@ -220,7 +220,7 @@ can be used by the user stack to detect if the kernel stack is still running.
 \ingroup module_ctrlkcal
 */
 //------------------------------------------------------------------------------
-void ctrlkcal_updateHeartbeat (UINT16 heartbeat_p)
+void ctrlkcal_updateHeartbeat(UINT16 heartbeat_p)
 {
     ctrlcal_writeData(offsetof(tCtrlBuf, heartbeat), &heartbeat_p, sizeof(UINT16));
 }
