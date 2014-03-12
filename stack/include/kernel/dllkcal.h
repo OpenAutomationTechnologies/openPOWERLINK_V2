@@ -7,7 +7,7 @@
 This file contains definitions for the kernel DLL CAL module
 
 Copyright (c) 2012, SYSTEC electronik GmbH
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -74,7 +74,7 @@ tOplkError dllkcal_init(void);
 tOplkError dllkcal_exit(void);
 
 tOplkError dllkcal_getAsyncTxCount(tDllAsyncReqPriority* pPriority_p,
-                                   UINT *pCount_p);
+                                   UINT* pCount_p);
 
 tOplkError dllkcal_getAsyncTxFrame(void* pFrame_p, UINT* pFrameSize_p,
                                    tDllAsyncReqPriority priority_p);
@@ -113,5 +113,4 @@ tOplkError dllkcal_setAsyncPendingRequests(UINT nodeId_p, tDllAsyncReqPriority a
 #endif
 
 #endif /* _INC_dllkcal_H_ */
-
 

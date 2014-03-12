@@ -11,7 +11,7 @@ the DLL kernel module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -76,8 +76,8 @@ typedef tOplkError (*tDllkStateFunc)(tNmtState, tNmtEvent, tEventDllError*);
 
 typedef struct
 {
-    tDllState                   nmtState;
-    tDllkStateFunc              pfnState;
+    tDllState      nmtState;
+    tDllkStateFunc pfnState;
 } tDllkStateTable;
 
 //------------------------------------------------------------------------------
@@ -352,7 +352,7 @@ static tOplkError processNmtMsFullCycle(tNmtState nmtState_p, tNmtEvent nmtEvent
                     if (ret != kErrorOk)
                         return ret;
 
-                    if ((ret = edrvcyclic_startCycle())  != kErrorOk)
+                    if ((ret = edrvcyclic_startCycle()) != kErrorOk)
                         return ret;
 
                     dllkInstance_g.dllState = kDllMsWaitSocTrig;
@@ -375,7 +375,6 @@ static tOplkError processNmtMsFullCycle(tNmtState nmtState_p, tNmtEvent nmtEvent
             break;
 
         case kNmtEventDllMeAsndTimeout:
-
             // SoC has been sent, update the prescaleCycleCount
             if (dllkInstance_g.dllConfigParam.prescaler > 0)
             {
@@ -731,6 +730,7 @@ static tOplkError processCsStoppedDllWaitSoc(tNmtState nmtState_p, tNmtEvent nmt
                 pDllEvent_p->dllErrorEvents |= DLL_ERR_CN_LOSS_SOC;
 
             break;
+
         case kNmtEventDllCeFrameTimeout:
             if(triggerLossOfSocEventOnFrameTimeout())
                 pDllEvent_p->dllErrorEvents |= DLL_ERR_CN_LOSS_SOC;
@@ -890,7 +890,7 @@ static BOOL triggerLossOfSocEventOnFrameTimeout(void)
         dllkInstance_g.lossSocStatus.fLossReported = TRUE;
         dllkInstance_g.lossSocStatus.fTimeoutOccurred = TRUE;
 
-        // Loss of Soc will be reported and can be marked as so!
+        // Loss of Soc will be reported and can be marked as such!
         fTriggerEvent = TRUE;
     }
     else

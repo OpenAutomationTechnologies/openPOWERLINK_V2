@@ -11,7 +11,7 @@ files.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -117,9 +117,9 @@ void  TgtDbgPostTraceValue (DWORD dwTraceValue_p);
 
 #if CONFIG_DLL_PRES_CHAINING_CN != FALSE
 #define DLLK_TXFRAME_SYNCRES      6   // SyncResponse on CN
-#define DLLK_TXFRAME_NONEPL       8   // non-EPL frame from FIFO on CN / MN
+#define DLLK_TXFRAME_NONEPL       8   // non-POWERLINK frame from FIFO on CN / MN
 #else
-#define DLLK_TXFRAME_NONEPL       6   // non-EPL frame from FIFO on CN / MN
+#define DLLK_TXFRAME_NONEPL       6   // non-POWERLINK frame from FIFO on CN / MN
 #endif
 
 #define DLLK_TXFRAME_PRES           (DLLK_TXFRAME_NONEPL + 2) // PRes on CN / MN
@@ -214,7 +214,7 @@ typedef struct
 #endif
 
 #if CONFIG_TIMER_USE_HIGHRES != FALSE
-    tTimerHdl               timerHdlCycle;                  // used for EPL cycle monitoring on CN and generation on MN
+    tTimerHdl               timerHdlCycle;                  // used for POWERLINK cycle monitoring on CN and generation on MN
 #if defined(CONFIG_INCLUDE_NMT_MN)
     tTimerHdl               timerHdlResponse;               // used for CN response monitoring
 #endif
@@ -251,17 +251,17 @@ extern "C" {
 
 //------------------------------------------------------------------------------
 /* Frame processing functions (dllkframe.c) */
-tEdrvReleaseRxBuffer dllk_processFrameReceived(tEdrvRxBuffer * pRxBuffer_p) SECTION_DLLK_FRAME_RCVD_CB;
-void       dllk_processTransmittedNmtReq(tEdrvTxBuffer * pTxBuffer_p);
-void       dllk_processTransmittedNonEpl(tEdrvTxBuffer * pTxBuffer_p);
+tEdrvReleaseRxBuffer dllk_processFrameReceived(tEdrvRxBuffer* pRxBuffer_p) SECTION_DLLK_FRAME_RCVD_CB;
+void       dllk_processTransmittedNmtReq(tEdrvTxBuffer* pTxBuffer_p);
+void       dllk_processTransmittedNonEpl(tEdrvTxBuffer* pTxBuffer_p);
 #if defined(CONFIG_INCLUDE_NMT_MN)
-void       dllk_processTransmittedSoc(tEdrvTxBuffer * pTxBuffer_p);
-void       dllk_processTransmittedSoa(tEdrvTxBuffer * pTxBuffer_p);
+void       dllk_processTransmittedSoc(tEdrvTxBuffer* pTxBuffer_p);
+void       dllk_processTransmittedSoa(tEdrvTxBuffer* pTxBuffer_p);
 #endif
 tOplkError dllk_updateFrameIdentRes(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p);
 tOplkError dllk_updateFrameStatusRes(tEdrvTxBuffer* pTxBuffer_p, tNmtState NmtState_p);
 tOplkError dllk_updateFramePres(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p);
-tOplkError dllk_checkFrame(tPlkFrame * pFrame_p, UINT frameSize_p);
+tOplkError dllk_checkFrame(tPlkFrame* pFrame_p, UINT frameSize_p);
 tOplkError dllk_createTxFrame(UINT* pHandle_p, UINT* pFrameSize_p,
                               tMsgType msgType_p, tDllAsndServiceId serviceId_p);
 tOplkError dllk_deleteTxFrame(UINT handle_p);
@@ -287,15 +287,15 @@ tOplkError dllk_issueLossOfPres(UINT nodeId_p);
 void       dllk_setupAsndFilter(tEdrvFilter* pFilter_p);
 void       dllk_setupSocFilter(tEdrvFilter* pFilter_p);
 void       dllk_setupSoaFilter(tEdrvFilter* pFilter_p);
-void       dllk_setupSoaIdentReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer *pBuffer_p);
-void       dllk_setupSoaStatusReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer *pBuffer_p);
-void       dllk_setupSoaNmtReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer *pBuffer_p);
+void       dllk_setupSoaIdentReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer* pBuffer_p);
+void       dllk_setupSoaStatusReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer* pBuffer_p);
+void       dllk_setupSoaNmtReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer* pBuffer_p);
 #if CONFIG_DLL_PRES_CHAINING_CN != FALSE
-void       dllk_setupSoaSyncReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer *pBuffer_p);
+void       dllk_setupSoaSyncReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer* pBuffer_p);
 #endif
-void       dllk_setupSoaUnspecReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer *pBuffer_p);
+void       dllk_setupSoaUnspecReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer* pBuffer_p);
 void       dllk_setupPresFilter(tEdrvFilter* pFilter_p, BOOL fEnable_p);
-void       dllk_setupPreqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer *pBuffer_p, UINT8* pMacAdrs_p);
+void       dllk_setupPreqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer* pBuffer_p, UINT8* pMacAdrs_p);
 #if NMT_MAX_NODE_ID > 0
 tOplkError dllk_addNodeFilter(tDllkNodeInfo* pIntNodeInfo_p, tDllNodeOpType NodeOpType_p, BOOL fUpdateEdrv_p);
 tOplkError dllk_deleteNodeFilter(tDllkNodeInfo* pIntNodeInfo_p, tDllNodeOpType nodeOpType_p, BOOL fUpdateEdrv_p);
@@ -326,7 +326,7 @@ tDllkNodeInfo* dllk_getNodeInfo(UINT uiNodeId_p);
 //------------------------------------------------------------------------------
 /* Cycle/Sync Callback functions */
 #if defined(CONFIG_INCLUDE_NMT_MN)
-tOplkError dllk_cbCyclicError(tOplkError errorCode_p, tEdrvTxBuffer * pTxBuffer_p);
+tOplkError dllk_cbCyclicError(tOplkError errorCode_p, tEdrvTxBuffer* pTxBuffer_p);
 tOplkError dllk_cbMnSyncHandler(void);
 tOplkError dllk_cbMnTimerCycle(tTimerEventArg* pEventArg_p);
 #endif
@@ -341,8 +341,8 @@ tOplkError dllk_cbCnLossOfSync(void);
 //------------------------------------------------------------------------------
 /* PRes Chaining functions */
 #if CONFIG_DLL_PRES_CHAINING_CN == TRUE
-tOplkError dllk_presChainingEnable (void);
-tOplkError dllk_presChainingDisable (void);
+tOplkError dllk_presChainingEnable(void);
+tOplkError dllk_presChainingDisable(void);
 #if (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER)
 tOplkError dllk_cbCnPresFallbackTimeout(void);
 #endif
@@ -354,3 +354,4 @@ tOplkError dllk_cbCnPresFallbackTimeout(void);
 
 
 #endif /* _INC_dllk_internal_H_ */
+

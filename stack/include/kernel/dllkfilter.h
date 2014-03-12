@@ -11,7 +11,7 @@ can only be used for MACs which have a frame filter.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -81,3 +81,4 @@ extern "C" {
 #endif
 
 #endif  // #ifndef _INC_dllkfilter_H_
+

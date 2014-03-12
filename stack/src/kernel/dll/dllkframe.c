@@ -10,7 +10,7 @@ This file contains the frame processing functions of the kernel DLL module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -89,7 +89,7 @@ static tOplkError processReceivedSoc(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
 static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtState_p);
 static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* pRxBuffer_p,
                                       tNmtState nmtState_p, tEdrvReleaseRxBuffer* pReleaseRxBuffer_p);
-static tOplkError forwardRpdo(tFrameInfo * pFrameInfo_p);
+static tOplkError forwardRpdo(tFrameInfo* pFrameInfo_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -115,16 +115,16 @@ The function implements the callback function to process a received frame.
 \retval kEdrvReleaseRxBufferLater           Buffer must be released later.
 */
 //------------------------------------------------------------------------------
-tEdrvReleaseRxBuffer dllk_processFrameReceived(tEdrvRxBuffer * pRxBuffer_p)
+tEdrvReleaseRxBuffer dllk_processFrameReceived(tEdrvRxBuffer* pRxBuffer_p)
 {
     tEdrvReleaseRxBuffer    releaseRxBuffer = kEdrvReleaseRxBufferImmediately;
     tOplkError              ret             = kErrorOk;
     tNmtState               nmtState;
     tNmtEvent               nmtEvent        = kNmtEventNoEvent;
     tEvent                  event;
-    tPlkFrame *             pFrame;
+    tPlkFrame*              pFrame;
     tFrameInfo              frameInfo;
-    tMsgType             	msgType;
+    tMsgType                msgType;
     TGT_DLLK_DECLARE_FLAGS
 
     TGT_DLLK_ENTER_CRITICAL_SECTION()
@@ -134,21 +134,22 @@ tEdrvReleaseRxBuffer dllk_processFrameReceived(tEdrvRxBuffer * pRxBuffer_p)
     if (nmtState <= kNmtGsResetConfiguration)
         goto Exit;
 
-    pFrame = (tPlkFrame *) pRxBuffer_p->pBuffer;
+    pFrame = (tPlkFrame*)pRxBuffer_p->pBuffer;
 #if CONFIG_EDRV_EARLY_RX_INT != FALSE
     switch (pRxBuffer_p->bufferInFrame)
     {
         case kEdrvBufferFirstInFrame:
         {
-            tEdrvTxBuffer*  pTxBuffer = NULL;
+            tEdrvTxBuffer* pTxBuffer = NULL;
 
             msgType = (tMsgType)ami_getUint8Le(&pFrame->messageType);
             if (msgType == kMsgTypePreq)
             {
                 if (dllkInstance_g.dllState == kDllCsWaitPreq)
                 {   // PReq expected and actually received
-                    // d.k.: The condition above is sufficent, because EPL cycle is active
-                    //       and no non-EPL frame shall be received in isochronous phase.
+                    // d.k.: The condition above is sufficent, because POWERLINK
+                    //       cycle is active and no non-POWERLINK frame shall be
+                    //       received in isochronous phase.
                     // start transmission PRes
                     // $$$ What if Tx buffer is invalid?
                     pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES +
@@ -156,9 +157,9 @@ tEdrvReleaseRxBuffer dllk_processFrameReceived(tEdrvRxBuffer * pRxBuffer_p)
 #if (CONFIG_DLL_PRES_READY_AFTER_SOA != FALSE) || (CONFIG_DLL_PRES_READY_AFTER_SOC != FALSE)
                     Ret = edrv_startTxBuffer(pTxBuffer);
 #else
-                    pTxFrame = (tPlkFrame *) pTxBuffer->pBuffer;
+                    pTxFrame = (tPlkFrame*)pTxBuffer->pBuffer;
                     // update frame (NMT state, RD, RS, PR, MS, EN flags)
-                    ami_setUint8Le(&pTxFrame->data.pres.nmtStatus, (BYTE) nmtState);
+                    ami_setUint8Le(&pTxFrame->data.pres.nmtStatus, (BYTE)nmtState);
                     ami_setUint8Le(&pTxFrame->data.pres.flag2, dllkInstance_g.flag2);
                     if (nmtState != kNmtCsOperational)
                     {   // mark PDO as invalid in NMT state Op
@@ -188,7 +189,7 @@ tEdrvReleaseRxBuffer dllk_processFrameReceived(tEdrvRxBuffer * pRxBuffer_p)
     frameInfo.frameSize = pRxBuffer_p->rxFrameSize;
 
     if (ami_getUint16Be(&pFrame->etherType) != C_DLL_ETHERTYPE_EPL)
-    {   // non-EPL frame
+    {   // non-POWERLINK frame
         //TRACE("cbFrameReceived: pfnCbAsync=0x%p SrcMAC=0x%llx\n", dllkInstance_g.pfnCbAsync, ami_getUint48Be(pFrame->aSrcMac));
         if (dllkInstance_g.pfnCbAsync != NULL)
         {   // handler for async frames is registered
@@ -263,7 +264,7 @@ tEdrvReleaseRxBuffer dllk_processFrameReceived(tEdrvRxBuffer * pRxBuffer_p)
             // inform NMT module
             event.eventSink = kEventSinkNmtk;
             event.eventType = kEventTypeNmtEvent;
-            event.eventArgSize = sizeof (nmtEvent);
+            event.eventArgSize = sizeof(nmtEvent);
             event.pEventArg = &nmtEvent;
             ret = eventk_postEvent(&event);
         }
@@ -272,7 +273,7 @@ tEdrvReleaseRxBuffer dllk_processFrameReceived(tEdrvRxBuffer * pRxBuffer_p)
 Exit:
     if (ret != kErrorOk)
     {
-        UINT32      arg;
+        UINT32 arg;
 
         BENCHMARK_MOD_02_TOGGLE(7);
         arg = dllkInstance_g.dllState | (nmtEvent << 8);
@@ -294,10 +295,9 @@ frame was transmitted.
 
 \param  pTxBuffer_p         Pointer to TxBuffer structure of transmitted frame.
 
-\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-void dllk_processTransmittedNmtReq(tEdrvTxBuffer * pTxBuffer_p)
+void dllk_processTransmittedNmtReq(tEdrvTxBuffer* pTxBuffer_p)
 {
     tOplkError              ret = kErrorOk;
     tEvent                  event;
@@ -317,16 +317,16 @@ void dllk_processTransmittedNmtReq(tEdrvTxBuffer * pTxBuffer_p)
 #if defined(CONFIG_INCLUDE_NMT_MN)
     if (nmtState >= kNmtMsNotActive)
     {
-        tPlkFrame *     pTxFrame;
+        tPlkFrame* pTxFrame;
 
         // check if this frame is a NMT command,
         // then forward this frame back to NmtMnu module,
         // because it needs the time, when this frame is
         // actually sent, to start the timer for monitoring
         // the NMT state change.
-        pTxFrame = (tPlkFrame *) pTxBuffer_p->pBuffer;
-        if ((ami_getUint8Le(&pTxFrame->messageType) == (UINT8) kMsgTypeAsnd) &&
-            (ami_getUint8Le(&pTxFrame->data.asnd.serviceId) == (UINT8) kDllAsndNmtCommand))
+        pTxFrame = (tPlkFrame*)pTxBuffer_p->pBuffer;
+        if ((ami_getUint8Le(&pTxFrame->messageType) == (UINT8)kMsgTypeAsnd) &&
+            (ami_getUint8Le(&pTxFrame->data.asnd.serviceId) == (UINT8)kDllAsndNmtCommand))
         {   // post event directly to NmtMnu module
             event.eventSink = kEventSinkNmtMnu;
             event.eventType = kEventTypeNmtMnuNmtCmdSent;
@@ -369,17 +369,16 @@ Exit:
 
 //------------------------------------------------------------------------------
 /**
-\brief  Callback function for transmitted Non POWERLINK frame
+\brief  Callback function for transmitted non-POWERLINK frame
 
-The function implements the callback function which is called when a NON
+The function implements the callback function which is called when a non-
 POWERLINK frame was transmitted.
 
 \param  pTxBuffer_p         Pointer to TxBuffer structure of transmitted frame.
 
-\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-void dllk_processTransmittedNonEpl(tEdrvTxBuffer * pTxBuffer_p)
+void dllk_processTransmittedNonEpl(tEdrvTxBuffer* pTxBuffer_p)
 {
     tOplkError              ret = kErrorOk;
     tEvent                  event;
@@ -430,10 +429,9 @@ frame was transmitted.
 
 \param  pTxBuffer_p         Pointer to TxBuffer structure of transmitted frame.
 
-\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-void dllk_processTransmittedSoc(tEdrvTxBuffer * pTxBuffer_p)
+void dllk_processTransmittedSoc(tEdrvTxBuffer* pTxBuffer_p)
 {
     tOplkError      ret = kErrorOk;
     tNmtState       nmtState;
@@ -477,10 +475,9 @@ frame was transmitted.
 
 \param  pTxBuffer_p         Pointer to TxBuffer structure of transmitted frame.
 
-\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-void dllk_processTransmittedSoa(tEdrvTxBuffer * pTxBuffer_p)
+void dllk_processTransmittedSoa(tEdrvTxBuffer* pTxBuffer_p)
 {
     tOplkError      ret = kErrorOk;
     tNmtState       nmtState;
@@ -544,11 +541,11 @@ void dllk_processTransmittedSoa(tEdrvTxBuffer * pTxBuffer_p)
 
             case kDllReqServiceUnspecified:
                 if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONEPL + dllkInstance_g.curTxBufferOffsetNonEpl].pBuffer != NULL)
-                {   // non-EPL frame does exist
+                {   // non-POWERLINK frame does exist
                     // check if frame is not empty and not being filled
                     if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONEPL + dllkInstance_g.curTxBufferOffsetNonEpl].txFrameSize > DLLK_BUFLEN_FILLING)
                     {
-                        // send non-EPL frame
+                        // send non-POWERLINK frame
                         ret = edrv_sendTxBuffer(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONEPL + dllkInstance_g.curTxBufferOffsetNonEpl]);
                         if (ret != kErrorOk)
                             goto Exit;
@@ -572,8 +569,8 @@ void dllk_processTransmittedSoa(tEdrvTxBuffer * pTxBuffer_p)
         (dllkInstance_g.dllConfigParam.asyncSlotTimeout != 0))
     {
         ret = hrestimer_modifyTimer(&dllkInstance_g.timerHdlCycle,
-                                            dllkInstance_g.dllConfigParam.asyncSlotTimeout,
-                                            dllk_cbMnTimerCycle, 0L, FALSE);
+                                    dllkInstance_g.dllConfigParam.asyncSlotTimeout,
+                                    dllk_cbMnTimerCycle, 0L, FALSE);
         if (ret != kErrorOk)
             goto Exit;
 
@@ -610,7 +607,7 @@ Exit:
 /**
 \brief  Update IdentResponse frame
 
-The function updates a IdentResponse frame with the specified information.
+The function updates an IdentResponse frame with the specified information.
 
 \param  pTxBuffer_p         Pointer to TX buffer of frame.
 \param  nmtState_p          NMT state of node.
@@ -621,9 +618,9 @@ The function updates a IdentResponse frame with the specified information.
 tOplkError dllk_updateFrameIdentRes(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p)
 {
     tOplkError      ret = kErrorOk;
-    tPlkFrame *     pTxFrame;
+    tPlkFrame*      pTxFrame;
 
-    pTxFrame = (tPlkFrame *) pTxBuffer_p->pBuffer;
+    pTxFrame = (tPlkFrame*)pTxBuffer_p->pBuffer;
 
     // update frame (NMT state, RD, RS, PR flags)
     ami_setUint8Le(&pTxFrame->data.asnd.payload.identResponse.nmtStatus, (UINT8)nmtState_p);
@@ -654,9 +651,9 @@ The function updates a StatusResponse frame with the specified information.
 tOplkError dllk_updateFrameStatusRes(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p)
 {
     tOplkError      ret = kErrorOk;
-    tPlkFrame *     pTxFrame;
+    tPlkFrame*      pTxFrame;
 
-    pTxFrame = (tPlkFrame *) pTxBuffer_p->pBuffer;
+    pTxFrame = (tPlkFrame*)pTxBuffer_p->pBuffer;
 
     // update frame (NMT state, RD, RS, PR, EC, EN flags)
     ami_setUint8Le(&pTxFrame->data.asnd.payload.statusResponse.nmtStatus, (UINT8)nmtState_p);
@@ -688,10 +685,10 @@ The function updates a PRes frame with the specified information.
 tOplkError dllk_updateFramePres(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p)
 {
     tOplkError      ret = kErrorOk;
-    tPlkFrame *     pTxFrame;
+    tPlkFrame*      pTxFrame;
     UINT8           flag1;
 
-    pTxFrame = (tPlkFrame *) pTxBuffer_p->pBuffer;
+    pTxFrame = (tPlkFrame*)pTxBuffer_p->pBuffer;
 
     // update frame (NMT state, RD, RS, PR, MS, EN flags)
     ami_setUint8Le(&pTxFrame->data.pres.nmtStatus, (BYTE) nmtState_p);
@@ -700,13 +697,13 @@ tOplkError dllk_updateFramePres(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p
     // get RD flag
     flag1 = ami_getUint8Le(&pTxFrame->data.pres.flag1) & PLK_FRAME_FLAG1_RD;
 
-    if ( (dllkInstance_g.dllConfigParam.multipleCycleCnt > 0) &&
-         (dllkInstance_g.mnFlag1 & PLK_FRAME_FLAG1_MS) ) // MS flag set in PReq
+    if ((dllkInstance_g.dllConfigParam.multipleCycleCnt > 0) &&
+        (dllkInstance_g.mnFlag1 & PLK_FRAME_FLAG1_MS))  // MS flag set in PReq
     {   // set MS flag, because PRes will be sent multiplexed with other CNs
         flag1 |= PLK_FRAME_FLAG1_MS;
     }
 
-    // add EN flag from Error signaling module
+    // add EN flag from error signaling module
     flag1 |= dllkInstance_g.flag1 & PLK_FRAME_FLAG1_EN;
 
     if (nmtState_p != kNmtCsOperational)
@@ -738,7 +735,7 @@ It sets fields in the Ethernet and POWERLINK header parts.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError dllk_checkFrame(tPlkFrame * pFrame_p, UINT frameSize_p)
+tOplkError dllk_checkFrame(tPlkFrame* pFrame_p, UINT frameSize_p)
 {
     tOplkError      ret = kErrorOk;
     tMsgType        MsgType;
@@ -758,7 +755,7 @@ tOplkError dllk_checkFrame(tPlkFrame * pFrame_p, UINT frameSize_p)
         etherType = ami_getUint16Be(&pFrame_p->etherType);
         if (etherType == 0)
         {
-            // assume EPL frame
+            // assume POWERLINK frame
             etherType = C_DLL_ETHERTYPE_EPL;
             ami_setUint16Be(&pFrame_p->etherType, etherType);
         }
@@ -766,14 +763,14 @@ tOplkError dllk_checkFrame(tPlkFrame * pFrame_p, UINT frameSize_p)
         if (etherType == C_DLL_ETHERTYPE_EPL)
         {
             // source node ID
-            ami_setUint8Le(&pFrame_p->srcNodeId, (BYTE) dllkInstance_g.dllConfigParam.nodeId);
+            ami_setUint8Le(&pFrame_p->srcNodeId, (BYTE)dllkInstance_g.dllConfigParam.nodeId);
 
             // check message type
             MsgType = ami_getUint8Le(&pFrame_p->messageType);
             if (MsgType == 0)
             {
                 MsgType = kMsgTypeAsnd;
-                ami_setUint8Le(&pFrame_p->messageType, (BYTE) MsgType);
+                ami_setUint8Le(&pFrame_p->messageType, (BYTE)MsgType);
             }
 
             if (MsgType == kMsgTypeAsnd)
@@ -794,13 +791,13 @@ tOplkError dllk_checkFrame(tPlkFrame * pFrame_p, UINT frameSize_p)
 /**
 \brief  Update and transmit SoA
 
-The function updates and transmits a SoA.
+The function updates and transmits an SoA.
 
 \param  nmtState_p              Current NMT state.
 \param  pDllStateProposed_p     Proposed DLL state.
 \param  fEnableInvitation_p     Enable invitation for asynchronous phase. It
                                 will be disabled for C_DLL_PREOP1_START_CYCLES
-                                SoAs.^
+                                SoAs.
 
 \return The function returns a tOplkError error code.
 */
@@ -808,7 +805,7 @@ The function updates and transmits a SoA.
 tOplkError dllk_mnSendSoa(tNmtState nmtState_p, tDllState* pDllStateProposed_p, BOOL fEnableInvitation_p)
 {
     tOplkError      ret = kErrorOk;
-    tEdrvTxBuffer  *pTxBuffer = NULL;
+    tEdrvTxBuffer*  pTxBuffer = NULL;
 
     *pDllStateProposed_p = kDllMsNonCyclic;
 
@@ -849,13 +846,13 @@ tOplkError dllk_mnSendSoa(tNmtState nmtState_p, tDllState* pDllStateProposed_p, 
 /**
 \brief  Update SoA frame
 
-The function updates a SoA frame.
+The function updates an SoA frame.
 
 \param  pTxBuffer_p             Pointer to TX buffer of frame.
 \param  nmtState_p              NMT state of the local node.
 \param  fEnableInvitation_p     Enable the invitation for asynchronous phase.
                                 It will be disabled for the first C_DLL_PREOP1_START_CYCLES
-                                SoAs
+                                SoAs.
 \param  curReq_p                Index of current request.
 
 \return The function returns a tOplkError error code.
@@ -865,10 +862,10 @@ tOplkError dllk_updateFrameSoa(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p,
                                BOOL fEnableInvitation_p, UINT8 curReq_p)
 {
     tOplkError          ret = kErrorOk;
-    tPlkFrame *         pTxFrame;
+    tPlkFrame*          pTxFrame;
     tDllkNodeInfo*      pNodeInfo;
 
-    pTxFrame = (tPlkFrame *) pTxBuffer_p->pBuffer;
+    pTxFrame = (tPlkFrame*)pTxBuffer_p->pBuffer;
 
     if (fEnableInvitation_p != FALSE)
     {   // fetch target of asynchronous phase
@@ -885,8 +882,8 @@ tOplkError dllk_updateFrameSoa(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p,
             dllkInstance_g.aLastReqServiceId[curReq_p] = kDllReqServiceUnspecified;
         }
         ret = dllkcal_getSoaRequest(&dllkInstance_g.aLastReqServiceId[curReq_p],
-                                           &dllkInstance_g.aLastTargetNodeId[curReq_p],
-                                           &pTxFrame->data.soa.payload);
+                                    &dllkInstance_g.aLastTargetNodeId[curReq_p],
+                                    &pTxFrame->data.soa.payload);
         if (ret != kErrorOk)
             return ret;
 
@@ -921,11 +918,11 @@ tOplkError dllk_updateFrameSoa(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p,
 
     // update frame (target)
     ami_setUint8Le(&pTxFrame->data.soa.reqServiceId,
-                   (UINT8) dllkInstance_g.aLastReqServiceId[curReq_p]);
+                   (UINT8)dllkInstance_g.aLastReqServiceId[curReq_p]);
     ami_setUint8Le(&pTxFrame->data.soa.reqServiceTarget,
-                   (UINT8) dllkInstance_g.aLastTargetNodeId[curReq_p]);
+                   (UINT8)dllkInstance_g.aLastTargetNodeId[curReq_p]);
     // update frame (NMT state)
-    ami_setUint8Le(&pTxFrame->data.soa.nmtStatus, (BYTE) nmtState_p);
+    ami_setUint8Le(&pTxFrame->data.soa.nmtStatus, (BYTE)nmtState_p);
 
     return ret;
 }
@@ -984,7 +981,7 @@ tOplkError dllk_asyncFrameNotReceived(tDllReqServiceId reqServiceId_p, UINT node
 /**
 \brief  Create TX frame
 
-The function creates the buffer for a TX frame and registers it to the ethernet
+The function creates the buffer for a TX frame and registers it to the Ethernet
 driver.
 
 \param  pHandle_p           Handle to the last allocated frame buffer used for
@@ -1005,7 +1002,7 @@ tOplkError dllk_createTxFrame (UINT* pHandle_p, UINT* pFrameSize_p,
                                tMsgType msgType_p, tDllAsndServiceId serviceId_p)
 {
     tOplkError      ret = kErrorOk;
-    tPlkFrame *     pTxFrame;
+    tPlkFrame*      pTxFrame;
     UINT            handle = *pHandle_p;
     tEdrvTxBuffer*  pTxBuffer = NULL;
     UINT            nIndex = 0;
@@ -1101,7 +1098,7 @@ tOplkError dllk_createTxFrame (UINT* pHandle_p, UINT* pFrameSize_p,
 
     *pHandle_p = handle;
 
-    for ( ; nIndex < 2; nIndex++, handle++)
+    for (; nIndex < 2; nIndex++, handle++)
     {
         // test if requested entry is free
         pTxBuffer = &dllkInstance_g.pTxBuffer[handle];
@@ -1120,19 +1117,20 @@ tOplkError dllk_createTxFrame (UINT* pHandle_p, UINT* pFrameSize_p,
             goto Exit;
         }
 
-        // because buffer size may be larger than requested/ memorize real length of frame
+        // because buffer size may be larger than requested, save real length of frame
         pTxBuffer->txFrameSize = *pFrameSize_p;
         // initialize time offset
         pTxBuffer->timeOffsetNs = 0;
         // fill whole frame with 0
         OPLK_MEMSET(pTxBuffer->pBuffer, 0, pTxBuffer->maxBufferSize);
-        pTxFrame = (tPlkFrame *) pTxBuffer->pBuffer;
+        pTxFrame = (tPlkFrame*)pTxBuffer->pBuffer;
 
         if (msgType_p != kMsgTypeNonPowerlink)
         {   // fill out Frame only if it is an EPL frame
             ami_setUint16Be(&pTxFrame->etherType, C_DLL_ETHERTYPE_EPL);
             ami_setUint8Le(&pTxFrame->srcNodeId, (BYTE) dllkInstance_g.dllConfigParam.nodeId);
             OPLK_MEMCPY(&pTxFrame->aSrcMac[0], &dllkInstance_g.aLocalMac[0], 6);
+
             switch (msgType_p)
             {
                 case kMsgTypeAsnd:
@@ -1143,11 +1141,11 @@ tOplkError dllk_createTxFrame (UINT* pHandle_p, UINT* pFrameSize_p,
                     {
                         case kDllAsndIdentResponse:
                             ami_setUint8Le(&pTxFrame->data.asnd.payload.identResponse.powerlinkProfileVersion,
-                                           (UINT8) PLK_SPEC_VERSION);
+                                           (UINT8)PLK_SPEC_VERSION);
                             ami_setUint32Le(&pTxFrame->data.asnd.payload.identResponse.featureFlagsLe,
                                             dllkInstance_g.dllConfigParam.featureFlags);
                             ami_setUint16Le(&pTxFrame->data.asnd.payload.identResponse.mtuLe,
-                                           (UINT16) dllkInstance_g.dllConfigParam.asyncMtu);
+                                           (UINT16)dllkInstance_g.dllConfigParam.asyncMtu);
                             ami_setUint16Le(&pTxFrame->data.asnd.payload.identResponse.pollInSizeLe,
                                            (UINT16)dllkInstance_g.dllConfigParam.preqActPayloadLimit);
                             ami_setUint16Le(&pTxFrame->data.asnd.payload.identResponse.pollOutSizeLe,
@@ -1181,22 +1179,22 @@ tOplkError dllk_createTxFrame (UINT* pHandle_p, UINT* pFrameSize_p,
                             ami_setUint32Le(&pTxFrame->data.asnd.payload.identResponse.defaultGatewayLe,
                                             dllkInstance_g.dllIdentParam.defaultGateway);
                             OPLK_MEMCPY(&pTxFrame->data.asnd.payload.identResponse.sHostName[0],
-                                       &dllkInstance_g.dllIdentParam.sHostname[0],
-                                       sizeof (dllkInstance_g.dllIdentParam.sHostname));
+                                        &dllkInstance_g.dllIdentParam.sHostname[0],
+                                        sizeof(dllkInstance_g.dllIdentParam.sHostname));
                             OPLK_MEMCPY(&pTxFrame->data.asnd.payload.identResponse.aVendorSpecificExt2[0],
-                                       &dllkInstance_g.dllIdentParam.aVendorSpecificExt2[0],
-                                       sizeof (dllkInstance_g.dllIdentParam.aVendorSpecificExt2));
+                                        &dllkInstance_g.dllIdentParam.aVendorSpecificExt2[0],
+                                        sizeof(dllkInstance_g.dllIdentParam.aVendorSpecificExt2));
                             // fall-through
 
                         case kDllAsndStatusResponse:
-                            // IdentResponses and StatusResponses are Broadcast
-                            ami_setUint8Le(&pTxFrame->dstNodeId, (BYTE) C_ADR_BROADCAST);
+                            // IdentResponses and StatusResponses are broadcast
+                            ami_setUint8Le(&pTxFrame->dstNodeId, (BYTE)C_ADR_BROADCAST);
                             break;
 
 #if CONFIG_DLL_PRES_CHAINING_CN != FALSE
                         case kDllAsndSyncResponse:
                             // SyncRes destination node ID is MN node ID
-                            ami_setUint8Le(&pTxFrame->dstNodeId, (BYTE) C_ADR_MN_DEF_NODE_ID);
+                            ami_setUint8Le(&pTxFrame->dstNodeId, (BYTE)C_ADR_MN_DEF_NODE_ID);
                             ami_setUint32Le(&pTxFrame->data.asnd.payload.syncResponse.latencyLe,
                                             dllkInstance_g.dllConfigParam.syncResLatency);
                             // SyncStatus: PResMode disabled / PResTimeFirst and PResTimeSecond invalid
@@ -1218,19 +1216,19 @@ tOplkError dllk_createTxFrame (UINT* pHandle_p, UINT* pFrameSize_p,
 
                 case kMsgTypePres:
                     ami_setUint48Be(&pTxFrame->aDstMac[0], C_DLL_MULTICAST_PRES);
-                    ami_setUint8Le(&pTxFrame->dstNodeId, (BYTE) C_ADR_BROADCAST);
+                    ami_setUint8Le(&pTxFrame->dstNodeId, (BYTE)C_ADR_BROADCAST);
                     break;
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
                 case kMsgTypeSoc:
                     ami_setUint48Be(&pTxFrame->aDstMac[0], C_DLL_MULTICAST_SOC);
-                    ami_setUint8Le(&pTxFrame->dstNodeId, (BYTE) C_ADR_BROADCAST);
+                    ami_setUint8Le(&pTxFrame->dstNodeId, (BYTE)C_ADR_BROADCAST);
                     break;
 
                 case kMsgTypeSoa:
                     ami_setUint48Be(&pTxFrame->aDstMac[0], C_DLL_MULTICAST_SOA);
-                    ami_setUint8Le(&pTxFrame->dstNodeId, (BYTE) C_ADR_BROADCAST);
-                    ami_setUint8Le(&pTxFrame->data.soa.powerlinkVersion, (BYTE) PLK_SPEC_VERSION);
+                    ami_setUint8Le(&pTxFrame->dstNodeId, (BYTE)C_ADR_BROADCAST);
+                    ami_setUint8Le(&pTxFrame->data.soa.powerlinkVersion, (BYTE)PLK_SPEC_VERSION);
                     break;
 
                 case kMsgTypePreq:
@@ -1241,8 +1239,8 @@ tOplkError dllk_createTxFrame (UINT* pHandle_p, UINT* pFrameSize_p,
                     break;
             }
 
-            // EPL message type
-            ami_setUint8Le(&pTxFrame->messageType, (BYTE) msgType_p);
+            // POWERLINK message type
+            ami_setUint8Le(&pTxFrame->messageType, (BYTE)msgType_p);
         }
     }
 
@@ -1256,10 +1254,10 @@ Exit:
 /**
 \brief  Delete TX frame
 
-The function deletes the buffer for a TX frame and frees it in the ethernet
+The function deletes the buffer for a TX frame and frees it in the Ethernet
 driver.
 
-\param  handle_p            Handle to the frame buffer.
+\param  handle_p            Handle of the frame buffer.
 
 \return The function returns a tOplkError error code.
 */
@@ -1275,7 +1273,7 @@ tOplkError dllk_deleteTxFrame (UINT handle_p)
         return kErrorDllIllegalHdl;
     }
 
-    for ( ; nIndex < 2; nIndex++, handle_p++)
+    for (; nIndex < 2; nIndex++, handle_p++)
     {
         pTxBuffer = &dllkInstance_g.pTxBuffer[handle_p];
 
@@ -1308,9 +1306,9 @@ callback function (i.e. to the PDO module).
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError dllk_processTpdo(tFrameInfo * pFrameInfo_p, BOOL fReadyFlag_p)
+tOplkError dllk_processTpdo(tFrameInfo* pFrameInfo_p, BOOL fReadyFlag_p)
 {
-    tOplkError      ret = kErrorOk;
+    tOplkError ret = kErrorOk;
 
     if (dllkInstance_g.pfnCbProcessTpdo != NULL)
     {
@@ -1342,7 +1340,7 @@ static tOplkError processReceivedPreq(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
                                       tEdrvReleaseRxBuffer* pReleaseRxBuffer_p)
 {
     tOplkError      ret = kErrorOk;
-    tPlkFrame *     pFrame;
+    tPlkFrame*      pFrame;
     BYTE            bFlag1;
 
     pFrame = pFrameInfo_p->pFrame;
@@ -1394,8 +1392,8 @@ static tOplkError processReceivedPreq(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
             }
 
             // compares real frame size and PDO size
-            if (((UINT) (preqPayloadSize + PLK_FRAME_OFFSET_PDO_PAYLOAD) > pFrameInfo_p->frameSize) ||
-                        (preqPayloadSize > dllkInstance_g.dllConfigParam.preqActPayloadLimit))
+            if (((UINT)(preqPayloadSize + PLK_FRAME_OFFSET_PDO_PAYLOAD) > pFrameInfo_p->frameSize) ||
+                       (preqPayloadSize > dllkInstance_g.dllConfigParam.preqActPayloadLimit))
             {   // format error
                 tEventDllError  dllEvent;
 
@@ -1452,7 +1450,7 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
                                       tNmtEvent* pNmtEvent_p, tEdrvReleaseRxBuffer* pReleaseRxBuffer_p)
 {
     tOplkError      ret = kErrorOk;
-    tPlkFrame *     pFrame;
+    tPlkFrame*      pFrame;
     UINT            nodeId;
 
 #if NMT_MAX_NODE_ID > 0
@@ -1554,30 +1552,30 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
         // forward Flag2 to asynchronous scheduler
         flag1 = ami_getUint8Le(&pFrame->data.asnd.payload.statusResponse.flag2);
         ret = dllkcal_setAsyncPendingRequests(nodeId,
-            ((tDllAsyncReqPriority) ((flag1 & PLK_FRAME_FLAG2_PR) >> PLK_FRAME_FLAG2_PR_SHIFT)),
+            ((tDllAsyncReqPriority)((flag1 & PLK_FRAME_FLAG2_PR) >> PLK_FRAME_FLAG2_PR_SHIFT)),
             (flag1 & PLK_FRAME_FLAG2_RS));
         if (ret != kErrorOk)
             goto Exit;
 
         // check NMT state of CN
         heartbeatEvent.errorCode = E_NO_ERROR;
-        heartbeatEvent.nmtState = (tNmtState) (ami_getUint8Le(&pFrame->data.pres.nmtStatus) | NMT_TYPE_CS);
+        heartbeatEvent.nmtState = (tNmtState)(ami_getUint8Le(&pFrame->data.pres.nmtStatus) | NMT_TYPE_CS);
 
         if (pIntNodeInfo->nmtState != heartbeatEvent.nmtState)
         {   // NMT state of CN has changed -> post event to NmtMnu module
-            tEvent      event;
+            tEvent event;
 
             if (pIntNodeInfo->fSoftDelete == FALSE)
             {   // normal isochronous CN
                 heartbeatEvent.nodeId = nodeId;
                 event.eventSink = kEventSinkNmtMnu;
                 event.eventType = kEventTypeHeartbeat;
-                event.eventArgSize = sizeof (heartbeatEvent);
+                event.eventArgSize = sizeof(heartbeatEvent);
                 event.pEventArg = &heartbeatEvent;
             }
             else
-            {   // CN shall be deleted softly, so remove it now, without issuing any error
-                tDllNodeOpParam     nodeOpParam;
+            {   // CN shall be deleted softly, so remove it now without issuing any error
+                tDllNodeOpParam nodeOpParam;
 
                 nodeOpParam.opNodeType = kDllNodeOpTypeIsochronous;
                 nodeOpParam.nodeId = pIntNodeInfo->nodeId;
@@ -1585,7 +1583,7 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
                 event.eventSink = kEventSinkDllkCal;
                 event.eventType = kEventTypeDllkDelNode;
                 // $$$ d.k. set Event.netTime to current time
-                event.eventArgSize = sizeof (nodeOpParam);
+                event.eventArgSize = sizeof(nodeOpParam);
                 event.pEventArg = &nodeOpParam;
             }
 
@@ -1610,12 +1608,12 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
         // compare real frame size and PDO size?
         WORD wPresPayloadSize = ami_getUint16Le(&pFrame->data.pres.sizeLe);
 
-        if (((UINT) (wPresPayloadSize + PLK_FRAME_OFFSET_PDO_PAYLOAD) > pFrameInfo_p->frameSize)
+        if (((UINT)(wPresPayloadSize + PLK_FRAME_OFFSET_PDO_PAYLOAD) > pFrameInfo_p->frameSize)
 #if NMT_MAX_NODE_ID > 0
             || (wPresPayloadSize > pIntNodeInfo->presPayloadLimit)
             || ((nmtState_p >= kNmtMsNotActive)
                 && (pFrameInfo_p->frameSize >
-                    (UINT) (pIntNodeInfo->presPayloadLimit + PLK_FRAME_OFFSET_PDO_PAYLOAD)))
+                    (UINT)(pIntNodeInfo->presPayloadLimit + PLK_FRAME_OFFSET_PDO_PAYLOAD)))
 #endif
             )
         {   // format error
@@ -1738,7 +1736,7 @@ static tOplkError processReceivedSoc(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
     if (dllkInstance_g.frameTimeout != 0)
     {
         hrestimer_modifyTimer(&dllkInstance_g.timerHdlCycle, dllkInstance_g.frameTimeout,
-                                      dllk_cbCnTimer, 0L, FALSE);
+                              dllk_cbCnTimer, 0L, FALSE);
     }
 #endif
     return ret;
@@ -1759,7 +1757,7 @@ The function processes a received SoA frame.
 static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtState_p)
 {
     tOplkError          ret = kErrorOk;
-    tPlkFrame *         pFrame;
+    tPlkFrame*          pFrame;
 #if (CONFIG_EDRV_AUTO_RESPONSE == FALSE)
     tEdrvTxBuffer*      pTxBuffer = NULL;
 #endif
@@ -1767,7 +1765,7 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
     UINT                nodeId;
     UINT8               flag1;
 
-    pFrame = (tPlkFrame *)pRxBuffer_p->pBuffer;
+    pFrame = (tPlkFrame*)pRxBuffer_p->pBuffer;
 
     if (nmtState_p >= kNmtMsNotActive)
     {   // MN is active -> wrong msg type
@@ -1785,7 +1783,7 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
     {   // local node is the target of the current request
 
         // check ServiceId
-        reqServiceId = (tDllReqServiceId) ami_getUint8Le(&pFrame->data.soa.reqServiceId);
+        reqServiceId = (tDllReqServiceId)ami_getUint8Le(&pFrame->data.soa.reqServiceId);
         switch (reqServiceId)
         {
             case kDllReqServiceStatus:
@@ -1901,16 +1899,16 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
                 {
                 // SyncRequest
 #if CONFIG_DLL_PRES_CHAINING_CN != FALSE
-                UINT32      syncControl;
-                tPlkFrame* pTxFrameSyncRes;
-                tDllkPrcCycleTiming  PrcCycleTiming;
+                UINT32              syncControl;
+                tPlkFrame*          pTxFrameSyncRes;
+                tDllkPrcCycleTiming PrcCycleTiming;
 
-                pTxFrameSyncRes = (tPlkFrame *) dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SYNCRES].pBuffer;
+                pTxFrameSyncRes = (tPlkFrame*)dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SYNCRES].pBuffer;
                 syncControl = ami_getUint32Le(&pFrame->data.soa.payload.syncRequest.syncControlLe);
                 if (syncControl & PLK_SYNC_DEST_MAC_ADDRESS_VALID)
                 {
                     if (OPLK_MEMCMP(&pFrame->data.soa.payload.syncRequest.aDestMacAddress,
-                                   &dllkInstance_g.aLocalMac, 6) != 0)
+                                    &dllkInstance_g.aLocalMac, 6) != 0)
                     {   // DestMacAddress valid but unequal to own MAC address -> SyncReq is ignored
                         goto Exit;
                     }
@@ -1925,8 +1923,8 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
 
                     dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES].timeOffsetNs = PrcCycleTiming.pResTimeFirstNs;
                     ret = edrv_changeRxFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT,
-                                           DLLK_FILTER_PREQ,
-                                           EDRV_FILTER_CHANGE_AUTO_RESPONSE_DELAY);
+                                              DLLK_FILTER_PREQ,
+                                              EDRV_FILTER_CHANGE_AUTO_RESPONSE_DELAY);
                     if (ret != kErrorOk)
                         goto Exit;
 
@@ -1995,11 +1993,11 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
                 // Auto-response is not available
                 pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONEPL + dllkInstance_g.curTxBufferOffsetNonEpl];
                 if (pTxBuffer->pBuffer != NULL)
-                {   // non-EPL frame does exist
+                {   // non-POWERLINK frame does exist
                     // check if frame is not empty and not being filled
                     if (pTxBuffer->txFrameSize > DLLK_BUFLEN_FILLING)
                     {
-                        // send non-EPL frame
+                        // send non-POWERLINK frame
                         ret = edrv_sendTxBuffer(pTxBuffer);
                         if (ret != kErrorOk)
                             goto Exit;
@@ -2035,7 +2033,7 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
     else
     {   // other node is the target of the current request
         // check ServiceId
-        reqServiceId = (tDllReqServiceId) ami_getUint8Le(&pFrame->data.soa.reqServiceId);
+        reqServiceId = (tDllReqServiceId)ami_getUint8Le(&pFrame->data.soa.reqServiceId);
         if (reqServiceId == kDllReqServiceSync)
         {   // SyncRequest -> store node ID and TimeStamp
             dllkInstance_g.syncReqPrevNodeId = nodeId;
@@ -2079,7 +2077,7 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
                                       tNmtState nmtState_p, tEdrvReleaseRxBuffer* pReleaseRxBuffer_p)
 {
     tOplkError      ret = kErrorOk;
-    tPlkFrame *     pFrame;
+    tPlkFrame*      pFrame;
     UINT            asndServiceId;
     UINT            nodeId;
 
@@ -2100,20 +2098,20 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
 #if defined(CONFIG_INCLUDE_NMT_MN)
     if (dllkInstance_g.dllState >= kDllMsNonCyclic)
     {
-        switch ((tDllAsndServiceId) asndServiceId)
+        switch ((tDllAsndServiceId)asndServiceId)
         {
             case kDllAsndStatusResponse:
             case kDllAsndIdentResponse:
             case kDllAsndSyncResponse:
                 nodeId = ami_getUint8Le(&pFrame->srcNodeId);
-                if ((dllkInstance_g.aLastReqServiceId[dllkInstance_g.curLastSoaReq] == ((tDllReqServiceId) asndServiceId)) &&
+                if ((dllkInstance_g.aLastReqServiceId[dllkInstance_g.curLastSoaReq] == ((tDllReqServiceId)asndServiceId)) &&
                     (nodeId == dllkInstance_g.aLastTargetNodeId[dllkInstance_g.curLastSoaReq]))
                 {   // mark request as responded
                     dllkInstance_g.aLastReqServiceId[dllkInstance_g.curLastSoaReq] = kDllReqServiceNo;
                 }
 
-                if (((tDllAsndServiceId) asndServiceId) == kDllAsndIdentResponse)
-                {   // memorize MAC address of CN for PReq
+                if (((tDllAsndServiceId)asndServiceId) == kDllAsndIdentResponse)
+                {   // save MAC address of CN for PReq
                     tDllkNodeInfo*   pIntNodeInfo;
 
                     pIntNodeInfo = dllk_getNodeInfo(nodeId);
@@ -2135,7 +2133,7 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
                 // forward Flag2 to asynchronous scheduler
                 flag1 = ami_getUint8Le(&pFrame->data.asnd.payload.statusResponse.flag2);
                 ret = dllkcal_setAsyncPendingRequests(nodeId,
-                    ((tDllAsyncReqPriority) ((flag1 & PLK_FRAME_FLAG2_PR) >> PLK_FRAME_FLAG2_PR_SHIFT)),
+                    ((tDllAsyncReqPriority)((flag1 & PLK_FRAME_FLAG2_PR) >> PLK_FRAME_FLAG2_PR_SHIFT)),
                     (flag1 & PLK_FRAME_FLAG2_RS));
                 if (ret != kErrorOk)
                     goto Exit;
@@ -2155,7 +2153,7 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
         {
             tPlkFrame* pTxFrameSyncRes;
 
-            pTxFrameSyncRes = (tPlkFrame *) dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SYNCRES].pBuffer;
+            pTxFrameSyncRes = (tPlkFrame*)dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SYNCRES].pBuffer;
             nodeId = (UINT) ami_getUint8Le(&pFrame->srcNodeId);
 
             if (nodeId == dllkInstance_g.syncReqPrevNodeId)
@@ -2168,13 +2166,13 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
 
                 // update SyncRes frame (SyncDelay and SyncNodeNumber)
                 ami_setUint32Le(&pTxFrameSyncRes->data.asnd.payload.syncResponse.syncDelayLe, syncDelayNs);
-                ami_setUint32Le(&pTxFrameSyncRes->data.asnd.payload.syncResponse.syncNodeNumberLe, (UINT32) nodeId);
+                ami_setUint32Le(&pTxFrameSyncRes->data.asnd.payload.syncResponse.syncNodeNumberLe, (UINT32)nodeId);
                 // $$$ m.u.: CbUpdateRelativeLatencyDiff
             }
             else
             {
                 ami_setUint32Le(&pTxFrameSyncRes->data.asnd.payload.syncResponse.syncDelayLe, 0);
-                ami_setUint32Le(&pTxFrameSyncRes->data.asnd.payload.syncResponse.syncNodeNumberLe, (UINT32) 0);
+                ami_setUint32Le(&pTxFrameSyncRes->data.asnd.payload.syncResponse.syncNodeNumberLe, (UINT32)0);
             }
 
             // update Tx buffer in Edrv
@@ -2226,7 +2224,7 @@ Exit:
 /**
 \brief  Forward RPDO frame
 
-The function is called if PREs or PReq frame was received. It posts the frame to
+The function is called if PRes or PReq frame was received. It posts the frame to
 the event queue. It is called in states NMT_CS_READY_TO_OPERATE and
 NMT_CS_OPERATIONAL. The passed PDO needs to be valid.
 
@@ -2235,9 +2233,9 @@ NMT_CS_OPERATIONAL. The passed PDO needs to be valid.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError forwardRpdo(tFrameInfo * pFrameInfo_p)
+static tOplkError forwardRpdo(tFrameInfo* pFrameInfo_p)
 {
-    tOplkError      ret = kErrorOk;
+    tOplkError ret = kErrorOk;
 
     if (dllkInstance_g.pfnCbProcessRpdo != NULL)
     {
