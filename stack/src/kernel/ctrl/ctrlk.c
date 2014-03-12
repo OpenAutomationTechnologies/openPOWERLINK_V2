@@ -6,13 +6,13 @@
 
 This file contains the implementation of the kernel control module. The kernel
 control module is responsible to execute commands from the user part of the
-stack. Additionally it provides status information to the user part.
+stack. Additionally, it provides status information to the user part.
 
 \ingroup module_ctrlk
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -93,8 +93,8 @@ The structure specifies the instance variable of the kernel control module.
 */
 typedef struct
 {
-    tCtrlInitParam      initParam;           ///< initialization parameters
-    UINT16              heartbeat;           ///< The heartbeat counter.
+    tCtrlInitParam      initParam;           ///< Initialization parameters
+    UINT16              heartbeat;           ///< Heartbeat counter
 } tCtrlkInstance;
 
 //------------------------------------------------------------------------------
@@ -164,9 +164,9 @@ void ctrlk_exit(void)
 This function implements the main function of the control module. It processes
 commands from the user part of the stack and executes them.
 
-\return Returns the exit flag
-\retval TRUE    If kernel stack should exit.
-\retval FALSE   If kernel stack should continue running.
+\return Returns the exit flag.
+\retval TRUE    Kernel stack should exit.
+\retval FALSE   Kernel stack should continue running.
 
 \ingroup module_ctrlk
 */
@@ -181,7 +181,7 @@ BOOL ctrlk_process(void)
 
     if (ctrlkcal_getCmd(&cmd) != kErrorOk)
     {
-        DEBUG_LVL_ERROR_TRACE ("%s: error getting command!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s: error getting command!\n", __func__);
         return FALSE;
     }
 
@@ -232,31 +232,31 @@ tOplkError ctrlk_executeCmd(tCtrlCmdType cmd_p, tOplkError* pRet_p, UINT16* pSta
     UINT16              status;
     BOOL                fExit;
 
-    switch(cmd_p)
+    switch (cmd_p)
     {
         case kCtrlInitStack:
-            TRACE ("Initialize kernel modules...\n");
+            TRACE("Initialize kernel modules...\n");
             *pRet_p = initStack();
             status = kCtrlStatusRunning;
             fExit = FALSE;
             break;
 
         case kCtrlCleanupStack:
-            TRACE ("Shutdown kernel modules...\n");
+            TRACE("Shutdown kernel modules...\n");
             *pRet_p = shutdownStack();
             status = kCtrlStatusReady;
             fExit = FALSE;
             break;
 
         case kCtrlShutdown:
-            TRACE ("Shutdown kernel stack...\n");
+            TRACE("Shutdown kernel stack...\n");
             *pRet_p = shutdownStack();
             status = kCtrlStatusUnavailable;
             fExit = TRUE;
             break;
 
         default:
-            TRACE ("Unknown command\n");
+            TRACE("Unknown command\n");
             ret = kErrorGeneralError;
             status = kCtrlStatusUnavailable;
             fExit = TRUE;
@@ -280,7 +280,7 @@ tOplkError ctrlk_executeCmd(tCtrlCmdType cmd_p, tOplkError* pRet_p, UINT16* pSta
 /**
 \brief  Update heartbeat counter
 
-The function updates the heartbeat counter of the kernel stack which could be
+The function updates the heartbeat counter of the kernel stack which can be
 used by the user stack to detect if the kernel stack is still running. It has
 to be called periodically, e.g. from a timer routine.
 
@@ -301,7 +301,7 @@ void ctrlk_updateHeartbeat(void)
 
 The function returns the heartbeat counter.
 
-\return     Heartbeat counter
+\return     Heartbeat counter.
 
 \ingroup module_ctrlk
 */
@@ -365,7 +365,7 @@ static tOplkError initStack(void)
     // initialize Virtual Ethernet Driver
 #if defined(CONFIG_INCLUDE_VETH)
     if ((ret = veth_addInstance(instance_l.initParam.aMacAddress)) != kErrorOk)
-    return ret;
+        return ret;
 #endif
 
     ret = errhndk_init();
@@ -375,11 +375,11 @@ static tOplkError initStack(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief Cleanup the kernel stack modules
+\brief Clean up the kernel stack modules
 
-The function cleans up the kernel stack modules
+The function cleans up the kernel stack modules.
 
-\return Returns always kErrorOk
+\return Returns always kErrorOk.
 */
 //------------------------------------------------------------------------------
 static tOplkError shutdownStack(void)
