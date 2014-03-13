@@ -13,7 +13,7 @@ userspace platform. It uses the circular buffer interface for all event queues.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -107,7 +107,7 @@ static tEventkCalInstance   instance_l;             ///< Instance variable of ke
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static void* eventThread(void *arg);
+static void* eventThread(void* arg);
 static void signalKernelEvent(void);
 static void signalUserEvent(void);
 
@@ -122,13 +122,13 @@ static void signalUserEvent(void);
 The function initializes the kernel event CAL module on Linux.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tOplkError eventkcal_init (void)
+tOplkError eventkcal_init(void)
 {
     struct sched_param  schedParam;
 
@@ -184,19 +184,19 @@ Exit:
 
 //------------------------------------------------------------------------------
 /**
-\brief    Cleanup kernel event CAL module
+\brief    Clean up kernel event CAL module
 
 The function cleans up the kernel event CAL module. For cleanup it calls the exit
 functions of the queue implementations for each used queue.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tOplkError eventkcal_exit (void)
+tOplkError eventkcal_exit(void)
 {
     UINT             i = 0;
 
@@ -234,13 +234,13 @@ This function posts a event to the kernel queue.
 \param  pEvent_p                Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tOplkError eventkcal_postKernelEvent (tEvent *pEvent_p)
+tOplkError eventkcal_postKernelEvent(tEvent* pEvent_p)
 {
     tOplkError      ret = kErrorOk;
 
@@ -258,13 +258,13 @@ This function posts a event to the user queue.
 \param  pEvent_p                Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tOplkError eventkcal_postUserEvent (tEvent *pEvent_p)
+tOplkError eventkcal_postUserEvent(tEvent* pEvent_p)
 {
     tOplkError      ret = kErrorOk;
 
@@ -364,3 +364,4 @@ void signalKernelEvent(void)
 }
 
 /// \}
+

@@ -12,7 +12,7 @@ implementations.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -65,11 +65,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tOplkError eventkcal_init (void);
-tOplkError eventkcal_exit (void);
-tOplkError eventkcal_postUserEvent (tEvent *pEvent_p) SECTION_EVENTKCAL_POST;
-tOplkError eventkcal_postKernelEvent (tEvent *pEvent_p) SECTION_EVENTKCAL_POST;
-tOplkError eventkcal_rxHandler (tEvent *pEvent_p);
+tOplkError eventkcal_init(void);
+tOplkError eventkcal_exit(void);
+tOplkError eventkcal_postUserEvent(tEvent* pEvent_p) SECTION_EVENTKCAL_POST;
+tOplkError eventkcal_postKernelEvent(tEvent* pEvent_p) SECTION_EVENTKCAL_POST;
+tOplkError eventkcal_rxHandler(tEvent* pEvent_p);
 void       eventkcal_process(void);
 
 /* functions used in eventkcal-linuxkernel.c */
@@ -81,3 +81,4 @@ int        eventkcal_getEventForUser(unsigned long arg);
 #endif
 
 #endif /* _INC_eventkcal_H_ */
+

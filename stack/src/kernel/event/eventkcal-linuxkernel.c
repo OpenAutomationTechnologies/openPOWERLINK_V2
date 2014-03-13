@@ -13,7 +13,7 @@ kernelspace platform. It uses the circular buffer interface for all event queues
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -93,7 +93,7 @@ CAL module.
 */
 typedef struct
 {
-    struct task_struct      *threadId;
+    struct task_struct*     threadId;
     wait_queue_head_t       kernelWaitQueue;
     wait_queue_head_t       userWaitQueue;
     atomic_t                userEventCount;
@@ -113,7 +113,7 @@ static tEventkCalInstance   instance_l;             ///< Instance variable of ke
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static int eventThread(void *arg);
+static int eventThread(void* arg);
 static void signalUserEvent(void);
 static void signalKernelEvent(void);
 
@@ -130,13 +130,13 @@ configuration it gets the function pointer interface of the used queue
 implementations and calls the appropriate init functions.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tOplkError eventkcal_init (void)
+tOplkError eventkcal_init(void)
 {
     OPLK_MEMSET(&instance_l, 0, sizeof(tEventkCalInstance));
 
@@ -185,19 +185,19 @@ Exit:
 
 //------------------------------------------------------------------------------
 /**
-\brief    Cleanup kernel event CAL module
+\brief    Clean up kernel event CAL module
 
 The function cleans up the kernel event CAL module. For cleanup it calls the exit
 functions of the queue implementations for each used queue.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tOplkError eventkcal_exit (void)
+tOplkError eventkcal_exit(void)
 {
     UINT                i = 0;
 
@@ -234,13 +234,13 @@ queue post function is called.
 \param  pEvent_p                Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tOplkError eventkcal_postUserEvent (tEvent *pEvent_p)
+tOplkError eventkcal_postUserEvent(tEvent* pEvent_p)
 {
     tOplkError      ret = kErrorOk;
 
@@ -258,20 +258,20 @@ tOplkError eventkcal_postUserEvent (tEvent *pEvent_p)
 /**
 \brief    Post kernel event
 
-This function posts a event to a queue. It is called from the generic kernel
+This function posts an event to a queue. It is called from the generic kernel
 event post function in the event handler. Depending on the sink the appropriate
 queue post function is called.
 
 \param  pEvent_p                Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tOplkError eventkcal_postKernelEvent (tEvent *pEvent_p)
+tOplkError eventkcal_postKernelEvent(tEvent* pEvent_p)
 {
     tOplkError      ret = kErrorOk;
 
@@ -315,7 +315,7 @@ int eventkcal_postEventFromUser(unsigned long arg)
 {
     tOplkError      ret = kErrorOk;
     tEvent          event;
-    char            *pArg = NULL;
+    char*           pArg = NULL;
     int             order = 0;
 
     if (!instance_l.fInitialized)
@@ -327,7 +327,7 @@ int eventkcal_postEventFromUser(unsigned long arg)
     if (event.eventArgSize != 0)
     {
         order = get_order(event.eventArgSize);
-        pArg = (BYTE *)__get_free_pages(GFP_KERNEL, order);
+        pArg = (BYTE*)__get_free_pages(GFP_KERNEL, order);
 
         if (!pArg)
             return -EIO;
@@ -341,7 +341,7 @@ int eventkcal_postEventFromUser(unsigned long arg)
         event.pEventArg = pArg;
     }
 
-    switch(event.eventSink)
+    switch (event.eventSink)
     {
         case kEventSinkSync:
         case kEventSinkNmtk:
@@ -384,7 +384,7 @@ int eventkcal_postEventFromUser(unsigned long arg)
 
 //------------------------------------------------------------------------------
 /**
-\brief    Get a event for the user layer
+\brief    Get an event for the user layer
 
 This function waits for events to the user.
 
@@ -426,7 +426,7 @@ int eventkcal_getEventForUser(unsigned long arg)
         error = eventkcal_getEventCircbuf(kEventQueueK2U, instance_l.aK2URxBuffer, &readSize);
         if(error != kErrorOk)
         {
-            DEBUG_LVL_ERROR_TRACE ("%s() Error reading K2U events %d!\n", __func__, error);
+            DEBUG_LVL_ERROR_TRACE("%s() Error reading K2U events %d!\n", __func__, error);
             return -EIO;
         }
 
@@ -477,7 +477,7 @@ This function contains the main function for the event handler thread.
 \return The function returns the thread exit code.
 */
 //------------------------------------------------------------------------------
-static int eventThread(void *arg)
+static int eventThread(void* arg)
 {
     int     timeout = 500 * HZ / 1000;
     int     result;
@@ -551,3 +551,4 @@ void signalKernelEvent(void)
 }
 
 /// \}
+
