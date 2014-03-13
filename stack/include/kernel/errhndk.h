@@ -10,7 +10,7 @@ This header provides the external interface of the error handler kernel module
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -104,4 +104,5 @@ tOplkError errhndk_resetCnError(UINT nodeId_p);
 }
 #endif
 
-#endif /* _INC_ErrHndk_H_ */
+#endif /* _INC_errhndk_H_ */
+

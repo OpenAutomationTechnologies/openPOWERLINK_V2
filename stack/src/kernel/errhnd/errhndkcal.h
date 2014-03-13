@@ -10,7 +10,7 @@ module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -66,19 +66,19 @@ void errhndkcal_exit (void);
 tErrHndObjects* errhndkcal_getMemPtr(void);
 
 /* Reading of error objects */
-void errhndkcal_getCnLossSocError(UINT32 *pCumulativeCnt_p, UINT32 *pThresholdCnt_p, UINT32 *pThreshold_p);
-void errhndkcal_getCnLossPreqError(UINT32 *pCumulativeCnt_p, UINT32 *pThresholdCnt_p, UINT32 *pThreshold_p);
-void errhndkcal_getCnCrcError(UINT32 *pCumulativeCnt_p, UINT32 *pThresholdCnt_p, UINT32 *pThreshold_p);
-void errhndkcal_getMnCrcError(UINT32 *pCumulativeCnt_p, UINT32 *pThresholdCnt_p, UINT32 *pThreshold_p) SECTION_ERRHNDKCAL_GETMNCNT;
-void errhndkcal_getMnCycTimeExceedError(UINT32 *pCumulativeCnt_p, UINT32 *pThresholdCnt_p, UINT32 *pThreshold_p) SECTION_ERRHNDKCAL_GETMNCNT;
-void errhndkcal_getMnCnLossPresError(UINT nodeIdx_p, UINT32 *pCumulativeCnt_p, UINT32 *pThresholdCnt_p, UINT32 *pThreshold_p) SECTION_ERRHNDKCAL_GETMNCNT;
+void errhndkcal_getCnLossSocError(UINT32* pCumulativeCnt_p, UINT32* pThresholdCnt_p, UINT32* pThreshold_p);
+void errhndkcal_getCnLossPreqError(UINT32* pCumulativeCnt_p, UINT32* pThresholdCnt_p, UINT32* pThreshold_p);
+void errhndkcal_getCnCrcError(UINT32* pCumulativeCnt_p, UINT32* pThresholdCnt_p, UINT32* pThreshold_p);
+void errhndkcal_getMnCrcError(UINT32* pCumulativeCnt_p, UINT32* pThresholdCnt_p, UINT32* pThreshold_p) SECTION_ERRHNDKCAL_GETMNCNT;
+void errhndkcal_getMnCycTimeExceedError(UINT32* pCumulativeCnt_p, UINT32* pThresholdCnt_p, UINT32* pThreshold_p) SECTION_ERRHNDKCAL_GETMNCNT;
+void errhndkcal_getMnCnLossPresError(UINT nodeIdx_p, UINT32* pCumulativeCnt_p, UINT32* pThresholdCnt_p, UINT32* pThreshold_p) SECTION_ERRHNDKCAL_GETMNCNT;
 
-void errhndkcal_getLossSocThresholdCnt(UINT32 *pThresholdCnt_p);
-void errhndkcal_getLossPreqThresholdCnt(UINT32 *pThresholdCnt_p);
-void errhndkcal_getCnCrcThresholdCnt(UINT32 *pThresholdCnt_p);
-void errhndkcal_getMnCrcThresholdCnt(UINT32 *pThresholdCnt_p) SECTION_ERRHNDKCAL_GETMNCNT;
-void errhndkcal_getMnCycTimeExceedThresholdCnt(UINT32 *pThresholdCnt_p) SECTION_ERRHNDKCAL_GETMNCNT;
-void errhndkcal_getMnCnLossPresThresholdCnt(UINT nodeIdx_p, UINT32 *pThresholdCnt_p) SECTION_ERRHNDKCAL_GETMNCNT;
+void errhndkcal_getLossSocThresholdCnt(UINT32* pThresholdCnt_p);
+void errhndkcal_getLossPreqThresholdCnt(UINT32* pThresholdCnt_p);
+void errhndkcal_getCnCrcThresholdCnt(UINT32* pThresholdCnt_p);
+void errhndkcal_getMnCrcThresholdCnt(UINT32* pThresholdCnt_p) SECTION_ERRHNDKCAL_GETMNCNT;
+void errhndkcal_getMnCycTimeExceedThresholdCnt(UINT32* pThresholdCnt_p) SECTION_ERRHNDKCAL_GETMNCNT;
+void errhndkcal_getMnCnLossPresThresholdCnt(UINT nodeIdx_p, UINT32* pThresholdCnt_p) SECTION_ERRHNDKCAL_GETMNCNT;
 
 /* Writing of error counters */
 void errhndkcal_setCnLossSocCounters(UINT32 cumulativeCnt_p, UINT32 thresholdCnt_p);
@@ -99,4 +99,5 @@ void errhndkcal_setMnCnLossPresThresholdCnt(UINT nodeIdx_p, UINT32 thresholdCnt_
 }
 #endif
 
-#endif /* _INC_ErrHndkCal_H_ */
+#endif /* _INC_errhndkcal_H_ */
+
