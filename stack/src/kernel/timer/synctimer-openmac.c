@@ -4,14 +4,15 @@
 
 \brief  Implementation of openMAC synchronization timer module
 
-This file contains the implementation of the openMAC synchronization timer module.
+This file contains the implementation of the openMAC synchronization timer
+module.
 
 \ingroup module_synctimer
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -141,8 +142,8 @@ static tTimerInstance   instance_l;
 // local function prototypes
 //------------------------------------------------------------------------------
 static tOplkError ctrlDoSyncAdjustment(UINT32 timeStamp_p);
-static void  ctrlSetConfiguredTimeDiff(UINT32 configuredTimeDiff_p);
-static void  ctrlUpdateLossOfSyncTolerance(void);
+static void ctrlSetConfiguredTimeDiff(UINT32 configuredTimeDiff_p);
+static void ctrlUpdateLossOfSyncTolerance(void);
 static UINT32 ctrlGetNextAbsoluteTime(UINT timerHdl_p, UINT32 currentTime_p);
 
 #ifdef TIMER_USE_EXT_SYNC_INT
@@ -160,7 +161,8 @@ static void ctrlUpdateRejectThreshold(void);
 static tOplkError drvModifyTimerAbs(UINT timerHdl_p, UINT32 absoluteTime_p);
 
 static tOplkError drvModifyTimerRel(UINT timerHdl_p, INT timeAdjustment_p,
-                                    UINT32* pAbsoluteTime_p, BOOL* pfAbsoluteTimeAlreadySet_p);
+                                    UINT32* pAbsoluteTime_p,
+                                    BOOL* pfAbsoluteTimeAlreadySet_p);
 
 static tOplkError drvDeleteTimer(UINT timerHdl_p);
 
@@ -172,7 +174,7 @@ static tOplkError drvDeleteTimer(UINT timerHdl_p);
 /**
 \brief  Synchronization timer module initialization
 
-This function initializes the Synchronization timer module.
+This function initializes the synchronization timer module.
 
 \return The function returns a tOplkError error code.
 
@@ -183,7 +185,7 @@ tOplkError synctimer_addInstance(void)
 {
     tOplkError ret = kErrorOk;
 
-    OPLK_MEMSET(&instance_l, 0, sizeof (instance_l));
+    OPLK_MEMSET(&instance_l, 0, sizeof(instance_l));
 
     openmac_timerIrqDisable(HWTIMER_SYNC);
     openmac_timerSetCompareValue(HWTIMER_SYNC, 0);
@@ -201,7 +203,7 @@ tOplkError synctimer_addInstance(void)
 /**
 \brief  Synchronization timer delete module
 
-This function deletes the Synchronization timer module.
+This function deletes the synchronization timer module.
 
 \return The function returns a tOplkError error code.
 
@@ -221,10 +223,9 @@ tOplkError synctimer_delInstance(void)
 
     openmac_isrReg(kOpenmacIrqSync, NULL, NULL);
 
-    OPLK_MEMSET(&instance_l, 0, sizeof (instance_l));
+    OPLK_MEMSET(&instance_l, 0, sizeof(instance_l));
 
     return ret;
-
 }
 
 //------------------------------------------------------------------------------
@@ -415,7 +416,7 @@ tOplkError synctimer_syncTriggerAtTimeStamp(tTimestamp* pTimeStamp_p)
     tOplkError ret = kErrorOk;
 
     ret = drvModifyTimerAbs(TIMER_HDL_LOSSOFSYNC,
-                                      (pTimeStamp_p->timeStamp + instance_l.lossOfSyncTimeout));
+                            (pTimeStamp_p->timeStamp + instance_l.lossOfSyncTimeout));
     if (ret != kErrorOk)
     {
         goto Exit;
@@ -425,7 +426,7 @@ tOplkError synctimer_syncTriggerAtTimeStamp(tTimestamp* pTimeStamp_p)
     if (instance_l.lossOfSyncTimeout2 > 0)
     {
         ret = drvModifyTimerAbs(TIMER_HDL_LOSSOFSYNC2,
-                                          (pTimeStamp_p->timeStamp + instance_l.lossOfSyncTimeout2));
+                                (pTimeStamp_p->timeStamp + instance_l.lossOfSyncTimeout2));
         if (ret != kErrorOk)
         {
             goto Exit;
@@ -441,7 +442,7 @@ Exit:
 
 //------------------------------------------------------------------------------
 /**
-\brief  Stop Synchronization timer module
+\brief  Stop synchronization timer module
 
 This function stops the module.
 
@@ -635,7 +636,7 @@ static void ctrlSetConfiguredTimeDiff(UINT32 configuredTimeDiff_p)
 
     instance_l.configuredTimeDiff = configuredTimeDiff_p;
 
-    for (i=0; i < TIMEDIFF_COUNT; i++)
+    for (i = 0; i < TIMEDIFF_COUNT; i++)
     {
         instance_l.aActualTimeDiff[i] = configuredTimeDiff_p;
     }
@@ -768,7 +769,8 @@ This function modifies the timer's realtive timer value.
 */
 //------------------------------------------------------------------------------
 static tOplkError drvModifyTimerRel(UINT timerHdl_p, INT timeAdjustment_p,
-        UINT32* pAbsoluteTime_p, BOOL* pfAbsoluteTimeAlreadySet_p)
+                                    UINT32* pAbsoluteTime_p,
+                                    BOOL* pfAbsoluteTimeAlreadySet_p)
 {
     tOplkError  ret = kErrorOk;
     tTimerInfo* pTimerInfo;
@@ -932,9 +934,9 @@ static void drvCalcExtSyncIrqValue(void)
         targetAbsoluteTime = pTimerInfo->absoluteTime;
 
         openmac_timerSetCompareValue(HWTIMER_EXT_SYNC,
-                targetAbsoluteTime -
-                instance_l.meanTimeDiff +    // minus one cycle
-                instance_l.advanceShift);      // plus sync shift
+                                     targetAbsoluteTime -
+                                     instance_l.meanTimeDiff +    // minus one cycle
+                                     instance_l.advanceShift);    // plus sync shift
         cycleCnt = 0;
     }
     else if (cycleCnt > instance_l.syncIntCycle)
@@ -992,44 +994,39 @@ static void drvInterruptHandler(void* pArg_p)
         switch (timerHdl)
         {
             case TIMER_HDL_SYNC:
-            {
-                #ifdef TIMER_USE_EXT_SYNC_INT
-                    BENCHMARK_MOD_24_SET(0);
-                    if(instance_l.fExtSyncEnable != FALSE)
-                    {
-                        drvCalcExtSyncIrqValue();
-                    }
-                    BENCHMARK_MOD_24_RESET(0);
-                #endif //TIMER_USE_EXT_SYNC_INT
+#ifdef TIMER_USE_EXT_SYNC_INT
+                BENCHMARK_MOD_24_SET(0);
+                if (instance_l.fExtSyncEnable != FALSE)
+                {
+                    drvCalcExtSyncIrqValue();
+                }
+                BENCHMARK_MOD_24_RESET(0);
+#endif //TIMER_USE_EXT_SYNC_INT
 
                 if (instance_l.pfnSyncCb != NULL)
                 {
                     instance_l.pfnSyncCb();
                 }
                 break;
-            }
+
             case TIMER_HDL_LOSSOFSYNC:
-            {
                 if (instance_l.pfnLossOfSyncCb != NULL)
                 {
                     instance_l.pfnLossOfSyncCb();
                 }
                 break;
-            }
+
 #if (TIMER_SYNC_SECOND_LOSS_OF_SYNC != FALSE)
             case TIMER_HDL_LOSSOFSYNC2:
-            {
                 if (instance_l.pfnLossOfSync2Cb != NULL)
                 {
                     instance_l.pfnLossOfSync2Cb();
                 }
                 break;
-            }
 #endif
+
             default:
-            {
                 break;
-            }
         }
     }
 
@@ -1039,3 +1036,4 @@ static void drvInterruptHandler(void* pArg_p)
 }
 
 ///\}
+

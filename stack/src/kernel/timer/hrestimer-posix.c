@@ -124,7 +124,7 @@ static tHresTimerInstance       hresTimerInstance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static void * timerThread(void *pParm_p);
+static void* timerThread(void* pParm_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -240,20 +240,20 @@ tOplkError hrestimer_delInstance(void)
 \brief    Modify a high-resolution timer
 
 The function modifies the timeout of the timer with the specified handle.
-If the handle, the pointer points to, is zero, the timer must be created first.
-If it is not possible to stop the old timer, this function always assures that
-the old timer does not trigger the callback function with the same handle as
-the new timer. That means the callback function must check the passed handle
+If the handle to which the pointer points to is zero, the timer must be created
+first. If it is not possible to stop the old timer, this function always assures
+that the old timer does not trigger the callback function with the same handle
+as the new timer. That means the callback function must check the passed handle
 with the one returned by this function. If these are unequal, the call can be
 discarded.
 
 \param  pTimerHdl_p     Pointer to timer handle.
 \param  time_p          Relative timeout in [ns].
 \param  pfnCallback_p   Callback function, which is called when timer expires.
-                        (The function is called mutual exclusive with the Edrv
+                        (The function is called mutually exclusive with the Edrv
                         callback functions (Rx and Tx)).
 \param  argument_p      User-specific argument
-\param  fContinue_p     If TRUE, callback function will be called continuously.
+\param  fContinue_p     If TRUE, the callback function will be called continuously.
                         Otherwise, it is a one-shot timer.
 
 \return Returns a tOplkError error code.
@@ -271,7 +271,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
     struct itimerspec       RelTime;
 
     // check pointer to handle
-    if(pTimerHdl_p == NULL)
+    if (pTimerHdl_p == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Invalid timer handle\n", __func__);
         return kErrorTimerInvalidHandle;
@@ -325,7 +325,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
 
     /* initialize timer info */
     pTimerInfo->eventArg.argument.value = argument_p;
-    pTimerInfo->pfnCallback      = pfnCallback_p;
+    pTimerInfo->pfnCallback = pfnCallback_p;
 
     if (time_p >= 1000000000L)
     {
@@ -363,7 +363,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
 \brief    Delete a high-resolution timer
 
 The function deletes an created high-resolution timer. The timer is specified
-by its timer handle. After deleting the handle is reset to zero.
+by its timer handle. After deleting, the handle is reset to zero.
 
 \param  pTimerHdl_p     Pointer to timer handle.
 
@@ -431,10 +431,10 @@ The function provides the main function of the timer thread.
 \return Returns a void* as specified by the pthread interface but it is not used!
 */
 //------------------------------------------------------------------------------
-static void* timerThread(void *pParm_p)
+static void* timerThread(void* pParm_p)
 {
     INT                                 iRet;
-    tHresTimerInfo                      *pTimerInfo;
+    tHresTimerInfo*                     pTimerInfo;
     sigset_t                            awaitedSignal;
     siginfo_t                           signalInfo;
 
@@ -451,7 +451,7 @@ static void* timerThread(void *pParm_p)
     {
         if ((iRet = sigwaitinfo(&awaitedSignal, &signalInfo)) > 0)
         {
-            pTimerInfo = (tHresTimerInfo *)signalInfo.si_value.sival_ptr;
+            pTimerInfo = (tHresTimerInfo*)signalInfo.si_value.sival_ptr;
             /* call callback function */
             if (pTimerInfo->pfnCallback != NULL)
             {
@@ -465,3 +465,4 @@ static void* timerThread(void *pParm_p)
 }
 
 /// \}
+

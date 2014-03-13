@@ -134,13 +134,13 @@ static tHresTimerInstance    hresTimerInstance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static void* timerThread(void *pArgument_p);
-static inline void timespec_add (struct timespec *time1_p, ULONGLONG time_p,
-                                 struct timespec *result_p);
+static void* timerThread(void* pArgument_p);
+static inline void timespec_add(struct timespec* time1_p, ULONGLONG time_p,
+                                struct timespec* result_p);
 
 #ifdef HIGH_RESK_TIMER_LATENCY_DEBUG
-static inline void timespec_sub (struct timespec *time1_p, struct timespec *time2_p,
-                                 struct timespec *result_p);
+static inline void timespec_sub(struct timespec* time1_p, struct timespec* time2_p,
+                                struct timespec* result_p);
 #endif
 
 
@@ -182,7 +182,7 @@ tOplkError hrestimer_addInstance(void)
     struct sched_param          schedParam;
     tHresTimerInfo*             pTimerInfo;
 
-    OPLK_MEMSET(&hresTimerInstance_l, 0, sizeof (hresTimerInstance_l));
+    OPLK_MEMSET(&hresTimerInstance_l, 0, sizeof(hresTimerInstance_l));
 
     /* Initialize timer threads for all usable timers. */
     for (index = 0; index < TIMER_COUNT; index++)
@@ -264,20 +264,20 @@ tOplkError hrestimer_delInstance(void)
 \brief    Modify a high-resolution timer
 
 The function modifies the timeout of the timer with the specified handle.
-If the handle, the pointer points to, is zero, the timer must be created first.
-If it is not possible to stop the old timer, this function always assures that
-the old timer does not trigger the callback function with the same handle as
-the new timer. That means the callback function must check the passed handle
+If the handle to which the pointer points to is zero, the timer must be created
+first. If it is not possible to stop the old timer, this function always assures
+that the old timer does not trigger the callback function with the same handle
+as the new timer. That means the callback function must check the passed handle
 with the one returned by this function. If these are unequal, the call can be
 discarded.
 
 \param  pTimerHdl_p     Pointer to timer handle.
 \param  time_p          Relative timeout in [ns].
 \param  pfnCallback_p   Callback function, which is called when timer expires.
-                        (The function is called mutual exclusive with the Edrv
+                        (The function is called mutually exclusive with the Edrv
                         callback functions (Rx and Tx)).
 \param  argument_p      User-specific argument
-\param  fContinue_p     If TRUE, callback function will be called continuously.
+\param  fContinue_p     If TRUE, the callback function will be called continuously.
                         Otherwise, it is a one-shot timer.
 
 \return Returns a tOplkError error code.
@@ -348,9 +348,9 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
 
     /* initialize timer info */
     pTimerInfo->eventArg.argument.value = argument_p;
-    pTimerInfo->pfnCallback      = pfnCallback_p;
-    pTimerInfo->fContinue    = fContinue_p;
-    pTimerInfo->time          = time_p;
+    pTimerInfo->pfnCallback = pfnCallback_p;
+    pTimerInfo->fContinue   = fContinue_p;
+    pTimerInfo->time        = time_p;
 
     clock_gettime(CLOCK_MONOTONIC, &pTimerInfo->startTime);  // get current time
     sem_post(&pTimerInfo->syncSem); /* signal timer start to thread */
@@ -363,7 +363,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
 \brief    Delete a high-resolution timer
 
 The function deletes an created high-resolution timer. The timer is specified
-by its timer handle. After deleting the handle is reset to zero.
+by its timer handle. After deleting, the handle is reset to zero.
 
 \param  pTimerHdl_p     Pointer to timer handle.
 
@@ -425,13 +425,13 @@ clock_nanosleep() until the timeout is reached. When the timeout is reached
 the callback function registered in the timer info structure is called. If the
 flag m_fContinue is set the thread loops until the timer is deleted.
 
-\param  pArgument_p     Thread parameter. It contains the Pointer to the timer
+\param  pArgument_p     Thread parameter. It contains the pointer to the timer
                         info structure.
 
 \return Returns a void* as specified by the pthread interface but it is not used!
 */
 //------------------------------------------------------------------------------
-static void* timerThread(void *pArgument_p)
+static void* timerThread(void* pArgument_p)
 {
     INT                         iRet;
     tHresTimerInfo*             pTimerInfo;
@@ -480,7 +480,7 @@ static void* timerThread(void *pArgument_p)
                 if (iRet < 0)
                 {
                     DEBUG_LVL_ERROR_TRACE("%s(): Error in clock_nanosleep!\n",
-                                            __func__);
+                                          __func__);
                     /* todo how to signal that timeout wasn't correct? */
                 }
                 FTRACE_MARKER("HighReskTimer(%d) expired (%d ns)",
@@ -494,13 +494,13 @@ static void* timerThread(void *pArgument_p)
                 if (debugtime.tv_nsec > pTimerInfo->maxLatency)
                 {
                     DEBUG_LVL_TIMERH_TRACE("%s() Timer elapsed: max latency=%ld ns\n",
-                                             __func__, debugtime.tv_nsec);
+                                           __func__, debugtime.tv_nsec);
                     pTimerInfo->maxLatency = debugtime.tv_nsec;
                 }
                 if (timeout.tv_nsec < pTimerInfo->minLatency)
                 {
                     DEBUG_LVL_TIMERH_TRACE("%s() Timer elapsed: min latency=%ld ns\n",
-                                             __func__, debugtime.tv_nsec);
+                                           __func__, debugtime.tv_nsec);
                     pTimerInfo->minLatency = debugtime.tv_nsec;
                 }
 #endif
@@ -535,15 +535,15 @@ static void* timerThread(void *pArgument_p)
 /**
 \brief    Add offset to timespec value
 
-The function adds an time offset in nanoseconds to a timespec value.
+The function adds a time offset in nanoseconds to a timespec value.
 
 \param  time1_p     Pointer to timespec to which the offset should be added.
 \param  offset_p    Offset in nanoseconds to add.
 \param  result_p    Pointer to store the result of the calculation.
 */
 //------------------------------------------------------------------------------
-static inline void timespec_add (struct timespec *time1_p, ULONGLONG offset_p,
-                                 struct timespec *result_p)
+static inline void timespec_add(struct timespec* time1_p, ULONGLONG offset_p,
+                                struct timespec* result_p)
 {
     result_p->tv_sec = time1_p->tv_sec;
     if (offset_p >= 1000000000L)
@@ -566,14 +566,14 @@ static inline void timespec_add (struct timespec *time1_p, ULONGLONG offset_p,
 
 The function subtracts two timespec values.
 
-\param  time1_p     Pointer to first timespec value, from which to substract the
+\param  time1_p     Pointer to first timespec value from which to substract the
                     second one.
 \param  time2_p     Pointer to second timespec value which will be substracted.
 \param  result_p    Pointer to store the result of the calculation.
 */
 //------------------------------------------------------------------------------
-static inline void timespec_sub (struct timespec *time1_p, struct timespec *time2_p,
-                                 struct timespec *result_p)
+static inline void timespec_sub(struct timespec* time1_p, struct timespec* time2_p,
+                                struct timespec* result_p)
 {
     if (time2_p->tv_nsec > time1_p->tv_nsec)
     {
@@ -589,3 +589,4 @@ static inline void timespec_sub (struct timespec *time1_p, struct timespec *time
 #endif
 
 /// \}
+
