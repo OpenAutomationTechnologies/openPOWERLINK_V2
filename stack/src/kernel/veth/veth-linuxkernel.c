@@ -12,7 +12,7 @@ implementation.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -102,17 +102,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static struct net_device * pVEthNetDevice_g = NULL;
+static struct net_device* pVEthNetDevice_g = NULL;
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static int veth_open(struct net_device *pNetDevice_p);
-static int veth_close(struct net_device *pNetDevice_p);
-static int veth_xmit(struct sk_buff *pSkb_p, struct net_device *pNetDevice_p);
-static struct net_device_stats* veth_getStats(struct net_device *pNetDevice_p);
-static void veth_timeout(struct net_device *pNetDevice_p);
-static tOplkError veth_receiveFrame(tFrameInfo * pFrameInfo_p);
+static int veth_open(struct net_device* pNetDevice_p);
+static int veth_close(struct net_device* pNetDevice_p);
+static int veth_xmit(struct sk_buff* pSkb_p, struct net_device* pNetDevice_p);
+static struct net_device_stats* veth_getStats(struct net_device* pNetDevice_p);
+static void veth_timeout(struct net_device* pNetDevice_p);
+static tOplkError veth_receiveFrame(tFrameInfo* pFrameInfo_p);
 
 //------------------------------------------------------------------------------
 // local vars
@@ -149,7 +149,7 @@ The function adds a virtual Ethernet instance.
 tOplkError veth_addInstance(const UINT8 aSrcMac_p[6])
 {
     // allocate net device structure with priv pointing to stats structure
-    pVEthNetDevice_g = alloc_netdev(sizeof (struct net_device_stats), PLK_VETH_NAME,
+    pVEthNetDevice_g = alloc_netdev(sizeof(struct net_device_stats), PLK_VETH_NAME,
                                     ether_setup);
 
     if (pVEthNetDevice_g == NULL)
@@ -175,7 +175,7 @@ tOplkError veth_addInstance(const UINT8 aSrcMac_p[6])
 /**
 \brief  Delete virtual Ethernet instance
 
-The function deletes a virtual ethernet instance.
+The function deletes a virtual Ethernet instance.
 
 \return The function returns a tOplkError error code.
 
@@ -213,7 +213,7 @@ The function contains the open routine of the virtual Ethernet driver.
 \return The function returns an error code.
 */
 //------------------------------------------------------------------------------
-static int veth_open(struct net_device *pNetDevice_p)
+static int veth_open(struct net_device* pNetDevice_p)
 {
     tOplkError  ret = kErrorOk;
 
@@ -239,7 +239,7 @@ The function contains the close routine of the virtual Ethernet driver.
 \return The function returns an error code.
 */
 //------------------------------------------------------------------------------
-static int veth_close(struct net_device *pNetDevice_p)
+static int veth_close(struct net_device* pNetDevice_p)
 {
     DEBUG_LVL_VETH_TRACE("VEthClose\n");
 
@@ -260,7 +260,7 @@ The function contains the transmit function for the virtual Ethernet driver.
 \return The function returns an error code.
 */
 //------------------------------------------------------------------------------
-static int veth_xmit(struct sk_buff *pSkb_p, struct net_device *pNetDevice_p)
+static int veth_xmit(struct sk_buff* pSkb_p, struct net_device* pNetDevice_p)
 {
     tOplkError      ret = kErrorOk;
     tFrameInfo      frameInfo;
@@ -271,7 +271,7 @@ static int veth_xmit(struct sk_buff *pSkb_p, struct net_device *pNetDevice_p)
     //save timestemp
     pNetDevice_p->trans_start = jiffies;
 
-    frameInfo.pFrame = (tPlkFrame *)pSkb_p->data;
+    frameInfo.pFrame = (tPlkFrame*)pSkb_p->data;
     frameInfo.frameSize = pSkb_p->len;
 
     //call send fkt on DLL
@@ -307,7 +307,7 @@ The function gets the statistics of the interface.
 \return The function returns a pointer to a net_device_stats structure.
 */
 //------------------------------------------------------------------------------
-static struct net_device_stats* veth_getStats(struct net_device *pNetDevice_p)
+static struct net_device_stats* veth_getStats(struct net_device* pNetDevice_p)
 {
     DEBUG_LVL_VETH_TRACE("veth_getStats\n");
     return netdev_priv(pNetDevice_p);
@@ -322,7 +322,7 @@ The function provides the TX timeout entry point of the driver.
 \param  pNetDevice_p        Pointer to net device structure of interface.
 */
 //------------------------------------------------------------------------------
-static void veth_timeout(struct net_device *pNetDevice_p)
+static void veth_timeout(struct net_device* pNetDevice_p)
 {
     DEBUG_LVL_VETH_TRACE("veth_timeout(\n");
     // $$$ d.k.: move to extra function, which is called by DLL when new space is available in TxFifo
@@ -343,12 +343,12 @@ The function receives a frame from the virtual Ethernet interface.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError veth_receiveFrame(tFrameInfo * pFrameInfo_p)
+static tOplkError veth_receiveFrame(tFrameInfo* pFrameInfo_p)
 {
     tOplkError  ret = kErrorOk;
     struct net_device* pNetDevice = pVEthNetDevice_g;
     struct net_device_stats* pStats = netdev_priv(pNetDevice);
-    struct sk_buff *pSkb;
+    struct sk_buff* pSkb;
 
     DEBUG_LVL_VETH_TRACE("veth_receiveFrame: FrameSize=%u\n", pFrameInfo_p->frameSize);
 
@@ -361,7 +361,7 @@ static tOplkError veth_receiveFrame(tFrameInfo * pFrameInfo_p)
 
     skb_reserve(pSkb, 2);
 
-    OPLK_MEMCPY((void *)skb_put(pSkb, pFrameInfo_p->frameSize), pFrameInfo_p->pFrame, pFrameInfo_p->frameSize);
+    OPLK_MEMCPY((void*)skb_put(pSkb, pFrameInfo_p->frameSize), pFrameInfo_p->pFrame, pFrameInfo_p->frameSize);
 
     pSkb->protocol = eth_type_trans(pSkb, pNetDevice);
     pSkb->ip_summed = CHECKSUM_UNNECESSARY;
@@ -379,6 +379,4 @@ Exit:
 }
 
 ///\}
-
-
 
