@@ -5,16 +5,16 @@
 \brief  PDO CAL kernel sync module using the openPOWERLINK Linux kernel driver
 
 This file contains an implementation for the kernel PDO CAL sync module which
-uses the openPOWERLINK Linux kernel driver interface..
+uses the openPOWERLINK Linux kernel driver interface.
 
 The sync module is responsible to notify the user layer that new PDO data
-could be transfered.
+can be transfered.
 
 \ingroup module_pdokcal
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -121,7 +121,7 @@ tOplkError pdokcal_initSync(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Cleanup PDO CAL sync module
+\brief  Clean up PDO CAL sync module
 
 The function cleans up the PDO CAL sync module
 
@@ -205,3 +205,4 @@ tOplkError pdokcal_controlSync(BOOL fEnable_p)
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+

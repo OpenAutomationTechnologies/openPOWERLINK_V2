@@ -19,7 +19,7 @@ without locking, the buffer switching has to be performed in an atomic operation
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -107,9 +107,9 @@ The function returns the address of the PDO memory region.
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-BYTE * pdokcal_getPdoMemRegion(void)
+BYTE* pdokcal_getPdoMemRegion(void)
 {
-    return (BYTE *)pPdoMem_l;
+    return (BYTE*)pPdoMem_l;
 }
 
 //------------------------------------------------------------------------------
@@ -143,7 +143,7 @@ tOplkError pdokcal_initPdoMem(tPdoChannelSetup* pPdoChannels, size_t rxPdoMemSiz
         return kErrorNoResource;
     }
 
-    pTripleBuf_l[0] = (BYTE *)pPdoMem_l + sizeof(tPdoMemRegion);
+    pTripleBuf_l[0] = (BYTE*)pPdoMem_l + sizeof(tPdoMemRegion);
     pTripleBuf_l[1] = pTripleBuf_l[0] + pdoMemSize;
     pTripleBuf_l[2] = pTripleBuf_l[1] + pdoMemSize;
 
@@ -161,7 +161,7 @@ tOplkError pdokcal_initPdoMem(tPdoChannelSetup* pPdoChannels, size_t rxPdoMemSiz
 
 //------------------------------------------------------------------------------
 /**
-\brief  Cleanup PDO memory
+\brief  Clean up PDO memory
 
 The function cleans the memory allocated for PDO buffers.
 
@@ -173,7 +173,7 @@ void pdokcal_cleanupPdoMem(void)
     TRACE("%s()\n", __func__);
 
     if (pPdoMem_l != NULL)
-        pdokcal_freeMem((BYTE *)pPdoMem_l, pdoMemRegionSize_l);
+        pdokcal_freeMem((BYTE*)pPdoMem_l, pdoMemRegionSize_l);
 
     pPdoMem_l = NULL;
     pdoMemRegionSize_l = 0;
@@ -197,7 +197,7 @@ The function writes a received RXPDO into the PDO memory range.
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tOplkError pdokcal_writeRxPdo(UINT channelId_p, BYTE *pPayload_p, UINT16 pdoSize_p)
+tOplkError pdokcal_writeRxPdo(UINT channelId_p, BYTE* pPayload_p, UINT16 pdoSize_p)
 {
     BYTE*           pPdo;
     OPLK_ATOMIC_T   temp;
@@ -210,8 +210,8 @@ tOplkError pdokcal_writeRxPdo(UINT channelId_p, BYTE *pPayload_p, UINT16 pdoSize
 
     temp = pPdoMem_l->rxChannelInfo[channelId_p].writeBuf;
     OPLK_ATOMIC_EXCHANGE(&pPdoMem_l->rxChannelInfo[channelId_p].cleanBuf,
-                    temp,
-                    pPdoMem_l->rxChannelInfo[channelId_p].writeBuf);
+                         temp,
+                         pPdoMem_l->rxChannelInfo[channelId_p].writeBuf);
 
     pPdoMem_l->rxChannelInfo[channelId_p].newData = 1;
 
@@ -244,8 +244,8 @@ tOplkError pdokcal_readTxPdo(UINT channelId_p, BYTE* pPayload_p, UINT16 pdoSize_
     {
         readBuf = pPdoMem_l->txChannelInfo[channelId_p].readBuf;
         OPLK_ATOMIC_EXCHANGE(&pPdoMem_l->txChannelInfo[channelId_p].cleanBuf,
-                        readBuf,
-                        pPdoMem_l->txChannelInfo[channelId_p].readBuf);
+                             readBuf,
+                             pPdoMem_l->txChannelInfo[channelId_p].readBuf);
         pPdoMem_l->txChannelInfo[channelId_p].newData = 0;
     }
 
@@ -255,7 +255,7 @@ tOplkError pdokcal_readTxPdo(UINT channelId_p, BYTE* pPayload_p, UINT16 pdoSize_
     pPdo =  pTripleBuf_l[pPdoMem_l->txChannelInfo[channelId_p].readBuf] +
             pPdoMem_l->txChannelInfo[channelId_p].channelOffset;
 
-    OPLK_MEMCPY (pPayload_p, pPdo, pdoSize_p);
+    OPLK_MEMCPY(pPayload_p, pPdo, pdoSize_p);
 
     return kErrorOk;
 }
@@ -270,7 +270,7 @@ tOplkError pdokcal_readTxPdo(UINT channelId_p, BYTE* pPayload_p, UINT16 pdoSize_
 \brief  Setup PDO memory info
 
 The function sets up the PDO memory info. For each channel the offset in the
-shared buffer and the size is stored.
+shared buffer and the size are stored.
 
 \param  pPdoChannels_p      Pointer to PDO channel setup.
 \param  pPdoMemRegion_p     Pointer to shared PDO memory region.

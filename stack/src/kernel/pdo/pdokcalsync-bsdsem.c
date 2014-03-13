@@ -8,13 +8,13 @@ This file contains an implementation for the kernel PDO CAL sync module which
 uses BSD semaphores for synchronisation.
 
 The sync module is responsible to notify the user layer that new PDO data
-could be transfered.
+can be transfered.
 
 \ingroup module_pdokcal
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -107,7 +107,7 @@ tOplkError pdokcal_initSync(void)
 {
     if ((syncSem_l = sem_open(PDO_SYNC_BSDSEM, O_CREAT, S_IRWXG, 1)) == SEM_FAILED)
     {
-        TRACE ("%s() creating sem failed!\n", __func__);
+        TRACE("%s() creating sem failed!\n", __func__);
         return kErrorNoResource;
     }
     return kErrorOk;
@@ -115,9 +115,9 @@ tOplkError pdokcal_initSync(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Cleanup PDO CAL sync module
+\brief  Clean up PDO CAL sync module
 
-The function cleans up the PDO CAL sync module
+The function cleans up the PDO CAL sync module.
 
 \ingroup module_pdokcal
 */
@@ -131,7 +131,7 @@ void pdokcal_exitSync(void)
 /**
 \brief  Send a sync event
 
-The function sends a sync event
+The function sends a sync event.
 
 \return The function returns a tOplkError error code.
 
@@ -148,7 +148,7 @@ tOplkError pdokcal_sendSyncEvent(void)
 /**
 \brief  Enable sync events
 
-The function enables sync events
+The function enables sync events.
 
 \param  fEnable_p               enable/disable sync event
 
@@ -166,3 +166,4 @@ tOplkError pdokcal_controlSync(BOOL fEnable_p)
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+

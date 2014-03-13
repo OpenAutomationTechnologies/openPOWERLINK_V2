@@ -11,7 +11,7 @@ This file contains the main implementation of the kernel PDO module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -98,9 +98,9 @@ static tPdokInstance  pdokInstance_g;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError cbProcessTpdo(tFrameInfo * pFrameInfo_p, BOOL fReadyFlag_p) SECTION_PDOK_PROCESS_TPDO_CB;
+static tOplkError cbProcessTpdo(tFrameInfo* pFrameInfo_p, BOOL fReadyFlag_p) SECTION_PDOK_PROCESS_TPDO_CB;
 static tOplkError copyTxPdo(tPlkFrame* pFrame_p, UINT frameSize_p, BOOL fReadyFlag_p);
-static void disablePdoChannels(tPdoChannel *pPdoChannel, UINT channelCnt);
+static void disablePdoChannels(tPdoChannel* pPdoChannel, UINT channelCnt);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -135,7 +135,7 @@ tOplkError pdok_init(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Cleanup PDO kernel module
+\brief  Clean up PDO kernel module
 
 The function cleans up the PDO kernel module.
 
@@ -156,9 +156,9 @@ tOplkError pdok_exit(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Deallocate memory for PDOs
+\brief  De-allocate memory for PDOs
 
-This function deallocates memory for PDOs.
+This function de-allocates memory for PDOs.
 
 \return The function returns a tOplkError error code.
 
@@ -178,13 +178,13 @@ tOplkError pdok_deAllocChannelMem(void)
     if (Ret != kErrorOk)
     {
         DEBUG_LVL_PDO_TRACE("%s() dllk_deleteNode failed (%s)\n",
-                             __func__, debugstr_getRetValStr(Ret));
+                            __func__, debugstr_getRetValStr(Ret));
         return Ret;
     }
 #endif // NMT_MAX_NODE_ID > 0
 
 
-    // deallocate mem for RX PDO channels
+    // de-allocate mem for RX PDO channels
     if (pdokInstance_g.pdoChannels.allocation.rxPdoChannelCount != 0)
     {
         pdokInstance_g.pdoChannels.allocation.rxPdoChannelCount = 0;
@@ -194,7 +194,7 @@ tOplkError pdok_deAllocChannelMem(void)
             pdokInstance_g.pdoChannels.pRxPdoChannel = NULL;
         }
     }
-    // deallocate mem for TX PDO channels
+    // de-allocate mem for TX PDO channels
     if (pdokInstance_g.pdoChannels.allocation.txPdoChannelCount != 0)
     {
         pdokInstance_g.pdoChannels.allocation.txPdoChannelCount = 0;
@@ -212,7 +212,7 @@ tOplkError pdok_deAllocChannelMem(void)
 /**
 \brief  Allocate memory for PDO channels
 
-This function allocates memory for the PDO channels
+This function allocates memory for the PDO channels.
 
 \param  pAllocationParam_p      Pointer to allocation parameters.
 
@@ -249,8 +249,8 @@ tOplkError pdok_allocChannelMem(tPdoAllocationParam* pAllocationParam_p)
         if (pAllocationParam_p->rxPdoChannelCount > 0)
         {
             pdokInstance_g.pdoChannels.pRxPdoChannel =
-                            OPLK_MALLOC(sizeof (*pdokInstance_g.pdoChannels.pRxPdoChannel) *
-                                       pAllocationParam_p->rxPdoChannelCount);
+                            OPLK_MALLOC(sizeof(*pdokInstance_g.pdoChannels.pRxPdoChannel) *
+                                        pAllocationParam_p->rxPdoChannelCount);
 
             if (pdokInstance_g.pdoChannels.pRxPdoChannel == NULL)
             {
@@ -276,8 +276,8 @@ tOplkError pdok_allocChannelMem(tPdoAllocationParam* pAllocationParam_p)
         if (pAllocationParam_p->txPdoChannelCount > 0)
         {
             pdokInstance_g.pdoChannels.pTxPdoChannel =
-                    OPLK_MALLOC(sizeof (*pdokInstance_g.pdoChannels.pTxPdoChannel) *
-                               pAllocationParam_p->txPdoChannelCount);
+                    OPLK_MALLOC(sizeof(*pdokInstance_g.pdoChannels.pTxPdoChannel) *
+                                pAllocationParam_p->txPdoChannelCount);
 
             if (pdokInstance_g.pdoChannels.pTxPdoChannel == NULL)
             {
@@ -340,7 +340,7 @@ tOplkError pdok_configureChannel(tPdoChannelConf* pChannelConf_p)
 
         // copy channel configuration to local structure
         OPLK_MEMCPY(pDestPdoChannel, &pChannelConf_p->pdoChannel,
-                   sizeof (pChannelConf_p->pdoChannel));
+                    sizeof (pChannelConf_p->pdoChannel));
 
 #if NMT_MAX_NODE_ID > 0
         if ((pDestPdoChannel->nodeId != PDO_INVALID_NODE_ID)
@@ -368,7 +368,7 @@ tOplkError pdok_configureChannel(tPdoChannelConf* pChannelConf_p)
 
         // copy channel to local structure
         OPLK_MEMCPY(&pdokInstance_g.pdoChannels.pTxPdoChannel[pChannelConf_p->channelId],
-                   &pChannelConf_p->pdoChannel, sizeof (pChannelConf_p->pdoChannel));
+                    &pChannelConf_p->pdoChannel, sizeof (pChannelConf_p->pdoChannel));
     }
 
     pdokInstance_g.fRunning = FALSE;
@@ -395,7 +395,7 @@ tOplkError pdok_processRxPdo(tPlkFrame* pFrame_p, UINT frameSize_p)
     tOplkError          ret = kErrorOk;
     BYTE                frameData;
     UINT                nodeId;
-    tMsgType         	msgType;
+    tMsgType            msgType;
     tPdoChannel*        pPdoChannel;
     UINT                channelId;
 
@@ -454,8 +454,8 @@ tOplkError pdok_processRxPdo(tPlkFrame* pFrame_p, UINT frameSize_p)
             */
 
             pdokcal_writeRxPdo(channelId,
-                              &pFrame_p->data.pres.aPayload[0],
-                              pPdoChannel->pdoSize);
+                               &pFrame_p->data.pres.aPayload[0],
+                               pPdoChannel->pdoSize);
 
             // processing finished successfully
             break;
@@ -526,8 +526,9 @@ tOplkError pdok_sendSyncEvent(void)
 /**
 \brief  TPDO callback function
 
-This function is called by DLL if PRes or PReq need to be encoded. It is called
-in NMT_CS_PRE_OPERATIONAL_2, NMT_CS_READY_TO_OPERATE and NMT_CS_OPERATIONAL.
+This function is called by the DLL if a PRes or a PReq need to be encoded. It
+is called in NMT_CS_PRE_OPERATIONAL_2, NMT_CS_READY_TO_OPERATE and
+NMT_CS_OPERATIONAL.
 
 \param  pFrameInfo_p                Pointer to frame info structure
 \param  fReadyFlag_p                State of RD flag which shall be set in TPDO
@@ -535,7 +536,7 @@ in NMT_CS_PRE_OPERATIONAL_2, NMT_CS_READY_TO_OPERATE and NMT_CS_OPERATIONAL.
 \return The function returns a tOplkError error code.
 **/
 //------------------------------------------------------------------------------
-static tOplkError cbProcessTpdo(tFrameInfo * pFrameInfo_p, BOOL fReadyFlag_p)
+static tOplkError cbProcessTpdo(tFrameInfo* pFrameInfo_p, BOOL fReadyFlag_p)
 {
     tOplkError      Ret = kErrorOk;
     Ret = copyTxPdo(pFrameInfo_p->pFrame, pFrameInfo_p->frameSize, fReadyFlag_p);
@@ -544,19 +545,19 @@ static tOplkError cbProcessTpdo(tFrameInfo * pFrameInfo_p, BOOL fReadyFlag_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief  disable PDO channels
+\brief  Disable PDO channels
 
-The function disables all PDO channels of a direction (RX/TX)
+The function disables all PDO channels of a given direction (RX/TX)
 
 \param  pPdoChannel_p           Pointer to first PDO channel
 \param  channelCnt_p            Number of PDO channels
 */
 //------------------------------------------------------------------------------
-static void disablePdoChannels(tPdoChannel *pPdoChannel_p, UINT channelCnt_p)
+static void disablePdoChannels(tPdoChannel* pPdoChannel_p, UINT channelCnt_p)
 {
     UINT        index;
 
-    // disable all TPDOs
+    // disable all PDOs
     for (index = 0; index < channelCnt_p; index++)
     {
         pPdoChannel_p[index].nodeId = PDO_INVALID_NODE_ID;
@@ -582,7 +583,7 @@ static tOplkError copyTxPdo(tPlkFrame* pFrame_p, UINT frameSize_p, BOOL fReadyFl
     tOplkError          ret = kErrorOk;
     BYTE                flag1;
     UINT                nodeId;
-    tMsgType         	msgType;
+    tMsgType            msgType;
     tPdoChannel*        pPdoChannel;
     UINT                channelId;
 
@@ -590,7 +591,7 @@ static tOplkError copyTxPdo(tPlkFrame* pFrame_p, UINT frameSize_p, BOOL fReadyFl
     flag1 = ami_getUint8Le(&pFrame_p->data.pres.flag1);
     ami_setUint8Le(&pFrame_p->data.pres.flag1, (flag1 & ~PLK_FRAME_FLAG1_RD));
 
-    // retrieve EPL message type
+    // retrieve POWERLINK message type
     msgType = ami_getUint8Le(&pFrame_p->messageType);
     if (msgType == kMsgTypePres)
     {   // TPDO is PRes frame
@@ -660,5 +661,4 @@ Exit:
 }
 
 ///\}
-
 
