@@ -6,7 +6,7 @@
 
 This module is the target specific implementation of the high-resolution
 timer module for Linux kernelspace.
-The Linux kernel has to be compiled with high resolution timers enabled.
+The Linux kernel has to be compiled with high-resolution timers enabled.
 This is done by configuring the kernel with CONFIG_HIGH_RES_TIMERS enabled.
 
 \ingroup module_hrestimer
@@ -167,7 +167,7 @@ tOplkError hrestimer_init(void)
 /**
 \brief    Add instance of high-resolution timer module
 
-The function adds an instance of the high-resolution timer module
+The function adds an instance of the high-resolution timer module.
 
 \return Returns a tOplkError error code.
 
@@ -191,7 +191,7 @@ tOplkError hrestimer_addInstance(void)
     for (index = 0; index < TIMER_COUNT; index++)
     {
         tHresTimerInfo*  pTimerInfo;
-        struct hrtimer*              pTimer;
+        struct hrtimer*  pTimer;
 
         pTimerInfo = &hresTimerInstance_l.aTimerInfo[index];
         pTimer = &pTimerInfo->timer;
@@ -213,7 +213,7 @@ tOplkError hrestimer_addInstance(void)
 /**
 \brief    Delete instance of high-resolution timer module
 
-The function deletes an instance of the high-resolution timer module
+The function deletes an instance of the high-resolution timer module.
 
 \return Returns a tOplkError error code.
 
@@ -245,17 +245,17 @@ tOplkError hrestimer_delInstance(void)
 \brief    Modify a high-resolution timer
 
 The function modifies the timeout of the timer with the specified handle.
-If the handle, the pointer points to, is zero, the timer must be created first.
-If it is not possible to stop the old timer, this function always assures that
-the old timer does not trigger the callback function with the same handle as
-the new timer. That means the callback function must check the passed handle
+If the handle to which the pointer points to is zero, the timer must be created
+first. If it is not possible to stop the old timer, this function always assures
+that the old timer does not trigger the callback function with the same handle
+as the new timer. That means the callback function must check the passed handle
 with the one returned by this function. If these are unequal, the call can be
 discarded.
 
 \param  pTimerHdl_p     Pointer to timer handle.
 \param  time_p          Relative timeout in [ns].
 \param  pfnCallback_p   Callback function, which is called when timer expires.
-                        (The function is called mutual exclusive with the Edrv
+                        (The function is called mutually exclusive with the Edrv
                         callback functions (Rx and Tx)).
 \param  argument_p      User-specific argument
 \param  fContinue_p     If TRUE, callback function will be called continuously.
@@ -320,8 +320,8 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
     }
 
     pTimerInfo->eventArg.argument.value = argument_p;
-    pTimerInfo->pfnCallback      = pfnCallback_p;
-    pTimerInfo->fContinuously    = fContinue_p;
+    pTimerInfo->pfnCallback   = pfnCallback_p;
+    pTimerInfo->fContinuously = fContinue_p;
     pTimerInfo->period        = time_p;
 
     /* HRTIMER_MODE_REL does not influence general handling of this timer.
@@ -330,8 +330,9 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
      * hrtimer_start also skips pending timer events.
      * The state HRTIMER_STATE_CALLBACK is ignored.
      * We have to cope with that in our callback function. */
-    relTime = ktime_add_ns(ktime_set(0,0), time_p);
+    relTime = ktime_add_ns(ktime_set(0, 0), time_p);
     hrtimer_start(&pTimerInfo->timer, relTime, HRTIMER_MODE_REL);
+
     return ret;
 }
 
@@ -339,8 +340,8 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
 /**
 \brief    Delete a high-resolution timer
 
-The function deletes an created high-resolution timer. The timer is specified
-by its timer handle. After deleting the handle is reset to zero.
+The function deletes a created high-resolution timer. The timer is specified
+by its timer handle. After deleting, the handle is reset to zero.
 
 \param  pTimerHdl_p     Pointer to timer handle.
 
@@ -418,7 +419,7 @@ expires.
 \return Returns a hrtimer_restart value
 */
 //------------------------------------------------------------------------------
-enum hrtimer_restart timerCallback (struct hrtimer* pTimer_p)
+enum hrtimer_restart timerCallback(struct hrtimer* pTimer_p)
 {
     UINT                    index;
     tHresTimerInfo*         pTimerInfo;
@@ -429,7 +430,7 @@ enum hrtimer_restart timerCallback (struct hrtimer* pTimer_p)
 
     ret        = HRTIMER_NORESTART;
     pTimerInfo = container_of(pTimer_p, tHresTimerInfo, timer);
-    index    = HDL_TO_IDX(pTimerInfo->eventArg.timerHdl);
+    index      = HDL_TO_IDX(pTimerInfo->eventArg.timerHdl);
     if (index >= TIMER_COUNT)
         goto Exit;      // invalid handle
 
@@ -456,7 +457,7 @@ enum hrtimer_restart timerCallback (struct hrtimer* pTimer_p)
 
 #ifdef PROVE_OVERRUN
         now      = ktime_get();
-        interval = ktime_add_ns(ktime_set(0,0), pTimerInfo->period);
+        interval = ktime_add_ns(ktime_set(0, 0), pTimerInfo->period);
         overruns = hrtimer_forward(pTimer_p, now, interval);
         if (overruns > 1)
         {
@@ -477,3 +478,4 @@ Exit:
 }
 
 /// \}
+

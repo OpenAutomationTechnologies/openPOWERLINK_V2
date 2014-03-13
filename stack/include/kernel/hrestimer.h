@@ -4,7 +4,7 @@
 
 \brief  Definitions for high-resolution timer module
 
-This file contains the definitions for the high-resolution timer module
+This file contains the definitions for the high-resolution timer module.
 
 *******************************************************************************/
 
@@ -82,5 +82,4 @@ UINT32     timestamp_calcTimeDiff(tTimestamp* pTimeStampPrevious_p,
 #endif
 
 #endif  // #ifndef _INC_hrestimer_H_
-
 

@@ -107,3 +107,4 @@ UINT32 timestamp_calcTimeDiff(tTimestamp* pTimeStampPrevious_p,
 
     return OMETH_TICKS_2_NS(timeDiffTicks);
 }
+

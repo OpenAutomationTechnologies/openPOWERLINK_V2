@@ -63,7 +63,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // global function prototypes
 //------------------------------------------------------------------------------
 
-/* Currently timers will be created in edrv module, therefor we need to
+/* Currently, timers will be created in edrv module. Therefore, we need to
    get the timer handle. This dependancy should be removed! */
 HANDLE edrv_getTimerHandle(UINT index_p);
 
@@ -104,12 +104,12 @@ typedef struct
 
 
 // function types from NTDLL.DLL
-typedef LONG (NTAPI *NTQUERYTIMERRESOLUTION) (OUT PULONG MinimumResolution,
-                                              OUT PULONG MaximumResolution,
-                                              OUT PULONG CurrentResolution);
-typedef LONG (NTAPI *NTSETTIMERRESOLUTION) (IN ULONG DesiredResolution,
-                                            IN BOOLEAN SetResolution,
-                                            OUT PULONG CurrentResolution);
+typedef LONG (NTAPI* NTQUERYTIMERRESOLUTION)(OUT PULONG MinimumResolution,
+                                             OUT PULONG MaximumResolution,
+                                             OUT PULONG CurrentResolution);
+typedef LONG (NTAPI* NTSETTIMERRESOLUTION)(IN ULONG DesiredResolution,
+                                           IN BOOLEAN SetResolution,
+                                           OUT PULONG CurrentResolution);
 
 //------------------------------------------------------------------------------
 // module local vars
@@ -183,8 +183,8 @@ tOplkError hrestimer_addInstance(void)
     }
 
     // load proc address of NtSetTimerResolution
-    NtSetTimerResolution = (NTSETTIMERRESOLUTION) GetProcAddress(hresTimerInstance_l.hInstLibNtDll,
-                                                                 "NtSetTimerResolution");
+    NtSetTimerResolution = (NTSETTIMERRESOLUTION)GetProcAddress(hresTimerInstance_l.hInstLibNtDll,
+                                                                "NtSetTimerResolution");
     if (NtSetTimerResolution == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("GetProcAddress(NtSetTimerResolution) failed (%d)\n", GetLastError());
@@ -235,20 +235,20 @@ tOplkError hrestimer_delInstance(void)
 \brief    Modify a high-resolution timer
 
 The function modifies the timeout of the timer with the specified handle.
-If the handle, the pointer points to, is zero, the timer must be created first.
-If it is not possible to stop the old timer, this function always assures that
-the old timer does not trigger the callback function with the same handle as
-the new timer. That means the callback function must check the passed handle
+If the handle to which the pointer points to is zero, the timer must be created
+first. If it is not possible to stop the old timer, this function always assures
+that the old timer does not trigger the callback function with the same handle
+as the new timer. That means the callback function must check the passed handle
 with the one returned by this function. If these are unequal, the call can be
 discarded.
 
 \param  pTimerHdl_p     Pointer to timer handle.
 \param  time_p          Relative timeout in [ns].
 \param  pfnCallback_p   Callback function, which is called when timer expires.
-                        (The function is called mutual exclusive with the Edrv
+                        (The function is called mutually exclusive with the Edrv
                         callback functions (Rx and Tx)).
-\param  argument_p      User-specific argument
-\param  fContinue_p     If TRUE, callback function will be called continuously.
+\param  argument_p      User-specific argument.
+\param  fContinue_p     If TRUE, the callback function will be called continuously.
                         Otherwise, it is a one-shot timer.
 
 \return Returns a tOplkError error code.
@@ -297,7 +297,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
                                         | ((index + 1) << TIMERHDL_SHIFT);
 
     // calculate duetime [100 ns] (negative value = relative time)
-    dueTime.QuadPart = (LONGLONG) time_p / -100LL;
+    dueTime.QuadPart = (LONGLONG)time_p / -100LL;
     if (dueTime.QuadPart > -10000LL)
     {   // duetime is less than 1 ms
         dueTime.QuadPart = -10000LL;
@@ -334,7 +334,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
 \brief    Delete a high-resolution timer
 
 The function deletes an created high-resolution timer. The timer is specified
-by its timer handle. After deleting the handle is reset to zero.
+by its timer handle. After deleting, the handle is reset to zero.
 
 \param  pTimerHdl_p     Pointer to timer handle.
 
@@ -422,3 +422,4 @@ void hresTimerCb(UINT index_p)
     }
     return;
 }
+

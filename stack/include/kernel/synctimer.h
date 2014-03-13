@@ -52,8 +52,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-typedef tOplkError (*tSyncTimerCbSync) (void);
-typedef tOplkError (*tSyncTimerCbLossOfSync) (void);
+typedef tOplkError (*tSyncTimerCbSync)(void);
+typedef tOplkError (*tSyncTimerCbLossOfSync)(void);
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -82,3 +82,4 @@ void       synctimer_disableExtSyncIrq(void);
 #endif
 
 #endif /* _INC_synctimer_H_ */
+
