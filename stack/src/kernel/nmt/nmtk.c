@@ -11,7 +11,7 @@ This file contains the implementation of the NMT kernel module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -53,8 +53,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // TracePoint support for realtime-debugging
 #ifdef _DBG_TRACE_POINTS_
-    void  TgtDbgSignalTracePoint (BYTE bTracePointNumber_p);
-    void  TgtDbgPostTraceValue (DWORD dwTraceValue_p);
+    void  TgtDbgSignalTracePoint(BYTE bTracePointNumber_p);
+    void  TgtDbgPostTraceValue(DWORD dwTraceValue_p);
     #define TGT_DBG_SIGNAL_TRACE_POINT(p)   TgtDbgSignalTracePoint(p)
     #define TGT_DBG_POST_TRACE_VALUE(v)     TgtDbgPostTraceValue(v)
 #else
@@ -252,7 +252,7 @@ tOplkError nmtk_process(tEvent* pEvent_p)
 
     ret = kErrorOk;
 
-    switch(pEvent_p->eventType)
+    switch (pEvent_p->eventType)
     {
         case kEventTypeNmtEvent:
             nmtEvent = *((tNmtEvent*)pEvent_p->pEventArg);
@@ -381,7 +381,7 @@ and the standardised device profile area is done.
 //------------------------------------------------------------------------------
 static tOplkError doStateGsResetApplication(tNmtEvent nmtEvent_p)
 {
-    switch(nmtEvent_p)
+    switch (nmtEvent_p)
     {
         // 2006/07/31 d.k.: react also on NMT reset commands in ResetApp state
         // NMT Command SwitchOff
@@ -425,7 +425,7 @@ In this state the initialization of the communication profile area is done.
 //------------------------------------------------------------------------------
 static tOplkError doStateGsResetCommunication(tNmtEvent nmtEvent_p)
 {
-    switch(nmtEvent_p)
+    switch (nmtEvent_p)
     {
         // 2006/07/31 d.k.: react also on NMT reset commands in ResetComm state
         // NMT Command SwitchOff
@@ -465,7 +465,7 @@ static tOplkError doStateGsResetCommunication(tNmtEvent nmtEvent_p)
 \brief  Process State GS_RESET_CONFIGURATION
 
 The function processes the NMT state GS_RESET_CONFIGURATION.
-In this state we build the configuration with infos from OD.
+In this state we build the configuration with information from the OD.
 
 \param  nmtEvent_p      NMT event to be processed.
 
@@ -480,7 +480,7 @@ static tOplkError doStateGsResetConfiguration(tNmtEvent nmtEvent_p)
     nmtkInstance_g.fFrozen = FALSE;
 
     // check events
-    switch(nmtEvent_p)
+    switch (nmtEvent_p)
     {
         // 2006/07/31 d.k.: react also on NMT reset commands in ResetConf state
         // NMT Command SwitchOff
@@ -536,7 +536,7 @@ static tOplkError doStateGsResetConfiguration(tNmtEvent nmtEvent_p)
 \brief  Process State CS_NOT_ACTIVE
 
 The function processes the NMT state CS_NOT_ACTIVE.
-In this state the node listens for EPL-Frames and checks timeout.
+In this state the node listens for POWERLINK frames and checks timeout.
 
 \param  nmtEvent_p      NMT event to be processed.
 
@@ -612,7 +612,7 @@ In this state the node processes only async frames.
 //------------------------------------------------------------------------------
 static tOplkError doStateCsPreOperational1(tNmtEvent nmtEvent_p)
 {
-    switch(nmtEvent_p)
+    switch (nmtEvent_p)
     {
         // NMT Command SwitchOff
         case kNmtEventCriticalError:
@@ -672,7 +672,7 @@ In this state the node processes isochronous and asynchronous frames.
 //------------------------------------------------------------------------------
 static tOplkError doStateCsPreOperational2(tNmtEvent nmtEvent_p)
 {
-    switch(nmtEvent_p)
+    switch (nmtEvent_p)
     {
         // NMT Command SwitchOff
         case kNmtEventCriticalError:
@@ -725,7 +725,7 @@ static tOplkError doStateCsPreOperational2(tNmtEvent nmtEvent_p)
         // check if application is ready to operate
         case kNmtEventEnterReadyToOperate:
             // check if command NMTEnableReadyToOperate from MN was received
-            if(nmtkInstance_g.fEnableReadyToOperate == TRUE)
+            if (nmtkInstance_g.fEnableReadyToOperate == TRUE)
             {   // reset flags
                 nmtkInstance_g.fEnableReadyToOperate = FALSE;
                 nmtkInstance_g.fAppReadyToOperate = FALSE;
@@ -741,7 +741,7 @@ static tOplkError doStateCsPreOperational2(tNmtEvent nmtEvent_p)
         // NMT Commando EnableReadyToOperate
         case kNmtEventEnableReadyToOperate:
             // check if application is ready
-            if(nmtkInstance_g.fAppReadyToOperate == TRUE)
+            if (nmtkInstance_g.fAppReadyToOperate == TRUE)
             {   // reset flags
                 nmtkInstance_g.fEnableReadyToOperate = FALSE;
                 nmtkInstance_g.fAppReadyToOperate = FALSE;
@@ -774,7 +774,7 @@ In this state the node should be configured and application is ready.
 //------------------------------------------------------------------------------
 static tOplkError doStateCsReadyToOperate(tNmtEvent nmtEvent_p)
 {
-    switch(nmtEvent_p)
+    switch (nmtEvent_p)
     {
         // NMT Command SwitchOff
         case kNmtEventCriticalError:
@@ -845,7 +845,7 @@ This is the normal working state of a CN.
 //------------------------------------------------------------------------------
 static tOplkError doStateCsOperational(tNmtEvent nmtEvent_p)
 {
-    switch(nmtEvent_p)
+    switch (nmtEvent_p)
     {
         // NMT Command SwitchOff
         case kNmtEventCriticalError:
@@ -917,7 +917,7 @@ frames.
 //------------------------------------------------------------------------------
 static tOplkError doStateCsStopped(tNmtEvent nmtEvent_p)
 {
-    switch(nmtEvent_p)
+    switch (nmtEvent_p)
     {
         // NMT Command SwitchOff
         case kNmtEventCriticalError:
@@ -974,7 +974,7 @@ static tOplkError doStateCsStopped(tNmtEvent nmtEvent_p)
 \brief  Process State CS_BASIC_ETHERNET
 
 The function processes the NMT state CS_BASIC_ETHERNET.
-In this state there is no POWERLINK cycle and the node performs normal ethernet
+In this state there is no POWERLINK cycle and the node performs normal Ethernet
 communication.
 
 \param  nmtEvent_p      NMT event to be processed.
@@ -984,7 +984,7 @@ communication.
 //------------------------------------------------------------------------------
 static tOplkError doStateCsBasicEthernet(tNmtEvent nmtEvent_p)
 {
-    switch(nmtEvent_p)
+    switch (nmtEvent_p)
     {
         // NMT Command SwitchOff
         case kNmtEventCriticalError:
@@ -1060,7 +1060,7 @@ static tOplkError doStateMsNotActive(tNmtEvent nmtEvent_p)
     // TODO: -create error E_NMT_BA1_NO_MN_SUPPORT
     nmtkInstance_g.fFrozen = TRUE;
 #else
-    switch(nmtEvent_p)
+    switch (nmtEvent_p)
     {
         // NMT Command SwitchOff
         case kNmtEventCriticalError:
@@ -1093,7 +1093,7 @@ static tOplkError doStateMsNotActive(tNmtEvent nmtEvent_p)
             nmtkInstance_g.stateIndex = kNmtkGsResetConfiguration;
             break;
 
-        // EPL frames received
+        // POWERLINK frames received
         case kNmtEventDllCeSoc:
         case kNmtEventDllCeSoa:
             // other MN in network
@@ -1146,7 +1146,7 @@ In this state the MN processes the reduced POWERLINK cycle.
 //------------------------------------------------------------------------------
 static tOplkError doStateMsPreOperational1(tNmtEvent nmtEvent_p)
 {
-    switch(nmtEvent_p)
+    switch (nmtEvent_p)
     {
         // NMT Command SwitchOff
         case kNmtEventCriticalError:
@@ -1240,7 +1240,7 @@ In this state the MN processes the full POWERLINK cycle.
 //------------------------------------------------------------------------------
 static tOplkError doStateMsPreOperational2(tNmtEvent nmtEvent_p)
 {
-    switch(nmtEvent_p)
+    switch (nmtEvent_p)
     {
         // NMT Command SwitchOff
         case kNmtEventCriticalError:
@@ -1313,7 +1313,7 @@ POWERLINK cycle.
 //------------------------------------------------------------------------------
 static tOplkError doStateMsReadyToOperate(tNmtEvent nmtEvent_p)
 {
-    switch(nmtEvent_p)
+    switch (nmtEvent_p)
     {
         // NMT Command SwitchOff
         case kNmtEventCriticalError:
@@ -1384,7 +1384,7 @@ This is the normal working state of a MN.
 //------------------------------------------------------------------------------
 static tOplkError doStateMsOperational(tNmtEvent nmtEvent_p)
 {
-    switch(nmtEvent_p)
+    switch (nmtEvent_p)
     {
         // NMT Command SwitchOff
         case kNmtEventCriticalError:
@@ -1442,7 +1442,7 @@ static tOplkError doStateMsOperational(tNmtEvent nmtEvent_p)
 \brief  Process State MS_BASIC_ETHERNET
 
 The function processes the NMT state MS_BASIC_ETHERNET.
-In this state the MN processes normal ethernet traffic.
+In this state the MN processes normal Ethernet traffic.
 
 \param  nmtEvent_p      NMT event to be processed.
 
@@ -1451,7 +1451,7 @@ In this state the MN processes normal ethernet traffic.
 //------------------------------------------------------------------------------
 tOplkError doStateMsBasicEthernet(tNmtEvent nmtEvent_p)
 {
-    switch(nmtEvent_p)
+    switch (nmtEvent_p)
     {
         // NMT Command SwitchOff
         case kNmtEventCriticalError:
@@ -1505,3 +1505,4 @@ tOplkError doStateMsBasicEthernet(tNmtEvent nmtEvent_p)
 }
 
 #endif
+
