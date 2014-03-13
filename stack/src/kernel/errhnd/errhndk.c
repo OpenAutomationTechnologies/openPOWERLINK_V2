@@ -13,7 +13,7 @@ error counters.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -86,7 +86,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 /**
-\brief  instance of kernel error handler
+\brief  Instance of kernel error handler
 
 The structure defines the instance variables of the kernel error handler.
 */
@@ -110,7 +110,7 @@ static tOplkError generateHistoryEntry(UINT16 errorCode_p, tNetTime netTime_p);
 static tOplkError generateHistoryEntryNodeId(UINT16 errorCode_p, tNetTime netTime_p, UINT nodeId_p);
 static void       decrementCnCounters(void);
 static tOplkError postHistoryEntryEvent(tErrHistoryEntry* pHistoryEntry_p);
-static tOplkError handleDllErrors(tEvent *pEvent_p);
+static tOplkError handleDllErrors(tEvent* pEvent_p);
 
 #ifdef CONFIG_INCLUDE_NMT_MN
 static tOplkError decrementMnCounters(void);
@@ -169,11 +169,11 @@ tOplkError errhndk_exit()
 The function processes error events and modifies the appropriate error counters.
 It will be called by the DLL.
 
-\param  pEvent_p            Pointer to error event which should be processed
+\param  pEvent_p            Pointer to error event which should be processed.
 
 \return Returns a tOplkError error code
-\retval kErrorOk      Event was successfully handled
-\retval kErrorInvalidEvent    An invalid event was supplied
+\retval kErrorOk              Event was successfully handled.
+\retval kErrorInvalidEvent    An invalid event was supplied.
 
 \ingroup module_errhndk
 */
@@ -184,7 +184,7 @@ tOplkError errhndk_process(tEvent* pEvent_p)
 
     ret = kErrorOk;
 
-    switch(pEvent_p->eventType)
+    switch (pEvent_p->eventType)
     {
         case kEventTypeDllError:
             ret = handleDllErrors(pEvent_p);
@@ -205,7 +205,7 @@ tOplkError errhndk_process(tEvent* pEvent_p)
 The function decrements the error counters. It should be called at the end
 of each cycle.
 
-\param  fMN_p               Flag determines if node is running as MN
+\param  fMN_p               Flag determines if node is running as MN.
 
 \return Returns always kErrorOk
 
@@ -241,7 +241,7 @@ tOplkError errhndk_decrementCounters(BOOL fMN_p)
 The function posts an error event to the error handler module. It is provided
 to other modules which need to post error events to the error handler.
 
-\param  pErrEvent_p         Pointer to error event which should be posted
+\param  pErrEvent_p         Pointer to error event which should be posted.
 
 \return Returns error code provided by eventk_postEvent()
 
@@ -255,7 +255,7 @@ tOplkError errhndk_postError(tEventDllError* pErrEvent_p)
 
     Event.eventSink = kEventSinkErrk;
     Event.eventType = kEventTypeDllError;
-    Event.eventArgSize = sizeof (tEventDllError);
+    Event.eventArgSize = sizeof(tEventDllError);
     Event.pEventArg = pErrEvent_p;
     Ret = eventk_postEvent(&Event);
 
@@ -270,7 +270,7 @@ tOplkError errhndk_postError(tEventDllError* pErrEvent_p)
 
 The function resets the error flag for the specified CN.
 
-\param  nodeId_p            Node ID of CN for which error flag will be reseted
+\param  nodeId_p            Node ID of CN for which error flag will be reset.
 
 \return Returns always kErrorOk
 
@@ -323,8 +323,8 @@ static tOplkError decrementMnCounters(void)
         nodeIdx = *pCnNodeId - 1;
         if (nodeIdx < NUM_DLL_MNCN_LOSSPRES_OBJS)
         {
-            if  (instance_l.aMnCnLossPresEvent[nodeIdx] ==
-                 ERRORHANDLERK_CN_LOSS_PRES_EVENT_NONE)
+            if (instance_l.aMnCnLossPresEvent[nodeIdx] ==
+                ERRORHANDLERK_CN_LOSS_PRES_EVENT_NONE)
             {
                 errhndkcal_getMnCnLossPresThresholdCnt(nodeIdx, &thresholdCnt);
                 if (thresholdCnt > 0)
@@ -336,7 +336,7 @@ static tOplkError decrementMnCounters(void)
             else
             {
                 if (instance_l.aMnCnLossPresEvent[nodeIdx] ==
-                     ERRORHANDLERK_CN_LOSS_PRES_EVENT_OCC)
+                    ERRORHANDLERK_CN_LOSS_PRES_EVENT_OCC)
                 {
                     instance_l.aMnCnLossPresEvent[nodeIdx] =
                                           ERRORHANDLERK_CN_LOSS_PRES_EVENT_NONE;
@@ -411,12 +411,12 @@ The function checks if a CN Loss of SoC error occured. It updates the
 appropriate error counters, generates a history entry and posts the error event
 to the NMT.
 
-\param  pEvent_p        Pointer to error event provided by DLL
+\param  pEvent_p        Pointer to error event provided by DLL.
 
 \return Returns kErrorOk or error code
 */
 //------------------------------------------------------------------------------
-static tOplkError handleCnLossSoc(tEvent *pEvent_p)
+static tOplkError handleCnLossSoc(tEvent* pEvent_p)
 {
     tOplkError              ret = kErrorOk;
     tEventDllError*         pErrorHandlerEvent = (tEventDllError*)pEvent_p->pEventArg;
@@ -462,12 +462,12 @@ The function checks if a CN Loss of PReq error occured. It updates the
 appropriate error counters, generates a history entry and posts the error event
 to the NMT.
 
-\param  pEvent_p        Pointer to error event provided by DLL
+\param  pEvent_p        Pointer to error event provided by DLL.
 
 \return Returns kErrorOk or error code
 */
 //------------------------------------------------------------------------------
-static tOplkError handleCnLossPreq(tEvent *pEvent_p)
+static tOplkError handleCnLossPreq(tEvent* pEvent_p)
 {
     tOplkError              ret;
     tEventDllError*         pErrorHandlerEvent = (tEventDllError*)pEvent_p->pEventArg;
@@ -510,12 +510,12 @@ static tOplkError handleCnLossPreq(tEvent *pEvent_p)
 The function checks if a PReq was successfully received. If it is, the
 appropriate error counter will be decremented.
 
-\param  pEvent_p        Pointer to error event provided by DLL
+\param  pEvent_p        Pointer to error event provided by DLL.
 
 \return Returns kErrorOk or error code
 */
 //------------------------------------------------------------------------------
-static void handleCorrectPreq(tEvent *pEvent_p)
+static void handleCorrectPreq(tEvent* pEvent_p)
 {
     tEventDllError*         pErrorHandlerEvent = (tEventDllError*)pEvent_p->pEventArg;
     UINT32                  thresholdCnt;
@@ -539,12 +539,12 @@ The function checks if a CN CRC error occured. It updates the
 appropriate error counters, generates a history entry and posts the error event
 to the NMT.
 
-\param  pEvent_p        Pointer to error event provided by DLL
+\param  pEvent_p        Pointer to error event provided by DLL.
 
 \return Returns kErrorOk or error code
 */
 //------------------------------------------------------------------------------
-static tOplkError handleCnCrc(tEvent *pEvent_p)
+static tOplkError handleCnCrc(tEvent* pEvent_p)
 {
     tOplkError              ret;
     tEventDllError*         pErrorHandlerEvent = (tEventDllError*)pEvent_p->pEventArg;
@@ -586,16 +586,16 @@ static tOplkError handleCnCrc(tEvent *pEvent_p)
 /**
 \brief    Handle a invalid format error
 
-The function checks if a invalid format error occured. A appropriate histroy
-entry will be generated. If the node is acting as MN the CN causing the error
+The function checks if a invalid format error occured. An appropriate histroy
+entry will be generated. If the node is acting as MN, the CN causing the error
 is removed from the isochronous phase.
 
-\param  pEvent_p        Pointer to error event provided by DLL
+\param  pEvent_p        Pointer to error event provided by DLL.
 
 \return Returns kErrorOk or error code
 */
 //------------------------------------------------------------------------------
-static tOplkError handleInvalidFormat(tEvent *pEvent_p)
+static tOplkError handleInvalidFormat(tEvent* pEvent_p)
 {
     tOplkError              ret;
     tEventDllError*         pErrorHandlerEvent = (tEventDllError*)pEvent_p->pEventArg;
@@ -620,7 +620,7 @@ static tOplkError handleInvalidFormat(tEvent *pEvent_p)
             tDllNodeOpParam     NodeOpParam;
 
             NodeOpParam.opNodeType = kDllNodeOpTypeIsochronous;
-            NodeOpParam.nodeId =pErrorHandlerEvent->nodeId;
+            NodeOpParam.nodeId = pErrorHandlerEvent->nodeId;
             // remove node from isochronous phase
             dllk_deleteNode(&NodeOpParam);
 
@@ -647,18 +647,18 @@ static tOplkError handleInvalidFormat(tEvent *pEvent_p)
 #ifdef CONFIG_INCLUDE_NMT_MN
 //------------------------------------------------------------------------------
 /**
-\brief    Handle a MN CRC error
+\brief    Handle an MN CRC error
 
-The function checks if a MN CRC error occured. It updates the
+The function checks if an MN CRC error occured. It updates the
 appropriate error counters, generates a history entry and posts the error event
 to the NMT.
 
-\param  pEvent_p        Pointer to error event provided by DLL
+\param  pEvent_p        Pointer to error event provided by DLL.
 
 \return Returns kErrorOk or error code
 */
 //------------------------------------------------------------------------------
-static tOplkError handleMnCrc(tEvent *pEvent_p)
+static tOplkError handleMnCrc(tEvent* pEvent_p)
 {
     tOplkError              ret;
     tEventDllError*         pErrorHandlerEvent = (tEventDllError*)pEvent_p->pEventArg;
@@ -693,17 +693,17 @@ static tOplkError handleMnCrc(tEvent *pEvent_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief    Handle a MN cycle time exceeded error
+\brief    Handle an MN cycle time exceeded error
 
-The function checks if a MN cylce time exceeded error occured. It updates the
+The function checks if an MN cylce time exceeded error occured. It updates the
 appropriate error counters and generates a history entry.
 
-\param  pEvent_p        Pointer to error event provided by DLL
+\param  pEvent_p        Pointer to error event provided by DLL.
 
 \return Returns kErrorOk or error code
 */
 //------------------------------------------------------------------------------
-static tOplkError handleMnCycTimeExceed(tEvent *pEvent_p)
+static tOplkError handleMnCycTimeExceed(tEvent* pEvent_p)
 {
     tOplkError              ret = kErrorOk;
     tEventDllError*         pErrorHandlerEvent =
@@ -726,8 +726,8 @@ static tOplkError handleMnCycTimeExceed(tEvent *pEvent_p)
         if (thresholdCnt >= threshold)
         {
             ret = generateHistoryEntryWithError(E_DLL_CYCLE_EXCEED_TH,
-                                               pEvent_p->netTime,
-                                               pErrorHandlerEvent->oplkError);
+                                                pEvent_p->netTime,
+                                                pErrorHandlerEvent->oplkError);
             if (ret != kErrorOk)
             {
                 errhndkcal_setMnCycTimeExceedCounters(thresholdCnt, cumulativeCnt);
@@ -738,8 +738,8 @@ static tOplkError handleMnCycTimeExceed(tEvent *pEvent_p)
         else
         {
             ret = generateHistoryEntryWithError(E_DLL_CYCLE_EXCEED,
-                                               pEvent_p->netTime,
-                                               pErrorHandlerEvent->oplkError);
+                                                pEvent_p->netTime,
+                                                pErrorHandlerEvent->oplkError);
             if (ret != kErrorOk)
             {
                 errhndkcal_setMnCycTimeExceedCounters(cumulativeCnt, thresholdCnt);
@@ -758,14 +758,14 @@ static tOplkError handleMnCycTimeExceed(tEvent *pEvent_p)
 
 The function checks if a Loss of PRes error occured for a CN. It updates the
 appropriate error counters and generates a history entry. If the threshold
-count is reached the CN will be removed from the isochronous phase.
+count is reached, the CN will be removed from the isochronous phase.
 
-\param  pEvent_p        Pointer to error event provided by DLL
+\param  pEvent_p        Pointer to error event provided by DLL.
 
 \return Returns kErrorOk or error code
 */
 //------------------------------------------------------------------------------
-static tOplkError handleMnCnLossPres(tEvent *pEvent_p)
+static tOplkError handleMnCnLossPres(tEvent* pEvent_p)
 {
     tOplkError              ret;
     UINT                    nodeIdx;
@@ -839,12 +839,12 @@ static tOplkError handleMnCnLossPres(tEvent *pEvent_p)
 The function is called by the error handler's proccess function and calls the
 different error handling functions to update the error counters.
 
-\param  pEvent_p        Pointer to error event provided by DLL
+\param  pEvent_p        Pointer to error event provided by DLL.
 
 \return Returns kErrorOk or error code
 */
 //------------------------------------------------------------------------------
-static tOplkError handleDllErrors(tEvent *pEvent_p)
+static tOplkError handleDllErrors(tEvent* pEvent_p)
 {
     tOplkError              ret = kErrorOk;
 
@@ -891,15 +891,15 @@ static tOplkError handleDllErrors(tEvent *pEvent_p)
 
 The function is used to post a heartbeat event to the NMT.
 
-\param  nodeId_p          Node Id of CN to be posted
-\param  state_p             State to be posted
-\param  errorCode_p        Error Code which occured
+\param  nodeId_p           Node Id of CN to be posted.
+\param  state_p            State to be posted.
+\param  errorCode_p        Error Code which occured.
 
 \return Returns kErrorOk or error code
 */
 //------------------------------------------------------------------------------
 static tOplkError postHeartbeatEvent(UINT nodeId_p, tNmtState state_p,
-                                    UINT16 errorCode_p)
+                                     UINT16 errorCode_p)
 {
     tOplkError              ret;
     tHeartbeatEvent         heartbeatEvent;
@@ -910,7 +910,7 @@ static tOplkError postHeartbeatEvent(UINT nodeId_p, tNmtState state_p,
     heartbeatEvent.errorCode = errorCode_p;
     event.eventSink = kEventSinkNmtMnu;
     event.eventType = kEventTypeHeartbeat;
-    event.eventArgSize = sizeof (heartbeatEvent);
+    event.eventArgSize = sizeof(heartbeatEvent);
     event.pEventArg = &heartbeatEvent;
     ret = eventk_postEvent(&event);
     return ret;
@@ -935,7 +935,7 @@ static tOplkError postHistoryEntryEvent(tErrHistoryEntry* pHistoryEntry_p)
 
     event.eventSink = kEventSinkApi;
     event.eventType = kEventTypeHistoryEntry;
-    event.eventArgSize = sizeof (*pHistoryEntry_p);
+    event.eventArgSize = sizeof(*pHistoryEntry_p);
     event.pEventArg = pHistoryEntry_p;
     ret = eventk_postEvent(&event);
 
@@ -949,8 +949,8 @@ static tOplkError postHistoryEntryEvent(tErrHistoryEntry* pHistoryEntry_p)
 The function generates a history entry by setting up a history entry event and
 posting it to the API.
 
-\param  errorCode_p            Error which occured
-\param  netTime_p               Timestamp at which error occured
+\param  errorCode_p            Error which occured.
+\param  netTime_p              Timestamp at which error occured.
 
 \return Returns kErrorOk or error code
 */
@@ -958,11 +958,11 @@ posting it to the API.
 static tOplkError generateHistoryEntry(UINT16 errorCode_p, tNetTime netTime_p)
 {
     tOplkError                  ret;
-    tErrHistoryEntry         	historyEntry;
+    tErrHistoryEntry            historyEntry;
 
     historyEntry.entryType = ERR_ENTRYTYPE_MODE_OCCURRED |
-                                ERR_ENTRYTYPE_PROF_EPL |
-                                ERR_ENTRYTYPE_HISTORY;
+                             ERR_ENTRYTYPE_PROF_EPL |
+                             ERR_ENTRYTYPE_HISTORY;
 
     historyEntry.errorCode = errorCode_p;
     historyEntry.timeStamp = netTime_p;
@@ -979,22 +979,22 @@ static tOplkError generateHistoryEntry(UINT16 errorCode_p, tNetTime netTime_p)
 The function generates a history entry for a specific node ID. This is done
 by setting up a history entry event and posting it to the API.
 
-\param  errorCode_p             Error which occured
-\param  netTime_p               Timestamp at which error occured
+\param  errorCode_p           Error which occured
+\param  netTime_p             Timestamp at which error occured
 \param  nodeId_p              Node ID for which to generate history entry
 
 \return Returns kErrorOk or error code
 */
 //------------------------------------------------------------------------------
 static tOplkError generateHistoryEntryNodeId(UINT16 errorCode_p,
-                                tNetTime netTime_p, UINT nodeId_p)
+                                             tNetTime netTime_p, UINT nodeId_p)
 {
     tOplkError                  ret;
-    tErrHistoryEntry         	historyEntry;
+    tErrHistoryEntry            historyEntry;
 
     historyEntry.entryType = ERR_ENTRYTYPE_MODE_OCCURRED |
-                                ERR_ENTRYTYPE_PROF_EPL |
-                                ERR_ENTRYTYPE_HISTORY;
+                             ERR_ENTRYTYPE_PROF_EPL |
+                             ERR_ENTRYTYPE_HISTORY;
 
     historyEntry.errorCode = errorCode_p;
     historyEntry.timeStamp = netTime_p;
@@ -1013,22 +1013,23 @@ The function generates a history entry which contains an additional error
 flag. This is done by setting up a history entry event and posting it to the
 API.
 
-\param  errorCode_p             Error which occured
-\param  netTime_p               Timestamp at which error occured
-\param  eplError_p              Error flag to be included in history entry
+\param  errorCode_p             Error which occured.
+\param  netTime_p               Timestamp at which error occured.
+\param  eplError_p              Error flag to be included in history entry.
 
 \return Returns kErrorOk or error code
 */
 //------------------------------------------------------------------------------
 static tOplkError generateHistoryEntryWithError(UINT16 errorCode_p,
-                                tNetTime netTime_p, UINT16 eplError_p)
+                                                tNetTime netTime_p,
+                                                UINT16 eplError_p)
 {
     tOplkError                  ret;
-    tErrHistoryEntry         	historyEntry;
+    tErrHistoryEntry            historyEntry;
 
     historyEntry.entryType = ERR_ENTRYTYPE_MODE_OCCURRED |
-                                ERR_ENTRYTYPE_PROF_EPL |
-                                ERR_ENTRYTYPE_HISTORY;
+                             ERR_ENTRYTYPE_PROF_EPL |
+                             ERR_ENTRYTYPE_HISTORY;
 
     historyEntry.errorCode = errorCode_p;
     historyEntry.timeStamp = netTime_p;
@@ -1045,7 +1046,7 @@ static tOplkError generateHistoryEntryWithError(UINT16 errorCode_p,
 
 The function posts a NMT event to the NMT.
 
-\param  nmtEvent_p              NMT event to post
+\param  nmtEvent_p              NMT event to post.
 
 \return Returns kErrorOk or error code
 */
@@ -1060,9 +1061,10 @@ static tOplkError postNmtEvent(tNmtEvent nmtEvent_p)
     event.eventSink = kEventSinkNmtk;
     event.eventType = kEventTypeNmtEvent;
     event.pEventArg = &nmtEvent;
-    event.eventArgSize = sizeof (nmtEvent);
+    event.eventArgSize = sizeof(nmtEvent);
     ret = eventk_postEvent(&event);
     return ret;
 }
 
 /// \}
+
