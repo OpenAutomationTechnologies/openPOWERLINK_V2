@@ -114,13 +114,13 @@ static void signalUserEvent(void);
 The function initializes the kernel event CAL module on Windows.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tOplkError eventkcal_init (void)
+tOplkError eventkcal_init(void)
 {
     tOplkError      ret = kErrorOk;
 
@@ -146,8 +146,8 @@ tOplkError eventkcal_init (void)
     eventkcal_setSignalingCircbuf(kEventQueueKInt, signalKernelEvent);
 
     instance_l.fStopThread = FALSE;
-    if ((instance_l.threadHandle = CreateThread (NULL, 0, eventThread, (LPVOID)&instance_l,
-                                                 0, NULL)) == NULL)
+    if ((instance_l.threadHandle = CreateThread(NULL, 0, eventThread, (LPVOID)&instance_l,
+                                                0, NULL)) == NULL)
         goto Exit;
 
     SetThreadPriority(instance_l.threadHandle, THREAD_PRIORITY_ABOVE_NORMAL);
@@ -174,19 +174,19 @@ Exit:
 
 //------------------------------------------------------------------------------
 /**
-\brief    Cleanup kernel event CAL module
+\brief    Clean up kernel event CAL module
 
 The function cleans up the kernel event CAL module. For cleanup it calls the exit
 functions of the queue implementations for each used queue.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tOplkError eventkcal_exit (void)
+tOplkError eventkcal_exit(void)
 {
     if (instance_l.fInitialized == TRUE)
     {
@@ -215,13 +215,13 @@ This function posts a event to the kernel queue.
 \param  pEvent_p                Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tOplkError eventkcal_postKernelEvent (tEvent *pEvent_p)
+tOplkError eventkcal_postKernelEvent(tEvent* pEvent_p)
 {
     tOplkError      ret = kErrorOk;
 
@@ -239,13 +239,13 @@ This function posts a event to the user queue.
 \param  pEvent_p                Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tOplkError eventkcal_postUserEvent (tEvent *pEvent_p)
+tOplkError eventkcal_postUserEvent (tEvent* pEvent_p)
 {
     tOplkError      ret = kErrorOk;
 
@@ -288,12 +288,12 @@ This function contains the main function for the event handler thread.
 static DWORD WINAPI eventThread(LPVOID arg)
 {
     tEventkCalInstance*     pInstance = (tEventkCalInstance*)arg;
-    DWORD                    waitResult;
+    DWORD                   waitResult;
 
     TRACE("Kernel event thread %d waiting for events...\n", GetCurrentThreadId());
     while (!pInstance->fStopThread)
     {
-        waitResult = WaitForSingleObject (pInstance->semKernelData, 100);
+        waitResult = WaitForSingleObject(pInstance->semKernelData, 100);
         switch (waitResult)
         {
             case WAIT_OBJECT_0:
@@ -329,7 +329,7 @@ static DWORD WINAPI eventThread(LPVOID arg)
 \brief  Signal a user event
 
 This function signals that a user event was posted. It will be registered in
-the circular buffer library as signal callback function
+the circular buffer library as signal callback function.
 */
 //------------------------------------------------------------------------------
 void signalUserEvent(void)
@@ -342,7 +342,7 @@ void signalUserEvent(void)
 \brief  Signal a kernel event
 
 This function signals that a kernel event was posted. It will be registered in
-the circular buffer library as signal callback function
+the circular buffer library as signal callback function.
 */
 //------------------------------------------------------------------------------
 void signalKernelEvent(void)
@@ -351,3 +351,4 @@ void signalKernelEvent(void)
 }
 
 /// \}
+

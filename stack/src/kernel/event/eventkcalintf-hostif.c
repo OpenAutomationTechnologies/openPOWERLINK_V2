@@ -11,7 +11,7 @@ the host interface for communication.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -103,8 +103,8 @@ is specified by eventQueue_p.
 \param  eventQueue_p            Event queue to initialize.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventkcal
 */
@@ -125,10 +125,10 @@ tOplkError eventkcal_initQueueHostif(tEventQueue eventQueue_p)
     if (instance_l[eventQueue_p] != NULL)
         return kErrorNoResource;
 
-    if((pHifInstance = hostif_getInstance(0)) == NULL)
+    if ((pHifInstance = hostif_getInstance(0)) == NULL)
         return kErrorNoResource;
 
-    switch(eventQueue_p)
+    switch (eventQueue_p)
     {
         case kEventQueueK2U:
             hifInstanceId = kHostifInstIdK2UQueue;
@@ -171,7 +171,7 @@ tOplkError eventkcal_initQueueHostif(tEventQueue eventQueue_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief    Cleanup a event queue
+\brief    Clean up a event queue
 
 The function cleans up a host interface event queue. The queue to cleanup is
 specified by eventQueue_p.
@@ -179,13 +179,13 @@ specified by eventQueue_p.
 \param  eventQueue_p            Event queue to cleanup.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tOplkError eventkcal_exitQueueHostif (tEventQueue eventQueue_p)
+tOplkError eventkcal_exitQueueHostif(tEventQueue eventQueue_p)
 {
     if (eventQueue_p > kEventQueueNum)
         return kErrorInvalidInstanceParam;
@@ -193,7 +193,7 @@ tOplkError eventkcal_exitQueueHostif (tEventQueue eventQueue_p)
     if (instance_l[eventQueue_p] == NULL)
         return kErrorOk;
 
-    switch(eventQueue_p)
+    switch (eventQueue_p)
     {
         case kEventQueueU2K:
         case kEventQueueK2U:
@@ -220,17 +220,17 @@ This function posts an event to the specified host interface queue.
 \param  pEvent_p                Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tOplkError eventkcal_postEventHostif (tEventQueue eventQueue_p, tEvent *pEvent_p)
+tOplkError eventkcal_postEventHostif(tEventQueue eventQueue_p, tEvent* pEvent_p)
 {
     tOplkError          ret = kErrorOk;
     tQueueReturn        lfqRet;
-    DWORD               aPostBuffer[(sizeof(tEvent) + MAX_EVENT_ARG_SIZE)/4];
+    DWORD               aPostBuffer[(sizeof(tEvent) + MAX_EVENT_ARG_SIZE) / 4];
     BYTE*               pPostBuffer = (BYTE*)aPostBuffer;
     ULONG               dataSize;
 
@@ -276,8 +276,8 @@ by calling the event handlers process function.
 \param  eventQueue_p            Event queue used for reading the event.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          if function executes correctly
-\retval other                   error
+\retval kErrorOk                Function executes correctly
+\retval other                   Error
 
 \ingroup module_eventkcal
 */
@@ -288,7 +288,7 @@ tOplkError eventkcal_processEventHostif(tEventQueue eventQueue_p)
     tQueueReturn        lfqRet;
     tEvent*             pEplEvent;
     WORD                dataSize = sizeof(tEvent) + MAX_EVENT_ARG_SIZE;
-    DWORD               aRxBuffer[(sizeof(tEvent) + MAX_EVENT_ARG_SIZE)/4];
+    DWORD               aRxBuffer[(sizeof(tEvent) + MAX_EVENT_ARG_SIZE) / 4];
     BYTE*               pRxBuffer = (BYTE*)aRxBuffer;
 
     if (eventQueue_p > kEventQueueNum)
@@ -298,15 +298,15 @@ tOplkError eventkcal_processEventHostif(tEventQueue eventQueue_p)
         return kErrorInvalidInstanceParam;
 
     lfqRet = lfq_entryDequeue(instance_l[eventQueue_p], pRxBuffer, &dataSize);
-    if(lfqRet != kQueueSuccessful)
+    if (lfqRet != kQueueSuccessful)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Getting event from queue failed (0x%X)\n", __func__, lfqRet);
         eventk_postError(kEventSourceEventk, kErrorEventReadError,
-                         sizeof (lfqRet), &lfqRet);
+                         sizeof(lfqRet), &lfqRet);
         goto Exit;
     }
 
-    pEplEvent = (tEvent *) pRxBuffer;
+    pEplEvent = (tEvent*)pRxBuffer;
     pEplEvent->eventArgSize = (UINT)dataSize - sizeof(tEvent);
     if(pEplEvent->eventArgSize > 0)
         pEplEvent->pEventArg = &pRxBuffer[sizeof(tEvent)];

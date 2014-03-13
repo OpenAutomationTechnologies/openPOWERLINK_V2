@@ -2,7 +2,7 @@
 ********************************************************************************
 \file   eventk.h
 
-\brief  Definitions of ther kernel event CAL module
+\brief  Definitions of the kernel event CAL module
 
 This file contains definitions for the kernel CAL module.
 
@@ -10,7 +10,7 @@ This file contains definitions for the kernel CAL module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -65,15 +65,16 @@ tOplkError eventk_init(void);
 
 tOplkError eventk_exit(void);
 
-tOplkError eventk_process(tEvent * pEvent_p) SECTION_EVENTK_PROCESS;
+tOplkError eventk_process(tEvent* pEvent_p) SECTION_EVENTK_PROCESS;
 
-tOplkError eventk_postEvent(tEvent * pEvent_p) SECTION_EVENTK_POST;
+tOplkError eventk_postEvent(tEvent* pEvent_p) SECTION_EVENTK_POST;
 
 tOplkError eventk_postError(tEventSource eventSource_p, tOplkError eplError_p,
-                                   UINT argSize_p, void* pArg_p);
+                            UINT argSize_p, void* pArg_p);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* _INC_eventk_H_ */
+

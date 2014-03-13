@@ -12,7 +12,7 @@ interface for posting events to other kernel modules.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -123,11 +123,11 @@ static tEventDispatchEntry eventDispatchTbl_l[] =
 \brief    Initialize kernel event module
 
 The function initializes the kernel event module. It is also responsible to call
-the init function of it's CAL module.
+the init function of its CAL module.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventk
 */
@@ -143,18 +143,18 @@ tOplkError eventk_init (void)
 
 //------------------------------------------------------------------------------
 /**
-\brief    Cleanup kernel event module
+\brief    Clean up kernel event module
 
 This function cleans up the kernel event module.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventk
 */
 //------------------------------------------------------------------------------
-tOplkError eventk_exit (void)
+tOplkError eventk_exit(void)
 {
     tOplkError      ret = kErrorOk;
 
@@ -174,13 +174,13 @@ specific module.
 \param  pEvent_p                Received event.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventk
 */
 //------------------------------------------------------------------------------
-tOplkError eventk_process (tEvent *pEvent_p)
+tOplkError eventk_process(tEvent* pEvent_p)
 {
     tOplkError              ret = kErrorOk;
     tEventSource            eventSource;
@@ -219,7 +219,7 @@ tOplkError eventk_process (tEvent *pEvent_p)
                     // forward error event to API layer
                     eventk_postError(kEventSourceEventk, ret,
                                      sizeof(eventSource),
-                                      &eventSource);
+                                     &eventSource);
                 }
             }
             fAlreadyHandled = TRUE;
@@ -239,17 +239,17 @@ CAL module which distributes the event to the suitable event queue.
 \param  pEvent_p                Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventk
 */
 //------------------------------------------------------------------------------
-tOplkError eventk_postEvent (tEvent *pEvent_p)
+tOplkError eventk_postEvent(tEvent* pEvent_p)
 {
     tOplkError ret = kErrorOk;
 
-    switch(pEvent_p->eventSink)
+    switch (pEvent_p->eventSink)
     {
         case kEventSinkNmtMnu:
         case kEventSinkNmtu:
@@ -291,14 +291,14 @@ This function posts an error event to the API module.
 \param  pArg_p                  Error argument
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventk
 */
 //------------------------------------------------------------------------------
-tOplkError eventk_postError (tEventSource eventSource_p, tOplkError eplError_p,
-                             UINT argSize_p, void *pArg_p)
+tOplkError eventk_postError(tEventSource eventSource_p, tOplkError eplError_p,
+                            UINT argSize_p, void* pArg_p)
 {
     tOplkError          ret;
     tEventError         eventError;
@@ -309,7 +309,7 @@ tOplkError eventk_postError (tEventSource eventSource_p, tOplkError eplError_p,
     // create argument
     eventError.eventSource = eventSource_p;
     eventError.oplkError = eplError_p;
-    argSize_p = (UINT) min ((size_t) argSize_p, sizeof (eventError.errorArg));
+    argSize_p = (UINT)min((size_t)argSize_p, sizeof(eventError.errorArg));
     OPLK_MEMCPY(&eventError.errorArg, pArg_p, argSize_p);
 
     // create event
@@ -334,14 +334,14 @@ tOplkError eventk_postError (tEventSource eventSource_p, tOplkError eplError_p,
 /**
 \brief  Handle NMT event in DLL
 
-This function dispatches NMT events which need also be handled by DLL to
-the DLLk module.
+This function dispatches NMT events which need to be handled by DLL to the DLLk
+module.
 
 \param  pEvent_p                Event to process.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 */
 //------------------------------------------------------------------------------
 static tOplkError handleNmtEventinDll(tEvent* pEvent_p)
@@ -364,3 +364,4 @@ static tOplkError handleNmtEventinDll(tEvent* pEvent_p)
 }
 
 /// \}
+

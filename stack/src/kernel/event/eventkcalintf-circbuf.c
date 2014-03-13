@@ -11,7 +11,7 @@ circular buffers for communication.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -100,8 +100,8 @@ is specified by eventQueue_p.
 \param  eventQueue_p            Event queue to initialize.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventkcal
 */
@@ -122,10 +122,11 @@ tOplkError eventkcal_initQueueCircbuf(tEventQueue eventQueue_p)
         return kErrorNoResource;
     }
 
-    switch(eventQueue_p)
+    switch (eventQueue_p)
     {
         case kEventQueueKInt:
-            circError = circbuf_alloc(CIRCBUF_KERNEL_INTERNAL_QUEUE, CONFIG_EVENT_SIZE_CIRCBUF_KERNEL_INTERNAL,
+            circError = circbuf_alloc(CIRCBUF_KERNEL_INTERNAL_QUEUE,
+                                      CONFIG_EVENT_SIZE_CIRCBUF_KERNEL_INTERNAL,
                                       &instance_l[eventQueue_p]);
             if (circError != kCircBufOk)
             {
@@ -135,18 +136,19 @@ tOplkError eventkcal_initQueueCircbuf(tEventQueue eventQueue_p)
             break;
 
         case kEventQueueU2K:
-            circError = circbuf_alloc(CIRCBUF_USER_TO_KERNEL_QUEUE, CONFIG_EVENT_SIZE_CIRCBUF_USER_TO_KERNEL,
+            circError = circbuf_alloc(CIRCBUF_USER_TO_KERNEL_QUEUE,
+                                      CONFIG_EVENT_SIZE_CIRCBUF_USER_TO_KERNEL,
                                       &instance_l[eventQueue_p]);
             if (circError != kCircBufOk)
             {
                 TRACE("PLK : Could not allocate CIRCBUF_USER_TO_KERNEL_QUEUE circbuffer\n");
                 return kErrorNoResource;
             }
-
             break;
 
         case kEventQueueK2U:
-            circError = circbuf_alloc(CIRCBUF_KERNEL_TO_USER_QUEUE, CONFIG_EVENT_SIZE_CIRCBUF_KERNEL_TO_USER,
+            circError = circbuf_alloc(CIRCBUF_KERNEL_TO_USER_QUEUE,
+                                      CONFIG_EVENT_SIZE_CIRCBUF_KERNEL_TO_USER,
                                       &instance_l[eventQueue_p]);
             if (circError != kCircBufOk)
             {
@@ -156,7 +158,8 @@ tOplkError eventkcal_initQueueCircbuf(tEventQueue eventQueue_p)
             break;
 
         case kEventQueueUInt:
-            circError = circbuf_alloc(CIRCBUF_USER_INTERNAL_QUEUE, CONFIG_EVENT_SIZE_CIRCBUF_USER_INTERNAL,
+            circError = circbuf_alloc(CIRCBUF_USER_INTERNAL_QUEUE,
+                                      CONFIG_EVENT_SIZE_CIRCBUF_USER_INTERNAL,
                                       &instance_l[eventQueue_p]);
             if (circError != kCircBufOk)
             {
@@ -175,7 +178,7 @@ tOplkError eventkcal_initQueueCircbuf(tEventQueue eventQueue_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief    Cleanup a event queue
+\brief    Clean up a event queue
 
 The function cleans up a circular buffer event queue. The queue to cleanup is
 specified by eventQueue_p.
@@ -183,13 +186,13 @@ specified by eventQueue_p.
 \param  eventQueue_p            Event queue to cleanup.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tOplkError eventkcal_exitQueueCircbuf (tEventQueue eventQueue_p)
+tOplkError eventkcal_exitQueueCircbuf(tEventQueue eventQueue_p)
 {
     if (eventQueue_p > kEventQueueNum)
         return kErrorInvalidInstanceParam;
@@ -214,13 +217,13 @@ This function posts an event to the provided queue instance.
 \param  pEvent_p                Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tOplkError eventkcal_postEventCircbuf (tEventQueue eventQueue_p, tEvent *pEvent_p)
+tOplkError eventkcal_postEventCircbuf(tEventQueue eventQueue_p, tEvent* pEvent_p)
 {
     tOplkError          ret = kErrorOk;
     tCircBufError       circError;
@@ -245,7 +248,7 @@ tOplkError eventkcal_postEventCircbuf (tEventQueue eventQueue_p, tEvent *pEvent_
     else
     {
         circError = circbuf_writeMultipleData(instance_l[eventQueue_p], pEvent_p, sizeof(tEvent),
-                                        pEvent_p->pEventArg, (ULONG)pEvent_p->eventArgSize);
+                                              pEvent_p->pEventArg, (ULONG)pEvent_p->eventArgSize);
     }
     if(circError != kCircBufOk)
     {
@@ -264,8 +267,8 @@ by calling the event handlers process function.
 \param  eventQueue_p            Event queue used for reading the event.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          if function executes correctly
-\retval other                   error
+\retval kErrorOk                Function executes correctly
+\retval other                   Error
 
 \ingroup module_eventkcal
 */
@@ -306,7 +309,7 @@ tOplkError eventkcal_processEventCircbuf(tEventQueue eventQueue_p)
 
         return kErrorGeneralError;
     }
-    pEplEvent = (tEvent *) aRxBuffer_l[eventQueue_p];
+    pEplEvent = (tEvent*)aRxBuffer_l[eventQueue_p];
     pEplEvent->eventArgSize = (readSize - sizeof(tEvent));
 
     if(pEplEvent->eventArgSize > 0)
@@ -336,8 +339,8 @@ at pDataBuffer_p.
 \param  pReadSize_p             Pointer to store length of event.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          if function executes correctly
-\retval other                   error
+\retval kErrorOk                Function executes correctly
+\retval other                   Error
 
 \ingroup module_eventkcal
 */
@@ -444,3 +447,4 @@ tOplkError eventkcal_setSignalingCircbuf(tEventQueue eventQueue_p, VOIDFUNCPTR p
 /// \{
 
 /// \}
+
