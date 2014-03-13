@@ -90,6 +90,15 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
 static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* pRxBuffer_p,
                                       tNmtState nmtState_p, tEdrvReleaseRxBuffer* pReleaseRxBuffer_p);
 static tOplkError forwardRpdo(tFrameInfo* pFrameInfo_p);
+static void       postInvalidFormatError(UINT nodeId_p, tNmtState nmtState_p);
+static BOOL       presFrameFormatIsInvalid(tFrameInfo* pFrameInfo_p,
+                                           tDllkNodeInfo* pIntNodeInfo_p, tNmtState nmtState_p);
+
+#if defined(CONFIG_INCLUDE_NMT_MN)
+static tOplkError checkAndSetSyncEvent(BOOL fPrcSlotFinished_p, UINT nodeId_p);
+static tOplkError updateNode(tPlkFrame* pFrame_p, tDllkNodeInfo* pIntNodeInfo_p, UINT nodeId_p);
+static tOplkError searchNodeInfo(UINT nodeId_p, tDllkNodeInfo** ppIntNodeInfo_p, BOOL* pfPrcSlotFinished_p);
+#endif
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -1323,6 +1332,26 @@ tOplkError dllk_processTpdo(tFrameInfo* pFrameInfo_p, BOOL fReadyFlag_p)
 
 //------------------------------------------------------------------------------
 /**
+\brief  Post invalid frame error event
+
+The function posts an invalid frame error event.
+
+\param  nodeId_p            Node ID of node which sent an invalid frame.
+\param  nmtState_p          NMT state of the local node
+*/
+//------------------------------------------------------------------------------
+static void postInvalidFormatError(UINT nodeId_p, tNmtState nmtState_p)
+{
+    tEventDllError  dllEvent;
+
+    dllEvent.dllErrorEvents = DLL_ERR_INVALID_FORMAT;
+    dllEvent.nodeId = nodeId_p;
+    dllEvent.nmtState = nmtState_p;
+    errhndk_postError(&dllEvent);
+}
+
+//------------------------------------------------------------------------------
+/**
 \brief  Process received PReq frame.
 
 The function processes a received PReq frame.
@@ -1395,12 +1424,7 @@ static tOplkError processReceivedPreq(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
             if (((UINT)(preqPayloadSize + PLK_FRAME_OFFSET_PDO_PAYLOAD) > pFrameInfo_p->frameSize) ||
                        (preqPayloadSize > dllkInstance_g.dllConfigParam.preqActPayloadLimit))
             {   // format error
-                tEventDllError  dllEvent;
-
-                dllEvent.dllErrorEvents = DLL_ERR_INVALID_FORMAT;
-                dllEvent.nodeId = ami_getUint8Le(&pFrame->srcNodeId);
-                dllEvent.nmtState = nmtState_p;
-                errhndk_postError(&dllEvent);
+                postInvalidFormatError(ami_getUint8Le(&pFrame->srcNodeId), nmtState_p);
                 goto Exit;
             }
 
@@ -1432,6 +1456,214 @@ Exit:
 
 //------------------------------------------------------------------------------
 /**
+\brief  Check for a valid PRes frame
+
+The function checks if a PRes frame is valid.
+
+\param  pFrameInfo_p        Pointer to frame information.
+\param  pIntNodeInfo_p      Pointer to node information.
+\param  nmtState_p          NMT state of the local node
+
+\return The function returns TRUE if the frame is valid and FALSE otherwise.
+*/
+//------------------------------------------------------------------------------
+static BOOL presFrameFormatIsInvalid(tFrameInfo* pFrameInfo_p,
+                                     tDllkNodeInfo* pIntNodeInfo_p, tNmtState nmtState_p)
+{
+    tPlkFrame*  pFrame = pFrameInfo_p->pFrame;
+    size_t      frameSize = pFrameInfo_p->frameSize;
+    size_t      payloadSize = ami_getUint16Le(&pFrame->data.pres.sizeLe);
+
+#if (NMT_MAX_NODE_ID == 0)
+    UNUSED_PARAMETER(pIntNodeInfo_p);
+    UNUSED_PARAMETER(nmtState_p);
+
+    if ((payloadSize + PLK_FRAME_OFFSET_PDO_PAYLOAD) > frameSize)
+    {
+        return TRUE;
+    }
+#else
+    size_t      payloadLimit = pIntNodeInfo_p->presPayloadLimit;
+
+    if (((payloadSize + PLK_FRAME_OFFSET_PDO_PAYLOAD) > frameSize) ||
+        (payloadSize > payloadLimit))
+        return TRUE;
+
+    // if we are MN we have to do additional checks
+    if (nmtState_p >= kNmtMsNotActive)
+    {
+        if (frameSize > (payloadLimit + PLK_FRAME_OFFSET_PDO_PAYLOAD))
+            return TRUE;
+    }
+#endif
+    return FALSE;
+}
+
+
+#if defined(CONFIG_INCLUDE_NMT_MN)
+//------------------------------------------------------------------------------
+/**
+\brief Check and set the sync event
+
+The function checks if the conditions for setting a sync event are fullfilled
+and sends the event if necessary.
+
+\param  fPrcSlotFinished_p  Flag determines if poll response chaining slot is
+                            finished.
+\param  nodeId_p            Node ID for which to do the check.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError checkAndSetSyncEvent(BOOL fPrcSlotFinished_p, UINT nodeId_p)
+{
+    tOplkError  ret = kErrorOk;
+
+    if (fPrcSlotFinished_p)
+    {
+        dllkInstance_g.fPrcSlotFinished = TRUE;
+
+        if ((dllkInstance_g.dllConfigParam.syncNodeId > C_ADR_SYNC_ON_SOC) &&
+            (dllkInstance_g.fSyncProcessed == FALSE) &&
+            (dllkInstance_g.dllConfigParam.fSyncOnPrcNode != FALSE))
+        {
+            dllkInstance_g.fSyncProcessed = TRUE;
+            ret = dllk_postEvent(kEventTypeSync);
+        }
+    }
+    else
+    {
+        if ((dllkInstance_g.dllConfigParam.syncNodeId > C_ADR_SYNC_ON_SOC) &&
+            (dllkInstance_g.fSyncProcessed == FALSE) &&
+            (dllkInstance_g.dllConfigParam.fSyncOnPrcNode != dllkInstance_g.fPrcSlotFinished) &&
+            (nodeId_p > dllkInstance_g.dllConfigParam.syncNodeId))
+        {
+            dllkInstance_g.fSyncProcessed = TRUE;
+            ret = dllk_postEvent(kEventTypeSync);
+        }
+    }
+
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief Update a node
+
+The function updates a node by sending the appropriate event to the NMT or
+DLLK module.
+
+\param  pFrame_p            Pointer to the received frame.
+\param  pIntNodeInfo_p      Pointer to the node information of the node to
+                            delete.
+\param  nodeId_p            Node ID of the node to delete.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError updateNode(tPlkFrame* pFrame_p, tDllkNodeInfo* pIntNodeInfo_p, UINT nodeId_p)
+{
+    tOplkError          ret = kErrorOk;
+    tHeartbeatEvent     heartbeatEvent;
+    tDllNodeOpParam     nodeOpParam;
+    tEvent              event;
+
+    // check NMT state of CN
+    heartbeatEvent.errorCode = E_NO_ERROR;
+    heartbeatEvent.nmtState = (tNmtState)(ami_getUint8Le(&pFrame_p->data.pres.nmtStatus) | NMT_TYPE_CS);
+
+    if (pIntNodeInfo_p->nmtState != heartbeatEvent.nmtState)
+    {   // NMT state of CN has changed -> post event to NmtMnu module
+
+        if (!pIntNodeInfo_p->fSoftDelete)
+        {   // normal isochronous CN
+            heartbeatEvent.nodeId = nodeId_p;
+            event.eventSink = kEventSinkNmtMnu;
+            event.eventType = kEventTypeHeartbeat;
+            event.eventArgSize = sizeof(heartbeatEvent);
+            event.pEventArg = &heartbeatEvent;
+        }
+        else
+        {   // CN shall be deleted softly, so remove it now without issuing any error
+            nodeOpParam.opNodeType = kDllNodeOpTypeIsochronous;
+            nodeOpParam.nodeId = pIntNodeInfo_p->nodeId;
+
+            event.eventSink = kEventSinkDllkCal;
+            event.eventType = kEventTypeDllkDelNode;
+            // $$$ d.k. set Event.netTime to current time
+            event.eventArgSize = sizeof(nodeOpParam);
+            event.pEventArg = &nodeOpParam;
+        }
+
+        if ((ret = eventk_postEvent(&event)) != kErrorOk)
+            return ret;
+
+        // save current NMT state of CN in internal node structure
+        pIntNodeInfo_p->nmtState = heartbeatEvent.nmtState;
+    }
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief Search for Node Info and handle Loss of PRes
+
+The function searches the node information for the node from which we received
+the PRes frame. For all nodes between the one we received the last PRes and
+this node we issue a loss of PRes. The node information of the node will
+be stored at \p ppIntNodeInfo_p.
+
+\param  nodeId_p            Node ID of node to search.
+\param  ppIntNodeInfo_p     Location to store the pointer to the node information.
+\param  pfPrcSlotFinished_p Pointer to store the flag for a finished poll response
+                            chaning slot.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError searchNodeInfo(UINT nodeId_p, tDllkNodeInfo** ppIntNodeInfo_p,
+                                 BOOL* pfPrcSlotFinished_p)
+{
+    tOplkError      ret = kErrorOk;
+    UINT8           nextNodeIndex = dllkInstance_g.curNodeIndex;
+    UINT8*          pCnNodeId = &dllkInstance_g.aCnNodeIdList[dllkInstance_g.curTxBufferOffsetCycle][nextNodeIndex];
+    tDllkNodeInfo*  pIntNodeInfo = NULL;
+
+    while (*pCnNodeId != C_ADR_INVALID)
+    {
+        if (*pCnNodeId == nodeId_p)
+        {   // CN found in list
+            nextNodeIndex = nextNodeIndex - dllkInstance_g.curNodeIndex;
+            dllkInstance_g.curNodeIndex += nextNodeIndex + 1;
+
+            // issue error for each CN in list between last and current
+            for (pCnNodeId-- ; nextNodeIndex > 0; nextNodeIndex--, pCnNodeId--)
+            {
+                if ((ret = dllk_issueLossOfPres(*pCnNodeId)) != kErrorOk)
+                    return ret;
+            }
+
+            pIntNodeInfo = dllk_getNodeInfo(nodeId_p);
+            break;
+        }
+        else
+        {
+            if (*pCnNodeId == C_ADR_BROADCAST)
+                *pfPrcSlotFinished_p = TRUE;        // PRC slot finished
+        }
+
+        pCnNodeId++;
+        nextNodeIndex++;
+    }
+
+    *ppIntNodeInfo_p = pIntNodeInfo;
+    return ret;
+}
+
+#endif
+
+//------------------------------------------------------------------------------
+/**
 \brief  Process received PRes frame
 
 The function processes a received PRes frame.
@@ -1452,24 +1684,19 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
     tOplkError      ret = kErrorOk;
     tPlkFrame*      pFrame;
     UINT            nodeId;
-
-#if NMT_MAX_NODE_ID > 0
     tDllkNodeInfo*  pIntNodeInfo = NULL;
-#endif
 
     pFrame = pFrameInfo_p->pFrame;
     nodeId = ami_getUint8Le(&pFrame->srcNodeId);
 
 #if CONFIG_DLL_PRES_CHAINING_CN != FALSE
     if ((dllkInstance_g.fPrcEnabled != FALSE) && (nodeId == C_ADR_MN_DEF_NODE_ID))
-    {   // handle PResMN as PReq for PRes Chaining
-        *pNmtEvent_p = kNmtEventDllCePreq;
-    }
+        *pNmtEvent_p = kNmtEventDllCePreq;      // handle PResMN as PReq for PRes Chaining
     else
-#endif
-    {
         *pNmtEvent_p = kNmtEventDllCePres;
-    }
+#else
+    *pNmtEvent_p = kNmtEventDllCePres;
+#endif
 
     if ((nmtState_p >= kNmtCsPreOperational2) && (nmtState_p <= kNmtCsOperational))
     {   // process PRes frames only in PreOp2, ReadyToOp and Op of CN
@@ -1477,186 +1704,89 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
         pIntNodeInfo = dllk_getNodeInfo(nodeId);
         if (pIntNodeInfo == NULL)
         {   // no node info structure available
-            ret = kErrorDllNoNodeInfo;
-            goto Exit;
+            return kErrorDllNoNodeInfo;
         }
 #endif
     }
-
-#if defined(CONFIG_INCLUDE_NMT_MN)
     else
+#if defined(CONFIG_INCLUDE_NMT_MN)
+    {
         if (dllkInstance_g.dllState > kDllMsNonCyclic)
         {   // or process PRes frames in MsWaitPres
-        tHeartbeatEvent     heartbeatEvent;
-        BYTE                flag1;
-        BYTE                nextNodeIndex = dllkInstance_g.curNodeIndex;
-        BYTE*               pCnNodeId = &dllkInstance_g.aCnNodeIdList[dllkInstance_g.curTxBufferOffsetCycle][nextNodeIndex];
-        BOOL    fPrcSlotFinished = FALSE;
+            UINT8                   flag2;
+            BOOL                    fPrcSlotFinished = FALSE;
+            tDllAsyncReqPriority    asyncReqPrio;
 
-        while (*pCnNodeId != C_ADR_INVALID)
-        {
-            if (*pCnNodeId == nodeId)
-            {   // CN found in list
-                nextNodeIndex = nextNodeIndex - dllkInstance_g.curNodeIndex;
-                dllkInstance_g.curNodeIndex += nextNodeIndex + 1;
-
-                for (pCnNodeId-- ; nextNodeIndex > 0; nextNodeIndex--, pCnNodeId--)
-                {   // issue error for each CN in list between last and current
-                    if ((ret = dllk_issueLossOfPres(*pCnNodeId)) != kErrorOk)
-                        goto Exit;
-                }
-
-                pIntNodeInfo = dllk_getNodeInfo(nodeId);
-
-                break;
-            }
-            else if (*pCnNodeId == C_ADR_BROADCAST)
-            {   // PRC slot finished
-                fPrcSlotFinished = TRUE;
+            if ((ret = searchNodeInfo(nodeId, &pIntNodeInfo, &fPrcSlotFinished)) != kErrorOk)
+                return ret;
+            if (pIntNodeInfo == NULL)
+            {   // ignore PRes, because it is from wrong CN
+                *pNmtEvent_p = kNmtEventNoEvent;
+                return ret;
             }
 
-            pCnNodeId++;
-            nextNodeIndex++;
-        }
-        if (pIntNodeInfo == NULL)
-        {   // ignore PRes, because it is from wrong CN
-            *pNmtEvent_p = kNmtEventNoEvent;
-            goto Exit;
-        }
+            if ((ret = checkAndSetSyncEvent(fPrcSlotFinished, nodeId)) != kErrorOk)
+                return ret;
 
-        if (fPrcSlotFinished != FALSE)
-        {
-            dllkInstance_g.fPrcSlotFinished = TRUE;
+            // forward Flag2 to asynchronous scheduler
+            flag2 = ami_getUint8Le(&pFrame->data.asnd.payload.statusResponse.flag2);
+            asyncReqPrio = (tDllAsyncReqPriority)((flag2 & PLK_FRAME_FLAG2_PR) >> PLK_FRAME_FLAG2_PR_SHIFT);
+            ret = dllkcal_setAsyncPendingRequests(nodeId, asyncReqPrio, flag2 & PLK_FRAME_FLAG2_RS);
+            if (ret != kErrorOk)
+                return ret;
 
-            if ((dllkInstance_g.dllConfigParam.syncNodeId > C_ADR_SYNC_ON_SOC)
-                && (dllkInstance_g.fSyncProcessed == FALSE)
-                && (dllkInstance_g.dllConfigParam.fSyncOnPrcNode != FALSE))
-            {
-                dllkInstance_g.fSyncProcessed = TRUE;
-                if ((ret = dllk_postEvent(kEventTypeSync)) != kErrorOk)
-                    goto Exit;
-            }
+            if ((ret = updateNode(pFrame, pIntNodeInfo, nodeId)) != kErrorOk)
+                return ret;
         }
         else
-
-        if ((dllkInstance_g.dllConfigParam.syncNodeId > C_ADR_SYNC_ON_SOC)
-            && (dllkInstance_g.fSyncProcessed == FALSE)
-            && (dllkInstance_g.dllConfigParam.fSyncOnPrcNode != dllkInstance_g.fPrcSlotFinished)
-            && (nodeId > dllkInstance_g.dllConfigParam.syncNodeId))
-        {
-            dllkInstance_g.fSyncProcessed = TRUE;
-            if ((ret = dllk_postEvent(kEventTypeSync)) != kErrorOk)
-                goto Exit;
-        }
-
-        // forward Flag2 to asynchronous scheduler
-        flag1 = ami_getUint8Le(&pFrame->data.asnd.payload.statusResponse.flag2);
-        ret = dllkcal_setAsyncPendingRequests(nodeId,
-            ((tDllAsyncReqPriority)((flag1 & PLK_FRAME_FLAG2_PR) >> PLK_FRAME_FLAG2_PR_SHIFT)),
-            (flag1 & PLK_FRAME_FLAG2_RS));
-        if (ret != kErrorOk)
-            goto Exit;
-
-        // check NMT state of CN
-        heartbeatEvent.errorCode = E_NO_ERROR;
-        heartbeatEvent.nmtState = (tNmtState)(ami_getUint8Le(&pFrame->data.pres.nmtStatus) | NMT_TYPE_CS);
-
-        if (pIntNodeInfo->nmtState != heartbeatEvent.nmtState)
-        {   // NMT state of CN has changed -> post event to NmtMnu module
-            tEvent event;
-
-            if (pIntNodeInfo->fSoftDelete == FALSE)
-            {   // normal isochronous CN
-                heartbeatEvent.nodeId = nodeId;
-                event.eventSink = kEventSinkNmtMnu;
-                event.eventType = kEventTypeHeartbeat;
-                event.eventArgSize = sizeof(heartbeatEvent);
-                event.pEventArg = &heartbeatEvent;
-            }
-            else
-            {   // CN shall be deleted softly, so remove it now without issuing any error
-                tDllNodeOpParam nodeOpParam;
-
-                nodeOpParam.opNodeType = kDllNodeOpTypeIsochronous;
-                nodeOpParam.nodeId = pIntNodeInfo->nodeId;
-
-                event.eventSink = kEventSinkDllkCal;
-                event.eventType = kEventTypeDllkDelNode;
-                // $$$ d.k. set Event.netTime to current time
-                event.eventArgSize = sizeof(nodeOpParam);
-                event.pEventArg = &nodeOpParam;
-            }
-
-            if ((ret = eventk_postEvent(&event)) != kErrorOk)
-                goto Exit;
-
-            // save current NMT state of CN in internal node structure
-            pIntNodeInfo->nmtState = heartbeatEvent.nmtState;
+        {   // ignore PRes, because it was received in wrong NMT state
+            // but execute changeState() and post event to NMT module
+            return ret;
         }
     }
-#endif
-    else
+#else
     {   // ignore PRes, because it was received in wrong NMT state
         // but execute changeState() and post event to NMT module
-        goto Exit;
+        return ret;
     }
+#endif
 
-    // inform PDO module
 #if defined(CONFIG_INCLUDE_PDO)
-    if (( nmtState_p != kNmtCsPreOperational2) && (nmtState_p != kNmtMsPreOperational2))
-    {   // inform PDO module only in ReadyToOp and Op
-        // compare real frame size and PDO size?
-        WORD wPresPayloadSize = ami_getUint16Le(&pFrame->data.pres.sizeLe);
-
-        if (((UINT)(wPresPayloadSize + PLK_FRAME_OFFSET_PDO_PAYLOAD) > pFrameInfo_p->frameSize)
-#if NMT_MAX_NODE_ID > 0
-            || (wPresPayloadSize > pIntNodeInfo->presPayloadLimit)
-            || ((nmtState_p >= kNmtMsNotActive)
-                && (pFrameInfo_p->frameSize >
-                    (UINT)(pIntNodeInfo->presPayloadLimit + PLK_FRAME_OFFSET_PDO_PAYLOAD)))
-#endif
-            )
-        {   // format error
-        tEventDllError  DllEvent;
-
-#if NMT_MAX_NODE_ID > 0
+    // At this point we know that we are in a cyclic state due to the checks above!
+    if ((nmtState_p != kNmtCsPreOperational2) && (nmtState_p != kNmtMsPreOperational2))
+    {
+        // So we are in ReadyToOp or Operational after the check and can inform the PDO module now.
+        if (presFrameFormatIsInvalid(pFrameInfo_p, pIntNodeInfo, nmtState_p))
+        {
             if (pIntNodeInfo->presPayloadLimit > 0)
-#endif
-            {   // This PRes frame was expected, but it is too large
-                // otherwise it will be silently ignored
-                DllEvent.dllErrorEvents = DLL_ERR_INVALID_FORMAT;
-                DllEvent.nodeId = nodeId;
-                DllEvent.nmtState = nmtState_p;
-                ret = errhndk_postError(&DllEvent);
-                if (ret != kErrorOk)
-                    goto Exit;
+                postInvalidFormatError(nodeId, nmtState_p);
+            return ret;
+        }
+
+        if ((nmtState_p != kNmtCsOperational) && (nmtState_p != kNmtMsOperational))
+            ami_setUint8Le(&pFrame->data.pres.flag1, 0);    // Reset RD flag, this that doesn't matter, because it was processed above
+
+        if ((ret = forwardRpdo(pFrameInfo_p)) != kErrorOk)
+        {
+            if (ret == kErrorReject)
+            {
+                *pReleaseRxBuffer_p = kEdrvReleaseRxBufferLater;
+                ret = kErrorOk;
             }
-            goto Exit;
-        }
-        if ((nmtState_p != kNmtCsOperational)
-            && (nmtState_p != kNmtMsOperational))
-        {
-            // reset RD flag and all other flags, but that does not matter, because they were processed above
-            ami_setUint8Le(&pFrame->data.pres.flag1, 0);
-        }
-        ret = forwardRpdo(pFrameInfo_p);
-        if (ret == kErrorReject)
-        {
-            *pReleaseRxBuffer_p = kEdrvReleaseRxBufferLater;
-            ret = kErrorOk;
-        }
-        else if (ret != kErrorOk)
-        {
-            goto Exit;
+            else
+            {
+                return ret;
+            }
         }
     }
 #endif
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
+    // check if Sync event needs to be triggered
     if ((dllkInstance_g.dllState > kDllMsNonCyclic) &&
         (dllkInstance_g.dllConfigParam.syncNodeId > C_ADR_SYNC_ON_SOC) &&
         (dllkInstance_g.fSyncProcessed == FALSE))
-    {   // check if Sync event needs to be triggered
+    {
         if ((dllkInstance_g.dllConfigParam.fSyncOnPrcNode != dllkInstance_g.fPrcSlotFinished) &&
             (nodeId == dllkInstance_g.dllConfigParam.syncNodeId))
         {
@@ -1666,7 +1796,6 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
     }
 #endif
 
-Exit:
     return ret;
 }
 
