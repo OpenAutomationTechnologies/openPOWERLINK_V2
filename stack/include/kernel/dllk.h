@@ -52,6 +52,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 
+// States for error signaling initialization on a MN
+#define STATE_MN_ERRSIG_INIT_WAIT_EC1       0
+#define STATE_MN_ERRSIG_INIT_WAIT_EC0       1
+#define STATE_MN_ERRSIG_INIT_READY          2
+
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
@@ -81,6 +86,8 @@ struct _tDllkNodeInfo
     UINT32                      presTimeoutNs;          // object 0x1F92: NMT_MNCNPResTimeout_AU32
     struct sEdrvTxBuffer*       pPreqTxBuffer;
     struct _tDllkNodeInfo*      pNextNodeInfo;
+    UINT8                       errSigState;            // State of error signaling initialization state machine
+    UINT8                       errSigReqCnt;           // Request counter for error signaling initialization
 #endif
 
 };
