@@ -100,6 +100,10 @@ static tOplkError updateNode(tDllkNodeInfo* pIntNodeInfo_p, UINT nodeId_p, tNmtS
 static tOplkError searchNodeInfo(UINT nodeId_p, tDllkNodeInfo** ppIntNodeInfo_p, BOOL* pfPrcSlotFinished_p);
 #endif
 
+#if defined(CONFIG_INCLUDE_NMT_MN)
+static void       handleErrorSignaling(tPlkFrame* pFrame_p, UINT nodeId_p);
+#endif
+
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
 //============================================================================//
@@ -910,9 +914,16 @@ tOplkError dllk_updateFrameSoa(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p,
                 return ret;
             }
 
-            // update frame (EA, ER flags)
-            ami_setUint8Le(&pTxFrame->data.soa.flag1,
-                pNodeInfo->soaFlag1 & (PLK_FRAME_FLAG1_EA | PLK_FRAME_FLAG1_ER));
+            // Update EA/ER flag only for StatusReq
+            if (dllkInstance_g.aLastReqServiceId[curReq_p] == kDllReqServiceStatus)
+            {
+                ami_setUint8Le(&pTxFrame->data.soa.flag1,
+                               pNodeInfo->soaFlag1 & (PLK_FRAME_FLAG1_EA | PLK_FRAME_FLAG1_ER));
+            }
+            else
+            {
+                pTxFrame->data.soa.flag1 = 0;
+            }
         }
         else
         {   // no assignment of asynchronous phase
@@ -2193,6 +2204,102 @@ Exit:
     return ret;
 }
 
+#if defined(CONFIG_INCLUDE_NMT_MN)
+//------------------------------------------------------------------------------
+/**
+\brief  Handle MN error signaling
+
+The function handles the error signaling on an MN.
+
+\param  pFrame_p            Pointer to received ASnd Frame
+\param  nodeId_p            Node ID of CN to handle error signaling
+*/
+//------------------------------------------------------------------------------
+static void handleErrorSignaling(tPlkFrame* pFrame_p, UINT nodeId_p)
+{
+    tOplkError          ret = kErrorOk;
+    BOOL                fSendRequest = FALSE;
+    tEvent              event;
+    tDllCalIssueRequest issueReq;
+    BOOL                fEcIsSet;
+    tDllkNodeInfo*      pIntNodeInfo;
+
+    pIntNodeInfo = dllk_getNodeInfo(nodeId_p);
+    if (pIntNodeInfo == NULL)
+        return;         // we have no node info therefore error signaling couldn't be handled
+
+    // extract EC flag for error signaling
+    fEcIsSet = ami_getUint8Le(&pFrame_p->data.asnd.payload.statusResponse.flag1) & PLK_FRAME_FLAG1_EC;
+
+    switch (pIntNodeInfo->errSigState)
+    {
+        case STATE_MN_ERRSIG_INIT_WAIT_EC1:
+            fSendRequest = TRUE;
+            if (fEcIsSet)
+            {
+                pIntNodeInfo->soaFlag1 &= ~PLK_FRAME_FLAG1_ER;
+                pIntNodeInfo->errSigState = STATE_MN_ERRSIG_INIT_WAIT_EC0;
+                pIntNodeInfo->errSigReqCnt = 0;
+            }
+            break;
+
+        case STATE_MN_ERRSIG_INIT_WAIT_EC0:
+            if (fEcIsSet)
+            {
+                fSendRequest = TRUE;
+                // if the CN does not react it could be that it was reset
+                // and waits for starting error signaling by ER=1
+                if (pIntNodeInfo->errSigReqCnt > 0)
+                {
+                    // restart error signaling initialization
+                    pIntNodeInfo->errSigState = STATE_MN_ERRSIG_INIT_WAIT_EC1;
+                    pIntNodeInfo->soaFlag1 |= PLK_FRAME_FLAG1_ER;
+                }
+                else
+                {
+                    pIntNodeInfo->errSigReqCnt++;   // try a second time to set ER = 0
+                }
+            }
+            else
+            {
+                // CN responded with EC=0, we are ready
+                pIntNodeInfo->errSigState = STATE_MN_ERRSIG_INIT_READY;
+            }
+            break;
+
+        case STATE_MN_ERRSIG_INIT_READY:
+            // If EC=1 CN must be reset so we have to restart error
+            // signaling initialization
+            if (fEcIsSet)
+            {
+                pIntNodeInfo->errSigState = STATE_MN_ERRSIG_INIT_WAIT_EC1;
+                pIntNodeInfo->soaFlag1 |= PLK_FRAME_FLAG1_ER;
+                fSendRequest = TRUE;
+            }
+            break;
+
+        default:
+            // we never come here
+            break;
+    }
+
+    if (fSendRequest)
+    {
+        event.eventSink = kEventSinkDllkCal;
+        event.eventType = kEventTypeDllkIssueReq;
+        issueReq.service = kDllReqServiceStatus;
+        issueReq.nodeId = pIntNodeInfo->nodeId;
+        issueReq.soaFlag1 = pIntNodeInfo->soaFlag1;
+        event.pEventArg = &issueReq;
+        event.eventArgSize = sizeof(tDllCalIssueRequest);
+        if ((ret = eventk_postEvent(&event)) != kErrorOk)
+        {
+            DEBUG_LVL_EVENTK_TRACE("%s() Couldn't post kEventTypeDllkIssueReq!\n", __func__);
+        }
+    }
+}
+#endif
+
 //------------------------------------------------------------------------------
 /**
 \brief  Process received ASnd frame
@@ -2260,6 +2367,10 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
                     {
                         OPLK_MEMCPY(pIntNodeInfo->aMacAddr, pFrame->aSrcMac, 6);
                     }
+                }
+                if (((tDllAsndServiceId)asndServiceId) == kDllAsndStatusResponse)
+                {
+                    handleErrorSignaling(pFrame, nodeId);
                 }
                 else if (((tDllAsndServiceId) asndServiceId) == kDllAsndSyncResponse)
                 {
