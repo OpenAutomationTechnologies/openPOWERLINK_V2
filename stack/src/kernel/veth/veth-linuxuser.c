@@ -11,7 +11,7 @@ implementation. It uses a TUN/TAP device as virtual ethernet driver.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -110,7 +110,7 @@ static tVethInstance        vethInstance_l;
 // local function prototypes
 //------------------------------------------------------------------------------
 static void getMacAdrs(UINT8* pMac_p);
-static tOplkError veth_receiveFrame(tFrameInfo * pFrameInfo_p);
+static tOplkError veth_receiveFrame(tFrameInfo* pFrameInfo_p);
 static void* vethRecvThread(void* pArg_p);
 
 //------------------------------------------------------------------------------
@@ -140,7 +140,7 @@ tOplkError veth_addInstance(const UINT8 aSrcMac_p[6])
     struct ifreq        ifr;
     int                 err;
 
-    if((vethInstance_l.fd = open(TUN_DEV_NAME, O_RDWR)) < 0 )
+    if ((vethInstance_l.fd = open(TUN_DEV_NAME, O_RDWR)) < 0 )
     {
         DEBUG_LVL_VETH_TRACE("Error opening %s\n", TUN_DEV_NAME);
         return kErrorNoFreeInstance;
@@ -150,16 +150,16 @@ tOplkError veth_addInstance(const UINT8 aSrcMac_p[6])
     ifr.ifr_flags = IFF_TAP | IFF_NO_PI;
     strncpy(ifr.ifr_name, PLK_VETH_NAME, IFNAMSIZ);
 
-    if ((err = ioctl(vethInstance_l.fd, TUNSETIFF, (void *)&ifr)) < 0)
+    if ((err = ioctl(vethInstance_l.fd, TUNSETIFF, (void*)&ifr)) < 0)
     {
         DEBUG_LVL_VETH_TRACE("Error setting TUN IFF options\n");
         close(vethInstance_l.fd);
         return err;
     }
 
-    // save MAC address of TAP device and ethernet device to be able to
+    // save MAC address of TAP device and Ethernet device to be able to
     // exchange them
-    OPLK_MEMCPY (vethInstance_l.macAdrs, aSrcMac_p, 6);
+    OPLK_MEMCPY(vethInstance_l.macAdrs, aSrcMac_p, 6);
     getMacAdrs(vethInstance_l.tapMacAdrs);
 
     // start tap receive thread
@@ -205,7 +205,7 @@ tOplkError veth_delInstance(void)
 /**
 \brief  Get MAC address of veth interface
 
-The function reads the MAC address of the virtual ethernet interface.
+The function reads the MAC address of the virtual Ethernet interface.
 
 \param  pMac_p        Pointer to store the MAC address
 */
@@ -238,7 +238,7 @@ static void getMacAdrs(UINT8* pMac_p)
 
     close(sock);
 
-    OPLK_MEMCPY (pMac_p, &ifr.ifr_hwaddr.sa_data[0], ETHER_ADDR_LEN);
+    OPLK_MEMCPY(pMac_p, &ifr.ifr_hwaddr.sa_data[0], ETHER_ADDR_LEN);
 }
 
 //------------------------------------------------------------------------------
@@ -252,15 +252,15 @@ The function receives a frame from the virtual Ethernet interface.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError veth_receiveFrame(tFrameInfo * pFrameInfo_p)
+static tOplkError veth_receiveFrame(tFrameInfo* pFrameInfo_p)
 {
     UINT            nwrite;
 
-    // replace the mac address of the POWERLINK Ethernet interface with virtual
-    // ethernet MAC address before forwarding it into the virtual ethernet interface
-    if (OPLK_MEMCMP (pFrameInfo_p->pFrame->aDstMac, vethInstance_l.macAdrs, ETHER_ADDR_LEN) == 0)
+    // replace the MAC address of the POWERLINK Ethernet interface with virtual
+    // Ethernet MAC address before forwarding it into the virtual Ethernet interface
+    if (OPLK_MEMCMP(pFrameInfo_p->pFrame->aDstMac, vethInstance_l.macAdrs, ETHER_ADDR_LEN) == 0)
     {
-        OPLK_MEMCPY (pFrameInfo_p->pFrame->aDstMac, vethInstance_l.tapMacAdrs, ETHER_ADDR_LEN);
+        OPLK_MEMCPY(pFrameInfo_p->pFrame->aDstMac, vethInstance_l.tapMacAdrs, ETHER_ADDR_LEN);
     }
 
     nwrite = write(vethInstance_l.fd, pFrameInfo_p->pFrame, pFrameInfo_p->frameSize);
@@ -302,15 +302,17 @@ static void* vethRecvThread(void* pArg_p)
         FD_ZERO(&readFds);
         FD_SET(pInstance->fd, &readFds);
 
-        result = select (pInstance->fd + 1, &readFds, NULL, NULL, &timeout);
-        switch(result)
+        result = select(pInstance->fd + 1, &readFds, NULL, NULL, &timeout);
+        switch (result)
         {
             case 0:     // timeout
-                //DEBUG_LVL_VETH_TRACE ("select timeout\n");
+                //DEBUG_LVL_VETH_TRACE("select timeout\n");
                 break;
+
             case -1:    // error
-                DEBUG_LVL_VETH_TRACE ("select error: %s\n", strerror(errno));
+                DEBUG_LVL_VETH_TRACE("select error: %s\n", strerror(errno));
                 break;
+
             default:    // data from tun/tap ready for read
                 nread = read(pInstance->fd, buffer, ETHERMTU);
                 if (nread > 0)
@@ -320,8 +322,8 @@ static void* vethRecvThread(void* pArg_p)
                                           buffer[6], buffer[7], buffer[8], buffer[9], buffer[10], buffer[11]);
                     DEBUG_LVL_VETH_TRACE("DST MAC: %02X:%02X:%02x:%02X:%02X:%02x\n",
                                           buffer[0], buffer[1], buffer[2], buffer[3], buffer[4], buffer[5]);
-                    // replace src MAC address with MAC address of virtual ethernet interface
-                    OPLK_MEMCPY (&buffer[6], pInstance->macAdrs, ETHER_ADDR_LEN);
+                    // replace src MAC address with MAC address of virtual Ethernet interface
+                    OPLK_MEMCPY(&buffer[6], pInstance->macAdrs, ETHER_ADDR_LEN);
 
                     frameInfo.pFrame = (tPlkFrame *)buffer;
                     frameInfo.frameSize = nread;
@@ -341,6 +343,4 @@ static void* vethRecvThread(void* pArg_p)
 }
 
 ///\}
-
-
 
