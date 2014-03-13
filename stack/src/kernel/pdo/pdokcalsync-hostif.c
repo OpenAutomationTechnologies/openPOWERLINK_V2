@@ -5,13 +5,13 @@
 \brief  Host interface PDO CAL kernel sync module
 
 The sync module is responsible to notify the user layer that new PDO data
-could be transfered.
+can be transfered.
 
 \ingroup module_pdokcal
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -104,7 +104,7 @@ tOplkError pdokcal_initSync(void)
 {
     pHifInstance_l = hostif_getInstance(0);
 
-    if(pHifInstance_l == NULL)
+    if (pHifInstance_l == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s: Could not find hostif instance!\n", __func__);
         return kErrorNoResource;
@@ -115,7 +115,7 @@ tOplkError pdokcal_initSync(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Cleanup PDO CAL sync module
+\brief  Clean up PDO CAL sync module
 
 The function cleans up the PDO CAL sync module
 
@@ -124,7 +124,7 @@ The function cleans up the PDO CAL sync module
 //------------------------------------------------------------------------------
 void pdokcal_exitSync(void)
 {
-    if(pHifInstance_l == NULL)
+    if (pHifInstance_l == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s: Could not find hostif instance!\n", __func__);
         return;
@@ -137,7 +137,7 @@ void pdokcal_exitSync(void)
 /**
 \brief  Send a sync event
 
-The function sends a sync event
+The function sends a sync event.
 
 \return The function returns a tOplkError error code.
 
@@ -153,7 +153,7 @@ tOplkError pdokcal_sendSyncEvent(void)
 /**
 \brief  Enable sync events
 
-The function enables sync events
+The function enables sync events.
 
 \param  fEnable_p               enable/disable sync event
 
@@ -164,7 +164,7 @@ The function enables sync events
 //------------------------------------------------------------------------------
 tOplkError pdokcal_controlSync(BOOL fEnable_p)
 {
-    if(pHifInstance_l == NULL)
+    if (pHifInstance_l == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s: Could not find hostif instance!\n", __func__);
         return kErrorNoResource;
@@ -179,7 +179,7 @@ tOplkError pdokcal_controlSync(BOOL fEnable_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Enable sync interrupt source in host interface ipcore
+\brief  Enable sync interrupt source in host interface IP-Core
 
 \param  fEnable_p               enable/disable sync interrupt source
 
@@ -192,7 +192,7 @@ static tOplkError enableSyncIrq(BOOL fEnable_p)
 
     hifRet = hostif_irqSourceEnable(pHifInstance_l, kHostifIrqSrcSync, fEnable_p);
 
-    if(hifRet != kHostifSuccessful)
+    if (hifRet != kHostifSuccessful)
     {
         DEBUG_LVL_ERROR_TRACE("%s irq not possible (%d)!\n",
                    fEnable_p ? "enable" : "disable", hifRet);
@@ -201,3 +201,4 @@ static tOplkError enableSyncIrq(BOOL fEnable_p)
 
     return kErrorOk;
 }
+

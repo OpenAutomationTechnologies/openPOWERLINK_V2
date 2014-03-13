@@ -12,7 +12,7 @@ between user and kernel layer.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -97,7 +97,7 @@ static int                  fd_l;
 \brief  Open PDO shared memory
 
 The function performs all actions needed to setup the shared memory at
-starting of the stack.
+the start of the stack.
 
 For the Posix shared-memory implementation it opens the shared memory segment.
 
@@ -119,7 +119,7 @@ tOplkError pdokcal_openMem(void)
 /**
 \brief  Close PDO shared memory
 
-The function performs all actions needed to cleanup the shared memory at
+The function performs all actions needed to clean up the shared memory at
 shutdown.
 
 For the Posix shared-memory implementation it unlinks the shared memory segment.
@@ -174,7 +174,7 @@ tOplkError pdokcal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
 The function frees shared memory which was allocated in the kernel layer for
 transfering the PDOs.
 
-\param  pMem_p                  Pointer to the shared memory segment.
+\param  pMem_p                  Pointer to the shared memory segment
 \param  memSize_p               Size of PDO memory
 
 \return The function returns a tOplkError error code.
@@ -188,7 +188,7 @@ tOplkError pdokcal_freeMem(BYTE* pMem_p, size_t memSize_p)
 
     if (munmap(pMem_p, memSize_p) != 0)
     {
-        TRACE ("%s() munmap failed!\n", __func__);
+        TRACE("%s() munmap failed!\n", __func__);
         return kErrorGeneralError;
     }
     return kErrorOk;

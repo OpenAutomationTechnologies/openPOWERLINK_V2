@@ -2,18 +2,18 @@
 ********************************************************************************
 \file   pdokcalmem-hostif.c
 
-\brief  PDO kernel CAL shared-memory module using host interface ipcore
+\brief  PDO kernel CAL shared-memory module using host interface IP-Core
 
 This file contains an implementation for the user PDO CAL shared-memroy module
-which uses host interface ipcore. The shared memory is used to transfer
-PDO data between user and kernel layer. This implementation is used if user and
-kernel layer are separated by host interface ipcore.
+utilizing the host interface IP-Core. Shared memory is used to transfer PDO data
+between user and kernel layer. This implementation is used if user and kernel
+layer are separated by host interface IP-Core.
 
 \ingroup module_pdokcal
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -96,8 +96,8 @@ static tLimInstance         limPdo_l;
 /**
 \brief  Open PDO shared memory
 
-The function performs all actions needed to setup the shared memory at
-starting of the stack.
+The function performs all actions needed to setup the shared memory at the
+start of the stack.
 
 \return The function returns a tOplkError error code.
 
@@ -109,20 +109,20 @@ tOplkError pdokcal_openMem(void)
     tHostifReturn hifret;
     tHostifInstance pInstance = hostif_getInstance(0);
 
-    if(pInstance == NULL)
+    if (pInstance == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s() couldn't get Pcp hostif instance\n",
-                __func__);
+                              __func__);
         return kErrorNoResource;
     }
 
     //jz abuse rpdo buffer for rpdo and tpdo! Merge also in ipcore!
     hifret = hostif_getBuf(pInstance, kHostifInstIdRpdo, &limPdo_l.pBase, &limPdo_l.span);
 
-    if(hifret != kHostifSuccessful)
+    if (hifret != kHostifSuccessful)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Could not get buffer from host interface (%d)\n",
-                __func__, hifret);
+                              __func__, hifret);
         return kErrorNoResource;
     }
 
@@ -133,7 +133,7 @@ tOplkError pdokcal_openMem(void)
 /**
 \brief  Close PDO shared memory
 
-The function performs all actions needed to cleanup the shared memory at
+The function performs all actions needed to clean up the shared memory at
 shutdown.
 
 \return The function returns a tOplkError error code.
@@ -155,7 +155,7 @@ tOplkError pdokcal_closeMem(void)
 The function allocates shared memory for the kernel needed to transfer the PDOs.
 
 \param  memSize_p               Size of PDO memory
-\param  ppPdoMem_p              Pointer to store the PDO memory pointer.
+\param  ppPdoMem_p              Pointer to store the PDO memory pointer
 
 \return The function returns a tOplkError error code.
 
@@ -164,10 +164,10 @@ The function allocates shared memory for the kernel needed to transfer the PDOs.
 //------------------------------------------------------------------------------
 tOplkError pdokcal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
 {
-    if(memSize_p > limPdo_l.span)
+    if (memSize_p > limPdo_l.span)
     {
         DEBUG_LVL_ERROR_TRACE("%s() out of memory (%d > %d)\n",
-                __func__, memSize_p, limPdo_l.span);
+                              __func__, memSize_p, limPdo_l.span);
         return kErrorNoResource;
     }
 
@@ -183,7 +183,7 @@ tOplkError pdokcal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
 The function frees shared memory which was allocated in the kernel layer for
 transfering the PDOs.
 
-\param  pMem_p                  Pointer to the shared memory segment.
+\param  pMem_p                  Pointer to the shared memory segment
 \param  memSize_p               Size of PDO memory
 
 \return The function returns a tOplkError error code.
@@ -197,7 +197,7 @@ tOplkError pdokcal_freeMem(BYTE* pMem_p, size_t memSize_p)
     UNUSED_PARAMETER(memSize_p);
 
     TRACE("%s() try to free address %p (%p)\n",
-            __func__, pMem_p, limPdo_l.pBase);
+          __func__, pMem_p, limPdo_l.pBase);
 
     return kErrorOk;
 }
@@ -209,3 +209,4 @@ tOplkError pdokcal_freeMem(BYTE* pMem_p, size_t memSize_p)
 /// \{
 
 ///\}
+

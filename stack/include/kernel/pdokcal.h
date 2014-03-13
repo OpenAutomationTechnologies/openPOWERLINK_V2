@@ -8,7 +8,7 @@
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -61,7 +61,7 @@ extern "C" {
 
 tOplkError pdokcal_init(void);
 tOplkError pdokcal_exit(void);
-tOplkError pdokcal_process(tEvent * pEvent_p) SECTION_PDOKCAL_PROCESS;
+tOplkError pdokcal_process(tEvent* pEvent_p) SECTION_PDOKCAL_PROCESS;
 
 // PDO memory functions
 tOplkError pdokcal_openMem(void);
@@ -74,7 +74,7 @@ tOplkError pdokcal_initPdoMem(tPdoChannelSetup* pPdoChannels, size_t rxPdoMemSiz
                               size_t txPdoMemSize_p);
 void       pdokcal_cleanupPdoMem(void);
 BYTE*      pdokcal_getPdoMemRegion(void);
-tOplkError pdokcal_writeRxPdo(UINT channelId_p, BYTE *pPayload_p, UINT16 pdoSize_p) SECTION_PDOKCAL_WRITE_RPDO;
+tOplkError pdokcal_writeRxPdo(UINT channelId_p, BYTE* pPayload_p, UINT16 pdoSize_p) SECTION_PDOKCAL_WRITE_RPDO;
 tOplkError pdokcal_readTxPdo(UINT channelId_p, BYTE* pPayload_p, UINT16 pdoSize_p) SECTION_PDOKCAL_READ_TPDO;
 BYTE*      pdokcal_getPdoPointer(BOOL fTxPdo_p, UINT offset_p, UINT16 pdoSize_p);
 
@@ -90,5 +90,4 @@ tOplkError pdokcal_sendSyncEvent(void);
 #endif
 
 #endif  // #ifndef _INC_PDOKCAL_H_
-
 
