@@ -10,7 +10,7 @@ This file contains the user DLL CAL module.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -124,7 +124,7 @@ tOplkError dllucal_init(void)
     tOplkError      ret = kErrorOk;
 
     // reset instance structure
-    OPLK_MEMSET(&instance_l, 0, sizeof (instance_l));
+    OPLK_MEMSET(&instance_l, 0, sizeof(instance_l));
 
     instance_l.pTxNmtFuncs = GET_DLLUCAL_INTERFACE();
     instance_l.pTxGenFuncs = GET_DLLUCAL_INTERFACE();
@@ -134,14 +134,14 @@ tOplkError dllucal_init(void)
 
     ret = instance_l.pTxNmtFuncs->pfnAddInstance(&instance_l.dllCalQueueTxNmt,
                                                  kDllCalQueueTxNmt);
-    if(ret != kErrorOk)
+    if (ret != kErrorOk)
     {
         goto Exit;
     }
 
     ret = instance_l.pTxGenFuncs->pfnAddInstance(&instance_l.dllCalQueueTxGen,
                                                  kDllCalQueueTxGen);
-    if(ret != kErrorOk)
+    if (ret != kErrorOk)
     {
         goto Exit;
     }
@@ -149,7 +149,7 @@ tOplkError dllucal_init(void)
 #if defined(CONFIG_INCLUDE_NMT_MN)
     ret = instance_l.pTxSyncFuncs->pfnAddInstance(&instance_l.dllCalQueueTxSync,
                                                   kDllCalQueueTxSync);
-    if(ret != kErrorOk)
+    if (ret != kErrorOk)
     {
         goto Exit;
     }
@@ -161,7 +161,7 @@ Exit:
 
 //------------------------------------------------------------------------------
 /**
-\brief  Cleanup User DLL CAL module
+\brief  Clean up user DLL CAL module
 
 This function cleans up the user DLL CAL module
 
@@ -180,7 +180,7 @@ tOplkError dllucal_exit(void)
     instance_l.pTxSyncFuncs->pfnDelInstance(instance_l.dllCalQueueTxSync);
 #endif
     // reset instance structure
-    OPLK_MEMSET(&instance_l, 0, sizeof (instance_l));
+    OPLK_MEMSET(&instance_l, 0, sizeof(instance_l));
 
     return ret;
 }
@@ -198,7 +198,7 @@ The function processes an asynchronous frame event
 \ingroup module_dllucal
 */
 //------------------------------------------------------------------------------
-tOplkError dllucal_process(tEvent * pEvent_p)
+tOplkError dllucal_process(tEvent* pEvent_p)
 {
     tOplkError      ret = kErrorOk;
     tFrameInfo*     pFrameInfo = NULL;
@@ -207,15 +207,15 @@ tOplkError dllucal_process(tEvent * pEvent_p)
     tFrameInfo      FrameInfo;
 #endif
 
-    switch(pEvent_p->eventType)
+    switch (pEvent_p->eventType)
     {
         case kEventTypeAsndRx:
 #if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC == FALSE
-            FrameInfo.pFrame = (tPlkFrame*) pEvent_p->pEventArg;
+            FrameInfo.pFrame = (tPlkFrame*)pEvent_p->pEventArg;
             FrameInfo.frameSize = pEvent_p->eventArgSize;
             pFrameInfo = &FrameInfo;
 #else
-            pFrameInfo = (tFrameInfo*) pEvent_p->pEventArg;
+            pFrameInfo = (tFrameInfo*)pEvent_p->pEventArg;
 #endif
             ret = HandleRxAsndFrame(pFrameInfo);
             break;
@@ -246,7 +246,7 @@ This function posts a DLL configuration event to the kernel DLL CAL module
 \ingroup module_dllucal
 */
 //------------------------------------------------------------------------------
-tOplkError dllucal_config(tDllConfigParam * pDllConfigParam_p)
+tOplkError dllucal_config(tDllConfigParam* pDllConfigParam_p)
 {
     tOplkError  ret = kErrorOk;
     tEvent      event;
@@ -254,7 +254,7 @@ tOplkError dllucal_config(tDllConfigParam * pDllConfigParam_p)
     event.eventSink = kEventSinkDllkCal;
     event.eventType = kEventTypeDllkConfig;
     event.pEventArg = pDllConfigParam_p;
-    event.eventArgSize = sizeof (*pDllConfigParam_p);
+    event.eventArgSize = sizeof(*pDllConfigParam_p);
     ret = eventu_postEvent(&event);
 
     return ret;
@@ -274,7 +274,7 @@ configure the identity of a local node for IdentResponse.
 \ingroup module_dllucal
 */
 //------------------------------------------------------------------------------
-tOplkError dllucal_setIdentity(tDllIdentParam * pDllIdentParam_p)
+tOplkError dllucal_setIdentity(tDllIdentParam* pDllIdentParam_p)
 {
     tOplkError  ret = kErrorOk;
     tEvent      event;
@@ -282,7 +282,7 @@ tOplkError dllucal_setIdentity(tDllIdentParam * pDllIdentParam_p)
     event.eventSink = kEventSinkDllkCal;
     event.eventType = kEventTypeDllkIdentity;
     event.pEventArg = pDllIdentParam_p;
-    event.eventArgSize = sizeof (*pDllIdentParam_p);
+    event.eventArgSize = sizeof(*pDllIdentParam_p);
     ret = eventu_postEvent(&event);
     return ret;
 }
@@ -304,12 +304,12 @@ ID with the specified node ID filter.
 */
 //------------------------------------------------------------------------------
 tOplkError dllucal_regAsndService(tDllAsndServiceId serviceId_p,
-                                    tEplDlluCbAsnd pfnDlluCbAsnd_p,
-                                    tDllAsndFilter filter_p)
+                                  tEplDlluCbAsnd pfnDlluCbAsnd_p,
+                                  tDllAsndFilter filter_p)
 {
     tOplkError  ret = kErrorOk;
 
-    if (serviceId_p < tabentries (instance_l.apfnDlluCbAsnd))
+    if (serviceId_p < tabentries(instance_l.apfnDlluCbAsnd))
     {
         // memorize function pointer
         instance_l.apfnDlluCbAsnd[serviceId_p] = pfnDlluCbAsnd_p;
@@ -344,7 +344,7 @@ This function sends an asynchronous fram with the specified priority.
 \ingroup module_dllucal
 */
 //------------------------------------------------------------------------------
-tOplkError dllucal_sendAsyncFrame(tFrameInfo * pFrameInfo_p,
+tOplkError dllucal_sendAsyncFrame(tFrameInfo* pFrameInfo_p,
                                   tDllAsyncReqPriority priority_p)
 {
     tOplkError  ret = kErrorOk;
@@ -367,7 +367,7 @@ tOplkError dllucal_sendAsyncFrame(tFrameInfo * pFrameInfo_p,
             break;
     }
 
-    if(ret != kErrorOk)
+    if (ret != kErrorOk)
     {
         goto Exit;
     }
@@ -379,6 +379,7 @@ tOplkError dllucal_sendAsyncFrame(tFrameInfo * pFrameInfo_p,
     event.pEventArg = &priority_p;
     event.eventArgSize = sizeof(priority_p);
     ret = eventu_postEvent(&event);
+
 Exit:
     return ret;
 }
@@ -418,7 +419,7 @@ tOplkError dllucal_issueRequest(tDllReqServiceId service_p, UINT nodeId_p,
             issueReq.nodeId = nodeId_p;
             issueReq.soaFlag1 = soaFlag1_p;
             event.pEventArg = &issueReq;
-            event.eventArgSize = sizeof (issueReq);
+            event.eventArgSize = sizeof(issueReq);
             ret = eventu_postEvent(&event);
             break;
 
@@ -479,7 +480,7 @@ tOplkError dllucal_configNode(tDllNodeInfo* pNodeInfo_p)
     event.eventSink = kEventSinkDllkCal;
     event.eventType = kEventTypeDllkConfigNode;
     event.pEventArg = pNodeInfo_p;
-    event.eventArgSize = sizeof (*pNodeInfo_p);
+    event.eventArgSize = sizeof(*pNodeInfo_p);
 
     ret = eventu_postEvent(&event);
 
@@ -509,7 +510,7 @@ tOplkError dllucal_addNode(tDllNodeOpParam* pNodeOpParam_p)
     event.eventSink = kEventSinkDllkCal;
     event.eventType = kEventTypeDllkAddNode;
     event.pEventArg = pNodeOpParam_p;
-    event.eventArgSize = sizeof (*pNodeOpParam_p);
+    event.eventArgSize = sizeof(*pNodeOpParam_p);
 
     ret = eventu_postEvent(&event);
 
@@ -523,7 +524,7 @@ tOplkError dllucal_addNode(tDllNodeOpParam* pNodeOpParam_p)
 The function removes the specified node from the isochronous phase by sending
 a kEventTypeDllkDelNode event to the kernel DLL CAL module.
 
-\param  pNodeOpParam_p          Pointer to node	info structure
+\param  pNodeOpParam_p          Pointer to node info structure
 
 \return The function returns a tOplkError error code.
 
@@ -538,7 +539,7 @@ tOplkError dllucal_deleteNode(tDllNodeOpParam* pNodeOpParam_p)
     event.eventSink = kEventSinkDllkCal;
     event.eventType = kEventTypeDllkDelNode;
     event.pEventArg = pNodeOpParam_p;
-    event.eventArgSize = sizeof (*pNodeOpParam_p);
+    event.eventArgSize = sizeof(*pNodeOpParam_p);
 
     ret = eventu_postEvent(&event);
 
@@ -575,7 +576,7 @@ static tOplkError SetAsndServiceIdFilter(tDllAsndServiceId serviceId_p,
     servFilter.serviceId = serviceId_p;
     servFilter.filter = filter_p;
     event.pEventArg = &servFilter;
-    event.eventArgSize = sizeof (servFilter);
+    event.eventArgSize = sizeof(servFilter);
     ret = eventu_postEvent(&event);
 
     return ret;
@@ -592,7 +593,7 @@ static tOplkError SetAsndServiceIdFilter(tDllAsndServiceId serviceId_p,
 //------------------------------------------------------------------------------
 static tOplkError HandleRxAsndFrame(tFrameInfo *pFrameInfo_p)
 {
-    tMsgType     	msgType;
+    tMsgType        msgType;
     unsigned int    asndServiceId;
     tOplkError      ret = kErrorOk;
 #if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC != FALSE
@@ -607,7 +608,7 @@ static tOplkError HandleRxAsndFrame(tFrameInfo *pFrameInfo_p)
         goto Exit;
     }
 
-    asndServiceId = (unsigned int) ami_getUint8Le(&pFrameInfo_p->pFrame->data.asnd.serviceId);
+    asndServiceId = (unsigned int)ami_getUint8Le(&pFrameInfo_p->pFrame->data.asnd.serviceId);
     if (asndServiceId < DLL_MAX_ASND_SERVICE_ID)
     {   // ASnd service ID is valid
         if (instance_l.apfnDlluCbAsnd[asndServiceId] != NULL)
@@ -621,8 +622,8 @@ Exit:
     // call free function for Asnd frame
     event.eventSink = kEventSinkDllkCal;
     event.eventType = kEventTypeReleaseRxFrame;
-    event.eventArgSize    = sizeof(tFrameInfo);
-    event.pEventArg      = pFrameInfo_p;
+    event.eventArgSize = sizeof(tFrameInfo);
+    event.pEventArg = pFrameInfo_p;
 
     eventRet = eventu_postEvent(&event);
 
@@ -642,7 +643,7 @@ Exit:
 
 \param  pAsndNotRx_p             Pointer to the frame information structure
 
-\return The function returns a tEplKernel error code.
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 static tOplkError HandleNotRxAsndFrame(tDllAsndNotRx* pAsndNotRx_p)
@@ -660,7 +661,7 @@ static tOplkError HandleNotRxAsndFrame(tDllAsndNotRx* pAsndNotRx_p)
     frameInfo.frameSize = DLLUCAL_NOTRX_FRAME_SIZE;
     frameInfo.pFrame = pFrame;
 
-    asndServiceId = (UINT) ami_getUint8Le(&pFrame->data.asnd.serviceId);
+    asndServiceId = (UINT)ami_getUint8Le(&pFrame->data.asnd.serviceId);
     if (asndServiceId < DLL_MAX_ASND_SERVICE_ID)
     {   // ASnd service ID is valid
         if (instance_l.apfnDlluCbAsnd[asndServiceId] != NULL)
@@ -671,3 +672,4 @@ static tOplkError HandleNotRxAsndFrame(tDllAsndNotRx* pAsndNotRx_p)
 
     return ret;
 }
+
