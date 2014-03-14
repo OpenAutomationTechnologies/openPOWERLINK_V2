@@ -11,7 +11,7 @@ Linux ioctl for communication with the kernel layer.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012-2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -100,7 +100,7 @@ typedef struct
 //------------------------------------------------------------------------------
 static tOplkError addInstance(tDllCalQueueInstance* ppDllCalQueue_p, tDllCalQueue DllCalQueue_p);
 static tOplkError delInstance(tDllCalQueueInstance pDllCalQueue_p);
-static tOplkError insertDataBlock(tDllCalQueueInstance pDllCalQueue_p, BYTE *pData_p, UINT* pDataSize_p);
+static tOplkError insertDataBlock(tDllCalQueueInstance pDllCalQueue_p, BYTE* pData_p, UINT* pDataSize_p);
 
 /* define external function interface */
 static tDllCalFuncIntf funcintf_l =
@@ -144,22 +144,22 @@ tDllCalFuncIntf* dllcalioctl_getInterface(void)
 
 Add an instance for TX packet forwarding in DLL CAL.
 
-\param  ppDllCalQueue_p         double-pointer to DllCal Queue instance
-\param  dllCalQueue_p           parameter that determines the queue
+\param  ppDllCalQueue_p         Double-pointer to DllCal Queue instance
+\param  dllCalQueue_p           Parameter that determines the queue
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          if function executes correctly
-\retval other                   error
+\retval kErrorOk                Function executes correctly
+\retval other                   Error
 */
 //------------------------------------------------------------------------------
-static tOplkError addInstance(tDllCalQueueInstance *ppDllCalQueue_p,
+static tOplkError addInstance(tDllCalQueueInstance* ppDllCalQueue_p,
                               tDllCalQueue dllCalQueue_p)
 {
     tOplkError                  ret = kErrorOk;
     tDllCalIoctlInstance*       pInstance;
 
-    pInstance = (tDllCalIoctlInstance *) OPLK_MALLOC(sizeof(tDllCalIoctlInstance));
-    if(pInstance == NULL)
+    pInstance = (tDllCalIoctlInstance*)OPLK_MALLOC(sizeof(tDllCalIoctlInstance));
+    if (pInstance == NULL)
     {
         ret = kErrorNoResource;
         goto Exit;
@@ -184,8 +184,8 @@ Delete the DLL CAL instance.
 \param  pDllCalQueue_p          Pointer to DllCal Queue instance
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          if function executes correctly
-\retval other                   error
+\retval kErrorOk                Function executes correctly
+\retval other                   Error
 */
 //------------------------------------------------------------------------------
 static tOplkError delInstance(tDllCalQueueInstance pDllCalQueue_p)
@@ -203,17 +203,17 @@ static tOplkError delInstance(tDllCalQueueInstance pDllCalQueue_p)
 Inserts a data block into the DLL CAL queue.
 
 \param  pDllCalQueue_p          Pointer to DllCal Queue instance
-\param  pData_p                 Pointer to the data block to be insert
+\param  pData_p                 Pointer to the data block to be inserted
 \param  pDataSize_p             Pointer to the size of the data block to be
                                 insert
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          if function executes correctly
-\retval other                   error
+\retval kErrorOk                Function executes correctly
+\retval other                   Error
 */
 //------------------------------------------------------------------------------
-static tOplkError insertDataBlock (tDllCalQueueInstance pDllCalQueue_p,
-                                   BYTE *pData_p, UINT *pDataSize_p)
+static tOplkError insertDataBlock(tDllCalQueueInstance pDllCalQueue_p,
+                                  BYTE* pData_p, UINT* pDataSize_p)
 {
     tOplkError                      ret = kErrorOk;
     tDllCalIoctlInstance*           pInstance =
@@ -221,7 +221,7 @@ static tOplkError insertDataBlock (tDllCalQueueInstance pDllCalQueue_p,
     tIoctlDllCalAsync               ioctlAsyncFrame;
     int                             ioctlRet;
 
-    if(pInstance == NULL)
+    if (pInstance == NULL)
     {
         ret = kErrorInvalidInstanceParam;
         goto Exit;
@@ -239,7 +239,4 @@ static tOplkError insertDataBlock (tDllCalQueueInstance pDllCalQueue_p,
 Exit:
     return ret;
 }
-
-
-
 

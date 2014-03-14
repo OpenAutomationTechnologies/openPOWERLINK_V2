@@ -7,7 +7,7 @@
 This header file contains definitions for the user DLL CAL module.
 
 Copyright (c) 2012, SYSTEC electronik GmbH
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -50,7 +50,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-typedef tOplkError (*tEplDlluCbAsnd) (tFrameInfo* pFrameInfo_p);
+typedef tOplkError (*tEplDlluCbAsnd)(tFrameInfo* pFrameInfo_p);
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -64,17 +64,17 @@ tOplkError dllucal_init(void);
 
 tOplkError dllucal_exit(void);
 
-tOplkError dllucal_config(tDllConfigParam * pDllConfigParam_p);
+tOplkError dllucal_config(tDllConfigParam* pDllConfigParam_p);
 
-tOplkError dllucal_setIdentity(tDllIdentParam * pDllIdentParam_p);
+tOplkError dllucal_setIdentity(tDllIdentParam* pDllIdentParam_p);
 
 tOplkError dllucal_regAsndService(tDllAsndServiceId ServiceId_p,
                                   tEplDlluCbAsnd pfnDlluCbAsnd_p,
                                   tDllAsndFilter Filter_p);
 
-tOplkError dllucal_sendAsyncFrame(tFrameInfo * pFrameInfo, tDllAsyncReqPriority Priority_p);
+tOplkError dllucal_sendAsyncFrame(tFrameInfo* pFrameInfo, tDllAsyncReqPriority Priority_p);
 
-tOplkError dllucal_process(tEvent * pEvent_p);
+tOplkError dllucal_process(tEvent* pEvent_p);
 
 
 #if NMT_MAX_NODE_ID > 0
