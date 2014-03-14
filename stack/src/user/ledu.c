@@ -10,7 +10,7 @@ This file contains the implementation of the user LED module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -294,11 +294,11 @@ tOplkError ledu_processEvent(tEvent* pEvent_p)
     tTimerArg           timerArg;
     UINT32              timeout = 0;
     BOOL                fLedOn = FALSE;
-    tTimerEventArg   *  pTimerEventArg;
+    tTimerEventArg*     pTimerEventArg;
 
     ret = kErrorOk;
 
-    switch(pEvent_p->eventType)
+    switch (pEvent_p->eventType)
     {
         // timer event
         case kEventTypeTimer:
@@ -344,7 +344,6 @@ tOplkError ledu_processEvent(tEvent* pEvent_p)
                         fLedOn = TRUE;
                     }
                     timeout = LEDU_DURATION_BLINKING;
-
                     break;
 
                 case kLeduModeSingleFlash:
@@ -391,7 +390,6 @@ tOplkError ledu_processEvent(tEvent* pEvent_p)
                             ? TRUE : FALSE;
                     }
                     break;
-
             }
 
             // create new timer
@@ -402,12 +400,10 @@ tOplkError ledu_processEvent(tEvent* pEvent_p)
 
             // call callback function
             ret = callStateChanged(kLedTypeStatus, fLedOn);
-
             break;
 
         default:
             ret = kErrorNmtInvalidEvent;
-
     }
 
 Exit:
@@ -517,8 +513,8 @@ static tOplkError changeMode(tLeduMode newMode_p)
         leduInstance_g.timerArg++;
         timerArg.argument.value = leduInstance_g.timerArg;
         ret = timeru_modifyTimer(&leduInstance_g.timerHdlLedBlink,
-                                     timeout,
-                                     timerArg);
+                                 timeout,
+                                 timerArg);
 
         // call callback function
         ret = callStateChanged(kLedTypeStatus, fLedOn);

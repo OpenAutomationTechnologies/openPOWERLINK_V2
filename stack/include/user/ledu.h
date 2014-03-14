@@ -8,7 +8,7 @@ This file contains definitions and declarations of the user LED module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -53,7 +53,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-typedef tOplkError (*tLeduStateChangeCallback) (tLedType ledType_p, BOOL fOn_p);
+typedef tOplkError (*tLeduStateChangeCallback)(tLedType ledType_p, BOOL fOn_p);
 
 //------------------------------------------------------------------------------
 // function prototypes
