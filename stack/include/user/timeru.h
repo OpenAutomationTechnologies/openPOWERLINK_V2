@@ -8,7 +8,7 @@ This file contains definitions for the user timer module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -66,5 +66,4 @@ BOOL       timeru_isActive(tTimerHdl timerHdl_p);
 #endif
 
 #endif /* _INC_timeru_H_ */
-
 

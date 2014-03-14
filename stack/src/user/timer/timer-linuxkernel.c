@@ -11,7 +11,7 @@ kernelspace.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -183,7 +183,7 @@ tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg a
     if(pTimerHdl_p == NULL)
         return kErrorTimerInvalidHandle;
 
-    pData = (tTimeruData*) OPLK_MALLOC(sizeof (tTimeruData));
+    pData = (tTimeruData*)OPLK_MALLOC(sizeof(tTimeruData));
     if (pData == NULL)
         return kErrorNoResource;
 
@@ -195,7 +195,7 @@ tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg a
     OPLK_MEMCPY(&pData->timerArgument, &argument_p, sizeof(tTimerArg));
 
     add_timer(&pData->timer);
-    *pTimerHdl_p = (tTimerHdl) pData;
+    *pTimerHdl_p = (tTimerHdl)pData;
     return ret;
 }
 
@@ -229,7 +229,7 @@ tOplkError timeru_modifyTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerAr
     {
         return timeru_setTimer(pTimerHdl_p, timeInMs_p, argument_p);
     }
-    pData = (tTimeruData*) *pTimerHdl_p;
+    pData = (tTimeruData*)*pTimerHdl_p;
     if ((tTimeruData*)pData->timer.data != pData)
         return kErrorTimerInvalidHandle;
 
@@ -260,8 +260,8 @@ This function deletes an existing timer.
 \param  pTimerHdl_p     Pointer to timer handle of timer to delete.
 
 \return The function returns a tOplkError error code.
-\retval kErrorTimerInvalidHandle  If an invalid timer handle was specified.
-\retval kErrorOk          If the timer is deleted.
+\retval kErrorTimerInvalidHandle  An invalid timer handle was specified.
+\retval kErrorOk                  The timer is deleted.
 
 \ingroup module_timeru
 */
@@ -279,7 +279,7 @@ tOplkError timeru_deleteTimer(tTimerHdl* pTimerHdl_p)
     if (*pTimerHdl_p == 0)
         return kErrorOk;
 
-    pData = (tTimeruData*) *pTimerHdl_p;
+    pData = (tTimeruData*)*pTimerHdl_p;
     if ((tTimeruData*)pData->timer.data != pData)
         return kErrorTimerInvalidHandle;
 
@@ -314,7 +314,7 @@ BOOL timeru_isActive(tTimerHdl timerHdl_p)
         return fActive;
     }
 
-    pData = (tTimeruData*) timerHdl_p;
+    pData = (tTimeruData*)timerHdl_p;
     if ((tTimeruData*)pData->timer.data != pData)
     {   // invalid timer
         return fActive;
@@ -352,11 +352,11 @@ static void cbTimer(ULONG parameter_p)
     tEvent              event;
     tTimerEventArg      timerEventArg;
 
-    pData = (tTimeruData*) parameter_p;
+    pData = (tTimeruData*)parameter_p;
 
     // call event function
     timerEventArg.timerHdl = (tTimerHdl)pData;
-    OPLK_MEMCPY(&timerEventArg.argument, &pData->timerArgument.argument, sizeof (timerEventArg.argument));
+    OPLK_MEMCPY(&timerEventArg.argument, &pData->timerArgument.argument, sizeof(timerEventArg.argument));
 
     event.eventSink = pData->timerArgument.eventSink;
     event.eventType = kEventTypeTimer;
@@ -369,3 +369,4 @@ static void cbTimer(ULONG parameter_p)
 }
 
 ///\}
+
