@@ -6,13 +6,13 @@
 
 This file contains an implementation of the user control CAL module which uses
 direct calls for communication between user and kernel layer. It is used if
-both kernel and user stack running in the same instance.
+both, kernel and user stack running in the same instance.
 
 \ingroup module_ctrlucal
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -112,14 +112,14 @@ tOplkError ctrlucal_init(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Cleanup user control CAL module
+\brief  Clean up user control CAL module
 
-The function cleans-up the user control CAL module.
+The function cleans up the user control CAL module.
 
 \ingroup module_ctrlucal
 */
 //------------------------------------------------------------------------------
-void ctrlucal_exit (void)
+void ctrlucal_exit(void)
 {
 
 }
@@ -135,7 +135,7 @@ This function provides processing time for the CAL module.
 \ingroup module_ctrlucal
 */
 //------------------------------------------------------------------------------
-tOplkError ctrlucal_process (void)
+tOplkError ctrlucal_process(void)
 {
     return kErrorOk;
 }
@@ -174,8 +174,8 @@ The function checks the state of the kernel stack.
 for direct calls as the kernel stack runs in the same instance.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk  If kernel stack is initialized
-\retval kErrorNoResource  If kernel stack is not running or in wrong state
+\retval kErrorOk             Kernel stack is initialized
+\retval kErrorNoResource     Kernel stack is not running or in wrong state
 
 \ingroup module_ctrlucal
 */
@@ -196,7 +196,7 @@ The function gets the status of the kernel stack
 \ingroup module_ctrlucal
 */
 //------------------------------------------------------------------------------
-UINT16 ctrlucal_getStatus (void)
+UINT16 ctrlucal_getStatus(void)
 {
     return status_l;
 }
@@ -208,14 +208,14 @@ UINT16 ctrlucal_getStatus (void)
 The function reads the heartbeat genereated by the kernel stack.
 
 \note Every time the function is called it returns another value as a heartbeat
-      is not needed because kernel is running in the same instance.
+      is not needed because the kernel is running in the same instance.
 
 \return The function returns the heartbeat counter.
 
 \ingroup module_ctrlucal
 */
 //------------------------------------------------------------------------------
-UINT16 ctrlucal_getHeartbeat (void)
+UINT16 ctrlucal_getHeartbeat(void)
 {
     return ++dummyHeartbeat_l;
 }

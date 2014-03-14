@@ -9,7 +9,7 @@ This file contains the definitions for the user control module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -65,7 +65,7 @@ extern "C" {
 
 tOplkError ctrlu_init(void);
 void       ctrlu_exit(void);
-tOplkError ctrlu_initStack(tOplkApiInitParam * pInitParam_p);
+tOplkError ctrlu_initStack(tOplkApiInitParam* pInitParam_p);
 tOplkError ctrlu_shutdownStack(void);
 tOplkError ctrlu_processStack(void);
 BOOL       ctrlu_checkKernelStack(void);

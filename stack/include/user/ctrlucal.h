@@ -9,7 +9,7 @@ This file contains the definitions for the user ctrl CAL module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -60,11 +60,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tOplkError ctrlucal_init (void);
-void       ctrlucal_exit (void);
-tOplkError ctrlucal_process (void);
-UINT16     ctrlucal_getStatus (void);
-UINT16     ctrlucal_getHeartbeat (void);
+tOplkError ctrlucal_init(void);
+void       ctrlucal_exit(void);
+tOplkError ctrlucal_process(void);
+UINT16     ctrlucal_getStatus(void);
+UINT16     ctrlucal_getHeartbeat(void);
 tOplkError ctrlucal_executeCmd(tCtrlCmdType cmd_p);
 tOplkError ctrlucal_checkKernelStack(void);
 void       ctrlucal_storeInitParam(tCtrlInitParam* pInitParam_p);

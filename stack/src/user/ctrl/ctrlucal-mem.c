@@ -11,7 +11,7 @@ a shared memory block for communication with the kernel layer.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -87,7 +87,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-UINT16 getMagic (void);
+static UINT16 getMagic(void);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -111,14 +111,14 @@ tOplkError ctrlucal_init(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Cleanup user control CAL module
+\brief  Clean up user control CAL module
 
-The function cleans-up the user control CAL module.
+The function cleans up the user control CAL module.
 
 \ingroup module_ctrlucal
 */
 //------------------------------------------------------------------------------
-void ctrlucal_exit (void)
+void ctrlucal_exit(void)
 {
     ctrlcal_exit();
 }
@@ -134,7 +134,7 @@ This function provides processing time for the CAL module.
 \ingroup module_ctrlucal
 */
 //------------------------------------------------------------------------------
-tOplkError ctrlucal_process (void)
+tOplkError ctrlucal_process(void)
 {
     return kErrorOk;
 }
@@ -189,8 +189,8 @@ The function checks the state of the kernel stack. If it is already running
 it tries to shutdown.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk  If kernel stack is initialized
-\retval kErrorNoResource  If kernel stack is not running or in wrong state
+\retval kErrorOk             Kernel stack is initialized
+\retval kErrorNoResource     Kernel stack is not running or in wrong state
 
 \ingroup module_ctrlucal
 */
@@ -200,16 +200,16 @@ tOplkError ctrlucal_checkKernelStack(void)
     UINT16              kernelStatus;
     tOplkError          ret;
 
-    TRACE ("Checking for kernel stack...\n");
+    TRACE("Checking for kernel stack...\n");
     if (getMagic() != CTRL_MAGIC)
     {
-        TRACE ("Kernel daemon not running! Exiting...\n");
+        TRACE("Kernel daemon not running! Exiting...\n");
         return kErrorNoResource;
     }
 
     kernelStatus = ctrlucal_getStatus();
 
-    switch(kernelStatus)
+    switch (kernelStatus)
     {
         case kCtrlStatusReady:
             ret = kErrorOk;
@@ -279,7 +279,7 @@ UINT16 ctrlucal_getHeartbeat(void)
     UINT16      heartbeat;
 
     if ((ctrlcal_readData(&heartbeat, offsetof(tCtrlBuf, heartbeat),
-                                sizeof(UINT16))) == kErrorOk)
+                          sizeof(UINT16))) == kErrorOk)
         return heartbeat;
     else
         return 0;
@@ -333,14 +333,14 @@ tOplkError ctrlucal_readInitParam(tCtrlInitParam* pInitParam_p)
 \brief  Get magic number
 
 The function reads the magic number stored in the control memory block to
-detect if it's a valid memory block.
+detect if it is a valid memory block.
 
 \return Return the magic number
 
 \ingroup module_ctrl
 */
 //------------------------------------------------------------------------------
-UINT16 getMagic (void)
+static UINT16 getMagic(void)
 {
     UINT16          magic;
 
@@ -352,3 +352,4 @@ UINT16 getMagic (void)
 
     return 0;
 }
+
