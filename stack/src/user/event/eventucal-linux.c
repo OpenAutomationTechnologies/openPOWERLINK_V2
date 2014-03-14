@@ -13,7 +13,7 @@ userspace platform. It uses the circular buffer interface for all event queues.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -108,7 +108,7 @@ static tEventuCalInstance       instance_l;             ///< Instance variable o
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static void* eventThread(void *arg);
+static void* eventThread(void* arg);
 static void signalUserEvent(void);
 static void signalKernelEvent(void);
 
@@ -124,13 +124,13 @@ The function initializes the architecture specific stuff of the user event
 CAL module.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-tOplkError eventucal_init (void)
+tOplkError eventucal_init(void)
 {
     struct sched_param  schedParam;
 
@@ -163,7 +163,7 @@ tOplkError eventucal_init (void)
     if (pthread_setschedparam(instance_l.threadId, SCHED_FIFO, &schedParam) != 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s(): couldn't set thread scheduling parameters! %d\n",
-               __func__, schedParam.__sched_priority);
+                              __func__, schedParam.__sched_priority);
     }
     instance_l.fInitialized = TRUE;
     return kErrorOk;
@@ -184,19 +184,19 @@ Exit:
 
 //------------------------------------------------------------------------------
 /**
-\brief    Cleanup kernel event CAL module
+\brief    Clean up kernel event CAL module
 
 The function cleans up the kernel event CAL module. For cleanup it calls the exit
 functions of the queue implementations for each used queue.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-tOplkError eventucal_exit (void)
+tOplkError eventucal_exit(void)
 {
     UINT            i = 0;
 
@@ -229,20 +229,20 @@ tOplkError eventucal_exit (void)
 /**
 \brief    Post kernel event
 
-This function posts a event to a queue. It is called from the generic kernel
+This function posts an event to a queue. It is called from the generic kernel
 event post function in the event handler. Depending on the sink the appropriate
 queue post function is called.
 
 \param  pEvent_p                Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-tOplkError eventucal_postKernelEvent (tEvent *pEvent_p)
+tOplkError eventucal_postKernelEvent(tEvent* pEvent_p)
 {
     tOplkError      ret;
     /*TRACE("U2K type:%s(%d) sink:%s(%d) size:%d!\n",
@@ -257,20 +257,20 @@ tOplkError eventucal_postKernelEvent (tEvent *pEvent_p)
 /**
 \brief    Post user event
 
-This function posts a event to a queue. It is called from the generic kernel
+This function posts an event to a queue. It is called from the generic kernel
 event post function in the event handler. Depending on the sink the appropriate
 queue post function is called.
 
 \param  pEvent_p                Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-tOplkError eventucal_postUserEvent (tEvent *pEvent_p)
+tOplkError eventucal_postUserEvent(tEvent* pEvent_p)
 {
     tOplkError      ret;
 
@@ -287,7 +287,7 @@ tOplkError eventucal_postUserEvent (tEvent *pEvent_p)
 /**
 \brief  Process function of user CAL module
 
-This function will be called by the systems process function.
+This function will be called by the system process function.
 
 \ingroup module_eventucal
 */
@@ -314,7 +314,7 @@ This function contains the main function for the event handler thread.
 \return The function returns the thread exit code.
 */
 //------------------------------------------------------------------------------
-static void* eventThread(void *arg)
+static void* eventThread(void* arg)
 {
     struct timespec         curTime, timeout;
     tEventuCalInstance*     pInstance = (tEventuCalInstance*)arg;
@@ -351,8 +351,8 @@ static void* eventThread(void *arg)
 /**
 \brief  Signal a user event
 
-This function signals that a user event was posted. It will be registered in
-the circular buffer library as signal callback function
+This function signals that a user event has been posted. It will be registered
+in the circular buffer library as signal callback function.
 */
 //------------------------------------------------------------------------------
 void signalUserEvent(void)
@@ -364,8 +364,8 @@ void signalUserEvent(void)
 /**
 \brief  Signal a kernel event
 
-This function signals that a kernel event was posted. It will be registered in
-the circular buffer library as signal callback function
+This function signals that a kernel event has been posted. It will be registered
+in the circular buffer library as signal callback function.
 */
 //------------------------------------------------------------------------------
 void signalKernelEvent(void)
@@ -374,3 +374,4 @@ void signalKernelEvent(void)
 }
 
 /// \}
+

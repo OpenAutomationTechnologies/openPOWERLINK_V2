@@ -11,7 +11,7 @@ circular buffers for communication.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -86,7 +86,7 @@ static tCircBufInstance*       instance_l[kEventQueueNum];
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError postEvent (tCircBufInstance* pCircBufInstance_p, tEvent *pEvent_p);
+static tOplkError postEvent(tCircBufInstance* pCircBufInstance_p, tEvent* pEvent_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -98,7 +98,7 @@ static tOplkError postEvent (tCircBufInstance* pCircBufInstance_p, tEvent *pEven
 
 //------------------------------------------------------------------------------
 /**
-\brief    Initialize a event queue
+\brief    Initialize an event queue
 
 The function initializes a circular buffer event queue. The queue to initialize
 is specified by eventQueue_p.
@@ -106,8 +106,8 @@ is specified by eventQueue_p.
 \param  eventQueue_p            Event queue to initialize.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventucal
 */
@@ -122,7 +122,7 @@ tOplkError eventucal_initQueueCircbuf(tEventQueue eventQueue_p)
     if (instance_l[eventQueue_p] != NULL)
         return kErrorNoResource;
 
-    switch(eventQueue_p)
+    switch (eventQueue_p)
     {
         case kEventQueueUInt:
             circError = circbuf_alloc(CIRCBUF_USER_INTERNAL_QUEUE, CONFIG_EVENT_SIZE_CIRCBUF_USER_INTERNAL,
@@ -141,7 +141,6 @@ tOplkError eventucal_initQueueCircbuf(tEventQueue eventQueue_p)
                 TRACE("PLK : Could not allocate CIRCBUF_USER_TO_KERNEL_QUEUE circbuffer\n");
                 return kErrorNoResource;
             }
-
             break;
 
         case kEventQueueK2U:
@@ -163,7 +162,7 @@ tOplkError eventucal_initQueueCircbuf(tEventQueue eventQueue_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief    Cleanup a event queue
+\brief    Clean up a event queue
 
 The function cleans up a circular buffer event queue. The queue to cleanup is
 specified by eventQueue_p.
@@ -171,13 +170,13 @@ specified by eventQueue_p.
 \param  eventQueue_p            Event queue to cleanup.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-tOplkError eventucal_exitQueueCircbuf (tEventQueue eventQueue_p)
+tOplkError eventucal_exitQueueCircbuf(tEventQueue eventQueue_p)
 {
     if (eventQueue_p > kEventQueueNum)
         return kErrorInvalidInstanceParam;
@@ -185,7 +184,7 @@ tOplkError eventucal_exitQueueCircbuf (tEventQueue eventQueue_p)
     if (instance_l[eventQueue_p] == NULL)
         return kErrorOk;
 
-    switch(eventQueue_p)
+    switch (eventQueue_p)
     {
         case kEventQueueUInt:
             circbuf_free(instance_l[eventQueue_p]);
@@ -215,17 +214,17 @@ tOplkError eventucal_exitQueueCircbuf (tEventQueue eventQueue_p)
 
 This function posts an event to the provided queue instance.
 
-\param  eventQueue_p            Event queue to which the event should be posted.
+\param  eventQueue_p            Event queue to which the event should be posted to.
 \param  pEvent_p                Pointer to event
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-tOplkError eventucal_postEventCircbuf (tEventQueue eventQueue_p, tEvent *pEvent_p)
+tOplkError eventucal_postEventCircbuf(tEventQueue eventQueue_p, tEvent* pEvent_p)
 {
     if (eventQueue_p > kEventQueueNum)
         return kErrorInvalidInstanceParam;
@@ -246,8 +245,8 @@ by calling the event handlers process function.
 \param  eventQueue_p            Event queue used for reading the event.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          if function executes correctly
-\retval other                   error
+\retval kErrorOk                Function executes correctly
+\retval other                   Error
 
 \ingroup module_eventucal
 */
@@ -282,7 +281,7 @@ tOplkError eventucal_processEventCircbuf(tEventQueue eventQueue_p)
         return kErrorGeneralError;
     }
 
-    pEplEvent = (tEvent *) aRxBuffer;
+    pEplEvent = (tEvent*)aRxBuffer;
     pEplEvent->eventArgSize = (readSize - sizeof(tEvent));
 
     if(pEplEvent->eventArgSize > 0)
@@ -334,7 +333,6 @@ queue.
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-
 tOplkError eventucal_setSignalingCircbuf(tEventQueue eventQueue_p, VOIDFUNCPTR pfnSignalCb_p)
 {
     if (eventQueue_p > kEventQueueNum)
@@ -363,11 +361,11 @@ This function posts an event to the provided queue instance.
 \param  pEvent_p                Pointer to event
 
 \return tOplkError
-\retval kErrorOk          if function executes correctly
-\retval other                   error
+\retval kErrorOk                Function executes correctly
+\retval other                   Error
 */
 //------------------------------------------------------------------------------
-static tOplkError postEvent (tCircBufInstance* pCircBufInstance_p, tEvent *pEvent_p)
+static tOplkError postEvent(tCircBufInstance* pCircBufInstance_p, tEvent* pEvent_p)
 {
     tOplkError          ret = kErrorOk;
     tCircBufError       circError;
@@ -380,7 +378,7 @@ static tOplkError postEvent (tCircBufInstance* pCircBufInstance_p, tEvent *pEven
     else
     {
         circError = circbuf_writeMultipleData(pCircBufInstance_p, pEvent_p, sizeof(tEvent),
-                                        pEvent_p->pEventArg, (ULONG)pEvent_p->eventArgSize);
+                                              pEvent_p->pEventArg, (ULONG)pEvent_p->eventArgSize);
     }
     if(circError != kCircBufOk)
     {
