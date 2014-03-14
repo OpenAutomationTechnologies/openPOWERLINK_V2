@@ -13,7 +13,7 @@ to get rid of "#ifdef" statements for different platforms!
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -167,9 +167,9 @@ tOplkError sdoudp_init(tSequLayerReceiveCb pfnReceiveCb_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Add an instance of a SDO over UDP module
+\brief  Add an instance of an SDO over UDP module
 
-The function adds an instance of a SDO over UDP module.
+The function adds an instance of an SDO over UDP module.
 
 \param  pfnReceiveCb_p          Pointer to SDO sequence layer receive callback function.
 
@@ -200,7 +200,7 @@ tOplkError sdoudp_addInstance(tSequLayerReceiveCb pfnReceiveCb_p)
 
 #if (TARGET_SYSTEM == _WIN32_)
     //  windows specific start of socket
-    if ((error = WSAStartup(MAKEWORD(2,0), &wsa)) != 0)
+    if ((error = WSAStartup(MAKEWORD(2, 0), &wsa)) != 0)
         return kErrorSdoUdpNoSocket;
 
     // create critical section for access of instance variables
@@ -217,9 +217,9 @@ tOplkError sdoudp_addInstance(tSequLayerReceiveCb pfnReceiveCb_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Delete an instance of a SDO over UDP module
+\brief  Delete an instance of an SDO over UDP module
 
-The function deletes an instance of a SDO over UDP module. It deletes the created
+The function deletes an instance of an SDO over UDP module. It deletes the created
 sockets and deletes the listener thread.
 
 \return The function returns a tOplkError error code.
@@ -266,7 +266,7 @@ tOplkError sdoudp_delInstance(void)
 /**
 \brief  Reconfigure socket
 
-The function reconfigures socket with a new IP address. It is needed for
+The function reconfigures a socket with a new IP address. It is needed for
 NMT_ResetConfiguration.
 
 \param  ipAddr_p            IP address to configure.
@@ -301,7 +301,7 @@ tOplkError sdoudp_config(ULONG ipAddr_p, UINT port_p)
     {   // listen thread was started -> close old thread
 #if (TARGET_SYSTEM == _WIN32_)
         fTermError = TerminateThread(sdoUdpInstance_l.threadHandle, 0);
-        if(fTermError == FALSE)
+        if (fTermError == FALSE)
             return kErrorSdoUdpThreadError;
 #elif (TARGET_SYSTEM == _LINUX_)
         sdoUdpInstance_l.fStopThread = TRUE;
@@ -315,7 +315,7 @@ tOplkError sdoudp_config(ULONG ipAddr_p, UINT port_p)
     {
         error = closesocket(sdoUdpInstance_l.udpSocket);
         sdoUdpInstance_l.udpSocket = INVALID_SOCKET;
-        if(error != 0)
+        if (error != 0)
             return kErrorSdoUdpSocketError;
     }
 
@@ -330,7 +330,7 @@ tOplkError sdoudp_config(ULONG ipAddr_p, UINT port_p)
 
     // bind socket
     addr.sin_family = AF_INET;
-    addr.sin_port = htons((USHORT) port_p);
+    addr.sin_port = htons((USHORT)port_p);
     addr.sin_addr.s_addr = htonl(ipAddr_p);
     error = bind(sdoUdpInstance_l.udpSocket, (struct sockaddr*)&addr, sizeof(addr));
     if (error < 0)
@@ -436,13 +436,13 @@ tOplkError sdoudp_sendData(tSdoConHdl sdoConHandle_p, tPlkFrame* pSrcData_p, UIN
     struct sockaddr_in  addr;
 
     array = (sdoConHandle_p & ~SDO_ASY_HANDLE_MASK);
-    if(array >= CONFIG_SDO_MAX_CONNECTION_UDP)
+    if (array >= CONFIG_SDO_MAX_CONNECTION_UDP)
         return kErrorSdoUdpInvalidHdl;
 
     ami_setUint8Le(&pSrcData_p->messageType, 0x06);   // set message type SDO
     ami_setUint8Le(&pSrcData_p->dstNodeId, 0x00);     // target node id (for Udp = 0)
     ami_setUint8Le(&pSrcData_p->srcNodeId, 0x00);     // set source-nodeid (for Udp = 0)
-    dataSize_p += ASND_HEADER_SIZE;                         // calc size
+    dataSize_p += ASND_HEADER_SIZE;                   // calc size
 
     addr.sin_family = AF_INET;
 #if (TARGET_SYSTEM == _WIN32_)
@@ -455,9 +455,9 @@ tOplkError sdoudp_sendData(tSdoConHdl sdoConHandle_p, tPlkFrame* pSrcData_p, UIN
     LeaveCriticalSection(sdoUdpInstance_l.pCriticalSection);
 #endif
 
-    error = sendto (sdoUdpInstance_l.udpSocket, (const char*) &pSrcData_p->messageType,
-                    dataSize_p, 0, (struct sockaddr*)&addr, sizeof(struct sockaddr_in));
-    if(error < 0)
+    error = sendto(sdoUdpInstance_l.udpSocket, (const char*)&pSrcData_p->messageType,
+                   dataSize_p, 0, (struct sockaddr*)&addr, sizeof(struct sockaddr_in));
+    if (error < 0)
     {
         DEBUG_LVL_SDO_TRACE("sdoudp_sendData: sendto() finished with %i\n", error);
         return kErrorSdoUdpSendError;
@@ -484,7 +484,7 @@ tOplkError sdoudp_delConnection(tSdoConHdl sdoConHandle_p)
     UINT            array;
 
     array = (sdoConHandle_p & ~SDO_ASY_HANDLE_MASK);
-    if(array >= CONFIG_SDO_MAX_CONNECTION_UDP)
+    if (array >= CONFIG_SDO_MAX_CONNECTION_UDP)
     {
         return kErrorSdoUdpInvalidHdl;
     }
@@ -525,7 +525,7 @@ void receiveFromSocket(tSdoUdpInstance* pInstance_p)
 
     size = sizeof(struct sockaddr);
 
-    error = recvfrom(pInstance_p->udpSocket, (char *)&aBuffer[0], sizeof(aBuffer),
+    error = recvfrom(pInstance_p->udpSocket, (char*)&aBuffer[0], sizeof(aBuffer),
                      0, (struct sockaddr*)&remoteAddr, (SOCKLEN_T)&size);
     if (error > 0)
     {
@@ -538,15 +538,15 @@ void receiveFromSocket(tSdoUdpInstance* pInstance_p)
         while (count < CONFIG_SDO_MAX_CONNECTION_UDP)
         {
             // check if this connection is already known
-            if((pInstance_p->aSdoAbsUdpConnection[count].ipAddr == remoteAddr.sin_addr.s_addr) &&
-               (pInstance_p->aSdoAbsUdpConnection[count].port == remoteAddr.sin_port))
+            if ((pInstance_p->aSdoAbsUdpConnection[count].ipAddr == remoteAddr.sin_addr.s_addr) &&
+                (pInstance_p->aSdoAbsUdpConnection[count].port == remoteAddr.sin_port))
             {
                 break;
             }
 
-            if((pInstance_p->aSdoAbsUdpConnection[count].ipAddr == 0) &&
-               (pInstance_p->aSdoAbsUdpConnection[count].port == 0) &&
-               (freeEntry == 0xFFFF))
+            if ((pInstance_p->aSdoAbsUdpConnection[count].ipAddr == 0) &&
+                (pInstance_p->aSdoAbsUdpConnection[count].port == 0) &&
+                (freeEntry == 0xFFFF))
             {
                 freeEntry = count;
             }
@@ -573,8 +573,8 @@ void receiveFromSocket(tSdoUdpInstance* pInstance_p)
                 if (ret != kErrorOk)
                 {
                     DEBUG_LVL_ERROR_TRACE("%s new con: ip=%lX, port=%u, Ret=0x%X\n", __func__,
-                          (ULONG) ntohl(pInstance_p->aSdoAbsUdpConnection[freeEntry].ipAddr),
-                          ntohs((USHORT) pInstance_p->aSdoAbsUdpConnection[freeEntry].port), ret);
+                          (ULONG)ntohl(pInstance_p->aSdoAbsUdpConnection[freeEntry].ipAddr),
+                          ntohs((USHORT)pInstance_p->aSdoAbsUdpConnection[freeEntry].port), ret);
                 }
             }
             else
@@ -591,15 +591,15 @@ void receiveFromSocket(tSdoUdpInstance* pInstance_p)
             sdoConHdl = count;
             sdoConHdl |= SDO_UDP_HANDLE;
 #if (TARGET_SYSTEM == _WIN32_)
-LeaveCriticalSection(sdoUdpInstance_l.pCriticalSection);
+            LeaveCriticalSection(sdoUdpInstance_l.pCriticalSection);
 #endif
             // offset 4 -> start of SDO Sequence header
             ret = pInstance_p->pfnSdoAsySeqCb(sdoConHdl, (tAsySdoSeq*)&aBuffer[4], (error - 4));
             if (ret != kErrorOk)
             {
                 DEBUG_LVL_ERROR_TRACE("%s known con: ip=%lX, port=%u, Ret=0x%X\n", __func__,
-                      (ULONG) ntohl(pInstance_p->aSdoAbsUdpConnection[count].ipAddr),
-                      ntohs((USHORT) pInstance_p->aSdoAbsUdpConnection[count].port), ret);
+                      (ULONG)ntohl(pInstance_p->aSdoAbsUdpConnection[count].ipAddr),
+                      ntohs((USHORT)pInstance_p->aSdoAbsUdpConnection[count].port), ret);
             }
         }
     }
@@ -636,8 +636,8 @@ static tThreadResult sdoUdpThread(tThreadArg pArg_p)
         FD_ZERO(&readFds);
         FD_SET(pInstance->udpSocket, &readFds);
 
-        result = select (pInstance->udpSocket + 1, &readFds, NULL, NULL, &timeout);
-        switch(result)
+        result = select(pInstance->udpSocket + 1, &readFds, NULL, NULL, &timeout);
+        switch (result)
         {
             case 0:     // timeout
                 //DEBUG_LVL_SDO_TRACE ("select timeout\n");
