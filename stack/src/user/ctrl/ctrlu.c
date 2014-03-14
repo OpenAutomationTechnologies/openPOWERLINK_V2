@@ -10,7 +10,7 @@ This file contains the implementation of the user stack control module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -122,21 +122,21 @@ static tCtrluInstance       ctrlInstance_l;
 static tOplkError initNmtu(tOplkApiInitParam* pInitParam_p);
 static tOplkError initObd(tOplkApiInitParam* pInitParam_p);
 static tOplkError updateDllConfig(tOplkApiInitParam* pInitParam_p, BOOL fUpdateIdentity_p);
-static tOplkError updateSdoConfig();
+static tOplkError updateSdoConfig(void);
 static tOplkError updateObd(tOplkApiInitParam* pInitParam_p);
 
-static tOplkError processUserEvent(tEvent* pEplEvent_p);
+static tOplkError processUserEvent(tEvent* pEvent_p);
 static tOplkError cbCnCheckEvent(tNmtEvent NmtEvent_p);
 static tOplkError cbNmtStateChange(tEventNmtStateChange nmtStateChange_p);
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
 static tOplkError cbNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p,
-                                    tNmtState nmtState_p, UINT16 errorCode_p,
-                                    BOOL fMandatory_p);
+                              tNmtState nmtState_p, UINT16 errorCode_p,
+                              BOOL fMandatory_p);
 #endif
 
 static tOplkError cbBootEvent(tNmtBootEvent BootEvent_p, tNmtState NmtState_p,
-                                    UINT16 errorCode_p);
+                              UINT16 errorCode_p);
 
 #if defined(CONFIG_INCLUDE_LEDU)
 static tOplkError cbLedStateChange(tLedType LedType_p, BOOL fOn_p);
@@ -166,13 +166,13 @@ tOplkError ctrlu_init(void)
 {
     tOplkError          ret;
 
-    TRACE ("Initialize ctrl module ...\n");
+    TRACE("Initialize ctrl module ...\n");
 
     ctrlInstance_l.lastHeartbeat = 0;
 
     if ((ret = ctrlucal_init()) != kErrorOk)
     {
-        DEBUG_LVL_ERROR_TRACE ("Could not initialize ctrlucal\n");
+        DEBUG_LVL_ERROR_TRACE("Could not initialize ctrlucal\n");
         goto Exit;
     }
 
@@ -211,8 +211,8 @@ The function initializes the openPOWERLINK stack. It initializes all
 user modules and communication with the kernel control module to initialize
 the kernel modules.
 
-After return from this function the application must start the NMT state
-machine via EplApiExecNmtCommand(kNmtEventSwReset) and thereby the whole
+After returning from this function, the application must start the NMT state
+machine via oplk_execNmtCommand(kNmtEventSwReset) and thereby the whole
 openPOWERLINK stack.
 
 \param  pInitParam_p            Pointer to the initialization parameters
@@ -223,15 +223,15 @@ openPOWERLINK stack.
 \ingroup module_ctrlu
 */
 //------------------------------------------------------------------------------
-tOplkError ctrlu_initStack(tOplkApiInitParam * pInitParam_p)
+tOplkError ctrlu_initStack(tOplkApiInitParam* pInitParam_p)
 {
     tOplkError              ret = kErrorOk;
     tCtrlInitParam          ctrlParam;
 
     // reset instance structure
-    OPLK_MEMSET(&ctrlInstance_l.initParam, 0, sizeof (tOplkApiInitParam));
+    OPLK_MEMSET(&ctrlInstance_l.initParam, 0, sizeof(tOplkApiInitParam));
     OPLK_MEMCPY(&ctrlInstance_l.initParam, pInitParam_p,
-               min(sizeof(tOplkApiInitParam), (size_t)pInitParam_p->sizeOfInitParam));
+                min(sizeof(tOplkApiInitParam), (size_t)pInitParam_p->sizeOfInitParam));
 
     // check event callback function pointer
     if (ctrlInstance_l.initParam.pfnCbEvent == NULL)
@@ -243,8 +243,8 @@ tOplkError ctrlu_initStack(tOplkApiInitParam * pInitParam_p)
     if ((ret = initObd(&ctrlInstance_l.initParam)) != kErrorOk)
         goto Exit;
 
-    TRACE ("Initializing kernel modules ...\n");
-    OPLK_MEMCPY (ctrlParam.aMacAddress, ctrlInstance_l.initParam.aMacAddress, 6);
+    TRACE("Initializing kernel modules ...\n");
+    OPLK_MEMCPY(ctrlParam.aMacAddress, ctrlInstance_l.initParam.aMacAddress, 6);
     strncpy(ctrlParam.szEthDevName, ctrlInstance_l.initParam.hwParam.pDevName, 127);
     ctrlParam.ethDevNumber = ctrlInstance_l.initParam.hwParam.devNum;
     ctrlucal_storeInitParam(&ctrlParam);
@@ -259,24 +259,24 @@ tOplkError ctrlu_initStack(tOplkApiInitParam * pInitParam_p)
         goto Exit;
     }
 
-    OPLK_MEMCPY (ctrlInstance_l.initParam.aMacAddress, ctrlParam.aMacAddress, 6);
+    OPLK_MEMCPY(ctrlInstance_l.initParam.aMacAddress, ctrlParam.aMacAddress, 6);
 
-    TRACE ("Initialize Eventu module...\n");
+    TRACE("Initialize Eventu module...\n");
     if ((ret = eventu_init(processUserEvent)) != kErrorOk)
         goto Exit;
 
-    TRACE ("Initialize Timeru module...\n");
+    TRACE("Initialize Timeru module...\n");
     if ((ret = timeru_init()) != kErrorOk)
         goto Exit;
 
-    TRACE ("initialize error handler user module...\n");
+    TRACE("initialize error handler user module...\n");
     ret = errhndu_init();
     if (ret != kErrorOk)
     {
         goto Exit;
     }
 
-    TRACE ("Initialize DlluCal module...\n");
+    TRACE("Initialize DlluCal module...\n");
     ret = dllucal_init();
     if (ret != kErrorOk)
     {
@@ -284,7 +284,7 @@ tOplkError ctrlu_initStack(tOplkApiInitParam * pInitParam_p)
     }
 
 #if defined(CONFIG_INCLUDE_PDO)
-    TRACE ("Initialize Pdou module...\n");
+    TRACE("Initialize Pdou module...\n");
     ret = pdou_init(ctrlInstance_l.initParam.pfnCbSync);
     if (ret != kErrorOk)
     {
@@ -305,7 +305,7 @@ tOplkError ctrlu_initStack(tOplkApiInitParam * pInitParam_p)
 
 #if defined(CONFIG_INCLUDE_SDOS) || defined(CONFIG_INCLUDE_SDOC)
     // init sdo command layer
-    TRACE ("Initialize SdoCom module...\n");
+    TRACE("Initialize SdoCom module...\n");
     ret = sdocom_init();
     if (ret != kErrorOk)
     {
@@ -314,7 +314,7 @@ tOplkError ctrlu_initStack(tOplkApiInitParam * pInitParam_p)
 #endif
 
 #if defined (CONFIG_INCLUDE_CFM)
-    TRACE ("Initialize Cfm module...\n");
+    TRACE("Initialize Cfm module...\n");
     ret = cfmu_init(cbCfmEventCnProgress, cbCfmEventCnResult);
     if (ret != kErrorOk)
     {
@@ -323,8 +323,8 @@ tOplkError ctrlu_initStack(tOplkApiInitParam * pInitParam_p)
 #endif
 
     // the application must start NMT state machine
-    // via EplApiExecNmtCommand(kNmtEventSwReset)
-    // and thereby the whole EPL stack
+    // via oplk_execNmtCommand(kNmtEventSwReset)
+    // and thereby the whole POWERLINK stack
 
 Exit:
     return ret;
@@ -366,7 +366,7 @@ tOplkError ctrlu_shutdownStack(void)
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
     ret = nmtmnu_delInstance();
-    TRACE("EplNmtMnuDelInstance():  0x%X\n", ret);
+    TRACE("nmtmnu_delInstance():  0x%X\n", ret);
 
     ret = identu_delInstance();
     TRACE("identu_delInstance():  0x%X\n", ret);
@@ -378,7 +378,7 @@ tOplkError ctrlu_shutdownStack(void)
 #endif
 
     ret = nmtcnu_delInstance();
-    TRACE("EplNmtCnuDelInstance():  0x%X\n", ret);
+    TRACE("nmtcnu_delInstance():  0x%X\n", ret);
 
     ret = nmtu_delInstance();
     TRACE("nmtu_delInstance():    0x%X\n", ret);
@@ -413,7 +413,7 @@ tOplkError ctrlu_shutdownStack(void)
 /**
 \brief  Process openPOWERLINK stack
 
-This function provides processing timing to several tasks in the openPOWERLINK
+This function provides processing time to several tasks in the openPOWERLINK
 stack.
 
 \return The function returns a tOplkError error code.
@@ -423,18 +423,18 @@ stack.
 //------------------------------------------------------------------------------
 tOplkError ctrlu_processStack(void)
 {
-    tOplkError Ret = kErrorOk;
+    tOplkError ret = kErrorOk;
 
     eventucal_process();
 
-    Ret = ctrlucal_process();
-    if(Ret != kErrorOk)
+    ret = ctrlucal_process();
+    if (ret != kErrorOk)
         goto Exit;
 
-    Ret = timeru_process();
+    ret = timeru_process();
 
 Exit:
-    return Ret;
+    return ret;
 }
 
 //------------------------------------------------------------------------------
@@ -443,7 +443,7 @@ Exit:
 
 The function checks if the kernel stack is still running.
 
-\return Returns TRUE if the kernel stack is running or FALSE if is not running.
+\return Returns TRUE if the kernel stack is running or FALSE if it is not running.
 
 \ingroup module_ctrlu
 */
@@ -484,7 +484,7 @@ tOplkError ctrlu_callUserEventCallback(tOplkApiEventType eventType_p, tOplkApiEv
     tOplkError          ret = kErrorOk;
 
     ret = ctrlInstance_l.initParam.pfnCbEvent(eventType_p, pEventArg_p,
-                                                ctrlInstance_l.initParam.pEventUserArg);
+                                              ctrlInstance_l.initParam.pEventUserArg);
     return ret;
 }
 
@@ -553,7 +553,7 @@ tOplkError ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
             {
                 UINT8    nmtCommand;
 
-                nmtCommand = *((UINT8 *) pParam_p->pArg);
+                nmtCommand = *((UINT8*)pParam_p->pArg);
                 // check value range
                 switch ((tNmtCommand)nmtCommand)
                 {
@@ -575,7 +575,7 @@ tOplkError ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
             {
                 UINT8    nmtCommand;
 
-                nmtCommand = *((UINT8 *) pParam_p->pArg);
+                nmtCommand = *((UINT8*)pParam_p->pArg);
                 // check value range
                 switch ((tNmtCommand)nmtCommand)
                 {
@@ -683,58 +683,58 @@ The function initializes the NMTU modules.
 //------------------------------------------------------------------------------
 static tOplkError initNmtu(tOplkApiInitParam* pInitParam_p)
 {
-    tOplkError      Ret = kErrorOk;
+    tOplkError      ret = kErrorOk;
 
-    // initialize EplNmtCnu module
-    TRACE ("Initialize NMT_CN module...\n");
-    Ret = nmtcnu_addInstance(pInitParam_p->nodeId);
-    if (Ret != kErrorOk)
+    // initialize NmtCnu module
+    TRACE("Initialize NMT_CN module...\n");
+    ret = nmtcnu_addInstance(pInitParam_p->nodeId);
+    if (ret != kErrorOk)
         goto Exit;
 
-    Ret = nmtcnu_registerCheckEventCb(cbCnCheckEvent);
-    if (Ret != kErrorOk)
+    ret = nmtcnu_registerCheckEventCb(cbCnCheckEvent);
+    if (ret != kErrorOk)
         goto Exit;
 
-    // initialize EplNmtu module
-    TRACE ("Initialize NMTu module...\n");
-    Ret = nmtu_init();
-    if (Ret != kErrorOk)
+    // initialize Nmtu module
+    TRACE("Initialize NMTu module...\n");
+    ret = nmtu_init();
+    if (ret != kErrorOk)
         goto Exit;
 
     // register NMT event callback function
-    Ret = nmtu_registerStateChangeCb(cbNmtStateChange);
-    if (Ret != kErrorOk)
+    ret = nmtu_registerStateChangeCb(cbNmtStateChange);
+    if (ret != kErrorOk)
         goto Exit;
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
-    // initialize EplNmtMnu module
-    TRACE ("Initialize NMT_MN module...\n");
-    Ret = nmtmnu_init(cbNodeEvent, cbBootEvent);
-    if (Ret != kErrorOk)
+    // initialize NmtMnu module
+    TRACE("Initialize NMT_MN module...\n");
+    ret = nmtmnu_init(cbNodeEvent, cbBootEvent);
+    if (ret != kErrorOk)
         goto Exit;
 
     // initialize identu module
-    TRACE ("Initialize Identu module...\n");
-    Ret = identu_init();
-    if (Ret != kErrorOk)
+    TRACE("Initialize Identu module...\n");
+    ret = identu_init();
+    if (ret != kErrorOk)
         goto Exit;
 
-    // initialize EplStatusu module
-    TRACE ("Initialize Statusu module...\n");
-    Ret = statusu_init();
-    if (Ret != kErrorOk)
+    // initialize Statusu module
+    TRACE("Initialize Statusu module...\n");
+    ret = statusu_init();
+    if (ret != kErrorOk)
         goto Exit;
 
     // initialize syncu module
-    TRACE ("Initialize Syncu module...\n");
-    Ret = syncu_init();
-    if (Ret != kErrorOk)
+    TRACE("Initialize Syncu module...\n");
+    ret = syncu_init();
+    if (ret != kErrorOk)
         goto Exit;
 
 #endif
 
 Exit:
-    return Ret;
+    return ret;
 }
 
 //------------------------------------------------------------------------------
@@ -755,7 +755,7 @@ static tOplkError initObd(tOplkApiInitParam* pInitParam_p)
 
     UNUSED_PARAMETER(pInitParam_p);
 
-    TRACE ("Initialize OBD module...\n");
+    TRACE("Initialize OBD module...\n");
     ret = obd_initObd(&ObdInitParam);
     if (ret != kErrorOk)
         return ret;
@@ -786,18 +786,18 @@ static tOplkError cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
 {
     tOplkError          ret = kErrorOk;
     BYTE                nmtState;
-    tOplkApiEventArg     eventArg;
+    tOplkApiEventArg    eventArg;
 
     // save NMT state in OD
-    nmtState = (UINT8) nmtStateChange_p.newNmtState;
+    nmtState = (UINT8)nmtStateChange_p.newNmtState;
     ret = obd_writeEntry(0x1F8C, 0, &nmtState, 1);
-    if(ret != kErrorOk)
+    if (ret != kErrorOk)
         return ret;
 
     // do work which must be done in that state
     switch (nmtStateChange_p.newNmtState)
     {
-        // EPL stack is not running
+        // POWERLINK stack is not running
         case kNmtGsOff:
             break;
 
@@ -805,7 +805,7 @@ static tOplkError cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
         case kNmtGsInitialising:
 #if 0
 #if defined(CONFIG_INCLUDE_SDO_UDP)
-            // configure SDO via UDP (i.e. bind it to the EPL ethernet interface)
+            // configure SDO via UDP (i.e. bind it to the POWERLINK Ethernet interface)
             ret = sdoudp_config(ctrlInstance_l.initParam.ipAddress, C_SDO_EPL_PORT);
             if (ret != kErrorOk)
                 return ret;
@@ -850,16 +850,15 @@ static tOplkError cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
             ret = updateSdoConfig();
             if (ret != kErrorOk)
                 return ret;
-
             break;
 
         //-----------------------------------------------------------
         // CN part of the state machine
 
-        // node list for EPL-Frames and check timeout
+        // node list for POWERLINK frames and check timeout
         case kNmtCsNotActive:
             // indicate completion of reset in NMT_ResetCmd_U8
-            nmtState = (UINT8) kNmtCmdInvalidService;
+            nmtState = (UINT8)kNmtCmdInvalidService;
             ret = obd_writeEntry(0x1F9E, 0, &nmtState, 1);
             if (ret != kErrorOk)
                 return ret;
@@ -886,15 +885,15 @@ static tOplkError cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
         case kNmtCsStopped:
             break;
 
-        // no EPL cycle
-        // -> normal ethernet communication
+        // no POWERLINK cycle
+        // -> normal Ethernet communication
         case kNmtCsBasicEthernet:
             break;
 
         //-----------------------------------------------------------
         // MN part of the state machine
 
-        // node listens for EPL-Frames and check timeout
+        // node listens for POWERLINK-Frames and check timeout
         case kNmtMsNotActive:
             break;
 
@@ -914,8 +913,8 @@ static tOplkError cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
         case kNmtMsOperational:
             break;
 
-        // no EPL cycle
-        // -> normal ethernet communication
+        // no POWERLINK cycle
+        // -> normal Ethernet communication
         case kNmtMsBasicEthernet:
             break;
 
@@ -974,11 +973,11 @@ static tOplkError processUserEvent(tEvent* pEvent_p)
 
     ret = kErrorOk;
 
-    switch(pEvent_p->eventType)
+    switch (pEvent_p->eventType)
     {
         // error event
         case kEventTypeError:
-            pEventError = (tEventError*) pEvent_p->pEventArg;
+            pEventError = (tEventError*)pEvent_p->pEventArg;
             switch (pEventError->eventSource)
             {
                 // treat the errors from the following sources as critical
@@ -1143,14 +1142,14 @@ static tOplkError updateDllConfig(tOplkApiInitParam* pInitParam_p, BOOL fUpdateI
     dllConfigParam.fSyncOnPrcNode = pInitParam_p->fSyncOnPrcNode;
     dllConfigParam.syncNodeId = pInitParam_p->syncNodeId;
 
-    dllConfigParam.sizeOfStruct = sizeof (dllConfigParam);
+    dllConfigParam.sizeOfStruct = sizeof(dllConfigParam);
     if ((ret = dllucal_config(&dllConfigParam)) != kErrorOk)
         return ret;
 
     if (fUpdateIdentity_p != FALSE)
     {
         // configure Identity
-        OPLK_MEMSET(&dllIdentParam, 0, sizeof (dllIdentParam));
+        OPLK_MEMSET(&dllIdentParam, 0, sizeof(dllIdentParam));
 
         obdSize = 4;
         if ((ret = obd_readEntry(0x1000, 0, &dllIdentParam.deviceType, &obdSize)) != kErrorOk)
@@ -1175,7 +1174,7 @@ static tOplkError updateDllConfig(tOplkApiInitParam* pInitParam_p, BOOL fUpdateI
         dllIdentParam.ipAddress = pInitParam_p->ipAddress;
         dllIdentParam.subnetMask = pInitParam_p->subnetMask;
 
-        obdSize = sizeof (dllIdentParam.defaultGateway);
+        obdSize = sizeof(dllIdentParam.defaultGateway);
         ret = obd_readEntry(0x1E40, 5, &dllIdentParam.defaultGateway, &obdSize);
         if (ret != kErrorOk)
         {   // NWL_IpAddrTable_Xh_REC.DefaultGateway_IPAD seams to not exist,
@@ -1186,18 +1185,18 @@ static tOplkError updateDllConfig(tOplkApiInitParam* pInitParam_p, BOOL fUpdateI
 #if defined(CONFIG_INCLUDE_VETH)
         // configure Virtual Ethernet Driver
         ret = target_setIpAdrs(PLK_VETH_NAME, dllIdentParam.ipAddress, dllIdentParam.subnetMask, (UINT16)dllConfigParam.asyncMtu);
-        if(ret != kErrorOk)
+        if (ret != kErrorOk)
             return ret;
 
 #if (CONFIG_VETH_SET_DEFAULT_GATEWAY == TRUE)
         ret = target_setDefaultGateway(dllIdentParam.defaultGateway);
-        if(ret != kErrorOk)
+        if (ret != kErrorOk)
             return ret;
 #endif
 
 #endif
 
-        obdSize = sizeof (dllIdentParam.sHostname);
+        obdSize = sizeof(dllIdentParam.sHostname);
         if ((ret = obd_readEntry(0x1F9A, 0, &dllIdentParam.sHostname[0], &obdSize)) != kErrorOk)
         {   // NMT_HostName_VSTR seams to not exist,
             // so use the one supplied in the init parameter
@@ -1218,7 +1217,7 @@ static tOplkError updateDllConfig(tOplkApiInitParam* pInitParam_p, BOOL fUpdateI
         dllIdentParam.vendorSpecificExt1 = pInitParam_p->vendorSpecificExt1;
 
         OPLK_MEMCPY(&dllIdentParam.aVendorSpecificExt2[0], &pInitParam_p->aVendorSpecificExt2[0],
-                   sizeof(dllIdentParam.aVendorSpecificExt2));
+                    sizeof(dllIdentParam.aVendorSpecificExt2));
 
         dllIdentParam.sizeOfStruct = sizeof (dllIdentParam);
         if ((ret = dllucal_setIdentity(&dllIdentParam)) != kErrorOk)
@@ -1271,7 +1270,7 @@ static tOplkError updateObd(tOplkApiInitParam* pInitParam_p)
 
     // set node id in OD
     ret = obd_setNodeId(pInitParam_p->nodeId,    // node id
-                            kObdNodeIdHardware); // set by hardware
+                        kObdNodeIdHardware);     // set by hardware
     if (ret != kErrorOk)
         return ret;
 
@@ -1291,23 +1290,23 @@ static tOplkError updateObd(tOplkApiInitParam* pInitParam_p)
         obd_writeEntry(0x1F82, 0, &pInitParam_p->featureFlags, 4);
     }
 
-    wTemp = (WORD) pInitParam_p->isochrTxMaxPayload;
+    wTemp = (WORD)pInitParam_p->isochrTxMaxPayload;
     obd_writeEntry(0x1F98, 1, &wTemp, 2);
 
-    wTemp = (WORD) pInitParam_p->isochrRxMaxPayload;
+    wTemp = (WORD)pInitParam_p->isochrRxMaxPayload;
     obd_writeEntry(0x1F98, 2, &wTemp, 2);
 
     obd_writeEntry(0x1F98, 3, &pInitParam_p->presMaxLatency, 4);
 
     if (pInitParam_p->preqActPayloadLimit <= C_DLL_ISOCHR_MAX_PAYL)
     {
-        wTemp = (WORD) pInitParam_p->preqActPayloadLimit;
+        wTemp = (WORD)pInitParam_p->preqActPayloadLimit;
         obd_writeEntry(0x1F98, 4, &wTemp, 2);
     }
 
     if (pInitParam_p->presActPayloadLimit <= C_DLL_ISOCHR_MAX_PAYL)
     {
-        wTemp = (WORD) pInitParam_p->presActPayloadLimit;
+        wTemp = (WORD)pInitParam_p->presActPayloadLimit;
         obd_writeEntry(0x1F98, 5, &wTemp, 2);
     }
 
@@ -1315,19 +1314,19 @@ static tOplkError updateObd(tOplkApiInitParam* pInitParam_p)
 
     if (pInitParam_p->multiplCylceCnt <= 0xFF)
     {
-        bTemp = (BYTE) pInitParam_p->multiplCylceCnt;
+        bTemp = (BYTE)pInitParam_p->multiplCylceCnt;
         obd_writeEntry(0x1F98, 7, &bTemp, 1);
     }
 
     if (pInitParam_p->asyncMtu <= C_DLL_MAX_ASYNC_MTU)
     {
-        wTemp = (WORD) pInitParam_p->asyncMtu;
+        wTemp = (WORD)pInitParam_p->asyncMtu;
         obd_writeEntry(0x1F98, 8, &wTemp, 2);
     }
 
     if (pInitParam_p->prescaler <= 1000)
     {
-        wTemp = (WORD) pInitParam_p->prescaler;
+        wTemp = (WORD)pInitParam_p->prescaler;
         obd_writeEntry(0x1F98, 9, &wTemp, 2);
     }
 
@@ -1372,42 +1371,42 @@ static tOplkError updateObd(tOplkApiInitParam* pInitParam_p)
     if (pInitParam_p->pDevName != NULL)
     {
         // write Device Name (0x1008)
-        obd_writeEntry (0x1008, 0, (void*)pInitParam_p->pDevName,
-                          (tObdSize) strlen(pInitParam_p->pDevName));
+        obd_writeEntry(0x1008, 0, (void*)pInitParam_p->pDevName,
+                       (tObdSize)strlen(pInitParam_p->pDevName));
     }
 
     if (pInitParam_p->pHwVersion != NULL)
     {
         // write Hardware version (0x1009)
-        obd_writeEntry (0x1009, 0, (void*)pInitParam_p->pHwVersion,
-                          (tObdSize) strlen(pInitParam_p->pHwVersion));
+        obd_writeEntry(0x1009, 0, (void*)pInitParam_p->pHwVersion,
+                       (tObdSize)strlen(pInitParam_p->pHwVersion));
     }
 
     if (pInitParam_p->pSwVersion != NULL)
     {
         // write Software version (0x100A)
-        obd_writeEntry (0x100A, 0, (void*)pInitParam_p->pSwVersion,
-                          (tObdSize) strlen(pInitParam_p->pSwVersion));
+        obd_writeEntry(0x100A, 0, (void*)pInitParam_p->pSwVersion,
+                       (tObdSize)strlen(pInitParam_p->pSwVersion));
     }
 
 #if defined(CONFIG_INCLUDE_VETH)
     // write NMT_HostName_VSTR (0x1F9A)
-    obd_writeEntry (0x1F9A, 0, (void*)&pInitParam_p->sHostname[0],
-                      sizeof (pInitParam_p->sHostname));
+    obd_writeEntry(0x1F9A, 0, (void*)&pInitParam_p->sHostname[0],
+                   sizeof(pInitParam_p->sHostname));
 
     //TRACE("%s: write NMT_HostName_VSTR %d\n", __func__, Ret);
 
     // write NWL_IpAddrTable_Xh_REC.Addr_IPAD (0x1E40/2)
-    obd_writeEntry (0x1E40, 2, (void*)&pInitParam_p->ipAddress,
-                      sizeof (pInitParam_p->ipAddress));
+    obd_writeEntry(0x1E40, 2, (void*)&pInitParam_p->ipAddress,
+                   sizeof(pInitParam_p->ipAddress));
 
     // write NWL_IpAddrTable_Xh_REC.NetMask_IPAD (0x1E40/3)
-    obd_writeEntry (0x1E40, 3, (void*)&pInitParam_p->subnetMask,
-                      sizeof (pInitParam_p->subnetMask));
+    obd_writeEntry(0x1E40, 3, (void*)&pInitParam_p->subnetMask,
+                   sizeof(pInitParam_p->subnetMask));
 
     // write NWL_IpAddrTable_Xh_REC.DefaultGateway_IPAD (0x1E40/5)
-    obd_writeEntry (0x1E40, 5, (void*)&pInitParam_p->defaultGateway,
-                      sizeof (pInitParam_p->defaultGateway));
+    obd_writeEntry(0x1E40, 5, (void*)&pInitParam_p->defaultGateway,
+                   sizeof(pInitParam_p->defaultGateway));
 #endif
 
     // ignore return code
@@ -1434,7 +1433,7 @@ static tOplkError cbNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtStat
                               UINT16 errorCode_p, BOOL fMandatory_p)
 {
     tOplkError              ret;
-    tOplkApiEventArg         eventArg;
+    tOplkApiEventArg        eventArg;
 
     ret = kErrorOk;
 
@@ -1471,10 +1470,10 @@ The function implements the callback function for node events.
 */
 //------------------------------------------------------------------------------
 static tOplkError cbBootEvent(tNmtBootEvent bootEvent_p, tNmtState nmtState_p,
-                                    UINT16 errorCode_p)
+                              UINT16 errorCode_p)
 {
     tOplkError              ret;
-    tOplkApiEventArg         eventArg;
+    tOplkApiEventArg        eventArg;
 
     ret = kErrorOk;
 
@@ -1503,7 +1502,7 @@ The function implements the callback function for LED change events.
 static tOplkError cbLedStateChange(tLedType ledType_p, BOOL fOn_p)
 {
     tOplkError              ret;
-    tOplkApiEventArg         eventArg;
+    tOplkApiEventArg        eventArg;
 
     ret = kErrorOk;
 
@@ -1534,7 +1533,7 @@ The function implements the callback function for CFM progress events.
 static tOplkError cbCfmEventCnProgress(tCfmEventCnProgress* pEventCnProgress_p)
 {
     tOplkError              ret;
-    tOplkApiEventArg         eventArg;
+    tOplkApiEventArg        eventArg;
 
     ret = kErrorOk;
 
@@ -1558,7 +1557,7 @@ The function implements the callback function for CFM result events.
 static tOplkError cbCfmEventCnResult(UINT nodeId_p, tNmtNodeCommand nodeCommand_p)
 {
     tOplkError              ret;
-    tOplkApiEventArg         eventArg;
+    tOplkApiEventArg        eventArg;
 
     eventArg.cfmResult.nodeId = nodeId_p;
     eventArg.cfmResult.nodeCommand = nodeCommand_p;
@@ -1603,8 +1602,6 @@ static tOplkError cbCnCheckEvent(tNmtEvent nmtEvent_p)
     }
     return ret;
 }
-
-
 
 /// \}
 

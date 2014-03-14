@@ -11,7 +11,7 @@ a shared memory block for communication with the kernel layer.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -129,7 +129,7 @@ tOplkError ctrlucal_init(void)
     hifConfig.version.major = HOSTIF_VERSION_MAJOR;
 
     hifRet = hostif_create(&hifConfig, &instance_l.hifInstance);
-    if(hifRet != kHostifSuccessful)
+    if (hifRet != kHostifSuccessful)
     {
         DEBUG_LVL_ERROR_TRACE ("Could not initialize Host Interface (0x%X)\n", hifRet);
         return kErrorNoResource;
@@ -139,7 +139,7 @@ tOplkError ctrlucal_init(void)
     instance_l.fIrqMasterEnable = FALSE;
 
     hifRet = hostif_irqMasterEnable(instance_l.hifInstance, instance_l.fIrqMasterEnable);
-    if(hifRet != kHostifSuccessful)
+    if (hifRet != kHostifSuccessful)
     {
         DEBUG_LVL_ERROR_TRACE ("Could not disable Master Irq (0x%X)\n", hifRet);
         return kErrorNoResource;
@@ -150,14 +150,14 @@ tOplkError ctrlucal_init(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Cleanup user control CAL module
+\brief  Clean up user control CAL module
 
-The function cleans-up the user control CAL module.
+The function cleans up the user control CAL module.
 
 \ingroup module_ctrlucal
 */
 //------------------------------------------------------------------------------
-void ctrlucal_exit (void)
+void ctrlucal_exit(void)
 {
     tHostifReturn hifRet;
 
@@ -165,11 +165,11 @@ void ctrlucal_exit (void)
     instance_l.fIrqMasterEnable = FALSE;
 
     hifRet = hostif_irqMasterEnable(instance_l.hifInstance, instance_l.fIrqMasterEnable);
-    if(hifRet != kHostifSuccessful)
-        DEBUG_LVL_ERROR_TRACE ("Could not disable Master Irq (0x%X)\n", hifRet);
+    if (hifRet != kHostifSuccessful)
+        DEBUG_LVL_ERROR_TRACE("Could not disable Master Irq (0x%X)\n", hifRet);
 
     hifRet = hostif_delete(instance_l.hifInstance);
-    if(hifRet != kHostifSuccessful)
+    if (hifRet != kHostifSuccessful)
         DEBUG_LVL_ERROR_TRACE("Could not delete Host Inetrface (0x%X)\n", hifRet);
 }
 
@@ -184,19 +184,19 @@ This function provides processing time for the CAL module.
 \ingroup module_ctrlucal
 */
 //------------------------------------------------------------------------------
-tOplkError ctrlucal_process (void)
+tOplkError ctrlucal_process(void)
 {
     tHostifReturn hifRet;
 
-    if(instance_l.fIrqMasterEnable == FALSE)
+    if (instance_l.fIrqMasterEnable == FALSE)
     {
         //enable master irq
         instance_l.fIrqMasterEnable = TRUE;
 
         hifRet = hostif_irqMasterEnable(instance_l.hifInstance, instance_l.fIrqMasterEnable);
-        if(hifRet != kHostifSuccessful)
+        if (hifRet != kHostifSuccessful)
         {
-            DEBUG_LVL_ERROR_TRACE ("Could not enable Master Irq (0x%X)\n", hifRet);
+            DEBUG_LVL_ERROR_TRACE("Could not enable Master Irq (0x%X)\n", hifRet);
             return kErrorNoResource;
         }
     }
@@ -233,14 +233,14 @@ tOplkError ctrlucal_executeCmd(tCtrlCmdType cmd_p)
         target_msleep(1000U);
 
         hifret = hostif_getCommand(instance_l.hifInstance, &hifcmd);
-        if(hifret != kHostifSuccessful)
+        if (hifret != kHostifSuccessful)
             return kErrorGeneralError;
 
         hifret = hostif_getError(instance_l.hifInstance, &hiferr);
-        if(hifret != kHostifSuccessful)
+        if (hifret != kHostifSuccessful)
             return kErrorGeneralError;
 
-        if(hifcmd == 0)
+        if (hifcmd == 0)
         {
             return hiferr;
         }
@@ -259,8 +259,8 @@ The function checks the state of the kernel stack. If it is already running
 it tries to shutdown.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk  If kernel stack is initialized
-\retval kErrorNoResource  If kernel stack is not running or in wrong state
+\retval kErrorOk             Kernel stack is initialized
+\retval kErrorNoResource     Kernel stack is not running or in wrong state
 
 \ingroup module_ctrlucal
 */
@@ -269,14 +269,14 @@ tOplkError ctrlucal_checkKernelStack(void)
 {
     tOplkError ret;
     UINT16 kernelStatus;
-    BOOL fExit =FALSE;
+    BOOL fExit = FALSE;
     int timeout = 0;
 
     TRACE("Check Kernel Stack...\n");
 
-    while(!fExit)
+    while (!fExit)
     {
-        switch(kernelStatus = ctrlucal_getStatus())
+        switch (kernelStatus = ctrlucal_getStatus())
         {
             case kCtrlStatusReady:
                 TRACE("-> Kernel Stack is ready\n");
@@ -289,7 +289,7 @@ tOplkError ctrlucal_checkKernelStack(void)
                 TRACE("-> Try to shutdown Kernel Stack\n");
 
                 ret = ctrlucal_executeCmd(kCtrlCleanupStack);
-                if(ret != kErrorOk)
+                if (ret != kErrorOk)
                 {
                     fExit = TRUE;
                     ret = kErrorNoResource;
@@ -297,12 +297,12 @@ tOplkError ctrlucal_checkKernelStack(void)
                 break;
 
             default:
-                if(timeout == 0)
+                if (timeout == 0)
                     TRACE("-> Wait for Kernel Stack\n");
 
                 target_msleep(1000U);
 
-                if(timeout++ >= CMD_TIMEOUT_SEC)
+                if (timeout++ >= CMD_TIMEOUT_SEC)
                 {
                     fExit = TRUE;
                     ret = kErrorNoResource;
@@ -331,7 +331,7 @@ UINT16 ctrlucal_getStatus(void)
     UINT16 status;
 
     hifret = hostif_getState(instance_l.hifInstance, (tHostifState*)&status);
-    if(hifret != kErrorOk)
+    if (hifret != kErrorOk)
         status = kCtrlStatusUnavailable;
 
     return status;
@@ -354,7 +354,7 @@ UINT16 ctrlucal_getHeartbeat(void)
     UINT16 heartbeat;
 
     hifret = hostif_getHeartbeat(instance_l.hifInstance, &heartbeat);
-    if(hifret != kErrorOk)
+    if (hifret != kErrorOk)
         heartbeat = 0; // return constant heartbeat, so the user recognizes issue
 
     return heartbeat;
@@ -379,7 +379,7 @@ void ctrlucal_storeInitParam(tCtrlInitParam* pInitParam_p)
     UINT8*          pDst;
 
     hifret = hostif_getInitParam(instance_l.hifInstance, &pInitBase);
-    if(hifret != kHostifSuccessful)
+    if (hifret != kHostifSuccessful)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Getting init base failed (0x%X)!\n", __func__, hifret);
         return;
@@ -387,7 +387,7 @@ void ctrlucal_storeInitParam(tCtrlInitParam* pInitParam_p)
 
     pDst = getDynBuff((UINT32)pInitBase);
 
-    if(pDst != NULL)
+    if (pDst != NULL)
         OPLK_MEMCPY(pDst, pInitParam_p, sizeof(tCtrlInitParam));
 
     freeDynBuff(pDst);
@@ -415,7 +415,7 @@ tOplkError ctrlucal_readInitParam(tCtrlInitParam* pInitParam_p)
     UINT8*          pSrc;
 
     hifret = hostif_getInitParam(instance_l.hifInstance, &pInitBase);
-    if(hifret != kHostifSuccessful)
+    if (hifret != kHostifSuccessful)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Getting init base failed (0x%X)!\n", __func__, hifret);
         ret = kErrorNoResource;
@@ -424,7 +424,7 @@ tOplkError ctrlucal_readInitParam(tCtrlInitParam* pInitParam_p)
 
     pSrc = getDynBuff((UINT32)pInitBase);
 
-    if(pSrc == NULL)
+    if (pSrc == NULL)
         return kErrorNoResource;
 
     OPLK_MEMCPY(pInitParam_p, pSrc, sizeof(tCtrlInitParam));
@@ -460,7 +460,7 @@ static UINT8* getDynBuff(UINT32 pcpBase_p)
     UINT8* pDynBufBase;
 
     hifret = hostif_dynBufAcquire(instance_l.hifInstance, pcpBase_p, &pDynBufBase);
-    if(hifret != kHostifSuccessful)
+    if (hifret != kHostifSuccessful)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Acquiring dynamic buffer failed (0x%X)!\n", __func__, hifret);
         pDynBufBase = NULL;
@@ -484,10 +484,11 @@ static void freeDynBuff(UINT8* pDynBufBase_p)
 
     hifret = hostif_dynBufFree(instance_l.hifInstance, pDynBufBase_p);
 
-    if(hifret != kHostifSuccessful)
+    if (hifret != kHostifSuccessful)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Freeing dynamic buffer failed (0x%X)", __func__, hifret);
     }
 }
 
 ///\}
+

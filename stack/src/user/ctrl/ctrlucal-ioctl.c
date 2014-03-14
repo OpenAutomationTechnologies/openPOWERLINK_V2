@@ -11,7 +11,7 @@ ioctl calls for communication with the kernel layer.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -94,7 +94,6 @@ static int fd_l;           // file descriptor for powerlink device
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-UINT16 getMagic (void);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -124,16 +123,16 @@ tOplkError ctrlucal_init(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Cleanup user control CAL module
+\brief  Clean up user control CAL module
 
-The function cleans-up the user control CAL module.
+The function cleans up the user control CAL module.
 
 \ingroup module_ctrlucal
 */
 //------------------------------------------------------------------------------
-void ctrlucal_exit (void)
+void ctrlucal_exit(void)
 {
-    close (fd_l);
+    close(fd_l);
 }
 
 //------------------------------------------------------------------------------
@@ -147,7 +146,7 @@ This function provides processing time for the CAL module.
 \ingroup module_ctrlucal
 */
 //------------------------------------------------------------------------------
-tOplkError ctrlucal_process (void)
+tOplkError ctrlucal_process(void)
 {
     return kErrorOk;
 }
@@ -173,7 +172,7 @@ tOplkError ctrlucal_executeCmd(tCtrlCmdType cmd_p)
     ctrlCmd.cmd = cmd_p;
     ctrlCmd.retVal = 0;
 
-    if ((ret = ioctl (fd_l, PLK_CMD_CTRL_EXECUTE_CMD, &ctrlCmd)) != 0)
+    if ((ret = ioctl(fd_l, PLK_CMD_CTRL_EXECUTE_CMD, &ctrlCmd)) != 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s() ioctl error %d\n", __func__, ret);
         return kErrorGeneralError;
@@ -191,8 +190,8 @@ The function checks the state of the kernel stack. If it is already running
 it tries to shutdown.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk  If kernel stack is initialized
-\retval kErrorNoResource  If kernel stack is not running or in wrong state
+\retval kErrorOk             Kernel stack is initialized
+\retval kErrorNoResource     Kernel stack is not running or in wrong state
 
 \ingroup module_ctrlucal
 */
@@ -202,10 +201,10 @@ tOplkError ctrlucal_checkKernelStack(void)
     UINT16              kernelStatus;
     tOplkError          ret;
 
-    TRACE ("Checking for kernel stack...\n");
+    TRACE("Checking for kernel stack...\n");
     kernelStatus = ctrlucal_getStatus();
 
-    switch(kernelStatus)
+    switch (kernelStatus)
     {
         case kCtrlStatusReady:
             ret = kErrorOk;
@@ -253,7 +252,7 @@ UINT16 ctrlucal_getStatus(void)
     int         ret;
     UINT16      status;
 
-    if ((ret = ioctl (fd_l, PLK_CMD_CTRL_GET_STATUS, &status)) != 0)
+    if ((ret = ioctl(fd_l, PLK_CMD_CTRL_GET_STATUS, &status)) != 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s() ioctl error %d\n", __func__, ret);
         return kCtrlStatusUnavailable;
@@ -277,7 +276,7 @@ UINT16 ctrlucal_getHeartbeat(void)
     int         ret;
     UINT16      heartbeat;
 
-    if ((ret = ioctl (fd_l, PLK_CMD_CTRL_GET_HEARTBEAT, &heartbeat)) != 0)
+    if ((ret = ioctl(fd_l, PLK_CMD_CTRL_GET_HEARTBEAT, &heartbeat)) != 0)
     {
         TRACE("%s() error %d\n", __func__, ret);
         return 0;
@@ -301,7 +300,7 @@ void ctrlucal_storeInitParam(tCtrlInitParam* pInitParam_p)
 {
     int                 ret;
 
-    if ((ret = ioctl (fd_l, PLK_CMD_CTRL_STORE_INITPARAM, pInitParam_p)) != 0)
+    if ((ret = ioctl(fd_l, PLK_CMD_CTRL_STORE_INITPARAM, pInitParam_p)) != 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s() ioctl error %d\n", __func__, ret);
     }
@@ -326,7 +325,7 @@ tOplkError ctrlucal_readInitParam(tCtrlInitParam* pInitParam_p)
 {
     int                 ret;
 
-    if ((ret = ioctl (fd_l, PLK_CMD_CTRL_READ_INITPARAM, pInitParam_p)) != 0)
+    if ((ret = ioctl(fd_l, PLK_CMD_CTRL_READ_INITPARAM, pInitParam_p)) != 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s() ioctl error %d\n", __func__, ret);
         return kErrorGeneralError;
