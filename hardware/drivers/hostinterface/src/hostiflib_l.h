@@ -83,9 +83,6 @@ UINT16 hostif_readReturn(UINT8* pHostifScBase_p);
 void hostif_writeReturn(UINT8* pHostifScBase_p, UINT16 val_p);
 UINT16 hostif_readHeartbeat(UINT8* pHostifScBase_p);
 void hostif_writeHeartbeat(UINT8* pHostifScBase_p, UINT16 val_p);
-UINT8 hostif_readNodeId(UINT8* pHostifScBase_p);
-UINT16 hostif_readLed(UINT8* pHostifScBase_p);
-void hostif_writeLed(UINT8* pHostifScBase_p, UINT16 val_p);
 
 UINT16 hostif_readIrqEnable(UINT8* pHostifScBase_p);
 void hostif_writeIrqEnable(UINT8* pHostifScBase_p, UINT16 val_p);

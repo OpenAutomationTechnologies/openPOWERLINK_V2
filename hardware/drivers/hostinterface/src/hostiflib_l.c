@@ -113,11 +113,11 @@ typedef struct sScCont
     volatile UINT16     state;        ///< state word
     volatile UINT16     ret;          ///< return word
     volatile UINT16     heartbeat;    ///< heart beat word
-    volatile UINT8      nodeId;       ///< node id
+    volatile UINT8      RESERVED1;    ///< reserved
     volatile UINT8      RESERVED2;    ///< reserved
     volatile UINT16     RESERVED3;    ///< reserved
-    volatile UINT16     ledControl;   ///< led control
     volatile UINT16     RESERVED4;    ///< reserved
+    volatile UINT16     RESERVED5;    ///< reserved
 } tScCont;
 
 /**
@@ -448,56 +448,6 @@ void hostif_writeHeartbeat(UINT8* pHostifScBase_p, UINT16 val_p)
 {
     HOSTIF_WR16(pHostifScBase_p + HOSTIF_SC_CONT_OFFS,
                 offsetof(tScCont, heartbeat), val_p);
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Read node id field
-
-\param  pHostifScBase_p     base address of Status/Control registers
-
-\return The function returns the node id field.
-
-\ingroup module_hostiflib
-*/
-//------------------------------------------------------------------------------
-UINT8 hostif_readNodeId(UINT8* pHostifScBase_p)
-{
-    return HOSTIF_RD8(pHostifScBase_p + HOSTIF_SC_CONT_OFFS,
-                      offsetof(tScCont, nodeId));
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Read led field
-
-\param  pHostifScBase_p     base address of Status/Control registers
-
-\return The function returns the led field.
-
-\ingroup module_hostiflib
-*/
-//------------------------------------------------------------------------------
-UINT16 hostif_readLed(UINT8* pHostifScBase_p)
-{
-    return HOSTIF_RD16(pHostifScBase_p + HOSTIF_SC_CONT_OFFS,
-                       offsetof(tScCont, ledControl));
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Write led field
-
-\param  pHostifScBase_p     base address of Status/Control registers
-\param  val_p               pattern to be written
-
-\ingroup module_hostiflib
-*/
-//------------------------------------------------------------------------------
-void hostif_writeLed(UINT8* pHostifScBase_p, UINT16 val_p)
-{
-    HOSTIF_WR16(pHostifScBase_p + HOSTIF_SC_CONT_OFFS,
-                offsetof(tScCont, ledControl), val_p);
 }
 
 //------------------------------------------------------------------------------
