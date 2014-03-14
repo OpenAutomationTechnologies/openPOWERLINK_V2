@@ -4,13 +4,12 @@
 
 \brief  Definitions for user CAL module of error handler
 
-This file provides the interface of the error handlers user CAL
-module.
+This file provides the interface of the error handlers user CAL module.
 
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -60,13 +59,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tOplkError errhnducal_init (tErrHndObjects *pLocalObjects_p);
-void errhnducal_exit (void);
-tOplkError errhnducal_writeErrorObject(UINT index_p, UINT subIndex_p, UINT32 *pParam_p);
-tOplkError errhnducal_readErrorObject(UINT index_p, UINT subIndex_p, UINT32 *pParam_p);
+tOplkError errhnducal_init(tErrHndObjects* pLocalObjects_p);
+void errhnducal_exit(void);
+tOplkError errhnducal_writeErrorObject(UINT index_p, UINT subIndex_p, UINT32* pParam_p);
+tOplkError errhnducal_readErrorObject(UINT index_p, UINT subIndex_p, UINT32* pParam_p);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_ErrHndkCal_H_ */
+#endif /* _INC_errhnducal_H_ */
+
