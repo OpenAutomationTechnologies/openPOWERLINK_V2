@@ -10,7 +10,7 @@ This file contains the implementation of the SDO sequence layer
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -44,7 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/sdoseq.h>
 
 #if !defined(CONFIG_INCLUDE_SDO_UDP) && !defined(CONFIG_INCLUDE_SDO_ASND)
-#error 'ERROR: sdo-seq.c - At least UDP or ASND module needed!'
+#error 'ERROR: sdo-sequ.c - At least UDP or ASND module needed!'
 #endif
 
 //============================================================================//
@@ -68,7 +68,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define SDO_SEQ_HISTROY_FRAME_SIZE  SDO_MAX_FRAME_SIZE      // buffersize for one frame in history
 #define SDO_CON_MASK                0x03                    // mask to get scon and rcon
 
-const UINT32 SDO_SEQU_MAX_TIMEOUT_MS = (UINT32) 86400000UL; // [ms], 86400000 ms = 1 day
+const UINT32 SDO_SEQU_MAX_TIMEOUT_MS = (UINT32)86400000UL; // [ms], 86400000 ms = 1 day
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -160,10 +160,10 @@ This structure defines a SDO sequence layer instance.
 */
 typedef struct
 {
-    tSdoSeqCon              aSdoSeqCon[CONFIG_SDO_MAX_CONNECTION_SEQ];    ///< Array of sequence layer connections
-    tSdoComReceiveCb        pfnSdoComRecvCb;                ///< Pointer to receive callback function
-    tSdoComConCb            pfnSdoComConCb;                 ///< Pointer to connection callback function
-    UINT32                  sdoSeqTimeout;                  ///< Configured Sequence layer timeout
+    tSdoSeqCon              aSdoSeqCon[CONFIG_SDO_MAX_CONNECTION_SEQ];  ///< Array of sequence layer connections
+    tSdoComReceiveCb        pfnSdoComRecvCb;                            ///< Pointer to receive callback function
+    tSdoComConCb            pfnSdoComConCb;                             ///< Pointer to connection callback function
+    UINT32                  sdoSeqTimeout;                              ///< Configured Sequence layer timeout
 
 #if defined(WIN32) || defined(_WIN32)
     LPCRITICAL_SECTION      pCriticalSection;
@@ -172,7 +172,7 @@ typedef struct
     LPCRITICAL_SECTION      pCriticalSectionReceive;
     CRITICAL_SECTION        criticalSectionReceive;
 #endif
-}tSdoSeqInstance;
+} tSdoSeqInstance;
 
 //------------------------------------------------------------------------------
 // local vars
@@ -270,7 +270,7 @@ tOplkError sdoseq_addInstance(tSdoComReceiveCb pfnSdoComRecvCb_p, tSdoComConCb p
 {
     tOplkError      ret = kErrorOk;
 
-    if(pfnSdoComRecvCb_p == NULL)
+    if (pfnSdoComRecvCb_p == NULL)
     {
         return kErrorSdoSeqMissCb;
     }
@@ -279,7 +279,7 @@ tOplkError sdoseq_addInstance(tSdoComReceiveCb pfnSdoComRecvCb_p, tSdoComConCb p
         sdoSeqInstance_l.pfnSdoComRecvCb = pfnSdoComRecvCb_p;
     }
 
-    if(pfnSdoComConCb_p == NULL)
+    if (pfnSdoComConCb_p == NULL)
     {
         return kErrorSdoSeqMissCb;
     }
@@ -303,13 +303,13 @@ tOplkError sdoseq_addInstance(tSdoComReceiveCb pfnSdoComRecvCb_p, tSdoComConCb p
     // init lower layers
 #if defined(CONFIG_INCLUDE_SDO_UDP)
     ret = sdoudp_addInstance(receiveCb);
-    if(ret != kErrorOk)
+    if (ret != kErrorOk)
         return ret;
 #endif
 
 #if defined(CONFIG_INCLUDE_SDO_ASND)
     ret = sdoasnd_addInstance(receiveCb);
-    if(ret != kErrorOk)
+    if (ret != kErrorOk)
         return ret;
 #endif
     sdoSeqInstance_l.sdoSeqTimeout = SDO_SEQ_DEFAULT_TIMEOUT;
@@ -336,7 +336,7 @@ tOplkError sdoseq_delInstance(void)
     // delete timer of open connections
     count = 0;
     pSdoSeqCon = &sdoSeqInstance_l.aSdoSeqCon[0];
-    while(count < CONFIG_SDO_MAX_CONNECTION_SEQ)
+    while (count < CONFIG_SDO_MAX_CONNECTION_SEQ)
     {
         if (pSdoSeqCon->conHandle != 0)
         {
@@ -395,7 +395,7 @@ tOplkError sdoseq_initCon(tSdoSeqConHdl* pSdoSeqConHdl_p, UINT nodeId_p, tSdoTyp
         case kSdoTypeUdp:
 #if defined(CONFIG_INCLUDE_SDO_UDP)
             ret = sdoudp_initCon(&conHandle, nodeId_p);
-            if(ret != kErrorOk)
+            if (ret != kErrorOk)
                 return ret;
 #else
             return kErrorSdoSeqUnsupportedProt;
@@ -405,7 +405,7 @@ tOplkError sdoseq_initCon(tSdoSeqConHdl* pSdoSeqConHdl_p, UINT nodeId_p, tSdoTyp
         case kSdoTypeAsnd:
 #if defined(CONFIG_INCLUDE_SDO_ASND)
             ret = sdoasnd_initCon(&conHandle, nodeId_p);
-            if(ret != kErrorOk)
+            if (ret != kErrorOk)
                 return ret;
 #else
             return kErrorSdoSeqUnsupportedProt;
@@ -445,7 +445,7 @@ tOplkError sdoseq_initCon(tSdoSeqConHdl* pSdoSeqConHdl_p, UINT nodeId_p, tSdoTyp
                 case kSdoTypeUdp:
 #if defined(CONFIG_INCLUDE_SDO_UDP)
                     ret = sdoudp_delConnection(conHandle);
-                    if(ret != kErrorOk)
+                    if (ret != kErrorOk)
                         return ret;
 #endif
                     break;
@@ -453,7 +453,7 @@ tOplkError sdoseq_initCon(tSdoSeqConHdl* pSdoSeqConHdl_p, UINT nodeId_p, tSdoTyp
                 case kSdoTypeAsnd:
 #if defined(CONFIG_INCLUDE_SDO_ASND)
                     ret = sdoasnd_deleteCon(conHandle);
-                    if(ret != kErrorOk)
+                    if (ret != kErrorOk)
                         return ret;
 #endif
                     break;
@@ -464,7 +464,6 @@ tOplkError sdoseq_initCon(tSdoSeqConHdl* pSdoSeqConHdl_p, UINT nodeId_p, tSdoTyp
                 default:
                     return kErrorSdoSeqUnsupportedProt;
             }
-
             return kErrorSdoSeqNoFreeHandle;
         }
         else
@@ -508,14 +507,14 @@ tOplkError sdoseq_sendData(tSdoSeqConHdl sdoSeqConHdl_p, UINT dataSize_p, tPlkFr
     handle = (sdoSeqConHdl_p & ~SDO_SEQ_HANDLE_MASK);
 
     // check if connection ready
-    if(sdoSeqInstance_l.aSdoSeqCon[handle].sdoSeqState == kSdoSeqStateIdle )
+    if (sdoSeqInstance_l.aSdoSeqCon[handle].sdoSeqState == kSdoSeqStateIdle )
     {
         // no connection with this handle
         return kErrorSdoSeqInvalidHdl;
     }
     else
     {
-        if(sdoSeqInstance_l.aSdoSeqCon[handle].sdoSeqState != kSdoSeqStateConnected)
+        if (sdoSeqInstance_l.aSdoSeqCon[handle].sdoSeqState != kSdoSeqStateConnected)
         {
             return kErrorSdoSeqConnectionBusy;
         }
@@ -526,7 +525,7 @@ tOplkError sdoseq_sendData(tSdoSeqConHdl sdoSeqConHdl_p, UINT dataSize_p, tPlkFr
 
 //------------------------------------------------------------------------------
 /**
-\brief  Process a SDO event
+\brief  Process an SDO event
 
 The function processes SDO events.
 
@@ -540,15 +539,15 @@ The function processes SDO events.
 tOplkError sdoseq_processEvent(tEvent* pEvent_p)
 {
     tOplkError          ret = kErrorOk;
-    tTimerEventArg   *  pTimerEventArg;
+    tTimerEventArg*     pTimerEventArg;
     tSdoSeqCon*         pSdoSeqCon;
     tTimerHdl           timerHdl;
     UINT                count;
 
-    if(pEvent_p == NULL)
+    if (pEvent_p == NULL)
         return kErrorSdoSeqInvalidEvent;
 
-    if(pEvent_p->eventType != kEventTypeTimer)
+    if (pEvent_p->eventType != kEventTypeTimer)
         return kErrorSdoSeqInvalidEvent;
 
     // get timer handle
@@ -560,7 +559,7 @@ tOplkError sdoseq_processEvent(tEvent* pEvent_p)
 
     pSdoSeqCon = (tSdoSeqCon*)pTimerEventArg->argument.pValue;
     // check if time is current
-    if(timerHdl != pSdoSeqCon->timerHandle)
+    if (timerHdl != pSdoSeqCon->timerHandle)
     {
         timeru_deleteTimer(&timerHdl);
         return ret;
@@ -569,10 +568,10 @@ tOplkError sdoseq_processEvent(tEvent* pEvent_p)
 
     // get indexnumber of control structure
     count = 0;
-    while((&sdoSeqInstance_l.aSdoSeqCon[count]) != pSdoSeqCon)
+    while ((&sdoSeqInstance_l.aSdoSeqCon[count]) != pSdoSeqCon)
     {
         count++;
-        if(count > CONFIG_SDO_MAX_CONNECTION_SEQ)
+        if (count > CONFIG_SDO_MAX_CONNECTION_SEQ)
             return ret;
     }
 
@@ -616,7 +615,7 @@ tOplkError sdoseq_deleteCon(tSdoSeqConHdl sdoSeqConHdl_p)
         ret = processState(handle, 0, NULL, NULL, kSdoSeqEventCloseCon);
 
         //check protocol
-        if((pSdoSeqCon->conHandle & SDO_ASY_HANDLE_MASK) == SDO_UDP_HANDLE)
+        if ((pSdoSeqCon->conHandle & SDO_ASY_HANDLE_MASK) == SDO_UDP_HANDLE)
         {
 #if defined(CONFIG_INCLUDE_SDO_UDP)
             sdoudp_delConnection(pSdoSeqCon->conHandle);
@@ -655,7 +654,7 @@ tOplkError sdoseq_setTimeout(UINT32 timeout_p)
 {
     // Adopt new SDO sequence layer timeout (truncated to an upper bound)
     sdoSeqInstance_l.sdoSeqTimeout = min(timeout_p, SDO_SEQU_MAX_TIMEOUT_MS);
-    return  kErrorOk;
+    return kErrorOk;
 }
 
 //============================================================================//
@@ -683,14 +682,14 @@ static tOplkError processStateIdle(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSe
 {
     tOplkError      ret = kErrorOk;
 
-    switch(event_p)
+    switch (event_p)
     {
         // new connection -> send init frame and change to kSdoSeqStateInit1
         case kSdoSeqEventInitCon:
             pSdoSeqCon_p->recvSeqNum = 0x01;    // set sending scon to 1
             pSdoSeqCon_p->sendSeqNum = 0x00;    // set set send rcon to 0
             ret = sendFrame(pSdoSeqCon_p, 0, NULL, FALSE);
-            if(ret != kErrorOk)
+            if (ret != kErrorOk)
                 return ret;
 
             pSdoSeqCon_p->sdoSeqState = kSdoSeqStateInit1; // change state
@@ -700,12 +699,12 @@ static tOplkError processStateIdle(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSe
         // init con from extern, check rcon and scon -> send answer
         case kSdoSeqEventFrameRec:
             DEBUG_LVL_SDO_TRACE("%s scon=%u rcon=%u\n", __func__,
-                               pRecvFrame_p->sendSeqNumCon,
-                               pRecvFrame_p->recvSeqNumCon);
+                                pRecvFrame_p->sendSeqNumCon,
+                                pRecvFrame_p->recvSeqNumCon);
 
             // check if scon == 1 and rcon == 0
-            if(((pRecvFrame_p->recvSeqNumCon & SDO_CON_MASK) == 0x00) &&
-               ((pRecvFrame_p->sendSeqNumCon & SDO_CON_MASK) == 0x01))
+            if (((pRecvFrame_p->recvSeqNumCon & SDO_CON_MASK) == 0x00) &&
+                ((pRecvFrame_p->sendSeqNumCon & SDO_CON_MASK) == 0x01))
             {
                 // save sequence numbers
                 pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->recvSeqNumCon);
@@ -713,7 +712,7 @@ static tOplkError processStateIdle(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSe
                 // create answer and send answer, set rcon to 1 (in send direction own scon)
                 pSdoSeqCon_p->recvSeqNum++;
                 ret = sendFrame(pSdoSeqCon_p, 0, NULL, FALSE);
-                if(ret != kErrorOk)
+                if (ret != kErrorOk)
                     return kErrorOk;
 
                 pSdoSeqCon_p->sdoSeqState = kSdoSeqStateInit2; // change state to kSdoSeqStateInit2
@@ -766,20 +765,20 @@ static tOplkError processStateInit1(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
 
     // TRACE("EplSdoAsySequ: StateInit1\n");
 
-    switch(event_p)
+    switch (event_p)
     {
         // frame received
         case kSdoSeqEventFrameRec:
             // check scon == 1 and rcon == 1
-            if(((pRecvFrame_p->recvSeqNumCon & SDO_CON_MASK) == 0x01) &&
-               ((pRecvFrame_p->sendSeqNumCon & SDO_CON_MASK) == 0x01))
+            if (((pRecvFrame_p->recvSeqNumCon & SDO_CON_MASK) == 0x01) &&
+                ((pRecvFrame_p->sendSeqNumCon & SDO_CON_MASK) == 0x01))
             {   // create answer own scon = 2 - save sequence numbers
                 pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->recvSeqNumCon);
                 pSdoSeqCon_p->sendSeqNum = ami_getUint8Le(&pRecvFrame_p->sendSeqNumCon);
 
                 pSdoSeqCon_p->recvSeqNum++;
                 ret = sendFrame(pSdoSeqCon_p, 0, NULL, FALSE);
-                if(ret != kErrorOk)
+                if (ret != kErrorOk)
                     return ret;
 
                 pSdoSeqCon_p->sdoSeqState = kSdoSeqStateInit3;
@@ -788,8 +787,8 @@ static tOplkError processStateInit1(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
 
             }
             // check if scon == 1 and rcon == 0, i.e. other side wants me to be server
-            else if(((pRecvFrame_p->recvSeqNumCon & SDO_CON_MASK) == 0x00) &&
-                    ((pRecvFrame_p->sendSeqNumCon & SDO_CON_MASK) == 0x01))
+            else if (((pRecvFrame_p->recvSeqNumCon & SDO_CON_MASK) == 0x00) &&
+                     ((pRecvFrame_p->sendSeqNumCon & SDO_CON_MASK) == 0x01))
             {
                 // save sequence numbers
                 pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->recvSeqNumCon);
@@ -797,7 +796,7 @@ static tOplkError processStateInit1(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
                 // create answer and send answer - set rcon to 1 (in send direction own scon)
                 pSdoSeqCon_p->recvSeqNum++;
                 ret = sendFrame(pSdoSeqCon_p, 0, NULL, FALSE);
-                if(ret != kErrorOk)
+                if (ret != kErrorOk)
                     return ret;
 
                 pSdoSeqCon_p->sdoSeqState = kSdoSeqStateInit2;
@@ -870,20 +869,20 @@ static tOplkError processStateInit2(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
 
     // TRACE("EplSdoAsySequ: StateInit2\n");
 
-    switch(event_p)
+    switch (event_p)
     {
         // frame received
         case kSdoSeqEventFrameRec:
             // check scon == 2 and rcon == 1
-            if(((pRecvFrame_p->recvSeqNumCon & SDO_CON_MASK) == 0x01) &&
-               ((pRecvFrame_p->sendSeqNumCon & SDO_CON_MASK) == 0x02))
+            if (((pRecvFrame_p->recvSeqNumCon & SDO_CON_MASK) == 0x01) &&
+                ((pRecvFrame_p->sendSeqNumCon & SDO_CON_MASK) == 0x02))
             {   // create answer own rcon = 2 - save sequence numbers
                 pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->recvSeqNumCon);
                 pSdoSeqCon_p->sendSeqNum = ami_getUint8Le(&pRecvFrame_p->sendSeqNumCon);
 
                 pSdoSeqCon_p->recvSeqNum++;
                 ret = sendFrame(pSdoSeqCon_p, 0, NULL, FALSE);
-                if(ret != kErrorOk)
+                if (ret != kErrorOk)
                     return ret;
 
                 // change state to kSdoSeqStateConnected
@@ -899,8 +898,8 @@ static tOplkError processStateInit2(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
 
             }
             // check scon == 1 and rcon == 1, i.e. other side wants me to initiate the connection
-            else if(((pRecvFrame_p->recvSeqNumCon & SDO_CON_MASK) == 0x01) &&
-                    ((pRecvFrame_p->sendSeqNumCon & SDO_CON_MASK) == 0x01))
+            else if (((pRecvFrame_p->recvSeqNumCon & SDO_CON_MASK) == 0x01) &&
+                     ((pRecvFrame_p->sendSeqNumCon & SDO_CON_MASK) == 0x01))
             {
                 pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->recvSeqNumCon);
                 pSdoSeqCon_p->sendSeqNum = ami_getUint8Le(&pRecvFrame_p->sendSeqNumCon);
@@ -953,7 +952,7 @@ static tOplkError processStateInit2(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
 
         default:
             break;
-    }// end of switch(Event_p)
+    } // end of switch (Event_p)
 
     return ret;
 }
@@ -977,13 +976,13 @@ static tOplkError processStateInit3(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
 {
     tOplkError          ret = kErrorOk;
 
-    switch(event_p)
+    switch (event_p)
     {
         // frame received
         case kSdoSeqEventFrameRec:
             // check scon == 2 and rcon == 2
-            if(((pRecvFrame_p->recvSeqNumCon & SDO_CON_MASK) == 0x02) &&
-               ((pRecvFrame_p->sendSeqNumCon & SDO_CON_MASK) == 0x02))
+            if (((pRecvFrame_p->recvSeqNumCon & SDO_CON_MASK) == 0x02) &&
+                ((pRecvFrame_p->sendSeqNumCon & SDO_CON_MASK) == 0x02))
             {
                 pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->recvSeqNumCon);
                 pSdoSeqCon_p->sendSeqNum = ami_getUint8Le(&pRecvFrame_p->sendSeqNumCon);
@@ -991,7 +990,7 @@ static tOplkError processStateInit3(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
                 pSdoSeqCon_p->sdoSeqState = kSdoSeqStateConnected;
 
                 ret = initHistory(pSdoSeqCon_p);
-                if(ret != kErrorOk)
+                if (ret != kErrorOk)
                     return ret;
 
                 ret = setTimer(pSdoSeqCon_p, sdoSeqInstance_l.sdoSeqTimeout);
@@ -1000,8 +999,8 @@ static tOplkError processStateInit3(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
 
             }
             // check scon == 2 and rcon == 1
-            else if(((pRecvFrame_p->recvSeqNumCon & SDO_CON_MASK) == 0x01) &&
-                    ((pRecvFrame_p->sendSeqNumCon & SDO_CON_MASK) == 0x02))
+            else if (((pRecvFrame_p->recvSeqNumCon & SDO_CON_MASK) == 0x01) &&
+                     ((pRecvFrame_p->sendSeqNumCon & SDO_CON_MASK) == 0x02))
             {   // create answer own rcon = 2 - save sequence numbers
                 pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->recvSeqNumCon);
                 pSdoSeqCon_p->sendSeqNum = ami_getUint8Le(&pRecvFrame_p->sendSeqNumCon);
@@ -1093,14 +1092,14 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
     tPlkFrame *         pFrame;
     UINT                freeEntries;
 
-    switch(event_p)
+    switch (event_p)
     {
         // frame to send
         case kSdoSeqEventFrameSend:
             // set timer
             ret = setTimer(pSdoSeqCon_p, sdoSeqInstance_l.sdoSeqTimeout);
             // check if data frame or ack
-            if(pData_p == NULL)
+            if (pData_p == NULL)
             {   // send ack, increment scon
                 // jba ?? pSdoSeqCon_p->recvSeqNum += 4;
                 ret = sendFrame(pSdoSeqCon_p, 0, NULL, FALSE);
@@ -1184,10 +1183,10 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
                         pSdoSeqCon_p->sendSeqNum = sendSeqNumCon & ~0x01;
 
                         // check if ack or data-frame, ignore ack -> already processed
-                        if(dataSize_p > SDO_SEQ_HEADER_SIZE)
+                        if (dataSize_p > SDO_SEQ_HEADER_SIZE)
                         {
                             sdoSeqInstance_l.pfnSdoComRecvCb(sdoSeqConHdl_p,
-                                                ((tAsySdoCom*) &pRecvFrame_p->sdoSeqPayload),
+                                                ((tAsySdoCom*)&pRecvFrame_p->sdoSeqPayload),
                                                 (dataSize_p - SDO_SEQ_HEADER_SIZE));
 
                             sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateFrameSended);
@@ -1258,7 +1257,7 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
                 {
                     // set ack request in scon
                     ami_setUint8Le(&pFrame->data.asnd.payload.sdoSequenceFrame.sendSeqNumCon,
-                                   ami_getUint8Le( &pFrame->data.asnd.payload.sdoSequenceFrame.sendSeqNumCon) | 0x03);
+                                   ami_getUint8Le(&pFrame->data.asnd.payload.sdoSequenceFrame.sendSeqNumCon) | 0x03);
 
                     ret = sendToLowerLayer(pSdoSeqCon_p, frameSize, pFrame);
                     if (ret != kErrorOk)
@@ -1277,7 +1276,6 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
 
                 sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateTimeout);
             }
-
             break;
 
         default:
@@ -1345,17 +1343,17 @@ static tOplkError processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sd
                 pSdoSeqCon_p->sdoSeqState = kSdoSeqStateConnected;
                 sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateAckReceived);
                 // send data to higher layer if needed
-                if(dataSize_p > SDO_SEQ_HEADER_SIZE)
+                if (dataSize_p > SDO_SEQ_HEADER_SIZE)
                 {
                     sdoSeqInstance_l.pfnSdoComRecvCb(sdoSeqConHdl_p,
-                                        ((tAsySdoCom*) &pRecvFrame_p->sdoSeqPayload),
+                                        ((tAsySdoCom*)&pRecvFrame_p->sdoSeqPayload),
                                         (dataSize_p - SDO_SEQ_HEADER_SIZE));
                 }
                 break;
 
             // Request Ack or Error Ack
             case 3:
-                if(pRecvFrame_p->recvSeqNumCon == pSdoSeqCon_p->recvSeqNum)
+                if (pRecvFrame_p->recvSeqNumCon == pSdoSeqCon_p->recvSeqNum)
                 {
                     // -> change to state kSdoSeqStateConnected
                     pSdoSeqCon_p->sdoSeqState = kSdoSeqStateConnected;
@@ -1367,10 +1365,10 @@ static tOplkError processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sd
                     // create answer own rcon = 2
                     pSdoSeqCon_p->recvSeqNum--;
                     // check if ack or data-frame
-                    if(dataSize_p > SDO_SEQ_HEADER_SIZE)
+                    if (dataSize_p > SDO_SEQ_HEADER_SIZE)
                     {
                         sdoSeqInstance_l.pfnSdoComRecvCb(sdoSeqConHdl_p,
-                                                         ((tAsySdoCom*) &pRecvFrame_p->sdoSeqPayload),
+                                                         ((tAsySdoCom*)&pRecvFrame_p->sdoSeqPayload),
                                                          (dataSize_p - SDO_SEQ_HEADER_SIZE));
                         sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateFrameSended);
                     }
@@ -1398,7 +1396,7 @@ static tOplkError processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sd
         }
 
     }
-    else if(event_p == kSdoSeqEventTimeout)
+    else if (event_p == kSdoSeqEventTimeout)
     {   // error -> Close
         pSdoSeqCon_p->sdoSeqState = kSdoSeqStateIdle;
         // set rcon and scon to 0
@@ -1441,18 +1439,18 @@ static tOplkError processState(UINT handle_p, UINT dataSize_p, tPlkFrame* pData_
     sdoSeqConHdl = handle_p | SDO_ASY_HANDLE;
 
     // check if handle invalid
-    if((sdoSeqConHdl & ~SDO_SEQ_HANDLE_MASK) == SDO_SEQ_INVALID_HDL)
+    if ((sdoSeqConHdl & ~SDO_SEQ_HANDLE_MASK) == SDO_SEQ_INVALID_HDL)
         return kErrorSdoSeqInvalidHdl;
 
     // get pointer to connection
     pSdoSeqCon = &sdoSeqInstance_l.aSdoSeqCon[handle_p];
 
     // check size
-    if((pData_p == NULL) && (pRecvFrame_p == NULL) && (dataSize_p != 0))
+    if ((pData_p == NULL) && (pRecvFrame_p == NULL) && (dataSize_p != 0))
         return kErrorSdoSeqInvalidFrame;
 
     // check state
-    switch(pSdoSeqCon->sdoSeqState)
+    switch (pSdoSeqCon->sdoSeqState)
     {
         // idle state
         case kSdoSeqStateIdle:
@@ -1490,7 +1488,7 @@ static tOplkError processState(UINT handle_p, UINT dataSize_p, tPlkFrame* pData_
         default:
             DEBUG_LVL_SDO_TRACE("Error: Unknown State in processState\n");
             break;
-    }// end of switch(pSdoSeqCon_p->sdoSeqState)
+    } // end of switch (pSdoSeqCon_p->sdoSeqState)
 
 #if defined(WIN32) || defined(_WIN32)
     LeaveCriticalSection(sdoSeqInstance_l.pCriticalSection);
@@ -1501,7 +1499,7 @@ static tOplkError processState(UINT handle_p, UINT dataSize_p, tPlkFrame* pData_
 
 //------------------------------------------------------------------------------
 /**
-\brief  Send a SDO frame
+\brief  Send an SDO frame
 
 The function creates and sends a frame. If dataSize_p is 0 it creates a frame
 with information from pSdoSeqCon_p.
@@ -1510,7 +1508,7 @@ with information from pSdoSeqCon_p.
 \param  dataSize_p          Size of frame to be sent. Contains only the payload
                             without headers!
 \param  pData_p             Pointer to frame to be sent (can be NULL).
-\param  fFrameInHistory_p   If true, the frame is saved into the history buffer.
+\param  fFrameInHistory_p   If TRUE, the frame is saved into the history buffer.
 
 \return The function returns a tOplkError error code.
 */
@@ -1544,10 +1542,10 @@ static tOplkError sendFrame(tSdoSeqCon* pSdoSeqCon_p, UINT dataSize_p,
     }
 
     // filling header informations
-    ami_setUint8Le( &pFrame->data.asnd.serviceId, 0x05);
-    ami_setUint8Le( &pFrame->data.asnd.payload.sdoSequenceFrame.aReserved,0x00);
-    ami_setUint8Le( &pFrame->data.asnd.payload.sdoSequenceFrame.recvSeqNumCon, pSdoSeqCon_p->sendSeqNum);
-    ami_setUint8Le( &pFrame->data.asnd.payload.sdoSequenceFrame.sendSeqNumCon, pSdoSeqCon_p->recvSeqNum);
+    ami_setUint8Le(&pFrame->data.asnd.serviceId, 0x05);
+    ami_setUint8Le(&pFrame->data.asnd.payload.sdoSequenceFrame.aReserved,0x00);
+    ami_setUint8Le(&pFrame->data.asnd.payload.sdoSequenceFrame.recvSeqNumCon, pSdoSeqCon_p->sendSeqNum);
+    ami_setUint8Le(&pFrame->data.asnd.payload.sdoSequenceFrame.sendSeqNumCon, pSdoSeqCon_p->recvSeqNum);
     dataSize_p += SDO_SEQ_HEADER_SIZE;
 
     ret = sendToLowerLayer(pSdoSeqCon_p, dataSize_p, pFrame);
@@ -1577,7 +1575,7 @@ The function sends an already created fram to the lower layer.
 \param  pSdoSeqCon_p        Pointer to control structure of connection.
 \param  dataSize_p          Size of frame to be sent. Contains only the payload
                             without headers!
-\param  pFrame_p             Pointer to frame to be sent (can be NULL).
+\param  pFrame_p            Pointer to frame to be sent (can be NULL).
 
 \return The function returns a tOplkError error code.
 */
@@ -1590,7 +1588,7 @@ static tOplkError sendToLowerLayer(tSdoSeqCon* pSdoSeqCon_p, UINT dataSize_p,
 
     handle = pSdoSeqCon_p->conHandle & SDO_ASY_HANDLE_MASK;
 
-    switch(handle)
+    switch (handle)
     {
         case SDO_UDP_HANDLE:
 #if defined(CONFIG_INCLUDE_SDO_UDP)
@@ -1741,20 +1739,20 @@ static tOplkError addFrameToHistory(tSdoSeqCon* pSdoSeqCon_p, tPlkFrame* pFrame_
 
     // add frame to history buffer
     // check size - SDO_SEQ_HISTORY_FRAME_SIZE includes the header size, but size_p does not!
-    if(size_p > SDO_SEQ_HISTROY_FRAME_SIZE)
+    if (size_p > SDO_SEQ_HISTROY_FRAME_SIZE)
         return kErrorSdoSeqFrameSizeError;
 
     pHistory = &pSdoSeqCon_p->sdoSeqConHistory;      // save pointer to history
 
     // check if a free entry is available
-    if(pHistory->freeEntries > 0)
+    if (pHistory->freeEntries > 0)
     {   // write message in free entry
         OPLK_MEMCPY(&((tPlkFrame*)pHistory->aHistoryFrame[pHistory->writeIndex])->messageType,
-                   &pFrame_p->messageType, size_p + ASND_HEADER_SIZE);
+                    &pFrame_p->messageType, size_p + ASND_HEADER_SIZE);
         pHistory->aFrameSize[pHistory->writeIndex] = size_p;
         pHistory->freeEntries--;
         pHistory->writeIndex++;
-        if(pHistory->writeIndex == SDO_HISTORY_SIZE)    // check if write-index ran over array-border
+        if (pHistory->writeIndex == SDO_HISTORY_SIZE)    // check if write-index ran over array-border
         {
             pHistory->writeIndex = 0;
         }
@@ -1862,7 +1860,7 @@ static tOplkError readFromHistory(tSdoSeqCon* pSdoSeqCon_p, tPlkFrame** ppFrame_
         (pHistory->writeIndex != pHistory->readIndex))
     {
         DEBUG_LVL_SDO_TRACE("readFromHistory(): init = %d, read = %u, write = %u, ack = %u",
-                             (int) fInitRead_p, (WORD)pHistory->readIndex,
+                             (int)fInitRead_p, (WORD)pHistory->readIndex,
                              (WORD)pHistory->writeIndex, (WORD)pHistory->ackIndex);
         DEBUG_LVL_SDO_TRACE(", free entries = %u, next frame size = %u\n",
                              (WORD)pHistory->freeEntries, pHistory->aFrameSize[pHistory->readIndex]);
@@ -1871,7 +1869,7 @@ static tOplkError readFromHistory(tSdoSeqCon* pSdoSeqCon_p, tPlkFrame** ppFrame_
         *ppFrame_p = (tPlkFrame*)pHistory->aHistoryFrame[pHistory->readIndex];
         *pSize_p = pHistory->aFrameSize[pHistory->readIndex];   // save size
         pHistory->readIndex++;
-        if(pHistory->readIndex == SDO_HISTORY_SIZE)
+        if (pHistory->readIndex == SDO_HISTORY_SIZE)
         {
             pHistory->readIndex = 0;
         }
@@ -1928,7 +1926,7 @@ static tOplkError setTimer(tSdoSeqCon* pSdoSeqCon_p, ULONG timeout_p)
     timerArg.eventSink = kEventSinkSdoAsySeq;
     timerArg.argument.pValue = pSdoSeqCon_p;
 
-    if(pSdoSeqCon_p->timerHandle == 0)
+    if (pSdoSeqCon_p->timerHandle == 0)
     {   // create new timer
         ret = timeru_setTimer(&pSdoSeqCon_p->timerHandle, timeout_p, timerArg);
     }
