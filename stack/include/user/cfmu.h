@@ -8,7 +8,7 @@ This file contains the definitions of the CFM module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -52,8 +52,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-typedef tOplkError (*tCfmCbEventCnProgress) (tCfmEventCnProgress* pEventCnProgress_p);
-typedef tOplkError (*tCfmCbEventCnResult) (UINT nodeId_p, tNmtNodeCommand nodeCommand_p);
+typedef tOplkError (*tCfmCbEventCnProgress)(tCfmEventCnProgress* pEventCnProgress_p);
+typedef tOplkError (*tCfmCbEventCnResult)(UINT nodeId_p, tNmtNodeCommand nodeCommand_p);
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -63,15 +63,14 @@ typedef tOplkError (*tCfmCbEventCnResult) (UINT nodeId_p, tNmtNodeCommand nodeCo
 extern "C" {
 #endif
 
-tOplkError  cfmu_init(tCfmCbEventCnProgress pfnCbEventCnProgress_p, tCfmCbEventCnResult pfnCbEventCnResult_p);
-tOplkError  cfmu_exit(void);
-tOplkError  cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtState nmtState_p);
-BOOL        cfmu_isSdoRunning(UINT nodeId_p);
+tOplkError cfmu_init(tCfmCbEventCnProgress pfnCbEventCnProgress_p, tCfmCbEventCnResult pfnCbEventCnResult_p);
+tOplkError cfmu_exit(void);
+tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtState nmtState_p);
+BOOL       cfmu_isSdoRunning(UINT nodeId_p);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* _INC_EplCfmu_H_ */
-
 

@@ -12,7 +12,7 @@ This file contains the implementation of the configuration file manager (CFM).
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -72,7 +72,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // return pointer to node info structure for specified node ID
 // d.k. may be replaced by special (hash) function if node ID array is smaller than 254
-#define CFM_GET_NODEINFO(uiNodeId_p) (cfmInstance_g.apNodeInfo[uiNodeId_p - 1])
+#define CFM_GET_NODEINFO(uiNodeId_p)(cfmInstance_g.apNodeInfo[uiNodeId_p - 1])
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -172,7 +172,7 @@ The function initializes the CFM module.
 
 \param  pfnCbEventCnProgress_p      Pointer to callback function for CN progress
                                     events.
-\param  pfnCbEventCnResult_p          Pointer to callback function for CN result
+\param  pfnCbEventCnResult_p        Pointer to callback function for CN result
                                     events.
 
 \return The function returns a tOplkError error code.
@@ -215,7 +215,7 @@ tOplkError cfmu_init(tCfmCbEventCnProgress pfnCbEventCnProgress_p,
 /**
 \brief  Exit CFM module
 
-The function deinitializes the CFM module.
+The function de-initializes the CFM module.
 
 \return The function returns a tOplkError error code.
 
@@ -266,17 +266,17 @@ tOplkError cfmu_exit(void)
 /**
 \brief  Process node event
 
-The function processes a node event. It starts configuration of the specified
-CN if configuration data and time differs with local values.
+The function processes a node event. It starts configuring a specified CN if the
+configuration data and time of this CN differ from the expected (local) values.
 
-\param  nodeId_p        Node ID of node to configure.
+\param  nodeId_p        Node ID of the node to be configured.
 \param  nodeEvent_p     Node event to process.
 \param  nmtState_p      NMT state of the node.
 
 \return The function returns a tOplkError error code.
 \retval kErrorOk  Configuration is OK -> continue boot process for this CN.
-\retval kErrorReject      Defer further processing until configuration process has finished
-\retval other error     Major error occurred.
+\retval kErrorReject    Defer further processing until configuration process has finished.
+\retval other error     Major error has occurred.
 
 \ingroup module_cfmu
 */
@@ -289,7 +289,7 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtS
     tObdSize            obdSize;
     UINT32              expConfTime = 0;
     UINT32              expConfDate = 0;
-    tIdentResponse*  	pIdentResponse = NULL;
+    tIdentResponse*     pIdentResponse = NULL;
     BOOL                fDoUpdate = FALSE;
 
     if ((nodeEvent_p != kNmtNodeEventCheckConf) &&
@@ -363,13 +363,13 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtS
     }
     else
     {
-        obdSize = sizeof (expConfDate);
+        obdSize = sizeof(expConfDate);
         ret = obd_readEntry(0x1F26, nodeId_p, &expConfDate, &obdSize);
         if (ret != kErrorOk)
         {
             DEBUG_LVL_CFM_TRACE("CN%x Error Reading 0x1F26 returns 0x%X\n", nodeId_p, ret);
         }
-        obdSize = sizeof (expConfTime);
+        obdSize = sizeof(expConfTime);
         ret = obd_readEntry(0x1F27, nodeId_p, &expConfTime, &obdSize);
         if (ret != kErrorOk)
         {
@@ -379,7 +379,7 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtS
         {   // store configuration in CN at the end of the download,
             // because expected configuration date or time is set
             pNodeInfo->fDoStore = TRUE;
-            pNodeInfo->eventCnProgress.totalNumberOfBytes += sizeof (UINT32);
+            pNodeInfo->eventCnProgress.totalNumberOfBytes += sizeof(UINT32);
         }
         else
         {   // expected configuration date and time is not set
@@ -442,7 +442,7 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtS
 
         pNodeInfo->eventCnProgress.objectIndex = 0x1011;
         pNodeInfo->eventCnProgress.objectSubIndex = 0x01;
-        ret = sdoWriteObject(pNodeInfo, &leSignature, sizeof (leSignature));
+        ret = sdoWriteObject(pNodeInfo, &leSignature, sizeof(leSignature));
         if (ret == kErrorOk)
         {   // SDO transfer started
             ret = kErrorReject;
@@ -460,9 +460,9 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtS
 /**
 \brief  Determine if SDO is running
 
-The function determines if the a SDO is running for the specified node.
+The function determines if an SDO transfer is running for the specified node.
 
-\param  nodeId_p        Node ID of node to determine SDO state.
+\param  nodeId_p        Node ID of the node to determine the SDO state.
 
 \return The function returns TRUE if SDO is running and FALSE otherwise.
 
@@ -733,7 +733,7 @@ static tOplkError cbSdoCon(tSdoComFinished* pSdoComFinished_p)
 \brief  Download cycle length
 
 The function reads the specified entry from the OD of the specified node.
-If this node is a remote node, it performs a SDO transfer, which means this
+If this node is a remote node, it performs an SDO transfer, which means this
 function returns kErrorApiTaskDeferred and the application is informed via
 the event callback function when the task is completed.
 
@@ -859,7 +859,7 @@ static tOplkError downloadObject(tCfmNodeInfo* pNodeInfo_p)
 
 The function writes the specified entry to the OD of the specified node.
 
-\param  pNodeInfo_p     Node info of the node to write.
+\param  pNodeInfo_p     Node info of the node to write to.
 \param  pLeSrcData_p    Pointer to data in little endian byte order.
 \param  size_p          Size of data.
 
@@ -878,8 +878,8 @@ static tOplkError sdoWriteObject(tCfmNodeInfo* pNodeInfo_p, void* pLeSrcData_p, 
     {
         // init command layer connection
         ret = sdocom_defineConnection(&pNodeInfo_p->sdoComConHdl,
-                                 pNodeInfo_p->eventCnProgress.nodeId,
-                                 kSdoTypeAsnd);
+                                      pNodeInfo_p->eventCnProgress.nodeId,
+                                      kSdoTypeAsnd);
         if ((ret != kErrorOk) && (ret != kErrorSdoComHandleExists))
             return ret;
     }
@@ -915,8 +915,8 @@ static tOplkError sdoWriteObject(tCfmNodeInfo* pNodeInfo_p, void* pLeSrcData_p, 
 
         // reinit command layer connection
         ret = sdocom_defineConnection(&pNodeInfo_p->sdoComConHdl,
-                                 pNodeInfo_p->eventCnProgress.nodeId,
-                                 kSdoTypeAsnd);
+                                      pNodeInfo_p->eventCnProgress.nodeId,
+                                      kSdoTypeAsnd);
         if ((ret != kErrorOk) && (ret != kErrorSdoComHandleExists))
             return ret;
 
