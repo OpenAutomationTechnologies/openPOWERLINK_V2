@@ -16,7 +16,7 @@ CAL module running in Linux kernelspace.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -109,8 +109,8 @@ static tEventuCalInstance    instance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static void *eventThread (void * arg_p);
-static tOplkError postEvent(tEvent *pEvent_p);
+static void* eventThread(void* arg_p);
+static tOplkError postEvent(tEvent* pEvent_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -125,8 +125,8 @@ configuration it gets the function pointer interface of the used queue
 implementations and calls the appropriate init functions.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventucal
 */
@@ -150,7 +150,7 @@ tOplkError eventucal_init(void)
     if (pthread_setschedparam(instance_l.threadId, SCHED_FIFO, &schedParam) != 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s(): couldn't set thread scheduling parameters! %d\n",
-               __func__, schedParam.__sched_priority);
+                              __func__, schedParam.__sched_priority);
     }
 
 Exit:
@@ -159,19 +159,19 @@ Exit:
 
 //------------------------------------------------------------------------------
 /**
-\brief    Cleanup user event CAL module
+\brief    Clean up user event CAL module
 
 The function cleans up the user event CAL module. For cleanup it calls the exit
 functions of the queue implementations for each used queue.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-tOplkError eventucal_exit (void)
+tOplkError eventucal_exit(void)
 {
     UINT            i = 0;
 
@@ -193,20 +193,20 @@ tOplkError eventucal_exit (void)
 /**
 \brief    Post user event
 
-This function posts a event to a queue. It is called from the generic user
+This function posts an event to a queue. It is called from the generic user
 event post function in the event handler. Depending on the sink the appropriate
 queue post function is called.
 
 \param  pEvent_p                Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-tOplkError eventucal_postUserEvent(tEvent *pEvent_p)
+tOplkError eventucal_postUserEvent(tEvent* pEvent_p)
 {
     return postEvent(pEvent_p);
 }
@@ -215,20 +215,20 @@ tOplkError eventucal_postUserEvent(tEvent *pEvent_p)
 /**
 \brief    Post kernel event
 
-This function posts a event to a queue. It is called from the generic user
+This function posts an event to a queue. It is called from the generic user
 event post function in the event handler. Depending on the sink the appropriate
 queue post function is called.
 
 \param  pEvent_p                Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-tOplkError eventucal_postKernelEvent(tEvent *pEvent_p)
+tOplkError eventucal_postKernelEvent(tEvent* pEvent_p)
 {
     return postEvent(pEvent_p);
 }
@@ -237,7 +237,7 @@ tOplkError eventucal_postKernelEvent(tEvent *pEvent_p)
 /**
 \brief  Process function of user CAL module
 
-This function will be called by the systems process function.
+This function will be called by the system process function.
 
 \ingroup module_eventucal
 */
@@ -255,18 +255,18 @@ void eventucal_process(void)
 /**
 \brief    Post event
 
-This function posts a event to a queue. It is called from the generic user
+This function posts an event to a queue. It is called from the generic user
 event post function in the event handler. Depending on the sink the appropriate
 queue post function is called.
 
 \param  pEvent_p                Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 */
 //------------------------------------------------------------------------------
-static tOplkError postEvent(tEvent *pEvent_p)
+static tOplkError postEvent(tEvent* pEvent_p)
 {
     int             ioctlret;
 
@@ -275,7 +275,7 @@ static tOplkError postEvent(tEvent *pEvent_p)
            debugstr_getEventSinkStr(pEvent_p->eventSink), pEvent_p->eventSink,
            pEvent_p->eventArgSize);*/
 
-    ioctlret = ioctl (instance_l.fd, PLK_CMD_POST_EVENT, pEvent_p);
+    ioctlret = ioctl(instance_l.fd, PLK_CMD_POST_EVENT, pEvent_p);
     if (ioctlret != 0)
         return kErrorNoResource;
 
@@ -292,9 +292,9 @@ This function implements the event thread.
 
 */
 //------------------------------------------------------------------------------
-static void *eventThread (void * arg_p)
+static void* eventThread(void* arg_p)
 {
-    tEvent*  pEvent;
+    tEvent*     pEvent;
     int         ret;
     char        eventBuf[sizeof(tEvent) + MAX_EVENT_ARG_SIZE];
 
@@ -311,7 +311,7 @@ static void *eventThread (void * arg_p)
                     pEvent->eventType, debugstr_getEventTypeStr(pEvent->eventType),
                     pEvent->eventSink, debugstr_getEventSinkStr(pEvent->eventSink));*/
             if (pEvent->eventArgSize != 0)
-                pEvent->pEventArg = (char *)pEvent + sizeof(tEvent);
+                pEvent->pEventArg = (char*)pEvent + sizeof(tEvent);
 
             ret = eventu_process(pEvent);
         }

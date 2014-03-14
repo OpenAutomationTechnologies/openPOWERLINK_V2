@@ -14,7 +14,7 @@ event queue and direct calls for the user-internal queue.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -113,13 +113,13 @@ The function initializes the architecture specific stuff of the user event
 CAL module.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-tOplkError eventucal_init (void)
+tOplkError eventucal_init(void)
 {
     OPLK_MEMSET(&instance_l, 0, sizeof(tEventuCalInstance));
 
@@ -137,19 +137,19 @@ Exit:
 
 //------------------------------------------------------------------------------
 /**
-\brief    Cleanup kernel event CAL module
+\brief    Clean up kernel event CAL module
 
 The function cleans up the kernel event CAL module. For cleanup it calls the exit
 functions of the queue implementations for each used queue.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-tOplkError eventucal_exit (void)
+tOplkError eventucal_exit(void)
 {
     if (instance_l.fInitialized == TRUE)
     {
@@ -164,20 +164,20 @@ tOplkError eventucal_exit (void)
 /**
 \brief    Post kernel event
 
-This function posts a event to a queue. It is called from the generic kernel
+This function posts an event to a queue. It is called from the generic kernel
 event post function in the event handler. Depending on the sink the appropriate
 queue post function is called.
 
 \param  pEvent_p                Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-tOplkError eventucal_postKernelEvent (tEvent *pEvent_p)
+tOplkError eventucal_postKernelEvent(tEvent* pEvent_p)
 {
     tOplkError      ret;
     /*TRACE("U2K type:%s(%d) sink:%s(%d) size:%d!\n",
@@ -198,20 +198,20 @@ tOplkError eventucal_postKernelEvent (tEvent *pEvent_p)
 /**
 \brief    Post user event
 
-This function posts a event to a queue. It is called from the generic kernel
+This function posts an event to a queue. It is called from the generic kernel
 event post function in the event handler. Depending on the sink the appropriate
 queue post function is called.
 
 \param  pEvent_p                Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-tOplkError eventucal_postUserEvent (tEvent *pEvent_p)
+tOplkError eventucal_postUserEvent(tEvent* pEvent_p)
 {
     tOplkError      ret;
 
@@ -249,3 +249,4 @@ void eventucal_process(void)
 /// \{
 
 /// \}
+

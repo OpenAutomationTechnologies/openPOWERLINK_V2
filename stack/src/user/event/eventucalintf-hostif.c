@@ -11,7 +11,7 @@ the host interface for communication.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -99,7 +99,7 @@ static tQueueInstance     instance_l[kEventQueueNum];
 
 //------------------------------------------------------------------------------
 /**
-\brief    Initialize a event queue
+\brief    Initialize an event queue
 
 The function initializes a circular buffer event queue. The queue to initialize
 is specified by eventQueue_p.
@@ -107,8 +107,8 @@ is specified by eventQueue_p.
 \param  eventQueue_p            Event queue to initialize.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventucal
 */
@@ -131,10 +131,10 @@ tOplkError eventucal_initQueueHostif(tEventQueue eventQueue_p)
 
     pHifInstance = hostif_getInstance(0);
 
-    if(pHifInstance == NULL)
+    if (pHifInstance == NULL)
         return kErrorNoResource;
 
-    switch(eventQueue_p)
+    switch (eventQueue_p)
     {
         case kEventQueueK2U:
             hifInstanceId = kHostifInstIdK2UQueue;
@@ -152,10 +152,10 @@ tOplkError eventucal_initQueueHostif(tEventQueue eventQueue_p)
 
     hifRet = hostif_getBuf(pHifInstance, hifInstanceId, &pBufBase, &bufSize);
 
-    if(hifRet != kHostifSuccessful)
+    if (hifRet != kHostifSuccessful)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Could not get buffer from host interface (%d)\n",
-                __func__, hifRet);
+                              __func__, hifRet);
         return kErrorNoResource;
     }
 
@@ -165,10 +165,10 @@ tOplkError eventucal_initQueueHostif(tEventQueue eventQueue_p)
 
     lfqRet = lfq_create(&lfqConfig, &instance_l[eventQueue_p]);
 
-    if(lfqRet != kQueueSuccessful)
+    if (lfqRet != kQueueSuccessful)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Queue create failed (%d)\n",
-                __func__, lfqRet);
+                              __func__, lfqRet);
         return kErrorNoResource;
     }
 
@@ -177,7 +177,7 @@ tOplkError eventucal_initQueueHostif(tEventQueue eventQueue_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief    Cleanup a event queue
+\brief    Clean up an event queue
 
 The function cleans up a circular buffer event queue. The queue to cleanup is
 specified by eventQueue_p.
@@ -185,13 +185,13 @@ specified by eventQueue_p.
 \param  eventQueue_p            Event queue to cleanup.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-tOplkError eventucal_exitQueueHostif (tEventQueue eventQueue_p)
+tOplkError eventucal_exitQueueHostif(tEventQueue eventQueue_p)
 {
     if (eventQueue_p > kEventQueueNum)
         return kErrorInvalidInstanceParam;
@@ -199,7 +199,7 @@ tOplkError eventucal_exitQueueHostif (tEventQueue eventQueue_p)
     if (instance_l[eventQueue_p] == NULL)
         return kErrorOk;
 
-    switch(eventQueue_p)
+    switch (eventQueue_p)
     {
         case kEventQueueU2K:
         case kEventQueueK2U:
@@ -222,21 +222,21 @@ tOplkError eventucal_exitQueueHostif (tEventQueue eventQueue_p)
 
 This function posts an event to the specified hostif queue.
 
-\param  eventQueue_p            Event queue to post event.
-\param  pEvent_p                Pointer to event
+\param  eventQueue_p            Event queue to post the event to
+\param  pEvent_p                Pointer to the event
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-tOplkError eventucal_postEventHostif (tEventQueue eventQueue_p, tEvent *pEvent_p)
+tOplkError eventucal_postEventHostif(tEventQueue eventQueue_p, tEvent* pEvent_p)
 {
     tOplkError          ret = kErrorOk;
     tQueueReturn        lfqRet;
-    DWORD               aPostBuffer[(sizeof(tEvent) + MAX_EVENT_ARG_SIZE)/4];
+    DWORD               aPostBuffer[(sizeof(tEvent) + MAX_EVENT_ARG_SIZE) / 4];
     BYTE*               pPostBuffer = (BYTE*)aPostBuffer;
     ULONG               dataSize;
 
@@ -253,7 +253,7 @@ tOplkError eventucal_postEventHostif (tEventQueue eventQueue_p, tEvent *pEvent_p
     OPLK_MEMCPY(pPostBuffer, pEvent_p, dataSize);
 
     // copy argument data if present
-    if(pEvent_p->pEventArg != NULL)
+    if (pEvent_p->pEventArg != NULL)
     {
         OPLK_MEMCPY(&pPostBuffer[dataSize], pEvent_p->pEventArg, pEvent_p->eventArgSize);
         // add optional argument data size
@@ -261,7 +261,7 @@ tOplkError eventucal_postEventHostif (tEventQueue eventQueue_p, tEvent *pEvent_p
     }
 
     lfqRet = lfq_entryEnqueue(instance_l[eventQueue_p], pPostBuffer, dataSize);
-    if(lfqRet != kQueueSuccessful)
+    if (lfqRet != kQueueSuccessful)
     {
         ret = kErrorEventPostError;
         goto Exit;
@@ -275,14 +275,14 @@ Exit:
 /**
 \brief    Process event using circular buffers
 
-This function reads a circular buffer event queue and processes the event
-by calling the event handlers process function.
+This function reads a circular buffer event queue and processes the event by
+calling the event handler's process function.
 
 \param  eventQueue_p            Event queue used for reading the event.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          if function executes correctly
-\retval other                   error
+\retval kErrorOk                Function executes correctly
+\retval other                   Error
 
 \ingroup module_eventucal
 */
@@ -293,7 +293,7 @@ tOplkError eventucal_processEventHostif(tEventQueue eventQueue_p)
     tQueueReturn        lfqRet;
     tEvent*             pEplEvent;
     WORD                dataSize = sizeof(tEvent) + MAX_EVENT_ARG_SIZE;
-    DWORD               aRxBuffer[(sizeof(tEvent) + MAX_EVENT_ARG_SIZE)/4];
+    DWORD               aRxBuffer[(sizeof(tEvent) + MAX_EVENT_ARG_SIZE) / 4];
     BYTE*               pRxBuffer = (BYTE*)aRxBuffer;
 
     if (eventQueue_p > kEventQueueNum)
@@ -303,14 +303,14 @@ tOplkError eventucal_processEventHostif(tEventQueue eventQueue_p)
         return kErrorInvalidInstanceParam;
 
     lfqRet = lfq_entryDequeue(instance_l[eventQueue_p], pRxBuffer, &dataSize);
-    if(lfqRet != kQueueSuccessful)
+    if (lfqRet != kQueueSuccessful)
     {
         eventu_postError(kEventSourceEventk, kErrorEventReadError,
-                         sizeof (lfqRet), &lfqRet);
+                         sizeof(lfqRet), &lfqRet);
         goto Exit;
     }
 
-    pEplEvent = (tEvent *) pRxBuffer;
+    pEplEvent = (tEvent*)pRxBuffer;
     pEplEvent->eventArgSize = (UINT)dataSize - sizeof(tEvent);
     if(pEplEvent->eventArgSize > 0)
         pEplEvent->pEventArg = &pRxBuffer[sizeof(tEvent)];
@@ -347,7 +347,7 @@ UINT eventucal_getEventCountHostif(tEventQueue eventQueue_p)
     if (instance_l[eventQueue_p] == NULL)
         return 0;
 
-    lfq_getEntryCount (instance_l[eventQueue_p], &count);
+    lfq_getEntryCount(instance_l[eventQueue_p], &count);
 
     return count;
 }

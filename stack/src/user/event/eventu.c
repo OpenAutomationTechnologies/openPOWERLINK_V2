@@ -12,7 +12,7 @@ interface for posting and receiving events to/from other user modules.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -97,7 +97,7 @@ typedef struct
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError callApiEventCb (tEvent* pEvent_p);
+static tOplkError callApiEventCb(tEvent* pEvent_p);
 
 //------------------------------------------------------------------------------
 // local vars
@@ -140,13 +140,13 @@ static tEventDispatchEntry eventDispatchTbl_l[] =
 \brief    Initialize user event module
 
 The function initializes the user event module. It is also responsible to call
-the init function of it's CAL module.
+the init function of its CAL module.
 
 \param  pfnApiProcessEventCb_p  Function pointer to generic event callback function.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventu
 */
@@ -164,13 +164,13 @@ tOplkError eventu_init(tProcessEventCb pfnApiProcessEventCb_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief    Cleanup user event module
+\brief    Clean up user event module
 
 This function cleans up the user event module.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventu
 */
@@ -195,13 +195,13 @@ specific module
 \param  pEvent_p                Received event.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventu
 */
 //------------------------------------------------------------------------------
-tOplkError eventu_process (tEvent *pEvent_p)
+tOplkError eventu_process (tEvent* pEvent_p)
 {
     tOplkError              ret = kErrorOk;
     tEventSource            eventSource;
@@ -215,7 +215,7 @@ tOplkError eventu_process (tEvent *pEvent_p)
     {
         // Unknown sink, provide error event to API layer
         eventu_postError(kEventSourceEventu, ret, sizeof(pEvent_p->eventSink),
-                        &pEvent_p->eventSink);
+                         &pEvent_p->eventSink);
     }
     else
     {
@@ -225,8 +225,8 @@ tOplkError eventu_process (tEvent *pEvent_p)
             if ((ret != kErrorOk) && (ret != kErrorShutdown))
             {
                 // forward error event to API layer
-                eventu_postError(kEventSourceEventu, ret,  sizeof(eventSource),
-                                &eventSource);
+                eventu_postError(kEventSourceEventu, ret, sizeof(eventSource),
+                                 &eventSource);
             }
         }
     }
@@ -243,18 +243,18 @@ CAL module which distributes the event to the suitable event queue.
 \param  pEvent_p                Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventu
 */
 //------------------------------------------------------------------------------
-tOplkError eventu_postEvent (tEvent *pEvent_p)
+tOplkError eventu_postEvent(tEvent* pEvent_p)
 {
     tOplkError ret = kErrorOk;
 
-    // split event post to user internal and user to kernel
-    switch(pEvent_p->eventSink)
+    // Split event post to user internal and user to kernel
+    switch (pEvent_p->eventSink)
     {
         // kernel layer modules
         case kEventSinkSync:
@@ -297,14 +297,14 @@ This function posts an error event to the API module.
 \param  pArg_p                  Error argument
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventu
 */
 //------------------------------------------------------------------------------
-tOplkError eventu_postError (tEventSource eventSource_p,  tOplkError error_p,
-                             UINT argSize_p, void* pArg_p)
+tOplkError eventu_postError(tEventSource eventSource_p,  tOplkError error_p,
+                            UINT argSize_p, void* pArg_p)
 {
     tOplkError          ret;
     tEventError         eventError;
@@ -315,7 +315,7 @@ tOplkError eventu_postError (tEventSource eventSource_p,  tOplkError error_p,
     // create argument
     eventError.eventSource = eventSource_p;
     eventError.oplkError = error_p;
-    argSize_p = (UINT) min ((size_t) argSize_p, sizeof (eventError.errorArg));
+    argSize_p = (UINT)min((size_t)argSize_p, sizeof(eventError.errorArg));
     OPLK_MEMCPY(&eventError.errorArg, pArg_p, argSize_p);
 
     // create event
@@ -338,17 +338,17 @@ tOplkError eventu_postError (tEventSource eventSource_p,  tOplkError error_p,
 
 //------------------------------------------------------------------------------
 /**
-\brief	API event callback wrapper
+\brief  API event callback wrapper
 
-This function implements an API event handler wrapper. It determines if
-an API event callback was registered and calls it.
+This function implements an API event handler wrapper. It determines if an API
+event callback was registered and calls it.
 
 \param  pEvent_p            Pointer to event.
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError callApiEventCb (tEvent* pEvent_p)
+static tOplkError callApiEventCb(tEvent* pEvent_p)
 {
     if (instance_l.pfnApiProcessEventCb != NULL)
     {
@@ -357,5 +357,4 @@ static tOplkError callApiEventCb (tEvent* pEvent_p)
     return kErrorEventPostError;
 }
 /// \}
-
 

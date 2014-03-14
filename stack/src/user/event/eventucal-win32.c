@@ -119,13 +119,13 @@ configuration it gets the function pointer interface of the used queue
 implementations and calls the appropriate init functions.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-tOplkError eventucal_init (void)
+tOplkError eventucal_init(void)
 {
     tOplkError      ret = kErrorOk;
 
@@ -151,8 +151,8 @@ tOplkError eventucal_init (void)
     eventucal_setSignalingCircbuf(kEventQueueUInt, signalUserEvent);
 
     instance_l.fStopThread = FALSE;
-    if ((instance_l.threadHandle = CreateThread (NULL, 0, eventThread, (LPVOID)&instance_l,
-                                            0, NULL)) == NULL)
+    if ((instance_l.threadHandle = CreateThread(NULL, 0, eventThread, (LPVOID)&instance_l,
+                                                0, NULL)) == NULL)
     {
         TRACE("%s() CreateThread fails! Error:%ld\n", __func__, GetLastError());
         goto Exit;
@@ -182,19 +182,19 @@ Exit:
 
 //------------------------------------------------------------------------------
 /**
-\brief    Cleanup kernel event CAL module
+\brief    Clean up kernel event CAL module
 
 The function cleans up the kernel event CAL module. For cleanup it calls the exit
 functions of the queue implementations for each used queue.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-tOplkError eventucal_exit (void)
+tOplkError eventucal_exit(void)
 {
     if (instance_l.fInitialized == TRUE)
     {
@@ -218,20 +218,20 @@ tOplkError eventucal_exit (void)
 /**
 \brief    Post kernel event
 
-This function posts a event to a queue. It is called from the generic kernel
+This function posts an event to a queue. It is called from the generic kernel
 event post function in the event handler. Depending on the sink the appropriate
 queue post function is called.
 
 \param  pEvent_p                Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-tOplkError eventucal_postKernelEvent (tEvent *pEvent_p)
+tOplkError eventucal_postKernelEvent(tEvent* pEvent_p)
 {
     tOplkError      ret;
     /*TRACE("U2K type:%s(%d) sink:%s(%d) size:%d!\n",
@@ -246,20 +246,20 @@ tOplkError eventucal_postKernelEvent (tEvent *pEvent_p)
 /**
 \brief    Post user event
 
-This function posts a event to a queue. It is called from the generic kernel
+This function posts an event to a queue. It is called from the generic kernel
 event post function in the event handler. Depending on the sink the appropriate
 queue post function is called.
 
 \param  pEvent_p                Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
+\retval kErrorOk                Function executes correctly
+\retval other error codes       An error occurred
 
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-tOplkError eventucal_postUserEvent (tEvent *pEvent_p)
+tOplkError eventucal_postUserEvent(tEvent* pEvent_p)
 {
     tOplkError      ret;
 
@@ -305,13 +305,13 @@ This function contains the main function for the event handler thread.
 static DWORD WINAPI eventThread(LPVOID arg)
 {
     tEventuCalInstance*     pInstance = (tEventuCalInstance*)arg;
-    DWORD                    waitResult;
+    DWORD                   waitResult;
 
     TRACE("User event thread %d waiting for events...\n", GetCurrentThreadId());
 
     while (!pInstance->fStopThread)
     {
-        waitResult = WaitForSingleObject (pInstance->semUserData, 5000);
+        waitResult = WaitForSingleObject(pInstance->semUserData, 5000);
         switch (waitResult)
         {
             case WAIT_OBJECT_0:
@@ -369,3 +369,4 @@ void signalKernelEvent(void)
 }
 
 /// \}
+

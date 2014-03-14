@@ -12,7 +12,7 @@ implementations.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -65,10 +65,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tOplkError eventucal_init (void);
-tOplkError eventucal_exit (void);
-tOplkError eventucal_postKernelEvent (tEvent *pEvent_p);
-tOplkError eventucal_postUserEvent(tEvent *pEvent_p);
+tOplkError eventucal_init(void);
+tOplkError eventucal_exit(void);
+tOplkError eventucal_postKernelEvent(tEvent* pEvent_p);
+tOplkError eventucal_postUserEvent(tEvent* pEvent_p);
 void       eventucal_process(void);
 
 #ifdef __cplusplus
@@ -76,3 +76,4 @@ void       eventucal_process(void);
 #endif
 
 #endif /* _INC_eventucal_H_ */
+
