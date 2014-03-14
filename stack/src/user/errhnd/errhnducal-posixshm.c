@@ -11,7 +11,7 @@ between user and kernel part.
 \ingroup module_errhnducal
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2012-2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -85,7 +85,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static tErrHndObjects           *pLocalObjects_l;       ///< pointer to user error objects
+static tErrHndObjects*          pLocalObjects_l;       ///< Pointer to user error objects
 static int                      fd_l;
 static BYTE*                    pErrHndMem_l;
 static BOOL                     fCreator_l;
@@ -111,7 +111,7 @@ The function initializes the user layer CAL module of the error handler.
 \ingroup module_errhnducal
 */
 //------------------------------------------------------------------------------
-tOplkError errhnducal_init (tErrHndObjects *pLocalObjects_p)
+tOplkError errhnducal_init(tErrHndObjects* pLocalObjects_p)
 {
     struct stat             stat;
 
@@ -128,7 +128,7 @@ tOplkError errhnducal_init (tErrHndObjects *pLocalObjects_p)
 
     if (fstat(fd_l, &stat) != 0)
     {
-        close (fd_l);
+        close(fd_l);
         return kErrorNoResource;
     }
 
@@ -137,7 +137,7 @@ tOplkError errhnducal_init (tErrHndObjects *pLocalObjects_p)
         if (ftruncate(fd_l, sizeof(tErrHndObjects)) == -1)
         {
             DEBUG_LVL_ERROR_TRACE("%s() ftruncate failed!\n", __func__);
-            close (fd_l);
+            close(fd_l);
             shm_unlink(ERRHND_SHM_NAME);
             return kErrorNoResource;
         }
@@ -148,7 +148,7 @@ tOplkError errhnducal_init (tErrHndObjects *pLocalObjects_p)
     if (pErrHndMem_l == MAP_FAILED)
     {
         DEBUG_LVL_ERROR_TRACE("%s() mmap error handler objects failed!\n", __func__);
-        close (fd_l);
+        close(fd_l);
         if (fCreator_l)
             shm_unlink(ERRHND_SHM_NAME);
         return kErrorNoResource;
@@ -163,15 +163,15 @@ tOplkError errhnducal_init (tErrHndObjects *pLocalObjects_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief    shutdown error handler user CAL module
+\brief    Shutdown error handler user CAL module
 
-The function is used to deinitialize and shutdown the user layer
-CAL module of the error handler.
+The function is used to de-initialize and shutdown the user layer CAL module of
+the error handler.
 
 \ingroup module_errhnducal
 */
 //------------------------------------------------------------------------------
-void errhnducal_exit (void)
+void errhnducal_exit(void)
 {
     if (pErrHndMem_l != NULL)
     {
@@ -186,7 +186,7 @@ void errhnducal_exit (void)
 
 //------------------------------------------------------------------------------
 /**
-\brief    write an error handler object
+\brief    Write an error handler object
 
 The function writes an error handler object to the shared memory region used
 by user and kernel modules.
@@ -200,21 +200,21 @@ by user and kernel modules.
 \ingroup module_errhnducal
 */
 //------------------------------------------------------------------------------
-tOplkError errhnducal_writeErrorObject(UINT index_p, UINT subIndex_p, UINT32 *pParam_p)
+tOplkError errhnducal_writeErrorObject(UINT index_p, UINT subIndex_p, UINT32* pParam_p)
 {
     UINT    offset;
 
     UNUSED_PARAMETER(index_p);
     UNUSED_PARAMETER(subIndex_p);
 
-    offset = (char *)pParam_p - (char *)pLocalObjects_l;
+    offset = (char*)pParam_p - (char*)pLocalObjects_l;
     *(UINT32*)(pErrHndMem_l + offset) = *pParam_p;
     return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief    read an error handler object
+\brief    Read an error handler object
 
 The function reads an error handler object from the shared memory region used
 by user and kernel modules.
@@ -235,7 +235,7 @@ tOplkError errhnducal_readErrorObject(UINT index_p, UINT subIndex_p, UINT32* pPa
     UNUSED_PARAMETER(index_p);
     UNUSED_PARAMETER(subIndex_p);
 
-    offset = (char *)pParam_p - (char *)pLocalObjects_l;
+    offset = (char*)pParam_p - (char*)pLocalObjects_l;
     *pParam_p = *(UINT32*)(pErrHndMem_l + offset);
     return kErrorOk;
 }
@@ -243,5 +243,4 @@ tOplkError errhnducal_readErrorObject(UINT index_p, UINT subIndex_p, UINT32* pPa
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
-
 

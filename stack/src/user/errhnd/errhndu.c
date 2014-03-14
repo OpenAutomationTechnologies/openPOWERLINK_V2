@@ -4,19 +4,19 @@
 
 \brief  Implementation of user part of error handler module
 
-This file implements the user part of the error handler module.It is
+This file implements the user part of the error handler module. It is
 responsible for linking the POWERLINK error counters into the object
 dictionary. It contains object callback function which are responsible
 to read values from kernel layer when reading the object or writing them
 into kernel layer after writing the object. The communication with the
-kernel part of the error handler is implemented by a error handler CAL
+kernel part of the error handler is implemented via an error handler CAL
 module.
 
 \ingroup module_errhndu
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -102,7 +102,7 @@ static tErrHnduInstance        instance_l;
 static tOplkError linkErrorCounter(tErrorObject* pErrorCounter_p, UINT index_p);
 
 #ifdef CONFIG_INCLUDE_NMT_MN
-static tOplkError checkErrorObject(UINT index_p, BYTE *pEntries_p);
+static tOplkError checkErrorObject(UINT index_p, BYTE* pEntries_p);
 static tOplkError linkMnCnLossPresErrors(tErrHndObjects* pError_p);
 #endif
 
@@ -130,7 +130,7 @@ tOplkError errhndu_init(void)
     ret = errhnducal_init(&instance_l.errorObjects);
     if (ret != kErrorOk)
     {
-        TRACE ("Couldn't init error handler CAL (%d)\n", ret);
+        TRACE("Couldn't init error handler CAL (%d)\n", ret);
         goto Exit;
     }
 
@@ -201,7 +201,7 @@ tOplkError errhndu_exit()
 \brief    Error handler OD callback function
 
 The function implements an OD callback function. It will be added to the
-error objects so that error counters could be updated in shared memory by
+error objects so that error counters can be updated in shared memory by
 PostWrite events and local objects will be updated from shared memory on
 PreRead events.
 
@@ -215,7 +215,7 @@ tOplkError errhndu_cbObdAccess(tObdCbParam MEM* pParam_p)
     switch (pParam_p->obdEvent)
     {
         case kObdEvPostDefault:
-            if(pParam_p->subIndex == SUBIDX_DLL_ERROR_CUM_CNT)
+            if (pParam_p->subIndex == SUBIDX_DLL_ERROR_CUM_CNT)
             {
                 break;
             }
@@ -224,12 +224,12 @@ tOplkError errhndu_cbObdAccess(tObdCbParam MEM* pParam_p)
             switch (pParam_p->subIndex)
             {
                 // only cumulative counter and threshold will be written by
-                // application
+                // the application
                 case SUBIDX_DLL_ERROR_CUM_CNT:
                 case SUBIDX_DLL_ERROR_THRESHOLD:
                     errhnducal_writeErrorObject(pParam_p->index,
                                                 pParam_p->subIndex,
-                                                (UINT32 *)pParam_p->pArg);
+                                                (UINT32*)pParam_p->pArg);
                     break;
             }
             break;
@@ -243,7 +243,7 @@ tOplkError errhndu_cbObdAccess(tObdCbParam MEM* pParam_p)
                 case SUBIDX_DLL_ERROR_THR_CNT:
                     errhnducal_readErrorObject(pParam_p->index,
                                                pParam_p->subIndex,
-                                               (UINT32 *)pParam_p->pArg);
+                                               (UINT32*)pParam_p->pArg);
                     break;
             }
             break;
@@ -260,9 +260,9 @@ tOplkError errhndu_cbObdAccess(tObdCbParam MEM* pParam_p)
 \brief    Loss of PRes error handler OD callback function
 
 The function implements an OD callback function for Loss of PRes errors.
-There's a separate callback function because these errors counters are stored
+There is a separate callback function because these error counters are stored
 as subindexes for each CN. The function will be added to the appropriate
-error objects so that error counters could be updated in shared memory by
+error objects so that error counters can be updated in shared memory by
 PostWrite events and local objects will be updated from shared memory on
 PreRead objects.
 
@@ -283,7 +283,7 @@ tOplkError errhndu_mnCnLossPresCbObdAccess(tObdCbParam MEM* pParam_p)
     switch (pParam_p->obdEvent)
     {
         case kObdEvPostDefault:
-            if(pParam_p->index == OID_DLL_MNCN_LOSSPRES_CUMCNT_AU32)
+            if (pParam_p->index == OID_DLL_MNCN_LOSSPRES_CUMCNT_AU32)
             {
                 break;
             }
@@ -292,12 +292,12 @@ tOplkError errhndu_mnCnLossPresCbObdAccess(tObdCbParam MEM* pParam_p)
             switch (pParam_p->index)
             {
                 // only cumulative counter and threshold will be written by
-                // application
+                // the application
                 case OID_DLL_MNCN_LOSSPRES_CUMCNT_AU32:
                 case OID_DLL_MNCN_LOSSPRES_THRESHOLD_AU32:
                     errhnducal_writeErrorObject(pParam_p->index,
                                                 pParam_p->subIndex,
-                                                (UINT32 *)pParam_p->pArg);
+                                                (UINT32*)pParam_p->pArg);
                     break;
             }
             break;
@@ -311,7 +311,7 @@ tOplkError errhndu_mnCnLossPresCbObdAccess(tObdCbParam MEM* pParam_p)
                 case OID_DLL_MNCN_LOSSPRES_THRCNT_AU32:
                     errhnducal_readErrorObject(pParam_p->index,
                                                pParam_p->subIndex,
-                                               (UINT32 *)pParam_p->pArg);
+                                               (UINT32*)pParam_p->pArg);
                     break;
             }
             break;
@@ -330,7 +330,7 @@ tOplkError errhndu_mnCnLossPresCbObdAccess(tObdCbParam MEM* pParam_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief    link error counter structure to OD entry
+\brief    Link error counter structure to OD entry
 
 The function links an error counter structure to the according object
 directory entry.
@@ -373,7 +373,7 @@ static tOplkError linkErrorCounter(tErrorObject* pErrorCounter_p, UINT index_p)
 #ifdef CONFIG_INCLUDE_NMT_MN
 //------------------------------------------------------------------------------
 /**
-\brief    check if error object exists in OD
+\brief    Check if error object exists in OD
 
 The function checks if the specified error object exists in the object
 dictionary.
@@ -383,20 +383,20 @@ dictionary.
                             object.
 
 \return Returns a tOplkError error code.
-\retval kErrorOk          If object exists
-\retval kErrorObdIndexNotExist    IF index does not exist
+\retval kErrorOk                  Object exists
+\retval kErrorObdIndexNotExist    Index does not exist
 
 \ingroup module_errhndu
 */
 //------------------------------------------------------------------------------
-static tOplkError checkErrorObject(UINT index_p, BYTE *pEntries_p)
+static tOplkError checkErrorObject(UINT index_p, BYTE* pEntries_p)
 {
     tOplkError      ret = kErrorOk;
     tObdSize        entrySize;
     BYTE            indexEntries;
 
-    entrySize = (tObdSize)  sizeof(indexEntries);
-    ret = obd_readEntry ( index_p, 0x00, (void*)&indexEntries, &entrySize );
+    entrySize = (tObdSize)sizeof(indexEntries);
+    ret = obd_readEntry(index_p, 0x00, (void*)&indexEntries, &entrySize);
 
     if ((ret != kErrorOk) || (indexEntries == 0x00))
     {
@@ -412,7 +412,7 @@ static tOplkError checkErrorObject(UINT index_p, BYTE *pEntries_p)
 /**
 \brief    Link Loss of PRes errors to object dictionary
 
-The function links the Loss of PRes error to the object dictionary. These
+The function links the Loss of PRes error to the object dictionary. This
 error must be handled differently because its entries are stored as
 subindexes for each node ID.
 
@@ -429,7 +429,7 @@ static tOplkError linkMnCnLossPresErrors(tErrHndObjects* pError_p)
     tVarParam       varParam;
     BYTE            indexEntries;
     BYTE            numObjs;
-    tErrorObject   *pErrCnt;
+    tErrorObject*   pErrCnt;
 
     /* Check if error objects exist and use the minimum number of subindexes
      * for initialization as it makes no sense to have different number

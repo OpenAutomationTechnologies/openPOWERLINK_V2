@@ -6,8 +6,8 @@
 
 This module implements the user layer CAL functions of the error handler.
 This implementation uses a global variable which will be referenced from user
-and from kernel space. It can be used if the user and kernel part is running
-in the same domain and global variables could be shared. It has to be used
+and from kernel space. It can be used if the user and kernel part are running
+in the same domain and global variables can be shared. It has to be used
 together with errhndkcal-local.c which provides the global variable to store
 the error objects!
 
@@ -15,7 +15,7 @@ the error objects!
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -84,7 +84,7 @@ extern tErrHndObjects   errhndk_errorObjects_g;
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static tErrHndObjects    *pLocalObjects_l;       ///< pointer to user error objects
+static tErrHndObjects* pLocalObjects_l;       ///< Pointer to user error objects
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -107,7 +107,7 @@ The function initializes the user layer CAL module of the error handler.
 \ingroup module_errhnducal
 */
 //------------------------------------------------------------------------------
-tOplkError errhnducal_init (tErrHndObjects *pLocalObjects_p)
+tOplkError errhnducal_init(tErrHndObjects* pLocalObjects_p)
 {
     pLocalObjects_l = pLocalObjects_p;
     return kErrorOk;
@@ -115,22 +115,22 @@ tOplkError errhnducal_init (tErrHndObjects *pLocalObjects_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief    shutdown error handler user CAL module
+\brief    Shutdown error handler user CAL module
 
-The function is used to deinitialize and shutdown the user layer
-CAL module of the error handler.
+The function is used to de-initialize and shutdown the user layer CAL module of
+the error handler.
 
 \ingroup module_errhnducal
 */
 //------------------------------------------------------------------------------
-void errhnducal_exit (void)
+void errhnducal_exit(void)
 {
     // currently nothing to do!
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief    write an error handler object
+\brief    Write an error handler object
 
 The function writes an error handler object to the shared memory region used
 by user and kernel modules.
@@ -145,22 +145,22 @@ by user and kernel modules.
 */
 //------------------------------------------------------------------------------
 tOplkError errhnducal_writeErrorObject(UINT index_p, UINT subIndex_p,
-                                      UINT32 *pParam_p)
+                                       UINT32 *pParam_p)
 {
     UINT    offset;
 
     UNUSED_PARAMETER(index_p);
     UNUSED_PARAMETER(subIndex_p);
 
-    offset = (char *)pParam_p - (char *)pLocalObjects_l;
+    offset = (char*)pParam_p - (char*)pLocalObjects_l;
 
-    *(UINT32 *)((char *)&errhndk_errorObjects_g + offset) = *pParam_p;
+    *(UINT32*)((char*)&errhndk_errorObjects_g + offset) = *pParam_p;
     return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief    read an error handler object
+\brief    Read an error handler object
 
 The function reads an error handler object from the shared memory region used
 by user and kernel modules.
@@ -175,16 +175,16 @@ by user and kernel modules.
 */
 //------------------------------------------------------------------------------
 tOplkError errhnducal_readErrorObject(UINT index_p, UINT subIndex_p,
-                                     UINT32 * pParam_p)
+                                      UINT32 * pParam_p)
 {
     UINT    offset;
 
     UNUSED_PARAMETER(index_p);
     UNUSED_PARAMETER(subIndex_p);
 
-    offset = (char *)pParam_p - (char *)pLocalObjects_l;
+    offset = (char*)pParam_p - (char*)pLocalObjects_l;
 
-    *pParam_p = *(UINT32 *)((char *)&errhndk_errorObjects_g + offset);
+    *pParam_p = *(UINT32*)((char*)&errhndk_errorObjects_g + offset);
     return kErrorOk;
 }
 
@@ -192,5 +192,4 @@ tOplkError errhnducal_readErrorObject(UINT index_p, UINT subIndex_p,
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
-
 

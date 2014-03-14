@@ -2,14 +2,14 @@
 ********************************************************************************
 \file   errhndu.h
 
-\brief  interface definitions for user  error handler module
+\brief  interface definitions for user error handler module
 
 This file provides the interface for the user error handler module.
 
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -75,3 +75,4 @@ tOplkError errhndu_mnCnLossPresCbObdAccess(tObdCbParam MEM* pParam_p);
 #endif
 
 #endif /* _INC_ErrHndu_H_ */
+

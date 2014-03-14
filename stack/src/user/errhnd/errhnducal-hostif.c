@@ -11,7 +11,7 @@ This implementation uses the host interface ipcore from the user side.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -81,8 +81,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static tErrHndObjects*  pLocalObjects_l; ///< pointer to user error objects
-static UINT8*           pHostifMem_l; ///< pointer to hostinterface memory
+static tErrHndObjects*  pLocalObjects_l;    ///< Pointer to user error objects
+static UINT8*           pHostifMem_l;       ///< Pointer to hostinterface memory
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -101,13 +101,13 @@ The function initializes the user layer CAL module of the error handler.
 \param  pLocalObjects_p         Pointer to local error objects
 
 \return     tOplkError
-\retval     kErrorOk      successful return
-\retval     kErrorNoResource      ipcore instance not found
+\retval     kErrorOk              Returned successfully
+\retval     kErrorNoResource      IP-Core instance has not been found
 
 \ingroup module_errhnducal
 */
 //------------------------------------------------------------------------------
-tOplkError errhnducal_init (tErrHndObjects *pLocalObjects_p)
+tOplkError errhnducal_init(tErrHndObjects* pLocalObjects_p)
 {
     tHostifInstance pHostifInstance = hostif_getInstance(0);
     tOplkError      Ret = kErrorOk;
@@ -115,7 +115,7 @@ tOplkError errhnducal_init (tErrHndObjects *pLocalObjects_p)
     UINT8*          pBase;
     UINT            span;
 
-    if(pHostifInstance == NULL)
+    if (pHostifInstance == NULL)
     {
         Ret = kErrorNoResource;
         goto Exit;
@@ -124,13 +124,13 @@ tOplkError errhnducal_init (tErrHndObjects *pLocalObjects_p)
     // get linear buffer and check span
     hostifRet = hostif_getBuf(pHostifInstance, kHostifInstIdErrCount, &pBase, &span);
 
-    if(hostifRet != kHostifSuccessful)
+    if (hostifRet != kHostifSuccessful)
     {
         Ret = kErrorNoResource;
         goto Exit;
     }
 
-    if(span < sizeof(tErrHndObjects))
+    if (span < sizeof(tErrHndObjects))
     {
         DEBUG_LVL_ERROR_TRACE("%s: Error Handler Object Buffer too small\n",
                 __func__);
@@ -148,41 +148,41 @@ Exit:
 
 //------------------------------------------------------------------------------
 /**
-\brief    shutdown error handler user CAL module
+\brief    Shutdown error handler user CAL module
 
-The function is used to deinitialize and shutdown the user layer
-CAL module of the error handler.
+The function is used to de-initialize and shutdown the user layer CAL module of
+the error handler.
 
 \ingroup module_errhnducal
 */
 //------------------------------------------------------------------------------
-void errhnducal_exit (void)
+void errhnducal_exit(void)
 {
     pHostifMem_l = NULL;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief    write an error handler object
+\brief    Write an error handler object
 
 The function writes an error handler object to the shared memory region used
 by user and kernel modules.
 
-\param  index_p             index of object in object dictionary
-\param  subIndex_p          subindex of object
-\param  pParam_p            pointer to object in error handlers memory space
+\param  index_p             Index of object in object dictionary
+\param  subIndex_p          Subindex of object
+\param  pParam_p            Pointer to object in error handlers memory space
 
 \ingroup module_errhnducal
 */
 //------------------------------------------------------------------------------
-tOplkError errhnducal_writeErrorObject(UINT index_p, UINT subIndex_p, UINT32 *pParam_p)
+tOplkError errhnducal_writeErrorObject(UINT index_p, UINT subIndex_p, UINT32* pParam_p)
 {
     UINT    offset;
 
     UNUSED_PARAMETER(index_p);
     UNUSED_PARAMETER(subIndex_p);
 
-    offset = (char *)pParam_p - (char *)pLocalObjects_l;
+    offset = (char*)pParam_p - (char*)pLocalObjects_l;
 
     OPLK_MEMCPY(pHostifMem_l + offset, (UINT8*)pParam_p, sizeof(UINT32));
 
@@ -191,26 +191,26 @@ tOplkError errhnducal_writeErrorObject(UINT index_p, UINT subIndex_p, UINT32 *pP
 
 //------------------------------------------------------------------------------
 /**
-\brief    read an error handler object
+\brief    Read an error handler object
 
 The function reads an error handler object from the shared memory region used
 by user and kernel modules.
 
-\param  index_p             index of object in object dictionary
-\param  subIndex_p          subindex of object
-\param  pParam_p            pointer to object in error handlers memory space
+\param  index_p             Index of object in object dictionary
+\param  subIndex_p          Subindex of object
+\param  pParam_p            Pointer to object in error handlers memory space
 
 \ingroup module_errhnducal
 */
 //------------------------------------------------------------------------------
-tOplkError errhnducal_readErrorObject(UINT index_p, UINT subIndex_p, UINT32 * pParam_p)
+tOplkError errhnducal_readErrorObject(UINT index_p, UINT subIndex_p, UINT32* pParam_p)
 {
     UINT    offset;
 
     UNUSED_PARAMETER(index_p);
     UNUSED_PARAMETER(subIndex_p);
 
-    offset = (char *)pParam_p - (char *)pLocalObjects_l;
+    offset = (char*)pParam_p - (char*)pLocalObjects_l;
 
     OPLK_MEMCPY((UINT8*)pParam_p, pHostifMem_l + offset, sizeof(UINT32));
 
@@ -221,5 +221,4 @@ tOplkError errhnducal_readErrorObject(UINT index_p, UINT subIndex_p, UINT32 * pP
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
-
 
