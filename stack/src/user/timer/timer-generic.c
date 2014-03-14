@@ -11,7 +11,7 @@ generic timer list. It is used for Windows and non OS targets.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -113,7 +113,7 @@ static tTimeruInstance timeruInstance_l;
 //------------------------------------------------------------------------------
 static void  enterCriticalSection(int nType_p);
 static void  leaveCriticalSection(int nType_p);
-static UINT32 getTickCount (void);
+static UINT32 getTickCount(void);
 
 #if (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_ )
 static DWORD WINAPI processThread (LPVOID parameter_p);
@@ -155,9 +155,9 @@ tOplkError timeru_addInstance(void)
     int             nIdx;
 
     // reset instance structure
-    OPLK_MEMSET(&timeruInstance_l, 0, sizeof (timeruInstance_l));
+    OPLK_MEMSET(&timeruInstance_l, 0, sizeof(timeruInstance_l));
 
-    timeruInstance_l.pEntries = OPLK_MALLOC(sizeof (tTimerEntry) * TIMERU_MAX_ENTRIES);
+    timeruInstance_l.pEntries = OPLK_MALLOC(sizeof(tTimerEntry) * TIMERU_MAX_ENTRIES);
     if (timeruInstance_l.pEntries == NULL)
         return kErrorNoResource;
 
@@ -279,7 +279,7 @@ tOplkError timeru_process(void)
     if (pTimerEntry != NULL)
     {
         // call event function
-        timerEventArg.timerHdl = (tTimerHdl) pTimerEntry;
+        timerEventArg.timerHdl = (tTimerHdl)pTimerEntry;
         OPLK_MEMCPY(&timerEventArg.argument, &pTimerEntry->timerArg.argument, sizeof(timerEventArg.argument));
 
         event.eventSink = pTimerEntry->timerArg.eventSink;
@@ -316,7 +316,7 @@ tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg a
     tTimerEntry**   ppEntry;
 
     // check pointer to handle
-    if(pTimerHdl_p == NULL)
+    if (pTimerHdl_p == NULL)
         return kErrorTimerInvalidHandle;
 
     // fetch entry from free timer list
@@ -338,7 +338,7 @@ tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg a
         return kErrorTimerNoTimerCreated;
     }
 
-    *pTimerHdl_p = (tTimerHdl) pNewEntry;
+    *pTimerHdl_p = (tTimerHdl)pNewEntry;
     OPLK_MEMCPY(&pNewEntry->timerArg, &argument_p, sizeof(tTimerArg));
 
     // insert timer entry in timer list
@@ -398,7 +398,6 @@ tOplkError timeru_modifyTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerAr
 
     ret = timeru_setTimer(pTimerHdl_p, timeInMs_p, argument_p);
     return ret;
-
 }
 
 //------------------------------------------------------------------------------
@@ -410,8 +409,8 @@ This function deletes an existing timer.
 \param  pTimerHdl_p     Pointer to timer handle of timer to delete.
 
 \return The function returns a tOplkError error code.
-\retval kErrorTimerInvalidHandle  If an invalid timer handle was specified.
-\retval kErrorOk          If the timer is deleted.
+\retval kErrorTimerInvalidHandle  An invalid timer handle was specified.
+\retval kErrorOk                  The timer is deleted.
 
 \ingroup module_timeru
 */
@@ -422,14 +421,14 @@ tOplkError timeru_deleteTimer(tTimerHdl* pTimerHdl_p)
     tTimerEntry**   ppEntry;
 
     // check pointer to handle
-    if(pTimerHdl_p == NULL)
+    if (pTimerHdl_p == NULL)
         return kErrorTimerInvalidHandle;
 
     // check handle itself, i.e. was the handle initialized before
     if (*pTimerHdl_p == 0)
         return kErrorOk;
 
-    pTimerEntry = (tTimerEntry*) *pTimerHdl_p;
+    pTimerEntry = (tTimerEntry*)*pTimerHdl_p;
 
     // remove timer entry from timer list
     enterCriticalSection(TIMERU_TIMER_LIST);
@@ -478,7 +477,7 @@ This function returns the timer tick count.
 \return The function returns the tick count in milliseconds.
 */
 //------------------------------------------------------------------------------
-static UINT32 getTickCount (void)
+static UINT32 getTickCount(void)
 {
     UINT32    tickCountInMs;
 
@@ -500,7 +499,7 @@ This function enters a critical section of the timer module.
 \param  nType_p         Type of critical section to enter.
 */
 //------------------------------------------------------------------------------
-static void enterCriticalSection (int nType_p)
+static void enterCriticalSection(int nType_p)
 {
 #if (TARGET_SYSTEM == _NO_OS_)
     UNUSED_PARAMETER(nType_p);
@@ -520,7 +519,7 @@ This function leaves a critical section of the timer module.
 \param  nType_p         Type of critical section to leave.
 */
 //------------------------------------------------------------------------------
-static void leaveCriticalSection (int nType_p)
+static void leaveCriticalSection(int nType_p)
 {
 #if (TARGET_SYSTEM == _NO_OS_)
     UNUSED_PARAMETER(nType_p);
@@ -544,7 +543,7 @@ Windows.
 \return The function returns the thread error code.
 */
 //------------------------------------------------------------------------------
-static DWORD WINAPI processThread (LPVOID parameter_p)
+static DWORD WINAPI processThread(LPVOID parameter_p)
 {
     tTimerEntry*    pTimerEntry;
     UINT32          timeoutInMs;

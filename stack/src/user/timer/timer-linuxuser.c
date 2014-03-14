@@ -11,7 +11,7 @@ userspace. This implementation uses the posix timer interface.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -85,8 +85,8 @@ struct sTimeruData
 {
     timer_t             timer;
     tTimerArg           timerArgument;
-    tTimeruData         *pNextTimer;
-    tTimeruData         *pPrevTimer;
+    tTimeruData*        pNextTimer;
+    tTimeruData*        pPrevTimer;
 };
 
 typedef struct
@@ -107,9 +107,9 @@ static tTimeruInstance timeruInstance_g;
 // local function prototypes
 //------------------------------------------------------------------------------
 static void cbTimer(ULONG parameter_p);
-static void* processThread(void *pArgument_p);
-static void addTimer(tTimeruData *pData_p);
-static void removeTimer(tTimeruData *pData_p);
+static void* processThread(void* pArgument_p);
+static void addTimer(tTimeruData* pData_p);
+static void removeTimer(tTimeruData* pData_p);
 static void resetTimerList(void);
 static tTimeruData* getNextTimer(void);
 
@@ -264,7 +264,7 @@ tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg a
     if(pTimerHdl_p == NULL)
         return kErrorTimerInvalidHandle;
 
-    pData = (tTimeruData*) OPLK_MALLOC(sizeof (tTimeruData));
+    pData = (tTimeruData*)OPLK_MALLOC(sizeof(tTimeruData));
     if (pData == NULL)
         return kErrorNoResource;
 
@@ -305,7 +305,7 @@ tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg a
         return kErrorTimerNoTimerCreated;
     }
 
-    *pTimerHdl_p = (tTimerHdl) pData;
+    *pTimerHdl_p = (tTimerHdl)pData;
     return kErrorOk;
 }
 
@@ -338,7 +338,7 @@ tOplkError timeru_modifyTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerAr
     {
         return timeru_setTimer(pTimerHdl_p, timeInMs_p, argument_p);
     }
-    pData = (tTimeruData*) *pTimerHdl_p;
+    pData = (tTimeruData*)*pTimerHdl_p;
 
     if (timeInMs_p >= 1000)
     {
@@ -364,7 +364,7 @@ tOplkError timeru_modifyTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerAr
 
     // copy the TimerArg after the timer is restarted,
     // so that a timer occurred immediately before timer_settime
-    // won't use the new TimerArg and
+    // won't use the new timerArg and
     // therefore the old timer cannot be distinguished from the new one.
     // But if the new timer is too fast, it may get lost.
     OPLK_MEMCPY(&pData->timerArgument, &argument_p, sizeof(tTimerArg));
@@ -381,8 +381,8 @@ This function deletes an existing timer.
 \param  pTimerHdl_p     Pointer to timer handle of timer to delete.
 
 \return The function returns a tOplkError error code.
-\retval kErrorTimerInvalidHandle  If an invalid timer handle was specified.
-\retval kErrorOk          If the timer is deleted.
+\retval kErrorTimerInvalidHandle  An invalid timer handle was specified.
+\retval kErrorOk                  The timer is deleted.
 
 \ingroup module_timeru
 */
@@ -399,9 +399,9 @@ tOplkError timeru_deleteTimer(tTimerHdl* pTimerHdl_p)
     {
         return kErrorOk;
     }
-    pData = (tTimeruData*) *pTimerHdl_p;
+    pData = (tTimeruData*)*pTimerHdl_p;
 
-    timer_delete (pData->timer);
+    timer_delete(pData->timer);
     removeTimer(pData);
     OPLK_FREE(pData);
 
@@ -434,7 +434,7 @@ BOOL timeru_isActive(tTimerHdl timerHdl_p)
     {   // timer was not created yet, so it is not active
         return FALSE;
     }
-    pData = (tTimeruData*) timerHdl_p;
+    pData = (tTimeruData*)timerHdl_p;
 
     // check if timer is running
     timer_gettime(pData->timer, &remaining);
@@ -467,7 +467,7 @@ thread and is responsible for processing expired timers.
 \return The function returns a thread exit value (always NULL)
 */
 //------------------------------------------------------------------------------
-static void* processThread(void *pArgument_p)
+static void* processThread(void* pArgument_p)
 {
     tTimeruData*    pTimer;
     sigset_t        awaitedSignal;
@@ -486,7 +486,7 @@ static void* processThread(void *pArgument_p)
     {
         if (sigwaitinfo(&awaitedSignal, &signalInfo) > 0)
         {
-            pTimer = (tTimeruData *)signalInfo.si_value.sival_ptr;
+            pTimer = (tTimeruData*)signalInfo.si_value.sival_ptr;
             /* call callback function of timer */
             cbTimer((ULONG)pTimer);
         }
@@ -513,7 +513,7 @@ static void cbTimer(ULONG parameter_p)
     tEvent              event;
     tTimerEventArg      timerEventArg;
 
-    pData = (tTimeruData*) parameter_p;
+    pData = (tTimeruData*)parameter_p;
 
     // call event function
     timerEventArg.timerHdl = (tTimerHdl)pData;
@@ -538,9 +538,9 @@ This function adds a new timer to the timer list.
 \param  pData_p         Pointer to the timer structure.
 */
 //------------------------------------------------------------------------------
-static void addTimer(tTimeruData *pData_p)
+static void addTimer(tTimeruData* pData_p)
 {
-    tTimeruData          *pTimerData;
+    tTimeruData*          pTimerData;
 
     pthread_mutex_lock(&timeruInstance_g.mutex);
 
@@ -573,9 +573,9 @@ This function removes a new timer from the timer list.
 \param  pData_p         Pointer to the timer structure.
 */
 //------------------------------------------------------------------------------
-static void removeTimer(tTimeruData *pData_p)
+static void removeTimer(tTimeruData* pData_p)
 {
-    tTimeruData          *pTimerData;
+    tTimeruData*          pTimerData;
 
     pthread_mutex_lock(&timeruInstance_g.mutex);
 

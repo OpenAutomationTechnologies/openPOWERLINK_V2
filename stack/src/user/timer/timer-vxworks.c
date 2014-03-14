@@ -10,7 +10,7 @@ This file contains the implementation of the user timer module for VxWorks
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -84,8 +84,8 @@ struct sTimeruData
 {
     timer_t             timer;
     tTimerArg           timerArg;
-    tTimeruData         *pNextTimer;
-    tTimeruData         *pPrevTimer;
+    tTimeruData*        pNextTimer;
+    tTimeruData*        pPrevTimer;
 };
 
 typedef struct
@@ -93,9 +93,9 @@ typedef struct
     int                 taskId;
     SEM_ID              mutex;
     MSG_Q_ID            msgQueue;
-    tTimeruData         *pFirstTimer;
-    tTimeruData         *pLastTimer;
-    tTimeruData         *pCurrentTimer;
+    tTimeruData*        pFirstTimer;
+    tTimeruData*        pLastTimer;
+    tTimeruData*        pCurrentTimer;
 } tTimeruInstance;
 
 //------------------------------------------------------------------------------
@@ -106,8 +106,8 @@ static tTimeruInstance timeruInstance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static void addTimer(tTimeruData *pData_p);
-static void removeTimer(tTimeruData *pData_p);
+static void addTimer(tTimeruData* pData_p);
+static void removeTimer(tTimeruData* pData_p);
 static void resetTimerList(void);
 static tTimeruData* getNextTimer(void);
 static void cbTimer(ULONG ulParameter_p);
@@ -146,17 +146,17 @@ The function adds a user timer instance.
 //------------------------------------------------------------------------------
 tOplkError timeru_addInstance(void)
 {
-    OPLK_MEMSET(&timeruInstance_l, 0, sizeof (timeruInstance_l));
+    OPLK_MEMSET(&timeruInstance_l, 0, sizeof(timeruInstance_l));
 
     /* initialize message queue */
     if ((timeruInstance_l.msgQueue = msgQCreate(TIMERU_MAX_MSGS,
-                                                  sizeof(unsigned long),
-                                                  MSG_Q_FIFO)) == NULL)
+                                                sizeof(unsigned long),
+                                                MSG_Q_FIFO)) == NULL)
         return kErrorTimerThreadError;
 
     /* initialize mutexe for synchronisation */
-    if ((timeruInstance_l.mutex = semMCreate (SEM_Q_PRIORITY | SEM_DELETE_SAFE |
-                                                SEM_INVERSION_SAFE)) == NULL)
+    if ((timeruInstance_l.mutex = semMCreate(SEM_Q_PRIORITY | SEM_DELETE_SAFE |
+                                             SEM_INVERSION_SAFE)) == NULL)
         return kErrorTimerThreadError;
 
     /* create user timer task */
@@ -167,7 +167,6 @@ tOplkError timeru_addInstance(void)
         return kErrorTimerThreadError;
 
     return kErrorOk;
-
 }
 
 //------------------------------------------------------------------------------
@@ -184,11 +183,11 @@ The function deletes a user timer instance.
 tOplkError timeru_delInstance(void)
 {
     ULONG               msg;
-    tTimeruData         *pTimer;
+    tTimeruData*        pTimer;
 
     /* send message to timer task to signal shutdown */
     msg = 0;
-    msgQSend (timeruInstance_l.msgQueue, (char *)&msg, sizeof(ULONG),
+    msgQSend (timeruInstance_l.msgQueue, (char*)&msg, sizeof(ULONG),
               NO_WAIT, MSG_PRI_NORMAL);
 
     /* wait for timer task to end */
@@ -205,8 +204,8 @@ tOplkError timeru_delInstance(void)
     }
 
     /* cleanup resources */
-    semDelete (timeruInstance_l.mutex);
-    msgQDelete (timeruInstance_l.msgQueue);
+    semDelete(timeruInstance_l.mutex);
+    msgQDelete(timeruInstance_l.msgQueue);
 
     timeruInstance_l.pFirstTimer = NULL;
     timeruInstance_l.pLastTimer = NULL;
@@ -258,7 +257,7 @@ tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg a
     if(pTimerHdl_p == NULL)
         return kErrorTimerInvalidHandle;
 
-    pData = (tTimeruData*) OPLK_MALLOC(sizeof (tTimeruData));
+    pData = (tTimeruData*)OPLK_MALLOC(sizeof(tTimeruData));
     if (pData == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("error allocating user timer memory!\n");
@@ -294,7 +293,7 @@ tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg a
     relTime.it_interval.tv_nsec = 0;
 
     DEBUG_LVL_TIMERU_TRACE("%s() Set timer:%08x timeInMs_p=%ld\n",
-                             __func__, *pData, timeInMs_p);
+                           __func__, *pData, timeInMs_p);
 
     if (hrtimer_settime(pData->timer, 0, &relTime, NULL) < 0)
     {
@@ -302,10 +301,9 @@ tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg a
         return kErrorTimerNoTimerCreated;
     }
 
-    *pTimerHdl_p = (tTimerHdl) pData;
+    *pTimerHdl_p = (tTimerHdl)pData;
 
     return kErrorOk;
-
 }
 
 //------------------------------------------------------------------------------
@@ -337,7 +335,7 @@ tOplkError timeru_modifyTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerAr
     {
         return timeru_setTimer(pTimerHdl_p, timeInMs_p, argument_p);
     }
-    pData = (tTimeruData*) *pTimerHdl_p;
+    pData = (tTimeruData*)*pTimerHdl_p;
 
     if (timeInMs_p >= 1000)
     {
@@ -351,7 +349,7 @@ tOplkError timeru_modifyTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerAr
     }
 
     DEBUG_LVL_TIMERU_TRACE("%s() Modify timer:%08x timeInMs_p=%ld\n",
-                             __func__, *pTimerHdl_p, timeInMs_p);
+                           __func__, *pTimerHdl_p, timeInMs_p);
 
     relTime.it_interval.tv_sec = 0;
     relTime.it_interval.tv_nsec = 0;
@@ -364,7 +362,7 @@ tOplkError timeru_modifyTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerAr
 
     // copy the TimerArg after the timer is restarted,
     // so that a timer occured immediately before hrtimer_settime
-    // won't use the new TimerArg and
+    // won't use the new timerArg and
     // therefore the old timer cannot be distinguished from the new one.
     // But if the new timer is too fast, it may get lost.
     OPLK_MEMCPY(&pData->timerArg, &argument_p, sizeof(tTimerArg));
@@ -381,8 +379,8 @@ This function deletes an existing timer.
 \param  pTimerHdl_p     Pointer to timer handle of timer to delete.
 
 \return The function returns a tOplkError error code.
-\retval kErrorTimerInvalidHandle  If an invalid timer handle was specified.
-\retval kErrorOk          If the timer is deleted.
+\retval kErrorTimerInvalidHandle  An invalid timer handle was specified.
+\retval kErrorOk                  The timer is deleted.
 
 \ingroup module_timeru
 */
@@ -399,9 +397,9 @@ tOplkError timeru_deleteTimer(tTimerHdl* pTimerHdl_p)
     if (*pTimerHdl_p == 0)
         return kErrorOk;
 
-    pData = (tTimeruData*) *pTimerHdl_p;
+    pData = (tTimeruData*)*pTimerHdl_p;
 
-    hrtimer_delete (pData->timer);
+    hrtimer_delete(pData->timer);
     removeTimer(pData);
     OPLK_FREE(pData);
 
@@ -409,7 +407,6 @@ tOplkError timeru_deleteTimer(tTimerHdl* pTimerHdl_p)
     *pTimerHdl_p = 0;
 
     return kErrorOk;
-
 }
 
 //============================================================================//
@@ -428,14 +425,14 @@ if a timer message is available in the message queue.
 
 */
 //------------------------------------------------------------------------------
-static void processTask (void)
+static void processTask(void)
 {
     ULONG       timer;
 
     while (TRUE)
     {
         timer = 0;
-        msgQReceive(timeruInstance_l.msgQueue, (char *)&timer, sizeof(ULONG), WAIT_FOREVER);
+        msgQReceive(timeruInstance_l.msgQueue, (char*)&timer, sizeof(ULONG), WAIT_FOREVER);
 
         if (timer != 0)
         {
@@ -468,7 +465,7 @@ static void cbTimer(ULONG parameter_p)
     tEvent              event;
     tTimerEventArg      timerEventArg;
 
-    pData = (tTimeruData*) parameter_p;
+    pData = (tTimeruData*)parameter_p;
 
     // call event function
     timerEventArg.timerHdl = (tTimerHdl)pData;
@@ -492,9 +489,9 @@ This function adds a new timer to the timer list.
 \param  pData_p         Pointer to the timer structure.
 */
 //------------------------------------------------------------------------------
-static void addTimer(tTimeruData *pData_p)
+static void addTimer(tTimeruData* pData_p)
 {
-    tTimeruData              *pTimerData;
+    tTimeruData*              pTimerData;
 
     semTake(timeruInstance_l.mutex, WAIT_FOREVER);
 
@@ -527,9 +524,9 @@ This function removes a new timer from the timer list.
 \param  pData_p         Pointer to the timer structure.
 */
 //------------------------------------------------------------------------------
-static void removeTimer(tTimeruData *pData_p)
+static void removeTimer(tTimeruData* pData_p)
 {
-    tTimeruData              *pTimerData;
+    tTimeruData*              pTimerData;
 
     semTake(timeruInstance_l.mutex, WAIT_FOREVER);
 
@@ -578,9 +575,9 @@ This function gets the next timer from the timer list.
 \return     The function returns a pointer to the next timer in the timer list.
 */
 //------------------------------------------------------------------------------
-static tTimeruData * getNextTimer(void)
+static tTimeruData* getNextTimer(void)
 {
-    tTimeruData *pTimer;
+    tTimeruData* pTimer;
 
     pTimer = timeruInstance_l.pCurrentTimer;
     if (pTimer != NULL)
