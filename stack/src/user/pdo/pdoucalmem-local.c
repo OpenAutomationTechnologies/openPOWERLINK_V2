@@ -5,15 +5,15 @@
 \brief  PDO user CAL shared-memory module using local memory
 
 This file contains an implementation for the user PDO CAL shared-memroy module
-which uses local allocated memory. The shared memory is used to transfer PDO data
-between user and kernel layer. This implementation is used if user and kernel
-layer run in the same domain and can both access the local memory.
+which uses locally allocated memory. The shared memory is used to transfer PDO
+data between user and kernel layer. This implementation is used if user and
+kernel layer run in the same domain and can both access the local memory.
 
 \ingroup module_pdoucal
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -93,8 +93,8 @@ extern BYTE*           pdokcalmem_pPdo_g;
 /**
 \brief  Open PDO shared memory
 
-The function performs all actions needed to setup the shared memory at
-starting of the stack.
+The function performs all actions needed to setup the shared memory at the
+start of the stack.
 
 For the local memory implementation nothing needs to be done.
 
@@ -112,7 +112,7 @@ tOplkError pdoucal_openMem(void)
 /**
 \brief  Close PDO shared memory
 
-The function performs all actions needed to cleanup the shared memory at
+The function performs all actions needed to clean up the shared memory at
 shutdown.
 
 For the local memory implementation nothing needs to be done.
@@ -145,8 +145,8 @@ tOplkError pdoucal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
 {
     UNUSED_PARAMETER(memSize_p);
 
-    /* be sure kernel memory is allocated! */
-    while(pdokcalmem_pPdo_g == NULL)
+    /* be sure that kernel memory is allocated! */
+    while (pdokcalmem_pPdo_g == NULL)
         target_msleep(1);
     *ppPdoMem_p = pdokcalmem_pPdo_g;
     return kErrorOk;
@@ -181,6 +181,5 @@ tOplkError pdoucal_freeMem(BYTE* pMem_p, size_t memSize_p)
 /// \name Private Functions
 /// \{
 
-
-
 ///\}
+

@@ -8,7 +8,7 @@
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -78,7 +78,7 @@ tOplkError pdoucal_initPdoMem(tPdoChannelSetup* pPdoChannels_p, size_t rxPdoMemS
                               size_t txPdoMemSize_p);
 void       pdoucal_cleanupPdoMem(void);
 BYTE*      pdoucal_getTxPdoAdrs(UINT channelId_p);
-tOplkError pdoucal_setTxPdo(UINT channelId_p, BYTE* pPdo_p,  WORD pdoSize_p);
+tOplkError pdoucal_setTxPdo(UINT channelId_p, BYTE* pPdo_p, WORD pdoSize_p);
 tOplkError pdoucal_getRxPdo(BYTE** ppPdo_p, UINT channelId_p, WORD pdoSize_p);
 
 // PDO sync functions
@@ -91,4 +91,5 @@ tOplkError pdoucal_callSyncCb(void);
 }
 #endif
 
-#endif /* _INC_PdouCal_H_ */
+#endif /* _INC_pdoucal_H_ */
+
