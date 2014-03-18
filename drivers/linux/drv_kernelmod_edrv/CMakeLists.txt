@@ -61,9 +61,8 @@ SET(CFG_KERNEL_DIR "" CACHE PATH
         "Select the kernel directory to be used, if not specified, system kernel dir will be used!")
 
 SET(CFG_POWERLINK_EDRV "82573" CACHE STRING
-        "Valid drivers are 8139, 82573, 8255x")
-SET_PROPERTY(CACHE CFG_POWERLINK_EDRV PROPERTY STRINGS 8139 82573 8255x)
-
+        "Valid drivers are 8139, 82573, 8255x, EmacPs")
+SET_PROPERTY(CACHE CFG_POWERLINK_EDRV PROPERTY STRINGS 8139 82573 8255x EmacPs)
 ################################################################################
 # Set global directories
 ################################################################################
@@ -105,6 +104,17 @@ ELSEIF(CFG_POWERLINK_EDRV STREQUAL "8255x")
     SET(MODULE_DEFS "${MODULE_DEFS} -DCONFIG_EDRV=8255")
     SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} ${EDRV_SOURCE_DIR}/edrv-8255x.c)
 
+ELSEIF(CFG_POWERLINK_EDRV STREQUAL "EmacPs")
+    
+    IF(CMAKE_SYSTEM_PROCESSOR MATCHES arm)
+    SET(MODULE_NAME "oplkemacps")
+    SET(MODULE_DEFS "${MODULE_DEFS} -DCONFIG_EDRV=267200")
+    # 267200 corresponds to Z7200 arch of Zynq family. (Z is represented by 26)
+    SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} ${EDRV_SOURCE_DIR}/edrv-emacPs.c )
+    ELSE()
+    message(FATAL_ERROR "EmacPs supported only for ARM processor")
+    ENDIF()
+ 
 ELSE()
 
     message(FATAL_ERROR
