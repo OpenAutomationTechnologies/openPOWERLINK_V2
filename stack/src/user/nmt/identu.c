@@ -11,7 +11,7 @@ This file contains the implementation of the ident module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -75,7 +75,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 typedef struct
 {
-    tIdentResponse*  apIdentResponse[254];    // the IdentResponse are managed dynamically
+    tIdentResponse*     apIdentResponse[254];    // the IdentResponse are managed dynamically
     tIdentuCbResponse   apfnCbResponse[254];
 } tIdentuInstance;
 
@@ -87,7 +87,7 @@ static tIdentuInstance   instance_g;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError   identu_cbIdentResponse(tFrameInfo * pFrameInfo_p);
+static tOplkError   identu_cbIdentResponse(tFrameInfo* pFrameInfo_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -179,7 +179,7 @@ tOplkError identu_reset()
             OPLK_FREE(instance_g.apIdentResponse[index]);
         }
     }
-    OPLK_MEMSET(&instance_g, 0, sizeof (tIdentuInstance));
+    OPLK_MEMSET(&instance_g, 0, sizeof(tIdentuInstance));
 
     return ret;
 }
@@ -202,14 +202,14 @@ The function gets the IdentResponse for a specified node.
 tOplkError identu_getIdentResponse(UINT nodeId_p, tIdentResponse** ppIdentResponse_p)
 {
     tOplkError          ret = kErrorOk;
-    tIdentResponse*  	pIdentResponse;
+    tIdentResponse*     pIdentResponse;
 
     // decrement node ID, because array is zero based
     nodeId_p--;
     if (nodeId_p < tabentries(instance_g.apIdentResponse))
     {
-        pIdentResponse      = instance_g.apIdentResponse[nodeId_p];
-        *ppIdentResponse_p  = pIdentResponse;
+        pIdentResponse     = instance_g.apIdentResponse[nodeId_p];
+        *ppIdentResponse_p = pIdentResponse;
 
         // Check if ident response is valid, adjust return value otherwise
         if( NULL == pIdentResponse )
@@ -342,7 +342,7 @@ static tOplkError identu_cbIdentResponse(tFrameInfo* pFrameInfo_p)
 
     if (index < tabentries(instance_g.apfnCbResponse))
     {
-        // memorize pointer to callback function
+        // save pointer to callback function
         pfnCbResponse = instance_g.apfnCbResponse[index];
         // reset callback function pointer so that caller may issue next request immediately
         instance_g.apfnCbResponse[index] = NULL;
@@ -369,8 +369,8 @@ static tOplkError identu_cbIdentResponse(tFrameInfo* pFrameInfo_p)
 
             // copy IdentResponse to instance structure
             OPLK_MEMCPY(instance_g.apIdentResponse[index],
-                       &pFrameInfo_p->pFrame->data.asnd.payload.identResponse,
-                       sizeof(tIdentResponse));
+                        &pFrameInfo_p->pFrame->data.asnd.payload.identResponse,
+                        sizeof(tIdentResponse));
             ret = pfnCbResponse(nodeId, instance_g.apIdentResponse[index]);
         }
     }

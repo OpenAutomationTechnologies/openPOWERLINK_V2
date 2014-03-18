@@ -11,7 +11,7 @@ This file contains the implementation of the status module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -85,7 +85,7 @@ static tStatusuInstance   instance_g;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError statusu_cbStatusResponse(tFrameInfo * pFrameInfo_p);
+static tOplkError statusu_cbStatusResponse(tFrameInfo* pFrameInfo_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -126,7 +126,7 @@ tOplkError statusu_addInstance(void)
 {
     tOplkError  ret = kErrorOk;
 
-    OPLK_MEMSET(&instance_g, 0, sizeof (instance_g));
+    OPLK_MEMSET(&instance_g, 0, sizeof(instance_g));
 
     // register StatusResponse callback function
     ret = dllucal_regAsndService(kDllAsndStatusResponse, statusu_cbStatusResponse,
@@ -140,7 +140,7 @@ tOplkError statusu_addInstance(void)
 /**
 \brief  Delete status module instance
 
-The function deletes an status module instance
+The function deletes a status module instance
 
 \return The function returns a tOplkError error code.
 
@@ -160,7 +160,7 @@ tOplkError statusu_delInstance(void)
 /**
 \brief  Reset status module instance
 
-The function resets an status module instance
+The function resets a status module instance
 
 \return The function returns a tOplkError error code.
 
@@ -253,7 +253,7 @@ StatusResponse is received.
 \ingroup module_statusu
 */
 //------------------------------------------------------------------------------
-static tOplkError statusu_cbStatusResponse(tFrameInfo * pFrameInfo_p)
+static tOplkError statusu_cbStatusResponse(tFrameInfo* pFrameInfo_p)
 {
     tOplkError          ret = kErrorOk;
     UINT                nodeId;
@@ -263,7 +263,7 @@ static tOplkError statusu_cbStatusResponse(tFrameInfo * pFrameInfo_p)
     nodeId = ami_getUint8Le(&pFrameInfo_p->pFrame->srcNodeId);
     index = nodeId - 1;
 
-    if (index < tabentries (instance_g.apfnCbResponse))
+    if (index < tabentries(instance_g.apfnCbResponse))
     {
         // memorize pointer to callback function
         pfnCbResponse = instance_g.apfnCbResponse[index];
@@ -271,7 +271,7 @@ static tOplkError statusu_cbStatusResponse(tFrameInfo * pFrameInfo_p)
         {   // response was not requested
             goto Exit;
         }
-        // reset callback function pointer so that caller may issue next request
+        // reset callback function pointer so that a caller may issue next request
         instance_g.apfnCbResponse[index] = NULL;
 
         if (pFrameInfo_p->frameSize < C_DLL_MINSIZE_STATUSRES)

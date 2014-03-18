@@ -5,14 +5,14 @@
 \brief  Implementation of user sync module
 
 This file contains the implementation of the sync module which is responsible
-for handliny SyncReq/SyncResp frames used with poll response chaining.
+for handliny SyncReq/SyncResp frames used with PollResponse Chaining.
 
 \ingroup module_syncu
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -88,7 +88,7 @@ static tSyncuInstance   syncuInstance_g;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError syncu_cbSyncResponse(tFrameInfo * pFrameInfo_p);
+static tOplkError syncu_cbSyncResponse(tFrameInfo* pFrameInfo_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -125,7 +125,7 @@ tOplkError syncu_addInstance(void)
 {
     tOplkError ret = kErrorOk;
 
-    OPLK_MEMSET(&syncuInstance_g, 0, sizeof (syncuInstance_g));
+    OPLK_MEMSET(&syncuInstance_g, 0, sizeof(syncuInstance_g));
     ret = dllucal_regAsndService(kDllAsndSyncResponse, syncu_cbSyncResponse,
                                  kDllAsndFilterAny);
 
@@ -164,7 +164,7 @@ The function resets a sync module instance
 //------------------------------------------------------------------------------
 tOplkError syncu_reset(void)
 {
-    OPLK_MEMSET(&syncuInstance_g, 0, sizeof (syncuInstance_g));
+    OPLK_MEMSET(&syncuInstance_g, 0, sizeof(syncuInstance_g));
     return kErrorOk;
 }
 
@@ -184,9 +184,9 @@ The function requests the SyncResponse for a specified node.
 \ingroup module_syncu
 */
 //------------------------------------------------------------------------------
-tOplkError  syncu_requestSyncResponse(tSyncuCbResponse pfnCbResponse_p,
-                                      tDllSyncRequest* pSyncRequestData_p,
-                                      UINT size_p)
+tOplkError syncu_requestSyncResponse(tSyncuCbResponse pfnCbResponse_p,
+                                     tDllSyncRequest* pSyncRequestData_p,
+                                     UINT size_p)
 {
     tOplkError      ret;
     UINT            nodeId;
@@ -201,7 +201,7 @@ tOplkError  syncu_requestSyncResponse(tSyncuCbResponse pfnCbResponse_p,
 
     // decrement node ID, because array is zero based
     nodeId--;
-    if (nodeId < tabentries (syncuInstance_g.apfnCbResponse))
+    if (nodeId < tabentries(syncuInstance_g.apfnCbResponse))
     {
         if (syncuInstance_g.apfnCbResponse[nodeId] != NULL)
         {   // request already issued (maybe by someone else)
@@ -242,7 +242,7 @@ SyncResponse is received.
 \ingroup module_identu
 */
 //------------------------------------------------------------------------------
-static tOplkError syncu_cbSyncResponse(tFrameInfo * pFrameInfo_p)
+static tOplkError syncu_cbSyncResponse(tFrameInfo* pFrameInfo_p)
 {
     tOplkError          ret;
     UINT                nodeId;
@@ -254,7 +254,7 @@ static tOplkError syncu_cbSyncResponse(tFrameInfo * pFrameInfo_p)
     nodeId = ami_getUint8Le(&pFrameInfo_p->pFrame->srcNodeId);
     index  = nodeId - 1;
 
-    if (index < tabentries (syncuInstance_g.apfnCbResponse))
+    if (index < tabentries(syncuInstance_g.apfnCbResponse))
     {
         // memorize pointer to callback function
         pfnCbResponse = syncuInstance_g.apfnCbResponse[index];
@@ -280,5 +280,4 @@ static tOplkError syncu_cbSyncResponse(tFrameInfo * pFrameInfo_p)
 ///\}
 
 #endif
-
 

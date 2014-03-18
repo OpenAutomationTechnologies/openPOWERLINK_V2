@@ -10,7 +10,7 @@ This file contains the definitions for the identu modules.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -52,7 +52,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-typedef tOplkError (*tIdentuCbResponse) (UINT nodeId_p, tIdentResponse* pIdentResponse_p);
+typedef tOplkError (*tIdentuCbResponse)(UINT nodeId_p, tIdentResponse* pIdentResponse_p);
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -75,3 +75,4 @@ UINT32     identu_getRunningRequests(void);
 #endif
 
 #endif /* _INC_identu_H_ */
+

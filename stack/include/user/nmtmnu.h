@@ -10,7 +10,7 @@ This file contains the definitions for the nmtmnu module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -53,18 +53,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // typedef
 //------------------------------------------------------------------------------
 
-typedef tOplkError (*tNmtMnuCbNodeEvent) (UINT nodeId_p, tNmtNodeEvent NodeEvent_p,
-                                          tNmtState NmtState_p, UINT16 wErrorCode_p,
-                                          BOOL fMandatory_p);
+typedef tOplkError (*tNmtMnuCbNodeEvent)(UINT nodeId_p, tNmtNodeEvent NodeEvent_p,
+                                         tNmtState NmtState_p, UINT16 wErrorCode_p,
+                                         BOOL fMandatory_p);
 
-typedef tOplkError (*tNmtMnuCbBootEvent) (tNmtBootEvent BootEvent_p,
-                                          tNmtState NmtState_p, UINT16 wErrorCode_p);
+typedef tOplkError (*tNmtMnuCbBootEvent)(tNmtBootEvent BootEvent_p,
+                                         tNmtState NmtState_p, UINT16 wErrorCode_p);
 
 typedef struct
 {
     UINT32   prcPResTimeFirstCorrectionNs;
     UINT32   prcPResTimeFirstNegOffsetNs;
-} tEplNmtMnuConfigParam;
+} tNmtMnuConfigParam;
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -87,7 +87,7 @@ tOplkError nmtmnu_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p);
 tOplkError nmtmnu_cbCheckEvent(tNmtEvent NmtEvent_p);
 tOplkError nmtmnu_getDiagnosticInfo(UINT* pMandatorySlaveCount_p, UINT* pSignalSlaveCount_p,
                                     UINT16* pflags_p);
-tOplkError nmtmnu_configPrc(tEplNmtMnuConfigParam* pConfigParam_p);
+tOplkError nmtmnu_configPrc(tNmtMnuConfigParam* pConfigParam_p);
 
 #endif
 
@@ -96,3 +96,4 @@ tOplkError nmtmnu_configPrc(tEplNmtMnuConfigParam* pConfigParam_p);
 #endif
 
 #endif /* _INC_nmtmnu_H_ */
+
