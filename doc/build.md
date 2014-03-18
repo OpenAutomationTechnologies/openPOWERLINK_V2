@@ -10,6 +10,8 @@ For building openPOWERLINK the build utility CMake
 software compilation process using simple platform and compiler independent
 configuration files.
 
+A CMake version 2.8.7 or higher is required for building openPOWERLINK!
+
 __NOTE:__ Currently, CMake is not used for all platforms. There are some platforms
 where platform specific build files are provided (e.g. Makefiles or Eclipse
 project files). Please refer to the [platform documentation](\ref page_platforms).

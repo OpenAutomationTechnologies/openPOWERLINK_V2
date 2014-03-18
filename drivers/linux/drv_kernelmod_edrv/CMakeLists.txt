@@ -33,7 +33,7 @@
 PROJECT (oplkdrv_kernelmodule_edrv C)
 
 IF(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    CMAKE_MINIMUM_REQUIRED (VERSION 2.8.0)
+    CMAKE_MINIMUM_REQUIRED (VERSION 2.8.7)
 ELSE()
     MESSAGE(FATAL_ERROR "Unsupported system ${CMAKE_SYSTEM_NAME} for this project!")
 ENDIF()

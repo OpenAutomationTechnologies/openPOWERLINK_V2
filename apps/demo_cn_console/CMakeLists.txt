@@ -34,12 +34,7 @@
 PROJECT(demo_cn_console C)
 MESSAGE(STATUS "Configuring demo_cn_console")
 
-IF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    # ensure working support of VS.NET 2010
-    CMAKE_MINIMUM_REQUIRED (VERSION 2.8.4)
-ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    CMAKE_MINIMUM_REQUIRED (VERSION 2.8.0)
-ENDIF()
+CMAKE_MINIMUM_REQUIRED (VERSION 2.8.7)
 
 INCLUDE(../common/cmake/options.cmake)
 

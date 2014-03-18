@@ -87,7 +87,7 @@ behaviour on a _multicore_ processor:
 ### CMake
 For building the openPOWERLINK stack and demo applications the Open Source
 cross-platform build tool CMake is used (<http://www.cmake.org>). CMake
-version V2.8 or higher is required.
+version V2.8.7 or higher is required.
 
 For a detailed description of CMake look at the
 [cmake section](\ref sect_build_cmake).

@@ -28,7 +28,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-CMAKE_MINIMUM_REQUIRED (VERSION 2.8.0)
+CMAKE_MINIMUM_REQUIRED (VERSION 2.8.7)
 
 ################################################################################
 # Setup project and generic options
