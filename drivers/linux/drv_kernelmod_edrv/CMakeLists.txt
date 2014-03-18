@@ -61,8 +61,8 @@ SET(CFG_KERNEL_DIR "" CACHE PATH
         "Select the kernel directory to be used, if not specified, system kernel dir will be used!")
 
 SET(CFG_POWERLINK_EDRV "82573" CACHE STRING
-        "Valid drivers are 8139, 82573, 8255x")
-SET_PROPERTY(CACHE CFG_POWERLINK_EDRV PROPERTY STRINGS 8139 82573 8255x)
+        "Valid drivers are 8139, 82573, 8255x, i210")
+SET_PROPERTY(CACHE CFG_POWERLINK_EDRV PROPERTY STRINGS 8139 82573 8255x i210)
 
 ################################################################################
 # Set global directories
@@ -105,10 +105,16 @@ ELSEIF(CFG_POWERLINK_EDRV STREQUAL "8255x")
     SET(MODULE_DEFS "${MODULE_DEFS} -DCONFIG_EDRV=8255")
     SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} ${EDRV_SOURCE_DIR}/edrv-8255x.c)
 
+ELSEIF(CFG_POWERLINK_EDRV STREQUAL "i210")
+
+    SET(MODULE_NAME "oplki210")
+    SET(MODULE_DEFS "${MODULE_DEFS} -DCONFIG_EDRV=210 -DEDRV_USE_TTTX=TRUE")
+    SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} ${EDRV_SOURCE_DIR}/edrv-i210.c)
+
 ELSE()
 
     message(FATAL_ERROR
-            "No valid ethernet driver (8139, 82573, 8255x) was specified in CFG_POWERLINK_EDRV")
+            "No valid ethernet driver was specified in CFG_POWERLINK_EDRV")
 
 ENDIF()
 
@@ -178,11 +184,16 @@ SET(MODULE_SOURCE_FILES
     ${KERNEL_SOURCE_DIR}/errhnd/errhndk.c
     ${KERNEL_SOURCE_DIR}/errhnd/errhndkcal-local.c
     ${KERNEL_SOURCE_DIR}/veth/veth-linuxkernel.c
-    ${KERNEL_SOURCE_DIR}/timer/hrestimer-linuxkernel.c
     ${COMMON_SOURCE_DIR}/circbuf/circbuffer.c
     ${COMMON_SOURCE_DIR}/circbuf/circbuf-linuxkernel.c
     ${COMMON_SOURCE_DIR}/debugstr.c
     )
+
+IF(CFG_POWERLINK_EDRV STREQUAL "i210")
+    SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} ${KERNEL_SOURCE_DIR}/timer/hrestimer-i210.c)
+ELSE()
+    SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} ${KERNEL_SOURCE_DIR}/timer/hrestimer-linuxkernel.c)
+ENDIF()
 
 IF((CMAKE_SYSTEM_PROCESSOR MATCHES x86*) OR (CMAKE_SYSTEM_PROCESSOR MATCHES i686))
     SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} ${COMMON_SOURCE_DIR}/ami/amix86.c)

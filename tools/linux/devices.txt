@@ -6,3 +6,4 @@
 8139,RTL-8139,8139too
 8255x,Intel Corporation 82557,e100
 8255x,Intel Corporation 8255xER,e100
+i210,Intel Corporation I210,igb
