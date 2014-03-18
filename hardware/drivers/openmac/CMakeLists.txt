@@ -35,7 +35,7 @@ STRING(TOLOWER ${OMETH_PROJECT_NAME} OMETH_PROJECT_NAME)
 
 PROJECT(${OMETH_PROJECT_NAME} C)
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.7)
 
 ################################################################################
 # Set options

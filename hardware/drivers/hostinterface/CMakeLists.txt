@@ -51,7 +51,7 @@ STRING(TOLOWER ${HOSTIF_PROJECT_NAME} HOSTIF_PROJECT_NAME)
 
 PROJECT(${HOSTIF_PROJECT_NAME} C)
 
-CMAKE_MINIMUM_REQUIRED (VERSION 2.8.0)
+CMAKE_MINIMUM_REQUIRED (VERSION 2.8.7)
 
 ################################################################################
 # Set options
