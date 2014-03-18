@@ -582,19 +582,19 @@ static tOplkError processSdoEvent(tOplkApiEventType EventType_p,
                                   tOplkApiEventArg* pEventArg_p,
                                   void* pUserArg_p)
 {
-    tEplSdoComFinished*       pSdo = &pEventArg_p->sdoInfo;
-    tOplkError                ret = kErrorOk;
+    tSdoComFinished*    pSdo = &pEventArg_p->sdoInfo;
+    tOplkError          ret = kErrorOk;
 
     UNUSED_PARAMETER(EventType_p);
     UNUSED_PARAMETER(pUserArg_p);
 
     // SDO transfer finished
-    if ((ret = oplk_freeSdoChannel(pSdo->m_SdoAccessType)) != kErrorOk)
+    if ((ret = oplk_freeSdoChannel(pSdo->sdoAccessType)) != kErrorOk)
     {
         return ret;
     }
 
-    if (pSdo->m_SdoComConState == kEplSdoComTransferFinished)
+    if (pSdo->sdoComConState == kEplSdoComTransferFinished)
     {   // continue boot-up of CN with NMT command Reset Configuration
         ret = oplk_triggerMnStateChange(pSdo->nodeId, kNmtNodeCommandConfReset);
     }
