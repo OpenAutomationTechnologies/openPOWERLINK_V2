@@ -9,7 +9,7 @@ This file contains the definitions for the statusu module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-typedef tOplkError (*tStatusuCbResponse) (UINT nodeId_p, tStatusResponse* pStatusResponse_p);
+typedef tOplkError (*tStatusuCbResponse)(UINT nodeId_p, tStatusResponse* pStatusResponse_p);
 
 //------------------------------------------------------------------------------
 // function prototypes

@@ -10,7 +10,7 @@ This file contains the definitions for the nmtu module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -99,8 +99,8 @@ typedef enum
     kNmtCmdInvalidService            = 0xFF
 } tNmtCommand;
 
-typedef tOplkError (*tNmtuStateChangeCallback) (tEventNmtStateChange  NmtStateChange_p);
-typedef tOplkError (*tNmtuCheckEventCallback) (tNmtEvent  NmtEvent_p);
+typedef tOplkError (*tNmtuStateChangeCallback)(tEventNmtStateChange NmtStateChange_p);
+typedef tOplkError (*tNmtuCheckEventCallback)(tNmtEvent NmtEvent_p);
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -123,5 +123,4 @@ tOplkError      nmtu_registerStateChangeCb(tNmtuStateChangeCallback pfnNmtStateC
 #endif
 
 #endif  // #ifndef _INC_nmtu_H_
-
 
