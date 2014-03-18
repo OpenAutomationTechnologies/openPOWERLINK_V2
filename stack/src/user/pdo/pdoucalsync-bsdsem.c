@@ -11,7 +11,7 @@ uses BSD semaphores for synchronisation.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -97,7 +97,7 @@ static sem_t*           syncSem_l;
 
 The function initializes the PDO user CAL sync module
 
-\param  pfnSyncCb_p             function that is called in case of sync event
+\param  pfnSyncCb_p             Function that is called in case of sync event
 
 \return The function returns a tOplkError error code.
 */
@@ -108,7 +108,7 @@ tOplkError pdoucal_initSync(tSyncCb pfnSyncCb_p)
 
     if ((syncSem_l = sem_open(PDO_SYNC_BSDSEM, O_CREAT, S_IRWXG, 1)) == SEM_FAILED)
     {
-        TRACE ("%s() creating sem failed!\n", __func__);
+        TRACE("%s() creating sem failed!\n", __func__);
         return kErrorNoResource;
     }
     return kErrorOk;
@@ -116,7 +116,7 @@ tOplkError pdoucal_initSync(tSyncCb pfnSyncCb_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Cleanup PDO user CAL sync module
+\brief  Clean up PDO user CAL sync module
 
 The function cleans up the PDO user CAL sync module
 */
@@ -136,7 +136,7 @@ The function waits for a sync event.
                         forever.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk      Successfully received sync event
+\retval kErrorOk              Successfully received sync event
 \retval kErrorGeneralError    Error while waiting on sync event
 */
 //------------------------------------------------------------------------------
@@ -151,7 +151,7 @@ tOplkError pdoucal_waitSyncEvent(ULONG timeout_p)
         if (timeout_p >= 1000000)
         {
             semTimeout.tv_sec = (timeout_p / 1000000);
-            semTimeout.tv_nsec = (timeout_p % 1000000) * 1000 ;
+            semTimeout.tv_nsec = (timeout_p % 1000000) * 1000;
         }
         else
         {

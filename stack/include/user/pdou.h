@@ -8,7 +8,7 @@
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -79,6 +79,5 @@ tOplkError pdou_copyTxPdoFromPi (void);
 }
 #endif
 
-#endif /* _INC_Pdou_H_ */
-
+#endif /* _INC_pdou_H_ */
 

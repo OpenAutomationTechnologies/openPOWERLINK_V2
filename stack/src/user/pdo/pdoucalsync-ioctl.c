@@ -11,7 +11,7 @@ uses a Linux ioctl call for synchronisation.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -100,7 +100,7 @@ static int              fd_l;
 
 The function initializes the PDO user CAL sync module
 
-\param  pfnSyncCb_p             function that is called in case of sync event
+\param  pfnSyncCb_p             Function that is called in case of sync event
 
 \return The function returns a tOplkError error code.
 */
@@ -115,7 +115,7 @@ tOplkError pdoucal_initSync(tSyncCb pfnSyncCb_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Cleanup PDO user CAL sync module
+\brief  Clean up PDO user CAL sync module
 
 The function cleans up the PDO user CAL sync module
 */
@@ -134,7 +134,7 @@ The function waits for a sync event.
                         forever.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk      Successfully received sync event
+\retval kErrorOk              Successfully received sync event
 \retval kErrorGeneralError    Error while waiting on sync event
 */
 //------------------------------------------------------------------------------

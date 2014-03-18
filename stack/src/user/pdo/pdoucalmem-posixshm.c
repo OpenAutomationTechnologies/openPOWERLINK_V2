@@ -12,7 +12,7 @@ between user and kernel layer.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -97,8 +97,8 @@ static int                  fd_l;
 /**
 \brief  Open PDO shared memory
 
-The function performs all actions needed to setup the shared memory at
-starting of the stack.
+The function performs all actions needed to setup the shared memory at the
+start of the stack.
 
 For the Posix shared-memory implementation it opens the shared memory segment.
 
@@ -111,7 +111,7 @@ tOplkError pdoucal_openMem(void)
 {
     if ((fd_l = shm_open(PDO_SHMEM_NAME, O_RDWR, 0)) < 0)
     {
-        TRACE ("%s() Error open shared memory!\n", __func__);
+        TRACE("%s() Error open shared memory!\n", __func__);
         return kErrorNoResource;
     }
     return kErrorOk;
@@ -121,7 +121,7 @@ tOplkError pdoucal_openMem(void)
 /**
 \brief  Close PDO shared memory
 
-The function performs all actions needed to cleanup the shared memory at
+The function performs all actions needed to clean up the shared memory at
 shutdown.
 
 For the Posix shared-memory implementation it unlinks the shared memory segment.
@@ -154,10 +154,10 @@ The function allocates shared memory for the user needed to transfer the PDOs.
 tOplkError pdoucal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
 {
     *ppPdoMem_p = mmap(NULL, memSize_p, PROT_READ | PROT_WRITE, MAP_SHARED,
-                     fd_l, 0);
+                       fd_l, 0);
     if (*ppPdoMem_p == MAP_FAILED)
     {
-        TRACE ("%s() mmap failed!\n", __func__);
+        TRACE("%s() mmap failed!\n", __func__);
         *ppPdoMem_p = NULL;
         return kErrorNoResource;
     }
@@ -181,9 +181,9 @@ transfering the PDOs.
 //------------------------------------------------------------------------------
 tOplkError pdoucal_freeMem(BYTE* pMem_p, size_t memSize_p)
 {
-    if(munmap(pMem_p, memSize_p) != 0)
+    if (munmap(pMem_p, memSize_p) != 0)
     {
-        TRACE ("%s() munmap failed (%s)\n", __func__, strerror(errno));
+        TRACE("%s() munmap failed (%s)\n", __func__, strerror(errno));
         return kErrorGeneralError;
     }
     return kErrorOk;
@@ -195,6 +195,5 @@ tOplkError pdoucal_freeMem(BYTE* pMem_p, size_t memSize_p)
 /// \name Private Functions
 /// \{
 
-
-
 ///\}
+

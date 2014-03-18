@@ -19,7 +19,7 @@ without locking, the buffer switching has to be performed in an atomic operation
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -129,20 +129,20 @@ tOplkError pdoucal_initPdoMem(tPdoChannelSetup* pPdoChannels_p, size_t rxPdoMemS
     {
         if (pdoucal_allocateMem(memSize_l, (BYTE**)&pPdoMem_l) != kErrorOk)
         {
-            DEBUG_LVL_ERROR_TRACE ("%s() Allocating PDO memory failed!\n", __func__);
+            DEBUG_LVL_ERROR_TRACE("%s() Allocating PDO memory failed!\n", __func__);
             pPdoMem_l = NULL;
             return kErrorNoResource;
         }
     }
 
-    pTripleBuf_l[0] = (BYTE *)pPdoMem_l + sizeof(tPdoMemRegion);
+    pTripleBuf_l[0] = (BYTE*)pPdoMem_l + sizeof(tPdoMemRegion);
     pTripleBuf_l[1] = pTripleBuf_l[0] + pdoMemSize;
     pTripleBuf_l[2] = pTripleBuf_l[1] + pdoMemSize;
 
-    TRACE ("%s() Mapped shared memory for PDO mem region at %p size %d\n",
-            __func__, pPdoMem_l, memSize_l);
-    TRACE ("%s() Triple buffers at: %p/%p/%p\n", __func__,
-            pTripleBuf_l[0], pTripleBuf_l[1], pTripleBuf_l[2]);
+    TRACE("%s() Mapped shared memory for PDO mem region at %p size %d\n",
+          __func__, pPdoMem_l, memSize_l);
+    TRACE("%s() Triple buffers at: %p/%p/%p\n", __func__,
+          pTripleBuf_l[0], pTripleBuf_l[1], pTripleBuf_l[2]);
 
     OPLK_ATOMIC_INIT(pPdoMem_l);
 
@@ -151,7 +151,7 @@ tOplkError pdoucal_initPdoMem(tPdoChannelSetup* pPdoChannels_p, size_t rxPdoMemS
 
 //------------------------------------------------------------------------------
 /**
-\brief  Cleanup PDO memory
+\brief  Clean up PDO memory
 
 The function cleans the memory allocated for PDO buffers.
 
@@ -162,16 +162,16 @@ void pdoucal_cleanupPdoMem(void)
 {
     if (pPdoMem_l != NULL)
     {
-        if (pdoucal_freeMem((BYTE *)pPdoMem_l, memSize_l) != kErrorOk)
+        if (pdoucal_freeMem((BYTE*)pPdoMem_l, memSize_l) != kErrorOk)
         {
-            DEBUG_LVL_ERROR_TRACE ("%s() Unmapping shared PDO mem failed\n", __func__);
+            DEBUG_LVL_ERROR_TRACE("%s() Unmapping shared PDO mem failed\n", __func__);
         }
     }
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Get Address of TX PDO buffer
+\brief  Get address of TX PDO buffer
 
 The function returns the address of the TXPDO buffer specified.
 
@@ -182,13 +182,13 @@ The function returns the address of the TXPDO buffer specified.
 \ingroup module_pdoucal
 */
 //------------------------------------------------------------------------------
-BYTE *pdoucal_getTxPdoAdrs(UINT channelId_p)
+BYTE* pdoucal_getTxPdoAdrs(UINT channelId_p)
 {
     OPLK_ATOMIC_T    wi;
     BYTE*            pPdo;
 
     wi = pPdoMem_l->txChannelInfo[channelId_p].writeBuf;
-    //TRACE ("%s() channelId:%d wi:%d\n", __func__, channelId_p, wi);
+    //TRACE("%s() channelId:%d wi:%d\n", __func__, channelId_p, wi);
     pPdo = pTripleBuf_l[wi] + pPdoMem_l->txChannelInfo[channelId_p].channelOffset;
     return pPdo;
 }
@@ -208,24 +208,24 @@ The function writes a TXPDO to the PDO memory range.
 \ingroup module_pdoucal
 */
 //------------------------------------------------------------------------------
-tOplkError pdoucal_setTxPdo(UINT channelId_p, BYTE* pPdo_p,  WORD pdoSize_p)
+tOplkError pdoucal_setTxPdo(UINT channelId_p, BYTE* pPdo_p, WORD pdoSize_p)
 {
     OPLK_ATOMIC_T    temp;
 
     UNUSED_PARAMETER(pPdo_p);
     UNUSED_PARAMETER(pdoSize_p);
 
-    //TRACE ("%s() chan:%d wi:%d\n", __func__, channelId_p, pPdoMem_l->txChannelInfo[channelId_p].writeBuf);
+    //TRACE("%s() chan:%d wi:%d\n", __func__, channelId_p, pPdoMem_l->txChannelInfo[channelId_p].writeBuf);
 
     //shmWriterSpinlock(&pPdoMem_l->txSpinlock);
     temp = pPdoMem_l->txChannelInfo[channelId_p].writeBuf;
     OPLK_ATOMIC_EXCHANGE(&pPdoMem_l->txChannelInfo[channelId_p].cleanBuf,
-                    temp,
-                    pPdoMem_l->txChannelInfo[channelId_p].writeBuf);
+                         temp,
+                         pPdoMem_l->txChannelInfo[channelId_p].writeBuf);
     pPdoMem_l->txChannelInfo[channelId_p].newData = 1;
     //shmWriterSpinUnlock(&pPdoMem_l->txSpinlock);
 
-    //TRACE ("%s() chan:%d new wi:%d\n", __func__, channelId_p, pPdoMem_l->txChannelInfo[channelId_p].writeBuf);
+    //TRACE("%s() chan:%d new wi:%d\n", __func__, channelId_p, pPdoMem_l->txChannelInfo[channelId_p].writeBuf);
 
     return kErrorOk;
 }
@@ -234,7 +234,7 @@ tOplkError pdoucal_setTxPdo(UINT channelId_p, BYTE* pPdo_p,  WORD pdoSize_p)
 /**
 \brief  Read RXPDO from PDO memory
 
-The function reads a RXPDO from the PDO buffer.
+The function reads an RXPDO from the PDO buffer.
 
 \param  ppPdo_p                 Pointer to store the RXPDO data address.
 \param  channelId_p             Channel ID of PDO to read.
@@ -255,13 +255,13 @@ tOplkError pdoucal_getRxPdo(BYTE** ppPdo_p, UINT channelId_p, WORD pdoSize_p)
     {
         readBuf = pPdoMem_l->rxChannelInfo[channelId_p].readBuf;
         OPLK_ATOMIC_EXCHANGE(&pPdoMem_l->rxChannelInfo[channelId_p].cleanBuf,
-                        readBuf,
-                        pPdoMem_l->rxChannelInfo[channelId_p].readBuf);
+                             readBuf,
+                             pPdoMem_l->rxChannelInfo[channelId_p].readBuf);
         pPdoMem_l->rxChannelInfo[channelId_p].newData = 0;
     }
 
     readBuf = pPdoMem_l->rxChannelInfo[channelId_p].readBuf;
-    *ppPdo_p =  pTripleBuf_l[readBuf] + pPdoMem_l->rxChannelInfo[channelId_p].channelOffset;
+    *ppPdo_p = pTripleBuf_l[readBuf] + pPdoMem_l->rxChannelInfo[channelId_p].channelOffset;
 
     return kErrorOk;
 }
@@ -272,7 +272,5 @@ tOplkError pdoucal_getRxPdo(BYTE** ppPdo_p, UINT channelId_p, WORD pdoSize_p)
 /// \name Private Functions
 /// \{
 
-
-
-
 ///\}
+

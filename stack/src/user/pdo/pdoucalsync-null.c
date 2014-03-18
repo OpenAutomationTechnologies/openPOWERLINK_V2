@@ -2,7 +2,7 @@
 ********************************************************************************
 \file   pdoucalsync-null.c
 
-\brief  Empty Sync implementation for the PDO user CAL module
+\brief  Empty sync implementation for the PDO user CAL module
 
 This file contains an empty sync implementation for the PDU user CAL module.
 
@@ -10,7 +10,7 @@ This file contains an empty sync implementation for the PDU user CAL module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplk/oplkinc.h>
 #include <common/pdo.h>
 #include <user/pdoucal.h>
+
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
@@ -90,7 +91,7 @@ static tSyncCb      pfnSyncCb_l;
 
 The function initializes the PDO user CAL sync module
 
-\param  pfnSyncCb_p             function that is called in case of sync event
+\param  pfnSyncCb_p             Function that is called in case of sync event
 
 \return The function returns a tOplkError error code.
 */
@@ -103,7 +104,7 @@ tOplkError pdoucal_initSync(tSyncCb pfnSyncCb_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Cleanup PDO user CAL sync module
+\brief  Clean up PDO user CAL sync module
 
 The function cleans up the PDO user CAL sync module
 */
@@ -119,11 +120,11 @@ void pdoucal_exitSync(void)
 
 The function waits for a sync event.
 
-\param  timeout_p       Specifies a timeout in microseconds. If 0 it waits
+\param  timeout_p       Specifies a timeout in microseconds. If 0, it waits
                         forever.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk      Successfully received sync event
+\retval kErrorOk              Successfully received sync event
 \retval kErrorGeneralError    Error while waiting on sync event
 */
 //------------------------------------------------------------------------------

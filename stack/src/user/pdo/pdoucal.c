@@ -11,7 +11,7 @@ This file contains the generic functions of the user PDO CAL module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -108,7 +108,7 @@ tOplkError pdoucal_init(tSyncCb pfnSyncCb_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Cleanup PDO user CAL module
+\brief  Clean up PDO user CAL module
 
 The function cleans up the PDO user CAL module.
 
@@ -147,7 +147,7 @@ tOplkError pdoucal_postPdokChannelAlloc(tPdoAllocationParam* pAllocationParam_p)
     Event.eventSink = kEventSinkPdokCal;
     Event.eventType = kEventTypePdokAlloc;
     Event.pEventArg = pAllocationParam_p;
-    Event.eventArgSize = sizeof (*pAllocationParam_p);
+    Event.eventArgSize = sizeof(*pAllocationParam_p);
 
     Ret = eventu_postEvent(&Event);
 
