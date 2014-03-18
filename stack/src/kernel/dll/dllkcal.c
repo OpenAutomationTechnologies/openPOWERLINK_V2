@@ -922,6 +922,7 @@ static BOOL getCnGenRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p)
             {
                 *pNodeId_p = rxNodeId;
                 *pReqServiceId_p = kDllReqServiceUnspecified;
+                instance_l.aCnRequestCntGen[rxNodeId-1]--;
 
                 return TRUE;
             }
@@ -967,6 +968,7 @@ static BOOL getCnNmtRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p)
             {
                 *pNodeId_p = rxNodeId;
                 *pReqServiceId_p = kDllReqServiceNmtRequest;
+                instance_l.aCnRequestCntNmt[rxNodeId-1]--;
 
                 return TRUE;
             }
