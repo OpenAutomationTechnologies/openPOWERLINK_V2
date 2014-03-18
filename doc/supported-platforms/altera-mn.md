@@ -39,7 +39,7 @@ the Qsys subsystem instances in `hardware/ipcore/altera/qsys/mn_[pcp|host]`!_
 The software projects for the PCP and the host processor are split into
 `drivers` and `apps`:
 - PCP driver daemon: \n
-    `drivers/altera-nios2/drv_daemon`
+    `drivers/altera-nios2/drv_daemon/build`
 - Host "demo_mn_embedded": \n
     `apps/demo_mn_embedded/build/altera-nios2`
 
@@ -93,7 +93,7 @@ Steps 1-5 can be carried out by executing `$ make all` in a
 6. Open "Nios II Command Shell"
 7. Use the software design available in the openPOWERLINK subdirectory \n
    `apps/demo_mn_embedded/build/altera-nios2` and \n
-   `drivers/altera-nios2/drv_daemon`. \n
+   `drivers/altera-nios2/drv_daemon/build`. \n
 8. Run the scripts *create-this-drv* or *create-this-app* respectively
    to create the Makefile for the driver daemon and the application demo. \n
    `$ ./create-this-app` or `$ ./create-this-drv` \n
@@ -142,7 +142,7 @@ Requirement: Steps in the previous section *How to build the binary* are complet
    *Browse...*)
 5. Set the project name to `demo_mn_embedded`.
 6. Press the button *Finish*.
-7. Repeat steps 2-6 with path `drivers/altera-nios2/drv_daemon` and project name
+7. Repeat steps 2-6 with path `drivers/altera-nios2/drv_daemon/build` and project name
    `drv_daemon`.
 
 # How to write the program to local flash {#sect_altera-mn_flash}
