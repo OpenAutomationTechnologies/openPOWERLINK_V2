@@ -4,14 +4,14 @@
 
 \brief  Implementation of OBD CDC functions
 
-This file contains the functions for parsing a concise device configuration CDC
+This file contains the functions for parsing a Concise Device Configuration (CDC)
 and write the configured data into the object dictionary.
 
 \ingroup module_obd
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -138,8 +138,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 typedef enum
 {
-    kEplObdCdcTypeFile      = 0,
-    kEplObdCdcTypeBuffer    = 1,
+    kObdCdcTypeFile      = 0,
+    kObdCdcTypeBuffer    = 1,
 } tObdCdcType;
 
 typedef struct
@@ -296,7 +296,7 @@ tOplkError obdcdc_loadCdc(void)
 \brief  Load Concise Device Configuration file
 
 The function loads the concise device configuration (CDC) from the specified
-buffer and writes its contents into the OD.
+file and writes its contents into the OD.
 
 \param  pCdcFilename_p  The filename of the CDC file to load.
 
@@ -310,7 +310,7 @@ static tOplkError loadCdcFile(char* pCdcFilename_p)
     UINT32          error;
 
     OPLK_MEMSET(&cdcInfo, 0, sizeof(tObdCdcInfo));
-    cdcInfo.type = kEplObdCdcTypeFile;
+    cdcInfo.type = kObdCdcTypeFile;
     cdcInfo.handle.fdCdcFile = open(pCdcFilename_p, O_RDONLY | O_BINARY, 0666);
     if (!IS_FD_VALID(cdcInfo.handle.fdCdcFile))
     {   // error occurred
@@ -356,7 +356,7 @@ static tOplkError loadCdcBuffer(UINT8* pCdc_p, size_t cdcSize_p)
     tObdCdcInfo     cdcInfo;
 
     OPLK_MEMSET(&cdcInfo, 0, sizeof(tObdCdcInfo));
-    cdcInfo.type = kEplObdCdcTypeBuffer;
+    cdcInfo.type = kObdCdcTypeBuffer;
     cdcInfo.handle.pNextBuffer = pCdc_p;
     if (cdcInfo.handle.pNextBuffer == NULL)
     {   // error occurred
@@ -364,7 +364,7 @@ static tOplkError loadCdcBuffer(UINT8* pCdc_p, size_t cdcSize_p)
         goto Exit;
     }
 
-    cdcInfo.cdcSize = (size_t) cdcSize_p;
+    cdcInfo.cdcSize = (size_t)cdcSize_p;
     cdcInfo.bufferSize = cdcInfo.cdcSize;
 
     ret = processCdc(&cdcInfo);
@@ -393,7 +393,7 @@ static tOplkError processCdc(tObdCdcInfo* pCdcInfo_p)
     UINT            objectSubIndex;
     size_t          curDataSize;
 
-    if ((ret = loadNextBuffer(pCdcInfo_p, sizeof(UINT32)))  != kErrorOk)
+    if ((ret = loadNextBuffer(pCdcInfo_p, sizeof(UINT32))) != kErrorOk)
         return ret;
 
     entriesRemaining = ami_getUint32Le(pCdcInfo_p->pCurBuffer);
@@ -422,7 +422,7 @@ static tOplkError processCdc(tObdCdcInfo* pCdcInfo_p)
         }
 
         ret = obd_writeEntryFromLe(objectIndex, objectSubIndex, pCdcInfo_p->pCurBuffer,
-                                     (tObdSize) curDataSize);
+                                   (tObdSize)curDataSize);
         if (ret != kErrorOk)
         {
             tEventObdError          obdError;
@@ -461,7 +461,7 @@ static tOplkError loadNextBuffer(tObdCdcInfo* pCdcInfo_p, size_t bufferSize)
 
     switch (pCdcInfo_p->type)
     {
-        case kEplObdCdcTypeFile:
+        case kObdCdcTypeFile:
             if (pCdcInfo_p->bufferSize < bufferSize)
             {
                 if (pCdcInfo_p->pCurBuffer != NULL)
@@ -481,6 +481,7 @@ static tOplkError loadNextBuffer(tObdCdcInfo* pCdcInfo_p, size_t bufferSize)
                 pCdcInfo_p->bufferSize = bufferSize;
             }
             pBuffer = pCdcInfo_p->pCurBuffer;
+
             do
             {
                 readSize = read(pCdcInfo_p->handle.fdCdcFile, pBuffer, bufferSize);
@@ -498,7 +499,7 @@ static tOplkError loadNextBuffer(tObdCdcInfo* pCdcInfo_p, size_t bufferSize)
             while (bufferSize > 0);
             break;
 
-        case kEplObdCdcTypeBuffer:
+        case kObdCdcTypeBuffer:
             if (pCdcInfo_p->bufferSize < bufferSize)
             {
                 ret = eventu_postError(kEventSourceObdu, kErrorObdInvalidDcf, 0, NULL);
@@ -518,3 +519,4 @@ static tOplkError loadNextBuffer(tObdCdcInfo* pCdcInfo_p, size_t bufferSize)
 ///\}
 
 #endif
+

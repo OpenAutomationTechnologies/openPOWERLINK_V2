@@ -10,7 +10,7 @@ This file contains the implementation of the object dictionary (OD) module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -74,9 +74,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // decomposition of float
 typedef union
 {
-    tObdReal32      m_flRealPart;
-    int             m_nIntegerPart;
-} tEplObdRealParts;
+    tObdReal32      flRealPart;
+    int             nIntegerPart;
+} tObdRealParts;
 
 typedef struct
 {
@@ -114,8 +114,8 @@ static tObdSize     getObjectSize(tObdSubEntryPtr pSubIndexEntry_p);
 static tOplkError   getVarEntry(tObdSubEntryPtr pSubIndexEntry_p, tObdVarEntry MEM** ppVarEntry_p);
 static tOplkError   getEntry(UINT index_p, UINT subIndex_p, tObdEntryPtr* ppObdEntry_p,
                              tObdSubEntryPtr* ppObdSubEntry_p);
-static CONST void*  getObjectDefaultPtr (tObdSubEntryPtr pSubIndexEntry_p);
-static void MEM*    getObjectCurrentPtr (tObdSubEntryPtr pSubIndexEntry_p);
+static CONST void*  getObjectDefaultPtr(tObdSubEntryPtr pSubIndexEntry_p);
+static void MEM*    getObjectCurrentPtr(tObdSubEntryPtr pSubIndexEntry_p);
 static void*        getObjectDataPtr(tObdSubEntryPtr pSubIndexEntry_p);
 static tObdEntryPtr searchIndex(tObdEntryPtr pObdEntry_p, UINT index_p);
 static tOplkError   getIndex(tObdInitParam MEM* pInitParam_p, UINT index_p, tObdEntryPtr* ppObdEntry_p);
@@ -124,18 +124,18 @@ static tOplkError   accessOdPartition(tObdPart currentOdPart_p, tObdEntryPtr pOb
 static void         copyObjectData(void MEM* pDstData_p, CONST void* pSrcData_p, tObdSize objSize_p,
                                    tObdType objType_p);
 static tOplkError   callObjectCallback(tObdCallback pfnCallback_p, tObdCbParam MEM* pCbParam_p);
-static tOplkError   callPostDefault(void *pData_p, tObdEntryPtr pObdEntry_p, tObdSubEntryPtr pObdSubEntry_p);
+static tOplkError   callPostDefault(void* pData_p, tObdEntryPtr pObdEntry_p, tObdSubEntryPtr pObdSubEntry_p);
 static tOplkError   isNumerical(tObdSubEntryPtr pObdSubEntry_p, BOOL* pfEntryNumerical_p);
 
 #if (CONFIG_OBD_CHECK_OBJECT_RANGE != FALSE)
-static tOplkError   checkObjectRange(tObdSubEntryPtr pSubIndexEntry_p, void * pData_p);
+static tOplkError   checkObjectRange(tObdSubEntryPtr pSubIndexEntry_p, void* pData_p);
 #endif
 
 #if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
 static tOplkError   prepareStoreRestore(tObdDir direction_p, tObdCbStoreParam MEM* pCbStore_p);
 static tOplkError   cleanupStoreRestore(tObdDir direction_p, tObdCbStoreParam MEM* pCbStore_p)
 static tOplkError   doStoreRestore(tObdAccess access_p, tObdCbStoreParam MEM* pCbStore_p,
-                                   void MEM * pObjData_p, tObdSize objSize_p);
+                                   void MEM* pObjData_p, tObdSize objSize_p);
 static tOplkError   callStoreCallback(tObdCbStoreParam MEM* pCbStoreParam_p);
 #endif // (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
 
@@ -199,23 +199,23 @@ tOplkError obd_init(tObdInitParam MEM* pInitParam_p)
     if (pInitParam_p == NULL)
         return kErrorOk;
 
-    OPLK_MEMCPY (&obdInstance_l.initParam, pInitParam_p, sizeof (tObdInitParam));
+    OPLK_MEMCPY(&obdInstance_l.initParam, pInitParam_p, sizeof(tObdInitParam));
 
     // clear callback function for command LOAD and STORE
     obdInstance_l.pfnStoreLoadObjectCb = NULL;
 
     // initialize object dictionary
     // so all all VarEntries will be initialized to trash object and default values will be set to current data
-    ret = obd_accessOdPart (kObdPartAll, kObdDirInit);
+    ret = obd_accessOdPart(kObdPartAll, kObdDirInit);
 
     return ret;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Deinitialize OD module
+\brief  De-initialize OD module
 
-The function deinitializes the OD module.
+The function de-initializes the OD module.
 
 \return The function returns a tOplkError error code.
 
@@ -267,7 +267,7 @@ tOplkError obd_writeEntry(UINT index_p, UINT subIndex_p, void* pSrcData_p, tObdS
 \brief  Read OD entry
 
 The function reads an OD entry. The object can always be read, even if the
-attribute  kObdAccRead is not set. The attribute is only checked for SDO
+attribute kObdAccRead is not set. The attribute is only checked for SDO
 transfers.
 
 \param      index_p         Index to read.
@@ -287,7 +287,7 @@ tOplkError obd_readEntry(UINT index_p, UINT subIndex_p, void* pDstData_p, tObdSi
     tObdEntryPtr                    pObdEntry;
     tObdSubEntryPtr                 pSubEntry;
     tObdCbParam  MEM                cbParam;
-    void *                          pSrcData;
+    void*                           pSrcData;
     tObdSize                        obdSize;
 
     if ((pDstData_p == NULL) || (pSize_p == NULL))
@@ -319,12 +319,12 @@ tOplkError obd_readEntry(UINT index_p, UINT subIndex_p, void* pDstData_p, tObdSi
         return kErrorObdValueLengthError;
 
     // read value from object
-    OPLK_MEMCPY (pDstData_p, pSrcData, obdSize);
+    OPLK_MEMCPY(pDstData_p, pSrcData, obdSize);
     if (pSubEntry->type == kObdTypeVString)
     {
         if (*pSize_p > obdSize)
         {   // space left to set the terminating null-character
-            ((char MEM*) pDstData_p)[obdSize] = '\0';
+            ((char MEM*)pDstData_p)[obdSize] = '\0';
             obdSize++;
         }
     }
@@ -353,7 +353,7 @@ restores default values of one part of OD
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tOplkError obd_accessOdPart (tObdPart obdPart_p, tObdDir direction_p)
+tOplkError obd_accessOdPart(tObdPart obdPart_p, tObdDir direction_p)
 {
     tOplkError      ret = kErrorOk;
     BOOL            fPartFount;
@@ -418,7 +418,7 @@ The function defines an OD variable.
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tOplkError obd_defineVar (tVarParam MEM* pVarParam_p)
+tOplkError obd_defineVar(tVarParam MEM* pVarParam_p)
 {
     tOplkError              ret;
     tObdVarEntry MEM*       pVarEntry;
@@ -431,13 +431,13 @@ tOplkError obd_defineVar (tVarParam MEM* pVarParam_p)
         return ret;
 
     // get var entry
-    ret = getVarEntry (pSubIndexEntry, &pVarEntry);
+    ret = getVarEntry(pSubIndexEntry, &pVarEntry);
     if (ret != kErrorOk)
         return ret;
 
     varValid =  pVarParam_p->validFlag;
 
-    // copy only this values, which valid flag is set
+    // copy only values for which the valid flag is set
     if ((varValid & kVarValidSize) != 0)
     {
         if (pSubIndexEntry->type != kObdTypeDomain)
@@ -461,7 +461,7 @@ tOplkError obd_defineVar (tVarParam MEM* pVarParam_p)
     {
        pVarEntry->pData = pVarParam_p->pData;
     }
-    // ret is already set to kErrorOk from ObdGetVarIntern()
+    // ret is already set to kErrorOk from getVarEntry()
     return ret;
 }
 
@@ -469,7 +469,7 @@ tOplkError obd_defineVar (tVarParam MEM* pVarParam_p)
 /**
 \brief  Get current data pointer of object entry
 
-The function returns the current data pointer. If object is an
+The function returns the current data pointer. If object is a
 constant object it returns the default pointer.
 
 \param  index_p             Index of the entry.
@@ -483,20 +483,20 @@ constant object it returns the default pointer.
 void* obd_getObjectDataPtr(UINT index_p, UINT subIndex_p)
  {
     tOplkError          ret;
-    void *              pData;
+    void*               pData;
     tObdEntryPtr        pObdEntry;
     tObdSubEntryPtr     pObdSubEntry;
 
     // get pointer to index structure
-    ret = getIndex (&obdInstance_l.initParam, index_p, &pObdEntry);
-    if(ret != kErrorOk)
+    ret = getIndex(&obdInstance_l.initParam, index_p, &pObdEntry);
+    if (ret != kErrorOk)
     {
         pData = NULL;
         return pData;
     }
 
-    ret = getSubindex (pObdEntry, subIndex_p, &pObdSubEntry);
-    if(ret != kErrorOk)
+    ret = getSubindex(pObdEntry, subIndex_p, &pObdSubEntry);
+    if (ret != kErrorOk)
     {
         pData = NULL;
         return pData;
@@ -508,9 +508,9 @@ void* obd_getObjectDataPtr(UINT index_p, UINT subIndex_p)
 #if (defined (OBD_USER_OD) && (OBD_USER_OD != FALSE))
 //------------------------------------------------------------------------------
 /**
-\brief  Register an user OD
+\brief  Register a user OD
 
-The function registers an user object dictionary.
+The function registers a user object dictionary.
 
 \param  pUserOd_p            Pointer to user OD.
 
@@ -519,7 +519,7 @@ The function registers an user object dictionary.
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tOplkError obd_registerUserOd (tObdEntryPtr pUserOd_p)
+tOplkError obd_registerUserOd(tObdEntryPtr pUserOd_p)
 {
     obdInitParam_l.m_pUserPart = pUserOd_p;
     return kErrorOk;
@@ -530,7 +530,7 @@ tOplkError obd_registerUserOd (tObdEntryPtr pUserOd_p)
 /**
 \brief  Initialize VarEntry
 
-The function initializes the VarEntry dependant on object type.
+The function initializes the VarEntry dependant on the object type.
 The function will not be used for strings.
 
 \param  pVarEntry_p             Pointer to VarEntry structure.
@@ -590,7 +590,7 @@ tObdSize obd_getDataSize(UINT index_p, UINT subIndex_p)
     }
 
     ret = getSubindex(pObdEntry, subIndex_p, &pObdSubEntry);
-    if(ret != kErrorOk)
+    if (ret != kErrorOk)
     {
         obdSize = 0;
         return obdSize;
@@ -753,14 +753,14 @@ tOplkError obd_getType(UINT index_p, UINT subIndex_p, tObdType* pType_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Read entry and convert to little endian
+\brief  Read entry and convert it to little endian
 
 The function reads an object entry and converts numerical types into the little
 endian byte order for numerical types. For other types a normal read will be
 performed. This is useful for the PDO and SDO module.
 
 The application can always read the data even if the attribute kObdAccRead is
-not set. The attribute is only checked up for SDO transfer.
+not set. The attribute is only checked on SDO transfers.
 
 \param  index_p                 Index of object to read.
 \param  subIndex_p              Sub-index of object to read.
@@ -774,8 +774,8 @@ not set. The attribute is only checked up for SDO transfer.
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tOplkError obd_readEntryToLe (UINT index_p, UINT subIndex_p, void* pDstData_p,
-                              tObdSize* pSize_p)
+tOplkError obd_readEntryToLe(UINT index_p, UINT subIndex_p, void* pDstData_p,
+                             tObdSize* pSize_p)
 {
     tOplkError                      ret;
     tObdEntryPtr                    pObdEntry;
@@ -803,23 +803,23 @@ tOplkError obd_readEntryToLe (UINT index_p, UINT subIndex_p, void* pDstData_p,
         return ret;
 
     // get size of data and check if application has reserved enough memory
-    obdSize = getDataSize (pSubEntry);
+    obdSize = getDataSize(pSubEntry);
     if (*pSize_p < obdSize)
         return kErrorObdValueLengthError;
 
     // check if numerical type
-    switch(pSubEntry->type)
+    switch (pSubEntry->type)
     {
         case kObdTypeVString:
         case kObdTypeOString:
         case kObdTypeDomain:
         default:
-            OPLK_MEMCPY (pDstData_p, pSrcData, obdSize);
+            OPLK_MEMCPY(pDstData_p, pSrcData, obdSize);
             if (pSubEntry->type == kObdTypeVString)
             {
                 if (*pSize_p > obdSize)
                 {   // space left to set the terminating null-character
-                    ((char MEM*) pDstData_p)[obdSize] = '\0';
+                    ((char MEM*)pDstData_p)[obdSize] = '\0';
                     obdSize++;
                 }
             }
@@ -888,7 +888,7 @@ tOplkError obd_readEntryToLe (UINT index_p, UINT subIndex_p, void* pDstData_p,
 
 //------------------------------------------------------------------------------
 /**
-\brief  Write entry and convert if from little endian
+\brief  Write entry and convert it from little endian
 
 The function writes an object entry and converts numerical types from the little
 endian byte order into the system byte order. For other types a normal write will
@@ -904,8 +904,8 @@ be performed. Strings are stored with added '\0' character.
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tOplkError obd_writeEntryFromLe (UINT index_p, UINT subIndex_p, void* pSrcData_p,
-                                 tObdSize size_p)
+tOplkError obd_writeEntryFromLe(UINT index_p, UINT subIndex_p, void* pSrcData_p,
+                                tObdSize size_p)
 {
     tOplkError              ret;
     tObdEntryPtr            pObdEntry;
@@ -921,7 +921,7 @@ tOplkError obd_writeEntryFromLe (UINT index_p, UINT subIndex_p, void* pSrcData_p
     if (ret != kErrorOk)
         return ret;
 
-    switch(pSubEntry->type)
+    switch (pSubEntry->type)
     {
         case kObdTypeBool:
         case kObdTypeInt8:
@@ -1034,7 +1034,7 @@ tOplkError obd_searchVarEntry(UINT index_p, UINT subIndex_p, tObdVarEntry MEM** 
     tOplkError           ret;
     tObdSubEntryPtr      pSubIndexEntry;
 
-    ret = getEntry (index_p, subIndex_p, NULL, &pSubIndexEntry);
+    ret = getEntry(index_p, subIndex_p, NULL, &pSubIndexEntry);
     if (ret == kErrorOk)
     {
         ret = getVarEntry(pSubIndexEntry, ppVarEntry_p);
@@ -1056,7 +1056,7 @@ The function sets the callback function for the load/store command.
 */
 //------------------------------------------------------------------------------
 #if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
-tOplkError obd_storeLoadObjCallback (tObdStoreLoadCallback pfnCallback_p)
+tOplkError obd_storeLoadObjCallback(tObdStoreLoadCallback pfnCallback_p)
 {
     // set new address of callback function
     pfnStoreLoadObjectCb_l = pfnCallback_p;
@@ -1090,10 +1090,10 @@ added '\0' character.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError writeEntryPre (UINT index_p, UINT subIndex_p, void* pSrcData_p,
-                                 void** ppDstData_p, tObdSize size_p, tObdEntryPtr* ppObdEntry_p,
-                                 tObdSubEntryPtr* ppSubEntry_p, tObdCbParam MEM* pCbParam_p,
-                                 tObdSize*  pObdSize_p)
+static tOplkError writeEntryPre(UINT index_p, UINT subIndex_p, void* pSrcData_p,
+                                void** ppDstData_p, tObdSize size_p, tObdEntryPtr* ppObdEntry_p,
+                                tObdSubEntryPtr* ppSubEntry_p, tObdCbParam MEM* pCbParam_p,
+                                tObdSize*  pObdSize_p)
 {
     tOplkError              ret;
     tObdEntryPtr            pObdEntry;
@@ -1112,7 +1112,7 @@ static tOplkError writeEntryPre (UINT index_p, UINT subIndex_p, void* pSrcData_p
     if (ret != kErrorOk)
         return ret;
 
-    access = (tObdAccess) pSubEntry->access;
+    access = (tObdAccess)pSubEntry->access;
     // check access for write
     if ((access & kObdAccConst) != 0)
         return kErrorObdAccessViolation;
@@ -1126,7 +1126,7 @@ static tOplkError writeEntryPre (UINT index_p, UINT subIndex_p, void* pSrcData_p
     // Because object size and object pointer are adapted by user callback
     // function, re-read this values.
     obdSize = getObjectSize(pSubEntry);
-    pDstData = (void MEM*) getObjectDataPtr(pSubEntry);
+    pDstData = (void MEM*)getObjectDataPtr(pSubEntry);
 
     // Function obd_writeEntry() calls event kObdEvWrStringDomain for String or
     // Domain which lets called module directly change the data pointer or size.
@@ -1146,16 +1146,16 @@ static tOplkError writeEntryPre (UINT index_p, UINT subIndex_p, void* pSrcData_p
         memVStringDomain.pData        = pDstData;
         pCbParam_p->obdEvent = kObdEvWrStringDomain;
         pCbParam_p->pArg     = &memVStringDomain;
-        ret = callObjectCallback (pObdEntry->pfnCallback, pCbParam_p);
+        ret = callObjectCallback(pObdEntry->pfnCallback, pCbParam_p);
         if (ret != kErrorOk)
             return ret;
 
         // write back new settings
         pCurrData = pSubEntry->pCurrent;
-        if ((pSubEntry->type == kObdTypeVString) ||(pSubEntry->type == kObdTypeOString))
+        if ((pSubEntry->type == kObdTypeVString) || (pSubEntry->type == kObdTypeOString))
         {
-            ((tObdVString MEM*) pCurrData)->size    = memVStringDomain.objSize;
-            ((tObdVString MEM*) pCurrData)->pString = memVStringDomain.pData;
+            ((tObdVString MEM*)pCurrData)->size    = memVStringDomain.objSize;
+            ((tObdVString MEM*)pCurrData)->pString = memVStringDomain.pData;
         }
         else
         {
@@ -1170,13 +1170,13 @@ static tOplkError writeEntryPre (UINT index_p, UINT subIndex_p, void* pSrcData_p
                 return kErrorObdAccessViolation;
             }
             pVarEntry->size  = memVStringDomain.objSize;
-            pVarEntry->pData = (void MEM*) memVStringDomain.pData;
+            pVarEntry->pData = (void MEM*)memVStringDomain.pData;
         }
 
         // Because object size and object pointer are adapted by user callback
         // function, re-read this values.
         obdSize  = memVStringDomain.objSize;
-        pDstData = (void MEM*) memVStringDomain.pData;
+        pDstData = (void MEM*)memVStringDomain.pData;
     }
 #endif
 
@@ -1195,10 +1195,10 @@ static tOplkError writeEntryPre (UINT index_p, UINT subIndex_p, void* pSrcData_p
 
     if (pSubEntry->type == kObdTypeVString)
     {
-        if (((char MEM*) pSrcData_p)[size_p - 1] == '\0')
+        if (((char MEM*)pSrcData_p)[size_p - 1] == '\0')
         {   // last byte of source string contains null character
             // reserve one byte in destination for 0-termination
-            size_p  -= 1;
+            size_p -= 1;
         }
         else if (size_p >= obdSize)
         {   // source string is not 0-terminated and destination buffer is too short
@@ -1255,7 +1255,7 @@ static tOplkError writeEntryPost(tObdEntryPtr pObdEntry_p, tObdSubEntryPtr pSubE
     // now the range of the value may be checked
 #if (CONFIG_OBD_CHECK_OBJECT_RANGE != FALSE)
     {
-        ret = checkObjectRange (pSubEntry_p, pSrcData_p);
+        ret = checkObjectRange(pSubEntry_p, pSrcData_p);
         if (ret != kErrorOk)
             return ret;
     }
@@ -1270,11 +1270,11 @@ static tOplkError writeEntryPost(tObdEntryPtr pObdEntry_p, tObdSubEntryPtr pSubE
         return ret;
 
     // copy object data to OBD
-    OPLK_MEMCPY (pDstData_p, pSrcData_p, obdSize_p);
+    OPLK_MEMCPY(pDstData_p, pSrcData_p, obdSize_p);
 
     if (pSubEntry_p->type == kObdTypeVString)
     {
-        ((char MEM*) pDstData_p)[obdSize_p] = '\0';
+        ((char MEM*)pDstData_p)[obdSize_p] = '\0';
     }
 
     // write address of destination to structure of callback parameters
@@ -1310,10 +1310,10 @@ static tObdSize getDataSize(tObdSubEntryPtr pSubIndexEntry_p)
     if (pSubIndexEntry_p->type == kObdTypeVString)
     {
         // The pointer to current value can be received from getObjectCurrentPtr()
-        pData = ((void MEM*) getObjectCurrentPtr(pSubIndexEntry_p));
+        pData = ((void MEM*)getObjectCurrentPtr(pSubIndexEntry_p));
         if (pData != NULL)
         {
-            dataSize = getObdStringLen((void *) pData, dataSize, pSubIndexEntry_p->type);
+            dataSize = getObdStringLen((void *)pData, dataSize, pSubIndexEntry_p->type);
         }
     }
     return dataSize;
@@ -1357,7 +1357,7 @@ static tObdSize getObdStringLen(void* pObjData_p, tObdSize objLen_p, tObdType ob
         // all other types
         strLen = 0;
     }
-    return (strLen);
+    return strLen;
 }
 
 //------------------------------------------------------------------------------
@@ -1404,24 +1404,24 @@ static tObdSize getVstringSize(tObdSubEntryPtr pSubIndexEntry_p)
     // If OD entry is defined by macro OBD_SUBINDEX_ROM_VSTRING
     // then the current pointer is always NULL. The function
     // returns the length of default string.
-    pData = (void *) pSubIndexEntry_p->pCurrent;
-    if ((void MEM*) pData != (void MEM*) NULL)
+    pData = (void*)pSubIndexEntry_p->pCurrent;
+    if ((void MEM*)pData != (void MEM*)NULL)
     {
         // The max. size of strings defined by STRING-Macro is stored in
         // tObdVString of current value.
-        // (types tObdVString, tObdOString and tEplObdUString has the same members)
-        dataSize = ((tObdVString MEM*) pData)->size;
+        // (types tObdVString, tObdOString and tObdUString has the same members)
+        dataSize = ((tObdVString MEM*)pData)->size;
     }
     else
     {
         // The current position is not declared. The string
         // is located in ROM, therefore use default pointer.
-        pData = (void *) pSubIndexEntry_p->pDefault;
-        if ((CONST void ROM*) pData != (CONST void ROM*) NULL)
+        pData = (void*)pSubIndexEntry_p->pDefault;
+        if ((CONST void ROM*)pData != (CONST void ROM*)NULL)
         {
            // The max. size of strings defined by STRING-Macro is stored in
            // tObdVString of default value.
-           dataSize = ((CONST tObdVString ROM*) pData)->size;
+           dataSize = ((CONST tObdVString ROM*)pData)->size;
         }
     }
     return dataSize;
@@ -1443,24 +1443,24 @@ static tObdSize getOstringSize(tObdSubEntryPtr pSubIndexEntry_p)
     tObdSize                dataSize = 0;
     void*                   pData;
 
-    pData = (void *) pSubIndexEntry_p->pCurrent;
-    if ((void MEM*) pData != (void MEM*) NULL)
+    pData = (void*)pSubIndexEntry_p->pCurrent;
+    if ((void MEM*)pData != (void MEM*)NULL)
     {
         // The max. size of strings defined by STRING-Macro is stored in
         // tObdVString of current value.
-        // (types tObdVString, tObdOString and tEplObdUString has the same members)
-        dataSize = ((tObdOString MEM*) pData)->size;
+        // (types tObdVString, tObdOString and tObdUString has the same members)
+        dataSize = ((tObdOString MEM*)pData)->size;
     }
     else
     {
         // The current position is not declared. The string
         // is located in ROM, therefore use default pointer.
-        pData = (void *) pSubIndexEntry_p->pDefault;
-        if ((CONST void ROM*) pData != (CONST void ROM*) NULL)
+        pData = (void*)pSubIndexEntry_p->pDefault;
+        if ((CONST void ROM*)pData != (CONST void ROM*)NULL)
         {
            // The max. size of strings defined by STRING-Macro is stored in
            // tObdVString of default value.
-           dataSize = ((CONST tObdOString ROM*) pData)->size;
+           dataSize = ((CONST tObdOString ROM*)pData)->size;
         }
     }
     return dataSize;
@@ -1505,7 +1505,7 @@ The function returns the variable entry of an object.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError getVarEntry (tObdSubEntryPtr pSubIndexEntry_p, tObdVarEntry MEM** ppVarEntry_p)
+static tOplkError getVarEntry(tObdSubEntryPtr pSubIndexEntry_p, tObdVarEntry MEM** ppVarEntry_p)
 {
     tOplkError ret = kErrorObdVarEntryNotExist;
 
@@ -1515,11 +1515,11 @@ static tOplkError getVarEntry (tObdSubEntryPtr pSubIndexEntry_p, tObdVarEntry ME
         // check if object is an array
         if ((pSubIndexEntry_p->access & kObdAccArray) != 0)
         {
-            *ppVarEntry_p = &((tObdVarEntry MEM*) pSubIndexEntry_p->pCurrent)[pSubIndexEntry_p->subIndex - 1];
+            *ppVarEntry_p = &((tObdVarEntry MEM*)pSubIndexEntry_p->pCurrent)[pSubIndexEntry_p->subIndex - 1];
         }
         else
         {
-            *ppVarEntry_p = (tObdVarEntry MEM*) pSubIndexEntry_p->pCurrent;
+            *ppVarEntry_p = (tObdVarEntry MEM*)pSubIndexEntry_p->pCurrent;
         }
         ret = kErrorOk;
     }
@@ -1547,20 +1547,20 @@ static tOplkError getEntry(UINT index_p, UINT subIndex_p, tObdEntryPtr* ppObdEnt
     tObdCbParam MEM         cbParam;
     tOplkError              ret;
 
-    ret = getIndex (&obdInstance_l.initParam, index_p, &pObdEntry);
+    ret = getIndex(&obdInstance_l.initParam, index_p, &pObdEntry);
     if (ret != kErrorOk)
         return ret;
 
-    ret = getSubindex (pObdEntry, subIndex_p, ppObdSubEntry_p);
+    ret = getSubindex(pObdEntry, subIndex_p, ppObdSubEntry_p);
     if (ret != kErrorOk)
         return ret;
 
     // call callback function to inform user/stack that an object will be searched
     // if the called module returns an error then we abort the searching with kErrorObdIndexNotExist
-    cbParam.index =     index_p;
-    cbParam.subIndex =  subIndex_p;
-    cbParam.pArg =      NULL;
-    cbParam.obdEvent =  kObdEvCheckExist;
+    cbParam.index = index_p;
+    cbParam.subIndex = subIndex_p;
+    cbParam.pArg = NULL;
+    cbParam.obdEvent = kObdEvCheckExist;
     ret = callObjectCallback(pObdEntry->pfnCallback, &cbParam);
     if (ret != kErrorOk)
         return kErrorObdIndexNotExist;
@@ -1591,7 +1591,7 @@ static CONST void* getObjectDefaultPtr(tObdSubEntryPtr pSubIndexEntry_p)
     CONST void*     pDefault;
     tObdType        type;
 
-    ASSERTMSG (pSubIndexEntry_p != NULL, "getObjectDefaultPtr(): pointer to SubEntry not valid!\n");
+    ASSERTMSG(pSubIndexEntry_p != NULL, "getObjectDefaultPtr(): pointer to SubEntry not valid!\n");
 
     // get address to default data from default pointer
     pDefault = pSubIndexEntry_p->pDefault;
@@ -1604,11 +1604,11 @@ static CONST void* getObjectDefaultPtr(tObdSubEntryPtr pSubIndexEntry_p)
         // check if object type is a string value
         if (type == kObdTypeVString)
         {
-            pDefault = ((tObdVStringDef *) pDefault)->pDefString;
+            pDefault = ((tObdVStringDef*)pDefault)->pDefString;
         }
-        else if(type == kObdTypeOString)
+        else if (type == kObdTypeOString)
         {
-             pDefault = ((tObdOStringDef *) pDefault)->pDefString;
+             pDefault = ((tObdOStringDef*)pDefault)->pDefString;
         }
     }
     return pDefault;
@@ -1642,26 +1642,26 @@ static void MEM* getObjectCurrentPtr(tObdSubEntryPtr pSubIndexEntry_p)
             arrayIndex = pSubIndexEntry_p->subIndex - 1;
             if ((pSubIndexEntry_p->access & kObdAccVar) != 0)
             {
-                size = sizeof (tObdVarEntry);
+                size = sizeof(tObdVarEntry);
             }
             else
             {
-                size = getObjectSize (pSubIndexEntry_p);
+                size = getObjectSize(pSubIndexEntry_p);
             }
-            pData = ((BYTE MEM*) pData) + (size * arrayIndex);
+            pData = ((BYTE MEM*)pData) + (size * arrayIndex);
         }
 
         if ((pSubIndexEntry_p->access & kObdAccVar) != 0)
         {
-            pData = ((tObdVarEntry MEM*) pData)->pData;
+            pData = ((tObdVarEntry MEM*)pData)->pData;
         }
         else if (pSubIndexEntry_p->type == kObdTypeVString)
         {
-            pData = (void MEM*) ((tObdVString MEM*) pData)->pString;
+            pData = (void MEM*)((tObdVString MEM*)pData)->pString;
         }
         else if (pSubIndexEntry_p->type == kObdTypeOString)
         {
-            pData = (void MEM*) ((tObdOString MEM*) pData)->pString;
+            pData = (void MEM*)((tObdOString MEM*)pData)->pString;
         }
     }
     return pData;
@@ -1672,7 +1672,7 @@ static void MEM* getObjectCurrentPtr(tObdSubEntryPtr pSubIndexEntry_p)
 \brief  Get object data pointer
 
 The function gets the data pointer of an object. It returns the current data
-pointer. But if object is an constant object it returns the default pointer.
+pointer. If the object is a constant object, it returns the default pointer.
 
 \param  pSubIndexEntry_p        Pointer to sub-index entry of object.
 
@@ -1684,7 +1684,7 @@ static void* getObjectDataPtr(tObdSubEntryPtr pSubIndexEntry_p)
     void*       pData;
     tObdAccess  access;
 
-    ASSERTMSG (pSubIndexEntry_p != NULL, "getObjectDataPtr(): pointer to SubEntry not valid!\n");
+    ASSERTMSG(pSubIndexEntry_p != NULL, "getObjectDataPtr(): pointer to SubEntry not valid!\n");
 
     // there are are some objects whose data pointer has to get from other structure
     // get access type for this object
@@ -1695,12 +1695,12 @@ static void* getObjectDataPtr(tObdSubEntryPtr pSubIndexEntry_p)
     if ((access & kObdAccConst) != 0)
     {
         // The pointer to default value can be received from ObdGetObjectDefaultPtr()
-        pData = ((void *) getObjectDefaultPtr (pSubIndexEntry_p));
+        pData = ((void*)getObjectDefaultPtr(pSubIndexEntry_p));
     }
     else
     {
         // The pointer to current value can be received from ObdGetObjectCurrentPtr()
-        pData = getObjectCurrentPtr (pSubIndexEntry_p);
+        pData = getObjectCurrentPtr(pSubIndexEntry_p);
     }
     return pData;
 }
@@ -1760,7 +1760,7 @@ The function searches for an index entry in the OD.
 */
 //------------------------------------------------------------------------------
 static tOplkError getIndex(tObdInitParam MEM* pInitParam_p, UINT index_p,
-                                 tObdEntryPtr* ppObdEntry_p)
+                           tObdEntryPtr* ppObdEntry_p)
 {
     tObdEntryPtr    pObdEntry;
 
@@ -1858,14 +1858,14 @@ The function searches for an sub-index entry in the OD.
 */
 //------------------------------------------------------------------------------
 static tOplkError getSubindex(tObdEntryPtr pObdEntry_p, UINT subIndex_p,
-                                    tObdSubEntryPtr* ppObdSubEntry_p)
+                              tObdSubEntryPtr* ppObdSubEntry_p)
 {
     tObdSubEntryPtr     pSubEntry;
     UINT                nSubIndexCount;
 
     // get start address of sub-index table and count of sub-indices
-    pSubEntry =       pObdEntry_p->pSubIndex;
-    nSubIndexCount =  pObdEntry_p->count;
+    pSubEntry =      pObdEntry_p->pSubIndex;
+    nSubIndexCount = pObdEntry_p->count;
 
     // search sub-index in sub-index table
     while (nSubIndexCount > 0)
@@ -1911,8 +1911,8 @@ The functions runs a job in an OD partition.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError accessOdPartition (tObdPart currentOdPart_p, tObdEntryPtr pObdEntry_p,
-                                      tObdDir direction_p)
+static tOplkError accessOdPartition(tObdPart currentOdPart_p, tObdEntryPtr pObdEntry_p,
+                                    tObdDir direction_p)
 {
     tObdSubEntryPtr             pSubIndex;
     UINT                        nSubIndexCount;
@@ -1931,7 +1931,7 @@ static tOplkError accessOdPartition (tObdPart currentOdPart_p, tObdEntryPtr pObd
 
 #if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
     // prepare structure for STORE RESTORE callback function
-    CbStore.currentOdPart   = (BYTE) currentOdPart_p;
+    CbStore.currentOdPart   = (BYTE)currentOdPart_p;
     CbStore.pData           = NULL;
     CbStore.objSize         = 0;
 
@@ -1951,7 +1951,7 @@ static tOplkError accessOdPartition (tObdPart currentOdPart_p, tObdEntryPtr pObd
 
             while (nSubIndexCount != 0)                         // walk through sub-index table till all sub-indices were restored
             {
-                Access = (tObdAccess) pSubIndex->access;
+                Access = (tObdAccess)pSubIndex->access;
                 pDefault = getObjectDefaultPtr(pSubIndex);
                 pDstData = getObjectCurrentPtr(pSubIndex);
                 ObjSize  = getObjectSize(pSubIndex);
@@ -1979,11 +1979,11 @@ static tOplkError accessOdPartition (tObdPart currentOdPart_p, tObdEntryPtr pObd
                             {
                                 // For copying data we have to set the destination pointer to the real RAM string. This
                                 // pointer to RAM string is located in default string info structure.
-                                pDstData = (void MEM*) ((tObdVStringDef ROM*) pSubIndex->pDefault)->pString;
-                                ObjSize  = ((tObdVStringDef ROM*) pSubIndex->pDefault)->size;
+                                pDstData = (void MEM*)((tObdVStringDef ROM*)pSubIndex->pDefault)->pString;
+                                ObjSize  = ((tObdVStringDef ROM*)pSubIndex->pDefault)->size;
 
-                                ((tObdVString MEM*) pSubIndex->pCurrent)->pString = pDstData;
-                                ((tObdVString MEM*) pSubIndex->pCurrent)->size    = ObjSize;
+                                ((tObdVString MEM*)pSubIndex->pCurrent)->pString = pDstData;
+                                ((tObdVString MEM*)pSubIndex->pCurrent)->size    = ObjSize;
                             }
                         }
                         else if(pSubIndex->type == kObdTypeOString)
@@ -1992,11 +1992,11 @@ static tOplkError accessOdPartition (tObdPart currentOdPart_p, tObdEntryPtr pObd
                             {
                                 // For copying data we have to set the destination pointer to the real RAM string. This
                                 // pointer to RAM string is located in default string info structure.
-                                pDstData = (void MEM*) ((tObdOStringDef ROM*) pSubIndex->pDefault)->pString;
-                                ObjSize  = ((tObdOStringDef ROM*) pSubIndex->pDefault)->size;
+                                pDstData = (void MEM*)((tObdOStringDef ROM*)pSubIndex->pDefault)->pString;
+                                ObjSize  = ((tObdOStringDef ROM*)pSubIndex->pDefault)->size;
 
-                                ((tObdOString MEM*) pSubIndex->pCurrent)->pString = pDstData;
-                                ((tObdOString MEM*) pSubIndex->pCurrent)->size    = ObjSize;
+                                ((tObdOString MEM*)pSubIndex->pCurrent)->pString = pDstData;
+                                ((tObdOString MEM*)pSubIndex->pCurrent)->size    = ObjSize;
                             }
                         }
 
@@ -2050,7 +2050,7 @@ static tOplkError accessOdPartition (tObdPart currentOdPart_p, tObdEntryPtr pObd
                     }
                 }
             }
-            pObdEntry_p++;                       // next index entry
+            pObdEntry_p++;                          // next index entry
         }
     }
 
@@ -2076,8 +2076,8 @@ The functions copies object data.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static void copyObjectData (void MEM* pDstData_p, CONST void* pSrcData_p,
-                            tObdSize objSize_p, tObdType objType_p)
+static void copyObjectData(void MEM* pDstData_p, CONST void* pSrcData_p,
+                           tObdSize objSize_p, tObdType objType_p)
 {
     tObdSize StrSize = 0;
 
@@ -2090,7 +2090,7 @@ static void copyObjectData (void MEM* pDstData_p, CONST void* pSrcData_p,
             // object entry size can be bigger as string size of default string.
             // The '\0'-termination is NOT included. A string with no characters has a
             // size of 0.
-            StrSize = getObdStringLen((void *)pSrcData_p, objSize_p, kObdTypeVString);
+            StrSize = getObdStringLen((void*)pSrcData_p, objSize_p, kObdTypeVString);
 
             // If the string length is greater than or equal to the entry size in OD then only copy
             // entry size - 1 and always set the '\0'-termination.
@@ -2102,10 +2102,10 @@ static void copyObjectData (void MEM* pDstData_p, CONST void* pSrcData_p,
 
         if (pSrcData_p != NULL)
         {
-            OPLK_MEMCPY (pDstData_p, pSrcData_p, objSize_p);
+            OPLK_MEMCPY(pDstData_p, pSrcData_p, objSize_p);
             if (objType_p == kObdTypeVString)
             {
-                ((char MEM*) pDstData_p)[StrSize] = '\0';
+                ((char MEM*)pDstData_p)[StrSize] = '\0';
             }
         }
     }
@@ -2177,7 +2177,7 @@ The functions checks if an object is a numerical object.
 */
 //------------------------------------------------------------------------------
 static tOplkError isNumerical(tObdSubEntryPtr pObdSubEntry_p,
-                                    BOOL* pfEntryNumerical_p)
+                              BOOL* pfEntryNumerical_p)
 {
     tOplkError          ret = kErrorOk;
 
@@ -2211,7 +2211,7 @@ ObjType is unequal to kObdTypeInt8 or kObdTypeUInt8!
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError checkObjectRange (tObdSubEntryPtr pSubIndexEntry_p, void* pData_p)
+static tOplkError checkObjectRange(tObdSubEntryPtr pSubIndexEntry_p, void* pData_p)
 {
     tOplkError          ret = kErrorOk;
     const void*         pRangeData;
@@ -2223,77 +2223,77 @@ static tOplkError checkObjectRange (tObdSubEntryPtr pSubIndexEntry_p, void* pDat
     pRangeData = pSubIndexEntry_p->pDefault;    // get address of default data
 
     // jump to called object type
-    switch ((tObdType) pSubIndexEntry_p->type)
+    switch ((tObdType)pSubIndexEntry_p->type)
     {
         // ObdType kObdTypeBool will not be checked because there are only
         // two possible values 0 or 1.
 
         // ObdTypes which has to be checked up because numerical values
         case kObdTypeInt8:
-            pRangeData = ((tObdInteger8 *) pRangeData) + 1;             // switch to lower limit
-            if (*((tObdInteger8 *) pData_p) < *((tObdInteger8 *) pRangeData))
+            pRangeData = ((tObdInteger8*)pRangeData) + 1;            // switch to lower limit
+            if (*((tObdInteger8*)pData_p) < *((tObdInteger8*)pRangeData))
             {
                 ret = kErrorObdValueTooLow;
                 break;
             }
-            pRangeData = ((tObdInteger8 *) pRangeData) + 1;            // switch to higher limit
-            if (*((tObdInteger8 *) pData_p) > *((tObdInteger8 *) pRangeData))
+            pRangeData = ((tObdInteger8*)pRangeData) + 1;            // switch to higher limit
+            if (*((tObdInteger8*)pData_p) > *((tObdInteger8*)pRangeData))
             {
                 ret = kErrorObdValueTooHigh;
             }
             break;
 
         case kObdTypeUInt8:
-            pRangeData = ((tObdUnsigned8 *) pRangeData) + 1;            // switch to lower limit
-            if (*((tObdUnsigned8 *) pData_p) < *((tObdUnsigned8 *) pRangeData))
+            pRangeData = ((tObdUnsigned8*)pRangeData) + 1;           // switch to lower limit
+            if (*((tObdUnsigned8*)pData_p) < *((tObdUnsigned8*)pRangeData))
             {
                 ret = kErrorObdValueTooLow;
                 break;
             }
-            pRangeData = ((tObdUnsigned8*) pRangeData) + 1;            // switch to higher limit
-            if (*((tObdUnsigned8 *) pData_p) > *((tObdUnsigned8 *) pRangeData))
+            pRangeData = ((tObdUnsigned8*)pRangeData) + 1;           // switch to higher limit
+            if (*((tObdUnsigned8*)pData_p) > *((tObdUnsigned8*)pRangeData))
             {
                 ret = kErrorObdValueTooHigh;
             }
             break;
 
         case kObdTypeInt16:
-            pRangeData = ((tObdInteger16 *) pRangeData) + 1;            // switch to lower limit
-            if (*((tObdInteger16 *) pData_p) < *((tObdInteger16 *) pRangeData))
+            pRangeData = ((tObdInteger16*)pRangeData) + 1;           // switch to lower limit
+            if (*((tObdInteger16*)pData_p) < *((tObdInteger16*)pRangeData))
             {
                 ret = kErrorObdValueTooLow;
                 break;
             }
-            pRangeData = ((tObdInteger16 *) pRangeData) + 1;            // switch to higher limit
-            if (*((tObdInteger16 *) pData_p) > *((tObdInteger16 *) pRangeData))
+            pRangeData = ((tObdInteger16*)pRangeData) + 1;           // switch to higher limit
+            if (*((tObdInteger16*)pData_p) > *((tObdInteger16*)pRangeData))
             {
                 ret = kErrorObdValueTooHigh;
             }
             break;
 
         case kObdTypeUInt16:
-            pRangeData = ((tObdUnsigned16 *) pRangeData) + 1;            // switch to lower limit
-            if (*((tObdUnsigned16 *) pData_p) < *((tObdUnsigned16 *) pRangeData))
+            pRangeData = ((tObdUnsigned16*)pRangeData) + 1;          // switch to lower limit
+            if (*((tObdUnsigned16*)pData_p) < *((tObdUnsigned16*)pRangeData))
             {
                 ret = kErrorObdValueTooLow;
                 break;
             }
-            pRangeData = ((tObdUnsigned16 *) pRangeData) + 1;            // switch to higher limit
-            if (*((tObdUnsigned16 *) pData_p) > *((tObdUnsigned16 *) pRangeData))
+            pRangeData = ((tObdUnsigned16*)pRangeData) + 1;          // switch to higher limit
+            if (*((tObdUnsigned16*)pData_p) > *((tObdUnsigned16*)pRangeData))
             {
                 ret = kErrorObdValueTooHigh;
             }
             break;
 
         case kObdTypeInt32:
-            pRangeData = ((tObdInteger32 *) pRangeData) + 1;            // switch to lower limit
-            if (*((tObdInteger32 *) pData_p) < *((tObdInteger32 *) pRangeData))
+            pRangeData = ((tObdInteger32*)pRangeData) + 1;           // switch to lower limit
+            if (*((tObdInteger32*)pData_p) < *((tObdInteger32*)pRangeData))
             {
                 ret = kErrorObdValueTooLow;
                 break;
             }
-            pRangeData = ((tObdInteger32 *) pRangeData) + 1;            // switch to higher limit
-            if (*((tObdInteger32 *) pData_p) > *((tObdInteger32 *) pRangeData))
+            pRangeData = ((tObdInteger32*)pRangeData) + 1;           // switch to higher limit
+            if (*((tObdInteger32*)pData_p) > *((tObdInteger32*)pRangeData))
             {
                 ret = kErrorObdValueTooHigh;
             }
@@ -2301,28 +2301,28 @@ static tOplkError checkObjectRange (tObdSubEntryPtr pSubIndexEntry_p, void* pDat
             break;
 
         case kObdTypeUInt32:
-            pRangeData = ((tObdUnsigned32 *) pRangeData) + 1;            // switch to lower limit
-            if (*((tObdUnsigned32 *) pData_p) < *((tObdUnsigned32 *) pRangeData))
+            pRangeData = ((tObdUnsigned32*)pRangeData) + 1;          // switch to lower limit
+            if (*((tObdUnsigned32*)pData_p) < *((tObdUnsigned32*)pRangeData))
             {
                 ret = kErrorObdValueTooLow;
                 break;
             }
-            pRangeData = ((tObdUnsigned32 *) pRangeData) + 1;            // switch to higher limit
-            if (*((tObdUnsigned32 *) pData_p) > *((tObdUnsigned32 *) pRangeData))
+            pRangeData = ((tObdUnsigned32*)pRangeData) + 1;          // switch to higher limit
+            if (*((tObdUnsigned32*)pData_p) > *((tObdUnsigned32*)pRangeData))
             {
                 ret = kErrorObdValueTooHigh;
             }
             break;
 
         case kObdTypeReal32:
-            pRangeData = ((tObdReal32 *) pRangeData) + 1;               // switch to lower limit
-            if (*((tObdReal32 *) pData_p) < *((tObdReal32 *) pRangeData))
+            pRangeData = ((tObdReal32*)pRangeData) + 1;              // switch to lower limit
+            if (*((tObdReal32*)pData_p) < *((tObdReal32*)pRangeData))
             {
                 ret = kErrorObdValueTooLow;
                 break;
             }
-            pRangeData = ((tObdReal32 *) pRangeData) + 1;            // switch to higher limit
-            if (*((tObdReal32 *) pData_p) > *((tObdReal32 *) pRangeData))
+            pRangeData = ((tObdReal32*)pRangeData) + 1;              // switch to higher limit
+            if (*((tObdReal32*)pData_p) > *((tObdReal32*)pRangeData))
             {
                 ret = kErrorObdValueTooHigh;
             }
@@ -2332,14 +2332,14 @@ static tOplkError checkObjectRange (tObdSubEntryPtr pSubIndexEntry_p, void* pDat
         case kObdTypeInt48:
         case kObdTypeInt56:
         case kObdTypeInt64:
-            pRangeData = ((tObdInteger64 *) pRangeData) + 1;            // switch to lower limit
-            if (*((tObdInteger64 *) pData_p) < *((tObdInteger64 *) pRangeData))
+            pRangeData = ((tObdInteger64*)pRangeData) + 1;           // switch to lower limit
+            if (*((tObdInteger64*)pData_p) < *((tObdInteger64*)pRangeData))
             {
                 ret = kErrorObdValueTooLow;
                 break;
             }
-            pRangeData = ((tObdInteger64 *) pRangeData) + 1;             // switch to higher limit
-            if (*((tObdInteger64 *) pData_p) > *((tObdInteger64 *) pRangeData))
+            pRangeData = ((tObdInteger64*)pRangeData) + 1;           // switch to higher limit
+            if (*((tObdInteger64*)pData_p) > *((tObdInteger64*)pRangeData))
             {
                 ret = kErrorObdValueTooHigh;
             }
@@ -2349,28 +2349,28 @@ static tOplkError checkObjectRange (tObdSubEntryPtr pSubIndexEntry_p, void* pDat
         case kObdTypeUInt48:
         case kObdTypeUInt56:
         case kObdTypeUInt64:
-            pRangeData = ((tObdUnsigned64 *) pRangeData) + 1;           // switch to lower limit
-            if (*((tObdUnsigned64 *) pData_p) < *((tObdUnsigned64 *) pRangeData))
+            pRangeData = ((tObdUnsigned64*)pRangeData) + 1;          // switch to lower limit
+            if (*((tObdUnsigned64*)pData_p) < *((tObdUnsigned64*)pRangeData))
             {
                 ret = kErrorObdValueTooLow;
                 break;
             }
-            pRangeData = ((tObdUnsigned64 *) pRangeData) + 1;            // switch to higher limit
-            if (*((tObdUnsigned64 *) pData_p) > *((tObdUnsigned64 *) pRangeData))
+            pRangeData = ((tObdUnsigned64*)pRangeData) + 1;          // switch to higher limit
+            if (*((tObdUnsigned64*)pData_p) > *((tObdUnsigned64*)pRangeData))
             {
                 ret = kErrorObdValueTooHigh;
             }
             break;
 
         case kObdTypeReal64:
-            pRangeData = ((tObdReal64 *) pRangeData) + 1;               // switch to lower limit
-            if (*((tObdReal64 *) pData_p) < *((tObdReal64 *) pRangeData))
+            pRangeData = ((tObdReal64*)pRangeData) + 1;              // switch to lower limit
+            if (*((tObdReal64*)pData_p) < *((tObdReal64*)pRangeData))
             {
                 ret = kErrorObdValueTooLow;
                 break;
             }
-            pRangeData = ((tObdReal64 *) pRangeData) + 1;               // switch to higher limit
-            if (*((tObdReal64 *) pData_p) > *((tObdReal64 *) pRangeData))
+            pRangeData = ((tObdReal64*)pRangeData) + 1;              // switch to higher limit
+            if (*((tObdReal64*)pData_p) > *((tObdReal64*)pRangeData))
             {
                 ret = kErrorObdValueTooHigh;
             }
@@ -2409,25 +2409,25 @@ static tOplkError prepareStoreRestore(tObdDir direction_p, tObdCbStoreParam MEM*
 
     if (direction_p == kObdDirLoad)
     {
-        pCbStore_p->command = (BYTE) kObdCmdOpenRead;
+        pCbStore_p->command = (BYTE)kObdCmdOpenRead;
         // call callback function for previous command
         ret = callStoreCallback(pCbStore_p);
         if (ret != kErrorOk)
             return ret;
 
         // set command for index and sub-index loop
-        pCbStore_p->command = (BYTE) kObdCmdReadObj;
+        pCbStore_p->command = (BYTE)kObdCmdReadObj;
     }
     else if (direction_p == kObdDirStore)
     {
-        pCbStore_p->command = (BYTE) kObdCmdOpenWrite;
+        pCbStore_p->command = (BYTE)kObdCmdOpenWrite;
         // call callback function for previous command
         ret = callStoreCallback (pCbStore_p);
         if (ret != kErrorOk)
             return ret;
 
         // set command for index and sub-index loop
-        pCbStore_p->command = (BYTE) kObdCmdWriteObj;
+        pCbStore_p->command = (BYTE)kObdCmdWriteObj;
     }
     return kErrorOk;
 }
@@ -2456,15 +2456,15 @@ static tOplkError cleanupStoreRestore(tObdDir direction_p, tObdCbStoreParam MEM*
     {
         if (direction_p == kObdDirLoad)
         {
-            pCbStore_p->command = (BYTE) kObdCmdCloseRead;
+            pCbStore_p->command = (BYTE)kObdCmdCloseRead;
         }
         else if (direction_p == kObdDirStore)
         {
-            pCbStore_p->command = (BYTE) kObdCmdCloseWrite;
+            pCbStore_p->command = (BYTE)kObdCmdCloseWrite;
         }
         else if (direction_p == kObdDirRestore)
         {
-            pCbStore_p->command = (BYTE) kObdCmdClear;
+            pCbStore_p->command = (BYTE)kObdCmdClear;
         }
         else
         {
@@ -2489,7 +2489,7 @@ The functions executes a store/restore command.
 */
 //------------------------------------------------------------------------------
 static tOplkError doStoreRestore(tObdAccess access_p, tObdCbStoreParam MEM* pCbStore_p,
-                          void MEM * pObjData_p, tObdSize objSize_p)
+                                 void MEM* pObjData_p, tObdSize objSize_p)
 {
     tOplkError          ret = kErrorOk;
 
@@ -2497,8 +2497,8 @@ static tOplkError doStoreRestore(tObdAccess access_p, tObdCbStoreParam MEM* pCbS
     if ((access_p & kObdAccStore) != 0)
     {
         // fill out data pointer and size of data
-        pCbStore_p->pData    = pObjData_p;
-        pCbStore_p->objSize  = objSize_p;
+        pCbStore_p->pData   = pObjData_p;
+        pCbStore_p->objSize = objSize_p;
 
         // call callback function for read or write object
         ret = callStoreCallback(pCbStore_p);
