@@ -91,7 +91,7 @@ typedef struct
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static int                  usedNodeIds_l[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 0};
+static int                  usedNodeIds_l[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0};
 static UINT                 cnt_l;
 static APP_NODE_VAR_T       nodeVar_l[MAX_NODES];
 static PI_IN*               pProcessImageIn_l;
@@ -187,8 +187,6 @@ tOplkError processSync(void)
     nodeVar_l[7].input = pProcessImageOut_l->CN8_M00_Digital_Input_8_Bit_Byte_1;
     nodeVar_l[8].input = pProcessImageOut_l->CN9_M00_Digital_Input_8_Bit_Byte_1;
     nodeVar_l[9].input = pProcessImageOut_l->CN10_M00_Digital_Input_8_Bit_Byte_1;
-    nodeVar_l[10].input = pProcessImageOut_l->CN11_M00_Digital_Input_8_Bit_Byte_1;
-    nodeVar_l[11].input = pProcessImageOut_l->CN12_M00_Digital_Input_8_Bit_Byte_1;
 
     for (i = 0; (i < MAX_NODES) && (usedNodeIds_l[i] != 0); i++)
     {
@@ -234,18 +232,16 @@ tOplkError processSync(void)
         }
     }
 
-    pProcessImageIn_l->CN1_M00_Digital_Ouput_8_Bit_Byte_1 = nodeVar_l[0].leds;
-    pProcessImageIn_l->CN2_M00_Digital_Ouput_8_Bit_Byte_1 = nodeVar_l[1].leds;
-    pProcessImageIn_l->CN3_M00_Digital_Ouput_8_Bit_Byte_1 = nodeVar_l[2].leds;
-    pProcessImageIn_l->CN4_M00_Digital_Ouput_8_Bit_Byte_1 = nodeVar_l[3].leds;
-    pProcessImageIn_l->CN5_M00_Digital_Ouput_8_Bit_Byte_1 = nodeVar_l[4].leds;
-    pProcessImageIn_l->CN6_M00_Digital_Ouput_8_Bit_Byte_1 = nodeVar_l[5].leds;
-    pProcessImageIn_l->CN7_M00_Digital_Ouput_8_Bit_Byte_1 = nodeVar_l[6].leds;
-    pProcessImageIn_l->CN8_M00_Digital_Ouput_8_Bit_Byte_1 = nodeVar_l[7].leds;
-    pProcessImageIn_l->CN9_M00_Digital_Ouput_8_Bit_Byte_1 = nodeVar_l[8].leds;
-    pProcessImageIn_l->CN10_M00_Digital_Ouput_8_Bit_Byte_1 = nodeVar_l[9].leds;
-    pProcessImageIn_l->CN11_M00_Digital_Ouput_8_Bit_Byte_1 = nodeVar_l[10].leds;
-    pProcessImageIn_l->CN12_M00_Digital_Ouput_8_Bit_Byte_1 = nodeVar_l[11].leds;
+    pProcessImageIn_l->CN1_M00_Digital_Output_8_Bit_Byte_1 = nodeVar_l[0].leds;
+    pProcessImageIn_l->CN2_M00_Digital_Output_8_Bit_Byte_1 = nodeVar_l[1].leds;
+    pProcessImageIn_l->CN3_M00_Digital_Output_8_Bit_Byte_1 = nodeVar_l[2].leds;
+    pProcessImageIn_l->CN4_M00_Digital_Output_8_Bit_Byte_1 = nodeVar_l[3].leds;
+    pProcessImageIn_l->CN5_M00_Digital_Output_8_Bit_Byte_1 = nodeVar_l[4].leds;
+    pProcessImageIn_l->CN6_M00_Digital_Output_8_Bit_Byte_1 = nodeVar_l[5].leds;
+    pProcessImageIn_l->CN7_M00_Digital_Output_8_Bit_Byte_1 = nodeVar_l[6].leds;
+    pProcessImageIn_l->CN8_M00_Digital_Output_8_Bit_Byte_1 = nodeVar_l[7].leds;
+    pProcessImageIn_l->CN9_M00_Digital_Output_8_Bit_Byte_1 = nodeVar_l[8].leds;
+    pProcessImageIn_l->CN10_M00_Digital_Output_8_Bit_Byte_1 = nodeVar_l[9].leds;
 
     ret = oplk_exchangeProcessImageIn();
 
