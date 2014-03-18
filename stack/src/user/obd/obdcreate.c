@@ -20,7 +20,7 @@ the next table.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -51,9 +51,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <oplk/oplk.h>            // function prototype of OD callback function
-#include <oplk/obd.h>            // function prototypes of the EplOBD-Modul
-#include <user/pdou.h>      // function prototype of OD callback function
-#include <user/errhndu.h>   // function prototype of error handler od callback functions
+#include <oplk/obd.h>             // function prototypes of the obd module
+#include <user/pdou.h>            // function prototype of OD callback function
+#include <user/errhndu.h>         // function prototype of error handler od callback functions
 #include <user/ctrlu.h>
 
 //------------------------------------------------------------------------------
@@ -64,13 +64,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // To prevent unused memory in subindex tables we need this macro.
 // But not all compilers support to preset the last struct value followed by a comma.
-// Compilers which does not support a comma after last struct value has to place in a dummy subindex.
+// For compilers not supporting a comma after last struct value,  a dummy subindex
+// has to be added.
 #if ((DEV_SYSTEM & _DEV_COMMA_EXT_) != 0)
     #define OBD_END_SUBINDEX()
     #define OBD_MAX_ARRAY_SUBENTRIES    2
 
 #else
-    #define OBD_END_SUBINDEX()          {0,0,0,NULL,NULL}
+    #define OBD_END_SUBINDEX()          {0, 0, 0, NULL, NULL}
     #define OBD_MAX_ARRAY_SUBENTRIES    3
 #endif
 
@@ -128,8 +129,8 @@ tOplkError obd_initObd(tObdInitParam MEM* pInitParam_p)
     // if not then only copy subindex tables below
     if (pInitParam != NULL)
     {
-        // at first delete all parameters (all pointers will be set zu NULL)
-        OPLK_MEMSET (pInitParam, 0, sizeof (tObdInitParam));
+        // at first delete all parameters (all pointers will be set to NULL)
+        OPLK_MEMSET(pInitParam, 0, sizeof(tObdInitParam));
 
         #define OBD_CREATE_INIT_FUNCTION
         {
@@ -138,9 +139,9 @@ tOplkError obd_initObd(tObdInitParam MEM* pInitParam_p)
         }
         #undef OBD_CREATE_INIT_FUNCTION
 
-#if (defined (OBD_USER_OD) && (OBD_USER_OD != FALSE))
+#if (defined(OBD_USER_OD) && (OBD_USER_OD != FALSE))
         {
-            // to begin no user OD is defined
+            // at the beginning no user OD is defined
             pInitParam_p->pUserPart = NULL;
         }
 #endif
@@ -155,3 +156,4 @@ tOplkError obd_initObd(tObdInitParam MEM* pInitParam_p)
 #endif // !defined(DOXYGEN_PARSER)
     return kErrorOk;
 }
+
