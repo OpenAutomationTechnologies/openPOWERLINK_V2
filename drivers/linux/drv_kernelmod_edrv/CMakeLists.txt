@@ -110,7 +110,10 @@ ELSEIF(CFG_POWERLINK_EDRV STREQUAL "EmacPs")
     SET(MODULE_NAME "oplkemacps")
     SET(MODULE_DEFS "${MODULE_DEFS} -DCONFIG_EDRV=267200")
     # 267200 corresponds to Z7200 arch of Zynq family. (Z is represented by 26)
-    SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} ${EDRV_SOURCE_DIR}/edrv-emacPs.c )
+    SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} 
+                            ${KERNEL_SOURCE_DIR}/timer/hrestimer-zynqttc.c
+                            ${EDRV_SOURCE_DIR}/edrv-emacPs.c
+                            )
     ELSE()
     message(FATAL_ERROR "EmacPs supported only for ARM processor")
     ENDIF()
@@ -188,11 +191,14 @@ SET(MODULE_SOURCE_FILES
     ${KERNEL_SOURCE_DIR}/errhnd/errhndk.c
     ${KERNEL_SOURCE_DIR}/errhnd/errhndkcal-local.c
     ${KERNEL_SOURCE_DIR}/veth/veth-linuxkernel.c
-    ${KERNEL_SOURCE_DIR}/timer/hrestimer-linuxkernel.c
     ${COMMON_SOURCE_DIR}/circbuf/circbuffer.c
     ${COMMON_SOURCE_DIR}/circbuf/circbuf-linuxkernel.c
     ${COMMON_SOURCE_DIR}/debugstr.c
     )
+
+IF(NOT CFG_POWERLINK_EDRV STREQUAL "EmacPs")
+SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} ${KERNEL_SOURCE_DIR}/timer/hrestimer-linuxkernel.c )
+ENDIF()
 
 IF((CMAKE_SYSTEM_PROCESSOR MATCHES x86*) OR (CMAKE_SYSTEM_PROCESSOR MATCHES i686))
     SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} ${COMMON_SOURCE_DIR}/ami/amix86.c)
