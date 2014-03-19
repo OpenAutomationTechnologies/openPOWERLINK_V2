@@ -48,6 +48,9 @@ CFG_APP_BSP_TYPE=hal
 # BSP optimization
 CFG_APP_BSP_OPT_LEVEL=-O2
 
+# EPCS flash is present
+CFG_APP_EPCS=1
+
 ################################################################################
 # OTHER SETTINGS
 
