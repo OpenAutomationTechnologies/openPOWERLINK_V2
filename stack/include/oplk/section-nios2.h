@@ -1,13 +1,13 @@
 /**
 ********************************************************************************
-\file   section-nios2.h
+\file   oplk/section-nios2.h
 
 \brief  Macros for special function linking for Altera Nios II
 
 This header file defines macros for Altera Nios II targets to link specific
 functions to tightly-coupled memory.
 
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2012, SYSTEC electronik GmbH
 Copyright (c) 2012, Kalycito Infotech Private Ltd.
 All rights reserved.
@@ -35,8 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
-#ifndef _INC_SECTION_NIOS2_H_
-#define _INC_SECTION_NIOS2_H_
+#ifndef _INC_oplk_section_nios2_H_
+#define _INC_oplk_section_nios2_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -113,4 +113,5 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // function prototypes
 //------------------------------------------------------------------------------
 
-#endif /* _INC_SECTION_NIOS2_H_ */
+#endif /* _INC_oplk_section_nios2_H_ */
+

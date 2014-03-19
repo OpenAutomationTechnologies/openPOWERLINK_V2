@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   powerlink-module.h
+\file   oplk/powerlink-module.h
 
 \brief  Header file for openPOWERLINK Linux kernel module
 
@@ -9,7 +9,7 @@ Linux module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -36,8 +36,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_powerlink_module_H_
-#define _INC_powerlink_module_H_
+#ifndef _INC_oplk_powerlink_module_H_
+#define _INC_oplk_powerlink_module_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -97,7 +97,5 @@ typedef struct
 //------------------------------------------------------------------------------
 
 
-#endif /* _INC_powerlink-module_H_ */
-
-
+#endif /* _INC_oplk_powerlink_module_H_ */
 

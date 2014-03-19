@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   cfm.h
+\file   oplk/cfm.h
 
 \brief  General include file for configuration file manager (CFM)
 
@@ -8,7 +8,7 @@ This file contains global definitions for the CFM module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -35,8 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_cfm_H_
-#define _INC_cfm_H_
+#ifndef _INC_oplk_cfm_H_
+#define _INC_oplk_cfm_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -76,10 +76,11 @@ typedef struct
 extern "C" {
 #endif
 
-tOplkError  cfmu_cbObdAccess(tObdCbParam MEM* pParam_p);
+tOplkError cfmu_cbObdAccess(tObdCbParam MEM* pParam_p);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_cfm_H_ */
+#endif /* _INC_oplk_cfm_H_ */
+

@@ -58,7 +58,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MEM                     // Memory attribute to optimize speed and code of pointer access.
 
 #ifndef CONST
-#define CONST const         // variables mapped to ROM (i.e. flash)
+#define CONST const             // variables mapped to ROM (i.e. flash)
 #endif
 
 #define UNUSED_PARAMETER(par) (void)par
@@ -89,11 +89,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifdef ASSERTMSG
 #undef ASSERTMSG
-#define ASSERTMSG(expr,string) \
+#define ASSERTMSG(expr, string) \
     if (!(expr))\
     { \
-        MessageBox (NULL, string, "Assertion failed", MB_OK | MB_ICONERROR); \
-        exit (-1); \
+        MessageBox(NULL, string, "Assertion failed", MB_OK | MB_ICONERROR); \
+        exit(-1); \
     }
 #endif
 
@@ -108,3 +108,4 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             oldval = InterlockedExchange(address, newval);
 
 #endif /* _INC_targetdefs_windows_H_ */
+

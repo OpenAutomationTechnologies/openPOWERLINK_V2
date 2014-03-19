@@ -76,20 +76,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define UNUSED_PARAMETER(par)   (void)par
 
 #ifdef __KERNEL__
-#define OPLK_MALLOC(siz)            kmalloc(siz, GFP_KERNEL)
-#define OPLK_FREE(ptr)              kfree(ptr)
+#define OPLK_MALLOC(siz)        kmalloc(siz, GFP_KERNEL)
+#define OPLK_FREE(ptr)          kfree(ptr)
 #endif
 
 #ifdef __KERNEL__
-#define PRINTF(...)                 printk(__VA_ARGS__)
+#define PRINTF(...)             printk(__VA_ARGS__)
 #else
-#define PRINTF(...)                 printf(__VA_ARGS__)
+#define PRINTF(...)             printf(__VA_ARGS__)
 #endif
 
 #define OPLK_ATOMIC_T    UINT8
 #define OPLK_ATOMIC_EXCHANGE(address, newval, oldval) \
     oldval = __sync_lock_test_and_set(address, newval);
 
-
-
 #endif /* _INC_targetdefs_linux_H_ */
+

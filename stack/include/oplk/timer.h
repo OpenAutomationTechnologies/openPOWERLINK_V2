@@ -100,6 +100,7 @@ This type defines a function pointer to a timer callback function.
 
 \return The function returns a tOplkError error code.
 */
-typedef tOplkError (*tTimerkCallback) (tTimerEventArg* pEventArg_p);
+typedef tOplkError (*tTimerkCallback)(tTimerEventArg* pEventArg_p);
 
-#endif /* _INC_timer_H_ */
+#endif /* _INC_oplk_timer_H_ */
+

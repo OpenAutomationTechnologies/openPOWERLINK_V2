@@ -1,11 +1,11 @@
 /**
 ********************************************************************************
-\file   targetsystem.h
+\file   oplk/targetsystem.h
 
 \brief  Target system definitions
 
 The file contains definitions for selecting the target and development system
-and include the suitable target specific definitions.
+and including the suitable target specific definitions.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -41,7 +41,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //------------------------------------------------------------------------------
 // elements of defines for development system
-// these defines are necessary to check some of characteristics of the development system
+// these defines are necessary to check some of the characteristics of the
+// development system
 
 // endianness
 #define _DEV_BIGEND_            0x80000000L     // big endian (motorola format)
@@ -112,7 +113,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #undef  INLINE_FUNCTION_DEF         // disable inlining for all compilers per default
 
 //------------------------------------------------------------------------------
-//  To determine system, first check for used compiler
+//  To determine the system, first check for used compiler
 
 #if defined (__GNUC__)
 
@@ -220,3 +221,4 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplk/section-default.h>
 
 #endif /* _INC_oplk_targetsystem_H_ */
+

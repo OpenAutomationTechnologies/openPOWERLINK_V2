@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   debug.h
+\file   oplk/debug.h
 
 \brief  Definitions for debugging
 
@@ -76,13 +76,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //------------------------------------------------------------------------------
 // this macro defines a version string
-#define MAKE_VERSION_STRING(product,appname,verstr,author) \
+#define MAKE_VERSION_STRING(product, appname, verstr, author) \
     "$prd$:" product ",$app$:" appname ",$ver$:" verstr ",$dat$:" __DATE__ ",$aut$:" author
 
 
 //------------------------------------------------------------------------------
 // this macro defines a build info string (e.g. for using in printf())
-#define DEBUG_MAKE_BUILD_INFO(prefix,product,prodid,descr,verstr,author) "\n" \
+#define DEBUG_MAKE_BUILD_INFO(prefix, product, prodid, descr, verstr, author) "\n" \
     prefix "***************************************************\n" \
     prefix "Project:   " product ", " prodid                  "\n" \
     prefix "Descript.: " descr                                "\n" \
@@ -111,7 +111,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // debug-level (using OR).
 // Example: DEBUG_TRACE(DEBUG_LVL_30 | DEBUG_LVL_02, "Hello %d", bCount);
 
-#define DEBUG_TRACE(lvl,...)                TraceLvl((lvl),__VA_ARGS__)
+#define DEBUG_TRACE(lvl,...)                TraceLvl((lvl), __VA_ARGS__)
 #define DEBUG_GLB_LVL                       debugLevel_g
 
 #else
@@ -243,17 +243,17 @@ extern "C"
 {
 #endif
 
-void DumpData (char* szStr_p, UINT8* pData_p, UINT16 size_p);
+void DumpData(char* szStr_p, UINT8* pData_p, UINT16 size_p);
 
 #ifdef __cplusplus
 }
 #endif
 
-#define DEBUG_DUMP_DATA(lvl,str,ptr,siz) \
-    if ((DEBUG_GLB_LVL & (lvl))==(lvl)) \
+#define DEBUG_DUMP_DATA(lvl, str, ptr, siz) \
+    if ((DEBUG_GLB_LVL & (lvl)) == (lvl)) \
         DumpData (str, (UINT8*)(ptr), (UINT16)(siz));
 #else
-#define DEBUG_DUMP_DATA(lvl,str,ptr,siz)
+#define DEBUG_DUMP_DATA(lvl, str, ptr, siz)
 #endif
 
 
@@ -266,37 +266,37 @@ void DumpData (char* szStr_p, UINT8* pData_p, UINT16 size_p);
 
 #if (DEV_SYSTEM == _DEV_WIN32_)
 // For WIN32 process will be killed after closing message box.
-#define DEBUG_ASSERT(expr,str) \
+#define DEBUG_ASSERT(expr, str) \
     if (!(expr ) && ((DEBUG_GLB_LVL & DEBUG_LVL_ASSERT)!=0)) \
     { \
-        MessageBox (NULL, "Assertion failed: line " __LINE__ " file " __FILE__ "\n    -> " str "\n"); \
-        ExitProcess (-1); \
+        MessageBox(NULL, "Assertion failed: line " __LINE__ " file " __FILE__ "\n    -> " str "\n"); \
+        ExitProcess(-1); \
     }
 
-#define DEBUG_ASSERT1(expr,str,p1) \
+#define DEBUG_ASSERT1(expr, str, p1) \
     if (!(expr ) && ((DEBUG_GLB_LVL & DEBUG_LVL_ASSERT)!=0)) \
     { \
-        MessageBox (NULL, "Assertion failed: line " __LINE__ " file " __FILE__ "\n    -> " str "\n"); \
-        ExitProcess (-1); \
+        MessageBox(NULL, "Assertion failed: line " __LINE__ " file " __FILE__ "\n    -> " str "\n"); \
+        ExitProcess(-1); \
     }
 
 #else
 
 // For microcontrollers process will be stopped using endless loop.
-#define DEBUG_ASSERT0(expr,str) \
+#define DEBUG_ASSERT0(expr, str) \
     if (!(expr )) \
     { \
-        DEBUG_LVL_ASSERT_TRACE ("Assertion failed: line %d file '%s'\n" \
-                                "    -> '%s'\n", __LINE__, __FILE__, str); \
+        DEBUG_LVL_ASSERT_TRACE("Assertion failed: line %d file '%s'\n" \
+                               "    -> '%s'\n", __LINE__, __FILE__, str); \
         while (1); \
     }
 
-#define DEBUG_ASSERT1(expr,str,p1) \
+#define DEBUG_ASSERT1(expr, str, p1) \
     if (!(expr )) \
     { \
-    DEBUG_LVL_ASSERT_TRACE ("Assertion failed: line %d file '%s'\n" \
-                            "    -> '%s'\n" \
-                            "    -> 0x%08lX\n", __LINE__, __FILE__, str, (DWORD) p1); \
+    DEBUG_LVL_ASSERT_TRACE("Assertion failed: line %d file '%s'\n" \
+                           "    -> '%s'\n" \
+                           "    -> 0x%08lX\n", __LINE__, __FILE__, str, (DWORD) p1); \
     while (1); \
     }
 
@@ -304,8 +304,8 @@ void DumpData (char* szStr_p, UINT8* pData_p, UINT16 size_p);
 
 #else
 
-#define DEBUG_ASSERT0(expr,str)
-#define DEBUG_ASSERT1(expr,str,p1)
+#define DEBUG_ASSERT0(expr, str)
+#define DEBUG_ASSERT1(expr, str, p1)
 
 #endif
 
@@ -323,3 +323,4 @@ void DumpData (char* szStr_p, UINT8* pData_p, UINT16 size_p);
 #endif
 
 #endif /* _INC_oplk_debug_H_ */
+

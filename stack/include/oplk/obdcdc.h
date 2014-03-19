@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   obdcdc.h
+\file   oplk/obdcdc.h
 
 \brief  Definitions for OBD CDC module
 
@@ -8,7 +8,7 @@ This file contains definitions for the OBD CDC module
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -35,8 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_obdcdc_H_
-#define _INC_obdcdc_H_
+#ifndef _INC_oplk_obdcdc_H_
+#define _INC_oplk_obdcdc_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -69,8 +69,5 @@ tOplkError obdcdc_loadCdc(void);
 }
 #endif
 
-#endif /* _INC_obdcdc_H_ */
-
-
-
+#endif /* _INC_oplk_obdcdc_H_ */
 

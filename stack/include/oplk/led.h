@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   led.h
+\file   oplk/led.h
 
 \brief  Definitions for user LED module
 
@@ -8,7 +8,7 @@ This file contains definitions for the user LED module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -35,8 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_led_H_
-#define _INC_led_H_
+#ifndef _INC_oplk_led_H_
+#define _INC_oplk_led_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -74,6 +74,5 @@ extern "C" {
 }
 #endif
 
-#endif /* _INC_led_H_ */
-
+#endif /* _INC_oplk_led_H_ */
 

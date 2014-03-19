@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   nmt.h
+\file   oplk/nmt.h
 
 \brief  Global include file for NMT modules
 
@@ -9,7 +9,7 @@ This file is the global include file for all NMT modules
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,8 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_nmt_H_
-#define _INC_nmt_H_
+#ifndef _INC_oplk_nmt_H_
+#define _INC_oplk_nmt_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -111,7 +111,7 @@ typedef enum
 typedef enum
 {
     // Events from DLL
-    // Events defined by EPL V2 specification
+    // Events defined by the POWERLINK specification
     kNmtEventNoEvent                =   0x00,
     // kNmtEventDllMePres           =   0x01,
     kNmtEventDllMePresTimeout       =   0x02,
@@ -193,7 +193,7 @@ typedef enum
     kNmtNodeEventCheckConf          = 0x02,     ///< application / Configuration Manager shall check and update configuration on CN
     kNmtNodeEventUpdateConf         = 0x03,     ///< application / Configuration Manager shall update configuration on CN (check was done by NmtMn module)
     kNmtNodeEventVerifyConf         = 0x04,     ///< application / Configuration Manager shall verify configuration of CN
-    kNmtNodeEventReadyToStart       = 0x05,     ///< issued if NMT_STARTUP_NO_STARTNODE set, application must call EplNmtMnuSendNmtCommand(kErrorNmtCmdStartNode) manually
+    kNmtNodeEventReadyToStart       = 0x05,     ///< issued if NMT_STARTUP_NO_STARTNODE set, application must call oplk_execNmtCommand(kErrorNmtCmdStartNode) manually
     kNmtNodeEventNmtState           = 0x06,
     kNmtNodeEventError              = 0x07,     ///< NMT error of CN
 } tNmtNodeEvent;
@@ -235,6 +235,5 @@ typedef enum
 //------------------------------------------------------------------------------
 
 
-#endif  // #ifndef _INC_nmt_H_
-
+#endif  // #ifndef _INC_oplk_nmt_H_
 
