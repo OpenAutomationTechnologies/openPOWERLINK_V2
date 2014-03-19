@@ -147,12 +147,7 @@ Requirement: Steps in the previous section *How to build the binary* are complet
 
 # How to write the program to local flash {#sect_altera-mn_flash}
 
-Requirement: Steps in the previous section *How to build the binary* are
-             completed.
-
-1. After successfully building the design use the makefile to program the
-   flash:\n
-   `$ make program-epcs`
+This feature is not supported by now.
 
 # Troubleshooting {#sect_altera-mn_trouble}
 
