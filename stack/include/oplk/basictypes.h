@@ -136,7 +136,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #ifndef NULL
-#define NULL ((void *) 0)
+#define NULL ((void*)0)
 #endif
 
 #endif
@@ -146,3 +146,4 @@ typedef void (*VOIDFUNCPTR)(void);
 typedef int (*INTFUNCPTR)(void);
 
 #endif /* _INC_oplk_basictypes_H_ */
+

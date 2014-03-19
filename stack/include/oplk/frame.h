@@ -46,7 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-// defines for EplFrame.m_wFlag
+// Defines for tFrameData.flag1 and tFrameData.flag2
 #define PLK_FRAME_FLAG1_RD          0x01    // ready                                    (PReq, PRes)
 #define PLK_FRAME_FLAG1_ER          0x02    // exception reset (error signalling)       (SoA)
 #define PLK_FRAME_FLAG1_EA          0x04    // exception acknowledge (error signalling) (PReq, SoA)
@@ -71,7 +71,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define ERR_ENTRYTYPE_PROF_EPL      0x0002
 #define ERR_ENTRYTYPE_PROF_MASK     0x0FFF
 
-// defines for EPL version / PDO version
+// defines for POWERLINK version / PDO version
 #define PLK_VERSION_SUB             0x0F  // sub version
 #define PLK_VERSION_MAIN            0xF0  // main version
 
@@ -121,7 +121,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #elif defined(__GNUC__)
 #define PACK_STRUCT    __attribute__((packed))
 #else
-#error you must byte-align these structures with the appropriate compiler directives
+#error You must Byte-align these structures with the appropriate compiler directives
 #endif
 
 typedef struct
@@ -186,7 +186,7 @@ typedef struct
 /**
 \brief Structure for error history entries
 
-the following structure defines an error history entry.
+The following structure defines an error history entry.
 */
 typedef struct
 {
@@ -316,9 +316,9 @@ typedef struct
     UINT8                   aDstMac[6];                     ///< Offset 0: MAC address of the addressed nodes
     UINT8                   aSrcMac[6];                     ///< Offset 6: MAC address of the transmitting node
     UINT16                  etherType;                      ///< Offset 12: Ethernet message type (big endian)
-    UINT8                   messageType;                    ///< Offset 14: EPL message type
-    UINT8                   dstNodeId;                      ///< Offset 15: EPL node ID of the addressed nodes
-    UINT8                   srcNodeId;                      ///< Offset 16: EPL node ID of the transmitting node
+    UINT8                   messageType;                    ///< Offset 14: POWERLINK message type
+    UINT8                   dstNodeId;                      ///< Offset 15: POWERLINK node ID of the addressed nodes
+    UINT8                   srcNodeId;                      ///< Offset 16: POWERLINK node ID of the transmitting node
     tFrameData              data;                           ///< Offset 17:
 } PACK_STRUCT tPlkFrame;
 
@@ -340,3 +340,4 @@ typedef enum
 } tMsgType;
 
 #endif /* _INC_oplk_frame_H_ */
+

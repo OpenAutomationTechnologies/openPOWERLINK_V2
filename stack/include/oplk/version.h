@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   version.h
+\file   oplk/version.h
 
 \brief  openPOWERLINK version definitions
 
@@ -66,3 +66,4 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define PLK_PRODUCT_DESCRIPTION     "openPOWERLINK Protocol Stack Source"
 
 #endif /* _INC_oplk_version_H_ */
+

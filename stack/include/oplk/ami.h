@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   ami.h
+\file   oplk/ami.h
 
 \brief  Definitions for the abstract memory interface (ami)
 
@@ -34,8 +34,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_ami_H_
-#define _INC_ami_H_
+#ifndef _INC_oplk_ami_H_
+#define _INC_oplk_ami_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -47,11 +47,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 // Conversion macros for datatype UINT8 (saves code size)
-#define ami_setUint8Be(pAddr_p, uint8Val_p) {*(UINT8 *)(pAddr_p) = (uint8Val_p);}
-#define ami_setUint8Le(pAddr_p, uint8Val_p) {*(UINT8 *)(pAddr_p) = (uint8Val_p);}
+#define ami_setUint8Be(pAddr_p, uint8Val_p) {*(UINT8*)(pAddr_p) = (uint8Val_p);}
+#define ami_setUint8Le(pAddr_p, uint8Val_p) {*(UINT8*)(pAddr_p) = (uint8Val_p);}
 
-#define ami_getUint8Be(pAddr_p) (*(UINT8 *)(pAddr_p))
-#define ami_getUint8Le(pAddr_p) (*(UINT8 *)(pAddr_p))
+#define ami_getUint8Be(pAddr_p) (*(UINT8*)(pAddr_p))
+#define ami_getUint8Le(pAddr_p) (*(UINT8*)(pAddr_p))
 
 //------------------------------------------------------------------------------
 // typedef
@@ -123,4 +123,5 @@ void ami_getTimeOfDay(void* pAddr_p, tTimeOfDay* pTimeOfDay_p);
 #endif
 
 
-#endif /* _INC_ami_H_ */
+#endif /* _INC_oplk_ami_H_ */
+

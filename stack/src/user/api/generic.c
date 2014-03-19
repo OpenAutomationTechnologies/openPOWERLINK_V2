@@ -10,7 +10,7 @@ This file contains the implementation of the generic API functions.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -167,9 +167,9 @@ tOplkError oplk_shutdown(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Execute a NMT command
+\brief  Execute an NMT command
 
-The function executes a NMT command, i.e. post the NMT event to the NMT module,
+The function executes an NMT command, i.e. post the NMT event to the NMT module.
 NMT commands which are not appropriate in the current NMT state are silently
 ignored. Please keep in mind that the NMT state may change until the NMT command
 is actually executed.
@@ -196,7 +196,7 @@ tOplkError oplk_execNmtCommand(tNmtEvent nmtEvent_p)
 The function links an array of application variables onto the specified object
 in the object dictionary (OD).
 
-\param  objIndex_p          Object ID of object to link the variable to.
+\param  objIndex_p          Index of the object to link the variable to.
 \param  pVar_p              Pointer to the application variable that should be
                             linked.
 \param  pVarEntries_p       Pointer to the number of entries to link. The function
@@ -209,12 +209,12 @@ in the object dictionary (OD).
 \param  firstSubindex_p     Specifies the first subindex to be linked.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          The variables are successfully linked to the
-                                object dictionary.
+\retval kErrorOk                  The variables are successfully linked to the
+                                  object dictionary.
 \retval kErrorObdIndexNotExist    The object index does not exist in the object
-                                dictionary.
+                                  dictionary.
 \retval kErrorObdSubindexNotExist The subindex does not exist in the object
-                                dictionary.
+                                  dictionary.
 
 \ingroup module_api
 */
@@ -235,7 +235,7 @@ tOplkError oplk_linkObject(UINT objIndex_p, void* pVar_p, UINT* pVarEntries_p,
     if ((pVar_p == NULL) || (pVarEntries_p == NULL) || (*pVarEntries_p == 0) || (pEntrySize_p == NULL))
         return kErrorApiInvalidParam;
 
-    pData      = (UINT8 MEM*) pVar_p;
+    pData      = (UINT8 MEM*)pVar_p;
     varEntries = (UINT8)*pVarEntries_p;
     usedSize   = 0;
 
@@ -248,7 +248,7 @@ tOplkError oplk_linkObject(UINT objIndex_p, void* pVar_p, UINT* pVarEntries_p,
         // because user wants to link a variable to a subindex unequal 0x00
         // read number of entries
         entrySize = (tObdSize)sizeof(indexEntries);
-        ret = obd_readEntry (objIndex_p, 0x00, (void*) &indexEntries, &entrySize );
+        ret = obd_readEntry(objIndex_p, 0x00, (void*)&indexEntries, &entrySize);
         if ((ret != kErrorOk) || (indexEntries == 0x00))
         {
             // Object doesn't exist or invalid entry number
@@ -262,8 +262,8 @@ tOplkError oplk_linkObject(UINT objIndex_p, void* pVar_p, UINT* pVarEntries_p,
     }
 
     // Correct number of entries if number read from OD is greater than the specified number.
-    // This is done, so that we do not set more entries than subindexes the
-    // object actually has.
+    // This is done in order to avoid setting more entries than there are subindexes in
+    // the object.
     if ((indexEntries > (varEntries + firstSubindex_p - 1)) && (varEntries != 0x00))
     {
         indexEntries = (UINT8)(varEntries + firstSubindex_p - 1);
@@ -291,7 +291,7 @@ tOplkError oplk_linkObject(UINT objIndex_p, void* pVar_p, UINT* pVarEntries_p,
         varParam.pData = pData;
 
         usedSize += entrySize;
-        pData   += entrySize;
+        pData += entrySize;
 
         if ((ret = obd_defineVar(&varParam)) != kErrorOk)
             break;
@@ -308,13 +308,13 @@ tOplkError oplk_linkObject(UINT objIndex_p, void* pVar_p, UINT* pVarEntries_p,
 \brief  Read entry from object dictionary
 
 The function reads the specified entry from the object dictionary of the specified
-node. If this node is a remote node, it performs a SDO transfer, which means this
+node. If this node is a remote node, it performs an SDO transfer. In such case this
 function returns kErrorApiTaskDeferred and the application is informed via the
 event callback function when the task is completed.
 
 \param  pSdoComConHdl_p     A pointer to the SDO connection handle. It may be
                             NULL in case of local OD access.
-\param  nodeId_p            Node ID of the node to read. If node ID is 0 the
+\param  nodeId_p            Node ID of the node to read. If node ID is 0, the
                             local OD will be read.
 \param  index_p             The index of the object to read.
 \param  subindex_p          The subindex of the object to read.
@@ -345,9 +345,9 @@ tOplkError oplk_readObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT i
 
     if (nodeId_p == 0 || nodeId_p == obd_getNodeId())
     {   // local OD access can be performed
-        obdSize = (tObdSize) *pSize_p;
+        obdSize = (tObdSize)*pSize_p;
         ret = obd_readEntryToLe(index_p, subindex_p, pDstData_le_p, &obdSize);
-        *pSize_p = (UINT) obdSize;
+        *pSize_p = (UINT)obdSize;
     }
     else
     {   // perform SDO transfer
@@ -396,13 +396,13 @@ tOplkError oplk_readObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT i
 \brief  Write entry to object dictionary
 
 The function writes the specified entry to the object dictionary of the specified
-node. If this node is a remote node, it performs a SDO transfer, which means this
+node. If this node is a remote node, it performs an SDO transfer. In such case this
 function returns kErrorApiTaskDeferred and the application is informed via the
 event callback function when the task is completed.
 
 \param  pSdoComConHdl_p     A pointer to the SDO connection handle. It may be
                             NULL in case of local OD access.
-\param  nodeId_p            Node ID of the node to write. If node ID is 0 the
+\param  nodeId_p            Node ID of the node to write. If node ID is 0, the
                             local OD will be read.
 \param  index_p             The index of the object to write.
 \param  subindex_p          The subindex of the object to write.
@@ -517,7 +517,7 @@ tOplkError oplk_freeSdoChannel(tSdoComConHdl sdoComConHdl_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Abort a SDO transfer
+\brief  Abort an SDO transfer
 
 The function aborts the running SDO transfer on the specified SDO channel.
 
@@ -602,7 +602,7 @@ The function writes the specified entry to the local object dictionary.
 */
 //------------------------------------------------------------------------------
 tOplkError oplk_writeLocalObject(UINT index_p, UINT subindex_p, void* pSrcData_p,
-                                        UINT size_p)
+                                 UINT size_p)
 {
     return obd_writeEntry(index_p, subindex_p, pSrcData_p, (tObdSize)size_p);
 }
@@ -623,7 +623,7 @@ The function sends a generic ASnd frame.
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tOplkError oplk_sendAsndFrame(UINT8 dstNodeId_p, tAsndFrame *pAsndFrame_p,
+tOplkError oplk_sendAsndFrame(UINT8 dstNodeId_p, tAsndFrame* pAsndFrame_p,
                               size_t asndSize_p)
 {
     tOplkError      ret;
@@ -635,20 +635,20 @@ tOplkError oplk_sendAsndFrame(UINT8 dstNodeId_p, tAsndFrame *pAsndFrame_p,
 
     // Check for correct input
     if ((pAsndFrame_p == NULL) || (frameInfo.frameSize >= sizeof(buffer)))
-        return  kErrorReject;
+        return kErrorReject;
 
     // Calculate size of frame (Asnd data + header)
     frameInfo.frameSize = asndSize_p + offsetof(tPlkFrame, data);
-    frameInfo.pFrame = (tPlkFrame *)buffer;
+    frameInfo.pFrame = (tPlkFrame*)buffer;
 
     // Copy Asnd data
     OPLK_MEMSET(frameInfo.pFrame, 0x00, frameInfo.frameSize);
     OPLK_MEMCPY(&frameInfo.pFrame->data.asnd, pAsndFrame_p, asndSize_p);
 
     // Fill in additional data (SrcNodeId is filled by DLL if it is set to 0)
-    ami_setUint8Le(&frameInfo.pFrame->messageType, (UINT8) kMsgTypeAsnd);
-    ami_setUint8Le(&frameInfo.pFrame->dstNodeId, (UINT8) dstNodeId_p );
-    ami_setUint8Le(&frameInfo.pFrame->srcNodeId, (UINT8) 0);
+    ami_setUint8Le(&frameInfo.pFrame->messageType, (UINT8)kMsgTypeAsnd);
+    ami_setUint8Le(&frameInfo.pFrame->dstNodeId, (UINT8)dstNodeId_p);
+    ami_setUint8Le(&frameInfo.pFrame->srcNodeId, (UINT8)0);
 
     // Request frame transmission
     ret = dllucal_sendAsyncFrame(&frameInfo, kDllAsyncReqPrioGeneric);
@@ -661,7 +661,7 @@ tOplkError oplk_sendAsndFrame(UINT8 dstNodeId_p, tAsndFrame *pAsndFrame_p,
 \brief  Set forwarding of received ASnd frames
 
 The function enables or disables the forwarding of received ASnd frames
- to the application.
+to the application.
 
 \param  serviceId_p         The ASnd service ID for which the forwarding will
                             be set.
@@ -679,7 +679,7 @@ tOplkError oplk_setAsndForward(UINT8 serviceId_p, tOplkApiAsndFilter filterType_
     tDllAsndFilter      dllFilter;
 
     // Map API filter types to stack internal filter types
-    switch(filterType_p)
+    switch (filterType_p)
     {
         case tOplkApiAsndFilterLocal:
             dllFilter = kDllAsndFilterLocal;
@@ -838,8 +838,8 @@ tOplkError oplk_process(void)
 The function checks if the kernel part of the stack is alive.
 
 \return Returns the status of the kernel stack.
-\retval TRUE        If the kernel stack is alive.
-\retval FALSE       IF the kernel stack is dead.
+\retval TRUE        The kernel stack is alive.
+\retval FALSE       The kernel stack is dead.
 
 \ingroup module_api
 */
@@ -907,7 +907,7 @@ tOplkError oplk_getIdentResponse(UINT nodeId_p, tIdentResponse** ppIdentResponse
 \brief  Callback function for SDO transfers
 
 The function implements the callback function for SDO transfers. It will be
-registered for a SDO transfer. When it is called by the SDO stack it sends a
+registered for an SDO transfer. When it is called by the SDO stack it sends an
 SDO event to the application.
 
 \param  pSdoComFinished_p   SDO parameter.
@@ -919,7 +919,7 @@ SDO event to the application.
 static tOplkError cbSdoCon(tSdoComFinished* pSdoComFinished_p)
 {
     tOplkError          ret = kErrorOk;
-    tOplkApiEventArg     eventArg;
+    tOplkApiEventArg    eventArg;
 
     eventArg.sdoInfo = *pSdoComFinished_p;
     ret = ctrlu_callUserEventCallback(kOplkApiEventSdo, &eventArg);
@@ -939,12 +939,12 @@ Frames will be forwarded to the application by sending a user event.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError cbReceivedAsnd(tFrameInfo *pFrameInfo_p)
+static tOplkError cbReceivedAsnd(tFrameInfo* pFrameInfo_p)
 {
     tOplkError              ret = kErrorOk;
     UINT                    asndOffset;
-    tOplkApiEventArg         apiEventArg;
-    tOplkApiEventType        eventType;
+    tOplkApiEventArg        apiEventArg;
+    tOplkApiEventType       eventType;
 
     // Check for correct input
     asndOffset = offsetof(tPlkFrame, data.asnd);

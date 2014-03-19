@@ -1,13 +1,13 @@
 /**
 ********************************************************************************
-\file   section-microblaze.h
+\file   oplk/section-microblaze.h
 
 \brief  Macros for special function linking for Xilinx Microblaze
 
 This header file defines macros for Xilinx Microblaze targets to link specific
 functions to local memory.
 
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2012, SYSTEC electronik GmbH
 Copyright (c) 2012, Kalycito Infotech Private Ltd.
 All rights reserved.
@@ -35,8 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
-#ifndef _INC_SECTION_MICROBLAZE_H_
-#define _INC_SECTION_MICROBLAZE_H_
+#ifndef _INC_oplk_section_microblaze_H_
+#define _INC_oplk_section_microblaze_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -83,4 +83,5 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // function prototypes
 //------------------------------------------------------------------------------
 
-#endif /* _INC_SECTION_MICROBLAZE_H_ */
+#endif /* _INC_oplk_section_microblaze_H_ */
+

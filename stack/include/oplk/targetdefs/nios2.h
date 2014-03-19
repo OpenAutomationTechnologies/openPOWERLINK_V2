@@ -86,7 +86,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OPLK_ATOMIC_T    alt_u8
 #define OPLK_LOCK_T      LOCK_T
 #define OPLK_ATOMIC_INIT(base) \
-                        if(target_initLock(&base->lock) != 0) \
+                        if (target_initLock(&base->lock) != 0) \
                             return kErrorNoResource
 #define OPLK_ATOMIC_EXCHANGE(address, newval, oldval) \
                         target_lock(); \
@@ -95,3 +95,4 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                         target_unlock()
 
 #endif /* _INC_targetdefs_nios2_H_ */
+

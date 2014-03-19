@@ -1,13 +1,13 @@
 /**
 ********************************************************************************
-\file   section-default.h
+\file   oplk/section-default.h
 
 \brief  Macros for default function linking
 
 This header file defines empty macros if the specific functions are not linked
 to a specific section.
 
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2012, SYSTEC electronik GmbH
 Copyright (c) 2012, Kalycito Infotech Private Ltd.
 All rights reserved.
@@ -35,8 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
-#ifndef _INC_SECTION_DEFAULT_H_
-#define _INC_SECTION_DEFAULT_H_
+#ifndef _INC_oplk_section_default_H_
+#define _INC_oplk_section_default_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -46,7 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 
-// per default, no function placement in special memory
+// By default, no function placement in special memory
     #ifndef SECTION_DLLK_FRAME_RCVD_CB
         #define SECTION_DLLK_FRAME_RCVD_CB
     #endif
@@ -137,4 +137,5 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // function prototypes
 //------------------------------------------------------------------------------
 
-#endif /* _INC_SECTION_DEFAULT_H_ */
+#endif /* _INC_oplk_section_default_H_ */
+

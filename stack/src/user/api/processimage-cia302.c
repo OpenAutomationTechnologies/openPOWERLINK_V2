@@ -161,12 +161,12 @@ tOplkError oplk_setupProcessImage(void)
 
 The function links a range of variables to the object dictionary.
 
-\param  objIndexStart_p     Start index of range to link.
-\param  objIndexEnd_p       End index of range to link.
-\param  offsetPI_p          Offset of range in the process image.
-\param  fOutputPI_p         Determines if input image or output image should
-                            be used: TRUE = output image, FALSE = imput image
-\param  entrySize_p         The size of one process variable.
+\param  objIndexStart_p         Start index of range to link.
+\param  objIndexEnd_p           End index of range to link.
+\param  offsetPI_p              Offset of range in the process image.
+\param  fOutputPI_p             Determines if input image or output image should
+                                be used: TRUE = output image, FALSE = imput image
+\param  entrySize_p             The size of one process variable.
 \param  subindexCountPerIndex_p Number of subindexes per index to be linked.
 
 \return The function returns a tOplkError error code.

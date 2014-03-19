@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   dll.h
+\file   oplk/dll.h
 
 \brief  Definitions for DLL module
 
@@ -10,7 +10,7 @@ This file contains the definitions for the DLL module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -36,8 +36,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_dll_H_
-#define _INC_dll_H_
+#ifndef _INC_oplk_dll_H_
+#define _INC_oplk_dll_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -129,7 +129,7 @@ The structure contains all information about a POWERLINK frame.
 typedef struct
 {
     UINT            frameSize;                      ///< Size of the frame
-    tPlkFrame *     pFrame;                         ///< Pointer to the frame
+    tPlkFrame*      pFrame;                         ///< Pointer to the frame
 } tFrameInfo;
 
 /**
@@ -264,5 +264,5 @@ extern "C" {
 }
 #endif
 
-#endif  // #ifndef _INC_dll_H_
+#endif  // #ifndef _INC_oplk_dll_H_
 

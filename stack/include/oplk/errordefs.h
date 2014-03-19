@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   errordefs.h
+\file   oplk/errordefs.h
 
 \brief  openPOWERLINK error definitions
 
@@ -145,7 +145,7 @@ typedef enum
     // area for DLL module 0x0020 - 0x002F
     kErrorDllOutOfMemory            = 0x0021,       ///< DLL is out of memory
     kErrorDllIllegalHdl             = 0x0022,       ///< Illegal handle for a TxFrame was passed
-    kErrorDllCbAsyncRegistered      = 0x0023,       ///< Handler for non-EPL frames was already registered before
+    kErrorDllCbAsyncRegistered      = 0x0023,       ///< Handler for non-POWERLINK frames was already registered before
     kErrorDllAsyncSyncReqFull       = 0x0024,       ///< The buffer for SyncRequests is full
     kErrorDllAsyncTxBufferEmpty     = 0x0025,       ///< The transmit buffer for asynchronous frames is empty
     kErrorDllAsyncTxBufferFull      = 0x0026,       ///< Transmit buffer for asynchronous frames is full
@@ -201,7 +201,7 @@ typedef enum
     kErrorSdoSeqConnectionBusy      = 0x0068,       ///< Connection is busy -> retry later
     kErrorSdoSeqInvalidEvent        = 0x0069,       ///< Invalid event received
 
-    // area for SDO Command Layer Module 0x0070 - 0x007F
+    // area for SDO Command Layer module 0x0070 - 0x007F
     kErrorSdoComUnsupportedProt     = 0x0070,       ///< Unsupported Protocol selected
     kErrorSdoComNoFreeHandle        = 0x0071,       ///< No free handle for connection
     kErrorSdoComInvalidServiceType  = 0x0072,       ///< Invalid SDO service type specified
@@ -212,18 +212,18 @@ typedef enum
     kErrorSdoComHandleBusy          = 0x0077,       ///< Transfer via this handle is already running
     kErrorSdoComInvalidParam        = 0x0078,       ///< Invalid parameters passed to function
 
-    // area for EPL Event-Modul 0x0080 - 0x008F
+    // area for openPOWERLINK event module 0x0080 - 0x008F
     kErrorEventUnknownSink          = 0x0080,       ///< Unknown sink for event
     kErrorEventPostError            = 0x0081,       ///< Error during post of event
     kErrorEventReadError            = 0x0082,       ///< Error during reading of event from queue
     kErrorEventWrongSize            = 0x0083,       ///< Event arg has wrong size
 
-    // area for EPL Timer Modul 0x0090 - 0x009F
+    // area for openPOWERLINK timer module 0x0090 - 0x009F
     kErrorTimerInvalidHandle        = 0x0090,       ///< Invalid handle for timer
     kErrorTimerNoTimerCreated       = 0x0091,       ///< No timer was created caused by an error
     kErrorTimerThreadError          = 0x0092,       ///< Process thread could not be created
 
-    // area for EPL SDO/Asnd Module 0x00A0 - 0x0AF
+    // area for openPOWERLINK SDO/Asnd module 0x00A0 - 0x0AF
     kErrorSdoAsndInvalidNodeId      = 0x00A0,       ///< Node-ID is invalid
     kErrorSdoAsndNoFreeHandle       = 0x00A1,       ///< No free handle for connection
     kErrorSdoAsndInvalidHandle      = 0x00A2,       ///< Handle for connection is invalid

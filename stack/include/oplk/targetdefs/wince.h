@@ -48,12 +48,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MEM                     // Memory attribute to optimize speed and code of pointer access.
 
 #ifndef CONST
-#define CONST const         // variables mapped to ROM (i.e. flash)
+#define CONST const             // variables mapped to ROM (i.e. flash)
 #endif
 
 #ifndef NO_QWORD
 #ifndef QWORD
-//#define QWORD long long int // MSVC .NET can use "long long int" too (like GNU)
+//#define QWORD long long int   // MSVC .NET can use "long long int" too (like GNU)
 #define QWORD __int64
 #endif
 #endif
@@ -72,11 +72,11 @@ void trace (const char* fmt, ...);
 #ifdef ASSERTMSG
 #undef ASSERTMSG
 
-#define ASSERTMSG(expr,string) \
+#define ASSERTMSG(expr, string) \
     if (!(expr))\
     { \
-    MessageBox (NULL, string, L"Assertion failed", MB_OK | MB_ICONERROR); \
-    exit (-1);\
+    MessageBox(NULL, string, L"Assertion failed", MB_OK | MB_ICONERROR); \
+    exit(-1);\
     }
 
 #endif
@@ -88,3 +88,4 @@ void trace (const char* fmt, ...);
 #endif
 
 #endif /* _INC_targetdefs_wince_H_ */
+

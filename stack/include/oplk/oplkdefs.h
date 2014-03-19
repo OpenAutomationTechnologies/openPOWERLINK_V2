@@ -50,9 +50,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // Version macros
 #define PLK_SPEC_VERSION                                0x20    // Ethernet POWERLINK V 2.0
-#define PLK_STACK_VERSION(ver,rev,rel)                  (((((UINT32)(ver)) & 0xFF)<<24)|((((UINT32)(rev))&0xFF)<<16)|(((UINT32)(rel))&0xFFFF))
-#define PLK_OBJ1018_VERSION(ver,rev,rel)                ((((UINT32)(ver))<<16) |(((UINT32)(rev))&0xFFFF))
-#define PLK_STRING_VERSION(ver,rev,rel,bld)             "V" #ver "." #rev "." #rel "-" #bld
+#define PLK_STACK_VERSION(ver, rev, rel)                (((((UINT32)(ver)) & 0xFF) << 24) | ((((UINT32)(rev)) & 0xFF) << 16) | (((UINT32)(rel)) & 0xFFFF))
+#define PLK_OBJ1018_VERSION(ver, rev, rel)              ((((UINT32)(ver))<<16) | (((UINT32)(rev)) & 0xFFFF))
+#define PLK_STRING_VERSION(ver, rev, rel, bld)          "V" #ver "." #rev "." #rel "-" #bld
 
 //------------------------------------------------------------------------------
 /// \name Default POWERLINK constants
@@ -187,3 +187,4 @@ These constants determine the different queue implementations.
 #define NMT_NODEASSIGN_VALID                            0x80000000L
 
 #endif /* _INC_oplk_oplkdefs_H_ */
+

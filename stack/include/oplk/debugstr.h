@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   debugstr.h
+\file   oplk/debugstr.h
 
 \brief  Definitions for debug-string module
 
@@ -35,8 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_debugstr_H_
-#define _INC_debugstr_H_
+#ifndef _INC_oplk_debugstr_H_
+#define _INC_oplk_debugstr_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -77,4 +77,5 @@ OPLKDLLEXPORT char* debugstr_getEmergErrCodeStr(UINT16 EmergErrCode_p);
 }
 #endif
 
-#endif // _INC_debugstr_H_
+#endif // _INC_oplk_debugstr_H_
+

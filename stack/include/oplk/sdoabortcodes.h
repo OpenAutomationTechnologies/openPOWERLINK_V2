@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   sdoabortcodes.h
+\file   oplk/sdoabortcodes.h
 
 \brief  Definition of SDO abort codes
 
@@ -8,7 +8,7 @@ This file contains the definitions of the SDO abort codes.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -35,8 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_sdoabortcodes_H_
-#define _INC_sdoabortcodes_H_
+#ifndef _INC_oplk_sdoabortcodes_H_
+#define _INC_oplk_sdoabortcodes_H_
 
 
 //------------------------------------------------------------------------------
@@ -74,4 +74,5 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define SDO_AC_OBJECT_DICTIONARY_NOT_EXIST          0x08000023L
 #define SDO_AC_CONFIG_DATA_EMPTY                    0x08000024L
 
-#endif /* _INC_sdoabortcodes_H_ */
+#endif /* _INC_oplk_sdoabortcodes_H_ */
+

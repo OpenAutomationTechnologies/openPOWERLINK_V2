@@ -65,9 +65,9 @@ typedef enum
 } tOplkApiAsndFilter;
 
 /**
-\brief Node Event
+\brief Node event
 
-The following structure specifies a node event on a MN. The application will be
+The following structure specifies a node event on an MN. The application will be
 informed with this event if the state of the specified node has changed.
 */
 typedef struct
@@ -80,7 +80,7 @@ typedef struct
 } tOplkApiEventNode;
 
 /**
-\brief Boot Event
+\brief Boot event
 
 The following structure specifies a boot event. It is used to inform the application
 about events concerning the entire boot-up process of the MN.
@@ -94,10 +94,10 @@ typedef struct
 
 
 /**
-\brief LED Event
+\brief LED event
 
 This structure specifies a LED event. It contains change events for the POWERLINK
-status and error LED. It allows the application to change the status and error
+status and error LEDs. It allows the application to change the status and error
 LEDs on the device according to the specification.
 */
 typedef struct
@@ -107,29 +107,29 @@ typedef struct
 } tOplkApiEventLed;
 
 /**
-\brief CFM Result Event
+\brief CFM result event
 
 The structure describes the CFM result event. This includes the normal progress
 but also errors which occurred during the configuration process.
 
-\note It is only valid for a MN.
+\note It is only valid for an MN.
 */
 typedef struct
 {
-    UINT                        nodeId;         ///< Node ID of the CN which created the event
-    tNmtNodeCommand             nodeCommand;    ///< Node command which will be issued to the CN as result of the configuration process. See \ref tNmtNodeCommand
+    UINT                        nodeId;         ///< Node ID of the CN which generated the event
+    tNmtNodeCommand             nodeCommand;    ///< Node command which will be issued to the CN as a result of the configuration process. See \ref tNmtNodeCommand
 
 } tOplkApiEventCfmResult;
 
 /**
-\brief Received ASnd Event
+\brief Received ASnd event
 
 This structure specifies the event for received ASnd frames. It is used to inform
 the application about received ASnd frames.
 */
 typedef struct
 {
-    tPlkFrame                   *pFrame;        ///< Pointer to the received ASnd frame
+    tPlkFrame*                  pFrame;         ///< Pointer to the received ASnd frame
     size_t                      frameSize;      ///< Size of the received ASnd frame
 }
 tOplkApiEventRcvAsnd;
@@ -137,7 +137,7 @@ tOplkApiEventRcvAsnd;
 /**
 \brief Application event types
 
-This enumeration specifies the valid application events which could be
+This enumeration specifies the valid application events which can be
 sent by the openPOWERLINK stack.
 */
 typedef enum
@@ -147,13 +147,13 @@ typedef enum
     a pointer to the user specific argument. */
     kOplkApiEventUserDef            = 0x00,
 
-    /** NMT state change event. If \ref kErrorReject is returned the subsequent
+    /** NMT state change event. If \ref kErrorReject is returned, the subsequent
     NMT state will not be entered. In this case the application is in charge of
-    executing the appropriate NMT commands. The event argument contains a NMT
+    executing the appropriate NMT commands. The event argument contains an NMT
     state change event \ref tEventNmtStateChange .*/
     kOplkApiEventNmtStateChange     = 0x10,
 
-    /** Critical error event. When this event occurs the NMT state machine will
+    /** Critical error event. If this event occurs, the NMT state machine will
     be switched off with NMT event \ref kNmtEventCriticalError. The application
     may restart the NMT state machine afterwards, but it is unlikely that the
     openPOWERLINK stack will run stable, because this critical error or the
@@ -185,12 +185,12 @@ typedef enum
     kOplkApiEventSdo                = 0x62,
 
     /** Object dictionary access. This event informs about an access of the
-    object dictionary. The event argument contains a OBD callback parameter
+    object dictionary. The event argument contains an OBD callback parameter
     (\ref tObdCbParam). */
     kOplkApiEventObdAccess          = 0x69,
 
     /** Status and error LED event. The event allows the application to perform
-    the signaling of the POWERLINK LEDs according to the application. The event
+    the signaling of the POWERLINK LEDs according to the specification. The event
     argument contains a LED event (\ref kOplkApiEventLed). */
     kOplkApiEventLed                = 0x70,
 
@@ -252,12 +252,12 @@ typedef tOplkError (*tOplkApiCbEvent)(tOplkApiEventType eventType_p, tOplkApiEve
 \brief openPOWERLINK initialization parameters
 
 The structure defines the openPOWERLINK initialization parameters. The openPOWERLINK
-stack will be initialized with this parameters when oplk_init() is called. Most
+stack will be initialized with these parameters when oplk_init() is called. Most
 of the parameters will be stored in the object dictionary. Some of these objects
 are constant (read-only) objects and the initialization parameters are the only way of
 setting their values. Writable objects could be overwritten later at the boot-up
-process. This could be done by reading an CDC file for a MN or by configuration
-of a CN from a MN with SDO transfers.
+process. This could be done by reading a CDC file for an MN or by configuration
+of a CN from an MN via SDO transfers.
 
 \note The elements of the parameter structure must be specified in platform
 byte order!
@@ -334,18 +334,18 @@ OPLKDLLEXPORT tOplkError oplk_init(tOplkApiInitParam* pInitParam_p);
 OPLKDLLEXPORT tOplkError oplk_shutdown(void);
 OPLKDLLEXPORT tOplkError oplk_execNmtCommand(tNmtEvent NmtEvent_p);
 OPLKDLLEXPORT tOplkError oplk_linkObject(UINT objIndex_p, void* pVar_p, UINT* pVarEntries_p,
-                                        tObdSize* pEntrySize_p, UINT firstSubindex_p);
-OPLKDLLEXPORT tOplkError oplk_readObject(tSdoComConHdl* pSdoComConHdl_p, UINT  nodeId_p, UINT index_p,
-                                        UINT subindex_p, void* pDstData_le_p, UINT* pSize_p,
-                                        tSdoType sdoType_p, void* pUserArg_p);
-OPLKDLLEXPORT tOplkError oplk_writeObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT index_p,
-                                         UINT subindex_p, void* pSrcData_le_p, UINT size_p,
+                                         tObdSize* pEntrySize_p, UINT firstSubindex_p);
+OPLKDLLEXPORT tOplkError oplk_readObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT index_p,
+                                         UINT subindex_p, void* pDstData_le_p, UINT* pSize_p,
                                          tSdoType sdoType_p, void* pUserArg_p);
+OPLKDLLEXPORT tOplkError oplk_writeObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT index_p,
+                                          UINT subindex_p, void* pSrcData_le_p, UINT size_p,
+                                          tSdoType sdoType_p, void* pUserArg_p);
 OPLKDLLEXPORT tOplkError oplk_freeSdoChannel(tSdoComConHdl sdoComConHdl_p);
 OPLKDLLEXPORT tOplkError oplk_abortSdo(tSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p);
 OPLKDLLEXPORT tOplkError oplk_readLocalObject(UINT index_p, UINT subindex_p, void* pDstData_p, UINT* pSize_p);
 OPLKDLLEXPORT tOplkError oplk_writeLocalObject(UINT index_p, UINT subindex_p, void* pSrcData_p, UINT size_p);
-OPLKDLLEXPORT tOplkError oplk_sendAsndFrame(UINT8 dstNodeId_p, tAsndFrame *pAsndFrame_p, size_t asndSize_p);
+OPLKDLLEXPORT tOplkError oplk_sendAsndFrame(UINT8 dstNodeId_p, tAsndFrame* pAsndFrame_p, size_t asndSize_p);
 OPLKDLLEXPORT tOplkError oplk_setAsndForward(UINT8 serviceId_p, tOplkApiAsndFilter FilterType_p);
 OPLKDLLEXPORT tOplkError oplk_postUserEvent(void* pUserArg_p);
 OPLKDLLEXPORT tOplkError oplk_triggerMnStateChange(UINT nodeId_p, tNmtNodeCommand nodeCommand_p);
@@ -360,7 +360,7 @@ OPLKDLLEXPORT tOplkError oplk_waitSyncEvent(ULONG timeout_p);
 OPLKDLLEXPORT tOplkError oplk_allocProcessImage(UINT sizeProcessImageIn_p, UINT sizeProcessImageOut_p);
 OPLKDLLEXPORT tOplkError oplk_freeProcessImage(void);
 OPLKDLLEXPORT tOplkError oplk_linkProcessImageObject(UINT objIndex_p, UINT firstSubindex_p, UINT offsetPI_p,
-                                                    BOOL fOutputPI_p, tObdSize entrySize_p, UINT* pVarEntries_p);
+                                                     BOOL fOutputPI_p, tObdSize entrySize_p, UINT* pVarEntries_p);
 OPLKDLLEXPORT tOplkError oplk_exchangeProcessImageIn(void);
 OPLKDLLEXPORT tOplkError oplk_exchangeProcessImageOut(void);
 OPLKDLLEXPORT void*      oplk_getProcessImageIn(void);
@@ -374,3 +374,4 @@ OPLKDLLEXPORT tOplkError oplk_setupProcessImage(void);
 #endif
 
 #endif  // #ifndef _INC_oplk_oplk_H_
+

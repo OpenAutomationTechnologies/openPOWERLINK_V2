@@ -10,7 +10,7 @@ This source file contains the implementation of the process image functions.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -183,7 +183,7 @@ Exit:
 
 The function links an object in the OD into a location in the process image.
 
-\param  objIndex_p              The Object index of the object to link.
+\param  objIndex_p              The object index of the object to link.
 \param  firstSubindex_p         The sub-index of the object where the first
                                 variable should be linked to.
 \param  offsetPI_p              The offset of the first process variable in the
@@ -216,7 +216,7 @@ tOplkError oplk_linkProcessImageObject(UINT objIndex_p, UINT firstSubindex_p,
 
     if (fOutputPI_p)
     {
-        pVar = ((BYTE*) instance_l.outputImage.pImage) + offsetPI_p;
+        pVar = ((BYTE*)instance_l.outputImage.pImage) + offsetPI_p;
         if ((offsetPI_p + entrySize_p) > instance_l.outputImage.imageSize)
         {   // at least one entry should fit into the PI, but it doesn't
             return kErrorApiPISizeExceeded;
@@ -228,7 +228,7 @@ tOplkError oplk_linkProcessImageObject(UINT objIndex_p, UINT firstSubindex_p,
     }
     else
     {
-        pVar = ((BYTE*) instance_l.inputImage.pImage) + offsetPI_p;
+        pVar = ((BYTE*)instance_l.inputImage.pImage) + offsetPI_p;
         if ((offsetPI_p + entrySize_p) > instance_l.inputImage.imageSize)
         {   // at least one entry should fit into the PI, but it doesn't
             return kErrorApiPISizeExceeded;
@@ -321,5 +321,4 @@ void* oplk_getProcessImageOut(void)
 {
     return instance_l.outputImage.pImage;
 }
-
 

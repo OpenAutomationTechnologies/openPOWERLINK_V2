@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   benchmark.h
+\file   oplk/benchmark.h
 
 \brief  Definitions for benchmark functions
 
@@ -36,8 +36,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_benchmark_H_
-#define _INC_benchmark_H_
+#ifndef _INC_oplk_benchmark_H_
+#define _INC_oplk_benchmark_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -438,4 +438,5 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     #define BENCHMARK_MOD_32_RESET(x)
 #endif
 
-#endif /* _INC_benchmark_H_ */
+#endif /* _INC_oplk_benchmark_H_ */
+

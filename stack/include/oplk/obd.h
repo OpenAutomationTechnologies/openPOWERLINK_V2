@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   obd.h
+\file   oplk/obd.h
 
 \brief  Definitions for OBD module
 
@@ -8,7 +8,7 @@ This file contains definitions for the OBD module
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
 All rights reserved.
@@ -36,8 +36,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_obd_H_
-#define _INC_obd_H_
+#ifndef _INC_oplk_obd_H_
+#define _INC_oplk_obd_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -90,7 +90,7 @@ typedef enum
     kObdDirLoad             = 0x02,    ///< Load all object values from non volatile memory
     kObdDirRestore          = 0x03,    ///< Deletes non volatile memory (restore)
     kObdDirOBKCheck         = 0xFF     ///< Reserved
-}tObdDir;
+} tObdDir;
 
 /**
 * \brief Valid OD store commands
@@ -106,7 +106,7 @@ typedef enum
     kObdCmdReadObj          = 0x05,
     kObdCmdCloseRead        = 0x06,
     kObdCmdClear            = 0x07,
-}tObdCommand;
+} tObdCommand;
 
 /**
 * \brief Events of object callback function
@@ -304,7 +304,7 @@ typedef struct
 typedef struct
 {
    tObdSize             size;
-   BYTE *               pString;
+   BYTE*                pString;
 } tObdOString;                              // 0009
 
 typedef struct
@@ -352,7 +352,7 @@ typedef struct
 } tObdCbParam;
 
 // define type for callback function: pParam_p points to tObdCbParam
-typedef tOplkError (ROM* tObdCallback) (tObdCbParam MEM* pParam_p);
+typedef tOplkError (ROM* tObdCallback)(tObdCbParam MEM* pParam_p);
 
 /**
 \brief Structure for subindices
@@ -368,7 +368,7 @@ typedef struct
     void  MEM*          pCurrent;           ///< Pointer to data (points always to RAM)
 } tObdSubEntry;
 
-typedef tObdSubEntry * tObdSubEntryPtr;
+typedef tObdSubEntry* tObdSubEntryPtr;
 
 
 /**
@@ -384,7 +384,7 @@ typedef struct
     tObdCallback        pfnCallback;        ///< function is called back if object access
 } tObdEntry;
 
-typedef tObdEntry * tObdEntryPtr;
+typedef tObdEntry* tObdEntryPtr;
 
 /**
 \brief Structure for OBD init parameters
@@ -393,7 +393,7 @@ This structure defines the init parameters of the OBD module.
 */
 struct _tObdInitParam
 {
-    tObdEntryPtr        pGenericPart;           /// Pointer to generic part of OD
+    tObdEntryPtr        pGenericPart;           ///< Pointer to generic part of OD
     tObdEntryPtr        pManufacturerPart;      ///< Pointer to manufacturer part of OD
     tObdEntryPtr        pDevicePart;            ///< Pointer to device part of OD
 #if (defined (OBD_USER_OD) && (OBD_USER_OD != FALSE))
@@ -416,8 +416,8 @@ typedef struct
     tObdSize            objSize;
 } tObdCbStoreParam;
 
-typedef tOplkError (ROM* tInitTabEntryCallback) (void MEM* pTabEntry_p, UINT uiObjIndex_p);
-typedef tOplkError (ROM* tObdStoreLoadCallback) (tObdCbStoreParam MEM* pCbStoreParam_p);
+typedef tOplkError (ROM *tInitTabEntryCallback)(void MEM* pTabEntry_p, UINT uiObjIndex_p);
+typedef tOplkError (ROM *tObdStoreLoadCallback)(tObdCbStoreParam MEM* pCbStoreParam_p);
 
 /**
 \brief Enumeration for Node ID setting types
@@ -439,34 +439,34 @@ typedef enum
 extern "C" {
 #endif
 
-tOplkError  obd_init(tObdInitParam MEM* pInitParam_p);
-tOplkError  obd_deleteInstance(void);
-tOplkError  obd_writeEntry(UINT index_p, UINT subIndex_p, void* pSrcData_p, tObdSize size_p);
-tOplkError  obd_readEntry(UINT index_p, UINT subIndex_p, void* pDstData_p, tObdSize *pSize_p);
-tOplkError  obd_accessOdPart(tObdPart obdPart_p, tObdDir direction_p);
-tOplkError  obd_defineVar(tVarParam MEM* pVarParam_p);
-void*       obd_getObjectDataPtr(UINT index_p, UINT subIndex_p);
-tOplkError  obd_registerUserOd(tObdEntryPtr pUserOd_p);
-void        obd_initVarEntry(tObdVarEntry MEM* pVarEntry_p, tObdType type_p, tObdSize obdSize_p);
-tObdSize    obd_getDataSize(UINT index_p, UINT subIndex_p);
-UINT        obd_getNodeId(void);
-tOplkError  obd_setNodeId(UINT nodeId_p, tObdNodeIdType nodeIdType_p);
-tOplkError  obd_isNumerical(UINT index_p, UINT subIndex_p, BOOL* pfEntryNumerical_p);
-tOplkError  obd_getType(UINT index_p, UINT subIndex_p, tObdType* pType_p);
-tOplkError  obd_writeEntryFromLe(UINT index_p, UINT subIndex_p, void* pSrcData_p, tObdSize size_p);
-tOplkError  obd_readEntryToLe(UINT index_p, UINT subIndex_p, void* pDstData_p, tObdSize* pSize_p);
-tOplkError  obd_getAccessType(UINT index_p, UINT subIndex_p, tObdAccess* pAccessType_p);
-tOplkError  obd_searchVarEntry(UINT index_p, UINT subindex_p, tObdVarEntry MEM** ppVarEntry_p);
+tOplkError obd_init(tObdInitParam MEM* pInitParam_p);
+tOplkError obd_deleteInstance(void);
+tOplkError obd_writeEntry(UINT index_p, UINT subIndex_p, void* pSrcData_p, tObdSize size_p);
+tOplkError obd_readEntry(UINT index_p, UINT subIndex_p, void* pDstData_p, tObdSize* pSize_p);
+tOplkError obd_accessOdPart(tObdPart obdPart_p, tObdDir direction_p);
+tOplkError obd_defineVar(tVarParam MEM* pVarParam_p);
+void*      obd_getObjectDataPtr(UINT index_p, UINT subIndex_p);
+tOplkError obd_registerUserOd(tObdEntryPtr pUserOd_p);
+void       obd_initVarEntry(tObdVarEntry MEM* pVarEntry_p, tObdType type_p, tObdSize obdSize_p);
+tObdSize   obd_getDataSize(UINT index_p, UINT subIndex_p);
+UINT       obd_getNodeId(void);
+tOplkError obd_setNodeId(UINT nodeId_p, tObdNodeIdType nodeIdType_p);
+tOplkError obd_isNumerical(UINT index_p, UINT subIndex_p, BOOL* pfEntryNumerical_p);
+tOplkError obd_getType(UINT index_p, UINT subIndex_p, tObdType* pType_p);
+tOplkError obd_writeEntryFromLe(UINT index_p, UINT subIndex_p, void* pSrcData_p, tObdSize size_p);
+tOplkError obd_readEntryToLe(UINT index_p, UINT subIndex_p, void* pDstData_p, tObdSize* pSize_p);
+tOplkError obd_getAccessType(UINT index_p, UINT subIndex_p, tObdAccess* pAccessType_p);
+tOplkError obd_searchVarEntry(UINT index_p, UINT subindex_p, tObdVarEntry MEM** ppVarEntry_p);
 
-tOplkError  obd_initObd(tObdInitParam MEM* pInitParam_p);
+tOplkError obd_initObd(tObdInitParam MEM* pInitParam_p);
 
 #if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
-tOplkError  obd_storeLoadObjCallback(tObdStoreLoadCallback pfnCallback_p);
+tOplkError obd_storeLoadObjCallback(tObdStoreLoadCallback pfnCallback_p);
 #endif
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_obd_H_ */
+#endif /* _INC_oplk_obd_H_ */
 

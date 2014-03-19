@@ -151,9 +151,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef CONFIG_DLL_PRES_FILTER_COUNT
 #if defined(CONFIG_INCLUDE_NMT_MN)
-#define CONFIG_DLL_PRES_FILTER_COUNT                           -1                  // maximum count of Rx filter entries for PRes frames
+#define CONFIG_DLL_PRES_FILTER_COUNT                           -1           // maximum count of Rx filter entries for PRes frames
 #else
-#define CONFIG_DLL_PRES_FILTER_COUNT                           0                   // maximum count of Rx filter entries for PRes frames
+#define CONFIG_DLL_PRES_FILTER_COUNT                           0            // maximum count of Rx filter entries for PRes frames
 #endif
 #endif
 
@@ -173,7 +173,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define NMTMNU_PRC_NODE_ADD_MAX_NUM                     D_NMT_MaxCNNumber_U8
 #endif
 
-// defines for EPL API layer static process image
+// defines for POWERLINK API layer static process image
 #ifndef API_PROCESS_IMAGE_SIZE_IN
 #define API_PROCESS_IMAGE_SIZE_IN                       0
 #endif
@@ -226,12 +226,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CONFIG_VETH_SET_DEFAULT_GATEWAY                 FALSE
 #endif
 
-// rough approximation of max. number of timer entries for module EplTimeruGeneric
+// rough approximation of max. number of timer entries for module user/timer-generic
 #ifndef TIMERU_MAX_ENTRIES
 #if defined(CONFIG_INCLUDE_NMT_MN)
 #define TIMERU_MAX_ENTRIES                              (NMT_MAX_NODE_ID * 3)   // 3 timers for each node
 #else
-#define TIMERU_MAX_ENTRIES                               7                   // LED module 1 + NMT module 1 + SDO sequence layer 5
+#define TIMERU_MAX_ENTRIES                               7                  // LED module 1 + NMT module 1 + SDO sequence layer 5
 #endif
 #endif
 
@@ -248,3 +248,4 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #endif /* _INC_oplk_defaultcfg_H_ */
+
