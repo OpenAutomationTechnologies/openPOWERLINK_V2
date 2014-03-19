@@ -83,6 +83,7 @@ fi
 # Let's source the board.settings (null.settings before)
 BOARD_SETTINGS_FILE=${BOARD_PATH}/board.settings
 CFG_APP_CPU_NAME=
+CFG_APP_EPCS=
 CFG_JTAG_CABLE=
 if [ -f ${BOARD_SETTINGS_FILE} ]; then
     source ${BOARD_SETTINGS_FILE}
@@ -202,5 +203,11 @@ fi
 
 chmod +x ${OPLK_BASE_DIR}/tools/altera-nios2/fix-app-makefile
 ${OPLK_BASE_DIR}/tools/altera-nios2/fix-app-makefile ${OUT_PATH}/Makefile
+
+# Add EPCS flash makefile rules
+if [ -n "${CFG_APP_EPCS}" ]; then
+    chmod +x ${OPLK_BASE_DIR}/tools/altera-nios2/add-app-makefile-epcs
+    ${OPLK_BASE_DIR}/tools/altera-nios2/add-app-makefile-epcs ${OUT_PATH}/Makefile
+fi
 
 exit 0

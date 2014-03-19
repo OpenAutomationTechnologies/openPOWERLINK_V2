@@ -1,0 +1,45 @@
+#!/bin/bash
+# $ ./add-app-makefile-epcs [MAKEFILE]
+# Add EPCS targets to APP Makefile for Qsys processors.
+
+MAKE_FILE=$1
+
+cat >> ${MAKE_FILE} <<'Heredoc'
+
+# Rules for EPCS flash programming commands (EPCS contains SOF and application)
+PROGRAM_EPCS_SUFFIX := -epcs
+PROGRAM_EPCS_TARGET := $(addsuffix $(PROGRAM_EPCS_SUFFIX), $(FLASH_FILES))
+PROGRAM_EPCS_OVERRIDE := --override=$(OPLK_BASE_DIR)/tools/altera-nios2/nios2-flash-override.txt
+
+.PHONY : program-epcs
+program-epcs : $(PROGRAM_EPCS_TARGET)
+
+SOF_FILE := $(wildcard $(QUARTUS_PROJECT_DIR)/*.sof)
+
+.PHONY : $(PROGRAM_EPCS_TARGET)
+$(PROGRAM_EPCS_TARGET) : $(ELF)
+	@$(ECHO) Info: Programming $(basename $@).flash
+	@if [ -n "$($(basename $@)_EPCS_FLAGS)" ]; \
+	then \
+		nios2-configure-sof $(DOWNLOAD_CABLE_FLAG) -C $(QUARTUS_PROJECT_DIR); \
+		sof2flash --epcs --input=$(SOF_FILE) --output=sof.flash; \
+		$(ELF2FLASH) --after=sof.flash --input=$(ELF) --outfile=$(basename $@)_after_sof.flash --sim_optimize=$(SIM_OPTIMIZE) $(elf2flash_extra_args); \
+		$(ECHO) $(FLASHPROG) $(DOWNLOAD_CABLE_FLAG) $(SOPC_SYSID_FLAG) --epcs --base=$($(basename $@)_START) -g $(PROGRAM_EPCS_OVERRIDE) sof.flash $(basename $@)_after_sof.flash; \
+		$(FLASHPROG) $(DOWNLOAD_CABLE_FLAG) $(SOPC_SYSID_FLAG) --epcs --base=$($(basename $@)_START) -g $(PROGRAM_EPCS_OVERRIDE) sof.flash $(basename $@)_after_sof.flash; \
+	fi
+
+# Rule for erasing the EPCS memory content
+.PHONY : erase-epcs
+erase-epcs:
+	@nios2-configure-sof $(DOWNLOAD_CABLE_FLAG) -C $(QUARTUS_PROJECT_DIR); \
+	$(ECHO) $(FLASHPROG) $(DOWNLOAD_CABLE_FLAG) $(SOPC_SYSID_FLAG) --epcs --base=$($(basename $(PROGRAM_EPCS_TARGET))_START) --accept-bad-sysid --erase-all; \
+	$(FLASHPROG) $(DOWNLOAD_CABLE_FLAG) $(SOPC_SYSID_FLAG) --epcs --base=$($(basename $(PROGRAM_EPCS_TARGET))_START) --accept-bad-sysid --erase-all
+
+# Rule for epcs help output
+help::
+	@$(ECHO)
+	@$(ECHO) "  EPCS flash targets:"
+	@$(ECHO) "    program-epcs      - Program EPCS flash device with SOF and ELF"
+	@$(ECHO) "    erase-epcs        - Erase EPCS flash device"
+
+Heredoc
