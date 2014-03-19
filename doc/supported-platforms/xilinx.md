@@ -154,3 +154,35 @@ After the project import right lick on your demo project `demo-cn-embedded`
 and use:\n
 `Run` -> `Debug As` -> `Launch on Hardware` to start the debugger and step
 through the code.
+
+# How to write the program to local flash  {#sect_xilinx_flash}
+
+**Requirement:** All steps from the section \ref sect_xilinx_build are
+completed and the binary is installed into the __bin__ directory.
+
+- Open the `ISE Design Suite Command Prompt` and execute the following
+  commands:\n
+
+      > cd <openPOWERLINK_dir>/contrib/bootloader/xilinx-microblaze/simpleboot/build
+      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../
+      > cmake -DCFG_BIN_DIR=../../../../../bin/generic/microblaze/avnet-s6plkeb/cn-single-gpio -DCFG_HW_LIB_DIR=../../../../../hardware/lib/generic/microblaze/avnet-s6plkeb/cn-single-gpio ../
+      > make all
+      > make prog-flash
+
+These commands build the bootloader for your demo and generate a flash image
+which can be written to the local flash. Take care to change the variables
+`CFG_BIN_DIR` and `CFG_HW_LIB_DIR` to build the bootloader for any other
+example design.
+
+## Configuration Options {#sect_xilinx_flash_options}
+
+If you would like to change the configuration options you have to provide
+the configuration options on the command line (-DCFG_XXX=XXX).
+
+- **CFG_BIN_DIR**
+
+  Path to the install folder of your POWERLINK example. (e.g: <openPOWERLINK_dir>/bin/generic/microblaze/avnet-s6plkeb/cn-single-gpio)
+
+- **CFG_HW_LIB_DIR**
+
+  Path to the install folder of your POWERLINK example hardware project. (e.g: <openPOWERLINK_dir>/hardware/lib/generic/microblaze/avnet-s6plkeb/cn-single-gpio)
