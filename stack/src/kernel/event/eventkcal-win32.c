@@ -196,7 +196,7 @@ tOplkError eventkcal_exit(void)
 
         eventkcal_exitQueueCircbuf(kEventQueueK2U);
         eventkcal_exitQueueCircbuf(kEventQueueU2K);
-        eventkcal_exitQueueCircbuf(kEventQueueUInt);
+        eventkcal_exitQueueCircbuf(kEventQueueKInt);
 
         CloseHandle(instance_l.semKernelData);
         CloseHandle(instance_l.semUserData);
