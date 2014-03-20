@@ -10,7 +10,7 @@ Initialize the system timer and count the milliseconds
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -84,7 +84,7 @@ static UINT32 msCount_l = 0;
 // local function prototypes
 //------------------------------------------------------------------------------
 
-static void irqHandler (void* pArg_p);
+static void irqHandler(void* pArg_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -102,13 +102,11 @@ void timer_init(void)
 
     //register fit interrupt handler
     XIntc_RegisterHandler(XPAR_PCP_INTC_BASEADDR, XPAR_PCP_INTC_FIT_TIMER_0_INTERRUPT_INTR,
-            (XInterruptHandler)irqHandler, 0);
+                          (XInterruptHandler)irqHandler, 0);
 
     //enable the fit interrupt
     XIntc_EnableIntr(XPAR_PCP_INTC_BASEADDR, XPAR_FIT_TIMER_0_INTERRUPT_MASK);
 }
-
-
 
 //------------------------------------------------------------------------------
 /**
@@ -140,7 +138,7 @@ UINT32 timer_getMSCount(void)
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-static void irqHandler (void* pArg_p)
+static void irqHandler(void* pArg_p)
 {
     UNUSED_PARAMETER(pArg_p);
 
@@ -148,3 +146,4 @@ static void irqHandler (void* pArg_p)
 }
 
 ///\}
+

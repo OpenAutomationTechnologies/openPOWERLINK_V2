@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   openmac-microblaze.c
+\file   xilinx_microblaze/openmac-microblaze.c
 
 \brief  Implementation of openMAC drivers
 
@@ -11,7 +11,7 @@ This file contains the implementation of the openMAC driver.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -103,7 +103,7 @@ static tOpenmacInst instance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static void irqHandler (void* pArg_p) SECTION_EDRVOPENMAC_IRQ_HDL;
+static void irqHandler(void* pArg_p) SECTION_EDRVOPENMAC_IRQ_HDL;
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -131,16 +131,18 @@ tOplkError openmac_isrReg(tOpenmacIrqSource irqSource_p, tOpenmacIrqCb pfnIsrCb_
     UINT32      irqMask;
     UINT32      intcMask;
 
-    switch(irqSource_p)
+    switch (irqSource_p)
     {
         case kOpenmacIrqSync:
             irqId = OPENMAC_SYNC_IRQ;
             irqMask = OPENMAC_SYNC_IRQ_MASK;
             break;
+
         case kOpenmacIrqTxRx:
             irqId = OPENMAC_TXRX_IRQ;
             irqMask = OPENMAC_TXRX_IRQ_MASK;
             break;
+
         default:
             ret = kErrorNoResource;
             goto Exit;
@@ -189,7 +191,7 @@ UINT8* openmac_memUncached(UINT8* pMem_p, UINT size_p)
 \brief  Allocated uncached memory
 
 This function allocates memory.
-Since the packet buffers are allocated in cached memory no uncaching is implemented.
+Since the packet buffers are allocated in cached memory, no uncaching is implemented.
 
 \param  size_p      Size of uncached memory to be allocated
 
@@ -288,14 +290,16 @@ void openmac_timerIrqDisable(UINT timer_p)
 {
     UINT offset;
 
-    switch(timer_p)
+    switch (timer_p)
     {
         case HWTIMER_SYNC:
             offset = OPENMAC_TIMER_OFFSET_CTRL;
             break;
+
         case HWTIMER_EXT_SYNC:
             offset = OPENMAC_TIMER_OFFSET_2ND_CTRL;
             break;
+
         default:
             return;
     }
@@ -307,7 +311,7 @@ void openmac_timerIrqDisable(UINT timer_p)
 /**
 \brief  Timer interrupt enable
 
-This function enables the timer instance and sets the generated pulse width if
+This function enables the timer instance and sets the generated pulse width, if
 the associated HW timer supports it.
 
 \param  timer_p         Timer instance to be disabled
@@ -321,16 +325,18 @@ void openmac_timerIrqEnable(UINT timer_p, UINT32 pulseWidthNs_p)
     UINT    offset;
     UINT32  value;
 
-    switch(timer_p)
+    switch (timer_p)
     {
         case HWTIMER_SYNC:
             offset = OPENMAC_TIMER_OFFSET_CTRL;
             value = 1;
             break;
+
         case HWTIMER_EXT_SYNC:
             offset = OPENMAC_TIMER_OFFSET_2ND_CTRL;
             value = 1 | (OMETH_NS_2_TICKS(pulseWidthNs_p) << 1);
             break;
+
         default:
             return;
     }
@@ -354,14 +360,16 @@ void openmac_timerSetCompareValue(UINT timer_p, UINT32 val_p)
 {
     UINT offset;
 
-    switch(timer_p)
+    switch (timer_p)
     {
         case HWTIMER_SYNC:
             offset = OPENMAC_TIMER_OFFSET_CMP_VAL;
             break;
+
         case HWTIMER_EXT_SYNC:
             offset = OPENMAC_TIMER_OFFSET_2ND_CMP_VAL;
             break;
+
         default:
             return;
     }
@@ -378,7 +386,7 @@ This function gets the current timer instance value.
 \param  timer_p         Timer instance to be disabled
 
 \return The function returns the current timer instance value.
-        It returns 0 if the instance does not provide the current value.
+        It returns 0, if the instance does not provide the current value.
 
 \ingroup module_openmac
 */
@@ -387,11 +395,12 @@ UINT32 openmac_timerGetTimeValue(UINT timer_p)
 {
     UINT offset;
 
-    switch(timer_p)
+    switch (timer_p)
     {
         case HWTIMER_SYNC:
             offset = OPENMAC_TIMER_OFFSET_TIME_VAL;
             break;
+
         case HWTIMER_EXT_SYNC:
         default:
             return 0;
@@ -416,20 +425,21 @@ the registered interrupt callbacks.
 \param  pArg_p      Argument holds the interrupt source
 
 \return The function returns the current timer instance value.
-        It returns 0 if the instance does not provide the current value.
+        It returns 0, if the instance does not provide the current value.
 */
 //------------------------------------------------------------------------------
-static void irqHandler (void* pArg_p)
+static void irqHandler(void* pArg_p)
 {
     tOpenmacIrqSource   irqSource = (tOpenmacIrqSource)pArg_p;
 
     // Check if given argument is within array range.
-    if(irqSource >= kOpenmacIrqLast)
+    if (irqSource >= kOpenmacIrqLast)
         return;
 
     // Invoke callback with argument for corresponding source.
-    if(instance_l.pfnIrqCb[irqSource] != NULL)
+    if (instance_l.pfnIrqCb[irqSource] != NULL)
         instance_l.pfnIrqCb[irqSource](instance_l.pIrqCbArg[irqSource]);
 }
 
 ///\}
+

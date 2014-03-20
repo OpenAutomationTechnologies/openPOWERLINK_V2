@@ -11,7 +11,7 @@ Microblaze system. Note that the functions are empty calls!
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -92,12 +92,12 @@ This function initializes the lock instance.
 
 \param  pLock_p                Reference to lock
 
-\return The function returns 0 when successful.
+\return The function returns 0, if successful.
 
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-int target_initLock (LOCK_T *pLock_p)
+int target_initLock(LOCK_T* pLock_p)
 {
     UNUSED_PARAMETER(pLock_p);
 
@@ -111,12 +111,12 @@ int target_initLock (LOCK_T *pLock_p)
 This function tries to lock the given lock, otherwise it spins until the
 lock is freed.
 
-\return The function returns 0 when successful.
+\return The function returns 0, if successful.
 
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-int target_lock (void)
+int target_lock(void)
 {
     return 0;
 }
@@ -127,12 +127,12 @@ int target_lock (void)
 
 This function frees the given lock.
 
-\return The function returns 0 when successful.
+\return The function returns 0, if successful.
 
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-int target_unlock (void)
+int target_unlock(void)
 {
     return 0;
 }
@@ -140,3 +140,4 @@ int target_unlock (void)
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+

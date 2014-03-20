@@ -11,7 +11,7 @@ Nios II system. Note that the functions are empty calls!
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -97,7 +97,7 @@ This function initializes the lock instance.
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-int target_initLock (LOCK_T *pLock_p)
+int target_initLock(LOCK_T* pLock_p)
 {
     UNUSED_PARAMETER(pLock_p);
 
@@ -116,7 +116,7 @@ lock is freed.
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-int target_lock (void)
+int target_lock(void)
 {
     return 0;
 }
@@ -132,7 +132,7 @@ This function frees the given lock.
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-int target_unlock (void)
+int target_unlock(void)
 {
     return 0;
 }
@@ -140,3 +140,4 @@ int target_unlock (void)
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+

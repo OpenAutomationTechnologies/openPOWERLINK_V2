@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   target-windows.c
+\file   windows/target-windows.c
 
 \brief  Target specific functions for Windows
 
@@ -10,7 +10,7 @@ The file implements target specific functions used in the openPOWERLINK stack.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -62,9 +62,9 @@ tOplkError target_init(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Cleanup target specific stuff
+\brief  Clean up target specific stuff
 
-The function cleans-up target specific stuff.
+The function cleans up target specific stuff.
 
 \return The function returns a tOplkError error code.
 */

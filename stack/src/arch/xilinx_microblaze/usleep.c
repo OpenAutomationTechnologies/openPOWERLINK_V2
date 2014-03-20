@@ -12,7 +12,7 @@ into BRAM blocks to increase the accuracy.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -77,9 +77,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     #error "There is no CPU speed available! Please check xparameters.h"
 #endif
 
-#define CPU_SPEED_MHZ (CPU_SPEED_TICKS/1000000)     ///< CPU speed in Mhz
+#define CPU_SPEED_MHZ (CPU_SPEED_TICKS / 1000000)     ///< CPU speed in Mhz
 
-#define SMALL_LOOP_SPEED (10 * (CPU_SPEED_MHZ/50))  ///< The small loop always takes 1us -> it is adjusted to need 10 iterations with 50Mhz
+#define SMALL_LOOP_SPEED (10 * (CPU_SPEED_MHZ / 50))  ///< The small loop always takes 1us -> it is adjusted to need 10 iterations with 50Mhz
 
 //------------------------------------------------------------------------------
 // local types
@@ -101,9 +101,9 @@ void usleep(u32 usecs_p) __attribute__((section(".local_memory")));
 
 //------------------------------------------------------------------------------
 /**
-\brief    Sleep until limit of micro seconds is reached
+\brief    Sleep until limit of microseconds is reached
 
-\param  usecs_p                Count of micro seconds to sleep
+\param  usecs_p                Count of microseconds to sleep
 
 \ingroup module_target
 */
@@ -135,3 +135,4 @@ void usleep(u32 usecs_p)
 /// \{
 
 ///\}
+

@@ -8,7 +8,7 @@
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,8 +34,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_lock_H_
-#define _INC_lock_H_
+#ifndef _INC_altera_nios2_lock_H_
+#define _INC_altera_nios2_lock_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -64,12 +64,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-int target_initLock (LOCK_T *pSlock_p);
-int target_lock (void);
-int target_unlock (void);
+int target_initLock(LOCK_T* pSlock_p);
+int target_lock(void);
+int target_unlock(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_lock_H_ */
+#endif /* _INC_altera_nios2_lock_H_ */
+
