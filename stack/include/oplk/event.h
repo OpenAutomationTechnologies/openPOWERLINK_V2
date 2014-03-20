@@ -156,7 +156,7 @@ typedef enum
     kEventSourceTimeru              = 0x19,     ///< Events from Timeru module
     kEventSourceCfgMau              = 0x1A,     ///< Events from CfgMau module
     kEventSourceEventu              = 0x1B,     ///< Events from Eventu module
-    kEventSourceEplApi              = 0x1C,     ///< Events from Api module
+    kEventSourceOplkApi             = 0x1C,     ///< Events from Api module
     kEventSourceLedu                = 0x1D,     ///< Events from Ledu module
     kEventSourceGw309Ascii          = 0x1E,     ///< Events from GW309ASCII module
     kEventSourceErru                = 0x1F,     ///< Events from User Error handler module
@@ -265,7 +265,7 @@ This callback is used to call error event posting over the module boundaries.
 e.g. eventkcal-* -> eventk_postError
 
 \param  EventSource_p       Source of Event.
-\param  eplError_p          Error code.
+\param  oplkError_p         Error code.
 \param  argSize_p           Size of argument.
 \param  pArg_p              Pointer to argument.
 

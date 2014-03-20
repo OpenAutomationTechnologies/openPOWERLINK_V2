@@ -49,12 +49,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DLLK_FILTER_SOA_NMTREQ          3
 #if CONFIG_DLL_PRES_CHAINING_CN != FALSE
   #define DLLK_FILTER_SOA_SYNCREQ       4
-  #define DLLK_FILTER_SOA_NONEPL        5
+  #define DLLK_FILTER_SOA_NONPLK        5
 #else
-  #define DLLK_FILTER_SOA_NONEPL        4
+  #define DLLK_FILTER_SOA_NONPLK        4
 #endif
 
-#define DLLK_FILTER_SOA                 (DLLK_FILTER_SOA_NONEPL + 1)
+#define DLLK_FILTER_SOA                 (DLLK_FILTER_SOA_NONPLK + 1)
 #define DLLK_FILTER_SOC                 (DLLK_FILTER_SOA + 1)
 #define DLLK_FILTER_ASND                (DLLK_FILTER_SOC + 1)
 #define DLLK_FILTER_PRES                (DLLK_FILTER_ASND + 1)

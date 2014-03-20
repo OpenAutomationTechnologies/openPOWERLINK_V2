@@ -684,7 +684,7 @@ static tOplkError processCycleViolation(UINT32 nextTimerIrqNs_p)
         goto Exit;
     }
 
-    //post error to generate DLL_ERR_MN_CYCTIMEEXCEED in EplDllkCbCyclicError()
+    //post error to generate DLL_ERR_MN_CYCTIMEEXCEED in dllk_cbCyclicError()
     ret = kErrorEdrvTxListNotFinishedYet;
 Exit:
     return ret;

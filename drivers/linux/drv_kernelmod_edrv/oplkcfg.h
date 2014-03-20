@@ -40,7 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _INC_oplkcfg_H_
 
 //==============================================================================
-// generic defines which for whole EPL Stack
+// generic defines which for whole openPOWERLINK stack
 //==============================================================================
 
 #ifndef BENCHMARK_MODULES

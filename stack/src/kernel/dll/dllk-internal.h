@@ -72,11 +72,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #if ((CONFIG_DLL_PRES_READY_AFTER_SOA != FALSE) || (CONFIG_DLL_PRES_READY_AFTER_SOC != FALSE)) &&  defined(CONFIG_INCLUDE_NMT_MN)
-#error "DLLK: currently, EPL_DLL_PRES_READY_AFTER_* is not supported if EPL_MODULE_NMT_MN is enabled."
+#error "DLLK: currently, CONFIG_DLL_PRES_READY_AFTER_* is not supported if CONFIG_INCLUDE_NMT_MN is enabled."
 #endif
 
 #if (CONFIG_EDRV_FAST_TXFRAMES == FALSE) && ((CONFIG_DLL_PRES_READY_AFTER_SOA != FALSE) || (CONFIG_DLL_PRES_READY_AFTER_SOC != FALSE))
-#error "DLLK: EPL_DLL_PRES_READY_AFTER_* is enabled, but not CONFIG_EDRV_FAST_TXFRAMES."
+#error "DLLK: CONFIG_DLL_PRES_READY_AFTER_* is enabled, but not CONFIG_EDRV_FAST_TXFRAMES."
 #endif
 
 #if defined(CONFIG_INCLUDE_NMT_MN) && (CONFIG_DLL_PRES_FILTER_COUNT == 0)
@@ -110,19 +110,19 @@ void  TgtDbgPostTraceValue (DWORD dwTraceValue_p);
     TGT_DBG_POST_TRACE_VALUE((kEventSinkDllk << 28) | (Event_p << 24) \
                              | (uiNodeId_p << 16) | wErrorCode_p)
 
-// defines for indexes of tEplDllInstance.m_pTxFrameInfo
+// defines for indexes of tDllkInstance.pTxBuffer
 #define DLLK_TXFRAME_IDENTRES       0   // IdentResponse on CN / MN
 #define DLLK_TXFRAME_STATUSRES      2   // StatusResponse on CN / MN
 #define DLLK_TXFRAME_NMTREQ         4   // NMT Request from FIFO on CN / MN
 
 #if CONFIG_DLL_PRES_CHAINING_CN != FALSE
 #define DLLK_TXFRAME_SYNCRES      6   // SyncResponse on CN
-#define DLLK_TXFRAME_NONEPL       8   // non-POWERLINK frame from FIFO on CN / MN
+#define DLLK_TXFRAME_NONPLK       8   // non-POWERLINK frame from FIFO on CN / MN
 #else
-#define DLLK_TXFRAME_NONEPL       6   // non-POWERLINK frame from FIFO on CN / MN
+#define DLLK_TXFRAME_NONPLK       6   // non-POWERLINK frame from FIFO on CN / MN
 #endif
 
-#define DLLK_TXFRAME_PRES           (DLLK_TXFRAME_NONEPL + 2) // PRes on CN / MN
+#define DLLK_TXFRAME_PRES           (DLLK_TXFRAME_NONPLK + 2) // PRes on CN / MN
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
   #define DLLK_TXFRAME_SOC          (DLLK_TXFRAME_PRES + 2)   // SoC on MN
@@ -141,12 +141,12 @@ void  TgtDbgPostTraceValue (DWORD dwTraceValue_p);
 #define DLLK_BUFLEN_FILLING             1   // just the buffer is being filled
 #define DLLK_BUFLEN_MIN                 60  // minimum ethernet frame length
 
-// defines for tEplDllkInstance.m_bUpdateTxFrame
+// defines for tDllkInstance.updateTxFrame
 #define DLLK_UPDATE_NONE                0   // no update necessary
 #define DLLK_UPDATE_STATUS              1   // StatusRes needs update
 #define DLLK_UPDATE_BOTH                2   // IdentRes and StatusRes need update
 
-// defines for tDllNodeInfo.m_bPresFilterFlags
+// defines for tDllkNodeInfo.presFilterFlags
 #define DLLK_FILTER_FLAG_PDO            0x01    // PRes needed for RPDO
 #define DLLK_FILTER_FLAG_HB             0x02    // PRes needed for Heartbeat Consumer
 
@@ -183,7 +183,7 @@ typedef struct
     tDllState               dllState;
     tDllkCbProcessRpdo      pfnCbProcessRpdo;
     tDllkCbProcessTpdo      pfnCbProcessTpdo;
-    tEplDllkCbAsync         pfnCbAsync;
+    tDllkCbAsync            pfnCbAsync;
     tSyncCb                 pfnCbSync;
     tDllAsndFilter          aAsndFilter[DLL_MAX_ASND_SERVICE_ID];
     tEdrvFilter             aFilter[DLLK_FILTER_COUNT];
@@ -193,7 +193,7 @@ typedef struct
     UINT8                   curTxBufferOffsetIdentRes;
     UINT8                   curTxBufferOffsetStatusRes;
     UINT8                   curTxBufferOffsetNmtReq;
-    UINT8                   curTxBufferOffsetNonEpl;
+    UINT8                   curTxBufferOffsetNonPlk;
     UINT8                   curTxBufferOffsetCycle;         // PRes, SoC, SoA, PReq
 #if CONFIG_DLL_PRES_CHAINING_CN != FALSE
     UINT8                   curTxBufferOffsetSyncRes;
@@ -253,7 +253,7 @@ extern "C" {
 /* Frame processing functions (dllkframe.c) */
 tEdrvReleaseRxBuffer dllk_processFrameReceived(tEdrvRxBuffer* pRxBuffer_p) SECTION_DLLK_FRAME_RCVD_CB;
 void       dllk_processTransmittedNmtReq(tEdrvTxBuffer* pTxBuffer_p);
-void       dllk_processTransmittedNonEpl(tEdrvTxBuffer* pTxBuffer_p);
+void       dllk_processTransmittedNonPlk(tEdrvTxBuffer* pTxBuffer_p);
 #if defined(CONFIG_INCLUDE_NMT_MN)
 void       dllk_processTransmittedSoc(tEdrvTxBuffer* pTxBuffer_p);
 void       dllk_processTransmittedSoa(tEdrvTxBuffer* pTxBuffer_p);

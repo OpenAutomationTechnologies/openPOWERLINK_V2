@@ -130,7 +130,7 @@ MainWindow::MainWindow(QWidget *parent)
     QHBoxLayout *pStatusRegion = new QHBoxLayout();
     pStatusRegion->setObjectName("StatusRegion");
 
-    // EPL network state
+    // POWERLINK network state
     pState = new State;
     pStatusRegion->addWidget(pState);
 
@@ -159,9 +159,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     pFootRegion->addSpacing(20);
 
-    pStartStopEpl = new QPushButton(tr("Start POWERLINK"));
-    pFootRegion->addWidget(pStartStopEpl);
-    connect(pStartStopEpl, SIGNAL(clicked()), this, SLOT(startPowerlink()));
+    pStartStopOplk = new QPushButton(tr("Start POWERLINK"));
+    pFootRegion->addWidget(pStartStopOplk);
+    connect(pStartStopOplk, SIGNAL(clicked()), this, SLOT(startPowerlink()));
 
     pFootRegion->addStretch();
 
@@ -242,7 +242,7 @@ void MainWindow::startPowerlink()
     devName = pInterfaceDialog->getDevName();
     delete pInterfaceDialog;
 #else
-    devName = "epl";
+    devName = "plk";
 #endif
 
     pNodeIdEdit->setEnabled(false);
@@ -253,9 +253,9 @@ void MainWindow::startPowerlink()
     }
 
     // change the button to stop
-    pStartStopEpl->setText(tr("Stop POWERLINK"));
-    pStartStopEpl->disconnect(this, SLOT(startPowerlink()));
-    connect(pStartStopEpl, SIGNAL(clicked()), this, SLOT(stopPowerlink()));
+    pStartStopOplk->setText(tr("Stop POWERLINK"));
+    pStartStopOplk->disconnect(this, SLOT(startPowerlink()));
+    connect(pStartStopOplk, SIGNAL(clicked()), this, SLOT(stopPowerlink()));
 
     pApi = new Api(this, nodeId, devName);
 
@@ -271,9 +271,9 @@ Stops the openPOWERLINK stack.
 void MainWindow::stopPowerlink()
 {
     delete pApi;
-    pStartStopEpl->setText(tr("Start POWERLINK"));
-    pStartStopEpl->disconnect(this, SLOT(stopPowerlink()));
-    connect(pStartStopEpl, SIGNAL(clicked()), this, SLOT(startPowerlink()));
+    pStartStopOplk->setText(tr("Start POWERLINK"));
+    pStartStopOplk->disconnect(this, SLOT(stopPowerlink()));
+    connect(pStartStopOplk, SIGNAL(clicked()), this, SLOT(startPowerlink()));
     pNodeIdEdit->setEnabled(true);
 }
 

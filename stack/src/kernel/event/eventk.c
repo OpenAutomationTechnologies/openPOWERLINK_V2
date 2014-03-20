@@ -286,7 +286,7 @@ tOplkError eventk_postEvent(tEvent* pEvent_p)
 This function posts an error event to the API module.
 
 \param  eventSource_p           Source that caused the error
-\param  eplError_p              Error code
+\param  oplkError_p             Error code
 \param  argSize_p               Size of error argument
 \param  pArg_p                  Error argument
 
@@ -297,29 +297,29 @@ This function posts an error event to the API module.
 \ingroup module_eventk
 */
 //------------------------------------------------------------------------------
-tOplkError eventk_postError(tEventSource eventSource_p, tOplkError eplError_p,
+tOplkError eventk_postError(tEventSource eventSource_p, tOplkError oplkError_p,
                             UINT argSize_p, void* pArg_p)
 {
     tOplkError          ret;
     tEventError         eventError;
-    tEvent              eplEvent;
+    tEvent              oplkEvent;
 
     ret = kErrorOk;
 
     // create argument
     eventError.eventSource = eventSource_p;
-    eventError.oplkError = eplError_p;
+    eventError.oplkError = oplkError_p;
     argSize_p = (UINT)min((size_t)argSize_p, sizeof(eventError.errorArg));
     OPLK_MEMCPY(&eventError.errorArg, pArg_p, argSize_p);
 
     // create event
-    eplEvent.eventType = kEventTypeError;
-    eplEvent.eventSink = kEventSinkApi;
-    OPLK_MEMSET(&eplEvent.netTime, 0x00, sizeof(eplEvent.netTime));
-    eplEvent.eventArgSize = offsetof(tEventError, errorArg) + argSize_p;
-    eplEvent.pEventArg = &eventError;
+    oplkEvent.eventType = kEventTypeError;
+    oplkEvent.eventSink = kEventSinkApi;
+    OPLK_MEMSET(&oplkEvent.netTime, 0x00, sizeof(oplkEvent.netTime));
+    oplkEvent.eventArgSize = offsetof(tEventError, errorArg) + argSize_p;
+    oplkEvent.pEventArg = &eventError;
 
-    ret = eventk_postEvent(&eplEvent);
+    ret = eventk_postEvent(&oplkEvent);
 
     return ret;
 }

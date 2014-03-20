@@ -115,7 +115,7 @@ static tOplkError handleDllErrors(tEvent* pEvent_p);
 #ifdef CONFIG_INCLUDE_NMT_MN
 static tOplkError decrementMnCounters(void);
 static tOplkError postHeartbeatEvent(UINT nodeId_p, tNmtState state_p, UINT16 errorCode_p);
-static tOplkError generateHistoryEntryWithError(UINT16 errorCode_p, tNetTime netTime_p, UINT16 eplError_p);
+static tOplkError generateHistoryEntryWithError(UINT16 errorCode_p, tNetTime netTime_p, UINT16 oplkError_p);
 #endif
 
 //============================================================================//
@@ -961,7 +961,7 @@ static tOplkError generateHistoryEntry(UINT16 errorCode_p, tNetTime netTime_p)
     tErrHistoryEntry            historyEntry;
 
     historyEntry.entryType = ERR_ENTRYTYPE_MODE_OCCURRED |
-                             ERR_ENTRYTYPE_PROF_EPL |
+                             ERR_ENTRYTYPE_PROF_PLK |
                              ERR_ENTRYTYPE_HISTORY;
 
     historyEntry.errorCode = errorCode_p;
@@ -993,7 +993,7 @@ static tOplkError generateHistoryEntryNodeId(UINT16 errorCode_p,
     tErrHistoryEntry            historyEntry;
 
     historyEntry.entryType = ERR_ENTRYTYPE_MODE_OCCURRED |
-                             ERR_ENTRYTYPE_PROF_EPL |
+                             ERR_ENTRYTYPE_PROF_PLK |
                              ERR_ENTRYTYPE_HISTORY;
 
     historyEntry.errorCode = errorCode_p;
@@ -1015,25 +1015,25 @@ API.
 
 \param  errorCode_p             Error which occured.
 \param  netTime_p               Timestamp at which error occured.
-\param  eplError_p              Error flag to be included in history entry.
+\param  oplkError_p             Error flag to be included in history entry.
 
 \return Returns kErrorOk or error code
 */
 //------------------------------------------------------------------------------
 static tOplkError generateHistoryEntryWithError(UINT16 errorCode_p,
                                                 tNetTime netTime_p,
-                                                UINT16 eplError_p)
+                                                UINT16 oplkError_p)
 {
     tOplkError                  ret;
     tErrHistoryEntry            historyEntry;
 
     historyEntry.entryType = ERR_ENTRYTYPE_MODE_OCCURRED |
-                             ERR_ENTRYTYPE_PROF_EPL |
+                             ERR_ENTRYTYPE_PROF_PLK |
                              ERR_ENTRYTYPE_HISTORY;
 
     historyEntry.errorCode = errorCode_p;
     historyEntry.timeStamp = netTime_p;
-    ami_setUint16Le(&historyEntry.aAddInfo[0], (UINT16)eplError_p);
+    ami_setUint16Le(&historyEntry.aAddInfo[0], (UINT16)oplkError_p);
 
     ret = postHistoryEntryEvent(&historyEntry);
     return ret;

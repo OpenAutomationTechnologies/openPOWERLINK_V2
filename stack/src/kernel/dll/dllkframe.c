@@ -378,13 +378,13 @@ POWERLINK frame was transmitted.
 
 */
 //------------------------------------------------------------------------------
-void dllk_processTransmittedNonEpl(tEdrvTxBuffer* pTxBuffer_p)
+void dllk_processTransmittedNonPlk(tEdrvTxBuffer* pTxBuffer_p)
 {
     tOplkError              ret = kErrorOk;
     tEvent                  event;
     tDllAsyncReqPriority    priority;
     tNmtState               nmtState;
-    UINT                    handle = DLLK_TXFRAME_NONEPL;
+    UINT                    handle = DLLK_TXFRAME_NONPLK;
     UINT32                  arg;
 
     TGT_DLLK_DECLARE_FLAGS
@@ -540,17 +540,17 @@ void dllk_processTransmittedSoa(tEdrvTxBuffer* pTxBuffer_p)
                 break;
 
             case kDllReqServiceUnspecified:
-                if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONEPL + dllkInstance_g.curTxBufferOffsetNonEpl].pBuffer != NULL)
+                if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONPLK + dllkInstance_g.curTxBufferOffsetNonPlk].pBuffer != NULL)
                 {   // non-POWERLINK frame does exist
                     // check if frame is not empty and not being filled
-                    if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONEPL + dllkInstance_g.curTxBufferOffsetNonEpl].txFrameSize > DLLK_BUFLEN_FILLING)
+                    if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONPLK + dllkInstance_g.curTxBufferOffsetNonPlk].txFrameSize > DLLK_BUFLEN_FILLING)
                     {
                         // send non-POWERLINK frame
-                        ret = edrv_sendTxBuffer(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONEPL + dllkInstance_g.curTxBufferOffsetNonEpl]);
+                        ret = edrv_sendTxBuffer(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONPLK + dllkInstance_g.curTxBufferOffsetNonPlk]);
                         if (ret != kErrorOk)
                             goto Exit;
 
-                        dllkInstance_g.curTxBufferOffsetNonEpl ^= 1;
+                        dllkInstance_g.curTxBufferOffsetNonPlk ^= 1;
                     }
                 }
                 break;
@@ -1048,7 +1048,7 @@ tOplkError dllk_createTxFrame (UINT* pHandle_p, UINT* pFrameSize_p,
             break;
 
         case kMsgTypeNonPowerlink:
-            handle = DLLK_TXFRAME_NONEPL;
+            handle = DLLK_TXFRAME_NONPLK;
             break;
 
         case kMsgTypePres:
@@ -1126,7 +1126,7 @@ tOplkError dllk_createTxFrame (UINT* pHandle_p, UINT* pFrameSize_p,
         pTxFrame = (tPlkFrame*)pTxBuffer->pBuffer;
 
         if (msgType_p != kMsgTypeNonPowerlink)
-        {   // fill out Frame only if it is an EPL frame
+        {   // fill out Frame only if it is a POWERLINK frame
             ami_setUint16Be(&pTxFrame->etherType, C_DLL_ETHERTYPE_EPL);
             ami_setUint8Le(&pTxFrame->srcNodeId, (BYTE) dllkInstance_g.dllConfigParam.nodeId);
             OPLK_MEMCPY(&pTxFrame->aSrcMac[0], &dllkInstance_g.aLocalMac[0], 6);
@@ -1773,7 +1773,7 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
     }
 
     if ((nmtState_p & NMT_SUPERSTATE_MASK) != NMT_CS_PLKMODE)
-    {   // do not respond, if NMT state is < PreOp1 (i.e. not EPL_MODE)
+    {   // do not respond, if NMT state is < PreOp1 (i.e. not in a POWERLINK mode)
         goto Exit;
     }
 
@@ -1991,7 +1991,7 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
                 // unspecified invite
 #if (CONFIG_EDRV_AUTO_RESPONSE == FALSE)
                 // Auto-response is not available
-                pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONEPL + dllkInstance_g.curTxBufferOffsetNonEpl];
+                pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONPLK + dllkInstance_g.curTxBufferOffsetNonPlk];
                 if (pTxBuffer->pBuffer != NULL)
                 {   // non-POWERLINK frame does exist
                     // check if frame is not empty and not being filled

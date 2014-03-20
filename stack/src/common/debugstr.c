@@ -190,7 +190,7 @@ static char* eventSourceStr_l[] =
     "EventSourceTimeru",        // Timeru module
     "EventSourceCfgMau",        // CfgMau module
     "EventSourceEventu",        // Eventu module
-    "EventSourceEplApi",        // Api module
+    "EventSourceOplkApi",       // Api module
     "EventSourceLedu",          // Ledu module
     "EventSourceGw309Ascii",    // GW309ASCII module
 };

@@ -55,7 +55,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-typedef tOplkError (*tEplDllkCbAsync)(tFrameInfo* pFrameInfo_p);
+typedef tOplkError (*tDllkCbAsync)(tFrameInfo* pFrameInfo_p);
 
 typedef struct
 {
@@ -105,7 +105,7 @@ typedef enum
     kDllCsWaitPreq       = 0x01,    // CN: wait for PReq frame
     kDllCsWaitSoc        = 0x02,    // CN: wait for SoC frame
     kDllCsWaitSoa        = 0x03,    // CN: wait for SoA frame
-    kDllMsNonCyclic      = 0x04,    // MN: reduced EPL cycle (PreOp1)
+    kDllMsNonCyclic      = 0x04,    // MN: reduced POWERLINK cycle (PreOp1)
     kDllMsWaitSocTrig    = 0x05,    // MN: wait for SoC trigger (cycle timer)
     kDllMsWaitPreqTrig   = 0x06,    // MN: wait for (first) PReq trigger (WaitSoCPReq_U32)
     kDllMsWaitPres       = 0x07,    // MN: wait for PRes frame from CN
@@ -126,8 +126,8 @@ tOplkError dllk_delInstance(void);
 tOplkError dllk_config(tDllConfigParam* pDllConfigParam_p);
 tOplkError dllk_setIdentity(tDllIdentParam* pDllIdentParam_p);
 tOplkError dllk_process(tEvent* pEvent_p) SECTION_DLLK_PROCESS;
-tOplkError dllk_regAsyncHandler(tEplDllkCbAsync pfnDllkCbAsync_p);
-tOplkError dllk_deregAsyncHandler(tEplDllkCbAsync pfnDllkCbAsync_p);
+tOplkError dllk_regAsyncHandler(tDllkCbAsync pfnDllkCbAsync_p);
+tOplkError dllk_deregAsyncHandler(tDllkCbAsync pfnDllkCbAsync_p);
 tOplkError dllk_setAsndServiceIdFilter(tDllAsndServiceId ServiceId_p, tDllAsndFilter Filter_p);
 void       dllk_regRpdoHandler(tDllkCbProcessRpdo pfnDllkCbProcessRpdo_p);
 void       dllk_regTpdoHandler(tDllkCbProcessTpdo pfnDllkCbProcessTpdo_p);

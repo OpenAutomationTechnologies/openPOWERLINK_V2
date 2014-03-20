@@ -35,8 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_EplCfmu_H_
-#define _INC_EplCfmu_H_
+#ifndef _INC_cfmu_H_
+#define _INC_cfmu_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -72,5 +72,5 @@ BOOL       cfmu_isSdoRunning(UINT nodeId_p);
 }
 #endif
 
-#endif /* _INC_EplCfmu_H_ */
+#endif /* _INC_cfmu_H_ */
 

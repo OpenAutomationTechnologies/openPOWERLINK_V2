@@ -182,7 +182,7 @@ tOplkError hrestimer_addInstance(void)
     OPLK_MEMSET(&hresTimerInstance_l, 0, sizeof (hresTimerInstance_l));
 
 #ifndef CONFIG_HIGH_RES_TIMERS
-    printk("EplTimerHighResk: Kernel symbol CONFIG_HIGH_RES_TIMERS is required.\n");
+    printk("hrestimer: Kernel symbol CONFIG_HIGH_RES_TIMERS is required.\n");
     ret = kErrorNoResource;
     return ret;
 #endif

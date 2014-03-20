@@ -239,7 +239,7 @@ static tOplkError processStateChangeEvent(tOplkApiEventType EventType_p,
     {
         case kNmtGsOff:
            // NMT state machine was shut down,
-            // because of user signal (CTRL-C) or critical EPL stack error
+            // because of user signal (CTRL-C) or critical POWERLINK stack error
             // -> also shut down oplk_process() and main()
             ret = kErrorShutdown;
 

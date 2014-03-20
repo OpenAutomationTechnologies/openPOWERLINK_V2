@@ -108,7 +108,7 @@ typedef enum
 \brief type for DLL CAL queue instance
 
 The DllCalQueueInstance is used to identify the abstracted queue instance in
-EplDll*Cal. The queue itself is defined by its implementation (e.g. DIRECT or
+dll*cal. The queue itself is defined by its implementation (e.g. DIRECT or
 SHB)
 */
 typedef void* tDllCalQueueInstance;

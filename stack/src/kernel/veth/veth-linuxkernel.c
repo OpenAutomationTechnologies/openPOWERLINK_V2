@@ -117,7 +117,7 @@ static tOplkError veth_receiveFrame(tFrameInfo* pFrameInfo_p);
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static const struct net_device_ops epl_netdev_ops =
+static const struct net_device_ops oplk_netdev_ops =
 {
     .ndo_open               = veth_open,
     .ndo_stop               = veth_close,
@@ -155,7 +155,7 @@ tOplkError veth_addInstance(const UINT8 aSrcMac_p[6])
     if (pVEthNetDevice_g == NULL)
         return kErrorNoResource;
 
-    pVEthNetDevice_g->netdev_ops        = &epl_netdev_ops;
+    pVEthNetDevice_g->netdev_ops        = &oplk_netdev_ops;
     pVEthNetDevice_g->watchdog_timeo    = VETH_TX_TIMEOUT;
     pVEthNetDevice_g->destructor        = free_netdev;
 
@@ -224,7 +224,7 @@ static int veth_open(struct net_device* pNetDevice_p)
     // register callback function in DLL
     ret = dllk_regAsyncHandler(veth_receiveFrame);
 
-    DEBUG_LVL_VETH_TRACE("veth_open: EplDllkRegAsyncHandler returned 0x%02X\n", ret);
+    DEBUG_LVL_VETH_TRACE("veth_open: dllk_regAsyncHandler returned 0x%02X\n", ret);
     return 0;
 }
 
@@ -241,7 +241,7 @@ The function contains the close routine of the virtual Ethernet driver.
 //------------------------------------------------------------------------------
 static int veth_close(struct net_device* pNetDevice_p)
 {
-    DEBUG_LVL_VETH_TRACE("VEthClose\n");
+    DEBUG_LVL_VETH_TRACE("veth_close\n");
 
     dllk_deregAsyncHandler(veth_receiveFrame);
     netif_stop_queue(pNetDevice_p);     //stop the interface queue for the network subsystem

@@ -152,7 +152,6 @@ tOplkError dllk_addInstance(tDllkInitParam* pInitParam_p)
     OPLK_MEMCPY(EdrvInitParam.aMacAddr, pInitParam_p->aLocalMac, 6);
     EdrvInitParam.hwParam = pInitParam_p->hwParam;
     EdrvInitParam.pfnRxHandler = dllk_processFrameReceived;
-    //    EdrvInitParam.pfnTxHandler = EplDllkCbFrameTransmitted; //jba why commented out?
     if ((ret = edrv_init(&EdrvInitParam)) != kErrorOk)
         return ret;
 
@@ -314,7 +313,7 @@ Ethernet driver).
 \ingroup module_dllk
 */
 //------------------------------------------------------------------------------
-tOplkError dllk_regAsyncHandler(tEplDllkCbAsync pfnDllkCbAsync_p)
+tOplkError dllk_regAsyncHandler(tDllkCbAsync pfnDllkCbAsync_p)
 {
     tOplkError  ret = kErrorOk;
 
@@ -348,7 +347,7 @@ Ethernet driver).
 \ingroup module_dllk
 */
 //------------------------------------------------------------------------------
-tOplkError dllk_deregAsyncHandler(tEplDllkCbAsync pfnDllkCbAsync_p)
+tOplkError dllk_deregAsyncHandler(tDllkCbAsync pfnDllkCbAsync_p)
 {
     tOplkError  ret = kErrorOk;
 
@@ -1144,17 +1143,17 @@ tOplkError dllk_setupLocalNode(tNmtState nmtState_p)
     dllkInstance_g.pTxBuffer[handle].txFrameSize = DLLK_BUFLEN_EMPTY;
     dllkInstance_g.pTxBuffer[handle].pfnTxHandler = dllk_processTransmittedNmtReq;
 
-    // non-EPL frame
+    // non-POWERLINK frame
     frameSize = C_IP_MAX_MTU;
     ret = dllk_createTxFrame(&handle, &frameSize, kMsgTypeNonPowerlink, kDllAsndNotDefined);
     if (ret != kErrorOk)
         return ret;
     // mark Tx buffer as empty
     dllkInstance_g.pTxBuffer[handle].txFrameSize = DLLK_BUFLEN_EMPTY;
-    dllkInstance_g.pTxBuffer[handle].pfnTxHandler = dllk_processTransmittedNonEpl;
+    dllkInstance_g.pTxBuffer[handle].pfnTxHandler = dllk_processTransmittedNonPlk;
     handle++;
     dllkInstance_g.pTxBuffer[handle].txFrameSize = DLLK_BUFLEN_EMPTY;
-    dllkInstance_g.pTxBuffer[handle].pfnTxHandler = dllk_processTransmittedNonEpl;
+    dllkInstance_g.pTxBuffer[handle].pfnTxHandler = dllk_processTransmittedNonPlk;
 
     /*------------------------------------------------------------------------*/
     /* setup filter structure for Edrv */
@@ -1176,9 +1175,9 @@ tOplkError dllk_setupLocalNode(tNmtState nmtState_p)
                                  dllkInstance_g.dllConfigParam.nodeId,
                                  &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SYNCRES]);
 #endif
-    dllk_setupSoaUnspecReqFilter(&dllkInstance_g.aFilter[DLLK_FILTER_SOA_NONEPL],
+    dllk_setupSoaUnspecReqFilter(&dllkInstance_g.aFilter[DLLK_FILTER_SOA_NONPLK],
                                  dllkInstance_g.dllConfigParam.nodeId,
-                                 &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONEPL]);
+                                 &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONPLK]);
 
     // register multicast MACs in ethernet driver
     ami_setUint48Be(&aMulticastMac[0], C_DLL_MULTICAST_SOC);
@@ -1452,7 +1451,7 @@ tOplkError dllk_cleanupLocalNode(tNmtState oldNmtState_p)
         return ret;
 #endif
 
-    if ((ret = dllk_deleteTxFrame(DLLK_TXFRAME_NONEPL)) != kErrorOk)
+    if ((ret = dllk_deleteTxFrame(DLLK_TXFRAME_NONPLK)) != kErrorOk)
         return ret;
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
@@ -1950,8 +1949,8 @@ tOplkError dllk_setupAsyncPhase(tNmtState nmtState_p, UINT nextTxBufferOffset_p,
 
             case kDllReqServiceUnspecified:
                 // unspecified invite
-                pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONEPL +
-                                                      dllkInstance_g.curTxBufferOffsetNonEpl];
+                pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONPLK +
+                                                      dllkInstance_g.curTxBufferOffsetNonPlk];
                 if (pTxBuffer->pBuffer != NULL)
                 {   // non-POWERLINK frame does exist
                     // check if frame is not empty and not being filled
@@ -1959,7 +1958,7 @@ tOplkError dllk_setupAsyncPhase(tNmtState nmtState_p, UINT nextTxBufferOffset_p,
                     {
                         dllkInstance_g.ppTxBufferList[*pIndex_p] = pTxBuffer;
                         (*pIndex_p)++;
-                        dllkInstance_g.curTxBufferOffsetNonEpl ^= 1;
+                        dllkInstance_g.curTxBufferOffsetNonPlk ^= 1;
 
                         //TX buffer is ready, invitation enabled
                         fEnableInvitation = TRUE;
