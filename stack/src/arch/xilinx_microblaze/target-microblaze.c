@@ -147,42 +147,6 @@ void target_enableGlobalInterrupt (UINT8 fEnable_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief    checks if CPU is in interrupt context
-
-This function obtains if the CPU is in interrupt context.
-
-\return UINT8
-\retval TRUE                    CPU is in interrupt context
-\retval FALSE                   CPU is NOT in interrupt context
-
-\ingroup module_target
-*/
-//------------------------------------------------------------------------------
-UINT8 EplTgtIsInterruptContext (void)
-{
-    // No real interrupt context check is performed.
-    // This would be possible with a flag in the ISR, only.
-    // For now, the global interrupt enable flag is checked.
-
-    UINT32 glIntEn;
-
-    glIntEn = Xil_In32(XPAR_PCP_INTC_BASEADDR + XIN_MER_OFFSET) & \
-            XIN_INT_MASTER_ENABLE_MASK;
-
-    if(glIntEn == 0)
-    {
-        //master enable is off
-        return TRUE;
-    }
-    else
-    {
-        //master enable is on
-        return FALSE;
-    }
-}
-
-//------------------------------------------------------------------------------
-/**
 \brief  Initialize target specific stuff
 
 The function initialize target specific stuff which is needed to run the
