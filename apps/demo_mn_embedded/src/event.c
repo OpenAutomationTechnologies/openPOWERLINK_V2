@@ -594,7 +594,7 @@ static tOplkError processSdoEvent(tOplkApiEventType EventType_p,
         return ret;
     }
 
-    if (pSdo->sdoComConState == kEplSdoComTransferFinished)
+    if (pSdo->sdoComConState == kSdoComTransferFinished)
     {   // continue boot-up of CN with NMT command Reset Configuration
         ret = oplk_triggerMnStateChange(pSdo->nodeId, kNmtNodeCommandConfReset);
     }

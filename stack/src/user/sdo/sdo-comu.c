@@ -532,21 +532,21 @@ tOplkError sdocom_getState(tSdoComConHdl sdoComConHdl_p, tSdoComFinished* pSdoCo
 
     if (pSdoComCon->lastAbortCode != 0)
     {   // sdo abort
-        pSdoComFinished_p->sdoComConState = kEplSdoComTransferRxAborted;
+        pSdoComFinished_p->sdoComConState = kSdoComTransferRxAborted;
         // delete abort code
         pSdoComCon->lastAbortCode = 0;
     }
     else if ((pSdoComCon->sdoSeqConHdl & ~SDO_SEQ_HANDLE_MASK)== SDO_SEQ_INVALID_HDL)
     {   // check state
-        pSdoComFinished_p->sdoComConState = kEplSdoComTransferLowerLayerAbort;
+        pSdoComFinished_p->sdoComConState = kSdoComTransferLowerLayerAbort;
     }
     else if (pSdoComCon->sdoComState == kSdoComStateClientWaitInit)
     {   // finished
-        pSdoComFinished_p->sdoComConState = kEplSdoComTransferNotActive;
+        pSdoComFinished_p->sdoComConState = kSdoComTransferNotActive;
     }
     else if (pSdoComCon->transferSize == 0)
     {   // finished
-        pSdoComFinished_p->sdoComConState = kEplSdoComTransferFinished;
+        pSdoComFinished_p->sdoComConState = kSdoComTransferFinished;
     }
     return ret;
 }
@@ -1114,7 +1114,7 @@ static tOplkError processStateClientWaitInit(tSdoComConHdl sdoComConHdl_p, tSdoC
         // abort to send from higher layer
         case kSdoComConEventAbort:
             pSdoComCon->lastAbortCode = *((UINT32*)pSdoComCon->pData);
-            ret = transferFinished(sdoComConHdl_p, pSdoComCon, kEplSdoComTransferTxAborted);
+            ret = transferFinished(sdoComConHdl_p, pSdoComCon, kSdoComTransferTxAborted);
             break;
 
         case kSdoComConEventConClosed:
@@ -1131,7 +1131,7 @@ static tOplkError processStateClientWaitInit(tSdoComConHdl sdoComConHdl_p, tSdoC
             {
                 pSdoComCon->lastAbortCode = 0;
             }
-            ret = transferFinished(sdoComConHdl_p, pSdoComCon, kEplSdoComTransferLowerLayerAbort);
+            ret = transferFinished(sdoComConHdl_p, pSdoComCon, kSdoComTransferLowerLayerAbort);
             // d.k.: do not clean control structure
             break;
 
@@ -1180,7 +1180,7 @@ static tOplkError processStateClientConnected(tSdoComConHdl sdoComConHdl_p, tSdo
             {
                 pSdoComCon->transactionId++;
                 pSdoComCon->lastAbortCode = 0;
-                ret = transferFinished(sdoComConHdl_p, pSdoComCon, kEplSdoComTransferFinished);
+                ret = transferFinished(sdoComConHdl_p, pSdoComCon, kSdoComTransferFinished);
                 return ret;
             }
 
@@ -1203,7 +1203,7 @@ static tOplkError processStateClientConnected(tSdoComConHdl sdoComConHdl_p, tSdo
                     ret = sdoseq_sendData(pSdoComCon->sdoSeqConHdl, 0, (tPlkFrame*)NULL);
                     pSdoComCon->transactionId++;
                     pSdoComCon->lastAbortCode = ami_getUint32Le(&pRecvdCmdLayer_p->aCommandData[0]);
-                    ret = transferFinished(sdoComConHdl_p, pSdoComCon, kEplSdoComTransferRxAborted);
+                    ret = transferFinished(sdoComConHdl_p, pSdoComCon, kSdoComTransferRxAborted);
                     return ret;
                 }
                 else
@@ -1216,7 +1216,7 @@ static tOplkError processStateClientConnected(tSdoComConHdl sdoComConHdl_p, tSdo
                         ret = sdoseq_sendData(pSdoComCon->sdoSeqConHdl, 0, (tPlkFrame*)NULL);
                         pSdoComCon->transactionId++;
                         pSdoComCon->lastAbortCode = 0;
-                        ret = transferFinished(sdoComConHdl_p, pSdoComCon, kEplSdoComTransferFinished);
+                        ret = transferFinished(sdoComConHdl_p, pSdoComCon, kSdoComTransferFinished);
                         return ret;
                     }
                 }
@@ -1236,14 +1236,14 @@ static tOplkError processStateClientConnected(tSdoComConHdl sdoComConHdl_p, tSdo
             pSdoComCon->sdoSeqConHdl |= SDO_SEQ_INVALID_HDL;
             pSdoComCon->sdoComState = kSdoComStateClientWaitInit;
             pSdoComCon->lastAbortCode = 0;
-            ret = transferFinished(sdoComConHdl_p, pSdoComCon, kEplSdoComTransferLowerLayerAbort);
+            ret = transferFinished(sdoComConHdl_p, pSdoComCon, kSdoComTransferLowerLayerAbort);
             break;
 
         case kSdoComConEventAbort:
             clientSendAbort(pSdoComCon,*((UINT32*)pSdoComCon->pData));
             pSdoComCon->transactionId++;
             pSdoComCon->lastAbortCode = *((UINT32*)pSdoComCon->pData);
-            ret = transferFinished(sdoComConHdl_p, pSdoComCon, kEplSdoComTransferTxAborted);
+            ret = transferFinished(sdoComConHdl_p, pSdoComCon, kSdoComTransferTxAborted);
             break;
 
         case kSdoComConEventInitError:
@@ -1252,13 +1252,13 @@ static tOplkError processStateClientConnected(tSdoComConHdl sdoComConHdl_p, tSdo
             pSdoComCon->sdoSeqConHdl |= SDO_SEQ_INVALID_HDL;
             pSdoComCon->sdoComState = kSdoComStateClientWaitInit;
             pSdoComCon->lastAbortCode = SDO_AC_TIME_OUT;
-            ret = transferFinished(sdoComConHdl_p, pSdoComCon, kEplSdoComTransferLowerLayerAbort);
+            ret = transferFinished(sdoComConHdl_p, pSdoComCon, kSdoComTransferLowerLayerAbort);
             break;
 
         case kSdoComConEventTransferAbort:
             pSdoComCon->sdoComState = kSdoComStateClientWaitInit;
             pSdoComCon->lastAbortCode = SDO_AC_TIME_OUT;
-            ret = transferFinished(sdoComConHdl_p, pSdoComCon, kEplSdoComTransferLowerLayerAbort);
+            ret = transferFinished(sdoComConHdl_p, pSdoComCon, kSdoComTransferLowerLayerAbort);
             break;
 
         default:
@@ -1304,7 +1304,7 @@ static tOplkError processStateClientSegmTransfer(tSdoComConHdl sdoComConHdl_p, t
                 pSdoComCon->transactionId++;
                 pSdoComCon->sdoComState = kSdoComStateClientConnected;
                 pSdoComCon->lastAbortCode = 0;
-                ret = transferFinished(sdoComConHdl_p, pSdoComCon, kEplSdoComTransferFinished);
+                ret = transferFinished(sdoComConHdl_p, pSdoComCon, kSdoComTransferFinished);
                 return ret;
             }
             break;
@@ -1322,7 +1322,7 @@ static tOplkError processStateClientSegmTransfer(tSdoComConHdl sdoComConHdl_p, t
                     pSdoComCon->transactionId++;
                     pSdoComCon->sdoComState = kSdoComStateClientConnected;
                     pSdoComCon->lastAbortCode = ami_getUint32Le(&pRecvdCmdLayer_p->aCommandData[0]);
-                    ret = transferFinished(sdoComConHdl_p, pSdoComCon, kEplSdoComTransferRxAborted);
+                    ret = transferFinished(sdoComConHdl_p, pSdoComCon, kSdoComTransferRxAborted);
                     return ret;
                 }
                 else
@@ -1336,7 +1336,7 @@ static tOplkError processStateClientSegmTransfer(tSdoComConHdl sdoComConHdl_p, t
                         pSdoComCon->transactionId++;
                         pSdoComCon->sdoComState = kSdoComStateClientConnected;
                         pSdoComCon->lastAbortCode = 0;
-                        ret = transferFinished(sdoComConHdl_p, pSdoComCon, kEplSdoComTransferFinished);
+                        ret = transferFinished(sdoComConHdl_p, pSdoComCon, kSdoComTransferFinished);
                     }
                 }
             }
@@ -1350,7 +1350,7 @@ static tOplkError processStateClientSegmTransfer(tSdoComConHdl sdoComConHdl_p, t
             pSdoComCon->sdoComState = kSdoComStateClientWaitInit;
             pSdoComCon->transactionId++;
             pSdoComCon->lastAbortCode = 0;
-            ret = transferFinished(sdoComConHdl_p, pSdoComCon, kEplSdoComTransferFinished);
+            ret = transferFinished(sdoComConHdl_p, pSdoComCon, kSdoComTransferFinished);
             break;
 
         // abort to send from higher layer
@@ -1359,7 +1359,7 @@ static tOplkError processStateClientSegmTransfer(tSdoComConHdl sdoComConHdl_p, t
             pSdoComCon->transactionId++;
             pSdoComCon->sdoComState = kSdoComStateClientConnected;
             pSdoComCon->lastAbortCode = *((UINT32*)pSdoComCon->pData);
-            ret = transferFinished(sdoComConHdl_p, pSdoComCon, kEplSdoComTransferTxAborted);
+            ret = transferFinished(sdoComConHdl_p, pSdoComCon, kSdoComTransferTxAborted);
             break;
 
         case kSdoComConEventInitError:
@@ -1368,13 +1368,13 @@ static tOplkError processStateClientSegmTransfer(tSdoComConHdl sdoComConHdl_p, t
             pSdoComCon->sdoSeqConHdl |= SDO_SEQ_INVALID_HDL;
             pSdoComCon->sdoComState = kSdoComStateClientWaitInit;
             pSdoComCon->lastAbortCode = SDO_AC_TIME_OUT;
-            ret = transferFinished(sdoComConHdl_p, pSdoComCon, kEplSdoComTransferLowerLayerAbort);
+            ret = transferFinished(sdoComConHdl_p, pSdoComCon, kSdoComTransferLowerLayerAbort);
             break;
 
         case kSdoComConEventTransferAbort:
             pSdoComCon->sdoComState = kSdoComStateClientWaitInit;
             pSdoComCon->lastAbortCode = SDO_AC_TIME_OUT;
-            ret = transferFinished(sdoComConHdl_p, pSdoComCon, kEplSdoComTransferLowerLayerAbort);
+            ret = transferFinished(sdoComConHdl_p, pSdoComCon, kSdoComTransferLowerLayerAbort);
             break;
 
         default:
@@ -2084,7 +2084,7 @@ static tOplkError clientProcessFrame(tSdoComConHdl sdoComConHdl_p, tAsySdoCom* p
         {
             pSdoComCon->lastAbortCode = SDO_AC_GENERAL_ERROR;
             clientSendAbort(pSdoComCon, pSdoComCon->lastAbortCode);
-            ret = transferFinished(sdoComConHdl_p, pSdoComCon, kEplSdoComTransferTxAborted);
+            ret = transferFinished(sdoComConHdl_p, pSdoComCon, kSdoComTransferTxAborted);
         }
     }
     else
@@ -2098,7 +2098,7 @@ static tOplkError clientProcessFrame(tSdoComConHdl sdoComConHdl_p, tAsySdoCom* p
             {
                 pSdoComCon->lastAbortCode = SDO_AC_GENERAL_ERROR;
                 clientSendAbort(pSdoComCon, pSdoComCon->lastAbortCode);
-                ret = transferFinished(sdoComConHdl_p, pSdoComCon, kEplSdoComTransferTxAborted);
+                ret = transferFinished(sdoComConHdl_p, pSdoComCon, kSdoComTransferTxAborted);
             }
         }
         else
@@ -2144,7 +2144,7 @@ static tOplkError clientProcessFrame(tSdoComConHdl sdoComConHdl_p, tAsySdoCom* p
                             {   // buffer too small -> send abort
                                 pSdoComCon->lastAbortCode = SDO_AC_DATA_TYPE_LENGTH_TOO_HIGH;
                                 clientSendAbort(pSdoComCon, pSdoComCon->lastAbortCode);
-                                ret = transferFinished(sdoComConHdl_p, pSdoComCon, kEplSdoComTransferTxAborted);
+                                ret = transferFinished(sdoComConHdl_p, pSdoComCon, kSdoComTransferTxAborted);
                                 return ret;
                             }
 
@@ -2169,7 +2169,7 @@ static tOplkError clientProcessFrame(tSdoComConHdl sdoComConHdl_p, tAsySdoCom* p
                             {   // segment too large -> send abort
                                 pSdoComCon->lastAbortCode = SDO_AC_INVALID_BLOCK_SIZE;
                                 clientSendAbort(pSdoComCon, pSdoComCon->lastAbortCode);
-                                ret = transferFinished(sdoComConHdl_p, pSdoComCon, kEplSdoComTransferTxAborted);
+                                ret = transferFinished(sdoComConHdl_p, pSdoComCon, kSdoComTransferTxAborted);
                                 return ret;
                             }
                             OPLK_MEMCPY(pSdoComCon->pData, &pSdoCom_p->aCommandData[0], segmentSize);
@@ -2187,7 +2187,7 @@ static tOplkError clientProcessFrame(tSdoComConHdl sdoComConHdl_p, tAsySdoCom* p
                             {   // segment too large -> send abort
                                 pSdoComCon->lastAbortCode = SDO_AC_INVALID_BLOCK_SIZE;
                                 clientSendAbort(pSdoComCon, pSdoComCon->lastAbortCode);
-                                ret = transferFinished(sdoComConHdl_p, pSdoComCon, kEplSdoComTransferTxAborted);
+                                ret = transferFinished(sdoComConHdl_p, pSdoComCon, kSdoComTransferTxAborted);
                                 return ret;
                             }
                             OPLK_MEMCPY(pSdoComCon->pData, &pSdoCom_p->aCommandData[0], segmentSize);
