@@ -406,7 +406,7 @@ tOplkError pdok_processRxPdo(tPlkFrame* pFrame_p, UINT frameSize_p)
         goto Exit;
     }
 
-    // retrieve EPL message type
+    // retrieve POWERLINK message type
     msgType = ami_getUint8Le(&pFrame_p->messageType);
     if (msgType == kMsgTypePreq)
     {   // RPDO is PReq frame

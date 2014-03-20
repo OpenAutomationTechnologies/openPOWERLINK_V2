@@ -763,7 +763,7 @@ static tOplkError processStateInit1(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
 {
     tOplkError              ret = kErrorOk;
 
-    // TRACE("EplSdoAsySequ: StateInit1\n");
+    // TRACE("sdo-sequ: processStateInit1\n");
 
     switch (event_p)
     {
@@ -867,7 +867,7 @@ static tOplkError processStateInit2(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
 {
     tOplkError          ret = kErrorOk;
 
-    // TRACE("EplSdoAsySequ: StateInit2\n");
+    // TRACE("sdo-sequ: processStateInit2\n");
 
     switch (event_p)
     {
@@ -1309,7 +1309,7 @@ static tOplkError processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sd
     UINT                frameSize;
     tPlkFrame *         pFrame;
 
-    DEBUG_LVL_SDO_TRACE("EplSdoAsySequ: StateWaitAck\n");
+    DEBUG_LVL_SDO_TRACE("sdo-sequ: processStateWaitAck\n");
 
     ret = setTimer(pSdoSeqCon_p, sdoSeqInstance_l.sdoSeqTimeout);
 

@@ -137,7 +137,7 @@ Api::Api(MainWindow *pMainWindow_p, UINT nodeId_p, QString devName_p)
     pCnState = pMainWindow_p->getCnStateWidget();
 
     pProcessThread = new ProcessThread(pMainWindow_p);
-    QObject::connect(pProcessThread, SIGNAL(eplStatusChanged(int)),
+    QObject::connect(pProcessThread, SIGNAL(oplkStatusChanged(int)),
                      pState, SLOT(setStatusLed(int)));
     QObject::connect(pProcessThread, SIGNAL(nmtStateChanged(const QString&)),
                      pState, SLOT(setNmtStateText(const QString &)));
@@ -226,7 +226,7 @@ Api::Api(MainWindow *pMainWindow_p, UINT nodeId_p, QString devName_p)
     initParam.pfnCbSync  =    NULL;
 #endif
 
-    // init EPL
+    // init POWERLINK
     ret = oplk_init(&initParam);
     if(ret != kErrorOk)
     {
@@ -252,7 +252,7 @@ Api::Api(MainWindow *pMainWindow_p, UINT nodeId_p, QString devName_p)
                               "Error code: 0x"+ QString::number(ret, 16));
         goto Exit;
     }
-    // start the EPL stack
+    // start the openPOWERLINK stack
     ret = oplk_execNmtCommand(kNmtEventSwReset);
 
     // start process thread

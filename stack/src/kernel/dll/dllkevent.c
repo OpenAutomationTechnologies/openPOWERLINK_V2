@@ -161,7 +161,7 @@ tOplkError dllk_process(tEvent* pEvent_p)
 
         default:
             ret = kErrorInvalidEvent;
-            ASSERTMSG(ret != kErrorInvalidEvent, "EplDllkProcess(): unhandled event type!\n");
+            ASSERTMSG(ret != kErrorInvalidEvent, "dllk_process(): unhandled event type!\n");
             break;
     }
 
@@ -612,10 +612,10 @@ static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtSta
             break;
 
         default:    // generic priority
-            nextTxBufferOffset = dllkInstance_g.curTxBufferOffsetNonEpl;
-            pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONEPL + nextTxBufferOffset];
+            nextTxBufferOffset = dllkInstance_g.curTxBufferOffsetNonPlk;
+            pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONPLK + nextTxBufferOffset];
 #if (CONFIG_EDRV_AUTO_RESPONSE != FALSE)
-            filterEntry = DLLK_FILTER_SOA_NONEPL;
+            filterEntry = DLLK_FILTER_SOA_NONPLK;
 #endif
             break;
     }
@@ -693,11 +693,11 @@ static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtSta
                 ret = edrv_sendTxBuffer(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NMTREQ +
                                                               dllkInstance_g.curTxBufferOffsetNmtReq]);
             }
-            else if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONEPL +
-                                              dllkInstance_g.curTxBufferOffsetNonEpl].txFrameSize > DLLK_BUFLEN_EMPTY)
-            {   // non-EPL Tx buffer contains a frame
-                ret = edrv_sendTxBuffer(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONEPL +
-                                                              dllkInstance_g.curTxBufferOffsetNonEpl]);
+            else if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONPLK +
+                                              dllkInstance_g.curTxBufferOffsetNonPlk].txFrameSize > DLLK_BUFLEN_EMPTY)
+            {   // non-POWERLINK Tx buffer contains a frame
+                ret = edrv_sendTxBuffer(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONPLK +
+                                                              dllkInstance_g.curTxBufferOffsetNonPlk]);
             }
             if (ret == kErrorInvalidOperation)
             {   // ignore error if caused by already active transmission
@@ -728,8 +728,8 @@ static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtSta
                 frameCount = 1;
                 asyncReqPriority_p = kDllAsyncReqPrioNmt;
             }
-            else if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONEPL +
-                                              dllkInstance_g.curTxBufferOffsetNonEpl].txFrameSize > DLLK_BUFLEN_EMPTY)
+            else if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONPLK +
+                                              dllkInstance_g.curTxBufferOffsetNonPlk].txFrameSize > DLLK_BUFLEN_EMPTY)
             {   // non-POWERLINK Tx buffer contains a frame
                 // use NMT request FIFO, because of higher priority
                 // add one more frame

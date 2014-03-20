@@ -250,7 +250,7 @@ tOplkError nmtu_processEvent(tEvent* pEvent_p)
 #endif
                         {
                             ret = kErrorNmtInvalidState;
-                            TRACE("EplNmtuProcess(): unhandled NMT state 0x%X\n",
+                            TRACE("nmtu_processEvent(): unhandled NMT state 0x%X\n",
                                   pNmtStateChange->newNmtState);
                         }
                     }
@@ -261,7 +261,7 @@ tOplkError nmtu_processEvent(tEvent* pEvent_p)
             {   // application wants to change NMT state itself, it's OK
                 ret = kErrorOk;
             }
-            DEBUG_LVL_NMTU_TRACE("EplNmtuProcessEvent(): NMT-State-Maschine announce change of NMT State\n");
+            DEBUG_LVL_NMTU_TRACE("nmtu_processEvent(): NMT state machine announce change of NMT State\n");
             break;
 
         default:
@@ -449,7 +449,7 @@ static BOOL processGeneralStateChange(tNmtState newNmtState_p, tOplkError* pRet_
 #if defined(CONFIG_INCLUDE_NMT_MN)
                 ret = nmtu_postNmtEvent(kNmtEventEnterMsNotActive);
 #else
-                TRACE("EplNmtuProcess(): no MN functionality implemented\n");
+                TRACE("processGeneralStateChange(): no MN functionality implemented\n");
 #endif
             }
             else
@@ -492,7 +492,7 @@ static BOOL processMnStateChange(tNmtState newNmtState_p, tOplkError* pRet_p)
 
     switch (newNmtState_p)
     {
-        // node listens for EPL-Frames and check timeout
+        // node listens for POWERLINK frames and check timeout
         case kNmtMsNotActive:
             // create timer to switch automatically to BasicEthernet/PreOp1 if no other MN active in network
             // check NMT_StartUp_U32.Bit13
@@ -591,7 +591,7 @@ static BOOL processCnStateChange(tNmtState newNmtState_p, tOplkError* pRet_p)
 
     switch (newNmtState_p)
     {
-        // node listens for EPL-Frames and check timeout
+        // node listens for POWERLINK frames and check timeout
         case kNmtCsNotActive:
             // create timer to switch automatically to BasicEthernet if no MN
             // is available in the network

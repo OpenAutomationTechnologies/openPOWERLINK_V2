@@ -73,7 +73,7 @@ public:
     ProcessThread(MainWindow *pMainWindow_p);
 
     void            run();
-    void            sigEplStatus(int status_p);
+    void            sigOplkStatus(int status_p);
     void            sigNmtState(tNmtState State_p);
     void            sigPrintLog(QString log_p);
     void            sigNodeAppeared(int nodeId_p) { emit nodeAppeared(nodeId_p); };
@@ -86,7 +86,7 @@ public:
     void            reachedNmtStateOff();
 
 signals:
-    void            eplStatusChanged(int status_p);
+    void            oplkStatusChanged(int status_p);
     void            nmtStateChanged(const QString &strState_p);
     void            nodeAppeared(int nodeId_p);
     void            nodeDisappeared(int nodeId_p);

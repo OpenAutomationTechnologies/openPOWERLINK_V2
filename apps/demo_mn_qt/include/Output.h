@@ -59,7 +59,7 @@ class QVBoxLayout;
 
 //------------------------------------------------------------------------------
 /**
-\brief  EplOutput class
+\brief  Output class
 
 The class implements the output data widget.
 */

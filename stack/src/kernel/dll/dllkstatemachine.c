@@ -282,7 +282,7 @@ static tOplkError processNmtMsPreop1(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
     {
         case kNmtEventDllMeSocTrig:
         case kNmtEventDllCeAsnd:
-            // because of reduced EPL cycle SoA shall be triggered, not SoC
+            // because of reduced POWERLINK cycle SoA shall be triggered, not SoC
 
             ret = dllk_asyncFrameNotReceived(dllkInstance_g.aLastReqServiceId[dllkInstance_g.curLastSoaReq],
                                              dllkInstance_g.aLastTargetNodeId[dllkInstance_g.curLastSoaReq]);

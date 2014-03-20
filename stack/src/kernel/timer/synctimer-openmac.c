@@ -114,7 +114,7 @@ typedef struct
     tSyncTimerCbLossOfSync      pfnLossOfSync2Cb;
     UINT32                      lossOfSyncTimeout2;
 #endif
-    // EplTimerSynckCtrl specific
+    // synctimer ctrl specific
     BOOL                        fRun;
     UINT32                      aActualTimeDiff[TIMEDIFF_COUNT];
     UINT                        actualTimeDiffNextIndex;
@@ -124,7 +124,7 @@ typedef struct
     UINT32                      rejectThreshold;
     UINT32                      targetSyncTime;
     UINT32                      previousSyncTime;
-    // EplTimerSynckDrv specific
+    // synctimer drv specific
     tTimerInfo                  aTimerInfo[TIMER_COUNT];
     UINT                        activeTimerHdl;
 #ifdef TIMER_USE_EXT_SYNC_INT

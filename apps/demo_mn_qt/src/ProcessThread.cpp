@@ -115,10 +115,10 @@ run() implements the starting point for the event thread.
 //------------------------------------------------------------------------------
 void ProcessThread::run()
 {
-    tOplkError          EplRet;
+    tOplkError          ret;
 
     // start process function
-    EplRet = oplk_process();
+    ret = oplk_process();
 }
 
 //------------------------------------------------------------------------------
@@ -130,11 +130,11 @@ The function signals the POWERLINK status
 \param  status_p       POWERLINK status
 */
 //------------------------------------------------------------------------------
-void ProcessThread::sigEplStatus(int status_p)
+void ProcessThread::sigOplkStatus(int status_p)
 {
     if(status_p != status)
     {
-        emit eplStatusChanged(status_p);
+        emit oplkStatusChanged(status_p);
         status = status_p;
     }
 }
@@ -360,11 +360,11 @@ tOplkError ProcessThread::processStateChangeEvent(tOplkApiEventType EventType_p,
     switch (pNmtStateChange->newNmtState)
     {
         case kNmtGsOff:
-            pProcessThread_g->sigEplStatus(0);
+            pProcessThread_g->sigOplkStatus(0);
 
             // NMT state machine was shut down,
-            // because of user signal (CTRL-C) or critical EPL stack error
-            // -> also shut down EplApiProcess()
+            // because of user signal (CTRL-C) or critical POWERLINK stack error
+            // -> also shut down oplk_process()
             ret = kErrorShutdown;
             // and unblock DataInDataOutThread
             oplk_freeProcessImage(); //jba do we need it here?
@@ -380,7 +380,7 @@ tOplkError ProcessThread::processStateChangeEvent(tOplkApiEventType EventType_p,
 #if !defined(CONFIG_INCLUDE_CFM)
             ret = setDefaultNodeAssignment();
 #endif
-            pProcessThread_g->sigEplStatus(1);
+            pProcessThread_g->sigOplkStatus(1);
             sigPrintLog(QString("StateChangeEvent(0x%1) originating event = 0x%2 (%3)")
                      .arg(pNmtStateChange->newNmtState, 4, 16, QLatin1Char('0'))
                      .arg(pNmtStateChange->nmtEvent, 4, 16, QLatin1Char('0'))
@@ -394,14 +394,14 @@ tOplkError ProcessThread::processStateChangeEvent(tOplkApiEventType EventType_p,
         // (in little endian byte order)
         // for configuration of remote CN
             varLen = sizeof(UINT32);
-            EplRet = EplApiReadObject(NULL, 0, 0x1006, 0x00, &cycleLen_g,
-                                      &varLen, kSdoTypeAsnd, NULL);
+            ret = oplk_readObject(NULL, 0, 0x1006, 0x00, &cycleLen_g,
+                                  &varLen, kSdoTypeAsnd, NULL);
             if (ret != kErrorOk)
             {   // local OD access failed
                 break;
             }
 #endif
-            sigEplStatus(1);
+            sigOplkStatus(1);
             sigPrintLog(QString("StateChangeEvent(0x%1) originating event = 0x%2 (%3)")
                      .arg(pNmtStateChange->newNmtState, 4, 16, QLatin1Char('0'))
                      .arg(pNmtStateChange->nmtEvent, 4, 16, QLatin1Char('0'))
@@ -424,7 +424,7 @@ tOplkError ProcessThread::processStateChangeEvent(tOplkApiEventType EventType_p,
                      .arg(pNmtStateChange->newNmtState, 4, 16, QLatin1Char('0'))
                      .arg(pNmtStateChange->nmtEvent, 4, 16, QLatin1Char('0'))
                      .arg(debugstr_getNmtEventStr(pNmtStateChange->nmtEvent)));
-            sigEplStatus(1);
+            sigOplkStatus(1);
             break;
 
         case kNmtCsOperational:
@@ -433,12 +433,12 @@ tOplkError ProcessThread::processStateChangeEvent(tOplkApiEventType EventType_p,
                      .arg(pNmtStateChange->newNmtState, 4, 16, QLatin1Char('0'))
                      .arg(pNmtStateChange->nmtEvent, 4, 16, QLatin1Char('0'))
                      .arg(debugstr_getNmtEventStr(pNmtStateChange->nmtEvent)));
-            sigEplStatus(2);
+            sigOplkStatus(2);
             break;
 
 
         default:
-            sigEplStatus(-1);
+            sigOplkStatus(-1);
             break;
     }
 
@@ -552,7 +552,7 @@ tOplkError ProcessThread::processNodeEvent(tOplkApiEventType EventType_p,
                                    void* pUserArg_p)
 {
     tOplkApiEventNode*   pNode = &pEventArg_p->nodeEvent;
-    tOplkError          EplRet = kErrorOk;
+    tOplkError           ret = kErrorOk;
 
     UNUSED_PARAMETER(EventType_p);
     UNUSED_PARAMETER(pUserArg_p);
@@ -568,33 +568,33 @@ tOplkError ProcessThread::processNodeEvent(tOplkApiEventType EventType_p,
             tSdoComConHdl SdoComConHdl;
 
             // update object 0x1006 on CN
-            EplRet = oplk_writeObject(&SdoComConHdl, pEventArg_p->nodeEvent.nodeId,
-                                       0x1006, 0x00, &cycleLen_g, 4,
-                                       kSdoTypeAsnd, NULL);
-            if (EplRet == kErrorApiTaskDeferred)
+            ret = oplk_writeObject(&SdoComConHdl, pEventArg_p->nodeEvent.nodeId,
+                                   0x1006, 0x00, &cycleLen_g, 4,
+                                   kSdoTypeAsnd, NULL);
+            if (ret == kErrorApiTaskDeferred)
             {   // SDO transfer started
-                EplRet = kErrorReject;
+                ret = kErrorReject;
             }
-            else if (EplRet == kErrorOk)
+            else if (ret == kErrorOk)
             {   // local OD access (should not occur)
                 printf("AppCbEvent(Node) write to local OD\n");
             }
             else
             {   // error occured
 
-                EplRet = oplk_freeSdoChannel(SdoComConHdl);
+                ret = oplk_freeSdoChannel(SdoComConHdl);
                 SdoComConHdl = 0;
 
-                EplRet = oplk_writeObject(&SdoComConHdl, pEventArg_p->nodeEvent.nodeId,
-                                           0x1006, 0x00, &cycleLen_g, 4,
-                                           kSdoTypeAsnd, NULL);
-                if (EplRet == kErrorApiTaskDeferred)
+                ret = oplk_writeObject(&SdoComConHdl, pEventArg_p->nodeEvent.nodeId,
+                                       0x1006, 0x00, &cycleLen_g, 4,
+                                       kSdoTypeAsnd, NULL);
+                if (ret == kErrorApiTaskDeferred)
                 {   // SDO transfer started
-                    EplRet = kErrorReject;
+                    ret = kErrorReject;
                 }
                 else
                 {
-                    printf("AppCbEvent(Node): EplApiWriteObject() returned 0x%03X", EplRet);
+                    printf("AppCbEvent(Node): oplk_writeObject() returned 0x%03X", ret);
                 }
             }
 #endif

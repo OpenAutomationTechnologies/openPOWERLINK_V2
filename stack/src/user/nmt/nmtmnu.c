@@ -646,7 +646,7 @@ tOplkError nmtmnu_sendNmtCommandEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
     // The expected node state will be updated when the NMT command
     // was actually sent.
     // See functions processInternalEvent(kNmtMnuIntNodeEventNmtCmdSent),
-    // EplNmtMnuProcessEvent(kEventTypeNmtMnuNmtCmdSent).
+    // nmtmnu_processEvent(kEventTypeNmtMnuNmtCmdSent).
 
     // remove CN from isochronous phase;
     // This must be done here and not when NMT command is actually sent

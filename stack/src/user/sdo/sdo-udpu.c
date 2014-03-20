@@ -579,7 +579,7 @@ void receiveFromSocket(tSdoUdpInstance* pInstance_p)
             }
             else
             {
-                DEBUG_LVL_ERROR_TRACE("Error in EplSdoUdpThread() no free handle\n");
+                DEBUG_LVL_ERROR_TRACE("Error in sdo-udpu: receiveFromSocket(): no free handle\n");
 #if (TARGET_SYSTEM == _WIN32_)
                 LeaveCriticalSection(sdoUdpInstance_l.pCriticalSection);
 #endif

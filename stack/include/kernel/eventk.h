@@ -69,7 +69,7 @@ tOplkError eventk_process(tEvent* pEvent_p) SECTION_EVENTK_PROCESS;
 
 tOplkError eventk_postEvent(tEvent* pEvent_p) SECTION_EVENTK_POST;
 
-tOplkError eventk_postError(tEventSource eventSource_p, tOplkError eplError_p,
+tOplkError eventk_postError(tEventSource eventSource_p, tOplkError oplkError_p,
                             UINT argSize_p, void* pArg_p);
 
 #ifdef __cplusplus

@@ -97,7 +97,7 @@ private:
     QLineEdit   *pNodeIdEdit;
 
     QPushButton *pToggleMax;
-    QPushButton *pStartStopEpl;
+    QPushButton *pStartStopOplk;
 
     QFrame      *pFrameSepHeadMiddle;
     QFrame      *pFrameSepMiddle;

@@ -211,7 +211,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     // get event handle for pcap instance
     edrInstance_l.aHandle[EDRV_HANDLE_PCAP] = pcap_getevent(edrInstance_l.pcap);
 
-    // Create two unnamed waitable timers for EplTimerHighResk sub-module.
+    // Create two unnamed waitable timers for hrestimer sub-module.
     edrInstance_l.aHandle[EDRV_HANDLE_TIMER0] = CreateWaitableTimer(NULL, FALSE, NULL);
     if (edrInstance_l.aHandle[EDRV_HANDLE_TIMER0] == NULL)
     {

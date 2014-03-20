@@ -510,9 +510,6 @@ tOplkError ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
     tOplkApiEventArg     eventArg;
 
     // call user callback
-    // must be disabled for EplApiLinuxKernel.c, because of reentrancy problem
-    // for local OD access. This is not so bad as user callback function in
-    // application does not use OD callbacks at the moment.
     eventArg.obdCbParam = *pParam_p;
     ret = ctrlu_callUserEventCallback(kOplkApiEventObdAccess, &eventArg);
     if (ret != kErrorOk)

@@ -62,7 +62,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     #define TGT_DBG_POST_TRACE_VALUE(v)
 #endif
 
-#define EPL_NMTK_DBG_POST_TRACE_VALUE(nmtEvent_p, oldNmtState_p, newNmtState_p) \
+#define OPLK_NMTK_DBG_POST_TRACE_VALUE(nmtEvent_p, oldNmtState_p, newNmtState_p) \
     TGT_DBG_POST_TRACE_VALUE((kEventSinkNmtk << 28) | ((mtEvent_p) << 16) \
                              | (((oldNmtState_p) & 0xFF) << 8) \
                              | ((newNmtState_p) & 0xFF))
@@ -276,9 +276,9 @@ tOplkError nmtk_process(tEvent* pEvent_p)
     // inform higher layer about State-Change if needed
     if (oldState != nmtkInstance_g.stateIndex)
     {
-        EPL_NMTK_DBG_POST_TRACE_VALUE(nmtEvent, nmtkStates_g[oldState].nmtState,
-                                      nmtkStates_g[nmtkInstance_g.stateIndex].nmtState);
-        DEBUG_LVL_NMTK_TRACE("EplNmtkProcess(NMT-event = 0x%04X): New NMT-State = 0x%03X\n",
+        OPLK_NMTK_DBG_POST_TRACE_VALUE(nmtEvent, nmtkStates_g[oldState].nmtState,
+                                       nmtkStates_g[nmtkInstance_g.stateIndex].nmtState);
+        DEBUG_LVL_NMTK_TRACE("nmtk_process(NMT-event = 0x%04X): New NMT-State = 0x%03X\n",
                               nmtEvent, nmtkStates_g[nmtkInstance_g.stateIndex].nmtState);
 
         nmtStateChange.newNmtState = nmtkStates_g[nmtkInstance_g.stateIndex].nmtState;
@@ -1027,7 +1027,7 @@ static tOplkError doStateCsBasicEthernet(tNmtEvent nmtEvent_p)
         case kNmtEventDllCePreq:
         case kNmtEventDllCePres:
         case kNmtEventDllCeSoa:
-            // NMT_CT12 - EPL frame on net -> stop any communication
+            // NMT_CT12 - POWERLINK frame on net -> stop any communication
             nmtkInstance_g.stateIndex = kNmtkCsPreOperational1;
             break;
 
@@ -1179,7 +1179,7 @@ static tOplkError doStateMsPreOperational1(tNmtEvent nmtEvent_p)
             nmtkInstance_g.stateIndex = kNmtkGsResetConfiguration;
             break;
 
-        // EPL frames received
+        // POWERLINK frames received
         case kNmtEventDllCeSoc:
         case kNmtEventDllCeSoa:
             // other MN in network
@@ -1273,7 +1273,7 @@ static tOplkError doStateMsPreOperational2(tNmtEvent nmtEvent_p)
             nmtkInstance_g.stateIndex = kNmtkGsResetConfiguration;
             break;
 
-        // EPL frames received
+        // POWERLINK frames received
         case kNmtEventDllCeSoc:
         case kNmtEventDllCeSoa:
             // other MN in network
@@ -1346,7 +1346,7 @@ static tOplkError doStateMsReadyToOperate(tNmtEvent nmtEvent_p)
             nmtkInstance_g.stateIndex = kNmtkGsResetConfiguration;
             break;
 
-        // EPL frames received
+        // POWERLINK frames received
         case kNmtEventDllCeSoc:
         case kNmtEventDllCeSoa:
             // other MN in network
@@ -1417,7 +1417,7 @@ static tOplkError doStateMsOperational(tNmtEvent nmtEvent_p)
             nmtkInstance_g.stateIndex = kNmtkGsResetConfiguration;
             break;
 
-        // EPL frames received
+        // POWERLINK frames received
         case kNmtEventDllCeSoc:
         case kNmtEventDllCeSoa:
             // other MN in network
@@ -1484,7 +1484,7 @@ tOplkError doStateMsBasicEthernet(tNmtEvent nmtEvent_p)
             nmtkInstance_g.stateIndex = kNmtkGsResetConfiguration;
             break;
 
-        // EPL frames received
+        // POWERLINK frames received
         case kNmtEventDllCeSoc:
         case kNmtEventDllCeSoa:
             // other MN in network

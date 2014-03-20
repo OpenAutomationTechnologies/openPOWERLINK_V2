@@ -353,7 +353,7 @@ static tOplkError initStack(void)
 
     dllk_regSyncHandler(pdok_sendSyncEvent);
 
-    // initialize EplDllkCal module
+    // initialize dllkcal module
     if ((ret = dllkcal_init()) != kErrorOk)
         return ret;
 

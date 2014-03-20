@@ -126,7 +126,7 @@ static tEventDispatchEntry eventDispatchTbl_l[] =
 #endif
     { kEventSinkDlluCal,     kEventSourceDllu,        dllucal_process },
     { kEventSinkErru,        kEventSourceErru,        NULL },
-    { kEventSinkApi,         kEventSourceEplApi,      callApiEventCb },
+    { kEventSinkApi,         kEventSourceOplkApi,     callApiEventCb },
     { kEventSinkInvalid,     kEventSourceInvalid,     NULL }
 };
 

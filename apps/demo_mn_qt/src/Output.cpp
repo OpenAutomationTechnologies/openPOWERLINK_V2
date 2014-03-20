@@ -51,7 +51,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /**
 \brief  constructor
 
-Constructs an EplOutput widget.
+Constructs an Output widget.
 
 \param          parent                  pointer parent window
 */

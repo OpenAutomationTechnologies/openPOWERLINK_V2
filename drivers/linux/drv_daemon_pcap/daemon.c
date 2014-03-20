@@ -114,7 +114,7 @@ running in Linux userspace.
 //------------------------------------------------------------------------------
 int  main (int argc, char **argv)
 {
-    tOplkError                  EplRet = kErrorOk;
+    tOplkError                  ret = kErrorOk;
     char                        cKey = 0;
     BOOL                        fExit;
 
@@ -166,8 +166,8 @@ int  main (int argc, char **argv)
     PRINTF("openPOWERLINK kernel stack daemon\n");
     PRINTF("----------------------------------------------------\n");
 
-    EplRet = ctrlk_init();
-    if (EplRet != kErrorOk)
+    ret = ctrlk_init();
+    if (ret != kErrorOk)
     {
         TRACE ("Could not initialize control module\n");
         goto Exit;
@@ -198,5 +198,5 @@ int  main (int argc, char **argv)
 
 Exit:
     PRINTF("Exiting\n");
-    return EplRet;
+    return ret;
 }
