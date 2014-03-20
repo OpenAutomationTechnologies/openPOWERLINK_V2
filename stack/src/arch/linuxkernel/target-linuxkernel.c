@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   target-linuxkernel.c
+\file   linuxkernel/target-linuxkernel.c
 
 \brief  Target specific functions for Linux kernel
 
@@ -62,5 +62,4 @@ ULONGLONG target_getCurrentTimestamp(void)
     timeStamp = ktime_to_ns(ktime_get());
     return timeStamp;
 }
-
 

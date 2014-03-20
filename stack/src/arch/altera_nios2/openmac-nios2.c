@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   openmac-nios2.c
+\file   altera_nios2/openmac-nios2.c
 
 \brief  Implementation of openMAC drivers
 
@@ -11,7 +11,7 @@ This file contains the implementation of the openMAC driver.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -105,7 +105,7 @@ static tOpenmacInst instance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static void irqHandler (void* pArg_p
+static void irqHandler(void* pArg_p
 #ifndef ALT_ENHANCED_INTERRUPT_API_PRESENT
         , UINT32 int_p
 #endif
@@ -138,14 +138,16 @@ tOplkError openmac_isrReg(tOpenmacIrqSource irqSource_p, tOpenmacIrqCb pfnIsrCb_
 
     icId = OPENMAC_IRQ_IC_ID;
 
-    switch(irqSource_p)
+    switch (irqSource_p)
     {
         case kOpenmacIrqSync:
             irqId = OPENMAC_SYNC_IRQ;
             break;
+
         case kOpenmacIrqTxRx:
             irqId = OPENMAC_TXRX_IRQ;
             break;
+
         default:
             ret = kErrorNoResource;
             goto Exit;
@@ -293,14 +295,16 @@ void openmac_timerIrqDisable(UINT timer_p)
 {
     UINT offset;
 
-    switch(timer_p)
+    switch (timer_p)
     {
         case HWTIMER_SYNC:
             offset = OPENMAC_TIMER_OFFSET_CTRL;
             break;
+
         case HWTIMER_EXT_SYNC:
             offset = OPENMAC_TIMER_OFFSET_2ND_CTRL;
             break;
+
         default:
             return;
     }
@@ -326,16 +330,18 @@ void openmac_timerIrqEnable(UINT timer_p, UINT32 pulseWidthNs_p)
     UINT    offset;
     UINT32  value;
 
-    switch(timer_p)
+    switch (timer_p)
     {
         case HWTIMER_SYNC:
             offset = OPENMAC_TIMER_OFFSET_CTRL;
             value = 1;
             break;
+
         case HWTIMER_EXT_SYNC:
             offset = OPENMAC_TIMER_OFFSET_2ND_CTRL;
             value = 1 | (OMETH_NS_2_TICKS(pulseWidthNs_p) << 1);
             break;
+
         default:
             return;
     }
@@ -359,14 +365,16 @@ void openmac_timerSetCompareValue(UINT timer_p, UINT32 val_p)
 {
     UINT offset;
 
-    switch(timer_p)
+    switch (timer_p)
     {
         case HWTIMER_SYNC:
             offset = OPENMAC_TIMER_OFFSET_CMP_VAL;
             break;
+
         case HWTIMER_EXT_SYNC:
             offset = OPENMAC_TIMER_OFFSET_2ND_CMP_VAL;
             break;
+
         default:
             return;
     }
@@ -383,7 +391,7 @@ This function gets the current timer instance value.
 \param  timer_p         Timer instance to be disabled
 
 \return The function returns the current timer instance value.
-        It returns 0 if the instance does not provide the current value.
+        It returns 0, if the instance does not provide the current value.
 
 \ingroup module_openmac
 */
@@ -392,11 +400,12 @@ UINT32 openmac_timerGetTimeValue(UINT timer_p)
 {
     UINT offset;
 
-    switch(timer_p)
+    switch (timer_p)
     {
         case HWTIMER_SYNC:
             offset = OPENMAC_TIMER_OFFSET_TIME_VAL;
             break;
+
         case HWTIMER_EXT_SYNC:
         default:
             return 0;
@@ -422,10 +431,10 @@ the registered interrupt callbacks.
 \param  int_p       Optional interrupt id
 
 \return The function returns the current timer instance value.
-        It returns 0 if the instance does not provide the current value.
+        It returns 0, if the instance does not provide the current value.
 */
 //------------------------------------------------------------------------------
-static void irqHandler (void* pArg_p
+static void irqHandler(void* pArg_p
 #ifndef ALT_ENHANCED_INTERRUPT_API_PRESENT
         , UINT32 int_p
 #endif
@@ -438,12 +447,13 @@ static void irqHandler (void* pArg_p
 #endif
 
     // Check if given argument is within array range.
-    if(irqSource >= kOpenmacIrqLast)
+    if (irqSource >= kOpenmacIrqLast)
         return;
 
     // Invoke callback with argument for corresponding source.
-    if(instance_l.pfnIrqCb[irqSource] != NULL)
+    if (instance_l.pfnIrqCb[irqSource] != NULL)
         instance_l.pfnIrqCb[irqSource](instance_l.pIrqCbArg[irqSource]);
 }
 
 ///\}
+

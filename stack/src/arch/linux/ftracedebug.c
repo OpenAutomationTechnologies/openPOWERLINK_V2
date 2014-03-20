@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   ftracedebug.c
+\file   linux/ftracedebug.c
 
 \brief  Linux ftrace debug functions
 
@@ -108,13 +108,13 @@ The function opens the tracing_on and trace_marker files.
 int ftrace_open(void)
 {
     char        sPath[MAX_PATH];
-    char        * p_debugfs;
+    char*       p_debugfs;
 
     p_debugfs = findDebugfs();
     if (p_debugfs != NULL)
     {
         strcpy(sPath, p_debugfs);
-        strcat(sPath,"/tracing/tracing_on");
+        strcat(sPath, "/tracing/tracing_on");
         if ((iFtraceEnableFd = open(sPath, O_WRONLY)) < 0)
         {
             return -1;
@@ -122,7 +122,7 @@ int ftrace_open(void)
         else
         {
             strcpy(sPath, p_debugfs);
-            strcat(sPath,"/tracing/trace_marker");
+            strcat(sPath, "/tracing/trace_marker");
             if ((iFtraceMarkerFd = open(sPath, O_WRONLY)) < 0)
             {
                 close(iFtraceEnableFd);
@@ -187,7 +187,7 @@ The function writes a ftrace marker.
 \ingroup module_debug
 */
 //------------------------------------------------------------------------------
-void ftrace_writeTraceMarker(char *fmt, ...)
+void ftrace_writeTraceMarker(char* fmt, ...)
 {
     va_list argp;
     char    sMessage[128];
@@ -198,8 +198,8 @@ void ftrace_writeTraceMarker(char *fmt, ...)
     len += vsprintf(sMessage + len, fmt, argp);
     va_end(argp);
 
-    sprintf (sMessage + len, " ====\n");
-    write (iFtraceMarkerFd, sMessage, strlen(sMessage) + 1);
+    sprintf(sMessage + len, " ====\n");
+    write(iFtraceMarkerFd, sMessage, strlen(sMessage) + 1);
 }
 
 //============================================================================//
@@ -217,17 +217,17 @@ The function searches the path to the debug file system on a Linux machine
 \return The function returns the path to the debug file system.
 */
 //------------------------------------------------------------------------------
-static char *findDebugfs(void)
+static char* findDebugfs(void)
 {
     static char debugfs[MAX_PATH + 1];
     static int debugfs_found;
     char type[100];
-    FILE *fp;
+    FILE* fp;
 
     if (debugfs_found)
         return debugfs;
 
-    if ((fp = fopen("/proc/mounts","r")) == NULL)
+    if ((fp = fopen("/proc/mounts", "r")) == NULL)
         return NULL;
 
     while (fscanf(fp, "%*s %"
@@ -250,5 +250,4 @@ static char *findDebugfs(void)
 ///\}
 
 #endif
-
 

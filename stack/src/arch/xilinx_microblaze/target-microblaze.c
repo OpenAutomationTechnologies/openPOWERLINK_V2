@@ -11,7 +11,7 @@ systems without shared buffer and any OS.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -55,7 +55,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define TGTCONIO_MS_IN_US(x)    (x*1000U)
+#define TGTCONIO_MS_IN_US(x)    (x * 1000U)
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -124,7 +124,7 @@ This function enables/disables global interrupts.
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-void target_enableGlobalInterrupt (UINT8 fEnable_p)
+void target_enableGlobalInterrupt(UINT8 fEnable_p)
 {
     static INT lockCount = 0;
 
@@ -182,9 +182,9 @@ tOplkError target_init(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Cleanup target specific stuff
+\brief  Clean up target specific stuff
 
-The function cleans-up target specific stuff.
+The function cleans up target specific stuff.
 
 \return The function returns a tOplkError error code.
 */
@@ -216,7 +216,7 @@ tOplkError target_cleanup(void)
 \brief Sleep for the specified number of milliseconds
 
 The function makes the calling thread sleep until the number of specified
-milliseconds have elapsed.
+milliseconds has elapsed.
 
 \param  milliSeconds_p      Number of milliseconds to sleep
 
@@ -260,3 +260,4 @@ static void disableInterruptMaster(void)
     XIntc_MasterDisable(XPAR_PCP_INTC_BASEADDR);
 }
 ///\}
+

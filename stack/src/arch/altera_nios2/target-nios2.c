@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   target-nios2.c
+\file   altera_nios2/target-nios2.c
 
 \brief  target specific functions for Nios II without OS
 
@@ -11,7 +11,7 @@ systems without shared buffer and any OS.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -52,7 +52,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define TGTCONIO_MS_IN_US(x)    (x*1000U)
+#define TGTCONIO_MS_IN_US(x)    (x * 1000U)
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -88,7 +88,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //------------------------------------------------------------------------------
 /**
-\brief    returns current system tick
+\brief    Get current system tick
 
 This function returns the current system tick determined by the system timer.
 
@@ -97,7 +97,7 @@ This function returns the current system tick determined by the system timer.
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-UINT32 target_getTickCount (void)
+UINT32 target_getTickCount(void)
 {
     UINT32 ticks;
 
@@ -108,7 +108,7 @@ UINT32 target_getTickCount (void)
 
 //------------------------------------------------------------------------------
 /**
-\brief    enables global interrupt
+\brief    Enable global interrupt
 
 This function enabels/disables global interrupts.
 
@@ -118,7 +118,7 @@ This function enabels/disables global interrupts.
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-void target_enableGlobalInterrupt (BYTE fEnable_p)
+void target_enableGlobalInterrupt(BYTE fEnable_p)
 {
 static alt_irq_context  irq_context = 0;
 static int              iLockCount = 0;
@@ -157,9 +157,9 @@ tOplkError target_init(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Cleanup target specific stuff
+\brief  Clean up target specific stuff
 
-The function cleans-up target specific stuff.
+The function cleans up target specific stuff.
 
 \return The function returns a tOplkError error code.
 */
@@ -173,15 +173,15 @@ tOplkError target_cleanup(void)
 /**
 \brief Sleep for the specified number of milliseconds
 
-The function makes the calling thread sleep until the number of specified
-milliseconds have elapsed.
+The function makes the calling thread sleep, until the number of specified
+milliseconds has elapsed.
 
 \param  milliSecond_p       Number of milliseconds to sleep
 
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-void target_msleep (unsigned int milliSecond_p)
+void target_msleep(unsigned int milliSecond_p)
 {
     usleep(TGTCONIO_MS_IN_US(milliSecond_p));
 }
@@ -189,3 +189,4 @@ void target_msleep (unsigned int milliSecond_p)
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+

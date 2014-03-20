@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   lock-dualprocnoos.c
+\file   altera_nios2/lock-dualprocnoos.c
 
 \brief  Locks for Nios II without OS in dual processor system
 
@@ -11,7 +11,7 @@ system with shared memory.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -105,9 +105,9 @@ This function initializes the lock instance.
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-int target_initLock (LOCK_T *pLock_p)
+int target_initLock(LOCK_T* pLock_p)
 {
-    if(pLock_p == NULL)
+    if (pLock_p == NULL)
         return -1;
 
     pLock_l = pLock_p;
@@ -127,24 +127,25 @@ lock is freed.
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-int target_lock (void)
+int target_lock(void)
 {
     alt_u8  val;
 
-    if(pLock_l == NULL)
+    if (pLock_l == NULL)
         return -1;
 
     // spin if id is not written to shared memory
-    do {
+    do
+    {
         val = IORD_8DIRECT(pLock_l, 0);
 
         // write local id if unlocked
-        if(val == LOCK_UNLOCKED_C)
+        if (val == LOCK_UNLOCKED_C)
         {
             IOWR_8DIRECT(pLock_l, 0, LOCK_LOCAL_ID);
             continue; // return to top of loop to check again
         }
-    } while(val != LOCK_LOCAL_ID);
+    } while (val != LOCK_LOCAL_ID);
 
     return 0;
 }
@@ -160,9 +161,9 @@ This function frees the given lock.
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-int target_unlock (void)
+int target_unlock(void)
 {
-    if(pLock_l == NULL)
+    if (pLock_l == NULL)
         return -1;
 
     IOWR_8DIRECT(pLock_l, 0, LOCK_UNLOCKED_C);
@@ -173,3 +174,4 @@ int target_unlock (void)
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+

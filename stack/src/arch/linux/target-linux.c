@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   target-linux.c
+\file   linux/target-linux.c
 
 \brief  Target specific functions for Linux
 
@@ -10,7 +10,7 @@ The file implements target specific functions used in the openPOWERLINK stack.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -77,9 +77,9 @@ tOplkError target_init(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Cleanup target specific stuff
+\brief  Clean up target specific stuff
 
-The function cleans-up target specific stuff.
+The function cleans up target specific stuff.
 
 \return The function returns a tOplkError error code.
 */
@@ -95,7 +95,7 @@ tOplkError target_cleanup(void)
 \brief Sleep for the specified number of milliseconds
 
 The function makes the calling thread sleep until the number of specified
-milliseconds have elapsed.
+milliseconds has elapsed.
 
 \param  milliSeconds_p      Number of milliseconds to sleep
 
@@ -165,15 +165,15 @@ tOplkError target_setIpAdrs(char* ifName_p, UINT32 ipAddress_p, UINT32 subnetMas
 
     // configure IP address of virtual network interface
     // for TCP/IP communication over the POWERLINK network
-    snprintf(sBufferIp, sizeof (sBufferIp), "%u.%u.%u.%u",
-             (UINT) (ipAddress_p >> 24), (UINT) ((ipAddress_p >> 16) & 0xFF),
-             (UINT) ((ipAddress_p >> 8) & 0xFF),(UINT) (ipAddress_p & 0xFF));
+    snprintf(sBufferIp, sizeof(sBufferIp), "%u.%u.%u.%u",
+             (UINT)(ipAddress_p >> 24), (UINT)((ipAddress_p >> 16) & 0xFF),
+             (UINT)((ipAddress_p >> 8) & 0xFF), (UINT)(ipAddress_p & 0xFF));
 
-    snprintf(sBufferMask, sizeof (sBufferMask), "%u.%u.%u.%u",
-             (UINT) (subnetMask_p >> 24), (UINT) ((subnetMask_p >> 16) & 0xFF),
-             (UINT) ((subnetMask_p >> 8) & 0xFF), (UINT) (subnetMask_p & 0xFF));
+    snprintf(sBufferMask, sizeof(sBufferMask), "%u.%u.%u.%u",
+             (UINT)(subnetMask_p >> 24), (UINT)((subnetMask_p >> 16) & 0xFF),
+             (UINT)((subnetMask_p >> 8) & 0xFF), (UINT)(subnetMask_p & 0xFF));
 
-    snprintf(sBufferMtu, sizeof (sBufferMtu), "%u", (UINT) mtu_p);
+    snprintf(sBufferMtu, sizeof(sBufferMtu), "%u", (UINT)mtu_p);
 
     /* call ifconfig to configure the virtual network interface */
     sprintf (command, "/sbin/ifconfig %s %s netmask %s mtu %s",
@@ -211,16 +211,16 @@ tOplkError target_setDefaultGateway(UINT32 defaultGateway_p)
     {
         // configure default gateway of virtual network interface
         // for TCP/IP communication over the POWERLINK network
-        snprintf(sBuffer, sizeof (sBuffer), "%u.%u.%u.%u",
-                 (UINT) (defaultGateway_p >> 24), (UINT) ((defaultGateway_p >> 16) & 0xFF),
-                 (UINT) ((defaultGateway_p >> 8) & 0xFF), (UINT) (defaultGateway_p & 0xFF));
+        snprintf(sBuffer, sizeof(sBuffer), "%u.%u.%u.%u",
+                 (UINT)(defaultGateway_p >> 24), (UINT)((defaultGateway_p >> 16) & 0xFF),
+                 (UINT)((defaultGateway_p >> 8) & 0xFF), (UINT)(defaultGateway_p & 0xFF));
 
-        sprintf (command, "route del default");
+        sprintf(command, "route del default");
         iRet = system(command);
         TRACE("route del default returned %d\n", iRet);
 
         /* call route to configure the default gateway */
-        sprintf (command, "route add default gw %s", sBuffer);
+        sprintf(command, "route add default gw %s", sBuffer);
         if ((iRet = system(command)) < 0)
         {
             TRACE("route add default gw %s returned %d\n", sBuffer, iRet);
@@ -229,3 +229,4 @@ tOplkError target_setDefaultGateway(UINT32 defaultGateway_p)
     }
     return ret;
 }
+
