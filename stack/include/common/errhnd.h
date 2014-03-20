@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   errhnd.h
+\file   common/errhnd.h
 
 \brief  include file for error handler modules
 
@@ -10,7 +10,7 @@ modules.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -36,8 +36,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_errhnd_H_
-#define _INC_errhnd_H_
+#ifndef _INC_common_errhnd_H_
+#define _INC_common_errhnd_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -85,5 +85,5 @@ extern "C" {
 }
 #endif
 
-#endif /* _INC_errhnd_H_ */
+#endif /* _INC_common_errhnd_H_ */
 

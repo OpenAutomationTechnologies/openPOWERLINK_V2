@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   ctrl.h
+\file   common/ctrl.h
 
 \brief  Definitions for ctrl module
 
@@ -9,7 +9,7 @@ This file contains the definitions for the ctrl modules.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,8 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_ctrl_H_
-#define _INC_ctrl_H_
+#ifndef _INC_common_ctrl_H_
+#define _INC_common_ctrl_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -101,5 +101,5 @@ extern "C" {
 }
 #endif
 
-#endif /* _INC_ctrl_H_ */
+#endif /* _INC_common_ctrl_H_ */
 

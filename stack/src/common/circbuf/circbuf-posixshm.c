@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   circbuf-posixshm.c
+\file   circbuf/circbuf-posixshm.c
 
 \brief  Circular buffer implementation using Posix shared memory
 
@@ -11,7 +11,7 @@ using posix shared memory and BSD semaphores for locking.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -85,7 +85,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 typedef struct
 {
     int                 fd;             ///< Shared memory file descriptor
-    sem_t               *lockSem;       ///< Semaphore used for locking
+    sem_t*              lockSem;        ///< Semaphore used for locking
 } tCircBufArchInstance;
 
 //------------------------------------------------------------------------------
@@ -120,7 +120,7 @@ tCircBufInstance* circbuf_createInstance(UINT8 id_p)
     char                        semName[16];
 
     if ((pInstance = OPLK_MALLOC(sizeof(tCircBufInstance) +
-                                sizeof(tCircBufArchInstance))) == NULL)
+                                 sizeof(tCircBufArchInstance))) == NULL)
     {
         TRACE("%s() malloc failed!\n", __func__);
         return NULL;
@@ -131,8 +131,8 @@ tCircBufInstance* circbuf_createInstance(UINT8 id_p)
 
     pArch = (tCircBufArchInstance*)pInstance->pCircBufArchInstance;
 
-    sprintf (semName, "/semCircbuf-%d", id_p);
-    if ((pArch->lockSem =  sem_open(semName, O_CREAT, S_IRWXG, 1)) == SEM_FAILED)
+    sprintf(semName, "/semCircbuf-%d", id_p);
+    if ((pArch->lockSem = sem_open(semName, O_CREAT, S_IRWXG, 1)) == SEM_FAILED)
     {
         TRACE("%s() open sem failed!\n", __func__);
         OPLK_FREE(pInstance);
@@ -170,7 +170,7 @@ The function allocates the memory needed for the circular buffer.
 \param  pInstance_p         Pointer to the circular buffer instance.
 \param  size_p              Size of memory to allocate.
 
-\return The function returns a tCircBuf Error code.
+\return The function returns a tCircBufError error code.
 
 \ingroup module_lib_circbuf
 */
@@ -184,7 +184,7 @@ tCircBufError circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t size_p)
 
     pArch = (tCircBufArchInstance*)pInstance_p->pCircBufArchInstance;
 
-    sprintf (shmName, "/shmCircbuf-%d", pInstance_p->bufferId);
+    sprintf(shmName, "/shmCircbuf-%d", pInstance_p->bufferId);
     pageSize = (sizeof(tCircBufHeader) + sysconf(_SC_PAGE_SIZE) - 1) & (~(sysconf(_SC_PAGE_SIZE) - 1));
     size = size_p + pageSize;
 
@@ -197,7 +197,7 @@ tCircBufError circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t size_p)
     if (ftruncate(pArch->fd, size) == -1)
     {
         TRACE("%s() ftruncate failed!\n", __func__);
-        close (pArch->fd);
+        close(pArch->fd);
         shm_unlink(shmName);
         return kCircBufNoResource;
     }
@@ -207,7 +207,7 @@ tCircBufError circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t size_p)
     if (pInstance_p->pCircBufHeader == MAP_FAILED)
     {
         TRACE("%s() mmap header failed!\n", __func__);
-        close (pArch->fd);
+        close(pArch->fd);
         shm_unlink(shmName);
         return kCircBufNoResource;
     }
@@ -218,7 +218,7 @@ tCircBufError circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t size_p)
     {
         TRACE("%s() mmap buffer failed! (%s)\n", __func__, strerror(errno));
         munmap(pInstance_p->pCircBufHeader, sizeof(tCircBufHeader));
-        close (pArch->fd);
+        close(pArch->fd);
         shm_unlink(shmName);
         return kCircBufNoResource;
     }
@@ -247,7 +247,7 @@ void circbuf_freeBuffer(tCircBufInstance* pInstance_p)
 
     munmap(pInstance_p->pCircBuf, pInstance_p->pCircBufHeader->bufferSize);
     munmap(pInstance_p->pCircBufHeader, sizeof(tCircBufHeader));
-    close (pArch->fd);
+    close(pArch->fd);
     shm_unlink(shmName);
 }
 
@@ -259,7 +259,7 @@ The function connects the calling thread to the circular buffer.
 
 \param  pInstance_p         Pointer to circular buffer instance.
 
-\return The function returns a tCircBuf Error code.
+\return The function returns a tCircBufError error code.
 
 \ingroup module_lib_circbuf
 */
@@ -274,7 +274,7 @@ tCircBufError circbuf_connectBuffer(tCircBufInstance* pInstance_p)
     pageSize = sysconf(_SC_PAGE_SIZE);
     pArch = (tCircBufArchInstance*)pInstance_p->pCircBufArchInstance;
 
-    sprintf (shmName, "/shmCircbuf-%d", pInstance_p->bufferId);
+    sprintf(shmName, "/shmCircbuf-%d", pInstance_p->bufferId);
     if ((pArch->fd = shm_open(shmName, O_RDWR, 0)) < 0)
     {
         return kCircBufNoResource;
@@ -291,7 +291,7 @@ tCircBufError circbuf_connectBuffer(tCircBufInstance* pInstance_p)
     size = pInstance_p->pCircBufHeader->bufferSize;
     pInstance_p->pCircBuf = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED,
                                  pArch->fd, pageSize);
-    if(pInstance_p->pCircBuf == MAP_FAILED)
+    if (pInstance_p->pCircBuf == MAP_FAILED)
     {
         munmap(pInstance_p->pCircBufHeader, sizeof(tCircBufHeader));
         close(pArch->fd);
@@ -319,7 +319,7 @@ void circbuf_disconnectBuffer(tCircBufInstance* pInstance_p)
     pArch = (tCircBufArchInstance*)pInstance_p->pCircBufArchInstance;
     munmap(pInstance_p->pCircBuf, pInstance_p->pCircBufHeader->bufferSize);
     munmap(pInstance_p->pCircBufHeader, sizeof(tCircBufHeader));
-    close (pArch->fd);
+    close(pArch->fd);
 }
 
 //------------------------------------------------------------------------------
@@ -365,10 +365,4 @@ void circbuf_unlock(tCircBufInstance* pInstance_p)
 /// \{
 
 ///\}
-
-
-
-
-
-
 

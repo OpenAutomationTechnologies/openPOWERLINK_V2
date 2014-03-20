@@ -1,13 +1,13 @@
 /**
 ********************************************************************************
-\file   circbuffer.h
+\file   common/circbuffer.h
 
 \brief  Definitions for circular buffer library
 
 This file contains the definitions for the circular buffer library.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_circbuffer_H_
-#define _INC_circbuffer_H_
+#ifndef _INC_common_circbuffer_H_
+#define _INC_common_circbuffer_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -50,6 +50,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
+/**
+*  \brief Error codes of the circular buffer library
+*
+*  The enumeration defines the error codes returned by functions of the a circular
+*  buffer library.
+*/
 typedef enum
 {
     kCircBufOk                          =  0,
@@ -103,14 +109,14 @@ typedef struct
 extern "C" {
 #endif
 
-tCircBufError circbuf_alloc (UINT8 id_p, size_t size_p, tCircBufInstance** ppInstance_p);
-tCircBufError circbuf_free (tCircBufInstance* pInstance_p);
-tCircBufError circbuf_connect (UINT8 id_p, tCircBufInstance** ppInstance_p);
-tCircBufError circbuf_disconnect (tCircBufInstance* pInstance_p);
-void          circbuf_reset (tCircBufInstance* pInstance_p);
-tCircBufError circbuf_writeData (tCircBufInstance* pInstance_p, const void* pData_p, size_t size_p);
+tCircBufError circbuf_alloc(UINT8 id_p, size_t size_p, tCircBufInstance** ppInstance_p);
+tCircBufError circbuf_free(tCircBufInstance* pInstance_p);
+tCircBufError circbuf_connect(UINT8 id_p, tCircBufInstance** ppInstance_p);
+tCircBufError circbuf_disconnect(tCircBufInstance* pInstance_p);
+void          circbuf_reset(tCircBufInstance* pInstance_p);
+tCircBufError circbuf_writeData(tCircBufInstance* pInstance_p, const void* pData_p, size_t size_p);
 tCircBufError circbuf_writeMultipleData(tCircBufInstance* pInstance_p, const void* pData_p, size_t size_p,
-                                        const void * pData2_p, size_t size2_p);
+                                        const void* pData2_p, size_t size2_p);
 tCircBufError circbuf_readData(tCircBufInstance* pInstance_p, void* pData_p,
                                size_t size_p, size_t* pDataBlockSize_p);
 UINT32        circbuf_getDataCount(tCircBufInstance* pInstance_p);
@@ -120,4 +126,5 @@ tCircBufError circBuf_setSignaling(tCircBufInstance* pInstance_p, VOIDFUNCPTR pf
 }
 #endif
 
-#endif /* _INC_circbuffer_H_ */
+#endif /* _INC_common_circbuffer_H_ */
+

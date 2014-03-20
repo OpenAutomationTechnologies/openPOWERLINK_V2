@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   event.c
+\file   event/event.c
 
 \brief  Source file for general functions used by event handler modules
 
@@ -12,7 +12,7 @@ handler modules.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -99,8 +99,8 @@ and the corresponding event source.
 \param  pEventSource_p      Pointer to store the corresponding event source.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          If the event sink was found.
-\retval kErrorEventUnknownSink    IF the event sink was not found.
+\retval kErrorOk                  The event sink was found.
+\retval kErrorEventUnknownSink    The event sink was not found.
 
 \ingroup module_event
 */
@@ -124,7 +124,6 @@ tOplkError event_getHandlerForSink(tEventDispatchEntry** ppDispatchEntry_p,
         }
         (*ppDispatchEntry_p)++;
     }
-
 
     return ret;
 }

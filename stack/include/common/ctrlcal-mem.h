@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   ctrlcal-mem.h
+\file   common/ctrlcal-mem.h
 
 \brief  Definitions for ctrl CAL module
 
@@ -9,7 +9,7 @@ This file contains the definitions for the ctrl CAL module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,8 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_ctrlcalmem_H_
-#define _INC_ctrlcalmem_H_
+#ifndef _INC_common_ctrlcal_mem_H_
+#define _INC_common_ctrlcal_mem_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -91,5 +91,5 @@ extern "C" {
 }
 #endif
 
-#endif /* _INC_ctrlcalmem_H_ */
+#endif /* _INC_common_ctrlcal_mem_H_ */
 

@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   circbuffer.c
+\file   circbuf/circbuffer.c
 
 \brief  Circular buffer library
 
@@ -8,7 +8,7 @@ This file contains the implementation of a circular buffer library. The
 interface of the circular buffer library is defined in circbuffer.h.
 
 The circular buffer library needs low level functions for locking and memory
-allocation. Therefore for each supported architecture a low-level module must
+allocation. Therefore, for each supported architecture a low-level module must
 be implemented. The interface of the low-level module is defined in
 circbuf-arch.h.
 
@@ -16,7 +16,7 @@ circbuf-arch.h.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -49,17 +49,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 \ingroup    libraries
 
 The circular buffer library is designed for concurrent access of different
-instances (threads, processes, etc.) to the circular buffer. Therefore a
-shared memory which could be accessed by all instances is needed. Additionally
+instances (threads, processes, etc.) to the circular buffer. Therefore, a
+shared memory which could be accessed by all instances is needed. Additionally,
 a lock mechanism is needed to lockout the critical sections.
 
-The circular buffer library provides "an asynchronous interface". This means
-there is a primary instance that uses different functions than all "secondary"
-instances which would like to access the buffer. The primary instance creates
-the buffer by calling circbuf_alloc(). All other instances need to connect to
-the buffer by calling circbuf_connect(). The same applies for deinitialization.
+The circular buffer library provides "an asynchronous interface". This means,
+there is a primary instance using a different function set to all "secondary"
+instances accessing the buffer. The primary instance creates the buffer by
+calling circbuf_alloc(). All other instances need to connect to the buffer by
+calling circbuf_connect(). The same applies for deinitialization.
 After all connected instances are disconnected by calling circbuf_disconnect(),
-the main instance could cleanup and free the buffer by calling circbuf_free().
+the main instance can clean up and free the buffer by calling circbuf_free().
 
 *******************************************************************************/
 
@@ -120,12 +120,12 @@ The function allocates a circular buffer.
 \param  ppInstance_p    A pointer to store the pointer to the instance of the
                         allocated circular buffer.
 
-\return The function returns a tCircBuf Error code.
+\return The function returns a tCircBufError error code.
 
 \ingroup module_lib_circbuf
 */
 //------------------------------------------------------------------------------
-tCircBufError circbuf_alloc (UINT8 id_p, size_t size_p, tCircBufInstance** ppInstance_p)
+tCircBufError circbuf_alloc(UINT8 id_p, size_t size_p, tCircBufInstance** ppInstance_p)
 {
     size_t              alignedSize;
     tCircBufInstance*   pInstance;
@@ -140,7 +140,7 @@ tCircBufError circbuf_alloc (UINT8 id_p, size_t size_p, tCircBufInstance** ppIns
     if ((pInstance  = circbuf_createInstance(id_p)) == NULL)
         return kCircBufNoResource;
 
-    alignedSize  = (size_p + (CIRCBUF_BLOCK_ALIGNMENT - 1)) & ~(CIRCBUF_BLOCK_ALIGNMENT - 1);
+    alignedSize = (size_p + (CIRCBUF_BLOCK_ALIGNMENT - 1)) & ~(CIRCBUF_BLOCK_ALIGNMENT - 1);
 
     if ((ret = circbuf_allocBuffer(pInstance, alignedSize)) != kCircBufOk)
     {
@@ -168,12 +168,12 @@ The function releases/frees a circular buffer.
 
 \param  pInstance_p     The instance of the buffer to free.
 
-\return The function returns a tCircBuf Error code.
+\return The function returns a tCircBufError error code.
 
 \ingroup module_lib_circbuf
 */
 //------------------------------------------------------------------------------
-tCircBufError circbuf_free (tCircBufInstance* pInstance_p)
+tCircBufError circbuf_free(tCircBufInstance* pInstance_p)
 {
     circbuf_freeBuffer(pInstance_p);
     circbuf_freeInstance(pInstance_p);
@@ -184,18 +184,18 @@ tCircBufError circbuf_free (tCircBufInstance* pInstance_p)
 /**
 \brief  Connect to a circular buffer
 
-The function connects to a existing circular buffer.
+The function connects to an existing circular buffer.
 
 \param  id_p            The ID of the buffer to connect to.
 \param  ppInstance_p    A pointer to store the pointer to the instance of the
                         connected circular buffer.
 
-\return The function returns a tCircBuf Error code.
+\return The function returns a tCircBufError error code.
 
 \ingroup module_lib_circbuf
 */
 //------------------------------------------------------------------------------
-tCircBufError circbuf_connect (UINT8 id_p, tCircBufInstance** ppInstance_p)
+tCircBufError circbuf_connect(UINT8 id_p, tCircBufInstance** ppInstance_p)
 {
     tCircBufError       ret;
     tCircBufInstance*   pInstance;
@@ -225,12 +225,12 @@ The function disconnects from a circular buffer.
 
 \param  pInstance_p         The instance of the buffer to disconnect.
 
-\return The function returns a tCircBuf Error code.
+\return The function returns a tCircBufError error code.
 
 \ingroup module_lib_circbuf
 */
 //------------------------------------------------------------------------------
-tCircBufError circbuf_disconnect (tCircBufInstance* pInstance_p)
+tCircBufError circbuf_disconnect(tCircBufInstance* pInstance_p)
 {
     circbuf_disconnectBuffer(pInstance_p);
     circbuf_freeInstance(pInstance_p);
@@ -241,7 +241,7 @@ tCircBufError circbuf_disconnect (tCircBufInstance* pInstance_p)
 /**
 \brief  Reset a circular buffer
 
-The function resets a circular buffer. The read and write pointer a restored
+The function resets a circular buffer. The read and write pointer are set
 to the start address of the buffer.
 
 \param  pInstance_p         Pointer to circular buffer instance to be reset.
@@ -251,7 +251,7 @@ to the start address of the buffer.
 \ingroup module_lib_circbuf
 */
 //------------------------------------------------------------------------------
-void circbuf_reset (tCircBufInstance* pInstance_p)
+void circbuf_reset(tCircBufInstance* pInstance_p)
 {
     tCircBufHeader*     pHeader = pInstance_p->pCircBufHeader;
 
@@ -273,7 +273,7 @@ The function writes a data block to a circular buffer.
 \param  pData_p         Pointer to the data which should be written.
 \param  size_p          The size of the data to write.
 
-\return The function returns a tCircBuf Error code.
+\return The function returns a tCircBufError error code.
 
 \ingroup module_lib_circbuf
 */
@@ -290,8 +290,8 @@ tCircBufError circbuf_writeData (tCircBufInstance* pInstance_p, const void* pDat
     if ((pData_p == NULL) || (size_p == 0))
         return kCircBufOk;
 
-    blockSize       = (size_p + (CIRCBUF_BLOCK_ALIGNMENT-1)) & ~(CIRCBUF_BLOCK_ALIGNMENT-1);
-    fullBlockSize  = blockSize + sizeof(UINT32);
+    blockSize     = (size_p + (CIRCBUF_BLOCK_ALIGNMENT-1)) & ~(CIRCBUF_BLOCK_ALIGNMENT-1);
+    fullBlockSize = blockSize + sizeof(UINT32);
 
     circbuf_lock(pInstance_p);
     if (fullBlockSize > pHeader->freeSize)
@@ -302,10 +302,10 @@ tCircBufError circbuf_writeData (tCircBufInstance* pInstance_p, const void* pDat
 
     if (pHeader->writeOffset + fullBlockSize <= pHeader->bufferSize)
     {
-        *(UINT32 *)(pCircBuf + pHeader->writeOffset) = size_p;
+        *(UINT32*)(pCircBuf + pHeader->writeOffset) = size_p;
 
-        OPLK_MEMCPY (pCircBuf + pHeader->writeOffset + sizeof(UINT32),
-                pData_p, size_p);
+        OPLK_MEMCPY(pCircBuf + pHeader->writeOffset + sizeof(UINT32),
+                    pData_p, size_p);
         if (pHeader->writeOffset + fullBlockSize == pHeader->bufferSize)
             pHeader->writeOffset = 0;
         else
@@ -313,12 +313,12 @@ tCircBufError circbuf_writeData (tCircBufInstance* pInstance_p, const void* pDat
     }
     else
     {
-        *(UINT32 *)(pCircBuf + pHeader->writeOffset) = size_p;
+        *(UINT32*)(pCircBuf + pHeader->writeOffset) = size_p;
         chunkSize = pHeader->bufferSize - pHeader->writeOffset - sizeof(UINT32);
 
-        OPLK_MEMCPY (pCircBuf + pHeader->writeOffset + sizeof(UINT32),
-                pData_p, chunkSize);
-        OPLK_MEMCPY (pCircBuf, (UINT8*)pData_p + chunkSize, size_p - chunkSize);
+        OPLK_MEMCPY(pCircBuf + pHeader->writeOffset + sizeof(UINT32),
+                    pData_p, chunkSize);
+        OPLK_MEMCPY(pCircBuf, (UINT8*)pData_p + chunkSize, size_p - chunkSize);
         pHeader->writeOffset = blockSize - chunkSize;
     }
     pHeader->freeSize -= fullBlockSize;
@@ -345,7 +345,7 @@ The function writes two different source data block to a circular buffer.
 \param  pData2_p        Pointer to the second data block to be written.
 \param  size2_p         The size of the second data block to be written.
 
-\return The function returns a tCircBuf Error code.
+\return The function returns a tCircBufError error code.
 
 \ingroup module_lib_circbuf
 */
@@ -367,7 +367,7 @@ tCircBufError circbuf_writeMultipleData(tCircBufInstance* pInstance_p,
         return kCircBufOk;
     }
 
-    blockSize       = (size_p + size2_p + (CIRCBUF_BLOCK_ALIGNMENT - 1)) & ~(CIRCBUF_BLOCK_ALIGNMENT - 1);
+    blockSize      = (size_p + size2_p + (CIRCBUF_BLOCK_ALIGNMENT - 1)) & ~(CIRCBUF_BLOCK_ALIGNMENT - 1);
     fullBlockSize  = blockSize + sizeof(UINT32);
 
     //TRACE("%s() size:%d wroff:%d\n", __func__, pHeader->bufferSize, pHeader->writeOffset);
@@ -381,12 +381,12 @@ tCircBufError circbuf_writeMultipleData(tCircBufInstance* pInstance_p,
 
     if (pHeader->writeOffset + fullBlockSize <= pHeader->bufferSize)
     {
-        *(UINT32 *)(pCircBuf + pHeader->writeOffset) = size_p + size2_p;
+        *(UINT32*)(pCircBuf + pHeader->writeOffset) = size_p + size2_p;
 
-        OPLK_MEMCPY (pCircBuf + pHeader->writeOffset + sizeof(UINT32),
-                pData_p, size_p);
-        OPLK_MEMCPY (pCircBuf + pHeader->writeOffset + sizeof(UINT32) + size_p,
-                pData2_p, size2_p);
+        OPLK_MEMCPY(pCircBuf + pHeader->writeOffset + sizeof(UINT32),
+                    pData_p, size_p);
+        OPLK_MEMCPY(pCircBuf + pHeader->writeOffset + sizeof(UINT32) + size_p,
+                    pData2_p, size2_p);
         if (pHeader->writeOffset + fullBlockSize == pHeader->bufferSize)
             pHeader->writeOffset = 0;
         else
@@ -395,24 +395,24 @@ tCircBufError circbuf_writeMultipleData(tCircBufInstance* pInstance_p,
     else
     {
         // we assume that there is at least size to store the size header
-        *(UINT32 *)(pCircBuf + pHeader->writeOffset) = size_p + size2_p;
+        *(UINT32*)(pCircBuf + pHeader->writeOffset) = size_p + size2_p;
         chunkSize = pHeader->bufferSize - pHeader->writeOffset - sizeof(UINT32);
         if (size_p <= chunkSize)
         {
-            OPLK_MEMCPY (pCircBuf + pHeader->writeOffset + sizeof(UINT32),
-                    pData_p, size_p);
+            OPLK_MEMCPY(pCircBuf + pHeader->writeOffset + sizeof(UINT32),
+                        pData_p, size_p);
             partSize = chunkSize - size_p;
-            OPLK_MEMCPY (pCircBuf + pHeader->writeOffset + size_p + sizeof(UINT32),
-                    pData2_p, partSize);
-            OPLK_MEMCPY (pCircBuf, (UINT8*)pData2_p + partSize, size2_p - partSize);
+            OPLK_MEMCPY(pCircBuf + pHeader->writeOffset + size_p + sizeof(UINT32),
+                        pData2_p, partSize);
+            OPLK_MEMCPY(pCircBuf, (UINT8*)pData2_p + partSize, size2_p - partSize);
         }
         else
         {
             partSize = size_p - chunkSize;
-            OPLK_MEMCPY (pCircBuf + pHeader->writeOffset + sizeof(UINT32),
-                    pData_p, chunkSize);
-            OPLK_MEMCPY (pCircBuf, (UINT8*)pData_p + chunkSize, partSize);
-            OPLK_MEMCPY (pCircBuf + partSize, pData2_p, size2_p);
+            OPLK_MEMCPY(pCircBuf + pHeader->writeOffset + sizeof(UINT32),
+                        pData_p, chunkSize);
+            OPLK_MEMCPY(pCircBuf, (UINT8*)pData_p + chunkSize, partSize);
+            OPLK_MEMCPY(pCircBuf + partSize, pData2_p, size2_p);
         }
         pHeader->writeOffset = blockSize - chunkSize;
 
@@ -439,7 +439,7 @@ The function reads a data block from a circular buffer.
 \param  size_p              The size of the destination buffer to store the data.
 \param  pDataBlockSize_p    Pointer to store the size of the read data.
 
-\return The function returns a tCircBuf Error code.
+\return The function returns a tCircBufError error code.
 
 \ingroup module_lib_circbuf
 */
@@ -473,8 +473,8 @@ tCircBufError circbuf_readData(tCircBufInstance* pInstance_p, void* pData_p,
 
     if (pHeader->readOffset + fullBlockSize <= pHeader->bufferSize)
     {
-        OPLK_MEMCPY (pData_p, pCircBuf + pHeader->readOffset + sizeof(UINT32),
-                dataSize);
+        OPLK_MEMCPY(pData_p, pCircBuf + pHeader->readOffset + sizeof(UINT32),
+                    dataSize);
         if (pHeader->readOffset + fullBlockSize == pHeader->bufferSize)
             pHeader->readOffset = 0;
         else
@@ -483,9 +483,9 @@ tCircBufError circbuf_readData(tCircBufInstance* pInstance_p, void* pData_p,
     else
     {
         chunkSize = pHeader->bufferSize - pHeader->readOffset - sizeof(UINT32);
-        OPLK_MEMCPY (pData_p, pCircBuf + pHeader->readOffset + sizeof(UINT32),
-                chunkSize);
-        OPLK_MEMCPY ((UINT8*)pData_p + chunkSize, pCircBuf, dataSize - chunkSize);
+        OPLK_MEMCPY(pData_p, pCircBuf + pHeader->readOffset + sizeof(UINT32),
+                    chunkSize);
+        OPLK_MEMCPY((UINT8*)pData_p + chunkSize, pCircBuf, dataSize - chunkSize);
         pHeader->readOffset = blockSize - chunkSize;
     }
     pHeader->freeSize += fullBlockSize;
@@ -525,7 +525,7 @@ The function sets up signalling for a specified buffer.
 \param  pInstance_p     Pointer to circular buffer instance.
 \param  pfnSigCb_p      Pointer to signaling callback function.
 
-\return The function returns a tCircBuf Error code.
+\return The function returns a tCircBufError error code.
 
 \ingroup module_lib_circbuf
 */
@@ -543,3 +543,4 @@ tCircBufError circBuf_setSignaling(tCircBufInstance* pInstance_p, VOIDFUNCPTR pf
 /// \{
 
 ///\}
+

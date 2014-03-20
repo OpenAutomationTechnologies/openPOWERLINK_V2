@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   ctrlcal.h
+\file   common/ctrlcal.h
 
 \brief  Definitions for ctrl CAL module
 
@@ -9,7 +9,7 @@ This file contains the definitions for the ctrl CAL module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,8 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_ctrlcal_H_
-#define _INC_ctrlcal_H_
+#ifndef _INC_common_ctrlcal_H_
+#define _INC_common_ctrlcal_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -62,12 +62,12 @@ extern "C" {
 tOplkError ctrlcal_init(UINT size_p);
 tOplkError ctrlcal_exit(void);
 
-void       ctrlcal_writeData(UINT offset_p, void * pSrc_p, size_t length_p);
+void       ctrlcal_writeData(UINT offset_p, void* pSrc_p, size_t length_p);
 tOplkError ctrlcal_readData(void* pDest_p, UINT offset_p, size_t length_p);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_ctrlcal_H_ */
+#endif /* _INC_common_ctrlcal_H_ */
 

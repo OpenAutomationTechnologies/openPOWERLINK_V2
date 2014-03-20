@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   target.h
+\file   common/target.h
 
 \brief  Definitions for target module
 
@@ -35,8 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_target_H_
-#define _INC_target_H_
+#ifndef _INC_common_target_H_
+#define _INC_common_target_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -73,5 +73,5 @@ UINT32     target_getTickCount(void);
 }
 #endif
 
-#endif /* _INC_ctrl_H_ */
+#endif /* _INC_common_target_H_ */
 
