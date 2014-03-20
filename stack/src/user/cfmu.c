@@ -678,7 +678,7 @@ static tOplkError cbSdoCon(tSdoComFinished* pSdoComFinished_p)
             break;
 
         case kCfmStateUpToDate:
-            if (pSdoComFinished_p->sdoComConState == kEplSdoComTransferFinished)
+            if (pSdoComFinished_p->sdoComConState == kSdoComTransferFinished)
                 nmtCommand = kNmtNodeCommandConfReset;  // continue boot-up of CN with NMT command Reset Configuration
             else
                 nmtCommand = kNmtNodeCommandConfErr;   // indicate configuration error CN
@@ -687,14 +687,14 @@ static tOplkError cbSdoCon(tSdoComFinished* pSdoComFinished_p)
             break;
 
         case kCfmStateDownload:
-            if (pSdoComFinished_p->sdoComConState == kEplSdoComTransferFinished)
+            if (pSdoComFinished_p->sdoComConState == kSdoComTransferFinished)
                 ret = downloadObject(pNodeInfo);
             else
                 ret = finishConfig(pNodeInfo, kNmtNodeCommandConfErr);      // configuration was not successful
             break;
 
         case kCfmStateWaitRestore:
-            if (pSdoComFinished_p->sdoComConState == kEplSdoComTransferFinished)
+            if (pSdoComFinished_p->sdoComConState == kSdoComTransferFinished)
             {   // configuration successfully restored
                 DEBUG_LVL_CFM_TRACE("\nCN%x - Restore Complete. Resetting Node...\n", pNodeInfo->eventCnProgress.nodeId);
                 // send NMT command reset node to activate the original configuration

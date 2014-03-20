@@ -120,12 +120,12 @@ This enumeration lists all valid SDO command layer connection states.
 */
 typedef enum
 {
-    kEplSdoComTransferNotActive         = 0x00,
-    kEplSdoComTransferRunning           = 0x01,
-    kEplSdoComTransferTxAborted         = 0x02,
-    kEplSdoComTransferRxAborted         = 0x03,
-    kEplSdoComTransferFinished          = 0x04,
-    kEplSdoComTransferLowerLayerAbort   = 0x05
+    kSdoComTransferNotActive            = 0x00,
+    kSdoComTransferRunning              = 0x01,
+    kSdoComTransferTxAborted            = 0x02,
+    kSdoComTransferRxAborted            = 0x03,
+    kSdoComTransferFinished             = 0x04,
+    kSdoComTransferLowerLayerAbort      = 0x05
 } tSdoComConState;
 
 /**
