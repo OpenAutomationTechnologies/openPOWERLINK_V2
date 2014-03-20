@@ -12,7 +12,7 @@ of openPOWERLINK enumerations and error codes into descriptive strings.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2010 E. Dumas
+Copyright (c) 2010, E. Dumas
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -82,7 +82,7 @@ typedef struct
 typedef struct
 {
     tOplkApiEventType    apiEvent;
-    char*               sApiEvent;
+    char*                sApiEvent;
 } tApiEventInfo;
 
 typedef struct
@@ -164,7 +164,7 @@ static char* eventSourceStr_l[] =
 {
     "0",                        // reserved
 
-    // kernelspace modules
+    // openPOWERLINK kernel modules
     "EventSourceDllk",          // Dllk module
     "EventSourceNmtk",          // Nmtk module
     "EventSourceObdk",          // Obdk module
@@ -177,7 +177,7 @@ static char* eventSourceStr_l[] =
     "0x0c", "0x0d", "0x0e",     // reserved
     "0x0f",                     // reserved
 
-    // userspace modules
+    // openPOWERLINK user modules
     "EventSourceDllu",          // Dllu module
     "EventSourceNmtu",          // Nmtu module
     "EventSourceNmtCnu",        // NmtCnu module
@@ -241,12 +241,15 @@ static char* eventTypeStr_l[] =
     "EventTypeDllkAddNode",             // add node to isochronous phase
     "EventTypeDllkDelNode",             // remove node from isochronous phase
     "EventTypeDllkConfigNode",          // configures parameters of node
-    "EventTypeDllkStartReducedCycle",   // start reduced EPL cycle on MN
+    "EventTypeDllkStartReducedCycle",   // start reduced POWERLINK cycle on MN
     "EventTypeNmtMnuNmtCmdSent",        // NMT command was actually sent
     "EventTypeApiUserDef",              // user-defined event
     "EventTypeDllkCycleFinish",         // SoA sent, cycle finished
-    "0x1B", "0x1C", "0x1D",             // reserved
-    "0x1E", "0x1F",                     // reserved
+    "0x1B",                             // reserved
+    "0x1C",                             // reserved
+    "0x1D",                             // reserved
+    "0x1E",                             // reserved
+    "0x1F",                             // reserved
     "EventTypePdokAlloc",               // alloc PDOs
     "EventTypePdokConfig",              // configure PDO channel
     "EventTypeNmtMnuNodeCmd",           // trigger NMT node command
@@ -300,159 +303,159 @@ static tApiEventInfo apiEventInfo_l[] =
 static tRetValInfo retValInfo_l[] =
 {
     /* area for generic errors 0x0000 - 0x000F */
-    { kErrorOk,                       "no error/successful run"},
-    { kErrorIllegalInstance,          "the called instance does not exist"},
-    { kErrorInvalidInstanceParam,     "invalid instance parameter"},
-    { kErrorNoFreeInstance,           "XxxAddInstance was called but no free instance is available"},
-    { kErrorWrongSignature,           "wrong signature while writing to object 0x1010 or 0x1011"},
-    { kErrorInvalidOperation,         "operation not allowed in this situation"},
-    { kErrorInvalidNodeId,            "invalid NodeId was specified"},
-    { kErrorNoResource,               "resource could not be created (Windows, PxROS, ...)"},
-    { kErrorShutdown,                 "stack is shutting down"},
-    { kErrorReject,                   "reject the subsequent command"},
-    { kErrorRetry,                    "retry this command"},
-    { kErrorInvalidEvent,             "invalid event was posted to process function"},
+    { kErrorOk,                       "No error / function call successful"},
+    { kErrorIllegalInstance,          "The called instance does not exist"},
+    { kErrorInvalidInstanceParam,     "Invalid instance parameter"},
+    { kErrorNoFreeInstance,           "Xxx_addInstance was called but no free instance is available"},
+    { kErrorWrongSignature,           "Wrong signature while writing to object 0x1010 or 0x1011"},
+    { kErrorInvalidOperation,         "Operation not allowed in this situation"},
+    { kErrorInvalidNodeId,            "Invalid NodeId was specified"},
+    { kErrorNoResource,               "Resource could not be created (Windows, PxROS, ...)"},
+    { kErrorShutdown,                 "Stack is shutting down"},
+    { kErrorReject,                   "Reject the subsequent command"},
+    { kErrorRetry,                    "Retry this command"},
+    { kErrorInvalidEvent,             "Invalid event was posted to process function"},
 
     /* area for EDRV module 0x0010 - 0x001F */
-    { kErrorEdrvNoFreeTxDesc,         "no free Tx descriptor available"},
-    { kErrorEdrvInvalidCycleLen,      "invalid cycle length (e.g. 0)"},
-    { kErrorEdrvInit,                 "initialisation error"},
-    { kErrorEdrvNoFreeBufEntry,       "no free entry in internal buffer table for Tx frames"},
-    { kErrorEdrvBufNotExisting,       "specified Tx buffer does not exist"},
-    { kErrorEdrvInvalidRxBuf,         "specified Rx buffer is invalid"},
-    { kErrorEdrvInvalidParam,         "invalid parameter in function call"},
-    { kErrorEdrvNextTxListNotEmpty,   "next Tx buffer list is not empty, i.e. still in use"},
-    { kErrorEdrvCurTxListEmpty,       "current Tx buffer list is empty, i.e. DLL didn't provide one"},
-    { kErrorEdrvTxListNotFinishedYet, "current Tx buffer list has not been finished yet, but new cycle has started"},
+    { kErrorEdrvNoFreeTxDesc,         "No free Tx descriptor available"},
+    { kErrorEdrvInvalidCycleLen,      "Invalid cycle length (e.g. 0)"},
+    { kErrorEdrvInit,                 "Initialisation error"},
+    { kErrorEdrvNoFreeBufEntry,       "No free entry in internal buffer table for Tx frames"},
+    { kErrorEdrvBufNotExisting,       "Specified Tx buffer does not exist"},
+    { kErrorEdrvInvalidRxBuf,         "Specified Rx buffer is invalid"},
+    { kErrorEdrvInvalidParam,         "Invalid parameter in function call"},
+    { kErrorEdrvNextTxListNotEmpty,   "Next Tx buffer list is not empty, i.e. still in use"},
+    { kErrorEdrvCurTxListEmpty,       "Current Tx buffer list is empty, i.e. DLL didn't provide one"},
+    { kErrorEdrvTxListNotFinishedYet, "Current Tx buffer list has not been finished yet, but new cycle has started"},
 
 
     /* area for DLL module 0x0020 - 0x002F */
-    { kErrorDllOutOfMemory,           "out of memory"},
-    { kErrorDllIllegalHdl,            "illegal handle for a TxFrame was passed"},
-    { kErrorDllCbAsyncRegistered,     "handler for non-EPL frames was already registered before"},
-    { kErrorDllAsyncSyncReqFull,      "buffer for SyncRequests is full"},
-    { kErrorDllAsyncTxBufferEmpty,    "transmit buffer for asynchronous frames is empty"},
-    { kErrorDllAsyncTxBufferFull,     "transmit buffer for asynchronous frames is full"},
-    { kErrorDllNoNodeInfo,            "MN: too less space in the internal node info structure"},
-    { kErrorDllInvalidParam,          "invalid parameters passed to function"},
-    { kErrorDllInvalidAsndServiceId,  "invalid AsndServiceId specified"},
+    { kErrorDllOutOfMemory,           "Out of memory"},
+    { kErrorDllIllegalHdl,            "Illegal handle for a TxFrame was passed"},
+    { kErrorDllCbAsyncRegistered,     "Handler for non-POWERLINK frames had already been registered before"},
+    { kErrorDllAsyncSyncReqFull,      "Buffer for SyncRequests is full"},
+    { kErrorDllAsyncTxBufferEmpty,    "Transmit buffer for asynchronous frames is empty"},
+    { kErrorDllAsyncTxBufferFull,     "Transmit buffer for asynchronous frames is full"},
+    { kErrorDllNoNodeInfo,            "MN: Too less space in the internal node info structure"},
+    { kErrorDllInvalidParam,          "Invalid parameters passed to function"},
+    { kErrorDllInvalidAsndServiceId,  "Invalid AsndServiceId specified"},
     { kErrorDllTxBufNotReady,         "TxBuffer (e.g. for PReq) is not ready yet"},
     { kErrorDllTxFrameInvalid,        "TxFrame (e.g. for PReq) is invalid or does not exist"},
 
     /* area for OBD module 0x0030 - 0x003F */
-    { kErrorObdIllegalPart,           "unknown OD part"},
-    { kErrorObdIndexNotExist,         "object index does not exist in OD"},
-    { kErrorObdSubindexNotExist,      "subindex does not exist in object index"},
-    { kErrorObdReadViolation,         "read access to a write-only object"},
-    { kErrorObdWriteViolation,        "write access to a read-only object"},
-    { kErrorObdAccessViolation,       "access not allowed"},
-    { kErrorObdUnknownObjectType,     "object type not defined/known"},
-    { kErrorObdVarEntryNotExist,      "object does not contain VarEntry structure"},
-    { kErrorObdValueTooLow,           "value to write to an object is too low"},
-    { kErrorObdValueTooHigh,          "value to write to an object is too high"},
-    { kErrorObdValueLengthError,      "value to write is to long or to short"},
-    { kErrorObdErrnoSet,              "file I/O error occurred and errno is set"},
-    { kErrorObdInvalidDcf,            "device configuration file (CDC) is not valid"},
-    { kErrorObdOutOfMemory,           "out of memory"},
-    { kErrorObdNoConfigData,          "no configuration data present (CDC is empty)"},
+    { kErrorObdIllegalPart,           "Unknown OD part"},
+    { kErrorObdIndexNotExist,         "Object index does not exist in the OD"},
+    { kErrorObdSubindexNotExist,      "Subindex does not exist in the object index"},
+    { kErrorObdReadViolation,         "Read access to a write-only object"},
+    { kErrorObdWriteViolation,        "Write access to a read-only object"},
+    { kErrorObdAccessViolation,       "Access not allowed"},
+    { kErrorObdUnknownObjectType,     "Object type not defined or unknown"},
+    { kErrorObdVarEntryNotExist,      "Object does not contain VarEntry structure"},
+    { kErrorObdValueTooLow,           "Value to write to the object is too low"},
+    { kErrorObdValueTooHigh,          "Value to write to the object is too high"},
+    { kErrorObdValueLengthError,      "Value to write is too long or too short"},
+    { kErrorObdErrnoSet,              "File I/O error occurred and errno is set"},
+    { kErrorObdInvalidDcf,            "Device configuration file (CDC) is not valid"},
+    { kErrorObdOutOfMemory,           "Out of memory"},
+    { kErrorObdNoConfigData,          "No configuration data present (CDC is empty)"},
 
 
     /* area for NMT module 0x0040 - 0x004F */
-    { kErrorNmtUnknownCommand,        "unknown NMT command"},
-    { kErrorNmtInvalidFramePointer,   "pointer to the frame is not valid"},
-    { kErrorNmtInvalidEvent,          "invalid event send to NMT module"},
-    { kErrorNmtInvalidState,          "unknown state in NMT state machine"},
-    { kErrorNmtInvalidParam,          "invalid parameters specified"},
+    { kErrorNmtUnknownCommand,        "Unknown NMT command"},
+    { kErrorNmtInvalidFramePointer,   "Pointer to the frame is not valid"},
+    { kErrorNmtInvalidEvent,          "Invalid event sent to NMT module"},
+    { kErrorNmtInvalidState,          "Unknown state in NMT state machine"},
+    { kErrorNmtInvalidParam,          "Invalid parameters specified"},
     { kErrorNmtSyncReqRejected,       "SyncReq could not be issued"},
 
     /* area for SDO/UDP module 0x0050 - 0x005F */
-    { kErrorSdoUdpMissCb,             "missing callback-function pointer during init of module"},
-    { kErrorSdoUdpNoSocket,           "error during init of socket"},
-    { kErrorSdoUdpSocketError,        "error during usage of socket"},
-    { kErrorSdoUdpThreadError,        "error during start of listen thread"},
-    { kErrorSdoUdpNoFreeHandle,       "no free connection handle for Udp"},
-    { kErrorSdoUdpSendError,          "Error during send of frame"},
-    { kErrorSdoUdpInvalidHdl,         "the connection handle is invalid"},
+    { kErrorSdoUdpMissCb,             "Missing callback-function pointer during init of module"},
+    { kErrorSdoUdpNoSocket,           "Error during init of socket"},
+    { kErrorSdoUdpSocketError,        "Error during usage of socket"},
+    { kErrorSdoUdpThreadError,        "Error during start of listen thread"},
+    { kErrorSdoUdpNoFreeHandle,       "No free connection handle for UDP"},
+    { kErrorSdoUdpSendError,          "Error during sending the frame"},
+    { kErrorSdoUdpInvalidHdl,         "The connection handle is invalid"},
 
     /* area for SDO Sequence layer module 0x0060 - 0x006F */
-    { kErrorSdoSeqMissCb,             "no callback-function assign"},
-    { kErrorSdoSeqNoFreeHandle,       "no free handle for connection"},
-    { kErrorSdoSeqInvalidHdl,         "invalid handle in SDO sequence layer"},
-    { kErrorSdoSeqUnsupportedProt,    "unsupported Protocol selected"},
-    { kErrorSdoSeqNoFreeHistory,      "no free entry in history"},
-    { kErrorSdoSeqFrameSizeError,     "the size of the frames is not correct"},
-    { kErrorSdoSeqRequestAckNeeded,   "indicates that the history buffer is full and a ack request is needed"},
-    { kErrorSdoSeqInvalidFrame,       "frame not valid"},
-    { kErrorSdoSeqConnectionBusy,     "connection is busy -> retry later"},
-    { kErrorSdoSeqInvalidEvent,       "invalid event received"},
+    { kErrorSdoSeqMissCb,             "No callback-function assigned"},
+    { kErrorSdoSeqNoFreeHandle,       "No free handle for connection"},
+    { kErrorSdoSeqInvalidHdl,         "Invalid handle in SDO sequence layer"},
+    { kErrorSdoSeqUnsupportedProt,    "Unsupported protocol selected"},
+    { kErrorSdoSeqNoFreeHistory,      "No free history entry"},
+    { kErrorSdoSeqFrameSizeError,     "The size of the frames is not correct"},
+    { kErrorSdoSeqRequestAckNeeded,   "Indicates that the history buffer is full and an ACK request is needed"},
+    { kErrorSdoSeqInvalidFrame,       "Frame not valid"},
+    { kErrorSdoSeqConnectionBusy,     "Connection is busy -> retry later"},
+    { kErrorSdoSeqInvalidEvent,       "Invalid event received"},
 
-    /* area for SDO Command Layer Module 0x0070 - 0x007F */
-    { kErrorSdoComUnsupportedProt,    "unsupported Protocol selected"},
-    { kErrorSdoComNoFreeHandle,       "no free handle for connection"},
-    { kErrorSdoComInvalidServiceType, "invalid SDO service type specified"},
-    { kErrorSdoComInvalidHandle,      "handle invalid"},
-    { kErrorSdoComInvalidSendType,    "the stated to of frame to send is not possible"},
-    { kErrorSdoComNotResponsible,     "internal error: command layer handle is not responsible for this event from sequence layer"},
-    { kErrorSdoComHandleExists,       "handle to same node already exists"},
-    { kErrorSdoComHandleBusy,         "transfer via this handle is already running"},
-    { kErrorSdoComInvalidParam,       "invalid parameters passed to function"},
+    /* area for SDO Command Layer module 0x0070 - 0x007F */
+    { kErrorSdoComUnsupportedProt,    "Unsupported Protocol selected"},
+    { kErrorSdoComNoFreeHandle,       "No free handle for connection"},
+    { kErrorSdoComInvalidServiceType, "Invalid SDO service type specified"},
+    { kErrorSdoComInvalidHandle,      "Handle invalid"},
+    { kErrorSdoComInvalidSendType,    "The passed frame type is invalid for sending"},
+    { kErrorSdoComNotResponsible,     "Internal error: command layer handle is not responsible for this event from sequence layer"},
+    { kErrorSdoComHandleExists,       "Handle to same node already exists"},
+    { kErrorSdoComHandleBusy,         "Transfer via this handle is already running"},
+    { kErrorSdoComInvalidParam,       "Invalid parameters passed to function"},
 
-    /* area for EPL Event-Modul 0x0080 - 0x008F */
-    { kErrorEventUnknownSink,         "unknown sink for event"},
-    { kErrorEventPostError,           "error during post of event"},
-    { kErrorEventReadError,           "error during reading of event from queue"},
-    { kErrorEventWrongSize,           "event arg has wrong size"},
+    /* area for openPOWERLINK event module 0x0080 - 0x008F */
+    { kErrorEventUnknownSink,         "Unknown sink for event"},
+    { kErrorEventPostError,           "Error during posting the event"},
+    { kErrorEventReadError,           "Error during reading the event from queue"},
+    { kErrorEventWrongSize,           "Event arg has wrong size"},
 
-    /* area for EPL Timer Modul 0x0090 - 0x009F */
-    { kErrorTimerInvalidHandle,       "invalid handle for timer"},
-    { kErrorTimerNoTimerCreated,      "no timer was created caused by an error"},
-    { kErrorTimerThreadError,         "process thread could not be created"},
+    /* area for openPOWERLINK timer module 0x0090 - 0x009F */
+    { kErrorTimerInvalidHandle,       "Invalid handle for timer"},
+    { kErrorTimerNoTimerCreated,      "No timer was created because of an error"},
+    { kErrorTimerThreadError,         "Process thread could not be created"},
 
-    /* area for EPL SDO/Asnd Module 0x00A0 - 0x0AF */
-    { kErrorSdoAsndInvalidNodeId,     "node id is invalid"},
-    { kErrorSdoAsndNoFreeHandle,      "no free handle for connection"},
-    { kErrorSdoAsndInvalidHandle,     "handle for connection is invalid"},
+    /* area for openPOWERLINK SDO/Asnd module 0x00A0 - 0x0AF */
+    { kErrorSdoAsndInvalidNodeId,     "Node id is invalid"},
+    { kErrorSdoAsndNoFreeHandle,      "No free handle for connection"},
+    { kErrorSdoAsndInvalidHandle,     "Handle for connection is invalid"},
 
     /* area for PDO module 0x00B0 - 0x00BF  */
-    { kErrorPdoNotExist,              "selected PDO does not exist"},
-    { kErrorPdoLengthExceeded,        "length of PDO mapping exceeds the current payload limit"},
-    { kErrorPdoGranularityMismatch,   "configured PDO granularity is not equal to supported granularity"},
-    { kErrorPdoInitError,             "error during initialisation of PDO module"},
+    { kErrorPdoNotExist,              "Selected PDO does not exist"},
+    { kErrorPdoLengthExceeded,        "Length of PDO mapping exceeds the current payload limit"},
+    { kErrorPdoGranularityMismatch,   "Configured PDO granularity is not equal to supported granularity"},
+    { kErrorPdoInitError,             "Error during initialisation of PDO module"},
     { kErrorPdoConfWhileEnabled,      "PDO configuration cannot be changed while it is enabled"},
-    { kErrorPdoErrorMapp,             "invalid PDO mapping"},
-    { kErrorPdoVarNotFound,           "the referenced object in a PDO mapping does not exist"},
-    { kErrorPdoVarNotMappable,        "the referenced object in a PDO mapping is not mappable"},
-    { kErrorPdoSizeMismatch,          "bit size of object mapping is larger than the object size"},
-    { kErrorPdoTooManyTxPdos,         "there exits more than one TPDO on CN"},
-    { kErrorPdoInvalidObjIndex,       "invalid object index used for PDO mapping or communication parameter"},
-    { kErrorPdoTooManyPdos,           "there exit to many PDOs"},
+    { kErrorPdoErrorMapp,             "Invalid PDO mapping"},
+    { kErrorPdoVarNotFound,           "The referenced object in a PDO mapping does not exist"},
+    { kErrorPdoVarNotMappable,        "The referenced object in a PDO mapping is not mappable"},
+    { kErrorPdoSizeMismatch,          "Bit size of object mapping is larger than the object size"},
+    { kErrorPdoTooManyTxPdos,         "Too many TPDOs are existing (only one TPDO is allowed on a CN)"},
+    { kErrorPdoInvalidObjIndex,       "Invalid object index used for PDO mapping or communication parameter"},
+    { kErrorPdoTooManyPdos,           "Too many PDOs are existing"},
 
     /* Configuration manager module 0x00C0 - 0x00CF */
-    { kErrorCfmConfigError,           "error in configuration manager"},
-    { kErrorCfmSdocTimeOutError,      "error in configuration manager, Sdo timeout"},
-    { kErrorCfmInvalidDcf,            "device configuration file (CDC) is not valid"},
-    { kErrorCfmUnsupportedDcf,        "unsupported DCF format"},
-    { kErrorCfmConfigWithErrors,      "configuration finished with errors"},
-    { kErrorCfmNoFreeConfig,          "no free configuration entry"},
-    { kErrorCfmNoConfigData,          "no configuration data present"},
-    { kErrorCfmUnsuppDatatypeDcf,     "unsupported datatype found in dcf -> this entry was not configured"},
+    { kErrorCfmConfigError,           "Error in configuration manager"},
+    { kErrorCfmSdocTimeOutError,      "Error in configuration manager due to an SDO timeout"},
+    { kErrorCfmInvalidDcf,            "Device configuration file (CDC) is not valid"},
+    { kErrorCfmUnsupportedDcf,        "Unsupported DCF format"},
+    { kErrorCfmConfigWithErrors,      "Configuration finished with errors"},
+    { kErrorCfmNoFreeConfig,          "No free configuration entry"},
+    { kErrorCfmNoConfigData,          "No configuration data present"},
+    { kErrorCfmUnsuppDatatypeDcf,     "Unsupported datatype found in DCF -> this entry was not configured"},
 
-    { kErrorApiTaskDeferred,          "EPL performs task in background and informs the application (or vice-versa), when it is finished"},
-    { kErrorApiInvalidParam,          "passed invalid parameters to a function (e.g. invalid node id)"},
-    { kErrorApiNoObdInitRam,          "no function pointer for ObdInitRam supplied"},
-    { kErrorApiSdoBusyIntern,         "the SDO channel to this node is internally used by the stack (e.g. the CFM) and currently not available for the application."},
-    { kErrorApiPIAlreadyAllocated,    "process image is already allocated"},
-    { kErrorApiPIOutOfMemory,         "process image: out of memory"},
-    { kErrorApiPISizeExceeded,        "process image: variable linking or copy job exceeds the size of the PI"},
-    { kErrorApiPINotAllocated,        "process image is not allocated"},
-    { kErrorApiPIJobQueueFull,        "process image: job queue is full"},
-    { kErrorApiPIJobQueueEmpty,       "process image: job queue is empty"},
-    { kErrorApiPIInvalidJobSize,      "process image: invalid job size"},
-    { kErrorApiPIInvalidPIPointer,    "process image: pointer to application's process image is invalid"},
-    { kErrorApiPINonBlockingNotSupp,  "process image: non-blocking copy jobs are not supported on this target"},
+    { kErrorApiTaskDeferred,          "openPOWERLINK performs a task in the background and informs the application (or vice-versa) when it is finished"},
+    { kErrorApiInvalidParam,          "Invalid parameters were passed to a function (e.g. invalid node id)"},
+    { kErrorApiNoObdInitRam,          "No function pointer for ObdInitRam supplied"},
+    { kErrorApiSdoBusyIntern,         "The SDO channel to this node is internally used by the stack (e.g. the CFM) and currently not available for the application."},
+    { kErrorApiPIAlreadyAllocated,    "Process image is already allocated"},
+    { kErrorApiPIOutOfMemory,         "Process image: out of memory"},
+    { kErrorApiPISizeExceeded,        "Process image: variable linking or copy job exceeds the size of the PI"},
+    { kErrorApiPINotAllocated,        "Process image is not allocated"},
+    { kErrorApiPIJobQueueFull,        "Process image: job queue is full"},
+    { kErrorApiPIJobQueueEmpty,       "Process image: job queue is empty"},
+    { kErrorApiPIInvalidJobSize,      "Process image: invalid job size"},
+    { kErrorApiPIInvalidPIPointer,    "Process image: pointer to application's process image is invalid"},
+    { kErrorApiPINonBlockingNotSupp,  "Process image: non-blocking copy jobs are not supported on this target"},
 };
 
-static const tEmergErrCodeInfo   emergErrCodeInfo_l[] =
+static const tEmergErrCodeInfo emergErrCodeInfo_l[] =
 {
     { E_NO_ERROR,                    "E_NO_ERROR"               },
 
@@ -516,7 +519,7 @@ static const tEmergErrCodeInfo   emergErrCodeInfo_l[] =
 };
 
 // text strings for NMT node events
-static char *EplNmtNodeEvtTypeStr_g[] =
+static char* OplkNmtNodeEvtTypeStr_g[] =
 {
     "Found",                    // 0x00
     "Update software",          // 0x01
@@ -529,7 +532,7 @@ static char *EplNmtNodeEvtTypeStr_g[] =
 };
 
 // text strings for NMT boot events
-static char *EplNmtBootEvtTypeStr_g[] =
+static char* OplkNmtBootEvtTypeStr_g[] =
 {
     "Boot step 1 finished",     // 0x00     PreOp2 is possible
     "Boot step 2 finished",     // 0x01     ReadyToOp is possible for MN
@@ -540,7 +543,7 @@ static char *EplNmtBootEvtTypeStr_g[] =
 };
 
 // text strings for SDO command layer connection states
-static char *EplSdoComConStateStr_g[] =
+static char* OplkSdoComConStateStr_g[] =
 {
     "NotActive",                // 0x00
     "Running",                  // 0x01
@@ -718,15 +721,15 @@ The function returns the string describing the specified NMT node event.
 \ingroup module_debugstr
 */
 //------------------------------------------------------------------------------
-char* debugstr_getNmtNodeEventTypeStr(tNmtNodeEvent NodeEventType_p )
+char* debugstr_getNmtNodeEventTypeStr(tNmtNodeEvent NodeEventType_p)
 {
-    if( NodeEventType_p >= tabentries(EplNmtNodeEvtTypeStr_g) )
+    if (NodeEventType_p >= tabentries(OplkNmtNodeEvtTypeStr_g))
     {
-        return  invalidStr_l;
+        return invalidStr_l;
     }
     else
     {
-        return  EplNmtNodeEvtTypeStr_g[ NodeEventType_p ];
+        return OplkNmtNodeEvtTypeStr_g[NodeEventType_p];
     }
 }
 
@@ -743,15 +746,15 @@ The function returns the string describing the specified NMT boot event.
 \ingroup module_debugstr
 */
 //------------------------------------------------------------------------------
-char* debugstr_getNmtBootEventTypeStr(tNmtBootEvent BootEventType_p )
+char* debugstr_getNmtBootEventTypeStr(tNmtBootEvent BootEventType_p)
 {
-    if( BootEventType_p >= tabentries(EplNmtBootEvtTypeStr_g) )
+    if (BootEventType_p >= tabentries(OplkNmtBootEvtTypeStr_g))
     {
-        return  invalidStr_l;
+        return invalidStr_l;
     }
     else
     {
-        return  EplNmtBootEvtTypeStr_g[ BootEventType_p ];
+        return OplkNmtBootEvtTypeStr_g[BootEventType_p];
     }
 }
 
@@ -772,13 +775,13 @@ connection state.
 //------------------------------------------------------------------------------
 char* debugstr_getSdoComConStateStr(tSdoComConState SdoComConState_p)
 {
-    if( SdoComConState_p >= tabentries(EplSdoComConStateStr_g) )
+    if (SdoComConState_p >= tabentries(OplkSdoComConStateStr_g))
     {
-        return  invalidStr_l;
+        return invalidStr_l;
     }
     else
     {
-        return  EplSdoComConStateStr_g[ SdoComConState_p ];
+        return OplkSdoComConStateStr_g[SdoComConState_p];
     }
 }
 
@@ -788,20 +791,20 @@ char* debugstr_getSdoComConStateStr(tSdoComConState SdoComConState_p)
 
 The function returns the string describing the given entry of type tOplkError.
 
-\param  EplKernel_p         tOplkError value to print
+\param  OplkError_p         tOplkError value to print
 
 \return The function returns a string describing the specified tOplkError type.
 
 \ingroup module_debugstr
 */
 //------------------------------------------------------------------------------
-char* debugstr_getRetValStr(tOplkError EplKernel_p)
+char* debugstr_getRetValStr(tOplkError OplkError_p)
 {
     UINT        i;
 
     for (i = 0; i < tabentries(retValInfo_l); i++)
     {
-        if (retValInfo_l[i].key == EplKernel_p)
+        if (retValInfo_l[i].key == OplkError_p)
             return (retValInfo_l[i].sName);
     }
     return invalidStr_l;

@@ -467,7 +467,7 @@ tOplkError ProcessThread::processErrorWarningEvent(tOplkApiEventType EventType_p
     UNUSED_PARAMETER(EventType_p);
     UNUSED_PARAMETER(pUserArg_p);
 
-    sigPrintLog(QString("Err/Warn: Source = %1 (0x%2) EplError = %3 (0x%4)")
+    sigPrintLog(QString("Err/Warn: Source = %1 (0x%2) OplkError = %3 (0x%4)")
             .arg(debugstr_getEventSourceStr(pInternalError->eventSource))
             .arg(pInternalError->eventSource, 2, 16, QLatin1Char('0'))
             .arg(debugstr_getRetValStr(pInternalError->oplkError))
