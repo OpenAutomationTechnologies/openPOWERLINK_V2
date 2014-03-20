@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   amile.c
+\file   ami/amile.c
 
 \brief  Generic implementation of the Abstract Memory Interface (ami)
 
@@ -91,7 +91,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 Sets a 16 bit value to a buffer in big endian
 
-\param[out] pAddr_p         Pointer to the destination buffer
+\param[out] pAddr_p           Pointer to the destination buffer
 \param[in]  uint16Val_p       The source value to convert
 
 \ingroup module_ami
@@ -99,8 +99,8 @@ Sets a 16 bit value to a buffer in big endian
 //------------------------------------------------------------------------------
 void ami_setUint16Be(void* pAddr_p, UINT16 uint16Val_p)
 {
-    ((UINT8 *) pAddr_p)[1] = ((UINT8 *) &uint16Val_p)[0];
-    ((UINT8 *) pAddr_p)[0] = ((UINT8 *) &uint16Val_p)[1];
+    ((UINT8*)pAddr_p)[1] = ((UINT8*)&uint16Val_p)[0];
+    ((UINT8*)pAddr_p)[0] = ((UINT8*)&uint16Val_p)[1];
 }
 
 //------------------------------------------------------------------------------
@@ -117,8 +117,8 @@ Sets a 16 bit value to a buffer in little endian
 //------------------------------------------------------------------------------
 void ami_setUint16Le(void* pAddr_p, UINT16 uint16Val_p)
 {
-    ((UINT8 *) pAddr_p)[0] = ((UINT8 *) &uint16Val_p)[0];
-    ((UINT8 *) pAddr_p)[1] = ((UINT8 *) &uint16Val_p)[1];
+    ((UINT8*)pAddr_p)[0] = ((UINT8*)&uint16Val_p)[0];
+    ((UINT8*)pAddr_p)[1] = ((UINT8*)&uint16Val_p)[1];
 }
 
 //------------------------------------------------------------------------------
@@ -139,8 +139,8 @@ UINT16 ami_getUint16Be(void* pAddr_p)
 {
     UINT16 val;
 
-    ((UINT8 *) &val)[1] = ((UINT8 *) pAddr_p)[0];
-    ((UINT8 *) &val)[0] = ((UINT8 *) pAddr_p)[1];
+    ((UINT8*)&val)[1] = ((UINT8*)pAddr_p)[0];
+    ((UINT8*)&val)[0] = ((UINT8*)pAddr_p)[1];
 
     return val;
 }
@@ -163,8 +163,8 @@ UINT16 ami_getUint16Le(void* pAddr_p)
 {
     UINT16 val;
 
-    ((UINT8 *) &val)[0] = ((UINT8 *) pAddr_p)[0];
-    ((UINT8 *) &val)[1] = ((UINT8 *) pAddr_p)[1];
+    ((UINT8*)&val)[0] = ((UINT8*)pAddr_p)[0];
+    ((UINT8*)&val)[1] = ((UINT8*)pAddr_p)[1];
 
     return val;
 }
@@ -183,9 +183,9 @@ Sets a 24 bit value to a buffer in big endian
 //------------------------------------------------------------------------------
 void ami_setUint24Be(void* pAddr_p, UINT32 uint32Val_p)
 {
-    ((UINT8 *) pAddr_p)[2] = ((UINT8 *) &uint32Val_p)[0];
-    ((UINT8 *) pAddr_p)[1] = ((UINT8 *) &uint32Val_p)[1];
-    ((UINT8 *) pAddr_p)[0] = ((UINT8 *) &uint32Val_p)[2];
+    ((UINT8*)pAddr_p)[2] = ((UINT8*)&uint32Val_p)[0];
+    ((UINT8*)pAddr_p)[1] = ((UINT8*)&uint32Val_p)[1];
+    ((UINT8*)pAddr_p)[0] = ((UINT8*)&uint32Val_p)[2];
 }
 
 //------------------------------------------------------------------------------
@@ -202,9 +202,9 @@ Sets a 24 bit value to a buffer in little endian
 //------------------------------------------------------------------------------
 void ami_setUint24Le(void* pAddr_p, UINT32 uint32Val_p)
 {
-    ((UINT8 *) pAddr_p)[0] = ((UINT8 *) &uint32Val_p)[0];
-    ((UINT8 *) pAddr_p)[1] = ((UINT8 *) &uint32Val_p)[1];
-    ((UINT8 *) pAddr_p)[2] = ((UINT8 *) &uint32Val_p)[2];
+    ((UINT8*)pAddr_p)[0] = ((UINT8*)&uint32Val_p)[0];
+    ((UINT8*)pAddr_p)[1] = ((UINT8*)&uint32Val_p)[1];
+    ((UINT8*)pAddr_p)[2] = ((UINT8*)&uint32Val_p)[2];
 }
 
 //------------------------------------------------------------------------------
@@ -225,9 +225,9 @@ UINT32 ami_getUint24Be(void* pAddr_p)
 {
     UINT32 val = 0;
 
-    ((UINT8 *) &val)[0] = ((UINT8 *) pAddr_p)[2];
-    ((UINT8 *) &val)[1] = ((UINT8 *) pAddr_p)[1];
-    ((UINT8 *) &val)[2] = ((UINT8 *) pAddr_p)[0];
+    ((UINT8*)&val)[0] = ((UINT8*)pAddr_p)[2];
+    ((UINT8*)&val)[1] = ((UINT8*)pAddr_p)[1];
+    ((UINT8*)&val)[2] = ((UINT8*)pAddr_p)[0];
 
     return val;
 }
@@ -250,9 +250,9 @@ UINT32 ami_getUint24Le(void* pAddr_p)
 {
     UINT32 val = 0;
 
-    ((UINT8 *) &val)[0] = ((UINT8 *) pAddr_p)[0];
-    ((UINT8 *) &val)[1] = ((UINT8 *) pAddr_p)[1];
-    ((UINT8 *) &val)[2] = ((UINT8 *) pAddr_p)[2];
+    ((UINT8*)&val)[0] = ((UINT8*)pAddr_p)[0];
+    ((UINT8*)&val)[1] = ((UINT8*)pAddr_p)[1];
+    ((UINT8*)&val)[2] = ((UINT8*)pAddr_p)[2];
 
     return val;
 }
@@ -271,10 +271,10 @@ Sets a 32 bit value to a buffer in big endian
 //------------------------------------------------------------------------------
 void ami_setUint32Be(void* pAddr_p, UINT32 uint32Val_p)
 {
-    ((UINT8 *) pAddr_p)[3] = ((UINT8 *) &uint32Val_p)[0];
-    ((UINT8 *) pAddr_p)[2] = ((UINT8 *) &uint32Val_p)[1];
-    ((UINT8 *) pAddr_p)[1] = ((UINT8 *) &uint32Val_p)[2];
-    ((UINT8 *) pAddr_p)[0] = ((UINT8 *) &uint32Val_p)[3];
+    ((UINT8*)pAddr_p)[3] = ((UINT8*)&uint32Val_p)[0];
+    ((UINT8*)pAddr_p)[2] = ((UINT8*)&uint32Val_p)[1];
+    ((UINT8*)pAddr_p)[1] = ((UINT8*)&uint32Val_p)[2];
+    ((UINT8*)pAddr_p)[0] = ((UINT8*)&uint32Val_p)[3];
 }
 
 //------------------------------------------------------------------------------
@@ -291,10 +291,10 @@ Sets a 32 bit value to a buffer in little endian
 //------------------------------------------------------------------------------
 void ami_setUint32Le(void* pAddr_p, UINT32 uint32Val_p)
 {
-    ((UINT8 *) pAddr_p)[0] = ((UINT8 *) &uint32Val_p)[0];
-    ((UINT8 *) pAddr_p)[1] = ((UINT8 *) &uint32Val_p)[1];
-    ((UINT8 *) pAddr_p)[2] = ((UINT8 *) &uint32Val_p)[2];
-    ((UINT8 *) pAddr_p)[3] = ((UINT8 *) &uint32Val_p)[3];
+    ((UINT8*)pAddr_p)[0] = ((UINT8*)&uint32Val_p)[0];
+    ((UINT8*)pAddr_p)[1] = ((UINT8*)&uint32Val_p)[1];
+    ((UINT8*)pAddr_p)[2] = ((UINT8*)&uint32Val_p)[2];
+    ((UINT8*)pAddr_p)[3] = ((UINT8*)&uint32Val_p)[3];
 }
 
 //------------------------------------------------------------------------------
@@ -315,10 +315,10 @@ UINT32 ami_getUint32Be(void* pAddr_p)
 {
     UINT32 val;
 
-    ((UINT8 *) &val)[3] = ((UINT8 *) pAddr_p)[0];
-    ((UINT8 *) &val)[2] = ((UINT8 *) pAddr_p)[1];
-    ((UINT8 *) &val)[1] = ((UINT8 *) pAddr_p)[2];
-    ((UINT8 *) &val)[0] = ((UINT8 *) pAddr_p)[3];
+    ((UINT8*)&val)[3] = ((UINT8*)pAddr_p)[0];
+    ((UINT8*)&val)[2] = ((UINT8*)pAddr_p)[1];
+    ((UINT8*)&val)[1] = ((UINT8*)pAddr_p)[2];
+    ((UINT8*)&val)[0] = ((UINT8*)pAddr_p)[3];
 
     return val;
 }
@@ -341,10 +341,10 @@ UINT32 ami_getUint32Le(void* pAddr_p)
 {
     UINT32 val;
 
-    ((UINT8 *) &val)[0] = ((UINT8 *) pAddr_p)[0];
-    ((UINT8 *) &val)[1] = ((UINT8 *) pAddr_p)[1];
-    ((UINT8 *) &val)[2] = ((UINT8 *) pAddr_p)[2];
-    ((UINT8 *) &val)[3] = ((UINT8 *) pAddr_p)[3];
+    ((UINT8*)&val)[0] = ((UINT8*)pAddr_p)[0];
+    ((UINT8*)&val)[1] = ((UINT8*)pAddr_p)[1];
+    ((UINT8*)&val)[2] = ((UINT8*)pAddr_p)[2];
+    ((UINT8*)&val)[3] = ((UINT8*)pAddr_p)[3];
 
     return val;
 }
@@ -363,11 +363,11 @@ Sets a 40 bit value to a buffer in big endian
 //------------------------------------------------------------------------------
 void ami_setUint40Be(void* pAddr_p, UINT64 uint64Val_p)
 {
-    ((UINT8 *) pAddr_p)[0] = ((UINT8 *) &uint64Val_p)[4];
-    ((UINT8 *) pAddr_p)[1] = ((UINT8 *) &uint64Val_p)[3];
-    ((UINT8 *) pAddr_p)[2] = ((UINT8 *) &uint64Val_p)[2];
-    ((UINT8 *) pAddr_p)[3] = ((UINT8 *) &uint64Val_p)[1];
-    ((UINT8 *) pAddr_p)[4] = ((UINT8 *) &uint64Val_p)[0];
+    ((UINT8*)pAddr_p)[0] = ((UINT8*)&uint64Val_p)[4];
+    ((UINT8*)pAddr_p)[1] = ((UINT8*)&uint64Val_p)[3];
+    ((UINT8*)pAddr_p)[2] = ((UINT8*)&uint64Val_p)[2];
+    ((UINT8*)pAddr_p)[3] = ((UINT8*)&uint64Val_p)[1];
+    ((UINT8*)pAddr_p)[4] = ((UINT8*)&uint64Val_p)[0];
 }
 
 //------------------------------------------------------------------------------
@@ -384,11 +384,11 @@ Sets a 40 bit value to a buffer in little endian
 //------------------------------------------------------------------------------
 void ami_setUint40Le(void* pAddr_p, UINT64 uint64Val_p)
 {
-    ((UINT8 *) pAddr_p)[0] = ((UINT8 *) &uint64Val_p)[0];
-    ((UINT8 *) pAddr_p)[1] = ((UINT8 *) &uint64Val_p)[1];
-    ((UINT8 *) pAddr_p)[2] = ((UINT8 *) &uint64Val_p)[2];
-    ((UINT8 *) pAddr_p)[3] = ((UINT8 *) &uint64Val_p)[3];
-    ((UINT8 *) pAddr_p)[4] = ((UINT8 *) &uint64Val_p)[4];
+    ((UINT8*)pAddr_p)[0] = ((UINT8*)&uint64Val_p)[0];
+    ((UINT8*)pAddr_p)[1] = ((UINT8*)&uint64Val_p)[1];
+    ((UINT8*)pAddr_p)[2] = ((UINT8*)&uint64Val_p)[2];
+    ((UINT8*)pAddr_p)[3] = ((UINT8*)&uint64Val_p)[3];
+    ((UINT8*)pAddr_p)[4] = ((UINT8*)&uint64Val_p)[4];
 }
 
 //------------------------------------------------------------------------------
@@ -409,11 +409,11 @@ UINT64 ami_getUint40Be(void* pAddr_p)
 {
     UINT64 val = 0;
 
-    ((UINT8 *) &val)[0] = ((UINT8 *) pAddr_p)[4];
-    ((UINT8 *) &val)[1] = ((UINT8 *) pAddr_p)[3];
-    ((UINT8 *) &val)[2] = ((UINT8 *) pAddr_p)[2];
-    ((UINT8 *) &val)[3] = ((UINT8 *) pAddr_p)[1];
-    ((UINT8 *) &val)[4] = ((UINT8 *) pAddr_p)[0];
+    ((UINT8*)&val)[0] = ((UINT8*)pAddr_p)[4];
+    ((UINT8*)&val)[1] = ((UINT8*)pAddr_p)[3];
+    ((UINT8*)&val)[2] = ((UINT8*)pAddr_p)[2];
+    ((UINT8*)&val)[3] = ((UINT8*)pAddr_p)[1];
+    ((UINT8*)&val)[4] = ((UINT8*)pAddr_p)[0];
 
     return val;
 }
@@ -436,11 +436,11 @@ UINT64 ami_getUint40Le(void* pAddr_p)
 {
     UINT64 val = 0;
 
-    ((UINT8 *) &val)[0] = ((UINT8 *) pAddr_p)[0];
-    ((UINT8 *) &val)[1] = ((UINT8 *) pAddr_p)[1];
-    ((UINT8 *) &val)[2] = ((UINT8 *) pAddr_p)[2];
-    ((UINT8 *) &val)[3] = ((UINT8 *) pAddr_p)[3];
-    ((UINT8 *) &val)[4] = ((UINT8 *) pAddr_p)[4];
+    ((UINT8*)&val)[0] = ((UINT8*)pAddr_p)[0];
+    ((UINT8*)&val)[1] = ((UINT8*)pAddr_p)[1];
+    ((UINT8*)&val)[2] = ((UINT8*)pAddr_p)[2];
+    ((UINT8*)&val)[3] = ((UINT8*)pAddr_p)[3];
+    ((UINT8*)&val)[4] = ((UINT8*)pAddr_p)[4];
 
     return val;
 }
@@ -459,12 +459,12 @@ Sets a 48 bit value to a buffer in big endian
 //------------------------------------------------------------------------------
 void ami_setUint48Be(void* pAddr_p, UINT64 uint64Val_p)
 {
-    ((UINT8 *) pAddr_p)[0] = ((UINT8 *) &uint64Val_p)[5];
-    ((UINT8 *) pAddr_p)[1] = ((UINT8 *) &uint64Val_p)[4];
-    ((UINT8 *) pAddr_p)[2] = ((UINT8 *) &uint64Val_p)[3];
-    ((UINT8 *) pAddr_p)[3] = ((UINT8 *) &uint64Val_p)[2];
-    ((UINT8 *) pAddr_p)[4] = ((UINT8 *) &uint64Val_p)[1];
-    ((UINT8 *) pAddr_p)[5] = ((UINT8 *) &uint64Val_p)[0];
+    ((UINT8*)pAddr_p)[0] = ((UINT8*)&uint64Val_p)[5];
+    ((UINT8*)pAddr_p)[1] = ((UINT8*)&uint64Val_p)[4];
+    ((UINT8*)pAddr_p)[2] = ((UINT8*)&uint64Val_p)[3];
+    ((UINT8*)pAddr_p)[3] = ((UINT8*)&uint64Val_p)[2];
+    ((UINT8*)pAddr_p)[4] = ((UINT8*)&uint64Val_p)[1];
+    ((UINT8*)pAddr_p)[5] = ((UINT8*)&uint64Val_p)[0];
 }
 
 //------------------------------------------------------------------------------
@@ -481,12 +481,12 @@ Sets a 48 bit value to a buffer in little endian
 //------------------------------------------------------------------------------
 void ami_setUint48Le(void* pAddr_p, UINT64 uint64Val_p)
 {
-    ((UINT8 *) pAddr_p)[0] = ((UINT8 *) &uint64Val_p)[0];
-    ((UINT8 *) pAddr_p)[1] = ((UINT8 *) &uint64Val_p)[1];
-    ((UINT8 *) pAddr_p)[2] = ((UINT8 *) &uint64Val_p)[2];
-    ((UINT8 *) pAddr_p)[3] = ((UINT8 *) &uint64Val_p)[3];
-    ((UINT8 *) pAddr_p)[4] = ((UINT8 *) &uint64Val_p)[4];
-    ((UINT8 *) pAddr_p)[5] = ((UINT8 *) &uint64Val_p)[5];
+    ((UINT8*)pAddr_p)[0] = ((UINT8*)&uint64Val_p)[0];
+    ((UINT8*)pAddr_p)[1] = ((UINT8*)&uint64Val_p)[1];
+    ((UINT8*)pAddr_p)[2] = ((UINT8*)&uint64Val_p)[2];
+    ((UINT8*)pAddr_p)[3] = ((UINT8*)&uint64Val_p)[3];
+    ((UINT8*)pAddr_p)[4] = ((UINT8*)&uint64Val_p)[4];
+    ((UINT8*)pAddr_p)[5] = ((UINT8*)&uint64Val_p)[5];
 }
 
 //------------------------------------------------------------------------------
@@ -507,12 +507,12 @@ UINT64 ami_getUint48Be(void* pAddr_p)
 {
     UINT64 val = 0;
 
-    ((UINT8 *) &val)[0] = ((UINT8 *) pAddr_p)[5];
-    ((UINT8 *) &val)[1] = ((UINT8 *) pAddr_p)[4];
-    ((UINT8 *) &val)[2] = ((UINT8 *) pAddr_p)[3];
-    ((UINT8 *) &val)[3] = ((UINT8 *) pAddr_p)[2];
-    ((UINT8 *) &val)[4] = ((UINT8 *) pAddr_p)[1];
-    ((UINT8 *) &val)[5] = ((UINT8 *) pAddr_p)[0];
+    ((UINT8*)&val)[0] = ((UINT8*)pAddr_p)[5];
+    ((UINT8*)&val)[1] = ((UINT8*)pAddr_p)[4];
+    ((UINT8*)&val)[2] = ((UINT8*)pAddr_p)[3];
+    ((UINT8*)&val)[3] = ((UINT8*)pAddr_p)[2];
+    ((UINT8*)&val)[4] = ((UINT8*)pAddr_p)[1];
+    ((UINT8*)&val)[5] = ((UINT8*)pAddr_p)[0];
 
     return val;
 }
@@ -535,12 +535,12 @@ UINT64 ami_getUint48Le(void* pAddr_p)
 {
     UINT64 val = 0;
 
-    ((UINT8 *) &val)[0] = ((UINT8 *) pAddr_p)[0];
-    ((UINT8 *) &val)[1] = ((UINT8 *) pAddr_p)[1];
-    ((UINT8 *) &val)[2] = ((UINT8 *) pAddr_p)[2];
-    ((UINT8 *) &val)[3] = ((UINT8 *) pAddr_p)[3];
-    ((UINT8 *) &val)[4] = ((UINT8 *) pAddr_p)[4];
-    ((UINT8 *) &val)[5] = ((UINT8 *) pAddr_p)[5];
+    ((UINT8*)&val)[0] = ((UINT8*)pAddr_p)[0];
+    ((UINT8*)&val)[1] = ((UINT8*)pAddr_p)[1];
+    ((UINT8*)&val)[2] = ((UINT8*)pAddr_p)[2];
+    ((UINT8*)&val)[3] = ((UINT8*)pAddr_p)[3];
+    ((UINT8*)&val)[4] = ((UINT8*)pAddr_p)[4];
+    ((UINT8*)&val)[5] = ((UINT8*)pAddr_p)[5];
 
     return val;
 }
@@ -559,13 +559,13 @@ Sets a 56 bit value to a buffer in big endian
 //------------------------------------------------------------------------------
 void ami_setUint56Be(void* pAddr_p, UINT64 uint64Val_p)
 {
-    ((UINT8 *) pAddr_p)[0] = ((UINT8 *) &uint64Val_p)[6];
-    ((UINT8 *) pAddr_p)[1] = ((UINT8 *) &uint64Val_p)[5];
-    ((UINT8 *) pAddr_p)[2] = ((UINT8 *) &uint64Val_p)[4];
-    ((UINT8 *) pAddr_p)[3] = ((UINT8 *) &uint64Val_p)[3];
-    ((UINT8 *) pAddr_p)[4] = ((UINT8 *) &uint64Val_p)[2];
-    ((UINT8 *) pAddr_p)[5] = ((UINT8 *) &uint64Val_p)[1];
-    ((UINT8 *) pAddr_p)[6] = ((UINT8 *) &uint64Val_p)[0];
+    ((UINT8*)pAddr_p)[0] = ((UINT8*)&uint64Val_p)[6];
+    ((UINT8*)pAddr_p)[1] = ((UINT8*)&uint64Val_p)[5];
+    ((UINT8*)pAddr_p)[2] = ((UINT8*)&uint64Val_p)[4];
+    ((UINT8*)pAddr_p)[3] = ((UINT8*)&uint64Val_p)[3];
+    ((UINT8*)pAddr_p)[4] = ((UINT8*)&uint64Val_p)[2];
+    ((UINT8*)pAddr_p)[5] = ((UINT8*)&uint64Val_p)[1];
+    ((UINT8*)pAddr_p)[6] = ((UINT8*)&uint64Val_p)[0];
 }
 
 //------------------------------------------------------------------------------
@@ -582,13 +582,13 @@ Sets a 56 bit value to a buffer in little endian
 //------------------------------------------------------------------------------
 void ami_setUint56Le(void* pAddr_p, UINT64 uint64Val_p)
 {
-    ((UINT8 *) pAddr_p)[0] = ((UINT8 *) &uint64Val_p)[0];
-    ((UINT8 *) pAddr_p)[1] = ((UINT8 *) &uint64Val_p)[1];
-    ((UINT8 *) pAddr_p)[2] = ((UINT8 *) &uint64Val_p)[2];
-    ((UINT8 *) pAddr_p)[3] = ((UINT8 *) &uint64Val_p)[3];
-    ((UINT8 *) pAddr_p)[4] = ((UINT8 *) &uint64Val_p)[4];
-    ((UINT8 *) pAddr_p)[5] = ((UINT8 *) &uint64Val_p)[5];
-    ((UINT8 *) pAddr_p)[6] = ((UINT8 *) &uint64Val_p)[6];
+    ((UINT8*)pAddr_p)[0] = ((UINT8*)&uint64Val_p)[0];
+    ((UINT8*)pAddr_p)[1] = ((UINT8*)&uint64Val_p)[1];
+    ((UINT8*)pAddr_p)[2] = ((UINT8*)&uint64Val_p)[2];
+    ((UINT8*)pAddr_p)[3] = ((UINT8*)&uint64Val_p)[3];
+    ((UINT8*)pAddr_p)[4] = ((UINT8*)&uint64Val_p)[4];
+    ((UINT8*)pAddr_p)[5] = ((UINT8*)&uint64Val_p)[5];
+    ((UINT8*)pAddr_p)[6] = ((UINT8*)&uint64Val_p)[6];
 }
 
 //------------------------------------------------------------------------------
@@ -609,13 +609,13 @@ UINT64 ami_getUint56Be(void* pAddr_p)
 {
     UINT64 val = 0;
 
-    ((UINT8 *) &val)[0] = ((UINT8 *) pAddr_p)[6];
-    ((UINT8 *) &val)[1] = ((UINT8 *) pAddr_p)[5];
-    ((UINT8 *) &val)[2] = ((UINT8 *) pAddr_p)[4];
-    ((UINT8 *) &val)[3] = ((UINT8 *) pAddr_p)[3];
-    ((UINT8 *) &val)[4] = ((UINT8 *) pAddr_p)[2];
-    ((UINT8 *) &val)[5] = ((UINT8 *) pAddr_p)[1];
-    ((UINT8 *) &val)[6] = ((UINT8 *) pAddr_p)[0];
+    ((UINT8*)&val)[0] = ((UINT8*)pAddr_p)[6];
+    ((UINT8*)&val)[1] = ((UINT8*)pAddr_p)[5];
+    ((UINT8*)&val)[2] = ((UINT8*)pAddr_p)[4];
+    ((UINT8*)&val)[3] = ((UINT8*)pAddr_p)[3];
+    ((UINT8*)&val)[4] = ((UINT8*)pAddr_p)[2];
+    ((UINT8*)&val)[5] = ((UINT8*)pAddr_p)[1];
+    ((UINT8*)&val)[6] = ((UINT8*)pAddr_p)[0];
 
     return val;
 }
@@ -638,13 +638,13 @@ UINT64 ami_getUint56Le(void* pAddr_p)
 {
     UINT64 val = 0;
 
-    ((UINT8 *) &val)[0] = ((UINT8 *) pAddr_p)[0];
-    ((UINT8 *) &val)[1] = ((UINT8 *) pAddr_p)[1];
-    ((UINT8 *) &val)[2] = ((UINT8 *) pAddr_p)[2];
-    ((UINT8 *) &val)[3] = ((UINT8 *) pAddr_p)[3];
-    ((UINT8 *) &val)[4] = ((UINT8 *) pAddr_p)[4];
-    ((UINT8 *) &val)[5] = ((UINT8 *) pAddr_p)[5];
-    ((UINT8 *) &val)[6] = ((UINT8 *) pAddr_p)[6];
+    ((UINT8*)&val)[0] = ((UINT8*)pAddr_p)[0];
+    ((UINT8*)&val)[1] = ((UINT8*)pAddr_p)[1];
+    ((UINT8*)&val)[2] = ((UINT8*)pAddr_p)[2];
+    ((UINT8*)&val)[3] = ((UINT8*)pAddr_p)[3];
+    ((UINT8*)&val)[4] = ((UINT8*)pAddr_p)[4];
+    ((UINT8*)&val)[5] = ((UINT8*)pAddr_p)[5];
+    ((UINT8*)&val)[6] = ((UINT8*)pAddr_p)[6];
 
     return val;
 }
@@ -663,14 +663,14 @@ Sets a 64 bit value to a buffer in big endian
 //------------------------------------------------------------------------------
 void ami_setUint64Be(void* pAddr_p, UINT64 uint64Val_p)
 {
-    ((UINT8 *) pAddr_p)[0] = ((UINT8 *) &uint64Val_p)[7];
-    ((UINT8 *) pAddr_p)[1] = ((UINT8 *) &uint64Val_p)[6];
-    ((UINT8 *) pAddr_p)[2] = ((UINT8 *) &uint64Val_p)[5];
-    ((UINT8 *) pAddr_p)[3] = ((UINT8 *) &uint64Val_p)[4];
-    ((UINT8 *) pAddr_p)[4] = ((UINT8 *) &uint64Val_p)[3];
-    ((UINT8 *) pAddr_p)[5] = ((UINT8 *) &uint64Val_p)[2];
-    ((UINT8 *) pAddr_p)[6] = ((UINT8 *) &uint64Val_p)[1];
-    ((UINT8 *) pAddr_p)[7] = ((UINT8 *) &uint64Val_p)[0];
+    ((UINT8*)pAddr_p)[0] = ((UINT8*)&uint64Val_p)[7];
+    ((UINT8*)pAddr_p)[1] = ((UINT8*)&uint64Val_p)[6];
+    ((UINT8*)pAddr_p)[2] = ((UINT8*)&uint64Val_p)[5];
+    ((UINT8*)pAddr_p)[3] = ((UINT8*)&uint64Val_p)[4];
+    ((UINT8*)pAddr_p)[4] = ((UINT8*)&uint64Val_p)[3];
+    ((UINT8*)pAddr_p)[5] = ((UINT8*)&uint64Val_p)[2];
+    ((UINT8*)pAddr_p)[6] = ((UINT8*)&uint64Val_p)[1];
+    ((UINT8*)pAddr_p)[7] = ((UINT8*)&uint64Val_p)[0];
 }
 
 //------------------------------------------------------------------------------
@@ -687,14 +687,14 @@ Sets a 64 bit value to a buffer in little endian
 //------------------------------------------------------------------------------
 void ami_setUint64Le(void* pAddr_p, UINT64 uint64Val_p)
 {
-    ((UINT8 *) pAddr_p)[0] = ((UINT8 *) &uint64Val_p)[0];
-    ((UINT8 *) pAddr_p)[1] = ((UINT8 *) &uint64Val_p)[1];
-    ((UINT8 *) pAddr_p)[2] = ((UINT8 *) &uint64Val_p)[2];
-    ((UINT8 *) pAddr_p)[3] = ((UINT8 *) &uint64Val_p)[3];
-    ((UINT8 *) pAddr_p)[4] = ((UINT8 *) &uint64Val_p)[4];
-    ((UINT8 *) pAddr_p)[5] = ((UINT8 *) &uint64Val_p)[5];
-    ((UINT8 *) pAddr_p)[6] = ((UINT8 *) &uint64Val_p)[6];
-    ((UINT8 *) pAddr_p)[7] = ((UINT8 *) &uint64Val_p)[7];
+    ((UINT8*)pAddr_p)[0] = ((UINT8*)&uint64Val_p)[0];
+    ((UINT8*)pAddr_p)[1] = ((UINT8*)&uint64Val_p)[1];
+    ((UINT8*)pAddr_p)[2] = ((UINT8*)&uint64Val_p)[2];
+    ((UINT8*)pAddr_p)[3] = ((UINT8*)&uint64Val_p)[3];
+    ((UINT8*)pAddr_p)[4] = ((UINT8*)&uint64Val_p)[4];
+    ((UINT8*)pAddr_p)[5] = ((UINT8*)&uint64Val_p)[5];
+    ((UINT8*)pAddr_p)[6] = ((UINT8*)&uint64Val_p)[6];
+    ((UINT8*)pAddr_p)[7] = ((UINT8*)&uint64Val_p)[7];
 }
 
 //------------------------------------------------------------------------------
@@ -715,14 +715,14 @@ UINT64 ami_getUint64Be(void* pAddr_p)
 {
     UINT64 val;
 
-    ((UINT8 *) &val)[0] = ((UINT8 *) pAddr_p)[7];
-    ((UINT8 *) &val)[1] = ((UINT8 *) pAddr_p)[6];
-    ((UINT8 *) &val)[2] = ((UINT8 *) pAddr_p)[5];
-    ((UINT8 *) &val)[3] = ((UINT8 *) pAddr_p)[4];
-    ((UINT8 *) &val)[4] = ((UINT8 *) pAddr_p)[3];
-    ((UINT8 *) &val)[5] = ((UINT8 *) pAddr_p)[2];
-    ((UINT8 *) &val)[6] = ((UINT8 *) pAddr_p)[1];
-    ((UINT8 *) &val)[7] = ((UINT8 *) pAddr_p)[0];
+    ((UINT8*)&val)[0] = ((UINT8*)pAddr_p)[7];
+    ((UINT8*)&val)[1] = ((UINT8*)pAddr_p)[6];
+    ((UINT8*)&val)[2] = ((UINT8*)pAddr_p)[5];
+    ((UINT8*)&val)[3] = ((UINT8*)pAddr_p)[4];
+    ((UINT8*)&val)[4] = ((UINT8*)pAddr_p)[3];
+    ((UINT8*)&val)[5] = ((UINT8*)pAddr_p)[2];
+    ((UINT8*)&val)[6] = ((UINT8*)pAddr_p)[1];
+    ((UINT8*)&val)[7] = ((UINT8*)pAddr_p)[0];
 
     return val;
 }
@@ -745,14 +745,14 @@ UINT64 ami_getUint64Le(void* pAddr_p)
 {
     UINT64 val;
 
-    ((UINT8 *) &val)[0] = ((UINT8 *) pAddr_p)[0];
-    ((UINT8 *) &val)[1] = ((UINT8 *) pAddr_p)[1];
-    ((UINT8 *) &val)[2] = ((UINT8 *) pAddr_p)[2];
-    ((UINT8 *) &val)[3] = ((UINT8 *) pAddr_p)[3];
-    ((UINT8 *) &val)[4] = ((UINT8 *) pAddr_p)[4];
-    ((UINT8 *) &val)[5] = ((UINT8 *) pAddr_p)[5];
-    ((UINT8 *) &val)[6] = ((UINT8 *) pAddr_p)[6];
-    ((UINT8 *) &val)[7] = ((UINT8 *) pAddr_p)[7];
+    ((UINT8*)&val)[0] = ((UINT8*)pAddr_p)[0];
+    ((UINT8*)&val)[1] = ((UINT8*)pAddr_p)[1];
+    ((UINT8*)&val)[2] = ((UINT8*)pAddr_p)[2];
+    ((UINT8*)&val)[3] = ((UINT8*)pAddr_p)[3];
+    ((UINT8*)&val)[4] = ((UINT8*)pAddr_p)[4];
+    ((UINT8*)&val)[5] = ((UINT8*)pAddr_p)[5];
+    ((UINT8*)&val)[6] = ((UINT8*)pAddr_p)[6];
+    ((UINT8*)&val)[7] = ((UINT8*)pAddr_p)[7];
 
     return val;
 }
@@ -761,7 +761,7 @@ UINT64 ami_getUint64Le(void* pAddr_p)
 /**
 \brief    Set time of day
 
-Sets the time of day (canOPEN timestamp) to memory in little endian
+Sets the time of day (CANopen timestamp) to memory in little endian
 
 \param[out] pAddr_p         Pointer to the destination buffer
 \param[in]  pTimeOfDay_p    Pointer to the source memory to convert
@@ -771,15 +771,15 @@ Sets the time of day (canOPEN timestamp) to memory in little endian
 //------------------------------------------------------------------------------
 void ami_setTimeOfDay(void* pAddr_p, tTimeOfDay* pTimeOfDay_p)
 {
-    ami_setUint32Le(((UINT8 *) pAddr_p), pTimeOfDay_p->msec & 0x0FFFFFFF);
-    ami_setUint16Le(((UINT8 *) pAddr_p) + 4, pTimeOfDay_p->days);
+    ami_setUint32Le(((UINT8*)pAddr_p), pTimeOfDay_p->msec & 0x0FFFFFFF);
+    ami_setUint16Le(((UINT8*)pAddr_p) + 4, pTimeOfDay_p->days);
 }
 
 //------------------------------------------------------------------------------
 /**
 \brief    Get time of day
 
-Get the time of day (canOPEN timestamp) from memory in little endian
+Get the time of day (CANopen timestamp) from memory in little endian
 
 \param[in]  pAddr_p         Pointer to the source memory to convert
 \param[out] pTimeOfDay_p    Pointer to the destination buffer
@@ -787,8 +787,9 @@ Get the time of day (canOPEN timestamp) from memory in little endian
 \ingroup module_ami
 */
 //------------------------------------------------------------------------------
-void ami_getTimeOfDay (void* pAddr_p, tTimeOfDay* pTimeOfDay_p)
+void ami_getTimeOfDay(void* pAddr_p, tTimeOfDay* pTimeOfDay_p)
 {
-    pTimeOfDay_p->msec  = ami_getUint32Le(((UINT8 *) pAddr_p)) & 0x0FFFFFFF;
-    pTimeOfDay_p->days = ami_getUint16Le(((UINT8 *) pAddr_p) + 4);
+    pTimeOfDay_p->msec = ami_getUint32Le(((UINT8*)pAddr_p)) & 0x0FFFFFFF;
+    pTimeOfDay_p->days = ami_getUint16Le(((UINT8*)pAddr_p) + 4);
 }
+

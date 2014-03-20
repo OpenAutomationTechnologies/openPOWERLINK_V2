@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   dllcal-direct.c
+\file   dll/dllcal-direct.c
 
 \brief  source file for DLL CAL direct call module
 
@@ -11,7 +11,7 @@ instance.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012-2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -81,10 +81,10 @@ event posting.
 */
 typedef struct sDllCalDirectInstance
 {
-    tDllCalQueue        dllCalQueue;            ///< DLL CAL queue
-    UINT                frameSize;              ///< size of frame in frame buffer (empty if zero)
-    BYTE                aFrameBuffer[DLLCALDIRECT_TXBUF_SIZE];   ///< frame buffer
-    struct sDllCalDirectInstance *pNext;   ///< pointer to next instance in direct module
+    tDllCalQueue                  dllCalQueue;                            ///< DLL CAL queue
+    UINT                          frameSize;                              ///< size of frame in frame buffer (empty if zero)
+    BYTE                          aFrameBuffer[DLLCALDIRECT_TXBUF_SIZE];  ///< frame buffer
+    struct sDllCalDirectInstance* pNext;                                  ///< pointer to next instance in direct module
 } tDllCalDirectInstance;
 
 //------------------------------------------------------------------------------
@@ -97,8 +97,8 @@ static tDllCalDirectInstance* pDllCalQueueHead_l = NULL; ///< pointer to the hea
 //------------------------------------------------------------------------------
 static tOplkError addInstance(tDllCalQueueInstance* ppDllCalQueue_p, tDllCalQueue DllCalQueue_p);
 static tOplkError delInstance(tDllCalQueueInstance pDllCalQueue_p);
-static tOplkError insertDataBlock(tDllCalQueueInstance pDllCalQueue_p, BYTE *pData_p, UINT* pDataSize_p);
-static tOplkError getDataBlock(tDllCalQueueInstance pDllCalQueue_p, BYTE *pData_p, UINT* pDataSize_p);
+static tOplkError insertDataBlock(tDllCalQueueInstance pDllCalQueue_p, BYTE* pData_p, UINT* pDataSize_p);
+static tOplkError getDataBlock(tDllCalQueueInstance pDllCalQueue_p, BYTE* pData_p, UINT* pDataSize_p);
 static tOplkError getDataBlockCount(tDllCalQueueInstance pDllCalQueue_p, ULONG* pDataBlockCount_p);
 static tOplkError resetDataBlockQueue(tDllCalQueueInstance pDllCalQueue_p, ULONG timeOutMs_p);
 
@@ -119,7 +119,7 @@ static tDllCalFuncIntf funcintf_l =
 
 //------------------------------------------------------------------------------
 /**
-\brief	Return pointer to function interface
+\brief  Return pointer to function interface
 
 This function returns a pointer to the function interface structure which
 is used to access the dllcal functions of the direct call implementation.
@@ -144,16 +144,16 @@ tDllCalFuncIntf* dllcaldirect_getInterface(void)
 
 Add a direct call instance for TX packet forwarding in DLL CAL
 
-\param  ppDllCalQueue_p         Double-pointer to DllCal Queue instance
+\param  ppDllCalQueue_p         Double-pointer to DllCal queue instance
 \param  dllCalQueue_p           Parameter that determines the queue
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          if function executes correctly
-\retval other                   error
+\retval kErrorOk                Function executes correctly
+\retval other                   Error
 */
 //------------------------------------------------------------------------------
-static tOplkError addInstance (tDllCalQueueInstance *ppDllCalQueue_p,
-                               tDllCalQueue dllCalQueue_p)
+static tOplkError addInstance(tDllCalQueueInstance* ppDllCalQueue_p,
+                              tDllCalQueue dllCalQueue_p)
 {
     tOplkError                  ret = kErrorOk;
     tDllCalDirectInstance*      pSearch;
@@ -164,16 +164,16 @@ static tOplkError addInstance (tDllCalQueueInstance *ppDllCalQueue_p,
     pSearch = pDllCalQueueHead_l;
     fInstanceFound = FALSE;
 
-    while(pSearch != NULL)
+    while (pSearch != NULL)
     {
-        if(pSearch->dllCalQueue == dllCalQueue_p)
+        if (pSearch->dllCalQueue == dllCalQueue_p)
         {
             //instance already exists
             fInstanceFound = TRUE;
             break;
         }
 
-        if(pSearch->pNext == NULL)
+        if (pSearch->pNext == NULL)
         {
             //reached tail of linked list
             break;
@@ -184,19 +184,19 @@ static tOplkError addInstance (tDllCalQueueInstance *ppDllCalQueue_p,
     }
 
     //no instance was found
-    if(!fInstanceFound)
+    if (!fInstanceFound)
     {
         //create new instance
         pDllCalDirectInstance =
-             (tDllCalDirectInstance *)OPLK_MALLOC(sizeof(tDllCalDirectInstance));
+             (tDllCalDirectInstance*)OPLK_MALLOC(sizeof(tDllCalDirectInstance));
 
-        if(pDllCalDirectInstance == NULL)
+        if (pDllCalDirectInstance == NULL)
         {
             ret = kErrorNoResource;
             goto Exit;
         }
 
-        if(pSearch == NULL)
+        if (pSearch == NULL)
         {
             //insert new instance at head of linked list
             pDllCalQueueHead_l = pDllCalDirectInstance;
@@ -235,14 +235,14 @@ Exit:
 
 Delete the direct call instance.
 
-\param  pDllCalQueue_p          Pointer to DllCal Queue instance
+\param  pDllCalQueue_p          Pointer to DllCal queue instance
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          if function executes correctly
-\retval other                   error
+\retval kErrorOk                Function executes correctly
+\retval other                   Error
 */
 //------------------------------------------------------------------------------
-static tOplkError delInstance (tDllCalQueueInstance pDllCalQueue_p)
+static tOplkError delInstance(tDllCalQueueInstance pDllCalQueue_p)
 {
     tDllCalDirectInstance*      pDllCalDirectInstance =
                                     (tDllCalDirectInstance*)pDllCalQueue_p;
@@ -254,9 +254,9 @@ static tOplkError delInstance (tDllCalQueueInstance pDllCalQueue_p)
     pSearch = pPrev = pDllCalQueueHead_l;
     fInstanceFound = FALSE;
 
-    while(pSearch != NULL)
+    while (pSearch != NULL)
     {
-        if(pSearch == pDllCalDirectInstance)
+        if (pSearch == pDllCalDirectInstance)
         {
             //instance found
             fInstanceFound = TRUE;
@@ -270,9 +270,9 @@ static tOplkError delInstance (tDllCalQueueInstance pDllCalQueue_p)
         pSearch = (tDllCalDirectInstance*)pSearch->pNext;
     }
 
-    if(fInstanceFound)
+    if (fInstanceFound)
     {
-        if(pSearch == pDllCalQueueHead_l)
+        if (pSearch == pDllCalQueueHead_l)
         {
             //head is freed
             pDllCalQueueHead_l = (tDllCalDirectInstance*)pSearch->pNext;
@@ -297,30 +297,30 @@ static tOplkError delInstance (tDllCalQueueInstance pDllCalQueue_p)
 Inserts a data block into the direct call instance. The data block can be of
 any type (e.g. TX packet).
 
-\param  pDllCalQueue_p          Pointer to DllCal Queue instance.
+\param  pDllCalQueue_p          Pointer to DllCal queue instance.
 \param  pData_p                 Pointer to the data block to be inserted.
 \param  pDataSize_p             Pointer to the size of the data block to be
                                 inserted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          if function executes correctly
-\retval other                   error
+\retval kErrorOk                Function executes correctly
+\retval other                   Error
 */
 //------------------------------------------------------------------------------
-static tOplkError insertDataBlock (tDllCalQueueInstance pDllCalQueue_p,
-                                   BYTE *pData_p, UINT *pDataSize_p)
+static tOplkError insertDataBlock(tDllCalQueueInstance pDllCalQueue_p,
+                                  BYTE* pData_p, UINT* pDataSize_p)
 {
     tOplkError                  ret = kErrorOk;
     tDllCalDirectInstance*      pDllCalDirectInstance =
                                     (tDllCalDirectInstance*)pDllCalQueue_p;
 
-    if(pDllCalDirectInstance == NULL)
+    if (pDllCalDirectInstance == NULL)
     {
         ret = kErrorInvalidInstanceParam;
         goto Exit;
     }
 
-    if(pDllCalDirectInstance->frameSize != DLLCALDIRECT_TXBUF_EMPTY)
+    if (pDllCalDirectInstance->frameSize != DLLCALDIRECT_TXBUF_EMPTY)
     {
         //TX buffer is not free
         ret = kErrorDllAsyncTxBufferFull;
@@ -346,38 +346,38 @@ Exit:
 Gets a data block from the direct call instance. The data block can be of any
 type (e.g. TX packet).
 
-\param  pDllCalQueue_p          Pointer to DllCal Queue instance
+\param  pDllCalQueue_p          Pointer to DllCal queue instance
 \param  pData_p                 Pointer to data buffer
 \param  pDataSize_p             Pointer to the size of the data buffer
                                 (will be replaced with actual data block size)
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          if function executes correctly
-\retval other                   error
+\retval kErrorOk                Function executes correctly
+\retval other                   Error
 */
 //------------------------------------------------------------------------------
-static tOplkError getDataBlock (tDllCalQueueInstance pDllCalQueue_p,
-                                BYTE *pData_p, UINT *pDataSize_p)
+static tOplkError getDataBlock(tDllCalQueueInstance pDllCalQueue_p,
+                               BYTE* pData_p, UINT* pDataSize_p)
 {
     tOplkError                  ret = kErrorOk;
     tDllCalDirectInstance*      pDllCalDirectInstance =
                                     (tDllCalDirectInstance*)pDllCalQueue_p;
 
-    if(pDllCalDirectInstance == NULL)
+    if (pDllCalDirectInstance == NULL)
     {
         ret = kErrorInvalidInstanceParam;
         goto Exit;
     }
 
-    if(pDllCalDirectInstance->frameSize == DLLCALDIRECT_TXBUF_EMPTY ||
-       pDllCalDirectInstance->frameSize == DLLCALDIRECT_TXBUF_FILLING)
+    if (pDllCalDirectInstance->frameSize == DLLCALDIRECT_TXBUF_EMPTY ||
+        pDllCalDirectInstance->frameSize == DLLCALDIRECT_TXBUF_FILLING)
     {
         //TX buffer is empty or not ready
         ret = kErrorDllAsyncTxBufferEmpty;
         goto Exit;
     }
 
-    if(pDllCalDirectInstance->frameSize > *pDataSize_p)
+    if (pDllCalDirectInstance->frameSize > *pDataSize_p)
     {
         //provided data buffer is too small
         ret = kErrorNoResource;
@@ -403,27 +403,27 @@ Exit:
 
 Returns the data block counter.
 
-\param  pDllCalQueue_p          Pointer to DllCal Queue instance
+\param  pDllCalQueue_p          Pointer to DllCal queue instance
 \param  pDataBlockCount_p       Pointer which returns the data block count
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          if function executes correctly
-\retval other                   error
+\retval kErrorOk                Function executes correctly
+\retval other                   Error
 */
 //------------------------------------------------------------------------------
-static tOplkError getDataBlockCount (tDllCalQueueInstance pDllCalQueue_p,
-                                     ULONG* pDataBlockCount_p)
+static tOplkError getDataBlockCount(tDllCalQueueInstance pDllCalQueue_p,
+                                    ULONG* pDataBlockCount_p)
 {
     tDllCalDirectInstance*  pDllCalDirectInstance =
                                 (tDllCalDirectInstance*)pDllCalQueue_p;
 
-    if(pDllCalDirectInstance == NULL)
+    if (pDllCalDirectInstance == NULL)
     {
         return kErrorInvalidInstanceParam;
     }
 
-    if(pDllCalDirectInstance->frameSize == DLLCALDIRECT_TXBUF_EMPTY ||
-       pDllCalDirectInstance->frameSize == DLLCALDIRECT_TXBUF_FILLING)
+    if (pDllCalDirectInstance->frameSize == DLLCALDIRECT_TXBUF_EMPTY ||
+        pDllCalDirectInstance->frameSize == DLLCALDIRECT_TXBUF_FILLING)
     {
         *pDataBlockCount_p = 0;
     }
@@ -441,23 +441,23 @@ static tOplkError getDataBlockCount (tDllCalQueueInstance pDllCalQueue_p,
 
 Resets the direct call instance
 
-\param  pDllCalQueue_p          Pointer to DllCal Queue instance
+\param  pDllCalQueue_p          Pointer to DllCal queue instance
 \param  timeOutMs_p             Timeout in milliseconds.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          if function executes correctly
-\retval other                   error
+\retval kErrorOk                Function executes correctly
+\retval other                   Error
 */
 //------------------------------------------------------------------------------
-static tOplkError resetDataBlockQueue (tDllCalQueueInstance pDllCalQueue_p,
-                                       ULONG timeOutMs_p)
+static tOplkError resetDataBlockQueue(tDllCalQueueInstance pDllCalQueue_p,
+                                      ULONG timeOutMs_p)
 {
     tDllCalDirectInstance*  pDllCalDirectInstance =
                                 (tDllCalDirectInstance*)pDllCalQueue_p;
 
     UNUSED_PARAMETER(timeOutMs_p);
 
-    if(pDllCalDirectInstance == NULL)
+    if (pDllCalDirectInstance == NULL)
     {
         return kErrorInvalidInstanceParam;
     }
@@ -467,6 +467,4 @@ static tOplkError resetDataBlockQueue (tDllCalQueueInstance pDllCalQueue_p,
 
     return kErrorOk;
 }
-
-
 

@@ -10,7 +10,7 @@ This file contains internal definitions of the event module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -67,5 +67,4 @@ tOplkError event_getHandlerForSink(tEventDispatchEntry** ppDispatchEntry_p,
 #endif
 
 #endif /* _INC_event_event_H_ */
-
 

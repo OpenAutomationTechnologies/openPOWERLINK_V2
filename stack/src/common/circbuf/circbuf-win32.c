@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   circbuf-win32.c
+\file   circbuf/circbuf-win32.c
 
 \brief  Circular buffer implementation for Windows
 
@@ -8,7 +8,7 @@ This file contains the architecture specific circular buffer functions for
 Windows.
 
 __NOTE__: This implementation requires that the circular buffer library
-is accessed only within one single process! Therefore normal malloc() could
+is accessed only within one single process! Therefore, normal malloc() can
 be used instead of special shared memory functions.
 
 \ingroup module_lib_circbuf
@@ -115,7 +115,7 @@ tCircBufInstance* circbuf_createInstance(UINT8 id_p)
     TCHAR                       mutexName[MAX_PATH];
 
     if ((pInstance = OPLK_MALLOC(sizeof(tCircBufInstance) +
-                                sizeof(tCircBufArchInstance))) == NULL)
+                                 sizeof(tCircBufArchInstance))) == NULL)
     {
         TRACE("%s() malloc failed!\n", __func__);
         return NULL;
@@ -127,7 +127,7 @@ tCircBufInstance* circbuf_createInstance(UINT8 id_p)
     pArch = (tCircBufArchInstance*)pInstance->pCircBufArchInstance;
 
     sprintf(mutexName, "Local\\circbufMutex%d", id_p);
-    if ((pArch->lockMutex = CreateMutex (NULL, FALSE, mutexName)) == NULL)
+    if ((pArch->lockMutex = CreateMutex(NULL, FALSE, mutexName)) == NULL)
     {
         TRACE("%s() creating mutex failed!\n", __func__);
         OPLK_FREE(pInstance);
@@ -165,7 +165,7 @@ The function allocates the memory needed for the circular buffer.
 \param  pInstance_p         Pointer to the circular buffer instance.
 \param  size_p              Size of memory to allocate.
 
-\return The function returns a tCircBuf Error code.
+\return The function returns a tCircBufError error code.
 
 \ingroup module_lib_circbuf
 */
@@ -218,7 +218,7 @@ The function connects the calling thread to the circular buffer.
 
 \param  pInstance_p         Pointer to circular buffer instance.
 
-\return The function returns a tCircBuf Error code.
+\return The function returns a tCircBufError error code.
 
 \ingroup module_lib_circbuf
 */
@@ -265,11 +265,12 @@ void circbuf_lock(tCircBufInstance* pInstance_p)
     tCircBufArchInstance*   pArchInstance =
                       (tCircBufArchInstance*)pInstance_p->pCircBufArchInstance;
 
-    waitResult = WaitForSingleObject (pArchInstance->lockMutex, INFINITE);
+    waitResult = WaitForSingleObject(pArchInstance->lockMutex, INFINITE);
     switch (waitResult)
     {
         case WAIT_OBJECT_0:
             break;
+
         default:
             TRACE("%s() Mutex wait unknown error! Error:%ld\n", __func__,
                   GetLastError());
@@ -293,7 +294,7 @@ void circbuf_unlock(tCircBufInstance* pInstance_p)
     tCircBufArchInstance* pArchInstance =
                       (tCircBufArchInstance*)pInstance_p->pCircBufArchInstance;
 
-    ReleaseMutex (pArchInstance->lockMutex);
+    ReleaseMutex(pArchInstance->lockMutex);
 }
 
 //============================================================================//
@@ -303,10 +304,4 @@ void circbuf_unlock(tCircBufInstance* pInstance_p)
 /// \{
 
 ///\}
-
-
-
-
-
-
 

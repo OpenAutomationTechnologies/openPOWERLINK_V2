@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   dllcal-hostif.c
+\file   dll/dllcal-hostif.c
 
 \brief  Source file for DLL CAL Host Interface module
 
@@ -11,7 +11,7 @@ TX packet forwarding.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -80,7 +80,7 @@ queues.
 */
 typedef struct
 {
-    tDllCalQueue            dllCalQueue; ///< DLL CAL queue
+    tDllCalQueue            dllCalQueue;    ///< DLL CAL queue
     tQueueInstance          pQueueInstance; ///< host interface queue instance
 } tDllCalHifInstance;
 
@@ -97,8 +97,8 @@ typedef struct
 //------------------------------------------------------------------------------
 static tOplkError addInstance(tDllCalQueueInstance* ppDllCalQueue_p, tDllCalQueue DllCalQueue_p);
 static tOplkError delInstance(tDllCalQueueInstance pDllCalQueue_p);
-static tOplkError insertDataBlock(tDllCalQueueInstance pDllCalQueue_p, BYTE *pData_p, UINT* pDataSize_p);
-static tOplkError getDataBlock(tDllCalQueueInstance pDllCalQueue_p, BYTE *pData_p, UINT* pDataSize_p);
+static tOplkError insertDataBlock(tDllCalQueueInstance pDllCalQueue_p, BYTE* pData_p, UINT* pDataSize_p);
+static tOplkError getDataBlock(tDllCalQueueInstance pDllCalQueue_p, BYTE* pData_p, UINT* pDataSize_p);
 static tOplkError getDataBlockCount(tDllCalQueueInstance pDllCalQueue_p, ULONG* pDataBlockCount_p);
 static tOplkError resetDataBlockQueue(tDllCalQueueInstance pDllCalQueue_p, ULONG timeOutMs_p);
 
@@ -144,12 +144,12 @@ tDllCalFuncIntf* dllcalhostif_getInterface(void)
 
 Add a host interface queue instance for TX packet forwarding in DLL CAL
 
-\param  ppDllCalQueue_p         double-pointer to DllCal Queue instance
-\param  dllCalQueue_p           parameter that determines the queue
+\param  ppDllCalQueue_p         Double-pointer to DllCal Queue instance
+\param  dllCalQueue_p           Parameter that determines the queue
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          if function executes correctly
-\retval other                   error
+\retval kErrorOk                Function executes correctly
+\retval other                   Error
 */
 //------------------------------------------------------------------------------
 static tOplkError addInstance(tDllCalQueueInstance *ppDllCalQueue_p,
@@ -165,9 +165,9 @@ static tOplkError addInstance(tDllCalQueueInstance *ppDllCalQueue_p,
     tQueueConfig                lfqConfig;
     tQueueReturn                lfqRet;
 
-    pDllCalInstance = (tDllCalHifInstance *) OPLK_MALLOC(sizeof(tDllCalHifInstance));
+    pDllCalInstance = (tDllCalHifInstance*)OPLK_MALLOC(sizeof(tDllCalHifInstance));
 
-    if(pDllCalInstance == NULL)
+    if (pDllCalInstance == NULL)
     {
         ret = kErrorNoResource;
         goto Exit;
@@ -190,14 +190,14 @@ static tOplkError addInstance(tDllCalQueueInstance *ppDllCalQueue_p,
     pHifInstance = NULL;
 #endif
 
-    if(pHifInstance == NULL)
+    if (pHifInstance == NULL)
     {
         ret = kErrorNoResource;
         goto Exit;
     }
 
     //initialize host interface queue
-    switch(pDllCalInstance->dllCalQueue)
+    switch (pDllCalInstance->dllCalQueue)
     {
         case kDllCalQueueTxGen:
             hifInstanceId = kHostifInstIdTxGenQueue;
@@ -218,10 +218,10 @@ static tOplkError addInstance(tDllCalQueueInstance *ppDllCalQueue_p,
 
     hifRet = hostif_getBuf(pHifInstance, hifInstanceId, &pBufBase, &bufSize);
 
-    if(hifRet != kHostifSuccessful)
+    if (hifRet != kHostifSuccessful)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Could not get buffer from host interface (%d)\n",
-                __func__, hifRet);
+                              __func__, hifRet);
         ret = kErrorNoResource;
         goto Exit;
     }
@@ -232,10 +232,10 @@ static tOplkError addInstance(tDllCalQueueInstance *ppDllCalQueue_p,
 
     lfqRet = lfq_create(&lfqConfig, &pDllCalInstance->pQueueInstance);
 
-    if(lfqRet != kQueueSuccessful)
+    if (lfqRet != kQueueSuccessful)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Queue create failed (%d)\n",
-                __func__, lfqRet);
+                              __func__, lfqRet);
         ret = kErrorNoResource;
         goto Exit;
     }
@@ -252,11 +252,11 @@ Exit:
 
 Delete the host interface queue instance.
 
-\param  pDllCalQueue_p          Pointer to DllCal Queue instance
+\param  pDllCalQueue_p          Pointer to DllCal queue instance
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          if function executes correctly
-\retval other                   error
+\retval kErrorOk                Function executes correctly
+\retval other                   Error
 */
 //------------------------------------------------------------------------------
 static tOplkError delInstance(tDllCalQueueInstance pDllCalQueue_p)
@@ -265,7 +265,7 @@ static tOplkError delInstance(tDllCalQueueInstance pDllCalQueue_p)
     tDllCalHifInstance*     pDllCalInstance = (tDllCalHifInstance*)pDllCalQueue_p;
 
     lfqRet = lfq_delete(pDllCalInstance->pQueueInstance);
-    if(lfqRet != kQueueSuccessful)
+    if (lfqRet != kQueueSuccessful)
     {
         return kErrorNoResource;
     }
@@ -283,24 +283,24 @@ static tOplkError delInstance(tDllCalQueueInstance pDllCalQueue_p)
 Inserts a data block into the host interface queue instance. The data block can
 be of any type (e.g. TX packet).
 
-\param  pDllCalQueue_p          Pointer to DllCal Queue instance
+\param  pDllCalQueue_p          Pointer to DllCal queue instance
 \param  pData_p                 Pointer to the data block to be insert
 \param  pDataSize_p             Pointer to the size of the data block to be
                                 insert
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          if function executes correctly
-\retval other                   error
+\retval kErrorOk                Function executes correctly
+\retval other                   Error
 */
 //------------------------------------------------------------------------------
-static tOplkError insertDataBlock (tDllCalQueueInstance pDllCalQueue_p,
-                                   BYTE *pData_p, UINT *pDataSize_p)
+static tOplkError insertDataBlock(tDllCalQueueInstance pDllCalQueue_p,
+                                  BYTE* pData_p, UINT* pDataSize_p)
 {
     tOplkError                  ret = kErrorOk;
     tQueueReturn                lfqRet;
     tDllCalHifInstance*         pDllCalInstance = (tDllCalHifInstance*)pDllCalQueue_p;
 
-    if(pDllCalInstance == NULL)
+    if (pDllCalInstance == NULL)
     {
         ret = kErrorInvalidInstanceParam;
         goto Exit;
@@ -335,34 +335,34 @@ Exit:
 Gets a data block from the host interface queue instance. The data block can be
 of any type (e.g. TX packet).
 
-\param  pDllCalQueue_p          Pointer to DllCal Queue instance
+\param  pDllCalQueue_p          Pointer to DllCal queue instance
 \param  pData_p                 Pointer to data buffer
 \param  pDataSize_p             Pointer to the size of the data buffer
                                 (will be replaced with actual data block size)
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          if function executes correctly
-\retval other                   error
+\retval kErrorOk                Function executes correctly
+\retval other                   Error
 */
 //------------------------------------------------------------------------------
-static tOplkError getDataBlock (tDllCalQueueInstance pDllCalQueue_p,
-                                BYTE *pData_p, UINT *pDataSize_p)
+static tOplkError getDataBlock(tDllCalQueueInstance pDllCalQueue_p,
+                               BYTE* pData_p, UINT* pDataSize_p)
 {
     tOplkError              ret = kErrorOk;
     tQueueReturn            lfqRet;
     tDllCalHifInstance*     pDllCalInstance = (tDllCalHifInstance*)pDllCalQueue_p;
     WORD                    actualDataSize = (WORD)*pDataSize_p;
 
-    if(pDllCalInstance == NULL)
+    if (pDllCalInstance == NULL)
     {
         ret = kErrorInvalidInstanceParam;
         goto Exit;
     }
 
     lfqRet = lfq_entryDequeue(pDllCalInstance->pQueueInstance, pData_p, &actualDataSize);
-    if(lfqRet != kQueueSuccessful)
+    if (lfqRet != kQueueSuccessful)
     {
-        if(lfqRet == kQueueEmpty)
+        if (lfqRet == kQueueEmpty)
         {
             ret = kErrorDllAsyncTxBufferEmpty;
         }
@@ -387,12 +387,12 @@ Exit:
 
 Returns the data block counter.
 
-\param  pDllCalQueue_p          Pointer to DllCal Queue instance
+\param  pDllCalQueue_p          Pointer to DllCal queue instance
 \param  pDataBlockCount_p       Pointer which returns the data block count
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          if function executes correctly
-\retval other                   error
+\retval kErrorOk                Function executes correctly
+\retval other                   Error
 */
 //------------------------------------------------------------------------------
 static tOplkError getDataBlockCount(tDllCalQueueInstance pDllCalQueue_p,
@@ -403,7 +403,7 @@ static tOplkError getDataBlockCount(tDllCalQueueInstance pDllCalQueue_p,
     tDllCalHifInstance*     pDllCalInstance = (tDllCalHifInstance*)pDllCalQueue_p;
     WORD                    dataBlockCount;
 
-    if(pDllCalInstance == NULL)
+    if (pDllCalInstance == NULL)
     {
         ret = kErrorInvalidInstanceParam;
         goto Exit;
@@ -413,7 +413,7 @@ static tOplkError getDataBlockCount(tDllCalQueueInstance pDllCalQueue_p,
 
     *pDataBlockCount_p = (ULONG)dataBlockCount;
 
-    if(lfqRet != kQueueSuccessful)
+    if (lfqRet != kQueueSuccessful)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Getting queue count failed (0x%X)\n", __func__, lfqRet);
         ret = kErrorNoResource;
@@ -429,16 +429,16 @@ Exit:
 
 Resets the host interface queue instance after a given timeout.
 
-\param  pDllCalQueue_p          pPinter to DllCal Queue instance
+\param  pDllCalQueue_p          pPinter to DllCal queue instance
 \param  timeOutMs_p             Timeout before buffer reset is done
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk          if function executes correctly
-\retval other                   error
+\retval kErrorOk                Function executes correctly
+\retval other                   Error
 */
 //------------------------------------------------------------------------------
 static tOplkError resetDataBlockQueue(tDllCalQueueInstance pDllCalQueue_p,
-                                           ULONG timeOutMs_p)
+                                      ULONG timeOutMs_p)
 {
     tOplkError              ret = kErrorOk;
     tQueueReturn            lfqRet;
@@ -446,14 +446,14 @@ static tOplkError resetDataBlockQueue(tDllCalQueueInstance pDllCalQueue_p,
 
     UNUSED_PARAMETER(timeOutMs_p);
 
-    if(pDllCalInstance == NULL)
+    if (pDllCalInstance == NULL)
     {
         ret = kErrorInvalidInstanceParam;
         goto Exit;
     }
 
     lfqRet = lfq_reset(pDllCalInstance->pQueueInstance);
-    if(lfqRet != kQueueSuccessful)
+    if (lfqRet != kQueueSuccessful)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Resetting queue failed (0x%X)\n", __func__, lfqRet);
         ret = kErrorNoResource;
@@ -462,5 +462,4 @@ static tOplkError resetDataBlockQueue(tDllCalQueueInstance pDllCalQueue_p,
 Exit:
     return ret;
 }
-
 

@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   pdo.h
+\file   common/pdo.h
 
 \brief  Include file for PDO module
 
@@ -34,8 +34,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_pdo_H_
-#define _INC_pdo_H_
+#ifndef _INC_common_pdo_H_
+#define _INC_common_pdo_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -92,7 +92,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             (pPdoMappObject_p->byteSizeOrType - PDO_COMMUNICATION_PROFILE_START)
 
 #define PDO_MAPPOBJECT_GET_TYPE(pPdoMappObject_p) \
-            ((tObdType) pPdoMappObject_p->byteSizeOrType)
+            ((tObdType)pPdoMappObject_p->byteSizeOrType)
 
 #define PDO_MAPPOBJECT_SET_BYTESIZE_OR_TYPE(pPdoMappObject_p, wByteSize_p, ObdType_p) \
             if ((ObdType_p == kObdTypeVString) || (ObdType_p == kObdTypeOString) || (ObdType_p == kObdTypeDomain)) \
@@ -145,7 +145,7 @@ typedef struct
     TPDO: 0x00=PRes, MN: CnNodeId=PReq
     */
     UINT                nodeId;
-    void *              pVar;                   ///< Pointer to frame data
+    void*               pVar;                   ///< Pointer to frame data
     WORD                pdoSize;                ///< Size of this PDO
     BYTE                mappingVersion;         ///< The mapping version of this PDO
     unsigned int        mappObjectCount;        ///< The actual number of used mapped objects
@@ -180,11 +180,11 @@ typedef struct
 
 typedef struct
 {
-    ULONG           channelOffset;
-    OPLK_ATOMIC_T   readBuf;
-    OPLK_ATOMIC_T   writeBuf;
-    OPLK_ATOMIC_T   cleanBuf;
-    UINT8           newData;
+    ULONG               channelOffset;
+    OPLK_ATOMIC_T       readBuf;
+    OPLK_ATOMIC_T       writeBuf;
+    OPLK_ATOMIC_T       cleanBuf;
+    UINT8               newData;
 } tPdoBufferInfo;
 
 typedef struct
@@ -217,6 +217,5 @@ extern "C" {
 }
 #endif
 
-#endif /* _INC_pdo_H_ */
-
+#endif /* _INC_common_pdo_H_ */
 

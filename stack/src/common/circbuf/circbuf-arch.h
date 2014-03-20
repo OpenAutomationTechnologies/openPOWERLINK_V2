@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   circbuf-arch.h
+\file   circbuf/circbuf-arch.h
 
 \brief  Architecture specific definitions for circular buffer library
 
@@ -9,7 +9,7 @@ buffer library.
 
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,8 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_circbufarch_H_
-#define _INC_circbufarch_H_
+#ifndef _INC_circbuf_circbuf_arch_H_
+#define _INC_circbuf_circbuf_arch_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -59,17 +59,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tCircBufInstance*   circbuf_createInstance(UINT8 id_p);
-void                circbuf_freeInstance(tCircBufInstance* pInstance_p);
-tCircBufError       circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t size_p);
-void                circbuf_freeBuffer(tCircBufInstance* pInstance_p);
-tCircBufError       circbuf_connectBuffer(tCircBufInstance* pInstance_p);
-void                circbuf_disconnectBuffer(tCircBufInstance* pInstance_p);
-void                circbuf_lock(tCircBufInstance* pInstance_p);
-void                circbuf_unlock(tCircBufInstance* pInstance_p);
+tCircBufInstance* circbuf_createInstance(UINT8 id_p);
+void              circbuf_freeInstance(tCircBufInstance* pInstance_p);
+tCircBufError     circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t size_p);
+void              circbuf_freeBuffer(tCircBufInstance* pInstance_p);
+tCircBufError     circbuf_connectBuffer(tCircBufInstance* pInstance_p);
+void              circbuf_disconnectBuffer(tCircBufInstance* pInstance_p);
+void              circbuf_lock(tCircBufInstance* pInstance_p);
+void              circbuf_unlock(tCircBufInstance* pInstance_p);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_circbufarch_H_ */
+#endif /* _INC_circbuf_circbuf_arch_H_ */
+

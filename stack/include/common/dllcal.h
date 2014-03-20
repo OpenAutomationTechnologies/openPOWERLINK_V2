@@ -1,13 +1,13 @@
 /**
 ********************************************************************************
-\file   dllcal.h
+\file   common/dllcal.h
 
 \brief  Definitions for DLL CAL module
 
 The file contains definitions for the DLL CAL module
 
 Copyright (c) 2012, SYSTEC electronik GmbH
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
-#ifndef _INC_dllcal_H_
-#define _INC_dllcal_H_
+#ifndef _INC_common_dllcal_H_
+#define _INC_common_dllcal_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -92,7 +92,7 @@ typedef struct
 } tDllCalIssueRequest;
 
 /**
-\brief enumerator for Queue
+\brief enumerator for queue
 
 This enumerator identifies DLLCal queue instance in order to differ between
 the queues.
@@ -142,6 +142,5 @@ tDllCalFuncIntf* dllkcalcircbuf_getInterface(void);
 }
 #endif
 
-#endif /* _INC_dllcal_H_ */
-
+#endif /* _INC_common_dllcal_H_ */
 

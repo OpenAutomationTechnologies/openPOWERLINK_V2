@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   ctrlcal-posixshm.c
+\file   ctrl/ctrlcal-posixshm.c
 
 \brief  Posix shared memory implementation for control CAL module
 
@@ -11,7 +11,7 @@ memory block control CAL modules.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -118,7 +118,7 @@ tOplkError ctrlcal_init(UINT size_p)
 
     if (fstat(fd_l, &stat) != 0)
     {
-        close (fd_l);
+        close(fd_l);
         return kErrorNoResource;
     }
 
@@ -127,7 +127,7 @@ tOplkError ctrlcal_init(UINT size_p)
         if (ftruncate(fd_l, size_p) == -1)
         {
             DEBUG_LVL_ERROR_TRACE("%s() ftruncate failed!\n", __func__);
-            close (fd_l);
+            close(fd_l);
             shm_unlink(CTRL_SHM_NAME);
             return kErrorNoResource;
         }
@@ -138,7 +138,7 @@ tOplkError ctrlcal_init(UINT size_p)
     if (pCtrlMem_l == MAP_FAILED)
     {
         DEBUG_LVL_ERROR_TRACE("%s() mmap header failed!\n", __func__);
-        close (fd_l);
+        close(fd_l);
         if (fCreator_l)
             shm_unlink(CTRL_SHM_NAME);
         return kErrorNoResource;
@@ -154,7 +154,7 @@ tOplkError ctrlcal_init(UINT size_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief    Cleanup control module
+\brief    Clean up control module
 
 The function cleans up the control CAL module.
 
@@ -163,7 +163,7 @@ The function cleans up the control CAL module.
 \ingroup module_ctrlcal
 */
 //------------------------------------------------------------------------------
-tOplkError ctrlcal_exit (void)
+tOplkError ctrlcal_exit(void)
 {
     tOplkError      ret = kErrorOk;
 
@@ -197,7 +197,7 @@ void ctrlcal_writeData(UINT offset_p, void* pSrc_p, size_t length_p)
 {
     if (pCtrlMem_l == NULL)
     {
-        DEBUG_LVL_ERROR_TRACE ("%s() instance == NULL!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() instance == NULL!\n", __func__);
         return;
     }
     OPLK_MEMCPY(pCtrlMem_l + offset_p, pSrc_p, length_p);
@@ -222,7 +222,7 @@ tOplkError ctrlcal_readData(void* pDest_p, UINT offset_p, size_t length_p)
 {
     if (pCtrlMem_l == NULL)
     {
-        DEBUG_LVL_ERROR_TRACE ("%s() pCtrlMem_l == NULL!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() pCtrlMem_l == NULL!\n", __func__);
         return kErrorGeneralError;
     }
 

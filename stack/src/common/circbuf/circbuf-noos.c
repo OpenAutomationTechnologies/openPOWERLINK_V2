@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   circbuf-noos.c
+\file   circbuf/circbuf-noos.c
 
 \brief  Circular buffer implementation for non-os systems
 
@@ -8,7 +8,7 @@ This file contains the architecture specific circular buffer functions
 for systems without operating system (e.g. microcontrollers, niosII, microblaze).
 
 This implementation stores the circular buffer instances in a global variable
-because there's no multitasking and this memory could be accessed from normal
+because there is no multitasking and this memory can be accessed from normal
 execution context as well as from interrupt context. Locking is simply performed
 by switching off interrupts.
 
@@ -16,7 +16,7 @@ by switching off interrupts.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -141,7 +141,7 @@ The function allocates the memory needed for the circular buffer.
 \param  pInstance_p         Pointer to the circular buffer instance.
 \param  size_p              Size of memory to allocate.
 
-\return The function returns a tCircBuf Error code.
+\return The function returns a tCircBufError error code.
 
 \ingroup module_lib_circbuf
 */
@@ -188,7 +188,7 @@ The function connects the calling thread to the circular buffer.
 
 \param  pInstance_p         Pointer to circular buffer instance.
 
-\return The function returns a tCircBuf Error code.
+\return The function returns a tCircBufError error code.
 
 \ingroup module_lib_circbuf
 */
@@ -256,10 +256,4 @@ void circbuf_unlock(tCircBufInstance* pInstance_p)
 /// \{
 
 ///\}
-
-
-
-
-
-
 

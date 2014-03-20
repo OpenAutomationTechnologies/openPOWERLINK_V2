@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   circbuf-linuxkernel.c
+\file   circbuf/circbuf-linuxkernel.c
 
 \brief  Circular buffer implementation for Linux Kernel
 
@@ -15,7 +15,7 @@ The locking is performed by spinlocks.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -119,7 +119,7 @@ tCircBufInstance* circbuf_createInstance(UINT8 id_p)
     tCircBufArchInstance*       pArch;
 
     if ((pInstance = OPLK_MALLOC(sizeof(tCircBufInstance) +
-                                sizeof(tCircBufArchInstance))) == NULL)
+                                 sizeof(tCircBufArchInstance))) == NULL)
         return NULL;
 
     OPLK_MEMSET(pInstance, 0, sizeof(tCircBufInstance) + sizeof(tCircBufArchInstance));
@@ -157,7 +157,7 @@ The function allocates the memory needed for the circular buffer.
 \param  pInstance_p         Pointer to the circular buffer instance.
 \param  size_p              Size of memory to allocate.
 
-\return The function returns a tCircBuf Error code.
+\return The function returns a tCircBufError error code.
 
 \ingroup module_lib_circbuf
 */
@@ -201,7 +201,7 @@ The function connects the calling thread to the circular buffer.
 
 \param  pInstance_p         Pointer to circular buffer instance.
 
-\return The function returns a tCircBuf Error code.
+\return The function returns a tCircBufError error code.
 
 \ingroup module_lib_circbuf
 */
@@ -274,10 +274,4 @@ void circbuf_unlock(tCircBufInstance* pInstance_p)
 /// \{
 
 ///\}
-
-
-
-
-
-
 
