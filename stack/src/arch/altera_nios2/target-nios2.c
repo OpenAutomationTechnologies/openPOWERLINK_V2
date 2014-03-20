@@ -142,35 +142,6 @@ static int              iLockCount = 0;
 
 //------------------------------------------------------------------------------
 /**
-\brief    checks if CPU is in interrupt context
-
-This function obtains if the CPU is in interrupt context.
-
-\return CPU in interrupt context
-\retval TRUE                    CPU is in interrupt context
-\retval FALSE                   CPU is NOT in interrupt context
-
-\ingroup module_target
-*/
-//------------------------------------------------------------------------------
-BYTE EplTgtIsInterruptContext (void)
-{
-    // No real interrupt context check is performed.
-    // This would be possible with a flag in the ISR, only.
-    // For now, the global interrupt enable flag is checked.
-
-    if (alt_irq_enabled() == 0)
-    {
-        return TRUE;
-    }
-    else
-    {
-        return FALSE;
-    }
-}
-
-//------------------------------------------------------------------------------
-/**
 \brief  Initialize target specific stuff
 
 The function initialize target specific stuff which is needed to run the
