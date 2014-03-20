@@ -237,13 +237,13 @@ static tOplkError processErrorWarningEvent(tOplkApiEventType EventType_p,
     UNUSED_PARAMETER(EventType_p);
     UNUSED_PARAMETER(pUserArg_p);
 
-    PRINTF("Err/Warn: Source = %s (%02X) EplError = %s (0x%03X)\n",
+    PRINTF("Err/Warn: Source = %s (%02X) OplkError = %s (0x%03X)\n",
                 debugstr_getEventSourceStr(pInternalError->eventSource),
                 pInternalError->eventSource,
                 debugstr_getRetValStr(pInternalError->oplkError),
                 pInternalError->oplkError);
 
-    PRINTF("Err/Warn: Source = %s (%02X) EplError = %s (0x%03X)\n",
+    PRINTF("Err/Warn: Source = %s (%02X) OplkError = %s (0x%03X)\n",
                 debugstr_getEventSourceStr(pInternalError->eventSource),
                 pInternalError->eventSource,
                 debugstr_getRetValStr(pInternalError->oplkError),
