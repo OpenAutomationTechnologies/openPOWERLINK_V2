@@ -64,6 +64,7 @@ The generic defines are valid for the whole openPOWERLINK stack.
                                             | BENCHMARK_MOD_01 \
                                             | BENCHMARK_MOD_02 \
                                             | BENCHMARK_MOD_03 \
+                                            | BENCHMARK_MOD_24 \
                                             )
     ///< enable benchmark for specific stack modules
 #endif
