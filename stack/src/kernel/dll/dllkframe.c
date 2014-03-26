@@ -91,12 +91,12 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
                                       tNmtState nmtState_p, tEdrvReleaseRxBuffer* pReleaseRxBuffer_p);
 static tOplkError forwardRpdo(tFrameInfo* pFrameInfo_p);
 static void       postInvalidFormatError(UINT nodeId_p, tNmtState nmtState_p);
-static BOOL       presFrameFormatIsInvalid(tFrameInfo* pFrameInfo_p,
-                                           tDllkNodeInfo* pIntNodeInfo_p, tNmtState nmtState_p);
+static BOOL       presFrameFormatIsInvalid(tFrameInfo* pFrameInfo_p, tDllkNodeInfo* pIntNodeInfo_p,
+                                           tNmtState nodeNmtState_p);
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
 static tOplkError checkAndSetSyncEvent(BOOL fPrcSlotFinished_p, UINT nodeId_p);
-static tOplkError updateNode(tPlkFrame* pFrame_p, tDllkNodeInfo* pIntNodeInfo_p, UINT nodeId_p);
+static tOplkError updateNode(tDllkNodeInfo* pIntNodeInfo_p, UINT nodeId_p, tNmtState nodeNmtState_p);
 static tOplkError searchNodeInfo(UINT nodeId_p, tDllkNodeInfo** ppIntNodeInfo_p, BOOL* pfPrcSlotFinished_p);
 #endif
 
@@ -1456,49 +1456,48 @@ Exit:
 
 //------------------------------------------------------------------------------
 /**
-\brief  Check for a valid PRes frame
+\brief  Check for a invalid PRes frame
 
-The function checks if a PRes frame is valid.
+The function checks if a PRes frame is invalid.
 
 \param  pFrameInfo_p        Pointer to frame information.
 \param  pIntNodeInfo_p      Pointer to node information.
-\param  nmtState_p          NMT state of the local node
+\param  nodeNmtState_p      NMT state of the node which sent the frame.
 
-\return The function returns TRUE if the frame is valid and FALSE otherwise.
+\return The function returns TRUE if the frame is invalid and FALSE if it is
+        valid.
 */
 //------------------------------------------------------------------------------
-static BOOL presFrameFormatIsInvalid(tFrameInfo* pFrameInfo_p,
-                                     tDllkNodeInfo* pIntNodeInfo_p, tNmtState nmtState_p)
+static BOOL presFrameFormatIsInvalid(tFrameInfo* pFrameInfo_p, tDllkNodeInfo* pIntNodeInfo_p,
+                                     tNmtState nodeNmtState_p)
 {
     tPlkFrame*  pFrame = pFrameInfo_p->pFrame;
     size_t      frameSize = pFrameInfo_p->frameSize;
     size_t      payloadSize = ami_getUint16Le(&pFrame->data.pres.sizeLe);
 
-#if (NMT_MAX_NODE_ID == 0)
-    UNUSED_PARAMETER(pIntNodeInfo_p);
-    UNUSED_PARAMETER(nmtState_p);
-
-    if ((payloadSize + PLK_FRAME_OFFSET_PDO_PAYLOAD) > frameSize)
-    {
-        return TRUE;
-    }
-#else
+#if (NMT_MAX_NODE_ID > 0)
     size_t      payloadLimit = pIntNodeInfo_p->presPayloadLimit;
+#else
+    UNUSED_PARAMETER(pIntNodeInfo_p);
+    UNUSED_PARAMETER(nodeNmtState_p);
+#endif
 
-    if (((payloadSize + PLK_FRAME_OFFSET_PDO_PAYLOAD) > frameSize) ||
-        (payloadSize > payloadLimit))
+    // Check if frame is too small for contained payload size
+    if ((payloadSize + PLK_FRAME_OFFSET_PDO_PAYLOAD) > frameSize)
         return TRUE;
 
-    // if we are MN we have to do additional checks
-    if (nmtState_p >= kNmtMsNotActive)
+    // Additional checks for MN and CN which can handle cross-traffic
+#if (NMT_MAX_NODE_ID > 0)
+    if ((nodeNmtState_p & 0xFF) > (kNmtCsPreOperational2 & 0xFF))
     {
-        if (frameSize > (payloadLimit + PLK_FRAME_OFFSET_PDO_PAYLOAD))
+        if ((payloadSize > payloadLimit) ||                                     // payload limit is exceeded
+            (frameSize > (payloadLimit + PLK_FRAME_OFFSET_PDO_PAYLOAD)))        // frame is too big for payload limit
             return TRUE;
     }
 #endif
+
     return FALSE;
 }
-
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
 //------------------------------------------------------------------------------
@@ -1542,7 +1541,6 @@ static tOplkError checkAndSetSyncEvent(BOOL fPrcSlotFinished_p, UINT nodeId_p)
             ret = dllk_postEvent(kEventTypeSync);
         }
     }
-
     return ret;
 }
 
@@ -1555,13 +1553,15 @@ DLLK module.
 
 \param  pFrame_p            Pointer to the received frame.
 \param  pIntNodeInfo_p      Pointer to the node information of the node to
-                            delete.
-\param  nodeId_p            Node ID of the node to delete.
+                            be updated.
+\param  nodeId_p            Node ID of the node to be updated.
+\param  nodeNmtState_p      NMT state of the node to be updated.
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError updateNode(tPlkFrame* pFrame_p, tDllkNodeInfo* pIntNodeInfo_p, UINT nodeId_p)
+static tOplkError updateNode(tDllkNodeInfo* pIntNodeInfo_p, UINT nodeId_p,
+                             tNmtState nodeNmtState_p)
 {
     tOplkError          ret = kErrorOk;
     tHeartbeatEvent     heartbeatEvent;
@@ -1570,7 +1570,7 @@ static tOplkError updateNode(tPlkFrame* pFrame_p, tDllkNodeInfo* pIntNodeInfo_p,
 
     // check NMT state of CN
     heartbeatEvent.errorCode = E_NO_ERROR;
-    heartbeatEvent.nmtState = (tNmtState)(ami_getUint8Le(&pFrame_p->data.pres.nmtStatus) | NMT_TYPE_CS);
+    heartbeatEvent.nmtState = nodeNmtState_p;
 
     if (pIntNodeInfo_p->nmtState != heartbeatEvent.nmtState)
     {   // NMT state of CN has changed -> post event to NmtMnu module
@@ -1685,11 +1685,18 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
     tPlkFrame*      pFrame;
     UINT            nodeId;
     tDllkNodeInfo*  pIntNodeInfo = NULL;
+    tNmtState       nodeNmtState;
 
     pFrame = pFrameInfo_p->pFrame;
     nodeId = ami_getUint8Le(&pFrame->srcNodeId);
 
+    if (nodeId == C_ADR_MN_DEF_NODE_ID)
+        nodeNmtState = (tNmtState)ami_getUint8Le(&pFrame->data.pres.nmtStatus) | NMT_TYPE_MS;
+    else
+        nodeNmtState = (tNmtState)ami_getUint8Le(&pFrame->data.pres.nmtStatus) | NMT_TYPE_CS;
+
 #if CONFIG_DLL_PRES_CHAINING_CN != FALSE
+    // handle PResMN as PReq for PRes Chaining
     if ((dllkInstance_g.fPrcEnabled != FALSE) && (nodeId == C_ADR_MN_DEF_NODE_ID))
         *pNmtEvent_p = kNmtEventDllCePreq;      // handle PResMN as PReq for PRes Chaining
     else
@@ -1735,7 +1742,7 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
             if (ret != kErrorOk)
                 return ret;
 
-            if ((ret = updateNode(pFrame, pIntNodeInfo, nodeId)) != kErrorOk)
+            if ((ret = updateNode(pIntNodeInfo, nodeId, nodeNmtState)) != kErrorOk)
                 return ret;
         }
         else
@@ -1756,7 +1763,7 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
     if ((nmtState_p != kNmtCsPreOperational2) && (nmtState_p != kNmtMsPreOperational2))
     {
         // So we are in ReadyToOp or Operational after the check and can inform the PDO module now.
-        if (presFrameFormatIsInvalid(pFrameInfo_p, pIntNodeInfo, nmtState_p))
+        if (presFrameFormatIsInvalid(pFrameInfo_p, pIntNodeInfo, nodeNmtState))
         {
             if (pIntNodeInfo->presPayloadLimit > 0)
                 postInvalidFormatError(nodeId, nmtState_p);
