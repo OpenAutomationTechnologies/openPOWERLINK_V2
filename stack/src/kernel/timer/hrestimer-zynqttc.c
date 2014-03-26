@@ -8,10 +8,10 @@ This module is the target specific implementation of the high-resolution
 timer module for Linux kernelspace running on Zynq platform.
 
 The module uses Triple Timer Counter (TTC) device 1 for providing the
-one-shot and continuous timer support of POWERLINK module
+one-shot and continuous timer support of POWERLINK module.
 
 Based on-
-       mach-zynq/timer.c : Timer module driver using TTC0 provided by Xilinx
+       mach-zynq/timer.c : Timer module driver using TTC0 provided by Xilinx.
 
 \ingroup module_hrestimer
 *******************************************************************************/
@@ -115,16 +115,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define USEC_TO_COUNT(timeout)      ((unsigned int)timeout/TTC_RESOLUTION_FACTOR)
 
-#define XTTCPSS_READ_REG(index,offset)          __raw_readl(pXttc_base_addr_g[index] + offset)
+#define XTTCPSS_READ_REG(index,offset)          __raw_readl(pTtcBaseAddr_g[index] + offset)
 
-#define XTTCPSS_WRITE_REG(index,offset, val)    __raw_writel(val,(pXttc_base_addr_g[index] + offset))
+#define XTTCPSS_WRITE_REG(index,offset, val)    __raw_writel(val,(pTtcBaseAddr_g[index] + offset))
 
 #define TIMERHDL_MASK               0x0FFFFFFF
 #define TIMERHDL_SHIFT              28
 #define HDL_TO_IDX(Hdl)             ((Hdl >> TIMERHDL_SHIFT) - 1)
 #define HDL_INIT(Idx)               ((Idx + 1) << TIMERHDL_SHIFT)
-#define HDL_INC(Hdl)                (((Hdl + 1) & TIMERHDL_MASK) \
-                                    | (Hdl & ~TIMERHDL_MASK))
+#define HDL_INC(Hdl)                (((Hdl + 1) & TIMERHDL_MASK) | \
+                                     (Hdl & ~TIMERHDL_MASK))
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -166,22 +166,21 @@ The structure defines a high-resolution timer module instance.
 */
 typedef struct
 {
-    tHresTimerInfo      aTimerInfo[TIMER_COUNT];    ///< Array with timer information for a set of timers
-     void*              pIoAddr;                  ///< Pointer to register space of Timer/Counter unit
+    tHresTimerInfo      aTimerInfo[TIMER_COUNT];  ///< Array with timer information for a set of timers
+    void*               pIoAddr;                  ///< Pointer to register space of Timer/Counter unit
 } tHresTimerInstance;
-
 
 //------------------------------------------------------------------------------
 // module local vars
 //------------------------------------------------------------------------------
 static tHresTimerInstance    hresTimerInstance_l;
-void* __iomem                pXttc_base_addr_g[TIMER_COUNT];
+void* __iomem                pTtcBaseAddr_g[TIMER_COUNT];
 
 //---------------------------------------------------------------------------
 // local function prototypes
 //---------------------------------------------------------------------------
 
-static irqreturn_t timerCounterIsr (INT irqNum_p, void* pDevInstData_p);
+static irqreturn_t timerCounterIsr(INT irqNum_p, void* pDevInstData_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -191,9 +190,9 @@ static irqreturn_t timerCounterIsr (INT irqNum_p, void* pDevInstData_p);
 /**
 \brief    Initialize high-resolution timer module
 
-The function initializes the high-resolution timer module
+The function initializes the high-resolution timer module.
 
-\return returns a tOplkError error code.
+\return Returns a tOplkError error code.
 
 \ingroup module_hrestimer
 */
@@ -207,16 +206,15 @@ tOplkError hrestimer_init(void)
 /**
 \brief    Add instance of high-resolution timer module
 
-The function adds an instance of the high-resolution timer module
+The function adds an instance of the high-resolution timer module.
 
-\return returns a tOplkError error code.
+\return Returns a tOplkError error code.
 
 \ingroup module_hrestimer
 */
 //------------------------------------------------------------------------------
 tOplkError hrestimer_addInstance(void)
 {
-    tOplkError      ret = kErrorOk;
     INT             result = 0;
     UINT            index;
     tHresTimerInfo* pTimerInfo;
@@ -228,13 +226,12 @@ tOplkError hrestimer_addInstance(void)
     hresTimerInstance_l.pIoAddr = ioremap(XTTC_BASE, SIZE);
     if (hresTimerInstance_l.pIoAddr == NULL)
     {
-        ret = kErrorNoResource;
-        goto Exit;
+        return kErrorNoResource;
     }
     PRINTF("%s: IoAddr=%p\n", __func__, hresTimerInstance_l.pIoAddr);
 
-    pXttc_base_addr_g[XTTC1] = (void *)(hresTimerInstance_l.pIoAddr + XTTC1_TIMERBASE);
-    pXttc_base_addr_g[XTTC2] = (void *)(hresTimerInstance_l.pIoAddr + XTTC2_TIMERBASE);
+    pTtcBaseAddr_g[XTTC1] = (void *)(hresTimerInstance_l.pIoAddr + XTTC1_TIMERBASE);
+    pTtcBaseAddr_g[XTTC2] = (void *)(hresTimerInstance_l.pIoAddr + XTTC2_TIMERBASE);
 
     pTimerInfo = &hresTimerInstance_l.aTimerInfo[0];
 
@@ -248,8 +245,7 @@ tOplkError hrestimer_addInstance(void)
       if (result != 0)
       {
           iounmap(hresTimerInstance_l.pIoAddr);
-          ret = kErrorNoResource;
-          goto Exit;
+          return kErrorNoResource;
       }
 
       reg = XTTCPSS_CNT_CNTRL_DISABLE;
@@ -269,15 +265,14 @@ tOplkError hrestimer_addInstance(void)
       XTTCPSS_WRITE_REG(index, XTTCPSS_IER_OFFSET, reg);
     }
 
-Exit:
-    return ret;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
 /**
  \brief    Delete instance of high-resolution timer module
 
- The function deletes an instance of the high-resolution timer module
+ The function deletes an instance of the high-resolution timer module.
 
  \return Returns a tOplkError error code.
 
@@ -286,7 +281,6 @@ Exit:
 //------------------------------------------------------------------------------
 tOplkError hrestimer_delInstance(void)
 {
-    tOplkError      ret = kErrorOk;
     UINT8           reg;
     UINT            index;
     tHresTimerInfo* pTimerInfo;
@@ -305,7 +299,7 @@ tOplkError hrestimer_delInstance(void)
 
     iounmap(hresTimerInstance_l.pIoAddr);
 
-    return ret;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -338,7 +332,6 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
                                  tTimerkCallback pfnCallback_p, ULONG argument_p,
                                  BOOL fContinue_p)
 {
-    tOplkError      ret = kErrorOk;
     tHresTimerInfo* pTimerInfo;
     UINT16          counter = 0;
     UINT            index;
@@ -347,8 +340,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
     // check pointer to handle
     if (pTimerHdl_p == NULL)
     {
-        ret = kErrorTimerInvalidHandle;
-        goto Exit;
+        return kErrorTimerInvalidHandle;
     }
 
     if (*pTimerHdl_p == 0)
@@ -364,8 +356,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
         }
         if (index >= TIMER_COUNT)
         {   // no free structure found
-            ret = kErrorTimerNoTimerCreated;
-            goto Exit;
+            return kErrorTimerNoTimerCreated;
         }
 
         pTimerInfo->eventArg.timerHdl = HDL_INIT(index);
@@ -375,8 +366,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
         index = HDL_TO_IDX(*pTimerHdl_p);
         if (index >= TIMER_COUNT)
         {   // invalid handle
-            ret = kErrorTimerInvalidHandle;
-            goto Exit;
+            return kErrorTimerInvalidHandle;
         }
 
         pTimerInfo = &hresTimerInstance_l.aTimerInfo[index];
@@ -407,8 +397,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
     counter = (UINT16)USEC_TO_COUNT(time_p);
     if (counter > 0xFFFF)
     {
-        ret = kErrorTimerNoTimerCreated;
-        goto Exit;
+        return kErrorTimerNoTimerCreated;
     }
 
     pTimerInfo->eventArg.argument.value = argument_p;
@@ -457,8 +446,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
     reg &= ~XTTCPSS_CNT_CNTRL_DISABLE;
     XTTCPSS_WRITE_REG(pTimerInfo->index, XTTCPSS_CNT_CNTRL_OFFSET, reg);
 
-Exit:
-    return ret;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -485,26 +473,24 @@ tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
     // check pointer to handle
     if (pTimerHdl_p == NULL)
     {
-        ret = kErrorTimerInvalidHandle;
-        goto Exit;
+        return kErrorTimerInvalidHandle;
     }
 
     if (*pTimerHdl_p == 0)
     {   // no timer created yet
-        goto Exit;
+        return ret;
     }
     else
     {
         index = HDL_TO_IDX(*pTimerHdl_p);
         if (index >= TIMER_COUNT)
         {   // invalid handle
-            ret = kErrorTimerInvalidHandle;
-            goto Exit;
+            return kErrorTimerInvalidHandle;
         }
         pTimerInfo = &hresTimerInstance_l.aTimerInfo[index];
         if (pTimerInfo->eventArg.timerHdl != *pTimerHdl_p)
         {   // invalid handle
-            goto Exit;
+            return ret;
         }
     }
 
@@ -522,7 +508,6 @@ tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
     reg |= (XTTCPSS_CNT_CNTRL_DISABLE | XTTCPSS_CNT_CNTRL_EN_WAVE);
     XTTCPSS_WRITE_REG(pTimerInfo->index, XTTCPSS_CNT_CNTRL_OFFSET, reg);
 
-Exit:
     return ret;
 
 }
@@ -535,18 +520,20 @@ Exit:
 
 //------------------------------------------------------------------------------
 /**
-\brief    Timer Isr
+\brief    TTC timer interrupt controller
 
-ISR routine for the TTC1 timer module.
+Interrupt service routine for the triple timer counter timer module used by
+POWERLINK kernel module on Xilinx Zynq platform.
 
 \param  irqNum_p            IRQ number
 \param  pDevInstData_p      Pointer to private data provided by request_irq
 
-\return Returns a interrupt handled status
+\return Returns a interrupt handled status.
 */
 //---------------------------------------------------------------------------------
 static irqreturn_t timerCounterIsr(INT irqNum_p, void* pDevInstData_p)
 {
+    irqreturn_t     ret = IRQ_HANDLED;
     UINT            index;
     tHresTimerInfo* pTimerInfo = (tHresTimerInfo*) pDevInstData_p;
     UINT8           reg = 0;
@@ -562,13 +549,13 @@ static irqreturn_t timerCounterIsr(INT irqNum_p, void* pDevInstData_p)
 
     if (index >= TIMER_COUNT)
     {   // invalid handle
-        goto Exit;
+        return ret;
     }
 
     if (!(reg & (XTTCPSS_INTR_MATCH_1)) && !(reg & XTTCPSS_INTR_INTERVAL))
     {
         // unknown interrupt
-        goto Exit;
+        return ret;
     }
 
     if (!pTimerInfo->fContinuously)
@@ -596,8 +583,7 @@ static irqreturn_t timerCounterIsr(INT irqNum_p, void* pDevInstData_p)
         pTimerInfo->pfnCallback(&pTimerInfo->eventArg);
     }
 
-Exit:
-    return IRQ_HANDLED;
+    return ret;
 }
 
 /// \}
