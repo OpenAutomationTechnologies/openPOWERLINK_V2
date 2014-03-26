@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   edrv-emacPs.c
+\file   edrv-emacps.c
 
 \brief  Implementation of Ethernet driver for Gigabit Ethernet Controller (GEM)
         on Zynq.
@@ -9,7 +9,7 @@ This file contains the implementation of the Ethernet driver for
 Gigabit Ethernet Controller (GEM) present on Zynq ZC7020 development board.
 
 Based on
-        1. xilinx_emacps.c : GEM ethernet driver provided by Xilinx
+        1. xilinx_emacps.c : GEM Ethernet driver provided by Xilinx.
 
 \ingroup module_edrv
 *******************************************************************************/
@@ -71,7 +71,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,19)
+#error "Linux Kernel versions older 2.6.19 are not supported by this driver!"
+#endif
 //------------------------------------------------------------------------------
 // module global vars
 //------------------------------------------------------------------------------
@@ -246,8 +248,8 @@ GEM device.
 */
 typedef struct
 {
-    UINT32        bufferAddr;       ///< Address of the recieve buffer
-    UINT32        status;           ///< Additonal information fields
+    UINT32        bufferAddr;       ///< Address of the receive buffer
+    UINT32        status;           ///< Additional information fields
 
 } tEdrvRxDesc;
 
@@ -266,7 +268,7 @@ typedef struct
     resource_size_t          resMemSize;      ///< Size of the memory allocated for device
     dma_addr_t               rxDescDma;       ///< Physical address of receive descriptor
     dma_addr_t               txDescDma;       ///< Physical address of transmit descriptor
-    UINT8                    abMacAddr[6];    ///< MAC address for the device
+    UINT8                    aMacAddr[6];     ///< MAC address for the device
     BOOL                     afTxBufUsed[EDRV_MAX_TX_BUFFERS];
                                               ///< Array to hold status of used transmit buffers
     tEdrvTxBuffer*           apTxBuffer[EDRV_MAX_TX_DESCRIPTOR];
@@ -293,15 +295,11 @@ tEdrvInstance edrvInstance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,19)
-static irqreturn_t edrvIrqHandler (INT irqNum_p, void* ppDevInstData_p);
-#else
-static INT edrvIrqHandler (INT irqNum_p, void* ppDevInstData_p, struct pt_regs* ptRegs_p);
-#endif
+static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p);
 static INT initOnePlatformDev(struct platform_device *pDev_p);
 static int removeOnePlatformDev(struct platform_device *pDev_p);
-static UINT32 getBitFromMac (UINT8 * pMAC_p, UINT32 bitPos);
-static UINT32 calculateHashAddr (UINT8 * pMAC_p);
+static UINT32 getBitFromMac(UINT8 * pMac_p, UINT32 bitPos_p);
+static UINT32 calculateHashAddr(UINT8 * pMac_p);
 static void mdioPhyWrite(INT phyId_p, INT regAddr_p, UINT16 value_p);
 static UINT16 mdioPhyRead(INT phyId_p, INT regAddr_p);
 //------------------------------------------------------------------------------
@@ -368,7 +366,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     result = platform_driver_register(&edrvDriver_l);
     if (result != 0)
     {
-        ret = kErrorNoResource;
+        return kErrorNoResource;
     }
     printk("Done \n");
     // local MAC address might have been changed in initOnePlatformDev
@@ -384,6 +382,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
 
     return ret;
 }
+
 //------------------------------------------------------------------------------
 /**
 \brief  Ethernet driver shutdown
@@ -397,11 +396,12 @@ This function shuts down the Ethernet driver.
 //------------------------------------------------------------------------------
 tOplkError edrv_shutdown(void)
 {
-    printk("%s calling pci_unregister_driver()\n", __FUNCTION__);
+    printk("%s calling platform_driver_unregister()\n", __FUNCTION__);
     platform_driver_unregister(&edrvDriver_l);
 
     return kErrorOk;
 }
+
 //------------------------------------------------------------------------------
 /**
 \brief  Change Rx filter setup
@@ -433,6 +433,7 @@ tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT32 count_p,
 
     return kErrorOk;
 }
+
 //------------------------------------------------------------------------------
 /**
 \brief  Set multicast address entry
@@ -472,6 +473,7 @@ tOplkError edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p)
 
     return  kErrorOk;
 }
+
 //------------------------------------------------------------------------------
 /**
 \brief  Clear multicast address entry
@@ -511,6 +513,7 @@ tOplkError edrv_clearRxMulticastMacAddr(UINT8* pMacAddr_p)
 
     return kErrorOk;
 }
+
 //------------------------------------------------------------------------------
 /**
 \brief  Allocate Tx buffer
@@ -526,20 +529,17 @@ This function allocates a Tx buffer.
 //------------------------------------------------------------------------------
 tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-    tOplkError      ret = kErrorOk;
     INT             channel;
 
     if (pBuffer_p->maxBufferSize > EDRV_MAX_FRAME_SIZE)
     {
-        ret = kErrorEdrvNoFreeBufEntry;
-        goto Exit;
+        return kErrorEdrvNoFreeBufEntry;
     }
 
     if (edrvInstance_l.pTxBuffer == NULL)
     {
         printk("%s Tx buffers currently not allocated\n", __FUNCTION__);
-        ret = kErrorEdrvNoFreeBufEntry;
-        goto Exit;
+        return kErrorEdrvNoFreeBufEntry;
     }
 
     // search a free Tx buffer with appropriate size
@@ -550,21 +550,20 @@ tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
             // free channel found
             edrvInstance_l.afTxBufUsed[channel] = TRUE;
             pBuffer_p->txBufferNumber.value = channel;
-            pBuffer_p->pBuffer = edrvInstance_l.pTxBuffer
-                    + (channel * EDRV_MAX_FRAME_SIZE);
+            pBuffer_p->pBuffer = edrvInstance_l.pTxBuffer +
+                                 (channel * EDRV_MAX_FRAME_SIZE);
             pBuffer_p->maxBufferSize = EDRV_MAX_FRAME_SIZE;
             break;
         }
     }
     if (channel >= EDRV_MAX_TX_BUFFERS)
     {
-        ret = kErrorEdrvNoFreeBufEntry;
-        goto Exit;
+        return kErrorEdrvNoFreeBufEntry;
     }
 
-Exit:
-    return ret;
+    return kErrorOk;
 }
+
 //------------------------------------------------------------------------------
 /**
 \brief  Free Tx buffer
@@ -590,8 +589,8 @@ tOplkError edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p)
     }
 
     return kErrorOk;
-
 }
+
 //------------------------------------------------------------------------------
 /**
 \brief  Send Tx buffer
@@ -607,26 +606,23 @@ This function sends the Tx buffer.
 //------------------------------------------------------------------------------
 tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-    tOplkError          ret = kErrorOk;
     UINT32              bufferNumber;
     tEdrvTxDesc*        pTxDesc;
-    dma_addr_t          TxDmaAddr;
+    dma_addr_t          txDmaAddr;
     UINT32              reg;
 
     bufferNumber = pBuffer_p->txBufferNumber.value;
 
-    if ((bufferNumber >= EDRV_MAX_TX_BUFFERS)
-            || (edrvInstance_l.afTxBufUsed[bufferNumber] == FALSE))
+    if ((bufferNumber >= EDRV_MAX_TX_BUFFERS) ||
+                            (edrvInstance_l.afTxBufUsed[bufferNumber] == FALSE))
     {
-        ret = kErrorEdrvBufNotExisting;
-        goto Exit;
+        return kErrorEdrvBufNotExisting;
     }
 
     // one descriptor has to be left empty for distinction between full and empty
     if (((edrvInstance_l.txDescTail + 1) & (EDRV_MAX_TX_DESC_LEN)) == edrvInstance_l.txDescHead)
     {
-        ret = kErrorEdrvNoFreeTxDesc;
-        goto Exit;
+        return kErrorEdrvNoFreeTxDesc;
     }
 
     // saved for call back
@@ -639,14 +635,13 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
     }
 
     pTxDesc = &edrvInstance_l.pTxDescAddr[edrvInstance_l.txDescTail];
-    TxDmaAddr = dma_map_single(&edrvInstance_l.pPlatformDev->dev,
+    txDmaAddr = dma_map_single(&edrvInstance_l.pPlatformDev->dev,
                                pBuffer_p->pBuffer,
                                pBuffer_p->txFrameSize,
                                DMA_TO_DEVICE);
-    EDRV_DESC_WRITE(pTxDesc, EDRV_DESC_ADDR_OFFSET, TxDmaAddr);
+    EDRV_DESC_WRITE(pTxDesc, EDRV_DESC_ADDR_OFFSET, txDmaAddr);
     // no re-ordering!
     wmb();
-
     reg = 0;
     reg = EDRV_DESC_READ(pTxDesc, EDRV_DESC_CNTRL_OFFSET);
     //clear the used bit
@@ -667,9 +662,9 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
     //scale len to size
     edrvInstance_l.txDescTail = (edrvInstance_l.txDescTail + 1) & (EDRV_MAX_TX_DESC_LEN);
 
-Exit:
-    return ret;
+    return kErrorOk;
 }
+
 //------------------------------------------------------------------------------
 /**
 \brief  Set Tx buffer ready
@@ -728,7 +723,7 @@ This function is the interrupt service routine for the Ethernet driver.
 \return The function returns an IRQ handled code.
 */
 //------------------------------------------------------------------------------
-static irqreturn_t edrvIrqHandler (INT irqNum_p, void* ppDevInstData_p)
+static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
 {
     UINT32          isrStatus;
     UINT32          stat = 0;
@@ -849,7 +844,7 @@ static irqreturn_t edrvIrqHandler (INT irqNum_p, void* ppDevInstData_p)
                                  pTxBuffer->txFrameSize,
                                  DMA_TO_DEVICE);
 
-                if (NULL != pTxBuffer)
+                if (pTxBuffer != NULL)
                 {
                     // Call Tx handler of Data link layer
                     if (pTxBuffer->pfnTxHandler != NULL)
@@ -865,14 +860,14 @@ static irqreturn_t edrvIrqHandler (INT irqNum_p, void* ppDevInstData_p)
 Exit:
     return result;
 }
+
 //------------------------------------------------------------------------------
 /**
 \brief  Initialize one Platform device
 
-This function initializes one PCI device.
+This function initializes one platform device.
 
-\param  pPciDev_p   Pointer to corresponding PCI device structure
-\param  pId_p       PCI device ID
+\param  pDev_p   Pointer to corresponding platform device structure
 
 \return The function returns an integer error code.
 \retval 0           Successful
@@ -947,7 +942,7 @@ static INT initOnePlatformDev(struct platform_device *pDev_p)
     /* Physical memory mapped to virtual memory*/
     edrvInstance_l.pIoAddr = ioremap(pResMem->start,
             (pResMem->end - pResMem->start + 1));
-    if (NULL == edrvInstance_l.pIoAddr)
+    if (edrvInstance_l.pIoAddr == NULL)
     {
         printk("Ioremap failed \n");
         result = -EIO;
@@ -957,8 +952,7 @@ static INT initOnePlatformDev(struct platform_device *pDev_p)
     // Request IRQ
     printk("Requesting IRQ resource ...");
 
-    if (request_irq(pResIrq->start, edrvIrqHandler, IRQF_SHARED,
-                    pDev_p->name, pDev_p))
+    if (request_irq(pResIrq->start, edrvIrqHandler, IRQF_SHARED, pDev_p->name, pDev_p))
     {
         printk("Failed \n");
         result = -EIO;
@@ -1008,11 +1002,9 @@ static INT initOnePlatformDev(struct platform_device *pDev_p)
     if ((result = clk_set_rate(edrvInstance_l.devClk, rate)))
     {
         printk("Setting new clock rate failed.\n");
-
     }
 
     // set MDC clock Division to be used
-
     reg = EDRV_READ_REG(EDRV_NET_CONFIG_REG);
     reg = 0;
     reg |= (MDC_DIV_224 << EDRV_NWCFG_MDCCLK_SHIFT);
@@ -1029,12 +1021,12 @@ static INT initOnePlatformDev(struct platform_device *pDev_p)
     EDRV_WRITE_REG(EDRV_NET_CONFIG_REG, reg);
 
     // set the MAC address
-    if ((edrvInstance_l.initParam.aMacAddr[0] != 0)
-            | (edrvInstance_l.initParam.aMacAddr[1] != 0)
-            | (edrvInstance_l.initParam.aMacAddr[2] != 0)
-            | (edrvInstance_l.initParam.aMacAddr[3] != 0)
-            | (edrvInstance_l.initParam.aMacAddr[4] != 0)
-            | (edrvInstance_l.initParam.aMacAddr[5] != 0))
+    if ((edrvInstance_l.initParam.aMacAddr[0] != 0) |
+        (edrvInstance_l.initParam.aMacAddr[1] != 0) |
+        (edrvInstance_l.initParam.aMacAddr[2] != 0) |
+        (edrvInstance_l.initParam.aMacAddr[3] != 0) |
+        (edrvInstance_l.initParam.aMacAddr[4] != 0) |
+        (edrvInstance_l.initParam.aMacAddr[5] != 0))
     {
         macLAddr = 0;
         macLAddr |= edrvInstance_l.initParam.aMacAddr[5];
@@ -1081,7 +1073,7 @@ static INT initOnePlatformDev(struct platform_device *pDev_p)
                                                     EDRV_TX_DESCS_SIZE,
                                                     &edrvInstance_l.txDescDma,
                                                     GFP_KERNEL);
-    if (edrvInstance_l.pTxDescVirt == NULL )
+    if (edrvInstance_l.pTxDescVirt == NULL)
     {
         printk("Failed \n");
         result = -ENOMEM;
@@ -1094,7 +1086,7 @@ static INT initOnePlatformDev(struct platform_device *pDev_p)
                                                     EDRV_RX_DESCS_SIZE,
                                                     &edrvInstance_l.rxDescDma,
                                                     GFP_KERNEL);
-    if (NULL == edrvInstance_l.pRxDescVirt)
+    if (edrvInstance_l.pRxDescVirt == NULL)
     {
         printk("Failed \n");
         result = -ENOMEM;
@@ -1105,7 +1097,7 @@ static INT initOnePlatformDev(struct platform_device *pDev_p)
 
     printk("Allocation of Rx Buffers ...");
     edrvInstance_l.pRxBuffer = kzalloc(EDRV_RX_BUFFER_SIZE, GFP_KERNEL);
-    if (!edrvInstance_l.pRxBuffer)
+    if (edrvInstance_l.pRxBuffer == NULL)
     {
         printk("Failed \n");
         result = -ENOMEM;
@@ -1126,12 +1118,12 @@ static INT initOnePlatformDev(struct platform_device *pDev_p)
             result = -EIO;
             goto Exit;
         }
-        edrvInstance_l.apRxBufInDesc[loop] = (edrvInstance_l.pRxBuffer  + \
+        edrvInstance_l.apRxBufInDesc[loop] = (edrvInstance_l.pRxBuffer +
                                               (loop * EDRV_MAX_FRAME_SIZE));
         edrvInstance_l.pRxDescAddr[loop].bufferAddr = rxDmaAddr;
         edrvInstance_l.pRxDescAddr[loop].bufferAddr &= EDRV_RXBUF_CLEAR_USED_MASK;
 
-        if ((EDRV_MAX_RX_DESCRIPTOR - 1) == loop)
+        if (loop == (EDRV_MAX_RX_DESCRIPTOR - 1))
         {
             edrvInstance_l.pRxDescAddr[loop].bufferAddr |= EDRV_RXBUF_WRAP_MASK;
         }
@@ -1196,16 +1188,16 @@ static INT initOnePlatformDev(struct platform_device *pDev_p)
 
     //enable Tx_used_bit read INTR
     EDRV_WRITE_REG(EDRV_INTR_EN_REG,
-                    ( EDRV_TX_AHB_CORR_READ \
-                    | EDRV_RX_COMPLETE_READ \
-                    | EDRV_TX_COMPLETE_READ \
-                    | EDRV_TX_BUFF_UNDRUN_READ \
-                    | EDRV_TX_LATE_COL_READ \
-                    | EDRV_RX_OVERUN_READ \
-                    )
-                   );
+                    ( EDRV_TX_AHB_CORR_READ |
+                      EDRV_RX_COMPLETE_READ |
+                      EDRV_TX_COMPLETE_READ |
+                      EDRV_TX_BUFF_UNDRUN_READ |
+                      EDRV_TX_LATE_COL_READ |
+                      EDRV_RX_OVERUN_READ
+                    ));
 
 Exit:
+    printk("%s finished with %d\n", __FUNCTION__, result);
     return result;
 }
 
@@ -1215,7 +1207,10 @@ Exit:
 
 This function removes one platform device.
 
-\param  pPciDev_p     Pointer to corresponding PCI device structure
+\param  pDev_p     Pointer to corresponding platform device structure
+
+\return The function returns an integer error code.
+\retval 0           Successful
 
 \ingroup module_edrv
 */
@@ -1227,7 +1222,7 @@ static int removeOnePlatformDev(struct platform_device *pDev_p)
     if (pDev_p !=  edrvInstance_l.pPlatformDev)
     {
         BUG_ON(edrvInstance_l.pPlatformDev != pDev_p);
-        goto Exit;
+        return 0;
     }
 
     if (edrvInstance_l.pTxBuffer != NULL)
@@ -1256,7 +1251,7 @@ static int removeOnePlatformDev(struct platform_device *pDev_p)
                          DMA_FROM_DEVICE);
     }
 
-    if (edrvInstance_l.pRxDescVirt != NULL )
+    if (edrvInstance_l.pRxDescVirt != NULL)
     {
         dma_free_coherent(&pDev_p->dev, EDRV_TX_DESCS_SIZE,
                            edrvInstance_l.pRxDescVirt,
@@ -1274,9 +1269,9 @@ static int removeOnePlatformDev(struct platform_device *pDev_p)
     release_mem_region(edrvInstance_l.resMemAddr, edrvInstance_l.resMemSize);
     iounmap(edrvInstance_l.pIoAddr);
 
-Exit:
     return 0;
 }
+
 //------------------------------------------------------------------------------
 /**
 \brief  Extract a bit from the given MAC address
@@ -1284,21 +1279,21 @@ Exit:
 This is a helper routine to calculate hash index for a given MAC
 address. It extracts the value for a specific bit specified by position.
 
-\param  pMAC_p     Pointer to MAC address
-\param  bitPos     Bit position to extract
+\param  pMac_p       Pointer to MAC address
+\param  bitPos_p     Bit position to extract
 
-\return returns the value at the specified bit position
+\return Returns the value at the specified bit position
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-static UINT32 getBitFromMac (UINT8 * pMAC_p, UINT32 bitPos)
+static UINT32 getBitFromMac(UINT8* pMac_p, UINT32 bitPos_p)
 {
     UINT8        macAdd;
-    UINT32         bitVal;
+    UINT32       bitVal;
 
-    macAdd = (*(pMAC_p + (bitPos/8)));
-    bitVal = ((macAdd >> (bitPos & 0x7)) & 0x01);
+    macAdd = (*(pMac_p + (bitPos_p/8)));
+    bitVal = ((macAdd >> (bitPos_p & 0x7)) & 0x01);
     return bitVal;
 }
 
@@ -1307,40 +1302,41 @@ static UINT32 getBitFromMac (UINT8 * pMAC_p, UINT32 bitPos)
 \brief  Calculate hash value
 
 This routine calculates the hash value for the specified address
-used to create the index table
+used to create the index table.
 
-\param  pMAC_p     Pointer to MAC address
+\param  pMac_p     Pointer to MAC address
 
-\return returns the hash value for the MAC address
+\return Returns the hash value for the MAC address
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-static UINT32 calculateHashAddr (UINT8 * pMAC_p)
+static UINT32 calculateHashAddr(UINT8 * pMac_p)
 {
     UINT32      hashIndex = 0;
     INT         loop;
 
     for (loop = 0; loop <= 5; loop ++)
     {
-        hashIndex |=  ((getBitFromMac(pMAC_p, (0 + loop)) ^
-                        getBitFromMac(pMAC_p, (6 + loop)) ^
-                        getBitFromMac(pMAC_p, (12 + loop)) ^
-                        getBitFromMac(pMAC_p, (18 + loop)) ^
-                        getBitFromMac(pMAC_p, (24 + loop)) ^
-                        getBitFromMac(pMAC_p, (30 + loop)) ^
-                        getBitFromMac(pMAC_p, (36 + loop)) ^
-                        getBitFromMac(pMAC_p, (42 + loop))) << loop);
+        hashIndex |=  ((getBitFromMac(pMac_p, (0 + loop)) ^
+                        getBitFromMac(pMac_p, (6 + loop)) ^
+                        getBitFromMac(pMac_p, (12 + loop)) ^
+                        getBitFromMac(pMac_p, (18 + loop)) ^
+                        getBitFromMac(pMac_p, (24 + loop)) ^
+                        getBitFromMac(pMac_p, (30 + loop)) ^
+                        getBitFromMac(pMac_p, (36 + loop)) ^
+                        getBitFromMac(pMac_p, (42 + loop))) << loop);
                                           
     }
     return hashIndex;
 }
+
 //------------------------------------------------------------------------------
 /**
 \brief  Write to a PHY register
 
-This routine write the specified word into the specified PHY register
-using the MDIO interface
+This routine writes the specified word into the specified PHY register
+using the MDIO interface.
 
 \param  phyId_p     ID/Address of the PHY to write
 \param  regAddr_p   Register to write
@@ -1363,24 +1359,24 @@ static void mdioPhyWrite(INT phyId_p, INT regAddr_p, UINT16 value_p)
     EDRV_WRITE_REG(EDRV_PHYMNTNC_OFFSET, regVal);
 
     // wait for completion of transfer
-
     do
     {
         cpu_relax();
         phyIdleState = EDRV_READ_REG(EDRV_NET_STATUS_REG);
     } while ((phyIdleState & EDRV_NWSR_MDIOIDLE_MASK) == 0); //wait PHYIDLE is set 1
 }
+
 //------------------------------------------------------------------------------
 /**
 \brief  Read from a PHY register
 
 This routine reads a word from the specified PHY register
-using the MDIO interface
+using the MDIO interface.
 
 \param  phyId_p     ID/Address of the PHY to read
 \param  regAddr_p   Register to read
 
-\return returns the read value
+\return Returns the read value.
 
 \ingroup module_edrv
 */
