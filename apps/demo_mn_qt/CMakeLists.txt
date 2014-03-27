@@ -45,6 +45,10 @@ SET(OBJDICT CiA302-4_MN)            # Set object dictionary to use
 FIND_OPLK_LIBRARY("mn")             # Find suitable openPOWERLINK library
 FIND_PACKAGE(Qt4 REQUIRED)          # Find Qt4
 
+SET(CFG_DEMO_PROJECT "Demo_3CN" CACHE STRING
+        "Valid projects are Demo_3CN, Demo_3CN_BC0083")
+SET_PROPERTY(CACHE CFG_DEMO_PROJECT PROPERTY STRINGS Demo_3CN Demo_3CN_BC0083)
+
 # Set generic sources and include directories for this demo
 SET (DEMO_SOURCES
      ${DEMO_SOURCE_DIR}/main.cpp
@@ -134,9 +138,15 @@ SOURCE_GROUP("openPOWERLINK Header Files" FILES ${OPLK_HEADERS})
 ################################################################################
 # Set the executable
 ADD_EXECUTABLE (demo_mn_qt ${DEMO_SOURCES} ${DEMO_ARCH_SOURCES} ${DEMO_HEADERS} ${DEMO_HEADERS_MOC}
-                           ${DEMO_FORMS_HEADERS} ${DEMO_RESOURCES_RCC})
+                           ${DEMO_FORMS_HEADERS} ${DEMO_RESOURCES_RCC} ${CMAKE_BINARY_DIR}/mnobd.cdc)
 SET_PROPERTY(TARGET demo_mn_qt
              PROPERTY COMPILE_DEFINITIONS_DEBUG DEBUG;DEF_DEBUG_LVL=${CFG_DEBUG_LVL})
+
+ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_BINARY_DIR}/mnobd.cdc
+                   COMMAND ${CMAKE_COMMAND} -E copy ${OPENCONFIG_PROJ_DIR}/${CFG_DEMO_PROJECT}/cdc_xap/mnobd.cdc ${CMAKE_BINARY_DIR}/mnobd.cdc
+                   DEPENDS ${OPENCONFIG_PROJ_DIR}/${CFG_DEMO_PROJECT}/cdc_xap/mnobd.cdc
+                   VERBATIM
+                   )
 
 ################################################################################
 # Libraries to link
@@ -148,4 +158,4 @@ TARGET_LINK_LIBRARIES(demo_mn_qt ${ARCH_LIBRARIES} ${QT_LIBRARIES})
 # Installation rules
 
 INSTALL(TARGETS demo_mn_qt RUNTIME DESTINATION ${CMAKE_PROJECT_NAME})
-INSTALL(FILES ${CMAKE_SOURCE_DIR}/mnobd.cdc DESTINATION ${CMAKE_PROJECT_NAME})
+INSTALL(FILES ${CMAKE_BINARY_DIR}/mnobd.cdc DESTINATION ${CMAKE_PROJECT_NAME})
