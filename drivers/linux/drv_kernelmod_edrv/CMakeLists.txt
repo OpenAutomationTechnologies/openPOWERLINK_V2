@@ -112,7 +112,7 @@ ELSEIF(CFG_POWERLINK_EDRV STREQUAL "EmacPs")
     # 267200 corresponds to Z7200 arch of Zynq family. (Z is represented by 26)
     SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} 
                             ${KERNEL_SOURCE_DIR}/timer/hrestimer-zynqttc.c
-                            ${EDRV_SOURCE_DIR}/edrv-emacPs.c
+                            ${EDRV_SOURCE_DIR}/edrv-emacps.c
                             )
     ELSE()
     message(FATAL_ERROR "EmacPs supported only for ARM processor")
