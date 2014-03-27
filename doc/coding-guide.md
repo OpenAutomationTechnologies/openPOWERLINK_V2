@@ -37,6 +37,8 @@ code remains maintainable.
 - All binary operators (operators that come between two values) shall have a
   space around the operator. Unary operators, such as ++, must not have a
   space between the operator and the variable.
+- Put the opening brace immediately after the function name and add a space between a
+  control statement (if, switch, for, ...) and the opening brace.
 - Always put a linebreak after a conditional statement, even if the body is only
   a return or other simple action.
 - Keep line length below 80 characters. This enables to view and compare two
@@ -232,13 +234,13 @@ __Examples:__
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 dll.h
 circbuffer.c
-eventucal_linux.c
-eventucal_win32.c
+eventucal-linux.c
+eventucal-win32.c
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Data Types {#sect_coding_datatypes}
 
-- Use the predefined macros located in global.h for standard data types
+- Use the predefined macros located in oplk/basictypes.h for standard data types
   (e.g. BOOL, INT, UINT, INT8, UINT8,  INT16, UINT16, DOUBLE, ...)
 
 # Comments {#sect_coding_comments}
