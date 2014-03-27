@@ -1303,9 +1303,9 @@ tOplkError dllk_setupLocalNodeMn(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief   Setup MN specific stuff of local node
+\brief   Setup CN specific stuff of local node
 
-The function initializes the MN specific stuff of the local node.
+The function initializes the CN specific stuff of the local node.
 
 \return The function returns a tOplkError error code.
 */
