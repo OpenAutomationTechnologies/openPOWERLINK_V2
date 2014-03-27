@@ -238,7 +238,7 @@ OBD_BEGIN ()
         OBD_BEGIN_INDEX_RAM(0x6402, 0x02, NULL)
             OBD_SUBINDEX_RAM_VAR(0x6402, 0x00, kObdTypeUInt8, kObdAccConst, tObdUnsigned8, NumberOfEntries, 0x01)
             OBD_SUBINDEX_RAM_USERDEF(0x6402, 0x01, kObdTypeInt32, kObdAccVPR, tObdInteger32, AnalogueInput, 0x00000000)
-        OBD_END_INDEX(0x6401)
+        OBD_END_INDEX(0x6402)
 
 		// AnalogueOutput_00h_AI8
         OBD_BEGIN_INDEX_RAM(0x6410, 0x05, NULL)
