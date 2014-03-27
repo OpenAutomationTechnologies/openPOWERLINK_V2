@@ -113,7 +113,7 @@ network configuration for your application.
 The following section contains a description of the
 [openPOWERLINK components](\ref page_components) available on a Linux system.
 
-## Stack Libraries
+## Stack Libraries {#sect_linux_components_libs}
 
 The openPOWERLINK stack is divided into a user and a kernel part. On a Linux
 system the following configurations are possible:
@@ -150,9 +150,9 @@ system the following configurations are possible:
   - `stack/proj/linux/liboplkmnapp-kernelintf` (liboplkmnapp-kernelintf.a)
   - `stack/proj/linux/liboplkcnapp-kernelintf` (liboplkcnapp-kernelintf.a)
 
-## Drivers
+## Drivers {#sect_linux_components_drivers}
 
-### Linux Userspace Daemon ussing PCAP
+### Linux Userspace Daemon using PCAP
 
 The kernel part of the stack is compiled as a separate userspace process. It
 uses the libpcap library for accessing the network interface and is therefore
