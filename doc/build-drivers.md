@@ -39,6 +39,13 @@ To build the kernel driver (e.g. for a MN using the Intel 82573 network interfac
       > make
       > make install
 
+To build the kernel driver on Zynq, additionally the cmake toolchain file and Linux source 
+directory has to be specified:
+
+      > cd <openPOWERLINK_dir>/drivers/linux/drv_kernelmod_edrv/build
+      > cmake -DCMAKE_TOOLCHAIN_FILE=../../../../cmake/toolchain-xilinx-arm-linux-eabi-gnu.cmake .. -DCFG_OPLK_MN=TRUE -DCFG_POWERLINK_EDRV=EmacPs -DCFG_KERNEL_DIR=<Path Linux kernel source> 
+      > make
+      > make install
 
 # Configuration Options {#sect_build_drivers_options}
 
@@ -92,3 +99,4 @@ To build the kernel driver (e.g. for a MN using the Intel 82573 network interfac
   - **8139**:  Realtek 8139-based network interface cards (100 MBit/s)
   - **8255x**: Intel 8255x-based network interface cards (100 MBit/s)
   - **82573**: Intel 82573-based network interface cards (1 GBit/s)
+  - **EmacPs**: Gigabit Ethernet controller on Xilinx ZC702 development kit

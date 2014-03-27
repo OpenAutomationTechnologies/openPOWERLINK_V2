@@ -33,6 +33,15 @@ __NOTE:__ You can also generate a Visual Studio Solution and compile the
 libraries in Visual Studio. Please refer to the CMAKE documentation for
 generating Visual Studio solution files.
 
+## Building for target Zynq {#sect_build_demos_build_zynq}
+
+The Linux based demo can be cross-compiled for Zynq by specifying the cmake tool-chain file:
+
+      > cd <openPOWERLINK_dir>/apps/<demo_dir>/build/linux
+      > cmake ../.. -DCMAKE_TOOLCHAIN_FILE=../../../../cmake/toolchain-xilinx-arm-linux-eabi-gnu.cmake
+      > make
+      > make install
+
 ## Building for target Microblaze {#sect_build_demos_build_microblaze}
 
 Follow the steps below to cross compile your demo application for Microblaze:

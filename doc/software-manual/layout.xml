@@ -21,6 +21,7 @@
           <tab type="user" url="\ref page_platform_xilinx" title="Xilinx Microblaze"/>
           <tab type="user" url="\ref page_platform_altera-mn" title="Altera(MN)"/>
           <tab type="user" url="\ref page_platform_altera-cn" title="Altera(CN)"/>
+          <tab type="user" url="\ref page_platform_zynq" title="Xilinx Zynq SoC"/>
       </tab>
     </tab>
     <tab type="usergroup" title="Software Manual">
