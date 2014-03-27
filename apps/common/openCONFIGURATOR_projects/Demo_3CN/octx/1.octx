@@ -102,18 +102,18 @@
      <Object index="1006" name="NMT_CycleLen_U32" objectType="7" dataType="0007" accessType="rw" defaultValue="1000" actualValue="0XC350" PDOmapping="NO" CDCFlag="TRUE"/>
      <Object index="1008" name="NMT_ManufactDevName_VS" objectType="7" dataType="0009" accessType="const" defaultValue="openPOWERLINK device" PDOmapping="NO" CDCFlag="FALSE"/>
      <Object index="1009" name="NMT_ManufactHwVers_VS" objectType="7" dataType="0009" accessType="const" defaultValue="1.00" PDOmapping="NO" CDCFlag="FALSE"/>
-     <Object index="100A" name="NMT_ManufactSwVers_VS" objectType="7" dataType="0009" accessType="const" defaultValue="EPL V2 V1.8 r1" PDOmapping="NO" CDCFlag="FALSE"/>
+     <Object index="100A" name="NMT_ManufactSwVers_VS" objectType="7" dataType="0009" accessType="const" defaultValue="OPLK V2.0.0-b1" PDOmapping="NO" CDCFlag="FALSE"/>
      <Object index="1018" name="NMT_IdentityObject_REC" objectType="9" CDCFlag="FALSE">
       <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" defaultValue="4" PDOmapping="NO" CDCFlag="FALSE"/>
       <SubObject subIndex="01" name="VendorId_U32" objectType="7" dataType="0007" accessType="const" defaultValue="0x00000000" PDOmapping="NO" CDCFlag="FALSE"/>
       <SubObject subIndex="02" name="ProductCode_U32" objectType="7" dataType="0007" accessType="const" defaultValue="0x00000000" PDOmapping="NO" CDCFlag="FALSE"/>
-      <SubObject subIndex="03" name="RevisionNo_U32" objectType="7" dataType="0007" accessType="const" defaultValue="0x00010008" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="03" name="RevisionNo_U32" objectType="7" dataType="0007" accessType="const" defaultValue="0x00020000" PDOmapping="NO" CDCFlag="FALSE"/>
       <SubObject subIndex="04" name="SerialNo_U32" objectType="7" dataType="0007" accessType="const" PDOmapping="NO" CDCFlag="FALSE"/>
      </Object>
      <Object index="1020" name="CFM_VerifyConfiguration_REC" objectType="9" CDCFlag="TRUE">
       <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" defaultValue="2" CDCFlag="TRUE"/>
-      <SubObject subIndex="01" name="ConfDate_U32" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="10871" CDCFlag="TRUE"/>
-      <SubObject subIndex="02" name="ConfTime_U32" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="47418000" CDCFlag="TRUE"/>
+      <SubObject subIndex="01" name="ConfDate_U32" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="11042" CDCFlag="TRUE"/>
+      <SubObject subIndex="02" name="ConfTime_U32" objectType="7" dataType="0007" accessType="rw" defaultValue="0" actualValue="46886000" CDCFlag="TRUE"/>
      </Object>
      <Object index="1030" name="NMT_InterfaceGroup_0h_REC" objectType="9" CDCFlag="FALSE">
       <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" defaultValue="9" PDOmapping="NO" CDCFlag="FALSE"/>
@@ -124,7 +124,7 @@
       <SubObject subIndex="05" name="InterfacePhysAddress_OSTR" objectType="7" dataType="000A" accessType="const" PDOmapping="NO" CDCFlag="FALSE"/>
       <SubObject subIndex="06" name="InterfaceName_VSTR" objectType="7" dataType="0009" accessType="ro" defaultValue="Interface 1" PDOmapping="NO" CDCFlag="FALSE"/>
       <SubObject subIndex="07" name="InterfaceOperStatus_U8" objectType="7" dataType="0005" accessType="ro" defaultValue="1" PDOmapping="NO" CDCFlag="FALSE"/>
-      <SubObject subIndex="08" name="InterfaceAdminState_U8" objectType="7" dataType="0005" accessType="rw" defaultValue="1" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="08" name="InterfaceAdminState_U8" objectType="7" dataType="0005" accessType="rw" defaultValue="1" lowLimit="0" highLimit="1" PDOmapping="NO" CDCFlag="FALSE"/>
       <SubObject subIndex="09" name="Valid_BOOL" objectType="7" dataType="0001" accessType="rw" defaultValue="true" PDOmapping="NO" CDCFlag="FALSE"/>
      </Object>
      <Object index="1050" name="NMT_RelativeLatencyDiff_AU32" objectType="8" dataType="0007" CDCFlag="FALSE">
@@ -384,24 +384,24 @@
       <SubObject subIndex="FD" name="RelativeLatencyDiff" objectType="7" dataType="0007" accessType="ro" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
       <SubObject subIndex="FE" name="RelativeLatencyDiff" objectType="7" dataType="0007" accessType="ro" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
      </Object>
-     <Object index="1300" name="SDO_SequLayerTimeout_U32" objectType="7" dataType="0007" accessType="rw" defaultValue="5000" PDOmapping="NO" CDCFlag="FALSE"/>
+     <Object index="1300" name="SDO_SequLayerTimeout_U32" objectType="7" dataType="0007" accessType="rw" defaultValue="5000" lowLimit="100" PDOmapping="NO" CDCFlag="FALSE"/>
      <Object index="1400" name="PDO_RxCommParam_00h_REC" objectType="9" CDCFlag="TRUE">
       <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" defaultValue="2" actualValue="2" PDOmapping="NO" CDCFlag="TRUE"/>
-      <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" defaultValue="0" actualValue="0x0" PDOmapping="NO" CDCFlag="TRUE"/>
+      <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" defaultValue="0" actualValue="0x0" highLimit="254" PDOmapping="NO" CDCFlag="TRUE"/>
       <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="NO" CDCFlag="TRUE"/>
      </Object>
      <Object index="1401" name="PDO_RxCommParam_01h_REC" objectType="9" CDCFlag="TRUE">
       <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" defaultValue="2" actualValue="2" PDOmapping="NO" CDCFlag="TRUE"/>
-      <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" defaultValue="0" actualValue="0x0" PDOmapping="NO" CDCFlag="TRUE"/>
+      <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" defaultValue="0" actualValue="0x0" highLimit="254" PDOmapping="NO" CDCFlag="TRUE"/>
       <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="NO" CDCFlag="TRUE"/>
      </Object>
      <Object index="1402" name="PDO_RxCommParam_02h_REC" objectType="9" CDCFlag="TRUE">
       <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" defaultValue="2" actualValue="2" PDOmapping="NO" CDCFlag="TRUE"/>
-      <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" defaultValue="0" actualValue="0x0" PDOmapping="NO" CDCFlag="TRUE"/>
+      <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" defaultValue="0" actualValue="0x0" highLimit="254" PDOmapping="NO" CDCFlag="TRUE"/>
       <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="NO" CDCFlag="TRUE"/>
      </Object>
      <Object index="1600" name="PDO_RxMappParam_00h_AU64" objectType="8" CDCFlag="TRUE">
-      <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="rw" defaultValue="0" actualValue="0x1" PDOmapping="NO" CDCFlag="TRUE"/>
+      <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="rw" defaultValue="0" actualValue="0x01" PDOmapping="NO" CDCFlag="TRUE"/>
       <SubObject subIndex="01" name="ObjectMapping" objectType="7" dataType="001B" accessType="rw" defaultValue="0x0000000000000000" actualValue="0x0008000000016200" PDOmapping="NO" CDCFlag="TRUE"/>
       <SubObject subIndex="02" name="ObjectMapping" objectType="7" dataType="001B" accessType="rw" defaultValue="0x0000000000000000" actualValue="0x0000000800000000" PDOmapping="NO" CDCFlag="TRUE"/>
       <SubObject subIndex="03" name="ObjectMapping" objectType="7" dataType="001B" accessType="rw" defaultValue="0x0000000000000000" actualValue="0x0000000800000000" PDOmapping="NO" CDCFlag="TRUE"/>
@@ -486,11 +486,11 @@
      </Object>
      <Object index="1800" name="PDO_TxCommParam_00h_REC" objectType="9" CDCFlag="TRUE">
       <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" defaultValue="2" actualValue="2" PDOmapping="NO" CDCFlag="TRUE"/>
-      <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" defaultValue="0" actualValue="0x0" PDOmapping="NO" CDCFlag="TRUE"/>
+      <SubObject subIndex="01" name="NodeID_U8" objectType="7" dataType="0005" accessType="rw" defaultValue="0" actualValue="0x0" highLimit="254" PDOmapping="NO" CDCFlag="TRUE"/>
       <SubObject subIndex="02" name="MappingVersion_U8" objectType="7" dataType="0005" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="NO" CDCFlag="TRUE"/>
      </Object>
      <Object index="1A00" name="PDO_TxMappParam_00h_AU64" objectType="8" CDCFlag="TRUE">
-      <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="rw" defaultValue="0" actualValue="0x1" PDOmapping="NO" CDCFlag="TRUE"/>
+      <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="rw" defaultValue="0" actualValue="0x01" PDOmapping="NO" CDCFlag="TRUE"/>
       <SubObject subIndex="01" name="ObjectMapping" objectType="7" dataType="001B" accessType="rw" defaultValue="0x0000000000000000" actualValue="0x0008000000016000" PDOmapping="NO" CDCFlag="TRUE"/>
       <SubObject subIndex="02" name="ObjectMapping" objectType="7" dataType="001B" accessType="rw" defaultValue="0x0000000000000000" actualValue="0x0000000800000000" PDOmapping="NO" CDCFlag="TRUE"/>
       <SubObject subIndex="03" name="ObjectMapping" objectType="7" dataType="001B" accessType="rw" defaultValue="0x0000000000000000" actualValue="0x0000000800000000" PDOmapping="NO" CDCFlag="TRUE"/>
@@ -793,7 +793,7 @@
       <SubObject subIndex="FD" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
       <SubObject subIndex="FE" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
      </Object>
-     <Object index="1F82" name="NMT_FeatureFlags_U32" objectType="7" dataType="0007" accessType="const" defaultValue="0x00040245" PDOmapping="NO" CDCFlag="FALSE"/>
+     <Object index="1F82" name="NMT_FeatureFlags_U32" objectType="7" dataType="0007" accessType="const" defaultValue="0x00050245" PDOmapping="NO" CDCFlag="FALSE"/>
      <Object index="1F83" name="NMT_EPLVersion_U8" objectType="7" dataType="0005" accessType="const" defaultValue="0x20" PDOmapping="NO" CDCFlag="FALSE"/>
      <Object index="1F8C" name="NMT_CurrNMTState_U8" objectType="7" dataType="0005" accessType="ro" PDOmapping="OPTIONAL" CDCFlag="FALSE"/>
      <Object index="1F8D" name="NMT_PResPayloadLimitList_AU16" objectType="8" dataType="0006" CDCFlag="FALSE">
@@ -1060,11 +1060,11 @@
      </Object>
      <Object index="1F98" name="NMT_CycleTiming_REC" objectType="9" CDCFlag="TRUE">
       <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" defaultValue="14" PDOmapping="NO" CDCFlag="TRUE"/>
-      <SubObject subIndex="01" name="IsochrTxMaxPayload_U16" objectType="7" dataType="0006" accessType="const" defaultValue="36" PDOmapping="NO" CDCFlag="TRUE"/>
-      <SubObject subIndex="02" name="IsochrRxMaxPayload_U16" objectType="7" dataType="0006" accessType="const" defaultValue="1490" PDOmapping="NO" CDCFlag="TRUE"/>
+      <SubObject subIndex="01" name="IsochrTxMaxPayload_U16" objectType="7" dataType="0006" accessType="const" defaultValue="64" PDOmapping="NO" CDCFlag="TRUE"/>
+      <SubObject subIndex="02" name="IsochrRxMaxPayload_U16" objectType="7" dataType="0006" accessType="const" defaultValue="64" PDOmapping="NO" CDCFlag="TRUE"/>
       <SubObject subIndex="03" name="PResMaxLatency_U32" objectType="7" dataType="0007" accessType="const" defaultValue="2000" PDOmapping="NO" CDCFlag="TRUE"/>
-      <SubObject subIndex="04" name="PReqActPayloadLimit_U16" objectType="7" dataType="0006" accessType="rw" defaultValue="36" actualValue="0x24" lowLimit="36" highLimit="1490" PDOmapping="NO" CDCFlag="TRUE"/>
-      <SubObject subIndex="05" name="PResActPayloadLimit_U16" objectType="7" dataType="0006" accessType="rw" defaultValue="40" actualValue="0x24" lowLimit="36" highLimit="40" PDOmapping="NO" CDCFlag="TRUE"/>
+      <SubObject subIndex="04" name="PReqActPayloadLimit_U16" objectType="7" dataType="0006" accessType="rw" defaultValue="36" actualValue="0x24" lowLimit="36" highLimit="36" PDOmapping="NO" CDCFlag="TRUE"/>
+      <SubObject subIndex="05" name="PResActPayloadLimit_U16" objectType="7" dataType="0006" accessType="rw" defaultValue="36" actualValue="0x24" lowLimit="36" highLimit="36" PDOmapping="NO" CDCFlag="TRUE"/>
       <SubObject subIndex="06" name="ASndMaxLatency_U32" objectType="7" dataType="0007" accessType="const" defaultValue="2000" PDOmapping="NO" CDCFlag="TRUE"/>
       <SubObject subIndex="07" name="MultiplCycleCnt_U8" objectType="7" dataType="0005" accessType="rw" defaultValue="0" actualValue="0" PDOmapping="NO" CDCFlag="TRUE"/>
       <SubObject subIndex="08" name="AsyncMTU_U16" objectType="7" dataType="0006" accessType="rw" defaultValue="300" actualValue="0x12C" lowLimit="300" highLimit="1500" PDOmapping="NO" CDCFlag="TRUE"/>
@@ -1075,6 +1075,263 @@
       <SubObject subIndex="0E" name="SyncMNDelaySecond_U32" objectType="7" dataType="0007" accessType="ro" defaultValue="0" PDOmapping="NO" CDCFlag="TRUE"/>
      </Object>
      <Object index="1F99" name="NMT_CNBasicEthernetTimeout_U32" objectType="7" dataType="0007" accessType="rw" defaultValue="5000000" PDOmapping="NO" CDCFlag="FALSE"/>
+     <Object index="1F9B" name="NMT_MultiplCycleAssign_AU8" objectType="8" dataType="0005" CDCFlag="FALSE">
+      <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="rw" defaultValue="254" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="01" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="02" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="03" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="04" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="05" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="06" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="07" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="08" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="09" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="0A" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="0B" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="0C" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="0D" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="0E" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="0F" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="10" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="11" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="12" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="13" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="14" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="15" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="16" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="17" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="18" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="19" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="1A" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="1B" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="1C" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="1D" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="1E" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="1F" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="20" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="21" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="22" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="23" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="24" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="25" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="26" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="27" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="28" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="29" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="2A" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="2B" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="2C" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="2D" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="2E" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="2F" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="30" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="31" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="32" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="33" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="34" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="35" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="36" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="37" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="38" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="39" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="3A" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="3B" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="3C" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="3D" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="3E" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="3F" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="40" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="41" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="42" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="43" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="44" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="45" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="46" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="47" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="48" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="49" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="4A" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="4B" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="4C" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="4D" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="4E" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="4F" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="50" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="51" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="52" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="53" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="54" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="55" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="56" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="57" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="58" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="59" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="5A" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="5B" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="5C" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="5D" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="5E" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="5F" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="60" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="61" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="62" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="63" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="64" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="65" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="66" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="67" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="68" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="69" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="6A" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="6B" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="6C" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="6D" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="6E" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="6F" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="70" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="71" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="72" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="73" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="74" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="75" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="76" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="77" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="78" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="79" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="7A" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="7B" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="7C" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="7D" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="7E" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="7F" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="80" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="81" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="82" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="83" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="84" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="85" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="86" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="87" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="88" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="89" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="8A" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="8B" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="8C" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="8D" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="8E" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="8F" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="90" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="91" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="92" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="93" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="94" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="95" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="96" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="97" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="98" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="99" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="9A" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="9B" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="9C" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="9D" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="9E" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="9F" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="A0" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="A1" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="A2" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="A3" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="A4" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="A5" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="A6" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="A7" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="A8" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="A9" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="AA" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="AB" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="AC" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="AD" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="AE" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="AF" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="B0" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="B1" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="B2" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="B3" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="B4" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="B5" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="B6" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="B7" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="B8" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="B9" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="BA" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="BB" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="BC" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="BD" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="BE" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="BF" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="C0" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="C1" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="C2" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="C3" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="C4" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="C5" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="C6" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="C7" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="C8" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="C9" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="CA" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="CB" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="CC" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="CD" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="CE" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="CF" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="D0" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="D1" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="D2" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="D3" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="D4" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="D5" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="D6" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="D7" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="D8" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="D9" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="DA" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="DB" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="DC" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="DD" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="DE" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="DF" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="E0" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="E1" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="E2" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="E3" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="E4" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="E5" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="E6" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="E7" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="E8" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="E9" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="EA" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="EB" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="EC" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="ED" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="EE" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="EF" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="F0" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="F1" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="F2" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="F3" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="F4" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="F5" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="F6" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="F7" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="F8" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="F9" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="FA" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="FB" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="FC" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="FD" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+      <SubObject subIndex="FE" name="CycleNo" objectType="7" dataType="0005" accessType="rw" defaultValue="0" PDOmapping="NO" CDCFlag="FALSE"/>
+     </Object>
      <Object index="1F9E" name="NMT_ResetCmd_U8" objectType="7" dataType="0005" accessType="rw" defaultValue="255" PDOmapping="NO" CDCFlag="FALSE"/>
      <Object index="6000" name="DigitalInput_00h_AU8" objectType="8" dataType="0005" CDCFlag="TRUE">
       <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" defaultValue="4" PDOmapping="NO" CDCFlag="TRUE"/>
