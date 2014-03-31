@@ -181,8 +181,8 @@ the configuration options on the command line (-DCFG_XXX=XXX).
 
 - **CFG_BIN_DIR**
 
-  Path to the install folder of your POWERLINK example. (e.g: <openPOWERLINK_dir>/bin/generic/microblaze/avnet-s6plkeb/cn-single-gpio)
+  Path to the install folder of your POWERLINK example. (e.g: `<openPOWERLINK_dir>/bin/generic/microblaze/avnet-s6plkeb/cn-single-gpio`)
 
 - **CFG_HW_LIB_DIR**
 
-  Path to the install folder of your POWERLINK example hardware project. (e.g: <openPOWERLINK_dir>/hardware/lib/generic/microblaze/avnet-s6plkeb/cn-single-gpio)
+  Path to the install folder of your POWERLINK example hardware project. (e.g: `<openPOWERLINK_dir>/hardware/lib/generic/microblaze/avnet-s6plkeb/cn-single-gpio`)
