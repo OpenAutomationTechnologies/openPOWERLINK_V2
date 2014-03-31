@@ -75,6 +75,12 @@ fi
 SOPCINFO_FILE=$(nios2-bsp-query-settings --settings ${BSP_PATH}/settings.bsp \
                             --cmd puts [get_sopcinfo_file] | grep sopcinfo)
 
+if [ "$(expr substr $(uname -s) 1 6)" == "CYGWIN" ];
+then
+    # In cygwin convert returned path to posix style
+    SOPCINFO_FILE=$(cygpath -u "${SOPCINFO_FILE}")
+fi
+
 if [ ! -f ${SOPCINFO_FILE} ];
 then
     echo "ERROR: SOPCINFO file not found!"
@@ -82,7 +88,22 @@ then
 fi
 
 # Get path to board
-HW_PATH=$(dirname ${SOPCINFO_FILE})/..
+HW_PATH=$(readlink -f "$(dirname ${SOPCINFO_FILE})/..")
+
+if [ ! -d "${HW_PATH}" ];
+then
+    echo "ERROR: Path to SOPCINFO file does not exist (${HW_PATH})!"
+    exit 1
+fi
+
+# Get path to common board directory
+HW_COMMON_PATH=$(readlink -f "${HW_PATH}/../common")
+
+if [ ! -d "${HW_COMMON_PATH}" ];
+then
+    echo "ERROR: Path to common board directory does not exist (${HW_COMMON_PATH})!"
+    exit 1
+fi
 
 # Get bsp's cpu name
 CPU_NAME=$(nios2-bsp-query-settings --settings ${BSP_PATH}/settings.bsp \
@@ -115,7 +136,7 @@ if [ "${CPU_NAME}" == "${CFG_APP_CPU_NAME}" ]; then
     CFG_TCI_MEM_NAME=${CFG_APP_TCI_MEM_NAME}
     if [ "${CFG_NODE}" == "CN" ] && [ -n "${CFG_OPENMAC}" ]; then
         LIB_NAME=oplkcn
-        LIB_SOURCES=${HW_PATH}/../common/drivers/openmac/omethlib_phycfg.c
+        LIB_SOURCES=${HW_COMMON_PATH}/drivers/openmac/omethlib_phycfg.c
     elif [ "${CFG_NODE}" == "MN" ] && [ -n "${CFG_HOSTINTERFACE}" ]; then
         LIB_NAME=oplkmnapp-hostif
         LIB_SOURCES=
@@ -125,7 +146,7 @@ elif [ "${CPU_NAME}" == "${CFG_DRV_CPU_NAME}" ]; then
     CFG_TCI_MEM_NAME=${CFG_DRV_TCI_MEM_NAME}
     if [ "${CFG_NODE}" == "MN" ] && [ -n "${CFG_OPENMAC}" ] && [ -n "${CFG_HOSTINTERFACE}" ]; then
         LIB_NAME=oplkmndrv-hostif
-        LIB_SOURCES=${HW_PATH}/../common/drivers/openmac/omethlib_phycfg.c
+        LIB_SOURCES=${HW_COMMON_PATH}/drivers/openmac/omethlib_phycfg.c
     fi
 else
     echo "ERROR: Please specify CFG_XXX_CPU_NAME in board.settings!"
