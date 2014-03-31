@@ -49,6 +49,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+#define NMT_PLAIN_COMMAND_START     0x20        // Start of plain NMT command range
+#define NMT_PLAIN_COMMAND_END       0x3F        // End of plain NMT command range
+
+#define NMT_EXT_COMMAND_START       0x40        // Start of extended NMT command range
+#define NMT_EXT_COMMAND_END         0x5F        // End of extended NMT command range
+
+#define C_MAX_NMT_CMD_DATA_SIZE (C_DLL_MAX_PAYL_OFFSET - 6)
 
 //------------------------------------------------------------------------------
 // typedef
