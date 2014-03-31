@@ -85,7 +85,7 @@ The following demo application are provided on Windows:
 * [demo_cn_console](\ref sect_components_demo_cn_console)
 * [demo_mn_qt](\ref sect_components_demo_mn_qt)
 
-# Running openPOWERLINK {#sect_linux_running}
+# Running openPOWERLINK {#sect_windows_running}
 
 The demo applications can be directly started by double-clicking the according
 .exe file in Winodws explorer.

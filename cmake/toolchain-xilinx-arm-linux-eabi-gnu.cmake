@@ -1,8 +1,8 @@
 ################################################################################
 #
-# CMake file for openPOWERLINK Linux userspace CN driver library
+# CMake target configuration file for Xilinx ARM Linux Eabi
 #
-# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2014, Kalycito Infotech Pvt. Ltd.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -27,49 +27,29 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
+################################################################################
+# Name of the target platform
+SET(CMAKE_SYSTEM Xilinx-ARM-linux-eabi)
+SET(CMAKE_SYSTEM_NAME Linux)
+SET(CMAKE_SYSTEM_PROCESSOR arm)
 
-# Set library name
-SET(LIB_NAME "oplkcndrv-pcap")
-MESSAGE(STATUS "Configuring ${LIB_NAME}")
+# Version of the system
+SET(CMAKE_SYSTEM_VERSION 1)
 
-# set general sources of POWERLINK library
-SET (LIB_SOURCES
-     ${KERNEL_SOURCES}
-     ${CTRL_KCAL_POSIXMEM_SOURCES}
-     ${DLL_KCAL_CIRCBUF_SOURCES}
-     ${ERRHND_KCAL_LOCAL_SOURCES}
-     ${EVENT_KCAL_LINUXUSER_SOURCES}
-     ${PDO_KCAL_POSIXMEM_SOURCES}
-     ${HARDWARE_DRIVER_LINUXUSER_SOURCES}
-     ${COMMON_SOURCES}
-     ${COMMON_LINUXUSER_SOURCES}
-     ${TARGET_LINUX_SOURCES}
-     ${CIRCBUF_POSIX_SOURCES}
-     )
+# specify the cross compiler
+SET(CMAKE_C_COMPILER arm-xilinx-linux-gnueabi-gcc)
+SET(CMAKE_CXX_COMPILER arm-xilinx-linux-gnueabi-g++)
+SET(CMAKE_ASM-ATT_COMPILER arm-xilinx-linux-gnueabi-as)
 
-IF((CMAKE_SYSTEM_PROCESSOR MATCHES x86*) OR (CMAKE_SYSTEM_PROCESSOR MATCHES i686))
-    SET(LIB_SOURCES ${LIB_SOURCES} ${ARCH_X86_SOURCES})
-ELSEIF(CMAKE_SYSTEM_PROCESSOR MATCHES "arm")
-    SET(LIB_SOURCES ${LIB_SOURCES} ${ARCH_LE_SOURCES})
-ELSE()
-    MESSAGE(FATAL_ERROR "Unsupported CMAKE_SYSTEM_PROCESSOR ${CMAKE_SYSTEM_PROCESSOR}")
-ENDIF()
+set( CMAKE_FIND_ROOT_PATH /opt/Xilinx/14.7/ISE_DS/EDK/gnu/arm/lin/arm-xilinx-linux-gnueabi/libc )
+# search for programs in the build host directories
+SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+# for libraries in the target and build host directories
+SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY BOTH)
+# for headers in the target directories
+SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 
-# Configure compile definitions
-ADD_DEFINITIONS(-DCONFIG_MN)
-ADD_DEFINITIONS(-Wall -Wextra -pedantic -std=c99 -pthread -D_GNU_SOURCE -D_POSIX_C_SOURCE=200112L
-                -fno-strict-aliasing)
-
-# Additional include directories
-INCLUDE_DIRECTORIES(
-    .
-    ${OBJDICT_DIR}/${OBJDICT}
-    )
-
-# Define library and installation rules
-ADD_LIBRARY(${LIB_NAME} ${LIB_TYPE} ${LIB_SOURCES})
-TARGET_LINK_LIBRARIES(${LIB_NAME} ${ARCH_LIBRARIES})
-SET_PROPERTY(TARGET ${LIB_NAME} PROPERTY COMPILE_DEFINITIONS_DEBUG DEBUG;DEF_DEBUG_LVL=${CFG_DEBUG_LVL})
-SET_PROPERTY(TARGET ${LIB_NAME} PROPERTY DEBUG_POSTFIX "_d")
-INSTALL(TARGETS ${LIB_NAME} ARCHIVE DESTINATION .)
+# cross compiler directives
+set( MAKE_KERNEL_ARCH arm )
+set( MAKE_KERNEL_CROSS_COMPILE /opt/Xilinx/14.7/ISE_DS/EDK/gnu/arm/lin/bin/arm-xilinx-linux-gnueabi- )
 

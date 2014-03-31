@@ -61,9 +61,8 @@ SET(CFG_KERNEL_DIR "" CACHE PATH
         "Select the kernel directory to be used, if not specified, system kernel dir will be used!")
 
 SET(CFG_POWERLINK_EDRV "82573" CACHE STRING
-        "Valid drivers are 8139, 82573, 8255x")
-SET_PROPERTY(CACHE CFG_POWERLINK_EDRV PROPERTY STRINGS 8139 82573 8255x)
-
+        "Valid drivers are 8139, 82573, 8255x, EmacPs")
+SET_PROPERTY(CACHE CFG_POWERLINK_EDRV PROPERTY STRINGS 8139 82573 8255x EmacPs)
 ################################################################################
 # Set global directories
 ################################################################################
@@ -105,6 +104,19 @@ ELSEIF(CFG_POWERLINK_EDRV STREQUAL "8255x")
     SET(MODULE_DEFS "${MODULE_DEFS} -DCONFIG_EDRV=8255")
     SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} ${EDRV_SOURCE_DIR}/edrv-8255x.c)
 
+ELSEIF(CFG_POWERLINK_EDRV STREQUAL "EmacPs")
+    
+    IF(CMAKE_SYSTEM_PROCESSOR MATCHES arm)
+    SET(MODULE_NAME "oplkemacps")
+    SET(MODULE_DEFS "${MODULE_DEFS} -DCONFIG_EDRV=267200")
+    # 267200 corresponds to Z7200 arch of Zynq family. (Z is represented by 26)
+    SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} 
+                            ${EDRV_SOURCE_DIR}/edrv-emacps.c
+                            )
+    ELSE()
+    message(FATAL_ERROR "EmacPs supported only for ARM processor")
+    ENDIF()
+ 
 ELSE()
 
     message(FATAL_ERROR
@@ -178,14 +190,21 @@ SET(MODULE_SOURCE_FILES
     ${KERNEL_SOURCE_DIR}/errhnd/errhndk.c
     ${KERNEL_SOURCE_DIR}/errhnd/errhndkcal-local.c
     ${KERNEL_SOURCE_DIR}/veth/veth-linuxkernel.c
-    ${KERNEL_SOURCE_DIR}/timer/hrestimer-linuxkernel.c
     ${COMMON_SOURCE_DIR}/circbuf/circbuffer.c
     ${COMMON_SOURCE_DIR}/circbuf/circbuf-linuxkernel.c
     ${COMMON_SOURCE_DIR}/debugstr.c
     )
 
+IF(CFG_POWERLINK_EDRV STREQUAL "EmacPs")
+SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} ${KERNEL_SOURCE_DIR}/timer/hrestimer-zynqttc.c )
+ELSE(CFG_POWERLINK_EDRV STREQUAL "EmacPs")
+SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} ${KERNEL_SOURCE_DIR}/timer/hrestimer-linuxkernel.c )
+ENDIF(CFG_POWERLINK_EDRV STREQUAL "EmacPs")
+
 IF((CMAKE_SYSTEM_PROCESSOR MATCHES x86*) OR (CMAKE_SYSTEM_PROCESSOR MATCHES i686))
     SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} ${COMMON_SOURCE_DIR}/ami/amix86.c)
+ELSEIF(CMAKE_SYSTEM_PROCESSOR MATCHES arm)
+    SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} ${COMMON_SOURCE_DIR}/ami/amile.c)
 ELSE()
     MESSAGE(FATAL_ERROR
             "ami: CMAKE_SYSTEM_PROCESSOR is set to ${CMAKE_SYSTEM_PROCESSOR}. Valid targets are (x86, x86_64, arm, armv7l, i686).")

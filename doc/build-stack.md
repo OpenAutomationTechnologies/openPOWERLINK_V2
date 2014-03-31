@@ -31,6 +31,13 @@ generates Makefiles by default.
       > make
       > make install
 
+* On Zynq additionally the cross-compilation tool chain file has to be specified for compiling
+
+      > cd openPOWERLINK/stack/build/linux
+      > cmake -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-arm-linux-eabi-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=[Debug/Release] 
+      > make
+      > make install
+
 The default library installation path is: `<openPOWERLINK_DIR>/lib/linux/<ARCH>`
 
 
