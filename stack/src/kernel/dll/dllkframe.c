@@ -1562,7 +1562,6 @@ static tOplkError checkAndSetSyncEvent(BOOL fPrcSlotFinished_p, UINT nodeId_p)
 The function updates a node by sending the appropriate event to the NMT or
 DLLK module.
 
-\param  pFrame_p            Pointer to the received frame.
 \param  pIntNodeInfo_p      Pointer to the node information of the node to
                             be updated.
 \param  nodeId_p            Node ID of the node to be updated.
