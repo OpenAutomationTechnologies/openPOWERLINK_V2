@@ -105,6 +105,21 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
+
+/**
+\brief Structure describing link requests
+
+This structure describes an object link request.
+*/
+typedef struct
+{
+    UINT                index;                  ///< Index of object to link
+    void*               pVar;                   ///< Pointer to variable which should be linked
+    UINT                varEntries;             ///< Number of entries.
+    tObdSize            entrySize;              ///< Size of an entry
+    UINT                firstSubindex;          ///< First sub-index this variable should be linked to.
+} tLinkObjectRequest;
+
 typedef struct
 {
     UINT16              lastHeartbeat;          ///< Last detected heartbeat
@@ -115,6 +130,16 @@ typedef struct
 // local vars
 //------------------------------------------------------------------------------
 static tCtrluInstance       ctrlInstance_l;
+
+#if defined(CONFIG_INCLUDE_NMT_MN)
+UINT8    aCmdData[C_MAX_NMT_CMD_DATA_SIZE];     // Extended NMT request command data
+
+// List of objects that need to get linked
+tLinkObjectRequest    linkObjectRequestsMn[]  =
+{//     Index       Variable        Count   Object size             SubIndex
+    {   0x1F9F,     aCmdData,       1,      sizeof(aCmdData),       4   },
+};
+#endif
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -134,6 +159,7 @@ static tOplkError cbEventPdoChange(tPdoEventPdoChange* pEventPdoChange_p);
 static tOplkError cbNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p,
                               tNmtState nmtState_p, UINT16 errorCode_p,
                               BOOL fMandatory_p);
+tOplkError linkDomainObjects(tLinkObjectRequest* pLinkRequest_p, size_t requestCnt_p);
 #endif
 
 static tOplkError cbBootEvent(tNmtBootEvent BootEvent_p, tNmtState NmtState_p,
@@ -243,6 +269,10 @@ tOplkError ctrlu_initStack(tOplkApiInitParam* pInitParam_p)
 
     if ((ret = initObd(&ctrlInstance_l.initParam)) != kErrorOk)
         goto Exit;
+
+#if defined(CONFIG_INCLUDE_NMT_MN)
+    ret = linkDomainObjects(linkObjectRequestsMn, tabentries(linkObjectRequestsMn));
+#endif
 
     TRACE("Initializing kernel modules ...\n");
     OPLK_MEMCPY(ctrlParam.aMacAddress, ctrlInstance_l.initParam.aMacAddress, 6);
@@ -621,6 +651,8 @@ tOplkError ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
                 UINT8       cmdTarget;
                 tObdSize    obdSize;
                 tNmtState   nmtState;
+                BYTE*       pCmdData;
+                tObdSize    cmdDataSize;
 
                 obdSize = sizeof(UINT8);
                 ret = obd_readEntry(0x1F9F, 2, &cmdId, &obdSize);
@@ -638,6 +670,31 @@ tOplkError ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
                     break;
                 }
 
+                if ((cmdId >= NMT_EXT_COMMAND_START) && (cmdId <= NMT_EXT_COMMAND_END))
+                {
+                    pCmdData = OPLK_MALLOC(C_MAX_NMT_CMD_DATA_SIZE);
+                    if (pCmdData == NULL)
+                    {
+                        ret = kErrorNoResource;
+                        pParam_p->abortCode = SDO_AC_GENERAL_ERROR;
+                        break;
+                    }
+
+                    cmdDataSize = C_MAX_NMT_CMD_DATA_SIZE;
+                    ret = obd_readEntry(0x1F9F, 4, pCmdData, &cmdDataSize);
+                    if (ret != kErrorOk)
+                    {
+                        OPLK_FREE(pCmdData);
+                        pParam_p->abortCode = SDO_AC_GENERAL_ERROR;
+                        break;
+                    }
+                }
+                else
+                {
+                    cmdDataSize = 0;
+                    pCmdData = NULL;
+                }
+
                 nmtState = nmtu_getNmtState();
 
                 if (nmtState < kNmtMsNotActive)
@@ -649,7 +706,8 @@ tOplkError ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
                 else
                 {   // local node is MN
                     // directly execute the requested NMT command
-                    ret = nmtmnu_requestNmtCommand(cmdTarget, (tNmtCommand) cmdId);
+                    ret = nmtmnu_requestNmtCommand(cmdTarget, (tNmtCommand) cmdId,
+                                                   pCmdData, cmdDataSize);
                 }
                 if (ret != kErrorOk)
                 {
@@ -658,6 +716,9 @@ tOplkError ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
 
                 // reset request flag
                 *((UINT8*)pParam_p->pArg) = 0;
+
+                if (pCmdData != NULL)
+                    OPLK_FREE(pCmdData);
             }
             break;
 #endif
@@ -1637,4 +1698,38 @@ static tOplkError cbEventPdoChange(tPdoEventPdoChange* pEventPdoChange_p)
 }
 #endif
 
+#if defined(CONFIG_INCLUDE_NMT_MN)
+//------------------------------------------------------------------------------
+/**
+\brief  Link domain objects to variables
+
+The function links domain objects to variables. The objects to be mapped are
+specified by a list of tLinkObjectRequest entries.
+
+\param  pLinkRequest_p      Pointer to link request entry table.
+\param  requestCnt_p        Number of link requests.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+tOplkError linkDomainObjects(tLinkObjectRequest* pLinkRequest_p, size_t requestCnt_p)
+{
+    tOplkError              ret = kErrorOk;
+    tObdSize                entrySize;
+    UINT                    varEntries;
+    size_t                  cnt;
+
+    for (cnt = 0; cnt < requestCnt_p; cnt++, pLinkRequest_p++)
+    {
+        entrySize = pLinkRequest_p->entrySize;
+        varEntries = pLinkRequest_p->varEntries;
+
+        ret = oplk_linkObject(pLinkRequest_p->index, pLinkRequest_p->pVar,
+                              &varEntries, &entrySize, pLinkRequest_p->firstSubindex);
+        if (ret != kErrorOk)
+            break;
+    }
+    return ret;
+}
+#endif
 /// \}

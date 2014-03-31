@@ -135,6 +135,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 #endif
 
+#ifndef PLK_DEF_FEATURE_NMT_EXT
+#define PLK_DEF_FEATURE_NMT_EXT             (PLK_FEATURE_NMT_EXT)
+#endif
+
 #define PLK_DEF_FEATURE_FLAGS (PLK_DEF_FEATURE_ISOCHR | \
                                PLK_DEF_FEATURE_SDO_ASND | \
                                PLK_DEF_FEATURE_SDO_UDP | \
@@ -143,6 +147,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                                PLK_DEF_FEATURE_CFM | \
                                PLK_DEF_FEATURE_DLL_MULTIPLEX | \
                                PLK_DEF_FEATURE_MASND | \
+                               PLK_DEF_FEATURE_NMT_EXT | \
                                PLK_DEF_FEATURE_PRES_CHAINING)
 
 #endif /* _INC_oplk_featureflags_H_ */

@@ -207,11 +207,12 @@ area from 0x1B00 - 0x1FFF.
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
         // Object 1F9Fh: NMT_RequestCmd_REC
-        OBD_BEGIN_INDEX_RAM(0x1F9F, 0x04, ctrlu_cbObdAccess)
-            OBD_SUBINDEX_RAM_VAR(0x1F9F, 0x00, kObdTypeUInt8, kObdAccConst, tObdUnsigned8, NumberOfEntries, 0x03)
+        OBD_BEGIN_INDEX_RAM(0x1F9F, 0x05, ctrlu_cbObdAccess)
+            OBD_SUBINDEX_RAM_VAR(0x1F9F, 0x00, kObdTypeUInt8, kObdAccConst, tObdUnsigned8, NumberOfEntries, 0x04)
             OBD_SUBINDEX_RAM_VAR(0x1F9F, 0x01, kObdTypeBool, kObdAccRW, tObdBoolean, Release_BOOL, FALSE)
             OBD_SUBINDEX_RAM_VAR(0x1F9F, 0x02, kObdTypeUInt8, kObdAccRW, tObdUnsigned8, CmdID_U8, 0xFF)
             OBD_SUBINDEX_RAM_VAR(0x1F9F, 0x03, kObdTypeUInt8, kObdAccRW, tObdUnsigned8, CmdTarget_U8, 0x00)
+            OBD_SUBINDEX_RAM_DOMAIN(0x1F9F, 0x04, kObdAccVRW, CmdData_DOM)
         OBD_END_INDEX(0x1F9F)
 #endif
 

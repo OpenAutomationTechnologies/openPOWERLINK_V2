@@ -81,7 +81,10 @@ tOplkError nmtmnu_addInstance(tNmtMnuCbNodeEvent pfnCbNodeEvent_p, tNmtMnuCbBoot
 tOplkError nmtmnu_delInstance(void);
 tOplkError nmtmnu_processEvent(tEvent* pEvent_p);
 tOplkError nmtmnu_sendNmtCommand(UINT nodeId_p, tNmtCommand  nmtCommand_p);
-tOplkError nmtmnu_requestNmtCommand(UINT nodeId_p, tNmtCommand nmtCommand_p);
+tOplkError nmtmnu_sendNmtCommandEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
+                                   void* pNmtCommandData_p, UINT dataSize_p);
+tOplkError nmtmnu_requestNmtCommand(UINT nodeId_p, tNmtCommand nmtCommand_p,
+                                    void* pNmtCommandData_p, UINT dataSize_p);
 tOplkError nmtmnu_triggerStateChange(UINT nodeId_p, tNmtNodeCommand nodeCommand_p);
 tOplkError nmtmnu_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p);
 tOplkError nmtmnu_cbCheckEvent(tNmtEvent NmtEvent_p);
