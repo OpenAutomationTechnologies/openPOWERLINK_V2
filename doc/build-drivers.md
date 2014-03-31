@@ -43,7 +43,7 @@ To build the kernel driver on Zynq, additionally the cmake toolchain file and Li
 directory has to be specified:
 
       > cd <openPOWERLINK_dir>/drivers/linux/drv_kernelmod_edrv/build
-      > cmake -DCMAKE_TOOLCHAIN_FILE=../../../../cmake/toolchain-xilinx-arm-linux-eabi-gnu.cmake .. -DCFG_OPLK_MN=TRUE -DCFG_POWERLINK_EDRV=EmacPs -DCFG_KERNEL_DIR=<Path Linux kernel source> 
+      > cmake -DCMAKE_TOOLCHAIN_FILE=../../../../cmake/toolchain-xilinx-arm-linux-eabi-gnu.cmake .. -DCFG_OPLK_MN=TRUE -DCFG_POWERLINK_EDRV=EmacPs -DCFG_KERNEL_DIR=
       > make
       > make install
 
@@ -99,4 +99,4 @@ directory has to be specified:
   - **8139**:  Realtek 8139-based network interface cards (100 MBit/s)
   - **8255x**: Intel 8255x-based network interface cards (100 MBit/s)
   - **82573**: Intel 82573-based network interface cards (1 GBit/s)
-  - **EmacPs**: Gigabit Ethernet controller on Xilinx ZC702 development kit
+  - **EmacPs**: Gigabit Ethernet controller on Xilinx Zynq 7000 series SoCs (10/100/1000 MBit/s)

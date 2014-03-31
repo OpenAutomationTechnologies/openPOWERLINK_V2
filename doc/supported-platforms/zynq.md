@@ -6,25 +6,26 @@ openPOWERLINK on Xilinx Zynq SoC {#page_platform_zynq}
 # Introduction {#sect_zynq_intro}
 
 This file contains documentation for the openPOWERLINK stack on Xilinx
-Zynq SoC. Currently stack only provides components for using Linux based demo
+Zynq SoC. Currently, the stack only provides components for using a Linux-based demo 
 on Zynq.
 
 ## Contents {#sect_zynq_intro_contents}
 
-- Edrv module for Gigabit Ethernet controller on Xilinx ZC702 development kit. 
-- HighRes module for Triple timer counter Zynq 7000 series SoCs.
+- Edrv module for Gigabit Ethernet controller on Zynq 7000 series SoCs. 
+- HighRes module for Triple timer counter on Zynq 7000 series SoCs.
 
 # Requirements {#sect_zynq_requirements}
 
 ## Development Boards {#sect_zynq_requirements_boards}
 
 - Xilinx ZC702 Development Kit
+- Any other board with Zynq 7000 series SoC.
 
 ## POWERLINK network {#sect_zynq_requirements_network}
 
-- POWERLINK network with a control node (CN)
-  * openPOWERLINK control node, e.g. Linux
-  * B&R POWERLINK control node
+- POWERLINK network with a controlled nodes (CN)
+  * openPOWERLINK controlled nodes, e.g. Linux
+  * B&R POWERLINK controlled nodes
 
 - POWERLINK network with a managing node (MN)
   * openPOWERLINK managing node, e.g. Linux
@@ -55,29 +56,28 @@ For a detailed description of CMake look at the
 In order to use the user-space POWERLINK stack the libpcap library is needed
 to access the Ethernet interface.
 
-The libpcap library has to cross-compiled to use it with Zynq SoC demo.
+The libpcap library has to be cross-compiled in order to use it with the Zynq SoC demo.
 
-### Serial Communication software
+### Terminal software
 
-A serial communication software is a program for printing out text which is 
-transmitted over a serial interface and push input through serial interface.
+A terminal software is required to interact with the device via a serial interface. 
+It will provide console access (keyboard input, text output) to the system.
 
-e.g. : Minicom: It is available for Debian and Ubuntu users through apt-get 
-interface through following command:
+Minicom is an Open Source terminal software. It is available for Debian and Ubuntu users via apt-get:
 
     > sudo apt-get install minicom
 
 ### Linux Kernel
 
-Linux kernel port for Zynq platform is needed to run the Linux based demo of openPOWERLINK.
-The Linux ports for Zynq platform are available on github and can be downloaded or 
-cloned from: https://github.com/Xilinx/linux-xlnx.
+A Linux kernel version for the Zynq platform is required in order to run the Linux-based demo
+of openPOWERLINK. The Linux ports for Zynq platform are available on github and can be 
+downloaded or cloned from: https://github.com/Xilinx/linux-xlnx.
 
 Linux kernel version 3.10 tagged as xilinx-v14.7 on github was used for testing at 
 the time of writing this document.
 
 The steps to cross-compile Linux for Zynq and information about availability of other 
-libraries for Zynq is available here : http://www.wiki.xilinx.com/Zynq+Linux.
+libraries for Zynq can be found here: http://www.wiki.xilinx.com/Zynq+Linux.
 
 # openPOWERLINK Stack Components {#sect_zynq_components}
 
@@ -86,7 +86,7 @@ The following section contains a description of the
 
 ## Stack Libraries {#sect_zynq_components_libs}
 
-The openPOWERLINK stack is divided into a user and a kernel part.The following
+The openPOWERLINK stack is divided into a user and a kernel part. The following
 libraries are available for Zynq SoC:
 
 * [Linux Stack Libraries](\ref sect_linux_components_libs)
@@ -116,10 +116,14 @@ steps can be carried out:
 
 # Running openPOWERLINK {#sect_zynq_running}
 
-In order to run the openPOWERLINK demo applications on Zynq follow the following steps:
+In order to run the openPOWERLINK demo applications on Zynq follow the steps listed below::
 
-* Prepare the SDCARD for boot up with Linux kernel image and other components copy the 
-  stack binaries to SDCARD.
-* Connect host PC to Zynq board using the serial interface on board.
+* Prepare the SD CARD for boot up with following:
+  - uImage : Linux kernel image
+  - uramdisk.image.gz : Initramfs file
+  - devicetree.dtb : Device tree blob
+  - boot.bin : Zynq boot image (generated using first stage bootloader(fsbl.elf), u-boot binary (u-boot-elf) and system.bit)
+* Copy the stack binaries to the SD card.
+* Connect the host PC to the Zynq board using the serial interface on board.
 * Use a terminal program to connect to the Linux console on Zynq.
-* Refer [running openPOWERLINK on Linux] (\ref sect_linux_running) to run application.
+* For starting the application, refer to [running openPOWERLINK on Linux] (\ref sect_linux_running).
