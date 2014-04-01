@@ -97,6 +97,12 @@ typedef struct
     char*               sName;
 } tEmergErrCodeInfo;
 
+typedef struct
+{
+    UINT32              abortCode;
+    char*               sAbortCode;
+} tAbortCodeInfo;
+
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
@@ -553,6 +559,40 @@ static char* OplkSdoComConStateStr_g[] =
     "LowerLayerAbort",          // 0x05
 };
 
+// text strings for abort codes
+static tAbortCodeInfo abortCodeInfo_g[] =
+{
+    { SDO_AC_TIME_OUT,                          "SDO_AC_TIME_OUT" },
+    { SDO_AC_UNKNOWN_COMMAND_SPECIFIER,         "SDO_AC_UNKNOWN_COMMAND_SPECIFIER" },
+    { SDO_AC_INVALID_BLOCK_SIZE,                "SDO_AC_INVALID_BLOCK_SIZE" },
+    { SDO_AC_INVALID_SEQUENCE_NUMBER,           "SDO_AC_INVALID_SEQUENCE_NUMBER" },
+    { SDO_AC_OUT_OF_MEMORY,                     "SDO_AC_OUT_OF_MEMORY" },
+    { SDO_AC_UNSUPPORTED_ACCESS,                "SDO_AC_UNSUPPORTED_ACCESS" },
+    { SDO_AC_READ_TO_WRITE_ONLY_OBJ,            "SDO_AC_READ_TO_WRITE_ONLY_OBJ" },
+    { SDO_AC_WRITE_TO_READ_ONLY_OBJ,            "SDO_AC_WRITE_TO_READ_ONLY_OBJ" },
+    { SDO_AC_OBJECT_NOT_EXIST,                  "SDO_AC_OBJECT_NOT_EXIST" },
+    { SDO_AC_OBJECT_NOT_MAPPABLE,               "SDO_AC_OBJECT_NOT_MAPPABLE" },
+    { SDO_AC_PDO_LENGTH_EXCEEDED,               "SDO_AC_PDO_LENGTH_EXCEEDED" },
+    { SDO_AC_GEN_PARAM_INCOMPATIBILITY,         "SDO_AC_GEN_PARAM_INCOMPATIBILITY" },
+    { SDO_AC_INVALID_HEARTBEAT_DEC,             "SDO_AC_INVALID_HEARTBEAT_DEC" },
+    { SDO_AC_GEN_INTERNAL_INCOMPATIBILITY,      "SDO_AC_GEN_INTERNAL_INCOMPATIBILITY" },
+    { SDO_AC_ACCESS_FAILED_DUE_HW_ERROR,        "SDO_AC_ACCESS_FAILED_DUE_HW_ERROR" },
+    { SDO_AC_DATA_TYPE_LENGTH_NOT_MATCH,        "SDO_AC_DATA_TYPE_LENGTH_NOT_MATCH" },
+    { SDO_AC_DATA_TYPE_LENGTH_TOO_HIGH,         "SDO_AC_DATA_TYPE_LENGTH_TOO_HIGH" },
+    { SDO_AC_DATA_TYPE_LENGTH_TOO_LOW,          "SDO_AC_DATA_TYPE_LENGTH_TOO_LOW" },
+    { SDO_AC_SUB_INDEX_NOT_EXIST,               "SDO_AC_SUB_INDEX_NOT_EXIST" },
+    { SDO_AC_VALUE_RANGE_EXCEEDED,              "SDO_AC_VALUE_RANGE_EXCEEDED" },
+    { SDO_AC_VALUE_RANGE_TOO_HIGH,              "SDO_AC_VALUE_RANGE_TOO_HIGH" },
+    { SDO_AC_VALUE_RANGE_TOO_LOW,               "SDO_AC_VALUE_RANGE_TOO_LOW" },
+    { SDO_AC_MAX_VALUE_LESS_MIN_VALUE,          "SDO_AC_MAX_VALUE_LESS_MIN_VALUE" },
+    { SDO_AC_GENERAL_ERROR,                     "SDO_AC_GENERAL_ERROR" },
+    { SDO_AC_DATA_NOT_TRANSF_OR_STORED,         "SDO_AC_DATA_NOT_TRANSF_OR_STORED" },
+    { SDO_AC_DATA_NOT_TRANSF_DUE_LOCAL_CONTROL, "SDO_AC_DATA_NOT_TRANSF_DUE_LOCAL_CONTROL" },
+    { SDO_AC_DATA_NOT_TRANSF_DUE_DEVICE_STATE,  "SDO_AC_DATA_NOT_TRANSF_DUE_DEVICE_STATE" },
+    { SDO_AC_OBJECT_DICTIONARY_NOT_EXIST,       "SDO_AC_OBJECT_DICTIONARY_NOT_EXIST" },
+    { SDO_AC_CONFIG_DATA_EMPTY,                 "SDO_AC_CONFIG_DATA_EMPTY" },
+    { 0,                                        "SDO_AC_OK" }
+};
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -837,3 +877,32 @@ char* debugstr_getEmergErrCodeStr(UINT16 emergErrCode_p)
     return invalidStr_l;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Return the string describing the specified abort code
+
+The function returns the string describing the specified abort code.
+
+\param  abortCode_p       Abort code value to print
+
+\return The function returns a string describing the specified abort code.
+
+\ingroup module_debugstr
+*/
+//------------------------------------------------------------------------------
+char* debugstr_getAbortCodeStr(UINT32 abortCode_p)
+{
+    tAbortCodeInfo*         pEntry;
+    UINT                    i;
+
+    pEntry = abortCodeInfo_g;
+    for (i = 0; i < tabentries(abortCodeInfo_g); i++)
+    {
+        if (pEntry->abortCode == abortCode_p)
+        {
+            return pEntry->sAbortCode;
+        }
+        pEntry++;
+    }
+    return invalidStr_l;
+}
