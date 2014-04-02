@@ -128,6 +128,7 @@ static tOplkError updateObd(tOplkApiInitParam* pInitParam_p);
 static tOplkError processUserEvent(tEvent* pEvent_p);
 static tOplkError cbCnCheckEvent(tNmtEvent NmtEvent_p);
 static tOplkError cbNmtStateChange(tEventNmtStateChange nmtStateChange_p);
+static tOplkError cbEventPdoChange(tPdoEventPdoChange* pEventPdoChange_p);
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
 static tOplkError cbNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p,
@@ -286,6 +287,12 @@ tOplkError ctrlu_initStack(tOplkApiInitParam* pInitParam_p)
 #if defined(CONFIG_INCLUDE_PDO)
     TRACE("Initialize Pdou module...\n");
     ret = pdou_init(ctrlInstance_l.initParam.pfnCbSync);
+    if (ret != kErrorOk)
+    {
+        goto Exit;
+    }
+
+    ret = pdou_registerEventPdoChangeCb(cbEventPdoChange);
     if (ret != kErrorOk)
     {
         goto Exit;
@@ -1601,5 +1608,33 @@ static tOplkError cbCnCheckEvent(tNmtEvent nmtEvent_p)
     return ret;
 }
 
-/// \}
+#if defined(CONFIG_INCLUDE_PDO)
+//------------------------------------------------------------------------------
+/**
+\brief  Callback function for PDO change events
 
+The function posts PDO change events directly to API layer.
+
+\param  pEventPdoChange_p       Pointer to PDO change event.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError cbEventPdoChange(tPdoEventPdoChange* pEventPdoChange_p)
+{
+    tOplkError          ret = kErrorOk;
+    tOplkApiEventArg    eventArg;
+
+    eventArg.pdoChange.fActivated = pEventPdoChange_p->fActivated;
+    eventArg.pdoChange.fTx = pEventPdoChange_p->fTx;
+    eventArg.pdoChange.nodeId = pEventPdoChange_p->nodeId;
+    eventArg.pdoChange.mappParamIndex = pEventPdoChange_p->mappParamIndex;
+    eventArg.pdoChange.mappObjectCount = pEventPdoChange_p->mappObjectCount;
+
+    ret = ctrlu_callUserEventCallback(kOplkApiEventPdoChange, &eventArg);
+
+    return ret;
+}
+#endif
+
+/// \}
