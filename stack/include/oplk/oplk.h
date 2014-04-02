@@ -135,6 +135,21 @@ typedef struct
 tOplkApiEventRcvAsnd;
 
 /**
+\brief PDO changed event
+
+This structure specifies the event for PDO changes. It will be sent to the
+application if the PDO mapping has changed
+*/
+typedef struct
+{
+    BOOL                        fActivated;     ///< Determines if mapping is activated.
+    BOOL                        fTx;            ///< Determines if it is a TXPDO or RXPDO.
+    UINT                        nodeId;         ///< The node ID the mapping is related to.
+    UINT                        mappParamIndex; ///< The object index of the mapping parameter object.
+    UINT                        mappObjectCount;///< The number of mapped objects (channels).
+} tOplkApiEventPdoChange;
+
+/**
 \brief Application event types
 
 This enumeration specifies the valid application events which can be
@@ -209,6 +224,10 @@ typedef enum
     the forwarding of ASnd frames by oplk_setAsndForward(). The event argument
     contains information on the received ASnd frame (\ref tOplkApiEventRcvAsnd). */
     kOplkApiEventReceivedAsnd       = 0x73,
+
+    /** PDO changed event. This event informs the application about a changed
+    PDO mapping. */
+    kOplkApiEventPdoChange          = 0x74,
 } tOplkApiEventType;
 
 
@@ -233,6 +252,7 @@ typedef union
     tOplkApiEventCfmResult      cfmResult;          ///< CFM result information (\ref kOplkApiEventCfmResult)
     tErrHistoryEntry            errorHistoryEntry;  ///< Error history entry (\ref kOplkApiEventHistoryEntry)
     tOplkApiEventRcvAsnd        receivedAsnd;       ///< Received ASnd frame information (\ref kOplkApiEventReceivedAsnd)
+    tOplkApiEventPdoChange      pdoChange;          ///< PDO change event (\ref kOplkApiEventPdoChange)
 } tOplkApiEventArg;
 
 /**
