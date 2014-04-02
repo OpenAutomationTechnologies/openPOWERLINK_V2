@@ -12,7 +12,7 @@ the running light is controlled by the read digital inputs.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronik GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.
 All rights reserved.
@@ -143,14 +143,14 @@ tOplkError initApp(void)
 /**
 \brief  Shutdown the synchronous data application
 
-The function shut's down the synchronous data application
+The function shuts down the synchronous data application
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_demo_mn_console
 */
 //------------------------------------------------------------------------------
-void shutdownApp (void)
+void shutdownApp(void)
 {
     oplk_freeProcessImage();
 }
@@ -258,7 +258,7 @@ static tOplkError initProcessImage(void)
 
     printf("Initializing process image...\n");
     printf("Size of input process image: %d\n", (UINT32)sizeof(PI_IN));
-    printf("Size of output process image: %d\n", (UINT32)sizeof (PI_OUT));
+    printf("Size of output process image: %d\n", (UINT32)sizeof(PI_OUT));
     ret = oplk_allocProcessImage(sizeof(PI_IN), sizeof(PI_OUT));
     if (ret != kErrorOk)
     {

@@ -2,7 +2,7 @@
 ********************************************************************************
 \file   app.c
 
-\brief  Demo CN application which implements an digital input/output node
+\brief  Demo CN application which implements a digital input/output node
 
 This file contains a demo application for digital input/output data.
 
@@ -10,7 +10,7 @@ This file contains a demo application for digital input/output data.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.
 All rights reserved.
@@ -130,14 +130,14 @@ tOplkError initApp(void)
 /**
 \brief  Shutdown the synchronous data application
 
-The function shut's down the synchronous data application
+The function shuts down the synchronous data application
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_demo_cn_console
 */
 //------------------------------------------------------------------------------
-void shutdownApp (void)
+void shutdownApp(void)
 {
     oplk_freeProcessImage();
 }
@@ -205,7 +205,7 @@ void increaseInputs(void)
         digitalIn_g = 1;
     else
         digitalIn_g = digitalIn_g << 1;
-    printf ("\b \b");
+    printf("\b \b");
     printInputs();
 }
 
@@ -225,7 +225,7 @@ void decreaseInputs(void)
         digitalIn_g = 128;
     else
         digitalIn_g = digitalIn_g >> 1;
-    printf ("\b \b");
+    printf("\b \b");
     printInputs();
 }
 
@@ -243,16 +243,16 @@ void printOutputs(void)
 {
     int i;
 
-    printf ("\b \b");
-    printf ("Digital Outputs: ");
+    printf("\b \b");
+    printf("Digital Outputs: ");
     for (i = 0; i < 8; i++)
     {
         if (((digitalOut_g >> i) & 1) == 1)
-            printf ("*");
+            printf("*");
         else
-            printf ("-");
+            printf("-");
     }
-    printf ("\n");
+    printf("\n");
 }
 
 //------------------------------------------------------------------------------
@@ -264,19 +264,19 @@ The function prints the value of the digital input port on the console.
 \ingroup module_demo_cn_console
 */
 //------------------------------------------------------------------------------
-void  printInputs(void)
+void printInputs(void)
 {
     int i;
 
-    printf ("Digital Inputs: ");
+    printf("Digital Inputs: ");
     for (i = 0; i < 8; i++)
     {
         if (((digitalIn_g >> i) & 1) == 1)
-            printf ("*");
+            printf("*");
         else
-            printf ("-");
+            printf("-");
     }
-    printf ("\n");
+    printf("\n");
 }
 
 //============================================================================//
@@ -303,7 +303,7 @@ static tOplkError initProcessImage(void)
     /* Allocate process image */
     printf("Initializing process image...\n");
     printf("Size of input process image: %ld\n", sizeof(PI_IN));
-    printf("Size of output process image: %ld\n", sizeof (PI_OUT));
+    printf("Size of output process image: %ld\n", sizeof(PI_OUT));
     ret = oplk_allocProcessImage(sizeof(PI_IN), sizeof(PI_OUT));
     if (ret != kErrorOk)
     {
@@ -319,7 +319,7 @@ static tOplkError initProcessImage(void)
     obdSize = sizeof(pProcessImageIn_l->digitalIn);
     varEntries = 1;
     ret = oplk_linkProcessImageObject(0x6000, 0x01, offsetof(PI_IN, digitalIn),
-                                     FALSE, obdSize, &varEntries);
+                                      FALSE, obdSize, &varEntries);
     if (ret != kErrorOk)
     {
         printf("linking process vars ... error %04x\n\n", ret);
@@ -329,7 +329,7 @@ static tOplkError initProcessImage(void)
     obdSize = sizeof(pProcessImageOut_l->digitalOut);
     varEntries = 1;
     ret = oplk_linkProcessImageObject(0x6200, 0x01, offsetof(PI_OUT, digitalOut),
-                                     TRUE, obdSize, &varEntries);
+                                      TRUE, obdSize, &varEntries);
     if (ret != kErrorOk)
     {
         printf("linking process vars ... error %04x\n\n", ret);
@@ -342,3 +342,4 @@ static tOplkError initProcessImage(void)
 }
 
 ///\}
+

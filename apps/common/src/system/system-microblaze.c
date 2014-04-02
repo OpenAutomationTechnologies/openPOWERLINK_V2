@@ -4,14 +4,14 @@
 
 \brief  System specific functions for Microblaze
 
-The file implements the system specific functions for microblaze used by the
+The file implements the system specific functions for Microblaze used by the
 openPOWERLINK demo applications.
 
 \ingroup module_app_common
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -50,7 +50,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define TGTCONIO_MS_IN_US(x)    (x*1000U)
+#define TGTCONIO_MS_IN_US(x)    (x * 1000U)
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -96,7 +96,7 @@ milliseconds have elapsed.
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-void msleep (unsigned int milliSecond_p)
+void msleep(unsigned int milliSecond_p)
 {
     usleep(TGTCONIO_MS_IN_US(milliSecond_p));
 }
@@ -106,6 +106,5 @@ void msleep (unsigned int milliSecond_p)
 //============================================================================//
 /// \name Private Functions
 /// \{
-
 
 ///\}

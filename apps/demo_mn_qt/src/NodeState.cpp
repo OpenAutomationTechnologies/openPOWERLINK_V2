@@ -7,7 +7,7 @@
 This file contains the implementation of the NodeState class.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -61,7 +61,7 @@ POWERLINK state of a node.
 \param  parent_p    Pointer to the parent widget.
 */
 //------------------------------------------------------------------------------
-NodeState::NodeState(const QString &label_p, QWidget *parent_p)
+NodeState::NodeState(const QString& label_p, QWidget* parent_p)
     : QWidget(parent_p)
 {
     pRedLed  = new QPixmap(":/img/ledred.png");
@@ -71,12 +71,12 @@ NodeState::NodeState(const QString &label_p, QWidget *parent_p)
     // ---------------------------------------------------------------------
     // Layout
     // ---------------------------------------------------------------------
-    QHBoxLayout *pStateLayout = new QHBoxLayout;
+    QHBoxLayout* pStateLayout = new QHBoxLayout;
     setLayout(pStateLayout);
 
     setContentsMargins(0, 0, 0, 0);
 
-    QLabel *pStateLabel = new QLabel(label_p);
+    QLabel* pStateLabel = new QLabel(label_p);
     QFont tmpFont1("Arial", 18, QFont::Bold);
     pStateLabel->setFont(tmpFont1);
     pStateLayout->addWidget(pStateLabel);
@@ -107,13 +107,14 @@ void NodeState::setState(int state_p)
         case 1:
             pLedLabel->setPixmap(*pYellowLed);
             break;
+
         case 2:
             pLedLabel->setPixmap(*pGreenLed);
             break;
+
         default:
             pLedLabel->setPixmap(*pRedLed);
             break;
     }
 }
-
 

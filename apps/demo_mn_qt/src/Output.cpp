@@ -7,7 +7,7 @@
 This file contains the implementation of the Output class.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -56,7 +56,7 @@ Constructs an Output widget.
 \param          parent                  pointer parent window
 */
 //------------------------------------------------------------------------------
-Output::Output(QWidget *parent)
+Output::Output(QWidget* parent)
     : QWidget(parent)
 {
     pOutputLayout = new QVBoxLayout;
@@ -145,8 +145,9 @@ void Output::removeAllNodes()
     int nIdx;
 
     // count() gives all widgets (hidden ones too)
-    for(nIdx=0; nIdx < NODE_ID_MAX; nIdx++)
+    for (nIdx = 0; nIdx < NODE_ID_MAX; nIdx++)
     {
         ppLeds[nIdx]->hide();
     }
 }
+

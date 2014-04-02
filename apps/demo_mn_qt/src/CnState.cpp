@@ -7,7 +7,7 @@
 This file implements the CnState class.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -53,10 +53,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 Constructs an CnState widget.
 
-\param          parent                  pointer parent window
+\param          parent                  Pointer to the parent window
 */
 //------------------------------------------------------------------------------
-CnState::CnState(QWidget *parent)
+CnState::CnState(QWidget* parent)
     : QWidget(parent)
 {
     QFont           LabelFont;
@@ -149,8 +149,9 @@ void CnState::removeAllNodes(void)
     int nIdx;
 
     // count() gives all widgets (hidden ones too)
-    for(nIdx=0; nIdx < NODE_ID_MAX; nIdx++)
+    for (nIdx = 0; nIdx < NODE_ID_MAX; nIdx++)
     {
         ppNodeState[nIdx]->hide();
     }
 }
+

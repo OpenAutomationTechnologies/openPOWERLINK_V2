@@ -7,7 +7,7 @@
 This file contains the implementation of the ProcessThread class.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -53,12 +53,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // global variables
 //------------------------------------------------------------------------------
-ProcessThread    *pProcessThread_g;
+ProcessThread* pProcessThread_g;
 
 #if !defined(CONFIG_INCLUDE_CFM)
 // Configuration Manager is not available,
 // so store local CycleLen for configuration of remote CNs
-static DWORD        cycleLen_g;
+static DWORD   cycleLen_g;
 #endif
 
 //============================================================================//
@@ -80,7 +80,7 @@ The function processes state change events.
 //------------------------------------------------------------------------------
 
 tOplkError ProcessThread::appCbEvent(tOplkApiEventType EventType_p,
-                                        tOplkApiEventArg* pEventArg_p, void* pUserArg_p)
+                                     tOplkApiEventArg* pEventArg_p, void* pUserArg_p)
 {
     return pProcessThread_g->processEvent(EventType_p, pEventArg_p, pUserArg_p);
 }
@@ -98,7 +98,7 @@ Constructs a ProcessThread object
 \param  pMainWindow_p       Pointer to main window object
 */
 //------------------------------------------------------------------------------
-ProcessThread::ProcessThread(MainWindow *pMainWindow_p)
+ProcessThread::ProcessThread(MainWindow* pMainWindow_p)
 {
     pProcessThread_g = this;
     pMainWindow = pMainWindow_p;
@@ -132,7 +132,7 @@ The function signals the POWERLINK status
 //------------------------------------------------------------------------------
 void ProcessThread::sigOplkStatus(int status_p)
 {
-    if(status_p != status)
+    if (status_p != status)
     {
         emit oplkStatusChanged(status_p);
         status = status_p;
@@ -172,42 +172,76 @@ void ProcessThread::sigNmtState(tNmtState State_p)
 {
     QString strState;
 
-    switch(State_p)
+    switch (State_p)
     {
         case kNmtGsOff:
-            strState = "Off"; break;
+            strState = "Off";
+            break;
+
         case kNmtGsInitialising:
-            strState = "Initializing"; break;
+            strState = "Initializing";
+            break;
+
         case kNmtGsResetApplication:
-            strState = "Reset Application"; break;
+            strState = "Reset Application";
+            break;
+
         case kNmtGsResetCommunication:
-            strState = "Reset Communication"; break;
+            strState = "Reset Communication";
+            break;
+
         case kNmtGsResetConfiguration:
-            strState = "Reset Configuration"; break;
+            strState = "Reset Configuration";
+            break;
+
         case kNmtCsNotActive:
-            strState = "CN Not Active"; break;
+            strState = "CN Not Active";
+            break;
+
         case kNmtCsPreOperational1:
-            strState = "CN Pre-Operational 1"; break;
+            strState = "CN Pre-Operational 1";
+            break;
+
         case kNmtCsPreOperational2:
-            strState = "CN Pre-Operational 2"; break;
+            strState = "CN Pre-Operational 2";
+            break;
+
         case kNmtCsReadyToOperate:
-            strState = "CN ReadyToOperate"; break;
+            strState = "CN ReadyToOperate";
+            break;
+
         case kNmtCsOperational:
-            strState = "CN Operational"; break;
+            strState = "CN Operational";
+            break;
+
         case kNmtCsBasicEthernet:
-            strState = "CN Basic Ethernet"; break;
+            strState = "CN Basic Ethernet";
+            break;
+
         case kNmtMsNotActive:
-            strState = "MN Not Active"; break;
+            strState = "MN Not Active";
+            break;
+
         case kNmtMsPreOperational1:
-            strState = "MN Pre-Operational 1"; break;
+            strState = "MN Pre-Operational 1";
+            break;
+
         case kNmtMsPreOperational2:
-            strState = "MN Pre-Operational 2"; break;
+            strState = "MN Pre-Operational 2";
+            break;
+
         case kNmtMsReadyToOperate:
-            strState = "MN ReadyToOperate"; break;
+            strState = "MN ReadyToOperate";
+            break;
+
         case kNmtMsOperational:
-            strState = "MN Operational"; break;
+            strState = "MN Operational";
+            break;
+
         case kNmtMsBasicEthernet:
-            strState = "MN Basic Ethernet"; break;
+            strState = "MN Basic Ethernet";
+            break;
+
         default:
             strState = "??? (0x";
             strState += QString::number(State_p, 16);
@@ -220,7 +254,7 @@ void ProcessThread::sigNmtState(tNmtState State_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief  wait for NMT state off
+\brief  Wait for NMT state off
 
 waitForNmtStateOff() waits until the NMT state NMT_STATE_OFF is reached
 */
@@ -237,7 +271,7 @@ void ProcessThread::waitForNmtStateOff()
 
 //------------------------------------------------------------------------------
 /**
-\brief  doing cleanup in NMT_STATE_OFF
+\brief  Do cleanup in NMT_STATE_OFF
 
 reachedNmtStateOff() cleanes up some staff after the NMT state NMT_STATE_OFF
 is reached.
@@ -253,7 +287,7 @@ void ProcessThread::reachedNmtStateOff()
 
 //------------------------------------------------------------------------------
 /**
-\brief  returns pointer to callback
+\brief  Returns pointer to callback
 
 The function returns the address of the event callback function.
 
@@ -277,7 +311,8 @@ AppCbEvent() implements the openPOWERLINKs event callback function.
 */
 //------------------------------------------------------------------------------
 tOplkError ProcessThread::processEvent(tOplkApiEventType EventType_p,
-                      tOplkApiEventArg* pEventArg_p, void* pUserArg_p)
+                                       tOplkApiEventArg* pEventArg_p,
+                                       void* pUserArg_p)
 {
     tOplkError  ret = kErrorOk;
 
@@ -344,15 +379,15 @@ The function processes state change events.
 */
 //------------------------------------------------------------------------------
 tOplkError ProcessThread::processStateChangeEvent(tOplkApiEventType EventType_p,
-                                          tOplkApiEventArg* pEventArg_p,
-                                          void* pUserArg_p)
+                                                  tOplkApiEventArg* pEventArg_p,
+                                                  void* pUserArg_p)
 {
     tOplkError                  ret = kErrorOk;
     tEventNmtStateChange*       pNmtStateChange = &pEventArg_p->nmtStateChange;
 #if !defined(CONFIG_INCLUDE_CFM)
     UINT                        varLen;
 #endif
-    const char                  *string;
+    const char*                 string;
     QString                     str;
 
     UNUSED_PARAMETER(EventType_p);
@@ -374,9 +409,9 @@ tOplkError ProcessThread::processStateChangeEvent(tOplkApiEventType EventType_p,
             oplk_freeProcessImage(); //jba do we need it here?
 
             sigPrintLog(QString("StateChangeEvent(0x%1) originating event = 0x%2 (%3)")
-                     .arg(pNmtStateChange->newNmtState, 0, 16, QLatin1Char('0'))
-                     .arg(pNmtStateChange->nmtEvent, 0, 16, QLatin1Char('0'))
-                     .arg(debugstr_getNmtEventStr(pNmtStateChange->nmtEvent)));
+                                .arg(pNmtStateChange->newNmtState, 0, 16, QLatin1Char('0'))
+                                .arg(pNmtStateChange->nmtEvent, 0, 16, QLatin1Char('0'))
+                                .arg(debugstr_getNmtEventStr(pNmtStateChange->nmtEvent)));
             reachedNmtStateOff();
             break;
 
@@ -386,9 +421,9 @@ tOplkError ProcessThread::processStateChangeEvent(tOplkApiEventType EventType_p,
 #endif
             pProcessThread_g->sigOplkStatus(1);
             sigPrintLog(QString("StateChangeEvent(0x%1) originating event = 0x%2 (%3)")
-                     .arg(pNmtStateChange->newNmtState, 4, 16, QLatin1Char('0'))
-                     .arg(pNmtStateChange->nmtEvent, 4, 16, QLatin1Char('0'))
-                     .arg(debugstr_getNmtEventStr(pNmtStateChange->nmtEvent)));
+                                .arg(pNmtStateChange->newNmtState, 4, 16, QLatin1Char('0'))
+                                .arg(pNmtStateChange->nmtEvent, 4, 16, QLatin1Char('0'))
+                                .arg(debugstr_getNmtEventStr(pNmtStateChange->nmtEvent)));
             break;
 
         case kNmtGsResetConfiguration:
@@ -407,9 +442,9 @@ tOplkError ProcessThread::processStateChangeEvent(tOplkApiEventType EventType_p,
 #endif
             sigOplkStatus(1);
             sigPrintLog(QString("StateChangeEvent(0x%1) originating event = 0x%2 (%3)")
-                     .arg(pNmtStateChange->newNmtState, 4, 16, QLatin1Char('0'))
-                     .arg(pNmtStateChange->nmtEvent, 4, 16, QLatin1Char('0'))
-                     .arg(debugstr_getNmtEventStr(pNmtStateChange->nmtEvent)));
+                                .arg(pNmtStateChange->newNmtState, 4, 16, QLatin1Char('0'))
+                                .arg(pNmtStateChange->nmtEvent, 4, 16, QLatin1Char('0'))
+                                .arg(debugstr_getNmtEventStr(pNmtStateChange->nmtEvent)));
             break;
 
         case kNmtCsNotActive:
@@ -425,18 +460,18 @@ tOplkError ProcessThread::processStateChangeEvent(tOplkApiEventType EventType_p,
         case kNmtCsBasicEthernet:
         case kNmtMsBasicEthernet:
             sigPrintLog(QString("StateChangeEvent(0x%1) originating event = 0x%2 (%3)")
-                     .arg(pNmtStateChange->newNmtState, 4, 16, QLatin1Char('0'))
-                     .arg(pNmtStateChange->nmtEvent, 4, 16, QLatin1Char('0'))
-                     .arg(debugstr_getNmtEventStr(pNmtStateChange->nmtEvent)));
+                                .arg(pNmtStateChange->newNmtState, 4, 16, QLatin1Char('0'))
+                                .arg(pNmtStateChange->nmtEvent, 4, 16, QLatin1Char('0'))
+                                .arg(debugstr_getNmtEventStr(pNmtStateChange->nmtEvent)));
             sigOplkStatus(1);
             break;
 
         case kNmtCsOperational:
         case kNmtMsOperational:
             sigPrintLog(QString("StateChangeEvent(0x%1) originating event = 0x%2 (%3)")
-                     .arg(pNmtStateChange->newNmtState, 4, 16, QLatin1Char('0'))
-                     .arg(pNmtStateChange->nmtEvent, 4, 16, QLatin1Char('0'))
-                     .arg(debugstr_getNmtEventStr(pNmtStateChange->nmtEvent)));
+                                .arg(pNmtStateChange->newNmtState, 4, 16, QLatin1Char('0'))
+                                .arg(pNmtStateChange->nmtEvent, 4, 16, QLatin1Char('0'))
+                                .arg(debugstr_getNmtEventStr(pNmtStateChange->nmtEvent)));
             sigOplkStatus(2);
             break;
 
@@ -463,8 +498,8 @@ The function processes error and warning events.
 */
 //------------------------------------------------------------------------------
 tOplkError ProcessThread::processErrorWarningEvent(tOplkApiEventType EventType_p,
-                                           tOplkApiEventArg* pEventArg_p,
-                                           void* pUserArg_p)
+                                                   tOplkApiEventArg* pEventArg_p,
+                                                   void* pUserArg_p)
 {
     tEventError*            pInternalError = &pEventArg_p->internalError;
 
@@ -472,10 +507,10 @@ tOplkError ProcessThread::processErrorWarningEvent(tOplkApiEventType EventType_p
     UNUSED_PARAMETER(pUserArg_p);
 
     sigPrintLog(QString("Err/Warn: Source = %1 (0x%2) OplkError = %3 (0x%4)")
-            .arg(debugstr_getEventSourceStr(pInternalError->eventSource))
-            .arg(pInternalError->eventSource, 2, 16, QLatin1Char('0'))
-            .arg(debugstr_getRetValStr(pInternalError->oplkError))
-            .arg(pInternalError->oplkError, 3, 16, QLatin1Char('0')));
+                        .arg(debugstr_getEventSourceStr(pInternalError->eventSource))
+                        .arg(pInternalError->eventSource, 2, 16, QLatin1Char('0'))
+                        .arg(debugstr_getRetValStr(pInternalError->oplkError))
+                        .arg(pInternalError->oplkError, 3, 16, QLatin1Char('0')));
 
     switch (pInternalError->eventSource)
     {
@@ -484,8 +519,8 @@ tOplkError ProcessThread::processErrorWarningEvent(tOplkApiEventType EventType_p
             // error occurred within event processing
             // either in kernel or in user part
             sigPrintLog(QString(" OrgSource = %1 %2")
-                 .arg(debugstr_getEventSourceStr(pInternalError->errorArg.eventSource))
-                 .arg(pInternalError->errorArg.eventSource, 2, 16, QLatin1Char('0')));
+                                .arg(debugstr_getEventSourceStr(pInternalError->errorArg.eventSource))
+                                .arg(pInternalError->errorArg.eventSource, 2, 16, QLatin1Char('0')));
             break;
 
         case kEventSourceDllk:
@@ -568,8 +603,8 @@ The function processes history events.
 */
 //------------------------------------------------------------------------------
 tOplkError ProcessThread::processHistoryEvent(tOplkApiEventType EventType_p,
-                                      tOplkApiEventArg* pEventArg_p,
-                                      void* pUserArg_p)
+                                              tOplkApiEventArg* pEventArg_p,
+                                              void* pUserArg_p)
 {
     tErrHistoryEntry*    pHistoryEntry = &pEventArg_p->errorHistoryEntry;
 
@@ -577,16 +612,16 @@ tOplkError ProcessThread::processHistoryEvent(tOplkApiEventType EventType_p,
     UNUSED_PARAMETER(pUserArg_p);
 
     sigPrintLog(QString("HistoryEntry: Type=0x%1 Code=0x%2 (0x%3 %4 %5 %6 %7 %8 %9 %10)")
-            .arg(pHistoryEntry->entryType, 4, 16, QLatin1Char('0'))
-            .arg(pHistoryEntry->errorCode, 4, 16, QLatin1Char('0'))
-            .arg((WORD)pHistoryEntry->aAddInfo[0], 2, 16, QLatin1Char('0'))
-            .arg((WORD)pHistoryEntry->aAddInfo[1], 2, 16, QLatin1Char('0'))
-            .arg((WORD)pHistoryEntry->aAddInfo[2], 2, 16, QLatin1Char('0'))
-            .arg((WORD)pHistoryEntry->aAddInfo[3], 2, 16, QLatin1Char('0'))
-            .arg((WORD)pHistoryEntry->aAddInfo[4], 2, 16, QLatin1Char('0'))
-            .arg((WORD)pHistoryEntry->aAddInfo[5], 2, 16, QLatin1Char('0'))
-            .arg((WORD)pHistoryEntry->aAddInfo[6], 2, 16, QLatin1Char('0'))
-            .arg((WORD)pHistoryEntry->aAddInfo[7], 2, 16, QLatin1Char('0')));
+                        .arg(pHistoryEntry->entryType, 4, 16, QLatin1Char('0'))
+                        .arg(pHistoryEntry->errorCode, 4, 16, QLatin1Char('0'))
+                        .arg((WORD)pHistoryEntry->aAddInfo[0], 2, 16, QLatin1Char('0'))
+                        .arg((WORD)pHistoryEntry->aAddInfo[1], 2, 16, QLatin1Char('0'))
+                        .arg((WORD)pHistoryEntry->aAddInfo[2], 2, 16, QLatin1Char('0'))
+                        .arg((WORD)pHistoryEntry->aAddInfo[3], 2, 16, QLatin1Char('0'))
+                        .arg((WORD)pHistoryEntry->aAddInfo[4], 2, 16, QLatin1Char('0'))
+                        .arg((WORD)pHistoryEntry->aAddInfo[5], 2, 16, QLatin1Char('0'))
+                        .arg((WORD)pHistoryEntry->aAddInfo[6], 2, 16, QLatin1Char('0'))
+                        .arg((WORD)pHistoryEntry->aAddInfo[7], 2, 16, QLatin1Char('0')));
 
     return kErrorOk;
 }
@@ -605,8 +640,8 @@ The function processes node events.
 */
 //------------------------------------------------------------------------------
 tOplkError ProcessThread::processNodeEvent(tOplkApiEventType EventType_p,
-                                   tOplkApiEventArg* pEventArg_p,
-                                   void* pUserArg_p)
+                                           tOplkApiEventArg* pEventArg_p,
+                                           void* pUserArg_p)
 {
     tOplkApiEventNode*   pNode = &pEventArg_p->nodeEvent;
     tOplkError           ret = kErrorOk;
@@ -614,7 +649,7 @@ tOplkError ProcessThread::processNodeEvent(tOplkApiEventType EventType_p,
     UNUSED_PARAMETER(EventType_p);
     UNUSED_PARAMETER(pUserArg_p);
     // printf("AppCbEvent(Node): NodeId=%u Event=0x%02X\n",
-    //       pEventArg_p->nodeEvent.nodeId, pEventArg_p->nodeEvent.nodeEvent);
+    //        pEventArg_p->nodeEvent.nodeId, pEventArg_p->nodeEvent.nodeEvent);
     // check additional argument
     switch (pEventArg_p->nodeEvent.nodeEvent)
     {
@@ -657,12 +692,12 @@ tOplkError ProcessThread::processNodeEvent(tOplkApiEventType EventType_p,
 #endif
 
             sigPrintLog(QString("Node Event: (Node=%2, CheckConf)")
-                        .arg(pEventArg_p->nodeEvent.nodeId, 0, 10));
+                                .arg(pEventArg_p->nodeEvent.nodeId, 0, 10));
             break;
 
         case kNmtNodeEventUpdateConf:
             sigPrintLog(QString("Node Event: (Node=%1, UpdateConf)")
-                        .arg(pEventArg_p->nodeEvent.nodeId, 0, 10));
+                                .arg(pEventArg_p->nodeEvent.nodeId, 0, 10));
             break;
 
         case kNmtNodeEventFound:
@@ -703,9 +738,9 @@ tOplkError ProcessThread::processNodeEvent(tOplkApiEventType EventType_p,
         case kNmtNodeEventError:
             pProcessThread_g->sigNodeStatus(pEventArg_p->nodeEvent.nodeId, -1);
             sigPrintLog(QString("AppCbEvent (Node=%1): Error = %2 (0x%3)")
-                    .arg(pEventArg_p->nodeEvent.nodeId, 0, 10)
-                    .arg(debugstr_getEmergErrCodeStr(pEventArg_p->nodeEvent.errorCode))
-                    .arg(pEventArg_p->nodeEvent.errorCode, 4, 16, QLatin1Char('0')));
+                                .arg(pEventArg_p->nodeEvent.nodeId, 0, 10)
+                                .arg(debugstr_getEmergErrCodeStr(pEventArg_p->nodeEvent.errorCode))
+                                .arg(pEventArg_p->nodeEvent.errorCode, 4, 16, QLatin1Char('0')));
             break;
 
         default:
@@ -728,8 +763,8 @@ The function processes CFM progress events.
 */
 //------------------------------------------------------------------------------
 tOplkError ProcessThread::processCfmProgressEvent(tOplkApiEventType EventType_p,
-                                          tOplkApiEventArg* pEventArg_p,
-                                          void* pUserArg_p)
+                                                  tOplkApiEventArg* pEventArg_p,
+                                                  void* pUserArg_p)
 {
     tCfmEventCnProgress*     pCfmProgress = &pEventArg_p->cfmProgress;
 
@@ -737,18 +772,18 @@ tOplkError ProcessThread::processCfmProgressEvent(tOplkApiEventType EventType_p,
     UNUSED_PARAMETER(pUserArg_p);
 
     sigPrintLog(QString("CFM Progress: (Node=%1, CFM-Progress: Object 0x%2/%3,  %4/%5 Bytes")
-             .arg(pCfmProgress->nodeId, 0, 10)
-             .arg(pCfmProgress->objectIndex, 4, 16, QLatin1Char('0'))
-             .arg(pCfmProgress->objectSubIndex, 0, 10)
-             .arg((ULONG)pCfmProgress->bytesDownloaded, 0, 10)
-             .arg((ULONG)pCfmProgress->totalNumberOfBytes, 0, 10));
+                        .arg(pCfmProgress->nodeId, 0, 10)
+                        .arg(pCfmProgress->objectIndex, 4, 16, QLatin1Char('0'))
+                        .arg(pCfmProgress->objectSubIndex, 0, 10)
+                        .arg((ULONG)pCfmProgress->bytesDownloaded, 0, 10)
+                        .arg((ULONG)pCfmProgress->totalNumberOfBytes, 0, 10));
 
-    if ((pCfmProgress->sdoAbortCode != 0)
-        || (pCfmProgress->error != kErrorOk))
+    if ((pCfmProgress->sdoAbortCode != 0) ||
+        (pCfmProgress->error != kErrorOk))
     {
         sigPrintLog(QString("             -> SDO Abort=0x%1, Error=0x%2)")
-                 .arg((ULONG) pCfmProgress->sdoAbortCode, 0, 16 , QLatin1Char('0'))
-                 .arg(pCfmProgress->error, 0, 16, QLatin1Char('0')));
+                            .arg((ULONG) pCfmProgress->sdoAbortCode, 0, 16 , QLatin1Char('0'))
+                            .arg(pCfmProgress->error, 0, 16, QLatin1Char('0')));
     }
     return kErrorOk;
 }
@@ -767,8 +802,8 @@ The function processes CFM result events.
 */
 //------------------------------------------------------------------------------
 tOplkError ProcessThread::processCfmResultEvent(tOplkApiEventType EventType_p,
-                                        tOplkApiEventArg* pEventArg_p,
-                                        void* pUserArg_p)
+                                                tOplkApiEventArg* pEventArg_p,
+                                                void* pUserArg_p)
 {
     tOplkApiEventCfmResult*       pCfmResult = &pEventArg_p->cfmResult;
 
@@ -795,8 +830,8 @@ tOplkError ProcessThread::processCfmResultEvent(tOplkApiEventType EventType_p,
 
         default:
             sigPrintLog(QString("CFM Result: (Node=%d, CfmResult=0x%X)")
-                    .arg(pCfmResult->nodeId, 0, 10)
-                    .arg(pCfmResult->nodeCommand, 4, 16, QLatin1Char('0')));
+                                .arg(pCfmResult->nodeId, 0, 10)
+                                .arg(pCfmResult->nodeCommand, 4, 16, QLatin1Char('0')));
             break;
     }
     return kErrorOk;
@@ -816,8 +851,8 @@ The function processes SDO events.
 */
 //------------------------------------------------------------------------------
 tOplkError ProcessThread::processSdoEvent(tOplkApiEventType EventType_p,
-                                  tOplkApiEventArg* pEventArg_p,
-                                  void* pUserArg_p)
+                                          tOplkApiEventArg* pEventArg_p,
+                                          void* pUserArg_p)
 {
     tSdoComFinished*          pSdo = &pEventArg_p->sdoInfo;
     tOplkError                ret = kErrorOk;
@@ -857,22 +892,21 @@ tOplkError ProcessThread::setDefaultNodeAssignment(void)
     DWORD       nodeAssignment;
 
     nodeAssignment = (NMT_NODEASSIGN_NODE_IS_CN | NMT_NODEASSIGN_NODE_EXISTS);    // 0x00000003L
-    ret = oplk_writeLocalObject(0x1F81, 0x01, &nodeAssignment, sizeof (nodeAssignment));
-    ret = oplk_writeLocalObject(0x1F81, 0x02, &nodeAssignment, sizeof (nodeAssignment));
-    ret = oplk_writeLocalObject(0x1F81, 0x03, &nodeAssignment, sizeof (nodeAssignment));
-    ret = oplk_writeLocalObject(0x1F81, 0x04, &nodeAssignment, sizeof (nodeAssignment));
-    ret = oplk_writeLocalObject(0x1F81, 0x05, &nodeAssignment, sizeof (nodeAssignment));
-    ret = oplk_writeLocalObject(0x1F81, 0x06, &nodeAssignment, sizeof (nodeAssignment));
-    ret = oplk_writeLocalObject(0x1F81, 0x07, &nodeAssignment, sizeof (nodeAssignment));
-    ret = oplk_writeLocalObject(0x1F81, 0x08, &nodeAssignment, sizeof (nodeAssignment));
-    ret = oplk_writeLocalObject(0x1F81, 0x20, &nodeAssignment, sizeof (nodeAssignment));
-    ret = oplk_writeLocalObject(0x1F81, 0xFE, &nodeAssignment, sizeof (nodeAssignment));
-    ret = oplk_writeLocalObject(0x1F81, 0x6E, &nodeAssignment, sizeof (nodeAssignment));
+    ret = oplk_writeLocalObject(0x1F81, 0x01, &nodeAssignment, sizeof(nodeAssignment));
+    ret = oplk_writeLocalObject(0x1F81, 0x02, &nodeAssignment, sizeof(nodeAssignment));
+    ret = oplk_writeLocalObject(0x1F81, 0x03, &nodeAssignment, sizeof(nodeAssignment));
+    ret = oplk_writeLocalObject(0x1F81, 0x04, &nodeAssignment, sizeof(nodeAssignment));
+    ret = oplk_writeLocalObject(0x1F81, 0x05, &nodeAssignment, sizeof(nodeAssignment));
+    ret = oplk_writeLocalObject(0x1F81, 0x06, &nodeAssignment, sizeof(nodeAssignment));
+    ret = oplk_writeLocalObject(0x1F81, 0x07, &nodeAssignment, sizeof(nodeAssignment));
+    ret = oplk_writeLocalObject(0x1F81, 0x08, &nodeAssignment, sizeof(nodeAssignment));
+    ret = oplk_writeLocalObject(0x1F81, 0x20, &nodeAssignment, sizeof(nodeAssignment));
+    ret = oplk_writeLocalObject(0x1F81, 0xFE, &nodeAssignment, sizeof(nodeAssignment));
+    ret = oplk_writeLocalObject(0x1F81, 0x6E, &nodeAssignment, sizeof(nodeAssignment));
 
     nodeAssignment = (NMT_NODEASSIGN_MN_PRES | NMT_NODEASSIGN_NODE_EXISTS);    // 0x00010001L
-    ret = oplk_writeLocalObject(0x1F81, 0xF0, &nodeAssignment, sizeof (nodeAssignment));
-	return ret;
+    ret = oplk_writeLocalObject(0x1F81, 0xF0, &nodeAssignment, sizeof(nodeAssignment));
+
+    return ret;
 }
-
-
 

@@ -7,7 +7,7 @@
 The file contains the definitions for the interface selection dialog
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -73,12 +73,13 @@ public:
     QString getDevName(void);
 
 private slots:
-    void itemChanged(QListWidgetItem *current, QListWidgetItem *previous);
+    void itemChanged(QListWidgetItem* current, QListWidgetItem* previous);
 
 private:
-    QListWidget     *m_deviceListWidget;
-    QString         m_devName;
-    QString         m_devDesc;
+    QListWidget*    deviceListWidget;
+    QString         devName;
+    QString         devDesc;
 };
 
 #endif /* _INC_InterfaceSelectDialog_H_ */
+

@@ -7,7 +7,7 @@
 This file contains the definitions for the POWERLINK MN state widget.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -70,37 +70,38 @@ class State : public QWidget
     Q_OBJECT
 
 public:
-    State(QWidget *parent = 0);
+    State(QWidget* parent = 0);
 
 public slots:
     void setStatusLed(int status_p);
-    void setNmtStateText(const QString &strState_p);
+    void setNmtStateText(const QString& strState_p);
 
 private:
-    QPalette    PalGreenButton;
-    QPalette    PalYellowButton;
-    QPalette    PalRedButton;
+    QPalette     PalGreenButton;
+    QPalette     PalYellowButton;
+    QPalette     PalRedButton;
 
     QHBoxLayout* pNodesLayout;
 
-    QLabel*     pStatusLed;
-    QLabel*     pNmtStateLabel;
+    QLabel*      pStatusLed;
+    QLabel*      pNmtStateLabel;
     QHBoxLayout* pNmtStateLayout;
 
-    QToolButton* apNodes[NODE_ID_MAX+1];
+    QToolButton* apNodes[NODE_ID_MAX + 1];
 
-    Leds*       pLeds;
+    Leds*        pLeds;
 
-    QLabel      *pNmtSectionLabel;
-    QLabel      *pNodesSectionLabel;
+    QLabel*      pNmtSectionLabel;
+    QLabel*      pNodesSectionLabel;
 
-    int         iNodeWidth;
-    int         iNodeHeight;
+    int          iNodeWidth;
+    int          iNodeHeight;
 
-    QPixmap     *pRedLed;
-    QPixmap     *pYellowLed;
-    QPixmap     *pGreenLed;
+    QPixmap*     pRedLed;
+    QPixmap*     pYellowLed;
+    QPixmap*     pGreenLed;
 
 };
 
 #endif /* _INC_State_H_ */
+

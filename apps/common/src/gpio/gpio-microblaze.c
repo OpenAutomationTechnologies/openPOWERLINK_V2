@@ -11,7 +11,7 @@ applications.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -174,10 +174,10 @@ The function sets the POWERLINK status LED.
 //------------------------------------------------------------------------------
 void gpio_setStatusLed(BOOL fOn_p)
 {
-    if(fOn_p != FALSE)
-        plkStatusLeds_l |= (1<<GPIO_STATUS_LED_BIT);
+    if (fOn_p != FALSE)
+        plkStatusLeds_l |= (1 << GPIO_STATUS_LED_BIT);
     else
-        plkStatusLeds_l &= ~(1<<GPIO_STATUS_LED_BIT);
+        plkStatusLeds_l &= ~(1 << GPIO_STATUS_LED_BIT);
 
 #ifdef STATUS_LEDS_BASE
     XGpio_WriteReg(STATUS_LEDS_BASE, XGPIO_DATA_OFFSET, plkStatusLeds_l);
@@ -197,10 +197,10 @@ The function sets the POWERLINK error LED.
 //------------------------------------------------------------------------------
 void gpio_setErrorLed(BOOL fOn_p)
 {
-    if(fOn_p != FALSE)
-        plkStatusLeds_l |= (1<<GPIO_ERROR_LED_BIT);
+    if (fOn_p != FALSE)
+        plkStatusLeds_l |= (1 << GPIO_ERROR_LED_BIT);
     else
-        plkStatusLeds_l &= ~(1<<GPIO_ERROR_LED_BIT);
+        plkStatusLeds_l &= ~(1 << GPIO_ERROR_LED_BIT);
 
 #ifdef STATUS_LEDS_BASE
     XGpio_WriteReg(STATUS_LEDS_BASE, XGPIO_DATA_OFFSET, plkStatusLeds_l);
@@ -254,4 +254,6 @@ void gpio_setAppOutputs(UINT32 val_p)
 //============================================================================//
 /// \name Private Functions
 /// \{
+
 ///\}
+

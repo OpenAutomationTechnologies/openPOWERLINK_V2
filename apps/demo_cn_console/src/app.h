@@ -8,7 +8,7 @@ The file contains the definitions for the CN digital I/O application.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
 All rights reserved.
@@ -60,7 +60,7 @@ extern "C" {
 #endif
 
 tOplkError initApp(void);
-void shutdownApp (void);
+void shutdownApp(void);
 tOplkError processSync(void);
 void printOutputs(void);
 void printInputs(void);
@@ -73,3 +73,4 @@ void decreaseInputs(void);
 #endif
 
 #endif /* _INC_app_H_ */
+

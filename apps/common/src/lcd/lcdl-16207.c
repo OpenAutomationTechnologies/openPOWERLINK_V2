@@ -2,14 +2,14 @@
 ********************************************************************************
 \file       lcd-16207.c
 
-\brief      Lcd functions for Altera Avalon LCD IP-Core with HD44780
+\brief      LCD functions for Altera Avalon LCD IP-Core with HD44780
 
-This implementation uses the Altera Avalon Lcd 16207 IP-Core to handle the
+This implementation uses the Altera Avalon LCD 16207 IP-Core to handle the
 display controller HD44780 - available e.g. on the Terasic DE2-115 board.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.
 All rights reserved.
@@ -101,9 +101,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //------------------------------------------------------------------------------
 /**
-\brief  Initialize the Lcd
+\brief  Initialize the LCD
 
-This function writes a sequence of initialization parameters to the Lcd.
+This function writes a sequence of initialization parameters to the LCD.
 */
 //------------------------------------------------------------------------------
 int lcdl_init(void)
@@ -124,9 +124,9 @@ int lcdl_init(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Exit the Lcd instance
+\brief  Exit the LCD instance
 
-This function exits the Lcd instance.
+This function exits the LCD instance.
 */
 //------------------------------------------------------------------------------
 void lcdl_exit(void)
@@ -136,7 +136,7 @@ void lcdl_exit(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Clear the Lcd
+\brief  Clear the LCD
 
 This function clears all lines of the display.
 */
@@ -151,7 +151,7 @@ void lcdl_clear(void)
 /**
 \brief  Change to specified line
 
-Changes to specified line of the Lcd
+Changes to specified line of the LCD
 
 \param  line_p      Specifies the line
 
@@ -160,19 +160,21 @@ Changes to specified line of the Lcd
 //------------------------------------------------------------------------------
 int lcdl_changeToLine(unsigned int line_p)
 {
-    if(line_p > LCDL_LINE)
+    if (line_p > LCDL_LINE)
         return -1;
 
-    switch(line_p)
+    switch (line_p)
     {
-    case 1:
-        LCDL_WRCMD(0x80);
-        break;
-    case 2:
-        LCDL_WRCMD(0xC0);
-        break;
-    default:
-        break;
+        case 1:
+            LCDL_WRCMD(0x80);
+            break;
+
+        case 2:
+            LCDL_WRCMD(0xC0);
+            break;
+
+        default:
+            break;
     }
 
     usleep(2000);
@@ -181,9 +183,9 @@ int lcdl_changeToLine(unsigned int line_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Print text to the Lcd
+\brief  Print text to the LCD
 
-Writes text to the Lcd currently selected.
+Writes text to the LCD currently selected.
 
 \param  sText_p     The text to print
 */
@@ -194,10 +196,10 @@ void lcdl_printText(const char* sText_p)
     int length = strlen(sText_p);
 
     // Longer text is cut due to column limitation!
-    for(i=0; i<LCDL_COLUMN; i++)
+    for (i = 0; i < LCDL_COLUMN; i++)
     {
         // Write blank if provided text is shorter than column count.
-        if(i<length)
+        if (i < length)
             LCDL_WRDATA(sText_p[i]);
         else
             LCDL_WRDATA(' ');
@@ -211,4 +213,6 @@ void lcdl_printText(const char* sText_p)
 //============================================================================//
 /// \name Private Functions
 /// \{
+
 ///\}
+

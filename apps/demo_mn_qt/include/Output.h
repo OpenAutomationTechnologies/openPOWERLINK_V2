@@ -7,7 +7,7 @@
 This file contains the definitions of the Output widget.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
 All rights reserved.
@@ -69,7 +69,7 @@ class Output : public QWidget
     Q_OBJECT
 
 public:
-    Output(QWidget *parent = 0);
+    Output(QWidget* parent = 0);
 
 public slots:
     void setValue(int dataIn_p, int nodeId_p);
@@ -86,5 +86,4 @@ private:
 };
 
 #endif /* _INC_Output_H_ */
-
 

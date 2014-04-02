@@ -2,12 +2,12 @@
 ********************************************************************************
 \file   lcd.h
 
-\brief  Generic Lcd interface
+\brief  Generic LCD interface
 
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.
 All rights reserved.
@@ -65,11 +65,12 @@ void lcd_exit(void);
 void lcd_clear(void);
 void lcd_printText(char* sText_p, UINT line_p);
 void lcd_printNmtState(tNmtState nmtState_p);
-void lcd_printNodeId (WORD wNodeId_p);
-void lcd_printError (tOplkError error_p);
+void lcd_printNodeId(WORD wNodeId_p);
+void lcd_printError(tOplkError error_p);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* _INC_lcd_H_ */
+

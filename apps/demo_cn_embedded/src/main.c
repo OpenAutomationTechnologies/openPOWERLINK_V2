@@ -11,7 +11,7 @@ application.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
 All rights reserved.
@@ -120,7 +120,7 @@ This is the main function of the openPOWERLINK embedded CN demo application.
 \ingroup module_demo_cn_embedded
 */
 //------------------------------------------------------------------------------
-int main (void)
+int main(void)
 {
     tOplkError  ret = kErrorOk;
     const UINT8 aMacAddr[] = {MAC_ADDR};
@@ -153,10 +153,10 @@ int main (void)
     PRINTF("NODEID=0x%02X\n", instance_l.nodeId);
     lcd_printNodeId((WORD)instance_l.nodeId);
 
-    if((ret = initPowerlink(&instance_l)) != kErrorOk)
+    if ((ret = initPowerlink(&instance_l)) != kErrorOk)
         goto Exit;
 
-    if((ret = initApp()) != kErrorOk)
+    if ((ret = initApp()) != kErrorOk)
         goto Exit;
 
     loopMain(&instance_l);
@@ -200,8 +200,7 @@ static tOplkError initPowerlink(tInstance* pInstance_p)
 
     OPLK_MEMCPY(initParam.aMacAddress, pInstance_p->aMacAddr, sizeof(initParam.aMacAddress));
 
-    initParam.fAsyncOnly = FALSE;
-
+    initParam.fAsyncOnly              = FALSE;
     initParam.featureFlags            = -1;
     initParam.cycleLen                = pInstance_p->cycleLen;  // required for error detection
     initParam.isochrTxMaxPayload      = 36;                     // const
@@ -227,7 +226,7 @@ static tOplkError initPowerlink(tInstance* pInstance_p)
     initParam.defaultGateway          = DEFAULT_GATEWAY;
     sprintf((char*)initParam.sHostname, "%02x-%08x", initParam.nodeId, initParam.vendorId);
     initParam.syncNodeId              = C_ADR_SYNC_ON_SOC;
-    initParam.fSyncOnPrcNode            = FALSE;
+    initParam.fSyncOnPrcNode          = FALSE;
 
     // set callback functions
     initParam.pfnCbEvent = processEvents;
@@ -235,7 +234,7 @@ static tOplkError initPowerlink(tInstance* pInstance_p)
 
     // initialize POWERLINK stack
     ret = oplk_init(&initParam);
-    if(ret != kErrorOk)
+    if (ret != kErrorOk)
     {
         PRINTF("oplk_init() failed (Error:0x%x!\n", ret);
         return ret;
@@ -249,7 +248,7 @@ static tOplkError initPowerlink(tInstance* pInstance_p)
 \brief  Main loop of demo application
 
 This function implements the main loop of the demo application.
-- It sends a NMT command to start the stack
+- It sends an NMT command to start the stack
 
 \param  pInstance_p             Pointer to demo instance
 
@@ -261,17 +260,17 @@ static tOplkError loopMain(tInstance* pInstance_p)
     tOplkError ret = kErrorOk;
 
     // start processing
-    if((ret = oplk_execNmtCommand(kNmtEventSwReset)) != kErrorOk)
+    if ((ret = oplk_execNmtCommand(kNmtEventSwReset)) != kErrorOk)
         return ret;
 
-    while(1)
+    while (1)
     {
         // do background tasks
-        if((ret = oplk_process()) != kErrorOk)
+        if ((ret = oplk_process()) != kErrorOk)
             break;
 
         // trigger switch off
-        if(pInstance_p->fShutdown != FALSE)
+        if (pInstance_p->fShutdown != FALSE)
         {
             oplk_execNmtCommand(kNmtEventSwitchOff);
 
@@ -280,7 +279,7 @@ static tOplkError loopMain(tInstance* pInstance_p)
         }
 
         // exit loop if NMT is in off state
-        if(pInstance_p->fGsOff != FALSE)
+        if (pInstance_p->fGsOff != FALSE)
             break;
     }
 
@@ -291,7 +290,7 @@ static tOplkError loopMain(tInstance* pInstance_p)
 /**
 \brief  Shutdown the demo application
 
-The function shut's down the demo application.
+The function shuts down the demo application.
 
 \param  pInstance_p             Pointer to demo instance
 */
@@ -326,12 +325,12 @@ static tOplkError eventCbPowerlink(tOplkApiEventType EventType_p, tOplkApiEventA
 
     UNUSED_PARAMETER(pUserArg_p);
 
-    switch(EventType_p)
+    switch (EventType_p)
     {
         case kOplkApiEventNmtStateChange:
             lcd_printNmtState(pEventArg_p->nmtStateChange.newNmtState);
 
-            switch(pEventArg_p->nmtStateChange.newNmtState)
+            switch (pEventArg_p->nmtStateChange.newNmtState)
             {
                 case kNmtGsOff:
                     // NMT state machine was shut down

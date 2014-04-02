@@ -10,7 +10,7 @@ This file contains a demo MN application event handler.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
 All rights reserved.
@@ -134,7 +134,7 @@ The function initializes the applications event module
 */
 //------------------------------------------------------------------------------
 
-void initEvents (BOOL* pfGsOff_p)
+void initEvents(BOOL* pfGsOff_p)
 {
     pfGsOff_l = pfGsOff_p;
 }
@@ -252,8 +252,8 @@ static tOplkError processStateChangeEvent(tOplkApiEventType EventType_p,
             ret = kErrorShutdown;
 
             console_printlog("StateChangeEvent:kNmtGsOff originating event = 0x%X (%s)\n",
-                     pNmtStateChange->nmtEvent,
-                     debugstr_getNmtEventStr(pNmtStateChange->nmtEvent));
+                             pNmtStateChange->nmtEvent,
+                             debugstr_getNmtEventStr(pNmtStateChange->nmtEvent));
 
             // signal that stack is off
             *pfGsOff_l = FALSE;
@@ -264,16 +264,16 @@ static tOplkError processStateChangeEvent(tOplkApiEventType EventType_p,
             ret = setDefaultNodeAssignment();
 #endif
             console_printlog("StateChangeEvent(0x%X) originating event = 0x%X (%s)\n",
-                   pNmtStateChange->newNmtState,
-                   pNmtStateChange->nmtEvent,
-                   debugstr_getNmtEventStr(pNmtStateChange->nmtEvent));
+                             pNmtStateChange->newNmtState,
+                             pNmtStateChange->nmtEvent,
+                             debugstr_getNmtEventStr(pNmtStateChange->nmtEvent));
             break;
 
         case kNmtGsResetConfiguration:
             console_printlog("StateChangeEvent(0x%X) originating event = 0x%X (%s)\n",
-                   pNmtStateChange->newNmtState,
-                   pNmtStateChange->nmtEvent,
-                   debugstr_getNmtEventStr(pNmtStateChange->nmtEvent));
+                             pNmtStateChange->newNmtState,
+                             pNmtStateChange->nmtEvent,
+                             debugstr_getNmtEventStr(pNmtStateChange->nmtEvent));
             break;
 
         case kNmtGsInitialising:
@@ -287,9 +287,9 @@ static tOplkError processStateChangeEvent(tOplkApiEventType EventType_p,
 
         default:
             console_printlog("StateChangeEvent(0x%X) originating event = 0x%X (%s)\n",
-                   pNmtStateChange->newNmtState,
-                   pNmtStateChange->nmtEvent,
-                   debugstr_getNmtEventStr(pNmtStateChange->nmtEvent));
+                             pNmtStateChange->newNmtState,
+                             pNmtStateChange->nmtEvent,
+                             debugstr_getNmtEventStr(pNmtStateChange->nmtEvent));
             break;
     }
 
@@ -322,16 +322,16 @@ static tOplkError processErrorWarningEvent(tOplkApiEventType EventType_p,
     UNUSED_PARAMETER(pUserArg_p);
 
     console_printlog("Err/Warn: Source = %s (%02X) OplkError = %s (0x%03X)\n",
-                debugstr_getEventSourceStr(pInternalError->eventSource),
-                pInternalError->eventSource,
-                debugstr_getRetValStr(pInternalError->oplkError),
-                pInternalError->oplkError);
+                     debugstr_getEventSourceStr(pInternalError->eventSource),
+                     pInternalError->eventSource,
+                     debugstr_getRetValStr(pInternalError->oplkError),
+                     pInternalError->oplkError);
 
     FTRACE_MARKER("Err/Warn: Source = %s (%02X) OplkError = %s (0x%03X)\n",
-                debugstr_getEventSourceStr(pInternalError->eventSource),
-                pInternalError->eventSource,
-                debugstr_getRetValStr(pInternalError->oplkError),
-                pInternalError->oplkError);
+                  debugstr_getEventSourceStr(pInternalError->eventSource),
+                  pInternalError->eventSource,
+                  debugstr_getRetValStr(pInternalError->oplkError),
+                  pInternalError->oplkError);
 
     // check additional argument
     switch (pInternalError->eventSource)
@@ -341,12 +341,12 @@ static tOplkError processErrorWarningEvent(tOplkApiEventType EventType_p,
             // error occurred within event processing
             // either in kernel or in user part
             console_printlog(" OrgSource = %s %02X\n",
-                     debugstr_getEventSourceStr(pInternalError->errorArg.eventSource),
-                     pInternalError->errorArg.eventSource);
+                             debugstr_getEventSourceStr(pInternalError->errorArg.eventSource),
+                             pInternalError->errorArg.eventSource);
 
             FTRACE_MARKER(" OrgSource = %s %02X\n",
-                     debugstr_getEventSourceStr(pInternalError->errorArg.eventSource),
-                     pInternalError->errorArg.eventSource);
+                          debugstr_getEventSourceStr(pInternalError->errorArg.eventSource),
+                          pInternalError->errorArg.eventSource);
             break;
 
         case kEventSourceDllk:
@@ -437,15 +437,15 @@ static tOplkError processNodeEvent(tOplkApiEventType EventType_p,
 
         case kNmtNodeEventNmtState:
             console_printlog("NodeEvent: (Node=%u, NmtState=%s)\n",
-                     pNode->nodeId,
-                     debugstr_getNmtStateStr(pNode->nmtState));
+                             pNode->nodeId,
+                             debugstr_getNmtStateStr(pNode->nmtState));
             break;
 
         case kNmtNodeEventError:
             console_printlog("NodeEvent: (Node=%u): Error=%s (0x%.4X)\n",
-                    pNode->nodeId,
-                    debugstr_getEmergErrCodeStr(pNode->errorCode),
-                    pNode->errorCode);
+                             pNode->nodeId,
+                             debugstr_getEmergErrCodeStr(pNode->errorCode),
+                             pNode->errorCode);
             break;
 
         case kNmtNodeEventFound:
@@ -529,19 +529,19 @@ static tOplkError processCfmProgressEvent(tOplkApiEventType EventType_p,
     UNUSED_PARAMETER(pUserArg_p);
 
     console_printlog("CFM Progress: (Node=%u, CFM-Progress: Object 0x%X/%u, ",
-                                                 pCfmProgress->nodeId,
-                                                 pCfmProgress->objectIndex,
-                                                 pCfmProgress->objectSubIndex);
+                     pCfmProgress->nodeId,
+                     pCfmProgress->objectIndex,
+                     pCfmProgress->objectSubIndex);
 
     console_printlogadd("%lu/%lu Bytes", (ULONG)pCfmProgress->bytesDownloaded,
-                            (ULONG)pCfmProgress->totalNumberOfBytes);
+                        (ULONG)pCfmProgress->totalNumberOfBytes);
 
-    if ((pCfmProgress->sdoAbortCode != 0)
-        || (pCfmProgress->error != kErrorOk))
+    if ((pCfmProgress->sdoAbortCode != 0) ||
+        (pCfmProgress->error != kErrorOk))
     {
         console_printlogadd(" -> SDO Abort=0x%lX, Error=0x%X)\n",
-               (ULONG) pCfmProgress->sdoAbortCode,
-               pCfmProgress->error);
+                            (ULONG)pCfmProgress->sdoAbortCode,
+                            pCfmProgress->error);
     }
     else
     {
@@ -592,7 +592,7 @@ static tOplkError processCfmResultEvent(tOplkApiEventType EventType_p,
 
         default:
             console_printlog("CFM Result: (Node=%d, CfmResult=0x%X)\n", pCfmResult->nodeId,
-                                                                pCfmResult->nodeCommand);
+                             pCfmResult->nodeCommand);
             break;
     }
     return kErrorOk;
@@ -656,26 +656,23 @@ static tOplkError setDefaultNodeAssignment(void)
     DWORD       nodeAssignment;
 
     nodeAssignment = (NMT_NODEASSIGN_NODE_IS_CN | NMT_NODEASSIGN_NODE_EXISTS);    // 0x00000003L
-    ret = oplk_writeLocalObject(0x1F81, 0x01, &nodeAssignment, sizeof (nodeAssignment));
-    ret = oplk_writeLocalObject(0x1F81, 0x02, &nodeAssignment, sizeof (nodeAssignment));
-    ret = oplk_writeLocalObject(0x1F81, 0x03, &nodeAssignment, sizeof (nodeAssignment));
-    ret = oplk_writeLocalObject(0x1F81, 0x04, &nodeAssignment, sizeof (nodeAssignment));
-    ret = oplk_writeLocalObject(0x1F81, 0x05, &nodeAssignment, sizeof (nodeAssignment));
-    ret = oplk_writeLocalObject(0x1F81, 0x06, &nodeAssignment, sizeof (nodeAssignment));
-    ret = oplk_writeLocalObject(0x1F81, 0x07, &nodeAssignment, sizeof (nodeAssignment));
-    ret = oplk_writeLocalObject(0x1F81, 0x08, &nodeAssignment, sizeof (nodeAssignment));
-    ret = oplk_writeLocalObject(0x1F81, 0x20, &nodeAssignment, sizeof (nodeAssignment));
-    ret = oplk_writeLocalObject(0x1F81, 0xFE, &nodeAssignment, sizeof (nodeAssignment));
-    ret = oplk_writeLocalObject(0x1F81, 0x6E, &nodeAssignment, sizeof (nodeAssignment));
+    ret = oplk_writeLocalObject(0x1F81, 0x01, &nodeAssignment, sizeof(nodeAssignment));
+    ret = oplk_writeLocalObject(0x1F81, 0x02, &nodeAssignment, sizeof(nodeAssignment));
+    ret = oplk_writeLocalObject(0x1F81, 0x03, &nodeAssignment, sizeof(nodeAssignment));
+    ret = oplk_writeLocalObject(0x1F81, 0x04, &nodeAssignment, sizeof(nodeAssignment));
+    ret = oplk_writeLocalObject(0x1F81, 0x05, &nodeAssignment, sizeof(nodeAssignment));
+    ret = oplk_writeLocalObject(0x1F81, 0x06, &nodeAssignment, sizeof(nodeAssignment));
+    ret = oplk_writeLocalObject(0x1F81, 0x07, &nodeAssignment, sizeof(nodeAssignment));
+    ret = oplk_writeLocalObject(0x1F81, 0x08, &nodeAssignment, sizeof(nodeAssignment));
+    ret = oplk_writeLocalObject(0x1F81, 0x20, &nodeAssignment, sizeof(nodeAssignment));
+    ret = oplk_writeLocalObject(0x1F81, 0xFE, &nodeAssignment, sizeof(nodeAssignment));
+    ret = oplk_writeLocalObject(0x1F81, 0x6E, &nodeAssignment, sizeof(nodeAssignment));
 
     nodeAssignment = (NMT_NODEASSIGN_MN_PRES | NMT_NODEASSIGN_NODE_EXISTS);    // 0x00010001L
-    ret = oplk_writeLocalObject(0x1F81, 0xF0, &nodeAssignment, sizeof (nodeAssignment));
+    ret = oplk_writeLocalObject(0x1F81, 0xF0, &nodeAssignment, sizeof(nodeAssignment));
     return ret;
 }
 #endif
 
 ///\}
-
-
-
 

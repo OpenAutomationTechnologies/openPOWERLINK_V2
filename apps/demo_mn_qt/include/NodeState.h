@@ -7,7 +7,7 @@
 The file contains the definitions fro the NodeState widget.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -67,13 +67,13 @@ class NodeState : public QWidget
     Q_OBJECT
 
 public:
-    NodeState(const QString & label_p, QWidget *parent_p = 0);
+    NodeState(const QString& label_p, QWidget* parent_p = 0);
 
 public:
     void setState(int state_p);
 
 private:
-    QLabel*         m_pStateLabel;
+    QLabel*         pStateLabel;
     QLabel*         pLedLabel;
     QPixmap*        pRedLed;
     QPixmap*        pYellowLed;
@@ -81,3 +81,4 @@ private:
 };
 
 #endif /* _INC_NodeState_H_ */
+

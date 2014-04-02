@@ -11,7 +11,7 @@ application.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
 All rights reserved.
@@ -149,7 +149,7 @@ int main(void)
 
     // set mac address (last byte is set to node ID)
     OPLK_MEMCPY(instance_l.aMacAddr, aMacAddr, sizeof(aMacAddr));
-    instance_l.aMacAddr[5]  = instance_l.nodeId;
+    instance_l.aMacAddr[5] = instance_l.nodeId;
 
     initEvents(&instance_l.fGsOff);
 
@@ -161,10 +161,10 @@ int main(void)
     PRINTF("NODEID=0x%02X\n", instance_l.nodeId);
     lcd_printNodeId((WORD)instance_l.nodeId);
 
-    if((ret = initPowerlink(&instance_l)) != kErrorOk)
+    if ((ret = initPowerlink(&instance_l)) != kErrorOk)
         goto Exit;
 
-    if((ret = initApp()) != kErrorOk)
+    if ((ret = initApp()) != kErrorOk)
         goto Exit;
 
     loopMain(&instance_l);
@@ -196,20 +196,19 @@ The function initializes the openPOWERLINK stack.
 static tOplkError initPowerlink(tInstance* pInstance_p)
 {
     tOplkError                  ret = kErrorOk;
-    static tOplkApiInitParam     initParam;
+    static tOplkApiInitParam    initParam;
 
-    PRINTF ("Initializing openPOWERLINK stack...\n");
+    PRINTF("Initializing openPOWERLINK stack...\n");
 
-    OPLK_MEMSET(&initParam, 0, sizeof (initParam));
-    initParam.sizeOfInitParam = sizeof (initParam);
+    OPLK_MEMSET(&initParam, 0, sizeof(initParam));
+    initParam.sizeOfInitParam = sizeof(initParam);
 
     initParam.nodeId = pInstance_p->nodeId;
     initParam.ipAddress = (0xFFFFFF00 & IP_ADDR) | initParam.nodeId;
 
     OPLK_MEMCPY(initParam.aMacAddress, pInstance_p->aMacAddr, sizeof (initParam.aMacAddress));
 
-    initParam.fAsyncOnly = FALSE;
-
+    initParam.fAsyncOnly              = FALSE;
     initParam.featureFlags            = -1;
     initParam.cycleLen                = pInstance_p->cycleLen;  // required for error detection
     initParam.isochrTxMaxPayload      = 256;                    // const
@@ -234,22 +233,22 @@ static tOplkError initPowerlink(tInstance* pInstance_p)
     initParam.defaultGateway          = DEFAULT_GATEWAY;
     sprintf((char*)initParam.sHostname, "%02x-%08x", initParam.nodeId, initParam.vendorId);
     initParam.syncNodeId              = C_ADR_SYNC_ON_SOC;
-    initParam.fSyncOnPrcNode            = FALSE;
+    initParam.fSyncOnPrcNode          = FALSE;
 
     // set callback functions
-    initParam.pfnCbEvent =    processEvents;
-    initParam.pfnCbSync  =    processSync;
+    initParam.pfnCbEvent = processEvents;
+    initParam.pfnCbSync  = processSync;
 
     // initialize POWERLINK stack
     ret = oplk_init(&initParam);
-    if(ret != kErrorOk)
+    if (ret != kErrorOk)
     {
         PRINTF("oplk_init() failed (Error:0x%x!)\n", ret);
         return ret;
     }
 
     ret = oplk_setCdcBuffer(pInstance_p->pCdcBuffer, pInstance_p->cdcBufferSize);
-    if(ret != kErrorOk)
+    if (ret != kErrorOk)
     {
         PRINTF("oplk_setCdcBuffer() failed (Error:0x%x!)\n", ret);
         return ret;
@@ -263,7 +262,7 @@ static tOplkError initPowerlink(tInstance* pInstance_p)
 \brief  Main loop of demo application
 
 This function implements the main loop of the demo application.
-- It sends a NMT command to start the stack
+- It sends an NMT command to start the stack
 
 \param  pInstance_p             Pointer to demo instance
 
@@ -276,20 +275,20 @@ static tOplkError loopMain(tInstance* pInstance_p)
     UINT        checkStack = 0;
 
     // start processing
-    if((ret = oplk_execNmtCommand(kNmtEventSwReset)) != kErrorOk)
+    if ((ret = oplk_execNmtCommand(kNmtEventSwReset)) != kErrorOk)
         return ret;
 
-    while(1)
+    while (1)
     {
         // do background tasks
-        if((ret = oplk_process()) != kErrorOk)
+        if ((ret = oplk_process()) != kErrorOk)
             break;
 
         // check the kernel part from time to time
-        if(checkStack++ >= CHECK_KERNEL_TIMEOUT)
+        if (checkStack++ >= CHECK_KERNEL_TIMEOUT)
         {
             checkStack = 0;
-            if(oplk_checkKernelStack() == FALSE)
+            if (oplk_checkKernelStack() == FALSE)
             {
                 PRINTF("Kernel stack has gone! Exiting...\n");
                 instance_l.fShutdown = TRUE;
@@ -297,7 +296,7 @@ static tOplkError loopMain(tInstance* pInstance_p)
         }
 
         // trigger switch off
-        if(pInstance_p->fShutdown != FALSE)
+        if (pInstance_p->fShutdown != FALSE)
         {
             oplk_execNmtCommand(kNmtEventSwitchOff);
 
@@ -306,7 +305,7 @@ static tOplkError loopMain(tInstance* pInstance_p)
         }
 
         // exit loop if NMT is in off state
-        if(pInstance_p->fGsOff != FALSE)
+        if (pInstance_p->fGsOff != FALSE)
             break;
     }
 
@@ -317,7 +316,7 @@ static tOplkError loopMain(tInstance* pInstance_p)
 /**
 \brief  Shutdown the demo application
 
-The function shut's down the demo application.
+The function shuts down the demo application.
 
 \param  pInstance_p             Pointer to demo instance
 */
@@ -332,3 +331,4 @@ static void shutdownPowerlink(tInstance* pInstance_p)
 }
 
 ///\}
+

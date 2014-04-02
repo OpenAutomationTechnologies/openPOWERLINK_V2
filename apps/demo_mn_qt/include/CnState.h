@@ -7,7 +7,7 @@
 This file contains the definitions of the CnState class.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -34,8 +34,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef __INC_CN_STATE_H
-#define __INC_CN_STATE_H
+#ifndef _INC_CnState_h_
+#define _INC_CnState_h_
 
 //------------------------------------------------------------------------------
 // includes
@@ -67,7 +67,7 @@ class CnState : public QWidget
     Q_OBJECT
 
 public:
-    CnState(QWidget *parent = 0);
+    CnState(QWidget* parent = 0);
 
 public slots:
     void setState(int iNodeId_p, int iState_p);
@@ -76,8 +76,9 @@ public slots:
     void removeAllNodes(void);
 
 private:
-    QVBoxLayout     *pStateLayout;
-    NodeState       **ppNodeState;
+    QVBoxLayout*      pStateLayout;
+    NodeState**       ppNodeState;
 };
 
-#endif // __INC_CN_STATE_H
+#endif // _INC_CnState_h_
+

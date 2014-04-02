@@ -10,7 +10,7 @@ This file contains a demo CN application event handler.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
 All rights reserved.
@@ -109,7 +109,7 @@ The function initializes the applications event module
 \ingroup module_demo_cn_embedded
 */
 //------------------------------------------------------------------------------
-void initEvents (tEventCb pfnEventCb_p)
+void initEvents(tEventCb pfnEventCb_p)
 {
     pfnEventCb_l = pfnEventCb_p;
 }
@@ -130,8 +130,8 @@ The function implements the applications stack event handler.
 */
 //------------------------------------------------------------------------------
 tOplkError processEvents(tOplkApiEventType EventType_p,
-                                tOplkApiEventArg* pEventArg_p,
-                                void* pUserArg_p)
+                         tOplkApiEventArg* pEventArg_p,
+                         void* pUserArg_p)
 {
     tOplkError          ret = kErrorOk;
 
@@ -150,7 +150,7 @@ tOplkError processEvents(tOplkApiEventType EventType_p,
 
         case kOplkApiEventLed:
             /* POWERLINK S/E LED needs to be changed */
-            switch(pEventArg_p->ledEvent.ledType)
+            switch (pEventArg_p->ledEvent.ledType)
             {
                 case kLedTypeStatus:
                     gpio_setStatusLed(pEventArg_p->ledEvent.fOn);
@@ -170,7 +170,7 @@ tOplkError processEvents(tOplkApiEventType EventType_p,
     }
 
     // call user event call back
-    if((ret == kErrorOk) && (pfnEventCb_l != NULL))
+    if ((ret == kErrorOk) && (pfnEventCb_l != NULL))
         ret = pfnEventCb_l(EventType_p, pEventArg_p, pUserArg_p);
 
     return ret;
@@ -238,16 +238,16 @@ static tOplkError processErrorWarningEvent(tOplkApiEventType EventType_p,
     UNUSED_PARAMETER(pUserArg_p);
 
     PRINTF("Err/Warn: Source = %s (%02X) OplkError = %s (0x%03X)\n",
-                debugstr_getEventSourceStr(pInternalError->eventSource),
-                pInternalError->eventSource,
-                debugstr_getRetValStr(pInternalError->oplkError),
-                pInternalError->oplkError);
+           debugstr_getEventSourceStr(pInternalError->eventSource),
+           pInternalError->eventSource,
+           debugstr_getRetValStr(pInternalError->oplkError),
+           pInternalError->oplkError);
 
     PRINTF("Err/Warn: Source = %s (%02X) OplkError = %s (0x%03X)\n",
-                debugstr_getEventSourceStr(pInternalError->eventSource),
-                pInternalError->eventSource,
-                debugstr_getRetValStr(pInternalError->oplkError),
-                pInternalError->oplkError);
+           debugstr_getEventSourceStr(pInternalError->eventSource),
+           pInternalError->eventSource,
+           debugstr_getRetValStr(pInternalError->oplkError),
+           pInternalError->oplkError);
 
     // check additional argument
     switch (pInternalError->eventSource)
@@ -257,12 +257,12 @@ static tOplkError processErrorWarningEvent(tOplkApiEventType EventType_p,
             // error occurred within event processing
             // either in kernel or in user part
             PRINTF(" OrgSource = %s %02X\n",
-                     debugstr_getEventSourceStr(pInternalError->errorArg.eventSource),
-                     pInternalError->errorArg.eventSource);
+                   debugstr_getEventSourceStr(pInternalError->errorArg.eventSource),
+                   pInternalError->errorArg.eventSource);
 
             PRINTF(" OrgSource = %s %02X\n",
-                     debugstr_getEventSourceStr(pInternalError->errorArg.eventSource),
-                     pInternalError->errorArg.eventSource);
+                   debugstr_getEventSourceStr(pInternalError->errorArg.eventSource),
+                   pInternalError->errorArg.eventSource);
             break;
 
         case kEventSourceDllk:
@@ -280,3 +280,4 @@ static tOplkError processErrorWarningEvent(tOplkApiEventType EventType_p,
 }
 
 ///\}
+

@@ -11,7 +11,7 @@ openPOWERLINK demo applications.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
 All rights reserved.
@@ -95,7 +95,7 @@ static tSyncThreadInstance      syncThreadInstance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-void *powerlinkSyncThread(void * arg);
+void* powerlinkSyncThread(void* arg);
 #endif
 
 void system_handleTermSignal(int signum);
@@ -119,7 +119,7 @@ int initSystem(void)
     struct sched_param          schedParam;
 
     /* adjust process priority */
-    if (nice (-20) == -1)         // push nice level in case we have no RTPreempt
+    if (nice(-20) == -1)         // push nice level in case we have no RTPreempt
     {
         DEBUG_LVL_ERROR_TRACE("%s() couldn't set nice value! (%s)\n", __func__, strerror(errno));
     }
@@ -127,19 +127,19 @@ int initSystem(void)
     if (pthread_setschedparam(pthread_self(), SCHED_RR, &schedParam) != 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s() couldn't set thread scheduling parameters! %d\n",
-                __func__, schedParam.__sched_priority);
+                              __func__, schedParam.__sched_priority);
     }
 
     // Register termination handler for signals with termination semantics
     struct sigaction new_action;
 
     new_action.sa_handler = system_handleTermSignal;
-    (void) sigemptyset(&new_action.sa_mask);
+    (void)sigemptyset(&new_action.sa_mask);
     new_action.sa_flags = 0;
 
-    (void) sigaction(SIGINT,  &new_action, NULL);    // Sent via CTRL-C
-    (void) sigaction(SIGTERM, &new_action, NULL);    // Generic signal used to cause program termination.
-    (void) sigaction(SIGQUIT, &new_action, NULL);    // Terminate because of abnormal condition
+    (void)sigaction(SIGINT,  &new_action, NULL);    // Sent via CTRL-C
+    (void)sigaction(SIGTERM, &new_action, NULL);    // Generic signal used to cause program termination.
+    (void)sigaction(SIGQUIT, &new_action, NULL);    // Terminate because of abnormal condition
 
 #ifdef SET_CPU_AFFINITY
     {
@@ -163,7 +163,7 @@ int initSystem(void)
 /**
 \brief  Shutdown system
 
-The function shuts-down the system.
+The function shuts down the system.
 
 \ingroup module_app_common
 */
@@ -229,7 +229,7 @@ This function implements the synchronous application thread.
 \param  arg             Needed for thread interface not used
 */
 //------------------------------------------------------------------------------
-void *powerlinkSyncThread(void* arg)
+void* powerlinkSyncThread(void* arg)
 {
     tSyncThreadInstance*     pSyncThreadInstance = (tSyncThreadInstance*)arg;
 
@@ -246,7 +246,7 @@ void *powerlinkSyncThread(void* arg)
 \brief  Handle termination requests
 
 This functions can be used to react on signals with termination semantics,
-and remembers in a flag that the user or the system asked to program to shut down.
+and remembers in a flag that the user or the system asked the program to shut down.
 The application can than check this flag.
 */
 //------------------------------------------------------------------------------
@@ -256,11 +256,12 @@ void system_handleTermSignal(int signum)
     {
         case SIGINT:    // Signals with termination semantics
         case SIGTERM:   // trigger a flag change
-        case SIGQUIT:   fTermSignalReceived_g = TRUE;
-                        break;
+        case SIGQUIT:
+            fTermSignalReceived_g = TRUE;
+            break;
 
         default:        // All other signals are ignored by this handler
-                        break;
+            break;
     }
 }
 
@@ -269,7 +270,7 @@ void system_handleTermSignal(int signum)
 \brief Sleep for the specified number of milliseconds
 
 The function makes the calling thread sleep until the number of specified
-milliseconds have elapsed.
+milliseconds has elapsed.
 
 \param  milliSeconds_p      Number of milliseconds to sleep
 
@@ -312,10 +313,4 @@ void msleep(unsigned int milliSeconds_p)
 }
 
 ///\}
-
-
-
-
-
-
 

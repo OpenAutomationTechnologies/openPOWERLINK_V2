@@ -7,7 +7,7 @@
 This file implements the openPOWERLINK API class.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -101,7 +101,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // local vars
 //------------------------------------------------------------------------------
 CONST BYTE abMacAddr[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-static char*    pszCdcFilename_g = (char *)"mnobd.cdc";
+static char*    pszCdcFilename_g = (char*)"mnobd.cdc";
 static char     devName_g[256];
 
 //------------------------------------------------------------------------------
@@ -114,16 +114,16 @@ static char     devName_g[256];
 
 //------------------------------------------------------------------------------
 /**
-\brief	Constructor
+\brief  Constructor
 
 Constructs a POWERLINK Api object.
 
-\param		pMainWindow_p	        Pointer to main window
+\param      pMainWindow_p           Pointer to main window
 \param      nodeId_p                Node ID of the POWERLINK node
 \param      devName_p               Device name of the network interface
 */
 //------------------------------------------------------------------------------
-Api::Api(MainWindow *pMainWindow_p, UINT nodeId_p, QString devName_p)
+Api::Api(MainWindow* pMainWindow_p, UINT nodeId_p, QString devName_p)
 {
     tOplkError          ret;
     State*              pState;
@@ -176,14 +176,13 @@ Api::Api(MainWindow *pMainWindow_p, UINT nodeId_p, QString devName_p)
     QObject::connect(pDataInOutThread, SIGNAL(processImageInChanged(int, int)),
                      pInput, SLOT(setLeds(int, int)));
 
-    OPLK_MEMSET(&initParam, 0, sizeof (initParam));
-    initParam.sizeOfInitParam = sizeof (initParam);
+    OPLK_MEMSET(&initParam, 0, sizeof(initParam));
+    initParam.sizeOfInitParam = sizeof(initParam);
 
     initParam.nodeId = nodeId_p;
     initParam.ipAddress = (IP_ADDR & 0xFFFFFF00) | initParam.nodeId;
 
     initParam.fAsyncOnly = FALSE;
-
     initParam.featureFlags = UINT_MAX;
     initParam.cycleLen = CYCLE_LEN;           // required for error detection
     initParam.isochrTxMaxPayload = 256;       // const
@@ -214,7 +213,7 @@ Api::Api(MainWindow *pMainWindow_p, UINT nodeId_p, QString devName_p)
     initParam.pfnCbEvent = pProcessThread->getEventCbFunc();
 
     /* write 00:00:00:00:00:00 to MAC address, so that the driver uses the real hardware address */
-    OPLK_MEMCPY(initParam.aMacAddress, abMacAddr, sizeof (initParam.aMacAddress));
+    OPLK_MEMCPY(initParam.aMacAddress, abMacAddr, sizeof(initParam.aMacAddress));
 
     // Copy the selected interface string to a local variable
     strcpy(devName_g, devName_p.toStdString().c_str());
@@ -228,18 +227,18 @@ Api::Api(MainWindow *pMainWindow_p, UINT nodeId_p, QString devName_p)
 
     // init POWERLINK
     ret = oplk_init(&initParam);
-    if(ret != kErrorOk)
+    if (ret != kErrorOk)
     {
         QMessageBox::critical(0, "POWERLINK demo",
                               QString("Initialization of openPOWERLINK Stack failed.\n") +
-                              "Error code: 0x"+ QString::number(ret, 16) +
-                              "\nThe most common error source are an unsupported Ethernet controller or the kernel module is not loaded."
-                              "\nFor further information please consult the manual.");
+                                      "Error code: 0x"+ QString::number(ret, 16) +
+                                      "\nThe most common error source are an unsupported Ethernet controller or the kernel module is not loaded."
+                                      "\nFor further information please consult the manual.");
         goto Exit;
     }
 
     ret = oplk_setCdcFilename(pszCdcFilename_g);
-    if(ret != kErrorOk)
+    if (ret != kErrorOk)
     {
         goto Exit;
     }
@@ -249,7 +248,7 @@ Api::Api(MainWindow *pMainWindow_p, UINT nodeId_p, QString devName_p)
     {
         QMessageBox::critical(0, "POWERLINK demo",
                               QString("Initialization of process image failed.\n") +
-                              "Error code: 0x"+ QString::number(ret, 16));
+                                      "Error code: 0x"+ QString::number(ret, 16));
         goto Exit;
     }
     // start the openPOWERLINK stack
@@ -270,7 +269,7 @@ Exit:
 
 /**
 ********************************************************************************
-\brief	Destructor
+\brief  Destructor
 
 Destructs a POWERLINK object.
 *******************************************************************************/
@@ -296,7 +295,4 @@ UINT Api::defaultNodeId()
 {
     return NODEID;
 }
-
-
-
 

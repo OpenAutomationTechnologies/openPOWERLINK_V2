@@ -7,7 +7,7 @@
 This file contains the implementation of the State class
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -94,7 +94,7 @@ Constructs a State object
 \param  parent          pointer to parent widget
 */
 //------------------------------------------------------------------------------
-State::State(QWidget *parent)
+State::State(QWidget* parent)
     : QWidget(parent)
 {
     QFont LabelFont;
@@ -105,7 +105,7 @@ State::State(QWidget *parent)
     pYellowLed = new QPixmap(":/img/ledyellow.png");
     pGreenLed = new QPixmap(":/img/ledgreen.png");
 
-    QHBoxLayout *pStateLayout = new QHBoxLayout;
+    QHBoxLayout* pStateLayout = new QHBoxLayout;
     setLayout(pStateLayout);
 
     pStateLayout->addStretch(0);
@@ -132,7 +132,7 @@ State::State(QWidget *parent)
 
 //------------------------------------------------------------------------------
 /**
-\brief  set POWERLINK status LED
+\brief  Set POWERLINK status LED
 
 Sets the POWERLINK status LED depending on the POWERLINK state.
 
@@ -165,14 +165,14 @@ void State::setStatusLed(int status_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief  sets the text to show
+\brief  Sets the text to show
 
 Sets the text to show for the POWERLINK state.
 
 \param  strState_p       POWERLINK status text
 */
 //------------------------------------------------------------------------------
-void State::setNmtStateText(const QString &strState_p)
+void State::setNmtStateText(const QString& strState_p)
 {
     pNmtStateLabel->show();
     pNmtStateLabel->setText(strState_p);

@@ -9,7 +9,7 @@ The file contains the implementation of the LED widget class.
 \ingroup module_demo_mn_qt
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -62,14 +62,14 @@ Constructs a LED widget
 \param  parent_p        Pointer to parent widget
 */
 //------------------------------------------------------------------------------
-Leds::Leds(int count_p, QWidget *parent_p)
+Leds::Leds(int count_p, QWidget* parent_p)
     : QWidget(parent_p)
 {
     int nIdx;
 
     count = count_p;
 
-    QHBoxLayout *pLedsLayout = new QHBoxLayout;
+    QHBoxLayout* pLedsLayout = new QHBoxLayout;
     setLayout(pLedsLayout);
 
     setContentsMargins(0, 0, 0, 0);
@@ -93,7 +93,7 @@ Leds::Leds(int count_p, QWidget *parent_p)
 /**
 \brief  set LEDs
 
-setLeds() sets the leds according to the data value.
+setLeds() sets the LEDs according to the data value.
 
 \param  dataIn_p        Data value to show
 */
@@ -102,7 +102,7 @@ void Leds::setLeds(UINT dataIn_p)
 {
     int nIdx;
 
-    for (nIdx=0; nIdx < count; nIdx++)
+    for (nIdx = 0; nIdx < count; nIdx++)
     {
         if (dataIn_p & (1 << nIdx))
         {
@@ -114,5 +114,4 @@ void Leds::setLeds(UINT dataIn_p)
         }
     }
 }
-
 
