@@ -8,7 +8,7 @@ EXTRA_CFLAGS += ${MODULE_DEFS}
 # object files for kernel object with relative paths
 MODULEOBJS      = ${MODULE_OBJS}
 
-# build rule for the kernel object epl.ko
+# build rule for the openPOWERLINK kernel object
 obj-m := ${MODULE_NAME}.o
 
 ${MODULE_NAME}-y := $(MODULEOBJS)
