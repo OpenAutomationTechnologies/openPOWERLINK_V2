@@ -103,6 +103,7 @@ private:
     tOplkError      processSdoEvent(tOplkApiEventType EventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
     tOplkError      processHistoryEvent(tOplkApiEventType EventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
     tOplkError      processNodeEvent(tOplkApiEventType EventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
+    tOplkError      processPdoChangeEvent(tOplkApiEventType EventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
     tOplkError      processCfmProgressEvent(tOplkApiEventType EventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
     tOplkError      processCfmResultEvent(tOplkApiEventType EventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
     tOplkError      setDefaultNodeAssignment(void);
