@@ -7,7 +7,7 @@
 This file contains the definitions of the main window class.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -34,8 +34,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef __INC_MAIN_WINDOW_H
-#define __INC_MAIN_WINDOW_H
+#ifndef _INC_MainWindow_H_
+#define _INC_MainWindow_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -71,44 +71,44 @@ class MainWindow : public QWidget
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = 0);
+    MainWindow(QWidget* parent = 0);
 
-    State*      getStateWidget() {return pState;}
-    Output*     getOutputWidget() {return pOutput;}
-    Input*      getInputWidget() {return pInput;}
-    CnState*    getCnStateWidget() {return pCnState;}
+    State*       getStateWidget() {return pState;}
+    Output*      getOutputWidget() {return pOutput;}
+    Input*       getInputWidget() {return pInput;}
+    CnState*     getCnStateWidget() {return pCnState;}
 
 private slots:
-    void        toggleWindowState();
-    void        startPowerlink();
-    void        stopPowerlink();
-    void        printlog(QString str);
+    void         toggleWindowState();
+    void         startPowerlink();
+    void         stopPowerlink();
+    void         printlog(QString str);
 
 private:
-    QHBoxLayout *pHeadRegion;
-    QPixmap     *pLogo;
-    QLabel      *pLabel;
+    QHBoxLayout* pHeadRegion;
+    QPixmap*     pLogo;
+    QLabel*      pLabel;
 
-    State       *pState;
-    CnState     *pCnState;
-    Input       *pInput;
-    Output      *pOutput;
+    State*       pState;
+    CnState*     pCnState;
+    Input*       pInput;
+    Output*      pOutput;
 
-    QLineEdit   *pNodeIdEdit;
+    QLineEdit*   pNodeIdEdit;
 
-    QPushButton *pToggleMax;
-    QPushButton *pStartStopOplk;
+    QPushButton* pToggleMax;
+    QPushButton* pStartStopOplk;
 
-    QFrame      *pFrameSepHeadMiddle;
-    QFrame      *pFrameSepMiddle;
-    QFrame      *pFrameSepMiddle2;
-    QFrame      *pFrameSepMiddleStatus;
-    QFrame      *pFrameSepStatusFoot;
+    QFrame*      pFrameSepHeadMiddle;
+    QFrame*      pFrameSepMiddle;
+    QFrame*      pFrameSepMiddle2;
+    QFrame*      pFrameSepMiddleStatus;
+    QFrame*      pFrameSepStatusFoot;
 
-    QTextEdit   *pTextEdit;
+    QTextEdit*   pTextEdit;
 
-    Api         *pApi;
+    Api*         pApi;
 };
 
-#endif /* __INC_MAIN_WINDOW_H */
+#endif /* _INC_MainWindow_H_ */
 

@@ -7,7 +7,7 @@
 The file contains the definitions for the POWERLINK process thread.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -70,49 +70,50 @@ class ProcessThread : public QThread
     Q_OBJECT
 
 public:
-    ProcessThread(MainWindow *pMainWindow_p);
+    ProcessThread(MainWindow* pMainWindow_p);
 
-    void            run();
-    void            sigOplkStatus(int status_p);
-    void            sigNmtState(tNmtState State_p);
-    void            sigPrintLog(QString log_p);
-    void            sigNodeAppeared(int nodeId_p) { emit nodeAppeared(nodeId_p); };
-    void            sigNodeDisappeared(int nodeId_p) { emit nodeDisappeared(nodeId_p); };
-    void            sigNodeStatus(int nodeId_p, int status_p) { emit nodeStatusChanged(nodeId_p, status_p); };
+    void              run();
+    void              sigOplkStatus(int status_p);
+    void              sigNmtState(tNmtState State_p);
+    void              sigPrintLog(QString log_p);
+    void              sigNodeAppeared(int nodeId_p) { emit nodeAppeared(nodeId_p); };
+    void              sigNodeDisappeared(int nodeId_p) { emit nodeDisappeared(nodeId_p); };
+    void              sigNodeStatus(int nodeId_p, int status_p) { emit nodeStatusChanged(nodeId_p, status_p); };
 
-    tOplkApiCbEvent getEventCbFunc(void);
+    tOplkApiCbEvent   getEventCbFunc(void);
 
-    void            waitForNmtStateOff();
-    void            reachedNmtStateOff();
+    void              waitForNmtStateOff();
+    void              reachedNmtStateOff();
 
 signals:
-    void            oplkStatusChanged(int status_p);
-    void            nmtStateChanged(const QString &strState_p);
-    void            nodeAppeared(int nodeId_p);
-    void            nodeDisappeared(int nodeId_p);
-    void            allNodesRemoved();
-    void            nodeStatusChanged(int iNodeId_p, int iStatus_p);
-    void            printLog(const QString &strState_p);
+    void              oplkStatusChanged(int status_p);
+    void              nmtStateChanged(const QString& strState_p);
+    void              nodeAppeared(int nodeId_p);
+    void              nodeDisappeared(int nodeId_p);
+    void              allNodesRemoved();
+    void              nodeStatusChanged(int iNodeId_p, int iStatus_p);
+    void              printLog(const QString &strState_p);
 
 private:
     static tOplkError appCbEvent(tOplkApiEventType EventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
 
-    tOplkError      processEvent(tOplkApiEventType EventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
-    tOplkError      processStateChangeEvent(tOplkApiEventType EventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
-    tOplkError      processErrorWarningEvent(tOplkApiEventType EventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
-    tOplkError      processSdoEvent(tOplkApiEventType EventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
-    tOplkError      processHistoryEvent(tOplkApiEventType EventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
-    tOplkError      processNodeEvent(tOplkApiEventType EventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
-    tOplkError      processPdoChangeEvent(tOplkApiEventType EventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
-    tOplkError      processCfmProgressEvent(tOplkApiEventType EventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
-    tOplkError      processCfmResultEvent(tOplkApiEventType EventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
-    tOplkError      setDefaultNodeAssignment(void);
+    tOplkError        processEvent(tOplkApiEventType EventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
+    tOplkError        processStateChangeEvent(tOplkApiEventType EventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
+    tOplkError        processErrorWarningEvent(tOplkApiEventType EventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
+    tOplkError        processSdoEvent(tOplkApiEventType EventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
+    tOplkError        processHistoryEvent(tOplkApiEventType EventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
+    tOplkError        processNodeEvent(tOplkApiEventType EventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
+    tOplkError        processPdoChangeEvent(tOplkApiEventType EventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
+    tOplkError        processCfmProgressEvent(tOplkApiEventType EventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
+    tOplkError        processCfmResultEvent(tOplkApiEventType EventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
+    tOplkError        setDefaultNodeAssignment(void);
 
-    QMutex          Mutex;
-    QWaitCondition  NmtStateOff;
-    MainWindow*     pMainWindow;
+    QMutex            Mutex;
+    QWaitCondition    NmtStateOff;
+    MainWindow*       pMainWindow;
 
-    int             status;
+    int               status;
 };
 
 #endif /* _INC_ProcessThread_H_ */
+

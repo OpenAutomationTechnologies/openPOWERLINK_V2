@@ -10,7 +10,7 @@ This file contains a demo application for digital input/output data.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.
 All rights reserved.
@@ -125,14 +125,14 @@ tOplkError initApp(void)
 /**
 \brief  Shutdown the synchronous data application
 
-The function shut's down the synchronous data application
+The function shuts down the synchronous data application
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_demo_cn_embedded
 */
 //------------------------------------------------------------------------------
-void shutdownApp (void)
+void shutdownApp(void)
 {
     oplk_freeProcessImage();
 }
@@ -219,7 +219,7 @@ static tOplkError initProcessImage(void)
     obdSize = sizeof(pProcessImageIn_l->digitalIn[0]);
     varEntries = 4;
     ret = oplk_linkProcessImageObject(0x6000, 0x01, offsetof(PI_IN, digitalIn),
-                                     FALSE, obdSize, &varEntries);
+                                      FALSE, obdSize, &varEntries);
     if (ret != kErrorOk)
     {
         PRINTF("linking process vars ... error %04x\n\n", ret);
@@ -229,7 +229,7 @@ static tOplkError initProcessImage(void)
     obdSize = sizeof(pProcessImageOut_l->digitalOut[0]);
     varEntries = 4;
     ret = oplk_linkProcessImageObject(0x6200, 0x01, offsetof(PI_OUT, digitalOut),
-                                     TRUE, obdSize, &varEntries);
+                                      TRUE, obdSize, &varEntries);
     if (ret != kErrorOk)
     {
         PRINTF("linking process vars ... error %04x\n\n", ret);
@@ -242,3 +242,4 @@ static tOplkError initProcessImage(void)
 }
 
 ///\}
+

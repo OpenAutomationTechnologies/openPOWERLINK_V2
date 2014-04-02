@@ -11,7 +11,7 @@ application.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
 All rights reserved.
@@ -80,9 +80,9 @@ static BOOL fGsOff_l;
 // global function prototypes
 //------------------------------------------------------------------------------
 #if defined(CONFIG_USE_PCAP)
-tOplkError selectPcapDevice(char *pDevName_p);
+tOplkError selectPcapDevice(char* pDevName_p);
 #endif
-void initEvents (BOOL* pfGsOff_p);
+void initEvents(BOOL* pfGsOff_p);
 tOplkError processEvents(tOplkApiEventType EventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
 
 //============================================================================//
@@ -109,7 +109,7 @@ typedef struct
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static int getOptions(int argc_p, char **argv_p, tOptions* pOpts_p);
+static int getOptions(int argc_p, char** argv_p, tOptions* pOpts_p);
 static tOplkError initPowerlink(UINT32 cycleLen_p, const BYTE* macAddr_p, UINT32 nodeId_p);
 static void loopMain(void);
 static void shutdownPowerlink(void);
@@ -122,26 +122,26 @@ static void shutdownPowerlink(void);
 /**
 \brief  main function
 
-This is the main function of the openPOWERLINK console MN demo application.
+This is the main function of the openPOWERLINK console CN demo application.
 
 \param  argc                    Number of arguments
 \param  argv                    Pointer to argument strings
 
 \return Returns an exit code
 
-\ingroup module_demo_mn_console
+\ingroup module_demo_cn_console
 */
 //------------------------------------------------------------------------------
-int main (int argc, char **argv)
+int main (int argc, char** argv)
 {
     tOplkError                  ret = kErrorOk;
     tOptions                    opts;
 
-    getOptions (argc, argv, &opts);
+    getOptions(argc, argv, &opts);
 
     if (initSystem() < 0)
     {
-        printf ("Error initializing system!");
+        printf("Error initializing system!");
         return 0;
     }
 
@@ -156,7 +156,7 @@ int main (int argc, char **argv)
         != kErrorOk)
         goto Exit;
 
-    if((ret = initApp()) != kErrorOk)
+    if ((ret = initApp()) != kErrorOk)
         goto Exit;
 
     loopMain();
@@ -193,14 +193,14 @@ static tOplkError initPowerlink(UINT32 cycleLen_p, const BYTE* macAddr_p, UINT32
     static tOplkApiInitParam    initParam;
     static char                 devName[128];
 
-    printf ("Initializing openPOWERLINK stack...\n");
+    printf("Initializing openPOWERLINK stack...\n");
 
 #if defined(CONFIG_USE_PCAP)
     selectPcapDevice(devName);
 #endif
 
-    OPLK_MEMSET(&initParam, 0, sizeof (initParam));
-    initParam.sizeOfInitParam = sizeof (initParam);
+    OPLK_MEMSET(&initParam, 0, sizeof(initParam));
+    initParam.sizeOfInitParam = sizeof(initParam);
 
     // pass selected device name to Edrv
     initParam.hwParam.pDevName = devName;
@@ -208,10 +208,9 @@ static tOplkError initPowerlink(UINT32 cycleLen_p, const BYTE* macAddr_p, UINT32
     initParam.ipAddress = (0xFFFFFF00 & IP_ADDR) | initParam.nodeId;
 
     /* write 00:00:00:00:00:00 to MAC address, so that the driver uses the real hardware address */
-    OPLK_MEMCPY(initParam.aMacAddress, macAddr_p, sizeof (initParam.aMacAddress));
+    OPLK_MEMCPY(initParam.aMacAddress, macAddr_p, sizeof(initParam.aMacAddress));
 
-    initParam.fAsyncOnly = FALSE;
-
+    initParam.fAsyncOnly              = FALSE;
     initParam.featureFlags            = UINT_MAX;
     initParam.cycleLen                = cycleLen_p;       // required for error detection
     initParam.isochrTxMaxPayload      = 36;               // const
@@ -233,25 +232,24 @@ static tOplkError initPowerlink(UINT32 cycleLen_p, const BYTE* macAddr_p, UINT32
     initParam.serialNumber            = UINT_MAX;               // NMT_IdentityObject_REC.SerialNo_U32
     initParam.applicationSwDate       = 0;
     initParam.applicationSwTime       = 0;
-
     initParam.subnetMask              = SUBNET_MASK;
     initParam.defaultGateway          = DEFAULT_GATEWAY;
     sprintf((char*)initParam.sHostname, "%02x-%08x", initParam.nodeId, initParam.vendorId);
     initParam.syncNodeId              = C_ADR_SYNC_ON_SOA;
-    initParam.fSyncOnPrcNode            = FALSE;
+    initParam.fSyncOnPrcNode          = FALSE;
 
     // set callback functions
     initParam.pfnCbEvent = processEvents;
 
 #if defined(CONFIG_KERNELSTACK_DIRECTLINK)
-    initParam.pfnCbSync  = processSync;
+    initParam.pfnCbSync = processSync;
 #else
     initParam.pfnCbSync = NULL;
 #endif
 
     // initialize POWERLINK stack
     ret = oplk_init(&initParam);
-    if(ret != kErrorOk)
+    if (ret != kErrorOk)
     {
         printf("oplk_init() failed (Error:0x%x!\n", ret);
         return ret;
@@ -307,20 +305,20 @@ static void loopMain(void)
     // wait for key hit
     while (!fExit)
     {
-        if(console_kbhit())
+        if (console_kbhit())
         {
-            cKey    = (BYTE) console_getch();
+            cKey = (BYTE)console_getch();
+
             switch (cKey)
             {
                 case 'r':
-                {
                     ret = oplk_execNmtCommand(kNmtEventSwReset);
                     if (ret != kErrorOk)
                     {
                         fExit = TRUE;
                     }
                     break;
-                }
+
                 case 'i':
                     increaseInputs();
                     break;
@@ -338,13 +336,11 @@ static void loopMain(void)
                     break;
 
                 default:
-                {
                     break;
-                }
             }
         }
 
-        if( system_getTermSignalState() == TRUE )
+        if (system_getTermSignalState() == TRUE)
         {
             fExit = TRUE;
             PRINTF("Received termination signal, exiting...\n");
@@ -375,7 +371,7 @@ static void loopMain(void)
 /**
 \brief  Shutdown the demo application
 
-The function shut's down the demo application.
+The function shuts down the demo application.
 */
 //------------------------------------------------------------------------------
 static void shutdownPowerlink(void)
@@ -394,10 +390,9 @@ static void shutdownPowerlink(void)
             break;
     }
 
-    printf ("Stack in State off ... Shutdown\n");
+    printf("Stack in State off ... Shutdown\n");
 
     oplk_shutdown();
-
 }
 
 //------------------------------------------------------------------------------
@@ -416,7 +411,7 @@ options at pOpts_p.
 \retval -1          Parsing error
 */
 //------------------------------------------------------------------------------
-static int getOptions(int argc_p, char **argv_p, tOptions* pOpts_p)
+static int getOptions(int argc_p, char** argv_p, tOptions* pOpts_p)
 {
     int                         opt;
 
@@ -429,17 +424,17 @@ static int getOptions(int argc_p, char **argv_p, tOptions* pOpts_p)
     {
         switch (opt)
         {
-        case 'n':
-            pOpts_p->nodeId = strtoul(optarg, NULL, 10);
-            break;
+            case 'n':
+                pOpts_p->nodeId = strtoul(optarg, NULL, 10);
+                break;
 
-        case 'l':
-            pOpts_p->pLogFile = optarg;
-            break;
+            case 'l':
+                pOpts_p->pLogFile = optarg;
+                break;
 
-        default: /* '?' */
-            fprintf (stderr, "Usage: %s [-n NODE_ID] [-l LOGFILE]\n", argv_p[0]);
-            return -1;
+            default: /* '?' */
+                fprintf(stderr, "Usage: %s [-n NODE_ID] [-l LOGFILE]\n", argv_p[0]);
+                return -1;
         }
     }
     return 0;

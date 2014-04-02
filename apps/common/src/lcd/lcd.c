@@ -2,13 +2,13 @@
 ********************************************************************************
 \file   lcd.c
 
-\brief  Generic Lcd interface
+\brief  Generic LCD interface
 
-The generic Lcd interface module enables to control any Lcd.
+The generic LCD interface module enables to control any LCD.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.
 All rights reserved.
@@ -100,16 +100,16 @@ const char aStrNmtState_l[10][LCD_COLUMN+1] = {
 
 //------------------------------------------------------------------------------
 /**
-\brief  Initialize the Lcd
+\brief  Initialize the LCD
 
-The function initializes the generic Lcd instance.
+The function initializes the generic LCD instance.
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 tOplkError lcd_init(void)
 {
-    if(lcdl_init() != 0)
+    if (lcdl_init() != 0)
         return kErrorNoResource;
 
     return kErrorOk;
@@ -117,9 +117,9 @@ tOplkError lcd_init(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Exit the Lcd
+\brief  Exit the LCD
 
-The function exits the generic Lcd instance.
+The function exits the generic LCD instance.
 */
 //------------------------------------------------------------------------------
 void lcd_exit(void)
@@ -129,7 +129,7 @@ void lcd_exit(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Clear the Lcd
+\brief  Clear the LCD
 
 The function clears the display.
 */
@@ -141,9 +141,9 @@ void lcd_clear(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Print text to Lcd
+\brief  Print text to LCD
 
-The function prints the provided text to the specified line in the Lcd.
+The function prints the provided text to the specified line in the LCD.
 
 \param  sText_p     Text to be printed
 \param  line_p      Line to print the text in
@@ -151,7 +151,7 @@ The function prints the provided text to the specified line in the Lcd.
 //------------------------------------------------------------------------------
 void lcd_printText(char* sText_p, UINT line_p)
 {
-    if(lcdl_changeToLine(line_p) != 0)
+    if (lcdl_changeToLine(line_p) != 0)
         return;
 
     lcdl_printText(sText_p);
@@ -159,7 +159,7 @@ void lcd_printText(char* sText_p, UINT line_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Print NMT state to Lcd
+\brief  Print NMT state to LCD
 
 The function prints the NMT state to the second line of the display.
 
@@ -168,7 +168,7 @@ The function prints the NMT state to the second line of the display.
 //------------------------------------------------------------------------------
 void lcd_printNmtState(tNmtState nmtState_p)
 {
-    if(lcdl_changeToLine(2) != 0)
+    if (lcdl_changeToLine(2) != 0)
         return;
 
     switch (nmtState_p)
@@ -176,39 +176,48 @@ void lcd_printNmtState(tNmtState nmtState_p)
         case kNmtGsOff:
             lcdl_printText(aStrNmtState_l[1]);
             break;
+
         case kNmtGsInitialising:
         case kNmtGsResetApplication:
         case kNmtGsResetCommunication:
         case kNmtGsResetConfiguration:
             lcdl_printText(aStrNmtState_l[2]);
             break;
+
         case kNmtCsNotActive:
         case kNmtMsNotActive:
             lcdl_printText(aStrNmtState_l[3]);
             break;
+
         case kNmtCsBasicEthernet:
         case kNmtMsBasicEthernet:
             lcdl_printText(aStrNmtState_l[4]);
             break;
+
         case kNmtCsPreOperational1:
         case kNmtMsPreOperational1:
             lcdl_printText(aStrNmtState_l[5]);
             break;
+
         case kNmtCsPreOperational2:
         case kNmtMsPreOperational2:
             lcdl_printText(aStrNmtState_l[6]);
             break;
+
         case kNmtCsReadyToOperate:
         case kNmtMsReadyToOperate:
             lcdl_printText(aStrNmtState_l[7]);
             break;
+
         case kNmtCsOperational:
         case kNmtMsOperational:
             lcdl_printText(aStrNmtState_l[8]);
             break;
+
         case kNmtCsStopped:
             lcdl_printText(aStrNmtState_l[9]);
             break;
+
         default:
             lcdl_printText(aStrNmtState_l[0]);
             break;
@@ -218,7 +227,7 @@ void lcd_printNmtState(tNmtState nmtState_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Print node ID to Lcd
+\brief  Print node ID to LCD
 
 The function prints the provided node ID to the first line of the display.
 In addition to the printed node ID 'MN' (=0xF0) or 'CN' is added.
@@ -226,14 +235,14 @@ In addition to the printed node ID 'MN' (=0xF0) or 'CN' is added.
 \param  nodeID      node ID to be written
 */
 //------------------------------------------------------------------------------
-void lcd_printNodeId (WORD wNodeId_p)
+void lcd_printNodeId(WORD wNodeId_p)
 {
     char TextNodeID[LCD_COLUMN+1];
 
     sprintf(TextNodeID, "NodeID=0x%02X (%s)", wNodeId_p,
             (wNodeId_p == C_ADR_MN_DEF_NODE_ID) ? "MN" : "CN");
 
-    if(lcdl_changeToLine(1) != 0)
+    if (lcdl_changeToLine(1) != 0)
         return;
 
     lcdl_printText(TextNodeID);
@@ -248,13 +257,13 @@ The function prints the provided error code to the second line of the display.
 \param  error_p     error code
 */
 //------------------------------------------------------------------------------
-void lcd_printError (tOplkError error_p)
+void lcd_printError(tOplkError error_p)
 {
     char TextError[LCD_COLUMN+1];
 
     sprintf(TextError, "ERROR=0x%04X", error_p);
 
-    if(lcdl_changeToLine(2) != 0)
+    if (lcdl_changeToLine(2) != 0)
         return;
 
     lcdl_printText(TextError);
@@ -265,4 +274,6 @@ void lcd_printError (tOplkError error_p)
 //============================================================================//
 /// \name Private Functions
 /// \{
+
 ///\}
+

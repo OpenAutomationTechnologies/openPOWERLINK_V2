@@ -7,7 +7,7 @@
 This file contains the definitions for the LED widget.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -67,9 +67,7 @@ class Leds : public QWidget
     Q_OBJECT
 
 public:
-    Leds(int count_p, QWidget *parent = 0);
-
-public:
+    Leds(int count_p, QWidget* parent = 0);
     void setLeds(UINT dataIn_p);
 
 private:

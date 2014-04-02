@@ -7,7 +7,7 @@
 This file contains the implementation of the main window class.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -55,21 +55,21 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //------------------------------------------------------------------------------
 /**
-\brief	constructor
+\brief  constructor
 
 Constructor of main window class.
 
-\param		parent			pointer parent window
+\param  parent      Pointer to the parent window
 */
 //------------------------------------------------------------------------------
-MainWindow::MainWindow(QWidget *parent)
+MainWindow::MainWindow(QWidget* parent)
     : QWidget(parent)
 {
     pApi = NULL;
 
     resize(1000, 600);
 
-    QVBoxLayout *pWindowLayout = new QVBoxLayout();
+    QVBoxLayout* pWindowLayout = new QVBoxLayout();
     pWindowLayout->setObjectName("MainLayout");
     setLayout(pWindowLayout);
 
@@ -96,7 +96,7 @@ MainWindow::MainWindow(QWidget *parent)
     // ---------------------------------------------------------------------
 
     // separate in left and right side
-    QHBoxLayout *pMiddleRegion = new QHBoxLayout();
+    QHBoxLayout* pMiddleRegion = new QHBoxLayout();
     pMiddleRegion->setObjectName("MiddleRegion");
 
     pCnState = new CnState;
@@ -127,7 +127,7 @@ MainWindow::MainWindow(QWidget *parent)
     // ---------------------------------------------------------------------
     // Status Region
     // ---------------------------------------------------------------------
-    QHBoxLayout *pStatusRegion = new QHBoxLayout();
+    QHBoxLayout* pStatusRegion = new QHBoxLayout();
     pStatusRegion->setObjectName("StatusRegion");
 
     // POWERLINK network state
@@ -143,7 +143,7 @@ MainWindow::MainWindow(QWidget *parent)
     // ---------------------------------------------------------------------
     // Foot Region
     // ---------------------------------------------------------------------
-    QHBoxLayout *pFootRegion = new QHBoxLayout();
+    QHBoxLayout* pFootRegion = new QHBoxLayout();
     pFootRegion->setObjectName("FootRegion");
 
     QLabel* pNodeIdLabel = new QLabel("Node-ID:");
@@ -152,7 +152,7 @@ MainWindow::MainWindow(QWidget *parent)
     QString sNodeId;
     sNodeId.setNum(Api::defaultNodeId());
 
-    QValidator *pValidator = new QIntValidator(1, 254, this);
+    QValidator* pValidator = new QIntValidator(1, 254, this);
     pNodeIdEdit = new QLineEdit(sNodeId);
     pNodeIdEdit->setValidator(pValidator);
     pFootRegion->addWidget(pNodeIdEdit);
@@ -170,7 +170,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(pToggleMax, SIGNAL(clicked()),
             this, SLOT(toggleWindowState()));
 
-    QPushButton *pQuit = new QPushButton(tr("Quit"));
+    QPushButton* pQuit = new QPushButton(tr("Quit"));
     pFootRegion->addWidget(pQuit);
     connect(pQuit, SIGNAL(clicked()), qApp, SLOT(quit()));
 
@@ -179,7 +179,7 @@ MainWindow::MainWindow(QWidget *parent)
     // ---------------------------------------------------------------------
     // Text Console Region
     // ---------------------------------------------------------------------
-    QHBoxLayout *pTextRegion = new QHBoxLayout();
+    QHBoxLayout* pTextRegion = new QHBoxLayout();
     pTextRegion->setObjectName("TextRegion");
 
     pTextEdit = new QTextEdit();
@@ -191,7 +191,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 //------------------------------------------------------------------------------
 /**
-\brief  toggle window state
+\brief  Toggle window state
 
 toggleWindowState() toggles between fullscreen and normal window state.
 */
@@ -211,7 +211,7 @@ void MainWindow::toggleWindowState()
 
 //------------------------------------------------------------------------------
 /**
-\brief  start POWERLINK
+\brief  Start POWERLINK
 
 Starts the openPOWERLINK stack.
 */
@@ -224,7 +224,7 @@ void MainWindow::startPowerlink()
 
 #if defined(CONFIG_USE_PCAP)
     // start the selection dialog
-    InterfaceSelectDialog *pInterfaceDialog = new InterfaceSelectDialog();
+    InterfaceSelectDialog* pInterfaceDialog = new InterfaceSelectDialog();
     if (pInterfaceDialog->fillList() < 0)
     {
         QMessageBox::warning(this, "PCAP not working!",
@@ -263,7 +263,7 @@ void MainWindow::startPowerlink()
 
 //------------------------------------------------------------------------------
 /**
-\brief  stop POWERLINK
+\brief  Stop POWERLINK
 
 Stops the openPOWERLINK stack.
 */
@@ -279,7 +279,7 @@ void MainWindow::stopPowerlink()
 
 //------------------------------------------------------------------------------
 /**
-\brief  print log entry
+\brief  Print a log entry
 
 The function prints a log entry.
 

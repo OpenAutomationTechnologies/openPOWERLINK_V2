@@ -7,7 +7,7 @@
 This file contains the definitions for the Input Widget
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
 All rights reserved.
@@ -70,7 +70,7 @@ class Input : public QWidget
     Q_OBJECT
 
 public:
-    Input(QWidget *parent = 0);
+    Input(QWidget* parent = 0);
 
 public slots:
     void setLeds(int dataIn_p, int nodeId_p);
@@ -79,8 +79,9 @@ public slots:
     void removeAllNodes();
 
 private:
-    QVBoxLayout     *pInputLayout;
-    Leds            **ppLeds;
+    QVBoxLayout* pInputLayout;
+    Leds**       ppLeds;
 };
 
 #endif // _INC_Input_H_
+

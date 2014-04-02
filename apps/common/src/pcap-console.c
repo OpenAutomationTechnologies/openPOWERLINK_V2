@@ -11,7 +11,7 @@ library.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
 All rights reserved.
@@ -95,19 +95,20 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /**
 \brief  Select PCAP device
 
-The function is used to select the PCAP device to be used for openPOWERLINK
-from a list of devices
+With this function the PCAP device to be used for openPOWERLINK is selected
+from a list of devices.
 
-\param  pDevName_p              Pointer to store device name which should be used.
+\param  pDevName_p              Pointer to store the device name which should be
+                                used.
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError selectPcapDevice(char *pDevName_p)
+tOplkError selectPcapDevice(char* pDevName_p)
 {
     char            sErr_Msg[ PCAP_ERRBUF_SIZE ];
-    pcap_if_t *     alldevs;
-    pcap_if_t *     seldev;
+    pcap_if_t*      alldevs;
+    pcap_if_t*      seldev;
     int             i = 0;
     int             inum;
 
@@ -173,10 +174,3 @@ tOplkError selectPcapDevice(char *pDevName_p)
 
 
 ///\}
-
-
-
-
-
-
-

@@ -7,7 +7,7 @@
 This file contains the definitions of the openPOWERLINK API class.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -34,8 +34,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef __INC_API_H
-#define __INC_API_H
+#ifndef _INC_Api_H_
+#define _INC_Api_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -62,16 +62,16 @@ Class Api implements the API interface to the openPOWERLINK stack.
 class Api
 {
 public:
-    Api(MainWindow *pMainWindow_p, UINT uiNodeId_p, QString devName_p);
+    Api(MainWindow* pMainWindow_p, UINT uiNodeId_p, QString devName_p);
     ~Api();
     static UINT defaultNodeId();
 
 private:
-    tOplkApiInitParam    initParam;
+    tOplkApiInitParam   initParam;
 
     ProcessThread*      pProcessThread;
     DataInOutThread*    pDataInOutThread;
 };
 
-#endif /*__INC_API_H*/
+#endif /*_INC_Api_H_*/
 

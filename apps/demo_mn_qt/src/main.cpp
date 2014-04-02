@@ -7,7 +7,7 @@
 The file contains the main source code of the QT MN demo application
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -79,27 +79,26 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //------------------------------------------------------------------------------
 /**
-\brief  main function
+\brief  Main function
 
 main function of the QT demo application
 
-\param  argc            number of command line arguments
-\param  argv            pointer to command line argument strings
+\param  argc            Number of command line arguments
+\param  argv            Pointer to command line argument strings
 
 \return application return value
 */
 //------------------------------------------------------------------------------
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
-    MainWindow   *pMainWindow;
-    QApplication *pApp;
+    MainWindow*   pMainWindow;
+    QApplication* pApp;
 
     pApp        = new QApplication(argc, argv);
     pMainWindow = new MainWindow;
+
     pMainWindow->show();
 
     return pApp->exec();
 }
-
-
 

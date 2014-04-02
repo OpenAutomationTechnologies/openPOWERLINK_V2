@@ -7,7 +7,7 @@
 The file contains the implementation of the input widget.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -99,7 +99,7 @@ Constructs an Input widget.
 \param  parent                  pointer to parent widget
 */
 //------------------------------------------------------------------------------
-Input::Input(QWidget *parent)
+Input::Input(QWidget* parent)
     : QWidget(parent)
 {
     QFont LabelFont;
@@ -191,8 +191,9 @@ void Input::removeAllNodes()
     int nIdx;
 
     // count() gives all widgets (hidden ones too)
-    for(nIdx=0; nIdx < NODE_ID_MAX; nIdx++)
+    for (nIdx = 0; nIdx < NODE_ID_MAX; nIdx++)
     {
         ppLeds[nIdx]->hide();
     }
 }
+

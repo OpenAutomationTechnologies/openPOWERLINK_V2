@@ -2,13 +2,13 @@
 ********************************************************************************
 \file       lcd-null.c
 
-\brief      Lcd null implementation
+\brief      LCD null implementation
 
-This implementation shall be used for platforms without an Lcd.
+This implementation shall be used for platforms without an LCD.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.
 All rights reserved.
@@ -84,9 +84,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //------------------------------------------------------------------------------
 /**
-\brief  Initialize the Lcd
+\brief  Initialize the LCD
 
-This function writes a sequence of initialization parameters to the Lcd.
+This function writes a sequence of initialization parameters to the LCD.
 */
 //------------------------------------------------------------------------------
 int lcdl_init(void)
@@ -96,9 +96,9 @@ int lcdl_init(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Exit the Lcd instance
+\brief  Exit the LCD instance
 
-This function exits the Lcd instance.
+This function exits the LCD instance.
 */
 //------------------------------------------------------------------------------
 void lcdl_exit(void)
@@ -108,7 +108,7 @@ void lcdl_exit(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Clear the Lcd
+\brief  Clear the LCD
 
 This function clears all lines of the display.
 */
@@ -122,7 +122,7 @@ void lcdl_clear(void)
 /**
 \brief  Change to specified line
 
-Changes to specified line of the Lcd
+Changes to specified line of the LCD
 
 \param  line_p      Specifies the line
 
@@ -136,9 +136,9 @@ int lcdl_changeToLine(unsigned int line_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Print text to the Lcd
+\brief  Print text to the LCD
 
-Writes text to the Lcd currently selected.
+Writes text to the LCD currently selected.
 
 \param  sText_p     The text to print
 */
@@ -153,4 +153,5 @@ void lcdl_printText(const char* sText_p)
 //============================================================================//
 /// \name Private Functions
 /// \{
+
 ///\}

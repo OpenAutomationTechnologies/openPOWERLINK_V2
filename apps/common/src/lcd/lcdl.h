@@ -2,13 +2,13 @@
 ********************************************************************************
 \file       lcd-l.h
 
-\brief      Low-level interface for Lcd
+\brief      Low-level interface for LCD
 
-This is the low-level interface definition for specific Lcds.
+This is the low-level interface definition for specific LCDs.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.
 All rights reserved.
@@ -70,3 +70,4 @@ void lcdl_printText(const char* pText_p);
 #endif
 
 #endif /* _INC_lcdl_H_ */
+

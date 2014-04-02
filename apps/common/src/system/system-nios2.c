@@ -11,7 +11,7 @@ openPOWERLINK demo applications.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define TGTCONIO_MS_IN_US(x)    (x*1000U)
+#define TGTCONIO_MS_IN_US(x)    (x * 1000U)
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -97,7 +97,7 @@ milliseconds have elapsed.
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-void msleep (unsigned int milliSecond_p)
+void msleep(unsigned int milliSecond_p)
 {
     usleep(TGTCONIO_MS_IN_US(milliSecond_p));
 }
@@ -105,3 +105,8 @@ void msleep (unsigned int milliSecond_p)
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+/// \name Private Functions
+/// \{
+
+///\}
+

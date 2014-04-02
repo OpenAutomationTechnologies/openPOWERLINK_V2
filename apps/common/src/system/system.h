@@ -9,7 +9,7 @@ by the openPOWERLINK examples.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
 All rights reserved.
@@ -64,7 +64,7 @@ extern "C" {
 int initSystem(void);
 void shutdownSystem(void);
 BOOL system_getTermSignalState();
-void msleep (unsigned int milliSecond_p);
+void msleep(unsigned int milliSecond_p);
 
 #if defined(CONFIG_USE_SYNCTHREAD)
 void startSyncThread(tSyncCb pfnSync_p);
@@ -75,3 +75,4 @@ void startSyncThread(tSyncCb pfnSync_p);
 #endif
 
 #endif /* _INC_system_H_ */
+

@@ -11,7 +11,7 @@ applications.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
 All rights reserved.
@@ -157,7 +157,7 @@ The function sets the POWERLINK status LED.
 //------------------------------------------------------------------------------
 void gpio_setStatusLed(BOOL fOn_p)
 {
-    if(fOn_p != FALSE)
+    if (fOn_p != FALSE)
         IOWR_ALTERA_AVALON_PIO_SET_BITS(STATUS_LED_PIO_BASE, GPIO_STATUS_LED_BIT);
     else
         IOWR_ALTERA_AVALON_PIO_CLEAR_BITS(STATUS_LED_PIO_BASE, GPIO_STATUS_LED_BIT);
@@ -176,7 +176,7 @@ The function sets the POWERLINK error LED.
 //------------------------------------------------------------------------------
 void gpio_setErrorLed(BOOL fOn_p)
 {
-    if(fOn_p != FALSE)
+    if (fOn_p != FALSE)
         IOWR_ALTERA_AVALON_PIO_SET_BITS(STATUS_LED_PIO_BASE, GPIO_ERROR_LED_BIT);
     else
         IOWR_ALTERA_AVALON_PIO_CLEAR_BITS(STATUS_LED_PIO_BASE, GPIO_ERROR_LED_BIT);
@@ -228,4 +228,6 @@ void gpio_setAppOutputs(UINT32 val_p)
 //============================================================================//
 /// \name Private Functions
 /// \{
+
 ///\}
+

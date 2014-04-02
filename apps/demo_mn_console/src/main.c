@@ -11,7 +11,7 @@ application.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
 All rights reserved.
@@ -73,12 +73,12 @@ static BOOL fGsOff_l;
 // global function prototypes
 //------------------------------------------------------------------------------
 #if defined(CONFIG_USE_PCAP)
-tOplkError selectPcapDevice(char *pDevName_p);
+tOplkError selectPcapDevice(char* pDevName_p);
 #endif
 
-int getopt(int, char * const [], const char *);
+int getopt(int, char* const [], const char*);
 
-void initEvents (BOOL* pfGsOff_p);
+void initEvents(BOOL* pfGsOff_p);
 tOplkError processEvents(tOplkApiEventType EventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
 
 //============================================================================//
@@ -105,8 +105,8 @@ typedef struct
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static int getOptions(int argc_p, char **argv_p, tOptions* pOpts_p);
-static tOplkError initPowerlink(UINT32 cycleLen_p, char *pszCdcFileName_p,
+static int getOptions(int argc_p, char** argv_p, tOptions* pOpts_p);
+static tOplkError initPowerlink(UINT32 cycleLen_p, char* pszCdcFileName_p,
                                 const BYTE* macAddr_p);
 static void loopMain(void);
 static void shutdownPowerlink(void);
@@ -129,7 +129,7 @@ This is the main function of the openPOWERLINK console MN demo application.
 \ingroup module_demo_mn_console
 */
 //------------------------------------------------------------------------------
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
     tOplkError                  ret = kErrorOk;
     tOptions                    opts;
@@ -138,7 +138,7 @@ int main(int argc, char **argv)
 
     if (initSystem() < 0)
     {
-        printf ("Error initializing system!");
+        printf("Error initializing system!");
         return 0;
     }
 
@@ -152,7 +152,7 @@ int main(int argc, char **argv)
     if ((ret = initPowerlink(CYCLE_LEN, opts.cdcFile, aMacAddr_g)) != kErrorOk)
         goto Exit;
 
-    if((ret = initApp()) != kErrorOk)
+    if ((ret = initApp()) != kErrorOk)
         goto Exit;
 
     loopMain();
@@ -183,21 +183,21 @@ The function initializes the openPOWERLINK stack.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError initPowerlink(UINT32 cycleLen_p, char *pszCdcFileName_p,
+static tOplkError initPowerlink(UINT32 cycleLen_p, char* pszCdcFileName_p,
                                 const BYTE* macAddr_p)
 {
     tOplkError                  ret = kErrorOk;
-    static tOplkApiInitParam     initParam;
+    static tOplkApiInitParam    initParam;
     static char                 devName[128];
 
-    printf ("Initializing openPOWERLINK stack...\n");
+    printf("Initializing openPOWERLINK stack...\n");
 
 #if defined(CONFIG_USE_PCAP)
     selectPcapDevice(devName);
 #endif
 
-    OPLK_MEMSET(&initParam, 0, sizeof (initParam));
-    initParam.sizeOfInitParam = sizeof (initParam);
+    OPLK_MEMSET(&initParam, 0, sizeof(initParam));
+    initParam.sizeOfInitParam = sizeof(initParam);
 
     // pass selected device name to Edrv
     initParam.hwParam.pDevName = devName;
@@ -205,10 +205,9 @@ static tOplkError initPowerlink(UINT32 cycleLen_p, char *pszCdcFileName_p,
     initParam.ipAddress = (0xFFFFFF00 & IP_ADDR) | initParam.nodeId;
 
     /* write 00:00:00:00:00:00 to MAC address, so that the driver uses the real hardware address */
-    OPLK_MEMCPY(initParam.aMacAddress, macAddr_p, sizeof (initParam.aMacAddress));
+    OPLK_MEMCPY(initParam.aMacAddress, macAddr_p, sizeof(initParam.aMacAddress));
 
-    initParam.fAsyncOnly = FALSE;
-
+    initParam.fAsyncOnly              = FALSE;
     initParam.featureFlags            = UINT_MAX;
     initParam.cycleLen                = cycleLen_p;       // required for error detection
     initParam.isochrTxMaxPayload      = 256;              // const
@@ -233,15 +232,15 @@ static tOplkError initPowerlink(UINT32 cycleLen_p, char *pszCdcFileName_p,
     initParam.defaultGateway          = DEFAULT_GATEWAY;
     sprintf((char*)initParam.sHostname, "%02x-%08x", initParam.nodeId, initParam.vendorId);
     initParam.syncNodeId              = C_ADR_SYNC_ON_SOA;
-    initParam.fSyncOnPrcNode            = FALSE;
+    initParam.fSyncOnPrcNode          = FALSE;
 
     // set callback functions
-    initParam.pfnCbEvent =    processEvents;
+    initParam.pfnCbEvent = processEvents;
 
 #if defined(CONFIG_KERNELSTACK_DIRECTLINK)
-    initParam.pfnCbSync  =    processSync;
+    initParam.pfnCbSync  = processSync;
 #else
-    initParam.pfnCbSync  =    NULL;
+    initParam.pfnCbSync  = NULL;
 #endif
 
     // initialize POWERLINK stack
@@ -253,7 +252,7 @@ static tOplkError initPowerlink(UINT32 cycleLen_p, char *pszCdcFileName_p,
     }
 
     ret = oplk_setCdcFilename(pszCdcFileName_p);
-    if(ret != kErrorOk)
+    if (ret != kErrorOk)
     {
         printf("oplk_setCdcFilename() failed (Error:0x%x!)\n", ret);
         return ret;
@@ -300,7 +299,7 @@ static void loopMain(void)
     PRINTF("-------------------------------\n\n");
     while (!fExit)
     {
-        if(console_kbhit())
+        if (console_kbhit())
         {
             cKey = (BYTE)console_getch();
             switch (cKey)
@@ -330,7 +329,7 @@ static void loopMain(void)
             }
         }
 
-        if( system_getTermSignalState() == TRUE )
+        if (system_getTermSignalState() == TRUE)
         {
             fExit = TRUE;
             PRINTF("Received termination signal, exiting...\n");
@@ -362,7 +361,7 @@ static void loopMain(void)
 /**
 \brief  Shutdown the demo application
 
-The function shut's down the demo application.
+The function shuts down the demo application.
 */
 //------------------------------------------------------------------------------
 static void shutdownPowerlink(void)
@@ -380,7 +379,7 @@ static void shutdownPowerlink(void)
             break;
     }
 
-    printf ("Stack in State off ... Shutdown\n");
+    printf("Stack in State off ... Shutdown\n");
 
     oplk_shutdown();
 
@@ -402,12 +401,12 @@ options at pOpts_p.
 \retval -1          Parsing error
 */
 //------------------------------------------------------------------------------
-static int getOptions(int argc_p, char **argv_p, tOptions* pOpts_p)
+static int getOptions(int argc_p, char** argv_p, tOptions* pOpts_p)
 {
     int                         opt;
 
     /* setup default parameters */
-    strncpy (pOpts_p->cdcFile, "mnobd.cdc", 256);
+    strncpy(pOpts_p->cdcFile, "mnobd.cdc", 256);
     pOpts_p->pLogFile = NULL;
 
     /* get command line parameters */
@@ -415,20 +414,21 @@ static int getOptions(int argc_p, char **argv_p, tOptions* pOpts_p)
     {
         switch (opt)
         {
-        case 'c':
-            strncpy (pOpts_p->cdcFile, optarg, 256);
-            break;
+            case 'c':
+                strncpy(pOpts_p->cdcFile, optarg, 256);
+                break;
 
-        case 'l':
-            pOpts_p->pLogFile = optarg;
-            break;
+            case 'l':
+                pOpts_p->pLogFile = optarg;
+                break;
 
-        default: /* '?' */
-            printf ("Usage: %s [-c CDC-FILE] [-l LOGFILE]\n", argv_p[0]);
-            return -1;
+            default: /* '?' */
+                printf("Usage: %s [-c CDC-FILE] [-l LOGFILE]\n", argv_p[0]);
+                return -1;
         }
     }
     return 0;
 }
 
 ///\}
+

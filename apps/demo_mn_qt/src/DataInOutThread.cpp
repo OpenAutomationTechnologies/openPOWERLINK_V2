@@ -7,7 +7,7 @@
 This file implements the data Input/Output thread clas.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -54,13 +54,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // global variables
 //------------------------------------------------------------------------------
-DataInOutThread     *pDataInOutThread_g;
+DataInOutThread*  pDataInOutThread_g;
 
-static int usedNodeIds_g[] = {1, 32, 110, 0};
+static int        usedNodeIds_g[] = {1, 32, 110, 0};
 
 /* process images, structures defined in xap.h from openCONFIGURATOR */
-static PI_IN* pProcessImageIn_l;
-static PI_OUT* pProcessImageOut_l;
+static PI_IN*     pProcessImageIn_l;
+static PI_OUT*    pProcessImageOut_l;
 
 //============================================================================//
 //            S T A T I C   M E M B E R   F U N C T I O N S                   //
@@ -103,7 +103,7 @@ DataInOutThread::DataInOutThread()
 
 //------------------------------------------------------------------------------
 /**
-\brief  synchronous data callback
+\brief  Synchronous data callback
 
 The function implements the handling of synchronous data. It will be called
 from the stack at the synchronisation time.
@@ -202,8 +202,8 @@ tOplkError DataInOutThread::setupProcessImage()
         return ret;
     }
 
-    pProcessImageIn_l = (PI_IN *)oplk_getProcessImageIn();
-    pProcessImageOut_l = (PI_OUT *)oplk_getProcessImageOut();
+    pProcessImageIn_l = (PI_IN*)oplk_getProcessImageIn();
+    pProcessImageOut_l = (PI_OUT*)oplk_getProcessImageOut();
 
     ret = oplk_setupProcessImage();
     if (ret != kErrorOk)
@@ -278,3 +278,4 @@ tSyncCb DataInOutThread::getSyncCbFunc()
 {
     return AppCbSync;
 }
+

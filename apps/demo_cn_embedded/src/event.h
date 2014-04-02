@@ -8,7 +8,7 @@ The file contains the definitions for the CN digital I/O events.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
 All rights reserved.
@@ -60,12 +60,13 @@ typedef tOplkError (*tEventCb)(tOplkApiEventType EventType_p, tOplkApiEventArg* 
 extern "C" {
 #endif
 
-void initEvents (tEventCb pfnEventCb_p);
+void initEvents(tEventCb pfnEventCb_p);
 tOplkError processEvents(tOplkApiEventType EventType_p,
-        tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
+                         tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* _INC_demo_event_H_ */
+

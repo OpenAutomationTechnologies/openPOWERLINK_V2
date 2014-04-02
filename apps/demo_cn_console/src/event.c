@@ -2,7 +2,7 @@
 ********************************************************************************
 \file   event.c
 
-\brief  CN Application event handler
+\brief  CN application event handler
 
 This file contains a demo CN application event handler.
 
@@ -10,7 +10,7 @@ This file contains a demo CN application event handler.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
 All rights reserved.
@@ -109,7 +109,7 @@ The function initializes the applications event module
 \ingroup module_demo_cn_console
 */
 //------------------------------------------------------------------------------
-void initEvents (BOOL* pfGsOff_p)
+void initEvents(BOOL* pfGsOff_p)
 {
     pfGsOff_l = pfGsOff_p;
 }
@@ -118,7 +118,7 @@ void initEvents (BOOL* pfGsOff_p)
 /**
 \brief  Process openPOWERLINK events
 
-The function implements the applications stack event handler.
+The function implements the application's stack event handler.
 
 \param  EventType_p         Type of event
 \param  pEventArg_p         Pointer to union which describes the event in detail
@@ -199,8 +199,8 @@ static tOplkError processStateChangeEvent(tOplkApiEventType EventType_p,
             ret = kErrorShutdown;
 
             console_printlog("StateChangeEvent:kNmtGsOff originating event = 0x%X (%s)\n",
-                     pNmtStateChange->nmtEvent,
-                     debugstr_getNmtEventStr(pNmtStateChange->nmtEvent));
+                             pNmtStateChange->nmtEvent,
+                             debugstr_getNmtEventStr(pNmtStateChange->nmtEvent));
 
             // signal that stack is off
             *pfGsOff_l = FALSE;
@@ -220,9 +220,9 @@ static tOplkError processStateChangeEvent(tOplkApiEventType EventType_p,
 
         default:
             console_printlog("StateChangeEvent(0x%X) originating event = 0x%X (%s)\n",
-                   pNmtStateChange->newNmtState,
-                   pNmtStateChange->nmtEvent,
-                   debugstr_getNmtEventStr(pNmtStateChange->nmtEvent));
+                             pNmtStateChange->newNmtState,
+                             pNmtStateChange->nmtEvent,
+                             debugstr_getNmtEventStr(pNmtStateChange->nmtEvent));
             break;
     }
 
@@ -255,16 +255,16 @@ static tOplkError processErrorWarningEvent(tOplkApiEventType EventType_p,
     UNUSED_PARAMETER(pUserArg_p);
 
     console_printlog("Err/Warn: Source = %s (%02X) OplkError = %s (0x%03X)\n",
-                debugstr_getEventSourceStr(pInternalError->eventSource),
-                pInternalError->eventSource,
-                debugstr_getRetValStr(pInternalError->oplkError),
-                pInternalError->oplkError);
+                     debugstr_getEventSourceStr(pInternalError->eventSource),
+                     pInternalError->eventSource,
+                     debugstr_getRetValStr(pInternalError->oplkError),
+                     pInternalError->oplkError);
 
     FTRACE_MARKER("Err/Warn: Source = %s (%02X) OplkError = %s (0x%03X)\n",
-                debugstr_getEventSourceStr(pInternalError->eventSource),
-                pInternalError->eventSource,
-                debugstr_getRetValStr(pInternalError->oplkError),
-                pInternalError->oplkError);
+                  debugstr_getEventSourceStr(pInternalError->eventSource),
+                  pInternalError->eventSource,
+                  debugstr_getRetValStr(pInternalError->oplkError),
+                  pInternalError->oplkError);
 
     // check additional argument
     switch (pInternalError->eventSource)
@@ -274,12 +274,12 @@ static tOplkError processErrorWarningEvent(tOplkApiEventType EventType_p,
             // error occurred within event processing
             // either in kernel or in user part
             console_printlog(" OrgSource = %s %02X\n",
-                     debugstr_getEventSourceStr(pInternalError->errorArg.eventSource),
-                     pInternalError->errorArg.eventSource);
+                             debugstr_getEventSourceStr(pInternalError->errorArg.eventSource),
+                             pInternalError->errorArg.eventSource);
 
             FTRACE_MARKER(" OrgSource = %s %02X\n",
-                     debugstr_getEventSourceStr(pInternalError->errorArg.eventSource),
-                     pInternalError->errorArg.eventSource);
+                          debugstr_getEventSourceStr(pInternalError->errorArg.eventSource),
+                          pInternalError->errorArg.eventSource);
             break;
 
         case kEventSourceDllk:
@@ -345,7 +345,4 @@ static tOplkError processPdoChangeEvent(tOplkApiEventType EventType_p,
 }
 
 ///\}
-
-
-
 
