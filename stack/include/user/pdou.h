@@ -52,6 +52,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // typedef
 //------------------------------------------------------------------------------
 
+typedef struct
+{
+    BOOL                fActivated;
+    BOOL                fTx;
+    UINT                nodeId;
+    UINT                mappParamIndex;
+    UINT                mappObjectCount;
+} tPdoEventPdoChange;
+
+typedef tOplkError (*tPdoCbEventPdoChange)(tPdoEventPdoChange* pEventPdoChange_p);
+
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
@@ -74,6 +85,7 @@ tOplkError pdou_cbNmtStateChange(tEventNmtStateChange NmtStateChange_p);
 
 tOplkError pdou_copyRxPdoToPi (void);
 tOplkError pdou_copyTxPdoFromPi (void);
+tOplkError pdou_registerEventPdoChangeCb(tPdoCbEventPdoChange pfnCbEventPdoChange_p);
 
 #ifdef __cplusplus
 }

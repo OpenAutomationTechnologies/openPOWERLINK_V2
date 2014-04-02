@@ -98,6 +98,7 @@ typedef struct
     tPdoMappObject*         paTxObject;                 ///< Pointer to TX channel objects
     BOOL                    fAllocated;                 ///< Flag determines if PDOs are allocated
     BOOL                    fRunning;                   ///< Flag determines if PDO engine is running
+    tPdoCbEventPdoChange    pfnCbEventPdoChange;
     //BYTE*                   pPdoMem;                    ///< pointer to PDO memory
 } tPdouInstance;
 
@@ -109,6 +110,8 @@ static tPdouInstance  pdouInstance_g;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
+static tOplkError callPdoChangeCb(BOOL fActivated_p, UINT nodeId_p, UINT mappParamIndex_p,
+                                  UINT8 mappObjectCount_p, BOOL fTx_p);
 static tOplkError setupRxPdoChannelTables(BYTE abChannelIdToPdoIdRx_p[D_PDO_RPDOChannels_U16],
                                           UINT* pCountChannelIdRx_p);
 static tOplkError setupTxPdoChannelTables(BYTE abChannelIdToPdoIdTx_p[D_PDO_TPDOChannels_U16],
@@ -162,6 +165,7 @@ tOplkError pdou_init(tSyncCb pfnSyncCb_p)
     OPLK_MEMSET(&pdouInstance_g, 0, sizeof(pdouInstance_g));
     pdouInstance_g.fAllocated = FALSE;
     pdouInstance_g.fRunning = FALSE;
+    pdouInstance_g.pfnCbEventPdoChange = NULL;
 
     return pdoucal_init(pfnSyncCb_p);
 }
@@ -180,6 +184,7 @@ The function cleans up the PDO user module.
 tOplkError pdou_exit(void)
 {
     pdouInstance_g.fRunning = FALSE;
+    pdouInstance_g.pfnCbEventPdoChange = NULL;
     freePdoChannels();
     pdoucal_cleanupPdoMem();
     return pdoucal_exit();
@@ -209,8 +214,34 @@ tOplkError pdou_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
         case kNmtGsInitialising:
         case kNmtGsResetApplication:
         case kNmtGsResetCommunication:
-            pdouInstance_g.fAllocated = FALSE;
-            pdouInstance_g.fRunning = FALSE;
+            if (pdouInstance_g.fAllocated)
+            {
+                UINT    mapParamIndex;
+                UINT32  abortCode;
+
+                for (mapParamIndex = PDOU_OBD_IDX_RX_MAPP_PARAM;
+                     mapParamIndex < PDOU_OBD_IDX_RX_MAPP_PARAM + sizeof(pdouInstance_g.aPdoIdToChannelIdRx);
+                     mapParamIndex++)
+                {
+                    ret = checkAndConfigurePdo(mapParamIndex, 0, &abortCode);
+                }
+
+                for (mapParamIndex = PDOU_OBD_IDX_TX_MAPP_PARAM;
+
+#if defined(CONFIG_INCLUDE_NMT_MN)
+                     mapParamIndex < PDOU_OBD_IDX_TX_MAPP_PARAM + sizeof(pdouInstance_g.aPdoIdToChannelIdRx);
+#else
+                     mapParamIndex < PDOU_OBD_IDX_TX_MAPP_PARAM + (PDOU_PDO_ID_MASK + 1);
+#endif
+                     mapParamIndex++)
+                {
+                    ret = checkAndConfigurePdo(mapParamIndex, 0, &abortCode);
+                }
+
+                ret = kErrorOk;
+                pdouInstance_g.fAllocated = FALSE;
+                pdouInstance_g.fRunning = FALSE;
+            }
             break;
 
         case kNmtGsResetConfiguration:
@@ -444,11 +475,78 @@ tOplkError pdou_copyTxPdoFromPi (void)
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Register PDO change callback function
+
+The function is used to register a funtion for receiving PDO change events.
+
+\param  pfnCbEventPdoChange_p       Pointer to callback function.
+
+\return The function returns a tOplkError error code.
+
+\ingroup module_pdou
+*/
+//------------------------------------------------------------------------------
+tOplkError pdou_registerEventPdoChangeCb(tPdoCbEventPdoChange pfnCbEventPdoChange_p)
+{
+    pdouInstance_g.pfnCbEventPdoChange = pfnCbEventPdoChange_p;
+    return kErrorOk;
+}
+
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
 /// \name Private Functions
 /// \{
+
+//------------------------------------------------------------------------------
+/**
+\brief  Call PDO change callback function
+
+The function is used to call the registered callback function for PDO
+change events.
+
+\param  fActivated_p        Determines if PDO is activated or disabled.
+\param  nodeId_p            Node ID this PDO mapping belongs to.
+\param  mappParamIndex_p    Object index of mapping parameter object.
+\param  mappObjectCount_p   Number of mapped objects.
+\param  fTx_p               TRUE for TXPDO and FALSE for RXPDO.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError callPdoChangeCb(BOOL fActivated_p, UINT nodeId_p, UINT mappParamIndex_p,
+                                  UINT8 mappObjectCount_p, BOOL fTx_p)
+{
+    tOplkError              ret = kErrorOk;
+    tPdoEventPdoChange      eventPdoChange;
+    tObdSize                obdSize;
+
+    if (fActivated_p == FALSE)
+    {
+        obdSize = sizeof(mappObjectCount_p);
+        // read PDO mapping version
+        ret = obd_readEntry(mappParamIndex_p, 0x00, &mappObjectCount_p, &obdSize);
+        if (ret != kErrorOk)
+        {   // other fatal error occurred
+            return ret;
+        }
+
+        if (mappObjectCount_p == 0)
+        {   // PDO already disabled -> do not inform user
+            return ret;
+        }
+    }
+
+    eventPdoChange.fActivated = fActivated_p;
+    eventPdoChange.fTx = fTx_p;
+    eventPdoChange.nodeId = nodeId_p;
+    eventPdoChange.mappParamIndex = mappParamIndex_p;
+    eventPdoChange.mappObjectCount = mappObjectCount_p;
+
+    return pdouInstance_g.pfnCbEventPdoChange(&eventPdoChange);
+}
 
 //------------------------------------------------------------------------------
 /**
@@ -914,6 +1012,14 @@ static tOplkError checkAndConfigurePdo(UINT16 mappParamIndex_p,
         pdoChannelConf.pdoChannel.pdoSize = 0;
         pdouInstance_g.fRunning = FALSE;
         ret = configurePdoChannel(&pdoChannelConf);
+
+        if ((pdouInstance_g.fAllocated) && (pdouInstance_g.pfnCbEventPdoChange != NULL))
+        {
+            ret = callPdoChangeCb(FALSE, nodeId, mappParamIndex_p,
+                                  mappObjectCount_p, pdoChannelConf.fTx);
+            if (ret != kErrorOk)
+                 *pAbortCode_p = SDO_AC_DATA_NOT_TRANSF_DUE_LOCAL_CONTROL;
+        }
         goto Exit;
     }
 
@@ -973,6 +1079,14 @@ static tOplkError checkAndConfigurePdo(UINT16 mappParamIndex_p,
     {   // fatal error occurred
         *pAbortCode_p = SDO_AC_GENERAL_ERROR;
         goto Exit;
+    }
+
+    if ((pdouInstance_g.fAllocated) && (pdouInstance_g.pfnCbEventPdoChange != NULL))
+    {
+        ret = callPdoChangeCb(TRUE, nodeId, mappParamIndex_p,
+                              mappObjectCount_p, pdoChannelConf.fTx);
+        if (ret != kErrorOk)
+            *pAbortCode_p = SDO_AC_DATA_NOT_TRANSF_DUE_LOCAL_CONTROL;
     }
 
 Exit:
