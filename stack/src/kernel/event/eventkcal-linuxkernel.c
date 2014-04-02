@@ -249,7 +249,10 @@ tOplkError eventkcal_postUserEvent(tEvent* pEvent_p)
            debugstr_getEventSinkStr(pEvent_p->eventSink), pEvent_p->eventSink,
            pEvent_p->eventArgSize);*/
 
-    ret = eventkcal_postEventCircbuf(kEventQueueK2U, pEvent_p);
+    if (instance_l.fInitialized)
+        ret = eventkcal_postEventCircbuf(kEventQueueK2U, pEvent_p);
+    else
+        ret = kErrorIllegalInstance;
 
     return ret;
 }
@@ -280,7 +283,10 @@ tOplkError eventkcal_postKernelEvent(tEvent* pEvent_p)
            debugstr_getEventSinkStr(pEvent_p->eventSink), pEvent_p->eventSink,
            pEvent_p->eventArgSize);*/
 
-    ret = eventkcal_postEventCircbuf(kEventQueueKInt, pEvent_p);
+    if (instance_l.fInitialized)
+        ret = eventkcal_postEventCircbuf(kEventQueueKInt, pEvent_p);
+    else
+        ret = kErrorIllegalInstance;
 
     return ret;
 }
@@ -418,6 +424,9 @@ int eventkcal_getEventForUser(unsigned long arg)
         //TRACE("%s() interrupted\n", __func__);
         return ret;
     }
+
+    if (!instance_l.fInitialized)
+        return -EIO;
 
     if (eventkcal_getEventCountCircbuf(kEventQueueK2U) > 0)
     {
