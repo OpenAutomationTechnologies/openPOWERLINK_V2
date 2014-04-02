@@ -346,9 +346,6 @@ tOplkError ctrlu_shutdownStack(void)
 {
     tOplkError      ret = kErrorOk;
 
-    ret = eventu_exit();
-    TRACE("eventu_exit():  0x%X\n", ret);
-
 #if defined(CONFIG_INCLUDE_CFM)
     ret = cfmu_exit();
     TRACE("cfmu_exit():    0x%X\n", ret);
@@ -397,6 +394,10 @@ tOplkError ctrlu_shutdownStack(void)
     ret = timeru_delInstance();
     TRACE("timeru_delInstance():  0x%X\n", ret);
 
+    ret = eventu_exit();
+    TRACE("eventu_exit():  0x%X\n", ret);
+
+    /* shutdown kernel stack */
     ret = ctrlucal_executeCmd(kCtrlCleanupStack);
     TRACE("shoutdown kernel modules():  0x%X\n", ret);
 

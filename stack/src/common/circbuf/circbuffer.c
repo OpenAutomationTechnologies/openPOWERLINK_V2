@@ -469,7 +469,10 @@ tCircBufError circbuf_readData(tCircBufInstance* pInstance_p, void* pData_p,
     fullBlockSize  = blockSize + sizeof(UINT32);
 
     if (dataSize > size_p)
+    {
+        circbuf_unlock(pInstance_p);
         return kCircBufReadsizeTooSmall;
+    }
 
     if (pHeader->readOffset + fullBlockSize <= pHeader->bufferSize)
     {
