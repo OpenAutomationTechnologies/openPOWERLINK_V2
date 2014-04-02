@@ -324,28 +324,8 @@ tQueueReturn lfq_create(tQueueConfig* pQueueConfig_p,
         return kQueueNoResource;
     }
 
-    /// initialize queue header
-    switch (pQueue->config.queueRole)
-    {
-        case kQueueProducer:
-            break;
-
-        case kQueueConsumer:
-        case kQueueBoth:
-        {
-            setHwQueueState(pQueue, kQueueStateReset);
-
-            resetHwQueue(pQueue);
-
-            /// check if initializing was successful (queue must be empty)
-            getHwQueueBufferHeader(pQueue);
-
-            if (!checkQueueEmpty(pQueue))
-                return kQueueHwError;
-
-            setHwQueueState(pQueue, kQueueStateOperational);
-        }
-    }
+    // Set queue to reset state, first enqueue resets the queue
+    setHwQueueState(pQueue, kQueueStateReset);
 
     /// return initialized queue instance
     *ppInstance_p = pQueue;
@@ -407,7 +387,7 @@ This function resets the queue of the given instance
 \return tQueueReturn
 \retval kQueueSuccessful        The returned base address is valid
 \retval kQueueInvalidParamter   The parameter pointers are NULL
-\retval kQueueWrongCaller       Consumer is not allowed to reset queue
+\retval kQueueWrongCaller       Producer is not allowed to reset queue
 
 \ingroup module_hostiflib
 */
@@ -470,8 +450,12 @@ tQueueReturn lfq_checkEmpty(tQueueInstance pInstance_p,
             break;
 
         default:
-            /// queue is not operational, hence, empty!
-            *pfIsEmpty_p = TRUE;
+            // Consumer must see an empty and producer a full queue!
+            if (pQueue->config.queueRole == kQueueConsumer)
+                *pfIsEmpty_p = TRUE;
+            else
+                *pfIsEmpty_p = FALSE;
+
             goto Exit;
     }
 
@@ -509,6 +493,20 @@ tQueueReturn lfq_getEntryCount(tQueueInstance pInstance_p,
     {
         Ret = kQueueInvalidParameter;
         goto Exit;
+    }
+
+    switch (getHwQueueState(pQueue))
+    {
+        case kQueueStateOperational:
+            break;
+        default:
+            // Consumer must see an empty and producer a full queue!
+            if (pQueue->config.queueRole == kQueueConsumer)
+                *pEntryCount_p = 0;
+            else
+                *pEntryCount_p = pQueue->maxEntries;
+
+            goto Exit;
     }
 
     getHwQueueBufferHeader(pQueue);
@@ -558,7 +556,10 @@ tQueueReturn lfq_entryEnqueue(tQueueInstance pInstance_p,
             break;
 
         case kQueueStateReset:
-            /// queue was reset by consumer, producer reactivates queue
+            // Consumer requests reset, so do it
+            resetHwQueue(pQueue);
+
+            // Mark queue to be operational again
             setHwQueueState(pQueue, kQueueStateOperational);
             break;
 
@@ -589,11 +590,19 @@ tQueueReturn lfq_entryEnqueue(tQueueInstance pInstance_p,
     /// new element is written
     pQueue->local.entryIndices.ind.write += 1;
 
-    /// the new indices are written to hw only if the queue is still operational
-    if (getHwQueueState(pQueue) != kQueueStateOperational)
-        return kQueueSuccessful;
-
-    setHwQueueWrite(pQueue);
+    switch (getHwQueueState(pQueue))
+    {
+        case kQueueStateOperational:
+            // Queue is operational, write new indices to hw
+            setHwQueueWrite(pQueue);
+            break;
+        case kQueueStateReset:
+            // Consumer requests reset, dump the entry and return with full
+            return kQueueFull;
+        default:
+        case kQueueStateInvalid:
+            return kQueueHwError;
+    }
 
     return kQueueSuccessful;
 }
@@ -633,16 +642,26 @@ tQueueReturn lfq_entryDequeue(tQueueInstance pInstance_p,
     if (pQueue == NULL || pData_p == NULL)
         return kQueueInvalidParameter;
 
-    /// not operational queues are empty for the consumer
-    if (getHwQueueState(pQueue) != kQueueStateOperational)
-        return kQueueEmpty;
-
     if (UNALIGNED32(pData_p))
         return kQueueAlignment;
 
     getHwQueueBufferHeader(pQueue);
 
-    if (checkQueueEmpty(pQueue))
+    switch (getHwQueueState(pQueue))
+    {
+        case kQueueStateOperational:
+            // Queue is operational, move on
+            break;
+        case kQueueStateReset:
+            // Queue is in reset state, return with empty
+            return kQueueEmpty;
+        default:
+        case kQueueStateInvalid:
+            // Queue is invalid
+            return kQueueHwError;
+    }
+
+    if(checkQueueEmpty(pQueue))
         return kQueueEmpty;
 
     readHeader(pQueue, &EntryHeader);
@@ -660,7 +679,20 @@ tQueueReturn lfq_entryDequeue(tQueueInstance pInstance_p,
     /// element is read
     pQueue->local.entryIndices.ind.read += 1;
 
-    setHwQueueRead(pQueue);
+    switch (getHwQueueState(pQueue))
+    {
+        case kQueueStateOperational:
+            // Queue is operational, write new indices to hw
+            setHwQueueRead(pQueue);
+            break;
+        case kQueueStateReset:
+            // Queue is in reset state, return with empty
+            return kQueueEmpty;
+        default:
+        case kQueueStateInvalid:
+            // Queue is invalid
+            return kQueueHwError;
+    }
 
     /// return entry size
     *pSize_p = size;
