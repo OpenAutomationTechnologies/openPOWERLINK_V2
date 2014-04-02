@@ -67,7 +67,7 @@ tOplkError nmtcnu_init(UINT nodeId_p);
 tOplkError nmtcnu_addInstance(UINT nodeId_p);
 tOplkError nmtcnu_delInstance(void);
 tOplkError nmtcnu_sendNmtRequest(UINT nodeId_p, tNmtCommand nmtCommand_p);
-tOplkError nmtcnu_registerCheckEventCb(tNmtuCheckEventCallback pfnEplNmtCheckEventCb_p);
+tOplkError nmtcnu_registerCheckEventCb(tNmtuCheckEventCallback pfnNmtCheckEventCb_p);
 
 #ifdef __cplusplus
 }

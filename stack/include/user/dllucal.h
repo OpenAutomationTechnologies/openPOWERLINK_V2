@@ -50,7 +50,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-typedef tOplkError (*tEplDlluCbAsnd)(tFrameInfo* pFrameInfo_p);
+typedef tOplkError (*tDlluCbAsnd)(tFrameInfo* pFrameInfo_p);
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -69,7 +69,7 @@ tOplkError dllucal_config(tDllConfigParam* pDllConfigParam_p);
 tOplkError dllucal_setIdentity(tDllIdentParam* pDllIdentParam_p);
 
 tOplkError dllucal_regAsndService(tDllAsndServiceId ServiceId_p,
-                                  tEplDlluCbAsnd pfnDlluCbAsnd_p,
+                                  tDlluCbAsnd pfnDlluCbAsnd_p,
                                   tDllAsndFilter Filter_p);
 
 tOplkError dllucal_sendAsyncFrame(tFrameInfo* pFrameInfo, tDllAsyncReqPriority Priority_p);

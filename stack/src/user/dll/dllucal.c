@@ -77,7 +77,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 typedef struct
 {
-    tEplDlluCbAsnd           apfnDlluCbAsnd[DLL_MAX_ASND_SERVICE_ID];
+    tDlluCbAsnd              apfnDlluCbAsnd[DLL_MAX_ASND_SERVICE_ID];
     tDllCalQueueInstance     dllCalQueueTxNmt;          ///< Dll Cal Queue instance for NMT priority
     tDllCalQueueInstance     dllCalQueueTxGen;          ///< Dll Cal Queue instance for Generic priority
 #if defined(CONFIG_INCLUDE_NMT_MN)
@@ -304,7 +304,7 @@ ID with the specified node ID filter.
 */
 //------------------------------------------------------------------------------
 tOplkError dllucal_regAsndService(tDllAsndServiceId serviceId_p,
-                                  tEplDlluCbAsnd pfnDlluCbAsnd_p,
+                                  tDlluCbAsnd pfnDlluCbAsnd_p,
                                   tDllAsndFilter filter_p)
 {
     tOplkError  ret = kErrorOk;
