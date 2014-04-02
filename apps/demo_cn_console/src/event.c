@@ -89,6 +89,10 @@ static tOplkError processErrorWarningEvent(tOplkApiEventType EventType_p,
                                            tOplkApiEventArg* pEventArg_p,
                                            void* pUserArg_p);
 
+static tOplkError processPdoChangeEvent(tOplkApiEventType EventType_p,
+                                        tOplkApiEventArg* pEventArg_p,
+                                        void* pUserArg_p);
+
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
 //============================================================================//
@@ -142,6 +146,10 @@ tOplkError processEvents(tOplkApiEventType EventType_p,
         case kOplkApiEventCriticalError:
         case kOplkApiEventWarning:
             ret = processErrorWarningEvent(EventType_p, pEventArg_p, pUserArg_p);
+            break;
+
+        case kOplkApiEventPdoChange:
+            ret = processPdoChangeEvent(EventType_p, pEventArg_p, pUserArg_p);
             break;
 
         default:
@@ -284,6 +292,54 @@ static tOplkError processErrorWarningEvent(tOplkApiEventType EventType_p,
         default:
             console_printlog("\n");
             break;
+    }
+    return kErrorOk;
+}
+
+
+//------------------------------------------------------------------------------
+/**
+\brief  Process PDO change events
+
+The function processes PDO change events.
+
+\param  EventType_p         Type of event
+\param  pEventArg_p         Pointer to union which describes the event in detail
+\param  pUserArg_p          User specific argument
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError processPdoChangeEvent(tOplkApiEventType EventType_p,
+                                        tOplkApiEventArg* pEventArg_p,
+                                        void* pUserArg_p)
+{
+    tOplkApiEventPdoChange*     pPdoChange = &pEventArg_p->pdoChange;
+    UINT                        subIndex;
+    UINT64                      mappObject;
+    tOplkError                  ret;
+    UINT                        varLen;
+
+    UNUSED_PARAMETER(EventType_p);
+    UNUSED_PARAMETER(pUserArg_p);
+
+    console_printlog("PDO change event: (%sPDO = 0x%X to node 0x%X with %d objects %s)\n",
+                     (pPdoChange->fTx ? "T" : "R"), pPdoChange->mappParamIndex,
+                     pPdoChange->nodeId, pPdoChange->mappObjectCount,
+                     (pPdoChange->fActivated ? "activated" : "deleted"));
+
+    for (subIndex = 1; subIndex <= pPdoChange->mappObjectCount; subIndex++)
+    {
+        varLen = sizeof(mappObject);
+        ret = oplk_readLocalObject(pPdoChange->mappParamIndex, subIndex, &mappObject, &varLen);
+        if (ret != kErrorOk)
+        {
+            console_printlog("  Reading 0x%X/%d failed with 0x%X\n",
+                             pPdoChange->mappParamIndex, subIndex, ret);
+            continue;
+        }
+        console_printlog("  %d. mapped object 0x%X/%d\n", subIndex, mappObject & 0x00FFFFULL,
+                         (mappObject & 0xFF0000ULL) >> 16);
     }
     return kErrorOk;
 }

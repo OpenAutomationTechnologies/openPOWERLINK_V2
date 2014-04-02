@@ -300,6 +300,10 @@ tOplkError ProcessThread::processEvent(tOplkApiEventType EventType_p,
             ret = processNodeEvent(EventType_p, pEventArg_p, pUserArg_p);
             break;
 
+        case kOplkApiEventPdoChange:
+            ret = processPdoChangeEvent(EventType_p, pEventArg_p, pUserArg_p);
+            break;
+
         case kOplkApiEventCfmProgress:
             ret = processCfmProgressEvent(EventType_p, pEventArg_p, pUserArg_p);
             break;
@@ -493,6 +497,59 @@ tOplkError ProcessThread::processErrorWarningEvent(tOplkApiEventType EventType_p
         default:
             //sigPrintLog(QString("\n"));
             break;
+    }
+    return kErrorOk;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Process error and warning events
+
+The function processes error and warning events.
+
+\param  EventType_p         Type of event
+\param  pEventArg_p         Pointer to union which describes the event in detail
+\param  pUserArg_p          User specific argument
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+tOplkError ProcessThread::processPdoChangeEvent(tOplkApiEventType EventType_p,
+                                                tOplkApiEventArg* pEventArg_p,
+                                                void* pUserArg_p)
+{
+    tOplkApiEventPdoChange*     pPdoChange = &pEventArg_p->pdoChange;
+    UINT                        subIndex;
+    UINT64                      mappObject;
+    tOplkError                  ret;
+    UINT                        varLen;
+
+    UNUSED_PARAMETER(EventType_p);
+    UNUSED_PARAMETER(pUserArg_p);
+
+    sigPrintLog(QString("PDO change event: (%1PDO = 0x%2 to node 0x%3 with %4 objects %5)")
+                .arg(pPdoChange->fTx ? "T" : "R")
+                .arg(pPdoChange->mappParamIndex, 4, 16, QLatin1Char('0'))
+                .arg(pPdoChange->nodeId, 2, 16, QLatin1Char('0'))
+                .arg(pPdoChange->mappObjectCount)
+                .arg(pPdoChange->fActivated ? "activated" : "deleted"));
+
+    for (subIndex = 1; subIndex <= pPdoChange->mappObjectCount; subIndex++)
+    {
+        varLen = sizeof(mappObject);
+        ret = oplk_readLocalObject(pPdoChange->mappParamIndex, subIndex, &mappObject, &varLen);
+        if (ret != kErrorOk)
+        {
+            sigPrintLog(QString("  Reading 0x%1/%2 failed with 0x%3")
+                        .arg(pPdoChange->mappParamIndex, 4, 16, QLatin1Char('0'))
+                        .arg(subIndex)
+                        .arg(ret, 4, 16, QLatin1Char('0')));
+            continue;
+        }
+        sigPrintLog(QString("  %1. mapped object 0x%2/%3")
+                    .arg(subIndex)
+                    .arg(mappObject & 0x00FFFFULL, 4, 16, QLatin1Char('0'))
+                    .arg((mappObject & 0xFF0000ULL) >> 16, 4, 16, QLatin1Char('0')));
     }
     return kErrorOk;
 }
