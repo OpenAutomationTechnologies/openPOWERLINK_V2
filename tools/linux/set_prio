@@ -37,8 +37,6 @@ if [ "$?" -ne "0" ] ; then
   echo "  Maybe you need to add 'acpi=force' to kernel command line"
   echo "  or try it on a more recent X86 processor."
   echo
-  echo "The EPL module is and will not be loaded!"
-  echo
 
   exit
 else
