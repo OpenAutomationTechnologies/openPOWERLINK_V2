@@ -137,7 +137,7 @@ static tHresTimerInstance    hresTimerInstance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static void timerCallback(tEplTimerHdl* pTimerHdl_p);
+static void timerCallback(tTimerHdl* pTimerHdl_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -289,9 +289,9 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
     pTimerInfo->eventArg.argument.value = argument_p;
     pTimerInfo->pfnCallback = pfnCallback_p;
     pTimerInfo->period = time_p;
-    pTimerInfo->fContinue = fContinue_p;
+    pTimerInfo->fContinuously = fContinue_p;
 
-    ret = edrv_registerHresCallback(timerCb);
+    ret = edrv_registerHresCallback(timerCallback);
     if (ret != kErrorOk)
         return ret;
 
@@ -390,7 +390,7 @@ static void timerCallback(tTimerHdl* pTimerHdl_p)
 
     if (pTimerInfo->fContinuously)
     {
-        edrv_enableTimer(pTimerHdl_p);
+        edrv_restartTimer(pTimerHdl_p);
     }
     else
     {

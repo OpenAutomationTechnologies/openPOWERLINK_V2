@@ -269,6 +269,11 @@ tOplkError edrvcyclic_getDiagnostics(tEdrvCyclicDiagnostics** ppDiagnostics_p);
 
 #if EDRV_USE_TTTX == TRUE
 tOplkError edrv_getMacTime(UINT64* pCurtime_p);
+void edrv_setCyclicFrequency(UINT32 frequency);
+tOplkError edrv_startTimer(tTimerHdl* pTimerHdl_p, UINT32 frequency_p);
+tOplkError edrv_stopTimer(tTimerHdl* pTimerHdl_p);
+tOplkError edrv_restartTimer(tTimerHdl* pTimerHdl_p);
+tOplkError edrv_registerHresCallback(tHresCallback pfnHighResCb_p);
 #endif
 
 #ifdef __cplusplus
