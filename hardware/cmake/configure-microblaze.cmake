@@ -41,7 +41,7 @@ INCLUDE(setmicroblazeboardconfig)
 # U S E R    O P T I O N S
 
 # Assemble path to all boards with Xilinx demos
-SET(BOARD_DIRS ${PROJECT_SOURCE_DIR}/boards/avnet-s6plkeb)
+SET(BOARD_DIRS ${PROJECT_SOURCE_DIR}/boards/avnet-s6plkeb;${PROJECT_SOURCE_DIR}/boards/avnet-lx150t)
 
 ################################################################################
 # Find the Xilinx toolchain
