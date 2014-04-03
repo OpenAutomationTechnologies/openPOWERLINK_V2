@@ -1005,6 +1005,15 @@ static tOplkError checkAndConfigurePdo(UINT16 mappParamIndex_p,
         goto Exit;
     }
 
+    // read node ID from OD
+    obdSize = sizeof(nodeId);
+    ret = obd_readEntry(commParamIndex, 0x01, &nodeId, &obdSize);
+    if (ret != kErrorOk)
+    {   // fatal error occurred
+        goto Exit;
+    }
+    pdoChannelConf.pdoChannel.nodeId = nodeId;
+
     if (mappObjectCount_p == 0)
     {   // PDO shall be disabled (see 6.4.9.2)
         pdoChannelConf.pdoChannel.nodeId = PDO_INVALID_NODE_ID;
@@ -1032,15 +1041,6 @@ static tOplkError checkAndConfigurePdo(UINT16 mappParamIndex_p,
     {   // PDO is invalid or does not exist
         goto Exit;
     }
-
-    // read node ID from OD
-    obdSize = sizeof(nodeId);
-    ret = obd_readEntry(commParamIndex, 0x01, &nodeId, &obdSize);
-    if (ret != kErrorOk)
-    {   // fatal error occurred
-        goto Exit;
-    }
-    pdoChannelConf.pdoChannel.nodeId = nodeId;
 
     obdSize = sizeof(pdoChannelConf.pdoChannel.mappingVersion);
     // read PDO mapping version
