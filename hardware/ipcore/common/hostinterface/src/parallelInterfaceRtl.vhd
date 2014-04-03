@@ -108,56 +108,81 @@ entity parallelInterface is
 end parallelInterface;
 
 architecture rtl of parallelInterface is
-    -- address register to store the address populated to the interface
+    --! address register to store the address populated to the interface
     signal addressRegister      : std_logic_vector(iParHostAddress'range);
-    -- register clock enable
+    --! register clock enable
     signal addressRegClkEnable  : std_logic;
 
-    -- byteenable register to store byteenable qualifiers
+    --! byteenable register to store byteenable qualifiers
     signal byteenableRegister       : std_logic_vector(gDataWidth/cByte-1 downto 0);
-    -- register clock enable
+    --! register clock enable
     signal byteenableRegClkEnable   : std_logic;
 
-    -- write data register to store the data populated to the interface
+    --! write data register to store the data populated to the interface
     signal writeDataRegister        : std_logic_vector(gDataWidth-1 downto 0);
-    -- register clock enable
+    --! register clock enable
     signal writeDataRegClkEnable    : std_logic;
 
-    -- read data register to store the read data populated to the host
+    --! read data register to store the read data populated to the host
     signal readDataRegister         : std_logic_vector(gDataWidth-1 downto 0);
+    --! temperaory readDataRegister
     signal readDataRegister_next    : std_logic_vector(gDataWidth-1 downto 0);
 
     -- synchronized signals
+    --! Synchronised Chipselect signal
     signal hostChipselect   : std_logic;
+    --! Write signal for init the transfer
     signal hostWrite        : std_logic;
+    --! Synchronized Write signal 
     signal hostWrite_noCs   : std_logic;
+    --! Read signal for init transfer 
     signal hostRead         : std_logic;
+    --! Synchronized Read signal
     signal hostRead_noCs    : std_logic;
+    --! Address latch Enable
     signal hostAle          : std_logic;
+    --! Synchronized Address Latch Enable signal
     signal hostAle_noCs     : std_logic;
+    --! 
     signal hostAle_noCsEdge : std_logic;
-
+    --! Data Enable 
     signal hostDataEnable       : std_logic;
+    --! Registerd data Enable
     signal hostDataEnable_reg   : std_logic;
+    --! Transfer complete Ack signal
     signal hostAck              : std_logic;
+    --! Transfer complete Ack signal for registering
     signal hostAck_reg          : std_logic;
 
     -- fsm
-    type tFsm is (sIdle, sDo, sWait);
+    --! FSM state for Parallel Interface
+    type tFsm is (sIdle, 
+                  sDo, 
+                  sWait,
+                  sDone
+            );
+    --! state signal  
     signal fsm : tFsm;
 
-    -- timeout
+    -- Counter will enable only after the wait request gets activated.
+    --! timeout counter width
     constant cCountWidth    : natural := 4;
+    --! Timeout counter
     signal count            : std_logic_vector(cCountWidth-1 downto 0);
+    --! MSB of timeour counter
     alias countTc           : std_logic is count(cCountWidth-1);
+    --! Enable counter
     signal countEn          : std_logic;
+    --! Reset counter
     signal countRst         : std_logic;
-    constant cCountWrAckAct : std_logic_vector(count'range) := "0000";
-    constant cCountWrAckDea : std_logic_vector(count'range) := "0001";
-    constant cCountRdAckAct : std_logic_vector(count'range) := "0001";
-    constant cCountRdAckDea : std_logic_vector(count'range) := "0010";
-    constant cCountRdEnAct  : std_logic_vector(count'range) := "0000";
-    constant cCountRdEnDea  : std_logic_vector(count'range) := "0011";
+    --! Enable ACK for Write operations
+    constant cCountWrAckAct : std_logic_vector(count'range) := "0000"; --0
+    --! Disable ACK for Write operations
+    constant cCountWrAckDea : std_logic_vector(count'range) := "0111";--1
+    --! Enable ACK for Read operations
+    constant cCountRdAckAct : std_logic_vector(count'range) := "0010";--1
+    --! Disable ACK for Read operations
+    constant cCountRdAckDea : std_logic_vector(count'range) := "0111";--2
 
 begin
 
@@ -235,15 +260,19 @@ begin
                 if count >= cCountRdAckAct and count <= cCountRdAckDea then
                     hostAck <= cActivated;
                 end if;
-                -- activate data output for read
-                if count >= cCountRdEnAct and count <= cCountRdEnDea then
-                    hostDataEnable <= cActivated;
-                end if;
+                
             elsif hostWrite = cActivated then
                 -- activate ack signal for write
                 if count >= cCountWrAckAct and count <= cCountWrAckDea then
                     hostAck <= cActivated;
                 end if;
+            end if;
+        end if;
+        -- Keep Data available at Bus untill the read operations ends at Master
+        -- side
+        if fsm = sWait or fsm = sDone then
+            if hostRead = cActivated then
+               hostDataEnable <= cActivated;
             end if;
         end if;
     end process;
@@ -280,6 +309,7 @@ begin
                 end if;
 
                 case fsm is
+                   --Start the operations if Read/write activated by Master
                     when sIdle =>
                         if hostRead = cActivated or hostWrite = cActivated then
                             fsm <= sDo;
@@ -289,6 +319,7 @@ begin
                             byteenableRegClkEnable  <= cActivated;
                             writeDataRegClkEnable   <= hostWrite;
                         end if;
+                    --Wait for the response from Avalon side
                     when sDo =>
                         oHostRead   <= hostRead;
                         oHostWrite  <= hostWrite;
@@ -297,15 +328,24 @@ begin
                             oHostRead   <= cInactivated;
                             oHostWrite  <= cInactivated;
                         end if;
+                    -- Generate ACK signals
                     when sWait =>
                         if countTc = cActivated then
+                            fsm <= sDone;
+                        end if;
+                    --Wait for transfer to end at Parallel Master side
+                    when sDone =>
+                         if (hostRead =  cInactivated and hostWrite = cInactivated) then
                             fsm <= sIdle;
+                         else
+                            fsm <= sDone;
                         end if;
                 end case;
             end if;
         end if;
     end process;
 
+    -- Generate signals for DWORD data width
     genHostBusDword : if gDataWidth = cDword generate
     begin
         oHostByteenable         <= byteenableRegister;
@@ -313,10 +353,12 @@ begin
         readDataRegister_next   <= iHostReaddata;
     end generate;
 
+    -- Generate signals for WORD data width
     genHostBusWord : if gDataWidth = cWord generate
     begin
         oHostWritedata <= writeDataRegister & writeDataRegister;
 
+        --! Create ByteEnable and Read data from WORD based signals
         busCombProc : process (
             byteenableRegister,
             addressRegister,
@@ -352,6 +394,7 @@ begin
     end generate;
 
     -- synchronize all available control signals
+    --! Two synchronizer for ChipSelect
     syncChipselect : entity work.synchronizer
         generic map (
             gStages => 2,
@@ -364,6 +407,7 @@ begin
             oSync   => hostChipselect
         );
 
+    --! Two synchronizer for Write
     syncWrite : entity work.synchronizer
         generic map (
             gStages => 2,
@@ -378,6 +422,7 @@ begin
 
     hostWrite <= hostChipselect and hostWrite_noCs;
 
+    --! Two synchronizer for Read
     syncRead : entity work.synchronizer
         generic map (
             gStages => 2,
@@ -394,6 +439,7 @@ begin
 
     genSyncAle : if gMultiplex /= 0 generate
     begin
+        --! Two synchronizer for ALE
         syncAle : entity work.synchronizer
         generic map (
             gStages => 2,
@@ -406,6 +452,7 @@ begin
             oSync   => hostAle_noCs
         );
 
+        --! Edge Detector for ALE
         edgeAle : entity work.edgedetector
         port map (
             iArst       => iRst,
