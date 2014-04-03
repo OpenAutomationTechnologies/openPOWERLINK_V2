@@ -1,6 +1,6 @@
 ################################################################################
 #
-# CMake boards configuration file for Microblaze platform
+# CMake settings file for cn-single-gpio demo on avnet-s6plkeb
 #
 # Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
@@ -28,38 +28,50 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-################################################################################
-# Handle includes
-SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/microblaze" ${CMAKE_MODULE_PATH})
-SET(CMAKE_MODULE_PATH "${OPLK_BASE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+#################################################################################
+# D E M O   I D E N T I F I C A T I O N
 
-INCLUDE(geneclipsefilelist)
-INCLUDE(geneclipseincludelist)
-INCLUDE(setmicroblazeboardconfig)
+# Name of the demo
+SET(CFG_DEMO_NAME "mn-dual-hostif-gpio")
 
-################################################################################
-# U S E R    O P T I O N S
+# Board of the demo
+SET(CFG_DEMO_BOARD_NAME "avnet-lx150t")
 
-# Assemble path to all boards with Xilinx demos
-SET(BOARD_DIRS ${PROJECT_SOURCE_DIR}/boards/avnet-s6plkeb;${PROJECT_SOURCE_DIR}/boards/avnet-lx150t)
+# Bus system used in the demo
+SET(CFG_DEMO_BUS_SYSTEM "axi")
 
-################################################################################
-# Find the Xilinx toolchain
-UNSET(XIL_LIBGEN CACHE)
-FIND_PROGRAM(XIL_LIBGEN NAMES libgen
-    PATHS
-    ${XIL_ISE_ROOT}/EDK/bin
-    DOC "Xilinx board support package generation tool"
-)
+# Pcp's tightly coupled instruction memory name
+SET(CFG_PCP_TCIMEM_NAME pcp_ilmb_cntlr)
+SET(CFG_HOST_TCIMEM_NAME host_ilmb_cntlr)
 
-UNSET(XIL_XPS CACHE)
-FIND_PROGRAM(XIL_XPS NAMES xps
-    PATHS
-    ${XIL_ISE_ROOT}/EDK/bin
-    DOC "Xilinx Platform Studio"
-)
+# Interface between host and pcp
+SET(CFG_HOSTIF_ENABLE TRUE)
+#################################################################################
+# P R O C E S S O R   F E A T U R E S
 
-################################################################################
-# Set path to system folders
-SET(ARCH_IPCORE_REPO ${PROJECT_SOURCE_DIR}/ipcore/xilinx)
-SET(ARCH_TOOLS_DIR ${OPLK_BASE_DIR}/tools/xilinx-microblaze)
+# Name of the POWERLINK processor
+SET(CFG_PCP_NAME pcp)
+SET(CFG_HOST_NAME host)
+
+# Version of the Microblaze instance
+SET(CFG_CPU_VERSION "v8.50.c")
+
+# Microblaze has enabled multiplier
+OPTION(CFG_MICROBLAZE_HW_MULT "Microblaze has enabled hardware multiplier" OFF)
+MARK_AS_ADVANCED(CFG_MICROBLAZE_HW_MULT)
+
+# Microblaze has enabled divider
+OPTION(CFG_MICROBLAZE_HW_DIV "Microblaze has enabled hardware divider" OFF)
+MARK_AS_ADVANCED(CFG_MICROBLAZE_HW_DIV)
+
+# Microblaze has enabled pattern compare
+OPTION(CFG_MICROBLAZE_PAT_COMP "Microblaze has enabled pattern compare" OFF)
+MARK_AS_ADVANCED(CFG_MICROBLAZE_PAT_COMP)
+
+# Microblaze has enabled the barrel shifter
+OPTION(CFG_MICROBLAZE_BARREL_SHIFT "Microblaze has enabled the barrel shifter" OFF)
+MARK_AS_ADVANCED(CFG_MICROBLAZE_BARREL_SHIFT)
+
+# Microblaze has enabled the byte swapping instruction
+OPTION(CFG_MICROBLAZE_REORDER "Microblaze has enabled the byte swapping instruction" OFF)
+MARK_AS_ADVANCED(CFG_MICROBLAZE_REORDER)

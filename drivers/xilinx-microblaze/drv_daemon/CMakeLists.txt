@@ -109,20 +109,21 @@ SET(CMAKE_MODULE_PATH "${OPLK_ROOT_DIR}/cmake" ${CMAKE_MODULE_PATH})
 INCLUDE(geneclipsefilelist)
 INCLUDE(geneclipseincludelist)
 INCLUDE(setmicroblazeboardconfig)
-
 ################################################################################
 # Path to the hardware library folder of your board example
 
 IF("${HOST_PCP_LINK_TYPE}" STREQUAL "host-interface")
 
-    SET(CFG_HW_LIB_DIR ${OPLK_ROOT_DIR}/hardware/lib/${SYSTEM_NAME_DIR}/${SYSTEM_PROCESSOR_DIR}/avnet-s6plkeb/mn-single-hostif-drv
+    SET(CFG_HW_LIB_DIR ${OPLK_ROOT_DIR}/hardware/lib/${SYSTEM_NAME_DIR}/${SYSTEM_PROCESSOR_DIR}/avnet-lx150t/mn-dual-hostif-gpio
         CACHE PATH "Path to the hardware library folder of your demo application")
+
 ELSE()
     UNSET(CFG_HW_LIB_DIR CACHE)
 ENDIF ()
 
-# Include demo specific settings file
-SET_BOARD_CONFIGURATION(${CFG_HW_LIB_DIR})
+################################################################################
+# Include board specific settings file
+	SET_BOARD_CONFIGURATION(${CFG_HW_LIB_DIR})
 
 ################################################################################
 # Set variables

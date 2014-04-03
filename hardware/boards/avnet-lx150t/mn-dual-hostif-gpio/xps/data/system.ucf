@@ -1,0 +1,240 @@
+#
+# pin constraints
+#
+NET CLK LOC = "U23"  |  IOSTANDARD = "LVCMOS25";
+NET axi_hostinterface_0_iNodeId_nodeid_pin[0] LOC = "K21"  |  IOSTANDARD = "LVCMOS33";
+NET axi_hostinterface_0_iNodeId_nodeid_pin[1] LOC = "G23"  |  IOSTANDARD = "LVCMOS33";
+NET axi_hostinterface_0_iNodeId_nodeid_pin[2] LOC = "G24"  |  IOSTANDARD = "LVCMOS33";
+NET axi_hostinterface_0_iNodeId_nodeid_pin[3] LOC = "J20"  |  IOSTANDARD = "LVCMOS33";
+NET axi_hostinterface_0_iNodeId_nodeid_pin[4] LOC = "J22"  |  IOSTANDARD = "LVCMOS33";
+NET axi_hostinterface_0_iNodeId_nodeid_pin[5] LOC = "E24"  |  IOSTANDARD = "LVCMOS33";
+NET axi_hostinterface_0_iNodeId_nodeid_pin[6] LOC = "E23"  |  IOSTANDARD = "LVCMOS33";
+NET axi_hostinterface_0_iNodeId_nodeid_pin[7] LOC = "K22"  |  IOSTANDARD = "LVCMOS33";
+NET axi_hostinterface_0_oPlkLed_lederr_pin LOC = "M18"  |  IOSTANDARD = "LVCMOS33";
+NET axi_hostinterface_0_oPlkLed_ledst_pin LOC = "L19"  |  IOSTANDARD = "LVCMOS33";
+#NET LEDs_8Bits_TRI_O[2] LOC = "M21"  |  IOSTANDARD = "LVCMOS33";
+#NET LEDs_8Bits_TRI_O[3] LOC = "F22"  |  IOSTANDARD = "LVCMOS33";
+#NET LEDs_8Bits_TRI_O[4] LOC = "H22"  |  IOSTANDARD = "LVCMOS33";
+#NET LEDs_8Bits_TRI_O[5] LOC = "C25"  |  IOSTANDARD = "LVCMOS33";
+#NET LEDs_8Bits_TRI_O[6] LOC = "C26"  |  IOSTANDARD = "LVCMOS33";
+#NET LEDs_8Bits_TRI_O[7] LOC = "F23"  |  IOSTANDARD = "LVCMOS33";
+NET RESET LOC = "M19"  |  IOSTANDARD = "LVCMOS33"  |  TIG;
+NET RS232_USB_sin LOC = "AE2"  |  IOSTANDARD = "LVCMOS33";
+NET RS232_USB_sout LOC = "AE1"  |  IOSTANDARD = "LVCMOS33";
+NET RS232_sin LOC = "AC2"  |  IOSTANDARD = "LVCMOS33";
+NET RS232_sout LOC = "AC1"  |  IOSTANDARD = "LVCMOS33";
+#####################################
+## FMC (2)
+#NET PCP_BENCHMARK_GPIO_IO_O_pin<0> LOC = "AA17" | TIG;
+#NET PCP_BENCHMARK_GPIO_IO_O_pin<1> LOC = "AB24" | TIG;
+#NET PCP_BENCHMARK_GPIO_IO_O_pin<2> LOC = "AC23" | TIG;
+#NET PCP_BENCHMARK_GPIO_IO_O_pin<3> LOC = "AB26" | TIG;
+#NET PCP_BENCHMARK_GPIO_IO_O_pin<4> LOC = "U24" | TIG;
+#NET PCP_BENCHMARK_GPIO_IO_O_pin<5> LOC = "V23" | TIG;
+#NET PCP_BENCHMARK_GPIO_IO_O_pin<6> LOC = "R26" | TIG;
+#NET PCP_BENCHMARK_GPIO_IO_O_pin<7> LOC = "W24" | TIG;
+##
+#NET HOST_BENCHMARK_GPIO_IO_O_pin<0> LOC = "AE13" | TIG;
+#NET HOST_BENCHMARK_GPIO_IO_O_pin<1> LOC = "W16" | TIG;
+#NET HOST_BENCHMARK_GPIO_IO_O_pin<2> LOC = "AF13" | TIG;
+#NET HOST_BENCHMARK_GPIO_IO_O_pin<3> LOC = "Y16" | TIG;
+#NET HOST_BENCHMARK_GPIO_IO_O_pin<4> LOC = "V11" | TIG;
+#NET HOST_BENCHMARK_GPIO_IO_O_pin<5> LOC = "U13" | TIG;
+#NET HOST_BENCHMARK_GPIO_IO_O_pin<6> LOC = "V10" | TIG;
+#NET HOST_BENCHMARK_GPIO_IO_O_pin<7> LOC = "V13" | TIG;
+#### PHY 1 (FMC-ISMNET J2)
+NET axi_openmac_0_iMii_txClk_pin<0> LOC = "E13";
+NET axi_openmac_0_oMii_txEnable_pin<0> LOC = "C5";
+NET axi_openmac_0_oMii_txData_pin<3> LOC = "E8";
+NET axi_openmac_0_oMii_txData_pin<2> LOC = "F6";
+NET axi_openmac_0_oMii_txData_pin<1> LOC = "D5";
+NET axi_openmac_0_oMii_txData_pin<0> LOC = "F5";
+NET axi_openmac_0_iMii_rxClk_pin<0> LOC = "C13";
+NET axi_openmac_0_iMii_rxDataValid_pin<0> LOC = "B21" | PULLDOWN;
+NET axi_openmac_0_iMii_rxData_pin<3> LOC = "G8" | PULLDOWN;
+NET axi_openmac_0_iMii_rxData_pin<2> LOC = "G12" | PULLUP;
+NET axi_openmac_0_iMii_rxData_pin<1> LOC = "F9";
+NET axi_openmac_0_iMii_rxData_pin<0> LOC = "F7";
+NET axi_openmac_0_iMii_rxError_pin<0> LOC = "E14" | PULLUP;
+
+###PHY1 MII
+NET axi_openmac_0_ioSmi_dio_pin<0> LOC = "J16";
+NET axi_openmac_0_oSmi_clk_pin<0> LOC = "J17";
+NET axi_openmac_0_oSmi_nPhyRst_pin<0> LOC = "H12" | TIG;
+#NET axi_powerlink_0_phy0_link_pin LOC = "C21";
+
+#### PHY 2 (FMC-ISMNET J6)
+NET axi_openmac_0_iMii_txClk_pin<1> LOC = "B12";
+NET axi_openmac_0_oMii_txEnable_pin<1> LOC = "F11";
+NET axi_openmac_0_oMii_txData_pin<7> LOC = "E10";
+NET axi_openmac_0_oMii_txData_pin<6> LOC = "F10";
+NET axi_openmac_0_oMii_txData_pin<5> LOC = "G11";
+NET axi_openmac_0_oMii_txData_pin<4> LOC = "J11";
+NET axi_openmac_0_iMii_rxClk_pin<1> LOC = "B14";
+NET axi_openmac_0_iMii_rxDataValid_pin<1> LOC = "F19" | PULLDOWN;
+NET axi_openmac_0_iMii_rxData_pin<7> LOC = "F18" | PULLUP;
+NET axi_openmac_0_iMii_rxData_pin<6> LOC = "E18" | PULLDOWN;
+NET axi_openmac_0_iMii_rxData_pin<5> LOC = "F16";
+NET axi_openmac_0_iMii_rxData_pin<4> LOC = "B22";
+NET axi_openmac_0_iMii_rxError_pin<1> LOC = "G16" | PULLUP;
+
+###PHY2 MII
+NET axi_openmac_0_ioSmi_dio_pin<1> LOC = "F20";
+NET axi_openmac_0_oSmi_clk_pin<1> LOC = "G19";
+NET axi_openmac_0_oSmi_nPhyRst_pin<1> LOC = "H17" | TIG;
+#NET axi_powerlink_0_phy1_link_pin LOC = "F12";
+
+#
+# additional constraints
+#
+
+NET "CLK" TNM_NET = sys_clk_pin;
+TIMESPEC TS_sys_clk_pin = PERIOD sys_clk_pin 100000 kHz;
+############################################################################
+# VCC AUX VOLTAGE 
+############################################################################
+CONFIG VCCAUX=2.5; # Valid values are 2.5 and 3.3
+
+############################################################################
+# Extended MCB performance mode requires a different Vccint specification to
+# achieve higher maximum frequencies for DDR2 and DDR3.Consult the Spartan-6
+#datasheet (DS162) table 2 and 24 for more information 
+############################################################################
+CONFIG MCB_PERFORMANCE= STANDARD;
+
+
+##################################################################################
+# Timing Ignore constraints for paths crossing the clock domain 
+##################################################################################
+NET "*/mcb_raw_wrapper_inst/selfrefresh_mcb_mode"  TIG;
+     
+
+############################################################################
+## Memory Controller 3                               
+## Memory Device: DDR3_SDRAM->MT41J64M16XX-187E 
+## Frequency: 333.333 MHz
+## Time Period: 3000 ps
+## Supported Part Numbers: MT41J64M16LA-187E
+############################################################################
+
+############################################################################
+## Clock constraints                                                        
+############################################################################
+############################################################################
+
+############################################################################
+## I/O TERMINATION                                                          
+############################################################################
+NET "mcbx_dram_dq[*]"                                 IN_TERM = NONE;
+NET "mcbx_dram_dqs"                                   IN_TERM = NONE;
+NET "mcbx_dram_dqs_n"                                 IN_TERM = NONE;
+NET "mcbx_dram_udqs"                                  IN_TERM = NONE;
+NET "mcbx_dram_udqs_n"                                IN_TERM = NONE;
+
+############################################################################
+# I/O STANDARDS 
+############################################################################
+
+NET  "mcbx_dram_dq[*]"                               IOSTANDARD = SSTL15_II;
+NET  "mcbx_dram_addr[*]"                             IOSTANDARD = SSTL15_II;
+NET  "mcbx_dram_ba[*]"                               IOSTANDARD = SSTL15_II;
+NET  "mcbx_dram_dqs"                                 IOSTANDARD = DIFF_SSTL15_II;
+NET  "mcbx_dram_udqs"                                IOSTANDARD = DIFF_SSTL15_II;
+NET  "mcbx_dram_dqs_n"                               IOSTANDARD = DIFF_SSTL15_II;
+NET  "mcbx_dram_udqs_n"                              IOSTANDARD = DIFF_SSTL15_II;
+NET  "mcbx_dram_clk"                                 IOSTANDARD = DIFF_SSTL15_II;
+NET  "mcbx_dram_clk_n"                               IOSTANDARD = DIFF_SSTL15_II;
+NET  "mcbx_dram_cke"                                 IOSTANDARD = SSTL15_II;
+NET  "mcbx_dram_ras_n"                               IOSTANDARD = SSTL15_II;
+NET  "mcbx_dram_cas_n"                               IOSTANDARD = SSTL15_II;
+NET  "mcbx_dram_we_n"                                IOSTANDARD = SSTL15_II;
+NET  "mcbx_dram_odt"                                 IOSTANDARD = SSTL15_II;
+NET  "mcbx_dram_ddr3_rst"                            IOSTANDARD = SSTL15_II;
+NET  "mcbx_dram_ldm"                                 IOSTANDARD = SSTL15_II;
+NET  "mcbx_dram_udm"                                 IOSTANDARD = SSTL15_II;
+NET  "rzq"                                           IOSTANDARD = SSTL15_II;
+NET  "zio"                                           IOSTANDARD = SSTL15_II;
+############################################################################
+# MCB 3
+# Pin Location Constraints for Clock, Masks, Address, and Controls
+############################################################################
+
+NET  "mcbx_dram_addr[0]"                            LOC = "L7" ;
+NET  "mcbx_dram_addr[10]"                           LOC = "J9" ;
+NET  "mcbx_dram_addr[11]"                           LOC = "E3" ;
+NET  "mcbx_dram_addr[12]"                           LOC = "K8" ;
+NET  "mcbx_dram_addr[1]"                            LOC = "L6" ;
+NET  "mcbx_dram_addr[2]"                            LOC = "K10" ;
+NET  "mcbx_dram_addr[3]"                            LOC = "M8" ;
+NET  "mcbx_dram_addr[4]"                            LOC = "J7" ;
+NET  "mcbx_dram_addr[5]"                            LOC = "L4" ;
+NET  "mcbx_dram_addr[6]"                            LOC = "L3" ;
+NET  "mcbx_dram_addr[7]"                            LOC = "L10" ;
+NET  "mcbx_dram_addr[8]"                            LOC = "C2" ;
+NET  "mcbx_dram_addr[9]"                            LOC = "C1" ;
+
+NET  "mcbx_dram_ba[0]"                           LOC = "B2" ;
+NET  "mcbx_dram_ba[1]"                           LOC = "B1" ;
+NET  "mcbx_dram_ba[2]"                           LOC = "G3" ;
+
+NET  "mcbx_dram_cas_n"                           LOC = "L8" ;
+NET  "mcbx_dram_clk"                              LOC = "K5" ;
+NET  "mcbx_dram_clk_n"                            LOC = "J5" ;
+NET  "mcbx_dram_cke"                             LOC = "K9" ;
+NET  "mcbx_dram_ldm"                              LOC = "J3" ;
+
+NET  "mcbx_dram_dq[0]"                           LOC = "H3" ;
+NET  "mcbx_dram_dq[10]"                          LOC = "K3" ;
+NET  "mcbx_dram_dq[11]"                          LOC = "K1" ;
+NET  "mcbx_dram_dq[12]"                          LOC = "M3" ;
+NET  "mcbx_dram_dq[13]"                          LOC = "M1" ;
+NET  "mcbx_dram_dq[14]"                          LOC = "N2" ;
+NET  "mcbx_dram_dq[15]"                          LOC = "N1" ;
+NET  "mcbx_dram_dq[1]"                           LOC = "H1" ;
+NET  "mcbx_dram_dq[2]"                           LOC = "G2" ;
+NET  "mcbx_dram_dq[3]"                           LOC = "G1" ;
+NET  "mcbx_dram_dq[4]"                           LOC = "D3" ;
+NET  "mcbx_dram_dq[5]"                           LOC = "D1" ;
+NET  "mcbx_dram_dq[6]"                           LOC = "E2" ;
+NET  "mcbx_dram_dq[7]"                           LOC = "E1" ;
+NET  "mcbx_dram_dq[8]"                           LOC = "J2" ;
+NET  "mcbx_dram_dq[9]"                           LOC = "J1" ;
+
+NET  "mcbx_dram_dqs"                             LOC = "F3" ;
+NET  "mcbx_dram_dqs_n"                           LOC = "F1" ;
+NET  "mcbx_dram_odt"                             LOC = "M6" ;
+NET  "mcbx_dram_ras_n"                           LOC = "L9" ;
+NET  "mcbx_dram_ddr3_rst"                         LOC = "E4" ;
+NET  "mcbx_dram_udm"                             LOC = "J4" ;
+NET  "mcbx_dram_udqs"                            LOC = "L2" ;
+NET  "mcbx_dram_udqs_n"                          LOC = "L1" ;
+
+NET  "mcbx_dram_we_n"                            LOC = "G4" ;
+
+##################################################################################
+#RZQ is required for all MCB designs.   Do not move the location #
+#of this pin for ES devices.For production devices, RZQ can be moved to any #
+#valid package pin within the MCB bank.For designs using Calibrated Input Termination, #
+#a 2R resistor should be connected between RZQand ground, where R is the desired#
+#input termination value.  Otherwise, RZQ should be left as a no-connect (NC) pin.#
+##################################################################################
+NET  "rzq"                                  LOC = "M4" ;
+##################################################################################
+#ZIO is only required for MCB designs using Calibrated Input Termination.#
+#ZIO can be moved to any valid package pin (i.e. bonded IO) within the#
+#MCB bank but must be left as a no-connect (NC) pin.#
+##################################################################################
+NET  "zio"                                  LOC = "H6" ;
+
+
+#########################################################################
+# TIG synchronizer signals                                              #
+#########################################################################
+### have to comment out, otherwise fail ngdbuild   INST "MCB_DDR3/mcb_ui_top_0/P?_UI_AXI.axi_mcb_synch/synch_d1*" TNM="TNM_MCB_DDR3_SYNCH";
+TIMESPEC "TS_MCB_DDR3_SYNCH" = FROM FFS TO "TNM_MCB_DDR3_SYNCH" TIG;
+
+#########################################################################
+# Config for Extended Performance                                       #
+#########################################################################
+CONFIG MCB_PERFORMANCE=STANDARD;
+

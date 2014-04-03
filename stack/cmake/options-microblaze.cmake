@@ -64,7 +64,7 @@ ENDIF()
 # MN libraries
 IF(CFG_COMPILE_LIB_MNAPP_HOSTIF)
     # Path to the hardware library folder of your board example
-    SET( CFG_COMPILE_LIB_MN_APP_HOSTIF_HW_LIB_DIR ${XIL_HW_LIB_DIR}/avnet-s6plkeb/mn-single-hostif-gpio
+    SET( CFG_COMPILE_LIB_MN_APP_HOSTIF_HW_LIB_DIR ${XIL_HW_LIB_DIR}/avnet-lx150t/mn-dual-hostif-gpio
             CACHE PATH "Path to the hardware host library folder for the dual processor MN library")
     ADD_SUBDIRECTORY(proj/generic/liboplkmnapp-hostif)
 ELSE()
@@ -72,7 +72,7 @@ ELSE()
 ENDIF()
 IF(CFG_COMPILE_LIB_MNDRV_HOSTIF)
     # Path to the hardware library folder of your board example
-    SET( CFG_COMPILE_LIB_MN_DRV_HOSTIF_HW_LIB_DIR ${XIL_HW_LIB_DIR}/avnet-s6plkeb/mn-single-hostif-drv
+    SET( CFG_COMPILE_LIB_MN_DRV_HOSTIF_HW_LIB_DIR ${XIL_HW_LIB_DIR}/avnet-lx150t/mn-dual-hostif-gpio
             CACHE PATH "Path to the hardware pcp library folder for the dual processor MN library")
     ADD_SUBDIRECTORY(proj/generic/liboplkmndrv-hostif)
 ELSE()

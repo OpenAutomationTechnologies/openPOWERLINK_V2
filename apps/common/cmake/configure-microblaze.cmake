@@ -74,10 +74,11 @@ IF (CFG_KERNEL_STACK_DIRECTLINK)
 
 SET(CFG_HW_LIB_DIR ${OPLK_ROOT_DIR}/hardware/lib/${SYSTEM_NAME_DIR}/${SYSTEM_PROCESSOR_DIR}/avnet-s6plkeb/cn-single-gpio
         CACHE PATH "Path to the hardware library folder of your demo application")
+
 ELSEIF(CFG_KERNEL_STACK_PCP_HOSTIF_MODULE)
 
     UNSET(CFG_HW_LIB_DIR CACHE)
-    SET(CFG_HW_LIB_DIR ${OPLK_ROOT_DIR}/hardware/lib/${SYSTEM_NAME_DIR}/${SYSTEM_PROCESSOR_DIR}/avnet-s6plkeb/mn-single-hostif-gpio
+    SET(CFG_HW_LIB_DIR ${OPLK_ROOT_DIR}/hardware/lib/${SYSTEM_NAME_DIR}/${SYSTEM_PROCESSOR_DIR}/avnet-lx150t/mn-dual-hostif-gpio
         CACHE PATH "Path to the hardware library folder of your demo application")
 
 ELSE()
