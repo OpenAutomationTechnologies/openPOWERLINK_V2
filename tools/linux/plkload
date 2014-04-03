@@ -223,7 +223,7 @@ if [ ! "$tracing" = "nop" ] ; then
     #echo function       > /sys/kernel/debug/tracing/current_tracer
     #echo sched_switch   > /sys/kernel/debug/tracing/current_tracer
     #echo function_graph > /sys/kernel/debug/tracing/current_tracer
-    echo 'EplDllk* EdrvCyclic* TgtEthIsr EplPdok* EplEventk* EplNmtk* EplLin* EplApi*' > /sys/kernel/debug/tracing/set_ftrace_filter
+    echo 'dllk_* edrvcyclic_* edrvIrqHandler pdok_* eventk_* nmtk_* oplk_*' > /sys/kernel/debug/tracing/set_ftrace_filter
     echo funcgraph-abstime > /sys/kernel/debug/tracing/trace_options
     echo 1 > /sys/kernel/debug/tracing/tracing_enabled
     chmod o+w /sys/kernel/debug/tracing/tracing_enabled
