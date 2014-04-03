@@ -57,6 +57,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #define TGTCONIO_MS_IN_US(x)    (x * 1000U)
 
+#if CONFIG_HOSTIF_PCP == FALSE
+    #define TGT_INTC_BASE           XPAR_HOST_INTC_BASEADDR
+#else
+    #define TGT_INTC_BASE           XPAR_PCP_INTC_BASEADDR
+#endif
 //------------------------------------------------------------------------------
 // module global vars
 //------------------------------------------------------------------------------
@@ -145,6 +150,7 @@ void target_enableGlobalInterrupt(UINT8 fEnable_p)
     }
 }
 
+
 //------------------------------------------------------------------------------
 /**
 \brief  Initialize target specific stuff
@@ -163,11 +169,17 @@ tOplkError target_init(void)
     microblaze_enable_icache();
 #endif
 
+    microblaze_invalidate_dcache();
+    microblaze_disable_dcache();
+
 #if XPAR_MICROBLAZE_USE_DCACHE
     microblaze_invalidate_dcache();
     microblaze_enable_dcache();
 #endif
 
+    //FIXME: redundant and forced. find an alternative
+    microblaze_invalidate_dcache();
+    microblaze_disable_dcache();
     //enable microblaze interrupts
     microblaze_enable_interrupts();
 
@@ -244,7 +256,7 @@ void target_msleep (UINT32 milliSeconds_p)
 static void enableInterruptMaster(void)
 {
     //enable global interrupt master
-    XIntc_MasterEnable(XPAR_PCP_INTC_BASEADDR);
+    XIntc_MasterEnable(TGT_INTC_BASE);
 }
 
 //------------------------------------------------------------------------------
@@ -257,7 +269,7 @@ static void enableInterruptMaster(void)
 static void disableInterruptMaster(void)
 {
     //disable global interrupt master
-    XIntc_MasterDisable(XPAR_PCP_INTC_BASEADDR);
+    XIntc_MasterDisable(TGT_INTC_BASE);
 }
 ///\}
 
