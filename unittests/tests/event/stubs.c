@@ -87,13 +87,13 @@ void  target_enableGlobalInterrupt(BYTE fEnable_p)
     UNUSED_PARAMETER(fEnable_p);
 }
 
-tOplkError EplNmtkProcess(tEvent* pEvent_p)
+tOplkError nmtk_process(tEvent* pEvent_p)
 {
     UNUSED_PARAMETER(pEvent_p);
     return kErrorOk;
 }
 
-tOplkError EplDllkProcess(tEvent* pEvent_p)
+tOplkError dllk_process(tEvent* pEvent_p)
 {
     UNUSED_PARAMETER(pEvent_p);
     return kErrorOk;
@@ -117,6 +117,17 @@ tOplkError pdokcal_process(tEvent* pEvent_p)
     return kErrorOk;
 }
 
+tOplkError eventkcal_postUserEvent(tEvent* pEvent_p)
+{
+    UNUSED_PARAMETER(pEvent_p);
+    return kErrorOk;
+}
+
+tOplkError eventkcal_postKernelEvent(tEvent* pEvent_p)
+{
+    UNUSED_PARAMETER(pEvent_p);
+    return kErrorOk;
+}
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //

@@ -1,10 +1,8 @@
 ################################################################################
 #
-# Project: openPOWERLINK
+# CMake file for unit tests of event module
 #
-# Description: CMake file for unit tests of event module
-#
-# Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -31,50 +29,66 @@
 #
 ################################################################################
 
-CMAKE_MINIMUM_REQUIRED (VERSION 2.8.7)
+################################################################################
+# Project definitions
 
-PROJECT (unittest-event)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.7)
+
+PROJECT(unittest-event)
+
+SET(TEST_EXE_NAME test_event)
+SET(TEST_DESCRIPTION "Unit test for event handler")
+
+################################################################################
 
 # Drivers implement the tests and provide the testmethods
-SET (TEST_DRIVER
-    ${PROJECT_SOURCE_DIR}/test-event.c
-    ${PROJECT_SOURCE_DIR}/tests.c
+SET(TEST_DRIVER
+   ${PROJECT_SOURCE_DIR}/test-event.c
+   ${PROJECT_SOURCE_DIR}/tests.c
 )
 
 # Provide all stubs needed for running the tests
-SET (TEST_STUBS
-    ${PROJECT_SOURCE_DIR}/stubs.c
-    ${PROJECT_SOURCE_DIR}/stub_eventkcal.c
+SET(TEST_STUBS
+   ${PROJECT_SOURCE_DIR}/stubs.c
+   ${PROJECT_SOURCE_DIR}/stub_eventkcal.c
 )
 
 # Provide all openPOWERLINK files needed to compile
-SET (TEST_OPENPOWERLINK
+SET(TEST_OPENPOWERLINK
+   ${OPLK_SOURCE_DIR}/common/event/event.c
+   ${OPLK_SOURCE_DIR}/kernel/event/eventk.c
 )
 
-INCLUDE_DIRECTORIES ("${PROJECT_SOURCE_DIR}")
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR})
 
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
+################################################################################
 
-#
 # additional compiler flags
-#
 ADD_DEFINITIONS(-Wall -Wextra -pedantic -std=c99 -pthread -D_GNU_SOURCE -D_POSIX_C_SOURCE=200112L)
-ADD_DEFINITIONS(-DCONFIG_CFM -DCONFIG_OPENCONFIGURATOR_MAPPING -DCONFIG_MN -DCONFIG_POWERLINK_USERSTACK)
 
+# Add openPOWERLINK configuration options
+ADD_DEFINITIONS(-DCONFIG_MN)
+
+################################################################################
 # set sources of event test
-SET (TEST_SOURCES ${CMAKE_SOURCE_DIR}/unittests/common/basictest.c
-                  ${TEST_DRIVER}
-                  ${TEST_STUBS}
-                  ${TEST_OPENPOWERLINK}
-                  ${POWERLINK_SOURCE_DIR}/EplStack/common/event/event.c
-                  ${POWERLINK_SOURCE_DIR}/EplStack/kernel/event/eventk.c
+SET(TEST_SOURCES ${TEST_COMMON_SOURCE_DIR}/basictest.c
+                 ${TEST_DRIVER}
+                 ${TEST_STUBS}
+                 ${TEST_OPENPOWERLINK}
 )
 
-ADD_UNIT_TEST ("Unit test for event handler" "test_event" "${TEST_SOURCES}" )
+################################################################################
+ADD_UNIT_TEST("${TEST_DESCRIPTION}" "${TEST_EXE_NAME}" "${TEST_SOURCES}" )
 
-SET_PROPERTY(TARGET test_event
+SET_PROPERTY(TARGET ${TEST_EXE_NAME}
              PROPERTY COMPILE_DEFINITIONS_DEBUG DEBUG;DEF_DEBUG_LVL=${CFG_DEBUG_LVL})
 
-TARGET_LINK_LIBRARIES(test_event pthread rt)
+################################################################################
+# Libraries to link
+TARGET_LINK_LIBRARIES(${TEST_EXE_NAME} pthread rt)
 
+################################################################################
+# Installation rules
+
+INSTALL(TARGETS ${TEST_EXE_NAME} RUNTIME DESTINATION .)
 
