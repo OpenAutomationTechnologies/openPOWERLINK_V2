@@ -2,16 +2,16 @@
 ********************************************************************************
 \file   daemon.c
 
-\brief  POWERLINK FPGA Master daemon for Pcp (kernel part)
+\brief  POWERLINK FPGA Master daemon for PCP (kernel part)
 
-This is the daemon for the Pcp (kernel part) of the Altera Nios II POWERLINK
+This is the daemon for the PCP (kernel part) of the Altera Nios II POWERLINK
 master demo application.
 
 \ingroup module_daemon
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -85,9 +85,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError initPlk (void);
-static void shtdPlk (void);
-static void bgtPlk (void);
+static tOplkError initPlk(void);
+static void shtdPlk(void);
+static void bgtPlk(void);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -95,7 +95,7 @@ static void bgtPlk (void);
 
 //------------------------------------------------------------------------------
 /**
-\brief    main function
+\brief    Main function
 
 Calls the POWERLINK initialization and background task
 
@@ -104,28 +104,28 @@ Calls the POWERLINK initialization and background task
 \ingroup module_daemon
 */
 //------------------------------------------------------------------------------
-int main (void)
+int main(void)
 {
-    tOplkError Ret;
+    tOplkError ret;
 
     alt_icache_flush_all();
     alt_dcache_flush_all();
 
     PRINTF("CPU NIOS II /%s (%s)\n", ALT_CPU_CPU_IMPLEMENTATION, ALT_CPU_NAME);
-    PRINTF("FREQ = %d MHZ\n", ALT_CPU_CPU_FREQ/1000000U);
+    PRINTF("FREQ = %d MHZ\n", ALT_CPU_CPU_FREQ / 1000000U);
     PRINTF("DCACHE = %d BYTE\n", ALT_CPU_DCACHE_SIZE);
     PRINTF("ICACHE = %d BYTE\n", ALT_CPU_ICACHE_SIZE);
 
-    while(1)
+    while (1)
     {
         PRINTF("\n");
 
-        Ret = initPlk();
+        ret = initPlk();
 
         PRINTF("Initialization returned with \"%s\" (0x%X)\n",
-                debugstr_getRetValStr(Ret), Ret);
+               debugstr_getRetValStr(ret), ret);
 
-        if(Ret != kErrorOk)
+        if (ret != kErrorOk)
             break;
 
         bgtPlk();
@@ -155,23 +155,31 @@ This function initializes the communication stack and configures objects.
 \return This function returns tOplkError error codes.
 */
 //------------------------------------------------------------------------------
-static tOplkError initPlk (void)
+static tOplkError initPlk(void)
 {
-    tOplkError Ret;
+    tOplkError ret;
 
-    Ret = ctrlk_init();
+    ret = ctrlk_init();
 
-    if (Ret != kErrorOk)
+    if (ret != kErrorOk)
     {
-        printf ("Could not initialize control module\n");
+        printf("Could not initialize control module\n");
         goto Exit;
     }
 
 Exit:
-    return Ret;
+    return ret;
 }
 
-static void shtdPlk (void)
+
+//------------------------------------------------------------------------------
+/**
+\brief    openPOWERLINK stack shutdown
+
+This function shuts down the communication stack.
+*/
+//------------------------------------------------------------------------------
+static void shtdPlk(void)
 {
     ctrlk_exit();
 }
@@ -183,16 +191,17 @@ static void shtdPlk (void)
 This function runs the background tasks
 */
 //------------------------------------------------------------------------------
-static void bgtPlk (void)
+static void bgtPlk(void)
 {
     BOOL fExit = FALSE;
 
-    while(1)
+    while (1)
     {
         ctrlk_updateHeartbeat();
         fExit = ctrlk_process();
 
-        if(fExit != FALSE)
+        if (fExit != FALSE)
             break;
     }
 }
+
