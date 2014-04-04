@@ -11,7 +11,7 @@ The hostiflib provides several features like queues and linear memory modules.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -37,8 +37,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_HOSTIFLIB_H_
-#define _INC_HOSTIFLIB_H_
+#ifndef _INC_hostiflib_H_
+#define _INC_hostiflib_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -124,7 +124,7 @@ typedef enum eHostifIrqSrc
 This function callback is called for a given interrupt source, registerd by the
 host.
 */
-typedef void (*tHostifIrqCb) (void *pArg_p);
+typedef void (*tHostifIrqCb)(void* pArg_p);
 
 /**
 \brief Instance Id
@@ -188,37 +188,39 @@ typedef void* tHostifInstance;
 extern "C" {
 #endif
 
-tHostifReturn hostif_create (tHostifConfig* pConfig_p, tHostifInstance* ppInstance_p);
-tHostifReturn hostif_delete (tHostifInstance pInstance_p);
-tHostifInstance hostif_getInstance (UINT Instance_p);
+tHostifReturn hostif_create(tHostifConfig* pConfig_p, 
+                            tHostifInstance* ppInstance_p);
+tHostifReturn hostif_delete(tHostifInstance pInstance_p);
+tHostifInstance hostif_getInstance(UINT Instance_p);
 
-tHostifReturn hostif_irqRegHdl (tHostifInstance pInstance_p,
-        tHostifIrqSrc irqSrc_p, tHostifIrqCb pfnCb_p);
-tHostifReturn hostif_irqSourceEnable (tHostifInstance pInstance_p,
-        tHostifIrqSrc irqSrc_p, BOOL fEnable_p);
-tHostifReturn hostif_irqMasterEnable (tHostifInstance pInstance_p,
-        BOOL fEnable_p);
+tHostifReturn hostif_irqRegHdl(tHostifInstance pInstance_p,
+                               tHostifIrqSrc irqSrc_p, tHostifIrqCb pfnCb_p);
+tHostifReturn hostif_irqSourceEnable(tHostifInstance pInstance_p,
+                                     tHostifIrqSrc irqSrc_p, BOOL fEnable_p);
+tHostifReturn hostif_irqMasterEnable(tHostifInstance pInstance_p,
+                                     BOOL fEnable_p);
 
-tHostifReturn hostif_setCommand (tHostifInstance pInstance_p, tHostifCommand cmd_p);
-tHostifReturn hostif_getCommand (tHostifInstance pInstance_p, tHostifCommand* pCmd_p);
-tHostifReturn hostif_setState (tHostifInstance pInstance_p, tHostifState sta_p);
-tHostifReturn hostif_getState (tHostifInstance pInstance_p, tHostifState* pSta_p);
-tHostifReturn hostif_setError (tHostifInstance pInstance_p, tHostifError err_p);
-tHostifReturn hostif_getError (tHostifInstance pInstance_p, tHostifError* pErr_p);
-tHostifReturn hostif_setHeartbeat (tHostifInstance pInstance_p, UINT16 heartbeat_p);
-tHostifReturn hostif_getHeartbeat (tHostifInstance pInstance_p, UINT16* pHeartbeat_p);
+tHostifReturn hostif_setCommand(tHostifInstance pInstance_p, tHostifCommand cmd_p);
+tHostifReturn hostif_getCommand(tHostifInstance pInstance_p, tHostifCommand* pCmd_p);
+tHostifReturn hostif_setState(tHostifInstance pInstance_p, tHostifState sta_p);
+tHostifReturn hostif_getState(tHostifInstance pInstance_p, tHostifState* pSta_p);
+tHostifReturn hostif_setError(tHostifInstance pInstance_p, tHostifError err_p);
+tHostifReturn hostif_getError(tHostifInstance pInstance_p, tHostifError* pErr_p);
+tHostifReturn hostif_setHeartbeat(tHostifInstance pInstance_p, UINT16 heartbeat_p);
+tHostifReturn hostif_getHeartbeat(tHostifInstance pInstance_p, UINT16* pHeartbeat_p);
 
-tHostifReturn hostif_dynBufAcquire (tHostifInstance pInstance_p, UINT32 pcpBaseAddr_p,
-        UINT8** ppBufBase_p);
-tHostifReturn hostif_dynBufFree (tHostifInstance pInstance_p, UINT8* pBufBase_p);
+tHostifReturn hostif_dynBufAcquire(tHostifInstance pInstance_p, UINT32 pcpBaseAddr_p,
+                                   UINT8** ppBufBase_p);
+tHostifReturn hostif_dynBufFree(tHostifInstance pInstance_p, UINT8* pBufBase_p);
 
-tHostifReturn hostif_getBuf (tHostifInstance pInstance_p, tHostifInstanceId instId_p,
-        UINT8** ppBufBase_p, UINT* pBufSize_p);
+tHostifReturn hostif_getBuf(tHostifInstance pInstance_p, tHostifInstanceId instId_p,
+                            UINT8** ppBufBase_p, UINT* pBufSize_p);
 
-tHostifReturn hostif_getInitParam (tHostifInstance pInstance_p, UINT8** ppBase_p);
+tHostifReturn hostif_getInitParam(tHostifInstance pInstance_p, UINT8** ppBase_p);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_HOSTIFLIB_H_ */
+#endif /* _INC_hostiflib_H_ */
+

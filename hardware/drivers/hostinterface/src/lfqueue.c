@@ -12,7 +12,7 @@ This lock-free queue does not support multiple producer- and consumer-processes!
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -89,9 +89,9 @@ Note: This struct has to be UINT32-aligned!
 */
 typedef struct sEntryHeader
 {
-    UINT16          magic;           ///< Magic word to identify an entry
-    UINT16          payloadSize;     ///< Provides the entry's payload size
-    UINT8           aReserved[4];    ///< reserved
+    UINT16          magic;              ///< Magic word to identify an entry
+    UINT16          payloadSize;        ///< Provides the entry's payload size
+    UINT8           aReserved[4];       ///< reserved
 } tEntryHeader;
 
 /**
@@ -101,8 +101,8 @@ The queue entry is built out of a header and its payload.
 */
 typedef struct sQueueEntry
 {
-    tEntryHeader    header;           ///< Queue entry header
-    UINT8           aPayload[QUEUE_MAX_PAYLOAD]; ///< Entry payload
+    tEntryHeader    header;                         ///< Queue entry header
+    UINT8           aPayload[QUEUE_MAX_PAYLOAD];    ///< Entry payload
 } tQueueEntry;
 
 /**
@@ -128,10 +128,10 @@ typedef union Indices
 {
     struct
     {
-        tIndex      write;        ///< write index
-        tIndex      read;         ///< read index
+        tIndex      write;              ///< write index
+        tIndex      read;               ///< read index
     } ind;
-    tBothIndices    bothIndices;  ///< combined indices
+    tBothIndices    bothIndices;        ///< combined indices
 } tIndices;
 
 /**
@@ -141,9 +141,9 @@ These are the queue indices
 */
 typedef union uIndicesHw
 {
-    volatile tIndices       set;      ///< use this for setting individual
-    volatile tBothIndices   get;      ///< use this to get indices
-    volatile tBothIndices   reset;    ///< use this to reset indices
+    volatile tIndices       set;        ///< use this for setting individual
+    volatile tBothIndices   get;        ///< use this to get indices
+    volatile tBothIndices   reset;      ///< use this to reset indices
 } tIndicesHw;
 
 /**
@@ -165,10 +165,10 @@ This is the header of a queue buffer, with a size of 16 byte.
 */
 typedef struct sQueueBufferHdr
 {
-    volatile UINT8      state;       ///< queue state
+    volatile UINT8      state;          ///< queue state
     volatile UINT8      aReserved[3];
-    tIndicesHw          spaceIndices; ///< gives the offset within the queue
-    tIndicesHw          entryIndices; ///< gives the number of entries
+    tIndicesHw          spaceIndices;   ///< gives the offset within the queue
+    tIndicesHw          entryIndices;   ///< gives the number of entries
     volatile UINT32     reserved;
 } tQueueBufferHdr;
 
@@ -181,8 +181,8 @@ Note that the data section starting with data must have a span of power 2
 */
 typedef struct sQueueBuffer
 {
-    tQueueBufferHdr     header;   ///< queue buffer header
-    volatile UINT8      data;    ///< start of data section
+    tQueueBufferHdr     header;         ///< queue buffer header
+    volatile UINT8      data;           ///< start of data section
 } tQueueBuffer;
 
 /**
@@ -196,20 +196,20 @@ getQueueState.
 */
 typedef struct sQueue
 {
-    tQueueConfig    config;           ///< Copy of the queue configuration
-    UINT8           *pBase;           ///< Queue base address
-    UINT16          span;            ///< Queue span
+    tQueueConfig    config;             ///< Copy of the queue configuration
+    UINT8*          pBase;              ///< Queue base address
+    UINT16          span;               ///< Queue span
     struct
     {
-        tIndices    spaceIndices;     ///< Local copy of memory space indices
-        UINT16      freeSpace;       ///< Local copy of free memory space
-        UINT16      usedSpace;       ///< Local copy of used memory space
-        tIndices    entryIndices;     ///< Local copy of entry indices
-        UINT16      usedEntries;     ///< Local copy of used entries
+        tIndices    spaceIndices;       ///< Local copy of memory space indices
+        UINT16      freeSpace;          ///< Local copy of free memory space
+        UINT16      usedSpace;          ///< Local copy of used memory space
+        tIndices    entryIndices;       ///< Local copy of entry indices
+        UINT16      usedEntries;        ///< Local copy of used entries
     } local;
-    UINT16          maxEntries;      ///< Maximum addressable entries
-    UINT16          queueBufferSpan; ///< queue buffer span
-    tQueueBuffer    *pQueueBuffer;    ///< pointer to queue buffer
+    UINT16          maxEntries;         ///< Maximum addressable entries
+    UINT16          queueBufferSpan;    ///< queue buffer span
+    tQueueBuffer*   pQueueBuffer;       ///< pointer to queue buffer
 } tQueue;
 
 //------------------------------------------------------------------------------
@@ -219,30 +219,30 @@ typedef struct sQueue
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static void freePtr(void *p);
+static void freePtr(void* p);
 
-HOSTIF_INLINE static void getHwQueueBufferHeader (tQueue *pQueue_p);
-HOSTIF_INLINE static tQueueState getHwQueueState (tQueue *pQueue_p);
-HOSTIF_INLINE static void setHwQueueState (tQueue *pQueue_p, tQueueState State_p);
-HOSTIF_INLINE static void setHwQueueWrite (tQueue *pQueue_p);
-HOSTIF_INLINE static void setHwQueueRead (tQueue *pQueue_p);
-HOSTIF_INLINE static void resetHwQueue (tQueue *pQueue_p);
+HOSTIF_INLINE static void getHwQueueBufferHeader(tQueue* pQueue_p);
+HOSTIF_INLINE static tQueueState getHwQueueState(tQueue* pQueue_p);
+HOSTIF_INLINE static void setHwQueueState(tQueue* pQueue_p, tQueueState State_p);
+HOSTIF_INLINE static void setHwQueueWrite(tQueue* pQueue_p);
+HOSTIF_INLINE static void setHwQueueRead(tQueue* pQueue_p);
+HOSTIF_INLINE static void resetHwQueue(tQueue* pQueue_p);
 
-HOSTIF_INLINE static UINT16 getOffsetInCirBuffer (tQueue *pQueue_p, UINT16 index_p);
+HOSTIF_INLINE static UINT16 getOffsetInCirBuffer(tQueue* pQueue_p, UINT16 index_p);
 
-HOSTIF_INLINE static BOOL checkMagicValid (tEntryHeader *pHeader_p);
-HOSTIF_INLINE static BOOL checkPayloadFitable (tQueue *pQueue_p, UINT16 payloadSize_p);
-HOSTIF_INLINE static BOOL checkQueueEmpty (tQueue *pQueue_p);
+HOSTIF_INLINE static BOOL checkMagicValid(tEntryHeader* pHeader_p);
+HOSTIF_INLINE static BOOL checkPayloadFitable(tQueue* pQueue_p, UINT16 payloadSize_p);
+HOSTIF_INLINE static BOOL checkQueueEmpty(tQueue* pQueue_p);
 
-HOSTIF_INLINE static void writeHeader (tQueue *pQueue_p, tEntryHeader *pHeader_p);
-HOSTIF_INLINE static void writeData (tQueue *pQueue_p, UINT8 *pData_p, UINT16 size_p);
-HOSTIF_INLINE static void writeCirMemory (tQueue *pQueue_p, UINT16 offset_p,
-        UINT8 *pSrc_p, UINT16 srcSpan_p);
+HOSTIF_INLINE static void writeHeader(tQueue* pQueue_p, tEntryHeader* pHeader_p);
+HOSTIF_INLINE static void writeData(tQueue* pQueue_p, UINT8* pData_p, UINT16 size_p);
+HOSTIF_INLINE static void writeCirMemory(tQueue* pQueue_p, UINT16 offset_p,
+                                         UINT8* pSrc_p, UINT16 srcSpan_p);
 
-HOSTIF_INLINE static void readHeader (tQueue *pQueue_p, tEntryHeader *pHeader_p);
-HOSTIF_INLINE static void readData (tQueue *pQueue_p, UINT8 *pData_p, UINT16 size_p);
-HOSTIF_INLINE static void readCirMemory (tQueue *pQueue_p, UINT16 offset_p,
-        UINT8 *pDst_p, UINT16 dstSpan_p);
+HOSTIF_INLINE static void readHeader(tQueue* pQueue_p, tEntryHeader* pHeader_p);
+HOSTIF_INLINE static void readData(tQueue* pQueue_p, UINT8* pData_p, UINT16 size_p);
+HOSTIF_INLINE static void readCirMemory(tQueue* pQueue_p, UINT16 offset_p,
+                                        UINT8* pDst_p, UINT16 dstSpan_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -258,14 +258,14 @@ the queue is usable.
 
 \param  pQueueConfig_p          The caller provides configuration parameters
                                 with this parameter.
-\param  ppInstance_p            The function returns with this double-pointer
+\param  ppInstance_p            The function returns with this double-pointer,
                                 the created instance pointer. (return)
 
 \return tQueueReturn
 \retval kQueueSuccessful        The queue is created successfully with the
                                 provided configuration parameters
-\retval kQueueInvalidParamter   If the parameter pointers are NULL
-\retval kQueueAlignment         the allocated buffer queue does not satisfy
+\retval kQueueInvalidParamter   The parameter pointers are NULL
+\retval kQueueAlignment         The allocated buffer queue does not satisfy
                                 UINT32-alignment
 \retval kQueueNoResource        Either the heap allocation fails or the queue
                                 size exceeds the limit QUEUE_MAX_ENTRIES
@@ -275,20 +275,20 @@ the queue is usable.
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-tQueueReturn lfq_create (tQueueConfig *pQueueConfig_p,
-        tQueueInstance *ppInstance_p)
+tQueueReturn lfq_create(tQueueConfig* pQueueConfig_p,
+                        tQueueInstance* ppInstance_p)
 {
-    tQueue *pQueue = NULL;
+    tQueue* pQueue = NULL;
 
-    if(pQueueConfig_p == NULL || ppInstance_p == NULL)
+    if (pQueueConfig_p == NULL || ppInstance_p == NULL)
         return kQueueInvalidParameter;
 
-    if(UNALIGNED32(pQueueConfig_p->span - sizeof(tQueueBufferHdr)))
+    if (UNALIGNED32(pQueueConfig_p->span - sizeof(tQueueBufferHdr)))
         return kQueueAlignment;
 
     pQueue = (tQueue*)malloc(sizeof(tQueue));
 
-    if(pQueue == NULL)
+    if (pQueue == NULL)
         return kQueueNoResource;
 
     memset(pQueue, 0, sizeof(tQueue));
@@ -299,13 +299,13 @@ tQueueReturn lfq_create (tQueueConfig *pQueueConfig_p,
     /// allocate memory for queue
     pQueue->span = pQueue->config.span;
 
-    if(pQueue->config.fAllocHeap != FALSE)
+    if (pQueue->config.fAllocHeap != FALSE)
         pQueue->pBase = (UINT8*)HOSTIF_UNCACHED_MALLOC(pQueue->span);
     else
         pQueue->pBase = pQueue->config.pBase;
 
     /// kill instance if allocation is faulty
-    if(pQueue->pBase == NULL || UNALIGNED32(pQueue->pBase))
+    if (pQueue->pBase == NULL || UNALIGNED32(pQueue->pBase))
     {
         lfq_delete(pQueue);
         return kQueueNoResource;
@@ -315,20 +315,21 @@ tQueueReturn lfq_create (tQueueConfig *pQueueConfig_p,
     pQueue->pQueueBuffer = (tQueueBuffer*)pQueue->pBase;
     pQueue->queueBufferSpan = pQueue->span - sizeof(tQueueBufferHdr);
 
-    /// initialize max entries (=mask)
+    /// initialize max entries (= mask)
     pQueue->maxEntries = pQueue->queueBufferSpan / ENTRY_MIN_SIZE;
 
-    if(pQueue->maxEntries > QUEUE_MAX_ENTRIES)
+    if (pQueue->maxEntries > QUEUE_MAX_ENTRIES)
     {
         lfq_delete(pQueue);
         return kQueueNoResource;
     }
 
     /// initialize queue header
-    switch(pQueue->config.queueRole)
+    switch (pQueue->config.queueRole)
     {
         case kQueueProducer:
             break;
+
         case kQueueConsumer:
         case kQueueBoth:
         {
@@ -339,7 +340,7 @@ tQueueReturn lfq_create (tQueueConfig *pQueueConfig_p,
             /// check if initializing was successful (queue must be empty)
             getHwQueueBufferHeader(pQueue);
 
-            if(!checkQueueEmpty(pQueue))
+            if (!checkQueueEmpty(pQueue))
                 return kQueueHwError;
 
             setHwQueueState(pQueue, kQueueStateOperational);
@@ -368,24 +369,25 @@ the queue must not be used!
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-tQueueReturn lfq_delete (tQueueInstance pInstance_p)
+tQueueReturn lfq_delete(tQueueInstance pInstance_p)
 {
-    tQueue *pQueue = (tQueue*)pInstance_p;
+    tQueue* pQueue = (tQueue*)pInstance_p;
 
-    if(pQueue == NULL)
+    if (pQueue == NULL)
         return kQueueInvalidParameter;
 
-    switch(pQueue->config.queueRole)
+    switch (pQueue->config.queueRole)
     {
         case kQueueProducer:
             break;
+
         case kQueueConsumer:
         case kQueueBoth:
             setHwQueueState(pQueue, kQueueStateInvalid);
     }
 
     /// free memory for queue
-    if(pQueue->config.fAllocHeap != FALSE)
+    if (pQueue->config.fAllocHeap != FALSE)
         HOSTIF_UNCACHED_FREE(pQueue->pBase);
 
     /// free memory for queue instance
@@ -404,24 +406,24 @@ This function resets the queue of the given instance
 
 \return tQueueReturn
 \retval kQueueSuccessful        The returned base address is valid
-\retval kQueueInvalidParamter   If the parameter pointers are NULL
+\retval kQueueInvalidParamter   The parameter pointers are NULL
 \retval kQueueWrongCaller       Consumer is not allowed to reset queue
 
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-tQueueReturn lfq_reset (tQueueInstance pInstance_p)
+tQueueReturn lfq_reset(tQueueInstance pInstance_p)
 {
     tQueueReturn Ret = kQueueSuccessful;
-    tQueue *pQueue = (tQueue*)pInstance_p;
+    tQueue* pQueue = (tQueue*)pInstance_p;
 
-    if(pQueue == NULL)
+    if (pQueue == NULL)
     {
         Ret = kQueueInvalidParameter;
         goto Exit;
     }
 
-    if(pQueue->config.queueRole == kQueueProducer)
+    if (pQueue->config.queueRole == kQueueProducer)
     {
         Ret = kQueueWrongCaller;
         goto Exit;
@@ -445,27 +447,28 @@ This function returns the empty state of the queue instance (TRUE = is empty).
 
 \return tQueueReturn
 \retval kQueueSuccessful        The returned base address is valid
-\retval kQueueInvalidParamter   If the parameter pointers are NULL
+\retval kQueueInvalidParamter   The parameter pointers are NULL
 
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-tQueueReturn lfq_checkEmpty (tQueueInstance pInstance_p,
-        BOOL *pfIsEmpty_p)
+tQueueReturn lfq_checkEmpty(tQueueInstance pInstance_p,
+                            BOOL* pfIsEmpty_p)
 {
     tQueueReturn Ret = kQueueSuccessful;
-    tQueue *pQueue = (tQueue*)pInstance_p;
+    tQueue* pQueue = (tQueue*)pInstance_p;
 
-    if(pQueue == NULL || pfIsEmpty_p == NULL)
+    if (pQueue == NULL || pfIsEmpty_p == NULL)
     {
         Ret = kQueueInvalidParameter;
         goto Exit;
     }
 
-    switch(getHwQueueState(pQueue))
+    switch (getHwQueueState(pQueue))
     {
         case kQueueStateOperational:
             break;
+
         default:
             /// queue is not operational, hence, empty!
             *pfIsEmpty_p = TRUE;
@@ -491,18 +494,18 @@ This function returns the number of entries in the queue instance.
 
 \return tQueueReturn
 \retval kQueueSuccessful        The returned base address is valid
-\retval kQueueInvalidParamter   If the parameter pointers are NULL
+\retval kQueueInvalidParamter   The parameter pointers are NULL
 
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-tQueueReturn lfq_getEntryCount (tQueueInstance pInstance_p,
-        UINT16 *pEntryCount_p)
+tQueueReturn lfq_getEntryCount(tQueueInstance pInstance_p,
+                               UINT16* pEntryCount_p)
 {
     tQueueReturn Ret = kQueueSuccessful;
-    tQueue *pQueue = (tQueue*)pInstance_p;
+    tQueue* pQueue = (tQueue*)pInstance_p;
 
-    if(pQueue == NULL || pEntryCount_p == NULL)
+    if (pQueue == NULL || pEntryCount_p == NULL)
     {
         Ret = kQueueInvalidParameter;
         goto Exit;
@@ -526,50 +529,52 @@ Note that the entry which pEntry_p points to has to be initialized with the
 payload and its size (magic and reserved are set by this function).
 
 \param  pInstance_p             The queue instance of interest
-\param  pData_p                 data to be inserted
-\param  size_p                  size of data to be inserted
+\param  pData_p                 Data to be inserted
+\param  size_p                  Size of data to be inserted
 
 \return tQueueReturn
-\retval kQueueSuccessful        entry is enqueued successfully
-\retval kQueueInvalidParamter   If the parameter pointers are NULL
+\retval kQueueSuccessful        Entry is enqueued successfully
+\retval kQueueInvalidParamter   The parameter pointers are NULL
 \retval kQueueAlignment         The entry is not UINT32 aligned
 \retval kQueueFull              The queue instance is full
-\retval kQueueHwError           Queue invalid
+\retval kQueueHwError           Queue is invalid
 
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-tQueueReturn lfq_entryEnqueue (tQueueInstance pInstance_p,
-        UINT8 *pData_p, UINT16 size_p)
+tQueueReturn lfq_entryEnqueue(tQueueInstance pInstance_p,
+                              UINT8* pData_p, UINT16 size_p)
 {
-    tQueue *pQueue = (tQueue*)pInstance_p;
+    tQueue* pQueue = (tQueue*)pInstance_p;
     UINT16 entryPayloadSize;
     tEntryHeader entryHeader;
 
-    if(pQueue == NULL || pData_p == NULL || size_p > QUEUE_MAX_PAYLOAD)
+    if (pQueue == NULL || pData_p == NULL || size_p > QUEUE_MAX_PAYLOAD)
         return kQueueInvalidParameter;
 
-    switch(getHwQueueState(pQueue))
+    switch (getHwQueueState(pQueue))
     {
         case kQueueStateOperational:
             break;
+
         case kQueueStateReset:
             /// queue was reset by consumer, producer reactivates queue
             setHwQueueState(pQueue, kQueueStateOperational);
             break;
+
         default:
         case kQueueStateInvalid:
             return kQueueHwError;
     }
 
-    if(UNALIGNED32(pData_p))
+    if (UNALIGNED32(pData_p))
         return kQueueAlignment;
 
     getHwQueueBufferHeader(pQueue);
 
     entryPayloadSize = ALIGN32(size_p);
 
-    if(!checkPayloadFitable(pQueue, entryPayloadSize))
+    if (!checkPayloadFitable(pQueue, entryPayloadSize))
         return kQueueFull;
 
     /// prepare header
@@ -585,7 +590,7 @@ tQueueReturn lfq_entryEnqueue (tQueueInstance pInstance_p,
     pQueue->local.entryIndices.ind.write += 1;
 
     /// the new indices are written to hw only if the queue is still operational
-    if(getHwQueueState(pQueue) != kQueueStateOperational)
+    if (getHwQueueState(pQueue) != kQueueStateOperational)
         return kQueueSuccessful;
 
     setHwQueueWrite(pQueue);
@@ -602,13 +607,13 @@ entry buffer (pEntry_p). The caller has to provide the buffer size, to which the
 pointer pEntry_p points to.
 
 \param  pInstance_p             The queue instance of interest
-\param  pData_p                 buffer to be used for extracting next entry
-\param  pSize_p                 size of the buffer, returns the actual size of
+\param  pData_p                 Buffer to be used for extracting next entry
+\param  pSize_p                 Size of the buffer, returns the actual size of
                                 the entry
 
 \return tQueueReturn
 \retval kQueueSuccessful        The returned base address is valid
-\retval kQueueInvalidParamter   If the parameter pointers are NULL
+\retval kQueueInvalidParamter   The parameter pointers are NULL
 \retval kQueueAlignment         The entry buffer is not UINT32 aligned
 \retval kQueueEmpty             The queue instance is empty
 \retval kQueueInvalidEntry      The read entry of the queue instance is
@@ -618,36 +623,36 @@ pointer pEntry_p points to.
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-tQueueReturn lfq_entryDequeue (tQueueInstance pInstance_p,
-        UINT8 *pData_p, UINT16 *pSize_p)
+tQueueReturn lfq_entryDequeue(tQueueInstance pInstance_p,
+                              UINT8* pData_p, UINT16* pSize_p)
 {
-    tQueue *pQueue = (tQueue*)pInstance_p;
+    tQueue* pQueue = (tQueue*)pInstance_p;
     tEntryHeader EntryHeader;
     UINT16 size;
 
-    if(pQueue == NULL || pData_p == NULL)
+    if (pQueue == NULL || pData_p == NULL)
         return kQueueInvalidParameter;
 
     /// not operational queues are empty for the consumer
-    if(getHwQueueState(pQueue) != kQueueStateOperational)
+    if (getHwQueueState(pQueue) != kQueueStateOperational)
         return kQueueEmpty;
 
-    if(UNALIGNED32(pData_p))
+    if (UNALIGNED32(pData_p))
         return kQueueAlignment;
 
     getHwQueueBufferHeader(pQueue);
 
-    if(checkQueueEmpty(pQueue))
+    if (checkQueueEmpty(pQueue))
         return kQueueEmpty;
 
     readHeader(pQueue, &EntryHeader);
 
-    if(!checkMagicValid(&EntryHeader))
+    if (!checkMagicValid(&EntryHeader))
         return kQueueInvalidEntry;
 
     size = ALIGN32(EntryHeader.payloadSize);
 
-    if(size > *pSize_p)
+    if (size > *pSize_p)
         return kQueueNoResource;
 
     readData(pQueue, pData_p, size);
@@ -674,9 +679,9 @@ tQueueReturn lfq_entryDequeue (tQueueInstance pInstance_p,
 \param  p                       Pointer to be freed
 */
 //------------------------------------------------------------------------------
-static void freePtr(void *p)
+static void freePtr(void* p)
 {
-    if(p != NULL)
+    if (p != NULL)
         free(p);
 }
 
@@ -691,21 +696,21 @@ This ensures reading queue indices consistently.
 \param  pQueue_p                The queue instance of interest
 */
 //------------------------------------------------------------------------------
-static void getHwQueueBufferHeader (tQueue *pQueue_p)
+static void getHwQueueBufferHeader(tQueue* pQueue_p)
 {
     pQueue_p->local.spaceIndices.bothIndices =
             HOSTIF_RD32(pQueue_p->pQueueBuffer,
-            offsetof(tQueueBuffer, header.spaceIndices));
+                        offsetof(tQueueBuffer, header.spaceIndices));
 
     pQueue_p->local.entryIndices.bothIndices =
             HOSTIF_RD32(pQueue_p->pQueueBuffer,
-                    offsetof(tQueueBuffer, header.entryIndices));
+                        offsetof(tQueueBuffer, header.entryIndices));
 
     pQueue_p->local.usedSpace = pQueue_p->local.spaceIndices.ind.write -
             pQueue_p->local.spaceIndices.ind.read;
 
     pQueue_p->local.freeSpace =
-            pQueue_p->maxEntries -pQueue_p->local.usedSpace;
+            pQueue_p->maxEntries - pQueue_p->local.usedSpace;
 
     pQueue_p->local.usedEntries = pQueue_p->local.entryIndices.ind.write -
             pQueue_p->local.entryIndices.ind.read;
@@ -720,10 +725,10 @@ static void getHwQueueBufferHeader (tQueue *pQueue_p)
 \return The function returns the state of the queue instance.
 */
 //------------------------------------------------------------------------------
-static tQueueState getHwQueueState (tQueue *pQueue_p)
+static tQueueState getHwQueueState(tQueue* pQueue_p)
 {
     return (tQueueState)HOSTIF_RD8(pQueue_p->pQueueBuffer,
-            offsetof(tQueueBuffer, header.state));
+                                   offsetof(tQueueBuffer, header.state));
 }
 
 //------------------------------------------------------------------------------
@@ -734,10 +739,10 @@ static tQueueState getHwQueueState (tQueue *pQueue_p)
 \param  State_p                 Queue state to be written
 */
 //------------------------------------------------------------------------------
-static void setHwQueueState (tQueue *pQueue_p, tQueueState State_p)
+static void setHwQueueState(tQueue* pQueue_p, tQueueState State_p)
 {
     HOSTIF_WR8(pQueue_p->pQueueBuffer,
-            offsetof(tQueueBuffer, header.state), (UINT8)State_p);
+               offsetof(tQueueBuffer, header.state), (UINT8)State_p);
 }
 
 //------------------------------------------------------------------------------
@@ -749,15 +754,15 @@ This function writes the local write indices to the shared memory.
 \param  pQueue_p                The queue instance of interest
 */
 //------------------------------------------------------------------------------
-static void setHwQueueWrite (tQueue *pQueue_p)
+static void setHwQueueWrite(tQueue* pQueue_p)
 {
     HOSTIF_WR16(pQueue_p->pQueueBuffer,
-            offsetof(tQueueBuffer, header.spaceIndices.set.ind.write),
-            pQueue_p->local.spaceIndices.ind.write);
+                offsetof(tQueueBuffer, header.spaceIndices.set.ind.write),
+                pQueue_p->local.spaceIndices.ind.write);
 
     HOSTIF_WR16(pQueue_p->pQueueBuffer,
-            offsetof(tQueueBuffer, header.entryIndices.set.ind.write),
-            pQueue_p->local.entryIndices.ind.write);
+                offsetof(tQueueBuffer, header.entryIndices.set.ind.write),
+                pQueue_p->local.entryIndices.ind.write);
 }
 
 //------------------------------------------------------------------------------
@@ -769,15 +774,15 @@ This function writes the local read indices to the shared memory.
 \param  pQueue_p                The queue instance of interest
 */
 //------------------------------------------------------------------------------
-static void setHwQueueRead (tQueue *pQueue_p)
+static void setHwQueueRead(tQueue* pQueue_p)
 {
     HOSTIF_WR16(pQueue_p->pQueueBuffer,
-            offsetof(tQueueBuffer, header.spaceIndices.set.ind.read),
-            pQueue_p->local.spaceIndices.ind.read);
+                offsetof(tQueueBuffer, header.spaceIndices.set.ind.read),
+                pQueue_p->local.spaceIndices.ind.read);
 
     HOSTIF_WR16(pQueue_p->pQueueBuffer,
-            offsetof(tQueueBuffer, header.entryIndices.set.ind.read),
-            pQueue_p->local.entryIndices.ind.read);
+                offsetof(tQueueBuffer, header.entryIndices.set.ind.read),
+                pQueue_p->local.entryIndices.ind.read);
 }
 
 //------------------------------------------------------------------------------
@@ -790,13 +795,13 @@ memory region.
 \param  pQueue_p                The queue instance of interest
 */
 //------------------------------------------------------------------------------
-static void resetHwQueue (tQueue *pQueue_p)
+static void resetHwQueue(tQueue* pQueue_p)
 {
-    HOSTIF_WR32(pQueue_p->pQueueBuffer, offsetof(tQueueBuffer,
-            header.spaceIndices.reset), 0);
+    HOSTIF_WR32(pQueue_p->pQueueBuffer,
+                offsetof(tQueueBuffer, header.spaceIndices.reset), 0);
 
-    HOSTIF_WR32(pQueue_p->pQueueBuffer, offsetof(tQueueBuffer,
-            header.entryIndices.reset), 0);
+    HOSTIF_WR32(pQueue_p->pQueueBuffer,
+                offsetof(tQueueBuffer, header.entryIndices.reset), 0);
 }
 
 //------------------------------------------------------------------------------
@@ -811,7 +816,7 @@ This function returns the offset of an index of a queue instance.
 \return The function returns the offset of the specified index.
 */
 //------------------------------------------------------------------------------
-static UINT16 getOffsetInCirBuffer (tQueue *pQueue_p, UINT16 index_p)
+static UINT16 getOffsetInCirBuffer(tQueue* pQueue_p, UINT16 index_p)
 {
     return (index_p & (pQueue_p->maxEntries - 1)) * ENTRY_MIN_SIZE;
 }
@@ -827,9 +832,9 @@ This function checks the magic word of a queue entry header.
 \return The function returns TRUE if the queue entry header magic is valid.
 */
 //------------------------------------------------------------------------------
-static BOOL checkMagicValid (tEntryHeader *pHeader_p)
+static BOOL checkMagicValid(tEntryHeader* pHeader_p)
 {
-    if(pHeader_p->magic != QUEUE_MAGIC)
+    if (pHeader_p->magic != QUEUE_MAGIC)
     {
         return FALSE;
     }
@@ -852,11 +857,11 @@ instance.
 \return The function returns TRUE if the entry will fit.
 */
 //------------------------------------------------------------------------------
-static BOOL checkPayloadFitable (tQueue *pQueue_p, UINT16 payloadSize_p)
+static BOOL checkPayloadFitable(tQueue* pQueue_p, UINT16 payloadSize_p)
 {
     UINT16 space = (sizeof(tEntryHeader) + payloadSize_p) / ENTRY_MIN_SIZE;
 
-    if(space > pQueue_p->local.freeSpace)
+    if (space > pQueue_p->local.freeSpace)
     {
         return FALSE;
     }
@@ -879,7 +884,7 @@ called.
 \return The function returns TRUE if the queue instance is empty.
 */
 //------------------------------------------------------------------------------
-static BOOL checkQueueEmpty (tQueue *pQueue_p)
+static BOOL checkQueueEmpty(tQueue* pQueue_p)
 {
     return (pQueue_p->local.usedSpace == 0);
 }
@@ -892,15 +897,15 @@ static BOOL checkQueueEmpty (tQueue *pQueue_p)
 \param  pHeader_p               Reference to header to be written
 */
 //------------------------------------------------------------------------------
-static void writeHeader (tQueue *pQueue_p, tEntryHeader *pHeader_p)
+static void writeHeader(tQueue* pQueue_p, tEntryHeader* pHeader_p)
 {
     UINT16 offset = getOffsetInCirBuffer(pQueue_p,
-            pQueue_p->local.spaceIndices.ind.write);
+                                         pQueue_p->local.spaceIndices.ind.write);
 
     writeCirMemory(pQueue_p, offset, (UINT8*)pHeader_p, sizeof(tEntryHeader));
 
     pQueue_p->local.spaceIndices.ind.write += sizeof(tEntryHeader) /
-            ENTRY_MIN_SIZE;
+                                              ENTRY_MIN_SIZE;
 }
 
 //------------------------------------------------------------------------------
@@ -912,10 +917,10 @@ static void writeHeader (tQueue *pQueue_p, tEntryHeader *pHeader_p)
 \param  size_p                  Size of payload data to be written
 */
 //------------------------------------------------------------------------------
-static void writeData (tQueue *pQueue_p, UINT8 *pData_p, UINT16 size_p)
+static void writeData(tQueue* pQueue_p, UINT8* pData_p, UINT16 size_p)
 {
     UINT16 offset = getOffsetInCirBuffer(pQueue_p,
-            pQueue_p->local.spaceIndices.ind.write);
+                                         pQueue_p->local.spaceIndices.ind.write);
 
     writeCirMemory(pQueue_p, offset, pData_p, size_p);
 
@@ -934,13 +939,13 @@ This function writes data from a source to a circular memory.
 \param  srcSpan_p               Source data size
 */
 //------------------------------------------------------------------------------
-static void writeCirMemory (tQueue *pQueue_p, UINT16 offset_p,
-        UINT8 *pSrc_p, UINT16 srcSpan_p)
+static void writeCirMemory(tQueue* pQueue_p, UINT16 offset_p,
+                           UINT8* pSrc_p, UINT16 srcSpan_p)
 {
     UINT8 *pDst = (UINT8*)(&pQueue_p->pQueueBuffer->data);
     UINT16 part;
 
-    if(offset_p + srcSpan_p <= pQueue_p->queueBufferSpan)
+    if (offset_p + srcSpan_p <= pQueue_p->queueBufferSpan)
     {
         memcpy(pDst + offset_p, pSrc_p, srcSpan_p);
     }
@@ -966,15 +971,15 @@ static void writeCirMemory (tQueue *pQueue_p, UINT16 offset_p,
                                 with the read header
 */
 //------------------------------------------------------------------------------
-static void readHeader (tQueue *pQueue_p, tEntryHeader *pHeader_p)
+static void readHeader(tQueue* pQueue_p, tEntryHeader* pHeader_p)
 {
     UINT16 offset = getOffsetInCirBuffer(pQueue_p,
-            pQueue_p->local.spaceIndices.ind.read);
+                                         pQueue_p->local.spaceIndices.ind.read);
 
     readCirMemory(pQueue_p, offset, (UINT8*)pHeader_p, sizeof(tEntryHeader));
 
     pQueue_p->local.spaceIndices.ind.read += sizeof(tEntryHeader) /
-            ENTRY_MIN_SIZE;
+                                             ENTRY_MIN_SIZE;
 }
 
 //------------------------------------------------------------------------------
@@ -987,10 +992,10 @@ static void readHeader (tQueue *pQueue_p, tEntryHeader *pHeader_p)
 \param  size_p                  Size of data buffer
 */
 //------------------------------------------------------------------------------
-static void readData (tQueue *pQueue_p, UINT8 *pData_p, UINT16 size_p)
+static void readData(tQueue* pQueue_p, UINT8* pData_p, UINT16 size_p)
 {
     UINT16 offset = getOffsetInCirBuffer(pQueue_p,
-            pQueue_p->local.spaceIndices.ind.read);
+                                         pQueue_p->local.spaceIndices.ind.read);
 
     readCirMemory(pQueue_p, offset, pData_p, size_p);
 
@@ -1009,13 +1014,13 @@ This function reads data from a circular memory.
 \param  dstSpan_p               Destination data size
 */
 //------------------------------------------------------------------------------
-static void readCirMemory (tQueue *pQueue_p, UINT16 offset_p,
-        UINT8 *pDst_p, UINT16 dstSpan_p)
+static void readCirMemory(tQueue* pQueue_p, UINT16 offset_p,
+                          UINT8* pDst_p, UINT16 dstSpan_p)
 {
-    UINT8 *pSrc = (UINT8*)(&pQueue_p->pQueueBuffer->data);
+    UINT8* pSrc = (UINT8*)(&pQueue_p->pQueueBuffer->data);
     UINT16 part;
 
-    if(offset_p + dstSpan_p <= pQueue_p->queueBufferSpan)
+    if (offset_p + dstSpan_p <= pQueue_p->queueBufferSpan)
     {
         memcpy(pDst_p, pSrc + offset_p, dstSpan_p);
     }
@@ -1031,3 +1036,4 @@ static void readCirMemory (tQueue *pQueue_p, UINT16 offset_p,
         memcpy(pDst_p + part, pSrc, dstSpan_p - part);
     }
 }
+

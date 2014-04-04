@@ -10,7 +10,7 @@ The file contains the high level driver for the host interface library for Host.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 \ingroup    libraries
 
 The host interface library provides a software interface for using the host
-interface IP core. It provides several features like queues and linear memory
+interface IP-Core. It provides several features like queues and linear memory
 modules.
 *******************************************************************************/
 
@@ -89,9 +89,9 @@ modules.
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static void hostifIrqHandler (void *pArg_p);
-static tHostifReturn controlIrqMaster (tHostif *pHostif_p, BOOL fEnable_p);
-HOSTIF_INLINE static BOOL getBridgeEnabled (tHostif *pHostif_p);
+static void hostifIrqHandler(void* pArg_p);
+static tHostifReturn controlIrqMaster(tHostif* pHostif_p, BOOL fEnable_p);
+HOSTIF_INLINE static BOOL getBridgeEnabled(tHostif* pHostif_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -103,7 +103,7 @@ HOSTIF_INLINE static BOOL getBridgeEnabled (tHostif *pHostif_p);
 
 This function creates the Pcp-specific host interface instance.
 
-\param  pHostif_p               The host interface instance for Pcp.
+\param  pHostif_p               The host interface instance for PCP.
 
 \return The function returns a tHostifReturn error code.
 \retval kHostifSuccessful       The host interface is configured successfully
@@ -114,7 +114,7 @@ This function creates the Pcp-specific host interface instance.
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-tHostifReturn hostif_createInt (tHostif* pHostif_p)
+tHostifReturn hostif_createInt(tHostif* pHostif_p)
 {
     tHostifReturn       ret = kHostifSuccessful;
     UINT32              pcpAddr;
@@ -122,7 +122,7 @@ tHostifReturn hostif_createInt (tHostif* pHostif_p)
     UINT                i;
 
     // Busy wait for enabled bridge
-    while(getBridgeEnabled(pHostif_p) == FALSE)
+    while (getBridgeEnabled(pHostif_p) == FALSE)
     {
         //jz Use timeout?
     }
@@ -135,21 +135,21 @@ tHostifReturn hostif_createInt (tHostif* pHostif_p)
     pInitParam = (tHostifInitParam*)(pHostif_p->pBase + HOSTIF_STCTRL_SPAN);
 
     // Check if mem length is correct, otherwise version mismatch!
-    if(pInitParam->initMemLength != HOSTIF_DYNBUF_COUNT + HOSTIF_BUF_COUNT)
+    if (pInitParam->initMemLength != HOSTIF_DYNBUF_COUNT + HOSTIF_BUF_COUNT)
     {
         ret = kHostifWrongVersion;
         goto Exit;
     }
 
     // And now, get the stuff
-    for(i=0; i<pInitParam->initMemLength; i++)
+    for (i = 0; i < pInitParam->initMemLength; i++)
     {
         pHostif_p->aBufMap[i].pBase = pHostif_p->pBase + pInitParam->aInitMem[i].offset;
         pHostif_p->aBufMap[i].span = pInitParam->aInitMem[i].span;
     }
 
     // register isr in system
-    if(HOSTIF_IRQ_REG(hostifIrqHandler, (void*)pHostif_p))
+    if (HOSTIF_IRQ_REG(hostifIrqHandler, (void*)pHostif_p))
     {
         ret = kHostifNoResource;
         goto Exit;
@@ -176,14 +176,14 @@ This function deletes a host interface instance.
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-tHostifReturn hostif_deleteInt (tHostif* pHostif_p)
+tHostifReturn hostif_deleteInt(tHostif* pHostif_p)
 {
     tHostifReturn ret = kHostifSuccessful;
 
-    // enable system irq (ignore ret)
+    // enable system IRQ (ignore ret)
     HOSTIF_IRQ_DISABLE();
 
-    // degister isr in system (ignore ret)
+    // degister ISR in system (ignore ret)
     HOSTIF_IRQ_REG(NULL, NULL);
 
     return ret;
@@ -201,20 +201,20 @@ This function reads and verifies the version from the host interface.
 \return The function returns a tHostifReturn error code.
 */
 //------------------------------------------------------------------------------
-tHostifReturn hostif_checkVersion (UINT8* pBase_p, tHostifVersion* pSwVersion_p)
+tHostifReturn hostif_checkVersion(UINT8* pBase_p, tHostifVersion* pSwVersion_p)
 {
     tHostifReturn       ret = kHostifSuccessful;
     UINT32              versionField = hostif_readVersion(pBase_p);
     tHostifHwVersion*   pHwVersion = (tHostifHwVersion*)&versionField;
 
     /* Check Revision, Minor and Major */
-    if(pHwVersion->version.revision != pSwVersion_p->revision)
+    if (pHwVersion->version.revision != pSwVersion_p->revision)
         ret = kHostifWrongVersion;
 
-    if(pHwVersion->version.minor != pSwVersion_p->minor)
+    if (pHwVersion->version.minor != pSwVersion_p->minor)
         ret = kHostifWrongVersion;
 
-    if(pHwVersion->version.major != pSwVersion_p->major)
+    if (pHwVersion->version.major != pSwVersion_p->major)
         ret = kHostifWrongVersion;
 
     return ret;
@@ -222,14 +222,14 @@ tHostifReturn hostif_checkVersion (UINT8* pBase_p, tHostifVersion* pSwVersion_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief  This function adds an irq handler for the corresponding irq source
+\brief  This function adds an IRQ handler for the corresponding IRQ source
 
-This function adds an irq handler function for the corresponding irq source.
+This function adds an IRQ handler function for the corresponding IRQ source.
 Note: The provided callback is invoked within the interrupt context!
-If the provided callback is NULL, then the irq source is disabled.
+If the provided callback is NULL, then the IRQ source is disabled.
 
 \param  pInstance_p             Host interface instance
-\param  irqSrc_p                Irq source that should invoke the callback
+\param  irqSrc_p                IRQ source that should invoke the callback
 \param  pfnCb_p                 Callback function that is invoked
 
 \return The function returns a tHostifReturn error code.
@@ -239,24 +239,24 @@ If the provided callback is NULL, then the irq source is disabled.
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-tHostifReturn hostif_irqRegHdl (tHostifInstance pInstance_p,
-        tHostifIrqSrc irqSrc_p, tHostifIrqCb pfnCb_p)
+tHostifReturn hostif_irqRegHdl(tHostifInstance pInstance_p,
+                               tHostifIrqSrc irqSrc_p, tHostifIrqCb pfnCb_p)
 {
     tHostifReturn ret = kHostifSuccessful;
-    tHostif *pHostif = (tHostif*)pInstance_p;
-    UINT16 irqEnableVal;
+    tHostif*      pHostif = (tHostif*)pInstance_p;
+    UINT16        irqEnableVal;
 
-    if(pInstance_p == NULL || irqSrc_p >= kHostifIrqSrcLast)
+    if (pInstance_p == NULL || irqSrc_p >= kHostifIrqSrcLast)
     {
         ret = kHostifInvalidParameter;
         goto Exit;
     }
 
-    // get irq source enable from hw
+    // get IRQ source enable from hw
     irqEnableVal = hostif_readIrqEnable(pHostif->pBase);
 
-    // enable irq source if callback is not NULL
-    if(pfnCb_p != NULL)
+    // enable IRQ source if callback is not NULL
+    if (pfnCb_p != NULL)
         irqEnableVal |= (1 << irqSrc_p);
     else
         irqEnableVal &= ~(1 << irqSrc_p);
@@ -264,7 +264,7 @@ tHostifReturn hostif_irqRegHdl (tHostifInstance pInstance_p,
     // store callback in instance
     pHostif->apfnIrqCb[irqSrc_p] = pfnCb_p;
 
-    // write irq source enable back to hw
+    // write IRQ source enable back to hw
     hostif_writeIrqEnable(pHostif->pBase, irqEnableVal);
 
 Exit:
@@ -273,13 +273,13 @@ Exit:
 
 //------------------------------------------------------------------------------
 /**
-\brief  This function controls the master irq enable
+\brief  This function controls the master IRQ enable
 
-This function allows the host to enable or disable all irq sources from the
+This function allows the host to enable or disable all IRQ sources from the
 host interface.
 
 \param  pInstance_p             host interface instance
-\param  fEnable_p               enable the master irq (TRUE)
+\param  fEnable_p               enable the master IRQ (TRUE)
 
 \return The function returns a tHostifReturn error code.
 \retval kHostifSuccessful       The process function exit without errors.
@@ -288,13 +288,13 @@ host interface.
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-tHostifReturn hostif_irqMasterEnable (tHostifInstance pInstance_p,
-        BOOL fEnable_p)
+tHostifReturn hostif_irqMasterEnable(tHostifInstance pInstance_p,
+                                     BOOL fEnable_p)
 {
     tHostifReturn ret = kHostifSuccessful;
-    tHostif *pHostif = pInstance_p;
+    tHostif*      pHostif = pInstance_p;
 
-    if(pInstance_p == NULL)
+    if (pInstance_p == NULL)
     {
         ret = kHostifInvalidParameter;
         goto Exit;
@@ -303,7 +303,7 @@ tHostifReturn hostif_irqMasterEnable (tHostifInstance pInstance_p,
     // activte master irq enable
     ret = controlIrqMaster(pHostif, fEnable_p);
 
-    if(ret != kHostifSuccessful)
+    if (ret != kHostifSuccessful)
     {
         goto Exit;
     }
@@ -326,12 +326,12 @@ Exit:
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-tHostifReturn hostif_getState (tHostifInstance pInstance_p, tHostifState *pSta_p)
+tHostifReturn hostif_getState(tHostifInstance pInstance_p, tHostifState* pSta_p)
 {
     tHostifReturn ret = kHostifSuccessful;
-    tHostif *pHostif = (tHostif*)pInstance_p;
+    tHostif*      pHostif = (tHostif*)pInstance_p;
 
-    if(pInstance_p == NULL || pSta_p == NULL)
+    if (pInstance_p == NULL || pSta_p == NULL)
     {
         ret = kHostifInvalidParameter;
         goto Exit;
@@ -357,12 +357,12 @@ Exit:
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-tHostifReturn hostif_getError (tHostifInstance pInstance_p, tHostifError *pErr_p)
+tHostifReturn hostif_getError(tHostifInstance pInstance_p, tHostifError* pErr_p)
 {
     tHostifReturn ret = kHostifSuccessful;
-    tHostif *pHostif = (tHostif*)pInstance_p;
+    tHostif*      pHostif = (tHostif*)pInstance_p;
 
-    if(pInstance_p == NULL || pErr_p == NULL)
+    if (pInstance_p == NULL || pErr_p == NULL)
     {
         ret = kHostifInvalidParameter;
         goto Exit;
@@ -388,12 +388,12 @@ Exit:
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-tHostifReturn hostif_getHeartbeat (tHostifInstance pInstance_p, UINT16 *pHeartbeat_p)
+tHostifReturn hostif_getHeartbeat(tHostifInstance pInstance_p, UINT16* pHeartbeat_p)
 {
     tHostifReturn ret = kHostifSuccessful;
-    tHostif *pHostif = (tHostif*)pInstance_p;
+    tHostif*      pHostif = (tHostif*)pInstance_p;
 
-    if(pInstance_p == NULL || pHeartbeat_p == NULL)
+    if (pInstance_p == NULL || pHeartbeat_p == NULL)
     {
         ret = kHostifInvalidParameter;
         goto Exit;
@@ -422,20 +422,20 @@ Exit:
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-tHostifReturn hostif_dynBufAcquire (tHostifInstance pInstance_p, UINT32 pcpBaseAddr_p,
-        UINT8** ppBufBase_p)
+tHostifReturn hostif_dynBufAcquire(tHostifInstance pInstance_p, UINT32 pcpBaseAddr_p,
+                                   UINT8** ppBufBase_p)
 {
     tHostifReturn ret;
     tHostif*      pHostif = (tHostif*)pInstance_p;
     UINT          i;
 
-    if(pInstance_p == NULL || ppBufBase_p == NULL)
+    if (pInstance_p == NULL || ppBufBase_p == NULL)
     {
         ret = kHostifInvalidParameter;
         goto Exit;
     }
 
-    if(getBridgeEnabled(pHostif) == FALSE)
+    if (getBridgeEnabled(pHostif) == FALSE)
     {
         ret = kHostifBridgeDisabled;
         goto Exit;
@@ -443,9 +443,9 @@ tHostifReturn hostif_dynBufAcquire (tHostifInstance pInstance_p, UINT32 pcpBaseA
 
     ret = kHostifNoResource;
 
-    for(i=0; i<HOSTIF_DYNBUF_COUNT; i++)
+    for (i = 0; i < HOSTIF_DYNBUF_COUNT; i++)
     {
-        if(pHostif->apDynBuf[i] == NULL)
+        if (pHostif->apDynBuf[i] == NULL)
         {
             // handle base address in pcp memory space
             pHostif->apDynBuf[i] = (UINT8*)pcpBaseAddr_p;
@@ -479,21 +479,21 @@ Exit:
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-tHostifReturn hostif_dynBufFree (tHostifInstance pInstance_p, UINT8* pBufBase_p)
+tHostifReturn hostif_dynBufFree(tHostifInstance pInstance_p, UINT8* pBufBase_p)
 {
     tHostifReturn ret = kHostifSuccessful;
     tHostif*      pHostif = (tHostif*)pInstance_p;
     UINT          i;
 
-    if(pInstance_p == NULL)
+    if (pInstance_p == NULL)
     {
         ret = kHostifInvalidParameter;
         goto Exit;
     }
 
-    for(i=0; i<HOSTIF_DYNBUF_COUNT; i++)
+    for (i = 0; i < HOSTIF_DYNBUF_COUNT; i++)
     {
-        if(pHostif->aBufMap[i].pBase == pBufBase_p)
+        if (pHostif->aBufMap[i].pBase == pBufBase_p)
         {
             // Found dynamic buffer, free it
             pHostif->apDynBuf[i] = NULL;
@@ -503,7 +503,7 @@ tHostifReturn hostif_dynBufFree (tHostifInstance pInstance_p, UINT8* pBufBase_p)
         }
     }
 
-    if(ret == kHostifSuccessful)
+    if (ret == kHostifSuccessful)
         hostif_writeDynBufHost(pHostif->pBase, (UINT8)i, 0);
 
 Exit:
@@ -526,12 +526,12 @@ This function returns the user part of the initialization parameters.
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-tHostifReturn hostif_getInitParam (tHostifInstance pInstance_p, UINT8** ppBase_p)
+tHostifReturn hostif_getInitParam(tHostifInstance pInstance_p, UINT8** ppBase_p)
 {
     tHostifReturn   ret = kHostifSuccessful;
     tHostif*        pHostif = (tHostif*)pInstance_p;
 
-    if(pInstance_p == NULL || ppBase_p == NULL)
+    if (pInstance_p == NULL || ppBase_p == NULL)
     {
         ret = kHostifInvalidParameter;
         goto Exit;
@@ -560,30 +560,30 @@ hostif_irqRegHdl().
                                 interface instance with this parameter.
 */
 //------------------------------------------------------------------------------
-static void hostifIrqHandler (void *pArg_p)
+static void hostifIrqHandler(void* pArg_p)
 {
-    tHostif *pHostif = (tHostif*)pArg_p;
-    UINT16 pendings;
-    UINT16 mask;
-    int i;
+    tHostif* pHostif = (tHostif*)pArg_p;
+    UINT16   pendings;
+    UINT16   mask;
+    int      i;
 
-    if(pArg_p == NULL)
+    if (pArg_p == NULL)
     {
         goto Exit;
     }
 
     pendings = hostif_readIrqPending(pHostif->pBase);
 
-    for(i=0; i<kHostifIrqSrcLast; i++)
+    for (i = 0; i < kHostifIrqSrcLast; i++)
     {
         mask = 1 << i;
 
-        //ack irq source first
-        if(pendings & mask)
+        //ack IRQ source first
+        if (pendings & mask)
             hostif_ackIrq(pHostif->pBase, mask);
 
         //then try to execute the callback
-        if(pHostif->apfnIrqCb[i] != NULL)
+        if (pHostif->apfnIrqCb[i] != NULL)
             pHostif->apfnIrqCb[i](pArg_p);
     }
 
@@ -605,13 +605,13 @@ again.
 \return The function returns a tHostifReturn error code.
 */
 //------------------------------------------------------------------------------
-static tHostifReturn controlIrqMaster (tHostif *pHostif_p, BOOL fEnable_p)
+static tHostifReturn controlIrqMaster(tHostif* pHostif_p, BOOL fEnable_p)
 {
     tHostifReturn ret = kHostifSuccessful;
-    UINT16 dst = 0;
-    UINT16 src;
+    UINT16        dst = 0;
+    UINT16        src;
 
-    if(fEnable_p != FALSE)
+    if (fEnable_p != FALSE)
     {
         dst = HOSTIF_IRQ_MASTER_ENABLE;
     }
@@ -622,7 +622,7 @@ static tHostifReturn controlIrqMaster (tHostif *pHostif_p, BOOL fEnable_p)
     // read back value from hw and check if write was successful
     src = hostif_readIrqMasterEnable(pHostif_p->pBase);
 
-    if((src & HOSTIF_IRQ_MASTER_ENABLE) != dst)
+    if ((src & HOSTIF_IRQ_MASTER_ENABLE) != dst)
     {
         ret = kHostifHwWriteError;
         goto Exit;
@@ -643,14 +643,15 @@ This getter returns whether the bridge is turned on or off.
 \return The function returns TRUE if the bridge is turned on, otherwise FALSE.
 */
 //------------------------------------------------------------------------------
-static BOOL getBridgeEnabled (tHostif *pHostif_p)
+static BOOL getBridgeEnabled(tHostif* pHostif_p)
 {
     UINT16 val;
 
     val = hostif_readBridgeEnable(pHostif_p->pBase);
 
-    if(val & HOSTIF_BRIDGE_ENABLE)
+    if (val & HOSTIF_BRIDGE_ENABLE)
         return TRUE;
     else
         return FALSE;
 }
+

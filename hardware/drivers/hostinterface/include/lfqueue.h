@@ -11,7 +11,7 @@ This lock-free queue does not support multiple producer- and consumer-processes!
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -37,8 +37,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_LFQUEUE_H_
-#define _INC_LFQUEUE_H_
+#ifndef _INC_lfqueue_H_
+#define _INC_lfqueue_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -98,7 +98,7 @@ typedef struct sQueueConfig
 {
     tQueueRole      queueRole;        ///< Queue instance role
     BOOL            fAllocHeap;       ///< Allocate queue in heap memory
-    UINT8           *pBase;
+    UINT8*          pBase;
         ///< if fAllocHeap is FALSE, this base address is used
     UINT16          span;
         ///< size of queue buffer, must be power of 2 + sizeof(tQueueBufferHdr)
@@ -114,24 +114,25 @@ typedef void* tQueueInstance;
 extern "C" {
 #endif
 
-tQueueReturn lfq_create (tQueueConfig *pQueueConfig_p,
-        tQueueInstance *ppInstance_p);
-tQueueReturn lfq_delete (tQueueInstance pInstance_p);
+tQueueReturn lfq_create(tQueueConfig* pQueueConfig_p,
+                        tQueueInstance* ppInstance_p);
+tQueueReturn lfq_delete(tQueueInstance pInstance_p);
 
-tQueueReturn lfq_reset (tQueueInstance pInstance_p);
+tQueueReturn lfq_reset(tQueueInstance pInstance_p);
 
-tQueueReturn lfq_checkEmpty (tQueueInstance pInstance_p,
-        BOOL *pfIsEmpty_p);
-tQueueReturn lfq_getEntryCount (tQueueInstance pInstance_p,
-        UINT16 *pEntryCount_p);
+tQueueReturn lfq_checkEmpty(tQueueInstance pInstance_p,
+                            BOOL* pfIsEmpty_p);
+tQueueReturn lfq_getEntryCount(tQueueInstance pInstance_p,
+                               UINT16* pEntryCount_p);
 
-tQueueReturn lfq_entryEnqueue (tQueueInstance pInstance_p,
-        UINT8 *pData_p, UINT16 size_p);
-tQueueReturn lfq_entryDequeue (tQueueInstance pInstance_p,
-        UINT8 *pData_p, UINT16 *pSize_p);
+tQueueReturn lfq_entryEnqueue(tQueueInstance pInstance_p,
+                              UINT8* pData_p, UINT16 size_p);
+tQueueReturn lfq_entryDequeue(tQueueInstance pInstance_p,
+                              UINT8* pData_p, UINT16* pSize_p);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_LFQUEUE_H_ */
+#endif /* _INC_lfqueue_H_ */
+

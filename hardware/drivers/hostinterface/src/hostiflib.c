@@ -10,7 +10,7 @@ The file contains the high level driver for the host interface library.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 \ingroup    libraries
 
 The host interface library provides a software interface for using the host
-interface IP core. It provides several features like queues and linear memory
+interface IP-Core. It provides several features like queues and linear memory
 modules.
 *******************************************************************************/
 
@@ -93,7 +93,7 @@ modules.
 
 This array holds all Host Interface instances available.
 */
-static tHostif *paHostifInstance_l[HOSTIF_INSTANCE_COUNT] =
+static tHostif* paHostifInstance_l[HOSTIF_INSTANCE_COUNT] =
 {
     NULL
 };
@@ -101,9 +101,9 @@ static tHostif *paHostifInstance_l[HOSTIF_INSTANCE_COUNT] =
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-/* Local functions for Pcp and Host */
-static void freePtr(void *p);
-static tHostifReturn checkMagic (UINT8* pBase_p);
+/* Local functions for PCP and Host */
+static void freePtr(void* p);
+static tHostifReturn checkMagic(UINT8* pBase_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -135,14 +135,14 @@ on the pConfig_p parameters.
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-tHostifReturn hostif_create (tHostifConfig *pConfig_p, tHostifInstance *ppInstance_p)
+tHostifReturn hostif_create(tHostifConfig* pConfig_p, tHostifInstance* ppInstance_p)
 {
     tHostifReturn   ret = kHostifSuccessful;
     tHostif*        pHostif = NULL;
     UINT8*          pBase_p = NULL;
     int i;
 
-    if(pConfig_p == NULL || ppInstance_p == NULL)
+    if (pConfig_p == NULL || ppInstance_p == NULL)
     {
         ret = kHostifInvalidParameter;
         goto Exit;
@@ -153,7 +153,7 @@ tHostifReturn hostif_create (tHostifConfig *pConfig_p, tHostifInstance *ppInstan
     // check magic
     ret = checkMagic(pBase_p);
 
-    if(ret != kHostifSuccessful)
+    if (ret != kHostifSuccessful)
     {
         goto Exit;
     }
@@ -161,7 +161,7 @@ tHostifReturn hostif_create (tHostifConfig *pConfig_p, tHostifInstance *ppInstan
     // check version
     ret = hostif_checkVersion(pBase_p, &pConfig_p->version);
 
-    if(ret != kHostifSuccessful)
+    if (ret != kHostifSuccessful)
     {
         goto Exit;
     }
@@ -169,7 +169,7 @@ tHostifReturn hostif_create (tHostifConfig *pConfig_p, tHostifInstance *ppInstan
     // create instance
     pHostif = (tHostif*)malloc(sizeof(tHostif));
 
-    if(pHostif == NULL)
+    if (pHostif == NULL)
     {
         ret = kHostifNoResource;
         goto Exit;
@@ -184,24 +184,23 @@ tHostifReturn hostif_create (tHostifConfig *pConfig_p, tHostifInstance *ppInstan
     pHostif->pBase = HOSTIF_MAKE_NONCACHEABLE(pHostif->config.pBase);
 
     // store instance in array
-    for(i=0; i<HOSTIF_INSTANCE_COUNT; i++)
+    for (i = 0; i < HOSTIF_INSTANCE_COUNT; i++)
     {
-        if(paHostifInstance_l[i] == NULL)
+        if (paHostifInstance_l[i] == NULL)
         {
             // free entry found
             paHostifInstance_l[i] = pHostif;
-
             break;
         }
     }
 
-    if(i == HOSTIF_INSTANCE_COUNT)
+    if (i == HOSTIF_INSTANCE_COUNT)
     {
         ret = kHostifNoResource;
         goto Exit;
     }
 
-    if((ret = hostif_createInt(pHostif)) != kHostifSuccessful)
+    if ((ret = hostif_createInt(pHostif)) != kHostifSuccessful)
     {
         goto Exit;
     }
@@ -210,7 +209,7 @@ tHostifReturn hostif_create (tHostifConfig *pConfig_p, tHostifInstance *ppInstan
     *ppInstance_p = pHostif;
 
 Exit:
-    if(ret != kHostifSuccessful)
+    if (ret != kHostifSuccessful)
     {
         hostif_delete(pHostif);
     }
@@ -235,30 +234,29 @@ This function deletes a host interface instance.
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-tHostifReturn hostif_delete (tHostifInstance pInstance_p)
+tHostifReturn hostif_delete(tHostifInstance pInstance_p)
 {
     tHostifReturn ret = kHostifSuccessful;
-    tHostif *pHostif = (tHostif*)pInstance_p;
+    tHostif*      pHostif = (tHostif*)pInstance_p;
     int i;
 
-    if(pInstance_p == NULL)
+    if (pInstance_p == NULL)
     {
         ret = kHostifInvalidParameter;
         goto Exit;
     }
 
-    if((ret = hostif_deleteInt(pHostif)) != kHostifSuccessful)
+    if ((ret = hostif_deleteInt(pHostif)) != kHostifSuccessful)
     {
         goto Exit;
     }
 
     // delete instance in instance array
-    for(i=0; i<HOSTIF_INSTANCE_COUNT; i++)
+    for (i = 0; i < HOSTIF_INSTANCE_COUNT; i++)
     {
-        if(pHostif == paHostifInstance_l[i])
+        if (pHostif == paHostifInstance_l[i])
         {
             paHostifInstance_l[i] = NULL;
-
             break;
         }
     }
@@ -283,18 +281,17 @@ If the instance is not found NULL is returned.
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-tHostifInstance hostif_getInstance (UINT Instance_p)
+tHostifInstance hostif_getInstance(UINT Instance_p)
 {
     tHostifInstance pHostif = NULL;
     int i;
 
     // search through array and return the matching one
-    for(i=0; i<HOSTIF_INSTANCE_COUNT; i++)
+    for (i = 0; i < HOSTIF_INSTANCE_COUNT; i++)
     {
-        if(paHostifInstance_l[i]->config.instanceNum == Instance_p)
+        if (paHostifInstance_l[i]->config.instanceNum == Instance_p)
         {
             pHostif = (tHostifInstance)paHostifInstance_l[i];
-
             break;
         }
     }
@@ -316,12 +313,12 @@ tHostifInstance hostif_getInstance (UINT Instance_p)
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-tHostifReturn hostif_setCommand (tHostifInstance pInstance_p, tHostifCommand cmd_p)
+tHostifReturn hostif_setCommand(tHostifInstance pInstance_p, tHostifCommand cmd_p)
 {
     tHostifReturn ret = kHostifSuccessful;
-    tHostif *pHostif = (tHostif*)pInstance_p;
+    tHostif*      pHostif = (tHostif*)pInstance_p;
 
-    if(pInstance_p == NULL)
+    if (pInstance_p == NULL)
     {
         ret = kHostifInvalidParameter;
         goto Exit;
@@ -347,12 +344,12 @@ Exit:
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-tHostifReturn hostif_getCommand (tHostifInstance pInstance_p, tHostifCommand *pCmd_p)
+tHostifReturn hostif_getCommand(tHostifInstance pInstance_p, tHostifCommand* pCmd_p)
 {
     tHostifReturn ret = kHostifSuccessful;
-    tHostif *pHostif = (tHostif*)pInstance_p;
+    tHostif*      pHostif = (tHostif*)pInstance_p;
 
-    if(pInstance_p == NULL || pCmd_p == NULL)
+    if (pInstance_p == NULL || pCmd_p == NULL)
     {
         ret = kHostifInvalidParameter;
         goto Exit;
@@ -368,7 +365,7 @@ Exit:
 /**
 \brief  This function sets an error/return to the host interface
 
-Note that only the Pcp is allowed to write to this register!
+Note that only the PCP is allowed to write to this register!
 
 \param  pInstance_p             host interface instance
 \param  err_p                   error/return code
@@ -380,12 +377,12 @@ Note that only the Pcp is allowed to write to this register!
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-tHostifReturn hostif_setError (tHostifInstance pInstance_p, tHostifError err_p)
+tHostifReturn hostif_setError(tHostifInstance pInstance_p, tHostifError err_p)
 {
     tHostifReturn ret = kHostifSuccessful;
-    tHostif *pHostif = (tHostif*)pInstance_p;
+    tHostif*      pHostif = (tHostif*)pInstance_p;
 
-    if(pInstance_p == NULL)
+    if (pInstance_p == NULL)
     {
         ret = kHostifInvalidParameter;
         goto Exit;
@@ -415,14 +412,14 @@ This function gets the buffer base and size of the addressed instance.
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-tHostifReturn hostif_getBuf (tHostifInstance pInstance_p, tHostifInstanceId instId_p,
-        UINT8** ppBufBase_p, UINT* pBufSize_p)
+tHostifReturn hostif_getBuf(tHostifInstance pInstance_p, tHostifInstanceId instId_p,
+                            UINT8** ppBufBase_p, UINT* pBufSize_p)
 {
     tHostifReturn ret = kHostifSuccessful;
-    tHostif *pHostif = (tHostif*)pInstance_p;
+    tHostif*      pHostif = (tHostif*)pInstance_p;
 
-    if(pInstance_p == NULL || ppBufBase_p == NULL || pBufSize_p == NULL ||
-            !(instId_p < kHostifInstIdLast))
+    if (pInstance_p == NULL || ppBufBase_p == NULL || pBufSize_p == NULL ||
+        !(instId_p < kHostifInstIdLast))
     {
         ret = kHostifInvalidParameter;
         goto Exit;
@@ -448,15 +445,15 @@ The function frees a pointer if it isn't NULL.
 \param  p                       Pointer to be freed
 */
 //------------------------------------------------------------------------------
-static void freePtr(void *p)
+static void freePtr(void* p)
 {
-    if(p != NULL)
+    if (p != NULL)
         free(p);
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Check magic word of ipcore
+\brief  Check magic word of IP-Core
 
 This function reads and verifies the magic word from the host interface.
 
@@ -467,8 +464,9 @@ This function reads and verifies the magic word from the host interface.
 //------------------------------------------------------------------------------
 static tHostifReturn checkMagic(UINT8* pBase_p)
 {
-    if(hostif_readMagic(pBase_p) == HOSTIF_MAGIC)
+    if (hostif_readMagic(pBase_p) == HOSTIF_MAGIC)
         return kHostifSuccessful;
     else
         return kHostifWrongMagic;
 }
+
