@@ -90,6 +90,16 @@ typedef enum eQueueRole
 } tQueueRole;
 
 /**
+\brief Function type definition for critical section callback
+
+This function callback is called if a critical section is entered. The function
+should enable or disable global interrupts.
+
+\param fEnable_p    Enter/Exit critical section
+*/
+typedef void (*tQueueCriticalSection) (BOOL fEnable_p);
+
+/**
 \brief Queue instance configuration
 
 The queue creation is directed by the parameters in this structure.
@@ -102,6 +112,7 @@ typedef struct sQueueConfig
         ///< if fAllocHeap is FALSE, this base address is used
     UINT16          span;
         ///< size of queue buffer, must be power of 2 + sizeof(tQueueBufferHdr)
+    tQueueCriticalSection   pfnCriticalSection; ///< Critical section callback
 } tQueueConfig;
 
 typedef void* tQueueInstance;

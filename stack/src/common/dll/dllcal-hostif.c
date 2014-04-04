@@ -41,6 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/dllcal.h>
+#include <common/target.h>
 #include <hostiflib.h>
 #include <lfqueue.h>
 
@@ -229,6 +230,7 @@ static tOplkError addInstance(tDllCalQueueInstance *ppDllCalQueue_p,
     lfqConfig.fAllocHeap = FALSE; // malloc done in hostif
     lfqConfig.pBase = pBufBase;
     lfqConfig.span = (UINT16)bufSize;
+    lfqConfig.pfnCriticalSection = target_enableGlobalInterrupt;
 
     lfqRet = lfq_create(&lfqConfig, &pDllCalInstance->pQueueInstance);
 
