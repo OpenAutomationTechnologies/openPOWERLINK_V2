@@ -8,7 +8,7 @@ This file contains definitions for the getopt command option parser.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -40,7 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // global variable declarations
 //------------------------------------------------------------------------------
-extern char *optarg;                    /* getopt(3) external variables */
+extern char* optarg;                    /* getopt(3) external variables */
 extern int optind, opterr, optopt;
 
 //------------------------------------------------------------------------------
@@ -51,10 +51,11 @@ extern int optind, opterr, optopt;
 extern "C" {
 #endif
 
-int  getopt(int, char * const [], const char *);
+int getopt(int, char* const [], const char*);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* _INC_getopt_H_ */
+

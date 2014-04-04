@@ -8,7 +8,7 @@ This file contains definitions for the console input/output module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -58,11 +58,12 @@ extern "C" {
 #endif
 int console_getch(void);
 int console_kbhit(void);
-void console_printlog(char *fmt, ...);
-void console_printlogadd(char *fmt, ...);
+void console_printlog(char* fmt, ...);
+void console_printlogadd(char* fmt, ...);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* _INC_console_H_ */
+

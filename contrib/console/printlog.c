@@ -8,7 +8,7 @@
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronik GmbH
 All rights reserved.
 
@@ -59,18 +59,18 @@ with the current date and time.
 \ingroup module_console
 */
 //------------------------------------------------------------------------------
-void console_printlog(char *fmt, ...)
+void console_printlog(char* fmt, ...)
 {
     va_list             arglist;
     time_t              timeStamp;
-    struct tm           *p_timeVal;
+    struct tm*          p_timeVal;
     char                timeStr[20];
 
     time(&timeStamp);
     p_timeVal = localtime(&timeStamp);
     strftime(timeStr, 20, "%Y/%m/%d %H:%M:%S", p_timeVal);
 
-    fprintf (stderr, "%s - ", timeStr);
+    fprintf(stderr, "%s - ", timeStr);
     va_start(arglist, fmt);
     vfprintf(stderr, fmt, arglist);
     va_end(arglist);
@@ -88,7 +88,7 @@ The function adds a string to a log entry on the console (no timestamp).
 \ingroup module_console
 */
 //------------------------------------------------------------------------------
-void console_printlogadd(char *fmt, ...)
+void console_printlogadd(char* fmt, ...)
 {
     va_list             arglist;
 
