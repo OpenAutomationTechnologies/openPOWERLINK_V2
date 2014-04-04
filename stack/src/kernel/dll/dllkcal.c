@@ -595,7 +595,7 @@ tOplkError dllkcal_writeAsyncFrame(tFrameInfo* pFrameInfo_p, tDllCalQueue dllQue
             break;
 #if defined(CONFIG_INCLUDE_NMT_MN)
         case kDllCalQueueTxSync:   // sync request priority
-            ret = instance_l.pTxGenFuncs->pfnInsertDataBlock(
+            ret = instance_l.pTxSyncFuncs->pfnInsertDataBlock(
                                         instance_l.dllCalQueueTxSync,
                                         (BYTE*)pFrameInfo_p->pFrame,
                                         &(pFrameInfo_p->frameSize));
