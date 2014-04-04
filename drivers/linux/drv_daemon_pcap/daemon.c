@@ -10,7 +10,7 @@ which runs in Linux userspace.
 \ingroup    module_driver_linux
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.
 All rights reserved.
@@ -87,7 +87,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static char *pLogFile_g = NULL;
+static char* pLogFile_g = NULL;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -99,7 +99,7 @@ static char *pLogFile_g = NULL;
 
 //------------------------------------------------------------------------------
 /**
-\brief  main function
+\brief  Main function
 
 This is the main function of the openPOWERLINK Linux kernel stack daemon
 running in Linux userspace.
@@ -112,13 +112,13 @@ running in Linux userspace.
 \ingroup module_driver_linux
 */
 //------------------------------------------------------------------------------
-int  main (int argc, char **argv)
+int  main (int argc, char** argv)
 {
     tOplkError                  ret = kErrorOk;
     char                        cKey = 0;
     BOOL                        fExit;
 
-	struct sched_param          schedParam;
+    struct sched_param          schedParam;
     int                         opt;
 
     /* get command line parameters */
@@ -131,13 +131,13 @@ int  main (int argc, char **argv)
             break;
 
         default: /* '?' */
-            fprintf (stderr, "Usage: %s [-l LOGFILE]\n", argv[0]);
+            fprintf(stderr, "Usage: %s [-l LOGFILE]\n", argv[0]);
             goto Exit;
         }
     }
 
-	/* adjust process priority */
-    if (nice (-20) == -1)         // push nice level in case we have no RTPreempt
+    /* adjust process priority */
+    if (nice(-20) == -1)          // push nice level in case we have no RTPreempt
     {
         DEBUG_LVL_ERROR_TRACE("%s() couldn't set nice value! (%s)\n", __func__, strerror(errno));
     }
@@ -145,13 +145,13 @@ int  main (int argc, char **argv)
     if (pthread_setschedparam(pthread_self(), SCHED_RR, &schedParam) != 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s() couldn't set thread scheduling parameters! %d\n",
-                __func__, schedParam.__sched_priority);
+                              __func__, schedParam.__sched_priority);
     }
 
 #ifdef SET_CPU_AFFINITY
     {
         /* binds all openPOWERLINK threads to the first CPU core */
-        cpu_set_t                   affinity;
+        cpu_set_t   affinity;
 
         CPU_ZERO(&affinity);
         CPU_SET(0, &affinity);
@@ -169,18 +169,18 @@ int  main (int argc, char **argv)
     ret = ctrlk_init();
     if (ret != kErrorOk)
     {
-        TRACE ("Could not initialize control module\n");
+        TRACE("Could not initialize control module\n");
         goto Exit;
     }
 
     // initialize POWERLINK stack
-    PRINTF ("Running...\n");
+    PRINTF("Running...\n");
 
     fExit = FALSE;
     while (!fExit)
     {
         target_msleep(1);
-        if( console_kbhit() )
+        if (console_kbhit())
         {
             cKey = (BYTE)console_getch();
             if (cKey == 0x1B)
@@ -193,10 +193,11 @@ int  main (int argc, char **argv)
         }
     }
 
-    printf ("\nShutdown openPOWERLINK kernel daemon...\n");
+    printf("\nShutdown openPOWERLINK kernel daemon...\n");
     ctrlk_exit();
 
 Exit:
     PRINTF("Exiting\n");
     return ret;
 }
+
