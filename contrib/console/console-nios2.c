@@ -4,13 +4,13 @@
 
 \brief  Console input/output implementation for Altera NiosII
 
-This file contains the console input/output implementation for Linux.
+This file contains the console input/output implementation for Altera NiosII.
 
 \ingroup module_console
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -57,7 +57,7 @@ This function reads a character from the console input.
 \ingroup module_console
 */
 //------------------------------------------------------------------------------
-int console_getch (void)
+int console_getch(void)
 {
     //TODO
     return 0;

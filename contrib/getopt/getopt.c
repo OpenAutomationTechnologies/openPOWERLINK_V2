@@ -2,7 +2,7 @@
 ********************************************************************************
 \file   getopt.c
 
-\brief  get command line options
+\brief  Get command line options
 
 The file implements the getopt() function used to parse command line options.
 
@@ -11,7 +11,7 @@ The file implements the getopt() function used to parse command line options.
 /*------------------------------------------------------------------------------
 Copyright (c) 1987, 1993, 1994
       The Regents of the University of California.  All rights reserved.
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -120,23 +120,23 @@ int getopt(int nargc, char* const nargv[], const char* ostr)
     char*           oli;                       /* option letter list index */
 
     if (optreset || *place == 0)
-    {          /* update scanning pointer */
+    {   /* update scanning pointer */
         optreset = 0;
         place = nargv[optind];
         if (optind >= nargc || *place++ != '-')
         {
-                /* Argument is absent or is not an option */
-                place = EMSG;
-                return (-1);
+            /* Argument is absent or is not an option */
+            place = EMSG;
+            return (-1);
         }
 
         optopt = *place++;
         if (optopt == '-' && *place == 0)
         {
-                /* "--" => end of options */
-                ++optind;
-                place = EMSG;
-                return (-1);
+            /* "--" => end of options */
+            ++optind;
+            place = EMSG;
+            return (-1);
         }
 
         if (optopt == 0)
@@ -145,7 +145,7 @@ int getopt(int nargc, char* const nargv[], const char* ostr)
                if the program (eg su) is looking for it. */
             place = EMSG;
             if (strchr(ostr, '-') == NULL)
-                    return (-1);
+                return (-1);
             optopt = '-';
         }
     }

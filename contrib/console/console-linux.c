@@ -10,7 +10,7 @@ This file contains the console input/output implementation for Linux.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -67,20 +67,20 @@ int console_getch(void)
     int             ch;
 
     // Save old attributes
-    tcgetattr( STDIN_FILENO, &oldt );
+    tcgetattr(STDIN_FILENO, &oldt);
 
     // Calculate and set new attributes
     // ECHO ..... echo input key on/off
     // ICANON ... line buffering on/off
     newt = oldt;
-    newt.c_lflag &= ~( ICANON | ECHO );
-    tcsetattr( STDIN_FILENO, TCSANOW, &newt );
+    newt.c_lflag &= ~(ICANON | ECHO);
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
 
     // Read input key
     ch = getchar();
 
     // Restore old attributes
-    tcsetattr( STDIN_FILENO, TCSANOW, &oldt );
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
 
     return ch;
 }
@@ -126,7 +126,7 @@ int console_kbhit(void)
     fcntl(STDIN_FILENO, F_SETFL, oldf);
 
     // Put read character back where it was taken
-    if(ch != EOF)
+    if (ch != EOF)
     {
         ungetc(ch, stdin);
         return 1;

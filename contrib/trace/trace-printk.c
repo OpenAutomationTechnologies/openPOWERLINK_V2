@@ -2,12 +2,12 @@
 ********************************************************************************
 \file   trace-printk.c
 
-\brief  Trace function using linux kernel printk
+\brief  Trace function using Linux kernel printk
 
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronik GmbH
 All rights reserved.
 
@@ -59,11 +59,12 @@ The function prints a debug trace message using standard printf
 \param  ...         Arguments to print
 */
 //------------------------------------------------------------------------------
-void trace (const char *fmt, ...)
+void trace(const char* fmt, ...)
 {
     va_list argptr;
-    va_start (argptr, fmt);
-    vprintk (fmt, argptr);
-    va_end   (argptr);
+
+    va_start(argptr, fmt);
+    vprintk(fmt, argptr);
+    va_end(argptr);
 }
 

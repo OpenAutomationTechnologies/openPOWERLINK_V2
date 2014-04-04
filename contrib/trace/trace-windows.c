@@ -2,7 +2,7 @@
 ********************************************************************************
 \file   trace-windows.c
 
-\brief  Trace function for windows operating system
+\brief  Trace function for the Windows operating system
 
 *******************************************************************************/
 
@@ -58,21 +58,20 @@ The function prints a debug trace message.
 \param  ...         Arguments to print
 */
 //------------------------------------------------------------------------------
-void trace (const char *fmt, ...)
+void trace(const char* fmt, ...)
 {
     char    Buffer[0x400];
     va_list argptr;
 
-    va_start (argptr, fmt);
+    va_start(argptr, fmt);
 #if _MSC_VER >= 1400
-    vsprintf_s (Buffer, sizeof (Buffer), fmt, argptr);
+    vsprintf_s(Buffer, sizeof(Buffer), fmt, argptr);
 #else
-    vsprintf (Buffer, fmt, argptr);
+    vsprintf(Buffer, fmt, argptr);
 #endif
-    va_end   (argptr);
+    va_end(argptr);
 
-    OutputDebugString ((LPSTR)&Buffer);
+    OutputDebugString((LPSTR)&Buffer);
 
 }
-
 
