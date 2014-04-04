@@ -9,7 +9,7 @@ This header file provides specific macros for Altera Nios II soft-core CPU.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,8 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_HOSTIF_NIOS_H_
-#define _INC_HOSTIF_NIOS_H_
+#ifndef _INC_hostiflib_nios_H_
+#define _INC_hostiflib_nios_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -106,4 +106,5 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // function prototypes
 //------------------------------------------------------------------------------
 
-#endif /* _INC_HOSTIF_NIOS_H_ */
+#endif /* _INC_hostiflib_nios_H_ */
+

@@ -10,7 +10,7 @@ the target specific header file (e.g. hostiflib_nios.h).
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -36,8 +36,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_HOSTIF_TARGET_H_
-#define _INC_HOSTIF_TARGET_H_
+#ifndef _INC_hostiflib_target_H_
+#define _INC_hostiflib_target_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -109,4 +109,5 @@ set to those provided by stdint.h.
 // function prototypes
 //------------------------------------------------------------------------------
 
-#endif /* _INC_HOSTIF_TARGET_H_ */
+#endif /* _INC_hostiflib_target_H_ */
+

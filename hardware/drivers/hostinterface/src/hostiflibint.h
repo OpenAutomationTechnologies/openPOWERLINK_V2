@@ -9,7 +9,7 @@ This is the internal driver header.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,8 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_HOSTIFLIBINT_H_
-#define _INC_HOSTIFLIBINT_H_
+#ifndef _INC_hostiflibint_H_
+#define _INC_hostiflibint_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -47,7 +47,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #define HOSTIF_MAGIC              0x504C4B00  ///< Host Interface Magic
 
-#define HOSTIF_INSTANCE_COUNT       2   ///< number of supported instances
+#define HOSTIF_INSTANCE_COUNT     2           ///< number of supported instances
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
@@ -87,13 +87,13 @@ typedef struct sHostifBufMap
 /**
 \brief Initialization Parameter structure
 
-This structure is used to forward the initialization from Pcp to host.
+This structure is used to forward the initialization from PCP to host.
 */
 typedef struct sHostifInitParam
 {
-    UINT32          initMemLength; ///< Length of aInitMem
+    UINT32          initMemLength;                                    ///< Length of aInitMem
     tHostifBufDesc  aInitMem[HOSTIF_DYNBUF_COUNT + HOSTIF_BUF_COUNT]; ///< Memory map from hostiflib-mem.h
-    UINT8           aUser[HOSTIF_USER_INIT_PAR_SIZE]; ///< Space for higher layers
+    UINT8           aUser[HOSTIF_USER_INIT_PAR_SIZE];                 ///< Space for higher layers
 } tHostifInitParam;
 
 /**
@@ -103,11 +103,11 @@ Holds the configuration passed to the instance at creation.
 */
 typedef struct sHostif
 {
-    tHostifConfig       config; ///< copy of configuration
-    UINT8*              pBase;  ///< base address of host interface
-    tHostifIrqCb        apfnIrqCb[kHostifIrqSrcLast]; ///< table that stores the irq callbacks
-    tHostifBufMap       aBufMap[kHostifInstIdLast]; ///< Table storing buffer mapping
-    tHostifInitParam*   pInitParam; ///< Initialization parameter
+    tHostifConfig       config;                       ///< copy of configuration
+    UINT8*              pBase;                        ///< base address of host interface
+    tHostifIrqCb        apfnIrqCb[kHostifIrqSrcLast]; ///< table that stores the IRQ callbacks
+    tHostifBufMap       aBufMap[kHostifInstIdLast];   ///< Table storing buffer mapping
+    tHostifInitParam*   pInitParam;                   ///< Initialization parameter
     UINT8*              apDynBuf[HOSTIF_DYNBUF_COUNT];
 } tHostif;
 
@@ -119,12 +119,13 @@ typedef struct sHostif
 extern "C" {
 #endif
 
-tHostifReturn hostif_createInt (tHostif* pHostif_p);
-tHostifReturn hostif_deleteInt (tHostif* pHostif_p);
-tHostifReturn hostif_checkVersion (UINT8* pBase_p, tHostifVersion* pSwVersion_p);
+tHostifReturn hostif_createInt(tHostif* pHostif_p);
+tHostifReturn hostif_deleteInt(tHostif* pHostif_p);
+tHostifReturn hostif_checkVersion(UINT8* pBase_p, tHostifVersion* pSwVersion_p);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_HOSTIFLIBINT_H_ */
+#endif /* _INC_hostiflibint_H_ */
+
