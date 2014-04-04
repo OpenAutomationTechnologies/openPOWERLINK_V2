@@ -220,6 +220,7 @@ typedef struct sQueue
 // local function prototypes
 //------------------------------------------------------------------------------
 static void freePtr(void* p);
+static void criticalSection(tQueue* pQueue_p, BOOL fEnable_p);
 
 HOSTIF_INLINE static void getHwQueueBufferHeader(tQueue* pQueue_p);
 HOSTIF_INLINE static tQueueState getHwQueueState(tQueue* pQueue_p);
@@ -439,10 +440,10 @@ tQueueReturn lfq_checkEmpty(tQueueInstance pInstance_p,
     tQueue* pQueue = (tQueue*)pInstance_p;
 
     if (pQueue == NULL || pfIsEmpty_p == NULL)
-    {
-        Ret = kQueueInvalidParameter;
-        goto Exit;
-    }
+        return kQueueInvalidParameter;
+
+    // Enter critical section
+    criticalSection(pQueue, TRUE);
 
     switch (getHwQueueState(pQueue))
     {
@@ -464,6 +465,9 @@ tQueueReturn lfq_checkEmpty(tQueueInstance pInstance_p,
     *pfIsEmpty_p = checkQueueEmpty(pQueue);
 
 Exit:
+    // Exit critical section
+    criticalSection(pQueue, FALSE);
+
     return Ret;
 }
 
@@ -490,10 +494,10 @@ tQueueReturn lfq_getEntryCount(tQueueInstance pInstance_p,
     tQueue* pQueue = (tQueue*)pInstance_p;
 
     if (pQueue == NULL || pEntryCount_p == NULL)
-    {
-        Ret = kQueueInvalidParameter;
-        goto Exit;
-    }
+        return kQueueInvalidParameter;
+
+    // Enter critical section
+    criticalSection(pQueue, TRUE);
 
     switch (getHwQueueState(pQueue))
     {
@@ -514,6 +518,9 @@ tQueueReturn lfq_getEntryCount(tQueueInstance pInstance_p,
     *pEntryCount_p = pQueue->local.usedEntries;
 
 Exit:
+    // Exit critical section
+    criticalSection(pQueue, FALSE);
+
     return Ret;
 }
 
@@ -543,12 +550,16 @@ payload and its size (magic and reserved are set by this function).
 tQueueReturn lfq_entryEnqueue(tQueueInstance pInstance_p,
                               UINT8* pData_p, UINT16 size_p)
 {
-    tQueue* pQueue = (tQueue*)pInstance_p;
-    UINT16 entryPayloadSize;
-    tEntryHeader entryHeader;
+    tQueueReturn    Ret = kQueueSuccessful;
+    tQueue*         pQueue = (tQueue*)pInstance_p;
+    UINT16          entryPayloadSize;
+    tEntryHeader    entryHeader;
 
     if (pQueue == NULL || pData_p == NULL || size_p > QUEUE_MAX_PAYLOAD)
         return kQueueInvalidParameter;
+
+    // Enter critical section
+    criticalSection(pQueue, TRUE);
 
     switch (getHwQueueState(pQueue))
     {
@@ -565,18 +576,25 @@ tQueueReturn lfq_entryEnqueue(tQueueInstance pInstance_p,
 
         default:
         case kQueueStateInvalid:
-            return kQueueHwError;
+            Ret = kQueueHwError;
+            goto Exit;
     }
 
     if (UNALIGNED32(pData_p))
-        return kQueueAlignment;
+    {
+        Ret = kQueueAlignment;
+        goto Exit;
+    }
 
     getHwQueueBufferHeader(pQueue);
 
     entryPayloadSize = ALIGN32(size_p);
 
     if (!checkPayloadFitable(pQueue, entryPayloadSize))
-        return kQueueFull;
+    {
+        Ret = kQueueFull;
+        goto Exit;
+    }
 
     /// prepare header
     entryHeader.magic = QUEUE_MAGIC;
@@ -598,13 +616,19 @@ tQueueReturn lfq_entryEnqueue(tQueueInstance pInstance_p,
             break;
         case kQueueStateReset:
             // Consumer requests reset, dump the entry and return with full
-            return kQueueFull;
+            Ret = kQueueFull;
+            goto Exit;
         default:
         case kQueueStateInvalid:
-            return kQueueHwError;
+            Ret = kQueueHwError;
+            goto Exit;
     }
 
-    return kQueueSuccessful;
+Exit:
+    // Exit critical section
+    criticalSection(pQueue, FALSE);
+
+    return Ret;
 }
 
 //------------------------------------------------------------------------------
@@ -635,15 +659,19 @@ pointer pEntry_p points to.
 tQueueReturn lfq_entryDequeue(tQueueInstance pInstance_p,
                               UINT8* pData_p, UINT16* pSize_p)
 {
-    tQueue* pQueue = (tQueue*)pInstance_p;
-    tEntryHeader EntryHeader;
-    UINT16 size;
+    tQueueReturn    Ret = kQueueSuccessful;
+    tQueue*         pQueue = (tQueue*)pInstance_p;
+    tEntryHeader    EntryHeader;
+    UINT16          size;
 
     if (pQueue == NULL || pData_p == NULL)
         return kQueueInvalidParameter;
 
     if (UNALIGNED32(pData_p))
         return kQueueAlignment;
+
+    // Enter critical section
+    criticalSection(pQueue, TRUE);
 
     getHwQueueBufferHeader(pQueue);
 
@@ -654,25 +682,36 @@ tQueueReturn lfq_entryDequeue(tQueueInstance pInstance_p,
             break;
         case kQueueStateReset:
             // Queue is in reset state, return with empty
-            return kQueueEmpty;
+            Ret = kQueueEmpty;
+            goto Exit;
         default:
         case kQueueStateInvalid:
             // Queue is invalid
-            return kQueueHwError;
+            Ret = kQueueHwError;
+            goto Exit;
     }
 
     if(checkQueueEmpty(pQueue))
-        return kQueueEmpty;
+    {
+        Ret = kQueueEmpty;
+        goto Exit;
+    }
 
     readHeader(pQueue, &EntryHeader);
 
     if (!checkMagicValid(&EntryHeader))
-        return kQueueInvalidEntry;
+    {
+        Ret = kQueueInvalidEntry;
+        goto Exit;
+    }
 
     size = ALIGN32(EntryHeader.payloadSize);
 
     if (size > *pSize_p)
-        return kQueueNoResource;
+    {
+        Ret = kQueueNoResource;
+        goto Exit;
+    }
 
     readData(pQueue, pData_p, size);
 
@@ -687,17 +726,23 @@ tQueueReturn lfq_entryDequeue(tQueueInstance pInstance_p,
             break;
         case kQueueStateReset:
             // Queue is in reset state, return with empty
-            return kQueueEmpty;
+            Ret = kQueueEmpty;
+            goto Exit;
         default:
         case kQueueStateInvalid:
             // Queue is invalid
-            return kQueueHwError;
+            Ret = kQueueHwError;
+            goto Exit;
     }
 
     /// return entry size
     *pSize_p = size;
 
-    return kQueueSuccessful;
+Exit:
+    // Exit critical section
+    criticalSection(pQueue, FALSE);
+
+    return Ret;
 }
 
 //============================================================================//
@@ -715,6 +760,22 @@ static void freePtr(void* p)
 {
     if (p != NULL)
         free(p);
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Enable/Disable critical section
+
+\param  pQueue_p    The queue instance of interest
+\param  fEnable_p   Enable/Disable critical section
+*/
+//------------------------------------------------------------------------------
+static void criticalSection(tQueue* pQueue_p, BOOL fEnable_p)
+{
+    if (pQueue_p->config.pfnCriticalSection != NULL)
+    {
+        pQueue_p->config.pfnCriticalSection(fEnable_p);
+    }
 }
 
 //------------------------------------------------------------------------------

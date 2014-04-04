@@ -41,6 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <common/target.h>
 
 #include <kernel/eventkcal.h>
 #include <kernel/eventkcalintf.h>
@@ -156,6 +157,7 @@ tOplkError eventkcal_initQueueHostif(tEventQueue eventQueue_p)
     lfqConfig.fAllocHeap = FALSE; // malloc done in hostif
     lfqConfig.pBase = pBufBase;
     lfqConfig.span = (UINT16)bufSize;
+    lfqConfig.pfnCriticalSection = target_enableGlobalInterrupt;
 
     lfqRet = lfq_create(&lfqConfig, &instance_l[eventQueue_p]);
 
