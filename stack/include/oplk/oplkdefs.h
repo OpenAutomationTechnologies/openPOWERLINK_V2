@@ -52,7 +52,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define PLK_SPEC_VERSION                                0x20    // Ethernet POWERLINK V 2.0
 #define PLK_STACK_VERSION(ver, rev, rel)                (((((UINT32)(ver)) & 0xFF) << 24) | ((((UINT32)(rev)) & 0xFF) << 16) | (((UINT32)(rel)) & 0xFFFF))
 #define PLK_OBJ1018_VERSION(ver, rev, rel)              ((((UINT32)(ver))<<16) | (((UINT32)(rev)) & 0xFFFF))
-#define PLK_STRING_VERSION(ver, rev, rel, bld)          "V" #ver "." #rev "." #rel "-" #bld
+#define PLK_STRING_VERSION(ver, rev, rel)               "V" #ver "." #rev "." #rel
 
 //------------------------------------------------------------------------------
 /// \name Default POWERLINK constants

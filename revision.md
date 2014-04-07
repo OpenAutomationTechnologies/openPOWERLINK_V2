@@ -5,6 +5,44 @@ Revision history of openPOWERLINK Protocol Stack {#page_revision_history}
 
 # Release 2 {#sect_revision_v2}
 
+## V2.0.0 {#sect_revision_v2_0_0}
+
+This is the final release of openPOWERLINK V2.0.0.
+
+### Changes:
+
+- Selection of openCONFIGURATOR project for MN demos in CMake configuration
+- Added error signaling initialization on MN
+- Backporting of features from V1.08.3 and V1.08.4
+  - MN support for extended NMT commands
+  - Notification about PDO change events
+  - Ethernet driver (edrv) for Intel I210 added
+  - Implemented time triggered sending together with I210 driver
+- Code clean-up
+- Documentation clean-up
+- Several bugfixes
+
+### Known Issues:
+
+- Altera FPGA MN:
+  - After an up and running CN is reconnected to the network the FPGA MN is not able
+    bringing the node to operational again.
+
+    __Solution__:
+      - Restart the host processor (e.g. in demo_mn_embedded `make download-elf`).
+      - If the error resists, reprogram FPGA also (in drv_daemon `make download-all`).
+
+  - In case of short cycle times the FPGA MN enters off state due to full queues.
+
+    __Possible errors__: kErrorNoResource, kErrorEventPostError and kErrorDllAsyncTxBufferFull
+
+    __Solution__:
+    - Restart the host processor (e.g. in demo_mn_embedded `make download-elf`).
+    - If the error resists, reprogram FPGA also (in drv_daemon `make download-all`).
+    - Hold the MN in PreOp_1 until all nodes are configured or
+    - Start up the network stepwise (connect first 2 CNs, then another
+      2 CNs and so on...)
+
 ## V2.0.0-b1 {#sect_revision_v2_0_0_b1}
 
 This is the first beta version of the openPOWERLINK release 2.0.0.
