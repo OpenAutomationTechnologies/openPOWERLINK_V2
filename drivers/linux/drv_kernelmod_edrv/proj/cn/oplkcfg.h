@@ -2,7 +2,7 @@
 ********************************************************************************
 \file   oplkcfg.h
 
-\brief  Configuration options for openPOWERLINK kernel module
+\brief  Configuration options for openPOWERLINK CN kernel module
 
 This file contains the configuration options for the openPOWERLINK kernel module
 
@@ -56,10 +56,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #undef FTRACE_DEBUG
 
 // These macros define all modules which are included
-#define CONFIG_INCLUDE_NMT_MN
 #define CONFIG_INCLUDE_PDO
-#define CONFIG_INCLUDE_VETH
-#define CONFIG_INCLUDE_CFM
 
 #define CONFIG_DLLCAL_QUEUE                         CIRCBUF_QUEUE
 
@@ -91,9 +88,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // switch this define to TRUE if Edrv supports fast tx frames
 // and DLL shall pass PRes as ready to Edrv after SoA
 #define CONFIG_DLL_PRES_READY_AFTER_SOA             FALSE
-
-// activate PResChaining support on MN
-#define CONFIG_DLL_PRES_CHAINING_MN                 TRUE
 
 // CN supports PRes Chaining
 #define CONFIG_DLL_PRES_CHAINING_CN                 FALSE
