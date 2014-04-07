@@ -57,6 +57,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define STATE_MN_ERRSIG_INIT_WAIT_EC0       1
 #define STATE_MN_ERRSIG_INIT_READY          2
 
+#define ERRSIG_WAIT_EC0_TIMEOUT_CNT         10
+
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
