@@ -2233,26 +2233,45 @@ static void handleErrorSignaling(tPlkFrame* pFrame_p, UINT nodeId_p)
     switch (pIntNodeInfo->errSigState)
     {
         case STATE_MN_ERRSIG_INIT_WAIT_EC1:
+
+            DEBUG_LVL_DLL_TRACE("Node:%d ERRSIG_INIT_WAIT_EC1 Cnt:%d  EC:%d\n",
+                                pIntNodeInfo->nodeId, pIntNodeInfo->errSigReqCnt, (fEcIsSet != 0));
             fSendRequest = TRUE;
             if (fEcIsSet)
             {
-                pIntNodeInfo->soaFlag1 &= ~PLK_FRAME_FLAG1_ER;
-                pIntNodeInfo->errSigState = STATE_MN_ERRSIG_INIT_WAIT_EC0;
-                pIntNodeInfo->errSigReqCnt = 0;
+
+                if (pIntNodeInfo->errSigReqCnt > 0) // Ensure at least one StatusReq with ER=1 is sent
+                {
+                    DEBUG_LVL_DLL_TRACE("       --> WAIT_EC0\n");
+                    pIntNodeInfo->soaFlag1 &= ~PLK_FRAME_FLAG1_ER;
+                    pIntNodeInfo->errSigState = STATE_MN_ERRSIG_INIT_WAIT_EC0;
+                    pIntNodeInfo->errSigReqCnt = 0;
+                }
+                else
+                {
+                    pIntNodeInfo->errSigReqCnt++;
+                }
+            }
+            else
+            {
+                pIntNodeInfo->errSigReqCnt++;
             }
             break;
 
         case STATE_MN_ERRSIG_INIT_WAIT_EC0:
+            DEBUG_LVL_DLL_TRACE("Node:%d ERRSIG_INIT_WAIT_EC0 Cnt:%d EC:%d\n", pIntNodeInfo->nodeId,
+                                pIntNodeInfo->errSigReqCnt, (fEcIsSet != 0));
             if (fEcIsSet)
             {
                 fSendRequest = TRUE;
                 // if the CN does not react it could be that it was reset
                 // and waits for starting error signaling by ER=1
-                if (pIntNodeInfo->errSigReqCnt > 0)
+                if (pIntNodeInfo->errSigReqCnt > ERRSIG_WAIT_EC0_TIMEOUT_CNT)
                 {
                     // restart error signaling initialization
                     pIntNodeInfo->errSigState = STATE_MN_ERRSIG_INIT_WAIT_EC1;
                     pIntNodeInfo->soaFlag1 |= PLK_FRAME_FLAG1_ER;
+                    DEBUG_LVL_DLL_TRACE("       --> ERRSIG_INIT_WAIT_EC1\n");
                 }
                 else
                 {
@@ -2263,10 +2282,13 @@ static void handleErrorSignaling(tPlkFrame* pFrame_p, UINT nodeId_p)
             {
                 // CN responded with EC=0, we are ready
                 pIntNodeInfo->errSigState = STATE_MN_ERRSIG_INIT_READY;
+                DEBUG_LVL_DLL_TRACE("       --> ERRSIG_INIT_READY\n");
             }
             break;
 
         case STATE_MN_ERRSIG_INIT_READY:
+            DEBUG_LVL_DLL_TRACE("Node:%d ERRSIG_INIT_READY EC:%d\n", pIntNodeInfo->nodeId,
+                                (fEcIsSet != 0));
             // If EC=1 CN must be reset so we have to restart error
             // signaling initialization
             if (fEcIsSet)
@@ -2274,6 +2296,7 @@ static void handleErrorSignaling(tPlkFrame* pFrame_p, UINT nodeId_p)
                 pIntNodeInfo->errSigState = STATE_MN_ERRSIG_INIT_WAIT_EC1;
                 pIntNodeInfo->soaFlag1 |= PLK_FRAME_FLAG1_ER;
                 fSendRequest = TRUE;
+                DEBUG_LVL_DLL_TRACE("       --> ERRSIG_INIT_WAIT_EC1\n");
             }
             break;
 
@@ -2284,6 +2307,8 @@ static void handleErrorSignaling(tPlkFrame* pFrame_p, UINT nodeId_p)
 
     if (fSendRequest)
     {
+        DEBUG_LVL_DLL_TRACE("       --> Send StatusRequest: ER:%d\n",
+                            ((pIntNodeInfo->soaFlag1 & PLK_FRAME_FLAG1_ER) != 0));
         event.eventSink = kEventSinkDllkCal;
         event.eventType = kEventTypeDllkIssueReq;
         issueReq.service = kDllReqServiceStatus;

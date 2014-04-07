@@ -148,6 +148,7 @@ tOplkError dllk_addInstance(tDllkInitParam* pInitParam_p)
 #if defined(CONFIG_INCLUDE_NMT_MN)
         dllkInstance_g.aNodeInfo[index].soaFlag1 |= PLK_FRAME_FLAG1_ER;
         dllkInstance_g.aNodeInfo[index].errSigState = STATE_MN_ERRSIG_INIT_WAIT_EC1;
+        dllkInstance_g.aNodeInfo[index].errSigReqCnt = 0;
 #endif
     }
 #endif
@@ -541,6 +542,7 @@ tOplkError dllk_configNode(tDllNodeInfo* pNodeInfo_p)
     // initialize elements of internal node info structure
     pIntNodeInfo->soaFlag1 = PLK_FRAME_FLAG1_ER;
     pIntNodeInfo->errSigState = STATE_MN_ERRSIG_INIT_WAIT_EC1;
+    pIntNodeInfo->errSigReqCnt = 0;
     pIntNodeInfo->fSoftDelete = FALSE;
     pIntNodeInfo->dllErrorEvents = 0L;
     pIntNodeInfo->nmtState = kNmtCsNotActive;
@@ -1640,7 +1642,6 @@ tOplkError dllk_addNodeIsochronous(tDllkNodeInfo* pIntNodeInfo_p)
     }
 
     // initialize elements of internal node info structure
-    pIntNodeInfo_p->soaFlag1 = 0;
     pIntNodeInfo_p->fSoftDelete = FALSE;
     pIntNodeInfo_p->nmtState = kNmtCsNotActive;
     pIntNodeInfo_p->dllErrorEvents = 0L;
