@@ -370,7 +370,7 @@ tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
 The function provides the timer callback function which is called when a timer
 has expired.
 
-\param  pTimer_p     Pointer to hrtimer struct of the expired timer
+\param  pTimerHdl_p     Pointer to hrtimer struct of the expired timer
 
 \return Returns a hrtimer_restart value
 */
