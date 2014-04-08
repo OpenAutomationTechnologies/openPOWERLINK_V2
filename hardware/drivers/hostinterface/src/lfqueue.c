@@ -395,18 +395,18 @@ This function resets the queue of the given instance
 //------------------------------------------------------------------------------
 tQueueReturn lfq_reset(tQueueInstance pInstance_p)
 {
-    tQueueReturn Ret = kQueueSuccessful;
-    tQueue* pQueue = (tQueue*)pInstance_p;
+    tQueueReturn    ret = kQueueSuccessful;
+    tQueue*         pQueue = (tQueue*)pInstance_p;
 
     if (pQueue == NULL)
     {
-        Ret = kQueueInvalidParameter;
+        ret = kQueueInvalidParameter;
         goto Exit;
     }
 
     if (pQueue->config.queueRole == kQueueProducer)
     {
-        Ret = kQueueWrongCaller;
+        ret = kQueueWrongCaller;
         goto Exit;
     }
 
@@ -414,7 +414,7 @@ tQueueReturn lfq_reset(tQueueInstance pInstance_p)
     setHwQueueState(pQueue, kQueueStateReset);
 
 Exit:
-    return Ret;
+    return ret;
 }
 
 //------------------------------------------------------------------------------
@@ -436,8 +436,8 @@ This function returns the empty state of the queue instance (TRUE = is empty).
 tQueueReturn lfq_checkEmpty(tQueueInstance pInstance_p,
                             BOOL* pfIsEmpty_p)
 {
-    tQueueReturn Ret = kQueueSuccessful;
-    tQueue* pQueue = (tQueue*)pInstance_p;
+    tQueueReturn    ret = kQueueSuccessful;
+    tQueue*         pQueue = (tQueue*)pInstance_p;
 
     if (pQueue == NULL || pfIsEmpty_p == NULL)
         return kQueueInvalidParameter;
@@ -468,7 +468,7 @@ Exit:
     // Exit critical section
     criticalSection(pQueue, FALSE);
 
-    return Ret;
+    return ret;
 }
 
 //------------------------------------------------------------------------------
@@ -490,8 +490,8 @@ This function returns the number of entries in the queue instance.
 tQueueReturn lfq_getEntryCount(tQueueInstance pInstance_p,
                                UINT16* pEntryCount_p)
 {
-    tQueueReturn Ret = kQueueSuccessful;
-    tQueue* pQueue = (tQueue*)pInstance_p;
+    tQueueReturn    ret = kQueueSuccessful;
+    tQueue*         pQueue = (tQueue*)pInstance_p;
 
     if (pQueue == NULL || pEntryCount_p == NULL)
         return kQueueInvalidParameter;
@@ -521,7 +521,7 @@ Exit:
     // Exit critical section
     criticalSection(pQueue, FALSE);
 
-    return Ret;
+    return ret;
 }
 
 //------------------------------------------------------------------------------
@@ -550,7 +550,7 @@ payload and its size (magic and reserved are set by this function).
 tQueueReturn lfq_entryEnqueue(tQueueInstance pInstance_p,
                               UINT8* pData_p, UINT16 size_p)
 {
-    tQueueReturn    Ret = kQueueSuccessful;
+    tQueueReturn    ret = kQueueSuccessful;
     tQueue*         pQueue = (tQueue*)pInstance_p;
     UINT16          entryPayloadSize;
     tEntryHeader    entryHeader;
@@ -576,13 +576,13 @@ tQueueReturn lfq_entryEnqueue(tQueueInstance pInstance_p,
 
         default:
         case kQueueStateInvalid:
-            Ret = kQueueHwError;
+            ret = kQueueHwError;
             goto Exit;
     }
 
     if (UNALIGNED32(pData_p))
     {
-        Ret = kQueueAlignment;
+        ret = kQueueAlignment;
         goto Exit;
     }
 
@@ -592,7 +592,7 @@ tQueueReturn lfq_entryEnqueue(tQueueInstance pInstance_p,
 
     if (!checkPayloadFitable(pQueue, entryPayloadSize))
     {
-        Ret = kQueueFull;
+        ret = kQueueFull;
         goto Exit;
     }
 
@@ -616,11 +616,11 @@ tQueueReturn lfq_entryEnqueue(tQueueInstance pInstance_p,
             break;
         case kQueueStateReset:
             // Consumer requests reset, dump the entry and return with full
-            Ret = kQueueFull;
+            ret = kQueueFull;
             goto Exit;
         default:
         case kQueueStateInvalid:
-            Ret = kQueueHwError;
+            ret = kQueueHwError;
             goto Exit;
     }
 
@@ -628,7 +628,7 @@ Exit:
     // Exit critical section
     criticalSection(pQueue, FALSE);
 
-    return Ret;
+    return ret;
 }
 
 //------------------------------------------------------------------------------
@@ -659,9 +659,9 @@ pointer pEntry_p points to.
 tQueueReturn lfq_entryDequeue(tQueueInstance pInstance_p,
                               UINT8* pData_p, UINT16* pSize_p)
 {
-    tQueueReturn    Ret = kQueueSuccessful;
+    tQueueReturn    ret = kQueueSuccessful;
     tQueue*         pQueue = (tQueue*)pInstance_p;
-    tEntryHeader    EntryHeader;
+    tEntryHeader    entryHeader;
     UINT16          size;
 
     if (pQueue == NULL || pData_p == NULL)
@@ -682,34 +682,34 @@ tQueueReturn lfq_entryDequeue(tQueueInstance pInstance_p,
             break;
         case kQueueStateReset:
             // Queue is in reset state, return with empty
-            Ret = kQueueEmpty;
+            ret = kQueueEmpty;
             goto Exit;
         default:
         case kQueueStateInvalid:
             // Queue is invalid
-            Ret = kQueueHwError;
+            ret = kQueueHwError;
             goto Exit;
     }
 
     if(checkQueueEmpty(pQueue))
     {
-        Ret = kQueueEmpty;
+        ret = kQueueEmpty;
         goto Exit;
     }
 
-    readHeader(pQueue, &EntryHeader);
+    readHeader(pQueue, &entryHeader);
 
-    if (!checkMagicValid(&EntryHeader))
+    if (!checkMagicValid(&entryHeader))
     {
-        Ret = kQueueInvalidEntry;
+        ret = kQueueInvalidEntry;
         goto Exit;
     }
 
-    size = ALIGN32(EntryHeader.payloadSize);
+    size = ALIGN32(entryHeader.payloadSize);
 
     if (size > *pSize_p)
     {
-        Ret = kQueueNoResource;
+        ret = kQueueNoResource;
         goto Exit;
     }
 
@@ -726,12 +726,12 @@ tQueueReturn lfq_entryDequeue(tQueueInstance pInstance_p,
             break;
         case kQueueStateReset:
             // Queue is in reset state, return with empty
-            Ret = kQueueEmpty;
+            ret = kQueueEmpty;
             goto Exit;
         default:
         case kQueueStateInvalid:
             // Queue is invalid
-            Ret = kQueueHwError;
+            ret = kQueueHwError;
             goto Exit;
     }
 
@@ -742,7 +742,7 @@ Exit:
     // Exit critical section
     criticalSection(pQueue, FALSE);
 
-    return Ret;
+    return ret;
 }
 
 //============================================================================//
@@ -1035,8 +1035,8 @@ This function writes data from a source to a circular memory.
 static void writeCirMemory(tQueue* pQueue_p, UINT16 offset_p,
                            UINT8* pSrc_p, UINT16 srcSpan_p)
 {
-    UINT8 *pDst = (UINT8*)(&pQueue_p->pQueueBuffer->data);
-    UINT16 part;
+    UINT8*  pDst = (UINT8*)(&pQueue_p->pQueueBuffer->data);
+    UINT16  part;
 
     if (offset_p + srcSpan_p <= pQueue_p->queueBufferSpan)
     {
