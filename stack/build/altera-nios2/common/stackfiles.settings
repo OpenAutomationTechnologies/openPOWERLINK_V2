@@ -266,7 +266,6 @@ ${COMMON_SOURCE_DIR}/circbuf/circbuf-nooshostif.c \
 HOSTIF_COMMON_SOURCES="\
 ${HW_DRIVERS_DIR}/hostinterface/src/hostiflib.c \
 ${HW_DRIVERS_DIR}/hostinterface/src/hostiflib_l.c \
-${HW_DRIVERS_DIR}/hostinterface/src/lfqueue.c \
 "
 
 HOSTIF_USER_SOURCES="\

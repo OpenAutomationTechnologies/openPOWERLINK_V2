@@ -80,7 +80,6 @@ SET(EXAMPLE_BINARY_DIR ${CMAKE_BINARY_DIR}/boards/${BOARD_NAME}/${EXAMPLE_NAME})
 SET(HOSTIF_LIB_SRCS
     ${PROJECT_SOURCE_DIR}/src/hostiflib.c
     ${PROJECT_SOURCE_DIR}/src/hostiflib_l.c
-    ${PROJECT_SOURCE_DIR}/src/lfqueue.c
    )
 
 IF(CFG_HOSTIF_PCP)
