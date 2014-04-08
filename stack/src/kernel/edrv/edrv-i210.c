@@ -630,7 +630,7 @@ static struct pci_driver edrvDriver_l =
 
 This function initializes the Ethernet driver.
 
-\param  pEdrvInitParap    Edrv initialization parameters
+\param  pEdrvInitParam_p    Edrv initialization parameters
 
 \return The function returns a tOplkError error code.
 
@@ -1101,7 +1101,7 @@ void edrv_setCyclicFrequency(UINT32 frequency)
 The function starts the timer in the I210.
 
 \param  pTimerHdl_p     Timer handle of the timer to start.
-\param  offset_p        Cycle time (frequency).
+\param  frequency_p     Cycle time (frequency).
 
 \return The function returns a tOplkError error code.
 */
@@ -1922,7 +1922,7 @@ static void freeRxQueues(void)
 
 The function frees the buffers of a RX queue.
 
-\param  pTxQueue_p      RX Queue to be processed.
+\param  pRxQueue_p      RX Queue to be processed.
 */
 //------------------------------------------------------------------------------
 static void freeRxBuffersOfQueue(tEdrvQueue* pRxQueue_p)
