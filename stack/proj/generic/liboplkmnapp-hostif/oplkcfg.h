@@ -99,6 +99,8 @@ The OBD defines determine the Object Dictionary.
 #define CONFIG_OBD_USE_LOAD_CONCISEDCF             TRUE
 /**@}*/
 
+#define CONFIG_CFM_CONFIGURE_CYCLE_LENGTH          TRUE
+
 /**
 \name Service Date Object defines
 The SDO defines determine the SDO stack configuration.
