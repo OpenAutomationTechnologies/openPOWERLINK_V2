@@ -62,9 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if (CONFIG_DLLCAL_QUEUE == DIRECT_QUEUE)
 #define GET_DLLKCAL_INTERFACE dllcaldirect_getInterface
 #define GET_DLLUCAL_INTERFACE dllcaldirect_getInterface
-#elif (CONFIG_DLLCAL_QUEUE == HOSTINTERFACE_QUEUE)
-#define GET_DLLKCAL_INTERFACE dllcalhostif_getInterface
-#define GET_DLLUCAL_INTERFACE dllcalhostif_getInterface
 #elif (CONFIG_DLLCAL_QUEUE == IOCTL_QUEUE)
 #define GET_DLLKCAL_INTERFACE dllcalioctl_getInterface
 #define GET_DLLUCAL_INTERFACE dllcalioctl_getInterface

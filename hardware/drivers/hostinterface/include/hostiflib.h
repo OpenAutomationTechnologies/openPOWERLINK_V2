@@ -147,7 +147,8 @@ typedef enum eHostifInstanceId
     kHostifInstIdK2UQueue,      ///< K2U Queue
     kHostifInstIdU2KQueue,      ///< U2K Queue
     kHostifInstIdPdo,           ///< Pdo
-    kHostifInstIdLast           ///< last instance id
+    kHostifInstIdLast,          ///< last instance id
+    kHostifInstIdInvalid = -1   ///< Invalid instance id
 } tHostifInstanceId;
 
 /**

@@ -74,15 +74,6 @@ The generic defines are valid for the whole openPOWERLINK stack.
 #endif
 /**@}*/
 
-/**
-\name Queue defines
-The queue defines determine the stack's queues.
-*/
-/**@{*/
-#define CONFIG_DLLCAL_QUEUE                 HOSTINTERFACE_QUEUE
-    ///< DLLCAL queue implementation
-/**@}*/
-
 #define CONFIG_VETH_SET_DEFAULT_GATEWAY        FALSE
 
 #define CONFIG_CHECK_HEARTBEAT_PERIOD           1000        // 1000 ms

@@ -41,6 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <hostiflib-mem.h> // For host interface memory sizes
 
 //------------------------------------------------------------------------------
 // const defines
@@ -72,15 +73,6 @@ The generic defines are valid for the whole openPOWERLINK stack.
 #define DEF_DEBUG_LVL                       0x4C000001L
     ///< determine debug level for specific stack modules
 #endif
-/**@}*/
-
-/**
-\name Queue defines
-The queue defines determine the stack's queues.
-*/
-/**@{*/
-#define CONFIG_DLLCAL_QUEUE                 HOSTINTERFACE_QUEUE
-    ///< DLLCAL queue implementation
 /**@}*/
 
 /**
@@ -123,6 +115,18 @@ The timer defines determine the high resolution timer module.
 /**@{*/
 #define CONFIG_TIMER_USE_HIGHRES               TRUE
     ///< use high resolution timer
+/**@}*/
+
+/**
+\name Memory size for queues
+These defines are set by the host interface ipcore settings
+*/
+/**@{*/
+#define CONFIG_EVENT_SIZE_CIRCBUF_KERNEL_TO_USER    HOSTIF_SIZE_K2UQ
+#define CONFIG_EVENT_SIZE_CIRCBUF_USER_TO_KERNEL    HOSTIF_SIZE_U2KQ
+#define CONFIG_DLLCAL_BUFFER_SIZE_TX_NMT            HOSTIF_SIZE_TXNMTQ
+#define CONFIG_DLLCAL_BUFFER_SIZE_TX_GEN            HOSTIF_SIZE_TXGENQ
+#define CONFIG_DLLCAL_BUFFER_SIZE_TX_SYNC           HOSTIF_SIZE_TXSYNCQ
 /**@}*/
 
 //------------------------------------------------------------------------------

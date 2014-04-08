@@ -120,18 +120,18 @@ tOplkError eventkcal_init(void)
 {
     OPLK_MEMSET(&instance_l, 0, sizeof(tEventkCalInstance));
 
-    if (eventkcal_initQueueHostif(kEventQueueU2K) != kErrorOk)
+    if (eventkcal_initQueueCircbuf(kEventQueueU2K) != kErrorOk)
         goto Exit;
 
-    if (eventkcal_initQueueHostif(kEventQueueK2U) != kErrorOk)
+    if (eventkcal_initQueueCircbuf(kEventQueueK2U) != kErrorOk)
         goto Exit;
 
     instance_l.fInitialized = TRUE;
     return kErrorOk;
 
 Exit:
-    eventkcal_exitQueueHostif(kEventQueueK2U);
-    eventkcal_exitQueueHostif(kEventQueueU2K);
+    eventkcal_exitQueueCircbuf(kEventQueueK2U);
+    eventkcal_exitQueueCircbuf(kEventQueueU2K);
 
     return kErrorNoResource;
 }
@@ -155,8 +155,8 @@ tOplkError eventkcal_exit(void)
 {
     if (instance_l.fInitialized == TRUE)
     {
-        eventkcal_exitQueueHostif(kEventQueueK2U);
-        eventkcal_exitQueueHostif(kEventQueueU2K);
+        eventkcal_exitQueueCircbuf(kEventQueueK2U);
+        eventkcal_exitQueueCircbuf(kEventQueueU2K);
     }
     instance_l.fInitialized = FALSE;
 
@@ -210,7 +210,7 @@ tOplkError eventkcal_postUserEvent(tEvent* pEvent_p)
 {
     tOplkError      ret = kErrorOk;
 
-    ret = eventkcal_postEventHostif(kEventQueueK2U, pEvent_p);
+    ret = eventkcal_postEventCircbuf(kEventQueueK2U, pEvent_p);
 
     return ret;
 }
@@ -226,9 +226,9 @@ This function will be called by the systems process function.
 //------------------------------------------------------------------------------
 void eventkcal_process(void)
 {
-    if (eventkcal_getEventCountHostif(kEventQueueU2K) > 0)
+    if (eventkcal_getEventCountCircbuf(kEventQueueU2K) > 0)
     {
-        eventkcal_processEventHostif(kEventQueueU2K);
+        eventkcal_processEventCircbuf(kEventQueueU2K);
     }
 }
 

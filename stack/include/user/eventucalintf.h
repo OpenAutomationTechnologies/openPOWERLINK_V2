@@ -65,14 +65,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-/* hostif event interface */
-tOplkError eventucal_initQueueHostif(tEventQueue eventQueue_p);
-tOplkError eventucal_exitQueueHostif(tEventQueue eventQueue_p);
-tOplkError eventucal_postEventHostif(tEventQueue eventQueue_p, tEvent* pEvent_p);
-tOplkError eventucal_processEventHostif(tEventQueue eventQueue_p);
-UINT       eventucal_getEventCountHostif(tEventQueue eventQueue_p);
-tOplkError eventucal_setSignalingHostif(tEventQueue eventQueue_p, VOIDFUNCPTR pfnSignalCb_p);
-
 /* circular buffer event interface */
 tOplkError eventucal_initQueueCircbuf(tEventQueue eventQueue_p);
 tOplkError eventucal_exitQueueCircbuf(tEventQueue eventQueue_p);

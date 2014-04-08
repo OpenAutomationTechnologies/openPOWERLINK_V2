@@ -113,18 +113,18 @@ tOplkError eventucal_init(void)
 {
     OPLK_MEMSET(&instance_l, 0, sizeof(tEventuCalArchInstance));
 
-    if (eventucal_initQueueHostif(kEventQueueU2K) != kErrorOk)
+    if (eventucal_initQueueCircbuf(kEventQueueU2K) != kErrorOk)
         goto Exit;
 
-    if (eventucal_initQueueHostif(kEventQueueK2U) != kErrorOk)
+    if (eventucal_initQueueCircbuf(kEventQueueK2U) != kErrorOk)
         goto Exit;
 
     instance_l.fInitialized = TRUE;
     return kErrorOk;
 
 Exit:
-    eventucal_exitQueueHostif(kEventQueueK2U);
-    eventucal_exitQueueHostif(kEventQueueU2K);
+    eventucal_exitQueueCircbuf(kEventQueueK2U);
+    eventucal_exitQueueCircbuf(kEventQueueU2K);
 
     return kErrorNoResource;
 }
@@ -147,8 +147,8 @@ tOplkError eventucal_exit(void)
 {
     if (instance_l.fInitialized == TRUE)
     {
-        eventucal_exitQueueHostif(kEventQueueK2U);
-        eventucal_exitQueueHostif(kEventQueueU2K);
+        eventucal_exitQueueCircbuf(kEventQueueK2U);
+        eventucal_exitQueueCircbuf(kEventQueueU2K);
     }
 
     instance_l.fInitialized = FALSE;
@@ -177,7 +177,7 @@ tOplkError eventucal_postKernelEvent(tEvent* pEvent_p)
 {
     tOplkError      ret;
 
-    ret = eventucal_postEventHostif(kEventQueueU2K, pEvent_p);
+    ret = eventucal_postEventCircbuf(kEventQueueU2K, pEvent_p);
     return ret;
 }
 
@@ -217,9 +217,9 @@ This function will be called by the systems process function.
 //------------------------------------------------------------------------------
 void eventucal_process(void)
 {
-    if (eventucal_getEventCountHostif(kEventQueueK2U) > 0)
+    if (eventucal_getEventCountCircbuf(kEventQueueK2U) > 0)
     {
-        eventucal_processEventHostif(kEventQueueK2U);
+        eventucal_processEventCircbuf(kEventQueueK2U);
     }
 }
 

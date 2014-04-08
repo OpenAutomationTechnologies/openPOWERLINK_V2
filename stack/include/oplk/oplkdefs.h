@@ -131,7 +131,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 These constants determine the different queue implementations.
 */
 #define DIRECT_QUEUE                                    1                   ///< Using "direct" implementation (actually no queue)
-#define HOSTINTERFACE_QUEUE                             3                   ///< Use host interface IP core and library for queue
 #define IOCTL_QUEUE                                     4                   ///< Use Linux IOCTL calls for queue
 #define CIRCBUF_QUEUE                                   5                   ///< Use circular buffer library for queue
 /// \}

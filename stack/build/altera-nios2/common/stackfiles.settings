@@ -45,10 +45,6 @@ COMMON_CAL_DIRECT_SOURCES="\
 ${COMMON_SOURCE_DIR}/dll/dllcal-direct.c \
 "
 
-COMMON_CAL_HOSTIF_SOURCES="\
-${COMMON_SOURCE_DIR}/dll/dllcal-hostif.c \
-"
-
 ################################################################################
 # Application library (User sources
 ################################################################################
@@ -128,7 +124,7 @@ ${USER_SOURCE_DIR}/event/eventucal-nooscircbuf.c \
 "
 
 EVENT_UCAL_NOOSHOSTIF_SOURCES="\
-${USER_SOURCE_DIR}/event/eventucalintf-hostif.c \
+${USER_SOURCE_DIR}/event/eventucalintf-circbuf.c \
 ${USER_SOURCE_DIR}/event/eventucal-nooshostif.c \
 "
 
@@ -206,7 +202,7 @@ ${KERNEL_SOURCE_DIR}/event/eventkcal-nooscircbuf.c \
 "
 
 EVENT_KCAL_NOOSHOSTIF_SOURCES="\
-${KERNEL_SOURCE_DIR}/event/eventkcalintf-hostif.c \
+${KERNEL_SOURCE_DIR}/event/eventkcalintf-circbuf.c \
 ${KERNEL_SOURCE_DIR}/event/eventkcal-nooshostif.c \
 "
 
@@ -256,6 +252,11 @@ ${USER_SOURCE_DIR}/timer/timer-generic.c \
 CIRCBUF_NOOS_SOURCES="\
 ${COMMON_SOURCE_DIR}/circbuf/circbuffer.c \
 ${COMMON_SOURCE_DIR}/circbuf/circbuf-noos.c \
+"
+
+CIRCBUF_NOOSHOSTIF_SOURCES="\
+${COMMON_SOURCE_DIR}/circbuf/circbuffer.c \
+${COMMON_SOURCE_DIR}/circbuf/circbuf-nooshostif.c \
 "
 
 ################################################################################
