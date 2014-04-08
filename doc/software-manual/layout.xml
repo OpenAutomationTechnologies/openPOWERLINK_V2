@@ -42,7 +42,7 @@
       </tab>
     </tab>
     <tab type="usergroup" title="Contribute">
-        <tab type="user" url="\ref page_porting-guide" title="Porting openPOWERLINK"/>
+        <!--tab type="user" url="\ref page_porting-guide" title="Porting openPOWERLINK"/-->
         <tab type="user" url="\ref page_coding" title="Coding Guidelines"/>
     </tab>
     <tab type="user" url="\ref page_revision_history" title="Revision History"/>
