@@ -9,6 +9,6 @@
   <Node name="openPOWERLINK_MN" NodeId="240" NodeType="MN" xdc="octx/240.octx" ForceCycleFlag="false" StationType="Normal"/>
   <Node name="CN_1" NodeId="1" NodeType="CN" xdc="octx/1.octx" ForceCycleFlag="false" StationType="Normal"/>
   <Node name="CN_2" NodeId="32" NodeType="CN" xdc="octx/32.octx" ForceCycleFlag="false" StationType="Normal"/>
-  <Node name="CN_2" NodeId="110" NodeType="CN" xdc="octx/110.octx" ForceCycleFlag="false" StationType="Normal"/>
+  <Node name="CN_3" NodeId="110" NodeType="CN" xdc="octx/110.octx" ForceCycleFlag="false" StationType="Normal"/>
  </NodeCollection>
 </openCONFIGURATOR>
