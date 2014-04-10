@@ -85,6 +85,8 @@ The queue defines determine the stack's queues.
 
 #define CONFIG_VETH_SET_DEFAULT_GATEWAY        FALSE
 
+#define CONFIG_CHECK_HEARTBEAT_PERIOD           1000        // 1000 ms
+
 /**
 \name Object Dictionary defines
 The OBD defines determine the Object Dictionary.

@@ -72,6 +72,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define CONFIG_VETH_SET_DEFAULT_GATEWAY             FALSE
 
+#define CONFIG_CHECK_HEARTBEAT_PERIOD               1000        // 1000 ms
+
 //==============================================================================
 // Ethernet driver (Edrv) specific defines
 //==============================================================================

@@ -71,6 +71,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define CONFIG_VETH_SET_DEFAULT_GATEWAY                 FALSE
 
+#define CONFIG_CHECK_HEARTBEAT_PERIOD                   100        // 100 ms
+
 //==============================================================================
 // Data Link Layer (DLL) specific defines
 //==============================================================================
