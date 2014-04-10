@@ -91,3 +91,18 @@ void target_msleep(UINT32 milliSeconds_p)
     Sleep(milliSeconds_p);
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief    Get current system tick
+
+This function returns the current system tick determined by the system timer.
+
+\return Returns the system tick in milliseconds
+
+\ingroup module_target
+*/
+//------------------------------------------------------------------------------
+UINT32 target_getTickCount(void)
+{
+    return GetTickCount();
+}
