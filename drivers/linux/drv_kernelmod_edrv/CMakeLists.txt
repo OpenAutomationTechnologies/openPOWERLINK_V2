@@ -71,6 +71,7 @@ SET(OPLK_ROOT_DIR ${CMAKE_SOURCE_DIR}/../../..)
 SET(CONTRIB_SOURCE_DIR ${OPLK_ROOT_DIR}/contrib)
 SET(STACK_SOURCE_DIR ${OPLK_ROOT_DIR}/stack/src)
 SET(COMMON_SOURCE_DIR ${OPLK_ROOT_DIR}/stack/src/common)
+SET(ARCH_SOURCE_DIR ${OPLK_ROOT_DIR}/stack/src/arch/linuxkernel)
 SET(KERNEL_SOURCE_DIR ${OPLK_ROOT_DIR}/stack/src/kernel)
 SET(EDRV_SOURCE_DIR ${OPLK_ROOT_DIR}/stack/src/kernel/edrv)
 SET(OPLK_INCLUDE_DIR ${OPLK_ROOT_DIR}/stack/include)
@@ -188,6 +189,7 @@ SET(MODULE_SOURCE_FILES
     ${COMMON_SOURCE_DIR}/circbuf/circbuffer.c
     ${COMMON_SOURCE_DIR}/circbuf/circbuf-linuxkernel.c
     ${COMMON_SOURCE_DIR}/debugstr.c
+    ${ARCH_SOURCE_DIR}/target-linuxkernel.c
     )
 
 IF(CFG_POWERLINK_EDRV STREQUAL "i210")
