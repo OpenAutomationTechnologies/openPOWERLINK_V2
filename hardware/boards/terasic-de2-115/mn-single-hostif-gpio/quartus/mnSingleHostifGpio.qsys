@@ -101,11 +101,24 @@
          type = "int";
       }
    }
-   element lcd
+   element key_pio
    {
       datum _sortIndex
       {
          value = "6";
+         type = "int";
+      }
+      datum sopceditor_expanded
+      {
+         value = "0";
+         type = "boolean";
+      }
+   }
+   element lcd
+   {
+      datum _sortIndex
+      {
+         value = "7";
          type = "int";
       }
       datum megawizard_uipreferences
@@ -123,13 +136,21 @@
    {
       datum _sortIndex
       {
-         value = "8";
+         value = "9";
          type = "int";
       }
       datum sopceditor_expanded
       {
          value = "0";
          type = "boolean";
+      }
+   }
+   element key_pio.s1
+   {
+      datum baseAddress
+      {
+         value = "2080";
+         type = "String";
       }
    }
    element status_led_pio.s1
@@ -157,7 +178,7 @@
    {
       datum _sortIndex
       {
-         value = "7";
+         value = "8";
          type = "int";
       }
       datum sopceditor_expanded
@@ -181,7 +202,7 @@
  <parameter name="projectName">mn-single-hostif-gpio.qpf</parameter>
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1394467216351" />
+ <parameter name="timeStamp" value="1397577086676" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk50" internal="clk50.clk_in" type="clock" dir="end" />
@@ -215,6 +236,11 @@
    dir="start" />
  <interface name="lcd" internal="lcd.external" type="conduit" dir="end" />
  <interface name="prl0" internal="prlMaster_0.prl0" type="conduit" dir="end" />
+ <interface
+   name="key_pio"
+   internal="key_pio.external_connection"
+   type="conduit"
+   dir="end" />
  <module kind="clock_source" version="13.0" enabled="1" name="clk50">
   <parameter name="clockFrequency" value="50000000" />
   <parameter name="clockFrequencyKnown" value="true" />
@@ -290,10 +316,28 @@
    enabled="1"
    name="lcd" />
  <module kind="prlMaster" version="1.0.0" enabled="1" name="prlMaster_0">
+  <parameter name="sys_clk" value="100000000" />
   <parameter name="gui_enableMux" value="true" />
   <parameter name="gui_dataWidth" value="16" />
   <parameter name="gui_addrWidth" value="17" />
-  <parameter name="AUTO_C0_CLOCK_RATE" value="100000000" />
+ </module>
+ <module
+   kind="altera_avalon_pio"
+   version="13.0.1.99.2"
+   enabled="1"
+   name="key_pio">
+  <parameter name="bitClearingEdgeCapReg" value="false" />
+  <parameter name="bitModifyingOutReg" value="false" />
+  <parameter name="captureEdge" value="false" />
+  <parameter name="direction" value="Input" />
+  <parameter name="edgeType" value="RISING" />
+  <parameter name="generateIRQ" value="false" />
+  <parameter name="irqType" value="LEVEL" />
+  <parameter name="resetValue" value="0" />
+  <parameter name="simDoTestBenchWiring" value="false" />
+  <parameter name="simDrivenValue" value="0" />
+  <parameter name="width" value="4" />
+  <parameter name="clockRate" value="50000000" />
  </module>
  <connection
    kind="reset"
@@ -455,6 +499,31 @@
    version="13.0"
    start="clk25.clk_reset"
    end="prlMaster_0.r0" />
+ <connection kind="clock" version="13.0" start="clk50.clk" end="key_pio.clk" />
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="host_0.slow_bridge"
+   end="key_pio.s1">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0820" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk50.clk_reset"
+   end="key_pio.reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk100.clk_reset"
+   end="key_pio.reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk25.clk_reset"
+   end="key_pio.reset" />
  <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
  <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="0" />
 </system>

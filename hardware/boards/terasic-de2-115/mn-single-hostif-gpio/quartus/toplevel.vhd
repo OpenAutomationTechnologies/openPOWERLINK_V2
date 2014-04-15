@@ -50,41 +50,43 @@ use libcommon.global.all;
 entity toplevel is
     port (
         -- 50 MHZ CLK IN
-        EXT_CLK         : in  std_logic;
+        EXT_CLK         : in    std_logic;
         -- EPCS
-        EPCS_DCLK       : out  std_logic;
-        EPCS_SCE        : out  std_logic;
-        EPCS_SDO        : out  std_logic;
-        EPCS_DATA0      : in  std_logic;
+        EPCS_DCLK       : out   std_logic;
+        EPCS_SCE        : out   std_logic;
+        EPCS_SDO        : out   std_logic;
+        EPCS_DATA0      : in    std_logic;
         -- 64 MBx2 SDRAM
-        SDRAM_CLK       : out  std_logic;
-        SDRAM_CAS_n     : out  std_logic;
-        SDRAM_CKE       : out  std_logic;
-        SDRAM_CS_n      : out  std_logic;
-        SDRAM_RAS_n     : out  std_logic;
-        SDRAM_WE_n      : out  std_logic;
-        SDRAM_ADDR      : out  std_logic_vector(12 downto 0);
-        SDRAM_BA        : out  std_logic_vector(1 downto 0);
-        SDRAM_DQM       : out  std_logic_vector(3 downto 0);
-        SDRAM_DQ        : inout  std_logic_vector(31 downto 0);
+        SDRAM_CLK       : out   std_logic;
+        SDRAM_CAS_n     : out   std_logic;
+        SDRAM_CKE       : out   std_logic;
+        SDRAM_CS_n      : out   std_logic;
+        SDRAM_RAS_n     : out   std_logic;
+        SDRAM_WE_n      : out   std_logic;
+        SDRAM_ADDR      : out   std_logic_vector(12 downto 0);
+        SDRAM_BA        : out   std_logic_vector(1 downto 0);
+        SDRAM_DQM       : out   std_logic_vector(3 downto 0);
+        SDRAM_DQ        : inout std_logic_vector(31 downto 0);
         -- LED green
-        LEDG            : out  std_logic_vector(1 downto 0);
+        LEDG            : out   std_logic_vector(1 downto 0);
+        -- Low active KEY
+        KEY_n           : in    std_logic_vector(3 downto 0);
         -- LCD
-        LCD_ON          : out std_logic;
-        LCD_BLON        : out std_logic;
+        LCD_ON          : out   std_logic;
+        LCD_BLON        : out   std_logic;
         LCD_DQ          : inout std_logic_vector(7 downto 0);
-        LCD_E           : out std_logic;
-        LCD_RS          : out std_logic;
-        LCD_RW          : out std_logic;
+        LCD_E           : out   std_logic;
+        LCD_RS          : out   std_logic;
+        LCD_RW          : out   std_logic;
         -- HOST Interface
         HOSTIF_AD       : inout std_logic_vector(16 downto 0);
-        HOSTIF_BE       : out std_logic_vector(1 downto 0);
-        HOSTIF_CS_n     : out std_logic;
-        HOSTIF_WR_n     : out std_logic;
-        HOSTIF_ALE_n    : out std_logic;
-        HOSTIF_RD_n     : out std_logic;
-        HOSTIF_ACK_n    : in std_logic;
-        HOSTIF_IRQ_n    : in std_logic
+        HOSTIF_BE       : out   std_logic_vector(1 downto 0);
+        HOSTIF_CS_n     : out   std_logic;
+        HOSTIF_WR_n     : out   std_logic;
+        HOSTIF_ALE_n    : out   std_logic;
+        HOSTIF_RD_n     : out   std_logic;
+        HOSTIF_ACK_n    : in    std_logic;
+        HOSTIF_IRQ_n    : in    std_logic
     );
 end toplevel;
 
@@ -99,6 +101,7 @@ architecture rtl of toplevel is
 
             host_0_benchmark_pio_export         : out   std_logic_vector(7 downto 0);
             status_led_pio_export               : out   std_logic_vector(1 downto 0);
+            key_pio_export                      : in    std_logic_vector(3 downto 0);
             epcs_flash_dclk                     : out   std_logic;
             epcs_flash_sce                      : out   std_logic;
             epcs_flash_sdo                      : out   std_logic;
@@ -157,6 +160,8 @@ architecture rtl of toplevel is
     signal hostifAd_oen : std_logic;
 
     signal hostifIrq    : std_logic;
+
+    signal key          : std_logic_vector(KEY_n'range);
 begin
 
     LCD_ON      <= '1';
@@ -176,6 +181,8 @@ begin
 
     hostifIrq       <= not HOSTIF_IRQ_n;
 
+    key             <= not KEY_n;
+
     inst : component mnSingleHostifGpio
         port map (
             clk25_clk                       => clk25,
@@ -184,6 +191,8 @@ begin
             reset_reset_n                   => pllLocked,
 
             status_led_pio_export           => LEDG,
+
+            key_pio_export                  => key,
 
             host_0_benchmark_pio_export     => open,
 

@@ -50,56 +50,58 @@ use libcommon.global.all;
 entity toplevel is
     port (
         -- 50 MHZ CLK IN
-        EXT_CLK         : in  std_logic;
+        EXT_CLK         : in    std_logic;
         -- PHY Interfaces
-        PHY_GXCLK           : out   std_logic_vector(1 downto 0);
-        PHY_RXCLK           : in    std_logic_vector(1 downto 0);
-        PHY_RXER            : in    std_logic_vector(1 downto 0);
-        PHY_RXDV            : in    std_logic_vector(1 downto 0);
-        PHY_RXD             : in    std_logic_vector(7 downto 0);
-        PHY_TXCLK           : in    std_logic_vector(1 downto 0);
-        PHY_TXER            : out   std_logic_vector(1 downto 0);
-        PHY_TXEN            : out   std_logic_vector(1 downto 0);
-        PHY_TXD             : out   std_logic_vector(7 downto 0);
-        PHY_MDIO            : inout std_logic_vector(1 downto 0);
-        PHY_MDC             : out   std_logic_vector(1 downto 0);
-        PHY_RESET_n         : out   std_logic_vector(1 downto 0);
+        PHY_GXCLK       : out   std_logic_vector(1 downto 0);
+        PHY_RXCLK       : in    std_logic_vector(1 downto 0);
+        PHY_RXER        : in    std_logic_vector(1 downto 0);
+        PHY_RXDV        : in    std_logic_vector(1 downto 0);
+        PHY_RXD         : in    std_logic_vector(7 downto 0);
+        PHY_TXCLK       : in    std_logic_vector(1 downto 0);
+        PHY_TXER        : out   std_logic_vector(1 downto 0);
+        PHY_TXEN        : out   std_logic_vector(1 downto 0);
+        PHY_TXD         : out   std_logic_vector(7 downto 0);
+        PHY_MDIO        : inout std_logic_vector(1 downto 0);
+        PHY_MDC         : out   std_logic_vector(1 downto 0);
+        PHY_RESET_n     : out   std_logic_vector(1 downto 0);
         -- EPCS
-        EPCS_DCLK       : out  std_logic;
-        EPCS_SCE        : out  std_logic;
-        EPCS_SDO        : out  std_logic;
-        EPCS_DATA0      : in  std_logic;
+        EPCS_DCLK       : out   std_logic;
+        EPCS_SCE        : out   std_logic;
+        EPCS_SDO        : out   std_logic;
+        EPCS_DATA0      : in    std_logic;
         -- 2 MB SRAM
-        SRAM_CE_n       : out  std_logic;
-        SRAM_OE_n       : out  std_logic;
-        SRAM_WE_n       : out  std_logic;
-        SRAM_ADDR       : out  std_logic_vector(20 downto 1);
-        SRAM_BE_n       : out  std_logic_vector(1 downto 0);
-        SRAM_DQ         : inout  std_logic_vector(15 downto 0);
+        SRAM_CE_n       : out   std_logic;
+        SRAM_OE_n       : out   std_logic;
+        SRAM_WE_n       : out   std_logic;
+        SRAM_ADDR       : out   std_logic_vector(20 downto 1);
+        SRAM_BE_n       : out   std_logic_vector(1 downto 0);
+        SRAM_DQ         : inout std_logic_vector(15 downto 0);
         -- 64 MBx2 SDRAM
-        SDRAM_CLK       : out  std_logic;
-        SDRAM_CAS_n     : out  std_logic;
-        SDRAM_CKE       : out  std_logic;
-        SDRAM_CS_n      : out  std_logic;
-        SDRAM_RAS_n     : out  std_logic;
-        SDRAM_WE_n      : out  std_logic;
-        SDRAM_ADDR      : out  std_logic_vector(12 downto 0);
-        SDRAM_BA        : out  std_logic_vector(1 downto 0);
-        SDRAM_DQM       : out  std_logic_vector(3 downto 0);
-        SDRAM_DQ        : inout  std_logic_vector(31 downto 0);
+        SDRAM_CLK       : out   std_logic;
+        SDRAM_CAS_n     : out   std_logic;
+        SDRAM_CKE       : out   std_logic;
+        SDRAM_CS_n      : out   std_logic;
+        SDRAM_RAS_n     : out   std_logic;
+        SDRAM_WE_n      : out   std_logic;
+        SDRAM_ADDR      : out   std_logic_vector(12 downto 0);
+        SDRAM_BA        : out   std_logic_vector(1 downto 0);
+        SDRAM_DQM       : out   std_logic_vector(3 downto 0);
+        SDRAM_DQ        : inout std_logic_vector(31 downto 0);
         -- LED green
-        LEDG            : out  std_logic_vector(1 downto 0);
+        LEDG            : out   std_logic_vector(1 downto 0);
+        -- Low active KEY
+        KEY_n           : in    std_logic_vector(3 downto 0);
         -- LCD
-        LCD_ON              : out std_logic;
-        LCD_BLON            : out std_logic;
-        LCD_DQ              : inout std_logic_vector(7 downto 0);
-        LCD_E               : out std_logic;
-        LCD_RS              : out std_logic;
-        LCD_RW              : out std_logic;
+        LCD_ON          : out   std_logic;
+        LCD_BLON        : out   std_logic;
+        LCD_DQ          : inout std_logic_vector(7 downto 0);
+        LCD_E           : out   std_logic;
+        LCD_RS          : out   std_logic;
+        LCD_RW          : out   std_logic;
         -- BENCHMARK
-        BENCHMARK           : out std_logic_vector(7 downto 0);
+        BENCHMARK       : out   std_logic_vector(7 downto 0);
         -- BENCHMARK_AP
-        BENCHMARK_AP        : out std_logic_vector(7 downto 0)
+        BENCHMARK_AP    : out   std_logic_vector(7 downto 0)
     );
 end toplevel;
 
@@ -132,6 +134,7 @@ architecture rtl of toplevel is
             openmac_0_smi_dio                   : inout std_logic_vector(1 downto 0)  := (others => 'X');
             host_0_benchmark_pio_export         : out   std_logic_vector(7 downto 0);
             status_led_pio_export               : out   std_logic_vector(1 downto 0);
+            key_pio_export                      : in    std_logic_vector(3 downto 0);
             epcs_flash_dclk                     : out   std_logic;
             epcs_flash_sce                      : out   std_logic;
             epcs_flash_sdo                      : out   std_logic;
@@ -170,6 +173,7 @@ architecture rtl of toplevel is
     signal clk100_p     : std_logic;
     signal pllLocked    : std_logic;
     signal sramAddr     : std_logic_vector(SRAM_ADDR'high downto 0);
+    signal key          : std_logic_vector(KEY_n'range);
 
 begin
 
@@ -180,6 +184,8 @@ begin
 
     LCD_ON      <= '1';
     LCD_BLON    <= '1';
+
+    key         <= not KEY_n;
 
     SDRAM_CLK <= clk100_p;
 
@@ -211,6 +217,8 @@ begin
             pcp_0_benchmark_pio_export          => BENCHMARK,
 
             status_led_pio_export               => LEDG,
+
+            key_pio_export                      => key,
 
             host_0_benchmark_pio_export         => BENCHMARK_AP,
 

@@ -173,6 +173,11 @@ set_location_assignment PIN_A25     -to PHY_TXER[1]
 set_location_assignment PIN_E22     -to LEDG[1]
 set_location_assignment PIN_E21     -to LEDG[0]
 
+set_location_assignment PIN_M23     -to KEY_n[0]
+set_location_assignment PIN_M21     -to KEY_n[1]
+set_location_assignment PIN_N21     -to KEY_n[2]
+set_location_assignment PIN_R24     -to KEY_n[3]
+
 set_location_assignment PIN_L5      -to LCD_ON
 set_location_assignment PIN_L6      -to LCD_BLON
 set_location_assignment PIN_M5      -to LCD_DQ[7]

@@ -122,11 +122,24 @@
          type = "int";
       }
    }
-   element lcd
+   element key_pio
    {
       datum _sortIndex
       {
          value = "12";
+         type = "int";
+      }
+      datum sopceditor_expanded
+      {
+         value = "0";
+         type = "boolean";
+      }
+   }
+   element lcd
+   {
+      datum _sortIndex
+      {
+         value = "13";
          type = "int";
       }
       datum megawizard_uipreferences
@@ -183,6 +196,14 @@
       {
          value = "3";
          type = "int";
+      }
+   }
+   element key_pio.s1
+   {
+      datum baseAddress
+      {
+         value = "2064";
+         type = "String";
       }
    }
    element status_led_pio.s1
@@ -273,7 +294,7 @@
  <parameter name="projectName">mn-dual-hostif-gpio.qpf</parameter>
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1397034514180" />
+ <parameter name="timeStamp" value="1397576714216" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk50" internal="clk50.clk_in" type="clock" dir="end" />
@@ -323,6 +344,11 @@
  <interface
    name="openmac_0_smi"
    internal="openmac_0.smi"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="key_pio"
+   internal="key_pio.external_connection"
    type="conduit"
    dir="end" />
  <module kind="clock_source" version="13.0" enabled="1" name="clk50">
@@ -516,6 +542,24 @@
   <parameter name="gui_sdcEn" value="true" />
   <parameter name="AUTO_DMACLK_CLOCK_RATE" value="100000000" />
   <parameter name="AUTO_PKTCLK_CLOCK_RATE" value="-1" />
+ </module>
+ <module
+   kind="altera_avalon_pio"
+   version="13.0.1.99.2"
+   enabled="1"
+   name="key_pio">
+  <parameter name="bitClearingEdgeCapReg" value="false" />
+  <parameter name="bitModifyingOutReg" value="false" />
+  <parameter name="captureEdge" value="false" />
+  <parameter name="direction" value="Input" />
+  <parameter name="edgeType" value="RISING" />
+  <parameter name="generateIRQ" value="false" />
+  <parameter name="irqType" value="LEVEL" />
+  <parameter name="resetValue" value="0" />
+  <parameter name="simDoTestBenchWiring" value="false" />
+  <parameter name="simDrivenValue" value="0" />
+  <parameter name="width" value="4" />
+  <parameter name="clockRate" value="50000000" />
  </module>
  <connection
    kind="reset"
@@ -865,6 +909,31 @@
    end="openmac_0.timerIrq">
   <parameter name="irqNumber" value="0" />
  </connection>
+ <connection kind="clock" version="13.0" start="clk50.clk" end="key_pio.clk" />
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="host_0.slow_bridge"
+   end="key_pio.s1">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0810" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk50.clk_reset"
+   end="key_pio.reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk100.clk_reset"
+   end="key_pio.reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk25.clk_reset"
+   end="key_pio.reset" />
  <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
  <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="1" />
 </system>
