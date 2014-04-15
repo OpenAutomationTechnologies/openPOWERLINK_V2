@@ -624,7 +624,7 @@ tOplkError nmtmnu_sendNmtCommandEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
                         prcSetFlagsNmtCommandReset(pNodeInfo, nmtCommand_p);
 
                         // Disable PRes Chaining
-                        SyncReqData.nodeId      = nodeId_p;
+                        SyncReqData.nodeId      = tempNodeId;
                         SyncReqData.syncControl = PLK_SYNC_PRES_MODE_RESET |
                                                       PLK_SYNC_DEST_MAC_ADDRESS_VALID;
                         size = sizeof(UINT) + sizeof(UINT32);
