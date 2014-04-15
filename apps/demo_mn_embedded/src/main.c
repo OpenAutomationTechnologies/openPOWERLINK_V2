@@ -300,6 +300,26 @@ static tOplkError loopMain(tInstance* pInstance_p)
         // exit loop if NMT is in off state
         if (pInstance_p->fGsOff != FALSE)
             break;
+
+        switch (gpio_getAppInput())
+        {
+            case 0x01:
+                PRINTF("KEY0: SwReset\n");
+                lcd_printText("KEY0: SwReset", 2);
+                ret = oplk_execNmtCommand(kNmtEventSwReset);
+                break;
+
+            case 0x02:
+                PRINTF("KEY1: SwitchOff\n");
+                lcd_printText("KEY1: SwitchOff", 2);
+                ret = oplk_execNmtCommand(kNmtEventSwitchOff);
+                break;
+
+            default:
+                break;
+        }
+
+        while(gpio_getAppInput() != 0);
     }
 
     return ret;
