@@ -55,7 +55,7 @@
    {
       datum baseAddress
       {
-         value = "4096";
+         value = "8192";
          type = "String";
       }
    }
@@ -63,7 +63,7 @@
    {
       datum baseAddress
       {
-         value = "2048";
+         value = "4096";
          type = "String";
       }
    }
@@ -186,7 +186,7 @@
       }
       datum baseAddress
       {
-         value = "0";
+         value = "2048";
          type = "String";
       }
    }
@@ -198,19 +198,19 @@
          type = "int";
       }
    }
-   element key_pio.s1
-   {
-      datum baseAddress
-      {
-         value = "2064";
-         type = "String";
-      }
-   }
    element status_led_pio.s1
    {
       datum baseAddress
       {
          value = "2048";
+         type = "String";
+      }
+   }
+   element key_pio.s1
+   {
+      datum baseAddress
+      {
+         value = "2064";
          type = "String";
       }
    }
@@ -294,7 +294,7 @@
  <parameter name="projectName">mn-dual-hostif-gpio.qpf</parameter>
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1397576714216" />
+ <parameter name="timeStamp" value="1397651190190" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk50" internal="clk50.clk_in" type="clock" dir="end" />
@@ -778,7 +778,7 @@
    start="pcp_0.slow_bridge"
    end="sysid.control_slave">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0800" />
+  <parameter name="baseAddress" value="0x1000" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection kind="reset" version="13.0" start="clk50.clk_reset" end="sysid.reset" />
@@ -794,7 +794,7 @@
    start="pcp_0.slow_bridge"
    end="hostinterface_0.pcp">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="baseAddress" value="0x0800" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -822,7 +822,7 @@
    start="host_0.slow_bridge"
    end="lcd.control_slave">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x1000" />
+  <parameter name="baseAddress" value="0x2000" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection kind="reset" version="13.0" start="clk50.clk_reset" end="lcd.reset" />
@@ -934,6 +934,15 @@
    version="13.0"
    start="clk25.clk_reset"
    end="key_pio.reset" />
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="host_0.slow_bridge"
+   end="sysid.control_slave">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x1000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
  <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
  <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="1" />
 </system>
