@@ -61,7 +61,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // module global vars
 //------------------------------------------------------------------------------
-static BOOL*    pfGsOff_l = NULL;
+static BOOL*        pfGsOff_l = NULL;
+static tOplkError   errorEvent_l = kErrorOk;
 
 //------------------------------------------------------------------------------
 // global function prototypes
@@ -136,6 +137,7 @@ The function initializes the applications event module
 void initEvents(BOOL* pfGsOff_p)
 {
     pfGsOff_l = pfGsOff_p;
+    errorEvent_l = kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -263,6 +265,13 @@ static tOplkError processStateChangeEvent(tOplkApiEventType EventType_p,
             // -> also shut down oplk_process() and main()
             ret = kErrorShutdown;
 
+            // In off state print error code
+            if (errorEvent_l != kErrorOk)
+                lcd_printError(errorEvent_l);
+
+            // Reset error code
+            errorEvent_l = kErrorOk;
+
             PRINTF("StateChangeEvent:kNmtGsOff originating event = 0x%X (%s)\n",
                    pNmtStateChange->nmtEvent,
                    debugstr_getNmtEventStr(pNmtStateChange->nmtEvent));
@@ -332,6 +341,8 @@ static tOplkError processErrorWarningEvent(tOplkApiEventType EventType_p,
 
     UNUSED_PARAMETER(EventType_p);
     UNUSED_PARAMETER(pUserArg_p);
+
+    errorEvent_l = pInternalError->oplkError;
 
     PRINTF("Err/Warn: Source = %s (%02X) OplkError = %s (0x%03X)\n",
            debugstr_getEventSourceStr(pInternalError->eventSource),
