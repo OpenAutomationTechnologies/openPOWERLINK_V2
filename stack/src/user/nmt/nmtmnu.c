@@ -1182,7 +1182,7 @@ tOplkError nmtmnu_processEvent(tEvent* pEvent_p)
                 UINT                nodeId;
                 tNmtCommand         nmtCommand;
                 UINT8               bNmtState;
-                UINT                tempNodeId;
+                UINT                tempNodeId = C_ADR_INVALID; // Init to non-existent nodeId
                 UINT8*              pCmdData;
                 tNmtMnuGetNodeId    nodeListOp;
                 tOplkError          retGetNodeId;
