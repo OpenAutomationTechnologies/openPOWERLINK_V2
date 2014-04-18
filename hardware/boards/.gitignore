@@ -38,3 +38,4 @@ synthesis/
 *.make
 *.filters
 *.gui
+*.xdc
