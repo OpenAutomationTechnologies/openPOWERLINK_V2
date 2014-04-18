@@ -114,6 +114,10 @@ SET(CTRL_UCAL_POSIXMEM_SOURCES
 SET(CTRL_UCAL_DIRECT_SOURCES
     ${USER_SOURCE_DIR}/ctrl/ctrlucal-direct.c
     )
+    
+SET(CTRL_UCAL_DUALPROCSHM_SOURCES
+    ${USER_SOURCE_DIR}/ctrl/ctrlucal-noosdual.c
+    )
 
 ################################################################################
 # User DLL CAL sources
@@ -140,6 +144,10 @@ SET(ERRHND_UCAL_POSIXMEM_SOURCES
 SET(ERRHND_UCAL_LOCAL_SOURCES
     ${USER_SOURCE_DIR}/errhnd/errhnducal-local.c
     )
+    
+SET(ERRHND_UCAL_DUALPROCSHM_SOURCES
+    ${USER_SOURCE_DIR}/errhnd/errhnducal-noosdual.c
+    )
 
 ################################################################################
 # User event CAL sources
@@ -163,6 +171,11 @@ SET(EVENT_UCAL_NOOSKERNEL_SOURCES
     ${USER_SOURCE_DIR}/event/eventucal-nooscircbuf.c
     )
 
+SET(EVENT_UCAL_DUALPROCSHM_SOURCES
+    ${USER_SOURCE_DIR}/event/eventucal-noosdual.c
+    ${USER_SOURCE_DIR}/event/eventucalintf-circbuf.c
+    )
+
 ################################################################################
 # User PDO CAL sources
 SET(PDO_UCAL_LOCAL_SOURCES
@@ -178,6 +191,11 @@ SET(PDO_UCAL_POSIX_SOURCES
 SET(PDO_UCAL_LINUXMMAPIOCTL_SOURCES
     ${USER_SOURCE_DIR}/pdo/pdoucalsync-ioctl.c
     ${USER_SOURCE_DIR}/pdo/pdoucalmem-linuxmmap.c
+    )
+    
+SET(PDO_UCAL_DUALPROCSHM_SOURCES
+    ${USER_SOURCE_DIR}/pdo/pdoucalmem-noosdual.c
+    ${USER_SOURCE_DIR}/pdo/pdoucalsync-noosdual.c
     )
 
 ################################################################################
@@ -219,6 +237,10 @@ SET(CTRL_KCAL_LINUXIOCTL_SOURCES
     ${KERNEL_SOURCE_DIR}/ctrl/ctrlkcal-linuxkernel.c
     )
 
+SET(CTRL_KCAL_DUALPROCSHM_SOURCES
+    ${KERNEL_SOURCE_DIR}/ctrl/ctrlkcal-noosdual.c
+    )
+
 ################################################################################
 # Kernel DLL CAL sources
 
@@ -239,6 +261,10 @@ SET(ERRHND_KCAL_POSIXMEM_SOURCES
 
 SET(ERRHND_KCAL_LOCAL_SOURCES
     ${KERNEL_SOURCE_DIR}/errhnd/errhndkcal-local.c
+    )
+
+SET(ERRHND_KCAL_DUALPROCSHM_SOURCES
+    ${KERNEL_SOURCE_DIR}/errhnd/errhndkcal-noosdual.c
     )
 
 ################################################################################
@@ -264,6 +290,11 @@ SET(EVENT_KCAL_NOOSKERNEL_SOURCES
     ${KERNEL_SOURCE_DIR}/event/eventkcal-nooscircbuf.c
     )
 
+SET(EVENT_KCAL_DUALPROCSHM_SOURCES
+    ${KERNEL_SOURCE_DIR}/event/eventkcalintf-circbuf.c
+    ${KERNEL_SOURCE_DIR}/event/eventkcal-noosdual.c
+    )
+
 ################################################################################
 # Kernel PDO CAL sources
 
@@ -280,6 +311,11 @@ SET(PDO_KCAL_POSIXMEM_SOURCES
 SET(PDO_KCAL_LINUXKERNEL_SOURCES
     ${KERNEL_SOURCE_DIR}/pdo/pdokcalmem-linuxkernel.c
     ${KERNEL_SOURCE_DIR}/pdo/pdokcalsync-linuxkernel.c
+    )
+
+SET(PDO_KCAL_DUALPROCSHM_SOURCES
+    ${KERNEL_SOURCE_DIR}/pdo/pdokcalmem-noosdual.c
+    ${KERNEL_SOURCE_DIR}/pdo/pdokcalsync-noosdual.c
     )
 
 ################################################################################
@@ -311,6 +347,11 @@ SET(HARDWARE_DRIVER_OPENMAC_SOURCES
 
 SET(HARDWARE_DRIVER_OPENMAC_CN_SOURCES
      ${KERNEL_SOURCE_DIR}/timer/synctimer-openmac.c
+     )
+
+SET(HARDWARE_DRIVER_OPENMAC_MN_SOURCES
+     ${KERNEL_SOURCE_DIR}/timer/hrestimer-openmac.c
+     ${KERNEL_SOURCE_DIR}/edrv/edrvcyclic-openmac.c
      )
 
 ################################################################################
@@ -352,6 +393,11 @@ SET(CIRCBUF_NOOS_SOURCES
     ${COMMON_SOURCE_DIR}/circbuf/circbuffer.c
     ${COMMON_SOURCE_DIR}/circbuf/circbuf-noos.c
     )
+    
+SET(CIRCBUF_DUALPROCSHM_SOURCES
+    ${COMMON_SOURCE_DIR}/circbuf/circbuffer.c
+    ${COMMON_SOURCE_DIR}/circbuf/circbuf-noosdual.c
+    )
 
 ################################################################################
 # Target system specific sources
@@ -366,13 +412,27 @@ SET(TARGET_LINUX_SOURCES
     )
 
 SET(TARGET_MICROBLAZE_SOURCES
-    ${ARCH_SOURCE_DIR}/xilinx_microblaze/lock-localnoos.c
     ${ARCH_SOURCE_DIR}/xilinx_microblaze/systemtimer.c
     ${ARCH_SOURCE_DIR}/xilinx_microblaze/usleep.c
     ${ARCH_SOURCE_DIR}/xilinx_microblaze/target-microblaze.c
     ${ARCH_SOURCE_DIR}/xilinx_microblaze/openmac-microblaze.c
     )
 
+SET(TARGET_MICROBLAZE_LOCAL_SOURCES
+    ${ARCH_SOURCE_DIR}/xilinx_microblaze/lock-localnoos.c
+    )
+
+SET(TARGET_MICROBLAZE_DUAL_SOURCES
+    ${ARCH_SOURCE_DIR}/xilinx_microblaze/lock-dualprocnoos.c
+    )
+
+SET(TARGET_XILINX_ARM_SOURCES
+    ${ARCH_SOURCE_DIR}/xilinx_arm/target-arm.c
+    )
+
+SET(TARGET_XILINX_ARM_DUAL_SOURCES
+    ${ARCH_SOURCE_DIR}/xilinx_arm/lock-dualprocnoos.c
+    )
 ################################################################################
 # Architecture specific sources
 ################################################################################
