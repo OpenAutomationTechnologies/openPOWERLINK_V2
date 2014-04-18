@@ -43,7 +43,8 @@ SET(XIL_TOOLS_DIR ${TOOLS_DIR}/xilinx-microblaze)
 
 ################################################################################
 # Add libraries
-OPTION(CFG_COMPILE_LIB_CN                      "Compile openPOWERLINK CN library" ON)
+OPTION(CFG_COMPILE_LIB_CN                           "Compile openPOWERLINK CN library" ON)
+OPTION(CFG_COMPILE_LIB_MN_DRV_DUALPROCSHM           "Compile openPOWERLINK MN driver library using dual procesor shared memory" ON)
 
 # CN libraries
 IF(CFG_COMPILE_LIB_CN)
@@ -54,4 +55,15 @@ IF(CFG_COMPILE_LIB_CN)
     ADD_SUBDIRECTORY(proj/generic/liboplkcn)
 ELSE()
     UNSET(CFG_COMPILE_LIB_CN_HW_PATH CACHE)
+ENDIF()
+
+#MN libraries
+IF(CFG_COMPILE_LIB_MN_DRV_DUALPROCSHM)
+    # Path to the hardware library folder of your board example
+    SET( CFG_COMPILE_LIB_MN_HW_LIB_DIR ${XIL_HW_LIB_DIR}/xilinx-z702/mn-dual-shmem-gpio
+            CACHE PATH "Path to the hardware library folder for the dual processor MN library")
+
+    ADD_SUBDIRECTORY(proj/generic/liboplkmndrv-dualprocshm)
+ELSE()
+    UNSET(CFG_COMPILE_LIB_MN_HW_PATH CACHE)
 ENDIF()
