@@ -1,8 +1,9 @@
 ################################################################################
 #
-# CMake boards configuration file for Microblaze platform
+# CMake macro for installing the bitstream for Microblaze
 #
 # Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2014, Kalycito Infotech Pvt. Ltd.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,38 +29,28 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-################################################################################
-# Handle includes
-SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/microblaze" ${CMAKE_MODULE_PATH})
-SET(CMAKE_MODULE_PATH "${OPLK_BASE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+MACRO(INSTALL_BITSTREAM EXAMPLE_ROOT BITS_DESTINATION)
+    SET(SDK_EXPORT ${EXAMPLE_ROOT}/xps/SDK/SDK_Export/hw)
+    SET(XML_EXPORT ${EXAMPLE_ROOT}/sdk)
+    SET(DLCMD_SOURCE_DIR ${EXAMPLE_ROOT}/xps/etc)
 
-INCLUDE(geneclipsefilelist)
-INCLUDE(geneclipseincludelist)
-INCLUDE(setmicroblazeboardconfig)
+    # Remove folder prefix from download.cmd script
+    FILE(READ ${DLCMD_SOURCE_DIR}/download.cmd DLCMD_CONTENT)
+    STRING(REGEX REPLACE "implementation/" ""
+        MODIFIED_DLCMD_CONTENT "${DLCMD_CONTENT}")
+    FILE(WRITE ${PROJECT_BINARY_DIR}/download.cmd "${MODIFIED_DLCMD_CONTENT}")
 
-################################################################################
-# U S E R    O P T I O N S
+    # Copy hardware platform eclipse project file
+    CONFIGURE_FILE(${ARCH_TOOLS_DIR}/eclipse/hwplatformproject.in ${PROJECT_BINARY_DIR} @ONLY)
 
-# Assemble path to all boards with Xilinx demos
-SET(BOARD_DIRS ${PROJECT_SOURCE_DIR}/boards/avnet-s6plkeb;${PROJECT_SOURCE_DIR}/boards/xilinx-z702)
+    INSTALL(FILES ${SDK_EXPORT}/system.bit ${SDK_EXPORT}/download.bit ${XML_EXPORT}/system.xml ${SDK_EXPORT}/ps7_init.tcl ${SDK_EXPORT}/ps7_init.c ${SDK_EXPORT}/ps7_init.h 
+            DESTINATION ${BITS_DESTINATION}
+           )
 
-################################################################################
-# Find the Xilinx toolchain
-UNSET(XIL_LIBGEN CACHE)
-FIND_PROGRAM(XIL_LIBGEN NAMES libgen
-    PATHS
-    ${XIL_ISE_ROOT}/EDK/bin
-    DOC "Xilinx board support package generation tool"
-)
-
-UNSET(XIL_XPS CACHE)
-FIND_PROGRAM(XIL_XPS NAMES xps
-    PATHS
-    ${XIL_ISE_ROOT}/EDK/bin
-    DOC "Xilinx Platform Studio"
-)
-
-################################################################################
-# Set path to system folders
-SET(ARCH_IPCORE_REPO ${PROJECT_SOURCE_DIR}/ipcore/xilinx)
-SET(ARCH_TOOLS_DIR ${OPLK_BASE_DIR}/tools/xilinx-microblaze)
+    INSTALL(FILES ${PROJECT_BINARY_DIR}/hwplatformproject.in
+            DESTINATION ${BITS_DESTINATION} RENAME .project
+           )
+    INSTALL(FILES ${PROJECT_BINARY_DIR}/download.cmd 
+            DESTINATION ${BITS_DESTINATION}
+           )
+ENDMACRO()

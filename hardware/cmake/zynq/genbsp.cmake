@@ -1,6 +1,6 @@
 ################################################################################
 #
-# CMake boards configuration file for Microblaze platform
+# CMake macro for generating the board support package for Microblaze
 #
 # Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
@@ -28,38 +28,40 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-################################################################################
-# Handle includes
-SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/microblaze" ${CMAKE_MODULE_PATH})
-SET(CMAKE_MODULE_PATH "${OPLK_BASE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
-INCLUDE(geneclipsefilelist)
-INCLUDE(geneclipseincludelist)
-INCLUDE(setmicroblazeboardconfig)
+MACRO(GENERATE_BSP EXAMPLE_NAME XIL_DEMO_DIR XIL_BSP_TARGET_DIR PROCESSOR_NAME TCIMEM_NAME XIL_PLK_IPCORE_REPO)
 
-################################################################################
-# U S E R    O P T I O N S
+    # Set hardware directory internal paths
+    SET(BSP_SDK_DIR ${XIL_DEMO_DIR}/sdk)
+    SET(BSP_XPS_DIR ${XIL_DEMO_DIR}/xps)
+    SET(BSP_SDKEXPORT_DIR ${BSP_XPS_DIR}/SDK/SDK_Export/hw)
+    SET(BSP_SYSTEM_NAME system)
 
-# Assemble path to all boards with Xilinx demos
-SET(BOARD_DIRS ${PROJECT_SOURCE_DIR}/boards/avnet-s6plkeb;${PROJECT_SOURCE_DIR}/boards/xilinx-z702)
+    FILE(MAKE_DIRECTORY ${XIL_BSP_TARGET_DIR})
+    CONFIGURE_FILE(${BSP_SDK_DIR}/${PROCESSOR_NAME}${BSP_SYSTEM_NAME}.mss ${XIL_BSP_TARGET_DIR}/${BSP_SYSTEM_NAME}.mss COPY_ONLY)
+    CONFIGURE_FILE(${BSP_SDK_DIR}/${PROCESSOR_NAME}lscript.ld ${XIL_BSP_TARGET_DIR}/lscript.ld COPY_ONLY)
 
-################################################################################
-# Find the Xilinx toolchain
-UNSET(XIL_LIBGEN CACHE)
-FIND_PROGRAM(XIL_LIBGEN NAMES libgen
-    PATHS
-    ${XIL_ISE_ROOT}/EDK/bin
-    DOC "Xilinx board support package generation tool"
-)
+    IF(NOT XIL_LIBGEN STREQUAL "XIL_LIBGEN-NOTFOUND")
+        ADD_CUSTOM_TARGET(
+            bsp-${EXAMPLE_NAME} ALL
+            DEPENDS ${XIL_BSP_TARGET_DIR}/${PROCESSOR_NAME}/lib/libxil.a
+        )
 
-UNSET(XIL_XPS CACHE)
-FIND_PROGRAM(XIL_XPS NAMES xps
-    PATHS
-    ${XIL_ISE_ROOT}/EDK/bin
-    DOC "Xilinx Platform Studio"
-)
+        ADD_CUSTOM_COMMAND(
+            DEPENDS ${BSP_SDKEXPORT_DIR}/${BSP_SYSTEM_NAME}.xml
+            OUTPUT ${XIL_BSP_TARGET_DIR}/${PROCESSOR_NAME}/lib/libxil.a
+            COMMAND ${XIL_LIBGEN} -hw ${BSP_SDKEXPORT_DIR}/${BSP_SYSTEM_NAME}.xml -lp ${XIL_PLK_IPCORE_REPO} -pe ${PROCESSOR_NAME} -od ${XIL_BSP_TARGET_DIR} -log libgen.log ${XIL_BSP_TARGET_DIR}/${BSP_SYSTEM_NAME}.mss
+        )
 
-################################################################################
-# Set path to system folders
-SET(ARCH_IPCORE_REPO ${PROJECT_SOURCE_DIR}/ipcore/xilinx)
-SET(ARCH_TOOLS_DIR ${OPLK_BASE_DIR}/tools/xilinx-microblaze)
+        ADD_CUSTOM_TARGET(
+            clean-bsp-${EXAMPLE_NAME}
+            COMMAND ${CMAKE_COMMAND} -E remove_directory ${XIL_BSP_TARGET_DIR}
+        )
+
+        # Add all generated files to clean target
+        SET(ADD_CLEAN_FILES ${ADD_CLEAN_FILES} ${XIL_BSP_TARGET_DIR})
+    ELSE()
+        MESSAGE(FATAL_ERROR "libgen was not found in system PATH or ISE installation")
+    ENDIF()
+
+ENDMACRO()

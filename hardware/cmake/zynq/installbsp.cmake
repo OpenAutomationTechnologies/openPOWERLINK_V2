@@ -1,6 +1,6 @@
 ################################################################################
 #
-# CMake boards configuration file for Microblaze platform
+# CMake macro for installing the bsp for Microblaze
 #
 # Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
@@ -28,38 +28,34 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-################################################################################
-# Handle includes
-SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/microblaze" ${CMAKE_MODULE_PATH})
-SET(CMAKE_MODULE_PATH "${OPLK_BASE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+MACRO(INSTALL_BSP BSP_SOURCE_DIR BSP_TARGET_DIR BSP_CPU_NAME)
+    GET_FILENAME_COMPONENT(BSP_TARGET_NAME ${BSP_SOURCE_DIR} NAME )
+    SET(BSP_CPU_NAME ${BSP_CPU_NAME})
 
-INCLUDE(geneclipsefilelist)
-INCLUDE(geneclipseincludelist)
-INCLUDE(setmicroblazeboardconfig)
+    # Copy hardware platform eclipse project file
+    CONFIGURE_FILE(${ARCH_TOOLS_DIR}/eclipse/bspcproject.in ${BSP_SOURCE_DIR} COPY_ONLY)
+    CONFIGURE_FILE(${ARCH_TOOLS_DIR}/eclipse/bspproject.in ${BSP_SOURCE_DIR} COPY_ONLY)
+    CONFIGURE_FILE(${ARCH_TOOLS_DIR}/eclipse/bspsdkproject.in ${BSP_SOURCE_DIR} @ONLY)
+    CONFIGURE_FILE(${ARCH_TOOLS_DIR}/eclipse/bsplibgen.options.in ${BSP_SOURCE_DIR} @ONLY)
 
-################################################################################
-# U S E R    O P T I O N S
+    INSTALL(DIRECTORY ${BSP_SOURCE_DIR}
+            DESTINATION ${BSP_TARGET_DIR}
+            PATTERN "*.in" EXCLUDE
+           )
 
-# Assemble path to all boards with Xilinx demos
-SET(BOARD_DIRS ${PROJECT_SOURCE_DIR}/boards/avnet-s6plkeb;${PROJECT_SOURCE_DIR}/boards/xilinx-z702)
-
-################################################################################
-# Find the Xilinx toolchain
-UNSET(XIL_LIBGEN CACHE)
-FIND_PROGRAM(XIL_LIBGEN NAMES libgen
-    PATHS
-    ${XIL_ISE_ROOT}/EDK/bin
-    DOC "Xilinx board support package generation tool"
-)
-
-UNSET(XIL_XPS CACHE)
-FIND_PROGRAM(XIL_XPS NAMES xps
-    PATHS
-    ${XIL_ISE_ROOT}/EDK/bin
-    DOC "Xilinx Platform Studio"
-)
-
-################################################################################
-# Set path to system folders
-SET(ARCH_IPCORE_REPO ${PROJECT_SOURCE_DIR}/ipcore/xilinx)
-SET(ARCH_TOOLS_DIR ${OPLK_BASE_DIR}/tools/xilinx-microblaze)
+    INSTALL(FILES ${BSP_SOURCE_DIR}/bspcproject.in
+            DESTINATION ${BSP_TARGET_DIR}/${BSP_TARGET_NAME} RENAME .cproject
+           )
+    INSTALL(FILES ${BSP_SOURCE_DIR}/bspproject.in
+            DESTINATION ${BSP_TARGET_DIR}/${BSP_TARGET_NAME} RENAME .project
+           )
+    INSTALL(FILES ${BSP_SOURCE_DIR}/bspsdkproject.in
+            DESTINATION ${BSP_TARGET_DIR}/${BSP_TARGET_NAME} RENAME .sdkproject
+           )
+    INSTALL(FILES ${BSP_SOURCE_DIR}/bsplibgen.options.in
+            DESTINATION ${BSP_TARGET_DIR}/${BSP_TARGET_NAME} RENAME libgen.options
+           )
+    INSTALL(FILES ${ARCH_TOOLS_DIR}/eclipse/bspmakefile.in
+            DESTINATION ${BSP_TARGET_DIR}/${BSP_TARGET_NAME} RENAME Makefile
+           )
+ENDMACRO()

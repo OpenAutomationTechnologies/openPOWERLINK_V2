@@ -30,10 +30,17 @@
 
 ##################################################################################
 # Handle Includes
-INCLUDE(genbsp)
-INCLUDE(genbitstream)
-INCLUDE(installbsp)
-INCLUDE(installbitstream)
+IF(${CFG_DEMO_BOARD_NAME} STREQUAL "xilinx-z702")
+INCLUDE(zynq/genbsp)
+INCLUDE(zynq/genbitstream)
+INCLUDE(zynq/installbsp)
+INCLUDE(zynq/installbitstream)
+ELSE()
+INCLUDE(microblaze/genbsp)
+INCLUDE(microblaze/genbitstream)
+INCLUDE(microblaze/installbsp)
+INCLUDE(microblaze/installbitstream)
+ENDIF()
 
 REDUCE_BOARD_NAME(${CFG_DEMO_BOARD_NAME} "-" FRAG_DEMO_BOARD_NAME)
 
@@ -84,7 +91,12 @@ ENDIF()
 # Installation rules for the bistream
 INSTALL_BITSTREAM(${PROJECT_SOURCE_DIR} ${HW_PLATFORM_TARGET_DIR})
 
-INSTALL(FILES ${PROJECT_SOURCE_DIR}/cmake/settings.cmake DESTINATION ${BINS_INST_DIR})
+IF((DEFINED CFG_PCP_NAME  OR (NOT ${CFG_PCP_NAME} STREQUAL "")) )
+INSTALL(FILES ${PROJECT_SOURCE_DIR}/cmake/pcp/settings.cmake DESTINATION ${BINS_INST_DIR})
+ELSEIF((DEFINED CFG_HOST_NAME OR ( NOT ${CFG_HOST_NAME} STREQUAL "")))
+INSTALL(FILES ${PROJECT_SOURCE_DIR}/cmake/host/settings.cmake DESTINATION ${BINS_INST_DIR})
+ELSE()
+ENDIF()
 
 ################################################################################
 # Add clean files
