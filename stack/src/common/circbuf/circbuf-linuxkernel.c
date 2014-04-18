@@ -173,6 +173,11 @@ tCircBufError circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t size_p)
         OPLK_FREE(pInstance_p->pCircBufHeader);
         return kCircBufNoResource;
     }
+
+    /* Set buffer size to header */
+    pInstance_p->pCircBufHeader->bufferSize = size_p;
+    pInstance_p->pCircBufHeader->freeSize = size_p;
+
     return kCircBufOk;
 }
 

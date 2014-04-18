@@ -161,6 +161,10 @@ tCircBufError circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t size_p)
 
     pInstance_p->pCircBuf = ((BYTE*)pInstance_p->pCircBufHeader) + sizeof(tCircBufHeader);
 
+    /* Set buffer size to header */
+    pInstance_p->pCircBufHeader->bufferSize = size_p;
+    pInstance_p->pCircBufHeader->freeSize = size_p;
+
     return kCircBufOk;
 }
 

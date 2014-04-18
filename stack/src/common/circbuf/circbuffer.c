@@ -148,8 +148,6 @@ tCircBufError circbuf_alloc(UINT8 id_p, size_t size_p, tCircBufInstance** ppInst
         return ret;
     }
 
-    pInstance->pCircBufHeader->bufferSize = alignedSize;
-    pInstance->pCircBufHeader->freeSize = alignedSize;
     pInstance->pCircBufHeader->readOffset = 0;
     pInstance->pCircBufHeader->writeOffset = 0;
     pInstance->pCircBufHeader->dataCount = 0;
