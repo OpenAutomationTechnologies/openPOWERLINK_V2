@@ -75,6 +75,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 typedef struct
 {
     UINT                        nodeId;
+    UINT                        extNmtCmdByteOffset;
+    UINT8                       extNmtCmdBitMask;
     tNmtuCheckEventCallback     pfnCheckEventCb;
 } tNmtCnuInstance;
 
@@ -132,6 +134,11 @@ tOplkError nmtcnu_addInstance(UINT nodeId_p)
     OPLK_MEMSET(&nmtCnuInstance_g, 0, sizeof(nmtCnuInstance_g));
 
     nmtCnuInstance_g.nodeId = nodeId_p;
+
+    // Byte offset --> nodeid divide by 8
+    // Bit offset  --> 2 ^ (nodeid AND 0b111)
+    nmtCnuInstance_g.extNmtCmdByteOffset = (UINT)(nodeId_p >> 3);
+    nmtCnuInstance_g.extNmtCmdBitMask = 1 << ((UINT8)nodeId_p & 7);
 
     // register callback-function for NMT-commands
     ret = dllucal_regAsndService(kDllAsndNmtCommand, commandCb, kDllAsndFilterLocal);
@@ -482,18 +489,12 @@ The function checks if the own node ID is set in the node list.
 static BOOL checkNodeIdList(UINT8* pbNmtCommandDate_p)
 {
     BOOL            fNodeIdInList;
-    UINT            byteOffset;
-    UINT8           bitOffset;
+    UINT            byteOffset = nmtCnuInstance_g.extNmtCmdByteOffset;
+    UINT8           bitMask = nmtCnuInstance_g.extNmtCmdBitMask;
     UINT8           nodeListByte;
 
-    // get byte-offset of the own nodeid in NodeIdList
-    // devide though 8
-    byteOffset = (UINT)(nmtCnuInstance_g.nodeId >> 3);
-    // get bitoffset
-    bitOffset = (UINT8)nmtCnuInstance_g.nodeId % 8;
-
     nodeListByte = ami_getUint8Le(&pbNmtCommandDate_p[byteOffset]);
-    if((nodeListByte & bitOffset) == 0)
+    if((nodeListByte & bitMask) == 0)
         fNodeIdInList = FALSE;
     else
         fNodeIdInList = TRUE;
