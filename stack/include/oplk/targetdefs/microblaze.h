@@ -86,6 +86,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                         oldval = Xil_In8(address); \
                         Xil_Out8(address, newval); \
                         target_unlock()
+#define TARGET_FLUSH_DCACHE(base, range)        \
+                     microblaze_flush_dcache_range((UINT32)base, (UINT32)range);
+
+#define TARGET_INVALIDATE_DCACHE(base, range)   \
+                     microblaze_invalidate_dcache_range((UINT32)base,(UINT32)range);
 
 #endif /* _INC_targetdefs_microblaze_H_ */
 

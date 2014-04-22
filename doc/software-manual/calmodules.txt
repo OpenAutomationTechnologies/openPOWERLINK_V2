@@ -34,6 +34,7 @@ The following CAL module implementations are available:
 - Direct call implementation: \ref ctrlucal-direct.c, \ref ctrlkcal-direct.c
 - Implementation using IOCTL calls: \ref ctrlucal-ioctl.c, \ref ctrlkcal-linuxkernel.c
 - Host interface implementation: \ref ctrlucal-hostif.c, \ref ctrlkcal-hostif.c
+- Non-OS dual processor shared memory implementation: \ref ctrlucal-noosdual.c, \ref ctrlkcal-noosdual.c
 
 __NOTE:__ Depending on the used communication channel, only one of the available module
 pairs can be compiled into the openPOWERLINK stack at a time.
@@ -101,6 +102,7 @@ The following CAL module implementations are available:
 - Implementation using IOCTL calls: \ref errhnducal-ioctl.c, \ref errhndkcal-local.c
 - Host interface implementation: \ref errhnducal-hostif.c, \ref errhndkcal-hostif.c
 - Posix shared memory implementation: \ref errhnducal-posixshm.c, \ref errhndkcal-posixshm.c
+- Non-OS dual processor shared memory implementation: \ref errhnducal-noosdual.c, \ref errhndkcal-noosdual.c
 
 __NOTE:__ Depending on the used communication channel, only one of the available module
 pairs can be compiled into the openPOWERLINK stack at a time.
@@ -180,6 +182,9 @@ The following CAL module implementations are currently available:
   - \ref eventucalintf-hostif.c, \ref eventkcalintf-hostif.c
 - Single processor non-OS System using circular buffers:
   - \ref eventucal-nooscircbuf.c, \ref eventkcal-nooscircbuf.c
+  - \ref eventucalintf-circbuf.c, \ref eventkcalintf-circbuf.c
+- Dual processor non-OS System using shared memory :
+  - \ref eventucal-noosdual.c, \ref eventkcal-noosdual.c
   - \ref eventucalintf-circbuf.c, \ref eventkcalintf-circbuf.c
 
 ![](\ref eventcal_architecture.png "Architecture of event handler CAL interface")

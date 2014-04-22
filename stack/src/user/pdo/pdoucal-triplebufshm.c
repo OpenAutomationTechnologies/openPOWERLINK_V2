@@ -5,7 +5,7 @@
 \brief  Shared memory triple buffer implementation for user PDO CAL module
 
 This file contains an implementation for the user PDO CAL module which uses
-a shared memory region between user and kernel layer. PDOs are transfered
+a shared memory region between user and kernel layer. PDOs are transferred
 through triple buffering between the layers. Therefore, reads and writes to
 the PDOs can occur completely asynchronously.
 
@@ -186,7 +186,8 @@ BYTE* pdoucal_getTxPdoAdrs(UINT channelId_p)
 {
     OPLK_ATOMIC_T    wi;
     BYTE*            pPdo;
-
+    TARGET_INVALIDATE_DCACHE(&pPdoMem_l->txChannelInfo[channelId_p],
+                                                         sizeof(tPdoBufferInfo));
     wi = pPdoMem_l->txChannelInfo[channelId_p].writeBuf;
     //TRACE("%s() channelId:%d wi:%d\n", __func__, channelId_p, wi);
     pPdo = pTripleBuf_l[wi] + pPdoMem_l->txChannelInfo[channelId_p].channelOffset;
@@ -212,19 +213,22 @@ tOplkError pdoucal_setTxPdo(UINT channelId_p, BYTE* pPdo_p, WORD pdoSize_p)
 {
     OPLK_ATOMIC_T    temp;
 
-    UNUSED_PARAMETER(pPdo_p);
-    UNUSED_PARAMETER(pdoSize_p);
-
+   // UNUSED_PARAMETER(pPdo_p);
+   // UNUSED_PARAMETER(pdoSize_p);
+    TARGET_FLUSH_DCACHE((u32)pPdo_p, pdoSize_p);
     //TRACE("%s() chan:%d wi:%d\n", __func__, channelId_p, pPdoMem_l->txChannelInfo[channelId_p].writeBuf);
 
     //shmWriterSpinlock(&pPdoMem_l->txSpinlock);
+    TARGET_INVALIDATE_DCACHE(&pPdoMem_l->txChannelInfo[channelId_p],
+                                                       sizeof(tPdoBufferInfo));
     temp = pPdoMem_l->txChannelInfo[channelId_p].writeBuf;
     OPLK_ATOMIC_EXCHANGE(&pPdoMem_l->txChannelInfo[channelId_p].cleanBuf,
                          temp,
                          pPdoMem_l->txChannelInfo[channelId_p].writeBuf);
     pPdoMem_l->txChannelInfo[channelId_p].newData = 1;
     //shmWriterSpinUnlock(&pPdoMem_l->txSpinlock);
-
+    TARGET_FLUSH_DCACHE(&pPdoMem_l->txChannelInfo[channelId_p],
+                                                       sizeof(tPdoBufferInfo));
     //TRACE("%s() chan:%d new wi:%d\n", __func__, channelId_p, pPdoMem_l->txChannelInfo[channelId_p].writeBuf);
 
     return kErrorOk;
@@ -250,7 +254,8 @@ tOplkError pdoucal_getRxPdo(BYTE** ppPdo_p, UINT channelId_p, WORD pdoSize_p)
     OPLK_ATOMIC_T    readBuf;
 
     UNUSED_PARAMETER(pdoSize_p);
-
+    TARGET_INVALIDATE_DCACHE(&pPdoMem_l->rxChannelInfo[channelId_p],
+                                                        sizeof(tPdoBufferInfo));
     if (pPdoMem_l->rxChannelInfo[channelId_p].newData)
     {
         readBuf = pPdoMem_l->rxChannelInfo[channelId_p].readBuf;
@@ -261,7 +266,11 @@ tOplkError pdoucal_getRxPdo(BYTE** ppPdo_p, UINT channelId_p, WORD pdoSize_p)
     }
 
     readBuf = pPdoMem_l->rxChannelInfo[channelId_p].readBuf;
-    *ppPdo_p = pTripleBuf_l[readBuf] + pPdoMem_l->rxChannelInfo[channelId_p].channelOffset;
+    TARGET_FLUSH_DCACHE(&pPdoMem_l->rxChannelInfo[channelId_p],
+                                                          sizeof(tPdoBufferInfo));
+    *ppPdo_p =  pTripleBuf_l[readBuf] + pPdoMem_l->rxChannelInfo[channelId_p].channelOffset;
+
+    TARGET_INVALIDATE_DCACHE((UINT32)*ppPdo_p, pdoSize_p);
 
     return kErrorOk;
 }

@@ -39,6 +39,17 @@ To build the kernel driver (e.g. for a MN using the Intel 82573 network interfac
       > make
       > make install
 
+## Building a PCP daemon for Microblaze {#sect_build_drivers_build_daemon_microblaze}
+
+This section will explain the steps to build the PCP daemon application 
+for Microblaze softcore processor for a dual processor design.
+
+To build the PCP daemon (e.g. for Microblaze in Zynq SoC's PL using shared memory interface):
+
+      > cd <openPOWERLINK_dir>/drivers/xilinx-microblaze/drv_daemon/build
+      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Release ..
+      > make
+      > make install
 
 # Configuration Options {#sect_build_drivers_options}
 
@@ -92,3 +103,24 @@ To build the kernel driver (e.g. for a MN using the Intel 82573 network interfac
   - **8139**:  Realtek 8139-based network interface cards (100 MBit/s)
   - **8255x**: Intel 8255x-based network interface cards (100 MBit/s)
   - **82573**: Intel 82573-based network interface cards (1 GBit/s)
+
+## PCP daemon on Microblaze {#sect_build_drivers_options_pcp_daemon}
+
+Following options are available for a PCP daemon of a dual processor design:
+
+- **CFG_HW_LIB_DIR**
+
+  Path to the hardware platform install directory your application should refer to.
+  (e.g: `<openPOWERLINK_DIR>/hardware/lib/generic/microblaze/<BOARD_NAME>/<DEMO_NAME>`)
+
+- **CFG_BUILD_KERNEL_STACK**
+
+  Determines which kernel interface library of stack to link with the daemon application.
+  The following option is available and automatically (implicitly) pre-selected:
+
+  - __PCP Daemon Dual-Proc shm__
+
+    The openPOWERLINK user part will be running on a separate processor 
+    communicating to daemon through shared memory(dual processor).
+
+  

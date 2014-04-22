@@ -10,6 +10,7 @@ and run openPOWERLINK on your desired platform.
 - \ref page_platform_altera-mn
 - \ref page_platform_altera-cn
 - \ref page_platform_xilinx
+- \ref page_platform_zynq
 
 If your platform is not supported, please follow the
 [openPOWERLINK Porting Guide](\ref page_porting-guide) for information on how

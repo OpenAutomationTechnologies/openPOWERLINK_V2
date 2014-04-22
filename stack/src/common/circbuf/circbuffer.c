@@ -155,6 +155,7 @@ tCircBufError circbuf_alloc(UINT8 id_p, size_t size_p, tCircBufInstance** ppInst
     pInstance->pCircBufHeader->dataCount = 0;
     pInstance->pfnSigCb = NULL;
 
+    TARGET_FLUSH_DCACHE(pInstance->pCircBufHeader,sizeof(tCircBufHeader));
     *ppInstance_p = pInstance;
 
     return kCircBufOk;
@@ -256,10 +257,12 @@ void circbuf_reset(tCircBufInstance* pInstance_p)
     tCircBufHeader*     pHeader = pInstance_p->pCircBufHeader;
 
     circbuf_lock(pInstance_p);
+    TARGET_INVALIDATE_DCACHE(pInstance_p->pCircBufHeader,sizeof(tCircBufHeader));
     pHeader->readOffset = 0;
     pHeader->writeOffset = 0;
     pHeader->freeSize = pHeader->bufferSize;
     pHeader->dataCount = 0;
+    TARGET_FLUSH_DCACHE(pInstance_p->pCircBufHeader,sizeof(tCircBufHeader));
     circbuf_unlock(pInstance_p);
 }
 
@@ -294,6 +297,8 @@ tCircBufError circbuf_writeData (tCircBufInstance* pInstance_p, const void* pDat
     fullBlockSize = blockSize + sizeof(UINT32);
 
     circbuf_lock(pInstance_p);
+
+    TARGET_INVALIDATE_DCACHE(pHeader,sizeof(tCircBufHeader));
     if (fullBlockSize > pHeader->freeSize)
     {
         circbuf_unlock(pInstance_p);
@@ -306,6 +311,9 @@ tCircBufError circbuf_writeData (tCircBufInstance* pInstance_p, const void* pDat
 
         OPLK_MEMCPY(pCircBuf + pHeader->writeOffset + sizeof(UINT32),
                     pData_p, size_p);
+
+        TARGET_FLUSH_DCACHE((pCircBuf + pHeader->writeOffset),fullBlockSize);
+
         if (pHeader->writeOffset + fullBlockSize == pHeader->bufferSize)
             pHeader->writeOffset = 0;
         else
@@ -318,11 +326,17 @@ tCircBufError circbuf_writeData (tCircBufInstance* pInstance_p, const void* pDat
 
         OPLK_MEMCPY(pCircBuf + pHeader->writeOffset + sizeof(UINT32),
                     pData_p, chunkSize);
+        TARGET_FLUSH_DCACHE((pCircBuf + pHeader->writeOffset ),chunkSize + sizeof(UINT32));
         OPLK_MEMCPY(pCircBuf, (UINT8*)pData_p + chunkSize, size_p - chunkSize);
+        TARGET_FLUSH_DCACHE((pCircBuf),(size_p - chunkSize));
+
         pHeader->writeOffset = blockSize - chunkSize;
     }
     pHeader->freeSize -= fullBlockSize;
     pHeader->dataCount++;
+
+    TARGET_FLUSH_DCACHE(pHeader,sizeof(tCircBufHeader));
+
     circbuf_unlock(pInstance_p);
 
     if (pInstance_p->pfnSigCb != NULL)
@@ -373,6 +387,7 @@ tCircBufError circbuf_writeMultipleData(tCircBufInstance* pInstance_p,
     //TRACE("%s() size:%d wroff:%d\n", __func__, pHeader->bufferSize, pHeader->writeOffset);
     //TRACE("%s() ptr1:%p size1:%d ptr2:%p size2:%d\n", __func__, pData_p, size_p, pData2_p, size2_p);
     circbuf_lock(pInstance_p);
+    TARGET_INVALIDATE_DCACHE(pHeader,sizeof(tCircBufHeader));
     if (fullBlockSize > pHeader->freeSize)
     {
         circbuf_unlock(pInstance_p);
@@ -387,6 +402,9 @@ tCircBufError circbuf_writeMultipleData(tCircBufInstance* pInstance_p,
                     pData_p, size_p);
         OPLK_MEMCPY(pCircBuf + pHeader->writeOffset + sizeof(UINT32) + size_p,
                     pData2_p, size2_p);
+
+        TARGET_FLUSH_DCACHE((pCircBuf + pHeader->writeOffset),fullBlockSize);
+
         if (pHeader->writeOffset + fullBlockSize == pHeader->bufferSize)
             pHeader->writeOffset = 0;
         else
@@ -404,21 +422,29 @@ tCircBufError circbuf_writeMultipleData(tCircBufInstance* pInstance_p,
             partSize = chunkSize - size_p;
             OPLK_MEMCPY(pCircBuf + pHeader->writeOffset + size_p + sizeof(UINT32),
                         pData2_p, partSize);
+
+            TARGET_FLUSH_DCACHE((pCircBuf + pHeader->writeOffset),chunkSize + sizeof(UINT32));
             OPLK_MEMCPY(pCircBuf, (UINT8*)pData2_p + partSize, size2_p - partSize);
+            TARGET_FLUSH_DCACHE((pCircBuf),size2_p - partSize);
         }
         else
         {
             partSize = size_p - chunkSize;
             OPLK_MEMCPY(pCircBuf + pHeader->writeOffset + sizeof(UINT32),
                         pData_p, chunkSize);
+            TARGET_FLUSH_DCACHE((pCircBuf + pHeader->writeOffset),chunkSize + sizeof(UINT32));
             OPLK_MEMCPY(pCircBuf, (UINT8*)pData_p + chunkSize, partSize);
             OPLK_MEMCPY(pCircBuf + partSize, pData2_p, size2_p);
+
+            TARGET_FLUSH_DCACHE((pCircBuf),partSize + size2_p);
         }
         pHeader->writeOffset = blockSize - chunkSize;
 
     }
     pHeader->freeSize -= fullBlockSize;
     pHeader->dataCount++;
+
+    TARGET_FLUSH_DCACHE(pHeader,sizeof(tCircBufHeader));
 
     circbuf_unlock(pInstance_p);
     if (pInstance_p->pfnSigCb != NULL)
@@ -458,11 +484,15 @@ tCircBufError circbuf_readData(tCircBufInstance* pInstance_p, void* pData_p,
         return kCircBufOk;
 
     circbuf_lock(pInstance_p);
+
+    TARGET_INVALIDATE_DCACHE(pHeader,sizeof(tCircBufHeader));
     if (pHeader->freeSize == pHeader->bufferSize)
     {
         circbuf_unlock(pInstance_p);
         return kCircBufNoReadableData;
     }
+
+    TARGET_INVALIDATE_DCACHE((pCircBuf + pHeader->readOffset),sizeof(UINT32));
 
     dataSize = *(UINT32*)(pCircBuf + pHeader->readOffset);
     blockSize = (dataSize + (CIRCBUF_BLOCK_ALIGNMENT - 1)) & ~(CIRCBUF_BLOCK_ALIGNMENT - 1);
@@ -476,6 +506,8 @@ tCircBufError circbuf_readData(tCircBufInstance* pInstance_p, void* pData_p,
 
     if (pHeader->readOffset + fullBlockSize <= pHeader->bufferSize)
     {
+        TARGET_INVALIDATE_DCACHE((pCircBuf + pHeader->readOffset + sizeof(UINT32)) \
+                                    ,blockSize);
         OPLK_MEMCPY(pData_p, pCircBuf + pHeader->readOffset + sizeof(UINT32),
                     dataSize);
         if (pHeader->readOffset + fullBlockSize == pHeader->bufferSize)
@@ -486,13 +518,21 @@ tCircBufError circbuf_readData(tCircBufInstance* pInstance_p, void* pData_p,
     else
     {
         chunkSize = pHeader->bufferSize - pHeader->readOffset - sizeof(UINT32);
+        TARGET_INVALIDATE_DCACHE((pCircBuf + pHeader->readOffset + sizeof(UINT32)), 
+                                    chunkSize);
         OPLK_MEMCPY(pData_p, pCircBuf + pHeader->readOffset + sizeof(UINT32),
                     chunkSize);
+
+        TARGET_INVALIDATE_DCACHE(pCircBuf, dataSize - chunkSize);
+
         OPLK_MEMCPY((UINT8*)pData_p + chunkSize, pCircBuf, dataSize - chunkSize);
         pHeader->readOffset = blockSize - chunkSize;
     }
     pHeader->freeSize += fullBlockSize;
     pHeader->dataCount--;
+
+    TARGET_FLUSH_DCACHE(pHeader,sizeof(tCircBufHeader));
+
     circbuf_unlock(pInstance_p);
 
     *pDataBlockSize_p = dataSize;
@@ -516,6 +556,7 @@ The function returns the available data count
 UINT32 circbuf_getDataCount(tCircBufInstance* pInstance_p)
 {
     tCircBufHeader*     pHeader = pInstance_p->pCircBufHeader;
+    TARGET_INVALIDATE_DCACHE(&pHeader->dataCount,sizeof(UINT32));
     return pHeader->dataCount;
 }
 
