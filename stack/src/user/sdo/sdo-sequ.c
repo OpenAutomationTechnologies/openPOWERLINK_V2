@@ -1128,7 +1128,7 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
                 }
                 else
                 {
-                    sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateFrameSended);
+                    sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateFrameSent);
                 }
             }
             break;
@@ -1194,7 +1194,7 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
                                                 ((tAsySdoCom*)&pRecvFrame_p->sdoSeqPayload),
                                                 (dataSize_p - SDO_SEQ_HEADER_SIZE));
 
-                            sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateFrameSended);
+                            sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateFrameSent);
                         }
                         else
                         {
@@ -1375,7 +1375,7 @@ static tOplkError processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sd
                         sdoSeqInstance_l.pfnSdoComRecvCb(sdoSeqConHdl_p,
                                                          ((tAsySdoCom*)&pRecvFrame_p->sdoSeqPayload),
                                                          (dataSize_p - SDO_SEQ_HEADER_SIZE));
-                        sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateFrameSended);
+                        sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateFrameSent);
                     }
                     else
                     {
