@@ -607,6 +607,11 @@ tOplkError sdoseq_deleteCon(tSdoSeqConHdl sdoSeqConHdl_p)
         return kErrorSdoSeqInvalidHdl;
 
     pSdoSeqCon = &sdoSeqInstance_l.aSdoSeqCon[handle];    // get pointer to connection
+
+    // Check if connection is already closed
+    if (pSdoSeqCon->useCount == 0)
+        return ret;
+
     pSdoSeqCon->useCount--;
 
     if (pSdoSeqCon->useCount == 0)
