@@ -7,7 +7,7 @@ Building openPOWERLINK Hardware Platforms {#page_build_hardware}
 
 If the target platform is an embedded processor the openPOWERLINK stack needs
 hardware near libraries like a board support package to run properly. In case
-of an FPGA with a softcore processor, it is also necessary to generate the
+of an FPGA with a soft-core processor, it is also necessary to generate the
 configuration for the FPGA.
 
 This chapter describes the build steps needed to build the FPGA configuration

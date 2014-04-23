@@ -75,7 +75,7 @@ Available drivers can be found in the __drivers__ directory.
 
 The application is the part of a POWERLINK device that implements the actual
 functionality. It makes use of the openPOWERLINK stack API for transferring
-data accross a POWERLINK network.
+data across a POWERLINK network.
 
 The openPOWERLINK stack distribution contains a set of demo applications which
 demonstrate how a POWERLINK application can be implemented using the openPOWERLINK

@@ -62,7 +62,7 @@ The VxWorks openPOWERLINK implementation has the following limitations at
 the moment:
 
 - SDO over UDP is not supported
-- There is no virtual ethernet driver to be able to transfer standard ethernet
+- There is no virtual Ethernet driver to be able to transfer standard Ethernet
   traffic on the POWERLINK network.
 
 
@@ -75,7 +75,7 @@ openPOWERLINK on VxWorks and give some hints about porting to other targets.
 
 - Multitasking:
 
-  openPOWERLINK uses the VxWorks APIs for task synchronisation and communication.
+  openPOWERLINK uses the VxWorks APIs for task synchronization and communication.
   - VxWorks Tasks (taskLib)
   - Semaphores and Mutexes (semLib, semMLib, semBLib, semCLib)
 
@@ -146,7 +146,7 @@ The timer device module has to provide the following functions:
 - `int timerdev_readClock(unsigned long long* pClock_p)`
 
   This function reads the current clock value of the timer. It has to be
-  ensured that there is no clock overrun whithin the expected running time
+  ensured that there is no clock overrun within the expected running time
   of the application!
 
 - `int timerdev_registerInterruptHandler(VOIDFUNCPTR pHandler_p, int iArg_p)`
@@ -210,9 +210,9 @@ The B&R BSP for APC 810 (Based on Pentium4) is used.
   the functions `hpetInit()` and `hpetMmuMap()` will be called in order to be able
   to access the HPET from the openPOWERLINK high-resolution timer library.
 
-- Supported Etherent Interfaces
+- Supported Ethernet Interfaces
 
-  openPOWERLINK is supported on the following ethernet interfaces:
+  openPOWERLINK is supported on the following Ethernet interfaces:
   - Intel 82573 Gigabit Ethernet, gei825xxVxbEnd.c
 
 
@@ -260,7 +260,7 @@ It is located in: `Examples/X86/VxWorks/gnu/demo_mn_console`
 
                 -> openPowerlinkInit ("gei", 0)
                 
-  This starts POWERLINK on the ethernet interface gei0 (Intel Gigabit Ethernet)
+  This starts POWERLINK on the Ethernet interface gei0 (Intel Gigabit Ethernet)
 
 - To stop openPOWERLINK, type in a hostShell:
 
@@ -268,4 +268,3 @@ It is located in: `Examples/X86/VxWorks/gnu/demo_mn_console`
 
 
 # Troubleshooting {#sect_vxworks_trouble}
-

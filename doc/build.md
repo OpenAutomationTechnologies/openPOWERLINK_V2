@@ -19,7 +19,7 @@ project files). Please refer to the [platform documentation](\ref page_platforms
 ## Out-of-Source Builds {#sect_build_cmake_outofsource}
 
 CMake supports out-of-source builds. Therefore, all generated files are located
-in a seperate build directory. This keeps your sources clean.
+in a separate build directory. This keeps your sources clean.
 
 ## Interactive Mode {#sect_build_cmake_interactive}
 

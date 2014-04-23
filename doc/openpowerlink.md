@@ -36,7 +36,7 @@ to the release V1 (1.8.2), the code base has fundamentally changed.
   - User layer stack code
   - Kernel layer stack code
   - Architecture specific code
-  - Additonal libraries
+  - Additional libraries
   - Demo applications
 - The build system is changed to be more flexible (Configurations with user/kernel
   layers on different platforms)

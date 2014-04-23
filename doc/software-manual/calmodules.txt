@@ -23,8 +23,8 @@ need a CAL interface.
 
 \brief CAL modules which provide the control CAL interface
 
-The control module needs a CAL for transfering control information from the user
-to the kernel layer as well as transfering status information from the kernel to
+The control module needs a CAL for transferring control information from the user
+to the kernel layer as well as transferring status information from the kernel to
 the user layer.
 
 ![](\ref ctrlcal_architecture.png "Architecture of control CAL interface")
@@ -48,7 +48,7 @@ pairs can be compiled into the openPOWERLINK stack at a time.
 
 \brief User control CAL module
 
-The user control CAL module provides the communciation abstraction layer (CAL)
+The user control CAL module provides the communication abstraction layer (CAL)
 for the user control module to be able to communicate with the kernel stack.
 
 \see module_ctrlkcal
@@ -65,7 +65,7 @@ for the user control module to be able to communicate with the kernel stack.
 
 \brief Kernel control CAL module
 
-The kernel control CAL module provides the communciation abstraction layer (CAL)
+The kernel control CAL module provides the communication abstraction layer (CAL)
 for the kernel control module to be able to communicate with the user stack.
 
 \see module_ctrlk
@@ -116,7 +116,7 @@ pairs can be compiled into the openPOWERLINK stack at a time.
 \brief User error handler CAL module
 
 This module implements the CAL for the user POWERLINK error handler. It is
-responsible for transfering the error handler information to the kernel layer.
+responsible for transferring the error handler information to the kernel layer.
 There may be different implementations of the CAL layer using different
 communication mechanisms.
 
@@ -134,7 +134,7 @@ communication mechanisms.
 \brief Kernel error handler CAL module
 
 This module implements the CAL for the kernel POWERLINK error handler. It is
-responsible for transfering the error handler information to the user layer.
+responsible for transferring the error handler information to the user layer.
 There may be different implementations of the CAL layer using different
 communication mechanisms.
 
@@ -160,7 +160,7 @@ the kernel or the user layer.
 
 ![](\ref eventcalqueues.png "Event Queues")
 
-Because each platfrom needs a specific combination of event queue implementations
+Because each platform needs a specific combination of event queue implementations
 for its queues a platform specific eventcal module is needed. This platform
 specific version uses a lower layer of event queue interfaces to implement the
 appropriate event queues.
@@ -246,7 +246,7 @@ queues.
 
 The PDO CAL interface handles the transfer of isochronous data (PDOs)
 between the user and the kernel layer. In order to be able to access the data
-asynchonously without blocking the other side, a triple buffer mechanism is
+asynchronously without blocking the other side, a triple buffer mechanism is
 introduced.
 
 The PDO CAL interface is made up of two parts:
@@ -340,7 +340,7 @@ pairs can be compiled into the openPOWERLINK stack at a time.
 \brief User DLL CAL module
 
 The user DLL CAL module provides an interface to user modules for sending and
-recieving asynchronous data.
+receiving asynchronous data.
 
 \see module_dllk
 \see module_dllkcal
@@ -411,4 +411,3 @@ DLL CAL modules.
 \ingroup cal_layer_dll
 */
 //------------------------------------------------------------------------------
-

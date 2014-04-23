@@ -122,21 +122,21 @@ the configuration options on the command line (-DCFG_XXX=XXX) or
 - **CFG_COMPILE_LIB_MNAPP_USERINTF**
 
   Compile openPOWERLINK MN application library which contains the interface
-  to a Linux userspace driver. It is used for implementing a multi-process
+  to a Linux user space driver. It is used for implementing a multi-process
   solution where the openPOWERLINK kernel layer is running as a separate
-  Linux userspace daemon (e.g. a PCAP based userspace daemon)
+  Linux user space daemon (e.g. a PCAP based user space daemon)
 
 - **CFG_COMPILE_LIB_MNAPP_KERNELINTF**
 
   Compile openPOWERLINK MN application library which contains the interface to
-  a Linux kernelspace driver. It is used together with a Linux kernel module
+  a Linux kernel space driver. It is used together with a Linux kernel module
   openPOWERLINK driver.
 
 - **CFG_COMPILE_LIB_MNDRV_PCAP**
 
-  Compile openPOWERLINK MN driver library for Linux userspace. This library
+  Compile openPOWERLINK MN driver library for Linux user space. This library
   contains the openPOWERLINK kernel layer and uses the PCAP library for accessing
-  the network. It is used by the Linux userspace daemon driver.
+  the network. It is used by the Linux user space daemon driver.
 
 - **CFG_COMPILE_LIB_CN**
 
@@ -147,22 +147,22 @@ the configuration options on the command line (-DCFG_XXX=XXX) or
 - **CFG_COMPILE_LIB_CNAPP_USERINTF**
 
   Compile openPOWERLINK CN application library which contains the interface
-  to a Linux userspace driver. It is used for implementing a multi-process
+  to a Linux user space driver. It is used for implementing a multi-process
   solution where the openPOWERLINK kernel layer is running as a separate
-  Linux userspace daemon (e.g. a PCAP based userspace daemon). It is
+  Linux user space daemon (e.g. a PCAP based user space daemon). It is
   configured to contain only CN functionality.
 
 - **CFG_COMPILE_LIB_CNAPP_KERNELINTF**
 
   Compile openPOWERLINK MN application library which contains the interface to
-  a Linux kernelspace driver. It is used together with a Linux kernel module
+  a Linux kernel space driver. It is used together with a Linux kernel module
   openPOWERLINK driver. It is configured to contain only CN functionality.
 
 - **CFG_COMPILE_LIB_CNDRV_PCAP**
 
-  Compile openPOWERLINK CN driver library for Linux userspace. This library
+  Compile openPOWERLINK CN driver library for Linux user space. This library
   contains the openPOWERLINK kernel layer and uses the PCAP library for accessing
-  the network. It is used by the Linux userspace daemon driver. It is configured
+  the network. It is used by the Linux user space daemon driver. It is configured
   to contain only CN functionality.
 
 

@@ -7,8 +7,8 @@ openPOWERLINK on Windows {#page_platform_windows}
 
 This file contains documentation for the openPOWERLINK stack on Windows.
 
-__NOTE:__ Because Windows does not provide realtime behavior, openPOWERLINK can
-only be run with cycle times above 10ms. The achivable minimum cycle time
+__NOTE:__ Because Windows does not provide real-time behavior, openPOWERLINK can
+only be run with cycle times above 10ms. The achievable minimum cycle time
 depends very much on the used system and cannot be guaranteed!
 
 # Requirements {#sect_windows_require}
@@ -24,7 +24,7 @@ depends very much on the used system and cannot be guaranteed!
 
 On a Windows system openPOWERLINK uses the WinPCAP library to access the
 network interface. Therefore, no specific network controller is required.
-openPOWERLINK contains the WinPCAP libary. It is located in: `contrib\pcap`
+openPOWERLINK contains the WinPCAP library. It is located in: `contrib\pcap`
 
 - WinPcap:  <http://www.winpcap.org>
 
@@ -32,7 +32,7 @@ openPOWERLINK contains the WinPCAP libary. It is located in: `contrib\pcap`
 
 - Supported Versions: Windows 2000, XP, Vista, 7
 
-## Libraries and Tools {#sect_linux_libs}
+## Libraries and Tools {#sect_windows_libs}
 
 ### Compiler and Build Environment
 
@@ -85,7 +85,7 @@ The following demo application are provided on Windows:
 * [demo_cn_console](\ref sect_components_demo_cn_console)
 * [demo_mn_qt](\ref sect_components_demo_mn_qt)
 
-# Running openPOWERLINK {#sect_linux_running}
+# Running openPOWERLINK {#sect_windows_running}
 
 The demo applications can be directly started by double-clicking the according
-.exe file in Winodws explorer.
+.exe file in Windows explorer.
