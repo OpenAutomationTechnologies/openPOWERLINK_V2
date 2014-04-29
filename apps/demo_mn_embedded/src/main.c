@@ -63,7 +63,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define SUBNET_MASK             0xFFFFFF00          // 255.255.255.0
 #define DEFAULT_GATEWAY         0xC0A864FE          // 192.168.100.C_ADR_RT1_DEF_NODE_ID
 #define MAC_ADDR                0x00, 0x12, 0x34, 0x56, 0x78, NODEID
-#define CHECK_KERNEL_TIMEOUT    100000
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -272,7 +271,6 @@ This function implements the main loop of the demo application.
 static tOplkError loopMain(tInstance* pInstance_p)
 {
     tOplkError  ret = kErrorOk;
-    UINT        checkStack = 0;
 
     // start processing
     if ((ret = oplk_execNmtCommand(kNmtEventSwReset)) != kErrorOk)
@@ -284,15 +282,10 @@ static tOplkError loopMain(tInstance* pInstance_p)
         if ((ret = oplk_process()) != kErrorOk)
             break;
 
-        // check the kernel part from time to time
-        if (checkStack++ >= CHECK_KERNEL_TIMEOUT)
+        if (oplk_checkKernelStack() == FALSE)
         {
-            checkStack = 0;
-            if (oplk_checkKernelStack() == FALSE)
-            {
-                PRINTF("Kernel stack has gone! Exiting...\n");
-                instance_l.fShutdown = TRUE;
-            }
+            PRINTF("Kernel stack has gone! Exiting...\n");
+            instance_l.fShutdown = TRUE;
         }
 
         // trigger switch off
