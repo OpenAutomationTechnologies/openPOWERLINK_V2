@@ -203,7 +203,7 @@ static tOplkError processStateChangeEvent(tOplkApiEventType EventType_p,
                              debugstr_getNmtEventStr(pNmtStateChange->nmtEvent));
 
             // signal that stack is off
-            *pfGsOff_l = FALSE;
+            *pfGsOff_l = TRUE;
             break;
 
         case kNmtGsInitialising:
