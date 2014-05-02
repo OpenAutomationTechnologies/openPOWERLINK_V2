@@ -329,10 +329,16 @@ static tOplkError prcFindPredecessorNode(UINT nodeId_p);
 static void       prcSyncError(tNmtMnuNodeInfo* pNodeInfo_p);
 static void       prcSetFlagsNmtCommandReset(tNmtMnuNodeInfo* pNodeInfo_p,
                                              tNmtCommand nmtCommand_p);
+static tOplkError prcHandleNmtReset(UINT nodeId_p, tNmtCommand nmtCommand_p,
+                                    BOOL* pfWaitForSyncResp_p);
+
+static tOplkError sendNmtCommand(UINT nodeId_p, tNmtCommand nmtCommand_p,
+                                 UINT8* pNmtCommandData_p, UINT dataSize_p);
 
 static tOplkError getNodeIdFromCmd(UINT nodeId_p, tNmtCommand nmtCommand_p, UINT8* pCmdData_p,
                                    tNmtMnuGetNodeId* pOp_p, UINT* pNodeId_p);
 static tOplkError nodeListToNodeId(UINT8* pCmdData_p, tNmtMnuGetNodeId* pOp_p, UINT* pNodeId_p);
+static tOplkError removeNodeIdFromExtCmd(UINT nodeId_p, UINT8* pCmdData_p, UINT size_p);
 
 /* internal node event handler functions */
 static INT processNodeEventNoIdentResponse (UINT nodeId_p, tNmtState nodeNmtState_p,
@@ -497,18 +503,15 @@ The function sends an extended NMT command.
 tOplkError nmtmnu_sendNmtCommandEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
                                    void* pNmtCommandData_p, UINT dataSize_p)
 {
-    tOplkError          ret;
-    tFrameInfo          frameInfo;
-    UINT8               aBuffer[C_DLL_MINSIZE_NMTCMDEXT];
-    tPlkFrame*          pFrame;
+    tOplkError          ret = kErrorOk;
     tDllNodeOpParam     nodeOpParam;
     tNmtMnuNodeInfo*    pNodeInfo;
-    UINT                tempNodeId = C_ADR_INVALID;   // Init to non-existent nodeId
-    UINT8*              pCmdData;
+    UINT                tempNodeId;
+    UINT8*              pCmdData = (UINT8*)pNmtCommandData_p;
     tNmtMnuGetNodeId    nodeListOp;
     tOplkError          retGetNodeId;
-
-    ret = kErrorOk;
+    BOOL                fIsExtNmtCmd;
+    UINT                dstNodeCnt;
 
     if ((nodeId_p == 0) || (nodeId_p > C_ADR_BROADCAST))
     {   // invalid node ID specified
@@ -516,31 +519,70 @@ tOplkError nmtmnu_sendNmtCommandEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
         goto Exit;
     }
 
+    // Clip given size to extended NMT command size
     dataSize_p = min(dataSize_p, (UINT)(C_DLL_MINSIZE_NMTCMDEXT - C_DLL_MINSIZE_NMTCMD));
+
+    // Set flag if it is extended NMT command
+    fIsExtNmtCmd = (nmtCommand_p >= NMT_EXT_COMMAND_START && nmtCommand_p <= NMT_EXT_COMMAND_END);
 
     // $$$ d.k. may be check in future versions if the caller wants to perform
     //          prohibited state transitions. The CN should not perform these
-    //          transitions, but the expected NMT state will be changed and never fullfilled.
+    //          transitions, but the expected NMT state will be changed and never fulfilled.
 
-    // build frame
-    pFrame = (tPlkFrame*)aBuffer;
-    OPLK_MEMSET(pFrame, 0x00, sizeof(aBuffer));
-    ami_setUint8Le(&pFrame->dstNodeId, (UINT8)nodeId_p);
-    ami_setUint8Le(&pFrame->data.asnd.serviceId, (UINT8)kDllAsndNmtCommand);
-    ami_setUint8Le(&pFrame->data.asnd.payload.nmtCommandService.nmtCommandId, (UINT8)nmtCommand_p);
-    if ((pNmtCommandData_p != NULL) && (dataSize_p > 0))
-    {   // copy command data to frame
-        OPLK_MEMCPY(&pFrame->data.asnd.payload.nmtCommandService.aNmtCommandData[0], pNmtCommandData_p, dataSize_p);
+    if (fIsExtNmtCmd || nodeId_p < C_ADR_BROADCAST)
+    {
+        // Handle plain extended NMT and individual plain NMT commands
+        tempNodeId = C_ADR_INVALID;
+        OPLK_MEMSET(&nodeListOp, 0x00, sizeof(nodeListOp));
+        retGetNodeId = getNodeIdFromCmd(nodeId_p, nmtCommand_p, pCmdData, &nodeListOp, &tempNodeId);
+
+        dstNodeCnt = 0;
+        while (retGetNodeId == kErrorRetry)
+        {
+            BOOL fRemoveNmtCmd = FALSE;
+
+            ret = prcHandleNmtReset(tempNodeId, nmtCommand_p, &fRemoveNmtCmd);
+            if (ret != kErrorOk)
+                goto Exit;
+
+            if (fRemoveNmtCmd)
+            {
+                // Remove from extended NMT command
+                if (fIsExtNmtCmd)
+                {
+                    ret = removeNodeIdFromExtCmd(tempNodeId, pCmdData, dataSize_p);
+                    if (ret != kErrorOk)
+                        goto Exit;
+                }
+            }
+            else
+            {
+                // Destination may receive NMT command
+                dstNodeCnt++;
+            }
+
+            retGetNodeId = getNodeIdFromCmd(nodeId_p, nmtCommand_p, pCmdData,
+                                            &nodeListOp, &tempNodeId);
+        }
+    }
+    else
+    {
+        // Handle plain broadcast NMT command
+        dstNodeCnt = C_ADR_BROADCAST;
     }
 
-    // build info structure
-    frameInfo.pFrame = pFrame;
-    frameInfo.frameSize = sizeof(aBuffer);
-
-    // send NMT-Request
-    ret = dllucal_sendAsyncFrame(&frameInfo, kDllAsyncReqPrioNmt);
-    if (ret != kErrorOk)
+    if (dstNodeCnt > 0)
     {
+        ret = sendNmtCommand(nodeId_p, nmtCommand_p, pCmdData, dataSize_p);
+        if (ret != kErrorOk)
+        {
+            goto Exit;
+        }
+    }
+    else
+    {
+        // No destination node is interested into this NMT command.
+        // E.g. wait for syncResponse(s)
         goto Exit;
     }
 
@@ -589,98 +631,22 @@ tOplkError nmtmnu_sendNmtCommandEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
     // remove CN from isochronous phase;
     // This must be done here and not when NMT command is actually sent
     // because it will be too late and may cause unwanted errors
-    pCmdData = pFrame->data.asnd.payload.nmtCommandService.aNmtCommandData;
-    OPLK_MEMSET(&nodeListOp, 0x00, sizeof(nodeListOp));
 
+    tempNodeId = C_ADR_INVALID;
+    OPLK_MEMSET(&nodeListOp, 0x00, sizeof(nodeListOp));
     retGetNodeId = getNodeIdFromCmd(nodeId_p, nmtCommand_p, pCmdData, &nodeListOp, &tempNodeId);
 
     while (retGetNodeId == kErrorRetry)
     {
         pNodeInfo = NMTMNU_GET_NODEINFO(tempNodeId);
 
-        if (pNodeInfo->nodeCfg & NMT_NODEASSIGN_PRES_CHAINING)
-        {   // Node is a PRes Chaining node
-            switch (nmtCommand_p)
+        if (!(pNodeInfo->nodeCfg & NMT_NODEASSIGN_PRES_CHAINING))
+        {   // Remove non-PRC nodes from isochronous phase
+            if ((pNodeInfo->nodeCfg & (NMT_NODEASSIGN_NODE_IS_CN | NMT_NODEASSIGN_NODE_EXISTS)))
             {
-                case kNmtCmdStopNode:
-                case kNmtCmdResetNode:
-                case kNmtCmdResetCommunication:
-                case kNmtCmdResetConfiguration:
-                case kNmtCmdSwReset:
-                    if (pNodeInfo->prcFlags & (NMTMNU_NODE_FLAG_PRC_ADD_SCHEDULED |
-                                               NMTMNU_NODE_FLAG_PRC_ADD_IN_PROGRESS))
-                    {   // For this node, addition to the isochronous phase is scheduled
-                        // or in progress. Skip adding this node
-                        pNodeInfo->prcFlags &= ~(NMTMNU_NODE_FLAG_PRC_ADD_SCHEDULED |
-                                                 NMTMNU_NODE_FLAG_PRC_ADD_IN_PROGRESS);
-                    }
-
-                    if (pNodeInfo->flags & NMTMNU_NODE_FLAG_ISOCHRON)
-                    {   // PRes Chaining is enabled
-                        tDllSyncRequest    SyncReqData;
-                        UINT               size;
-
-                        // Store NMT command for later execution
-                        prcSetFlagsNmtCommandReset(pNodeInfo, nmtCommand_p);
-
-                        // Disable PRes Chaining
-                        SyncReqData.nodeId      = tempNodeId;
-                        SyncReqData.syncControl = PLK_SYNC_PRES_MODE_RESET |
-                                                      PLK_SYNC_DEST_MAC_ADDRESS_VALID;
-                        size = sizeof(UINT) + sizeof(UINT32);
-
-                        ret = syncu_requestSyncResponse(prcCbSyncResNextAction, &SyncReqData, size);
-                        switch (ret)
-                        {
-                            case kErrorOk:
-                                // Mark node as removed from the isochronous phase
-                                pNodeInfo->flags &= ~NMTMNU_NODE_FLAG_ISOCHRON;
-                                // Send NMT command when SyncRes is received
-                                goto Exit;
-
-                            case kErrorNmtSyncReqRejected:
-                                // A SyncReq has already been posted for this node .
-                                // Retry when SyncRes is received
-                                ret = kErrorOk;
-                                goto Exit;
-
-                            default:
-                                goto Exit;
-                        }
-                    }
-
-                    if (pNodeInfo->prcFlags & (NMTMNU_NODE_FLAG_PRC_RESET_MASK |
-                                                  NMTMNU_NODE_FLAG_PRC_ADD_SYNCREQ_SENT))
-                    {   // A Node-reset NMT command was already scheduled or
-                        // PRes Chaining is going to be enabled but the appropriate SyncRes
-                        // has not been received, yet.
-
-                        // Set the current NMT command if it has higher priority than a present one.
-                        prcSetFlagsNmtCommandReset(pNodeInfo, nmtCommand_p);
-
-                        // Wait for the SyncRes
-                        goto Exit;
-                    }
-
-                    break;
-
-                default:
-                    // Other NMT commands
-                    break;
+                nodeOpParam.nodeId = tempNodeId;
+                ret = dllucal_deleteNode(&nodeOpParam);
             }
-        }
-
-        if (pNodeInfo->nodeCfg & NMT_NODEASSIGN_PRES_CHAINING)
-        {   // Node is a PRes Chaining node
-            // The following action (delete node) is only necessary for non-PRC nodes
-            goto Exit;
-        }
-
-        if ((NMTMNU_GET_NODEINFO(tempNodeId)->nodeCfg &
-                                 (NMT_NODEASSIGN_NODE_IS_CN | NMT_NODEASSIGN_NODE_EXISTS)) != 0)
-        {
-            nodeOpParam.nodeId = tempNodeId;
-            ret = dllucal_deleteNode(&nodeOpParam);
         }
 
         retGetNodeId = getNodeIdFromCmd(nodeId_p, nmtCommand_p, pCmdData,
@@ -4244,6 +4210,7 @@ Exit:
 Before sending a reset-node NMT command, PRes Chaining has to be disabled by
 sending an appropriate SyncReq. The requested NMT command is stored until the
 SyncRes returns. Commands of higher priority overwrite those of lower priority.
+Furthermore, extended is converted to plain NMT.
 
 \param  pNodeInfo_p     Pointer to node information structure.
 \param  nmtCommand_p    NMT command.
@@ -4259,10 +4226,12 @@ static void prcSetFlagsNmtCommandReset(tNmtMnuNodeInfo* pNodeInfo_p,
     switch (nmtCommand_p)
     {
         case kNmtCmdResetNode:
+        case kNmtCmdResetNodeEx:
             prcFlagsReset = NMTMNU_NODE_FLAG_PRC_RESET_NODE;
             break;
 
         case kNmtCmdResetCommunication:
+        case kNmtCmdResetCommunicationEx:
             switch (prcFlagsReset)
             {
                 case NMTMNU_NODE_FLAG_PRC_RESET_CONF:
@@ -4278,6 +4247,7 @@ static void prcSetFlagsNmtCommandReset(tNmtMnuNodeInfo* pNodeInfo_p,
             break;
 
         case kNmtCmdResetConfiguration:
+        case kNmtCmdResetConfigurationEx:
             switch (prcFlagsReset)
             {
                 case NMTMNU_NODE_FLAG_PRC_RESET_SW:
@@ -4292,6 +4262,7 @@ static void prcSetFlagsNmtCommandReset(tNmtMnuNodeInfo* pNodeInfo_p,
             break;
 
         case kNmtCmdSwReset:
+        case kNmtCmdSwResetEx:
             switch (prcFlagsReset)
             {
                 case NMTMNU_NODE_FLAG_PRC_STOP_NODE:
@@ -4305,6 +4276,7 @@ static void prcSetFlagsNmtCommandReset(tNmtMnuNodeInfo* pNodeInfo_p,
             break;
 
         case kNmtCmdStopNode:
+        case kNmtCmdStopNodeEx:
             if (prcFlagsReset == 0)
             {
                 prcFlagsReset = NMTMNU_NODE_FLAG_PRC_STOP_NODE;
@@ -4319,6 +4291,170 @@ static void prcSetFlagsNmtCommandReset(tNmtMnuNodeInfo* pNodeInfo_p,
     pNodeInfo_p->prcFlags |= prcFlagsReset;
 
     return;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Handle NMT reset commands to PRes Chaining nodes
+
+This function handles NMT reset commands intended to be dispatched to PRes Chaining
+nodes. If the node's PRes Chaining mode is activated, a syncRequest frame is
+issued to the node. The NMT command is stored for later operation.
+The function returns with \p pfWaitForSyncResp_p if a syncRequest was issued
+to the node.
+
+\param  nodeId_p            Node id
+\param  nmtCommand_p        NMT command to be issued to the node
+\param  pfWaitForSyncResp_p Pointer to flag that instructs to wait for syncResponse
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError prcHandleNmtReset(UINT nodeId_p, tNmtCommand nmtCommand_p,
+                                    BOOL* pfWaitForSyncResp_p)
+{
+    tOplkError          ret = kErrorOk;
+    tNmtMnuNodeInfo*    pNodeInfo = NMTMNU_GET_NODEINFO(nodeId_p);
+
+    if (pfWaitForSyncResp_p == NULL)
+    {
+        ret = kErrorNmtInvalidParam;
+        goto Exit;
+    }
+
+    // default is not waiting for syncResp
+    *pfWaitForSyncResp_p = FALSE;
+
+    if (pNodeInfo->nodeCfg & NMT_NODEASSIGN_PRES_CHAINING)
+    {
+        // Node is configured for PRC
+        switch (nmtCommand_p)
+        {
+            case kNmtCmdStopNodeEx:
+            case kNmtCmdResetNodeEx:
+            case kNmtCmdResetCommunicationEx:
+            case kNmtCmdResetConfigurationEx:
+            case kNmtCmdSwResetEx:
+            case kNmtCmdStopNode:
+            case kNmtCmdResetNode:
+            case kNmtCmdResetCommunication:
+            case kNmtCmdResetConfiguration:
+            case kNmtCmdSwReset:
+                if (pNodeInfo->prcFlags & (NMTMNU_NODE_FLAG_PRC_ADD_SCHEDULED |
+                                           NMTMNU_NODE_FLAG_PRC_ADD_IN_PROGRESS))
+                {   // For this node, addition to the isochronous phase is scheduled
+                    // or in progress. Skip adding this node
+                    pNodeInfo->prcFlags &= ~(NMTMNU_NODE_FLAG_PRC_ADD_SCHEDULED |
+                                             NMTMNU_NODE_FLAG_PRC_ADD_IN_PROGRESS);
+                }
+
+                if (pNodeInfo->flags & NMTMNU_NODE_FLAG_ISOCHRON)
+                {   // PRes Chaining is enabled
+                    tDllSyncRequest    SyncReqData;
+                    UINT               size;
+
+                    // Store NMT command for later execution
+                    prcSetFlagsNmtCommandReset(pNodeInfo, nmtCommand_p);
+
+                    // Disable PRes Chaining
+                    SyncReqData.nodeId      = nodeId_p;
+                    SyncReqData.syncControl = PLK_SYNC_PRES_MODE_RESET |
+                                                  PLK_SYNC_DEST_MAC_ADDRESS_VALID;
+                    size = sizeof(UINT) + sizeof(UINT32);
+
+                    ret = syncu_requestSyncResponse(prcCbSyncResNextAction, &SyncReqData, size);
+                    switch (ret)
+                    {
+                        case kErrorOk:
+                            // Mark node as removed from the isochronous phase
+                            pNodeInfo->flags &= ~NMTMNU_NODE_FLAG_ISOCHRON;
+                            // Send NMT command when SyncRes is received
+
+                            *pfWaitForSyncResp_p = TRUE;
+                            goto Exit;
+
+                        case kErrorNmtSyncReqRejected:
+                            // A SyncReq has already been posted for this node .
+                            // Retry when SyncRes is received
+                            ret = kErrorOk;
+
+                            *pfWaitForSyncResp_p = TRUE;
+                            goto Exit;
+
+                        default:
+                            goto Exit;
+                    }
+                }
+
+                if (pNodeInfo->prcFlags & (NMTMNU_NODE_FLAG_PRC_RESET_MASK |
+                                              NMTMNU_NODE_FLAG_PRC_ADD_SYNCREQ_SENT))
+                {   // A Node-reset NMT command was already scheduled or
+                    // PRes Chaining is going to be enabled but the appropriate SyncRes
+                    // has not been received, yet.
+
+                    // Set the current NMT command if it has higher priority than a present one.
+                    prcSetFlagsNmtCommandReset(pNodeInfo, nmtCommand_p);
+
+                    // Wait for the SyncRes
+                    *pfWaitForSyncResp_p = TRUE;
+
+                    goto Exit;
+                }
+
+                break;
+
+            default:
+                // Other NMT commands
+                break;
+        }
+    }
+
+Exit:
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Send NMT command to network
+
+This function creates the NMT command frame and forwards it to DLL for
+transmission.
+
+\param  nodeId_p            Node id of target node
+\param  nmtCommand_p        NMT command
+\param  pNmtCommandData_p   Pointer to NMT command data
+\param  dataSize_p          Size of NMT command data
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError sendNmtCommand(UINT nodeId_p, tNmtCommand nmtCommand_p,
+                                 UINT8* pNmtCommandData_p, UINT dataSize_p)
+{
+    tOplkError  ret = kErrorOk;
+    tFrameInfo  frameInfo;
+    UINT8       aBuffer[C_DLL_MINSIZE_NMTCMDEXT];
+    tPlkFrame*  pFrame;
+
+    // build frame
+    pFrame = (tPlkFrame*)aBuffer;
+    OPLK_MEMSET(pFrame, 0x00, sizeof(aBuffer));
+    ami_setUint8Le(&pFrame->dstNodeId, (UINT8)nodeId_p);
+    ami_setUint8Le(&pFrame->data.asnd.serviceId, (UINT8)kDllAsndNmtCommand);
+    ami_setUint8Le(&pFrame->data.asnd.payload.nmtCommandService.nmtCommandId, (UINT8)nmtCommand_p);
+    if ((pNmtCommandData_p != NULL) && (dataSize_p > 0))
+    {   // copy command data to frame
+        OPLK_MEMCPY(&pFrame->data.asnd.payload.nmtCommandService.aNmtCommandData[0], pNmtCommandData_p, dataSize_p);
+    }
+
+    // build info structure
+    frameInfo.pFrame = pFrame;
+    frameInfo.frameSize = sizeof(aBuffer);
+
+    // send NMT-Request
+    ret = dllucal_sendAsyncFrame(&frameInfo, kDllAsyncReqPrioNmt);
+
+    return ret;
 }
 
 //------------------------------------------------------------------------------
@@ -4458,6 +4594,46 @@ static tOplkError nodeListToNodeId(UINT8* pCmdData_p, tNmtMnuGetNodeId* pOp_p,
         ret = kErrorRetry;
 
     return  ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Removes the node from the extended NMT command
+
+This function removes the specified node from the extended NMT command.
+
+\param  nodeId_p            Node id to be removed from extended NMT command
+\param  pCmdData_p          Extended NMT command node list
+\param  size_p              Size of extended NMT command node list
+
+\return The function returns a tOplkError error code.
+\retval kErrorOk                Node removed from node list
+\retval kErrorNmtInvalidParam   Node list size too short
+*/
+//------------------------------------------------------------------------------
+static tOplkError removeNodeIdFromExtCmd(UINT nodeId_p, UINT8* pCmdData_p, UINT size_p)
+{
+    UINT    byteOffset;
+    UINT8   bitMask;
+    UINT8   cmdByte;
+
+    // Byte offset --> nodeid divide by 8
+    // Bit offset  --> 2 ^ (nodeid AND 0b111)
+    byteOffset = (UINT)(nodeId_p >> 3);
+    bitMask = 1 << ((UINT8)nodeId_p & 7);
+
+    if (byteOffset < size_p)
+    {
+        cmdByte = ami_getUint8Le(&pCmdData_p[byteOffset]);
+
+        cmdByte &= ~bitMask; // Inactivate bit
+
+        ami_setUint8Le(&pCmdData_p[byteOffset], cmdByte);
+
+        return kErrorOk;
+    }
+
+    return kErrorNmtInvalidParam;
 }
 
 ///\}
