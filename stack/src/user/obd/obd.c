@@ -117,7 +117,7 @@ static tOplkError   getEntry(UINT index_p, UINT subIndex_p, tObdEntryPtr* ppObdE
 static CONST void*  getObjectDefaultPtr(tObdSubEntryPtr pSubIndexEntry_p);
 static void MEM*    getObjectCurrentPtr(tObdSubEntryPtr pSubIndexEntry_p);
 static void*        getObjectDataPtr(tObdSubEntryPtr pSubIndexEntry_p);
-static tObdEntryPtr searchIndex(tObdEntryPtr pObdEntry_p, UINT index_p);
+static tObdEntryPtr searchIndex(tObdEntryPtr pObdEntry_p, UINT32 numEntries_p, UINT index_p);
 static tOplkError   getIndex(tObdInitParam MEM* pInitParam_p, UINT index_p, tObdEntryPtr* ppObdEntry_p);
 static tOplkError   getSubindex(tObdEntryPtr pObdEntry_p, UINT subIndex_p, tObdSubEntryPtr* ppObdSubEntry_p);
 static tOplkError   accessOdPartition(tObdPart currentOdPart_p, tObdEntryPtr pObdEnty_p, tObdDir direction_p);
@@ -126,6 +126,8 @@ static void         copyObjectData(void MEM* pDstData_p, CONST void* pSrcData_p,
 static tOplkError   callObjectCallback(tObdCallback pfnCallback_p, tObdCbParam MEM* pCbParam_p);
 static tOplkError   callPostDefault(void* pData_p, tObdEntryPtr pObdEntry_p, tObdSubEntryPtr pObdSubEntry_p);
 static tOplkError   isNumerical(tObdSubEntryPtr pObdSubEntry_p, BOOL* pfEntryNumerical_p);
+static UINT32       calcPartitionIndexNum(tObdEntryPtr pObdEntry_p);
+static void         calcOdIndexNum(tObdInitParam* pInitParam_p);
 
 #if (CONFIG_OBD_CHECK_OBJECT_RANGE != FALSE)
 static tOplkError   checkObjectRange(tObdSubEntryPtr pSubIndexEntry_p, void* pData_p);
@@ -203,6 +205,8 @@ tOplkError obd_init(tObdInitParam MEM* pInitParam_p)
 
     // clear callback function for command LOAD and STORE
     obdInstance_l.pfnStoreLoadObjectCb = NULL;
+
+    calcOdIndexNum(&obdInstance_l.initParam);
 
     // initialize object dictionary
     // so all all VarEntries will be initialized to trash object and default values will be set to current data
@@ -1709,41 +1713,94 @@ static void* getObjectDataPtr(tObdSubEntryPtr pSubIndexEntry_p)
 /**
 \brief  Search for index in OBD
 
-The function searches for an index in an OD part.
+The function searches for an index in an OD part. It uses a binary search
+algorithm for searching.
 
 \param  pObdEntry_p         OD entry to start searching.
+\param  numEntries_p        Number of OD entries.
 \param  index_p             Index to search.
 
 \return The function returns the pointer to the OD entry of the searched index.
         If the index isn't found it returns NULL.
 */
 //------------------------------------------------------------------------------
-static tObdEntryPtr searchIndex(tObdEntryPtr pObdEntry_p, UINT index_p)
+static tObdEntryPtr searchIndex(tObdEntryPtr pObdEntry_p, UINT32 numEntries_p, UINT index_p)
+{
+    UINT32          first;
+    UINT32          last;
+    UINT32          middle;
+
+    first = 0;
+    last = numEntries_p - 1;
+
+    while (first <= last)
+    {
+        middle = (first + last) >> 1;
+        if (pObdEntry_p[middle].index == index_p)
+        {
+            return &pObdEntry_p[middle];
+        }
+        else if (pObdEntry_p[middle].index < index_p)
+            first = middle + 1;
+        else
+            last = middle - 1;
+    }
+    return NULL;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Calculate number of OD entries in partition
+
+The function calculates the number of OD index entries in a partition.
+
+\param  pObdEntry_p         Pointer to the first Index entry.
+
+\return The function returns the number of OD index entries in the partition.
+*/
+//------------------------------------------------------------------------------
+static UINT32 calcPartitionIndexNum(tObdEntryPtr pObdEntry_p)
 {
     UINT            index;
-
-    // The end of the index table is marked with 0xFFFF. If this function is called
-    // with index_p = 0xFFFF, no entry should be found. Therefore it is important to use
-    // while{} instead of do{}while !!!
+    UINT            numEntries = 0;
 
     index = pObdEntry_p->index;
-
     // search index in OD part
     while (index != OBD_TABLE_INDEX_END)
     {
-        if (index_p == index)
-            return pObdEntry_p;     // we found it
-
-        // Objects are sorted in OD. If the current index in OD is greater than the
-        // index which is to search then break the loop. In this case user OD has
-        // to be searched also.
-        if (index_p < index)
-            break;
-
+        numEntries++;
         pObdEntry_p++;
         index = pObdEntry_p->index;
     }
-    return NULL;
+    return numEntries;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Calculate number of OD entries
+
+The function calculates the number of OD index entries in the OD.
+
+\param  pInitParam_p        Pointer to the OD initialization parameters.
+*/
+//------------------------------------------------------------------------------
+static void calcOdIndexNum(tObdInitParam* pInitParam_p)
+{
+    tObdEntryPtr    pObdEntry;
+
+    pObdEntry = pInitParam_p->pGenericPart;
+    pInitParam_p->numGeneric = calcPartitionIndexNum(pObdEntry);
+
+    pObdEntry = pInitParam_p->pManufacturerPart;
+    pInitParam_p->numManufacturer = calcPartitionIndexNum(pObdEntry);
+
+    pObdEntry = pInitParam_p->pDevicePart;
+    pInitParam_p->numDevice = calcPartitionIndexNum(pObdEntry);
+
+#if (defined (OBD_USER_OD) && (OBD_USER_OD != FALSE))
+    pObdEntry = pInitParam_p->pUserPart;
+    pInitParam_p->numUser = calcPartitionIndexNum(pObdEntry);
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -1763,6 +1820,7 @@ static tOplkError getIndex(tObdInitParam MEM* pInitParam_p, UINT index_p,
                            tObdEntryPtr* ppObdEntry_p)
 {
     tObdEntryPtr    pObdEntry;
+    UINT32          numEntries;
 
 #if (defined (OBD_USER_OD) && (OBD_USER_OD != FALSE))
     UINT            nLoop;
@@ -1778,10 +1836,12 @@ static tOplkError getIndex(tObdInitParam MEM* pInitParam_p, UINT index_p,
     if ((index_p >= 0x1000) && (index_p < 0x2000))
     {
         pObdEntry = pInitParam_p->pGenericPart;
+        numEntries = pInitParam_p->numGeneric;
     }
     else if ((index_p >= 0x2000) && (index_p < 0x6000))
     {
         pObdEntry = pInitParam_p->pManufacturerPart;
+        numEntries = pInitParam_p->numManufacturer;
     }
 
     // index range 0xA000 to 0xFFFF is reserved for DSP-405
@@ -1797,6 +1857,7 @@ static tOplkError getIndex(tObdInitParam MEM* pInitParam_p, UINT index_p,
 #endif
     {
         pObdEntry = pInitParam_p->pDevicePart;
+        numEntries = pInitParam_p->numDevice;
     }
 
 #if (defined (OBD_USER_OD) && (OBD_USER_OD != FALSE))
@@ -1809,6 +1870,7 @@ static tOplkError getIndex(tObdInitParam MEM* pInitParam_p, UINT index_p,
         if (pObdEntry == NULL)
             return kErrorObdIndexNotExist;
 
+        numEntries = pInitParam_p->numUser;
         nLoop = 1;                                      // loop must only run once
     }
 #else
@@ -1822,11 +1884,12 @@ static tOplkError getIndex(tObdInitParam MEM* pInitParam_p, UINT index_p,
 #if (defined (OBD_USER_OD) && (OBD_USER_OD != FALSE))
     do
     {
-        if ((*ppObdEntry_p = searchIndex(pObdEntry, index_p)) != NULL)
+        if ((*ppObdEntry_p = searchIndex(pObdEntry, numEntries, index_p)) != NULL)
             return kErrorOk;
 
         // begin from first entry of user OD part
         pObdEntry = pInitParam_p->pUserPart;
+        numEntries = pInitParam_p->numUser;
 
         // no user OD is available
         if (pObdEntry == NULL)
@@ -1837,7 +1900,7 @@ static tOplkError getIndex(tObdInitParam MEM* pInitParam_p, UINT index_p,
     } while (nLoop > 0);
 #else
     // No user OD we only need to search once
-    if ((*ppObdEntry_p = searchIndex(pObdEntry, index_p)) != NULL)
+    if ((*ppObdEntry_p = searchIndex(pObdEntry, numEntries, index_p)) != NULL)
         return kErrorOk;
 #endif
 
