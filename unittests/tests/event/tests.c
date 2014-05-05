@@ -75,96 +75,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError processHandler1(tEvent* pEvent_p);
-static tOplkError processHandler2(tEvent* pEvent_p);
 
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static tEventDispatchEntry tstEventDispatchTbl_l[] =
-{
-    { kEventSinkNmtu,        kEventSourceNmtu,        processHandler1 },
-    { kEventSinkNmtu,        kEventSourceNmtMnu,      processHandler2 },
-    { kEventSinkNmtMnu,      kEventSourceNmtMnu,      processHandler2 },
-    { kEventSinkInvalid,     kEventSourceInvalid,     NULL }
-};
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
 //============================================================================//
-
-//------------------------------------------------------------------------------
-/**
-\brief  Test event_getHandlerForSink() with existing entry
-*/
-//------------------------------------------------------------------------------
-void test_getHandlerForSink_FirstExist(void)
-{
-    tOplkError              ret = kErrorIllegalInstance;
-    tEventSource            eventSource = kEventSourceInvalid;
-    tProcessEventCb         pfnEventHandler = NULL;
-    tEventDispatchEntry*    pDispatchEntry;
-
-    /* test search of existing entry */
-    pDispatchEntry = &tstEventDispatchTbl_l[0];
-    ret = event_getHandlerForSink(&pDispatchEntry, kEventSinkNmtu,
-                                  &pfnEventHandler, &eventSource);
-
-    CU_ASSERT_EQUAL(ret, kErrorOk);
-    CU_ASSERT_EQUAL(pfnEventHandler, processHandler1);
-    CU_ASSERT_EQUAL(eventSource, kEventSourceNmtu);
-    CU_ASSERT_EQUAL(pDispatchEntry, &tstEventDispatchTbl_l[1]);
-}
-
-
-//------------------------------------------------------------------------------
-/**
-\brief  Test event_getHandlerForSink() with further existing entry
-*/
-//------------------------------------------------------------------------------
-void test_getHandlerForSink_FurtherExist(void)
-{
-    tOplkError              ret = kErrorIllegalInstance;
-    tEventSource            eventSource = kEventSourceInvalid;
-    tProcessEventCb         pfnEventHandler = NULL;
-    tEventDispatchEntry*    pDispatchEntry;
-
-    /* test search of existing entry */
-    pDispatchEntry = &tstEventDispatchTbl_l[0];
-    event_getHandlerForSink(&pDispatchEntry, kEventSinkNmtu,
-                                  &pfnEventHandler, &eventSource);
-
-    ret = event_getHandlerForSink(&pDispatchEntry, kEventSinkNmtu,
-                                  &pfnEventHandler, &eventSource);
-
-    CU_ASSERT_EQUAL(ret, kErrorOk);
-    CU_ASSERT_EQUAL(pfnEventHandler, processHandler2);
-    CU_ASSERT_EQUAL(eventSource, kEventSourceNmtMnu);
-    CU_ASSERT_EQUAL(pDispatchEntry, &tstEventDispatchTbl_l[2]);
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Test event_getHandlerForSink() with not existing entry
-*/
-//------------------------------------------------------------------------------
-void test_getHandlerForSink_NotExist(void)
-{
-    tOplkError              ret = kErrorIllegalInstance;
-    tEventSource            eventSource = kEventSourceInvalid;
-    tProcessEventCb         pfnEventHandler = NULL;
-    tEventDispatchEntry*    pDispatchEntry;
-
-    /* test search of existing entry */
-    pDispatchEntry = &tstEventDispatchTbl_l[0];
-    ret = event_getHandlerForSink(&pDispatchEntry, kEventSinkDllk,
-                                  &pfnEventHandler, &eventSource);
-
-    CU_ASSERT_EQUAL(ret, kErrorEventUnknownSink);
-    CU_ASSERT_EQUAL(pfnEventHandler, NULL);
-    CU_ASSERT_EQUAL(eventSource, kEventSourceInvalid);
-}
-
 
 //------------------------------------------------------------------------------
 /**
@@ -198,33 +116,4 @@ void test_eventk_process(void)
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
-
-//------------------------------------------------------------------------------
-/**
-\brief  Dummy process handler function
-*/
-//------------------------------------------------------------------------------
-static tOplkError processHandler1(tEvent* pEvent_p)
-{
-    UNUSED_PARAMETER(pEvent_p);
-    return kErrorOk;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Dummy process handler function
-*/
-//------------------------------------------------------------------------------
-static tOplkError processHandler2(tEvent* pEvent_p)
-{
-    UNUSED_PARAMETER(pEvent_p);
-    return kErrorOk;
-}
-
-
-
-
-
-
-
 
