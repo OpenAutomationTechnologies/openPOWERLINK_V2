@@ -164,6 +164,8 @@ tOplkError eventkcal_init(void)
                __func__, schedParam.__sched_priority);
     }
 
+    pthread_setname_np(instance_l.threadId, "oplk-eventk");
+
     instance_l.fInitialized = TRUE;
     return kErrorOk;
 

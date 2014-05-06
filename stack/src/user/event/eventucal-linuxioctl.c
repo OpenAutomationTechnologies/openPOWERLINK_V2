@@ -153,6 +153,8 @@ tOplkError eventucal_init(void)
                               __func__, schedParam.__sched_priority);
     }
 
+    pthread_setname_np(instance_l.threadId, "oplk-eventu");
+
 Exit:
     return ret;
 }

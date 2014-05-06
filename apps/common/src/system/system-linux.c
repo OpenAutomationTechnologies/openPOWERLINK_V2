@@ -196,6 +196,8 @@ void startSyncThread(tSyncCb pfnSync_p)
     {
         return;
     }
+
+    pthread_setname_np(syncThreadId_l, "oplkdemo-sync");
 }
 #endif
 

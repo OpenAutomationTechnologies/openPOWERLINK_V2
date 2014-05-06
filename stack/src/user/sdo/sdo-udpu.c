@@ -349,6 +349,8 @@ tOplkError sdoudp_config(ULONG ipAddr_p, UINT port_p)
 #elif (TARGET_SYSTEM == _LINUX_)
     if (pthread_create(&sdoUdpInstance_l.threadHandle, NULL, sdoUdpThread, (void*)&sdoUdpInstance_l) != 0)
         return kErrorSdoUdpThreadError;
+
+    pthread_setname_np(sdoUdpInstance_l.threadHandle, "oplk-sdoudp");
 #endif
 
     return ret;
