@@ -74,11 +74,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #ifndef CONFIG_DLLCAL_SIZE_CIRCBUF_REQ_IDENT
-#define CONFIG_DLLCAL_SIZE_CIRCBUF_REQ_IDENT            256                 // Default size for ident request queue
+#define CONFIG_DLLCAL_SIZE_CIRCBUF_REQ_IDENT            2048                // Default size for ident request queue
 #endif
 
 #ifndef CONFIG_DLLCAL_SIZE_CIRCBUF_REQ_STATUS
-#define CONFIG_DLLCAL_SIZE_CIRCBUF_REQ_STATUS           256                 // Default size for status request queue
+#define CONFIG_DLLCAL_SIZE_CIRCBUF_REQ_STATUS           2048                // Default size for status request queue
 #endif
 
 #ifndef CONFIG_DLL_PRES_CHAINING_CN
