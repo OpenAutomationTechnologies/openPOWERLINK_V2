@@ -47,6 +47,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define NR_OF_CIRC_BUFFERS              20
 #define CIRCBUF_BLOCK_ALIGNMENT         4
 
+#undef  DEBUG_CIRCBUF_SIZE_CHECK                // Add debug code for retrieving maximum used buffer size
+
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
@@ -84,6 +86,9 @@ typedef struct
     UINT32              readOffset;         ///< The read offset
     size_t              freeSize;           ///< Available space in buffer
     UINT32              dataCount;          ///< The entry count
+#ifdef DEBUG_CIRCBUF_SIZE_CHECK
+    UINT32              maxSize;            ///< Maximum used space in circular buffer
+#endif
 } tCircBufHeader;
 
 /**
@@ -121,6 +126,10 @@ tCircBufError circbuf_readData(tCircBufInstance* pInstance_p, void* pData_p,
                                size_t size_p, size_t* pDataBlockSize_p);
 UINT32        circbuf_getDataCount(tCircBufInstance* pInstance_p);
 tCircBufError circBuf_setSignaling(tCircBufInstance* pInstance_p, VOIDFUNCPTR pfnSigCb_p);
+
+#ifdef DEBUG_CIRCBUF_SIZE_CHECK
+UINT32        circbuf_getMaxSize(tCircBufInstance* pInstance_p);
+#endif
 
 #ifdef __cplusplus
 }
