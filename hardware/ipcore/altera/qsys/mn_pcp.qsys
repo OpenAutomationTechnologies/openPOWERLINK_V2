@@ -359,7 +359,7 @@
   <parameter name="setting_activateModelChecker" value="false" />
   <parameter name="setting_HDLSimCachesCleared" value="true" />
   <parameter name="setting_HBreakTest" value="false" />
-  <parameter name="muldiv_divider" value="false" />
+  <parameter name="muldiv_divider" value="true" />
   <parameter name="mpu_useLimit" value="false" />
   <parameter name="mpu_enabled" value="false" />
   <parameter name="mmu_enabled" value="false" />
