@@ -88,6 +88,8 @@ typedef struct
 {
     tPdoChannelSetup        pdoChannels;        ///< PDO channel setup
     BOOL                    fRunning;           ///< Flag determines if PDO engine is running
+    UINT                    aTpdoChannelIdLut[D_PDO_TPDOChannels_U16];
+    UINT                    aRpdoChannelIdLut[D_PDO_RPDOChannels_U16];
 }tPdokInstance;
 
 //------------------------------------------------------------------------------
@@ -325,6 +327,9 @@ tOplkError pdok_configureChannel(tPdoChannelConf* pChannelConf_p)
 
         pDestPdoChannel = &pdokInstance_g.pdoChannels.pRxPdoChannel[pChannelConf_p->channelId];
 
+        // Store channel ID for fast access
+        pdokInstance_g.aRpdoChannelIdLut[pDestPdoChannel->nodeId] = pChannelConf_p->channelId;
+
 #if NMT_MAX_NODE_ID > 0
         if ((pDestPdoChannel->nodeId != PDO_INVALID_NODE_ID)
             && (pDestPdoChannel->nodeId != PDO_PREQ_NODE_ID))
@@ -366,9 +371,12 @@ tOplkError pdok_configureChannel(tPdoChannelConf* pChannelConf_p)
 
         pDestPdoChannel = &pdokInstance_g.pdoChannels.pTxPdoChannel[pChannelConf_p->channelId];
 
+        // Store channel ID for fast access
+        pdokInstance_g.aTpdoChannelIdLut[pDestPdoChannel->nodeId] = pChannelConf_p->channelId;
+
         // copy channel to local structure
-        OPLK_MEMCPY(&pdokInstance_g.pdoChannels.pTxPdoChannel[pChannelConf_p->channelId],
-                    &pChannelConf_p->pdoChannel, sizeof (pChannelConf_p->pdoChannel));
+        OPLK_MEMCPY(pDestPdoChannel, &pChannelConf_p->pdoChannel,
+                sizeof (pChannelConf_p->pdoChannel));
     }
 
     pdokInstance_g.fRunning = FALSE;
@@ -420,46 +428,36 @@ tOplkError pdok_processRxPdo(tPlkFrame* pFrame_p, UINT frameSize_p)
 
     if (pdokInstance_g.fRunning)
     {
-        // search for appropriate valid RPDO
-        for (channelId = 0, pPdoChannel = &pdokInstance_g.pdoChannels.pRxPdoChannel[0];
-             channelId < pdokInstance_g.pdoChannels.allocation.rxPdoChannelCount;
-             channelId++, pPdoChannel++)
-        {
-            if (pPdoChannel->nodeId != nodeId)
-            {
-                continue;
-            }
+        // Get PDO channel reference
+        channelId = pdokInstance_g.aRpdoChannelIdLut[nodeId];
+        pPdoChannel = &pdokInstance_g.pdoChannels.pRxPdoChannel[channelId];
 
-            // retrieve PDO version from frame
-            frameData = ami_getUint8Le(&pFrame_p->data.pres.pdoVersion);
-            if ((pPdoChannel->mappingVersion & PLK_VERSION_MAIN) != (frameData & PLK_VERSION_MAIN))
-            {   // PDO versions do not match
-                // $$$ raise PDO error
-                // termiate processing of this RPDO
-                goto Exit;
-            }
-
-            // valid RPDO found
-
-            if ((unsigned int)(pPdoChannel->pdoSize + PLK_FRAME_OFFSET_PDO_PAYLOAD) > frameSize_p)
-            {   // RPDO is too short
-                // $$$ raise PDO error, set Ret
-                goto Exit;
-            }
-
-            /*
-            TRACE ("%s() Channel:%d Node:%d MapObjectCnt:%d PdoSize:%d\n",
-                   __func__, channelId, nodeId, pPdoChannel->mappObjectCount,
-                   pPdoChannel->pdoSize);
-            */
-
-            pdokcal_writeRxPdo(channelId,
-                               &pFrame_p->data.pres.aPayload[0],
-                               pPdoChannel->pdoSize);
-
-            // processing finished successfully
-            break;
+        // retrieve PDO version from frame
+        frameData = ami_getUint8Le(&pFrame_p->data.pres.pdoVersion);
+        if ((pPdoChannel->mappingVersion & PLK_VERSION_MAIN) != (frameData & PLK_VERSION_MAIN))
+        {   // PDO versions do not match
+            // $$$ raise PDO error
+            // terminate processing of this RPDO
+            goto Exit;
         }
+
+        // valid RPDO found
+
+        if ((unsigned int)(pPdoChannel->pdoSize + PLK_FRAME_OFFSET_PDO_PAYLOAD) > frameSize_p)
+        {   // RPDO is too short
+            // $$$ raise PDO error, set Ret
+            goto Exit;
+        }
+
+        /*
+        TRACE ("%s() Channel:%d Node:%d MapObjectCnt:%d PdoSize:%d\n",
+               __func__, channelId, nodeId, pPdoChannel->mappObjectCount,
+               pPdoChannel->pdoSize);
+        */
+
+        pdokcal_writeRxPdo(channelId,
+                           &pFrame_p->data.pres.aPayload[0],
+                           pPdoChannel->pdoSize);
     }
 
 Exit:
@@ -586,6 +584,7 @@ static tOplkError copyTxPdo(tPlkFrame* pFrame_p, UINT frameSize_p, BOOL fReadyFl
     tMsgType            msgType;
     tPdoChannel*        pPdoChannel;
     UINT                channelId;
+    UINT16              pdoSize;
 
     // set TPDO invalid, so that only fully processed TPDOs are sent as valid
     flag1 = ami_getUint8Le(&pFrame_p->data.pres.flag1);
@@ -605,23 +604,13 @@ static tOplkError copyTxPdo(tPlkFrame* pFrame_p, UINT frameSize_p, BOOL fReadyFl
 
     if (pdokInstance_g.fRunning)
     {
-        // search for appropriate valid TPDO
-        for (channelId = 0, pPdoChannel = &pdokInstance_g.pdoChannels.pTxPdoChannel[0];
-             channelId < pdokInstance_g.pdoChannels.allocation.txPdoChannelCount;
-             channelId++, pPdoChannel++)
+        // Get PDO channel reference
+        channelId = pdokInstance_g.aTpdoChannelIdLut[nodeId];
+        pPdoChannel = &pdokInstance_g.pdoChannels.pTxPdoChannel[channelId];
+
+        // valid TPDO found
+        if ((unsigned int)(pPdoChannel->pdoSize + 24) <= frameSize_p)
         {
-            if (pPdoChannel->nodeId != nodeId)
-            {
-                continue;
-            }
-
-            // valid TPDO found
-            if ((unsigned int)(pPdoChannel->pdoSize + 24) > frameSize_p)
-            {   // TPDO is too short
-                // $$$ raise PDO error, set ret
-                break;
-            }
-
             /*
             TRACE ("%s() Channel:%d Node:%d MapObjectCnt:%d PdoSize:%d\n",
                 __func__, channelId, nodeId, pPdoChannel->mappObjectCount, pPdoChannel->pdoSize);
@@ -634,29 +623,29 @@ static tOplkError copyTxPdo(tPlkFrame* pFrame_p, UINT frameSize_p, BOOL fReadyFl
                               pPdoChannel->pdoSize);
 
             // set PDO size in frame
-            ami_setUint16Le(&pFrame_p->data.pres.sizeLe, pPdoChannel->pdoSize);
-
-            if (fReadyFlag_p != FALSE)
-            {
-                // set TPDO valid
-                ami_setUint8Le(&pFrame_p->data.pres.flag1, (flag1 | PLK_FRAME_FLAG1_RD));
-            }
-
-            // processing finished successfully
-            goto Exit;
+            pdoSize = pPdoChannel->pdoSize;
+        }
+        else
+        {   // TPDO is too short
+            // $$$ raise PDO error, set ret
+            pdoSize = 0;
         }
     }
+    else
+    {
+        // set PDO size in frame to zero, because no TPDO mapped
+        pdoSize = 0;
+    }
 
-    // set PDO size in frame to zero, because no TPDO mapped
-    ami_setUint16Le(&pFrame_p->data.pres.sizeLe, 0);
+    // set PDO size in frame
+    ami_setUint16Le(&pFrame_p->data.pres.sizeLe, pdoSize);
 
     if (fReadyFlag_p != FALSE)
     {
-        // set TPDO valid even if TPDO size is 0
+        // set TPDO valid
         ami_setUint8Le(&pFrame_p->data.pres.flag1, (flag1 | PLK_FRAME_FLAG1_RD));
     }
 
-Exit:
     return ret;
 }
 
