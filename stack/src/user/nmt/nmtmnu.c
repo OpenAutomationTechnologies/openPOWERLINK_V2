@@ -340,6 +340,8 @@ static tOplkError getNodeIdFromCmd(UINT nodeId_p, tNmtCommand nmtCommand_p, UINT
 static tOplkError nodeListToNodeId(UINT8* pCmdData_p, tNmtMnuGetNodeId* pOp_p, UINT* pNodeId_p);
 static tOplkError removeNodeIdFromExtCmd(UINT nodeId_p, UINT8* pCmdData_p, UINT size_p);
 
+static ULONG      computeCeilDiv(ULONG numerator_p, ULONG denominator_p);
+
 /* internal node event handler functions */
 static INT processNodeEventNoIdentResponse (UINT nodeId_p, tNmtState nodeNmtState_p,
                                             tNmtState nmtState_p, UINT16 errorCode_p, tOplkError* pRet_p);
@@ -886,7 +888,7 @@ tOplkError nmtmnu_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
         // build the configuration with infos from OD
         case kNmtGsResetConfiguration:
             {
-                UINT32          dwTimeout;
+                UINT32          timeout;
                 tObdSize        obdSize;
 
                 // read object 0x1F80 NMT_StartUp_U32
@@ -896,42 +898,31 @@ tOplkError nmtmnu_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
                     break;
 
                 // compute StatusReqDelay = object 0x1006 * C_NMT_STATREQ_CYCLE
-                obdSize = sizeof(dwTimeout);
-                ret = obd_readEntry(0x1006, 0, &dwTimeout, &obdSize);
+                obdSize = sizeof(timeout);
+                ret = obd_readEntry(0x1006, 0, &timeout, &obdSize);
                 if (ret != kErrorOk)
                     break;
 
-                if (dwTimeout != 0L)
+                if (timeout != 0L)
                 {
-                    nmtMnuInstance_g.statusRequestDelay = dwTimeout * C_NMT_STATREQ_CYCLE / 1000L;
-                    if (nmtMnuInstance_g.statusRequestDelay == 0L)
-                    {
-                        nmtMnuInstance_g.statusRequestDelay = 1L;    // at least 1 ms
-                    }
+                    nmtMnuInstance_g.statusRequestDelay =
+                            computeCeilDiv(timeout * C_NMT_STATREQ_CYCLE, 1000L);
 
                     // $$$ fetch and use MultiplexedCycleCount from OD
-                    nmtMnuInstance_g.timeoutCheckCom = dwTimeout * C_NMT_STATREQ_CYCLE / 1000L;
-                    if (nmtMnuInstance_g.timeoutCheckCom == 0L)
-                    {
-                        nmtMnuInstance_g.timeoutCheckCom = 1L;    // at least 1 ms
-                    }
+                    nmtMnuInstance_g.timeoutCheckCom =
+                            computeCeilDiv(timeout * C_NMT_STATREQ_CYCLE, 1000L);
                 }
 
                 // fetch MNTimeoutPreOp2_U32 from OD
-                obdSize = sizeof (dwTimeout);
-                ret = obd_readEntry(0x1F89, 4, &dwTimeout, &obdSize);
+                obdSize = sizeof (timeout);
+                ret = obd_readEntry(0x1F89, 4, &timeout, &obdSize);
                 if (ret != kErrorOk)
                     break;
 
-                if (dwTimeout != 0L)
+                if (timeout != 0L)
                 {
                     // convert [us] to [ms]
-                    dwTimeout /= 1000L;
-                    if (dwTimeout == 0L)
-                    {
-                        dwTimeout = 1L;    // at least 1 ms
-                    }
-                    nmtMnuInstance_g.timeoutReadyToOp = dwTimeout;
+                    nmtMnuInstance_g.timeoutReadyToOp = computeCeilDiv(timeout, 1000L);
                 }
                 else
                 {
@@ -4634,6 +4625,29 @@ static tOplkError removeNodeIdFromExtCmd(UINT nodeId_p, UINT8* pCmdData_p, UINT 
     }
 
     return kErrorNmtInvalidParam;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Compute ceiling of integer division
+
+This function computes the division of the given \p numerator_p and
+\p denominator_p.
+
+\param  numerator_p     Division numerator
+\param  denominator_p   Division denominator
+
+\return The function returns the ceiling of the integer division.
+*/
+//------------------------------------------------------------------------------
+static ULONG computeCeilDiv(ULONG numerator_p, ULONG denominator_p)
+{
+    ULONG result;
+
+    result = (numerator_p % denominator_p) ? numerator_p / denominator_p + 1 :
+                                             numerator_p / denominator_p;
+
+    return result;
 }
 
 ///\}
