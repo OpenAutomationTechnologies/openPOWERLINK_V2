@@ -198,6 +198,10 @@ OBD_BEGIN ()
 
     OBD_END_PART ()
 
+    OBD_BEGIN_PART_MANUFACTURER ()
+
+    OBD_END_PART ()
+
     OBD_BEGIN_PART_DEVICE ()
 
         // DigitalInput_00h_AU8

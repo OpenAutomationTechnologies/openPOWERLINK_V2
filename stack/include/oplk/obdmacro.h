@@ -310,9 +310,9 @@ These  macros are always positioned between the macros OBD_BEGIN and OBD_END and
 introduce a partition of the Object Dictionary. The "GENERIC" range is always
 utilized for the index range 0x1000 to 0x1FFF, the "MANUFACTURER" section
 is used for 0x2000 to 0x5FFF and the "DEVICE" section for index range 0x6000 to
-0x9FFF. Each of these macros may only be used a single time within an Object
-Dictionary. The applicable range or partial section is always closed with the
-macro OBD_END_PART.
+0x9FFF. Each of these macros must be used a single time (and only a single time!)
+within an Object Dictionary. The applicable range or partial section is always
+closed with the macro OBD_END_PART.
 */
 #define OBD_BEGIN_PART_GENERIC()                                            ///< Begin of generic partition
 #define OBD_BEGIN_PART_MANUFACTURER()                                       ///< Begin of manufacturer partition

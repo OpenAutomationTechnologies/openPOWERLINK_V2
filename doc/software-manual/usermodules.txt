@@ -314,6 +314,16 @@ After the openPOWERLINK stack is initialized, the corresponding default values a
 assigned to all object data. The above described structures are constructed via
 macros. These macros are located in obdmacro.h.
 
+The object dictionary is split into three parts:
+- Generic part: 0x1000 - 0x1FFF
+- Manufacturer-specific part: 0x2000 - 0x5FFF
+- Device-profile-specific part: 0x6000 - 0xFFFF
+
+The openPOWERLINK stack requires to define each of the three sections in the file
+objdict.h. If a part is not used, it must be declared, but will not contain any
+objects.
+
+
 \ingroup user_layer
 */
 //------------------------------------------------------------------------------
