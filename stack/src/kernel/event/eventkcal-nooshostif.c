@@ -98,6 +98,7 @@ static tEventkCalInstance   instance_l;             ///< Instance variable of ke
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
+static BOOL checkForwardEventToKint(tEvent* pEvent_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -126,10 +127,14 @@ tOplkError eventkcal_init(void)
     if (eventkcal_initQueueCircbuf(kEventQueueK2U) != kErrorOk)
         goto Exit;
 
+    if (eventkcal_initQueueCircbuf(kEventQueueKInt) != kErrorOk)
+        goto Exit;
+
     instance_l.fInitialized = TRUE;
     return kErrorOk;
 
 Exit:
+    eventkcal_exitQueueCircbuf(kEventQueueKInt);
     eventkcal_exitQueueCircbuf(kEventQueueK2U);
     eventkcal_exitQueueCircbuf(kEventQueueU2K);
 
@@ -155,6 +160,7 @@ tOplkError eventkcal_exit(void)
 {
     if (instance_l.fInitialized == TRUE)
     {
+        eventkcal_exitQueueCircbuf(kEventQueueKInt);
         eventkcal_exitQueueCircbuf(kEventQueueK2U);
         eventkcal_exitQueueCircbuf(kEventQueueU2K);
     }
@@ -182,11 +188,18 @@ tOplkError eventkcal_postKernelEvent(tEvent* pEvent_p)
 {
     tOplkError      ret = kErrorOk;
 
-    target_enableGlobalInterrupt(FALSE);
+    if (!checkForwardEventToKint(pEvent_p))
+    {   // Forward event with direct call
+        target_enableGlobalInterrupt(FALSE);
 
-    ret = eventk_process(pEvent_p);
+        ret = eventk_process(pEvent_p);
 
-    target_enableGlobalInterrupt(TRUE);
+        target_enableGlobalInterrupt(TRUE);
+    }
+    else
+    {   // Forward event to kernel internal queue
+        ret = eventkcal_postEventCircbuf(kEventQueueKInt, pEvent_p);
+    }
 
     return ret;
 }
@@ -230,6 +243,11 @@ void eventkcal_process(void)
     {
         eventkcal_processEventCircbuf(kEventQueueU2K);
     }
+
+    if (eventkcal_getEventCountCircbuf(kEventQueueKInt) > 0)
+    {
+        eventkcal_processEventCircbuf(kEventQueueKInt);
+    }
 }
 
 //============================================================================//
@@ -237,6 +255,47 @@ void eventkcal_process(void)
 //============================================================================//
 /// \name Private Functions
 /// \{
+
+//------------------------------------------------------------------------------
+/**
+\brief  Check forward event to kernel internal queue
+
+This function checks if the given event shall be forwarded by kernel internal
+queue.
+
+\param  pEvent_p    Pointer to event
+
+\return The function returns a BOOL.
+\retval TRUE    The event shall be forwarded by kernel internal queue.
+\retval FALSE   The event shall be forwarded by direct call.
+*/
+//------------------------------------------------------------------------------
+static BOOL checkForwardEventToKint(tEvent* pEvent_p)
+{
+    BOOL fRet = FALSE;
+
+    switch (pEvent_p->eventSink)
+    {
+        case kEventSinkDllk:
+            switch (pEvent_p->eventType)
+            {
+                case kEventTypeDllkFillTx:
+                    // Fill Tx events shall be forwarded by internal queue.
+                    // This enables filling async Tx frames in background.
+                    fRet = TRUE;
+                    break;
+
+                default:
+                    break;
+            }
+            break;
+
+        default:
+            break;
+    }
+
+    return fRet;
+}
 
 /// \}
 

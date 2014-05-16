@@ -125,6 +125,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Size of kernel to user queue
 #define CONFIG_EVENT_SIZE_CIRCBUF_KERNEL_TO_USER    8192
 
+// Size of kernel internal queue
+#define CONFIG_EVENT_SIZE_CIRCBUF_KERNEL_INTERNAL   1024
+
 // =========================================================================
 // OBD specific defines
 //==============================================================================

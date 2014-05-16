@@ -129,6 +129,8 @@ These defines are set by the host interface ipcore settings
 #define CONFIG_DLLCAL_BUFFER_SIZE_TX_SYNC           HOSTIF_SIZE_TXSYNCQ
 /**@}*/
 
+#define CONFIG_EVENT_SIZE_CIRCBUF_KERNEL_INTERNAL   2048
+
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------

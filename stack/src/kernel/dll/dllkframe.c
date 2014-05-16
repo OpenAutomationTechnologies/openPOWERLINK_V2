@@ -357,6 +357,14 @@ void dllk_processTransmittedNmtReq(tEdrvTxBuffer* pTxBuffer_p)
     // mark Tx-buffer as empty
     pTxBuffer_p->txFrameSize = DLLK_BUFLEN_EMPTY;
 
+#if CONFIG_EDRV_AUTO_RESPONSE == TRUE
+    // decrement RS in Flag 2
+    if ((dllkInstance_g.flag2 & PLK_FRAME_FLAG2_RS) != 0)
+    {
+        dllkInstance_g.flag2--;
+    }
+#endif
+
     // post event to DLL
     priority = kDllAsyncReqPrioNmt;
     event.eventSink = kEventSinkDllk;
@@ -411,6 +419,14 @@ void dllk_processTransmittedNonPlk(tEdrvTxBuffer* pTxBuffer_p)
     // frame from generic priority FIFO sent
     // mark Tx-buffer as empty
     pTxBuffer_p->txFrameSize = DLLK_BUFLEN_EMPTY;
+
+#if CONFIG_EDRV_AUTO_RESPONSE == TRUE
+    // decrement RS in Flag 2
+    if ((dllkInstance_g.flag2 & PLK_FRAME_FLAG2_RS) != 0)
+    {
+        dllkInstance_g.flag2--;
+    }
+#endif
 
     // post event to DLL
     priority = kDllAsyncReqPrioGeneric;
