@@ -2282,7 +2282,7 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
     result = dma_set_mask(&edrvInstance_l.pPciDev->dev, DMA_BIT_MASK(64));
     if (result == 0)
     {
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 33)
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2, 6, 33)
         dma_set_coherent_mask(&edrvInstance_l.pPciDev->dev, DMA_BIT_MASK(64));
 #else
         pci_set_dma_mask(pPciDev_p, DMA_BIT_MASK(64));
@@ -2294,7 +2294,7 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
         result = dma_set_mask(&pPciDev_p->dev, DMA_BIT_MASK(32));
         if (result == 0)
         {
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 33)
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2, 6, 33)
             result = dma_set_coherent_mask(&edrvInstance_l.pPciDev->dev,
                                            DMA_BIT_MASK(32));
 #else
