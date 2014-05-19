@@ -45,6 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplk/debugstr.h>
 
 #include <kernel/eventkcal.h>
+#include <kernel/eventkcalintf.h>
 
 #include <common/circbuffer.h>
 
