@@ -325,7 +325,7 @@ static tOplkError prcCalcPResResponseTimeNs(UINT nodeId_p, UINT nodeIdPredNode_p
 static tOplkError prcCalcPResChainingSlotTimeNs(UINT nodeIdLastNode_p,
                                                 UINT32* pPResChainingSlotTimeNs_p);
 
-static tOplkError prcFindPredecessorNode(UINT nodeId_p);
+static UINT       prcFindPredecessorNode(UINT nodeId_p);
 static void       prcSyncError(tNmtMnuNodeInfo* pNodeInfo_p);
 static void       prcSetFlagsNmtCommandReset(tNmtMnuNodeInfo* pNodeInfo_p,
                                              tNmtCommand nmtCommand_p);
