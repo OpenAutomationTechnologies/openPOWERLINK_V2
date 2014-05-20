@@ -24,6 +24,7 @@
       </tab>
     </tab>
     <tab type="usergroup" title="Software Manual">
+      <tab type="user" url="\ref module_api" title="openPOWERLINK API"/>
       <tab type="user" url="\ref page_software-architecture" title="Software Architecture"/>
       <tab type="modules" visible="yes" title="" intro=""/>
       <tab type="namespaces" visible="no" title="">
