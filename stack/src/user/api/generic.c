@@ -853,11 +853,22 @@ BOOL oplk_checkKernelStack(void)
 /**
 \brief Wait for sync event
 
-The function waits for a sync event.
+The function waits for a sync event. It blocks until the sync event occurred or
+the specified timeout elapsed.
 
-\param  timeout_p       Time to wait for event
+\note In a single process solution where the whole stack is linked to the
+      application, the function immediately returns! In this case, the
+      application must register its sync function as callback function so that
+      it is directly called from the stack (see pfnCbSync in
+      \ref tOplkApiInitParam).
+
+\param  timeout_p       Specifies a timeout in microseconds. If 0 it waits
+                        forever.
 
 \return The function returns a tOplkError error code.
+\retval kErrorOk            The sync event occurred.
+\retval kErrorGeneralError  An error or timeout occurred while waiting for the
+                            sync event.
 
 \ingroup module_api
 */

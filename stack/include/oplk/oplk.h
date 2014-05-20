@@ -323,8 +323,10 @@ typedef struct
     tOplkApiCbEvent     pfnCbEvent;                 ///< Pointer to the applications event handling function.
     void*               pEventUserArg;              ///< Pointer to a user argument that is supplied to the event callback function (\ref tOplkApiCbEvent)
     tSyncCb             pfnCbSync;                  ///< Pointer to the application sync callback function.
-                                                    /**< It is normally used only for non-threaded systems.
-                                                         If the application processes synchronous data by a separate thread it must be initialized with NULL! */
+                                                    /**< It is used for single process systems where the whole openPOWERLINK stack is linked to the application.
+                                                         In this case the stack calls the provided application callback function when synchronous data can be
+                                                         exchanged. If a split stack is used (e.g. Linux user/kernel) it must be initialized with NULL. In
+                                                         this case the application must use oplk_waitSyncEvent() for waiting on synchronous data. */
     tHwParam            hwParam;                    ///< The hardware parameters of the node
     UINT32              syncResLatency;             ///< Constant response latency for SyncRes in ns
     UINT                syncNodeId;                 ///< Specifies the synchronization point for the MN. The synchronization take place after a PRes from a CN with this node-ID (0 = SoC, 255 = SoA)
