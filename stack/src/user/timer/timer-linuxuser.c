@@ -177,6 +177,8 @@ tOplkError timeru_addInstance(void)
                                 __func__);
     }
 
+    pthread_setname_np(timeruInstance_g.processThread, "oplk-timeru");
+
     return kErrorOk;
 }
 

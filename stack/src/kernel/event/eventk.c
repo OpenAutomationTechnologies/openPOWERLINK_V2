@@ -95,25 +95,6 @@ static tOplkError handleNmtEventinDll(tEvent* pEvent_p);
 // local vars
 //------------------------------------------------------------------------------
 
-/**
-\brief  Event dispatch table
-
-The following table defines the event handlers to be used for the specific
-event sinks.
-*/
-static tEventDispatchEntry eventDispatchTbl_l[] =
-{
-    { kEventSinkNmtk,        kEventSourceNmtk,        nmtk_process },
-    { kEventSinkNmtk,        kEventSourceDllk,        handleNmtEventinDll },
-    { kEventSinkDllk,        kEventSourceDllk,        dllk_process },
-    { kEventSinkDllkCal,     kEventSourceDllk,        dllkcal_process },
-    { kEventSinkErrk,        kEventSourceErrk,        errhndk_process },
-#if defined(CONFIG_INCLUDE_PDO)
-    { kEventSinkPdokCal,     kEventSourcePdok,        pdokcal_process },
-#endif
-    { kEventSinkInvalid,     kEventSourceInvalid,     NULL }
-};
-
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
 //============================================================================//
@@ -184,46 +165,60 @@ tOplkError eventk_process(tEvent* pEvent_p)
 {
     tOplkError              ret = kErrorOk;
     tEventSource            eventSource;
-    tProcessEventCb         pfnEventHandler;
-    BOOL                    fStop = FALSE;
-    BOOL                    fAlreadyHandled = FALSE;
-    tEventDispatchEntry*    pDispatchEntry;
 
-    pDispatchEntry = &eventDispatchTbl_l[0];
-    while (!fStop)
+    switch (pEvent_p->eventSink)
     {
-        ret = event_getHandlerForSink(&pDispatchEntry, pEvent_p->eventSink,
-                                      &pfnEventHandler, &eventSource);
-        if (ret == kErrorEventUnknownSink)
-        {
-                if (!fAlreadyHandled)
-                {
-                    // Unknown sink, provide error event to API layer
-                    eventk_postError(kEventSourceEventk, ret,
-                                     sizeof(pEvent_p->eventSink),
-                                     &pEvent_p->eventSink);
-                }
-                else
-                {
-                    ret = kErrorOk;
-                }
-                fStop = TRUE;
-        }
-        else
-        {
-            if (pfnEventHandler != NULL)
+        // Note: case statements are sorted for best performance!
+        case kEventSinkDllk:
+            ret = dllk_process(pEvent_p);
+            eventSource = kEventSourceDllk;
+            break;
+
+#if defined(CONFIG_INCLUDE_PDO)
+        case kEventSinkPdokCal:
+            ret = pdokcal_process(pEvent_p);
+            eventSource = kEventSourcePdok;
+            break;
+#endif
+        case kEventSinkDllkCal:
+            ret = dllkcal_process(pEvent_p);
+            eventSource = kEventSourceDllk;
+            break;
+
+        case kEventSinkNmtk:
+            ret = nmtk_process(pEvent_p);
+            eventSource = kEventSourceNmtk;
+            if ((ret != kErrorOk) && (ret != kErrorShutdown))
             {
-                ret = pfnEventHandler(pEvent_p);
-                if ((ret != kErrorOk) && (ret != kErrorShutdown))
-                {
-                    // forward error event to API layer
-                    eventk_postError(kEventSourceEventk, ret,
-                                     sizeof(eventSource),
-                                     &eventSource);
-                }
+                // forward error event to API layer
+                eventk_postError(kEventSourceEventk, ret,
+                                 sizeof(eventSource),
+                                 &eventSource);
             }
-            fAlreadyHandled = TRUE;
-        }
+            ret = handleNmtEventinDll(pEvent_p);
+            eventSource = kEventSourceDllk;
+            break;
+
+        case kEventSinkErrk:
+            ret = errhndk_process(pEvent_p);
+            eventSource = kEventSourceErrk;
+            break;
+
+        default:
+            // Unknown sink, provide error event to API layer
+            eventk_postError(kEventSourceEventk, ret,
+                             sizeof(pEvent_p->eventSink),
+                             &pEvent_p->eventSink);
+            ret = kErrorEventUnknownSink;
+            break;
+    }
+
+    if ((ret != kErrorOk) && (ret != kErrorShutdown))
+    {
+        // forward error event to API layer
+        eventk_postError(kEventSourceEventk, ret,
+                         sizeof(eventSource),
+                         &eventSource);
     }
 
     return ret;

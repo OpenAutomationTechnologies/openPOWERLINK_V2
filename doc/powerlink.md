@@ -39,7 +39,7 @@ It is assumed that you are familiar with the Ethernet POWERLINK
 Communication Profile Specification.
 
 For additional information on the Ethernet POWERLINK protocol refer to
-the [Ethernet POWERLINK Standardisation Group EPSG](http://www.ethernet-powerlink.org).
+the [Ethernet POWERLINK Standardization Group EPSG](http://www.ethernet-powerlink.org).
 
 # Object Dictionary (OD) {#sect_powerlink_od}
 

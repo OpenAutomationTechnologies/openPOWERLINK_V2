@@ -13,12 +13,12 @@ result a _driver_.
 The drivers are located in the directory `drivers`. To build a driver, the
 necessary openPOWERLINK libraries must be compiled and installed.
 
-## Building a Linux PCAP Userspace Daemon {#sect_build_drivers_build_linux_pcap}
+## Building a Linux PCAP User Space Daemon {#sect_build_drivers_build_linux_pcap}
 
-The userspace daemon needs the PCAP driver libraries (`liboplkmndrv-pcap`, `liboplkcndrv-pcap`).
-They must be compiled and installed to be able to compile the userspace daemon.
+The user space daemon needs the PCAP driver libraries (`liboplkmndrv-pcap`, `liboplkcndrv-pcap`).
+They must be compiled and installed to be able to compile the user space daemon.
 
-To build the userspace daemon (e.g. for an MN):
+To build the user space daemon (e.g. for an MN):
 
       > cd <openPOWERLINK_dir>/drivers/linux/drv_daemon_pcap/build
       > cmake -DCFG_OPLK_MN=TRUE ..
@@ -28,7 +28,7 @@ To build the userspace daemon (e.g. for an MN):
 
 ## Building a Linux Edrv Kernel Driver {#sect_build_drivers_build_linux_edrv}
 
-To build the kernelspace driver the appropriate kernel sources must be installed
+To build the kernel space driver the appropriate kernel sources must be installed
 on your system. The path to the kernel sources can be configured by
 __CFG_KERNEL_DIR__.
 
@@ -62,7 +62,7 @@ To build the kernel driver (e.g. for a MN using the Intel 82573 network interfac
   options.
 
 
-## Linux PCAP Userspace Daemon {#sect_build_drivers_options_linux_pcap}
+## Linux PCAP User Space Daemon {#sect_build_drivers_options_linux_pcap}
 
 - **CFG_OPLK_MN**
 
@@ -92,3 +92,4 @@ To build the kernel driver (e.g. for a MN using the Intel 82573 network interfac
   - **8139**:  Realtek 8139-based network interface cards (100 MBit/s)
   - **8255x**: Intel 8255x-based network interface cards (100 MBit/s)
   - **82573**: Intel 82573-based network interface cards (1 GBit/s)
+  - **i210**:  Intel I210-based network interface cards (1 GBit/s)

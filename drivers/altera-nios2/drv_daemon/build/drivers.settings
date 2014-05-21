@@ -33,7 +33,6 @@ DRV_NAME=drv_daemon
 # Driver sources
 DRV_SOURCES="\
 ${OPLK_BASE_DIR}/drivers/altera-nios2/drv_daemon/daemon.c \
-${OPLK_BASE_DIR}/stack/src/common/debugstr.c \
 "
 
 DRV_INCLUDES="\

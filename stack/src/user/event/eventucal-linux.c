@@ -165,6 +165,9 @@ tOplkError eventucal_init(void)
         DEBUG_LVL_ERROR_TRACE("%s(): couldn't set thread scheduling parameters! %d\n",
                               __func__, schedParam.__sched_priority);
     }
+
+    pthread_setname_np(instance_l.threadId, "oplk-eventu");
+
     instance_l.fInitialized = TRUE;
     return kErrorOk;
 

@@ -82,9 +82,6 @@ static int eventTestsCleanup(void);
 //------------------------------------------------------------------------------
 
 static CU_TestInfo eventTests[] = {
-    { "Test event_getHandlerForSink() with existing entry",             test_getHandlerForSink_FirstExist },
-    { "Test event_getHandlerForSink() with further existing entry",     test_getHandlerForSink_FurtherExist },
-    { "Test event_getHandlerForSink() with not existing entry",         test_getHandlerForSink_NotExist },
     { "Test eventk_process()",                                          test_eventk_process },
     CU_TEST_INFO_NULL,
 };

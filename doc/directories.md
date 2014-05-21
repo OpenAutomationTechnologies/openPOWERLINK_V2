@@ -15,8 +15,6 @@ contrib                       | Additional libraries used by the openPOWERLINK s
 doc                           | Documentation of the openPOWERLINK stack
 drivers                       | openPOWERLINK drivers (kernel layer of a split-stack design)
 hardware                      | Hardware specific sources like IP cores, VHDL code and board specific software
-include                       | Include files needed for applications which link to the openPOWERLINK stack
-lib                           | openPOWERLINK stack library installation directory
 objdicts                      | CANopen object dictionaries used by the stack
 stack                         | openPOWERLINK stack sources
 staging                       | Unstable, unclean and untested source code
@@ -44,6 +42,7 @@ The __contrib__ directory contains additional libraries used by the openPOWERLIN
 
 Directory                     | Description
 ----------------------------- | -----------------------------------------------
+bootloader                    | Bootloaders used by non-OS openPOWERLINK targets
 console                       | Utilities for console input and output
 getopt                        | Command line parser
 pcap                          | libPcap library implementations
@@ -68,7 +67,12 @@ Directory                     | Description
 ----------------------------- | -----------------------------------------------
 build                         | Build directory for the stack library
 cmake                         | Files for the CMake build tool
-include                       | Stack internal include files
+include/oplk                  | External include files needed by applications which link to the openPOWERLINK stack
+include/common                | openPOWERLINK internal include files
+include/kernel                | openPOWERLINK include files used by kernel modules
+include/target                | Target specific openPOWERLINK include files
+include/user                  | openPOWERLINK include files used by user modules
+lib                           | openPOWERLINK stack library installation directory
 proj                          | Stack library projects (build and configuration files)
 src                           | Stack sources
 src/arch                      | Architecture specific helper functions

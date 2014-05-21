@@ -1,16 +1,18 @@
 /**
 ********************************************************************************
-\file   app.h
+\file   pcap-console.h
 
-\brief  Definitions for CN application
+\brief  Implementation of PCAP functions for console applications
 
-The file contains the definitions for the CN digital I/O application.
+This file contains the definitions of helper functions for console applications
+using the PCAP library.
+
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
+Copyright (c) 2013, Kalycito Infotech Private Ltd.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -36,12 +38,13 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_app_H_
-#define _INC_app_H_
+#ifndef _INC_pcap_console_H_
+#define _INC_pcap_console_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <oplk/oplkinc.h>
 #include <oplk/oplk.h>
 
 //------------------------------------------------------------------------------
@@ -60,18 +63,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tOplkError initApp(void);
-void shutdownApp(void);
-tOplkError processSync(void);
-void printOutputs(void);
-void printInputs(void);
-void setupInputs(void);
-void increaseInputs(void);
-void decreaseInputs(void);
+tOplkError selectPcapDevice(char* pDevName_p);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_app_H_ */
-
+#endif /* _INC_pcap_console_H_ */

@@ -45,6 +45,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplk/debugstr.h>
 #include <console/console.h>
 
+#include "event.h"
+
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
@@ -256,7 +258,7 @@ static tOplkError processStateChangeEvent(tOplkApiEventType EventType_p,
                              debugstr_getNmtEventStr(pNmtStateChange->nmtEvent));
 
             // signal that stack is off
-            *pfGsOff_l = FALSE;
+            *pfGsOff_l = TRUE;
             break;
 
         case kNmtGsResetCommunication:

@@ -42,6 +42,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <unistd.h>
 #include <fcntl.h>
 #include <signal.h>
+#include <time.h>
+
 #include <oplk/oplk.h>
 
 //============================================================================//
@@ -228,5 +230,27 @@ tOplkError target_setDefaultGateway(UINT32 defaultGateway_p)
         }
     }
     return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief    Get current system tick
+
+This function returns the current system tick determined by the system timer.
+
+\return Returns the system tick in milliseconds
+
+\ingroup module_target
+*/
+//------------------------------------------------------------------------------
+UINT32 target_getTickCount(void)
+{
+    UINT32                  ticks;
+    struct timespec         curTime;
+
+    clock_gettime(CLOCK_MONOTONIC, &curTime);
+    ticks = (curTime.tv_sec * 1000) + (curTime.tv_nsec / 1000000);
+
+    return ticks;
 }
 

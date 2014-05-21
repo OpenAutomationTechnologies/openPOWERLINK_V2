@@ -28,16 +28,12 @@ event modules.
 /**
 \defgroup module_ami ami
 
-\brief Common ami module
+\brief Common abstract memory interface module
 
 This module implements the abstract memory interface for big and little endian
 processors. It consists of a generic implementation for big and little endian
-(Always copies bytewise) and an optimized implementation for x86 processors.
+(Always copies byte by byte) and an optimized implementation for x86 processors.
 
 \ingroup modules_common
 */
 //------------------------------------------------------------------------------
-
-
-
-

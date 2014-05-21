@@ -43,6 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <user/timeru.h>
 #include <common/target.h>
+#include <limits.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -318,6 +319,13 @@ tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg a
     // check pointer to handle
     if (pTimerHdl_p == NULL)
         return kErrorTimerInvalidHandle;
+
+    // We can only handle timeouts less than the maximum 32 bit value minus
+    // the timeru_process() frequency. On Windows the timeru_process() is called
+    // by the timer thread which wakes up when the last timeout is elapsed.
+    // Therefore we can only handle timeouts less than UINT_MAX / 2.
+    if (timeInMs_p > (UINT_MAX >> 1))
+        return kErrorTimerNoTimerCreated;
 
     // fetch entry from free timer list
     enterCriticalSection(TIMERU_FREE_LIST);

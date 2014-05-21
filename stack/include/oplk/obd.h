@@ -394,10 +394,14 @@ This structure defines the init parameters of the OBD module.
 struct _tObdInitParam
 {
     tObdEntryPtr        pGenericPart;           ///< Pointer to generic part of OD
+    UINT32              numGeneric;             ///< Number of entries in generic partition
     tObdEntryPtr        pManufacturerPart;      ///< Pointer to manufacturer part of OD
+    UINT32              numManufacturer;        ///< Number of entries in manufacturer partition
     tObdEntryPtr        pDevicePart;            ///< Pointer to device part of OD
+    UINT32              numDevice;              ///< Number of entries in device partition
 #if (defined (OBD_USER_OD) && (OBD_USER_OD != FALSE))
     tObdEntryPtr        pUserPart;              ///< Pointer to user part of OD
+    UINT32              numUser;                ///< Number of entries in user partition
 #endif
 };
 

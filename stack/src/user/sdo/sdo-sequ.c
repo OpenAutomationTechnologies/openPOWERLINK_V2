@@ -607,6 +607,11 @@ tOplkError sdoseq_deleteCon(tSdoSeqConHdl sdoSeqConHdl_p)
         return kErrorSdoSeqInvalidHdl;
 
     pSdoSeqCon = &sdoSeqInstance_l.aSdoSeqCon[handle];    // get pointer to connection
+
+    // Check if connection is already closed
+    if (pSdoSeqCon->useCount == 0)
+        return ret;
+
     pSdoSeqCon->useCount--;
 
     if (pSdoSeqCon->useCount == 0)
@@ -1123,7 +1128,7 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
                 }
                 else
                 {
-                    sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateFrameSended);
+                    sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateFrameSent);
                 }
             }
             break;
@@ -1189,7 +1194,7 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
                                                 ((tAsySdoCom*)&pRecvFrame_p->sdoSeqPayload),
                                                 (dataSize_p - SDO_SEQ_HEADER_SIZE));
 
-                            sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateFrameSended);
+                            sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateFrameSent);
                         }
                         else
                         {
@@ -1370,7 +1375,7 @@ static tOplkError processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sd
                         sdoSeqInstance_l.pfnSdoComRecvCb(sdoSeqConHdl_p,
                                                          ((tAsySdoCom*)&pRecvFrame_p->sdoSeqPayload),
                                                          (dataSize_p - SDO_SEQ_HEADER_SIZE));
-                        sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateFrameSended);
+                        sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateFrameSent);
                     }
                     else
                     {

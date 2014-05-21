@@ -42,13 +42,20 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplk.h>
 #include <stdio.h>
-#include <getopt/getopt.h>
-#include <app.h>
-#include <system/system.h>
-#include <console/console.h>
 #include <limits.h>
+
+#include <oplk/oplk.h>
+#include <system/system.h>
+#include <getopt/getopt.h>
+#include <console/console.h>
+
+#if defined(CONFIG_USE_PCAP)
+#include <pcap/pcap-console.h>
+#endif
+
+#include "app.h"
+#include "event.h"
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -72,14 +79,6 @@ static BOOL fGsOff_l;
 //------------------------------------------------------------------------------
 // global function prototypes
 //------------------------------------------------------------------------------
-#if defined(CONFIG_USE_PCAP)
-tOplkError selectPcapDevice(char* pDevName_p);
-#endif
-
-int getopt(int, char* const [], const char*);
-
-void initEvents(BOOL* pfGsOff_p);
-tOplkError processEvents(tOplkApiEventType EventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
 
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //

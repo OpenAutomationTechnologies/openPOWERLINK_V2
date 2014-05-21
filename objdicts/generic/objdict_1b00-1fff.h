@@ -85,7 +85,7 @@ area from 0x1B00 - 0x1FFF.
 #if defined(CONFIG_INCLUDE_NMT_MN)
         // Object 1F80h: NMT_StartUp_U32
         OBD_BEGIN_INDEX_RAM(0x1F80, 0x01, NULL)
-            OBD_SUBINDEX_RAM_VAR(0x1F80, 0x00, kObdTypeUInt32, kObdAccSRW, tObdUnsigned32, NMT_StartUp_U32, 0x00)
+            OBD_SUBINDEX_RAM_VAR(0x1F80, 0x00, kObdTypeUInt32, kObdAccSRW, tObdUnsigned32, NMT_StartUp_U32, 0x00000800)
         OBD_END_INDEX(0x1F80)
 #endif
 

@@ -1,10 +1,10 @@
 /**
 ********************************************************************************
-\file   app.h
+\file   event.h
 
-\brief  Definitions for CN application
+\brief  Definitions of the MN demo event handler
 
-The file contains the definitions for the CN digital I/O application.
+The file contains the definitions for the MN demo event handler.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -36,8 +36,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_app_H_
-#define _INC_app_H_
+#ifndef _INC_demo_event_H_
+#define _INC_demo_event_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -60,18 +60,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tOplkError initApp(void);
-void shutdownApp(void);
-tOplkError processSync(void);
-void printOutputs(void);
-void printInputs(void);
-void setupInputs(void);
-void increaseInputs(void);
-void decreaseInputs(void);
+void initEvents(BOOL* pfGsOff_p);
+tOplkError processEvents(tOplkApiEventType EventType_p,
+                         tOplkApiEventArg* pEventArg_p,
+                         void* pUserArg_p);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_app_H_ */
-
+#endif /* _INC_demo_event_H_ */

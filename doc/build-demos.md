@@ -86,11 +86,11 @@ Follow the steps below to cross compile your demo application for Microblaze:
     The openPOWERLINK kernel part will be directly linked to the user part and
     application. libpcap will be used as Ethernet driver.
 
-  - __Linux Userspace Daemon__
+  - __Linux User Space Daemon__
 
     The library `liboplkappXn-userintf.a` will be used. It contains the interface
-    to a Linux userspace daemon. The kernel part of the openPOWERLINK stack is
-    located in the separate userspace daemon driver.
+    to a Linux user space daemon. The kernel part of the openPOWERLINK stack is
+    located in the separate user space daemon driver.
 
   - __Linux Kernel Module__
 
@@ -104,7 +104,7 @@ Follow the steps below to cross compile your demo application for Microblaze:
 - **CFG_BUILD_KERNEL_STACK**
 
   Determines how to build the kernel stack. The following option is available and
-  automatically (implicitely) pre-selected:
+  automatically (implicitly) pre-selected:
 
   - __Link to Application__
 
@@ -121,7 +121,7 @@ Follow the steps below to cross compile your demo application for Microblaze:
 - **CFG_BUILD_KERNEL_STACK**
 
   Determines how to build the kernel stack. The following option is available and
-  automatically (implicitely) pre-selected:
+  automatically (implicitly) pre-selected:
 
   - __Link to Application__
 
@@ -135,7 +135,7 @@ Follow the steps below to cross compile your demo application for Microblaze:
 - **CFG_DEMO_PROJECT**
 
   Selects the openCONFIGURATOR project to be used with this demo. Available
-  projects are provided by a dropdown list in the cmake QT GUI:
+  projects are provided by a drop-down list in the cmake QT GUI:
 
   - __Demo_3CN__: Demo project with 3 CNs using node ID 1, 32, 110. It uses the standard
                   CiA401_CN XDD and shall be used with openPOWERLINK CNs.

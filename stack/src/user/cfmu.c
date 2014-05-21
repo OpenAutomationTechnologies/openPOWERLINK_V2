@@ -303,19 +303,24 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtS
 
     if (pNodeInfo->cfmState != kCfmStateIdle)
     {
-        // send abort
+        // Set node CFM state
         pNodeInfo->cfmState = kCfmStateInternalAbort;
-        ret = sdocom_abortTransfer(pNodeInfo->sdoComConHdl, SDO_AC_DATA_NOT_TRANSF_DUE_LOCAL_CONTROL);
-        if (ret != kErrorOk)
-            return ret;
 
-        // close connection
-        ret = sdocom_undefineConnection(pNodeInfo->sdoComConHdl);
-        pNodeInfo->sdoComConHdl = UINT_MAX;
-        if (ret != kErrorOk)
+        // Send abort if SDO command is not undefined
+        if (pNodeInfo->sdoComConHdl != UINT_MAX)
         {
-            DEBUG_LVL_CFM_TRACE("SDO Free Error!\n");
-            return ret;
+            ret = sdocom_abortTransfer(pNodeInfo->sdoComConHdl, SDO_AC_DATA_NOT_TRANSF_DUE_LOCAL_CONTROL);
+            if (ret != kErrorOk)
+                return ret;
+
+            // close connection
+            ret = sdocom_undefineConnection(pNodeInfo->sdoComConHdl);
+            pNodeInfo->sdoComConHdl = UINT_MAX;
+            if (ret != kErrorOk)
+            {
+                DEBUG_LVL_CFM_TRACE("SDO Free Error!\n");
+                return ret;
+            }
         }
     }
 

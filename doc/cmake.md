@@ -41,7 +41,7 @@ There are three possible ways for configuring your build options
 # Out-of-Source Builds {#sect_cmake_outofsource}
 
 CMake support out-of-source builds. Therefore, all generated files are located
-in a seperate build directory which keeps your sources clean. It is recommended
+in a separate build directory which keeps your sources clean. It is recommended
 to use a separate build directory for building the openPOWERLINK stack and the
 demo applications.
 

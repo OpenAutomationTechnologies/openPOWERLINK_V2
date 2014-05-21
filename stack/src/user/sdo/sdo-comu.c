@@ -92,7 +92,7 @@ typedef enum
     kSdoComConEventConEstablished   = 0x02, ///< Connection established
     kSdoComConEventConClosed        = 0x03, ///< Connection closed
     kSdoComConEventAckReceived      = 0x04, ///< Acknowledge received by lower layer -> continue sending
-    kSdoComConEventFrameSended      = 0x05, ///< Lower has send a frame
+    kSdoComConEventFrameSent        = 0x05, ///< Lower has sent a frame
     kSdoComConEventInitError        = 0x06, ///< Error during initialization of the connection
     kSdoComConEventTimeout          = 0x07, ///< Timeout in lower layer
     kSdoComConEventTransferAbort    = 0x08, ///< Transfer abort by lower layer
@@ -697,9 +697,9 @@ static tOplkError conStateChangeCb(tSdoSeqConHdl sdoSeqConHdl_p,
             // continue transmission
             break;
 
-        case kAsySdoConStateFrameSended:
+        case kAsySdoConStateFrameSent:
             DEBUG_LVL_SDO_TRACE("One Frame sent\n");
-            sdoComConEvent = kSdoComConEventFrameSended;
+            sdoComConEvent = kSdoComConEventFrameSent;
             // to continue transmission
             break;
 
@@ -923,7 +923,7 @@ static tOplkError processStateServerSegmTrans(tSdoComConHdl sdoComConHdl_p, tSdo
     {
         // send next frame
         case kSdoComConEventAckReceived:
-        case kSdoComConEventFrameSended:
+        case kSdoComConEventFrameSent:
             // check if it is a read
             if (pSdoComCon->sdoServiceType == kSdoServiceReadByIndex)
             {
@@ -1169,7 +1169,7 @@ static tOplkError processStateClientConnected(tSdoComConHdl sdoComConHdl_p, tSdo
         // send a frame
         case kSdoComConEventSendFirst:
         case kSdoComConEventAckReceived:
-        case kSdoComConEventFrameSended:
+        case kSdoComConEventFrameSent:
             ret = clientSend(pSdoComCon);
             if (ret != kErrorOk)
                 return ret;
@@ -1293,7 +1293,7 @@ static tOplkError processStateClientSegmTransfer(tSdoComConHdl sdoComConHdl_p, t
     {
         case kSdoComConEventSendFirst:
         case kSdoComConEventAckReceived:
-        case kSdoComConEventFrameSended:
+        case kSdoComConEventFrameSent:
             ret = clientSend(pSdoComCon);
             if (ret != kErrorOk)
                 return ret;

@@ -215,6 +215,9 @@ tOplkError hrestimer_addInstance(void)
             pthread_cancel(pTimerInfo->timerThreadId);
             return kErrorNoResource;
         }
+
+        pthread_setname_np(pTimerInfo->timerThreadId, "oplk-hrtimer");
+
     }
 
     return ret;

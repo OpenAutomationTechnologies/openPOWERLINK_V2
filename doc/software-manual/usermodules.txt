@@ -28,7 +28,7 @@ interact with the openPOWERLINK stack.
 \brief User control module
 
 The user control module is responsible for startup and shutdown
-of the stack. It communicates whith the kernel control module by its CAL layer.
+of the stack. It communicates with the kernel control module by its CAL layer.
 
 \see module_ctrlk
 \see module_ctrlucal
@@ -85,8 +85,8 @@ different event queues.
 
 The user PDO module is responsible for exchanging process image data with the
 application using the process image API. Transmit data will be encoded to the
-configured PDOs and transfered to the kernel layer. Receive data will be
-received from the kernel layer and transfered to the application using the
+configured PDOs and transferred to the kernel layer. Receive data will be
+received from the kernel layer and transferred to the application using the
 process image module.
 
 For communication with the kernel PDO module the user PDO communication
@@ -164,7 +164,7 @@ This module implements the SDO command layer of the openPOWERLINK stack.
 
 \brief User NMT modules
 
-The user NMT modules provide the network managemement functions (NMT)
+The user NMT modules provide the network management functions (NMT)
 of the user layer.
 
 \ingroup user_layer
@@ -178,7 +178,7 @@ of the user layer.
 
 \brief User NMT module
 
-The user NMT module provides the general network managemement functions (NMT)
+The user NMT module provides the general network management functions (NMT)
 of the user layer.
 
 \see module_nmtmnu
@@ -198,7 +198,7 @@ of the user layer.
 
 \brief User NMT-MN module
 
-The user NMT-MN module provides the network managemement functions (NMT) for
+The user NMT-MN module provides the network management functions (NMT) for
 the Managing Node (MN).
 
 \see module_nmucnu
@@ -214,7 +214,7 @@ the Managing Node (MN).
 
 \brief User NMT-CN module
 
-The user NMT-CN module provides the network managemement functions (NMT) for
+The user NMT-CN module provides the network management functions (NMT) for
 the controlled node (CN).
 
 \see module_nmumnu
@@ -313,6 +313,16 @@ the location of the default value and the location of the actual data in RAM.
 After the openPOWERLINK stack is initialized, the corresponding default values are
 assigned to all object data. The above described structures are constructed via
 macros. These macros are located in obdmacro.h.
+
+The object dictionary is split into three parts:
+- Generic part: 0x1000 - 0x1FFF
+- Manufacturer-specific part: 0x2000 - 0x5FFF
+- Device-profile-specific part: 0x6000 - 0xFFFF
+
+The openPOWERLINK stack requires to define each of the three sections in the file
+objdict.h. If a part is not used, it must be declared, but will not contain any
+objects.
+
 
 \ingroup user_layer
 */

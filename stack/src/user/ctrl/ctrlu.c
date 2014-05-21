@@ -488,7 +488,22 @@ The function checks if the kernel stack is still running.
 //------------------------------------------------------------------------------
 BOOL ctrlu_checkKernelStack(void)
 {
-    UINT16 heartbeat;
+    static UINT32   lastTimestamp = 0;
+    UINT16          heartbeat;
+    UINT32          timestamp;
+    UINT32          diff;
+
+    // don't exceed kernel heartbeat frequency
+    timestamp = target_getTickCount();
+    if (timestamp >= lastTimestamp)
+        diff = timestamp - lastTimestamp;
+    else
+        diff = UINT_MAX - lastTimestamp + timestamp;
+
+    if (diff < CONFIG_CHECK_HEARTBEAT_PERIOD)
+        return TRUE;
+
+    lastTimestamp = timestamp;
 
     heartbeat = ctrlucal_getHeartbeat();
     if (heartbeat == ctrlInstance_l.lastHeartbeat)

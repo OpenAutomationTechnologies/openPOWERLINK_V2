@@ -153,6 +153,9 @@ tCircBufError circbuf_alloc(UINT8 id_p, size_t size_p, tCircBufInstance** ppInst
     pInstance->pCircBufHeader->readOffset = 0;
     pInstance->pCircBufHeader->writeOffset = 0;
     pInstance->pCircBufHeader->dataCount = 0;
+#ifdef DEBUG_CIRCBUF_SIZE_CHECK
+    pInstance->pCircBufHeader->maxSize = 0;
+#endif
     pInstance->pfnSigCb = NULL;
 
     *ppInstance_p = pInstance;
@@ -323,6 +326,12 @@ tCircBufError circbuf_writeData (tCircBufInstance* pInstance_p, const void* pDat
     }
     pHeader->freeSize -= fullBlockSize;
     pHeader->dataCount++;
+
+#ifdef DEBUG_CIRCBUF_SIZE_CHECK
+    if (pHeader->bufferSize - pHeader->freeSize > pHeader->maxSize)
+        pHeader->maxSize = pHeader->bufferSize - pHeader->freeSize;
+#endif
+
     circbuf_unlock(pInstance_p);
 
     if (pInstance_p->pfnSigCb != NULL)
@@ -419,6 +428,11 @@ tCircBufError circbuf_writeMultipleData(tCircBufInstance* pInstance_p,
     }
     pHeader->freeSize -= fullBlockSize;
     pHeader->dataCount++;
+
+#ifdef DEBUG_CIRCBUF_SIZE_CHECK
+    if (pHeader->bufferSize - pHeader->freeSize > pHeader->maxSize)
+        pHeader->maxSize = pHeader->bufferSize - pHeader->freeSize;
+#endif
 
     circbuf_unlock(pInstance_p);
     if (pInstance_p->pfnSigCb != NULL)
@@ -518,6 +532,26 @@ UINT32 circbuf_getDataCount(tCircBufInstance* pInstance_p)
     tCircBufHeader*     pHeader = pInstance_p->pCircBufHeader;
     return pHeader->dataCount;
 }
+
+#ifdef DEBUG_CIRCBUF_SIZE_CHECK
+//------------------------------------------------------------------------------
+/**
+\brief  Get maximum used size of circular buffer
+
+The function returns the maximum used size of the circular buffer.
+
+\param  pInstance_p     Pointer to circular buffer instance.
+
+\return The function returns the maximum used data size of the buffer.
+
+\ingroup module_lib_circbuf
+*/
+//------------------------------------------------------------------------------
+UINT32 circbuf_getMaxSize (tCircBufInstance* pInstance_p)
+{
+    return pInstance_p->pCircBufHeader->maxSize;
+}
+#endif
 
 //------------------------------------------------------------------------------
 /**

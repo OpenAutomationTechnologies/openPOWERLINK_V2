@@ -210,6 +210,8 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
                                 __func__);
     }
 
+    pthread_setname_np(edrvInstance_l.hThread, "oplk-edrvpcap");
+
     /* wait until thread is started */
     sem_wait(&edrvInstance_l.syncSem);
 

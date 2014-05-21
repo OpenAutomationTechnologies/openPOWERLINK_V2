@@ -123,7 +123,7 @@ if ($format eq "")
 
 @memfilecheck = split(/\./, $user_file);
 
-if (@memfilecheck[1] eq "mem")
+if (@memfilecheck[$#memfilecheck] eq "mem")
 {
 	print "Formatting MEM file...\n";
 	open (MEMFILE, $user_file) || die "Cannot open MEM file $user_file: $!";

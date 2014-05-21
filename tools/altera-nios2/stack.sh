@@ -72,14 +72,18 @@ then
 fi
 
 # Get path to sopcinfo
+echo "INFO: Get path to SOPCINFO file ... "
+
 SOPCINFO_FILE=$(nios2-bsp-query-settings --settings ${BSP_PATH}/settings.bsp \
-                            --cmd puts [get_sopcinfo_file] | grep sopcinfo)
+                            --cmd puts [get_sopcinfo_file] 2> /dev/null | grep sopcinfo)
 
 if [ "$(expr substr $(uname -s) 1 6)" == "CYGWIN" ];
 then
     # In cygwin convert returned path to posix style
     SOPCINFO_FILE=$(cygpath -u "${SOPCINFO_FILE}")
 fi
+
+echo "      ${SOPCINFO_FILE}"
 
 if [ ! -f ${SOPCINFO_FILE} ];
 then
@@ -106,9 +110,12 @@ then
 fi
 
 # Get bsp's cpu name
-CPU_NAME=$(nios2-bsp-query-settings --settings ${BSP_PATH}/settings.bsp \
-                            --cmd puts [get_cpu_name])
+echo "INFO: Get CPU name ... "
 
+CPU_NAME=$(nios2-bsp-query-settings --settings ${BSP_PATH}/settings.bsp \
+                            --cmd puts [get_cpu_name] 2> /dev/null)
+
+echo "      ${CPU_NAME}"
 
 # Let's source the board.settings (null.settings before)
 BOARD_SETTINGS_FILE=${HW_PATH}/board.settings
@@ -154,12 +161,16 @@ else
 fi
 
 # Set TCI memory size
+echo "INFO: Get TCI memory size ... "
+
 TCI_MEM_SIZE=$(nios2-bsp-query-settings --settings ${BSP_PATH}/settings.bsp \
-                            --cmd puts [get_addr_span ${CFG_TCI_MEM_NAME}])
+                            --cmd puts [get_addr_span ${CFG_TCI_MEM_NAME}] 2> /dev/null)
 
 if [ -z "$TCI_MEM_SIZE" ]; then
     TCI_MEM_SIZE=0
 fi
+
+echo "      ${TCI_MEM_SIZE}"
 
 # Let's source the stack library settings file
 LIB_SETTINGS_FILE=${OPLK_BASE_DIR}/stack/build/altera-nios2/lib${LIB_NAME}/lib.settings

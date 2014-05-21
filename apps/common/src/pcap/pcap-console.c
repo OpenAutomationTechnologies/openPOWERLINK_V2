@@ -2,9 +2,9 @@
 ********************************************************************************
 \file   pcap-console.c
 
-\brief  Implementation of PCAP functions for console applications
+\brief  Implementation of PCAP helper functions for console applications
 
-This file provides functions which help console applciations using the PCAP
+This file provides helper functions for console applications using the PCAP
 library.
 
 \ingroup module_app_common
@@ -39,16 +39,13 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-// todo how could we remove that?
-#if (TARGET_SYSTEM == _WIN32_)
-#define _WINSOCKAPI_ // prevent windows.h from including winsock.h
-#endif  // (TARGET_SYSTEM == _WIN32_)
-
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 #include <oplk/oplk.h>
 #include <pcap.h>
+
+#include "pcap-console.h"
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //

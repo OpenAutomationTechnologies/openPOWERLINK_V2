@@ -42,6 +42,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplk/oplkinc.h>
 #include <linux/hrtimer.h>
 
+#include <linux/sched.h>
+
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
 //============================================================================//
@@ -63,3 +65,18 @@ ULONGLONG target_getCurrentTimestamp(void)
     return timeStamp;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief    Get current system tick
+
+This function returns the current system tick determined by the system timer.
+
+\return Returns the system tick in milliseconds
+
+\ingroup module_target
+*/
+//------------------------------------------------------------------------------
+UINT32 target_getTickCount(void)
+{
+    return jiffies * 1000 / HZ;
+}

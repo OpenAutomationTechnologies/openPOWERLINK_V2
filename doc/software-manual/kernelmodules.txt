@@ -14,8 +14,8 @@ link layer (DLL) and its hardware drivers.
 
 \brief Kernel control module
 
-The kernel control module is used for controling the startup and shutdown
-of the kernel stack. It will be controled by the user stack and receives its
+The kernel control module is used for controlling the startup and shutdown
+of the kernel stack. It will be controlled by the user stack and receives its
 commands through its communication abstraction layer (CAL). Additionally it
 provides status information to the user stack.
 
@@ -103,7 +103,7 @@ abstraction layer module (PDO CAL).
 
 \brief Kernel NMT module
 
-The kernel NMT module provides the general network managemement functions (NMT)
+The kernel NMT module provides the general network management functions (NMT)
 of the kernel layer. It implements the NMT state machine but it will be
 controlled by the user NMT module.
 
@@ -121,7 +121,7 @@ controlled by the user NMT module.
 
 The virtual Ethernet driver provides a network interface which can be used
 by applications to send Ethernet packets on the POWERLINK network. The
-Ethernet packets will be transfered in the asynchronous phase of POWERLINK.
+Ethernet packets will be transferred in the asynchronous phase of POWERLINK.
 
 \ingroup kernel_layer
 */
@@ -144,9 +144,9 @@ high precision needed by the openPOWERLINK stack for timing the POWERLINKC cycle
 /**
 \defgroup module_synctimer synctimer
 
-\brief Synchronisation timer module
+\brief Synchronization timer module
 
-The synchronisation timer module provides functions for synchronisation of a CN
+The synchronization timer module provides functions for synchronization of a CN
 to the POWERLINK cycle.
 
 \ingroup kernel_layer
