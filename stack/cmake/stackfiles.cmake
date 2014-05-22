@@ -390,7 +390,6 @@ SET(ARCH_LE_SOURCES
 ################################################################################
 
 SET(OPLK_HEADERS
-    ${STACK_INCLUDE_DIR}/oplk/ami.h
     ${STACK_INCLUDE_DIR}/oplk/benchmark.h
     ${STACK_INCLUDE_DIR}/oplk/cfm.h
     ${STACK_INCLUDE_DIR}/oplk/debug.h
@@ -427,6 +426,7 @@ SET(OPLK_HEADERS
     )
 
 SET(STACK_HEADERS
+    ${STACK_INCLUDE_DIR}/common/ami.h
     ${STACK_INCLUDE_DIR}/common/circbuffer.h
     ${STACK_INCLUDE_DIR}/common/ctrl.h
     ${STACK_INCLUDE_DIR}/common/ctrlcal.h

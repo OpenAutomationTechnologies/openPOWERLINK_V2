@@ -41,7 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <stddef.h>
 
-#include <oplk/ami.h>
+#include <common/ami.h>
 #include <common/dllcal.h>
 #include <kernel/dllkcal.h>
 #include <kernel/dllk.h>

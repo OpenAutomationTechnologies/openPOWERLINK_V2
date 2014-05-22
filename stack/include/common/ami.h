@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   oplk/ami.h
+\file   common/ami.h
 
 \brief  Definitions for the abstract memory interface (ami)
 
@@ -34,8 +34,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_oplk_ami_H_
-#define _INC_oplk_ami_H_
+#ifndef _INC_common_ami_H_
+#define _INC_common_ami_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -62,7 +62,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 #ifdef __cplusplus
-    extern "C" {
+extern "C" {
 #endif
 
 // Conversion functions for datatype WORD
@@ -119,9 +119,8 @@ void ami_setTimeOfDay(void* pAddr_p, tTimeOfDay* pTimeOfDay_p);
 void ami_getTimeOfDay(void* pAddr_p, tTimeOfDay* pTimeOfDay_p);
 
 #ifdef __cplusplus
-    }
+}
 #endif
 
 
-#endif /* _INC_oplk_ami_H_ */
-
+#endif /* _INC_common_ami_H_ */

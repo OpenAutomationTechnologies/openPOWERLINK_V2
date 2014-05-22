@@ -81,7 +81,7 @@ DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <oplk/oplkinc.h>
-#include <oplk/ami.h>
+#include <common/ami.h>
 #include <kernel/edrv.h>
 
 #include <linux/module.h>

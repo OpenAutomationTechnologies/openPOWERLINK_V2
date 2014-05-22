@@ -41,7 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <oplk/oplk.h>
-#include <oplk/ami.h>
+#include <common/ami.h>
 #include <kernel/dllkfilter.h>
 
 #include <kernel/edrv.h>

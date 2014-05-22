@@ -41,7 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <oplk/obd.h>
-#include <oplk/ami.h>
+#include <common/ami.h>
 #include <kernel/pdok.h>
 #include <kernel/pdokcal.h>
 #include <kernel/eventk.h>

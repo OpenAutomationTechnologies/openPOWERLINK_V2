@@ -45,7 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/identu.h>
 #include <user/statusu.h>
 #include <user/dllucal.h>
-#include <oplk/ami.h>
+#include <common/ami.h>
 #include <oplk/benchmark.h>
 #include <oplk/obd.h>
 #include <user/syncu.h>

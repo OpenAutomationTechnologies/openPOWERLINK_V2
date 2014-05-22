@@ -42,7 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <stddef.h>
 
-#include <oplk/ami.h>
+#include <common/ami.h>
 #include "dllk-internal.h"
 
 //============================================================================//

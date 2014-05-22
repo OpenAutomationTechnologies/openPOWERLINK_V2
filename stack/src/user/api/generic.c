@@ -44,7 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <limits.h>
 
 #include <oplk/oplk.h>
-#include <oplk/ami.h>
+#include <common/ami.h>
 
 #include <user/pdoucal.h>
 #include <user/dllucal.h>

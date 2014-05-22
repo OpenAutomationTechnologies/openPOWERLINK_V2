@@ -46,7 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplk/oplkinc.h>
 #include <oplk/obd.h>
 #include <oplk/obdcdc.h>
-#include <oplk/ami.h>
+#include <common/ami.h>
 #include <user/eventu.h>
 
 #if (CONFIG_OBD_USE_LOAD_CONCISEDCF != FALSE)

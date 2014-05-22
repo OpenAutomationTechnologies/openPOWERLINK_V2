@@ -39,7 +39,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/ami.h>
+#include <common/ami.h>
 #include <user/sdoasnd.h>
 #include <user/dllucal.h>
 
