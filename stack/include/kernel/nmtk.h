@@ -71,4 +71,3 @@ tOplkError nmtk_process(tEvent* pEvent_p);
 #endif
 
 #endif  // #ifndef _INC_nmtk_H_
-

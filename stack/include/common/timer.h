@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   oplk/timer.h
+\file   common/timer.h
 
 \brief  Generic definitions for timer modules
 
@@ -35,8 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_oplk_timer_H_
-#define _INC_oplk_timer_H_
+#ifndef _INC_common_timer_H_
+#define _INC_common_timer_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -102,5 +102,4 @@ This type defines a function pointer to a timer callback function.
 */
 typedef tOplkError (*tTimerkCallback)(tTimerEventArg* pEventArg_p);
 
-#endif /* _INC_oplk_timer_H_ */
-
+#endif /* _INC_common_timer_H_ */

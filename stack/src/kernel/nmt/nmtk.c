@@ -41,7 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include "kernel/nmtk.h"
-#include <oplk/timer.h>
+#include <common/timer.h>
 #include "kernel/dllk.h"
 
 //============================================================================//

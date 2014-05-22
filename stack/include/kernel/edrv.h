@@ -43,7 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <oplk/oplkinc.h>
 #include <oplk/frame.h>
-#include <oplk/timer.h>
+#include <common/timer.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -276,4 +276,3 @@ tOplkError edrv_getMacTime(UINT64* pCurtime_p);
 #endif
 
 #endif /* _INC_edrv_H_ */
-

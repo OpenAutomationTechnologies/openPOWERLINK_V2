@@ -42,7 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <oplk/oplkinc.h>
-#include <oplk/timer.h>
+#include <common/timer.h>
 #include <user/eventu.h>
 
 //------------------------------------------------------------------------------
@@ -66,4 +66,3 @@ BOOL       timeru_isActive(tTimerHdl timerHdl_p);
 #endif
 
 #endif /* _INC_timeru_H_ */
-

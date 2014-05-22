@@ -36,7 +36,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-
 #ifndef _INC_hrestimer_H_
 #define _INC_hrestimer_H_
 
@@ -44,7 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <oplk/oplkinc.h>
-#include <oplk/timer.h>
+#include <common/timer.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -82,4 +81,3 @@ UINT32     timestamp_calcTimeDiff(tTimestamp* pTimeStampPrevious_p,
 #endif
 
 #endif  // #ifndef _INC_hrestimer_H_
-

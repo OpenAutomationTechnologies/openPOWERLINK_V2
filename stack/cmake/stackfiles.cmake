@@ -403,7 +403,6 @@ SET(OPLK_HEADERS
     ${STACK_INCLUDE_DIR}/oplk/frame.h
     ${STACK_INCLUDE_DIR}/oplk/oplkinc.h
     ${STACK_INCLUDE_DIR}/oplk/targetsystem.h
-    ${STACK_INCLUDE_DIR}/oplk/timer.h
     ${STACK_INCLUDE_DIR}/oplk/version.h
     ${STACK_INCLUDE_DIR}/oplk/event.h
     ${STACK_INCLUDE_DIR}/oplk/ftracedebug.h
@@ -436,6 +435,7 @@ SET(STACK_HEADERS
     ${STACK_INCLUDE_DIR}/common/errhnd.h
     ${STACK_INCLUDE_DIR}/common/pdo.h
     ${STACK_INCLUDE_DIR}/common/target.h
+    ${STACK_INCLUDE_DIR}/common/timer.h
     )
 
 SET(USER_HEADERS
