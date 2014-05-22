@@ -176,7 +176,7 @@ Api::Api(MainWindow* pMainWindow_p, UINT nodeId_p, QString devName_p)
     QObject::connect(pDataInOutThread, SIGNAL(processImageInChanged(int, int)),
                      pInput, SLOT(setLeds(int, int)));
 
-    OPLK_MEMSET(&initParam, 0, sizeof(initParam));
+    memset(&initParam, 0, sizeof(initParam));
     initParam.sizeOfInitParam = sizeof(initParam);
 
     initParam.nodeId = nodeId_p;
@@ -213,7 +213,7 @@ Api::Api(MainWindow* pMainWindow_p, UINT nodeId_p, QString devName_p)
     initParam.pfnCbEvent = pProcessThread->getEventCbFunc();
 
     /* write 00:00:00:00:00:00 to MAC address, so that the driver uses the real hardware address */
-    OPLK_MEMCPY(initParam.aMacAddress, abMacAddr, sizeof(initParam.aMacAddress));
+    memcpy(initParam.aMacAddress, abMacAddr, sizeof(initParam.aMacAddress));
 
     // Copy the selected interface string to a local variable
     strcpy(devName_g, devName_p.toStdString().c_str());
