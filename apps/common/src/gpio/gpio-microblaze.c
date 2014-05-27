@@ -11,7 +11,7 @@ applications.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -40,12 +40,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplk.h>
-
-#include "gpio.h"
-
 #include <xparameters.h>
-#include "xgpio_l.h"
+#include <xgpio_l.h>
+#include <oplk/oplk.h>
+#include "gpio.h"
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -111,16 +109,14 @@ static UINT32 plkStatusLeds_l = 0;  ///< Local copy of the state of the POWERLIN
 /**
 \brief  Initialize GPIO module
 
-The function initializes the GPIO module before being used.
-
-\return Returns 0 if successful
+The function initializes the GPIO module.
 
 \ingroup module_app_common
 */
 //------------------------------------------------------------------------------
-int gpio_init(void)
+void gpio_init(void)
 {
-    return 0;
+
 }
 
 //------------------------------------------------------------------------------
@@ -132,7 +128,7 @@ The function shuts down the GPIO module.
 \ingroup module_app_common
 */
 //------------------------------------------------------------------------------
-void gpio_shutdown(void)
+void gpio_exit(void)
 {
 
 }
@@ -257,5 +253,4 @@ void gpio_setAppOutputs(UINT32 val_p)
 /// \name Private Functions
 /// \{
 
-///\}
-
+/// \}

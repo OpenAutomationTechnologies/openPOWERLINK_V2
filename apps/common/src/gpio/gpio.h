@@ -9,7 +9,7 @@ examples.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
 All rights reserved.
@@ -62,20 +62,16 @@ extern "C"
 {
 #endif
 
-int gpio_init(void);
-void gpio_shutdown(void);
-
+void  gpio_init(void);
+void  gpio_exit(void);
 UINT8 gpio_getNodeid(void);
-
-void gpio_setStatusLed(BOOL fOn_p);
-void gpio_setErrorLed(BOOL fOn_p);
-
+void  gpio_setStatusLed(BOOL fOn_p);
+void  gpio_setErrorLed(BOOL fOn_p);
 UINT8 gpio_getAppInput(void);
-void gpio_setAppOutputs(UINT32 val_p);
+void  gpio_setAppOutputs(UINT32 val_p);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* _INC_gpio_H_ */
-

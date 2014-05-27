@@ -11,7 +11,7 @@ application.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
 All rights reserved.
@@ -146,6 +146,9 @@ int main(void)
 #if (CONFIG_CDC_ON_SD != FALSE)
     tCdcBuffInfo    cdcBuffInfo;
 #endif
+
+    // Initialize helper modules
+    gpio_init();
     lcd_init();
 
     // get node ID from input
@@ -203,6 +206,9 @@ Exit:
     arp_shutdown();
     shutdownPowerlink(&instance_l);
     shutdownApp();
+
+    // Shutdown helper modules
+    gpio_exit();
 
     return 0;
 }
@@ -274,7 +280,7 @@ static tOplkError initPowerlink(tInstance* pInstance_p)
     ret = oplk_init(&initParam);
     if (ret != kErrorOk)
     {
-        PRINTF("oplk_init() failed with \"%s\"\n(Error:0x%x!)\n",debugstr_getRetValStr(ret), ret);
+        PRINTF("oplk_init() failed with \"%s\"\n(Error:0x%x!)\n", debugstr_getRetValStr(ret), ret);
         return ret;
     }
 
@@ -449,4 +455,4 @@ static tOplkError eventCbPowerlink(tOplkApiEventType EventType_p,
     return ret;
 }
 
-///\}
+/// \}

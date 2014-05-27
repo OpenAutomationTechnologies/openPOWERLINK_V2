@@ -11,7 +11,7 @@ application.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
 All rights reserved.
@@ -128,6 +128,8 @@ int main(void)
     const UINT8 aMacAddr[] = {MAC_ADDR};
     UINT8       nodeid;
 
+    // Initialize helper modules
+    gpio_init();
     lcd_init();
 
     // get node ID from input
@@ -171,6 +173,9 @@ Exit:
     arp_shutdown();
     shutdownPowerlink(&instance_l);
     shutdownApp();
+
+    // Shutdown helper modules
+    gpio_exit();
 
     return 0;
 }
@@ -392,5 +397,4 @@ static tOplkError eventCbPowerlink(tOplkApiEventType EventType_p, tOplkApiEventA
     return ret;
 }
 
-///\}
-
+/// \}
