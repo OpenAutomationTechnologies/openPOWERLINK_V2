@@ -350,7 +350,9 @@ tOplkError sdoudp_config(ULONG ipAddr_p, UINT port_p)
     if (pthread_create(&sdoUdpInstance_l.threadHandle, NULL, sdoUdpThread, (void*)&sdoUdpInstance_l) != 0)
         return kErrorSdoUdpThreadError;
 
+#if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 12)
     pthread_setname_np(sdoUdpInstance_l.threadHandle, "oplk-sdoudp");
+#endif
 #endif
 
     return ret;

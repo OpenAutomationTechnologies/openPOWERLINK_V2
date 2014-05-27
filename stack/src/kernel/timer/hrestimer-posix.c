@@ -196,7 +196,9 @@ tOplkError hrestimer_addInstance(void)
         return kErrorNoResource;
     }
 
+#if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 12)
     pthread_setname_np(hresTimerInstance_l.threadId, "oplk-hrtimer");
+#endif
 
     return ret;
 }

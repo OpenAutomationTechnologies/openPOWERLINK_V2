@@ -166,7 +166,9 @@ tOplkError eventucal_init(void)
                               __func__, schedParam.__sched_priority);
     }
 
+#if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 12)
     pthread_setname_np(instance_l.threadId, "oplk-eventu");
+#endif
 
     instance_l.fInitialized = TRUE;
     return kErrorOk;
