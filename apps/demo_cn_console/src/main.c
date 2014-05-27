@@ -137,7 +137,7 @@ int main (int argc, char** argv)
 
     if (system_init() != 0)
     {
-        printf("Error initializing system!");
+        fprintf(stderr, "Error initializing system!");
         return 0;
     }
 
@@ -247,7 +247,7 @@ static tOplkError initPowerlink(UINT32 cycleLen_p, const BYTE* macAddr_p, UINT32
     ret = oplk_init(&initParam);
     if (ret != kErrorOk)
     {
-        printf("oplk_init() failed (Error:0x%x!\n", ret);
+        fprintf(stderr, "oplk_init() failed (Error:0x%x!)\n", ret);
         return ret;
     }
 
@@ -339,13 +339,13 @@ static void loopMain(void)
         if (system_getTermSignalState() == TRUE)
         {
             fExit = TRUE;
-            PRINTF("Received termination signal, exiting...\n");
+            printf("Received termination signal, exiting...\n");
         }
 
         if (oplk_checkKernelStack() == FALSE)
         {
             fExit = TRUE;
-            PRINTF("Kernel stack has gone! Exiting...\n");
+            fprintf(stderr, "Kernel stack has gone! Exiting...\n");
         }
 
 #if defined(CONFIG_USE_SYNCTHREAD) || defined(CONFIG_KERNELSTACK_DIRECTLINK)
@@ -356,7 +356,7 @@ static void loopMain(void)
     }
 
 #if (TARGET_SYSTEM == _WIN32_)
-    PRINTF("Press Enter to quit!\n");
+    printf("Press Enter to quit!\n");
     console_getch();
 #endif
 
@@ -391,8 +391,7 @@ static void shutdownPowerlink(void)
             break;
     }
 
-    printf("Stack in State off ... Shutdown\n");
-
+    printf("Stack is in state off ... Shutdown\n");
     oplk_shutdown();
 }
 
@@ -434,7 +433,7 @@ static int getOptions(int argc_p, char** argv_p, tOptions* pOpts_p)
                 break;
 
             default: /* '?' */
-                fprintf(stderr, "Usage: %s [-n NODE_ID] [-l LOGFILE]\n", argv_p[0]);
+                printf("Usage: %s [-n NODE_ID] [-l LOGFILE]\n", argv_p[0]);
                 return -1;
         }
     }

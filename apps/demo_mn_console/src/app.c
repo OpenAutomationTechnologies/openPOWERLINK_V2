@@ -274,5 +274,4 @@ static tOplkError initProcessImage(void)
     return ret;
 }
 
-///\}
-
+/// \}

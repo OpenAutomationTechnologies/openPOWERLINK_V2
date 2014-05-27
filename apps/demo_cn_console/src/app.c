@@ -315,7 +315,7 @@ static tOplkError initProcessImage(void)
     pProcessImageOut_l = oplk_getProcessImageOut();
 
     /* link process variables used by CN to object dictionary */
-    printf("Linking process image vars:\n");
+    fprintf(stderr, "Linking process image vars:\n");
 
     obdSize = sizeof(pProcessImageIn_l->digitalIn);
     varEntries = 1;
@@ -323,7 +323,7 @@ static tOplkError initProcessImage(void)
                                       FALSE, obdSize, &varEntries);
     if (ret != kErrorOk)
     {
-        printf("linking process vars ... error %04x\n\n", ret);
+        fprintf(stderr, "linking process vars ... error %04x\n\n", ret);
         return ret;
     }
 
@@ -333,14 +333,13 @@ static tOplkError initProcessImage(void)
                                       TRUE, obdSize, &varEntries);
     if (ret != kErrorOk)
     {
-        printf("linking process vars ... error %04x\n\n", ret);
+        fprintf(stderr, "linking process vars ... error %04x\n\n", ret);
         return ret;
     }
 
-    printf("Linking process vars... ok\n\n");
+    fprintf(stderr, "Linking process vars... ok\n\n");
 
     return kErrorOk;
 }
 
-///\}
-
+/// \}

@@ -332,12 +332,12 @@ static void* powerlinkSyncThread(void* arg)
 {
     tSyncThreadInstance*     pSyncThreadInstance = (tSyncThreadInstance*)arg;
 
-    PRINTF("Synchronous data thread is starting...\n");
+    printf("Synchronous data thread is starting...\n");
     while (!pSyncThreadInstance->fTerminate)
     {
         pSyncThreadInstance->pfnSyncCb();
     }
-    PRINTF("Synchronous data thread is terminating...\n");
+    printf("Synchronous data thread is terminating...\n");
 
     return NULL;
 }
