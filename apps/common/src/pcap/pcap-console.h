@@ -44,8 +44,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
-#include <oplk/oplk.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -63,7 +61,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tOplkError selectPcapDevice(char* pDevName_p);
+int selectPcapDevice(char* pDevName_p);
 
 #ifdef __cplusplus
 }

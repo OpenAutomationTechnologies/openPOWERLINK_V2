@@ -42,9 +42,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplk.h>
+#include <stdio.h>
+#include <string.h>
 #include <pcap.h>
-
 #include "pcap-console.h"
 
 //============================================================================//
@@ -98,12 +98,13 @@ from a list of devices.
 \param  pDevName_p              Pointer to store the device name which should be
                                 used.
 
-\return The function returns a tOplkError error code.
+\return The function returns 0 if a device could be selected, otherwise -1.
+
 */
 //------------------------------------------------------------------------------
-tOplkError selectPcapDevice(char* pDevName_p)
+int selectPcapDevice(char* pDevName_p)
 {
-    char            sErr_Msg[ PCAP_ERRBUF_SIZE ];
+    char            sErr_Msg[PCAP_ERRBUF_SIZE];
     pcap_if_t*      alldevs;
     pcap_if_t*      seldev;
     int             i = 0;
@@ -113,45 +114,46 @@ tOplkError selectPcapDevice(char* pDevName_p)
     if (pcap_findalldevs(&alldevs, sErr_Msg) == -1)
     {
         fprintf(stderr, "Error in pcap_findalldevs: %s\n", sErr_Msg);
-        return kErrorNoResource;
+        return -1;
     }
 
-    PRINTF("--------------------------------------------------\n");
-    PRINTF("List of Ethernet Cards Found in this System: \n");
-    PRINTF("--------------------------------------------------\n");
+    printf("--------------------------------------------------\n");
+    printf("List of Ethernet cards found in this system: \n");
+    printf("--------------------------------------------------\n");
+
     for (seldev = alldevs; seldev != NULL; seldev = seldev->next)
     {
-        PRINTF("%d. ", ++i);
+        printf("%d. ", ++i);
         if (seldev->description)
         {
-            PRINTF("%s\n      %s\n", seldev->description, seldev->name);
+            printf("%s\n      %s\n", seldev->description, seldev->name);
         }
         else
         {
-            PRINTF("%s\n", seldev->name);
+            printf("%s\n", seldev->name);
         }
     }
 
     if (i == 0)
     {
-        PRINTF("\nNo interfaces found! Make sure pcap library is installed.\n");
-        return kErrorNoResource;
+        fprintf(stderr, "\nNo interfaces found! Make sure pcap library is installed.\n");
+        return -1;
     }
 
-    PRINTF("--------------------------------------------------\n");
-    PRINTF("Select the interface to be used for POWERLINK (1-%d):",i);
+    printf("--------------------------------------------------\n");
+    printf("Select the interface to be used for POWERLINK (1-%d):",i);
     if (scanf("%d", &inum) == EOF)
     {
         pcap_freealldevs(alldevs);
-        return kErrorNoResource;
+        return -1;
     }
 
-    PRINTF("--------------------------------------------------\n");
+    printf("--------------------------------------------------\n");
     if ((inum < 1) || (inum > i))
     {
-        PRINTF("\nInterface number out of range.\n");
+        printf("\nInterface number out of range.\n");
         pcap_freealldevs(alldevs);
-        return kErrorNoResource;
+        return -1;
     }
 
     /* Jump to the selected adapter */
@@ -160,7 +162,7 @@ tOplkError selectPcapDevice(char* pDevName_p)
     }
     strncpy(pDevName_p, seldev->name, 127);
 
-    return kErrorOk;
+    return 0;
 }
 
 //============================================================================//
