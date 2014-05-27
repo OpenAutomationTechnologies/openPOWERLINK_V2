@@ -7,7 +7,7 @@
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.
 All rights reserved.
@@ -60,13 +60,13 @@ extern "C"
 {
 #endif
 
-tOplkError lcd_init(void);
+void lcd_init(void);
 void lcd_exit(void);
 
 void lcd_clear(void);
 void lcd_printText(char* sText_p, UINT line_p);
 void lcd_printNmtState(tNmtState nmtState_p);
-void lcd_printNodeId(WORD wNodeId_p);
+void lcd_printNodeId(UINT8 nodeId_p);
 void lcd_printError(tOplkError error_p);
 
 #ifdef __cplusplus
@@ -74,4 +74,3 @@ void lcd_printError(tOplkError error_p);
 #endif
 
 #endif /* _INC_lcd_H_ */
-

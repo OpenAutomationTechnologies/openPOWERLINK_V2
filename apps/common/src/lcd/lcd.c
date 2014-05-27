@@ -8,7 +8,7 @@ The generic LCD interface module enables to control any LCD.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.
 All rights reserved.
@@ -39,10 +39,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <string.h>
+#include <oplk/oplk.h>
 #include "lcd.h"
 #include "lcdl.h"
 
-#include <string.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -105,26 +106,24 @@ const char aStrNmtState_l[10][LCD_COLUMN+1] =
 
 The function initializes the generic LCD instance.
 
-\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError lcd_init(void)
+void lcd_init(void)
 {
-    if (lcdl_init() != 0)
-        return kErrorNoResource;
-
-    return kErrorOk;
+    // Initialize low-level module
+    lcdl_init();
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Exit the LCD
+\brief  Shutdown the LCD
 
 The function exits the generic LCD instance.
 */
 //------------------------------------------------------------------------------
 void lcd_exit(void)
 {
+    // Shutdown low-level module
     lcdl_exit();
 }
 
@@ -233,15 +232,15 @@ void lcd_printNmtState(tNmtState nmtState_p)
 The function prints the provided node ID to the first line of the display.
 In addition to the printed node ID 'MN' (=0xF0) or 'CN' is added.
 
-\param  nodeID      node ID to be written
+\param  nodeId_p    node ID to be written
 */
 //------------------------------------------------------------------------------
-void lcd_printNodeId(WORD wNodeId_p)
+void lcd_printNodeId(UINT8 nodeId_p)
 {
     char TextNodeID[LCD_COLUMN+1];
 
-    sprintf(TextNodeID, "NodeID=0x%02X (%s)", wNodeId_p,
-            (wNodeId_p == C_ADR_MN_DEF_NODE_ID) ? "MN" : "CN");
+    sprintf(TextNodeID, "NodeID=0x%02X (%s)", nodeId_p,
+            (nodeId_p == C_ADR_MN_DEF_NODE_ID) ? "MN" : "CN");
 
     if (lcdl_changeToLine(1) != 0)
         return;
@@ -251,7 +250,7 @@ void lcd_printNodeId(WORD wNodeId_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Print error code to Lcd
+\brief  Print error code to LCD
 
 The function prints the provided error code to the second line of the display.
 
@@ -276,5 +275,4 @@ void lcd_printError(tOplkError error_p)
 /// \name Private Functions
 /// \{
 
-///\}
-
+/// \}

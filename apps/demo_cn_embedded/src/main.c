@@ -156,7 +156,7 @@ int main(void)
     PRINTF("----------------------------------------------------\n");
 
     PRINTF("NODEID=0x%02X\n", instance_l.nodeId);
-    lcd_printNodeId((WORD)instance_l.nodeId);
+    lcd_printNodeId(instance_l.nodeId);
 
     if ((ret = initPowerlink(&instance_l)) != kErrorOk)
         goto Exit;
@@ -175,6 +175,7 @@ Exit:
     shutdownApp();
 
     // Shutdown helper modules
+    lcd_exit();
     gpio_exit();
 
     return 0;

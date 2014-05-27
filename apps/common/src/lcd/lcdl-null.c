@@ -1,14 +1,14 @@
 /**
 ********************************************************************************
-\file       lcd-null.c
+\file       lcdl-null.c
 
-\brief      LCD null implementation
+\brief      Low-level LCD null implementation
 
 This implementation shall be used for platforms without an LCD.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.
 All rights reserved.
@@ -84,21 +84,21 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //------------------------------------------------------------------------------
 /**
-\brief  Initialize the LCD
+\brief  Initialize the low-level LCD module
 
-This function writes a sequence of initialization parameters to the LCD.
+This function is a stub function to initialize the low-level LCD module.
 */
 //------------------------------------------------------------------------------
-int lcdl_init(void)
+void lcdl_init(void)
 {
-    return 0;
+
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Exit the LCD instance
+\brief  Shutdown the low-level LCD module
 
-This function exits the LCD instance.
+This function is a stub function to shutdown the low-level LCD module.
 */
 //------------------------------------------------------------------------------
 void lcdl_exit(void)
@@ -110,7 +110,7 @@ void lcdl_exit(void)
 /**
 \brief  Clear the LCD
 
-This function clears all lines of the display.
+This function is a stub function to clear all lines of the display.
 */
 //------------------------------------------------------------------------------
 void lcdl_clear(void)
@@ -122,11 +122,11 @@ void lcdl_clear(void)
 /**
 \brief  Change to specified line
 
-Changes to specified line of the LCD
+This function is a stub function to change to a specified line of the LCD.
 
 \param  line_p      Specifies the line
 
-\return The function returns 0 if the line is changed successfully, -1 otherwise.
+\return The function always returns 0 to signal a successful change of line.
 */
 //------------------------------------------------------------------------------
 int lcdl_changeToLine(unsigned int line_p)
@@ -138,7 +138,7 @@ int lcdl_changeToLine(unsigned int line_p)
 /**
 \brief  Print text to the LCD
 
-Writes text to the LCD currently selected.
+This function is a stub function to write text to the currently selected LCD.
 
 \param  sText_p     The text to print
 */
@@ -154,4 +154,4 @@ void lcdl_printText(const char* sText_p)
 /// \name Private Functions
 /// \{
 
-///\}
+/// \}
