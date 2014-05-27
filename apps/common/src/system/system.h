@@ -61,14 +61,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-int initSystem(void);
-void shutdownSystem(void);
+int  system_init(void);
+void system_exit(void);
 BOOL system_getTermSignalState();
-void msleep(unsigned int milliSecond_p);
+void system_msleep(unsigned int milliSeconds_p);
 
 #if defined(CONFIG_USE_SYNCTHREAD)
-void startSyncThread(tSyncCb pfnSync_p);
-void stopSyncThread(void);
+void system_startSyncThread(tSyncCb pfnSync_p);
+void system_stopSyncThread(void);
 #endif
 
 #ifdef __cplusplus
@@ -76,4 +76,3 @@ void stopSyncThread(void);
 #endif
 
 #endif /* _INC_system_H_ */
-

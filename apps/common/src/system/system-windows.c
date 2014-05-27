@@ -2,9 +2,9 @@
 ********************************************************************************
 \file   system-windows.c
 
-\brief  Sytem specific functions for Windows
+\brief  System specific functions for Windows
 
-The file implements the system specific funtions for Windows used by the
+The file implements the system specific functions for Windows used by the
 openPOWERLINK demo applications.
 
 \ingroup module_app_common
@@ -45,6 +45,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _WIN32_WINNT 0x0501     // Windows version must be at least Windows XP
 #define WIN32_LEAN_AND_MEAN     // Do not use extended Win32 API functions
 #include <Windows.h>
+
+#include "system.h"
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -94,10 +96,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 The function initializes important stuff on the system for openPOWERLINK to
 work correctly.
 
+\return The function returns 0 if the initialization has been successful,
+        otherwise -1.
+
 \ingroup module_app_common
 */
 //------------------------------------------------------------------------------
-int initSystem(void)
+int system_init(void)
 {
     // activate realtime priority class
     SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
@@ -111,58 +116,22 @@ int initSystem(void)
 /**
 \brief  Shutdown system
 
-The function shuts-down the system.
+The function shuts down the system.
 
 \ingroup module_app_common
 */
 //------------------------------------------------------------------------------
-void shutdownSystem(void)
+void system_exit(void)
 {
 
 }
 
-#if defined(CONFIG_USE_SYNCTHREAD)
-//------------------------------------------------------------------------------
 /**
-\brief  Start synchronous data thread
-
-The function starts the thread used for synchronous data handling.
-
-\param  pfnSync_p           Pointer to sync callback function
-
-\note   Currently not implemented for Windows!
-
-\ingroup module_app_common
-*/
-//------------------------------------------------------------------------------
-void startSyncThread(tSyncCb pfnSync_p)
-{
-    // Currently threads are not used on Windows
-    UNUSED_PARAMETER(pfnSync_p);
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Stop synchronous data thread
-
-The function stops the thread used for synchronous data handling.
-
-\ingroup module_app_common
-*/
-//------------------------------------------------------------------------------
-void stopSyncThread(void)
-{
-    // Currently threads are not used on Windows
-}
-#endif
-
-
-//------------------------------------------------------------------------------
-/**
-\brief  Return true if a termination signal has been received
+\brief  Determines whether a termination signal has been received
 
 The function can be used by the application to react on termination request.
-On Windows, this function only implemented as a stub.
+On Windows, this function is only implemented as a stub.
+
 
 \ingroup module_app_common
 */
@@ -181,13 +150,49 @@ milliseconds have elapsed.
 
 \param  milliSeconds_p      Number of milliseconds to sleep
 
-\ingroup module_target
+\ingroup module_app_common
 */
 //------------------------------------------------------------------------------
-void msleep(unsigned int milliSeconds_p)
+void system_msleep(unsigned int milliSeconds_p)
 {
     Sleep(milliSeconds_p);
 }
+
+#if defined(CONFIG_USE_SYNCTHREAD)
+//------------------------------------------------------------------------------
+/**
+\brief  Start synchronous data thread
+
+The function starts the thread used for synchronous data handling.
+
+\param  pfnSync_p           Pointer to sync callback function
+
+\note   Currently not implemented for Windows!
+
+\ingroup module_app_common
+*/
+//------------------------------------------------------------------------------
+void system_startSyncThread(tSyncCb pfnSync_p)
+{
+    // Currently threads are not used on Windows
+    UNUSED_PARAMETER(pfnSync_p);
+}
+
+
+//------------------------------------------------------------------------------
+/**
+\brief  Stop synchronous data thread
+
+The function stops the thread used for synchronous data handling.
+
+\ingroup module_app_common
+*/
+//------------------------------------------------------------------------------
+void system_stopSyncThread(void)
+{
+    // Currently threads are not used on Windows
+}
+#endif
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
@@ -195,5 +200,4 @@ void msleep(unsigned int milliSeconds_p)
 /// \name Private Functions
 /// \{
 
-///\}
-
+/// \}

@@ -48,7 +48,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <pthread.h>
 #include <signal.h>
 
-#include <oplk/oplk.h>
+#include "system.h"
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -77,29 +77,33 @@ static BOOL    fTermSignalReceived_g = FALSE;
 // const defines
 //------------------------------------------------------------------------------
 
-#if defined(CONFIG_USE_SYNCTHREAD)
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
+#if defined(CONFIG_USE_SYNCTHREAD)
 typedef struct
 {
     tSyncCb         pfnSyncCb;
     BOOL            fTerminate;
 } tSyncThreadInstance;
+#endif
 
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
+#if defined(CONFIG_USE_SYNCTHREAD)
 static pthread_t                syncThreadId_l;
 static tSyncThreadInstance      syncThreadInstance_l;
+#endif
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-void* powerlinkSyncThread(void* arg);
-#endif
+static void system_handleTermSignal(int signum);
 
-void system_handleTermSignal(int signum);
+#if defined(CONFIG_USE_SYNCTHREAD)
+static void* system_powerlinkSyncThread(void* arg);
+#endif
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -112,10 +116,13 @@ void system_handleTermSignal(int signum);
 The function initializes important stuff on the system for openPOWERLINK to
 work correctly.
 
+\return The function returns 0 if the initialization has been successful,
+        otherwise -1.
+
 \ingroup module_app_common
 */
 //------------------------------------------------------------------------------
-int initSystem(void)
+int system_init(void)
 {
     struct sched_param          schedParam;
 
@@ -169,59 +176,15 @@ The function shuts down the system.
 \ingroup module_app_common
 */
 //------------------------------------------------------------------------------
-void shutdownSystem(void)
+void system_exit(void)
 {
     /* Disable ftrace debugging */
     FTRACE_ENABLE(FALSE);
 }
 
-#if defined(CONFIG_USE_SYNCTHREAD)
 //------------------------------------------------------------------------------
 /**
-\brief  Start synchronous data thread
-
-The function starts the thread used for synchronous data handling.
-
-\param  pfnSync_p           Pointer to sync callback function
-
-\ingroup module_app_common
-*/
-//------------------------------------------------------------------------------
-void startSyncThread(tSyncCb pfnSync_p)
-{
-    syncThreadInstance_l.pfnSyncCb = pfnSync_p;
-    syncThreadInstance_l.fTerminate = FALSE;
-
-    // create sync thread
-    if (pthread_create(&syncThreadId_l, NULL, &powerlinkSyncThread,
-                       &syncThreadInstance_l) != 0)
-    {
-        return;
-    }
-
-#if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 12)
-    pthread_setname_np(syncThreadId_l, "oplkdemo-sync");
-#endif
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Stop synchronous data thread
-
-The function stops the thread used for synchronous data handling.
-
-\ingroup module_app_common
-*/
-//------------------------------------------------------------------------------
-void stopSyncThread(void)
-{
-    syncThreadInstance_l.fTerminate = TRUE;
-}
-#endif
-
-//------------------------------------------------------------------------------
-/**
-\brief  Return true if a termination signal has been received
+\brief  Determines whether a termination signal has been received
 
 The function can be used by the application to react on termination request.
 
@@ -233,60 +196,6 @@ BOOL system_getTermSignalState(void)
     return fTermSignalReceived_g;
 }
 
-//============================================================================//
-//            P R I V A T E   F U N C T I O N S                               //
-//============================================================================//
-/// \name Private Functions
-/// \{
-
-#if defined(CONFIG_USE_SYNCTHREAD)
-//------------------------------------------------------------------------------
-/**
-\brief  Synchronous application thread
-
-This function implements the synchronous application thread.
-
-\param  arg             Needed for thread interface not used
-*/
-//------------------------------------------------------------------------------
-void* powerlinkSyncThread(void* arg)
-{
-    tSyncThreadInstance*     pSyncThreadInstance = (tSyncThreadInstance*)arg;
-
-    PRINTF("Synchronous data thread is starting...\n");
-    while (!pSyncThreadInstance->fTerminate)
-    {
-        pSyncThreadInstance->pfnSyncCb();
-    }
-    PRINTF("Synchronous data thread is terminating...\n");
-
-    return NULL;
-}
-#endif
-
-//------------------------------------------------------------------------------
-/**
-\brief  Handle termination requests
-
-This functions can be used to react on signals with termination semantics,
-and remembers in a flag that the user or the system asked the program to shut down.
-The application can than check this flag.
-*/
-//------------------------------------------------------------------------------
-void system_handleTermSignal(int signum)
-{
-    switch (signum)
-    {
-        case SIGINT:    // Signals with termination semantics
-        case SIGTERM:   // trigger a flag change
-        case SIGQUIT:
-            fTermSignalReceived_g = TRUE;
-            break;
-
-        default:        // All other signals are ignored by this handler
-            break;
-    }
-}
 
 //------------------------------------------------------------------------------
 /**
@@ -297,10 +206,10 @@ milliseconds has elapsed.
 
 \param  milliSeconds_p      Number of milliseconds to sleep
 
-\ingroup module_target
+\ingroup module_app_common
 */
 //------------------------------------------------------------------------------
-void msleep(unsigned int milliSeconds_p)
+void system_msleep(unsigned int milliSeconds_p)
 {
     struct  timeval timeout;
     fd_set          readFds;
@@ -335,5 +244,103 @@ void msleep(unsigned int milliSeconds_p)
     }
 }
 
-///\}
+#if defined(CONFIG_USE_SYNCTHREAD)
+//------------------------------------------------------------------------------
+/**
+\brief  Start synchronous data thread
 
+The function starts the thread used for synchronous data handling.
+
+\param  pfnSync_p           Pointer to sync callback function
+
+\ingroup module_app_common
+*/
+//------------------------------------------------------------------------------
+void system_startSyncThread(tSyncCb pfnSync_p)
+{
+    syncThreadInstance_l.pfnSyncCb = pfnSync_p;
+    syncThreadInstance_l.fTerminate = FALSE;
+
+    // create sync thread
+    if (pthread_create(&syncThreadId_l, NULL, &powerlinkSyncThread,
+                       &syncThreadInstance_l) != 0)
+    {
+        return;
+    }
+
+#if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 12)
+    pthread_setname_np(syncThreadId_l, "oplkdemo-sync");
+#endif
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Stop synchronous data thread
+
+The function stops the thread used for synchronous data handling.
+
+\ingroup module_app_common
+*/
+//------------------------------------------------------------------------------
+void system_stopSyncThread(void)
+{
+    syncThreadInstance_l.fTerminate = TRUE;
+}
+#endif
+
+//============================================================================//
+//            P R I V A T E   F U N C T I O N S                               //
+//============================================================================//
+/// \name Private Functions
+/// \{
+
+//------------------------------------------------------------------------------
+/**
+\brief  Handle termination requests
+
+This functions can be used to react on signals with termination semantics,
+and remembers in a flag that the user or the system asked the program to shut down.
+The application can than check this flag.
+*/
+//------------------------------------------------------------------------------
+static void system_handleTermSignal(int signum)
+{
+    switch (signum)
+    {
+        case SIGINT:    // Signals with termination semantics
+        case SIGTERM:   // trigger a flag change
+        case SIGQUIT:
+            fTermSignalReceived_g = TRUE;
+            break;
+
+        default:        // All other signals are ignored by this handler
+            break;
+    }
+}
+
+#if defined(CONFIG_USE_SYNCTHREAD)
+//------------------------------------------------------------------------------
+/**
+\brief  Synchronous application thread
+
+This function implements the synchronous application thread.
+
+\param  arg             Needed for thread interface not used
+*/
+//------------------------------------------------------------------------------
+static void* system_powerlinkSyncThread(void* arg)
+{
+    tSyncThreadInstance*     pSyncThreadInstance = (tSyncThreadInstance*)arg;
+
+    PRINTF("Synchronous data thread is starting...\n");
+    while (!pSyncThreadInstance->fTerminate)
+    {
+        pSyncThreadInstance->pfnSyncCb();
+    }
+    PRINTF("Synchronous data thread is terminating...\n");
+
+    return NULL;
+}
+#endif
+
+/// \}

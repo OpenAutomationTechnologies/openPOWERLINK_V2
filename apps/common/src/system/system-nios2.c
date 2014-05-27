@@ -44,6 +44,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sys/alt_irq.h>
 #include <sys/alt_alarm.h>
 
+#include "system.h"
+
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
@@ -84,6 +86,53 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
 //============================================================================//
+//------------------------------------------------------------------------------
+/**
+\brief  Initialize system
+
+The function initializes important stuff on the system for openPOWERLINK to
+work correctly.
+
+\return The function returns 0 if the initialization has been successful,
+        otherwise -1.
+
+\ingroup module_app_common
+*/
+//------------------------------------------------------------------------------
+int system_init(void)
+{
+    return 0;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Shutdown system
+
+The function shuts down the system.
+
+\ingroup module_app_common
+*/
+//------------------------------------------------------------------------------
+void system_exit(void)
+{
+
+}
+
+/**
+\brief  Determines whether a termination signal has been received
+
+The function can be used by the application to react on termination request.
+On Nios2, this function is only implemented as a stub.
+
+
+\ingroup module_app_common
+*/
+//------------------------------------------------------------------------------
+BOOL system_getTermSignalState(void)
+{
+    return FALSE;
+}
+
 
 //------------------------------------------------------------------------------
 /**
@@ -92,14 +141,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 The function makes the calling thread sleep until the number of specified
 milliseconds have elapsed.
 
-\param  milliSecond_p       Number of milliseconds to sleep
+\param  milliSeconds_p      Number of milliseconds to sleep
 
-\ingroup module_target
+\ingroup module_app_common
 */
 //------------------------------------------------------------------------------
-void msleep(unsigned int milliSecond_p)
+void system_msleep(unsigned int milliSeconds_p)
 {
-    usleep(TGTCONIO_MS_IN_US(milliSecond_p));
+    usleep(TGTCONIO_MS_IN_US(milliSeconds_p));
 }
 
 //============================================================================//
@@ -108,5 +157,4 @@ void msleep(unsigned int milliSecond_p)
 /// \name Private Functions
 /// \{
 
-///\}
-
+/// \}

@@ -135,7 +135,7 @@ int main (int argc, char** argv)
 
     getOptions(argc, argv, &opts);
 
-    if (initSystem() < 0)
+    if (system_init() != 0)
     {
         printf("Error initializing system!");
         return 0;
@@ -160,7 +160,7 @@ int main (int argc, char** argv)
 Exit:
     shutdownPowerlink();
     shutdownApp();
-    shutdownSystem();
+    system_exit();
 
     return 0;
 }
@@ -274,7 +274,7 @@ static void loopMain(void)
 #if !defined(CONFIG_KERNELSTACK_DIRECTLINK)
 
 #if defined(CONFIG_USE_SYNCTHREAD)
-    startSyncThread(processSync);
+    system_startSyncThread(processSync);
 #endif
 
 #endif
@@ -349,7 +349,7 @@ static void loopMain(void)
         }
 
 #if defined(CONFIG_USE_SYNCTHREAD) || defined(CONFIG_KERNELSTACK_DIRECTLINK)
-        msleep(100);
+        system_msleep(100);
 #else
         processSync();
 #endif
@@ -377,8 +377,8 @@ static void shutdownPowerlink(void)
     fGsOff_l = FALSE;
 
 #if !defined(CONFIG_KERNELSTACK_DIRECTLINK) && defined(CONFIG_USE_SYNCTHREAD)
-    stopSyncThread();
-    msleep(100);
+    system_stopSyncThread();
+    system_msleep(100);
 #endif
 
     // halt the NMT state machine so the processing of POWERLINK frames stops
@@ -441,5 +441,4 @@ static int getOptions(int argc_p, char** argv_p, tOptions* pOpts_p)
     return 0;
 }
 
-///\}
-
+/// \}
