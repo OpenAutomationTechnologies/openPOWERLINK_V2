@@ -43,7 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #define _CRT_NONSTDC_NO_WARNINGS    // for MSVC 2005 or higher
 
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <oplk/obd.h>
 #include <oplk/obdcdc.h>
 #include <common/ami.h>
@@ -519,4 +519,3 @@ static tOplkError loadNextBuffer(tObdCdcInfo* pCdcInfo_p, size_t bufferSize)
 ///\}
 
 #endif
-

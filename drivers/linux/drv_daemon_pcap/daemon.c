@@ -49,6 +49,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sched.h>
 
 #include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <kernel/ctrlk.h>
 #include <console/console.h>
 #include <common/target.h>
@@ -200,4 +201,3 @@ Exit:
     PRINTF("Exiting\n");
     return ret;
 }
-

@@ -43,7 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -82,4 +82,3 @@ void       synctimer_disableExtSyncIrq(void);
 #endif
 
 #endif /* _INC_synctimer_H_ */
-

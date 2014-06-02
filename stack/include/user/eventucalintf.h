@@ -43,7 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <oplk/event.h>
 
 #include <user/eventu.h>
@@ -79,4 +79,3 @@ tOplkError eventucal_setSignalingCircbuf(tEventQueue eventQueue_p, VOIDFUNCPTR p
 #endif
 
 #endif /* _INC_eventucalintf_H_ */
-

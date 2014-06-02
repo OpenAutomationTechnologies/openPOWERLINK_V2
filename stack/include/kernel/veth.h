@@ -42,7 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -68,4 +68,3 @@ tOplkError veth_delInstance(void);
 #endif
 
 #endif  // #ifndef _INC_veth_H_
-

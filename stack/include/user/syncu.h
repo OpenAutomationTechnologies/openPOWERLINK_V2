@@ -42,7 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <oplk/dll.h>
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
@@ -78,4 +78,3 @@ tOplkError syncu_requestSyncResponse(tSyncuCbResponse pfnCbResponse_p,
 #endif
 
 #endif  /* _INC_syncu_H_ */
-

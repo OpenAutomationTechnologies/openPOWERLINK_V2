@@ -39,7 +39,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <oplk/dll.h>
 
 //------------------------------------------------------------------------------
@@ -140,4 +140,3 @@ tDllCalFuncIntf* dllkcalcircbuf_getInterface(void);
 #endif
 
 #endif /* _INC_common_dllcal_H_ */
-

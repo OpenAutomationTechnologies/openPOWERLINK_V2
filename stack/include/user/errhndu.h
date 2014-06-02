@@ -41,7 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <common/errhnd.h>
 
 //------------------------------------------------------------------------------
@@ -75,4 +75,3 @@ tOplkError errhndu_mnCnLossPresCbObdAccess(tObdCbParam MEM* pParam_p);
 #endif
 
 #endif /* _INC_ErrHndu_H_ */
-

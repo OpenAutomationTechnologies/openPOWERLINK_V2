@@ -43,7 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stddef.h>
 #include <limits.h>
 
-#include <oplk/oplk.h>
+#include <common/oplkinc.h>
 #include <common/ami.h>
 
 #include <user/pdoucal.h>
@@ -1020,4 +1020,3 @@ static tOplkError cbReceivedAsnd(tFrameInfo* pFrameInfo_p)
 }
 
 /// \}
-

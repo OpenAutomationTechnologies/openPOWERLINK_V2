@@ -39,7 +39,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <oplk/dll.h>
 #include <oplk/event.h>
 
@@ -99,4 +99,3 @@ tOplkError dllucal_issueSyncRequest(tDllSyncRequest* pSyncRequest_p, unsigned in
 #endif
 
 #endif /* _INC_dllucal_H_ */
-

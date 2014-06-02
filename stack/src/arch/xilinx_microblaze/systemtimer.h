@@ -41,7 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -69,4 +69,3 @@ UINT32 timer_getMSCount(void);
 #endif
 
 #endif /* _INC_xilinx_microblaze_systemtimer_H_ */
-

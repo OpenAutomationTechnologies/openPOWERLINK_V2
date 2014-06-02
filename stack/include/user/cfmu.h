@@ -41,7 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <oplk/nmt.h>
 #include <oplk/cfm.h>
 
@@ -73,4 +73,3 @@ BOOL       cfmu_isSdoRunning(UINT nodeId_p);
 #endif
 
 #endif /* _INC_cfmu_H_ */
-

@@ -42,7 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <oplk/dll.h>
 
 //------------------------------------------------------------------------------
@@ -75,4 +75,3 @@ UINT32     identu_getRunningRequests(void);
 #endif
 
 #endif /* _INC_identu_H_ */
-

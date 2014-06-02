@@ -40,7 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplk.h>
+#include <common/oplkinc.h>
 
 #include "usleep.h"
 #include "systemtimer.h"
@@ -262,4 +262,3 @@ static void disableInterruptMaster(void)
     XIntc_MasterDisable(XPAR_PCP_INTC_BASEADDR);
 }
 ///\}
-

@@ -397,7 +397,6 @@ SET(OPLK_HEADERS
     ${STACK_INCLUDE_DIR}/oplk/dll.h
     ${STACK_INCLUDE_DIR}/oplk/oplk.h
     ${STACK_INCLUDE_DIR}/oplk/oplkdefs.h
-    ${STACK_INCLUDE_DIR}/oplk/defaultcfg.h
     ${STACK_INCLUDE_DIR}/oplk/errordefs.h
     ${STACK_INCLUDE_DIR}/oplk/frame.h
     ${STACK_INCLUDE_DIR}/oplk/oplkinc.h
@@ -431,8 +430,10 @@ SET(STACK_HEADERS
     ${STACK_INCLUDE_DIR}/common/ctrl.h
     ${STACK_INCLUDE_DIR}/common/ctrlcal.h
     ${STACK_INCLUDE_DIR}/common/ctrlcal-mem.h
+    ${STACK_INCLUDE_DIR}/common/defaultcfg.h
     ${STACK_INCLUDE_DIR}/common/dllcal.h
     ${STACK_INCLUDE_DIR}/common/errhnd.h
+    ${STACK_INCLUDE_DIR}/common/oplkinc.h
     ${STACK_INCLUDE_DIR}/common/pdo.h
     ${STACK_INCLUDE_DIR}/common/target.h
     ${STACK_INCLUDE_DIR}/common/timer.h

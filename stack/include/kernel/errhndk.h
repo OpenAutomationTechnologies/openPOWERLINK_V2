@@ -42,7 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <oplk/event.h>
 #include <common/errhnd.h>
 
@@ -105,4 +105,3 @@ tOplkError errhndk_resetCnError(UINT nodeId_p);
 #endif
 
 #endif /* _INC_errhndk_H_ */
-

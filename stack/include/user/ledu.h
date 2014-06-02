@@ -41,7 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <oplk/led.h>
 #include <oplk/nmt.h>
 #include <user/eventu.h>
@@ -74,4 +74,3 @@ tOplkError ledu_processEvent(tEvent* pEvent_p);
 #endif
 
 #endif /* _INC_ledu_H_ */
-

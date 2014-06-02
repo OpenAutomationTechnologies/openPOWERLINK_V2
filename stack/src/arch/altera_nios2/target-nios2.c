@@ -43,7 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <unistd.h>
 #include <sys/alt_irq.h>
 #include <sys/alt_alarm.h>
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <common/target.h>
 
 //============================================================================//
@@ -190,4 +190,3 @@ void target_msleep(unsigned int milliSecond_p)
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
-

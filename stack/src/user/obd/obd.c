@@ -40,7 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <oplk/obd.h>
 #include <common/ami.h>
 
@@ -2593,4 +2593,3 @@ static tOplkError callStoreCallback(tObdCbStoreParam MEM* pCbStoreParam_p)
 #endif // (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
 
 ///\}
-

@@ -41,7 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -74,4 +74,3 @@ UINT32     target_getTickCount(void);
 #endif
 
 #endif /* _INC_common_target_H_ */
-

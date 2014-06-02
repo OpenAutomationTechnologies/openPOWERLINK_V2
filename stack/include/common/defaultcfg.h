@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   oplk/defaultcfg.h
+\file   common/defaultcfg.h
 
 \brief  Default configuration values
 
@@ -35,8 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_oplk_defaultcfg_H_
-#define _INC_oplk_defaultcfg_H_
+#ifndef _INC_common_defaultcfg_H_
+#define _INC_common_defaultcfg_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -247,5 +247,4 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CONFIG_EDRV_AUTO_RESPONSE_DELAY                 FALSE
 #endif
 
-#endif /* _INC_oplk_defaultcfg_H_ */
-
+#endif /* _INC_common_defaultcfg_H_ */

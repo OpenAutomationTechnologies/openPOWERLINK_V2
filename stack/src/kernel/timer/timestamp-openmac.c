@@ -40,7 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <omethlib.h>
 
 //============================================================================//
@@ -107,4 +107,3 @@ UINT32 timestamp_calcTimeDiff(tTimestamp* pTimeStampPrevious_p,
 
     return OMETH_TICKS_2_NS(timeDiffTicks);
 }
-

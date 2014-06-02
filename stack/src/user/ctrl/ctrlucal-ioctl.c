@@ -48,7 +48,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fcntl.h>
 #include <sys/mman.h>
 
-#include <oplk/oplk.h>
+#include <common/oplkinc.h>
 #include <common/ctrl.h>
 #include <common/ctrlcal.h>
 #include <common/ctrlcal-mem.h>
@@ -352,4 +352,3 @@ int ctrlucal_getFd(void)
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
-

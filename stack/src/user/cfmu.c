@@ -43,7 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <limits.h>
 
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <common/ami.h>
 #include <oplk/obd.h>
 #include <user/cfmu.h>
@@ -934,4 +934,3 @@ static tOplkError sdoWriteObject(tCfmNodeInfo* pNodeInfo_p, void* pLeSrcData_p, 
 }
 
 ///\}
-

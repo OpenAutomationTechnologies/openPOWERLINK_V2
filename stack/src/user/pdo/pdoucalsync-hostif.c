@@ -39,7 +39,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <common/pdo.h>
 #include <user/pdoucal.h>
 
@@ -184,4 +184,3 @@ static void hostifIrqSyncCb(void *pArg_p)
 
     pfnSyncCb_l();
 }
-

@@ -40,7 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplk.h>
+#include <common/oplkinc.h>
 #include <kernel/dllk.h>
 #include <kernel/eventk.h>
 #include <kernel/nmtk.h>

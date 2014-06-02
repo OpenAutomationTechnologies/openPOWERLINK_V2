@@ -42,7 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 
 #include <common/pdo.h>
 #include <user/ctrlucal.h>
@@ -211,4 +211,3 @@ tOplkError pdoucal_freeMem(BYTE* pMem_p, size_t memSize_p)
 /// \{
 
 ///\}
-

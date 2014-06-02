@@ -41,7 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 
 #include <kernel/synctimer.h>
 #include <target/openmac.h>
@@ -1036,4 +1036,3 @@ static void drvInterruptHandler(void* pArg_p)
 }
 
 ///\}
-

@@ -40,7 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <kernel/edrv.h>
 
 #define WPCAP           // include Windows pcap extensions
@@ -612,4 +612,3 @@ static UINT32 WINAPI edrvWorkerThread(void* pArgument_p)
 }
 
 ///\}
-

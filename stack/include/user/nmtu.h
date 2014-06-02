@@ -42,7 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <oplk/nmt.h>
 #include <user/eventu.h>
 
@@ -130,4 +130,3 @@ tOplkError      nmtu_registerStateChangeCb(tNmtuStateChangeCallback pfnNmtStateC
 #endif
 
 #endif  // #ifndef _INC_nmtu_H_
-

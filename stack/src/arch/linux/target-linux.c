@@ -44,7 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <signal.h>
 #include <time.h>
 
-#include <oplk/oplk.h>
+#include <common/oplkinc.h>
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -253,4 +253,3 @@ UINT32 target_getTickCount(void)
 
     return ticks;
 }
-

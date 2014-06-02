@@ -42,7 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <user/nmtu.h>
 #include <oplk/dll.h>
 #include <oplk/frame.h>
@@ -74,4 +74,3 @@ tOplkError nmtcnu_registerCheckEventCb(tNmtuCheckEventCallback pfnNmtCheckEventC
 #endif
 
 #endif /* _INC_nmtcnu_H_ */
-

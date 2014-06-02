@@ -47,7 +47,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sys/stat.h>
 #include <semaphore.h>
 
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <common/pdo.h>
 
 //============================================================================//
@@ -166,4 +166,3 @@ tOplkError pdokcal_controlSync(BOOL fEnable_p)
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
-

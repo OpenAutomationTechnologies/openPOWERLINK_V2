@@ -54,6 +54,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <asm/atomic.h>
 
 #include <oplk/oplk.h>
+#include <common/oplkinc.h>
 #include <oplk/powerlink-module.h>
 
 #include <common/ctrl.h>
@@ -772,4 +773,3 @@ void increaseHeartbeatCb(ULONG data_p)
 }
 
 ///\}
-

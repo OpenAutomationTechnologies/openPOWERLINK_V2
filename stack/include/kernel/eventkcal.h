@@ -44,7 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <oplk/event.h>
 
 #include <kernel/eventk.h>
@@ -81,4 +81,3 @@ int        eventkcal_getEventForUser(unsigned long arg);
 #endif
 
 #endif /* _INC_eventkcal_H_ */
-

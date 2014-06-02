@@ -42,7 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <unistd.h>
 
-#include <oplk/oplk.h>
+#include <common/oplkinc.h>
 #include <common/ctrl.h>
 #include <common/ctrlcal.h>
 #include <user/ctrlucal.h>
@@ -491,4 +491,3 @@ static void freeDynBuff(UINT8* pDynBufBase_p)
 }
 
 ///\}
-

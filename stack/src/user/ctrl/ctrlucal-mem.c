@@ -43,7 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <unistd.h>
 #include <stddef.h>
 
-#include <oplk/oplk.h>
+#include <common/oplkinc.h>
 #include <common/ctrl.h>
 #include <common/ctrlcal.h>
 #include <common/ctrlcal-mem.h>
@@ -352,4 +352,3 @@ static UINT16 getMagic(void)
 
     return 0;
 }
-

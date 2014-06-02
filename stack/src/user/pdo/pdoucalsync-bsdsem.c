@@ -45,7 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <semaphore.h>
 #include <time.h>
 
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <common/pdo.h>
 #include <user/pdoucal.h>
 #include <errno.h>
@@ -176,4 +176,3 @@ tOplkError pdoucal_waitSyncEvent(ULONG timeout_p)
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
-

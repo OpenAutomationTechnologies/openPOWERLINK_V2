@@ -40,7 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <common/pdo.h>
 #include <oplk/event.h>
 
@@ -92,4 +92,3 @@ tOplkError pdoucal_callSyncCb(void);
 #endif
 
 #endif /* _INC_pdoucal_H_ */
-

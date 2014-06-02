@@ -39,7 +39,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -139,4 +139,3 @@ UINT32        circbuf_getMaxSize(tCircBufInstance* pInstance_p);
 #endif
 
 #endif /* _INC_common_circbuffer_H_ */
-

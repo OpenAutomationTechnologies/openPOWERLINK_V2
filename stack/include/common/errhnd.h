@@ -42,7 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <oplk/obd.h>
 
 //------------------------------------------------------------------------------
@@ -86,4 +86,3 @@ extern "C" {
 #endif
 
 #endif /* _INC_common_errhnd_H_ */
-

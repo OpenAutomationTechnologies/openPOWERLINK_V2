@@ -40,7 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <common/pdo.h>
 #include <kernel/pdokcal.h>
 
@@ -201,4 +201,3 @@ static tOplkError enableSyncIrq(BOOL fEnable_p)
 
     return kErrorOk;
 }
-

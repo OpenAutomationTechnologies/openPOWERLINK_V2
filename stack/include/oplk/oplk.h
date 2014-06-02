@@ -43,6 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <oplk/oplkinc.h>
+#include <oplk/frame.h>
 #include <oplk/sdo.h>
 #include <oplk/obd.h>
 #include <oplk/led.h>
@@ -396,4 +397,3 @@ OPLKDLLEXPORT tOplkError oplk_setupProcessImage(void);
 #endif
 
 #endif  // #ifndef _INC_oplk_oplk_H_
-

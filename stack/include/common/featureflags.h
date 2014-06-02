@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   oplk/featureflags.h
+\file   common/featureflags.h
 
 \brief  Feature flag definitions
 
@@ -34,13 +34,13 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_oplk_featureflags_H_
-#define _INC_oplk_featureflags_H_
+#ifndef _INC_common_featureflags_H_
+#define _INC_common_featureflags_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+
 
 //------------------------------------------------------------------------------
 // const defines
@@ -150,5 +150,4 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                                PLK_DEF_FEATURE_NMT_EXT | \
                                PLK_DEF_FEATURE_PRES_CHAINING)
 
-#endif /* _INC_oplk_featureflags_H_ */
-
+#endif /* _INC_common_featureflags_H_ */

@@ -41,7 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <oplk/dll.h>
 
 //------------------------------------------------------------------------------
@@ -72,4 +72,3 @@ tOplkError statusu_requestStatusResponse(UINT nodeId_p, tStatusuCbResponse pfnCb
 #endif
 
 #endif /* _INC_statusu_H_ */
-

@@ -41,7 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <oplk/sdo.h>
 #include <oplk/obd.h>
 #include <oplk/sdoabortcodes.h>
@@ -81,4 +81,3 @@ tOplkError sdocom_abortTransfer(tSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p
 #endif
 
 #endif /* _INC_sdocom_H_ */
-

@@ -40,7 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <common/pdo.h>
 #include <kernel/pdokcal.h>
 
@@ -183,4 +183,3 @@ tOplkError pdokcal_freeMem(BYTE* pMem_p, size_t memSize_p)
 /// \{
 
 ///\}
-

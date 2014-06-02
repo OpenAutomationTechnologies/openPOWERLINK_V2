@@ -1,15 +1,17 @@
 /**
 ********************************************************************************
-\file   common/ctrlcal-mem.h
+\file   common/oplkinc.h
 
-\brief  Definitions for ctrl CAL module
+\brief  Standard include file
 
-This file contains the definitions for the ctrl CAL module.
-
+This is the standard include file that must be included by every openPOWERLINK
+header file. It includes all necessary files for setting up the basic types
+and definitions.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,60 +37,92 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_common_ctrlcal_mem_H_
-#define _INC_common_ctrlcal_mem_H_
+#ifndef _INC_common_oplkinc_H_
+#define _INC_common_oplkinc_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <common/oplkinc.h>
+#include <oplk/oplk.h>
+#include <oplkcfg.h>                 // Stack configuration file
+#include <common/defaultcfg.h>
+#include <common/featureflags.h>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define CTRL_MAGIC                      0xA5A5
+
+//------------------------------------------------------------------------------
+//  Set default definitions if not already set in target specific section
+
+#ifndef OPLK_MEMCPY
+#define OPLK_MEMCPY(dst, src, siz)    memcpy((dst), (src), (siz))
+#endif
+
+#ifndef OPLK_MEMSET
+#define OPLK_MEMSET(dst, val, siz)    memset((dst), (val), (siz))
+#endif
+
+#ifndef OPLK_MEMCMP
+#define OPLK_MEMCMP(src1, src2, siz)  memcmp((src1), (src2), (siz))
+#endif
+#ifndef OPLK_MALLOC
+#define OPLK_MALLOC(siz)              malloc(siz)
+#endif
+
+#ifndef OPLK_FREE
+#define OPLK_FREE(ptr)                free(ptr)
+#endif
+
+#ifndef OPLK_ATOMIC_INIT
+#define OPLK_ATOMIC_INIT(ignore)      ((void)0)
+#endif
+
+#ifndef TIME_STAMP_T
+#define TIME_STAMP_T                  UINT32
+#endif
 
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
 
 /**
-\brief Structure for control command
+\brief Timestamp structure
 
-The structure defines how a command looks like.
-*/
-typedef struct sCtrlCmd
-{
-    UINT16              cmd;        ///< The command to execute
-    UINT16              retVal;     ///< The return value of the command
-}tCtrlCmd;
-
-/**
-\brief Structure for control buffer
-
-This structure defines the control buffer which is used to exchange control
-information between the kernel and the user layer.
+The following structure defines a timestamp value use to store target specific
+timestamps.
 */
 typedef struct
 {
-    UINT16              magic;      ///< Magic 0xA5A5 identifies valid struct
-    UINT16              status;     ///< Status of the kernel stack
-    UINT16              heartbeat;  ///< Heartbeat counter
-    tCtrlCmd            ctrlCmd;    ///< The control command structure
-    tCtrlInitParam      initParam;  ///< The initialization parameter structure
-} tCtrlBuf;
+    TIME_STAMP_T        timeStamp;      ///< The timestamp.
+} tTimestamp;
+
 
 //------------------------------------------------------------------------------
-// function prototypes
+// global macros
 //------------------------------------------------------------------------------
-
-#ifdef __cplusplus
-extern "C" {
+#ifndef tabentries
+#define tabentries(aVar_p)  (sizeof(aVar_p) / sizeof(*(aVar_p)))
 #endif
 
-
-#ifdef __cplusplus
-}
+#ifndef min
+#define min(a, b)           (((a) < (b)) ? (a) : (b))
 #endif
 
-#endif /* _INC_common_ctrlcal_mem_H_ */
+#ifndef max
+#define max(a, b)           (((a) > (b)) ? (a) : (b))
+#endif
+
+/* macro for adding two timespec values */
+#define TIMESPECADD(vvp, uvp)                                           \
+        {                                                               \
+                (vvp)->tv_sec += (uvp)->tv_sec;                         \
+                (vvp)->tv_nsec += (uvp)->tv_nsec;                       \
+                if ((vvp)->tv_nsec >= 1000000000)                       \
+                {                                                       \
+                        (vvp)->tv_sec++;                                \
+                        (vvp)->tv_nsec -= 1000000000;                   \
+                }                                                       \
+        }
+
+#endif /* _INC_common_oplkinc_H_ */

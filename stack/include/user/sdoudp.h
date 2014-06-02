@@ -41,7 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <oplk/sdo.h>
 
 //------------------------------------------------------------------------------
@@ -77,4 +77,3 @@ tOplkError sdoudp_delConnection(tSdoConHdl SdoConHandle_p);
 #endif
 
 #endif /* _INC_sdoudp_H_ */
-

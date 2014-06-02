@@ -44,7 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 
 #include "circbuf-arch.h"
 
@@ -276,4 +276,3 @@ void circbuf_unlock(tCircBufInstance* pInstance_p)
 /// \{
 
 ///\}
-

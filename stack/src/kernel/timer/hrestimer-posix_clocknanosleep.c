@@ -42,7 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <kernel/hrestimer.h>
 #include <oplk/benchmark.h>
 
@@ -594,4 +594,3 @@ static inline void timespec_sub(struct timespec* time1_p, struct timespec* time2
 #endif
 
 /// \}
-

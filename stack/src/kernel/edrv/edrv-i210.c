@@ -52,7 +52,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <kernel/edrv.h>
 
 #include <linux/pci.h>
@@ -2804,4 +2804,3 @@ static void removeOnePciDev(struct pci_dev* pPciDev_p)
 Exit:
     return;
 }
-

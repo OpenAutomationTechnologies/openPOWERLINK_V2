@@ -42,7 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <common/errhnd.h>
 
 //------------------------------------------------------------------------------
@@ -100,4 +100,3 @@ void errhndkcal_setMnCnLossPresThresholdCnt(UINT nodeIdx_p, UINT32 thresholdCnt_
 #endif
 
 #endif /* _INC_errhndkcal_H_ */
-

@@ -40,7 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplk.h>
+#include <common/oplkinc.h>
 
 #include <user/pdou.h>
 
@@ -332,4 +332,3 @@ void* oplk_getProcessImageOut(void)
 {
     return instance_l.outputImage.pImage;
 }
-

@@ -43,7 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <stddef.h>
 
-#include <oplk/oplk.h>
+#include <common/oplkinc.h>
 #include <common/ctrl.h>
 #include <kernel/ctrlk.h>
 
@@ -256,4 +256,3 @@ tOplkError ctrlucal_readInitParam(tCtrlInitParam* pInitParam_p)
     OPLK_MEMCPY(pInitParam_p, &kernelInitParam_g, sizeof(tCtrlInitParam));
     return kErrorOk;
 }
-

@@ -42,7 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <oplk/event.h>
 
 //------------------------------------------------------------------------------
@@ -77,4 +77,3 @@ tOplkError eventk_postError(tEventSource eventSource_p, tOplkError oplkError_p,
 #endif
 
 #endif /* _INC_eventk_H_ */
-

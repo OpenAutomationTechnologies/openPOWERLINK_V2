@@ -41,7 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <oplk/benchmark.h>
 
 #include <time.h>
@@ -379,4 +379,3 @@ tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
     hrtimer_setCallback(pTimerInfo->timer, (void*)pTimerInfo->pfnCallback, 0);
     return ret;
 }
-

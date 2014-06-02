@@ -42,7 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <user/nmtu.h>
 
 //------------------------------------------------------------------------------
@@ -99,4 +99,3 @@ tOplkError nmtmnu_configPrc(tNmtMnuConfigParam* pConfigParam_p);
 #endif
 
 #endif /* _INC_nmtmnu_H_ */
-

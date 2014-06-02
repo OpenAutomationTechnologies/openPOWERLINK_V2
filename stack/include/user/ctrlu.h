@@ -42,8 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
-#include <oplk/oplk.h>
+#include <common/oplkinc.h>
 
 #include <common/ctrl.h>
 
@@ -77,4 +76,3 @@ tOplkError ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p);
 #endif
 
 #endif /* _INC_ctrlu_H_ */
-

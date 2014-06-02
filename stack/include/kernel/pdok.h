@@ -40,7 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //---------------------------------------------------------------------------
 // includes
 //---------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <common/pdo.h>
 #include <oplk/frame.h>
 #include <oplk/dll.h>
@@ -77,4 +77,3 @@ tOplkError pdok_sendSyncEvent(void);
 #endif
 
 #endif  // #ifndef _INC_pdok_H_
-

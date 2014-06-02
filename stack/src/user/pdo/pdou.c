@@ -40,8 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplk.h>
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <common/ami.h>
 #include <oplk/debugstr.h>
 
@@ -1794,4 +1793,3 @@ static UINT calcPdoMemSize(tPdoChannelSetup* pPdoChannels_p, size_t* pRxPdoMemSi
 }
 
 ///\}
-

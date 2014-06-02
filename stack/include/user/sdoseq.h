@@ -41,7 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <oplk/sdo.h>
 #include <user/sdoudp.h>
 #include <user/sdoasnd.h>
@@ -78,4 +78,3 @@ tOplkError sdoseq_setTimeout(UINT32 timeout_p);
 #endif
 
 #endif /* _INC_sdoseq_H_ */
-

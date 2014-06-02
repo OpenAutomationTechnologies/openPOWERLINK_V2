@@ -42,7 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <oplk/event.h>
 
 //------------------------------------------------------------------------------
@@ -67,4 +67,3 @@ tOplkError event_getHandlerForSink(tEventDispatchEntry** ppDispatchEntry_p,
 #endif
 
 #endif /* _INC_event_event_H_ */
-

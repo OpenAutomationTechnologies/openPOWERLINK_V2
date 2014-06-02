@@ -51,7 +51,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <common/ami.h>
 #include <kernel/edrv.h>
 
@@ -1249,4 +1249,3 @@ static UINT8 calcHash (UINT8* pMacAddr_p)
 }
 
 ///\}
-

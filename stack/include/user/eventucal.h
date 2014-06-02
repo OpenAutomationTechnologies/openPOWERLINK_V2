@@ -44,7 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <oplk/event.h>
 
 #include <user/eventu.h>
@@ -76,4 +76,3 @@ void       eventucal_process(void);
 #endif
 
 #endif /* _INC_eventucal_H_ */
-

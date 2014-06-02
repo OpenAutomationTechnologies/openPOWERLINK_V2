@@ -40,7 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <oplk/obd.h>
 #include "user/nmtu.h"
 #include "user/timeru.h"
@@ -670,4 +670,3 @@ static tOplkError setupNmtTimerEvent(UINT32 timeout_p, tNmtEvent event_p)
 }
 
 ///\}
-

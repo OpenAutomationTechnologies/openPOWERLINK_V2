@@ -43,8 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
-#include <oplk/oplk.h>
+#include <common/oplkinc.h>
 #include <common/target.h>
 
 #include <kernel/eventkcal.h>
@@ -287,4 +286,3 @@ static BOOL checkForwardEventToKint(tEvent* pEvent_p)
 }
 
 /// \}
-

@@ -40,7 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplk.h>
+#include <common/oplkinc.h>
 
 #include <unistd.h>
 #include <sys/mman.h>
@@ -229,4 +229,3 @@ tOplkError ctrlcal_readData(void* pDest_p, UINT offset_p, size_t length_p)
     OPLK_MEMCPY(pDest_p, pCtrlMem_l + offset_p, length_p);
     return kErrorOk;
 }
-

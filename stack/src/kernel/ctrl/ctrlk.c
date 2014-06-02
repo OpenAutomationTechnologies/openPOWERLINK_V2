@@ -41,7 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplk.h>
+#include <common/oplkinc.h>
 #include <kernel/dllk.h>
 #include <kernel/errhndk.h>
 #include <kernel/eventk.h>
@@ -408,4 +408,3 @@ static tOplkError shutdownStack(void)
 //------------------------------------------------------------------------------
 /// \}
 //------------------------------------------------------------------------------
-

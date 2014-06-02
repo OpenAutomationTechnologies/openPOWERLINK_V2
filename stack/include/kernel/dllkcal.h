@@ -39,7 +39,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <oplk/dll.h>
 #include <common/dllcal.h>
 #include <oplk/event.h>
@@ -113,4 +113,3 @@ tOplkError dllkcal_setAsyncPendingRequests(UINT nodeId_p, tDllAsyncReqPriority a
 #endif
 
 #endif /* _INC_dllkcal_H_ */
-

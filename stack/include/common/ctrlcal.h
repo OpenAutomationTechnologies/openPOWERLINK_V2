@@ -41,7 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -70,4 +70,3 @@ tOplkError ctrlcal_readData(void* pDest_p, UINT offset_p, size_t length_p);
 #endif
 
 #endif /* _INC_common_ctrlcal_H_ */
-

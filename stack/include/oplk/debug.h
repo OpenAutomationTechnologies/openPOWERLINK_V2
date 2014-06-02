@@ -312,6 +312,7 @@ void DumpData(char* szStr_p, UINT8* pData_p, UINT16 size_p);
 
 //------------------------------------------------------------------------------
 // The macro DEBUG_ONLY() implements code, if NDEBUG is not defined.
+//------------------------------------------------------------------------------
 #if !defined (DEBUG_ONLY)
 
 #if !defined (NDEBUG)
@@ -322,5 +323,60 @@ void DumpData(char* szStr_p, UINT8* pData_p, UINT16 size_p);
 
 #endif
 
-#endif /* _INC_oplk_debug_H_ */
 
+//------------------------------------------------------------------------------
+//  definition of TRACE
+//------------------------------------------------------------------------------
+#ifndef NDEBUG
+#define TRACE(...) trace(__VA_ARGS__)
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void trace(const char* fmt, ...);
+
+#ifdef __cplusplus
+}
+#endif
+#else
+
+#define TRACE(...)
+
+#endif
+
+
+//------------------------------------------------------------------------------
+//  definition of ASSERT
+//------------------------------------------------------------------------------
+#ifndef ASSERT
+
+#if !defined (__linux__) && !defined (__KERNEL__)
+#include <assert.h>
+#define ASSERT(p)    assert(p)
+#else
+#define ASSERT(p)
+#endif
+
+#endif
+
+
+//------------------------------------------------------------------------------
+// This macro doesn't print out C-file and line number of the failed assertion
+// but a string, which exactly names the mistake.
+//------------------------------------------------------------------------------
+#if !defined(ASSERTMSG) && !defined(NDEBUG)
+
+#define ASSERTMSG(expr, string) \
+    if (!(expr)) \
+    { \
+        PRINTF("Assertion failed: " string);\
+        for ( ; ; );\
+    }
+#else
+
+#define ASSERTMSG(expr, string)
+
+#endif
+
+#endif /* _INC_oplk_debug_H_ */

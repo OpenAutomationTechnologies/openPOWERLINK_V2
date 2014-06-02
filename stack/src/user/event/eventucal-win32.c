@@ -42,8 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
-#include <oplk/oplk.h>
+#include <common/oplkinc.h>
 #include <oplk/debugstr.h>
 
 #include <user/eventu.h>
@@ -369,4 +368,3 @@ void signalKernelEvent(void)
 }
 
 /// \}
-

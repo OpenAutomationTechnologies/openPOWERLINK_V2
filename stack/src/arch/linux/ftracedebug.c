@@ -47,7 +47,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdarg.h>
 #include <unistd.h>
 
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 
 #ifdef  FTRACE_DEBUG
 
@@ -250,4 +250,3 @@ static char* findDebugfs(void)
 ///\}
 
 #endif
-

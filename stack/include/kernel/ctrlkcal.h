@@ -41,7 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <common/ctrl.h>
 
 //------------------------------------------------------------------------------
@@ -76,4 +76,3 @@ void       ctrlkcal_storeInitParam(tCtrlInitParam* pInitParam_p);
 #endif
 
 #endif /* _INC_ctrlkcal_H_ */
-

@@ -41,7 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <oplk/sdo.h>
 #include <oplk/dll.h>
 
@@ -77,4 +77,3 @@ tOplkError sdoasnd_deleteCon(tSdoConHdl sdoConHandle_p);
 #endif
 
 #endif /* _INC_sdoasnd_H_ */
-

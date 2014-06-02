@@ -41,7 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplk.h>
+#include <common/oplkinc.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -202,4 +202,3 @@ static tOplkError linkProcessImageRange(UINT objIndexStart_p, UINT objIndexEnd_p
 }
 
 /// \}
-
