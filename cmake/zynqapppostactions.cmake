@@ -40,7 +40,7 @@ MARK_AS_ADVANCED(XIL_VERIFY_ELF)
 # Set paths
 SET(XIL_HW_SPEC ${CFG_HW_LIB_DIR}/hw_platform)
 SET(XIL_XPS_DEMO_DIR ${CFG_DEMO_DIR}/xps)
-
+SET(XIL_ZYNQ_BINARY_DIR ${CMAKE_INSTALL_PREFIX}/${CFG_DEMO_BOARD_NAME}/${CFG_DEMO_NAME})
 ##############################################################################
 # Demo post build action
 ADD_CUSTOM_COMMAND(
@@ -65,6 +65,11 @@ SET(ADD_CLEAN_FILES ${ADD_CLEAN_FILES}
                     ${PROJECT_NAME}.map
    )
 
+ADD_CUSTOM_TARGET(
+            build-sd
+            COMMAND make all
+            WORKING_DIRECTORY ${XIL_ZYNQ_BINARY_DIR}
+    )
 
 ################################################################################
 # Set architecture specific installation files

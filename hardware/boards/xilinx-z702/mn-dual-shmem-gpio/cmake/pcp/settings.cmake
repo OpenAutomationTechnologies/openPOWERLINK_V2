@@ -57,6 +57,9 @@ SET(CFG_CPU_VERSION "v8.50.c")
 
 SET(CFG_DUALPROCSHM_ENABLE "TRUE")
 
+# Bootloader not available for Microblaze
+SET(CFG_MB_BOOTLOADER_ENABLE "FALSE")
+
 # Microblaze has enabled multiplier
 OPTION(CFG_MICROBLAZE_HW_MULT "Microblaze has enabled hardware multiplier" OFF)
 MARK_AS_ADVANCED(CFG_MICROBLAZE_HW_MULT)

@@ -32,6 +32,7 @@ VERSION = 0.1
 
 ARM-OBJCOPY=arm-xilinx-eabi-objcopy
 BOOTGEN=bootgen
+OPLKDRV_DAEMON=oplkdrv_daemon
 .PHONY: header
 header:
 	@echo ""
@@ -48,20 +49,20 @@ header:
 	@echo "Write 'make clean-bin' to delete the boot.bin "
 
 .PHONY: all
-all: copy-files build-bin 
+all: clean-bin copy-files build-bin
 
 ####################################################
 # D O W N L O A D
 ####################################################
+.PHONY: clean-files
+clean-bin:
+	rm -f BOOT.bin 
+
 .PHONY: copy-files
 copy-files:
 	@echo Copying files
-	copy ..\..\..\microblaze\xilinx-z702\mn-dual-shmem-gpio\oplkdrv_daemon.elf .
+	cp ../../../microblaze/xilinx-z702/mn-dual-shmem-gpio/$(OPLKDRV_DAEMON).elf .
 .PHONY: build-bin
 build-bin:
-	$(ARM-OBJCOPY) -I elf32-little -O binary oplkdrv_daemon.elf oplkdrv_daemon.bin
+	$(ARM-OBJCOPY) -I elf32-little -O binary -R .local_memory $(OPLKDRV_DAEMON).elf $(OPLKDRV_DAEMON).bin
 	$(BOOTGEN) -image bootimage.bif -o i BOOT.BIN -w on 
-
-.PHONY: clean-bin
-clean-bin:
-	rm BOOT.BIN

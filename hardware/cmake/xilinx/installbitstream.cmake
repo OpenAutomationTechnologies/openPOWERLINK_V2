@@ -31,7 +31,6 @@
 
 MACRO(INSTALL_BITSTREAM EXAMPLE_ROOT BITS_DESTINATION)
     SET(SDK_EXPORT ${EXAMPLE_ROOT}/xps/SDK/SDK_Export/hw)
-    SET(XML_EXPORT ${EXAMPLE_ROOT}/sdk)
     SET(DLCMD_SOURCE_DIR ${EXAMPLE_ROOT}/xps/etc)
 
     # Remove folder prefix from download.cmd script
@@ -43,14 +42,20 @@ MACRO(INSTALL_BITSTREAM EXAMPLE_ROOT BITS_DESTINATION)
     # Copy hardware platform eclipse project file
     CONFIGURE_FILE(${ARCH_TOOLS_DIR}/eclipse/hwplatformproject.in ${PROJECT_BINARY_DIR} @ONLY)
 
-    INSTALL(FILES ${SDK_EXPORT}/system.bit ${SDK_EXPORT}/download.bit ${XML_EXPORT}/system.xml ${SDK_EXPORT}/ps7_init.tcl ${SDK_EXPORT}/ps7_init.c ${SDK_EXPORT}/ps7_init.h 
+    INSTALL(FILES ${SDK_EXPORT}/system.bit ${SDK_EXPORT}/download.bit ${SDK_EXPORT}/system.xml ${SDK_EXPORT}/system_bd.bmm
             DESTINATION ${BITS_DESTINATION}
            )
+    # Additional initialization modules generated for ARM on Zynq  
+    IF(${CFG_DEMO_BOARD_NAME} STREQUAL "xilinx-z702")
+        INSTALL(FILES ${SDK_EXPORT}/ps7_init.tcl ${SDK_EXPORT}/ps7_init.c ${SDK_EXPORT}/ps7_init.h
+            DESTINATION ${BITS_DESTINATION}
+           )
+    ENDIF(${CFG_DEMO_BOARD_NAME} STREQUAL "xilinx-z702")
 
     INSTALL(FILES ${PROJECT_BINARY_DIR}/hwplatformproject.in
             DESTINATION ${BITS_DESTINATION} RENAME .project
            )
-    INSTALL(FILES ${PROJECT_BINARY_DIR}/download.cmd 
+    INSTALL(FILES ${PROJECT_BINARY_DIR}/download.cmd
             DESTINATION ${BITS_DESTINATION}
            )
 ENDMACRO()

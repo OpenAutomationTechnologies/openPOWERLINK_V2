@@ -60,11 +60,11 @@ SET(CFG_DUALPROCSHM_ENABLE "TRUE")
 SET(CFG_CDC_ONSDCARD "TRUE")
 
 # ARM core has enabled frame compliant with AAPCS
-OPTION(CFG_ARM_FRAME_AAPCS "ARM core has Stack frame compliant with AAPCS" OFF)
+OPTION(CFG_ARM_FRAME_AAPCS "ARM core has Stack frame compliant with AAPCS" ON)
 MARK_AS_ADVANCED(CFG_ARM_FRAME_AAPCS)
 
 # ARM core should use 4 byte enums
-OPTION(CFG_ARM_SHORT_ENUMS "ARM core uses 4-bytes enums" OFF)
+OPTION(CFG_ARM_SHORT_ENUMS "ARM core uses 4-bytes enums" ON)
 MARK_AS_ADVANCED(CFG_ARM_SHORT_ENUMS)
 
 

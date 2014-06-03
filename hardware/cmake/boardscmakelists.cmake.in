@@ -30,17 +30,11 @@
 
 ##################################################################################
 # Handle Includes
-IF(${CFG_DEMO_BOARD_NAME} STREQUAL "xilinx-z702")
-INCLUDE(zynq/genbsp)
-INCLUDE(zynq/genbitstream)
-INCLUDE(zynq/installbsp)
-INCLUDE(zynq/installbitstream)
-ELSE()
-INCLUDE(microblaze/genbsp)
-INCLUDE(microblaze/genbitstream)
-INCLUDE(microblaze/installbsp)
-INCLUDE(microblaze/installbitstream)
-ENDIF()
+INCLUDE(xilinx/genbsp)
+INCLUDE(xilinx/genbitstream)
+INCLUDE(xilinx/installbsp)
+INCLUDE(xilinx/installbitstream)
+
 
 REDUCE_BOARD_NAME(${CFG_DEMO_BOARD_NAME} "-" FRAG_DEMO_BOARD_NAME)
 

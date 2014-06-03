@@ -52,6 +52,9 @@ SET(CFG_PCP_NAME pcp)
 # Version of the Microblaze instance
 SET(CFG_CPU_VERSION "v8.50.c")
 
+# Bootloader available for Microblaze
+SET(CFG_MB_BOOTLOADER_ENABLE "TRUE")
+
 # Microblaze has enabled multiplier
 OPTION(CFG_MICROBLAZE_HW_MULT "Microblaze has enabled hardware multiplier" ON)
 MARK_AS_ADVANCED(CFG_MICROBLAZE_HW_MULT)
