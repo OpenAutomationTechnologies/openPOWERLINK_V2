@@ -193,7 +193,7 @@ BEGIN microblaze
  PARAMETER HW_VER = 8.50.c
  PARAMETER C_INTERCONNECT = 2
  PARAMETER C_USE_BARREL = 1
- PARAMETER C_USE_FPU = 1
+ PARAMETER C_USE_FPU = 0
  PARAMETER C_DEBUG_ENABLED = 1
  PARAMETER C_BASE_VECTORS = 0x30000000
  PARAMETER C_ICACHE_BASEADDR = 0x20000000
@@ -323,25 +323,6 @@ BEGIN axi_gpio
  PORT S_AXI_ACLK = processing_system7_0_FCLK_CLK0
  PORT GPIO_IO_O = HOST_BENCHMARK_PIO_IO
  PORT GPIO_IO_I = HOST_BENCHMARK_PIO_IO
-END
-
-BEGIN chipscope_ila
- PARAMETER INSTANCE = chipscope_ila_0
- PARAMETER HW_VER = 1.05.a
- PARAMETER C_TRIG0_UNITS = 1
- PARAMETER C_TRIG0_TRIGGER_IN_WIDTH = 48
- PARAMETER C_NUM_DATA_SAMPLES = 65536
- PARAMETER C_TRIG0_UNIT_MATCH_TYPE = basic with edges
- PORT chipscope_ila_control = chipscope_ila_0_icon_control
- PORT TRIG0 = BENCHMARK_PIO_IO & HOST_BENCHMARK_PIO_IO & axi_openmac_0_MAC_IRQ & axi_openmac_0_TIMER_IRQ & axi_openmac_0_oMii_txData & axi_openmac_0_oMii_txEnable & axi_openmac_0_iMii_rxClk & axi_openmac_0_iMii_rxDataValid & axi_openmac_0_iMii_rxData & axi_openmac_0_iMii_txClk
- PORT CLK = clk_50_0000MHz
-END
-
-BEGIN chipscope_icon
- PARAMETER INSTANCE = chipscope_icon_0
- PARAMETER HW_VER = 1.06.a
- PARAMETER C_NUM_CONTROL_PORTS = 1
- PORT control0 = chipscope_ila_0_icon_control
 END
 
 BEGIN axi_gpio

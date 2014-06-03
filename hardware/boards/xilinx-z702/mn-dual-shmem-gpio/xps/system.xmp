@@ -3,7 +3,7 @@ XmpVersion: 14.7
 VerMgmt: 14.7
 IntStyle: default
 Flow: ise
-ModuleSearchPath: D:/Zynq-2.0/Hardware-Zynq/openPOWERLINK_systec/hardware/ipcore/xilinx
+ModuleSearchPath: ../../../../ipcore/xilinx
 MHS File: system.mhs
 Architecture: zynq
 Device: xc7z020
