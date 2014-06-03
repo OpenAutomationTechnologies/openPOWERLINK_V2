@@ -10,7 +10,7 @@ especially to read the CDC file during runtime.
 \ingroup module_demo
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2013 Kalycito Infotech Private Limited
+Copyright (c) 2014, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -99,8 +99,9 @@ INT sd_fs_init(void)
     /* Register volume work area, initialize device */
     ret = f_mount(0, &fatfs);
 
-    if (ret != FR_OK) {
-        printf("SD: failed to mount file system %d\n", ret);
+    if (ret != FR_OK)
+    {
+        printf("{%s}: failed to mount file system %d\n",__func__, ret);
         return XST_FAILURE;
     }
 
@@ -117,7 +118,7 @@ INT sd_fs_init(void)
  \param      pFile_p        pointer to receive the FILE structure
                             to the file to be opened
  \param      strFilename_p  Name of the file to be opened
- \param      bMode_p        FA_READ - open for reading
+ \param      mode_p         FA_READ - open for reading
                             FA_WRITE - open for read/write
 
  \return     - XST_SUCCESS if the controller opens file correctly
@@ -126,14 +127,14 @@ INT sd_fs_init(void)
  \ingroup module_demo
  */
 //------------------------------------------------------------------------------
-INT sd_open(FIL *pFile_p, char *strFilename_p, BYTE bMode_p)
+INT sd_open(FIL* pFile_p, char* strFilename_p, BYTE mode_p)
 {
     FRESULT ret;
 
-    ret = f_open(pFile_p, strFilename_p, bMode_p);
+    ret = f_open(pFile_p, strFilename_p, mode_p);
     if (ret)
     {
-        printf("SD: Unable to open file %s: %d\n", strFilename_p, ret);
+        printf("{%s}: Unable to open file %s: %d\n",__func__, strFilename_p, ret);
         return XST_FAILURE;
     }
 
@@ -148,7 +149,7 @@ INT sd_open(FIL *pFile_p, char *strFilename_p, BYTE bMode_p)
 
  \param      pFile_p        pointer to the FILE structure to the file to be read
  \param      pBuffer_p      Buffer to receive the read data
- \param      uiCount_p      Number of bytes to read
+ \param      count_p      Number of bytes to read
  \param      pReadNum_p     Number of bytes read
 
  \return     - XST_SUCCESS if the controller reads correctly
@@ -157,14 +158,14 @@ INT sd_open(FIL *pFile_p, char *strFilename_p, BYTE bMode_p)
  \ingroup module_demo
  */
 //------------------------------------------------------------------------------
-INT sd_read(FIL *pFile_p, void *pBuffer_p, UINT uiCount_p, UINT *pReadNum_p)
+INT sd_read(FIL* pFile_p, void* pBuffer_p, UINT count_p, UINT* pReadNum_p)
 {
     FRESULT ret;
 
-    ret = f_read(pFile_p, pBuffer_p, uiCount_p, pReadNum_p);
+    ret = f_read(pFile_p, pBuffer_p, count_p, pReadNum_p);
     if (ret)
     {
-        printf("*** ERROR: f_read returned %d\r\n", ret);
+        printf("ERROR: {%s} failed %d\r\n", __func__,ret);
         return XST_FAILURE;
     }
 
@@ -179,7 +180,7 @@ INT sd_read(FIL *pFile_p, void *pBuffer_p, UINT uiCount_p, UINT *pReadNum_p)
 
  \param      pFile_p        pointer to the FILE structure to the file to write
  \param      pBuffer_p      Buffer to containing data to write
- \param      uiCount_p      Number of bytes to write
+ \param      count_p      Number of bytes to write
  \param      pWriteNum_p     Number of bytes written
 
  \return     - XST_SUCCESS if the controller writes correctly
@@ -189,13 +190,14 @@ INT sd_read(FIL *pFile_p, void *pBuffer_p, UINT uiCount_p, UINT *pReadNum_p)
  */
 //------------------------------------------------------------------------------
 #if !_FS_READONLY
-INT sd_write(FIL *pFile_p, void *pBuffer_p, UINT uiCount_p, UINT *pWriteNum_p)
+INT sd_write(FIL* pFile_p, void* pBuffer_p, UINT count_p, UINT* pWriteNum_p)
 {
     FRESULT ret;
 
-    ret = f_write(pFile_p, pBuffer_p, uiCount_p, pWriteNum_p);
-    if (ret) {
-        printf("*** ERROR: f_write returned %d\r\n", ret);
+    ret = f_write(pFile_p, pBuffer_p, count_p, pWriteNum_p);
+    if (ret)
+    {
+        printf("ERROR: {%s} failed %d\r\n", __func__,ret);
         return XST_FAILURE;
     }
 
@@ -216,7 +218,7 @@ INT sd_write(FIL *pFile_p, void *pBuffer_p, UINT uiCount_p, UINT *pWriteNum_p)
  \ingroup module_demo
  */
 //------------------------------------------------------------------------------
-UINT sd_get_fsize(FIL *pFile_p)
+UINT sd_get_fsize(FIL* pFile_p)
 {
     return f_size(pFile_p);
 }
@@ -234,7 +236,7 @@ UINT sd_get_fsize(FIL *pFile_p)
  \ingroup module_demo
  */
 //------------------------------------------------------------------------------
-void sd_close(FIL *pFile_p)
+void sd_close(FIL* pFile_p)
 {
     f_close(pFile_p);
     return;

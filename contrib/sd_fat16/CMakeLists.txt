@@ -32,8 +32,10 @@ SET(SDFAT16_NAME sdfat16-zc702)
 
 SET(SDFAT16_PROJECT_NAME ${SDFAT16_NAME}-${DEMO_TARGET_NAME})
 STRING(TOLOWER ${SDFAT16_PROJECT_NAME} SDFAT16_PROJECT_NAME)
+SET(XIL_FAT_DIR $ENV{XILINX_EDK}/sw/lib/sw_apps/fsbl)
+STRING(REPLACE "\\" "/" XIL_FAT_DIR ${XIL_FAT_DIR})
 
-PROJECT(SDFAT16_PROJECT_NAME)
+PROJECT(${SDFAT16_PROJECT_NAME} C)
 
 CMAKE_MINIMUM_REQUIRED (VERSION 2.8.0)
 
@@ -62,17 +64,17 @@ SET(EXAMPLE_BINARY_DIR ${CMAKE_BINARY_DIR}/boards/${BOARD_NAME}/${EXAMPLE_NAME})
 # Set all source files
 ########################################################################
 SET(SDFAT16_LIB_SRCS
-    ${PROJECT_SOURCE_DIR}/src/ff.c
+    ${XIL_FAT_DIR}/src/ff.c
+    ${XIL_FAT_DIR}/src/mmc.c
     ${PROJECT_SOURCE_DIR}/src/fs_sdcard.c
-    ${PROJECT_SOURCE_DIR}/src/mmc.c
-   )
+)
 
 ########################################################################
 # Set include paths
 ########################################################################
 INCLUDE_DIRECTORIES(
                     ${PROJECT_SOURCE_DIR}/include
-                    ${PROJECT_SOURCE_DIR}/src
+                    ${XIL_FAT_DIR}/src
                    )
 
 ########################################################################
@@ -111,3 +113,5 @@ SET_DIRECTORY_PROPERTIES(PROPERTIES
 INSTALL(PROGRAMS ${PROJECT_BINARY_DIR}/lib${SDFAT16_LIB_NAME}.a DESTINATION ${CFG_DEMO_BOARD_NAME}/${CFG_DEMO_NAME}/lib${SDFAT16_NAME})
 INSTALL(DIRECTORY ${PROJECT_SOURCE_DIR}/include DESTINATION ${CFG_DEMO_BOARD_NAME}/${CFG_DEMO_NAME}/lib${SDFAT16_NAME}
         FILES_MATCHING PATTERN "*.h")
+INSTALL(FILES ${XIL_FAT_DIR}/src/diskio.h ${XIL_FAT_DIR}/src/ff.h ${XIL_FAT_DIR}/src/ffconf.h
+        ${XIL_FAT_DIR}/src/sd_hardware.h DESTINATION ${CFG_DEMO_BOARD_NAME}/${CFG_DEMO_NAME}/lib${SDFAT16_NAME}/include)
