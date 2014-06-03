@@ -261,7 +261,7 @@ such as memory buffers
 //------------------------------------------------------------------------------
 void dualprocshm_targetAcquireLock(UINT8* pBase_p, UINT8 lockToken_p)
 {
-    UINT8 lock = 0;
+    volatile UINT8 lock = 0;
 
     if (pBase_p == NULL)
     {
@@ -277,6 +277,10 @@ void dualprocshm_targetAcquireLock(UINT8* pBase_p, UINT8 lockToken_p)
         {
             DPSHM_WRITE8((UINT32)pBase_p,lockToken_p);
             DUALPROCSHM_FLUSH_DCACHE_RANGE((UINT32)pBase_p,1);
+            // Avoid re-ordering of load-store instruction to avoid
+            // memory corruption. This ensures the succesfull write of
+            // lock token in memory before the successive read.
+            DPSHM_DMB();
             continue;
         }
       }while (lock != lockToken_p);
@@ -296,7 +300,7 @@ This routine is used to release a lock acquired before at a address specified
 //------------------------------------------------------------------------------
 void dualprocshm_targetReleaseLock(UINT8* pBase_p)
 {
-    UINT8   defaultlock = DEFAULT_LOCK_ID;
+    volatile UINT8   defaultlock = DEFAULT_LOCK_ID;
 
     if (pBase_p == NULL)
     {

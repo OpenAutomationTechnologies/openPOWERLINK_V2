@@ -74,6 +74,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DPSHM_READ16(base)                  Xil_In16((UINT32)base);
 #define DPSHM_WRITE16(base,val)             Xil_Out16((UINT32)base,val);
 
+// Memory barrier
+#define DPSHM_DMB()                         dmb()
+
 /// cache handling
 #define DUALPROCSHM_FLUSH_DCACHE_RANGE(base,range) \
                     Xil_DCacheFlushRange((UINT32)base, range);
