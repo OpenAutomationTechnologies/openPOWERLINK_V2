@@ -186,6 +186,46 @@ BEGIN proc_sys_reset
  PORT Interconnect_aresetn = proc_sys_reset_0_Interconnect_aresetn
  PORT Ext_Reset_In = RESET
  PORT Aux_Reset_In = processing_system7_0_FCLK_RESET0_N
+ PORT Bus_Struct_Reset = proc_sys_reset_0_Bus_Struct_Reset_0
+END
+
+BEGIN lmb_v10
+ PARAMETER INSTANCE = pcp_ilmb
+ PARAMETER HW_VER = 2.00.b
+ PORT SYS_RST = proc_sys_reset_0_Bus_Struct_Reset_0
+ PORT LMB_CLK = clk_100_0000MHz
+END
+
+BEGIN lmb_v10
+ PARAMETER INSTANCE = pcp_dlmb
+ PARAMETER HW_VER = 2.00.b
+ PORT SYS_RST = proc_sys_reset_0_Bus_Struct_Reset_0
+ PORT LMB_CLK = clk_100_0000MHz
+END
+
+BEGIN lmb_bram_if_cntlr
+ PARAMETER INSTANCE = pcp_d_bram_ctrl
+ PARAMETER HW_VER = 3.10.c
+ PARAMETER C_BASEADDR = 0x40000000
+ PARAMETER C_HIGHADDR = 0x40007FFF
+ BUS_INTERFACE SLMB = pcp_dlmb
+ BUS_INTERFACE BRAM_PORT = pcp_d_bram_ctrl_BRAM_PORT
+END
+
+BEGIN lmb_bram_if_cntlr
+ PARAMETER INSTANCE = pcp_i_bram_ctrl
+ PARAMETER HW_VER = 3.10.c
+ PARAMETER C_BASEADDR = 0x40000000
+ PARAMETER C_HIGHADDR = 0x40007FFF
+ BUS_INTERFACE SLMB = pcp_ilmb
+ BUS_INTERFACE BRAM_PORT = pcp_i_bram_ctrl_BRAM_PORT
+END
+
+BEGIN bram_block
+ PARAMETER INSTANCE = pcp_bram_block
+ PARAMETER HW_VER = 1.00.a
+ BUS_INTERFACE PORTA = pcp_d_bram_ctrl_BRAM_PORT
+ BUS_INTERFACE PORTB = pcp_i_bram_ctrl_BRAM_PORT
 END
 
 BEGIN microblaze
@@ -215,6 +255,8 @@ BEGIN microblaze
  BUS_INTERFACE DEBUG = microblaze_0_debug
  BUS_INTERFACE M_AXI_IC = axi4_0
  BUS_INTERFACE M_AXI_DC = axi4_0
+ BUS_INTERFACE DLMB = pcp_dlmb
+ BUS_INTERFACE ILMB = pcp_ilmb
  PORT MB_RESET = proc_sys_reset_0_MB_Reset
  PORT CLK = clk_100_0000MHz
  PORT INTERRUPT = pcp_INTERRUPT

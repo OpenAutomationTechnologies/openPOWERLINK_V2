@@ -17,6 +17,7 @@ _HEAP_SIZE = DEFINED(_HEAP_SIZE) ? _HEAP_SIZE : 0xA00000;
 
 MEMORY
 {
+   pcp_i_bram_ctrl_pcp_d_bram_ctrl : ORIGIN = 0x40000000, LENGTH = 0x00008000
    ps7_ddr_0_S_AXI_HP0_BASEADDR : ORIGIN = 0x30000050, LENGTH = 0x3FFFFFB0
 }
 
@@ -184,6 +185,12 @@ SECTIONS
    . = ALIGN(4);
    __bss_end = .;
 } > ps7_ddr_0_S_AXI_HP0_BASEADDR
+
+.local_memory : {
+   __local_memory_start = .;
+   *(.local_memory)
+   __local_memory_end = .;
+} > pcp_i_bram_ctrl_pcp_d_bram_ctrl
 
 _SDA_BASE_ = __sdata_start + ((__sbss_end - __sdata_start) / 2 );
 
