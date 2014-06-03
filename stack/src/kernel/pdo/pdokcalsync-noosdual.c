@@ -7,6 +7,15 @@
 The sync module is responsible to notify the user layer that new PDO data
 can be transfered.
 
+Synchronisation of PDO is achieved through interrupts along with control
+mechanism in software. It uses interrupt triggered by the openMAC(timer interrupt)
+to intimate to user layer about presence of new data RPDO and to exchange new data
+to send TPDO.
+
+The software manages the interrupts on both sides to completely synchronise the
+data exchange with the network and POWERLINK DLL layer operations through a master
+interrupt distributor mechanism with Enable/Disable and Set/Clear functionality.
+
 \ingroup module_pdokcal
 *******************************************************************************/
 

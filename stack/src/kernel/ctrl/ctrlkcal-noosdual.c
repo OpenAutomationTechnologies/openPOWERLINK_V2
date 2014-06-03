@@ -45,6 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <common/ctrl.h>
 #include <common/ctrlcal.h>
+#include <common/ctrlcal-mem.h>
 #include <kernel/ctrlkcal.h>
 
 #include <dualprocshm.h>
@@ -64,7 +65,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // global function prototypes
 //------------------------------------------------------------------------------
-void eventkcal_process(void);
+
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //
 //============================================================================//
@@ -72,27 +73,10 @@ void eventkcal_process(void);
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define CTRL_MAGIC                      0xA5A5  ///< Control magic word
 #define CTRL_PROC_ID                    0xFB    ///< Processor Id for kernel layer
-#define DUALPROCSHM_DYNBUFF_ID          11      ///< Buffer Id for dynamic buffer
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
-
-/**
-\brief Control buffer - Status/Control
-
-The control sub-registers provide basic Pcp-to-Host communication features.
-*/
-typedef struct sCtrlBuff
-{
-    volatile UINT16     magic;      ///< Enable the bridge logic
-    volatile UINT16     status;     ///< Reserved
-    volatile UINT16     heartbeat;  ///< Heart beat word
-    volatile UINT16     command;    ///< Command word
-    volatile UINT16     retval;     ///< Return word
-    UINT16              resv;       ///< Reserved
-} tCtrlBuff;
 
 /**
 \brief Control module instance - Kernel Layer
@@ -103,8 +87,6 @@ control CAL module during runtime
 typedef struct
 {
     tDualprocDrvInstance dualProcDrvInst;    ///< Dual processor driver instance
-    UINT8*               initParamBase;      ///< Pointer to memory for init params
-    size_t               initParamBuffSize;  ///< Size of memory for init params
 }tCtrlkCalInstance;
 
 //------------------------------------------------------------------------------
@@ -156,15 +138,6 @@ tOplkError ctrlkcal_init(void)
         goto Exit;
     }
 
-    instance_l.initParamBuffSize = sizeof(tCtrlInitParam);
-    dualRet = dualprocshm_getMemory(instance_l.dualProcDrvInst,DUALPROCSHM_DYNBUFF_ID,
-                                &instance_l.initParamBase,&instance_l.initParamBuffSize,TRUE);
-    if (dualRet != kDualprocSuccessful)
-    {
-        ret = kErrorNoResource;
-        goto Exit;
-    }
-
     dualRet = dualprocshm_initInterrupts(instance_l.dualProcDrvInst);
     if (dualRet != kDualprocSuccessful)
     {
@@ -174,11 +147,11 @@ tOplkError ctrlkcal_init(void)
     }
 
     magic = CTRL_MAGIC;
-    dualRet = dualprocshm_writeDataCommon(instance_l.dualProcDrvInst,offsetof(tCtrlBuff,magic),
+    dualRet = dualprocshm_writeDataCommon(instance_l.dualProcDrvInst,offsetof(tCtrlBuf,magic),
                                           sizeof(magic),(UINT8 *)&magic);
     if (dualRet != kDualprocSuccessful)
     {
-        DEBUG_LVL_ERROR_TRACE(" {%s} Could not create write magic (0x%X)\n",\
+        DEBUG_LVL_ERROR_TRACE(" {%s} Could not create write magic (0x%X)\n",
                                             __func__,dualRet );
         ret = kErrorNoResource;
         goto Exit;
@@ -209,20 +182,12 @@ void ctrlkcal_exit(void)
 {
     tDualprocReturn dualRet;
 
-    dualRet = dualprocshm_freeMemory(instance_l.dualProcDrvInst,DUALPROCSHM_DYNBUFF_ID,TRUE);
-    if (dualRet != kDualprocSuccessful)
-    {
-         DEBUG_LVL_ERROR_TRACE("Unable to free memory (0x%X)\n",dualRet);
-    }
-
     dualRet = dualprocshm_delete(instance_l.dualProcDrvInst);
     if (dualRet != kDualprocSuccessful)
     {
          DEBUG_LVL_ERROR_TRACE("Could not delete dual processor driver (0x%X)\n", dualRet);
     }
 
-    instance_l.initParamBuffSize = 0;
-    instance_l.initParamBase = NULL;
 }
 
 //------------------------------------------------------------------------------
@@ -260,7 +225,7 @@ tOplkError ctrlkcal_getCmd(tCtrlCmdType *pCmd_p)
 {
     UINT16          cmd;
 
-    if (dualprocshm_readDataCommon(instance_l.dualProcDrvInst,offsetof(tCtrlBuff,command), \
+    if (dualprocshm_readDataCommon(instance_l.dualProcDrvInst,offsetof(tCtrlBuf,ctrlCmd.cmd),
             sizeof(cmd),(UINT8 *)&cmd) != kDualprocSuccessful)
         return kErrorGeneralError;
 
@@ -283,14 +248,13 @@ by storing it in the control memory block.
 //------------------------------------------------------------------------------
 void ctrlkcal_sendReturn(UINT16 retval_p)
 {
-    UINT16          cmd = 0;
+    tCtrlCmd          ctrlCmd;
 
-    dualprocshm_writeDataCommon(instance_l.dualProcDrvInst,offsetof(tCtrlBuff,retval), \
-                sizeof(retval_p),(UINT8 *)&retval_p);
+    ctrlCmd.cmd = 0;
+    ctrlCmd.retVal = retval_p;
 
-    dualprocshm_writeDataCommon(instance_l.dualProcDrvInst,offsetof(tCtrlBuff,command), \
-                   sizeof(cmd),(UINT8 *)&cmd);
-
+    dualprocshm_writeDataCommon(instance_l.dualProcDrvInst,offsetof(tCtrlBuf,ctrlCmd),
+                sizeof(tCtrlCmd),(UINT8 *)&ctrlCmd);
 }
 
 //------------------------------------------------------------------------------
@@ -306,7 +270,7 @@ The function stores the status of the kernel stack in the control memory block.
 //------------------------------------------------------------------------------
 void ctrlkcal_setStatus(UINT16 status_p)
 {
-    dualprocshm_writeDataCommon(instance_l.dualProcDrvInst,offsetof(tCtrlBuff,status), \
+    dualprocshm_writeDataCommon(instance_l.dualProcDrvInst,offsetof(tCtrlBuf,status),
                        sizeof(status_p),(UINT8 *)&status_p);
 }
 
@@ -324,7 +288,7 @@ can be used by the user stack to detect if the kernel stack is still running.
 //------------------------------------------------------------------------------
 void ctrlkcal_updateHeartbeat(UINT16 heartbeat_p)
 {
-    dualprocshm_writeDataCommon(instance_l.dualProcDrvInst,offsetof(tCtrlBuff,heartbeat), \
+    dualprocshm_writeDataCommon(instance_l.dualProcDrvInst,offsetof(tCtrlBuf,heartbeat),
                            sizeof(heartbeat_p),(UINT8 *)&heartbeat_p);
 }
 
@@ -344,11 +308,8 @@ parameters modified in the kernel stack.
 //------------------------------------------------------------------------------
 void ctrlkcal_storeInitParam(tCtrlInitParam* pInitParam_p)
 {
-    if (instance_l.initParamBase != NULL)
-    {
-        dualprocshm_writeData(instance_l.dualProcDrvInst,DUALPROCSHM_DYNBUFF_ID,0, \
-                                       sizeof(tCtrlInitParam),(UINT8 *)pInitParam_p);
-    }
+    dualprocshm_writeDataCommon(instance_l.dualProcDrvInst,offsetof(tCtrlBuf,initParam),
+                           sizeof(tCtrlInitParam),(UINT8 *)pInitParam_p);
 }
 
 //------------------------------------------------------------------------------
@@ -368,11 +329,8 @@ tOplkError ctrlkcal_readInitParam(tCtrlInitParam* pInitParam_p)
 {
     tDualprocReturn dualRet;
 
-    if (instance_l.initParamBase == NULL)
-        return kErrorNoResource;
-
-    dualRet = dualprocshm_readData(instance_l.dualProcDrvInst,DUALPROCSHM_DYNBUFF_ID,0, \
-            sizeof(tCtrlInitParam),(UINT8 *)pInitParam_p) ;
+    dualRet = dualprocshm_readDataCommon(instance_l.dualProcDrvInst,offsetof(tCtrlBuf,initParam),
+                                         sizeof(tCtrlInitParam),(UINT8 *)pInitParam_p);
 
     if (dualRet != kDualprocSuccessful)
     {

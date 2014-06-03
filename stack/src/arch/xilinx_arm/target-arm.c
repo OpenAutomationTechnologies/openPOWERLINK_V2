@@ -203,9 +203,6 @@ tOplkError target_init(void)
     // Initialize Interrupts
     initInterrupts();
 
-    // wait for PCP to complete initializatio
-    usleep(100000);
-
     return kErrorOk;
 
 }

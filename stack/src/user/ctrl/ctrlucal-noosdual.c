@@ -47,6 +47,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <common/ctrlcal.h>
 #include <user/ctrlucal.h>
 #include <common/target.h>
+#include <common/ctrlcal-mem.h>
 
 #include <dualprocshm.h>
 
@@ -59,7 +60,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 #define CMD_TIMEOUT_CNT     500     // loop counter for command timeout
-#define CTRL_MAGIC          0xA5A5
 //------------------------------------------------------------------------------
 // module global vars
 //------------------------------------------------------------------------------
@@ -76,25 +76,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 #define CTRL_PROC_ID            0xFA
-#define DUALPROCSHM_DYNBUFF_ID  11
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
 
-/**
-\brief Control buffer - Status/Control
-
-The control sub-registers provide basic Pcp-to-Host communication features.
-*/
-typedef struct sCtrlBuff
-{
-    volatile UINT16     magic;      ///< Enable the bridge logic
-    volatile UINT16     status;     ///< Reserved
-    volatile UINT16     heartbeat;  ///< Heart beat word
-    volatile UINT16     command;    ///< Command word
-    volatile UINT16     retval;     ///< Return word
-    UINT16              resv;       ///< Reserved
-} tCtrlBuff;
 
 /**
 \brief Control module instance - User Layer
@@ -105,10 +90,7 @@ control CAL module during runtime
 typedef struct
 {
     tDualprocDrvInstance dualProcDrvInst;      ///< Dual processor driver instance
-    UINT8*               initParamBase;        ///< Pointer to memory for init params
-    size_t               initParamBuffSize;    ///< Size of memory for init params
     BOOL                 fIrqMasterEnable;     ///< Master interrupts status
-
 }tCtrluCalInstance;
 
 
@@ -151,17 +133,9 @@ tOplkError ctrlucal_init(void)
     dualRet = dualprocshm_create(&dualProcConfig,&instance_l.dualProcDrvInst);
     if (dualRet != kDualprocSuccessful)
     {
-        DEBUG_LVL_ERROR_TRACE(" {%s} Could not create dual processor driver instance (0x%X)\n",\
+        DEBUG_LVL_ERROR_TRACE(" {%s} Could not create dual processor driver instance (0x%X)\n",
                                         __func__,dualRet );
         dualprocshm_delete(instance_l.dualProcDrvInst);
-        return kErrorNoResource;
-    }
-
-    dualRet = dualprocshm_getMemory(instance_l.dualProcDrvInst,DUALPROCSHM_DYNBUFF_ID,
-                                    &instance_l.initParamBase,&instance_l.initParamBuffSize,FALSE);
-    if (dualRet != kDualprocSuccessful)
-    {
-        DEBUG_LVL_ERROR_TRACE("{%s} Error Retrieving dynamic buff %x\n ",__func__,dualRet);
         return kErrorNoResource;
     }
 
@@ -196,20 +170,11 @@ void ctrlucal_exit(void)
     // disable system irq
     dualprocshm_freeInterrupts(instance_l.dualProcDrvInst);
 
-    dualRet = dualprocshm_freeMemory(instance_l.dualProcDrvInst,DUALPROCSHM_DYNBUFF_ID,FALSE);
-    if (dualRet != kDualprocSuccessful)
-    {
-        DEBUG_LVL_ERROR_TRACE("Unable to free memory (0x%X)\n",dualRet);
-    }
-
     dualRet = dualprocshm_delete(instance_l.dualProcDrvInst);
     if (dualRet != kDualprocSuccessful)
     {
         DEBUG_LVL_ERROR_TRACE ("Could not delete dual proc driver inst (0x%X)\n", dualRet);
     }
-
-    instance_l.initParamBuffSize = 0;
-    instance_l.initParamBase = NULL;
 }
 
 //------------------------------------------------------------------------------
@@ -248,19 +213,17 @@ The function executes a control command in the kernel stack.
 //------------------------------------------------------------------------------
 tOplkError ctrlucal_executeCmd(tCtrlCmdType cmd_p)
 {
+    tCtrlCmd            ctrlCmd;
     UINT16              cmd;
     UINT16              retVal;
     int                 timeout;
 
     // write command into shared buffer
-    cmd = cmd_p;
-    retVal = 0;
-    if (dualprocshm_writeDataCommon(instance_l.dualProcDrvInst,offsetof(tCtrlBuff,retval),
-        sizeof(retVal),(UINT8 *)&retVal) != kDualprocSuccessful )
-        return kErrorGeneralError;
+    ctrlCmd.cmd = cmd_p;
+    ctrlCmd.retVal = 0;
 
-    if (dualprocshm_writeDataCommon(instance_l.dualProcDrvInst,offsetof(tCtrlBuff,command),
-            sizeof(cmd),(UINT8 *)&cmd) != kDualprocSuccessful )
+    if (dualprocshm_writeDataCommon(instance_l.dualProcDrvInst,offsetof(tCtrlBuf,ctrlCmd),
+        sizeof(tCtrlCmd),(UINT8 *)&ctrlCmd) != kDualprocSuccessful )
         return kErrorGeneralError;
 
     // wait for response
@@ -268,16 +231,13 @@ tOplkError ctrlucal_executeCmd(tCtrlCmdType cmd_p)
     {
         target_msleep(10);
 
-        if (dualprocshm_readDataCommon(instance_l.dualProcDrvInst,offsetof(tCtrlBuff,command),
-                sizeof(cmd),(UINT8 *)&cmd) != kDualprocSuccessful )
+        if (dualprocshm_readDataCommon(instance_l.dualProcDrvInst,offsetof(tCtrlBuf,ctrlCmd),
+                sizeof(tCtrlCmd),(UINT8 *)&ctrlCmd) != kDualprocSuccessful )
             return kErrorGeneralError;
-        if (cmd == 0)
+
+        if (ctrlCmd.cmd == 0)
         {
-            if (dualprocshm_readDataCommon(instance_l.dualProcDrvInst,offsetof(tCtrlBuff,retval),
-                    sizeof(retVal),(UINT8 *)&retVal) != kDualprocSuccessful )
-                return kErrorGeneralError;
-            else
-                return retVal;
+            return ctrlCmd.retVal;
         }
     }
 
@@ -309,7 +269,7 @@ tOplkError ctrlucal_checkKernelStack(void)
 
     TRACE ("Checking for kernel stack...\n");
 
-    if (dualprocshm_readDataCommon(instance_l.dualProcDrvInst,offsetof(tCtrlBuff,magic),
+    if (dualprocshm_readDataCommon(instance_l.dualProcDrvInst,offsetof(tCtrlBuf,magic),
             sizeof(magic),(UINT8 *)&magic) != kDualprocSuccessful)
         return kErrorGeneralError;
 
@@ -371,7 +331,7 @@ UINT16 ctrlucal_getStatus(void)
 {
     UINT16          status;
 
-    if (dualprocshm_readDataCommon(instance_l.dualProcDrvInst,offsetof(tCtrlBuff,status),
+    if (dualprocshm_readDataCommon(instance_l.dualProcDrvInst,offsetof(tCtrlBuf,status),
             sizeof(status),(UINT8 *)&status) == kDualprocSuccessful)
         return status;
     else
@@ -393,7 +353,7 @@ UINT16 ctrlucal_getHeartbeat(void)
 {
     UINT16      heartbeat;
 
-    if (dualprocshm_readDataCommon(instance_l.dualProcDrvInst,offsetof(tCtrlBuff,heartbeat),
+    if (dualprocshm_readDataCommon(instance_l.dualProcDrvInst,offsetof(tCtrlBuf,heartbeat),
             sizeof(heartbeat),(UINT8 *)&heartbeat) == kDualprocSuccessful)
        return heartbeat;
     else
@@ -414,11 +374,8 @@ can be accessed by the kernel stack.
 //------------------------------------------------------------------------------
 void ctrlucal_storeInitParam(tCtrlInitParam* pInitParam_p)
 {
-    if (instance_l.initParamBase != NULL)
-    {
-        dualprocshm_writeData(instance_l.dualProcDrvInst,DUALPROCSHM_DYNBUFF_ID,0,
-                                       sizeof(tCtrlInitParam),(UINT8 *)pInitParam_p);
-    }
+    dualprocshm_writeDataCommon(instance_l.dualProcDrvInst,offsetof(tCtrlBuf,initParam),
+                           sizeof(tCtrlInitParam),(UINT8 *)pInitParam_p);
 }
 
 //------------------------------------------------------------------------------
@@ -438,13 +395,10 @@ tOplkError ctrlucal_readInitParam(tCtrlInitParam* pInitParam_p)
 {
     tDualprocReturn dualRet;
 
-    if (instance_l.initParamBase == NULL)
-        return kErrorNoResource;
+    dualRet = dualprocshm_readDataCommon(instance_l.dualProcDrvInst,offsetof(tCtrlBuf,initParam),
+                                        sizeof(tCtrlInitParam),(UINT8 *)pInitParam_p);
 
-    dualRet = dualprocshm_readData(instance_l.dualProcDrvInst,DUALPROCSHM_DYNBUFF_ID,0,
-            sizeof(tCtrlInitParam),(UINT8 *)pInitParam_p);
-
-    if (dualRet!= kDualprocSuccessful)
+    if (dualRet != kDualprocSuccessful)
     {
         DEBUG_LVL_ERROR_TRACE("Cannot read initparam (0x%X)\n",dualRet);
         return kErrorGeneralError;

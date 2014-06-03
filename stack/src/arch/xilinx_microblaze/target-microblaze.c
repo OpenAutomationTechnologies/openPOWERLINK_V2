@@ -327,9 +327,23 @@ static void disableInterruptMaster(void)
 }
 
 #ifdef __ZYNQ__
-void outbyte(char c)
+//------------------------------------------------------------------------------
+/**
+\brief Re-definition of standard BSP outbyte for Zynq
+
+This will redirect prints from Microblaze to the common UART
+device on Zynq platform which is not handled is the generated BSP.
+
+\param  char_p            Character too be sent
+
+\ingroup module_target
+
+*/
+//------------------------------------------------------------------------------
+
+void outbyte(char char_p)
 {
-    XUartChanged_SendByte(UART_BASE, c);
+    XUartChanged_SendByte(UART_BASE, char_p);
 }
 #endif
 

@@ -43,8 +43,8 @@ SET(XIL_TOOLS_DIR ${TOOLS_DIR}/xilinx-microblaze)
 
 ################################################################################
 # Add libraries
-OPTION(CFG_COMPILE_LIB_CN                           "Compile openPOWERLINK CN library" ON)
-OPTION(CFG_COMPILE_LIB_MN_DRV_DUALPROCSHM           "Compile openPOWERLINK MN driver library using dual procesor shared memory" ON)
+OPTION(CFG_COMPILE_LIB_CN                           "Compile openPOWERLINK CN library" OFF)
+OPTION(CFG_COMPILE_LIB_MN_DRV_DUALPROCSHM           "Compile openPOWERLINK MN driver library using dual procesor shared memory" OFF)
 
 # CN libraries
 IF(CFG_COMPILE_LIB_CN)
