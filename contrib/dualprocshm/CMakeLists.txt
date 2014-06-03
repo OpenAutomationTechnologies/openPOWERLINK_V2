@@ -95,6 +95,7 @@ ENDIF()
 INCLUDE_DIRECTORIES(
                     ${PROJECT_SOURCE_DIR}/include
                     ${PROJECT_SOURCE_DIR}/src
+                    ${OPLK_BASE_DIR}/stack/include
                    )
 
 ########################################################################

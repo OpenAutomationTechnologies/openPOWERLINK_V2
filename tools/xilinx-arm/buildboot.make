@@ -31,6 +31,7 @@
 VERSION = 0.1
 
 ARM-OBJCOPY=arm-xilinx-eabi-objcopy
+DATA2MEM=data2mem
 BOOTGEN=bootgen
 OPLKDRV_DAEMON=oplkdrv_daemon
 .PHONY: header
@@ -64,5 +65,6 @@ copy-files:
 	cp ../../../microblaze/xilinx-z702/mn-dual-shmem-gpio/$(OPLKDRV_DAEMON).elf .
 .PHONY: build-bin
 build-bin:
+	$(DATA2MEM) -bm system_bd.bmm -bt system.bit -bd $(OPLKDRV_DAEMON).elf tag pcp -o b download.bit
 	$(ARM-OBJCOPY) -I elf32-little -O binary -R .local_memory $(OPLKDRV_DAEMON).elf $(OPLKDRV_DAEMON).bin
 	$(BOOTGEN) -image bootimage.bif -o i BOOT.BIN -w on 

@@ -46,6 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "xintc_l.h"
 #include <xil_io.h>
 #include <xparameters.h>
+#include <oplk/section-microblaze.h>
 
 /// Memory
 #define DUALPROCSHM_MALLOC(size)            malloc(size)

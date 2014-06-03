@@ -106,7 +106,7 @@ tDualProcShmIntrInst  intrInst_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static void targetInterruptHandler( void* pArg_p );
+static void targetInterruptHandler(void* pArg_p) SECTION_DUALPROCSHM_IRQ_HDL;
 
 //------------------------------------------------------------------------------
 /**

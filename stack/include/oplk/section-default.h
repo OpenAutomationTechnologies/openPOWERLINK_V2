@@ -128,6 +128,27 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     #ifndef SECTION_MAIN_APP_CB_SYNC
         #define SECTION_MAIN_APP_CB_SYNC
     #endif
+    #ifndef SECTION_DUALPROCSHM_ACQUIRE_LOCK
+        #define SECTION_DUALPROCSHM_ACQUIRE_LOCK
+    #endif
+    #ifndef SECTION_DUALPROCSHM_RELEASE_LOCK
+        #define SECTION_DUALPROCSHM_RELEASE_LOCK
+    #endif
+    #ifndef SECTION_DUALPROCSHM_AQ_BUFF_LOCK
+        #define SECTION_DUALPROCSHM_AQ_BUFF_LOCK
+    #endif
+    #ifndef SECTION_DUALPROCSHM_RE_BUFF_LOCK
+        #define SECTION_DUALPROCSHM_RE_BUFF_LOCK
+    #endif
+    #ifndef SECTION_DUALPROCSHM_IRQ_ENABLE
+        #define SECTION_DUALPROCSHM_IRQ_ENABLE
+    #endif
+    #ifndef SECTION_DUALPROCSHM_IRQ_SET
+        #define SECTION_DUALPROCSHM_IRQ_SET
+    #endif
+    #ifndef SECTION_DUALPROCSHM_IRQ_HDL
+        #define SECTION_DUALPROCSHM_IRQ_HDL
+    #endif
 
 //------------------------------------------------------------------------------
 // typedef

@@ -189,16 +189,16 @@ tDualprocReturn dualprocshm_writeDataCommon(tDualprocDrvInstance pInstance_p,UIN
                                                             size_t  Size_p, UINT8* pData_p);
 
 
-tDualprocReturn dualprocshm_acquireBuffLock(tDualprocDrvInstance pInstance_p, UINT8 id_p);
-tDualprocReturn dualprocshm_releaseBuffLock(tDualprocDrvInstance pInstance_p, UINT8 id_p);
+tDualprocReturn dualprocshm_acquireBuffLock(tDualprocDrvInstance pInstance_p, UINT8 id_p) SECTION_DUALPROCSHM_RE_BUFF_LOCK;
+tDualprocReturn dualprocshm_releaseBuffLock(tDualprocDrvInstance pInstance_p, UINT8 id_p) SECTION_DUALPROCSHM_RE_BUFF_LOCK;
 
 tDualprocReturn dualprocshm_initInterrupts(tDualprocDrvInstance pInstance_p);
 tDualprocReturn dualprocshm_freeInterrupts(tDualprocDrvInstance pInstance_p);
 tDualprocReturn dualprocshm_registerHandler(tDualprocDrvInstance pInstance_p,
                                             UINT8 irqId_p,tTargetIrqCb pfnIrqHandler_p);
 tDualprocReturn dualprocshm_enableIrq(tDualprocDrvInstance pInstance_p,
-                                                   UINT8 irqId_p,BOOL fEnable_p);
-tDualprocReturn dualprocshm_setIrq(tDualprocDrvInstance pInstance_p, UINT8 irqId_p,BOOL fSet_p);
+                                                   UINT8 irqId_p,BOOL fEnable_p) SECTION_DUALPROCSHM_IRQ_ENABLE;
+tDualprocReturn dualprocshm_setIrq(tDualprocDrvInstance pInstance_p, UINT8 irqId_p,BOOL fSet_p) SECTION_DUALPROCSHM_IRQ_SET;
 
 #ifdef __cplusplus
 }

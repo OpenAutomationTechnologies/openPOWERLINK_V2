@@ -69,6 +69,7 @@ SET(OMETH_LIB_SRCS
 # Set include paths
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include
                     ${PROJECT_SOURCE_DIR}/src
+                    ${OPLK_BASE_DIR}/stack/include
                    )
 
 # Configure compile definitions

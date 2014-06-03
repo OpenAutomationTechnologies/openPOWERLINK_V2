@@ -76,6 +76,7 @@ ADD_CUSTOM_TARGET(
 INSTALL(FILES ${XIL_TOOLS_DIR}/bootimage.bif
               ${XIL_HW_SPEC}/system.bit
               ${XIL_HW_SPEC}/system.xml
+              ${XIL_HW_SPEC}/system_bd.bmm
         DESTINATION ${ARCH_INSTALL_POSTFIX}
        )
 INSTALL(PROGRAMS ${XIL_TOOLS_DIR}/buildboot.make

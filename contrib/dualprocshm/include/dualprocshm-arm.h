@@ -54,8 +54,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // include section header file for special functions in
 // tightly-coupled memory
-//#include <section-arm.h>//TODO@gks: Check if this is needed with no TCM
-
+// TODO@gks: Can ARM's OCM be used as TCM?
+#include <oplk/section-default.h>
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------

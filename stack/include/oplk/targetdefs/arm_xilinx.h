@@ -65,8 +65,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define UNUSED_PARAMETER(par)   (void)par
 
-#include <oplk/section-default.h>
-
 #ifndef NDEBUG
 #define PRINTF(...)                 printf(__VA_ARGS__)
 #else
