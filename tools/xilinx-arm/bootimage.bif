@@ -8,7 +8,7 @@
 the_ROM_image:
 {
 
-        [bootloader]        bootloader.elf
+        [bootloader]        zynq-fsbl.elf
                             download.bit
                             demo_mn_embedded.elf
         [load = 0x30000000] oplkdrv_daemon.bin
