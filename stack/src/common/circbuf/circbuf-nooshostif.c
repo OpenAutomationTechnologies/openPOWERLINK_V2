@@ -202,18 +202,22 @@ Circular buffer instances for host interface use memory buffers provided by
 hostif drivers. All other instances are allocated locally.
 
 \param  pInstance_p         Pointer to the circular buffer instance.
-\param  size_p              Size of memory to allocate.
+\param  pSize_p             Size of memory to allocate.
+                            Returns the actually allocated buffer size.
 
 \return The function returns a tCircBufError error code.
 
 \ingroup module_lib_circbuf
 */
 //------------------------------------------------------------------------------
-tCircBufError circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t size_p)
+tCircBufError circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t* pSize_p)
 {
+    size_t size = *pSize_p;
+
     if (pInstance_p->pCircBufArchInstance == NULL)
     {
-        size_t size = size_p + sizeof(tCircBufHeader);
+        // Allocate requested size + header
+        size += sizeof(tCircBufHeader);
 
         pInstance_p->pCircBufHeader = OPLK_MALLOC(size);
 
@@ -224,8 +228,8 @@ tCircBufError circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t size_p)
         }
 
         pInstance_p->pCircBuf = ((BYTE*)pInstance_p->pCircBufHeader) + sizeof(tCircBufHeader);
-        pInstance_p->pCircBufHeader->bufferSize = size_p;
-        pInstance_p->pCircBufHeader->freeSize = size_p;
+
+        // Return buffer size: pSize_p already holds the right value!
     }
     else
     {   // Queue must use host interface
@@ -245,10 +249,10 @@ tCircBufError circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t size_p)
         }
 
         // Check if there is enough memory available
-        if (size_p > bufSize)
+        if (size > bufSize)
         {
             TRACE("%s Hostif buffer (id=%d) only provides %d byte instead of %d byte!\n",
-                    __func__, pInstance_p->bufferId, bufSize, size_p);
+                    __func__, pInstance_p->bufferId, bufSize, size);
             return kCircBufNoResource;
         }
 
@@ -256,16 +260,10 @@ tCircBufError circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t size_p)
 
         pInstance_p->pCircBufHeader = &(pHostifBuffer->circBufHeader);
         pInstance_p->pCircBuf = (UINT8*)pHostifBuffer + sizeof(tCircBufHostiBuffer);
-        pInstance_p->pCircBufHeader->bufferSize = size_p - sizeof(tCircBufHostiBuffer);
-        pInstance_p->pCircBufHeader->freeSize = size_p - sizeof(tCircBufHostiBuffer);
+        size -= sizeof(tCircBufHostiBuffer);
 
-        TRACE("%s id=%d base=0x%X header=0x%X buf=0x%X size=%d\n",
-                __func__,
-                pInstance_p->bufferId,
-                pHostifBuffer,
-                pInstance_p->pCircBufHeader,
-                pInstance_p->pCircBuf,
-                pInstance_p->pCircBufHeader->bufferSize);
+        // Return buffer size
+        *pSize_p = size;
 
         HOSTIF_WR8(&(pHostifBuffer->lock), 0, CIRCBUF_HOSTIF_UNLOCK);
     }

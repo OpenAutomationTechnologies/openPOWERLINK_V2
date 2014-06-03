@@ -168,14 +168,15 @@ void circbuf_freeInstance(tCircBufInstance* pInstance_p)
 The function allocates the memory needed for the circular buffer.
 
 \param  pInstance_p         Pointer to the circular buffer instance.
-\param  size_p              Size of memory to allocate.
+\param  pSize_p             Size of memory to allocate.
+                            Returns the actually allocated buffer size.
 
 \return The function returns a tCircBufError error code.
 
 \ingroup module_lib_circbuf
 */
 //------------------------------------------------------------------------------
-tCircBufError circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t size_p)
+tCircBufError circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t* pSize_p)
 {
     char                        shmName[16];
     size_t                      size;
@@ -186,7 +187,7 @@ tCircBufError circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t size_p)
 
     sprintf(shmName, "/shmCircbuf-%d", pInstance_p->bufferId);
     pageSize = (sizeof(tCircBufHeader) + sysconf(_SC_PAGE_SIZE) - 1) & (~(sysconf(_SC_PAGE_SIZE) - 1));
-    size = size_p + pageSize;
+    size = *pSize_p + pageSize;
 
     if ((pArch->fd = shm_open(shmName, O_RDWR | O_CREAT, 0)) < 0)
     {
@@ -212,7 +213,7 @@ tCircBufError circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t size_p)
         return kCircBufNoResource;
     }
 
-    pInstance_p->pCircBuf = mmap(NULL, size_p, PROT_READ | PROT_WRITE, MAP_SHARED,
+    pInstance_p->pCircBuf = mmap(NULL, *pSize_p, PROT_READ | PROT_WRITE, MAP_SHARED,
                                  pArch->fd, pageSize);
     if (pInstance_p->pCircBuf == MAP_FAILED)
     {
@@ -222,10 +223,6 @@ tCircBufError circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t size_p)
         shm_unlink(shmName);
         return kCircBufNoResource;
     }
-
-    /* Set buffer size to header */
-    pInstance_p->pCircBufHeader->bufferSize = size_p;
-    pInstance_p->pCircBufHeader->freeSize = size_p;
 
     return kCircBufOk;
 }

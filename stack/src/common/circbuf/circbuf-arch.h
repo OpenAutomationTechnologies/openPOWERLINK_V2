@@ -61,7 +61,7 @@ extern "C" {
 
 tCircBufInstance* circbuf_createInstance(UINT8 id_p);
 void              circbuf_freeInstance(tCircBufInstance* pInstance_p);
-tCircBufError     circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t size_p);
+tCircBufError     circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t* pSize_p);
 void              circbuf_freeBuffer(tCircBufInstance* pInstance_p);
 tCircBufError     circbuf_connectBuffer(tCircBufInstance* pInstance_p);
 void              circbuf_disconnectBuffer(tCircBufInstance* pInstance_p);

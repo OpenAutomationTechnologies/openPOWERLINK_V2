@@ -155,28 +155,25 @@ void circbuf_freeInstance(tCircBufInstance* pInstance_p)
 The function allocates the memory needed for the circular buffer.
 
 \param  pInstance_p         Pointer to the circular buffer instance.
-\param  size_p              Size of memory to allocate.
+\param  pSize_p             Size of memory to allocate.
+                            Returns the actually allocated buffer size.
 
 \return The function returns a tCircBufError error code.
 
 \ingroup module_lib_circbuf
 */
 //------------------------------------------------------------------------------
-tCircBufError circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t size_p)
+tCircBufError circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t* pSize_p)
 {
     if ((pInstance_p->pCircBufHeader = OPLK_MALLOC(sizeof(tCircBufHeader))) == NULL)
     {
         return kCircBufNoResource;
     }
-    if ((pInstance_p->pCircBuf = OPLK_MALLOC(size_p)) == NULL)
+    if ((pInstance_p->pCircBuf = OPLK_MALLOC(*pSize_p)) == NULL)
     {
         OPLK_FREE(pInstance_p->pCircBufHeader);
         return kCircBufNoResource;
     }
-
-    /* Set buffer size to header */
-    pInstance_p->pCircBufHeader->bufferSize = size_p;
-    pInstance_p->pCircBufHeader->freeSize = size_p;
 
     return kCircBufOk;
 }
