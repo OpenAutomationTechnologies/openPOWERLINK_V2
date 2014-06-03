@@ -43,7 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stddef.h>
 #include <xil_types.h>
 #include <xil_cache.h>
-#include "xintc_l.h"
+#include <xintc_l.h>
 #include <xil_io.h>
 #include <xparameters.h>
 #include <oplk/section-microblaze.h>

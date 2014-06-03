@@ -68,6 +68,35 @@ typedef enum eDualprocReturn
     kDualprocUnspecError    = 0xFFFF        ///< Unspecified error
 } tDualprocReturn;
 
+#if (OPLK_OPTIMIZE != FALSE)
+/**
+\brief Dual processor buffer Id
+
+This is required to handle specially handle DLL circular buffers queue
+to optimize stack on non-OS platforms.
+
+*/
+typedef enum eDualprocBuffId
+{
+    kDualprocUsertoKernelQ      = 0x0000,       ///< User-to-kernel event queue
+    kDualprocKerneltoUserQ      = 0x0001,       ///< Kernel-to-user event queue
+    kDualprocKernelIntQ         = 0x0002,       ///< Kernel internal event queue
+    kDualprocUserIntQ           = 0x0003,       ///< User internal event queue
+    kDualprocDllCalTxGenQ       = 0x0004,       ///< Queue for sending generic requests in the DLLCAL
+    kDualprocDllCalTxNmtQ       = 0x0005,       ///< Queue for sending NMT requests in the DLLCAL
+    kDualprocDllCalTxSyncQ      = 0x0006,       ///< Queue for sending sync requests in the DLLCAL
+    kDualprocDllCalCnReqNmtQ    = 0x0007,       ///< NMT request queue for MN asynchronous scheduler
+    kDualprocDllCalCnReqGenQ    = 0x0008,       ///< Generic request queue for MN asynchronous scheduler
+    kDualprocDllCalCnReqIdentQ  = 0x0009,       ///< Ident request queue for MN asynchronous scheduler
+    kDualprocDllCalCnReqStatusQ = 0x000A,       ///< Status request queue for MN asynchronous scheduler
+    kDualprocErrorHandlerBuff   = 0x000B,       ///< Error handler shared buffer
+    kDualprocPdoBuff            = 0x000C,       ///< PDO exchange buffer
+
+    kDualprocUnspecQ            = 0xFFFF        ///< Unspecified queue
+} tDualprocBuffId;
+
+#endif
+
 /**
 \brief Processor instance
 

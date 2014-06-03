@@ -37,6 +37,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _INC_dualprocshm_ZYNQ_H_
 #define _INC_dualprocshm_ZYNQ_H_
 
+#define OPLK_OPTIMIZE               TRUE           ///< Optimize the dualprocessor library for openPOWERLINK stack on non-OS
+
 /* SIZE */
 #define MAX_COMMON_MEM_SIZE         2048                       ///< Max common memory size
 #define MAX_DYNAMIC_BUFF_COUNT      15                         ///< Number of maximum dynamic buffers

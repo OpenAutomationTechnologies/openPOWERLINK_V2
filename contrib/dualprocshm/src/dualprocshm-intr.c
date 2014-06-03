@@ -317,13 +317,12 @@ with a single interrupt line available. This handler acknowledges the processed
 interrupt sources and calls the corresponding callbacks registered with
 dualprocshm_registerHandler().
 
-\param  pArg_p                  The system caller should provide the control module
-                                instance with this parameter.
+\param  pArg_p                  Driver instance passed during initialisation.
 
 \ingroup module_dualprocshm
 */
 //------------------------------------------------------------------------------
-static void targetInterruptHandler( void* pArg_p )
+static void targetInterruptHandler(void* pArg_p)
 {
     UINT16 pendings;
     UINT16 mask;

@@ -112,6 +112,8 @@ typedef void (*targetSyncHdl)(void*);
 
 UINT8* dualprocshm_getCommonMemAddr(UINT16* pSize_p);
 UINT8* dualprocshm_getDynMapTableAddr(void);
+UINT8* dualprocshm_getIntrMemAddr(void);
+void dualprocshm_releaseIntrMemAddr();
 void dualprocshm_targetReadData(UINT8* pBase_p, UINT16 size_p, UINT8* pData_p);
 void dualprocshm_targetWriteData(UINT8* pBase_p, UINT16 size_p, UINT8* pData_p);
 void dualprocshm_releaseCommonMemAddr(UINT16 pSize_p);

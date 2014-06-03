@@ -34,7 +34,6 @@
 SET( LIB_ARCH_SRCS "" )
 
 INCLUDE_DIRECTORIES(
-                    ${ARCH_SOURCE_DIR}/xilinx_microblaze
                     ${EXAMPLE_BINARY_DIR}/bsp${CFG_PCP_NAME}/${CFG_PCP_NAME}/include
                    )
 

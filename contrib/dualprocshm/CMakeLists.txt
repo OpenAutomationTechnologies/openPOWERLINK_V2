@@ -2,7 +2,7 @@
 #
 # CMake file for dual processor shared memory libraries
 #
-# Copyright (c) 2014, Kalycito Infotech Pvt. Ltd.
+# Copyright (c) 2014, Kalycito Infotech Private Limited.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
