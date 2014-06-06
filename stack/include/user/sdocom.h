@@ -2,9 +2,9 @@
 ********************************************************************************
 \file   sdocom.h
 
-\brief  Definitions for SDO command layer module
+\brief  Definitions for SDO Command Layer module
 
-The file contains definitions for the SDO command layer module.
+The file contains definitions for the SDO Command Layer module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -43,9 +43,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
 #include <oplk/sdo.h>
-#include <oplk/obd.h>
-#include <oplk/sdoabortcodes.h>
-#include <user/sdoseq.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -54,6 +51,27 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
+/// Callback function pointer to inform application about connection
+typedef tOplkError (*tSdoFinishedCb)(tSdoComFinished* pSdoComFinished_p);
+
+/**
+\brief Structure for initializing Read/Write by Index SDO transfer
+
+This structure is used to initialize a SDO transfer of a Read or Write
+by Index command.
+*/
+typedef struct
+{
+    tSdoComConHdl       sdoComConHdl;           ///< Handle to SDO command layer connection
+    UINT                index;                  ///< Index to read/write
+    UINT                subindex;               ///< Sub-index to read/write
+    void*               pData;                  ///< Pointer to data which should be transfered
+    UINT                dataSize;               ///< Size of data to be transfered
+    UINT                timeout;                ///< Timeout: not supported in this version of openPOWERLINK
+    tSdoAccessType      sdoAccessType;          ///< The SDO access type (Read or Write) for this transfer
+    tSdoFinishedCb      pfnSdoFinishedCb;       ///< Pointer to callback function which will be called when transfer is finished.
+    void*               pUserArg;               ///< User definable argument pointer
+} tSdoComTransParamByIndex;
 
 //------------------------------------------------------------------------------
 // function prototypes

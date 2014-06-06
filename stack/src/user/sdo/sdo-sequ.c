@@ -2,9 +2,9 @@
 ********************************************************************************
 \file   sdo-sequ.c
 
-\brief  Implementation of SDO sequence layer
+\brief  Implementation of SDO Sequence Layer
 
-This file contains the implementation of the SDO sequence layer
+This file contains the implementation of the SDO Sequence Layer
 
 \ingroup module_sdo_seq
 *******************************************************************************/
@@ -40,8 +40,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <common/ami.h>
+#include <common/oplkinc.h>
 #include <user/sdoseq.h>
+#include <user/sdoal.h>
+#include <user/sdoasnd.h>
+#include <user/sdoudp.h>
+#include <user/timeru.h>
+#include <common/ami.h>
 
 #if !defined(CONFIG_INCLUDE_SDO_UDP) && !defined(CONFIG_INCLUDE_SDO_ASND)
 #error 'ERROR: sdo-sequ.c - At least UDP or ASND module needed!'
@@ -67,6 +72,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define SDO_SEQ_HEADER_SIZE         4                       // size of the header of the SDO Sequence layer
 #define SDO_SEQ_HISTROY_FRAME_SIZE  SDO_MAX_FRAME_SIZE      // buffersize for one frame in history
 #define SDO_CON_MASK                0x03                    // mask to get scon and rcon
+
+#define SEQ_NUM_MASK                0xFC
 
 const UINT32 SDO_SEQU_MAX_TIMEOUT_MS = (UINT32)86400000UL; // [ms], 86400000 ms = 1 day
 
@@ -103,7 +110,7 @@ typedef enum
     kSdoSeqEventFrameSend=   0x03,   ///< Frame to send
     kSdoSeqEventTimeout  =   0x04,   ///< Timeout for connection
     kSdoSeqEventCloseCon =   0x05    ///< Higher layer closed connection
-}tSdoSeqEvent;
+} tSdoSeqEvent;
 
 /**
 \brief  SDO sequence layer connection history
@@ -116,9 +123,9 @@ typedef struct
     UINT8           writeIndex;     ///< Index of the next free buffer entry
     UINT8           ackIndex;       ///< Index of the next message which should become acknowledged
     UINT8           readIndex;      ///< Index between ackIndex and writeIndex to the next message for retransmission
-    UINT8           aHistoryFrame[SDO_HISTORY_SIZE][SDO_SEQ_HISTROY_FRAME_SIZE];
-    UINT            aFrameSize[SDO_HISTORY_SIZE];
-}tSdoSeqConHistory;
+    UINT8           aHistoryFrame[SDO_HISTORY_SIZE][SDO_SEQ_HISTROY_FRAME_SIZE];    ///< Array of the history frames
+    UINT            aFrameSize[SDO_HISTORY_SIZE];                                   ///< Array of sizes of the history frames
+} tSdoSeqConHistory;
 
 /**
 \brief  SDO sequence layer states
@@ -128,13 +135,13 @@ machine.
 */
 typedef enum
 {
-    kSdoSeqStateIdle        = 0x00,
-    kSdoSeqStateInit1       = 0x01,
-    kSdoSeqStateInit2       = 0x02,
-    kSdoSeqStateInit3       = 0x03,
-    kSdoSeqStateConnected   = 0x04,
-    kSdoSeqStateWaitAck     = 0x05
-}tSdoSeqState;
+    kSdoSeqStateIdle        = 0x00,             ///< SDO connection is idle (closed)
+    kSdoSeqStateInit1       = 0x01,             ///< SDO init 1: scon=1, rcon=0
+    kSdoSeqStateInit2       = 0x02,             ///< SDO init 2: scon=1, rcon=1
+    kSdoSeqStateInit3       = 0x03,             ///< SDO init 3: scon=2, rcon=1
+    kSdoSeqStateConnected   = 0x04,             ///< SDO connection is established
+    kSdoSeqStateWaitAck     = 0x05              ///< SDO connection is waiting for an acknowledgement
+} tSdoSeqState;
 
 /**
 \brief  SDO sequence layer connection control structure
@@ -151,7 +158,7 @@ typedef struct
     tTimerHdl               timerHandle;        ///< Timer handle
     UINT                    retryCount;         ///< Retry counter
     UINT                    useCount;           ///< One sequence layer connection may be used by multiple command layer connections
-}tSdoSeqCon;
+} tSdoSeqCon;
 
 /**
 \brief  SDO sequence layer instance structure
@@ -566,7 +573,7 @@ tOplkError sdoseq_processEvent(tEvent* pEvent_p)
     }
     timeru_deleteTimer(&pSdoSeqCon->timerHandle);
 
-    // get indexnumber of control structure
+    // get index number of control structure
     count = 0;
     while ((&sdoSeqInstance_l.aSdoSeqCon[count]) != pSdoSeqCon)
     {
@@ -584,7 +591,7 @@ tOplkError sdoseq_processEvent(tEvent* pEvent_p)
 /**
 \brief  Delete a sequence layer connection
 
-The function closes and deletes an exisiting sequence layer connection.
+The function closes and deletes an existing sequence layer connection.
 
 \param  sdoSeqConHdl_p          Connection handle of sequence layer connection
                                 to delete.
@@ -603,7 +610,7 @@ tOplkError sdoseq_deleteCon(tSdoSeqConHdl sdoSeqConHdl_p)
     handle = (sdoSeqConHdl_p & ~SDO_SEQ_HANDLE_MASK);
 
     // check if handle invalid
-    if(handle >= CONFIG_SDO_MAX_CONNECTION_SEQ)
+    if (handle >= CONFIG_SDO_MAX_CONNECTION_SEQ)
         return kErrorSdoSeqInvalidHdl;
 
     pSdoSeqCon = &sdoSeqInstance_l.aSdoSeqCon[handle];    // get pointer to connection
@@ -911,7 +918,7 @@ static tOplkError processStateInit2(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
                 // create answer and send answer - set rcon to 1 (in send direction own scon)
                 pSdoSeqCon_p->recvSeqNum++;
                 ret = sendFrame(pSdoSeqCon_p, 0, NULL, FALSE);
-                if(ret != kErrorOk)
+                if (ret != kErrorOk)
                     return ret;
 
                 ret = setTimer(pSdoSeqCon_p, sdoSeqInstance_l.sdoSeqTimeout);
@@ -957,7 +964,7 @@ static tOplkError processStateInit2(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
 
         default:
             break;
-    } // end of switch (Event_p)
+    } // end of switch (event_p)
 
     return ret;
 }
@@ -1025,7 +1032,6 @@ static tOplkError processStateInit3(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
                 ret = setTimer(pSdoSeqCon_p, sdoSeqInstance_l.sdoSeqTimeout);
 
                 sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateConnected);
-
             }
             else
             {   // error -> Close
@@ -1094,7 +1100,7 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
     tOplkError          ret = kErrorOk;
     UINT8               sendSeqNumCon;
     UINT                frameSize;
-    tPlkFrame *         pFrame;
+    tPlkFrame*          pFrame;
     UINT                freeEntries;
 
     switch (event_p)
@@ -1153,7 +1159,7 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
                     timeru_deleteTimer(&pSdoSeqCon_p->timerHandle);
                     sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateTransferAbort);
                     // restart immediately with initialization request
-                    DEBUG_LVL_SDO_TRACE("sdoSeq: Reinit immediately\n");
+                    DEBUG_LVL_SDO_TRACE("sdo-sequ: Reinit immediately\n");
                     ret = kErrorRetry;
                     break;
 
@@ -1312,7 +1318,7 @@ static tOplkError processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sd
 {
     tOplkError          ret = kErrorOk;
     UINT                frameSize;
-    tPlkFrame *         pFrame;
+    tPlkFrame*          pFrame;
 
     DEBUG_LVL_SDO_TRACE("sdo-sequ: processStateWaitAck\n");
 
@@ -1351,8 +1357,8 @@ static tOplkError processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sd
                 if (dataSize_p > SDO_SEQ_HEADER_SIZE)
                 {
                     sdoSeqInstance_l.pfnSdoComRecvCb(sdoSeqConHdl_p,
-                                        ((tAsySdoCom*)&pRecvFrame_p->sdoSeqPayload),
-                                        (dataSize_p - SDO_SEQ_HEADER_SIZE));
+                                                     ((tAsySdoCom*)&pRecvFrame_p->sdoSeqPayload),
+                                                     (dataSize_p - SDO_SEQ_HEADER_SIZE));
                 }
                 break;
 
@@ -1523,7 +1529,7 @@ static tOplkError sendFrame(tSdoSeqCon* pSdoSeqCon_p, UINT dataSize_p,
 {
     tOplkError      ret;
     UINT8           aFrame[SDO_SEQ_FRAME_SIZE];
-    tPlkFrame *     pFrame;
+    tPlkFrame*      pFrame;
     UINT            freeEntries = 0;
 
     if (pData_p == NULL)
@@ -1882,7 +1888,7 @@ static tOplkError readFromHistory(tSdoSeqCon* pSdoSeqCon_p, tPlkFrame** ppFrame_
     else
     {
         DEBUG_LVL_SDO_TRACE("readFromHistory(): read = %u, ack = %u, free entries = %u, no frame\n",
-                             (WORD)pHistory->readIndex, (WORD)pHistory->ackIndex, (WORD)pHistory->freeEntries);
+                            (WORD)pHistory->readIndex, (WORD)pHistory->ackIndex, (WORD)pHistory->freeEntries);
 
         // no more frames to send - return null pointer
         *ppFrame_p = NULL;
@@ -1943,4 +1949,3 @@ static tOplkError setTimer(tSdoSeqCon* pSdoSeqCon_p, ULONG timeout_p)
 }
 
 ///\}
-

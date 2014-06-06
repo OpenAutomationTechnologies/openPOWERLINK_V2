@@ -42,8 +42,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-#include <oplk/sdo.h>
-#include <oplk/dll.h>
+#include <user/sdoal.h>
+#include <oplk/frame.h>
 
 //------------------------------------------------------------------------------
 // const defines

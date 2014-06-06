@@ -1,10 +1,11 @@
 /**
 ********************************************************************************
-\file   sdoudp.h
+\file   user/sdoal.h
 
-\brief  Definitions for SDO over UDP protocol abstraction layer
+\brief  Definitions for SDO protocol abstraction layer modules
 
-The file contains definitions for the SDO over UDP protocol abstraction layer.
+This file contains common definitions for the SDO protocol abstraction layer
+modules.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -35,46 +36,36 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_sdoudp_H_
-#define _INC_sdoudp_H_
+#ifndef _INC_user_sdoal_H_
+#define _INC_user_sdoal_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-#include <user/sdoal.h>
 #include <oplk/frame.h>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
 
-//------------------------------------------------------------------------------
-// typedef
-//------------------------------------------------------------------------------
+// handle between protocol abstraction layer and asynchronous SDO Sequence Layer
+#define SDO_UDP_HANDLE              0x8000
+#define SDO_ASND_HANDLE             0x4000
+#define SDO_ASY_HANDLE_MASK         0xC000
+#define SDO_ASY_INVALID_HDL         0x3FFF
+
+#define ASND_HEADER_SIZE            4
+
 
 //------------------------------------------------------------------------------
-// function prototypes
+// Type definitions
 //------------------------------------------------------------------------------
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+/// Data type for handle between protocol abstraction layer and asynchronous SDO Sequence Layer
+typedef UINT tSdoConHdl;
 
-#if defined(CONFIG_INCLUDE_SDO_UDP)
+/// Callback function pointer for the protocol abstraction layer to call the asynchronous SDO Sequence Layer
+typedef tOplkError (*tSequLayerReceiveCb)(tSdoConHdl conHdl_p, tAsySdoSeq* pSdoSeqData_p, UINT dataSize_p);
 
-tOplkError sdoudp_init(tSequLayerReceiveCb pfnReceiveCb_p);
-tOplkError sdoudp_addInstance(tSequLayerReceiveCb pfnReceiveCb_p);
-tOplkError sdoudp_delInstance(void);
-tOplkError sdoudp_config(ULONG ipAddr_p, UINT port_p);
-tOplkError sdoudp_initCon(tSdoConHdl* pSdoConHandle_p, UINT targetNodeId_p);
-tOplkError sdoudp_sendData(tSdoConHdl sdoConHandle_p, tPlkFrame* pSrcData_p, UINT32 dataSize_p);
-tOplkError sdoudp_delConnection(tSdoConHdl sdoConHandle_p);
-
-#endif
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* _INC_sdoudp_H_ */
+#endif /* _INC_user_sdoal_H_ */

@@ -43,18 +43,45 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
 #include <oplk/sdo.h>
-#include <user/sdoudp.h>
-#include <user/sdoasnd.h>
+#include <oplk/frame.h>
 #include <oplk/event.h>
-#include <user/timeru.h>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+// handle between SDO Sequence Layer and SDO Command Layer
+#define SDO_ASY_HANDLE              0x8000
+#define SDO_PDO_HANDLE              0x4000
+#define SDO_SEQ_HANDLE_MASK         0xC000
+#define SDO_SEQ_INVALID_HDL         0x3FFF
 
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
+/**
+\brief Enumeration lists valid SDO connection states
+
+This enumeration lists all valid SDO connection states.
+*/
+typedef enum
+{
+    kAsySdoConStateConnected            = 0x00,     ///< An SDO connection is established
+    kAsySdoConStateInitError            = 0x01,     ///< An error occured during initialization
+    kAsySdoConStateConClosed            = 0x02,     ///< The SDO connection is closed
+    kAsySdoConStateAckReceived          = 0x03,     ///< An acknowledge has been received
+    kAsySdoConStateFrameSent            = 0x04,     ///< A frame has been sent
+    kAsySdoConStateTimeout              = 0x05,     ///< A timeout has occured
+    kAsySdoConStateTransferAbort        = 0x06,     ///< The SDO transfer has been aborted
+} tAsySdoConState;
+
+/// Data type for handle between asynchronous SDO Sequence Layer and SDO Command Layer
+typedef UINT tSdoSeqConHdl;
+
+/// Callback function pointer for asynchronous SDO Sequence Layer to call SDO Command Layer for connection status
+typedef tOplkError (*tSdoComConCb)(tSdoSeqConHdl sdoSeqConHdl_p, tAsySdoConState asySdoConState_p);
+
+/// Callback function pointer for asynchronous SDO Sequence Layer to call SDO Command Layer for received data
+typedef tOplkError (*tSdoComReceiveCb)(tSdoSeqConHdl sdoSeqConHdl_p, tAsySdoCom* pAsySdoCom_p, UINT dataSize_p);
 
 //------------------------------------------------------------------------------
 // function prototypes

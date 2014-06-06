@@ -2,9 +2,9 @@
 ********************************************************************************
 \file   sdo-comu.c
 
-\brief  Implementation of SDO command layer
+\brief  Implementation of SDO Command Layer
 
-This file contains the implementation of the SDO command layer.
+This file contains the implementation of the SDO Command Layer.
 
 \ingroup module_sdo_com
 *******************************************************************************/
@@ -40,8 +40,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <common/ami.h>
+#include <common/oplkinc.h>
 #include <user/sdocom.h>
+#include <user/sdoseq.h>
+#include <oplk/obd.h>
+#include <common/ami.h>
+
 
 #if !defined(CONFIG_INCLUDE_SDOS) && !defined(CONFIG_INCLUDE_SDOC)
 #error 'ERROR: At least SDO Server or SDO Client should be activate!'
@@ -54,6 +58,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+#ifndef SDO_MAX_SEGMENT_SIZE
+#define SDO_MAX_SEGMENT_SIZE        256
+#endif
 
 #ifndef CONFIG_SDO_MAX_CONNECTION_COM
 #define CONFIG_SDO_MAX_CONNECTION_COM         5
@@ -78,6 +85,41 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
+/**
+\brief Enumeration for SDO transfer types
+
+This enumeration lists all valid SDO transfer types.
+*/
+typedef enum
+{
+    kSdoTransAuto                       = 0x00,     ///< Automatically select the transfer type
+    kSdoTransExpedited                  = 0x01,     ///< SDO expedited transfer
+    kSdoTransSegmented                  = 0x02      ///< SDO segmented transfer
+} tSdoTransType;
+
+/**
+\brief Enumeration for SDO service types (command IDs)
+
+This enumeration lists all valid SDO command IDs.
+*/
+typedef enum
+{
+    kSdoServiceNIL                      = 0x00,     ///< SDO NIL (do nothing)
+    kSdoServiceWriteByIndex             = 0x01,     ///< SDO Write of a single object/sub-object
+    kSdoServiceReadByIndex              = 0x02,     ///< SDO Read of a single object/sub-object
+
+    // the following services are optional and are not supported now
+    kSdoServiceWriteAllByIndex          = 0x03,     ///< SDO Write of all sub-objects of an object
+    kSdoServiceReadAllByIndex           = 0x04,     ///< SDO Read of all sub-objects of an object
+    kSdoServiceWriteByName              = 0x05,     ///< SDO Write of a single object/sub-object given by its name
+    kSdoServiceReadByName               = 0x06,     ///< SDO Read of a single object/sub-object given by its name
+    kSdoServiceFileWrite                = 0x20,     ///< SDO File Write service
+    kSdoServiceFileRead                 = 0x21,     ///< SDO File Read service
+    kSdoServiceWriteMultiByIndex        = 0x31,     ///< SDO Write of multiple objects/sub-objects
+    kSdoServiceReadMultiByIndex         = 0x32,     ///< SDO Read of multiple objects/sub-objects
+    kSdoServiceMaxSegSize               = 0x70      ///< SDO maximum segment size
+    // 0x80 - 0xFF manufacturer specific
+} tSdoServiceType;
 
 /**
 \brief  SDO command layer events
@@ -101,7 +143,6 @@ typedef enum
     kSdoComConEventAbort            = 0x0A, ///< Abort SDO transfer (only client)
 #endif
 } tSdoComConEvent;
-
 
 /**
 \brief  SDO command layer message types
@@ -142,9 +183,9 @@ This structure defines the connection control structure of the command layer.
 */
 typedef struct
 {
-    tSdoSeqConHdl       sdoSeqConHdl;       // if != 0 -> entry used
-    tSdoComState        sdoComState;
-    UINT8               transactionId;
+    tSdoSeqConHdl       sdoSeqConHdl;       ///< SDO sequence layer connection handle (only valid if not 0)
+    tSdoComState        sdoComState;        ///< SDO command layer state
+    UINT8               transactionId;      ///< Transaction ID
     UINT                nodeId;             ///< NodeId of the target -> needed to reinit connection after timeout
     tSdoTransType       sdoTransferType;    ///< Transfer Type: Auto, Expedited, Segmented
     tSdoServiceType     sdoServiceType;     ///< Service Type: WriteByIndex, ReadByIndex
@@ -186,7 +227,7 @@ static tSdoComInstance sdoComInstance_l;
 static tOplkError receiveCb(tSdoSeqConHdl sdoSeqConHdl_p, tAsySdoCom* pSdoCom_p, UINT dataSize_p);
 static tOplkError conStateChangeCb(tSdoSeqConHdl sdoSeqConHdl_p, tAsySdoConState sdoConnectionState_p);
 static tOplkError searchConnection(tSdoSeqConHdl sdoSeqConHdl_p, tSdoComConEvent sdoComConEvent_p, tAsySdoCom* pSdoCom_p);
-static tOplkError processState(tSdoComConHdl sdoComConHdl_p, tSdoComConEvent SdoComConEvent_p,
+static tOplkError processState(tSdoComConHdl sdoComConHdl_p, tSdoComConEvent sdoComConEvent_p,
                                tAsySdoCom* pSdoCom_p);
 static tOplkError processStateIdle(tSdoComConHdl sdoComConHdl_p, tSdoComConEvent sdoComConEvent_p,
                             tAsySdoCom* pRecvdCmdLayer_p);
@@ -422,7 +463,7 @@ tOplkError sdocom_initTransferByIndex(tSdoComTransParamByIndex* pSdoComTransPara
         pSdoComCon->sdoServiceType = kSdoServiceWriteByIndex;
     }
 
-    pSdoComCon->pData = pSdoComTransParam_p->pData;             // save pointer to data
+    pSdoComCon->pData = (UINT8*)pSdoComTransParam_p->pData;     // save pointer to data
     pSdoComCon->transferSize = pSdoComTransParam_p->dataSize;   // maximal bytes to transfer
     pSdoComCon->transferredBytes = 0;                           // bytes already transfered
 
@@ -754,7 +795,7 @@ static tOplkError searchConnection(tSdoSeqConHdl sdoSeqConHdl_p, tSdoComConEvent
         {   // matching command layer handle found
             ret = processState(hdlCount, sdoComConEvent_p, pSdoCom_p);
         }
-        else if ((pSdoComCon->sdoSeqConHdl == 0) &&(hdlFree == 0xFFFF))
+        else if ((pSdoComCon->sdoSeqConHdl == 0) && (hdlFree == 0xFFFF))
         {
             hdlFree = hdlCount;
         }
@@ -823,13 +864,13 @@ static tOplkError processStateIdle(tSdoComConHdl sdoComConHdl_p, tSdoComConEvent
             if ((pRecvdCmdLayer_p->flags & SDO_CMDL_FLAG_RESPONSE) == 0)
             {   // SDO request
                 if ((pRecvdCmdLayer_p->flags & SDO_CMDL_FLAG_ABORT) == 0)
-                {   // no SDO abort, save tansaction id
+                {   // no SDO abort, save transaction id
                     pSdoComCon->transactionId = ami_getUint8Le(&pRecvdCmdLayer_p->transactionId);
 
                     switch(pRecvdCmdLayer_p->commandId)
                     {
                         case kSdoServiceNIL:
-                            // simply acknowlegde NIL command on sequence layer
+                            // simply acknowledge NIL command on sequence layer
                             ret = sdoseq_sendData(pSdoComCon->sdoSeqConHdl, 0, (tPlkFrame*)NULL);
                             break;
 
@@ -1525,7 +1566,7 @@ static tOplkError serverInitReadByIndex(tSdoComCon* pSdoComCon_p, tAsySdoCom* pS
     if (entrySize > SDO_MAX_SEGMENT_SIZE)
     {
         pSdoComCon_p->sdoTransferType = kSdoTransSegmented;
-        pSdoComCon_p->pData = obd_getObjectDataPtr(index, subindex);
+        pSdoComCon_p->pData = (UINT8*)obd_getObjectDataPtr(index, subindex);
     }
     else
     {
@@ -1851,7 +1892,7 @@ static tOplkError serverInitWriteByIndex(tSdoComCon* pSdoComCon_p, tAsySdoCom* p
 
         bytesToTransfer = ami_getUint16Le(&pSdoCom_p->segmentSizeLe);
         bytesToTransfer -= (SDO_CMDL_HDR_FIXED_SIZE + SDO_CMDL_HDR_VAR_SIZE + SDO_CMDL_HDR_WRITEBYINDEX_SIZE);
-        pSdoComCon_p->pData = obd_getObjectDataPtr(index, subindex);    // get pointer to object entry
+        pSdoComCon_p->pData = (UINT8*)obd_getObjectDataPtr(index, subindex);    // get pointer to object entry
         if (pSdoComCon_p->pData == NULL)
         {
             pSdoComCon_p->lastAbortCode = SDO_AC_GENERAL_ERROR;
@@ -1904,7 +1945,7 @@ static tOplkError clientSend(tSdoComCon* pSdoComCon_p)
 {
     tOplkError      ret = kErrorOk;
     UINT8           aFrame[SDO_MAX_FRAME_SIZE];
-    tPlkFrame *     pFrame;
+    tPlkFrame*      pFrame;
     tAsySdoCom*     pCommandFrame;
     UINT            sizeOfFrame;
     UINT8           flags;
@@ -2226,7 +2267,7 @@ static tOplkError clientSendAbort(tSdoComCon* pSdoComCon_p, UINT32 abortCode_p)
 {
     tOplkError      ret = kErrorOk;
     UINT8           aFrame[SDO_MAX_FRAME_SIZE];
-    tPlkFrame *     pFrame;
+    tPlkFrame*      pFrame;
     tAsySdoCom*     pCommandFrame;
     UINT            sizeOfFrame;
 
@@ -2295,7 +2336,7 @@ static tOplkError transferFinished(tSdoComConHdl sdoComConHdl_p, tSdoComCon* pSd
     tSdoFinishedCb  pfnTransferFinished;
     tSdoComFinished sdoComFinished;
 
-    if(pSdoComCon_p->pfnTransferFinished != NULL)
+    if (pSdoComCon_p->pfnTransferFinished != NULL)
     {
 
         sdoComFinished.pUserArg = pSdoComCon_p->pUserArg;
@@ -2330,4 +2371,3 @@ static tOplkError transferFinished(tSdoComConHdl sdoComConHdl_p, tSdoComCon* pSd
 }
 
 ///\}
-

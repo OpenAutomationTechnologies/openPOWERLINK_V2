@@ -42,31 +42,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <oplk/oplkinc.h>
-#include <oplk/frame.h>
 #include <oplk/sdoabortcodes.h>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#ifndef SDO_MAX_SEGMENT_SIZE
-#define SDO_MAX_SEGMENT_SIZE        256
-#endif
-
-// handle between Protocol Abstraction Layer and asynchronous SDO Sequence Layer
-#define SDO_UDP_HANDLE              0x8000
-#define SDO_ASND_HANDLE             0x4000
-#define SDO_ASY_HANDLE_MASK         0xC000
-#define SDO_ASY_INVALID_HDL         0x3FFF
-
-// handle between SDO Sequence Layer and SDO command layer
-#define SDO_ASY_HANDLE              0x8000
-#define SDO_PDO_HANDLE              0x4000
-#define SDO_SEQ_HANDLE_MASK         0xC000
-#define SDO_SEQ_INVALID_HDL         0x3FFF
-
-#define ASND_HEADER_SIZE            4
-
-#define SEQ_NUM_MASK                0xFC
 
 // size for send buffer and history
 #define SDO_MAX_FRAME_SIZE          C_IP_MIN_MTU
@@ -78,91 +58,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // Type definitions
 //------------------------------------------------------------------------------
-
-/// Data type for handle between Protocol Abstraction Layer and asynchronous SDO Sequence Layer
-typedef UINT tSdoConHdl;
-
-/// Callback function pointer for Protocol Abstraction Layer to call asynchronous SDO Sequence Layer
-typedef tOplkError (*tSequLayerReceiveCb)(tSdoConHdl ConHdl_p, tAsySdoSeq* pSdoSeqData_p, UINT uiDataSize_p);
-
-/// Data type for handle between asynchronous SDO Sequence Layer and SDO Command layer
-typedef UINT tSdoSeqConHdl;
-
-/// Callback function pointer for asynchronous SDO Sequence Layer to call SDO Command layer for received data
-typedef tOplkError (*tSdoComReceiveCb)(tSdoSeqConHdl SdoSeqConHdl_p, tAsySdoCom* pAsySdoCom_p, UINT uiDataSize_p);
-
-/**
-\brief Enumeration lists valid SDO connection states
-
-This enumeration lists all valid SDO connection states.
-*/
-typedef enum
-{
-    kAsySdoConStateConnected            = 0x00,
-    kAsySdoConStateInitError            = 0x01,
-    kAsySdoConStateConClosed            = 0x02,
-    kAsySdoConStateAckReceived          = 0x03,
-    kAsySdoConStateFrameSent            = 0x04,
-    kAsySdoConStateTimeout              = 0x05,
-    kAsySdoConStateTransferAbort        = 0x06,
-}tAsySdoConState;
-
-/// callback function pointer for asynchronous SDO sequence layer to call SDO command layer for connection status
-typedef tOplkError (*tSdoComConCb)(tSdoSeqConHdl SdoSeqConHdl_p, tAsySdoConState AsySdoConState_p);
-
-/// Data type for handle between SDO command layer and application
+/// Data type for handle between SDO Command Layer and application
 typedef UINT tSdoComConHdl;
-
-/**
-\brief Enumeration lists valid SDO command layer connection states
-
-This enumeration lists all valid SDO command layer connection states.
-*/
-typedef enum
-{
-    kSdoComTransferNotActive            = 0x00,
-    kSdoComTransferRunning              = 0x01,
-    kSdoComTransferTxAborted            = 0x02,
-    kSdoComTransferRxAborted            = 0x03,
-    kSdoComTransferFinished             = 0x04,
-    kSdoComTransferLowerLayerAbort      = 0x05
-} tSdoComConState;
-
-/**
-\brief Enumeration for SDO service types (command IDs)
-
-This enumeration lists all valid SDO command IDs.
-*/
-typedef enum
-{
-    kSdoServiceNIL                      = 0x00,
-    kSdoServiceWriteByIndex             = 0x01,
-    kSdoServiceReadByIndex              = 0x02,
-
-    // the following services are optional and are not supported now
-    kSdoServiceWriteAllByIndex          = 0x03,
-    kSdoServiceReadAllByIndex           = 0x04,
-    kSdoServiceWriteByName              = 0x05,
-    kSdoServiceReadByName               = 0x06,
-    kSdoServiceFileWrite                = 0x20,
-    kSdoServiceFileRead                 = 0x21,
-    kSdoServiceWriteMultiByIndex        = 0x31,
-    kSdoServiceReadMultiByIndex         = 0x32,
-    kSdoServiceMaxSegSize               = 0x70
-    // 0x80 - 0xFF manufacturer specific
-} tSdoServiceType;
-
-
-/**
-\brief Enumeration for SDO access types
-
-This enumeration lists all valid SDO access types.
-*/
-typedef enum
-{
-    kSdoAccessTypeRead                  = 0x00,
-    kSdoAccessTypeWrite                 = 0x01
-} tSdoAccessType;
 
 /**
 \brief Enumeration for SDO types
@@ -171,23 +68,37 @@ This enumeration lists all valid SDO types.
 */
 typedef enum
 {
-    kSdoTypeAuto                        = 0x00,
-    kSdoTypeUdp                         = 0x01,
-    kSdoTypeAsnd                        = 0x02,
-    kSdoTypePdo                         = 0x03
-}tSdoType;
+    kSdoTypeAuto                        = 0x00,     ///< SDO connection type is automatically selected
+    kSdoTypeUdp                         = 0x01,     ///< Use SDO via UDP
+    kSdoTypeAsnd                        = 0x02,     ///< Use SDO via ASnd
+    kSdoTypePdo                         = 0x03      ///< Use SDO via PDO
+} tSdoType;
 
 /**
-\brief Enumeration for SDO transfer types
+\brief Enumeration lists valid SDO Command Layer connection states
 
-This enumeration lists all valid SDO transfer types.
+This enumeration lists all valid SDO Command Layer connection states.
 */
 typedef enum
 {
-    kSdoTransAuto                       = 0x00,
-    kSdoTransExpedited                  = 0x01,
-    kSdoTransSegmented                  = 0x02
-} tSdoTransType;
+    kSdoComTransferNotActive            = 0x00,     ///< SDO transfer is not active
+    kSdoComTransferRunning              = 0x01,     ///< SDO transfer is currently running
+    kSdoComTransferTxAborted            = 0x02,     ///< SDO transfer is aborted (abort code is going to be sent)
+    kSdoComTransferRxAborted            = 0x03,     ///< SDO transfer has been aborted by the remote side
+    kSdoComTransferFinished             = 0x04,     ///< SDO transfer is finished
+    kSdoComTransferLowerLayerAbort      = 0x05      ///< SDO transfer has been aborted by the SDO sequence layer
+} tSdoComConState;
+
+/**
+\brief Enumeration for SDO access types
+
+This enumeration lists all valid SDO access types.
+*/
+typedef enum
+{
+    kSdoAccessTypeRead                  = 0x00,     ///< SDO read access
+    kSdoAccessTypeWrite                 = 0x01      ///< SDO write access
+} tSdoAccessType;
 
 /**
 \brief Structure for finished SDO transfer
@@ -196,51 +107,15 @@ This structure is used to inform the application about a finished SDO transfer.
 */
 typedef struct
 {
-    tSdoComConHdl       sdoComConHdl;           ///< Handle to SDO command layer connection
-    tSdoComConState     sdoComConState;         ///< Status of SDO command layer connection
-    UINT32              abortCode;              ///< SDO abort code
-    tSdoAccessType      sdoAccessType;          ///< SDO access type
-    UINT                nodeId;                 ///< The node ID of the target
-    UINT                targetIndex;            ///< Index which was accessed
-    UINT                targetSubIndex;         ///< Sub-index which was accessed
-    UINT                transferredBytes;       ///< The number of bytes transferred
-    void*               pUserArg;               ///< The user defined argument pointer
+    tSdoComConHdl       sdoComConHdl;               ///< Handle to SDO Command Layer connection
+    tSdoComConState     sdoComConState;             ///< Status of SDO Command Layer connection
+    UINT32              abortCode;                  ///< SDO abort code
+    tSdoAccessType      sdoAccessType;              ///< SDO access type
+    UINT                nodeId;                     ///< The node ID of the target
+    UINT                targetIndex;                ///< Index which was accessed
+    UINT                targetSubIndex;             ///< Sub-index which was accessed
+    UINT                transferredBytes;           ///< The number of bytes transferred
+    void*               pUserArg;                   ///< The user defined argument pointer
 } tSdoComFinished;
 
-
-/// callback function pointer to inform application about connection
-typedef tOplkError (*tSdoFinishedCb)(tSdoComFinished* pSdoComFinished_p);
-
-/**
-\brief Structure for initializing Read/Write by Index SDO transfer
-
-This structure is used to initialize a SDO transfer of a Read or Write
-by Index command.
-*/
-typedef struct
-{
-    tSdoComConHdl       sdoComConHdl;           ///< Handle to SDO command layer connection
-    UINT                index;                  ///< Index to read/write
-    UINT                subindex;               ///< Sub-index to read/write
-    void*               pData;                  ///< Pointer to data which should be transfered
-    UINT                dataSize;               ///< Size of data to be transfered
-    UINT                timeout;                ///< Timeout: not supported in this version of openPOWERLINK
-    tSdoAccessType      sdoAccessType;          ///< The SDO access type (Read or Write) for this transfer
-    tSdoFinishedCb      pfnSdoFinishedCb;       ///< Pointer to callback function which will be called when transfer is finished.
-    void*               pUserArg;               ///< User definable argument pointer
-} tSdoComTransParamByIndex;
-
-//------------------------------------------------------------------------------
-// function prototypes
-//------------------------------------------------------------------------------
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#ifdef __cplusplus
-}
-#endif
-
 #endif /* _INC_oplk_sdo_H_ */
-

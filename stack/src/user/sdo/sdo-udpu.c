@@ -43,8 +43,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <common/ami.h>
+#include <common/oplkinc.h>
 #include <user/sdoudp.h>
+#include <common/ami.h>
 
 #if (TARGET_SYSTEM == _LINUX_)
 #include <unistd.h>
@@ -141,7 +142,8 @@ static tSdoUdpInstance      sdoUdpInstance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tThreadResult sdoUdpThread(tThreadArg lpParameter);
+static void receiveFromSocket(tSdoUdpInstance* pInstance_p);
+static tThreadResult sdoUdpThread(tThreadArg pArg_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -239,7 +241,7 @@ tOplkError sdoudp_delInstance(void)
     {   // listen thread was started -> close thread
 #if (TARGET_SYSTEM == _WIN32_)
         fTermError = TerminateThread(sdoUdpInstance_l.threadHandle, 0);
-        if(fTermError == FALSE)
+        if (fTermError == FALSE)
             return kErrorSdoUdpThreadError;
 #elif (TARGET_SYSTEM == _LINUX_)
         sdoUdpInstance_l.fStopThread = TRUE;
@@ -516,7 +518,7 @@ The function receives data from the UDP socket.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-void receiveFromSocket(tSdoUdpInstance* pInstance_p)
+static void receiveFromSocket(tSdoUdpInstance* pInstance_p)
 {
     tOplkError          ret;
     struct sockaddr_in  remoteAddr;
@@ -666,4 +668,3 @@ static tThreadResult sdoUdpThread(tThreadArg pArg_p)
 ///\}
 
 #endif
-

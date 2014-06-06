@@ -38,7 +38,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _INC_oplk_sdoabortcodes_H_
 #define _INC_oplk_sdoabortcodes_H_
 
-
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
@@ -75,4 +74,3 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define SDO_AC_CONFIG_DATA_EMPTY                    0x08000024L
 
 #endif /* _INC_oplk_sdoabortcodes_H_ */
-

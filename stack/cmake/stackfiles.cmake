@@ -455,9 +455,10 @@ SET(USER_HEADERS
     ${STACK_INCLUDE_DIR}/user/nmtu.h
     ${STACK_INCLUDE_DIR}/user/pdou.h
     ${STACK_INCLUDE_DIR}/user/pdoucal.h
-    ${STACK_INCLUDE_DIR}/user/sdoasnd.h
     ${STACK_INCLUDE_DIR}/user/sdocom.h
     ${STACK_INCLUDE_DIR}/user/sdoseq.h
+    ${STACK_INCLUDE_DIR}/user/sdoal.h
+    ${STACK_INCLUDE_DIR}/user/sdoasnd.h
     ${STACK_INCLUDE_DIR}/user/sdoudp.h
     ${STACK_INCLUDE_DIR}/user/statusu.h
     ${STACK_INCLUDE_DIR}/user/syncu.h

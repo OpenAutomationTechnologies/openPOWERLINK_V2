@@ -39,9 +39,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <common/ami.h>
+#include <common/oplkinc.h>
 #include <user/sdoasnd.h>
 #include <user/dllucal.h>
+#include <common/ami.h>
+
 
 #if defined(CONFIG_INCLUDE_SDO_ASND)
 
@@ -93,7 +95,7 @@ static tSdoAsndInstance  sdoAsndInstance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-tOplkError sdoAsndCb(tFrameInfo* pFrameInfo_p);
+static tOplkError sdoAsndCb(tFrameInfo* pFrameInfo_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -334,7 +336,7 @@ receiving ASnd frames.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError sdoAsndCb(tFrameInfo* pFrameInfo_p)
+static tOplkError sdoAsndCb(tFrameInfo* pFrameInfo_p)
 {
     tOplkError      ret = kErrorOk;
     UINT            count;
@@ -342,7 +344,7 @@ tOplkError sdoAsndCb(tFrameInfo* pFrameInfo_p)
     UINT            nodeId;
     UINT            freeEntry = 0xFFFF;
     tSdoConHdl      sdoConHdl;
-    tPlkFrame *     pFrame;
+    tPlkFrame*      pFrame;
 
     pFrame = pFrameInfo_p->pFrame;
     nodeId = ami_getUint8Le(&pFrame->srcNodeId);
@@ -388,4 +390,3 @@ tOplkError sdoAsndCb(tFrameInfo* pFrameInfo_p)
 ///\}
 
 #endif
-

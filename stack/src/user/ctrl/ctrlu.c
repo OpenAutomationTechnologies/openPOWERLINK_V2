@@ -54,6 +54,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/nmtcnu.h>
 #include <user/nmtmnu.h>
 #include <user/sdocom.h>
+#include <user/sdoseq.h>
 #include <user/identu.h>
 #include <user/statusu.h>
 #include <user/timeru.h>
