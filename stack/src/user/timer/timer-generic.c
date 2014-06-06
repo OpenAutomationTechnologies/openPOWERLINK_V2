@@ -41,8 +41,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <common/oplkinc.h>
 #include <user/timeru.h>
+#include <user/eventu.h>
 #include <common/target.h>
+
 #include <limits.h>
 
 //============================================================================//
@@ -114,10 +117,9 @@ static tTimeruInstance timeruInstance_l;
 //------------------------------------------------------------------------------
 static void  enterCriticalSection(int nType_p);
 static void  leaveCriticalSection(int nType_p);
-static UINT32 getTickCount(void);
 
 #if (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_ )
-static DWORD WINAPI processThread (LPVOID parameter_p);
+static DWORD WINAPI processThread(LPVOID parameter_p);
 #endif
 
 //============================================================================//
@@ -258,7 +260,7 @@ tOplkError timeru_process(void)
 
     enterCriticalSection(TIMERU_TIMER_LIST);
     // calculate elapsed time since start time
-    timeoutInMs = getTickCount() - timeruInstance_l.startTimeInMs;
+    timeoutInMs = target_getTickCount() - timeruInstance_l.startTimeInMs;
 
     // observe first timer entry in timer list
     pTimerEntry = timeruInstance_l.pTimerListFirst;
@@ -352,7 +354,7 @@ tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg a
     // insert timer entry in timer list
     enterCriticalSection(TIMERU_TIMER_LIST);
     // calculate timeout based on start time
-    pNewEntry->timeoutInMs = (getTickCount() - timeruInstance_l.startTimeInMs) + timeInMs_p;
+    pNewEntry->timeoutInMs = (target_getTickCount() - timeruInstance_l.startTimeInMs) + timeInMs_p;
 
     ppEntry = &timeruInstance_l.pTimerListFirst;
     while (*ppEntry != NULL)
@@ -467,7 +469,6 @@ tOplkError timeru_deleteTimer(tTimerHdl* pTimerHdl_p)
     // set handle invalid
     *pTimerHdl_p = 0;
     return kErrorOk;
-
 }
 
 //============================================================================//
@@ -475,28 +476,6 @@ tOplkError timeru_deleteTimer(tTimerHdl* pTimerHdl_p)
 //============================================================================//
 /// \name Private Functions
 /// \{
-
-//------------------------------------------------------------------------------
-/**
-\brief  Get timer tick
-
-This function returns the timer tick count.
-
-\return The function returns the tick count in milliseconds.
-*/
-//------------------------------------------------------------------------------
-static UINT32 getTickCount(void)
-{
-    UINT32    tickCountInMs;
-
-#if (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_ )
-    tickCountInMs = GetTickCount();
-#else
-    tickCountInMs = target_getTickCount();
-#endif
-
-    return tickCountInMs;
-}
 
 //------------------------------------------------------------------------------
 /**
@@ -577,7 +556,7 @@ static DWORD WINAPI processThread(LPVOID parameter_p)
         }
         else
         {
-            timeoutInMs = getTickCount() - timeruInstance_l.startTimeInMs;
+            timeoutInMs = target_getTickCount() - timeruInstance_l.startTimeInMs;
             if (timeoutInMs > pTimerEntry->timeoutInMs)
             {   // timeout elapsed
                 timeoutInMs = 0;
@@ -613,4 +592,3 @@ Exit:
 #endif
 
 ///\}
-

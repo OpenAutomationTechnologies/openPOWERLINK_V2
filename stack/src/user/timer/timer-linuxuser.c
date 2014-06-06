@@ -41,7 +41,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <common/oplkinc.h>
 #include <user/timeru.h>
+#include <user/eventu.h>
 
 #include <stdio.h>
 #include <unistd.h>
@@ -49,7 +51,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <pthread.h>
 #include <sys/syscall.h>
 #include <semaphore.h>
-
 #include <signal.h>
 
 //============================================================================//
@@ -265,7 +266,7 @@ tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg a
     struct itimerspec   curTime;
     struct sigevent     sev;
 
-    if(pTimerHdl_p == NULL)
+    if (pTimerHdl_p == NULL)
         return kErrorTimerInvalidHandle;
 
     pData = (tTimeruData*)OPLK_MALLOC(sizeof(tTimeruData));
@@ -334,7 +335,7 @@ tOplkError timeru_modifyTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerAr
     tTimeruData*        pData;
     struct itimerspec   relTime, curTime;
 
-    if(pTimerHdl_p == NULL)
+    if (pTimerHdl_p == NULL)
         return kErrorTimerInvalidHandle;
 
     // check handle itself, i.e. was the handle initialized before
@@ -395,7 +396,7 @@ tOplkError timeru_deleteTimer(tTimerHdl* pTimerHdl_p)
 {
     tTimeruData*        pData;
 
-    if(pTimerHdl_p == NULL)
+    if (pTimerHdl_p == NULL)
         return kErrorTimerInvalidHandle;
 
     // check handle itself, i.e. was the handle initialized before
@@ -412,7 +413,6 @@ tOplkError timeru_deleteTimer(tTimerHdl* pTimerHdl_p)
     // uninitialize handle
     *pTimerHdl_p = 0;
     return kErrorOk;
-
 }
 
 //------------------------------------------------------------------------------
@@ -522,7 +522,7 @@ static void cbTimer(ULONG parameter_p)
     // call event function
     timerEventArg.timerHdl = (tTimerHdl)pData;
     OPLK_MEMCPY(&timerEventArg.argument, &pData->timerArgument.argument,
-               sizeof(timerEventArg.argument));
+                sizeof(timerEventArg.argument));
 
     event.eventSink = pData->timerArgument.eventSink;
     event.eventType = kEventTypeTimer;
@@ -641,4 +641,3 @@ static tTimeruData* getNextTimer(void)
 }
 
 ///\}
-

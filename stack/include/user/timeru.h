@@ -43,7 +43,25 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
 #include <common/timer.h>
-#include <user/eventu.h>
+#include <oplk/event.h>
+
+//------------------------------------------------------------------------------
+// typedef
+//------------------------------------------------------------------------------
+/**
+\brief  Structure for timer arguments
+
+The structure defines the arguments for a timer. It is used to setup a timer.
+*/
+typedef struct
+{
+    tEventSink          eventSink;      ///< The sink to send the event when the timer expires
+    union
+    {
+        UINT32          value;          ///< Timer argument supplied as UINT32
+        void*           pValue;         ///< Timer argument supplied as void*
+    } argument;                         ///< The timer argument to be sent in the timer event
+} tTimerArg;
 
 //------------------------------------------------------------------------------
 // function prototypes

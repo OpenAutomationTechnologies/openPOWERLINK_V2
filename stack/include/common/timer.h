@@ -42,7 +42,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-#include <oplk/event.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -58,22 +57,6 @@ typedef ULONG_PTR tTimerHdl;
 #else
 typedef ULONG tTimerHdl;
 #endif
-
-/**
-\brief  Structure for timer arguments
-
-The structure defines the arguments for a timer. It is used to setup a timer.
-*/
-typedef struct
-{
-    tEventSink          eventSink;      ///< The sink to send the event when the timer expires
-    union
-    {
-        UINT32          value;          ///< Timer argument supplied as UINT32
-        void*           pValue;         ///< Timer argument supplied as void*
-    } argument;                         ///< The timer argument to be sent in the timer event
-} tTimerArg;
-
 
 /**
 \brief  Structure for timer event arguments

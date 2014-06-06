@@ -42,6 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
 #include <user/timeru.h>
+#include <user/eventu.h>
 
 #include <semLib.h>
 #include <taskLib.h>
@@ -187,8 +188,8 @@ tOplkError timeru_delInstance(void)
 
     /* send message to timer task to signal shutdown */
     msg = 0;
-    msgQSend (timeruInstance_l.msgQueue, (char*)&msg, sizeof(ULONG),
-              NO_WAIT, MSG_PRI_NORMAL);
+    msgQSend(timeruInstance_l.msgQueue, (char*)&msg, sizeof(ULONG),
+             NO_WAIT, MSG_PRI_NORMAL);
 
     /* wait for timer task to end */
     while (taskIdVerify(timeruInstance_l.taskId) == OK)
@@ -254,7 +255,7 @@ tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg a
     struct itimerspec   relTime;
     tHrtimerSig         sig;
 
-    if(pTimerHdl_p == NULL)
+    if (pTimerHdl_p == NULL)
         return kErrorTimerInvalidHandle;
 
     pData = (tTimeruData*)OPLK_MALLOC(sizeof(tTimeruData));
@@ -327,7 +328,7 @@ tOplkError timeru_modifyTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerAr
     tTimeruData*        pData;
     struct itimerspec   relTime;
 
-    if(pTimerHdl_p == NULL)
+    if (pTimerHdl_p == NULL)
         return kErrorTimerInvalidHandle;
 
     // check handle itself, i.e. was the handle initialized before
@@ -390,7 +391,7 @@ tOplkError timeru_deleteTimer(tTimerHdl* pTimerHdl_p)
     tTimeruData*        pData;
 
     // check pointer to handle
-    if(pTimerHdl_p == NULL)
+    if (pTimerHdl_p == NULL)
         return kErrorTimerInvalidHandle;
 
     // check handle itself, i.e. was the handle initialized before

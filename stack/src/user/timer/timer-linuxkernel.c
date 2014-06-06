@@ -41,9 +41,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <common/oplkinc.h>
 #include <user/timeru.h>
-#include <linux/timer.h>
+#include <user/eventu.h>
 
+#include <linux/timer.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -180,7 +182,7 @@ tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg a
     tTimeruData*        pData;
 
     // check pointer to handle
-    if(pTimerHdl_p == NULL)
+    if (pTimerHdl_p == NULL)
         return kErrorTimerInvalidHandle;
 
     pData = (tTimeruData*)OPLK_MALLOC(sizeof(tTimeruData));
@@ -189,7 +191,7 @@ tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg a
 
     init_timer(&pData->timer);
     pData->timer.function = cbTimer;
-    pData->timer.data = (unsigned long) pData;
+    pData->timer.data = (unsigned long)pData;
     pData->timer.expires = jiffies + 1 + ((timeInMs_p * HZ) + 999) / 1000;
 
     OPLK_MEMCPY(&pData->timerArgument, &argument_p, sizeof(tTimerArg));
@@ -221,7 +223,7 @@ tOplkError timeru_modifyTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerAr
     tTimeruData*        pData;
 
     // check pointer to handle
-    if(pTimerHdl_p == NULL)
+    if (pTimerHdl_p == NULL)
         return kErrorTimerInvalidHandle;
 
     // check handle itself, i.e. was the handle initialized before
@@ -272,7 +274,7 @@ tOplkError timeru_deleteTimer(tTimerHdl* pTimerHdl_p)
     tTimeruData*        pData;
 
     // check pointer to handle
-    if(pTimerHdl_p == NULL)
+    if (pTimerHdl_p == NULL)
         return kErrorTimerInvalidHandle;
 
     // check handle itself, i.e. was the handle initialized before
@@ -369,4 +371,3 @@ static void cbTimer(ULONG parameter_p)
 }
 
 ///\}
-
