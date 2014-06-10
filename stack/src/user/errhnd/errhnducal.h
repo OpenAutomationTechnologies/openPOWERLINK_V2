@@ -42,6 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
+#include <common/errhnd.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -60,7 +61,7 @@ extern "C" {
 #endif
 
 tOplkError errhnducal_init(tErrHndObjects* pLocalObjects_p);
-void errhnducal_exit(void);
+void       errhnducal_exit(void);
 tOplkError errhnducal_writeErrorObject(UINT index_p, UINT subIndex_p, UINT32* pParam_p);
 tOplkError errhnducal_readErrorObject(UINT index_p, UINT subIndex_p, UINT32* pParam_p);
 

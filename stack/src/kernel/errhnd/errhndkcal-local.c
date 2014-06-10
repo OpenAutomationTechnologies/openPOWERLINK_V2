@@ -43,9 +43,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-#include <oplk/event.h>
-#include <common/errhnd.h>
-
 #include "errhndkcal.h"
 
 //============================================================================//
@@ -552,3 +549,7 @@ void errhndkcal_setMnCnLossPresThresholdCnt(UINT nodeIdx_p,
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+/// \name Private Functions
+/// \{
+
+///\}

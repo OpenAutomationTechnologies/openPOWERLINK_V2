@@ -45,13 +45,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/nmt.h>
-#include <oplk/benchmark.h>
-#include <oplk/obd.h>
-
-#include <common/errhnd.h>
+#include <common/oplkinc.h>
 #include <user/errhndu.h>
-
+#include <oplk/obd.h>
 #include "errhnducal.h"
 
 //============================================================================//
@@ -327,6 +323,8 @@ tOplkError errhndu_mnCnLossPresCbObdAccess(tObdCbParam MEM* pParam_p)
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+/// \name Private Functions
+/// \{
 
 //------------------------------------------------------------------------------
 /**
@@ -485,3 +483,4 @@ static tOplkError linkMnCnLossPresErrors(tErrHndObjects* pError_p)
 
 #endif
 
+///\}

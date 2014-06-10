@@ -44,7 +44,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
 #include <oplk/event.h>
-#include <common/errhnd.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -98,7 +97,6 @@ tOplkError errhndk_decrementCounters(BOOL fMN_p) SECTION_ERRHNDK_DECRCNTERS;
 
 // reset error flag for the specified CN
 tOplkError errhndk_resetCnError(UINT nodeId_p);
-
 
 #ifdef __cplusplus
 }

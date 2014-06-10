@@ -43,6 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
 #include <common/errhnd.h>
+#include <oplk/obd.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -74,4 +75,4 @@ tOplkError errhndu_mnCnLossPresCbObdAccess(tObdCbParam MEM* pParam_p);
 }
 #endif
 
-#endif /* _INC_ErrHndu_H_ */
+#endif /* _INC_errhndu_H_ */

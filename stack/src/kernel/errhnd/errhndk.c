@@ -42,16 +42,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/nmt.h>
-#include <oplk/benchmark.h>
-#include <oplk/obd.h>
-#include <common/ami.h>
-#include <kernel/eventk.h>
-#include <kernel/dllk.h>
-
-#include <common/errhnd.h>
+#include <common/oplkinc.h>
 #include <kernel/errhndk.h>
+#include <kernel/eventk.h>
 
+#ifdef CONFIG_INCLUDE_NMT_MN
+#include <kernel/dllk.h>
+#endif
+
+#include <common/ami.h>
+#include <common/errhnd.h>
+#include <oplk/nmt.h>
+#include <oplk/frame.h>
+#include <oplk/benchmark.h>
 #include "errhndkcal.h"
 
 //============================================================================//
@@ -121,7 +124,6 @@ static tOplkError generateHistoryEntryWithError(UINT16 errorCode_p, tNetTime net
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
 //============================================================================//
-
 
 //------------------------------------------------------------------------------
 /**
@@ -297,7 +299,6 @@ tOplkError errhndk_resetCnError(UINT nodeId_p)
 //============================================================================//
 /// \name Private Functions
 /// \{
-
 
 #ifdef CONFIG_INCLUDE_NMT_MN
 //------------------------------------------------------------------------------
@@ -784,7 +785,7 @@ static tOplkError handleMnCnLossPres(tEvent* pEvent_p)
     errhndkcal_getMnCnLossPresError(nodeIdx, &cumulativeCnt,
                                     &thresholdCnt, &threshold);
 
-    if  (instance_l.aMnCnLossPresEvent[nodeIdx] !=
+    if (instance_l.aMnCnLossPresEvent[nodeIdx] !=
                                   ERRORHANDLERK_CN_LOSS_PRES_EVENT_NONE)
         return kErrorOk;
 
@@ -1067,4 +1068,3 @@ static tOplkError postNmtEvent(tNmtEvent nmtEvent_p)
 }
 
 /// \}
-

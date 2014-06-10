@@ -61,8 +61,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-tOplkError errhndkcal_init (void);
-void errhndkcal_exit (void);
+tOplkError      errhndkcal_init(void);
+void            errhndkcal_exit(void);
 tErrHndObjects* errhndkcal_getMemPtr(void);
 
 /* Reading of error objects */

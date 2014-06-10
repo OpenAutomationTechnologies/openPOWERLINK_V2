@@ -46,11 +46,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-#include <sys/ioctl.h>
-
-#include <common/errhnd.h>
+#include "errhnducal.h"
 #include <user/ctrlucal.h>
 #include <oplk/powerlink-module.h>
+
+#include <sys/ioctl.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -227,3 +227,7 @@ tOplkError errhnducal_readErrorObject(UINT index_p, UINT subIndex_p, UINT32* pPa
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+/// \name Private Functions
+/// \{
+
+///\}
