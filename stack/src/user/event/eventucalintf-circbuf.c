@@ -41,9 +41,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-
-#include <user/eventucal.h>
-
+#include <common/oplkinc.h>
+#include <user/eventucalintf.h>
+#include <user/eventu.h>
 #include <common/circbuffer.h>
 
 //============================================================================//
@@ -253,7 +253,7 @@ by calling the event handlers process function.
 //------------------------------------------------------------------------------
 tOplkError eventucal_processEventCircbuf(tEventQueue eventQueue_p)
 {
-    tEvent*             pEplEvent;
+    tEvent*             pEvent;
     tCircBufError       error;
     tOplkError          ret = kErrorOk;
     size_t              readSize;
@@ -270,7 +270,7 @@ tOplkError eventucal_processEventCircbuf(tEventQueue eventQueue_p)
 
     error = circbuf_readData(pCircBufInstance, aRxBuffer,
                              sizeof(tEvent) + MAX_EVENT_ARG_SIZE, &readSize);
-    if(error != kCircBufOk)
+    if (error != kCircBufOk)
     {
         if (error == kCircBufNoReadableData)
             return kErrorOk;
@@ -281,15 +281,15 @@ tOplkError eventucal_processEventCircbuf(tEventQueue eventQueue_p)
         return kErrorGeneralError;
     }
 
-    pEplEvent = (tEvent*)aRxBuffer;
-    pEplEvent->eventArgSize = (readSize - sizeof(tEvent));
+    pEvent = (tEvent*)aRxBuffer;
+    pEvent->eventArgSize = (readSize - sizeof(tEvent));
 
-    if(pEplEvent->eventArgSize > 0)
-        pEplEvent->pEventArg = &aRxBuffer[sizeof(tEvent)];
+    if (pEvent->eventArgSize > 0)
+        pEvent->pEventArg = &aRxBuffer[sizeof(tEvent)];
     else
-        pEplEvent->pEventArg = NULL;
+        pEvent->pEventArg = NULL;
 
-    ret = eventu_process(pEplEvent);
+    ret = eventu_process(pEvent);
     return ret;
 }
 
@@ -388,4 +388,3 @@ static tOplkError postEvent(tCircBufInstance* pCircBufInstance_p, tEvent* pEvent
 }
 
 /// \}
-

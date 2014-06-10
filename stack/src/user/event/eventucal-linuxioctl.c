@@ -46,17 +46,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/debugstr.h>
+#include <common/oplkinc.h>
 #include <user/eventucal.h>
+#include <user/eventu.h>
+#include <user/ctrlucal.h>
 #include <common/target.h>
+#include <oplk/powerlink-module.h>
+//#include <oplk/debugstr.h>
 
 #include <pthread.h>
-
-#include <oplk/powerlink-module.h>
 #include <sys/ioctl.h>
-
-#include <unistd.h> //sleep
-#include <user/ctrlucal.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -254,6 +253,8 @@ void eventucal_process(void)
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+/// \name Private Functions
+/// \{
 
 //------------------------------------------------------------------------------
 /**
@@ -311,7 +312,7 @@ static void* eventThread(void* arg_p)
         ret = ioctl(instance_l.fd, PLK_CMD_GET_EVENT, eventBuf);
         if (ret == 0)
         {
-            /*TRACE ("%s() User: got event type:%d(%s) sink:%d(%s)\n", __func__,
+            /*TRACE("%s() User: got event type:%d(%s) sink:%d(%s)\n", __func__,
                     pEvent->eventType, debugstr_getEventTypeStr(pEvent->eventType),
                     pEvent->eventSink, debugstr_getEventSinkStr(pEvent->eventSink));*/
             if (pEvent->eventArgSize != 0)
@@ -327,3 +328,4 @@ static void* eventThread(void* arg_p)
     return NULL;
 }
 
+///\}

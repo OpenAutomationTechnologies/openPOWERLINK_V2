@@ -46,9 +46,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <common/oplkinc.h>
 #include <oplk/event.h>
 
-#include <user/eventu.h>
-#include <user/eventucal.h>
-
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
@@ -72,7 +69,6 @@ tOplkError eventucal_postEventCircbuf(tEventQueue eventQueue_p, tEvent* pEvent_p
 tOplkError eventucal_processEventCircbuf(tEventQueue eventQueue_p);
 UINT       eventucal_getEventCountCircbuf(tEventQueue eventQueue_p);
 tOplkError eventucal_setSignalingCircbuf(tEventQueue eventQueue_p, VOIDFUNCPTR pfnSignalCb_p);
-
 
 #ifdef __cplusplus
 }

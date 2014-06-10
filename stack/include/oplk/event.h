@@ -259,21 +259,6 @@ e.g. eventkcal-* -> eventk_process
 typedef tOplkError (*tProcessEventCb)(tEvent* pEvent_p);
 
 /**
-\brief Callback for event error post
-
-This callback is used to call error event posting over the module boundaries.
-e.g. eventkcal-* -> eventk_postError
-
-\param  EventSource_p       Source of Event.
-\param  oplkError_p         Error code.
-\param  argSize_p           Size of argument.
-\param  pArg_p              Pointer to argument.
-
-\return The function returns a tOplkError error code.
-*/
-typedef tOplkError (*tPostErrorEventCb)(tEventSource eventSource_p, tOplkError oplkError_p, UINT argSize_p, void* pArg_p);
-
-/**
 \brief  Event dispatch entry
 
 The following struct specifies the entry for an event dispatch table.
@@ -287,14 +272,4 @@ typedef struct
     tProcessEventCb     pfnEventHandler;    ///< Event handler responsible for this sink
 } tEventDispatchEntry;
 
-/**
-\brief Pointer to event queue instances
-
-This typedef is used to identify the abstracted queue instance in
-eEventcal-*. The queue itself is defined by its implementation (e.g. DIRECT or
-SHB)
-*/
-typedef void* tEventQueueInstPtr;
-
 #endif /* _INC_oplk_event_H_ */
-

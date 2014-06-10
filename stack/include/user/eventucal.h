@@ -47,8 +47,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <common/oplkinc.h>
 #include <oplk/event.h>
 
-#include <user/eventu.h>
-
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------

@@ -43,18 +43,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-#include <oplk/debugstr.h>
-
-#include <user/eventu.h>
 #include <user/eventucal.h>
 #include <user/eventucalintf.h>
+#include <common/target.h>
+//#include <oplk/debugstr.h>
 
 #include <time.h>
 #include <fcntl.h>
 #include <pthread.h>
 #include <semaphore.h>
 #include <linux/errno.h>
-#include <common/target.h>
+
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -359,7 +358,7 @@ This function signals that a user event has been posted. It will be registered
 in the circular buffer library as signal callback function.
 */
 //------------------------------------------------------------------------------
-void signalUserEvent(void)
+static void signalUserEvent(void)
 {
     sem_post(instance_l.semUserData);
 }
@@ -372,7 +371,7 @@ This function signals that a kernel event has been posted. It will be registered
 in the circular buffer library as signal callback function.
 */
 //------------------------------------------------------------------------------
-void signalKernelEvent(void)
+static void signalKernelEvent(void)
 {
     sem_post(instance_l.semKernelData);
 }

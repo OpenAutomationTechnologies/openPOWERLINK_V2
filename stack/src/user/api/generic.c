@@ -46,6 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <common/oplkinc.h>
 #include <common/ami.h>
 
+#include <user/eventu.h>
 #include <user/pdoucal.h>
 #include <user/dllucal.h>
 #include <user/nmtcnu.h>

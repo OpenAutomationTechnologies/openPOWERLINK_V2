@@ -41,12 +41,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-#include <oplk/debugstr.h>
-
-#include <kernel/eventkcal.h>
 #include <kernel/eventkcalintf.h>
-
+#include <kernel/eventk.h>
 #include <common/circbuffer.h>
+//#include <oplk/debugstr.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -250,7 +248,8 @@ tOplkError eventkcal_postEventCircbuf(tEventQueue eventQueue_p, tEvent* pEvent_p
         circError = circbuf_writeMultipleData(instance_l[eventQueue_p], pEvent_p, sizeof(tEvent),
                                               pEvent_p->pEventArg, (ULONG)pEvent_p->eventArgSize);
     }
-    if(circError != kCircBufOk)
+
+    if (circError != kCircBufOk)
     {
         ret = kErrorEventPostError;
     }
@@ -275,7 +274,7 @@ by calling the event handlers process function.
 //------------------------------------------------------------------------------
 tOplkError eventkcal_processEventCircbuf(tEventQueue eventQueue_p)
 {
-    tEvent*             pEplEvent;
+    tEvent*             pEvent;
     tCircBufError       error;
     tOplkError          ret = kErrorOk;
     size_t              readSize;
@@ -299,7 +298,7 @@ tOplkError eventkcal_processEventCircbuf(tEventQueue eventQueue_p)
 
     error = circbuf_readData(pCircBufInstance, aRxBuffer_l[eventQueue_p],
                              sizeof(tEvent) + MAX_EVENT_ARG_SIZE, &readSize);
-    if(error != kCircBufOk)
+    if (error != kCircBufOk)
     {
         if (error == kCircBufNoReadableData)
             return kErrorOk;
@@ -309,20 +308,20 @@ tOplkError eventkcal_processEventCircbuf(tEventQueue eventQueue_p)
 
         return kErrorGeneralError;
     }
-    pEplEvent = (tEvent*)aRxBuffer_l[eventQueue_p];
-    pEplEvent->eventArgSize = (readSize - sizeof(tEvent));
+    pEvent = (tEvent*)aRxBuffer_l[eventQueue_p];
+    pEvent->eventArgSize = (readSize - sizeof(tEvent));
 
-    if(pEplEvent->eventArgSize > 0)
-        pEplEvent->pEventArg = &aRxBuffer_l[eventQueue_p][sizeof(tEvent)];
+    if (pEvent->eventArgSize > 0)
+        pEvent->pEventArg = &aRxBuffer_l[eventQueue_p][sizeof(tEvent)];
     else
-        pEplEvent->pEventArg = NULL;
+        pEvent->pEventArg = NULL;
 
     /*TRACE("Process Kernel  type:%s(%d) sink:%s(%d) size:%d!\n",
-           debugstr_getEventTypeStr(pEplEvent->eventType), pEplEvent->eventType,
-           debugstr_getEventSinkStr(pEplEvent->eventSink), pEplEvent->eventSink,
+           debugstr_getEventTypeStr(pEvent->eventType), pEvent->eventType,
+           debugstr_getEventSinkStr(pEvent->eventSink), pEvent->eventSink,
            pEplEvent->eventArgSize);*/
 
-    ret = eventk_process(pEplEvent);
+    ret = eventk_process(pEvent);
     return ret;
 }
 
@@ -427,7 +426,6 @@ queue.
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-
 tOplkError eventkcal_setSignalingCircbuf(tEventQueue eventQueue_p, VOIDFUNCPTR pfnSignalCb_p)
 {
     if (eventQueue_p > kEventQueueNum)

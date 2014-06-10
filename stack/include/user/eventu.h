@@ -62,13 +62,9 @@ extern "C" {
 #endif
 
 tOplkError eventu_init(tProcessEventCb pfnApiProcessEventCb_p);
-
 tOplkError eventu_exit(void);
-
 tOplkError eventu_process(tEvent* pEvent_p);
-
 tOplkError eventu_postEvent(tEvent* pEvent_p);
-
 tOplkError eventu_postError(tEventSource EventSource_p, tOplkError error_p,
                             UINT argSize_p, void* pArg_p);
 

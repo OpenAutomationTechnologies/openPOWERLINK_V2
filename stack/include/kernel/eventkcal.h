@@ -47,8 +47,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <common/oplkinc.h>
 #include <oplk/event.h>
 
-#include <kernel/eventk.h>
-
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
@@ -69,12 +67,13 @@ tOplkError eventkcal_init(void);
 tOplkError eventkcal_exit(void);
 tOplkError eventkcal_postUserEvent(tEvent* pEvent_p) SECTION_EVENTKCAL_POST;
 tOplkError eventkcal_postKernelEvent(tEvent* pEvent_p) SECTION_EVENTKCAL_POST;
-tOplkError eventkcal_rxHandler(tEvent* pEvent_p);
 void       eventkcal_process(void);
 
+#if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
 /* functions used in eventkcal-linuxkernel.c */
-int        eventkcal_postEventFromUser (unsigned long arg);
-int        eventkcal_getEventForUser(unsigned long arg);
+int        eventkcal_postEventFromUser(ULONG arg);
+int        eventkcal_getEventForUser(ULONG arg);
+#endif
 
 #ifdef __cplusplus
 }

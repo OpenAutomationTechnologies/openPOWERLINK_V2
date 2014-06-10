@@ -43,10 +43,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-
 #include <kernel/eventkcal.h>
 #include <kernel/eventkcalintf.h>
-#include <common/circbuffer.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -167,7 +165,6 @@ Exit:
     eventkcal_exitQueueCircbuf(kEventQueueKInt);
 
     return kErrorNoResource;
-
 }
 
 
@@ -331,7 +328,7 @@ This function signals that a user event was posted. It will be registered in
 the circular buffer library as signal callback function.
 */
 //------------------------------------------------------------------------------
-void signalUserEvent(void)
+static void signalUserEvent(void)
 {
     ReleaseSemaphore(instance_l.semUserData, 1, NULL);
 }
@@ -344,7 +341,7 @@ This function signals that a kernel event was posted. It will be registered in
 the circular buffer library as signal callback function.
 */
 //------------------------------------------------------------------------------
-void signalKernelEvent(void)
+static void signalKernelEvent(void)
 {
     ReleaseSemaphore(instance_l.semKernelData, 1, NULL);
 }

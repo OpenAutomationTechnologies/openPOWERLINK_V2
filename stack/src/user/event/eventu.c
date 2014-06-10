@@ -41,20 +41,26 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <stddef.h>
-
-#include <user/eventu.h>
-#include <user/eventucal.h>
-#include <user/nmtu.h>
-#include <user/nmtmnu.h>
-#include <user/sdoseq.h>
-#include <user/dllucal.h>
-#include <user/ledu.h>
-#include <oplk/benchmark.h>
 #include <common/oplkinc.h>
+#include <user/eventu.h>
+#include <user/nmtu.h>
+#include <user/dllucal.h>
+#include <user/eventucal.h>
 
+#if defined (CONFIG_INCLUDE_NMT_MN)
+#include <user/nmtmnu.h>
+#endif
+
+#if defined (CONFIG_INCLUDE_SDOC) || defined(CONFIG_INCLUDE_SDOS)
+#include <user/sdoseq.h>
+#endif
+
+#if defined (CONFIG_INCLUDE_LEDU)
+#include <user/ledu.h>
+#endif
 #include "common/event/event.h"
 
+#include <stddef.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -201,7 +207,7 @@ specific module
 \ingroup module_eventu
 */
 //------------------------------------------------------------------------------
-tOplkError eventu_process (tEvent* pEvent_p)
+tOplkError eventu_process(tEvent* pEvent_p)
 {
     tOplkError              ret = kErrorOk;
     tEventSource            eventSource;

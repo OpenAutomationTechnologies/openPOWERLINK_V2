@@ -43,12 +43,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-#include <oplk/debugstr.h>
-
-#include <user/eventu.h>
 #include <user/eventucal.h>
 #include <user/eventucalintf.h>
-#include <time.h>
+//#include <oplk/debugstr.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //

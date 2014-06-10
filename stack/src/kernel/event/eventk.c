@@ -43,6 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <stddef.h>
 
+#include <common/oplkinc.h>
 #include <kernel/eventk.h>
 #include <kernel/eventkcal.h>
 #include <kernel/nmtk.h>
@@ -52,11 +53,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplk/benchmark.h>
 
 #if defined(CONFIG_INCLUDE_PDO)
-#include <kernel/pdok.h>
 #include <kernel/pdokcal.h>
 #endif
-
-#include "common/event/event.h"
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -359,4 +357,3 @@ static tOplkError handleNmtEventinDll(tEvent* pEvent_p)
 }
 
 /// \}
-

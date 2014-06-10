@@ -43,16 +43,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-
 #include <kernel/eventkcal.h>
 #include <kernel/eventkcalintf.h>
+#include <common/target.h>
 
 #include <time.h>
 #include <fcntl.h>
 #include <pthread.h>
 #include <semaphore.h>
 #include <linux/errno.h>
-#include <common/target.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -107,8 +106,8 @@ static tEventkCalInstance   instance_l;             ///< Instance variable of ke
 // local function prototypes
 //------------------------------------------------------------------------------
 static void* eventThread(void* arg);
-static void signalKernelEvent(void);
-static void signalUserEvent(void);
+static void  signalKernelEvent(void);
+static void  signalUserEvent(void);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -307,7 +306,7 @@ This function contains the main function for the event handler thread.
 \return The function returns the thread exit code.
 */
 //------------------------------------------------------------------------------
-static void * eventThread(void *arg)
+static void* eventThread(void* arg)
 {
     struct timespec         curTime, timeout;
     tEventkCalInstance*     pInstance = (tEventkCalInstance*)arg;
@@ -348,7 +347,7 @@ This function signals that a user event was posted. It will be registered in
 the circular buffer library as signal callback function
 */
 //------------------------------------------------------------------------------
-void signalUserEvent(void)
+static void signalUserEvent(void)
 {
     sem_post(instance_l.semUserData);
 }
@@ -361,7 +360,7 @@ This function signals that a kernel event was posted. It will be registered in
 the circular buffer library as signal callback function
 */
 //------------------------------------------------------------------------------
-void signalKernelEvent(void)
+static void signalKernelEvent(void)
 {
     sem_post(instance_l.semKernelData);
 }

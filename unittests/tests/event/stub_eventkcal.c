@@ -7,7 +7,7 @@
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -168,29 +168,11 @@ tOplkError eventkcal_postEvent (tEvent *pEvent_p)
     return ret;
 }
 
-//------------------------------------------------------------------------------
-/**
-\brief    Kernel event CAL receive handler
-
-This is the event receive function for events posted to the kernel layer.
-
-\param  pEvent_p                Received event to be processed.
-
-\return The function returns a tOplkError error code.
-\retval kErrorOk          If function executes correctly
-\retval other error codes       If an error occurred
-*/
-//------------------------------------------------------------------------------
-tOplkError eventkcal_rxHandler (tEvent *pEvent_p)
-{
-    tOplkError ret = kErrorOk;
-
-    ret = eventk_process(pEvent_p);
-
-    return ret;
-}
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+/// \name Private Functions
+/// \{
 
+///\}

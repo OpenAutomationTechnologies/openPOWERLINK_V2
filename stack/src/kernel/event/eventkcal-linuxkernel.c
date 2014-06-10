@@ -43,18 +43,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-#include <oplk/debugstr.h>
-
 #include <kernel/eventkcal.h>
 #include <kernel/eventkcalintf.h>
-#include <common/circbuffer.h>
+//#include <oplk/debugstr.h>
 
 #include <linux/kthread.h>
-#include <asm/uaccess.h>
-#include <asm/atomic.h>
 #include <linux/errno.h>
 #include <linux/wait.h>
 #include <linux/delay.h>
+#include <asm/uaccess.h>
+#include <asm/atomic.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -112,7 +110,7 @@ static tEventkCalInstance   instance_l;             ///< Instance variable of ke
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static int eventThread(void* arg);
+static int  eventThread(void* arg);
 static void signalUserEvent(void);
 static void signalKernelEvent(void);
 
@@ -164,7 +162,7 @@ tOplkError eventkcal_init(void)
 
     eventkcal_setSignalingCircbuf(kEventQueueKInt, signalKernelEvent);
 
-    instance_l.threadId =  kthread_run(eventThread, NULL, "EventkThread");
+    instance_l.threadId = kthread_run(eventThread, NULL, "EventkThread");
 
     set_cpus_allowed(instance_l.threadId, cpumask_of_cpu(1));
 
@@ -204,7 +202,7 @@ tOplkError eventkcal_exit(void)
 
     kthread_stop(instance_l.threadId);
 
-    while(instance_l.fThreadIsRunning)
+    while (instance_l.fThreadIsRunning)
     {
         msleep(10);
         if (i++ > 1000)
@@ -316,7 +314,7 @@ This function posts a event from the user layer to a queue.
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-int eventkcal_postEventFromUser(unsigned long arg)
+int eventkcal_postEventFromUser(ULONG arg)
 {
     tOplkError      ret = kErrorOk;
     tEvent          event;
@@ -400,7 +398,7 @@ This function waits for events to the user.
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-int eventkcal_getEventForUser(unsigned long arg)
+int eventkcal_getEventForUser(ULONG arg)
 {
     tOplkError          error;
     int                 ret;
@@ -538,7 +536,7 @@ This function signals that a user event was posted. It will be registered in
 the circular buffer library as signal callback function
 */
 //------------------------------------------------------------------------------
-void signalUserEvent(void)
+static void signalUserEvent(void)
 {
     atomic_inc(&instance_l.userEventCount);
     wake_up_interruptible(&instance_l.userWaitQueue);
@@ -552,7 +550,7 @@ This function signals that a kernel event was posted. It will be registered in
 the circular buffer library as signal callback function
 */
 //------------------------------------------------------------------------------
-void signalKernelEvent(void)
+static void signalKernelEvent(void)
 {
     atomic_inc(&instance_l.kernelEventCount);
     wake_up_interruptible(&instance_l.kernelWaitQueue);
