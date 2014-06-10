@@ -43,8 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-#include <oplk/nmt.h>
-#include "kernel/eventk.h"
+#include <oplk/event.h>
 
 //------------------------------------------------------------------------------
 // const defines

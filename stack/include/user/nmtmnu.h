@@ -44,7 +44,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
 #include <user/nmtu.h>
+#include <oplk/event.h>
 
+#if defined(CONFIG_INCLUDE_NMT_MN)
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
@@ -60,10 +62,15 @@ typedef tOplkError (*tNmtMnuCbNodeEvent)(UINT nodeId_p, tNmtNodeEvent NodeEvent_
 typedef tOplkError (*tNmtMnuCbBootEvent)(tNmtBootEvent BootEvent_p,
                                          tNmtState NmtState_p, UINT16 wErrorCode_p);
 
+/**
+* \brief NMT MN configuration parameter structure
+*
+* This structure defines MN configuration parameters.
+*/
 typedef struct
 {
-    UINT32   prcPResTimeFirstCorrectionNs;
-    UINT32   prcPResTimeFirstNegOffsetNs;
+    UINT32   prcPResTimeFirstCorrectionNs;      ///< First correction time of a PRes in PRC mode (in ns)
+    UINT32   prcPResTimeFirstNegOffsetNs;       ///< First negative offset of a PRes in PRC mode (in ns)
 } tNmtMnuConfigParam;
 
 //------------------------------------------------------------------------------
@@ -73,8 +80,6 @@ typedef struct
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#if defined(CONFIG_INCLUDE_NMT_MN)
 
 tOplkError nmtmnu_init(tNmtMnuCbNodeEvent pfnCbNodeEvent_p, tNmtMnuCbBootEvent pfnCbBootEvent_p);
 tOplkError nmtmnu_addInstance(tNmtMnuCbNodeEvent pfnCbNodeEvent_p, tNmtMnuCbBootEvent pfnCbBootEvent_p);
@@ -92,10 +97,10 @@ tOplkError nmtmnu_getDiagnosticInfo(UINT* pMandatorySlaveCount_p, UINT* pSignalS
                                     UINT16* pflags_p);
 tOplkError nmtmnu_configPrc(tNmtMnuConfigParam* pConfigParam_p);
 
-#endif
-
 #ifdef __cplusplus
 }
+#endif
+
 #endif
 
 #endif /* _INC_nmtmnu_H_ */

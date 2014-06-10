@@ -44,6 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
 #include <oplk/dll.h>
+#include <oplk/frame.h>
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
 //------------------------------------------------------------------------------

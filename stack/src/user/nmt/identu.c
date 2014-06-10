@@ -40,10 +40,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <common/ami.h>
+#include <common/oplkinc.h>
 #include <user/identu.h>
 #include <user/dllucal.h>
-
+#include <common/ami.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -166,7 +166,7 @@ The function resets an ident module instance
 \ingroup module_identu
 */
 //------------------------------------------------------------------------------
-tOplkError identu_reset()
+tOplkError identu_reset(void)
 {
     tOplkError  ret;
     UINT        index;
@@ -212,7 +212,7 @@ tOplkError identu_getIdentResponse(UINT nodeId_p, tIdentResponse** ppIdentRespon
         *ppIdentResponse_p = pIdentResponse;
 
         // Check if ident response is valid, adjust return value otherwise
-        if( NULL == pIdentResponse )
+        if (pIdentResponse == NULL)
             ret = kErrorInvalidOperation;
     }
     else
@@ -358,7 +358,7 @@ static tOplkError identu_cbIdentResponse(tFrameInfo* pFrameInfo_p)
         {   // IdentResponse received
             if (instance_g.apIdentResponse[index] == NULL)
             {   // memory for IdentResponse must be allocated
-                instance_g.apIdentResponse[index] = OPLK_MALLOC(sizeof(tIdentResponse));
+                instance_g.apIdentResponse[index] = (tIdentResponse*)OPLK_MALLOC(sizeof(tIdentResponse));
                 if (instance_g.apIdentResponse[index] == NULL)
                 {   // malloc failed
                     ret = pfnCbResponse(nodeId,
@@ -380,4 +380,3 @@ Exit:
 }
 
 ///\}
-

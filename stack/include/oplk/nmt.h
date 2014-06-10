@@ -83,24 +83,24 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 typedef enum
 {
-    kNmtGsOff                       = 0x0000,
-    kNmtGsInitialising              = 0x0019,
-    kNmtGsResetApplication          = 0x0029,
-    kNmtGsResetCommunication        = 0x0039,
-    kNmtGsResetConfiguration        = 0x0079,
-    kNmtCsNotActive                 = 0x011C,
-    kNmtCsPreOperational1           = 0x011D,
-    kNmtCsStopped                   = 0x014D,
-    kNmtCsPreOperational2           = 0x015D,
-    kNmtCsReadyToOperate            = 0x016D,
-    kNmtCsOperational               = 0x01FD,
-    kNmtCsBasicEthernet             = 0x011E,
-    kNmtMsNotActive                 = 0x021C,
-    kNmtMsPreOperational1           = 0x021D,
-    kNmtMsPreOperational2           = 0x025D,
-    kNmtMsReadyToOperate            = 0x026D,
-    kNmtMsOperational               = 0x02FD,
-    kNmtMsBasicEthernet             = 0x021E
+    kNmtGsOff                       = 0x0000,   ///< NMT_GS_OFF
+    kNmtGsInitialising              = 0x0019,   ///< NMT_GS_INITIALIZING
+    kNmtGsResetApplication          = 0x0029,   ///< NMT_GS_RESET_APPLICATION
+    kNmtGsResetCommunication        = 0x0039,   ///< NMT_GS_RESET_COMMUNICATION
+    kNmtGsResetConfiguration        = 0x0079,   ///< NMT_GS_RESET_CONFIGURATION
+    kNmtCsNotActive                 = 0x011C,   ///< NMT_CS_NOT_ACTIVE
+    kNmtCsPreOperational1           = 0x011D,   ///< NMT_CS_PRE_OPERATIONAL_1
+    kNmtCsStopped                   = 0x014D,   ///< NMT_CS_STOPPED
+    kNmtCsPreOperational2           = 0x015D,   ///< NMT_CS_PRE_OPERATIONAL_2
+    kNmtCsReadyToOperate            = 0x016D,   ///< NMT_CS_READY_TO_OPERATE
+    kNmtCsOperational               = 0x01FD,   ///< NMT_CS_OPERATIONAL
+    kNmtCsBasicEthernet             = 0x011E,   ///< NMT_CS_BASIC_ETHERNET
+    kNmtMsNotActive                 = 0x021C,   ///< NMT_MS_NOT_ACTIVE
+    kNmtMsPreOperational1           = 0x021D,   ///< NMT_MS_PRE_OPERATIONAL_1
+    kNmtMsPreOperational2           = 0x025D,   ///< NMT_MS_PRE_OPERATIONAL_2
+    kNmtMsReadyToOperate            = 0x026D,   ///< NMT_MS_READY_TO_OPERATE
+    kNmtMsOperational               = 0x02FD,   ///< NMT_MS_OPERATIONAL
+    kNmtMsBasicEthernet             = 0x021E    ///< NMT_MS_BASIC_ETHERNET
 } tNmtState;
 
 /**
@@ -112,39 +112,39 @@ typedef enum
 {
     // Events from DLL
     // Events defined by the POWERLINK specification
-    kNmtEventNoEvent                =   0x00,
+    kNmtEventNoEvent                =   0x00,   ///< No event has occured
     // kNmtEventDllMePres           =   0x01,
-    kNmtEventDllMePresTimeout       =   0x02,
+    kNmtEventDllMePresTimeout       =   0x02,   ///< A PRes timeout event has occured on the MN
     // kNmtEventDllMeAsnd           =   0x03,
-    kNmtEventDllMeAsndTimeout       =   0x03,
+    kNmtEventDllMeAsndTimeout       =   0x03,   ///< An ASnd timeout event has occured on the MN
     // kNmtEventDllMeSoaSent        =   0x04,
-    kNmtEventDllMeSocTrig           =   0x05,
-    kNmtEventDllMeSoaTrig           =   0x06,
-    kNmtEventDllCeSoc               =   0x07,
-    kNmtEventDllCePreq              =   0x08,
-    kNmtEventDllCePres              =   0x09,
-    kNmtEventDllCeSoa               =   0x0A,
-    kNmtEventDllCeAInv              =   0x0B,
-    kNmtEventDllCeAsnd              =   0x0C,
-    kNmtEventDllCeFrameTimeout      =   0x0D,
+    kNmtEventDllMeSocTrig           =   0x05,   ///< An SoC trigger event has occured on the MN
+    kNmtEventDllMeSoaTrig           =   0x06,   ///< An SoA trigger event has occured on the MN
+    kNmtEventDllCeSoc               =   0x07,   ///< An SoC event has occured on the CN
+    kNmtEventDllCePreq              =   0x08,   ///< A PReq event has occured on the CN
+    kNmtEventDllCePres              =   0x09,   ///< A PRes event has occured on the CN
+    kNmtEventDllCeSoa               =   0x0A,   ///< An SoA event has occured on the CN
+    kNmtEventDllCeAInv              =   0x0B,   ///< An AInv event has occured on the CN
+    kNmtEventDllCeAsnd              =   0x0C,   ///< An ASnd event has occured on the CN
+    kNmtEventDllCeFrameTimeout      =   0x0D,   ///< A frame timeout has occured on the CN
 
     // Events triggered by NMT-Commands
-    kNmtEventSwReset                =   0x10,   ///< NMT_GT1, NMT_GT2, NMT_GT8
-    kNmtEventResetNode              =   0x11,
-    kNmtEventResetCom               =   0x12,
-    kNmtEventResetConfig            =   0x13,
-    kNmtEventEnterPreOperational2   =   0x14,
-    kNmtEventEnableReadyToOperate   =   0x15,
-    kNmtEventStartNode              =   0x16,   ///< NMT_CT7
-    kNmtEventStopNode               =   0x17,
+    kNmtEventSwReset                =   0x10,   ///< A SwReset event has occured (NMT_GT1, NMT_GT2, NMT_GT8)
+    kNmtEventResetNode              =   0x11,   ///< A ResetNode event has occured
+    kNmtEventResetCom               =   0x12,   ///< A ResetCommunication event has occured
+    kNmtEventResetConfig            =   0x13,   ///< A ResetConfiguration event has occured
+    kNmtEventEnterPreOperational2   =   0x14,   ///< An EnterPreOperational2 event has occured
+    kNmtEventEnableReadyToOperate   =   0x15,   ///< An EnableReadyToOperate event has occured
+    kNmtEventStartNode              =   0x16,   ///< A StartNode event has occured (NMT_CT7)
+    kNmtEventStopNode               =   0x17,   ///< A StopNode event has occured
 
     // Events triggered by higher layer
-    kNmtEventEnterResetApp          =   0x20,
-    kNmtEventEnterResetCom          =   0x21,
-    kNmtEventInternComError         =   0x22,   ///< NMT_GT6, internal communication error -> enter ResetCommunication
-    kNmtEventEnterResetConfig       =   0x23,
-    kNmtEventEnterCsNotActive       =   0x24,
-    kNmtEventEnterMsNotActive       =   0x25,
+    kNmtEventEnterResetApp          =   0x20,   ///< An EnterResetApplication event has occured
+    kNmtEventEnterResetCom          =   0x21,   ///< An EnterResetCommunication event has occured
+    kNmtEventInternComError         =   0x22,   ///< An internal communication error has occured (NMT_GT6 -> enter ResetCommunication)
+    kNmtEventEnterResetConfig       =   0x23,   ///< An EnterResetConfiguration event has occured
+    kNmtEventEnterCsNotActive       =   0x24,   ///< An EnterCsNotActive event has occured
+    kNmtEventEnterMsNotActive       =   0x25,   ///< An EnterMsNotActive event has occured
     kNmtEventTimerBasicEthernet     =   0x26,   ///< NMT_CT3; timer triggered state change (NotActive -> BasicEth)
     kNmtEventTimerMsPreOp1          =   0x27,   ///< enter PreOp1 on MN (NotActive -> MsPreOp1)
     kNmtEventNmtCycleError          =   0x28,   ///< NMT_CT11, NMT_MT6; error during cycle -> enter PreOp1
@@ -175,7 +175,7 @@ typedef struct
 */
 typedef struct
 {
-    UINT                    nodeId;             ///< Node ID.
+    UINT                    nodeId;             ///< Node ID
     tNmtState               nmtState;           ///< NMT state (remember distinguish between MN / CN)
     UINT16                  errorCode;          ///< POWERLINK error code in case of NMT state NotActive
 } tHeartbeatEvent;
@@ -188,14 +188,14 @@ typedef struct
 */
 typedef enum
 {
-    kNmtNodeEventFound              = 0x00,
-    kNmtNodeEventUpdateSw           = 0x01,     ///< application shall update software on CN
-    kNmtNodeEventCheckConf          = 0x02,     ///< application / Configuration Manager shall check and update configuration on CN
-    kNmtNodeEventUpdateConf         = 0x03,     ///< application / Configuration Manager shall update configuration on CN (check was done by NmtMn module)
-    kNmtNodeEventVerifyConf         = 0x04,     ///< application / Configuration Manager shall verify configuration of CN
-    kNmtNodeEventReadyToStart       = 0x05,     ///< issued if NMT_STARTUP_NO_STARTNODE set, application must call oplk_execNmtCommand(kErrorNmtCmdStartNode) manually
-    kNmtNodeEventNmtState           = 0x06,
-    kNmtNodeEventError              = 0x07,     ///< NMT error of CN
+    kNmtNodeEventFound              = 0x00,     ///< A configured node has been found.
+    kNmtNodeEventUpdateSw           = 0x01,     ///< The application shall update the software on the CN.
+    kNmtNodeEventCheckConf          = 0x02,     ///< The application / Configuration Manager shall check and update the configuration on the CN.
+    kNmtNodeEventUpdateConf         = 0x03,     ///< The application / Configuration Manager shall update the configuration on the CN (check was done by NmtMn module).
+    kNmtNodeEventVerifyConf         = 0x04,     ///< The application / Configuration Manager shall verify the configuration of the CN.
+    kNmtNodeEventReadyToStart       = 0x05,     ///< Issued if NMT_STARTUP_NO_STARTNODE set, application must call oplk_execNmtCommand(kErrorNmtCmdStartNode) manually.
+    kNmtNodeEventNmtState           = 0x06,     ///< Issued if the NMT state of the CN has changed.
+    kNmtNodeEventError              = 0x07,     ///< NMT error of the CN.
 } tNmtNodeEvent;
 
 /**
@@ -205,14 +205,14 @@ typedef enum
 */
 typedef enum
 {
-    kNmtNodeCommandBoot             = 0x01,     ///< if NMT_NODEASSIGN_START_CN not set it must be issued after kNmtNodeEventFound
-    kNmtNodeCommandSwOk             = 0x02,     ///< application updated software on CN successfully
-    kNmtNodeCommandSwUpdated        = 0x03,     ///< application updated software on CN successfully
-    kNmtNodeCommandConfOk           = 0x04,     ///< application / Configuration Manager has updated configuration on CN successfully
-    kNmtNodeCommandConfRestored     = 0x05,     ///< application / Configuration Manager has restored the original CN configuration and CN need ResetNode to complete the restore process, afterwards the new configuration can be downloaded
-    kNmtNodeCommandConfReset        = 0x06,     ///< application / Configuration Manager has updated configuration on CN successfully and CN needs ResetConf so that the configuration gets activated
-    kNmtNodeCommandConfErr          = 0x07,     ///< application / Configuration Manager failed on updating configuration on CN
-    kNmtNodeCommandStart            = 0x08,     ///< if NMT_STARTUP_NO_STARTNODE set it must be issued after kNmtNodeEventReadyToStart
+    kNmtNodeCommandBoot             = 0x01,     ///< If NMT_NODEASSIGN_START_CN is not set, this command must be issued after kNmtNodeEventFound.
+    kNmtNodeCommandSwOk             = 0x02,     ///< The application has verified the software on the CN to be fine.
+    kNmtNodeCommandSwUpdated        = 0x03,     ///< The application has successfully updated the software on the CN.
+    kNmtNodeCommandConfOk           = 0x04,     ///< The application / Configuration Manager has successfully updated the configuration on the CN.
+    kNmtNodeCommandConfRestored     = 0x05,     ///< The application / Configuration Manager has restored the original CN configuration, and the CN needs a ResetNode to complete the restore process. Afterwards, the new configuration can be downloaded.
+    kNmtNodeCommandConfReset        = 0x06,     ///< The application / Configuration Manager has successfully updated the configuration on the CN, and the CN needs ResetConf so that the configuration gets activated.
+    kNmtNodeCommandConfErr          = 0x07,     ///< The application / Configuration Manager failed on updating configuration on the CN.
+    kNmtNodeCommandStart            = 0x08,     ///< If NMT_STARTUP_NO_STARTNODE is set, this command must be issued after kNmtNodeEventReadyToStart.
 } tNmtNodeCommand;
 
 /**
@@ -230,10 +230,4 @@ typedef enum
     kNmtBootEventError              = 0x05,     ///< boot process halted because of an error
 } tNmtBootEvent;
 
-//------------------------------------------------------------------------------
-// function prototypes
-//------------------------------------------------------------------------------
-
-
 #endif  // #ifndef _INC_oplk_nmt_H_
-

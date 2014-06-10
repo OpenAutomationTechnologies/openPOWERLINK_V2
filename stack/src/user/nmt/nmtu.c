@@ -41,10 +41,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
+#include <user/nmtu.h>
+#include <user/timeru.h>
+#include <user/eventu.h>
 #include <oplk/obd.h>
-#include "user/nmtu.h"
-#include "user/timeru.h"
-#include "user/dllucal.h"
+
+#if NMT_MAX_NODE_ID > 0
+#include <user/dllucal.h>
+#endif
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //

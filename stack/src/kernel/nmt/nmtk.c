@@ -40,9 +40,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include "kernel/nmtk.h"
+#include <common/oplkinc.h>
+#include <kernel/nmtk.h>
+#include <oplk/nmt.h>
+#include <kernel/dllk.h>
+#include <kernel/eventk.h>
 #include <common/timer.h>
-#include "kernel/dllk.h"
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -309,6 +312,8 @@ tOplkError nmtk_process(tEvent* pEvent_p)
 //          P R I V A T E   D E F I N I T I O N S                          //
 //                                                                         //
 //=========================================================================//
+/// \name Private Functions
+/// \{
 
 //------------------------------------------------------------------------------
 /**
@@ -344,7 +349,7 @@ In this state the first init of the hardware will be done.
 //------------------------------------------------------------------------------
 static tOplkError doStateGsInitialising(tNmtEvent nmtEvent_p)
 {
-    switch(nmtEvent_p)
+    switch (nmtEvent_p)
     {
         // 2006/07/31 d.k.: react also on NMT reset commands in ResetApp state
         // NMT Command SwitchOff
@@ -545,7 +550,7 @@ In this state the node listens for POWERLINK frames and checks timeout.
 //------------------------------------------------------------------------------
 static tOplkError doStateCsNotActive(tNmtEvent nmtEvent_p)
 {
-    switch(nmtEvent_p)
+    switch (nmtEvent_p)
     {
         // 2006/07/31 d.k.: react also on NMT reset commands in NotActive state
         // NMT Command SwitchOff
@@ -1449,7 +1454,7 @@ In this state the MN processes normal Ethernet traffic.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError doStateMsBasicEthernet(tNmtEvent nmtEvent_p)
+static tOplkError doStateMsBasicEthernet(tNmtEvent nmtEvent_p)
 {
     switch (nmtEvent_p)
     {
@@ -1506,3 +1511,4 @@ tOplkError doStateMsBasicEthernet(tNmtEvent nmtEvent_p)
 
 #endif
 
+///\}

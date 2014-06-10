@@ -40,9 +40,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <common/ami.h>
+#include <common/oplkinc.h>
 #include <user/nmtcnu.h>
 #include <user/dllucal.h>
+#include <common/ami.h>
+#include <oplk/frame.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -195,7 +197,7 @@ tOplkError nmtcnu_sendNmtRequest(UINT nodeId_p, tNmtCommand nmtCommand_p)
     ami_setUint16Be(&nmtRequestFrame.etherType, C_DLL_ETHERTYPE_EPL);
     ami_setUint8Le(&nmtRequestFrame.dstNodeId, (BYTE)C_ADR_MN_DEF_NODE_ID); // node id of the MN
     ami_setUint8Le(&nmtRequestFrame.messageType, (BYTE)kMsgTypeAsnd);
-    ami_setUint8Le(&nmtRequestFrame.data.asnd.serviceId, (BYTE) kDllAsndNmtRequest);
+    ami_setUint8Le(&nmtRequestFrame.data.asnd.serviceId, (BYTE)kDllAsndNmtRequest);
     ami_setUint8Le(&nmtRequestFrame.data.asnd.payload.nmtRequestService.nmtCommandId,
                    (BYTE)nmtCommand_p);
     ami_setUint8Le(&nmtRequestFrame.data.asnd.payload.nmtRequestService.targetNodeId,
@@ -503,4 +505,3 @@ static BOOL checkNodeIdList(UINT8* pbNmtCommandDate_p)
 }
 
 ///\}
-

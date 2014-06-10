@@ -44,8 +44,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
 #include <user/nmtu.h>
-#include <oplk/dll.h>
-#include <oplk/frame.h>
 
 //------------------------------------------------------------------------------
 // const defines

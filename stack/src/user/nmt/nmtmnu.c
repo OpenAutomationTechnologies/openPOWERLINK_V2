@@ -40,22 +40,24 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <common/oplkinc.h>
 #include <user/nmtmnu.h>
 #include <user/timeru.h>
+#include <user/dllucal.h>
 #include <user/identu.h>
 #include <user/statusu.h>
-#include <user/dllucal.h>
-#include <common/ami.h>
-#include <oplk/benchmark.h>
-#include <oplk/obd.h>
 #include <user/syncu.h>
-
-#if defined(CONFIG_INCLUDE_NMT_MN)
+#include <user/eventu.h>
+#include <common/ami.h>
+#include <oplk/obd.h>
+#include <oplk/frame.h>
+#include <oplk/benchmark.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
 
+#if defined(CONFIG_INCLUDE_NMT_MN)
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
@@ -914,7 +916,7 @@ tOplkError nmtmnu_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
                 }
 
                 // fetch MNTimeoutPreOp2_U32 from OD
-                obdSize = sizeof (timeout);
+                obdSize = sizeof(timeout);
                 ret = obd_readEntry(0x1F89, 4, &timeout, &obdSize);
                 if (ret != kErrorOk)
                     break;
@@ -2939,7 +2941,7 @@ static INT processNodeEventNmtCmdSent(UINT nodeId_p, tNmtState nodeNmtState_p, t
 
     // update expected NMT state with the one that results
     // from the sent NMT command
-    bNmtState = (UINT8) (nodeNmtState_p & 0xFF);
+    bNmtState = (UINT8)(nodeNmtState_p & 0xFF);
 
     // write object 0x1F8F NMT_MNNodeExpState_AU8
     *pRet_p = obd_writeEntry(0x1F8F, nodeId_p, &bNmtState, 1);
@@ -3250,7 +3252,7 @@ static tOplkError checkNmtState(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p,
         // reset CN
         // store error code in NMT command data for diagnostic purpose
         ami_setUint16Le(&beErrorCode, errorCode_p);
-        ret = nmtmnu_sendNmtCommandEx(nodeId_p, kNmtCmdResetNode, &beErrorCode, sizeof (beErrorCode));
+        ret = nmtmnu_sendNmtCommandEx(nodeId_p, kNmtCmdResetNode, &beErrorCode, sizeof(beErrorCode));
         if (ret == kErrorOk)
             ret = kErrorReject;
 

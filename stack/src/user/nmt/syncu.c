@@ -41,12 +41,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <common/ami.h>
+#include <common/oplkinc.h>
 #include <user/syncu.h>
 #include <user/dllucal.h>
+#include <common/ami.h>
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
-
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
@@ -280,4 +280,3 @@ static tOplkError syncu_cbSyncResponse(tFrameInfo* pFrameInfo_p)
 ///\}
 
 #endif
-
