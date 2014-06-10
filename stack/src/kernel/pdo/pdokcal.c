@@ -40,11 +40,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <common/ami.h>
+#include <common/oplkinc.h>
 #include <kernel/pdokcal.h>
 #include <kernel/pdok.h>
 #include <kernel/dllk.h>
 #include <kernel/eventk.h>
+#include <common/ami.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -249,4 +250,3 @@ static tOplkError cbProcessRpdo(tFrameInfo* pFrameInfo_p)
 }
 
 ///\}
-

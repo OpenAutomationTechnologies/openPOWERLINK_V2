@@ -45,24 +45,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define PDO_SHB_BUF_ID                  "PdoMem"
 #define PDO_SYNC_BSDSEM                 "/semPdoSync"
-#define PDO_SHMEM_NAME                  "/podShm"
-
-#define PDO_MAX_ALLOC_SIZE      239 * 2 * 1500      //jba replace with a clean solution
-
-// PDO mapping related OD defines
-#define PDOU_OBD_IDX_RX_COMM_PARAM      0x1400
-#define PDOU_OBD_IDX_RX_MAPP_PARAM      0x1600
-#define PDOU_OBD_IDX_TX_COMM_PARAM      0x1800
-#define PDOU_OBD_IDX_TX_MAPP_PARAM      0x1A00
-#define PDOU_OBD_IDX_MAPP_PARAM         0x0200
-#define PDOU_OBD_IDX_MASK               0xFF00
-#define PDOU_PDO_ID_MASK                0x00FF
-
-#define PDOU_MAX_PDO_OBJECTS            256
-#define PDO_MAX_PDO_CHANNELS            256
-
+#define PDO_SHMEM_NAME                  "/pdoShm"
 
 // invalid PDO-NodeId
 #define PDO_INVALID_NODE_ID             0xFF
@@ -71,45 +55,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // NodeId for PRes TPDO
 #define PDO_PRES_NODE_ID                0x00
 
-#define PDO_COMMUNICATION_PROFILE_START 0x1000
-
-#define PDO_MAPPOBJECT_IS_NUMERIC(pPdoMappObject_p) \
-            (pPdoMappObject_p->byteSizeOrType < PDO_COMMUNICATION_PROFILE_START)
-
-#define PDO_MAPPOBJECT_GET_VAR(pPdoMappObject_p) \
-            pPdoMappObject_p->pVar
-
-#define PDO_MAPPOBJECT_SET_VAR(pPdoMappObject_p, pVar_p) \
-            (pPdoMappObject_p->pVar = pVar_p)
-
-#define PDO_MAPPOBJECT_GET_BITOFFSET(pPdoMappObject_p) \
-            pPdoMappObject_p->bitOffset
-
-#define PDO_MAPPOBJECT_SET_BITOFFSET(pPdoMappObject_p, wBitOffset_p) \
-            (pPdoMappObject_p->bitOffset = wBitOffset_p)
-
-#define PDO_MAPPOBJECT_GET_BYTESIZE(pPdoMappObject_p) \
-            (pPdoMappObject_p->byteSizeOrType - PDO_COMMUNICATION_PROFILE_START)
-
-#define PDO_MAPPOBJECT_GET_TYPE(pPdoMappObject_p) \
-            ((tObdType)pPdoMappObject_p->byteSizeOrType)
-
-#define PDO_MAPPOBJECT_SET_BYTESIZE_OR_TYPE(pPdoMappObject_p, wByteSize_p, ObdType_p) \
-            if ((ObdType_p == kObdTypeVString) || (ObdType_p == kObdTypeOString) || (ObdType_p == kObdTypeDomain)) \
-            { \
-                pPdoMappObject_p->byteSizeOrType = wByteSize_p + PDO_COMMUNICATION_PROFILE_START; \
-            } \
-            else \
-            { \
-                pPdoMappObject_p->byteSizeOrType = ObdType_p; \
-            }
-
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
 
 /**
-\brief PDO allocation param structure
+\brief PDO allocation parameter structure
 
 This structure specifies a PDO allocation parameter. It saves information about
 the number of used PDO channels.
@@ -121,21 +72,9 @@ typedef struct
 } tPdoAllocationParam;
 
 /**
-\brief PDO mapping object
-
-This structure structure specifies a PDO mapping object.
-*/
-typedef struct
-{
-    void*               pVar;                   ///< Pointer to PDO data
-    UINT16              bitOffset;              ///< Frame offset in bits
-    UINT16              byteSizeOrType;         ///< The size of the data in bytes
-} tPdoMappObject;
-
-/**
 \brief PDO channel
 
-This structure structure specifies a PDO channel. The PDO channel contains all
+This structure specifies a PDO channel. The PDO channel contains all
 information needed to transfer the PDO on the network.
 */
 typedef struct
@@ -154,8 +93,8 @@ typedef struct
 /**
 \brief PDO channel configuration
 
-This structure structure specifies a PDO channel configuration. It is used to
-exchange PDO channel information between the user and the kernel layer.
+This structure specifies a PDO channel configuration. It is used to exchange
+PDO channel information between the user and the kernel layer.
 */
 typedef struct
 {
@@ -167,8 +106,8 @@ typedef struct
 /**
 \brief PDO channel setup
 
-This structure structure specifies a PDO channel setup. It is basic structure
-used to manage the complete setup of PDO channels.
+This structure specifies a PDO channel setup. It is the basic structure used
+to manage the complete setup of the PDO channels.
 */
 typedef struct
 {
@@ -177,44 +116,48 @@ typedef struct
     tPdoChannel*        pTxPdoChannel;          ///< Pointer to TXPDO channel table
 } tPdoChannelSetup;
 
+/**
+\brief PDO buffer information
 
+This structure specifies a PDO channel buffer. Each PDO channel has got an
+offset in the buffers, and specifies the currently used buffer for consuming
+data, producing data and a clean buffer.
+*/
 typedef struct
 {
-    ULONG               channelOffset;
-    OPLK_ATOMIC_T       readBuf;
-    OPLK_ATOMIC_T       writeBuf;
-    OPLK_ATOMIC_T       cleanBuf;
-    UINT8               newData;
+    ULONG               channelOffset;          ///< Offset of the channel in the buffers
+    OPLK_ATOMIC_T       readBuf;                ///< Current buffer to consume data from
+    OPLK_ATOMIC_T       writeBuf;               ///< Current buffer to produce data to
+    OPLK_ATOMIC_T       cleanBuf;               ///< Current clean (i.e. unused) buffer
+    UINT8               newData;                ///< Flag indicating whether new data has been produced
 } tPdoBufferInfo;
 
+/**
+\brief PDO memory region
+
+This structure specifies a PDO memory region. It consists of arrays
+of receive and transmit PDO buffers.
+*/
 typedef struct
 {
-    UINT16              valid;
-    size_t              pdoMemSize;
-    tPdoBufferInfo      rxChannelInfo[D_PDO_RPDOChannels_U16];
-    tPdoBufferInfo      txChannelInfo[D_PDO_TPDOChannels_U16];
+    UINT16              valid;                                      ///< Defines whether the memory region is valid
+    size_t              pdoMemSize;                                 ///< Size of the overall PDO memory
+    tPdoBufferInfo      rxChannelInfo[D_PDO_RPDOChannels_U16];      ///< Array of RPDO channels
+    tPdoBufferInfo      txChannelInfo[D_PDO_TPDOChannels_U16];      ///< Array of TPDO channels
 #ifdef OPLK_LOCK_T
-    OPLK_LOCK_T         lock;
+    OPLK_LOCK_T         lock;                                       ///< Locking variable
 #endif
 } tPdoMemRegion;
 
+/**
+\brief PDO memory size
 
+This structure specifies the sizes of the RPDO and TPDO memory.
+*/
 typedef struct
 {
-    size_t      rxPdoMemSize;
-    size_t      txPdoMemSize;
+    size_t      rxPdoMemSize;                   ///< Size of the RPDO memory
+    size_t      txPdoMemSize;                   ///< Size of the TPDO memory
 } tPdoMemSize;
-
-//------------------------------------------------------------------------------
-// function prototypes
-//------------------------------------------------------------------------------
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* _INC_common_pdo_H_ */

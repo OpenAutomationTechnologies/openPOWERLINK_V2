@@ -41,8 +41,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-#include <common/pdo.h>
+#include <oplk/event.h>
 #include <oplk/nmt.h>
+#include <oplk/obd.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -52,13 +53,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // typedef
 //------------------------------------------------------------------------------
 
+/**
+\brief Structure for a PDO change event
+
+The structure contains the arguments for a PDO change event.
+*/
 typedef struct
 {
-    BOOL                fActivated;
-    BOOL                fTx;
-    UINT                nodeId;
-    UINT                mappParamIndex;
-    UINT                mappObjectCount;
+    BOOL                fActivated;             ///< Flag indicating whether the PDO is activated
+    BOOL                fTx;                    ///< Flag indicating whether the PDO is a TPDO
+    UINT                nodeId;                 ///< Node ID for which the PDO has changed
+    UINT                mappParamIndex;         ///< Object index of mapping parameter object
+    UINT                mappObjectCount;        ///< Number of mapped objects
 } tPdoEventPdoChange;
 
 typedef tOplkError (*tPdoCbEventPdoChange)(tPdoEventPdoChange* pEventPdoChange_p);
@@ -72,7 +78,6 @@ extern "C" {
 #endif
 
 tOplkError pdou_init(tSyncCb pfnSyncCb_p);
-
 tOplkError pdou_exit(void);
 
 #if defined(CONFIG_INCLUDE_PDO)
@@ -83,8 +88,8 @@ OPLKDLLEXPORT tOplkError pdou_cbObdAccess(tObdCbParam MEM* pParam_p);
 
 tOplkError pdou_cbNmtStateChange(tEventNmtStateChange NmtStateChange_p);
 
-tOplkError pdou_copyRxPdoToPi (void);
-tOplkError pdou_copyTxPdoFromPi (void);
+tOplkError pdou_copyRxPdoToPi(void);
+tOplkError pdou_copyTxPdoFromPi(void);
 tOplkError pdou_registerEventPdoChangeCb(tPdoCbEventPdoChange pfnCbEventPdoChange_p);
 
 #ifdef __cplusplus

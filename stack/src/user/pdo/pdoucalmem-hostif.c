@@ -43,9 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-
-#include <common/pdo.h>
-#include <user/ctrlucal.h>
+#include <user/pdoucal.h>
 
 #include <hostiflib.h>
 

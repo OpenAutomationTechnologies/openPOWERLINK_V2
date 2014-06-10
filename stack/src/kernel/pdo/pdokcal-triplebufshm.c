@@ -48,7 +48,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-#include <common/pdo.h>
 #include <kernel/pdokcal.h>
 
 //============================================================================//
@@ -147,9 +146,9 @@ tOplkError pdokcal_initPdoMem(tPdoChannelSetup* pPdoChannels, size_t rxPdoMemSiz
     pTripleBuf_l[1] = pTripleBuf_l[0] + pdoMemSize;
     pTripleBuf_l[2] = pTripleBuf_l[1] + pdoMemSize;
 
-    TRACE ("%s() PdoMem:%p size:%d Triple buffers at: %p/%p/%p\n", __func__,
-           pPdoMem_l, pdoMemRegionSize_l,
-           pTripleBuf_l[0], pTripleBuf_l[1], pTripleBuf_l[2]);
+    TRACE("%s() PdoMem:%p size:%d Triple buffers at: %p/%p/%p\n", __func__,
+          pPdoMem_l, pdoMemRegionSize_l,
+          pTripleBuf_l[0], pTripleBuf_l[1], pTripleBuf_l[2]);
 
     OPLK_MEMSET(pPdoMem_l, 0, pdoMemRegionSize_l);
     setupPdoMemInfo(pPdoChannels, pPdoMem_l);
@@ -204,7 +203,7 @@ tOplkError pdokcal_writeRxPdo(UINT channelId_p, BYTE* pPayload_p, UINT16 pdoSize
 
     pPdo = pTripleBuf_l[pPdoMem_l->rxChannelInfo[channelId_p].writeBuf] +
            pPdoMem_l->rxChannelInfo[channelId_p].channelOffset;
-    //TRACE ("%s() chan:%d wi:%d\n", __func__, channelId_p, pPdoMem_l->rxChannelInfo[channelId_p].writeBuf);
+    //TRACE("%s() chan:%d wi:%d\n", __func__, channelId_p, pPdoMem_l->rxChannelInfo[channelId_p].writeBuf);
 
     OPLK_MEMCPY(pPdo, pPayload_p, pdoSize_p);
 
@@ -215,8 +214,8 @@ tOplkError pdokcal_writeRxPdo(UINT channelId_p, BYTE* pPayload_p, UINT16 pdoSize
 
     pPdoMem_l->rxChannelInfo[channelId_p].newData = 1;
 
-    //TRACE ("%s() chan:%d new wi:%d\n", __func__, channelId_p, pPdoMem_l->rxChannelInfo[channelId_p].writeBuf);
-    //TRACE ("%s() *pPayload_p:%02x\n", __func__, *pPayload_p);
+    //TRACE("%s() chan:%d new wi:%d\n", __func__, channelId_p, pPdoMem_l->rxChannelInfo[channelId_p].writeBuf);
+    //TRACE("%s() *pPayload_p:%02x\n", __func__, *pPayload_p);
     return kErrorOk;
 }
 
@@ -249,11 +248,11 @@ tOplkError pdokcal_readTxPdo(UINT channelId_p, BYTE* pPayload_p, UINT16 pdoSize_
         pPdoMem_l->txChannelInfo[channelId_p].newData = 0;
     }
 
-    /*TRACE ("%s() pPdo_p:%p pPayload:%p size:%d value:%d\n", __func__,
+    /*TRACE("%s() pPdo_p:%p pPayload:%p size:%d value:%d\n", __func__,
             pPdo_p, pPayload_p, pdoSize_p, *pPdo_p);*/
-    //TRACE ("%s() chan:%d ri:%d\n", __func__, channelId_p, pPdoMem_l->txChannelInfo[channelId_p].readBuf);
-    pPdo =  pTripleBuf_l[pPdoMem_l->txChannelInfo[channelId_p].readBuf] +
-            pPdoMem_l->txChannelInfo[channelId_p].channelOffset;
+    //TRACE("%s() chan:%d ri:%d\n", __func__, channelId_p, pPdoMem_l->txChannelInfo[channelId_p].readBuf);
+    pPdo = pTripleBuf_l[pPdoMem_l->txChannelInfo[channelId_p].readBuf] +
+           pPdoMem_l->txChannelInfo[channelId_p].channelOffset;
 
     OPLK_MEMCPY(pPayload_p, pPdo, pdoSize_p);
 
@@ -265,6 +264,7 @@ tOplkError pdokcal_readTxPdo(UINT channelId_p, BYTE* pPayload_p, UINT16 pdoSize_
 //============================================================================//
 /// \name Private Functions
 /// \{
+
 //------------------------------------------------------------------------------
 /**
 \brief  Setup PDO memory info
@@ -289,7 +289,7 @@ static void setupPdoMemInfo(tPdoChannelSetup* pPdoChannels_p, tPdoMemRegion* pPd
          channelId < pPdoChannels_p->allocation.rxPdoChannelCount;
          channelId++, pPdoChannel++)
     {
-        //TRACE ("RPDO %d at offset:%d\n", channelId, offset);
+        //TRACE("RPDO %d at offset:%d\n", channelId, offset);
         pPdoMemRegion_p->rxChannelInfo[channelId].channelOffset = offset;
         pPdoMemRegion_p->rxChannelInfo[channelId].readBuf = 0;
         pPdoMemRegion_p->rxChannelInfo[channelId].writeBuf = 1;
@@ -302,7 +302,7 @@ static void setupPdoMemInfo(tPdoChannelSetup* pPdoChannels_p, tPdoMemRegion* pPd
          channelId < pPdoChannels_p->allocation.txPdoChannelCount;
          channelId++, pPdoChannel++)
     {
-        //TRACE ("TPDO %d at offset:%d\n", channelId, offset);
+        //TRACE("TPDO %d at offset:%d\n", channelId, offset);
         pPdoMemRegion_p->txChannelInfo[channelId].channelOffset = offset;
         pPdoMemRegion_p->txChannelInfo[channelId].readBuf = 0;
         pPdoMemRegion_p->txChannelInfo[channelId].writeBuf = 1;
@@ -312,4 +312,5 @@ static void setupPdoMemInfo(tPdoChannelSetup* pPdoChannels_p, tPdoMemRegion* pPd
     }
     pPdoMemRegion_p->pdoMemSize = offset;
 }
+
 ///\}

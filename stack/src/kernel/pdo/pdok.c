@@ -40,13 +40,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/obd.h>
-#include <common/ami.h>
+#include <common/oplkinc.h>
 #include <kernel/pdok.h>
 #include <kernel/pdokcal.h>
-#include <kernel/eventk.h>
 #include <kernel/dllk.h>
-#include <oplk/benchmark.h>
+#include <common/ami.h>
 #include <oplk/debugstr.h>
 
 //============================================================================//
@@ -90,7 +88,7 @@ typedef struct
     BOOL                    fRunning;           ///< Flag determines if PDO engine is running
     UINT                    aTpdoChannelIdLut[D_PDO_TPDOChannels_U16];
     UINT                    aRpdoChannelIdLut[D_PDO_RPDOChannels_U16];
-}tPdokInstance;
+} tPdokInstance;
 
 //------------------------------------------------------------------------------
 // local vars
@@ -251,7 +249,7 @@ tOplkError pdok_allocChannelMem(tPdoAllocationParam* pAllocationParam_p)
         if (pAllocationParam_p->rxPdoChannelCount > 0)
         {
             pdokInstance_g.pdoChannels.pRxPdoChannel =
-                            OPLK_MALLOC(sizeof(*pdokInstance_g.pdoChannels.pRxPdoChannel) *
+                            (tPdoChannel*)OPLK_MALLOC(sizeof(*pdokInstance_g.pdoChannels.pRxPdoChannel) *
                                         pAllocationParam_p->rxPdoChannelCount);
 
             if (pdokInstance_g.pdoChannels.pRxPdoChannel == NULL)
@@ -278,7 +276,7 @@ tOplkError pdok_allocChannelMem(tPdoAllocationParam* pAllocationParam_p)
         if (pAllocationParam_p->txPdoChannelCount > 0)
         {
             pdokInstance_g.pdoChannels.pTxPdoChannel =
-                    OPLK_MALLOC(sizeof(*pdokInstance_g.pdoChannels.pTxPdoChannel) *
+                    (tPdoChannel*)OPLK_MALLOC(sizeof(*pdokInstance_g.pdoChannels.pTxPdoChannel) *
                                 pAllocationParam_p->txPdoChannelCount);
 
             if (pdokInstance_g.pdoChannels.pTxPdoChannel == NULL)
@@ -329,7 +327,7 @@ tOplkError pdok_configureChannel(tPdoChannelConf* pChannelConf_p)
 
         // copy channel configuration to local structure
         OPLK_MEMCPY(pDestPdoChannel, &pChannelConf_p->pdoChannel,
-                    sizeof (pChannelConf_p->pdoChannel));
+                    sizeof(pChannelConf_p->pdoChannel));
 
         // Store channel ID for fast access
         pdokInstance_g.aRpdoChannelIdLut[pDestPdoChannel->nodeId] = pChannelConf_p->channelId;
@@ -373,7 +371,7 @@ tOplkError pdok_configureChannel(tPdoChannelConf* pChannelConf_p)
 
         // copy channel to local structure
         OPLK_MEMCPY(pDestPdoChannel, &pChannelConf_p->pdoChannel,
-                    sizeof (pChannelConf_p->pdoChannel));
+                    sizeof(pChannelConf_p->pdoChannel));
 
         // Store channel ID for fast access
         pdokInstance_g.aTpdoChannelIdLut[pDestPdoChannel->nodeId] = pChannelConf_p->channelId;
@@ -415,7 +413,7 @@ tOplkError pdok_processRxPdo(tPlkFrame* pFrame_p, UINT frameSize_p)
     }
 
     // retrieve POWERLINK message type
-    msgType = ami_getUint8Le(&pFrame_p->messageType);
+    msgType = (tMsgType)ami_getUint8Le(&pFrame_p->messageType);
     if (msgType == kMsgTypePreq)
     {   // RPDO is PReq frame
         nodeId = PDO_PREQ_NODE_ID;  // 0x00
@@ -450,9 +448,9 @@ tOplkError pdok_processRxPdo(tPlkFrame* pFrame_p, UINT frameSize_p)
         }
 
         /*
-        TRACE ("%s() Channel:%d Node:%d MapObjectCnt:%d PdoSize:%d\n",
-               __func__, channelId, nodeId, pPdoChannel->mappObjectCount,
-               pPdoChannel->pdoSize);
+        TRACE("%s() Channel:%d Node:%d MapObjectCnt:%d PdoSize:%d\n",
+              __func__, channelId, nodeId, pPdoChannel->mappObjectCount,
+              pPdoChannel->pdoSize);
         */
 
         pdokcal_writeRxPdo(channelId,
@@ -591,7 +589,7 @@ static tOplkError copyTxPdo(tPlkFrame* pFrame_p, UINT frameSize_p, BOOL fReadyFl
     ami_setUint8Le(&pFrame_p->data.pres.flag1, (flag1 & ~PLK_FRAME_FLAG1_RD));
 
     // retrieve POWERLINK message type
-    msgType = ami_getUint8Le(&pFrame_p->messageType);
+    msgType = (tMsgType)ami_getUint8Le(&pFrame_p->messageType);
     if (msgType == kMsgTypePres)
     {   // TPDO is PRes frame
         nodeId = PDO_PRES_NODE_ID;  // 0x00
@@ -612,8 +610,8 @@ static tOplkError copyTxPdo(tPlkFrame* pFrame_p, UINT frameSize_p, BOOL fReadyFl
         if ((unsigned int)(pPdoChannel->pdoSize + 24) <= frameSize_p)
         {
             /*
-            TRACE ("%s() Channel:%d Node:%d MapObjectCnt:%d PdoSize:%d\n",
-                __func__, channelId, nodeId, pPdoChannel->mappObjectCount, pPdoChannel->pdoSize);
+            TRACE("%s() Channel:%d Node:%d MapObjectCnt:%d PdoSize:%d\n",
+                  __func__, channelId, nodeId, pPdoChannel->mappObjectCount, pPdoChannel->pdoSize);
             */
 
             // set PDO version in frame
@@ -650,4 +648,3 @@ static tOplkError copyTxPdo(tPlkFrame* pFrame_p, UINT frameSize_p, BOOL fReadyFl
 }
 
 ///\}
-

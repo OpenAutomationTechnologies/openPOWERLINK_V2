@@ -40,7 +40,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-#include <common/pdo.h>
 #include <user/pdoucal.h>
 
 #include <hostiflib.h>
@@ -82,7 +81,7 @@ static tSyncCb pfnSyncCb_l = NULL;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static void hostifIrqSyncCb(void *pArg_p);
+static void hostifIrqSyncCb(void* pArg_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -170,6 +169,8 @@ tOplkError pdoucal_waitSyncEvent(ULONG timeout_p)
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+/// \name Private Functions
+/// \{
 
 //------------------------------------------------------------------------------
 /**
@@ -178,9 +179,11 @@ tOplkError pdoucal_waitSyncEvent(ULONG timeout_p)
 \param  pArg_p                  Argument pointer provides hostif instance
 */
 //------------------------------------------------------------------------------
-static void hostifIrqSyncCb(void *pArg_p)
+static void hostifIrqSyncCb(void* pArg_p)
 {
     UNUSED_PARAMETER(pArg_p);
 
     pfnSyncCb_l();
 }
+
+///\}

@@ -43,7 +43,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <common/oplkinc.h>
 #include <common/pdo.h>
 #include <oplk/frame.h>
-#include <oplk/dll.h>
 
 //---------------------------------------------------------------------------
 // const defines

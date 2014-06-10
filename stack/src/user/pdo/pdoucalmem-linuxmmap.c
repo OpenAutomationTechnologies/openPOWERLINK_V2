@@ -42,8 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-
-#include <common/pdo.h>
+#include <user/pdoucal.h>
 #include <user/ctrlucal.h>
 
 #include <unistd.h>
@@ -52,8 +51,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <errno.h>
-
-#include <oplk/powerlink-module.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //

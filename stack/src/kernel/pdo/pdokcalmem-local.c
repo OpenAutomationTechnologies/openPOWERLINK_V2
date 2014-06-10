@@ -42,7 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-#include <common/pdo.h>
+#include <kernel/pdokcal.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -141,7 +141,7 @@ tOplkError pdokcal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
 {
     TRACE("%s()\n", __func__);
 
-    pdokcalmem_pPdo_g = OPLK_MALLOC(memSize_p);
+    pdokcalmem_pPdo_g = (BYTE*)OPLK_MALLOC(memSize_p);
     if (pdokcalmem_pPdo_g == NULL)
     {
         TRACE("%s() malloc failed!}n", __func__);

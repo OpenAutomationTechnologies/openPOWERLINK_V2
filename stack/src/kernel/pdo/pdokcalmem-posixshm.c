@@ -41,13 +41,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-#include <common/pdo.h>
 #include <kernel/pdokcal.h>
 
+#include <unistd.h>
+#include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
 #include <sys/types.h>
 
 //============================================================================//
@@ -151,7 +150,7 @@ The function allocates shared memory for the kernel needed to transfer the PDOs.
 //------------------------------------------------------------------------------
 tOplkError pdokcal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
 {
-    TRACE ("%s()\n", __func__);
+    TRACE("%s()\n", __func__);
     if (ftruncate(fd_l, memSize_p) < 0)
         return kErrorNoResource;
 
@@ -163,7 +162,7 @@ tOplkError pdokcal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
         return kErrorNoResource;
     }
 
-    TRACE ("%s() Allocated memory for PDO at %p size:%d\n", __func__, *ppPdoMem_p, memSize_p);
+    TRACE("%s() Allocated memory for PDO at %p size:%d\n", __func__, *ppPdoMem_p, memSize_p);
     return kErrorOk;
 }
 
@@ -184,7 +183,7 @@ transfering the PDOs.
 //------------------------------------------------------------------------------
 tOplkError pdokcal_freeMem(BYTE* pMem_p, size_t memSize_p)
 {
-    TRACE ("%s()\n", __func__);
+    TRACE("%s()\n", __func__);
 
     if (munmap(pMem_p, memSize_p) != 0)
     {

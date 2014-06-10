@@ -40,17 +40,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <common/oplkinc.h>
+#include <user/pdoucal.h>
+#include <user/ctrlucal.h>
+#include <oplk/powerlink-module.h>
+
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
 #include <time.h>
-
-#include <common/oplkinc.h>
-#include <common/pdo.h>
-#include <user/pdoucal.h>
-#include <user/ctrlucal.h>
-
-#include <oplk/powerlink-module.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -153,3 +151,7 @@ tOplkError pdoucal_waitSyncEvent(ULONG timeout_p)
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+/// \name Private Functions
+/// \{
+
+///\}

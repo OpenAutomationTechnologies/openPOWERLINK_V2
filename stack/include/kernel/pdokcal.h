@@ -41,8 +41,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-#include <oplk/event.h>
 #include <common/pdo.h>
+#include <oplk/event.h>
 
 //------------------------------------------------------------------------------
 // const defines

@@ -41,7 +41,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-#include <common/pdo.h>
 #include <kernel/pdokcal.h>
 
 #include <hostiflib.h>
@@ -176,6 +175,8 @@ tOplkError pdokcal_controlSync(BOOL fEnable_p)
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+/// \name Private Functions
+/// \{
 
 //------------------------------------------------------------------------------
 /**
@@ -201,3 +202,5 @@ static tOplkError enableSyncIrq(BOOL fEnable_p)
 
     return kErrorOk;
 }
+
+///\}
