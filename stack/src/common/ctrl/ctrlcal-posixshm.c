@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   ctrl/ctrlcal-posixshm.c
+\file   common/ctrl/ctrlcal-posixshm.c
 
 \brief  Posix shared memory implementation for control CAL module
 
@@ -41,6 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
+#include <common/ctrlcal.h>
 
 #include <unistd.h>
 #include <sys/mman.h>
@@ -229,3 +230,11 @@ tOplkError ctrlcal_readData(void* pDest_p, UINT offset_p, size_t length_p)
     OPLK_MEMCPY(pDest_p, pCtrlMem_l + offset_p, length_p);
     return kErrorOk;
 }
+
+//============================================================================//
+//            P R I V A T E   F U N C T I O N S                               //
+//============================================================================//
+/// \name Private Functions
+/// \{
+
+/// \}

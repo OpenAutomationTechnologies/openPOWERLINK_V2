@@ -40,13 +40,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <unistd.h>
-
 #include <common/oplkinc.h>
-#include <common/ctrl.h>
-#include <common/ctrlcal.h>
 #include <user/ctrlucal.h>
 
+#include <unistd.h>
 #include <hostiflib.h>
 
 //============================================================================//
@@ -81,11 +78,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
+/**
+\brief  Instance of the user control CAL host interface module
+
+The structure defines the instance variables of the user control CAL module
+for the host interface.
+*/
 typedef struct
 {
-    tHostifInstance     hifInstance;
-    BOOL                fIrqMasterEnable;
-    tHostifInstanceId   dynBufInst;
+    tHostifInstance     hifInstance;                        ///< Host interface instance
+    BOOL                fIrqMasterEnable;                   ///< IRQ master enable
+    tHostifInstanceId   dynBufInst;                         ///< Dynamic buffer instance
 } tCtrluCalInstance;
 //------------------------------------------------------------------------------
 // local vars

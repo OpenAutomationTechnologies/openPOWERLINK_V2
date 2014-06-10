@@ -40,10 +40,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <unistd.h>
 #include <stddef.h>
 
-#include <common/ctrl.h>
+#include <common/oplkinc.h>
+#include <kernel/ctrlkcal.h>
 #include <common/ctrlcal.h>
 #include <common/ctrlcal-mem.h>
 
@@ -146,7 +146,7 @@ This function provides processing time for the CAL module.
 \ingroup module_ctrlkcal
 */
 //------------------------------------------------------------------------------
-tOplkError ctrlkcal_process (void)
+tOplkError ctrlkcal_process(void)
 {
     return kErrorOk;
 }
@@ -165,7 +165,7 @@ block to execute a kernel control function.
 \ingroup module_ctrlkcal
 */
 //------------------------------------------------------------------------------
-tOplkError ctrlkcal_getCmd (tCtrlCmdType *pCmd_p)
+tOplkError ctrlkcal_getCmd(tCtrlCmdType* pCmd_p)
 {
     return ctrlcal_readData(pCmd_p, offsetof(tCtrlBuf, ctrlCmd), sizeof(tCtrlCmd));
 }
@@ -264,3 +264,10 @@ tOplkError ctrlkcal_readInitParam(tCtrlInitParam* pInitParam_p)
                             sizeof(tCtrlInitParam));
 }
 
+//============================================================================//
+//            P R I V A T E   F U N C T I O N S                               //
+//============================================================================//
+/// \name Private Functions
+/// \{
+
+/// \}

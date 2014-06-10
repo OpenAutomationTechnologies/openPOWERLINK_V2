@@ -41,38 +41,44 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-#include <kernel/dllk.h>
-#include <kernel/eventk.h>
-#include <kernel/nmtk.h>
-#include <kernel/dllkcal.h>
-#include <kernel/pdokcal.h>
-#include <user/pdoucal.h>
-#include <user/pdou.h>
-#include <user/dllucal.h>
+#include <user/ctrlu.h>
+#include <user/ctrlucal.h>
+#include <user/eventu.h>
+#include <user/eventucal.h>
+#include <user/timeru.h>
 #include <user/errhndu.h>
-#include <user/ledu.h>
+#include <user/dllucal.h>
+#include <user/nmtu.h>
 #include <user/nmtcnu.h>
+#include <common/target.h>
+#include <oplk/obd.h>
+
+#if defined(CONFIG_INCLUDE_NMT_MN)
 #include <user/nmtmnu.h>
-#include <user/sdocom.h>
-#include <user/sdoseq.h>
 #include <user/identu.h>
 #include <user/statusu.h>
-#include <user/timeru.h>
+#include <user/syncu.h>
+#endif
+
+#if defined(CONFIG_INCLUDE_PDO)
+#include <user/pdou.h>
+#endif
+
+#if defined(CONFIG_INCLUDE_LEDU)
+#include <user/ledu.h>
+#endif
+
+#if defined(CONFIG_INCLUDE_SDOS) || defined(CONFIG_INCLUDE_SDOC)
+#include <user/sdoseq.h>
+#include <user/sdocom.h>
+#endif
+
+#if defined(CONFIG_INCLUDE_CFM)
 #include <user/cfmu.h>
-#include <user/eventucal.h>
-
-#include <common/ctrl.h>
-#include <oplk/obd.h>
-#include <common/target.h>
-
-#include <user/ctrlucal.h>
+#endif
 
 #if (CONFIG_OBD_USE_LOAD_CONCISEDCF != FALSE)
 #include <oplk/obdcdc.h>
-#endif
-
-#if defined(CONFIG_INCLUDE_NMT_MN)
-#include <user/syncu.h>
 #endif
 
 #include <stddef.h>
@@ -148,19 +154,25 @@ tLinkObjectRequest    linkObjectRequestsMn[]  =
 static tOplkError initNmtu(tOplkApiInitParam* pInitParam_p);
 static tOplkError initObd(tOplkApiInitParam* pInitParam_p);
 static tOplkError updateDllConfig(tOplkApiInitParam* pInitParam_p, BOOL fUpdateIdentity_p);
-static tOplkError updateSdoConfig(void);
 static tOplkError updateObd(tOplkApiInitParam* pInitParam_p);
-
 static tOplkError processUserEvent(tEvent* pEvent_p);
 static tOplkError cbCnCheckEvent(tNmtEvent NmtEvent_p);
 static tOplkError cbNmtStateChange(tEventNmtStateChange nmtStateChange_p);
+
+#if defined(CONFIG_INCLUDE_SDOS) || defined(CONFIG_INCLUDE_SDOC)
+static tOplkError updateSdoConfig(void);
+#endif
+
+#if defined(CONFIG_INCLUDE_PDO)
 static tOplkError cbEventPdoChange(tPdoEventPdoChange* pEventPdoChange_p);
+#endif
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
 static tOplkError cbNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p,
                               tNmtState nmtState_p, UINT16 errorCode_p,
                               BOOL fMandatory_p);
-tOplkError linkDomainObjects(tLinkObjectRequest* pLinkRequest_p, size_t requestCnt_p);
+static tOplkError linkDomainObjects(tLinkObjectRequest* pLinkRequest_p,
+                                    size_t requestCnt_p);
 #endif
 
 static tOplkError cbBootEvent(tNmtBootEvent BootEvent_p, tNmtState NmtState_p,
@@ -688,7 +700,7 @@ tOplkError ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
 
                 if ((cmdId >= NMT_EXT_COMMAND_START) && (cmdId <= NMT_EXT_COMMAND_END))
                 {
-                    pCmdData = OPLK_MALLOC(C_MAX_NMT_CMD_DATA_SIZE);
+                    pCmdData = (BYTE*)OPLK_MALLOC(C_MAX_NMT_CMD_DATA_SIZE);
                     if (pCmdData == NULL)
                     {
                         ret = kErrorNoResource;
@@ -929,9 +941,11 @@ static tOplkError cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
             if (ret != kErrorOk)
                 return ret;
 
+#if defined(CONFIG_INCLUDE_SDOS) || defined(CONFIG_INCLUDE_SDOC)
             ret = updateSdoConfig();
             if (ret != kErrorOk)
                 return ret;
+#endif
             break;
 
         //-----------------------------------------------------------
@@ -1308,6 +1322,7 @@ static tOplkError updateDllConfig(tOplkApiInitParam* pInitParam_p, BOOL fUpdateI
     return ret;
 }
 
+#if defined(CONFIG_INCLUDE_SDOS) || defined(CONFIG_INCLUDE_SDOC)
 //------------------------------------------------------------------------------
 /**
 \brief  Update the SDO configuration
@@ -1331,6 +1346,7 @@ static tOplkError updateSdoConfig(void)
     ret = sdoseq_setTimeout(sdoSequTimeout);
     return ret;
 }
+#endif
 
 //------------------------------------------------------------------------------
 /**
@@ -1728,7 +1744,8 @@ specified by a list of tLinkObjectRequest entries.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError linkDomainObjects(tLinkObjectRequest* pLinkRequest_p, size_t requestCnt_p)
+static tOplkError linkDomainObjects(tLinkObjectRequest* pLinkRequest_p,
+                                    size_t requestCnt_p)
 {
     tOplkError              ret = kErrorOk;
     tObdSize                entrySize;
@@ -1748,4 +1765,5 @@ tOplkError linkDomainObjects(tLinkObjectRequest* pLinkRequest_p, size_t requestC
     return ret;
 }
 #endif
+
 /// \}

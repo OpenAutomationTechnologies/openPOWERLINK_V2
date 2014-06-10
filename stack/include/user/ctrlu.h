@@ -43,8 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-
-#include <common/ctrl.h>
+#include <oplk/obd.h>
 
 //------------------------------------------------------------------------------
 // const defines

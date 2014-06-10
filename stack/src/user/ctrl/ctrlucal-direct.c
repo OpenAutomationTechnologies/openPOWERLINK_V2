@@ -41,10 +41,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <stddef.h>
-
 #include <common/oplkinc.h>
-#include <common/ctrl.h>
+#include <user/ctrlucal.h>
 #include <kernel/ctrlk.h>
 
 //============================================================================//
@@ -256,3 +254,12 @@ tOplkError ctrlucal_readInitParam(tCtrlInitParam* pInitParam_p)
     OPLK_MEMCPY(pInitParam_p, &kernelInitParam_g, sizeof(tCtrlInitParam));
     return kErrorOk;
 }
+
+
+//============================================================================//
+//            P R I V A T E   F U N C T I O N S                               //
+//============================================================================//
+/// \name Private Functions
+/// \{
+
+/// \}

@@ -42,18 +42,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-#include <kernel/dllk.h>
-#include <kernel/errhndk.h>
-#include <kernel/eventk.h>
-#include <kernel/nmtk.h>
-#include <kernel/dllkcal.h>
-#include <kernel/pdokcal.h>
-#include <kernel/pdok.h>
-#include <kernel/eventkcal.h>
-
-#include <common/ctrl.h>
 #include <kernel/ctrlk.h>
 #include <kernel/ctrlkcal.h>
+#include <kernel/dllk.h>
+#include <kernel/dllkcal.h>
+#include <kernel/eventk.h>
+#include <kernel/eventkcal.h>
+#include <kernel/errhndk.h>
+#include <kernel/nmtk.h>
+#include <kernel/pdok.h>
 
 #if defined(CONFIG_INCLUDE_VETH)
 #include <kernel/veth.h>
@@ -198,7 +195,7 @@ BOOL ctrlk_process(void)
     eventkcal_process();
 
     ret = ctrlkcal_process();
-    if(ret != kErrorOk)
+    if (ret != kErrorOk)
     {
         DEBUG_LVL_ERROR_TRACE("%s: CAL process returned with 0x%X\n", __func__, ret);
         fExit = TRUE;
@@ -405,6 +402,4 @@ static tOplkError shutdownStack(void)
     return kErrorOk;
 }
 
-//------------------------------------------------------------------------------
 /// \}
-//------------------------------------------------------------------------------

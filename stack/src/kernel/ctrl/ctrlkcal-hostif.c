@@ -40,10 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <unistd.h>
-
-#include <common/ctrl.h>
-#include <common/ctrlcal.h>
+#include <common/oplkinc.h>
 #include <kernel/ctrlkcal.h>
 
 #include <hostiflib.h>
@@ -79,10 +76,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
+/**
+\brief  Instance of the kernel control CAL host interface module
+
+The structure defines the instance variables of the kernel control CAL module
+for the host interface.
+*/
 typedef struct
 {
-    tHostifInstance     hifInstance;
-    UINT8*              pInitParamBase;
+    tHostifInstance     hifInstance;                        ///< Host interface instance
+    UINT8*              pInitParamBase;                     ///< Init parameters
 } tCtrlkCalInstance;
 
 //------------------------------------------------------------------------------
@@ -127,11 +130,11 @@ tOplkError ctrlkcal_init(void)
     hifConfig.version.major = HOSTIF_VERSION_MAJOR;
 
     hifRet = hostif_create(&hifConfig, &instance_l.hifInstance);
-    if(hifRet != kHostifSuccessful)
+    if (hifRet != kHostifSuccessful)
         goto Cleanup;
 
     hifRet = hostif_getInitParam(instance_l.hifInstance, &instance_l.pInitParamBase);
-    if(hifRet != kHostifSuccessful)
+    if (hifRet != kHostifSuccessful)
         goto Cleanup;
 
     ctrlkcal_setStatus(kCtrlStatusReady);
@@ -162,7 +165,7 @@ void ctrlkcal_exit(void)
     instance_l.pInitParamBase = NULL;
 
     hifRet = hostif_delete(instance_l.hifInstance);
-    if(hifRet != kHostifSuccessful)
+    if (hifRet != kHostifSuccessful)
         DEBUG_LVL_ERROR_TRACE("Could not delete Host Inetrface (0x%X)\n", hifRet);
 }
 
@@ -201,11 +204,11 @@ tOplkError ctrlkcal_getCmd(tCtrlCmdType* pCmd_p)
     tHostifReturn hifret;
     tHostifCommand hifcmd;
 
-    if(pCmd_p == NULL)
+    if (pCmd_p == NULL)
         return kErrorGeneralError;
 
     hifret = hostif_getCommand(instance_l.hifInstance, &hifcmd);
-    if(hifret != kHostifSuccessful)
+    if (hifret != kHostifSuccessful)
         return kErrorGeneralError;
 
     *pCmd_p = (tCtrlCmdType)hifcmd;
@@ -302,7 +305,7 @@ parameters modified in the kernel stack.
 //------------------------------------------------------------------------------
 void ctrlkcal_storeInitParam(tCtrlInitParam* pInitParam_p)
 {
-    if(instance_l.pInitParamBase != NULL)
+    if (instance_l.pInitParamBase != NULL)
         OPLK_MEMCPY(instance_l.pInitParamBase, pInitParam_p, sizeof(tCtrlInitParam));
 }
 
@@ -321,7 +324,7 @@ The function reads the initialization parameter from the user stack.
 //------------------------------------------------------------------------------
 tOplkError ctrlkcal_readInitParam(tCtrlInitParam* pInitParam_p)
 {
-    if(instance_l.pInitParamBase == NULL)
+    if (instance_l.pInitParamBase == NULL)
         return kErrorNoResource;
 
     OPLK_MEMCPY(pInitParam_p, instance_l.pInitParamBase, sizeof(tCtrlInitParam));
@@ -332,4 +335,7 @@ tOplkError ctrlkcal_readInitParam(tCtrlInitParam* pInitParam_p)
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+/// \name Private Functions
+/// \{
 
+/// \}

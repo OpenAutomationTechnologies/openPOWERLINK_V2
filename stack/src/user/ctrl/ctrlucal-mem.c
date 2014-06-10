@@ -40,16 +40,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <unistd.h>
-#include <stddef.h>
-
 #include <common/oplkinc.h>
-#include <common/ctrl.h>
+#include <user/ctrlucal.h>
 #include <common/ctrlcal.h>
 #include <common/ctrlcal-mem.h>
-#include <user/ctrlucal.h>
-
 #include <common/target.h>
+
+#include <stddef.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -327,6 +324,8 @@ tOplkError ctrlucal_readInitParam(tCtrlInitParam* pInitParam_p)
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+/// \name Private Functions
+/// \{
 
 //------------------------------------------------------------------------------
 /**
@@ -352,3 +351,5 @@ static UINT16 getMagic(void)
 
     return 0;
 }
+
+/// \}

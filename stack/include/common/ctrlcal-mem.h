@@ -42,6 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
+#include <common/ctrl.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -61,7 +62,7 @@ typedef struct sCtrlCmd
 {
     UINT16              cmd;        ///< The command to execute
     UINT16              retVal;     ///< The return value of the command
-}tCtrlCmd;
+} tCtrlCmd;
 
 /**
 \brief Structure for control buffer

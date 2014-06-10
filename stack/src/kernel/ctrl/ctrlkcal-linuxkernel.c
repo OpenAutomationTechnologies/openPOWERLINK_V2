@@ -40,10 +40,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <stddef.h>
-
-#include <common/ctrl.h>
-#include <common/ctrlcal.h>
+#include <common/oplkinc.h>
+#include <kernel/ctrlkcal.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -269,3 +267,10 @@ tOplkError ctrlkcal_readInitParam(tCtrlInitParam* pInitParam_p)
     return kErrorOk;
 }
 
+//============================================================================//
+//            P R I V A T E   F U N C T I O N S                               //
+//============================================================================//
+/// \name Private Functions
+/// \{
+
+/// \}

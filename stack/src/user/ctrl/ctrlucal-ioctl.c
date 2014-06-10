@@ -40,6 +40,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <common/oplkinc.h>
+#include <user/ctrlucal.h>
+#include <common/ctrlcal-mem.h>
+#include <common/target.h>
+#include <oplk/powerlink-module.h>
+
 #include <unistd.h>
 #include <stddef.h>
 #include <sys/ioctl.h>
@@ -47,15 +53,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <sys/mman.h>
-
-#include <common/oplkinc.h>
-#include <common/ctrl.h>
-#include <common/ctrlcal.h>
-#include <common/ctrlcal-mem.h>
-#include <user/ctrlucal.h>
-#include <common/target.h>
-
-#include <oplk/powerlink-module.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -352,3 +349,7 @@ int ctrlucal_getFd(void)
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+/// \name Private Functions
+/// \{
+
+/// \}

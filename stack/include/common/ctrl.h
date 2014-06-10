@@ -58,7 +58,7 @@ The following enumeration lists all valid ctrl commands.
 */
 typedef enum eCtrlCmd
 {
-    kCtrlNone = 0,
+    kCtrlNone = 0,                      ///< No command
     kCtrlInitStack,                     ///< Initialize kernel modules
     kCtrlCleanupStack,                  ///< Cleanup kernel modules
     kCtrlShutdown,                      ///< Shutdown stack
