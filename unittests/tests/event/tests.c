@@ -41,7 +41,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <CUnit/CUnit.h>
 
 #include <kernel/eventk.h>
-#include "common/event/event.h"
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //

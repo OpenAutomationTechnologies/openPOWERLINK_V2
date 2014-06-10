@@ -34,7 +34,6 @@
 
 SET(COMMON_SOURCES
     ${COMMON_SOURCE_DIR}/debugstr.c
-    ${COMMON_SOURCE_DIR}/event/event.c
     )
 
 SET(COMMON_WINDOWS_SOURCES

@@ -175,8 +175,6 @@ SET(MODULE_SOURCE_FILES
     ${KERNEL_SOURCE_DIR}/event/eventk.c
     ${KERNEL_SOURCE_DIR}/event/eventkcal-linuxkernel.c
     ${KERNEL_SOURCE_DIR}/event/eventkcalintf-circbuf.c
-    ${COMMON_SOURCE_DIR}/event/event.c
-    ${COMMON_SOURCE_DIR}/event/event.h
     ${KERNEL_SOURCE_DIR}/nmt/nmtk.c
     ${KERNEL_SOURCE_DIR}/pdo/pdok.c
     ${KERNEL_SOURCE_DIR}/pdo/pdokcal.c

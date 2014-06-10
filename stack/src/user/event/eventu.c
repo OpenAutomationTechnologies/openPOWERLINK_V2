@@ -47,18 +47,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/dllucal.h>
 #include <user/eventucal.h>
 
-#if defined (CONFIG_INCLUDE_NMT_MN)
+#if defined(CONFIG_INCLUDE_NMT_MN)
 #include <user/nmtmnu.h>
 #endif
 
-#if defined (CONFIG_INCLUDE_SDOC) || defined(CONFIG_INCLUDE_SDOS)
+#if defined(CONFIG_INCLUDE_SDOC) || defined(CONFIG_INCLUDE_SDOS)
 #include <user/sdoseq.h>
 #endif
 
-#if defined (CONFIG_INCLUDE_LEDU)
+#if defined(CONFIG_INCLUDE_LEDU)
 #include <user/ledu.h>
 #endif
-#include "common/event/event.h"
 
 #include <stddef.h>
 
@@ -109,33 +108,6 @@ static tOplkError callApiEventCb(tEvent* pEvent_p);
 // local vars
 //------------------------------------------------------------------------------
 static tEventuInstance              instance_l;
-
-/**
-\brief  Event dispatch table
-
-The following table defines the event handlers to be used for the specific
-event sinks.
-*/
-static tEventDispatchEntry eventDispatchTbl_l[] =
-{
-    { kEventSinkNmtu,        kEventSourceNmtu,        nmtu_processEvent },
-#if defined (CONFIG_INCLUDE_NMT_MN)
-    { kEventSinkNmtMnu,      kEventSourceNmtMnu,      nmtmnu_processEvent },
-#endif
-#if defined (CONFIG_INCLUDE_SDOC) || defined(CONFIG_INCLUDE_SDOS)
-    { kEventSinkSdoAsySeq,   kEventSourceSdoAsySeq,   sdoseq_processEvent },
-#endif
-#if defined (CONFIG_INCLUDE_LEDU)
-    { kEventSinkLedu,        kEventSourceLedu,        ledu_processEvent },
-#else
-    { kEventSinkLedu,        kEventSourceLedu,        NULL },
-#endif
-    { kEventSinkDlluCal,     kEventSourceDllu,        dllucal_process },
-    { kEventSinkErru,        kEventSourceErru,        NULL },
-    { kEventSinkApi,         kEventSourceOplkApi,     callApiEventCb },
-    { kEventSinkInvalid,     kEventSourceInvalid,     NULL }
-};
-
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -211,31 +183,65 @@ tOplkError eventu_process(tEvent* pEvent_p)
 {
     tOplkError              ret = kErrorOk;
     tEventSource            eventSource;
-    tProcessEventCb         pfnEventHandler;
-    tEventDispatchEntry*    pDispatchEntry;
 
-    pDispatchEntry = &eventDispatchTbl_l[0];
-    ret = event_getHandlerForSink(&pDispatchEntry, pEvent_p->eventSink,
-                                  &pfnEventHandler, &eventSource);
-    if (ret == kErrorEventUnknownSink)
+    switch (pEvent_p->eventSink)
     {
-        // Unknown sink, provide error event to API layer
-        eventu_postError(kEventSourceEventu, ret, sizeof(pEvent_p->eventSink),
-                         &pEvent_p->eventSink);
+        case kEventSinkDlluCal:
+            ret = dllucal_process(pEvent_p);
+            eventSource = kEventSourceDllu;
+            break;
+
+        case kEventSinkNmtu:
+            ret = nmtu_processEvent(pEvent_p);
+            eventSource = kEventSourceNmtu;
+            break;
+
+#if defined(CONFIG_INCLUDE_NMT_MN)
+        case kEventSinkNmtMnu:
+            ret = nmtmnu_processEvent(pEvent_p);
+            eventSource = kEventSourceNmtMnu;
+            break;
+#endif
+
+#if defined(CONFIG_INCLUDE_SDOC) || defined(CONFIG_INCLUDE_SDOS)
+        case kEventSinkSdoAsySeq:
+            ret = sdoseq_processEvent(pEvent_p);
+            eventSource = kEventSourceSdoAsySeq;
+            break;
+#endif
+
+        case kEventSinkLedu:
+#if defined(CONFIG_INCLUDE_LEDU)
+            ret = ledu_processEvent(pEvent_p);
+            eventSource = kEventSourceLedu;
+#endif
+            break;
+
+        case kEventSinkErru:
+            break;
+
+        case kEventSinkApi:
+            ret = callApiEventCb(pEvent_p);
+            eventSource = kEventSourceOplkApi;
+            break;
+
+        default:
+            // Unknown sink, provide error event to API layer
+            eventu_postError(kEventSourceEventu, ret,
+                             sizeof(pEvent_p->eventSink),
+                             &pEvent_p->eventSink);
+            ret = kErrorEventUnknownSink;
+            break;
     }
-    else
+
+    if ((ret != kErrorOk) && (ret != kErrorShutdown))
     {
-        if (pfnEventHandler != NULL)
-        {
-            ret = pfnEventHandler(pEvent_p);
-            if ((ret != kErrorOk) && (ret != kErrorShutdown))
-            {
-                // forward error event to API layer
-                eventu_postError(kEventSourceEventu, ret, sizeof(eventSource),
-                                 &eventSource);
-            }
-        }
+        // forward error event to API layer
+        eventu_postError(kEventSourceEventu, ret,
+                         sizeof(eventSource),
+                         &eventSource);
     }
+
     return ret;
 }
 
@@ -362,4 +368,5 @@ static tOplkError callApiEventCb(tEvent* pEvent_p)
     }
     return kErrorEventPostError;
 }
+
 /// \}

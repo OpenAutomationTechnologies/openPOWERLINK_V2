@@ -55,7 +55,6 @@ SET(TEST_STUBS
 
 # Provide all openPOWERLINK files needed to compile
 SET(TEST_OPENPOWERLINK
-   ${OPLK_SOURCE_DIR}/common/event/event.c
    ${OPLK_SOURCE_DIR}/kernel/event/eventk.c
 )
 

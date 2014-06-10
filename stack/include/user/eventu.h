@@ -53,6 +53,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // typedef
 //------------------------------------------------------------------------------
 
+/**
+\brief Callback for event post
+
+This callback is used to call event processing over the module boundaries.
+e.g. eventucal-* -> eventu_process
+
+\param pEvent_p          Pointer to event which should be processed.
+
+\return The function returns a tOplkError error code.
+*/
+typedef tOplkError (*tProcessEventCb)(tEvent* pEvent_p);
+
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------

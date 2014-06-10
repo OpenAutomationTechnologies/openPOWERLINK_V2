@@ -246,30 +246,4 @@ typedef struct
 */
 typedef tOplkError (*tSyncCb)(void);
 
-/**
-\brief Callback for event post
-
-This callback is used to call event processing over the module boundaries.
-e.g. eventkcal-* -> eventk_process
-
-\param pEvent_p          Pointer to event which should be processed.
-
-\return The function returns a tOplkError error code.
-*/
-typedef tOplkError (*tProcessEventCb)(tEvent* pEvent_p);
-
-/**
-\brief  Event dispatch entry
-
-The following struct specifies the entry for an event dispatch table.
-The table is used to store the appropriate event handlers for a specific
-event sink.
- */
-typedef struct
-{
-    tEventSink          sink;               ///< Event sink
-    tEventSource        source;             ///< Corresponding event source
-    tProcessEventCb     pfnEventHandler;    ///< Event handler responsible for this sink
-} tEventDispatchEntry;
-
 #endif /* _INC_oplk_event_H_ */
