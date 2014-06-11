@@ -40,27 +40,28 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <common/oplkinc.h>
+#include <kernel/veth.h>
+#include <kernel/dllk.h>
+#include <kernel/dllkcal.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <fcntl.h>
+#include <pthread.h>
+#include <errno.h>
 #include <sys/socket.h>
-#include <linux/if.h>
-#include <linux/if_tun.h>
 #include <sys/types.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <sys/select.h>
 #include <sys/time.h>
-#include <fcntl.h>
 #include <arpa/inet.h>
-#include <pthread.h>
-#include <errno.h>
+#include <linux/if.h>
+#include <linux/if_tun.h>
 #include <netinet/if_ether.h>
-
-#include <kernel/veth.h>
-#include <kernel/dllkcal.h>
-#include <kernel/dllk.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -90,20 +91,24 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
+/**
+\brief Structure describing an instance of the Virtual Ethernet driver
 
+This structure describes an instance of the Virtual Ethernet driver in Linux
+userspace.
+*/
 typedef struct
 {
-    UINT8               macAdrs[6];
-    UINT8               tapMacAdrs[6];
-    int                 fd;
-    BOOL                fStop;
-    pthread_t           threadHandle;
+    UINT8               macAdrs[6];         ///< MAC address of the VEth interface
+    UINT8               tapMacAdrs[6];      ///< MAC address of the TAP device
+    int                 fd;                 ///< File descriptor of the tunnel device
+    BOOL                fStop;              ///< Flag indicating whether the receive thread shall be stopped
+    pthread_t           threadHandle;       ///< Handle of the receive thread
 } tVethInstance;
 
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-
 static tVethInstance        vethInstance_l;
 
 //------------------------------------------------------------------------------
@@ -347,4 +352,3 @@ static void* vethRecvThread(void* pArg_p)
 }
 
 ///\}
-

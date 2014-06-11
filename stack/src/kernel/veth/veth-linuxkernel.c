@@ -41,6 +41,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <common/oplkinc.h>
+#include <kernel/veth.h>
+#include <kernel/dllk.h>
+#include <kernel/dllkcal.h>
+
+#include <net/arp.h>
+#include <net/protocol.h>
+#include <net/pkt_sched.h>
 #include <linux/version.h>
 #include <linux/module.h>
 #include <linux/netdevice.h>
@@ -48,10 +56,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/if_arp.h>
-#include <net/arp.h>
-
-#include <net/protocol.h>
-#include <net/pkt_sched.h>
 #include <linux/if_ether.h>
 #include <linux/in.h>
 #include <linux/ip.h>
@@ -59,11 +63,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <linux/mm.h>
 #include <linux/types.h>
 #include <linux/skbuff.h>  /* for struct sk_buff */
-
-#include <kernel/veth.h>
-#include <kernel/dllkcal.h>
-#include <kernel/dllk.h>
-#include <common/ami.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -326,9 +325,9 @@ static void veth_timeout(struct net_device* pNetDevice_p)
 {
     DEBUG_LVL_VETH_TRACE("veth_timeout(\n");
     // $$$ d.k.: move to extra function, which is called by DLL when new space is available in TxFifo
-    if (netif_queue_stopped (pNetDevice_p))
+    if (netif_queue_stopped(pNetDevice_p))
     {
-        netif_wake_queue (pNetDevice_p);
+        netif_wake_queue(pNetDevice_p);
     }
 }
 
@@ -345,10 +344,10 @@ The function receives a frame from the virtual Ethernet interface.
 //------------------------------------------------------------------------------
 static tOplkError veth_receiveFrame(tFrameInfo* pFrameInfo_p)
 {
-    tOplkError  ret = kErrorOk;
-    struct net_device* pNetDevice = pVEthNetDevice_g;
+    tOplkError               ret = kErrorOk;
+    struct net_device*       pNetDevice = pVEthNetDevice_g;
     struct net_device_stats* pStats = netdev_priv(pNetDevice);
-    struct sk_buff* pSkb;
+    struct sk_buff*          pSkb;
 
     DEBUG_LVL_VETH_TRACE("veth_receiveFrame: FrameSize=%u\n", pFrameInfo_p->frameSize);
 
@@ -368,7 +367,13 @@ static tOplkError veth_receiveFrame(tFrameInfo* pFrameInfo_p)
 
     netif_rx(pSkb);         // call netif_rx with skb
 
-    DEBUG_LVL_VETH_TRACE("veth_receiveFrame: SrcMAC=0x%llx\n", ami_getUint48Be(pFrameInfo_p->pFrame->aSrcMac));
+    DEBUG_LVL_VETH_TRACE("veth_receiveFrame: SrcMAC: %02X:%02X:%02x:%02X:%02X:%02x\n",
+                         pFrameInfo_p->pFrame->aSrcMac[0],
+                         pFrameInfo_p->pFrame->aSrcMac[1],
+                         pFrameInfo_p->pFrame->aSrcMac[2],
+                         pFrameInfo_p->pFrame->aSrcMac[3],
+                         pFrameInfo_p->pFrame->aSrcMac[4],
+                         pFrameInfo_p->pFrame->aSrcMac[5]);
 
     // update receive statistics
     pStats->rx_packets++;
@@ -379,4 +384,3 @@ Exit:
 }
 
 ///\}
-
