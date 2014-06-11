@@ -44,6 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <common/oplkinc.h>
 #include <oplk/nmt.h>
 #include <oplk/cfm.h>
+#include <oplk/obd.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -67,6 +68,7 @@ tOplkError cfmu_init(tCfmCbEventCnProgress pfnCbEventCnProgress_p, tCfmCbEventCn
 tOplkError cfmu_exit(void);
 tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtState nmtState_p);
 BOOL       cfmu_isSdoRunning(UINT nodeId_p);
+tOplkError cfmu_cbObdAccess(tObdCbParam MEM* pParam_p);
 
 #ifdef __cplusplus
 }

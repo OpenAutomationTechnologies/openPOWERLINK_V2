@@ -42,7 +42,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <oplk/oplkinc.h>
-#include <oplk/obd.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -68,19 +67,4 @@ typedef struct
     UINT32              bytesDownloaded;        ///< Number of already downloaded bytes
 } tCfmEventCnProgress;
 
-//------------------------------------------------------------------------------
-// function prototypes
-//------------------------------------------------------------------------------
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-tOplkError cfmu_cbObdAccess(tObdCbParam MEM* pParam_p);
-
-#ifdef __cplusplus
-}
-#endif
-
 #endif /* _INC_oplk_cfm_H_ */
-

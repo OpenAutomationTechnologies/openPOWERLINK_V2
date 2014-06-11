@@ -45,11 +45,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <common/oplkinc.h>
 #include <common/ami.h>
-#include <oplk/obd.h>
 #include <user/cfmu.h>
-#include <user/identu.h>
 #include <user/sdocom.h>
+#include <user/identu.h>
 #include <user/nmtu.h>
+#include <oplk/obd.h>
 
 #if !defined(CONFIG_INCLUDE_SDOC)
 #error "CFM module needs openPOWERLINK module SDO client!"
@@ -72,7 +72,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // return pointer to node info structure for specified node ID
 // d.k. may be replaced by special (hash) function if node ID array is smaller than 254
-#define CFM_GET_NODEINFO(uiNodeId_p)(cfmInstance_g.apNodeInfo[uiNodeId_p - 1])
+#define CFM_GET_NODEINFO(uiNodeId_p) (cfmInstance_g.apNodeInfo[uiNodeId_p - 1])
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -101,12 +101,12 @@ The following enumeration lists all valid CFM states.
 */
 typedef enum
 {
-    kCfmStateIdle           = 0x00,
-    kCfmStateWaitRestore,
-    kCfmStateDownload,
-    kCfmStateWaitStore,
-    kCfmStateUpToDate,
-    kCfmStateInternalAbort,
+    kCfmStateIdle           = 0x00,                         ///< The CFM is idle
+    kCfmStateWaitRestore,                                   ///< The CFM has issued a restore command and is awaiting the acknowledge
+    kCfmStateDownload,                                      ///< The CFM is downloading a new configuration
+    kCfmStateWaitStore,                                     ///< The CFM has issued a store command and is awaiting the acknowledge
+    kCfmStateUpToDate,                                      ///< The CN is up-to-date (no configuration download is required)
+    kCfmStateInternalAbort,                                 ///< The CFM has aborted due to an internal failure
 } tCfmState;
 
 /**
@@ -117,15 +117,15 @@ configuration manager.
 */
 typedef struct
 {
-    tCfmEventCnProgress     eventCnProgress;
-    UINT8*                  pObdBufferConciseDcf;
-    UINT8*                  pDataConciseDcf;
-    UINT32                  bytesRemaining;
-    UINT32                  entriesRemaining;
-    tSdoComConHdl           sdoComConHdl;
-    tCfmState               cfmState;
-    UINT                    curDataSize;
-    BOOL                    fDoStore;
+    tCfmEventCnProgress     eventCnProgress;                ///< Event arguments to report the CFM progress on a specific CN
+    UINT8*                  pObdBufferConciseDcf;           ///< Pointer of the CDC buffer in the object dictionary
+    UINT8*                  pDataConciseDcf;                ///< Pointer to the CDC data
+    UINT32                  bytesRemaining;                 ///< Number of configuration Bytes remaining for the active download
+    UINT32                  entriesRemaining;               ///< Number of entries remaining for the active download
+    tSdoComConHdl           sdoComConHdl;                   ///< SDO Command Layer connection handle
+    tCfmState               cfmState;                       ///< Current CFM state for the CN
+    UINT                    curDataSize;                    ///< Size of the current entry to be written via SDO
+    BOOL                    fDoStore;                       ///< Flag indicating whether a store command shall be issued
 } tCfmNodeInfo;
 
 /**
@@ -135,13 +135,13 @@ The following structure defines the instance of the configuration manager.
 */
 typedef struct
 {
-    tCfmNodeInfo*           apNodeInfo[NMT_MAX_NODE_ID];
-    UINT32                  leDomainSizeNull;
+    tCfmNodeInfo*           apNodeInfo[NMT_MAX_NODE_ID];    ///< CFM node information structures for all CNs
+    UINT32                  leDomainSizeNull;               ///< Dummy variable to link object 0x1F22 with
 #if (CONFIG_CFM_CONFIGURE_CYCLE_LENGTH != FALSE)
-    UINT32                  leCycleLength;
+    UINT32                  leCycleLength;                  ///< Cycle time
 #endif
-    tCfmCbEventCnProgress   pfnCbEventCnProgress;
-    tCfmCbEventCnResult     pfnCbEventCnResult;
+    tCfmCbEventCnProgress   pfnCbEventCnProgress;           ///< Pointer to the CN progress callback function
+    tCfmCbEventCnResult     pfnCbEventCnResult;             ///< Pointer to the CN result callback function
 } tCfmInstance;
 
 //------------------------------------------------------------------------------
@@ -155,6 +155,7 @@ static tCfmInstance             cfmInstance_g;
 
 static tCfmNodeInfo* allocNodeInfo(UINT nodeId_p);
 static tOplkError callCbProgress(tCfmNodeInfo* pNodeInfo_p);
+static tOplkError finishConfig(tCfmNodeInfo* pNodeInfo_p, tNmtNodeCommand nmtNodeCommand_p);
 static tOplkError downloadCycleLength(tCfmNodeInfo* pNodeInfo_p);
 static tOplkError downloadObject(tCfmNodeInfo* pNodeInfo_p);
 static tOplkError sdoWriteObject(tCfmNodeInfo* pNodeInfo_p, void* pLeSrcData_p, UINT size_p);
@@ -194,7 +195,7 @@ tOplkError cfmu_init(tCfmCbEventCnProgress pfnCbEventCnProgress_p,
 
     // link domain with 4 zero-bytes to object 0x1F22 CFM_ConciseDcfList_ADOM
     varParam.pData = &cfmInstance_g.leDomainSizeNull;
-    varParam.size = sizeof(cfmInstance_g.leDomainSizeNull);
+    varParam.size = (tObdSize)sizeof(cfmInstance_g.leDomainSizeNull);
     varParam.index = 0x1F22;    // CFM_ConciseDcfList_ADOM
     for (subindex = 1; subindex <= NMT_MAX_NODE_ID; subindex++)
     {
@@ -334,15 +335,15 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtS
 
     // fetch pointer to ConciseDCF from object 0x1F22
     // (this allows the application to link its own memory to this object)
-    pNodeInfo->pDataConciseDcf = obd_getObjectDataPtr(0x1F22, nodeId_p);
+    pNodeInfo->pDataConciseDcf = (UINT8*)obd_getObjectDataPtr(0x1F22, nodeId_p);
     if (pNodeInfo->pDataConciseDcf == NULL)
         return kErrorCfmNoConfigData;
 
     obdSize = obd_getDataSize(0x1F22, nodeId_p);
-    pNodeInfo->bytesRemaining = (UINT32) obdSize;
+    pNodeInfo->bytesRemaining = (UINT32)obdSize;
     pNodeInfo->eventCnProgress.totalNumberOfBytes = pNodeInfo->bytesRemaining;
 #if (CONFIG_CFM_CONFIGURE_CYCLE_LENGTH != FALSE)
-    pNodeInfo->eventCnProgress.totalNumberOfBytes += sizeof (UINT32);
+    pNodeInfo->eventCnProgress.totalNumberOfBytes += sizeof(UINT32);
 #endif
     pNodeInfo->eventCnProgress.bytesDownloaded = 0;
     if (obdSize < sizeof(UINT32))
@@ -523,7 +524,7 @@ tOplkError cfmu_cbObdAccess(tObdCbParam MEM* pParam_p)
         ret = sdocom_abortTransfer(pNodeInfo->sdoComConHdl, SDO_AC_DATA_NOT_TRANSF_DUE_DEVICE_STATE);
     }
 
-    pMemVStringDomain = pParam_p->pArg;
+    pMemVStringDomain = (tObdVStringDomain*)pParam_p->pArg;
     if ((pMemVStringDomain->objSize != pMemVStringDomain->downloadSize) ||
         (pMemVStringDomain->pData == NULL))
     {
@@ -540,7 +541,7 @@ tOplkError cfmu_cbObdAccess(tObdCbParam MEM* pParam_p)
             OPLK_FREE(pBuffer);
             pNodeInfo->pObdBufferConciseDcf = NULL;
         }
-        pBuffer = OPLK_MALLOC(pMemVStringDomain->downloadSize);
+        pBuffer = (UINT8*)OPLK_MALLOC(pMemVStringDomain->downloadSize);
         if (pBuffer == NULL)
         {
             pParam_p->abortCode = SDO_AC_OUT_OF_MEMORY;
@@ -582,7 +583,7 @@ static tCfmNodeInfo* allocNodeInfo(UINT nodeId_p)
     if (pNodeInfo != NULL)
         return pNodeInfo;
 
-    pNodeInfo = OPLK_MALLOC(sizeof(tCfmNodeInfo));
+    pNodeInfo = (tCfmNodeInfo*)OPLK_MALLOC(sizeof(tCfmNodeInfo));
     OPLK_MEMSET(pNodeInfo, 0, sizeof(tCfmNodeInfo));
     pNodeInfo->eventCnProgress.nodeId = nodeId_p;
     pNodeInfo->sdoComConHdl = UINT_MAX;
@@ -620,13 +621,16 @@ static tOplkError callCbProgress(tCfmNodeInfo* pNodeInfo_p)
 
 The function calls the result callback function of the specified node.
 
-\param  pNodeInfo_p     Node info of the node to call the result callback function.
-\param  nmtCommand_p    NMT command to execute in the result callback function.
+\param  pNodeInfo_p         Node info of the node to call the result callback
+                            function.
+\param  nmtNodeCommand_p    NMT node command to execute in the result callback
+                            function.
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError finishConfig(tCfmNodeInfo* pNodeInfo_p, tNmtCommand nmtCommand_p)
+static tOplkError finishConfig(tCfmNodeInfo* pNodeInfo_p,
+                               tNmtNodeCommand nmtNodeCommand_p)
 {
     tOplkError      ret = kErrorOk;
 
@@ -644,7 +648,7 @@ static tOplkError finishConfig(tCfmNodeInfo* pNodeInfo_p, tNmtCommand nmtCommand
     pNodeInfo_p->cfmState = kCfmStateIdle;
     if (cfmInstance_g.pfnCbEventCnResult != NULL)
     {
-        ret = cfmInstance_g.pfnCbEventCnResult(pNodeInfo_p->eventCnProgress.nodeId, nmtCommand_p);
+        ret = cfmInstance_g.pfnCbEventCnResult(pNodeInfo_p->eventCnProgress.nodeId, nmtNodeCommand_p);
     }
     return ret;
 }
@@ -664,8 +668,8 @@ transfer is finished.
 static tOplkError cbSdoCon(tSdoComFinished* pSdoComFinished_p)
 {
     tOplkError          ret = kErrorOk;
-    tCfmNodeInfo*       pNodeInfo = pSdoComFinished_p->pUserArg;
-    tNmtCommand         nmtCommand;
+    tCfmNodeInfo*       pNodeInfo = (tCfmNodeInfo*)pSdoComFinished_p->pUserArg;
+    tNmtNodeCommand     nmtNodeCommand;
 
     if (pNodeInfo == NULL)
         return kErrorInvalidNodeId;
@@ -684,11 +688,11 @@ static tOplkError cbSdoCon(tSdoComFinished* pSdoComFinished_p)
 
         case kCfmStateUpToDate:
             if (pSdoComFinished_p->sdoComConState == kSdoComTransferFinished)
-                nmtCommand = kNmtNodeCommandConfReset;  // continue boot-up of CN with NMT command Reset Configuration
+                nmtNodeCommand = kNmtNodeCommandConfReset;  // continue boot-up of CN with NMT command Reset Configuration
             else
-                nmtCommand = kNmtNodeCommandConfErr;   // indicate configuration error CN
+                nmtNodeCommand = kNmtNodeCommandConfErr;   // indicate configuration error CN
 
-            ret = finishConfig(pNodeInfo, nmtCommand);
+            ret = finishConfig(pNodeInfo, nmtNodeCommand);
             break;
 
         case kCfmStateDownload:
@@ -806,7 +810,7 @@ static tOplkError downloadObject(tCfmNodeInfo* pNodeInfo_p)
         // fetch next item from ConciseDCF
         pNodeInfo_p->eventCnProgress.objectIndex = ami_getUint16Le(&pNodeInfo_p->pDataConciseDcf[CDC_OFFSET_INDEX]);
         pNodeInfo_p->eventCnProgress.objectSubIndex = ami_getUint8Le(&pNodeInfo_p->pDataConciseDcf[CDC_OFFSET_SUBINDEX]);
-        pNodeInfo_p->curDataSize = (UINT) ami_getUint32Le(&pNodeInfo_p->pDataConciseDcf[CDC_OFFSET_SIZE]);
+        pNodeInfo_p->curDataSize = (UINT)ami_getUint32Le(&pNodeInfo_p->pDataConciseDcf[CDC_OFFSET_SIZE]);
         pNodeInfo_p->pDataConciseDcf += CDC_OFFSET_DATA;
         pNodeInfo_p->bytesRemaining -= CDC_OFFSET_DATA;
         pNodeInfo_p->eventCnProgress.bytesDownloaded += CDC_OFFSET_DATA;
@@ -835,7 +839,7 @@ static tOplkError downloadObject(tCfmNodeInfo* pNodeInfo_p)
             ami_setUint32Le(&leSignature, 0x65766173);
             pNodeInfo_p->eventCnProgress.objectIndex = 0x1010;
             pNodeInfo_p->eventCnProgress.objectSubIndex = 0x01;
-            ret = sdoWriteObject(pNodeInfo_p, &leSignature, sizeof (leSignature));
+            ret = sdoWriteObject(pNodeInfo_p, &leSignature, sizeof(leSignature));
             if (ret != kErrorOk)
                 return ret;
         }
@@ -856,7 +860,6 @@ static tOplkError downloadObject(tCfmNodeInfo* pNodeInfo_p)
 
     return ret;
 }
-
 
 //------------------------------------------------------------------------------
 /**

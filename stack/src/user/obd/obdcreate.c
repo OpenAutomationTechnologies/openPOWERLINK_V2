@@ -52,6 +52,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
 #include <oplk/obd.h>             // function prototypes of the obd module
+#include <user/cfmu.h>            // function prototypes of the cfm module
 #include <user/pdou.h>            // function prototype of OD callback function
 #include <user/errhndu.h>         // function prototype of error handler od callback functions
 #include <user/ctrlu.h>
