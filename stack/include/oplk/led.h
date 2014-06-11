@@ -62,17 +62,4 @@ typedef enum
     kLedTypeError    = 0x01,    ///< POWERLINK Error LED
 } tLedType;
 
-//------------------------------------------------------------------------------
-// function prototypes
-//------------------------------------------------------------------------------
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#ifdef __cplusplus
-}
-#endif
-
 #endif /* _INC_oplk_led_H_ */
-
