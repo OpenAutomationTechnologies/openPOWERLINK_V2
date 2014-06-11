@@ -473,6 +473,7 @@ SET(KERNEL_HEADERS
     ${STACK_INCLUDE_DIR}/kernel/dllkfilter.h
     ${STACK_INCLUDE_DIR}/kernel/dllktgt.h
     ${STACK_INCLUDE_DIR}/kernel/hrestimer.h
+    ${STACK_INCLUDE_DIR}/kernel/timestamp.h
     ${STACK_INCLUDE_DIR}/kernel/synctimer.h
     ${STACK_INCLUDE_DIR}/kernel/errhndk.h
     ${STACK_INCLUDE_DIR}/kernel/eventk.h

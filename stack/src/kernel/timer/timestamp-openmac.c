@@ -41,6 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
+#include <kernel/timestamp.h>
 #include <omethlib.h>
 
 //============================================================================//

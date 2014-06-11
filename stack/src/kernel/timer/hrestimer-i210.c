@@ -45,9 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
 #include <kernel/hrestimer.h>
-#include <oplk/benchmark.h>
-
-#include <kernel/edrv.h>
+#include <kernel/edrv.h>          // using definition of tHresCallback
 
 #include <linux/module.h>
 #include <linux/kernel.h>
@@ -67,8 +65,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // TracePoint support for realtime-debugging
 #ifdef _DBG_TRACE_POINTS_
-void TgtDbgSignalTracePoint (UINT8 bTracePointNumber_p);
-void TgtDbgPostTraceValue (UINT32 dwTraceValue_p);
+void TgtDbgSignalTracePoint(UINT8 bTracePointNumber_p);
+void TgtDbgPostTraceValue(UINT32 dwTraceValue_p);
 #define TGT_DBG_SIGNAL_TRACE_POINT(p)   TgtDbgSignalTracePoint(p)
 #define TGT_DBG_POST_TRACE_VALUE(v)     TgtDbgPostTraceValue(v)
 #else

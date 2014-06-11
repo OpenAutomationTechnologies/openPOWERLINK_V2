@@ -42,7 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-#include <oplk/benchmark.h>
+#include <kernel/hrestimer.h>
 
 #include <time.h>
 #include <unistd.h>
@@ -50,7 +50,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <timers.h>
 
 #include <hrtimerLib.h>
-#include <kernel/hrestimer.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -93,10 +92,10 @@ The structure contains all necessary information for a high-resolution timer.
 */
 typedef struct
 {
-    tTimerEventArg          eventArg;
-    tTimerkCallback         pfnCallback;
-    struct timespec         timeout;
-    timer_t                 timer;
+    tTimerEventArg          eventArg;       ///< Event argument
+    tTimerkCallback         pfnCallback;    ///< Pointer to timer callback function
+    struct timespec         timeout;        ///< Timestamp of timeout value
+    timer_t                 timer;          ///< timer_t struct of this timer
 } tHresTimerInfo;
 
 /**
@@ -106,8 +105,8 @@ The structure defines a high-resolution timer module instance.
 */
 typedef struct
 {
-    tHresTimerInfo          aTimerInfo[TIMER_COUNT];
-    int                     taskId;
+    tHresTimerInfo          aTimerInfo[TIMER_COUNT];    ///< Array with timer information for a set of timers
+    int                     taskId;                     ///< Timer task Id
 } tHresTimerInstance;
 
 //------------------------------------------------------------------------------
@@ -349,7 +348,7 @@ tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
 
     DEBUG_LVL_TIMERH_TRACE("%s() Deleting timer:%lx\n", __func__, *pTimerHdl_p);
 
-    if(pTimerHdl_p == NULL)
+    if (pTimerHdl_p == NULL)
         return kErrorTimerInvalidHandle;
 
     if (*pTimerHdl_p == 0)

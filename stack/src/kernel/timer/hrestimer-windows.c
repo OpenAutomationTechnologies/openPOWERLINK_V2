@@ -41,6 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <common/oplkinc.h>
 #include <kernel/hrestimer.h>
 
 //============================================================================//
@@ -86,9 +87,9 @@ The structure contains all necessary information for a high-resolution timer.
 */
 typedef struct
 {
-    tTimerEventArg      eventArg;
-    tTimerkCallback     pfnCallback;
-    LARGE_INTEGER       dueTime;    // for continuous timers, otherwise 0
+    tTimerEventArg      eventArg;           ///< Event argument
+    tTimerkCallback     pfnCallback;        ///< Pointer to timer callback function
+    LARGE_INTEGER       dueTime;            ///< Duetime for continuous timers, otherwise 0
 } tHresTimerInfo;
 
 /**
@@ -98,8 +99,8 @@ The structure defines a high-resolution timer module instance.
 */
 typedef struct
 {
-    tHresTimerInfo      aTimerInfo[TIMER_COUNT];
-    HINSTANCE           hInstLibNtDll;
+    tHresTimerInfo      aTimerInfo[TIMER_COUNT];    ///< Array with timer information for a set of timers
+    HINSTANCE           hInstLibNtDll;              ///< Instance handle of the loaded NT kernel DLL
 } tHresTimerInstance;
 
 
@@ -163,7 +164,7 @@ tOplkError hrestimer_addInstance(void)
     ULONG           max = ~0UL;
     ULONG           current = ~0UL;
 
-    OPLK_MEMSET(&hresTimerInstance_l, 0, sizeof (hresTimerInstance_l));
+    OPLK_MEMSET(&hresTimerInstance_l, 0, sizeof(hresTimerInstance_l));
 
     // load NTDLL.DLL
     hresTimerInstance_l.hInstLibNtDll = LoadLibrary("ntdll.dll");
@@ -267,7 +268,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
     HANDLE                      hTimer;
     LARGE_INTEGER               dueTime;
 
-    if(pTimerHdl_p == NULL)
+    if (pTimerHdl_p == NULL)
         return kErrorTimerInvalidHandle;
 
     if (*pTimerHdl_p == 0)
@@ -350,7 +351,7 @@ tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
     tHresTimerInfo*             pTimerInfo;
     HANDLE                      hTimer;
 
-    if(pTimerHdl_p == NULL)
+    if (pTimerHdl_p == NULL)
         return kErrorTimerInvalidHandle;
 
     if (*pTimerHdl_p == 0)
@@ -422,4 +423,3 @@ void hresTimerCb(UINT index_p)
     }
     return;
 }
-

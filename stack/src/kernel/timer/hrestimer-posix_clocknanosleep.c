@@ -44,7 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
 #include <kernel/hrestimer.h>
-#include <oplk/benchmark.h>
+#include <oplk/ftracedebug.h>
 
 #include <signal.h>
 #include <semaphore.h>
@@ -219,7 +219,6 @@ tOplkError hrestimer_addInstance(void)
 #if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 12)
         pthread_setname_np(pTimerInfo->timerThreadId, "oplk-hrtimer");
 #endif
-
     }
 
     return ret;
@@ -301,7 +300,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
     DEBUG_LVL_TIMERH_TRACE("%s() pTimerHdl_p=%08x/%08x\n",
                             __func__, (unsigned int)pTimerHdl_p,(unsigned int)*pTimerHdl_p);
 
-    if(pTimerHdl_p == NULL)
+    if (pTimerHdl_p == NULL)
         return kErrorTimerInvalidHandle;
 
     if (*pTimerHdl_p == 0)
@@ -384,7 +383,7 @@ tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
     tHresTimerInfo*         pTimerInfo;
 
     // check pointer to handle
-    if(pTimerHdl_p == NULL)
+    if (pTimerHdl_p == NULL)
         return kErrorTimerInvalidHandle;
 
     if (*pTimerHdl_p == 0)

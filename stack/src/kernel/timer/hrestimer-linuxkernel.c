@@ -70,8 +70,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // TracePoint support for realtime-debugging
 #ifdef _DBG_TRACE_POINTS_
-void TgtDbgSignalTracePoint (BYTE bTracePointNumber_p);
-void TgtDbgPostTraceValue (DWORD dwTraceValue_p);
+void TgtDbgSignalTracePoint(BYTE bTracePointNumber_p);
+void TgtDbgPostTraceValue(DWORD dwTraceValue_p);
 #define TGT_DBG_SIGNAL_TRACE_POINT(p)   TgtDbgSignalTracePoint(p)
 #define TGT_DBG_POST_TRACE_VALUE(v)     TgtDbgPostTraceValue(v)
 #else
@@ -179,7 +179,7 @@ tOplkError hrestimer_addInstance(void)
     tOplkError      ret = kErrorOk;
     UINT            index;
 
-    OPLK_MEMSET(&hresTimerInstance_l, 0, sizeof (hresTimerInstance_l));
+    OPLK_MEMSET(&hresTimerInstance_l, 0, sizeof(hresTimerInstance_l));
 
 #ifndef CONFIG_HIGH_RES_TIMERS
     printk("hrestimer: Kernel symbol CONFIG_HIGH_RES_TIMERS is required.\n");
@@ -275,7 +275,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
     tHresTimerInfo*         pTimerInfo;
     ktime_t                 relTime;
 
-    if(pTimerHdl_p == NULL)
+    if (pTimerHdl_p == NULL)
         return kErrorTimerInvalidHandle;
 
     if (*pTimerHdl_p == 0)
@@ -356,7 +356,7 @@ tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
     UINT                    index;
     tHresTimerInfo*         pTimerInfo;
 
-    if(pTimerHdl_p == NULL)
+    if (pTimerHdl_p == NULL)
         return kErrorTimerInvalidHandle;
 
     if (*pTimerHdl_p == 0)

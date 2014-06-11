@@ -1,15 +1,16 @@
 /**
 ********************************************************************************
-\file   common/timer.h
+\file   timestamp.h
 
-\brief  Generic definitions for timer modules
+\brief  Definitions for timestamp handling
 
-This file contains some generic definitions for timer modules.
+This file contains the definitions for timestamp handling.
+
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,8 +36,9 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_common_timer_H_
-#define _INC_common_timer_H_
+
+#ifndef _INC_timestamp_H_
+#define _INC_timestamp_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -51,27 +53,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // typedef
 //------------------------------------------------------------------------------
 
-// type for timer handle
-#if (TARGET_SYSTEM == _WIN32_)
-typedef ULONG_PTR tTimerHdl;
-#else
-typedef ULONG tTimerHdl;
+//------------------------------------------------------------------------------
+// function prototypes
+//------------------------------------------------------------------------------
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-/**
-\brief  Structure for timer event arguments
+UINT32 timestamp_calcTimeDiff(tTimestamp* pTimeStampPrevious_p,
+                              tTimestamp* pTimeStampCurrent_p);
 
-The structure defines a timer event argument. It provides information about
-the timer to the sink the event is sent to.
-*/
-typedef struct
-{
-    tTimerHdl           timerHdl;       ///< Delivers the handle of the expired timer
-    union
-    {
-        UINT32          value;          ///< Timer argument supplied as UINT32
-        void*           pValue;         ///< Timer argument supplied as void*
-    } argument;                         ///< The timer argument the timer was initialized with.
-} tTimerEventArg;
+#ifdef __cplusplus
+}
+#endif
 
-#endif /* _INC_common_timer_H_ */
+#endif  // #ifndef _INC_timestamp_H_

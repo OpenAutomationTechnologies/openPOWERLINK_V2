@@ -45,6 +45,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <common/ami.h>
 #include "dllk-internal.h"
 
+#if CONFIG_DLL_PRES_CHAINING_CN != FALSE
+#include <kernel/timestamp.h>
+#endif
+
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//

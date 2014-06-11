@@ -42,11 +42,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-
 #include <kernel/synctimer.h>
 #include <target/openmac.h>
 #include <omethlib.h>
-
 #include <oplk/benchmark.h>
 
 //============================================================================//
@@ -97,39 +95,50 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
+/**
+\brief  Sync timer information structure
+
+The structure contains the timer information for a synchronization timer.
+*/
 typedef struct
 {
-    UINT32  absoluteTime;
-    BOOL    fEnable;
+    UINT32  absoluteTime;                                           ///< Absolute time when the timer will fire
+    BOOL    fEnable;                                                ///< Flag to enable the timer
 } tTimerInfo;
 
+
+/**
+\brief  Sync timer instance
+
+The structure defines a synchronization timer module instance.
+*/
 typedef struct
 {
-    tSyncTimerCbSync            pfnSyncCb;
-    UINT32                      lossOfSyncTolerance;
-    tSyncTimerCbLossOfSync      pfnLossOfSyncCb;
-    UINT32                      lossOfSyncTimeout;
+    tSyncTimerCbSync            pfnSyncCb;                          ///< Pointer to synchronization timer callback function
+    UINT32                      lossOfSyncTolerance;                ///< Loss of synchronization tolerance value (in ns)
+    tSyncTimerCbLossOfSync      pfnLossOfSyncCb;                    ///< Pointer to the loss of synchronization callback function
+    UINT32                      lossOfSyncTimeout;                  ///< Loss of synchronization timeout value (in ns)
 #if (TIMER_SYNC_SECOND_LOSS_OF_SYNC != FALSE)
-    UINT32                      lossOfSyncTolerance2;
-    tSyncTimerCbLossOfSync      pfnLossOfSync2Cb;
-    UINT32                      lossOfSyncTimeout2;
+    UINT32                      lossOfSyncTolerance2;               ///< Second loss of synchronization tolerance value (in ns)
+    tSyncTimerCbLossOfSync      pfnLossOfSync2Cb;                   ///< Pointer to the second loss of synchronization callback function
+    UINT32                      lossOfSyncTimeout2;                 ///< Second loss of synchronization timeout value (in ns)
 #endif
     // synctimer ctrl specific
-    BOOL                        fRun;
-    UINT32                      aActualTimeDiff[TIMEDIFF_COUNT];
-    UINT                        actualTimeDiffNextIndex;
-    UINT32                      meanTimeDiff;
-    UINT32                      configuredTimeDiff;
-    UINT32                      advanceShift;
-    UINT32                      rejectThreshold;
-    UINT32                      targetSyncTime;
-    UINT32                      previousSyncTime;
+    BOOL                        fRun;                               ///< Flag to enable the synchronization timer
+    UINT32                      aActualTimeDiff[TIMEDIFF_COUNT];    ///< Array of time difference values
+    UINT                        actualTimeDiffNextIndex;            ///< Index of the next valid time difference value
+    UINT32                      meanTimeDiff;                       ///< Mean time difference
+    UINT32                      configuredTimeDiff;                 ///< Configured time difference
+    UINT32                      advanceShift;                       ///< Negative time shift to adjust the timer interrupt
+    UINT32                      rejectThreshold;                    ///< Time difference values exceeding this threshold are rejected
+    UINT32                      targetSyncTime;                     ///< Synchronization timestamp written to the target
+    UINT32                      previousSyncTime;                   ///< Previous synchronization timestamp
     // synctimer drv specific
-    tTimerInfo                  aTimerInfo[TIMER_COUNT];
-    UINT                        activeTimerHdl;
+    tTimerInfo                  aTimerInfo[TIMER_COUNT];            ///< Array with timer information for a set of timers
+    UINT                        activeTimerHdl;                     ///< Handle of the active timer
 #ifdef TIMER_USE_EXT_SYNC_INT
-    BOOL                        fExtSyncEnable;
-    UINT32                      syncIntCycle;
+    BOOL                        fExtSyncEnable;                     ///< Flag to enable the external synchronization interrupt
+    UINT32                      syncIntCycle;                       ///< Cycle time of the external synchronization interrupt
 #endif //TIMER_USE_EXT_SYNC_INT
 } tTimerInstance;
 

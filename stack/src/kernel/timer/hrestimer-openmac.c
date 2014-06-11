@@ -86,8 +86,8 @@ The structure contains all necessary information for a high-resolution timer.
 */
 typedef struct
 {
-    tTimerEventArg       eventArg;
-    tTimerkCallback      pfnCb;
+    tTimerEventArg       eventArg;          ///< Argument for timer event
+    tTimerkCallback      pfnCb;             ///< Timer callback function
 } tTimerInfo;
 
 /**
@@ -97,7 +97,7 @@ The structure defines a high-resolution timer module instance.
 */
 typedef struct
 {
-    tTimerInfo          timerInfo;
+    tTimerInfo          timerInfo;          ///< Timer information for a timer
 } tTimerInstance;
 
 //------------------------------------------------------------------------------
@@ -145,7 +145,7 @@ tOplkError hrestimer_addInstance(void)
 {
     tOplkError ret = kErrorOk;
 
-    OPLK_MEMSET(&instance_l, 0, sizeof (instance_l));
+    OPLK_MEMSET(&instance_l, 0, sizeof(instance_l));
 
     openmac_timerIrqDisable(HWTIMER_SYNC);
     openmac_timerSetCompareValue(HWTIMER_SYNC, 0);
@@ -175,7 +175,7 @@ tOplkError hrestimer_delInstance(void)
 
     openmac_isrReg(kOpenmacIrqSync, NULL, NULL);
 
-    OPLK_MEMSET(&instance_l, 0, sizeof (instance_l));
+    OPLK_MEMSET(&instance_l, 0, sizeof(instance_l));
 
     return ret;
 }

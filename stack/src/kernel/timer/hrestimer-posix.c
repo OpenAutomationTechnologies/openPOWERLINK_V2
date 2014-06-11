@@ -44,7 +44,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
 #include <kernel/hrestimer.h>
-#include <oplk/benchmark.h>
 
 #include <time.h>
 #include <unistd.h>
@@ -165,7 +164,7 @@ tOplkError hrestimer_addInstance(void)
     tHresTimerInfo*         pTimerInfo;
     struct sigevent         sev;
 
-    OPLK_MEMSET(&hresTimerInstance_l, 0, sizeof (hresTimerInstance_l));
+    OPLK_MEMSET(&hresTimerInstance_l, 0, sizeof(hresTimerInstance_l));
 
     /* Initialize timer threads for all usable timers. */
     for (index = 0; index < TIMER_COUNT; index++)
@@ -385,7 +384,7 @@ tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
 
     DEBUG_LVL_TIMERH_TRACE("%s() Deleting timer:%lx\n", __func__, *pTimerHdl_p);
 
-    if(pTimerHdl_p == NULL)
+    if (pTimerHdl_p == NULL)
         return kErrorTimerInvalidHandle;
 
     if (*pTimerHdl_p == 0)
