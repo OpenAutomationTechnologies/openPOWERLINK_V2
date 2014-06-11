@@ -226,9 +226,9 @@ void eventkcal_process(void)
     if (eventkcal_getEventCountCircbuf(kEventQueueU2K) > 0)
     {
         // TODO: gks Critical region ??
-        //target_enableGlobalInterrupt(FALSE);
+        target_enableGlobalInterrupt(FALSE);
         eventkcal_processEventCircbuf(kEventQueueU2K);
-        //target_enableGlobalInterrupt(TRUE);
+        target_enableGlobalInterrupt(TRUE);
     }
 }
 
