@@ -33,6 +33,13 @@ MACRO(INSTALL_BITSTREAM EXAMPLE_ROOT BITS_DESTINATION)
     SET(SDK_EXPORT ${EXAMPLE_ROOT}/xps/SDK/SDK_Export/hw)
     SET(DLCMD_SOURCE_DIR ${EXAMPLE_ROOT}/xps/etc)
 
+##########################################################
+# Additionally include the default XML path to avoid tool 
+# related issues 
+    IF(${CFG_DEMO_BOARD_NAME} STREQUAL "xilinx-z702")
+    SET(ZYNQ_XML ${EXAMPLE_ROOT}/sdk)
+    ENDIF(${CFG_DEMO_BOARD_NAME} STREQUAL "xilinx-z702")
+
     # Remove folder prefix from download.cmd script
     FILE(READ ${DLCMD_SOURCE_DIR}/download.cmd DLCMD_CONTENT)
     STRING(REGEX REPLACE "implementation/" ""
@@ -47,7 +54,7 @@ MACRO(INSTALL_BITSTREAM EXAMPLE_ROOT BITS_DESTINATION)
            )
     # Additional initialization modules generated for ARM on Zynq  
     IF(${CFG_DEMO_BOARD_NAME} STREQUAL "xilinx-z702")
-        INSTALL(FILES ${SDK_EXPORT}/ps7_init.tcl ${SDK_EXPORT}/ps7_init.c ${SDK_EXPORT}/ps7_init.h
+        INSTALL(FILES ${SDK_EXPORT}/ps7_init.tcl ${SDK_EXPORT}/ps7_init.c ${SDK_EXPORT}/ps7_init.h ${ZYNQ_XML}/system.xml
             DESTINATION ${BITS_DESTINATION}
            )
     ENDIF(${CFG_DEMO_BOARD_NAME} STREQUAL "xilinx-z702")

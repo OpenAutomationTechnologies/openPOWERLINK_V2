@@ -332,7 +332,7 @@ static void disableInterruptMaster(void)
 \brief Re-definition of standard BSP outbyte for Zynq
 
 This will redirect prints from Microblaze to the common UART
-device on Zynq platform which is not handled is the generated BSP.
+device on Zynq platform which is not handled by the generated BSP.
 
 \param  char_p            Character too be sent
 
