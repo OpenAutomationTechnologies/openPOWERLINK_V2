@@ -42,6 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
+#include <oplk/obd.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -72,14 +73,20 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
+/**
+\brief Structure describing the object linking for the process image
+
+This structure describes the object index range and its data type that shall be
+linked into the process image.
+*/
 typedef struct
 {
-    UINT            objIndexStart;
-    UINT            objIndexEnd;
-    UINT            offsetPI;
-    BOOL            fOutputPI;
-    tObdSize        entrySize;
-    UINT            subindexCountPerIndex;
+    UINT            objIndexStart;          ///< Start index of a range
+    UINT            objIndexEnd;            ///< End index of a range
+    UINT            offsetPI;               ///< Starting offset within the process image
+    BOOL            fOutputPI;              ///< Describes whether the objects are linked into an output process image
+    tObdSize        entrySize;              ///< Size in Bytes of a single entry in the process image
+    UINT            subindexCountPerIndex;  ///< Number of subindexes for each index
 } tProcessImageLink;
 
 //------------------------------------------------------------------------------

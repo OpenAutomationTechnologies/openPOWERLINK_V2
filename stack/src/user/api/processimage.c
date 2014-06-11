@@ -41,7 +41,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-
 #include <user/pdou.h>
 
 //============================================================================//
@@ -72,11 +71,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
+/**
+\brief Structure describing a process image instance
 
+This structure describes a process image instance consisting of an input and an
+output process image.
+*/
 typedef struct
 {
-    tOplkApiProcessImage     inputImage;
-    tOplkApiProcessImage     outputImage;
+    tOplkApiProcessImage     inputImage;    ///< Input process image
+    tOplkApiProcessImage     outputImage;   ///< Output process image
 } tApiProcessImageInstance;
 
 //------------------------------------------------------------------------------
@@ -116,7 +120,7 @@ tOplkError oplk_allocProcessImage(UINT sizeProcessImageIn_p, UINT sizeProcessIma
     TRACE("%s(): Alloc(%u, %u)\n", __func__, sizeProcessImageIn_p,
                                    sizeProcessImageOut_p);
 
-    if ((instance_l.inputImage.pImage != NULL)|| (instance_l.outputImage.pImage != NULL))
+    if ((instance_l.inputImage.pImage != NULL) || (instance_l.outputImage.pImage != NULL))
     {
         ret = kErrorApiPIAlreadyAllocated;
         goto Exit;
@@ -332,3 +336,11 @@ void* oplk_getProcessImageOut(void)
 {
     return instance_l.outputImage.pImage;
 }
+
+//============================================================================//
+//            P R I V A T E   F U N C T I O N S                               //
+//============================================================================//
+/// \name Private Functions
+/// \{
+
+/// \}

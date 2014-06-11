@@ -44,23 +44,33 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <limits.h>
 
 #include <common/oplkinc.h>
+#include <common/target.h>
 #include <common/ami.h>
-
+#include <user/ctrlu.h>
+#include <user/nmtu.h>
+#include <user/dllucal.h>
 #include <user/eventu.h>
 #include <user/pdoucal.h>
-#include <user/dllucal.h>
-#include <user/nmtcnu.h>
-#include <user/nmtmnu.h>
-#include <user/sdocom.h>
-#include <user/identu.h>
-#include <user/cfmu.h>
-#include <user/ctrlu.h>
+#include <oplk/obd.h>
+#include <oplk/sdo.h>
 
-#include <common/target.h>
+#if defined(CONFIG_INCLUDE_CFM)
+#include <user/cfmu.h>
+#endif
+
+#if defined(CONFIG_INCLUDE_SDOC)
+#include <user/sdocom.h>
+#endif
+
+#if defined(CONFIG_INCLUDE_NMT_MN)
+#include <user/nmtmnu.h>
+#include <user/identu.h>
+#endif
 
 #if (CONFIG_OBD_USE_LOAD_CONCISEDCF != FALSE)
 #include <oplk/obdcdc.h>
 #endif
+
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -714,7 +724,8 @@ tOplkError oplk_setAsndForward(UINT8 serviceId_p, tOplkApiAsndFilter filterType_
             break;
     }
 
-    ret = dllucal_regAsndService(serviceId_p, cbReceivedAsnd, dllFilter);
+    ret = dllucal_regAsndService((tDllAsndServiceId)serviceId_p,
+                                 cbReceivedAsnd, dllFilter);
 
     return ret;
 }
