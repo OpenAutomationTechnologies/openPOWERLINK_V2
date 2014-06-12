@@ -47,6 +47,8 @@ ADD_DEFINITIONS(${XIL_${PROC_INST_NAME}_CFLAGS} "-fmessage-length=0 -mcpu=${CFG_
 
 ########################################################################
 # Eclipse project files
+SET(CFG_CPU_NAME ${CFG_${PROC_INST_NAME}_NAME})
+
 GEN_ECLIPSE_FILE_LIST("${OMETH_LIB_SRCS}" "" PART_ECLIPSE_FILE_LIST)
 SET(ECLIPSE_FILE_LIST "${ECLIPSE_FILE_LIST} ${PART_ECLIPSE_FILE_LIST}")
 

@@ -53,6 +53,8 @@ ENDIF()
 
 ########################################################################
 # Eclipse project files
+SET(CFG_CPU_NAME ${CFG_${PROC_INST_NAME}_NAME})
+
 GEN_ECLIPSE_FILE_LIST("${SDFAT16_LIB_SRCS}" "" PART_ECLIPSE_FILE_LIST)
 SET(ECLIPSE_FILE_LIST "${ECLIPSE_FILE_LIST} ${PART_ECLIPSE_FILE_LIST}")
 
