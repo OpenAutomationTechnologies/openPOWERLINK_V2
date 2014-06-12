@@ -3,7 +3,7 @@
 	<name>@PROJECT_NAME@</name>
 	<comment></comment>
 	<projects>
-		<project>bsp-@CFG_DEMO_BOARD_NAME@-@CFG_DEMO_NAME@</project>
+		<project>bsp-@CFG_DEMO_BOARD_NAME@-@CFG_DEMO_NAME@-@CFG_CPU_NAME@</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

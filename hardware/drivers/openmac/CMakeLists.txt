@@ -67,9 +67,11 @@ SET(OMETH_LIB_SRCS
    )
 
 # Set include paths
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include
-                    ${PROJECT_SOURCE_DIR}/src
-                   )
+SET(OMETH_LIB_INCS
+    ${PROJECT_SOURCE_DIR}/include
+    ${PROJECT_SOURCE_DIR}/src
+    ${OPLK_BASE_DIR}/stack/include
+   )
 
 # Configure compile definitions
 ADD_DEFINITIONS("-Wall -Wextra -pedantic -std=c99")
@@ -86,6 +88,7 @@ ENDIF()
 ########################################################################
 # Add library
 ########################################################################
+INCLUDE_DIRECTORIES(${OMETH_LIB_INCS} ${LIB_ARCH_INCS})
 ADD_LIBRARY(${OMETH_PROJECT_NAME} ${OMETH_LIB_SRCS} ${LIB_ARCH_SRCS})
 SET_PROPERTY(TARGET ${OMETH_PROJECT_NAME} PROPERTY DEBUG_POSTFIX "_d")
 

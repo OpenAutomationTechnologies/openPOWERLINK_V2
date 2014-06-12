@@ -97,10 +97,10 @@ ENDIF()
 ########################################################################
 # Set include paths
 ########################################################################
-INCLUDE_DIRECTORIES(
-                    ${PROJECT_SOURCE_DIR}/include
-                    ${PROJECT_SOURCE_DIR}/src
-                   )
+SET(HOSTIF_LIB_INCS
+    ${PROJECT_SOURCE_DIR}/include
+    ${PROJECT_SOURCE_DIR}/src
+   )
 
 ########################################################################
 # Configure compile definitions
@@ -120,6 +120,7 @@ ENDIF()
 ########################################################################
 # Build library
 ########################################################################
+INCLUDE_DIRECTORIES(${HOSTIF_LIB_INCS} ${LIB_ARCH_INCS})
 ADD_LIBRARY(${HOSTIF_PROJECT_NAME} ${HOSTIF_LIB_SRCS} ${LIB_ARCH_SRCS})
 SET_PROPERTY(TARGET ${HOSTIF_PROJECT_NAME} PROPERTY DEBUG_POSTFIX "_d")
 

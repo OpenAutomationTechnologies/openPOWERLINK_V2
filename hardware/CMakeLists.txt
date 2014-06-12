@@ -97,22 +97,27 @@ FOREACH(BOARD_DIR IN ITEMS ${BOARD_DIRS})
             CONFIGURE_FILE(cmake/BoardsCMakeLists.cmake.in ${BOARD_DIR}/${EXAMPLE_NAME}/CMakeLists.txt COPYONLY)
             ADD_SUBDIRECTORY(${BOARD_DIR}/${EXAMPLE_NAME})
 
-            # Create targets for building the omethlib
-            IF(DEFINED CFG_PCP_NAME  OR (NOT ${CFG_PCP_NAME} STREQUAL ""))
-                ADD_SUBDIRECTORY(${OMETHLIB_BASE_DIR} ${OMETHLIB_BUILD_DIR}/${BOARD_NAME}/${EXAMPLE_NAME})
-            ENDIF()
+            FOREACH(PROC_INST_NAME PCP HOST)
+                # Create config variable prefix
+                SET(CFG_PREFIX CFG_${PROC_INST_NAME})
 
-            # Create targets for building the host interface
-            IF(DEFINED CFG_HOSTIF_ENABLE  OR (NOT ${CFG_HOSTIF_ENABLE} STREQUAL ""))
-                IF(DEFINED CFG_PCP_NAME  OR (NOT ${CFG_PCP_NAME} STREQUAL ""))
-                    SET(SEL_CPU_NAME ${CFG_PCP_NAME})
-                    ADD_SUBDIRECTORY(${HOSTIF_BASE_DIR} ${HOSTIF_BUILD_DIR}/${BOARD_NAME}/${EXAMPLE_NAME}/${CFG_PCP_NAME})
+                # Skip if configured processor does not exist or match current processor
+                IF(DEFINED ${CFG_PREFIX}_PROCESSOR )
+                    IF(${${CFG_PREFIX}_PROCESSOR} STREQUAL ${CMAKE_SYSTEM_PROCESSOR})
+                        # Create targets for building the omethlib
+                        IF(DEFINED ${CFG_PREFIX}_OMETHLIB_ENABLE  OR (NOT ${${CFG_PREFIX}_OMETHLIB_ENABLE} STREQUAL ""))
+                            ADD_SUBDIRECTORY(${OMETHLIB_BASE_DIR} ${OMETHLIB_BUILD_DIR}/${BOARD_NAME}/${EXAMPLE_NAME})
+                        ENDIF()
+
+                        # Create targets for building the host interface
+                        IF(DEFINED ${CFG_PREFIX}_HOSTIF_ENABLE  OR (NOT ${${CFG_PREFIX}HOSTIF_ENABLE} STREQUAL ""))
+                            SET(SEL_CPU_NAME ${${CFG_PREFIX}_NAME})
+                            ADD_SUBDIRECTORY(${HOSTIF_BASE_DIR} ${HOSTIF_BUILD_DIR}/${BOARD_NAME}/${EXAMPLE_NAME}/${${CFG_PREFIX}_NAME})
+                        ENDIF()
+
+                    ENDIF()
                 ENDIF()
-                IF(DEFINED CFG_HOST_NAME  OR (NOT ${CFG_HOST_NAME} STREQUAL ""))
-                    SET(SEL_CPU_NAME ${CFG_HOST_NAME})
-                    ADD_SUBDIRECTORY(${HOSTIF_BASE_DIR} ${HOSTIF_BUILD_DIR}/${BOARD_NAME}/${EXAMPLE_NAME}/${CFG_HOST_NAME})
-                ENDIF()
-            ENDIF()
+            ENDFOREACH(PROC_INST_NAME PCP HOST)
         ENDIF()
     ENDFOREACH(EXAMPLE_NAME IN ITEMS ${EXAMPLE_NAMES})
 

@@ -82,8 +82,10 @@ ENDIF()
 
 IF(${TARGET_CPU} STREQUAL "app")
     SET(EXECUTABLE_CPU_NAME ${CFG_HOST_NAME})
+    SET(CPU_PREFIX HOST)
 ELSE()
     SET(EXECUTABLE_CPU_NAME ${CFG_PCP_NAME})
+    SET(CPU_PREFIX PCP)
 ENDIF()
 
 ################################################################################
@@ -155,10 +157,10 @@ SET(ARCH_LIBS xil)
 
 ################################################################################
 # Set target specific compile flags
-SET(ARCH_CFLAGS "${XIL_CFLAGS} -Wl,--no-relax -ffunction-sections -fdata-sections")
-SET(ARCH_ASMFLAGS "${XIL_PLAT_ENDIAN}")
+SET(ARCH_CFLAGS "${XIL_${CPU_PREFIX}_CFLAGS} -Wl,--no-relax -ffunction-sections -fdata-sections")
+SET(ARCH_ASMFLAGS "${XIL_${CPU_PREFIX}_PLAT_ENDIAN}")
 
-SET(ARCH_LINKERFLAGS "${XIL_PLAT_ENDIAN} -Wl,-T -Wl,${XIL_LSCRIPT} -nostartfiles -Wl,-Map,${PROJECT_NAME}.map -Wl,--no-relax -Wl,--gc-sections")
+SET(ARCH_LINKERFLAGS "${XIL_${CPU_PREFIX}_PLAT_ENDIAN} -Wl,-T -Wl,${XIL_LSCRIPT} -nostartfiles -Wl,-Map,${PROJECT_NAME}.map -Wl,--no-relax -Wl,--gc-sections")
 
 ##################################################################################
 # Add custom target for flash image generation
@@ -198,6 +200,8 @@ ADD_CUSTOM_TARGET (
 
 ########################################################################
 # Eclipse project files
+SET(CFG_CPU_NAME ${EXECUTABLE_CPU_NAME})
+
 GEN_ECLIPSE_FILE_LIST("${BOOT_C_SRCS}" "" PART_ECLIPSE_FILE_LIST )
 SET(ECLIPSE_FILE_LIST "${ECLIPSE_FILE_LIST} ${PART_ECLIPSE_FILE_LIST}")
 

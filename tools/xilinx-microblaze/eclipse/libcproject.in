@@ -33,7 +33,6 @@
 								<option defaultValue="gnu.c.optimization.level.none" id="xilinx.gnu.compiler.option.optimization.level.1477163681" name="Optimization Level" superClass="xilinx.gnu.compiler.option.optimization.level" valueType="enumerated"/>
 								<option id="xilinx.gnu.compiler.option.debugging.level.788694162" name="Debug Level" superClass="xilinx.gnu.compiler.option.debugging.level" value="gnu.c.debugging.level.max" valueType="enumerated"/>
 								<option id="xilinx.gnu.compiler.dircategory.includes.1618620749" superClass="xilinx.gnu.compiler.dircategory.includes" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;C:\bsp&quot;"/>
 @ECLIPSE_INCLUDE_LIST@
 								</option>
 								<inputType id="xilinx.gnu.compiler.input.1449636074" name="C source files" superClass="xilinx.gnu.compiler.input"/>

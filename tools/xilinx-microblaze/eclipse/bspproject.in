@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>bsp-@CFG_DEMO_BOARD_NAME@-@CFG_DEMO_NAME@</name>
+	<name>bsp-@CFG_DEMO_BOARD_NAME@-@CFG_DEMO_NAME@-@CFG_CPU_NAME@</name>
 	<comment></comment>
 	<projects>
 		<project>hw_platform-@CFG_DEMO_BOARD_NAME@-@CFG_DEMO_NAME@</project>

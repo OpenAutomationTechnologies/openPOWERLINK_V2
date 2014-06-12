@@ -58,27 +58,27 @@ GENERATE_BITS(${DEMO_NAME} ${PROJECT_SOURCE_DIR})
 
 ##################################################################################
 # Add custom target for generating the board support package
-IF(DEFINED CFG_PCP_NAME  OR (NOT ${CFG_PCP_NAME} STREQUAL ""))
-    # Add targets for PCP processor bsp
-    SET(BSP_DEMO_NAME_PCP "${DEMO_NAME}-${CFG_PCP_NAME}")
-    SET(BSP_GENERATE_DIR ${PROJECT_BINARY_DIR}/bsp${CFG_PCP_NAME})
+FOREACH(PROC_INST_NAME PCP HOST)
+    IF(DEFINED CFG_${PROC_INST_NAME}_PROCESSOR)
+        IF(${CFG_${PROC_INST_NAME}_PROCESSOR} STREQUAL ${CMAKE_SYSTEM_PROCESSOR})
+            # Add targets for processor bsp
+            SET(BSP_DEMO_NAME_${PROC_INST_NAME} "${DEMO_NAME}-${CFG_${PROC_INST_NAME}_NAME}")
+            SET(BSP_GENERATE_DIR ${PROJECT_BINARY_DIR}/bsp${CFG_${PROC_INST_NAME}_NAME})
 
-    GENERATE_BSP(${BSP_DEMO_NAME_PCP} ${PROJECT_SOURCE_DIR} ${BSP_GENERATE_DIR} ${CFG_PCP_NAME} ${CFG_PCP_TCIMEM_NAME} ${IPCORE_REPOSITORY})
+            GENERATE_BSP(
+                ${BSP_DEMO_NAME_${PROC_INST_NAME}}
+                ${PROJECT_SOURCE_DIR}
+                ${BSP_GENERATE_DIR}
+                ${CFG_${PROC_INST_NAME}_NAME}
+                ${CFG_${PROC_INST_NAME}_TCIMEM_NAME}
+                ${IPCORE_REPOSITORY}
+            )
 
-    # Install the board support package for processor PCP
-    INSTALL_BSP(${BSP_GENERATE_DIR} ${BSP_TARGET_DIR} ${CFG_PCP_NAME})
-ENDIF()
-
-IF(DEFINED CFG_HOST_NAME OR ( NOT ${CFG_HOST_NAME} STREQUAL ""))
-    # Add targets for HOST processor bsp
-    SET(BSP_DEMO_NAME_HOST "${DEMO_NAME}-${CFG_HOST_NAME}")
-    SET(BSP_GENERATE_DIR ${PROJECT_BINARY_DIR}/bsp${CFG_HOST_NAME})
-
-    GENERATE_BSP(${BSP_DEMO_NAME_HOST} ${PROJECT_SOURCE_DIR} ${BSP_GENERATE_DIR} ${CFG_HOST_NAME} ${CFG_HOST_TCIMEM_NAME} ${IPCORE_REPOSITORY} )
-
-    # Install the board support package for processor HOST
-    INSTALL_BSP(${BSP_GENERATE_DIR} ${BSP_TARGET_DIR} ${CFG_HOST_NAME})
-ENDIF()
+            # Install the board support package for processor PCP
+            INSTALL_BSP(${BSP_GENERATE_DIR} ${BSP_TARGET_DIR} ${CFG_${PROC_INST_NAME}_NAME})
+        ENDIF()
+    ENDIF()
+ENDFOREACH()
 
 ################################################################################
 # Installation rules for the bistream

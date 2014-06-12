@@ -35,6 +35,7 @@ IF(CFG_KERNEL_STACK_DIRECTLINK)
     FILE(COPY ${CFG_HW_LIB_DIR}/bsp${CFG_PCP_NAME}/lscript.ld DESTINATION ${PROJECT_BINARY_DIR})
     SET(LSSCRIPT ${PROJECT_BINARY_DIR}/lscript.ld)
     SET(EXECUTABLE_CPU_NAME ${CFG_PCP_NAME})      # On direct link the CPU name is PCP
+    SET(CPU_PREFIX PCP)
 ELSE ()
     MESSAGE(FATAL_ERROR "Only CFG_KERNEL_STACK_DIRECTLINK is currently implemented on Microblaze!")
 ENDIF()
@@ -78,11 +79,11 @@ INCLUDE_DIRECTORIES(
 
 ################################################################################
 # Set architecture specific definitions
-ADD_DEFINITIONS(${XIL_CFLAGS} "-fmessage-length=0 -mcpu=${CFG_CPU_VERSION} -ffunction-sections -fdata-sections")
+ADD_DEFINITIONS(${XIL_${CPU_PREFIX}_CFLAGS} "-fmessage-length=0 -mcpu=${CFG_${CPU_PREFIX}_CPU_VERSION} -ffunction-sections -fdata-sections")
 
 ################################################################################
 # Set architecture specific linker flags
-SET(ARCH_LINKER_FLAGS "${XIL_PLAT_ENDIAN} -mcpu=${CFG_CPU_VERSION} -Wl,-T -Wl,${LSSCRIPT} -Wl,-Map,${PROJECT_NAME}.map" )
+SET(ARCH_LINKER_FLAGS "${XIL_${CPU_PREFIX}_PLAT_ENDIAN} -mcpu=${CFG_${CPU_PREFIX}_CPU_VERSION} -Wl,-T -Wl,${LSSCRIPT} -Wl,-Map,${PROJECT_NAME}.map" )
 
 ################################################################################
 # Set architecture specific libraries
@@ -103,6 +104,8 @@ ENDIF()
 
 ########################################################################
 # Eclipse project files
+SET(CFG_CPU_NAME ${EXECUTABLE_CPU_NAME})
+
 GEN_ECLIPSE_FILE_LIST("${DEMO_SOURCES}" "" PART_ECLIPSE_FILE_LIST )
 SET(ECLIPSE_FILE_LIST "${ECLIPSE_FILE_LIST} ${PART_ECLIPSE_FILE_LIST}")
 

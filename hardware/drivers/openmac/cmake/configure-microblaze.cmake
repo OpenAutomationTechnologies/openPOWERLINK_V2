@@ -34,12 +34,12 @@ SET(LIB_ARCH_SRCS
                    ${BOARDS_COMMON_DIR}/drivers/openmac/omethlib_phycfg.c
    )
 
-INCLUDE_DIRECTORIES(
-                    ${EXAMPLE_BINARY_DIR}/bsp${CFG_PCP_NAME}/${CFG_PCP_NAME}/include
+SET(LIB_ARCH_INCS
+                    ${EXAMPLE_BINARY_DIR}/bsp${CFG_${PROC_INST_NAME}_NAME}/${CFG_${PROC_INST_NAME}_NAME}/include
                    )
 
 # Set architecture specific definitions
-ADD_DEFINITIONS(${XIL_CFLAGS} "-fmessage-length=0 -mcpu=${CFG_CPU_VERSION} -ffunction-sections -fdata-sections")
+ADD_DEFINITIONS(${XIL_${PROC_INST_NAME}_CFLAGS} "-fmessage-length=0 -mcpu=${CFG_${PROC_INST_NAME}_CPU_VERSION} -ffunction-sections -fdata-sections")
 
 ################################################################################
 # Set architecture specific installation files
@@ -52,7 +52,7 @@ SET(ECLIPSE_FILE_LIST "${ECLIPSE_FILE_LIST} ${PART_ECLIPSE_FILE_LIST}")
 GEN_ECLIPSE_FILE_LIST("${LIB_ARCH_SRCS}" "arch" PART_ECLIPSE_FILE_LIST)
 SET(ECLIPSE_FILE_LIST "${ECLIPSE_FILE_LIST} ${PART_ECLIPSE_FILE_LIST}")
 
-GET_PROPERTY(LIBRARY_INCLUDES DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
+SET(LIBRARY_INCLUDES ${OMETH_LIB_INCS} ${LIB_ARCH_INCS})
 GEN_ECLIPSE_INCLUDE_LIST("${LIBRARY_INCLUDES}" ECLIPSE_INCLUDE_LIST )
 
 CONFIGURE_FILE(${ARCH_TOOLS_DIR}/eclipse/libproject.in ${PROJECT_BINARY_DIR}/.project @ONLY)
