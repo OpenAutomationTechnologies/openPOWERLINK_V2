@@ -78,6 +78,13 @@ proc checkConnected { busif_handle } {
     }
 }
 
+# Returns the next power of 2 value
+# Use built-in log functions to avoid hang with invalid input values.
+# Use wide instead of int avoiding integer overflow error.
+proc getNextPowerOfTwo { value } {
+    return [expr wide(pow(2, round(log($value)/log(2.0))))]
+}
+
 ###################################################
 ## Driver generate statement
 ###################################################
@@ -401,17 +408,44 @@ proc get_C_M_AXI_MAC_DMA_MAX_BURST_LEN { param_handle } {
 
 # This function returns the minimum size value for MAC REG.
 proc get_C_S_AXI_MAC_REG_MIN_SIZE { param_handle } {
+    set macRegBase      [getParentHwParam $param_handle "C_S_AXI_MAC_REG_RNG0_BASEADDR"]
+    set macTimerBase    [getParentHwParam $param_handle "C_S_AXI_MAC_REG_RNG1_BASEADDR"]
     set macRegHigh      [getParentHwParam $param_handle "C_S_AXI_MAC_REG_RNG0_HIGHADDR"]
     set macTimerHigh    [getParentHwParam $param_handle "C_S_AXI_MAC_REG_RNG1_HIGHADDR"]
 
-    if { $macRegHigh > $macTimerHigh } {
-        return $macRegHigh
+    # Get lowest base
+    if { $macRegBase < $macTimerBase } {
+        set base $macRegBase
     } else {
-        return $macTimerHigh
+        set base $macTimerBase
     }
+
+    # Get highest high
+    if { $macRegHigh > $macTimerHigh } {
+        set high $macRegHigh
+    } else {
+        set high $macTimerHigh
+    }
+
+    if { $base > $high } {
+        return [format "0x%08x" 4096]
+    }
+
+    set span [expr $high - $base]
+
+    return [format "0x%08x" [expr [getNextPowerOfTwo $span] - 1]]
 }
 
 # This function returns the minimum size value for MAC PKT.
 proc get_C_S_AXI_MAC_PKT_MIN_SIZE { param_handle } {
-    return [getParentHwParam $param_handle "C_S_AXI_MAC_PKT_HIGHADDR"]
+    set base [getParentHwParam $param_handle "C_S_AXI_MAC_PKT_BASEADDR"]
+    set high [getParentHwParam $param_handle "C_S_AXI_MAC_PKT_HIGHADDR"]
+
+    if { $base > $high } {
+        return [format "0x%08x" 4096]
+    }
+
+    set span [expr $high - $base]
+
+    return [format "0x%08x" [expr [getNextPowerOfTwo $span] - 1]]
 }
