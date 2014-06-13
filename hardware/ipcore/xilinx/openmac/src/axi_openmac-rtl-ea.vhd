@@ -405,8 +405,7 @@ entity axi_openmac is
         --! Packet activity (enabled with gEnableActivity)
         oPktActivity                : out   std_logic;
         --! MAC TIMER outputs
-        oMacTimerOut                : out   std_logic_vector(gTimerCount-1 downto 0);
-        testPort                    : out   std_logic_vector(255 downto 0)
+        oMacTimerOut                : out   std_logic_vector(gTimerCount-1 downto 0)
     );
 end axi_openmac;
 
@@ -1397,56 +1396,4 @@ begin
                 );
         end generate GEN_ODDR2;
     end generate GEN_RMII_CLK;
-
-    ---------------------------------------------------------------------------
-    -- TEST VECTOR
-    ---------------------------------------------------------------------------
-    TEST_ASSIGN : process (
-        intf_macReg, intf_macTimer, intf_dma, intf_pktBuf,
-        ipif_macReg, ipif_dma, ipif_pktBuf,
-        xing_macReg
-    )
-        constant cTestPortMode : string := "MAC_REG";
-    begin
-        -- default is zero
-        testPort <= (others => cInactivated);
-
-        case cTestPortMode is
-            when "MAC_REG" =>
-                testPort(181 downto 179)    <= intf_macReg.chipselect & intf_macReg.write & intf_macReg.read;
-                testPort(178)               <= intf_macReg.waitrequest;
-                testPort(177 downto 176)    <= intf_macReg.byteenable;
-
-                testPort(172 downto 160)    <= intf_macReg.address;
-                testPort(159 downto 144)    <= intf_macReg.writedata;
-                testPort(143 downto 128)    <= intf_macReg.readdata;
-
-                testPort(104 downto 102)    <= ipif_macReg.ipif_cs & ipif_macReg.ipif_rnw;
-                testPort(101 downto 100)    <= ipif_macReg.ipif_wrack & ipif_macReg.ipif_rdack;
-                testPort(99 downto 96)      <= ipif_macReg.ipif_be;
-
-                testPort(95 downto 64)      <= ipif_macReg.ipif_addr;
-                testPort(63 downto 32)      <= ipif_macReg.ipif_wrdata;
-                testPort(31 downto 0)       <= ipif_macReg.ipif_rddata;
-            when "MAC_DMA" =>
-                testPort(255 downto 251)    <= intf_dma.read & intf_dma.write & intf_dma.waitrequest & intf_dma.readdatavalid & ipif_dma.ipif_mst_type;
-
-                testPort(244 downto 240)    <= ipif_dma.ipif_mstwr_req & ipif_dma.ipif_mstwr_sof_n & ipif_dma.ipif_mstwr_eof_n &
-                                                ipif_dma.ipif_mstwr_src_rdy_n & ipif_dma.ipif_mstwr_dst_rdy_n;
-                testPort(234 downto 230)    <= ipif_dma.ipif_mstrd_req & ipif_dma.ipif_mstrd_sof_n & ipif_dma.ipif_mstrd_eof_n &
-                                                ipif_dma.ipif_mstrd_src_rdy_n & ipif_dma.ipif_mstrd_dst_rdy_n;
-
-                testPort(142 downto 140)    <= ipif_dma.ipif_mst_cmplt & ipif_dma.ipif_mst_error & ipif_dma.ipif_mst_cmd_timeout;
-
-                testPort(ipif_dma.ipif_mst_length'length+120-1 downto 120) <= ipif_dma.ipif_mst_length;
-
-                testPort(intf_dma.burstcount'length+110-1 downto 110) <= intf_dma.burstcount;
-                testPort(intf_dma.burstcounter'length+96-1 downto 96) <= intf_dma.burstcounter;
-                testPort(95 downto 64)      <= intf_dma.address;
-                testPort(63 downto 32)      <= intf_dma.writedata;
-                testPort(31 downto 0)       <= intf_dma.readdata;
-            when others =>
-                assert (FALSE) report "Unknown Test Port mode!" severity failure;
-        end case;
-    end process TEST_ASSIGN;
 end rtl;

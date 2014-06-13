@@ -266,8 +266,4 @@ PORT oSmi_dio_tri   = "", DIR = O,  IO_IF = SMI
 PORT oPktActivity   = "", DIR = O, ISVALID = (gui_actEn != 0)
 PORT oMacTimerOut   = "", DIR = O, VEC = [gTimerCount-1:0]
 
-###############################################################################
-## Test port
-PORT testPort  = "", DIR = O, VEC = [255:0]
-
 END
