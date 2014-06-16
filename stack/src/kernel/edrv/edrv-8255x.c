@@ -278,6 +278,10 @@ DAMAGE.
 #define DELAY_SYS_TX_CLK 10
 // custom hash defines - end
 
+#define TBD_ADDR_NULL 0xffffffff
+#define TBD_EL 0x00010000
+
+
 #define EDRV_COUNT_SEND             TGT_DBG_SIGNAL_TRACE_POINT(2)
 #define EDRV_COUNT_TIMEOUT          TGT_DBG_SIGNAL_TRACE_POINT(3)
 #define EDRV_COUNT_PCI_ERR          TGT_DBG_SIGNAL_TRACE_POINT(4)
@@ -302,61 +306,102 @@ DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
-/* command block */
+/**
+\brief Structure describing a transmit buffer descriptor
+
+This structure describes a transmit buffer descriptor used on the
+Intel 8255x Ethernet controller.
+*/
 typedef struct
 {
-    volatile UINT   stateCmd;
-    volatile UINT   linkAddr;
-    volatile UINT   value1;
-    volatile UINT   value2;
-    volatile UINT   value3;
-    volatile UINT   value4;
-    volatile UINT   value5;
-    volatile UINT   value6;
+    volatile UINT tbdAddr;                                  ///< Transmit buffer address
+    volatile UINT tbdSize;                                  ///< Transmit buffer size
+} tTxDescCmdBlock;
+
+/**
+\brief Structure describing a command block
+
+This structure describes a command block used on the Intel 8255x
+Ethernet controller.
+*/
+typedef struct
+{
+    volatile UINT statusCommand;                            ///< Status / command register
+    volatile UINT linkAddr;                                 ///< Link address (offset to the next command block)
 } tCommandBlock;
 
-// Private structure
+/**
+\brief Structure describing a receive descriptor command block
+
+This structure describes a receive descriptor command block used on the
+Intel 8255x Ethernet controller.
+*/
 typedef struct
 {
-    struct pci_dev* pPciDev; // pointer to PCI device structure
-    void*           pIoAddr; // pointer to register space of Ethernet controller
+    volatile UINT statusCommand;                            ///< Status / command register
+    volatile UINT linkAddr;                                 ///< Link address (offset to the next command block)
+    volatile UINT reserved : 32;                            ///< Reserved
+    volatile UINT size;                                     ///< Data buffer size
+} tRxDescCmdBlock;
 
-    UINT8*          apRxBufInDesc[EDRV_MAX_RX_DESCS];
-                                        // Stack of free rx buffers
-                                        // +1 additional place if ReleaseRxBuffer is called
-                                        // before return of RxHandler (multi processor)
-    UINT8*          apRxBufFree[EDRV_MAX_RX_BUFFERS - EDRV_MAX_RX_DESCS + 1];
-    int             rxBufFreeTop;
-    spinlock_t      spinLockTx;
-    int             pageAllocations;
+/**
+\brief Structure describing a transmit command block
 
-    UINT8*          pTxBuf; // pointer to Tx buffer
-    dma_addr_t      pTxBufDma;
-    tEdrvTxBuffer*  apTxBuffer[EDRV_MAX_TX_DESCS];
-    BOOL            afTxBufUsed[EDRV_MAX_TX_BUFFERS];
+This structure describes a transmit command block used on the Intel 8255x
+Ethernet controller.
+*/
+typedef struct
+{
+    volatile UINT   statusCommand;                          ///< Status / command register
+    volatile UINT   linkAddr;                               ///< Link address (offset to the next command block)
+    volatile UINT   tcbTbdPtr;                              ///< Transmit buffer descriptor array address
+    volatile UINT   tcbCtrl;                                ///< Transmit command buffer control register (number, threshold, EOF, block byte count)
+} tTxCmdBlock;
 
-    UINT            headTxDesc;
-    UINT            tailTxDesc;
-    UINT            headRxDesc;
-    UINT            tailRxDesc;
+/**
+\brief Structure describing a generic command block
 
-    tEdrvInitParam  initParam;
+This structure describes a generic command block used on the Intel 8255x
+Ethernet controller.
+*/
+typedef struct
+{
+    volatile UINT   statusCommand;                          ///< Status / command register
+    volatile UINT   linkAddr;                               ///< Link address (offset to the next command block)
+    volatile UINT   value[6];                               ///< Values
+} tCommandBlockGen;
 
-    // variable used to store EEPROM address bits
-    UINT            eepromAddrBits;
+/**
+\brief Structure describing an instance of the Edrv
 
-    UINT8*          pCbVirtAdd;
-    UINT8*          pRfdVirtAdd;
+This structure describes an instance of the Ethernet driver.
+*/
+typedef struct
+{
+    tEdrvInitParam  initParam;                              ///< Init parameters
+    struct pci_dev* pPciDev;                                ///< Pointer to the PCI device structure
+    void*           pIoAddr;                                ///< Pointer to the register space of the Ethernet controller
 
-    dma_addr_t      cbDmaHandle;
-    dma_addr_t      rfdDmaAdd;
+    UINT            eepromAddrBits;                         ///< Used to store EEPROM address bits
+    UINT16          multicastAddrByteCnt;                   ///< Number of Bytes used for multicast addresses
 
-    // array to store virtual address of pTxBuffer
-    volatile ULONG  aCbVirtAddrBuf[MAX_CBS];
-    // array to store dma mapped address of pTxBuffer->m_pBuffer
-    volatile ULONG  aCbDmaAddrBuf[MAX_CBS];
+    UINT8*          pTxBuf;                                 ///< Pointer to the TX buffer
+    dma_addr_t      pTxBufDma;                              ///< Pointer to the DMA of the TX buffer
+    BOOL            afTxBufUsed[EDRV_MAX_TX_BUFFERS];       ///< Array describing whether a TX buffer is used
 
-    UINT16           multicastAddrByteCnt;
+    UINT            headTxDesc;                             ///< Index of the head of the TX descriptor buffer
+    UINT            tailTxDesc;                             ///< Index of the tail of the TX descriptor buffer
+    UINT            headRxDesc;                             ///< Index of the head of the RX descriptor buffer
+    UINT            tailRxDesc;                             ///< Index of the tail of the RX descriptor buffer
+
+    UINT8*          pCbVirtAdd;                             ///< Virtual address of the command block
+    UINT8*          pRfdVirtAdd;                            ///< Virtual address of the receive descriptors
+
+    dma_addr_t      cbDmaHandle;                            ///< Command block DMA handle
+    dma_addr_t      rfdDmaAdd;                              ///< Receive descriptor DMA handle
+
+    volatile ULONG  aCbVirtAddrBuf[MAX_CBS];                ///< Array to store virtual address of a TX buffer
+    volatile ULONG  aCbDmaAddrBuf[MAX_CBS];                 ///< Array to store DMA mapped address of a TX buffer
 } tEdrvInstance;
 
 //------------------------------------------------------------------------------
@@ -381,35 +426,6 @@ static void removeOnePciDev(struct pci_dev* pPciDev_p);
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-struct sCmdBlock
-{
-    volatile UINT cmdStat;
-    volatile UINT link;
-};
-
-/* Transmit command block */
-struct sTxCmdBlock
-{
-    volatile UINT tcbTbdPtr; /* sTxDescCmdBlock array address */
-    volatile UINT tcbCtrl;
-};
-
-struct sTxDescCmdBlock
-{
-    volatile UINT tbdAddr;
-#define TBD_ADDR_NULL 0xffffffff
-    volatile UINT tbdSize;
-#define TBD_EL 0x00010000
-};
-
-struct sRxDescCmdBlock
-{
-    volatile UINT cmdStat;
-    volatile UINT link;
-    volatile UINT :32; //Reserved
-    volatile UINT size;
-};
-
 // buffers and buffer descriptors and pointers
 static struct pci_device_id aEdrvPciTbl_l[] = {
     {0x8086, 0x1091, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},
@@ -542,7 +558,7 @@ This function sets a multicast entry into the Ethernet controller.
 tOplkError edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p)
 {
     tOplkError          ret = kErrorOk;
-    struct sCmdBlock*   pCb;
+    tCommandBlock*      pCb;
     UINT8*              pCnt;
     int                 cbCnt = 0;
     static BOOL         fIsFirstEntry = FALSE;
@@ -551,7 +567,7 @@ tOplkError edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p)
     {
         fIsFirstEntry = TRUE;
         //pointer to the Command Block specified by the count value
-        pCb = (struct sCmdBlock*)(edrvInstance_l.pCbVirtAdd + (CB_REQUIRED_SIZE * cbCnt));
+        pCb = (tCommandBlock*)(edrvInstance_l.pCbVirtAdd + (CB_REQUIRED_SIZE * cbCnt));
 
         //set the byte count (number of mac addresses * 6 bytes per mac address)
         //in the corresponding section of the descriptor to zero
@@ -718,15 +734,12 @@ This function sends the Tx buffer.
 tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
     tOplkError          ret = kErrorOk;
-    struct sCmdBlock*   pCmdBlock;
 
     if (((edrvInstance_l.tailTxDesc + 1) % MAX_CBS) == edrvInstance_l.headTxDesc)
     {
         ret = kErrorEdrvNoFreeTxDesc;
             goto Exit;
     }
-
-    pCmdBlock = (struct sCmdBlock*)((edrvInstance_l.pCbVirtAdd) + (CB_REQUIRED_SIZE * edrvInstance_l.tailTxDesc));
 
     // array to store virtual address of pTxBuffer
     edrvInstance_l.aCbVirtAddrBuf[edrvInstance_l.tailTxDesc] = (ULONG)pBuffer_p;
@@ -779,9 +792,9 @@ static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
 {
     INT                     handled;
     UINT16                  state;
-    struct sCmdBlock*       pCmdBlock;
-    UINT                    cmdState;
-    struct sRxDescCmdBlock* pRxDescCmdBlock;
+    tCommandBlock*          pCmdBlock;
+    UINT                    statusCommand;
+    tRxDescCmdBlock*        pRxDescCmdBlock;
     tEdrvTxBuffer*          pTxBuffer = NULL;
     tEdrvTxBuffer*          pDmaBuffer = NULL;
 
@@ -817,9 +830,9 @@ static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
         do
         {
             // Process receive descriptors
-            pRxDescCmdBlock = (struct sRxDescCmdBlock*)((edrvInstance_l.pRfdVirtAdd) + (RFD_REQUIRED_SIZE * edrvInstance_l.headRxDesc));
+            pRxDescCmdBlock = (tRxDescCmdBlock*)((edrvInstance_l.pRfdVirtAdd) + (RFD_REQUIRED_SIZE * edrvInstance_l.headRxDesc));
 
-            while (pRxDescCmdBlock->cmdStat & CS_C)
+            while (pRxDescCmdBlock->statusCommand & CS_C)
             { // Rx frame available
                 tEdrvRxBuffer RxBuffer;
                 tEdrvReleaseRxBuffer RetReleaseRxBuffer;
@@ -837,7 +850,7 @@ static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
 
                     RxBuffer.pBuffer = ((edrvInstance_l.pRfdVirtAdd +
                                         (RFD_REQUIRED_SIZE * edrvInstance_l.headRxDesc)) +
-                                        (sizeof(struct sRxDescCmdBlock)));
+                                        (sizeof(tRxDescCmdBlock)));
 
                     // Call Rx handler of Data link layer
                     RetReleaseRxBuffer = edrvInstance_l.initParam.pfnRxHandler(&RxBuffer);
@@ -847,8 +860,8 @@ static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
                 // so that it is available for use the next time
                 rxDescWrite(edrvInstance_l.headRxDesc);
                 edrvInstance_l.headRxDesc = ((edrvInstance_l.headRxDesc + 1) % MAX_RFDS);
-                pRxDescCmdBlock = (struct sRxDescCmdBlock*)((edrvInstance_l.pRfdVirtAdd) + (RFD_REQUIRED_SIZE * edrvInstance_l.tailRxDesc));
-                pRxDescCmdBlock->cmdStat = 0x00000000;
+                pRxDescCmdBlock = (tRxDescCmdBlock*)((edrvInstance_l.pRfdVirtAdd) + (RFD_REQUIRED_SIZE * edrvInstance_l.tailRxDesc));
+                pRxDescCmdBlock->statusCommand = 0x00000000;
 
                 if (edrvInstance_l.headRxDesc == 0)
                 {
@@ -858,18 +871,18 @@ static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
                 {
                     edrvInstance_l.tailRxDesc = edrvInstance_l.headRxDesc - 1;
                 }
-                pRxDescCmdBlock = (struct sRxDescCmdBlock*)((edrvInstance_l.pRfdVirtAdd) + (RFD_REQUIRED_SIZE * edrvInstance_l.tailRxDesc));
-                pRxDescCmdBlock->cmdStat = CS_S;
-                pRxDescCmdBlock = (struct sRxDescCmdBlock*)(edrvInstance_l.pRfdVirtAdd + (RFD_REQUIRED_SIZE * edrvInstance_l.headRxDesc));
+                pRxDescCmdBlock = (tRxDescCmdBlock*)((edrvInstance_l.pRfdVirtAdd) + (RFD_REQUIRED_SIZE * edrvInstance_l.tailRxDesc));
+                pRxDescCmdBlock->statusCommand = CS_S;
+                pRxDescCmdBlock = (tRxDescCmdBlock*)(edrvInstance_l.pRfdVirtAdd + (RFD_REQUIRED_SIZE * edrvInstance_l.headRxDesc));
             }// closing RX while loop
 
-            pCmdBlock = (struct sCmdBlock*)((edrvInstance_l.pCbVirtAdd) + (CB_REQUIRED_SIZE * edrvInstance_l.headTxDesc));
+            pCmdBlock = (tCommandBlock*)((edrvInstance_l.pCbVirtAdd) + (CB_REQUIRED_SIZE * edrvInstance_l.headTxDesc));
 
-            if (pCmdBlock->cmdState & CS_C)
+            if (pCmdBlock->statusCommand & CS_C)
             {
-                cmdState = pCmdBlock->cmdStat;
+                statusCommand = pCmdBlock->statusCommand;
                 // clear the status bits of the current CB
-                pCmdBlock->cmdStat &= 0XFFFF0000;
+                pCmdBlock->statusCommand &= 0XFFFF0000;
 
                 // retrieve the address of the pTxBuffer pointer
                 // that was received in edrv_sendTxBuffer
@@ -933,34 +946,34 @@ This function issues an individual address command to insert the MAC address.
 //------------------------------------------------------------------------------
 static tOplkError individualAddressCmd(UINT opcode_p, UINT count_p)
 {
-    tOplkError      ret = kErrorOk;
-    tCommandBlock*  pCmdBlock;
+    tOplkError          ret = kErrorOk;
+    tCommandBlockGen*   pCmdBlock;
 
     //pointer to the Command Block specified by the count value
-    pCmdBlock = (tCommandBlock*)(edrvInstance_l.pCbVirtAdd + (CB_REQUIRED_SIZE * count_p));
+    pCmdBlock = (tCommandBlockGen*)(edrvInstance_l.pCbVirtAdd + (CB_REQUIRED_SIZE * count_p));
 
     //fill the individual address command to be executed
-    pCmdBlock->stateCmd = CS_EL | (opcode_p << CS_OP_SHIFT); //0x80010000
+    pCmdBlock->statusCommand = CS_EL | (opcode_p << CS_OP_SHIFT); //0x80010000
 
     //The MAC address bytes used below have been read from the EEPROM
 
     //MAC ADDRESS (BYTE4<<24) | (BYTE3<<16) | (BYTE2<<8) | (BYTE1<<0)
-    pCmdBlock->value1 = edrvInstance_l.initParam.aMacAddr[0] |
-                        edrvInstance_l.initParam.aMacAddr[1] << 8 |
-                        edrvInstance_l.initParam.aMacAddr[2] << 16 |
-                        edrvInstance_l.initParam.aMacAddr[3] << 24;
+    pCmdBlock->value[0] = edrvInstance_l.initParam.aMacAddr[0] |
+                          edrvInstance_l.initParam.aMacAddr[1] << 8 |
+                          edrvInstance_l.initParam.aMacAddr[2] << 16 |
+                          edrvInstance_l.initParam.aMacAddr[3] << 24;
 
     //MAC ADDRESS (BYTE6<<8) | (BYTE5<<0)
-    pCmdBlock->value2 = edrvInstance_l.initParam.aMacAddr[4] |
-                        edrvInstance_l.initParam.aMacAddr[5] << 8;
+    pCmdBlock->value[1] = edrvInstance_l.initParam.aMacAddr[4] |
+                          edrvInstance_l.initParam.aMacAddr[5] << 8;
 
     //start command issued to execute the individual address setup
     issueScbcmd(SC_CUC_START, edrvInstance_l.cbDmaHandle, OP_ADDRSETUP);
 
     //wait for command to complete successfully
-    while ((pCmdBlock->stateCmd & CS_C) == 0);
+    while ((pCmdBlock->statusCommand & CS_C) == 0);
 
-    if (pCmdBlock->stateCmd & CS_OK)
+    if (pCmdBlock->statusCommand & CS_OK)
     {
         ret = kErrorOk;
     }
@@ -986,28 +999,28 @@ This function issues a configure command to the Ethernet controller.
 //------------------------------------------------------------------------------
 static tOplkError configureCmd(UINT opcode_p, UINT count_p)
 {
-    tOplkError      ret = kErrorOk;
-    tCommandBlock*  pCmdBlock;
+    tOplkError          ret = kErrorOk;
+    tCommandBlockGen*   pCmdBlock;
 
     //pointer to the Command Block specified by the count_p value
-    pCmdBlock = (tCommandBlock*)(edrvInstance_l.pCbVirtAdd + (CB_REQUIRED_SIZE * count_p));
+    pCmdBlock = (tCommandBlockGen*)(edrvInstance_l.pCbVirtAdd + (CB_REQUIRED_SIZE * count_p));
 
     //fill the configure command to be executed
-    pCmdBlock->stateCmd = CS_EL | (opcode_p << CS_OP_SHIFT); //0x80020000
+    pCmdBlock->statusCommand = CS_EL | (opcode_p << CS_OP_SHIFT); //0x80020000
 
     //(Byte3<<24) | (Byte2<<16) | (Byte1<<8) | (Byte0<<0)
     //Byte0 - Byte Count of 16 bytes used in this configuration
     //Byte1 - Default Value
     //Byte2 - Default Value
     //Byte3 - Default Value
-    pCmdBlock->value1 = (0X00 << 24) | (0X00 << 16) | (0X08 << 8) | (0X10 << 0); //0x00000810
+    pCmdBlock->value[0] = (0X00 << 24) | (0X00 << 16) | (0X08 << 8) | (0X10 << 0); //0x00000810
 
     //Byte4 - Default Value
     //Byte5 - Default Value
     //Byte6 - Default Value for 82559
     //Byte7 - Default Value for 82559
     //(Byte7<<24) | (Byte6<<16) | (Byte5<<8) | (Byte4<<0)
-    pCmdBlock->value2 = (0X00 << 24) | (0X30 << 16) | (0X00 << 8) | (0X00 << 0); //0x00300000
+    pCmdBlock->value[1] = (0X00 << 24) | (0X30 << 16) | (0X00 << 8) | (0X00 << 0); //0x00300000
 
     //Byte8 - Bit0 set for 82559, Bit0 cleared to enable link operation, Rest of the
     // bits are default values for 82559
@@ -1016,14 +1029,14 @@ static tOplkError configureCmd(UINT opcode_p, UINT count_p)
     // disabled, other bits default for 82559
     //Byte11 - Default value for 82559
     //(Byte11<<24) | (Byte10<<16) | (Byte9<<8) | (Byte8<<0)
-    pCmdBlock->value3 = (0X00 << 24) | (0X2E << 16) | (0X00 << 8) | (0X01 << 0); //0x002E0001
+    pCmdBlock->value[2] = (0X00 << 24) | (0X2E << 16) | (0X00 << 8) | (0X01 << 0); //0x002E0001
 
     //Byte12 - Interframe spacing - default value, other bits default value for 82559
     //Byte13 - Default Value for 82559
     //Byte14 - Default Value for 82559
     //Byte15 - Bit0 cleared to disable promiscuous mode, other bits default value for 82559
     //(Byte15<<24) | (Byte14<<16) | (Byte13<<8) | (Byte12<<0)
-    pCmdBlock->value4 = (0XC8 << 24) | (0XF2 << 16) | (0X00 << 8) | (0X61 << 0); //0xC8F20061
+    pCmdBlock->value[3] = (0XC8 << 24) | (0XF2 << 16) | (0X00 << 8) | (0X61 << 0); //0xC8F20061
 
     //NOTE: the following configuration bytes not yet configured
     //Byte16 - Default Value
@@ -1031,22 +1044,22 @@ static tOplkError configureCmd(UINT opcode_p, UINT count_p)
     //Byte18 - Default Value
     //Byte19 - Default Value
     //(Byte19<<24) | (Byte18<<16) | (Byte17<<8) | (Byte16<<0)
-    //pCmdBlock->value5 = (0X80<<24) | (0XF2<<16) | (0X40<<8) | (0X00<<0); //
+    //pCmdBlock->value[4] = (0X80<<24) | (0XF2<<16) | (0X40<<8) | (0X00<<0); //
 
     //Byte20 - Defaut Value
     //Byte21 - Default Value
     //Byte22 - Zero Padding
     //Byte23 - Zero Padding
     //(Byte23<<24) | (Byte22<<16) | (Byte21<<8) | (Byte20<<0)
-    //pCmdBlock->value6 = (0X00<<24) | (0X00<<16) | (0X05<<8) | (0X3F<<0); //
+    //pCmdBlock->value[5] = (0X00<<24) | (0X00<<16) | (0X05<<8) | (0X3F<<0); //
 
     //start command issued to configure the device as per the configuration byte values
     issueScbcmd(SC_CUC_START, edrvInstance_l.cbDmaHandle, OP_CONFIGURE);
 
     //wait for command to complete successfully
-    while ((pCmdBlock->stateCmd & CS_C) == 0);
+    while ((pCmdBlock->statusCommand & CS_C) == 0);
 
-    if (pCmdBlock->stateCmd & CS_OK)
+    if (pCmdBlock->statusCommand & CS_OK)
     {
         ret = kErrorOk;
     }
@@ -1076,7 +1089,7 @@ This function issues a multicast command to the Ethernet controller.
 static tOplkError multicastCmd(UINT opcode_p, UINT count_p, UINT8* pMacAddr_p, UINT mode_p)
 {
     tOplkError          ret = kErrorOk;
-    struct sCmdBlock*   pCmdBlock;
+    tCommandBlock*      pCmdBlock;
     UINT8*              pByte;
     UINT16*             pByteCount;
     UINT16              multicastAddrCnt;
@@ -1084,10 +1097,10 @@ static tOplkError multicastCmd(UINT opcode_p, UINT count_p, UINT8* pMacAddr_p, U
     UINT                memCmpref = 0;
 
     //pointer to the Command Block specified by the count_p value
-    pCmdBlock = (struct sCmdBlock*)(edrvInstance_l.pCbVirtAdd + (CB_REQUIRED_SIZE * count_p));
+    pCmdBlock = (tCommandBlock*)(edrvInstance_l.pCbVirtAdd + (CB_REQUIRED_SIZE * count_p));
 
     //fill the multicast command to be executed
-    pCmdBlock->cmdStat = CS_EL | (opcode_p << CS_OP_SHIFT); //0x80030000
+    pCmdBlock->statusCommand = CS_EL | (opcode_p << CS_OP_SHIFT); //0x80030000
 
     pByte = (UINT8*)&pCmdBlock[1];
     //point the address where the byte count_p for multicast entries to be stored
@@ -1152,10 +1165,10 @@ static tOplkError multicastCmd(UINT opcode_p, UINT count_p, UINT8* pMacAddr_p, U
     issueScbcmd(SC_CUC_START, edrvInstance_l.cbDmaHandle, opcode_p);
 
     //wait for command to complete successfully
-    while ((pCmdBlock->cmdStat & CS_C) == 0)
+    while ((pCmdBlock->statusCommand & CS_C) == 0)
         ;
 
-    if (pCmdBlock->cmdStat & CS_OK)
+    if (pCmdBlock->statusCommand & CS_OK)
     {
         ret = kErrorOk;
     }
@@ -1183,24 +1196,21 @@ This function issues a transmit command to the Ethernet controller
 static tOplkError transmitCmd(UINT opcode_p, UINT count_p)
 {
     tOplkError              ret = kErrorOk;
-    struct sCmdBlock*       pCmdBlock = NULL;
-    struct sTxCmdBlock*     pTxCmdBlock;
-    struct sTxDescCmdBlock* pTxDescCmdBlock;
+    tTxCmdBlock*            pTxCmdBlock = NULL;
+    tTxDescCmdBlock*        pTxDescCmdBlock = NULL;
     UINT                    cbpDma = 0; //FIXME: Give me a meaningful name, now!
-    UINT8*                  pByte = NULL;
     tEdrvTxBuffer*          pTxBuffer = NULL;
     UINT                    temp;
 
     pTxBuffer = (tEdrvTxBuffer*)edrvInstance_l.aCbVirtAddrBuf[count_p];
     //pointer to the Command Block specified by the count_p value
-    pCmdBlock = (struct sCmdBlock*)(edrvInstance_l.pCbVirtAdd + (CB_REQUIRED_SIZE * count_p));
+    pTxCmdBlock = (tTxCmdBlock*)(edrvInstance_l.pCbVirtAdd + (CB_REQUIRED_SIZE * count_p));
+    pTxDescCmdBlock = (tTxDescCmdBlock*)&pTxCmdBlock[1];
+
     //physical address corresponding to the virtual address of the Command Block specified above
     cbpDma = (edrvInstance_l.cbDmaHandle + (CB_REQUIRED_SIZE * count_p));
 
-    pByte = (UINT8*)&pCmdBlock[1];
 
-    pTxCmdBlock = (struct sTxCmdBlock*)pByte;
-    pTxDescCmdBlock = (struct sTxDescCmdBlock*)&pTxCmdBlock[1];
     //fill the length of the buffer to be transmitted and indicate that it is the end of the frame
     pTxDescCmdBlock->tbdSize = TBD_EL | (pTxBuffer->txFrameSize);
     //fill the physical address of the buffer to be transmitted
@@ -1211,7 +1221,7 @@ static tOplkError transmitCmd(UINT opcode_p, UINT count_p)
                             | TCB_EOF; //0x01018000
 
     //fill in the physical address of the buffer descriptor in the TX descriptor's TCB address section
-    temp = cbpDma + sizeof(struct sCmdBlock) + sizeof(struct sTxCmdBlock);
+    temp = cbpDma + sizeof(tTxCmdBlock);
     pTxCmdBlock->tcbTbdPtr = temp;
 
     /* make command block */
@@ -1225,7 +1235,7 @@ static tOplkError transmitCmd(UINT opcode_p, UINT count_p)
     // set the suspend bit in the command
     temp |= CS_S;
 
-    pCmdBlock->cmdStat = temp;
+    pTxCmdBlock->statusCommand = temp;
 
     return ret;
 }
@@ -1429,17 +1439,17 @@ This function issues a command writing to the Rx descriptors.
 //------------------------------------------------------------------------------
 static tOplkError rxDescWrite(INT count_p)
 {
-    struct sRxDescCmdBlock* pRxDescCmdBlock;
+    tRxDescCmdBlock*        pRxDescCmdBlock;
     tOplkError              ret = kErrorOk;
 
     //select the virtual address of the RX descriptor whose status bits are to be cleared
-    pRxDescCmdBlock = (struct sRxDescCmdBlock*)((edrvInstance_l.pRfdVirtAdd) + (RFD_REQUIRED_SIZE * count_p));
+    pRxDescCmdBlock = (tRxDescCmdBlock*)((edrvInstance_l.pRfdVirtAdd) + (RFD_REQUIRED_SIZE * count_p));
 
     //clear the status bits of the selected RX descriptor
-    pRxDescCmdBlock->cmdStat = 0x00000000;
+    pRxDescCmdBlock->statusCommand = 0x00000000;
 
     //clear the status bits in the Size field of the RX descriptor
-    pRxDescCmdBlock->size = (((RFD_REQUIRED_SIZE - sizeof(struct sRxDescCmdBlock)))
+    pRxDescCmdBlock->size = (((RFD_REQUIRED_SIZE - sizeof(tRxDescCmdBlock)))
                              << RFD_SIZE_SHIFT) & RFD_SIZE;
 
     return ret;
@@ -1520,8 +1530,8 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
     tOplkError              ret = kErrorOk;
     INT                     result = 0;
     INT                     loopCount;
-    struct sCmdBlock*       pCmdBlock;
-    struct sRxDescCmdBlock* pRxDescCmdBlock;
+    tCommandBlock*          pCmdBlock;
+    tRxDescCmdBlock*        pRxDescCmdBlock;
     UINT16                  value; //FIXME: Give me a meaningful name, now!
     UINT32                  dwordTemp; //FIXME: Give me a meaningful name, now!
     UINT8                   byteTemp; //FIXME: Give me a meaningful name, now!
@@ -1626,16 +1636,16 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
     // fill CBs for which memory has been allocated - start
     for (loopCount = 0; loopCount < MAX_CBS; loopCount++)
     {
-        pCmdBlock = (struct sCmdBlock*)((edrvInstance_l.pCbVirtAdd) + (CB_REQUIRED_SIZE * loopCount));
+        pCmdBlock = (tCommandBlock*)((edrvInstance_l.pCbVirtAdd) + (CB_REQUIRED_SIZE * loopCount));
         if (loopCount == (MAX_CBS - 1))
         {
-            pCmdBlock->cmdStat = 0x00000000;
-            pCmdBlock->link = edrvInstance_l.cbDmaHandle;
+            pCmdBlock->statusCommand = 0x00000000;
+            pCmdBlock->linkAddr = edrvInstance_l.cbDmaHandle;
         }
         else
         {
-            pCmdBlock->cmdStat = 0x00000000;
-            pCmdBlock->link = edrvInstance_l.cbDmaHandle + (CB_REQUIRED_SIZE * (loopCount + 1));
+            pCmdBlock->statusCommand = 0x00000000;
+            pCmdBlock->linkAddr = edrvInstance_l.cbDmaHandle + (CB_REQUIRED_SIZE * (loopCount + 1));
         }
     }
     // fill CBs for which memory has been allocated - end
@@ -1652,20 +1662,20 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
     // fill RFDs for which memory has been allocated - start
     for (loopCount = 0; loopCount < MAX_RFDS; loopCount++)
     {
-        pRxDescCmdBlock = (struct sRxDescCmdBlock*)((edrvInstance_l.pRfdVirtAdd) + (RFD_REQUIRED_SIZE * loopCount));
+        pRxDescCmdBlock = (tRxDescCmdBlock*)((edrvInstance_l.pRfdVirtAdd) + (RFD_REQUIRED_SIZE * loopCount));
         if (loopCount == (MAX_RFDS - 1))
         {
-            pRxDescCmdBlock->cmdStat = 0x00000000;
-            pRxDescCmdBlock->size = (((RFD_REQUIRED_SIZE - sizeof(struct sRxDescCmdBlock)))
+            pRxDescCmdBlock->statusCommand = 0x00000000;
+            pRxDescCmdBlock->size = (((RFD_REQUIRED_SIZE - sizeof(tRxDescCmdBlock)))
                                      << RFD_SIZE_SHIFT) & RFD_SIZE;
-            pRxDescCmdBlock->link = edrvInstance_l.rfdDmaAdd;
+            pRxDescCmdBlock->linkAddr = edrvInstance_l.rfdDmaAdd;
         }
         else
         {
-            pRxDescCmdBlock->cmdStat = 0x00000000;
-            pRxDescCmdBlock->size = (((RFD_REQUIRED_SIZE - sizeof(struct sRxDescCmdBlock)))
+            pRxDescCmdBlock->statusCommand = 0x00000000;
+            pRxDescCmdBlock->size = (((RFD_REQUIRED_SIZE - sizeof(tRxDescCmdBlock)))
                                      << RFD_SIZE_SHIFT) & RFD_SIZE;
-            pRxDescCmdBlock->link = edrvInstance_l.rfdDmaAdd + (RFD_REQUIRED_SIZE * (loopCount + 1));
+            pRxDescCmdBlock->linkAddr = edrvInstance_l.rfdDmaAdd + (RFD_REQUIRED_SIZE * (loopCount + 1));
         }
     }
 
@@ -1743,8 +1753,8 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
 
     edrvInstance_l.headRxDesc = 0;
     edrvInstance_l.tailRxDesc = MAX_RFDS - 1;
-    pRxDescCmdBlock = (struct sRxDescCmdBlock*)((edrvInstance_l.pRfdVirtAdd) + (RFD_REQUIRED_SIZE * edrvInstance_l.tailRxDesc));
-    pRxDescCmdBlock->cmdStat = CS_S;
+    pRxDescCmdBlock = (tRxDescCmdBlock*)((edrvInstance_l.pRfdVirtAdd) + (RFD_REQUIRED_SIZE * edrvInstance_l.tailRxDesc));
+    pRxDescCmdBlock->statusCommand = CS_S;
 
     //Enable the receiver
     issueScbcmd(SC_RUC_START, edrvInstance_l.rfdDmaAdd, 0);
@@ -1794,13 +1804,13 @@ static void removeOnePciDev(struct pci_dev* pPciDev_p)
         edrvInstance_l.pCbVirtAdd = NULL;
     }
 
-    // sRxDescCmdBlock memory free in edrvremoveone - start
+    // tRxDescCmdBlock memory free in edrvremoveone - start
     if (edrvInstance_l.pRfdVirtAdd != NULL)
     {
         pci_free_consistent(pPciDev_p, RFD_REQUIRED_SIZE * MAX_RFDS, edrvInstance_l.pRfdVirtAdd, edrvInstance_l.rfdDmaAdd);
         edrvInstance_l.pRfdVirtAdd = NULL;
     }
-    // sRxDescCmdBlock memory free in edrvremoveone - end
+    // tRxDescCmdBlock memory free in edrvremoveone - end
 
     if (edrvInstance_l.pTxBuf != NULL)
     {
