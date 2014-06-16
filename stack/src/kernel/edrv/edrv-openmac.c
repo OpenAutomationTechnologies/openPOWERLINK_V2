@@ -41,16 +41,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-#include <common/ami.h>
-#include <kernel/dllkfilter.h>
-
 #include <kernel/edrv.h>
+#include <kernel/dllkfilter.h>
+#include <common/target.h>
+#include <oplk/benchmark.h>
+
 #include <target/openmac.h>
 #include <omethlib.h>
-#include <common/target.h>
-
-#include <oplk/benchmark.h>
-#include <oplk/debug.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -104,48 +101,57 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // local types
 //------------------------------------------------------------------------------
 #ifdef EDRV_2NDTXQUEUE
+/**
+\brief Structure describing the second TX queue.
+
+This structure describes the second TX queue of the openMAC Ethernet driver.
+*/
 typedef struct
 {
-    tEdrvTxBuffer*  pBuffer;
-    UINT32          timeOffsetAbs;
-}tEdrv2ndTxQueue;
+    tEdrvTxBuffer*  pBuffer;                                    ///< Pointer to the TX buffer
+    UINT32          timeOffsetAbs;                              ///< Absolute time offset for packet sending
+} tEdrv2ndTxQueue;
 #endif
 
+/**
+\brief Structure describing an instance of the Edrv
+
+This structure describes an instance of the openMAC Ethernet driver.
+*/
 typedef struct
 {
-    tEdrvInitParam      initParam;
-    ometh_config_typ    macConf;
-    OMETH_H             pMacInst;
-    OMETH_HOOK_H        pRxHookInst;
-    OMETH_FILTER_H      apRxFilterInst[EDRV_MAX_FILTERS];
-    phy_reg_typ*        apPhyInst[OPENMAC_PHYCNT];
-    UINT8               phyInstCount;
-    UINT32              txPacketFreed;
-    UINT32              txPacketSent;
+    tEdrvInitParam      initParam;                              ///< Init parameters
+    ometh_config_typ    macConf;                                ///< MAC configuration parameters
+    OMETH_H             pMacInst;                               ///< Handle of the openMAC low-level driver
+    OMETH_HOOK_H        pRxHookInst;                            ///< Handle of the MAC RX hook configuration
+    OMETH_FILTER_H      apRxFilterInst[EDRV_MAX_FILTERS];       ///< Array of RX filter configurations
+    phy_reg_typ*        apPhyInst[OPENMAC_PHYCNT];              ///< Array of PHY register configurations
+    UINT8               phyInstCount;                           ///< Number of PYHs instantiated
+    UINT32              txPacketFreed;                          ///< Counter of freed packet buffers
+    UINT32              txPacketSent;                           ///< Counter of of sent packets
 #if EDRV_MAX_AUTO_RESPONSES != 0
-    // auto-response Tx buffers
-    tEdrvTxBuffer*      apTxBuffer[EDRV_MAX_AUTO_RESPONSES];
+    tEdrvTxBuffer*      apTxBuffer[EDRV_MAX_AUTO_RESPONSES];    ///< Array of auto-response TX buffers
 #endif
 #if OPENMAC_DMAOBSERV != 0
-    BOOL                fDmaError;
+    BOOL                fDmaError;                              ///< Flag indicating a DMA error
 #endif
 #if OPENMAC_PKTLOCTX == OPENMAC_PKTBUF_LOCAL
-    void*               pTxBufferBase;
-    void*               pNextBufferBase;
-    UINT8               txBufferCount;
-    UINT                usedMemorySpace;
+    void*               pTxBufferBase;                          ///< Pointer to the TX buffer base address
+    void*               pNextBufferBase;                        ///< Pointer to the next buffer base address
+    UINT8               txBufferCount;                          ///< TX buffer counter
+    UINT                usedMemorySpace;                        ///< Used memory for the driver
 #endif
 #if OPENMAC_PKTLOCRX == OPENMAC_PKTBUF_LOCAL
-    void*               pRxBufferBase;
+    void*               pRxBufferBase;                          ///< Pointer to the RX buffer base address
 #endif
 #ifdef EDRV_2NDTXQUEUE
     //additional tx queue
-    tEdrv2ndTxQueue     txQueue[EDRV_MAX_TX_BUF2];
-    INT                 txQueueWriteIndex;
-    INT                 txQueueReadIndex;
+    tEdrv2ndTxQueue     txQueue[EDRV_MAX_TX_BUF2];              ///< Array of buffers for the second TX queue
+    INT                 txQueueWriteIndex;                      ///< Current index in the queue for writes
+    INT                 txQueueReadIndex;                       ///< Current index in the queue for reads
 #endif
 #if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC != FALSE
-    OMETH_HOOK_H        pRxAsndHookInst;
+    OMETH_HOOK_H        pRxAsndHookInst;                        ///< Pointer to the ASnd receive hook
 #endif
 } tEdrvInstance;
 
@@ -224,16 +230,16 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     }
 
     //verify phy management
-    for(i = 0; i < OPENMAC_PHYCNT; i++)
+    for (i = 0; i < OPENMAC_PHYCNT; i++)
     {
         edrvInstance_l.apPhyInst[i] = omethPhyInfo(edrvInstance_l.pMacInst, i);
-        if(edrvInstance_l.apPhyInst[i] != 0)
+        if (edrvInstance_l.apPhyInst[i] != 0)
         {
             edrvInstance_l.phyInstCount++;
         }
     }
 
-    if(edrvInstance_l.phyInstCount != OPENMAC_PHYCNT)
+    if (edrvInstance_l.phyInstCount != OPENMAC_PHYCNT)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Not all phy are found as configured (%d)!\n", __func__, OPENMAC_PHYCNT);
         ret = kErrorNoResource;
@@ -251,7 +257,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
 #if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC != FALSE
     // initialize Rx hook for Asnd frames with pending allowed
     edrvInstance_l.pRxAsndHookInst = omethHookCreate(edrvInstance_l.pMacInst, rxHook, CONFIG_EDRV_ASND_DEFFERRED_RX_BUFFERS);
-    if(edrvInstance_l.pRxAsndHookInst == NULL)
+    if (edrvInstance_l.pRxAsndHookInst == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Rx hook creation for Asnd frames failed!\n", __func__);
         ret = kErrorNoResource;
@@ -260,7 +266,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
 #endif
 
     ret = initRxFilters();
-    if(ret != kErrorOk)
+    if (ret != kErrorOk)
         goto Exit;
 
     //moved following lines here, since omethHookCreate may change tx buffer base!
@@ -278,7 +284,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
 
     ret = openmac_isrReg(kOpenmacIrqTxRx, irqHandler, (void*)edrvInstance_l.pMacInst);
 
-    if(ret != kErrorOk)
+    if (ret != kErrorOk)
         goto Exit;
 
     //wait some time (phy may not be ready...)
@@ -312,7 +318,7 @@ tOplkError edrv_shutdown(void)
 
         pMacStat = omethStatistics(edrvInstance_l.pMacInst);
 
-        if(pMacStat == NULL)
+        if (pMacStat == NULL)
         {
             DEBUG_LVL_ERROR_TRACE(" Serious error occurred!? Can't find the statistics!\n");
         }
@@ -343,7 +349,8 @@ tOplkError edrv_shutdown(void)
     }
 #endif
 
-    if (omethDestroy(edrvInstance_l.pMacInst) != 0) {
+    if (omethDestroy(edrvInstance_l.pMacInst) != 0)
+    {
         DEBUG_LVL_ERROR_TRACE("%s() Edrv Shutdown failed\n", __func__);
         return kErrorNoResource;
     }
@@ -531,7 +538,7 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
         txLength = omethTransmitTime(edrvInstance_l.pMacInst, pPacket,
                         txAckCb, pBuffer_p, pBuffer_p->timeOffsetAbs);
 
-        if( txLength == 0 )
+        if (txLength == 0)
         {
 #ifdef EDRV_2NDTXQUEUE
             //time triggered sent failed => move to 2nd tx queue
@@ -562,7 +569,7 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
     {
 #endif
         txLength = omethTransmitArg(edrvInstance_l.pMacInst, pPacket,
-                            txAckCb, pBuffer_p);
+                                    txAckCb, pBuffer_p);
 #if CONFIG_EDRV_TIME_TRIG_TX != FALSE
     }
 #endif
@@ -608,7 +615,7 @@ If entryChanged_p is equal or larger \p count_p all Rx filters shall be changed.
 */
 //------------------------------------------------------------------------------
 tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
-        UINT entryChanged_p, UINT changeFlags_p)
+                               UINT entryChanged_p, UINT changeFlags_p)
 {
     tOplkError  ret = kErrorOk;
     UINT        index;
@@ -884,7 +891,7 @@ tOplkError edrv_releaseRxBuffer(tEdrvRxBuffer* pRxBuffer_p)
     pPacket = GET_TYPE_BASE(ometh_packet_typ, data, pRxBuffer_p->pBuffer);
     pPacket->length = pRxBuffer_p->rxFrameSize;
 
-    if(pPacket->length != 0)
+    if (pPacket->length != 0)
         omethPacketFree(pPacket);
     else
         ret = kErrorEdrvInvalidRxBuf;
@@ -1040,7 +1047,7 @@ static ometh_packet_typ* allocTxMsgBufferIntern(tEdrvTxBuffer* pBuffer_p)
     bufferSize &= 0xFFFFFFFCU;
 
     // Check for enough memory space
-    if(bufferSize > OPENMAC_PKTBUFSIZE - edrvInstance_l.usedMemorySpace)
+    if (bufferSize > OPENMAC_PKTBUFSIZE - edrvInstance_l.usedMemorySpace)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Out of local memory\n", __func__);
         return NULL;
@@ -1049,7 +1056,7 @@ static ometh_packet_typ* allocTxMsgBufferIntern(tEdrvTxBuffer* pBuffer_p)
     pPacket = (ometh_packet_typ*)edrvInstance_l.pNextBufferBase;
 
     // Return if the requested buffer is not within the memory range
-    if(!(edrvInstance_l.pTxBufferBase <= (void*)pPacket && (void*)pPacket < (void*)((UINT32)pBufferBase + OPENMAC_PKTBUFSIZE)))
+    if (!(edrvInstance_l.pTxBufferBase <= (void*)pPacket && (void*)pPacket < (void*)((UINT32)pBufferBase + OPENMAC_PKTBUFSIZE)))
     {
         DEBUG_LVL_ERROR_TRACE("%s() Out of local memory\n", __func__);
         return NULL;
@@ -1113,8 +1120,9 @@ static void irqHandler(void* pArg_p)
     BENCHMARK_MOD_01_SET(1);
 #if OPENMAC_DMAOBSERV != 0
     UINT16 dmaObservVal = openmac_getDmaObserver(0);
+
     //read DMA observer feature
-    if( dmaObservVal != 0 )
+    if (dmaObservVal != 0)
     {
         edrvInstance_l.fDmaError = TRUE;
         BENCHMARK_MOD_01_TOGGLE(7);
@@ -1141,7 +1149,7 @@ static void irqHandler(void* pArg_p)
 
         //offset is the openMAC time tick (no conversion needed)
         txLength = omethTransmitTime(edrvInstance_l.pMacInst, pPacket,
-                        txAckCb, pBuffer_p, pTxqueue->timeOffsetAbs);
+                                     txAckCb, pBuffer_p, pTxqueue->timeOffsetAbs);
 
         if (txLength > 0)
         {
@@ -1180,7 +1188,7 @@ static void txAckCb(ometh_packet_typ* pPacket_p, void* pArg_p, ULONG time_p)
 
     edrvInstance_l.txPacketFreed++;
 
-    if(pArg_p != NULL && pTxBuffer->pfnTxHandler != NULL)
+    if (pArg_p != NULL && pTxBuffer->pfnTxHandler != NULL)
         pTxBuffer->pfnTxHandler(pTxBuffer);
 }
 
@@ -1222,7 +1230,7 @@ static INT rxHook(void* pArg_p, ometh_packet_typ* pPacket_p, OMETH_BUF_FREE_FCT*
 
     releaseRxBuffer = edrvInstance_l.initParam.pfnRxHandler(&rxBuffer); //pass frame to Powerlink Stack
 
-    if(releaseRxBuffer == kEdrvReleaseRxBufferLater)
+    if (releaseRxBuffer == kEdrvReleaseRxBufferLater)
         ret = 0; // Packet is deferred, openMAC may not use this buffer!
     else
         ret = -1; // Packet processing is done, returns to openMAC again

@@ -47,8 +47,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <pcap.h>
 #include <iphlpapi.h>
 
-#include <kernel/hrestimer.h>
-
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
@@ -84,16 +82,20 @@ void hresTimerCb(UINT index_p);
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
+/**
+\brief Structure describing an instance of the Edrv
 
+This structure describes an instance of the Ethernet driver.
+*/
 typedef struct
 {
-    tEdrvInitParam      initParam;
-    tEdrvTxBuffer*      pTransmittedTxBufferLastEntry;
-    tEdrvTxBuffer*      pTransmittedTxBufferFirstEntry;
-    CRITICAL_SECTION    criticalSection;
-    pcap_t*             pcap;
-    HANDLE              aHandle[EDRV_HANDLE_COUNT];
-    HANDLE              threadHandle;
+    tEdrvInitParam      initParam;                          ///< Init parameters
+    tEdrvTxBuffer*      pTransmittedTxBufferLastEntry;      ///< Pointer to the last entry of the transmitted TX buffer
+    tEdrvTxBuffer*      pTransmittedTxBufferFirstEntry;     ///< Pointer to the first entry of the transmitted Tx buffer
+    CRITICAL_SECTION    criticalSection;                    ///< Critical section locking variable
+    pcap_t*             pcap;                               ///< Pointer to the pcap interface instance
+    HANDLE              aHandle[EDRV_HANDLE_COUNT];         ///< Array of event handles of the pcap interface
+    HANDLE              threadHandle;                       ///< Handle of the Edrv worker thread
 } tEdrvInstance;
 
 //------------------------------------------------------------------------------
@@ -105,7 +107,7 @@ static tEdrvInstance edrInstance_l;
 // local function prototypes
 //------------------------------------------------------------------------------
 static void packetHandler(u_char* pParam_p, const struct pcap_pkthdr* pHeader_p, const u_char* pPktData_p);
-static UINT32 WINAPI edrvWorkerThread(void*);
+static DWORD WINAPI edrvWorkerThread(LPVOID pArgument_p);
 
 //------------------------------------------------------------------------------
 /**
@@ -123,7 +125,7 @@ This function initializes the Ethernet driver.
 tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
 {
     tOplkError          ret = kErrorOk;
-    UINT32              threadId;
+    DWORD               threadId;
     char                sErr_Msg[PCAP_ERRBUF_SIZE];
     // variables for IPHLPAPI
     ULONG               outBufLen;
@@ -181,7 +183,6 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     else
     {
         DEBUG_LVL_ERROR_TRACE("GetAdaptersInfo failed with error: %d\n", retVal);
-
     }
     if (pAdapterInfo)
         OPLK_FREE(pAdapterInfo);
@@ -267,7 +268,7 @@ tOplkError edrv_shutdown(void)
     DeleteCriticalSection(&edrInstance_l.criticalSection);
 
     // clear instance structure
-    OPLK_MEMSET(&edrInstance_l, 0, sizeof (edrInstance_l));
+    OPLK_MEMSET(&edrInstance_l, 0, sizeof(edrInstance_l));
 
     return kErrorOk; //assuming no problems with closing the handle
 }
@@ -342,7 +343,7 @@ tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
     }
 
     // allocate buffer with malloc
-    pBuffer_p->pBuffer = OPLK_MALLOC(pBuffer_p->maxBufferSize);
+    pBuffer_p->pBuffer = (UINT8*)OPLK_MALLOC(pBuffer_p->maxBufferSize);
     if (pBuffer_p->pBuffer == NULL)
     {
         return kErrorEdrvNoFreeBufEntry;
@@ -461,7 +462,6 @@ and Ethernet packets. This dependancy should be removed.
 //------------------------------------------------------------------------------
 HANDLE edrv_getTimerHandle(UINT index_p)
 {
-
     index_p += EDRV_HANDLE_TIMER0;
     if (index_p > EDRV_HANDLE_COUNT)
     {
@@ -495,7 +495,7 @@ static void packetHandler(u_char* pParam_p, const struct pcap_pkthdr* pHeader_p,
     tEdrvInstance*  pInstance = (tEdrvInstance*)pParam_p;
     tEdrvRxBuffer   RxBuffer;
 
-    if (OPLK_MEMCMP(pPktData_p + 6, pInstance->initParam.aMacAddr, 6 ) != 0)
+    if (OPLK_MEMCMP(pPktData_p + 6, pInstance->initParam.aMacAddr, 6) != 0)
     {   // filter out self generated traffic
         RxBuffer.bufferInFrame = kEdrvBufferLastInFrame;
         RxBuffer.rxFrameSize = pHeader_p->caplen;
@@ -516,7 +516,7 @@ static void packetHandler(u_char* pParam_p, const struct pcap_pkthdr* pHeader_p,
                 if (OPLK_MEMCMP(pPktData_p, pTxBuffer->pBuffer, 6) == 0)
                 {
                     EnterCriticalSection(&edrInstance_l.criticalSection);
-                    pInstance->pTransmittedTxBufferFirstEntry = pInstance->pTransmittedTxBufferFirstEntry->txBufferNumber.pArg;
+                    pInstance->pTransmittedTxBufferFirstEntry = (tEdrvTxBuffer*)pInstance->pTransmittedTxBufferFirstEntry->txBufferNumber.pArg;
                     if (pInstance->pTransmittedTxBufferFirstEntry == NULL)
                     {
                         pInstance->pTransmittedTxBufferLastEntry = NULL;
@@ -561,9 +561,9 @@ pcap and timer events.
 \return The function returns a thread return code
 */
 //------------------------------------------------------------------------------
-static UINT32 WINAPI edrvWorkerThread(void* pArgument_p)
+static DWORD WINAPI edrvWorkerThread(LPVOID pArgument_p)
 {
-    tEdrvInstance*  pInstance = pArgument_p;
+    tEdrvInstance*  pInstance = (tEdrvInstance*)pArgument_p;
     int             pcapRet;
     UINT32          waitRet;
 

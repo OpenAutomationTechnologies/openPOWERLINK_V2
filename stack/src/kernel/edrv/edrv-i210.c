@@ -436,146 +436,163 @@ void TgtDbgPostTraceValue (UINT32 dwTraceValue_p);
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
+/**
+\brief Advanced transmit data descriptor
 
-/*
-Advanced Transmit data descriptor union
-
-Points to buffers used to pass data to the controller.
+This union points to buffers used to pass data to the controller.
 */
 typedef union
 {
     struct
     {
-        UINT64      bufferAddrLe;        // Address of descriptor's data buf
-        UINT32      cmdTypeLen;          // Command, Descriptor Type, data length
-        UINT32      statusIdxPaylen;     // Status, Index , Payload length
+        UINT64      bufferAddrLe;                           ///< Address of descriptor's data buffer (little-endian)
+        UINT32      cmdTypeLen;                             ///< Command, descriptor type, data length
+        UINT32      statusIdxPaylen;                        ///< Status, index, payload length
     } sRead;
 
     struct
     {
-        UINT64      timeStampLe;         // Rsvd or Dma timestamp if enabled
-        UINT32      rsvdLe;              // Reserved
-        UINT32      statusLe;            // Status
+        UINT64      timeStampLe;                            ///< Reserved or DMA timestamp (if enabled) (little-endian)
+        UINT32      rsvdLe;                                 ///< Reserved (little-endian)
+        UINT32      statusLe;                               ///< Status (little-endian)
     } sWb;
 } tEdrvAdvTxDesc;
 
-/*
- Advanced context descriptor structure
+/**
+ \brief Advanced context descriptor structure
 
- Specifies a launch time for a packet stored in succeeding advanced data descriptor
+This structure specifies a launch time for a packet stored in succeeding
+advanced data descriptors.
  */
 typedef struct
 {
-    UINT32          ipMaclenVlan;
-    UINT32          launchTime;          // Launch Time for packet [32:56]
-    UINT32          tucmdType;
-    UINT32          idxL4lenMss;
+    UINT32          ipMaclenVlan;                           ///< IPv4 address / MAC length / VLAN
+    UINT32          launchTime;                             ///< Launch time for packet [32:56]
+    UINT32          tucmdType;                              ///< Command type
+    UINT32          idxL4lenMss;                            ///< Index, L4 MSS (maximum segment size)
 } tEdrvContextDesc;
 
-/*
-Advanced Recieve data descriptor union
+/**
+\brief Advanced receive data descriptor
 
-points to buffers used to pass data to the device driver from controller
+This union points to buffers used to pass data to the device driver from the
+controller.
 */
 typedef union
 {
     struct
     {
-        UINT64      bufferAddrLe;        // Data Buffer address
-        UINT64      headerAddrLe;        // Head buffer address
+        UINT64      bufferAddrLe;                           ///< Data buffer address (little-endian)
+        UINT64      headerAddrLe;                           ///< Head buffer address (little-endian)
     } sRead;
 
     struct
     {
-        UINT16      rssPktType;          // RSS Type, Packet Type
-        UINT16      headerLen;           // Header Len
-        UINT32      rssHash;             // Rss Hash
-        UINT32      extStatusError;      // Extended Error and Status
-        UINT32      lenVlanTag;          // Data Length, Vlan Tag
+        UINT16      rssPktType;                             ///< RSS type or packet Type
+        UINT16      headerLen;                              ///< Header length
+        UINT32      rssHash;                                ///< RSS hash
+        UINT32      extStatusError;                         ///< Extended error and status
+        UINT32      lenVlanTag;                             ///< Data length or VLAN tag
     } sWb;
 } tEdrvAdvRxDesc;
 
-/*
-Time-triggered send descriptor
+/**
+\brief Time-triggered send descriptor
 
-Structure used to refer to a pair of context descriptor and advanced Tx data descriptor
-pointing to a single data packet with its respective launch time.
+This structure is used to refer to a pair of context descriptor and advanced
+TX data descriptor pointing to a single data packet with its respective launch
+time.
 
-This structure simplifies the queue handling logic in time triggered send mode and
-makes it consistent with older configuration
+It simplifies the queue handling logic in time-triggered send mode and makes it
+consistent with older configurations.
 */
-
 typedef struct
 {
-    tEdrvContextDesc    ctxtDesc;        // Context Descriptor
-    tEdrvAdvTxDesc      advDesc;         // Data Descriptor
+    tEdrvContextDesc    ctxtDesc;                           ///< Context Descriptor
+    tEdrvAdvTxDesc      advDesc;                            ///< Data Descriptor
 } tEdrvTtxDesc;
 
-/*
-Structure for queue vector
+/**
+\brief Structure for queue vector
 
-Used as reference in ISR to identify the corresponding Tx-Rx queue pair
+This structure is used as reference in the ISR to identify the corresponding
+TX-RX queue pair.
 */
 typedef struct
 {
-    UINT                queueIdx;        // Queue Index
-    UINT                vector;          // Vector Index
-    char                strName[INTERRUPT_STRING_SIZE];
-// Name to be registered for vector
+    UINT                queueIdx;                           ///< Queue index
+    UINT                vector;                             ///< Vector index
+    char                strName[INTERRUPT_STRING_SIZE];     ///< Name to be registered for the vector
 } tEdrvQVector;
 
-// Structure for bookkeeping DMA address and length
+/**
+\brief Structure describing a packet buffer.
+
+This structure describes a packet buffer of the Ethernet driver. It is used for
+bookkeeping the DMA address and length.
+*/
 typedef struct
 {
-    dma_addr_t          dmaAddr;         // DMA address
-    UINT8*              pVirtAddr;       // Virtual address
-    UINT                len;             // Length of Buffer
+    dma_addr_t          dmaAddr;                            ///< DMA address
+    UINT8*              pVirtAddr;                          ///< Virtual address
+    UINT                len;                                ///< Length of the buffer
 } tEdrvPktBuff;
 
+/**
+\brief Structure describing an Edrv queue
+
+This structure describes an Ethernet driver queue.
+*/
 typedef struct
 {
-    tEdrvQVector*       pQvector;        // Pointer to the vector structure for this queue
-    INT                 index;           // Queue index
-    dma_addr_t          descDma;         // DMA address for descriptor queue
-    void*               pDescVirt;       // Virtual address for descriptor queue
-    tEdrvTxBuffer*      apTxBuffer[EDRV_MAX_TX_DESCRIPTOR];
-                                         // Tx buffer array
-    BYTE __iomem*       pBuf;            // pointer to buffer for the queue
-    tEdrvPktBuff*       pPktBuff;        // Bookkeeping structure
-    INT                 nextDesc;        // Next descriptor to used
-    INT                 nextWb;          // Next descriptor to be written back
+    tEdrvQVector*       pQvector;                           ///< Pointer to the vector structure for this queue
+    INT                 index;                              ///< Queue index
+    dma_addr_t          descDma;                            ///< DMA address for descriptor queue
+    void*               pDescVirt;                          ///< Virtual address for descriptor queue
+    tEdrvTxBuffer*      apTxBuffer[EDRV_MAX_TX_DESCRIPTOR]; ///< TX buffer array
+    BYTE __iomem*       pBuf;                               ///< Pointer to buffer for the queue
+    tEdrvPktBuff*       pPktBuff;                           ///< Bookkeeping structure
+    INT                 nextDesc;                           ///< Next descriptor to be used
+    INT                 nextWb;                             ///< Next descriptor to be written back
 } tEdrvQueue;
 
+/**
+\brief Structure describing an instance of the Edrv
+
+This structure describes an instance of the Ethernet driver.
+*/
 typedef struct
 {
-    struct pci_dev*     pPciDev;                           // pointer to PCI device structure
-    void*               pIoAddr;                           // pointer to register space of Ethernet controller
-    tEdrvQueue*         pTxQueue[EDRV_MAX_TX_QUEUES];      // Tx queue array
-    tEdrvQueue*         pRxQueue[EDRV_MAX_RX_QUEUES];      // Rx Queue Array
-    tEdrvQVector*       pQvector[EDRV_MAX_QUEUE_VECTOR];   // Vector Array
-    UINT8*              pTxBuf;                            // Tx Buffer pointer
-    BOOL                afTxBufUsed[EDRV_MAX_TX_BUFFERS];  // Array to keep track of used Tx buffers
+    tEdrvInitParam      initParam;                          ///< Init parameters
+    struct pci_dev*     pPciDev;                            ///< Pointer to the PCI device structure
+    void*               pIoAddr;                            ///< Pointer to the register space of the Ethernet controller
 
-    UINT                txMaxQueue;                        // Max Tx queue
-    UINT                rxMaxQueue;                        // Max Rx queue
-    UINT                numQVectors;                       // No. of queue vectors (Total = NumQvectors + 1)
-    struct msix_entry*  pMsixEntry;                        // Pointer to MSI-X structure
+    tEdrvQueue*         pTxQueue[EDRV_MAX_TX_QUEUES];       ///< Array of TX queues
+    tEdrvQueue*         pRxQueue[EDRV_MAX_RX_QUEUES];       ///< Array of RX queues
+    tEdrvQVector*       pQvector[EDRV_MAX_QUEUE_VECTOR];    ///< Array of vector queues
+    UINT                txMaxQueue;                         ///< Max number of TX queues
+    UINT                rxMaxQueue;                         ///< Max number of RX queues
+    UINT                numQVectors;                        ///< Number of queue vectors (Total = numQvectors + 1)
+
+    UINT8*              pTxBuf;                             ///< Pointer to the TX buffer
+    BOOL                afTxBufUsed[EDRV_MAX_TX_BUFFERS];   ///< Array indicating the use of a specific TX buffer
+
+    struct msix_entry*  pMsixEntry;                         //< Pointer to the MSI-X structure
+
     // Timer related members
-    tTimerHdl           timerHdl;                          // Timer handle
-    tHresCallback       hresTimerCb;                       // Timer callback
-
-    tEdrvInitParam      initParam;                         // Initialization parameters
+    tTimerHdl           timerHdl;                           ///< Timer handle
+    tHresCallback       hresTimerCb;                        ///< Timer callback
 } tEdrvInstance;
 
 //---------------------------------------------------------------------------
 // local function prototypes
 //---------------------------------------------------------------------------
 static irqreturn_t edrvTimerInterrupt(INT irqNum_p, void* ppDevInstData_p);
-static irqreturn_t edrvIrqHandler (INT irqNum_p, void* ppDevInstData_p);
+static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p);
 static UINT32 readSystimRegister(struct timespec* psTime_p);
 static void writeSystimRegister(const struct timespec* psTime_p);
-void releaseHwSemaphoreGeneric(void);
-tOplkError acquireHwSemaphore(void);
+static void releaseHwSemaphoreGeneric(void);
+static tOplkError acquireHwSemaphore(void);
 static void releaseHwSemaphore(void);
 static tOplkError acquireSwFwSync(UINT16 mask_p);
 static void releaseSwFwSync(UINT16 mask_p);
@@ -601,7 +618,6 @@ static void removeOnePciDev(struct pci_dev* pPciDev_p);
 //---------------------------------------------------------------------------
 // module global vars
 //---------------------------------------------------------------------------
-
 static struct pci_device_id aEdrvPciTbl[] =
 {
     { 0x8086, 0x1533, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },   //I210
@@ -760,6 +776,7 @@ tOplkError edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p)
         data |= pMacAddr_p[2] << 16;
         data |= pMacAddr_p[3] << 24;
         EDRV_REGDW_WRITE(EDRV_RAL(index), data);
+
         data = 0;
         data |= pMacAddr_p[4] << 0;
         data |= pMacAddr_p[5] << 8;
@@ -797,6 +814,7 @@ tOplkError edrv_clearRxMulticastMacAddr(UINT8* pMacAddr_p)
     addrLow |= pMacAddr_p[1] << 8;
     addrLow |= pMacAddr_p[2] << 16;
     addrLow |= pMacAddr_p[3] << 24;
+
     addrHigh = 0;
     addrHigh |= pMacAddr_p[4] << 0;
     addrHigh |= pMacAddr_p[5] << 8;
@@ -1236,7 +1254,6 @@ tOplkError edrv_registerHresCallback(tHresCallback pfnHighResCb_p)
 /// \name Private Functions
 /// \{
 
-
 //------------------------------------------------------------------------------
 /**
 \brief     edrvTimerInterrupt()
@@ -1326,7 +1343,7 @@ static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
     reg = EDRV_REGDW_READ(EDRV_INTR_READ_REG);
 
     // Process Rx with priority over Tx
-    if ((pRxQueue != NULL )&& (reg & EDRV_INTR_ICR_RXDW))
+    if ((pRxQueue != NULL ) && (reg & EDRV_INTR_ICR_RXDW))
     {
         tEdrvAdvRxDesc* pAdvRxDesc;
         tEdrvRxBuffer   rxBuffer;
@@ -1343,7 +1360,7 @@ static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
         {
             UINT rcvLen;
 
-            if(pAdvRxDesc->sWb.extStatusError & EDRV_RDESC_ERRORS_RXE)
+            if (pAdvRxDesc->sWb.extStatusError & EDRV_RDESC_ERRORS_RXE)
             {
                 EDRV_COUNT_RX_ERR_CRC;
             }
@@ -1501,7 +1518,7 @@ static void writeSystimRegister(const struct timespec* psTime_p)
 The function releases an acquired HW semaphore.
 */
 //------------------------------------------------------------------------------
-void releaseHwSemaphoreGeneric(void)
+static void releaseHwSemaphoreGeneric(void)
 {
     UINT32      swsm;
 
@@ -1519,7 +1536,7 @@ The function acquires the Hardware semaphore to access the PHY registers.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError acquireHwSemaphore(void)
+static tOplkError acquireHwSemaphore(void)
 {
     UINT32          swsm;
     tOplkError      result = kErrorOk;
@@ -1871,8 +1888,10 @@ static void configureTxQueue(tEdrvQueue* pTxQueue_p)
     {
         if ((EDRV_REGDW_READ(EDRV_TXDCTL(queue)) & EDRV_TXDCTL_QUEUE_EN))
             break;
+
         msleep(1);
     }
+
     if (index == EDRV_POLL_TIMEOUT)
         printk("...Fail\n");
     else
@@ -2341,6 +2360,7 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
     {
         if ((EDRV_REGDW_READ(EDRV_STATUS_REG) & EDRV_STATUS_MASTER_EN)== 0)
             break;
+
         msleep(1);
     }
 
@@ -2368,6 +2388,7 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
     {
         if (EDRV_REGDW_READ(EDRV_EECD_REG) & EDRV_EECD_AUTO_RD)
             break;
+
         msleep(1);
         index++;
     }
@@ -2632,7 +2653,7 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
     printk("...Done\n");
 
     // enable interrupts
-    EDRV_REGDW_WRITE(EDRV_INTR_MASK_SET_READ, (EDRV_INTR_ICR_TIME_SYNC ));
+    EDRV_REGDW_WRITE(EDRV_INTR_MASK_SET_READ, (EDRV_INTR_ICR_TIME_SYNC));
 
     reg = EDRV_REGDW_READ(EDRV_EXT_INTR_MASK_SET);
     reg |= (EDRV_EICS_TXRXQUEUE1 | EDRV_EICS_OTHER);
@@ -2669,7 +2690,6 @@ ExitFail:
 Exit:
     printk("%s finished with %d\n", __FUNCTION__, result);
     return result;
-
 }
 
 //------------------------------------------------------------------------------
@@ -2787,7 +2807,7 @@ static void removeOnePciDev(struct pci_dev* pPciDev_p)
     edrvInstance_l.numQVectors = 0;
 
     // unmap controller's register space
-    if (NULL != edrvInstance_l.pIoAddr)
+    if (edrvInstance_l.pIoAddr != NULL)
     {
         iounmap(edrvInstance_l.pIoAddr);
         edrvInstance_l.pIoAddr = NULL;
@@ -2804,3 +2824,5 @@ static void removeOnePciDev(struct pci_dev* pPciDev_p)
 Exit:
     return;
 }
+
+///\}

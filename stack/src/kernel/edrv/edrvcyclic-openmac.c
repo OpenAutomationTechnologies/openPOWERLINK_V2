@@ -42,14 +42,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-#include <kernel/hrestimer.h>
-
 #include <kernel/edrv.h>
+#include <kernel/hrestimer.h>
+#include <oplk/benchmark.h>
+
 #include <target/openmac.h>
 #include <omethlib.h>
-
-#include <oplk/benchmark.h>
-#include <oplk/debug.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -106,21 +104,26 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
+/**
+\brief Structure describing an instance of the cyclic Edrv
+
+This structure describes an instance of the cyclic Ethernet driver.
+*/
 typedef struct
 {
-    tEdrvTxBuffer**     apTxBufferList;
-    UINT                maxTxBufferCount;
-    UINT                currrentTxBufferList;
-    UINT                currentTxBufferEntry;
-    UINT32              cycleLengthUs;
-    tTimerHdl           timerHdlCycle;
-    tEdrvCyclicCbSync   pfnSyncCb;
-    tEdrvCyclicCbError  pfnErrorCb;
-    UINT32              nextCycleTime;
-    BOOL                fNextCycleTimeValid;
-    UINT32              aTxProcFilter[EDRVCYC_NEGSHFT_FLT_SPAN];
-    UINT                txProcFilterIndex;
-    UINT32              txProcFilterResult;
+    tEdrvTxBuffer**     apTxBufferList;                             ///< Pointer to the TX buffer list
+    UINT                maxTxBufferCount;                           ///< Maximum TX buffer count
+    UINT                currrentTxBufferList;                       ///< Current TX buffer list
+    UINT                currentTxBufferEntry;                       ///< Current TX buffer entry
+    UINT32              cycleLengthUs;                              ///< Cycle time (µs)
+    tTimerHdl           timerHdlCycle;                              ///< Handle of the cycle timer
+    tEdrvCyclicCbSync   pfnSyncCb;                                  ///< Function pointer to the sync callback function
+    tEdrvCyclicCbError  pfnErrorCb;                                 ///< Function pointer to the error callback function
+    UINT32              nextCycleTime;                              ///< Timestamp of the start of the next cycle
+    BOOL                fNextCycleTimeValid;                        ///< Flag indicating whether the value in nextCycleTime is valid
+    UINT32              aTxProcFilter[EDRVCYC_NEGSHFT_FLT_SPAN];    ///< Array of process filters
+    UINT                txProcFilterIndex;                          ///< Index of the current TX process filter
+    UINT32              txProcFilterResult;                         ///< TX filter result
 } tEdrvCyclicInstance;
 
 //------------------------------------------------------------------------------
@@ -207,7 +210,7 @@ tOplkError edrvcyclic_setMaxTxBufferListSize(UINT maxListSize_p)
             instance_l.apTxBufferList = NULL;
         }
 
-        instance_l.apTxBufferList = OPLK_MALLOC(sizeof(*instance_l.apTxBufferList) * maxListSize_p * 2);
+        instance_l.apTxBufferList = (tEdrvTxBuffer**)OPLK_MALLOC(sizeof(*instance_l.apTxBufferList) * maxListSize_p * 2);
         if (instance_l.apTxBufferList == NULL)
         {
             ret = kErrorEdrvNoFreeBufEntry;
@@ -314,7 +317,7 @@ tOplkError edrvcyclic_startCycle(void)
     instance_l.txProcFilterResult = OMETH_US_2_TICKS(EDRVCYC_POS_SHIFT_US);
 
     //initialize the filter
-    for(i = 0; i < EDRVCYC_NEGSHFT_FLT_SPAN; i++)
+    for (i = 0; i < EDRVCYC_NEGSHFT_FLT_SPAN; i++)
     {
         instance_l.aTxProcFilter[i] = OMETH_US_2_TICKS(EDRVCYC_POS_SHIFT_US);
     }
@@ -472,7 +475,7 @@ static tOplkError timerHdlCycleCb(tTimerEventArg* pEventArg_p)
 
     // sum all entries
     filterAccumulate = 0U;
-    for(i = 0; i < EDRVCYC_NEGSHFT_FLT_SPAN; i++)
+    for (i = 0; i < EDRVCYC_NEGSHFT_FLT_SPAN; i++)
     {
         filterAccumulate += instance_l.aTxProcFilter[i];
     }

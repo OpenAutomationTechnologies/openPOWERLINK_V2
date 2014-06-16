@@ -40,16 +40,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <common/oplkinc.h>
 #include <kernel/edrv.h>
 
 #include <unistd.h>
 #include <pcap.h>
 #include <string.h>
+#include <semaphore.h>
 #include <pthread.h>
 #include <sys/select.h>
 #include <sys/syscall.h>
-#include <semaphore.h>
-
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <netinet/in.h>
@@ -83,17 +83,21 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
-// Private structure
+/**
+\brief Structure describing an instance of the Edrv
+
+This structure describes an instance of the Ethernet driver.
+*/
 typedef struct
 {
-    tEdrvInitParam      initParam;
-    tEdrvTxBuffer*      pTransmittedTxBufferLastEntry;
-    tEdrvTxBuffer*      pTransmittedTxBufferFirstEntry;
-    pthread_mutex_t     mutex;
-    sem_t               syncSem;
-    pcap_t*             pPcap;
-    pcap_t*             pPcapThread;
-    pthread_t           hThread;
+    tEdrvInitParam      initParam;                          ///< Init parameters
+    tEdrvTxBuffer*      pTransmittedTxBufferLastEntry;      ///< Pointer to the last entry of the transmitted TX buffer
+    tEdrvTxBuffer*      pTransmittedTxBufferFirstEntry;     ///< Pointer to the first entry of the transmitted Tx buffer
+    pthread_mutex_t     mutex;                              ///< Mutex for locking of critical sections
+    sem_t               syncSem;                            ///< Semaphore for signalling the start of the worker thread
+    pcap_t*             pPcap;                              ///< Pointer to the pcap interface instance
+    pcap_t*             pPcapThread;                        ///< Handle of the pcap packet handler thread
+    pthread_t           hThread;                            ///< Handle of the worker thread
 } tEdrvInstance;
 
 //------------------------------------------------------------------------------
@@ -149,7 +153,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
         (pEdrvInitParam_p->aMacAddr[2] == 0) &&
         (pEdrvInitParam_p->aMacAddr[3] == 0) &&
         (pEdrvInitParam_p->aMacAddr[4] == 0) &&
-        (pEdrvInitParam_p->aMacAddr[5] == 0)  )
+        (pEdrvInitParam_p->aMacAddr[5] == 0))
     {   // read MAC address from controller
         getMacAdrs(pEdrvInitParam_p->hwParam.pDevName,
                    pEdrvInitParam_p->aMacAddr);
@@ -303,7 +307,7 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
 
         pcapRet = pcap_sendpacket(edrvInstance_l.pPcap, pBuffer_p->pBuffer,
                                   (INT)pBuffer_p->txFrameSize);
-        if  (pcapRet != 0)
+        if (pcapRet != 0)
         {
             DEBUG_LVL_EDRV_TRACE("%s() pcap_sendpacket returned %d (%s)\n",
                     __func__, pcapRet, pcap_geterr(edrvInstance_l.pPcap));
@@ -339,7 +343,7 @@ tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
     }
 
     // allocate buffer with malloc
-    pBuffer_p->pBuffer = OPLK_MALLOC(pBuffer_p->maxBufferSize);
+    pBuffer_p->pBuffer = (UINT8*)OPLK_MALLOC(pBuffer_p->maxBufferSize);
     if (pBuffer_p->pBuffer == NULL)
     {
         ret = kErrorEdrvNoFreeBufEntry;
@@ -471,7 +475,7 @@ static void packetHandler(u_char* pParam_p, const struct pcap_pkthdr* pHeader_p,
     tEdrvInstance*  pInstance = (tEdrvInstance*)pParam_p;
     tEdrvRxBuffer   rxBuffer;
 
-    if (OPLK_MEMCMP (pPktData_p + 6, pInstance->initParam.aMacAddr, 6 ) != 0)
+    if (OPLK_MEMCMP (pPktData_p + 6, pInstance->initParam.aMacAddr, 6) != 0)
     {   // filter out self generated traffic
         rxBuffer.bufferInFrame = kEdrvBufferLastInFrame;
         rxBuffer.rxFrameSize = pHeader_p->caplen;
@@ -495,6 +499,7 @@ static void packetHandler(u_char* pParam_p, const struct pcap_pkthdr* pHeader_p,
                     pthread_mutex_lock(&pInstance->mutex);
                     pInstance->pTransmittedTxBufferFirstEntry =
                         pInstance->pTransmittedTxBufferFirstEntry->txBufferNumber.pArg;
+
                     if (pInstance->pTransmittedTxBufferFirstEntry == NULL)
                     {
                         pInstance->pTransmittedTxBufferLastEntry = NULL;
@@ -676,4 +681,3 @@ static INT getLinkStatus(const char* pIfName_p)
 }
 
 ///\}
-

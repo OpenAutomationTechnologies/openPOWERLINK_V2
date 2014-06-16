@@ -145,8 +145,8 @@ This union is used to identify the Tx buffer in the Ethernet driver module.
 */
 typedef union
 {
-    UINT    value;
-    void*   pArg;
+    UINT    value;                      ///< Number of the TX buffer
+    void*   pArg;                       ///< Pointer to the TX buffer
 } tEdrvTxBufferNumber;
 
 /**
@@ -182,13 +182,13 @@ struct sEdrvRxBuffer
 /**
 \brief Structure for initialization
 
-This structure is used to initialise the Ethernet driver module.
+This structure is used to initialize the Ethernet driver module.
 */
 typedef struct
 {
-    UINT8           aMacAddr[6];    ///< The Ethernet controllers MAC address
-    tEdrvRxHandler  pfnRxHandler;   ///< Rx frame callback function pointer
-    tHwParam        hwParam;        ///< Hardware parameter
+    UINT8           aMacAddr[6];        ///< Ethernet controller MAC address
+    tEdrvRxHandler  pfnRxHandler;       ///< Rx frame callback function pointer
+    tHwParam        hwParam;            ///< Hardware parameter
 } tEdrvInitParam;
 
 /**
@@ -216,23 +216,23 @@ This structure is used to provide diagnostics of the cyclic Ethernet driver.
 typedef struct
 {
     // continuous min/max/avg measurement
-    ULONGLONG   cycleCount;
-    UINT32      cycleTimeMin;
-    UINT32      cycleTimeMax;
-    ULONGLONG   cycleTimeMeanSum; // sums run over after some years for ct=400
-    UINT32      usedCycleTimeMin;
-    UINT32      usedCycleTimeMax;
-    ULONGLONG   usedCycleTimeMeanSum;
-    UINT32      spareCycleTimeMin;
-    UINT32      spareCycleTimeMax;
-    ULONGLONG   spareCycleTimeMeanSum;
+    ULONGLONG   cycleCount;                                 ///< Cycle counter
+    UINT32      cycleTimeMin;                               ///< Minimum measured cycle time
+    UINT32      cycleTimeMax;                               ///< Maximum measured cycle time
+    ULONGLONG   cycleTimeMeanSum;                           ///< Sum of the mean measured cycle times
+    UINT32      usedCycleTimeMin;                           ///< Minimum utilized cycle time
+    UINT32      usedCycleTimeMax;                           ///< Maximum utilized cycle time
+    ULONGLONG   usedCycleTimeMeanSum;                       ///< Sum of the mean utilized cycle times
+    UINT32      spareCycleTimeMin;                          ///< Minimum spare cycle time
+    UINT32      spareCycleTimeMax;                          ///< Maximum spare cycle time
+    ULONGLONG   spareCycleTimeMeanSum;                      ///< Sum of the mean spare cycle times
     // sampling of runaway cycles
-    UINT        sampleNum;
-    UINT        sampleBufferedNum;
-    ULONGLONG   aSampleTimeStamp[EDRV_CYCLIC_SAMPLE_NUM]; // SOC send
-    UINT32      aCycleTime[EDRV_CYCLIC_SAMPLE_NUM]; // until next SOC send
-    UINT32      aUsedCycleTime[EDRV_CYCLIC_SAMPLE_NUM];
-    UINT32      aSpareCycleTime[EDRV_CYCLIC_SAMPLE_NUM];
+    UINT        sampleNum;                                  ///< Sample number
+    UINT        sampleBufferedNum;                          ///< Buffered sample number
+    ULONGLONG   aSampleTimeStamp[EDRV_CYCLIC_SAMPLE_NUM];   ///< Array of sampled timestamps (SoC send)
+    UINT32      aCycleTime[EDRV_CYCLIC_SAMPLE_NUM];         ///< Array of cycle time values (until next SoC send)
+    UINT32      aUsedCycleTime[EDRV_CYCLIC_SAMPLE_NUM];     ///< Array of used cycle time values
+    UINT32      aSpareCycleTime[EDRV_CYCLIC_SAMPLE_NUM];    ///< Array of spare cycle time values
 } tEdrvCyclicDiagnostics;
 
 //------------------------------------------------------------------------------

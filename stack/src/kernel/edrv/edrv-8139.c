@@ -52,7 +52,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-#include <common/ami.h>
 #include <kernel/edrv.h>
 
 #include <linux/module.h>
@@ -275,22 +274,25 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
-// Private structure
+/**
+\brief Structure describing an instance of the Edrv
+
+This structure describes an instance of the Ethernet driver.
+*/
 typedef struct
 {
-    struct pci_dev*     pPciDev;      // pointer to PCI device structure
-    void*               pIoAddr;      // pointer to register space of Ethernet controller
-    UINT8*              pRxBuf;      // pointer to Rx buffer
-    dma_addr_t          pRxBufDma;
-    UINT8*              pTxBuf;      // pointer to Tx buffer
-    dma_addr_t          pTxBufDma;
-    BOOL                afTxBufUsed[EDRV_MAX_TX_BUFFERS];
-    tEdrvTxBuffer*      apTxBuffer[EDRV_MAX_TX_DESCS];
-    spinlock_t          txSpinlock;
-    UINT                headTxDesc;
-    UINT                tailTxDesc;
-
-    tEdrvInitParam      initParam;
+    tEdrvInitParam      initParam;                          ///< Init parameters
+    struct pci_dev*     pPciDev;                            ///< Pointer to the PCI device structure
+    void*               pIoAddr;                            ///< Pointer to the register space of the Ethernet controller
+    UINT8*              pRxBuf;                             ///< Pointer to the RX buffer
+    dma_addr_t          pRxBufDma;                          ///< Pointer to the DMA of the RX buffer
+    UINT8*              pTxBuf;                             ///< Pointer to the TX buffer
+    dma_addr_t          pTxBufDma;                          ///< Pointer to the DMA of the TX buffer
+    BOOL                afTxBufUsed[EDRV_MAX_TX_BUFFERS];   ///< Array describing whether a TX buffer is used
+    tEdrvTxBuffer*      apTxBuffer[EDRV_MAX_TX_DESCS];      ///< Array of TX buffers
+    spinlock_t          txSpinlock;                         ///< Spinlock to protect critical sections
+    UINT                headTxDesc;                         ///< Index of the head of the TX descriptor buffer
+    UINT                tailTxDesc;                         ///< Index of the tail of the TX descriptor buffer
 } tEdrvInstance;
 
 //------------------------------------------------------------------------------
@@ -310,7 +312,7 @@ static struct pci_device_id aEdrvPciTbl_l[] = {
     {0x10ec, 0x8139, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},
     {0,}
 };
-MODULE_DEVICE_TABLE (pci, aEdrvPciTbl_l);
+MODULE_DEVICE_TABLE(pci, aEdrvPciTbl_l);
 
 static tEdrvInstance edrvInstance_l;
 
@@ -403,7 +405,7 @@ This function shuts down the Ethernet driver.
 //------------------------------------------------------------------------------
 tOplkError edrv_shutdown(void)
 {
-    if(edrvDriver_l.name != NULL)
+    if (edrvDriver_l.name != NULL)
     {
         printk("%s calling pci_unregister_driver()\n", __FUNCTION__);
         pci_unregister_driver(&edrvDriver_l);
@@ -567,6 +569,7 @@ tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
             break;
         }
     }
+
     if (i >= EDRV_MAX_TX_BUFFERS)
     {
         ret = kErrorEdrvNoFreeBufEntry;
@@ -739,7 +742,7 @@ This function is the interrupt service routine for the Ethernet driver.
 \return The function returns an IRQ handled code.
 */
 //------------------------------------------------------------------------------
-static irqreturn_t edrvIrqHandler (INT irqNum_p, void* ppDevInstData_p)
+static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
 {
     tEdrvRxBuffer   rxBuffer;
     WORD            status;
@@ -906,7 +909,7 @@ static irqreturn_t edrvIrqHandler (INT irqNum_p, void* ppDevInstData_p)
             {   // frame is OK
                 rxBuffer.bufferInFrame = kEdrvBufferLastInFrame;
                 rxBuffer.rxFrameSize = length - EDRV_ETH_CRC_SIZE;
-                rxBuffer.pBuffer = pRxBuffer + sizeof (rxStatus);
+                rxBuffer.pBuffer = pRxBuffer + sizeof(rxStatus);
 
                 EDRV_COUNT_RX;
 
@@ -921,7 +924,6 @@ static irqreturn_t edrvIrqHandler (INT irqNum_p, void* ppDevInstData_p)
 
             // reread current offset in receive buffer
             curRx = (EDRV_REGW_READ(EDRV_REGW_CAPR) + 0x10) % EDRV_RX_BUFFER_LENGTH;
-
         }
     }
 
@@ -1211,7 +1213,7 @@ This function calculates the entry for the hash-table from MAC address.
 \return The function returns the calculated hash table.
 */
 //------------------------------------------------------------------------------
-static UINT8 calcHash (UINT8* pMacAddr_p)
+static UINT8 calcHash(UINT8* pMacAddr_p)
 {
     UINT32  byteCounter;
     UINT32  bitCounter;

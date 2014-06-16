@@ -44,7 +44,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <common/oplkinc.h>
 #include <kernel/edrv.h>
 #include <kernel/hrestimer.h>
+
+#if CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
 #include <common/target.h>
+#endif
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -90,26 +93,31 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
+/**
+\brief Structure describing an instance of the cyclic Edrv
+
+This structure describes an instance of the cyclic Ethernet driver.
+*/
 typedef struct
 {
-    tEdrvTxBuffer**         ppTxBufferList;
-    UINT                    maxTxBufferCount;
-    UINT                    curTxBufferList;
-    UINT                    curTxBufferEntry;
-    UINT32                  cycleTimeUs;
-    tTimerHdl               timerHdlCycle;
-    tTimerHdl               timerHdlSlot;
-    tEdrvCyclicCbSync       pfnSyncCb;
-    tEdrvCyclicCbError      pfnErrorCb;
+    tEdrvTxBuffer**         ppTxBufferList;                 ///< Pointer to the TX buffer list
+    UINT                    maxTxBufferCount;               ///< Maximum TX buffer count
+    UINT                    curTxBufferList;                ///< Current TX buffer list
+    UINT                    curTxBufferEntry;               ///< Current TX buffer entry
+    UINT32                  cycleTimeUs;                    ///< Cycle time (µs)
+    tTimerHdl               timerHdlCycle;                  ///< Handle of the cycle timer
+    tTimerHdl               timerHdlSlot;                   ///< Handle of the slot timer
+    tEdrvCyclicCbSync       pfnSyncCb;                      ///< Function pointer to the sync callback function
+    tEdrvCyclicCbError      pfnErrorCb;                     ///< Function pointer to the error callback function
 #if (EDRV_USE_TTTX == TRUE)
-    ULONGLONG               nextCycleTime;
-    BOOL                    fNextCycleValid;
+    ULONGLONG               nextCycleTime;                  ///< Timestamp of the start of the next cycle
+    BOOL                    fNextCycleValid;                ///< Flag indicating whether the value in nextCycleTime is valid
 #endif
 #if CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
-    UINT                    sampleCount;
-    ULONGLONG               startCycleTimeStamp;
-    ULONGLONG               lastSlotTimeStamp;
-    tEdrvCyclicDiagnostics  diagnostics;
+    UINT                    sampleCount;                    ///< Sample counter
+    ULONGLONG               startCycleTimeStamp;            ///< Timestamp of the cycle start
+    ULONGLONG               lastSlotTimeStamp;              ///< Timestamp of the last slot
+    tEdrvCyclicDiagnostics  diagnostics;                    ///< Diagnose data
 #endif
 } tEdrvcyclicInstance;
 
@@ -145,7 +153,7 @@ This function initializes the cyclic Ethernet driver.
 tOplkError edrvcyclic_init(void)
 {
     // clear instance structure
-    OPLK_MEMSET(&edrvcyclicInstance_l, 0, sizeof (edrvcyclicInstance_l));
+    OPLK_MEMSET(&edrvcyclicInstance_l, 0, sizeof(edrvcyclicInstance_l));
 
 #if CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
     edrvcyclicInstance_l.diagnostics.cycleTimeMin        = 0xFFFFFFFF;
@@ -205,7 +213,7 @@ tOplkError edrvcyclic_setMaxTxBufferListSize(UINT maxListSize_p)
             edrvcyclicInstance_l.ppTxBufferList = NULL;
         }
 
-        edrvcyclicInstance_l.ppTxBufferList = OPLK_MALLOC(sizeof(*edrvcyclicInstance_l.ppTxBufferList) * maxListSize_p * 2);
+        edrvcyclicInstance_l.ppTxBufferList = (tEdrvTxBuffer**)OPLK_MALLOC(sizeof(*edrvcyclicInstance_l.ppTxBufferList) * maxListSize_p * 2);
         if (edrvcyclicInstance_l.ppTxBufferList == NULL)
         {
             ret = kErrorEdrvNoFreeBufEntry;
@@ -538,7 +546,7 @@ static tOplkError timerHdlCycleCb(tTimerEventArg* pEventArg_p)
             (abs(cycleTime - edrvcyclicInstance_l.cycleTimeUs * 1000) > EDRV_CYCLIC_SAMPLE_TH_CYCLE_TIME_DIFF_US * 1000) ||
             (spareCycleTime < EDRV_CYCLIC_SAMPLE_TH_SPARE_TIME_US * 1000))
         {
-        UINT uiSampleNo = edrvcyclicInstance_l.sampleCount;
+            UINT uiSampleNo = edrvcyclicInstance_l.sampleCount;
 
             edrvcyclicInstance_l.diagnostics.aSampleTimeStamp[uiSampleNo] = edrvcyclicInstance_l.startCycleTimeStamp;
             edrvcyclicInstance_l.diagnostics.aCycleTime[uiSampleNo]       = cycleTime;
@@ -691,7 +699,7 @@ static tOplkError processTxBufferList(void)
             pTxBuffer->launchTime = launchTime;
         }
 
-        if ((pTxBuffer->launchTime - cycleMin) >  (cycleMax - cycleMin))
+        if ((pTxBuffer->launchTime - cycleMin) > (cycleMax - cycleMin))
         {
             ret = kErrorEdrvTxListNotFinishedYet;
             goto Exit;

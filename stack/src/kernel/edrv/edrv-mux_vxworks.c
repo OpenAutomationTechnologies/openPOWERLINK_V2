@@ -39,8 +39,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <common/oplkinc.h>
 #include <kernel/edrv.h>
-#include <common/ami.h>
 
 #include <unistd.h>
 #include <vxWorks.h>
@@ -94,25 +94,29 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
-// Private structure
+/**
+\brief Structure describing an instance of the Edrv
+
+This structure describes an instance of the Ethernet driver.
+*/
 typedef struct
 {
-    tEdrvInitParam      initParam;
-    tEdrvTxBuffer*      pTransmittedTxBufferLastEntry;
-    tEdrvTxBuffer*      pTransmittedTxBufferFirstEntry;
-    SEM_ID              mutex;
-    SEM_ID              syncSem;
+    tEdrvInitParam      initParam;                          ///< Init parameters
+    tEdrvTxBuffer*      pTransmittedTxBufferLastEntry;      ///< Pointer to the last entry of the transmitted TX buffer
+    tEdrvTxBuffer*      pTransmittedTxBufferFirstEntry;     ///< Pointer to the first entry of the transmitted Tx buffer
+    SEM_ID              mutex;                              ///< Mutex for locking of critical sections
+    SEM_ID              syncSem;                            ///< Semaphore for thread synchronization
 
-    NET_POOL_ID         dataPoolId;
-    PROTO_COOKIE        pCookie;
-    INT                 txTaskId;
-    SEM_ID              txWakeupSem;
-    BOOL                fStopTxTask;
+    NET_POOL_ID         dataPoolId;                         ///< Data pool to allocate packet buffers
+    PROTO_COOKIE        pCookie;                            ///< Handle of the MUX interface used for POWERLINK
+    INT                 txTaskId;                           ///< ID of the TX handler task
+    SEM_ID              txWakeupSem;                        ///< Semaphore to wake up the TX sender task
+    BOOL                fStopTxTask;                        ///< Flag indicating whether the TX sender task shall be stopped
 
 #if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
-    struct timespec     txSendTime;
-    struct timespec     txCbTime;
-    struct timespec     maxTxLatency;
+    struct timespec     txSendTime;                         ///< Time of issuing a TX frame
+    struct timespec     txCbTime;                           ///< Time of entering the TX sender task
+    struct timespec     maxTxLatency;                       ///< Max time difference between issuing a frame and entering the sender task
 #endif
 
 } tEdrvInstance;
@@ -126,7 +130,7 @@ static tEdrvInstance edrvInstance_l;
 // local function prototypes
 //------------------------------------------------------------------------------
 static BOOL packetHandler(void* pCookie_p, LONG type_p, M_BLK_ID pPkt_p,
-                                LL_HDR_INFO* pLLHInfo_p, void* pNetCallbackId_p);
+                          LL_HDR_INFO* pLLHInfo_p, void* pNetCallbackId_p);
 static STATUS muxShutdown(void* pCookie_p, void* pNetCallbackId_p);
 static STATUS muxRestart(void* pEnd_p, void* pNetCallbackId_p);
 static void muxError(END_OBJ* pEnd_p, END_ERR* pError_p, void* pNetCallbackId_p);
@@ -565,9 +569,9 @@ This function is the packet handler forwarding the frames to the dllk.
 */
 //------------------------------------------------------------------------------
 static BOOL packetHandler(void* pCookie_p, LONG type_p, M_BLK_ID pPkt_p,
-                                LL_HDR_INFO* pLLHInfo_p, void* pNetCallbackId_p)
+                          LL_HDR_INFO* pLLHInfo_p, void* pNetCallbackId_p)
 {
-    tEdrvInstance*  pInstance = (tEdrvInstance*) pNetCallbackId_p;
+    tEdrvInstance*  pInstance = (tEdrvInstance*)pNetCallbackId_p;
     tEdrvRxBuffer   rxBuffer;
     char            aBuffer[EDRV_MAX_MTU];
 
@@ -666,7 +670,7 @@ This is transmit callback task.
 //------------------------------------------------------------------------------
 static INT txTask(INT arg_p)
 {
-    tEdrvInstance*  pInstance = (tEdrvInstance*) arg_p;
+    tEdrvInstance*  pInstance = (tEdrvInstance*)arg_p;
     STATUS          result;
 #if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
     struct timespec txLatency;
@@ -753,4 +757,3 @@ static void getMacAddr(PROTO_COOKIE pCookie_p, char* pIfName_p, UINT8* pMacAddr_
 }
 
 ///\}
-

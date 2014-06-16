@@ -52,8 +52,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-#include <common/ami.h>
 #include <kernel/edrv.h>
+#include <common/ami.h>
 
 #include <linux/module.h>
 #include <linux/kernel.h>
@@ -121,11 +121,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EDRV_MAX_FRAME_SIZE     0x600
 
 #define EDRV_TX_BUFFER_SIZE     (EDRV_MAX_TX_BUFFERS * EDRV_MAX_FRAME_SIZE) // n * (MTU + 14 + 4)
-#define EDRV_TX_DESCS_SIZE      (EDRV_MAX_TX_DESCS * sizeof (tEdrvTxDesc))
+#define EDRV_TX_DESCS_SIZE      (EDRV_MAX_TX_DESCS * sizeof(tEdrvTxDesc))
 
 #define EDRV_RX_BUFFER_SIZE_SHIFT   11  // 2048 Byte
 #define EDRV_RX_BUFFER_SIZE         (1 << EDRV_RX_BUFFER_SIZE_SHIFT)
-#define EDRV_RX_DESCS_SIZE          (EDRV_MAX_RX_DESCS * sizeof (tEdrvRxDesc))
+#define EDRV_RX_DESCS_SIZE          (EDRV_MAX_RX_DESCS * sizeof(tEdrvRxDesc))
 
 #define EDRV_AUTO_READ_DONE_TIMEOUT 10  // ms
 #define EDRV_MASTER_DISABLE_TIMEOUT 90  // ms
@@ -305,60 +305,74 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
+/**
+\brief Structure describing a transmit descriptor
+
+This structure describes a transmit descriptor of the Intel 82573 Ethernet
+chipset.
+*/
 typedef struct
 {
-    UINT64  bufferAddr_le;
-    UINT32  lengthCmd_le;
-    UINT32  status_le;
+    UINT64          bufferAddr_le;                          ///< Buffer address (little endian)
+    UINT32          lengthCmd_le;                           ///< Buffer length (little endian)
+    UINT32          status_le;                              ///< Status (little endian)
 } tEdrvTxDesc;
 
+/**
+\brief Structure describing a receive descriptor
+
+This structure describes a receive descriptor of the Intel 82573 Ethernet
+chipset.
+*/
 typedef struct
 {
-    UINT64  bufferAddr_le;
-    UINT16  length_le;
-    UINT16  checksum_le;
-    UINT8   status;
-    UINT8   error;
-    UINT16  reserved_le;
+    UINT64          bufferAddr_le;                          ///< Buffer address (little endian)
+    UINT16          length_le;                              ///< Buffer length (little endian)
+    UINT16          checksum_le;                            ///< Checksum (little endian)
+    UINT8           status;                                 ///< Status
+    UINT8           error;                                  ///< Error
+    UINT16          reserved_le;                            ///< Reserved
 } tEdrvRxDesc;
 
-// Private structure
+/**
+\brief Structure describing an instance of the Edrv
+
+This structure describes an instance of the Ethernet driver.
+*/
 typedef struct
 {
-    struct pci_dev*     pPciDev;      // pointer to PCI device structure
-    void*               pIoAddr;      // pointer to register space of Ethernet controller
+    tEdrvInitParam  initParam;                              ///< Init parameters
+    struct pci_dev* pPciDev;                                ///< Pointer to the PCI device structure
+    void*           pIoAddr;                                ///< Pointer to the register space of the Ethernet controller
 
-    tEdrvRxDesc*        pRxDesc;      // pointer to Rx descriptors
-    dma_addr_t          pRxDescDma;   // dma pointer to Rx descriptors
-    UINT8*              apRxBufInDesc[EDRV_MAX_RX_DESCS];
-                                        // Stack of free rx buffers
-                                        // +1 additional place if ReleaseRxBuffer is called
-                                        // before return of RxHandler (multi processor)
-    UINT8*              apRxBufFree[EDRV_MAX_RX_BUFFERS - EDRV_MAX_RX_DESCS + 1];
-    INT                 rxBufFreeTop;
-    spinlock_t          spinLockRxBufRelease;
-    INT                 pageAllocations;
+    tEdrvRxDesc*    pRxDesc;                                ///< Pointer to the RX descriptors
+    dma_addr_t      pRxDescDma;                             ///< Pointer to the RX descriptor DMA
+    UINT8*          apRxBufInDesc[EDRV_MAX_RX_DESCS];       ///< Stack of free RX buffers +1 additional place if ReleaseRxBuffer is called before return of RxHandler (multi processor)
+    UINT8*          apRxBufFree[EDRV_MAX_RX_BUFFERS - EDRV_MAX_RX_DESCS + 1];
+                                                            ///< Array of free RX buffers
+    INT             rxBufFreeTop;                           ///< Index of the top of the free RX buffer array
+    spinlock_t      spinLockRxBufRelease;                   ///< Spinlock for protecting the RX buffer release
+    INT             pageAllocations;                        ///< Counter of allocated pages
 
-    UINT8*              pTxBuf;      // pointer to Tx buffer
-    dma_addr_t          pTxBufDma;
-    tEdrvTxDesc*        pTxDesc;      // pointer to Tx descriptors
-    tEdrvTxBuffer*      apTxBuffer[EDRV_MAX_TX_DESCS];
-    dma_addr_t          pTxDescDma;
-    BOOL                afTxBufUsed[EDRV_MAX_TX_BUFFERS];
+    UINT8*          pTxBuf;                                 ///< Pointer to the TX buffer
+    dma_addr_t      pTxBufDma;                              ///< Pointer to the DMA of the TX buffer
+    tEdrvTxDesc*    pTxDesc;                                ///< Pointer to the TX descriptors
+    dma_addr_t      pTxDescDma;                             ///< Pointer to the DMA of the TX descriptors
+    tEdrvTxBuffer*  apTxBuffer[EDRV_MAX_TX_DESCS];          ///< Array of TX buffers
+    BOOL            afTxBufUsed[EDRV_MAX_TX_BUFFERS];       ///< Array indicating the use of a specific TX buffer
 
-    UINT                headTxDesc;
-    UINT                tailTxDesc;
-    UINT                headRxDesc;
-    UINT                tailRxDesc;
+    UINT            headTxDesc;                             ///< Index of the head of the TX descriptor buffer
+    UINT            tailTxDesc;                             ///< Index of the tail of the TX descriptor buffer
+    UINT            headRxDesc;                             ///< Index of the head of the RX descriptor buffer
+    UINT            tailRxDesc;                             ///< Index of the tail of the RX descriptor buffer
 
-    tEdrvInitParam      initParam;
 
 #if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
-    ULONGLONG           interruptCount;
-    INT                 rxBufFreeMin;
-    UINT                rxCount[EDRV_SAMPLE_NUM];
-    UINT                txCount[EDRV_SAMPLE_NUM];
-    UINT                pos;
+    ULONGLONG       interruptCount;                         ///< Interrupt counter
+    INT             rxBufFreeMin;                           ///< Minimum number of free RX buffers
+    UINT            rxCount[EDRV_SAMPLE_NUM];               ///< Array of RX counter samples
+    UINT            txCount[EDRV_SAMPLE_NUM];               ///< Array of TX counter samples
+    UINT            pos;                                    ///< Current sample position
 #endif
 } tEdrvInstance;
 
@@ -385,7 +399,7 @@ static struct pci_device_id aEdrvPciTbl_l[] = {
     {0x8086, 0x10d3, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},  // 82574L
     {0,}
 };
-MODULE_DEVICE_TABLE (pci, aEdrvPciTbl_l);
+MODULE_DEVICE_TABLE(pci, aEdrvPciTbl_l);
 
 static tEdrvInstance edrvInstance_l;
 
@@ -671,6 +685,7 @@ tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
             break;
         }
     }
+
     if (i >= EDRV_MAX_TX_BUFFERS)
     {
         ret = kErrorEdrvNoFreeBufEntry;
@@ -1044,7 +1059,7 @@ This function is the interrupt service routine for the Ethernet driver.
 \return The function returns an IRQ handled code.
 */
 //------------------------------------------------------------------------------
-static irqreturn_t edrvIrqHandler (INT irqNum_p, void* ppDevInstData_p)
+static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
 {
     UINT32  status;
     INT     handled = IRQ_HANDLED;
@@ -1360,7 +1375,7 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
         goto ExitFail;
     }
 
-    edrvInstance_l.pIoAddr = ioremap (pci_resource_start(pPciDev_p, 0), pci_resource_len(pPciDev_p, 0));
+    edrvInstance_l.pIoAddr = ioremap(pci_resource_start(pPciDev_p, 0), pci_resource_len(pPciDev_p, 0));
     if (edrvInstance_l.pIoAddr == NULL)
     {   // remap of controller's register space failed
         result = -EIO;
