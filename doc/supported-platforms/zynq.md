@@ -143,6 +143,33 @@ to achieve higher performance by reducing the jitter.
 
 The driver is located in: `drivers/xilinx-microblaze/drv_daemon`
 
+## Bootloader	{#sect_zynq_components_bootloader}
+
+Zynq non-OS demos requires an First Stage Bootloader (FSBL).
+The FSBL configures the FPGA with HW bit stream (if it exists) and loads the 
+Operating System (OS) Image or Standalone (SA) Image or 2nd Stage Boot Loader 
+image from the  non-volatile memory (NAND/NOR/QSPI) to RAM (DDR) and starts
+executing it. It supports multiple partitions, and each partition can be a code
+image or a bit stream.
+
+The FSBL for openPOWERLINK demo on Zynq is compiled by importing the project files
+from Xilinx installation directory into the dootloader repo and setting up necessary 
+configuration to build the bootloader using CMake configution files. Follow the 
+steps below to compile Zynq fsbl for demos:
+
+* Open a shell where the Xilinx ISE 14.7 Toolchain is configured.
+  - On a Windows host platform open the `ISE Design Suite [64,32] Bit Command
+    Prompt`.
+  - On a Linux host platform execute the script `<ISE_ROOT_DIR>/settings[32,64].sh>`
+    to configure your current shell.
+
+* Creating the executable
+
+      > cd <openPOWERLINK_dir>/contrib/bootloader/xilinx-arm/zynq-fsbl/build
+      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../../../cmake/toolchain-xilinx-arm-gnu.cmake ../ -DCMAKE_BUILD_TYPE=[Debug,Release]
+      > make all
+      > make install
+	  
 # Building {#sect_zynq_build}
 
 For building openPOWERLINK for Zynq refer to the
@@ -154,7 +181,7 @@ steps can be carried out:
 * [Build the openPOWERLINK stack libraries](\ref page_build_stack)
 * [Build the PCP daemon driver] (\ref page_build_drivers)
 * [Build your application (or a delivered demo application)](\ref page_build_demos)
-
+* [Build Zynq bootloader] (\ref sect_zynq_components_bootloader)
 
 # Running openPOWERLINK {#sect_zynq_running}
 
@@ -176,10 +203,6 @@ In order to run the openPOWERLINK demo applications on Zynq follow the steps lis
 
 The Zynq embedded demo can be started on the Zynq boards using the SD card boot mode.
 Follow the steps below to start MN demo on board:
-
-**Requirement:** The bootloader (Zynq FSBL) application for Zynq ARM core shall be separately 
-compiled and the binary should be copied to:\n
-`<openPOWERLINK_directory>\bin\generic\arm_xilinx\[BOARD_NAME]\[DEMO_NAME]`
 
 * Open the `ISE Design Suite Command Prompt` and execute the following
   commands:\n
