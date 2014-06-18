@@ -44,6 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <common/ami.h>
 #include "dllk-internal.h"
+#include "dllkstatemachine.h"
 
 #if CONFIG_DLL_PRES_CHAINING_CN != FALSE
 #include <kernel/timestamp.h>
@@ -271,7 +272,7 @@ tEdrvReleaseRxBuffer dllk_processFrameReceived(tEdrvRxBuffer* pRxBuffer_p)
 
     if (nmtEvent != kNmtEventNoEvent)
     {   // event for DLL and NMT state machine generated
-        ret = dllk_changeState(nmtEvent, nmtState);
+        ret = dllkstatemachine_changeState(nmtEvent, nmtState);
         if (ret != kErrorOk)
             goto Exit;
 
@@ -482,7 +483,7 @@ void dllk_processTransmittedSoc(tEdrvTxBuffer* pTxBuffer_p)
         goto Exit;
 
     // SoC frame sent
-    ret = dllk_changeState(kNmtEventDllMeAsndTimeout, nmtState);
+    ret = dllkstatemachine_changeState(kNmtEventDllMeAsndTimeout, nmtState);
     if (ret != kErrorOk)
         goto Exit;
 
@@ -2535,5 +2536,4 @@ static tOplkError forwardRpdo(tFrameInfo* pFrameInfo_p)
     return ret;
 }
 
-///\}
-
+/// \}

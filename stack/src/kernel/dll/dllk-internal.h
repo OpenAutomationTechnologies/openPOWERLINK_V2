@@ -302,10 +302,6 @@ tOplkError dllk_deleteNodeFilter(tDllkNodeInfo* pIntNodeInfo_p, tDllNodeOpType n
 #endif
 
 //------------------------------------------------------------------------------
-/* DLL state machine functions (dllkstatemachine.c) */
-tOplkError dllk_changeState(tNmtEvent nmtEvent_p, tNmtState nmtState_p) SECTION_DLLK_CHANGE_STATE;
-
-//------------------------------------------------------------------------------
 /* node functions */
 tOplkError dllk_cleanupLocalNode(tNmtState oldNmtState_p);
 tOplkError dllk_setupLocalNode(tNmtState nmtState_p);
@@ -354,4 +350,3 @@ tOplkError dllk_cbCnPresFallbackTimeout(void);
 
 
 #endif /* _INC_dllk_internal_H_ */
-

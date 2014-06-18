@@ -42,6 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <common/ami.h>
 #include "dllk-internal.h"
+#include "dllkstatemachine.h"
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -815,7 +816,7 @@ tOplkError dllk_cbMnTimerCycle(tTimerEventArg* pEventArg_p)
     if (nmtState <= kNmtGsResetConfiguration)
         goto Exit;
 
-    ret = dllk_changeState(kNmtEventDllMeSocTrig, nmtState);
+    ret = dllkstatemachine_changeState(kNmtEventDllMeSocTrig, nmtState);
 
 Exit:
     if (ret != kErrorOk)
@@ -982,7 +983,7 @@ tOplkError dllk_cbCnTimer(tTimerEventArg* pEventArg_p)
     if (nmtState <= kNmtGsResetConfiguration)
         goto Exit;
 
-    ret = dllk_changeState(kNmtEventDllCeFrameTimeout, nmtState);
+    ret = dllkstatemachine_changeState(kNmtEventDllCeFrameTimeout, nmtState);
     if (ret != kErrorOk)
         goto Exit;
 
@@ -1049,7 +1050,7 @@ tOplkError dllk_cbCnLossOfSync(void)
     if (nmtState <= kNmtGsResetConfiguration)
         goto Exit;
 
-    ret = dllk_changeState(kNmtEventDllCeFrameTimeout, nmtState);
+    ret = dllkstatemachine_changeState(kNmtEventDllCeFrameTimeout, nmtState);
     if (ret != kErrorOk)
         goto Exit;
 
@@ -2121,5 +2122,4 @@ tOplkError dllk_setupSyncPhase(tNmtState nmtState_p, BOOL fReadyFlag_p,
 }
 #endif
 
-///\}
-
+/// \}
