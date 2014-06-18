@@ -256,21 +256,6 @@ tOplkError dllk_postEvent(tEventType EventType_p);
 tOplkError controlPdokcalSync(BOOL fEnable_p);
 
 //------------------------------------------------------------------------------
-/* DLL filter functions (dllkfilter.c) */
-void       dllk_setupAsndFilter(tEdrvFilter* pFilter_p);
-void       dllk_setupSocFilter(tEdrvFilter* pFilter_p);
-void       dllk_setupSoaFilter(tEdrvFilter* pFilter_p);
-void       dllk_setupSoaIdentReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer *pBuffer_p);
-void       dllk_setupSoaStatusReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer *pBuffer_p);
-void       dllk_setupSoaNmtReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer *pBuffer_p);
-#if CONFIG_DLL_PRES_CHAINING_CN != FALSE
-void       dllk_setupSoaSyncReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer *pBuffer_p);
-#endif
-void       dllk_setupSoaUnspecReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer *pBuffer_p);
-void       dllk_setupPresFilter(tEdrvFilter* pFilter_p, BOOL fEnable_p);
-void       dllk_setupPreqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer *pBuffer_p, UINT8* pMacAdrs_p);
-
-//------------------------------------------------------------------------------
 /* Cycle/Sync Callback functions */
 #if defined(CONFIG_INCLUDE_NMT_MN)
 tOplkError dllk_cbCyclicError(tOplkError errorCode_p, tEdrvTxBuffer * pTxBuffer_p);

@@ -351,27 +351,7 @@ tOplkError dllknode_setupLocalNode(tNmtState nmtState_p)
 
     /*------------------------------------------------------------------------*/
     /* setup filter structure for Edrv */
-    OPLK_MEMSET(dllkInstance_g.aFilter, 0, sizeof(dllkInstance_g.aFilter));
-    dllk_setupAsndFilter(&dllkInstance_g.aFilter[DLLK_FILTER_ASND]);
-    dllk_setupSocFilter(&dllkInstance_g.aFilter[DLLK_FILTER_SOC]);
-    dllk_setupSoaFilter(&dllkInstance_g.aFilter[DLLK_FILTER_SOA]);
-    dllk_setupSoaIdentReqFilter(&dllkInstance_g.aFilter[DLLK_FILTER_SOA_IDREQ],
-                                dllkInstance_g.dllConfigParam.nodeId,
-                                &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_IDENTRES]);
-    dllk_setupSoaStatusReqFilter(&dllkInstance_g.aFilter[DLLK_FILTER_SOA_STATREQ],
-                                 dllkInstance_g.dllConfigParam.nodeId,
-                                 &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_STATUSRES]);
-    dllk_setupSoaNmtReqFilter(&dllkInstance_g.aFilter[DLLK_FILTER_SOA_NMTREQ],
-                              dllkInstance_g.dllConfigParam.nodeId,
-                              &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NMTREQ]);
-#if CONFIG_DLL_PRES_CHAINING_CN != FALSE
-    dllk_setupSoaSyncReqFilter(&dllkInstance_g.aFilter[DLLK_FILTER_SOA_SYNCREQ],
-                               dllkInstance_g.dllConfigParam.nodeId,
-                               &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SYNCRES]);
-#endif
-    dllk_setupSoaUnspecReqFilter(&dllkInstance_g.aFilter[DLLK_FILTER_SOA_NONPLK],
-                                 dllkInstance_g.dllConfigParam.nodeId,
-                                 &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONPLK]);
+    dllkfilter_setupFilters();
 
     // register multicast MACs in ethernet driver
     ami_setUint48Be(&aMulticastMac[0], C_DLL_MULTICAST_SOC);
@@ -1099,22 +1079,22 @@ static tOplkError setupLocalNodeCn(void)
 #endif
 #endif
 
-    dllk_setupPreqFilter(&dllkInstance_g.aFilter[DLLK_FILTER_PREQ],
-                         dllkInstance_g.dllConfigParam.nodeId,
-                         &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES],
-                         &dllkInstance_g.aLocalMac[0]);
+    dllkfilter_setupPreqFilter(&dllkInstance_g.aFilter[DLLK_FILTER_PREQ],
+                               dllkInstance_g.dllConfigParam.nodeId,
+                               &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES],
+                               &dllkInstance_g.aLocalMac[0]);
 
     // setup PRes filter
 #if CONFIG_DLL_PRES_FILTER_COUNT < 0
     if (dllkInstance_g.usedPresFilterCount > 0)
-        dllk_setupPresFilter(&dllkInstance_g.aFilter[DLLK_FILTER_PRES], TRUE);
+        dllkfilter_setupPresFilter(&dllkInstance_g.aFilter[DLLK_FILTER_PRES], TRUE);
     else
-        dllk_setupPresFilter(&dllkInstance_g.aFilter[DLLK_FILTER_PRES], FALSE);
+        dllkfilter_setupPresFilter(&dllkInstance_g.aFilter[DLLK_FILTER_PRES], FALSE);
 
 #else
     for (handle = DLLK_FILTER_PRES; handle < DLLK_FILTER_COUNT; handle++)
     {
-        dllk_setupPresFilter(&dllkInstance_g.aFilter[handle], FALSE);
+        dllkfilter_setupPresFilter(&dllkInstance_g.aFilter[handle], FALSE);
         ami_setUint8Be(&dllkInstance_g.aFilter[handle].aFilterMask[16], 0xFF);
     }
 
@@ -1236,7 +1216,7 @@ static tOplkError setupLocalNodeMn(void)
 
     dllkInstance_g.frameTimeout = 1000LL * ((UINT64)dllkInstance_g.dllConfigParam.cycleLen);
 
-    dllk_setupPresFilter(&dllkInstance_g.aFilter[DLLK_FILTER_PRES], TRUE);
+    dllkfilter_setupPresFilter(&dllkInstance_g.aFilter[DLLK_FILTER_PRES], TRUE);
 
     return ret;
 }

@@ -41,6 +41,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _INC_dllkfilter_H_
 
 //------------------------------------------------------------------------------
+// includes
+//------------------------------------------------------------------------------
+#include <common/oplkinc.h>
+#include <kernel/edrv.h>
+
+//------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
 #define DLLK_FILTER_PREQ                0
@@ -76,9 +82,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
+void dllkfilter_setupFilters(void);
+void dllkfilter_setupPresFilter(tEdrvFilter* pFilter_p, BOOL fEnable_p);
+void dllkfilter_setupPreqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p,
+                                tEdrvTxBuffer* pBuffer_p,
+                                UINT8* pMacAdrs_p);
+
 #ifdef __cplusplus
 }
 #endif
 
 #endif  // #ifndef _INC_dllkfilter_H_
-
