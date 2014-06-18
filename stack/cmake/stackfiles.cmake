@@ -192,6 +192,7 @@ SET(KERNEL_SOURCES
     ${KERNEL_SOURCE_DIR}/dll/dllkstatemachine.c
     ${KERNEL_SOURCE_DIR}/dll/dllkevent.c
     ${KERNEL_SOURCE_DIR}/dll/dllkframe.c
+    ${KERNEL_SOURCE_DIR}/dll/dllknode.c
     ${KERNEL_SOURCE_DIR}/dll/dllkcal.c
     ${KERNEL_SOURCE_DIR}/event/eventk.c
     ${KERNEL_SOURCE_DIR}/nmt/nmtk.c

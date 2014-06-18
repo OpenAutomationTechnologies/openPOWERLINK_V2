@@ -254,9 +254,6 @@ extern "C" {
 /* event functions (dllkevent.c) */
 tOplkError dllk_postEvent(tEventType EventType_p);
 tOplkError controlPdokcalSync(BOOL fEnable_p);
-#if defined(CONFIG_INCLUDE_NMT_MN)
-tOplkError dllk_issueLossOfPres(UINT nodeId_p);
-#endif
 
 //------------------------------------------------------------------------------
 /* DLL filter functions (dllkfilter.c) */
@@ -272,34 +269,11 @@ void       dllk_setupSoaSyncReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEd
 void       dllk_setupSoaUnspecReqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer *pBuffer_p);
 void       dllk_setupPresFilter(tEdrvFilter* pFilter_p, BOOL fEnable_p);
 void       dllk_setupPreqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p, tEdrvTxBuffer *pBuffer_p, UINT8* pMacAdrs_p);
-#if NMT_MAX_NODE_ID > 0
-tOplkError dllk_addNodeFilter(tDllkNodeInfo* pIntNodeInfo_p, tDllNodeOpType NodeOpType_p, BOOL fUpdateEdrv_p);
-tOplkError dllk_deleteNodeFilter(tDllkNodeInfo* pIntNodeInfo_p, tDllNodeOpType nodeOpType_p, BOOL fUpdateEdrv_p);
-#endif
-
-//------------------------------------------------------------------------------
-/* node functions */
-tOplkError dllk_cleanupLocalNode(tNmtState oldNmtState_p);
-tOplkError dllk_setupLocalNode(tNmtState nmtState_p);
-tOplkError dllk_setupLocalNodeCn(void);
-#if defined(CONFIG_INCLUDE_NMT_MN)
-tOplkError dllk_setupLocalNodeMn(void);
-tOplkError dllk_addNodeIsochronous(tDllkNodeInfo* pIntNodeInfo_p);
-tOplkError dllk_deleteNodeIsochronous(tDllkNodeInfo* pIntNodeInfo_p);
-tOplkError dllk_setupAsyncPhase(tNmtState nmtState_p, UINT nextTxBufferOffset_p,
-                                UINT32 nextTimeOffsetNs_p, UINT* pIndex_p) SECTION_DLLK_PROCESS_SYNC;
-tOplkError dllk_setupSyncPhase(tNmtState nmtState_p, BOOL fReadyFlag_p, UINT nextTxBufferOffset_p,
-                               UINT32* pNextTimeOffsetNs_p, UINT* pIndex_p) SECTION_DLLK_PROCESS_SYNC;
-#endif
-#if NMT_MAX_NODE_ID > 0
-tDllkNodeInfo* dllk_getNodeInfo(UINT uiNodeId_p);
-#endif
 
 //------------------------------------------------------------------------------
 /* Cycle/Sync Callback functions */
 #if defined(CONFIG_INCLUDE_NMT_MN)
 tOplkError dllk_cbCyclicError(tOplkError errorCode_p, tEdrvTxBuffer * pTxBuffer_p);
-tOplkError dllk_cbMnSyncHandler(void) SECTION_DLLK_MN_SYNC_CB;
 #endif
 #if (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER)
 tOplkError dllk_cbCnTimerSync(void);

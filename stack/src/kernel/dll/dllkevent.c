@@ -43,6 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <common/ami.h>
 #include "dllk-internal.h"
 #include "dllkframe.h"
+#include "dllknode.h"
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -169,58 +170,6 @@ tOplkError dllk_process(tEvent* pEvent_p)
     return ret;
 }
 
-#if defined(CONFIG_INCLUDE_NMT_MN)
-//------------------------------------------------------------------------------
-/**
-\brief  Issue loss of PRes
-
-The function forwards a loss of PRes event to the error handler module.
-
-\param  nodeId_p            Node ID of CN from which no PRes frame has been
-                            received.
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_dllk
-*/
-//------------------------------------------------------------------------------
-tOplkError dllk_issueLossOfPres(UINT nodeId_p)
-{
-    tOplkError          ret = kErrorOk;
-    tDllkNodeInfo*      pIntNodeInfo;
-    tEvent              event;
-    tDllNodeOpParam     nodeOpParam;
-
-    pIntNodeInfo = dllk_getNodeInfo(nodeId_p);
-    if (pIntNodeInfo != NULL)
-    {
-        if (pIntNodeInfo->fSoftDelete == FALSE)
-        {   // normal isochronous CN
-            tEventDllError  dllEvent;
-
-            dllEvent.dllErrorEvents = DLL_ERR_MN_CN_LOSS_PRES;
-            dllEvent.nodeId = pIntNodeInfo->nodeId;
-            ret = errhndk_postError(&dllEvent);
-            if (ret != kErrorOk)
-                return ret;
-        }
-        else
-        {   // CN shall be deleted softly, so remove it now without issuing any error
-            nodeOpParam.opNodeType = kDllNodeOpTypeIsochronous;
-            nodeOpParam.nodeId = pIntNodeInfo->nodeId;
-
-            event.eventSink = kEventSinkDllkCal;
-            event.eventType = kEventTypeDllkDelNode;
-            // $$$ d.k. set Event.netTime to current time
-            event.eventArgSize = sizeof(nodeOpParam);
-            event.pEventArg = &nodeOpParam;
-            eventk_postEvent(&event);
-        }
-    }
-    return ret;
-}
-#endif
-
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
@@ -307,7 +256,7 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
             dllkInstance_g.nmtState = newNmtState_p;
             if (oldNmtState_p > kNmtGsResetConfiguration)
             {
-                ret = dllk_cleanupLocalNode(oldNmtState_p);      // deinitialize DLL and destroy frames
+                ret = dllknode_cleanupLocalNode(oldNmtState_p);      // deinitialize DLL and destroy frames
             }
             break;
 
@@ -318,7 +267,7 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
             dllkInstance_g.nmtState = newNmtState_p;
             if (oldNmtState_p > kNmtGsResetConfiguration)
             {
-                ret = dllk_cleanupLocalNode(oldNmtState_p);      // deinitialize DLL and destroy frames
+                ret = dllknode_cleanupLocalNode(oldNmtState_p);      // deinitialize DLL and destroy frames
 
             }
             break;
@@ -329,7 +278,7 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
             if (oldNmtState_p <= kNmtGsResetConfiguration)
             {
                 // setup DLL and create frames
-                ret = dllk_setupLocalNode(newNmtState_p);
+                ret = dllknode_setupLocalNode(newNmtState_p);
             }
             break;
 
@@ -956,11 +905,11 @@ static tOplkError processSyncMn(tNmtState nmtState_p, BOOL fReadyFlag_p)
     dllkInstance_g.ppTxBufferList[index] = pTxBuffer;
     index++;
 
-    ret = dllk_setupSyncPhase(nmtState_p, fReadyFlag_p, nextTxBufferOffset, &nextTimeOffsetNs, &index);
+    ret = dllknode_setupSyncPhase(nmtState_p, fReadyFlag_p, nextTxBufferOffset, &nextTimeOffsetNs, &index);
     if (ret != kErrorOk)
         return ret;
 
-    dllk_setupAsyncPhase(nmtState_p, nextTxBufferOffset, nextTimeOffsetNs, &index);
+    dllknode_setupAsyncPhase(nmtState_p, nextTxBufferOffset, nextTimeOffsetNs, &index);
 
     // set last list element to NULL
     dllkInstance_g.ppTxBufferList[index] = NULL;
@@ -1048,14 +997,14 @@ static tOplkError processStartReducedCycle(void)
     // remove any CN from isochronous phase
     while (dllkInstance_g.pFirstNodeInfo != NULL)
     {
-        ret = dllk_deleteNodeIsochronous(dllkInstance_g.pFirstNodeInfo);
+        ret = dllknode_deleteNodeIsochronous(dllkInstance_g.pFirstNodeInfo);
         if (ret != kErrorOk)
             goto Exit;
     }
 
     while (dllkInstance_g.pFirstPrcNodeInfo != NULL)
     {
-        ret = dllk_deleteNodeIsochronous(dllkInstance_g.pFirstPrcNodeInfo);
+        ret = dllknode_deleteNodeIsochronous(dllkInstance_g.pFirstPrcNodeInfo);
         if (ret != kErrorOk)
             goto Exit;
     }

@@ -43,6 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <common/oplkinc.h>
 #include <stddef.h>
 #include "dllkframe.h"
+#include "dllknode.h"
 #include "dllkstatemachine.h"
 
 #include <kernel/dllktgt.h>
@@ -1296,7 +1297,7 @@ tOplkError dllkframe_updateFrameSoa(tEdrvTxBuffer* pTxBuffer_p,
                 dllkInstance_g.aLastTargetNodeId[curReq_p] = dllkInstance_g.dllConfigParam.nodeId;
             }
 
-            pNodeInfo = dllk_getNodeInfo(dllkInstance_g.aLastTargetNodeId[curReq_p]);
+            pNodeInfo = dllknode_getNodeInfo(dllkInstance_g.aLastTargetNodeId[curReq_p]);
             if (pNodeInfo == NULL)
             {   // no node info structure available
                 ret = kErrorDllNoNodeInfo;
@@ -1756,7 +1757,7 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
     if ((nmtState_p >= kNmtCsPreOperational2) && (nmtState_p <= kNmtCsOperational))
     {   // process PRes frames only in PreOp2, ReadyToOp and Op of CN
 #if NMT_MAX_NODE_ID > 0
-        pIntNodeInfo = dllk_getNodeInfo(nodeId);
+        pIntNodeInfo = dllknode_getNodeInfo(nodeId);
         if (pIntNodeInfo == NULL)
         {   // no node info structure available
             return kErrorDllNoNodeInfo;
@@ -2298,7 +2299,7 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
                 {   // save MAC address of CN for PReq
                     tDllkNodeInfo*   pIntNodeInfo;
 
-                    pIntNodeInfo = dllk_getNodeInfo(nodeId);
+                    pIntNodeInfo = dllknode_getNodeInfo(nodeId);
                     if (pIntNodeInfo == NULL)
                     {   // no node info structure available
                         ret = kErrorDllNoNodeInfo;
@@ -2571,11 +2572,11 @@ static tOplkError searchNodeInfo(UINT nodeId_p, tDllkNodeInfo** ppIntNodeInfo_p,
             // issue error for each CN in list between last and current
             for (pCnNodeId-- ; nextNodeIndex > 0; nextNodeIndex--, pCnNodeId--)
             {
-                if ((ret = dllk_issueLossOfPres(*pCnNodeId)) != kErrorOk)
+                if ((ret = dllknode_issueLossOfPres(*pCnNodeId)) != kErrorOk)
                     return ret;
             }
 
-            pIntNodeInfo = dllk_getNodeInfo(nodeId_p);
+            pIntNodeInfo = dllknode_getNodeInfo(nodeId_p);
             break;
         }
         else
@@ -2611,7 +2612,7 @@ static void handleErrorSignaling(tPlkFrame* pFrame_p, UINT nodeId_p)
     BOOL                fEcIsSet;
     tDllkNodeInfo*      pIntNodeInfo;
 
-    pIntNodeInfo = dllk_getNodeInfo(nodeId_p);
+    pIntNodeInfo = dllknode_getNodeInfo(nodeId_p);
     if (pIntNodeInfo == NULL)
         return;         // we have no node info therefore error signaling couldn't be handled
 
