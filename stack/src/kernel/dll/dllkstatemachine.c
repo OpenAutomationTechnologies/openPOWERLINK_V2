@@ -43,6 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
 #include "dllkstatemachine.h"
+#include "dllkframe.h"
 
 #include <kernel/dllk.h>
 #include <kernel/errhndk.h>
@@ -286,8 +287,8 @@ static tOplkError processNmtMsPreop1(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
         case kNmtEventDllCeAsnd:
             // because of reduced POWERLINK cycle SoA shall be triggered, not SoC
 
-            ret = dllk_asyncFrameNotReceived(dllkInstance_g.aLastReqServiceId[dllkInstance_g.curLastSoaReq],
-                                             dllkInstance_g.aLastTargetNodeId[dllkInstance_g.curLastSoaReq]);
+            ret = dllkframe_asyncFrameNotReceived(dllkInstance_g.aLastReqServiceId[dllkInstance_g.curLastSoaReq],
+                                                  dllkInstance_g.aLastTargetNodeId[dllkInstance_g.curLastSoaReq]);
             if (ret != kErrorOk)
                 return ret;
 
@@ -297,8 +298,8 @@ static tOplkError processNmtMsPreop1(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
             //          otherwise.
 
             // go ahead and send SoA
-            ret = dllk_mnSendSoa(nmtState_p, &DummyDllState,
-                                 (dllkInstance_g.cycleCount >= C_DLL_PREOP1_START_CYCLES));
+            ret = dllkframe_mnSendSoa(nmtState_p, &DummyDllState,
+                                      (dllkInstance_g.cycleCount >= C_DLL_PREOP1_START_CYCLES));
 
             // increment cycle counter to detect if C_DLL_PREOP1_START_CYCLES empty cycles are elapsed
             dllkInstance_g.cycleCount++;
@@ -388,8 +389,8 @@ static tOplkError processNmtMsFullCycle(tNmtState nmtState_p, tNmtEvent nmtEvent
             }
             // SoC has been sent, so ASnd should have been received
             // report if SoA was correctly answered
-            ret = dllk_asyncFrameNotReceived(dllkInstance_g.aLastReqServiceId[dllkInstance_g.curLastSoaReq],
-                                             dllkInstance_g.aLastTargetNodeId[dllkInstance_g.curLastSoaReq]);
+            ret = dllkframe_asyncFrameNotReceived(dllkInstance_g.aLastReqServiceId[dllkInstance_g.curLastSoaReq],
+                                                  dllkInstance_g.aLastTargetNodeId[dllkInstance_g.curLastSoaReq]);
             // switch SoAReq buffer
             dllkInstance_g.curLastSoaReq++;
             if (dllkInstance_g.curLastSoaReq >= DLLK_SOAREQ_COUNT)

@@ -40,11 +40,29 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <common/oplkinc.h>
 #include <stddef.h>
+#include "dllkframe.h"
+#include "dllkstatemachine.h"
+
+#include <kernel/dllktgt.h>
+#include <kernel/dllkfilter.h>
+#include <kernel/dllkcal.h>
+#include <kernel/eventk.h>
+#include <kernel/errhndk.h>
+
+#if CONFIG_TIMER_USE_HIGHRES != FALSE
+#include <kernel/hrestimer.h>
+#endif
+
+#if (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER)
+#include <kernel/synctimer.h>
+#endif
 
 #include <common/ami.h>
+#include <oplk/benchmark.h>
+
 #include "dllk-internal.h"
-#include "dllkstatemachine.h"
 
 #if CONFIG_DLL_PRES_CHAINING_CN != FALSE
 #include <kernel/timestamp.h>
@@ -103,11 +121,13 @@ static BOOL       presFrameFormatIsInvalid(tFrameInfo* pFrameInfo_p, tDllkNodeIn
 static tOplkError checkAndSetSyncEvent(BOOL fPrcSlotFinished_p, UINT nodeId_p);
 static tOplkError updateNode(tDllkNodeInfo* pIntNodeInfo_p, UINT nodeId_p, tNmtState nodeNmtState_p);
 static tOplkError searchNodeInfo(UINT nodeId_p, tDllkNodeInfo** ppIntNodeInfo_p, BOOL* pfPrcSlotFinished_p);
-#endif
-
-#if defined(CONFIG_INCLUDE_NMT_MN)
 static void       handleErrorSignaling(tPlkFrame* pFrame_p, UINT nodeId_p);
 #endif
+
+#if CONFIG_TIMER_USE_HIGHRES != FALSE
+static tOplkError cbCnTimer(tTimerEventArg* pEventArg_p);
+#endif
+
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -133,7 +153,7 @@ The function implements the callback function to process a received frame.
 \retval kEdrvReleaseRxBufferLater           Buffer must be released later.
 */
 //------------------------------------------------------------------------------
-tEdrvReleaseRxBuffer dllk_processFrameReceived(tEdrvRxBuffer* pRxBuffer_p)
+tEdrvReleaseRxBuffer dllkframe_processFrameReceived(tEdrvRxBuffer* pRxBuffer_p)
 {
     tEdrvReleaseRxBuffer    releaseRxBuffer = kEdrvReleaseRxBufferImmediately;
     tOplkError              ret             = kErrorOk;
@@ -315,7 +335,7 @@ frame was transmitted.
 
 */
 //------------------------------------------------------------------------------
-void dllk_processTransmittedNmtReq(tEdrvTxBuffer* pTxBuffer_p)
+void dllkframe_processTransmittedNmtReq(tEdrvTxBuffer* pTxBuffer_p)
 {
     tOplkError              ret = kErrorOk;
     tEvent                  event;
@@ -404,7 +424,7 @@ POWERLINK frame was transmitted.
 
 */
 //------------------------------------------------------------------------------
-void dllk_processTransmittedNonPlk(tEdrvTxBuffer* pTxBuffer_p)
+void dllkframe_processTransmittedNonPlk(tEdrvTxBuffer* pTxBuffer_p)
 {
     tOplkError              ret = kErrorOk;
     tEvent                  event;
@@ -453,189 +473,6 @@ Exit:
     return;
 }
 
-#if defined(CONFIG_INCLUDE_NMT_MN)
-//------------------------------------------------------------------------------
-/**
-\brief  Callback function for transmitted SoC frame
-
-The function implements the callback function which is called when a SoC
-frame was transmitted.
-
-\param  pTxBuffer_p         Pointer to TxBuffer structure of transmitted frame.
-
-*/
-//------------------------------------------------------------------------------
-void dllk_processTransmittedSoc(tEdrvTxBuffer* pTxBuffer_p)
-{
-    tOplkError      ret = kErrorOk;
-    tNmtState       nmtState;
-    UINT            handle = DLLK_TXFRAME_SOC;
-    UINT32          arg;
-
-    TGT_DLLK_DECLARE_FLAGS
-
-    UNUSED_PARAMETER(pTxBuffer_p);
-
-    TGT_DLLK_ENTER_CRITICAL_SECTION()
-
-    nmtState = dllkInstance_g.nmtState;
-    if (nmtState <= kNmtGsResetConfiguration)
-        goto Exit;
-
-    // SoC frame sent
-    ret = dllkstatemachine_changeState(kNmtEventDllMeAsndTimeout, nmtState);
-    if (ret != kErrorOk)
-        goto Exit;
-
-Exit:
-    if (ret != kErrorOk)
-    {
-        BENCHMARK_MOD_02_TOGGLE(7);
-        arg = dllkInstance_g.dllState | (handle << 16);
-        ret = eventk_postError(kEventSourceDllk, ret, sizeof(arg), &arg);
-    }
-    TGT_DLLK_LEAVE_CRITICAL_SECTION()
-    return;
-}
-#endif
-
-#if defined(CONFIG_INCLUDE_NMT_MN)
-//------------------------------------------------------------------------------
-/**
-\brief  Callback function for transmitted SoA frame
-
-The function implements the callback function which is called when a SoA
-frame was transmitted.
-
-\param  pTxBuffer_p         Pointer to TxBuffer structure of transmitted frame.
-
-*/
-//------------------------------------------------------------------------------
-void dllk_processTransmittedSoa(tEdrvTxBuffer* pTxBuffer_p)
-{
-    tOplkError      ret = kErrorOk;
-    tNmtState       nmtState;
-    UINT            handle = DLLK_TXFRAME_SOA;
-    UINT32          arg;
-
-    TGT_DLLK_DECLARE_FLAGS
-
-    UNUSED_PARAMETER(pTxBuffer_p);
-
-    TGT_DLLK_ENTER_CRITICAL_SECTION()
-
-    nmtState = dllkInstance_g.nmtState;
-    if (nmtState <= kNmtGsResetConfiguration)
-        goto Exit;
-
-    // SoA frame sent
-    // check if we are invited
-    // old handling only in PreOp1
-    if ((dllkInstance_g.dllState == kDllMsNonCyclic) &&
-        (dllkInstance_g.aLastTargetNodeId[dllkInstance_g.curLastSoaReq] == dllkInstance_g.dllConfigParam.nodeId))
-    {
-        switch (dllkInstance_g.aLastReqServiceId[dllkInstance_g.curLastSoaReq])
-        {
-            case kDllReqServiceStatus:
-                if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_STATUSRES + dllkInstance_g.curTxBufferOffsetStatusRes].pBuffer != NULL)
-                {   // StatusRes does exist
-                    // send StatusRes
-                    ret = edrv_sendTxBuffer(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_STATUSRES + dllkInstance_g.curTxBufferOffsetStatusRes]);
-                    if (ret != kErrorOk)
-                        goto Exit;
-                    TGT_DBG_SIGNAL_TRACE_POINT(8);
-                }
-                break;
-
-            case kDllReqServiceIdent:
-                if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_IDENTRES + dllkInstance_g.curTxBufferOffsetIdentRes].pBuffer != NULL)
-                {   // IdentRes does exist
-                    // send IdentRes
-                    ret = edrv_sendTxBuffer(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_IDENTRES + dllkInstance_g.curTxBufferOffsetIdentRes]);
-                    if (ret != kErrorOk)
-                        goto Exit;
-                    TGT_DBG_SIGNAL_TRACE_POINT(7);
-                }
-                break;
-
-            case kDllReqServiceNmtRequest:
-                if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NMTREQ + dllkInstance_g.curTxBufferOffsetNmtReq].pBuffer != NULL)
-                {   // NmtRequest does exist
-                    // check if frame is not empty and not being filled
-                    if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NMTREQ + dllkInstance_g.curTxBufferOffsetNmtReq].txFrameSize > DLLK_BUFLEN_FILLING)
-                    {
-                        // send NmtRequest
-                        ret = edrv_sendTxBuffer(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NMTREQ + dllkInstance_g.curTxBufferOffsetNmtReq]);
-                        if (ret != kErrorOk)
-                            goto Exit;
-                        dllkInstance_g.curTxBufferOffsetNmtReq ^= 1;
-                    }
-                }
-                break;
-
-            case kDllReqServiceUnspecified:
-                if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONPLK + dllkInstance_g.curTxBufferOffsetNonPlk].pBuffer != NULL)
-                {   // non-POWERLINK frame does exist
-                    // check if frame is not empty and not being filled
-                    if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONPLK + dllkInstance_g.curTxBufferOffsetNonPlk].txFrameSize > DLLK_BUFLEN_FILLING)
-                    {
-                        // send non-POWERLINK frame
-                        ret = edrv_sendTxBuffer(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONPLK + dllkInstance_g.curTxBufferOffsetNonPlk]);
-                        if (ret != kErrorOk)
-                            goto Exit;
-
-                        dllkInstance_g.curTxBufferOffsetNonPlk ^= 1;
-                    }
-                }
-                break;
-
-            default:
-                break;
-        }
-
-        // ASnd frame was sent, remove the request
-        dllkInstance_g.aLastReqServiceId[dllkInstance_g.curLastSoaReq] = kDllReqServiceNo;
-    }
-
-    // reprogram timer in PREOP1
-#if CONFIG_TIMER_USE_HIGHRES != FALSE
-    if ((dllkInstance_g.dllState == kDllMsNonCyclic) &&
-        (dllkInstance_g.dllConfigParam.asyncSlotTimeout != 0))
-    {
-        ret = hrestimer_modifyTimer(&dllkInstance_g.timerHdlCycle,
-                                    dllkInstance_g.dllConfigParam.asyncSlotTimeout,
-                                    dllk_cbMnTimerCycle, 0L, FALSE);
-        if (ret != kErrorOk)
-            goto Exit;
-
-        // forward event to ErrorHandler and DLLk module
-        ret = dllk_postEvent(kEventTypeDllkCycleFinish);
-        if (ret != kErrorOk)
-            goto Exit;
-    }
-#endif
-
-    if ((dllkInstance_g.dllState > kDllMsNonCyclic) &&
-        (dllkInstance_g.dllConfigParam.syncNodeId > C_ADR_SYNC_ON_SOC) &&
-        (dllkInstance_g.fSyncProcessed == FALSE))
-    {   // cyclic state is active, so preprocessing is necessary
-        dllkInstance_g.fSyncProcessed = TRUE;
-        ret = dllk_postEvent(kEventTypeSync);
-        if (ret != kErrorOk)
-            goto Exit;
-    }
-
-Exit:
-    if (ret != kErrorOk)
-    {
-        BENCHMARK_MOD_02_TOGGLE(7);
-        arg = dllkInstance_g.dllState | (handle << 16);
-        ret = eventk_postError(kEventSourceDllk, ret, sizeof(arg), &arg);
-    }
-    TGT_DLLK_LEAVE_CRITICAL_SECTION()
-    return;
-}
-#endif
 
 //------------------------------------------------------------------------------
 /**
@@ -649,7 +486,8 @@ The function updates an IdentResponse frame with the specified information.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError dllk_updateFrameIdentRes(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p)
+tOplkError dllkframe_updateFrameIdentRes(tEdrvTxBuffer* pTxBuffer_p,
+                                         tNmtState nmtState_p)
 {
     tOplkError      ret = kErrorOk;
     tPlkFrame*      pTxFrame;
@@ -682,7 +520,8 @@ The function updates a StatusResponse frame with the specified information.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError dllk_updateFrameStatusRes(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p)
+tOplkError dllkframe_updateFrameStatusRes(tEdrvTxBuffer* pTxBuffer_p,
+                                          tNmtState nmtState_p)
 {
     tOplkError      ret = kErrorOk;
     tPlkFrame*      pTxFrame;
@@ -716,7 +555,8 @@ The function updates a PRes frame with the specified information.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError dllk_updateFramePres(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p)
+tOplkError dllkframe_updateFramePres(tEdrvTxBuffer* pTxBuffer_p,
+                                     tNmtState nmtState_p)
 {
     tOplkError      ret = kErrorOk;
     tPlkFrame*      pTxFrame;
@@ -769,7 +609,7 @@ It sets fields in the Ethernet and POWERLINK header parts.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError dllk_checkFrame(tPlkFrame* pFrame_p, UINT frameSize_p)
+tOplkError dllkframe_checkFrame(tPlkFrame* pFrame_p, UINT frameSize_p)
 {
     tOplkError      ret = kErrorOk;
     tMsgType        MsgType;
@@ -800,7 +640,7 @@ tOplkError dllk_checkFrame(tPlkFrame* pFrame_p, UINT frameSize_p)
             ami_setUint8Le(&pFrame_p->srcNodeId, (BYTE)dllkInstance_g.dllConfigParam.nodeId);
 
             // check message type
-            MsgType = ami_getUint8Le(&pFrame_p->messageType);
+            MsgType = (tMsgType)ami_getUint8Le(&pFrame_p->messageType);
             if (MsgType == 0)
             {
                 MsgType = kMsgTypeAsnd;
@@ -819,204 +659,6 @@ tOplkError dllk_checkFrame(tPlkFrame* pFrame_p, UINT frameSize_p)
 
     return ret;
 }
-
-#if defined (CONFIG_INCLUDE_NMT_MN)
-//------------------------------------------------------------------------------
-/**
-\brief  Update and transmit SoA
-
-The function updates and transmits an SoA.
-
-\param  nmtState_p              Current NMT state.
-\param  pDllStateProposed_p     Proposed DLL state.
-\param  fEnableInvitation_p     Enable invitation for asynchronous phase. It
-                                will be disabled for C_DLL_PREOP1_START_CYCLES
-                                SoAs.
-
-\return The function returns a tOplkError error code.
-*/
-//------------------------------------------------------------------------------
-tOplkError dllk_mnSendSoa(tNmtState nmtState_p, tDllState* pDllStateProposed_p, BOOL fEnableInvitation_p)
-{
-    tOplkError      ret = kErrorOk;
-    tEdrvTxBuffer*  pTxBuffer = NULL;
-
-    *pDllStateProposed_p = kDllMsNonCyclic;
-
-    pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SOA];
-    if (pTxBuffer->pBuffer != NULL)
-    {   // SoA does exist
-        ret = dllk_updateFrameSoa(pTxBuffer, nmtState_p, fEnableInvitation_p, dllkInstance_g.curLastSoaReq);
-        if (ret != kErrorOk)
-            return ret;
-
-        if (dllkInstance_g.aLastReqServiceId[dllkInstance_g.curLastSoaReq] != kDllReqServiceNo)
-        {   // asynchronous phase will be assigned to one node
-            if (dllkInstance_g.aLastTargetNodeId[dllkInstance_g.curLastSoaReq] ==
-                                  dllkInstance_g.dllConfigParam.nodeId)
-            {   // d.k. DLL state WaitAsndTrig is not helpful;
-                //      so just step over to WaitSocTrig,
-                //      because own ASnd is sent automatically in CbFrameTransmitted() after SoA.
-                //*pDllStateProposed_p = kDllMsWaitAsndTrig;
-                *pDllStateProposed_p = kDllMsWaitSocTrig;
-            }
-            else
-            {   // assignment to CN
-                *pDllStateProposed_p = kDllMsWaitAsnd;
-            }
-        }
-        else
-        {   // no assignment of asynchronous phase
-            *pDllStateProposed_p = kDllMsWaitSocTrig;
-        }
-
-        // send SoA frame
-        ret = edrv_sendTxBuffer(pTxBuffer);
-    }
-    return ret;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Update SoA frame
-
-The function updates an SoA frame.
-
-\param  pTxBuffer_p             Pointer to TX buffer of frame.
-\param  nmtState_p              NMT state of the local node.
-\param  fEnableInvitation_p     Enable the invitation for asynchronous phase.
-                                It will be disabled for the first C_DLL_PREOP1_START_CYCLES
-                                SoAs.
-\param  curReq_p                Index of current request.
-
-\return The function returns a tOplkError error code.
-*/
-//------------------------------------------------------------------------------
-tOplkError dllk_updateFrameSoa(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p,
-                               BOOL fEnableInvitation_p, UINT8 curReq_p)
-{
-    tOplkError          ret = kErrorOk;
-    tPlkFrame*          pTxFrame;
-    tDllkNodeInfo*      pNodeInfo;
-
-    pTxFrame = (tPlkFrame*)pTxBuffer_p->pBuffer;
-
-    if (fEnableInvitation_p != FALSE)
-    {   // fetch target of asynchronous phase
-        if (dllkInstance_g.flag2 == 0)
-        {   // own queues are empty
-            dllkInstance_g.aLastReqServiceId[curReq_p] = kDllReqServiceNo;
-        }
-        else if (((tDllAsyncReqPriority) (dllkInstance_g.flag2 >> PLK_FRAME_FLAG2_PR_SHIFT)) == kDllAsyncReqPrioNmt)
-        {   // frames in own NMT request queue available
-            dllkInstance_g.aLastReqServiceId[curReq_p] = kDllReqServiceNmtRequest;
-        }
-        else
-        {
-            dllkInstance_g.aLastReqServiceId[curReq_p] = kDllReqServiceUnspecified;
-        }
-        ret = dllkcal_getSoaRequest(&dllkInstance_g.aLastReqServiceId[curReq_p],
-                                    &dllkInstance_g.aLastTargetNodeId[curReq_p],
-                                    &pTxFrame->data.soa.payload);
-        if (ret != kErrorOk)
-            return ret;
-
-        if (dllkInstance_g.aLastReqServiceId[curReq_p] != kDllReqServiceNo)
-        {   // asynchronous phase will be assigned to one node
-            if (dllkInstance_g.aLastTargetNodeId[curReq_p] == C_ADR_INVALID)
-            {   // exchange invalid node ID with local node ID
-                dllkInstance_g.aLastTargetNodeId[curReq_p] = dllkInstance_g.dllConfigParam.nodeId;
-            }
-
-            pNodeInfo = dllk_getNodeInfo(dllkInstance_g.aLastTargetNodeId[curReq_p]);
-            if (pNodeInfo == NULL)
-            {   // no node info structure available
-                ret = kErrorDllNoNodeInfo;
-                return ret;
-            }
-
-            // Update EA/ER flag only for StatusReq
-            if (dllkInstance_g.aLastReqServiceId[curReq_p] == kDllReqServiceStatus)
-            {
-                ami_setUint8Le(&pTxFrame->data.soa.flag1,
-                               pNodeInfo->soaFlag1 & (PLK_FRAME_FLAG1_EA | PLK_FRAME_FLAG1_ER));
-            }
-            else
-            {
-                pTxFrame->data.soa.flag1 = 0;
-            }
-        }
-        else
-        {   // no assignment of asynchronous phase
-            dllkInstance_g.aLastTargetNodeId[curReq_p] = C_ADR_INVALID;
-        }
-    }
-    else
-    {   // invite nobody
-        dllkInstance_g.aLastReqServiceId[curReq_p] = kDllReqServiceNo;
-        dllkInstance_g.aLastTargetNodeId[curReq_p] = C_ADR_INVALID;
-    }
-
-    // update frame (target)
-    ami_setUint8Le(&pTxFrame->data.soa.reqServiceId,
-                   (UINT8)dllkInstance_g.aLastReqServiceId[curReq_p]);
-    ami_setUint8Le(&pTxFrame->data.soa.reqServiceTarget,
-                   (UINT8)dllkInstance_g.aLastTargetNodeId[curReq_p]);
-    // update frame (NMT state)
-    ami_setUint8Le(&pTxFrame->data.soa.nmtStatus, (BYTE)nmtState_p);
-
-    return ret;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Pass empty ASnd frame to receive FIFO.
-
-The function passes an empty ASnd frame to the receive FIFO. It will be called
-only for frames with registered AsndServiceIds (only kDllAsndFilterAny).
-
-\param  reqServiceId_p  Requested service ID.
-\param  nodeId_p        Node ID.
-
-
-\return The function returns a tOplkError error code.
-*/
-//------------------------------------------------------------------------------
-tOplkError dllk_asyncFrameNotReceived(tDllReqServiceId reqServiceId_p, UINT nodeId_p)
-{
-    tOplkError      Ret = kErrorOk;
-    tDllAsndNotRx   asndNotRx;
-    tEvent          event;
-
-    // check if previous SoA invitation was not answered
-    switch (reqServiceId_p)
-    {
-        case kDllReqServiceIdent:
-        case kDllReqServiceStatus:
-        case kDllReqServiceSync:
-            // ASnd service registered?
-            if (dllkInstance_g.aAsndFilter[reqServiceId_p] == kDllAsndFilterAny)
-            {   // ASnd service ID is registered
-                asndNotRx.nodeId = (BYTE)nodeId_p;
-                asndNotRx.serviceId = (BYTE)reqServiceId_p;
-
-                event.eventSink = kEventSinkDlluCal;
-                event.eventType = kEventTypeAsndNotRx;
-                event.pEventArg = (void*)&asndNotRx;
-                event.eventArgSize = sizeof(tDllAsndNotRx);
-
-                // Post event with dummy frame
-                Ret = eventk_postEvent(&event);
-            }
-            break;
-
-        default:
-            // no invitation issued or it was successfully answered or it is uninteresting
-            break;
-    }
-    return Ret;
-}
-#endif
 
 //------------------------------------------------------------------------------
 /**
@@ -1039,8 +681,9 @@ driver.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError dllk_createTxFrame (UINT* pHandle_p, UINT* pFrameSize_p,
-                               tMsgType msgType_p, tDllAsndServiceId serviceId_p)
+tOplkError dllkframe_createTxFrame(UINT* pHandle_p, UINT* pFrameSize_p,
+                                   tMsgType msgType_p,
+                                   tDllAsndServiceId serviceId_p)
 {
     tOplkError      ret = kErrorOk;
     tPlkFrame*      pTxFrame;
@@ -1169,7 +812,7 @@ tOplkError dllk_createTxFrame (UINT* pHandle_p, UINT* pFrameSize_p,
         if (msgType_p != kMsgTypeNonPowerlink)
         {   // fill out Frame only if it is a POWERLINK frame
             ami_setUint16Be(&pTxFrame->etherType, C_DLL_ETHERTYPE_EPL);
-            ami_setUint8Le(&pTxFrame->srcNodeId, (BYTE) dllkInstance_g.dllConfigParam.nodeId);
+            ami_setUint8Le(&pTxFrame->srcNodeId, (BYTE)dllkInstance_g.dllConfigParam.nodeId);
             OPLK_MEMCPY(&pTxFrame->aSrcMac[0], &dllkInstance_g.aLocalMac[0], 6);
 
             switch (msgType_p)
@@ -1204,7 +847,7 @@ tOplkError dllk_createTxFrame (UINT* pHandle_p, UINT* pFrameSize_p,
                             ami_setUint32Le(&pTxFrame->data.asnd.payload.identResponse.serialNumberLe,
                                             dllkInstance_g.dllIdentParam.serialNumber);
                             ami_setUint64Le(&pTxFrame->data.asnd.payload.identResponse.vendorSpecificExt1Le,
-                                              dllkInstance_g.dllIdentParam.vendorSpecificExt1);
+                                            dllkInstance_g.dllIdentParam.vendorSpecificExt1);
                             ami_setUint32Le(&pTxFrame->data.asnd.payload.identResponse.verifyConfigurationDateLe,
                                             dllkInstance_g.dllIdentParam.verifyConfigurationDate);
                             ami_setUint32Le(&pTxFrame->data.asnd.payload.identResponse.verifyConfigurationTimeLe,
@@ -1303,7 +946,7 @@ driver.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError dllk_deleteTxFrame (UINT handle_p)
+tOplkError dllkframe_deleteTxFrame(UINT handle_p)
 {
     tOplkError      ret = kErrorOk;
     tEdrvTxBuffer*  pTxBuffer = NULL;
@@ -1347,7 +990,7 @@ callback function (i.e. to the PDO module).
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError dllk_processTpdo(tFrameInfo* pFrameInfo_p, BOOL fReadyFlag_p)
+tOplkError dllkframe_processTpdo(tFrameInfo* pFrameInfo_p, BOOL fReadyFlag_p)
 {
     tOplkError ret = kErrorOk;
 
@@ -1357,6 +1000,542 @@ tOplkError dllk_processTpdo(tFrameInfo* pFrameInfo_p, BOOL fReadyFlag_p)
     }
     return ret;
 }
+
+#if defined(CONFIG_INCLUDE_NMT_MN)
+//------------------------------------------------------------------------------
+/**
+\brief  Callback function for transmitted SoC frame
+
+The function implements the callback function which is called when a SoC
+frame was transmitted.
+
+\param  pTxBuffer_p         Pointer to TxBuffer structure of transmitted frame.
+
+*/
+//------------------------------------------------------------------------------
+void dllkframe_processTransmittedSoc(tEdrvTxBuffer* pTxBuffer_p)
+{
+    tOplkError      ret = kErrorOk;
+    tNmtState       nmtState;
+    UINT            handle = DLLK_TXFRAME_SOC;
+    UINT32          arg;
+
+    TGT_DLLK_DECLARE_FLAGS
+
+    UNUSED_PARAMETER(pTxBuffer_p);
+
+    TGT_DLLK_ENTER_CRITICAL_SECTION()
+
+    nmtState = dllkInstance_g.nmtState;
+    if (nmtState <= kNmtGsResetConfiguration)
+        goto Exit;
+
+    // SoC frame sent
+    ret = dllkstatemachine_changeState(kNmtEventDllMeAsndTimeout, nmtState);
+    if (ret != kErrorOk)
+        goto Exit;
+
+Exit:
+    if (ret != kErrorOk)
+    {
+        BENCHMARK_MOD_02_TOGGLE(7);
+        arg = dllkInstance_g.dllState | (handle << 16);
+        ret = eventk_postError(kEventSourceDllk, ret, sizeof(arg), &arg);
+    }
+    TGT_DLLK_LEAVE_CRITICAL_SECTION()
+    return;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Callback function for transmitted SoA frame
+
+The function implements the callback function which is called when a SoA
+frame was transmitted.
+
+\param  pTxBuffer_p         Pointer to TxBuffer structure of transmitted frame.
+
+*/
+//------------------------------------------------------------------------------
+void dllkframe_processTransmittedSoa(tEdrvTxBuffer* pTxBuffer_p)
+{
+    tOplkError      ret = kErrorOk;
+    tNmtState       nmtState;
+    UINT            handle = DLLK_TXFRAME_SOA;
+    UINT32          arg;
+
+    TGT_DLLK_DECLARE_FLAGS
+
+    UNUSED_PARAMETER(pTxBuffer_p);
+
+    TGT_DLLK_ENTER_CRITICAL_SECTION()
+
+    nmtState = dllkInstance_g.nmtState;
+    if (nmtState <= kNmtGsResetConfiguration)
+        goto Exit;
+
+    // SoA frame sent
+    // check if we are invited
+    // old handling only in PreOp1
+    if ((dllkInstance_g.dllState == kDllMsNonCyclic) &&
+        (dllkInstance_g.aLastTargetNodeId[dllkInstance_g.curLastSoaReq] == dllkInstance_g.dllConfigParam.nodeId))
+    {
+        switch (dllkInstance_g.aLastReqServiceId[dllkInstance_g.curLastSoaReq])
+        {
+            case kDllReqServiceStatus:
+                if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_STATUSRES + dllkInstance_g.curTxBufferOffsetStatusRes].pBuffer != NULL)
+                {   // StatusRes does exist
+                    // send StatusRes
+                    ret = edrv_sendTxBuffer(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_STATUSRES + dllkInstance_g.curTxBufferOffsetStatusRes]);
+                    if (ret != kErrorOk)
+                        goto Exit;
+                    TGT_DBG_SIGNAL_TRACE_POINT(8);
+                }
+                break;
+
+            case kDllReqServiceIdent:
+                if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_IDENTRES + dllkInstance_g.curTxBufferOffsetIdentRes].pBuffer != NULL)
+                {   // IdentRes does exist
+                    // send IdentRes
+                    ret = edrv_sendTxBuffer(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_IDENTRES + dllkInstance_g.curTxBufferOffsetIdentRes]);
+                    if (ret != kErrorOk)
+                        goto Exit;
+                    TGT_DBG_SIGNAL_TRACE_POINT(7);
+                }
+                break;
+
+            case kDllReqServiceNmtRequest:
+                if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NMTREQ + dllkInstance_g.curTxBufferOffsetNmtReq].pBuffer != NULL)
+                {   // NmtRequest does exist
+                    // check if frame is not empty and not being filled
+                    if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NMTREQ + dllkInstance_g.curTxBufferOffsetNmtReq].txFrameSize > DLLK_BUFLEN_FILLING)
+                    {
+                        // send NmtRequest
+                        ret = edrv_sendTxBuffer(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NMTREQ + dllkInstance_g.curTxBufferOffsetNmtReq]);
+                        if (ret != kErrorOk)
+                            goto Exit;
+                        dllkInstance_g.curTxBufferOffsetNmtReq ^= 1;
+                    }
+                }
+                break;
+
+            case kDllReqServiceUnspecified:
+                if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONPLK + dllkInstance_g.curTxBufferOffsetNonPlk].pBuffer != NULL)
+                {   // non-POWERLINK frame does exist
+                    // check if frame is not empty and not being filled
+                    if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONPLK + dllkInstance_g.curTxBufferOffsetNonPlk].txFrameSize > DLLK_BUFLEN_FILLING)
+                    {
+                        // send non-POWERLINK frame
+                        ret = edrv_sendTxBuffer(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONPLK + dllkInstance_g.curTxBufferOffsetNonPlk]);
+                        if (ret != kErrorOk)
+                            goto Exit;
+
+                        dllkInstance_g.curTxBufferOffsetNonPlk ^= 1;
+                    }
+                }
+                break;
+
+            default:
+                break;
+        }
+
+        // ASnd frame was sent, remove the request
+        dllkInstance_g.aLastReqServiceId[dllkInstance_g.curLastSoaReq] = kDllReqServiceNo;
+    }
+
+    // reprogram timer in PREOP1
+#if CONFIG_TIMER_USE_HIGHRES != FALSE
+    if ((dllkInstance_g.dllState == kDllMsNonCyclic) &&
+        (dllkInstance_g.dllConfigParam.asyncSlotTimeout != 0))
+    {
+        ret = hrestimer_modifyTimer(&dllkInstance_g.timerHdlCycle,
+                                    dllkInstance_g.dllConfigParam.asyncSlotTimeout,
+                                    dllkframe_cbMnTimerCycle, 0L, FALSE);
+        if (ret != kErrorOk)
+            goto Exit;
+
+        // forward event to ErrorHandler and DLLk module
+        ret = dllk_postEvent(kEventTypeDllkCycleFinish);
+        if (ret != kErrorOk)
+            goto Exit;
+    }
+#endif
+
+    if ((dllkInstance_g.dllState > kDllMsNonCyclic) &&
+        (dllkInstance_g.dllConfigParam.syncNodeId > C_ADR_SYNC_ON_SOC) &&
+        (dllkInstance_g.fSyncProcessed == FALSE))
+    {   // cyclic state is active, so preprocessing is necessary
+        dllkInstance_g.fSyncProcessed = TRUE;
+        ret = dllk_postEvent(kEventTypeSync);
+        if (ret != kErrorOk)
+            goto Exit;
+    }
+
+Exit:
+    if (ret != kErrorOk)
+    {
+        BENCHMARK_MOD_02_TOGGLE(7);
+        arg = dllkInstance_g.dllState | (handle << 16);
+        ret = eventk_postError(kEventSourceDllk, ret, sizeof(arg), &arg);
+    }
+    TGT_DLLK_LEAVE_CRITICAL_SECTION()
+    return;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Update and transmit SoA
+
+The function updates and transmits an SoA.
+
+\param  nmtState_p              Current NMT state.
+\param  pDllStateProposed_p     Proposed DLL state.
+\param  fEnableInvitation_p     Enable invitation for asynchronous phase. It
+                                will be disabled for C_DLL_PREOP1_START_CYCLES
+                                SoAs.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+tOplkError dllkframe_mnSendSoa(tNmtState nmtState_p,
+                               tDllState* pDllStateProposed_p,
+                               BOOL fEnableInvitation_p)
+{
+    tOplkError      ret = kErrorOk;
+    tEdrvTxBuffer*  pTxBuffer = NULL;
+
+    *pDllStateProposed_p = kDllMsNonCyclic;
+
+    pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SOA];
+    if (pTxBuffer->pBuffer != NULL)
+    {   // SoA does exist
+        ret = dllkframe_updateFrameSoa(pTxBuffer,
+                                       nmtState_p,
+                                       fEnableInvitation_p,
+                                       dllkInstance_g.curLastSoaReq);
+        if (ret != kErrorOk)
+            return ret;
+
+        if (dllkInstance_g.aLastReqServiceId[dllkInstance_g.curLastSoaReq] != kDllReqServiceNo)
+        {   // asynchronous phase will be assigned to one node
+            if (dllkInstance_g.aLastTargetNodeId[dllkInstance_g.curLastSoaReq] ==
+                                  dllkInstance_g.dllConfigParam.nodeId)
+            {   // d.k. DLL state WaitAsndTrig is not helpful;
+                //      so just step over to WaitSocTrig,
+                //      because own ASnd is sent automatically in CbFrameTransmitted() after SoA.
+                //*pDllStateProposed_p = kDllMsWaitAsndTrig;
+                *pDllStateProposed_p = kDllMsWaitSocTrig;
+            }
+            else
+            {   // assignment to CN
+                *pDllStateProposed_p = kDllMsWaitAsnd;
+            }
+        }
+        else
+        {   // no assignment of asynchronous phase
+            *pDllStateProposed_p = kDllMsWaitSocTrig;
+        }
+
+        // send SoA frame
+        ret = edrv_sendTxBuffer(pTxBuffer);
+    }
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Update SoA frame
+
+The function updates an SoA frame.
+
+\param  pTxBuffer_p             Pointer to TX buffer of frame.
+\param  nmtState_p              NMT state of the local node.
+\param  fEnableInvitation_p     Enable the invitation for asynchronous phase.
+                                It will be disabled for the first C_DLL_PREOP1_START_CYCLES
+                                SoAs.
+\param  curReq_p                Index of current request.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+tOplkError dllkframe_updateFrameSoa(tEdrvTxBuffer* pTxBuffer_p,
+                                    tNmtState nmtState_p,
+                                    BOOL fEnableInvitation_p,
+                                    UINT8 curReq_p)
+{
+    tOplkError          ret = kErrorOk;
+    tPlkFrame*          pTxFrame;
+    tDllkNodeInfo*      pNodeInfo;
+
+    pTxFrame = (tPlkFrame*)pTxBuffer_p->pBuffer;
+
+    if (fEnableInvitation_p != FALSE)
+    {   // fetch target of asynchronous phase
+        if (dllkInstance_g.flag2 == 0)
+        {   // own queues are empty
+            dllkInstance_g.aLastReqServiceId[curReq_p] = kDllReqServiceNo;
+        }
+        else if (((tDllAsyncReqPriority) (dllkInstance_g.flag2 >> PLK_FRAME_FLAG2_PR_SHIFT)) == kDllAsyncReqPrioNmt)
+        {   // frames in own NMT request queue available
+            dllkInstance_g.aLastReqServiceId[curReq_p] = kDllReqServiceNmtRequest;
+        }
+        else
+        {
+            dllkInstance_g.aLastReqServiceId[curReq_p] = kDllReqServiceUnspecified;
+        }
+        ret = dllkcal_getSoaRequest(&dllkInstance_g.aLastReqServiceId[curReq_p],
+                                    &dllkInstance_g.aLastTargetNodeId[curReq_p],
+                                    &pTxFrame->data.soa.payload);
+        if (ret != kErrorOk)
+            return ret;
+
+        if (dllkInstance_g.aLastReqServiceId[curReq_p] != kDllReqServiceNo)
+        {   // asynchronous phase will be assigned to one node
+            if (dllkInstance_g.aLastTargetNodeId[curReq_p] == C_ADR_INVALID)
+            {   // exchange invalid node ID with local node ID
+                dllkInstance_g.aLastTargetNodeId[curReq_p] = dllkInstance_g.dllConfigParam.nodeId;
+            }
+
+            pNodeInfo = dllk_getNodeInfo(dllkInstance_g.aLastTargetNodeId[curReq_p]);
+            if (pNodeInfo == NULL)
+            {   // no node info structure available
+                ret = kErrorDllNoNodeInfo;
+                return ret;
+            }
+
+            // Update EA/ER flag only for StatusReq
+            if (dllkInstance_g.aLastReqServiceId[curReq_p] == kDllReqServiceStatus)
+            {
+                ami_setUint8Le(&pTxFrame->data.soa.flag1,
+                               pNodeInfo->soaFlag1 & (PLK_FRAME_FLAG1_EA | PLK_FRAME_FLAG1_ER));
+            }
+            else
+            {
+                pTxFrame->data.soa.flag1 = 0;
+            }
+        }
+        else
+        {   // no assignment of asynchronous phase
+            dllkInstance_g.aLastTargetNodeId[curReq_p] = C_ADR_INVALID;
+        }
+    }
+    else
+    {   // invite nobody
+        dllkInstance_g.aLastReqServiceId[curReq_p] = kDllReqServiceNo;
+        dllkInstance_g.aLastTargetNodeId[curReq_p] = C_ADR_INVALID;
+    }
+
+    // update frame (target)
+    ami_setUint8Le(&pTxFrame->data.soa.reqServiceId,
+                   (UINT8)dllkInstance_g.aLastReqServiceId[curReq_p]);
+    ami_setUint8Le(&pTxFrame->data.soa.reqServiceTarget,
+                   (UINT8)dllkInstance_g.aLastTargetNodeId[curReq_p]);
+    // update frame (NMT state)
+    ami_setUint8Le(&pTxFrame->data.soa.nmtStatus, (BYTE)nmtState_p);
+
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Pass empty ASnd frame to receive FIFO.
+
+The function passes an empty ASnd frame to the receive FIFO. It will be called
+only for frames with registered AsndServiceIds (only kDllAsndFilterAny).
+
+\param  reqServiceId_p  Requested service ID.
+\param  nodeId_p        Node ID.
+
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+tOplkError dllkframe_asyncFrameNotReceived(tDllReqServiceId reqServiceId_p,
+                                           UINT nodeId_p)
+{
+    tOplkError      Ret = kErrorOk;
+    tDllAsndNotRx   asndNotRx;
+    tEvent          event;
+
+    // check if previous SoA invitation was not answered
+    switch (reqServiceId_p)
+    {
+        case kDllReqServiceIdent:
+        case kDllReqServiceStatus:
+        case kDllReqServiceSync:
+            // ASnd service registered?
+            if (dllkInstance_g.aAsndFilter[reqServiceId_p] == kDllAsndFilterAny)
+            {   // ASnd service ID is registered
+                asndNotRx.nodeId = (BYTE)nodeId_p;
+                asndNotRx.serviceId = (BYTE)reqServiceId_p;
+
+                event.eventSink = kEventSinkDlluCal;
+                event.eventType = kEventTypeAsndNotRx;
+                event.pEventArg = (void*)&asndNotRx;
+                event.eventArgSize = sizeof(tDllAsndNotRx);
+
+                // Post event with dummy frame
+                Ret = eventk_postEvent(&event);
+            }
+            break;
+
+        default:
+            // no invitation issued or it was successfully answered or it is uninteresting
+            break;
+    }
+    return Ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  MN timer callback function
+
+This function is called by the timer module. It triggers the SoC for an MN.
+
+\param  pEventArg_p         Pointer to timer event argument.
+
+\return The function returns a pointer to the node Information of the node.
+*/
+//------------------------------------------------------------------------------
+tOplkError dllkframe_cbMnTimerCycle(tTimerEventArg* pEventArg_p)
+{
+    tOplkError      ret = kErrorOk;
+    tNmtState       nmtState;
+    UINT32          arg;
+
+    TGT_DLLK_DECLARE_FLAGS;
+
+    TGT_DLLK_ENTER_CRITICAL_SECTION();
+
+#if CONFIG_TIMER_USE_HIGHRES != FALSE
+    if (pEventArg_p->timerHdl != dllkInstance_g.timerHdlCycle)
+    {   // zombie callback - just exit
+        goto Exit;
+    }
+#endif
+
+    nmtState = dllkInstance_g.nmtState;
+    if (nmtState <= kNmtGsResetConfiguration)
+        goto Exit;
+
+    ret = dllkstatemachine_changeState(kNmtEventDllMeSocTrig, nmtState);
+
+Exit:
+    if (ret != kErrorOk)
+    {
+        BENCHMARK_MOD_02_TOGGLE(7);
+        arg = dllkInstance_g.dllState | (kNmtEventDllMeSocTrig << 8);
+        // Error event for API layer
+        ret = eventk_postError(kEventSourceDllk, ret, sizeof(arg), &arg);
+    }
+    TGT_DLLK_LEAVE_CRITICAL_SECTION();
+    return ret;
+}
+
+#endif
+
+#if CONFIG_DLL_PRES_CHAINING_CN != FALSE
+//------------------------------------------------------------------------------
+/**
+\brief  Enable PRes chaining mode
+
+This function enables the PRes chaining mode.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+tOplkError dllkframe_presChainingEnable(void)
+{
+    tOplkError      Ret = kErrorOk;
+    tPlkFrame*      pTxFrameSyncRes;
+
+    if (dllkInstance_g.fPrcEnabled == FALSE)
+    {
+        // relocate PReq filter to PResMN
+        ami_setUint48Be(&dllkInstance_g.aFilter[DLLK_FILTER_PREQ].aFilterValue[0],
+                        C_DLL_MULTICAST_PRES);
+        ami_setUint8Be(&dllkInstance_g.aFilter[DLLK_FILTER_PREQ].aFilterValue[14],
+                       kMsgTypePres);
+        ami_setUint8Be(&dllkInstance_g.aFilter[DLLK_FILTER_PREQ].aFilterValue[15],
+                       C_ADR_BROADCAST); // Set Destination Node ID to C_ADR_BROADCAST
+
+        dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES].timeOffsetNs = dllkInstance_g.prcPResTimeFirst;
+
+        Ret = edrv_changeRxFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT, DLLK_FILTER_PREQ,
+                               EDRV_FILTER_CHANGE_VALUE | EDRV_FILTER_CHANGE_AUTO_RESPONSE_DELAY);
+        if (Ret != kErrorOk)
+            return Ret;
+
+        dllkInstance_g.fPrcEnabled = TRUE;
+        pTxFrameSyncRes = (tPlkFrame*)dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SYNCRES].pBuffer;
+
+        ami_setUint32Le(&pTxFrameSyncRes->data.asnd.payload.syncResponse.syncStatusLe,
+                        ami_getUint32Le(&pTxFrameSyncRes->data.asnd.payload.syncResponse.syncStatusLe)
+                        | PLK_SYNC_PRES_MODE_SET);
+        // update SyncRes Tx buffer in Edrv
+        Ret = edrv_updateTxBuffer(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SYNCRES]);
+        if (Ret != kErrorOk)
+            return Ret;
+
+#if (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER)
+        Ret = synctimer_setLossOfSyncTolerance2(dllkInstance_g.prcPResFallBackTimeout);
+#endif
+    }
+    return Ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Disable PRes chaining mode
+
+This function disables the PRes chaining mode, thus restoring PReq/PRes mode.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+tOplkError dllkframe_presChainingDisable(void)
+{
+    tOplkError      ret = kErrorOk;
+    tPlkFrame*      pTxFrameSyncRes;
+
+    if (dllkInstance_g.fPrcEnabled != FALSE)
+    {   // relocate PReq filter from PResMN to PReq
+        OPLK_MEMCPY(&dllkInstance_g.aFilter[DLLK_FILTER_PREQ].aFilterValue[0],
+                    &dllkInstance_g.aLocalMac[0], 6);
+        ami_setUint8Be(&dllkInstance_g.aFilter[DLLK_FILTER_PREQ].aFilterValue[14],
+                       kMsgTypePreq);
+        ami_setUint8Be(&dllkInstance_g.aFilter[DLLK_FILTER_PREQ].aFilterValue[15],
+                       (BYTE) dllkInstance_g.dllConfigParam.nodeId); // Set Dst Node ID
+
+        // disable auto-response delay
+        dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES].timeOffsetNs = 0;
+
+        dllkInstance_g.fPrcEnabled = FALSE;
+
+        ret = edrv_changeRxFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT, DLLK_FILTER_PREQ,
+                                  EDRV_FILTER_CHANGE_VALUE | EDRV_FILTER_CHANGE_AUTO_RESPONSE_DELAY);
+        if (ret != kErrorOk)
+            return ret;
+
+        pTxFrameSyncRes = (tPlkFrame*)dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SYNCRES].pBuffer;
+
+        ami_setUint32Le(&pTxFrameSyncRes->data.asnd.payload.syncResponse.syncStatusLe,
+                        ami_getUint32Le(&pTxFrameSyncRes->data.asnd.payload.syncResponse.syncStatusLe)
+                        & ~PLK_SYNC_PRES_MODE_SET);
+        // update SyncRes Tx buffer in Edrv
+        ret = edrv_updateTxBuffer(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SYNCRES]);
+        if (ret != kErrorOk)
+            return ret;
+
+#if (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER)
+        ret = synctimer_setLossOfSyncTolerance2(0);
+#endif
+    }
+    return ret;
+}
+
+#endif // #if CONFIG_DLL_PRES_CHAINING_CN != FALSE
+
 
 //----------------------------------------------------------------------------//
 //                L O C A L   F U N C T I O N S                               //
@@ -1488,7 +1667,7 @@ Exit:
 
 //------------------------------------------------------------------------------
 /**
-\brief  Check for a invalid PRes frame
+\brief  Check for an invalid PRes frame
 
 The function checks if a PRes frame is invalid.
 
@@ -1531,168 +1710,6 @@ static BOOL presFrameFormatIsInvalid(tFrameInfo* pFrameInfo_p, tDllkNodeInfo* pI
     return FALSE;
 }
 
-#if defined(CONFIG_INCLUDE_NMT_MN)
-//------------------------------------------------------------------------------
-/**
-\brief Check and set the sync event
-
-The function checks if the conditions for setting a sync event are fullfilled
-and sends the event if necessary.
-
-\param  fPrcSlotFinished_p  Flag determines if poll response chaining slot is
-                            finished.
-\param  nodeId_p            Node ID for which to do the check.
-
-\return The function returns a tOplkError error code.
-*/
-//------------------------------------------------------------------------------
-static tOplkError checkAndSetSyncEvent(BOOL fPrcSlotFinished_p, UINT nodeId_p)
-{
-    tOplkError  ret = kErrorOk;
-
-    if (fPrcSlotFinished_p)
-    {
-        dllkInstance_g.fPrcSlotFinished = TRUE;
-
-        if ((dllkInstance_g.dllConfigParam.syncNodeId > C_ADR_SYNC_ON_SOC) &&
-            (dllkInstance_g.fSyncProcessed == FALSE) &&
-            (dllkInstance_g.dllConfigParam.fSyncOnPrcNode != FALSE))
-        {
-            dllkInstance_g.fSyncProcessed = TRUE;
-            ret = dllk_postEvent(kEventTypeSync);
-        }
-    }
-    else
-    {
-        if ((dllkInstance_g.dllConfigParam.syncNodeId > C_ADR_SYNC_ON_SOC) &&
-            (dllkInstance_g.fSyncProcessed == FALSE) &&
-            (dllkInstance_g.dllConfigParam.fSyncOnPrcNode != dllkInstance_g.fPrcSlotFinished) &&
-            (nodeId_p > dllkInstance_g.dllConfigParam.syncNodeId))
-        {
-            dllkInstance_g.fSyncProcessed = TRUE;
-            ret = dllk_postEvent(kEventTypeSync);
-        }
-    }
-    return ret;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief Update a node
-
-The function updates a node by sending the appropriate event to the NMT or
-DLLK module.
-
-\param  pIntNodeInfo_p      Pointer to the node information of the node to
-                            be updated.
-\param  nodeId_p            Node ID of the node to be updated.
-\param  nodeNmtState_p      NMT state of the node to be updated.
-
-\return The function returns a tOplkError error code.
-*/
-//------------------------------------------------------------------------------
-static tOplkError updateNode(tDllkNodeInfo* pIntNodeInfo_p, UINT nodeId_p,
-                             tNmtState nodeNmtState_p)
-{
-    tOplkError          ret = kErrorOk;
-    tHeartbeatEvent     heartbeatEvent;
-    tDllNodeOpParam     nodeOpParam;
-    tEvent              event;
-
-    // check NMT state of CN
-    heartbeatEvent.errorCode = E_NO_ERROR;
-    heartbeatEvent.nmtState = nodeNmtState_p;
-
-    if (pIntNodeInfo_p->nmtState != heartbeatEvent.nmtState)
-    {   // NMT state of CN has changed -> post event to NmtMnu module
-
-        if (!pIntNodeInfo_p->fSoftDelete)
-        {   // normal isochronous CN
-            heartbeatEvent.nodeId = nodeId_p;
-            event.eventSink = kEventSinkNmtMnu;
-            event.eventType = kEventTypeHeartbeat;
-            event.eventArgSize = sizeof(heartbeatEvent);
-            event.pEventArg = &heartbeatEvent;
-        }
-        else
-        {   // CN shall be deleted softly, so remove it now without issuing any error
-            nodeOpParam.opNodeType = kDllNodeOpTypeIsochronous;
-            nodeOpParam.nodeId = pIntNodeInfo_p->nodeId;
-
-            event.eventSink = kEventSinkDllkCal;
-            event.eventType = kEventTypeDllkDelNode;
-            // $$$ d.k. set Event.netTime to current time
-            event.eventArgSize = sizeof(nodeOpParam);
-            event.pEventArg = &nodeOpParam;
-        }
-
-        if ((ret = eventk_postEvent(&event)) != kErrorOk)
-            return ret;
-
-        // save current NMT state of CN in internal node structure
-        pIntNodeInfo_p->nmtState = heartbeatEvent.nmtState;
-    }
-    return ret;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief Search for Node Info and handle Loss of PRes
-
-The function searches the node information for the node from which we received
-the PRes frame. For all nodes between the one we received the last PRes and
-this node we issue a loss of PRes. The node information of the node will
-be stored at \p ppIntNodeInfo_p.
-
-\param  nodeId_p            Node ID of node to search.
-\param  ppIntNodeInfo_p     Location to store the pointer to the node information.
-\param  pfPrcSlotFinished_p Pointer to store the flag for a finished poll response
-                            chaning slot.
-
-\return The function returns a tOplkError error code.
-*/
-//------------------------------------------------------------------------------
-static tOplkError searchNodeInfo(UINT nodeId_p, tDllkNodeInfo** ppIntNodeInfo_p,
-                                 BOOL* pfPrcSlotFinished_p)
-{
-    tOplkError      ret = kErrorOk;
-    UINT8           nextNodeIndex = dllkInstance_g.curNodeIndex;
-    UINT8*          pCnNodeId = &dllkInstance_g.aCnNodeIdList[dllkInstance_g.curTxBufferOffsetCycle][nextNodeIndex];
-    tDllkNodeInfo*  pIntNodeInfo = NULL;
-
-    while (*pCnNodeId != C_ADR_INVALID)
-    {
-        if (*pCnNodeId == nodeId_p)
-        {   // CN found in list
-            nextNodeIndex = nextNodeIndex - dllkInstance_g.curNodeIndex;
-            dllkInstance_g.curNodeIndex += nextNodeIndex + 1;
-
-            // issue error for each CN in list between last and current
-            for (pCnNodeId-- ; nextNodeIndex > 0; nextNodeIndex--, pCnNodeId--)
-            {
-                if ((ret = dllk_issueLossOfPres(*pCnNodeId)) != kErrorOk)
-                    return ret;
-            }
-
-            pIntNodeInfo = dllk_getNodeInfo(nodeId_p);
-            break;
-        }
-        else
-        {
-            if (*pCnNodeId == C_ADR_BROADCAST)
-                *pfPrcSlotFinished_p = TRUE;        // PRC slot finished
-        }
-
-        pCnNodeId++;
-        nextNodeIndex++;
-    }
-
-    *ppIntNodeInfo_p = pIntNodeInfo;
-    return ret;
-}
-
-#endif
-
 //------------------------------------------------------------------------------
 /**
 \brief  Process received PRes frame
@@ -1722,9 +1739,9 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
     nodeId = ami_getUint8Le(&pFrame->srcNodeId);
 
     if (nodeId == C_ADR_MN_DEF_NODE_ID)
-        nodeNmtState = (tNmtState)ami_getUint8Le(&pFrame->data.pres.nmtStatus) | NMT_TYPE_MS;
+        nodeNmtState = (tNmtState)(ami_getUint8Le(&pFrame->data.pres.nmtStatus) | NMT_TYPE_MS);
     else
-        nodeNmtState = (tNmtState)ami_getUint8Le(&pFrame->data.pres.nmtStatus) | NMT_TYPE_CS;
+        nodeNmtState = (tNmtState)(ami_getUint8Le(&pFrame->data.pres.nmtStatus) | NMT_TYPE_CS);
 
 #if CONFIG_DLL_PRES_CHAINING_CN != FALSE
     // handle PResMN as PReq for PRes Chaining
@@ -1903,7 +1920,7 @@ static tOplkError processReceivedSoc(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
     if (dllkInstance_g.frameTimeout != 0)
     {
         hrestimer_modifyTimer(&dllkInstance_g.timerHdlCycle, dllkInstance_g.frameTimeout,
-                              dllk_cbCnTimer, 0L, FALSE);
+                              cbCnTimer, 0L, FALSE);
     }
 #endif
     return ret;
@@ -2123,13 +2140,13 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
                     // PResModeReset overrules PResModeSet
                     syncControl &= ~PLK_SYNC_PRES_MODE_SET;
 
-                    ret = dllk_presChainingDisable();
+                    ret = dllkframe_presChainingDisable();
                     if (ret != kErrorOk)
                         goto Exit;
                 }
                 else if (syncControl & PLK_SYNC_PRES_MODE_SET)
                 {   // PRes Chaining is Enabled
-                    ret = dllk_presChainingEnable();
+                    ret = dllkframe_presChainingEnable();
                     if (ret != kErrorOk)
                         goto Exit;
                 }
@@ -2223,127 +2240,6 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
 Exit:
     return ret;
 }
-
-#if defined(CONFIG_INCLUDE_NMT_MN)
-//------------------------------------------------------------------------------
-/**
-\brief  Handle MN error signaling
-
-The function handles the error signaling on an MN.
-
-\param  pFrame_p            Pointer to received ASnd Frame
-\param  nodeId_p            Node ID of CN to handle error signaling
-*/
-//------------------------------------------------------------------------------
-static void handleErrorSignaling(tPlkFrame* pFrame_p, UINT nodeId_p)
-{
-    tOplkError          ret = kErrorOk;
-    BOOL                fSendRequest = FALSE;
-    tEvent              event;
-    tDllCalIssueRequest issueReq;
-    BOOL                fEcIsSet;
-    tDllkNodeInfo*      pIntNodeInfo;
-
-    pIntNodeInfo = dllk_getNodeInfo(nodeId_p);
-    if (pIntNodeInfo == NULL)
-        return;         // we have no node info therefore error signaling couldn't be handled
-
-    // extract EC flag for error signaling
-    fEcIsSet = ami_getUint8Le(&pFrame_p->data.asnd.payload.statusResponse.flag1) & PLK_FRAME_FLAG1_EC;
-
-    switch (pIntNodeInfo->errSigState)
-    {
-        case STATE_MN_ERRSIG_INIT_WAIT_EC1:
-
-            DEBUG_LVL_DLL_TRACE("Node:%d ERRSIG_INIT_WAIT_EC1 Cnt:%d  EC:%d\n",
-                                pIntNodeInfo->nodeId, pIntNodeInfo->errSigReqCnt, (fEcIsSet != 0));
-            fSendRequest = TRUE;
-            if (fEcIsSet)
-            {
-
-                if (pIntNodeInfo->errSigReqCnt > 0) // Ensure at least one StatusReq with ER=1 is sent
-                {
-                    DEBUG_LVL_DLL_TRACE("       --> WAIT_EC0\n");
-                    pIntNodeInfo->soaFlag1 &= ~PLK_FRAME_FLAG1_ER;
-                    pIntNodeInfo->errSigState = STATE_MN_ERRSIG_INIT_WAIT_EC0;
-                    pIntNodeInfo->errSigReqCnt = 0;
-                }
-                else
-                {
-                    pIntNodeInfo->errSigReqCnt++;
-                }
-            }
-            else
-            {
-                pIntNodeInfo->errSigReqCnt++;
-            }
-            break;
-
-        case STATE_MN_ERRSIG_INIT_WAIT_EC0:
-            DEBUG_LVL_DLL_TRACE("Node:%d ERRSIG_INIT_WAIT_EC0 Cnt:%d EC:%d\n", pIntNodeInfo->nodeId,
-                                pIntNodeInfo->errSigReqCnt, (fEcIsSet != 0));
-            if (fEcIsSet)
-            {
-                fSendRequest = TRUE;
-                // if the CN does not react it could be that it was reset
-                // and waits for starting error signaling by ER=1
-                if (pIntNodeInfo->errSigReqCnt > ERRSIG_WAIT_EC0_TIMEOUT_CNT)
-                {
-                    // restart error signaling initialization
-                    pIntNodeInfo->errSigState = STATE_MN_ERRSIG_INIT_WAIT_EC1;
-                    pIntNodeInfo->soaFlag1 |= PLK_FRAME_FLAG1_ER;
-                    DEBUG_LVL_DLL_TRACE("       --> ERRSIG_INIT_WAIT_EC1\n");
-                }
-                else
-                {
-                    pIntNodeInfo->errSigReqCnt++;   // try a second time to set ER = 0
-                }
-            }
-            else
-            {
-                // CN responded with EC=0, we are ready
-                pIntNodeInfo->errSigState = STATE_MN_ERRSIG_INIT_READY;
-                DEBUG_LVL_DLL_TRACE("       --> ERRSIG_INIT_READY\n");
-            }
-            break;
-
-        case STATE_MN_ERRSIG_INIT_READY:
-            DEBUG_LVL_DLL_TRACE("Node:%d ERRSIG_INIT_READY EC:%d\n", pIntNodeInfo->nodeId,
-                                (fEcIsSet != 0));
-            // If EC=1 CN must be reset so we have to restart error
-            // signaling initialization
-            if (fEcIsSet)
-            {
-                pIntNodeInfo->errSigState = STATE_MN_ERRSIG_INIT_WAIT_EC1;
-                pIntNodeInfo->soaFlag1 |= PLK_FRAME_FLAG1_ER;
-                fSendRequest = TRUE;
-                DEBUG_LVL_DLL_TRACE("       --> ERRSIG_INIT_WAIT_EC1\n");
-            }
-            break;
-
-        default:
-            // we never come here
-            break;
-    }
-
-    if (fSendRequest)
-    {
-        DEBUG_LVL_DLL_TRACE("       --> Send StatusRequest: ER:%d\n",
-                            ((pIntNodeInfo->soaFlag1 & PLK_FRAME_FLAG1_ER) != 0));
-        event.eventSink = kEventSinkDllkCal;
-        event.eventType = kEventTypeDllkIssueReq;
-        issueReq.service = kDllReqServiceStatus;
-        issueReq.nodeId = pIntNodeInfo->nodeId;
-        issueReq.soaFlag1 = pIntNodeInfo->soaFlag1;
-        event.pEventArg = &issueReq;
-        event.eventArgSize = sizeof(tDllCalIssueRequest);
-        if ((ret = eventk_postEvent(&event)) != kErrorOk)
-        {
-            DEBUG_LVL_EVENTK_TRACE("%s() Couldn't post kEventTypeDllkIssueReq!\n", __func__);
-        }
-    }
-}
-#endif
 
 //------------------------------------------------------------------------------
 /**
@@ -2535,5 +2431,342 @@ static tOplkError forwardRpdo(tFrameInfo* pFrameInfo_p)
     }
     return ret;
 }
+
+#if defined(CONFIG_INCLUDE_NMT_MN)
+//------------------------------------------------------------------------------
+/**
+\brief Check and set the sync event
+
+The function checks if the conditions for setting a sync event are fullfilled
+and sends the event if necessary.
+
+\param  fPrcSlotFinished_p  Flag determines if poll response chaining slot is
+                            finished.
+\param  nodeId_p            Node ID for which to do the check.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError checkAndSetSyncEvent(BOOL fPrcSlotFinished_p, UINT nodeId_p)
+{
+    tOplkError  ret = kErrorOk;
+
+    if (fPrcSlotFinished_p)
+    {
+        dllkInstance_g.fPrcSlotFinished = TRUE;
+
+        if ((dllkInstance_g.dllConfigParam.syncNodeId > C_ADR_SYNC_ON_SOC) &&
+            (dllkInstance_g.fSyncProcessed == FALSE) &&
+            (dllkInstance_g.dllConfigParam.fSyncOnPrcNode != FALSE))
+        {
+            dllkInstance_g.fSyncProcessed = TRUE;
+            ret = dllk_postEvent(kEventTypeSync);
+        }
+    }
+    else
+    {
+        if ((dllkInstance_g.dllConfigParam.syncNodeId > C_ADR_SYNC_ON_SOC) &&
+            (dllkInstance_g.fSyncProcessed == FALSE) &&
+            (dllkInstance_g.dllConfigParam.fSyncOnPrcNode != dllkInstance_g.fPrcSlotFinished) &&
+            (nodeId_p > dllkInstance_g.dllConfigParam.syncNodeId))
+        {
+            dllkInstance_g.fSyncProcessed = TRUE;
+            ret = dllk_postEvent(kEventTypeSync);
+        }
+    }
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief Update a node
+
+The function updates a node by sending the appropriate event to the NMT or
+DLLK module.
+
+\param  pIntNodeInfo_p      Pointer to the node information of the node to
+                            be updated.
+\param  nodeId_p            Node ID of the node to be updated.
+\param  nodeNmtState_p      NMT state of the node to be updated.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError updateNode(tDllkNodeInfo* pIntNodeInfo_p, UINT nodeId_p,
+                             tNmtState nodeNmtState_p)
+{
+    tOplkError          ret = kErrorOk;
+    tHeartbeatEvent     heartbeatEvent;
+    tDllNodeOpParam     nodeOpParam;
+    tEvent              event;
+
+    // check NMT state of CN
+    heartbeatEvent.errorCode = E_NO_ERROR;
+    heartbeatEvent.nmtState = nodeNmtState_p;
+
+    if (pIntNodeInfo_p->nmtState != heartbeatEvent.nmtState)
+    {   // NMT state of CN has changed -> post event to NmtMnu module
+
+        if (!pIntNodeInfo_p->fSoftDelete)
+        {   // normal isochronous CN
+            heartbeatEvent.nodeId = nodeId_p;
+            event.eventSink = kEventSinkNmtMnu;
+            event.eventType = kEventTypeHeartbeat;
+            event.eventArgSize = sizeof(heartbeatEvent);
+            event.pEventArg = &heartbeatEvent;
+        }
+        else
+        {   // CN shall be deleted softly, so remove it now without issuing any error
+            nodeOpParam.opNodeType = kDllNodeOpTypeIsochronous;
+            nodeOpParam.nodeId = pIntNodeInfo_p->nodeId;
+
+            event.eventSink = kEventSinkDllkCal;
+            event.eventType = kEventTypeDllkDelNode;
+            // $$$ d.k. set Event.netTime to current time
+            event.eventArgSize = sizeof(nodeOpParam);
+            event.pEventArg = &nodeOpParam;
+        }
+
+        if ((ret = eventk_postEvent(&event)) != kErrorOk)
+            return ret;
+
+        // save current NMT state of CN in internal node structure
+        pIntNodeInfo_p->nmtState = heartbeatEvent.nmtState;
+    }
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief Search for Node Info and handle Loss of PRes
+
+The function searches the node information for the node from which we received
+the PRes frame. For all nodes between the one we received the last PRes and
+this node we issue a loss of PRes. The node information of the node will
+be stored at \p ppIntNodeInfo_p.
+
+\param  nodeId_p            Node ID of node to search.
+\param  ppIntNodeInfo_p     Location to store the pointer to the node information.
+\param  pfPrcSlotFinished_p Pointer to store the flag for a finished poll response
+                            chaning slot.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError searchNodeInfo(UINT nodeId_p, tDllkNodeInfo** ppIntNodeInfo_p,
+                                 BOOL* pfPrcSlotFinished_p)
+{
+    tOplkError      ret = kErrorOk;
+    UINT8           nextNodeIndex = dllkInstance_g.curNodeIndex;
+    UINT8*          pCnNodeId = &dllkInstance_g.aCnNodeIdList[dllkInstance_g.curTxBufferOffsetCycle][nextNodeIndex];
+    tDllkNodeInfo*  pIntNodeInfo = NULL;
+
+    while (*pCnNodeId != C_ADR_INVALID)
+    {
+        if (*pCnNodeId == nodeId_p)
+        {   // CN found in list
+            nextNodeIndex = nextNodeIndex - dllkInstance_g.curNodeIndex;
+            dllkInstance_g.curNodeIndex += nextNodeIndex + 1;
+
+            // issue error for each CN in list between last and current
+            for (pCnNodeId-- ; nextNodeIndex > 0; nextNodeIndex--, pCnNodeId--)
+            {
+                if ((ret = dllk_issueLossOfPres(*pCnNodeId)) != kErrorOk)
+                    return ret;
+            }
+
+            pIntNodeInfo = dllk_getNodeInfo(nodeId_p);
+            break;
+        }
+        else
+        {
+            if (*pCnNodeId == C_ADR_BROADCAST)
+                *pfPrcSlotFinished_p = TRUE;        // PRC slot finished
+        }
+
+        pCnNodeId++;
+        nextNodeIndex++;
+    }
+
+    *ppIntNodeInfo_p = pIntNodeInfo;
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Handle MN error signaling
+
+The function handles the error signaling on an MN.
+
+\param  pFrame_p            Pointer to received ASnd Frame
+\param  nodeId_p            Node ID of CN to handle error signaling
+*/
+//------------------------------------------------------------------------------
+static void handleErrorSignaling(tPlkFrame* pFrame_p, UINT nodeId_p)
+{
+    tOplkError          ret = kErrorOk;
+    BOOL                fSendRequest = FALSE;
+    tEvent              event;
+    tDllCalIssueRequest issueReq;
+    BOOL                fEcIsSet;
+    tDllkNodeInfo*      pIntNodeInfo;
+
+    pIntNodeInfo = dllk_getNodeInfo(nodeId_p);
+    if (pIntNodeInfo == NULL)
+        return;         // we have no node info therefore error signaling couldn't be handled
+
+    // extract EC flag for error signaling
+    fEcIsSet = ami_getUint8Le(&pFrame_p->data.asnd.payload.statusResponse.flag1) & PLK_FRAME_FLAG1_EC;
+
+    switch (pIntNodeInfo->errSigState)
+    {
+        case STATE_MN_ERRSIG_INIT_WAIT_EC1:
+
+            DEBUG_LVL_DLL_TRACE("Node:%d ERRSIG_INIT_WAIT_EC1 Cnt:%d  EC:%d\n",
+                                pIntNodeInfo->nodeId, pIntNodeInfo->errSigReqCnt, (fEcIsSet != 0));
+            fSendRequest = TRUE;
+            if (fEcIsSet)
+            {
+
+                if (pIntNodeInfo->errSigReqCnt > 0) // Ensure at least one StatusReq with ER=1 is sent
+                {
+                    DEBUG_LVL_DLL_TRACE("       --> WAIT_EC0\n");
+                    pIntNodeInfo->soaFlag1 &= ~PLK_FRAME_FLAG1_ER;
+                    pIntNodeInfo->errSigState = STATE_MN_ERRSIG_INIT_WAIT_EC0;
+                    pIntNodeInfo->errSigReqCnt = 0;
+                }
+                else
+                {
+                    pIntNodeInfo->errSigReqCnt++;
+                }
+            }
+            else
+            {
+                pIntNodeInfo->errSigReqCnt++;
+            }
+            break;
+
+        case STATE_MN_ERRSIG_INIT_WAIT_EC0:
+            DEBUG_LVL_DLL_TRACE("Node:%d ERRSIG_INIT_WAIT_EC0 Cnt:%d EC:%d\n", pIntNodeInfo->nodeId,
+                                pIntNodeInfo->errSigReqCnt, (fEcIsSet != 0));
+            if (fEcIsSet)
+            {
+                fSendRequest = TRUE;
+                // if the CN does not react it could be that it was reset
+                // and waits for starting error signaling by ER=1
+                if (pIntNodeInfo->errSigReqCnt > ERRSIG_WAIT_EC0_TIMEOUT_CNT)
+                {
+                    // restart error signaling initialization
+                    pIntNodeInfo->errSigState = STATE_MN_ERRSIG_INIT_WAIT_EC1;
+                    pIntNodeInfo->soaFlag1 |= PLK_FRAME_FLAG1_ER;
+                    DEBUG_LVL_DLL_TRACE("       --> ERRSIG_INIT_WAIT_EC1\n");
+                }
+                else
+                {
+                    pIntNodeInfo->errSigReqCnt++;   // try a second time to set ER = 0
+                }
+            }
+            else
+            {
+                // CN responded with EC=0, we are ready
+                pIntNodeInfo->errSigState = STATE_MN_ERRSIG_INIT_READY;
+                DEBUG_LVL_DLL_TRACE("       --> ERRSIG_INIT_READY\n");
+            }
+            break;
+
+        case STATE_MN_ERRSIG_INIT_READY:
+            DEBUG_LVL_DLL_TRACE("Node:%d ERRSIG_INIT_READY EC:%d\n", pIntNodeInfo->nodeId,
+                                (fEcIsSet != 0));
+            // If EC=1 CN must be reset so we have to restart error
+            // signaling initialization
+            if (fEcIsSet)
+            {
+                pIntNodeInfo->errSigState = STATE_MN_ERRSIG_INIT_WAIT_EC1;
+                pIntNodeInfo->soaFlag1 |= PLK_FRAME_FLAG1_ER;
+                fSendRequest = TRUE;
+                DEBUG_LVL_DLL_TRACE("       --> ERRSIG_INIT_WAIT_EC1\n");
+            }
+            break;
+
+        default:
+            // we never come here
+            break;
+    }
+
+    if (fSendRequest)
+    {
+        DEBUG_LVL_DLL_TRACE("       --> Send StatusRequest: ER:%d\n",
+                            ((pIntNodeInfo->soaFlag1 & PLK_FRAME_FLAG1_ER) != 0));
+        event.eventSink = kEventSinkDllkCal;
+        event.eventType = kEventTypeDllkIssueReq;
+        issueReq.service = kDllReqServiceStatus;
+        issueReq.nodeId = pIntNodeInfo->nodeId;
+        issueReq.soaFlag1 = pIntNodeInfo->soaFlag1;
+        event.pEventArg = &issueReq;
+        event.eventArgSize = sizeof(tDllCalIssueRequest);
+        if ((ret = eventk_postEvent(&event)) != kErrorOk)
+        {
+            DEBUG_LVL_EVENTK_TRACE("%s() Couldn't post kEventTypeDllkIssueReq!\n", __func__);
+        }
+    }
+}
+
+#endif
+
+#if CONFIG_TIMER_USE_HIGHRES != FALSE
+//------------------------------------------------------------------------------
+/**
+\brief  CN timer callback function
+
+This function is called by the timer module. It monitors the POWERLINK cycle
+when running as CN.
+
+\param  pEventArg_p         Pointer to timer event argument.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError cbCnTimer(tTimerEventArg* pEventArg_p)
+{
+    tOplkError      ret = kErrorOk;
+    tNmtState       nmtState;
+    UINT32          arg;
+
+    TGT_DLLK_DECLARE_FLAGS;
+
+    TGT_DLLK_ENTER_CRITICAL_SECTION();
+
+    if (pEventArg_p->timerHdl != dllkInstance_g.timerHdlCycle)
+    {   // zombie callback - just exit
+        goto Exit;
+    }
+
+    nmtState = dllkInstance_g.nmtState;
+    if (nmtState <= kNmtGsResetConfiguration)
+        goto Exit;
+
+    ret = dllkstatemachine_changeState(kNmtEventDllCeFrameTimeout, nmtState);
+    if (ret != kErrorOk)
+        goto Exit;
+
+    // restart the timer to detect further loss of SoC
+    ret = hrestimer_modifyTimer(&dllkInstance_g.timerHdlCycle,
+               dllkInstance_g.dllConfigParam.cycleLen, cbCnTimer, 0L, FALSE);
+
+    if (ret != kErrorOk)
+        goto Exit;
+
+Exit:
+    if (ret != kErrorOk)
+    {
+        BENCHMARK_MOD_02_TOGGLE(7);
+        arg = dllkInstance_g.dllState | (kNmtEventDllCeFrameTimeout << 8);
+        // Error event for API layer
+        ret = eventk_postError(kEventSourceDllk, ret, sizeof(arg), &arg);
+    }
+    TGT_DLLK_LEAVE_CRITICAL_SECTION();
+    return ret;
+}
+#endif
 
 /// \}

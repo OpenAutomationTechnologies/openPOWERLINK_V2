@@ -42,6 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <common/ami.h>
 #include "dllk-internal.h"
+#include "dllkframe.h"
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -348,18 +349,20 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
 #endif
 
 #if CONFIG_DLL_PRES_CHAINING_CN != FALSE
-            if ((ret = dllk_presChainingDisable()) != kErrorOk)
+            if ((ret = dllkframe_presChainingDisable()) != kErrorOk)
                 return ret;
 #endif
 
             // update IdentRes and StatusRes
-            ret = dllk_updateFrameStatusRes(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_STATUSRES + dllkInstance_g.curTxBufferOffsetStatusRes],
-                                       newNmtState_p);
+            ret = dllkframe_updateFrameStatusRes(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_STATUSRES +
+                                                     dllkInstance_g.curTxBufferOffsetStatusRes],
+                                                 newNmtState_p);
             if (ret != kErrorOk)
                 return ret;
 
-            ret = dllk_updateFrameIdentRes(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_IDENTRES + dllkInstance_g.curTxBufferOffsetIdentRes],
-                                      newNmtState_p);
+            ret = dllkframe_updateFrameIdentRes(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_IDENTRES +
+                                                    dllkInstance_g.curTxBufferOffsetIdentRes],
+                                                newNmtState_p);
             if (ret != kErrorOk)
                 return ret;
 
@@ -390,13 +393,15 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
 #endif
 
             // update PRes (for sudden changes to PreOp2)
-            ret = dllk_updateFramePres(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES + (dllkInstance_g.curTxBufferOffsetCycle ^ 1)],
-                                  newNmtState_p);
+            ret = dllkframe_updateFramePres(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES +
+                                                (dllkInstance_g.curTxBufferOffsetCycle ^ 1)],
+                                            newNmtState_p);
             if (ret != kErrorOk)
                 return ret;
 
-            ret = dllk_updateFramePres(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES + dllkInstance_g.curTxBufferOffsetCycle],
-                                  newNmtState_p);
+            ret = dllkframe_updateFramePres(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES +
+                                                dllkInstance_g.curTxBufferOffsetCycle],
+                                            newNmtState_p);
             if (ret != kErrorOk)
                 return ret;
 
@@ -445,15 +450,15 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
                 return ret;
 
             // update IdentRes and StatusRes
-            ret = dllk_updateFrameIdentRes(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_IDENTRES +
-                                                                dllkInstance_g.curTxBufferOffsetIdentRes],
-                                      newNmtState_p);
+            ret = dllkframe_updateFrameIdentRes(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_IDENTRES +
+                                                    dllkInstance_g.curTxBufferOffsetIdentRes],
+                                                newNmtState_p);
             if (ret != kErrorOk)
                 return ret;
 
-            ret = dllk_updateFrameStatusRes(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_STATUSRES +
-                                                                 dllkInstance_g.curTxBufferOffsetStatusRes],
-                                       newNmtState_p);
+            ret = dllkframe_updateFrameStatusRes(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_STATUSRES +
+                                                     dllkInstance_g.curTxBufferOffsetStatusRes],
+                                                 newNmtState_p);
             break;
 
         case kNmtMsReadyToOperate:
@@ -498,15 +503,15 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
 #endif
 
             // update PRes
-            ret = dllk_updateFramePres(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES +
-                                                            (dllkInstance_g.curTxBufferOffsetCycle ^ 1)],
-                                         newNmtState_p);
+            ret = dllkframe_updateFramePres(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES +
+                                                (dllkInstance_g.curTxBufferOffsetCycle ^ 1)],
+                                            newNmtState_p);
             if (ret != kErrorOk)
                 return ret;
 
-            ret = dllk_updateFramePres(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES +
-                                                            dllkInstance_g.curTxBufferOffsetCycle],
-                                         newNmtState_p);
+            ret = dllkframe_updateFramePres(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES +
+                                                dllkInstance_g.curTxBufferOffsetCycle],
+                                            newNmtState_p);
             if (ret != kErrorOk)
                 return ret;
             break;
@@ -633,7 +638,7 @@ static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtSta
             if (ret == kErrorOk)
             {
                 pTxFrame = (tPlkFrame*)pTxBuffer->pBuffer;
-                ret = dllk_checkFrame(pTxFrame, frameSize);
+                ret = dllkframe_checkFrame(pTxFrame, frameSize);
                 if(ret != kErrorOk)
                     goto Exit;
 
@@ -781,7 +786,7 @@ static tOplkError processCycleFinish(tNmtState nmtState_p)
                                                   dllkInstance_g.curTxBufferOffsetIdentRes];
             if (pTxBuffer->pBuffer != NULL)
             {   // IdentRes does exist
-                if ((ret = dllk_updateFrameIdentRes(pTxBuffer, nmtState_p)) != kErrorOk)
+                if ((ret = dllkframe_updateFrameIdentRes(pTxBuffer, nmtState_p)) != kErrorOk)
                     return ret;
             }
             // fall-through
@@ -792,7 +797,7 @@ static tOplkError processCycleFinish(tNmtState nmtState_p)
                                                   dllkInstance_g.curTxBufferOffsetStatusRes];
             if (pTxBuffer->pBuffer != NULL)
             {   // StatusRes does exist
-                if ((ret = dllk_updateFrameStatusRes(pTxBuffer, nmtState_p)) != kErrorOk)
+                if ((ret = dllkframe_updateFrameStatusRes(pTxBuffer, nmtState_p)) != kErrorOk)
                     return ret;
             }
 
@@ -895,13 +900,13 @@ static tOplkError processSyncCn(tNmtState nmtState_p, BOOL fReadyFlag_p)
 
         FrameInfo.pFrame = pTxFrame;
         FrameInfo.frameSize = pTxBuffer->txFrameSize;
-        ret = dllk_processTpdo(&FrameInfo, fReadyFlag_p);
+        ret = dllkframe_processTpdo(&FrameInfo, fReadyFlag_p);
         if (ret != kErrorOk)
             return ret;
 
 //      BENCHMARK_MOD_02_TOGGLE(7);
 
-        ret = dllk_updateFramePres(pTxBuffer, nmtState_p);
+        ret = dllkframe_updateFramePres(pTxBuffer, nmtState_p);
         if (ret != kErrorOk)
             return ret;
 
@@ -1064,7 +1069,7 @@ static tOplkError processStartReducedCycle(void)
     {
         ret = hrestimer_modifyTimer(&dllkInstance_g.timerHdlCycle,
                                     dllkInstance_g.dllConfigParam.asyncSlotTimeout,
-                                    dllk_cbMnTimerCycle, 0L, FALSE);
+                                    dllkframe_cbMnTimerCycle, 0L, FALSE);
     }
 #endif
 
@@ -1077,4 +1082,3 @@ Exit:
 #endif
 
 ///\}
-
