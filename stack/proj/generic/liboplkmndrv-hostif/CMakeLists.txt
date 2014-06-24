@@ -1,6 +1,6 @@
 ################################################################################
 #
-# CMake file for hostif library where target is Microblaze
+# CMake file for openPOWERLINK MN driver/PCP library on embedded-noos
 #
 # Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
@@ -28,43 +28,72 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-################################################################################
-# Handle includes
-SET(CMAKE_MODULE_PATH "${OPLK_BASE_DIR}/cmake" ${CMAKE_MODULE_PATH})
-# Include target specific global configuration file
-INCLUDE(setmicroblazeboardconfig)
+PROJECT(oplkmndrv-hostif C)
+MESSAGE(STATUS "Configuring ${PROJECT_NAME}")
 
 ################################################################################
-# Add support for Xilinx Designs in hostinterface
-# Set architecture specific sources and include directories
+# Select object dictionary
+SET(OBJDICT CiA302-4_MN)
 
-SET( LIB_ARCH_SRCS 
-        ${PROJECT_SOURCE_DIR}/src/hostiflib_microblaze.c
+# set sources of POWERLINK library
+SET(LIB_KERNEL_SOURCES
+     ${KERNEL_SOURCES}
+     ${CTRL_KCAL_HOSTIF_SOURCES}
+     ${DLL_KCAL_CIRCBUF_SOURCES}
+     ${EVENT_KCAL_NOOSHOSTIF_SOURCES}
+     ${ERRHND_KCAL_HOSTIF_SOURCES}
+     ${PDO_KCAL_HOSTIF_SOURCES}
+     ${HARDWARE_DRIVER_OPENMAC_SOURCES}
+     ${HARDWARE_DRIVER_OPENMAC_MN_SOURCES}
     )
 
-IF(CFG_HOSTIF_PCP)
+SET(LIB_USER_SOURCES
+    ${USER_MN_SOURCES}
+     ${USER_SOURCES}
+     ${CTRL_UCAL_HOSTIF_SOURCES}
+     ${DLL_UCAL_CIRCBUF_SOURCES}
+     ${ERRHND_UCAL_HOSTIF_SOURCES}
+     ${PDO_UCAL_HOSTIF_SOURCES}
+     ${EVENT_UCAL_NOOSHOSTIF_SOURCES}
+     ${USER_TIMER_GENERIC_SOURCES}
+    )
+
+SET(LIB_COMMON_SOURCES
+     ${COMMON_SOURCES}
+     ${COMMON_CAL_HOSTIF_SOURCES}
+     ${CIRCBUF_NOOS_SOURCES}
+     ${COMMON_NOOS_SOURCES}
+     ${ARCH_LE_SOURCES}
+   )
+
+# Create full source list
+SET(LIB_SOURCES
+     ${LIB_KERNEL_SOURCES}
+     ${LIB_COMMON_SOURCES}
+   )
+
+# set includes of POWERLINK library
 INCLUDE_DIRECTORIES(
-                    ${EXAMPLE_BINARY_DIR}/bsp${CFG_PCP_NAME}/${CFG_PCP_NAME}/include
-                   )
+    ${PROJECT_SOURCE_DIR}
+   )
+
+# set flags of the openPOWERLINK library
+ADD_DEFINITIONS("-Wall -Wextra -pedantic -std=c99")
+ADD_DEFINITIONS("-DCONFIG_HOSTIF_PCP=TRUE")
+
+################################################################################
+# Handle target specific functions
+IF(${CMAKE_SYSTEM_NAME} STREQUAL "Generic" AND ${CMAKE_SYSTEM_PROCESSOR} STREQUAL "Microblaze")
+    INCLUDE(configure-microblaze.cmake)
 ELSE()
-
-INCLUDE_DIRECTORIES(
-                    ${EXAMPLE_BINARY_DIR}/bsp${CFG_HOST_NAME}/${CFG_HOST_NAME}/include
-                   )
+    MESSAGE(FATAL_ERROR "Unknown platform selected!")
 ENDIF()
-################################################################################
-# Set architecture specific definitions
-ADD_DEFINITIONS(${XIL_CFLAGS} "-fmessage-length=0 -mcpu=${CFG_CPU_VERSION} -ffunction-sections -fdata-sections")
 
 ################################################################################
-# Set architecture specific installation files
-########################################################################
-# Eclipse project files
-GEN_ECLIPSE_FILE_LIST("${HOSTIF_LIB_SRCS}" "" PART_ECLIPSE_FILE_LIST)
-SET(ECLIPSE_FILE_LIST "${ECLIPSE_FILE_LIST} ${PART_ECLIPSE_FILE_LIST}")
-GEN_ECLIPSE_FILE_LIST("${LIB_ARCH_SRCS}" "arch" PART_ECLIPSE_FILE_LIST)
-SET(ECLIPSE_FILE_LIST "${ECLIPSE_FILE_LIST} ${PART_ECLIPSE_FILE_LIST}")
-GET_PROPERTY(LIBRARY_INCLUDES DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
-GEN_ECLIPSE_INCLUDE_LIST("${LIBRARY_INCLUDES}" ECLIPSE_INCLUDE_LIST )
-CONFIGURE_FILE(${ARCH_TOOLS_DIR}/eclipse/libproject.in ${PROJECT_BINARY_DIR}/.project @ONLY)
-CONFIGURE_FILE(${ARCH_TOOLS_DIR}/eclipse/libcproject.in ${PROJECT_BINARY_DIR}/.cproject @ONLY)
+# Define library and installation rules
+ADD_LIBRARY(${PROJECT_NAME} ${LIB_TYPE} ${LIB_SOURCES} ${LIB_ARCH_SOURCES})
+SET_PROPERTY(TARGET ${PROJECT_NAME} PROPERTY COMPILE_DEFINITIONS_DEBUG DEBUG;DEF_DEBUG_LVL=${CFG_DEBUG_LVL})
+SET_PROPERTY(TARGET ${PROJECT_NAME} PROPERTY DEBUG_POSTFIX "_d")
+INSTALL(TARGETS ${PROJECT_NAME} ARCHIVE DESTINATION ${ARCH_INSTALL_POSTFIX})
+INSTALL(FILES ${PROJECT_SOURCE_DIR}/oplkcfg.h DESTINATION ${ARCH_INSTALL_POSTFIX}/config-${PROJECT_NAME})
+

@@ -979,7 +979,10 @@ called.
 //------------------------------------------------------------------------------
 static BOOL checkQueueEmpty(tQueue* pQueue_p)
 {
-    return (pQueue_p->local.usedSpace == 0);
+    if (pQueue_p->local.usedSpace == 0)
+        return TRUE;
+    else
+        return FALSE;
 }
 
 //------------------------------------------------------------------------------

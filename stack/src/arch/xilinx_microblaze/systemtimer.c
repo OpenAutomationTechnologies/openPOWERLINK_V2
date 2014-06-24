@@ -53,7 +53,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+#if CONFIG_HOSTIF_PCP == FALSE
+#define TGT_INTC_BASE XPAR_INTC_0_BASEADDR
+#define TGT_TIMER_INTR XPAR_HOST_INTC_FIT_TIMER_0_INTERRUPT_INTR
+#else
+#define TGT_INTC_BASE XPAR_INTC_0_BASEADDR
+#define TGT_TIMER_INTR XPAR_PCP_INTC_FIT_TIMER_0_INTERRUPT_INTR
+#endif
 
+#define TGT_TIMER_INTR_MASK XPAR_FIT_TIMER_0_INTERRUPT_MASK
 //------------------------------------------------------------------------------
 // module global vars
 //------------------------------------------------------------------------------
@@ -101,11 +109,11 @@ void timer_init(void)
 {
 
     //register fit interrupt handler
-    XIntc_RegisterHandler(XPAR_PCP_INTC_BASEADDR, XPAR_PCP_INTC_FIT_TIMER_0_INTERRUPT_INTR,
+    XIntc_RegisterHandler(TGT_INTC_BASE, TGT_TIMER_INTR,
                           (XInterruptHandler)irqHandler, 0);
 
     //enable the fit interrupt
-    XIntc_EnableIntr(XPAR_PCP_INTC_BASEADDR, XPAR_FIT_TIMER_0_INTERRUPT_MASK);
+    XIntc_EnableIntr(TGT_INTC_BASE, TGT_TIMER_INTR_MASK);
 }
 
 //------------------------------------------------------------------------------

@@ -1,17 +1,17 @@
 /**
 ********************************************************************************
-\file   xilinx_microblaze/target-microblaze.c
+\file   daemon.c
 
-\brief  target specific functions for Microblaze without OS
+\brief  POWERLINK FPGA Master daemon for Pcp (kernel part)
 
-This target depending module provides several functions that are necessary for
-systems without shared buffer and any OS.
+This is the daemon for the Pcp (kernel part) of the Xilinx Microblaze POWERLINK
+master demo application.
 
-\ingroup module_target
+\ingroup module_daemon
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -37,16 +37,17 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
+
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+
+#include <unistd.h>
+#include <mb_interface.h>
+
 #include <oplk/oplk.h>
-
-#include "usleep.h"
-#include "systemtimer.h"
-
-#include <xparameters.h>
-#include <xintc.h>         // interrupt controller
+#include <oplk/debugstr.h>
+#include <kernel/ctrlk.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -55,13 +56,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define TGTCONIO_MS_IN_US(x)    (x * 1000U)
 
-#if CONFIG_HOSTIF_PCP == FALSE
-    #define TGT_INTC_BASE           XPAR_HOST_INTC_BASEADDR
-#else
-    #define TGT_INTC_BASE           XPAR_PCP_INTC_BASEADDR
-#endif
 //------------------------------------------------------------------------------
 // module global vars
 //------------------------------------------------------------------------------
@@ -89,9 +84,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-
-static void enableInterruptMaster(void);
-static void disableInterruptMaster(void);
+static tOplkError initPowerlink(void);
+static void shutdownPowerlink(void);
+static void backgroundProcess(void);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -99,177 +94,119 @@ static void disableInterruptMaster(void);
 
 //------------------------------------------------------------------------------
 /**
-\brief    Get current system tick
+\brief    main function
 
-This function returns the current system tick determined by the system timer.
+Calls the POWERLINK initialization and background task
 
-\return Returns the system tick in milliseconds
+\return 0
 
-\ingroup module_target
+\ingroup module_daemon
 */
 //------------------------------------------------------------------------------
-UINT32 target_getTickCount(void)
+INT main(void)
 {
-    UINT32 ticks;
-
-    ticks = timer_getMSCount();
-
-    return ticks;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief    enables global interrupt
-
-This function enables/disables global interrupts.
-
-\param  fEnable_p               TRUE = enable interrupts
-                                FALSE = disable interrupts
-
-\ingroup module_target
-*/
-//------------------------------------------------------------------------------
-void target_enableGlobalInterrupt(UINT8 fEnable_p)
-{
-    static INT lockCount = 0;
-
-    if (fEnable_p != FALSE)
-    {   // restore interrupts
-        if (--lockCount == 0)
-        {
-            enableInterruptMaster();
-        }
+    tOplkError ret;
+    
+    ret = target_init();
+    if (kErrorOk != ret)
+    {
+        PRINTF("Target Initialization Failed\n\n");
+        return ret;
     }
-    else
-    {   // disable interrupts
-        if (lockCount == 0)
-        {
-            disableInterruptMaster();
-        }
-        lockCount++;
+
+    while(1)
+    {
+        PRINTF("\n");
+
+        ret = initPowerlink();
+
+        PRINTF("Initialization returned with \"%s\" (0x%X)\n",
+                debugstr_getRetValStr(ret), ret);
+
+        if (ret != kErrorOk)
+            break;
+
+        backgroundProcess();
+
+        PRINTF("Background loop stopped.\nShutdown Kernel Stack\n");
+
+        shutdownPowerlink();
+
+        usleep(1000000U);
     }
-}
 
+    PRINTF("halt terminal\n%c", 4);
 
-//------------------------------------------------------------------------------
-/**
-\brief  Initialize target specific stuff
-
-The function initialize target specific stuff which is needed to run the
-openPOWERLINK stack.
-
-\return The function returns a tOplkError error code.
-*/
-//------------------------------------------------------------------------------
-tOplkError target_init(void)
-{
-    // initialize microblaze caches
-#if XPAR_MICROBLAZE_USE_ICACHE
-    microblaze_invalidate_icache();
-    microblaze_enable_icache();
-#endif
-
-    microblaze_invalidate_dcache();
-    microblaze_disable_dcache();
-
-#if XPAR_MICROBLAZE_USE_DCACHE
-    microblaze_invalidate_dcache();
-    microblaze_enable_dcache();
-#endif
-
-    //FIXME: redundant and forced. find an alternative
-    microblaze_invalidate_dcache();
-    microblaze_disable_dcache();
-    //enable microblaze interrupts
-    microblaze_enable_interrupts();
-
-    // initialize system timer
-    timer_init();
-
-    // enable the interrupt master
-    enableInterruptMaster();
-
-    return kErrorOk;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Clean up target specific stuff
-
-The function cleans up target specific stuff.
-
-\return The function returns a tOplkError error code.
-*/
-//------------------------------------------------------------------------------
-tOplkError target_cleanup(void)
-{
-    // disable microblaze caches
-#if XPAR_MICROBLAZE_USE_DCACHE
-    microblaze_invalidate_dcache();
-    microblaze_disable_dcache();
-#endif
-
-#if XPAR_MICROBLAZE_USE_ICACHE
-    microblaze_invalidate_icache();
-    microblaze_disable_icache();
-#endif
-
-    //disable microblaze interrupts
-    microblaze_disable_interrupts();
-
-    // disable the interrupt master
-    disableInterruptMaster();
-
-    return kErrorOk;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief Sleep for the specified number of milliseconds
-
-The function makes the calling thread sleep until the number of specified
-milliseconds has elapsed.
-
-\param  milliSeconds_p      Number of milliseconds to sleep
-
-\ingroup module_target
-*/
-//------------------------------------------------------------------------------
-void target_msleep (UINT32 milliSeconds_p)
-{
-    usleep(TGTCONIO_MS_IN_US(milliSeconds_p));
+    return 0;
 }
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
-/// \name Private Functions
-/// \{
 
 //------------------------------------------------------------------------------
 /**
-\brief Enable the global interrupt master
+\brief    openPOWERLINK stack initialization
 
-\ingroup module_target
+This function initializes the communication stack and configures objects.
+
+\return This function returns tOplkError error codes.
 */
 //------------------------------------------------------------------------------
-static void enableInterruptMaster(void)
+static tOplkError initPowerlink(void)
 {
-    //enable global interrupt master
-    XIntc_MasterEnable(TGT_INTC_BASE);
+    tOplkError ret;
+
+    ret = ctrlk_init();
+
+    if (ret != kErrorOk)
+    {
+        printf ("Could not initialize control module\n");
+        goto Exit;
+    }
+
+Exit:
+    return ret;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief Disable the global interrupt master
+\brief    openPOWERLINK stack shutdown
 
-\ingroup module_target
+This function initiates shutdown of the stack by freeing the allocated
+resources and suspending all processes
+
+\ingroup module_daemon
 */
 //------------------------------------------------------------------------------
-static void disableInterruptMaster(void)
+static void shutdownPowerlink(void)
 {
-    //disable global interrupt master
-    XIntc_MasterDisable(TGT_INTC_BASE);
+    ctrlk_exit();
 }
-///\}
+
+//------------------------------------------------------------------------------
+/**
+\brief    openPOWERLINK stack background tasks
+
+Routine to handle background tasks of POWERLINK such as
+- Event handling
+- Packet processing
+- Status and command exchange
+
+\ingroup module_daemon
+*/
+//------------------------------------------------------------------------------
+static void backgroundProcess(void)
+{
+    BOOL fExit = FALSE;
+
+    while (1)
+    {
+        ctrlk_updateHeartbeat();
+        fExit = ctrlk_process();
+
+        if (fExit != FALSE)
+            break;
+    }
+}
 
