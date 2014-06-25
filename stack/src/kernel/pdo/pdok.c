@@ -327,6 +327,10 @@ tOplkError pdok_configureChannel(tPdoChannelConf* pChannelConf_p)
 
         pDestPdoChannel = &pdokInstance_g.pdoChannels.pRxPdoChannel[pChannelConf_p->channelId];
 
+        // copy channel configuration to local structure
+        OPLK_MEMCPY(pDestPdoChannel, &pChannelConf_p->pdoChannel,
+                    sizeof (pChannelConf_p->pdoChannel));
+
         // Store channel ID for fast access
         pdokInstance_g.aRpdoChannelIdLut[pDestPdoChannel->nodeId] = pChannelConf_p->channelId;
 
@@ -342,10 +346,6 @@ tOplkError pdok_configureChannel(tPdoChannelConf* pChannelConf_p)
             }
         }
 #endif // NMT_MAX_NODE_ID > 0
-
-        // copy channel configuration to local structure
-        OPLK_MEMCPY(pDestPdoChannel, &pChannelConf_p->pdoChannel,
-                    sizeof (pChannelConf_p->pdoChannel));
 
 #if NMT_MAX_NODE_ID > 0
         if ((pDestPdoChannel->nodeId != PDO_INVALID_NODE_ID)
@@ -371,12 +371,12 @@ tOplkError pdok_configureChannel(tPdoChannelConf* pChannelConf_p)
 
         pDestPdoChannel = &pdokInstance_g.pdoChannels.pTxPdoChannel[pChannelConf_p->channelId];
 
-        // Store channel ID for fast access
-        pdokInstance_g.aTpdoChannelIdLut[pDestPdoChannel->nodeId] = pChannelConf_p->channelId;
-
         // copy channel to local structure
         OPLK_MEMCPY(pDestPdoChannel, &pChannelConf_p->pdoChannel,
-                sizeof (pChannelConf_p->pdoChannel));
+                    sizeof (pChannelConf_p->pdoChannel));
+
+        // Store channel ID for fast access
+        pdokInstance_g.aTpdoChannelIdLut[pDestPdoChannel->nodeId] = pChannelConf_p->channelId;
     }
 
     pdokInstance_g.fRunning = FALSE;
