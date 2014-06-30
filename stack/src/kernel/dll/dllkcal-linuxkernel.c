@@ -72,7 +72,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
-
 /**
 \brief DLL CAL shared buffer instance type
 
@@ -82,7 +81,7 @@ for event posting.
 typedef struct
 {
     tDllCalQueue        dllCalQueue;        ///< DLL CAL queue
-    tCircBufInstance*   pCircBufInstance;
+    tCircBufInstance*   pCircBufInstance;   ///< Shared buffer instance
 } tDllCalCircbufInstance;
 
 //------------------------------------------------------------------------------
@@ -138,6 +137,8 @@ tDllCalFuncIntf* dllkcalcircbuf_getInterface(void)
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+/// \name Private Functions
+/// \{
 
 //------------------------------------------------------------------------------
 /**
@@ -403,3 +404,4 @@ Exit:
     return ret;
 }
 
+/// \}

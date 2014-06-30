@@ -40,11 +40,27 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <common/ami.h>
+#include <common/oplkinc.h>
+#include <kernel/dllk.h>
+
 #include "dllkframe.h"
 #include "dllknode.h"
 #include "dllk-internal.h"
 #include "dllkstatemachine.h"
+
+#include <kernel/dllktgt.h>
+#include <kernel/edrv.h>
+#include <kernel/errhndk.h>
+#include <kernel/eventk.h>
+#include <oplk/benchmark.h>
+
+#if CONFIG_TIMER_USE_HIGHRES != FALSE
+#include <kernel/hrestimer.h>
+#endif
+
+#if (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER)
+#include <kernel/synctimer.h>
+#endif
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -57,6 +73,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // module global vars
 //------------------------------------------------------------------------------
+tDllkInstance               dllkInstance_g;
+TGT_DLLK_DEFINE_CRITICAL_SECTION
 
 //------------------------------------------------------------------------------
 // global function prototypes
@@ -77,13 +95,23 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-tDllkInstance               dllkInstance_g;
 static tEdrvTxBuffer        aDllkTxBuffer_l[DLLK_TXFRAME_COUNT];
-TGT_DLLK_DEFINE_CRITICAL_SECTION
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
+/* Cycle/Sync Callback functions */
+#if defined(CONFIG_INCLUDE_NMT_MN)
+static tOplkError cbCyclicError(tOplkError errorCode_p, tEdrvTxBuffer* pTxBuffer_p);
+#endif
+
+#if (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER)
+static tOplkError cbCnTimerSync(void);
+static tOplkError cbCnLossOfSync(void);
+#if CONFIG_DLL_PRES_CHAINING_CN != FALSE
+static tOplkError cbCnPresFallbackTimeout(void);
+#endif
+#endif
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -109,7 +137,7 @@ tOplkError dllk_addInstance(tDllkInitParam* pInitParam_p)
     tEdrvInitParam  EdrvInitParam;
 
     // reset instance structure
-    OPLK_MEMSET(&dllkInstance_g, 0, sizeof (dllkInstance_g));
+    OPLK_MEMSET(&dllkInstance_g, 0, sizeof(dllkInstance_g));
 
     //jba able to work without hresk?
 #if CONFIG_TIMER_USE_HIGHRES != FALSE
@@ -121,14 +149,14 @@ tOplkError dllk_addInstance(tDllkInitParam* pInitParam_p)
     if ((ret = synctimer_addInstance()) != kErrorOk)
         return ret;
 
-    if ((ret = synctimer_registerHandler(dllk_cbCnTimerSync)) != kErrorOk)
+    if ((ret = synctimer_registerHandler(cbCnTimerSync)) != kErrorOk)
         return ret;
 
-    if ((ret = synctimer_registerLossOfSyncHandler(dllk_cbCnLossOfSync)) != kErrorOk)
+    if ((ret = synctimer_registerLossOfSyncHandler(cbCnLossOfSync)) != kErrorOk)
         return ret;
 
 #if CONFIG_DLL_PRES_CHAINING_CN != FALSE
-    if ((ret = synctimer_registerLossOfSyncHandler2(dllk_cbCnPresFallbackTimeout)) != kErrorOk)
+    if ((ret = synctimer_registerLossOfSyncHandler2(cbCnPresFallbackTimeout)) != kErrorOk)
         return ret;
 #endif
 
@@ -140,7 +168,7 @@ tOplkError dllk_addInstance(tDllkInitParam* pInitParam_p)
 
     // initialize and link pointers in instance structure to frame tables
     dllkInstance_g.pTxBuffer = aDllkTxBuffer_l;
-    dllkInstance_g.maxTxFrames = sizeof (aDllkTxBuffer_l) / sizeof (tEdrvTxBuffer);
+    dllkInstance_g.maxTxFrames = sizeof(aDllkTxBuffer_l) / sizeof(tEdrvTxBuffer);
     dllkInstance_g.dllState = kDllGsInit;               // initialize state
 
 #if NMT_MAX_NODE_ID > 0
@@ -178,7 +206,7 @@ tOplkError dllk_addInstance(tDllkInitParam* pInitParam_p)
     if ((ret = edrvcyclic_init()) != kErrorOk)
         return ret;
 
-    if ((ret = edrvcyclic_regErrorHandler(dllk_cbCyclicError)) != kErrorOk)
+    if ((ret = edrvcyclic_regErrorHandler(cbCyclicError)) != kErrorOk)
         return ret;
 #endif
 
@@ -252,7 +280,7 @@ tOplkError dllk_config(tDllConfigParam* pDllConfigParam_p)
     else
     {   // copy entire configuration to local storage,
         // because we are in state DLL_GS_INIT
-        OPLK_MEMCPY (&dllkInstance_g.dllConfigParam, pDllConfigParam_p,
+        OPLK_MEMCPY(&dllkInstance_g.dllConfigParam, pDllConfigParam_p,
             (pDllConfigParam_p->sizeOfStruct < sizeof(tDllConfigParam) ?
             pDllConfigParam_p->sizeOfStruct : sizeof(tDllConfigParam)));
 #if (EDRV_USE_TTTX == TRUE)
@@ -300,9 +328,9 @@ case of hostname change).
 //------------------------------------------------------------------------------
 tOplkError dllk_setIdentity(tDllIdentParam* pDllIdentParam_p)
 {
-    OPLK_MEMCPY (&dllkInstance_g.dllIdentParam, pDllIdentParam_p,
-        (pDllIdentParam_p->sizeOfStruct < sizeof (tDllIdentParam) ?
-        pDllIdentParam_p->sizeOfStruct : sizeof (tDllIdentParam)));
+    OPLK_MEMCPY(&dllkInstance_g.dllIdentParam, pDllIdentParam_p,
+        (pDllIdentParam_p->sizeOfStruct < sizeof(tDllIdentParam) ?
+        pDllIdentParam_p->sizeOfStruct : sizeof(tDllIdentParam)));
 
     // $$$ if IdentResponse frame exists, update it
     return kErrorOk;
@@ -493,7 +521,6 @@ tOplkError dllk_releaseRxFrame(tPlkFrame* pFrame_p, UINT frameSize_p)
     return ret;
 }
 #endif
-
 
 #if NMT_MAX_NODE_ID > 0
 //------------------------------------------------------------------------------
@@ -779,6 +806,30 @@ tOplkError dllk_getCnMacAddress(UINT nodeId_p, BYTE* pCnMacAddress_p)
 
 #endif
 
+//------------------------------------------------------------------------------
+/**
+\brief  Post an event
+
+The function posts the specified event type to itself.
+
+\param  eventType_p             Event type to post.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+tOplkError dllk_postEvent(tEventType eventType_p)
+{
+    tOplkError              ret;
+    tEvent                  event;
+
+    event.eventSink = kEventSinkDllk;
+    event.eventType = eventType_p;
+    event.eventArgSize = 0;
+    event.pEventArg = NULL;
+    ret = eventk_postEvent(&event);
+    return ret;
+}
+
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
@@ -799,7 +850,7 @@ error occurred.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError dllk_cbCyclicError(tOplkError errorCode_p, tEdrvTxBuffer* pTxBuffer_p)
+static tOplkError cbCyclicError(tOplkError errorCode_p, tEdrvTxBuffer* pTxBuffer_p)
 {
     tOplkError      ret = kErrorOk;
     tNmtState       nmtState;
@@ -860,7 +911,7 @@ This function is called by the timer sync module. It signals the sync event.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError dllk_cbCnTimerSync(void)
+static tOplkError cbCnTimerSync(void)
 {
     tOplkError      ret = kErrorOk;
 
@@ -879,7 +930,7 @@ was lost.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError dllk_cbCnLossOfSync(void)
+static tOplkError cbCnLossOfSync(void)
 {
     tOplkError      ret = kErrorOk;
     tNmtState       nmtState;
@@ -910,9 +961,7 @@ Exit:
     return ret;
 }
 
-#endif
-
-#if (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER)
+#if CONFIG_DLL_PRES_CHAINING_CN != FALSE
 //------------------------------------------------------------------------------
 /**
 \brief  Callback function for PResFallBackTimeout
@@ -923,7 +972,7 @@ PResFallBackTimeout hat triggered.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError dllk_cbCnPresFallbackTimeout(void)
+static tOplkError cbCnPresFallbackTimeout(void)
 {
     tOplkError      ret = kErrorOk;
     tNmtState       nmtState;
@@ -951,6 +1000,8 @@ Exit:
     TGT_DLLK_LEAVE_CRITICAL_SECTION();
     return ret;
 }
+#endif
+
 #endif
 
 /// \}

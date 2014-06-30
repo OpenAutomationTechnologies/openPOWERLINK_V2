@@ -43,26 +43,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <common/oplkinc.h>
 
-#include <kernel/dllk.h>
-#include <kernel/dllkcal.h>
-#include <kernel/dllkfilter.h>
-#include <kernel/eventk.h>
-#include <kernel/errhndk.h>
 #include <oplk/nmt.h>
+#include <oplk/dll.h>
 #include <kernel/edrv.h>
-#include <oplk/benchmark.h>
-
-#if CONFIG_TIMER_USE_HIGHRES != FALSE
-#include <kernel/hrestimer.h>
-#endif
-
-#include "kernel/dllktgt.h"
-
-#if (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER)
-#include <kernel/synctimer.h>
-#endif
-
+#include <kernel/dllk.h>
+#include <kernel/dllkfilter.h>
+#include <kernel/dllktgt.h>
+#include <common/timer.h>
 
 //------------------------------------------------------------------------------
 // check for correct compilation options
@@ -153,85 +142,89 @@ void  TgtDbgPostTraceValue (DWORD dwTraceValue_p);
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-
 /**
- * \brief Structure for handling the report of a loss of SoC to the error handler
- *
- * A loss of SoC shall be reported only once per cycle to the error handler.
- * This structure controls the status of the reported errors in each cycle.
- */
+\brief Structure for handling the report of a loss of SoC to the error handler
+
+A loss of SoC shall be reported only once per cycle to the error handler.
+This structure controls the status of the reported errors in each cycle.
+*/
 typedef struct
 {
     BOOL      fLossReported;        ///< A loss of SoC was already reported in this cycle
     BOOL      fTimeoutOccurred;     ///< The sync interrupt occurred after a report of a loss of SoC
 } tDllLossSocStatus;
 
+/**
+\brief Structure containing the DLLk instance information
+
+This structure contains the data of a DLLk instance.
+*/
 typedef struct
 {
-    tNmtState               nmtState;
-    UINT64                  relativeTime;
-    UINT8                   aLocalMac[6];
-    tEdrvTxBuffer*          pTxBuffer;                      // Buffers for Tx-Frames
-    UINT                    maxTxFrames;
-    UINT8                   flag1;                          // Flag 1 with EN, EC for PRes, StatusRes
-    UINT8                   mnFlag1;                        // Flag 1 with MS, EA, ER from PReq, SoA of MN
-    UINT8                   flag2;                          // Flag 2 with PR and RS for PRes, StatusRes, IdentRes
-    UINT8                   updateTxFrame;
-    UINT                    usedPresFilterCount;
-    tDllConfigParam         dllConfigParam;
-    tDllIdentParam          dllIdentParam;
-    tDllState               dllState;
-    tDllkCbProcessRpdo      pfnCbProcessRpdo;
-    tDllkCbProcessTpdo      pfnCbProcessTpdo;
-    tDllkCbAsync            pfnCbAsync;
-    tSyncCb                 pfnCbSync;
-    tDllAsndFilter          aAsndFilter[DLL_MAX_ASND_SERVICE_ID];
-    tEdrvFilter             aFilter[DLLK_FILTER_COUNT];
+    tNmtState               nmtState;                               ///< Current NMT state
+    UINT64                  relativeTime;                           ///< Current RelativeTime
+    UINT8                   aLocalMac[6];                           ///< Ethernet MAC address
+    tEdrvTxBuffer*          pTxBuffer;                              ///< Buffers for TX frames
+    UINT                    maxTxFrames;                            ///< Max TX frames
+    UINT8                   flag1;                                  ///< Flag 1 with EN, EC for PRes, StatusRes
+    UINT8                   mnFlag1;                                ///< Flag 1 with MS, EA, ER from PReq, SoA of MN
+    UINT8                   flag2;                                  ///< Flag 2 with PR and RS for PRes, StatusRes, IdentRes
+    UINT8                   updateTxFrame;                          ///< Update TX frame
+    UINT                    usedPresFilterCount;                    ///< Count of used PRes filters
+    tDllConfigParam         dllConfigParam;                         ///< DLL configuration parameters
+    tDllIdentParam          dllIdentParam;                          ///< DLL ident parameters
+    tDllState               dllState;                               ///< Current DLL state
+    tDllkCbProcessRpdo      pfnCbProcessRpdo;                       ///< Pointer to the RPDO process callback function
+    tDllkCbProcessTpdo      pfnCbProcessTpdo;                       ///< Pointer to the TPDO process callback function
+    tDllkCbAsync            pfnCbAsync;                             ///< Pointer to the asynchronous callback function
+    tSyncCb                 pfnCbSync;                              ///< Pointer to the synchronous callback function
+    tDllAsndFilter          aAsndFilter[DLL_MAX_ASND_SERVICE_ID];   ///< Array of ASnd filters
+    tEdrvFilter             aFilter[DLLK_FILTER_COUNT];             ///< Array of Ethernet driver filters
 #if NMT_MAX_NODE_ID > 0
-    tDllkNodeInfo           aNodeInfo[NMT_MAX_NODE_ID];
+    tDllkNodeInfo           aNodeInfo[NMT_MAX_NODE_ID];             ///< Array of node information structures
 #endif
-    UINT8                   curTxBufferOffsetIdentRes;
-    UINT8                   curTxBufferOffsetStatusRes;
-    UINT8                   curTxBufferOffsetNmtReq;
-    UINT8                   curTxBufferOffsetNonPlk;
-    UINT8                   curTxBufferOffsetCycle;         // PRes, SoC, SoA, PReq
+    UINT8                   curTxBufferOffsetIdentRes;              ///< Current TX buffer offset for IdentResponse frames
+    UINT8                   curTxBufferOffsetStatusRes;             ///< Current TX buffer offset for StatusResponse frames
+    UINT8                   curTxBufferOffsetNmtReq;                ///< Current TX buffer offset for NMT-priority frames
+    UINT8                   curTxBufferOffsetNonPlk;                ///< Current TX buffer offset for non-POWERLINK frames
+    UINT8                   curTxBufferOffsetCycle;                 ///< Current TX buffer offset for PRes, SoC, SoA, PReq
 #if CONFIG_DLL_PRES_CHAINING_CN != FALSE
-    UINT8                   curTxBufferOffsetSyncRes;
+    UINT8                   curTxBufferOffsetSyncRes;               ///< Current TX buffer offset for SyncResponse frames
 #endif
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
-    tDllkNodeInfo*          pFirstNodeInfo;
-    UINT8                   aCnNodeIdList[2][NMT_MAX_NODE_ID];
-    UINT8                   curNodeIndex;
-    tEdrvTxBuffer**         ppTxBufferList;
-    UINT8                   syncLastSoaReq;
-    tDllReqServiceId        aLastReqServiceId[DLLK_SOAREQ_COUNT];
-    UINT                    aLastTargetNodeId[DLLK_SOAREQ_COUNT];
-    UINT8                   curLastSoaReq;
-    BOOL                    fSyncProcessed;
-    BOOL                    fPrcSlotFinished;
-    tDllkNodeInfo*          pFirstPrcNodeInfo;
+    tDllkNodeInfo*          pFirstNodeInfo;                         ///< Pointer to the first node information structure
+    UINT8                   aCnNodeIdList[2][NMT_MAX_NODE_ID];      ///< Double-buffered node ID list
+    UINT8                   curNodeIndex;                           ///< Current node index
+    tEdrvTxBuffer**         ppTxBufferList;                         ///< Pointer to the TX buffer list
+    UINT8                   syncLastSoaReq;                         ///< Sync last SoA request
+    tDllReqServiceId        aLastReqServiceId[DLLK_SOAREQ_COUNT];   ///< Array of last requested service IDs
+    UINT                    aLastTargetNodeId[DLLK_SOAREQ_COUNT];   ///< Array of last target node IDs
+    UINT8                   curLastSoaReq;                          ///< Current last SoA request
+    BOOL                    fSyncProcessed;                         ///< Sync is processed
+    BOOL                    fPrcSlotFinished;                       ///< PRC slot is finished
+    tDllkNodeInfo*          pFirstPrcNodeInfo;                      ///< Pointer to the first PRC node information structure
 #endif
 
 #if CONFIG_TIMER_USE_HIGHRES != FALSE
-    tTimerHdl               timerHdlCycle;                  // used for POWERLINK cycle monitoring on CN and generation on MN
+    tTimerHdl               timerHdlCycle;                          ///< Timer handle used for POWERLINK cycle monitoring on CN and generation on MN
 #if defined(CONFIG_INCLUDE_NMT_MN)
-    tTimerHdl               timerHdlResponse;               // used for CN response monitoring
+    tTimerHdl               timerHdlResponse;                       ///< Timer handle used for CN response monitoring
 #endif
 #endif
 
-    UINT                    prescaleCycleCount;             // cycle counter for toggling PS bit in MN SOC
-    UINT                    cycleCount;                     // cycle counter (needed for multiplexed cycle support)
-    UINT64                  frameTimeout;                   // frame timeout (cycle length + loss of frame tolerance)
+    UINT                    prescaleCycleCount;                     ///< Cycle counter for toggling PS bit in MN SOC
+    UINT                    cycleCount;                             ///< Cycle counter (needed for multiplexed cycle support)
+    UINT64                  frameTimeout;                           ///< Frame timeout (cycle length + loss of frame tolerance)
 
-    tDllLossSocStatus       lossSocStatus;
+    tDllLossSocStatus       lossSocStatus;                          ///< Loss of SoC status
 
 #if CONFIG_DLL_PRES_CHAINING_CN != FALSE
-    UINT                    syncReqPrevNodeId;
-    tTimestamp              syncReqPrevTimeStamp;
-    BOOL                    fPrcEnabled;
-    UINT32                  prcPResTimeFirst;
-    UINT32                  prcPResFallBackTimeout;
+    UINT                    syncReqPrevNodeId;                      ///< Node ID of the previous SyncRequest
+    tTimestamp              syncReqPrevTimeStamp;                   ///< Timestamp of the previous SyncRequest
+    BOOL                    fPrcEnabled;                            ///< PRC is enabled
+    UINT32                  prcPResTimeFirst;                       ///< PRes time on the first communication path
+    UINT32                  prcPResFallBackTimeout;                 ///< Timeout to fall back to PReq/PRes mode on the first communication path
 #endif
 } tDllkInstance;
 
@@ -249,33 +242,12 @@ TGT_DLLK_DECLARE_CRITICAL_SECTION
 extern "C" {
 #endif
 
-
 //------------------------------------------------------------------------------
-/* event functions (dllkevent.c) */
+/* Helper functions */
 tOplkError dllk_postEvent(tEventType EventType_p);
-tOplkError controlPdokcalSync(BOOL fEnable_p);
-
-//------------------------------------------------------------------------------
-/* Cycle/Sync Callback functions */
-#if defined(CONFIG_INCLUDE_NMT_MN)
-tOplkError dllk_cbCyclicError(tOplkError errorCode_p, tEdrvTxBuffer * pTxBuffer_p);
-#endif
-#if (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER)
-tOplkError dllk_cbCnTimerSync(void);
-tOplkError dllk_cbCnLossOfSync(void);
-#endif
-
-//------------------------------------------------------------------------------
-/* PRes Chaining functions */
-#if CONFIG_DLL_PRES_CHAINING_CN == TRUE
-#if (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER)
-tOplkError dllk_cbCnPresFallbackTimeout(void);
-#endif
-#endif
 
 #ifdef __cplusplus
 }
 #endif
-
 
 #endif /* _INC_dllk_internal_H_ */

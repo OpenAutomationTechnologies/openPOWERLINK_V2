@@ -68,7 +68,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
-
 /**
 \brief DLL CAL shared buffer instance type
 
@@ -134,6 +133,9 @@ tDllCalFuncIntf* dllkcalcircbuf_getInterface(void)
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+
+/// \name Private Functions
+/// \{
 
 //------------------------------------------------------------------------------
 /**
@@ -246,7 +248,7 @@ Inserts a data block into the DLL CAL queue.
 */
 //------------------------------------------------------------------------------
 static tOplkError insertDataBlock(tDllCalQueueInstance pDllCalQueue_p,
-                                   BYTE* pData_p, UINT* pDataSize_p)
+                                  BYTE* pData_p, UINT* pDataSize_p)
 {
     tOplkError                  ret = kErrorOk;
     tCircBufError               error;
@@ -389,3 +391,4 @@ static tOplkError resetDataBlockQueue(tDllCalQueueInstance pDllCalQueue_p,
     return kErrorOk;
 }
 
+/// \}

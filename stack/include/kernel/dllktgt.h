@@ -67,7 +67,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define TGT_DLLK_LEAVE_CRITICAL_SECTION() \
         spin_unlock_irqrestore(&tgtDllkCriticalSection_l, tgtDllkFlags);
 
-
 #else   // all other targets do not need the critical section within DLL
 
 #define TGT_DLLK_DEFINE_CRITICAL_SECTION
@@ -75,7 +74,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define TGT_DLLK_DECLARE_FLAGS
 #define TGT_DLLK_ENTER_CRITICAL_SECTION()
 #define TGT_DLLK_LEAVE_CRITICAL_SECTION()
-
 
 #endif
 

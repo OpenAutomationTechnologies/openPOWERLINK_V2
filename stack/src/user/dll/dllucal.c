@@ -39,10 +39,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <common/ami.h>
-#include <common/dllcal.h>
+#include <common/oplkinc.h>
 #include <user/dllucal.h>
 #include <user/eventu.h>
+#include <common/dllcal.h>
+#include <common/ami.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -75,17 +76,27 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
+/**
+\brief DLLu CAL instance type
+
+This structure defines an instance of the POWERLINK Data Link Layer
+Communication Abstraction Layer user module.
+*/
 typedef struct
 {
     tDlluCbAsnd              apfnDlluCbAsnd[DLL_MAX_ASND_SERVICE_ID];
-    tDllCalQueueInstance     dllCalQueueTxNmt;          ///< Dll Cal Queue instance for NMT priority
-    tDllCalQueueInstance     dllCalQueueTxGen;          ///< Dll Cal Queue instance for Generic priority
+                                                        ///< Array of callback functions registered for receiving incoming ASnd frames with a specific ServiceId
+
+    tDllCalQueueInstance     dllCalQueueTxNmt;          ///< DLL CAL queue instance for NMT priority
+    tDllCalFuncIntf*         pTxNmtFuncs;               ///< Function pointer to the TX functions for NMT priority
+
+    tDllCalQueueInstance     dllCalQueueTxGen;          ///< DLL CAL queue instance for generic priority
+    tDllCalFuncIntf*         pTxGenFuncs;               ///< Function pointer to the TX functions for generic priority
+
 #if defined(CONFIG_INCLUDE_NMT_MN)
-    tDllCalQueueInstance     dllCalQueueTxSync;         ///< Dll Cal Queue instance for Sync Request
-    tDllCalFuncIntf*         pTxSyncFuncs;
+    tDllCalQueueInstance     dllCalQueueTxSync;         ///< DLL CAL queue instance for SyncRequest frames
+    tDllCalFuncIntf*         pTxSyncFuncs;              ///< Function pointer to the TX functions for SyncRequest frames
 #endif
-    tDllCalFuncIntf*         pTxNmtFuncs;
-    tDllCalFuncIntf*         pTxGenFuncs;
 } tDlluCalInstance;
 
 //------------------------------------------------------------------------------
@@ -487,7 +498,6 @@ tOplkError dllucal_configNode(tDllNodeInfo* pNodeInfo_p)
     return ret;
 }
 
-
 //------------------------------------------------------------------------------
 /**
 \brief  Add a node to the isochronous phase
@@ -551,6 +561,8 @@ tOplkError dllucal_deleteNode(tDllNodeOpParam* pNodeOpParam_p)
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+/// \name Private Functions
+/// \{
 
 //------------------------------------------------------------------------------
 /**
@@ -673,3 +685,4 @@ static tOplkError HandleNotRxAsndFrame(tDllAsndNotRx* pAsndNotRx_p)
     return ret;
 }
 
+/// \}

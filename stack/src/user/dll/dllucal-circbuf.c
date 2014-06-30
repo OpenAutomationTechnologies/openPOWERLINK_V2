@@ -40,6 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <common/oplkinc.h>
 #include <common/dllcal.h>
 #include <common/circbuffer.h>
 
@@ -136,6 +137,8 @@ tDllCalFuncIntf* dllucalcircbuf_getInterface(void)
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+/// \name Private Functions
+/// \{
 
 //------------------------------------------------------------------------------
 /**
@@ -388,3 +391,4 @@ static tOplkError resetDataBlockQueue(tDllCalQueueInstance pDllCalQueue_p,
     return kErrorOk;
 }
 
+/// \}

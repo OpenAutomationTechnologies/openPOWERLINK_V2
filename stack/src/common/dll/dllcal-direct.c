@@ -40,6 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <common/oplkinc.h>
 #include <common/dllcal.h>
 
 //============================================================================//
@@ -82,9 +83,9 @@ event posting.
 typedef struct sDllCalDirectInstance
 {
     tDllCalQueue                  dllCalQueue;                            ///< DLL CAL queue
-    UINT                          frameSize;                              ///< size of frame in frame buffer (empty if zero)
-    BYTE                          aFrameBuffer[DLLCALDIRECT_TXBUF_SIZE];  ///< frame buffer
-    struct sDllCalDirectInstance* pNext;                                  ///< pointer to next instance in direct module
+    UINT                          frameSize;                              ///< Size of frame in frame buffer (empty if zero)
+    BYTE                          aFrameBuffer[DLLCALDIRECT_TXBUF_SIZE];  ///< Frame buffer
+    struct sDllCalDirectInstance* pNext;                                  ///< Pointer to the next instance in the direct module
 } tDllCalDirectInstance;
 
 //------------------------------------------------------------------------------
@@ -137,6 +138,8 @@ tDllCalFuncIntf* dllcaldirect_getInterface(void)
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+/// \name Private Functions
+/// \{
 
 //------------------------------------------------------------------------------
 /**
@@ -468,3 +471,4 @@ static tOplkError resetDataBlockQueue(tDllCalQueueInstance pDllCalQueue_p,
     return kErrorOk;
 }
 
+/// \}

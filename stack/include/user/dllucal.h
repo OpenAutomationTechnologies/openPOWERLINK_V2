@@ -61,28 +61,19 @@ extern "C" {
 #endif
 
 tOplkError dllucal_init(void);
-
 tOplkError dllucal_exit(void);
-
 tOplkError dllucal_config(tDllConfigParam* pDllConfigParam_p);
-
 tOplkError dllucal_setIdentity(tDllIdentParam* pDllIdentParam_p);
-
 tOplkError dllucal_regAsndService(tDllAsndServiceId ServiceId_p,
                                   tDlluCbAsnd pfnDlluCbAsnd_p,
                                   tDllAsndFilter Filter_p);
-
 tOplkError dllucal_sendAsyncFrame(tFrameInfo* pFrameInfo, tDllAsyncReqPriority Priority_p);
-
 tOplkError dllucal_process(tEvent* pEvent_p);
-
 
 #if NMT_MAX_NODE_ID > 0
 
 tOplkError dllucal_configNode(tDllNodeInfo* pNodeInfo_p);
-
 tOplkError dllucal_addNode(tDllNodeOpParam* pNodeOpParam_p);
-
 tOplkError dllucal_deleteNode(tDllNodeOpParam* pNodeOpParam_p);
 
 #endif

@@ -2,7 +2,7 @@
 ********************************************************************************
 \file   dllkevent.c
 
-\brief  Event handling functions of kernel DLL module
+\brief  Event handling functions of the kernel DLL module
 
 This file contains the event handling functions of the kernel DLL module.
 
@@ -40,10 +40,24 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <common/ami.h>
+#include <common/oplkinc.h>
 #include "dllk-internal.h"
 #include "dllkframe.h"
 #include "dllknode.h"
+
+#include <kernel/dllkcal.h>
+#include <kernel/eventk.h>
+#include <kernel/errhndk.h>
+#include <common/ami.h>
+
+#if CONFIG_TIMER_USE_HIGHRES != FALSE
+#include <kernel/hrestimer.h>
+#endif
+
+#if (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER)
+#include <kernel/synctimer.h>
+#endif
+
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -81,6 +95,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
+static tOplkError controlPdokcalSync(BOOL fEnable_p);
+
 static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState OldNmtState_p);
 static tOplkError processNmtEvent(tEvent* pEvent_p);
 static tOplkError processCycleFinish(tNmtState nmtState_p) SECTION_DLLK_PROCESS_CYCFIN;
@@ -178,30 +194,6 @@ tOplkError dllk_process(tEvent* pEvent_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Post an event
-
-The function posts the specified event type to itself.
-
-\param  eventType_p             Event type to post.
-
-\return The function returns a tOplkError error code.
-*/
-//------------------------------------------------------------------------------
-tOplkError dllk_postEvent(tEventType eventType_p)
-{
-    tOplkError              ret;
-    tEvent                  event;
-
-    event.eventSink = kEventSinkDllk;
-    event.eventType = eventType_p;
-    event.eventArgSize = 0;
-    event.pEventArg = NULL;
-    ret = eventk_postEvent(&event);
-    return ret;
-}
-
-//------------------------------------------------------------------------------
-/**
 \brief  Control PDOK CAL sync function
 
 This function controls the kernel PDO CAL sync function. It enables/disables
@@ -212,7 +204,7 @@ the sync function by sending the appropriate event.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError controlPdokcalSync(BOOL fEnable_p)
+static tOplkError controlPdokcalSync(BOOL fEnable_p)
 {
     tEvent event;
     BOOL fEnable = fEnable_p;
@@ -224,10 +216,6 @@ tOplkError controlPdokcalSync(BOOL fEnable_p)
 
     return eventk_postEvent(&event);
 }
-
-//----------------------------------------------------------------------------//
-//                L O C A L   F U N C T I O N S                               //
-//----------------------------------------------------------------------------//
 
 //------------------------------------------------------------------------------
 /**
@@ -1030,4 +1018,4 @@ Exit:
 }
 #endif
 
-///\}
+/// \}

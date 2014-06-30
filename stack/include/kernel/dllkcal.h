@@ -40,9 +40,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-#include <oplk/dll.h>
 #include <common/dllcal.h>
+#include <oplk/dll.h>
 #include <oplk/event.h>
+#include <oplk/frame.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -51,14 +52,20 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
+/**
+\brief Structure defining statistics of the DLLk CAL module
+
+This structure defines statistic data of the POWERLINK Data Link Layer
+Communication Abstraction Layer kernel module.
+*/
 typedef struct
 {
-    ULONG       curTxFrameCountGen;
-    ULONG       curTxFrameCountNmt;
-    ULONG       curRxFrameCount;
-    ULONG       maxTxFrameCountGen;
-    ULONG       maxTxFrameCountNmt;
-    ULONG       maxRxFrameCount;
+    ULONG       curTxFrameCountGen;                         ///< Number of frames in the generic TX queue
+    ULONG       curTxFrameCountNmt;                         ///< Number of frames in the NMT TX queue
+    ULONG       curRxFrameCount;                            ///< Number of frames in the RX queue
+    ULONG       maxTxFrameCountGen;                         ///< Max number of frames in the generic TX queue
+    ULONG       maxTxFrameCountNmt;                         ///< Max number of frames in the NMT TX queue
+    ULONG       maxRxFrameCount;                            ///< Max number of frames in the RX queue
 } tDllkCalStatistics;
 
 //------------------------------------------------------------------------------
@@ -70,43 +77,31 @@ extern "C" {
 #endif
 
 tOplkError dllkcal_init(void);
-
 tOplkError dllkcal_exit(void);
-
 tOplkError dllkcal_getAsyncTxCount(tDllAsyncReqPriority* pPriority_p,
                                    UINT* pCount_p);
-
 tOplkError dllkcal_getAsyncTxFrame(void* pFrame_p, UINT* pFrameSize_p,
                                    tDllAsyncReqPriority priority_p);
 
 // only frames with registered AsndServiceIds are passed to CAL
 tOplkError dllkcal_asyncFrameReceived(tFrameInfo* pFrameInfo_p) SECTION_DLLKCAL_ASYNCRX;
-
 tOplkError dllkcal_sendAsyncFrame(tFrameInfo* pFrameInfo_p, tDllAsyncReqPriority priority_p);
-
 tOplkError dllkcal_writeAsyncFrame(tFrameInfo* pFrameInfo_p, tDllCalQueue dllQueue);
-
 tOplkError dllkcal_clearAsyncBuffer(void);
-
 tOplkError dllkcal_getStatistics(tDllkCalStatistics** ppStatistics);
-
 tOplkError dllkcal_process(tEvent* pEvent_p);
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
 
 tOplkError dllkcal_clearAsyncQueues(void);
-
 tOplkError dllkcal_issueRequest(tDllReqServiceId service_p, UINT nodeId_p,
                                 BYTE soaFlag1_p);
-
 tOplkError dllkcal_getSoaRequest(tDllReqServiceId* pReqServiceId_p,
                                  UINT* pNodeId_p, tSoaPayload* pSoaPayload_p) SECTION_DLLKCAL_GETSOAREQ;
-
 tOplkError dllkcal_setAsyncPendingRequests(UINT nodeId_p, tDllAsyncReqPriority asyncReqPrio_p,
                                            UINT count_p) SECTION_DLLKCAL_GETPENREQ;
 
 #endif
-
 
 #ifdef __cplusplus
 }

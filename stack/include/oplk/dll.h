@@ -64,14 +64,14 @@ The enumeration contains all valid ASnd service IDs.
 */
 typedef enum
 {
-    kDllAsndNotDefined       = 0x00,
-    kDllAsndIdentResponse    = 0x01,
-    kDllAsndStatusResponse   = 0x02,
-    kDllAsndNmtRequest       = 0x03,
-    kDllAsndNmtCommand       = 0x04,
-    kDllAsndSdo              = 0x05,
+    kDllAsndNotDefined       = 0x00,                        ///< No service
+    kDllAsndIdentResponse    = 0x01,                        ///< Send an IdentResponse frame
+    kDllAsndStatusResponse   = 0x02,                        ///< Send a StatusResponse frame
+    kDllAsndNmtRequest       = 0x03,                        ///< Send an NMT request
+    kDllAsndNmtCommand       = 0x04,                        ///< Send an NMT command
+    kDllAsndSdo              = 0x05,                        ///< Send an SDO/ASnd frame
 #if ((CONFIG_DLL_PRES_CHAINING_CN != FALSE) || defined(CONFIG_INCLUDE_NMT_MN))
-    kDllAsndSyncResponse     = 0x06
+    kDllAsndSyncResponse     = 0x06                         ///< Send a SyncResponse frame
 #endif
 } tDllAsndServiceId;
 
@@ -82,9 +82,9 @@ The enumeration contains all valid ASnd filters.
 */
 typedef enum
 {
-    kDllAsndFilterNone      = 0x00,
-    kDllAsndFilterLocal     = 0x01,  // receive only ASnd frames with local or broadcast node ID
-    kDllAsndFilterAny       = 0x02,  // receive any ASnd frame
+    kDllAsndFilterNone      = 0x00,                         ///< No filter
+    kDllAsndFilterLocal     = 0x01,                         ///< Receive only ASnd frames with local or broadcast node ID
+    kDllAsndFilterAny       = 0x02,                         ///< Receive any ASnd frame
 } tDllAsndFilter;
 
 /**
@@ -94,14 +94,14 @@ The enumeration contains all valid request service IDs.
 */
 typedef enum
 {
-    kDllReqServiceNo         = 0x00,
-    kDllReqServiceIdent      = 0x01,
-    kDllReqServiceStatus     = 0x02,
-    kDllReqServiceNmtRequest = 0x03,
+    kDllReqServiceNo         = 0x00,                        ///< No service
+    kDllReqServiceIdent      = 0x01,                        ///< Send an IdentRequest frame
+    kDllReqServiceStatus     = 0x02,                        ///< Send a StatusRequest frame
+    kDllReqServiceNmtRequest = 0x03,                        ///< Invite a node for sending an NMT priority frame
 #if (CONFIG_DLL_PRES_CHAINING_CN != FALSE) || defined(CONFIG_INCLUDE_NMT_MN)
-    kDllReqServiceSync       = 0x06,
+    kDllReqServiceSync       = 0x06,                        ///< Send a SyncRequest frame
 #endif
-    kDllReqServiceUnspecified= 0xFF,
+    kDllReqServiceUnspecified= 0xFF,                        ///< Invite a node for sending a generic asynchronous frame
 } tDllReqServiceId;
 
 /**
@@ -112,13 +112,13 @@ The enumeration contains all valid asynchronous request priorities.
 typedef enum
 {
     kDllAsyncReqPrioNmt      = 0x07,            ///< PRIO_NMT_REQUEST
-    kDllAsyncReqPrio6        = 0x06,
-    kDllAsyncReqPrio5        = 0x05,
-    kDllAsyncReqPrio4        = 0x04,
+    kDllAsyncReqPrio6        = 0x06,            ///< Priority 6 (unused)
+    kDllAsyncReqPrio5        = 0x05,            ///< Priority 5 (unused)
+    kDllAsyncReqPrio4        = 0x04,            ///< Priority 4 (unused)
     kDllAsyncReqPrioGeneric  = 0x03,            ///< PRIO_GENERIC_REQUEST
-    kDllAsyncReqPrio2        = 0x02,            ///< till WSP 0.1.3: PRIO_ABOVE_GENERIC
-    kDllAsyncReqPrio1        = 0x01,            ///< till WSP 0.1.3: PRIO_BELOW_GENERIC
-    kDllAsyncReqPrio0        = 0x00,            ///< till WSP 0.1.3: PRIO_GENERIC_REQUEST
+    kDllAsyncReqPrio2        = 0x02,            ///< Priority 2 (unused - until WSP 0.1.3: PRIO_ABOVE_GENERIC)
+    kDllAsyncReqPrio1        = 0x01,            ///< Priority 1 (unused - until WSP 0.1.3: PRIO_BELOW_GENERIC)
+    kDllAsyncReqPrio0        = 0x00,            ///< Priority 0 (unused - until WSP 0.1.3: PRIO_GENERIC_REQUEST)
 } tDllAsyncReqPriority;
 
 /**
@@ -151,7 +151,7 @@ the data link layer (DLL).
 */
 typedef struct
 {
-    UINT                sizeOfStruct;
+    UINT                sizeOfStruct;               ///< Size of the structure
     BOOL                fAsyncOnly;                 ///< Async only node, does not need to register PRes-Frame
     UINT                nodeId;                     ///< Local node ID
     UINT32              featureFlags;               ///< 0x1F82: NMT_FeatureFlags_U32
@@ -182,22 +182,22 @@ node on the network.
 */
 typedef struct
 {
-    UINT                sizeOfStruct;
+    UINT                sizeOfStruct;                   ///< Size of the structure
     UINT32              deviceType;                     ///< NMT_DeviceType_U32
     UINT32              vendorId;                       ///< NMT_IdentityObject_REC.VendorId_U32
     UINT32              productCode;                    ///< NMT_IdentityObject_REC.ProductCode_U32
     UINT32              revisionNumber;                 ///< NMT_IdentityObject_REC.RevisionNo_U32
     UINT32              serialNumber;                   ///< NMT_IdentityObject_REC.SerialNo_U32
-    UINT64              vendorSpecificExt1;
+    UINT64              vendorSpecificExt1;             ///< Vendor-specific extenstion field 1
     UINT32              verifyConfigurationDate;        ///< CFM_VerifyConfiguration_REC.ConfDate_U32
     UINT32              verifyConfigurationTime;        ///< CFM_VerifyConfiguration_REC.ConfTime_U32
     UINT32              applicationSwDate;              ///< PDL_LocVerApplSw_REC.ApplSwDate_U32 on programmable device or date portion of NMT_ManufactSwVers_VS on non-programmable device
     UINT32              applicationSwTime;              ///< PDL_LocVerApplSw_REC.ApplSwTime_U32 on programmable device or time portion of NMT_ManufactSwVers_VS on non-programmable device
-    UINT32              ipAddress;
-    UINT32              subnetMask;
-    UINT32              defaultGateway;
-    UINT8               sHostname[32];
-    UINT8               aVendorSpecificExt2[48];
+    UINT32              ipAddress;                      ///< IP address
+    UINT32              subnetMask;                     ///< IP subnet mask
+    UINT32              defaultGateway;                 ///< IP default gateway address
+    UINT8               sHostname[32];                  ///< Hostname
+    UINT8               aVendorSpecificExt2[48];        ///< Vendor-specific extenstion field 2
 } tDllIdentParam;
 
 /**
@@ -208,11 +208,11 @@ The structure contains all information of a node needed by the data link layer
 */
 typedef struct
 {
-    UINT                nodeId;
-    UINT16              presPayloadLimit;               ///< object 0x1F8D: NMT_PResPayloadLimitList_AU16
+    UINT                nodeId;                         ///< Node ID
+    UINT16              presPayloadLimit;               ///< NMT_PResPayloadLimitList_AU16 (0x1F8D)
 #if defined(CONFIG_INCLUDE_NMT_MN)
-    UINT16              preqPayloadLimit;               ///< object 0x1F8B: NMT_MNPReqPayloadLimitList_AU16
-    UINT32              presTimeoutNs;                  ///< object 0x1F92: NMT_MNCNPResTimeout_AU32
+    UINT16              preqPayloadLimit;               ///< NMT_MNPReqPayloadLimitList_AU16 (0x1F8B)
+    UINT32              presTimeoutNs;                  ///< NMT_MNCNPResTimeout_AU32 (0x1F92)
 #endif
 } tDllNodeInfo;
 
@@ -223,10 +223,10 @@ The enumeration contains all valid node operations.
 */
 typedef enum
 {
-    kDllNodeOpTypeIsochronous        = 0x00,
-    kDllNodeOpTypeFilterPdo          = 0x01,
-    kDllNodeOpTypeFilterHeartbeat    = 0x02,
-    kDllNodeOpTypeSoftDelete         = 0x03,
+    kDllNodeOpTypeIsochronous        = 0x00,            ///< Isochronous operation
+    kDllNodeOpTypeFilterPdo          = 0x01,            ///< Filter PDO
+    kDllNodeOpTypeFilterHeartbeat    = 0x02,            ///< Filter heartbeat
+    kDllNodeOpTypeSoftDelete         = 0x03,            ///< Remove the node via soft delete
 } tDllNodeOpType;
 
 /**
@@ -247,22 +247,10 @@ The structure contains all parameters for a node operation.
 */
 typedef struct
 {
-    UINT                nodeId;
-    UINT32              syncControl;
-    UINT32              pResTimeFirst;
-    UINT32              pResFallBackTimeout;
+    UINT                nodeId;                         ///< Node ID
+    UINT32              syncControl;                    ///< Sync control register
+    UINT32              pResTimeFirst;                  ///< PRes time of the first communication path
+    UINT32              pResFallBackTimeout;            ///< Timeout to fall back to PReq/PRes mode
 } tDllSyncRequest;
 
-//------------------------------------------------------------------------------
-// function prototypes
-//------------------------------------------------------------------------------
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#ifdef __cplusplus
-}
-#endif
-
 #endif  // #ifndef _INC_oplk_dll_H_
-

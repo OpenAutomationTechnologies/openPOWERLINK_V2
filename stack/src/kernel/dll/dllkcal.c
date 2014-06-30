@@ -89,33 +89,37 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
+/**
+\brief DLLk CAL instance type
+
+This structure defines an instance of the POWERLINK Data Link Layer
+Communication Abstraction Layer kernel module.
+*/
 typedef struct
 {
-    tDllCalQueueInstance    dllCalQueueTxNmt;       ///< Dll Cal Queue instance for NMT priority
-    tDllCalQueueInstance    dllCalQueueTxGen;       ///< Dll Cal Queue instance for Generic priority
-    tDllCalFuncIntf*        pTxNmtFuncs;
-    tDllCalFuncIntf*        pTxGenFuncs;
+    tDllCalQueueInstance    dllCalQueueTxNmt;       ///< DLL CAL queue instance for NMT priority
+    tDllCalFuncIntf*        pTxNmtFuncs;            ///< Function pointer to the TX functions for NMT priority
+
+    tDllCalQueueInstance    dllCalQueueTxGen;       ///< DLL CAL queue instance for generic priority
+    tDllCalFuncIntf*        pTxGenFuncs;            ///< Function pointer to the TX functions for generic priority
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
-    tDllCalQueueInstance    dllCalQueueTxSync;      ///< Dll Cal Queue instance for Sync Request
-    tDllCalFuncIntf*        pTxSyncFuncs;
+    tDllCalQueueInstance    dllCalQueueTxSync;      ///< DLL CAL queue instance for SyncRequest frames
+    tDllCalFuncIntf*        pTxSyncFuncs;           ///< Function pointer to the TX functions for SyncRequest frames
 #endif
-    tDllkCalStatistics      statistics;
+
+    tDllkCalStatistics      statistics;             ///< DLL CAL statistics
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
-    // IdentRequest queue with CN node IDs
+    tCircBufInstance*       pQueueIdentReq;         ///< IdentRequest queue with the CN node IDs
+    tCircBufInstance*       pQueueStatusReq;        ///< StatusRequest queue with the CN node IDs
 
-    tCircBufInstance*       pQueueIdentReq;
+    tCircBufInstance*       pQueueCnRequestNmt;     ///< Queue for NMT priority CN requests
+    UINT                    aCnRequestCntNmt[254];  ///< Array of requested frames in the NMT priority queues of each CN
+    tCircBufInstance*       pQueueCnRequestGen;     ///< Queue for generic priority CN requests
+    UINT                    aCnRequestCntGen[254];  ///< Array of requested frames in the generic priority queues of each CN
 
-    // StatusRequest queue with CN node IDs
-    tCircBufInstance*       pQueueStatusReq;
-
-    tCircBufInstance*       pQueueCnRequestNmt;
-    UINT                    aCnRequestCntNmt[254];
-    tCircBufInstance*       pQueueCnRequestGen;
-    UINT                    aCnRequestCntGen[254];
-
-    UINT                    nextRequestQueue;
+    UINT                    nextRequestQueue;       ///< Number of next request queue to be scheduled
 #endif
 } tDllkCalInstance;
 
@@ -161,7 +165,7 @@ tOplkError dllkcal_init(void)
 #endif
 
     // reset instance structure
-    OPLK_MEMSET(&instance_l, 0, sizeof (instance_l));
+    OPLK_MEMSET(&instance_l, 0, sizeof(instance_l));
 
     instance_l.pTxNmtFuncs = GET_DLLKCAL_INTERFACE();
     instance_l.pTxGenFuncs = GET_DLLKCAL_INTERFACE();
@@ -887,6 +891,8 @@ tOplkError dllkcal_setAsyncPendingRequests(UINT nodeId_p,
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+/// \name Private Functions
+/// \{
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
 //------------------------------------------------------------------------------
@@ -1180,3 +1186,4 @@ static BOOL getMnSyncRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p,
 
 #endif
 
+/// \}

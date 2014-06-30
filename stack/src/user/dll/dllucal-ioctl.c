@@ -40,6 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <common/oplkinc.h>
 #include <common/dllcal.h>
 #include <user/ctrlucal.h>
 #include <oplk/powerlink-module.h>
@@ -137,6 +138,8 @@ tDllCalFuncIntf* dllcalioctl_getInterface(void)
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+/// \name Private Functions
+/// \{
 
 //------------------------------------------------------------------------------
 /**
@@ -240,3 +243,4 @@ Exit:
     return ret;
 }
 
+/// \}

@@ -43,10 +43,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-#include <oplk/dll.h>
-#include <oplk/event.h>
 #include <kernel/edrv.h>
-
+#include <oplk/dll.h>
+#include <oplk/nmt.h>
+#include <oplk/event.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -64,63 +64,80 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 typedef tOplkError (*tDllkCbAsync)(tFrameInfo* pFrameInfo_p);
 
+/**
+\brief Structure defining DLLk init parameters
+
+This structure defines the init parameters of the POWERLINK Data Link Layer
+kernel module.
+*/
 typedef struct
 {
-    UINT8               aLocalMac[6];
-    tHwParam            hwParam;
+    UINT8               aLocalMac[6];                   ///< Ethernet MAC address
+    tHwParam            hwParam;                        ///< Hardware parameters
 } tDllkInitParam;
 
-// forward declaration
-struct _tEdrvTxBuffer;
+/**
+\brief Structure defining node informations
 
+This structure defines informations about a POWERLINK node in the network.
+*/
 struct _tDllkNodeInfo
 {
-    UINT                        nodeId;
-    UINT16                      presPayloadLimit;       // object 0x1F8D: NMT_PResPayloadLimitList_AU16
-    UINT8                       presFilterFlags;
+    UINT                        nodeId;                 ///< Node ID
+    UINT16                      presPayloadLimit;       ///< NMT_PResPayloadLimitList_AU16 (0x1F8D)
+    UINT8                       presFilterFlags;        ///< PRes filter flags
 #if defined(CONFIG_INCLUDE_NMT_MN)
-    UINT8                       aMacAddr[6];
-    UINT8                       soaFlag1;
-    BOOL                        fSoftDelete;            // delete node after error and ignore error
-    UINT16                      preqPayloadLimit;       // object 0x1F8B: NMT_MNPReqPayloadLimitList_AU16
-    tNmtState                   nmtState;
-    ULONG                       dllErrorEvents;
-    UINT32                      presTimeoutNs;          // object 0x1F92: NMT_MNCNPResTimeout_AU32
-    struct sEdrvTxBuffer*       pPreqTxBuffer;
-    struct _tDllkNodeInfo*      pNextNodeInfo;
-    UINT8                       errSigState;            // State of error signaling initialization state machine
-    UINT8                       errSigReqCnt;           // Request counter for error signaling initialization
+    UINT8                       aMacAddr[6];            ///< Ethernet MAC address
+    UINT8                       soaFlag1;               ///< SoA flag1 register
+    BOOL                        fSoftDelete;            ///< Delete node after error and ignore error
+    UINT16                      preqPayloadLimit;       ///< NMT_MNPReqPayloadLimitList_AU16 (0x1F8B)
+    tNmtState                   nmtState;               ///< NMT state
+    ULONG                       dllErrorEvents;         ///< DLL error events
+    UINT32                      presTimeoutNs;          ///< NMT_MNCNPResTimeout_AU32 (0x1F92)
+    struct sEdrvTxBuffer*       pPreqTxBuffer;          ///< PReq TX buffer list
+    struct _tDllkNodeInfo*      pNextNodeInfo;          ///< Next node information structure
+    UINT8                       errSigState;            ///< State of error signaling initialization state machine
+    UINT8                       errSigReqCnt;           ///< Request counter for error signaling initialization
 #endif
-
 };
 typedef struct _tDllkNodeInfo tDllkNodeInfo;
 
+/**
+\brief Structure defining the cycle timing in PRC mode
+
+This structure defines the cycle timing in PollResponse Chaining mode.
+*/
 typedef struct
 {
-    UINT32   syncControl;
-    UINT32   pResTimeFirstNs;
-    UINT32   pResTimeSecondNs;
-    UINT32   syncMNDelayFirstNs;
-    UINT32   syncMNDelaySecondNs;
+    UINT32   syncControl;                               ///< Sync control register
+    UINT32   pResTimeFirstNs;                           ///< PRes time on the first communication path (ns)
+    UINT32   pResTimeSecondNs;                          ///< PRes time on the second communication path (ns)
+    UINT32   syncMNDelayFirstNs;                        ///< Sync delay of the MN on the first communication path (ns)
+    UINT32   syncMNDelaySecondNs;                       ///< Sync delay of the MN on the second communication path (ns)
 } tDllkPrcCycleTiming;
 
 // callback function for frame processing
 typedef tOplkError (*tDllkCbProcessRpdo)(tFrameInfo* pFrameInfo_p);
 typedef tOplkError (*tDllkCbProcessTpdo)(tFrameInfo* pFrameInfo_p, BOOL fReadyFlag_p);
 
+/**
+\brief Enum defining the DLL node states
+
+This enumeration defines the DLL node states.
+*/
 typedef enum
 {
-    kDllGsInit           = 0x00,    // MN/CN: initialisation (< PreOp2)
-    kDllCsWaitPreq       = 0x01,    // CN: wait for PReq frame
-    kDllCsWaitSoc        = 0x02,    // CN: wait for SoC frame
-    kDllCsWaitSoa        = 0x03,    // CN: wait for SoA frame
-    kDllMsNonCyclic      = 0x04,    // MN: reduced POWERLINK cycle (PreOp1)
-    kDllMsWaitSocTrig    = 0x05,    // MN: wait for SoC trigger (cycle timer)
-    kDllMsWaitPreqTrig   = 0x06,    // MN: wait for (first) PReq trigger (WaitSoCPReq_U32)
-    kDllMsWaitPres       = 0x07,    // MN: wait for PRes frame from CN
-    kDllMsWaitSoaTrig    = 0x08,    // MN: wait for SoA trigger (PRes transmitted)
-    kDllMsWaitAsndTrig   = 0x09,    // MN: wait for ASnd trigger (SoA transmitted)
-    kDllMsWaitAsnd       = 0x0A,    // MN: wait for ASnd frame if SoA contained invitation
+    kDllGsInit           = 0x00,                        ///< MN/CN: initialisation (< PreOp2)
+    kDllCsWaitPreq       = 0x01,                        ///< CN: wait for PReq frame
+    kDllCsWaitSoc        = 0x02,                        ///< CN: wait for SoC frame
+    kDllCsWaitSoa        = 0x03,                        ///< CN: wait for SoA frame
+    kDllMsNonCyclic      = 0x04,                        ///< MN: reduced POWERLINK cycle (PreOp1)
+    kDllMsWaitSocTrig    = 0x05,                        ///< MN: wait for SoC trigger (cycle timer)
+    kDllMsWaitPreqTrig   = 0x06,                        ///< MN: wait for (first) PReq trigger (WaitSoCPReq_U32)
+    kDllMsWaitPres       = 0x07,                        ///< MN: wait for PRes frame from CN
+    kDllMsWaitSoaTrig    = 0x08,                        ///< MN: wait for SoA trigger (PRes transmitted)
+    kDllMsWaitAsndTrig   = 0x09,                        ///< MN: wait for ASnd trigger (SoA transmitted)
+    kDllMsWaitAsnd       = 0x0A,                        ///< MN: wait for ASnd frame if SoA contained invitation
 } tDllState;
 
 //------------------------------------------------------------------------------
@@ -134,13 +151,13 @@ tOplkError dllk_addInstance(tDllkInitParam* pInitParam_p);
 tOplkError dllk_delInstance(void);
 tOplkError dllk_config(tDllConfigParam* pDllConfigParam_p);
 tOplkError dllk_setIdentity(tDllIdentParam* pDllIdentParam_p);
-tOplkError dllk_process(tEvent* pEvent_p) SECTION_DLLK_PROCESS;
 tOplkError dllk_regAsyncHandler(tDllkCbAsync pfnDllkCbAsync_p);
 tOplkError dllk_deregAsyncHandler(tDllkCbAsync pfnDllkCbAsync_p);
 tOplkError dllk_setAsndServiceIdFilter(tDllAsndServiceId ServiceId_p, tDllAsndFilter Filter_p);
 void       dllk_regRpdoHandler(tDllkCbProcessRpdo pfnDllkCbProcessRpdo_p);
 void       dllk_regTpdoHandler(tDllkCbProcessTpdo pfnDllkCbProcessTpdo_p);
-tSyncCb dllk_regSyncHandler(tSyncCb pfnCbSync_p);
+tSyncCb    dllk_regSyncHandler(tSyncCb pfnCbSync_p);
+
 #if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC != FALSE || CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC != FALSE
 tOplkError dllk_releaseRxFrame(tPlkFrame* pFrame_p, UINT uiFrameSize_p);
 #endif
@@ -156,6 +173,9 @@ tOplkError dllk_setFlag1OfNode(UINT nodeId_p, UINT8 soaFlag1_p);
 void       dllk_getCurrentCnNodeIdList(BYTE** ppbCnNodeIdList_p);
 tOplkError dllk_getCnMacAddress(UINT nodeId_p, UINT8* pCnMacAddress_p);
 #endif
+
+// dllkevent.c
+tOplkError dllk_process(tEvent* pEvent_p) SECTION_DLLK_PROCESS;
 
 #ifdef __cplusplus
 }
