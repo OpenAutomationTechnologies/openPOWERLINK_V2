@@ -518,7 +518,6 @@ static tOplkError processCsFullCycleDllWaitSoc(tNmtState nmtState_p, tNmtEvent n
             dllkInstance_g.lossSocStatus.fTimeoutOccurred = FALSE;
             break;
 
-//          case kNmtEventDllCePres: // jba why commented out
         case kNmtEventDllCeFrameTimeout:    // DLL_CT4
             if (nmtState_p == kNmtCsPreOperational2)
             {   // ignore frame timeout in PreOp2,
@@ -534,6 +533,8 @@ static tOplkError processCsFullCycleDllWaitSoc(tNmtState nmtState_p, tNmtEvent n
                 pDllEvent_p->dllErrorEvents |= DLL_ERR_CN_LOSS_SOC;
 
             break;
+
+        case kNmtEventDllCePres:
         case kNmtEventDllCePreq:
         case kNmtEventDllCeSoa:
             if(triggerLossOfSocEvent())
@@ -723,7 +724,6 @@ static tOplkError processCsStoppedDllWaitSoc(tNmtState nmtState_p, tNmtEvent nmt
             dllkInstance_g.dllState = kDllCsWaitSoa;
             break;
 
-//          case kNmtEventDllCePres: //jba why commented out?
         case kNmtEventDllCePreq:            // DLL_CT4
         case kNmtEventDllCeSoa:
             if(triggerLossOfSocEvent())
