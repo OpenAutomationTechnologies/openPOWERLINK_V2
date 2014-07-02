@@ -17,13 +17,13 @@
       <tab type="usergroup" title="Supported Platforms" url="\ref page_platforms">
           <tab type="user" url="\ref page_platform_linux" title="Linux"/>
           <tab type="user" url="\ref page_platform_windows" title="Windows"/>
-          <tab type="user" url="\ref page_platform_vxworks" title="VxWorks"/>
           <tab type="user" url="\ref page_platform_xilinx" title="Xilinx Microblaze"/>
           <tab type="user" url="\ref page_platform_altera-mn" title="Altera(MN)"/>
           <tab type="user" url="\ref page_platform_altera-cn" title="Altera(CN)"/>
       </tab>
     </tab>
     <tab type="usergroup" title="Software Manual">
+      <tab type="user" url="\ref module_api" title="openPOWERLINK API"/>
       <tab type="user" url="\ref page_software-architecture" title="Software Architecture"/>
       <tab type="modules" visible="yes" title="" intro=""/>
       <tab type="namespaces" visible="no" title="">

@@ -197,7 +197,9 @@ void startSyncThread(tSyncCb pfnSync_p)
         return;
     }
 
+#if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 12)
     pthread_setname_np(syncThreadId_l, "oplkdemo-sync");
+#endif
 }
 #endif
 

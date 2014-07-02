@@ -96,12 +96,15 @@ static tApiProcessImageInstance  instance_l;
 /**
 \brief  Allocate process images
 
-The function allocates the input and output process images
+The function allocates memory for the input and output process images.
 
-\param  sizeProcessImageIn_p          Size for input process image
-\param  sizeProcessImageOut_p         Size for output process image
+\param  sizeProcessImageIn_p          Size for input process image.
+\param  sizeProcessImageOut_p         Size for output process image.
 
-\return The function returns a tOplkError error code.
+\return The function returns a \ref tOplkError error code.
+\retval kErrorOk                        Process images are successfully allocated.
+\retval kErrorApiPIAlreadyAllocated     Process images were already allocated.
+\retval kErrorApiPIOutOfMemory          Process images could not be allocated.
 
 \ingroup module_api
 */
@@ -149,7 +152,7 @@ Exit:
 
 The function frees the allocated process images
 
-\return The function returns a tOplkError error code.
+\return The function always returns kErrorOk.
 
 \ingroup module_api
 */
@@ -196,7 +199,11 @@ The function links an object in the OD into a location in the process image.
                                 actual number of process variables which were
                                 linked to the object dictionary.
 
-\return The function returns a tOplkError error code.
+\return The function returns a \ref tOplkError error code.
+\retval kErrorOk                    Object is successfully linked.
+\retval kErrorApiInvalidParam       Invalid parameters specified.
+\retval kErrorApiPINotAllocated     Memory for process images is not allocated.
+\retval kErrorApiPISizeExceeded     Size of process image is exceeded.
 
 \ingroup module_api
 */
@@ -250,7 +257,9 @@ tOplkError oplk_linkProcessImageObject(UINT objIndex_p, UINT firstSubindex_p,
 
 The function exchanges the input process image.
 
-\return The function returns a tOplkError error code.
+\return The function returns a \ref tOplkError error code.
+\retval kErrorOk                    Input process image is successfully exchanged.
+\retval kErrorApiPINotAllocated     Memory for process images is not allocated.
 
 \ingroup module_api
 */
@@ -273,7 +282,9 @@ tOplkError oplk_exchangeProcessImageIn(void)
 
 The function exchanges the output process image.
 
-\return The function returns a tOplkError error code.
+\return The function returns a \ref tOplkError error code.
+\retval kErrorOk                    Output process image is successfully exchanged.
+\retval kErrorApiPINotAllocated     Memory for process images is not allocated.
 
 \ingroup module_api
 */

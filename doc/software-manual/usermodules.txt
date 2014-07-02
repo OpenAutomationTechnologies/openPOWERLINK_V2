@@ -9,9 +9,9 @@ stack. It contains the interface to the application and the higher level modules
 
 //-----------------------------------------------------------------------------
 /**
-\defgroup module_api api
+\defgroup module_api API
 
-\brief Application programming interface module
+\brief Application programming interface (API) module
 
 The API module implements the application programming interface of the
 openPOWERLINK stack. It provides all functions used by an application to

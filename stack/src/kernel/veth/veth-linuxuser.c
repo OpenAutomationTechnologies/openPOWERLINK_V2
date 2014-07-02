@@ -167,7 +167,9 @@ tOplkError veth_addInstance(const UINT8 aSrcMac_p[6])
     if (pthread_create(&vethInstance_l.threadHandle, NULL, vethRecvThread, (void*)&vethInstance_l) != 0)
         return kErrorNoFreeInstance;
 
+#if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 12)
     pthread_setname_np(vethInstance_l.threadHandle, "oplk-veth");
+#endif
 
     // register callback function in DLL
     ret = dllk_regAsyncHandler(veth_receiveFrame);

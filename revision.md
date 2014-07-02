@@ -5,6 +5,45 @@ Revision history of openPOWERLINK Protocol Stack {#page_revision_history}
 
 # Release 2 {#sect_revision_v2}
 
+## V2.0.1 {#sect_revision_v2_0_1}
+
+This is the final release of openPOWERLINK V2.0.1. No new features are
+introduced within this version. It contains only fixes and optimizations
+as well as some backported features from V1.8.4.
+
+### Fixes:
+- Fix error "invalid handle" which occurs when CFM initializes the network
+- Fix setup of PReq filter in dllk_presChainingDisable()
+- Fix compilation issue of edrv-i210.c on Linux 2.6.33
+- Fix NMT MN timeout calculations
+- Fix NMT command handling to avoid potential deadlocks with PRes chaining nodes
+- Fix extended NMT command handling on CNs
+- Fix sending of SyncRequests in NMT MN module
+- Fix timer overflow in generic timer module
+- Fix kernel heartbeat errors with small cycle times
+- Fix "stack off" signalization in demos
+- Fix feature flags to show support of ext. NMT commands
+- Fix SDO sequence layer use count underflow
+- Fix missing target-linuxkernel.c in Linux kernel module compilation
+- Add missing prescaler suboject in CiA401_CN XDD
+- Fix path issue in microblaze simpleboot script
+- Increase default values for request queues to avoid buffer overflows on MN
+  with more than 10 nodes
+- Several minor fixes in header and source files
+- Several fixes, cleanups and improvements in the documentation
+
+### Changes:
+- Optimize searching for OD entries
+- Optimize eventk_process()
+
+### Additions:
+- Add seeting of thread names on Linux
+- Add debug code to retrieve maximum used circbuffer size
+- Add target_getTickCount() for Linux and Windows
+
+### Removals:
+- Remove outdated VxWorks documentation
+
 ## V2.0.0 {#sect_revision_v2_0_0}
 
 This is the final release of openPOWERLINK V2.0.0.

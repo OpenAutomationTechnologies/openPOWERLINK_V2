@@ -177,7 +177,9 @@ tOplkError timeru_addInstance(void)
                                 __func__);
     }
 
+#if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 12)
     pthread_setname_np(timeruInstance_g.processThread, "oplk-timeru");
+#endif
 
     return kErrorOk;
 }

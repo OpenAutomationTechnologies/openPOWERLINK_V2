@@ -1781,7 +1781,7 @@ tOplkError dllk_presChainingDisable(void)
                    &dllkInstance_g.aLocalMac[0], 6);
         ami_setUint8Be(&dllkInstance_g.aFilter[DLLK_FILTER_PREQ].aFilterValue[14],
                        kMsgTypePreq);
-        ami_setUint8Be(&dllkInstance_g.aFilter[DLLK_FILTER_PREQ].aFilterMask[15],
+        ami_setUint8Be(&dllkInstance_g.aFilter[DLLK_FILTER_PREQ].aFilterValue[15],
                        (BYTE) dllkInstance_g.dllConfigParam.nodeId); // Set Dst Node ID
 
         // disable auto-response delay

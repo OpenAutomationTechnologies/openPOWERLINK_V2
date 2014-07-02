@@ -2,7 +2,7 @@
 ********************************************************************************
 \file   generic.c
 
-\brief  Generic API function
+\brief  Generic API functions
 
 This file contains the implementation of the generic API functions.
 
@@ -113,14 +113,15 @@ static tOplkError cbReceivedAsnd(tFrameInfo *pFrameInfo_p);
 
 The function initializes the openPOWERLINK stack. After the stack is initialized
 the application must start it by performing a software reset. This is done by
-sending the NMT event kNmtEventSwReset. The event can be sent by calling
-oplk_execNmtCommand(kNmtEventSwReset).
+sending the NMT event \ref kNmtEventSwReset. The event can be sent by calling
+\b oplk_execNmtCommand(kNmtEventSwReset).
 
 \param  pInitParam_p            Pointer to the init parameters. The init
                                 parameters must be set by the application.
 
-\return The function returns a tOplkError error code.
-\retval kErrorOk          Stack was successfully initialized.
+\return The function returns a \ref tOplkError error code.
+\retval kErrorOk                Stack was successfully initialized.
+\retval Other                   Error occurred while initializing the openPOWERLINK stack.
 
 \ingroup module_api
 */
@@ -148,8 +149,9 @@ The function shuts down the openPOWERLINK stack. Before shutting down the stack
 it should be stopped by sending the NMT command kNmtEventSwitchOff. The command
 can be sent by calling oplk_execNmtCommand(kNmtEventSwitchOff);
 
-\return The function returns a tOplkError error code.
+\return The function returns a \ref tOplkError error code.
 \retval kErrorOk          Stack was successfully shut down.
+\retval Other             Error occurred while shutting down the openPOWERLINK stack.
 
 \ingroup module_api
 */
@@ -176,7 +178,7 @@ is actually executed.
 
 \param  nmtEvent_p              NMT command to send.
 
-\return The function returns a tOplkError error code.
+\return The function returns a \ref tOplkError error code.
 
 \ingroup module_api
 */
@@ -208,7 +210,7 @@ in the object dictionary (OD).
                             all linked entries at this location.
 \param  firstSubindex_p     Specifies the first subindex to be linked.
 
-\return The function returns a tOplkError error code.
+\return The function returns a \ref tOplkError error code.
 \retval kErrorOk                  The variables are successfully linked to the
                                   object dictionary.
 \retval kErrorObdIndexNotExist    The object index does not exist in the object
@@ -328,7 +330,9 @@ event callback function when the task is completed.
 \param  pUserArg_p          User defined argument which will be passed to the
                             event callback function.
 
-\return The function returns a tOplkError error code.
+\return The function returns a \ref tOplkError error code.
+\retval kErrorOk          Entry was successfully read from OD.
+\retval Other             Error occurred while reading the OD.
 
 \ingroup module_api
 */
@@ -414,7 +418,9 @@ event callback function when the task is completed.
 \param  pUserArg_p          User defined argument which will be passed to the
                             event callback function.
 
-\return The function returns a tOplkError error code.
+\return The function returns a \ref tOplkError error code.
+\retval kErrorOk          Entry was successfully written to the OD.
+\retval Other             Error occurred while writing to the OD.
 
 \ingroup module_api
 */
@@ -487,7 +493,9 @@ callback function when the last SDO transfer to a remote node has completed.
 
 \param  sdoComConHdl_p      The SDO connection handle.
 
-\return The function returns a tOplkError error code.
+\return The function returns a \ref tOplkError error code.
+\retval kErrorOk          SDO channel was successfully freed.
+\retval Other             Error occurred while freeing the SDO channel.
 
 \ingroup module_api
 */
@@ -525,7 +533,9 @@ The function aborts the running SDO transfer on the specified SDO channel.
 \param  abortCode_p         The abort code which shall be sent to the remote
                             node.
 
-\return The function returns a tOplkError error code.
+\return The function returns a \ref tOplkError error code.
+\retval kErrorOk          SDO transfer was successfully freed.
+\retval Other             Error occurred while aborting the SDO transfer.
 
 \ingroup module_api
 */
@@ -566,7 +576,9 @@ The function reads the specified entry from the local object dictionary.
 \param  pSize_p             Pointer to the size of the buffer. The function
                             stores the size of the object at this location.
 
-\return The function returns a tOplkError error code.
+\return The function returns a \ref tOplkError error code.
+\retval kErrorOk          Entry was successfully read from local OD.
+\retval Other             Error occurred while reading the OD.
 
 \ingroup module_api
 */
@@ -596,7 +608,9 @@ The function writes the specified entry to the local object dictionary.
                             order.
 \param  size_p              Size of the data to write.
 
-\return The function returns a tOplkError error code.
+\return The function returns a \ref tOplkError error code.
+\retval kErrorOk          Entry was successfully written to local OD.
+\retval Other             Error occurred while writing to the OD.
 
 \ingroup module_api
 */
@@ -618,7 +632,9 @@ The function sends a generic ASnd frame.
 \param  asndSize_p          Size of ASnd frame to send. The size contains the
                             service ID and the payload.
 
-\return The function returns a tOplkError error code.
+\return The function returns a \ref tOplkError error code.
+\retval kErrorOk          ASnd frame was successfully sent.
+\retval Other             Error occurred while sending the ASnd frame.
 
 \ingroup module_api
 */
@@ -668,7 +684,9 @@ to the application.
 \param  filterType_p        Specifies which types of ASnd frames should be
                             received. Could be none, unicast or all frames.
 
-\return The function returns a tOplkError error code.
+\return The function returns a \ref tOplkError error code.
+\retval kErrorOk          Forwarding was successfully set.
+\retval Other             Error occurred while setting ASnd forwarding.
 
 \ingroup module_api
 */
@@ -705,12 +723,14 @@ tOplkError oplk_setAsndForward(UINT8 serviceId_p, tOplkApiAsndFilter filterType_
 \brief  Post user defined event
 
 The function posts user-defined events to event processing thread, i.e. calls
-user event callback function with event kOplkApiEventUserDef. This function is
-thread safe and is meant for synchronization.
+user event callback function with event \ref kOplkApiEventUserDef. This function
+is thread safe and is meant for synchronization.
 
 \param  pUserArg_p          User defined pointer.
 
-\return The function returns a tOplkError error code.
+\return The function returns a \ref tOplkError error code.
+\retval kErrorOk          Event was successfully posted.
+\retval Other             Error while posting the event.
 
 \ingroup module_api
 */
@@ -742,7 +762,12 @@ for the specified node.
 \param  nodeId_p            The Node ID for which the node command will be executed.
 \param  nodeCommand_p       The Node command to execute.
 
-\return The function returns a tOplkError error code.
+\note   The function is only used on an MN. On a CN it always returns
+        \ref kErrorApiInvalidParam.
+
+\return The function returns a \ref tOplkError error code.
+\retval kErrorOk          NMT node command was successfully sent.
+\retval Other             Error occurred while sending NMT node command.
 
 \ingroup module_api
 */
@@ -764,12 +789,22 @@ tOplkError oplk_triggerMnStateChange(UINT nodeId_p, tNmtNodeCommand nodeCommand_
 \brief  Set CDC buffer
 
 The function sets the concise device description (CDC) buffer to be used by
-the stack to read the configuration.
+the stack to read the configuration. It can be used instead of
+oplk_setCdcFilename() when no file system is available (e.g. on an
+embedded system).
 
 \param  pCdc_p          Pointer to the concise device description.
 \param  cdcSize_p       Size of the concise device description
 
-\return The function returns a tOplkError error code.
+\note   The function is only used if the CDC functionality is included in the
+        openPOWERLINK stack.
+
+\see oplk_setCdcFilename()
+
+\return The function returns a \ref tOplkError error code.
+\retval kErrorOk                    The buffer has successfully been set.
+\retval kErrorApiInvalidParam       The function is not available due to missing
+                                    CDC module.
 
 \ingroup module_api
 */
@@ -797,7 +832,15 @@ the stack to read the configuration.
 \param  pCdcFilename_p  Filename to be used for reading the concise device
                         description.
 
-\return The function returns a tOplkError error code.
+\note   The function is only used if the CDC functionality is included in the
+        openPOWERLINK stack.
+
+\see oplk_setCdcBuffer()
+
+\return The function returns a \ref tOplkError error code.
+\retval kErrorOk                    The filename has successfully been set.
+\retval kErrorApiInvalidParam       The function is not available due to missing
+                                    CDC module.
 
 \ingroup module_api
 */
@@ -818,10 +861,10 @@ tOplkError oplk_setCdcFilename(char* pCdcFilename_p)
 /**
 \brief  Stack process function
 
-The process function is used in single threaded environment e.g. without any OS.
+The process function is used in single threaded environments e.g. without any OS.
 It gives processing time to several tasks in the openPOWERLINK stack.
 
-\return The function returns a tOplkError error code.
+\return The function returns a \ref tOplkError error code.
 
 \ingroup module_api
 */
@@ -853,11 +896,22 @@ BOOL oplk_checkKernelStack(void)
 /**
 \brief Wait for sync event
 
-The function waits for a sync event.
+The function waits for a sync event. It blocks until the sync event occurred or
+the specified timeout elapsed.
 
-\param  timeout_p       Time to wait for event
+\note In a single process solution where the whole stack is linked to the
+      application, the function immediately returns! In this case, the
+      application must register its sync function as callback function so that
+      it is directly called from the stack (see pfnCbSync in
+      \ref tOplkApiInitParam).
 
-\return The function returns a tOplkError error code.
+\param  timeout_p       Specifies a timeout in microseconds. If 0 it waits
+                        forever.
+
+\return The function returns a \ref tOplkError error code.
+\retval kErrorOk            The sync event occurred.
+\retval kErrorGeneralError  An error or timeout occurred while waiting for the
+                            sync event.
 
 \ingroup module_api
 */
@@ -877,7 +931,10 @@ The function returns the stored IdentResponse frame of the specified node.
 \param  ppIdentResponse_p   Pointer to store the address of the IdentResponse
                             frame.
 
-\return The function returns a tOplkError error code.
+\note   The function is only used on an MN. On a CN it returns always
+        \ref kErrorApiInvalidParam.
+
+\return The function returns a \ref tOplkError error code.
 
 \ingroup module_api
 */
@@ -912,7 +969,7 @@ SDO event to the application.
 
 \param  pSdoComFinished_p   SDO parameter.
 
-\return The function returns a tOplkError error code.
+\return The function returns a \ref tOplkError error code.
 */
 //------------------------------------------------------------------------------
 #if defined(CONFIG_INCLUDE_SDOC)
@@ -936,7 +993,7 @@ Frames will be forwarded to the application by sending a user event.
 
 \param  pFrameInfo_p   Pointer to information about the received frame.
 
-\return The function returns a tOplkError error code.
+\return The function returns a \ref tOplkError error code.
 */
 //------------------------------------------------------------------------------
 static tOplkError cbReceivedAsnd(tFrameInfo* pFrameInfo_p)
