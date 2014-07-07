@@ -106,6 +106,8 @@ The Data Link Layer (DLL) defines determine the POWERLINK DLL module.
     ///< max. supported PRes packet filters (for specific nodes)
 #define CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC    FALSE
     ///< disable deferred RX frames if Edrv does not support it
+#define CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC   TRUE
+#define CONFIG_EDRV_ASND_DEFFERRED_RX_BUFFERS       8
 /**@}*/
 
 /**

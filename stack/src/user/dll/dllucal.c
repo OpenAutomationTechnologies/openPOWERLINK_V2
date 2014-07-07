@@ -40,6 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
+#include <common/memmap.h>
 #include <user/dllucal.h>
 #include <user/eventu.h>
 #include <common/dllcal.h>
@@ -113,6 +114,7 @@ static tDlluCalInstance     instance_l;
 static tOplkError SetAsndServiceIdFilter(tDllAsndServiceId ServiceId_p,
                                          tDllAsndFilter Filter_p);
 static tOplkError HandleRxAsndFrame(tFrameInfo* pFrameInfo_p);
+static tOplkError HandleRxAsndFrameInfo(tFrameInfo* pFrameInfo_p);
 static tOplkError HandleNotRxAsndFrame(tDllAsndNotRx* pAsndNotRx_p);
 
 //============================================================================//
@@ -214,21 +216,23 @@ tOplkError dllucal_process(tEvent* pEvent_p)
     tOplkError      ret = kErrorOk;
     tFrameInfo*     pFrameInfo = NULL;
     tDllAsndNotRx*  pAsndNotRx = NULL;
-#if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC == FALSE
     tFrameInfo      FrameInfo;
-#endif
 
     switch (pEvent_p->eventType)
     {
         case kEventTypeAsndRx:
-#if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC == FALSE
+            // Argument pointer is frame
             FrameInfo.pFrame = (tPlkFrame*)pEvent_p->pEventArg;
             FrameInfo.frameSize = pEvent_p->eventArgSize;
             pFrameInfo = &FrameInfo;
-#else
-            pFrameInfo = (tFrameInfo*)pEvent_p->pEventArg;
-#endif
             ret = HandleRxAsndFrame(pFrameInfo);
+            break;
+
+        case kEventTypeAsndRxInfo:
+            // Argument pointer is frame info
+            pFrameInfo = (tFrameInfo*)pEvent_p->pEventArg;
+
+            ret = HandleRxAsndFrameInfo(pFrameInfo);
             break;
 
         case kEventTypeAsndNotRx:
@@ -608,10 +612,6 @@ static tOplkError HandleRxAsndFrame(tFrameInfo *pFrameInfo_p)
     tMsgType        msgType;
     unsigned int    asndServiceId;
     tOplkError      ret = kErrorOk;
-#if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC != FALSE
-    tOplkError      eventRet;
-    tEvent          event;
-#endif
 
     msgType = (tMsgType)ami_getUint8Le(&pFrameInfo_p->pFrame->messageType);
     if (msgType != kMsgTypeAsnd)
@@ -630,22 +630,57 @@ static tOplkError HandleRxAsndFrame(tFrameInfo *pFrameInfo_p)
     }
 
 Exit:
-#if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC != FALSE
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Forward Asnd frame to desired user space module
+
+This function gets the Asnd frame from the kernel layer and forwards it to
+user layer modules.
+
+\param  pFrameInfo_p             Pointer to the frame information structure
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError HandleRxAsndFrameInfo(tFrameInfo* pFrameInfo_p)
+{
+    tOplkError      ret;
+    tEvent          event;
+    tPlkFrame*      pKernelBuffer = pFrameInfo_p->pFrame;
+    tPlkFrame*      pAcqBuffer;
+
+    // Get Rx buffer from kernel layer
+    pAcqBuffer = memmap_mapKernelBuffer(pKernelBuffer);
+    if (pAcqBuffer == NULL)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s Getting the Rx buffer from kernel failed!\n", __func__);
+        return kErrorDllOutOfMemory; //jz Use other error code?
+    }
+
+    // Set reference to kernel buffer for processing
+    pFrameInfo_p->pFrame = pAcqBuffer;
+
+    // Now handle the Asnd frame
+    ret = HandleRxAsndFrame(pFrameInfo_p);
+
+    // Free the acquired kernel buffer
+    memmap_unmapKernelBuffer(pAcqBuffer);
+
+    // Restore frame info for releasing Rx frame
+    pFrameInfo_p->pFrame = pKernelBuffer;
+
     // call free function for Asnd frame
     event.eventSink = kEventSinkDllkCal;
     event.eventType = kEventTypeReleaseRxFrame;
     event.eventArgSize = sizeof(tFrameInfo);
     event.pEventArg = pFrameInfo_p;
 
-    eventRet = eventu_postEvent(&event);
+    eventu_postEvent(&event);
 
-    if(eventRet != kErrorOk)
-    {
-        // Event post error is returned
-        ret = eventRet;
-    }
-#endif
-
+    // Return HandleRxAsndFrame() return value (ignore others)
     return ret;
 }
 

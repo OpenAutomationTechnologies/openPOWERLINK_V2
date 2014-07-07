@@ -484,11 +484,14 @@ tOplkError dllkcal_asyncFrameReceived(tFrameInfo* pFrameInfo_p)
     tEvent      event;
 
     event.eventSink = kEventSinkDlluCal;
-    event.eventType = kEventTypeAsndRx;
 #if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC == FALSE
+    // Copy the frame into event queue
+    event.eventType = kEventTypeAsndRx;
     event.pEventArg = pFrameInfo_p->pFrame;
     event.eventArgSize = pFrameInfo_p->frameSize;
 #else
+    // Only copy frame info into event queue
+    event.eventType = kEventTypeAsndRxInfo;
     event.pEventArg = pFrameInfo_p;
     event.eventArgSize = sizeof(tFrameInfo);
 #endif
