@@ -30,9 +30,62 @@
 
 if { $argc != 2 } {
     #Exit on error
-    puts "ERROR: Invalid download script parameters!"
-    exit 1;
+    puts "Warning: Too Many download script parameters!"
+
+    #exit 1;
+    if { $argc != 3 } {
+     puts "Error: Invalid download script parameters!"
+     exit 1;
+    }
 }
+
+if { $argc == 3 } {
+
+    set enVerify [lindex $argv 2]
+    
+    # Establish connection to debug module
+    # 0- app 1- drv
+    connect mb mdm -debugdevice cpunr 1
+
+    # Read name of executeable from script arguments
+    puts "[ $argv 2] is downloading....."
+    puts "[lindex $argv 2] is downloading....."
+    set executeable "[lindex $argv 2]"
+    dow $executeable
+
+    if { $enVerify } {
+        puts "INFO: Verify elf download. This can take a few minutes!"
+        elf_verify
+    }
+    # Reset system before run
+    debugconfig -reset_on_run processor enable
+    run
+    disconnect 0
+    
+    #############################################
+    
+    # Establish connection to debug module
+    connect mb mdm -debugdevice cpunr 2
+
+    # Read name of executeable from script arguments
+    puts "[ $argv 1] is downloading....."
+    puts "[lindex $argv 1] is downloading....."
+    set executeable "[lindex $argv 1]"
+    dow $executeable
+
+    if { $enVerify } {
+        puts "INFO: Verify elf download. This can take a few minutes!"
+        elf_verify
+    }
+
+    # Reset system before run
+    debugconfig -reset_on_run processor enable
+    run
+    disconnect 1
+    exit;
+}
+else
+{
 
 set enVerify [lindex $argv 1]
 
@@ -55,3 +108,4 @@ run
 
 disconnect 0
 exit;
+}

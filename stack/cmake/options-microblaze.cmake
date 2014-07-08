@@ -42,8 +42,14 @@ SET(XIL_HW_LIB_DIR ${OPLK_BASE_DIR}/hardware/lib/${SYSTEM_NAME_DIR}/${SYSTEM_PRO
 SET(XIL_TOOLS_DIR ${TOOLS_DIR}/xilinx-microblaze)
 
 ################################################################################
-# Add libraries
+# Options for CN libraries
 OPTION(CFG_COMPILE_LIB_CN                      "Compile openPOWERLINK CN library" ON)
+################################################################################
+# Options for MN libraries
+OPTION(CFG_COMPILE_LIB_MNAPP_HOSTIF     "Compile openPOWERLINK MN host/application library" ON)
+OPTION(CFG_COMPILE_LIB_MNDRV_HOSTIF     "Compile openPOWERLINK MN driver library" ON)
+################################################################################
+# Add library subdirectories and hardware library path
 
 # CN libraries
 IF(CFG_COMPILE_LIB_CN)
@@ -54,4 +60,21 @@ IF(CFG_COMPILE_LIB_CN)
     ADD_SUBDIRECTORY(proj/generic/liboplkcn)
 ELSE()
     UNSET(CFG_COMPILE_LIB_CN_HW_PATH CACHE)
+ENDIF()
+# MN libraries
+IF(CFG_COMPILE_LIB_MNAPP_HOSTIF)
+    # Path to the hardware library folder of your board example
+    SET( CFG_COMPILE_LIB_MN_APP_HOSTIF_HW_LIB_DIR ${XIL_HW_LIB_DIR}/avnet-lx150t/mn-dual-hostif-gpio
+            CACHE PATH "Path to the hardware host library folder for the dual processor MN library")
+    ADD_SUBDIRECTORY(proj/generic/liboplkmnapp-hostif)
+ELSE()
+    UNSET(CFG_COMPILE_LIB_MN_APP_HOSTIF_HW_LIB_DIR CACHE)
+ENDIF()
+IF(CFG_COMPILE_LIB_MNDRV_HOSTIF)
+    # Path to the hardware library folder of your board example
+    SET( CFG_COMPILE_LIB_MN_DRV_HOSTIF_HW_LIB_DIR ${XIL_HW_LIB_DIR}/avnet-lx150t/mn-dual-hostif-gpio
+            CACHE PATH "Path to the hardware pcp library folder for the dual processor MN library")
+    ADD_SUBDIRECTORY(proj/generic/liboplkmndrv-hostif)
+ELSE()
+    UNSET(CFG_COMPILE_LIB_MN_DRV_HOSTIF_HW_LIB_DIR CACHE)
 ENDIF()

@@ -1,6 +1,11 @@
 Revision {#revision}
 ========
 
+- [FIX] Support 'static timing' for Master to read/write on memory/registers
+- [FIX] Fix wrong oHostWaitrequest generation for invalid Address
+- [FIX] Fix address based read operation on status and Control register
+- [TASK] Enable Master Interface to support higher clock frequency at memory side - add registers on input from hostInterfaceIPCore to avoid glitches on Master AXI Interface - Add FSM to make sure the transfer completion on both Master/Slave sides - update top level and test-bench for adapt the modification - add descriptions and cleanup the code
+- [FEATURE] Add axi host interface toplevel
 - [TASK] Set ipcore versions to 1.0.0
 - [FEATURE] Split hostiflib into Pcp and Host specific
 - [TASK] Cleanup host interface driver
