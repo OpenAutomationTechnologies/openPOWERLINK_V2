@@ -29,17 +29,42 @@
 ################################################################################
 
 ################################################################################
-# Set architecture specific sources and include directories
-
-SET( LIB_ARCH_SRCS "" )
-
-INCLUDE_DIRECTORIES(
-                    ${EXAMPLE_BINARY_DIR}/bsp/${CFG_PCP_NAME}/include
-                   )
+# Handle includes
+SET(CMAKE_MODULE_PATH "${OPLK_BASE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+# Include target specific global configuration file
+INCLUDE(setmicroblazeboardconfig)
 
 ################################################################################
+# Add support for Xilinx Designs in hostinterface
+# Set architecture specific sources and include directories
+
+SET( LIB_ARCH_SRCS 
+        ${PROJECT_SOURCE_DIR}/src/hostiflib_microblaze.c
+    )
+
+IF(CFG_HOSTIF_PCP)
+INCLUDE_DIRECTORIES(
+                    ${EXAMPLE_BINARY_DIR}/bsp${CFG_PCP_NAME}/${CFG_PCP_NAME}/include
+                   )
+ELSE()
+
+INCLUDE_DIRECTORIES(
+                    ${EXAMPLE_BINARY_DIR}/bsp${CFG_HOST_NAME}/${CFG_HOST_NAME}/include
+                   )
+ENDIF()
+################################################################################
 # Set architecture specific definitions
-ADD_DEFINITIONS(${XIL_CFLAGS} "-fmessage-length=0 -mcpu=${CFG_PCP_VERSION} -ffunction-sections -fdata-sections")
+ADD_DEFINITIONS(${XIL_CFLAGS} "-fmessage-length=0 -mcpu=${CFG_CPU_VERSION} -ffunction-sections -fdata-sections")
 
 ################################################################################
 # Set architecture specific installation files
+########################################################################
+# Eclipse project files
+GEN_ECLIPSE_FILE_LIST("${HOSTIF_LIB_SRCS}" "" PART_ECLIPSE_FILE_LIST)
+SET(ECLIPSE_FILE_LIST "${ECLIPSE_FILE_LIST} ${PART_ECLIPSE_FILE_LIST}")
+GEN_ECLIPSE_FILE_LIST("${LIB_ARCH_SRCS}" "arch" PART_ECLIPSE_FILE_LIST)
+SET(ECLIPSE_FILE_LIST "${ECLIPSE_FILE_LIST} ${PART_ECLIPSE_FILE_LIST}")
+GET_PROPERTY(LIBRARY_INCLUDES DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
+GEN_ECLIPSE_INCLUDE_LIST("${LIBRARY_INCLUDES}" ECLIPSE_INCLUDE_LIST )
+CONFIGURE_FILE(${ARCH_TOOLS_DIR}/eclipse/libproject.in ${PROJECT_BINARY_DIR}/.project @ONLY)
+CONFIGURE_FILE(${ARCH_TOOLS_DIR}/eclipse/libcproject.in ${PROJECT_BINARY_DIR}/.cproject @ONLY)

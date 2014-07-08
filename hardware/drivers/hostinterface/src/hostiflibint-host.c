@@ -155,6 +155,11 @@ tHostifReturn hostif_createInt(tHostif* pHostif_p)
         goto Exit;
     }
 
+    for(i=0; i<HOSTIF_DYNBUF_COUNT; i++)
+    {
+    	  pHostif_p->apDynBuf[i] = NULL;
+    }
+
     // enable system irq
     HOSTIF_IRQ_ENABLE();
 

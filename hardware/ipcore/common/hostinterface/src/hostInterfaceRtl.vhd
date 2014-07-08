@@ -287,9 +287,10 @@ begin
 
     -- host waitrequest from status/control, bridge or invalid
     oHostWaitrequest <= statCtrlWaitrequest when statCtrlSel = cActivated else
+                        not (iHostWrite or iHostRead) when invalidSel = cActivated else
                         cInactivated when bridgeEnable = cInactivated else
                         not bridgeTfDone when bridgeSel = cActivated else
-                        not invalidSel;
+                        cActivated;
 
     -- host readdata from status/control or bridge
     oHostReaddata <=    bridgeReaddata when bridgeSel = cActivated else

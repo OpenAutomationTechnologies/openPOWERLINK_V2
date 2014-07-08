@@ -30,7 +30,7 @@ bootloops/
 hdl/
 implementation/
 pcores/
-SDK/
+**/xps/SDK/
 synthesis/
 ## Files
 *.log
