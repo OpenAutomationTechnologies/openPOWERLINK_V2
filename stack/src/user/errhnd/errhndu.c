@@ -126,7 +126,7 @@ tOplkError errhndu_init(void)
     ret = errhnducal_init(&instance_l.errorObjects);
     if (ret != kErrorOk)
     {
-        TRACE("Couldn't init error handler CAL (%d)\n", ret);
+        DEBUG_LVL_ERROR_TRACE("Couldn't init error handler CAL (%d)\n", ret);
         goto Exit;
     }
 

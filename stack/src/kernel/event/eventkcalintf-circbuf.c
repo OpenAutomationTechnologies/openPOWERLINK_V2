@@ -110,13 +110,13 @@ tOplkError eventkcal_initQueueCircbuf(tEventQueue eventQueue_p)
 
     if (eventQueue_p > kEventQueueNum)
     {
-        TRACE("%s() Error: invalid queue %d!\n", __func__, eventQueue_p);
+        DEBUG_LVL_ERROR_TRACE("%s() Error: invalid queue %d!\n", __func__, eventQueue_p);
         return kErrorInvalidInstanceParam;
     }
 
     if (instance_l[eventQueue_p] != NULL)
     {
-        TRACE("%s() Error: instance of queue %d not NULL!\n", __func__, eventQueue_p);
+        DEBUG_LVL_ERROR_TRACE("%s() Error: instance of queue %d not NULL!\n", __func__, eventQueue_p);
         return kErrorNoResource;
     }
 
@@ -128,7 +128,7 @@ tOplkError eventkcal_initQueueCircbuf(tEventQueue eventQueue_p)
                                       &instance_l[eventQueue_p]);
             if (circError != kCircBufOk)
             {
-                TRACE("PLK : Could not allocate CIRCBUF_USER_INTERNAL_QUEUE circbuffer\n");
+                DEBUG_LVL_ERROR_TRACE("PLK : Could not allocate CIRCBUF_USER_INTERNAL_QUEUE circbuffer\n");
                 return kErrorNoResource;
             }
             break;
@@ -139,7 +139,7 @@ tOplkError eventkcal_initQueueCircbuf(tEventQueue eventQueue_p)
                                       &instance_l[eventQueue_p]);
             if (circError != kCircBufOk)
             {
-                TRACE("PLK : Could not allocate CIRCBUF_USER_TO_KERNEL_QUEUE circbuffer\n");
+                DEBUG_LVL_ERROR_TRACE("PLK : Could not allocate CIRCBUF_USER_TO_KERNEL_QUEUE circbuffer\n");
                 return kErrorNoResource;
             }
             break;
@@ -150,7 +150,7 @@ tOplkError eventkcal_initQueueCircbuf(tEventQueue eventQueue_p)
                                       &instance_l[eventQueue_p]);
             if (circError != kCircBufOk)
             {
-                TRACE("PLK : Could not allocate CIRCBUF_KERNEL_TO_USER_QUEUE circbuffer\n");
+                DEBUG_LVL_ERROR_TRACE("PLK : Could not allocate CIRCBUF_KERNEL_TO_USER_QUEUE circbuffer\n");
                 return kErrorNoResource;
             }
             break;
@@ -161,7 +161,7 @@ tOplkError eventkcal_initQueueCircbuf(tEventQueue eventQueue_p)
                                       &instance_l[eventQueue_p]);
             if (circError != kCircBufOk)
             {
-                TRACE("PLK : Could not allocate CIRCBUF_KERNEL_TO_USER_QUEUE circbuffer\n");
+                DEBUG_LVL_ERROR_TRACE("PLK : Could not allocate CIRCBUF_KERNEL_TO_USER_QUEUE circbuffer\n");
                 return kErrorNoResource;
             }
             break;
@@ -228,13 +228,13 @@ tOplkError eventkcal_postEventCircbuf(tEventQueue eventQueue_p, tEvent* pEvent_p
 
     if (eventQueue_p > kEventQueueNum)
     {
-        TRACE("%s() invalid queue %d!\n", __func__, eventQueue_p);
+        DEBUG_LVL_ERROR_TRACE("%s() invalid queue %d!\n", __func__, eventQueue_p);
         return kErrorInvalidInstanceParam;
     }
 
     if (instance_l[eventQueue_p] == NULL)
     {
-        TRACE("%s() instance %d = NULL!\n", __func__, eventQueue_p);
+        DEBUG_LVL_ERROR_TRACE("%s() instance %d = NULL!\n", __func__, eventQueue_p);
         return kErrorInvalidInstanceParam;
     }
 
@@ -284,13 +284,13 @@ tOplkError eventkcal_processEventCircbuf(tEventQueue eventQueue_p)
 
     if (eventQueue_p > kEventQueueNum)
     {
-        TRACE("%s() invalid queue %d!\n", __func__, eventQueue_p);
+        DEBUG_LVL_ERROR_TRACE("%s() invalid queue %d!\n", __func__, eventQueue_p);
         return kErrorInvalidInstanceParam;
     }
 
     if (instance_l[eventQueue_p] == NULL)
     {
-        TRACE("%s() instance %d = NULL!\n", __func__, eventQueue_p);
+        DEBUG_LVL_ERROR_TRACE("%s() instance %d = NULL!\n", __func__, eventQueue_p);
         return kErrorInvalidInstanceParam;
     }
 
@@ -352,13 +352,13 @@ tOplkError eventkcal_getEventCircbuf(tEventQueue eventQueue_p, BYTE* pDataBuffer
 
     if (eventQueue_p > kEventQueueNum)
     {
-        TRACE("%s() invalid queue %d!\n", __func__, eventQueue_p);
+        DEBUG_LVL_ERROR_TRACE("%s() invalid queue %d!\n", __func__, eventQueue_p);
         return kErrorInvalidInstanceParam;
     }
 
     if (instance_l[eventQueue_p] == NULL)
     {
-        TRACE("%s() instance %d = NULL!\n", __func__, eventQueue_p);
+        DEBUG_LVL_ERROR_TRACE("%s() instance %d = NULL!\n", __func__, eventQueue_p);
         return kErrorInvalidInstanceParam;
     }
 
@@ -398,13 +398,13 @@ UINT eventkcal_getEventCountCircbuf(tEventQueue eventQueue_p)
 {
     if (eventQueue_p > kEventQueueNum)
     {
-        TRACE("%s() Invalid event queue %d!!!\n", __func__, eventQueue_p);
+        DEBUG_LVL_ERROR_TRACE("%s() Invalid event queue %d!!!\n", __func__, eventQueue_p);
         return 0;
     }
 
     if (instance_l[eventQueue_p] == NULL)
     {
-        TRACE("%s() No event queue instance %d!!!\n", __func__, eventQueue_p);
+        DEBUG_LVL_ERROR_TRACE("%s() No event queue instance %d!!!\n", __func__, eventQueue_p);
         return 0;
     }
 

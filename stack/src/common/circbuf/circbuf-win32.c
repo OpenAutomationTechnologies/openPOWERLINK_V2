@@ -117,7 +117,7 @@ tCircBufInstance* circbuf_createInstance(UINT8 id_p)
     if ((pInstance = OPLK_MALLOC(sizeof(tCircBufInstance) +
                                  sizeof(tCircBufArchInstance))) == NULL)
     {
-        TRACE("%s() malloc failed!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() malloc failed!\n", __func__);
         return NULL;
     }
     OPLK_MEMSET(pInstance, 0, sizeof(tCircBufInstance) + sizeof(tCircBufArchInstance));
@@ -129,7 +129,7 @@ tCircBufInstance* circbuf_createInstance(UINT8 id_p)
     sprintf(mutexName, "Local\\circbufMutex%d", id_p);
     if ((pArch->lockMutex = CreateMutex(NULL, FALSE, mutexName)) == NULL)
     {
-        TRACE("%s() creating mutex failed!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() creating mutex failed!\n", __func__);
         OPLK_FREE(pInstance);
         return NULL;
     }
@@ -183,7 +183,7 @@ tCircBufError circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t* pSize_p
     pInstance_p->pCircBufHeader = OPLK_MALLOC(size);
     if (pInstance_p->pCircBufHeader == NULL)
     {
-        TRACE("%s() malloc failed!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() malloc failed!\n", __func__);
         return kCircBufNoResource;
     }
 
@@ -273,8 +273,8 @@ void circbuf_lock(tCircBufInstance* pInstance_p)
             break;
 
         default:
-            TRACE("%s() Mutex wait unknown error! Error:%ld\n", __func__,
-                  GetLastError());
+            DEBUG_LVL_ERROR_TRACE("%s() Mutex wait unknown error! Error:%ld\n",
+                                  __func__, GetLastError());
             break;
     }
 }

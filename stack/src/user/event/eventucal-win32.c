@@ -150,7 +150,7 @@ tOplkError eventucal_init(void)
     if ((instance_l.threadHandle = CreateThread(NULL, 0, eventThread, (LPVOID)&instance_l,
                                                 0, NULL)) == NULL)
     {
-        TRACE("%s() CreateThread fails! Error:%ld\n", __func__, GetLastError());
+        DEBUG_LVL_ERROR_TRACE("%s() CreateThread fails! Error:%ld\n", __func__, GetLastError());
         goto Exit;
     }
 
@@ -330,7 +330,8 @@ static DWORD WINAPI eventThread(LPVOID arg)
                 break;
 
             default:
-                TRACE("%s() Semaphore wait unknown error! Error:%ld\n", __func__, GetLastError());
+                DEBUG_LVL_ERROR_TRACE("%s() Semaphore wait unknown error! Error:%ld\n",
+                                      __func__, GetLastError());
                 break;
         }
     }

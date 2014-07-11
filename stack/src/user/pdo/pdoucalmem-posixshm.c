@@ -111,7 +111,7 @@ tOplkError pdoucal_openMem(void)
 {
     if ((fd_l = shm_open(PDO_SHMEM_NAME, O_RDWR, 0)) < 0)
     {
-        TRACE("%s() Error open shared memory!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() Error open shared memory!\n", __func__);
         return kErrorNoResource;
     }
     return kErrorOk;
@@ -157,7 +157,7 @@ tOplkError pdoucal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
                        fd_l, 0);
     if (*ppPdoMem_p == MAP_FAILED)
     {
-        TRACE("%s() mmap failed!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() mmap failed!\n", __func__);
         *ppPdoMem_p = NULL;
         return kErrorNoResource;
     }
@@ -183,7 +183,7 @@ tOplkError pdoucal_freeMem(BYTE* pMem_p, size_t memSize_p)
 {
     if (munmap(pMem_p, memSize_p) != 0)
     {
-        TRACE("%s() munmap failed (%s)\n", __func__, strerror(errno));
+        DEBUG_LVL_ERROR_TRACE("%s() munmap failed (%s)\n", __func__, strerror(errno));
         return kErrorGeneralError;
     }
     return kErrorOk;

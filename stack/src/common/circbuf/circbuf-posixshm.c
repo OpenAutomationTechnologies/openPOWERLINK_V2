@@ -122,7 +122,7 @@ tCircBufInstance* circbuf_createInstance(UINT8 id_p)
     if ((pInstance = OPLK_MALLOC(sizeof(tCircBufInstance) +
                                  sizeof(tCircBufArchInstance))) == NULL)
     {
-        TRACE("%s() malloc failed!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() malloc failed!\n", __func__);
         return NULL;
     }
     OPLK_MEMSET(pInstance, 0, sizeof(tCircBufInstance) + sizeof(tCircBufArchInstance));
@@ -134,7 +134,7 @@ tCircBufInstance* circbuf_createInstance(UINT8 id_p)
     sprintf(semName, "/semCircbuf-%d", id_p);
     if ((pArch->lockSem = sem_open(semName, O_CREAT, S_IRWXG, 1)) == SEM_FAILED)
     {
-        TRACE("%s() open sem failed!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() open sem failed!\n", __func__);
         OPLK_FREE(pInstance);
         return NULL;
     }
@@ -191,13 +191,13 @@ tCircBufError circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t* pSize_p
 
     if ((pArch->fd = shm_open(shmName, O_RDWR | O_CREAT, 0)) < 0)
     {
-        TRACE("%s() shm_open failed!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() shm_open failed!\n", __func__);
         return kCircBufNoResource;
     }
 
     if (ftruncate(pArch->fd, size) == -1)
     {
-        TRACE("%s() ftruncate failed!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() ftruncate failed!\n", __func__);
         close(pArch->fd);
         shm_unlink(shmName);
         return kCircBufNoResource;
@@ -207,7 +207,7 @@ tCircBufError circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t* pSize_p
                                        PROT_READ | PROT_WRITE, MAP_SHARED, pArch->fd, 0);
     if (pInstance_p->pCircBufHeader == MAP_FAILED)
     {
-        TRACE("%s() mmap header failed!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() mmap header failed!\n", __func__);
         close(pArch->fd);
         shm_unlink(shmName);
         return kCircBufNoResource;
@@ -217,7 +217,7 @@ tCircBufError circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t* pSize_p
                                  pArch->fd, pageSize);
     if (pInstance_p->pCircBuf == MAP_FAILED)
     {
-        TRACE("%s() mmap buffer failed! (%s)\n", __func__, strerror(errno));
+        DEBUG_LVL_ERROR_TRACE("%s() mmap buffer failed! (%s)\n", __func__, strerror(errno));
         munmap(pInstance_p->pCircBufHeader, sizeof(tCircBufHeader));
         close(pArch->fd);
         shm_unlink(shmName);

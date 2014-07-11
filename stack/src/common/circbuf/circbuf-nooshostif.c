@@ -164,7 +164,7 @@ tCircBufInstance* circbuf_createInstance(UINT8 id_p)
         pHostif = hostif_getInstance(0);
         if (pHostif == NULL)
         {
-            TRACE("%s getting hostif instance failed!\n", __func__);
+            DEBUG_LVL_ERROR_TRACE("%s getting hostif instance failed!\n", __func__);
             return NULL;
         }
 
@@ -223,7 +223,7 @@ tCircBufError circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t* pSize_p
 
         if (pInstance_p->pCircBufHeader == NULL)
         {
-            TRACE("%s() malloc failed!\n", __func__);
+            DEBUG_LVL_ERROR_TRACE("%s() malloc failed!\n", __func__);
             return kCircBufNoResource;
         }
 
@@ -244,15 +244,16 @@ tCircBufError circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t* pSize_p
                             &pBufBase, &bufSize);
         if (ret != kHostifSuccessful)
         {
-            TRACE("%s getting hostif buffer instance failed with 0x%X!\n", __func__, ret);
+            DEBUG_LVL_ERROR_TRACE("%s getting hostif buffer instance failed with 0x%X!\n",
+                                  __func__, ret);
             return kCircBufNoResource;
         }
 
         // Check if there is enough memory available
         if (size > bufSize)
         {
-            TRACE("%s Hostif buffer (id=%d) only provides %d byte instead of %d byte!\n",
-                    __func__, pInstance_p->bufferId, bufSize, size);
+            DEBUG_LVL_ERROR_TRACE("%s Hostif buffer (id=%d) only provides %d byte instead of %d byte!\n",
+                                  __func__, pInstance_p->bufferId, bufSize, size);
             return kCircBufNoResource;
         }
 
@@ -316,7 +317,8 @@ tCircBufError circbuf_connectBuffer(tCircBufInstance* pInstance_p)
                             &pBufBase, &bufSize);
         if (ret != kHostifSuccessful)
         {
-            TRACE("%s getting hostif buffer instance failed with 0x%X!\n", __func__, ret);
+            DEBUG_LVL_ERROR_TRACE("%s getting hostif buffer instance failed with 0x%X!\n",
+                                  __func__, ret);
             return kCircBufNoResource;
         }
 
@@ -324,14 +326,6 @@ tCircBufError circbuf_connectBuffer(tCircBufInstance* pInstance_p)
 
         pInstance_p->pCircBufHeader = &(pHostifBuffer->circBufHeader);
         pInstance_p->pCircBuf = (UINT8*)pHostifBuffer + sizeof(tCircBufHostiBuffer);
-
-        TRACE("%s id=%d base=0x%X header=0x%X buf=0x%X size=%d\n",
-                __func__,
-                pInstance_p->bufferId,
-                pHostifBuffer,
-                pInstance_p->pCircBufHeader,
-                pInstance_p->pCircBuf,
-                pInstance_p->pCircBufHeader->bufferSize);
     }
 
     return kCircBufOk;

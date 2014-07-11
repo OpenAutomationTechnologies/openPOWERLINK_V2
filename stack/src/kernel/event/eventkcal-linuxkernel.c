@@ -171,7 +171,7 @@ tOplkError eventkcal_init(void)
     return kErrorOk;
 
 Exit:
-    TRACE("%s() Initialization error!\n", __func__);
+    DEBUG_LVL_ERROR_TRACE("%s() Initialization error!\n", __func__);
     eventkcal_exitQueueCircbuf(kEventQueueK2U);
     eventkcal_exitQueueCircbuf(kEventQueueU2K);
     eventkcal_exitQueueCircbuf(kEventQueueKInt);

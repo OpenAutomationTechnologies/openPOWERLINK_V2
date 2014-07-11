@@ -116,7 +116,7 @@ tOplkError errhndkcal_init(void)
 
     if ((fd_l = shm_open(ERRHND_SHM_NAME, O_RDWR | O_CREAT, 0)) < 0)
     {
-        TRACE("%s() shm_open failed!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() shm_open failed!\n", __func__);
         return kErrorNoResource;
     }
 
@@ -130,7 +130,7 @@ tOplkError errhndkcal_init(void)
     {
         if (ftruncate(fd_l, sizeof(tErrHndObjects)) == -1)
         {
-            TRACE("%s() ftruncate failed!\n", __func__);
+            DEBUG_LVL_ERROR_TRACE("%s() ftruncate failed!\n", __func__);
             close(fd_l);
             shm_unlink(ERRHND_SHM_NAME);
             return kErrorNoResource;
@@ -141,7 +141,7 @@ tOplkError errhndkcal_init(void)
     pErrHndMem_l = mmap(NULL, sizeof(tErrHndObjects), PROT_READ | PROT_WRITE, MAP_SHARED, fd_l, 0);
     if (pErrHndMem_l == MAP_FAILED)
     {
-        TRACE("%s() mmap header failed!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() mmap header failed!\n", __func__);
         close(fd_l);
         if (fCreator_l)
             shm_unlink(ERRHND_SHM_NAME);

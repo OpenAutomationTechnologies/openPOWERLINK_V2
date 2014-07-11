@@ -157,7 +157,7 @@ tOplkError pdokcal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
     *ppPdoMem_p = mmap(NULL, memSize_p, PROT_READ | PROT_WRITE, MAP_SHARED, fd_l, 0);
     if (*ppPdoMem_p == MAP_FAILED)
     {
-        TRACE ("%s() mmap failed!}n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() mmap failed!}n", __func__);
         *ppPdoMem_p = NULL;
         return kErrorNoResource;
     }
@@ -187,7 +187,7 @@ tOplkError pdokcal_freeMem(BYTE* pMem_p, size_t memSize_p)
 
     if (munmap(pMem_p, memSize_p) != 0)
     {
-        TRACE("%s() munmap failed!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() munmap failed!\n", __func__);
         return kErrorGeneralError;
     }
     return kErrorOk;

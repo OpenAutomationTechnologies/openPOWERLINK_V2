@@ -129,7 +129,7 @@ tOplkError eventucal_initQueueCircbuf(tEventQueue eventQueue_p)
                                       &instance_l[eventQueue_p]);
             if (circError != kCircBufOk)
             {
-                TRACE("PLK : Could not allocate CIRCBUF_USER_INTERNAL_QUEUE circbuffer\n");
+                DEBUG_LVL_ERROR_TRACE("PLK : Could not allocate CIRCBUF_USER_INTERNAL_QUEUE circbuffer\n");
                 return kErrorNoResource;
             }
             break;
@@ -138,7 +138,7 @@ tOplkError eventucal_initQueueCircbuf(tEventQueue eventQueue_p)
             circError = circbuf_connect(CIRCBUF_USER_TO_KERNEL_QUEUE, &instance_l[eventQueue_p]);
             if (circError != kCircBufOk)
             {
-                TRACE("PLK : Could not allocate CIRCBUF_USER_TO_KERNEL_QUEUE circbuffer\n");
+                DEBUG_LVL_ERROR_TRACE("PLK : Could not allocate CIRCBUF_USER_TO_KERNEL_QUEUE circbuffer\n");
                 return kErrorNoResource;
             }
             break;
@@ -147,7 +147,7 @@ tOplkError eventucal_initQueueCircbuf(tEventQueue eventQueue_p)
             circError = circbuf_connect(CIRCBUF_KERNEL_TO_USER_QUEUE, &instance_l[eventQueue_p]);
             if (circError != kCircBufOk)
             {
-                TRACE("PLK : Could not allocate CIRCBUF_KERNEL_TO_USER_QUEUE circbuffer\n");
+                DEBUG_LVL_ERROR_TRACE("PLK : Could not allocate CIRCBUF_KERNEL_TO_USER_QUEUE circbuffer\n");
                 return kErrorNoResource;
             }
             break;

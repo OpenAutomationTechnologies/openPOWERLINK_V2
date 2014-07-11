@@ -265,7 +265,7 @@ tOplkError oplk_linkObject(UINT objIndex_p, void* pVar_p, UINT* pVarEntries_p,
         if ((ret != kErrorOk) || (indexEntries == 0x00))
         {
             // Object doesn't exist or invalid entry number
-            TRACE("%s() Object %04x not existing\n", __func__, objIndex_p);
+            DEBUG_LVL_ERROR_TRACE("%s() Object %04x not existing\n", __func__, objIndex_p);
             return kErrorObdIndexNotExist;
         }
     }

@@ -254,7 +254,7 @@ tOplkError nmtu_processEvent(tEvent* pEvent_p)
 #endif
                         {
                             ret = kErrorNmtInvalidState;
-                            TRACE("nmtu_processEvent(): unhandled NMT state 0x%X\n",
+                            DEBUG_LVL_ERROR_TRACE("nmtu_processEvent(): unhandled NMT state 0x%X\n",
                                   pNmtStateChange->newNmtState);
                         }
                     }
@@ -453,7 +453,7 @@ static BOOL processGeneralStateChange(tNmtState newNmtState_p, tOplkError* pRet_
 #if defined(CONFIG_INCLUDE_NMT_MN)
                 ret = nmtu_postNmtEvent(kNmtEventEnterMsNotActive);
 #else
-                TRACE("processGeneralStateChange(): no MN functionality implemented\n");
+                DEBUG_LVL_ERROR_TRACE("processGeneralStateChange(): no MN functionality implemented\n");
 #endif
             }
             else

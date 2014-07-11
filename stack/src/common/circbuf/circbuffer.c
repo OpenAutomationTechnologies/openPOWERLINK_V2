@@ -133,7 +133,7 @@ tCircBufError circbuf_alloc(UINT8 id_p, size_t size_p, tCircBufInstance** ppInst
 
     if ((size_p == 0) || (id_p >= NR_OF_CIRC_BUFFERS))
     {
-        TRACE("%s() invalid arg!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() invalid arg!\n", __func__);
         return kCircBufInvalidArg;
     }
 
@@ -372,7 +372,7 @@ tCircBufError circbuf_writeMultipleData(tCircBufInstance* pInstance_p,
 
     if ((pData_p == NULL) || (size_p == 0) || (pData2_p == NULL) || (size2_p == 0))
     {
-        TRACE("%s() Invalid pointer or size!\n");
+        DEBUG_LVL_ERROR_TRACE("%s() Invalid pointer or size!\n");
         return kCircBufOk;
     }
 

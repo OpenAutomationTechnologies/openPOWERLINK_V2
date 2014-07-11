@@ -312,7 +312,8 @@ static DWORD WINAPI eventThread(LPVOID arg)
                 break;
 
             default:
-                TRACE("%s() Semaphore wait unknown error! Error:%ld\n", __func__, GetLastError());
+                DEBUG_LVL_ERROR_TRACE("%s() Semaphore wait unknown error! Error:%ld\n",
+                                      __func__, GetLastError());
                 break;
         }
     }

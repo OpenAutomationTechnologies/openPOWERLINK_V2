@@ -107,7 +107,7 @@ tOplkError pdokcal_initSync(void)
 {
     if ((syncSem_l = sem_open(PDO_SYNC_BSDSEM, O_CREAT, S_IRWXG, 1)) == SEM_FAILED)
     {
-        TRACE("%s() creating sem failed!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() creating sem failed!\n", __func__);
         return kErrorNoResource;
     }
     return kErrorOk;

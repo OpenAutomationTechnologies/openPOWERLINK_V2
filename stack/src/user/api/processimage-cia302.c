@@ -200,7 +200,8 @@ static tOplkError linkProcessImageRange(UINT objIndexStart_p, UINT objIndexEnd_p
         }
         if (ret != kErrorOk)
         {
-            TRACE("oplk_linkProcessImageObject returned: %xh for index %xh\n", ret, objIndexStart_p);
+            DEBUG_LVL_ERROR_TRACE("oplk_linkProcessImageObject returned: %xh for index %xh\n",
+                                  ret, objIndexStart_p);
             break;
         }
     }

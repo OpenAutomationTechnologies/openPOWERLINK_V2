@@ -156,7 +156,7 @@ tCircBufError circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t* pSize_p
     pInstance_p->pCircBufHeader = OPLK_MALLOC(size);
     if (pInstance_p->pCircBufHeader == NULL)
     {
-        TRACE("%s() malloc failed!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() malloc failed!\n", __func__);
         return kCircBufNoResource;
     }
 
