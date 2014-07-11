@@ -20,6 +20,9 @@ set_sw_property auto_initialize false
 # Where to copy driver into BSP
 set_sw_property bsp_subdirectory drivers
 
+# This driver supports enhanced Interrupt Api only
+set_sw_property supported_interrupt_apis enhanced_interrupt_api
+
 #
 # Header/Source Files
 #
