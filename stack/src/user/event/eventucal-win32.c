@@ -303,7 +303,7 @@ static DWORD WINAPI eventThread(LPVOID arg)
     tEventuCalInstance*     pInstance = (tEventuCalInstance*)arg;
     DWORD                   waitResult;
 
-    TRACE("User event thread %d waiting for events...\n", GetCurrentThreadId());
+    DEBUG_LVL_EVENTU_TRACE("User event thread %d waiting for events...\n", GetCurrentThreadId());
 
     while (!pInstance->fStopThread)
     {
@@ -335,7 +335,7 @@ static DWORD WINAPI eventThread(LPVOID arg)
                 break;
         }
     }
-    TRACE("User Event Thread is exiting!\n");
+    DEBUG_LVL_EVENTU_TRACE("User Event Thread is exiting!\n");
     return 0;
 }
 

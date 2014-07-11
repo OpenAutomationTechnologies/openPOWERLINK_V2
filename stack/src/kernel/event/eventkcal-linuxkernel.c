@@ -207,7 +207,7 @@ tOplkError eventkcal_exit(void)
         msleep(10);
         if (i++ > 1000)
         {
-            TRACE("Event Thread is not terminating, continue shutdown...!\n");
+            DEBUG_LVL_EVENTK_TRACE("Event Thread is not terminating, continue shutdown...!\n");
             break;
         }
     }
@@ -452,7 +452,7 @@ int eventkcal_getEventForUser(ULONG arg)
             error = eventkcal_getEventCircbuf(kEventQueueUInt, instance_l.aUintRxBuffer, &readSize);
             if(error != kErrorOk)
             {
-                DEBUG_LVL_ERROR_TRACE ("%s() Error reading UINT events %d!\n", __func__, error);
+                DEBUG_LVL_ERROR_TRACE("%s() Error reading UINT events %d!\n", __func__, error);
                 return -EIO;
             }
 

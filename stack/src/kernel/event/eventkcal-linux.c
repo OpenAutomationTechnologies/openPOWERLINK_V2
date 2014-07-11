@@ -210,7 +210,7 @@ tOplkError eventkcal_exit(void)
             target_msleep(10);
             if (i++ > 100)
             {
-                TRACE("Event Thread is not terminating, continue shutdown...!\n");
+                DEBUG_LVL_EVENTK_TRACE("Event Thread is not terminating, continue shutdown...!\n");
                 break;
             }
         }

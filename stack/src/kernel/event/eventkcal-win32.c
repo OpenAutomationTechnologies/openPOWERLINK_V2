@@ -286,7 +286,7 @@ static DWORD WINAPI eventThread(LPVOID arg)
     tEventkCalInstance*     pInstance = (tEventkCalInstance*)arg;
     DWORD                   waitResult;
 
-    TRACE("Kernel event thread %d waiting for events...\n", GetCurrentThreadId());
+    DEBUG_LVL_EVENTK_TRACE("Kernel event thread %d waiting for events...\n", GetCurrentThreadId());
     while (!pInstance->fStopThread)
     {
         waitResult = WaitForSingleObject(pInstance->semKernelData, 100);
@@ -317,7 +317,7 @@ static DWORD WINAPI eventThread(LPVOID arg)
                 break;
         }
     }
-    TRACE("Kernel Event Thread is exiting!\n");
+    DEBUG_LVL_EVENTK_TRACE("Kernel Event Thread is exiting!\n");
     return 0;
 }
 
