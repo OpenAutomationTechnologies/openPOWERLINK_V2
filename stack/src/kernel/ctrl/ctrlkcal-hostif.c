@@ -142,7 +142,7 @@ tOplkError ctrlkcal_init(void)
     return kErrorOk;
 
 Cleanup:
-    DEBUG_LVL_ERROR_TRACE ("Could not initialize Host Interface (0x%X)\n", hifRet);
+    DEBUG_LVL_ERROR_TRACE("Could not initialize Host Interface (0x%X)\n", hifRet);
     ctrlkcal_exit();
     return kErrorNoResource;
 }

@@ -111,7 +111,7 @@ tOplkError ctrlucal_init(void)
 {
     if ((fd_l = open(PLK_DEV_FILE, O_RDWR)) < 0)
     {
-        TRACE("%s() open return error %d (%s)\n", __func__, fd_l, strerror(fd_l));
+        DEBUG_LVL_ERROR_TRACE("%s() open return error %d (%s)\n", __func__, fd_l, strerror(fd_l));
         return kErrorNoResource;
     }
 
@@ -198,7 +198,7 @@ tOplkError ctrlucal_checkKernelStack(void)
     UINT16              kernelStatus;
     tOplkError          ret;
 
-    TRACE("Checking for kernel stack...\n");
+    DEBUG_LVL_CTRL_TRACE("Checking for kernel stack...\n");
     kernelStatus = ctrlucal_getStatus();
 
     switch (kernelStatus)
@@ -275,7 +275,7 @@ UINT16 ctrlucal_getHeartbeat(void)
 
     if ((ret = ioctl(fd_l, PLK_CMD_CTRL_GET_HEARTBEAT, &heartbeat)) != 0)
     {
-        TRACE("%s() error %d\n", __func__, ret);
+        DEBUG_LVL_ERROR_TRACE("%s() error %d\n", __func__, ret);
         return 0;
     }
     return heartbeat;

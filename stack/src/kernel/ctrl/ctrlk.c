@@ -232,28 +232,28 @@ tOplkError ctrlk_executeCmd(tCtrlCmdType cmd_p, tOplkError* pRet_p, UINT16* pSta
     switch (cmd_p)
     {
         case kCtrlInitStack:
-            TRACE("Initialize kernel modules...\n");
+            DEBUG_LVL_CTRL_TRACE("Initialize kernel modules...\n");
             *pRet_p = initStack();
             status = kCtrlStatusRunning;
             fExit = FALSE;
             break;
 
         case kCtrlCleanupStack:
-            TRACE("Shutdown kernel modules...\n");
+            DEBUG_LVL_CTRL_TRACE("Shutdown kernel modules...\n");
             *pRet_p = shutdownStack();
             status = kCtrlStatusReady;
             fExit = FALSE;
             break;
 
         case kCtrlShutdown:
-            TRACE("Shutdown kernel stack...\n");
+            DEBUG_LVL_CTRL_TRACE("Shutdown kernel stack...\n");
             *pRet_p = shutdownStack();
             status = kCtrlStatusUnavailable;
             fExit = TRUE;
             break;
 
         default:
-            TRACE("Unknown command\n");
+            DEBUG_LVL_ERROR_TRACE("Unknown command\n");
             ret = kErrorGeneralError;
             status = kCtrlStatusUnavailable;
             fExit = TRUE;

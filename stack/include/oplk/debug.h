@@ -63,6 +63,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DEBUG_LVL_CFM                   0x00000080
 #define DEBUG_LVL_TIMERU                0x00000100
 #define DEBUG_LVL_TIMERH                0x00000200
+#define DEBUG_LVL_CTRL                  0x00000400
 
 #define DEBUG_LVL_PDO                   0x00800000
 #define DEBUG_LVL_SDO                   0x01000000
@@ -173,6 +174,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DEBUG_LVL_TIMERH_TRACE(...)                TRACE(__VA_ARGS__)
 #else
 #define DEBUG_LVL_TIMERH_TRACE(...)
+#endif
+
+#if (DEBUG_GLB_LVL & DEBUG_LVL_CTRL)
+#define DEBUG_LVL_CTRL_TRACE(...)                  TRACE(__VA_ARGS__)
+#else
+#define DEBUG_LVL_CTRL_TRACE(...)
 #endif
 
 #if (DEBUG_GLB_LVL & DEBUG_LVL_TIMERU)

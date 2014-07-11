@@ -134,7 +134,7 @@ tOplkError ctrlucal_init(void)
     hifRet = hostif_create(&hifConfig, &instance_l.hifInstance);
     if (hifRet != kHostifSuccessful)
     {
-        DEBUG_LVL_ERROR_TRACE ("Could not initialize Host Interface (0x%X)\n", hifRet);
+        DEBUG_LVL_ERROR_TRACE("Could not initialize Host Interface (0x%X)\n", hifRet);
         return kErrorNoResource;
     }
 
@@ -144,7 +144,7 @@ tOplkError ctrlucal_init(void)
     hifRet = hostif_irqMasterEnable(instance_l.hifInstance, instance_l.fIrqMasterEnable);
     if (hifRet != kHostifSuccessful)
     {
-        DEBUG_LVL_ERROR_TRACE ("Could not disable Master Irq (0x%X)\n", hifRet);
+        DEBUG_LVL_ERROR_TRACE("Could not disable Master Irq (0x%X)\n", hifRet);
         return kErrorNoResource;
     }
 
@@ -249,7 +249,7 @@ tOplkError ctrlucal_executeCmd(tCtrlCmdType cmd_p)
         }
     }
 
-    TRACE("%s() Timeout waiting for return!\n", __func__);
+    DEBUG_LVL_ERROR_TRACE("%s() Timeout waiting for return!\n", __func__);
     return kErrorGeneralError;
 }
 
@@ -275,21 +275,21 @@ tOplkError ctrlucal_checkKernelStack(void)
     BOOL fExit = FALSE;
     int timeout = 0;
 
-    TRACE("Check Kernel Stack...\n");
+    DEBUG_LVL_CTRL_TRACE("Check Kernel Stack...\n");
 
     while (!fExit)
     {
         switch (kernelStatus = ctrlucal_getStatus())
         {
             case kCtrlStatusReady:
-                TRACE("-> Kernel Stack is ready\n");
+                DEBUG_LVL_CTRL_TRACE("-> Kernel Stack is ready\n");
                 fExit = TRUE;
                 ret = kErrorOk;
                 break;
 
             case kCtrlStatusRunning:
                 /* try to shutdown kernel stack */
-                TRACE("-> Try to shutdown Kernel Stack\n");
+                DEBUG_LVL_CTRL_TRACE("-> Try to shutdown Kernel Stack\n");
 
                 ret = ctrlucal_executeCmd(kCtrlCleanupStack);
                 if (ret != kErrorOk)
@@ -301,7 +301,7 @@ tOplkError ctrlucal_checkKernelStack(void)
 
             default:
                 if (timeout == 0)
-                    TRACE("-> Wait for Kernel Stack\n");
+                    DEBUG_LVL_CTRL_TRACE("-> Wait for Kernel Stack\n");
 
                 target_msleep(1000U);
 

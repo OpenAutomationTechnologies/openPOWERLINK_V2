@@ -173,7 +173,7 @@ tOplkError ctrlucal_executeCmd(tCtrlCmdType cmd_p)
         }
     }
 
-    TRACE("%s() Timeout waiting for return!\n", __func__);
+    DEBUG_LVL_ERROR_TRACE("%s() Timeout waiting for return!\n", __func__);
     return kErrorGeneralError;
 }
 
@@ -197,10 +197,10 @@ tOplkError ctrlucal_checkKernelStack(void)
     UINT16              kernelStatus;
     tOplkError          ret;
 
-    TRACE("Checking for kernel stack...\n");
+    DEBUG_LVL_CTRL_TRACE("Checking for kernel stack...\n");
     if (getMagic() != CTRL_MAGIC)
     {
-        TRACE("Kernel daemon not running! Exiting...\n");
+        DEBUG_LVL_ERROR_TRACE("Kernel daemon not running! Exiting...\n");
         return kErrorNoResource;
     }
 

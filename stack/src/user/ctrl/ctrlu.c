@@ -206,7 +206,7 @@ tOplkError ctrlu_init(void)
 {
     tOplkError          ret;
 
-    TRACE("Initialize ctrl module ...\n");
+    DEBUG_LVL_CTRL_TRACE("Initialize ctrl module ...\n");
 
     ctrlInstance_l.lastHeartbeat = 0;
 
@@ -287,7 +287,7 @@ tOplkError ctrlu_initStack(tOplkApiInitParam* pInitParam_p)
     ret = linkDomainObjects(linkObjectRequestsMn, tabentries(linkObjectRequestsMn));
 #endif
 
-    TRACE("Initializing kernel modules ...\n");
+    DEBUG_LVL_CTRL_TRACE("Initializing kernel modules ...\n");
     OPLK_MEMCPY(ctrlParam.aMacAddress, ctrlInstance_l.initParam.aMacAddress, 6);
     strncpy(ctrlParam.szEthDevName, ctrlInstance_l.initParam.hwParam.pDevName, 127);
     ctrlParam.ethDevNumber = ctrlInstance_l.initParam.hwParam.devNum;
@@ -305,22 +305,22 @@ tOplkError ctrlu_initStack(tOplkApiInitParam* pInitParam_p)
 
     OPLK_MEMCPY(ctrlInstance_l.initParam.aMacAddress, ctrlParam.aMacAddress, 6);
 
-    TRACE("Initialize Eventu module...\n");
+    DEBUG_LVL_CTRL_TRACE("Initialize Eventu module...\n");
     if ((ret = eventu_init(processUserEvent)) != kErrorOk)
         goto Exit;
 
-    TRACE("Initialize Timeru module...\n");
+    DEBUG_LVL_CTRL_TRACE("Initialize Timeru module...\n");
     if ((ret = timeru_init()) != kErrorOk)
         goto Exit;
 
-    TRACE("initialize error handler user module...\n");
+    DEBUG_LVL_CTRL_TRACE("initialize error handler user module...\n");
     ret = errhndu_init();
     if (ret != kErrorOk)
     {
         goto Exit;
     }
 
-    TRACE("Initialize DlluCal module...\n");
+    DEBUG_LVL_CTRL_TRACE("Initialize DlluCal module...\n");
     ret = dllucal_init();
     if (ret != kErrorOk)
     {
@@ -328,7 +328,7 @@ tOplkError ctrlu_initStack(tOplkApiInitParam* pInitParam_p)
     }
 
 #if defined(CONFIG_INCLUDE_PDO)
-    TRACE("Initialize Pdou module...\n");
+    DEBUG_LVL_CTRL_TRACE("Initialize Pdou module...\n");
     ret = pdou_init(ctrlInstance_l.initParam.pfnCbSync);
     if (ret != kErrorOk)
     {
@@ -355,7 +355,7 @@ tOplkError ctrlu_initStack(tOplkApiInitParam* pInitParam_p)
 
 #if defined(CONFIG_INCLUDE_SDOS) || defined(CONFIG_INCLUDE_SDOC)
     // init sdo command layer
-    TRACE("Initialize SdoCom module...\n");
+    DEBUG_LVL_CTRL_TRACE("Initialize SdoCom module...\n");
     ret = sdocom_init();
     if (ret != kErrorOk)
     {
@@ -364,7 +364,7 @@ tOplkError ctrlu_initStack(tOplkApiInitParam* pInitParam_p)
 #endif
 
 #if defined (CONFIG_INCLUDE_CFM)
-    TRACE("Initialize Cfm module...\n");
+    DEBUG_LVL_CTRL_TRACE("Initialize Cfm module...\n");
     ret = cfmu_init(cbCfmEventCnProgress, cbCfmEventCnResult);
     if (ret != kErrorOk)
     {
@@ -398,58 +398,58 @@ tOplkError ctrlu_shutdownStack(void)
 
 #if defined(CONFIG_INCLUDE_CFM)
     ret = cfmu_exit();
-    TRACE("cfmu_exit():    0x%X\n", ret);
+    DEBUG_LVL_CTRL_TRACE("cfmu_exit():    0x%X\n", ret);
 #endif
 
 #if defined(CONFIG_INCLUDE_SDOS) || defined(CONFIG_INCLUDE_SDOC)
     ret = sdocom_delInstance();
-    TRACE("sdocom_delInstance():  0x%X\n", ret);
+    DEBUG_LVL_CTRL_TRACE("sdocom_delInstance():  0x%X\n", ret);
 #endif
 
 #if defined(CONFIG_INCLUDE_LEDU)
     ret = ledu_exit();
-    TRACE("ledu_exit():    0x%X\n", ret);
+    DEBUG_LVL_CTRL_TRACE("ledu_exit():    0x%X\n", ret);
 #endif
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
     ret = nmtmnu_delInstance();
-    TRACE("nmtmnu_delInstance():  0x%X\n", ret);
+    DEBUG_LVL_CTRL_TRACE("nmtmnu_delInstance():  0x%X\n", ret);
 
     ret = identu_delInstance();
-    TRACE("identu_delInstance():  0x%X\n", ret);
+    DEBUG_LVL_CTRL_TRACE("identu_delInstance():  0x%X\n", ret);
 
     ret = statusu_delInstance();
-    TRACE("statusu_delInstance():  0x%X\n", ret);
+    DEBUG_LVL_CTRL_TRACE("statusu_delInstance():  0x%X\n", ret);
 
     ret = syncu_delInstance();
 #endif
 
     ret = nmtcnu_delInstance();
-    TRACE("nmtcnu_delInstance():  0x%X\n", ret);
+    DEBUG_LVL_CTRL_TRACE("nmtcnu_delInstance():  0x%X\n", ret);
 
     ret = nmtu_delInstance();
-    TRACE("nmtu_delInstance():    0x%X\n", ret);
+    DEBUG_LVL_CTRL_TRACE("nmtu_delInstance():    0x%X\n", ret);
 
 #if defined(CONFIG_INCLUDE_PDO)
     ret = pdou_exit();
-    TRACE("pdou_exit():    0x%X\n", ret);
+    DEBUG_LVL_CTRL_TRACE("pdou_exit():    0x%X\n", ret);
 #endif
 
     ret = dllucal_exit();
-    TRACE("dllucal_exit(): 0x%X\n", ret);
+    DEBUG_LVL_CTRL_TRACE("dllucal_exit(): 0x%X\n", ret);
 
     ret = errhndu_exit();
-    TRACE("errhndu_exit():  0x%X\n", ret);
+    DEBUG_LVL_CTRL_TRACE("errhndu_exit():  0x%X\n", ret);
 
     ret = timeru_delInstance();
-    TRACE("timeru_delInstance():  0x%X\n", ret);
+    DEBUG_LVL_CTRL_TRACE("timeru_delInstance():  0x%X\n", ret);
 
     ret = eventu_exit();
-    TRACE("eventu_exit():  0x%X\n", ret);
+    DEBUG_LVL_CTRL_TRACE("eventu_exit():  0x%X\n", ret);
 
     /* shutdown kernel stack */
     ret = ctrlucal_executeCmd(kCtrlCleanupStack);
-    TRACE("shoutdown kernel modules():  0x%X\n", ret);
+    DEBUG_LVL_CTRL_TRACE("shoutdown kernel modules():  0x%X\n", ret);
 
 #if (CONFIG_OBD_USE_LOAD_CONCISEDCF != FALSE)
     obdcdc_exit();
@@ -521,7 +521,7 @@ BOOL ctrlu_checkKernelStack(void)
     heartbeat = ctrlucal_getHeartbeat();
     if (heartbeat == ctrlInstance_l.lastHeartbeat)
     {
-        TRACE("heartbeat:%d ctrlInstance_l.lastHeartbeat:%d\n", heartbeat, ctrlInstance_l.lastHeartbeat);
+        DEBUG_LVL_CTRL_TRACE("heartbeat:%d ctrlInstance_l.lastHeartbeat:%d\n", heartbeat, ctrlInstance_l.lastHeartbeat);
         return FALSE;
     }
     else
@@ -780,7 +780,7 @@ static tOplkError initNmtu(tOplkApiInitParam* pInitParam_p)
     tOplkError      ret = kErrorOk;
 
     // initialize NmtCnu module
-    TRACE("Initialize NMT_CN module...\n");
+    DEBUG_LVL_CTRL_TRACE("Initialize NMT_CN module...\n");
     ret = nmtcnu_addInstance(pInitParam_p->nodeId);
     if (ret != kErrorOk)
         goto Exit;
@@ -790,7 +790,7 @@ static tOplkError initNmtu(tOplkApiInitParam* pInitParam_p)
         goto Exit;
 
     // initialize Nmtu module
-    TRACE("Initialize NMTu module...\n");
+    DEBUG_LVL_CTRL_TRACE("Initialize NMTu module...\n");
     ret = nmtu_init();
     if (ret != kErrorOk)
         goto Exit;
@@ -802,25 +802,25 @@ static tOplkError initNmtu(tOplkApiInitParam* pInitParam_p)
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
     // initialize NmtMnu module
-    TRACE("Initialize NMT_MN module...\n");
+    DEBUG_LVL_CTRL_TRACE("Initialize NMT_MN module...\n");
     ret = nmtmnu_init(cbNodeEvent, cbBootEvent);
     if (ret != kErrorOk)
         goto Exit;
 
     // initialize identu module
-    TRACE("Initialize Identu module...\n");
+    DEBUG_LVL_CTRL_TRACE("Initialize Identu module...\n");
     ret = identu_init();
     if (ret != kErrorOk)
         goto Exit;
 
     // initialize Statusu module
-    TRACE("Initialize Statusu module...\n");
+    DEBUG_LVL_CTRL_TRACE("Initialize Statusu module...\n");
     ret = statusu_init();
     if (ret != kErrorOk)
         goto Exit;
 
     // initialize syncu module
-    TRACE("Initialize Syncu module...\n");
+    DEBUG_LVL_CTRL_TRACE("Initialize Syncu module...\n");
     ret = syncu_init();
     if (ret != kErrorOk)
         goto Exit;
@@ -849,7 +849,7 @@ static tOplkError initObd(tOplkApiInitParam* pInitParam_p)
 
     UNUSED_PARAMETER(pInitParam_p);
 
-    TRACE("Initialize OBD module...\n");
+    DEBUG_LVL_CTRL_TRACE("Initialize OBD module...\n");
     ret = obd_initObd(&ObdInitParam);
     if (ret != kErrorOk)
         return ret;
@@ -1015,7 +1015,7 @@ static tOplkError cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
             break;
 
         default:
-            TRACE("cbNmtStateChange(): unhandled NMT state\n");
+            DEBUG_LVL_CTRL_TRACE("cbNmtStateChange(): unhandled NMT state\n");
             break;
     }
 
@@ -1492,7 +1492,7 @@ static tOplkError updateObd(tOplkApiInitParam* pInitParam_p)
     obd_writeEntry(0x1F9A, 0, (void*)&pInitParam_p->sHostname[0],
                    sizeof(pInitParam_p->sHostname));
 
-    //TRACE("%s: write NMT_HostName_VSTR %d\n", __func__, Ret);
+    //DEBUG_LVL_CTRL_TRACE("%s: write NMT_HostName_VSTR %d\n", __func__, Ret);
 
     // write NWL_IpAddrTable_Xh_REC.Addr_IPAD (0x1E40/2)
     obd_writeEntry(0x1E40, 2, (void*)&pInitParam_p->ipAddress,
