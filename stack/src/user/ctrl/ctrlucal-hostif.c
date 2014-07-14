@@ -45,6 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplk/oplk.h>
 #include <common/ctrl.h>
 #include <common/ctrlcal.h>
+#include <common/target.h>
 #include <user/ctrlucal.h>
 
 #include <hostiflib.h>

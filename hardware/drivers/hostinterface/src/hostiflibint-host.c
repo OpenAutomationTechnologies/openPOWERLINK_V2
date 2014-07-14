@@ -180,6 +180,8 @@ tHostifReturn hostif_deleteInt(tHostif* pHostif_p)
 {
     tHostifReturn ret = kHostifSuccessful;
 
+    UNUSED_PARAMETER(pHostif_p);
+
     // enable system IRQ (ignore ret)
     HOSTIF_IRQ_DISABLE();
 
