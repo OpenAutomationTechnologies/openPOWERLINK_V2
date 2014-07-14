@@ -61,8 +61,8 @@ SET(CFG_KERNEL_DIR "" CACHE PATH
         "Select the kernel directory to be used, if not specified, system kernel dir will be used!")
 
 SET(CFG_POWERLINK_EDRV "82573" CACHE STRING
-        "Valid drivers are 8139, 82573, 8255x, i210, 8111")
-SET_PROPERTY(CACHE CFG_POWERLINK_EDRV PROPERTY STRINGS 8139 82573 8255x i210 8111)
+        "Valid drivers are 8139, 82573, 8255x, i210, 8111, emacps")
+SET_PROPERTY(CACHE CFG_POWERLINK_EDRV PROPERTY STRINGS 8139 82573 8255x i210 8111 emacps)
 
 ################################################################################
 # Set global directories
@@ -118,6 +118,15 @@ ELSEIF(CFG_POWERLINK_EDRV STREQUAL "8111")
     SET(MODULE_DEFS "${MODULE_DEFS} -DCONFIG_EDRV=8111")
     SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} ${EDRV_SOURCE_DIR}/edrv-8111.c)
 
+ELSEIF(CFG_POWERLINK_EDRV STREQUAL "emacps")
+    IF(CMAKE_SYSTEM_PROCESSOR MATCHES arm)
+        SET(MODULE_NAME "oplkemacps")
+        SET(MODULE_DEFS "${MODULE_DEFS} -DCONFIG_EDRV=267200")
+        # 267200 corresponds to Z7200 arch of Zynq family. (Z is represented by 26)
+        SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} ${EDRV_SOURCE_DIR}/edrv-emacps.c)
+    ELSE()
+        MESSAGE(FATAL_ERROR "EmacPs supported only for ARM processor")
+    ENDIF()
 ELSE()
 
     message(FATAL_ERROR
@@ -199,6 +208,8 @@ SET(MODULE_SOURCE_FILES
 
 IF(CFG_POWERLINK_EDRV STREQUAL "i210")
     SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} ${KERNEL_SOURCE_DIR}/timer/hrestimer-i210.c)
+ELSEIF(CFG_POWERLINK_EDRV STREQUAL "EmacPs")
+    SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} ${KERNEL_SOURCE_DIR}/timer/hrestimer-zynqttc.c )
 ELSE()
     SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} ${KERNEL_SOURCE_DIR}/timer/hrestimer-linuxkernel.c)
 ENDIF()
