@@ -122,7 +122,7 @@ typedef struct
     UINT8               phyInstCount;
     UINT32              txPacketFreed;
     UINT32              txPacketSent;
-#if EDRV_MAX_AUTO_RESPONSES != 0
+#if EDRV_MAX_AUTO_RESPONSES > 0
     // auto-response Tx buffers
     tEdrvTxBuffer*      apTxBuffer[EDRV_MAX_AUTO_RESPONSES];
 #endif
@@ -426,11 +426,13 @@ tOplkError edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p)
     ometh_packet_typ*   pPacket = NULL;
 #endif
 
+#if EDRV_MAX_AUTO_RESPONSES > 0
     if (pBuffer_p->txBufferNumber.value < EDRV_MAX_AUTO_RESPONSES)
     {
         // disable auto-response
         omethResponseDisable(edrvInstance_l.apRxFilterInst[pBuffer_p->txBufferNumber.value]);
     }
+#endif
 
     if (pBuffer_p->pBuffer == NULL)
     {
@@ -496,6 +498,7 @@ tOplkError edrv_updateTxBuffer(tEdrvTxBuffer* pBuffer_p)
 
 Exit:
 #else
+    UNUSED_PARAMETER(pBuffer_p);
     //invalid call, since auto-resp is deactivated for MN support
     ret = kErrorEdrvInvalidParam;
 #endif
@@ -954,7 +957,7 @@ This function initializes all Rx filters and disables them.
 static tOplkError initRxFilters(void)
 {
     tOplkError      ret = kErrorOk;
-    INT             i;
+    UINT            i;
     UINT8           aMask[31];
     UINT8           aValue[31];
     OMETH_HOOK_H    pHook;
@@ -989,6 +992,7 @@ static tOplkError initRxFilters(void)
 
         omethFilterDisable(edrvInstance_l.apRxFilterInst[i]);
 
+#if EDRV_MAX_AUTO_RESPONSES > 0
         if (i < EDRV_MAX_AUTO_RESPONSES)
         {
             // initialize the auto response for each filter ...
@@ -1001,6 +1005,7 @@ static tOplkError initRxFilters(void)
             // ... but disable it
             omethResponseDisable(edrvInstance_l.apRxFilterInst[i]);
         }
+#endif
     }
 
 Exit:
@@ -1207,6 +1212,8 @@ static INT rxHook(void* pArg_p, ometh_packet_typ* pPacket_p, OMETH_BUF_FREE_FCT*
     tTimestamp              timeStamp;
 #if EDRV_MAX_AUTO_RESPONSES > 0
     UINT                    txRespIndex = (UINT)pArg_p;
+#else
+    UNUSED_PARAMETER(pArg_p);
 #endif
     UNUSED_PARAMETER(pfnFree_p);
 

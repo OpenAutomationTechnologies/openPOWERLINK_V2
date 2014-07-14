@@ -365,6 +365,8 @@ This function is invoked by the openMAC HW sync timer interrupt.
 //------------------------------------------------------------------------------
 static void drvInterruptHandler(void* pArg_p)
 {
+    UNUSED_PARAMETER(pArg_p);
+
     BENCHMARK_MOD_24_SET(4);
 
     openmac_timerSetCompareValue(HWTIMER_SYNC, 0);
