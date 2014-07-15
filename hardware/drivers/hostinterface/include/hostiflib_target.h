@@ -11,6 +11,7 @@ the target specific header file (e.g. hostiflib_nios.h).
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -50,7 +51,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #elif defined(__MICROBLAZE__)
 
-#error "Microblaze not yet supported!"
+#include "hostiflib_microblaze.h"
 
 #else
 
@@ -73,31 +74,31 @@ set to those provided by stdint.h.
 */
 /**@{*/
 #ifndef UINT8
-#define UINT8               uint8_t
+#define UINT8       uint8_t
 #endif
 
 #ifndef UINT16
-#define UINT16              uint16_t
+#define UINT16      uint16_t
 #endif
 
 #ifndef UINT32
-#define UINT32              uint32_t
+#define UINT32      uint32_t
 #endif
 
 #ifndef UINT
-#define UINT                unsigned int
+#define UINT        unsigned int
 #endif
 
 #ifndef BOOL
-#define BOOL                uint8_t
+#define BOOL        uint8_t
 #endif
 
 #ifndef FALSE
-#define FALSE               0x00
+#define FALSE       0x00
 #endif
 
 #ifndef TRUE
-#define TRUE                0xFF
+#define TRUE        0xFF
 #endif
 /**@}*/
 
@@ -110,4 +111,3 @@ set to those provided by stdint.h.
 //------------------------------------------------------------------------------
 
 #endif /* _INC_hostiflib_target_H_ */
-
