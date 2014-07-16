@@ -1,0 +1,376 @@
+
+# ##############################################################################
+# Created by Base System Builder Wizard for Xilinx EDK 13.2 Build EDK_O.61xd
+# Thu Apr 12 16:21:28 2012
+# Target Board:  Custom
+# Family:    spartan6
+# Device:    xc6slx16
+# Package:   csg324
+# Speed Grade:  -2
+# ##############################################################################
+ PARAMETER VERSION = 2.1.0
+
+
+ PORT fpga_0_clk_1_sys_clk_pin = CLK_S, DIR = I, SIGIS = CLK, CLK_FREQ = 50000000
+ PORT fpga_0_rst_1_sys_rst_pin = sys_rst_s, DIR = I, SIGIS = RST, RST_POLARITY = 0
+ PORT fpga_0_MCB_DDR2_zio = fpga_0_MCB_DDR2_zio, DIR = IO
+ PORT fpga_0_MCB_DDR2_rzq = fpga_0_MCB_DDR2_rzq, DIR = IO
+ PORT MCB_DDR2_dram_we_n = MCB_DDR2_dram_we_n, DIR = O
+ PORT MCB_DDR2_dram_udqs_n = MCB_DDR2_dram_udqs_n, DIR = IO
+ PORT MCB_DDR2_dram_udqs = MCB_DDR2_dram_udqs, DIR = IO
+ PORT MCB_DDR2_dram_udm = MCB_DDR2_dram_udm, DIR = O
+ PORT MCB_DDR2_dram_ras_n = MCB_DDR2_dram_ras_n, DIR = O
+ PORT MCB_DDR2_dram_odt = MCB_DDR2_dram_odt, DIR = O
+ PORT MCB_DDR2_dram_ldm = MCB_DDR2_dram_ldm, DIR = O
+ PORT MCB_DDR2_dram_dqs_n = MCB_DDR2_dram_dqs_n, DIR = IO
+ PORT MCB_DDR2_dram_dqs = MCB_DDR2_dram_dqs, DIR = IO
+ PORT MCB_DDR2_dram_dq = MCB_DDR2_dram_dq, DIR = IO, VEC = [15:0]
+ PORT MCB_DDR2_dram_clk_n = MCB_DDR2_dram_clk_n, DIR = O
+ PORT MCB_DDR2_dram_clk = MCB_DDR2_dram_clk, DIR = O
+ PORT MCB_DDR2_dram_cke = MCB_DDR2_dram_cke, DIR = O
+ PORT MCB_DDR2_dram_cas_n = MCB_DDR2_dram_cas_n, DIR = O
+ PORT MCB_DDR2_dram_ba = MCB_DDR2_dram_ba, DIR = O, VEC = [1:0]
+ PORT MCB_DDR2_dram_addr = MCB_DDR2_dram_addr, DIR = O, VEC = [12:0]
+ PORT fpga_0_SPI_FLASH_SS_pin = fpga_0_SPI_FLASH_SS, DIR = IO
+ PORT fpga_0_SPI_FLASH_SCK_pin = fpga_0_SPI_FLASH_SCK, DIR = IO
+ PORT fpga_0_SPI_FLASH_MOSI_pin = fpga_0_SPI_FLASH_MOSI, DIR = IO
+ PORT fpga_0_SPI_FLASH_MISO_pin = fpga_0_SPI_FLASH_MISO, DIR = IO
+ PORT fpga_0_RS232_TX_pin = fpga_0_RS232_TX, DIR = O
+ PORT fpga_0_RS232_RX_pin = fpga_0_RS232_RX, DIR = I
+ PORT axi_openmac_0_oRmii_clk_pin = axi_openmac_0_oRmii_clk, DIR = O, VEC = [1:0]
+ PORT axi_openmac_0_iRmii_rxDataValid_pin = axi_openmac_0_iRmii_rxDataValid, DIR = I, VEC = [1:0]
+ PORT axi_openmac_0_iRmii_rxData_pin = axi_openmac_0_iRmii_rxData, DIR = I, VEC = [3:0]
+ PORT axi_openmac_0_oRmii_txEnable_pin = axi_openmac_0_oRmii_txEnable, DIR = O, VEC = [1:0]
+ PORT axi_openmac_0_oRmii_txData_pin = axi_openmac_0_oRmii_txData, DIR = O, VEC = [3:0]
+ PORT axi_openmac_0_oSmi_nPhyRst_pin = axi_openmac_0_oSmi_nPhyRst, DIR = O
+ PORT axi_openmac_0_oSmi_clk_pin = axi_openmac_0_oSmi_clk, DIR = O
+ PORT axi_openmac_0_ioSmi_dio_pin = axi_openmac_0_ioSmi_dio, DIR = IO
+ PORT axi_hostinterface_0_iExtSync_exsync_pin = axi_hostinterface_0_iExtSync_exsync, DIR = I
+ PORT axi_hostinterface_0_iParHost_chipselect_pin = axi_hostinterface_0_iParHost_chipselect, DIR = I
+ PORT axi_hostinterface_0_iParHost_read_pin = axi_hostinterface_0_iParHost_read, DIR = I
+ PORT axi_hostinterface_0_iParHost_write_pin = axi_hostinterface_0_iParHost_write, DIR = I
+ PORT axi_hostinterface_0_oParHost_acknowledge_pin = axi_hostinterface_0_oParHost_acknowledge, DIR = O
+ PORT axi_hostinterface_0_iParHost_byteenable_pin = axi_hostinterface_0_iParHost_byteenable, DIR = I, VEC = [1:0]
+ PORT axi_hostinterface_0_iParHost_address_pin = axi_hostinterface_0_iParHost_address, DIR = I, VEC = [15:0]
+ PORT axi_hostinterface_0_ioParHost_data_io_pin = axi_hostinterface_0_ioParHost_data_io, DIR = IO, VEC = [15:0]
+ PORT axi_hostinterface_0_irqOut_irq_pin = axi_hostinterface_0_irqOut_irq, DIR = O, SIGIS = INTERRUPT
+
+BEGIN proc_sys_reset
+ PARAMETER INSTANCE = proc_sys_reset_0
+ PARAMETER HW_VER = 3.00.a
+ PARAMETER C_EXT_RESET_HIGH = 0
+ PORT MB_Debug_Sys_Rst = proc_sys_reset_0_MB_Debug_Sys_Rst
+ PORT Dcm_locked = proc_sys_reset_0_Dcm_locked
+ PORT MB_Reset = proc_sys_reset_0_MB_Reset
+ PORT Slowest_sync_clk = clk_50_0000MHzPLL0
+ PORT Interconnect_aresetn = proc_sys_reset_0_Interconnect_aresetn
+ PORT Ext_Reset_In = sys_rst_s
+ PORT BUS_STRUCT_RESET = proc_sys_reset_0_BUS_STRUCT_RESET
+ PORT Peripheral_Reset = proc_sys_reset_0_Peripheral_Reset
+END
+
+BEGIN lmb_v10
+ PARAMETER INSTANCE = pcp_ilmb
+ PARAMETER HW_VER = 2.00.b
+ PORT SYS_RST = proc_sys_reset_0_BUS_STRUCT_RESET
+ PORT LMB_CLK = clk_100_0000MHzPLL0
+END
+
+BEGIN lmb_bram_if_cntlr
+ PARAMETER INSTANCE = pcp_i_bram_ctrl
+ PARAMETER HW_VER = 3.10.c
+ PARAMETER C_BASEADDR = 0x00002000
+ PARAMETER C_HIGHADDR = 0x00003fff
+ BUS_INTERFACE SLMB = pcp_ilmb
+ BUS_INTERFACE BRAM_PORT = pcp_i_bram_ctrl_BRAM_PORT
+END
+
+BEGIN lmb_v10
+ PARAMETER INSTANCE = pcp_dlmb
+ PARAMETER HW_VER = 2.00.b
+ PORT SYS_RST = proc_sys_reset_0_BUS_STRUCT_RESET
+ PORT LMB_CLK = clk_100_0000MHzPLL0
+END
+
+BEGIN lmb_bram_if_cntlr
+ PARAMETER INSTANCE = pcp_d_bram_ctrl
+ PARAMETER HW_VER = 3.10.c
+ PARAMETER C_BASEADDR = 0x00002000
+ PARAMETER C_HIGHADDR = 0x00003fff
+ BUS_INTERFACE SLMB = pcp_dlmb
+ BUS_INTERFACE BRAM_PORT = pcp_d_bram_ctrl_BRAM_PORT
+END
+
+BEGIN bram_block
+ PARAMETER INSTANCE = pcp_bram_block
+ PARAMETER HW_VER = 1.00.a
+ BUS_INTERFACE PORTA = pcp_d_bram_ctrl_BRAM_PORT
+ BUS_INTERFACE PORTB = pcp_i_bram_ctrl_BRAM_PORT
+END
+
+BEGIN bram_block
+ PARAMETER INSTANCE = boot_lmb_bram
+ PARAMETER HW_VER = 1.00.a
+ BUS_INTERFACE PORTA = boot_ilmb_port
+ BUS_INTERFACE PORTB = boot_dlmb_port
+END
+
+BEGIN lmb_bram_if_cntlr
+ PARAMETER INSTANCE = boot_ilmb_cntlr
+ PARAMETER HW_VER = 3.10.c
+ PARAMETER C_BASEADDR = 0x00000000
+ PARAMETER C_HIGHADDR = 0x00000fff
+ BUS_INTERFACE SLMB = pcp_ilmb
+ BUS_INTERFACE BRAM_PORT = boot_ilmb_port
+END
+
+BEGIN lmb_bram_if_cntlr
+ PARAMETER INSTANCE = boot_dlmb_cntlr
+ PARAMETER HW_VER = 3.10.c
+ PARAMETER C_BASEADDR = 0x00000000
+ PARAMETER C_HIGHADDR = 0x00000fff
+ BUS_INTERFACE SLMB = pcp_dlmb
+ BUS_INTERFACE BRAM_PORT = boot_dlmb_port
+END
+
+BEGIN microblaze
+ PARAMETER INSTANCE = pcp
+ PARAMETER HW_VER = 8.50.c
+ PARAMETER C_INTERCONNECT = 2
+ PARAMETER C_USE_BARREL = 1
+ PARAMETER C_USE_FPU = 0
+ PARAMETER C_DEBUG_ENABLED = 1
+ PARAMETER C_ICACHE_BASEADDR = 0x20000000
+ PARAMETER C_ICACHE_HIGHADDR = 0x27ffffff
+ PARAMETER C_USE_ICACHE = 1
+ PARAMETER C_CACHE_BYTE_SIZE = 2048
+ PARAMETER C_ICACHE_ALWAYS_USED = 1
+ PARAMETER C_DCACHE_BASEADDR = 0x20000000
+ PARAMETER C_DCACHE_HIGHADDR = 0x27ffffff
+ PARAMETER C_USE_DCACHE = 1
+ PARAMETER C_DCACHE_BYTE_SIZE = 2048
+ PARAMETER C_DCACHE_ALWAYS_USED = 1
+ PARAMETER C_USE_MSR_INSTR = 1
+ PARAMETER C_USE_PCMP_INSTR = 1
+ PARAMETER C_AREA_OPTIMIZED = 0
+ PARAMETER C_USE_HW_MUL = 1
+ PARAMETER C_NUMBER_OF_PC_BRK = 1
+ PARAMETER C_NUMBER_OF_RD_ADDR_BRK = 0
+ PARAMETER C_NUMBER_OF_WR_ADDR_BRK = 0
+ PARAMETER C_USE_REORDER_INSTR = 1
+ PARAMETER C_USE_DIV = 1
+ BUS_INTERFACE M_AXI_DP = axi4lite
+ BUS_INTERFACE M_AXI_IP = axi4lite
+ BUS_INTERFACE M_AXI_DC = axi4
+ BUS_INTERFACE M_AXI_IC = axi4
+ BUS_INTERFACE DEBUG = debug_module_MBDEBUG_0
+ BUS_INTERFACE DLMB = pcp_dlmb
+ BUS_INTERFACE ILMB = pcp_ilmb
+ PORT MB_RESET = proc_sys_reset_0_MB_Reset
+ PORT CLK = clk_100_0000MHzPLL0
+ PORT INTERRUPT = pcp_INTERRUPT
+END
+
+BEGIN mdm
+ PARAMETER INSTANCE = debug_module
+ PARAMETER HW_VER = 2.10.a
+ PARAMETER C_INTERCONNECT = 2
+ PARAMETER C_USE_UART = 1
+ PARAMETER C_MB_DBG_PORTS = 1
+ PARAMETER C_BASEADDR = 0x41400000
+ PARAMETER C_HIGHADDR = 0x4140ffff
+ BUS_INTERFACE S_AXI = axi4lite
+ BUS_INTERFACE MBDEBUG_0 = debug_module_MBDEBUG_0
+ PORT Debug_SYS_Rst = proc_sys_reset_0_MB_Debug_Sys_Rst
+ PORT S_AXI_ACLK = clk_100_0000MHzPLL0
+END
+
+BEGIN clock_generator
+ PARAMETER INSTANCE = clock_generator_0
+ PARAMETER C_EXT_RESET_HIGH = 0
+ PARAMETER HW_VER = 4.03.a
+ PARAMETER C_CLKIN_FREQ = 50000000
+ PARAMETER C_CLKOUT0_FREQ = 600000000
+ PARAMETER C_CLKOUT0_GROUP = PLL0
+ PARAMETER C_CLKOUT0_BUF = FALSE
+ PARAMETER C_CLKOUT1_FREQ = 600000000
+ PARAMETER C_CLKOUT1_PHASE = 180
+ PARAMETER C_CLKOUT1_GROUP = PLL0
+ PARAMETER C_CLKOUT1_BUF = FALSE
+ PARAMETER C_CLKOUT2_FREQ = 100000000
+ PARAMETER C_CLKOUT2_GROUP = PLL0
+ PARAMETER C_CLKOUT3_FREQ = 50000000
+ PARAMETER C_CLKOUT3_GROUP = PLL0
+ PORT LOCKED = proc_sys_reset_0_Dcm_locked
+ PORT RST = sys_rst_s
+ PORT CLKIN = CLK_S
+ PORT CLKOUT0 = clk_600_0000MHzPLL0_nobuf
+ PORT CLKOUT1 = clk_600_0000MHz180PLL0_nobuf
+ PORT CLKOUT2 = clk_100_0000MHzPLL0
+ PORT CLKOUT3 = clk_50_0000MHzPLL0
+END
+
+BEGIN axi_interconnect
+ PARAMETER INSTANCE = axi4lite
+ PARAMETER HW_VER = 1.06.a
+ PARAMETER C_INTERCONNECT_CONNECTIVITY_MODE = 0
+ PORT INTERCONNECT_ARESETN = proc_sys_reset_0_Interconnect_aresetn
+ PORT INTERCONNECT_ACLK = clk_100_0000MHzPLL0
+END
+
+BEGIN axi_interconnect
+ PARAMETER INSTANCE = axi4
+ PARAMETER HW_VER = 1.06.a
+ PORT interconnect_aclk = clk_100_0000MHzPLL0
+ PORT INTERCONNECT_ARESETN = proc_sys_reset_0_Interconnect_aresetn
+END
+
+BEGIN axi_uartlite
+ PARAMETER INSTANCE = RS232
+ PARAMETER HW_VER = 1.02.a
+ PARAMETER C_BAUDRATE = 9600
+ PARAMETER C_DATA_BITS = 8
+ PARAMETER C_USE_PARITY = 0
+ PARAMETER C_ODD_PARITY = 1
+ PARAMETER C_BASEADDR = 0x40600000
+ PARAMETER C_HIGHADDR = 0x4060ffff
+ BUS_INTERFACE S_AXI = axi4lite
+ PORT S_AXI_ACLK = clk_100_0000MHzPLL0
+ PORT TX = fpga_0_RS232_TX
+ PORT RX = fpga_0_RS232_RX
+END
+
+BEGIN axi_s6_ddrx
+ PARAMETER INSTANCE = MCB_DDR2
+ PARAMETER HW_VER = 1.06.a
+ PARAMETER C_MCB_RZQ_LOC = N4
+ PARAMETER C_MCB_ZIO_LOC = P4
+ PARAMETER C_MEM_TYPE = DDR2
+ PARAMETER C_MEM_PARTNO = MT47H32M16XX-25E-IT
+ PARAMETER C_MEM_DDR2_RTT = 50OHMS
+ PARAMETER C_S0_AXI_STRICT_COHERENCY = 0
+ PARAMETER C_INTERCONNECT_S0_AXI_AW_REGISTER = 8
+ PARAMETER C_INTERCONNECT_S0_AXI_AR_REGISTER = 8
+ PARAMETER C_INTERCONNECT_S0_AXI_W_REGISTER = 8
+ PARAMETER C_INTERCONNECT_S0_AXI_R_REGISTER = 8
+ PARAMETER C_INTERCONNECT_S0_AXI_B_REGISTER = 8
+ PARAMETER C_MEM_BANKADDR_WIDTH = 2
+ PARAMETER C_INTERCONNECT_S0_AXI_MASTERS = pcp.M_AXI_IC & pcp.M_AXI_DC & axi_openmac_0.M_AXI_MAC_DMA & axi_hostinterface_0.M_AXI_PCP
+ PARAMETER C_S0_AXI_BASEADDR = 0x20000000
+ PARAMETER C_S0_AXI_HIGHADDR = 0x27FFFFFF
+ BUS_INTERFACE S0_AXI = axi4
+ PORT s0_axi_aclk = clk_100_0000MHzPLL0
+ PORT zio = fpga_0_MCB_DDR2_zio
+ PORT sysclk_2x = clk_600_0000MHzPLL0_nobuf
+ PORT sysclk_2x_180 = clk_600_0000MHz180PLL0_nobuf
+ PORT rzq = fpga_0_MCB_DDR2_rzq
+ PORT mcbx_dram_we_n = MCB_DDR2_dram_we_n
+ PORT mcbx_dram_udqs_n = MCB_DDR2_dram_udqs_n
+ PORT mcbx_dram_udqs = MCB_DDR2_dram_udqs
+ PORT mcbx_dram_udm = MCB_DDR2_dram_udm
+ PORT mcbx_dram_ras_n = MCB_DDR2_dram_ras_n
+ PORT mcbx_dram_odt = MCB_DDR2_dram_odt
+ PORT mcbx_dram_ldm = MCB_DDR2_dram_ldm
+ PORT mcbx_dram_dqs_n = MCB_DDR2_dram_dqs_n
+ PORT mcbx_dram_dqs = MCB_DDR2_dram_dqs
+ PORT mcbx_dram_dq = MCB_DDR2_dram_dq
+ PORT mcbx_dram_clk_n = MCB_DDR2_dram_clk_n
+ PORT mcbx_dram_clk = MCB_DDR2_dram_clk
+ PORT mcbx_dram_cke = MCB_DDR2_dram_cke
+ PORT mcbx_dram_cas_n = MCB_DDR2_dram_cas_n
+ PORT mcbx_dram_ba = MCB_DDR2_dram_ba
+ PORT mcbx_dram_addr = MCB_DDR2_dram_addr
+ PORT SYS_RST = proc_sys_reset_0_BUS_STRUCT_RESET
+ PORT PLL_LOCK = proc_sys_reset_0_Dcm_locked
+ PORT ui_clk = clk_100_0000MHzPLL0
+END
+
+BEGIN axi_intc
+ PARAMETER INSTANCE = pcp_intc
+ PARAMETER HW_VER = 1.04.a
+ PARAMETER C_BASEADDR = 0x41200000
+ PARAMETER C_HIGHADDR = 0x4120ffff
+ BUS_INTERFACE S_AXI = axi4lite
+ PORT S_AXI_ACLK = clk_100_0000MHzPLL0
+ PORT Irq = pcp_INTERRUPT
+ PORT Intr = fit_timer_0_Interrupt & axi_openmac_0_MAC_IRQ & axi_openmac_0_TIMER_IRQ
+END
+
+BEGIN fit_timer
+ PARAMETER INSTANCE = fit_timer_0
+ PARAMETER HW_VER = 1.01.c
+ PARAMETER C_NO_CLOCKS = 50000
+ PORT Clk = clk_50_0000MHzPLL0
+ PORT Interrupt = fit_timer_0_Interrupt
+END
+
+BEGIN axi_spi
+ PARAMETER INSTANCE = SPI_FLASH
+ PARAMETER HW_VER = 1.02.a
+ PARAMETER C_SCK_RATIO = 8
+ PARAMETER C_BASEADDR = 0x40a00000
+ PARAMETER C_HIGHADDR = 0x40a0ffff
+ BUS_INTERFACE S_AXI = axi4lite
+ PORT S_AXI_ACLK = clk_100_0000MHzPLL0
+ PORT SPISEL = net_vcc
+ PORT SS = fpga_0_SPI_FLASH_SS
+ PORT SCK = fpga_0_SPI_FLASH_SCK
+ PORT MOSI = fpga_0_SPI_FLASH_MOSI
+ PORT MISO = fpga_0_SPI_FLASH_MISO
+END
+
+BEGIN axi_openmac
+ PARAMETER INSTANCE = axi_openmac_0
+ PARAMETER HW_VER = 1.00.a
+ PARAMETER gui_phyCount = 2
+ PARAMETER gui_txBufSize = 16
+ PARAMETER gui_rxBufLoc = 2
+ PARAMETER gui_rxBurstSize = 8
+ PARAMETER C_S_AXI_MAC_PKT_BASEADDR = 0x70400000
+ PARAMETER C_S_AXI_MAC_PKT_HIGHADDR = 0x7040ffff
+ PARAMETER C_S_AXI_MAC_REG_RNG0_BASEADDR = 0x7c400000
+ PARAMETER C_S_AXI_MAC_REG_RNG0_HIGHADDR = 0x7c40ffff
+ PARAMETER C_S_AXI_MAC_REG_RNG1_BASEADDR = 0x7c420000
+ PARAMETER C_S_AXI_MAC_REG_RNG1_HIGHADDR = 0x7c42ffff
+ BUS_INTERFACE M_AXI_MAC_DMA = axi4
+ BUS_INTERFACE S_AXI_MAC_REG = axi4lite
+ BUS_INTERFACE S_AXI_MAC_PKT = axi4lite
+ PORT S_AXI_MAC_REG_ACLK = clk_100_0000MHzPLL0
+ PORT M_AXI_MAC_DMA_ACLK = clk_100_0000MHzPLL0
+ PORT oRmii_clk = axi_openmac_0_oRmii_clk
+ PORT iRmii_rxDataValid = axi_openmac_0_iRmii_rxDataValid
+ PORT iRmii_rxData = axi_openmac_0_iRmii_rxData
+ PORT oRmii_txEnable = axi_openmac_0_oRmii_txEnable
+ PORT oRmii_txData = axi_openmac_0_oRmii_txData
+ PORT oSmi_nPhyRst = axi_openmac_0_oSmi_nPhyRst
+ PORT oSmi_clk = axi_openmac_0_oSmi_clk
+ PORT ioSmi_dio = axi_openmac_0_ioSmi_dio
+ PORT MAC_IRQ = axi_openmac_0_MAC_IRQ
+ PORT TIMER_IRQ = axi_openmac_0_TIMER_IRQ
+ PORT iClk50 = clk_50_0000MHzPLL0
+ PORT iClk100 = clk_100_0000MHzPLL0
+ PORT S_AXI_MAC_PKT_ACLK = clk_100_0000MHzPLL0
+ PORT iRmii_rxError = net_gnd
+END
+
+BEGIN axi_hostinterface
+ PARAMETER INSTANCE = axi_hostinterface_0
+ PARAMETER HW_VER = 1.00.a
+ PARAMETER C_BASEADDR = 0x76c00000
+ PARAMETER C_HIGHADDR = 0x76c0ffff
+ PARAMETER gParallelMultiplex = 0
+ BUS_INTERFACE S_AXI_PCP = axi4lite
+ BUS_INTERFACE M_AXI_PCP = axi4
+ PORT S_AXI_PCP_ACLK = clk_50_0000MHzPLL0
+ PORT M_AXI_ACLK = clk_100_0000MHzPLL0
+ PORT iExtSync_exsync = axi_hostinterface_0_iExtSync_exsync
+ PORT iParHost_chipselect = axi_hostinterface_0_iParHost_chipselect
+ PORT iParHost_read = axi_hostinterface_0_iParHost_read
+ PORT iParHost_write = axi_hostinterface_0_iParHost_write
+ PORT oParHost_acknowledge = axi_hostinterface_0_oParHost_acknowledge
+ PORT iParHost_byteenable = axi_hostinterface_0_iParHost_byteenable
+ PORT iParHost_address = axi_hostinterface_0_iParHost_address
+ PORT ioParHost_data_io = axi_hostinterface_0_ioParHost_data_io
+ PORT irqSync_irq = axi_openmac_0_TIMER_IRQ
+ PORT irqOut_irq = axi_hostinterface_0_irqOut_irq
+END
