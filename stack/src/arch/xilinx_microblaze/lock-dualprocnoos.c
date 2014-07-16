@@ -1,18 +1,19 @@
 /**
 ********************************************************************************
-\file   xilinx_microblaze/target-microblaze.c
+\file   xilinx_microblaze/lock-dualprocnoos.c
 
-\brief  Target specific functions for Microblaze without OS
+\brief  Locks for Microblaze without OS in dual processor system
 
-This target depending module provides several functions that are necessary for
-systems without OS and not using shared buffer library.
+This target depending module provides lock functionality in dual processor
+system with shared memory.
 
 \ingroup module_target
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2014, Kalycito Infotech Private Limited
+Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Kalycito Infotech Private Limited.
+
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -41,15 +42,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <common/oplkinc.h>
+#include "lock.h"
 
-#include "usleep.h"
-#include "systemtimer.h"
-
+#include <stdlib.h>
 #include <xparameters.h>
-#include <xintc.h>         // interrupt controller
-
-#include <common/target.h>
+#include <xil_io.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -58,13 +55,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define TGTCONIO_MS_IN_US(x)    (x * 1000U)
 
-#ifdef CONFIG_HOST
-#define TGT_INTC_BASE       XPAR_HOST_INTC_BASEADDR
-#elif defined CONFIG_PCP
-#define TGT_INTC_BASE       XPAR_PCP_INTC_BASEADDR
-#endif
 //------------------------------------------------------------------------------
 // module global vars
 //------------------------------------------------------------------------------
@@ -80,6 +71,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+#define LOCK_LOCAL_ID    (XPAR_CPU_ID + 1)
+
+#if (LOCK_LOCAL_ID == LOCK_UNLOCKED_C)
+#error "Change the to LOCK_LOCAL_ID to some unique BYTE value unequal 0x0!"
+#endif
 
 //------------------------------------------------------------------------------
 // local types
@@ -88,13 +84,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
+static LOCK_T*   pLock_l = NULL;
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-
-static void enableInterruptMaster(void);
-static void disableInterruptMaster(void);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -102,170 +96,85 @@ static void disableInterruptMaster(void);
 
 //------------------------------------------------------------------------------
 /**
-\brief    Get current system tick
+\brief    Initializes given lock
 
-This function returns the current system tick determined by the system timer.
+This function initializes the lock instance.
 
-\return Returns the system tick in milliseconds
+\param  pLock_p                Reference to lock
+
+\return The function returns 0 when successful.
 
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-UINT32 target_getTickCount(void)
+int target_initLock(LOCK_T*pLock_p)
 {
-    UINT32    ticks;
+    if (pLock_p == NULL)
+        return -1;
 
-    ticks = timer_getMSCount();
+    pLock_l = pLock_p;
 
-    return ticks;
+    return 0;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief    enables global interrupt
+\brief    Lock the given lock
 
-This function enables/disables global interrupts.
+This function tries to lock the given lock, otherwise it spins until the
+lock is freed.
 
-\param  fEnable_p               TRUE = enable interrupts
-                                FALSE = disable interrupts
+\return The function returns 0 when successful.
 
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-void target_enableGlobalInterrupt(UINT8 fEnable_p)
+int target_lock(void)
 {
-    static INT    lockCount = 0;
+    u8    val;
 
-    if (fEnable_p != FALSE) // restore interrupts
+    if (pLock_l == NULL)
+        return -1;
+
+    // spin if id is not written to shared memory
+    do
     {
-        if (--lockCount == 0)
+        microblaze_invalidate_dcache_range((u32)pLock_l, 1);
+        val = Xil_In8((u32)pLock_l);
+
+        // write local id if unlocked
+        if (val == LOCK_UNLOCKED_C)
         {
-            enableInterruptMaster();
+            Xil_Out8(pLock_l, LOCK_LOCAL_ID);
+            microblaze_flush_dcache_range((u32)pLock_l, 1);
+            continue; // return to top of loop to check again
         }
-    }
-    else
-    {                       // disable interrupts
-        if (lockCount == 0)
-        {
-            disableInterruptMaster();
-        }
-        lockCount++;
-    }
+    } while (val != LOCK_LOCAL_ID);
+
+    return 0;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Initialize target specific stuff
+\brief    Unlock the given lock
 
-The function initialize target specific stuff which is needed to run the
-openPOWERLINK stack.
+This function frees the given lock.
 
-\return The function returns a tOplkError error code.
-*/
-//------------------------------------------------------------------------------
-tOplkError target_init(void)
-{
-    // initialize microblaze caches
-#if XPAR_MICROBLAZE_USE_ICACHE
-    microblaze_invalidate_icache();
-    microblaze_enable_icache();
-#endif
-
-#if XPAR_MICROBLAZE_USE_DCACHE
-    microblaze_invalidate_dcache();
-    microblaze_enable_dcache();
-#endif
-
-    //enable microblaze interrupts
-    microblaze_enable_interrupts();
-
-    // initialize system timer
-    timer_init();
-
-    // enable the interrupt master
-    enableInterruptMaster();
-
-    return kErrorOk;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Clean up target specific stuff
-
-The function cleans up target specific stuff.
-
-\return The function returns a tOplkError error code.
-*/
-//------------------------------------------------------------------------------
-tOplkError target_cleanup(void)
-{
-    // disable microblaze caches
-#if XPAR_MICROBLAZE_USE_DCACHE
-    microblaze_invalidate_dcache();
-    microblaze_disable_dcache();
-#endif
-
-#if XPAR_MICROBLAZE_USE_ICACHE
-    microblaze_invalidate_icache();
-    microblaze_disable_icache();
-#endif
-
-    //disable microblaze interrupts
-    microblaze_disable_interrupts();
-
-    // disable the interrupt master
-    disableInterruptMaster();
-
-    return kErrorOk;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief Sleep for the specified number of milliseconds
-
-The function makes the calling thread sleep until the number of specified
-milliseconds has elapsed.
-
-\param  milliSeconds_p      Number of milliseconds to sleep
+\return The function returns 0 when successful.
 
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-void target_msleep(UINT32 milliSeconds_p)
+int target_unlock(void)
 {
-    usleep(TGTCONIO_MS_IN_US(milliSeconds_p));
+    if (pLock_l == NULL)
+        return -1;
+
+    Xil_Out8(pLock_l, LOCK_UNLOCKED_C);
+    microblaze_flush_dcache_range((u32)pLock_l, 1);
+    return 0;
 }
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
-/// \name Private Functions
-/// \{
-
-//------------------------------------------------------------------------------
-/**
-\brief Enable the global interrupt master
-
-\ingroup module_target
-*/
-//------------------------------------------------------------------------------
-static void enableInterruptMaster(void)
-{
-    //enable global interrupt master
-    XIntc_MasterEnable(TGT_INTC_BASE);
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief Disable the global interrupt master
-
-\ingroup module_target
-*/
-//------------------------------------------------------------------------------
-static void disableInterruptMaster(void)
-{
-    //disable global interrupt master
-    XIntc_MasterDisable(TGT_INTC_BASE);
-}
-
-///\}

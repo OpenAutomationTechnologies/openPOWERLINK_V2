@@ -11,6 +11,7 @@ Initialize the system timer and count the milliseconds
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -53,7 +54,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+#ifdef CONFIG_HOST
+#define TGT_INTC_BASE           XPAR_INTC_0_BASEADDR
+#define TGT_TIMER_INTR          XPAR_HOST_INTC_FIT_TIMER_0_INTERRUPT_INTR
 
+#elif defined CONFIG_PCP
+#define TGT_INTC_BASE           XPAR_INTC_0_BASEADDR
+#define TGT_TIMER_INTR          XPAR_PCP_INTC_FIT_TIMER_0_INTERRUPT_INTR
+#endif
+
+#define TGT_TIMER_INTR_MASK     XPAR_FIT_TIMER_0_INTERRUPT_MASK
 //------------------------------------------------------------------------------
 // module global vars
 //------------------------------------------------------------------------------
@@ -78,7 +88,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // local vars
 //------------------------------------------------------------------------------
 
-static UINT32 msCount_l = 0;
+static UINT32    msCount_l = 0;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -99,13 +109,12 @@ static void irqHandler(void* pArg_p);
 //------------------------------------------------------------------------------
 void timer_init(void)
 {
-
     //register fit interrupt handler
-    XIntc_RegisterHandler(XPAR_PCP_INTC_BASEADDR, XPAR_PCP_INTC_FIT_TIMER_0_INTERRUPT_INTR,
+    XIntc_RegisterHandler(TGT_INTC_BASE, TGT_TIMER_INTR,
                           (XInterruptHandler)irqHandler, 0);
 
     //enable the fit interrupt
-    XIntc_EnableIntr(XPAR_PCP_INTC_BASEADDR, XPAR_FIT_TIMER_0_INTERRUPT_MASK);
+    XIntc_EnableIntr(TGT_INTC_BASE, TGT_TIMER_INTR_MASK);
 }
 
 //------------------------------------------------------------------------------
@@ -146,4 +155,3 @@ static void irqHandler(void* pArg_p)
 }
 
 ///\}
-
