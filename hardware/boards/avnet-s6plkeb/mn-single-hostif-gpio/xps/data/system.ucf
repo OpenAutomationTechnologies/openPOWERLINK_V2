@@ -1,0 +1,114 @@
+#  Spartan-6 LX16 POWERLINK Evaluation Board
+
+######################
+# CLK and RST        #
+######################
+Net fpga_0_clk_1_sys_clk_pin LOC = V10 | IOSTANDARD = LVCMOS33;
+Net fpga_0_rst_1_sys_rst_pin LOC = C2 | IOSTANDARD = LVCMOS33;
+Net fpga_0_clk_1_sys_clk_pin TNM_NET = sys_clk_pin;
+TIMESPEC TS_sys_clk_pin = PERIOD sys_clk_pin 50000 kHz;
+Net fpga_0_rst_1_sys_rst_pin TIG;
+
+###### By Mani #######
+#NET axi_epc_0_S_AXI_ACLK_pin TNM_NET = S_AXI_ACLK;
+#TIMESPEC TS_S_AXI_ACLK = PERIOD S_AXI_ACLK 10 ns HIGH 50%;
+
+######################
+# 4 DIP SWITCH       #
+######################
+Net DIP_Switches_GPIO_IO_I_pin<0> LOC = R5 | IOSTANDARD = LVCMOS33 | TIG;
+Net DIP_Switches_GPIO_IO_I_pin<1> LOC = T5 | IOSTANDARD = LVCMOS33 | TIG;
+Net DIP_Switches_GPIO_IO_I_pin<2> LOC = N5 | IOSTANDARD = LVCMOS33 | TIG;
+Net DIP_Switches_GPIO_IO_I_pin<3> LOC = R3 | IOSTANDARD = LVCMOS33 | TIG;
+
+######################
+# 4 PUSH BUTTON      #
+######################
+Net Push_Buttons_GPIO_IO_I_pin<0> LOC = R7 | IOSTANDARD = LVCMOS33 | TIG;
+Net Push_Buttons_GPIO_IO_I_pin<1> LOC = T7 | IOSTANDARD = LVCMOS33 | TIG;
+Net Push_Buttons_GPIO_IO_I_pin<2> LOC = P6 | IOSTANDARD = LVCMOS33 | TIG;
+Net Push_Buttons_GPIO_IO_I_pin<3> LOC = T6 | IOSTANDARD = LVCMOS33 | TIG;
+
+######################
+# 8 LED              #
+######################
+Net LEDS_GPIO_IO_O_pin<0> LOC = R11 | IOSTANDARD = LVCMOS33 | TIG; #LED8
+Net LEDS_GPIO_IO_O_pin<1> LOC = T11 | IOSTANDARD = LVCMOS33 | TIG; #LED7
+Net LEDS_GPIO_IO_O_pin<2> LOC = R10 | IOSTANDARD = LVCMOS33 | TIG; #LED6
+Net LEDS_GPIO_IO_O_pin<3> LOC = T10 | IOSTANDARD = LVCMOS33 | TIG; #LED5
+Net LEDS_GPIO_IO_O_pin<4> LOC = T9 | IOSTANDARD = LVCMOS33 | TIG; #LED4
+Net LEDS_GPIO_IO_O_pin<5> LOC = R8 | IOSTANDARD = LVCMOS33 | TIG; #LED3
+Net LEDS_GPIO_IO_O_pin<6> LOC = T8 | IOSTANDARD = LVCMOS33 | TIG; #LED2
+Net LEDS_GPIO_IO_O_pin<7> LOC = P12 | IOSTANDARD = LVCMOS33 | TIG; #LED1
+
+######################
+# DDR2 RAM           #
+######################
+Net fpga_0_MCB_DDR2_rzq IOSTANDARD = LVCMOS18_JEDEC;
+Net fpga_0_MCB_DDR2_zio IOSTANDARD = LVCMOS18_JEDEC;
+
+######################
+# SPI                #
+######################
+Net fpga_0_SPI_FLASH_MISO_pin LOC = R13 | IOSTANDARD = LVCMOS33 | PULLUP;
+Net fpga_0_SPI_FLASH_MOSI_pin LOC = T13 | IOSTANDARD = LVCMOS33;
+Net fpga_0_SPI_FLASH_SCK_pin LOC = R15 | IOSTANDARD = LVCMOS33;
+Net fpga_0_SPI_FLASH_SS_pin LOC = V3 | IOSTANDARD = LVCMOS33;
+
+######################
+# UART               #
+######################
+Net fpga_0_RS232_RX_pin LOC = V8 | IOSTANDARD = LVCMOS33;
+Net fpga_0_RS232_TX_pin LOC = U8 | IOSTANDARD = LVCMOS33;
+
+######################
+# EMC PAP 16bit      #
+######################
+ Net axi_epc_0_PRH_Data_pin<15> LOC = E13 | IOSTANDARD = LVCMOS33;
+ Net axi_epc_0_PRH_Data_pin<14> LOC = F13 | IOSTANDARD = LVCMOS33;
+ Net axi_epc_0_PRH_Data_pin<13> LOC = A15 | IOSTANDARD = LVCMOS33;
+ Net axi_epc_0_PRH_Data_pin<12> LOC = B16 | IOSTANDARD = LVCMOS33;
+ Net axi_epc_0_PRH_Data_pin<11> LOC = A16 | IOSTANDARD = LVCMOS33;
+ Net axi_epc_0_PRH_Data_pin<10> LOC = C14 | IOSTANDARD = LVCMOS33;
+ Net axi_epc_0_PRH_Data_pin<9> LOC = D14 | IOSTANDARD = LVCMOS33;
+ Net axi_epc_0_PRH_Data_pin<8> LOC = C15 | IOSTANDARD = LVCMOS33;
+ Net axi_epc_0_PRH_Data_pin<7> LOC = V15 | IOSTANDARD = LVCMOS33;
+ Net axi_epc_0_PRH_Data_pin<6> LOC = M11 | IOSTANDARD = LVCMOS33;
+ Net axi_epc_0_PRH_Data_pin<5> LOC = N11 | IOSTANDARD = LVCMOS33;
+ Net axi_epc_0_PRH_Data_pin<4> LOC = P11 | IOSTANDARD = LVCMOS33;
+ Net axi_epc_0_PRH_Data_pin<3> LOC = N10 | IOSTANDARD = LVCMOS33;
+ Net axi_epc_0_PRH_Data_pin<2> LOC = M10 | IOSTANDARD = LVCMOS33;
+ Net axi_epc_0_PRH_Data_pin<1> LOC = N9 | IOSTANDARD = LVCMOS33;
+ Net axi_epc_0_PRH_Data_pin<0> LOC = P7 | IOSTANDARD = LVCMOS33;
+
+ Net axi_epc_0_PRH_Addr_pin<14> LOC = B11 | IOSTANDARD = LVCMOS33;
+ Net axi_epc_0_PRH_Addr_pin<13> LOC = A11 | IOSTANDARD = LVCMOS33;
+ Net axi_epc_0_PRH_Addr_pin<12> LOC = B12 | IOSTANDARD = LVCMOS33;
+ Net axi_epc_0_PRH_Addr_pin<11> LOC = A12 | IOSTANDARD = LVCMOS33;
+ Net axi_epc_0_PRH_Addr_pin<10> LOC = C8 | IOSTANDARD = LVCMOS33;
+ Net axi_epc_0_PRH_Addr_pin<9> LOC = D11 | IOSTANDARD = LVCMOS33;
+ Net axi_epc_0_PRH_Addr_pin<8> LOC = C11 | IOSTANDARD = LVCMOS33;
+ Net axi_epc_0_PRH_Addr_pin<7> LOC = D8 | IOSTANDARD = LVCMOS33;
+ Net axi_epc_0_PRH_Addr_pin<6> LOC = B14 | IOSTANDARD = LVCMOS33;
+ Net axi_epc_0_PRH_Addr_pin<5> LOC = A14 | IOSTANDARD = LVCMOS33;
+ Net axi_epc_0_PRH_Addr_pin<4> LOC = C7 | IOSTANDARD = LVCMOS33;
+ Net axi_epc_0_PRH_Addr_pin<3> LOC = F9 | IOSTANDARD = LVCMOS33;
+ Net axi_epc_0_PRH_Addr_pin<2> LOC = G9 | IOSTANDARD = LVCMOS33;
+ Net axi_epc_0_PRH_Addr_pin<1> LOC = A13 | IOSTANDARD = LVCMOS33;
+ Net axi_epc_0_PRH_Addr_pin<0> LOC = C13 | IOSTANDARD = LVCMOS33;
+ #Net axi_epc_0_PRH_Addr_pin<0> LOC = U15 | IOSTANDARD = LVCMOS33;
+
+ Net dummy_pin LOC = U15 | PULLDOWN |IOSTANDARD = LVCMOS33;
+
+ Net axi_epc_0_PRH_CS_pin LOC = U13 | IOSTANDARD = LVCMOS33;
+ Net axi_epc_0_PRH_Rd_pin LOC = V13 | IOSTANDARD = LVCMOS33;
+ Net axi_epc_0_PRH_Wr_pin LOC = T4 | IOSTANDARD = LVCMOS33;
+ Net axi_epc_0_PRH_BE_pin<1> LOC = N8 | IOSTANDARD = LVCMOS33;
+ Net axi_epc_0_PRH_BE_pin<0> LOC = P8 | IOSTANDARD = LVCMOS33;
+ Net axi_hostinterface_0_irqOut_irq_pin LOC = U10 | IOSTANDARD = LVCMOS33; #HOST_IRQ
+
+################################################################################
+# TIMING CONSTRAINTS
+## Clock groups
+### PLB and MAC clock
+NET "clk_50_0000MHzPLL0" TNM = "SLOW_CLK_GRP";
