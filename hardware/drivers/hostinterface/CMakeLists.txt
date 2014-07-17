@@ -128,7 +128,7 @@ SET_PROPERTY(TARGET ${HOSTIF_PROJECT_NAME} PROPERTY DEBUG_POSTFIX "_d")
 ########################################################################
 ADD_CUSTOM_COMMAND(TARGET ${HOSTIF_PROJECT_NAME}
                    POST_BUILD
-                   COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE_NAME:${HOSTIF_PROJECT_NAME}> ${PROJECT_BINARY_DIR}/${HOSTIF_LIB_NAME}.a
+                   COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE_NAME:${HOSTIF_PROJECT_NAME}> ${PROJECT_BINARY_DIR}/lib${HOSTIF_LIB_NAME}.a
                   )
 
 SET_DIRECTORY_PROPERTIES(PROPERTIES
