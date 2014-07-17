@@ -611,7 +611,8 @@ static tOplkError copyTxPdo(tPlkFrame* pFrame_p, UINT frameSize_p, BOOL fReadyFl
         {
             /*
             TRACE("%s() Channel:%d Node:%d MapObjectCnt:%d PdoSize:%d\n",
-                  __func__, channelId, nodeId, pPdoChannel->mappObjectCount, pPdoChannel->pdoSize);
+                  __func__, channelId, nodeId, pPdoChannel->mappObjectCount,
+                  pPdoChannel->pdoSize);
             */
 
             // set PDO version in frame

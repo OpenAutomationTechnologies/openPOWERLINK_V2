@@ -139,18 +139,19 @@ The function allocates shared memory for the kernel needed to transfer the PDOs.
 //------------------------------------------------------------------------------
 tOplkError pdokcal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
 {
-    TRACE("%s()\n", __func__);
+    DEBUG_LVL_PDO_TRACE("%s()\n", __func__);
 
     pdokcalmem_pPdo_g = (BYTE*)OPLK_MALLOC(memSize_p);
     if (pdokcalmem_pPdo_g == NULL)
     {
-        TRACE("%s() malloc failed!}n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() malloc failed!\n", __func__);
         *ppPdoMem_p = NULL;
         return kErrorNoResource;
     }
     *ppPdoMem_p = pdokcalmem_pPdo_g;
 
-    TRACE("%s() Allocated memory for PDO at %p size:%d\n", __func__, *ppPdoMem_p, memSize_p);
+    DEBUG_LVL_PDO_TRACE("%s() Allocated memory for PDO at %p size:%d\n",
+                        __func__, *ppPdoMem_p, memSize_p);
     return kErrorOk;
 }
 
@@ -173,7 +174,7 @@ tOplkError pdokcal_freeMem(BYTE* pMem_p, size_t memSize_p)
 {
     UNUSED_PARAMETER(memSize_p);
 
-    TRACE("%s()\n", __func__);
+    DEBUG_LVL_PDO_TRACE("%s()\n", __func__);
     OPLK_FREE(pMem_p);
     return kErrorOk;
 }

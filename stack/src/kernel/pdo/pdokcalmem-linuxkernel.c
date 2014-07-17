@@ -147,7 +147,8 @@ tOplkError pdokcal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
     {
         return kErrorNoResource;
     }
-    TRACE("%s() Allocated memory for PDO at %p size:%d/%d\n", __func__, *ppPdoMem_p, memSize_p, order);
+    DEBUG_LVL_PDO_TRACE("%s() Allocated memory for PDO at %p size:%d/%d\n",
+                        __func__, *ppPdoMem_p, memSize_p, order);
     return kErrorOk;
 }
 

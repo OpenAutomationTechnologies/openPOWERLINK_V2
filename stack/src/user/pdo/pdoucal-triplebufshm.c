@@ -138,10 +138,10 @@ tOplkError pdoucal_initPdoMem(tPdoChannelSetup* pPdoChannels_p, size_t rxPdoMemS
     pTripleBuf_l[1] = pTripleBuf_l[0] + pdoMemSize;
     pTripleBuf_l[2] = pTripleBuf_l[1] + pdoMemSize;
 
-    TRACE("%s() Mapped shared memory for PDO mem region at %p size %d\n",
-          __func__, pPdoMem_l, memSize_l);
-    TRACE("%s() Triple buffers at: %p/%p/%p\n", __func__,
-          pTripleBuf_l[0], pTripleBuf_l[1], pTripleBuf_l[2]);
+    DEBUG_LVL_PDO_TRACE("%s() Mapped shared memory for PDO mem region at %p size %d\n",
+                        __func__, pPdoMem_l, memSize_l);
+    DEBUG_LVL_PDO_TRACE("%s() Triple buffers at: %p/%p/%p\n", __func__,
+                        pTripleBuf_l[0], pTripleBuf_l[1], pTripleBuf_l[2]);
 
     OPLK_ATOMIC_INIT(pPdoMem_l);
 

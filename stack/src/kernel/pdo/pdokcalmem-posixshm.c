@@ -150,19 +150,20 @@ The function allocates shared memory for the kernel needed to transfer the PDOs.
 //------------------------------------------------------------------------------
 tOplkError pdokcal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
 {
-    TRACE("%s()\n", __func__);
+    DEBUG_LVL_PDO_TRACE("%s()\n", __func__);
     if (ftruncate(fd_l, memSize_p) < 0)
         return kErrorNoResource;
 
     *ppPdoMem_p = mmap(NULL, memSize_p, PROT_READ | PROT_WRITE, MAP_SHARED, fd_l, 0);
     if (*ppPdoMem_p == MAP_FAILED)
     {
-        DEBUG_LVL_ERROR_TRACE("%s() mmap failed!}n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() mmap failed!\n", __func__);
         *ppPdoMem_p = NULL;
         return kErrorNoResource;
     }
 
-    TRACE("%s() Allocated memory for PDO at %p size:%d\n", __func__, *ppPdoMem_p, memSize_p);
+    DEBUG_LVL_PDO_TRACE("%s() Allocated memory for PDO at %p size:%d\n",
+                        __func__, *ppPdoMem_p, memSize_p);
     return kErrorOk;
 }
 
@@ -183,7 +184,7 @@ transfering the PDOs.
 //------------------------------------------------------------------------------
 tOplkError pdokcal_freeMem(BYTE* pMem_p, size_t memSize_p)
 {
-    TRACE("%s()\n", __func__);
+    DEBUG_LVL_PDO_TRACE("%s()\n", __func__);
 
     if (munmap(pMem_p, memSize_p) != 0)
     {

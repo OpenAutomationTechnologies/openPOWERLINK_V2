@@ -195,8 +195,8 @@ tOplkError pdokcal_freeMem(BYTE* pMem_p, size_t memSize_p)
     UNUSED_PARAMETER(pMem_p);
     UNUSED_PARAMETER(memSize_p);
 
-    TRACE("%s() try to free address %p (%p)\n",
-          __func__, pMem_p, limPdo_l.pBase);
+    DEBUG_LVL_PDO_TRACE("%s() try to free address %p (%p)\n",
+                        __func__, pMem_p, limPdo_l.pBase);
 
     return kErrorOk;
 }

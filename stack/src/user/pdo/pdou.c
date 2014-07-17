@@ -502,7 +502,7 @@ tOplkError pdou_copyTxPdoFromPi(void)
         }
 
         pPdo = pdoucal_getTxPdoAdrs(channelId);
-        //TRACE ("%s() pPdo: %p\n", __func__, pPdo);
+        //TRACE("%s() pPdo: %p\n", __func__, pPdo);
 
         for (mappObjectCount = pPdoChannel->mappObjectCount,
              pMappObject = pdouInstance_g.paTxObject + (channelId * D_PDO_TPDOChannelObjects_U8);
@@ -741,7 +741,7 @@ static tOplkError setupTxPdoChannelTables(
     }
     *pCountChannelIdTx_p = channelCount;
 
-    TRACE("%s() TX channel count: %d\n", __func__, channelCount);
+    DEBUG_LVL_PDO_TRACE("%s() TX channel count: %d\n", __func__, channelCount);
     return kErrorOk;
 }
 

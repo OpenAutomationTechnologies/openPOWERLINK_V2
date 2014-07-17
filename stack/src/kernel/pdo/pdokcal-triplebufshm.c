@@ -146,9 +146,9 @@ tOplkError pdokcal_initPdoMem(tPdoChannelSetup* pPdoChannels, size_t rxPdoMemSiz
     pTripleBuf_l[1] = pTripleBuf_l[0] + pdoMemSize;
     pTripleBuf_l[2] = pTripleBuf_l[1] + pdoMemSize;
 
-    TRACE("%s() PdoMem:%p size:%d Triple buffers at: %p/%p/%p\n", __func__,
-          pPdoMem_l, pdoMemRegionSize_l,
-          pTripleBuf_l[0], pTripleBuf_l[1], pTripleBuf_l[2]);
+    DEBUG_LVL_PDO_TRACE("%s() PdoMem:%p size:%d Triple buffers at: %p/%p/%p\n",
+                        __func__, pPdoMem_l, pdoMemRegionSize_l,
+                        pTripleBuf_l[0], pTripleBuf_l[1], pTripleBuf_l[2]);
 
     OPLK_MEMSET(pPdoMem_l, 0, pdoMemRegionSize_l);
     setupPdoMemInfo(pPdoChannels, pPdoMem_l);
@@ -169,7 +169,7 @@ The function cleans the memory allocated for PDO buffers.
 //------------------------------------------------------------------------------
 void pdokcal_cleanupPdoMem(void)
 {
-    TRACE("%s()\n", __func__);
+    DEBUG_LVL_PDO_TRACE("%s()\n", __func__);
 
     if (pPdoMem_l != NULL)
         pdokcal_freeMem((BYTE*)pPdoMem_l, pdoMemRegionSize_l);
