@@ -53,7 +53,9 @@ ENDIF()
 # Set architecture specific sources
 SET(LIB_ARCH_SOURCES
                      ${TARGET_MICROBLAZE_SOURCES}
-   )
+                     ${TARGET_MICROBLAZE_LOCAL_SOURCES}
+                     ${TARGET_MICROBLAZE_OPENMAC_SOURCES}
+    )
 
 ################################################################################
 # Set architecture specific includes
