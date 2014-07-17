@@ -3,6 +3,7 @@
 # Microblaze configuration options for openPOWERLINK stack
 #
 # Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2014, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -34,11 +35,21 @@ SET(CMAKE_MODULE_PATH "${OPLK_ROOT_DIR}/cmake" ${CMAKE_MODULE_PATH})
 INCLUDE(geneclipsefilelist)
 INCLUDE(geneclipseincludelist)
 INCLUDE(setmicroblazeboardconfig)
+INCLUDE(listdir)
 
 ################################################################################
 # Path to the hardware library folder of your board example
-SET(CFG_HW_LIB_DIR ${OPLK_ROOT_DIR}/hardware/lib/${SYSTEM_NAME_DIR}/${SYSTEM_PROCESSOR_DIR}/avnet-s6plkeb/cn-single-gpio
-        CACHE PATH "Path to the hardware library folder of your demo application")
+SET(CFG_HW_LIB_PATH ${OPLK_ROOT_DIR}/hardware/lib/${SYSTEM_NAME_DIR}/${SYSTEM_PROCESSOR_DIR}
+        CACHE PATH "Path to the hardware library folder")
+
+# Get subdirectories (board/demo)
+LIST_SUBDIRECTORIES(HW_BOARD_DEMOS ${CFG_HW_LIB_PATH} 2)
+
+SET(CFG_HW_LIB avnet-s6plkeb/cn-single-gpio CACHE STRING
+    "Subfolder of hardware board demo")
+SET_PROPERTY(CACHE CFG_HW_LIB PROPERTY STRINGS ${HW_BOARD_DEMOS})
+
+SET(CFG_HW_LIB_DIR ${CFG_HW_LIB_PATH}/${CFG_HW_LIB})
 
 ################################################################################
 # Include board specific settings file
@@ -52,7 +63,31 @@ SET(XIL_TOOLS_DIR ${TOOLS_DIR}/xilinx-microblaze)
 
 ################################################################################
 # Stack configuration
-################################################################################
-SET(CFG_KERNEL_STACK_DIRECTLINK ON CACHE INTERNAL
-    "Link kernel stack directly into application (Single process solution)")
-UNSET(CFG_KERNEL_STACK_USERSPACE_DAEMON CACHE)
+SET(CFG_BUILD_KERNEL_STACK "Link to Application"
+    CACHE STRING "Configure how to build the kernel stack")
+
+SET(KernelStackBuildTypes
+    "Link to Application;PCP Daemon Host-Interface;None"
+    CACHE INTERNAL
+    "List of possible kernel stack build types")
+
+SET_PROPERTY(CACHE CFG_BUILD_KERNEL_STACK
+             PROPERTY STRINGS ${KernelStackBuildTypes})
+
+IF (CFG_BUILD_KERNEL_STACK STREQUAL "Link to Application")
+
+    SET(CFG_KERNEL_STACK_DIRECTLINK ON CACHE INTERNAL
+         "Link kernel stack directly into application (Single process solution)")
+    UNSET(CFG_KERNEL_STACK_PCP_HOSTIF_MODULE CACHE)
+
+ELSEIF (CFG_BUILD_KERNEL_STACK STREQUAL "PCP Daemon Host-Interface")
+
+    SET(CFG_KERNEL_STACK_PCP_HOSTIF_MODULE ON CACHE INTERNAL
+         "Build kernel stack as PCP daemon (dual processor)")
+    UNSET(CFG_KERNEL_STACK_DIRECTLINK CACHE)
+
+ELSEIF (CFG_BUILD_KERNEL_STACK STREQUAL "None")
+    UNSET(CFG_KERNEL_STACK_PCP_HOSTIF_MODULE CACHE)
+    UNSET(CFG_KERNEL_STACK_DIRECTLINK CACHE)
+
+ENDIF (CFG_BUILD_KERNEL_STACK STREQUAL "Link to Application")
