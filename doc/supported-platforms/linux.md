@@ -43,6 +43,15 @@ provides the necessary real-time extensions (https://rt.wiki.kernel.org).
 Additional information on the Linux real-time kernel can be found on the
 OSADL home page (http://www.osadl.org).
 
+**Tested Kernel Versions**
+
+Whereas openPOWERLINK should run on any kernel specified in: \ref sect_linux_kernel,
+it is recommended to use one of the following kernel versions which were
+extensively tested with this openPOWERLINK version.
+
+- 2.6.33.7.2-rt30
+- 3.12.24-rt38
+
 **Thread Priorities**
 If using a real-time kernel, the real-time priorities of the necessary
 threads must be adjusted for deterministic POWERLINK behavior.
@@ -52,14 +61,11 @@ For the user space stack, a script setting the priorities is provided in
 `tools/linux/set_prio`. It increases the priorities of the high resolution
 timer softirq thread (only on 2.6 kernels) and of the Ethernet IRQ thread.
 
-**Kernel 3.x**  
+**Kernel 3.x**
 The behavior of a 3.X real-time kernel differs to previous kernel version.
 Split softirq threads are no longer available, although there is a patch which
 implements split softirq locks. If you are using a 3.X real-time kernel you
 should ensure that this patch is included.
-
-For example: A current Linux version at writing of this document which
-includes the patch is v3.6.11.4-rt36.
 
 Additionally, the following steps could be made to improve the real-time
 behavior on a _multicore_ processor:
@@ -81,6 +87,7 @@ behavior on a _multicore_ processor:
 
 * Disable IRQ balancing by disable irqbalance. This depends on your
   Linux distribution. For example in Ubuntu edit `/etc/default/irqbalance`
+
 
 ## Libraries and Tools {#sect_linux_libs}
 

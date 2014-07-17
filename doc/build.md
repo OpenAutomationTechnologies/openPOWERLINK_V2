@@ -64,8 +64,19 @@ toolchain files" will be delivered in the `cmake` directory. To configure
 the build to use a cross compiler and build environment you have to select
 the appropriate cross toolchain file when calling cmake.
 
-      > cmake -DCMAKE_TOOLCHAIN_FILE=<PATH_TO_TOOLCHAIN_FILE>
+The following toolchain files are delivered in the main cmake directory:
 
+| Platform                 | Toolchain file                                   |
+| ----------------------   | ------------------------------------------------ |
+| Xilinx Microblaze        | toolchain-xilinx-microblaze-gnu.cmake            |
+
+The toolchain file must be specified with the CMake option __CMAKE_TOOLCHAIN_FILE__.
+
+__For example:__
+
+Configuring cross compilation for the Xilinx Microblaze platform:
+
+> cmake -DCMAKE_TOOLCHAIN_FILE=<OPENPOWERLINK_DIR>/cmake/toolchain-xilinx-microblaze-gnu.cmake <SOURCE_DIR>
 
 # Build Steps {#sect_build_steps}
 

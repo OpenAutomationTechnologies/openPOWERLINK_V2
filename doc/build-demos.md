@@ -76,6 +76,11 @@ Follow the steps below to cross compile your demo application for Microblaze:
   architecture different options may be available. Please refer to the
   platform specific options.
 
+- **CMAKE_TOOLCHAIN_FILE**
+
+  Specifies a cross toolchain file to be used. It is only needed if you
+  cross-compile for another target platform. (\ref sect_build_cmake_crosscompile)
+
 ## Linux Specific Options  {#sect_build_demos_linux_options}
 
 - **CFG_BUILD_KERNEL_STACK**
@@ -147,5 +152,5 @@ Follow the steps below to cross compile your demo application for Microblaze:
 
   Determines if the application uses the configuration manager (CFM).
 
-  This option must be enabled if the used openPOWERLINK stack is build with
+  This option must be enabled if the used openPOWERLINK stack is built with
   configuration manager functionality!

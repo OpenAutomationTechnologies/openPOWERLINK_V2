@@ -111,6 +111,10 @@ the configuration options on the command line (-DCFG_XXX=XXX) or
   If the build type _Debug_ is specified, the code is compiled with debugging
   options.
 
+- **CMAKE_TOOLCHAIN_FILE**
+
+  Specifies a cross toolchain file to be used. It is only needed if you
+  cross-compile for another target platform. (\ref sect_build_cmake_crosscompile)
 
 ## Linux Configuration Options
 
