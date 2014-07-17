@@ -3,6 +3,7 @@
 # File lists for openPOWERLINK stack sources
 #
 # Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2014, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -114,6 +115,10 @@ SET(CTRL_UCAL_DIRECT_SOURCES
     ${USER_SOURCE_DIR}/ctrl/ctrlucal-direct.c
     )
 
+SET(CTRL_UCAL_HOSTIF_SOURCES
+    ${USER_SOURCE_DIR}/ctrl/ctrlucal-hostif.c
+    )
+
 ################################################################################
 # User DLL CAL sources
 
@@ -140,6 +145,10 @@ SET(ERRHND_UCAL_LOCAL_SOURCES
     ${USER_SOURCE_DIR}/errhnd/errhnducal-local.c
     )
 
+SET(ERRHND_UCAL_HOSTIF_SOURCES
+    ${USER_SOURCE_DIR}/errhnd/errhnducal-hostif.c
+    )
+
 ################################################################################
 # User event CAL sources
 
@@ -162,6 +171,11 @@ SET(EVENT_UCAL_NOOSKERNEL_SOURCES
     ${USER_SOURCE_DIR}/event/eventucal-nooscircbuf.c
     )
 
+SET(EVENT_UCAL_NOOSHOSTIF_SOURCES
+    ${USER_SOURCE_DIR}/event/eventucalintf-circbuf.c
+    ${USER_SOURCE_DIR}/event/eventucal-nooshostif.c
+    )
+
 ################################################################################
 # User PDO CAL sources
 SET(PDO_UCAL_LOCAL_SOURCES
@@ -177,6 +191,11 @@ SET(PDO_UCAL_POSIX_SOURCES
 SET(PDO_UCAL_LINUXMMAPIOCTL_SOURCES
     ${USER_SOURCE_DIR}/pdo/pdoucalsync-ioctl.c
     ${USER_SOURCE_DIR}/pdo/pdoucalmem-linuxmmap.c
+    )
+
+SET(PDO_UCAL_HOSTIF_SOURCES
+    ${USER_SOURCE_DIR}/pdo/pdoucalsync-hostif.c
+    ${USER_SOURCE_DIR}/pdo/pdoucalmem-hostif.c
     )
 
 ################################################################################
@@ -219,6 +238,10 @@ SET(CTRL_KCAL_LINUXIOCTL_SOURCES
     ${KERNEL_SOURCE_DIR}/ctrl/ctrlkcal-direct.c
     )
 
+SET(CTRL_KCAL_HOSTIF_SOURCES
+    ${KERNEL_SOURCE_DIR}/ctrl/ctrlkcal-hostif.c
+    )
+
 ################################################################################
 # Kernel DLL CAL sources
 
@@ -239,6 +262,10 @@ SET(ERRHND_KCAL_POSIXMEM_SOURCES
 
 SET(ERRHND_KCAL_LOCAL_SOURCES
     ${KERNEL_SOURCE_DIR}/errhnd/errhndkcal-local.c
+    )
+
+SET(ERRHND_KCAL_HOSTIF_SOURCES
+    ${KERNEL_SOURCE_DIR}/errhnd/errhndkcal-hostif.c
     )
 
 ################################################################################
@@ -264,6 +291,11 @@ SET(EVENT_KCAL_NOOSKERNEL_SOURCES
     ${KERNEL_SOURCE_DIR}/event/eventkcal-nooscircbuf.c
     )
 
+SET(EVENT_KCAL_NOOSHOSTIF_SOURCES
+    ${KERNEL_SOURCE_DIR}/event/eventkcalintf-circbuf.c
+    ${KERNEL_SOURCE_DIR}/event/eventkcal-nooshostif.c
+    )
+
 ################################################################################
 # Kernel PDO CAL sources
 
@@ -280,6 +312,11 @@ SET(PDO_KCAL_POSIXMEM_SOURCES
 SET(PDO_KCAL_LINUXKERNEL_SOURCES
     ${KERNEL_SOURCE_DIR}/pdo/pdokcalmem-linuxkernel.c
     ${KERNEL_SOURCE_DIR}/pdo/pdokcalsync-linuxkernel.c
+    )
+
+SET(PDO_KCAL_HOSTIF_SOURCES
+    ${KERNEL_SOURCE_DIR}/pdo/pdokcalmem-hostif.c
+    ${KERNEL_SOURCE_DIR}/pdo/pdokcalsync-hostif.c
     )
 
 ################################################################################
@@ -314,6 +351,10 @@ SET(HARDWARE_DRIVER_OPENMAC_CN_SOURCES
      ${KERNEL_SOURCE_DIR}/timer/synctimer-openmac.c
      )
 
+SET(HARDWARE_DRIVER_OPENMAC_MN_SOURCES
+    ${KERNEL_SOURCE_DIR}/timer/hrestimer-openmac.c
+    ${KERNEL_SOURCE_DIR}/edrv/edrvcyclic-openmac.c
+    )
 ################################################################################
 # User timer sources
 
@@ -354,6 +395,11 @@ SET(CIRCBUF_NOOS_SOURCES
     ${COMMON_SOURCE_DIR}/circbuf/circbuf-noos.c
     )
 
+SET(CIRCBUF_NOOSHOSTIF_SOURCES
+    ${COMMON_SOURCE_DIR}/circbuf/circbuffer.c
+    ${COMMON_SOURCE_DIR}/circbuf/circbuf-nooshostif.c
+    )
+
 ################################################################################
 # Memory Mapping sources
 ################################################################################
@@ -383,10 +429,20 @@ SET(TARGET_LINUX_SOURCES
     )
 
 SET(TARGET_MICROBLAZE_SOURCES
-    ${ARCH_SOURCE_DIR}/xilinx_microblaze/lock-localnoos.c
     ${ARCH_SOURCE_DIR}/xilinx_microblaze/systemtimer.c
     ${ARCH_SOURCE_DIR}/xilinx_microblaze/usleep.c
     ${ARCH_SOURCE_DIR}/xilinx_microblaze/target-microblaze.c
+    )
+
+SET(TARGET_MICROBLAZE_LOCAL_SOURCES
+    ${ARCH_SOURCE_DIR}/xilinx_microblaze/lock-localnoos.c
+    )
+
+SET(TARGET_MICROBLAZE_DUAL_SOURCES
+    ${ARCH_SOURCE_DIR}/xilinx_microblaze/lock-dualprocnoos.c
+    )
+
+SET(TARGET_MICROBLAZE_OPENMAC_SOURCES
     ${ARCH_SOURCE_DIR}/xilinx_microblaze/openmac-microblaze.c
     )
 
