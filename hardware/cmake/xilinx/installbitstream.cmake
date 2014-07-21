@@ -3,6 +3,7 @@
 # CMake macro for installing the bitstream for Microblaze
 #
 # Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2014, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -44,6 +45,15 @@ MACRO(INSTALL_BITSTREAM EXAMPLE_ROOT BITS_DESTINATION)
     INSTALL(FILES ${SDK_EXPORT}/system.bit ${SDK_EXPORT}/download.bit ${SDK_EXPORT}/system.xml ${SDK_EXPORT}/system_bd.bmm
             DESTINATION ${BITS_DESTINATION}
            )
+
+    # Additional initialization modules generated for ARM on Zynq
+    IF(DEFINED CFG_DEMO_BOARD_ZYNQ AND CFG_DEMO_BOARD_ZYNQ)
+        SET(ZYNQ_XML ${EXAMPLE_ROOT}/sdk)
+
+        INSTALL(FILES ${SDK_EXPORT}/ps7_init.tcl ${SDK_EXPORT}/ps7_init.c ${SDK_EXPORT}/ps7_init.h ${ZYNQ_XML}/system.xml
+                DESTINATION ${BITS_DESTINATION}
+               )
+    ENDIF()
 
     INSTALL(FILES ${PROJECT_BINARY_DIR}/hwplatformproject.in
             DESTINATION ${BITS_DESTINATION} RENAME .project
