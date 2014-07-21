@@ -1,0 +1,134 @@
+
+################################################################################
+## PL Constraints
+################################################################################
+
+NET "CLK_P" TNM_NET = TNM_sys_clk_pin;
+TIMESPEC TS_sys_clk_pin = PERIOD TNM_sys_clk_pin 200 MHz;
+
+
+NET  CLK_P   LOC = D18  |  DIFF_TERM = "TRUE"  |  IOSTANDARD = "DIFF_HSTL_II_18";
+NET  CLK_N   LOC = C19  |  DIFF_TERM = "TRUE"  |  IOSTANDARD = "DIFF_HSTL_II_18";
+
+NET  RESET   LOC = F19  | IOSTANDARD=LVCMOS25;
+
+## FMC (1)
+#### LEDs
+
+NET axi_powerlink_0_PHY0_PWRDWN_INT_n_pin LOC = "B20" |  IOSTANDARD = "LVCMOS25";
+
+NET axi_openmac_0_ioSmi_dio_pin<0> LOC = "N15" |  IOSTANDARD = "LVCMOS25";
+NET axi_openmac_0_oSmi_clk_pin<0> LOC = "P15" |  IOSTANDARD = "LVCMOS25";
+NET axi_openmac_0_oSmi_nPhyRst_pin<0> LOC = "P20" | TIG |  IOSTANDARD = "LVCMOS25";
+#NET axi_powerlink_0_phy0_link_pin LOC = "P16" |  IOSTANDARD = "LVCMOS25";
+
+#### PHY 1 (FMC1-ISMNET J2)
+NET axi_openmac_0_iMii_txClk_pin<0> LOC = "M19" |  IOSTANDARD = "LVCMOS25";
+NET axi_openmac_0_oMii_txEnable_pin<0> LOC = "C22" |  IOSTANDARD = "LVCMOS25";
+NET axi_openmac_0_oMii_txData_pin<3> LOC = "B15" |  IOSTANDARD = "LVCMOS25";
+NET axi_openmac_0_oMii_txData_pin<2> LOC = "A22" |  IOSTANDARD = "LVCMOS25";
+NET axi_openmac_0_oMii_txData_pin<1> LOC = "D22" |  IOSTANDARD = "LVCMOS25";
+NET axi_openmac_0_oMii_txData_pin<0> LOC = "B17" |  IOSTANDARD = "LVCMOS25";
+NET axi_openmac_0_iMii_rxClk_pin<0> LOC = "L18" |  IOSTANDARD = "LVCMOS25";
+NET axi_openmac_0_iMii_rxDataValid_pin<0> LOC = "R16" | PULLDOWN |  IOSTANDARD = "LVCMOS25";
+NET axi_openmac_0_iMii_rxData_pin<3> LOC = "F22" | PULLDOWN |  IOSTANDARD = "LVCMOS25";
+NET axi_openmac_0_iMii_rxData_pin<2> LOC = "C17" | PULLUP |  IOSTANDARD = "LVCMOS25";
+NET axi_openmac_0_iMii_rxData_pin<1> LOC = "C15" |  IOSTANDARD = "LVCMOS25";
+NET axi_openmac_0_iMii_rxData_pin<0> LOC = "A21" |  IOSTANDARD = "LVCMOS25";
+NET axi_openmac_0_iMii_rxError_pin<0> LOC = "J17" | PULLUP |  IOSTANDARD = "LVCMOS25";
+
+#### PHY 2 (FMC1-ISMNET J6)
+NET axi_powerlink_0_PHY1_PWRDWN_INT_n_pin LOC = "R21" |  IOSTANDARD = "LVCMOS25";
+
+NET axi_openmac_0_iMii_txClk_pin<1> LOC = "B19" |  IOSTANDARD = "LVCMOS25";
+NET axi_openmac_0_oMii_txEnable_pin<1> LOC = "C18" |  IOSTANDARD = "LVCMOS25";
+NET axi_openmac_0_oMii_txData_pin<7> LOC = "E18" |  IOSTANDARD = "LVCMOS25";
+NET axi_openmac_0_oMii_txData_pin<6> LOC = "F18" |  IOSTANDARD = "LVCMOS25";
+NET axi_openmac_0_oMii_txData_pin<5> LOC = "G16" |  IOSTANDARD = "LVCMOS25";
+NET axi_openmac_0_oMii_txData_pin<4> LOC = "G15" |  IOSTANDARD = "LVCMOS25";
+NET axi_openmac_0_iMii_rxClk_pin<1> LOC = "K19" |  IOSTANDARD = "LVCMOS25";
+NET axi_openmac_0_iMii_rxDataValid_pin<1> LOC = "M22" | PULLDOWN |  IOSTANDARD = "LVCMOS25";
+NET axi_openmac_0_iMii_rxData_pin<7> LOC = "J15" | PULLUP |  IOSTANDARD = "LVCMOS25";
+NET axi_openmac_0_iMii_rxData_pin<6> LOC = "K15" | PULLDOWN |  IOSTANDARD = "LVCMOS25";
+NET axi_openmac_0_iMii_rxData_pin<5> LOC = "M15" |  IOSTANDARD = "LVCMOS25";
+NET axi_openmac_0_iMii_rxData_pin<4> LOC = "R20" |  IOSTANDARD = "LVCMOS25";
+NET axi_openmac_0_iMii_rxError_pin<1> LOC = "J21" | PULLUP | IOSTANDARD = "LVCMOS25";
+#
+####PHY2 MII
+NET axi_openmac_0_ioSmi_dio_pin<1> LOC = "N17" |  IOSTANDARD = "LVCMOS25";
+NET axi_openmac_0_oSmi_clk_pin<1> LOC = "M21" |  IOSTANDARD = "LVCMOS25";
+NET axi_openmac_0_oSmi_nPhyRst_pin<1> LOC = "J18" | TIG |  IOSTANDARD = "LVCMOS25";
+#NET axi_powerlink_0_phy1_link_pin LOC = "G20" |  IOSTANDARD = "LVCMOS25";
+
+################################################################################
+# TIMING CONSTRAINTS
+## Clock groups
+### PLB and MAC clock
+NET "clk_100_0000MHz" TNM = "FAST_CLK_GRP";
+NET "clk_50_0000MHz" TNM = "SLOW_CLK_GRP";
+
+### PHY0 clock
+NET "axi_openmac_0_iMii_rxClk_pin<0>" TNM_NET = "PHY0_RXCLK_GRP";
+NET "axi_openmac_0_iMii_rxClk_pin<0>" MAXSKEW = 6 ns;
+TIMESPEC "TS_RXCLK0" = PERIOD "PHY0_RXCLK_GRP" 40 ns HIGH 20 ns;
+NET "axi_openmac_0_iMii_txClk_pin<0>" TNM_NET = "PHY0_TXCLK_GRP";
+NET "axi_openmac_0_iMii_txClk_pin<0>" MAXSKEW = 6 ns;
+TIMESPEC "TS_TXCLK0" = PERIOD "PHY0_TXCLK_GRP" 40 ns HIGH 20 ns;
+
+#### PHY1 clock
+NET "axi_openmac_0_iMii_rxClk_pin<1>" TNM_NET = "PHY1_RXCLK_GRP";
+NET "axi_openmac_0_iMii_rxClk_pin<1>" MAXSKEW = 6 ns;
+TIMESPEC "TS_RXCLK1" = PERIOD "PHY1_RXCLK_GRP" 40 ns HIGH 20 ns;
+NET "axi_openmac_0_iMii_txClk_pin<1>" TNM_NET = "PHY1_TXCLK_GRP";
+NET "axi_openmac_0_iMii_txClk_pin<1>" MAXSKEW = 6 ns;
+TIMESPEC "TS_TXCLK1" = PERIOD "PHY1_TXCLK_GRP" 40 ns HIGH 20 ns;
+
+
+
+
+### SLOW <--> FAST
+TIMESPEC TS_SLOW_FAST_TIG = FROM "FAST_CLK_GRP" TO "SLOW_CLK_GRP" TIG;
+TIMESPEC TS_FAST_SLOW_TIG = FROM "SLOW_CLK_GRP" TO "FAST_CLK_GRP" TIG;
+
+### SLOW <--> PHY0
+TIMESPEC TS_AXI_PHY0TX_TIG = FROM "SLOW_CLK_GRP" TO "PHY0_TXCLK_GRP" TIG;
+TIMESPEC TS_PHY0TX_AXI_TIG = FROM "PHY0_TXCLK_GRP" TO "SLOW_CLK_GRP" TIG;
+TIMESPEC TS_AXI_PHY0RX_TIG = FROM "SLOW_CLK_GRP" TO "PHY0_RXCLK_GRP" TIG;
+TIMESPEC TS_PHY0RX_AXI_TIG = FROM "PHY0_RXCLK_GRP" TO "SLOW_CLK_GRP" TIG;
+
+#### SLOW <--> PHY1
+TIMESPEC TS_AXI_PHY1TX_TIG = FROM "SLOW_CLK_GRP" TO "PHY1_TXCLK_GRP" TIG;
+TIMESPEC TS_PHY1TX_AXI_TIG = FROM "PHY1_TXCLK_GRP" TO "SLOW_CLK_GRP" TIG;
+TIMESPEC TS_AXI_PHY1RX_TIG = FROM "SLOW_CLK_GRP" TO "PHY1_RXCLK_GRP" TIG;
+TIMESPEC TS_PHY1RX_AXI_TIG = FROM "PHY1_RXCLK_GRP" TO "SLOW_CLK_GRP" TIG;
+
+## I/O
+### PHY0
+OFFSET = IN 30 ns VALID 20 ns AFTER "axi_openmac_0_iMii_rxClk_pin<0>";
+OFFSET = OUT 10 ns VALID 10 ns BEFORE "axi_openmac_0_iMii_txClk_pin<0>";
+
+### PHY1
+OFFSET = IN 30 ns VALID 20 ns AFTER "axi_openmac_0_iMii_rxClk_pin<1>";
+OFFSET = OUT 10 ns VALID 10 ns BEFORE "axi_openmac_0_iMii_txClk_pin<1>";
+################################################################################
+## avoid phy interface ffs mapped into iobs
+#INST "*/TX_BLOCK.fifo_dout_l*" IOB=FALSE;
+#INST "*/TX_BLOCK.fifo_valid_l*" IOB=FALSE;
+
+# ON BOARD LEDS
+
+NET PW_LEDS_6BIT_TRI_IO[0] LOC = "P17"  |  IOSTANDARD = "LVCMOS25";
+NET PW_LEDS_6BIT_TRI_IO[1] LOC = "P18"  |  IOSTANDARD = "LVCMOS25";
+NET PW_LEDS_6BIT_TRI_IO[2] LOC = "W10"  |  IOSTANDARD = "LVCMOS25";
+NET PW_LEDS_6BIT_TRI_IO[3] LOC = "V7"   |  IOSTANDARD = "LVCMOS25";
+
+NET PW_LEDS_6BIT_TRI_IO[4] LOC = "W5"  |  IOSTANDARD = "LVCMOS25";
+NET PW_LEDS_6BIT_TRI_IO[5] LOC = "W17"  |  IOSTANDARD = "LVCMOS25";
+
+#POWERLINK STATUS
+NET POWERLINK_LED_TRI_IO[0] LOC = "D15"  |  IOSTANDARD = "LVCMOS25";
+NET POWERLINK_LED_TRI_IO[1] LOC = "E15"  |  IOSTANDARD = "LVCMOS25";
+
+#POWERLINK NODESWITH -MODEL
+NET Node_Switches_I_pin[0] LOC = "W7"  |  IOSTANDARD = "LVCMOS25";
+NET Node_Switches_I_pin[1] LOC = "W6"  |  IOSTANDARD = "LVCMOS25";
