@@ -54,6 +54,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 
+#ifndef TARGET_FLUSH_DCACHE
+#define TARGET_FLUSH_DCACHE(base, range)        ((void)0)
+#endif
+
+#ifndef TARGET_INVALIDATE_DCACHE
+#define TARGET_INVALIDATE_DCACHE(base, range)   ((void)0)
+#endif
+
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
