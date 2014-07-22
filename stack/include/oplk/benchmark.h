@@ -120,6 +120,23 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         #undef BENCHMARK_MODULES
         #define BENCHMARK_MODULES           0x00000000
     #endif
+#elif (TARGET_SYSTEM == _NO_OS_) && (DEV_SYSTEM == _DEV_ARM_XILINX_EABI_)
+
+    #include "xparameters.h"
+
+    #ifdef XPAR_HOST_BENCHMARK_PIO_BASEADDR
+        #include "xgpio_l.h"
+
+        #define BENCHMARK_SET(x)    XGpio_WriteReg(XPAR_HOST_BENCHMARK_PIO_BASEADDR, 0, \
+                                    XGpio_ReadReg(XPAR_HOST_BENCHMARK_PIO_BASEADDR, 0) | (1<<x))
+        #define BENCHMARK_RESET(x)  XGpio_WriteReg(XPAR_HOST_BENCHMARK_PIO_BASEADDR, 0, \
+                                    XGpio_ReadReg(XPAR_HOST_BENCHMARK_PIO_BASEADDR, 0) & ~(1<<x))
+        #define BENCHMARK_TOGGLE(x) XGpio_WriteReg(XPAR_HOST_BENCHMARK_PIO_BASEADDR, 0, \
+                                    XGpio_ReadReg(XPAR_HOST_BENCHMARK_PIO_BASEADDR, 0) ^ (1<<x))
+    #else
+        #undef BENCHMARK_MODULES
+        #define BENCHMARK_MODULES           0x00000000
+    #endif
 #else
     // disable Benchmarking
     #undef BENCHMARK_MODULES
