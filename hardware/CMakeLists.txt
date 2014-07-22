@@ -47,6 +47,8 @@ SET(HOSTIF_BASE_DIR ${PROJECT_SOURCE_DIR}/drivers/hostinterface)
 SET(HOSTIF_BUILD_DIR ${PROJECT_BINARY_DIR}/drivers/hostinterface)
 SET(DUALPROCSHM_BASE_DIR ${OPLK_BASE_DIR}/contrib/dualprocshm)
 SET(DUALPROCSHM_BUILD_DIR ${PROJECT_BINARY_DIR}/contrib/dualprocshm)
+SET(SDFAT16_BASE_DIR ${OPLK_BASE_DIR}/contrib/sd_fat16)
+SET(SDFAT16_BUILD_DIR ${PROJECT_BINARY_DIR}/contrib/sd_fat16)
 SET(MB_UART_BUILD_DIR ${PROJECT_BINARY_DIR}/drivers/mb_uart)
 
 STRING(TOLOWER "${CMAKE_SYSTEM_NAME}" SYSTEM_NAME_DIR)
@@ -124,6 +126,14 @@ FOREACH(BOARD_DIR IN ITEMS ${BOARD_DIRS})
                         IF(DEFINED ${CFG_PREFIX}_DUALPROCSHM_ENABLE  OR (NOT ${${CFG_PREFIX}_DUALPROCSHM_ENABLE} STREQUAL ""))
                             SET(SEL_CPU_NAME ${${CFG_PREFIX}_NAME})
                             ADD_SUBDIRECTORY(${DUALPROCSHM_BASE_DIR} ${DUALPROCSHM_BUILD_DIR}/${BOARD_NAME}/${EXAMPLE_NAME}/${${CFG_PREFIX}_NAME})
+                        ENDIF()
+
+                        # Create targets for building SDCARD FAT16 library
+                        IF( NOT ${CFG_CDC_ONSDCARD} STREQUAL "" AND ${PROC_INST_NAME} STREQUAL HOST)
+                            IF(DEFINED CFG_HOST_NAME  OR (NOT ${CFG_HOST_NAME} STREQUAL ""))
+                                SET(SEL_CPU_NAME ${${CFG_PREFIX}_NAME})
+                                ADD_SUBDIRECTORY(${SDFAT16_BASE_DIR} ${SDFAT16_BUILD_DIR}/${BOARD_NAME}/${EXAMPLE_NAME}/${CFG_HOST_NAME})
+                            ENDIF()
                         ENDIF()
 
                         IF( NOT ${CFG_MB_UART} STREQUAL "" AND ${PROC_INST_NAME} STREQUAL PCP)
