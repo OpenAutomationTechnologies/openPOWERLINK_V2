@@ -48,6 +48,8 @@ getopt                        | Command line parser
 pcap                          | libPcap library implementations
 timer                         | Timer library
 trace                         | Functions for handling trace output
+dualprocshm                   | Interface library for shared memory for non-OS systems
+sd_fat16                      | FAT16 SD card access library for Zynq SoC
 
 ## Object dictionaries {#sect_directories_objdict}
 

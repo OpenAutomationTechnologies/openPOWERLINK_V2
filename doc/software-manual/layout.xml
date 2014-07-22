@@ -20,6 +20,7 @@
           <tab type="user" url="\ref page_platform_zynq" title="Xilinx Zynq"/>
           <tab type="user" url="\ref page_platform_altera-mn" title="Altera(MN)"/>
           <tab type="user" url="\ref page_platform_altera-cn" title="Altera(CN)"/>
+          <tab type="user" url="\ref page_platform_zynq" title="Xilinx Zynq SoC"/>
       </tab>
       <tab type="usergroup" title="Supported Operating Systems" url="\ref page_platforms">
           <tab type="user" url="\ref page_platform_linux" title="Linux"/>

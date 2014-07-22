@@ -49,6 +49,22 @@ Follow the steps below to cross compile your demo application for Microblaze:
       > make all
       > make install
 
+## Building for target Xilinx ARM {#sect_build_demos_build_xilinx_arm}
+
+Follow the steps below to cross compile your demo application for Microblaze:
+* Open a shell where the Xilinx ISE 14.7 Toolchain is configured.
+  - On a Windows host platform open the `ISE Design Suite [64,32] Bit Command
+    Prompt`.
+  - On a Linux host platform execute the script `<ISE_ROOT_DIR>/settings[32,64].sh>`
+    to configure your current shell.
+
+* Creating the executable
+
+      > cd <openPOWERLINK_dir>/apps/<demo_dir>/build/xilinx-arm
+      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../../cmake/toolchain-xilinx-arm-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=[Debug,Release]
+      > make all
+      > make install
+
 # Configuration Options {#sect_build_demos_options}
 
 ## Generic Options {#sect_build_demos_generic_options}
@@ -132,6 +148,24 @@ Follow the steps below to cross compile your demo application for Microblaze:
 
     The openPOWERLINK kernel part will be directly linked to the user part and
     application. (Single processor demo)
+
+
+## Xilinx ARM Specific Options  {#sect_build_demos_xilinx-arm_options}
+
+- **CFG_HW_LIB_DIR**
+
+  Path to the hardware platform install directory your application should refer to.
+  (e.g: `<openPOWERLINK_DIR>/hardware/lib/generic/arm_xilinx/<BOARD_NAME>/<DEMO_NAME>`)
+
+- **CFG_BUILD_KERNEL_STACK**
+
+  Determines how to build the kernel stack. The following option is available and
+  automatically (implicitly) pre-selected:
+
+  - __PCP Daemon using shared memory__
+
+    The openPOWERLINK kernel part will be running on a separate processor
+    communicating to application through shared memory(dual processor).
 
 ## Application Specific Options {#sect_build_demos_app_options}
 

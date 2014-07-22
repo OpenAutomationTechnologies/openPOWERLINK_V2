@@ -85,6 +85,32 @@ Follow the steps below to build the stack library on your host platform:
 The default library installation path is:
 `<openPOWERLINK_DIR>/stack/lib/generic/microblaze/<BOARD_NAME>/<DEMO_NAME>`
 
+## Xilinx ARM {#sect_build_stack_build_arm-xilinx}
+
+Follow the steps below to build the stack library on your host platform:
+* Open a shell where the Xilinx ISE 14.7 Toolchain is configured.
+  - On a Windows host platform open the `ISE Design Suite [64,32] Bit Command
+    Prompt`.
+  - On a Linux host platform execute the script `<ISE_ROOT_DIR>/settings[32,64].sh>`
+    to configure your current shell.
+
+* Creating debug libraries
+
+      > cd <openPOWERLINK_directory>\stack\build\xilinx-arm
+      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-arm-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Debug
+      > make all
+      > make install
+
+* Creating release libraries
+
+      > cd <openPOWERLINK_directory>\stack\build\xilinx-arm
+      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-arm-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Release
+      > make all
+      > make install
+
+The default library installation path is:
+`<openPOWERLINK_DIR>/stack/lib/generic/arm/<BOARD_NAME>/<DEMO_NAME>`
+
 # Configuration Options {#sect_build_stack_options}
 
 If you would like to change the configuration options you have to provide
@@ -199,3 +225,29 @@ the configuration options on the command line (-DCFG_XXX=XXX) or
     Specify the path to the hardware platform the CN library should refer to.
     The path to the hardware platform should point to the export folder of the hardware
     project. (e.g: `<openPOWERLINK_DIR>/hardware/lib/generic/microblaze/<BOARD_NAME>/<DEMO_NAME>`)
+
+- **CFG_COMPILE_LIB_MN_DRV_DUALPROCSHM**
+
+  Compile kernel part of the openPOWERLINK MN library using dual processor shared
+  memory library. The library consists of kernel part of the stack using CAL modules
+  for dual processor library.
+  - __CFG_COMPILE_LIB_MN_HW_LIB_DIR__
+
+  Specify the path to the hardware platform the MN library should refer to.
+  The path to the hardware platform should point to the export folder of the hardware
+  project. (e.g: `<openPOWERLINK_DIR>/hardware/lib/generic/microblaze/<BOARD_NAME>/<DEMO_NAME>`)
+
+## Xilinx ARM Configuration Options
+
+- **CFG_COMPILE_LIB_MN_APP_DUALPROCSHM**
+
+  Compile user part of the openPOWERLINK MN library using dual processor shared
+  memory library. The library consists of user part of the stack using CAL modules
+  for dual processor library. The library can be linked with an host application
+  designed to run on ARM processor as the host processor. It requires the kernel
+  daemon running on separate processor(PCP) sharing a memory.
+    - __CFG_COMPILE_LIB_MN_HW_LIB_DIR__
+
+  Specify the path to the hardware platform the MN library should refer to.
+  The path to the hardware platform should point to the export folder of the hardware
+  project. (e.g: `<openPOWERLINK_DIR>/hardware/lib/generic/arm_xilinx/<BOARD_NAME>/<DEMO_NAME>`)
