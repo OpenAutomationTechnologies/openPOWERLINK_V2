@@ -16,10 +16,10 @@ and all hardware near drivers.
 **NOTE:** In order to be able to debug the final user application, both, the
 Debug and the Release driver versions should be created.
 
-## Target Xilinx Microblaze {#sect_build_stack_build_microblaze}
+## Target Xilinx Zynq ARM and Microblaze {#sect_build_stack_build_xilinx}
 
 Execute the following steps below to generate the FPGA configuration and all
-hardware near drivers for the target Xilinx Microblaze.
+hardware-dependant drivers for the target Xilinx Microblaze and Zynq ARM.
 * Open a shell where the Xilinx ISE 14.7 Toolchain is configured:
   - On a Windows host platform open the `ISE Design Suite [64,32] Bit Command
     Prompt`.
@@ -28,29 +28,42 @@ hardware near drivers for the target Xilinx Microblaze.
 
 * Initialize the hardware platform build system
 
+### Xilinx Microblaze
+
       > cd openPOWERLINK/hardware/build/xilinx-microblaze
       > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../..
 
-   After this command CMake will search for available hardware platforms and
-   report all found platforms by the following messages:
+After this command CMake will search for available hardware platforms and
+report all found platforms by the following messages:
 
        Found hardware platform: DEMO_S6PLKEB_CN_SINGLE_GPIO set to OFF!
        Found hardware platform: DEMO_[BOARD_NAME]_[DEMO_NAME] set to OFF!
 
-* Building all hardware platforms with all driver libraries set to debug
+### Xilinx Zynq ARM
 
-      > cmake ../.. -DCMAKE_BUILD_TYPE=Debug -DDEMO_S6PLKEB_CN_SINGLE_GPIO=ON -DDEMO_[BOARD_NAME]_[DEMO_NAME]=ON
+      > cd openPOWERLINK/hardware/build/xilinx-zynqarm
+      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-zynqarm-eabi-gnu.cmake ../..
+
+After this command CMake will search for available hardware platforms and
+report all found platforms by the following messages:
+
+       Found hardware platform: DEMO_Z702_MN_DUAL_SHMEM_GPIO set to OFF!
+       Found hardware platform: DEMO_[BOARD_NAME]_[DEMO_NAME] set to OFF!
+
+* Building hardware platform with all driver libraries set to debug
+
+      > cmake ../.. -DCMAKE_BUILD_TYPE=Debug -DDEMO_[BOARD_NAME]_[DEMO_NAME]=ON
       > make
       > make install
 
-   This will build the hardware platform for the demos `DEMO_S6PLKEB_CN_SINGLE_GPIO`
-   and `DEMO_[BOARD_NAME]_[DEMO_NAME]`.
+  This will build the hardware platform for the demo `DEMO_[BOARD_NAME]_[DEMO_NAME]`.
+  Multiple platforms can be built together by passing each platform define to CMake.
 
-* Building all hardware platforms with all driver libraries set to release
+* Building hardware platforms with all driver libraries set to release
 
-      > cmake ../.. -DCMAKE_BUILD_TYPE=Release -DDEMO_S6PLKEB_CN_SINGLE_GPIO=ON -DDEMO_[BOARD_NAME]_[DEMO_NAME]=ON
+      > cmake ../.. -DCMAKE_BUILD_TYPE=Release -DDEMO_[BOARD_NAME]_[DEMO_NAME]=ON
       > make
       > make install
 
 The default hardware platform installation path is:
-`<openPOWERLINK_DIR>/hardware/lib/generic/microblaze/<BOARD_NAME>/<DEMO_NAME>`
+`<openPOWERLINK_DIR>/hardware/lib/generic/<CMAKE_SYSTEM_PROCESSOR>/<BOARD_NAME>/<DEMO_NAME>`

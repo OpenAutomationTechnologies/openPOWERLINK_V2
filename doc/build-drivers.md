@@ -39,6 +39,19 @@ To build the kernel driver (e.g. for a MN using the Intel 82573 network interfac
       > make
       > make install
 
+## Building a PCP daemon for Microblaze {#sect_build_drivers_build_daemon_microblaze}
+
+This section will explain the steps to build the PCP daemon for a Microblaze
+softcore processor in a dual processor design.
+The PCP daemon uses the driver library for the dual processor shared memory interface
+(`liboplkmndrv-dualprocshm`).
+
+To build the PCP daemon (e.g. for Microblaze in Zynq SoC's programming logic (PL) using shared memory interface):
+
+      > cd <openPOWERLINK_dir>/drivers/xilinx-microblaze/drv_daemon/build
+      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Release ..
+      > make
+      > make install
 
 # Configuration Options {#sect_build_drivers_options}
 
@@ -99,3 +112,26 @@ To build the kernel driver (e.g. for a MN using the Intel 82573 network interfac
   - **82573**: Intel 82573-based network interface cards (1 GBit/s)
   - **i210**:  Intel I210-based network interface cards (1 GBit/s)
   - **emacps**:Zynq Emac network interface controller (1 GBit/s)
+
+## PCP daemon on Microblaze {#sect_build_drivers_options_pcp_daemon}
+
+Following options are available for a PCP daemon of a dual processor design:
+
+- **CFG_HW_LIB_DIR**
+  Path to the hardware platform installation directory your daemon should refer to.
+  (e.g: `<openPOWERLINK_DIR>/hardware/lib/generic/microblaze/<BOARD_NAME>/<DEMO_NAME>`)
+
+- **CFG_BUILD_KERNEL_STACK**
+
+  Determines which driver library of the stack should be linked with the daemon.
+  The following options are available and automatically (implicitly) pre-selected:
+
+  - __PCP Daemon Dual-Proc__
+
+    The openPOWERLINK user part will be running on a separate processor
+    communicating with the daemon through shared memory (dual processor).
+
+  - __host-interface__
+
+    The openPOWERLINK user part will be running on a separate processor
+    communicating with the daemon through the host interface IP (dual processor).

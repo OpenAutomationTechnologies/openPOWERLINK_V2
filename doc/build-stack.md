@@ -61,7 +61,9 @@ __NOTE:__ You can also generate a Visual Studio Solution and compile the
 libraries in Visual Studio. Please refer to the CMAKE documentation for
 generating Visual Studio solution files.
 
-## Microblaze {#sect_build_stack_build_microblaze}
+## Embedded Systems (No-OS) {#sect_build_stack_build_noos}
+
+### Microblaze {#sect_build_stack_build_microblaze}
 
 Follow the steps below to build the stack library on your host platform:
 * Open a shell where the Xilinx ISE 14.7 Toolchain is configured.
@@ -86,6 +88,32 @@ Follow the steps below to build the stack library on your host platform:
 
 The default library installation path is:
 `<openPOWERLINK_DIR>/stack/lib/generic/microblaze/<BOARD_NAME>/<DEMO_NAME>`
+
+### Xilinx Zynq ARM {#sect_build_stack_build_zynqarm-xilinx}
+
+Follow the steps below to build the stack library on your host platform:
+* Open a shell where the Xilinx ISE 14.7 Toolchain is configured.
+  - On a Windows host platform open the `ISE Design Suite [64,32] Bit Command
+    Prompt`.
+  - On a Linux host platform execute the script `<ISE_ROOT_DIR>/settings[32,64].sh>`
+    to configure your current shell.
+
+* Creating debug libraries
+
+      > cd <openPOWERLINK_directory>\stack\build\xilinx-zynqarm
+      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-zynqarm-eabi-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Debug
+      > make all
+      > make install
+
+* Creating release libraries
+
+      > cd <openPOWERLINK_directory>\stack\build\xilinx-zynqarm
+      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../toolchain-xilinx-zynqarm-eabi-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Release
+      > make all
+      > make install
+
+The default library installation path is:
+`<openPOWERLINK_DIR>/stack/lib/generic/xilinx-zynqarm/<BOARD_NAME>/<DEMO_NAME>`
 
 # Configuration Options {#sect_build_stack_options}
 
@@ -190,7 +218,9 @@ the configuration options on the command line (-DCFG_XXX=XXX) or
   driver which is using the WinPCAP library for accessing the network. It is
   configured to contain only CN functionality.
 
-## Microblaze Configuration Options
+## Options for embedded systems (No-OS)
+
+### Microblaze Configuration Options
 
 - **CFG_COMPILE_LIB_CN**
 
@@ -201,3 +231,36 @@ the configuration options on the command line (-DCFG_XXX=XXX) or
     Specify the path to the hardware platform the CN library should refer to.
     The path to the hardware platform should point to the export folder of the hardware
     project. (e.g: `<openPOWERLINK_DIR>/hardware/lib/generic/microblaze/<BOARD_NAME>/<DEMO_NAME>`)
+
+- **CFG_COMPILE_LIB_MNDRV_DUALPROCSHM**
+
+  Compile openPOWERLINK MN driver library for Xilinx Microblaze. This library
+  contains the openPOWERLINK kernel layer and uses the openMAC driver for
+  accessing the network. It communicates with the openPOWERLINK user part by
+  using the dual processor shared memory library. It can be used to implement
+  an openPOWERLINK driver (PCP) on dual processor designs where the openPOWERLINK
+  user layer is running on a separate processor connected via a shared memory.
+
+  - __CFG_COMPILE_LIB_MN_HW_LIB_DIR__
+
+  Specify the path to the hardware platform the driver library should refer to.
+  The path to the hardware platform should point to the export folder of the hardware
+  project. (e.g: `<openPOWERLINK_DIR>/hardware/lib/generic/microblaze/<BOARD_NAME>/<DEMO_NAME>`)
+
+### Xilinx Zynq ARM Configuration Options
+
+- **CFG_COMPILE_LIB_MNAPP_DUALPROCSHM**
+
+  Compile openPOWERLINK MN application library for Xilinx Zynq ARM. The library
+  contains the openPOWERLINK user layer with CAL modules for accessing dual
+  processor shared memory library. The dual processor shared memory library is
+  used to communication with the user part of openPOWERLINK. The library can be
+  used to implement an application designed to run on non-OS Zynq ARM processor
+  communicating with the openPOWERLINK kernel layer running on a separate
+  processor connected via a shared memory.
+
+    - __CFG_COMPILE_LIB_MN_HW_LIB_DIR__
+
+  Specify the path to the hardware platform the application library should refer to.
+  The path to the hardware platform should point to the export folder of the hardware
+  project. (e.g: `<openPOWERLINK_DIR>/hardware/lib/generic/zynqarm/<BOARD_NAME>/<DEMO_NAME>`)

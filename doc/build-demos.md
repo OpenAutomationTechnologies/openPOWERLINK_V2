@@ -35,7 +35,9 @@ __NOTE:__ You can also generate a Visual Studio Solution and compile the
 libraries in Visual Studio. Please refer to the CMAKE documentation for
 generating Visual Studio solution files.
 
-## Building for target Microblaze {#sect_build_demos_build_microblaze}
+## Building for embedded systems (Non-OS targets) (#sect_build_demos_noos)
+
+### Building for target Microblaze {#sect_build_demos_build_microblaze}
 
 Follow the steps below to cross compile your demo application for Microblaze:
 * Open a shell where the Xilinx ISE 14.7 Toolchain is configured.
@@ -48,6 +50,22 @@ Follow the steps below to cross compile your demo application for Microblaze:
 
       > cd <openPOWERLINK_dir>/apps/<demo_dir>/build/xilinx-microblaze
       > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=[Debug,Release]
+      > make all
+      > make install
+
+### Building for target Xilinx Zynq ARM {#sect_build_demos_build_xilinx_zynqarm}
+
+Follow the steps below to cross compile your demo application for Zynq ARM:
+* Open a shell where the Xilinx ISE 14.7 Toolchain is configured.
+  - On a Windows host platform open the `ISE Design Suite [64,32] Bit Command
+    Prompt`.
+  - On a Linux host platform execute the script `<ISE_ROOT_DIR>/settings[32,64].sh>`
+    to configure your current shell.
+
+* Creating the executable
+
+      > cd <openPOWERLINK_dir>/apps/<demo_dir>/build/xilinx-zynqarm
+      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../../cmake/toolchain-xilinx-zynqarm-eabi-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=[Debug,Release]
       > make all
       > make install
 
@@ -105,7 +123,6 @@ Follow the steps below to cross compile your demo application for Microblaze:
     to a Linux kernel module. The kernel part of the openPOWERLINK stack is
     located in the separate kernel module driver.
 
-
 ## Windows Specific Options  {#sect_build_demos_windows_options}
 
 - **CFG_BUILD_KERNEL_STACK**
@@ -118,7 +135,9 @@ Follow the steps below to cross compile your demo application for Microblaze:
     The openPOWERLINK kernel part will be directly linked to the user part and
     application. WinPCAP will be used as Ethernet driver.
 
-## Microblaze Specific Options  {#sect_build_demos_microblaze_options}
+## Options for embedded platforms (Non-OS) {#sect_build_demos_noos_options}
+
+### Microblaze Specific Options  {#sect_build_demos_microblaze_options}
 
 - **CFG_HW_LIB_DIR**
 
@@ -134,6 +153,25 @@ Follow the steps below to cross compile your demo application for Microblaze:
 
     The openPOWERLINK kernel part will be directly linked to the user part and
     application. (Single processor demo)
+
+### Xilinx Zynq ARM Specific Options  {#sect_build_demos_xilinx-zynqarm_options}
+
+- **CFG_HW_LIB_DIR**
+
+  Path to the hardware platform install directory your application should refer to.
+  (e.g: `<openPOWERLINK_DIR>/hardware/lib/generic/zynqarm/<BOARD_NAME>/<DEMO_NAME>`)
+
+- **CFG_BUILD_KERNEL_STACK**
+
+  Determines how to build the kernel stack. The following option is available and
+  automatically (implicitly) pre-selected:
+
+  - __PCP Daemon using shared memory__
+
+    The library liboplk[mn,cn]app-dualprocshm.a will be used. It contains the interface
+    to the kernel daemon running on a separate processor. It uses the dual processor
+    shared memory library to communicate with the kernel part of the openPOWERLINK
+    running on the second processor.
 
 ## Application Specific Options {#sect_build_demos_app_options}
 
