@@ -68,7 +68,8 @@ tOplkError target_setDefaultGateway(UINT32 defaultGateway_p);
 ULONGLONG  target_getCurrentTimestamp(void);
 void       target_enableGlobalInterrupt(BYTE fEnable_p) SECTION_TARGET_GLOBAL_INT;
 UINT32     target_getTickCount(void);
-
+void       target_regSyncIrqHdl( void* callback_p,void* pArg_p);
+void       target_enableSyncIrq(BOOL fEnable_p);
 #ifdef __cplusplus
 }
 #endif
