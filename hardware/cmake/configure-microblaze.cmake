@@ -30,7 +30,7 @@
 
 ################################################################################
 # Handle includes
-SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/microblaze" ${CMAKE_MODULE_PATH})
+SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/xilinx" ${CMAKE_MODULE_PATH})
 SET(CMAKE_MODULE_PATH "${OPLK_BASE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
 INCLUDE(geneclipsefilelist)
