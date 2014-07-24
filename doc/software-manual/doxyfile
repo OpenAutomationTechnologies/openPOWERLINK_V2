@@ -706,6 +706,7 @@ INPUT                  = ../../stack/src \
                          ../supported-platforms/altera-mn.md \
                          ../supported-platforms/altera-cn.md \
                          ../supported-platforms/xilinx.md \
+                         ../supported-platforms/zynq.md \
                          ../../readme.md \
                          ../../license.md \
                          ../../revision.md

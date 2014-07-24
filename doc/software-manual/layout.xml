@@ -17,6 +17,7 @@
       <tab type="usergroup" title="Supported Processor Platforms" url="\ref page_platforms">
           <tab type="user" url="\ref page_platform_x86" title="Intel X86"/>
           <tab type="user" url="\ref page_platform_xilinx" title="Xilinx Microblaze"/>
+          <tab type="user" url="\ref page_platform_zynq" title="Xilinx Zynq"/>
           <tab type="user" url="\ref page_platform_altera-mn" title="Altera(MN)"/>
           <tab type="user" url="\ref page_platform_altera-cn" title="Altera(CN)"/>
       </tab>

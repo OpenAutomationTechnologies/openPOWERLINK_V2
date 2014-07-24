@@ -69,6 +69,7 @@ The following toolchain files are delivered in the main cmake directory:
 | Platform                 | Toolchain file                                   |
 | ----------------------   | ------------------------------------------------ |
 | Xilinx Microblaze        | toolchain-xilinx-microblaze-gnu.cmake            |
+| Xilinx ARM (Zynq) Linux  | toolchain-xilinx-arm-linux-eabi-gnu.cmake        |
 
 The toolchain file must be specified with the CMake option __CMAKE_TOOLCHAIN_FILE__.
 
