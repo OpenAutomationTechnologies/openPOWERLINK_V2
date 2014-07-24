@@ -1,0 +1,241 @@
+#
+#   (c) B&R, 2014
+#   (c) Kalycito Infotech Private Limited, 2014
+#
+#   Redistribution and use in source and binary forms, with or without
+#   modification, are permitted provided that the following conditions
+#   are met:
+#
+#   1. Redistributions of source code must retain the above copyright
+#      notice, this list of conditions and the following disclaimer.
+#
+#   2. Redistributions in binary form must reproduce the above copyright
+#      notice, this list of conditions and the following disclaimer in the
+#      documentation and/or other materials provided with the distribution.
+#
+#   3. Neither the name of B&R nor the names of its
+#      contributors may be used to endorse or promote products derived
+#      from this software without prior written permission. For written
+#      permission, please contact office@br-automation.com
+#
+#   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+#   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+#   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+#   FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+#   COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+#   INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+#   BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+#   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+#   CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+#   LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+#   ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+#   POSSIBILITY OF SUCH DAMAGE.
+#
+# -----------------------------------------------------------------------------
+
+BEGIN axi_hostinterface
+
+###############################################################################
+## Peripheral Options
+OPTION IPTYPE = PERIPHERAL
+OPTION IMP_NETLIST = TRUE
+OPTION HDL = VHDL
+OPTION IP_GROUP = 'Industrial Ethernet:MICROBLAZE:PPC'
+OPTION DESC = AXI_HOSTINTERFACE
+OPTION ARCH_SUPPORT_MAP = (others=DEVELOPMENT)
+
+##IO Interface
+IO_INTERFACE IO_IF = PAP, IO_TYPE = XIL_GPIO_V1
+
+###############################################################################
+## Bus Interfaces
+BUS_INTERFACE BUS = S_AXI_PCP,  BUS_STD = AXI, BUS_TYPE = SLAVE
+BUS_INTERFACE BUS = S_AXI_HOST, BUS_STD = AXI, BUS_TYPE = SLAVE, ISVALID = (gHostIfType == 0)
+BUS_INTERFACE BUS = M_AXI_PCP,  BUS_STD = AXI, BUS_TYPE = MASTER
+
+###############################################################################
+
+## Parameters for PCP Host interface
+PARAMETER C_FAMILY               = virtex6,    DT = STRING,            BUS = S_AXI_PCP
+PARAMETER C_S_AXI_PCP_MIN_SIZE   = 0x0001ffff, DT = std_logic_vector,  BUS = S_AXI_PCP
+
+PARAMETER C_S_AXI_PCP_DATA_WIDTH = 32,         DT = INTEGER,           BUS = S_AXI_PCP, ASSIGNMENT = CONSTANT
+PARAMETER C_S_AXI_PCP_ADDR_WIDTH = 32,         DT = INTEGER,           BUS = S_AXI_PCP, ASSIGNMENT = CONSTANT
+PARAMETER C_S_AXI_PCP_PROTOCOL   = AXI4LITE,   DT = STRING,            BUS = S_AXI_PCP, ASSIGNMENT = CONSTANT, TYPE = NON_HDL
+
+PARAMETER C_BASEADDR             = 0xffffffff, DT = std_logic_vector,  BUS = S_AXI_PCP, PAIR = C_HIGHADDR, ADDRESS = BASE, MIN_SIZE = 0x10000
+PARAMETER C_HIGHADDR             = 0x00000000, DT = std_logic_vector,  BUS = S_AXI_PCP, PAIR = C_BASEADDR, ADDRESS = HIGH
+
+###############################################################################
+## Generic for Host processor interface
+PARAMETER C_HOST_FAMILY           = virtex6,    DT = STRING,            BUS = S_AXI_HOST, ISVALID = (gHostIfType == 0)
+PARAMETER C_S_AXI_HOST_MIN_SIZE   = 0x0001ffff, DT = std_logic_vector,  BUS = S_AXI_HOST, ISVALID = (gHostIfType == 0)
+PARAMETER C_S_AXI_HOST_DATA_WIDTH = 32,         DT = INTEGER,           BUS = S_AXI_HOST, ASSIGNMENT = CONSTANT, ISVALID = (gHostIfType == 0)
+PARAMETER C_S_AXI_HOST_ADDR_WIDTH = 32,         DT = INTEGER,           BUS = S_AXI_HOST, ASSIGNMENT = CONSTANT, ISVALID = (gHostIfType == 0)
+PARAMETER C_S_AXI_HOST_PROTOCOL   = AXI4LITE,   DT = STRING,            BUS = S_AXI_HOST, ASSIGNMENT = CONSTANT, ISVALID = (gHostIfType == 0), TYPE = NON_HDL
+PARAMETER C_HOST_BASEADDR         = 0xffffffff, DT = std_logic_vector,  PAIR = C_HOST_HIGHADDR, ADDRESS = BASE, BUS = S_AXI_HOST, ISVALID = (gHostIfType == 0), MIN_SIZE = 0x10000
+PARAMETER C_HOST_HIGHADDR         = 0x00000000, DT = std_logic_vector,  PAIR = C_HOST_BASEADDR, ADDRESS = HIGH, BUS = S_AXI_HOST, ISVALID = (gHostIfType == 0)
+###############################################################################
+
+## Generic used for Master Bridge
+PARAMETER C_M_AXI_ADDR_WIDTH      = 32,        DT = INTEGER, ASSIGNMENT = CONSTANT, BUS = M_AXI_PCP
+PARAMETER C_M_AXI_DATA_WIDTH      = 32,        DT = INTEGER, ASSIGNMENT = CONSTANT, BUS = M_AXI_PCP
+PARAMETER C_M_AXI_PROTOCOL        = AXI4Lite,  DT = string,  ASSIGNMENT = CONSTANT, BUS = M_AXI_PCP, TYPE = NON_HDL
+PARAMETER C_M_AXI_SUPPORTS_READ   = 1,         DT = integer, ASSIGNMENT = CONSTANT, BUS = M_AXI_PCP, TYPE = NON_HDL
+PARAMETER C_M_AXI_SUPPORTS_WRITE  = 1,         DT = integer, ASSIGNMENT = CONSTANT, BUS = M_AXI_PCP, TYPE = NON_HDL
+
+###############################################################################
+## Generics used for Host Interface IP
+
+PARAMETER gHostIfType       = 1,    DT = INTEGER, RANGE = (0:1),    VALUES = (0 = "Internal AXI Bus", 1 = "Parallel Interface" )
+PARAMETER gVersionMajor     = 0xFF, DT = INTEGER, RANGE = (0:65535), ASSIGNMENT = CONSTANT
+PARAMETER gVersionMinor     = 0xFF, DT = INTEGER, RANGE = (0:65535), ASSIGNMENT = CONSTANT
+PARAMETER gVersionRevision  = 0xFF, DT = INTEGER, RANGE = (0:65535), ASSIGNMENT = CONSTANT
+PARAMETER gVersionCount     = 0x0,  DT = INTEGER, RANGE = (0:65535), ASSIGNMENT = CONSTANT
+
+###############################################################################
+##Generic for Parallel Interface IP
+PARAMETER gParallelMultiplex = 0,   DT = INTEGER, RANGE = (0:1),   ISVALID = (gHostIfType == 1),  VALUES = (0 = "Demultiplexed", 1 = "Multiplexed")
+PARAMETER gParallelDataWidth = 16,  DT = INTEGER, RANGE = (16,32), ISVALID = (gHostIfType == 1)
+
+###############################################################################
+## Buffer Managements
+PARAMETER gBaseDynBuf0  = 0x800,    DT = INTEGER, ASSIGNMENT = CONSTANT
+PARAMETER gBaseDynBuf1  = 0x01000,  DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_baseadr_dbuf1
+PARAMETER gBaseErrCntr  = 0x01800,  DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_baseadr_Errcntr
+PARAMETER gBaseTxNmtQ   = 0x02800,  DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_baseadr_TxNmtQ
+PARAMETER gBaseTxGenQ   = 0x03800,  DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_baseadr_TxGenQ
+PARAMETER gBaseTxSynQ   = 0x04800,  DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_baseadr_TxSynQ
+PARAMETER gBaseTxVetQ   = 0x05800,  DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_baseadr_TxVetQ
+PARAMETER gBaseRxVetQ   = 0x06800,  DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_baseadr_RxVetQ
+PARAMETER gBaseK2UQ     = 0x07000,  DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_baseadr_K2UQ
+PARAMETER gBaseU2KQ     = 0x09000,  DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_baseadr_U2KQ
+PARAMETER gBasePdo      = 0x0B000,  DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_baseadr_Pdo
+PARAMETER gBaseRes      = 0x0E000,  DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_baseadr_Res
+
+###############################################################################
+## Other Parameters that Used In GUI
+PARAMETER gTotalMem     = 49152,    DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_total_memory, TYPE = NON_HDL
+
+###############################################################################
+PARAMETER Size_KB_DynBuf0       = 2,     DT = INTEGER, RANGE = (2)
+PARAMETER Size_KB_DynBuf1       = 2,     DT = INTEGER, RANGE = (2)
+PARAMETER Size_B_ErrorCounter   = 3108,  DT = INTEGER, RANGE = (36,3108,1024,2048,4096,8192), VALUES = (36= "CN" , 3108 = "MN", 1024 = "1024", 2048 = "2048", 4096 = "4096", 8192 = "8192")
+PARAMETER Size_KB_TxNmtQ        = 2,     DT = INTEGER, RANGE = (1,2,4,8,16,32,64)
+PARAMETER Size_KB_TxGenQ        = 2,     DT = INTEGER, RANGE = (1,2,4,8,16,32,64)
+PARAMETER Size_KB_TxSynQ        = 2,     DT = INTEGER, RANGE = (1,2,4,8,16,32,64)
+PARAMETER Size_KB_TxVetQ        = 2,     DT = INTEGER, RANGE = (1,2,4,8,16,32,64)
+PARAMETER Size_KB_RxVetQ        = 1,     DT = INTEGER, RANGE = (1,2,4,8,16,32,64)
+PARAMETER Size_KB_K2UQ          = 8,     DT = INTEGER, RANGE = (1,2,4,8,16,32,64)
+PARAMETER Size_KB_U2KQ          = 8,     DT = INTEGER, RANGE = (1,2,4,8,16,32,64)
+PARAMETER Size_B_Pdo            = 12288, DT = INTEGER
+###############################################################################
+PARAMETER Conv_Size_KB_DynBuf0      = 2,     DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_size_dbuf0
+PARAMETER Conv_Size_KB_DynBuf1      = 2,     DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_size_dbuf0
+PARAMETER Conv_Size_B_ErrorCounter  = 3108,  DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_size_Errcntr
+PARAMETER Conv_Size_KB_TxNmtQ       = 2,     DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_size_TxNmtQ
+PARAMETER Conv_Size_KB_TxGenQ       = 2,     DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_size_TxGenQ
+PARAMETER Conv_Size_KB_TxSynQ       = 2,     DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_size_TxSynQ
+PARAMETER Conv_Size_KB_TxVetQ       = 2,     DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_size_TxVetQ
+PARAMETER Conv_Size_KB_RxVetQ       = 1,     DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_size_RxVetQ
+PARAMETER Conv_Size_KB_K2UQ         = 8,     DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_size_K2UQ
+PARAMETER Conv_Size_KB_U2KQ         = 8,     DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_size_U2KQ
+PARAMETER Conv_Size_B_Pdo           = 12288, DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_size_Pdo
+###############################################################################
+## Ports
+## Host Interface IP PCP Ports
+PORT S_AXI_PCP_ACLK     = "",       DIR = I, BUS = S_AXI_PCP, SIGIS = CLK
+PORT S_AXI_PCP_ARESETN  = ARESETN,  DIR = I, BUS = S_AXI_PCP, SIGIS = RST
+PORT S_AXI_PCP_AWADDR   = AWADDR,   DIR = I, BUS = S_AXI_PCP, VEC = [(C_S_AXI_PCP_ADDR_WIDTH-1):0], ENDIAN = LITTLE
+PORT S_AXI_PCP_AWVALID  = AWVALID,  DIR = I, BUS = S_AXI_PCP
+PORT S_AXI_PCP_WDATA    = WDATA,    DIR = I, BUS = S_AXI_PCP, VEC = [(C_S_AXI_PCP_DATA_WIDTH-1):0], ENDIAN = LITTLE
+PORT S_AXI_PCP_WSTRB    = WSTRB,    DIR = I, BUS = S_AXI_PCP, VEC = [((C_S_AXI_PCP_DATA_WIDTH/8)-1):0], ENDIAN = LITTLE
+PORT S_AXI_PCP_WVALID   = WVALID,   DIR = I, BUS = S_AXI_PCP
+PORT S_AXI_PCP_BREADY   = BREADY,   DIR = I, BUS = S_AXI_PCP
+PORT S_AXI_PCP_ARADDR   = ARADDR,   DIR = I, BUS = S_AXI_PCP, VEC = [(C_S_AXI_PCP_ADDR_WIDTH-1):0], ENDIAN = LITTLE
+PORT S_AXI_PCP_ARVALID  = ARVALID,  DIR = I, BUS = S_AXI_PCP
+PORT S_AXI_PCP_RREADY   = RREADY,   DIR = I, BUS = S_AXI_PCP
+PORT S_AXI_PCP_ARREADY  = ARREADY,  DIR = O, BUS = S_AXI_PCP
+PORT S_AXI_PCP_RDATA    = RDATA,    DIR = O, BUS = S_AXI_PCP, VEC = [(C_S_AXI_PCP_DATA_WIDTH-1):0], ENDIAN = LITTLE
+PORT S_AXI_PCP_RRESP    = RRESP,    DIR = O, BUS = S_AXI_PCP, VEC = [1:0]
+PORT S_AXI_PCP_RVALID   = RVALID,   DIR = O, BUS = S_AXI_PCP
+PORT S_AXI_PCP_WREADY   = WREADY,   DIR = O, BUS = S_AXI_PCP
+PORT S_AXI_PCP_BRESP    = BRESP,    DIR = O, BUS = S_AXI_PCP, VEC = [1:0]
+PORT S_AXI_PCP_BVALID   = BVALID,   DIR = O, BUS = S_AXI_PCP
+PORT S_AXI_PCP_AWREADY  = AWREADY,  DIR = O, BUS = S_AXI_PCP
+
+###############################################################################
+## Host Interface IP Host Internal AXI Ports
+PORT S_AXI_HOST_ACLK    = "",       DIR = I, BUS = S_AXI_HOST, SIGIS = CLK
+PORT S_AXI_HOST_ARESETN = ARESETN,  DIR = I, BUS = S_AXI_HOST, SIGIS = RST
+PORT S_AXI_HOST_AWADDR  = AWADDR,   DIR = I, BUS = S_AXI_HOST, VEC = [(C_S_AXI_PCP_ADDR_WIDTH-1):0],     ENDIAN = LITTLE
+PORT S_AXI_HOST_AWVALID = AWVALID,  DIR = I, BUS = S_AXI_HOST
+PORT S_AXI_HOST_WDATA   = WDATA,    DIR = I, BUS = S_AXI_HOST, VEC = [(C_S_AXI_PCP_DATA_WIDTH-1):0],     ENDIAN = LITTLE
+PORT S_AXI_HOST_WSTRB   = WSTRB,    DIR = I, BUS = S_AXI_HOST, VEC = [((C_S_AXI_PCP_DATA_WIDTH/8)-1):0], ENDIAN = LITTLE
+PORT S_AXI_HOST_WVALID  = WVALID,   DIR = I, BUS = S_AXI_HOST
+PORT S_AXI_HOST_BREADY  = BREADY,   DIR = I, BUS = S_AXI_HOST
+PORT S_AXI_HOST_ARADDR  = ARADDR,   DIR = I, BUS = S_AXI_HOST, VEC = [(C_S_AXI_PCP_ADDR_WIDTH-1):0],     ENDIAN = LITTLE
+PORT S_AXI_HOST_ARVALID = ARVALID,  DIR = I, BUS = S_AXI_HOST
+PORT S_AXI_HOST_RREADY  = RREADY,   DIR = I, BUS = S_AXI_HOST
+PORT S_AXI_HOST_ARREADY = ARREADY,  DIR = O, BUS = S_AXI_HOST
+PORT S_AXI_HOST_RDATA   = RDATA,    DIR = O, BUS = S_AXI_HOST, VEC = [(C_S_AXI_PCP_DATA_WIDTH-1):0],     ENDIAN = LITTLE
+PORT S_AXI_HOST_RRESP   = RRESP,    DIR = O, BUS = S_AXI_HOST, VEC = [1:0]
+PORT S_AXI_HOST_RVALID  = RVALID,   DIR = O, BUS = S_AXI_HOST
+PORT S_AXI_HOST_WREADY  = WREADY,   DIR = O, BUS = S_AXI_HOST
+PORT S_AXI_HOST_BRESP   = BRESP,    DIR = O, BUS = S_AXI_HOST, VEC = [1:0],
+PORT S_AXI_HOST_BVALID  = BVALID,   DIR = O, BUS = S_AXI_HOST
+PORT S_AXI_HOST_AWREADY = AWREADY,  DIR = O, BUS = S_AXI_HOST
+
+###############################################################################
+## Host Interface Bridge Ports
+PORT M_AXI_ACLK         = "",      DIR = I, BUS = M_AXI_PCP, SIGIS = CLK
+PORT M_AXI_ARESETN      = ARESETN, DIR = I, BUS = M_AXI_PCP, SIGIS = RST
+PORT M_AXI_AWADDR       = AWADDR,  DIR = O, BUS = M_AXI_PCP, VEC = [(C_M_AXI_ADDR_WIDTH-1):0]
+PORT M_AXI_AWPROT       = AWPROT,  DIR = O, BUS = M_AXI_PCP, VEC = [2:0]
+PORT M_AXI_AWVALID      = AWVALID, DIR = O, BUS = M_AXI_PCP
+PORT M_AXI_AWREADY      = AWREADY, DIR = I, BUS = M_AXI_PCP
+PORT M_AXI_WDATA        = WDATA,   DIR = O, BUS = M_AXI_PCP, VEC = [(C_M_AXI_DATA_WIDTH-1):0]
+PORT M_AXI_WSTRB        = WSTRB,   DIR = O, BUS = M_AXI_PCP, VEC = [((C_M_AXI_DATA_WIDTH/8) -1):0]
+PORT M_AXI_WVALID       = WVALID,  DIR = O, BUS = M_AXI_PCP
+PORT M_AXI_WREADY       = WREADY,  DIR = I, BUS = M_AXI_PCP
+PORT M_AXI_WLAST        = WLAST,   DIR = O, BUS = M_AXI_PCP
+PORT M_AXI_BRESP        = BRESP,   DIR = I, BUS = M_AXI_PCP, VEC = [1:0]
+PORT M_AXI_BVALID       = BVALID,  DIR = I, BUS = M_AXI_PCP
+PORT M_AXI_BREADY       = BREADY,  DIR = O, BUS = M_AXI_PCP
+PORT M_AXI_ARADDR       = ARADDR,  DIR = O, BUS = M_AXI_PCP, VEC = [(C_M_AXI_ADDR_WIDTH-1):0
+PORT M_AXI_ARPROT       = ARPROT,  DIR = O, BUS = M_AXI_PCP, VEC = [2:0]
+PORT M_AXI_ARVALID      = ARVALID, DIR = O, BUS = M_AXI_PCP
+PORT M_AXI_ARREADY      = ARREADY, DIR = I, BUS = M_AXI_PCP
+PORT M_AXI_RDATA        = RDATA,   DIR = I, BUS = M_AXI_PCP, VEC = [(C_M_AXI_DATA_WIDTH-1):0]
+PORT M_AXI_RRESP        = RRESP,   DIR = I, BUS = M_AXI_PCP, VEC = [1:0]
+PORT M_AXI_RVALID       = RVALID,  DIR = I, BUS = M_AXI_PCP
+PORT M_AXI_RREADY       = RREADY,  DIR = O, BUS = M_AXI_PCP
+
+###############################################################################
+## Host Interface Signals
+PORT irqSync_irq = "", DIR = I, SIGIS = INTERRUPT, SENSITIVITY = LEVEL_HIGH
+PORT irqOut_irq = "", DIR = O, SIGIS = INTERRUPT, SENSITIVITY = LEVEL_HIGH
+PORT iExtSync_exsync = "" , DIR = I
+###############################################################################
+## Parallel Interface Signals
+PORT iParHost_chipselect  = "", DIR = I, IO_IF = PAP, ISVALID = (gHostIfType == 1)
+PORT iParHost_read        = "", DIR = I, IO_IF = PAP, ISVALID = (gHostIfType == 1)
+PORT iParHost_write       = "", DIR = I, IO_IF = PAP, ISVALID = (gHostIfType == 1)
+PORT oParHost_acknowledge = "", DIR = O, IO_IF = PAP, ISVALID = (gHostIfType == 1)
+PORT iParHost_byteenable  = "", DIR = I, IO_IF = PAP, ISVALID = (gHostIfType == 1), VEC =[(gParallelDataWidth/8)-1:0]
+PORT iParHost_address     = "", DIR = I, IO_IF = PAP, ISVALID = (gHostIfType == 1), VEC =[15:0]
+
+###############################################################################
+PORT iParHost_data_io            = "", DIR = I,     IO_IF = PAP, ISVALID = (gHostIfType == 1),      VEC =[gParallelDataWidth-1:0]
+PORT oParHost_data_io            = "", DIR = O,     IO_IF = PAP, ISVALID = (gHostIfType == 1),      VEC =[gParallelDataWidth-1:0]
+PORT oParHost_data_io_tri        = "", DIR = O,     IO_IF = PAP, ISVALID = (gHostIfType == 1)
+PORT ioParHost_data_io           = "", DIR = INOUT, IO_IF = PAP, ISVALID = (gHostIfType == 1),      VEC =[gParallelDataWidth-1:0],  THREE_STATE = TRUE, TRI_I = iParHost_data_io, TRI_O = oParHost_data_io, TRI_T = oParHost_data_io_tri
+PORT iParHost_addressLatchEnable = "", DIR = I,     IO_IF = PAP, ISVALID = (gParallelMultiplex == 1)
+
+###############################################################################
+PORT iParHost_addressData_io     = "", DIR = I,     IO_IF = PAP, ISVALID = (gParallelMultiplex == 1), VEC =[gParallelDataWidth-1:0]
+PORT oParHost_addressData_io     = "", DIR = O,     IO_IF = PAP, ISVALID = (gParallelMultiplex == 1), VEC =[gParallelDataWidth-1:0]
+PORT oParHost_addressData_tri    = "", DIR = O,     IO_IF = PAP, ISVALID = (gParallelMultiplex == 1)
+PORT ioParHost_addressData_io    = "", DIR = INOUT, IO_IF = PAP, ISVALID = (gParallelMultiplex == 1), VEC =[gParallelDataWidth-1:0], THREE_STATE = TRUE, TRI_I = iParHost_addressData_io, TRI_O = oParHost_addressData_io, TRI_T = oParHost_addressData_tri
+
+END

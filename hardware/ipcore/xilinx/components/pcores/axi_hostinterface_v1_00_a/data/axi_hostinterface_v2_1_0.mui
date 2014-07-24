@@ -1,0 +1,476 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!--
+#
+#   (c) B&R, 2014
+#   (c) Kalycito Infotech Private Limited, 2014
+#
+#   Redistribution and use in source and binary forms, with or without
+#   modification, are permitted provided that the following conditions
+#   are met:
+#
+#   1. Redistributions of source code must retain the above copyright
+#      notice, this list of conditions and the following disclaimer.
+#
+#   2. Redistributions in binary form must reproduce the above copyright
+#      notice, this list of conditions and the following disclaimer in the
+#      documentation and/or other materials provided with the distribution.
+#
+#   3. Neither the name of B&R nor the names of its
+#      contributors may be used to endorse or promote products derived
+#      from this software without prior written permission. For written
+#      permission, please contact office@br-automation.com
+#
+#   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+#   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+#   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+#   FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+#   COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+#   INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+#   BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+#   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+#   CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+#   LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+#   ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+#   POSSIBILITY OF SUCH DAMAGE.
+#
+###############################################################################
+-->
+
+<!--
+      PCP Slave Interface Declarations
+-->
+
+<!DOCTYPE doc SYSTEM "../../ipdialog.dtd" [
+      <!ENTITY C_S_AXI_PCP_ADDR_WIDTH '
+      <widget id="C_S_AXI_PCP_ADDR_WIDTH">
+            <key>C_S_AXI_PCP_ADDR_WIDTH</key>
+            <label>Slave AXI Address Width: </label>
+            <tip></tip>
+      </widget>
+      '>
+      <!ENTITY C_S_AXI_PCP_DATA_WIDTH '
+      <widget id="C_S_AXI_PCP_DATA_WIDTH">
+            <key>C_S_AXI_PCP_DATA_WIDTH</key>
+            <label>Slave AXI Data Width: </label>
+            <tip></tip>
+      </widget>
+      '>
+      <!ENTITY C_S_AXI_PCP_PROTOCOL '
+      <widget id="C_S_AXI_PCP_PROTOCOL">
+            <key>C_S_AXI_PCP_PROTOCOL</key>
+            <label>Slave AXI Protocol: </label>
+            <tip></tip>
+      </widget>
+      '>
+      <!ENTITY C_S_AXI_PCP_MIN_SIZE '
+      <widget id="C_S_AXI_PCP_MIN_SIZE">
+            <key>C_S_AXI_PCP_MIN_SIZE</key>
+            <label>Slave AXI Min Size:</label>
+            <tip></tip>
+      </widget>
+      '>
+
+      <!ENTITY C_BASEADDR '
+      <widget id="C_BASEADDR">
+            <key>C_BASEADDR</key>
+            <label>Slave Base Address: </label>
+            <tip></tip>
+      </widget>
+      '>
+      <!ENTITY C_HIGHADDR '
+      <widget id="C_HIGHADDR">
+            <key>C_HIGHADDR</key>
+            <label>Slave High Address:</label>
+            <tip></tip>
+      </widget>
+      '>
+<!--
+      AP Slave Interface Declarations
+-->
+      <!ENTITY C_HOST_BASEADDR '
+      <widget id="C_HOST_BASEADDR">
+            <key>C_HOST_BASEADDR</key>
+            <label>Host AXI Salve Base Address: </label>
+            <tip></tip>
+      </widget>
+      '>
+      <!ENTITY C_HOST_HIGHADDR '
+      <widget id="C_HOST_HIGHADDR">
+            <key>C_HOST_HIGHADDR</key>
+            <label>Host AXI Salve High Address: </label>
+            <tip></tip>
+      </widget>
+      '>
+      <!ENTITY C_S_AXI_HOST_ADDR_WIDTH '
+      <widget id="C_S_AXI_HOST_ADDR_WIDTH">
+            <key>C_S_AXI_HOST_ADDR_WIDTH</key>
+            <label>Host AXI Salve Address Width: </label>
+            <tip></tip>
+      </widget>
+      '>
+      <!ENTITY C_S_AXI_HOST_DATA_WIDTH '
+      <widget id="C_S_AXI_HOST_DATA_WIDTH">
+            <key>C_S_AXI_HOST_DATA_WIDTH</key>
+            <label>Host AXI Salve Data Width:</label>
+            <tip></tip>
+      </widget>
+      '>
+<!--
+      PCP Master Bridge Interface Declarations
+ -->
+      <!ENTITY C_M_AXI_ADDR_WIDTH '
+      <widget id="C_M_AXI_ADDR_WIDTH">
+            <key>C_M_AXI_ADDR_WIDTH</key>
+            <label>Master Address Width:</label>
+            <tip></tip>
+      </widget>
+      '>
+      <!ENTITY C_M_AXI_DATA_WIDTH '
+      <widget id="C_M_AXI_DATA_WIDTH">
+            <key>C_M_AXI_DATA_WIDTH</key>
+            <label>Master Data Width: </label>
+            <tip></tip>
+      </widget>
+      '>
+
+<!--
+      Declaration for Getting Size of Parallel Interface Buffers from User to Calculate Base Address
+-->
+
+      <!ENTITY Size_KB_DynBuf0 '
+      <widget id="Size_KB_DynBuf0">
+            <key>Size_KB_DynBuf0</key>
+            <label>Dynamic Buffer for RX Virtual Ethernet Queue: </label>
+            <tip>[CDATA[Kilobytes]]</tip>
+      </widget>
+      '>
+
+      <!ENTITY Size_KB_DynBuf1 '
+      <widget id="Size_KB_DynBuf1">
+            <key>Size_KB_DynBuf1</key>
+            <label>Dynamic Buffer for Kernel-to-User Queue: </label>
+            <tip>[CDATA[Kilobytes]]</tip>
+      </widget>
+      '>
+
+      <!ENTITY Size_B_ErrorCounter '
+      <widget id="Size_B_ErrorCounter">
+            <key>Size_B_ErrorCounter</key>
+            <label>Error Counter: </label>
+            <tip><![CDATA[Bytes]]></tip>
+      </widget>
+      '>
+      <!ENTITY Size_KB_TxNmtQ '
+      <widget id="Size_KB_TxNmtQ">
+            <key>Size_KB_TxNmtQ</key>
+            <label>TX NMT Queue: </label>
+            <tip><![CDATA[Kilobytes]]></tip>
+      </widget>
+      '>
+      <!ENTITY Size_KB_TxGenQ '
+      <widget id="Size_KB_TxGenQ">
+            <key>Size_KB_TxGenQ</key>
+            <label>TX Generic Queue: </label>
+            <tip><![CDATA[Kilobytes]]></tip>
+      </widget>
+      '>
+      <!ENTITY Size_KB_TxSynQ '
+      <widget id="Size_KB_TxSynQ">
+            <key>Size_KB_TxSynQ</key>
+            <label>TX Sync Queue: </label>
+            <tip><![CDATA[Kilobytes]]></tip>
+      </widget>
+      '>
+      <!ENTITY Size_KB_TxVetQ '
+      <widget id="Size_KB_TxVetQ">
+            <key>Size_KB_TxVetQ</key>
+            <label>TX Virtual Ethernet Queue</label>
+            <tip><![CDATA[Kilobytes]]></tip>
+      </widget>
+      '>
+      <!ENTITY Size_KB_RxVetQ '
+      <widget id="Size_KB_RxVetQ">
+            <key>Size_KB_RxVetQ</key>
+            <label>RX Virtual Ethernet Queue: </label>
+            <tip><![CDATA[Kilobytes]]></tip>
+      </widget>
+      '>
+      <!ENTITY Size_KB_K2UQ '
+      <widget id="Size_KB_K2UQ">
+            <key>Size_KB_K2UQ</key>
+            <label>Kernel-to-User Queue: </label>
+            <tip><![CDATA[Kilobytes]]></tip>
+      </widget>
+      '>
+      <!ENTITY Size_KB_U2KQ '
+      <widget id="Size_KB_U2KQ">
+            <key>Size_KB_U2KQ</key>
+            <label>User-to-Kernel Queue: </label>
+            <tip><![CDATA[Kilobytes]]></tip>
+      </widget>
+      '>
+      <!ENTITY Size_B_Tpdo '
+      <widget id="Size_B_Tpdo">
+            <key>Size_B_Tpdo</key>
+            <label>Transmit Process Data Objects (TPDO): </label>
+            <tip><![CDATA[Bytes]]></tip>
+      </widget>
+      '>
+      <!ENTITY Size_B_Rpdo '
+      <widget id="Size_B_Rpdo">
+            <key>Size_B_Rpdo</key>
+            <label>Receive Process Data Objects (RPDO): </label>
+            <tip><![CDATA[Bytes]]></tip>
+      </widget>
+      '>
+<!--
+      Parallel Interface Generics
+-->
+
+      <!ENTITY gVersionMajor '
+      <widget id="gVersionMajor">
+            <key>gVersionMajor</key>
+            <label>gVersionMajor </label>
+            <tip></tip>
+      </widget>
+      '>
+      <!ENTITY gVersionMinor '
+      <widget id="gVersionMinor">
+            <key>gVersionMinor</key>
+            <label>gVersionMinor </label>
+            <tip></tip>
+      </widget>
+      '>
+      <!ENTITY gVersionRevision '
+      <widget id="gVersionRevision">
+            <key>gVersionRevision</key>
+            <label>gVersionRevision </label>
+            <tip></tip>
+      </widget>
+      '>
+      <!ENTITY gVersionCount '
+      <widget id="gVersionCount">
+            <key>gVersionCount</key>
+            <label>gVersionCount </label>
+            <tip></tip>
+      </widget>
+      '>
+      <!ENTITY gHostIfType '
+      <widget id="gHostIfType">
+            <key>gHostIfType</key>
+            <label>Host Interface Configuration</label>
+            <tip><![CDATA[1:Parallel Interface 0: Internal AXI Bus.]]></tip>
+      </widget>
+      '>
+      <!ENTITY gParallelDataWidth '
+      <widget id="gParallelDataWidth">
+            <key>gParallelDataWidth</key>
+            <label>Data Width</label>
+            <tip><![CDATA[Bits]]></tip>
+      </widget>
+      '>
+      <!ENTITY gParallelMultiplex '
+      <widget id="gParallelMultiplex">
+            <key>gParallelMultiplex</key>
+            <label>Address-/Data-Bus Multiplexing </label>
+            <tip><![CDATA[Kilobytes]]></tip>
+      </widget>
+      '>
+
+      <!ENTITY gBaseErrCntr '
+      <widget id="gBaseErrCntr">
+            <key>gBaseErrCntr</key>
+            <label>gBaseErrCntr</label>
+            <tip><![CDATA[Bytes]]></tip>
+      </widget>
+      '>
+      <!ENTITY gBaseTxNmtQ '
+      <widget id="gBaseTxNmtQ">
+            <key>gBaseTxNmtQ</key>
+            <label>gBaseTxNmtQ</label>
+            <tip><![CDATA[Kilobytes]]></tip>
+      </widget>
+      '>
+      <!ENTITY gBaseTxGenQ '
+      <widget id="gBaseTxGenQ">
+            <key>gBaseTxGenQ</key>
+            <label>gBaseTxGenQ</label>
+            <tip><![CDATA[Kilobytes]]></tip>
+      </widget>
+      '>
+      <!ENTITY gBaseTxSynQ '
+      <widget id="gBaseTxSynQ">
+            <key>gBaseTxSynQ</key>
+            <label>gBaseTxSynQ</label>
+            <tip><![CDATA[Kilobytes]]></tip>
+      </widget>
+      '>
+      <!ENTITY gBaseTxVetQ '
+      <widget id="gBaseTxVetQ">
+            <key>gBaseTxVetQ</key>
+            <label>gBaseTxVetQ</label>
+            <tip><![CDATA[Kilobytes]]></tip>
+      </widget>
+      '>
+      <!ENTITY gBaseRxVetQ '
+      <widget id="gBaseRxVetQ">
+            <key>gBaseRxVetQ</key>
+            <label>gBaseRxVetQ</label>
+            <tip><![CDATA[Kilobytes]]></tip>
+      </widget>
+      '>
+      <!ENTITY gBaseK2UQ '
+      <widget id="gBaseK2UQ">
+            <key>gBaseK2UQ</key>
+            <label>gBaseK2UQ</label>
+            <tip><![CDATA[Kilobytes]]></tip>
+      </widget>
+      '>
+      <!ENTITY gBaseU2KQ '
+      <widget id="gBaseU2KQ">
+            <key>gBaseU2KQ</key>
+            <label>gBaseU2KQ</label>
+            <tip><![CDATA[Kilobytes]]></tip>
+      </widget>
+      '>
+      <!ENTITY gBaseTpdo '
+      <widget id="gBaseTpdo">
+            <key>gBaseTpdo</key>
+            <label>gBaseTpdo</label>
+            <tip><![CDATA[Bytes]]></tip>
+      </widget>
+      '>
+      <!ENTITY gBaseRpdo '
+      <widget id="gBaseRpdo">
+            <key>gBaseRpdo</key>
+            <label>gBaseRpdo</label>
+            <tip><![CDATA[Bytes]]></tip>
+      </widget>
+      '>
+      <!ENTITY gBaseRes '
+      <widget id="gBaseRes">
+            <key>gBaseRes</key>
+            <label>gBaseRes</label>
+            <tip><![CDATA[Kilobytes]]></tip>
+      </widget>
+      '>
+      <!ENTITY gBaseDynBuf0 '
+      <widget id="gBaseDynBuf0">
+            <key>gBaseDynBuf0</key>
+            <label>gBaseDynBuf0</label>
+            <tip><![CDATA[Kilobytes]]></tip>
+      </widget>
+      '>
+
+      <!ENTITY gBaseDynBuf1 '
+      <widget id="gBaseDynBuf1">
+            <key>gBaseDynBuf1</key>
+            <label>gBaseDynBuf1</label>
+            <tip><![CDATA[Kilobytes]]></tip>
+      </widget>
+      '>
+<!--
+      Total Memory Allotted for Buffers
+-->
+
+      <!ENTITY gTotalMem '
+      <widget id="gTotalMem">
+            <key>gTotalMem</key>
+            <label>Total Memory Size</label>
+            <tip><![CDATA[bytes]]></tip>
+      </widget>
+      '>
+]>
+
+<doc>
+      <view id="General">
+            <display>General</display>
+            <group id="PCP AXI Slave Configurations">
+                  <display>PCP Slave Configurations</display>
+                  <item>&C_BASEADDR;</item>
+                  <item>&C_HIGHADDR;</item>
+            </group>
+            <group id="Host AXI Slave Configurations">
+                  <display>Host Slave Configurations</display>
+                  <item>&C_HOST_BASEADDR;</item>
+                  <item>&C_HOST_HIGHADDR;</item>
+                  <item>&C_S_AXI_HOST_ADDR_WIDTH;</item>
+                  <item>&C_S_AXI_HOST_DATA_WIDTH;</item>
+            </group>
+            <group id="Master Bridge Configurations">
+                  <display>Master Configuration</display>
+                  <item>&C_M_AXI_ADDR_WIDTH;</item>
+                  <item>&C_M_AXI_DATA_WIDTH;</item>
+            </group>
+            <group id="Host Processor Interface">
+                  <display>Host Processor Interface</display>
+                  <item>&gHostIfType;</item>
+                  <item>&gParallelDataWidth;</item>
+                  <item>&gParallelMultiplex;</item>
+            </group>
+      </view>
+      <view id="Buffer Configuration">
+            <display>Buffer Configuration</display>
+            <group id="Properties">
+                  <display>Properties</display>
+                  <item>&gVersionMajor;</item>
+                  <item>&gVersionMinor;</item>
+                  <item>&gVersionRevision;</item>
+                  <item>&gVersionCount;</item>
+            </group>
+            <group id="Queues">
+            <display>Queues</display>
+                  <item>&Size_KB_TxNmtQ;</item>
+                  <item>&Size_KB_TxGenQ;</item>
+                  <item>&Size_KB_TxSynQ;</item>
+                  <item>&Size_KB_TxVetQ;</item>
+                  <item>&Size_KB_RxVetQ;</item>
+                  <item>&Size_KB_K2UQ;</item>
+                  <item>&Size_KB_U2KQ;</item>
+              </group>
+            <group id="PDO">
+            <display>PDO</display>
+                  <item>&Size_B_Tpdo;</item>
+                  <item>&Size_B_Rpdo;</item>
+            </group>
+            <group id="Others">
+            <display>Others</display>
+                  <item>&Size_KB_DynBuf0;</item>
+                  <item>&Size_KB_DynBuf1;</item>
+                  <item>&Size_B_ErrorCounter;</item>
+            </group>
+      </view>
+      <view id = "Information">
+            <display>Information</display>
+            <group id = "Memory Mapping">
+            <display>Memory Mapping</display>
+            </group>
+            <group id = "Total Memory">
+            <display>Total Memory</display>
+                  <item>&gTotalMem;</item>
+            </group>
+            <group id = "Queues">
+            <display>Base Address of Queues</display>
+                  <item>&gBaseTxNmtQ;</item>
+                  <item>&gBaseTxGenQ;</item>
+                  <item>&gBaseTxSynQ;</item>
+                  <item>&gBaseTxVetQ;</item>
+                  <item>&gBaseRxVetQ;</item>
+                  <item>&gBaseK2UQ;</item>
+                  <item>&gBaseU2KQ;</item>
+            </group>
+            <group id = "PDO">
+            <display>Base Address of PDO</display>
+                  <item>&gBaseTpdo;</item>
+                  <item>&gBaseRpdo;</item>
+            </group>
+            <group id = "Others">
+            <display>Base Address of Others</display>
+                  <item>&gBaseDynBuf0;</item>
+                  <item>&gBaseDynBuf1;</item>
+                  <item>&gBaseErrCntr;</item>
+                  <item>&gBaseRes;</item>
+            </group>
+      </view>
+</doc>
