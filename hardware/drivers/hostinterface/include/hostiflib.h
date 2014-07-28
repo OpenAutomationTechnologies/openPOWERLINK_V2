@@ -63,6 +63,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 #define HOSTIF_USER_INIT_PAR_SIZE   1024    ///< User specific initialization size
+#define HOSTIF_DYNBUF_COUNT         2       ///< number of supported dynamic buffers
 
 //------------------------------------------------------------------------------
 // typedef
