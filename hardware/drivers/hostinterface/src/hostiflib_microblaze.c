@@ -92,12 +92,12 @@ int hostiflib_registerHandler(u32 baseAddress_p,
 
 //------------------------------------------------------------------------------
 /**
-\brief  Read functions with Invalidation
+\brief  32 bit read functions with Invalidation
 
 \param  base_p      Base address to be read
 \param  offset_p    Offset to be read
 
-\return Read data of the given type
+\return 32 bit read data of the given type
  */
 //------------------------------------------------------------------------------
 u32 mb_read32(u32 base_p, u32 offset_p)
@@ -107,6 +107,16 @@ u32 mb_read32(u32 base_p, u32 offset_p)
     return Xil_In32(address);
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  16 bit read functions with Invalidation
+
+\param  base_p      Base address to be read
+\param  offset_p    Offset to be read
+
+\return 16 bit read data of the given type
+ */
+//------------------------------------------------------------------------------
 u16 mb_read16(u32 base_p, u32 offset_p)
 {
     u32    address = (u32) base_p + offset_p;
@@ -114,6 +124,16 @@ u16 mb_read16(u32 base_p, u32 offset_p)
     return Xil_In16(address);
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  8 bit read functions with Invalidation
+
+\param  base_p      Base address to be read
+\param  offset_p    Offset to be read
+
+\return 8 bit read data of the given type
+ */
+//------------------------------------------------------------------------------
 u8 mb_read8(u32 base_p, u32 offset_p)
 {
     u32    address = (u32) base_p + offset_p;
@@ -123,11 +143,11 @@ u8 mb_read8(u32 base_p, u32 offset_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Write functions with flushing
+\brief  32 bit write functions with flushing
 
 \param  base_p      Base address to writer
 \param  offset_p    Offset to write
-\param  val_p       Value to write
+\param  val_p       32 bit value to write
  */
 //------------------------------------------------------------------------------
 void mb_write32(u32 base_p, u32 offset_p, u32 val_p)
@@ -137,6 +157,15 @@ void mb_write32(u32 base_p, u32 offset_p, u32 val_p)
     microblaze_flush_dcache_range(address, 4);
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  16 bit write functions with flushing
+
+\param  base_p      Base address to writer
+\param  offset_p    Offset to write
+\param  val_p       16 bit value to write
+ */
+//------------------------------------------------------------------------------
 void mb_write16(u32 base_p, u32 offset_p, u16 val_p)
 {
     u32    address = (u32) base_p + offset_p;
@@ -144,6 +173,15 @@ void mb_write16(u32 base_p, u32 offset_p, u16 val_p)
     microblaze_flush_dcache_range(address, 2);
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  8 bit write functions with flushing
+
+\param  base_p      Base address to writer
+\param  offset_p    Offset to write
+\param  val_p       8 bit value to write
+ */
+//------------------------------------------------------------------------------
 void mb_write8(u32 base_p, u32 offset_p, u8 val_p)
 {
     u32    address = (u32) base_p + offset_p;

@@ -49,7 +49,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //=============================================================================
 //  F U N C T I O N    P R O T O T Y P E S
 //=============================================================================
-// TODO: Move this to a target specific file
 int     hostiflib_registerHandler(u32 baseAddress_p,
                                   int interruptId_p,
                                   XInterruptHandler handler_p,
