@@ -88,9 +88,9 @@ PARAMETER C_M_AXI_SUPPORTS_WRITE  = 1,         DT = integer, ASSIGNMENT = CONSTA
 ## Generics used for Host Interface IP
 
 PARAMETER gHostIfType       = 1,    DT = INTEGER, RANGE = (0:1),    VALUES = (0 = "Internal AXI Bus", 1 = "Parallel Interface" )
-PARAMETER gVersionMajor     = 0xFF, DT = INTEGER, RANGE = (0:65535), ASSIGNMENT = CONSTANT
-PARAMETER gVersionMinor     = 0xFF, DT = INTEGER, RANGE = (0:65535), ASSIGNMENT = CONSTANT
-PARAMETER gVersionRevision  = 0xFF, DT = INTEGER, RANGE = (0:65535), ASSIGNMENT = CONSTANT
+PARAMETER gVersionMajor     = 0x1,  DT = INTEGER, RANGE = (0:65535), ASSIGNMENT = CONSTANT
+PARAMETER gVersionMinor     = 0x0,  DT = INTEGER, RANGE = (0:65535), ASSIGNMENT = CONSTANT
+PARAMETER gVersionRevision  = 0x0,  DT = INTEGER, RANGE = (0:65535), ASSIGNMENT = CONSTANT
 PARAMETER gVersionCount     = 0x0,  DT = INTEGER, RANGE = (0:65535), ASSIGNMENT = CONSTANT
 
 ###############################################################################
