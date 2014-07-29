@@ -142,3 +142,10 @@ Follow the steps below to cross compile your demo application for Microblaze:
   - __Demo_3CN_BC0083__: Demo project with 3CNs using node ID 1, 32, 110. It uses
                        a modified XDD to work with a B&R BC0083 bus controller
                        together with a digital input and digital output module.
+
+- **CFG_CFM**
+
+  Determines if the application uses the configuration manager (CFM).
+
+  This option must be enabled if the used openPOWERLINK stack is build with
+  configuration manager functionality!

@@ -48,7 +48,7 @@ ${OPLK_BASE_DIR}/stack/proj/generic/liboplkmnapp-hostif \
 "
 
 CFG_APP_ARGS="\
---set APP_CFLAGS_DEFINED_SYMBOLS=-G4 \
+--set APP_CFLAGS_DEFINED_SYMBOLS=-G4 -DCONFIG_INCLUDE_CFM\
 "
 
 APP_OPT_LEVEL=-O2

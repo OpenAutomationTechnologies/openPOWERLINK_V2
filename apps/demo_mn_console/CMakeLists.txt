@@ -48,6 +48,8 @@ SET(CFG_DEMO_PROJECT "Demo_3CN" CACHE STRING
         "Valid projects are Demo_3CN, Demo_3CN_BC0083")
 SET_PROPERTY(CACHE CFG_DEMO_PROJECT PROPERTY STRINGS Demo_3CN Demo_3CN_BC0083)
 
+SET(CFG_CFM ON CACHE BOOL "Use Configuration Manager (CFM)")
+
 # Set generic sources and include directories for this demo
 SET(DEMO_SOURCES
     ${DEMO_SOURCE_DIR}/main.c
@@ -65,6 +67,10 @@ ADD_DEFINITIONS(-DCONFIG_MN)
 
 ################################################################################
 # Setup compile definitions depending on configuration
+
+IF(CFG_CFM)
+    ADD_DEFINITIONS(-DCONFIG_INCLUDE_CFM)
+ENDIF()
 
 # PCAP is used for directlink or userspace daemon
 IF (CFG_KERNEL_STACK_DIRECTLINK OR CFG_KERNEL_STACK_USERSPACE_DAEMON)
