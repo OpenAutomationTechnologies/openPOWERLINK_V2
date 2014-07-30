@@ -54,9 +54,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <hostiflib-mem.h> // Only Pcp has access to the ipcore settings
 #else
 /* This is the host interface version for host. */
-#define HOSTIF_VERSION_MAJOR            0xFF
-#define HOSTIF_VERSION_MINOR            0xFF
-#define HOSTIF_VERSION_REVISION         0xFF
+#define HOSTIF_VERSION_MAJOR            1
+#define HOSTIF_VERSION_MINOR            0
+#define HOSTIF_VERSION_REVISION         0
 #endif
 
 //------------------------------------------------------------------------------
