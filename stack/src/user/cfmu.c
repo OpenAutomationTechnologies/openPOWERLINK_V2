@@ -304,12 +304,12 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtS
 
     if (pNodeInfo->cfmState != kCfmStateIdle)
     {
-        // Set node CFM state
-        pNodeInfo->cfmState = kCfmStateInternalAbort;
-
         // Send abort if SDO command is not undefined
         if (pNodeInfo->sdoComConHdl != UINT_MAX)
         {
+            // Set node CFM state to an intermediate state to catch the SDO callback
+            pNodeInfo->cfmState = kCfmStateInternalAbort;
+
             ret = sdocom_abortTransfer(pNodeInfo->sdoComConHdl, SDO_AC_DATA_NOT_TRANSF_DUE_LOCAL_CONTROL);
             if (ret != kErrorOk)
                 return ret;
@@ -323,6 +323,9 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtS
                 return ret;
             }
         }
+
+        // Set node CFM state to idle
+        pNodeInfo->cfmState = kCfmStateIdle;
     }
 
     if ((nodeEvent_p == kNmtNodeEventFound) ||

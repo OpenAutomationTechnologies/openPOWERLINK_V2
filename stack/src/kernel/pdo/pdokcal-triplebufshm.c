@@ -129,6 +129,7 @@ The function initializes the memory needed to transfer PDOs.
 tOplkError pdokcal_initPdoMem(tPdoChannelSetup* pPdoChannels, size_t rxPdoMemSize_p,
                               size_t txPdoMemSize_p)
 {
+    BYTE*   pMem;
     size_t  pdoMemSize;
 
     pdoMemSize = txPdoMemSize_p + rxPdoMemSize_p;
@@ -137,10 +138,12 @@ tOplkError pdokcal_initPdoMem(tPdoChannelSetup* pPdoChannels, size_t rxPdoMemSiz
         pdokcal_freeMem((BYTE*)pPdoMem_l, pdoMemRegionSize_l);
 
     pdoMemRegionSize_l = (pdoMemSize * 3) + sizeof(tPdoMemRegion);
-    if (pdokcal_allocateMem(pdoMemRegionSize_l, (BYTE**)&pPdoMem_l) != kErrorOk)
+    if (pdokcal_allocateMem(pdoMemRegionSize_l, &pMem) != kErrorOk)
     {
         return kErrorNoResource;
     }
+
+    pPdoMem_l = (tPdoMemRegion*)pMem;
 
     pTripleBuf_l[0] = (BYTE*)pPdoMem_l + sizeof(tPdoMemRegion);
     pTripleBuf_l[1] = pTripleBuf_l[0] + pdoMemSize;

@@ -160,13 +160,10 @@ the memory block access functions.
 //------------------------------------------------------------------------------
 void ctrlkcal_exit(void)
 {
-    tHostifReturn hifRet;
-
     instance_l.pInitParamBase = NULL;
 
-    hifRet = hostif_delete(instance_l.hifInstance);
-    if (hifRet != kHostifSuccessful)
-        DEBUG_LVL_ERROR_TRACE("Could not delete Host Inetrface (0x%X)\n", hifRet);
+    hostif_delete(instance_l.hifInstance);
+    // ignore ret, because we shutdown anyway
 }
 
 //------------------------------------------------------------------------------

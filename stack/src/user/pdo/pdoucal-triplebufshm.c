@@ -112,6 +112,7 @@ The function initializes the memory needed to transfer PDOs.
 tOplkError pdoucal_initPdoMem(tPdoChannelSetup* pPdoChannels_p, size_t rxPdoMemSize_p,
                               size_t txPdoMemSize_p)
 {
+    BYTE*           pMem = NULL;
     size_t          pdoMemSize;
 
     UNUSED_PARAMETER(pPdoChannels_p);
@@ -126,13 +127,14 @@ tOplkError pdoucal_initPdoMem(tPdoChannelSetup* pPdoChannels_p, size_t rxPdoMemS
     memSize_l = (pdoMemSize * 3) + sizeof(tPdoMemRegion);
     if (memSize_l != 0)
     {
-        if (pdoucal_allocateMem(memSize_l, (BYTE**)&pPdoMem_l) != kErrorOk)
+        if (pdoucal_allocateMem(memSize_l, &pMem) != kErrorOk)
         {
             DEBUG_LVL_ERROR_TRACE("%s() Allocating PDO memory failed!\n", __func__);
-            pPdoMem_l = NULL;
             return kErrorNoResource;
         }
     }
+
+    pPdoMem_l = (tPdoMemRegion*)pMem;
 
     pTripleBuf_l[0] = (BYTE*)pPdoMem_l + sizeof(tPdoMemRegion);
     pTripleBuf_l[1] = pTripleBuf_l[0] + pdoMemSize;

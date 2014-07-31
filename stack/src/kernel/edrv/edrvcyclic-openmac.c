@@ -305,7 +305,7 @@ This function starts the cycles.
 tOplkError edrvcyclic_startCycle(void)
 {
     tOplkError  ret = kErrorOk;
-    INT         i;
+    UINT        i;
 
     if (instance_l.cycleLengthUs == 0)
     {
@@ -418,7 +418,7 @@ static tOplkError timerHdlCycleCb(tTimerEventArg* pEventArg_p)
     UINT32      macTime1;
     UINT32      macTime2;
     UINT32      filterAccumulate;
-    INT         i;
+    UINT        i;
 
     if (pEventArg_p->timerHdl != instance_l.timerHdlCycle)
     {   // zombie callback
