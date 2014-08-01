@@ -47,6 +47,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplkcfg.h>                 // Stack configuration file
 #include <common/defaultcfg.h>
 #include <common/featureflags.h>
+#include <common/section.h>
 
 //------------------------------------------------------------------------------
 // const defines

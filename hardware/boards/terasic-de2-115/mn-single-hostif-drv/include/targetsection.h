@@ -1,8 +1,8 @@
 /**
 ********************************************************************************
-\file   oplk/section-nios2.h
+\file   targetsection.h
 
-\brief  Macros for special function linking for Altera Nios II
+\brief  Special function linking for TERASIC DE2-115 Eval Board MN driver
 
 This header file defines macros for Altera Nios II targets to link specific
 functions to tightly-coupled memory.
@@ -35,8 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
-#ifndef _INC_oplk_section_nios2_H_
-#define _INC_oplk_section_nios2_H_
+#ifndef _INC_targetsection_H_
+#define _INC_targetsection_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -47,13 +47,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 #ifndef ALT_TCIMEM_SIZE
-    #define ALT_TCIMEM_SIZE                     0
+#define ALT_TCIMEM_SIZE                     0
 #endif
 
-#define ALT_INTERNAL_RAM    __attribute__((section(".tc_i_mem")))
-
 #ifdef NDEBUG
-#ifdef CONFIG_MN
+#define ALT_INTERNAL_RAM    __attribute__((section(".tc_i_mem")))
+#else
+#define ALT_INTERNAL_RAM
+#endif
 
 #define SECTION_CIRCBUF_WRITE_DATA          ALT_INTERNAL_RAM
 #define SECTION_CIRCBUF_WRITE_MULT_DATA     ALT_INTERNAL_RAM
@@ -97,27 +98,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define SECTION_TARGET_GLOBAL_INT           ALT_INTERNAL_RAM
 #define SECTION_ERRHNDK_DECRCNTERS          ALT_INTERNAL_RAM
 
-#else
-
-#if (ALT_TCIMEM_SIZE >= 2048)
-#define SECTION_EVENT_GET_HDL_FOR_SINK      ALT_INTERNAL_RAM
-#define SECTION_EVENTK_POST                 ALT_INTERNAL_RAM
-#define SECTION_EVENTK_PROCESS              ALT_INTERNAL_RAM
-#define SECTION_EDRVOPENMAC_IRQ_HDL         ALT_INTERNAL_RAM
-#define SECTION_SYNCTIMER_FINDTIMER         ALT_INTERNAL_RAM
-#define SECTION_SYNCTIMER_CONFTIMER         ALT_INTERNAL_RAM
-#define SECTION_OMETHLIB_RX_IRQ_HDL         ALT_INTERNAL_RAM
-#define SECTION_OMETHLIB_RXTX_IRQ_MUX       ALT_INTERNAL_RAM
-#endif
-
-#if (ALT_TCIMEM_SIZE >= 4096)
-#define SECTION_EDRVOPENMAC_RX_HOOK         ALT_INTERNAL_RAM
-#define SECTION_DLLK_CHANGE_STATE           ALT_INTERNAL_RAM
-#endif
-
-#endif
-#endif
-
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
@@ -126,5 +106,4 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // function prototypes
 //------------------------------------------------------------------------------
 
-#endif /* _INC_oplk_section_nios2_H_ */
-
+#endif /* _INC_targetsection_H_ */

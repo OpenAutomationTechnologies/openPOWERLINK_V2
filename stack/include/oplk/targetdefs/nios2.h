@@ -71,8 +71,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #undef  INLINE_FUNCTION_DEF
 #endif
 
-#include <oplk/section-nios2.h>
-
 #ifndef NDEBUG
 #define PRINTF(...)                 printf(__VA_ARGS__)
 #else

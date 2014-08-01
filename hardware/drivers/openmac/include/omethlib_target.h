@@ -77,11 +77,6 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     #define OMETH_UNCACHED_MALLOC(size)        alt_uncached_malloc(size)
     #define OMETH_UNCACHED_FREE(ptr)           alt_uncached_free(ptr)
 
-    //---------------------------------------------------------
-    // include section header file for special functions in
-    // tightly-coupled memory
-    #include <oplk/section-nios2.h>
-
 #elif defined(__MICROBLAZE__)
 
 #include <xparameters.h>
@@ -101,11 +96,6 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     #define OMETH_UNCACHED_MALLOC(size)     malloc(size)
     #define OMETH_UNCACHED_FREE(ptr)        free(ptr)
 
-    //---------------------------------------------------------
-    // include section header file for special functions in
-    // local memory
-    #include <oplk/section-microblaze.h>
-
 #else
     #error "Host CPU is unknown, set OMETH_HW_MODE and OMETH_MAKE_NONCACHABLE!"
     #define OMETH_HW_MODE                    0
@@ -114,9 +104,23 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     #define OMETH_UNCACHED_FREE(ptr)        free(ptr)
 #endif
 
-    //---------------------------------------------------------
-    // include section header file with null macros
-    #include <oplk/section-default.h>
+//---------------------------------------------------------
+// include section header file for special functions in
+// local memory
+#include <targetsection.h>
 
+// Set empty defines for undefined section assignments
+#ifndef SECTION_OMETHLIB_RX_IRQ_HDL
+#define SECTION_OMETHLIB_RX_IRQ_HDL
+#endif
+#ifndef SECTION_OMETHLIB_TX_IRQ_HDL
+#define SECTION_OMETHLIB_TX_IRQ_HDL
+#endif
+#ifndef SECTION_OMETHLIB_RXTX_IRQ_MUX
+#define SECTION_OMETHLIB_RXTX_IRQ_MUX
+#endif
+#ifndef SECTION_OMETHLIB_TX_TIME
+#define SECTION_OMETHLIB_TX_TIME
 #endif
 
+#endif

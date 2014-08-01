@@ -218,7 +218,4 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endif
 
-#include <oplk/section-default.h>
-
 #endif /* _INC_oplk_targetsystem_H_ */
-
