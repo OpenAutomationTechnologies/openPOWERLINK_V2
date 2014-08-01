@@ -175,6 +175,18 @@ APP_GEN_ARGS="\
 ${CFG_APP_ARGS} \
 "
 
+# Get path to board includes
+BOARD_INCLUDE_PATH=$(readlink -f "${BOARD_PATH}/include")
+
+if [ ! -d "${BOARD_INCLUDE_PATH}" ];
+then
+    echo "ERROR: Path to board include does not exist (${BOARD_INCLUDE_PATH})!"
+    exit 1
+fi
+
+# Add board includes to app includes
+APP_INCLUDES+=" ${BOARD_INCLUDE_PATH}"
+
 # Add includes
 for i in ${APP_INCLUDES}
 do

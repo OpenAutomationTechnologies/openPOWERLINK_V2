@@ -173,6 +173,18 @@ DRV_GEN_ARGS="\
 ${CFG_DRV_ARGS} \
 "
 
+# Get path to board includes
+BOARD_INCLUDE_PATH=$(readlink -f "${BOARD_PATH}/include")
+
+if [ ! -d "${BOARD_INCLUDE_PATH}" ];
+then
+    echo "ERROR: Path to board include does not exist (${BOARD_INCLUDE_PATH})!"
+    exit 1
+fi
+
+# Add board includes to drv includes
+DRV_INCLUDES+=" ${BOARD_INCLUDE_PATH}"
+
 # Add includes
 for i in ${DRV_INCLUDES}
 do

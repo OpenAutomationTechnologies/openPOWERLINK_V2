@@ -109,6 +109,15 @@ then
     exit 1
 fi
 
+# Get path to board includes
+BOARD_INCLUDE_PATH=$(readlink -f "${HW_PATH}/include")
+
+if [ ! -d "${BOARD_INCLUDE_PATH}" ];
+then
+    echo "ERROR: Path to board include does not exist (${BOARD_INCLUDE_PATH})!"
+    exit 1
+fi
+
 # Get bsp's cpu name
 echo "INFO: Get CPU name ... "
 
@@ -181,7 +190,7 @@ else
 fi
 
 LIB_SOURCES+=" ${CFG_LIB_SOURCES}"
-LIB_INCLUDES+=" ${CFG_LIB_INCLUDES}"
+LIB_INCLUDES+=" ${CFG_LIB_INCLUDES} ${BOARD_INCLUDE_PATH}"
 
 if [ -n "${DEBUG}" ]; then
     LIB_OPT_LEVEL=-O0
