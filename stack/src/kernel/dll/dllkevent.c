@@ -111,6 +111,11 @@ static tOplkError processPresReady(tNmtState nmtState_p);
 #endif
 static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtState nmtState_p);
 
+#if defined(CONFIG_INCLUDE_NMT_MN) && defined(CONFIG_INCLUDE_PRES_FORWARD)
+// Request forwarding of Pres frames (for conformance test)
+static tOplkError requestPresForward(UINT node_p);
+#endif
+
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
 //============================================================================//
@@ -169,6 +174,13 @@ tOplkError dllk_process(tEvent* pEvent_p)
         case kEventTypeDllkStartReducedCycle:
             ret = processStartReducedCycle();
             break;
+
+#if defined(CONFIG_INCLUDE_PRES_FORWARD)
+        case kEventTypeRequPresForward:
+            ret = requestPresForward(*((UINT*)pEvent_p->pEventArg));
+            break;
+#endif
+
 #endif
 
 #if CONFIG_DLL_PRES_READY_AFTER_SOA != FALSE
@@ -176,6 +188,7 @@ tOplkError dllk_process(tEvent* pEvent_p)
             ret = processPresReady(dllkInstance_g.nmtState);
             break;
 #endif
+
 
         default:
             ret = kErrorInvalidEvent;
@@ -1016,6 +1029,31 @@ static tOplkError processStartReducedCycle(void)
 Exit:
     return ret;
 }
+
+#if defined(CONFIG_INCLUDE_PRES_FORWARD)
+//------------------------------------------------------------------------------
+/**
+\brief  Request of forwarding PRes frames to the application
+
+The function requests the DLL to forward a received PRES frame to the
+application.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError requestPresForward(UINT node_p)
+{
+    tOplkError      ret = kErrorOk;
+
+    if (node_p < NMT_MAX_NODE_ID)
+        dllkInstance_g.aPresForward[node_p].numRequests++;
+    else
+        ret = kErrorInvalidNodeId;
+
+    return  ret;
+}
+#endif
+
 #endif
 
 /// \}

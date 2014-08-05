@@ -52,6 +52,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/nmtcnu.h>
 #include <common/target.h>
 #include <oplk/obd.h>
+#include <oplk/dll.h>
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
 #include <user/nmtmnu.h>
@@ -1064,8 +1065,8 @@ static tOplkError processUserEvent(tEvent* pEvent_p)
 {
     tOplkError          ret;
     tEventError*        pEventError;
-    tOplkApiEventType    eventType;
-    tOplkApiEventArg     apiEventArg;
+    tOplkApiEventType   eventType;
+    tOplkApiEventArg    apiEventArg;
 
     ret = kErrorOk;
 
@@ -1114,6 +1115,25 @@ static tOplkError processUserEvent(tEvent* pEvent_p)
             apiEventArg.pUserArg = *(void**)pEvent_p->pEventArg;
             ret = ctrlu_callUserEventCallback(eventType, &apiEventArg);
             break;
+
+#if defined(CONFIG_INCLUDE_NMT_MN) && defined(CONFIG_INCLUDE_PRES_FORWARD)
+        case kEventTypeReceivedPres:
+            {
+                tOplkApiEventReceivedPres*  pApiData;
+                tDllEventReceivedPres*      pDllData;
+
+                pApiData = &apiEventArg.receivedPres;
+                pDllData = (tDllEventReceivedPres*)pEvent_p->pEventArg;
+
+                pApiData->nodeId = pDllData->nodeId;
+                pApiData->frameSize = pDllData->frameSize;
+                pApiData->pFrame = (tPlkFrame*)pDllData->frameBuf;
+
+                eventType = kOplkApiEventReceivedPres;
+                ret = ctrlu_callUserEventCallback(eventType, &apiEventArg);
+            }
+            break;
+#endif
 
         // at present, there are no other events for this module
         default:

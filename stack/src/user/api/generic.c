@@ -964,6 +964,42 @@ tOplkError oplk_getIdentResponse(UINT nodeId_p, tIdentResponse** ppIdentResponse
 #endif
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Trigger PRes forward
+
+The function triggers the forwarding of a PRes frame from Node \p nodeId_p
+to the application. It can be used by the application for diagnosis purpose
+(e.g. conformance test). After request "one" PRes frame form the specified
+node will be forwarded to the application. The PRes frame is forwarded by
+a \ref kOplkApiEventReceivedPres event. The application has to handle this event
+to get the frame.
+
+\param  nodeId_p            Node ID of which to get the PRes frame.
+
+\return The function returns a \ref tOplkError error code.
+
+\ingroup module_api
+*/
+//------------------------------------------------------------------------------
+tOplkError oplk_triggerPresForward(UINT nodeId_p)
+{
+#if defined(CONFIG_INCLUDE_NMT_MN) && defined(CONFIG_INCLUDE_PRES_FORWARD)
+    tEvent      event;
+
+    event.eventSink     = kEventSinkDllk;
+    event.netTime.nsec  = 0;
+    event.netTime.sec   = 0;
+    event.eventType     = kEventTypeRequPresForward;
+    event.pEventArg     = &nodeId_p;
+    event.eventArgSize  = sizeof(nodeId_p);
+
+    return eventu_postEvent(&event);
+#else
+    UNUSED_PARAMETER(nodeId_p);
+    return kErrorApiInvalidParam;
+#endif
+}
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //

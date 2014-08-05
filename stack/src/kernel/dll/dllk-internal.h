@@ -155,6 +155,18 @@ typedef struct
 } tDllLossSocStatus;
 
 /**
+\brief Structure for handling PRes forwarding to application
+
+The structure is used by the PRes forwarding function to the application which
+can be used for diagnosis purpose.
+*/
+typedef struct
+{
+    UINT8       numRequests;        ///< Forward request, incremented by call from app
+    UINT8       numResponse;        ///< Forward response, incremented by Dllk layer
+} tDllkPresFw;
+
+/**
 \brief Structure containing the DLLk instance information
 
 This structure contains the data of a DLLk instance.
@@ -225,6 +237,10 @@ typedef struct
     BOOL                    fPrcEnabled;                            ///< PRC is enabled
     UINT32                  prcPResTimeFirst;                       ///< PRes time on the first communication path
     UINT32                  prcPResFallBackTimeout;                 ///< Timeout to fall back to PReq/PRes mode on the first communication path
+#endif
+
+#if defined(CONFIG_INCLUDE_NMT_MN) && defined(CONFIG_INCLUDE_PRES_FORWARD)
+    tDllkPresFw             aPresForward[NMT_MAX_NODE_ID];
 #endif
 } tDllkInstance;
 

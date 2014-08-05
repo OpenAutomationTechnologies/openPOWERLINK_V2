@@ -1510,7 +1510,6 @@ tOplkError dllkframe_presChainingDisable(void)
 
         // disable auto-response delay
         dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES].timeOffsetNs = 0;
-
         dllkInstance_g.fPrcEnabled = FALSE;
 
         ret = edrv_changeRxFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT, DLLK_FILTER_PREQ,
@@ -1736,8 +1735,40 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
     tDllkNodeInfo*  pIntNodeInfo = NULL;
     tNmtState       nodeNmtState;
 
+#if defined(CONFIG_INCLUDE_NMT_MN) && defined(CONFIG_INCLUDE_PRES_FORWARD)
+    tDllkPresFw*    pPresFw;
+#endif
+
     pFrame = pFrameInfo_p->pFrame;
     nodeId = ami_getUint8Le(&pFrame->srcNodeId);
+
+#if defined(CONFIG_INCLUDE_NMT_MN) && defined(CONFIG_INCLUDE_PRES_FORWARD)
+    // Check if PRes frame should be forwarded to API layer
+    pPresFw = &dllkInstance_g.aPresForward[nodeId];
+
+    if (pPresFw->numRequests != pPresFw->numResponse)
+    {
+        tEvent                  event;
+        tDllEventReceivedPres   presEvent;
+
+        OPLK_MEMSET(&presEvent, 0x00, sizeof(presEvent));
+
+        presEvent.nodeId    = nodeId;
+        presEvent.frameSize = pFrameInfo_p->frameSize;
+
+        // If Presp frames are received which are larger than the buffer, they are cut off
+        // (the application will most probably just be interested in the frame-header anyway).
+        OPLK_MEMCPY(&presEvent.frameBuf, pFrame, min(sizeof(presEvent.frameBuf), pFrameInfo_p->frameSize));
+
+        event.eventSink = kEventSinkApi;
+        event.eventType = kEventTypeReceivedPres;
+        event.eventArgSize = sizeof(presEvent);
+        event.pEventArg = &presEvent;
+
+        ret = eventk_postEvent(&event);
+        pPresFw->numResponse++;
+    }
+#endif
 
     if (nodeId == C_ADR_MN_DEF_NODE_ID)
         nodeNmtState = (tNmtState)(ami_getUint8Le(&pFrame->data.pres.nmtStatus) | NMT_TYPE_MS);

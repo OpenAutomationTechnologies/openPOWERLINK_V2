@@ -53,6 +53,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DLL_MAX_ASND_SERVICE_ID (C_DLL_MAX_ASND_SERVICE_IDS + 1)
 #endif
 
+#define MAX_PRES_FORWARD_BUFLEN             300
+
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
@@ -252,5 +254,18 @@ typedef struct
     UINT32              pResTimeFirst;                  ///< PRes time of the first communication path
     UINT32              pResFallBackTimeout;            ///< Timeout to fall back to PReq/PRes mode
 } tDllSyncRequest;
+
+/**
+\brief Structure for forwarded PRes frames
+
+The structure describes a PRes forwarding event which is used by the
+DLL to forward PRes frames to the application.
+*/
+typedef struct
+{
+    UINT16          nodeId;                             ///< Node ID from which the PRes was received.
+    UINT16          frameSize;                          ///< The size of the received PRes frame.
+    UINT8           frameBuf[MAX_PRES_FORWARD_BUFLEN];  ///< The received PRes frame.
+} tDllEventReceivedPres;
 
 #endif  // #ifndef _INC_oplk_dll_H_

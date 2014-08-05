@@ -99,6 +99,8 @@ typedef enum
     kEventTypePdokControlSync       = 0x26,     ///< enable/disable the pdokcal sync trigger (arg is pointer to BOOL)
     kEventTypeReleaseRxFrame        = 0x27,     ///< Free receive buffer (arg is pointer to the buffer to release)
     kEventTypeAsndNotRx             = 0x28,     ///< Didn't receive ASnd frame for DLL user module (arg is pointer to tDllAsndNotRx)
+    kEventTypeReceivedPres          = 0x30,     ///< Received a PRes frame, which shall be forwarded to application (arg is pointer to tEventReceivedPres)
+    kEventTypeRequPresForward       = 0x31,     ///< Request forwarding of a PRes frame to API layer (e.g. for conformance test)
 } tEventType;
 
 /**

@@ -151,6 +151,19 @@ typedef struct
 } tOplkApiEventPdoChange;
 
 /**
+\brief Received PRes event
+
+This structure specifies the event for received PRes frames. It is used to
+forward requested PRes frames to the application (e.g. for diagnosis).
+*/
+typedef struct
+{
+    UINT16                      nodeId;         ///< Node ID of the received PRes frame
+    UINT16                      frameSize;      ///< Size of the received PRes frame
+    tPlkFrame*                  pFrame;         ///< Pointer to the received PRes frame
+} tOplkApiEventReceivedPres;
+
+/**
 \brief Application event types
 
 This enumeration specifies the valid application events which can be
@@ -229,6 +242,11 @@ typedef enum
     /** PDO changed event. This event informs the application about a changed
     PDO mapping. */
     kOplkApiEventPdoChange          = 0x74,
+
+    /** Received PRes event. This event informs the application that a requested
+    PRes frame was received. It can be used for diagnosis purpose. */
+    kOplkApiEventReceivedPres       = 0x80,
+
 } tOplkApiEventType;
 
 
@@ -254,6 +272,7 @@ typedef union
     tErrHistoryEntry            errorHistoryEntry;  ///< Error history entry (\ref kOplkApiEventHistoryEntry)
     tOplkApiEventRcvAsnd        receivedAsnd;       ///< Received ASnd frame information (\ref kOplkApiEventReceivedAsnd)
     tOplkApiEventPdoChange      pdoChange;          ///< PDO change event (\ref kOplkApiEventPdoChange)
+    tOplkApiEventReceivedPres   receivedPres;       ///< Received PRes frame (\ref kOplkApiEventReceivedPres)
 } tOplkApiEventArg;
 
 /**
@@ -391,6 +410,9 @@ OPLKDLLEXPORT void*      oplk_getProcessImageOut(void);
 
 // objdict specific process image functions
 OPLKDLLEXPORT tOplkError oplk_setupProcessImage(void);
+
+// Request forwarding of Pres frame from DLL -> API
+OPLKDLLEXPORT tOplkError oplk_triggerPresForward(UINT nodeId_p);
 
 #ifdef __cplusplus
 }
