@@ -65,6 +65,7 @@ INCLUDE_DIRECTORIES(
                     ${ARCH_SOURCE_DIR}/xilinx_microblaze
                     ${CFG_COMPILE_LIB_MN_DRV_HOSTIF_HW_LIB_DIR}/libomethlib/include
                     ${CFG_COMPILE_LIB_MN_DRV_HOSTIF_HW_LIB_DIR}/libhostiflib-pcp/include
+                    ${CFG_COMPILE_LIB_MN_DRV_HOSTIF_HW_LIB_DIR}/include
                    )
 
 ################################################################################

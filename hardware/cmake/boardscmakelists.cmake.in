@@ -87,5 +87,9 @@ INSTALL_BITSTREAM(${PROJECT_SOURCE_DIR} ${HW_PLATFORM_TARGET_DIR})
 INSTALL(FILES ${PROJECT_SOURCE_DIR}/cmake/settings.cmake DESTINATION ${BINS_INST_DIR})
 
 ################################################################################
+# Installation rules for board specific includes
+INSTALL(DIRECTORY ${PROJECT_SOURCE_DIR}/include DESTINATION ${BINS_INST_DIR})
+
+################################################################################
 # Add clean files
 SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${ADD_CLEAN_FILES}")

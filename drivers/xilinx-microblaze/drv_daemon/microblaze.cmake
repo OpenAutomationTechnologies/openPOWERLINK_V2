@@ -120,6 +120,7 @@ INCLUDE_DIRECTORIES(
                     ${OPLK_ROOT_DIR}/stack/src/arch/xilinx_microblaze
                     ${OPLK_INCLUDE_DIR}
                     ${PROJECT_SOURCE_DIR}
+                    ${CFG_HW_LIB_DIR}/include
                    )
 
 ################################################################################

@@ -36,6 +36,7 @@ SET(LIB_ARCH_SRCS
 
 SET(LIB_ARCH_INCS
                     ${EXAMPLE_BINARY_DIR}/bsp${CFG_${PROC_INST_NAME}_NAME}/${CFG_${PROC_INST_NAME}_NAME}/include
+                    ${BOARD_EXAMPLE_DIR}/include
                    )
 
 # Set architecture specific definitions

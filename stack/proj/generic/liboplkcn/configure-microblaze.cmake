@@ -63,6 +63,7 @@ INCLUDE_DIRECTORIES(
                     ${XIL_LIB_BSP_INC}
                     ${ARCH_SOURCE_DIR}/xilinx_microblaze
                     ${CFG_COMPILE_LIB_CN_HW_LIB_DIR}/libomethlib/include
+                    ${CFG_COMPILE_LIB_CN_HW_LIB_DIR}/include
                    )
 
 ################################################################################

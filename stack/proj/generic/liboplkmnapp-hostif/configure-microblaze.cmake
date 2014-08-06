@@ -63,6 +63,7 @@ INCLUDE_DIRECTORIES(
                     ${XIL_LIB_BSP_INC}
                     ${ARCH_SOURCE_DIR}/xilinx_microblaze
                     ${CFG_COMPILE_LIB_MN_APP_HOSTIF_HW_LIB_DIR}/libhostiflib-host/include
+                    ${CFG_COMPILE_LIB_MN_APP_HOSTIF_HW_LIB_DIR}/include
                    )
 
 ################################################################################
