@@ -46,6 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string.h>
 #include <xil_types.h>
 #include <xil_io.h>
+#include <xil_cache.h>
 #include <lock.h>
 
 #include <oplk/basictypes.h>
@@ -71,6 +72,23 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #else
 #define PRINTF(...)
 #endif
+
+// Target IO functions
+// - Write
+#define OPLK_IO_WR8(addr, val)      Xil_Out8(addr, val)
+#define OPLK_IO_WR16(addr, val)     Xil_Out16(addr, val)
+#define OPLK_IO_WR32(addr, val)     Xil_Out32(addr, val)
+// - Read
+#define OPLK_IO_RD8(addr)           Xil_In8(addr)
+#define OPLK_IO_RD16(addr)          Xil_In16(addr)
+#define OPLK_IO_RD32(addr)          Xil_In32(addr)
+
+// Target data cache functions
+#define OPLK_DCACHE_FLUSH(addr, len)        Xil_DCacheFlushRange(addr, len)
+#define OPLK_DCACHE_INVALIDATE(addr, len)   Xil_DCacheInvalidateRange(addr, len)
+
+// Target memory barrier function
+#define OPLK_MEMBAR()               __asm("mbar 0")
 
 /* NOTE:
  * Pseudo atomic macro is applied with locking.

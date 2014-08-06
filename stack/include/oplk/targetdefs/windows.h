@@ -103,6 +103,23 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OPLKDLLEXPORT
 #endif
 
+// Target IO functions
+// - Write
+#define OPLK_IO_WR8(addr, val)      (*(volatile UINT8*)(addr)) = (val)
+#define OPLK_IO_WR16(addr, val)     (*(volatile UINT16*)(addr)) = (val)
+#define OPLK_IO_WR32(addr, val)     (*(volatile UINT32*)(addr)) = (val)
+// - Read
+#define OPLK_IO_RD8(addr)           (*(volatile UINT8*)(addr))
+#define OPLK_IO_RD16(addr)          (*(volatile UINT16*)(addr))
+#define OPLK_IO_RD32(addr)          (*(volatile UINT32*)(addr))
+
+// Target data cache functions
+#define OPLK_DCACHE_FLUSH(addr, len)        ((void)0)
+#define OPLK_DCACHE_INVALIDATE(addr, len)   ((void)0)
+
+// Target memory barrier function
+#define OPLK_MEMBAR()               ((void)0)
+
 #define OPLK_ATOMIC_T    ULONG
 #define OPLK_ATOMIC_EXCHANGE(address, newval, oldval) \
             oldval = InterlockedExchange(address, newval);

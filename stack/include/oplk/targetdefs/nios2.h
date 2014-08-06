@@ -79,6 +79,23 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define PRINTF(...)
 #endif
 
+// Target IO functions
+// - Write
+#define OPLK_IO_WR8(addr, val)      IOWR_8DIRECT(addr, 0, val)
+#define OPLK_IO_WR16(addr, val)     IOWR_16DIRECT(addr, 0, val)
+#define OPLK_IO_WR32(addr, val)     IOWR_32DIRECT(addr, 0, val)
+// - Read
+#define OPLK_IO_RD8(addr)           IORD_8DIRECT(addr, 0)
+#define OPLK_IO_RD16(addr)          IORD_16DIRECT(addr, 0)
+#define OPLK_IO_RD32(addr)          IORD_32DIRECT(addr, 0)
+
+// Target data cache functions
+#define OPLK_DCACHE_FLUSH(addr, len)        ((void)0)
+#define OPLK_DCACHE_INVALIDATE(addr, len)   ((void)0)
+
+// Target memory barrier function
+#define OPLK_MEMBAR()               __asm("sync")
+
 /* NOTE:
  * Nios II does not support atomic instructions, hence, pseudo atomic
  * macro is applied with locking.
