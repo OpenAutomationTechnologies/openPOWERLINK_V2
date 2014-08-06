@@ -76,7 +76,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 \param  Handler_p        Callback ISR routine
 \param  CallBackRef_p    Reference argument to be passed with ISR.
 
-\return 0                Success
+\return The function will always return 0
 
 \ingroup module_hostiflib
 */
