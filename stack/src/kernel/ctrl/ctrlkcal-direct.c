@@ -55,7 +55,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // module global vars
 //------------------------------------------------------------------------------
-extern tCtrlInitParam kernelInitParam_g;
+tCtrlInitParam kernelInitParam_g;
 
 //------------------------------------------------------------------------------
 // global function prototypes
@@ -76,6 +76,7 @@ extern tCtrlInitParam kernelInitParam_g;
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
+static UINT16 status_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -99,6 +100,7 @@ implementation nothing has to be done!
 //------------------------------------------------------------------------------
 tOplkError ctrlkcal_init(void)
 {
+    status_l = kCtrlStatusReady;
     return kErrorOk;
 }
 
@@ -115,6 +117,7 @@ the memory block access functions.
 //------------------------------------------------------------------------------
 void ctrlkcal_exit(void)
 {
+    status_l = kCtrlStatusUnavailable;
 }
 
 //------------------------------------------------------------------------------
@@ -184,10 +187,6 @@ void ctrlkcal_sendReturn(UINT16 retval_p)
 
 The function stores the status of the kernel stack in the control memory block.
 
-\note The function is only implemented to provide the interface, but is not
-      used, because in the direct implemtation the kernel and user stack are
-      running in the same instance.
-
 \param  status_p                Status to set.
 
 \ingroup module_ctrlkcal
@@ -195,7 +194,23 @@ The function stores the status of the kernel stack in the control memory block.
 //------------------------------------------------------------------------------
 void ctrlkcal_setStatus(UINT16 status_p)
 {
-    UNUSED_PARAMETER(status_p);
+    status_l = status_p;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Get the kernel stack status
+
+The function gets the status of the kernel stack.
+
+\return The function returns the status of the kernel stack.
+
+\ingroup module_ctrlkcal
+*/
+//------------------------------------------------------------------------------
+UINT16 ctrlkcal_getStatus(void)
+{
+    return status_l;
 }
 
 //------------------------------------------------------------------------------

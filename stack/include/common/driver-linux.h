@@ -1,16 +1,15 @@
 /**
 ********************************************************************************
-\file   oplk/powerlink-module.h
+\file   common/driver-linux.h
 
-\brief  Header file for openPOWERLINK Linux kernel module
+\brief  Header file for Linux openPOWERLINK drivers
 
 This file contains the necessary definitions for using the openPOWERLINK
-Linux module.
+Linux kernel driver.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -36,24 +35,16 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_oplk_powerlink_module_H_
-#define _INC_oplk_powerlink_module_H_
+#ifndef _INC_common_driver_linux_H_
+#define _INC_common_driver_linux_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
-#include <oplk/dll.h>
-#include <common/dllcal.h>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define PLK_CLASS_NAME    "plk"
-#define PLK_DEV_NAME      "plk" // used for "/dev" and "/proc" entry
-#define PLK_DRV_NAME      "plk"
-#define PLK_DEV_FILE      "/dev/plk"
-#define PLK_IOC_MAGIC     '='
 
 //------------------------------------------------------------------------------
 //  Commands for <ioctl>
@@ -73,29 +64,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-typedef struct
-{
-    tDllCalQueue            queue;
-    void*                   pData;
-    size_t                  size;
-} tIoctlDllCalAsync;
-
-typedef struct
-{
-    void*                   pData;
-    size_t                  size;
-} tIoctlBufInfo;
-
-typedef struct
-{
-    UINT32                  offset;
-    UINT32                  errVal;
-} tErrHndIoctl;
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
 
-
-#endif /* _INC_oplk_powerlink_module_H_ */
-
+#endif /* _INC_common_driver_linux_H_ */

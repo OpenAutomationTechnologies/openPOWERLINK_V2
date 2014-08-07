@@ -43,7 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <common/oplkinc.h>
 #include <user/pdoucal.h>
 #include <user/ctrlucal.h>
-#include <oplk/powerlink-module.h>
+#include <common/driver.h>
 
 #include <fcntl.h>
 #include <sys/stat.h>

@@ -204,7 +204,7 @@ SET(KERNEL_SOURCES
     )
 
 ################################################################################
-# Control DLL CAL sources
+# Control CAL sources
 
 SET(CTRL_KCAL_POSIXMEM_SOURCES
     ${KERNEL_SOURCE_DIR}/ctrl/ctrlkcal-mem.c
@@ -216,7 +216,7 @@ SET(CTRL_KCAL_DIRECT_SOURCES
     )
 
 SET(CTRL_KCAL_LINUXIOCTL_SOURCES
-    ${KERNEL_SOURCE_DIR}/ctrl/ctrlkcal-linuxkernel.c
+    ${KERNEL_SOURCE_DIR}/ctrl/ctrlkcal-direct.c
     )
 
 ################################################################################
@@ -227,7 +227,7 @@ SET(DLL_KCAL_CIRCBUF_SOURCES
     )
 
 SET(DLL_KCAL_LINUXIOCTL_SOURCES
-    ${KERNEL_SOURCE_DIR}/dll/dllkcal-linuxkernel.c
+    ${KERNEL_SOURCE_DIR}/dll/dllkcal-circbuf.c
     )
 
 ################################################################################

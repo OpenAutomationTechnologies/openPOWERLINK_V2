@@ -44,7 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/ctrlucal.h>
 #include <common/ctrlcal-mem.h>
 #include <common/target.h>
-#include <oplk/powerlink-module.h>
+#include <common/driver.h>
 
 #include <unistd.h>
 #include <stddef.h>

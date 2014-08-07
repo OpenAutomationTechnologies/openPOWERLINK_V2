@@ -48,7 +48,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <common/oplkinc.h>
 #include "errhnducal.h"
 #include <user/ctrlucal.h>
-#include <oplk/powerlink-module.h>
+#include <common/driver.h>
 
 #include <sys/ioctl.h>
 

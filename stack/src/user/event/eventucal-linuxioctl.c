@@ -51,7 +51,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/eventu.h>
 #include <user/ctrlucal.h>
 #include <common/target.h>
-#include <oplk/powerlink-module.h>
+#include <common/driver.h>
 //#include <oplk/debugstr.h>
 
 #include <pthread.h>

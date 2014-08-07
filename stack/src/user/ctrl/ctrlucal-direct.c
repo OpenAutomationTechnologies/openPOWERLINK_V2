@@ -44,6 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <common/oplkinc.h>
 #include <user/ctrlucal.h>
 #include <kernel/ctrlk.h>
+#include <kernel/ctrlkcal.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -56,7 +57,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // module global vars
 //------------------------------------------------------------------------------
-tOplkApiInitParam    kernelInitParam_g;
 
 //------------------------------------------------------------------------------
 // global function prototypes
@@ -77,8 +77,8 @@ tOplkApiInitParam    kernelInitParam_g;
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static UINT16       status_l;
-static UINT16       dummyHeartbeat_l;
+extern tCtrlInitParam   kernelInitParam_g;
+static UINT16           dummyHeartbeat_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -103,7 +103,6 @@ The function initializes the user control CAL module.
 //------------------------------------------------------------------------------
 tOplkError ctrlucal_init(void)
 {
-    status_l = kCtrlStatusReady;
     dummyHeartbeat_l = 0;
     return kErrorOk;
 }
@@ -155,10 +154,12 @@ tOplkError ctrlucal_executeCmd(tCtrlCmdType cmd_p)
 {
     tOplkError          ret;
     tOplkError          fRet;
+    UINT16              status;
 
-    if ((ret = ctrlk_executeCmd(cmd_p, &fRet, &status_l, NULL)) != kErrorOk)
+    if ((ret = ctrlk_executeCmd(cmd_p, &fRet, &status, NULL)) != kErrorOk)
         return ret;
 
+    ctrlkcal_setStatus(status);
     return fRet;
 }
 
@@ -196,7 +197,7 @@ The function gets the status of the kernel stack
 //------------------------------------------------------------------------------
 UINT16 ctrlucal_getStatus(void)
 {
-    return status_l;
+    return ctrlkcal_getStatus();
 }
 
 //------------------------------------------------------------------------------

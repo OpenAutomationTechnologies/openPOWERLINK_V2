@@ -184,7 +184,7 @@ SET(MODULE_SOURCE_FILES
     ${CONTRIB_SOURCE_DIR}/trace/trace-printk.c
     ${EDRV_SOURCE_DIR}/edrvcyclic.c
     ${KERNEL_SOURCE_DIR}/ctrl/ctrlk.c
-    ${KERNEL_SOURCE_DIR}/ctrl/ctrlkcal-linuxkernel.c
+    ${KERNEL_SOURCE_DIR}/ctrl/ctrlkcal-direct.c
     ${KERNEL_SOURCE_DIR}/dll/dllk.c
     ${KERNEL_SOURCE_DIR}/dll/dllkfilter.c
     ${KERNEL_SOURCE_DIR}/dll/dllkstatemachine.c
@@ -192,7 +192,7 @@ SET(MODULE_SOURCE_FILES
     ${KERNEL_SOURCE_DIR}/dll/dllkframe.c
     ${KERNEL_SOURCE_DIR}/dll/dllknode.c
     ${KERNEL_SOURCE_DIR}/dll/dllkcal.c
-    ${KERNEL_SOURCE_DIR}/dll/dllkcal-linuxkernel.c
+    ${KERNEL_SOURCE_DIR}/dll/dllkcal-circbuf.c
     ${KERNEL_SOURCE_DIR}/event/eventk.c
     ${KERNEL_SOURCE_DIR}/event/eventkcal-linuxkernel.c
     ${KERNEL_SOURCE_DIR}/event/eventkcalintf-circbuf.c

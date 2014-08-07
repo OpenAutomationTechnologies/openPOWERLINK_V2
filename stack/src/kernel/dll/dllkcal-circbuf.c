@@ -71,8 +71,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /**
 \brief DLL CAL shared buffer instance type
 
-The EventShbInstance is used for every event queue using the shared buffer for
-event posting.
+The tDllCalCircBufInstance is used for every event queue using the circular buffer
+for event posting.
 */
 typedef struct
 {
@@ -120,7 +120,7 @@ static tDllCalFuncIntf funcintf_l =
 This function returns a pointer to the function interface structure which
 is used to access the dllcal functions of the shared buffer implementation.
 
-\return Returns a pointer to the local function interface
+\return Returns a pointer to the local function interface.
 
 \ingroup module_dllkcal
 */
@@ -237,10 +237,10 @@ static tOplkError delInstance(tDllCalQueueInstance pDllCalQueue_p)
 
 Inserts a data block into the DLL CAL queue.
 
-\param  pDllCalQueue_p          Pointer to DllCal Queue instance
-\param  pData_p                 Pointer to the data block to be insert
+\param  pDllCalQueue_p          Pointer to DllCal Queue instance.
+\param  pData_p                 Pointer to the data block to be inserted.
 \param  pDataSize_p             Pointer to the size of the data block to be
-                                inserted
+                                inserted.
 
 \return The function returns a tOplkError error code.
 \retval kErrorOk                Function executes correctly
@@ -261,8 +261,7 @@ static tOplkError insertDataBlock(tDllCalQueueInstance pDllCalQueue_p,
         goto Exit;
     }
 
-    error = circbuf_writeData(pDllCalCircBufInstance->pCircBufInstance,
-            pData_p, *pDataSize_p);
+    error = circbuf_writeData(pDllCalCircBufInstance->pCircBufInstance, pData_p, *pDataSize_p);
     switch (error)
     {
         case kCircBufOk:
@@ -289,10 +288,10 @@ Exit:
 
 Gets a data block from the DLL CAL queue.
 
-\param  pDllCalQueue_p          Pointer to DllCal Queue instance
-\param  pData_p                 Pointer to data buffer
+\param  pDllCalQueue_p          Pointer to DllCal Queue instance.
+\param  pData_p                 Pointer to data buffer.
 \param  pDataSize_p             Pointer to the size of the data buffer
-                                (will be replaced with actual data block size)
+                                (will be replaced with actual data block size).
 
 \return The function returns a tOplkError error code.
 \retval kErrorOk                Function executes correctly
@@ -314,9 +313,8 @@ static tOplkError getDataBlock(tDllCalQueueInstance pDllCalQueue_p,
         goto Exit;
     }
 
-    error = circbuf_readData(pDllCalCircBufInstance->pCircBufInstance,
-                             (void*)pData_p, (unsigned long)*pDataSize_p,
-                             &actualDataSize);
+    error = circbuf_readData(pDllCalCircBufInstance->pCircBufInstance, pData_p,
+                             (size_t)*pDataSize_p, &actualDataSize);
     if (error != kCircBufOk)
     {
         if (error == kCircBufNoReadableData)
@@ -342,8 +340,8 @@ Exit:
 
 Returns the data block counter.
 
-\param  pDllCalQueue_p          Pointer to DllCal Queue instance
-\param  pDataBlockCount_p       Pointer which returns the data block count
+\param  pDllCalQueue_p          Pointer to DllCal Queue instance.
+\param  pDataBlockCount_p       Pointer which returns the data block count.
 
 \return The function returns a tOplkError error code.
 \retval kErrorOk                Function executes correctly
@@ -369,8 +367,8 @@ static tOplkError getDataBlockCount(tDllCalQueueInstance pDllCalQueue_p,
 
 Resets the DLL CAL queue instance after a given timeout.
 
-\param  pDllCalQueue_p          Pointer to DllCal Queue instance
-\param  timeOutMs_p             Timeout before buffer reset is done
+\param  pDllCalQueue_p          Pointer to DllCal Queue instance.
+\param  timeOutMs_p             Timeout before buffer reset is done.
 
 \return The function returns a tOplkError error code.
 \retval kErrorOk                Function executes correctly
