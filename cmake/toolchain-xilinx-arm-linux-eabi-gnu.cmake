@@ -27,7 +27,6 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
-
 ################################################################################
 # Name of the target platform
 SET(CMAKE_SYSTEM Xilinx-ARM-linux-eabi)
@@ -42,7 +41,7 @@ SET(CMAKE_C_COMPILER arm-xilinx-linux-gnueabi-gcc)
 SET(CMAKE_CXX_COMPILER arm-xilinx-linux-gnueabi-g++)
 SET(CMAKE_ASM-ATT_COMPILER arm-xilinx-linux-gnueabi-as)
 
-SET(CMAKE_FIND_ROOT_PATH /opt/Xilinx/14.7/ISE_DS/EDK/gnu/arm/lin/arm-xilinx-linux-gnueabi/libc)
+set(CMAKE_FIND_ROOT_PATH $(XILINX_EDK)/gnu/arm/lin/arm-xilinx-linux-gnueabi/libc)
 # search for programs in the build host directories
 SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 # for libraries in the target and build host directories
@@ -51,5 +50,5 @@ SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY BOTH)
 SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 
 # cross compiler directives
-SET(MAKE_KERNEL_ARCH arm)
-SET(MAKE_KERNEL_CROSS_COMPILE /opt/Xilinx/14.7/ISE_DS/EDK/gnu/arm/lin/bin/arm-xilinx-linux-gnueabi-)
+set(MAKE_KERNEL_ARCH arm)
+set(MAKE_KERNEL_CROSS_COMPILE arm-xilinx-linux-gnueabi-)
