@@ -43,7 +43,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <stdint.h>
 #include <sys/alt_cache.h>
-#include <sys/alt_irq.h>
 #include <unistd.h>
 #include <io.h>
 #include <system.h>
@@ -86,16 +85,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define HOSTIF_WR32(base, offset, dword)  IOWR_32DIRECT(base, offset, dword)
 #define HOSTIF_WR16(base, offset, word)   IOWR_16DIRECT(base, offset, word)
 #define HOSTIF_WR8(base, offset, byte)    IOWR_8DIRECT(base, offset, byte)
-
-/// irq handling
-#define HOSTIF_IRQ_REG(cb, arg)     \
-    alt_ic_isr_register(HOSTIF_IRQ_IC_ID, HOSTIF_IRQ, cb, arg, NULL)
-
-#define HOSTIF_IRQ_ENABLE()         \
-    alt_ic_irq_enable(HOSTIF_IRQ_IC_ID, HOSTIF_IRQ)
-
-#define HOSTIF_IRQ_DISABLE()        \
-    alt_ic_irq_disable(HOSTIF_IRQ_IC_ID, HOSTIF_IRQ)
 
 #define HOSTIF_INLINE inline
 //------------------------------------------------------------------------------

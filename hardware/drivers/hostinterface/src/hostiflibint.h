@@ -123,6 +123,12 @@ tHostifReturn hostif_createInt(tHostif* pHostif_p);
 tHostifReturn hostif_deleteInt(tHostif* pHostif_p);
 tHostifReturn hostif_checkVersion(UINT8* pBase_p, tHostifVersion* pSwVersion_p);
 
+#if CONFIG_HOSTIF_PCP == FALSE
+// Host processor target specific functions
+tHostifReturn hostif_sysIrqRegHandler(tHostifIrqCb pfnIrqCb_p, void* pArg_p);
+tHostifReturn hostif_sysIrqEnable(BOOL fEnable_p);
+#endif
+
 #ifdef __cplusplus
 }
 #endif

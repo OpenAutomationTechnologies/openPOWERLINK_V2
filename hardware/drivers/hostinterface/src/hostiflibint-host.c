@@ -149,14 +149,13 @@ tHostifReturn hostif_createInt(tHostif* pHostif_p)
     }
 
     // register isr in system
-    if (HOSTIF_IRQ_REG(hostifIrqHandler, (void*)pHostif_p))
+    if ((ret = hostif_sysIrqRegHandler(hostifIrqHandler, (void*)pHostif_p)) != kHostifSuccessful)
     {
-        ret = kHostifNoResource;
         goto Exit;
     }
 
     // enable system irq
-    HOSTIF_IRQ_ENABLE();
+    ret = hostif_sysIrqEnable(TRUE);
 
 Exit:
     return ret;
@@ -178,17 +177,15 @@ This function deletes a host interface instance.
 //------------------------------------------------------------------------------
 tHostifReturn hostif_deleteInt(tHostif* pHostif_p)
 {
-    tHostifReturn ret = kHostifSuccessful;
-
     UNUSED_PARAMETER(pHostif_p);
 
     // enable system IRQ (ignore ret)
-    HOSTIF_IRQ_DISABLE();
+    hostif_sysIrqEnable(FALSE);
 
-    // degister ISR in system (ignore ret)
-    HOSTIF_IRQ_REG(NULL, NULL);
+    // unregister ISR in system (ignore ret)
+    hostif_sysIrqRegHandler(NULL, NULL);
 
-    return ret;
+    return kHostifSuccessful;
 }
 
 //------------------------------------------------------------------------------

@@ -99,11 +99,11 @@ set to those provided by stdint.h.
 #ifndef TRUE
 #define TRUE                0xFF
 #endif
+/**@}*/
 
 #ifndef UNUSED_PARAMETER
 #define UNUSED_PARAMETER(par)   (void)par
 #endif
-/**@}*/
 
 //------------------------------------------------------------------------------
 // typedef

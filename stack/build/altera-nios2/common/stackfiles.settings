@@ -272,6 +272,10 @@ HOSTIF_USER_SOURCES="\
 ${HW_DRIVERS_DIR}/hostinterface/src/hostiflibint-host.c \
 "
 
+HOSTIF_USER_NIOS2_SOURCES="\
+${HW_DRIVERS_DIR}/hostinterface/src/hostiflibint_nios.c \
+"
+
 HOSTIF_KERNEL_SOURCES="\
 ${HW_DRIVERS_DIR}/hostinterface/src/hostiflibint-pcp.c \
 "
