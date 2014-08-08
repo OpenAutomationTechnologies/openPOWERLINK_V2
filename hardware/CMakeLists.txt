@@ -94,7 +94,7 @@ FOREACH(BOARD_DIR IN ITEMS ${BOARD_DIRS})
             # Include board specific settings file
             SET_BOARD_CONFIGURATION(${BOARD_DIR}/${EXAMPLE_NAME}/cmake)
 
-            CONFIGURE_FILE(cmake/BoardsCMakeLists.cmake.in ${BOARD_DIR}/${EXAMPLE_NAME}/CMakeLists.txt COPYONLY)
+            CONFIGURE_FILE(cmake/boardscmakelists.cmake.in ${BOARD_DIR}/${EXAMPLE_NAME}/CMakeLists.txt COPYONLY)
             ADD_SUBDIRECTORY(${BOARD_DIR}/${EXAMPLE_NAME})
 
             # Create targets for building the omethlib
