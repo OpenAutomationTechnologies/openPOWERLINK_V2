@@ -656,16 +656,17 @@ tOplkError oplk_sendAsndFrame(UINT8 dstNodeId_p, tAsndFrame* pAsndFrame_p,
     tOplkError      ret;
     tFrameInfo      frameInfo;
     BYTE            buffer[C_DLL_MAX_ASYNC_MTU];
+    UINT            frameSize;
 
     // Calculate size of frame (Asnd data + header)
-    frameInfo.frameSize = asndSize_p + offsetof(tPlkFrame, data);
+    frameSize = asndSize_p + offsetof(tPlkFrame, data);
 
     // Check for correct input
-    if ((pAsndFrame_p == NULL) || (frameInfo.frameSize >= sizeof(buffer)))
+    if ((pAsndFrame_p == NULL) || (frameSize >= sizeof(buffer)))
         return kErrorReject;
 
-    // Calculate size of frame (Asnd data + header)
-    frameInfo.frameSize = asndSize_p + offsetof(tPlkFrame, data);
+    // Set up frame info
+    frameInfo.frameSize = frameSize;
     frameInfo.pFrame = (tPlkFrame*)buffer;
 
     // Copy Asnd data
