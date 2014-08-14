@@ -67,6 +67,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/identu.h>
 #endif
 
+#include <common/target.h>
+#include <common/memmap.h>
+
 #if (CONFIG_OBD_USE_LOAD_CONCISEDCF != FALSE)
 #include <oplk/obdcdc.h>
 #endif
@@ -149,6 +152,12 @@ tOplkError oplk_init(tOplkApiInitParam* pInitParam_p)
         return ret;
     }
 
+    if (memmap_init() != kMemMapOk)
+    {
+        target_cleanup();
+        return kErrorNoResource;
+    }
+
     return ctrlu_initStack(pInitParam_p);
 }
 
@@ -173,6 +182,7 @@ tOplkError oplk_shutdown(void)
 
     ret = ctrlu_shutdownStack();
     ctrlu_exit();
+    memmap_shutdown();
     target_cleanup();
 
     return ret;

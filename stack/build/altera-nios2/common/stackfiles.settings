@@ -260,6 +260,18 @@ ${COMMON_SOURCE_DIR}/circbuf/circbuf-nooshostif.c \
 "
 
 ################################################################################
+# Memory Mapping sources
+################################################################################
+
+MEMMAP_NOOSLOCAL_SOURCES="\
+${COMMON_SOURCE_DIR}/memmap/memmap-nooslocal.c \
+"
+
+MEMMAP_NOOSHOSTIF_SOURCES="\
+${COMMON_SOURCE_DIR}/memmap/memmap-nooshostif.c \
+"
+
+################################################################################
 # Host interface sources
 ################################################################################
 
