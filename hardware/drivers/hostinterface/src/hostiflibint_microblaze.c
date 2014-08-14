@@ -52,7 +52,6 @@ modules.
 //------------------------------------------------------------------------------
 #include "hostiflib.h"
 #include "hostiflib_target.h"
-#include "hostiflibint.h"
 
 #include <xintc_l.h>
 #include <xil_io.h>
@@ -146,7 +145,7 @@ tHostifReturn hostif_sysIrqEnable(BOOL fEnable_p)
     {
         XIntc_DisableIntr(HOSTIF_IRQ_IC_ID,
                           (Xil_In32(HOSTIF_IRQ_IC_ID + XIN_IER_OFFSET) &
-                          ~(1 << HOSTIF_IRQ)))
+                          ~(1 << HOSTIF_IRQ)));
     }
 
     return kHostifSuccessful;
