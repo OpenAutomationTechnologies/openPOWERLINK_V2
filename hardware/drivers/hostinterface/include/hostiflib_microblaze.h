@@ -40,6 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <stddef.h>
+#include <xil_types.h>
 #include <xparameters.h>
 
 #include <cachemem/cachemem.h> // For data cache aware memory access
@@ -50,6 +51,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if CONFIG_HOSTIF_PCP != FALSE
 
 #define HOSTIF_BASE             XPAR_AXI_HOSTINTERFACE_0_BASEADDR
+#define HOSTIF_IRQ_IC_ID        -1
+#define HOSTIF_IRQ              -1
 
 #else
 
