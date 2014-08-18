@@ -59,6 +59,7 @@ The generic defines are valid for the whole openPOWERLINK stack.
 #define CONFIG_INCLUDE_SDOS
 #define CONFIG_INCLUDE_SDOC
 #define CONFIG_INCLUDE_SDO_ASND
+#define CONFIG_INCLUDE_VETH
 
 #ifndef BENCHMARK_MODULES
 #define BENCHMARK_MODULES                   (0 \
@@ -108,6 +109,7 @@ The Data Link Layer (DLL) defines determine the POWERLINK DLL module.
     ///< disable deferred RX frames if Edrv does not support it
 #define CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC   TRUE
 #define CONFIG_EDRV_ASND_DEFFERRED_RX_BUFFERS       8
+#define CONFIG_EDRV_VETH_DEFFERRED_RX_BUFFERS       5
 /**@}*/
 
 /**
@@ -129,6 +131,7 @@ These defines are set by the host interface ipcore settings
 #define CONFIG_DLLCAL_BUFFER_SIZE_TX_NMT            HOSTIF_SIZE_TXNMTQ
 #define CONFIG_DLLCAL_BUFFER_SIZE_TX_GEN            HOSTIF_SIZE_TXGENQ
 #define CONFIG_DLLCAL_BUFFER_SIZE_TX_SYNC           HOSTIF_SIZE_TXSYNCQ
+#define CONFIG_DLLCAL_BUFFER_SIZE_TX_VETH           HOSTIF_SIZE_TXVETHQ
 /**@}*/
 
 #define CONFIG_EVENT_SIZE_CIRCBUF_KERNEL_INTERNAL   2048
