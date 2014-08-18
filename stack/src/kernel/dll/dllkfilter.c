@@ -105,6 +105,10 @@ static void setupSoaSyncReqFilter(tEdrvFilter* pFilter_p,
 static void setupSoaUnspecReqFilter(tEdrvFilter* pFilter_p,
                                     UINT nodeId_p,
                                     tEdrvTxBuffer* pBuffer_p);
+#if defined(CONFIG_INCLUDE_VETH)
+static void setupVethUnicast(tEdrvFilter* pFilter_p, UINT8* pMacAdrs_p, BOOL fEnable_p);
+static void setupVethBroadcast(tEdrvFilter* pFilter_p, BOOL fEnable_p);
+#endif
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -149,6 +153,13 @@ void dllkfilter_setupFilters(void)
     setupSoaUnspecReqFilter(&dllkInstance_g.aFilter[DLLK_FILTER_SOA_NONPLK],
                             dllkInstance_g.dllConfigParam.nodeId,
                             &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONPLK]);
+#if defined(CONFIG_INCLUDE_VETH)
+    setupVethUnicast(&dllkInstance_g.aFilter[DLLK_FILTER_VETH_UNICAST],
+                     &dllkInstance_g.aLocalMac[0],
+                     TRUE);
+    setupVethBroadcast(&dllkInstance_g.aFilter[DLLK_FILTER_VETH_BROADCAST],
+                       TRUE);
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -438,5 +449,50 @@ static void setupSoaUnspecReqFilter(tEdrvFilter* pFilter_p,
     pFilter_p->pTxBuffer = pBuffer_p;
     pFilter_p->fEnable = FALSE;
 }
+
+#if defined(CONFIG_INCLUDE_VETH)
+//------------------------------------------------------------------------------
+/**
+\brief  Setup virtual Ethernet unicast filter
+
+The function sets up an virtual Ethernet unicast filter in the Edrv filter
+structure.
+
+\param  pFilter_p       Pointer to Edrv filter structure.
+\param  pMacAdrs_p      Pointer to mac address of node.
+\param  fEnable_p       Flag determines if filter is enabled or disabled.
+
+*/
+//------------------------------------------------------------------------------
+static void setupVethUnicast(tEdrvFilter* pFilter_p, UINT8* pMacAdrs_p, BOOL fEnable_p)
+{
+    OPLK_MEMCPY(&pFilter_p->aFilterValue[0], pMacAdrs_p, 6);
+    ami_setUint48Be(&pFilter_p->aFilterMask[0], C_DLL_MACADDR_MASK);
+
+    pFilter_p->pTxBuffer = NULL;
+    pFilter_p->fEnable = fEnable_p;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Setup virtual Ethernet broadcast filter
+
+The function sets up an virtual Ethernet broadcast filter in the Edrv filter
+structure.
+
+\param  pFilter_p       Pointer to Edrv filter structure.
+\param  fEnable_p       Flag determines if filter is enabled or disabled.
+
+*/
+//------------------------------------------------------------------------------
+static void setupVethBroadcast(tEdrvFilter* pFilter_p, BOOL fEnable_p)
+{
+    ami_setUint48Be(&pFilter_p->aFilterValue[0], C_DLL_MACADDR_MASK);
+    ami_setUint48Be(&pFilter_p->aFilterMask[0], C_DLL_MACADDR_MASK);
+
+    pFilter_p->pTxBuffer = NULL;
+    pFilter_p->fEnable = fEnable_p;
+}
+#endif
 
 /// \}

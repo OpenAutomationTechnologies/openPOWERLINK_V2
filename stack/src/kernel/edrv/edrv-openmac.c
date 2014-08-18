@@ -154,6 +154,9 @@ typedef struct
 #if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC != FALSE
     OMETH_HOOK_H        pRxAsndHookInst;                        ///< Pointer to the ASnd receive hook
 #endif
+#if defined(CONFIG_INCLUDE_VETH)
+    OMETH_HOOK_H        pRxVethHookInst;                        ///< Pointer to virtual Ethernet receive hook
+#endif
 } tEdrvInstance;
 
 //------------------------------------------------------------------------------
@@ -261,6 +264,17 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     if (edrvInstance_l.pRxAsndHookInst == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Rx hook creation for Asnd frames failed!\n", __func__);
+        ret = kErrorNoResource;
+        goto Exit;
+    }
+#endif
+
+#if defined(CONFIG_INCLUDE_VETH)
+    // initialize Rx hook for Veth frames with pending allowed
+    edrvInstance_l.pRxVethHookInst = omethHookCreate(edrvInstance_l.pMacInst, rxHook, CONFIG_EDRV_VETH_DEFFERRED_RX_BUFFERS);
+    if(edrvInstance_l.pRxVethHookInst == NULL)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() Rx hook creation for Veth frames failed!\n", __func__);
         ret = kErrorNoResource;
         goto Exit;
     }
@@ -983,6 +997,12 @@ static tOplkError initRxFilters(void)
 #if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC != FALSE
             case DLLK_FILTER_ASND:
                 pHook = edrvInstance_l.pRxAsndHookInst;
+                break;
+#endif
+#if defined(CONFIG_INCLUDE_VETH)
+            case DLLK_FILTER_VETH_UNICAST:
+            case DLLK_FILTER_VETH_BROADCAST:
+                pHook = edrvInstance_l.pRxVethHookInst;
                 break;
 #endif
             default:
