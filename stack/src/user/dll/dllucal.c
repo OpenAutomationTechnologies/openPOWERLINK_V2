@@ -113,9 +113,10 @@ static tDlluCalInstance     instance_l;
 
 static tOplkError SetAsndServiceIdFilter(tDllAsndServiceId ServiceId_p,
                                          tDllAsndFilter Filter_p);
-static tOplkError HandleRxAsndFrame(tFrameInfo* pFrameInfo_p);
-static tOplkError HandleRxAsndFrameInfo(tFrameInfo* pFrameInfo_p);
-static tOplkError HandleNotRxAsndFrame(tDllAsndNotRx* pAsndNotRx_p);
+static tOplkError handleRxAsyncFrame(tFrameInfo* pFrameInfo_p);
+static tOplkError handleRxAsndFrame(tFrameInfo* pFrameInfo_p);
+static tOplkError handleRxAsyncFrameInfo(tFrameInfo* pFrameInfo_p);
+static tOplkError handleNotRxAsndFrame(tDllAsndNotRx* pAsndNotRx_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -225,19 +226,19 @@ tOplkError dllucal_process(tEvent* pEvent_p)
             FrameInfo.pFrame = (tPlkFrame*)pEvent_p->pEventArg;
             FrameInfo.frameSize = pEvent_p->eventArgSize;
             pFrameInfo = &FrameInfo;
-            ret = HandleRxAsndFrame(pFrameInfo);
+            ret = handleRxAsyncFrame(pFrameInfo);
             break;
 
         case kEventTypeAsndRxInfo:
             // Argument pointer is frame info
             pFrameInfo = (tFrameInfo*)pEvent_p->pEventArg;
 
-            ret = HandleRxAsndFrameInfo(pFrameInfo);
+            ret = handleRxAsyncFrameInfo(pFrameInfo);
             break;
 
         case kEventTypeAsndNotRx:
             pAsndNotRx = (tDllAsndNotRx*)pEvent_p->pEventArg;
-            ret = HandleNotRxAsndFrame(pAsndNotRx);
+            ret = handleNotRxAsndFrame(pAsndNotRx);
             break;
 
         default:
@@ -600,14 +601,49 @@ static tOplkError SetAsndServiceIdFilter(tDllAsndServiceId serviceId_p,
 
 //------------------------------------------------------------------------------
 /**
-\brief  Forward Asnd frame to desired user space module
+\brief  Forward asynchronous frame to desired user space module
+
+This function forwards the asynchronous frame to the desired module depending
+on the frame type (e.g. POWERLINK or non-POWERLINK frames).
 
 \param  pFrameInfo_p             Pointer to the frame information structure
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError HandleRxAsndFrame(tFrameInfo *pFrameInfo_p)
+static tOplkError handleRxAsyncFrame(tFrameInfo* pFrameInfo_p)
+{
+    tOplkError  ret = kErrorOk;
+    UINT16      etherType = ami_getUint16Be(&pFrameInfo_p->pFrame->etherType);
+
+    switch (etherType)
+    {
+        case C_DLL_ETHERTYPE_EPL:
+            ret = handleRxAsndFrame(pFrameInfo_p);
+            break;
+
+        default:
+            DEBUG_LVL_DLL_TRACE("Received frame with etherType=0x%04X\n", etherType);
+            break;
+    }
+
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Forward Asnd frame to desired user space module
+
+This function forwards Asnd frames depending on the Asnd service ID to the
+corresponding module. If the module has not registered any callback function,
+the Asnd frame is ignored silently.
+
+\param  pFrameInfo_p             Pointer to the frame information structure
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError handleRxAsndFrame(tFrameInfo *pFrameInfo_p)
 {
     tMsgType        msgType;
     unsigned int    asndServiceId;
@@ -645,7 +681,7 @@ user layer modules.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError HandleRxAsndFrameInfo(tFrameInfo* pFrameInfo_p)
+static tOplkError handleRxAsyncFrameInfo(tFrameInfo* pFrameInfo_p)
 {
     tOplkError      ret;
     tEvent          event;
@@ -663,8 +699,8 @@ static tOplkError HandleRxAsndFrameInfo(tFrameInfo* pFrameInfo_p)
     // Set reference to kernel buffer for processing
     pFrameInfo_p->pFrame = pAcqBuffer;
 
-    // Now handle the Asnd frame
-    ret = HandleRxAsndFrame(pFrameInfo_p);
+    // Now handle the async frame
+    ret = handleRxAsyncFrame(pFrameInfo_p);
 
     // Free the acquired kernel buffer
     memmap_unmapKernelBuffer(pAcqBuffer);
@@ -680,7 +716,7 @@ static tOplkError HandleRxAsndFrameInfo(tFrameInfo* pFrameInfo_p)
 
     eventu_postEvent(&event);
 
-    // Return HandleRxAsndFrame() return value (ignore others)
+    // Return handleRxAsyncFrameInfo() return value (ignore others)
     return ret;
 }
 
@@ -693,7 +729,7 @@ static tOplkError HandleRxAsndFrameInfo(tFrameInfo* pFrameInfo_p)
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError HandleNotRxAsndFrame(tDllAsndNotRx* pAsndNotRx_p)
+static tOplkError handleNotRxAsndFrame(tDllAsndNotRx* pAsndNotRx_p)
 {
     tOplkError  ret = kErrorOk;
     BYTE        aBuffer[DLLUCAL_NOTRX_FRAME_SIZE];
