@@ -82,7 +82,7 @@ INCLUDE_DIRECTORIES(
 ADD_DEFINITIONS("-Wall -Wextra -pedantic -std=c99")
 
 # set macro to change mapping to internal memory
-ADD_DEFINITIONS(-DCONFIG_CN)
+ADD_DEFINITIONS(-DCONFIG_CN -DCONFIG_PCP=TRUE)
 
 ################################################################################
 # Handle target specific functions

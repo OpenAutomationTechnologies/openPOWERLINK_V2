@@ -54,16 +54,24 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#ifdef CONFIG_HOST
+#ifndef CONFIG_PCP
+#error "CONFIG_PCP is needed for this implementation!"
+#endif
+
+#if (CONFIG_PCP == FALSE)
 #define TGT_INTC_BASE           XPAR_INTC_0_BASEADDR
 #define TGT_TIMER_INTR          XPAR_HOST_INTC_FIT_TIMER_0_INTERRUPT_INTR
 
-#elif defined CONFIG_PCP
+#elif (CONFIG_PCP == TRUE)
 #define TGT_INTC_BASE           XPAR_INTC_0_BASEADDR
 #define TGT_TIMER_INTR          XPAR_PCP_INTC_FIT_TIMER_0_INTERRUPT_INTR
+
+#else
+#error  "Unable to determine the processor instance"
 #endif
 
 #define TGT_TIMER_INTR_MASK     XPAR_FIT_TIMER_0_INTERRUPT_MASK
+
 //------------------------------------------------------------------------------
 // module global vars
 //------------------------------------------------------------------------------
