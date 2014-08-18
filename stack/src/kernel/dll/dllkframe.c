@@ -235,7 +235,7 @@ tEdrvReleaseRxBuffer dllkframe_processFrameReceived(tEdrvRxBuffer* pRxBuffer_p)
         //TRACE("cbFrameReceived: pfnCbAsync=0x%p SrcMAC=0x%llx\n", dllkInstance_g.pfnCbAsync, ami_getUint48Be(pFrame->aSrcMac));
         if (dllkInstance_g.pfnCbAsync != NULL)
         {   // handler for async frames is registered
-            dllkInstance_g.pfnCbAsync(&frameInfo);
+            ret = dllkInstance_g.pfnCbAsync(&frameInfo, &releaseRxBuffer);
         }
         goto Exit;
     }

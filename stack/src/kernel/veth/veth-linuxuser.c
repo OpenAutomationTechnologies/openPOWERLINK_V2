@@ -115,7 +115,8 @@ static tVethInstance        vethInstance_l;
 // local function prototypes
 //------------------------------------------------------------------------------
 static void getMacAdrs(UINT8* pMac_p);
-static tOplkError veth_receiveFrame(tFrameInfo* pFrameInfo_p);
+static tOplkError veth_receiveFrame(tFrameInfo* pFrameInfo_p,
+                                    tEdrvReleaseRxBuffer* pReleaseRxBuffer_p);
 static void* vethRecvThread(void* pArg_p);
 
 //------------------------------------------------------------------------------
@@ -257,11 +258,15 @@ static void getMacAdrs(UINT8* pMac_p)
 The function receives a frame from the virtual Ethernet interface.
 
 \param  pFrameInfo_p        Pointer to frame information of received frame.
+\param  pReleaseRxBuffer_p  Pointer to buffer release flag. The function must
+                            set this flag to determine if the RxBuffer could be
+                            released immediately.
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError veth_receiveFrame(tFrameInfo* pFrameInfo_p)
+static tOplkError veth_receiveFrame(tFrameInfo* pFrameInfo_p,
+                                    tEdrvReleaseRxBuffer* pReleaseRxBuffer_p)
 {
     UINT            nwrite;
 
@@ -277,6 +282,9 @@ static tOplkError veth_receiveFrame(tFrameInfo* pFrameInfo_p)
     {
         DEBUG_LVL_VETH_TRACE("Error writing data to virtual Ethernet interface!\n");
     }
+
+    *pReleaseRxBuffer_p = kEdrvReleaseRxBufferImmediately;
+
     return kErrorOk;
 }
 

@@ -62,7 +62,21 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-typedef tOplkError (*tDllkCbAsync)(tFrameInfo* pFrameInfo_p);
+/**
+\brief Type for DLLk asynchronous frame receive callback function pointer
+
+This type defines a function pointer to the DLLk asynchronous frame received
+callback function.
+
+\param  pFrameInfo_p        Frame info of the received frame
+\param  pReleaseRxBuffer_p  Pointer to buffer release flag. The function must
+                            set this flag to determine if the RxBuffer could be
+                            released immediately.
+
+\return The function returns a tOplkError error code
+*/
+typedef tOplkError (*tDllkCbAsync)(tFrameInfo* pFrameInfo_p,
+                                   tEdrvReleaseRxBuffer* pReleaseRxBuffer_p);
 
 /**
 \brief Structure defining DLLk init parameters
