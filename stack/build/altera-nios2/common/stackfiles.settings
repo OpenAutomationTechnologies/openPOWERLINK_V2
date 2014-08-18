@@ -165,7 +165,7 @@ ${KERNEL_SOURCE_DIR}/ctrl/ctrlk.c \
 "
 
 ################################################################################
-# Control DLL CAL sources
+# Kernel Control CAL sources
 
 CTRL_KCAL_DIRECT_SOURCES="\
 ${KERNEL_SOURCE_DIR}/ctrl/ctrlkcal-direct.c \
@@ -225,6 +225,7 @@ ${KERNEL_SOURCE_DIR}/pdo/pdokcalsync-hostif.c \
 HARDWARE_DRIVER_OPENMAC_SOURCES="\
 ${KERNEL_SOURCE_DIR}/timer/timestamp-openmac.c \
 ${KERNEL_SOURCE_DIR}/edrv/edrv-openmac.c \
+${KERNEL_SOURCE_DIR}/veth/veth-generic.c \
 ${HW_DRIVERS_DIR}/openmac/src/omethlib.c \
 ${HW_DRIVERS_DIR}/openmac/src/omethlibint.c \
 "
