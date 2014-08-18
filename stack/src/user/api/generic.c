@@ -657,12 +657,23 @@ tOplkError oplk_sendAsndFrame(UINT8 dstNodeId_p, tAsndFrame* pAsndFrame_p,
     tFrameInfo      frameInfo;
     BYTE            buffer[C_DLL_MAX_ASYNC_MTU];
     UINT            frameSize;
+    UINT16          asyncMtu;
+    tObdSize        obdSize;
 
     // Calculate size of frame (Asnd data + header)
     frameSize = asndSize_p + offsetof(tPlkFrame, data);
 
     // Check for correct input
     if ((pAsndFrame_p == NULL) || (frameSize >= sizeof(buffer)))
+        return kErrorReject;
+
+    // Check size against configured AsyncMTU value
+    obdSize = sizeof(UINT16);
+    ret = obd_readEntry(0x1F98, 8, &asyncMtu, &obdSize);
+    if (ret != kErrorOk)
+        return kErrorReject;
+
+    if (asndSize_p > asyncMtu)
         return kErrorReject;
 
     // Set up frame info
