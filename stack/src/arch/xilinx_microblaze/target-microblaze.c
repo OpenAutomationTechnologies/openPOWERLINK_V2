@@ -2,16 +2,17 @@
 ********************************************************************************
 \file   xilinx_microblaze/target-microblaze.c
 
-\brief  target specific functions for Microblaze without OS
+\brief  Target specific functions for Microblaze without OS
 
 This target depending module provides several functions that are necessary for
-systems without shared buffer and any OS.
+systems without OS and not using shared buffer library.
 
 \ingroup module_target
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -59,6 +60,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #define TGTCONIO_MS_IN_US(x)    (x * 1000U)
 
+#ifdef CONFIG_HOST
+#define TGT_INTC_BASE       XPAR_HOST_INTC_BASEADDR
+#elif defined CONFIG_PCP
+#define TGT_INTC_BASE       XPAR_PCP_INTC_BASEADDR
+#endif
 //------------------------------------------------------------------------------
 // module global vars
 //------------------------------------------------------------------------------
@@ -107,7 +113,7 @@ This function returns the current system tick determined by the system timer.
 //------------------------------------------------------------------------------
 UINT32 target_getTickCount(void)
 {
-    UINT32 ticks;
+    UINT32    ticks;
 
     ticks = timer_getMSCount();
 
@@ -128,17 +134,17 @@ This function enables/disables global interrupts.
 //------------------------------------------------------------------------------
 void target_enableGlobalInterrupt(UINT8 fEnable_p)
 {
-    static INT lockCount = 0;
+    static INT    lockCount = 0;
 
-    if (fEnable_p != FALSE)
-    {   // restore interrupts
+    if (fEnable_p != FALSE) // restore interrupts
+    {
         if (--lockCount == 0)
         {
             enableInterruptMaster();
         }
     }
     else
-    {   // disable interrupts
+    {                       // disable interrupts
         if (lockCount == 0)
         {
             disableInterruptMaster();
@@ -225,7 +231,7 @@ milliseconds has elapsed.
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-void target_msleep (UINT32 milliSeconds_p)
+void target_msleep(UINT32 milliSeconds_p)
 {
     usleep(TGTCONIO_MS_IN_US(milliSeconds_p));
 }
@@ -246,7 +252,7 @@ void target_msleep (UINT32 milliSeconds_p)
 static void enableInterruptMaster(void)
 {
     //enable global interrupt master
-    XIntc_MasterEnable(XPAR_PCP_INTC_BASEADDR);
+    XIntc_MasterEnable(TGT_INTC_BASE);
 }
 
 //------------------------------------------------------------------------------
@@ -259,6 +265,7 @@ static void enableInterruptMaster(void)
 static void disableInterruptMaster(void)
 {
     //disable global interrupt master
-    XIntc_MasterDisable(XPAR_PCP_INTC_BASEADDR);
+    XIntc_MasterDisable(TGT_INTC_BASE);
 }
+
 ///\}
