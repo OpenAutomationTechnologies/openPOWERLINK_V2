@@ -51,6 +51,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // typedef
 //------------------------------------------------------------------------------
 typedef tOplkError (*tDlluCbAsnd)(tFrameInfo* pFrameInfo_p);
+typedef tOplkError (*tDlluCbNonPlk)(tFrameInfo* pFrameInfo_p);
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -64,6 +65,9 @@ tOplkError dllucal_init(void);
 tOplkError dllucal_exit(void);
 tOplkError dllucal_config(tDllConfigParam* pDllConfigParam_p);
 tOplkError dllucal_setIdentity(tDllIdentParam* pDllIdentParam_p);
+#if defined(CONFIG_INCLUDE_VETH)
+tOplkError dllucal_regNonPlkHandler(tDlluCbNonPlk pfnNonPlkCb_p);
+#endif
 tOplkError dllucal_regAsndService(tDllAsndServiceId ServiceId_p,
                                   tDlluCbAsnd pfnDlluCbAsnd_p,
                                   tDllAsndFilter Filter_p);

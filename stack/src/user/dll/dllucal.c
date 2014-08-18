@@ -88,6 +88,10 @@ typedef struct
     tDlluCbAsnd              apfnDlluCbAsnd[DLL_MAX_ASND_SERVICE_ID];
                                                         ///< Array of callback functions registered for receiving incoming ASnd frames with a specific ServiceId
 
+#if defined(CONFIG_INCLUDE_VETH)
+    tDlluCbNonPlk            pfnDlluCbNonPlk;           ///< Callback function for received non-POWERLINK frames
+#endif
+
     tDllCalQueueInstance     dllCalQueueTxNmt;          ///< DLL CAL queue instance for NMT priority
     tDllCalFuncIntf*         pTxNmtFuncs;               ///< Function pointer to the TX functions for NMT priority
 
@@ -302,6 +306,32 @@ tOplkError dllucal_setIdentity(tDllIdentParam* pDllIdentParam_p)
     ret = eventu_postEvent(&event);
     return ret;
 }
+
+#if defined(CONFIG_INCLUDE_VETH)
+//------------------------------------------------------------------------------
+/**
+\brief  Register non-POWERLINK receive handler
+
+This function register the handler for non-POWERLINK frames.
+
+pfnNonPlkCb_p   Pointer to callback function
+
+\return The function returns a tOplkError error code.
+
+\ingroup module_dllucal
+*/
+//------------------------------------------------------------------------------
+tOplkError dllucal_regNonPlkHandler(tDlluCbNonPlk pfnNonPlkCb_p)
+{
+    tOplkError ret = kErrorOk;
+
+    instance_l.pfnDlluCbNonPlk = pfnNonPlkCb_p;
+
+    //jz Disable vethcal forwarding if no callback is registered?
+
+    return ret;
+}
+#endif
 
 //------------------------------------------------------------------------------
 /**
@@ -624,6 +654,12 @@ static tOplkError handleRxAsyncFrame(tFrameInfo* pFrameInfo_p)
 
         default:
             DEBUG_LVL_DLL_TRACE("Received frame with etherType=0x%04X\n", etherType);
+#if defined(CONFIG_INCLUDE_VETH)
+            if (instance_l.pfnDlluCbNonPlk != NULL)
+            {
+                ret = instance_l.pfnDlluCbNonPlk(pFrameInfo_p);
+            }
+#endif
             break;
     }
 
