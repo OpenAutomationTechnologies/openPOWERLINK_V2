@@ -47,6 +47,11 @@ OPTION (CFG_COMPILE_LIB_CNAPP_KERNELINTF        "Compile openPOWERLINK CN applic
 OPTION (CFG_COMPILE_LIB_CNDRV_PCAP              "Compile openPOWERLINK CN driver library for linux userspace (pcap)" ON)
 
 ################################################################################
+# Options for shared libraries
+
+OPTION (CFG_COMPILE_SHARED_LIBRARY              "Build openPOWERLINK library as shared library" OFF)
+
+################################################################################
 # Add library subdirectories
 
 # Add MN libraries
