@@ -185,6 +185,10 @@ static tOplkError addInstance(tDllCalQueueInstance* ppDllCalQueue_p,
             error = circbuf_connect(CIRCBUF_DLLCAL_TXSYNC, &pDllCalCircBufInstance->pCircBufInstance);
             break;
 
+        case kDllCalQueueTxVeth:
+            error = circbuf_connect(CIRCBUF_DLLCAL_TXVETH, &pDllCalCircBufInstance->pCircBufInstance);
+            break;
+
         default:
             ret = kErrorInvalidInstanceParam;
             break;

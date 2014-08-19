@@ -90,6 +90,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // local types
 //------------------------------------------------------------------------------
 /**
+\brief Asynchronous Tx queue select enum for generic priority
+
+This enum is used to select the asynchronous Tx queue with generic priority.
+*/
+typedef enum
+{
+    kDllkCalTxQueueSelectGen    = 0,    ///< TxGen is selected
+    kDllkCalTxQueueSelectVeth   = 1,    ///< TxVeth is selected
+    kDllkCalTxQueueSelectLast,          ///< Dummy enum to get select count
+} tDllkCalTxQueueSelect;
+
+/**
 \brief DLLk CAL instance type
 
 This structure defines an instance of the POWERLINK Data Link Layer
@@ -97,6 +109,13 @@ Communication Abstraction Layer kernel module.
 */
 typedef struct
 {
+#if defined(CONFIG_INCLUDE_VETH)
+    tDllCalQueueInstance    dllCalQueueTxVeth;      ///< DLL CAL queue instance for virtual Ethernet
+    tDllCalFuncIntf*        pTxVethFuncs;           ///< Function pointer to the TX functions for virtual Ethernet
+#endif
+
+    tDllkCalTxQueueSelect   currentTxQueueSelect;   ///< Current Tx queue (TxGen vs. TxVeth)
+
     tDllCalQueueInstance    dllCalQueueTxNmt;       ///< DLL CAL queue instance for NMT priority
     tDllCalFuncIntf*        pTxNmtFuncs;            ///< Function pointer to the TX functions for NMT priority
 
@@ -142,6 +161,9 @@ static BOOL getMnSyncRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p,
                              tSoaPayload* pSoaPayload_p);
 #endif
 
+static tOplkError sendGenericAsyncFrame(tFrameInfo* pFrameInfo_p);
+static tOplkError getGenericAsyncFrame(UINT8* pFrame_p, UINT* pFrameSize_p);
+
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
 //============================================================================//
@@ -171,6 +193,9 @@ tOplkError dllkcal_init(void)
     instance_l.pTxGenFuncs = GET_DLLKCAL_INTERFACE();
 #if defined(CONFIG_INCLUDE_NMT_MN)
     instance_l.pTxSyncFuncs = GET_DLLKCAL_INTERFACE();
+#endif
+#if defined(CONFIG_INCLUDE_VETH)
+    instance_l.pTxVethFuncs = GET_DLLKCAL_INTERFACE();
 #endif
 
     ret = instance_l.pTxNmtFuncs->pfnAddInstance(&instance_l.dllCalQueueTxNmt,
@@ -230,6 +255,17 @@ tOplkError dllkcal_init(void)
     }
 #endif
 
+#if defined(CONFIG_INCLUDE_VETH)
+    ret = instance_l.pTxVethFuncs->pfnAddInstance(&instance_l.dllCalQueueTxVeth,
+                                                  kDllCalQueueTxVeth);
+    if (ret != kErrorOk)
+    {
+        goto Exit;
+    }
+#endif
+
+    instance_l.currentTxQueueSelect = kDllkCalTxQueueSelectGen;
+
 Exit:
     return ret;
 }
@@ -260,6 +296,9 @@ tOplkError dllkcal_exit(void)
     instance_l.pTxGenFuncs->pfnDelInstance(instance_l.dllCalQueueTxGen);
 #if defined(CONFIG_INCLUDE_NMT_MN)
     instance_l.pTxSyncFuncs->pfnDelInstance(instance_l.dllCalQueueTxSync);
+#endif
+#if defined(CONFIG_INCLUDE_VETH)
+    instance_l.pTxVethFuncs->pfnDelInstance(instance_l.dllCalQueueTxVeth);
 #endif
 
     // reset instance structure
@@ -386,6 +425,7 @@ tOplkError dllkcal_getAsyncTxCount(tDllAsyncReqPriority* pPriority_p,
 {
     tOplkError  ret = kErrorOk;
     ULONG       frameCount;
+    ULONG       frameCountVeth;
 
     ret = instance_l.pTxNmtFuncs->pfnGetDataBlockCount(instance_l.dllCalQueueTxNmt,
                                                        &frameCount);
@@ -412,6 +452,19 @@ tOplkError dllkcal_getAsyncTxCount(tDllAsyncReqPriority* pPriority_p,
     {
         goto Exit;
     }
+
+#if defined(CONFIG_INCLUDE_VETH)
+    // Add Veth count to the generic queue count
+    ret = instance_l.pTxVethFuncs->pfnGetDataBlockCount(instance_l.dllCalQueueTxVeth,
+                                                        &frameCountVeth);
+    if (ret != kErrorOk)
+    {
+        goto Exit;
+    }
+    frameCount += frameCountVeth;
+#else
+    UNUSED_PARAMETER(frameCountVeth);
+#endif
 
     if (frameCount > instance_l.statistics.maxTxFrameCountGen)
     {
@@ -455,9 +508,7 @@ tOplkError dllkcal_getAsyncTxFrame(void* pFrame_p, UINT* pFrameSize_p,
             break;
 
         default:    // generic priority
-            ret = instance_l.pTxGenFuncs->pfnGetDataBlock(
-                                            instance_l.dllCalQueueTxGen,
-                                            (BYTE*)pFrame_p, pFrameSize_p);
+            ret = getGenericAsyncFrame((UINT8*)pFrame_p, pFrameSize_p);
             break;
     }
 
@@ -543,10 +594,7 @@ tOplkError dllkcal_sendAsyncFrame(tFrameInfo* pFrameInfo_p,
             break;
 
         default:    // generic priority
-            ret = instance_l.pTxGenFuncs->pfnInsertDataBlock(
-                                        instance_l.dllCalQueueTxGen,
-                                        (BYTE*)pFrameInfo_p->pFrame,
-                                        &(pFrameInfo_p->frameSize));
+            ret = sendGenericAsyncFrame(pFrameInfo_p);
             break;
     }
 
@@ -608,6 +656,14 @@ tOplkError dllkcal_writeAsyncFrame(tFrameInfo* pFrameInfo_p, tDllCalQueue dllQue
                                         &(pFrameInfo_p->frameSize));
             break;
 #endif
+#if defined(CONFIG_INCLUDE_VETH)
+        case kDllCalQueueTxVeth:   // virtual Ethernet
+            ret = instance_l.pTxVethFuncs->pfnInsertDataBlock(
+                                        instance_l.dllCalQueueTxVeth,
+                                        (UINT8*)pFrameInfo_p->pFrame,
+                                        &(pFrameInfo_p->frameSize));
+            break;
+#endif
         default:
             break;
     }
@@ -637,6 +693,12 @@ tOplkError dllkcal_clearAsyncBuffer(void)
     //ret is ignored
     ret = instance_l.pTxGenFuncs->pfnResetDataBlockQueue(
                                     instance_l.dllCalQueueTxGen, 1000);
+
+#if defined(CONFIG_INCLUDE_VETH)
+    //ret is ignored
+    ret = instance_l.pTxVethFuncs->pfnResetDataBlockQueue(
+                                    instance_l.dllCalQueueTxVeth, 1000);
+#endif
     return ret;
 }
 
@@ -688,6 +750,8 @@ The function returns statistics of the asynchronous queues
 tOplkError dllkcal_getStatistics(tDllkCalStatistics** ppStatistics)
 {
     tOplkError  ret = kErrorOk;
+    ULONG       frameCount;
+    ULONG       frameCountVeth;
 
     //ret is ignored
     ret = instance_l.pTxNmtFuncs->pfnGetDataBlockCount(instance_l.dllCalQueueTxNmt,
@@ -695,7 +759,17 @@ tOplkError dllkcal_getStatistics(tDllkCalStatistics** ppStatistics)
 
     //ret is ignored
     ret = instance_l.pTxGenFuncs->pfnGetDataBlockCount(instance_l.dllCalQueueTxGen,
-                                     &instance_l.statistics.curTxFrameCountGen);
+                                     &frameCount);
+
+#if defined(CONFIG_INCLUDE_VETH)
+    //ret is ignored
+    ret = instance_l.pTxVethFuncs->pfnGetDataBlockCount(instance_l.dllCalQueueTxVeth,
+                                     &frameCountVeth);
+    frameCount += frameCountVeth;
+#else
+    UNUSED_PARAMETER(frameCountVeth);
+#endif
+    instance_l.statistics.curTxFrameCountGen = frameCount;
 
     *ppStatistics = &instance_l.statistics;
     return ret;
@@ -1188,5 +1262,108 @@ static BOOL getMnSyncRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p,
 }
 
 #endif
+
+//------------------------------------------------------------------------------
+/**
+\brief  Send asynchronous frame
+
+This function sends an asynchronous frame with generic priority.
+The EtherType of the given frame determines the queue to be used for queuing.
+If the frame is a POWERLINK frame or EtherType is 0x0, the generic priority Tx
+queue is used. Other frame types (e.g. IP) are forwarded with the virtual
+Ethernet Tx queue.
+
+\param  pFrameInfo_p            Pointer to asynchronous frame. The frame size
+                                includes the ethernet header (14 bytes).
+\param  priority_p              Priority for sending this frame.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError sendGenericAsyncFrame(tFrameInfo* pFrameInfo_p)
+{
+    tOplkError  ret = kErrorOk;
+    UINT16      etherType = ami_getUint16Be(&pFrameInfo_p->pFrame->etherType);
+
+    if (etherType == 0 || etherType == C_DLL_ETHERTYPE_EPL)
+    {
+        ret = instance_l.pTxGenFuncs->pfnInsertDataBlock(
+                                    instance_l.dllCalQueueTxGen,
+                                    (UINT8*)pFrameInfo_p->pFrame,
+                                    &(pFrameInfo_p->frameSize));
+    }
+    else
+    {
+#if defined(CONFIG_INCLUDE_VETH)
+        ret = instance_l.pTxVethFuncs->pfnInsertDataBlock(
+                                    instance_l.dllCalQueueTxVeth,
+                                    (UINT8*)pFrameInfo_p->pFrame,
+                                    &(pFrameInfo_p->frameSize));
+#else
+        // Return error since virtual Ethernet is not existing!
+        ret = kErrorIllegalInstance;
+#endif
+    }
+
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Get current asynchronous frame with generic priority
+
+\param  pFrame_p             Pointer to the asynchronous frame
+\param  pFrameSize_p         Size of the asynchronous frame
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError getGenericAsyncFrame(UINT8* pFrame_p, UINT* pFrameSize_p)
+{
+    tOplkError  ret = kErrorOk;
+#if defined(CONFIG_INCLUDE_VETH)
+    UINT        i;
+
+    for (i=0; i<kDllkCalTxQueueSelectLast; i++)
+    {
+        switch (instance_l.currentTxQueueSelect)
+        {
+            case kDllkCalTxQueueSelectGen:
+                ret = instance_l.pTxGenFuncs->pfnGetDataBlock(
+                                            instance_l.dllCalQueueTxGen,
+                                            (UINT8*)pFrame_p, pFrameSize_p);
+
+                // Set current queue select to next queue
+                instance_l.currentTxQueueSelect = kDllkCalTxQueueSelectVeth;
+                break;
+
+            case kDllkCalTxQueueSelectVeth:
+                ret = instance_l.pTxVethFuncs->pfnGetDataBlock(
+                                            instance_l.dllCalQueueTxVeth,
+                                            (UINT8*)pFrame_p, pFrameSize_p);
+
+                // Set current queue select to next queue
+                instance_l.currentTxQueueSelect = kDllkCalTxQueueSelectGen;
+                break;
+
+            default:
+                DEBUG_LVL_ERROR_TRACE("%s current selected Tx queue %d invalid!\n",
+                                      __func__, instance_l.currentTxQueueSelect);
+                ret = kErrorDllInvalidParam;
+                break;
+        }
+
+        // Break loop earlier if data is found or an error happens
+        if (ret != kErrorDllAsyncTxBufferEmpty)
+            break;
+    }
+#else
+    ret = instance_l.pTxGenFuncs->pfnGetDataBlock(
+                                instance_l.dllCalQueueTxGen,
+                                (UINT8*)pFrame_p, pFrameSize_p);
+#endif
+
+    return ret;
+}
 
 /// \}

@@ -90,6 +90,8 @@ typedef struct
 
 #if defined(CONFIG_INCLUDE_VETH)
     tDlluCbNonPlk            pfnDlluCbNonPlk;           ///< Callback function for received non-POWERLINK frames
+    tDllCalQueueInstance     dllCalQueueTxVeth;         ///< DLL CAL queue instance for virtual Ethernet
+    tDllCalFuncIntf*         pTxVethFuncs;               ///< Function pointer to the TX functions for virtual Ethernet
 #endif
 
     tDllCalQueueInstance     dllCalQueueTxNmt;          ///< DLL CAL queue instance for NMT priority
@@ -121,6 +123,7 @@ static tOplkError handleRxAsyncFrame(tFrameInfo* pFrameInfo_p);
 static tOplkError handleRxAsndFrame(tFrameInfo* pFrameInfo_p);
 static tOplkError handleRxAsyncFrameInfo(tFrameInfo* pFrameInfo_p);
 static tOplkError handleNotRxAsndFrame(tDllAsndNotRx* pAsndNotRx_p);
+static tOplkError sendGenericAsyncFrame(tFrameInfo* pFrameInfo_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -149,6 +152,9 @@ tOplkError dllucal_init(void)
 #if defined(CONFIG_INCLUDE_NMT_MN)
     instance_l.pTxSyncFuncs = GET_DLLUCAL_INTERFACE();
 #endif
+#if defined(CONFIG_INCLUDE_VETH)
+    instance_l.pTxVethFuncs = GET_DLLUCAL_INTERFACE();
+#endif
 
     ret = instance_l.pTxNmtFuncs->pfnAddInstance(&instance_l.dllCalQueueTxNmt,
                                                  kDllCalQueueTxNmt);
@@ -167,6 +173,15 @@ tOplkError dllucal_init(void)
 #if defined(CONFIG_INCLUDE_NMT_MN)
     ret = instance_l.pTxSyncFuncs->pfnAddInstance(&instance_l.dllCalQueueTxSync,
                                                   kDllCalQueueTxSync);
+    if (ret != kErrorOk)
+    {
+        goto Exit;
+    }
+#endif
+
+#if defined(CONFIG_INCLUDE_VETH)
+    ret = instance_l.pTxVethFuncs->pfnAddInstance(&instance_l.dllCalQueueTxVeth,
+                                                  kDllCalQueueTxVeth);
     if (ret != kErrorOk)
     {
         goto Exit;
@@ -196,6 +211,9 @@ tOplkError dllucal_exit(void)
     instance_l.pTxGenFuncs->pfnDelInstance(instance_l.dllCalQueueTxGen);
 #if defined(CONFIG_INCLUDE_NMT_MN)
     instance_l.pTxSyncFuncs->pfnDelInstance(instance_l.dllCalQueueTxSync);
+#endif
+#if defined(CONFIG_INCLUDE_VETH)
+    instance_l.pTxVethFuncs->pfnDelInstance(instance_l.dllCalQueueTxVeth);
 #endif
     // reset instance structure
     OPLK_MEMSET(&instance_l, 0, sizeof(instance_l));
@@ -406,10 +424,7 @@ tOplkError dllucal_sendAsyncFrame(tFrameInfo* pFrameInfo_p,
             break;
 
         default:
-            ret = instance_l.pTxGenFuncs->pfnInsertDataBlock(
-                                        instance_l.dllCalQueueTxGen,
-                                        (BYTE*)pFrameInfo_p->pFrame,
-                                        &(pFrameInfo_p->frameSize));
+            ret = sendGenericAsyncFrame(pFrameInfo_p);
             break;
     }
 
@@ -787,6 +802,54 @@ static tOplkError handleNotRxAsndFrame(tDllAsndNotRx* pAsndNotRx_p)
         {   // handler was registered
             ret = instance_l.apfnDlluCbAsnd[asndServiceId](&frameInfo);
         }
+    }
+
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Send asynchronous frame
+
+This function sends an asynchronous frame with generic priority.
+The EtherType of the given frame determines the queue to be used for queuing.
+If the frame is a POWERLINK frame or EtherType is 0x0, the generic priority Tx
+queue is used. Other frame types (e.g. IP) are forwarded with the virtual
+Ethernet Tx queue.
+
+\param  pFrameInfo_p            Pointer to asynchronous frame. The frame size
+                                includes the ethernet header (14 bytes).
+\param  priority_p              Priority for sending this frame.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError sendGenericAsyncFrame(tFrameInfo* pFrameInfo_p)
+{
+    tOplkError  ret = kErrorOk;
+    UINT16      etherType = ami_getUint16Be(&pFrameInfo_p->pFrame->etherType);
+
+    if (etherType == 0 || etherType == C_DLL_ETHERTYPE_EPL)
+    {
+        ret = instance_l.pTxGenFuncs->pfnInsertDataBlock(
+                                    instance_l.dllCalQueueTxGen,
+                                    (BYTE*)pFrameInfo_p->pFrame,
+                                    &(pFrameInfo_p->frameSize));
+    }
+    else
+    {
+#if defined(CONFIG_INCLUDE_VETH)
+        ret = instance_l.pTxVethFuncs->pfnInsertDataBlock(
+                                    instance_l.dllCalQueueTxVeth,
+                                    (UINT8*)pFrameInfo_p->pFrame,
+                                    &(pFrameInfo_p->frameSize));
+#else
+    // Return error since virtual Ethernet is not existing!
+    ret = kErrorIllegalInstance;
+    DEBUG_LVL_ERROR_TRACE("%s() frame cannot be send, "
+                          "because virtual Ethernet is inactive!\n",
+                          __func__);
+#endif
     }
 
     return ret;

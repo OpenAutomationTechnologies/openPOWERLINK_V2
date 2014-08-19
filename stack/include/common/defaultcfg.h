@@ -81,6 +81,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CONFIG_DLLCAL_SIZE_CIRCBUF_REQ_STATUS           2048                // Default size for status request queue
 #endif
 
+#ifndef CONFIG_DLLCAL_BUFFER_SIZE_TX_VETH
+#define CONFIG_DLLCAL_BUFFER_SIZE_TX_VETH               32768               // Default size for virtual Ethernet Tx queue
+#endif
+
 #ifndef CONFIG_DLL_PRES_CHAINING_CN
 #define CONFIG_DLL_PRES_CHAINING_CN                     FALSE
 #endif

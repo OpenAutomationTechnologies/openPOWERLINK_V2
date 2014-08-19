@@ -151,6 +151,7 @@ These constants determine the different queue implementations.
 #define CIRCBUF_DLLCAL_CN_REQ_GEN                       8                   ///< Generic request queue for MN asynchronous scheduler
 #define CIRCBUF_DLLCAL_CN_REQ_IDENT                     9                   ///< Ident request queue for MN asynchronous scheduler
 #define CIRCBUF_DLLCAL_CN_REQ_STATUS                    10                  ///< Status request queue for MN asynchronous scheduler
+#define CIRCBUF_DLLCAL_TXVETH                           11                  ///< Queue for sending virtual Ethernet frames in the DLLCAL
 /// \}
 
 //------------------------------------------------------------------------------

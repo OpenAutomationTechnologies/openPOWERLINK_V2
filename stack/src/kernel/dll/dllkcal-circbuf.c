@@ -186,6 +186,11 @@ static tOplkError addInstance(tDllCalQueueInstance* ppDllCalQueue_p,
                                   &pDllCalCircBufInstance->pCircBufInstance);
             break;
 
+        case kDllCalQueueTxVeth:
+            error = circbuf_alloc(CIRCBUF_DLLCAL_TXVETH, CONFIG_DLLCAL_BUFFER_SIZE_TX_VETH,
+                                  &pDllCalCircBufInstance->pCircBufInstance);
+            break;
+
         default:
             DEBUG_LVL_ERROR_TRACE("%s() Invalid Queue!\n", __func__);
             ret = kErrorInvalidInstanceParam;

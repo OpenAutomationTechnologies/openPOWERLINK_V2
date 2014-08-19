@@ -93,6 +93,7 @@ const tHostifInstanceId hostifInstance[NR_OF_CIRC_BUFFERS] =
         kHostifInstIdInvalid,       ///< Generic request queue for MN asynchronous scheduler
         kHostifInstIdInvalid,       ///< Ident request queue for MN asynchronous scheduler
         kHostifInstIdInvalid,       ///< Status request queue for MN asynchronous scheduler
+        kHostifInstIdTxVethQueue,   ///< Queue for sending virtual Ethernet frames in the DLLCAL
 };
 
 #if CONFIG_HOSTIF_PCP == TRUE

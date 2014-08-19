@@ -58,6 +58,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CONFIG_DLLCAL_BUFFER_SIZE_TX_SYNC  8192
 #endif
 
+#ifndef CONFIG_DLLCAL_BUFFER_SIZE_TX_VETH
+#define CONFIG_DLLCAL_BUFFER_SIZE_TX_VETH  8192
+#endif
+
 /* setup interface getting function for DLLCAL queue */
 #if (CONFIG_DLLCAL_QUEUE == DIRECT_QUEUE)
 #define GET_DLLKCAL_INTERFACE dllcaldirect_getInterface
@@ -99,6 +103,7 @@ typedef enum
     kDllCalQueueTxNmt        = 0x01, ///< TX NMT queue
     kDllCalQueueTxGen        = 0x02, ///< TX Generic queue
     kDllCalQueueTxSync       = 0x03, ///< Tx Sync queue
+    kDllCalQueueTxVeth       = 0x04, ///< Virtual Ethernet Tx queue
 } tDllCalQueue;
 
 /**
