@@ -60,11 +60,22 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #define TGTCONIO_MS_IN_US(x)    (x * 1000U)
 
-#ifdef CONFIG_HOST
+#if defined CONFIG_PCP
+#ifdef CONFIG_PCP == FALSE
 #define TGT_INTC_BASE       XPAR_HOST_INTC_BASEADDR
-#elif defined CONFIG_PCP
+
+#elif CONFIG_PCP == TRUE
 #define TGT_INTC_BASE       XPAR_PCP_INTC_BASEADDR
+
+#else
+#error  "Unable to determine the processor instance"
 #endif
+
+#else // CONFIG_PCP
+#error  "No processor instance arguement passed"
+
+#endif // CONFIG_PCP
+
 //------------------------------------------------------------------------------
 // module global vars
 //------------------------------------------------------------------------------
