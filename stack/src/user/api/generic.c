@@ -636,16 +636,22 @@ tOplkError oplk_writeLocalObject(UINT index_p, UINT subindex_p, void* pSrcData_p
 /**
 \brief  Send a generic ASnd frame
 
-The function sends a generic ASnd frame.
+The function sends a generic ASnd frame to the specified node. The function
+queues the frame into the generic ASnd queue and immediately returns. The
+sending of the frame is then controlled by the asynchronous scheduler.
 
-\param  dstNodeId_p         Destination Node ID
+\param  dstNodeId_p         Destination Node ID to send the ASnd frame to.
 \param  pAsndFrame_p        Pointer to ASnd frame which should be sent.
 \param  asndSize_p          Size of ASnd frame to send. The size contains the
-                            service ID and the payload.
+                            service ID and the payload. The size cannot
+                            exceed the maximum asynchronous size configured
+                            in AsyncMTU.
 
 \return The function returns a \ref tOplkError error code.
-\retval kErrorOk          ASnd frame was successfully sent.
-\retval Other             Error occurred while sending the ASnd frame.
+\retval kErrorOk          The ASnd frame was successfully queued into the
+                          generic ASnd buffer.
+\retval Other             Error occurred while adding the ASnd frame into
+                          the generic ASnd buffer.
 
 \ingroup module_api
 */
