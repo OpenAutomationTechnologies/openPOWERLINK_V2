@@ -69,6 +69,7 @@ tOplkError ctrlu_processStack(void);
 BOOL       ctrlu_checkKernelStack(void);
 tOplkError ctrlu_callUserEventCallback(tOplkApiEventType eventType_p, tOplkApiEventArg* pEventArg_p);
 tOplkError ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p);
+UINT8*     ctrlu_getEthMacAddr(void);
 
 #ifdef __cplusplus
 }

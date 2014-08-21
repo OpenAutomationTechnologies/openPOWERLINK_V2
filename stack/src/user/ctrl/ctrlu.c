@@ -759,6 +759,23 @@ tOplkError ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Get Ethernet Interface MAC address
+
+The function returns the Ethernet Interface MAC address used by the
+Ethernet controller.
+
+\return The function returns the Ethernet MAC address.
+
+\ingroup module_ctrlu
+*/
+//------------------------------------------------------------------------------
+UINT8* ctrlu_getEthMacAddr(void)
+{
+    return &ctrlInstance_l.initParam.aMacAddress[0];
+}
+
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//

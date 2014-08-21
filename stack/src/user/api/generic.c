@@ -1081,6 +1081,34 @@ tOplkError oplk_getIdentResponse(UINT nodeId_p, tIdentResponse** ppIdentResponse
 
 //------------------------------------------------------------------------------
 /**
+\brief  Get Ethernet Interface MAC address
+
+The function provides the Ethernet Interface MAC address used by the
+Ethernet controller.
+
+\param  pMacAddr_p      Pointer to memory buffer which is used to copy the MAC
+                        address into. The memory buffer must have a size of
+                        6 bytes!
+
+\return The function returns a \ref tOplkError error code.
+
+\ingroup module_api
+*/
+//------------------------------------------------------------------------------
+tOplkError oplk_getEthMacAddr(UINT8* pMacAddr_p)
+{
+    tOplkError ret = kErrorOk;
+
+    if (pMacAddr_p != NULL)
+        OPLK_MEMCPY(pMacAddr_p, ctrlu_getEthMacAddr(), 6);
+    else
+        ret = kErrorInvalidOperation;
+
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
 \brief  Trigger PRes forward
 
 The function triggers the forwarding of a PRes frame from Node \p nodeId_p

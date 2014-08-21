@@ -415,6 +415,7 @@ OPLKDLLEXPORT tOplkError oplk_setCdcBuffer(BYTE* pbCdc_p, UINT cdcSize_p);
 OPLKDLLEXPORT tOplkError oplk_setCdcFilename(char* pszCdcFilename_p);
 OPLKDLLEXPORT tOplkError oplk_process(void);
 OPLKDLLEXPORT tOplkError oplk_getIdentResponse(UINT nodeId_p, tIdentResponse** ppIdentResponse_p);
+OPLKDLLEXPORT tOplkError oplk_getEthMacAddr(UINT8* pMacAddr_p);
 OPLKDLLEXPORT BOOL       oplk_checkKernelStack(void);
 OPLKDLLEXPORT tOplkError oplk_waitSyncEvent(ULONG timeout_p);
 
