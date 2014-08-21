@@ -46,6 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <gpio.h>
 #include <lcd.h>
+#include <arp.h>
 
 #include "app.h"
 #include "event.h"
@@ -153,6 +154,7 @@ int main(void)
     instance_l.aMacAddr[5] = instance_l.nodeId;
 
     initEvents(&instance_l.fGsOff, &eventCbPowerlink);
+    arp_init((UINT8)instance_l.nodeId);
 
     PRINTF("----------------------------------------------------\n");
     PRINTF("openPOWERLINK console MN DEMO application\n");
@@ -168,9 +170,13 @@ int main(void)
     if ((ret = initApp()) != kErrorOk)
         goto Exit;
 
+    if ((ret = oplk_setNonPlkForward(TRUE)) != kErrorOk)
+        goto Exit;
+
     loopMain(&instance_l);
 
 Exit:
+    arp_shutdown();
     shutdownPowerlink(&instance_l);
     shutdownApp();
 
@@ -254,6 +260,13 @@ static tOplkError initPowerlink(tInstance* pInstance_p)
         PRINTF("oplk_setCdcBuffer() failed (Error:0x%x!)\n", ret);
         return ret;
     }
+
+    // Set real MAC address to ARP module
+    oplk_getEthMacAddr(initParam.aMacAddress);
+    arp_setMacAddr(initParam.aMacAddress);
+
+    // Set IP address to ARP module
+    arp_setIpAddr(initParam.ipAddress);
 
     return kErrorOk;
 }
@@ -363,9 +376,41 @@ static tOplkError eventCbPowerlink(tOplkApiEventType EventType_p,
 {
     tOplkError ret = kErrorOk;
 
-    UNUSED_PARAMETER(EventType_p);
-    UNUSED_PARAMETER(pEventArg_p);
     UNUSED_PARAMETER(pUserArg_p);
+
+    // Handle ARP demo:
+    // - If a node is found (e.g. plug in a CN), then an ARP request is sent
+    //   to this node. There is no timeout handling done.
+    // - If an Ethernet frame is received, it is forwarded to process reply.
+    //   The function prints the ARP reply information.
+    if (EventType_p == kOplkApiEventNode)
+    {
+        tOplkApiEventNode* pNode = &pEventArg_p->nodeEvent;
+
+        // Note: This is a demonstration to generate non-POWERLINK frames.
+        if (pNode->nodeEvent == kNmtNodeEventFound)
+        {
+            arp_sendRequest(pNode->nodeId);
+        }
+    }
+    else if (EventType_p == kOplkApiEventReceivedNonPlk)
+    {
+        tOplkApiEventReceivedNonPlk* pFrameInfo = &pEventArg_p->receivedEth;
+
+        // Note: This is a demonstration how to forward Ethernet frames to upper
+        //       layers. Instead you can insert an IP stack and forward the
+        //       pFrameInfo content to it. Frames that are sent from the IP
+        //       stack to lower layers must be forwarded with the function
+        //       \ref oplk_sendEthFrame.
+
+        // Forward received frame to ARP processing
+        ret = arp_processReceive(pFrameInfo->pFrame, pFrameInfo->frameSize);
+         if (ret != kErrorRetry)
+             return ret;
+
+         // If you get here, the received Ethernet frame is no ARP frame.
+         // Here you can call other protocol stacks for processing.
+    }
 
     return ret;
 }

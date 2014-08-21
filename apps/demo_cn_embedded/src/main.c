@@ -46,6 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <gpio.h>
 #include <lcd.h>
+#include <arp.h>
 
 #include "app.h"
 #include "event.h"
@@ -144,6 +145,7 @@ int main(void)
     instance_l.aMacAddr[5]  = instance_l.nodeId;
 
     initEvents(&eventCbPowerlink);
+    arp_init((UINT8)instance_l.nodeId);
 
     PRINTF("----------------------------------------------------\n");
     PRINTF("openPOWERLINK embedded CN DEMO application\n");
@@ -159,9 +161,13 @@ int main(void)
     if ((ret = initApp()) != kErrorOk)
         goto Exit;
 
+    if ((ret = oplk_setNonPlkForward(TRUE)) != kErrorOk)
+        goto Exit;
+
     loopMain(&instance_l);
 
 Exit:
+    arp_shutdown();
     shutdownPowerlink(&instance_l);
     shutdownApp();
 
@@ -239,6 +245,13 @@ static tOplkError initPowerlink(tInstance* pInstance_p)
         PRINTF("oplk_init() failed (Error:0x%x!\n", ret);
         return ret;
     }
+
+    // Set real MAC address to ARP module
+    oplk_getEthMacAddr(initParam.aMacAddress);
+    arp_setMacAddr(initParam.aMacAddress);
+
+    // Set IP address to ARP module
+    arp_setIpAddr(initParam.ipAddress);
 
     return kErrorOk;
 }
@@ -321,7 +334,8 @@ The function implements the applications stack event handler.
 //------------------------------------------------------------------------------
 static tOplkError eventCbPowerlink(tOplkApiEventType EventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p)
 {
-    tOplkError  ret = kErrorOk;
+    tOplkError                      ret = kErrorOk;
+    tOplkApiEventReceivedNonPlk*    pFrameInfo = &pEventArg_p->receivedEth;
 
     UNUSED_PARAMETER(pUserArg_p);
 
@@ -340,9 +354,25 @@ static tOplkError eventCbPowerlink(tOplkApiEventType EventType_p, tOplkApiEventA
                     instance_l.fGsOff = TRUE;
                     break;
 
+                case kNmtCsBasicEthernet:
+                    // ARP demo: Send request to MN
+                    arp_sendRequest(C_ADR_MN_DEF_NODE_ID);
+                    break;
+
                 default:
                     break;
             }
+            break;
+
+        case kOplkApiEventReceivedNonPlk:
+            ret = arp_processReceive(pFrameInfo->pFrame, pFrameInfo->frameSize);
+            if (ret != kErrorRetry)
+                return ret;
+
+            // If you get here, the received Ethernet frame is no ARP frame.
+            // Here you can call other protocol stacks for processing.
+
+            ret = kErrorOk; // Frame wasn't processed, so simply dump it.
             break;
 
         default:
