@@ -62,6 +62,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // module global vars
 //------------------------------------------------------------------------------
 static BOOL*        pfGsOff_l = NULL;
+static tEventCb     pfnEventCb_l = NULL;
 static tOplkError   errorEvent_l = kErrorOk;
 
 //------------------------------------------------------------------------------
@@ -130,13 +131,15 @@ static tOplkError processSdoEvent(tOplkApiEventType EventType_p,
 The function initializes the applications event module
 
 \param  pfGsOff_p               Pointer to GsOff flag (determines that stack is down)
+\param  pfnEventCb_p            User event callback
 
 \ingroup module_demo_mn_console
 */
 //------------------------------------------------------------------------------
-void initEvents(BOOL* pfGsOff_p)
+void initEvents(BOOL* pfGsOff_p, tEventCb pfnEventCb_p)
 {
     pfGsOff_l = pfGsOff_p;
+    pfnEventCb_l = pfnEventCb_p;
     errorEvent_l = kErrorOk;
 }
 
@@ -217,6 +220,11 @@ tOplkError processEvents(tOplkApiEventType EventType_p, tOplkApiEventArg* pEvent
         default:
             break;
     }
+
+    // call user event call back
+    if ((ret == kErrorOk) && (pfnEventCb_l != NULL))
+        ret = pfnEventCb_l(EventType_p, pEventArg_p, pUserArg_p);
+
     return ret;
 }
 
