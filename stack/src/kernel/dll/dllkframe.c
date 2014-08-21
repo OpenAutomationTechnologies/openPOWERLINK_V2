@@ -129,6 +129,9 @@ static void       handleErrorSignaling(tPlkFrame* pFrame_p, UINT nodeId_p);
 static tOplkError cbCnTimer(tTimerEventArg* pEventArg_p);
 #endif
 
+#if CONFIG_EDRV_AUTO_RESPONSE == TRUE
+static tOplkError enableRxFilter(UINT filterEntry_p, BOOL fEnable_p);
+#endif
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -384,6 +387,14 @@ void dllkframe_processTransmittedNmtReq(tEdrvTxBuffer* pTxBuffer_p)
     pTxBuffer_p->txFrameSize = DLLK_BUFLEN_EMPTY;
 
 #if CONFIG_EDRV_AUTO_RESPONSE == TRUE
+    // Disable the filter to avoid retransmission of the same frame
+    if ((dllkInstance_g.nmtState & (NMT_TYPE_MASK | NMT_SUPERSTATE_MASK)) == (NMT_TYPE_CS | NMT_CS_PLKMODE))
+    {
+        ret = enableRxFilter(DLLK_FILTER_SOA_NMTREQ, FALSE);
+        if (ret != kErrorOk)
+            goto Exit;
+    }
+
     // decrement RS in Flag 2
     if ((dllkInstance_g.flag2 & PLK_FRAME_FLAG2_RS) != 0)
     {
@@ -448,6 +459,14 @@ void dllkframe_processTransmittedNonPlk(tEdrvTxBuffer* pTxBuffer_p)
     pTxBuffer_p->txFrameSize = DLLK_BUFLEN_EMPTY;
 
 #if CONFIG_EDRV_AUTO_RESPONSE == TRUE
+    // Disable the filter to avoid retransmission of the same frame
+    if ((dllkInstance_g.nmtState & (NMT_TYPE_MASK | NMT_SUPERSTATE_MASK)) == (NMT_TYPE_CS | NMT_CS_PLKMODE))
+    {
+        ret = enableRxFilter(DLLK_FILTER_SOA_NONPLK, FALSE);
+        if (ret != kErrorOk)
+            goto Exit;
+    }
+
     // decrement RS in Flag 2
     if ((dllkInstance_g.flag2 & PLK_FRAME_FLAG2_RS) != 0)
     {
@@ -2799,6 +2818,33 @@ Exit:
         ret = eventk_postError(kEventSourceDllk, ret, sizeof(arg), &arg);
     }
     TGT_DLLK_LEAVE_CRITICAL_SECTION();
+    return ret;
+}
+#endif
+
+#if CONFIG_EDRV_AUTO_RESPONSE == TRUE
+//------------------------------------------------------------------------------
+/**
+\brief  Enable Rx filter
+
+This function enables the given Rx filter.
+
+\param  filterEntry_p   Filter to be enabled/disabled
+\param  fEnable_p       Enable the filter with TRUE
+                        Disable the filter with FALSE
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError enableRxFilter(UINT filterEntry_p, BOOL fEnable_p)
+{
+    tOplkError ret = kErrorOk;
+
+    // disable corresponding Rx filter
+    dllkInstance_g.aFilter[filterEntry_p].fEnable = fEnable_p;
+    ret = edrv_changeRxFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT,
+                              filterEntry_p, EDRV_FILTER_CHANGE_STATE);
+
     return ret;
 }
 #endif

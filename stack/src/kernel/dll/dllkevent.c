@@ -612,18 +612,6 @@ static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtSta
             {   // empty Tx buffer is not a real problem so just ignore it
                 ret = kErrorOk;
                 pTxBuffer->txFrameSize = DLLK_BUFLEN_EMPTY;    // mark Tx buffer as empty
-
-#if (CONFIG_EDRV_AUTO_RESPONSE != FALSE)
-                if ((nmtState_p & (NMT_TYPE_MASK | NMT_SUPERSTATE_MASK)) == (NMT_TYPE_CS | NMT_CS_PLKMODE))
-                {
-                    // disable corresponding Rx filter
-                    dllkInstance_g.aFilter[filterEntry].fEnable = FALSE;
-                    ret = edrv_changeRxFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT,
-                                           filterEntry, EDRV_FILTER_CHANGE_STATE);
-                    if (ret != kErrorOk)
-                        goto Exit;
-                }
-#endif
             }
             else
             {
