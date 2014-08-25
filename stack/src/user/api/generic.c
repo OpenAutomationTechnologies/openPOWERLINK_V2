@@ -713,6 +713,51 @@ tOplkError oplk_sendAsndFrame(UINT8 dstNodeId_p, tAsndFrame* pAsndFrame_p,
 
 //------------------------------------------------------------------------------
 /**
+\brief  Send an Ethernet frame
+
+The function sends an Ethernet frame with generic priority. The given frame's
+EtherType must be set to a valid pattern unequal 0x0000 and 0x88AB. The lower
+layer inserts the node's MAC address if the source MAC address is set to 0.
+
+\param  pFrame_p        Pointer to frame which should be sent.
+\param  frameSize_p     Size of frame which should be sent.
+                        The size shall include Ethernet header and payload
+                        (e.g. min. Ethernet frame 14 byte + 46 byte = 60 byte).
+
+\return The function returns a \ref tOplkError error code.
+\retval kErrorOk                Ethernet frame was successfully sent.
+\retval kErrorInvalidOperation  EtherType set in frame is invalid.
+\retval Other                   Error occurred while sending the Ethernet frame.
+
+\ingroup module_api
+*/
+//------------------------------------------------------------------------------
+tOplkError oplk_sendEthFrame(tPlkFrame* pFrame_p, UINT frameSize_p)
+{
+    tOplkError  ret = kErrorOk;
+    tFrameInfo  frameInfo;
+    UINT16      etherType;
+
+    // Check for correct input
+    if ((pFrame_p == NULL) || (frameSize_p > C_DLL_MAX_ETH_FRAME))
+        return kErrorReject;
+
+    etherType = ami_getUint16Be(&pFrame_p->etherType);
+    if ((etherType == 0) || (etherType == C_DLL_ETHERTYPE_EPL))
+        return kErrorInvalidOperation;
+
+    // Set frame info
+    frameInfo.frameSize = frameSize_p;
+    frameInfo.pFrame = pFrame_p;
+
+    // Forward frame to DLLuCAL
+    ret = dllucal_sendAsyncFrame(&frameInfo, kDllAsyncReqPrioGeneric);
+
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
 \brief  Set forwarding of received ASnd frames
 
 The function enables or disables the forwarding of received ASnd frames
