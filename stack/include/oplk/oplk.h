@@ -164,6 +164,18 @@ typedef struct
 } tOplkApiEventReceivedPres;
 
 /**
+\brief Received non-POWERLINK Ethernet frame event
+
+This structure specifies the event for received Ethernet frames. It is used to
+inform the application about received Ethernet frames.
+*/
+typedef struct
+{
+    tPlkFrame*                  pFrame;         ///< Pointer to the received Ethernet frame
+    size_t                      frameSize;      ///< Size of the received Ethernet frame
+} tOplkApiEventReceivedNonPlk;
+
+/**
 \brief Application event types
 
 This enumeration specifies the valid application events which can be
@@ -247,6 +259,11 @@ typedef enum
     PRes frame was received. It can be used for diagnosis purpose. */
     kOplkApiEventReceivedPres       = 0x80,
 
+    /** Received Ethernet frame event. This event informs the application about
+    a received Ethernet frame. The event argument contains information on the
+    received Ethernet frame (\ref tOplkApiEventReceivedNonPlk). */
+    kOplkApiEventReceivedNonPlk     = 0x81,
+
 } tOplkApiEventType;
 
 
@@ -273,6 +290,7 @@ typedef union
     tOplkApiEventRcvAsnd        receivedAsnd;       ///< Received ASnd frame information (\ref kOplkApiEventReceivedAsnd)
     tOplkApiEventPdoChange      pdoChange;          ///< PDO change event (\ref kOplkApiEventPdoChange)
     tOplkApiEventReceivedPres   receivedPres;       ///< Received PRes frame (\ref kOplkApiEventReceivedPres)
+    tOplkApiEventReceivedNonPlk receivedEth;        ///< Received Ethernet frame (\ref kOplkApiEventReceivedNonPlk)
 } tOplkApiEventArg;
 
 /**
@@ -390,6 +408,7 @@ OPLKDLLEXPORT tOplkError oplk_writeLocalObject(UINT index_p, UINT subindex_p, vo
 OPLKDLLEXPORT tOplkError oplk_sendAsndFrame(UINT8 dstNodeId_p, tAsndFrame* pAsndFrame_p, size_t asndSize_p);
 OPLKDLLEXPORT tOplkError oplk_sendEthFrame(tPlkFrame* pFrame_p, UINT frameSize_p);
 OPLKDLLEXPORT tOplkError oplk_setAsndForward(UINT8 serviceId_p, tOplkApiAsndFilter FilterType_p);
+OPLKDLLEXPORT tOplkError oplk_setNonPlkForward(BOOL fEnable_p);
 OPLKDLLEXPORT tOplkError oplk_postUserEvent(void* pUserArg_p);
 OPLKDLLEXPORT tOplkError oplk_triggerMnStateChange(UINT nodeId_p, tNmtNodeCommand nodeCommand_p);
 OPLKDLLEXPORT tOplkError oplk_setCdcBuffer(BYTE* pbCdc_p, UINT cdcSize_p);

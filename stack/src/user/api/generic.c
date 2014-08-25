@@ -116,6 +116,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 static tOplkError cbSdoCon(tSdoComFinished* pSdoComFinished_p);
 #endif
 static tOplkError cbReceivedAsnd(tFrameInfo *pFrameInfo_p);
+#if defined(CONFIG_INCLUDE_VETH)
+static tOplkError cbReceivedEth(tFrameInfo* pFrameInfo_p);
+#endif
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -158,7 +161,11 @@ tOplkError oplk_init(tOplkApiInitParam* pInitParam_p)
         return kErrorNoResource;
     }
 
-    return ctrlu_initStack(pInitParam_p);
+    ret = ctrlu_initStack(pInitParam_p);
+    if (ret != kErrorOk)
+        return ret;
+
+    return ret;
 }
 
 //------------------------------------------------------------------------------
@@ -805,6 +812,41 @@ tOplkError oplk_setAsndForward(UINT8 serviceId_p, tOplkApiAsndFilter filterType_
 
 //------------------------------------------------------------------------------
 /**
+\brief  Set forwarding of received non-POWERLINK Ethernet frames
+
+The function enables or disables the forwarding of received non-POWERLINK
+Ethernet frames to the application.
+
+\param  fEnable_p           Enable received Ethernet frame forwarding with TRUE.
+                            Disable received Ethernet frame forwarding with FALSE.
+
+\return The function returns a \ref tOplkError error code.
+\retval kErrorOk                Forwarding was successfully set.
+\retval kErrorIllegalInstance   Virtual Ethernet is not enabled.
+\retval Other                   Error occurred while setting Ethernet forwarding.
+
+\ingroup module_api
+*/
+//------------------------------------------------------------------------------
+tOplkError oplk_setNonPlkForward(BOOL fEnable_p)
+{
+    tOplkError ret;
+
+#if defined(CONFIG_INCLUDE_VETH)
+    if (fEnable_p)
+        ret = dllucal_regNonPlkHandler(cbReceivedEth);
+    else
+        ret = dllucal_regNonPlkHandler(NULL);
+#else
+    UNUSED_PARAMETER(fEnable_p);
+    ret = kErrorIllegalInstance;
+#endif
+
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
 \brief  Post user defined event
 
 The function posts user-defined events to event processing thread, i.e. calls
@@ -1139,5 +1181,32 @@ static tOplkError cbReceivedAsnd(tFrameInfo* pFrameInfo_p)
     ret = ctrlu_callUserEventCallback(eventType, &apiEventArg);
     return ret;
 }
+
+#if defined(CONFIG_INCLUDE_VETH)
+//------------------------------------------------------------------------------
+/**
+\brief  Callback function for received Ethernet frames
+
+The function implements the callback function to handle received Ethernet frames.
+Frames will be forwarded to the application by sending a user event.
+
+\param  pFrameInfo_p   Pointer to information about the received frame.
+
+\return The function returns a \ref tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError cbReceivedEth(tFrameInfo* pFrameInfo_p)
+{
+    tOplkError          ret = kErrorOk;
+    tOplkApiEventArg    eventArg;
+
+    eventArg.receivedEth.pFrame = pFrameInfo_p->pFrame;
+    eventArg.receivedEth.frameSize = pFrameInfo_p->frameSize;
+
+    ret = ctrlu_callUserEventCallback(kOplkApiEventReceivedNonPlk, &eventArg);
+
+    return ret;
+}
+#endif
 
 /// \}
