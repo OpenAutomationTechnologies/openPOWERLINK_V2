@@ -388,6 +388,7 @@ void dllkframe_processTransmittedNmtReq(tEdrvTxBuffer* pTxBuffer_p)
     if ((dllkInstance_g.flag2 & PLK_FRAME_FLAG2_RS) != 0)
     {
         dllkInstance_g.flag2--;
+        dllkInstance_g.updateTxFrame = DLLK_UPDATE_BOTH;
     }
 #endif
 
@@ -451,6 +452,7 @@ void dllkframe_processTransmittedNonPlk(tEdrvTxBuffer* pTxBuffer_p)
     if ((dllkInstance_g.flag2 & PLK_FRAME_FLAG2_RS) != 0)
     {
         dllkInstance_g.flag2--;
+        dllkInstance_g.updateTxFrame = DLLK_UPDATE_BOTH;
     }
 #endif
 
