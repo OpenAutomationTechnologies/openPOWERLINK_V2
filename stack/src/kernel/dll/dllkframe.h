@@ -79,6 +79,7 @@ void       dllkframe_processTransmittedNonPlk(tEdrvTxBuffer* pTxBuffer_p)
 
 tOplkError dllkframe_updateFrameIdentRes(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p);
 tOplkError dllkframe_updateFrameStatusRes(tEdrvTxBuffer* pTxBuffer_p, tNmtState NmtState_p);
+tOplkError dllkframe_updateFrameAsyncRes(tNmtState nmtState_p);
 tOplkError dllkframe_updateFramePres(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p);
 tOplkError dllkframe_checkFrame(tPlkFrame* pFrame_p, UINT frameSize_p);
 tOplkError dllkframe_createTxFrame(UINT* pHandle_p, UINT* pFrameSize_p,

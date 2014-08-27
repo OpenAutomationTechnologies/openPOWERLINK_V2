@@ -728,39 +728,11 @@ The function processes a cycle finish event.
 //------------------------------------------------------------------------------
 static tOplkError processCycleFinish(tNmtState nmtState_p)
 {
-    tOplkError      ret = kErrorReject;
-    tEdrvTxBuffer*  pTxBuffer;
+    tOplkError      ret = kErrorOk;
 
-    switch (dllkInstance_g.updateTxFrame)
-    {
-        case DLLK_UPDATE_BOTH:
-            dllkInstance_g.curTxBufferOffsetIdentRes ^= 1;
-            pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_IDENTRES +
-                                                  dllkInstance_g.curTxBufferOffsetIdentRes];
-            if (pTxBuffer->pBuffer != NULL)
-            {   // IdentRes does exist
-                if ((ret = dllkframe_updateFrameIdentRes(pTxBuffer, nmtState_p)) != kErrorOk)
-                    return ret;
-            }
-            // fall-through
-
-        case DLLK_UPDATE_STATUS:
-            dllkInstance_g.curTxBufferOffsetStatusRes ^= 1;
-            pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_STATUSRES +
-                                                  dllkInstance_g.curTxBufferOffsetStatusRes];
-            if (pTxBuffer->pBuffer != NULL)
-            {   // StatusRes does exist
-                if ((ret = dllkframe_updateFrameStatusRes(pTxBuffer, nmtState_p)) != kErrorOk)
-                    return ret;
-            }
-
-            // reset signal variable
-            dllkInstance_g.updateTxFrame = DLLK_UPDATE_NONE;
-            break;
-
-        default:
-            break;
-    }
+    ret = dllkframe_updateFrameAsyncRes(nmtState_p);
+    if (ret != kErrorOk)
+        goto Exit;
 
     ret = errhndk_decrementCounters((nmtState_p >= kNmtMsNotActive));
 
@@ -773,7 +745,7 @@ static tOplkError processCycleFinish(tNmtState nmtState_p)
         }
     }
 #endif
-
+Exit:
     return ret;
 }
 
