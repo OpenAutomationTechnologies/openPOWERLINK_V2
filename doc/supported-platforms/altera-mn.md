@@ -134,7 +134,8 @@ Steps 1-5 can be carried out by executing `$ make all` in a
 
 Requirement: Steps in the previous section *How to build the binary* are completed.
 
-1. Start the Nios II Software Build Tools for Eclipse
+1. Start the Nios II Software Build Tools for Eclipse\n
+   Note: It is recommended to place the workspace location outside the openPOWERLINK directory.
 2. Select menu *File -> Import...*
 3. Select the import source *Nios II Software Build Tools Project* ->
    *Import Nios II Software Build Tools Project*
@@ -155,3 +156,6 @@ This feature is not supported by now.
    the other.
 2. Always download the PCP ELF file before the host ELF file.
 3. In case of separated FPGA demo, download the PCP's design bitstream first.
+4. Eclipse project import fails\n
+   Make sure the Eclipse workspace is neither located in the makefile's directory nor its subdirectory.
+   Best practice is to place the workspace location outside the openPOWERLINK sources.

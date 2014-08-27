@@ -129,7 +129,8 @@ Note: You can combine step 2-3 by typing the following into the
 
 Requirement: Steps in the previous section "How to build the binary" are
 completed.
-1. Start the Nios II Software Build Tools for Eclipse
+1. Start the Nios II Software Build Tools for Eclipse\n
+   Note: It is recommended to place the workspace location outside the openPOWERLINK directory
 2. Select menu *File -> Import...*
 3. Select the import source *Nios II Software Build Tools Project* -> *Import
    Nios II Software Build Tools Project*
@@ -151,3 +152,6 @@ completed.
 
 1. It is advised to clean all generated files after switching from one demo to
    the other.
+2. Eclipse project import fails\n
+   Make sure the Eclipse workspace is neither located in the makefile's directory nor its subdirectory.
+   Best practice is to place the workspace location outside the openPOWERLINK sources.
