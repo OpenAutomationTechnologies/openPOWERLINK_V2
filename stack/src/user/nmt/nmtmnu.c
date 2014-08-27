@@ -2930,7 +2930,9 @@ The function processes the internal node event kNmtMnuIntNodeEventNmtCmdSent.
 static INT processNodeEventNmtCmdSent(UINT nodeId_p, tNmtState nodeNmtState_p, tNmtState nmtState_p,
                                       UINT16 errorCode_p, tOplkError* pRet_p)
 {
-    UINT8               bNmtState;
+    UINT8               destinationNmtState;
+    UINT8               initialNmtState;
+    tObdSize            objSize = sizeof(initialNmtState);
     tTimerArg           timerArg;
     tNmtMnuNodeInfo*    pNodeInfo;
 
@@ -2941,10 +2943,34 @@ static INT processNodeEventNmtCmdSent(UINT nodeId_p, tNmtState nodeNmtState_p, t
 
     // update expected NMT state with the one that results
     // from the sent NMT command
-    bNmtState = (UINT8)(nodeNmtState_p & 0xFF);
+    destinationNmtState = (UINT8)(nodeNmtState_p & 0xFF);
+
+    if (nodeNmtState_p == kNmtCsPreOperational2)
+    {
+        // If the MN sends NMTEnableReadyToOperate to the node, the initial and
+        // destination NMT state is NMT_CS_PRE_OPERATIONAL_2. Therefore it is
+        // not necessary to issue a status request frame to monitor the
+        // C_NMT_STATE_TOLERANCE!
+
+        // Get initial NMT state
+        *pRet_p = obd_readEntry(0x1F8F, nodeId_p, &initialNmtState, &objSize);
+        if (*pRet_p != kErrorOk)
+            return -1;
+
+        if (initialNmtState == destinationNmtState)
+        {
+            // set NMT state change flag
+            pNodeInfo->flags |= NMTMNU_NODE_FLAG_NMT_CMD_ISSUED;
+
+            // Return without setting up timer for state tolerance monitoring,
+            // the "longer" timer is already set up!
+            // And no need to update 0x1F8F, it already has the right value!
+            return -1;
+        }
+    }
 
     // write object 0x1F8F NMT_MNNodeExpState_AU8
-    *pRet_p = obd_writeEntry(0x1F8F, nodeId_p, &bNmtState, 1);
+    *pRet_p = obd_writeEntry(0x1F8F, nodeId_p, &destinationNmtState, 1);
     if (*pRet_p != kErrorOk)
         return -1;
 

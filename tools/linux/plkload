@@ -5,8 +5,7 @@
 #
 # \brief Script to load openPOWERLINK kernel module
 #
-#
-# Copyright (c) 2013, SYSTEC electronik GmbH
+# Copyright (c) 2013, SYSTEC electronic GmbH
 # Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
 #
@@ -89,12 +88,22 @@ KERNEL_MAIN=`uname -r | cut -f1 -d.`
 ###############################################################################
 # Used by udev rule to set priority
 if [ "$setprio" = "true" ] ; then
-    # Set real-time priority -81 for Ethernet ISR thread
-    chrt -f -p 80 `ps -C \`ps -e -o comm |grep ^irq/.*plk\$\` -o pid --no-headers`
-    # Bind thread to second core
-    taskset -p 2 `ps -C \`ps -e -o comm |grep ^irq/.*plk*\$\` -o pid --no-headers`
-    # Bind powerlink interrupts to second core
-    echo 2 > /proc/irq/`cat /proc/interrupts | grep plk | cut -f1 -d: -s | sed 's/^ *//'`/smp_affinity
+
+    # Change thread parameters of plk irq threads
+    irqthreads=`ps -e -o pid,comm --no-headers | grep irq/.*plk | sed 's/^ *//' | cut -f1 -d" "`
+    for pid in $irqthreads ; do
+        # Set real-time priority -81 for Ethernet ISR thread
+        chrt -f -p 80 $pid
+        # Bind thread to second core
+        taskset -p 2 $pid
+    done
+
+    # Bind openPowerlink interrupts to second core
+    interrupts=`cat /proc/interrupts | grep plk | cut -f1 -d: -s | sed 's/^ *//'`
+    for irq in $interrupts ; do
+        echo 2 > /proc/irq/$irq/smp_affinity
+    done
+
     exit
 fi
 
