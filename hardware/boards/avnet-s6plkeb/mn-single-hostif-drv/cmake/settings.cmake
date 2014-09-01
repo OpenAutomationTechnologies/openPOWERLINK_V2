@@ -58,25 +58,27 @@ SET(CFG_PCP_CPU_VERSION "v8.50.c")
 # Pcp's tightly coupled instruction memory name
 SET(CFG_PCP_TCIMEM_NAME pcp_ilmb_cntlr)
 # Microblaze has enabled multiplier
-OPTION(CFG_PCP_MICROBLAZE_HW_MULT "Microblaze has enabled hardware multiplier" OFF)
+OPTION(CFG_PCP_MICROBLAZE_HW_MULT "Microblaze has enabled hardware multiplier" ON)
 MARK_AS_ADVANCED(CFG_PCP_MICROBLAZE_HW_MULT)
 
 # Microblaze has enabled divider
-OPTION(CFG_PCP_MICROBLAZE_HW_DIV "Microblaze has enabled hardware divider" OFF)
+OPTION(CFG_PCP_MICROBLAZE_HW_DIV "Microblaze has enabled hardware divider" ON)
 MARK_AS_ADVANCED(CFG_PCP_MICROBLAZE_HW_DIV)
 
 # Microblaze has enabled pattern compare
-OPTION(CFG_PCP_MICROBLAZE_PAT_COMP "Microblaze has enabled pattern compare" OFF)
+OPTION(CFG_PCP_MICROBLAZE_PAT_COMP "Microblaze has enabled pattern compare" ON)
 MARK_AS_ADVANCED(CFG_PCP_MICROBLAZE_PAT_COMP)
 
 # Microblaze has enabled the barrel shifter
-OPTION(CFG_PCP_MICROBLAZE_BARREL_SHIFT "Microblaze has enabled the barrel shifter" OFF)
+OPTION(CFG_PCP_MICROBLAZE_BARREL_SHIFT "Microblaze has enabled the barrel shifter" ON)
 MARK_AS_ADVANCED(CFG_PCP_MICROBLAZE_BARREL_SHIFT)
 
 # Microblaze has enabled the byte swapping instruction
-OPTION(CFG_PCP_MICROBLAZE_REORDER "Microblaze has enabled the byte swapping instruction" OFF)
+OPTION(CFG_PCP_MICROBLAZE_REORDER "Microblaze has enabled the byte swapping instruction" ON)
 MARK_AS_ADVANCED(CFG_PCP_MICROBLAZE_REORDER)
+
 # Interface between host and pcp
 SET(CFG_PCP_HOSTIF_ENABLE TRUE)
+
 # Enable openMAC driver (omethlib)
 SET(CFG_PCP_OMETHLIB_ENABLE "TRUE")
