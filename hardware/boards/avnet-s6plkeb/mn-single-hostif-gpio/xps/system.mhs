@@ -49,7 +49,7 @@
  PORT axi_epc_0_PRH_Burst_pin = axi_epc_0_PRH_Burst, DIR = O
  PORT axi_epc_0_PRH_Data_pin = axi_epc_0_PRH_Data, DIR = IO, VEC = [0:15]
  PORT axi_epc_0_PRH_BE_pin = axi_epc_0_PRH_BE, DIR = O, VEC = [0:1]
- PORT axi_epc_0_S_AXI_ACLK_pin = net_axi_epc_0_S_AXI_ACLK_pin, DIR = I, SIGIS = CLK
+#Make address bit(0)to GND of parallel interface to support 16bit operation
  PORT dummy_pin = net_gnd, DIR = O
 
 
