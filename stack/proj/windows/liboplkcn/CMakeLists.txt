@@ -92,6 +92,7 @@ SOURCE_GROUP("Source Files\\Kernel Source Files" FILES
     ${ERRHND_KCAL_LOCAL_SOURCES}
     ${EVENT_KCAL_WINDOWS_SOURCES}
     ${PDO_KCAL_LOCAL_SOURCES}
+    ${HARDWARE_DRIVER_WINDOWS_SOURCES}
     )
 
 SOURCE_GROUP("Source Files\\Common Source Files" FILES
@@ -99,6 +100,7 @@ SOURCE_GROUP("Source Files\\Common Source Files" FILES
     ${COMMON_WINDOWS_SOURCES}
     ${TARGET_WINDOWS_SOURCES}
     ${CIRCBUF_WINDOWS_SOURCES}
+    ${MEMMAP_NULL_SOURCES}
     )
 
 SOURCE_GROUP("Source Files\\Architecture Source Files" FILES
