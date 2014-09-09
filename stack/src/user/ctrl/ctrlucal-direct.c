@@ -134,6 +134,9 @@ This function provides processing time for the CAL module.
 //------------------------------------------------------------------------------
 tOplkError ctrlucal_process(void)
 {
+    if(ctrlk_process())
+        return kErrorShutdown;
+
     return kErrorOk;
 }
 
