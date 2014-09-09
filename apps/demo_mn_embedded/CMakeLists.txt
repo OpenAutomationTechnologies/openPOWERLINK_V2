@@ -55,11 +55,13 @@ SET(DEMO_SOURCES
     ${DEMO_SOURCE_DIR}/app.c
     ${DEMO_SOURCE_DIR}/event.c
     ${COMMON_SOURCE_DIR}/lcd/lcd.c
+    ${COMMON_SOURCE_DIR}/arp/arp.c
     )
 
 INCLUDE_DIRECTORIES(
                     ${DEMO_SOURCE_DIR}
                     ${COMMON_SOURCE_DIR}/lcd
+                    ${COMMON_SOURCE_DIR}/arp
                    )
 
 ################################################################################
