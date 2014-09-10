@@ -1,8 +1,9 @@
 ################################################################################
 #
-# CMake configuration for openPOWERLINK CN library on Xilinx/Microblaze
+# CMake configuration for openPOWERLINK MN application/host
+# library on Xilinx Microblaze
 #
-# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2014, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -29,10 +30,10 @@
 ################################################################################
 
 ################################################################################
-# Include board specific settings file
+# Include demo specific settings file
 INCLUDE(setmicroblazeboardconfig)
 
-SET_BOARD_CONFIGURATION(${CFG_COMPILE_LIB_CN_HW_LIB_DIR})
+SET_BOARD_CONFIGURATION(${CFG_COMPILE_LIB_MN_APP_HOSTIF_HW_LIB_DIR})
 
 ################################################################################
 # Set paths
@@ -40,21 +41,20 @@ SET(ARCH_INSTALL_POSTFIX ${CFG_DEMO_BOARD_NAME}/${CFG_DEMO_NAME})
 
 ################################################################################
 # Find boards support package
-SET(XIL_BSP_DIR ${CFG_COMPILE_LIB_CN_HW_LIB_DIR}/bsp${CFG_PCP_NAME}/${CFG_PCP_NAME})
+SET(XIL_BSP_DIR ${CFG_COMPILE_LIB_MN_APP_HOSTIF_HW_LIB_DIR}/bsp${CFG_HOST_NAME}/${CFG_HOST_NAME})
 
 MESSAGE(STATUS "Searching for the board support package in ${XIL_BSP_DIR}")
-IF(EXISTS ${XIL_BSP_DIR})
+IF (EXISTS ${XIL_BSP_DIR})
     SET(XIL_LIB_BSP_INC ${XIL_BSP_DIR}/include)
-ELSE()
+ELSE ()
     MESSAGE(FATAL_ERROR "Board support package for board ${CFG_DEMO_BOARD_NAME} and demo ${CFG_DEMO_NAME} not found!")
-ENDIF()
+ENDIF ()
 
 ################################################################################
 # Set architecture specific sources
 SET(LIB_ARCH_SOURCES
                      ${TARGET_MICROBLAZE_SOURCES}
-                     ${TARGET_MICROBLAZE_LOCAL_SOURCES}
-                     ${TARGET_MICROBLAZE_OPENMAC_SOURCES}
+                     ${TARGET_MICROBLAZE_DUAL_SOURCES}
     )
 
 ################################################################################
@@ -62,12 +62,12 @@ SET(LIB_ARCH_SOURCES
 INCLUDE_DIRECTORIES(
                     ${XIL_LIB_BSP_INC}
                     ${ARCH_SOURCE_DIR}/xilinx_microblaze
-                    ${CFG_COMPILE_LIB_CN_HW_LIB_DIR}/libomethlib/include
+                    ${CFG_COMPILE_LIB_MN_APP_HOSTIF_HW_LIB_DIR}/libhostiflib-host/include
                    )
 
 ################################################################################
 # Set additional target specific compile flags
-ADD_DEFINITIONS("${XIL_PCP_CFLAGS} -fmessage-length=0 -mcpu=${CFG_PCP_CPU_VERSION} -ffunction-sections -fdata-sections")
+ADD_DEFINITIONS("${XIL_HOST_CFLAGS} -fmessage-length=0 -mcpu=${CFG_HOST_CPU_VERSION} -ffunction-sections -fdata-sections")
 
 ################################################################################
 # Deactivate optimization for usleep
@@ -76,8 +76,6 @@ SET_SOURCE_FILES_PROPERTIES(${ARCH_SOURCE_DIR}/xilinx_microblaze/usleep.c
 
 ########################################################################
 # Eclipse project files
-GEN_ECLIPSE_FILE_LIST("${LIB_KERNEL_SOURCES}" "kernel" PART_ECLIPSE_FILE_LIST)
-SET(ECLIPSE_FILE_LIST "${ECLIPSE_FILE_LIST} ${PART_ECLIPSE_FILE_LIST}")
 
 GEN_ECLIPSE_FILE_LIST("${LIB_USER_SOURCES}" "user" PART_ECLIPSE_FILE_LIST)
 SET(ECLIPSE_FILE_LIST "${ECLIPSE_FILE_LIST} ${PART_ECLIPSE_FILE_LIST}")
