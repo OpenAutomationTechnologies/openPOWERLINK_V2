@@ -210,17 +210,10 @@
             <tip><![CDATA[Kilobytes]]></tip>
       </widget>
       '>
-      <!ENTITY Size_B_Tpdo '
-      <widget id="Size_B_Tpdo">
-            <key>Size_B_Tpdo</key>
-            <label>Transmit Process Data Objects (TPDO): </label>
-            <tip><![CDATA[Bytes]]></tip>
-      </widget>
-      '>
-      <!ENTITY Size_B_Rpdo '
-      <widget id="Size_B_Rpdo">
-            <key>Size_B_Rpdo</key>
-            <label>Receive Process Data Objects (RPDO): </label>
+      <!ENTITY Size_B_Pdo '
+      <widget id="Size_B_Pdo">
+            <key>Size_B_Pdo</key>
+            <label>Process Data Objects (PDO): </label>
             <tip><![CDATA[Bytes]]></tip>
       </widget>
       '>
@@ -334,17 +327,10 @@
             <tip><![CDATA[Kilobytes]]></tip>
       </widget>
       '>
-      <!ENTITY gBaseTpdo '
-      <widget id="gBaseTpdo">
-            <key>gBaseTpdo</key>
-            <label>gBaseTpdo</label>
-            <tip><![CDATA[Bytes]]></tip>
-      </widget>
-      '>
-      <!ENTITY gBaseRpdo '
-      <widget id="gBaseRpdo">
-            <key>gBaseRpdo</key>
-            <label>gBaseRpdo</label>
+      <!ENTITY gBasePdo '
+      <widget id="gBasePdo">
+            <key>gBasePdo</key>
+            <label>gBasePdo</label>
             <tip><![CDATA[Bytes]]></tip>
       </widget>
       '>
@@ -431,8 +417,7 @@
               </group>
             <group id="PDO">
             <display>PDO</display>
-                  <item>&Size_B_Tpdo;</item>
-                  <item>&Size_B_Rpdo;</item>
+                  <item>&Size_B_Pdo;</item>
             </group>
             <group id="Others">
             <display>Others</display>
@@ -462,8 +447,7 @@
             </group>
             <group id = "PDO">
             <display>Base Address of PDO</display>
-                  <item>&gBaseTpdo;</item>
-                  <item>&gBaseRpdo;</item>
+                  <item>&gBasePdo;</item>
             </group>
             <group id = "Others">
             <display>Base Address of Others</display>
