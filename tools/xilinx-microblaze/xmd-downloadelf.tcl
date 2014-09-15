@@ -34,7 +34,6 @@ if { $argc != 2 } {
     #Exit on error
     puts "Warning: Too Many download script parameters!"
 
-    #exit 1;
     if { $argc != 3 } {
      puts "Error: Invalid download script parameters!"
      exit 1;
@@ -49,10 +48,10 @@ if { $argc == 3 } {
     # 0- app 1- drv
     connect mb mdm -debugdevice cpunr 1
 
-    # Read name of executeable from script arguments
+    # Read name of executable from script arguments
     puts "[lindex $argv 1] is downloading....."
-    set executeable "[lindex $argv 1]"
-    dow $executeable
+    set executable "[lindex $argv 1]"
+    dow $executable
 
     if { $enVerify } {
         puts "INFO: Verify elf download. This can take a few minutes!"
@@ -67,10 +66,10 @@ if { $argc == 3 } {
     # Establish connection to debug module
     connect mb mdm -debugdevice cpunr 2
 
-    # Read name of executeable from script arguments
+    # Read name of executable from script arguments
     puts "[lindex $argv 0] is downloading....."
-    set executeable "[lindex $argv 0]"
-    dow $executeable
+    set executable "[lindex $argv 0]"
+    dow $executable
 
     if { $enVerify } {
         puts "INFO: Verify elf download. This can take a few minutes!"
@@ -89,9 +88,9 @@ set enVerify [lindex $argv 1]
 # Establish connection to debug module
 connect mb mdm
 
-# Read name of executeable from script arguments
-set executeable "[lindex $argv 0]"
-dow $executeable
+# Read name of executable from script arguments
+set executable "[lindex $argv 0]"
+dow $executable
 
 if { $enVerify } {
     puts "INFO: Verify elf download. This can take a few minutes!"
