@@ -865,9 +865,12 @@ static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
 
             pCmdBlock = (struct sCmdBlock*)((edrvInstance_l.pCbVirtAdd) + (CB_REQUIRED_SIZE * edrvInstance_l.headTxDesc));
 
-            if(pCmdBlock->cmdStat & CS_C)
+            cmdState = pCmdBlock->cmdStat;
+            if ((pCmdBlock->cmdStat & CS_C) &&
+                (pCmdBlock->cmdStat & CS_SF_) &&
+                (CS_SF_) &&
+                (pCmdBlock->cmdStat & (OP_TX << CS_OP_SHIFT)))
             {
-                cmdState = pCmdBlock->cmdStat;
                 // clear the status bits of the current CB
                 pCmdBlock->cmdStat &= 0XFFFF0000;
 
@@ -878,18 +881,18 @@ static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
                 pDmaBuffer = (tEdrvTxBuffer*)edrvInstance_l.aCbDmaAddrBuf[edrvInstance_l.headTxDesc];
 
                 edrvInstance_l.aCbVirtAddrBuf[edrvInstance_l.headTxDesc] = 0;
-
+                edrvInstance_l.aCbDmaAddrBuf[edrvInstance_l.headTxDesc] = 0;
                 // Increment Tx descriptor queue head pointer
                 edrvInstance_l.headTxDesc = ((edrvInstance_l.headTxDesc + 1) % MAX_CBS);
 
-                if(NULL != pDmaBuffer)
+                if ((pDmaBuffer != NULL) && (pTxBuffer != NULL))
                 {
                     // retrieve the address of the DMA handle to
                     // pTxBuffer_p->pBuffer pointer
                     // that was received in edrv_sendTxBuffer
                     // so that the mapping can be correspondingly unmapped
                     pci_unmap_single(edrvInstance_l.pPciDev,
-                                     (dma_addr_t) edrvInstance_l.aCbDmaAddrBuf[edrvInstance_l.headTxDesc],
+                                     (dma_addr_t)pDmaBuffer,
                                      pTxBuffer->txFrameSize, PCI_DMA_TODEVICE);
                 }
 
@@ -1674,22 +1677,7 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
         }
     }
 
-    // fill RFDs for which memory has been allocated - end
-
-    ret = cmdDescWrite(OP_ADDRSETUP, 0);
-    if (ret != kErrorOk)
-    {
-        result = -EIO;
-        goto Exit;
-    }
-    ret = cmdDescWrite(OP_CONFIGURE, 0);
-    if(ret != kErrorOk)
-    {
-        result = -EIO;
-        goto Exit;
-    }
-
-    //acknowledge pended interrupts and clear interrupt mask
+   //acknowledge pended interrupts and clear interrupt mask
     temp = ioread16(edrvInstance_l.pIoAddr + SCBSTAT);
     udelay(5);
     iowrite16(temp, edrvInstance_l.pIoAddr + SCBSTAT);
@@ -1746,7 +1734,23 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
             edrvInstance_l.initParam.aMacAddr[loopCount+1] = (UINT8)(value >> 8);
         }
     }
+    // fill RFDs for which memory has been allocated - end
 
+    ret = cmdDescWrite(OP_ADDRSETUP, 0);
+    if (ret != kErrorOk)
+    {
+        result = -EIO;
+        goto Exit;
+    }
+    ret = cmdDescWrite(OP_CONFIGURE, 0);
+    if (ret != kErrorOk)
+    {
+        result = -EIO;
+        goto Exit;
+    }
+
+    edrvInstance_l.tailTxDesc = 0;
+    edrvInstance_l.headTxDesc = 0;
     edrvInstance_l.headRxDesc = 0;
     edrvInstance_l.tailRxDesc = MAX_RFDS - 1;
     pRxDescCmdBlock = (struct sRxDescCmdBlock*)((edrvInstance_l.pRfdVirtAdd) + (RFD_REQUIRED_SIZE * edrvInstance_l.tailRxDesc));
