@@ -63,7 +63,7 @@ extern "C" {
 tOplkError ctrlk_init(void);
 void       ctrlk_exit(void);
 BOOL       ctrlk_process(void);
-tOplkError ctrlk_executeCmd(tCtrlCmdType cmd, tOplkError* pRet_p, UINT16* pStatus_p,
+tOplkError ctrlk_executeCmd(tCtrlCmdType cmd, UINT16* pRet_p, UINT16* pStatus_p,
                             BOOL* pfExit_p);
 void       ctrlk_updateHeartbeat(void);
 UINT16     ctrlk_getHeartbeat(void);

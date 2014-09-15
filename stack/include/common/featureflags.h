@@ -150,4 +150,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                                PLK_DEF_FEATURE_NMT_EXT | \
                                PLK_DEF_FEATURE_PRES_CHAINING)
 
+
+// defines for kernel stack features
+
+// These flags are used to determine how the kernel part of the stack is
+// configured. It is needed to ensure that user and kernel part are
+// working together in a multi processor system.
+#define OPLK_KERNEL_MN                                  0x00000001
+#define OPLK_KERNEL_ISOCHR                              0x00000002
+#define OPLK_KERNEL_PRES_CHAINING_CN                    0x00000004
+#define OPLK_KERNEL_VETH                                0x00000008
+#define OPLK_KERNEL_PRES_FORWARD                        0x00000010
+
 #endif /* _INC_common_featureflags_H_ */

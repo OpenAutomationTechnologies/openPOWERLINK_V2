@@ -90,8 +90,9 @@ The structure specifies the instance variable of the kernel control module.
 */
 typedef struct
 {
-    tCtrlInitParam      initParam;           ///< Initialization parameters
-    UINT16              heartbeat;           ///< Heartbeat counter
+    tCtrlInitParam      initParam;          ///< Initialization parameters
+    UINT16              heartbeat;          ///< Heartbeat counter
+    UINT32              features;           ///< Features provided by the kernel stack
 } tCtrlkInstance;
 
 //------------------------------------------------------------------------------
@@ -104,6 +105,7 @@ static tCtrlkInstance   instance_l;
 //------------------------------------------------------------------------------
 static tOplkError initStack(void);
 static tOplkError shutdownStack(void);
+static void setupKernelFeatures(void);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -123,7 +125,6 @@ The function initializes the kernel control module.
 tOplkError ctrlk_init(void)
 {
     tOplkError      ret = kErrorOk;
-
     if ((ret = ctrlkcal_init()) != kErrorOk)
     {
         DEBUG_LVL_ERROR_TRACE("ctrlkcal_init failed!\n");
@@ -132,6 +133,8 @@ tOplkError ctrlk_init(void)
 
     // initialize heartbeat counter
     instance_l.heartbeat = 1;
+
+    setupKernelFeatures();
 
     return kErrorOk;
 
@@ -171,7 +174,7 @@ commands from the user part of the stack and executes them.
 BOOL ctrlk_process(void)
 {
     tOplkError          ret = kErrorOk;
-    tOplkError          fRet;
+    UINT16              fRet;
     UINT16              status;
     tCtrlCmdType        cmd = kCtrlNone;
     BOOL                fExit = FALSE;
@@ -188,7 +191,8 @@ BOOL ctrlk_process(void)
         if (ret == kErrorOk)
         {
             ctrlkcal_sendReturn(fRet);
-            ctrlkcal_setStatus(status);
+            if (status != kCtrlStatusUnchanged)
+                ctrlkcal_setStatus(status);
         }
     }
 
@@ -222,38 +226,66 @@ pointer to the status and exit flag is not NULL the appropriate data is stored.
 \ingroup module_ctrlk
 */
 //------------------------------------------------------------------------------
-tOplkError ctrlk_executeCmd(tCtrlCmdType cmd_p, tOplkError* pRet_p, UINT16* pStatus_p,
+tOplkError ctrlk_executeCmd(tCtrlCmdType cmd_p, UINT16* pRet_p, UINT16* pStatus_p,
                             BOOL* pfExit_p)
 {
     tOplkError          ret = kErrorOk;
     UINT16              status;
     BOOL                fExit;
+    tOplkError          retVal;
 
     switch (cmd_p)
     {
         case kCtrlInitStack:
             DEBUG_LVL_CTRL_TRACE("Initialize kernel modules...\n");
-            *pRet_p = initStack();
+            retVal = initStack();
+            *pRet_p = (UINT16)retVal;
             status = kCtrlStatusRunning;
             fExit = FALSE;
             break;
 
         case kCtrlCleanupStack:
             DEBUG_LVL_CTRL_TRACE("Shutdown kernel modules...\n");
-            *pRet_p = shutdownStack();
+            retVal = shutdownStack();
+            *pRet_p = (UINT16)retVal;
             status = kCtrlStatusReady;
             fExit = FALSE;
             break;
 
         case kCtrlShutdown:
             DEBUG_LVL_CTRL_TRACE("Shutdown kernel stack...\n");
-            *pRet_p = shutdownStack();
+            retVal = shutdownStack();
+            *pRet_p = (UINT16)retVal;
             status = kCtrlStatusUnavailable;
             fExit = TRUE;
             break;
 
+        case kCtrlGetVersionHigh:
+            *pRet_p = (UINT16)(PLK_DEFINED_STACK_VERSION >> 16);
+            status = kCtrlStatusUnchanged;
+            fExit = FALSE;
+            break;
+
+        case kCtrlGetVersionLow:
+            *pRet_p = (UINT16)(PLK_DEFINED_STACK_VERSION & 0xFFFF);
+            status = kCtrlStatusUnchanged;
+            fExit = FALSE;
+            break;
+
+        case kCtrlGetFeaturesHigh:
+            *pRet_p = (UINT16)(instance_l.features >> 16);
+            status = kCtrlStatusUnchanged;
+            fExit = FALSE;
+            break;
+
+        case kCtrlGetFeaturesLow:
+            *pRet_p = (UINT16)(instance_l.features & 0xFFFF);
+            status = kCtrlStatusUnchanged;
+            fExit = FALSE;
+            break;
+
         default:
-            DEBUG_LVL_ERROR_TRACE("Unknown command\n");
+            DEBUG_LVL_ERROR_TRACE("%s() Unknown command %d\n", __func__, cmd_p);
             ret = kErrorGeneralError;
             status = kCtrlStatusUnavailable;
             fExit = TRUE;
@@ -400,6 +432,46 @@ static tOplkError shutdownStack(void)
     errhndk_exit();
 
     return kErrorOk;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Setup kernel features
+
+The function sets up the features which are supported by the kernel stack.
+*/
+//------------------------------------------------------------------------------
+void setupKernelFeatures(void)
+{
+    instance_l.features = 0;
+
+#if defined(CONFIG_INCLUDE_NMT_MN)
+    // We do have NMT functionality compiled in and therefore need an MN
+    // kernel stack
+    instance_l.features |= OPLK_KERNEL_MN;
+#endif
+
+#if defined(CONFIG_INCLUDE_PDO)
+    // We contain the PDO module for isochronous transfers and therefore need
+    // a kernel module which can handle isochronous transfers.
+    instance_l.features |= OPLK_KERNEL_ISOCHR;
+#endif
+
+#if defined(CONFIG_INCLUDE_PRES_FORWARD)
+    // We contain the PRES forwarding module (used for diagnosis) and therefore
+    // need a kernel with this feature.
+    instance_l.features |= OPLK_KERNEL_PRES_FORWARD;
+#endif
+
+#if defined(CONFIG_INCLUDE_VETH)
+    // We contain the virtual Ethernet module and therefore need a kernel
+    // which supports virtual Ethernet.
+    instance_l.features |= OPLK_KERNEL_VETH;
+#endif
+
+#if (CONFIG_DLL_PRES_CHAINING_CN == TRUE)
+    instance_l.features |= OPLK_KERNEL_PRES_CHAINING_CN;
+#endif
 }
 
 /// \}

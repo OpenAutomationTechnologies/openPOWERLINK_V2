@@ -129,6 +129,7 @@ typedef enum
     kErrorRetry                     = 0x000B,       ///< Retry this command
     kErrorInvalidEvent              = 0x000C,       ///< Invalid event was posted
     kErrorGeneralError              = 0x000D,       ///< General error
+    kErrorFeatureMismatch           = 0x000E,       ///< Features of user and kernel stack are mismatched
 
     // area for EDRV module 0x0010 - 0x001F
     kErrorEdrvNoFreeTxDesc          = 0x0011,       ///< No free TX descriptor available

@@ -132,6 +132,8 @@ typedef struct
 {
     UINT16              lastHeartbeat;          ///< Last detected heartbeat
     tOplkApiInitParam   initParam;              ///< Stack initialization parameters
+    tCtrlKernelInfo     kernelInfo;             ///< Information about kernel stack
+    UINT32              requiredKernelFeatures; ///< Kernel stack features we need to run correctly
 } tCtrluInstance;
 
 //------------------------------------------------------------------------------
@@ -187,6 +189,7 @@ static tOplkError cbLedStateChange(tLedType LedType_p, BOOL fOn_p);
 static tOplkError cbCfmEventCnProgress(tCfmEventCnProgress* pEventCnProgress_p);
 static tOplkError cbCfmEventCnResult(unsigned int uiNodeId_p, tNmtNodeCommand NodeCommand_p);
 #endif
+void setupRequiredKernelFeatures(void);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -222,7 +225,31 @@ tOplkError ctrlu_init(void)
         ctrlucal_exit();
         goto Exit;
     }
-    return kErrorOk;
+
+    setupRequiredKernelFeatures();
+    if ((ret = ctrlu_getKernelInfo(&ctrlInstance_l.kernelInfo)) != kErrorOk)
+    {
+        ctrlucal_exit();
+        goto Exit;
+    }
+
+    if ((ctrlInstance_l.kernelInfo.featureFlags == ctrlInstance_l.requiredKernelFeatures) &&
+        (ctrlInstance_l.kernelInfo.version == PLK_DEFINED_STACK_VERSION))
+    {
+        DEBUG_LVL_ALWAYS_TRACE("Kernel features: 0x%08x\n", ctrlInstance_l.kernelInfo.featureFlags);
+        DEBUG_LVL_ALWAYS_TRACE("Kernel version: 0x%08x\n", ctrlInstance_l.kernelInfo.version);
+        return kErrorOk;
+    }
+    else
+    {
+        DEBUG_LVL_ERROR_TRACE("Kernel feature/version mismatch:\n");
+        DEBUG_LVL_ERROR_TRACE("  Version: Is:%08x - required:%08x\n",
+                              ctrlInstance_l.kernelInfo.version, PLK_DEFINED_STACK_VERSION);
+        DEBUG_LVL_ERROR_TRACE("  Features: Is:%08x - required:%08x\n",
+                              ctrlInstance_l.kernelInfo.featureFlags, ctrlInstance_l.requiredKernelFeatures);
+        ctrlucal_exit();
+        return kErrorFeatureMismatch;
+    }
 
 Exit:
     return ret;
@@ -268,6 +295,7 @@ tOplkError ctrlu_initStack(tOplkApiInitParam* pInitParam_p)
 {
     tOplkError              ret = kErrorOk;
     tCtrlInitParam          ctrlParam;
+    UINT16                  retVal;
 
     // reset instance structure
     OPLK_MEMSET(&ctrlInstance_l.initParam, 0, sizeof(tOplkApiInitParam));
@@ -294,7 +322,10 @@ tOplkError ctrlu_initStack(tOplkApiInitParam* pInitParam_p)
     ctrlParam.ethDevNumber = ctrlInstance_l.initParam.hwParam.devNum;
     ctrlucal_storeInitParam(&ctrlParam);
 
-    if ((ret = ctrlucal_executeCmd(kCtrlInitStack)) != kErrorOk)
+    if ((ret = ctrlucal_executeCmd(kCtrlInitStack, &retVal)) != kErrorOk)
+        goto Exit;
+
+    if ((tOplkError)retVal != kErrorOk)
         goto Exit;
 
     /* Read back init param because current MAC address was copied by DLLK */
@@ -396,6 +427,7 @@ and the kernel modules by using the kernel control module.
 tOplkError ctrlu_shutdownStack(void)
 {
     tOplkError      ret = kErrorOk;
+    UINT16          retVal;
 
 #if defined(CONFIG_INCLUDE_CFM)
     ret = cfmu_exit();
@@ -449,7 +481,7 @@ tOplkError ctrlu_shutdownStack(void)
     DEBUG_LVL_CTRL_TRACE("eventu_exit():  0x%X\n", ret);
 
     /* shutdown kernel stack */
-    ret = ctrlucal_executeCmd(kCtrlCleanupStack);
+    ret = ctrlucal_executeCmd(kCtrlCleanupStack, &retVal);
     DEBUG_LVL_CTRL_TRACE("shoutdown kernel modules():  0x%X\n", ret);
 
 #if (CONFIG_OBD_USE_LOAD_CONCISEDCF != FALSE)
@@ -530,6 +562,42 @@ BOOL ctrlu_checkKernelStack(void)
         ctrlInstance_l.lastHeartbeat = heartbeat;
         return (ctrlucal_getStatus() == kCtrlStatusRunning);
     }
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Get information about kernel stack
+
+The function gets information about the version and features of the kernel stack.
+
+\param  pKernelInfo_p       Pointer to store kernel information.
+
+\return The function returns a tOplkError error code.
+
+\ingroup module_ctrlu
+*/
+//------------------------------------------------------------------------------
+tOplkError ctrlu_getKernelInfo(tCtrlKernelInfo* pKernelInfo_p)
+{
+    UINT16      retVal;
+
+    if (ctrlucal_executeCmd(kCtrlGetFeaturesHigh, &retVal) != kErrorOk)
+        return kErrorNoResource;
+    pKernelInfo_p->featureFlags = (retVal << 16);
+
+    if (ctrlucal_executeCmd(kCtrlGetFeaturesLow, &retVal) != kErrorOk)
+        return kErrorNoResource;
+    pKernelInfo_p->featureFlags |= retVal;
+
+    if (ctrlucal_executeCmd(kCtrlGetVersionHigh, &retVal) != kErrorOk)
+        return kErrorNoResource;
+    pKernelInfo_p->version = (retVal << 16);
+
+    if (ctrlucal_executeCmd(kCtrlGetVersionLow, &retVal) != kErrorOk)
+        return kErrorNoResource;
+    pKernelInfo_p->version |= retVal;
+
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -1817,5 +1885,48 @@ static tOplkError linkDomainObjects(tLinkObjectRequest* pLinkRequest_p,
     return ret;
 }
 #endif
+
+//------------------------------------------------------------------------------
+/**
+\brief  Setup required kernel features
+
+The function sets up the feature which are required from the kernel stack.
+They will be set depending on the compilation guarded by feature macros
+of the user stack.
+*/
+//------------------------------------------------------------------------------
+void setupRequiredKernelFeatures(void)
+{
+    ctrlInstance_l.requiredKernelFeatures = 0;
+
+#if defined(CONFIG_INCLUDE_NMT_MN)
+    // We do have NMT functionality compiled in and therefore need an MN
+    // kernel stack
+    ctrlInstance_l.requiredKernelFeatures |= OPLK_KERNEL_MN;
+#endif
+
+#if defined(CONFIG_INCLUDE_PDO)
+    // We contain the PDO module for isochronous transfers and therefore need
+    // a kernel module which can handle isochronous transfers.
+    ctrlInstance_l.requiredKernelFeatures |= OPLK_KERNEL_ISOCHR;
+#endif
+
+#if defined(CONFIG_INCLUDE_PRES_FORWARD)
+    // We contain the PRES forwarding module (used for diagnosis) and therefore
+    // need a kernel whith this feature.
+    ctrlInstance_l.requiredKernelFeatures |= OPLK_KERNEL_PRES_FORWARD;
+#endif
+
+#if defined(CONFIG_INCLUDE_VETH)
+    // We contain the virtual ethernet module and therefore need a kernel
+    // which supports virtual ethernet.
+    ctrlInstance_l.requiredKernelFeatures |= OPLK_KERNEL_VETH;
+#endif
+
+#if (CONFIG_DLL_PRES_CHAINING_CN == TRUE)
+    ctrlInstance_l.requiredKernelFeatures |= OPLK_KERNEL_PRES_CHAINING_CN;
+#endif
+
+}
 
 /// \}

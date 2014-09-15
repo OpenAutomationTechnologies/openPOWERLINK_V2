@@ -62,6 +62,10 @@ typedef enum eCtrlCmd
     kCtrlInitStack,                     ///< Initialize kernel modules
     kCtrlCleanupStack,                  ///< Cleanup kernel modules
     kCtrlShutdown,                      ///< Shutdown stack
+    kCtrlGetVersionHigh,                ///< Get higher part of kernel stack version
+    kCtrlGetVersionLow,                 ///< Get lower part of kernel stack version
+    kCtrlGetFeaturesHigh,               ///< Get higher part of features of kernel stack
+    kCtrlGetFeaturesLow,                ///< Get lower part of features of kernel stack
 } tCtrlCmdType;
 
 /**
@@ -74,7 +78,15 @@ typedef enum
     kCtrlStatusUnavailable = 0,         ///< Kernel stack is unavailable
     kCtrlStatusReady,                   ///< Kernel stack is ready
     kCtrlStatusRunning,                 ///< Kernel stack is running
+    kCtrlStatusUnchanged,               ///< State has not changed
 } tCtrlKernelStatus;
+
+
+typedef struct
+{
+    UINT32      version;
+    UINT32      featureFlags;
+} tCtrlKernelInfo;
 
 /**
 \brief Init Parameters

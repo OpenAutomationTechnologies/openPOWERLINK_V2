@@ -154,14 +154,15 @@ tOplkError ctrlucal_process(void)
 
 The function executes a control command in the kernel stack.
 
-\param  cmd_p            Command to execute
+\param  cmd_p           Command to execute.
+\param  pRetVal_p       Return value from the control command.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_ctrlucal
 */
 //------------------------------------------------------------------------------
-tOplkError ctrlucal_executeCmd(tCtrlCmdType cmd_p)
+tOplkError ctrlucal_executeCmd(tCtrlCmdType cmd_p, UINT16* pRetVal_p)
 {
     tCtrlCmd            ctrlCmd;
     int                 ret;
@@ -175,7 +176,8 @@ tOplkError ctrlucal_executeCmd(tCtrlCmdType cmd_p)
         return kErrorGeneralError;
     }
 
-    return ctrlCmd.retVal;
+    *pRetVal_p = ctrlCmd.retVal;
+    return kErrorOk;
 }
 
 
@@ -197,6 +199,7 @@ tOplkError ctrlucal_checkKernelStack(void)
 {
     UINT16              kernelStatus;
     tOplkError          ret;
+    UINT16              retVal;
 
     DEBUG_LVL_CTRL_TRACE("Checking for kernel stack...\n");
     kernelStatus = ctrlucal_getStatus();
@@ -209,8 +212,8 @@ tOplkError ctrlucal_checkKernelStack(void)
 
         case kCtrlStatusRunning:
             /* try to shutdown kernel stack */
-            ret = ctrlucal_executeCmd(kCtrlCleanupStack);
-            if (ret != kErrorOk)
+            ret = ctrlucal_executeCmd(kCtrlCleanupStack, &retVal);
+            if ((ret != kErrorOk) || ((tOplkError)retVal != kErrorOk))
             {
                 ret = kErrorNoResource;
                 break;
@@ -220,9 +223,9 @@ tOplkError ctrlucal_checkKernelStack(void)
 
             kernelStatus = ctrlucal_getStatus();
             if (kernelStatus != kCtrlStatusReady)
-            {
                 ret = kErrorNoResource;
-            }
+            else
+                ret = kErrorOk;
             break;
 
         default:

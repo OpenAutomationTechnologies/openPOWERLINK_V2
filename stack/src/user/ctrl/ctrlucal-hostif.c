@@ -218,14 +218,15 @@ tOplkError ctrlucal_process(void)
 
 The function executes a control command in the kernel stack.
 
-\param  cmd_p            Command to execute
+\param  cmd_p           Command to execute.
+\param  pRetVal_p       Return value from the control command.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_ctrlucal
 */
 //------------------------------------------------------------------------------
-tOplkError ctrlucal_executeCmd(tCtrlCmdType cmd_p)
+tOplkError ctrlucal_executeCmd(tCtrlCmdType cmd_p, UINT16* pRetVal_p)
 {
     tHostifReturn hifret;
     tHostifCommand hifcmd = (tHostifCommand)cmd_p;
@@ -250,7 +251,8 @@ tOplkError ctrlucal_executeCmd(tCtrlCmdType cmd_p)
 
         if (hifcmd == 0)
         {
-            return hiferr;
+            *pRetVal_p = hiferr;
+            return kErrorOk;
         }
     }
 
@@ -279,6 +281,7 @@ tOplkError ctrlucal_checkKernelStack(void)
     UINT16 kernelStatus;
     BOOL fExit = FALSE;
     int timeout = 0;
+    UINT16 retVal;
 
     DEBUG_LVL_CTRL_TRACE("Check Kernel Stack...\n");
 
@@ -296,11 +299,12 @@ tOplkError ctrlucal_checkKernelStack(void)
                 /* try to shutdown kernel stack */
                 DEBUG_LVL_CTRL_TRACE("-> Try to shutdown Kernel Stack\n");
 
-                ret = ctrlucal_executeCmd(kCtrlCleanupStack);
-                if (ret != kErrorOk)
+                ret = ctrlucal_executeCmd(kCtrlCleanupStack, &retVal);
+                if ((ret != kErrorOk) || ((tOplkError)retVal != kErrorOk))
                 {
                     fExit = TRUE;
                     ret = kErrorNoResource;
+                    break;
                 }
                 break;
 

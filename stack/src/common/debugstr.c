@@ -327,6 +327,7 @@ static tRetValInfo retValInfo_l[] =
     { kErrorRetry,                    "Retry this command"},
     { kErrorInvalidEvent,             "Invalid event was posted to process function"},
     { kErrorGeneralError,             "General error"},
+    { kErrorFeatureMismatch,          "Features of user and kernel stack are mismatched"},
 
     /* area for EDRV module 0x0010 - 0x001F */
     { kErrorEdrvNoFreeTxDesc,         "No free Tx descriptor available"},

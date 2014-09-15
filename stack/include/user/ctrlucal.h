@@ -65,7 +65,7 @@ void       ctrlucal_exit(void);
 tOplkError ctrlucal_process(void);
 UINT16     ctrlucal_getStatus(void);
 UINT16     ctrlucal_getHeartbeat(void);
-tOplkError ctrlucal_executeCmd(tCtrlCmdType cmd_p);
+tOplkError ctrlucal_executeCmd(tCtrlCmdType cmd_p, UINT16* pRetVal_p);
 tOplkError ctrlucal_checkKernelStack(void);
 void       ctrlucal_storeInitParam(tCtrlInitParam* pInitParam_p);
 tOplkError ctrlucal_readInitParam(tCtrlInitParam* pInitParam_p);

@@ -151,24 +151,28 @@ tOplkError ctrlucal_process(void)
 
 The function executes a control command in the kernel stack.
 
-\param  cmd_p            Command to execute
+\param  cmd_p           Command to execute.
+\param  pRetVal_p       Return value from the control command.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_ctrlucal
 */
 //------------------------------------------------------------------------------
-tOplkError ctrlucal_executeCmd(tCtrlCmdType cmd_p)
+tOplkError ctrlucal_executeCmd(tCtrlCmdType cmd_p, UINT16* pRetVal_p)
 {
     tOplkError          ret;
-    tOplkError          fRet;
+    UINT16              fRet;
     UINT16              status;
 
     if ((ret = ctrlk_executeCmd(cmd_p, &fRet, &status, NULL)) != kErrorOk)
         return ret;
 
-    ctrlkcal_setStatus(status);
-    return fRet;
+    if (status != kCtrlStatusUnchanged)
+        ctrlkcal_setStatus(status);
+
+    *pRetVal_p = fRet;
+    return ret;
 }
 
 //------------------------------------------------------------------------------

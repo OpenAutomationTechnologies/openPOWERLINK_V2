@@ -44,6 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
 #include <oplk/obd.h>
+#include <common/ctrl.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -67,6 +68,7 @@ tOplkError ctrlu_initStack(tOplkApiInitParam* pInitParam_p);
 tOplkError ctrlu_shutdownStack(void);
 tOplkError ctrlu_processStack(void);
 BOOL       ctrlu_checkKernelStack(void);
+tOplkError ctrlu_getKernelInfo(tCtrlKernelInfo* pKernelInfo_p);
 tOplkError ctrlu_callUserEventCallback(tOplkApiEventType eventType_p, tOplkApiEventArg* pEventArg_p);
 tOplkError ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p);
 UINT8*     ctrlu_getEthMacAddr(void);

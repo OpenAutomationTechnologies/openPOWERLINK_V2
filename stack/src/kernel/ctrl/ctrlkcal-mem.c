@@ -167,7 +167,15 @@ block to execute a kernel control function.
 //------------------------------------------------------------------------------
 tOplkError ctrlkcal_getCmd(tCtrlCmdType* pCmd_p)
 {
-    return ctrlcal_readData(pCmd_p, offsetof(tCtrlBuf, ctrlCmd), sizeof(tCtrlCmd));
+    UINT16      cmd;
+    tOplkError  ret;
+
+    ret = ctrlcal_readData(&cmd, offsetof(tCtrlBuf, ctrlCmd.cmd), sizeof(UINT16));
+    if (ret == kErrorOk)
+    {
+        *pCmd_p = (tCtrlCmdType)cmd;
+    }
+    return ret;
 }
 
 //------------------------------------------------------------------------------
