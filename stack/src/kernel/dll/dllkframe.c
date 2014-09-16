@@ -1779,7 +1779,7 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
 
         // If Presp frames are received which are larger than the buffer, they are cut off
         // (the application will most probably just be interested in the frame-header anyway).
-        OPLK_MEMCPY(&presEvent.frameBuf, pFrame, min(sizeof(presEvent.frameBuf), pFrameInfo_p->frameSize));
+        OPLK_MEMCPY(&presEvent.frameBuf, pFrame, min(sizeof(presEvent.frameBuf), (size_t)pFrameInfo_p->frameSize));
 
         event.eventSink = kEventSinkApi;
         event.eventType = kEventTypeReceivedPres;
