@@ -199,6 +199,7 @@ static char* eventSourceStr_l[] =
     "EventSourceOplkApi",       // Api module
     "EventSourceLedu",          // Ledu module
     "EventSourceGw309Ascii",    // GW309ASCII module
+    "EventSourceErru"           // User error module
 };
 
 // text strings for POWERLINK event sinks
@@ -262,7 +263,9 @@ static char* eventTypeStr_l[] =
     "EventTypeGw309AsciiReq",           // GW309ASCII request
     "EventTypeNmtMnuNodeAdded",         // node was added to isochronous phase by DLL
     "EventTypePdokSetupPdoBuf",         // dealloc PDOs
-    "EventTypePdokControlSync"          // enable/disable the pdokcal sync trigger (arg is pointer to BOOL)
+    "EventTypePdokControlSync",         // enable/disable the pdokcal sync trigger (arg is pointer to BOOL)
+    "EventTypeReleaseRxFrame",          // Free receive buffer
+    "EventTypeASndNotRx"                // Didn't receive ASnd frame for DLL user module
 };
 
 // text strings for POWERLINK states
@@ -303,6 +306,8 @@ static tApiEventInfo apiEventInfo_l[] =
     { kOplkApiEventLed,              "LED event"                         },
     { kOplkApiEventCfmProgress,      "CFM progress"                      },
     { kOplkApiEventCfmResult,        "CFM result"                        },
+    { kOplkApiEventReceivedAsnd,     "Received ASnd"                     },
+    { kOplkApiEventPdoChange,        "PDO change"                        }
 };
 
 // text strings for values of type tOplkError
@@ -321,6 +326,7 @@ static tRetValInfo retValInfo_l[] =
     { kErrorReject,                   "Reject the subsequent command"},
     { kErrorRetry,                    "Retry this command"},
     { kErrorInvalidEvent,             "Invalid event was posted to process function"},
+    { kErrorGeneralError,             "General error"},
 
     /* area for EDRV module 0x0010 - 0x001F */
     { kErrorEdrvNoFreeTxDesc,         "No free Tx descriptor available"},
