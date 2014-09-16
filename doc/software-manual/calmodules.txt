@@ -32,7 +32,7 @@ the user layer.
 The following CAL module implementations are available:
 - Shared memory block implementation: \ref ctrlucal-mem.c, \ref ctrlkcal-mem.c
 - Direct call implementation: \ref ctrlucal-direct.c, \ref ctrlkcal-direct.c
-- Implementation using IOCTL calls: \ref ctrlucal-ioctl.c, \ref ctrlkcal-linuxkernel.c
+- Implementation using IOCTL calls: \ref ctrlucal-ioctl.c, \ref ctrlkcal-mem.c
 - Host interface implementation: \ref ctrlucal-hostif.c, \ref ctrlkcal-hostif.c
 
 __NOTE:__ Depending on the used communication channel, only one of the available module
@@ -177,8 +177,7 @@ The following CAL module implementations are currently available:
   - \ref eventkcalintf-circbuf.c,
 - Dual processor non-OS System using host interface IP core:
   - \ref eventucal-nooshostif.c, \ref eventkcal-nooshostif.c
-  - \ref eventucalintf-hostif.c, \ref eventkcalintf-hostif.c
-- Single processor non-OS System using circular buffers:
+  Single processor non-OS System using circular buffers:
   - \ref eventucal-nooscircbuf.c, \ref eventkcal-nooscircbuf.c
   - \ref eventucalintf-circbuf.c, \ref eventkcalintf-circbuf.c
 
@@ -323,8 +322,7 @@ and receiving asynchronous frames.
 The following CAL module implementations are available:
 - Direct call implementation: \ref dllcal-direct.c
 - Implementation using circbuffer library: \ref dllucal-circbuf.c, \ref dllkcal-circbuf.c
-- Host interface implementation: \ref dllcal-hostif.c
-- Implementation using IOCTL calls: \ref dllucal-ioctl.c, \ref dllkcal-linuxkernel.c
+- Implementation using IOCTL calls: \ref dllucal-ioctl.c, \ref dllkcal-circbuf.c
 
 __NOTE:__ Depending on the used communication channel, only one of the available module
 pairs can be compiled into the openPOWERLINK stack at a time.

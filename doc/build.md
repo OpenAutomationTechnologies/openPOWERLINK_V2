@@ -77,7 +77,7 @@ __For example:__
 
 Configuring cross compilation for the Xilinx Microblaze platform:
 
-> cmake -DCMAKE_TOOLCHAIN_FILE=<OPENPOWERLINK_DIR>/cmake/toolchain-xilinx-microblaze-gnu.cmake <SOURCE_DIR>
+    > cmake -DCMAKE_TOOLCHAIN_FILE=<OPENPOWERLINK_DIR>/cmake/toolchain-xilinx-microblaze-gnu.cmake <SOURCE_DIR>
 
 # Build Steps {#sect_build_steps}
 

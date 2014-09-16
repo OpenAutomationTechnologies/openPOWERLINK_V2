@@ -145,7 +145,7 @@ void* memmap_mapKernelBuffer(void* pKernelBuffer_p)
 
 The function disconnects from a memory mapping.
 
-\param  pKernelBuffer_p     The pointer to the previously mapped buffer.
+\param  pBuffer_p       The pointer to the previously mapped buffer.
 
 \ingroup module_lib_memmap
 */

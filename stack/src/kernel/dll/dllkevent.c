@@ -1023,8 +1023,10 @@ Exit:
 /**
 \brief  Request of forwarding PRes frames to the application
 
-The function requests the DLL to forward a received PRES frame to the
+The function requests the DLL to forward a received PRes frame to the
 application.
+
+\param  node_p          Node ID of node to request PRes forwarding.
 
 \return The function returns a tOplkError error code.
 */

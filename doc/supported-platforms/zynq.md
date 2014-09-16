@@ -106,7 +106,7 @@ steps from this section. On the platform Xilinx Zynq the following build
 steps can be carried out:
 
 * [Build the openPOWERLINK stack libraries](\ref page_build_stack)
-* [Build your application (or a delivered demo application)](\ref sect_build_demos_build_zynq)
+* [Build your application (or a delivered demo application)](\ref page_build_demos)
 
 ## Running openPOWERLINK {#sect_zynq_running}
 

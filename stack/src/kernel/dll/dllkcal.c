@@ -1275,7 +1275,6 @@ Ethernet Tx queue.
 
 \param  pFrameInfo_p            Pointer to asynchronous frame. The frame size
                                 includes the ethernet header (14 bytes).
-\param  priority_p              Priority for sending this frame.
 
 \return The function returns a tOplkError error code.
 */

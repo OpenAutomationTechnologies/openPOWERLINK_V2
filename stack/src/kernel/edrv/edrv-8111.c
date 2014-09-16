@@ -992,14 +992,14 @@ tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p,
 
 This function releases a late release Rx buffer.
 
-\param  pBuffer_p       Rx buffer to be released
+\param  pRxBuffer_p     Rx buffer to be released
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_releaseRxBuffer(tEdrvRxBuffer* pBuffer_p)
+tOplkError edrv_releaseRxBuffer(tEdrvRxBuffer* pRxBuffer_p)
 {
     tOplkError    ret = kErrorEdrvInvalidRxBuf;
 

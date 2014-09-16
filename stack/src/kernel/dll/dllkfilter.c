@@ -126,8 +126,6 @@ static void setupVethBroadcast(tEdrvFilter* pFilter_p, BOOL fEnable_p);
 
 The function sets up all filters in the Edrv filter structure.
 
-\param  pFilter_p       Pointer to Edrv filte structure.
-
 */
 //------------------------------------------------------------------------------
 void dllkfilter_setupFilters(void)

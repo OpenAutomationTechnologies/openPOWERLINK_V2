@@ -50,7 +50,29 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
+
+/**
+* \brief Callback function for handling received ASnd frames
+*
+* This function type is used for callback functions handling received ASnd
+* frames.
+*
+* \param pFrameInfo_p       Information about received ASnd frame.
+*
+* \return The function returns a tOplkError error code
+*/
 typedef tOplkError (*tDlluCbAsnd)(tFrameInfo* pFrameInfo_p);
+
+/**
+* \brief Callback function for handling received Non-PLK frames
+*
+* This function type is used for callback functions handling received non-
+* POWERLINK (Ethernet) frames.
+*
+* \param pFrameInfo_p       Information about received frame.
+*
+* \return The function returns a tOplkError error code
+*/
 typedef tOplkError (*tDlluCbNonPlk)(tFrameInfo* pFrameInfo_p);
 
 //------------------------------------------------------------------------------

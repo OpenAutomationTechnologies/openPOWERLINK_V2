@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   memmap/memmap-noos.c
+\file   memmap/memmap-nooslocal.c
 
 \brief  Memory mapping implementation for non-os systems
 
@@ -141,7 +141,7 @@ void* memmap_mapKernelBuffer(void* pKernelBuffer_p)
 
 The function disconnects from a memory mapping.
 
-\param  pKernelBuffer_p     The pointer the previously mapped buffer.
+\param  pBuffer_p           The pointer the previously mapped buffer.
 
 \ingroup module_lib_memmap
 */

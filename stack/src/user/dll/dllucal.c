@@ -333,7 +333,7 @@ tOplkError dllucal_setIdentity(tDllIdentParam* pDllIdentParam_p)
 
 This function register the handler for non-POWERLINK frames.
 
-pfnNonPlkCb_p   Pointer to callback function
+\param pfnNonPlkCb_p   Pointer to callback function
 
 \return The function returns a tOplkError error code.
 
@@ -820,7 +820,6 @@ Ethernet Tx queue.
 
 \param  pFrameInfo_p            Pointer to asynchronous frame. The frame size
                                 includes the ethernet header (14 bytes).
-\param  priority_p              Priority for sending this frame.
 
 \return The function returns a tOplkError error code.
 */
