@@ -253,6 +253,9 @@ static tOplkError initPowerlink(tInstance* pInstance_p)
     // Set IP address to ARP module
     arp_setIpAddr(initParam.ipAddress);
 
+    // Set default gateway to ARP module
+    arp_setDefGateway(initParam.defaultGateway);
+
     return kErrorOk;
 }
 
@@ -373,6 +376,13 @@ static tOplkError eventCbPowerlink(tOplkApiEventType EventType_p, tOplkApiEventA
             // Here you can call other protocol stacks for processing.
 
             ret = kErrorOk; // Frame wasn't processed, so simply dump it.
+            break;
+
+        case kOplkApiEventDefaultGwChange:
+            // ARP demo: Set default gateway and send request
+            arp_setDefGateway(pEventArg_p->defaultGwChange.defaultGateway);
+
+            arp_sendRequest(pEventArg_p->defaultGwChange.defaultGateway);
             break;
 
         default:

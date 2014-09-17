@@ -63,6 +63,7 @@ tOplkError arp_init(UINT8 nodeId_p);
 void       arp_shutdown(void);
 tOplkError arp_setMacAddr(UINT8* pMacAddr_p);
 tOplkError arp_setIpAddr(UINT32 ipAddr_p);
+tOplkError arp_setDefGateway(UINT32 defGateway_p);
 
 tOplkError arp_sendRequest(UINT32 ipAddr_p);
 tOplkError arp_processReceive(tPlkFrame* pFrame_p, UINT size_p);

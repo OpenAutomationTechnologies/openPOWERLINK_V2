@@ -109,10 +109,12 @@ typedef struct
  */
 typedef struct
 {
-    tArpFrame   frameTemplate;                  ///< ARP frame template
-    UINT8       nodeId;                         ///< The local node ID
-    UINT8       aMacAddr[ARP_HWADDR_LENGTH];    ///< The local node's MAC address in network order
-    UINT8       aIpAddr[ARP_PROADDR_LENGTH];    ///< The local node's IP address in network order
+    tArpFrame   frameTemplate;                      ///< ARP frame template
+    UINT8       nodeId;                             ///< The local node ID
+    UINT8       aMacAddr[ARP_HWADDR_LENGTH];        ///< The local node's MAC address in network order
+    UINT8       aIpAddr[ARP_PROADDR_LENGTH];        ///< The local node's IP address in network order
+    UINT8       aDefaultGwIp[ARP_PROADDR_LENGTH];   ///< Default gateway IP address in network order
+    UINT8       aDefaultGwMac[ARP_HWADDR_LENGTH];   ///< Default gateway MAC address in network order
 } tArpInstance;
 
 //------------------------------------------------------------------------------
@@ -224,6 +226,31 @@ tOplkError arp_setIpAddr(UINT32 ipAddr_p)
     UINT32 ipAddr = htonl(ipAddr_p); // Swap to get network order
 
     memcpy(arpInstance_l.aIpAddr, (UINT8*)&ipAddr, ARP_PROADDR_LENGTH);
+
+    return kErrorOk;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Set default gateway address
+
+The function sets the default gateway's IP address.
+
+\param  defGateway_p    Default gateway IP address
+
+\return The function returns a tOplkError error code.
+
+\ingroup module_app_common
+*/
+//------------------------------------------------------------------------------
+tOplkError arp_setDefGateway(UINT32 defGateway_p)
+{
+    UINT32 defGateway = htonl(defGateway_p); // Swap to get network order
+
+    memcpy(arpInstance_l.aDefaultGwIp, (UINT8*)&defGateway, ARP_PROADDR_LENGTH);
+
+    // Invalidate default gateway's MAC address
+    memset(arpInstance_l.aDefaultGwMac, 0, ARP_HWADDR_LENGTH);
 
     return kErrorOk;
 }
@@ -348,22 +375,28 @@ static tOplkError handleReply(tArpFrame* pFrame_p)
 {
     tOplkError ret = kErrorOk;
 
-#ifdef NDEBUG
-    UNUSED_PARAMETER(pFrame_p);
-#endif
-
     PRINTF("ARP: Node with IP Address %d.%d.%d.%d ",
            pFrame_p->aSenderProtocolAddress[0],
            pFrame_p->aSenderProtocolAddress[1],
            pFrame_p->aSenderProtocolAddress[2],
            pFrame_p->aSenderProtocolAddress[3]);
-    PRINTF("has MAC Address %02X:%02X:%02X:%02X:%02X:%02X\n",
+    PRINTF("has MAC Address %02X:%02X:%02X:%02X:%02X:%02X ",
            pFrame_p->aSenderHardwareAddress[0],
            pFrame_p->aSenderHardwareAddress[1],
            pFrame_p->aSenderHardwareAddress[2],
            pFrame_p->aSenderHardwareAddress[3],
            pFrame_p->aSenderHardwareAddress[4],
            pFrame_p->aSenderHardwareAddress[5]);
+
+    if (memcmp(pFrame_p->aSenderProtocolAddress, arpInstance_l.aDefaultGwIp, ARP_PROADDR_LENGTH) == 0)
+    {
+        PRINTF("(default gateway)");
+
+        // Store default gateway's MAC address
+        memcpy(arpInstance_l.aDefaultGwMac, pFrame_p->aSenderHardwareAddress, ARP_HWADDR_LENGTH);
+    }
+
+    PRINTF("\n");
 
     return ret;
 }
