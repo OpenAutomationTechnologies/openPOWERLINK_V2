@@ -910,7 +910,14 @@ tOplkError edrv_releaseRxBuffer(tEdrvRxBuffer* pRxBuffer_p)
     pPacket->length = pRxBuffer_p->rxFrameSize;
 
     if (pPacket->length != 0)
+    {
+        target_enableGlobalInterrupt(FALSE);
+
+        // Freeing the Rx buffer is done in a critical section
         omethPacketFree(pPacket);
+
+        target_enableGlobalInterrupt(TRUE);
+    }
     else
         ret = kErrorEdrvInvalidRxBuf;
 
