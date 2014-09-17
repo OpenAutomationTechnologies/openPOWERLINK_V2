@@ -72,7 +72,7 @@ SET_PROPERTY(CACHE CFG_POWERLINK_EDRV PROPERTY STRINGS 8139 82573 8255x i210 811
 ################################################################################
 # Set global directories
 ################################################################################
-SET(OPLK_BASE_DIR ${CMAKE_SOURCE_DIR}/../../..)
+SET(OPLK_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../..)
 SET(CONTRIB_SOURCE_DIR ${OPLK_BASE_DIR}/contrib)
 SET(STACK_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src)
 SET(COMMON_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/common)
@@ -149,10 +149,10 @@ IF(CFG_OPLK_MN)
     ENDIF()
     SET(MODULE_DEFS "${MODULE_DEFS} -DCONFIG_MN")
     SET(MODULE_NAME "${MODULE_NAME}mn")
-    INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/proj/mn)
+    INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/proj/mn)
 ELSE()
     SET(MODULE_NAME "${MODULE_NAME}cn")
-    INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/proj/cn)
+    INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/proj/cn)
 ENDIF()
 
 ###############################################################################
@@ -188,7 +188,7 @@ ENDFOREACH()
 #
 SET(MODULE_SOURCE_FILES
     ${MODULE_SOURCE_FILES}
-    ${CMAKE_SOURCE_DIR}/main.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/main.c
     ${CONTRIB_SOURCE_DIR}/trace/trace-printk.c
     ${EDRV_SOURCE_DIR}/edrvcyclic.c
     ${KERNEL_SOURCE_DIR}/ctrl/ctrlk.c
