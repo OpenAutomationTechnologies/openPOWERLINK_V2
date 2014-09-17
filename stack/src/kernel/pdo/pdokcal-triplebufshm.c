@@ -204,11 +204,16 @@ tOplkError pdokcal_writeRxPdo(UINT channelId_p, BYTE* pPayload_p, UINT16 pdoSize
     BYTE*           pPdo;
     OPLK_ATOMIC_T   temp;
 
+    // Invalidate data cache for addressed rxChannelInfo
+    OPLK_DCACHE_INVALIDATE(&(pPdoMem_l->rxChannelInfo[channelId_p]), sizeof(tPdoBufferInfo));
+
     pPdo = pTripleBuf_l[pPdoMem_l->rxChannelInfo[channelId_p].writeBuf] +
            pPdoMem_l->rxChannelInfo[channelId_p].channelOffset;
     //TRACE("%s() chan:%d wi:%d\n", __func__, channelId_p, pPdoMem_l->rxChannelInfo[channelId_p].writeBuf);
 
     OPLK_MEMCPY(pPdo, pPayload_p, pdoSize_p);
+
+    OPLK_DCACHE_FLUSH(pPdo, pdoSize_p);
 
     temp = pPdoMem_l->rxChannelInfo[channelId_p].writeBuf;
     OPLK_ATOMIC_EXCHANGE(&pPdoMem_l->rxChannelInfo[channelId_p].cleanBuf,
@@ -216,6 +221,10 @@ tOplkError pdokcal_writeRxPdo(UINT channelId_p, BYTE* pPayload_p, UINT16 pdoSize
                          pPdoMem_l->rxChannelInfo[channelId_p].writeBuf);
 
     pPdoMem_l->rxChannelInfo[channelId_p].newData = 1;
+
+    // Flush data cache for variables changed in this function
+    OPLK_DCACHE_FLUSH(&(pPdoMem_l->rxChannelInfo[channelId_p].writeBuf), sizeof(OPLK_ATOMIC_T));
+    OPLK_DCACHE_FLUSH(&(pPdoMem_l->rxChannelInfo[channelId_p].newData), sizeof(UINT8));
 
     //TRACE("%s() chan:%d new wi:%d\n", __func__, channelId_p, pPdoMem_l->rxChannelInfo[channelId_p].writeBuf);
     //TRACE("%s() *pPayload_p:%02x\n", __func__, *pPayload_p);
@@ -242,6 +251,9 @@ tOplkError pdokcal_readTxPdo(UINT channelId_p, BYTE* pPayload_p, UINT16 pdoSize_
     BYTE*           pPdo;
     OPLK_ATOMIC_T   readBuf;
 
+    // Invalidate data cache for addressed txChannelInfo
+    OPLK_DCACHE_INVALIDATE(&(pPdoMem_l->txChannelInfo[channelId_p]), sizeof(tPdoBufferInfo));
+
     if (pPdoMem_l->txChannelInfo[channelId_p].newData)
     {
         readBuf = pPdoMem_l->txChannelInfo[channelId_p].readBuf;
@@ -249,6 +261,10 @@ tOplkError pdokcal_readTxPdo(UINT channelId_p, BYTE* pPayload_p, UINT16 pdoSize_
                              readBuf,
                              pPdoMem_l->txChannelInfo[channelId_p].readBuf);
         pPdoMem_l->txChannelInfo[channelId_p].newData = 0;
+
+        // Flush data cache for variables changed in this function
+        OPLK_DCACHE_FLUSH(&(pPdoMem_l->txChannelInfo[channelId_p].readBuf), sizeof(OPLK_ATOMIC_T));
+        OPLK_DCACHE_FLUSH(&(pPdoMem_l->txChannelInfo[channelId_p].newData), sizeof(UINT8));
     }
 
     /*TRACE("%s() pPdo_p:%p pPayload:%p size:%d value:%d\n", __func__,
@@ -256,6 +272,8 @@ tOplkError pdokcal_readTxPdo(UINT channelId_p, BYTE* pPayload_p, UINT16 pdoSize_
     //TRACE("%s() chan:%d ri:%d\n", __func__, channelId_p, pPdoMem_l->txChannelInfo[channelId_p].readBuf);
     pPdo = pTripleBuf_l[pPdoMem_l->txChannelInfo[channelId_p].readBuf] +
            pPdoMem_l->txChannelInfo[channelId_p].channelOffset;
+
+    OPLK_DCACHE_INVALIDATE(pPdo, pdoSize_p);
 
     OPLK_MEMCPY(pPayload_p, pPdo, pdoSize_p);
 
@@ -314,6 +332,8 @@ static void setupPdoMemInfo(tPdoChannelSetup* pPdoChannels_p, tPdoMemRegion* pPd
         offset += pPdoChannel->pdoSize;
     }
     pPdoMemRegion_p->pdoMemSize = offset;
+
+    OPLK_DCACHE_FLUSH(pPdoMemRegion_p, sizeof(tPdoMemRegion));
 }
 
 ///\}
