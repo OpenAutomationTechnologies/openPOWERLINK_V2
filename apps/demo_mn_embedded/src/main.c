@@ -390,7 +390,7 @@ static tOplkError eventCbPowerlink(tOplkApiEventType EventType_p,
         // Note: This is a demonstration to generate non-POWERLINK frames.
         if (pNode->nodeEvent == kNmtNodeEventFound)
         {
-            arp_sendRequest(pNode->nodeId);
+            arp_sendRequest((0xFFFFFF00 & IP_ADDR) | pNode->nodeId);
         }
     }
     else if (EventType_p == kOplkApiEventReceivedNonPlk)

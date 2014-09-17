@@ -356,7 +356,7 @@ static tOplkError eventCbPowerlink(tOplkApiEventType EventType_p, tOplkApiEventA
 
                 case kNmtCsBasicEthernet:
                     // ARP demo: Send request to MN
-                    arp_sendRequest(C_ADR_MN_DEF_NODE_ID);
+                    arp_sendRequest((0xFFFFFF00 & IP_ADDR) | C_ADR_MN_DEF_NODE_ID);
                     break;
 
                 default:

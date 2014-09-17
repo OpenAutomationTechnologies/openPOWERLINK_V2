@@ -234,16 +234,19 @@ tOplkError arp_setIpAddr(UINT32 ipAddr_p)
 
 The function sends an ARP request to the given POWERLINK node.
 
+\param  ipAddr_p    IP address to destination node
+
 \return The function returns a tOplkError error code.
 
 \ingroup module_app_common
 */
 //------------------------------------------------------------------------------
-tOplkError arp_sendRequest(UINT8 dstNodeId_p)
+tOplkError arp_sendRequest(UINT32 ipAddr_p)
 {
     tOplkError  ret = kErrorOk;
     tArpFrame   frameBuffer;
     tArpFrame*  pFrame = &frameBuffer;
+    UINT32      ipAddr = htonl(ipAddr_p); // Swap to get network order
 
     // Copy ARP frame template to frame buffer
     memcpy(pFrame, &arpInstance_l.frameTemplate, sizeof(tArpFrame));
@@ -264,10 +267,7 @@ tOplkError arp_sendRequest(UINT8 dstNodeId_p)
     memcpy(pFrame->aSenderHardwareAddress, &arpInstance_l.aMacAddr[0], ARP_HWADDR_LENGTH);
 
     // Target IP Address
-    memcpy(pFrame->aTargetProtocolAddress, arpInstance_l.aIpAddr, ARP_PROADDR_LENGTH);
-
-    // Overwrite last byte with destination node ID
-    pFrame->aTargetProtocolAddress[3] = dstNodeId_p;
+    memcpy(pFrame->aTargetProtocolAddress, &ipAddr, ARP_PROADDR_LENGTH);
 
     ret = oplk_sendEthFrame((tPlkFrame*)pFrame, sizeof(tArpFrame));
 
@@ -281,6 +281,7 @@ tOplkError arp_sendRequest(UINT8 dstNodeId_p)
 The function processes a received Ethernet frame for ARP handling.
 
 \param  pFrame_p    Pointer to ARP frame
+\param  size_p      Size of the frame
 
 \return The function returns a tOplkError error code.
 
