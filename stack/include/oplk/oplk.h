@@ -176,6 +176,17 @@ typedef struct
 } tOplkApiEventReceivedNonPlk;
 
 /**
+\brief Default gateway changed event
+
+This structure specifies the event for default gateway changed. It is used to
+inform the application about the changed default gateway address.
+*/
+typedef struct
+{
+    UINT32                      defaultGateway; ///< Default gateway
+} tOplkApiEventDefaultGwChange;
+
+/**
 \brief Application event types
 
 This enumeration specifies the valid application events which can be
@@ -264,6 +275,11 @@ typedef enum
     received Ethernet frame (\ref tOplkApiEventReceivedNonPlk). */
     kOplkApiEventReceivedNonPlk     = 0x81,
 
+    /** Default gateway changed event. This event informs the application about
+    a changed default gateway. The event argument gives the default gateway
+    (\ref tOplkApiEventDefaultGwChange).*/
+    kOplkApiEventDefaultGwChange    = 0x82,
+
 } tOplkApiEventType;
 
 
@@ -291,6 +307,7 @@ typedef union
     tOplkApiEventPdoChange      pdoChange;          ///< PDO change event (\ref kOplkApiEventPdoChange)
     tOplkApiEventReceivedPres   receivedPres;       ///< Received PRes frame (\ref kOplkApiEventReceivedPres)
     tOplkApiEventReceivedNonPlk receivedEth;        ///< Received Ethernet frame (\ref kOplkApiEventReceivedNonPlk)
+    tOplkApiEventDefaultGwChange defaultGwChange;   ///< Default gateway change event (\ref kOplkApiEventDefaultGwChange)
 } tOplkApiEventArg;
 
 /**

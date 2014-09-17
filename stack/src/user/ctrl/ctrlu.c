@@ -670,6 +670,21 @@ tOplkError ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
             }
             break;
 
+#if defined(CONFIG_INCLUDE_VETH)
+        case 0x1E40:    // NWL_IpAddrTable_0h_REC
+            if ((pParam_p->obdEvent == kObdEvPostWrite) && (pParam_p->subIndex == 5))
+            {
+                tOplkApiEventArg    eventArg;
+
+                eventArg.defaultGwChange.defaultGateway = *((UINT32*)pParam_p->pArg);
+
+                ret = ctrlu_callUserEventCallback(kOplkApiEventDefaultGwChange, &eventArg);
+                if (ret == kErrorReject)
+                    ret = kErrorOk; // Ignore reject
+            }
+            break;
+#endif
+
 #if defined(CONFIG_INCLUDE_NMT_MN)
         case 0x1F9F:    // NMT_RequestCmd_REC
             if ((pParam_p->obdEvent == kObdEvPostWrite) &&
