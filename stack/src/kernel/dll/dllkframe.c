@@ -1765,8 +1765,8 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
 
 #if defined(CONFIG_INCLUDE_NMT_MN) && defined(CONFIG_INCLUDE_PRES_FORWARD)
     // Check if PRes frame should be forwarded to API layer
-    pPresFw = &dllkInstance_g.aPresForward[nodeId];
 
+    pPresFw = &dllkInstance_g.aPresForward[nodeId - 1];
     if (pPresFw->numRequests != pPresFw->numResponse)
     {
         tEvent                  event;

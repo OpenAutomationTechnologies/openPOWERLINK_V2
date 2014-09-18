@@ -1035,8 +1035,8 @@ static tOplkError requestPresForward(UINT node_p)
 {
     tOplkError      ret = kErrorOk;
 
-    if (node_p < NMT_MAX_NODE_ID)
-        dllkInstance_g.aPresForward[node_p].numRequests++;
+    if ((node_p > 0) && (node_p <= NMT_MAX_NODE_ID))
+        dllkInstance_g.aPresForward[node_p - 1].numRequests++;
     else
         ret = kErrorInvalidNodeId;
 
