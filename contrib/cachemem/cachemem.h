@@ -58,13 +58,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-unsigned long   cachemem_invAndRead32(unsigned int base_p, unsigned int offset_p);
-unsigned short  cachemem_invAndRead16(unsigned int base_p, unsigned int offset_p);
-unsigned char   cachemem_invAndRead8(unsigned int base_p, unsigned int offset_p);
+unsigned long   cachemem_invAndRead32(void* base_p, unsigned int offset_p);
+unsigned short  cachemem_invAndRead16(void* base_p, unsigned int offset_p);
+unsigned char   cachemem_invAndRead8(void* base_p, unsigned int offset_p);
 
-void cachemem_writeAndFlush32(unsigned int base_p, unsigned int offset_p, unsigned long val_p);
-void cachemem_writeAndFlush16(unsigned int base_p, unsigned int offset_p, unsigned short val_p);
-void cachemem_writeAndFlush8(unsigned int base_p, unsigned int offset_p, unsigned char val_p);
+void cachemem_writeAndFlush32(void* base_p, unsigned int offset_p, unsigned long val_p);
+void cachemem_writeAndFlush16(void* base_p, unsigned int offset_p, unsigned short val_p);
+void cachemem_writeAndFlush8(void* base_p, unsigned int offset_p, unsigned char val_p);
 
 #ifdef __cplusplus
 }

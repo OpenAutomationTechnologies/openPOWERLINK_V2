@@ -40,6 +40,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <stddef.h>
+#include <stdlib.h>
+#include <stdint.h>
 #include <xil_types.h>
 #include <xparameters.h>
 
@@ -52,7 +54,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define HOSTIF_BASE             XPAR_AXI_HOSTINTERFACE_0_BASEADDR
 #define HOSTIF_IRQ_IC_ID        -1
-#define HOSTIF_IRQ              -1
+#define HOSTIF_IRQ              (UINT32_MAX + 1) // the irq mask is 32 bit wide
 
 #else
 
