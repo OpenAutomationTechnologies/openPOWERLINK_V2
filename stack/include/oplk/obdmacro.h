@@ -184,7 +184,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                                                                                 {1, typ,          (acc) | kObdAccArray,              &xDef##ind##_0x01_g, &axCur##ind##_g[0]}, \
                                                                                 OBD_END_SUBINDEX()};
 #define OBD_RAM_INDEX_RAM_ARRAY_ALT(ind, cnt, call, typ, acc, dtyp, name, def)  static tObdSubEntry MEM aObdSubEntry##ind##Ram_g[]= { \
-                                                                                {0, kObdTypeUInt8, kObdAccRW,                        &xDef##ind##_0x00_g, &xCur##ind##_0x00_g}, \
+                                                                                {0, kObdTypeUInt8,(acc),                             &xDef##ind##_0x00_g, &xCur##ind##_0x00_g}, \
                                                                                 {1, typ,          (acc) | kObdAccArray,              &xDef##ind##_0x01_g, &axCur##ind##_g[0]}, \
                                                                                 OBD_END_SUBINDEX()};
 #define OBD_RAM_INDEX_RAM_VARARRAY(ind, cnt, call, typ, acc, dtyp, name, def)   static tObdSubEntry MEM aObdSubEntry##ind##Ram_g[]= { \
@@ -196,7 +196,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                                                                                 {1, typ,          (acc) | kObdAccArray | kObdAccVar, NULL,                &aVarEntry##ind##_g[0]}, \
                                                                                 OBD_END_SUBINDEX()};
 #define OBD_RAM_INDEX_RAM_PDO_MAPPING(ind, cnt, call, acc, name, def)           static tObdSubEntry MEM aObdSubEntry##ind##Ram_g[]= { \
-                                                                                {0, kObdTypeUInt8, kObdAccRW,                        &xDef##ind##_0x00_g, &xCur##ind##_0x00_g}, \
+                                                                                {0, kObdTypeUInt8,  (acc),                           &xDef##ind##_0x00_g, &xCur##ind##_0x00_g}, \
                                                                                 {1, kObdTypeUInt64, (acc) | kObdAccArray,            &xDef##ind##_0x01_g, &axCur##ind##_g[0]}, \
                                                                                 OBD_END_SUBINDEX()};
 
