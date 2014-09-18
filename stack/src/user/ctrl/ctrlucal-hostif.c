@@ -170,11 +170,15 @@ void ctrlucal_exit(void)
 
     hifRet = hostif_irqMasterEnable(instance_l.hifInstance, instance_l.fIrqMasterEnable);
     if (hifRet != kHostifSuccessful)
+    {
         DEBUG_LVL_ERROR_TRACE("Could not disable Master Irq (0x%X)\n", hifRet);
+    }
 
     hifRet = hostif_delete(instance_l.hifInstance);
     if (hifRet != kHostifSuccessful)
+    {
         DEBUG_LVL_ERROR_TRACE("Could not delete Host Inetrface (0x%X)\n", hifRet);
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -302,7 +306,9 @@ tOplkError ctrlucal_checkKernelStack(void)
 
             default:
                 if (timeout == 0)
+                {
                     DEBUG_LVL_CTRL_TRACE("-> Wait for Kernel Stack\n");
+                }
 
                 target_msleep(1000U);
 
@@ -335,7 +341,7 @@ UINT16 ctrlucal_getStatus(void)
     UINT16 status;
 
     hifret = hostif_getState(instance_l.hifInstance, (tHostifState*)&status);
-    if (hifret != kErrorOk)
+    if (hifret != kHostifSuccessful)
         status = kCtrlStatusUnavailable;
 
     return status;
@@ -358,7 +364,7 @@ UINT16 ctrlucal_getHeartbeat(void)
     UINT16 heartbeat;
 
     hifret = hostif_getHeartbeat(instance_l.hifInstance, &heartbeat);
-    if (hifret != kErrorOk)
+    if (hifret != kHostifSuccessful)
         heartbeat = 0; // return constant heartbeat, so the user recognizes issue
 
     return heartbeat;

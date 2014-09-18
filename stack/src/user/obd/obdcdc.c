@@ -78,6 +78,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #elif (TARGET_SYSTEM == _VXWORKS_)
         #include "ioLib.h"
+#elif (TARGET_SYSTEM == _NO_OS_)
+    #include <unistd.h>
 #endif
 
 //============================================================================//

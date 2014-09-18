@@ -143,7 +143,9 @@ void pdoucal_exitSync(void)
 
     hifRet = hostif_irqRegHdl(pHifInstance, kHostifIrqSrcSync, NULL);
     if (hifRet != kHostifSuccessful)
+    {
         DEBUG_LVL_ERROR_TRACE("%s: Disable irq not possible (%d)!\n", __func__, hifRet);
+    }
 }
 
 //------------------------------------------------------------------------------

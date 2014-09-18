@@ -105,9 +105,9 @@ cache invalidation.
 \return 32 bit read data of the given type
  */
 //------------------------------------------------------------------------------
-unsigned long cachemem_invAndRead32(unsigned int base_p, unsigned int offset_p)
+unsigned long cachemem_invAndRead32(void* base_p, unsigned int offset_p)
 {
-    unsigned int address = base_p + offset_p;
+    unsigned int address = (unsigned int) base_p + offset_p;
 
     CACHEMEM_INVALIDATE(address, sizeof(u32));
 
@@ -127,9 +127,9 @@ cache invalidation.
 \return 16 bit read data of the given type
  */
 //------------------------------------------------------------------------------
-unsigned short cachemem_invAndRead16(unsigned int base_p, unsigned int offset_p)
+unsigned short cachemem_invAndRead16(void* base_p, unsigned int offset_p)
 {
-    unsigned int address = base_p + offset_p;
+    unsigned int address = (unsigned int) base_p + offset_p;
 
     CACHEMEM_INVALIDATE(address, sizeof(u16));
 
@@ -149,9 +149,9 @@ cache invalidation.
 \return 8 bit read data of the given type
  */
 //------------------------------------------------------------------------------
-unsigned char cachemem_invAndRead8(unsigned int base_p, unsigned int offset_p)
+unsigned char cachemem_invAndRead8(void* base_p, unsigned int offset_p)
 {
-    unsigned int address = base_p + offset_p;
+    unsigned int address = (unsigned int) base_p + offset_p;
 
     CACHEMEM_INVALIDATE(address, sizeof(u8));
 
@@ -170,9 +170,9 @@ flush afterwards.
 \param  val_p       32 bit value to write
  */
 //------------------------------------------------------------------------------
-void cachemem_writeAndFlush32(unsigned int base_p, unsigned int offset_p, unsigned long val_p)
+void cachemem_writeAndFlush32(void* base_p, unsigned int offset_p, unsigned long val_p)
 {
-    unsigned int address = base_p + offset_p;
+    unsigned int address = (unsigned int) base_p + offset_p;
 
     Xil_Out32(address, (u32)val_p);
 
@@ -191,9 +191,9 @@ flush afterwards.
 \param  val_p       16 bit value to write
  */
 //------------------------------------------------------------------------------
-void cachemem_writeAndFlush16(unsigned int base_p, unsigned int offset_p, unsigned short val_p)
+void cachemem_writeAndFlush16(void* base_p, unsigned int offset_p, unsigned short val_p)
 {
-    unsigned int address = base_p + offset_p;
+    unsigned int address = (unsigned int) base_p + offset_p;
 
     Xil_Out16(address, (u16)val_p);
 
@@ -212,9 +212,9 @@ flush afterwards.
 \param  val_p       8 bit value to write
  */
 //------------------------------------------------------------------------------
-void cachemem_writeAndFlush8(unsigned int base_p, unsigned int offset_p, unsigned char val_p)
+void cachemem_writeAndFlush8(void* base_p, unsigned int offset_p, unsigned char val_p)
 {
-    unsigned int address = base_p + offset_p;
+    unsigned int address = (unsigned int) base_p + offset_p;
 
     Xil_Out8(address, (u8)val_p);
 
