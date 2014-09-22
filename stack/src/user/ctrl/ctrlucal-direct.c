@@ -104,7 +104,10 @@ The function initializes the user control CAL module.
 tOplkError ctrlucal_init(void)
 {
     dummyHeartbeat_l = 0;
-    return kErrorOk;
+
+    // For the single process solution we are responsible that the kernel
+    // control module is correctly initialized.
+    return ctrlk_init();
 }
 
 //------------------------------------------------------------------------------
@@ -118,7 +121,9 @@ The function cleans up the user control CAL module.
 //------------------------------------------------------------------------------
 void ctrlucal_exit(void)
 {
-
+    // For the single process solution we are responsible that the kernel
+    // control module is correctly deinitialized.
+    ctrlk_exit();
 }
 
 //------------------------------------------------------------------------------
