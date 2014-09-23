@@ -133,6 +133,8 @@ tOplkError oplk_allocProcessImage(UINT sizeProcessImageIn_p, UINT sizeProcessIma
         goto Exit;
     }
     instance_l.inputImage.imageSize = sizeProcessImageIn_p;
+    OPLK_MEMSET(instance_l.inputImage.pImage, 0x00, sizeProcessImageIn_p);
+
 
     instance_l.outputImage.pImage = OPLK_MALLOC(sizeProcessImageOut_p);
     if (instance_l.outputImage.pImage == NULL)
@@ -141,6 +143,7 @@ tOplkError oplk_allocProcessImage(UINT sizeProcessImageIn_p, UINT sizeProcessIma
         goto Exit;
     }
     instance_l.outputImage.imageSize = sizeProcessImageOut_p;
+    OPLK_MEMSET(instance_l.outputImage.pImage, 0x00, sizeProcessImageOut_p);
 
     TRACE("%s: Alloc(%p, %u, %p, %u)\n", __func__,
           instance_l.inputImage.pImage,  instance_l.inputImage.imageSize,
