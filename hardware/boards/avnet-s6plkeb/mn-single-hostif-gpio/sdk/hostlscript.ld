@@ -17,7 +17,7 @@ _HEAP_SIZE = DEFINED(_HEAP_SIZE) ? _HEAP_SIZE : 0x500000;
 
 MEMORY
 {
-    ap_i_bram_ctrl_ap_d_bram_ctrl : ORIGIN = 0x00002000, LENGTH = 0x00002000
+    ap_i_bram_ctrl_ap_d_bram_ctrl : ORIGIN = 0x00004000, LENGTH = 0x00004000
     boot_i_bram_ctrl_boot_d_bram_ctrl : ORIGIN = 0x00000050, LENGTH = 0x00000FB0
     mcb_ddr2_S0_AXI_BASEADDR : ORIGIN = 0x20000000, LENGTH = 0x08000000
 }
