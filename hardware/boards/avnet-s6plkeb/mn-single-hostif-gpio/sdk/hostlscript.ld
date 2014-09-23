@@ -187,6 +187,12 @@ SECTIONS
         __bss_end = .;
     } > mcb_ddr2_S0_AXI_BASEADDR
 
+    .local_memory : {
+        __local_memory_start = .;
+        *(local_memory)
+        __local_memory_end = .;
+    } > ap_i_bram_ctrl_ap_d_bram_ctrl
+
     _SDA_BASE_ = __sdata_start + ((__sbss_end - __sdata_start) / 2 );
 
     _SDA2_BASE_ = __sdata2_start + ((__sbss2_end - __sdata2_start) / 2 );

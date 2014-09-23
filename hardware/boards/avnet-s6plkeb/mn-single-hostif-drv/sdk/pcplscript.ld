@@ -187,7 +187,7 @@ SECTIONS
         __bss_end = .;
     } > mcb_ddr2_S0_AXI_BASEADDR
 
-local_memory : {
+    .local_memory : {
         __local_memory_start = .;
         *(local_memory)
         __local_memory_end = .;
