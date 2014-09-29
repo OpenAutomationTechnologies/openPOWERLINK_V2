@@ -9,8 +9,10 @@ The openPOWERLINK stack itself is implemented via stack libraries. A stack
 library can either contain the whole stack (_complete library_), the user part
 (_application library_) or the kernel part (_driver library_).
 
-__NOTE:__ In order to be able to build an application, both, the Debug and the Release
-library versions must be created.
+__NOTE:__ In order to be able to build an application, both, the Debug and the
+Release library versions must be available. If one of the libraries is missing
+you get an OPLKLIB-NOTFOUND or OPLKLIB_DEBUG-NOTFOUND error in the demos
+CMake configuration.
 
 ## Linux {#sect_build_stack_build_linux}
 
