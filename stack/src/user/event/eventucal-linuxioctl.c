@@ -179,14 +179,17 @@ tOplkError eventucal_exit(void)
 {
     UINT            i = 0;
 
-    instance_l.fStopThread = TRUE;
-    while (instance_l.fStopThread == TRUE)
+    if (instance_l.threadId != NULL)
     {
-        target_msleep(10);
-        if (i++ > 1000)
+        instance_l.fStopThread = TRUE;
+        while (instance_l.fStopThread == TRUE)
         {
-            TRACE("Event Thread is not terminating, continue shutdown...!\n");
-            break;
+            target_msleep(10);
+            if (i++ > 1000)
+            {
+                TRACE("Event Thread is not terminating, continue shutdown...!\n");
+                break;
+            }
         }
     }
 
