@@ -136,11 +136,6 @@ void  TgtDbgPostTraceValue (DWORD dwTraceValue_p);
 
 #define DLLK_SOAREQ_COUNT               3
 
-// defines for tEdrvTxBuffer.m_uiTxBufLen
-#define DLLK_BUFLEN_EMPTY               0   // buffer is empty
-#define DLLK_BUFLEN_FILLING             1   // just the buffer is being filled
-#define DLLK_BUFLEN_MIN                 60  // minimum ethernet frame length
-
 // defines for tDllkInstance.updateTxFrame
 #define DLLK_UPDATE_NONE                0   // no update necessary
 #define DLLK_UPDATE_STATUS              1   // StatusRes needs update
@@ -153,6 +148,14 @@ void  TgtDbgPostTraceValue (DWORD dwTraceValue_p);
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
+
+typedef enum
+{
+    kDllkTxBufEmpty      = 0,    // Tx buffer is empty
+    kDllkTxBufFilling,           // just the buffer is being filled
+    kDllkTxBufSending,           // the buffer is being transmitted
+    kDllkTxBufReady,             // the buffer is ready for transmission
+} tDllkTxBufState;
 
 /**
  * \brief Structure for handling the report of a loss of SoC to the error handler
@@ -198,7 +201,8 @@ typedef struct
 #if CONFIG_DLL_PRES_CHAINING_CN != FALSE
     UINT8                   curTxBufferOffsetSyncRes;
 #endif
-
+    tDllkTxBufState         aTxBufferStateNmtReq[2];
+    tDllkTxBufState         aTxBufferStateNonPlk[2];
 #if defined(CONFIG_INCLUDE_NMT_MN)
     tDllkNodeInfo*          pFirstNodeInfo;
     UINT8                   aCnNodeIdList[2][NMT_MAX_NODE_ID];

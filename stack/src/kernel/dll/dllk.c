@@ -1148,10 +1148,12 @@ tOplkError dllk_setupLocalNode(tNmtState nmtState_p)
     if (ret != kErrorOk)
         return ret;
     // mark Tx buffer as empty
-    dllkInstance_g.pTxBuffer[handle].txFrameSize = DLLK_BUFLEN_EMPTY;
+    dllkInstance_g.aTxBufferStateNmtReq[0] = kDllkTxBufEmpty;
+    dllkInstance_g.pTxBuffer[handle].txFrameSize = 0;
     dllkInstance_g.pTxBuffer[handle].pfnTxHandler = dllk_processTransmittedNmtReq;
     handle++;
-    dllkInstance_g.pTxBuffer[handle].txFrameSize = DLLK_BUFLEN_EMPTY;
+    dllkInstance_g.aTxBufferStateNmtReq[1] = kDllkTxBufEmpty;
+    dllkInstance_g.pTxBuffer[handle].txFrameSize = 0;
     dllkInstance_g.pTxBuffer[handle].pfnTxHandler = dllk_processTransmittedNmtReq;
 
     // non-POWERLINK frame
@@ -1160,10 +1162,12 @@ tOplkError dllk_setupLocalNode(tNmtState nmtState_p)
     if (ret != kErrorOk)
         return ret;
     // mark Tx buffer as empty
-    dllkInstance_g.pTxBuffer[handle].txFrameSize = DLLK_BUFLEN_EMPTY;
+    dllkInstance_g.aTxBufferStateNonPlk[0] = kDllkTxBufEmpty;
+    dllkInstance_g.pTxBuffer[handle].txFrameSize = 0;
     dllkInstance_g.pTxBuffer[handle].pfnTxHandler = dllk_processTransmittedNonPlk;
     handle++;
-    dllkInstance_g.pTxBuffer[handle].txFrameSize = DLLK_BUFLEN_EMPTY;
+    dllkInstance_g.aTxBufferStateNonPlk[1] = kDllkTxBufEmpty;
+    dllkInstance_g.pTxBuffer[handle].txFrameSize = 0;
     dllkInstance_g.pTxBuffer[handle].pfnTxHandler = dllk_processTransmittedNonPlk;
 
     /*------------------------------------------------------------------------*/
@@ -1454,6 +1458,8 @@ tOplkError dllk_cleanupLocalNode(tNmtState oldNmtState_p)
     if ((ret = dllk_deleteTxFrame(DLLK_TXFRAME_PRES)) != kErrorOk)
         return ret;
 
+    dllkInstance_g.aTxBufferStateNmtReq[0] = kDllkTxBufEmpty;
+    dllkInstance_g.aTxBufferStateNmtReq[1] = kDllkTxBufEmpty;
     if ((ret = dllk_deleteTxFrame(DLLK_TXFRAME_NMTREQ)) != kErrorOk)
         return ret;
 
@@ -1461,6 +1467,9 @@ tOplkError dllk_cleanupLocalNode(tNmtState oldNmtState_p)
     if ((ret = dllk_deleteTxFrame(DLLK_TXFRAME_SYNCRES)) != kErrorOk)
         return ret;
 #endif
+
+    dllkInstance_g.aTxBufferStateNonPlk[0] = kDllkTxBufEmpty;
+    dllkInstance_g.aTxBufferStateNonPlk[1] = kDllkTxBufEmpty;
 
     if ((ret = dllk_deleteTxFrame(DLLK_TXFRAME_NONPLK)) != kErrorOk)
         return ret;
