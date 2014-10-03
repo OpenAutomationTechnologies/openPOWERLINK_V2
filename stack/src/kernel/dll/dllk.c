@@ -1874,9 +1874,7 @@ tOplkError dllk_setupAsyncPhase(tNmtState nmtState_p, UINT nextTxBufferOffset_p,
                                 UINT32 nextTimeOffsetNs_p, UINT* pIndex_p)
 {
     tOplkError          ret = kErrorOk;
-    BOOL                fEnableInvitation;
     tEdrvTxBuffer*      pTxBuffer;
-    UINT                soaIndex;
 
     pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SOA + nextTxBufferOffset_p];
     pTxBuffer->timeOffsetNs = nextTimeOffsetNs_p;
@@ -1892,17 +1890,12 @@ tOplkError dllk_setupAsyncPhase(tNmtState nmtState_p, UINT nextTxBufferOffset_p,
     //          currently, processSync is not called in PreOp1
     ret = dllk_updateFrameSoa(pTxBuffer, nmtState_p, TRUE, dllkInstance_g.syncLastSoaReq);
     dllkInstance_g.ppTxBufferList[*pIndex_p] = pTxBuffer;
-    //store SoA *pIndex_p
-    soaIndex = *pIndex_p;
     (*pIndex_p)++;
 
     // check if we are invited in SoA
     if (dllkInstance_g.aLastTargetNodeId[dllkInstance_g.syncLastSoaReq] ==
                                        dllkInstance_g.dllConfigParam.nodeId)
     {
-        //disable invitation per default
-        fEnableInvitation = FALSE;
-
         switch (dllkInstance_g.aLastReqServiceId[dllkInstance_g.syncLastSoaReq])
         {
             case kDllReqServiceStatus:
@@ -1913,9 +1906,6 @@ tOplkError dllk_setupAsyncPhase(tNmtState nmtState_p, UINT nextTxBufferOffset_p,
                 {   // StatusRes does exist
                     dllkInstance_g.ppTxBufferList[*pIndex_p] = pTxBuffer;
                     (*pIndex_p)++;
-
-                    //TX buffer is ready, invitation enabled
-                    fEnableInvitation = TRUE;
 
                     TGT_DBG_SIGNAL_TRACE_POINT(8);
                 }
@@ -1930,9 +1920,6 @@ tOplkError dllk_setupAsyncPhase(tNmtState nmtState_p, UINT nextTxBufferOffset_p,
                 {   // IdentRes does exist
                     dllkInstance_g.ppTxBufferList[*pIndex_p] = pTxBuffer;
                     (*pIndex_p)++;
-
-                    //TX buffer is ready, invitation enabled
-                    fEnableInvitation = TRUE;
 
                     TGT_DBG_SIGNAL_TRACE_POINT(7);
                 }
@@ -1950,9 +1937,6 @@ tOplkError dllk_setupAsyncPhase(tNmtState nmtState_p, UINT nextTxBufferOffset_p,
                         dllkInstance_g.ppTxBufferList[*pIndex_p] = pTxBuffer;
                         (*pIndex_p)++;
                         dllkInstance_g.curTxBufferOffsetNmtReq ^= 1;
-
-                        //TX buffer is ready, invitation enabled
-                        fEnableInvitation = TRUE;
                     }
                 }
                 break;
@@ -1969,9 +1953,6 @@ tOplkError dllk_setupAsyncPhase(tNmtState nmtState_p, UINT nextTxBufferOffset_p,
                         dllkInstance_g.ppTxBufferList[*pIndex_p] = pTxBuffer;
                         (*pIndex_p)++;
                         dllkInstance_g.curTxBufferOffsetNonPlk ^= 1;
-
-                        //TX buffer is ready, invitation enabled
-                        fEnableInvitation = TRUE;
                     }
                 }
                 break;
@@ -1980,23 +1961,8 @@ tOplkError dllk_setupAsyncPhase(tNmtState nmtState_p, UINT nextTxBufferOffset_p,
                 break;
         }
 
-        //is invitation allowed?
-        if(fEnableInvitation == FALSE)
-        {
-            tPlkFrame *pTxFrame = (tPlkFrame*)
-                dllkInstance_g.ppTxBufferList[soaIndex]->pBuffer;
-
-            //reset invitation
-            ami_setUint8Le(&pTxFrame->data.soa.reqServiceId,
-                    kDllReqServiceNo);
-            ami_setUint8Le(&pTxFrame->data.soa.reqServiceTarget,
-                    C_ADR_INVALID);
-        }
-        else
-        {
-            // Asnd frame will be sent, remove the request
-            dllkInstance_g.aLastReqServiceId[dllkInstance_g.syncLastSoaReq] = kDllReqServiceNo;
-        }
+        // Asnd frame will be sent, remove the request
+        dllkInstance_g.aLastReqServiceId[dllkInstance_g.syncLastSoaReq] = kDllReqServiceNo;
     }
     return ret;
 }
