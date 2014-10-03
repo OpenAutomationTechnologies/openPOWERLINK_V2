@@ -903,8 +903,48 @@ tOplkError dllk_updateFrameSoa(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p,
         if (dllkInstance_g.aLastReqServiceId[curReq_p] != kDllReqServiceNo)
         {   // asynchronous phase will be assigned to one node
             if (dllkInstance_g.aLastTargetNodeId[curReq_p] == C_ADR_INVALID)
-            {   // exchange invalid node ID with local node ID
+            {
+                int             selectTxBuffer;
+                tEdrvTxBuffer*  pTxBuffer;
+
+                // exchange invalid node ID with local node ID
                 dllkInstance_g.aLastTargetNodeId[curReq_p] = dllkInstance_g.dllConfigParam.nodeId;
+
+                // Select the Tx buffer that should hold the async Tx message
+                switch (dllkInstance_g.aLastReqServiceId[curReq_p])
+                {
+                    case kDllReqServiceStatus:
+                        selectTxBuffer = DLLK_TXFRAME_STATUSRES + dllkInstance_g.curTxBufferOffsetStatusRes;
+                        pTxBuffer = &dllkInstance_g.pTxBuffer[selectTxBuffer];
+                        break;
+
+                    case kDllReqServiceIdent:
+                        selectTxBuffer = DLLK_TXFRAME_IDENTRES + dllkInstance_g.curTxBufferOffsetIdentRes;
+                        pTxBuffer = &dllkInstance_g.pTxBuffer[selectTxBuffer];
+                        break;
+
+                    case kDllReqServiceNmtRequest:
+                        selectTxBuffer = DLLK_TXFRAME_NMTREQ + dllkInstance_g.curTxBufferOffsetNmtReq;
+                        pTxBuffer = &dllkInstance_g.pTxBuffer[selectTxBuffer];
+                        break;
+
+                    case kDllReqServiceUnspecified:
+                        selectTxBuffer = DLLK_TXFRAME_NONPLK + dllkInstance_g.curTxBufferOffsetNonPlk;
+                        pTxBuffer = &dllkInstance_g.pTxBuffer[selectTxBuffer];
+                        break;
+
+                    default:
+                        pTxBuffer = NULL;
+                        break;
+                }
+
+                // If the async Tx buffer is not ready discard the request
+                if ((pTxBuffer == NULL) || !(pTxBuffer->txFrameSize > DLLK_BUFLEN_FILLING))
+                {
+                    dllkInstance_g.aLastReqServiceId[curReq_p] = kDllReqServiceNo;
+                    dllkInstance_g.aLastTargetNodeId[curReq_p] = C_ADR_INVALID;
+                    return ret;
+                }
             }
 
             pNodeInfo = dllk_getNodeInfo(dllkInstance_g.aLastTargetNodeId[curReq_p]);
