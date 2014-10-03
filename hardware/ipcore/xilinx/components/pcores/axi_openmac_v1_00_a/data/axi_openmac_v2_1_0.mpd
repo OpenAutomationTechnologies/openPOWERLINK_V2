@@ -236,7 +236,7 @@ PORT MAC_IRQ    = "", DIR = O, SIGIS = INTERRUPT, SENSITIVITY = LEVEL_HIGH
 ###############################################################################
 ## RMII
 PORT oRmii_clk          = "", DIR = O, VEC = [gPhyPortCount-1:0],   ISVALID = (gui_phyType == 1), IO_IF = RMII, IO_IS = rmii_clk
-PORT iRmii_rxDataValid  = "", DIR = I, VEC = [gPhyPortCount-1:0],   ISVALID = (gui_phyType == 1), IO_IF = RMII, IO_IS = rmii_rxdv
+PORT iRmii_rxCrsDataValid = "", DIR = I, VEC = [gPhyPortCount-1:0],   ISVALID = (gui_phyType == 1), IO_IF = RMII, IO_IS = rmii_rxdv
 PORT iRmii_rxData       = "", DIR = I, VEC = [gPhyPortCount*2-1:0], ISVALID = (gui_phyType == 1), IO_IF = RMII, IO_IS = rmii_rxdat
 PORT iRmii_rxError      = "", DIR = I, VEC = [gPhyPortCount-1:0],   ISVALID = (gui_phyType == 1), IO_IF = RMII, IO_IS = rmii_rxerr
 PORT oRmii_txEnable     = "", DIR = O, VEC = [gPhyPortCount-1:0],   ISVALID = (gui_phyType == 1), IO_IF = RMII, IO_IS = rmii_txen
