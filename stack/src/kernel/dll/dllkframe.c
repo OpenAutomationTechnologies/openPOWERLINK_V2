@@ -2051,6 +2051,7 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
 #if (CONFIG_EDRV_AUTO_RESPONSE == FALSE)
                 // Auto-response is not available
                 pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NMTREQ + dllkInstance_g.curTxBufferOffsetNmtReq];
+                pTxBufferState = &dllkInstance_g.aTxBufferStateNmtReq[dllkInstance_g.curTxBufferOffsetNmtReq];
                 if (pTxBuffer->pBuffer != NULL)
                 {   // NmtRequest does exist
                     // check if frame is not empty and not being filled
@@ -2181,6 +2182,7 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
 #if (CONFIG_EDRV_AUTO_RESPONSE == FALSE)
                 // Auto-response is not available
                 pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONPLK + dllkInstance_g.curTxBufferOffsetNonPlk];
+                pTxBufferState = &dllkInstance_g.aTxBufferStateNonPlk[dllkInstance_g.curTxBufferOffsetNonPlk];
                 if (pTxBuffer->pBuffer != NULL)
                 {   // non-POWERLINK frame does exist
                     // check if frame is not empty and not being filled
