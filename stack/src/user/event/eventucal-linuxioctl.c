@@ -179,7 +179,7 @@ tOplkError eventucal_exit(void)
 {
     UINT            i = 0;
 
-    if (instance_l.threadId != NULL)
+    if (instance_l.threadId != 0)
     {
         instance_l.fStopThread = TRUE;
         while (instance_l.fStopThread == TRUE)
