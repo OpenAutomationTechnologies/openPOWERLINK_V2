@@ -158,12 +158,14 @@ can be sent by calling oplk_execNmtCommand(kNmtEventSwitchOff);
 //------------------------------------------------------------------------------
 tOplkError oplk_shutdown(void)
 {
-    tOplkError          ret;
+    tOplkError          ret = kErrorApiNotInitialized;
 
-    ret = ctrlu_shutdownStack();
-    ctrlu_exit();
-    target_cleanup();
-
+    if (ctrlu_stackIsInitialized())
+    {
+        ret = ctrlu_shutdownStack();
+        ctrlu_exit();
+        target_cleanup();
+    }
     return ret;
 }
 
@@ -186,6 +188,9 @@ is actually executed.
 tOplkError oplk_execNmtCommand(tNmtEvent nmtEvent_p)
 {
     tOplkError      ret = kErrorOk;
+
+    if (!ctrlu_stackIsInitialized())
+        return kErrorApiNotInitialized;
 
     ret = nmtu_postNmtEvent(nmtEvent_p);
     return ret;
@@ -233,6 +238,9 @@ tOplkError oplk_linkObject(UINT objIndex_p, void* pVar_p, UINT* pVarEntries_p,
     tObdSize        usedSize;
 
     tOplkError      ret = kErrorOk;
+
+    if (!ctrlu_stackIsInitialized())
+        return kErrorApiNotInitialized;
 
     if ((pVar_p == NULL) || (pVarEntries_p == NULL) || (*pVarEntries_p == 0) || (pEntrySize_p == NULL))
         return kErrorApiInvalidParam;
@@ -344,6 +352,9 @@ tOplkError oplk_readObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT i
     tOplkError      ret = kErrorOk;
     tObdSize        obdSize;
 
+    if (!ctrlu_stackIsInitialized())
+        return kErrorApiNotInitialized;
+
     if ((index_p == 0) || (pDstData_le_p == NULL) || (pSize_p == NULL) || (*pSize_p == 0))
         return kErrorApiInvalidParam;
 
@@ -431,6 +442,9 @@ tOplkError oplk_writeObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT 
 {
     tOplkError      ret = kErrorOk;
 
+    if (!ctrlu_stackIsInitialized())
+        return kErrorApiNotInitialized;
+
     if ((index_p == 0) || (pSrcData_le_p == NULL) || (size_p == 0))
         return kErrorApiInvalidParam;
 
@@ -504,6 +518,9 @@ tOplkError oplk_freeSdoChannel(tSdoComConHdl sdoComConHdl_p)
 {
     tOplkError      ret = kErrorOk;
 
+    if (!ctrlu_stackIsInitialized())
+        return kErrorApiNotInitialized;
+
 #if defined(CONFIG_INCLUDE_SDOC)
 
 #if defined(CONFIG_INCLUDE_CFM)
@@ -543,6 +560,9 @@ The function aborts the running SDO transfer on the specified SDO channel.
 tOplkError oplk_abortSdo(tSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p)
 {
     tOplkError      ret = kErrorOk;
+
+    if (!ctrlu_stackIsInitialized())
+        return kErrorApiNotInitialized;
 
 #if defined(CONFIG_INCLUDE_SDOC)
 
@@ -589,6 +609,9 @@ tOplkError oplk_readLocalObject(UINT index_p, UINT subindex_p, void* pDstData_p,
     tOplkError      ret = kErrorOk;
     tObdSize        obdSize;
 
+    if (!ctrlu_stackIsInitialized())
+        return kErrorApiNotInitialized;
+
     obdSize = (tObdSize)*pSize_p;
     ret = obd_readEntry(index_p, subindex_p, pDstData_p, &obdSize);
     *pSize_p = (UINT)obdSize;
@@ -618,6 +641,9 @@ The function writes the specified entry to the local object dictionary.
 tOplkError oplk_writeLocalObject(UINT index_p, UINT subindex_p, void* pSrcData_p,
                                  UINT size_p)
 {
+    if (!ctrlu_stackIsInitialized())
+        return kErrorApiNotInitialized;
+
     return obd_writeEntry(index_p, subindex_p, pSrcData_p, (tObdSize)size_p);
 }
 
@@ -645,6 +671,9 @@ tOplkError oplk_sendAsndFrame(UINT8 dstNodeId_p, tAsndFrame* pAsndFrame_p,
     tOplkError      ret;
     tFrameInfo      frameInfo;
     BYTE            buffer[C_DLL_MAX_ASYNC_MTU];
+
+    if (!ctrlu_stackIsInitialized())
+        return kErrorApiNotInitialized;
 
     // Calculate size of frame (Asnd data + header)
     frameInfo.frameSize = asndSize_p + offsetof(tPlkFrame, data);
@@ -696,6 +725,9 @@ tOplkError oplk_setAsndForward(UINT8 serviceId_p, tOplkApiAsndFilter filterType_
     tOplkError          ret;
     tDllAsndFilter      dllFilter;
 
+    if (!ctrlu_stackIsInitialized())
+        return kErrorApiNotInitialized;
+
     // Map API filter types to stack internal filter types
     switch (filterType_p)
     {
@@ -740,6 +772,9 @@ tOplkError oplk_postUserEvent(void* pUserArg_p)
     tOplkError  ret;
     tEvent      event;
 
+    if (!ctrlu_stackIsInitialized())
+        return kErrorApiNotInitialized;
+
     event.eventSink = kEventSinkApi;
     event.netTime.nsec = 0;
     event.netTime.sec = 0;
@@ -774,6 +809,9 @@ for the specified node.
 //------------------------------------------------------------------------------
 tOplkError oplk_triggerMnStateChange(UINT nodeId_p, tNmtNodeCommand nodeCommand_p)
 {
+    if (!ctrlu_stackIsInitialized())
+        return kErrorApiNotInitialized;
+
 #if defined(CONFIG_INCLUDE_NMT_MN)
     return nmtmnu_triggerStateChange(nodeId_p, nodeCommand_p);
 #else
@@ -811,6 +849,9 @@ embedded system).
 //------------------------------------------------------------------------------
 tOplkError oplk_setCdcBuffer(BYTE* pCdc_p, UINT cdcSize_p)
 {
+    if (!ctrlu_stackIsInitialized())
+        return kErrorApiNotInitialized;
+
 #if (CONFIG_OBD_USE_LOAD_CONCISEDCF != FALSE)
     obdcdc_setBuffer(pCdc_p, cdcSize_p);
     return kErrorOk;
@@ -847,6 +888,9 @@ the stack to read the configuration.
 //------------------------------------------------------------------------------
 tOplkError oplk_setCdcFilename(char* pCdcFilename_p)
 {
+    if (!ctrlu_stackIsInitialized())
+        return kErrorApiNotInitialized;
+
 #if (CONFIG_OBD_USE_LOAD_CONCISEDCF != FALSE)
     obdcdc_setFilename(pCdcFilename_p);
     return kErrorOk;
@@ -871,6 +915,9 @@ It gives processing time to several tasks in the openPOWERLINK stack.
 //------------------------------------------------------------------------------
 tOplkError oplk_process(void)
 {
+    if (!ctrlu_stackIsInitialized())
+        return kErrorApiNotInitialized;
+
     return ctrlu_processStack();
 }
 
@@ -889,6 +936,9 @@ The function checks if the kernel part of the stack is alive.
 //------------------------------------------------------------------------------
 BOOL oplk_checkKernelStack(void)
 {
+    if (!ctrlu_stackIsInitialized())
+        return FALSE;
+
     return ctrlu_checkKernelStack();
 }
 
@@ -918,6 +968,9 @@ the specified timeout elapsed.
 //------------------------------------------------------------------------------
 tOplkError oplk_waitSyncEvent(ULONG timeout_p)
 {
+    if (!ctrlu_stackIsInitialized())
+        return kErrorApiNotInitialized;
+
     return pdoucal_waitSyncEvent(timeout_p);
 }
 
@@ -941,6 +994,9 @@ The function returns the stored IdentResponse frame of the specified node.
 //------------------------------------------------------------------------------
 tOplkError oplk_getIdentResponse(UINT nodeId_p, tIdentResponse** ppIdentResponse_p)
 {
+    if (!ctrlu_stackIsInitialized())
+        return kErrorApiNotInitialized;
+
 #if defined(CONFIG_INCLUDE_NMT_MN)
     return identu_getIdentResponse(nodeId_p, ppIdentResponse_p);
 #else

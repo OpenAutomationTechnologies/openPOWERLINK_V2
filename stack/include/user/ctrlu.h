@@ -71,6 +71,7 @@ tOplkError ctrlu_processStack(void);
 BOOL       ctrlu_checkKernelStack(void);
 tOplkError ctrlu_callUserEventCallback(tOplkApiEventType eventType_p, tOplkApiEventArg* pEventArg_p);
 tOplkError ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p);
+BOOL       ctrlu_stackIsInitialized(void);
 
 #ifdef __cplusplus
 }
