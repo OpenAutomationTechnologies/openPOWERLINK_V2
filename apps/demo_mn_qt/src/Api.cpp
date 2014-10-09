@@ -277,6 +277,8 @@ Api::~Api()
 {
     tOplkError          ret;
 
+    pDataInOutThread->stop();
+    pDataInOutThread->wait(100);  // wait until thread terminates (max 100ms)
     ret = oplk_execNmtCommand(kNmtEventSwitchOff);
     pProcessThread->waitForNmtStateOff();
     ret = oplk_freeProcessImage();

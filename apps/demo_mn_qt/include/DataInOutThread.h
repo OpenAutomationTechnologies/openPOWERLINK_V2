@@ -79,6 +79,7 @@ public:
     tSyncCb getSyncCbFunc();
     tOplkError processSync(void);
     static tOplkError AppCbSync(void);
+    void stop();
 
 signals:
     void processImageInChanged(int data_p, int nodeId_p);
@@ -94,6 +95,7 @@ private:
     UINT            inputOld[MAX_NODES];
     UINT            period[MAX_NODES];
     int             toggle[MAX_NODES];
+    BOOL            fStop;
 
 };
 

@@ -97,6 +97,7 @@ DataInOutThread::DataInOutThread()
         period[i] = 0;
     }
 
+    fStop = FALSE;
     pDataInOutThread_g = this;
 }
 
@@ -253,15 +254,17 @@ void DataInOutThread::run()
 {
     tOplkError  ret;
 
-    for (;;)
+    this->fStop = FALSE;
+    while (!this->fStop)
     {
-        oplk_waitSyncEvent(0);
+        if (oplk_waitSyncEvent(10000) != kErrorOk)
+            continue;
+
         ret = processSync();
         if (ret != kErrorOk)
         {
             return;
         }
-        QThread::msleep(8);
     }
 }
 
@@ -279,3 +282,14 @@ tSyncCb DataInOutThread::getSyncCbFunc()
     return AppCbSync;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Stop synchronous data thread
+
+The function stops the synchronous data thread.
+*/
+//------------------------------------------------------------------------------
+void DataInOutThread::stop()
+{
+    this->fStop = TRUE;
+}
