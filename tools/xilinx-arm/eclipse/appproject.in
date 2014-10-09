@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>@PROJECT_NAME@</name>
+	<comment>bsp-@CFG_DEMO_BOARD_NAME@-@CFG_DEMO_NAME@ - @CFG_CPU_NAME@</comment>
+	<projects>
+		<project>bsp-@CFG_DEMO_BOARD_NAME@-@CFG_DEMO_NAME@-@CFG_CPU_NAME@</project>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>org.eclipse.cdt.managedbuilder.core.genmakebuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+		<buildCommand>
+			<name>org.eclipse.cdt.managedbuilder.core.ScannerConfigBuilder</name>
+			<triggers>full,incremental,</triggers>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>org.eclipse.cdt.core.cnature</nature>
+		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
+		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
+	</natures>
+	<linkedResources>
+@ECLIPSE_FILE_LIST@
+
+	</linkedResources>
+</projectDescription>
