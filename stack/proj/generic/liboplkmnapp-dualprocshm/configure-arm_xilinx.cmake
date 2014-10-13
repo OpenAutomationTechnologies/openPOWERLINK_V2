@@ -66,6 +66,7 @@ INCLUDE_DIRECTORIES(
                     ${XIL_LIB_BSP_INC}
                     ${ARCH_SOURCE_DIR}/xilinx_arm
                     ${CONTRIB_SOURCE_DIR}/dualprocshm/include
+                    ${CFG_COMPILE_LIB_MN_HW_LIB_DIR}/include
                    )
 
 ################################################################################
