@@ -58,6 +58,7 @@ The generic defines are valid for the whole openPOWERLINK stack.
 #define CONFIG_INCLUDE_SDOS
 #define CONFIG_INCLUDE_SDOC
 #define CONFIG_INCLUDE_SDO_ASND
+#define CONFIG_INCLUDE_VETH
 
 #ifndef BENCHMARK_MODULES
 #define BENCHMARK_MODULES                   (0 \
@@ -105,6 +106,7 @@ The Data Link Layer (DLL) defines determine the POWERLINK DLL module.
     ///< max. supported PRes packet filters (for specific nodes)
 #define CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC    FALSE
     ///< disable deferred RX frames if Edrv does not support it
+#define CONFIG_EDRV_VETH_DEFFERRED_RX_BUFFERS       5
 /**@}*/
 
 /**
