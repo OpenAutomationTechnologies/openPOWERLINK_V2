@@ -63,14 +63,20 @@ SET(CFG_BUILD_KERNEL_STACK "host-interface"
     CACHE STRING "Configure how to build the kernel stack")
 
 SET(KernelStackBuildTypes
-    "host-interface;None"
+    "PCP Daemon Dual-Proc;host-interface;None"
     CACHE INTERNAL
     "List of possible kernel stack build types")
 
 SET_PROPERTY(CACHE CFG_BUILD_KERNEL_STACK
              PROPERTY STRINGS ${KernelStackBuildTypes})
 
-IF (CFG_BUILD_KERNEL_STACK STREQUAL "host-interface")
+IF (CFG_BUILD_KERNEL_STACK STREQUAL "PCP Daemon Dual-Proc")
+
+    UNSET(CFG_KERNEL_STACK_PCP_HOSTIF_MODULE CACHE)
+    SET(CFG_KERNEL_DUALPROCSHM ON CACHE INTERNAL
+         "Kernel-User stack communication through Dual processor library(Dual processor solution)")
+
+ELSEIF (CFG_BUILD_KERNEL_STACK STREQUAL "host-interface")
     UNSET(CFG_KERNEL_DUALPROCSHM CACHE)
     SET(CFG_KERNEL_STACK_PCP_HOSTIF_MODULE ON CACHE INTERNAL
         "Kernel-User stack communication through host interface library(Dual processor solution)")
