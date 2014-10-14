@@ -45,6 +45,8 @@ SET(OMETHLIB_BASE_DIR ${PROJECT_SOURCE_DIR}/drivers/openmac)
 SET(OMETHLIB_BUILD_DIR ${PROJECT_BINARY_DIR}/drivers/openmac)
 SET(HOSTIF_BASE_DIR ${PROJECT_SOURCE_DIR}/drivers/hostinterface)
 SET(HOSTIF_BUILD_DIR ${PROJECT_BINARY_DIR}/drivers/hostinterface)
+SET(DUALPROCSHM_BASE_DIR ${OPLK_BASE_DIR}/contrib/dualprocshm)
+SET(DUALPROCSHM_BUILD_DIR ${PROJECT_BINARY_DIR}/contrib/dualprocshm)
 SET(MB_UART_BUILD_DIR ${PROJECT_BINARY_DIR}/drivers/mb_uart)
 
 STRING(TOLOWER "${CMAKE_SYSTEM_NAME}" SYSTEM_NAME_DIR)
@@ -116,6 +118,12 @@ FOREACH(BOARD_DIR IN ITEMS ${BOARD_DIRS})
                         IF(DEFINED ${CFG_PREFIX}_HOSTIF_ENABLE  OR (NOT ${${CFG_PREFIX}HOSTIF_ENABLE} STREQUAL ""))
                             SET(SEL_CPU_NAME ${${CFG_PREFIX}_NAME})
                             ADD_SUBDIRECTORY(${HOSTIF_BASE_DIR} ${HOSTIF_BUILD_DIR}/${BOARD_NAME}/${EXAMPLE_NAME}/${${CFG_PREFIX}_NAME})
+                        ENDIF()
+
+                        # Create targets for building the dual processor library
+                        IF(DEFINED ${CFG_PREFIX}_DUALPROCSHM_ENABLE  OR (NOT ${${CFG_PREFIX}_DUALPROCSHM_ENABLE} STREQUAL ""))
+                            SET(SEL_CPU_NAME ${${CFG_PREFIX}_NAME})
+                            ADD_SUBDIRECTORY(${DUALPROCSHM_BASE_DIR} ${DUALPROCSHM_BUILD_DIR}/${BOARD_NAME}/${EXAMPLE_NAME}/${${CFG_PREFIX}_NAME})
                         ENDIF()
 
                         IF( NOT ${CFG_MB_UART} STREQUAL "" AND ${PROC_INST_NAME} STREQUAL PCP)
