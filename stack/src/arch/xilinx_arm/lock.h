@@ -2,13 +2,16 @@
 ********************************************************************************
 \file   xilinx_arm/lock.h
 
-\brief  Include file Xilinx_Arm lock
+\brief  Locks include file for Xilinx_ARM
 
+Header file for lock implementation to support locking in non-OS systems running
+on Xilinx ARM.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
+Copyright (c) 2014, Kalycito Infotech Private Limited
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -64,7 +67,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-int target_initLock(LOCK_T*pSlock_p);
+int target_initLock(LOCK_T* pSlock_p);
 int target_lock(void);
 int target_unlock(void);
 

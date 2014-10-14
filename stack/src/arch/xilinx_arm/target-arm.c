@@ -5,7 +5,7 @@
 \brief  Target specific functions for ARM on Zynq without OS
 
 This target depending module provides several functions that are necessary for
-systems without OS and not using the shared buffer library.
+systems without OS.
 
 \ingroup module_target
 *******************************************************************************/
@@ -43,10 +43,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplk/oplk.h>
 #include <xscugic.h>
 #include <xtime_l.h>
-#include "xil_cache.h"
-#include "xil_types.h"
-#include "xil_io.h"
-#include "xil_exception.h"
+#include <xil_cache.h>
+#include <xil_types.h>
+#include <xil_io.h>
+#include <xil_exception.h>
 #include <unistd.h>
 
 #include <xparameters.h>
@@ -348,7 +348,7 @@ static void initInterrupts(void)
         return;
     }
 
-    // CPU interrupt interface & distributor has been enabled before this point     */
+    // CPU interrupt interface & distributor has been enabled before this point
 
     Xil_ExceptionInit();
 

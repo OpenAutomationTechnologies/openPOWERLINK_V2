@@ -45,6 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string.h>
 #include <xil_types.h>
 #include <xil_io.h>
+#include <xil_cache.h>
 #include <lock.h>
 
 #include <oplk/basictypes.h>
@@ -69,6 +70,20 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define PRINTF(...)
 #endif
 
+#define OPLK_IO_WR8(addr, val)      Xil_Out8(addr, val)
+#define OPLK_IO_WR16(addr, val)     Xil_Out16(addr, val)
+#define OPLK_IO_WR32(addr, val)     Xil_Out32(addr, val)
+// - Read
+#define OPLK_IO_RD8(addr)           Xil_In8(addr)
+#define OPLK_IO_RD16(addr)          Xil_In16(addr)
+#define OPLK_IO_RD32(addr)          Xil_In32(addr)
+
+// Target data cache functions
+#define OPLK_DCACHE_FLUSH(addr, len)        Xil_DCacheFlushRange((unsigned int) addr, len)
+#define OPLK_DCACHE_INVALIDATE(addr, len)   Xil_DCacheInvalidateRange((unsigned int) addr, len)
+
+// Target memory barrier function
+#define OPLK_MEMBAR()               dmb()
 /* NOTE:
  * Pseudo atomic macro is applied with locking.
  */
@@ -83,10 +98,5 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     oldval = Xil_In8((u32)address);                   \
     Xil_Out8((u32)address, newval);                   \
     target_unlock()
-#define TARGET_FLUSH_DCACHE(base, range) \
-    Xil_DCacheFlushRange((u32)base, (u32)range);
-
-#define TARGET_INVALIDATE_DCACHE(base, range) \
-    Xil_DCacheInvalidateRange((u32)base, (u32)range);
 
 #endif /* _INC_targetdefs_arm_xilinx_H_ */

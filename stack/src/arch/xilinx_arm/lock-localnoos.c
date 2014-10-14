@@ -1,17 +1,18 @@
 /**
 ********************************************************************************
-\file   xilinx_microblaze/lock-localnoos.c
+\file   xilinx_arm/lock-localnoos.c
 
-\brief  Locks for Microblaze without OS in single-thread-system
+\brief  Locks for Xilinx ARM A9 without OS in single-thread-system
 
 This target depending module provides lock functionality in single threaded
-Microblaze system. Note that the functions are empty calls!
+Xilinx ARM system. Note that the functions are empty calls!
 
 \ingroup module_target
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Kalycito Infotech Private Limited
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -97,7 +98,7 @@ This function initializes the lock instance.
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-int target_initLock(LOCK_T*pLock_p)
+int target_initLock(LOCK_T* pLock_p)
 {
     UNUSED_PARAMETER(pLock_p);
 

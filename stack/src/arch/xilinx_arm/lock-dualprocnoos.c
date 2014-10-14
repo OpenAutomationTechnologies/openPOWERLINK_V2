@@ -106,7 +106,7 @@ This function initializes the lock instance.
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-int target_initLock(LOCK_T*pLock_p)
+int target_initLock(LOCK_T* pLock_p)
 {
     if (pLock_p == NULL)
         return -1;
