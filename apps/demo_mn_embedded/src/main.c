@@ -52,8 +52,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "event.h"
 
 #if (CONFIG_CDC_ON_SD != FALSE)
-#include "fs_sdcard.h"
-#include "xstatus.h"
+#include <sdcard.h>
 #endif
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -86,9 +85,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #if (CONFIG_CDC_ON_SD != FALSE)
 
-static unsigned char*   aCdcBuffer;
 static char*            pszCdcFilename_g = "mnobd.cdc";
-static UINT32           cdcSize_l;
 
 #else
 const unsigned char     aCdcBuffer[] =
@@ -124,9 +121,6 @@ static void         shutdownPowerlink(tInstance* pInstance_p);
 static tOplkError eventCbPowerlink(tOplkApiEventType EventType_p,
                                    tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
 
-#if (CONFIG_CDC_ON_SD != FALSE)
-static tOplkError   getCdcOnSd(void);
-#endif
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
 //============================================================================//
@@ -147,7 +141,9 @@ int main(void)
     tOplkError      ret = kErrorOk;
     const UINT8     aMacAddr[] = {MAC_ADDR};
     UINT8           nodeid;
-
+#if (CONFIG_CDC_ON_SD != FALSE)
+    tCdcBuffInfo    cdcBuffInfo;
+#endif
     lcd_init();
 
     // get node ID from input
@@ -161,13 +157,13 @@ int main(void)
     instance_l.fShutdown        = FALSE;
     instance_l.fGsOff           = FALSE;
 #if (CONFIG_CDC_ON_SD != FALSE)
-    ret = getCdcOnSd();
+    ret = sdcard_getCdcOnSd(pszCdcFilename_g, &cdcBuffInfo);
     if (ret != kErrorOk)
     {
         goto Exit;
     }
-    instance_l.pCdcBuffer       = (unsigned char*)aCdcBuffer;
-    instance_l.cdcBufferSize    = cdcSize_l;
+    instance_l.pCdcBuffer       = (unsigned char*)cdcBuffInfo.pCdcBuffer;
+    instance_l.cdcBufferSize    = cdcBuffInfo.cdcSize;
 #else
     instance_l.pCdcBuffer       = (unsigned char*)aCdcBuffer;
     instance_l.cdcBufferSize    = sizeof(aCdcBuffer);
@@ -447,78 +443,5 @@ static tOplkError eventCbPowerlink(tOplkApiEventType EventType_p,
 
     return ret;
 }
-
-//------------------------------------------------------------------------------
-/**
-\brief    Read CDC from SD
-
-This function is used to read CDC file from a SD CARD
-
-\return The function returns a tEplKernel error code.
-
-\ingroup module_demo
-*/
-//------------------------------------------------------------------------------
-#if (CONFIG_CDC_ON_SD != FALSE)
-static tOplkError getCdcOnSd(void)
-{
-    tOplkError      ret = kErrorOk;
-    INT             result = 0;
-    UINT            cdcSize;
-    UINT            readSize;
-    FIL             file;
-
-    /* Flush the Caches */
-    Xil_DCacheFlush();
-
-    /* Disable Data Cache */
-    Xil_DCacheDisable();
-
-    result = sd_fs_init();
-    if (result != XST_SUCCESS)
-    {
-        // error occurred
-        PRINTF("%s Error Initializing SD Card \n", __func__);
-        ret = kErrorNoResource;
-        goto Exit;
-    }
-
-    result = sd_open(&file, pszCdcFilename_g, FA_READ);
-    if (result != XST_SUCCESS)
-    {
-        // error occurred
-        PRINTF("%s Error opening file \n", __func__);
-        ret = kErrorNoResource;
-        goto Exit;
-    }
-
-    cdcSize = sd_get_fsize(&file);
-    cdcSize_l = cdcSize;
-    PRINTF("CDC file size %d\n", cdcSize_l);
-
-    aCdcBuffer = malloc(cdcSize_l);
-    if (aCdcBuffer == NULL)
-    {
-        PRINTF("Memory Allocation failed for CDC\n");
-        ret = kErrorNoResource;
-        goto Exit;
-    }
-
-    result = sd_read(&file, aCdcBuffer, cdcSize, &readSize);
-    if (readSize != cdcSize || result != XST_SUCCESS)
-    {
-        PRINTF("%s CDC Read failed \n", __func__);
-        ret = kErrorNoResource;
-        goto Exit;
-    }
-
-    sd_close(&file);
-
-Exit:
-    Xil_DCacheEnable();
-    return ret;
-}
-
-#endif /* (EPL_CDC_ON_SD != FALSE) */
 
 ///\}

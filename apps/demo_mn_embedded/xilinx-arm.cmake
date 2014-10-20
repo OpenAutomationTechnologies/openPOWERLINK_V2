@@ -90,8 +90,21 @@ INCLUDE_DIRECTORIES(
                     ${XIL_BSP_DIR}/include
                     ${OPLK_ROOT_DIR}/stack/src/arch/xilinx_arm
                     ${COMMON_SOURCE_DIR}/gpio
-                    ${SDFAT16_DIR}/include
                    )
+
+IF(CFG_CDC_ON_SD)
+
+    SET(DEMO_ARCH_SOURCES 
+    ${DEMO_ARCH_SOURCES}
+    ${COMMON_SOURCE_DIR}/sdcard/sdcard-arm_xilinx.c
+    )
+
+    INCLUDE_DIRECTORIES(
+                        ${SDFAT16_DIR}/include
+                        ${COMMON_SOURCE_DIR}/sdcard
+                       )
+
+ENDIF()
 
 ################################################################################
 # Set architecture specific definitions
