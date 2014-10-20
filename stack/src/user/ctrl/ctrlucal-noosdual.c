@@ -88,7 +88,6 @@ control CAL module during runtime
 typedef struct
 {
     tDualprocDrvInstance    dualProcDrvInst;    ///< Dual processor driver instance
-    BOOL                    fIrqMasterEnable;   ///< Master interrupts status
 }tCtrluCalInstance;
 
 //------------------------------------------------------------------------------
@@ -135,9 +134,6 @@ tOplkError ctrlucal_init(void)
         return kErrorNoResource;
     }
 
-    // Disable the Interrupts from PCP
-    instance_l.fIrqMasterEnable =  FALSE;
-
     dualRet = dualprocshm_initInterrupts(instance_l.dualProcDrvInst);
     if (dualRet != kDualprocSuccessful)
     {
@@ -160,8 +156,6 @@ The function cleans up the user control CAL module.
 void ctrlucal_exit(void)
 {
     tDualprocReturn    dualRet;
-
-    instance_l.fIrqMasterEnable =  FALSE;
 
     // disable system irq
     dualprocshm_freeInterrupts(instance_l.dualProcDrvInst);
@@ -186,11 +180,6 @@ This function provides processing time for the CAL module.
 //------------------------------------------------------------------------------
 tOplkError ctrlucal_process(void)
 {
-    if (instance_l.fIrqMasterEnable == FALSE)
-    {
-        instance_l.fIrqMasterEnable = TRUE;
-    }
-
     return kErrorOk;
 }
 
