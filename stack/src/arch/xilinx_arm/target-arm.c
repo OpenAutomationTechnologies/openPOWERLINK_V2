@@ -59,17 +59,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 #define TGTCONIO_MS_IN_US(x)      (x * 1000U)
-#define TARGET_SYNC_IRQ_ID         XPAR_PS7_SCUGIC_0_DEVICE_ID
-#define TARGET_SYNC_IRQ            XPAR_FABRIC_AXI_OPENMAC_0_TIMER_IRQ_INTR
-
-///< Interrupt controller specific defines
-#ifdef XPAR_PS7_SCUGIC_0_BASEADDR
-#define TARGET_IRQ_IC_BASE         XPAR_PS7_SCUGIC_0_BASEADDR
-#endif
-
-#ifdef XPAR_PS7_SCUGIC_0_DIST_BASEADDR
-#define TARGET_IRQ_IC_DIST_BASE    XPAR_PS7_SCUGIC_0_DIST_BASEADDR
-#endif
 
 #if (XPAR_CPU_ID == 0)
 #define TARGET_CPU_VALUE           0x01
@@ -291,55 +280,6 @@ tOplkError target_setDefaultGateway(UINT32 defaultGateway_p)
     //      these settings to the used IP stack by itself!
 
     return kErrorOk;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief Register synchronization interrupt handler
-
-The function registers the ISR for target specific synchronization interrupt
-used by the application for PDO and event synchronization.
-
-\param  callback_p              Interrupt handler
-\param  pArg_p                  Argument to be passed while calling the handler
-
-\return The function returns the error code as a integer value
-\retval 0 if able to register
-\retval other if not
-
-\ingroup module_target
-*/
-//------------------------------------------------------------------------------
-void target_regSyncIrqHdl(void* callback_p, void* pArg_p)
-{
-    // register sync irq handler
-    XScuGic_RegisterHandler(TARGET_IRQ_IC_BASE, TARGET_SYNC_IRQ,
-                            (Xil_InterruptHandler) callback_p, pArg_p);
-    // enable the sync interrupt
-    XScuGic_EnableIntr(TARGET_IRQ_IC_DIST_BASE, TARGET_SYNC_IRQ);
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief Sync interrupt control routine
-
-The function is used to enable or disable the sync interrupt
-
-\param  fEnable_p              enable if TRUE, disable if FALSE
-
-\ingroup module_target
-*/
-//------------------------------------------------------------------------------
-void target_enableSyncIrq(BOOL fEnable_p)
-{
-    if (fEnable_p)
-    {
-        XScuGic_EnableIntr(TARGET_SYNC_IRQ_ID, TARGET_SYNC_IRQ);
-    }
-    else
-    {
-        XScuGic_DisableIntr(TARGET_SYNC_IRQ_ID, TARGET_SYNC_IRQ);
-    }
 }
 
 //============================================================================//

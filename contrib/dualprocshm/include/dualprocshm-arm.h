@@ -77,6 +77,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DUALPROCSHM_INVALIDATE_DCACHE_RANGE(base, range) \
     Xil_DCacheInvalidateRange((UINT32)base, range);
 
+#define DPSHM_REG_SYNC_INTR(callback, arg)                       \
+    XScuGic_RegisterHandler(TARGET_IRQ_IC_BASE, TARGET_SYNC_IRQ, \
+                           (Xil_InterruptHandler) callback, arg);\
+    XScuGic_EnableIntr(TARGET_IRQ_IC_DIST_BASE, TARGET_SYNC_IRQ)
+
+#define DPSHM_ENABLE_SYNC_INTR() \
+    XScuGic_EnableIntr(TARGET_SYNC_IRQ_ID, TARGET_SYNC_IRQ)
+
+#define DPSHM_DISABLE_SYNC_INTR() \
+    XScuGic_DisableIntr(TARGET_SYNC_IRQ_ID, TARGET_SYNC_IRQ)
+
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------

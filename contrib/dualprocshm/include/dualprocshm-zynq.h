@@ -53,6 +53,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define COMMON_MEM_BASE             0x2C000000
 #define MEM_ADDR_TABLE_BASE         COMMON_MEM_BASE + MAX_COMMON_MEM_SIZE
 #define MEM_INTR_BASE               MEM_ADDR_TABLE_BASE + MAX_DYNAMIC_BUFF_SIZE
+
+#define TARGET_SYNC_IRQ_ID         -1
+#define TARGET_SYNC_IRQ            -1
+
+///< Interrupt controller specific defines
+#define TARGET_IRQ_IC_BASE         -1
+#define TARGET_IRQ_IC_DIST_BASE    -1
+
+
 #elif defined(__arm__)
 
 #include "dualprocshm-arm.h"
@@ -61,6 +70,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define COMMON_MEM_BASE             0x2C000000
 #define MEM_ADDR_TABLE_BASE         COMMON_MEM_BASE + MAX_COMMON_MEM_SIZE
 #define MEM_INTR_BASE               MEM_ADDR_TABLE_BASE + MAX_DYNAMIC_BUFF_SIZE
+
+#define TARGET_SYNC_IRQ_ID         XPAR_PS7_SCUGIC_0_DEVICE_ID
+#define TARGET_SYNC_IRQ            XPAR_FABRIC_AXI_OPENMAC_0_TIMER_IRQ_INTR
+
+///< Interrupt controller specific defines
+#ifdef XPAR_PS7_SCUGIC_0_BASEADDR
+#define TARGET_IRQ_IC_BASE         XPAR_PS7_SCUGIC_0_BASEADDR
+#endif
+
+#ifdef XPAR_PS7_SCUGIC_0_DIST_BASEADDR
+#define TARGET_IRQ_IC_DIST_BASE    XPAR_PS7_SCUGIC_0_DIST_BASEADDR
+#endif
 
 #else
 

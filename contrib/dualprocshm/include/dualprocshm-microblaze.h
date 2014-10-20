@@ -71,4 +71,20 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DUALPROCSHM_INVALIDATE_DCACHE_RANGE(base, range) \
     microblaze_invalidate_dcache_range((UINT32)base, range);
 
+#define DPSHM_REG_SYNC_INTR(callback, arg)                     \
+    UINT32      intcMask;                                      \
+    XIntc_RegisterHandler(TARGET_IRQ_IC_BASE, TARGET_SYNC_IRQ, \
+                         (XInterruptHandler) callback, arg);   \
+    intcMask = Xil_In32(TARGET_IRQ_IC_BASE + XIN_IER_OFFSET);  \
+    XIntc_EnableIntr(TARGET_IRQ_IC_DIST_BASE,                  \
+                     TARGET_SYNC_IRQ | intcMask)
+
+#define DPSHM_ENABLE_SYNC_INTR()                                   \
+    XIntc_EnableIntr(TARGET_SYNC_IRQ_ID, TARGET_SYNC_IRQ |         \
+                     Xil_In32(TARGET_IRQ_IC_BASE + XIN_IER_OFFSET))
+
+#define DPSHM_DISABLE_SYNC_INTR()                                  \
+    XIntc_DisableIntr(TARGET_SYNC_IRQ_ID, TARGET_SYNC_IRQ |        \
+                      Xil_In32(TARGET_IRQ_IC_BASE + XIN_IER_OFFSET))
+
 #endif /* _INC_dualprocshm_microblaze_H_ */

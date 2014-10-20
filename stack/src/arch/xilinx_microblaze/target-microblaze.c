@@ -322,47 +322,6 @@ tOplkError target_setDefaultGateway(UINT32 defaultGateway_p)
     return kErrorOk;
 }
 
-//------------------------------------------------------------------------------
-/**
-\brief Register synchronization interrupt handler
-
-The function registers the ISR for target specific synchronization interrupt
-used by the application for PDO and event synchronization.
-
-\param  callback_p              Interrupt handler
-\param  pArg_p                  Argument to be passed while calling the handler
-
-\return The function returns the error code as a integer value
-\retval 0 if able to register
-\retval other if not
-
-\ingroup module_target
-*/
-//------------------------------------------------------------------------------
-void target_regSyncIrqHdl( void* callback_p, void* pArg_p)
-{
-    UNUSED_PARAMETER(callback_p);
-    UNUSED_PARAMETER(pArg_p);
-    // todo gks: Add Target interrupt registration for sync here
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief Sync interrupt control routine
-
-The function is used to enable or disable the sync interrupt
-
-\param  fEnable_p              enable if TRUE, disable if FALSE
-
-\ingroup module_target
-*/
-//------------------------------------------------------------------------------
-void target_enableSyncIrq(BOOL fEnable_p)
-{
-    UNUSED_PARAMETER(fEnable_p);
-    // todo gks Add interrupt handling
-}
-
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
