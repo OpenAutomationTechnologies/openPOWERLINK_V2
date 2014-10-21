@@ -64,6 +64,8 @@ SET(CFG_PCP_TCIMEM_NAME pcp_ilmb_cntlr)
 # Bootloader not available for Microblaze
 SET(CFG_MB_BOOTLOADER_ENABLE "FALSE")
 
+SET(CFG_MB_UART "TRUE")
+
 # Microblaze has enabled multiplier
 OPTION(CFG_PCP_MICROBLAZE_HW_MULT "Microblaze has enabled hardware multiplier" ON)
 MARK_AS_ADVANCED(CFG_PCP_MICROBLAZE_HW_MULT)
