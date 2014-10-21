@@ -213,8 +213,8 @@ entity alteraOpenmacTop is
         -----------------------------------------------------------------------
         -- Rmii Phy ports
         -----------------------------------------------------------------------
-        --! Rmii Rx data valid ports
-        coe_rmii_rxDataValid    : in    std_logic_vector(gPhyPortCount-1 downto 0);
+        --! Rmii Rx Crs data valid ports
+        coe_rmii_rxCrsDataValid    : in    std_logic_vector(gPhyPortCount-1 downto 0);
         --! Rmii Rx data ports
         coe_rmii_rxData         : in    std_logic_vector(gPhyPortCount*2-1 downto 0);
         --! Rmii Rx error ports
@@ -318,7 +318,7 @@ begin
 
     -- Phy Rx path
     stdLogicVectorToRmiiPathArray(
-        iEnable => coe_rmii_rxDataValid,
+        iEnable => coe_rmii_rxCrsDataValid,
         iData   => coe_rmii_rxData,
         oVector => rmiiRx
     );

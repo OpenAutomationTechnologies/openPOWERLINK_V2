@@ -134,6 +134,7 @@ typedef struct
     tOplkApiInitParam   initParam;              ///< Stack initialization parameters
     tCtrlKernelInfo     kernelInfo;             ///< Information about kernel stack
     UINT32              requiredKernelFeatures; ///< Kernel stack features we need to run correctly
+    BOOL                fInitialized;           ///< Flag determines if stack is initialized/ready
 } tCtrluInstance;
 
 //------------------------------------------------------------------------------
@@ -408,6 +409,8 @@ tOplkError ctrlu_initStack(tOplkApiInitParam* pInitParam_p)
     // via oplk_execNmtCommand(kNmtEventSwReset)
     // and thereby the whole POWERLINK stack
 
+    ctrlInstance_l.fInitialized = TRUE;
+
 Exit:
     return ret;
 }
@@ -428,6 +431,8 @@ tOplkError ctrlu_shutdownStack(void)
 {
     tOplkError      ret = kErrorOk;
     UINT16          retVal;
+
+    ctrlInstance_l.fInitialized = FALSE;
 
 #if defined(CONFIG_INCLUDE_CFM)
     ret = cfmu_exit();
@@ -618,8 +623,13 @@ tOplkError ctrlu_callUserEventCallback(tOplkApiEventType eventType_p, tOplkApiEv
 {
     tOplkError          ret = kErrorOk;
 
-    ret = ctrlInstance_l.initParam.pfnCbEvent(eventType_p, pEventArg_p,
+    // If the stack is not initialized but we get events, we don't forward
+    // them to the application!
+    if (ctrlInstance_l.fInitialized)
+    {
+        ret = ctrlInstance_l.initParam.pfnCbEvent(eventType_p, pEventArg_p,
                                               ctrlInstance_l.initParam.pEventUserArg);
+    }
     return ret;
 }
 
@@ -857,6 +867,23 @@ Ethernet controller.
 UINT8* ctrlu_getEthMacAddr(void)
 {
     return &ctrlInstance_l.initParam.aMacAddress[0];
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Returns the stacks initialization state
+
+The function returns the initialization state of the stack.
+
+\return The function returns TRUE if the stack is initialized and running or
+        FALSE if it is shutdown.
+
+\ingroup module_ctrlu
+*/
+//------------------------------------------------------------------------------
+BOOL ctrlu_stackIsInitialized(void)
+{
+    return ctrlInstance_l.fInitialized;
 }
 
 //============================================================================//

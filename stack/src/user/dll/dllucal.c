@@ -207,10 +207,21 @@ tOplkError dllucal_exit(void)
 {
     tOplkError      ret = kErrorOk;
 
-    instance_l.pTxNmtFuncs->pfnDelInstance(instance_l.dllCalQueueTxNmt);
-    instance_l.pTxGenFuncs->pfnDelInstance(instance_l.dllCalQueueTxGen);
+    if (instance_l.pTxNmtFuncs != NULL)
+    {
+        instance_l.pTxNmtFuncs->pfnDelInstance(instance_l.dllCalQueueTxNmt);
+    }
+
+    if (instance_l.pTxGenFuncs != NULL)
+    {
+        instance_l.pTxGenFuncs->pfnDelInstance(instance_l.dllCalQueueTxGen);
+    }
+
 #if defined(CONFIG_INCLUDE_NMT_MN)
-    instance_l.pTxSyncFuncs->pfnDelInstance(instance_l.dllCalQueueTxSync);
+    if (instance_l.pTxSyncFuncs != NULL)
+    {
+        instance_l.pTxSyncFuncs->pfnDelInstance(instance_l.dllCalQueueTxSync);
+    }
 #endif
 #if defined(CONFIG_INCLUDE_VETH)
     instance_l.pTxVethFuncs->pfnDelInstance(instance_l.dllCalQueueTxVeth);

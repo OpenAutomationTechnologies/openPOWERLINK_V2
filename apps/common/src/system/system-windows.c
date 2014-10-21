@@ -137,7 +137,22 @@ The function starts the thread used for synchronous data handling.
 //------------------------------------------------------------------------------
 void startSyncThread(tSyncCb pfnSync_p)
 {
+    // Currently threads are not used on Windows
     UNUSED_PARAMETER(pfnSync_p);
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Stop synchronous data thread
+
+The function stops the thread used for synchronous data handling.
+
+\ingroup module_app_common
+*/
+//------------------------------------------------------------------------------
+void stopSyncThread(void)
+{
+    // Currently threads are not used on Windows
 }
 #endif
 

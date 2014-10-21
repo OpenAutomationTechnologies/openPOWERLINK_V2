@@ -42,6 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
 #include <user/pdou.h>
+#include <user/ctrlu.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -222,6 +223,9 @@ tOplkError oplk_linkProcessImageObject(UINT objIndex_p, UINT firstSubindex_p,
     tOplkError      ret = kErrorOk;
     void*           pVar;
 
+    if (!ctrlu_stackIsInitialized())
+        return kErrorApiNotInitialized;
+
     if (pVarEntries_p == NULL)
         return kErrorApiInvalidParam;
 
@@ -275,6 +279,9 @@ tOplkError oplk_exchangeProcessImageIn(void)
 {
     tOplkError      ret;
 
+    if (!ctrlu_stackIsInitialized())
+        return kErrorApiNotInitialized;
+
     if (instance_l.inputImage.pImage != NULL)
         ret = pdou_copyTxPdoFromPi();
     else
@@ -300,6 +307,9 @@ tOplkError oplk_exchangeProcessImageOut(void)
 {
     tOplkError      ret;
 
+    if (!ctrlu_stackIsInitialized())
+        return kErrorApiNotInitialized;
+
     if (instance_l.outputImage.pImage != NULL)
         ret = pdou_copyRxPdoToPi();
     else
@@ -321,6 +331,9 @@ The function returns the pointer to the input process image.
 //------------------------------------------------------------------------------
 void* oplk_getProcessImageIn(void)
 {
+    if (!ctrlu_stackIsInitialized())
+        return NULL;
+
     return instance_l.inputImage.pImage;
 }
 
@@ -337,6 +350,9 @@ The function returns the pointer to the output process image.
 //------------------------------------------------------------------------------
 void* oplk_getProcessImageOut(void)
 {
+    if (!ctrlu_stackIsInitialized())
+        return NULL;
+
     return instance_l.outputImage.pImage;
 }
 

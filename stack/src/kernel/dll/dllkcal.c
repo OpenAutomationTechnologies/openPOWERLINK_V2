@@ -286,16 +286,28 @@ tOplkError dllkcal_exit(void)
     tOplkError      ret = kErrorOk;
 
 #ifdef CONFIG_INCLUDE_NMT_MN
-    circbuf_free(instance_l.pQueueCnRequestGen);
-    circbuf_free(instance_l.pQueueCnRequestNmt);
-    circbuf_free(instance_l.pQueueIdentReq);
-    circbuf_free(instance_l.pQueueStatusReq);
+    if (instance_l.pQueueCnRequestGen != NULL)
+        circbuf_free(instance_l.pQueueCnRequestGen);
+
+    if (instance_l.pQueueCnRequestNmt != NULL)
+        circbuf_free(instance_l.pQueueCnRequestNmt);
+
+    if (instance_l.pQueueIdentReq != NULL)
+        circbuf_free(instance_l.pQueueIdentReq);
+
+    if (instance_l.pQueueStatusReq != NULL)
+        circbuf_free(instance_l.pQueueStatusReq);
 #endif
 
-    instance_l.pTxNmtFuncs->pfnDelInstance(instance_l.dllCalQueueTxNmt);
-    instance_l.pTxGenFuncs->pfnDelInstance(instance_l.dllCalQueueTxGen);
+    if (instance_l.pTxNmtFuncs != NULL)
+        instance_l.pTxNmtFuncs->pfnDelInstance(instance_l.dllCalQueueTxNmt);
+
+    if (instance_l.pTxGenFuncs != NULL)
+        instance_l.pTxGenFuncs->pfnDelInstance(instance_l.dllCalQueueTxGen);
+
 #if defined(CONFIG_INCLUDE_NMT_MN)
-    instance_l.pTxSyncFuncs->pfnDelInstance(instance_l.dllCalQueueTxSync);
+    if (instance_l.pTxSyncFuncs != NULL)
+        instance_l.pTxSyncFuncs->pfnDelInstance(instance_l.dllCalQueueTxSync);
 #endif
 #if defined(CONFIG_INCLUDE_VETH)
     instance_l.pTxVethFuncs->pfnDelInstance(instance_l.dllCalQueueTxVeth);

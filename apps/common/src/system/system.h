@@ -68,6 +68,7 @@ void msleep(unsigned int milliSecond_p);
 
 #if defined(CONFIG_USE_SYNCTHREAD)
 void startSyncThread(tSyncCb pfnSync_p);
+void stopSyncThread(void);
 #endif
 
 #ifdef __cplusplus

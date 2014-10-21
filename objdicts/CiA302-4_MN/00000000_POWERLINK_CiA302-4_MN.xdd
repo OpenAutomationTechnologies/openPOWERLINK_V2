@@ -22,8 +22,8 @@
       fileCreator="SYSTEC electronic GmbH"
       fileCreationDate="2009-09-18"
       fileCreationTime="15:50:00+01:00"
-      fileModificationDate="2014-09-18"
-      fileModificationTime="13:46:00+02:00"
+      fileModificationDate="2014-10-09"
+      fileModificationTime="09:00:00+02:00"
       fileModifiedBy="Bernecker+Rainer Industrie-Elektronik Ges.m.b.H."
       fileVersion="01.00"
       supportedLanguages="en">
@@ -70,8 +70,8 @@
       fileCreator="SYSTEC electronic GmbH"
       fileCreationDate="2009-09-18"
       fileCreationTime="15:50:00+01:00"
-      fileModificationDate="2014-09-18"
-      fileModificationTime="13:46:00+02:00"
+      fileModificationDate="2014-10-09"
+      fileModificationTime="09:00:00+02:00"
       fileModifiedBy="Bernecker+Rainer Industrie-Elektronik Ges.m.b.H."
       fileVersion="01.00"
       supportedLanguages="en">
@@ -911,6 +911,7 @@
             <SubObject subIndex="FC" name="ObjectMapping" objectType="7" dataType="001B" accessType="rw" PDOmapping="no" defaultValue="0x0000000000000000"/>
             <SubObject subIndex="FD" name="ObjectMapping" objectType="7" dataType="001B" accessType="rw" PDOmapping="no" defaultValue="0x0000000000000000"/>
             <SubObject subIndex="FE" name="ObjectMapping" objectType="7" dataType="001B" accessType="rw" PDOmapping="no" defaultValue="0x0000000000000000"/>
+          </Object>
           <Object index="1601" name="PDO_RxMappParam_01h_AU64" objectType="8">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
             <SubObject subIndex="01" name="ObjectMapping" objectType="7" dataType="001B" accessType="rw" PDOmapping="no" defaultValue="0x0000000000000000"/>

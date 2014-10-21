@@ -179,6 +179,8 @@ tOplkError dllknode_cleanupLocalNode(tNmtState oldNmtState_p)
     if ((ret = dllkframe_deleteTxFrame(DLLK_TXFRAME_PRES)) != kErrorOk)
         return ret;
 
+    dllkInstance_g.aTxBufferStateNmtReq[0] = kDllkTxBufEmpty;
+    dllkInstance_g.aTxBufferStateNmtReq[1] = kDllkTxBufEmpty;
     if ((ret = dllkframe_deleteTxFrame(DLLK_TXFRAME_NMTREQ)) != kErrorOk)
         return ret;
 
@@ -187,6 +189,8 @@ tOplkError dllknode_cleanupLocalNode(tNmtState oldNmtState_p)
         return ret;
 #endif
 
+    dllkInstance_g.aTxBufferStateNonPlk[0] = kDllkTxBufEmpty;
+    dllkInstance_g.aTxBufferStateNonPlk[1] = kDllkTxBufEmpty;
     if ((ret = dllkframe_deleteTxFrame(DLLK_TXFRAME_NONPLK)) != kErrorOk)
         return ret;
 
@@ -331,10 +335,12 @@ tOplkError dllknode_setupLocalNode(tNmtState nmtState_p)
     if (ret != kErrorOk)
         return ret;
     // mark Tx buffer as empty
-    dllkInstance_g.pTxBuffer[handle].txFrameSize = DLLK_BUFLEN_EMPTY;
+    dllkInstance_g.aTxBufferStateNmtReq[0] = kDllkTxBufEmpty;
+    dllkInstance_g.pTxBuffer[handle].txFrameSize = 0;
     dllkInstance_g.pTxBuffer[handle].pfnTxHandler = dllkframe_processTransmittedNmtReq;
     handle++;
-    dllkInstance_g.pTxBuffer[handle].txFrameSize = DLLK_BUFLEN_EMPTY;
+    dllkInstance_g.aTxBufferStateNmtReq[1] = kDllkTxBufEmpty;
+    dllkInstance_g.pTxBuffer[handle].txFrameSize = 0;
     dllkInstance_g.pTxBuffer[handle].pfnTxHandler = dllkframe_processTransmittedNmtReq;
 
     // non-POWERLINK frame
@@ -343,10 +349,12 @@ tOplkError dllknode_setupLocalNode(tNmtState nmtState_p)
     if (ret != kErrorOk)
         return ret;
     // mark Tx buffer as empty
-    dllkInstance_g.pTxBuffer[handle].txFrameSize = DLLK_BUFLEN_EMPTY;
+    dllkInstance_g.aTxBufferStateNonPlk[0] = kDllkTxBufEmpty;
+    dllkInstance_g.pTxBuffer[handle].txFrameSize = 0;
     dllkInstance_g.pTxBuffer[handle].pfnTxHandler = dllkframe_processTransmittedNonPlk;
     handle++;
-    dllkInstance_g.pTxBuffer[handle].txFrameSize = DLLK_BUFLEN_EMPTY;
+    dllkInstance_g.aTxBufferStateNonPlk[1] = kDllkTxBufEmpty;
+    dllkInstance_g.pTxBuffer[handle].txFrameSize = 0;
     dllkInstance_g.pTxBuffer[handle].pfnTxHandler = dllkframe_processTransmittedNonPlk;
 
     /*------------------------------------------------------------------------*/
@@ -572,9 +580,7 @@ tOplkError dllknode_setupAsyncPhase(tNmtState nmtState_p, UINT nextTxBufferOffse
                                     UINT32 nextTimeOffsetNs_p, UINT* pIndex_p)
 {
     tOplkError          ret = kErrorOk;
-    BOOL                fEnableInvitation;
     tEdrvTxBuffer*      pTxBuffer;
-    UINT                soaIndex;
 
     pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SOA + nextTxBufferOffset_p];
     pTxBuffer->timeOffsetNs = nextTimeOffsetNs_p;
@@ -590,110 +596,60 @@ tOplkError dllknode_setupAsyncPhase(tNmtState nmtState_p, UINT nextTxBufferOffse
     //          currently, processSync is not called in PreOp1
     ret = dllkframe_updateFrameSoa(pTxBuffer, nmtState_p, TRUE, dllkInstance_g.syncLastSoaReq);
     dllkInstance_g.ppTxBufferList[*pIndex_p] = pTxBuffer;
-    //store SoA *pIndex_p
-    soaIndex = *pIndex_p;
     (*pIndex_p)++;
 
     // check if we are invited in SoA
     if (dllkInstance_g.aLastTargetNodeId[dllkInstance_g.syncLastSoaReq] ==
                                        dllkInstance_g.dllConfigParam.nodeId)
-    {
-        //disable invitation per default
-        fEnableInvitation = FALSE;
-
+    {   // Note: The Tx buffers exist / are ready!
+        //       This is checked in dllk_updateFrameSoa()
         switch (dllkInstance_g.aLastReqServiceId[dllkInstance_g.syncLastSoaReq])
         {
             case kDllReqServiceStatus:
                 // StatusRequest
                 pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_STATUSRES +
                                                       dllkInstance_g.curTxBufferOffsetStatusRes];
-                if (pTxBuffer->pBuffer != NULL)
-                {   // StatusRes does exist
-                    dllkInstance_g.ppTxBufferList[*pIndex_p] = pTxBuffer;
-                    (*pIndex_p)++;
+                dllkInstance_g.ppTxBufferList[*pIndex_p] = pTxBuffer;
+                (*pIndex_p)++;
 
-                    //TX buffer is ready, invitation enabled
-                    fEnableInvitation = TRUE;
-
-                    TGT_DBG_SIGNAL_TRACE_POINT(8);
-                }
+                TGT_DBG_SIGNAL_TRACE_POINT(8);
                 break;
 
             case kDllReqServiceIdent:
                 // IdentRequest
                 pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_IDENTRES +
                                                       dllkInstance_g.curTxBufferOffsetIdentRes];
-                if (pTxBuffer->pBuffer != NULL)
-                {   // IdentRes does exist
-                    dllkInstance_g.ppTxBufferList[*pIndex_p] = pTxBuffer;
-                    (*pIndex_p)++;
+                dllkInstance_g.ppTxBufferList[*pIndex_p] = pTxBuffer;
+                (*pIndex_p)++;
 
-                    //TX buffer is ready, invitation enabled
-                    fEnableInvitation = TRUE;
 
-                    TGT_DBG_SIGNAL_TRACE_POINT(7);
-                }
+                TGT_DBG_SIGNAL_TRACE_POINT(7);
                 break;
 
             case kDllReqServiceNmtRequest:
                 // NmtRequest
                 pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NMTREQ +
                                                       dllkInstance_g.curTxBufferOffsetNmtReq];
-                if (pTxBuffer->pBuffer != NULL)
-                {   // NmtRequest does exist
-                    // check if frame is not empty and not being filled
-                    if (pTxBuffer->txFrameSize > DLLK_BUFLEN_FILLING)
-                    {
-                        dllkInstance_g.ppTxBufferList[*pIndex_p] = pTxBuffer;
-                        (*pIndex_p)++;
-                        dllkInstance_g.curTxBufferOffsetNmtReq ^= 1;
-
-                        //TX buffer is ready, invitation enabled
-                        fEnableInvitation = TRUE;
-                    }
-                }
+                dllkInstance_g.ppTxBufferList[*pIndex_p] = pTxBuffer;
+                (*pIndex_p)++;
+                dllkInstance_g.curTxBufferOffsetNmtReq ^= 1;
                 break;
 
             case kDllReqServiceUnspecified:
                 // unspecified invite
                 pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONPLK +
                                                       dllkInstance_g.curTxBufferOffsetNonPlk];
-                if (pTxBuffer->pBuffer != NULL)
-                {   // non-POWERLINK frame does exist
-                    // check if frame is not empty and not being filled
-                    if (pTxBuffer->txFrameSize > DLLK_BUFLEN_FILLING)
-                    {
-                        dllkInstance_g.ppTxBufferList[*pIndex_p] = pTxBuffer;
-                        (*pIndex_p)++;
-                        dllkInstance_g.curTxBufferOffsetNonPlk ^= 1;
-
-                        //TX buffer is ready, invitation enabled
-                        fEnableInvitation = TRUE;
-                    }
-                }
+                dllkInstance_g.ppTxBufferList[*pIndex_p] = pTxBuffer;
+                (*pIndex_p)++;
+                dllkInstance_g.curTxBufferOffsetNonPlk ^= 1;
                 break;
 
             default:
                 break;
         }
 
-        //is invitation allowed?
-        if (fEnableInvitation == FALSE)
-        {
-            tPlkFrame* pTxFrame = (tPlkFrame*)
-                dllkInstance_g.ppTxBufferList[soaIndex]->pBuffer;
-
-            //reset invitation
-            ami_setUint8Le(&pTxFrame->data.soa.reqServiceId,
-                    kDllReqServiceNo);
-            ami_setUint8Le(&pTxFrame->data.soa.reqServiceTarget,
-                    C_ADR_INVALID);
-        }
-        else
-        {
-            // Asnd frame will be sent, remove the request
-            dllkInstance_g.aLastReqServiceId[dllkInstance_g.syncLastSoaReq] = kDllReqServiceNo;
-        }
+        // Asnd frame will be sent, remove the request
+        dllkInstance_g.aLastReqServiceId[dllkInstance_g.syncLastSoaReq] = kDllReqServiceNo;
     }
     return ret;
 }

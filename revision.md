@@ -5,6 +5,42 @@ Revision history of openPOWERLINK Protocol Stack {#page_revision_history}
 
 # Release 2 {#sect_revision_v2}
 
+## V2.0.2 {#sect_revision_v2_0_2}
+
+This is the final release of openPOWERLINK V2.0.2. This release is a stable
+release, it contains fixes and optimizations.
+
+### Fixes:
+- Add missing CMake option for sync thread in demo_cn_console
+- Correctly stop synchronous data thread in demo apps
+- Prevent API to call stack functions if stack is not ready
+- Fix demo_cn_console segmentation fault
+- Fix resending of the same Tx buffer in BasicEthernet state
+- Fix MN asynchronous slot self-invitation
+- Fix shutdown behaviour if kernel initialization fails
+- Add missing definitions in debugstr.c
+- Fix 8255x Edrv NULL pointer crash
+- Fix access rights in obdmacro.h
+- Fix typos in 00000000_POWERLINK_CiA302-4_MN.xdd
+- Fix initialization of process image
+- Fix MN issuing StatusRequest after NMTEnableReadyToOperate
+- Add missing openMAC waveforms to documentation
+- Resolve Xilinx cmake filename case issue
+- Reimplement handling of PRes in transition DLL_CT4
+- Fix plkload to correctly handle multiple threads/irqs
+- Fix dereferencing warning in pdo CAL
+- Fix compiler warnings in host interface SW modules and openMAC drivers
+- Fix used interrupt api for Altera IP-Cores
+- Fix SDO busy intern after CN reset command
+
+### Changes:
+- Extend PDO mapping subindexes
+- Rename RMII Rx data valid input in openMAC IP-Core
+
+### Additions:
+- Add additional documention about NOTFOUND CMake error
+
+
 ## V2.0.1 {#sect_revision_v2_0_1}
 
 This is the final release of openPOWERLINK V2.0.1. No new features are

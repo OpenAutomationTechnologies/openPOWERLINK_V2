@@ -358,8 +358,8 @@ entity axi_openmac is
         -----------------------------------------------------------------------
         --! Rmii Clock ports (optional)
         oRmii_clk                   : out   std_logic_vector(gPhyPortCount-1 downto 0);
-        --! Rmii Rx data valid ports
-        iRmii_rxDataValid           : in    std_logic_vector(gPhyPortCount-1 downto 0);
+        --! Rmii Rx Crs data valid ports
+        iRmii_rxCrsDataValid           : in    std_logic_vector(gPhyPortCount-1 downto 0);
         --! Rmii Rx data ports
         iRmii_rxData                : in    std_logic_vector(gPhyPortCount*2-1 downto 0);
         --! Rmii Rx error ports
@@ -791,7 +791,7 @@ begin
 
     -- Phy Rx path
     stdLogicVectorToRmiiPathArray(
-        iEnable => iRmii_rxDataValid,
+        iEnable => iRmii_rxCrsDataValid,
         iData   => iRmii_rxData,
         oVector => rmiiRx
     );

@@ -384,7 +384,7 @@ void dllkframe_processTransmittedNmtReq(tEdrvTxBuffer* pTxBuffer_p)
 
     // frame from NMT request FIFO sent
     // mark Tx-buffer as empty
-    pTxBuffer_p->txFrameSize = DLLK_BUFLEN_EMPTY;
+    dllkInstance_g.aTxBufferStateNmtReq[pTxBuffer_p - &dllkInstance_g.pTxBuffer[handle]] = kDllkTxBufEmpty;
 
 #if CONFIG_EDRV_AUTO_RESPONSE == TRUE
     // Disable the filter to avoid retransmission of the same frame
@@ -456,7 +456,7 @@ void dllkframe_processTransmittedNonPlk(tEdrvTxBuffer* pTxBuffer_p)
 
     // frame from generic priority FIFO sent
     // mark Tx-buffer as empty
-    pTxBuffer_p->txFrameSize = DLLK_BUFLEN_EMPTY;
+   dllkInstance_g.aTxBufferStateNonPlk[pTxBuffer_p - &dllkInstance_g.pTxBuffer[handle]] = kDllkTxBufEmpty;
 
 #if CONFIG_EDRV_AUTO_RESPONSE == TRUE
     // Disable the filter to avoid retransmission of the same frame
@@ -494,7 +494,6 @@ Exit:
     TGT_DLLK_LEAVE_CRITICAL_SECTION()
     return;
 }
-
 
 //------------------------------------------------------------------------------
 /**
@@ -983,10 +982,6 @@ tOplkError dllkframe_deleteTxFrame(UINT handle_p)
     {
         pTxBuffer = &dllkInstance_g.pTxBuffer[handle_p];
 
-        // mark buffer as free so that frame will not be send in future anymore
-        // $$$ d.k. What's up with running transmissions?
-        pTxBuffer->txFrameSize = DLLK_BUFLEN_EMPTY;
-
         ret = edrv_freeTxBuffer(pTxBuffer);
         if (ret != kErrorOk)
         {   // error occurred while releasing Tx frame
@@ -1130,9 +1125,10 @@ void dllkframe_processTransmittedSoa(tEdrvTxBuffer* pTxBuffer_p)
                 if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NMTREQ + dllkInstance_g.curTxBufferOffsetNmtReq].pBuffer != NULL)
                 {   // NmtRequest does exist
                     // check if frame is not empty and not being filled
-                    if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NMTREQ + dllkInstance_g.curTxBufferOffsetNmtReq].txFrameSize > DLLK_BUFLEN_FILLING)
+                    if (dllkInstance_g.aTxBufferStateNmtReq[dllkInstance_g.curTxBufferOffsetNmtReq] == kDllkTxBufReady)
                     {
                         // send NmtRequest
+                        dllkInstance_g.aTxBufferStateNmtReq[dllkInstance_g.curTxBufferOffsetNmtReq] = kDllkTxBufSending;
                         ret = edrv_sendTxBuffer(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NMTREQ + dllkInstance_g.curTxBufferOffsetNmtReq]);
                         if (ret != kErrorOk)
                             goto Exit;
@@ -1145,9 +1141,10 @@ void dllkframe_processTransmittedSoa(tEdrvTxBuffer* pTxBuffer_p)
                 if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONPLK + dllkInstance_g.curTxBufferOffsetNonPlk].pBuffer != NULL)
                 {   // non-POWERLINK frame does exist
                     // check if frame is not empty and not being filled
-                    if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONPLK + dllkInstance_g.curTxBufferOffsetNonPlk].txFrameSize > DLLK_BUFLEN_FILLING)
+                    if (dllkInstance_g.aTxBufferStateNonPlk[dllkInstance_g.curTxBufferOffsetNonPlk] == kDllkTxBufReady)
                     {
                         // send non-POWERLINK frame
+                        dllkInstance_g.aTxBufferStateNonPlk[dllkInstance_g.curTxBufferOffsetNonPlk] = kDllkTxBufSending;
                         ret = edrv_sendTxBuffer(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONPLK + dllkInstance_g.curTxBufferOffsetNonPlk]);
                         if (ret != kErrorOk)
                             goto Exit;
@@ -1288,6 +1285,7 @@ tOplkError dllkframe_updateFrameSoa(tEdrvTxBuffer* pTxBuffer_p,
     tOplkError          ret = kErrorOk;
     tPlkFrame*          pTxFrame;
     tDllkNodeInfo*      pNodeInfo;
+    tDllkTxBufState*    pTxBufferState = NULL;
 
     pTxFrame = (tPlkFrame*)pTxBuffer_p->pBuffer;
 
@@ -1314,8 +1312,50 @@ tOplkError dllkframe_updateFrameSoa(tEdrvTxBuffer* pTxBuffer_p,
         if (dllkInstance_g.aLastReqServiceId[curReq_p] != kDllReqServiceNo)
         {   // asynchronous phase will be assigned to one node
             if (dllkInstance_g.aLastTargetNodeId[curReq_p] == C_ADR_INVALID)
-            {   // exchange invalid node ID with local node ID
+            {
+                int             selectTxBuffer;
+                tEdrvTxBuffer*  pTxBuffer;
+
+                // exchange invalid node ID with local node ID
                 dllkInstance_g.aLastTargetNodeId[curReq_p] = dllkInstance_g.dllConfigParam.nodeId;
+
+                // Select the Tx buffer that should hold the async Tx message
+                switch (dllkInstance_g.aLastReqServiceId[curReq_p])
+                {
+                    case kDllReqServiceStatus:
+                        selectTxBuffer = DLLK_TXFRAME_STATUSRES + dllkInstance_g.curTxBufferOffsetStatusRes;
+                        pTxBuffer = &dllkInstance_g.pTxBuffer[selectTxBuffer];
+                        break;
+
+                    case kDllReqServiceIdent:
+                        selectTxBuffer = DLLK_TXFRAME_IDENTRES + dllkInstance_g.curTxBufferOffsetIdentRes;
+                        pTxBuffer = &dllkInstance_g.pTxBuffer[selectTxBuffer];
+                        break;
+
+                    case kDllReqServiceNmtRequest:
+                        selectTxBuffer = DLLK_TXFRAME_NMTREQ + dllkInstance_g.curTxBufferOffsetNmtReq;
+                        pTxBuffer = &dllkInstance_g.pTxBuffer[selectTxBuffer];
+                        pTxBufferState = &dllkInstance_g.aTxBufferStateNmtReq[dllkInstance_g.curTxBufferOffsetNmtReq];
+                        break;
+
+                    case kDllReqServiceUnspecified:
+                        selectTxBuffer = DLLK_TXFRAME_NONPLK + dllkInstance_g.curTxBufferOffsetNonPlk;
+                        pTxBuffer = &dllkInstance_g.pTxBuffer[selectTxBuffer];
+                        pTxBufferState = &dllkInstance_g.aTxBufferStateNonPlk[dllkInstance_g.curTxBufferOffsetNonPlk];
+                        break;
+
+                    default:
+                        pTxBuffer = NULL;
+                        break;
+                }
+
+                // If the async Tx buffer is not ready discard the request
+                if ((pTxBuffer == NULL) || ((pTxBufferState != NULL) && (*pTxBufferState != kDllkTxBufReady)))
+                {
+                    dllkInstance_g.aLastReqServiceId[curReq_p] = kDllReqServiceNo;
+                    dllkInstance_g.aLastTargetNodeId[curReq_p] = C_ADR_INVALID;
+                    return ret;
+                }
             }
 
             pNodeInfo = dllknode_getNodeInfo(dllkInstance_g.aLastTargetNodeId[curReq_p]);
@@ -1998,6 +2038,7 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
 #if (CONFIG_EDRV_AUTO_RESPONSE == FALSE)
     tEdrvTxBuffer*      pTxBuffer = NULL;
 #endif
+    tDllkTxBufState*    pTxBufferState = NULL;
     tDllReqServiceId reqServiceId;
     UINT                nodeId;
     UINT8               flag1;
@@ -2100,12 +2141,14 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
 #if (CONFIG_EDRV_AUTO_RESPONSE == FALSE)
                 // Auto-response is not available
                 pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NMTREQ + dllkInstance_g.curTxBufferOffsetNmtReq];
+                pTxBufferState = &dllkInstance_g.aTxBufferStateNmtReq[dllkInstance_g.curTxBufferOffsetNmtReq];
                 if (pTxBuffer->pBuffer != NULL)
                 {   // NmtRequest does exist
                     // check if frame is not empty and not being filled
-                    if (pTxBuffer->txFrameSize > DLLK_BUFLEN_FILLING)
+                    if (*pTxBufferState == kDllkTxBufReady)
                     {
                         // send NmtRequest
+                        *pTxBufferState = kDllkTxBufSending;
                         ret = edrv_sendTxBuffer(pTxBuffer);
                         if (ret != kErrorOk)
                             goto Exit;
@@ -2229,12 +2272,14 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
 #if (CONFIG_EDRV_AUTO_RESPONSE == FALSE)
                 // Auto-response is not available
                 pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONPLK + dllkInstance_g.curTxBufferOffsetNonPlk];
+                pTxBufferState = &dllkInstance_g.aTxBufferStateNonPlk[dllkInstance_g.curTxBufferOffsetNonPlk];
                 if (pTxBuffer->pBuffer != NULL)
                 {   // non-POWERLINK frame does exist
                     // check if frame is not empty and not being filled
-                    if (pTxBuffer->txFrameSize > DLLK_BUFLEN_FILLING)
+                    if (*pTxBufferState == kDllkTxBufReady)
                     {
                         // send non-POWERLINK frame
+                        *pTxBufferState = kDllkTxBufSending;
                         ret = edrv_sendTxBuffer(pTxBuffer);
                         if (ret != kErrorOk)
                             goto Exit;

@@ -68,8 +68,15 @@ ENDIF (CFG_KERNEL_STACK_DIRECTLINK OR CFG_KERNEL_STACK_USERSPACE_DAEMON)
 
 # Setup compile definitions depending on configuration
 IF (CFG_KERNEL_STACK_DIRECTLINK)
+    UNSET (CFG_DEMO_CN_CONSOLE_USE_SYNCTHREAD CACHE)
     ADD_DEFINITIONS(-DCONFIG_KERNELSTACK_DIRECTLINK)
+ELSE (CFG_KERNEL_STACK_DIRECTLINK)
+    OPTION (CFG_DEMO_CN_CONSOLE_USE_SYNCTHREAD "Create separate thread for syncronous data exchange" ON)
+    IF (CFG_DEMO_CN_CONSOLE_USE_SYNCTHREAD)
+        ADD_DEFINITIONS(-DCONFIG_USE_SYNCTHREAD)
+    ENDIF (CFG_DEMO_CN_CONSOLE_USE_SYNCTHREAD)
 ENDIF (CFG_KERNEL_STACK_DIRECTLINK)
+
 
 ################################################################################
 # Setup the architecture specific definitions

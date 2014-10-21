@@ -823,7 +823,7 @@ set_interface_property  rmii ENABLED true
 add_interface_port      rmii coe_rmii_txEnable export Output gphyportcount
 add_interface_port      rmii coe_rmii_txData export Output gphyportcount*2
 add_interface_port      rmii coe_rmii_rxError export Input gphyportcount
-add_interface_port      rmii coe_rmii_rxDataValid export Input gphyportcount
+add_interface_port      rmii coe_rmii_rxCrsDataValid export Input gphyportcount
 add_interface_port      rmii coe_rmii_rxData export Input gphyportcount*2
 
 # connection point mii

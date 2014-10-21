@@ -84,6 +84,7 @@ static BOOL    fTermSignalReceived_g = FALSE;
 typedef struct
 {
     tSyncCb         pfnSyncCb;
+    BOOL            fTerminate;
 } tSyncThreadInstance;
 
 //------------------------------------------------------------------------------
@@ -189,6 +190,7 @@ The function starts the thread used for synchronous data handling.
 void startSyncThread(tSyncCb pfnSync_p)
 {
     syncThreadInstance_l.pfnSyncCb = pfnSync_p;
+    syncThreadInstance_l.fTerminate = FALSE;
 
     // create sync thread
     if (pthread_create(&syncThreadId_l, NULL, &powerlinkSyncThread,
@@ -200,6 +202,20 @@ void startSyncThread(tSyncCb pfnSync_p)
 #if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 12)
     pthread_setname_np(syncThreadId_l, "oplkdemo-sync");
 #endif
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Stop synchronous data thread
+
+The function stops the thread used for synchronous data handling.
+
+\ingroup module_app_common
+*/
+//------------------------------------------------------------------------------
+void stopSyncThread(void)
+{
+    syncThreadInstance_l.fTerminate = TRUE;
 }
 #endif
 
@@ -237,10 +253,13 @@ void* powerlinkSyncThread(void* arg)
 {
     tSyncThreadInstance*     pSyncThreadInstance = (tSyncThreadInstance*)arg;
 
-    while (1)
+    PRINTF("Synchronous data thread is starting...\n");
+    while (!pSyncThreadInstance->fTerminate)
     {
         pSyncThreadInstance->pfnSyncCb();
     }
+    PRINTF("Synchronous data thread is terminating...\n");
+
     return NULL;
 }
 #endif

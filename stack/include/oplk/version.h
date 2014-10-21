@@ -56,7 +56,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define PLK_DEFINED_OBJ1018_VERSION PLK_OBJ1018_VERSION (2, 1, 0)
 #define PLK_DEFINED_STRING_VERSION  PLK_STRING_VERSION  (2, 1, 0)
 
-
 // -----------------------------------------------------------------------------
 #define PLK_PRODUCT_NAME            "OPLK"
 #define PLK_PRODUCT_VERSION         PLK_DEFINED_STRING_VERSION

@@ -368,6 +368,11 @@ static void shutdownPowerlink(void)
     UINT                i;
     fGsOff_l = FALSE;
 
+#if !defined(CONFIG_KERNELSTACK_DIRECTLINK) && defined(CONFIG_USE_SYNCTHREAD)
+    stopSyncThread();
+    msleep(100);
+#endif
+
     // halt the NMT state machine so the processing of POWERLINK frames stops
     oplk_execNmtCommand(kNmtEventSwitchOff);
 

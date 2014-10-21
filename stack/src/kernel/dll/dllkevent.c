@@ -550,6 +550,7 @@ static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtSta
     UINT            frameSize;
     UINT            frameCount;
     UINT            nextTxBufferOffset;
+    tDllkTxBufState* pTxBufferState = NULL;
 #if (CONFIG_EDRV_AUTO_RESPONSE != FALSE)
     UINT            filterEntry;
 #endif
@@ -561,6 +562,7 @@ static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtSta
         case kDllAsyncReqPrioNmt:    // NMT request priority
             nextTxBufferOffset = dllkInstance_g.curTxBufferOffsetNmtReq;
             pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NMTREQ + nextTxBufferOffset];
+            pTxBufferState = &dllkInstance_g.aTxBufferStateNmtReq[nextTxBufferOffset];
 #if (CONFIG_EDRV_AUTO_RESPONSE != FALSE)
             filterEntry = DLLK_FILTER_SOA_NMTREQ;
 #endif
@@ -569,6 +571,7 @@ static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtSta
         default:    // generic priority
             nextTxBufferOffset = dllkInstance_g.curTxBufferOffsetNonPlk;
             pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONPLK + nextTxBufferOffset];
+            pTxBufferState = &dllkInstance_g.aTxBufferStateNonPlk[nextTxBufferOffset];
 #if (CONFIG_EDRV_AUTO_RESPONSE != FALSE)
             filterEntry = DLLK_FILTER_SOA_NONPLK;
 #endif
@@ -578,9 +581,9 @@ static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtSta
     if (pTxBuffer->pBuffer != NULL)
     {   // NmtRequest or non-POWERLINK frame does exist
         // check if frame is empty and not being filled
-        if (pTxBuffer->txFrameSize == DLLK_BUFLEN_EMPTY)
+        if (*pTxBufferState == kDllkTxBufEmpty)
         {
-            pTxBuffer->txFrameSize = DLLK_BUFLEN_FILLING;      // mark Tx buffer as filling is in process
+            *pTxBufferState = kDllkTxBufFilling;              // mark Tx buffer as filling is in process
             frameSize = pTxBuffer->maxBufferSize;            // set max buffer size as input parameter
 
             // copy frame from shared loop buffer to Tx buffer
@@ -593,6 +596,7 @@ static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtSta
                     goto Exit;
 
                 pTxBuffer->txFrameSize = frameSize;    // set buffer valid
+                *pTxBufferState = kDllkTxBufReady;
 
 #if (CONFIG_EDRV_AUTO_RESPONSE != FALSE)
                 if ((nmtState_p & (NMT_TYPE_MASK | NMT_SUPERSTATE_MASK)) == (NMT_TYPE_CS | NMT_CS_PLKMODE))
@@ -611,7 +615,20 @@ static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtSta
             else if (ret == kErrorDllAsyncTxBufferEmpty)
             {   // empty Tx buffer is not a real problem so just ignore it
                 ret = kErrorOk;
-                pTxBuffer->txFrameSize = DLLK_BUFLEN_EMPTY;    // mark Tx buffer as empty
+
+                *pTxBufferState = kDllkTxBufEmpty;    // mark Tx buffer as empty
+
+#if (CONFIG_EDRV_AUTO_RESPONSE != FALSE)
+                if ((nmtState_p & (NMT_TYPE_MASK | NMT_SUPERSTATE_MASK)) == (NMT_TYPE_CS | NMT_CS_PLKMODE))
+                {
+                    // disable corresponding Rx filter
+                    dllkInstance_g.aFilter[filterEntry].fEnable = FALSE;
+                    ret = edrv_changeRxFilter(dllkInstance_g.aFilter, DLLK_FILTER_COUNT,
+                                           filterEntry, EDRV_FILTER_CHANGE_STATE);
+                    if (ret != kErrorOk)
+                        goto Exit;
+                }
+#endif
             }
             else
             {
@@ -624,21 +641,22 @@ static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtSta
     {   // send frame immediately
         if (pTxFrame != NULL)
         {   // frame is present - padding is done by Edrv or ethernet controller
+            *pTxBufferState = kDllkTxBufSending;
             ret = edrv_sendTxBuffer(pTxBuffer);
         }
         else
         {   // no frame moved to TxBuffer
 
             // check if TxBuffers contain unsent frames
-            if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NMTREQ +
-                                         dllkInstance_g.curTxBufferOffsetNmtReq].txFrameSize > DLLK_BUFLEN_EMPTY)
+            if (dllkInstance_g.aTxBufferStateNmtReq[dllkInstance_g.curTxBufferOffsetNmtReq] == kDllkTxBufReady)
             {   // NMT request Tx buffer contains a frame
+                dllkInstance_g.aTxBufferStateNmtReq[dllkInstance_g.curTxBufferOffsetNmtReq] = kDllkTxBufSending;
                 ret = edrv_sendTxBuffer(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NMTREQ +
                                                               dllkInstance_g.curTxBufferOffsetNmtReq]);
             }
-            else if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONPLK +
-                                              dllkInstance_g.curTxBufferOffsetNonPlk].txFrameSize > DLLK_BUFLEN_EMPTY)
+            else if (dllkInstance_g.aTxBufferStateNonPlk[dllkInstance_g.curTxBufferOffsetNonPlk] == kDllkTxBufReady)
             {   // non-POWERLINK Tx buffer contains a frame
+                dllkInstance_g.aTxBufferStateNonPlk[dllkInstance_g.curTxBufferOffsetNonPlk] = kDllkTxBufSending;
                 ret = edrv_sendTxBuffer(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONPLK +
                                                               dllkInstance_g.curTxBufferOffsetNonPlk]);
             }
@@ -655,8 +673,7 @@ static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtSta
         ret = dllkcal_getAsyncTxCount(&asyncReqPriority_p, &frameCount);
         if (asyncReqPriority_p == kDllAsyncReqPrioNmt)
         {   // non-empty FIFO with hightest priority is for NMT requests
-            if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NMTREQ +
-                                         dllkInstance_g.curTxBufferOffsetNmtReq].txFrameSize > DLLK_BUFLEN_EMPTY)
+            if (dllkInstance_g.aTxBufferStateNmtReq[dllkInstance_g.curTxBufferOffsetNmtReq] == kDllkTxBufReady)
             {   // NMT request Tx buffer contains a frame
                 // add one more frame
                 frameCount++;
@@ -664,15 +681,13 @@ static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtSta
         }
         else
         {   // non-empty FIFO with highest priority is for generic frames
-            if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NMTREQ +
-                                         dllkInstance_g.curTxBufferOffsetNmtReq].txFrameSize > DLLK_BUFLEN_EMPTY)
+            if (dllkInstance_g.aTxBufferStateNmtReq[dllkInstance_g.curTxBufferOffsetNmtReq] == kDllkTxBufReady)
             {   // NMT request Tx buffer contains a frame
                 // use NMT request FIFO, because of higher priority
                 frameCount = 1;
                 asyncReqPriority_p = kDllAsyncReqPrioNmt;
             }
-            else if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONPLK +
-                                              dllkInstance_g.curTxBufferOffsetNonPlk].txFrameSize > DLLK_BUFLEN_EMPTY)
+            else if (dllkInstance_g.aTxBufferStateNonPlk[dllkInstance_g.curTxBufferOffsetNonPlk] == kDllkTxBufReady)
             {   // non-POWERLINK Tx buffer contains a frame
                 // use NMT request FIFO, because of higher priority
                 // add one more frame
