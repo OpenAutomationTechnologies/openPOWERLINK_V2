@@ -48,7 +48,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <xil_io.h>
 #include <xil_cache.h>
 #include <lock.h>
-
+#ifdef __ZYNQ__
+// Required to include UART redirection for Zynq Microblaze
+#include <mb_uart.h>
+#endif
 #include <oplk/basictypes.h>
 
 #define ROM_INIT                // variables will be initialized directly in ROM (means no copy from RAM in startup)

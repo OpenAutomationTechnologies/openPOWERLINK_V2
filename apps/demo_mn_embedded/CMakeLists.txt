@@ -44,6 +44,8 @@ INCLUDE(../common/cmake/options.cmake)
 SET(OBJDICT CiA302-4_MN)              # Set object dictionary to use
 FIND_OPLK_LIBRARY("mn")
 
+SET(CFG_CDC_ON_SD ON CACHE BOOL "CDC on external SDCARD")
+
 # Set generic sources and include directories for this demo
 SET(DEMO_SOURCES
     ${DEMO_SOURCE_DIR}/main.c
@@ -64,6 +66,8 @@ INCLUDE_DIRECTORIES(
 
 IF (CMAKE_SYSTEM_NAME STREQUAL "Generic" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "Microblaze")
     include(microblaze.cmake)
+ELSEIF (CMAKE_SYSTEM_NAME STREQUAL "Generic" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "ARM_Xilinx")
+    include(xilinx-arm.cmake)
 ELSE ()
     MESSAGE(FATAL_ERROR "System ${CMAKE_SYSTEM_NAME} with processor ${CMAKE_SYSTEM_PROCESSOR} is not supported!")
 ENDIF ()
@@ -72,6 +76,10 @@ SET(EXECUTABLE_NAME "${PROJECT_NAME}${ARCH_EXE_SUFFIX}")
 
 ################################################################################
 # Setup compile definitions depending on configuration
+
+IF(CFG_CDC_ON_SD)
+    ADD_DEFINITIONS(-DCONFIG_CDC_ON_SD)
+ENDIF()
 
 IF (CFG_KERNEL_STACK_DIRECTLINK)
     ADD_DEFINITIONS(-DCONFIG_KERNELSTACK_DIRECTLINK)
@@ -94,7 +102,9 @@ TARGET_LINK_LIBRARIES(${EXECUTABLE_NAME} ${ARCH_LIBRARIES})
 
 ################################################################################
 # Post Build targets
-IF (CMAKE_SYSTEM_NAME STREQUAL "Generic" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "Microblaze")
+IF (CMAKE_SYSTEM_NAME STREQUAL "Generic" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "ARM_Xilinx")
+    INCLUDE(zynqapppostactions)
+ELSEIF (CMAKE_SYSTEM_NAME STREQUAL "Generic" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "Microblaze")
    INCLUDE(microblazeapppostactions)
 ENDIF ()
 

@@ -1,0 +1,15 @@
+
+//////////////////////////////////////////////////////////////
+// ROM Image for multi SDCARD boot for Powerlink MN
+// This will load Powelrink Powerlink Stack to the memory address
+// 0x30000000 and Application to base 0x00000000 from SDCARD
+///////////////////////////////////////////////////////////////////
+
+the_ROM_image:
+{
+
+        [bootloader]        zynq-fsbl.elf
+                            download.bit
+                            demo_mn_embedded.elf
+        [load = 0x30000000] oplkdrv_daemon.bin
+}

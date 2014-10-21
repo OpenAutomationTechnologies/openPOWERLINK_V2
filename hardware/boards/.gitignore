@@ -38,3 +38,5 @@ synthesis/
 *.make
 *.filters
 *.gui
+*.xdc
+*.ucf

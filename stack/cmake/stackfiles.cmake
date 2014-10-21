@@ -119,6 +119,10 @@ SET(CTRL_UCAL_HOSTIF_SOURCES
     ${USER_SOURCE_DIR}/ctrl/ctrlucal-hostif.c
     )
 
+SET(CTRL_UCAL_DUALPROCSHM_SOURCES
+    ${USER_SOURCE_DIR}/ctrl/ctrlucal-noosdual.c
+    )
+
 ################################################################################
 # User DLL CAL sources
 
@@ -149,6 +153,10 @@ SET(ERRHND_UCAL_HOSTIF_SOURCES
     ${USER_SOURCE_DIR}/errhnd/errhnducal-hostif.c
     )
 
+SET(ERRHND_UCAL_DUALPROCSHM_SOURCES
+    ${USER_SOURCE_DIR}/errhnd/errhnducal-noosdual.c
+    )
+
 ################################################################################
 # User event CAL sources
 
@@ -176,6 +184,11 @@ SET(EVENT_UCAL_NOOSHOSTIF_SOURCES
     ${USER_SOURCE_DIR}/event/eventucal-nooshostif.c
     )
 
+SET(EVENT_UCAL_DUALPROCSHM_SOURCES
+    ${USER_SOURCE_DIR}/event/eventucal-noosdual.c
+    ${USER_SOURCE_DIR}/event/eventucalintf-circbuf.c
+    )
+
 ################################################################################
 # User PDO CAL sources
 SET(PDO_UCAL_LOCAL_SOURCES
@@ -196,6 +209,11 @@ SET(PDO_UCAL_LINUXMMAPIOCTL_SOURCES
 SET(PDO_UCAL_HOSTIF_SOURCES
     ${USER_SOURCE_DIR}/pdo/pdoucalsync-hostif.c
     ${USER_SOURCE_DIR}/pdo/pdoucalmem-hostif.c
+    )
+
+SET(PDO_UCAL_DUALPROCSHM_SOURCES
+    ${USER_SOURCE_DIR}/pdo/pdoucalmem-noosdual.c
+    ${USER_SOURCE_DIR}/pdo/pdoucalsync-noosdual.c
     )
 
 ################################################################################
@@ -242,6 +260,10 @@ SET(CTRL_KCAL_HOSTIF_SOURCES
     ${KERNEL_SOURCE_DIR}/ctrl/ctrlkcal-hostif.c
     )
 
+SET(CTRL_KCAL_DUALPROCSHM_SOURCES
+    ${KERNEL_SOURCE_DIR}/ctrl/ctrlkcal-noosdual.c
+    )
+
 ################################################################################
 # Kernel DLL CAL sources
 
@@ -266,6 +288,10 @@ SET(ERRHND_KCAL_LOCAL_SOURCES
 
 SET(ERRHND_KCAL_HOSTIF_SOURCES
     ${KERNEL_SOURCE_DIR}/errhnd/errhndkcal-hostif.c
+    )
+
+SET(ERRHND_KCAL_DUALPROCSHM_SOURCES
+    ${KERNEL_SOURCE_DIR}/errhnd/errhndkcal-noosdual.c
     )
 
 ################################################################################
@@ -296,6 +322,11 @@ SET(EVENT_KCAL_NOOSHOSTIF_SOURCES
     ${KERNEL_SOURCE_DIR}/event/eventkcal-nooshostif.c
     )
 
+SET(EVENT_KCAL_DUALPROCSHM_SOURCES
+    ${KERNEL_SOURCE_DIR}/event/eventkcalintf-circbuf.c
+    ${KERNEL_SOURCE_DIR}/event/eventkcal-noosdual.c
+    )
+
 ################################################################################
 # Kernel PDO CAL sources
 
@@ -317,6 +348,11 @@ SET(PDO_KCAL_LINUXKERNEL_SOURCES
 SET(PDO_KCAL_HOSTIF_SOURCES
     ${KERNEL_SOURCE_DIR}/pdo/pdokcalmem-hostif.c
     ${KERNEL_SOURCE_DIR}/pdo/pdokcalsync-hostif.c
+    )
+
+SET(PDO_KCAL_DUALPROCSHM_SOURCES
+    ${KERNEL_SOURCE_DIR}/pdo/pdokcalmem-noosdual.c
+    ${KERNEL_SOURCE_DIR}/pdo/pdokcalsync-noosdual.c
     )
 
 ################################################################################
@@ -400,6 +436,11 @@ SET(CIRCBUF_NOOSHOSTIF_SOURCES
     ${COMMON_SOURCE_DIR}/circbuf/circbuf-nooshostif.c
     )
 
+SET(CIRCBUF_DUALPROCSHM_SOURCES
+    ${COMMON_SOURCE_DIR}/circbuf/circbuffer.c
+    ${COMMON_SOURCE_DIR}/circbuf/circbuf-noosdual.c
+    )
+
 ################################################################################
 # Memory Mapping sources
 ################################################################################
@@ -446,6 +487,13 @@ SET(TARGET_MICROBLAZE_OPENMAC_SOURCES
     ${ARCH_SOURCE_DIR}/xilinx_microblaze/openmac-microblaze.c
     )
 
+SET(TARGET_XILINX_ARM_SOURCES
+    ${ARCH_SOURCE_DIR}/xilinx_arm/target-arm.c
+    )
+
+SET(TARGET_XILINX_ARM_DUAL_SOURCES
+    ${ARCH_SOURCE_DIR}/xilinx_arm/lock-dualprocnoos.c
+    )
 ################################################################################
 # Architecture specific sources
 ################################################################################

@@ -50,7 +50,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <xintc.h>         // interrupt controller
 
 #include <common/target.h>
-
+#ifdef __ZYNQ__
+#include <mb_uart.h>
+#endif
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
@@ -190,7 +192,9 @@ tOplkError target_init(void)
 
     // initialize system timer
     timer_init();
-
+#ifdef __ZYNQ__
+    uart_init();
+#endif
     // enable the interrupt master
     enableInterruptMaster();
 

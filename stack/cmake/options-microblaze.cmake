@@ -50,7 +50,7 @@ OPTION(CFG_COMPILE_LIB_CN                           "Compile openPOWERLINK CN li
 # Options for MN libraries
 OPTION(CFG_COMPILE_LIB_MNAPP_HOSTIF     "Compile openPOWERLINK MN host/application library" OFF)
 OPTION(CFG_COMPILE_LIB_MNDRV_HOSTIF     "Compile openPOWERLINK MN driver library" OFF)
-
+OPTION(CFG_COMPILE_LIB_MN_DRV_DUALPROCSHM           "Compile openPOWERLINK MN driver library using dual procesor shared memory" OFF)
 ################################################################################
 # Add library subdirectories and hardware library path
 
@@ -81,3 +81,13 @@ IF (CFG_COMPILE_LIB_MNDRV_HOSTIF)
 ELSE ()
     UNSET(CFG_COMPILE_LIB_MN_DRV_HOSTIF_HW_LIB_DIR CACHE)
 ENDIF ()
+IF (CFG_COMPILE_LIB_MN_DRV_DUALPROCSHM)
+    # Path to the hardware library folder of your board example
+    SET(CFG_COMPILE_LIB_MN_HW_LIB_DIR ${XIL_HW_LIB_DIR}/xilinx-z702/mn-dual-shmem-gpio
+            CACHE PATH "Path to the hardware library folder for the dual processor MN library")
+
+    ADD_SUBDIRECTORY(proj/generic/liboplkmndrv-dualprocshm)
+ELSE ()
+    UNSET(CFG_COMPILE_LIB_MN_HW_PATH CACHE)
+ENDIF ()
+
