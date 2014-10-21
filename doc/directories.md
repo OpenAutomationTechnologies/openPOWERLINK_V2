@@ -11,6 +11,7 @@ Directory                     | Description
 ----------------------------- | -----------------------------------------------
 apps                          | Demo applications for evaluating the openPOWERLINK stack
 bin                           | Installation directory for binaries (drivers and applications)
+cmake                         | Common files for the CMake build tool
 contrib                       | Additional libraries used by the openPOWERLINK stack
 doc                           | Documentation of the openPOWERLINK stack
 drivers                       | openPOWERLINK drivers (kernel layer of a split-stack design)
