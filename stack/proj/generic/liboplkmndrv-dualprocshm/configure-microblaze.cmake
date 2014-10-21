@@ -62,6 +62,11 @@ SET(LIB_ARCH_SOURCES
 
 ################################################################################
 # Set architecture specific includes
+
+IF(${CFG_MB_UART} STREQUAL "TRUE")
+    INCLUDE_DIRECTORIES(${OPLK_BASE_DIR}/hardware/boards/xilinx-z702/common/drivers/mb_uart/include)
+ENDIF()
+
 INCLUDE_DIRECTORIES(
                     ${XIL_LIB_BSP_INC}
                     ${ARCH_SOURCE_DIR}/xilinx_microblaze

@@ -51,7 +51,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <common/target.h>
 #ifdef __ZYNQ__
-#include "xil_io.h"
+#include <mb_uart.h>
 #endif
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -91,26 +91,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#ifdef __ZYNQ__
-// base address of PS Uart1
-#define UART_BASE    0xE0001000
-/* Write to memory location or register */
-#define X_mWriteReg(BASE_ADDRESS, RegOffset, data) \
-    *(unsigned int*)(BASE_ADDRESS + RegOffset) = ((unsigned int) data);
-/* Read from memory location or register */
-#define X_mReadReg(BASE_ADDRESS, RegOffset) \
-    *(unsigned int*)(BASE_ADDRESS + RegOffset);
 
-#define XUartChanged_IsTransmitFull(BaseAddress) \
-    ((Xil_In32((BaseAddress) + 0x2C) &           \
-      0x10) == 0x10)
-
-#define XUartChanged_SendByte(BAddr, Data)                 \
-    u32 u32BaseAddress = BAddr;                            \
-    u8    u8Data = Data;                                   \
-    while (XUartChanged_IsTransmitFull(u32BaseAddress)) ;  \
-    X_mWriteReg(u32BaseAddress, 0x30, u8Data);
-#endif
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
@@ -125,9 +106,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 static void enableInterruptMaster(void);
 static void disableInterruptMaster(void);
-#ifdef __ZYNQ__
-void        print(char*str);
-#endif
+
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
 //============================================================================//
@@ -213,7 +192,9 @@ tOplkError target_init(void)
 
     // initialize system timer
     timer_init();
-
+#ifdef __ZYNQ__
+    uart_init();
+#endif
     // enable the interrupt master
     enableInterruptMaster();
 
@@ -353,27 +334,5 @@ static void disableInterruptMaster(void)
     //disable global interrupt master
     XIntc_MasterDisable(TGT_INTC_BASE);
 }
-
-#ifdef __ZYNQ__
-//------------------------------------------------------------------------------
-/**
-\brief Re-definition of standard BSP outbyte for Zynq
-
-This will redirect prints from Microblaze to the common UART
-device on Zynq platform which is not handled by the generated BSP.
-
-\param  char_p            Character too be sent
-
-\ingroup module_target
-
-*/
-//------------------------------------------------------------------------------
-
-void outbyte(char char_p)
-{
-    XUartChanged_SendByte(UART_BASE, char_p);
-}
-
-#endif
 
 ///\}

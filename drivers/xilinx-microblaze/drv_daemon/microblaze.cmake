@@ -130,6 +130,23 @@ ELSEIF (CFG_KERNEL_STACK_PCP_HOSTIF_MODULE)
 ENDIF()
 
 ################################################################################
+# Find driver mb-uart
+IF (CFG_MB_UART STREQUAL "TRUE")
+    IF (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+        SET(LIB_MB_UART_NAME "mb-uart_d")
+    ELSE ()
+        SET(LIB_MB_UART_NAME "mb-uart")
+    ENDIF ()
+    
+    UNSET(XIL_LIB_MB_UART)
+    MESSAGE(STATUS "Searching for LIBRARY ${LIB_MB_UART_NAME} in ${CFG_HW_LIB_DIR}/libmb-uart")
+    FIND_LIBRARY(XIL_LIB_MB_UART NAMES ${LIB_MB_UART_NAME}
+                            HINTS ${CFG_HW_LIB_DIR}/libmb-uart
+                )
+    INCLUDE_DIRECTORIES(${CFG_HW_LIB_DIR}/libmb-uart/include)
+ENDIF()
+
+################################################################################
 # Set architecture specific sources and include directories
 
 SET(DEMO_ARCH_SOURCES
@@ -155,6 +172,15 @@ SET(ARCH_LINKER_FLAGS "${XIL_PCP_PLAT_ENDIAN} -mcpu=${CFG_PCP_CPU_VERSION} -Wl,-
 
 ################################################################################
 # Set architecture specific libraries
+IF (CFG_MB_UART STREQUAL "TRUE")
+
+    IF (NOT ${XIL_LIB_MB_UART} STREQUAL "XIL_LIB_MB_UART-NOTFOUND")
+        SET(ARCH_LIBRARIES ${ARCH_LIBRARIES} ${XIL_LIB_MB_UART})
+    ELSE ()
+        MESSAGE(FATAL_ERROR "${LIB_MB_UART_NAME} for board ${CFG_DEMO_BOARD_NAME} and demo ${CFG_DEMO_NAME} not found! Check the parameter CMAKE_BUILD_TYPE to confirm your 'Debug' or 'Release' settings")
+    ENDIF()
+
+ENDIF()
 
 IF (NOT ${XIL_LIB_BSP} STREQUAL "XIL_LIB_BSP-NOTFOUND" )
     SET(ARCH_LIBRARIES  ${ARCH_LIBRARIES} ${XIL_LIB_BSP})
