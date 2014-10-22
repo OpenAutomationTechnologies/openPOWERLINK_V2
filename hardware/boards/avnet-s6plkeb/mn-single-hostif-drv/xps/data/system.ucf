@@ -85,7 +85,7 @@ Net axi_openmac_0_oSmi_nPhyRst_pin LOC = D6 | IOSTANDARD = LVCMOS33 | TIG;
 Net axi_openmac_0_oRmii_clk_pin<0> LOC = D9 | IOSTANDARD = LVCMOS33;
 Net axi_openmac_0_iRmii_rxData_pin<0> LOC = B4 | IOSTANDARD = LVCMOS33 | TNM = PHY_RX;
 Net axi_openmac_0_iRmii_rxData_pin<1> LOC = A3 | IOSTANDARD = LVCMOS33 | TNM = PHY_RX;
-Net axi_openmac_0_iRmii_rxDataValid_pin<0> LOC = B3 | IOSTANDARD = LVCMOS33 | PULLUP | TNM = PHY_RX;
+Net axi_openmac_0_iRmii_rxCrsDataValid_pin<0> LOC = B3 | IOSTANDARD = LVCMOS33 | PULLUP | TNM = PHY_RX;
 Net axi_openmac_0_oRmii_txData_pin<0> LOC = C5 | IOSTANDARD = LVCMOS33 | TNM = PHY_TX;
 Net axi_openmac_0_oRmii_txData_pin<1> LOC = C6 | IOSTANDARD = LVCMOS33 | TNM = PHY_TX;
 Net axi_openmac_0_oRmii_txEnable_pin<0> LOC = A4 | IOSTANDARD = LVCMOS33 | TNM = PHY_TX;
@@ -96,7 +96,7 @@ Net axi_openmac_0_oRmii_txEnable_pin<0> LOC = A4 | IOSTANDARD = LVCMOS33 | TNM =
 Net axi_openmac_0_oRmii_clk_pin<1> LOC = A9 | IOSTANDARD = LVCMOS33;
 Net axi_openmac_0_iRmii_rxData_pin<2> LOC = A6 | IOSTANDARD = LVCMOS33 | TNM = PHY_RX;
 Net axi_openmac_0_iRmii_rxData_pin<3> LOC = B6 | IOSTANDARD = LVCMOS33 | TNM = PHY_RX;
-Net axi_openmac_0_iRmii_rxDataValid_pin<1> LOC = A5 | IOSTANDARD = LVCMOS33 | PULLUP | TNM = PHY_RX;
+Net axi_openmac_0_iRmii_rxCrsDataValid_pin<1> LOC = A5 | IOSTANDARD = LVCMOS33 | PULLUP | TNM = PHY_RX;
 Net axi_openmac_0_oRmii_txData_pin<2> LOC = B8 | IOSTANDARD = LVCMOS33 | TNM = PHY_TX;
 Net axi_openmac_0_oRmii_txData_pin<3> LOC = A8 | IOSTANDARD = LVCMOS33 | TNM = PHY_TX;
 Net axi_openmac_0_oRmii_txEnable_pin<1> LOC = A7 | IOSTANDARD = LVCMOS33 | TNM = PHY_TX;

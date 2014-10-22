@@ -38,7 +38,7 @@
  PORT fpga_0_RS232_TX_pin = fpga_0_RS232_TX, DIR = O
  PORT fpga_0_RS232_RX_pin = fpga_0_RS232_RX, DIR = I
  PORT axi_openmac_0_oRmii_clk_pin = axi_openmac_0_oRmii_clk, DIR = O, VEC = [1:0]
- PORT axi_openmac_0_iRmii_rxDataValid_pin = axi_openmac_0_iRmii_rxDataValid, DIR = I, VEC = [1:0]
+ PORT axi_openmac_0_iRmii_rxCrsDataValid_pin = axi_openmac_0_iRmii_rxCrsDataValid, DIR = I, VEC = [1:0]
  PORT axi_openmac_0_iRmii_rxData_pin = axi_openmac_0_iRmii_rxData, DIR = I, VEC = [3:0]
  PORT axi_openmac_0_oRmii_txEnable_pin = axi_openmac_0_oRmii_txEnable, DIR = O, VEC = [1:0]
  PORT axi_openmac_0_oRmii_txData_pin = axi_openmac_0_oRmii_txData, DIR = O, VEC = [3:0]
@@ -338,7 +338,7 @@ BEGIN axi_openmac
  PORT S_AXI_MAC_REG_ACLK = clk_100_0000MHzPLL0
  PORT M_AXI_MAC_DMA_ACLK = clk_100_0000MHzPLL0
  PORT oRmii_clk = axi_openmac_0_oRmii_clk
- PORT iRmii_rxDataValid = axi_openmac_0_iRmii_rxDataValid
+ PORT iRmii_rxCrsDataValid = axi_openmac_0_iRmii_rxCrsDataValid
  PORT iRmii_rxData = axi_openmac_0_iRmii_rxData
  PORT oRmii_txEnable = axi_openmac_0_oRmii_txEnable
  PORT oRmii_txData = axi_openmac_0_oRmii_txData
