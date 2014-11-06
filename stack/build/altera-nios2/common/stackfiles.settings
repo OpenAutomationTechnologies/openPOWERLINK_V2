@@ -62,6 +62,7 @@ ${USER_SOURCE_DIR}/cfmu.c \
 
 USER_SOURCES="\
 ${USER_SOURCE_DIR}/api/generic.c \
+${USER_SOURCE_DIR}/api/sdotest.c \
 ${USER_SOURCE_DIR}/api/processimage.c \
 ${USER_SOURCE_DIR}/obd/obd.c \
 ${USER_SOURCE_DIR}/obd/obdcreate.c \
@@ -76,10 +77,14 @@ ${USER_SOURCE_DIR}/nmt/syncu.c \
 ${USER_SOURCE_DIR}/pdo/pdou.c \
 ${USER_SOURCE_DIR}/pdo/pdoucal.c \
 ${USER_SOURCE_DIR}/pdo/pdoucal-triplebufshm.c \
-${USER_SOURCE_DIR}/sdo/sdocom.c \
+${USER_SOURCE_DIR}/sdo/sdocom-std.c \
 ${USER_SOURCE_DIR}/sdo/sdoseq.c \
 ${USER_SOURCE_DIR}/sdo/sdoasnd.c \
 ${USER_SOURCE_DIR}/sdo/sdoudp.c \
+${USER_SOURCE_DIR}/sdo/sdocom-dummy.c \
+${USER_SOURCE_DIR}/sdo/sdotest-com.c \
+${USER_SOURCE_DIR}/sdo/sdotest-seq.c \
+${USER_SOURCE_DIR}/sdo/sdocom.c \
 ${USER_SOURCE_DIR}/errhnd/errhndu.c \
 ${USER_SOURCE_DIR}/ctrl/ctrlu.c \
 ${USER_SOURCE_DIR}/ledu.c \

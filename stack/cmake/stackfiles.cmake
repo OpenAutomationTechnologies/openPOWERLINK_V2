@@ -77,6 +77,7 @@ SET(USER_MN_SOURCES
 SET(USER_SOURCES
     ${USER_SOURCE_DIR}/api/generic.c
     ${USER_SOURCE_DIR}/api/processimage.c
+    ${USER_SOURCE_DIR}/api/sdotest.c
     ${USER_SOURCE_DIR}/obd/obd.c
     ${USER_SOURCE_DIR}/obd/obdcreate.c
     ${USER_SOURCE_DIR}/dll/dllucal.c
@@ -90,7 +91,11 @@ SET(USER_SOURCES
     ${USER_SOURCE_DIR}/pdo/pdou.c
     ${USER_SOURCE_DIR}/pdo/pdoucal.c
     ${USER_SOURCE_DIR}/pdo/pdoucal-triplebufshm.c
+    ${USER_SOURCE_DIR}/sdo/sdotest-com.c
+    ${USER_SOURCE_DIR}/sdo/sdotest-seq.c
+    ${USER_SOURCE_DIR}/sdo/sdocom-dummy.c
     ${USER_SOURCE_DIR}/sdo/sdocom.c
+    ${USER_SOURCE_DIR}/sdo/sdocom-std.c
     ${USER_SOURCE_DIR}/sdo/sdoseq.c
     ${USER_SOURCE_DIR}/sdo/sdoasnd.c
     ${USER_SOURCE_DIR}/sdo/sdoudp.c
@@ -581,6 +586,7 @@ SET(USER_HEADERS
     ${STACK_INCLUDE_DIR}/user/pdou.h
     ${STACK_INCLUDE_DIR}/user/pdoucal.h
     ${STACK_INCLUDE_DIR}/user/sdocom.h
+    ${STACK_INCLUDE_DIR}/user/sdotest.h
     ${STACK_INCLUDE_DIR}/user/sdoseq.h
     ${STACK_INCLUDE_DIR}/user/sdoal.h
     ${STACK_INCLUDE_DIR}/user/sdoasnd.h

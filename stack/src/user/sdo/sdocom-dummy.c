@@ -1,13 +1,13 @@
 /**
 ********************************************************************************
-\file   sdocom.c
+\file   sdocom-dummy.c
 
-\brief  SDO command layer wrapper
+\brief  SDO Dummy functions
 
-This file manages the available SDO stacks. The function calls are forwarded
-to the SDO stack defined in the api init parameters.
+This file contains the implementation of the SDO Dummy Command Layer.
+It is used to avoid SDO access by other modules (i.e. cfm).
 
-\ingroup module_sdocom
+\ingroup module_sdocom_dummy
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -43,10 +43,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <user/sdocom.h>
 
-//============================================================================//
-//            G L O B A L   D E F I N I T I O N S                             //
-//============================================================================//
-
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
@@ -58,8 +54,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // global function prototypes
 //------------------------------------------------------------------------------
-tSdoComFunctions* sdocomdummy_getInterface(void);
-tSdoComFunctions* sdocomstandard_getInterface(void);
 
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //
@@ -74,13 +68,41 @@ tSdoComFunctions* sdocomstandard_getInterface(void);
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// local vars
-//------------------------------------------------------------------------------
-static tSdoComFunctions* pSdoComInstance;
-
-//------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
+static tOplkError sdoInit(void);
+static tOplkError sdoAddInstance(void);
+static tOplkError sdoDelInstance(void);
+static tOplkError sdoDefineConnection(tSdoComConHdl* pSdoComConHdl_p, UINT targetNodeId_p,
+                                       tSdoType protType_p);
+static tOplkError sdoInitTransferByIndex(tSdoComTransParamByIndex* pSdoComTransParam_p);
+static tOplkError sdoUndefineConnection(tSdoComConHdl sdoComConHdl_p);
+static tOplkError sdoGetState(tSdoComConHdl sdoComConHdl_p, tSdoComFinished* pSdoComFinished_p);
+static UINT       sdoGetNodeId(tSdoComConHdl sdoComConHdl_p);
+static tOplkError sdoAbortTransfer(tSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p);
+
+//------------------------------------------------------------------------------
+// local vars
+//------------------------------------------------------------------------------
+
+/**
+\brief Structure for the SDO command layer dummy function implementation
+
+This structure provides the SDO command layer function interface for
+the dummy implementation.
+*/
+static tSdoComFunctions dummySdoFunctions =
+{
+    sdoInit,
+    sdoAddInstance,
+    sdoDelInstance,
+    sdoDefineConnection,
+    sdoInitTransferByIndex,
+    sdoUndefineConnection,
+    sdoGetState,
+    sdoGetNodeId,
+    sdoAbortTransfer,
+};
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -88,216 +110,193 @@ static tSdoComFunctions* pSdoComInstance;
 
 //------------------------------------------------------------------------------
 /**
-\brief  Initialize SDO stack
+\brief  Get the function interface pointer
 
-The function initializes the SDO stack.
+This function returns a pointer to the function interface structure.
 
-\param stackType_p             variable that defines which SDO stack to use.
+\return The function returns a pointer to the local tSdoComFunctions structure
 
-\return The function returns a tOplkError error code.
-
-\ingroup module_sdocom
+\ingroup module_sdocom_dummy
 */
 //------------------------------------------------------------------------------
-tOplkError sdocom_init(UINT stackType_p)
+tSdoComFunctions* sdocomdummy_getInterface(void)
 {
-    tOplkError ret = kErrorOk;
+    return &dummySdoFunctions;
+}
 
-    switch (stackType_p)
-    {
-       case tOplkApiTestSdoCom:
-       case tOplkApiTestSdoSeq:
-            pSdoComInstance = sdocomdummy_getInterface();
-           break;
+//============================================================================//
+//            P R I V A T E   F U N C T I O N S                               //
+//============================================================================//
+/// \name Private Functions
+/// \{
 
-       default:
-       case tOplkApiStdSdoStack:
-            pSdoComInstance = sdocomstandard_getInterface();
-           break;
-    }
+//------------------------------------------------------------------------------
+/**
+\brief  Initialize SDO command layer module
 
-    ret = pSdoComInstance->pfnInit();
+This function does nothing, except returning kErrorOk.
 
-    return ret;
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError sdoInit(void)
+{
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Initialize SDO layer instance
+\brief  Add an instance of the SDO command layer module
 
-The function initializes the SDO layer
+This function does nothing, except returning kErrorOk.
 
 \return The function returns a tOplkError error code.
-
-\ingroup module_sdocom
 */
 //------------------------------------------------------------------------------
-tOplkError sdocom_addInstance(void)
+static tOplkError sdoAddInstance(void)
 {
-    tOplkError ret = kErrorOk;
-
-    ret = pSdoComInstance->pfnAddInstance();
-
-    return ret;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Delete SDO layer instance
+\brief  Delete an instance of the SDO command layer module
 
-The function deletes an instance of the SDO layer.
+This function does nothing, except returning kErrorOk.
 
 \return The function returns a tOplkError error code.
-
-\ingroup module_sdocom
 */
 //------------------------------------------------------------------------------
-tOplkError sdocom_delInstance(void)
+static tOplkError sdoDelInstance(void)
 {
-    tOplkError ret = kErrorOk;
-
-    ret = pSdoComInstance->pfnDelInstance();
-
-    return ret;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Initialize a SDO layer connection
+\brief  Define a command layer connection
 
-The function initializes a SDO layer connection. It tries to reuse an
-existing connection to the specified node.
+This function does nothing, except returning kErrorOk.
 
-\param  pSdoComConHdl_p         Pointer to store the layer connection
-                                handle.
-\param  targetNodeId_p          Node ID of the target to connect to.
-\param  sdoType_p               Type of the SDO connection.
+\param  pSdoComConHdl_p         Pointer to store the connection handle.
+\param  targetNodeId_p          The node ID to connect to.
+\param  protType_p              The protocol type to use for the connection
+                                (UDP and ASnd is supported)
 
 \return The function returns a tOplkError error code.
-
-\ingroup module_sdocom
 */
 //------------------------------------------------------------------------------
-tOplkError sdocom_defineConnection(tSdoComConHdl* pSdoComConHdl_p, UINT targetNodeId_p,
-                                   tSdoType sdoType_p)
+static tOplkError sdoDefineConnection(tSdoComConHdl* pSdoComConHdl_p,
+                                      UINT targetNodeId_p,
+                                      tSdoType protType_p)
 {
-    tOplkError ret = kErrorOk;
+    // Ignore unused parameters
+    UNUSED_PARAMETER(pSdoComConHdl_p);
+    UNUSED_PARAMETER(targetNodeId_p);
+    UNUSED_PARAMETER(protType_p);
 
-    ret = pSdoComInstance->pfnDefineCon(pSdoComConHdl_p, targetNodeId_p, sdoType_p);
-
-    return ret;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
 /**
 \brief  Initialize a transfer by index command
 
-The function initializes a "transfer by index" operation for a connection.
+This function does nothing, except returning kErrorOk.
 
 \param  pSdoComTransParam_p     Pointer to transfer command parameters
 
 \return The function returns a tOplkError error code.
-
-\ingroup module_sdocom
 */
 //------------------------------------------------------------------------------
-tOplkError sdocom_initTransferByIndex(tSdoComTransParamByIndex* pSdoComTransParam_p)
+static tOplkError sdoInitTransferByIndex(tSdoComTransParamByIndex* pSdoComTransParam_p)
 {
-    tOplkError ret = kErrorOk;
+    // Ignore unused parameters
+    UNUSED_PARAMETER(pSdoComTransParam_p);
 
-    ret = pSdoComInstance->pfnTransByIdx(pSdoComTransParam_p);
-
-    return ret;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Get remote node ID of connection
+\brief  Delete a command layer connection
 
-The function returns the node ID of the remote node of a connection.
+This function does nothing, except returning kErrorOk.
 
-\param  sdoComConHdl_p          Handle of connection.
+\param  sdoComConHdl_p          Handle of the connection to delete.
 
-\return The function returns the node ID of the remote node or C_ADR_INVALID
-        on error.
-
-\ingroup module_sdocom
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-UINT sdocom_getNodeId(tSdoComConHdl sdoComConHdl_p)
+static tOplkError sdoUndefineConnection(tSdoComConHdl sdoComConHdl_p)
 {
-    UINT node;
+    // Ignore unused parameters
+    UNUSED_PARAMETER(sdoComConHdl_p);
 
-    node = pSdoComInstance->pfnGetNodeId(sdoComConHdl_p);
-
-    return node;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
 /**
 \brief  Get command layer connection state
 
-The function returns the state of a command layer connection.
+This function does nothing, except returning kErrorOk.
 
 \param  sdoComConHdl_p          Handle of the command layer connection.
 \param  pSdoComFinished_p       Pointer to store connection information.
 
 \return The function returns a tOplkError error code.
-
-\ingroup module_sdocom
 */
 //------------------------------------------------------------------------------
-tOplkError sdocom_getState(tSdoComConHdl sdoComConHdl_p, tSdoComFinished* pSdoComFinished_p)
+static tOplkError sdoGetState(tSdoComConHdl sdoComConHdl_p,
+                              tSdoComFinished* pSdoComFinished_p)
 {
-    tOplkError ret = kErrorOk;
+    // Ignore unused parameters
+    UNUSED_PARAMETER(sdoComConHdl_p);
+    UNUSED_PARAMETER(pSdoComFinished_p);
 
-    ret = pSdoComInstance->pfnGetState(sdoComConHdl_p, pSdoComFinished_p);
+    return kErrorOk;
+}
 
-    return ret;
+//------------------------------------------------------------------------------
+/**
+\brief  Get remote node ID of connection
+
+This function does nothing, except returning C_ADR_INVALID
+
+\param  sdoComConHdl_p          Handle of connection.
+
+\return The function returns a C_ADR_INVALID error code.
+*/
+//------------------------------------------------------------------------------
+static UINT sdoGetNodeId(tSdoComConHdl sdoComConHdl_p)
+{
+    // Ignore unused parameters
+    UNUSED_PARAMETER(sdoComConHdl_p);
+
+    return C_ADR_INVALID;
 }
 
 //------------------------------------------------------------------------------
 /**
 \brief  Abort a SDO transfer
 
-The function aborts an SDO transfer.
+This function does nothing, except returning kErrorOk.
 
 \param  sdoComConHdl_p          Handle of the connection to abort.
 \param  abortCode_p             The abort code to use.
 
 \return The function returns a tOplkError error code.
-
-\ingroup module_sdocom
 */
 //------------------------------------------------------------------------------
-tOplkError sdocom_abortTransfer(tSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p)
+static tOplkError sdoAbortTransfer(tSdoComConHdl sdoComConHdl_p,
+                                   UINT32 abortCode_p)
 {
-    tOplkError ret = kErrorOk;
+    // Ignore unused parameters
+    UNUSED_PARAMETER(sdoComConHdl_p);
+    UNUSED_PARAMETER(abortCode_p);
 
-    ret = pSdoComInstance->pfnSdoAbort(sdoComConHdl_p, abortCode_p);
-
-    return ret;
+    return kErrorOk;
 }
 
-//------------------------------------------------------------------------------
-/**
-\brief  Delete a layer connection
-
-The function closes and deletes an existing layer connection.
-
-\param  sdoComConHdl_p          Connection handle of command layer connection
-                                to delete.
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_sdocom
-*/
-//------------------------------------------------------------------------------
-tOplkError sdocom_undefineConnection(tSdoComConHdl sdoComConHdl_p)
-{
-    tOplkError ret = kErrorOk;
-
-    ret = pSdoComInstance->pfnDeleteCon(sdoComConHdl_p);
-
-    return ret;
-}
+/// \}

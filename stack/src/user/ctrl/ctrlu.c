@@ -389,7 +389,7 @@ tOplkError ctrlu_initStack(tOplkApiInitParam* pInitParam_p)
 #if defined(CONFIG_INCLUDE_SDOS) || defined(CONFIG_INCLUDE_SDOC)
     // init sdo command layer
     DEBUG_LVL_CTRL_TRACE("Initialize SdoCom module...\n");
-    ret = sdocom_init();
+    ret = sdocom_init(pInitParam_p->sdoStackType);
     if (ret != kErrorOk)
     {
         goto Exit;

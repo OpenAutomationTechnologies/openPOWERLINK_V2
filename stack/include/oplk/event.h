@@ -102,6 +102,7 @@ typedef enum
     kEventTypeAsndRxInfo            = 0x29,     ///< Received ASnd frame for DLL user module (arg is pointer to tFrameInfo)
     kEventTypeReceivedPres          = 0x30,     ///< Received a PRes frame, which shall be forwarded to application (arg is pointer to tEventReceivedPres)
     kEventTypeRequPresForward       = 0x31,     ///< Request forwarding of a PRes frame to API layer (e.g. for conformance test)
+    kEventTypeSdoAsySend            = 0x32,     ///< SDO sequence layer event (for SDO command layer testing module)
 } tEventType;
 
 /**
@@ -126,6 +127,7 @@ typedef enum
     kEventSinkPdokCal               = 0x0C,     ///< events for PdokCal module
     kEventSinkGw309Ascii            = 0x0E,     ///< events for GW309ASCII module
     kEventSinkApi                   = 0x0F,     ///< events for API module
+    kEventSinkSdoTest               = 0x10,     ///< events for SDO testing module
 
     kEventSinkInvalid               = 0xFF      ///< Identifies an invalid sink
 } tEventSink;
@@ -163,6 +165,7 @@ typedef enum
     kEventSourceLedu                = 0x1D,     ///< Events from Ledu module
     kEventSourceGw309Ascii          = 0x1E,     ///< Events from GW309ASCII module
     kEventSourceErru                = 0x1F,     ///< Events from User Error handler module
+    kEventSourceSdoTest             = 0x20,     ///< Events from SDO testing module
 
     kEventSourceInvalid             = 0xFF      ///< Identifies an invalid event source
 } tEventSource;

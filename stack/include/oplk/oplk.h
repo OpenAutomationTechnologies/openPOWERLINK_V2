@@ -66,6 +66,20 @@ typedef enum
 } tOplkApiAsndFilter;
 
 /**
+\brief SDO stack
+
+The following enum defines the different SDO stacks. The application can
+switch between the SDO stacks.
+*/
+typedef enum
+{
+    tOplkApiStdSdoStack         = 0x00,  // Use the standard SDO stack (default)
+    tOplkApiTestSdoCom          = 0x10,  // Use testing functions for SDO command layer
+    tOplkApiTestSdoSeq          = 0x20   // Use testing functions for SDO sequence layer
+} tOplkApiSdoStack;
+
+
+/**
 \brief Node event
 
 The following structure specifies a node event on an MN. The application will be
@@ -187,6 +201,30 @@ typedef struct
 } tOplkApiEventDefaultGwChange;
 
 /**
+\brief SDO command layer receive event
+
+This structure specifies the event for an received SDO command layer.
+It is used to inform the application about the received SDO command layer.
+*/
+typedef struct
+{
+    tAsySdoCom*                 pAsySdoCom;     ///< Pointer to the SDO command layer
+    UINT                        dataSize;       ///< Size of the received SDO command layer
+} tOplkApiEventReceivedSdoCom;
+
+/**
+\brief SDO sequence layer receive event
+
+This structure specifies the event for an received SDO sequence layer.
+It is used to inform the application about the received SDO sequence layer.
+*/
+typedef struct
+{
+    tAsySdoSeq*                 pAsySdoSeq;     ///< Pointer to the SDO sequence layer
+    UINT                        dataSize;       ///< Size of the received SDO sequence layer
+} tOplkApiEventReceivedSdoSeq;
+
+/**
 \brief Application event types
 
 This enumeration specifies the valid application events which can be
@@ -280,6 +318,16 @@ typedef enum
     (\ref tOplkApiEventDefaultGwChange).*/
     kOplkApiEventDefaultGwChange    = 0x82,
 
+    /** Received SDO command layer. This event informs the application about
+    a received SDO command layer. This event argument contains information on the
+    received SDO command layer. (\ref tOplkApiEventReceivedSdoCom). */
+    kOplkApiEventReceivedSdoCom     = 0x83,
+
+    /** Received SDO sequence layer. This event informs the application about
+    a received SDO sequence layer. This event argument contains information on the
+    received SDO sequence layer. (\ref tOplkApiEventReceivedSdoSeq). */
+    kOplkApiEventReceivedSdoSeq     = 0x84,
+
 } tOplkApiEventType;
 
 
@@ -308,6 +356,8 @@ typedef union
     tOplkApiEventReceivedPres   receivedPres;       ///< Received PRes frame (\ref kOplkApiEventReceivedPres)
     tOplkApiEventReceivedNonPlk receivedEth;        ///< Received Ethernet frame (\ref kOplkApiEventReceivedNonPlk)
     tOplkApiEventDefaultGwChange defaultGwChange;   ///< Default gateway change event (\ref kOplkApiEventDefaultGwChange)
+    tOplkApiEventReceivedSdoCom receivedSdoCom;     ///< Received SDO command layer (\ref kOplkApiEventReceivedSdoCom)
+    tOplkApiEventReceivedSdoSeq receivedSdoSeq;     ///< Received SDO sequence layer (\ref kOplkApiEventReceivedSdoSeq)
 } tOplkApiEventArg;
 
 /**
@@ -386,6 +436,9 @@ typedef struct
     UINT32              syncResLatency;             ///< Constant response latency for SyncRes in ns
     UINT                syncNodeId;                 ///< Specifies the synchronization point for the MN. The synchronization take place after a PRes from a CN with this node-ID (0 = SoC, 255 = SoA)
     BOOL                fSyncOnPrcNode;             ///< If it is TRUE, Sync on PRes chained CN; FALSE: conventional CN (PReq/PRes)
+    tOplkApiSdoStack    sdoStackType;               ///< Specifies the SDO stack that should be used.
+                                                    /**< It is used for switching between the standard SDO stack and alternative SDO stacks. The available SDO stacks are defined by the \ref tOplkApiSdoStack enumeration.
+                                                         If the standard SDO stack is used it must be initialized with 0x00.*/
 } tOplkApiInitParam;
 
 /**
@@ -451,6 +504,19 @@ OPLKDLLEXPORT tOplkError oplk_setupProcessImage(void);
 
 // Request forwarding of Pres frame from DLL -> API
 OPLKDLLEXPORT tOplkError oplk_triggerPresForward(UINT nodeId_p);
+
+// SDO Test Api functions
+OPLKDLLEXPORT void       oplk_testSdoSetVal(tOplkApiInitParam* pInitParam_p);
+OPLKDLLEXPORT tOplkError oplk_testSdoComInit(void);
+OPLKDLLEXPORT tOplkError oplk_testSdoSeqInit(void);
+// Testing functions for SDO command layer
+OPLKDLLEXPORT tOplkError oplk_testSdoComSend(UINT uiNodeId_p, tSdoType SdoType_p,
+                                              tAsySdoCom* pSdoCom_p, size_t SdoSize_p);
+OPLKDLLEXPORT tOplkError oplk_testSdoComDelCon(void);
+// Testing functions for SDO sequence layer
+OPLKDLLEXPORT tOplkError oplk_testSdoSeqSend(UINT uiNodeId_p, tSdoType SdoType_p,
+                                              tAsySdoSeq* pSdoCom_p, size_t SdoSize_p);
+OPLKDLLEXPORT tOplkError oplk_testSdoSeqDelCon(void);
 
 #ifdef __cplusplus
 }

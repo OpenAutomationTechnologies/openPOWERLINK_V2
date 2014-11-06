@@ -53,6 +53,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #if defined(CONFIG_INCLUDE_SDOC) || defined(CONFIG_INCLUDE_SDOS)
 #include <user/sdoseq.h>
+#include <user/sdotest.h>
 #endif
 
 #if defined(CONFIG_INCLUDE_LEDU)
@@ -225,6 +226,11 @@ tOplkError eventu_process(tEvent* pEvent_p)
             eventSource = kEventSourceOplkApi;
             break;
 
+        case kEventSinkSdoTest:
+            ret = sdotestcom_cbEvent(pEvent_p);
+            eventSource = kEventSourceSdoTest;
+            break;
+
         default:
             // Unknown sink, provide error event to API layer
             eventu_postError(kEventSourceEventu, ret,
@@ -284,6 +290,7 @@ tOplkError eventu_postEvent(tEvent* pEvent_p)
         case kEventSinkNmtu:
         case kEventSinkSdoAsySeq:
         case kEventSinkApi:
+        case kEventSinkSdoTest:
         case kEventSinkDlluCal:
         case kEventSinkErru:
         case kEventSinkLedu:
