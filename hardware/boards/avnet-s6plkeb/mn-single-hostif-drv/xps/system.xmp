@@ -3,6 +3,7 @@ XmpVersion: 14.7
 VerMgmt: 14.7
 IntStyle: default
 Flow: ise
+ModuleSearchPath: ../../../../ipcore/xilinx
 MHS File: system.mhs
 Architecture: spartan6
 Device: xc6slx16
