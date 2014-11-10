@@ -20,12 +20,6 @@ Debug and the Release driver versions should be created.
 
 Execute the following steps below to generate the FPGA configuration and all
 hardware near drivers for the target Xilinx Microblaze.
-* Open the `Xilinx Platform Studio (XPS)` and set the `Global Repository Search
-  Path` to the openPOWERLINK stack IP-Core repository.\n
-  `Edit` -> `Preferences` -> `Application` -> `Global Peripheral Repository Search Path`
-  (e.g: `$OPLK_ROOT/hardware/ipcore/xilinx`).\n
-  (There is no need to open any project inside the **XPS**!)
-
 * Open a shell where the Xilinx ISE 14.7 Toolchain is configured:
   - On a Windows host platform open the `ISE Design Suite [64,32] Bit Command
     Prompt`.
