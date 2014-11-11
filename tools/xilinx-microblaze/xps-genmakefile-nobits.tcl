@@ -1,8 +1,8 @@
 ################################################################################
 #
-# CMake boards configuration file for Xilinx Zynq ARM
+# Initialize the XPS build system and generate the system Makefile
 #
-# Copyright (c) 2014, Kalycito Infotech Private Limited
+# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,42 +28,6 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-################################################################################
-# Handle includes
-SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/xilinx" ${CMAKE_MODULE_PATH})
-SET(CMAKE_MODULE_PATH "${OPLK_BASE_DIR}/cmake" ${CMAKE_MODULE_PATH})
-
-INCLUDE(geneclipsefilelist)
-INCLUDE(geneclipseincludelist)
-INCLUDE(setzynqarmboardconfig)
-
-################################################################################
-# U S E R    O P T I O N S
-
-# Assemble path to all boards with Xilinx demos
-SET(BOARD_DIRS ${PROJECT_SOURCE_DIR}/boards/xilinx-z702)
-
-# Skip bitstream generation
-OPTION(SKIP_BITSTREAM "Skip bitstream generation to save time." OFF)
-MARK_AS_ADVANCED(SKIP_BITSTREAM)
-
-################################################################################
-# Find the Xilinx toolchain
-UNSET(XIL_LIBGEN CACHE)
-FIND_PROGRAM(XIL_LIBGEN NAMES libgen
-    PATHS
-    ${XIL_ISE_ROOT}/EDK/bin
-    DOC "Xilinx board support package generation tool"
-)
-
-UNSET(XIL_XPS CACHE)
-FIND_PROGRAM(XIL_XPS NAMES xps
-    PATHS
-    ${XIL_ISE_ROOT}/EDK/bin
-    DOC "Xilinx Platform Studio"
-)
-
-################################################################################
-# Set path to system folders
-SET(ARCH_IPCORE_REPO ${PROJECT_SOURCE_DIR}/ipcore/xilinx)
-SET(ARCH_TOOLS_DIR ${OPLK_BASE_DIR}/tools/xilinx-zynqarm)
+xset sdk_export_bmm_bit 0
+save make
+exit;

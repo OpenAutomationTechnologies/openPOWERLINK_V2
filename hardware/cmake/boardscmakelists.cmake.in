@@ -54,7 +54,7 @@ SET(HW_PLATFORM_TARGET_DIR ${BINS_INST_DIR}/hw_platform)
 
 ##################################################################################
 # Add custom target for generating the bitstream
-GENERATE_BITS(${DEMO_NAME} ${PROJECT_SOURCE_DIR})
+GENERATE_BITS(${DEMO_NAME} ${PROJECT_SOURCE_DIR} ${SKIP_BITSTREAM})
 
 ##################################################################################
 # Add custom target for generating the board support package
@@ -82,7 +82,7 @@ ENDFOREACH()
 
 ################################################################################
 # Installation rules for the bistream
-INSTALL_BITSTREAM(${PROJECT_SOURCE_DIR} ${HW_PLATFORM_TARGET_DIR})
+INSTALL_BITSTREAM(${PROJECT_SOURCE_DIR} ${HW_PLATFORM_TARGET_DIR} ${SKIP_BITSTREAM})
 
 INSTALL(FILES ${PROJECT_SOURCE_DIR}/cmake/settings.cmake DESTINATION ${BINS_INST_DIR})
 

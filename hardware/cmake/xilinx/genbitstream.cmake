@@ -28,7 +28,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-MACRO(GENERATE_BITS EXAMPLE_NAME HW_DEMO_DIR)
+MACRO(GENERATE_BITS EXAMPLE_NAME HW_DEMO_DIR SKIP_BITSTREAM)
 
     SET(BITS_SYSTEM_NAME system)
     SET(XPS_DEMO_DIR ${HW_DEMO_DIR}/xps)
@@ -36,25 +36,40 @@ MACRO(GENERATE_BITS EXAMPLE_NAME HW_DEMO_DIR)
 
     IF(NOT ${XIL_XPS} STREQUAL "XIL_XPS-NOTFOUND")
 
-        ADD_CUSTOM_COMMAND(
-            OUTPUT ${XPS_DEMO_DIR}/${BITS_SYSTEM_NAME}.make
-            COMMAND ${XIL_XPS} -nw -scr ${ARCH_TOOLS_DIR}/xps-genmakefile.tcl ${BITS_SYSTEM_NAME}.xmp
-            WORKING_DIRECTORY ${XPS_DEMO_DIR}
-        )
+        IF(SKIP_BITSTREAM)
+            ADD_CUSTOM_COMMAND(
+                OUTPUT ${XPS_DEMO_DIR}/${BITS_SYSTEM_NAME}.make
+                COMMAND ${XIL_XPS} -nw -scr ${ARCH_TOOLS_DIR}/xps-genmakefile-nobits.tcl ${BITS_SYSTEM_NAME}.xmp
+                WORKING_DIRECTORY ${XPS_DEMO_DIR}
+            )
 
-        ADD_CUSTOM_COMMAND(
-            DEPENDS ${XPS_DEMO_DIR}/${BITS_SYSTEM_NAME}.make
-            OUTPUT ${XPS_DEMO_DIR}/implementation/${BITS_SYSTEM_NAME}.bit
-            COMMAND ${CMAKE_MAKE_PROGRAM} -C ${XPS_DEMO_DIR} -f ${BITS_SYSTEM_NAME}.make bits
-        )
+            ADD_CUSTOM_COMMAND(
+                DEPENDS ${XPS_DEMO_DIR}/${BITS_SYSTEM_NAME}.make
+                OUTPUT ${BITS_SDK_EXPORT}/${BITS_SYSTEM_NAME}.xml
+                COMMAND ${CMAKE_MAKE_PROGRAM} -C ${XPS_DEMO_DIR} -f ${BITS_SYSTEM_NAME}.make exporttosdk
+            )
+        ELSE()
+            ADD_CUSTOM_COMMAND(
+                OUTPUT ${XPS_DEMO_DIR}/${BITS_SYSTEM_NAME}.make
+                COMMAND ${XIL_XPS} -nw -scr ${ARCH_TOOLS_DIR}/xps-genmakefile.tcl ${BITS_SYSTEM_NAME}.xmp
+                WORKING_DIRECTORY ${XPS_DEMO_DIR}
+            )
 
-        ADD_CUSTOM_COMMAND(
-            DEPENDS ${XPS_DEMO_DIR}/implementation/${BITS_SYSTEM_NAME}.bit
-            OUTPUT ${BITS_SDK_EXPORT}/${BITS_SYSTEM_NAME}.xml
-            COMMAND ${CMAKE_MAKE_PROGRAM} -C ${XPS_DEMO_DIR} -f ${BITS_SYSTEM_NAME}.make exporttosdk
-            COMMAND ${CMAKE_MAKE_PROGRAM} -C ${XPS_DEMO_DIR} -f ${BITS_SYSTEM_NAME}.make init_bram
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different ${XPS_DEMO_DIR}/implementation/download.bit ${BITS_SDK_EXPORT}
-        )
+            ADD_CUSTOM_COMMAND(
+                DEPENDS ${XPS_DEMO_DIR}/${BITS_SYSTEM_NAME}.make
+                OUTPUT ${XPS_DEMO_DIR}/implementation/${BITS_SYSTEM_NAME}.bit
+                COMMAND ${CMAKE_MAKE_PROGRAM} -C ${XPS_DEMO_DIR} -f ${BITS_SYSTEM_NAME}.make bits
+            )
+
+            ADD_CUSTOM_COMMAND(
+                DEPENDS ${XPS_DEMO_DIR}/implementation/${BITS_SYSTEM_NAME}.bit
+                DEPENDS ${XPS_DEMO_DIR}/${BITS_SYSTEM_NAME}.make
+                OUTPUT ${BITS_SDK_EXPORT}/${BITS_SYSTEM_NAME}.xml
+                COMMAND ${CMAKE_MAKE_PROGRAM} -C ${XPS_DEMO_DIR} -f ${BITS_SYSTEM_NAME}.make exporttosdk
+                COMMAND ${CMAKE_MAKE_PROGRAM} -C ${XPS_DEMO_DIR} -f ${BITS_SYSTEM_NAME}.make init_bram
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different ${XPS_DEMO_DIR}/implementation/download.bit ${BITS_SDK_EXPORT}
+            )
+        ENDIF()
 
         ADD_CUSTOM_TARGET(
             bits-${EXAMPLE_NAME} ALL

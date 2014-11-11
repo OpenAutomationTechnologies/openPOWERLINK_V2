@@ -43,6 +43,10 @@ INCLUDE(setmicroblazeboardconfig)
 # Assemble path to all boards with Xilinx demos
 SET(BOARD_DIRS ${PROJECT_SOURCE_DIR}/boards/avnet-s6plkeb;${PROJECT_SOURCE_DIR}/boards/avnet-lx150t;${PROJECT_SOURCE_DIR}/boards/xilinx-z702)
 
+# Skip bitstream generation
+OPTION(SKIP_BITSTREAM "Skip bitstream generation to save time." OFF)
+MARK_AS_ADVANCED(SKIP_BITSTREAM)
+
 ################################################################################
 # Find the Xilinx toolchain
 UNSET(XIL_LIBGEN CACHE)

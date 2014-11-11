@@ -29,7 +29,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-MACRO(INSTALL_BITSTREAM EXAMPLE_ROOT BITS_DESTINATION)
+MACRO(INSTALL_BITSTREAM EXAMPLE_ROOT BITS_DESTINATION SKIP_BITSTREAM)
     SET(SDK_EXPORT ${EXAMPLE_ROOT}/xps/SDK/SDK_Export/hw)
     SET(DLCMD_SOURCE_DIR ${EXAMPLE_ROOT}/xps/etc)
 
@@ -42,9 +42,15 @@ MACRO(INSTALL_BITSTREAM EXAMPLE_ROOT BITS_DESTINATION)
     # Copy hardware platform eclipse project file
     CONFIGURE_FILE(${ARCH_TOOLS_DIR}/eclipse/hwplatformproject.in ${PROJECT_BINARY_DIR} @ONLY)
 
-    INSTALL(FILES ${SDK_EXPORT}/system.bit ${SDK_EXPORT}/download.bit ${SDK_EXPORT}/system.xml ${SDK_EXPORT}/system_bd.bmm
-            DESTINATION ${BITS_DESTINATION}
-           )
+    IF(SKIP_BITSTREAM)
+        INSTALL(FILES ${SDK_EXPORT}/system.xml
+                DESTINATION ${BITS_DESTINATION}
+               )
+    ELSE()
+        INSTALL(FILES ${SDK_EXPORT}/system.bit ${SDK_EXPORT}/download.bit ${SDK_EXPORT}/system.xml ${SDK_EXPORT}/system_bd.bmm
+                DESTINATION ${BITS_DESTINATION}
+               )
+    ENDIF()
 
     # Additional initialization modules generated for ARM on Zynq
     IF(DEFINED CFG_DEMO_BOARD_ZYNQ AND CFG_DEMO_BOARD_ZYNQ)
