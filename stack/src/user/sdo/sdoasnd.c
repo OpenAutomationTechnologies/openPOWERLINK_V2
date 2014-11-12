@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   sdo-asndu.c
+\file   sdoasnd.c
 
 \brief  Implementation of SDO over ASnd protocol
 

@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   sdo-sequ.c
+\file   sdoseq.c
 
 \brief  Implementation of SDO Sequence Layer
 
@@ -49,7 +49,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <common/ami.h>
 
 #if !defined(CONFIG_INCLUDE_SDO_UDP) && !defined(CONFIG_INCLUDE_SDO_ASND)
-#error 'ERROR: sdo-sequ.c - At least UDP or ASND module needed!'
+#error 'ERROR: sdoseq.c - At least UDP or ASND module needed!'
 #endif
 
 //============================================================================//
@@ -775,7 +775,7 @@ static tOplkError processStateInit1(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
 {
     tOplkError              ret = kErrorOk;
 
-    // TRACE("sdo-sequ: processStateInit1\n");
+    // TRACE("sdoseq: processStateInit1\n");
 
     switch (event_p)
     {
@@ -879,7 +879,7 @@ static tOplkError processStateInit2(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
 {
     tOplkError          ret = kErrorOk;
 
-    // TRACE("sdo-sequ: processStateInit2\n");
+    // TRACE("sdoseq: processStateInit2\n");
 
     switch (event_p)
     {
@@ -1159,7 +1159,7 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
                     timeru_deleteTimer(&pSdoSeqCon_p->timerHandle);
                     sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateTransferAbort);
                     // restart immediately with initialization request
-                    DEBUG_LVL_SDO_TRACE("sdo-sequ: Reinit immediately\n");
+                    DEBUG_LVL_SDO_TRACE("sdoseq: Reinit immediately\n");
                     ret = kErrorRetry;
                     break;
 
@@ -1320,7 +1320,7 @@ static tOplkError processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sd
     UINT                frameSize;
     tPlkFrame*          pFrame;
 
-    DEBUG_LVL_SDO_TRACE("sdo-sequ: processStateWaitAck\n");
+    DEBUG_LVL_SDO_TRACE("sdoseq: processStateWaitAck\n");
 
     ret = setTimer(pSdoSeqCon_p, sdoSeqInstance_l.sdoSeqTimeout);
 

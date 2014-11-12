@@ -90,10 +90,10 @@ SET(USER_SOURCES
     ${USER_SOURCE_DIR}/pdo/pdou.c
     ${USER_SOURCE_DIR}/pdo/pdoucal.c
     ${USER_SOURCE_DIR}/pdo/pdoucal-triplebufshm.c
-    ${USER_SOURCE_DIR}/sdo/sdo-comu.c
-    ${USER_SOURCE_DIR}/sdo/sdo-sequ.c
-    ${USER_SOURCE_DIR}/sdo/sdo-asndu.c
-    ${USER_SOURCE_DIR}/sdo/sdo-udpu.c
+    ${USER_SOURCE_DIR}/sdo/sdocom.c
+    ${USER_SOURCE_DIR}/sdo/sdoseq.c
+    ${USER_SOURCE_DIR}/sdo/sdoasnd.c
+    ${USER_SOURCE_DIR}/sdo/sdoudp.c
     ${USER_SOURCE_DIR}/errhnd/errhndu.c
     ${USER_SOURCE_DIR}/ctrl/ctrlu.c
     ${USER_SOURCE_DIR}/ledu.c

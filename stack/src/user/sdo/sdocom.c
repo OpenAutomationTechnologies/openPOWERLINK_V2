@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   sdo-comu.c
+\file   sdocom.c
 
 \brief  Implementation of SDO Command Layer
 
