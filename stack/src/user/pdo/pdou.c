@@ -148,6 +148,7 @@ typedef struct
     BOOL                    fRunning;                   ///< Flag determines if PDO engine is running
     tPdoCbEventPdoChange    pfnCbEventPdoChange;
     //BYTE*                   pPdoMem;                    ///< pointer to PDO memory
+    OPLK_MUTEX_T            lockMutex;                  ///< Mutex used to protect stack from disabling PDOs while copy is in progress
 } tPdouInstance;
 
 //------------------------------------------------------------------------------
@@ -214,6 +215,8 @@ tOplkError pdou_init(tSyncCb pfnSyncCb_p)
     pdouInstance_g.fAllocated = FALSE;
     pdouInstance_g.fRunning = FALSE;
     pdouInstance_g.pfnCbEventPdoChange = NULL;
+    if (target_createMutex("/pdoMutex", &pdouInstance_g.lockMutex) != kErrorOk)
+        return kErrorNoFreeInstance;
 
     return pdoucal_init(pfnSyncCb_p);
 }
@@ -231,7 +234,11 @@ The function cleans up the PDO user module.
 //------------------------------------------------------------------------------
 tOplkError pdou_exit(void)
 {
+    target_lockMutex(pdouInstance_g.lockMutex);
     pdouInstance_g.fRunning = FALSE;
+    target_unlockMutex(pdouInstance_g.lockMutex);
+    target_destroyMutex(pdouInstance_g.lockMutex);
+
     pdouInstance_g.pfnCbEventPdoChange = NULL;
     freePdoChannels();
     pdoucal_cleanupPdoMem();
@@ -267,6 +274,11 @@ tOplkError pdou_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
                 UINT    mapParamIndex;
                 UINT32  abortCode;
 
+                target_lockMutex(pdouInstance_g.lockMutex);
+                pdouInstance_g.fAllocated = FALSE;
+                pdouInstance_g.fRunning = FALSE;
+                target_unlockMutex(pdouInstance_g.lockMutex);
+
                 for (mapParamIndex = PDOU_OBD_IDX_RX_MAPP_PARAM;
                      mapParamIndex < PDOU_OBD_IDX_RX_MAPP_PARAM + sizeof(pdouInstance_g.aPdoIdToChannelIdRx);
                      mapParamIndex++)
@@ -287,14 +299,15 @@ tOplkError pdou_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
                 }
 
                 ret = kErrorOk;
-                pdouInstance_g.fAllocated = FALSE;
-                pdouInstance_g.fRunning = FALSE;
+
             }
             break;
 
         case kNmtGsResetConfiguration:
+            target_lockMutex(pdouInstance_g.lockMutex);
             pdouInstance_g.fAllocated = FALSE;
             pdouInstance_g.fRunning = FALSE;
+            target_unlockMutex(pdouInstance_g.lockMutex);
 
             // forward PDO configuration to Pdok module
             ret = configureAllPdos();
@@ -426,9 +439,13 @@ tOplkError pdou_copyRxPdoToPi(void)
     UINT                channelId;
     BYTE*               pPdo;
 
+    if (target_lockMutex(pdouInstance_g.lockMutex) != kErrorOk)
+        return kErrorIllegalInstance;
+
     if (!pdouInstance_g.fRunning)
     {
         DEBUG_LVL_PDO_TRACE("%s() PDO channels not running!\n", __func__);
+        target_unlockMutex(pdouInstance_g.lockMutex);
         return kErrorOk;
     }
 
@@ -455,10 +472,13 @@ tOplkError pdou_copyRxPdoToPi(void)
             Ret = copyVarFromPdo(pPdo, pMappObject);
             if (Ret != kErrorOk)
             {   // other fatal error occurred
+                target_unlockMutex(pdouInstance_g.lockMutex);
                 return Ret;
             }
         }
     }
+
+    target_unlockMutex(pdouInstance_g.lockMutex);
     return kErrorOk;
 }
 
@@ -484,9 +504,12 @@ tOplkError pdou_copyTxPdoFromPi(void)
     BYTE*               pPdo;
 
     //TRACE_FUNC_ENTRY;
+    if (target_lockMutex(pdouInstance_g.lockMutex) != kErrorOk)
+        return kErrorIllegalInstance;
 
     if (!pdouInstance_g.fRunning)
     {
+        target_unlockMutex(pdouInstance_g.lockMutex);
         return kErrorOk;
     }
 
@@ -512,6 +535,7 @@ tOplkError pdou_copyTxPdoFromPi(void)
             ret = copyVarToPdo(pPdo, pMappObject);
             if (ret != kErrorOk)
             {   // other fatal error occurred
+                target_unlockMutex(pdouInstance_g.lockMutex);
                 return ret;
             }
         }
@@ -519,6 +543,8 @@ tOplkError pdou_copyTxPdoFromPi(void)
         // send PDO data to kernel layer
         ret = pdoucal_setTxPdo(channelId, pPdo, pPdoChannel->pdoSize);
     }
+
+    target_unlockMutex(pdouInstance_g.lockMutex);
 
     return ret;
 }
