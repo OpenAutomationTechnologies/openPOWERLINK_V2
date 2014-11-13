@@ -124,5 +124,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OPLK_ATOMIC_EXCHANGE(address, newval, oldval) \
             oldval = InterlockedExchange(address, newval);
 
+#define OPLK_MUTEX_T    HANDLE
+
 #endif /* _INC_targetdefs_windows_H_ */
 

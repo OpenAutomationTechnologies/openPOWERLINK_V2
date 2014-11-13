@@ -99,4 +99,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     Xil_Out8((u32)address, newval);                   \
     target_unlock()
 
+#define OPLK_MUTEX_T       u8
+
 #endif /* _INC_targetdefs_zynqarm_H_ */

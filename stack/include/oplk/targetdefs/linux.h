@@ -45,6 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <semaphore.h>
 #else
 #include <linux/module.h>
 #include <linux/kernel.h>
@@ -106,6 +107,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OPLK_ATOMIC_T    UINT8
 #define OPLK_ATOMIC_EXCHANGE(address, newval, oldval) \
     oldval = __sync_lock_test_and_set(address, newval);
+
+#ifndef __KERNEL__
+#define OPLK_MUTEX_T     sem_t*
+#else
+#define OPLK_MUTEX_T
+#endif
 
 #endif /* _INC_targetdefs_linux_H_ */
 

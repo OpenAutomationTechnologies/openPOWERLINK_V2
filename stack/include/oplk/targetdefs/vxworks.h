@@ -81,5 +81,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Target memory barrier function
 #define OPLK_MEMBAR()               ((void)0)
 
+#define OPLK_MUTEX_T                SEM_ID
+
 #endif /* _INC_targetdefs_vxworks_H_ */
 

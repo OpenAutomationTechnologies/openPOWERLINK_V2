@@ -299,6 +299,7 @@ ${HW_DRIVERS_DIR}/hostinterface/src/hostiflibint-pcp.c \
 
 TARGET_NIOS2_SOURCES="\
 ${ARCH_SOURCE_DIR}/altera_nios2/target-nios2.c \
+${ARCH_SOURCE_DIR}/altera_nios2/target-mutex.c \
 "
 
 TARGET_NIOS2_LOCAL_SOURCES="\

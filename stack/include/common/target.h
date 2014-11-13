@@ -69,6 +69,12 @@ ULONGLONG  target_getCurrentTimestamp(void);
 void       target_enableGlobalInterrupt(BYTE fEnable_p) SECTION_TARGET_GLOBAL_INT;
 UINT32     target_getTickCount(void);
 
+/* functions for mutex implementation */
+tOplkError target_createMutex(char* mutexName_p, OPLK_MUTEX_T* pMutex_p);
+tOplkError target_lockMutex(OPLK_MUTEX_T mutexId_p);
+void       target_unlockMutex(OPLK_MUTEX_T mutexId_p);
+void       target_destroyMutex(OPLK_MUTEX_T mutexId_p);
+
 #ifdef __cplusplus
 }
 #endif

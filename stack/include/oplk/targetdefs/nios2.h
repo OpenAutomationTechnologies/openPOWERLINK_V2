@@ -109,5 +109,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                         IOWR_8DIRECT(address, 0, newval); \
                         target_unlock()
 
+#define OPLK_MUTEX_T    alt_u8
+
 #endif /* _INC_targetdefs_nios2_H_ */
 

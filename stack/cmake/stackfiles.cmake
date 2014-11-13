@@ -463,16 +463,19 @@ SET(MEMMAP_NULL_SOURCES
 
 SET(TARGET_WINDOWS_SOURCES
     ${ARCH_SOURCE_DIR}/windows/target-windows.c
+    ${ARCH_SOURCE_DIR}/windows/target-mutex.c
     )
 
 SET(TARGET_LINUX_SOURCES
     ${ARCH_SOURCE_DIR}/linux/target-linux.c
+    ${ARCH_SOURCE_DIR}/linux/target-mutex.c
     )
 
 SET(TARGET_MICROBLAZE_SOURCES
     ${ARCH_SOURCE_DIR}/xilinx_microblaze/systemtimer.c
     ${ARCH_SOURCE_DIR}/xilinx_microblaze/usleep.c
     ${ARCH_SOURCE_DIR}/xilinx_microblaze/target-microblaze.c
+    ${ARCH_SOURCE_DIR}/xilinx_microblaze/target-mutex.c
     )
 
 SET(TARGET_MICROBLAZE_LOCAL_SOURCES
@@ -489,6 +492,7 @@ SET(TARGET_MICROBLAZE_OPENMAC_SOURCES
 
 SET(TARGET_XILINX_ARM_SOURCES
     ${ARCH_SOURCE_DIR}/xilinx-zynqarm/target-zynqarm.c
+    ${ARCH_SOURCE_DIR}/xilinx-zynqarm/target-mutex.c
     )
 
 SET(TARGET_XILINX_ARM_DUAL_SOURCES
