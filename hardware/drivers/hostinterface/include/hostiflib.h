@@ -55,7 +55,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /* This is the host interface version for host. */
 #define HOSTIF_VERSION_MAJOR            1
 #define HOSTIF_VERSION_MINOR            0
-#define HOSTIF_VERSION_REVISION         0
+#define HOSTIF_VERSION_REVISION         2
 #endif
 
 //------------------------------------------------------------------------------

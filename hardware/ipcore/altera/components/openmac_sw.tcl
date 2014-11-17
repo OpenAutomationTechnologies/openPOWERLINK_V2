@@ -9,10 +9,10 @@ create_driver openmac
 set_sw_property hw_class_name openmac
 
 # Define driver version
-set_sw_property version 1.0.0
+set_sw_property version 1.0.2
 
 # Define minimum version of hw compatible
-set_sw_property min_compatible_hw_version 1.0.0
+set_sw_property min_compatible_hw_version 1.0.2
 
 # Don't initialize driver in alt_sys_init()
 set_sw_property auto_initialize false

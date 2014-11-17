@@ -359,7 +359,7 @@
  </module>
  <module
    kind="hostinterface"
-   version="1.0.0"
+   version="1.0.2"
    enabled="1"
    name="hostinterface_0">
   <parameter name="sys_uniqueId" value="0" />
@@ -522,7 +522,7 @@
    version="13.0.1.99.2"
    enabled="1"
    name="lcd" />
- <module kind="openmac" version="1.0.0" enabled="1" name="openmac_0">
+ <module kind="openmac" version="1.0.2" enabled="1" name="openmac_0">
   <parameter name="sys_mainClk" value="50000000" />
   <parameter name="sys_mainClkx2" value="100000000" />
   <parameter name="sys_dmaAddrWidth" value="21" />

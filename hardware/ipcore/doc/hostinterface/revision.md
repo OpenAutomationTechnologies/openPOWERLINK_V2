@@ -1,6 +1,8 @@
 Revision {#revision}
 ========
 
+- [TASK] Clean up axi host interface ipcore
+- [TASK] Clean up axi ipcores
 - [TASK] Update license header
 - [TASK] Cleanup AXI ipcore code
 - [FEATURE] Enable AXI master supporting higher clock frequency

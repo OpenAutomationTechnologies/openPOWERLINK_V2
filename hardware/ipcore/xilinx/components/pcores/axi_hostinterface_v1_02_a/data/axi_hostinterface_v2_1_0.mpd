@@ -90,7 +90,7 @@ PARAMETER C_M_AXI_SUPPORTS_WRITE  = 1,         DT = integer, ASSIGNMENT = CONSTA
 PARAMETER gHostIfType       = 1,    DT = INTEGER, RANGE = (0:1),    VALUES = (0 = "Internal AXI Bus", 1 = "Parallel Interface" )
 PARAMETER gVersionMajor     = 0x1,  DT = INTEGER, RANGE = (0:65535), ASSIGNMENT = CONSTANT
 PARAMETER gVersionMinor     = 0x0,  DT = INTEGER, RANGE = (0:65535), ASSIGNMENT = CONSTANT
-PARAMETER gVersionRevision  = 0x0,  DT = INTEGER, RANGE = (0:65535), ASSIGNMENT = CONSTANT
+PARAMETER gVersionRevision  = 0x2,  DT = INTEGER, RANGE = (0:65535), ASSIGNMENT = CONSTANT
 PARAMETER gVersionCount     = 0x0,  DT = INTEGER, RANGE = (0:65535), ASSIGNMENT = CONSTANT
 
 ###############################################################################

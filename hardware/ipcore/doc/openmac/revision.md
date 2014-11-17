@@ -1,6 +1,8 @@
 Revision {#revision}
 ========
 
+- [FIX] Rename RMII Rx data valid input in openMAC
+- [FIX] Fix axi openMAC ipcore
 - [FIX] Fix openMAC DMA address width
 - [TASK] Update license header
 - [FIX] Fix synthesis warnings in openMAC components

@@ -427,7 +427,7 @@ END
 
 BEGIN axi_openmac
  PARAMETER INSTANCE = axi_openmac_0
- PARAMETER HW_VER = 1.00.a
+ PARAMETER HW_VER = 1.02.a
  PARAMETER gui_phyCount = 2
  PARAMETER gui_txBufSize = 32
  PARAMETER gui_rxBufLoc = 2
@@ -463,7 +463,7 @@ END
 
 BEGIN axi_hostinterface
  PARAMETER INSTANCE = axi_hostinterface_0
- PARAMETER HW_VER = 1.00.a
+ PARAMETER HW_VER = 1.02.a
  PARAMETER gHostIfType = 0
  PARAMETER C_BASEADDR = 0x76c00000
  PARAMETER C_HIGHADDR = 0x76c0ffff

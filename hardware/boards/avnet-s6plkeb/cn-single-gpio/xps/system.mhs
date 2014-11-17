@@ -353,7 +353,7 @@ END
 
 BEGIN axi_openmac
  PARAMETER INSTANCE = axi_openmac_0
- PARAMETER HW_VER = 1.00.a
+ PARAMETER HW_VER = 1.02.a
  PARAMETER gui_phyCount = 2
  PARAMETER gui_txBufSize = 8
  PARAMETER gui_rxBufLoc = 2

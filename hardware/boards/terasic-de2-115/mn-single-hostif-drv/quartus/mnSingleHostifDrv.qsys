@@ -264,7 +264,7 @@
  </module>
  <module
    kind="hostinterface"
-   version="1.0.0"
+   version="1.0.2"
    enabled="1"
    name="hostinterface_0">
   <parameter name="sys_uniqueId" value="0" />
@@ -392,7 +392,7 @@
   <parameter name="AUTO_CLK_CLOCK_RATE" value="50000000" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone IV E" />
  </module>
- <module kind="openmac" version="1.0.0" enabled="1" name="openmac_0">
+ <module kind="openmac" version="1.0.2" enabled="1" name="openmac_0">
   <parameter name="sys_mainClk" value="50000000" />
   <parameter name="sys_mainClkx2" value="100000000" />
   <parameter name="sys_dmaAddrWidth" value="21" />
@@ -413,7 +413,7 @@
   <parameter name="AUTO_DMACLK_CLOCK_RATE" value="100000000" />
   <parameter name="AUTO_PKTCLK_CLOCK_RATE" value="-1" />
  </module>
- <module kind="prlSlave" version="1.0.0" enabled="1" name="prlSlave_0">
+ <module kind="prlSlave" version="1.0.2" enabled="1" name="prlSlave_0">
   <parameter name="gui_enableMux" value="true" />
   <parameter name="gui_dataWidth" value="16" />
   <parameter name="gui_addrWidth" value="17" />

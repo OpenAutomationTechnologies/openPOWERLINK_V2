@@ -55,7 +55,7 @@ package require qsysUtil 0.0.1
 # module
 # -----------------------------------------------------------------------------
 set_module_property NAME prlSlave
-set_module_property VERSION 1.0.0
+set_module_property VERSION 1.0.2
 set_module_property INTERNAL false
 set_module_property OPAQUE_ADDRESS_MAP true
 set_module_property AUTHOR "B&R"

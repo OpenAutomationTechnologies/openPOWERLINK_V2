@@ -67,7 +67,7 @@ set cPhyPortMii     $::openmac::cPhyPortMii
 # module
 # -----------------------------------------------------------------------------
 set_module_property NAME openmac
-set_module_property VERSION 1.0.0
+set_module_property VERSION 1.0.2
 set_module_property INTERNAL false
 set_module_property GROUP "Interface Protocols/Ethernet"
 set_module_property AUTHOR "B&R"
@@ -375,8 +375,8 @@ proc generateDma {} {
     if { [getDmaUsed] } {
         # Enable DMA
         set_interface_property dma ENABLED TRUE
-        set_interface_property dma ENABLED TRUE
-        set_interface_property dma ENABLED TRUE
+        set_interface_property dmaClk ENABLED TRUE
+        set_interface_property dmaRst ENABLED TRUE
 
         # Terminate burstcount if no bursts are used
         if { [getBurstUsed] } {
@@ -406,8 +406,8 @@ proc generateDma {} {
         }
     } else {
         set_interface_property dma ENABLED FALSE
-        set_interface_property dma ENABLED FALSE
-        set_interface_property dma ENABLED FALSE
+        set_interface_property dmaClk ENABLED FALSE
+        set_interface_property dmaRst ENABLED FALSE
     }
 }
 

@@ -315,7 +315,7 @@
    version="13.0.1.99.2"
    enabled="1"
    name="lcd" />
- <module kind="prlMaster" version="1.0.0" enabled="1" name="prlMaster_0">
+ <module kind="prlMaster" version="1.0.2" enabled="1" name="prlMaster_0">
   <parameter name="sys_clk" value="100000000" />
   <parameter name="gui_enableMux" value="true" />
   <parameter name="gui_dataWidth" value="16" />

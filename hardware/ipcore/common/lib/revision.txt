@@ -1,5 +1,6 @@
-Revision (6c37475ec70bf2ffb6746e22ac0eee8e39f46571 / V1.0.0)
+Revision (ce592997fe387dda3ca4ba2fa79c9731b65acd0c / V1.0.2)
 
+- [FIX] Fix clock crossing component
 - [TASK] Update license header
 - [FIX] Fix log dualis function in global.vhd
 - [FEATURE] Create libraries for common vhdl sources
