@@ -130,6 +130,7 @@ architecture rtl of toplevel is
             openmac_0_smi_nPhyRst                           : out   std_logic_vector(1 downto 0);
             openmac_0_smi_clk                               : out   std_logic_vector(1 downto 0);
             openmac_0_smi_dio                               : inout std_logic_vector(1 downto 0)  := (others => 'X');
+            openmac_0_mactimerout_export                    : out   std_logic_vector(0 downto 0);
             -- BENCHMARK
             pcp_0_benchmark_pio_export                      : out   std_logic_vector(7 downto 0);
             -- EPCS
@@ -151,7 +152,10 @@ architecture rtl of toplevel is
             -- LEDR
             ledr_pio_export                                 : out   std_logic_vector(15 downto 0);
             -- KEY
-            key_pio_export                                  : in    std_logic_vector(3 downto 0)  := (others => 'X')
+            key_pio_export                                  : in    std_logic_vector(3 downto 0)  := (others => 'X');
+            -- CPU RESET REQUEST
+            pcp_0_cpu_resetrequest_resetrequest             : in    std_logic                     := 'X';
+            pcp_0_cpu_resetrequest_resettaken               : out   std_logic
         );
     end component cnSingleGpio;
 
@@ -197,6 +201,9 @@ begin
             clk100_clk                                      => clk100,
             reset_reset_n                                   => pllLocked,
 
+            pcp_0_cpu_resetrequest_resetrequest             => '0',
+            pcp_0_cpu_resetrequest_resettaken               => open,
+
             openmac_0_mii_txEnable                          => PHY_TXEN,
             openmac_0_mii_txData                            => PHY_TXD,
             openmac_0_mii_txClk                             => PHY_TXCLK,
@@ -207,6 +214,7 @@ begin
             openmac_0_smi_nPhyRst                           => PHY_RESET_n,
             openmac_0_smi_clk                               => PHY_MDC,
             openmac_0_smi_dio                               => PHY_MDIO,
+            openmac_0_mactimerout_export                    => open,
 
             tri_state_0_tcm_address_out                     => sramAddr,
             tri_state_0_tcm_read_n_out                      => SRAM_OE_n,
