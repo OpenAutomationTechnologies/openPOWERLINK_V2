@@ -7,7 +7,7 @@
    description=""
    tags=""
    categories="System" />
- <parameter name="bonusData"><![CDATA[bonusData 
+ <parameter name="bonusData"><![CDATA[bonusData
 {
    element $${FILENAME}
    {
@@ -67,7 +67,7 @@
          type = "String";
       }
    }
-   element epcs_flash_controller_0.epcs_control_port
+   element epcs_flash_controller.epcs_control_port
    {
       datum baseAddress
       {
@@ -75,11 +75,11 @@
          type = "String";
       }
    }
-   element epcs_flash_controller_0
+   element epcs_flash_controller
    {
       datum _sortIndex
       {
-         value = "4";
+         value = "6";
          type = "int";
       }
       datum megawizard_uipreferences
@@ -105,7 +105,7 @@
    {
       datum _sortIndex
       {
-         value = "6";
+         value = "8";
          type = "int";
       }
       datum sopceditor_expanded
@@ -118,7 +118,7 @@
    {
       datum _sortIndex
       {
-         value = "7";
+         value = "9";
          type = "int";
       }
       datum megawizard_uipreferences
@@ -136,7 +136,7 @@
    {
       datum _sortIndex
       {
-         value = "9";
+         value = "11";
          type = "int";
       }
       datum sopceditor_expanded
@@ -145,11 +145,11 @@
          type = "boolean";
       }
    }
-   element key_pio.s1
+   element prlMaster_0.s0
    {
       datum baseAddress
       {
-         value = "2080";
+         value = "131072";
          type = "String";
       }
    }
@@ -161,7 +161,15 @@
          type = "String";
       }
    }
-   element status_led_pio
+   element key_pio.s1
+   {
+      datum baseAddress
+      {
+         value = "2080";
+         type = "String";
+      }
+   }
+   element sdram_0
    {
       datum _sortIndex
       {
@@ -174,11 +182,37 @@
          type = "boolean";
       }
    }
+   element status_led_pio
+   {
+      datum _sortIndex
+      {
+         value = "7";
+         type = "int";
+      }
+      datum sopceditor_expanded
+      {
+         value = "0";
+         type = "boolean";
+      }
+   }
+   element sync_irq
+   {
+      datum _sortIndex
+      {
+         value = "4";
+         type = "int";
+      }
+      datum sopceditor_expanded
+      {
+         value = "0";
+         type = "boolean";
+      }
+   }
    element sysid
    {
       datum _sortIndex
       {
-         value = "8";
+         value = "10";
          type = "int";
       }
       datum sopceditor_expanded
@@ -202,7 +236,7 @@
  <parameter name="projectName">mn-single-hostif-gpio.qpf</parameter>
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1397577086676" />
+ <parameter name="timeStamp" value="1423058110569" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk50" internal="clk50.clk_in" type="clock" dir="end" />
@@ -214,14 +248,10 @@
    internal="host_0.benchmark_pio"
    type="conduit"
    dir="end" />
- <interface
-   name="host_0_sdram_0"
-   internal="host_0.sdram_0"
-   type="conduit"
-   dir="end" />
+ <interface name="host_0_sdram_0" internal="host_0.sdram_0" />
  <interface
    name="epcs_flash"
-   internal="epcs_flash_controller_0.external"
+   internal="epcs_flash_controller.external"
    type="conduit"
    dir="end" />
  <interface
@@ -229,11 +259,7 @@
    internal="status_led_pio.external_connection"
    type="conduit"
    dir="end" />
- <interface
-   name="host_0_irq"
-   internal="host_0.irq_bridge_0_receiver_irq"
-   type="interrupt"
-   dir="start" />
+ <interface name="host_0_irq" internal="host_0.irq_bridge_0_receiver_irq" />
  <interface name="lcd" internal="lcd.external" type="conduit" dir="end" />
  <interface name="prl0" internal="prlMaster_0.prl0" type="conduit" dir="end" />
  <interface
@@ -241,6 +267,12 @@
    internal="key_pio.external_connection"
    type="conduit"
    dir="end" />
+ <interface name="sdram_0" internal="sdram_0.wire" type="conduit" dir="end" />
+ <interface
+   name="sync_irq"
+   internal="sync_irq.receiver_irq"
+   type="interrupt"
+   dir="start" />
  <module kind="clock_source" version="13.0" enabled="1" name="clk50">
   <parameter name="clockFrequency" value="50000000" />
   <parameter name="clockFrequencyKnown" value="true" />
@@ -275,12 +307,12 @@
    kind="altera_avalon_epcs_flash_controller"
    version="13.0.1.99.2"
    enabled="1"
-   name="epcs_flash_controller_0">
+   name="epcs_flash_controller">
   <parameter name="autoSelectASMIAtom" value="true" />
   <parameter name="useASMIAtom" value="false" />
   <parameter name="clockRate" value="50000000" />
   <parameter name="deviceFamilyString" value="Cyclone IV E" />
-  <parameter name="autoInitializationFileName">$${FILENAME}_epcs_flash_controller_0</parameter>
+  <parameter name="autoInitializationFileName">$${FILENAME}_epcs_flash_controller</parameter>
  </module>
  <module
    kind="altera_avalon_pio"
@@ -339,6 +371,41 @@
   <parameter name="width" value="4" />
   <parameter name="clockRate" value="50000000" />
  </module>
+ <module
+   kind="altera_avalon_new_sdram_controller"
+   version="13.0.1.99.2"
+   enabled="1"
+   name="sdram_0">
+  <parameter name="TAC" value="6.0" />
+  <parameter name="TRCD" value="20.0" />
+  <parameter name="TRFC" value="70.0" />
+  <parameter name="TRP" value="20.0" />
+  <parameter name="TWR" value="14.0" />
+  <parameter name="casLatency" value="3" />
+  <parameter name="columnWidth" value="10" />
+  <parameter name="dataWidth" value="32" />
+  <parameter name="generateSimulationModel" value="false" />
+  <parameter name="initRefreshCommands" value="2" />
+  <parameter name="model">single_Micron_MT48LC4M32B2_7_chip</parameter>
+  <parameter name="numberOfBanks" value="4" />
+  <parameter name="numberOfChipSelects" value="1" />
+  <parameter name="pinsSharedViaTriState" value="false" />
+  <parameter name="powerUpDelay" value="100.0" />
+  <parameter name="refreshPeriod" value="7.8125" />
+  <parameter name="rowWidth" value="13" />
+  <parameter name="masteredTristateBridgeSlave" value="0" />
+  <parameter name="TMRD" value="3" />
+  <parameter name="initNOPDelay" value="0.0" />
+  <parameter name="registerDataIn" value="true" />
+  <parameter name="clockRate" value="100000000" />
+  <parameter name="componentName">$${FILENAME}_sdram_0</parameter>
+ </module>
+ <module kind="altera_irq_bridge" version="13.0" enabled="1" name="sync_irq">
+  <parameter name="IRQ_WIDTH" value="1" />
+  <parameter name="IRQ_N" value="0" />
+  <parameter name="AUTO_CLK_CLOCK_RATE" value="100000000" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone IV E" />
+ </module>
  <connection
    kind="reset"
    version="13.0"
@@ -390,31 +457,22 @@
    kind="clock"
    version="13.0"
    start="clk50.clk"
-   end="epcs_flash_controller_0.clk" />
- <connection
-   kind="avalon"
-   version="13.0"
-   start="host_0.slow_bridge"
-   end="epcs_flash_controller_0.epcs_control_port">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0000" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
+   end="epcs_flash_controller.clk" />
  <connection
    kind="reset"
    version="13.0"
    start="clk50.clk_reset"
-   end="epcs_flash_controller_0.reset" />
+   end="epcs_flash_controller.reset" />
  <connection
    kind="reset"
    version="13.0"
    start="clk100.clk_reset"
-   end="epcs_flash_controller_0.reset" />
+   end="epcs_flash_controller.reset" />
  <connection
    kind="reset"
    version="13.0"
    start="clk25.clk_reset"
-   end="epcs_flash_controller_0.reset" />
+   end="epcs_flash_controller.reset" />
  <connection
    kind="clock"
    version="13.0"
@@ -475,16 +533,6 @@
  <connection kind="reset" version="13.0" start="clk100.clk_reset" end="lcd.reset" />
  <connection kind="reset" version="13.0" start="clk25.clk_reset" end="lcd.reset" />
  <connection
-   kind="avalon"
-   version="13.0"
-   start="host_0.fast_bridge"
-   end="prlMaster_0.s0">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0000" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection kind="clock" version="13.0" start="clk100.clk" end="prlMaster_0.c0" />
- <connection
    kind="reset"
    version="13.0"
    start="clk50.clk_reset"
@@ -524,6 +572,100 @@
    version="13.0"
    start="clk25.clk_reset"
    end="key_pio.reset" />
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="host_0.flash_bridge"
+   end="epcs_flash_controller.epcs_control_port">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="reset"
+   version="13.0"
+   start="host_0.jtag_reset"
+   end="epcs_flash_controller.reset" />
+ <connection kind="clock" version="13.0" start="clk100.clk" end="sdram_0.clk" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk100.clk_reset"
+   end="sdram_0.reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk25.clk_reset"
+   end="sdram_0.reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk50.clk_reset"
+   end="sdram_0.reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="host_0.jtag_reset"
+   end="sdram_0.reset" />
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="host_0.cpu_bridge"
+   end="sdram_0.s1">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="interrupt"
+   version="13.0"
+   start="host_0.gp_irq"
+   end="epcs_flash_controller.irq">
+  <parameter name="irqNumber" value="0" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="host_0.slow_bridge"
+   end="prlMaster_0.s0">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x00020000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection kind="clock" version="13.0" start="clk100.clk" end="prlMaster_0.c0" />
+ <connection kind="clock" version="13.0" start="clk100.clk" end="sync_irq.clk" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk100.clk_reset"
+   end="sync_irq.clk_reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk25.clk_reset"
+   end="sync_irq.clk_reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk50.clk_reset"
+   end="sync_irq.clk_reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="host_0.jtag_reset"
+   end="sync_irq.clk_reset" />
+ <connection
+   kind="interrupt"
+   version="13.0"
+   start="host_0.sync_irq"
+   end="sync_irq.sender0_irq">
+  <parameter name="irqNumber" value="0" />
+ </connection>
+ <connection
+   kind="reset"
+   version="13.0"
+   start="host_0.jtag_reset"
+   end="prlMaster_0.r0" />
  <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
  <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="0" />
 </system>

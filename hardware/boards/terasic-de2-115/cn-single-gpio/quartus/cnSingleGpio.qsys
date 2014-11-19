@@ -7,7 +7,7 @@
    description=""
    tags=""
    categories="System" />
- <parameter name="bonusData"><![CDATA[bonusData 
+ <parameter name="bonusData"><![CDATA[bonusData
 {
    element $${FILENAME}
    {
@@ -51,14 +51,6 @@
          type = "boolean";
       }
    }
-   element sysid.control_slave
-   {
-      datum baseAddress
-      {
-         value = "4096";
-         type = "String";
-      }
-   }
    element lcd.control_slave
    {
       datum baseAddress
@@ -67,20 +59,15 @@
          type = "String";
       }
    }
-   element hex_pio
+   element sysid.control_slave
    {
-      datum _sortIndex
+      datum baseAddress
       {
-         value = "12";
-         type = "int";
-      }
-      datum sopceditor_expanded
-      {
-         value = "0";
-         type = "boolean";
+         value = "4096";
+         type = "String";
       }
    }
-   element key_pio
+   element epcs_flash_controller
    {
       datum _sortIndex
       {
@@ -93,11 +80,37 @@
          type = "boolean";
       }
    }
-   element lcd
+   element hex_pio
    {
       datum _sortIndex
       {
          value = "11";
+         type = "int";
+      }
+      datum sopceditor_expanded
+      {
+         value = "0";
+         type = "boolean";
+      }
+   }
+   element key_pio
+   {
+      datum _sortIndex
+      {
+         value = "13";
+         type = "int";
+      }
+      datum sopceditor_expanded
+      {
+         value = "0";
+         type = "boolean";
+      }
+   }
+   element lcd
+   {
+      datum _sortIndex
+      {
+         value = "10";
          type = "int";
       }
       datum megawizard_uipreferences
@@ -115,7 +128,7 @@
    {
       datum _sortIndex
       {
-         value = "13";
+         value = "12";
          type = "int";
       }
       datum sopceditor_expanded
@@ -144,7 +157,7 @@
    {
       datum _sortIndex
       {
-         value = "9";
+         value = "8";
          type = "int";
       }
       datum sopceditor_expanded
@@ -169,11 +182,11 @@
          type = "int";
       }
    }
-   element remote_update_cycloneiii_0
+   element remote_update
    {
       datum _sortIndex
       {
-         value = "8";
+         value = "15";
          type = "int";
       }
       datum sopceditor_expanded
@@ -182,35 +195,11 @@
          type = "boolean";
       }
    }
-   element hex_pio.s1
-   {
-      datum baseAddress
-      {
-         value = "32";
-         type = "String";
-      }
-   }
-   element remote_update_cycloneiii_0.s1
-   {
-      datum baseAddress
-      {
-         value = "2048";
-         type = "String";
-      }
-   }
    element status_led_pio.s1
    {
       datum baseAddress
       {
          value = "4128";
-         type = "String";
-      }
-   }
-   element key_pio.s1
-   {
-      datum baseAddress
-      {
-         value = "8224";
          type = "String";
       }
    }
@@ -222,11 +211,35 @@
          type = "String";
       }
    }
+   element hex_pio.s1
+   {
+      datum baseAddress
+      {
+         value = "32";
+         type = "String";
+      }
+   }
+   element key_pio.s1
+   {
+      datum baseAddress
+      {
+         value = "8224";
+         type = "String";
+      }
+   }
    element ledr_pio.s1
    {
       datum baseAddress
       {
          value = "48";
+         type = "String";
+      }
+   }
+   element remote_update.s1
+   {
+      datum baseAddress
+      {
+         value = "2048";
          type = "String";
       }
    }
@@ -247,7 +260,7 @@
    {
       datum _sortIndex
       {
-         value = "10";
+         value = "9";
          type = "int";
       }
       datum sopceditor_expanded
@@ -297,7 +310,7 @@
  <parameter name="projectName" value="cn-single-gpio.qpf" />
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1395222179186" />
+ <parameter name="timeStamp" value="1423058066063" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk50" internal="clk50.clk_in" type="clock" dir="end" />
@@ -360,7 +373,17 @@
    dir="end" />
  <interface
    name="epcs_flash"
-   internal="pcp_0.epcs_flash"
+   internal="epcs_flash_controller.external"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="openmac_0_mactimerout"
+   internal="openmac_0.macTimerOut"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="pcp_0_cpu_resetrequest"
+   internal="pcp_0.cpu_resetrequest"
    type="conduit"
    dir="end" />
  <module kind="clock_source" version="13.0" enabled="1" name="clk50">
@@ -568,7 +591,7 @@
    kind="altera_avalon_remote_update_cycloneiii"
    version="13.0"
    enabled="1"
-   name="remote_update_cycloneiii_0">
+   name="remote_update">
   <parameter name="clockFrequency" value="25000000" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone IV E" />
  </module>
@@ -592,6 +615,17 @@
   <parameter name="gui_sdcEn" value="true" />
   <parameter name="AUTO_DMACLK_CLOCK_RATE" value="100000000" />
   <parameter name="AUTO_PKTCLK_CLOCK_RATE" value="-1" />
+ </module>
+ <module
+   kind="altera_avalon_epcs_flash_controller"
+   version="13.0.1.99.2"
+   enabled="1"
+   name="epcs_flash_controller">
+  <parameter name="autoSelectASMIAtom" value="true" />
+  <parameter name="useASMIAtom" value="false" />
+  <parameter name="clockRate" value="50000000" />
+  <parameter name="deviceFamilyString" value="Cyclone IV E" />
+  <parameter name="autoInitializationFileName">$${FILENAME}_epcs_flash_controller</parameter>
  </module>
  <connection kind="clock" version="13.0" start="clk50.clk" end="lcd.clk" />
  <connection
@@ -848,12 +882,12 @@
    kind="clock"
    version="13.0"
    start="clk25.clk"
-   end="remote_update_cycloneiii_0.global_signals_clock" />
+   end="remote_update.global_signals_clock" />
  <connection
    kind="avalon"
    version="13.0"
    start="pcp_0.slow_bridge"
-   end="remote_update_cycloneiii_0.s1">
+   end="remote_update.s1">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x0800" />
   <parameter name="defaultConnection" value="false" />
@@ -862,17 +896,17 @@
    kind="reset"
    version="13.0"
    start="clk50.clk_reset"
-   end="remote_update_cycloneiii_0.global_signals_clock_reset" />
+   end="remote_update.global_signals_clock_reset" />
  <connection
    kind="reset"
    version="13.0"
    start="clk100.clk_reset"
-   end="remote_update_cycloneiii_0.global_signals_clock_reset" />
+   end="remote_update.global_signals_clock_reset" />
  <connection
    kind="reset"
    version="13.0"
    start="clk25.clk_reset"
-   end="remote_update_cycloneiii_0.global_signals_clock_reset" />
+   end="remote_update.global_signals_clock_reset" />
  <connection kind="clock" version="13.0" start="clk50.clk" end="openmac_0.mainClk" />
  <connection
    kind="clock"
@@ -947,6 +981,47 @@
    end="openmac_0.macIrq">
   <parameter name="irqNumber" value="0" />
  </connection>
+ <connection
+   kind="clock"
+   version="13.0"
+   start="clk50.clk"
+   end="epcs_flash_controller.clk" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk50.clk_reset"
+   end="epcs_flash_controller.reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk100.clk_reset"
+   end="epcs_flash_controller.reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk25.clk_reset"
+   end="epcs_flash_controller.reset" />
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="pcp_0.flash_bridge"
+   end="epcs_flash_controller.epcs_control_port">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="interrupt"
+   version="13.0"
+   start="pcp_0.gp_irq"
+   end="epcs_flash_controller.irq">
+  <parameter name="irqNumber" value="0" />
+ </connection>
+ <connection
+   kind="reset"
+   version="13.0"
+   start="pcp_0.jtag_reset"
+   end="epcs_flash_controller.reset" />
  <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
  <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="1" />
 </system>
