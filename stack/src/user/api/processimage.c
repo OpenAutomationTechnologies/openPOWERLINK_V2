@@ -87,7 +87,7 @@ typedef struct
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static tApiProcessImageInstance  instance_l;
+static tApiProcessImageInstance  instance_l = { { NULL, 0 }, { NULL, 0 } };
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -110,6 +110,7 @@ The function allocates memory for the input and output process images.
 \retval kErrorOk                        Process images are successfully allocated.
 \retval kErrorApiPIAlreadyAllocated     Process images were already allocated.
 \retval kErrorApiPIOutOfMemory          Process images could not be allocated.
+\retval kErrorApiNotInitialized         openPOWERLINK stack is not initialized.
 
 \ingroup module_api
 */
@@ -121,36 +122,42 @@ tOplkError oplk_allocProcessImage(UINT sizeProcessImageIn_p, UINT sizeProcessIma
     TRACE("%s(): Alloc(%u, %u)\n", __func__, sizeProcessImageIn_p,
                                    sizeProcessImageOut_p);
 
+    if (!ctrlu_stackIsInitialized())
+        return kErrorApiNotInitialized;
+
     if ((instance_l.inputImage.pImage != NULL) || (instance_l.outputImage.pImage != NULL))
     {
-        ret = kErrorApiPIAlreadyAllocated;
-        goto Exit;
+        return kErrorApiPIAlreadyAllocated;
     }
 
-    instance_l.inputImage.pImage = OPLK_MALLOC(sizeProcessImageIn_p);
-    if (instance_l.inputImage.pImage == NULL)
+    if (sizeProcessImageIn_p != 0)
     {
-        ret = kErrorApiPIOutOfMemory;
-        goto Exit;
+        instance_l.inputImage.pImage = OPLK_MALLOC(sizeProcessImageIn_p);
+        if (instance_l.inputImage.pImage == NULL)
+        {
+            return kErrorApiPIOutOfMemory;
+        }
+        instance_l.inputImage.imageSize = sizeProcessImageIn_p;
+        OPLK_MEMSET(instance_l.inputImage.pImage, 0x00, sizeProcessImageIn_p);
     }
-    instance_l.inputImage.imageSize = sizeProcessImageIn_p;
-    OPLK_MEMSET(instance_l.inputImage.pImage, 0x00, sizeProcessImageIn_p);
 
-
-    instance_l.outputImage.pImage = OPLK_MALLOC(sizeProcessImageOut_p);
-    if (instance_l.outputImage.pImage == NULL)
+    if (sizeProcessImageOut_p != 0)
     {
-        ret = kErrorApiPIOutOfMemory;
-        goto Exit;
+        instance_l.outputImage.pImage = OPLK_MALLOC(sizeProcessImageOut_p);
+        if (instance_l.outputImage.pImage == NULL)
+        {
+            // Output image allocation failed, therefore we free input image to be consistent
+            oplk_freeProcessImage();
+            return kErrorApiPIOutOfMemory;
+        }
+        instance_l.outputImage.imageSize = sizeProcessImageOut_p;
+        OPLK_MEMSET(instance_l.outputImage.pImage, 0x00, sizeProcessImageOut_p);
     }
-    instance_l.outputImage.imageSize = sizeProcessImageOut_p;
-    OPLK_MEMSET(instance_l.outputImage.pImage, 0x00, sizeProcessImageOut_p);
 
     TRACE("%s: Alloc(%p, %u, %p, %u)\n", __func__,
           instance_l.inputImage.pImage,  instance_l.inputImage.imageSize,
           instance_l.outputImage.pImage, instance_l.outputImage.imageSize);
 
-Exit:
     return ret;
 }
 
@@ -160,32 +167,35 @@ Exit:
 
 The function frees the allocated process images
 
-\return The function always returns kErrorOk.
+\return The function returns a \ref tOplkError error code.
+\retval kErrorOk                        Process images are successfully freed.
+\retval kErrorApiNotInitialized         openPOWERLINK stack is not initialized.
 
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-
 tOplkError oplk_freeProcessImage(void)
 {
-    tOplkError      Ret = kErrorOk;
+    tOplkError      ret = kErrorOk;
 
-    if ((instance_l.inputImage.pImage == NULL) &&
-        (instance_l.outputImage.pImage == NULL))
+    if (!ctrlu_stackIsInitialized())
+        return kErrorApiNotInitialized;
+
+    if (instance_l.inputImage.pImage != NULL)
     {
-        goto Exit;
+        OPLK_FREE(instance_l.inputImage.pImage);
+        instance_l.inputImage.pImage = NULL;
+        instance_l.inputImage.imageSize = 0;
     }
 
-    instance_l.inputImage.imageSize = 0;
-    instance_l.outputImage.imageSize = 0;
+    if (instance_l.outputImage.pImage != NULL)
+    {
+        OPLK_FREE(instance_l.outputImage.pImage);
+        instance_l.outputImage.pImage = NULL;
+        instance_l.outputImage.imageSize = 0;
+    }
 
-    OPLK_FREE(instance_l.inputImage.pImage);
-    instance_l.inputImage.pImage = NULL;
-    OPLK_FREE(instance_l.outputImage.pImage);
-    instance_l.outputImage.pImage = NULL;
-
-Exit:
-    return Ret;
+    return ret;
 }
 
 //------------------------------------------------------------------------------
@@ -210,8 +220,8 @@ The function links an object in the OD into a location in the process image.
 \return The function returns a \ref tOplkError error code.
 \retval kErrorOk                    Object is successfully linked.
 \retval kErrorApiInvalidParam       Invalid parameters specified.
-\retval kErrorApiPINotAllocated     Memory for process images is not allocated.
 \retval kErrorApiPISizeExceeded     Size of process image is exceeded.
+\retval kErrorApiNotInitialized     openPOWERLINK stack is not initialized.
 
 \ingroup module_api
 */
@@ -229,11 +239,11 @@ tOplkError oplk_linkProcessImageObject(UINT objIndex_p, UINT firstSubindex_p,
     if (pVarEntries_p == NULL)
         return kErrorApiInvalidParam;
 
-    if ((instance_l.inputImage.pImage == NULL) || (instance_l.outputImage.pImage == NULL))
-        return kErrorApiPINotAllocated;
-
     if (fOutputPI_p)
     {
+        if (instance_l.outputImage.pImage == NULL)
+            return kErrorApiPISizeExceeded;     // If there's no image, we are too big
+
         pVar = ((BYTE*)instance_l.outputImage.pImage) + offsetPI_p;
         if ((offsetPI_p + entrySize_p) > instance_l.outputImage.imageSize)
         {   // at least one entry should fit into the PI, but it doesn't
@@ -246,6 +256,9 @@ tOplkError oplk_linkProcessImageObject(UINT objIndex_p, UINT firstSubindex_p,
     }
     else
     {
+        if (instance_l.inputImage.pImage == NULL)
+            return kErrorApiPISizeExceeded;     // If there's no image, we are too big
+
         pVar = ((BYTE*)instance_l.inputImage.pImage) + offsetPI_p;
         if ((offsetPI_p + entrySize_p) > instance_l.inputImage.imageSize)
         {   // at least one entry should fit into the PI, but it doesn't
@@ -271,6 +284,7 @@ The function exchanges the input process image.
 \return The function returns a \ref tOplkError error code.
 \retval kErrorOk                    Input process image is successfully exchanged.
 \retval kErrorApiPINotAllocated     Memory for process images is not allocated.
+\retval kErrorApiNotInitialized     openPOWERLINK stack is not initialized.
 
 \ingroup module_api
 */
@@ -299,6 +313,7 @@ The function exchanges the output process image.
 \return The function returns a \ref tOplkError error code.
 \retval kErrorOk                    Output process image is successfully exchanged.
 \retval kErrorApiPINotAllocated     Memory for process images is not allocated.
+\retval kErrorApiNotInitialized     openPOWERLINK stack is not initialized.
 
 \ingroup module_api
 */
@@ -324,7 +339,8 @@ tOplkError oplk_exchangeProcessImageOut(void)
 
 The function returns the pointer to the input process image.
 
-\return The function returns a pointer to the input process image.
+\return The function returns a pointer to the input process image or NULL if the
+        stack is not initialized.
 
 \ingroup module_api
 */
@@ -343,7 +359,8 @@ void* oplk_getProcessImageIn(void)
 
 The function returns the pointer to the output process image.
 
-\return The function returns a pointer to the output process image.
+\return The function returns a pointer to the output process image or NULL if
+        the stack is not initialized.
 
 \ingroup module_api
 */
