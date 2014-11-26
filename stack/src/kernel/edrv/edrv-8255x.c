@@ -878,11 +878,12 @@ static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
 
             pCmdBlock = (tCommandBlock*)((edrvInstance_l.pCbVirtAdd) + (CB_REQUIRED_SIZE * edrvInstance_l.headTxDesc));
 
-            cmdState = pCmdBlock->cmdStat;
-            if ((pCmdBlock->cmdStat & CS_C) &&
-                (pCmdBlock->cmdStat & CS_SF_) &&
+
+            statusCommand = pCmdBlock->statusCommand;
+            if ((pCmdBlock->statusCommand & CS_C) &&
+                (pCmdBlock->statusCommand & CS_SF_) &&
                 (CS_SF_) &&
-                (pCmdBlock->cmdStat & (OP_TX << CS_OP_SHIFT)))
+                (pCmdBlock->statusCommand & (OP_TX << CS_OP_SHIFT)))
             {
                 // clear the status bits of the current CB
                 pCmdBlock->statusCommand &= 0XFFFF0000;
@@ -895,6 +896,7 @@ static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
 
                 edrvInstance_l.aCbVirtAddrBuf[edrvInstance_l.headTxDesc] = 0;
                 edrvInstance_l.aCbDmaAddrBuf[edrvInstance_l.headTxDesc] = 0;
+
                 // Increment Tx descriptor queue head pointer
                 edrvInstance_l.headTxDesc = ((edrvInstance_l.headTxDesc + 1) % MAX_CBS);
 
