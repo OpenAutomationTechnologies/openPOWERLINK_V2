@@ -5,6 +5,77 @@ Revision history of openPOWERLINK Protocol Stack {#page_revision_history}
 
 # Release 2 {#sect_revision_v2}
 
+## V2.1.0 {#sect_revision_v2_1_0}
+
+This is the first release of the V2.1 release series. It contains new features
+and functionalities. For productive environments it is recommended to use the
+latest stable release of the V2.0 series (\ref sect_revision_v2_0_2)
+
+Following is a summary of changes in V2.1.0. For a detailed revision history
+refer to the Git source code history.
+
+### New features:
+- Xilinx Zynq support for No-OS systems
+- Support Linux on Xilinx Zynq ARM
+- Linux Ethernet driver for Realtek-8111/8168
+- Support for detecting application/driver compatibility
+
+### Fixes:
+- Fix openMAC address decoder configuration
+- Fix clock crossing IP-Core
+- Fix MN issuing StatusRequest after NMTEnableReadyToOperate
+- Fix Add missing interrupt dummy parameters for PCP
+- Fix doxygen issues
+- Fix compiler warnings
+- Fix potential crash in PRes forwarding
+- Fix crashes on PDO copy
+- Fix potential NULL pointer access in process image functions
+- Connect sysid to host in dual processor design
+
+### Additions:
+- Add default gateway handling in embedded demos
+- Add Xilinx Zynq MN design for Z702 board
+- Add UART redirection module for ZC702 board
+- Add Zynq MN demo with Microblaze and openMAC in FPGA-part (PL)
+- Add Zynq FSBL CMake project
+- Add SD FAT16 file system library
+- Add high resolution timer module for Xilinx Zynq
+- Add Edrv module for Xilinx Zanq Gigabit Ethernet controller
+- Add cross toolchain file for Xilinx ARM
+- Using hardware divider on Nios II MN to improve performance
+- Add a kernel internal queue for fill Tx events on No-os systems
+- Add hostinterface IP-Core for Xilinx designs
+- Add parallel bus master IP-Core for Altera designs
+- Add Microblaze support in host interface driver
+- Add dualprocshm library for No-OS systems
+- Add architecture specific mutex implementation
+
+### Changes:
+- Improve documentation
+- Miscellaneous code cleanups
+- Cleanly split header files into public and private files
+- Change host interface to use circular buffer library
+- Update IP-Cores to version 1.0.2
+- Update Altera Quartus and Qsys demos
+- SDRAM timing constraints are added in INK demos
+- Add push buttons to TERASIC MN demo designs
+- Enhancements in demo_mn_embedded
+- Optimize kernel PDO module
+
+### Known Issues:
+- Xilinx Zynq MN:
+    - When following the steps in [xapp1093](http://www.xilinx.com/support/documentation/application_notes/xapp1093-amp-bare-metal-microblaze.pdf)
+      to run Microblaze without FSBL XMD-connect fails to stop/reset Microblaze.
+      Usually this error can be ignored, debugging Microblaze is possible although.
+      Otherwise, debugging the design with using the FSBL works.
+
+    - The address map to HP0 AXI slave port of PS is not forwarded to system.xml
+      by XPS automatically. Therefore, the `system.xml` in
+      `hardware/boards/xilinx-z702/mn-dual-shmem-gpio/sdk` is used instead.
+      If any changes are done in XPS (e.g. add some IP-Core, change addresses or
+      add Chip Scope instance), the `system.xml` in `hardware/boards/xilinx-z702/mn-dual-shmem-gpio/sdk`
+      must be revised accordingly.
+
 ## V2.0.2 {#sect_revision_v2_0_2}
 
 This is the final release of openPOWERLINK V2.0.2. This release is a stable
@@ -528,7 +599,7 @@ used for testing. It is not advised to use it in productive environments!
 - altera_nios2: Use Altera Enhanced Interrupt API
 - [FEATURE] Update of the Altera example for SYS TEC ECUcore-EP3C board
             with the new POWERLINK IP-core
-            
+
 ## V1.8 {#sect_revision_v1_8}
 
 - Enable PResChaining in Altera FPGA demo project
