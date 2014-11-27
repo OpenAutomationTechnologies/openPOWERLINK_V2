@@ -99,10 +99,10 @@ static tSyncThreadInstance      syncThreadInstance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static void system_handleTermSignal(int signum);
+static void handleTermSignal(int signum);
 
 #if defined(CONFIG_USE_SYNCTHREAD)
-static void* system_powerlinkSyncThread(void* arg);
+static void* powerlinkSyncThread(void* arg);
 #endif
 
 //============================================================================//
@@ -141,7 +141,7 @@ int system_init(void)
     // Register termination handler for signals with termination semantics
     struct sigaction new_action;
 
-    new_action.sa_handler = system_handleTermSignal;
+    new_action.sa_handler = handleTermSignal;
     (void)sigemptyset(&new_action.sa_mask);
     new_action.sa_flags = 0;
 
@@ -303,7 +303,7 @@ and remembers in a flag that the user or the system asked the program to shut do
 The application can than check this flag.
 */
 //------------------------------------------------------------------------------
-static void system_handleTermSignal(int signum)
+static void handleTermSignal(int signum)
 {
     switch (signum)
     {
@@ -328,7 +328,7 @@ This function implements the synchronous application thread.
 \param  arg             Needed for thread interface not used
 */
 //------------------------------------------------------------------------------
-static void* system_powerlinkSyncThread(void* arg)
+static void* powerlinkSyncThread(void* arg)
 {
     tSyncThreadInstance*     pSyncThreadInstance = (tSyncThreadInstance*)arg;
 
