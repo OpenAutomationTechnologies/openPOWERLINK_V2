@@ -215,12 +215,12 @@ The function writes a TXPDO to the PDO memory range.
 tOplkError pdoucal_setTxPdo(UINT channelId_p, BYTE* pPdo_p, WORD pdoSize_p)
 {
     OPLK_ATOMIC_T    temp;
+    UNUSED_PARAMETER(pPdo_p);       // Used to avoid compiler warning if OPLK_DCACHE_FLUSH is not set
+    UNUSED_PARAMETER(pdoSize_p);    // Used to avoid compiler warning if OPLK_DCACHE_FLUSH is not set
 
     OPLK_DCACHE_FLUSH(pPdo_p, pdoSize_p);
 
     //TRACE("%s() chan:%d wi:%d\n", __func__, channelId_p, pPdoMem_l->txChannelInfo[channelId_p].writeBuf);
-
-    //shmWriterSpinlock(&pPdoMem_l->txSpinlock);
 
     // Invalidate data cache already done in pdoucal_getTxPdoAdrs()
 
@@ -233,8 +233,6 @@ tOplkError pdoucal_setTxPdo(UINT channelId_p, BYTE* pPdo_p, WORD pdoSize_p)
     // Flush data cache for variables changed in this function
     OPLK_DCACHE_FLUSH(&(pPdoMem_l->rxChannelInfo[channelId_p].writeBuf), sizeof(OPLK_ATOMIC_T));
     OPLK_DCACHE_FLUSH(&(pPdoMem_l->rxChannelInfo[channelId_p].newData), sizeof(UINT8));
-
-    //shmWriterSpinUnlock(&pPdoMem_l->txSpinlock);
 
     //TRACE("%s() chan:%d new wi:%d\n", __func__, channelId_p, pPdoMem_l->txChannelInfo[channelId_p].writeBuf);
 
@@ -259,6 +257,7 @@ The function reads an RXPDO from the PDO buffer.
 tOplkError pdoucal_getRxPdo(BYTE** ppPdo_p, UINT channelId_p, WORD pdoSize_p)
 {
     OPLK_ATOMIC_T    readBuf;
+    UNUSED_PARAMETER(pdoSize_p);    // Used to avoid compiler warning if OPLK_DCACHE_INVALIDATE is not set
 
     // Invalidate data cache for addressed txChannelInfo
     OPLK_DCACHE_INVALIDATE(&(pPdoMem_l->rxChannelInfo[channelId_p]), sizeof(tPdoBufferInfo));
