@@ -202,6 +202,7 @@ static int __init powerlinkInit(void)
     int  err;
 
     DEBUG_LVL_ALWAYS_TRACE("PLK: powerlinkInit()  Driver build: %s / %s\n", __DATE__, __TIME__);
+    DEBUG_LVL_ALWAYS_TRACE("PLK: powerlinkInit()  Stack version: %s\n", PLK_DEFINED_STRING_VERSION);
     plkDev_g = 0;
     atomic_set(&openCount_g, 0);
 

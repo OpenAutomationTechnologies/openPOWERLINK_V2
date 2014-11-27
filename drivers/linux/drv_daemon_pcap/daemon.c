@@ -165,6 +165,7 @@ int  main (int argc, char** argv)
 
     PRINTF("----------------------------------------------------\n");
     PRINTF("openPOWERLINK kernel stack daemon\n");
+    PRINTF("using openPOWERLINK Stack: %s\n", PLK_DEFINED_STRING_VERSION);
     PRINTF("----------------------------------------------------\n");
 
     ret = ctrlk_init();
