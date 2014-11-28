@@ -47,11 +47,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <stdio.h>
 #include <unistd.h>
-#include <sys/timerfd.h>
 #include <pthread.h>
-#include <sys/syscall.h>
 #include <semaphore.h>
 #include <signal.h>
+
+// Needed for debugging to extract thread ID on Linux
+//#include <sys/syscall.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -479,7 +480,8 @@ static void* processThread(void* pArgument_p)
 
     UNUSED_PARAMETER(pArgument_p);
 
-    DEBUG_LVL_TIMERU_TRACE("%s() ThreadId:%d\n", __func__, syscall(SYS_gettid));
+    // Uncomment to show the thread ID on Linux (include must also be uncommented)!
+    // DEBUG_LVL_TIMERU_TRACE("%s() ThreadId:%d\n", __func__, syscall(SYS_gettid));
 
     sigemptyset(&awaitedSignal);
     sigaddset(&awaitedSignal, SIGRTMIN);
