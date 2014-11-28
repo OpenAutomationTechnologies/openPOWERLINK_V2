@@ -155,11 +155,11 @@ tOplkError eventkcal_init(void)
     if (pthread_create(&instance_l.threadId, NULL, eventThread, (void*)&instance_l) != 0)
         goto Exit;
 
-    schedParam.__sched_priority = KERNEL_EVENT_THREAD_PRIORITY;
+    schedParam.sched_priority = KERNEL_EVENT_THREAD_PRIORITY;
     if (pthread_setschedparam(instance_l.threadId, SCHED_FIFO, &schedParam) != 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s(): couldn't set thread scheduling parameters! %d\n",
-               __func__, schedParam.__sched_priority);
+               __func__, schedParam.sched_priority);
     }
 
 #if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 12)
