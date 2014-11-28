@@ -47,9 +47,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <stdio.h>
 #include <unistd.h>
-#include <sys/timerfd.h>
 #include <pthread.h>
-#include <sys/syscall.h>
 #include <semaphore.h>
 #include <signal.h>
 
