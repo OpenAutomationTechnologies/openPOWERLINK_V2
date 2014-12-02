@@ -1008,7 +1008,7 @@ tOplkError edrv_releaseRxBuffer(tEdrvRxBuffer* pRxBuffer_p)
         ULONG    flag;
 
         spin_lock_irqsave(&edrvInstance_l.spinLockRxBufRelease, flag);
-        edrvInstance_l.apRxBufFree[++edrvInstance_l.rxBufFreeTop] = pBuffer_p->pBuffer;
+        edrvInstance_l.apRxBufFree[++edrvInstance_l.rxBufFreeTop] = pRxBuffer_p->pBuffer;
         spin_unlock_irqrestore(&edrvInstance_l.spinLockRxBufRelease, flag);
 
         ret = kErrorOk;
@@ -1755,7 +1755,7 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p,
     }
 
     // Set Dma mask size to 32 bits
-    printk("enable DMA- size: %u\n", sizeof(dma_addr_t));
+    printk("enable DMA- size: %lu\n", sizeof(dma_addr_t));
     result = pci_set_dma_mask(pPciDev_p, DMA_BIT_MASK(32));
     if (result != 0)
     {
