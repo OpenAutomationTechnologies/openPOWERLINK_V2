@@ -192,12 +192,6 @@ fi
 # Add board includes to drv includes
 DRV_INCLUDES+=" ${BOARD_INCLUDE_PATH}"
 
-# Add includes
-for i in ${DRV_INCLUDES}
-do
-    DRV_GEN_ARGS+="--inc-dir ${i} "
-done
-
 # Add JTAG cable from board.settings
 if [ -n "${CFG_JTAG_CABLE}" ];
 then
@@ -209,6 +203,16 @@ fi
 LIB_STACK_DIR=$(find ${OUT_PATH} -type d -name "liboplk*")
 
 DRV_GEN_ARGS+="--use-lib-dir ${LIB_STACK_DIR} "
+
+# And add include to stack proj
+LIB_PROJ_DIR=${OPLK_BASE_DIR}/stack/proj/generic/$(basename $LIB_STACK_DIR)
+DRV_INCLUDES+=" ${LIB_PROJ_DIR}"
+
+# Add includes
+for i in ${DRV_INCLUDES}
+do
+    DRV_GEN_ARGS+="--inc-dir ${i} "
+done
 
 nios2-app-generate-makefile ${DRV_GEN_ARGS}
 RET=$?

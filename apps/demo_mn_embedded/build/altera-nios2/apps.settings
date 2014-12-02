@@ -46,7 +46,6 @@ ${OPLK_BASE_DIR}/apps/common/src/gpio \
 ${OPLK_BASE_DIR}/apps/common/src/lcd \
 ${OPLK_BASE_DIR}/apps/common/src/arp \
 ${OPLK_BASE_DIR}/stack/include \
-${OPLK_BASE_DIR}/stack/proj/generic/liboplkmnapp-hostif \
 "
 
 CFG_APP_ARGS="\
