@@ -84,6 +84,7 @@ fi
 BOARD_SETTINGS_FILE=${BOARD_PATH}/board.settings
 CFG_DRV_CPU_NAME=
 CFG_JTAG_CABLE=
+CFG_DRV_MAX_HEAP_BYTES=
 if [ -f ${BOARD_SETTINGS_FILE} ]; then
     source ${BOARD_SETTINGS_FILE}
 else
@@ -107,6 +108,12 @@ BSP_GEN_ARGS="${CFG_DRV_BSP_TYPE} ${BSP_PATH} ${BOARD_PATH}/quartus \
 --set hal.sys_clk_timer ${CFG_DRV_SYS_TIMER_NAME} \
 --cmd add_section_mapping .tc_i_mem ${CFG_DRV_TCI_MEM_NAME} \
 "
+
+if [ -n "${CFG_DRV_MAX_HEAP_BYTES}" ];
+then
+    BSP_GEN_ARGS+="--set hal.make.bsp_cflags_user_flags -DALT_MAX_HEAP_BYTES=${CFG_DRV_MAX_HEAP_BYTES} "
+    echo "INFO: Specify maximum heap size to ${CFG_DRV_MAX_HEAP_BYTES} BYTES!"
+fi
 
 if [ -z "${DEBUG}" ];
 then
