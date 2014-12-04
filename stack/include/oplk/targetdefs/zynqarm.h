@@ -46,7 +46,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <xil_types.h>
 #include <xil_io.h>
 #include <xil_cache.h>
-#include <lock.h>
 
 #include <oplk/basictypes.h>
 
@@ -85,11 +84,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Target memory barrier function
 #define OPLK_MEMBAR()               dmb()
 
+// Target lock
+#define OPLK_LOCK_T                 UINT8
+
 /* NOTE:
  * Pseudo atomic macro is applied with locking.
  */
 #define OPLK_ATOMIC_T       u8
-#define OPLK_LOCK_T         LOCK_T
 #define OPLK_ATOMIC_INIT(base)             \
     if (target_initLock(&base->lock) != 0) \
         return kErrorNoResource

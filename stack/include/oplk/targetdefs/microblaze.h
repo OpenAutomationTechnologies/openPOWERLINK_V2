@@ -47,13 +47,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <xil_types.h>
 #include <xil_io.h>
 #include <xil_cache.h>
-#include <lock.h>
 #ifdef __ZYNQ__
 // Required to include UART redirection for Zynq Microblaze
 #include <mb_uart.h>
 #endif
 #include <oplk/basictypes.h>
 
+//------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
 #define ROM_INIT                // variables will be initialized directly in ROM (means no copy from RAM in startup)
 #define ROM                     // code or variables mapped to ROM (i.e. flash)
                                 // usage: CONST BYTE ROM foo = 0x00;
@@ -91,12 +93,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Target memory barrier function
 #define OPLK_MEMBAR()               __asm("mbar 0")
 
+// Target lock
+#define OPLK_LOCK_T                 UINT8
+
 /* NOTE:
  * Pseudo atomic macro is applied with locking.
  */
-
 #define OPLK_ATOMIC_T    u8
-#define OPLK_LOCK_T      LOCK_T
 #define OPLK_ATOMIC_INIT(base) \
                         if (target_initLock(&base->lock) != 0) \
                             return kErrorNoResource

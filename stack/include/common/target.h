@@ -75,6 +75,11 @@ tOplkError target_lockMutex(OPLK_MUTEX_T mutexId_p);
 void       target_unlockMutex(OPLK_MUTEX_T mutexId_p);
 void       target_destroyMutex(OPLK_MUTEX_T mutexId_p);
 
+/* functions for lock implementation */
+int target_initLock(OPLK_LOCK_T* pSlock_p);
+int target_lock(void);
+int target_unlock(void);
+
 #ifdef __cplusplus
 }
 #endif

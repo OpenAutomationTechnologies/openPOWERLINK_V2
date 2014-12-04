@@ -46,10 +46,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string.h>
 #include <alt_types.h>
 #include <io.h>
-#include <lock.h>
 
 #include <oplk/basictypes.h>
 
+//------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
 #define ROM_INIT                // variables will be initialized directly in ROM (means no copy from RAM in startup)
 #define ROM                     // code or variables mapped to ROM (i.e. flash)
                                 // usage: CONST BYTE ROM foo = 0x00;
@@ -94,12 +96,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Target memory barrier function
 #define OPLK_MEMBAR()               __asm("sync")
 
+// Target lock
+#define OPLK_LOCK_T                 UINT8
+
 /* NOTE:
  * Nios II does not support atomic instructions, hence, pseudo atomic
  * macro is applied with locking.
  */
 #define OPLK_ATOMIC_T    alt_u8
-#define OPLK_LOCK_T      LOCK_T
 #define OPLK_ATOMIC_INIT(base) \
                         if (target_initLock(&base->lock) != 0) \
                             return kErrorNoResource

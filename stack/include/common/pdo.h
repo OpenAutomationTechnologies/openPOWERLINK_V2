@@ -144,9 +144,7 @@ typedef struct
     size_t              pdoMemSize;                                 ///< Size of the overall PDO memory
     tPdoBufferInfo      rxChannelInfo[D_PDO_RPDOChannels_U16];      ///< Array of RPDO channels
     tPdoBufferInfo      txChannelInfo[D_PDO_TPDOChannels_U16];      ///< Array of TPDO channels
-#ifdef OPLK_LOCK_T
     OPLK_LOCK_T         lock;                                       ///< Locking variable
-#endif
 } tPdoMemRegion;
 
 /**

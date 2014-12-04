@@ -40,7 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include "lock.h"
+#include <common/target.h>
 
 #include <common/oplkinc.h>
 
@@ -67,6 +67,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+// Define unlock value or take predefined one...
+#ifndef LOCK_UNLOCKED_C
+#define LOCK_UNLOCKED_C     0
+#endif
 
 //------------------------------------------------------------------------------
 // local types
@@ -97,7 +101,7 @@ This function initializes the lock instance.
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-int target_initLock(LOCK_T* pLock_p)
+int target_initLock(OPLK_LOCK_T* pLock_p)
 {
     UNUSED_PARAMETER(pLock_p);
 

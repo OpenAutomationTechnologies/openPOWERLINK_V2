@@ -104,6 +104,9 @@ void trace (const char* fmt, ...);
 // Target memory barrier function
 #define OPLK_MEMBAR()               ((void)0)
 
+// Target lock
+#define OPLK_LOCK_T                 UINT8
+
 #define OPLK_MUTEX_T                HANDLE
 
 #endif /* _INC_targetdefs_wince_H_ */

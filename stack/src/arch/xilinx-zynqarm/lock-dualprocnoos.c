@@ -41,7 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include "lock.h"
+#include <common/target.h>
 
 #include <stdlib.h>
 #include <xparameters.h>
@@ -72,6 +72,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #define LOCK_LOCAL_ID    (XPAR_CPU_ID + 1)
 
+// Define unlock value or take predefined one...
+#ifndef LOCK_UNLOCKED_C
+#define LOCK_UNLOCKED_C     0
+#endif
+
 #if (LOCK_LOCAL_ID == LOCK_UNLOCKED_C)
 #error "Change the to LOCK_LOCAL_ID to some unique BYTE value unequal 0x0!"
 #endif
@@ -83,7 +88,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static LOCK_T*   pLock_l = NULL;
+static OPLK_LOCK_T*   pLock_l = NULL;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -106,7 +111,7 @@ This function initializes the lock instance.
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-int target_initLock(LOCK_T* pLock_p)
+int target_initLock(OPLK_LOCK_T* pLock_p)
 {
     if (pLock_p == NULL)
         return -1;
