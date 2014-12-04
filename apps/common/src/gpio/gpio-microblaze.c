@@ -246,6 +246,8 @@ void gpio_setAppOutputs(UINT32 val_p)
 {
 #ifdef GPIO_OUTPUTS_BASE
     XGpio_WriteReg(GPIO_OUTPUTS_BASE, XGPIO_DATA_OFFSET, val_p);
+#else
+    UNUSED_PARAMETER(val_p);
 #endif
 }
 

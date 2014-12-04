@@ -203,6 +203,7 @@ static tOplkError processStateChangeEvent(tOplkApiEventType EventType_p,
 
     UNUSED_PARAMETER(EventType_p);
     UNUSED_PARAMETER(pUserArg_p);
+    UNUSED_PARAMETER(pNmtStateChange); // Avoid warning if debug is disabled
 
     PRINTF("StateChangeEvent(0x%X) originating event = 0x%X (%s)\n",
            pNmtStateChange->newNmtState,

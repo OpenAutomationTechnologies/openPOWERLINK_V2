@@ -45,6 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <user/eventucal.h>
 #include <user/eventucalintf.h>
+#include <user/eventu.h>
 
 #include <dualprocshm.h>
 

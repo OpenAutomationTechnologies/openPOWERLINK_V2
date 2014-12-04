@@ -47,6 +47,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdlib.h>
 #include <xparameters.h>
 #include <xil_io.h>
+#include <mb_interface.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //

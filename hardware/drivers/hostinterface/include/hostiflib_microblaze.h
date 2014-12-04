@@ -75,7 +75,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #else
 // Parallel Interface Host  External Processor
-#warning using external host. Ensure the interface base address is correct
+// Note: Using external host, ensure the interface base address is correct!
 #define HOSTIF_BASE             XPAR_AXI_EPC_0_PRH0_BASEADDR
 
 #ifdef XPAR_HOST_INTC_DEVICE_ID

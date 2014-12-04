@@ -2037,8 +2037,8 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
     tPlkFrame*          pFrame;
 #if (CONFIG_EDRV_AUTO_RESPONSE == FALSE)
     tEdrvTxBuffer*      pTxBuffer = NULL;
-#endif
     tDllkTxBufState*    pTxBufferState = NULL;
+#endif
     tDllReqServiceId reqServiceId;
     UINT                nodeId;
     UINT8               flag1;

@@ -43,6 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <xil_cache.h>
 #include <xscugic.h>
 #include <xil_exception.h>
@@ -89,10 +90,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DPSHM_DISABLE_SYNC_INTR() \
     XScuGic_DisableIntr(TARGET_SYNC_IRQ_ID, TARGET_SYNC_IRQ)
 
+#ifndef TRACE
 #ifndef NDEBUG
 #define TRACE(...) printf(__VA_ARGS__)
 #else
 #define TRACE(...)
+#endif
 #endif
 
 //------------------------------------------------------------------------------

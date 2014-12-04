@@ -197,6 +197,7 @@ tOplkError pdoucal_freeMem(UINT8* pMem_p, size_t memSize_p)
     tDualprocReturn    dualRet;
 
     UNUSED_PARAMETER(memSize_p);
+    UNUSED_PARAMETER(pMem_p); // Avoid warning if debug is disabled
 
     DEBUG_LVL_PDO_TRACE("%s() try to free address %p\n", __func__, pMem_p);
 

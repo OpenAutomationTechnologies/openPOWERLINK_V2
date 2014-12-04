@@ -415,6 +415,7 @@ static tOplkError processHistoryEvent(tOplkApiEventType EventType_p,
 
     UNUSED_PARAMETER(EventType_p);
     UNUSED_PARAMETER(pUserArg_p);
+    UNUSED_PARAMETER(pHistoryEntry); // Avoid warning if debug is disabled
 
     PRINTF("HistoryEntry: Type=0x%04X Code=0x%04X (0x%02X %02X %02X %02X %02X %02X %02X %02X)\n",
            pHistoryEntry->entryType, pHistoryEntry->errorCode,

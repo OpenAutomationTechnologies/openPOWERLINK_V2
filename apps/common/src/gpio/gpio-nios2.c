@@ -220,6 +220,8 @@ void gpio_setAppOutputs(UINT32 val_p)
 {
 #ifdef HEX_PIO_BASE
     IOWR_ALTERA_AVALON_PIO_DATA(HEX_PIO_BASE, val_p);
+#else
+    UNUSED_PARAMETER(val_p);
 #endif
 }
 

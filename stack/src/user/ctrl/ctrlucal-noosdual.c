@@ -259,7 +259,7 @@ tOplkError ctrlucal_checkKernelStack(void)
     tOplkError      ret;
     UINT16          magic;
     UINT16          retVal;
-    UINT32          timeout;
+    UINT32          timeout = 0;
     BOOL            fExit = FALSE;
 
     DEBUG_LVL_CTRL_TRACE("Checking for kernel stack...\n");

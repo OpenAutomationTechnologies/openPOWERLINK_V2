@@ -42,6 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <stddef.h>
+#include <stdio.h>
 #include <xil_types.h>
 #include <xil_cache.h>
 #include <xintc_l.h>
@@ -93,10 +94,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     XIntc_DisableIntr(TARGET_SYNC_IRQ_ID, TARGET_SYNC_IRQ |        \
                       Xil_In32(TARGET_IRQ_IC_BASE + XIN_IER_OFFSET))
 
+#ifndef TRACE
 #ifndef NDEBUG
 #define TRACE(...) printf(__VA_ARGS__)
 #else
 #define TRACE(...)
+#endif
 #endif
 
 //------------------------------------------------------------------------------
