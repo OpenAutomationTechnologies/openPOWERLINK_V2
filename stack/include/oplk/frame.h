@@ -266,7 +266,7 @@ typedef struct
     UINT16                  segmentSizeLe;
     UINT16                  reserved2;
     UINT8                   aCommandData[8];                // just reserve a minimum number of bytes as a placeholder
-}PACK_STRUCT tAsySdoCom;
+} PACK_STRUCT tAsySdoCom;
 
 
 // asynchronous SDO Sequence Header
@@ -342,4 +342,3 @@ typedef enum
 } tMsgType;
 
 #endif /* _INC_oplk_frame_H_ */
-

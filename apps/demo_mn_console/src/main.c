@@ -44,8 +44,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <stdio.h>
 #include <limits.h>
+#include <string.h>
 
 #include <oplk/oplk.h>
+
 #include <system/system.h>
 #include <getopt/getopt.h>
 #include <console/console.h>
@@ -296,11 +298,12 @@ static void loopMain(void)
     printf("Press Esc to leave the program\n");
     printf("Press r to reset the node\n");
     printf("-------------------------------\n\n");
+
     while (!fExit)
     {
         if (console_kbhit())
         {
-            cKey = (BYTE)console_getch();
+            cKey = (char)console_getch();
             switch (cKey)
             {
                 case 'r':
@@ -353,7 +356,6 @@ static void loopMain(void)
     console_getch();
 #endif
 
-    return;
 }
 
 //------------------------------------------------------------------------------
@@ -366,6 +368,8 @@ The function shuts down the demo application.
 static void shutdownPowerlink(void)
 {
     UINT                i;
+
+    // NMT_GS_OFF state has not yet been reached
     fGsOff_l = FALSE;
 
 #if !defined(CONFIG_KERNELSTACK_DIRECTLINK) && defined(CONFIG_USE_SYNCTHREAD)

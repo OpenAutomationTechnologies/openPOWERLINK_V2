@@ -44,7 +44,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplk/oplk.h>
 #include <oplk/debugstr.h>
 #include <console/console.h>
-
 #include "event.h"
 
 //============================================================================//
@@ -145,7 +144,7 @@ void initEvents(BOOL* pfGsOff_p)
 /**
 \brief  Process openPOWERLINK events
 
-The function implements the applications stack event handler.
+The function implements the application stack event handler.
 
 \param  EventType_p         Type of event
 \param  pEventArg_p         Pointer to union which describes the event in detail
@@ -241,7 +240,7 @@ static tOplkError processStateChangeEvent(tOplkApiEventType EventType_p,
 
     if (pfGsOff_l == NULL)
     {
-        console_printlog("Applications event module isn't initialized!\n");
+        console_printlog("Application event module is not initialized!\n");
         return kErrorGeneralError;
     }
 
@@ -677,4 +676,3 @@ static tOplkError setDefaultNodeAssignment(void)
 #endif
 
 ///\}
-

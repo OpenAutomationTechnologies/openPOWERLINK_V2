@@ -311,8 +311,8 @@ static tOplkError initProcessImage(void)
         return ret;
     }
 
-    pProcessImageIn_l = oplk_getProcessImageIn();
-    pProcessImageOut_l = oplk_getProcessImageOut();
+    pProcessImageIn_l = (PI_IN*)oplk_getProcessImageIn();
+    pProcessImageOut_l = (PI_OUT*)oplk_getProcessImageOut();
 
     /* link process variables used by CN to object dictionary */
     fprintf(stderr, "Linking process image vars:\n");

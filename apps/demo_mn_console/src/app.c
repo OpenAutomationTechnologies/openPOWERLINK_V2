@@ -172,7 +172,8 @@ tOplkError processSync(void)
     tOplkError          ret = kErrorOk;
     int                 i;
 
-    if (oplk_waitSyncEvent(100000) != kErrorOk)
+    ret = oplk_waitSyncEvent(100000);
+    if (ret != kErrorOk)
         return ret;
 
     ret = oplk_exchangeProcessImageOut();
@@ -187,7 +188,7 @@ tOplkError processSync(void)
 
     for (i = 0; (i < MAX_NODES) && (usedNodeIds_l[i] != 0); i++)
     {
-        /* Running Leds */
+        /* Running LEDs */
         /* period for LED flashing determined by inputs */
         nodeVar_l[i].period = (nodeVar_l[i].input == 0) ? 1 : (nodeVar_l[i].input * 20);
         if (cnt_l % nodeVar_l[i].period == 0)
@@ -258,16 +259,16 @@ static tOplkError initProcessImage(void)
     tOplkError      ret = kErrorOk;
 
     printf("Initializing process image...\n");
-    printf("Size of input process image: %d\n", (UINT32)sizeof(PI_IN));
-    printf("Size of output process image: %d\n", (UINT32)sizeof(PI_OUT));
+    printf("Size of input process image: %ld\n", sizeof(PI_IN));
+    printf("Size of output process image: %ld\n", sizeof(PI_OUT));
     ret = oplk_allocProcessImage(sizeof(PI_IN), sizeof(PI_OUT));
     if (ret != kErrorOk)
     {
         return ret;
     }
 
-    pProcessImageIn_l = oplk_getProcessImageIn();
-    pProcessImageOut_l = oplk_getProcessImageOut();
+    pProcessImageIn_l = (PI_IN*)oplk_getProcessImageIn();
+    pProcessImageOut_l = (PI_OUT*)oplk_getProcessImageOut();
 
     ret = oplk_setupProcessImage();
 

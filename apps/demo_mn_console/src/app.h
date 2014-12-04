@@ -4,7 +4,7 @@
 
 \brief  Definitions for MN running-light application
 
-The file contains the definition for the CN running-light application.
+The file contains the definition for the MN running-light application.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -69,4 +69,3 @@ tOplkError processSync(void);
 #endif
 
 #endif /* _INC_app_H_ */
-

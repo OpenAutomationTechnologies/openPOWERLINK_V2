@@ -50,6 +50,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplk/cfm.h>
 #include <oplk/event.h>
 
+
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
@@ -133,7 +134,6 @@ typedef struct
 {
     UINT                        nodeId;         ///< Node ID of the CN which generated the event
     tNmtNodeCommand             nodeCommand;    ///< Node command which will be issued to the CN as a result of the configuration process. See \ref tNmtNodeCommand
-
 } tOplkApiEventCfmResult;
 
 /**
@@ -146,8 +146,7 @@ typedef struct
 {
     tPlkFrame*                  pFrame;         ///< Pointer to the received ASnd frame
     size_t                      frameSize;      ///< Size of the received ASnd frame
-}
-tOplkApiEventRcvAsnd;
+} tOplkApiEventRcvAsnd;
 
 /**
 \brief PDO changed event

@@ -56,6 +56,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 int console_getch(void);
 int console_kbhit(void);
 void console_printlog(char* fmt, ...);
@@ -66,4 +67,3 @@ void console_printlogadd(char* fmt, ...);
 #endif
 
 #endif /* _INC_console_H_ */
-
