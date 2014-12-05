@@ -232,6 +232,9 @@ This function will be called by the systems process function.
 //------------------------------------------------------------------------------
 void eventkcal_process(void)
 {
+    if (instance_l.fInitialized == FALSE)
+        return;
+
     if (eventkcal_getEventCountCircbuf(kEventQueueKInt) > 0)
     {
         eventkcal_processEventCircbuf(kEventQueueKInt);
