@@ -47,7 +47,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplk/errordefs.h>
 #include <oplk/version.h>
 #include <oplk/debug.h>
-#include <oplk/ftracedebug.h>
 
 //------------------------------------------------------------------------------
 // const defines

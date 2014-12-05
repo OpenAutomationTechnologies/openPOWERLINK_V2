@@ -160,10 +160,6 @@ int system_init(void)
     }
 #endif
 
-    /* Enabling ftrace for debugging */
-    FTRACE_OPEN();
-    FTRACE_ENABLE(TRUE);
-
     return 0;
 }
 
@@ -178,8 +174,7 @@ The function shuts down the system.
 //------------------------------------------------------------------------------
 void system_exit(void)
 {
-    /* Disable ftrace debugging */
-    FTRACE_ENABLE(FALSE);
+
 }
 
 //------------------------------------------------------------------------------

@@ -262,12 +262,6 @@ static tOplkError processErrorWarningEvent(tOplkApiEventType EventType_p,
                      debugstr_getRetValStr(pInternalError->oplkError),
                      pInternalError->oplkError);
 
-    FTRACE_MARKER("Err/Warn: Source = %s (%02X) OplkError = %s (0x%03X)\n",
-                  debugstr_getEventSourceStr(pInternalError->eventSource),
-                  pInternalError->eventSource,
-                  debugstr_getRetValStr(pInternalError->oplkError),
-                  pInternalError->oplkError);
-
     // check additional argument
     switch (pInternalError->eventSource)
     {
@@ -278,17 +272,12 @@ static tOplkError processErrorWarningEvent(tOplkApiEventType EventType_p,
             console_printlog(" OrgSource = %s %02X\n",
                              debugstr_getEventSourceStr(pInternalError->errorArg.eventSource),
                              pInternalError->errorArg.eventSource);
-
-            FTRACE_MARKER(" OrgSource = %s %02X\n",
-                          debugstr_getEventSourceStr(pInternalError->errorArg.eventSource),
-                          pInternalError->errorArg.eventSource);
             break;
 
         case kEventSourceDllk:
             // error occurred within the data link layer (e.g. interrupt processing)
             // the DWORD argument contains the DLL state and the NMT event
             console_printlog(" val = %X\n", pInternalError->errorArg.uintArg);
-            FTRACE_MARKER(" val = %X\n", pInternalError->errorArg.uintArg);
             break;
 
         default:
@@ -346,5 +335,4 @@ static tOplkError processPdoChangeEvent(tOplkApiEventType EventType_p,
     return kErrorOk;
 }
 
-///\}
-
+/// \}

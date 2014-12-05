@@ -45,6 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <time.h>
 
 #include <common/oplkinc.h>
+#include <oplk/ftracedebug.h>
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -74,6 +75,10 @@ tOplkError target_init(void)
     sigaddset(&mask, SIGRTMIN + 1);
     pthread_sigmask(SIG_BLOCK, &mask, NULL);
 
+    /* Enabling ftrace for debugging */
+    FTRACE_OPEN();
+    FTRACE_ENABLE(TRUE);
+
     return Ret;
 }
 
@@ -89,6 +94,10 @@ The function cleans up target specific stuff.
 tOplkError target_cleanup(void)
 {
     tOplkError  Ret  = kErrorOk;
+
+    /* Disable ftrace debugging */
+    FTRACE_ENABLE(FALSE);
+
     return Ret;
 }
 
