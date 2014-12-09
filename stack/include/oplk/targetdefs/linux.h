@@ -109,9 +109,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     oldval = __sync_lock_test_and_set(address, newval);
 
 #ifndef __KERNEL__
-#define OPLK_MUTEX_T     sem_t*
+#define OPLK_MUTEX_T                sem_t*
 #else
-#define OPLK_MUTEX_T
+#define OPLK_MUTEX_T                void*
 #endif
 
 #endif /* _INC_targetdefs_linux_H_ */
