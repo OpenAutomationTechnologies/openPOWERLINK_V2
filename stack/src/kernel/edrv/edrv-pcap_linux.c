@@ -41,8 +41,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
+#include <common/ftracedebug.h>
 #include <kernel/edrv.h>
-#include <oplk/ftracedebug.h>
 
 #include <unistd.h>
 #include <pcap.h>

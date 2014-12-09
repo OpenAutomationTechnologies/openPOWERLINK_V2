@@ -43,8 +43,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
+#include <common/ftracedebug.h>
 #include <kernel/hrestimer.h>
-#include <oplk/ftracedebug.h>
 
 #include <signal.h>
 #include <semaphore.h>

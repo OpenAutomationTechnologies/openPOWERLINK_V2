@@ -45,7 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <time.h>
 
 #include <common/oplkinc.h>
-#include <oplk/ftracedebug.h>
+#include <common/ftracedebug.h>
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //

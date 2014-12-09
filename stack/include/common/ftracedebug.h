@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   oplk/ftracedebug.h
+\file   common/ftracedebug.h
 
 \brief  Definitions for Linux ftrace debug module
 
@@ -35,8 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_oplk_ftracedebug_H_
-#define _INC_oplk_ftracedebug_H_
+#ifndef _INC_common_ftracedebug_H_
+#define _INC_common_ftracedebug_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -81,5 +81,4 @@ void ftrace_writeTraceMarker(char* fmt, ...);
 }
 #endif
 
-#endif /* _INC_oplk_ftracedebug_H_ */
-
+#endif /* _INC_common_ftracedebug_H_ */

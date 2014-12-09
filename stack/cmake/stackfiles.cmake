@@ -533,7 +533,6 @@ SET(OPLK_HEADERS
     ${STACK_INCLUDE_DIR}/oplk/targetsystem.h
     ${STACK_INCLUDE_DIR}/oplk/version.h
     ${STACK_INCLUDE_DIR}/oplk/event.h
-    ${STACK_INCLUDE_DIR}/oplk/ftracedebug.h
     ${STACK_INCLUDE_DIR}/oplk/basictypes.h
     ${STACK_INCLUDE_DIR}/oplk/led.h
     ${STACK_INCLUDE_DIR}/oplk/nmt.h
@@ -566,6 +565,7 @@ SET(STACK_HEADERS
     ${STACK_INCLUDE_DIR}/common/oplkinc.h
     ${STACK_INCLUDE_DIR}/common/pdo.h
     ${STACK_INCLUDE_DIR}/common/target.h
+    ${STACK_INCLUDE_DIR}/common/ftracedebug.h
     ${STACK_INCLUDE_DIR}/common/timer.h
     )
 
