@@ -35,7 +35,7 @@ __NOTE:__ You can also generate a Visual Studio Solution and compile the
 libraries in Visual Studio. Please refer to the CMAKE documentation for
 generating Visual Studio solution files.
 
-## Building for embedded systems (Non-OS targets) (#sect_build_demos_noos)
+## Building for embedded systems (Non-OS targets) {#sect_build_demos_noos}
 
 ### Building for target Microblaze {#sect_build_demos_build_microblaze}
 
