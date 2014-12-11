@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   target-mutex.c
+\file   xilinx_microblaze/target-mutex.c
 
 \brief  Architecture specific mutex implementation
 

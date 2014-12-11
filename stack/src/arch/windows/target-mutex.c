@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   target-mutex.c
+\file   windows/target-mutex.c
 
 \brief  Architecture specific mutex implementation
 

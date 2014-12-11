@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   target-mutex.c
+\file   altera_nios2/target-mutex.c
 
 \brief  Architecture specific mutex implementation
 

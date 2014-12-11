@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   target-mutex.c
+\file   xilinx-zynqarm/target-mutex.c
 
 \brief  Architecture specific mutex implementation
 
