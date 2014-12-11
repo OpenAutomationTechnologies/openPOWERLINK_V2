@@ -15,6 +15,7 @@ via ASnd and SDO via UDP, as well as asynchronous communication via a Virtual
 Ethernet interface.
 
 Latest stable version: [2.0.2](\ref sect_revision_v2_0_2)
+Current version: [2.1.0](\ref sect_revision_v2_1_0)
 
 ## License
 
@@ -58,7 +59,7 @@ Support on openPOWERLINK is available via the online discussion forums:
 openPOWERLINK can be downloaded from its SourceForge project site:
 
 * Sourcecode: [tar.gz](http://sourceforge.net/projects/openpowerlink/files/
-openPOWERLINK/V2.0.2/openPOWERLINK-V2.0.2.tar.gz)
+openPOWERLINK/V2.1.0/openPOWERLINK-V2.1.0.tar.gz)
 
 
 ## Contributors
