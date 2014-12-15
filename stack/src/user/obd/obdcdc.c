@@ -70,7 +70,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #elif (TARGET_SYSTEM == _LINUX_)
 
     #include <unistd.h>
-    #include <sys/vfs.h>
     #include <sys/types.h>
     #include <sys/timeb.h>
     #include <utime.h>
