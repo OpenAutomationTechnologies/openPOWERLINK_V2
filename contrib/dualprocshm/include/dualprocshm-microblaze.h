@@ -47,6 +47,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <xil_cache.h>
 #include <xintc_l.h>
 #include <xil_io.h>
+#include <mb_interface.h>
 #include <xparameters.h>
 #include <targetsection.h>
 #include <dualprocshm-mem.h>
@@ -66,8 +67,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DPSHM_WRITE16(base, val)    Xil_Out16((UINT32)base, val);
 
 // Memory barrier
-// FIXME: Find other suitable way to handle memory barrier for Microblaze
-#define DPSHM_DMB()                 usleep(2)
+#define DPSHM_DMB()                 mbar(1)
 
 // Cache hadling
 #define DUALPROCSHM_FLUSH_DCACHE_RANGE(base, range) \

@@ -47,6 +47,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <xil_types.h>
 #include <xil_io.h>
 #include <xil_cache.h>
+#include <mb_interface.h>
 #ifdef __ZYNQ__
 // Required to include UART redirection for Zynq Microblaze
 #include <mb_uart.h>
@@ -91,7 +92,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OPLK_DCACHE_INVALIDATE(addr, len)   Xil_DCacheInvalidateRange((unsigned int) addr, len)
 
 // Target memory barrier function
-#define OPLK_MEMBAR()               __asm("mbar 0")
+#define OPLK_MEMBAR()               mbar(1)
 
 // Target lock
 #define OPLK_LOCK_T                 UINT8
