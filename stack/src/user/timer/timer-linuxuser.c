@@ -489,8 +489,11 @@ static void* processThread(void* pArgument_p)
         if (sigwaitinfo(&awaitedSignal, &signalInfo) > 0)
         {
             pTimer = (tTimeruData*)signalInfo.si_value.sival_ptr;
-            /* call callback function of timer */
-            cbTimer((ULONG)pTimer);
+            if (pTimer != NULL)
+                /* call callback function of timer */
+                cbTimer((ULONG)pTimer);
+            else
+                printf("%s() sival_ptr==NULL code=%d\n", __func__, signalInfo.si_code);
         }
     }
 
