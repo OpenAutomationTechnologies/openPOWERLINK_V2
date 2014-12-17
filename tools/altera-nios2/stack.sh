@@ -134,6 +134,7 @@ CFG_APP_CPU_NAME=
 CFG_DRV_CPU_NAME=
 CFG_OPENMAC=
 CFG_HOSTINTERFACE=
+CFG_DUALPROCSHM=
 CFG_NODE=
 CFG_BOARD_CFLAGS=
 if [ -f ${BOARD_SETTINGS_FILE} ]; then
@@ -216,6 +217,10 @@ if [ "${CFG_NODE}" == "MN" ] && [ -n "${CFG_DUALPROCSHM}" ]; then
         # For internal bus usage between two processors using dualprocshm interface
         LIB_SOURCES+=" ${DUALPROCSHM_DRIVER_SOURCES}"
         CFG_LIB_CFLAGS+=" -D__INT_BUS__"
+    elif [ "${CFG_DRV_BUS}" == "PCIE BUS" ]; then
+        # For PCIe bus usage between two processors using dualprocshm interface
+        LIB_SOURCES+=" ${DUALPROCSHM_PCIE_SOURCES}"
+        CFG_LIB_CFLAGS+=" -D__PCIE__"
     else
         echo "ERROR: Dualprocshm with ${CFG_DRV_BUS} interface for NIOS driver is not supported"
         exit 1

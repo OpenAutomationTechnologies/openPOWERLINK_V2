@@ -9,7 +9,7 @@ library without an OS which is using the dualprocshm interface.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Kalycito Infotech Private Limited.
+Copyright (c) 2015, Kalycito Infotech Private Limited.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+// Include memory file to override default queue sizes
+#include <dualprocshm-mem.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -59,7 +61,10 @@ The generic defines are valid for the whole openPOWERLINK stack.
 #define CONFIG_INCLUDE_SDOS
 #define CONFIG_INCLUDE_SDOC
 #define CONFIG_INCLUDE_SDO_ASND
-#define CONFIG_INCLUDE_VETH
+
+// TODO: PCIe interface does not support virtual Ethernet
+//       Add it through conditional compilation
+//#define CONFIG_INCLUDE_VETH
 
 #ifndef BENCHMARK_MODULES
 #define BENCHMARK_MODULES                   (0 |\
