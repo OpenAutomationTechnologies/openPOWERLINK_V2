@@ -30,8 +30,9 @@
 
 MESSAGE(STATUS "Adding CMake configuration options for Windows")
 
-OPTION(CFG_COMPILE_LIB_MN           "Compile openPOWERLINK MN library" ON)
-OPTION(CFG_COMPILE_LIB_CN           "Compile openPOWERLINK CN library" ON)
+OPTION(CFG_COMPILE_LIB_MN                       "Compile openPOWERLINK MN library" ON)
+OPTION(CFG_COMPILE_LIB_CN                       "Compile openPOWERLINK CN library" ON)
+OPTION(CFG_COMPILE_LIB_MNAPP_PCIEINTF           "Compile openPOWERLINK MN application library for PCIe interface" ON)
 
 OPTION(CFG_WINDOWS_DLL              "Build openPOWERLINK library as DLL" OFF)
 
@@ -43,6 +44,10 @@ OPTION (CFG_INCLUDE_MN_REDUNDANCY               "Compile MN redundancy functions
 # MN libraries
 IF(CFG_COMPILE_LIB_MN)
     ADD_SUBDIRECTORY(proj/windows/liboplkmn)
+ENDIF()
+
+IF(CFG_COMPILE_LIB_MNAPP_PCIEINTF)
+    ADD_SUBDIRECTORY(proj/windows/liboplkmnapp-pcieintf)
 ENDIF()
 
 # CN libraries
