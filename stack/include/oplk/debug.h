@@ -213,8 +213,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //  definition of TRACE
 //------------------------------------------------------------------------------
 #ifndef NDEBUG
-#define TRACE(...) trace(__VA_ARGS__)
-
+#if ((TARGET_SYSTEM == _WIN32_) && defined(_KERNEL_MODE))
+#define TRACE(...)      DbgPrint(__VA_ARGS__)
+#else
+#define TRACE(...)      trace(__VA_ARGS__)
+#endif
 #ifdef __cplusplus
 extern "C"
 {
@@ -251,8 +254,8 @@ void trace(const char* fmt, ...);
 // This macro doesn't print out C-file and line number of the failed assertion
 // but a string, which exactly names the mistake.
 //------------------------------------------------------------------------------
-#if !defined(ASSERTMSG) && !defined(NDEBUG)
-
+#ifndef ASSERTMSG
+#ifndef NDEBUG
 #define ASSERTMSG(expr, string) \
     if (!(expr)) \
     { \
@@ -260,9 +263,8 @@ void trace(const char* fmt, ...);
         for (;;);\
     }
 #else
-
 #define ASSERTMSG(expr, string)
-
-#endif
+#endif /* NDEBUG */
+#endif /* ASSERTMSG */
 
 #endif /* _INC_oplk_debug_H_ */

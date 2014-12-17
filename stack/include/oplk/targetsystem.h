@@ -219,7 +219,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #elif (TARGET_SYSTEM == _WIN32_)
 
+#ifdef _KERNEL_MODE
+#include <oplk/targetdefs/winkernel.h>
+#else
 #include <oplk/targetdefs/windows.h>
+#endif
 
 #elif (TARGET_SYSTEM == _WINCE_)
 

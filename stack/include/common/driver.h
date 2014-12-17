@@ -48,11 +48,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define PLK_CLASS_NAME    "plk"
-#define PLK_DEV_NAME      "plk" // used for "/dev" and "/proc" entry
-#define PLK_DRV_NAME      "plk"
-#define PLK_DEV_FILE      "/dev/plk"
-#define PLK_IOC_MAGIC     '='
 
 //------------------------------------------------------------------------------
 // typedef
@@ -60,8 +55,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 typedef struct
 {
     tDllCalQueue            queue;
-    void*                   pData;
     size_t                  size;
+    void*                   pData;
 } tIoctlDllCalAsync;
 
 typedef struct
@@ -76,6 +71,43 @@ typedef struct
     UINT32                  errVal;
 } tErrHndIoctl;
 
+/**
+\brief PDO memory structure
+
+The structure is used to retrieve the PDO memory allocated by openPOWERLINK
+kernel stack and mapped into user virtual address space.
+*/
+typedef struct
+{
+    UINT32                  memSize;        ///< Size of PDO to be allocated and mapped
+    UINT32                  pdoMemOffset;   ///< Offset of PDO memory returned by kernel
+} tPdoMem;
+
+/**
+\brief Benchmark memory structure
+
+The structure is used to retrieve the benchmark port(PIO in FPGA) memory
+in the kernel stack. The memory is mapped by the driver in the user virtual
+address space before sharing.
+*/
+typedef struct
+{
+    void*                   pBaseAddr;      ///< Pointer to the benchmark address returned by kernel
+} tBenchmarkMem;
+
+/**
+\brief Memory parameters for a mapped memory
+
+The structure contains parameters used to map openPOWERLINK kernel layer
+memory into user layer.
+*/
+typedef struct
+{
+    void*                   pKernelAddr;    ///< Pointer to the Kernel address
+    void*                   pUserAddr;      ///< Pointer to the User address
+    UINT32                  size;           ///< Size of the shared memory
+} tMemStruc;
+
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
@@ -85,6 +117,8 @@ typedef struct
 //------------------------------------------------------------------------------
 #if (TARGET_SYSTEM == _LINUX_)
 #include <common/driver-linux.h>
+#elif (TARGET_SYSTEM == _WIN32_)
+#include <common/driver-windows.h>
 #endif
 
 #endif /* _INC_common_driver_H_ */
