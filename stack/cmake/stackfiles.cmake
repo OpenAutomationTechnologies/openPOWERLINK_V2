@@ -128,6 +128,10 @@ SET(CTRL_UCAL_DUALPROCSHM_SOURCES
     ${USER_SOURCE_DIR}/ctrl/ctrlucal-noosdual.c
     )
 
+SET(CTRL_UCAL_WINDOWSIOCTL_SOURCES
+    ${USER_SOURCE_DIR}/ctrl/ctrlucal-winioctl.c
+    )
+
 ################################################################################
 # User DLL CAL sources
 
@@ -137,6 +141,10 @@ SET(DLL_UCAL_CIRCBUF_SOURCES
 
 SET(DLL_UCAL_LINUXIOCTL_SOURCES
     ${USER_SOURCE_DIR}/dll/dllucal-ioctl.c
+    )
+
+SET(DLL_UCAL_WINDOWSIOCTL_SOURCES
+    ${USER_SOURCE_DIR}/dll/dllucal-winioctl.c
     )
 
 ################################################################################
@@ -160,6 +168,10 @@ SET(ERRHND_UCAL_HOSTIF_SOURCES
 
 SET(ERRHND_UCAL_DUALPROCSHM_SOURCES
     ${USER_SOURCE_DIR}/errhnd/errhnducal-noosdual.c
+    )
+
+SET(ERRHND_UCAL_WINDOWSIOCTL_SOURCES
+    ${USER_SOURCE_DIR}/errhnd/errhnducal-winioctl.c
     )
 
 ################################################################################
@@ -194,6 +206,11 @@ SET(EVENT_UCAL_DUALPROCSHM_SOURCES
     ${USER_SOURCE_DIR}/event/eventucalintf-circbuf.c
     )
 
+SET(EVENT_UCAL_WINDOWSPCIE_SOURCES
+    ${USER_SOURCE_DIR}/event/eventucalintf-circbuf.c
+    ${USER_SOURCE_DIR}/event/eventucal-winpcie.c
+    )
+
 ################################################################################
 # User PDO CAL sources
 SET(PDO_UCAL_LOCAL_SOURCES
@@ -219,6 +236,11 @@ SET(PDO_UCAL_HOSTIF_SOURCES
 SET(PDO_UCAL_DUALPROCSHM_SOURCES
     ${USER_SOURCE_DIR}/pdo/pdoucalmem-noosdual.c
     ${USER_SOURCE_DIR}/pdo/pdoucalsync-noosdual.c
+    )
+
+SET(PDO_UCAL_WINDOWSMMAPIOCTL_SOURCES
+    ${USER_SOURCE_DIR}/pdo/pdoucalsync-winioctl.c
+    ${USER_SOURCE_DIR}/pdo/pdoucalmem-winioctl.c
     )
 
 ################################################################################

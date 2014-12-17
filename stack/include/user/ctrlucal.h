@@ -71,7 +71,8 @@ tOplkError          ctrlucal_checkKernelStack(void);
 void                ctrlucal_storeInitParam(tCtrlInitParam* pInitParam_p);
 tOplkError          ctrlucal_readInitParam(tCtrlInitParam* pInitParam_p);
 OPLK_FILE_HANDLE    ctrlucal_getFd(void);
-
+tOplkError          ctrlucal_getMappedMem(UINT32 kernelOffs_p, UINT32 size_p,
+                                          UINT8** ppUserMem_p);
 #ifdef __cplusplus
 }
 #endif
