@@ -13,7 +13,7 @@ openPOWERLINK demo applications.
 /*------------------------------------------------------------------------------
 Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
+Copyright (c) 2015, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -76,14 +76,33 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
+#if defined(CONFIG_USE_SYNCTHREAD)
+/**
+\brief  Local instance for synchronization thread
+
+This structure contains local variables used by the synchronization thread.
+*/
+typedef struct
+{
+    HANDLE      hSyncThreadHandle;      ///< Synchronization thread handle
+    tSyncCb     pfnSyncCb;              ///< Pointer to synchronization callback routine
+    BOOL        fThreadExit;            ///< Flag to communicate with main thread
+} tSyncThreadInstance;
+#endif
 
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
+#if defined(CONFIG_USE_SYNCTHREAD)
+static tSyncThreadInstance syncThreadInstance_l;
+#endif
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
+#if defined(CONFIG_USE_SYNCTHREAD)
+static DWORD WINAPI syncThread(LPVOID pArg_p);
+#endif
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -109,6 +128,10 @@ int system_init(void)
     // lower the priority of this thread
     SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_IDLE);
 
+#if defined(CONFIG_USE_SYNCTHREAD)
+    syncThreadInstance_l.fThreadExit = FALSE;
+#endif
+
     return 0;
 }
 
@@ -123,7 +146,9 @@ The function shuts down the system.
 //------------------------------------------------------------------------------
 void system_exit(void)
 {
-
+#if defined(CONFIG_USE_SYNCTHREAD)
+    CloseHandle(syncThreadInstance_l.hSyncThreadHandle);
+#endif
 }
 
 /**
@@ -175,9 +200,16 @@ The function starts the thread used for synchronous data handling.
 void system_startSyncThread(tSyncCb pfnSync_p)
 {
     // Currently threads are not used on Windows
-    UNUSED_PARAMETER(pfnSync_p);
-}
+    syncThreadInstance_l.pfnSyncCb = pfnSync_p;
 
+    syncThreadInstance_l.hSyncThreadHandle = CreateThread(NULL,          // Default security attributes
+                                                          0,             // Use Default stack size
+                                                          syncThread,    // Thread routine
+                                                          NULL,          // Argument to the thread routine
+                                                          0,             // Use default creation flags
+                                                          NULL           // Returned thread Id
+                                                          );
+}
 
 //------------------------------------------------------------------------------
 /**
@@ -190,7 +222,11 @@ The function stops the thread used for synchronous data handling.
 //------------------------------------------------------------------------------
 void system_stopSyncThread(void)
 {
-    // Currently threads are not used on Windows
+    CancelIoEx(syncThreadInstance_l.hSyncThreadHandle, NULL);
+
+    // Signal to stop the thread and wait for the thread to terminate
+    syncThreadInstance_l.fThreadExit = TRUE;
+    WaitForSingleObject(syncThreadInstance_l.hSyncThreadHandle, INFINITE);
 }
 #endif
 
@@ -199,5 +235,44 @@ void system_stopSyncThread(void)
 //============================================================================//
 /// \name Private Functions
 /// \{
+
+#if defined(CONFIG_USE_SYNCTHREAD)
+//------------------------------------------------------------------------------
+/**
+\brief  Synchronous application thread
+
+This function implements the synchronous application thread.
+
+\param  pArg_p    Thread parameter. Not used!
+
+\return The function returns the thread exit code.
+*/
+//------------------------------------------------------------------------------
+static DWORD WINAPI syncThread(LPVOID pArg_p)
+{
+    tOplkError ret;
+
+    UNUSED_PARAMETER(pArg_p);
+
+    while (!syncThreadInstance_l.fThreadExit)
+    {
+        if (syncThreadInstance_l.pfnSyncCb)
+        {
+            ret = syncThreadInstance_l.pfnSyncCb();
+            if (ret != kErrorOk)
+            {
+                break;
+            }
+        }
+        else
+        {
+            break;
+        }
+    }
+
+    printf("Exiting Sync Thread\n");
+    return 0;
+}
+#endif
 
 /// \}
