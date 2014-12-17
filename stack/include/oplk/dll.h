@@ -159,6 +159,7 @@ The structure contains all information about a POWERLINK frame.
 typedef struct
 {
     UINT            frameSize;                      ///< Size of the frame
+    UINT32          padding1;                       ///< Padding variable 1
     tPlkFrame*      pFrame;                         ///< Pointer to the frame
 } tFrameInfo;
 
@@ -233,6 +234,7 @@ typedef struct
     UINT32              defaultGateway;                 ///< IP default gateway address
     UINT8               sHostname[32];                  ///< Hostname
     UINT8               aVendorSpecificExt2[48];        ///< Vendor-specific extenstion field 2
+    UINT32              padding1;                       ///< Padding variable 1
 } tDllIdentParam;
 
 /**
