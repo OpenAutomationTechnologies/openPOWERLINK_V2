@@ -364,13 +364,10 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     }
     printk("Done \n");
     // local MAC address might have been changed in initOnePlatformDev
-    OPLK_MEMCPY(pEdrvInitParam_p->aMacAddr,
-                edrvInstance_l.initParam.aMacAddr, 6);
-
     printk("Local MAC = ");
     for (loop = 0; loop < 6; loop++)
     {
-        printk("0x%02x ", pEdrvInitParam_p->aMacAddr[loop]);
+        printk("0x%02x ", edrvInstance_l.initParam.aMacAddr[loop]);
     }
     printk("\n");
 
@@ -394,6 +391,22 @@ tOplkError edrv_shutdown(void)
     platform_driver_unregister(&edrvDriver_l);
 
     return kErrorOk;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Get MAC address
+
+This function returns the MAC address of the Ethernet controller
+
+\return The function returns a pointer to the MAC address.
+
+\ingroup module_edrv
+*/
+//------------------------------------------------------------------------------
+UINT8* edrv_getMacAddr(void)
+{
+    return edrvInstance_l.initParam.aMacAddr;
 }
 
 //------------------------------------------------------------------------------

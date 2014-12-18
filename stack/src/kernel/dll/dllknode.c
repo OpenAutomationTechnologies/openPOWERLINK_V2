@@ -1042,7 +1042,7 @@ static tOplkError setupLocalNodeCn(void)
     dllkfilter_setupPreqFilter(&dllkInstance_g.aFilter[DLLK_FILTER_PREQ],
                                dllkInstance_g.dllConfigParam.nodeId,
                                &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES],
-                               &dllkInstance_g.aLocalMac[0]);
+                               edrv_getMacAddr());
 
     // setup PRes filter
 #if CONFIG_DLL_PRES_FILTER_COUNT < 0

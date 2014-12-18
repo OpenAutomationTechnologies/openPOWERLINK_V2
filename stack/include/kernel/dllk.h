@@ -79,18 +79,6 @@ typedef tOplkError (*tDllkCbAsync)(tFrameInfo* pFrameInfo_p,
                                    tEdrvReleaseRxBuffer* pReleaseRxBuffer_p);
 
 /**
-\brief Structure defining DLLk init parameters
-
-This structure defines the init parameters of the POWERLINK Data Link Layer
-kernel module.
-*/
-typedef struct
-{
-    UINT8               aLocalMac[6];                   ///< Ethernet MAC address
-    tHwParam            hwParam;                        ///< Hardware parameters
-} tDllkInitParam;
-
-/**
 \brief Structure defining node informations
 
 This structure defines informations about a POWERLINK node in the network.
@@ -161,7 +149,7 @@ typedef enum
 extern "C" {
 #endif
 
-tOplkError dllk_addInstance(tDllkInitParam* pInitParam_p);
+tOplkError dllk_addInstance(void);
 tOplkError dllk_delInstance(void);
 tOplkError dllk_config(tDllConfigParam* pDllConfigParam_p);
 tOplkError dllk_setIdentity(tDllIdentParam* pDllIdentParam_p);
@@ -171,6 +159,10 @@ tOplkError dllk_setAsndServiceIdFilter(tDllAsndServiceId ServiceId_p, tDllAsndFi
 void       dllk_regRpdoHandler(tDllkCbProcessRpdo pfnDllkCbProcessRpdo_p);
 void       dllk_regTpdoHandler(tDllkCbProcessTpdo pfnDllkCbProcessTpdo_p);
 tSyncCb    dllk_regSyncHandler(tSyncCb pfnCbSync_p);
+
+#if defined(CONFIG_INCLUDE_NMT_MN)
+tOplkError dllk_cbCyclicError(tOplkError errorCode_p, tEdrvTxBuffer* pTxBuffer_p);
+#endif
 
 #if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC != FALSE || CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC != FALSE
 tOplkError dllk_releaseRxFrame(tPlkFrame* pFrame_p, UINT uiFrameSize_p);

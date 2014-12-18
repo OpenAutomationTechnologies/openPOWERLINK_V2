@@ -101,10 +101,6 @@ static tEdrvTxBuffer        aDllkTxBuffer_l[DLLK_TXFRAME_COUNT];
 // local function prototypes
 //------------------------------------------------------------------------------
 /* Cycle/Sync Callback functions */
-#if defined(CONFIG_INCLUDE_NMT_MN)
-static tOplkError cbCyclicError(tOplkError errorCode_p, tEdrvTxBuffer* pTxBuffer_p);
-#endif
-
 #if (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER)
 static tOplkError cbCnTimerSync(void);
 static tOplkError cbCnLossOfSync(void);
@@ -130,11 +126,10 @@ The function adds a DLL kernel module instance.
 \ingroup module_dllk
 */
 //------------------------------------------------------------------------------
-tOplkError dllk_addInstance(tDllkInitParam* pInitParam_p)
+tOplkError dllk_addInstance(void)
 {
     tOplkError      ret = kErrorOk;
     UINT            index;
-    tEdrvInitParam  EdrvInitParam;
 
     // reset instance structure
     OPLK_MEMSET(&dllkInstance_g, 0, sizeof(dllkInstance_g));
@@ -184,31 +179,11 @@ tOplkError dllk_addInstance(tDllkInitParam* pInitParam_p)
     }
 #endif
 
-    // initialize Edrv
-    OPLK_MEMCPY(EdrvInitParam.aMacAddr, pInitParam_p->aLocalMac, 6);
-    EdrvInitParam.hwParam = pInitParam_p->hwParam;
-    EdrvInitParam.pfnRxHandler = dllkframe_processFrameReceived;
-    if ((ret = edrv_init(&EdrvInitParam)) != kErrorOk)
-        return ret;
-
-    // copy local MAC address from Ethernet driver back to local instance structure
-    // because Ethernet driver may have read it from controller EEPROM
-    OPLK_MEMCPY(dllkInstance_g.aLocalMac, EdrvInitParam.aMacAddr, 6);
-    OPLK_MEMCPY(pInitParam_p->aLocalMac, EdrvInitParam.aMacAddr, 6);
-
     // initialize TxBuffer array
     for (index = 0; index < dllkInstance_g.maxTxFrames; index++)
     {
         dllkInstance_g.pTxBuffer[index].pBuffer = NULL;
     }
-
-#if defined(CONFIG_INCLUDE_NMT_MN)
-    if ((ret = edrvcyclic_init()) != kErrorOk)
-        return ret;
-
-    if ((ret = edrvcyclic_regErrorHandler(cbCyclicError)) != kErrorOk)
-        return ret;
-#endif
 
     return ret;
 }
@@ -231,10 +206,6 @@ tOplkError dllk_delInstance(void)
     // reset state
     dllkInstance_g.dllState = kDllGsInit;
 
-#if defined (CONFIG_INCLUDE_NMT_MN)
-    ret = edrvcyclic_shutdown();
-#endif
-
 #if (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER)
     ret = synctimer_delInstance();
 #endif
@@ -243,7 +214,6 @@ tOplkError dllk_delInstance(void)
     ret = hrestimer_delInstance();
 #endif
 
-    ret = edrv_shutdown();
     return ret;
 }
 
@@ -830,12 +800,6 @@ tOplkError dllk_postEvent(tEventType eventType_p)
     return ret;
 }
 
-//============================================================================//
-//            P R I V A T E   F U N C T I O N S                               //
-//============================================================================//
-/// \name Private Functions
-/// \{
-
 #if defined CONFIG_INCLUDE_NMT_MN
 //------------------------------------------------------------------------------
 /**
@@ -848,9 +812,11 @@ error occurred.
 \param  pTxBuffer_p         Pointer to TxBuffer structure of transmitted frame.
 
 \return The function returns a tOplkError error code.
+
+\ingroup module_dllk
 */
 //------------------------------------------------------------------------------
-static tOplkError cbCyclicError(tOplkError errorCode_p, tEdrvTxBuffer* pTxBuffer_p)
+tOplkError dllk_cbCyclicError(tOplkError errorCode_p, tEdrvTxBuffer* pTxBuffer_p)
 {
     tOplkError      ret = kErrorOk;
     tNmtState       nmtState;
@@ -900,6 +866,12 @@ Exit:
     return ret;
 }
 #endif
+
+//============================================================================//
+//            P R I V A T E   F U N C T I O N S                               //
+//============================================================================//
+/// \name Private Functions
+/// \{
 
 #if (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER)
 //------------------------------------------------------------------------------

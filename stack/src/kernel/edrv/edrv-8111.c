@@ -686,8 +686,8 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     printk("%s local MAC = ", __FUNCTION__);
     for (index = 0; index < 6; index++)
     {
-        pEdrvInitParam_p->aMacAddr[index] = EDRV_REGB_READ((RW_REGDW_MAC_ADDR_BANK_0 + index));
-        printk("%02X ", (UINT)pEdrvInitParam_p->aMacAddr[index]);
+        edrvInstance_l.initParam.aMacAddr[index] = EDRV_REGB_READ((RW_REGDW_MAC_ADDR_BANK_0 + index));
+        printk("%02X ", (UINT)edrvInstance_l.initParam.aMacAddr[index]);
     }
 
     printk("\n");
@@ -714,6 +714,22 @@ tOplkError edrv_shutdown(void)
     pci_unregister_driver(&edrvDriver_l);
 
     return kErrorOk;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Get MAC address
+
+This function returns the MAC address of the Ethernet controller
+
+\return The function returns a pointer to the MAC address.
+
+\ingroup module_edrv
+*/
+//------------------------------------------------------------------------------
+UINT8* edrv_getMacAddr(void)
+{
+    return edrvInstance_l.initParam.aMacAddr;
 }
 
 //------------------------------------------------------------------------------

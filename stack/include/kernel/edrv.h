@@ -244,6 +244,7 @@ extern "C" {
 
 tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p);
 tOplkError edrv_shutdown(void);
+UINT8*     edrv_getMacAddr(void);
 tOplkError edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p);
 tOplkError edrv_clearRxMulticastMacAddr(UINT8* pMacAddr_p);
 tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p);

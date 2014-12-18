@@ -153,8 +153,7 @@ void dllkfilter_setupFilters(void)
                             &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONPLK]);
 #if defined(CONFIG_INCLUDE_VETH)
     setupVethUnicast(&dllkInstance_g.aFilter[DLLK_FILTER_VETH_UNICAST],
-                     &dllkInstance_g.aLocalMac[0],
-                     TRUE);
+                     edrv_getMacAddr(), TRUE);
     setupVethBroadcast(&dllkInstance_g.aFilter[DLLK_FILTER_VETH_BROADCAST],
                        TRUE);
 #endif

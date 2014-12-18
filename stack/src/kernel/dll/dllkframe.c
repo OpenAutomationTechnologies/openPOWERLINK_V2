@@ -643,7 +643,7 @@ tOplkError dllkframe_checkFrame(tPlkFrame* pFrame_p, UINT frameSize_p)
         if (ami_getUint48Be(pFrame_p->aSrcMac) == 0)
         {
             // source MAC address
-            OPLK_MEMCPY(&pFrame_p->aSrcMac[0], &dllkInstance_g.aLocalMac[0], 6);
+            OPLK_MEMCPY(&pFrame_p->aSrcMac[0], edrv_getMacAddr(), 6);
         }
 
         // check ethertype
@@ -834,7 +834,7 @@ tOplkError dllkframe_createTxFrame(UINT* pHandle_p, UINT* pFrameSize_p,
         {   // fill out Frame only if it is a POWERLINK frame
             ami_setUint16Be(&pTxFrame->etherType, C_DLL_ETHERTYPE_EPL);
             ami_setUint8Le(&pTxFrame->srcNodeId, (BYTE)dllkInstance_g.dllConfigParam.nodeId);
-            OPLK_MEMCPY(&pTxFrame->aSrcMac[0], &dllkInstance_g.aLocalMac[0], 6);
+            OPLK_MEMCPY(&pTxFrame->aSrcMac[0], edrv_getMacAddr(), 6);
 
             switch (msgType_p)
             {
@@ -1563,7 +1563,7 @@ tOplkError dllkframe_presChainingDisable(void)
     if (dllkInstance_g.fPrcEnabled != FALSE)
     {   // relocate PReq filter from PResMN to PReq
         OPLK_MEMCPY(&dllkInstance_g.aFilter[DLLK_FILTER_PREQ].aFilterValue[0],
-                    &dllkInstance_g.aLocalMac[0], 6);
+                    edrv_getMacAddr(), 6);
         ami_setUint8Be(&dllkInstance_g.aFilter[DLLK_FILTER_PREQ].aFilterValue[14],
                        kMsgTypePreq);
         ami_setUint8Be(&dllkInstance_g.aFilter[DLLK_FILTER_PREQ].aFilterValue[15],
@@ -2188,7 +2188,7 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
                 if (syncControl & PLK_SYNC_DEST_MAC_ADDRESS_VALID)
                 {
                     if (OPLK_MEMCMP(&pFrame->data.soa.payload.syncRequest.aDestMacAddress,
-                                    &dllkInstance_g.aLocalMac, 6) != 0)
+                                    edrv_getMacAddr(), 6) != 0)
                     {   // DestMacAddress valid but unequal to own MAC address -> SyncReq is ignored
                         goto Exit;
                     }

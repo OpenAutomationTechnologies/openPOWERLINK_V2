@@ -179,7 +179,6 @@ typedef struct
 {
     tNmtState               nmtState;                               ///< Current NMT state
     UINT64                  relativeTime;                           ///< Current RelativeTime
-    UINT8                   aLocalMac[6];                           ///< Ethernet MAC address
     tEdrvTxBuffer*          pTxBuffer;                              ///< Buffers for TX frames
     UINT                    maxTxFrames;                            ///< Max TX frames
     UINT8                   flag1;                                  ///< Flag 1 with EN, EC for PRes, StatusRes

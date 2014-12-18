@@ -693,12 +693,10 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     }
 
     // local MAC address might have been changed in EdrvInitOne
-    OPLK_MEMCPY(pEdrvInitParam_p->aMacAddr, edrvInstance_l.initParam.aMacAddr, 6);
-
     printk("%s local MAC = ", __FUNCTION__);
     for (index = 0; index < 6; index++)
     {
-        printk("%02X ", (UINT)pEdrvInitParam_p->aMacAddr[index]);
+        printk("%02X ", (UINT)edrvInstance_l.initParam.aMacAddr[index]);
     }
     printk("\n");
 
@@ -730,6 +728,22 @@ tOplkError edrv_shutdown(void)
         printk("%s pci driver for openPOWERLINK already unregisted\n", __FUNCTION__);
     }
     return kErrorOk;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Get MAC address
+
+This function returns the MAC address of the Ethernet controller
+
+\return The function returns a pointer to the MAC address.
+
+\ingroup module_edrv
+*/
+//------------------------------------------------------------------------------
+UINT8* edrv_getMacAddr(void)
+{
+    return edrvInstance_l.initParam.aMacAddr;
 }
 
 //------------------------------------------------------------------------------

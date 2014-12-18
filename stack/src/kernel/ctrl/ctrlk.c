@@ -52,6 +52,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/nmtk.h>
 #include <kernel/pdok.h>
 
+#include "../dll/dllkframe.h"
+
 #if defined(CONFIG_INCLUDE_VETH)
 #include <kernel/veth.h>
 #endif
@@ -358,7 +360,7 @@ The function initializes the kernel stack modules.
 static tOplkError initStack(void)
 {
     tOplkError          ret;
-    tDllkInitParam      dllkInitParam;
+    tEdrvInitParam      edrvInitParam;
 
     ctrlkcal_readInitParam(&instance_l.initParam);
 
@@ -368,17 +370,31 @@ static tOplkError initStack(void)
     if ((ret = nmtk_init()) != kErrorOk)
         return ret;
 
-    OPLK_MEMCPY(dllkInitParam.aLocalMac, instance_l.initParam.aMacAddress, 6);
-    dllkInitParam.hwParam.pDevName = instance_l.initParam.szEthDevName;
-    dllkInitParam.hwParam.devNum = instance_l.initParam.ethDevNumber;
-
-    ret = dllk_addInstance(&dllkInitParam);
+    ret = dllk_addInstance();
     if (ret != kErrorOk)
         return ret;
 
-    // copy MAC address back to instance structure
-    OPLK_MEMCPY(instance_l.initParam.aMacAddress, dllkInitParam.aLocalMac, 6);
+    // initialize Edrv
+    OPLK_MEMCPY(edrvInitParam.aMacAddr, instance_l.initParam.aMacAddress, 6);
+    edrvInitParam.hwParam.devNum = instance_l.initParam.ethDevNumber;
+    edrvInitParam.hwParam.pDevName = instance_l.initParam.szEthDevName;
+    edrvInitParam.pfnRxHandler = dllkframe_processFrameReceived;
+    if ((ret = edrv_init(&edrvInitParam)) != kErrorOk)
+        return ret;
+
+    // copy local MAC address from Ethernet driver back to init parameters
+    // because Ethernet driver may have read it from controller EEPROM
+    OPLK_MEMCPY(instance_l.initParam.aMacAddress, edrv_getMacAddr(), 6);
     ctrlkcal_storeInitParam(&instance_l.initParam);
+
+    // initialize Edrvcyclic
+#if defined(CONFIG_INCLUDE_NMT_MN)
+    if ((ret = edrvcyclic_init()) != kErrorOk)
+        return ret;
+
+    if ((ret = edrvcyclic_regErrorHandler(dllk_cbCyclicError)) != kErrorOk)
+        return ret;
+#endif
 
     dllk_regSyncHandler(pdok_sendSyncEvent);
 
@@ -429,6 +445,14 @@ static tOplkError shutdownStack(void)
     dllkcal_exit();
 
     eventk_exit();
+
+#if defined (CONFIG_INCLUDE_NMT_MN)
+    // DLL and events are shutdown, now it's save to shutdown edrvcyclic
+    edrvcyclic_shutdown();
+#endif
+
+    edrv_shutdown();
+
     errhndk_exit();
 
     return kErrorOk;

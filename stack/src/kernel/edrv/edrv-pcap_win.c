@@ -275,6 +275,22 @@ tOplkError edrv_shutdown(void)
 
 //------------------------------------------------------------------------------
 /**
+\brief  Get MAC address
+
+This function returns the MAC address of the Ethernet controller
+
+\return The function returns a pointer to the MAC address.
+
+\ingroup module_edrv
+*/
+//------------------------------------------------------------------------------
+UINT8* edrv_getMacAddr(void)
+{
+    return edrInstance_l.initParam.aMacAddr;
+}
+
+//------------------------------------------------------------------------------
+/**
 \brief  Send Tx buffer
 
 This function sends the Tx buffer.
