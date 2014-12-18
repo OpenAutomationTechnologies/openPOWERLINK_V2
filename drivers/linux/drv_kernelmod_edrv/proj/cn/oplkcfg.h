@@ -95,9 +95,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // time when CN processing the isochronous task (sync callback of application and cycle preparation)
 #define CONFIG_DLL_PROCESS_SYNC                     DLL_PROCESS_SYNC_ON_SOC
 
-// Disable deferred release of rx-buffers until EdrvPcap supports it
+// Enable deferred buffer release for Ethernet drivers supporting it
+#if (CONFIG_EDRV == 82573) || (CONFIG_EDRV == 8111)
+#define CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC    TRUE
+#define CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC   FALSE
+#else
 #define CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC    FALSE
 #define CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC   FALSE
+#endif
 
 //==============================================================================
 // Timer module specific defines
