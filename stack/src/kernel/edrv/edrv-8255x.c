@@ -139,7 +139,7 @@ DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 #ifndef EDRV_MAX_TX_BUFFERS
-#define EDRV_MAX_TX_BUFFERS 42
+#define EDRV_MAX_TX_BUFFERS 256
 #endif
 
 #ifndef EDRV_MAX_TX_DESCS

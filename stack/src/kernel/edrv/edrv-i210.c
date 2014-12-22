@@ -164,7 +164,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // One slot to diff full
 #define EDRV_MAX_TTX_DESC_LEN    ((EDRV_MAX_TX_DESCRIPTOR >> 1) -1)
 #ifndef EDRV_MAX_TX_BUFFERS
-#define EDRV_MAX_TX_BUFFERS      128             // Max no of Buffers
+#define EDRV_MAX_TX_BUFFERS      256             // Max no of Buffers
 #endif
 
 #define EDRV_MAX_FRAME_SIZE      0x600           // 1536

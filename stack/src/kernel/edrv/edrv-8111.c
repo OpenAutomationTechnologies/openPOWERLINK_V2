@@ -94,7 +94,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // Buffer and descriptor configurations
 #ifndef EDRV_MAX_TX_BUFFERS
-#define EDRV_MAX_TX_BUFFERS                             42                                          // max no. of tx buffers to be allocated
+#define EDRV_MAX_TX_BUFFERS                             256                                        // max no. of tx buffers to be allocated
 #endif
 
 #ifndef EDRV_MAX_TX_DESCS

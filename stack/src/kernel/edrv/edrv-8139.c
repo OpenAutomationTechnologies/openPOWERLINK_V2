@@ -99,7 +99,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 #ifndef EDRV_MAX_TX_BUFFERS
-#define EDRV_MAX_TX_BUFFERS     42
+#define EDRV_MAX_TX_BUFFERS     256
 #endif
 
 #define EDRV_MAX_TX_DESCS       4
