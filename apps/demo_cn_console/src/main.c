@@ -220,7 +220,7 @@ static tOplkError initPowerlink(UINT32 cycleLen_p, const BYTE* macAddr_p, UINT32
     initParam.prescaler               = 2;                // required for sync
     initParam.lossOfFrameTolerance    = 500000;
     initParam.asyncSlotTimeout        = 3000000;
-    initParam.waitSocPreq             = 150000;
+    initParam.waitSocPreq             = 1000;
     initParam.deviceType              = UINT_MAX;               // NMT_DeviceType_U32
     initParam.vendorId                = UINT_MAX;               // NMT_IdentityObject_REC.VendorId_U32
     initParam.productCode             = UINT_MAX;               // NMT_IdentityObject_REC.ProductCode_U32
