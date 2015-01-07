@@ -76,7 +76,7 @@ tSdoComFunctions* sdocomstandard_getInterface(void);
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static tSdoComFunctions* pSdoComInstance;
+static tSdoComFunctions* pSdoComInstance = NULL;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -136,7 +136,8 @@ tOplkError sdocom_addInstance(void)
 {
     tOplkError ret = kErrorOk;
 
-    ret = pSdoComInstance->pfnAddInstance();
+    if (pSdoComInstance != NULL)
+        ret = pSdoComInstance->pfnAddInstance();
 
     return ret;
 }
@@ -156,7 +157,11 @@ tOplkError sdocom_delInstance(void)
 {
     tOplkError ret = kErrorOk;
 
-    ret = pSdoComInstance->pfnDelInstance();
+    if (pSdoComInstance != NULL)
+    {
+        ret = pSdoComInstance->pfnDelInstance();
+        pSdoComInstance = NULL;
+    }
 
     return ret;
 }
@@ -183,7 +188,8 @@ tOplkError sdocom_defineConnection(tSdoComConHdl* pSdoComConHdl_p, UINT targetNo
 {
     tOplkError ret = kErrorOk;
 
-    ret = pSdoComInstance->pfnDefineCon(pSdoComConHdl_p, targetNodeId_p, sdoType_p);
+    if (pSdoComInstance != NULL)
+        ret = pSdoComInstance->pfnDefineCon(pSdoComConHdl_p, targetNodeId_p, sdoType_p);
 
     return ret;
 }
@@ -205,7 +211,8 @@ tOplkError sdocom_initTransferByIndex(tSdoComTransParamByIndex* pSdoComTransPara
 {
     tOplkError ret = kErrorOk;
 
-    ret = pSdoComInstance->pfnTransByIdx(pSdoComTransParam_p);
+    if (pSdoComInstance != NULL)
+        ret = pSdoComInstance->pfnTransByIdx(pSdoComTransParam_p);
 
     return ret;
 }
@@ -228,7 +235,10 @@ UINT sdocom_getNodeId(tSdoComConHdl sdoComConHdl_p)
 {
     UINT node;
 
-    node = pSdoComInstance->pfnGetNodeId(sdoComConHdl_p);
+    if (pSdoComInstance != NULL)
+        node = pSdoComInstance->pfnGetNodeId(sdoComConHdl_p);
+    else
+        node = C_ADR_INVALID;
 
     return node;
 }
@@ -251,7 +261,8 @@ tOplkError sdocom_getState(tSdoComConHdl sdoComConHdl_p, tSdoComFinished* pSdoCo
 {
     tOplkError ret = kErrorOk;
 
-    ret = pSdoComInstance->pfnGetState(sdoComConHdl_p, pSdoComFinished_p);
+    if (pSdoComInstance != NULL)
+        ret = pSdoComInstance->pfnGetState(sdoComConHdl_p, pSdoComFinished_p);
 
     return ret;
 }
@@ -274,7 +285,8 @@ tOplkError sdocom_abortTransfer(tSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p
 {
     tOplkError ret = kErrorOk;
 
-    ret = pSdoComInstance->pfnSdoAbort(sdoComConHdl_p, abortCode_p);
+    if (pSdoComInstance != NULL)
+        ret = pSdoComInstance->pfnSdoAbort(sdoComConHdl_p, abortCode_p);
 
     return ret;
 }
@@ -297,7 +309,8 @@ tOplkError sdocom_undefineConnection(tSdoComConHdl sdoComConHdl_p)
 {
     tOplkError ret = kErrorOk;
 
-    ret = pSdoComInstance->pfnDeleteCon(sdoComConHdl_p);
+    if (pSdoComInstance != NULL)
+        ret = pSdoComInstance->pfnDeleteCon(sdoComConHdl_p);
 
     return ret;
 }
