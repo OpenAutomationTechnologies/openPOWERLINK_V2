@@ -187,13 +187,10 @@ tOplkError oplk_shutdown(void)
 {
     tOplkError          ret = kErrorApiNotInitialized;
 
-    if (ctrlu_stackIsInitialized())
-    {
-        ret = ctrlu_shutdownStack();
-        ctrlu_exit();
-        memmap_shutdown();
-        target_cleanup();
-    }
+    ret = ctrlu_shutdownStack();
+    ctrlu_exit();
+    memmap_shutdown();
+    target_cleanup();
     return ret;
 }
 
