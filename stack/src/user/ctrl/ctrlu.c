@@ -327,7 +327,10 @@ tOplkError ctrlu_initStack(tOplkApiInitParam* pInitParam_p)
         goto Exit;
 
     if ((tOplkError)retVal != kErrorOk)
+    {
+        ret = (tOplkError)retVal;
         goto Exit;
+    }
 
     /* Read back init param because current MAC address was copied by DLLK */
     ret = ctrlucal_readInitParam(&ctrlParam);
