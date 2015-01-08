@@ -287,6 +287,7 @@ static int powerlinkOpen(struct inode* pDeviceFile_p, struct file* pInstance_p)
 
     if (ctrlk_init() != kErrorOk)
     {
+        atomic_dec(&openCount_g);
         return -EIO;
     }
 
