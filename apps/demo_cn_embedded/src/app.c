@@ -42,6 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <oplk/oplk.h>
+#include <oplk/debugstr.h>
 
 #include <gpio.h>
 #include "app.h"
@@ -222,7 +223,7 @@ static tOplkError initProcessImage(void)
                                       FALSE, obdSize, &varEntries);
     if (ret != kErrorOk)
     {
-        PRINTF("linking process vars ... error %04x\n\n", ret);
+        PRINTF("linking process vars ... error %04x\n\"%s\"\n\n", ret, debugstr_getRetValStr(ret));
         return ret;
     }
 
@@ -232,7 +233,7 @@ static tOplkError initProcessImage(void)
                                       TRUE, obdSize, &varEntries);
     if (ret != kErrorOk)
     {
-        PRINTF("linking process vars ... error %04x\n\n", ret);
+        PRINTF("linking process vars ... error %04x\n\"%s\"\n\n", ret, debugstr_getRetValStr(ret));
         return ret;
     }
 

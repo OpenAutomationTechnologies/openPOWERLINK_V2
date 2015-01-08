@@ -47,6 +47,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string.h>
 
 #include <oplk/oplk.h>
+#include <oplk/debugstr.h>
 
 #include <system/system.h>
 #include <getopt/getopt.h>
@@ -248,14 +249,14 @@ static tOplkError initPowerlink(UINT32 cycleLen_p, char* pszCdcFileName_p,
     ret = oplk_init(&initParam);
     if (ret != kErrorOk)
     {
-        fprintf(stderr, "oplk_init() failed (Error:0x%x!)\n", ret);
+        fprintf(stderr, "oplk_init() failed with \"%s\" (0x%04x)\n", debugstr_getRetValStr(ret), ret);
         return ret;
     }
 
     ret = oplk_setCdcFilename(pszCdcFileName_p);
     if (ret != kErrorOk)
     {
-        fprintf(stderr, "oplk_setCdcFilename() failed (Error:0x%x!)\n", ret);
+        fprintf(stderr, "oplk_setCdcFilename() failed with \"%s\" (0x%04x)\n", debugstr_getRetValStr(ret), ret);
         return ret;
     }
 

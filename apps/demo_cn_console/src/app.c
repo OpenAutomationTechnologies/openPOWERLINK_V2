@@ -44,6 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stddef.h>
 
 #include <oplk/oplk.h>
+#include <oplk/debugstr.h>
 
 #include "app.h"
 
@@ -323,7 +324,7 @@ static tOplkError initProcessImage(void)
                                       FALSE, obdSize, &varEntries);
     if (ret != kErrorOk)
     {
-        fprintf(stderr, "linking process vars ... error %04x\n\n", ret);
+        fprintf(stderr, "linking process vars failed with \"%s\" (0x%04x)\n", debugstr_getRetValStr(ret), ret);
         return ret;
     }
 
@@ -333,7 +334,7 @@ static tOplkError initProcessImage(void)
                                       TRUE, obdSize, &varEntries);
     if (ret != kErrorOk)
     {
-        fprintf(stderr, "linking process vars ... error %04x\n\n", ret);
+        fprintf(stderr, "linking process vars failed with \"%s\" (0x%04x)\n", debugstr_getRetValStr(ret), ret);
         return ret;
     }
 

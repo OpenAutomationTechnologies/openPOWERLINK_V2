@@ -43,6 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <oplk/oplk.h>
+#include <oplk/debugstr.h>
 
 #include <gpio.h>
 #include <lcd.h>
@@ -273,14 +274,14 @@ static tOplkError initPowerlink(tInstance* pInstance_p)
     ret = oplk_init(&initParam);
     if (ret != kErrorOk)
     {
-        PRINTF("oplk_init() failed (Error:0x%x!)\n", ret);
+        PRINTF("oplk_init() failed with \"%s\"\n(Error:0x%x!)\n",debugstr_getRetValStr(ret), ret);
         return ret;
     }
 
     ret = oplk_setCdcBuffer(pInstance_p->pCdcBuffer, pInstance_p->cdcBufferSize);
     if (ret != kErrorOk)
     {
-        PRINTF("oplk_setCdcBuffer() failed (Error:0x%x!)\n", ret);
+        PRINTF("oplk_setCdcBuffer() failed with \"%s\"\n(Error:0x%x!)\n", debugstr_getRetValStr(ret), ret);
         return ret;
     }
 

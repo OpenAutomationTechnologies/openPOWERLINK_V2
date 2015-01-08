@@ -325,8 +325,8 @@ static tOplkError processPdoChangeEvent(tOplkApiEventType EventType_p,
         ret = oplk_readLocalObject(pPdoChange->mappParamIndex, subIndex, &mappObject, &varLen);
         if (ret != kErrorOk)
         {
-            console_printlog("  Reading 0x%X/%d failed with 0x%X\n",
-                             pPdoChange->mappParamIndex, subIndex, ret);
+            console_printlog("  Reading 0x%X/%d failed with 0x%X\n\"%s\"\n",
+                             pPdoChange->mappParamIndex, subIndex, ret, debugstr_getRetValStr(ret));
             continue;
         }
         console_printlog("  %d. mapped object 0x%X/%d\n", subIndex, mappObject & 0x00FFFFULL,

@@ -436,7 +436,10 @@ tOplkError ProcessThread::processStateChangeEvent(tOplkApiEventType EventType_p,
             ret = oplk_readObject(NULL, 0, 0x1006, 0x00, &cycleLen_g,
                                   &varLen, kSdoTypeAsnd, NULL);
             if (ret != kErrorOk)
-            {   // local OD access failed
+            {
+                sigPrintLog(QString("  oplk_readObject() failed with 0x%1\n\"2\"")
+                                    .arg(ret)
+                                    .arg(debugstr_getRetValStr(ret)));
                 break;
             }
 #endif
@@ -575,10 +578,11 @@ tOplkError ProcessThread::processPdoChangeEvent(tOplkApiEventType EventType_p,
         ret = oplk_readLocalObject(pPdoChange->mappParamIndex, subIndex, &mappObject, &varLen);
         if (ret != kErrorOk)
         {
-            sigPrintLog(QString("  Reading 0x%1/%2 failed with 0x%3")
+            sigPrintLog(QString("  Reading 0x%1/%2 failed with 0x%3\n\"4\"")
                         .arg(pPdoChange->mappParamIndex, 4, 16, QLatin1Char('0'))
                         .arg(subIndex)
-                        .arg(ret, 4, 16, QLatin1Char('0')));
+                        .arg(ret, 4, 16, QLatin1Char('0'))
+                        .arg(debugstr_getRetValStr(ret)));
             continue;
         }
         sigPrintLog(QString("  %1. mapped object 0x%2/%3")

@@ -46,6 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <limits.h>
 
 #include <oplk/oplk.h>
+#include <oplk/debugstr.h>
 #include <system/system.h>
 #include <getopt/getopt.h>
 #include <console/console.h>
@@ -247,7 +248,7 @@ static tOplkError initPowerlink(UINT32 cycleLen_p, const BYTE* macAddr_p, UINT32
     ret = oplk_init(&initParam);
     if (ret != kErrorOk)
     {
-        fprintf(stderr, "oplk_init() failed (Error:0x%x!)\n", ret);
+        fprintf(stderr, "oplk_init() failed with \"%s\" (0x%04x)\n", debugstr_getRetValStr(ret), ret);
         return ret;
     }
 

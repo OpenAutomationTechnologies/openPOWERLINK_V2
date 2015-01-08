@@ -43,6 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QThread>
 #include <QString>
 #include <QMessageBox>
+#include <oplk/debugstr.h>
 
 #include "Api.h"
 #include "State.h"
@@ -232,6 +233,7 @@ Api::Api(MainWindow* pMainWindow_p, UINT nodeId_p, QString devName_p)
         QMessageBox::critical(0, "POWERLINK demo",
                               QString("Initialization of openPOWERLINK Stack failed.\n") +
                                       "Error code: 0x"+ QString::number(ret, 16) +
+                                      "\n\"" + debugstr_getRetValStr(ret) + "\""
                                       "\nThe most common error source are an unsupported Ethernet controller or the kernel module is not loaded."
                                       "\nFor further information please consult the manual.");
         goto Exit;
@@ -240,6 +242,10 @@ Api::Api(MainWindow* pMainWindow_p, UINT nodeId_p, QString devName_p)
     ret = oplk_setCdcFilename(pszCdcFilename_g);
     if (ret != kErrorOk)
     {
+        QMessageBox::critical(0, "POWERLINK demo",
+                                      QString("oplk_setCdcFilename() failed.\n") +
+                                              "Error code: 0x"+ QString::number(ret, 16) +
+                                              "\n\"" + debugstr_getRetValStr(ret) + "\"");
         goto Exit;
     }
 
@@ -247,12 +253,22 @@ Api::Api(MainWindow* pMainWindow_p, UINT nodeId_p, QString devName_p)
     if (ret != kErrorOk)
     {
         QMessageBox::critical(0, "POWERLINK demo",
-                              QString("Initialization of process image failed.\n") +
-                                      "Error code: 0x"+ QString::number(ret, 16));
+                                      QString("setupProcessImage() failed.\n") +
+                                              "Error code: 0x"+ QString::number(ret, 16) +
+                                              "\n\"" + debugstr_getRetValStr(ret) + "\"");
         goto Exit;
     }
+
     // start the openPOWERLINK stack
     ret = oplk_execNmtCommand(kNmtEventSwReset);
+    if (ret != kErrorOk)
+    {
+        QMessageBox::critical(0, "POWERLINK demo",
+                                      QString("oplk_execNmtCommand() failed.\n") +
+                                              "Error code: 0x"+ QString::number(ret, 16) +
+                                              "\n\"" + debugstr_getRetValStr(ret) + "\"");
+        goto Exit;
+    }
 
     // start process thread
     pProcessThread->start();
