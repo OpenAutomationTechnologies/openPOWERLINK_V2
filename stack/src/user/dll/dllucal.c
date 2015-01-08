@@ -224,7 +224,10 @@ tOplkError dllucal_exit(void)
     }
 #endif
 #if defined(CONFIG_INCLUDE_VETH)
-    instance_l.pTxVethFuncs->pfnDelInstance(instance_l.dllCalQueueTxVeth);
+    if (instance_l.pTxVethFuncs != NULL)
+    {
+        instance_l.pTxVethFuncs->pfnDelInstance(instance_l.dllCalQueueTxVeth);
+    }
     dllucal_regNonPlkHandler(NULL);
 #endif
     // reset instance structure
