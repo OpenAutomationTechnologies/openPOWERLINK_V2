@@ -146,6 +146,7 @@ typedef struct
     tPdoMappObject*         paTxObject;                 ///< Pointer to TX channel objects
     BOOL                    fAllocated;                 ///< Flag determines if PDOs are allocated
     BOOL                    fRunning;                   ///< Flag determines if PDO engine is running
+    BOOL                    fInitialized;               ///< Flag determines if PDO module is initialized
     tPdoCbEventPdoChange    pfnCbEventPdoChange;
     //BYTE*                   pPdoMem;                    ///< pointer to PDO memory
     OPLK_MUTEX_T            lockMutex;                  ///< Mutex used to protect stack from disabling PDOs while copy is in progress
@@ -211,6 +212,8 @@ The function initializes the PDO user module.
 //------------------------------------------------------------------------------
 tOplkError pdou_init(tSyncCb pfnSyncCb_p)
 {
+    tOplkError          ret;
+
     OPLK_MEMSET(&pdouInstance_g, 0, sizeof(pdouInstance_g));
     pdouInstance_g.fAllocated = FALSE;
     pdouInstance_g.fRunning = FALSE;
@@ -218,7 +221,10 @@ tOplkError pdou_init(tSyncCb pfnSyncCb_p)
     if (target_createMutex("/pdoMutex", &pdouInstance_g.lockMutex) != kErrorOk)
         return kErrorNoFreeInstance;
 
-    return pdoucal_init(pfnSyncCb_p);
+    ret = pdoucal_init(pfnSyncCb_p);
+    pdouInstance_g.fInitialized = TRUE;
+
+    return ret;
 }
 
 //------------------------------------------------------------------------------
@@ -234,15 +240,22 @@ The function cleans up the PDO user module.
 //------------------------------------------------------------------------------
 tOplkError pdou_exit(void)
 {
-    target_lockMutex(pdouInstance_g.lockMutex);
-    pdouInstance_g.fRunning = FALSE;
-    target_unlockMutex(pdouInstance_g.lockMutex);
-    target_destroyMutex(pdouInstance_g.lockMutex);
+    tOplkError      ret = kErrorOk;
 
-    pdouInstance_g.pfnCbEventPdoChange = NULL;
-    freePdoChannels();
-    pdoucal_cleanupPdoMem();
-    return pdoucal_exit();
+    if (pdouInstance_g.fInitialized)
+    {
+        target_lockMutex(pdouInstance_g.lockMutex);
+        pdouInstance_g.fRunning = FALSE;
+        target_unlockMutex(pdouInstance_g.lockMutex);
+        target_destroyMutex(pdouInstance_g.lockMutex);
+
+        pdouInstance_g.pfnCbEventPdoChange = NULL;
+        freePdoChannels();
+        pdoucal_cleanupPdoMem();
+        pdouInstance_g.fInitialized = FALSE;
+        ret = pdoucal_exit();
+    }
+    return ret;
 }
 
 //------------------------------------------------------------------------------
