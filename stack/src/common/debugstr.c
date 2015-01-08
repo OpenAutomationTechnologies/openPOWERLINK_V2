@@ -466,6 +466,7 @@ static tRetValInfo retValInfo_l[] =
     { kErrorApiPIInvalidJobSize,      "Process image: invalid job size"},
     { kErrorApiPIInvalidPIPointer,    "Process image: pointer to application's process image is invalid"},
     { kErrorApiPINonBlockingNotSupp,  "Process image: non-blocking copy jobs are not supported on this target"},
+    { kErrorApiNotInitialized,        "API called but stack is not initialized/running"},
 };
 
 static const tEmergErrCodeInfo emergErrCodeInfo_l[] =
