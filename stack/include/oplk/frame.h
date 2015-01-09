@@ -126,202 +126,323 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #error You must Byte-align these structures with the appropriate compiler directives
 #endif
 
+/**
+* \brief Start of cycle Frame (SoC)
+*
+* This structure contains the layout of an SoC frame. At the beginning of a POWERLINK cycle, the MN sends an SoC frame to all nodes via Ethernet
+* multicast. The send and receive time of this frame shall be the basis for the common timing of all the nodes.
+*
+* For more information consult the POWERLINK specification document "EPSG DS 301 V1.2.0" chapter 4.2.4.1.1 and 4.6.1.1.2.
+* */
 typedef struct
 {
-    UINT8                   reserved1;                      ///< Offset 17: reserved
-    UINT8                   flag1;                          ///< Offset 18: Flags: MC, PS
-    UINT8                   flag2;                          ///< Offset 19: Flags: res
-    tNetTime                netTimeLe;                      ///< Offset 20: supported if D_NMT_NetTimeIsRealTime_BOOL is set
-    UINT64                  relativeTimeLe;                 ///< Offset 28: in us (supported if D_NMT_RelativeTime_BOOL is set)
+    UINT8                   reserved1;                      ///< Reserved (Offset 17)
+    UINT8                   flag1;                          ///< Contains the flag Multiplexed Cycle Completed (MC) and the flag Prescaled Slot (PS). (Offset 18)
+    UINT8                   flag2;                          ///< Reserved (Offset 19)
+    tNetTime                netTimeLe;                      ///< Optional, if D_NMT_NetTimeIsRealTime_BOOL is set. MN may distribute the starting time of the POWERLINK cycle. (Offset 20)
+    UINT64                  relativeTimeLe;                 ///< Optional, if D_NMT_RelativeTime_BOOL is set. The relative time (in us) is incremented in every cycle by the cycle time. It shall be set to 0 when NMT state equals NMT_GS_INITIALISING. (Offset 28)
 } PACK_STRUCT tSocFrame;
 
-typedef struct
-{
-    UINT8                   reserved1;                      ///< Offset 17: reserved
-    UINT8                   flag1;                          ///< Offset 18: Flags: MS, EA, RD
-    UINT8                   flag2;                          ///< Offset 19: Flags: res
-    UINT8                   pdoVersion;                     ///< Offset 20: PDO Version
-    UINT8                   reserved2;                      ///< Offset 21: reserved
-    UINT16                  sizeLe;                         ///< Offset 22:
-    UINT8                   aPayload[256];                  ///< Offset 24: Payload
-} PACK_STRUCT tPreqFrame;
-
-typedef struct
-{
-    UINT8                   nmtStatus;                      ///< Offset 17: NMT state
-    UINT8                   flag1;                          ///< Offset 18: Flags: MS, EN, RD
-    UINT8                   flag2;                          ///< Offset 19: Flags: PR, RS
-    UINT8                   pdoVersion;                     ///< Offset 20:
-    UINT8                   reserved2;                      ///< Offset 21: reserved
-    UINT16                  sizeLe;                         ///< Offset 22:
-    UINT8                   aPayload[256];                  ///< Offset 24: Payload
-} PACK_STRUCT tPresFrame;
-
-typedef struct
-{
-    UINT8                   reserved;                       ///< Offset 23:
-    UINT32                  syncControlLe;
-    UINT32                  presTimeFirstLe;
-    UINT32                  presTimeSecondLe;
-    UINT32                  syncMnDelayFirstLe;
-    UINT32                  syncMnDelaySecondLe;
-    UINT32                  presFallBackTimeoutLe;
-    UINT8                   aDestMacAddress[6];
-} PACK_STRUCT tSyncRequest;
-
-typedef union
-{
-    tSyncRequest            syncRequest;                    ///< Offset 23
-} tSoaPayload;
-
-typedef struct
-{
-    UINT8                   nmtStatus;                      ///< Offset 17:NMT state
-    UINT8                   flag1;                          ///< Offset 18: Flags: EA, ER
-    UINT8                   flag2;                          ///< Offset 19: Flags: res
-    UINT8                   reqServiceId;                   ///< Offset 20:
-    UINT8                   reqServiceTarget;               ///< Offset 21:
-    UINT8                   powerlinkVersion;               ///< Offset 22:
-    tSoaPayload             payload;                        ///< Offset 23:
-} PACK_STRUCT tSoaFrame;
-
 /**
-\brief Structure for error history entries
-
-The following structure defines an error history entry.
+* \brief Poll Request Frame (PReq)
+*
+* This structure defines the PReq frame. It is transmitted cyclically by the MN to a CN via Ethernet unicast.
+*
+* For more information consult the POWERLINK specification document "EPSG DS 301 V1.2.0" chapter 4.6.1.1.3.
 */
 typedef struct
 {
-    UINT16                  entryType;                      ///< The type of the entry
-    UINT16                  errorCode;                      ///< The error code of the entry
-    tNetTime                timeStamp;                      ///< The timestamp when the error was added
-    UINT8                   aAddInfo[8];                    ///< Additional error information
-} PACK_STRUCT tErrHistoryEntry;
+    UINT8                   reserved1;                      ///< Reserved (Offset 17)
+    UINT8                   flag1;                          ///< Contains the flags Multiplexed Slot (MS), Exception Acknowledge (EA) and Ready (RD). (Offset 18)
+    UINT8                   flag2;                          ///< Reserved (Offset 19)
+    UINT8                   pdoVersion;                     ///< Indicates the PDO Version (Offset 20)
+    UINT8                   reserved2;                      ///< Reserved (Offset 21)
+    UINT16                  sizeLe;                         ///< Contains the number of payload data octets (Offset 22)
+    UINT8                   aPayload[256];                  ///< Payload (Offset 24)
+} PACK_STRUCT tPreqFrame;
 
+/**
+* \brief Poll Response Frame (PRes)
+*
+* This structure defines the PRes frame. It is transmitted cyclically via Ethernet multicast.
+*
+* For more information consult the POWERLINK specification document "EPSG DS 301 V1.2.0" chapter 4.6.1.1.4.
+*/
 typedef struct
 {
-    UINT8                   flag1;                          ///< Offset 18: Flags: EN, EC
-    UINT8                   flag2;                          ///< Offset 19: Flags: PR, RS
-    UINT8                   nmtStatus;                      ///< Offset 20: NMT state
-    UINT8                   reserved1[3];
-    UINT64                  staticErrorLe;                  ///< static error bit field
-    tErrHistoryEntry        aErrorHistoryEntry[14];
-} PACK_STRUCT tStatusResponse;
+    UINT8                   nmtStatus;                      ///< Defines the NMT state. (Offset 17)
+    UINT8                   flag1;                          ///< Contains the flags multiplexed Slot (MS), Exception New (EN) and Ready (RD). (Offset 18)
+    UINT8                   flag2;                          ///< Contains the flags Priority (PR) and Request to send (RS). (Offset 19)
+    UINT8                   pdoVersion;                     ///< Indicates the PDO Version. (Offset 20)
+    UINT8                   reserved2;                      ///< Reserved (Offset 21)
+    UINT16                  sizeLe;                         ///< Contains the number of payload data octets. (Offset 22)
+    UINT8                   aPayload[256];                  ///< Payload (Offset 24)
+} PACK_STRUCT tPresFrame;
 
+/**
+* \brief Synchronization Request (SyncReq)
+*
+* The SyncReq is a special form of an SoA frame used in PollResponse Chaining mode.
+*
+* For detailed information, refer to the POWERLINK specification addendum EPSG DS 302-C V-1-0-0 chapter 3.3.
+*/
 typedef struct
 {
-    UINT8                   flag1;                          ///< Offset 18: Flags: res
-    UINT8                   flag2;                          ///< Flags: PR, RS
-    UINT8                   nmtStatus;                      ///< NMT state
-    UINT8                   identResponseFlags;             ///< Flags: FW
-    UINT8                   powerlinkProfileVersion;
-    UINT8                   reserved1;
-    UINT32                  featureFlagsLe;                 ///< NMT_FeatureFlags_U32
-    UINT16                  mtuLe;                          ///< NMT_CycleTiming_REC.AsyncMTU_U16: C_IP_MIN_MTU - C_IP_MAX_MTU
-    UINT16                  pollInSizeLe;                   ///< NMT_CycleTiming_REC.PReqActPayload_U16
-    UINT16                  pollOutSizeLe;                  ///< NMT_CycleTiming_REC.PResActPayload_U16
-    UINT32                  responseTimeLe;                 ///< NMT_CycleTiming_REC.PResMaxLatency_U32
-    UINT16                  reserved2;
-    UINT32                  deviceTypeLe;                   ///< NMT_DeviceType_U32
-    UINT32                  vendorIdLe;                     ///< NMT_IdentityObject_REC.VendorId_U32
-    UINT32                  productCodeLe;                  ///< NMT_IdentityObject_REC.ProductCode_U32
-    UINT32                  revisionNumberLe;               ///< NMT_IdentityObject_REC.RevisionNo_U32
-    UINT32                  serialNumberLe;                 ///< NMT_IdentityObject_REC.SerialNo_U32
-    UINT64                  vendorSpecificExt1Le;
-    UINT32                  verifyConfigurationDateLe;      ///< CFM_VerifyConfiguration_REC.ConfDate_U32
-    UINT32                  verifyConfigurationTimeLe;      ///< CFM_VerifyConfiguration_REC.ConfTime_U32
-    UINT32                  applicationSwDateLe;            ///< PDL_LocVerApplSw_REC.ApplSwDate_U32 on programmable device or date portion of NMT_ManufactSwVers_VS on non-programmable device
-    UINT32                  applicationSwTimeLe;            ///< PDL_LocVerApplSw_REC.ApplSwTime_U32 on programmable device or time portion of NMT_ManufactSwVers_VS on non-programmable device
-    UINT32                  ipAddressLe;
-    UINT32                  subnetMaskLe;
-    UINT32                  defaultGatewayLe;
-    UINT8                   sHostName[32];
-    UINT8                   aVendorSpecificExt2[48];
-} PACK_STRUCT tIdentResponse;
+    UINT8                   reserved;                       ///< Reserved (Offset 23)
+    UINT32                  syncControlLe;                  ///< Sync Control
+                                                            //*< Contains the flags PResTimeFirstValid, PResTimeSecondValid, SyncMNDelayFirstValid, SyncMNDelaySecondValid, PResFallBackTimeoutValid, DestMacAddressValid, PResModeReset and PResModeSet.*/
+    UINT32                  presTimeFirstLe;                ///< Contains the PRes Response Time [ns] starting from the end of the PResMN.
+    UINT32                  presTimeSecondLe;               ///< In case of ring redundancy this parameter contains the PRes Response Time [ns] for the secondary direction of communication starting from the end of the PResMN. Otherwise this parameter shall be ignored.
+    UINT32                  syncMnDelayFirstLe;             ///< Contains the propagation delay [ns] between the Managing Node and the Controlled Node.
+    UINT32                  syncMnDelaySecondLe;            ///< In case of ring redundancy this parameter contains the propagation delay [ns] between the Managing Node and the Controlled Node for the secondary direction of communication.
+    UINT32                  presFallBackTimeoutLe;          ///< In NMT_CN_PRE_OPERATIONAL_2 the node is not able to monitor the cycle time. The actual cycle time might not be configured yet.
+    UINT8                   aDestMacAddress[6];             ///< Holds the MAC address of the node the SyncReq is sent to.
+} PACK_STRUCT tSyncRequest;
 
-typedef struct
-{
-    UINT8                   nmtCommandId;                   ///< Offset 18:
-    UINT8                   reserved1;
-    UINT8                   aNmtCommandData[32];
-} PACK_STRUCT tNmtCommandService;
-
-typedef struct
-{
-    UINT16                  reserved;                       ///< Offset 18:
-    UINT32                  syncStatusLe;
-    UINT32                  latencyLe;
-    UINT32                  syncNodeNumberLe;
-    UINT32                  syncDelayLe;
-    UINT32                  presTimeFirstLe;
-    UINT32                  presTimeSecondLe;
-} PACK_STRUCT tSyncResponse;
-
-typedef struct
-{
-    UINT8                   reserved1;
-    UINT8                   transactionId;
-    UINT8                   flags;
-    UINT8                   commandId;
-    UINT16                  segmentSizeLe;
-    UINT16                  reserved2;
-    UINT8                   aCommandData[8];                // just reserve a minimum number of bytes as a placeholder
-} PACK_STRUCT tAsySdoCom;
-
-
-// asynchronous SDO Sequence Header
-typedef struct
-{
-    UINT8                   recvSeqNumCon;
-    UINT8                   sendSeqNumCon;
-    UINT8                   aReserved[2];
-    tAsySdoCom              sdoSeqPayload;
-} PACK_STRUCT tAsySdoSeq;
-
-typedef struct
-{
-    // Offset 18
-    UINT8                   nmtCommandId;
-    UINT8                   targetNodeId;
-    UINT8                   aNmtCommandData[32];
-} PACK_STRUCT tNmtRequestService;
-
-
+/**
+* \brief Start of asynchronous Payload
+*
+* This union contains the SoA payload.
+*
+* It currently contains only the structure syncRequest.
+*/
 typedef union
 {
-    tStatusResponse         statusResponse;                 ///< Offset 18:
-    tIdentResponse          identResponse;
-    tNmtCommandService      nmtCommandService;
-    tNmtRequestService      nmtRequestService;
-    tAsySdoSeq              sdoSequenceFrame;
-    tSyncResponse           syncResponse;
+    tSyncRequest            syncRequest;                    ///< Used in PollResponse Chaining mode. (Offset 23)
+} tSoaPayload;
+
+/**
+* \brief Start of asynchronous frame (SoA)
+*
+* This structure defines the SoA frame structure. In the asynchronous phase of the cycle, access to the POWERLINK network may be granted to any node for the
+* transfer of an asynchronous message. There shall be two types of asynchronous frames available:
+* - The POWERLINK ASnd frame shall use the POWERLINK addressing scheme and shall be sent via unicast, multicast or broadcast to any other node.
+* - A Legacy Ethernet message may be sent.
+*
+* For more information consult the POWERLINK specification document "EPSG DS 301 V1.2.0" chapter 4.6.1.1.5 and 4.2.4.1.2.
+*/
+typedef struct
+{
+    UINT8                   nmtStatus;                      ///< Reports the current MN NMT status (Offset 17)
+    UINT8                   flag1;                          ///< Contains the flags Exception Acknowledgment (EA) and Exception Reset (ER). (Offset 18)
+    UINT8                   flag2;                          ///< Reserved (Offset 19)
+    UINT8                   reqServiceId;                   ///< Indicates the asynchronous service ID dedicated to the SoA and to the following asynchronous slot (refer below). (Offset 20)
+    UINT8                   reqServiceTarget;               ///< Indicates the POWERLINK address of the node, which is allowed to send. (Offset 21)
+    UINT8                   powerlinkVersion;               ///< Indicates the current POWERLINK Version of the MN (Offset 22)
+    tSoaPayload             payload;                        ///< SoA Payload (Offset 23)
+} PACK_STRUCT tSoaFrame;
+
+/**
+* \brief Error History
+*
+* The following structure defines an error history entry.
+*/
+typedef struct
+{
+    UINT16                  entryType;                      ///< Contains the type of the entry
+    UINT16                  errorCode;                      ///< Contains the error code of the entry
+    tNetTime                timeStamp;                      ///< Contains the timestamp when the error was added
+    UINT8                   aAddInfo[8];                    ///< Includes the additional error information
+} PACK_STRUCT tErrHistoryEntry;
+
+/**
+* \brief Status Response
+*
+* The following structure defines the StatusResponse.
+* This service is used by the MN to query the current status of a CN.
+*
+* For more information consult the POWERLINK specification document "EPSG DS 301 V1.2.0" chapter 7.3.3.3.1.
+*/
+typedef struct
+{
+    UINT8                   flag1;                          ///< Contains the flags Exception New (EN) and Exception Clear (EC). (Offset 18)
+    UINT8                   flag2;                          ///< Contains the flags PR (priority of the requested asynchronous frame) and RS (number of pending requests to send at the CN). (Offset 19)
+    UINT8                   nmtStatus;                      ///< Reports the current status of the CN’s NMT state machine. (Offset 20)
+    UINT8                   reserved1[3];                   ///< Reserved
+    UINT64                  staticErrorLe;                  ///< Includes specific bits, which are set to indicate pending errors at the CN.
+    tErrHistoryEntry        aErrorHistoryEntry[14];         ///< Contains a list of errors, that have occurred at the CN.
+} PACK_STRUCT tStatusResponse;
+
+/**
+* \brief Ident Response
+*
+* The IdentResponse is sent by a CN in reply to an IdentRequest. It is used to inform the network about
+* the identity and features of a CN.
+*
+* For more information consult the POWERLINK specification document "EPSG DS 301 V1.2.0" chapter 7.3.3.2.1.
+*/
+typedef struct
+{
+    UINT8                   flag1;                          ///< Reserved (Offset 18)
+    UINT8                   flag2;                          ///< Contains the flags PR (priority of the requested asynchronous frame) and RS (number of pending requests to send at the CN).
+    UINT8                   nmtStatus;                      ///< Reports the current status of the CN’s NMT state machine
+    UINT8                   identResponseFlags;             ///< Ident Response Flags
+    UINT8                   powerlinkProfileVersion;        ///< Indicates the POWERLINK Version to which the CN conforms
+    UINT8                   reserved1;                      ///< Reserved
+    UINT32                  featureFlagsLe;                 ///< Reports the device’s feature flags (NMT_FeatureFlags_U32)
+    UINT16                  mtuLe;                          ///< Reports the maximum size of an asynchronous frame that can be handled by the CN (without Ethernet header and trailer).
+    UINT16                  pollInSizeLe;                   ///< Reports the current CN setting.
+    UINT16                  pollOutSizeLe;                  ///< Reports the current CN setting.
+    UINT32                  responseTimeLe;                 ///< Reports the maximum time required by the CN to respond to a PReq with a PRes.
+    UINT16                  reserved2;                      ///< Reserved
+    UINT32                  deviceTypeLe;                   ///< Reports the CN’s Device type.
+    UINT32                  vendorIdLe;                     ///< Reports the CN’s Vendor ID.
+    UINT32                  productCodeLe;                  ///< Reports the CN’s Product Code
+    UINT32                  revisionNumberLe;               ///< Reports the CN’s Revision Number.
+    UINT32                  serialNumberLe;                 ///< Reports the CN’s Serial Number.
+    UINT64                  vendorSpecificExt1Le;           ///< May be used for vendor specific purpose, to be filled with zeros if not in use.
+    UINT32                  verifyConfigurationDateLe;      ///< Reports the CN’s Configuration date.
+    UINT32                  verifyConfigurationTimeLe;      ///< Reports the CN’s Configuration time.
+    UINT32                  applicationSwDateLe;            ///< Reports the CN’s Application SW date.
+    UINT32                  applicationSwTimeLe;            ///< Reports the CN’s Application SW time.
+    UINT32                  ipAddressLe;                    ///< Reports the current IP address value of the CN.
+    UINT32                  subnetMaskLe;                   ///< Reports the current IP subnet mask value of the CN.
+    UINT32                  defaultGatewayLe;               ///< Reports the current IP default gateway value of the CN.
+    UINT8                   sHostName[32];                  ///< Reports the current DNS hostname of the CN.
+    UINT8                   aVendorSpecificExt2[48];        ///< May be used for vendor specific purpose.
+} PACK_STRUCT tIdentResponse;
+
+/**
+* \brief Command Service
+*
+* The MN uses NMT State Command Services to control the CN state machine(s).
+*
+* For more information consult the POWERLINK specification document "EPSG DS 301 V1.2.0" chapter 7.3.4.
+*/
+typedef struct
+{
+    UINT8                   nmtCommandId;                   ///< Qualifies the NMT state command. (Offset 18)
+    UINT8                   reserved1;                      ///< Reserved
+    UINT8                   aNmtCommandData[32];            ///< NMT command-specific data to be issued by the MN.
+} PACK_STRUCT tNmtCommandService;
+
+/**
+* \brief Synchronization Response (SyncRes)
+*
+* The SyncRes is a special form of an SoA frame used in PollResponse Chaining mode.
+*
+* For detailed information, refer to the POWERLINK specification addendum EPSG DS 302-C V-1-0-0 chapter 3.4.
+*/
+typedef struct
+{
+    UINT16                  reserved;                       ///< Reserved (Offset 18)
+    UINT32                  syncStatusLe;                   ///< Contains the flags PResTimeFirstValid, PResTimeSecondValid and PResModeStatus.
+    UINT32                  latencyLe;                      ///< Contains the PollResponse latency in [ns]. The value is constant.
+    UINT32                  syncNodeNumberLe;               ///< Contains the node number received last inside the SyncReq/SyncRes frames.
+    UINT32                  syncDelayLe;                    ///< Contains the time difference between the end of receiving the SyncReq and the beginning of receiving the SyncRes in [ns].
+    UINT32                  presTimeFirstLe;                ///< Holds the current value of the PRes Response Time [ns] i.e. PResTimeFirst_U32 for the first direction of communication.
+    UINT32                  presTimeSecondLe;               ///< In case of ring redundancy this parameter holds the current value of the PRes Response Time [ns] i.e. PResTimeSecond_U32 for the secondary direction of communication.
+} PACK_STRUCT tSyncResponse;
+
+/**
+ * \brief SDO Command Layer Protocol
+ *
+ * This structure defines the fixed part of the POWERLINK SDO Command Layer protocol.
+ *
+ * For more information consult the POWERLINK specification document "EPSG DS 301 V1.2.0" chapter 6.3.2.4.1.
+ */
+typedef struct
+{
+    UINT8                   reserved1;                      ///< Reserved
+    UINT8                   transactionId;                  ///< Contains unambiguous transaction ID for a command. Changed by the client with every new command.
+    UINT8                   flags;                          ///< Contains the flags Request, Response (rsp), requested transfer (a) and the differentiates between expedited and segmented transfer (seg)
+    UINT8                   commandId;                      ///< Specifies the command (cid)
+    UINT16                  segmentSizeLe;                  ///< Segment size (ss)
+    UINT16                  reserved2;                      ///< Reserved
+    UINT8                   aCommandData[8];                ///< Reserves a minimum number of bytes as a placeholder
+} PACK_STRUCT tAsySdoCom;
+
+/** \brief Asynchronous SDO Sequence Header
+*
+* The POWERLINK SDO Sequence Layer provides the service of a reliable bidirectional connection that guarantees that no messages are lost or duplicated and
+* that all messages arrive in the correct order.
+*
+* For more information consult the POWERLINK specification document "EPSG DS 301 V1.2.0" chapter 6.3.2.3.
+*/
+typedef struct
+{
+    UINT8                   recvSeqNumCon;                  ///< Contains the sequence number of the last correctly received frame
+    UINT8                   sendSeqNumCon;                  ///< Contains own sequence number of the frame, shall be increased by 1 with every new frame
+    UINT8                   aReserved[2];                   ///< Reserved
+    tAsySdoCom              sdoSeqPayload;                  ///< SDO Payload Data
+} PACK_STRUCT tAsySdoSeq;
+
+/**
+* \brief Network management Request Service
+*
+* The Network management Request Service is issued by a CN that received a NMTRequestInvite via SoA.
+*/
+typedef struct
+{
+    UINT8                   nmtCommandId;                   ///< Qualifies the NMT Managing Command (Offset 18)
+    UINT8                   targetNodeId;                   ///< Includes the target node ID
+    UINT8                   aNmtCommandData[32];            ///< Contains managing command-specific data to be issued by the MN.
+} PACK_STRUCT tNmtRequestService;
+
+/**
+* \brief ServiceID Values
+*
+* This union contains the ServiceID Values in the Asnd frame.
+*
+* For more information consult the POWERLINK specification document "EPSG DS 301 V1.2.0" chapter 4.6.1.1.6.1.
+*/
+typedef union
+{
+    tStatusResponse         statusResponse;                 ///< Issued by a node that received a StatusRequest via SoA (Offset 18)
+    tIdentResponse          identResponse;                  ///< Issued by a node that received an IdentRequest via SoA
+    tNmtCommandService      nmtCommandService;              ///< Issued by the MN upon an internal request or upon an external request via NMTRequest.
+    tNmtRequestService      nmtRequestService;              ///< Issued by a CN that received a NMTRequestInvite via SoA
+    tAsySdoSeq              sdoSequenceFrame;               ///< Issued by a CN that received an UnspecifiedInvite via SoA to indicate SDO transmission via ASnd.
+    tSyncResponse           syncResponse;                   ///< Received by all nodes supporting PResChaining. The SyncRes is an ASnd frame.
     UINT8                   aPayload[256];
 } tAsndPayload;
 
+/**
+* \brief Asynchronous Send Frame
+*
+* This structure defines the Asynchronous Send Frame (ASnd) frame structure.
+*
+* For more information consult the POWERLINK specification document "EPSG DS 301 V1.2.0" chapter 4.6.1.1.6.
+*/
 typedef struct
 {
-    UINT8                   serviceId;                      ///< Offset 17
-    tAsndPayload            payload;                        ///< Offset 18
+    UINT8                   serviceId;                      ///< Indicates the service ID dedicated to the asynchronous slot (Offset 17)
+    tAsndPayload            payload;                        ///< Contains data, that are specific for the current ServiceID (Offset 18)
 } PACK_STRUCT tAsndFrame;
 
+/**
+* \brief Frame Data
+*
+* This union contains the various POWERLINK messages types.
+*
+* For more information consult the POWERLINK specification document "EPSG DS 301 V1.2.0" chapter 4.6.1.1.1.
+*/
 typedef union
 {
-    tSocFrame               soc;                            ///< Offset 17
-    tPreqFrame              preq;
-    tPresFrame              pres;
-    tSoaFrame               soa;
-    tAsndFrame              asnd;
+    tSocFrame               soc;                            ///< Contains the Soc frame structure (Multicast)
+    tPreqFrame              preq;                           ///< Contains the Poll request frame structure (Unicast)
+    tPresFrame              pres;                           ///< Contains the Poll response frame structure (Multicast)
+    tSoaFrame               soa;                            ///< Contains the Start of asynchronous frame structure (Multicast)
+    tAsndFrame              asnd;                           ///< Contains the Asynchronous send frame structure (Multicast)
 } tFrameData;
 
+/**
+* \brief POWERLINK Frame
+*
+* This structure contains the POWERLINK Basic Frame Format. The POWERLINK Basic Frame format shall be encapsulated by the Ethernet wrapper consisting of
+* 14 octets of leading Ethernet header (Destination and Source MAC addresses, EtherType) and 4 octets of terminating CRC32 checksum.
+*
+* For more information consult the POWERLINK specification document "EPSG DS 301 V1.2.0" chapter 4.6.1.1.
+*/
 typedef struct
 {
-    UINT8                   aDstMac[6];                     ///< Offset 0: MAC address of the addressed nodes
-    UINT8                   aSrcMac[6];                     ///< Offset 6: MAC address of the transmitting node
-    UINT16                  etherType;                      ///< Offset 12: Ethernet message type (big endian)
-    UINT8                   messageType;                    ///< Offset 14: POWERLINK message type
-    UINT8                   dstNodeId;                      ///< Offset 15: POWERLINK node ID of the addressed nodes
-    UINT8                   srcNodeId;                      ///< Offset 16: POWERLINK node ID of the transmitting node
-    tFrameData              data;                           ///< Offset 17:
+    UINT8                   aDstMac[6];                     ///< Contains the MAC address of the addressed nodes (Offset 0)
+    UINT8                   aSrcMac[6];                     ///< Contains the MAC address of the transmitting node (Offset 6)
+    UINT16                  etherType;                      ///< Contains the Ethernet message type (big endian) (Offset 12)
+    UINT8                   messageType;                    ///< Contains the POWERLINK message type (Offset 14)
+    UINT8                   dstNodeId;                      ///< Contains the POWERLINK node ID of the addressed nodes (Offset 15)
+    UINT8                   srcNodeId;                      ///< Contains the POWERLINK node ID of the transmitting node (Offset 16)
+    tFrameData              data;                           ///< Contains the Frame Data (Offset 17)
 } PACK_STRUCT tPlkFrame;
 
 // reset byte-align of structures
@@ -329,16 +450,22 @@ typedef struct
 #pragma pack(pop, packing)
 #endif
 
-
+/**
+* \brief Message type
+*
+* This enumeration defines the POWERLINK message type IDs.
+*
+* For more information consult the POWERLINK specification document "EPSG DS 301 V1.2.0" on page 349.
+*/
 typedef enum
 {
-    kMsgTypeNonPowerlink        = 0x00,
-    kMsgTypeSoc                 = 0x01,
-    kMsgTypePreq                = 0x03,
-    kMsgTypePres                = 0x04,
-    kMsgTypeSoa                 = 0x05,
-    kMsgTypeAsnd                = 0x06,
-    kMsgTypeAInv                = 0x0D,
+    kMsgTypeNonPowerlink        = 0x00,                     ///< Defines non POWERLINK Frame
+    kMsgTypeSoc                 = 0x01,                     ///< Defines Start of Cycle Frame
+    kMsgTypePreq                = 0x03,                     ///< Defines Poll Request Frame
+    kMsgTypePres                = 0x04,                     ///< Defines Poll Response Frame
+    kMsgTypeSoa                 = 0x05,                     ///< Defines Start of Asynchronous Cycle Frame
+    kMsgTypeAsnd                = 0x06,                     ///< Defines Asynchronous Send Frame
+    kMsgTypeAInv                = 0x0D,                     ///< Defines Asynchronous Invite Frame
 } tMsgType;
 
 #endif /* _INC_oplk_frame_H_ */
