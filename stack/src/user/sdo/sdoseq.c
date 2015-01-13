@@ -506,7 +506,7 @@ The function sends data via an existing sequence layer connection.
 \ingroup module_sdo_seq
 */
 //------------------------------------------------------------------------------
-tOplkError sdoseq_sendData(tSdoSeqConHdl sdoSeqConHdl_p, UINT dataSize_p, tPlkFrame* pData_p )
+tOplkError sdoseq_sendData(tSdoSeqConHdl sdoSeqConHdl_p, UINT dataSize_p, tPlkFrame* pData_p)
 {
     tOplkError      ret;
     UINT            handle;
@@ -514,7 +514,7 @@ tOplkError sdoseq_sendData(tSdoSeqConHdl sdoSeqConHdl_p, UINT dataSize_p, tPlkFr
     handle = (sdoSeqConHdl_p & ~SDO_SEQ_HANDLE_MASK);
 
     // check if connection ready
-    if (sdoSeqInstance_l.aSdoSeqCon[handle].sdoSeqState == kSdoSeqStateIdle )
+    if (sdoSeqInstance_l.aSdoSeqCon[handle].sdoSeqState == kSdoSeqStateIdle)
     {
         // no connection with this handle
         return kErrorSdoSeqInvalidHdl;
@@ -1253,8 +1253,8 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
         // timeout
         case kSdoSeqEventTimeout:
             freeEntries = getFreeHistoryEntries(pSdoSeqCon_p);
-            if ((freeEntries < SDO_HISTORY_SIZE)
-                && (pSdoSeqCon_p->retryCount < SDO_SEQ_RETRY_COUNT))
+            if ((freeEntries < SDO_HISTORY_SIZE) &&
+                (pSdoSeqCon_p->retryCount < SDO_SEQ_RETRY_COUNT))
             {   // unacknowledged frames in history and retry counter not exceeded
                 // resend data with acknowledge request
                 pSdoSeqCon_p->retryCount++;
@@ -1554,7 +1554,7 @@ static tOplkError sendFrame(tSdoSeqCon* pSdoSeqCon_p, UINT dataSize_p,
 
     // filling header informations
     ami_setUint8Le(&pFrame->data.asnd.serviceId, 0x05);
-    ami_setUint8Le(&pFrame->data.asnd.payload.sdoSequenceFrame.aReserved,0x00);
+    ami_setUint8Le(&pFrame->data.asnd.payload.sdoSequenceFrame.aReserved, 0x00);
     ami_setUint8Le(&pFrame->data.asnd.payload.sdoSequenceFrame.recvSeqNumCon, pSdoSeqCon_p->sendSeqNum);
     ami_setUint8Le(&pFrame->data.asnd.payload.sdoSequenceFrame.sendSeqNumCon, pSdoSeqCon_p->recvSeqNum);
     dataSize_p += SDO_SEQ_HEADER_SIZE;

@@ -131,7 +131,8 @@ typedef struct
 //------------------------------------------------------------------------------
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 tDllCalFuncIntf* dllcaldirect_getInterface(void);

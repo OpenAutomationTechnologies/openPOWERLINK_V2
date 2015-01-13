@@ -90,8 +90,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     #define TGT_DBG_POST_TRACE_VALUE(v)
 #endif
 #define NMTMNU_DBG_POST_TRACE_VALUE(Event_p, uiNodeId_p, wErrorCode_p) \
-    TGT_DBG_POST_TRACE_VALUE((kEventSinkNmtMnu << 28) | (Event_p << 24) \
-                             | (uiNodeId_p << 16) | wErrorCode_p)
+    TGT_DBG_POST_TRACE_VALUE((kEventSinkNmtMnu << 28) | (Event_p << 24) |\
+                             (uiNodeId_p << 16) | wErrorCode_p)
 
 // defines for flags in node info structure
 #define NMTMNU_NODE_FLAG_ISOCHRON               0x0001  // CN is being accessed isochronously
@@ -285,8 +285,6 @@ typedef struct
 // local vars
 //------------------------------------------------------------------------------
 static tNmtMnuInstance   nmtMnuInstance_g;
-
-
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -881,8 +879,8 @@ tOplkError nmtmnu_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
     // Save new MN state in object 0x1F8E
     newMnNmtState   = (UINT8)nmtStateChange_p.newNmtState;
     ret = obd_writeEntry(0x1F8E, 240, &newMnNmtState, 1);
-    if(ret != kErrorOk)
-        return  ret;
+    if (ret != kErrorOk)
+        return ret;
 
     // do work which must be done in that state
     switch (nmtStateChange_p.newNmtState)
@@ -3169,8 +3167,7 @@ static tOplkError checkNmtState(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p,
     else if ((expNmtState == kNmtCsStopped) && (nodeNmtState_p == kNmtCsStopped))
     {
         // reset flags ISOCHRON and PREOP2_REACHED
-        pNodeInfo_p->flags &= ~(NMTMNU_NODE_FLAG_ISOCHRON
-                                | NMTMNU_NODE_FLAG_PREOP2_REACHED);
+        pNodeInfo_p->flags &= ~(NMTMNU_NODE_FLAG_ISOCHRON | NMTMNU_NODE_FLAG_PREOP2_REACHED);
     }
     else if ((expNmtState == kNmtCsPreOperational2) && (nodeNmtState_p == kNmtCsPreOperational2))
     {   // CN is PreOp2
@@ -3376,9 +3373,9 @@ static tOplkError prcMeasure(void)
         if (pNodeInfo == NULL)
             continue;
 
-        if ((pNodeInfo->nodeCfg & NMT_NODEASSIGN_PRES_CHAINING)
-            && ((pNodeInfo->flags & NMTMNU_NODE_FLAG_ISOCHRON)
-                || (pNodeInfo->prcFlags & NMTMNU_NODE_FLAG_PRC_ADD_IN_PROGRESS)))
+        if ((pNodeInfo->nodeCfg & NMT_NODEASSIGN_PRES_CHAINING) &&
+               ((pNodeInfo->flags & NMTMNU_NODE_FLAG_ISOCHRON) ||
+                (pNodeInfo->prcFlags & NMTMNU_NODE_FLAG_PRC_ADD_IN_PROGRESS)))
         {
             if (nodeIdFirstNode == C_ADR_INVALID)
             {
@@ -4542,12 +4539,12 @@ static tOplkError getNodeIdFromCmd(UINT nodeId_p, tNmtCommand nmtCommand_p,
             ret = kErrorOk;
         }
     }
-    else if ((nmtCommand_p >= NMT_EXT_COMMAND_START ) && (nmtCommand_p <= NMT_EXT_COMMAND_END))
+    else if ((nmtCommand_p >= NMT_EXT_COMMAND_START) && (nmtCommand_p <= NMT_EXT_COMMAND_END))
     {
         ret = nodeListToNodeId(pCmdData_p, pOp_p, pNodeId_p);
     }
 
-    return  ret;
+    return ret;
 }
 
 //------------------------------------------------------------------------------
@@ -4612,7 +4609,7 @@ static tOplkError nodeListToNodeId(UINT8* pCmdData_p, tNmtMnuGetNodeId* pOp_p,
     if (matchFound == TRUE)
         ret = kErrorRetry;
 
-    return  ret;
+    return ret;
 }
 
 //------------------------------------------------------------------------------

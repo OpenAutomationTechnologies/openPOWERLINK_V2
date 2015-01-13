@@ -67,7 +67,8 @@ typedef struct
 // function prototypes
 //------------------------------------------------------------------------------
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 tOplkError timeru_init(void);

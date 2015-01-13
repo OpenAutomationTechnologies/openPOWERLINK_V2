@@ -321,7 +321,7 @@ static struct platform_driver       edrvDriver_l =
     .driver     = { .name = DRV_NAME,
                     .owner = THIS_MODULE,
                     .of_match_table = xemacps_of_match,     // This function is to check the device
-    },                                                      // from the device tree
+                  },                                        // from the device tree
 };
 
 //============================================================================//
@@ -1193,7 +1193,8 @@ static INT initOnePlatformDev(struct platform_device*pDev_p)
 
     //enable Tx_used_bit read INTR
     EDRV_WRITE_REG(EDRV_INTR_EN_REG,
-                   ( EDRV_TX_AHB_CORR_READ |
+                   (
+                     EDRV_TX_AHB_CORR_READ |
                      EDRV_RX_COMPLETE_READ |
                      EDRV_TX_COMPLETE_READ |
                      EDRV_TX_BUFF_UNDRUN_READ |

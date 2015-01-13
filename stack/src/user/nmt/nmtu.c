@@ -364,7 +364,7 @@ static tOplkError configureDll(void)
             }
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
-            if ((nodeCfg & (NMT_NODEASSIGN_NODE_IS_CN | NMT_NODEASSIGN_PRES_CHAINING )) == NMT_NODEASSIGN_NODE_IS_CN)
+            if ((nodeCfg & (NMT_NODEASSIGN_NODE_IS_CN | NMT_NODEASSIGN_PRES_CHAINING)) == NMT_NODEASSIGN_NODE_IS_CN)
             {   // node is CN
                 obdSize = sizeof(dllNodeInfo.preqPayloadLimit);
                 ret = obd_readEntry(0x1F8B, index, &dllNodeInfo.preqPayloadLimit, &obdSize);
@@ -670,7 +670,7 @@ static tOplkError setupNmtTimerEvent(UINT32 timeout_p, tNmtEvent event_p)
     timerArg.eventSink = kEventSinkNmtk;
     timerArg.argument.value = (UINT32)event_p;
     ret = timeru_modifyTimer(&nmtuInstance_g.timerHdl, (ULONG)timeout_p, timerArg);
-    return  ret;
+    return ret;
 }
 
 ///\}

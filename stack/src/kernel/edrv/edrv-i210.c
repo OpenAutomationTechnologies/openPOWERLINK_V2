@@ -70,7 +70,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,19)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 19)
 #error "Linux Kernel versions older than 2.6.19 are not supported by this driver!"
 #endif
 
@@ -176,7 +176,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EDRV_TDESC_CMD_IC                (1 << 26)         // Insert Checksum
 #define EDRV_TDESC_CMD_IFCS              (1 << 25)         // Insert FCS
 #define EDRV_TDESC_CMD_EOP               (1 << 24)         // End of Packet
-#define EDRV_TDESC_STATUS_DD             (1 << 0 )         // Descriptor done
+#define EDRV_TDESC_STATUS_DD             (1 << 0)          // Descriptor done
 #define EDRV_TDESC_DTYP_CTXT             (2 << 20)         // Context Descriptor
 #define EDRV_TDESC_DTYP_ADV              (3 << 20)         // Advance Tx Descriptor
 #define EDRV_TCTL_CT                     0x000000F0        // Collision Threshold
@@ -192,12 +192,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EDRV_TXDCTL_QUEUE_EN             0x02000000        // Transmit Queue Enable
 #define EDRV_TXDCTL_SWFLSH               (1 << 26)         // Software Flush of queue
 #define EDRV_TXDCTL_PRIORITY             (1 << 27)         // Transmit Queue Priority
-#define EDRV_TQAVCTRL_TXMODE             (1 << 0 )         // Transmit mode configuration
-#define EDRV_TQAVCTRL_FETCH_ARB          (1 << 4 )         // Data Fetch arbitration
-#define EDRV_TQAVCTRL_DTRANSARB          (1 << 8 )         // Data Transmit arbitration
-#define EDRV_TQAVCTRL_TRANSTIM           (1 << 9 )         // Data Launch time valid
+#define EDRV_TQAVCTRL_TXMODE             (1 << 0)          // Transmit mode configuration
+#define EDRV_TQAVCTRL_FETCH_ARB          (1 << 4)          // Data Fetch arbitration
+#define EDRV_TQAVCTRL_DTRANSARB          (1 << 8)          // Data Transmit arbitration
+#define EDRV_TQAVCTRL_TRANSTIM           (1 << 9)          // Data Launch time valid
 #define EDRV_TQAVCTRL_SP_WAIT_SR         (1 << 10)         // SP queues wait for SR queue to quarantee SR launch time
-#define EDRV_TQAVCTRL_1588_STAT_EN       (1 << 2 )         // Report DMA transmit time in WB descriptors
+#define EDRV_TQAVCTRL_1588_STAT_EN       (1 << 2)          // Report DMA transmit time in WB descriptors
 #define EDRV_TQAVCC_QUEUE_MODE_SR        (1 << 31)         // Queue mode Strict Reservation (Launch time based)
 #define EDRV_TQAVCTRL_FETCH_TM_SHIFT     16                // Fetch time shift
 #define EDRV_LAUNCH_OSO_SHIFT            5                 // Launch time offset shift (Launch time = Launch time + Off)
@@ -239,13 +239,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EDRV_RDESC_STATUS_EOP    (1 << 1)        // End of Packet
 #define EDRV_RDESC_STATUS_DD     (1 << 0)        // Descriptor done
 #define EDRV_RDESC_ERRORS_RXE    (1 << 31)       // RX data Error
-#define EDRV_RCTL_EN             (1 << 1 )       // Receive Enable
-#define EDRV_RCTL_SBP            (1 << 2 )       // Store Bad Packets
-#define EDRV_RCTL_UPE            (1 << 3 )       // Unicast Enable
-#define EDRV_RCTL_MPE            (1 << 4 )       // Multicast Enable
-#define EDRV_RCTL_LPE            (1 << 5 )       // Long packet Reception enable
-#define EDRV_RCTL_LBM_MAC        (1 << 6 )       // Loop back mode
-#define EDRV_RCTL_LBM_CLEAR      (3 << 6 )       // Clear loop back
+#define EDRV_RCTL_EN             (1 << 1)        // Receive Enable
+#define EDRV_RCTL_SBP            (1 << 2)        // Store Bad Packets
+#define EDRV_RCTL_UPE            (1 << 3)        // Unicast Enable
+#define EDRV_RCTL_MPE            (1 << 4)        // Multicast Enable
+#define EDRV_RCTL_LPE            (1 << 5)        // Long packet Reception enable
+#define EDRV_RCTL_LBM_MAC        (1 << 6)        // Loop back mode
+#define EDRV_RCTL_LBM_CLEAR      (3 << 6)        // Clear loop back
 #define EDRV_RCTL_MO_SHIFT       12
 #define EDRV_RCTL_MO_36_47       (0 << 12)       // Multicast Offset bit[47:36]
 #define EDRV_RCTL_MO_35_46       (1 << 12)       // Multicast Offset bit[46:35]
@@ -290,8 +290,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EDRV_TSAUXC_ST0                  (1 << 4)          // Start Clock 0 Toggle on Target Time 0
 #define EDRV_TSSDP_TS_SDP3_SEL_CLK0      (2 << 15)         // Freq clock 0 is output on SDP3
 #define EDRV_TSSDP_TS_SDP3_EN            (1 << 17)         // SDP3 is assigned to Tsync
-#define EDRV_TSSDP_TS_SDP0_SEL_CLK0      (2 << 6 )         // Freq clock 0 is output on SDP0
-#define EDRV_TSSDP_TS_SDP0_EN            (1 << 8 )         // SDP0 is assigned to Tsync
+#define EDRV_TSSDP_TS_SDP0_SEL_CLK0      (2 << 6)          // Freq clock 0 is output on SDP0
+#define EDRV_TSSDP_TS_SDP0_EN            (1 << 8)          // SDP0 is assigned to Tsync
 #define SDP0_SET_DIR_OUT                 0x00400000        // Set direction Out for SDP0
 #define SDP0_SET_HIGH                    0x00040000        // Set SDP0 High
 #define SDP1_SET_DIR_OUT                 0x00800000        // Set direction Out for SDP1
@@ -316,22 +316,22 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 #define EDRV_EIMC_CLEAR_ALL      0xC000001F      // Clear all interrupts
-#define EDRV_INTR_GPIE_NSICR     (1 << 0 )       // Non Selective Interrupt Clear on Read
-#define EDRV_INTR_GPIE_MULT_MSIX (1 << 4 )       // Multiple MSIX
+#define EDRV_INTR_GPIE_NSICR     (1 << 0)        // Non Selective Interrupt Clear on Read
+#define EDRV_INTR_GPIE_MULT_MSIX (1 << 4)        // Multiple MSIX
 #define EDRV_INTR_GPIE_PBA       (1 << 31)       // PBA Support
 #define EDRV_INTR_ICR_TXDW       0x00000001      // Transmit descriptor write back
-#define EDRV_INTR_ICR_RXDW       (1 << 7 )       // Receive descriptor write back
+#define EDRV_INTR_ICR_RXDW       (1 << 7)        // Receive descriptor write back
 #define EDRV_INTR_ICR_TIME_SYNC  (1 << 19)       // Time Sync interrupt
-#define	EDRV_INTR_ICR_RXDMT0     (1 << 4 )       // Receive Descriptor Minimum Threshold Reached
+#define	EDRV_INTR_ICR_RXDMT0     (1 << 4)        // Receive Descriptor Minimum Threshold Reached
 #define EDRV_INTR_ICR_RXMISS     (1 << 6)        // Missed packet interrupt
 #define EDRV_INTR_ICR_FER        (1 << 22)       // Fatal Error
 #define EDRV_EIMC_OTHR_EN        (1 << 31)       // Other Interrupt Cause Active
-#define EDRV_EICS_OTHER          (1 << 0 )       // Vector for Other Interrupt Cause in MSI-X mode
+#define EDRV_EICS_OTHER          (1 << 0)        // Vector for Other Interrupt Cause in MSI-X mode
 #define EDRV_EICS_QUEUE          0x0000001E      // All queue interrupts
-#define EDRV_EICS_TXRXQUEUE1     (1 << 1 )       // Vector for TX-RX queue 0
-#define EDRV_EICS_TXRXQUEUE2     (1 << 2 )       // Vector for TX-RX queue 1
-#define EDRV_EICS_TXRXQUEUE3     (1 << 3 )       // Vector for TX-RX queue 2
-#define EDRV_EICS_TXRXQUEUE4     (1 << 4 )       // Vector for TX-RX queue 3
+#define EDRV_EICS_TXRXQUEUE1     (1 << 1)        // Vector for TX-RX queue 0
+#define EDRV_EICS_TXRXQUEUE2     (1 << 2)        // Vector for TX-RX queue 1
+#define EDRV_EICS_TXRXQUEUE3     (1 << 3)        // Vector for TX-RX queue 2
+#define EDRV_EICS_TXRXQUEUE4     (1 << 4)        // Vector for TX-RX queue 3
 #define EDRV_IVAR_VALID          0x80            // Interrupt vector valid bit
 #define EDRV_INTR_ICR_MASK_DEF   (EDRV_INTR_ICR_TXDW           /* Transmit descriptor write back */\
                                   | EDRV_INTR_ICR_RXDW         /* Receive descriptor write back */\
@@ -357,9 +357,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 #define EDRV_CTRL_FD             0x00000001      // Full Duplex
-#define EDRV_CTRL_MASTER_DIS     (1 << 2 )       // GIO Master Disable
-#define EDRV_CTRL_SLU            (1 << 6 )       // Set Link Up
-#define EDRV_CTRL_ILOS           (1 << 7 )       // Invert Loss-of-Signal (LOS/LINK) Signal
+#define EDRV_CTRL_MASTER_DIS     (1 << 2)        // GIO Master Disable
+#define EDRV_CTRL_SLU            (1 << 6)        // Set Link Up
+#define EDRV_CTRL_ILOS           (1 << 7)        // Invert Loss-of-Signal (LOS/LINK) Signal
 #define EDRV_CTRL_RST            (1 << 26)       // Port Software Reset
 #define EDRV_CTRL_RFCE           (1 << 27)       // Receive Flow Control Enable
 #define EDRV_CTRL_TFCE           (1 << 28)       // Transmit Flow Control Enable
@@ -395,7 +395,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EDRV_GET_RX_DESC(pQueue, index)   (&(((tEdrvAdvRxDesc*)pQueue->pDescVirt)[index]))
 #define EDRV_GET_TX_DESC(pQueue, index)   (&(((tEdrvAdvTxDesc*)pQueue->pDescVirt)[index]))
 #define EDRV_GET_CTXT_DESC(pQueue, index) (&(((tEdrvContextDesc*)pQueue->pDescVirt)[index]))
-#define EDRV_GET_TTX_DESC(pQueue, index ) (&(((tEdrvTtxDesc*)pQueue->pDescVirt)[index]))
+#define EDRV_GET_TTX_DESC(pQueue, index) (&(((tEdrvTtxDesc*)pQueue->pDescVirt)[index]))
 
 #define EDRV_REGDW_READ(reg)            readl((UINT8*)edrvInstance_l.pIoAddr + reg)
 #define EDRV_REGDW_WRITE(reg, val)      writel(val, (UINT8*)edrvInstance_l.pIoAddr + reg)
@@ -1003,7 +1003,7 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
         goto Exit;
     }
 
-    pTtxDesc = EDRV_GET_TTX_DESC(pTxQueue,index);
+    pTtxDesc = EDRV_GET_TTX_DESC(pTxQueue, index);
 
     pTtxDesc->ctxtDesc.idxL4lenMss = 0;
     pTtxDesc->ctxtDesc.ipMaclenVlan = 0;
@@ -1357,7 +1357,7 @@ static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
     reg = EDRV_REGDW_READ(EDRV_INTR_READ_REG);
 
     // Process Rx with priority over Tx
-    if ((pRxQueue != NULL ) && (reg & EDRV_INTR_ICR_RXDW))
+    if ((pRxQueue != NULL) && (reg & EDRV_INTR_ICR_RXDW))
     {
         tEdrvAdvRxDesc* pAdvRxDesc;
         tEdrvRxBuffer   rxBuffer;
@@ -1367,7 +1367,7 @@ static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
         // Clear the Rx write-back bit
         reg &= ~EDRV_INTR_ICR_RXDW;
 
-        pAdvRxDesc = EDRV_GET_RX_DESC(pRxQueue,index);
+        pAdvRxDesc = EDRV_GET_RX_DESC(pRxQueue, index);
 
         while ((pAdvRxDesc->sWb.extStatusError & EDRV_RDESC_STATUS_DD) &&
               (pAdvRxDesc->sWb.extStatusError & EDRV_RDESC_STATUS_EOP))
@@ -1463,7 +1463,7 @@ static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
                 index = ((index + 1) & EDRV_MAX_TTX_DESC_LEN);
 
                 pTxQueue->nextWb = index;
-                pTtxDesc = EDRV_GET_TTX_DESC(pTxQueue,index);
+                pTtxDesc = EDRV_GET_TTX_DESC(pTxQueue, index);
                 pAdvTxDesc = &(pTtxDesc->advDesc);
             }
             else
@@ -1885,8 +1885,8 @@ static void configureTxQueue(tEdrvQueue* pTxQueue_p)
 
     // Setup the threshold values for queue and enable
     reg = 0;
-    reg |= (EDRV_TXDCTL_PTHRESH | (EDRV_TXDCTL_HTHRESH << 8)
-            | (EDRV_TXDCTL_WTHRESH << 16));
+    reg |= (EDRV_TXDCTL_PTHRESH | (EDRV_TXDCTL_HTHRESH << 8) |
+           (EDRV_TXDCTL_WTHRESH << 16));
 
     // Highest priority to Queue0
     if (queue == 0)
@@ -2057,20 +2057,20 @@ static tOplkError allocateRxBuffer(tEdrvQueue* pRxQueue_p)
 
     for (index = 0; index < EDRV_MAX_RX_DESCRIPTOR; index++)
     {
-        rxDesc = EDRV_GET_RX_DESC(pRxQueue_p,index) ;
+        rxDesc = EDRV_GET_RX_DESC(pRxQueue_p, index);
 
         rxDma = dma_map_single(&edrvInstance_l.pPciDev->dev,
                                (pRxQueue_p->pBuf + (index * EDRV_MAX_FRAME_SIZE)),
-                               EDRV_MAX_FRAME_SIZE, DMA_FROM_DEVICE );
+                               EDRV_MAX_FRAME_SIZE, DMA_FROM_DEVICE);
 
-        if (dma_mapping_error(&edrvInstance_l.pPciDev->dev,rxDma))
+        if (dma_mapping_error(&edrvInstance_l.pPciDev->dev, rxDma))
             return kErrorEdrvInit;
 
         pRxQueue_p->pPktBuff[index].dmaAddr = rxDma;
         pRxQueue_p->pPktBuff[index].pVirtAddr = (pRxQueue_p->pBuf + (index * EDRV_MAX_FRAME_SIZE));
         rxDesc->sRead.bufferAddrLe = cpu_to_le64(rxDma);
 
-        EDRV_REGDW_WRITE(EDRV_RDTAIL(pRxQueue_p->index),index);
+        EDRV_REGDW_WRITE(EDRV_RDTAIL(pRxQueue_p->index), index);
     }
 
     return ret;
@@ -2115,8 +2115,8 @@ static void configureRxQueue(tEdrvQueue* pRxQueue_p)
 
     // Enable the rx queue
     reg = 0;
-    reg = (EDRV_RXDCTL_PTHRESH | (EDRV_RXDCTL_HTHRESH << 8)
-           | (EDRV_RXDCTL_WTHRESH << 16));
+    reg = (EDRV_RXDCTL_PTHRESH | (EDRV_RXDCTL_HTHRESH << 8) |
+           (EDRV_RXDCTL_WTHRESH << 16));
     reg |= EDRV_RXDCTL_QUEUE_EN;
     EDRV_REGDW_WRITE(EDRV_RXDCTL(queue), reg);
 
@@ -2165,9 +2165,9 @@ static void initQavMode(void)
     EDRV_REGDW_WRITE(EDRV_TQAVCC(0), dwTqavcc0);
 
     dwTqavctrl = 0;
-    dwTqavctrl = EDRV_TQAVCTRL_TXMODE | EDRV_TQAVCTRL_FETCH_ARB
-            | EDRV_TQAVCTRL_TRANSTIM | EDRV_TQAVCTRL_SP_WAIT_SR
-            | EDRV_TQAVCTRL_1588_STAT_EN;
+    dwTqavctrl = EDRV_TQAVCTRL_TXMODE | EDRV_TQAVCTRL_FETCH_ARB |
+                 EDRV_TQAVCTRL_TRANSTIM | EDRV_TQAVCTRL_SP_WAIT_SR |
+                 EDRV_TQAVCTRL_1588_STAT_EN;
 
     // default to a 10 usec prefetch delta from launch time
     dwTqavctrl |= (10 << 5) << EDRV_TQAVCTRL_FETCH_TM_SHIFT;

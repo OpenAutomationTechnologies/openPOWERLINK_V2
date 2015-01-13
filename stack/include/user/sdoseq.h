@@ -88,7 +88,8 @@ typedef tOplkError (*tSdoComReceiveCb)(tSdoSeqConHdl sdoSeqConHdl_p, tAsySdoCom*
 //------------------------------------------------------------------------------
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 tOplkError sdoseq_init(tSdoComReceiveCb pfnSdoComRecvCb_p, tSdoComConCb pfnSdoComConCb_p);

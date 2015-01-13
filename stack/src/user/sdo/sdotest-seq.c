@@ -259,7 +259,7 @@ tOplkError sdotestseq_delInstance(void)
     // Shutdown connection handling
     pCon = &sdoTestSeqInst.seqCon;
 
-    if (pCon->state != kOplkTestSdoSequConIdle )
+    if (pCon->state != kOplkTestSdoSequConIdle)
     {
         switch (pCon->sdoType)
         {

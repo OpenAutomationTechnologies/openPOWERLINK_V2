@@ -4,7 +4,7 @@
 
 \brief  Definitions for GPIOs
 
-This header file provides the definitions for GPIOs used by the openPOWERLINK 
+This header file provides the definitions for GPIOs used by the openPOWERLINK
 examples.
 *******************************************************************************/
 
@@ -58,7 +58,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 int gpio_init(void);

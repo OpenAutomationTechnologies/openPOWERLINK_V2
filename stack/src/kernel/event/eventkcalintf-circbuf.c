@@ -366,7 +366,7 @@ tOplkError eventkcal_getEventCircbuf(tEventQueue eventQueue_p, BYTE* pDataBuffer
 
     error = circbuf_readData(pCircBufInstance, pDataBuffer_p,
                              sizeof(tEvent) + MAX_EVENT_ARG_SIZE, pReadSize_p);
-    if(error != kCircBufOk)
+    if (error != kCircBufOk)
     {
         if (error == kCircBufNoReadableData)
             return kErrorOk;

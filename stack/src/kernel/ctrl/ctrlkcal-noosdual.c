@@ -133,7 +133,7 @@ tOplkError ctrlkcal_init(void)
     if (dualRet != kDualprocSuccessful)
     {
         DEBUG_LVL_ERROR_TRACE(" {%s} Could not create dual processor driver instance (0x%X)\n",
-                              __func__, dualRet );
+                              __func__, dualRet);
         ret = kErrorNoResource;
 
         // Since dualprocshm_delete() is already called in dualprocshm_create()
@@ -157,7 +157,7 @@ tOplkError ctrlkcal_init(void)
     if (dualRet != kDualprocSuccessful)
     {
         DEBUG_LVL_ERROR_TRACE(" {%s} Could not create write magic (0x%X)\n",
-                              __func__, dualRet );
+                              __func__, dualRet);
         ret = kErrorNoResource;
         goto Exit;
     }

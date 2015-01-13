@@ -64,8 +64,8 @@ The generic defines are valid for the whole openPOWERLINK stack.
 #define CONFIG_INCLUDE_VETH
 
 #ifndef BENCHMARK_MODULES
-#define BENCHMARK_MODULES                   (0 \
-                                            | BENCHMARK_MOD_32 \
+#define BENCHMARK_MODULES                   (0 | \
+                                             BENCHMARK_MOD_32 \
                                             )
     ///< enable benchmark for specific stack modules
 #endif
@@ -117,7 +117,8 @@ The SDO defines determine the SDO stack configuration.
 //------------------------------------------------------------------------------
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 #ifdef __cplusplus

@@ -61,7 +61,8 @@ typedef tOplkError (*tCfmCbEventCnResult)(UINT nodeId_p, tNmtNodeCommand nodeCom
 //------------------------------------------------------------------------------
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 tOplkError cfmu_init(tCfmCbEventCnProgress pfnCbEventCnProgress_p, tCfmCbEventCnResult pfnCbEventCnResult_p);

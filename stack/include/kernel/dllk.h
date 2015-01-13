@@ -146,7 +146,8 @@ typedef enum
 // function prototypes
 //------------------------------------------------------------------------------
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 tOplkError dllk_addInstance(void);

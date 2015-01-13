@@ -58,7 +58,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 OPLKDLLEXPORT char* debugstr_getNmtEventStr(tNmtEvent nmtEvent_p);

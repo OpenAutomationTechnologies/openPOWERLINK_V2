@@ -410,7 +410,7 @@ static tOplkError processCdc(tObdCdcInfo* pCdcInfo_p)
         return ret;
     }
 
-    for ( ; entriesRemaining != 0; entriesRemaining--)
+    for (; entriesRemaining != 0; entriesRemaining--)
     {
         if ((ret = loadNextBuffer(pCdcInfo_p, CDC_OFFSET_DATA))  != kErrorOk)
             return ret;

@@ -115,7 +115,8 @@ typedef tOplkError (*tNmtuCheckEventCallback)(tNmtEvent NmtEvent_p);
 //------------------------------------------------------------------------------
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 tOplkError      nmtu_init(void);

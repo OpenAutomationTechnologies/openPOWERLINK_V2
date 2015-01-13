@@ -251,49 +251,35 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define R_REGDW_TCR_HW_VER_ID2                          0x00800000      // MAC hardware version ID bit 2
 
 // default configurations
-#define REGDW_TCR_VER_MASK                              ( \
-                                                        R_REGDW_TCR_HW_VER_ID0 | \
+#define REGDW_TCR_VER_MASK                              (R_REGDW_TCR_HW_VER_ID0 | \
                                                         R_REGDW_TCR_HW_VER_ID1 | \
-                                                        R_REGDW_TCR_HW_VER_ID2 \
-                                                        )
+                                                        R_REGDW_TCR_HW_VER_ID2)
 
-#define REGDW_TCR_VER_8111B_8168B                       ( \
-                                                        R_REGDW_TCR_HW_VER_ID0 & \
+#define REGDW_TCR_VER_8111B_8168B                       (R_REGDW_TCR_HW_VER_ID0 & \
                                                         ~R_REGDW_TCR_HW_VER_ID1 & \
-                                                        ~R_REGDW_TCR_HW_VER_ID2 \
-                                                        )
+                                                        ~R_REGDW_TCR_HW_VER_ID2)
 
-#define REGDW_TCR_VER_8100E                             ( \
-                                                        (R_REGDW_TCR_HW_VER_ID0 & \
+#define REGDW_TCR_VER_8100E                             ((R_REGDW_TCR_HW_VER_ID0 & \
                                                          ~R_REGDW_TCR_HW_VER_ID1) | \
-                                                        R_REGDW_TCR_HW_VER_ID2 \
-                                                        )
+                                                        R_REGDW_TCR_HW_VER_ID2)
 
-#define REGDW_TCR_VER_8101E                             ( \
-                                                        R_REGDW_TCR_HW_VER_ID0 | \
+#define REGDW_TCR_VER_8101E                             (R_REGDW_TCR_HW_VER_ID0 | \
                                                         (R_REGDW_TCR_HW_VER_ID1 & \
-                                                         ~R_REGDW_TCR_HW_VER_ID2) \
-                                                        )
+                                                         ~R_REGDW_TCR_HW_VER_ID2))
 
-#define REGDW_TCR_VER_8111D                             ( \
-                                                        R_REGDW_TCR_HW_VER_ID0_FIELD_HI & \
+#define REGDW_TCR_VER_8111D                             (R_REGDW_TCR_HW_VER_ID0_FIELD_HI & \
                                                         ~R_REGDW_TCR_HW_VER_ID0_FIELD_LO & \
                                                         ~R_REGDW_TCR_HW_VER_ID1 & \
-                                                        ~R_REGDW_TCR_HW_VER_ID2 \
-                                                        )
+                                                        ~R_REGDW_TCR_HW_VER_ID2)
 
-#define REGDW_TCR_IFG_960                               ( \
-                                                        ~RW_REGDW_TCR_IFG_TIME_HI & \
-                                                        RW_REGDW_TCR_IFG_TIME_LO \
-                                                        )
+#define REGDW_TCR_IFG_960                               (~RW_REGDW_TCR_IFG_TIME_HI & \
+                                                        RW_REGDW_TCR_IFG_TIME_LO)
 
 #define RW_REGDW_TCR_MAX_DMA_BURST_SIZE_UNLMTD          RW_REGDW_TCR_MAX_DMA_BURST_SIZE
 
-#define RW_REGDW_TCR_DEF                                ( \
-                                                        (RW_REGDW_TCR_MAX_DMA_BURST_SIZE_UNLMTD | \
+#define RW_REGDW_TCR_DEF                                ((RW_REGDW_TCR_MAX_DMA_BURST_SIZE_UNLMTD | \
                                                          REGDW_TCR_IFG_960) & \
-                                                        ~RW_REGDW_TCR_TX_CRC_DIS \
-                                                        )
+                                                        ~RW_REGDW_TCR_TX_CRC_DIS)
 
 // Transmit Priority Polling
 #define RW_REGB_TX_PRIO_POLL                            0x0038          // tx priority polling register address offset
@@ -332,13 +318,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // default configurations
 #define RW_REGDW_RCR_RX_FIFO_THRSHOLD_UNLMTD            RW_REGDW_RCR_RX_FIFO_THRSHLD
 #define RW_REGDW_RCR_MAX_DMA_BURST_SIZE_UNLMTD          RW_REGDW_RCR_MAX_DMA_BURST_SIZE
-#define RW_REGDW_RCR_DEF                                ( \
-                                                        RW_REGDW_RCR_RX_FIFO_THRSHOLD_UNLMTD | \
+#define RW_REGDW_RCR_DEF                                (RW_REGDW_RCR_RX_FIFO_THRSHOLD_UNLMTD | \
                                                         RW_REGDW_RCR_MAX_DMA_BURST_SIZE_UNLMTD | \
                                                         RW_REGDW_RCR_ACC_UNICAST_PKTS | \
                                                         RW_REGDW_RCR_ACC_MULTICAST_PKTS | \
-                                                        RW_REGDW_RCR_ACC_BROADCAST_PKTS /* for arp */ \
-                                                        )
+                                                        RW_REGDW_RCR_ACC_BROADCAST_PKTS /* for arp */)
 
 // Dump tally Counter command (DTCCR)
 #define RW_REGQW_DUMP_TALLY_COUNT                       0x10                // dump-tally-counter-command register address offset
@@ -376,15 +360,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define RW_REGW_INT_MASK_TIMEOUT                        0x4000          // enable interrupt for timeout in TCTR
 
 // default configurations
-#define RW_REGW_INT_MASK_DEF                            ( \
-                                                         RW_REGW_INT_MASK_TX_OK | \
+#define RW_REGW_INT_MASK_DEF                            (RW_REGW_INT_MASK_TX_OK | \
                                                          RW_REGW_INT_MASK_TX_ERR | \
                                                          RW_REGW_INT_MASK_LINK_CHNG | \
                                                          RW_REGW_INT_MASK_RX_OK | \
                                                          RW_REGW_INT_MASK_RX_ERR | \
                                                          RW_REGW_INT_MASK_RX_FIFO_OV | \
-                                                         RW_REGW_INT_MASK_RX_DESC_UNAVLBL \
-                                                        )
+                                                         RW_REGW_INT_MASK_RX_DESC_UNAVLBL)
 
 // Interrupt Status Register
 #define RW_REGW_INT_STATUS                              0x003E          // interrupt status register address offset
@@ -427,19 +409,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define R_REGB_PHY_STATUS_TX_FLOW_CTRL_ON               0x0040          // flag for Phy rx flow control on
 
 // required configuration
-#define R_REGB_PHY_STATUS_CFG_MASK                      ( \
-                                                        R_REGB_PHY_STATUS_FULL_DUPLEX | \
+#define R_REGB_PHY_STATUS_CFG_MASK                      (R_REGB_PHY_STATUS_FULL_DUPLEX | \
                                                         R_REGB_PHY_STATUS_LINK_STATUS | \
                                                         R_REGB_PHY_STATUS_LINK_SPEED_10 | \
                                                         R_REGB_PHY_STATUS_LINK_SPEED_100 | \
                                                         R_REGB_PHY_STATUS_FULL_DUPLEX_1000 | \
                                                         R_REGB_PHY_STATUS_RX_FLOW_CTRL_ON | \
-                                                        R_REGB_PHY_STATUS_TX_FLOW_CTRL_ON \
-                                                        )
-#define R_REGB_PHY_STATUS_REQ_CFG                       ( \
-                                                        R_REGB_PHY_STATUS_LINK_SPEED_100 | \
-                                                        R_REGB_PHY_STATUS_LINK_STATUS \
-                                                        )
+                                                        R_REGB_PHY_STATUS_TX_FLOW_CTRL_ON)
+#define R_REGB_PHY_STATUS_REQ_CFG                       (R_REGB_PHY_STATUS_LINK_SPEED_100 | \
+                                                        R_REGB_PHY_STATUS_LINK_STATUS)
 // PHY Basic Mode Control Register
 #define RW_REGW_PHY_BASIC_MOD_CTRL                      0x0000          // Phy basic-mode-control-register address offset
 #define RW_REGW_PHY_BASIC_MOD_CTRL_SPEED_1              0x0040          // Phy link speed selection bit 1 (00- 10 Mbps, 01- 100 Mbps)
@@ -453,14 +431,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define RW_REGW_PHY_BASIC_MOD_CTRL_RESET                0x8000          // reset Phy (register and configurations)
 
 // default configurations
-#define RW_REGW_PHY_BASIC_MOD_CTRL_DEF                  ( \
-                                                        ~RW_REGW_PHY_BASIC_MOD_CTRL_SPEED_1 & \
+#define RW_REGW_PHY_BASIC_MOD_CTRL_DEF                  (~RW_REGW_PHY_BASIC_MOD_CTRL_SPEED_1 & \
                                                         RW_REGW_PHY_BASIC_MOD_CTRL_SPEED_0 & \
                                                         ~RW_REGW_PHY_BASIC_MOD_CTRL_FULL_DUPLEX_EN & \
                                                         ~RW_REGW_PHY_BASIC_MOD_CTRL_ISOLATE & \
                                                         ~RW_REGW_PHY_BASIC_MOD_CTRL_PWR_DWN & \
-                                                        ~RW_REGW_PHY_BASIC_MOD_CTRL_AUTONEGOTIATE_EN    \
-                                                        )
+                                                        ~RW_REGW_PHY_BASIC_MOD_CTRL_AUTONEGOTIATE_EN)
 
 // PHY Basic Mode Status Register
 #define RW_REGW_PHY_BASIC_MOD_STATUS                    0x0001
@@ -610,7 +586,8 @@ static void         reinitRx(void);
 // local vars
 //------------------------------------------------------------------------------
 
-static struct pci_device_id     aEdrvPciTbl_l[] = {
+static struct pci_device_id     aEdrvPciTbl_l[] =
+{
     {0x10ec, 0x8111, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},  // 8111B
     {0x10ec, 0x8168, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},  // 8168B
     {0, }
@@ -620,7 +597,8 @@ MODULE_DEVICE_TABLE(pci, aEdrvPciTbl_l);
 
 static tEdrvInstance            edrvInstance_l;
 
-static struct pci_driver        edrvDriver_l = {
+static struct pci_driver        edrvDriver_l =
+{
     .name         = DRV_NAME,
     .id_table     = aEdrvPciTbl_l,
     .probe        = initOnePciDev,
@@ -1841,7 +1819,7 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p,
         rxBuffersInAllocation = 1 << (PAGE_SHIFT - EDRV_RX_BUFFER_SIZE_SHIFT);
     }
 
-    for (rxBufferCount = 0; rxBufferCount < EDRV_MAX_RX_BUFFERS; )
+    for (rxBufferCount = 0; rxBufferCount < EDRV_MAX_RX_BUFFERS;)
     {
         ULONG       bufferPointer;
         UINT        nInAlloc;

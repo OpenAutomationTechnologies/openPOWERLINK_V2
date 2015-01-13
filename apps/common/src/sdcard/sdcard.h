@@ -59,7 +59,8 @@ typedef struct
 //------------------------------------------------------------------------------
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 tOplkError  sdcard_getCdcOnSd(char* pszCdcFilename_p, tCdcBuffInfo* pCdcBuffInfo_p);

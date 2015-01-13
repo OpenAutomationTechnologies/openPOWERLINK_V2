@@ -163,7 +163,7 @@ tOplkError processSync(void)
     appOutVal = pProcessImageOut_l->digitalOut[0] << 0  |
                 pProcessImageOut_l->digitalOut[1] << 8  |
                 pProcessImageOut_l->digitalOut[2] << 16 |
-                pProcessImageOut_l->digitalOut[3] << 24 ;
+                pProcessImageOut_l->digitalOut[3] << 24;
 
     gpio_setAppOutputs(appOutVal);
 

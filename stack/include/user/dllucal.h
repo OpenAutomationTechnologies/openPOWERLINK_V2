@@ -80,7 +80,8 @@ typedef tOplkError (*tDlluCbNonPlk)(tFrameInfo* pFrameInfo_p);
 //------------------------------------------------------------------------------
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 tOplkError dllucal_init(void);

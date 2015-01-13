@@ -132,7 +132,7 @@ tOplkError ctrlucal_init(void)
     if (dualRet != kDualprocSuccessful)
     {
         DEBUG_LVL_ERROR_TRACE("%s Could not create dual processor driver instance (0x%X)\n",
-                              __func__, dualRet );
+                              __func__, dualRet);
         dualprocshm_delete(instance_l.dualProcDrvInst);
         return kErrorNoResource;
     }
@@ -270,7 +270,7 @@ tOplkError ctrlucal_checkKernelStack(void)
     if (dualRet != kDualprocSuccessful)
         return kErrorGeneralError;
 
-    if ( magic != CTRL_MAGIC)
+    if (magic != CTRL_MAGIC)
     {
         DEBUG_LVL_CTRL_TRACE("Kernel daemon not running! Exiting...\n");
         return kErrorNoResource;

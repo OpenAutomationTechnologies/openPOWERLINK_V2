@@ -184,8 +184,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                                                                                 {1, typ,          (acc) | kObdAccArray,              &xDef##ind##_0x01_g, &axCur##ind##_g[0]}, \
                                                                                 OBD_END_SUBINDEX()};
 #define OBD_RAM_INDEX_RAM_ARRAY_ALT(ind, cnt, call, typ, acc, dtyp, name, def)  static tObdSubEntry MEM aObdSubEntry##ind##Ram_g[]= { \
-                                                                                {0, kObdTypeUInt8,(acc),                             &xDef##ind##_0x00_g, &xCur##ind##_0x00_g}, \
-                                                                                {1, typ,          (acc) | kObdAccArray,              &xDef##ind##_0x01_g, &axCur##ind##_g[0]}, \
+                                                                                {0, kObdTypeUInt8, (acc),                             &xDef##ind##_0x00_g, &xCur##ind##_0x00_g}, \
+                                                                                {1, typ,           (acc) | kObdAccArray,              &xDef##ind##_0x01_g, &axCur##ind##_g[0]}, \
                                                                                 OBD_END_SUBINDEX()};
 #define OBD_RAM_INDEX_RAM_VARARRAY(ind, cnt, call, typ, acc, dtyp, name, def)   static tObdSubEntry MEM aObdSubEntry##ind##Ram_g[]= { \
                                                                                 {0, kObdTypeUInt8, kObdAccCR,                        &xDef##ind##_0x00_g, NULL}, \
@@ -348,9 +348,6 @@ with the macro OBD_BEGIN_INDEX_... and ended with OBD_END_INDEX. The suffix
                             objects.
 */
 #define OBD_BEGIN_INDEX_RAM(ind, cnt, call)
-
-
-
 
 /**
 \brief Begin of array index entry

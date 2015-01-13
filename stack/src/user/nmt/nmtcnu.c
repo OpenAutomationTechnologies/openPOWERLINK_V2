@@ -259,7 +259,7 @@ static tOplkError commandCb(tFrameInfo* pFrameInfo_p)
     BOOL            fNodeIdInList;
     tNmtEvent       nmtEvent = kNmtEventNoEvent;
 
-    if(pFrameInfo_p == NULL)
+    if (pFrameInfo_p == NULL)
         return kErrorNmtInvalidFramePointer;
 
     nmtCommand = getNmtCommand(pFrameInfo_p);
@@ -496,12 +496,12 @@ static BOOL checkNodeIdList(UINT8* pbNmtCommandDate_p)
     UINT8           nodeListByte;
 
     nodeListByte = ami_getUint8Le(&pbNmtCommandDate_p[byteOffset]);
-    if((nodeListByte & bitMask) == 0)
+    if ((nodeListByte & bitMask) == 0)
         fNodeIdInList = FALSE;
     else
         fNodeIdInList = TRUE;
 
-    return  fNodeIdInList;
+    return fNodeIdInList;
 }
 
 ///\}

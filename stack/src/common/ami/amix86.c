@@ -740,4 +740,3 @@ void ami_getTimeOfDay(void* pAddr_p, tTimeOfDay* pTimeOfDay_p)
     pTimeOfDay_p->msec = ami_getUint32Le(((UINT8 *) pAddr_p)) & 0x0FFFFFFF;
     pTimeOfDay_p->days = ami_getUint16Le(((UINT8 *) pAddr_p) + 4);
 }
-

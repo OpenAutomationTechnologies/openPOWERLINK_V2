@@ -216,7 +216,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define TRACE(...) trace(__VA_ARGS__)
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 void trace(const char* fmt, ...);
@@ -256,7 +257,7 @@ void trace(const char* fmt, ...);
     if (!(expr)) \
     { \
         PRINTF("Assertion failed: " string);\
-        for ( ; ; );\
+        for (;;);\
     }
 #else
 

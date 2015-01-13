@@ -329,7 +329,7 @@ tCircBufError circbuf_writeData (tCircBufInstance* pInstance_p, const void* pDat
 
         OPLK_MEMCPY(pCircBuf + pHeader->writeOffset + sizeof(UINT32),
                     pData_p, chunkSize);
-        OPLK_DCACHE_FLUSH((pCircBuf + pHeader->writeOffset ), chunkSize + sizeof(UINT32));
+        OPLK_DCACHE_FLUSH((pCircBuf + pHeader->writeOffset), chunkSize + sizeof(UINT32));
         OPLK_MEMCPY(pCircBuf, (UINT8*)pData_p + chunkSize, size_p - chunkSize);
         OPLK_DCACHE_FLUSH((pCircBuf), (size_p - chunkSize));
 
@@ -619,4 +619,3 @@ tCircBufError circBuf_setSignaling(tCircBufInstance* pInstance_p, VOIDFUNCPTR pf
 /// \{
 
 ///\}
-

@@ -710,7 +710,7 @@ static int readErrorObject(unsigned long arg)
     tErrHndIoctl    readObject;
     tErrHndObjects* errorObjects;
 
-    if(copy_from_user(&readObject, (const void __user *)arg, sizeof(tErrHndIoctl)))
+    if (copy_from_user(&readObject, (const void __user *)arg, sizeof(tErrHndIoctl)))
         return -EFAULT;
 
     errorObjects = errhndkcal_getMemPtr();

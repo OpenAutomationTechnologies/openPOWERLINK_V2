@@ -216,7 +216,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
         (pEdrvInitParam_p->aMacAddr[2] == 0) &&
         (pEdrvInitParam_p->aMacAddr[3] == 0) &&
         (pEdrvInitParam_p->aMacAddr[4] == 0) &&
-        (pEdrvInitParam_p->aMacAddr[5] == 0)  )
+        (pEdrvInitParam_p->aMacAddr[5] == 0))
     {   // read MAC address from controller
         getMacAddr(edrvInstance_l.pCookie,
                    pEdrvInitParam_p->hwParam.pDevName,
@@ -595,7 +595,7 @@ static BOOL packetHandler(void* pCookie_p, LONG type_p, M_BLK_ID pPkt_p,
     UNUSED_PARAMETER(type_p);
 
     if (OPLK_MEMCMP(pPkt_p->mBlkHdr.mData + pLLHInfo_p->srcAddrOffset,
-                    pInstance->initParam.aMacAddr, 6 ) != 0)
+                    pInstance->initParam.aMacAddr, 6) != 0)
     {
         rxBuffer.bufferInFrame = kEdrvBufferLastInFrame;
         rxBuffer.rxFrameSize = netMblkToBufCopy(pPkt_p, aBuffer, NULL);

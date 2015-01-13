@@ -1532,8 +1532,8 @@ tOplkError dllkframe_presChainingEnable(void)
         pTxFrameSyncRes = (tPlkFrame*)dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SYNCRES].pBuffer;
 
         ami_setUint32Le(&pTxFrameSyncRes->data.asnd.payload.syncResponse.syncStatusLe,
-                        ami_getUint32Le(&pTxFrameSyncRes->data.asnd.payload.syncResponse.syncStatusLe)
-                        | PLK_SYNC_PRES_MODE_SET);
+                        ami_getUint32Le(&pTxFrameSyncRes->data.asnd.payload.syncResponse.syncStatusLe) |
+                        PLK_SYNC_PRES_MODE_SET);
         // update SyncRes Tx buffer in Edrv
         Ret = edrv_updateTxBuffer(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SYNCRES]);
         if (Ret != kErrorOk)
@@ -2109,8 +2109,8 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
                 // update (only) EA and ER flag from MN for Status request response cycle
                 // $$$ d.k. only in PreOp1 and when async-only or not accessed isochronously
                 dllkInstance_g.mnFlag1 =
-                        (dllkInstance_g.mnFlag1 & ~(PLK_FRAME_FLAG1_EA | PLK_FRAME_FLAG1_ER)) // preserve all flags except EA and ER
-                        | (flag1 & (PLK_FRAME_FLAG1_EA | PLK_FRAME_FLAG1_ER));                     // set EA and ER flag
+                        (dllkInstance_g.mnFlag1 & ~(PLK_FRAME_FLAG1_EA | PLK_FRAME_FLAG1_ER)) | // preserve all flags except EA and ER
+                        (flag1 & (PLK_FRAME_FLAG1_EA | PLK_FRAME_FLAG1_ER));                     // set EA and ER flag
                 goto Exit;
                 break;
 
@@ -2211,8 +2211,8 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
                     ami_setUint32Le(&pTxFrameSyncRes->data.asnd.payload.syncResponse.presTimeFirstLe,
                                     PrcCycleTiming.pResTimeFirstNs);
                     ami_setUint32Le(&pTxFrameSyncRes->data.asnd.payload.syncResponse.syncStatusLe,
-                                    ami_getUint32Le(&pTxFrameSyncRes->data.asnd.payload.syncResponse.syncStatusLe)
-                                    | PLK_SYNC_PRES_TIME_FIRST_VALID);
+                                    ami_getUint32Le(&pTxFrameSyncRes->data.asnd.payload.syncResponse.syncStatusLe) |
+                                    PLK_SYNC_PRES_TIME_FIRST_VALID);
                     // update SyncRes Tx buffer in Edrv
                     ret = edrv_updateTxBuffer(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SYNCRES]);
                     if (ret != kErrorOk)
@@ -2247,12 +2247,12 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
                         goto Exit;
                 }
 
-                PrcCycleTiming.syncControl = syncControl & (PLK_SYNC_PRES_TIME_FIRST_VALID
-                                                              | PLK_SYNC_PRES_TIME_SECOND_VALID
-                                                              | PLK_SYNC_SYNC_MN_DELAY_FIRST_VALID
-                                                              | PLK_SYNC_SYNC_MN_DELAY_SECOND_VALID
-                                                              | PLK_SYNC_PRES_MODE_RESET
-                                                              | PLK_SYNC_PRES_MODE_SET);
+                PrcCycleTiming.syncControl = syncControl & (PLK_SYNC_PRES_TIME_FIRST_VALID |
+                                                            PLK_SYNC_PRES_TIME_SECOND_VALID |
+                                                            PLK_SYNC_SYNC_MN_DELAY_FIRST_VALID |
+                                                            PLK_SYNC_SYNC_MN_DELAY_SECOND_VALID |
+                                                            PLK_SYNC_PRES_MODE_RESET |
+                                                            PLK_SYNC_PRES_MODE_SET);
 
                 if (PrcCycleTiming.syncControl != 0)
                 {
@@ -2475,7 +2475,7 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
         {   // ASnd service ID is registered
             // forward frame via async receive FIFO to userspace
             ret = dllkcal_asyncFrameReceived(pFrameInfo_p);
-            if(ret == kErrorReject)
+            if (ret == kErrorReject)
             {
                 *pReleaseRxBuffer_p = kEdrvReleaseRxBufferLater;
                 ret = kErrorOk;
@@ -2491,7 +2491,7 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
             {   // ASnd frame is intended for us
                 // forward frame via async receive FIFO to userspace
                 ret = dllkcal_asyncFrameReceived(pFrameInfo_p);
-                if(ret == kErrorReject)
+                if (ret == kErrorReject)
                 {
                     *pReleaseRxBuffer_p = kEdrvReleaseRxBufferLater;
                     ret = kErrorOk;

@@ -70,7 +70,8 @@ typedef tOplkError (*tProcessEventCb)(tEvent* pEvent_p);
 //------------------------------------------------------------------------------
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 tOplkError eventu_init(tProcessEventCb pfnApiProcessEventCb_p);

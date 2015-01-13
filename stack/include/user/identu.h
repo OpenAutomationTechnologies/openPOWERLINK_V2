@@ -59,7 +59,8 @@ typedef tOplkError (*tIdentuCbResponse)(UINT nodeId_p, tIdentResponse* pIdentRes
 //------------------------------------------------------------------------------
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 tOplkError identu_init(void);

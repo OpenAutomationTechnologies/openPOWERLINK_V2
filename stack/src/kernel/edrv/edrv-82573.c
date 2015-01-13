@@ -81,7 +81,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,19)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 19)
 #error "Linux Kernel versions older 2.6.19 are not supported by this driver!"
 #endif
 
@@ -138,9 +138,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EDRV_TX_DESC_CMD_RS     0x08000000  // Report Status
 #define EDRV_TX_DESC_CMD_IFCS   0x02000000  // Insert Frame Check Sum
 #define EDRV_TX_DESC_CMD_EOP    0x01000000  // End of Packet
-#define EDRV_TX_DESC_CMD_DEF    (EDRV_TX_DESC_CMD_EOP \
-                               | EDRV_TX_DESC_CMD_IFCS \
-                               | EDRV_TX_DESC_CMD_RS)
+#define EDRV_TX_DESC_CMD_DEF    (EDRV_TX_DESC_CMD_EOP | \
+                                 EDRV_TX_DESC_CMD_IFCS | \
+                                 EDRV_TX_DESC_CMD_RS)
 #define EDRV_TX_DESC_STATUS_DD  0x01        // Descriptor Done
 #define EDRV_TX_DESC_STATUS_EC  0x02        // Excess Collisions
 #define EDRV_TX_DESC_STATUS_LC  0x04        // Late Collision
@@ -155,8 +155,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EDRV_REGDW_CTRL_RST     0x04000000  // Reset
 #define EDRV_REGDW_CTRL_PHY_RST 0x80000000  // PHY Reset
 
-#define EDRV_REGDW_CTRL_DEF     (EDRV_REGDW_CTRL_LRST \
-                               | EDRV_REGDW_CTRL_SLU)
+#define EDRV_REGDW_CTRL_DEF     (EDRV_REGDW_CTRL_LRST | \
+                                 EDRV_REGDW_CTRL_SLU)
 
 #define EDRV_REGDW_STATUS       0x00008     // Device Status
 #define EDRV_REGDW_STATUS_LU    0x00000002  // Link Up Indication
@@ -181,11 +181,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EDRV_REGDW_INT_SRPD     0x00010000  // Small Receive Packet Detected
 #define EDRV_REGDW_INT_INT_ASSERTED 0x80000000  // PCIe Int. has been asserted
 
-#define EDRV_REGDW_INT_MASK_DEF (EDRV_REGDW_INT_TXDW \
-                               | EDRV_REGDW_INT_RXT0 \
-                               | EDRV_REGDW_INT_RXDMT0 \
-                               | EDRV_REGDW_INT_RXO \
-                               | EDRV_REGDW_INT_RXSEQ)
+#define EDRV_REGDW_INT_MASK_DEF (EDRV_REGDW_INT_TXDW | \
+                                 EDRV_REGDW_INT_RXT0 | \
+                                 EDRV_REGDW_INT_RXDMT0 | \
+                                 EDRV_REGDW_INT_RXO | \
+                                 EDRV_REGDW_INT_RXSEQ)
 
 #define EDRV_REGDW_TIPG         0x00410     // Transmit Inter Packet Gap
 #define EDRV_REGDW_TIPG_DEF     0x00702008  // default according to Intel PCIe GbE Controllers Open Source Software Developer's Manual
@@ -207,10 +207,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EDRV_REGDW_TCTL_PSP     0x00000008  // Pad Short Packets
 #define EDRV_REGDW_TCTL_CT      0x000000F0  // Collision Threshold
 #define EDRV_REGDW_TCTL_COLD    0x0003F000  // Collision Distance
-#define EDRV_REGDW_TCTL_DEF     (EDRV_REGDW_TCTL_EN \
-                               | EDRV_REGDW_TCTL_PSP \
-                               | EDRV_REGDW_TCTL_CT \
-                               | EDRV_REGDW_TCTL_COLD)
+#define EDRV_REGDW_TCTL_DEF     (EDRV_REGDW_TCTL_EN | \
+                                 EDRV_REGDW_TCTL_PSP | \
+                                 EDRV_REGDW_TCTL_CT | \
+                                 EDRV_REGDW_TCTL_COLD)
 
 #define EDRV_REGDW_RCTL         0x00100     // Receive Control
 #define EDRV_REGDW_RCTL_EN      0x00000002  // Receive Enable
@@ -220,11 +220,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define EDRV_REGDW_RCTL_BSIZE_2048  0x00000000  // buffer size is 2048 byte
 
-#define EDRV_REGDW_RCTL_DEF     (EDRV_REGDW_RCTL_EN \
-                               | EDRV_REGDW_RCTL_SBP \
-                               | EDRV_REGDW_RCTL_BAM \
-                               | EDRV_REGDW_RCTL_SECRC \
-                               | EDRV_REGDW_RCTL_BSIZE_2048)
+#define EDRV_REGDW_RCTL_DEF     (EDRV_REGDW_RCTL_EN | \
+                                 EDRV_REGDW_RCTL_SBP | \
+                                 EDRV_REGDW_RCTL_BAM | \
+                                 EDRV_REGDW_RCTL_SECRC | \
+                                 EDRV_REGDW_RCTL_BSIZE_2048)
 
 #define EDRV_REGDW_TDBAL        0x03800     // Transmit Descriptor Base Address Low
 #define EDRV_REGDW_TDBAH        0x03804     // Transmit Descriptor Base Address High
@@ -379,7 +379,7 @@ typedef struct
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,19)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 19)
 static irqreturn_t edrvIrqHandler (INT irqNum_p, void* ppDevInstData_p);
 #else
 static INT edrvIrqHandler (INT irqNum_p, void* ppDevInstData_p, struct pt_regs* ptRegs_p);
@@ -391,19 +391,21 @@ static void removeOnePciDev(struct pci_dev* pPciDev_p);
 // local vars
 //------------------------------------------------------------------------------
 // buffers and buffer descriptors and pointers
-static struct pci_device_id aEdrvPciTbl_l[] = {
+static struct pci_device_id aEdrvPciTbl_l[] =
+{
     {0x8086, 0x109a, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},  // 82573L
     {0x8086, 0x1501, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},  // 82567V
     {0x8086, 0x150c, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},  // 82583V
     {0x8086, 0x10de, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},  // 82567LM
     {0x8086, 0x10d3, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},  // 82574L
-    {0,}
+    {0, }
 };
 MODULE_DEVICE_TABLE(pci, aEdrvPciTbl_l);
 
 static tEdrvInstance edrvInstance_l;
 
-static struct pci_driver edrvDriver_l = {
+static struct pci_driver edrvDriver_l =
+{
     .name         = DRV_NAME,
     .id_table     = aEdrvPciTbl_l,
     .probe        = initOnePciDev,
@@ -1560,7 +1562,7 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
         rxBuffersInAllocation = 1 << (PAGE_SHIFT - EDRV_RX_BUFFER_SIZE_SHIFT);
     }
 
-    for (rxBuffer = 0; rxBuffer < EDRV_MAX_RX_BUFFERS; )
+    for (rxBuffer = 0; rxBuffer < EDRV_MAX_RX_BUFFERS;)
     {
         ULONG   bufferPointer;
         UINT    inAlloc;
@@ -1601,7 +1603,7 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
         (edrvInstance_l.initParam.aMacAddr[2] != 0) ||
         (edrvInstance_l.initParam.aMacAddr[3] != 0) ||
         (edrvInstance_l.initParam.aMacAddr[4] != 0) ||
-        (edrvInstance_l.initParam.aMacAddr[5] != 0)  )
+        (edrvInstance_l.initParam.aMacAddr[5] != 0))
     {   // write specified MAC address to controller
         temp = 0;
         EDRV_REGDW_WRITE(EDRV_REGDW_RAH(0), temp); // disable Entry

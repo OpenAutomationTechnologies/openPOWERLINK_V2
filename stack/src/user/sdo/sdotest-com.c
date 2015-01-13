@@ -161,7 +161,7 @@ tOplkError sdotestcom_init(sdoApiCbComTest sdoComCbApi_p)
     }
 
     // Init circular buffer for module internal communication
-    cbret = circbuf_alloc(CIRCBUF_USER_INTERNAL_QUEUE,CONFIG_EVENT_SIZE_CIRCBUF_USER_INTERNAL, &sdoTestComInst.tCmdCon.pCbBufInst);
+    cbret = circbuf_alloc(CIRCBUF_USER_INTERNAL_QUEUE, CONFIG_EVENT_SIZE_CIRCBUF_USER_INTERNAL, &sdoTestComInst.tCmdCon.pCbBufInst);
 
     if (kCircBufOk != cbret)
     {
@@ -390,7 +390,7 @@ tOplkError sdotestcom_cbEvent(tEvent* pOplkEvent_p)
         case kEventTypeSdoAsySend:
 
             // Check parameter
-            if (sizeof( *pCmdCon) == pOplkEvent_p->eventArgSize)
+            if (sizeof(*pCmdCon) == pOplkEvent_p->eventArgSize)
             {
                 pCmdCon = (tSdoTestComCon*)pOplkEvent_p->pEventArg;
             }
@@ -422,10 +422,10 @@ tOplkError sdotestcom_cbEvent(tEvent* pOplkEvent_p)
                 {
                     Sequret = sdoseq_sendData(pCmdCon->tSeqHdl,
                                               ulDataSize - PLK_FRAME_OFFSET_SDO_COMU,
-                                              pFrame );
+                                              pFrame);
 
                     // Send all frames, but return error code if any frame fails
-                    if (Sequret != kErrorOk )
+                    if (Sequret != kErrorOk)
                     {
                         ret = Sequret;
                     }

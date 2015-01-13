@@ -455,7 +455,8 @@ typedef struct
 // function prototypes
 //------------------------------------------------------------------------------
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 // Generic API functions

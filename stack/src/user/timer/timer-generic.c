@@ -75,7 +75,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define TIMERU_TIMER_LIST   0
 #define TIMERU_FREE_LIST    1
 
-#if (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_ )
+#if (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_)
 #define TIMERU_EVENT_SHUTDOWN   0   // smaller index has higher priority
 #define TIMERU_EVENT_WAKEUP     1
 #endif
@@ -100,7 +100,7 @@ typedef struct
     UINT                    freeEntries;
     UINT                    minFreeEntries;   // minimum number of free entries
                                               // used to check if TIMERU_MAX_ENTRIES is large enough
-#if (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_ )
+#if (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_)
     CRITICAL_SECTION        aCriticalSections[2];
     HANDLE                  hProcessThread;
     HANDLE                  ahEvents[2];      // WakeUp and ShutDown event handles
@@ -118,7 +118,7 @@ static tTimeruInstance timeruInstance_l;
 static void  enterCriticalSection(int nType_p);
 static void  leaveCriticalSection(int nType_p);
 
-#if (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_ )
+#if (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_)
 static DWORD WINAPI processThread(LPVOID parameter_p);
 #endif
 
@@ -181,7 +181,7 @@ tOplkError timeru_addInstance(void)
     // -> the only solution = 0
     timeruInstance_l.startTimeInMs = 0;
 
-#if (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_ )
+#if (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_)
     InitializeCriticalSection(&timeruInstance_l.aCriticalSections[TIMERU_TIMER_LIST]);
     InitializeCriticalSection(&timeruInstance_l.aCriticalSections[TIMERU_FREE_LIST]);
 
@@ -215,7 +215,7 @@ The function deletes a user timer instance.
 //------------------------------------------------------------------------------
 tOplkError timeru_delInstance(void)
 {
-#if (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_ )
+#if (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_)
     SetEvent(timeruInstance_l.ahEvents[TIMERU_EVENT_SHUTDOWN]);
 
     WaitForSingleObject(timeruInstance_l.hProcessThread, INFINITE);
@@ -372,7 +372,7 @@ tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg a
     *ppEntry = pNewEntry;
     leaveCriticalSection(TIMERU_TIMER_LIST);
 
-#if (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_ )
+#if (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_)
     if (ppEntry == &timeruInstance_l.pTimerListFirst)
     {
         SetEvent(timeruInstance_l.ahEvents[TIMERU_EVENT_WAKEUP]);
@@ -492,7 +492,7 @@ static void enterCriticalSection(int nType_p)
     UNUSED_PARAMETER(nType_p);
 
     target_enableGlobalInterrupt(FALSE);
-#elif (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_ )
+#elif (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_)
     EnterCriticalSection(&timeruInstance_l.aCriticalSections[nType_p]);
 #endif
 }
@@ -512,12 +512,12 @@ static void leaveCriticalSection(int nType_p)
     UNUSED_PARAMETER(nType_p);
 
     target_enableGlobalInterrupt(TRUE);
-#elif (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_ )
+#elif (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_)
     LeaveCriticalSection(&timeruInstance_l.aCriticalSections[nType_p]);
 #endif
 }
 
-#if (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_ )
+#if (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_)
 //------------------------------------------------------------------------------
 /**
 \brief  Timer thread function

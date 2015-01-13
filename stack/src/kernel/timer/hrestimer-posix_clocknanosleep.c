@@ -298,7 +298,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
     tHresTimerInfo*         pTimerInfo;
 
     DEBUG_LVL_TIMERH_TRACE("%s() pTimerHdl_p=%08x/%08x\n",
-                            __func__, (unsigned int)pTimerHdl_p,(unsigned int)*pTimerHdl_p);
+                            __func__, (unsigned int)pTimerHdl_p, (unsigned int)*pTimerHdl_p);
 
     if (pTimerHdl_p == NULL)
         return kErrorTimerInvalidHandle;

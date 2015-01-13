@@ -89,7 +89,8 @@ typedef tOplkError (*sdoApiCbComTest)(tAsySdoCom* pSdoComData_p, UINT dataSize_p
 //------------------------------------------------------------------------------
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 tOplkError sdotestseq_init(sdoApiCbSeqTest sdoSequCbApi_p);

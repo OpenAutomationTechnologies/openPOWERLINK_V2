@@ -485,7 +485,7 @@ constant object it returns the default pointer.
 */
 //------------------------------------------------------------------------------
 void* obd_getObjectDataPtr(UINT index_p, UINT subIndex_p)
- {
+{
     tOplkError          ret;
     void*               pData;
     tObdEntryPtr        pObdEntry;
@@ -624,7 +624,7 @@ UINT obd_getNodeId(void)
     nodeId = 0;
     obdSize = sizeof(nodeId);
     ret = obd_readEntry(OBD_NODE_ID_INDEX, OBD_NODE_ID_SUBINDEX, &nodeId, &obdSize);
-    if(ret != kErrorOk)
+    if (ret != kErrorOk)
     {
         nodeId = C_ADR_INVALID;
     }
@@ -652,13 +652,13 @@ tOplkError obd_setNodeId(UINT nodeId_p, tObdNodeIdType nodeIdType_p)
     UINT8       fHwBool;
     UINT8       nodeId;
 
-    if(nodeId_p == C_ADR_INVALID)
+    if (nodeId_p == C_ADR_INVALID)
         return kErrorInvalidNodeId;
 
     nodeId = (UINT8)nodeId_p;
     obdSize = sizeof(UINT8);
     ret = obd_writeEntry(OBD_NODE_ID_INDEX, OBD_NODE_ID_SUBINDEX, &nodeId, obdSize);
-    if(ret != kErrorOk)
+    if (ret != kErrorOk)
         return ret;
 
     // set HWBOOL-Flag in Sub-index OBD_NODE_ID_HWBOOL_SUBINDEX
@@ -1011,7 +1011,7 @@ tOplkError obd_getAccessType(UINT index_p, UINT subIndex_p, tObdAccess* pAccessT
         return ret;
 
     ret = getSubindex(pObdEntry, subIndex_p, &pObdSubEntry);
-    if(ret != kErrorOk)
+    if (ret != kErrorOk)
         return ret;
 
     *pAccessType_p = pObdSubEntry->access;
@@ -2049,7 +2049,7 @@ static tOplkError accessOdPartition(tObdPart currentOdPart_p, tObdEntryPtr pObdE
                                 ((tObdVString MEM*)pSubIndex->pCurrent)->size    = ObjSize;
                             }
                         }
-                        else if(pSubIndex->type == kObdTypeOString)
+                        else if (pSubIndex->type == kObdTypeOString)
                         {
                             if (pSubIndex->pCurrent != NULL)
                             {
@@ -2245,9 +2245,9 @@ static tOplkError isNumerical(tObdSubEntryPtr pObdSubEntry_p,
     tOplkError          ret = kErrorOk;
 
     // get Type
-    if((pObdSubEntry_p->type == kObdTypeVString) ||
-       (pObdSubEntry_p->type == kObdTypeOString) ||
-       (pObdSubEntry_p->type == kObdTypeDomain))
+    if ((pObdSubEntry_p->type == kObdTypeVString) ||
+        (pObdSubEntry_p->type == kObdTypeOString) ||
+        (pObdSubEntry_p->type == kObdTypeDomain))
     {   // not numerical types
         *pfEntryNumerical_p = FALSE;
     }

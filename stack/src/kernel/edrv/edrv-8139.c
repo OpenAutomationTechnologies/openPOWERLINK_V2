@@ -79,7 +79,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,19)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 19)
 #error "Linux Kernel versions older 2.6.19 are not supported by this driver!"
 #endif
 
@@ -129,15 +129,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EDRV_REGW_INT_LENCHG    0x2000  // Cable length change interrupt
 #define EDRV_REGW_INT_TIMEOUT   0x4000  // Time out interrupt
 #define EDRV_REGW_INT_SERR      0x8000  // System error interrupt
-#define EDRV_REGW_INT_MASK_DEF  (EDRV_REGW_INT_ROK \
-                                 | EDRV_REGW_INT_RER \
-                                 | EDRV_REGW_INT_TOK \
-                                 | EDRV_REGW_INT_TER \
-                                 | EDRV_REGW_INT_RXOVW \
-                                 | EDRV_REGW_INT_FOVW \
-                                 | EDRV_REGW_INT_PUN \
-                                 | EDRV_REGW_INT_TIMEOUT \
-                                 | EDRV_REGW_INT_SERR)   // default interrupt mask
+#define EDRV_REGW_INT_MASK_DEF  (EDRV_REGW_INT_ROK | \
+                                 EDRV_REGW_INT_RER | \
+                                 EDRV_REGW_INT_TOK | \
+                                 EDRV_REGW_INT_TER | \
+                                 EDRV_REGW_INT_RXOVW | \
+                                 EDRV_REGW_INT_FOVW | \
+                                 EDRV_REGW_INT_PUN | \
+                                 EDRV_REGW_INT_TIMEOUT | \
+                                 EDRV_REGW_INT_SERR)   // default interrupt mask
 
 #define EDRV_REGB_COMMAND       0x37    // command register
 #define EDRV_REGB_COMMAND_RST   0x10
@@ -160,14 +160,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EDRV_REGDW_RCR_AM       0x00000004  // accept multicast frames
 #define EDRV_REGDW_RCR_APM      0x00000002  // accept physical match frames
 #define EDRV_REGDW_RCR_AAP      0x00000001  // accept all frames
-#define EDRV_REGDW_RCR_DEF      (EDRV_REGDW_RCR_NO_FTH \
-                                 | EDRV_REGDW_RCR_RBLEN32K \
-                                 | EDRV_REGDW_RCR_MXDMAUNL \
-                                 | EDRV_REGDW_RCR_NOWRAP \
-                                 | EDRV_REGDW_RCR_AB \
-                                 | EDRV_REGDW_RCR_AM \
-                                 | EDRV_REGDW_RCR_AAP /* promiscuous mode */ \
-                                 | EDRV_REGDW_RCR_APM)  // default value
+#define EDRV_REGDW_RCR_DEF      (EDRV_REGDW_RCR_NO_FTH |\
+                                 EDRV_REGDW_RCR_RBLEN32K | \
+                                 EDRV_REGDW_RCR_MXDMAUNL | \
+                                 EDRV_REGDW_RCR_NOWRAP | \
+                                 EDRV_REGDW_RCR_AB | \
+                                 EDRV_REGDW_RCR_AM | \
+                                 EDRV_REGDW_RCR_AAP | /* promiscuous mode */ \
+                                 EDRV_REGDW_RCR_APM)  // default value
 
 #define EDRV_REGDW_TCR          0x40    // Tx configuration register
 #define EDRV_REGDW_TCR_VER_MASK 0x7CC00000  // mask for hardware version
@@ -179,9 +179,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EDRV_REGDW_TCR_CRC      0x00010000  // disable appending of CRC by the controller
 #define EDRV_REGDW_TCR_MXDMAUNL 0x00000700  // maximum DMA burst size of 2048 b
 #define EDRV_REGDW_TCR_TXRETRY  0x00000000  // 16 retries
-#define EDRV_REGDW_TCR_DEF      (EDRV_REGDW_TCR_IFG96 \
-                                 | EDRV_REGDW_TCR_MXDMAUNL \
-                                 | EDRV_REGDW_TCR_TXRETRY)
+#define EDRV_REGDW_TCR_DEF      (EDRV_REGDW_TCR_IFG96 | \
+                                 EDRV_REGDW_TCR_MXDMAUNL | \
+                                 EDRV_REGDW_TCR_TXRETRY)
 
 #define EDRV_REGW_MULINT        0x5C    // multiple interrupt select register
 
@@ -308,15 +308,17 @@ static UINT8 calcHash (UINT8* pMacAddr_p);
 // local vars
 //------------------------------------------------------------------------------
 // buffers and buffer descriptors and pointers
-static struct pci_device_id aEdrvPciTbl_l[] = {
+static struct pci_device_id aEdrvPciTbl_l[] =
+{
     {0x10ec, 0x8139, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},
-    {0,}
+    {0, }
 };
 MODULE_DEVICE_TABLE(pci, aEdrvPciTbl_l);
 
 static tEdrvInstance edrvInstance_l;
 
-static struct pci_driver edrvDriver_l = {
+static struct pci_driver edrvDriver_l =
+{
     .name         = DRV_NAME,
     .id_table     = aEdrvPciTbl_l,
     .probe        = initOnePciDev,
@@ -654,8 +656,8 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
         goto Exit;
     }
 
-    if ((bufferNumber >= EDRV_MAX_TX_BUFFERS)
-        || (edrvInstance_l.afTxBufUsed[bufferNumber] == FALSE))
+    if ((bufferNumber >= EDRV_MAX_TX_BUFFERS) ||
+        (edrvInstance_l.afTxBufUsed[bufferNumber] == FALSE))
     {
         ret = kErrorEdrvBufNotExisting;
         goto Exit;

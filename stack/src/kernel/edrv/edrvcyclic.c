@@ -104,7 +104,7 @@ typedef struct
     UINT                    maxTxBufferCount;               ///< Maximum TX buffer count
     UINT                    curTxBufferList;                ///< Current TX buffer list
     UINT                    curTxBufferEntry;               ///< Current TX buffer entry
-    UINT32                  cycleTimeUs;                    ///< Cycle time (µs)
+    UINT32                  cycleTimeUs;                    ///< Cycle time (us)
     tTimerHdl               timerHdlCycle;                  ///< Handle of the cycle timer
     tTimerHdl               timerHdlSlot;                   ///< Handle of the slot timer
     tEdrvCyclicCbSync       pfnSyncCb;                      ///< Function pointer to the sync callback function
@@ -690,7 +690,7 @@ static tOplkError processTxBufferList(void)
 
         if (fFirstPacket)
         {
-            pTxBuffer->launchTime = launchTime ;
+            pTxBuffer->launchTime = launchTime;
             fFirstPacket = FALSE;
         }
         else

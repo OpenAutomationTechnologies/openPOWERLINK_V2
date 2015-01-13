@@ -333,8 +333,8 @@ tOplkError pdok_configureChannel(tPdoChannelConf* pChannelConf_p)
         pdokInstance_g.aRpdoChannelIdLut[pDestPdoChannel->nodeId] = pChannelConf_p->channelId;
 
 #if NMT_MAX_NODE_ID > 0
-        if ((pDestPdoChannel->nodeId != PDO_INVALID_NODE_ID)
-            && (pDestPdoChannel->nodeId != PDO_PREQ_NODE_ID))
+        if ((pDestPdoChannel->nodeId != PDO_INVALID_NODE_ID) &&
+            (pDestPdoChannel->nodeId != PDO_PREQ_NODE_ID))
         {   // disable old PRes filter in DLL
             NodeOpParam.nodeId = pDestPdoChannel->nodeId;
             Ret = dllk_deleteNode(&NodeOpParam);
@@ -346,8 +346,8 @@ tOplkError pdok_configureChannel(tPdoChannelConf* pChannelConf_p)
 #endif // NMT_MAX_NODE_ID > 0
 
 #if NMT_MAX_NODE_ID > 0
-        if ((pDestPdoChannel->nodeId != PDO_INVALID_NODE_ID)
-            && (pDestPdoChannel->nodeId != PDO_PREQ_NODE_ID))
+        if ((pDestPdoChannel->nodeId != PDO_INVALID_NODE_ID) &&
+            (pDestPdoChannel->nodeId != PDO_PREQ_NODE_ID))
         {   // enable new PRes filter in DLL
             NodeOpParam.nodeId = pDestPdoChannel->nodeId;
             Ret = dllk_addNode(&NodeOpParam);

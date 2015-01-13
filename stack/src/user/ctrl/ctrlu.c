@@ -1490,7 +1490,7 @@ static tOplkError updateSdoConfig(void)
 
     obdSize = sizeof(sdoSequTimeout);
     ret = obd_readEntry(0x1300, 0, &sdoSequTimeout, &obdSize);
-    if(ret != kErrorOk)
+    if (ret != kErrorOk)
         return ret;
 
     ret = sdoseq_setTimeout(sdoSequTimeout);

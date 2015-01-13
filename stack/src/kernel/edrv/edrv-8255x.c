@@ -109,7 +109,7 @@ DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,19)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 19)
 #error "Linux Kernel versions older 2.6.19 are not supported by this driver!"
 #endif
 
@@ -427,7 +427,8 @@ static void removeOnePciDev(struct pci_dev* pPciDev_p);
 // local vars
 //------------------------------------------------------------------------------
 // buffers and buffer descriptors and pointers
-static struct pci_device_id aEdrvPciTbl_l[] = {
+static struct pci_device_id aEdrvPciTbl_l[] =
+{
     {0x8086, 0x1091, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},
     {0x8086, 0x1092, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},
     {0x8086, 0x1093, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},
@@ -435,13 +436,14 @@ static struct pci_device_id aEdrvPciTbl_l[] = {
     {0x8086, 0x1095, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},
     {0x8086, 0x1209, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0}, // Intel Corporation 8255xER/82551IT (APC-620)
     {0x8086, 0x1229, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0}, // Intel Corporation 82557/8/9/0/1 Ethernet Pro 100
-    {0,}
+    {0, }
 };
 MODULE_DEVICE_TABLE (pci, aEdrvPciTbl_l);
 
 static tEdrvInstance edrvInstance_l;
 
-static struct pci_driver edrvDriver_l = {
+static struct pci_driver edrvDriver_l =
+{
     .name = DRV_NAME,
     .id_table = aEdrvPciTbl_l,
     .probe = initOnePciDev,
@@ -761,8 +763,6 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
     // array to store dma mapped address of data pointed by pBuffer_p->pBuffer
     edrvInstance_l.aCbDmaAddrBuf[edrvInstance_l.tailTxDesc] = pci_map_single(edrvInstance_l.pPciDev, pBuffer_p->pBuffer,
                                                 pBuffer_p->txFrameSize, PCI_DMA_TODEVICE);
-
-
 
     // fill the TXCB descriptor with the relevant data
 
@@ -1235,9 +1235,9 @@ static tOplkError transmitCmd(UINT opcode_p, UINT count_p)
     //fill the physical address of the buffer to be transmitted
     pTxDescCmdBlock->tbdAddr = edrvInstance_l.aCbDmaAddrBuf[count_p];
     //fill the status bits and the end of frame indication bit in the TCB Control section
-    pTxCmdBlock->tcbCtrl = (0X01 << TCB_TBDNUM_SHIFT)
-                            | (0X01 << TCB_TXTHR_SHIFT)
-                            | TCB_EOF; //0x01018000
+    pTxCmdBlock->tcbCtrl = (0X01 << TCB_TBDNUM_SHIFT) |
+                           (0X01 << TCB_TXTHR_SHIFT) |
+                           TCB_EOF; //0x01018000
 
     //fill in the physical address of the buffer descriptor in the TX descriptor's TCB address section
     temp = cbpDma + sizeof(tTxCmdBlock);
@@ -1389,8 +1389,7 @@ static UINT16 readEeprom(UINT addr_p)
         iowrite8(chipselect | EC_EESK, edrvInstance_l.pIoAddr + EECTRL);
         eepromDelay();
 
-        ret = (ret << 1)
-              | ((ioread8(edrvInstance_l.pIoAddr + EECTRL) >> EC_EEDO_SHIFT) & 1);
+        ret = (ret << 1) | ((ioread8(edrvInstance_l.pIoAddr + EECTRL) >> EC_EEDO_SHIFT) & 1);
 
         iowrite8(chipselect, edrvInstance_l.pIoAddr + EECTRL);
         eepromDelay();
@@ -1574,15 +1573,15 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
 
     wordTemp = 0;
     pci_read_config_word(pPciDev_p, PCI_VENDOR_ID, &wordTemp);
-    printk("Vendor ID : %d\n",wordTemp);
+    printk("Vendor ID : %d\n", wordTemp);
 
     wordTemp = 0;
     pci_read_config_word(pPciDev_p, PCI_DEVICE_ID, &wordTemp);
-    printk("Device ID : %d\n",wordTemp);
+    printk("Device ID : %d\n", wordTemp);
 
     byteTemp = 0;
     pci_read_config_byte(pPciDev_p, PCI_REVISION_ID, &byteTemp);
-    printk("Revision ID : %d\n",byteTemp);
+    printk("Revision ID : %d\n", byteTemp);
 
     edrvInstance_l.pPciDev = pPciDev_p;
 
@@ -1729,7 +1728,7 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
         (edrvInstance_l.initParam.aMacAddr[2] != 0) ||
         (edrvInstance_l.initParam.aMacAddr[3] != 0) ||
         (edrvInstance_l.initParam.aMacAddr[4] != 0) ||
-        (edrvInstance_l.initParam.aMacAddr[5] != 0) )
+        (edrvInstance_l.initParam.aMacAddr[5] != 0))
     { // write specified MAC address to controller
         dwordTemp = 0;
 

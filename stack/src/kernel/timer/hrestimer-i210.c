@@ -83,8 +83,8 @@ void TgtDbgPostTraceValue(UINT32 dwTraceValue_p);
 #define TIMERHDL_SHIFT          28
 #define HDL_TO_IDX(Hdl)         ((Hdl >> TIMERHDL_SHIFT) - 1)
 #define HDL_INIT(Idx)           ((Idx + 1) << TIMERHDL_SHIFT)
-#define HDL_INC(Hdl)            (((Hdl + 1) & TIMERHDL_MASK) \
-                                 | (Hdl & ~TIMERHDL_MASK))
+#define HDL_INC(Hdl)            (((Hdl + 1) & TIMERHDL_MASK) |\
+                                 (Hdl & ~TIMERHDL_MASK))
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -247,7 +247,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
     tHresTimerInfo*     pTimerInfo;
     UINT32              timerFreq;
 
-    if (pTimerHdl_p == NULL )
+    if (pTimerHdl_p == NULL)
         return kErrorTimerInvalidHandle;
 
     if (*pTimerHdl_p == 0)
@@ -327,7 +327,7 @@ tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
     UINT                index;
     tHresTimerInfo*     pTimerInfo;
 
-    if (pTimerHdl_p == NULL )
+    if (pTimerHdl_p == NULL)
         return kErrorTimerInvalidHandle;
 
     if (*pTimerHdl_p == 0)
@@ -386,7 +386,7 @@ static void timerCallback(tTimerHdl* pTimerHdl_p)
     pTimerInfo = &hresTimerInstance_l.aTimerInfo[index];
 
     orgTimerHdl = *pTimerHdl_p;
-    if (pTimerInfo->pfnCallback != NULL )
+    if (pTimerInfo->pfnCallback != NULL)
     {
         pTimerInfo->pfnCallback(&pTimerInfo->eventArg);
     }

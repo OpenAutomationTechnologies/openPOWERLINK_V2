@@ -127,7 +127,7 @@ tCircBufInstance        instance_l[NR_OF_CIRC_BUFFERS];
 // local function prototypes
 //------------------------------------------------------------------------------
 #define GET_QUEUE_BUF_BASE(pHeader) \
-    ((tCircBufHostiBuffer*)( ((size_t)pHeader) - (size_t)&((tCircBufHostiBuffer*)0)->circBufHeader ))
+    ((tCircBufHostiBuffer*)(((size_t)pHeader) - (size_t)&((tCircBufHostiBuffer*)0)->circBufHeader))
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //

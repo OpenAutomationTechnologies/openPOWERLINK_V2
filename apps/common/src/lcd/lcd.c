@@ -77,7 +77,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // local vars
 //------------------------------------------------------------------------------
 
-const char aStrNmtState_l[10][LCD_COLUMN+1] = {
+const char aStrNmtState_l[10][LCD_COLUMN+1] =
+{
         "INVALID          ",
         "OFF              ",
         "INITIALISATION   ",

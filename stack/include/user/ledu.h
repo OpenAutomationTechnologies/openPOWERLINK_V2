@@ -60,7 +60,8 @@ typedef tOplkError (*tLeduStateChangeCallback)(tLedType ledType_p, BOOL fOn_p);
 //------------------------------------------------------------------------------
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 tOplkError ledu_init(tLeduStateChangeCallback pfnCbStateChange_p);

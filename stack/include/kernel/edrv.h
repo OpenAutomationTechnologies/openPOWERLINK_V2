@@ -69,11 +69,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #define EDRV_FILTER_CHANGE_ALL  (0 \
-                                | EDRV_FILTER_CHANGE_VALUE \
-                                | EDRV_FILTER_CHANGE_MASK \
-                                | EDRV_FILTER_CHANGE_STATE \
-                                | EDRV_FILTER_CHANGE_AUTO_RESPONSE \
-                                | EDRV_FILTER_CHANGE_AUTO_RESPONSE_DELAY_DEF \
+                                 EDRV_FILTER_CHANGE_VALUE | \
+                                 EDRV_FILTER_CHANGE_MASK | \
+                                 EDRV_FILTER_CHANGE_STATE | \
+                                 EDRV_FILTER_CHANGE_AUTO_RESPONSE | \
+                                 EDRV_FILTER_CHANGE_AUTO_RESPONSE_DELAY_DEF \
                                 )
 
 #ifndef CONFIG_EDRV_USE_DIAGNOSTICS
@@ -239,7 +239,8 @@ typedef struct
 // function prototypes
 //------------------------------------------------------------------------------
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p);

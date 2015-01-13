@@ -295,7 +295,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
     if (time_p >= 1000000000L)
     {
         relTime.it_value.tv_sec = (time_p / 1000000000L);
-        relTime.it_value.tv_nsec = (time_p % 1000000000) ;
+        relTime.it_value.tv_nsec = (time_p % 1000000000);
     }
     else
     {

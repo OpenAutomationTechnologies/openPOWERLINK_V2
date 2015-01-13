@@ -59,7 +59,8 @@ typedef tOplkError (*tSyncTimerCbLossOfSync)(void);
 //------------------------------------------------------------------------------
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 tOplkError synctimer_addInstance(void);

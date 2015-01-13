@@ -380,7 +380,7 @@ static tOplkError postEvent(tCircBufInstance* pCircBufInstance_p, tEvent* pEvent
         circError = circbuf_writeMultipleData(pCircBufInstance_p, pEvent_p, sizeof(tEvent),
                                               pEvent_p->pEventArg, (ULONG)pEvent_p->eventArgSize);
     }
-    if(circError != kCircBufOk)
+    if (circError != kCircBufOk)
     {
         ret = kErrorEventPostError;
     }

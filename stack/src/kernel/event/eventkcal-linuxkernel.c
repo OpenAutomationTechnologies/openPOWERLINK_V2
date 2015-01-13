@@ -430,7 +430,7 @@ int eventkcal_getEventForUser(ULONG arg)
         atomic_dec(&instance_l.userEventCount);
 
         error = eventkcal_getEventCircbuf(kEventQueueK2U, instance_l.aK2URxBuffer, &readSize);
-        if(error != kErrorOk)
+        if (error != kErrorOk)
         {
             DEBUG_LVL_ERROR_TRACE("%s() Error reading K2U events %d!\n", __func__, error);
             return -EIO;
@@ -450,14 +450,14 @@ int eventkcal_getEventForUser(ULONG arg)
             atomic_dec(&instance_l.userEventCount);
 
             error = eventkcal_getEventCircbuf(kEventQueueUInt, instance_l.aUintRxBuffer, &readSize);
-            if(error != kErrorOk)
+            if (error != kErrorOk)
             {
                 DEBUG_LVL_ERROR_TRACE("%s() Error reading UINT events %d!\n", __func__, error);
                 return -EIO;
             }
 
             //TRACE("%s() copy user event to user: %d Bytes\n", __func__, readSize);
-            if(copy_to_user((void __user *)arg, instance_l.aUintRxBuffer, readSize))
+            if (copy_to_user((void __user *)arg, instance_l.aUintRxBuffer, readSize))
                 return -EFAULT;
 
             return 0;

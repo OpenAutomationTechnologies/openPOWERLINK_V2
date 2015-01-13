@@ -294,8 +294,8 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
 
     // increment timer handle (if timer expires right after this statement,
     // the user would detect an unknown timer handle and discard it)
-    pTimerInfo->eventArg.timerHdl = ((pTimerInfo->eventArg.timerHdl + 1) & TIMERHDL_MASK)
-                                        | ((index + 1) << TIMERHDL_SHIFT);
+    pTimerInfo->eventArg.timerHdl = ((pTimerInfo->eventArg.timerHdl + 1) & TIMERHDL_MASK) |
+                                    ((index + 1) << TIMERHDL_SHIFT);
 
     // calculate duetime [100 ns] (negative value = relative time)
     dueTime.QuadPart = (LONGLONG)time_p / -100LL;

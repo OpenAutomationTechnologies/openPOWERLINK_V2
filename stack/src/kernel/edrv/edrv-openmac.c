@@ -272,7 +272,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
 #if defined(CONFIG_INCLUDE_VETH)
     // initialize Rx hook for Veth frames with pending allowed
     edrvInstance_l.pRxVethHookInst = omethHookCreate(edrvInstance_l.pMacInst, rxHook, CONFIG_EDRV_VETH_DEFFERRED_RX_BUFFERS);
-    if(edrvInstance_l.pRxVethHookInst == NULL)
+    if (edrvInstance_l.pRxVethHookInst == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Rx hook creation for Veth frames failed!\n", __func__);
         ret = kErrorNoResource;
@@ -734,13 +734,13 @@ tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
     else
     {   // specific entry should be changed
 
-        if (((changeFlags_p & (EDRV_FILTER_CHANGE_VALUE
-                                 | EDRV_FILTER_CHANGE_MASK
+        if (((changeFlags_p & (EDRV_FILTER_CHANGE_VALUE |
+                               EDRV_FILTER_CHANGE_MASK |
 #if CONFIG_EDRV_AUTO_RESPONSE_DELAY != FALSE
-                                 | EDRV_FILTER_CHANGE_AUTO_RESPONSE_DELAY
+                               EDRV_FILTER_CHANGE_AUTO_RESPONSE_DELAY |
 #endif
-                                 | EDRV_FILTER_CHANGE_AUTO_RESPONSE)) != 0)
-            || (pFilter_p[entryChanged_p].fEnable == FALSE))
+                               EDRV_FILTER_CHANGE_AUTO_RESPONSE)) != 0) ||
+              (pFilter_p[entryChanged_p].fEnable == FALSE))
         {
             // disable this filter entry
             omethFilterDisable(edrvInstance_l.apRxFilterInst[entryChanged_p]);
@@ -966,10 +966,10 @@ static ometh_config_typ getMacConfig(UINT adapter_p)
     config.adapter = adapter_p;
     config.macType = OMETH_MAC_TYPE_01;
 
-    config.mode = 0
-            | OMETH_MODE_HALFDUPLEX         // Half-duplex
-            | OMETH_MODE_100MBIT            // 100 Mbps
-            | OMETH_MODE_DIS_AUTO_NEG       // Disable Phy auto-negotiation
+    config.mode = 0 |
+                  OMETH_MODE_HALFDUPLEX |         // Half-duplex
+                  OMETH_MODE_100MBIT |            // 100 Mbps
+                  OMETH_MODE_DIS_AUTO_NEG       // Disable Phy auto-negotiation
             ;
 
     config.rxBuffers = EDRV_MAX_RX_BUFFERS;
@@ -1082,7 +1082,7 @@ static ometh_packet_typ* allocTxMsgBufferIntern(tEdrvTxBuffer* pBuffer_p)
     void*               pBufferBase = openmac_memUncached((void*)OPENMAC_PKT_BASE, OPENMAC_PKT_SPAN);
 
     // Initialize if no buffer is allocated
-    if(edrvInstance_l.txBufferCount == 0)
+    if (edrvInstance_l.txBufferCount == 0)
     {
         edrvInstance_l.pNextBufferBase = edrvInstance_l.pTxBufferBase;
         edrvInstance_l.usedMemorySpace = 0;

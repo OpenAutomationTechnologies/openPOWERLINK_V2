@@ -59,7 +59,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //---------------------------------------------------------------------------
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 tOplkError pdok_processRxPdo(tPlkFrame* pFrame_p, UINT frameSize_p) SECTION_PDOK_PROCESS_RPDO;

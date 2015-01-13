@@ -68,7 +68,8 @@ typedef tOplkError (*tTimerkCallback)(tTimerEventArg* pEventArg_p);
 //------------------------------------------------------------------------------
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 tOplkError hrestimer_init(void);

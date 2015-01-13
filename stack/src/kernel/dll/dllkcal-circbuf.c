@@ -159,7 +159,7 @@ static tOplkError addInstance(tDllCalQueueInstance* ppDllCalQueue_p,
     tDllCalCircBufInstance*     pDllCalCircBufInstance;
 
     pDllCalCircBufInstance = (tDllCalCircBufInstance*)OPLK_MALLOC(sizeof(tDllCalCircBufInstance));
-    if(pDllCalCircBufInstance == NULL)
+    if (pDllCalCircBufInstance == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s() malloc error!\n", __func__);
         ret = kErrorNoResource;
@@ -196,7 +196,7 @@ static tOplkError addInstance(tDllCalQueueInstance* ppDllCalQueue_p,
             ret = kErrorInvalidInstanceParam;
             break;
     }
-    if(error != kCircBufOk)
+    if (error != kCircBufOk)
     {
         DEBUG_LVL_ERROR_TRACE("%s() circbuf_alloc error!\n", __func__);
         ret = kErrorNoResource;
@@ -312,7 +312,7 @@ static tOplkError getDataBlock(tDllCalQueueInstance pDllCalQueue_p,
                                             (tDllCalCircBufInstance*)pDllCalQueue_p;
     size_t                  actualDataSize;
 
-    if(pDllCalCircBufInstance == NULL)
+    if (pDllCalCircBufInstance == NULL)
     {
         ret = kErrorInvalidInstanceParam;
         goto Exit;
@@ -359,7 +359,7 @@ static tOplkError getDataBlockCount(tDllCalQueueInstance pDllCalQueue_p,
     tDllCalCircBufInstance* pDllCalCircBufInstance =
                                         (tDllCalCircBufInstance*)pDllCalQueue_p;
 
-    if(pDllCalCircBufInstance == NULL)
+    if (pDllCalCircBufInstance == NULL)
         return kErrorInvalidInstanceParam;
 
     *pDataBlockCount_p = circbuf_getDataCount(pDllCalCircBufInstance->pCircBufInstance);
@@ -387,7 +387,7 @@ static tOplkError resetDataBlockQueue(tDllCalQueueInstance pDllCalQueue_p,
                                         (tDllCalCircBufInstance*)pDllCalQueue_p;
     UNUSED_PARAMETER(timeOutMs_p);
 
-    if(pDllCalCircBufInstance == NULL)
+    if (pDllCalCircBufInstance == NULL)
         return kErrorInvalidInstanceParam;
 
     circbuf_reset(pDllCalCircBufInstance->pCircBufInstance);

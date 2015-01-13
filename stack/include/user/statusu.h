@@ -58,7 +58,8 @@ typedef tOplkError (*tStatusuCbResponse)(UINT nodeId_p, tStatusResponse* pStatus
 //------------------------------------------------------------------------------
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 tOplkError statusu_init(void);

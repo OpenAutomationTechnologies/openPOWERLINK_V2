@@ -96,8 +96,8 @@ void  TgtDbgPostTraceValue (DWORD dwTraceValue_p);
 #endif
 
 #define DLLK_DBG_POST_TRACE_VALUE(Event_p, uiNodeId_p, wErrorCode_p) \
-    TGT_DBG_POST_TRACE_VALUE((kEventSinkDllk << 28) | (Event_p << 24) \
-                             | (uiNodeId_p << 16) | wErrorCode_p)
+    TGT_DBG_POST_TRACE_VALUE((kEventSinkDllk << 28) | (Event_p << 24) | \
+                             (uiNodeId_p << 16) | wErrorCode_p)
 
 // defines for indexes of tDllkInstance.pTxBuffer
 #define DLLK_TXFRAME_IDENTRES       0   // IdentResponse on CN / MN
@@ -259,7 +259,8 @@ TGT_DLLK_DECLARE_CRITICAL_SECTION
 //------------------------------------------------------------------------------
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 //------------------------------------------------------------------------------

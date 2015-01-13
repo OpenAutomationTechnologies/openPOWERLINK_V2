@@ -61,7 +61,8 @@ typedef tOplkError (*tSyncuCbResponse)(UINT nodeId_p, tSyncResponse* pSyncRespon
 //------------------------------------------------------------------------------
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 tOplkError syncu_init(void);

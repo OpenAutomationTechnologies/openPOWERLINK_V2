@@ -692,8 +692,8 @@ tOplkError dllknode_setupSyncPhase(tNmtState nmtState_p, BOOL fReadyFlag_p,
     // calculate WaitSoCPReq delay
     if (dllkInstance_g.dllConfigParam.waitSocPreq != 0)
     {
-        *pNextTimeOffsetNs_p = dllkInstance_g.dllConfigParam.waitSocPreq
-                            + C_DLL_T_PREAMBLE + C_DLL_T_MIN_FRAME + C_DLL_T_IFG;
+        *pNextTimeOffsetNs_p = dllkInstance_g.dllConfigParam.waitSocPreq +
+                               C_DLL_T_PREAMBLE + C_DLL_T_MIN_FRAME + C_DLL_T_IFG;
     }
     else
     {

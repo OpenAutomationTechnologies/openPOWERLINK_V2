@@ -66,7 +66,8 @@ typedef enum
 //------------------------------------------------------------------------------
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 tMemMapReturn memmap_init(void);

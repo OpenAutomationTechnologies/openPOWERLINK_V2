@@ -255,8 +255,8 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
     // increment timer handle (if timer expires right after this statement,
     // the user would detect an unknown timer handle and discard it)
     // => unused in this implementation, as the timer can always be stopped
-    pTimerInfo->eventArg.timerHdl = ((pTimerInfo->eventArg.timerHdl + 1) & TIMERHDL_MASK)
-                                        | ((index + 1) << TIMERHDL_SHIFT);
+    pTimerInfo->eventArg.timerHdl = ((pTimerInfo->eventArg.timerHdl + 1) & TIMERHDL_MASK) |
+                                    ((index + 1) << TIMERHDL_SHIFT);
 
     *pTimerHdl_p = pTimerInfo->eventArg.timerHdl;
 

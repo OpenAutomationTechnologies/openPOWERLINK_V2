@@ -388,7 +388,7 @@ static tOplkError resetDataBlockQueue(tDllCalQueueInstance pDllCalQueue_p,
 
     UNUSED_PARAMETER(timeOutMs_p);
 
-    if(pDllCalCircBufInstance == NULL)
+    if (pDllCalCircBufInstance == NULL)
         return kErrorInvalidInstanceParam;
 
     circbuf_reset(pDllCalCircBufInstance->pCircBufInstance);

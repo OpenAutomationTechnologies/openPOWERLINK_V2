@@ -283,8 +283,6 @@ typedef enum
     kVarValidAll            = 0x03          // currently only size and data are implemented and used
 }tVarParamValid;
 
-
-
 typedef struct
 {
     tVarParamValid      validFlag;
@@ -440,7 +438,8 @@ typedef enum
 // function prototypes
 //------------------------------------------------------------------------------
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 tOplkError obd_init(tObdInitParam MEM* pInitParam_p);

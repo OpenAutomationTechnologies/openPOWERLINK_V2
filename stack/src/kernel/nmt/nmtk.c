@@ -66,9 +66,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #define OPLK_NMTK_DBG_POST_TRACE_VALUE(nmtEvent_p, oldNmtState_p, newNmtState_p) \
-    TGT_DBG_POST_TRACE_VALUE((kEventSinkNmtk << 28) | ((mtEvent_p) << 16) \
-                             | (((oldNmtState_p) & 0xFF) << 8) \
-                             | ((newNmtState_p) & 0xFF))
+    TGT_DBG_POST_TRACE_VALUE((kEventSinkNmtk << 28) | ((mtEvent_p) << 16) | \
+                             (((oldNmtState_p) & 0xFF) << 8) | \
+                             ((newNmtState_p) & 0xFF))
 
 //------------------------------------------------------------------------------
 // module global vars

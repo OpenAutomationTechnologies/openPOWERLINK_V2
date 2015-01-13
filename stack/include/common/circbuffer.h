@@ -111,7 +111,8 @@ typedef struct
 //------------------------------------------------------------------------------
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 tCircBufError circbuf_alloc(UINT8 id_p, size_t size_p, tCircBufInstance** ppInstance_p);

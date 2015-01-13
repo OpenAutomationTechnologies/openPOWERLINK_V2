@@ -146,7 +146,7 @@ tOplkError veth_addInstance(const UINT8 aSrcMac_p[6])
     struct ifreq        ifr;
     int                 err;
 
-    if ((vethInstance_l.fd = open(TUN_DEV_NAME, O_RDWR)) < 0 )
+    if ((vethInstance_l.fd = open(TUN_DEV_NAME, O_RDWR)) < 0)
     {
         DEBUG_LVL_VETH_TRACE("Error opening %s\n", TUN_DEV_NAME);
         return kErrorNoFreeInstance;

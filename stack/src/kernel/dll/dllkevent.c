@@ -592,7 +592,7 @@ static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtSta
             {
                 pTxFrame = (tPlkFrame*)pTxBuffer->pBuffer;
                 ret = dllkframe_checkFrame(pTxFrame, frameSize);
-                if(ret != kErrorOk)
+                if (ret != kErrorOk)
                     goto Exit;
 
                 pTxBuffer->txFrameSize = frameSize;    // set buffer valid
@@ -1055,7 +1055,7 @@ static tOplkError requestPresForward(UINT node_p)
     else
         ret = kErrorInvalidNodeId;
 
-    return  ret;
+    return ret;
 }
 #endif
 

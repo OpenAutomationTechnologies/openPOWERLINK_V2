@@ -328,7 +328,7 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
     LeaveCriticalSection(&edrInstance_l.criticalSection);
 
     iRet = pcap_sendpacket(edrInstance_l.pcap, pBuffer_p->pBuffer, (int)pBuffer_p->txFrameSize);
-    if  (iRet != 0)
+    if (iRet != 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s pcap_sendpacket returned %d (%s)\n", __func__, iRet, pcap_geterr(edrInstance_l.pcap));
         ret = kErrorInvalidOperation;

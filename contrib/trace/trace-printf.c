@@ -62,4 +62,3 @@ void trace(const char* fmt, ...)
     vfprintf(stderr, fmt, argptr);
     va_end(argptr);
 }
-

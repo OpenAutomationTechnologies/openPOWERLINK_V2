@@ -79,15 +79,15 @@ void TgtDbgPostTraceValue(DWORD dwTraceValue_p);
 #define TGT_DBG_POST_TRACE_VALUE(v)
 #endif
 #define HRT_DBG_POST_TRACE_VALUE(Event_p, uiNodeId_p, wErrorCode_p) \
-    TGT_DBG_POST_TRACE_VALUE((0xE << 28) | (Event_p << 24) \
-                             | (uiNodeId_p << 16) | wErrorCode_p)
+    TGT_DBG_POST_TRACE_VALUE((0xE << 28) | (Event_p << 24) | \
+                             (uiNodeId_p << 16) | wErrorCode_p)
 
 #define TIMERHDL_MASK         0x0FFFFFFF
 #define TIMERHDL_SHIFT        28
 #define HDL_TO_IDX(Hdl)       ((Hdl >> TIMERHDL_SHIFT) - 1)
 #define HDL_INIT(Idx)         ((Idx + 1) << TIMERHDL_SHIFT)
-#define HDL_INC(Hdl)          (((Hdl + 1) & TIMERHDL_MASK) \
-                               | (Hdl & ~TIMERHDL_MASK))
+#define HDL_INC(Hdl)          (((Hdl + 1) & TIMERHDL_MASK) |\
+                               (Hdl & ~TIMERHDL_MASK))
 //------------------------------------------------------------------------------
 // module global vars
 //------------------------------------------------------------------------------
@@ -199,7 +199,7 @@ tOplkError hrestimer_addInstance(void)
 
         pTimer->function = timerCallback;
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 28)
         /* We use HRTIMER_CB_SOFTIRQ here.
          * HRTIMER_CB_IRQSAFE is critical as the callback function
          * would be called with IRQs disabled. */

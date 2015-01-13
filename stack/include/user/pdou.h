@@ -74,7 +74,8 @@ typedef tOplkError (*tPdoCbEventPdoChange)(tPdoEventPdoChange* pEventPdoChange_p
 //------------------------------------------------------------------------------
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 tOplkError pdou_init(tSyncCb pfnSyncCb_p);

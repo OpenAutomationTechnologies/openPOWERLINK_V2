@@ -179,7 +179,7 @@ tOplkError dllkstatemachine_changeState(tNmtEvent nmtEvent_p,
         case kNmtCsPreOperational2:
         case kNmtCsReadyToOperate:
         case kNmtCsOperational:
-            if(dllkInstance_g.dllState < kDllMsNonCyclic)     // ensure that only CS states are handled
+            if (dllkInstance_g.dllState < kDllMsNonCyclic)     // ensure that only CS states are handled
                 ret = pfnProcessCsFullCycle_g[dllkInstance_g.dllState](nmtState_p,
                                                                        nmtEvent_p,
                                                                        &dllEvent);
@@ -213,7 +213,7 @@ tOplkError dllkstatemachine_changeState(tNmtEvent nmtEvent_p,
             break;
 
         case kNmtCsStopped:
-            if(dllkInstance_g.dllState < kDllMsNonCyclic)     // ensure that only CS states are handled
+            if (dllkInstance_g.dllState < kDllMsNonCyclic)     // ensure that only CS states are handled
                 ret = pfnProcessCsStopped_g[dllkInstance_g.dllState](nmtState_p,
                                                                      nmtEvent_p,
                                                                      &dllEvent);
@@ -381,7 +381,7 @@ static tOplkError processNmtMsFullCycle(tNmtState nmtState_p, tNmtEvent nmtEvent
             // SoC has been sent, update the prescaleCycleCount
             if (dllkInstance_g.dllConfigParam.prescaler > 0)
             {
-                if(++dllkInstance_g.prescaleCycleCount == dllkInstance_g.dllConfigParam.prescaler)
+                if (++dllkInstance_g.prescaleCycleCount == dllkInstance_g.dllConfigParam.prescaler)
                 {
                     dllkInstance_g.prescaleCycleCount = 0;
                     dllkInstance_g.mnFlag1 ^= PLK_FRAME_FLAG1_PS;
@@ -441,7 +441,7 @@ static tOplkError processCsFullCycleDllWaitPreq(tNmtState nmtState_p, tNmtEvent 
                 break;
             }
 
-            if(triggerLossOfSocEventOnFrameTimeout())
+            if (triggerLossOfSocEventOnFrameTimeout())
                 pDllEvent_p->dllErrorEvents |= DLL_ERR_CN_LOSS_SOC;
 
             // report DLL_CEV_LOSS_SOA

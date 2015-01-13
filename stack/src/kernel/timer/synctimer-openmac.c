@@ -395,8 +395,8 @@ tOplkError synctimer_setLossOfSyncTolerance2(UINT32 lossOfSyncTolerance2_p)
 
     if (lossOfSyncTolerance2_p > 0)
     {
-        instance_l.lossOfSyncTimeout2 = instance_l.configuredTimeDiff
-                + OMETH_NS_2_TICKS(instance_l.lossOfSyncTolerance2);
+        instance_l.lossOfSyncTimeout2 = instance_l.configuredTimeDiff +
+                                        OMETH_NS_2_TICKS(instance_l.lossOfSyncTolerance2);
     }
     else
     {
@@ -591,8 +591,8 @@ static void ctrlAddActualTimeDiff(UINT32 actualTimeDiff_p)
     // reject TimeDiff values which are too large
     if (actualTimeDiff_p < instance_l.rejectThreshold)
     {
-        instance_l.aActualTimeDiff[instance_l.actualTimeDiffNextIndex]
-            = actualTimeDiff_p;
+        instance_l.aActualTimeDiff[instance_l.actualTimeDiffNextIndex] =
+                   actualTimeDiff_p;
         instance_l.actualTimeDiffNextIndex++;
         instance_l.actualTimeDiffNextIndex &= (TIMEDIFF_COUNT - 1);
 

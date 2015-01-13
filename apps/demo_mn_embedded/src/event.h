@@ -58,7 +58,8 @@ typedef tOplkError (*tEventCb)(tOplkApiEventType EventType_p,
 //------------------------------------------------------------------------------
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 void initEvents(BOOL* pfGsOff_p, tEventCb pfnEventCb_p);

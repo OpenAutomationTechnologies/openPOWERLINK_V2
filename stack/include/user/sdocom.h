@@ -98,7 +98,8 @@ typedef struct
 //------------------------------------------------------------------------------
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 tOplkError sdocom_init(UINT stackType_p);

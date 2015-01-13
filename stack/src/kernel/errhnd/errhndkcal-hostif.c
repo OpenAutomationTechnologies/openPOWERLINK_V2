@@ -199,7 +199,7 @@ void errhndkcal_getCnLossSocError(UINT32* pCumulativeCnt_p,
 \param  pThreshold_p          Pointer to store threshold.
 */
 //------------------------------------------------------------------------------
-void errhndkcal_getCnLossPreqError(UINT32* pCumulativeCnt_p, 
+void errhndkcal_getCnLossPreqError(UINT32* pCumulativeCnt_p,
                                    UINT32* pThresholdCnt_p,
                                    UINT32* pThreshold_p)
 {

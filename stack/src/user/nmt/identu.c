@@ -144,7 +144,7 @@ The function deletes an ident module instance
 */
 //------------------------------------------------------------------------------
 tOplkError identu_delInstance(void)
-    {
+{
     tOplkError  ret = kErrorOk;
 
     // deregister IdentResponse callback function
