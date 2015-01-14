@@ -2693,7 +2693,7 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
     {
         printk("Link Down\n");
         result = -EIO;
-        goto Exit;
+        goto ExitFail;
     }
 
     goto Exit;
