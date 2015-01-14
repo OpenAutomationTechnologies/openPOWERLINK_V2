@@ -577,11 +577,12 @@ typedef struct
     UINT8*              pTxBuf;                             ///< Pointer to the TX buffer
     BOOL                afTxBufUsed[EDRV_MAX_TX_BUFFERS];   ///< Array indicating the use of a specific TX buffer
 
-    struct msix_entry*  pMsixEntry;                         //< Pointer to the MSI-X structure
+    struct msix_entry*  pMsixEntry;                         ///< Pointer to the MSI-X structure
 
     // Timer related members
     tTimerHdl           timerHdl;                           ///< Timer handle
     tHresCallback       hresTimerCb;                        ///< Timer callback
+    BOOL                fInitialized;                       ///< Flag determines if module is initialized
 } tEdrvInstance;
 
 //---------------------------------------------------------------------------
@@ -1123,6 +1124,10 @@ The function configure the cycle frequency in the I210 timer.
 //------------------------------------------------------------------------------
 void edrv_setCyclicFrequency(UINT32 frequency)
 {
+
+    if (!edrvInstance_l.fInitialized)
+        return;
+
     EDRV_REGDW_WRITE(EDRV_FREQOUT0, frequency);
 }
 
@@ -1142,6 +1147,9 @@ tOplkError edrv_startTimer(tTimerHdl* pTimerHdl_p, UINT32 frequency_p)
 {
     UINT32              reg;
     struct timespec     ts;
+
+    if (!edrvInstance_l.fInitialized)
+        return kErrorOk;
 
     if (pTimerHdl_p == NULL)
     {
@@ -1195,6 +1203,9 @@ tOplkError edrv_stopTimer(tTimerHdl* pTimerHdl_p)
 {
     UINT32      reg;
 
+    if (!edrvInstance_l.fInitialized)
+        return kErrorOk;
+
     if (*pTimerHdl_p != edrvInstance_l.timerHdl)
         return kErrorTimerInvalidHandle;
 
@@ -1228,6 +1239,9 @@ tOplkError edrv_restartTimer(tTimerHdl* pTimerHdl_p)
 {
     UINT32          reg;
     struct timespec ts;
+
+    if (!edrvInstance_l.fInitialized)
+        return kErrorOk;
 
     readSystimRegister(&ts);
     if (*pTimerHdl_p != edrvInstance_l.timerHdl)
@@ -2696,7 +2710,9 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
         goto ExitFail;
     }
 
+    edrvInstance_l.fInitialized = TRUE;
     goto Exit;
+
 
 ExitFail:
     removeOnePciDev(pPciDev_p);
@@ -2722,6 +2738,8 @@ static void removeOnePciDev(struct pci_dev* pPciDev_p)
     UINT16          wReg;
     INT             vector;
     tEdrvQVector*   pVector;
+
+    edrvInstance_l.fInitialized = FALSE;
 
     if (pPciDev_p != edrvInstance_l.pPciDev)
     {
