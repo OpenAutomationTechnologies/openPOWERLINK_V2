@@ -12,7 +12,7 @@ It is part of the DLL kernel module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2015, SYSTEC electronic GmbH
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -156,6 +156,11 @@ tOplkError dllknode_cleanupLocalNode(tNmtState oldNmtState_p)
 #if CONFIG_TIMER_USE_HIGHRES != FALSE
     if ((ret = hrestimer_deleteTimer(&dllkInstance_g.timerHdlCycle)) != kErrorOk)
         return ret;
+
+#if defined(CONFIG_INCLUDE_NMT_RMN)
+    if ((ret = hrestimer_deleteTimer(&dllkInstance_g.timerHdlSwitchOver)) != kErrorOk)
+        return ret;
+#endif
 #endif
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
@@ -187,6 +192,14 @@ tOplkError dllknode_cleanupLocalNode(tNmtState oldNmtState_p)
     if ((ret = dllkframe_deleteTxFrame(DLLK_TXFRAME_PRES)) != kErrorOk)
         return ret;
 
+#if defined(CONFIG_INCLUDE_NMT_RMN)
+    if (dllkInstance_g.fRedundancy)
+    {
+      if ((ret = dllkframe_deleteTxFrame(DLLK_TXFRAME_AMNI)) != kErrorOk)
+        return ret;
+    }
+#endif
+
     dllkInstance_g.aTxBufferStateNmtReq[0] = kDllkTxBufEmpty;
     dllkInstance_g.aTxBufferStateNmtReq[1] = kDllkTxBufEmpty;
     if ((ret = dllkframe_deleteTxFrame(DLLK_TXFRAME_NMTREQ)) != kErrorOk)
@@ -203,7 +216,11 @@ tOplkError dllknode_cleanupLocalNode(tNmtState oldNmtState_p)
         return ret;
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
-    if (oldNmtState_p >= kNmtMsNotActive)
+#if !defined(CONFIG_INCLUDE_NMT_RMN)
+    if (NMT_IF_MN_OR_RMN(oldNmtState_p))
+#else
+    if (NMT_IF_MN_OR_RMN(oldNmtState_p) || (dllkInstance_g.fRedundancy))
+#endif
     {   // local node was MN
         if ((ret = dllkframe_deleteTxFrame(DLLK_TXFRAME_SOC)) != kErrorOk)
             return ret;
@@ -295,6 +312,23 @@ tOplkError dllknode_setupLocalNode(tNmtState nmtState_p)
     dllkInstance_g.pFirstNodeInfo = NULL;
     dllkInstance_g.pFirstPrcNodeInfo = NULL;
 #endif
+#if defined(CONFIG_INCLUDE_NMT_RMN)
+    if (nmtState_p == kNmtRmsNotActive)
+        dllkInstance_g.fRedundancy = TRUE;
+    else
+        dllkInstance_g.fRedundancy = FALSE;
+
+    // AMNI
+    if (dllkInstance_g.fRedundancy)
+    {
+        frameSize = C_DLL_MINSIZE_AMNI;
+        ret = dllkframe_createTxFrame(&handle, &frameSize, kMsgTypeAmni, kDllAsndNotDefined);
+        if (ret != kErrorOk)
+        {   // error occurred while registering Tx frame
+            return ret;
+        }
+    }
+#endif
 
     /*-----------------------------------------------------------------------*/
     /* register TxFrames in Edrv */
@@ -379,11 +413,27 @@ tOplkError dllknode_setupLocalNode(tNmtState nmtState_p)
     ami_setUint48Be(&aMulticastMac[0], C_DLL_MULTICAST_ASND);
     ret = edrv_setRxMulticastMacAddr(aMulticastMac);
 
+#if defined(CONFIG_INCLUDE_NMT_RMN)
+    if (dllkInstance_g.fRedundancy)
+    {
+        ami_setUint48Be(&aMulticastMac[0], C_DLL_MULTICAST_AMNI);
+        ret = edrv_setRxMulticastMacAddr(aMulticastMac);
+    }
+#endif
+
 #if defined(CONFIG_INCLUDE_NMT_MN)
-    if (nmtState_p >= kNmtMsNotActive)
+    if (NMT_IF_MN_OR_RMN(nmtState_p))
     {
         if ((ret = setupLocalNodeMn()) != kErrorOk)
             return ret;
+
+#if defined(CONFIG_INCLUDE_NMT_RMN)
+        if (nmtState_p == kNmtRmsNotActive)
+        {
+            if ((ret = setupLocalNodeCn()) != kErrorOk)
+                return ret;
+        }
+#endif
     }
     else
     {
