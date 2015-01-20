@@ -10,7 +10,7 @@ This file contains the implementation of the NMT kernel module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2015, SYSTEC electronic GmbH
 Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
@@ -101,6 +101,7 @@ typedef enum
     kNmtkCsOperational,
     kNmtkCsBasicEthernet,
     kNmtkMsNotActive,
+    kNmtkRmsNotActive,
     kNmtkMsPreOperational1,
     kNmtkMsPreOperational2,
     kNmtkMsReadyToOperate,
@@ -121,6 +122,7 @@ typedef struct
     volatile BOOL               fTimerMsPreOp2;
     volatile BOOL               fAllMandatoryCNIdent;
     volatile BOOL               fFrozen;
+    volatile BOOL               fRedundancy;
 } tNmtkInstance;
 
 typedef struct
@@ -159,6 +161,7 @@ static tOplkError doStateCsPreOperational2(tNmtEvent nmtEvent_p);
 static tOplkError doStateCsReadyToOperate(tNmtEvent nmtEvent_p);
 static tOplkError doStateCsOperational(tNmtEvent nmtEvent_p);
 static tOplkError doStateCsStopped(tNmtEvent nmtEvent_p);
+static tOplkError doStateRmsNotActive(tNmtEvent nmtEvent_p);
 
 //------------------------------------------------------------------------------
 // local vars
@@ -178,6 +181,7 @@ tNmtkStateTable             nmtkStates_g[] =
     { kNmtCsOperational,         doStateCsOperational },
     { kNmtCsBasicEthernet,       doStateCsBasicEthernet },
     { kNmtMsNotActive,           doStateMsNotActive },
+    { kNmtRmsNotActive,          doStateRmsNotActive },
 #if defined(CONFIG_INCLUDE_NMT_MN)
     { kNmtMsPreOperational1,     doStateMsPreOperational1 },
     { kNmtMsPreOperational2,     doStateMsPreOperational2 },
@@ -211,6 +215,7 @@ tOplkError nmtk_init(void)
     nmtkInstance_g.fTimerMsPreOp2 = FALSE;
     nmtkInstance_g.fAllMandatoryCNIdent = FALSE;
     nmtkInstance_g.fFrozen = FALSE;
+    nmtkInstance_g.fRedundancy = FALSE;
 
     return kErrorOk;
 }
@@ -529,6 +534,14 @@ static tOplkError doStateGsResetConfiguration(tNmtEvent nmtEvent_p)
                 nmtkInstance_g.stateIndex = kNmtkMsNotActive;
 #endif
             break;
+#if defined(CONFIG_INCLUDE_NMT_RMN)
+        case kNmtEventEnterRmsNotActive:
+            // Node should be RMN (NMT_RMT1)
+            nmtkInstance_g.stateIndex = kNmtkRmsNotActive;
+            nmtkInstance_g.fRedundancy = TRUE;
+            break;
+
+#endif
 
         default:
             break;
@@ -657,6 +670,13 @@ static tOplkError doStateCsPreOperational1(tNmtEvent nmtEvent_p)
             nmtkInstance_g.stateIndex = kNmtkCsPreOperational2;
             break;
 
+#if defined(CONFIG_INCLUDE_NMT_RMN)
+        case kNmtEventDllReSwitchOverTimeout:
+            // NMT_RMT4
+            nmtkInstance_g.stateIndex = kNmtkMsPreOperational1;
+            break;
+#endif
+
         default:
             break;
     }
@@ -759,6 +779,13 @@ static tOplkError doStateCsPreOperational2(tNmtEvent nmtEvent_p)
             }
             break;
 
+#if defined(CONFIG_INCLUDE_NMT_RMN)
+        case kNmtEventDllReSwitchOverTimeout:
+            // NMT_RMT4
+            nmtkInstance_g.stateIndex = kNmtkMsPreOperational1;
+            break;
+#endif
+
         default:
             break;
     }
@@ -829,6 +856,13 @@ static tOplkError doStateCsReadyToOperate(tNmtEvent nmtEvent_p)
             // NMT_CT7
             nmtkInstance_g.stateIndex = kNmtkCsOperational;
             break;
+
+#if defined(CONFIG_INCLUDE_NMT_RMN)
+        case kNmtEventDllReSwitchOverTimeout:
+            // NMT_RMT4
+            nmtkInstance_g.stateIndex = kNmtkMsPreOperational1;
+            break;
+#endif
 
         default:
             break;
@@ -901,6 +935,13 @@ static tOplkError doStateCsOperational(tNmtEvent nmtEvent_p)
             nmtkInstance_g.stateIndex = kNmtkCsPreOperational1;
             break;
 
+#if defined(CONFIG_INCLUDE_NMT_RMN)
+        case kNmtEventDllReSwitchOverTimeout:
+            // NMT_RMT6
+            nmtkInstance_g.stateIndex = kNmtkMsOperational;
+            break;
+#endif
+
         default:
             break;
     }
@@ -967,6 +1008,13 @@ static tOplkError doStateCsStopped(tNmtEvent nmtEvent_p)
             // NMT_CT11
             nmtkInstance_g.stateIndex = kNmtkCsPreOperational1;
             break;
+
+#if defined(CONFIG_INCLUDE_NMT_RMN)
+        case kNmtEventDllReSwitchOverTimeout:
+            // NMT_RMT4
+            nmtkInstance_g.stateIndex = kNmtkMsPreOperational1;
+            break;
+#endif
 
         default:
             break;
@@ -1135,6 +1183,89 @@ static tOplkError doStateMsNotActive(tNmtEvent nmtEvent_p)
     return kErrorOk;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Process State RMS_NOT_ACTIVE
+
+The function processes the NMT state RMS_NOT_ACTIVE.
+In this state the RMN listens to the network. If there is no POWERLINK traffic,
+the node goes to the next state.
+
+\param  nmtEvent_p      NMT event to be processed.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError doStateRmsNotActive(tNmtEvent nmtEvent_p)
+{
+
+#if !defined(CONFIG_INCLUDE_NMT_RMN)
+    UNUSED_PARAMETER(nmtEvent_p);
+
+    // no MN functionality
+    // TODO: -create error E_NMT_BA1_NO_MN_SUPPORT
+    nmtkInstance_g.fFrozen = TRUE;
+#else
+    switch (nmtEvent_p)
+    {
+        // NMT Command SwitchOff
+        case kNmtEventCriticalError:
+        case kNmtEventSwitchOff:
+            // NMT_GT3
+            nmtkInstance_g.stateIndex = kNmtkGsOff;
+            break;
+
+        // NMT Command SwReset
+        case kNmtEventSwReset:
+            // NMT_GT8
+            nmtkInstance_g.stateIndex = kNmtkGsInitialising;
+            break;
+
+        // NMT Command ResetNode
+        case kNmtEventResetNode:
+            // NMT_GT4
+            nmtkInstance_g.stateIndex = kNmtkGsResetApplication;
+            break;
+
+        // NMT Command ResetCommunication or internal Communication error
+        case kNmtEventResetCom:          // NMT_GT5
+        case kNmtEventInternComError:    // NMT_GT6
+            nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
+            break;
+
+        // NMT Command ResetConfiguration
+        case kNmtEventResetConfig:
+            // NMT_GT7
+            nmtkInstance_g.stateIndex = kNmtkGsResetConfiguration;
+            break;
+
+        // POWERLINK frames received
+        case kNmtEventDllCeSoc:
+        case kNmtEventDllCeSoa:
+        case kNmtEventDllReAmni:
+            // NMT_RMT3
+            nmtkInstance_g.stateIndex = kNmtkCsPreOperational1;
+            break;
+
+        // timeout event
+        case kNmtEventTimerMsPreOp1:
+            // NMT_RMT2
+            if (nmtkInstance_g.fFrozen == FALSE)
+            {   // new state PreOp1
+                nmtkInstance_g.stateIndex = kNmtkMsPreOperational1;
+                nmtkInstance_g.fTimerMsPreOp2 = FALSE;
+                nmtkInstance_g.fAllMandatoryCNIdent = FALSE;
+            }
+            break;
+
+        default:
+            break;
+
+    }
+#endif
+    return kErrorOk;
+}
+
 #if defined(CONFIG_INCLUDE_NMT_MN)
 
 //------------------------------------------------------------------------------
@@ -1187,6 +1318,14 @@ static tOplkError doStateMsPreOperational1(tNmtEvent nmtEvent_p)
         // POWERLINK frames received
         case kNmtEventDllCeSoc:
         case kNmtEventDllCeSoa:
+#if defined(CONFIG_INCLUDE_NMT_RMN)
+        case kNmtEventDllReAmni:
+            if (nmtkInstance_g.fRedundancy)
+            {
+                nmtkInstance_g.stateIndex = kNmtkCsPreOperational1;
+                break;
+            }
+#endif
             // other MN in network
             // $$$ d.k.: generate error history entry
             nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
@@ -1281,6 +1420,14 @@ static tOplkError doStateMsPreOperational2(tNmtEvent nmtEvent_p)
         // POWERLINK frames received
         case kNmtEventDllCeSoc:
         case kNmtEventDllCeSoa:
+#if defined(CONFIG_INCLUDE_NMT_RMN)
+        case kNmtEventDllReAmni:
+            if (nmtkInstance_g.fRedundancy)
+            {
+                nmtkInstance_g.stateIndex = kNmtkCsPreOperational1;
+                break;
+            }
+#endif
             // other MN in network
             // $$$ d.k.: generate error history entry
             nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
@@ -1354,6 +1501,14 @@ static tOplkError doStateMsReadyToOperate(tNmtEvent nmtEvent_p)
         // POWERLINK frames received
         case kNmtEventDllCeSoc:
         case kNmtEventDllCeSoa:
+#if defined(CONFIG_INCLUDE_NMT_RMN)
+        case kNmtEventDllReAmni:
+            if (nmtkInstance_g.fRedundancy)
+            {
+                nmtkInstance_g.stateIndex = kNmtkCsPreOperational1;
+                break;
+            }
+#endif
             // other MN in network
             // $$$ d.k.: generate error history entry
             nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
@@ -1425,6 +1580,14 @@ static tOplkError doStateMsOperational(tNmtEvent nmtEvent_p)
         // POWERLINK frames received
         case kNmtEventDllCeSoc:
         case kNmtEventDllCeSoa:
+#if defined(CONFIG_INCLUDE_NMT_RMN)
+        case kNmtEventDllReAmni:
+            if (nmtkInstance_g.fRedundancy)
+            {
+                nmtkInstance_g.stateIndex = kNmtkCsOperational;
+                break;
+            }
+#endif
             // other MN in network
             // $$$ d.k.: generate error history entry
             nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
