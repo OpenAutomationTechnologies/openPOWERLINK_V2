@@ -58,6 +58,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define NMT_TYPE_UNDEFINED          0x0000  // type of NMT state is still undefined
 #define NMT_TYPE_CS                 0x0100  // CS type of NMT state
 #define NMT_TYPE_MS                 0x0200  // MS type of NMT state
+#define NMT_TYPE_RMS                0x0300  // RMS type of NMT state
 #define NMT_TYPE_MASK               0x0300  // mask to select type of NMT state (i.e. CS or MS)
 
 #define NMT_STATE_GS_INITIALISING           0x0019
@@ -72,6 +73,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define NMT_STATE_XX_OPERATIONAL            0x00FD
 #define NMT_STATE_XX_STOPPED                0x004D
 #define NMT_STATE_XX_BASIC_ETHERNET         0x001E
+
+#define NMT_IF_CN_OR_RMN(NmtState)  ((NmtState) & NMT_TYPE_CS)
+#define NMT_IF_CN(NmtState)         (((NmtState) & NMT_TYPE_MASK) == NMT_TYPE_CS)
+#define NMT_IF_ACTIVE_CN(NmtState)  (((NmtState) & (NMT_TYPE_MASK | NMT_SUPERSTATE_MASK)) \
+                                    == (NMT_TYPE_CS | NMT_CS_PLKMODE))
+#define NMT_IF_MN(NmtState)         (((NmtState) & NMT_TYPE_MASK) == NMT_TYPE_MS)
+#define NMT_IF_MN_OR_RMN(NmtState)  ((NmtState) & NMT_TYPE_MS)
+#define NMT_IF_ACTIVE_MN(NmtState)  (((NmtState) & (NMT_TYPE_MASK | NMT_SUPERSTATE_MASK)) \
+                                    == (NMT_TYPE_MS | NMT_MS_PLKMODE))
+#define NMT_IF_ACTIVE(NmtState)     (((NmtState) & NMT_SUPERSTATE_MASK) \
+                                    == NMT_CS_PLKMODE)
 
 //------------------------------------------------------------------------------
 // typedef
