@@ -562,10 +562,7 @@ tOplkError dllk_addNode(tDllNodeOpParam* pNodeOpParam_p)
     {
 #if defined(CONFIG_INCLUDE_NMT_MN)
         case kDllNodeOpTypeIsochronous:
-            if (nmtState >= kNmtMsNotActive)
-                ret = dllknode_addNodeIsochronous(pIntNodeInfo);
-            else
-                ret = kErrorDllInvalidParam;
+            ret = dllknode_addNodeIsochronous(pIntNodeInfo);
             break;
 #endif
 
@@ -643,10 +640,7 @@ tOplkError dllk_deleteNode(tDllNodeOpParam* pNodeOpParam_p)
     {
 #if defined(CONFIG_INCLUDE_NMT_MN)
         case kDllNodeOpTypeIsochronous:
-            if (nmtState >= kNmtMsNotActive)
-                ret = dllknode_deleteNodeIsochronous(pIntNodeInfo);
-            else
-                ret = kErrorDllInvalidParam;
+            ret = dllknode_deleteNodeIsochronous(pIntNodeInfo);
             break;
 
         case kDllNodeOpTypeSoftDelete:
