@@ -11,7 +11,7 @@ This file contains the implementation of the user stack control module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2015, SYSTEC electronic GmbH
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -1132,6 +1132,9 @@ static tOplkError cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
         case kNmtMsBasicEthernet:
             break;
 
+        case kNmtRmsNotActive:
+          break;
+
         default:
             DEBUG_LVL_CTRL_TRACE("cbNmtStateChange(): unhandled NMT state\n");
             break;
@@ -1372,6 +1375,41 @@ static tOplkError updateDllConfig(tOplkApiInitParam* pInitParam_p, BOOL fUpdateI
     dllConfigParam.syncResLatency = pInitParam_p->syncResLatency;
 #endif
 
+#if defined(CONFIG_INCLUDE_NMT_RMN)
+    {
+        UINT32 mnSwitchOverPriority = 0;
+        UINT32 mnSwitchOverDelay = 0;
+        UINT32 mnSwitchOverCycleDivider = 0;
+        UINT32 mnWaitNotAct = 0;
+
+        obdSize = 4;
+        if ((ret = obd_readEntry(0x1F89, 0x0a, &mnSwitchOverPriority, &obdSize)) != kErrorOk)
+            return ret;
+
+        obdSize = 4;
+        if ((ret = obd_readEntry(0x1F89, 0x0b, &mnSwitchOverDelay, &obdSize)) != kErrorOk)
+            return ret;
+
+        obdSize = 4;
+        if ((ret = obd_readEntry(0x1F89, 0x0c, &mnSwitchOverCycleDivider, &obdSize)) != kErrorOk)
+            return ret;
+
+        dllConfigParam.switchOverTimeMn = (UINT32)(dllConfigParam.cycleLen +
+                ((dllConfigParam.cycleLen * ((UINT64)mnSwitchOverPriority)) /
+                mnSwitchOverCycleDivider));
+
+        dllConfigParam.delayedSwitchOverTimeMn = (UINT32)(dllConfigParam.cycleLen +
+                ((dllConfigParam.cycleLen * ((UINT64)mnSwitchOverPriority + mnSwitchOverDelay)) /
+                mnSwitchOverCycleDivider));
+
+        obdSize = 4;
+        if ((ret = obd_readEntry(0x1F89, 0x01, &mnWaitNotAct, &obdSize)) != kErrorOk)
+            return ret;
+
+        dllConfigParam.reducedSwitchOverTimeMn = mnWaitNotAct;
+    }
+#endif
+
     dllConfigParam.fSyncOnPrcNode = pInitParam_p->fSyncOnPrcNode;
     dllConfigParam.syncNodeId = pInitParam_p->syncNodeId;
 
@@ -1574,6 +1612,18 @@ static tOplkError updateObd(tOplkApiInitParam* pInitParam_p)
     if ((pInitParam_p->asyncSlotTimeout != 0) && (pInitParam_p->asyncSlotTimeout != UINT_MAX))
     {
         obd_writeEntry(0x1F8A, 2, &pInitParam_p->asyncSlotTimeout, 4);
+    }
+#endif
+
+#if defined(CONFIG_INCLUDE_NMT_RMN)
+    {
+        UINT32              switchOverPriority;
+
+        if (pInitParam_p->nodeId > C_ADR_MN_DEF_NODE_ID)
+        {
+            switchOverPriority = pInitParam_p->nodeId - C_ADR_MN_DEF_NODE_ID;
+            obd_writeEntry(0x1F89, 0x0a, &switchOverPriority, 4);
+        }
     }
 #endif
 
