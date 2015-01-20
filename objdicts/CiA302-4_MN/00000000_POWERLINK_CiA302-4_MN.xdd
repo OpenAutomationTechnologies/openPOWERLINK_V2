@@ -22,8 +22,8 @@
       fileCreator="SYSTEC electronic GmbH"
       fileCreationDate="2009-09-18"
       fileCreationTime="15:50:00+01:00"
-      fileModificationDate="2014-10-09"
-      fileModificationTime="09:00:00+02:00"
+      fileModificationDate="2015-01-20"
+      fileModificationTime="09:50:00+01:00"
       fileModifiedBy="Bernecker+Rainer Industrie-Elektronik Ges.m.b.H."
       fileVersion="01.00"
       supportedLanguages="en">
@@ -70,8 +70,8 @@
       fileCreator="SYSTEC electronic GmbH"
       fileCreationDate="2009-09-18"
       fileCreationTime="15:50:00+01:00"
-      fileModificationDate="2014-10-09"
-      fileModificationTime="09:00:00+02:00"
+      fileModificationDate="2015-01-20"
+      fileModificationTime="09:50:00+01:00"
       fileModifiedBy="Bernecker+Rainer Industrie-Elektronik Ges.m.b.H."
       fileVersion="01.00"
       supportedLanguages="en">
@@ -24827,7 +24827,7 @@
             <SubObject subIndex="06" name="ASndMaxLatency_U32" objectType="7" dataType="0007" accessType="const" PDOmapping="no" defaultValue="2000"/>
             <SubObject subIndex="07" name="MultiplCycleCnt_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
             <SubObject subIndex="08" name="AsyncMTU_U16" objectType="7" dataType="0006" accessType="rw" PDOmapping="no" lowLimit="300" highLimit="1500" defaultValue="300"/>
-            <!-- <SubObject subIndex="09" name="Prescaler_U16" objectType="7" dataType="0006" accessType="rw" PDOmapping="no" highLimit="1000" defaultValue="2"/> -->
+            <SubObject subIndex="09" name="Prescaler_U16" objectType="7" dataType="0006" accessType="rw" PDOmapping="no" highLimit="1000" defaultValue="2"/>
             <SubObject subIndex="0A" name="PResMode_U8" objectType="7" dataType="0005" accessType="ro" PDOmapping="no" highLimit="1" defaultValue="0"/>
             <SubObject subIndex="0B" name="PResTimeFirst_U32" objectType="7" dataType="0007" accessType="ro" PDOmapping="no" defaultValue="0"/>
             <SubObject subIndex="0C" name="PResTimeSecond_U32" objectType="7" dataType="0007" accessType="ro" PDOmapping="no" defaultValue="0"/>
