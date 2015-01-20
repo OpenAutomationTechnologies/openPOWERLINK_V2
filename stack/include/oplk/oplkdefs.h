@@ -10,7 +10,7 @@ openPOWERLINK stack.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2015, SYSTEC electronic GmbH
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -131,6 +131,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define C_DLL_MINSIZE_NMTCMDEXT                         52                  ///< Minimum size of NmtCommand without padding and CRC
 #define C_DLL_MINSIZE_NMTREQ                            20                  ///< Minimum size of NmtRequest without CommandData, padding and CRC
 #define C_DLL_MINSIZE_NMTREQEXT                         52                  ///< Minimum size of NmtRequest without padding and CRC
+#define C_DLL_MINSIZE_AMNI                              20                  ///< Minimum size of AMNI
 
 #define C_DLL_MACADDR_MASK                              0xFFFFFFFFFFFFLL    ///< MAC address mask, canonical form
 /// \}
@@ -187,6 +188,7 @@ These constants determine the different queue implementations.
 #define NMT_STARTUP_CONFCHECK                           0x00000800L
 #define NMT_STARTUP_NO_RETURN_PREOP1                    0x00001000L
 #define NMT_STARTUP_BASICETHERNET                       0x00002000L
+#define NMT_STARTUP_REDUNDANCY                          0x00004000L
 
 //------------------------------------------------------------------------------
 // Defines for object 0x1F81 NMT_NodeAssignment_AU32
