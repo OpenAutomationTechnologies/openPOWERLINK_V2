@@ -109,13 +109,23 @@ area from 0x1B00 - 0x1FFF.
         OBD_RAM_INDEX_RAM_ARRAY_ALT(0x1F84, 254, NULL, kObdTypeUInt32, kObdAccSRW, tObdUnsigned32, NMT_MNDeviceTypeIdList_AU32, 0)
 
         // Object 1F89h: NMT_BootTime_REC
+#if defined(CONFIG_INCLUDE_NMT_RMN)
+        OBD_BEGIN_INDEX_RAM(0x1F89, 0x09, NULL)
+        OBD_SUBINDEX_RAM_VAR(0x1F89, 0x00, kObdTypeUInt8, kObdAccConst, tObdUnsigned8, NumberOfEntries, 0x0c)
+#else
         OBD_BEGIN_INDEX_RAM(0x1F89, 0x06, NULL)
-            OBD_SUBINDEX_RAM_VAR(0x1F89, 0x00, kObdTypeUInt8, kObdAccConst, tObdUnsigned8, NumberOfEntries, 0x05)
+        OBD_SUBINDEX_RAM_VAR(0x1F89, 0x00, kObdTypeUInt8, kObdAccConst, tObdUnsigned8, NumberOfEntries, 0x05)
+#endif
             OBD_SUBINDEX_RAM_VAR(0x1F89, 0x01, kObdTypeUInt32, kObdAccSRW, tObdUnsigned32, MNWaitNotAct_U32, 1000000)        // in [us]
             OBD_SUBINDEX_RAM_VAR(0x1F89, 0x02, kObdTypeUInt32, kObdAccSRW, tObdUnsigned32, MNTimeoutPreOp1_U32, 500000)      // in [us]
             OBD_SUBINDEX_RAM_VAR(0x1F89, 0x03, kObdTypeUInt32, kObdAccSRW, tObdUnsigned32, MNWaitPreOp1_U32, 500000)         // in [us]
             OBD_SUBINDEX_RAM_VAR(0x1F89, 0x04, kObdTypeUInt32, kObdAccSRW, tObdUnsigned32, MNTimeoutPreOp2_U32, 5000000)      // in [us]
             OBD_SUBINDEX_RAM_VAR(0x1F89, 0x05, kObdTypeUInt32, kObdAccSRW, tObdUnsigned32, MNTimeoutReadyToOp_U32, 500000)   // in [us]
+#if defined(CONFIG_INCLUDE_NMT_RMN)
+            OBD_SUBINDEX_RAM_VAR(0x1F89, 0x0a, kObdTypeUInt32, kObdAccSRW, tObdUnsigned32, MNSwitchOverPriority_U32, 10)
+            OBD_SUBINDEX_RAM_VAR(0x1F89, 0x0b, kObdTypeUInt32, kObdAccSRW, tObdUnsigned32, MNSwitchOverDelay_U32, 10)
+            OBD_SUBINDEX_RAM_VAR(0x1F89, 0x0c, kObdTypeUInt32, kObdAccSRW, tObdUnsigned32, MNSwitchOverCycleDivider_U32, 10)
+#endif
         OBD_END_INDEX(0x1F89)
 
         // Object 1F8Ah: NMT_MNCycleTiming_REC
