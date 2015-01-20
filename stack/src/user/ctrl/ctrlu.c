@@ -795,7 +795,7 @@ tOplkError ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
 
                 nmtState = nmtu_getNmtState();
 
-                if (nmtState < kNmtMsNotActive)
+                if (NMT_IF_CN_OR_RMN(nmtState))
                 {   // local node is CN
                     // forward the command to the MN
                     // d.k. this is a manufacturer specific feature
