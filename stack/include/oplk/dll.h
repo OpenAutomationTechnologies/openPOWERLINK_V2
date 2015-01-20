@@ -174,6 +174,11 @@ typedef struct
     UINT32              syncResLatency;             ///< Constant response latency for SyncRes in [ns]
     UINT                syncNodeId;                 ///< Synchronization trigger (AppCbSync, cycle preparation) after PRes from CN with this node-ID (0 = SoC, 255 = SoA)
     BOOL                fSyncOnPrcNode;             ///< TRUE: CN is PRes chained; FALSE: conventional CN (PReq/PRes)
+#if defined(CONFIG_INCLUDE_NMT_RMN)
+    UINT32              switchOverTimeMn;           ///< Switch over time when CS_OPERATIONAL in [us]
+    UINT32              reducedSwitchOverTimeMn;    ///< Switch over time when CS_PREOPERATIONAL1 in [us]
+    UINT32              delayedSwitchOverTimeMn;    ///< Switch over time otherwise in [us]
+#endif
 } tDllConfigParam;
 
 /**
