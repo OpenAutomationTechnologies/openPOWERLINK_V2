@@ -357,7 +357,7 @@ void dllkframe_processTransmittedNmtReq(tEdrvTxBuffer* pTxBuffer_p)
         goto Exit;
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
-    if (nmtState >= kNmtMsNotActive)
+    if (NMT_IF_ACTIVE_MN(nmtState))
     {
         tPlkFrame* pTxFrame;
 
@@ -528,7 +528,7 @@ tOplkError dllkframe_updateFrameIdentRes(tEdrvTxBuffer* pTxBuffer_p,
     ami_setUint8Le(&pTxFrame->data.asnd.payload.identResponse.flag2, dllkInstance_g.flag2);
 
 #if (CONFIG_EDRV_AUTO_RESPONSE != FALSE)
-    if (nmtState_p < kNmtMsNotActive)
+    if (NMT_IF_CN_OR_RMN(nmtState_p))
     {
         ret = edrv_updateTxBuffer(pTxBuffer_p);
     }
@@ -563,7 +563,7 @@ tOplkError dllkframe_updateFrameStatusRes(tEdrvTxBuffer* pTxBuffer_p,
     ami_setUint8Le(&pTxFrame->data.asnd.payload.statusResponse.flag1, dllkInstance_g.flag1);
 
 #if (CONFIG_EDRV_AUTO_RESPONSE != FALSE)
-    if (nmtState_p < kNmtMsNotActive)
+    if (NMT_IF_CN_OR_RMN(nmtState_p))
     {
         ret = edrv_updateTxBuffer(pTxBuffer_p);
     }
@@ -1705,7 +1705,7 @@ static tOplkError processReceivedPreq(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
 
     pFrame = pFrameInfo_p->pFrame;
 
-    if (nmtState_p >= kNmtMsNotActive)
+    if (!NMT_IF_ACTIVE_CN(nmtState_p))
     {   // MN is active -> wrong msg type
         goto Exit;
     }

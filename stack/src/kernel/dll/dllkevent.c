@@ -737,7 +737,7 @@ static tOplkError processCycleFinish(tNmtState nmtState_p)
     if (ret != kErrorOk)
         goto Exit;
 
-    ret = errhndk_decrementCounters((nmtState_p >= kNmtMsNotActive));
+    ret = errhndk_decrementCounters(NMT_IF_ACTIVE_MN(nmtState_p));
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
     if (dllkInstance_g.dllState > kDllMsNonCyclic)
@@ -781,7 +781,7 @@ static tOplkError processSync(tNmtState nmtState_p)
 
     // do cycle preparation
 #if defined(CONFIG_INCLUDE_NMT_MN)
-    if (nmtState_p >= kNmtMsNotActive)
+    if (NMT_IF_ACTIVE_MN(nmtState_p))
     {   // local node is MN
         ret = processSyncMn(nmtState_p, fReadyFlag);
     }
