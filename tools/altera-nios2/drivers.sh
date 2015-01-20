@@ -111,7 +111,7 @@ BSP_GEN_ARGS="${CFG_DRV_BSP_TYPE} ${BSP_PATH} ${BOARD_PATH}/quartus \
 if [ -z "${DEBUG}" ];
 then
     BSP_GEN_ARGS+="\
-    --set hal.stdout none --set hal.stderr none \
+    --set hal.stdout none --set hal.stdin none --set hal.stderr none \
     --set hal.make.bsp_cflags_optimization ${CFG_DRV_BSP_OPT_LEVEL} \
     "
 else
