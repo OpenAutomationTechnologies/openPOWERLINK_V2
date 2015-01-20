@@ -177,17 +177,6 @@ Follow the steps below to cross compile your demo application for Zynq ARM:
 
 ### MN Applications
 
-- **CFG_DEMO_PROJECT**
-
-  Selects the openCONFIGURATOR project to be used with this demo. Available
-  projects are provided by a drop-down list in the cmake QT GUI:
-
-  - __Demo_3CN__: Demo project with 3 CNs using node ID 1, 32, 110. It uses the standard
-                  CiA401_CN XDD and shall be used with openPOWERLINK CNs.
-  - __Demo_3CN_BC0083__: Demo project with 3CNs using node ID 1, 32, 110. It uses
-                       a modified XDD to work with a B&R BC0083 bus controller
-                       together with a digital input and digital output module.
-
 - **CFG_CFM**
 
   Determines if the application uses the configuration manager (CFM).
