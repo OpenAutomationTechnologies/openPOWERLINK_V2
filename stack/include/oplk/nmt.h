@@ -8,7 +8,7 @@ This file is the global include file for all NMT modules
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2015, SYSTEC electronic GmbH
 Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
@@ -114,6 +114,7 @@ typedef enum
     kNmtMsReadyToOperate            = 0x026D,   ///< NMT_MS_READY_TO_OPERATE
     kNmtMsOperational               = 0x02FD,   ///< NMT_MS_OPERATIONAL
     kNmtMsBasicEthernet             = 0x021E,   ///< NMT_MS_BASIC_ETHERNET
+    kNmtRmsNotActive                = 0x031C,   ///< NMT_RMS_NOT_ACTIVE
     kNmtStateInvalid                = 0xFFFF    ///< Dummy state to detect invalid states (garbage)
 } tNmtState;
 
@@ -141,6 +142,8 @@ typedef enum
     kNmtEventDllCeAInv              =   0x0B,   ///< An AInv event has occured on the CN
     kNmtEventDllCeAsnd              =   0x0C,   ///< An ASnd event has occured on the CN
     kNmtEventDllCeFrameTimeout      =   0x0D,   ///< A frame timeout has occured on the CN
+    kNmtEventDllReAmni              =   0x0E,   ///< NMT_RMT5, NMT_RMT7
+    kNmtEventDllReSwitchOverTimeout =   0x0F,   ///< NMT_RMT4, NMT_RMT6
 
     // Events triggered by NMT-Commands
     kNmtEventSwReset                =   0x10,   ///< A SwReset event has occured (NMT_GT1, NMT_GT2, NMT_GT8)
@@ -168,6 +171,7 @@ typedef enum
     kNmtEventEnterMsOperational     =   0x2C,   ///< enter Operational on MN
     kNmtEventSwitchOff              =   0x2D,   ///< enter state Off
     kNmtEventCriticalError          =   0x2E,   ///< enter state Off because of critical error
+    kNmtEventEnterRmsNotActive      =   0x2F,   ///< enter RMS NotActive state, because Bit 14 in object 0x1F80
 } tNmtEvent;
 
 /**
