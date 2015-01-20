@@ -465,6 +465,7 @@ typedef enum
     kMsgTypePres                = 0x04,                     ///< Defines Poll Response Frame
     kMsgTypeSoa                 = 0x05,                     ///< Defines Start of Asynchronous Cycle Frame
     kMsgTypeAsnd                = 0x06,                     ///< Defines Asynchronous Send Frame
+    kMsgTypeAmni                = 0x07,                     ///< Defines Active Managing Node Indication Frame
     kMsgTypeAInv                = 0x0D,                     ///< Defines Asynchronous Invite Frame
 } tMsgType;
 
