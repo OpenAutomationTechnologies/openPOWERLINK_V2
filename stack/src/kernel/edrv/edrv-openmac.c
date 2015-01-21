@@ -73,9 +73,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 
-//comment the following lines to disable feature
-//#define EDRV_2NDTXQUEUE    //use additional TX queue for MN
-
 #if (CONFIG_EDRV_AUTO_RESPONSE == FALSE)
     #undef EDRV_MAX_AUTO_RESPONSES
     #define EDRV_MAX_AUTO_RESPONSES 0 //no auto-response used
@@ -92,15 +89,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #error "Please disable CONFIG_EDRV_AUTO_RESPONSE in oplkcfg.h to use openMAC for MN!"
 #endif
 
-#if (defined(EDRV_2NDTXQUEUE) && CONFIG_EDRV_TIME_TRIG_TX == FALSE)
-    #undef EDRV_2NDTXQUEUE //2nd TX queue makes no sense here..
-    #undef EDRV_MAX_TX_BUF2
+#ifndef CONFIG_EDRV_MAX_TX2_BUFFERS
+#define CONFIG_EDRV_MAX_TX2_BUFFERS 16
 #endif
 
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
-#ifdef EDRV_2NDTXQUEUE
+#if CONFIG_EDRV_TIME_TRIG_TX != FALSE
 /**
 \brief Structure describing the second TX queue.
 
@@ -145,9 +141,9 @@ typedef struct
 #if OPENMAC_PKTLOCRX == OPENMAC_PKTBUF_LOCAL
     void*               pRxBufferBase;                          ///< Pointer to the RX buffer base address
 #endif
-#ifdef EDRV_2NDTXQUEUE
+#if CONFIG_EDRV_TIME_TRIG_TX != FALSE
     //additional tx queue
-    tEdrv2ndTxQueue     txQueue[EDRV_MAX_TX_BUF2];              ///< Array of buffers for the second TX queue
+    tEdrv2ndTxQueue     txQueue[CONFIG_EDRV_MAX_TX2_BUFFERS];   ///< Array of buffers for the second TX queue
     INT                 txQueueWriteIndex;                      ///< Current index in the queue for writes
     INT                 txQueueReadIndex;                       ///< Current index in the queue for reads
 #endif
@@ -574,9 +570,9 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
 
         if (txLength == 0)
         {
-#ifdef EDRV_2NDTXQUEUE
+#if CONFIG_EDRV_TIME_TRIG_TX != FALSE
             //time triggered sent failed => move to 2nd tx queue
-            if ((edrvInstance_l.txQueueWriteIndex - edrvInstance_l.txQueueReadIndex) >= EDRV_MAX_TX_BUF2)
+            if ((edrvInstance_l.txQueueWriteIndex - edrvInstance_l.txQueueReadIndex) >= CONFIG_EDRV_MAX_TX2_BUFFERS)
             {
                 DEBUG_LVL_ERROR_TRACE("%s() Edrv 2nd TX queue is full\n", __func__);
                 ret = kErrorEdrvNoFreeBufEntry;
@@ -584,7 +580,7 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
             }
             else
             {
-                tEdrv2ndTxQueue* pTxqueue = &edrvInstance_l.txQueue[edrvInstance_l.txQueueWriteIndex & (EDRV_MAX_TX_BUF2-1)];
+                tEdrv2ndTxQueue* pTxqueue = &edrvInstance_l.txQueue[edrvInstance_l.txQueueWriteIndex & (CONFIG_EDRV_MAX_TX2_BUFFERS-1)];
                 pTxqueue->pBuffer = pBuffer_p;
                 pTxqueue->timeOffsetAbs = pBuffer_p->timeOffsetAbs;
 
@@ -1181,7 +1177,7 @@ static void irqHandler(void* pArg_p)
     }
 #endif
 
-#if (defined(EDRV_2NDTXQUEUE) && (CONFIG_EDRV_TIME_TRIG_TX != FALSE))
+#if CONFIG_EDRV_TIME_TRIG_TX != FALSE
     //observe additional TX queue and send packet if necessary
     while ((edrvInstance_l.txQueueWriteIndex - edrvInstance_l.txQueueReadIndex) &&
            (omethTransmitPending(edrvInstance_l.pMacInst) < 16U))
@@ -1189,7 +1185,7 @@ static void irqHandler(void* pArg_p)
         tEdrvTxBuffer*      pBuffer_p;
         ometh_packet_typ*   pPacket;
         ULONG               txLength = 0U;
-        tEdrv2ndTxQueue*    pTxqueue = &edrvInstance_l.txQueue[edrvInstance_l.txQueueReadIndex & (EDRV_MAX_TX_BUF2-1)];
+        tEdrv2ndTxQueue*    pTxqueue = &edrvInstance_l.txQueue[edrvInstance_l.txQueueReadIndex & (CONFIG_EDRV_MAX_TX2_BUFFERS-1)];
         pBuffer_p = pTxqueue->pBuffer;
 
         pPacket = GET_TYPE_BASE(ometh_packet_typ, data, pBuffer_p->pBuffer);

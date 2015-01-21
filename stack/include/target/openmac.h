@@ -65,7 +65,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EDRV_MAX_RX_BUFFERS         16      ///< Number of supported Rx buffers
 #define EDRV_MAX_FILTERS            16      ///< Number of supported Rx Filters
 #define EDRV_MAX_AUTO_RESPONSES     14      ///< Number of supported auto-response
-#define EDRV_MAX_TX_BUF2            16      ///< Length of 2nd Tx queue
 
 #define HWTIMER_SYNC            0   ///< Sync hardware timer
 #define HWTIMER_EXT_SYNC        1   ///< External sync hardware timer

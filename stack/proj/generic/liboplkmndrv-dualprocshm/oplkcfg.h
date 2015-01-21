@@ -89,6 +89,8 @@ Note: The settings are specific for MN with openMAC!
     ///< support auto-response (e.g. openMAC)
 #define CONFIG_EDRV_TIME_TRIG_TX            TRUE
     ///< support time triggered transmission (e.g. openMAC)
+#define CONFIG_EDRV_MAX_TX2_BUFFERS         64
+    ///< set number for second Tx buffer queue to support larger networks
 #define CONFIG_EDRVCYC_NEG_SHIFT_US         100U
     ///< us (timer irq before next cycle)
 /**@}*/
