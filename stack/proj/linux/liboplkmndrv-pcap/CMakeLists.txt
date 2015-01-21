@@ -63,6 +63,9 @@ ELSE()
 ENDIF()
 
 # Configure compile definitions
+IF(CFG_INCLUDE_MN_REDUNDANCY)
+    ADD_DEFINITIONS(-DCONFIG_INCLUDE_NMT_RMN)
+ENDIF()
 ADD_DEFINITIONS(-DCONFIG_MN)
 ADD_DEFINITIONS(-Wall -Wextra -pedantic -std=c99 -pthread -D_GNU_SOURCE -D_POSIX_C_SOURCE=200112L
                 -fno-strict-aliasing)

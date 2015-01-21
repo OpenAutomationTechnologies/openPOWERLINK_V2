@@ -35,6 +35,11 @@ OPTION(CFG_COMPILE_LIB_CN           "Compile openPOWERLINK CN library" ON)
 
 OPTION(CFG_WINDOWS_DLL              "Build openPOWERLINK library as DLL" OFF)
 
+################################################################################
+# Options for library features
+
+OPTION (CFG_INCLUDE_MN_REDUNDANCY               "Compile MN redundancy functions into MN libraries" OFF)
+
 # MN libraries
 IF(CFG_COMPILE_LIB_MN)
     ADD_SUBDIRECTORY(proj/windows/liboplkmn)

@@ -32,6 +32,9 @@
 
 PROJECT (oplkdrv_kernelmodule_edrv C)
 
+# include cmake modules
+INCLUDE(CMakeDependentOption)
+
 IF(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     CMAKE_MINIMUM_REQUIRED (VERSION 2.8.7)
 ELSE()
@@ -54,6 +57,8 @@ IF(NOT CMAKE_BUILD_TYPE)
 ENDIF()
 
 OPTION (CFG_OPLK_MN "Compile openPOWERLINK MN (Otherwise CN)" ON)
+CMAKE_DEPENDENT_OPTION(CFG_INCLUDE_MN_REDUNDANCY "Compile MN redundancy functions into MN driver" OFF
+                       "CFG_OPLK_MN" OFF)
 
 SET(CFG_DEBUG_LVL "0xEC000000L" CACHE STRING "Debug Level for debug output")
 
@@ -139,6 +144,9 @@ ENDIF()
 # Configure depending selected mode
 #
 IF(CFG_OPLK_MN)
+    IF(CFG_INCLUDE_MN_REDUNDANCY)
+         SET(MODULE_DEFS "${MODULE_DEFS} -DCONFIG_INCLUDE_NMT_RMN")
+    ENDIF()
     SET(MODULE_DEFS "${MODULE_DEFS} -DCONFIG_MN")
     SET(MODULE_NAME "${MODULE_NAME}mn")
     INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/proj/mn)

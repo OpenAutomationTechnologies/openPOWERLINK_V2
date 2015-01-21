@@ -52,6 +52,11 @@ OPTION (CFG_COMPILE_LIB_CNDRV_PCAP              "Compile openPOWERLINK CN driver
 OPTION (CFG_COMPILE_SHARED_LIBRARY              "Build openPOWERLINK library as shared library" OFF)
 
 ################################################################################
+# Options for library features
+
+OPTION (CFG_INCLUDE_MN_REDUNDANCY               "Compile MN redundancy functions into MN libraries" OFF)
+
+################################################################################
 # Add library subdirectories
 
 # Add MN libraries
