@@ -245,6 +245,10 @@ void ProcessThread::sigNmtState(tNmtState State_p)
             strState = "MN Basic Ethernet";
             break;
 
+        case kNmtRmsNotActive:
+            strState = "RMN Not Active";
+            break;
+
         default:
             strState = "??? (0x";
             strState += QString::number(State_p, 16);
@@ -454,6 +458,7 @@ tOplkError ProcessThread::processStateChangeEvent(tOplkApiEventType EventType_p,
 
         case kNmtCsNotActive:
         case kNmtMsNotActive:
+        case kNmtRmsNotActive:
         case kNmtGsInitialising:
         case kNmtGsResetApplication:
         case kNmtCsPreOperational1:
