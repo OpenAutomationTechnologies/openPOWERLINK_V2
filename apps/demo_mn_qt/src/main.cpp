@@ -41,6 +41,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "MainWindow.h"
 
+#if !defined(_WIN32) && (defined(__unix__) || defined(__unix) || (defined(__APPLE__) && defined(__MACH__)))
+#include <unistd.h>
+#if defined(_POSIX_THREADS)
+#include <signal.h>
+#endif
+#endif
+
+
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
@@ -93,6 +101,19 @@ int main(int argc, char* argv[])
 {
     MainWindow*   pMainWindow;
     QApplication* pApp;
+
+#if defined(_POSIX_THREADS)
+    sigset_t    mask;
+
+    /*
+     * We have to block the real time signals used by the timer modules so
+     * that they are able to wait on them using sigwaitinfo!
+     */
+    sigemptyset(&mask);
+    sigaddset(&mask, SIGRTMIN);
+    sigaddset(&mask, SIGRTMIN + 1);
+    pthread_sigmask(SIG_BLOCK, &mask, NULL);
+#endif
 
     pApp        = new QApplication(argc, argv);
     pMainWindow = new MainWindow;
