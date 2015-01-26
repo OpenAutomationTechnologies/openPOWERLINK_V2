@@ -30,12 +30,7 @@
 # Generated with "quartus_sh --help=makefiles" and customized afterwards!
 ################################################################################
 
-PROJECT = mn-dual-hostif-gpio
-QSYS_PROJECT = mnDualHostifGpio
-QSYS_QIP_FILE = $(QSYS_PROJECT)/synthesis/$(QSYS_PROJECT).qip
-
-SOURCE_FILES = toplevel.vhd
-SOURCE_FILES += ../../common/ipcore/pll.qip
+include settings.mk
 
 ASSIGNMENT_FILES = $(PROJECT).qpf $(PROJECT).qsf
 
@@ -54,9 +49,9 @@ clean-quartus:
 	rm -rf *.rpt *.chg smart.log *.htm *.eqn *.pin *.sof *.pof db
 
 clean-qsys:
-	rm -rf $(QSYS_PROJECT) $(QSYS_PROJECT).sopcinfo
+	rm -rf $(QSYS_OUT)
 
-qsys: $(QSYS_QIP_FILE)
+qsys: $(QSYS_OUT)
 map: smart.log $(PROJECT).map.rpt
 fit: smart.log $(PROJECT).fit.rpt
 asm: smart.log $(PROJECT).asm.rpt
@@ -79,10 +74,10 @@ STA_ARGS =
 
 STAMP = echo done >
 
-$(QSYS_QIP_FILE): $(QSYS_PROJECT).qsys
+$(QSYS_OUT): $(QSYS_PROJECT).qsys
 	qsys-generate $(QSYS_PROJECT).qsys $(QSYS_ARGS)
 
-$(PROJECT).map.rpt: map.chg $(SOURCE_FILES) $(QSYS_QIP_FILE)
+$(PROJECT).map.rpt: map.chg $(SOURCE_FILES)
 	quartus_map $(MAP_ARGS) $(PROJECT)
 	$(STAMP) fit.chg
 
@@ -115,5 +110,3 @@ sta.chg:
 	$(STAMP) sta.chg
 asm.chg:
 	$(STAMP) asm.chg
-
-
