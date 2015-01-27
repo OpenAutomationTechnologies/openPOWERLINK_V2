@@ -13,6 +13,9 @@ result a _driver_.
 The drivers are located in the directory `drivers`. To build a driver, the
 necessary openPOWERLINK libraries must be compiled and installed.
 
+__NOTE__: You don't need to compile a driver if you are using a single process
+solution. (e.g. Linux PCAP single process, Windows PCAP)
+
 ## Building a Linux PCAP User Space Daemon {#sect_build_drivers_build_linux_pcap}
 
 The user space daemon needs the PCAP driver libraries (`liboplkmndrv-pcap`, `liboplkcndrv-pcap`).

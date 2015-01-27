@@ -88,6 +88,7 @@ The following build steps are necessary to build an openPOWERLINK solution:
   (This step is only necessary for embedded targets)
 * [Build the openPOWERLINK stack libraries](\ref page_build_stack)
 * [Build the necessary openPOWERLINK drivers](\ref page_build_drivers)
+  (This step is only necessary for split stack versions)
 * [Build your application (or a delivered demo application)](\ref page_build_demos)
 
 # Platform Specific Build Information {#sect_build_platform}
