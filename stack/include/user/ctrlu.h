@@ -74,6 +74,7 @@ tOplkError ctrlu_callUserEventCallback(tOplkApiEventType eventType_p, tOplkApiEv
 tOplkError ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p);
 UINT8*     ctrlu_getEthMacAddr(void);
 BOOL       ctrlu_stackIsInitialized(void);
+UINT32     ctrlu_getFeatureFlags(void);
 
 #ifdef __cplusplus
 }

@@ -488,6 +488,8 @@ OPLKDLLEXPORT tOplkError oplk_getIdentResponse(UINT nodeId_p, tIdentResponse** p
 OPLKDLLEXPORT tOplkError oplk_getEthMacAddr(UINT8* pMacAddr_p);
 OPLKDLLEXPORT BOOL       oplk_checkKernelStack(void);
 OPLKDLLEXPORT tOplkError oplk_waitSyncEvent(ULONG timeout_p);
+OPLKDLLEXPORT UINT32     oplk_getVersion(void);
+OPLKDLLEXPORT UINT32     oplk_getStackConfiguration(void);
 
 // Process image API functions
 OPLKDLLEXPORT tOplkError oplk_allocProcessImage(UINT sizeProcessImageIn_p, UINT sizeProcessImageOut_p);

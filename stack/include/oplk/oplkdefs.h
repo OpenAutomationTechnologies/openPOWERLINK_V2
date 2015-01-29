@@ -48,11 +48,29 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// Version macros
-#define PLK_SPEC_VERSION                                0x20    // Ethernet POWERLINK V 2.0
-#define PLK_STACK_VERSION(ver, rev, rel)                (((((UINT32)(ver)) & 0xFF) << 24) | ((((UINT32)(rev)) & 0xFF) << 16) | (((UINT32)(rel)) & 0xFFFF))
-#define PLK_OBJ1018_VERSION(ver, rev, rel)              ((((UINT32)(ver))<<16) | (((UINT32)(rev)) & 0xFFFF))
-#define PLK_STRING_VERSION(ver, rev, rel)               "V" #ver "." #rev "." #rel
+/// \name Version macros
+/// \{
+#define PLK_SPEC_VERSION                                0x20                                                    ///< Ethernet POWERLINK V 2.0
+#define PLK_STACK_VERSION(ver, rev, rel)                (((((UINT32)(ver)) & 0xFF) << 24) | ((((UINT32)(rev)) & 0xFF) << 16) | (((UINT32)(rel)) & 0xFFFF))      ///< Version in UINT32 format
+#define PLK_OBJ1018_VERSION(ver, rev, rel)              ((((UINT32)(ver))<<16) | (((UINT32)(rev)) & 0xFFFF))    ///< Version in UINT32 format for Object 0x1018 which contains general information about a device.
+#define PLK_STRING_VERSION(ver, rev, rel)               "V" #ver "." #rev "." #rel                              ///< Version in string format
+#define PLK_STACK_VER(ver)                              ((UINT32)ver & 0xFF000000) >> 24                        ///< Parses the 32 bit version number and returns the major number.
+#define PLK_STACK_REF(ver)                              ((UINT32)ver & 0x00FF0000) >> 16                        ///< Parses the 32 bit version number and returns the minor number.
+#define PLK_STACK_REL(ver)                              ((UINT32)ver & 0x0000FFFF)                              ///< Parses the 32 bit version number and returns the build number.
+/// \}
+
+//------------------------------------------------------------------------------
+/// \name Kernel feature flags
+/// \{
+// These flags are used to determine how the kernel part of the stack is
+// configured. It is needed to ensure that user and kernel part are
+// working together in a multi processor system.
+#define OPLK_KERNEL_MN                                  0x00000001      ///< NMT functionality compiled in
+#define OPLK_KERNEL_ISOCHR                              0x00000002      ///< PDO module for isochronous transfers
+#define OPLK_KERNEL_PRES_CHAINING_CN                    0x00000004      ///< Feature Poll Response Chaining
+#define OPLK_KERNEL_VETH                                0x00000008      ///< Virtual ethernet module
+#define OPLK_KERNEL_PRES_FORWARD                        0x00000010      ///< PRES forwarding module (used for diagnosis)
+/// \}
 
 //------------------------------------------------------------------------------
 /// \name Default POWERLINK constants

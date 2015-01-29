@@ -1068,6 +1068,44 @@ BOOL oplk_checkKernelStack(void)
 
 //------------------------------------------------------------------------------
 /**
+\brief Get openPOWERLINK Version
+
+The function identifies the openPOWERLINK version of the stack.
+The version is represented by a 32 bit number, which contains the major-, minor- and build-number.
+Additionally the macros \ref PLK_STACK_VER, \ref PLK_STACK_REF and \ref PLK_STACK_REL can be used
+to get the respective value of the major-, minor- or build-number.
+
+\return Returns the openPOWERLINK version
+\retval Returns a 32 bit number, which contains the major-, minor- and build-number.
+
+*/
+//------------------------------------------------------------------------------
+UINT32 oplk_getVersion(void)
+{
+    return PLK_DEFINED_STACK_VERSION;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief Get openPOWERLINK stack configuration
+
+The function returns the openPOWERLINK kernel feature flags (configuration options) of the stack.
+The stack can be compiled conditionally with different features. The user library requires these
+features from the kernel driver. The kernel feature flags are located in the header file \ref oplk/oplkdefs.h.
+
+\return Returns the configured kernel features
+\retval Returns a UINT32 variable with the kernel feature flags.
+
+*/
+//------------------------------------------------------------------------------
+UINT32 oplk_getStackConfiguration(void)
+{
+    return ctrlu_getFeatureFlags();
+}
+
+//------------------------------------------------------------------------------
+
+/**
 \brief Wait for sync event
 
 The function waits for a sync event. It blocks until the sync event occurred or
