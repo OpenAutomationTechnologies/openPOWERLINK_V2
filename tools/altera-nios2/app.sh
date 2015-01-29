@@ -326,6 +326,30 @@ ${OPLK_BASE_DIR}/tools/altera-nios2/fix-app-makefile ${OUT_PATH}/Makefile
 
 # Add EPCS flash makefile rules
 if [ -n "${SEL_EPCS}" ]; then
+    # Create system.mk to get system info
+    SOPCINFO_FILE=$(find ${BOARD_PATH}/quartus -name *.sopcinfo)
+    SWINFO_FILE=${OUT_PATH}/swinfo
+    SETTINGS_FILE=${OUT_PATH}/system.mk
+
+    sopcinfo2swinfo --input=${SOPCINFO_FILE} --output=${SWINFO_FILE}
+    RET=$?
+
+    if [ ${RET} -ne 0 ]; then
+        echo "ERROR: Generating ${SWINFO_FILE} file failed with error ${RET}!"
+        exit ${RET}
+    fi
+
+    swinfo2header --swinfo ${SWINFO_FILE} --format mk --single ${SETTINGS_FILE} --module ${SEL_CPU_NAME}
+    RET=$?
+
+    if [ ${RET} -ne 0 ]; then
+        echo "ERROR: Generating ${SETTINGS_FILE} file failed with error ${RET}!"
+        exit ${RET}
+    fi
+
+    # Remove unused swinfo file
+    rm -f ${SWINFO_FILE}
+
     chmod +x ${OPLK_BASE_DIR}/tools/altera-nios2/add-app-makefile-epcs
     ${OPLK_BASE_DIR}/tools/altera-nios2/add-app-makefile-epcs ${OUT_PATH}/Makefile
 fi

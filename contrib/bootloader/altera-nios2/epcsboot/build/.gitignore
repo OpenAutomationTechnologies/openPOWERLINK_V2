@@ -1,0 +1,4 @@
+*.elf
+*.srec
+*.hex
+*.dump

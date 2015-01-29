@@ -6,6 +6,24 @@ MAKE_FILE=$1
 
 cat >> ${MAKE_FILE} <<'Heredoc'
 
+# Rules for EPCS bootloader with remote update core consideration
+include system.mk
+
+EPCSBOOT_DIR := $(OPLK_BASE_DIR)/contrib/bootloader/altera-nios2/epcsboot/build
+EPCS_BASE := $(EPCS_FLASH_CONTROLLER_BASE)
+EPCS_REGS_OFFSET := $(EPCS_FLASH_CONTROLLER_REGISTER_OFFSET)
+EPCS_CODE_BASE := $(EPCS_BASE)
+EPCS_REGS_BASE := $$(( $(EPCS_BASE) + $(EPCS_REGS_OFFSET) ))
+
+.PHONY : update-epcsboot
+update-epcsboot:
+	@$(ECHO) Info: Compile EPCS boot in $(EPCSBOOT_DIR)
+	@$(MAKE) -C $(EPCSBOOT_DIR) clean all CODE_BASE=$(EPCS_CODE_BASE) \
+	EPCS_REGS_BASE=$(EPCS_REGS_BASE) REMOTE_UPDATE_BASE=$(REMOTE_UPDATE_BASE)
+	@$(ECHO) Info: Update memory initialization in $(SOF_FILE)
+	$(CP) $(EPCSBOOT_DIR)/epcsboot.hex $(QUARTUS_PROJECT_DIR)/$(EPCS_FLASH_CONTROLLER_MEMORY_INFO_MEM_INIT_FILENAME).hex
+	$(MAKE) -C $(QUARTUS_PROJECT_DIR) update-mif
+
 # Rules for EPCS flash programming commands (EPCS contains SOF and application)
 PROGRAM_EPCS_SUFFIX := -epcs
 PROGRAM_EPCS_TARGET := $(addsuffix $(PROGRAM_EPCS_SUFFIX), $(FLASH_FILES))
@@ -35,6 +53,7 @@ $(PROGRAM_EPCS_TARGET) : $(ELF)
 help::
 	@$(ECHO)
 	@$(ECHO) "  EPCS flash targets:"
+	@$(ECHO) "    update-epcsboot   - Update EPCS bootloader in SOF"
 	@$(ECHO) "    program-epcs      - Program EPCS flash device with SOF and ELF"
 
 Heredoc
