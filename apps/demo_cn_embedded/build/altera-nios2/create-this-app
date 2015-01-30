@@ -43,7 +43,7 @@ do
             BOARD_PATH=$1
             ;;
         --rebuild)
-            rm -rf bsp*/ lib*/ Makefile
+            rm -f bsp*/Makefile lib*/Makefile Makefile
             ;;
         --help)
             echo "$ create-this-apps [OPTIONS]"
@@ -65,6 +65,8 @@ if [ -z "${OPLK_BASE_DIR}" ]; then
     OPLK_BASE_DIR=$(readlink -f "${SCRIPTDIR}/../../../..")
 fi
 
+APP_PATH=${OPLK_BASE_DIR}/apps/demo_cn_embedded/build/altera-nios2
+
 # include functions
 . ${OPLK_BASE_DIR}/tools/altera-nios2/shell_functions
 
@@ -74,5 +76,5 @@ if [ -z "${BOARD_PATH}" ]; then
     test $? -ne 0 && echo "$0 failed!" && exit
 fi
 
-chmod +x ${OPLK_BASE_DIR}/tools/altera-nios2/apps.sh
-${OPLK_BASE_DIR}/tools/altera-nios2/apps.sh . ${BOARD_PATH} ${ARGS}
+chmod +x ${OPLK_BASE_DIR}/tools/altera-nios2/app.sh
+${OPLK_BASE_DIR}/tools/altera-nios2/app.sh ${APP_PATH} ${BOARD_PATH} ${ARGS}

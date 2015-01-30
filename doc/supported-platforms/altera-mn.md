@@ -94,22 +94,21 @@ Steps 1-5 can be carried out by executing `$ make all` in a
 7. Use the software design available in the openPOWERLINK subdirectory \n
    `apps/demo_mn_embedded/build/altera-nios2` and \n
    `drivers/altera-nios2/drv_daemon/build`. \n
-8. Run the scripts *create-this-drv* or *create-this-app* respectively
+8. Run the scripts *create-this-app* respectively
    to create the Makefile for the driver daemon and the application demo. \n
-   `$ ./create-this-app` or `$ ./create-this-drv` \n
+   `$ ./create-this-app` \n
    Note: The script uses the TERASIC DE2-115 dual MN demo by default
    (`hardware/boards/terasic-de2-115/mn-dual-hostif-gpio/board.settings`).
    If you want to change to another board, use the `--board` option: \n
-   `$ ./create-this-app --board [PATH-TO-BOARD]` or
-   `$ ./create-this-drv --board [PATH-TO-BOARD]` \n
+   `$ ./create-this-app --board [PATH-TO-BOARD]` \n
 9. Run make to build the ELF file after changing the sources.\n
    `$ make`
 10. Rebuild the Makefile also if the Nios II Design was changed inside Qsys. \n
-    `$ ./create-this-app --rebuild` or `$ ./create-this-drv --rebuild`
+    `$ ./create-this-app --rebuild`
 11. If you want to debug the demo, use the `--debug` option. \n
-    `$ ./create-this-app --debug` or `$ ./create-this-drv --debug`
+    `$ ./create-this-app --debug`
 12. The script's help message can be printed with `--help`. \n
-    `$ ./create-this-app --help` or `$ ./create-this-drv --help`
+    `$ ./create-this-app --help`
 
 # How to run the demo {#sect_altera-mn_run}
 

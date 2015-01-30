@@ -28,27 +28,21 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-APP_NAME=demo_mn_embedded
+APP_TYPE=drv
 
-# Library sources
+APP_NAME=drv_daemon
+
+# Driver sources
 APP_SOURCES="\
-${OPLK_BASE_DIR}/apps/common/src/lcd/lcd.c \
-${OPLK_BASE_DIR}/apps/common/src/lcd/lcdl-16207.c \
-${OPLK_BASE_DIR}/apps/common/src/gpio/gpio-nios2.c \
-${OPLK_BASE_DIR}/apps/common/src/system/system-nios2.c \
-${OPLK_BASE_DIR}/apps/common/src/arp/arp.c \
-${OPLK_BASE_DIR}/apps/demo_mn_embedded/src/app.c \
-${OPLK_BASE_DIR}/apps/demo_mn_embedded/src/event.c \
-${OPLK_BASE_DIR}/apps/demo_mn_embedded/src/main.c \
+${OPLK_BASE_DIR}/drivers/altera-nios2/drv_daemon/daemon.c \
 "
 
 APP_INCLUDES="\
-${OPLK_BASE_DIR}/apps/common/src \
 ${OPLK_BASE_DIR}/stack/include \
+${OPLK_BASE_DIR}/stack/include/kernel \
 "
 
-CFG_APP_ARGS="\
---set APP_CFLAGS_DEFINED_SYMBOLS=-G4 -DCONFIG_INCLUDE_CFM\
+APP_CFLAGS="\
 "
 
 APP_OPT_LEVEL=-O2

@@ -1,6 +1,7 @@
+#!/bin/bash
 ################################################################################
 #
-# Application creation settings file for Altera Nios II
+# Create this app for Altera Nios II
 #
 # Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
@@ -28,24 +29,52 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-APP_NAME=demo_cn_embedded
+# process arguments
+BOARD_PATH=
+ARGS=
+while [ $# -gt 0 ]
+do
+    case "$1" in
+        --debug)
+            ARGS+="$1 "
+            ;;
+        --board)
+            shift
+            BOARD_PATH=$1
+            ;;
+        --rebuild)
+            rm -f bsp*/Makefile lib*/Makefile Makefile
+            ;;
+        --help)
+            echo "$ create-this-app [OPTIONS]"
+            echo "OPTIONS:"
+            echo "  --debug         ... App is created for debug"
+            echo "  --rebuild       ... Forces rebuild"
+            echo "  --board [PATH]  ... Path to board design (board.settings)"
+            exit 1
+            ;;
+        *)
+            ;;
+    esac
+    shift
+done
 
-# Library sources
-APP_SOURCES="\
-${OPLK_BASE_DIR}/apps/common/src/lcd/lcd.c \
-${OPLK_BASE_DIR}/apps/common/src/lcd/lcdl-16207.c \
-${OPLK_BASE_DIR}/apps/common/src/gpio/gpio-nios2.c \
-${OPLK_BASE_DIR}/apps/common/src/arp/arp.c \
-${OPLK_BASE_DIR}/apps/demo_cn_embedded/src/app.c \
-${OPLK_BASE_DIR}/apps/demo_cn_embedded/src/event.c \
-${OPLK_BASE_DIR}/apps/demo_cn_embedded/src/main.c \
-"
+if [ -z "${OPLK_BASE_DIR}" ]; then
+    # Find oplk root path
+    SCRIPTDIR=$(dirname $(readlink -f "${0}"))
+    OPLK_BASE_DIR=$(readlink -f "${SCRIPTDIR}/../../../..")
+fi
 
-APP_INCLUDES="\
-${OPLK_BASE_DIR}/apps/common/src/gpio \
-${OPLK_BASE_DIR}/apps/common/src/lcd \
-${OPLK_BASE_DIR}/apps/common/src/arp \
-${OPLK_BASE_DIR}/stack/include \
-"
+APP_PATH=${OPLK_BASE_DIR}/drivers/altera-nios2/drv_daemon/build
 
-APP_OPT_LEVEL=-O2
+# include functions
+. ${OPLK_BASE_DIR}/tools/altera-nios2/shell_functions
+
+if [ -z "${BOARD_PATH}" ]; then
+    # user selects from existing boards
+    BOARD_PATH=`select_dir_abs ${OPLK_BASE_DIR}/hardware/boards 'board.settings' 'grep -e dual -e drv -e soc'`
+    test $? -ne 0 && echo "$0 failed!" && exit
+fi
+
+chmod +x ${OPLK_BASE_DIR}/tools/altera-nios2/app.sh
+${OPLK_BASE_DIR}/tools/altera-nios2/app.sh ${APP_PATH} ${BOARD_PATH} ${ARGS}

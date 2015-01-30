@@ -1,7 +1,6 @@
-#!/bin/bash
 ################################################################################
 #
-# Create this driver for Altera Nios II
+# Application creation settings file for Altera Nios II
 #
 # Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
@@ -29,50 +28,29 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-# process arguments
-BOARD_PATH=
-ARGS=
-while [ $# -gt 0 ]
-do
-    case "$1" in
-        --debug)
-            ARGS+="$1 "
-            ;;
-        --board)
-            shift
-            BOARD_PATH=$1
-            ;;
-        --rebuild)
-            rm -rf bsp*/ lib*/ Makefile
-            ;;
-        --help)
-            echo "$ create-this-apps [OPTIONS]"
-            echo "OPTIONS:"
-            echo "  --debug         ... App is created for debug"
-            echo "  --rebuild       ... Forces rebuild"
-            echo "  --board [PATH]  ... Path to board design (board.settings)"
-            exit 1
-            ;;
-        *)
-            ;;
-    esac
-    shift
-done
+APP_TYPE=app
 
-if [ -z "${OPLK_BASE_DIR}" ]; then
-    # Find oplk root path
-    SCRIPTDIR=$(dirname $(readlink -f "${0}"))
-    OPLK_BASE_DIR=$(readlink -f "${SCRIPTDIR}/../../../..")
-fi
+APP_NAME=demo_mn_embedded
 
-# include functions
-. ${OPLK_BASE_DIR}/tools/altera-nios2/shell_functions
+# Library sources
+APP_SOURCES="\
+${OPLK_BASE_DIR}/apps/common/src/lcd/lcd.c \
+${OPLK_BASE_DIR}/apps/common/src/lcd/lcdl-16207.c \
+${OPLK_BASE_DIR}/apps/common/src/gpio/gpio-nios2.c \
+${OPLK_BASE_DIR}/apps/common/src/system/system-nios2.c \
+${OPLK_BASE_DIR}/apps/common/src/arp/arp.c \
+${OPLK_BASE_DIR}/apps/demo_mn_embedded/src/app.c \
+${OPLK_BASE_DIR}/apps/demo_mn_embedded/src/event.c \
+${OPLK_BASE_DIR}/apps/demo_mn_embedded/src/main.c \
+"
 
-if [ -z "${BOARD_PATH}" ]; then
-    # user selects from existing boards
-    BOARD_PATH=`select_dir_abs ${OPLK_BASE_DIR}/hardware/boards 'board.settings' 'grep -e dual -e drv -e soc'`
-    test $? -ne 0 && echo "$0 failed!" && exit
-fi
+APP_INCLUDES="\
+${OPLK_BASE_DIR}/apps/common/src \
+${OPLK_BASE_DIR}/stack/include \
+"
 
-chmod +x ${OPLK_BASE_DIR}/tools/altera-nios2/drivers.sh
-${OPLK_BASE_DIR}/tools/altera-nios2/drivers.sh . ${BOARD_PATH} ${ARGS}
+APP_CFLAGS="\
+-G4 -DCONFIG_INCLUDE_CFM \
+"
+
+APP_OPT_LEVEL=-O2

@@ -66,6 +66,8 @@ do
     shift
 done
 
+TMP_LIB_FILE=${OUT_PATH}/created-lib.tmp
+
 if [ -z "${BSP_PATH}" ];
 then
     echo "ERROR: No BSP path is given!"
@@ -239,5 +241,14 @@ do
 done
 
 nios2-lib-generate-makefile ${LIB_GEN_ARGS}
+RET=$?
+
+if [ ${RET} -ne 0 ]; then
+    echo "ERROR: Library generation returned with error ${RET}!"
+    exit ${RET}
+fi
+
+# Write library name into tmp file for app.sh
+echo ${LIB_NAME} > ${TMP_LIB_FILE}
 
 exit $?
