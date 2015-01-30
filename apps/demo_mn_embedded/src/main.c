@@ -143,6 +143,8 @@ int main(void)
     tOplkError      ret = kErrorOk;
     const UINT8     aMacAddr[] = {MAC_ADDR};
     UINT8           nodeid;
+    UINT32          version;
+
 #if (CONFIG_CDC_ON_SD != FALSE)
     tCdcBuffInfo    cdcBuffInfo;
 #endif
@@ -177,9 +179,10 @@ int main(void)
     initEvents(&instance_l.fGsOff, &eventCbPowerlink);
     arp_init((UINT8)instance_l.nodeId);
 
+    version = oplk_getVersion();
     PRINTF("----------------------------------------------------\n");
-    PRINTF("openPOWERLINK console MN DEMO application\n");
-    PRINTF("using openPOWERLINK Stack: %s\n", PLK_DEFINED_STRING_VERSION);
+    PRINTF("openPOWERLINK embedded MN DEMO application\n");
+    PRINTF("using openPOWERLINK Stack: %x.%x.%x\n", PLK_STACK_VER(version), PLK_STACK_REF(version), PLK_STACK_REL(version));
     PRINTF("----------------------------------------------------\n");
 
     PRINTF("NODEID=0x%02X\n", instance_l.nodeId);
@@ -274,7 +277,7 @@ static tOplkError initPowerlink(tInstance* pInstance_p)
     ret = oplk_init(&initParam);
     if (ret != kErrorOk)
     {
-        PRINTF("oplk_init() failed with \"%s\"\n(Error:0x%x!)\n",debugstr_getRetValStr(ret), ret);
+        PRINTF("oplk_init() failed with \"%s\"\n(Error:0x%x!)\n", debugstr_getRetValStr(ret), ret);
         return ret;
     }
 

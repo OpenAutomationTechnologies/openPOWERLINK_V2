@@ -84,6 +84,13 @@ MainWindow::MainWindow(QWidget* parent)
     pLabel->setPixmap(*pLogo);
     pHeadRegion->addWidget(pLabel, 1, Qt::AlignLeft);
 
+    version = oplk_getVersion();
+    QLabel* pVersion = new QLabel("openPOWERLINK MN QT Demo\nVersion "
+                                  + QString::number(PLK_STACK_VER(version))+ "."
+                                  + QString::number(PLK_STACK_REF(version)) + "."
+                                  + QString::number(PLK_STACK_REL(version)));
+    pHeadRegion->addWidget(pVersion, Qt::AlignCenter,Qt::AlignLeft);
+
     pWindowLayout->addLayout(pHeadRegion);
     pWindowLayout->addSpacing(10);
 

@@ -127,6 +127,7 @@ int main(void)
     tOplkError  ret = kErrorOk;
     const UINT8 aMacAddr[] = {MAC_ADDR};
     UINT8       nodeid;
+    UINT32      version;
 
     lcd_init();
 
@@ -148,9 +149,10 @@ int main(void)
     initEvents(&eventCbPowerlink);
     arp_init((UINT8)instance_l.nodeId);
 
+    version = oplk_getVersion();
     PRINTF("----------------------------------------------------\n");
     PRINTF("openPOWERLINK embedded CN DEMO application\n");
-    PRINTF("using openPOWERLINK Stack: %s\n", PLK_DEFINED_STRING_VERSION);
+    PRINTF("using openPOWERLINK Stack: %x.%x.%x\n", PLK_STACK_VER(version), PLK_STACK_REF(version), PLK_STACK_REL(version));
     PRINTF("----------------------------------------------------\n");
 
     PRINTF("NODEID=0x%02X\n", instance_l.nodeId);

@@ -108,6 +108,8 @@ private:
     QTextEdit*   pTextEdit;
 
     Api*         pApi;
+
+    UINT32       version;
 };
 
 #endif /* _INC_MainWindow_H_ */
