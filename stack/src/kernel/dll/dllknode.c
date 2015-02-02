@@ -148,12 +148,6 @@ tOplkError dllknode_cleanupLocalNode(tNmtState oldNmtState_p)
     // remove all filters from Edrv
     ret = edrv_changeRxFilter(NULL, 0, 0, 0);
 
-#if defined(CONFIG_INCLUDE_NMT_MN)
-    // destroy all data structures
-    OPLK_FREE(dllkInstance_g.ppTxBufferList);
-    dllkInstance_g.ppTxBufferList = NULL;
-#endif
-
     // delete timer
 #if CONFIG_TIMER_USE_HIGHRES != FALSE
     if ((ret = hrestimer_deleteTimer(&dllkInstance_g.timerHdlCycle)) != kErrorOk)
@@ -171,6 +165,12 @@ tOplkError dllknode_cleanupLocalNode(tNmtState oldNmtState_p)
 #if (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER)
     if ((ret = synctimer_stopSync()) != kErrorOk)
         return ret;
+#endif
+
+#if defined(CONFIG_INCLUDE_NMT_MN)
+    // destroy all data structures
+    OPLK_FREE(dllkInstance_g.ppTxBufferList);
+    dllkInstance_g.ppTxBufferList = NULL;
 #endif
 
     // delete Tx frames
