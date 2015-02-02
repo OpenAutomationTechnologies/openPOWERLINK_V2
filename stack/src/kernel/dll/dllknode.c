@@ -1179,8 +1179,6 @@ static tOplkError setupLocalNodeMn(void)
     if (ret != kErrorOk)
         return ret;
 
-    dllkInstance_g.frameTimeout = 1000LL * ((UINT64)dllkInstance_g.dllConfigParam.cycleLen);
-
     dllkfilter_setupPresFilter(&dllkInstance_g.aFilter[DLLK_FILTER_PRES], TRUE);
 
     return ret;
