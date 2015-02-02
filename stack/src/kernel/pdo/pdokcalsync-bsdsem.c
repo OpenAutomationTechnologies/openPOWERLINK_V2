@@ -105,6 +105,8 @@ The function initializes the kernel PDO CAL sync module.
 //------------------------------------------------------------------------------
 tOplkError pdokcal_initSync(void)
 {
+    sem_unlink(PDO_SYNC_BSDSEM);
+
     if ((syncSem_l = sem_open(PDO_SYNC_BSDSEM, O_CREAT, S_IRWXG, 1)) == SEM_FAILED)
     {
         DEBUG_LVL_ERROR_TRACE("%s() creating sem failed!\n", __func__);
