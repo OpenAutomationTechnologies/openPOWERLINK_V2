@@ -236,19 +236,15 @@ tOplkError dllk_config(tDllConfigParam* pDllConfigParam_p)
 #endif
     }
 
-    if (nmtState < kNmtMsNotActive)
-    {   // CN or NMT reset states are active, so we can calculate the frame timeout.
-        // MN calculates its own frame timeout on kEventTypeDllkCreate.
-        if ((dllkInstance_g.dllConfigParam.cycleLen != 0) &&
-            (dllkInstance_g.dllConfigParam.lossOfFrameTolerance != 0))
-        {   // monitor POWERLINK cycle, calculate frame timeout
-            dllkInstance_g.frameTimeout = (1000LL * ((UINT64)dllkInstance_g.dllConfigParam.cycleLen)) +
-                ((UINT64)dllkInstance_g.dllConfigParam.lossOfFrameTolerance);
-        }
-        else
-        {
-            dllkInstance_g.frameTimeout = 0LL;
-        }
+    if ((dllkInstance_g.dllConfigParam.cycleLen != 0) &&
+        (dllkInstance_g.dllConfigParam.lossOfFrameTolerance != 0))
+    {   // monitor POWERLINK cycle, calculate frame timeout
+        dllkInstance_g.frameTimeout = (1000LL * ((UINT64)dllkInstance_g.dllConfigParam.cycleLen)) +
+            ((UINT64)dllkInstance_g.dllConfigParam.lossOfFrameTolerance);
+    }
+    else
+    {
+        dllkInstance_g.frameTimeout = 0LL;
     }
 
     if (dllkInstance_g.dllConfigParam.fAsyncOnly != FALSE)
