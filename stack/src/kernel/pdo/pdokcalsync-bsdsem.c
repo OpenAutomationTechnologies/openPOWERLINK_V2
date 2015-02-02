@@ -127,6 +127,7 @@ The function cleans up the PDO CAL sync module.
 void pdokcal_exitSync(void)
 {
     sem_close(syncSem_l);
+    sem_unlink(PDO_SYNC_BSDSEM);
 }
 
 //------------------------------------------------------------------------------
