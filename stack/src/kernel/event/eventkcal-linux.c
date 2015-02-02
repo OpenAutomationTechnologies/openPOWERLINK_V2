@@ -224,6 +224,10 @@ tOplkError eventkcal_exit(void)
 
         sem_close(instance_l.semUserData);
         sem_close(instance_l.semKernelData);
+
+        sem_unlink("/semUserEvent");
+        sem_unlink("/semKernelEvent");
+
     }
     instance_l.fInitialized = FALSE;
 
