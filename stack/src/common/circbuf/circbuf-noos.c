@@ -98,15 +98,19 @@ tCircBufInstance        instance_l[NR_OF_CIRC_BUFFERS];
 The function allocates the memory needed for the circular buffer instance.
 
 \param  id_p                ID of the circular buffer.
+\param  fNew_p              TRUE: Create new instance.
+                            FALSE: Connect to existing instance.
 
 \return The function returns the pointer to the buffer instance or NULL on error.
 
 \ingroup module_lib_circbuf
 */
 //------------------------------------------------------------------------------
-tCircBufInstance* circbuf_createInstance(UINT8 id_p)
+tCircBufInstance* circbuf_createInstance(UINT8 id_p, BOOL fNew_p)
 {
     tCircBufInstance*           pInstance;
+
+    UNUSED_PARAMETER(fNew_p);
 
     pInstance = &instance_l[id_p];
 
