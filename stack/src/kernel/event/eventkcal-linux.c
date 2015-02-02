@@ -132,6 +132,9 @@ tOplkError eventkcal_init(void)
 
     OPLK_MEMSET(&instance_l, 0, sizeof(tEventkCalInstance));
 
+    sem_unlink("/semUserEvent");
+    sem_unlink("/semKernelEvent");
+
     if ((instance_l.semUserData = sem_open("/semUserEvent", O_CREAT | O_RDWR, S_IRWXG, 0)) == SEM_FAILED)
         goto Exit;
 
@@ -221,6 +224,10 @@ tOplkError eventkcal_exit(void)
 
         sem_close(instance_l.semUserData);
         sem_close(instance_l.semKernelData);
+
+        sem_unlink("/semUserEvent");
+        sem_unlink("/semKernelEvent");
+
     }
     instance_l.fInitialized = FALSE;
 
