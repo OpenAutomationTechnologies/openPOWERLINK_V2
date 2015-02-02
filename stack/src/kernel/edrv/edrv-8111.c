@@ -131,7 +131,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EDRV_MASTER_DISABLE_TIMEOUT                     90                                          // in ms, max wait time for MAC reset
 #define EDRV_LINK_UP_TIMEOUT                            3000                                        // in ms, max wait time for Phy reset
 #define EDRV_DIAG_DUMP_TIMEOUT                          10                                          // in ms, max wait time for dump tally counter to dump data
-#define EDRV_PHY_UP_WAIT_TIME                           5000                                        // in ms, max wait time for Phy to be up
+#define EDRV_PHY_UP_WAIT_TIME                           500                                         // in ms, max wait time for Phy to be up
 #define EDRV_PHY_LINK_CHANGE_WAIT_TIME                  20                                          // in ms, wait time for Phy state change
 
 // Register read write functions
