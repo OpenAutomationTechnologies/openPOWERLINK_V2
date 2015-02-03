@@ -50,12 +50,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+#ifndef HOSTIF_BASE
 // Get hostinterface base address from system.h
 #if defined(__HOSTINTERFACE)
 #define HOSTIF_BASE                 HOSTINTERFACE_0_BASE
+#elif defined(__PRLMASTER)
+#define HOSTIF_BASE                 PRLMASTER_0_BASE
 #else
-#define HOSTIF_BASE                 0x10000000 //FIXME: Use multiplex ipcore base here
+#error "Please set HOSTIF_BASE define to base address of host interface!"
 #endif
+#endif //HOSTIF_BASE
 
 #define HOSTIF_IRQ_IC_ID            0   ///< Irq Controller Id
 #define HOSTIF_IRQ                  0   ///< Irq Id
