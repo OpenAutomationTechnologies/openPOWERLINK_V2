@@ -18,8 +18,8 @@
           <tab type="user" url="\ref page_platform_x86" title="Intel X86"/>
           <tab type="user" url="\ref page_platform_xilinx" title="Xilinx Microblaze"/>
           <tab type="user" url="\ref page_platform_zynq" title="Xilinx Zynq"/>
-          <tab type="user" url="\ref page_platform_altera-mn" title="Altera(MN)"/>
-          <tab type="user" url="\ref page_platform_altera-cn" title="Altera(CN)"/>
+          <tab type="user" url="\ref page_platform_altera-mn" title="Altera Nios II (MN)"/>
+          <tab type="user" url="\ref page_platform_altera-cn" title="Altera Nios II (CN)"/>
       </tab>
       <tab type="usergroup" title="Supported Operating Systems" url="\ref page_platforms">
           <tab type="user" url="\ref page_platform_linux" title="Linux"/>
