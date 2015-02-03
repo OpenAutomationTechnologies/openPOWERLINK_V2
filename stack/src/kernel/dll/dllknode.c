@@ -522,7 +522,8 @@ tOplkError dllknode_deleteNodeIsochronous(tDllkNodeInfo* pIntNodeInfo_p)
     tDllkNodeInfo**     ppIntNodeInfo;
     tPlkFrame *         pTxFrame;
 
-    if (pIntNodeInfo_p->pPreqTxBuffer == NULL)
+    if ((pIntNodeInfo_p->pPreqTxBuffer == NULL)
+        && (pIntNodeInfo_p->nodeId != dllkInstance_g.dllConfigParam.nodeId))
     {
         ppIntNodeInfo = &dllkInstance_g.pFirstPrcNodeInfo;
     }
