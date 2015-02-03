@@ -568,7 +568,7 @@ tOplkError dllk_addNode(tDllNodeOpParam* pNodeOpParam_p)
 
         case kDllNodeOpTypeFilterPdo:
         case kDllNodeOpTypeFilterHeartbeat:
-            if ((nmtState >= kNmtCsNotActive) && (nmtState < kNmtMsNotActive))
+            if (NMT_IF_CN_OR_RMN(nmtState))
                 fUpdateEdrv = TRUE;
             ret = dllknode_addNodeFilter(pIntNodeInfo, pNodeOpParam_p->opNodeType, fUpdateEdrv);
             break;
@@ -610,7 +610,7 @@ tOplkError dllk_deleteNode(tDllNodeOpParam* pNodeOpParam_p)
         {
             case kDllNodeOpTypeFilterPdo:
             case kDllNodeOpTypeFilterHeartbeat:
-                if ((nmtState >= kNmtCsNotActive) && (nmtState < kNmtMsNotActive))
+                if (NMT_IF_CN_OR_RMN(nmtState))
                     fUpdateEdrv = TRUE;
 
                 for (index = 0, pIntNodeInfo = &dllkInstance_g.aNodeInfo[0];
@@ -650,7 +650,7 @@ tOplkError dllk_deleteNode(tDllNodeOpParam* pNodeOpParam_p)
 
         case kDllNodeOpTypeFilterPdo:
         case kDllNodeOpTypeFilterHeartbeat:
-            if ((nmtState >= kNmtCsNotActive) && (nmtState < kNmtMsNotActive))
+            if (NMT_IF_CN_OR_RMN(nmtState))
                 fUpdateEdrv = TRUE;
             ret = dllknode_deleteNodeFilter(pIntNodeInfo, pNodeOpParam_p->opNodeType, fUpdateEdrv);
             break;
@@ -802,7 +802,8 @@ tOplkError dllk_cbCyclicError(tOplkError errorCode_p, tEdrvTxBuffer* pTxBuffer_p
     TGT_DLLK_ENTER_CRITICAL_SECTION();
 
     nmtState = dllkInstance_g.nmtState;
-    if (nmtState <= kNmtGsResetConfiguration)
+    if (!NMT_IF_MN(nmtState))
+        // ignore errors if not MN
         goto Exit;
 
     if (pTxBuffer_p != NULL)
