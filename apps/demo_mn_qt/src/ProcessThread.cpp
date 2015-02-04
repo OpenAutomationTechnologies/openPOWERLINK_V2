@@ -387,14 +387,17 @@ tOplkError ProcessThread::processStateChangeEvent(tOplkApiEventType EventType_p,
 #if !defined(CONFIG_INCLUDE_CFM)
     UINT                        varLen;
 #endif
-    const char*                 string;
     QString                     str;
 
     UNUSED_PARAMETER(EventType_p);
     UNUSED_PARAMETER(pUserArg_p);
 
     sigNmtState(pNmtStateChange->newNmtState);
-    string = debugstr_getNmtEventStr(pNmtStateChange->nmtEvent);
+
+    sigPrintLog(QString("StateChangeEvent %1: %2 -> %3")
+                        .arg(debugstr_getNmtEventStr(pNmtStateChange->nmtEvent))
+                        .arg(debugstr_getNmtStateStr(pNmtStateChange->oldNmtState))
+                        .arg(debugstr_getNmtStateStr(pNmtStateChange->newNmtState)));
 
     switch (pNmtStateChange->newNmtState)
     {
@@ -408,10 +411,6 @@ tOplkError ProcessThread::processStateChangeEvent(tOplkApiEventType EventType_p,
             // and unblock DataInDataOutThread
             oplk_freeProcessImage(); //jba do we need it here?
 
-            sigPrintLog(QString("StateChangeEvent(0x%1) originating event = 0x%2 (%3)")
-                                .arg(pNmtStateChange->newNmtState, 0, 16, QLatin1Char('0'))
-                                .arg(pNmtStateChange->nmtEvent, 0, 16, QLatin1Char('0'))
-                                .arg(debugstr_getNmtEventStr(pNmtStateChange->nmtEvent)));
             reachedNmtStateOff();
             break;
 
@@ -420,10 +419,6 @@ tOplkError ProcessThread::processStateChangeEvent(tOplkApiEventType EventType_p,
             ret = setDefaultNodeAssignment();
 #endif
             pProcessThread_g->sigOplkStatus(1);
-            sigPrintLog(QString("StateChangeEvent(0x%1) originating event = 0x%2 (%3)")
-                                .arg(pNmtStateChange->newNmtState, 4, 16, QLatin1Char('0'))
-                                .arg(pNmtStateChange->nmtEvent, 4, 16, QLatin1Char('0'))
-                                .arg(debugstr_getNmtEventStr(pNmtStateChange->nmtEvent)));
             break;
 
         case kNmtGsResetConfiguration:
@@ -444,10 +439,6 @@ tOplkError ProcessThread::processStateChangeEvent(tOplkApiEventType EventType_p,
             }
 #endif
             sigOplkStatus(1);
-            sigPrintLog(QString("StateChangeEvent(0x%1) originating event = 0x%2 (%3)")
-                                .arg(pNmtStateChange->newNmtState, 4, 16, QLatin1Char('0'))
-                                .arg(pNmtStateChange->nmtEvent, 4, 16, QLatin1Char('0'))
-                                .arg(debugstr_getNmtEventStr(pNmtStateChange->nmtEvent)));
             break;
 
         case kNmtCsNotActive:
@@ -462,19 +453,11 @@ tOplkError ProcessThread::processStateChangeEvent(tOplkApiEventType EventType_p,
         case kNmtMsReadyToOperate:
         case kNmtCsBasicEthernet:
         case kNmtMsBasicEthernet:
-            sigPrintLog(QString("StateChangeEvent(0x%1) originating event = 0x%2 (%3)")
-                                .arg(pNmtStateChange->newNmtState, 4, 16, QLatin1Char('0'))
-                                .arg(pNmtStateChange->nmtEvent, 4, 16, QLatin1Char('0'))
-                                .arg(debugstr_getNmtEventStr(pNmtStateChange->nmtEvent)));
             sigOplkStatus(1);
             break;
 
         case kNmtCsOperational:
         case kNmtMsOperational:
-            sigPrintLog(QString("StateChangeEvent(0x%1) originating event = 0x%2 (%3)")
-                                .arg(pNmtStateChange->newNmtState, 4, 16, QLatin1Char('0'))
-                                .arg(pNmtStateChange->nmtEvent, 4, 16, QLatin1Char('0'))
-                                .arg(debugstr_getNmtEventStr(pNmtStateChange->nmtEvent)));
             sigOplkStatus(2);
             break;
 
