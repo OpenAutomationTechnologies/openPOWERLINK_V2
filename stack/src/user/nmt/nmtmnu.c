@@ -1203,8 +1203,8 @@ tOplkError nmtmnu_processEvent(tEvent* pEvent_p)
                 retGetNodeId = getNodeIdFromCmd(nodeId, nmtCommand, pCmdData, &nodeListOp, &tempNodeId);
                 while (retGetNodeId == kErrorRetry)
                 {
-                    if ((NMTMNU_GET_NODEINFO(tempNodeId)->nodeCfg &
-                        (NMT_NODEASSIGN_NODE_IS_CN | NMT_NODEASSIGN_NODE_EXISTS)) != 0)
+                    if ((~NMTMNU_GET_NODEINFO(tempNodeId)->nodeCfg &
+                        (NMT_NODEASSIGN_NODE_IS_CN | NMT_NODEASSIGN_NODE_EXISTS)) == 0)
                     {
                         ret = processInternalEvent(tempNodeId, (tNmtState)(bNmtState | NMT_TYPE_CS),
                                                    0, kNmtMnuIntNodeEventNmtCmdSent);
@@ -1698,7 +1698,7 @@ static tOplkError startBootStep1(BOOL fNmtResetAllIssued_p)
             pNodeInfo->nodeCfg = nodeCfg;
             pNodeInfo->nodeState = kNmtMnuNodeStateUnknown;
 
-            if ((nodeCfg & (NMT_NODEASSIGN_NODE_IS_CN | NMT_NODEASSIGN_NODE_EXISTS)) != 0)
+            if ((~nodeCfg & (NMT_NODEASSIGN_NODE_IS_CN | NMT_NODEASSIGN_NODE_EXISTS)) == 0)
             {   // node is configured as CN
                 if (fNmtResetAllIssued_p == FALSE)
                 {
@@ -1722,7 +1722,7 @@ static tOplkError startBootStep1(BOOL fNmtResetAllIssued_p)
         }
         else
         {   // subindex of MN
-            if ((nodeCfg & (NMT_NODEASSIGN_MN_PRES | NMT_NODEASSIGN_NODE_EXISTS)) != 0)
+            if ((~nodeCfg & (NMT_NODEASSIGN_MN_PRES | NMT_NODEASSIGN_NODE_EXISTS)) == 0)
             {   // MN shall send PRes
                 ret = addNodeIsochronous(localNodeId);
             }
