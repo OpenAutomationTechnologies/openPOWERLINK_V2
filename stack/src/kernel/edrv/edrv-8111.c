@@ -98,7 +98,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #ifndef EDRV_MAX_TX_DESCS
-#define EDRV_MAX_TX_DESCS                               16                                          // max no. of tx descriptors to be used
+#define EDRV_MAX_TX_DESCS                               64                                          // max no. of tx descriptors to be used
 #define EDRV_TX_DESC_MASK                               (EDRV_MAX_TX_DESCS - 1)
 #endif
 
