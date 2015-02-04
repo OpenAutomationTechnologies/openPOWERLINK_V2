@@ -422,6 +422,15 @@ tOplkError ProcessThread::processStateChangeEvent(tOplkApiEventType EventType_p,
 #if !defined(CONFIG_INCLUDE_CFM)
             ret = setDefaultNodeAssignment();
 #endif
+            DWORD       nodeAssignment;
+
+            // add RMNs to node list (This should be done by openCONFIGURATOR in the future)
+            nodeAssignment = (NMT_NODEASSIGN_NODE_IS_CN | NMT_NODEASSIGN_NODE_EXISTS);    // 0x00000003L
+            ret = oplk_writeLocalObject(0x1F81, 0xF1, &nodeAssignment, sizeof(nodeAssignment));
+            ret = oplk_writeLocalObject(0x1F81, 0xF2, &nodeAssignment, sizeof(nodeAssignment));
+            ret = oplk_writeLocalObject(0x1F81, 0xF3, &nodeAssignment, sizeof(nodeAssignment));
+            ret = oplk_writeLocalObject(0x1F81, 0xF4, &nodeAssignment, sizeof(nodeAssignment));
+
             pProcessThread_g->sigOplkStatus(1);
             break;
 
