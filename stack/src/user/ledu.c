@@ -248,6 +248,9 @@ tOplkError ledu_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
         case kNmtMsBasicEthernet:
             ret = changeMode(kLeduModeFlickering);
             break;
+
+        default:
+            break;
     }
 
     // activate error LED according to NMT event

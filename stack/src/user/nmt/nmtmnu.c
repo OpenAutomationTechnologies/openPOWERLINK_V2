@@ -342,6 +342,8 @@ static tOplkError removeNodeIdFromExtCmd(UINT nodeId_p, UINT8* pCmdData_p, UINT 
 
 static ULONG      computeCeilDiv(ULONG numerator_p, ULONG denominator_p);
 
+static tNmtState  correctNmtState(UINT8 nmtState_p);
+
 /* internal node event handler functions */
 static INT processNodeEventNoIdentResponse (UINT nodeId_p, tNmtState nodeNmtState_p,
                                             tNmtState nmtState_p, UINT16 errorCode_p, tOplkError* pRet_p);
@@ -1438,7 +1440,8 @@ static tOplkError cbIdentResponse(UINT nodeId_p, tIdentResponse* pIdentResponse_
     else
     {   // node answered IdentRequest
         errorCode = E_NO_ERROR;
-        nmtState = (tNmtState)(ami_getUint8Le(&pIdentResponse_p->nmtStatus) | NMT_TYPE_CS);
+
+        nmtState = correctNmtState(ami_getUint8Le(&pIdentResponse_p->nmtStatus));
 
         // check IdentResponse $$$ move to ProcessIntern, because this function may be called also if CN
 
@@ -1456,8 +1459,7 @@ static tOplkError cbIdentResponse(UINT nodeId_p, tIdentResponse* pIdentResponse_
                 errorCode = E_NMT_BPO1_DEVICE_TYPE;
             }
         }
-        ret = processInternalEvent(nodeId_p, nmtState, errorCode,
-                                   kNmtMnuIntNodeEventIdentResponse);
+        ret = processInternalEvent(nodeId_p, nmtState, errorCode, kNmtMnuIntNodeEventIdentResponse);
     }
 Exit:
     return ret;
@@ -1479,6 +1481,7 @@ The function implements the callback function for Status responses
 static tOplkError cbStatusResponse(UINT nodeId_p, tStatusResponse* pStatusResponse_p)
 {
     tOplkError      ret = kErrorOk;
+    tNmtState       nmtState;
 
     if (pStatusResponse_p == NULL)
     {   // node did not answer
@@ -1486,10 +1489,9 @@ static tOplkError cbStatusResponse(UINT nodeId_p, tStatusResponse* pStatusRespon
                                    kNmtMnuIntNodeEventNoStatusResponse);
     }
     else
-    {   // node answered StatusRequest
-        ret = processInternalEvent(nodeId_p,
-                                   (tNmtState)(ami_getUint8Le(&pStatusResponse_p->nmtStatus) | NMT_TYPE_CS),
-                                   E_NO_ERROR, kNmtMnuIntNodeEventStatusResponse);
+    {
+        nmtState = correctNmtState(ami_getUint8Le(&pStatusResponse_p->nmtStatus));
+        ret = processInternalEvent(nodeId_p, nmtState, E_NO_ERROR, kNmtMnuIntNodeEventStatusResponse);
     }
     return ret;
 }
@@ -3279,8 +3281,24 @@ static tOplkError checkNmtState(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p,
         if (ret == kErrorOk)
             ret = kErrorReject;
 
-        // d.k. continue with updating the current NMT state of the CN
-//        goto Exit;
+        // Sometimes we get an invalid state in a StatusResponse/IdentResponse
+        // In this case we don't want to store it and inform the application!
+        // If it's a correct NMT state we do update it.
+        switch (nodeNmtState_p)
+        {
+            case kNmtCsNotActive:
+            case kNmtCsBasicEthernet:
+            case kNmtCsPreOperational1:
+            case kNmtCsPreOperational2:
+            case kNmtCsReadyToOperate:
+            case kNmtCsOperational:
+                goto ExitButUpdate;
+                break;
+
+            default:
+                goto Exit;
+                break;
+        }
     }
 
 ExitButUpdate:
@@ -4673,6 +4691,52 @@ static ULONG computeCeilDiv(ULONG numerator_p, ULONG denominator_p)
                                              numerator_p / denominator_p;
 
     return result;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Correct a NMT state variable
+
+The function checks if \p nmtState_p is a valid tNmtState. If it is a global
+state it is unmodified. If it is a node specific state, we add the CN flag and
+if it contains garbage, it is set to kNmtStateInvalid.
+
+\param  nmtState_p     The NMT state to be corrected
+
+\return Returns the corrected NMT state value.
+*/
+//------------------------------------------------------------------------------
+static tNmtState correctNmtState(UINT8 nmtState_p)
+{
+    tNmtState       correctedNmtState;
+
+    switch (nmtState_p)
+    {
+        // Check if it's a valid node specific NMT state and if it is, set the CN flag
+        case NMT_STATE_XX_PRE_OPERATIONAL_1:
+        case NMT_STATE_XX_PRE_OPERATIONAL_2:
+        case NMT_STATE_XX_READY_TO_OPERATE:
+        case NMT_STATE_XX_OPERATIONAL:
+        case NMT_STATE_XX_NOT_ACTIVE:
+        case NMT_STATE_XX_BASIC_ETHERNET:
+            correctedNmtState = (tNmtState)(nmtState_p | NMT_TYPE_CS);
+            break;
+
+        // if it is a global state don't modify it
+        case NMT_STATE_GS_INITIALISING:
+        case NMT_STATE_GS_RESET_APPLICATION:
+        case NMT_STATE_GS_RESET_COMMUNICATION:
+        case NMT_STATE_GS_RESET_CONFIGURATION:
+            correctedNmtState = (tNmtState)nmtState_p;
+            break;
+
+        default:
+            // NMT state contains garbage, set it to a defined value
+            correctedNmtState = kNmtStateInvalid;
+            break;
+    }
+
+    return correctedNmtState;
 }
 
 ///\}

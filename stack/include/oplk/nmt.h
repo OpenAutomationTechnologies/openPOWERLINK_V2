@@ -60,6 +60,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define NMT_TYPE_MS                 0x0200  // MS type of NMT state
 #define NMT_TYPE_MASK               0x0300  // mask to select type of NMT state (i.e. CS or MS)
 
+#define NMT_STATE_GS_INITIALISING           0x0019
+#define NMT_STATE_GS_RESET_APPLICATION      0x0029
+#define NMT_STATE_GS_RESET_COMMUNICATION    0x0039
+#define NMT_STATE_GS_RESET_CONFIGURATION    0x0079
+
+#define NMT_STATE_XX_NOT_ACTIVE             0x001C
+#define NMT_STATE_XX_PRE_OPERATIONAL_1      0x001D
+#define NMT_STATE_XX_PRE_OPERATIONAL_2      0x005D
+#define NMT_STATE_XX_READY_TO_OPERATE       0x006D
+#define NMT_STATE_XX_OPERATIONAL            0x00FD
+#define NMT_STATE_XX_STOPPED                0x004D
+#define NMT_STATE_XX_BASIC_ETHERNET         0x001E
+
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
@@ -100,7 +113,8 @@ typedef enum
     kNmtMsPreOperational2           = 0x025D,   ///< NMT_MS_PRE_OPERATIONAL_2
     kNmtMsReadyToOperate            = 0x026D,   ///< NMT_MS_READY_TO_OPERATE
     kNmtMsOperational               = 0x02FD,   ///< NMT_MS_OPERATIONAL
-    kNmtMsBasicEthernet             = 0x021E    ///< NMT_MS_BASIC_ETHERNET
+    kNmtMsBasicEthernet             = 0x021E,   ///< NMT_MS_BASIC_ETHERNET
+    kNmtStateInvalid                = 0xFFFF    ///< Dummy state to detect invalid states (garbage)
 } tNmtState;
 
 /**

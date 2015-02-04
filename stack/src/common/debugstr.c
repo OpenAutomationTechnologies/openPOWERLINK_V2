@@ -289,6 +289,7 @@ static tNmtStateInfo nmtStateInfo_l[] =
     { kNmtMsReadyToOperate,      "NmtMsReadyToOperate"       },
     { kNmtMsOperational,         "NmtMsOperational"          },
     { kNmtMsBasicEthernet,       "NmtMsBasicEthernet"        },
+    { kNmtStateInvalid,          "Invalid NMT State"         },
 };
 
 // text strings for API events
