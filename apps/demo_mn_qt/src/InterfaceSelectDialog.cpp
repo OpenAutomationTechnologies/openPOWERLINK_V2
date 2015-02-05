@@ -105,11 +105,13 @@ InterfaceSelectDialog::InterfaceSelectDialog()
 
 SetupProcessImage() sets up the process image used by the application.
 
+\param  devName_p               Device name which shall be selected by default.
+
 \retval         -1              if interface list couldn't be filled
 \retval         0               if interface list was successfully filled
 */
 //------------------------------------------------------------------------------
-int InterfaceSelectDialog::fillList(void)
+int InterfaceSelectDialog::fillList(QString devName_p)
 {
     char                        sErr_Msg[PCAP_ERRBUF_SIZE];
     pcap_if_t*                  alldevs;
@@ -144,6 +146,10 @@ int InterfaceSelectDialog::fillList(void)
         newItem->setText(devDesc);
         deviceListWidget->addItem(newItem);
 
+        if (devName_p == devName)
+        {
+            deviceListWidget->setCurrentItem(newItem);
+        }
     }
     pcap_freealldevs(alldevs);
 
