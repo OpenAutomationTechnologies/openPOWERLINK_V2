@@ -728,6 +728,7 @@ tOplkError ProcessThread::processNodeEvent(tOplkApiEventType EventType_p,
                     break;
 
                 case kNmtCsOperational:
+                    pProcessThread_g->sigNodeAppeared(pEventArg_p->nodeEvent.nodeId);
                     pProcessThread_g->sigNodeStatus(pEventArg_p->nodeEvent.nodeId, 2);
                     break;
 
