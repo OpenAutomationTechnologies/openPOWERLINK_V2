@@ -11,7 +11,7 @@ This file contains the frame processing functions of the kernel DLL module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2015, SYSTEC electronic GmbH
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -2021,6 +2021,7 @@ The function processes a received SoC frame.
 static tOplkError processReceivedSoc(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtState_p)
 {
     tOplkError      ret = kErrorOk;
+    tPlkFrame*      pFrame;
 #if CONFIG_DLL_PRES_READY_AFTER_SOC != FALSE
     tEdrvTxBuffer*  pTxBuffer = NULL;
 #endif
@@ -2033,6 +2034,9 @@ static tOplkError processReceivedSoc(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
     {   // MN is active -> wrong msg type
         return ret;
     }
+
+    pFrame = (tPlkFrame*)pRxBuffer_p->pBuffer;
+    dllkInstance_g.relativeTime = ami_getUint64Le(&pFrame->data.soc.relativeTimeLe);
 
 #if CONFIG_DLL_PRES_READY_AFTER_SOC != FALSE
     // post PRes to transmit FIFO of the ethernet controller, but don't start
