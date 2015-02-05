@@ -431,6 +431,15 @@ tOplkError ProcessThread::processStateChangeEvent(tOplkApiEventType EventType_p,
             ret = oplk_writeLocalObject(0x1F81, 0xF3, &nodeAssignment, sizeof(nodeAssignment));
             ret = oplk_writeLocalObject(0x1F81, 0xF4, &nodeAssignment, sizeof(nodeAssignment));
 
+            DWORD       presTimeout;
+
+            // configure PResTimeout for RMNs (This should be done by openCONFIGURATOR in the future)
+            presTimeout = 1000000;
+            ret = oplk_writeLocalObject(0x1F92, 0xF1, &presTimeout, sizeof(presTimeout));
+            ret = oplk_writeLocalObject(0x1F92, 0xF2, &presTimeout, sizeof(presTimeout));
+            ret = oplk_writeLocalObject(0x1F92, 0xF3, &presTimeout, sizeof(presTimeout));
+            ret = oplk_writeLocalObject(0x1F92, 0xF4, &presTimeout, sizeof(presTimeout));
+
             pProcessThread_g->sigOplkStatus(1);
             break;
 
