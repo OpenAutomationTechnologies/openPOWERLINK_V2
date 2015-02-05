@@ -430,6 +430,12 @@ tOplkError pdok_processRxPdo(tPlkFrame* pFrame_p, UINT frameSize_p)
         channelId = pdokInstance_g.aRpdoChannelIdLut[nodeId];
         pPdoChannel = &pdokInstance_g.pdoChannels.pRxPdoChannel[channelId];
 
+        if (pPdoChannel->nodeId != nodeId)
+        {   // we received a PDO which we aren't interested in
+            // discard it
+            goto Exit;
+        }
+
         // retrieve PDO version from frame
         frameData = ami_getUint8Le(&pFrame_p->data.pres.pdoVersion);
         if ((pPdoChannel->mappingVersion & PLK_VERSION_MAIN) != (frameData & PLK_VERSION_MAIN))
