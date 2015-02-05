@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openCONFIGURATORProject xmlns="http://sourceforge.net/projects/openconf/configuration" xmlns:oc="http://sourceforge.net/projects/openconf/configuration" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://sourceforge.net/projects/openconf/configuration openCONFIGURATOR.xsd">
+ <Generator vendor="Kalycito Infotech Private Limited &amp; Bernecker + Rainer Industrie Elektronik Ges.m.b.H." toolName="openCONFIGURATOR" toolVersion="1.4.0" createdOn="2015-02-05T10:23:21" modifiedOn="2015-02-05T18:43:08"/>
+ <IDEConfiguration activeViewSetting="ADVANCED">
+  <ViewSettings type="BASIC">
+   <Setting name="default" value="SIMPLE"/>
+  </ViewSettings>
+  <ViewSettings type="ADVANCED">
+   <Setting name="default" value="EXPERT"/>
+  </ViewSettings>
+ </IDEConfiguration>
+ <ProjectConfiguration activeAutoGenerationSetting="all">
+  <PathSettings>
+   <Path id="defaultOutputPath" path="output"/>
+  </PathSettings>
+  <AutoGenerationSettings id="all"/>
+  <AutoGenerationSettings id="none"/>
+ </ProjectConfiguration>
+ <NetworkConfiguration cycleTime="50000" asyncMTU="300" multiplexedCycleLength="0">
+  <NodeCollection>
+   <MN nodeID="240" name="openPOWERLINK_MN" pathToXDC="deviceConfiguration/openPOWERLINK_MN_240.xdc"/>
+   <CN nodeID="1" name="CN_1" pathToXDC="deviceConfiguration/CN_1_1_1.xdc"/>
+   <CN nodeID="32" name="CN_2" pathToXDC="deviceConfiguration/CN_2_32_32.xdc"/>
+   <CN nodeID="110" name="CN_3" pathToXDC="deviceConfiguration/CN_3_110_110.xdc"/>
+  </NodeCollection>
+ </NetworkConfiguration>
+</openCONFIGURATORProject>
