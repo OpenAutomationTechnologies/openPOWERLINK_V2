@@ -110,6 +110,7 @@ private:
     Api*         pApi;
 
     UINT32       version;
+    QString      devName;
 };
 
 #endif /* _INC_MainWindow_H_ */
