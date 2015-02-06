@@ -976,6 +976,47 @@ tOplkError dllkcal_setAsyncPendingRequests(UINT nodeId_p,
 
     return ret;
 }
+
+//------------------------------------------------------------------------------
+/**
+\brief Acknowledge a pending asynchronous request
+
+The function acknowledges a pending asynchronous frame request of the specified
+node.
+
+\param  nodeId_p                Specifies the node to acknowledge the request.
+\param  reqServiceId_p          The request service ID.
+
+\return The function returns a tOplkError error code.
+
+\ingroup module_dllkcal
+*/
+//------------------------------------------------------------------------------
+tOplkError dllkcal_ackAsyncRequest(UINT nodeId_p, tDllReqServiceId reqServiceId_p)
+{
+    tOplkError  ret = kErrorOk;
+    UINT*       pLocalRequestCnt;
+
+    switch (reqServiceId_p)
+    {
+        case kDllReqServiceNmtRequest:
+            pLocalRequestCnt = &instance_l.aCnRequestCntNmt[nodeId_p-1];
+            break;
+
+        case kDllReqServiceUnspecified:
+            pLocalRequestCnt = &instance_l.aCnRequestCntGen[nodeId_p-1];
+            break;
+
+        default:
+            // No need to handle other requests
+            return ret;
+    }
+
+    if (*pLocalRequestCnt > 0)
+        (*pLocalRequestCnt)--;
+
+    return ret;
+}
 #endif
 
 //============================================================================//
@@ -1018,7 +1059,7 @@ static BOOL getCnGenRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p)
             {
                 *pNodeId_p = rxNodeId;
                 *pReqServiceId_p = kDllReqServiceUnspecified;
-                instance_l.aCnRequestCntGen[rxNodeId-1]--;
+                // dllkcal_ackAsyncRequest() will decrement the request count!
 
                 return TRUE;
             }
@@ -1064,7 +1105,7 @@ static BOOL getCnNmtRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p)
             {
                 *pNodeId_p = rxNodeId;
                 *pReqServiceId_p = kDllReqServiceNmtRequest;
-                instance_l.aCnRequestCntNmt[rxNodeId-1]--;
+                // dllkcal_ackAsyncRequest() will decrement the request count!
 
                 return TRUE;
             }
