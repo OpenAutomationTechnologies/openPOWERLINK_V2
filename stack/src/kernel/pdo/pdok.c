@@ -613,7 +613,8 @@ static tOplkError copyTxPdo(tPlkFrame* pFrame_p, UINT frameSize_p, BOOL fReadyFl
         pPdoChannel = &pdokInstance_g.pdoChannels.pTxPdoChannel[channelId];
 
         // valid TPDO found
-        if ((unsigned int)(pPdoChannel->pdoSize + 24) <= frameSize_p)
+        if ((pPdoChannel->nodeId == nodeId)
+            && ((unsigned int)(pPdoChannel->pdoSize + 24) <= frameSize_p))
         {
             /*
             TRACE("%s() Channel:%d Node:%d MapObjectCnt:%d PdoSize:%d\n",
@@ -631,7 +632,7 @@ static tOplkError copyTxPdo(tPlkFrame* pFrame_p, UINT frameSize_p, BOOL fReadyFl
             pdoSize = pPdoChannel->pdoSize;
         }
         else
-        {   // TPDO is too short
+        {   // TPDO is too short or invalid
             // $$$ raise PDO error, set ret
             pdoSize = 0;
         }
