@@ -748,6 +748,11 @@ tOplkError ProcessThread::processNodeEvent(tOplkApiEventType EventType_p,
                                 .arg(pEventArg_p->nodeEvent.errorCode, 4, 16, QLatin1Char('0')));
             break;
 
+        case kNmtNodeEventAmniReceived:
+            sigPrintLog(QString("AppCbEvent (Node=%1): received ActiveManagingNodeIndication")
+                                .arg(pEventArg_p->nodeEvent.nodeId, 0, 10));
+            break;
+
         default:
             break;
     }
