@@ -2156,7 +2156,18 @@ The function processes a received AMNI frame.
 static tOplkError processReceivedAmni(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtState_p)
 {
     tOplkError      ret = kErrorOk;
-    UNUSED_PARAMETER(pRxBuffer_p);
+    tPlkFrame*      pFrame;
+    tEvent          event;
+    UINT            nodeId;
+
+    pFrame = (tPlkFrame*)pRxBuffer_p->pBuffer;
+    nodeId = ami_getUint8Le(&pFrame->srcNodeId);
+
+    event.eventSink = kEventSinkNmtMnu;
+    event.eventType = kEventTypeReceivedAmni;
+    event.eventArgSize = sizeof(nodeId);
+    event.pEventArg = &nodeId;
+    ret = eventk_postEvent(&event);
 
     if (!NMT_IF_ACTIVE(nmtState_p))
     {   // not in POWERLINK mode

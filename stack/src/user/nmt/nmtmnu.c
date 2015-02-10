@@ -1327,6 +1327,15 @@ tOplkError nmtmnu_processEvent(tEvent* pEvent_p)
             }
             break;
 
+        case kEventTypeReceivedAmni:
+            {
+                UINT        nodeId;
+                nodeId = *((UINT*)pEvent_p->pEventArg);
+                ret = nmtMnuInstance_g.pfnCbNodeEvent(nodeId, kNmtNodeEventAmniRecvd,
+                                                        kNmtGsOff, 0, FALSE);
+            }
+            break;
+
         default:
             ret = kErrorNmtInvalidEvent;
             break;
