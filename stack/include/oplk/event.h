@@ -100,6 +100,7 @@ typedef enum
     kEventTypeReleaseRxFrame        = 0x27,     ///< Free receive buffer (arg is pointer to the buffer to release)
     kEventTypeAsndNotRx             = 0x28,     ///< Didn't receive ASnd frame for DLL user module (arg is pointer to tDllAsndNotRx)
     kEventTypeAsndRxInfo            = 0x29,     ///< Received ASnd frame for DLL user module (arg is pointer to tFrameInfo)
+    kEventTypeReceivedAmni          = 0x2A,     ///< Received AMNI frame (arg is pointer to unsigned int containing the source node-ID)
     kEventTypeReceivedPres          = 0x30,     ///< Received a PRes frame, which shall be forwarded to application (arg is pointer to tEventReceivedPres)
     kEventTypeRequPresForward       = 0x31,     ///< Request forwarding of a PRes frame to API layer (e.g. for conformance test)
     kEventTypeSdoAsySend            = 0x32,     ///< SDO sequence layer event (for SDO command layer testing module)
