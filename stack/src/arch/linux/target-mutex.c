@@ -108,8 +108,6 @@ tOplkError target_createMutex(char* mutexName_p, OPLK_MUTEX_T* pMutex_p)
 {
     OPLK_MUTEX_T      lockSem;
 
-    lockSem = sem_open(mutexName_p, O_CREAT);
-
     if ((lockSem = sem_open(mutexName_p, O_CREAT | O_RDWR, S_IRWXG, 1)) == SEM_FAILED)
         return kErrorNoFreeInstance;
 
