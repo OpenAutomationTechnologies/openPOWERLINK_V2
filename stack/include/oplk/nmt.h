@@ -226,6 +226,7 @@ typedef enum
     kNmtNodeEventReadyToStart       = 0x05,     ///< Issued if NMT_STARTUP_NO_STARTNODE set, application must call oplk_execNmtCommand(kErrorNmtCmdStartNode) manually.
     kNmtNodeEventNmtState           = 0x06,     ///< Issued if the NMT state of the CN has changed.
     kNmtNodeEventError              = 0x07,     ///< NMT error of the CN.
+    kNmtNodeEventAmniRecvd          = 0x08,     ///< AMNI frame received.
 } tNmtNodeEvent;
 
 /**
