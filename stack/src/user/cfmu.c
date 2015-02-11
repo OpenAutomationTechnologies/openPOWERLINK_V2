@@ -371,8 +371,17 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtS
         if (ret != kErrorOk)
             return ret;
     }
+    else if (nodeEvent_p == kNmtNodeEventUpdateConf)
+        fDoUpdate = TRUE;
     else
     {
+        identu_getIdentResponse(nodeId_p, &pIdentResponse);
+        if (pIdentResponse == NULL)
+        {
+            DEBUG_LVL_CFM_TRACE("CN%x Ident Response is NULL\n", nodeId_p);
+            return kErrorInvalidNodeId;
+        }
+
         obdSize = sizeof(expConfDate);
         ret = obd_readEntry(0x1F26, nodeId_p, &expConfDate, &obdSize);
         if (ret != kErrorOk)
@@ -385,21 +394,21 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtS
         {
             DEBUG_LVL_CFM_TRACE("CN%x Error Reading 0x1F27 returns 0x%X\n", nodeId_p, ret);
         }
+
         if ((expConfDate != 0) || (expConfTime != 0))
-        {   // store configuration in CN at the end of the download,
-            // because expected configuration date or time is set
+        {   // expected configuration date or time is set
+            if ((ami_getUint32Le(&pIdentResponse->verifyConfigurationDateLe) != expConfDate) ||
+                (ami_getUint32Le(&pIdentResponse->verifyConfigurationTimeLe) != expConfTime))
+            {   // update configuration because date or time differ from the expected value
+                fDoUpdate = TRUE;
+            }
+            // store configuration in CN at the end of the download
             pNodeInfo->fDoStore = TRUE;
             pNodeInfo->eventCnProgress.totalNumberOfBytes += sizeof(UINT32);
         }
         else
         {   // expected configuration date and time is not set
             fDoUpdate = TRUE;
-        }
-        identu_getIdentResponse(nodeId_p, &pIdentResponse);
-        if (pIdentResponse == NULL)
-        {
-            DEBUG_LVL_CFM_TRACE("CN%x Ident Response is NULL\n", nodeId_p);
-            return kErrorInvalidNodeId;
         }
     }
 
@@ -413,10 +422,7 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtS
     }
 #endif
 
-    if ((pNodeInfo->entriesRemaining == 0) ||
-        ((nodeEvent_p != kNmtNodeEventUpdateConf) && (fDoUpdate == FALSE) &&
-         ((ami_getUint32Le(&pIdentResponse->verifyConfigurationDateLe) == expConfDate) &&
-          (ami_getUint32Le(&pIdentResponse->verifyConfigurationTimeLe) == expConfTime))))
+    if (fDoUpdate == FALSE)
     {
         pNodeInfo->cfmState = kCfmStateIdle;
 
