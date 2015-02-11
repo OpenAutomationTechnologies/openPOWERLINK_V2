@@ -91,7 +91,7 @@ static char*            pszCdcFilename_g = "mnobd.cdc";
 #else
 const unsigned char     aCdcBuffer[] =
 {
-    #include "mnobd.txt"
+    #include "mnobd_char.txt"
 };
 
 #endif

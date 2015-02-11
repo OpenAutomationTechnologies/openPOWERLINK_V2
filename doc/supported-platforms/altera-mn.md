@@ -150,6 +150,12 @@ Requirement: Steps in the previous section *How to build the binary* are complet
 
 This feature is not supported by now.
 
+# How to use MN configuration file {#sect_altera-mn_config}
+
+The MN configuration file `mnobd.cdc` has to be stored in a file system.
+The Nios II demos have no file system implemented, thus, an `mnobd_char.txt`
+file has to be generated (\ref sect_openconfig_generate_char_file).
+
 # Troubleshooting {#sect_altera-mn_trouble}
 
 1. It is advised to clean all generated files after switching from one demo to

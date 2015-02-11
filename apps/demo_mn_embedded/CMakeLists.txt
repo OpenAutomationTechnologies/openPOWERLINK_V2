@@ -92,12 +92,18 @@ ENDIF (CFG_KERNEL_STACK_DIRECTLINK)
 
 ################################################################################
 # Set the executable
-ADD_EXECUTABLE(${EXECUTABLE_NAME} ${DEMO_SOURCES} ${DEMO_ARCH_SOURCES})
+ADD_EXECUTABLE(${EXECUTABLE_NAME} ${DEMO_SOURCES} ${DEMO_ARCH_SOURCES} ${CMAKE_BINARY_DIR}/mnobd.cdc)
 SET_PROPERTY(TARGET ${EXECUTABLE_NAME}
              PROPERTY COMPILE_DEFINITIONS_DEBUG DEBUG;DEF_DEBUG_LVL=${CFG_DEBUG_LVL})
 
 SET_PROPERTY(TARGET ${EXECUTABLE_NAME}
              PROPERTY LINK_FLAGS ${ARCH_LINKER_FLAGS})
+
+ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_BINARY_DIR}/mnobd.cdc
+                   COMMAND ${CMAKE_COMMAND} -E copy ${OPENCONFIG_PROJ_DIR}/Demo_3CN/output/mnobd.cdc ${CMAKE_BINARY_DIR}/mnobd.cdc
+                   DEPENDS ${OPENCONFIG_PROJ_DIR}/Demo_3CN/output/mnobd.cdc
+                   VERBATIM
+                   )
 
 ################################################################################
 # Libraries to link
@@ -120,3 +126,4 @@ SET_DIRECTORY_PROPERTIES( PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${ADD_CLEAN_FI
 ################################################################################
 # Installation rules
 INSTALL(TARGETS ${EXECUTABLE_NAME} RUNTIME DESTINATION ${CFG_DEMO_BOARD_NAME}/${CFG_DEMO_NAME})
+INSTALL(FILES ${CMAKE_BINARY_DIR}/mnobd.cdc DESTINATION ${CFG_DEMO_BOARD_NAME}/${CFG_DEMO_NAME})

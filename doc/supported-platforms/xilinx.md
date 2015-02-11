@@ -186,3 +186,9 @@ the configuration options on the command line (-DCFG_XXX=XXX).
 - **CFG_HW_LIB_DIR**
 
   Path to the install folder of your POWERLINK example hardware project. (e.g: `<openPOWERLINK_dir>/hardware/lib/generic/microblaze/avnet-s6plkeb/cn-single-gpio`)
+
+# How to use MN configuration file {#sect_altera-mn_config}
+
+The MN configuration file `mnobd.cdc` has to be stored in a file system.
+The Microblaze demos have no file system implemented, thus, an `mnobd_char.txt`
+file has to be generated (\ref sect_openconfig_generate_char_file).

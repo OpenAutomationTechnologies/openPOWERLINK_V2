@@ -45,3 +45,22 @@ stack and application:
   form of two ANSI C structures. It can be directly included in an application
   such as the openPOWERLINK stack demos.
 
+## Generate _char.txt file {#sect_openconfig_generate_char_file}
+
+It could be useful to compile the generated `mnobd.cdc` into the executable
+directly (e.g. no file system available).
+The Perl script `tools/convert-cdc-to-char.pl` generates a `_char.txt` file,
+which initializes a char array - refer to the following example for usage in C.
+
+  ~~~{.c}
+  const char aCdcBuf[] =
+  {
+    #include "mnobd_char.txt"
+  }
+  ~~~
+
+To convert the `mnobd.cdc` to a `mnobd_char.txt` file:
+
+    $ ./tools/convert-cdc-to-char.pl [PATH_TO_CDC]/mnobd.cdc [PATH_TO_CHAR_TXT]/mnobd_char.txt
+
+*Note that you need to recompile every time the `mnobd_char.txt` file changes!*
