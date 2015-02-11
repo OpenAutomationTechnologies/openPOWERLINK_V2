@@ -504,6 +504,16 @@ SET(TARGET_XILINX_ARM_SOURCES
 SET(TARGET_XILINX_ARM_DUAL_SOURCES
     ${ARCH_SOURCE_DIR}/xilinx-zynqarm/lock-dualprocnoos.c
     )
+
+SET(TARGET_ALTERA_ARM_SOURCES
+    ${ARCH_SOURCE_DIR}/altera_arm/target-arm.c
+    ${ARCH_SOURCE_DIR}/altera_arm/target-mutex.c
+    ${ARCH_SOURCE_DIR}/altera_arm/sleep.c
+    )
+
+SET(TARGET_ALTERA_ARM_DUAL_SOURCES
+    ${ARCH_SOURCE_DIR}/altera_arm/lock-dualprocnoos.c
+    )
 ################################################################################
 # Architecture specific sources
 ################################################################################
