@@ -349,6 +349,7 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtS
     pNodeInfo->eventCnProgress.totalNumberOfBytes += sizeof(UINT32);
 #endif
     pNodeInfo->eventCnProgress.bytesDownloaded = 0;
+    pNodeInfo->eventCnProgress.error = kErrorOk;
     if (obdSize < sizeof(UINT32))
     {
         pNodeInfo->eventCnProgress.error = kErrorCfmInvalidDcf;
@@ -615,6 +616,8 @@ static tOplkError callCbProgress(tCfmNodeInfo* pNodeInfo_p)
     {
         ret = cfmInstance_g.pfnCbEventCnProgress(&pNodeInfo_p->eventCnProgress);
     }
+    pNodeInfo_p->eventCnProgress.sdoAbortCode = 0;
+    pNodeInfo_p->eventCnProgress.error = kErrorOk;
     return ret;
 }
 
