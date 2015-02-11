@@ -409,6 +409,8 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtS
         else
         {   // expected configuration date and time is not set
             fDoUpdate = TRUE;
+            // do not store configuration in CN at the end of the download
+            pNodeInfo->fDoStore = FALSE;
         }
     }
 
