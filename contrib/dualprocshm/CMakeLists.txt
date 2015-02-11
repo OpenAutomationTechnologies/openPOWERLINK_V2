@@ -102,8 +102,9 @@ SET(DUALPROCSHM_LIB_INCS
 ########################################################################
 # Configure compile definitions
 ########################################################################
-ADD_DEFINITIONS("-Wall -Wextra -pedantic -std=c99")
-ADD_DEFINITIONS("${DUALPROCSHM_CFLAGS} -DCONFIG_DUALPROCSHM_PCP=${CFG_DUALPROCSHM_PCP}")
+SET(CMAKE_C_FLAGS "-Wall -Wextra -pedantic -std=c99")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${DUALPROCSHM_CFLAGS}")
+ADD_DEFINITIONS(-DCONFIG_DUALPROCSHM_PCP=${CFG_DUALPROCSHM_PCP})
 
 ########################################################################
 # Setup the architecture specific definitions
