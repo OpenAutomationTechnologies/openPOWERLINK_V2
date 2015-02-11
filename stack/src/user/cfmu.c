@@ -104,6 +104,7 @@ typedef enum
     kCfmStateIdle           = 0x00,                         ///< The CFM is idle
     kCfmStateWaitRestore,                                   ///< The CFM has issued a restore command and is awaiting the acknowledge
     kCfmStateDownload,                                      ///< The CFM is downloading a new configuration
+    kCfmStateDownloadNetConf,                               ///< The CFM is downloading a new network configuration in case of RMN support
     kCfmStateWaitStore,                                     ///< The CFM has issued a store command and is awaiting the acknowledge
     kCfmStateUpToDate,                                      ///< The CN is up-to-date (no configuration download is required)
     kCfmStateInternalAbort,                                 ///< The CFM has aborted due to an internal failure
@@ -160,6 +161,12 @@ static tOplkError downloadCycleLength(tCfmNodeInfo* pNodeInfo_p);
 static tOplkError downloadObject(tCfmNodeInfo* pNodeInfo_p);
 static tOplkError sdoWriteObject(tCfmNodeInfo* pNodeInfo_p, void* pLeSrcData_p, UINT size_p);
 static tOplkError cbSdoCon(tSdoComFinished* pSdoComFinished_p);
+static tOplkError finishDownload(tCfmNodeInfo* pNodeInfo_p);
+
+#if defined(CONFIG_INCLUDE_NMT_RMN)
+static tOplkError downloadNetConf(tCfmNodeInfo* pNodeInfo_p);
+#endif
+
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -292,6 +299,7 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtS
     UINT32              expConfDate = 0;
     tIdentResponse*     pIdentResponse = NULL;
     BOOL                fDoUpdate = FALSE;
+    BOOL                fDoNetConf = FALSE;
 
     if ((nodeEvent_p != kNmtNodeEventCheckConf) &&
         (nodeEvent_p != kNmtNodeEventUpdateConf) &&
@@ -359,6 +367,31 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtS
         return pNodeInfo->eventCnProgress.error;
     }
 
+    identu_getIdentResponse(nodeId_p, &pIdentResponse);
+    if (pIdentResponse == NULL)
+    {
+        DEBUG_LVL_CFM_TRACE("CN%x Ident Response is NULL\n", nodeId_p);
+        return kErrorInvalidNodeId;
+    }
+
+#if defined(CONFIG_INCLUDE_NMT_RMN)
+    if (ami_getUint32Le(&pIdentResponse->featureFlagsLe) & PLK_FEATURE_CFM)
+    {
+        UINT subindex;
+
+        // add size of network configuration (domains in CFM_ConciseDcfList_ADOM)
+        for (subindex = 1; subindex <= NMT_MAX_NODE_ID; subindex++)
+        {
+            obdSize = obd_getDataSize(0x1F22, subindex);
+            // Download only cDCFs with at least one entry
+            if (obdSize > 4)
+                pNodeInfo->eventCnProgress.totalNumberOfBytes += (UINT32)obdSize;
+        }
+
+        fDoNetConf = TRUE;
+    }
+#endif
+
     pNodeInfo->entriesRemaining = ami_getUint32Le(pNodeInfo->pDataConciseDcf);
     pNodeInfo->pDataConciseDcf += sizeof(UINT32);
     pNodeInfo->bytesRemaining -= sizeof(UINT32);
@@ -375,13 +408,6 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtS
         fDoUpdate = TRUE;
     else
     {
-        identu_getIdentResponse(nodeId_p, &pIdentResponse);
-        if (pIdentResponse == NULL)
-        {
-            DEBUG_LVL_CFM_TRACE("CN%x Ident Response is NULL\n", nodeId_p);
-            return kErrorInvalidNodeId;
-        }
-
         obdSize = sizeof(expConfDate);
         ret = obd_readEntry(0x1F26, nodeId_p, &expConfDate, &obdSize);
         if (ret != kErrorOk)
@@ -424,7 +450,8 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtS
     }
 #endif
 
-    if (fDoUpdate == FALSE)
+    if ((fDoUpdate == FALSE) &&
+        !(fDoNetConf && (pNodeInfo->entriesRemaining == 0)))
     {
         pNodeInfo->cfmState = kCfmStateIdle;
 
@@ -450,13 +477,23 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtS
     {
         pNodeInfo->cfmState = kCfmStateWaitRestore;
 
+#if defined(CONFIG_INCLUDE_NMT_RMN)
+        if (pNodeInfo->entriesRemaining == 0)
+        {
+            DEBUG_LVL_CFM_TRACE("CN%x - CFM Network-Cfg Update. Restoring Default...\n");
+        }
+        else
+#endif
+        {
+            DEBUG_LVL_CFM_TRACE("CN%x - Cfg Mismatch | MN Expects: %lx-%lx ", nodeId_p, expConfDate, expConfTime);
+            DEBUG_LVL_CFM_TRACE("CN Has: %lx-%lx. Restoring Default...\n",
+                                 ami_getUint32Le(&pIdentResponse->verifyConfigurationDateLe),
+                                 ami_getUint32Le(&pIdentResponse->verifyConfigurationTimeLe));
+        }
+
+        //Restore Default Parameters
         pNodeInfo->eventCnProgress.totalNumberOfBytes += sizeof(leSignature);
         ami_setUint32Le(&leSignature, 0x64616F6C);
-        //Restore Default Parameters
-        DEBUG_LVL_CFM_TRACE("CN%x - Cfg Mismatch | MN Expects: %lx-%lx ", nodeId_p, expConfDate, expConfTime);
-        DEBUG_LVL_CFM_TRACE("CN Has: %lx-%lx. Restoring Default...\n",
-                             ami_getUint32Le(&pIdentResponse->verifyConfigurationDateLe),
-                             ami_getUint32Le(&pIdentResponse->verifyConfigurationTimeLe));
 
         pNodeInfo->eventCnProgress.objectIndex = 0x1011;
         pNodeInfo->eventCnProgress.objectSubIndex = 0x01;
@@ -716,6 +753,19 @@ static tOplkError cbSdoCon(tSdoComFinished* pSdoComFinished_p)
                 ret = finishConfig(pNodeInfo, kNmtNodeCommandConfErr);      // configuration was not successful
             break;
 
+        case kCfmStateDownloadNetConf:
+#if defined(CONFIG_INCLUDE_NMT_RMN)
+            if (pSdoComFinished_p->sdoComConState == kSdoComTransferFinished)
+                ret = downloadNetConf(pNodeInfo);
+            else
+                ret = finishConfig(pNodeInfo, kNmtNodeCommandConfErr);
+#else
+            // Normally we don't get into this case if redundancy MN is
+            // not configured. If we get here, we issue kNmtNodeCommandConfErr.
+            ret = finishConfig(pNodeInfo, kNmtNodeCommandConfErr);
+#endif
+            break;
+
         case kCfmStateWaitRestore:
             if (pSdoComFinished_p->sdoComConState == kSdoComTransferFinished)
             {   // configuration successfully restored
@@ -802,7 +852,6 @@ node.
 static tOplkError downloadObject(tCfmNodeInfo* pNodeInfo_p)
 {
     tOplkError          ret = kErrorOk;
-    static UINT32       leSignature;
 
     // forward data pointer for last transfer
     pNodeInfo_p->pDataConciseDcf += pNodeInfo_p->curDataSize;
@@ -844,6 +893,103 @@ static tOplkError downloadObject(tCfmNodeInfo* pNodeInfo_p)
     }
     else
     {   // download finished
+        ret = finishDownload(pNodeInfo_p);
+        if (ret != kErrorOk)
+            return ret;
+    }
+
+    return ret;
+}
+
+#if defined(CONFIG_INCLUDE_NMT_RMN)
+//------------------------------------------------------------------------------
+/**
+\brief  Download network configuration
+
+The function downloads the next domain of the network configuration.
+If RMN support is not enabled or the addressed node has no configruation manager,
+the function does only finish the ordinary ConciseDCF download.
+
+\param  pNodeInfo_p     Node info of the node for which to download the next
+                        domain.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError downloadNetConf(tCfmNodeInfo* pNodeInfo_p)
+{
+    tOplkError          ret = kErrorOk;
+
+    if (pNodeInfo_p->cfmState == kCfmStateDownload)
+    {
+        tIdentResponse* pIdentResponse = NULL;
+
+        identu_getIdentResponse(pNodeInfo_p->eventCnProgress.nodeId, &pIdentResponse);
+        if (pIdentResponse == NULL)
+        {
+            DEBUG_LVL_CFM_TRACE("CN%x Ident Response is NULL\n", pNodeInfo_p->eventCnProgress.nodeId);
+            return kErrorInvalidNodeId;
+        }
+
+        if (ami_getUint32Le(&pIdentResponse->featureFlagsLe) & PLK_FEATURE_CFM)
+        {
+            pNodeInfo_p->cfmState = kCfmStateDownloadNetConf;
+            pNodeInfo_p->entriesRemaining = NMT_MAX_NODE_ID;
+            pNodeInfo_p->eventCnProgress.objectIndex = 0x1F22;
+        }
+    }
+
+    for (; pNodeInfo_p->entriesRemaining > 0; pNodeInfo_p->entriesRemaining--)
+    {
+        UINT            subindex = NMT_MAX_NODE_ID - pNodeInfo_p->entriesRemaining + 1;
+        tObdSize        obdSize;
+        UINT8*          pData;
+
+        obdSize = obd_getDataSize(0x1F22, subindex);
+        // Download only cDCFs with at least one entry
+        if (obdSize <= 4)
+            continue;
+
+        // fetch pointer to ConciseDCF from object 0x1F22
+        // (this allows the application to link its own memory to this object)
+        pData = (UINT8*)obd_getObjectDataPtr(0x1F22, subindex);
+        if (pData == NULL)
+            return kErrorCfmNoConfigData;
+
+        pNodeInfo_p->entriesRemaining--;
+        pNodeInfo_p->eventCnProgress.objectSubIndex = subindex;
+        ret = sdoWriteObject(pNodeInfo_p, pData, (UINT)obdSize);
+        return ret;
+    }
+
+    if (pNodeInfo_p->entriesRemaining == 0)
+    {   // download finished
+        ret = finishDownload(pNodeInfo_p);
+        if (ret != kErrorOk)
+            return ret;
+    }
+    return ret;
+}
+#endif
+
+//------------------------------------------------------------------------------
+/**
+\brief  Finish configuration download
+
+The function finishes a configuration download.
+
+\param  pNodeInfo_p     Node info of the node for which the download should be
+                        finished.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError finishDownload(tCfmNodeInfo* pNodeInfo_p)
+{
+    tOplkError          ret = kErrorOk;
+    static UINT32       leSignature;
+
+    {   // download finished
         if (pNodeInfo_p->fDoStore != FALSE)
         {
             // store configuration into non-volatile memory
@@ -869,7 +1015,6 @@ static tOplkError downloadObject(tCfmNodeInfo* pNodeInfo_p)
             }
         }
     }
-
     return ret;
 }
 
