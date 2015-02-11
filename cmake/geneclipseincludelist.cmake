@@ -4,6 +4,7 @@
 # file
 #
 # Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2015, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,14 +29,15 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
-MACRO(GEN_ECLIPSE_INCLUDE_LIST IN_INC_LIST RES_SRC_LIST)
+MACRO(GEN_ECLIPSE_INCLUDE_LIST IN_INC_LIST RES_INC_LIST)
 
     SET(TMP_RESULT "")
 
     FOREACH(INC_PATH IN ITEMS ${IN_INC_LIST})
+        STRING(STRIP ${INC_PATH} INC_PATH)
         SET(TMP_RESULT "${TMP_RESULT}\t\t\t\t\t\t\t\t\t<listOptionValue builtIn=\"false\" value=\"${INC_PATH}\"/>\r")
     ENDFOREACH()
 
     # Add to result list
-    SET(${RES_SRC_LIST} ${TMP_RESULT})
+    SET(${RES_INC_LIST} ${TMP_RESULT})
 ENDMACRO()
