@@ -1,0 +1,158 @@
+<session jtag_chain="USB-Blaster [USB-0]" jtag_device="@1: EP4CGX150 (0x028040DD)" sof_file="mnSingleDualProcDrv_time_limited.sof">
+  <display_tree gui_logging_enabled="0">
+    <display_branch instance="auto_signaltap_0" signal_set="USE_GLOBAL_TEMP" trigger="USE_GLOBAL_TEMP"/>
+  </display_tree>
+  <instance enabled="true" entity_name="sld_signaltap" is_auto_node="yes" is_expanded="true" name="auto_signaltap_0" source_file="sld_signaltap.vhd">
+    <node_ip_info instance_id="0" mfg_id="110" node_id="0" version="6"/>
+    <position_info>
+      <single attribute="active tab" value="1"/>
+      <single attribute="data horizontal scroll position" value="0"/>
+      <single attribute="data vertical scroll position" value="0"/>
+      <single attribute="setup horizontal scroll position" value="0"/>
+      <single attribute="setup vertical scroll position" value="0"/>
+      <single attribute="zoom level denominator" value="1"/>
+      <single attribute="zoom level numerator" value="1"/>
+      <single attribute="zoom offset denominator" value="1"/>
+      <single attribute="zoom offset numerator" value="130944"/>
+      <multi attribute="timebars" size="2" value="16,81"/>
+    </position_info>
+    <signal_set global_temp="1" name="signal_set: 2014/11/29 16:09:24  #0">
+      <clock name="pll:PLL1|altpll:altpll_component|pll_altpll:auto_generated|wire_pll1_clk[0]" polarity="posedge" tap_mode="probeonly"/>
+      <config ram_type="AUTO" reserved_data_nodes="0" reserved_storage_qualifier_nodes="0" reserved_trigger_nodes="0" sample_depth="16384" trigger_in_enable="no" trigger_out_enable="no"/>
+      <top_entity/>
+      <signal_vec>
+        <trigger_input_vec>
+          <wire name="mnSingleDualProcDrv:inst|alteraOpenmacTop:openmac_0|ins_macIrq_irq" tap_mode="probeonly"/>
+          <wire name="mnSingleDualProcDrv:inst|alteraOpenmacTop:openmac_0|openmacTop:THEOPENMACTOP|openmacTimer:THEOPENMACTIMER|irq_s" tap_mode="probeonly"/>
+          <wire name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[0]" tap_mode="probeonly"/>
+          <wire name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[1]" tap_mode="probeonly"/>
+          <wire name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[2]" tap_mode="probeonly"/>
+          <wire name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[3]" tap_mode="probeonly"/>
+          <wire name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[4]" tap_mode="probeonly"/>
+          <wire name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[5]" tap_mode="probeonly"/>
+          <wire name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[6]" tap_mode="probeonly"/>
+          <wire name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[7]" tap_mode="probeonly"/>
+        </trigger_input_vec>
+        <data_input_vec>
+          <wire name="mnSingleDualProcDrv:inst|alteraOpenmacTop:openmac_0|ins_macIrq_irq" tap_mode="probeonly"/>
+          <wire name="mnSingleDualProcDrv:inst|alteraOpenmacTop:openmac_0|openmacTop:THEOPENMACTOP|openmacTimer:THEOPENMACTIMER|irq_s" tap_mode="probeonly"/>
+          <wire name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[0]" tap_mode="probeonly"/>
+          <wire name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[1]" tap_mode="probeonly"/>
+          <wire name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[2]" tap_mode="probeonly"/>
+          <wire name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[3]" tap_mode="probeonly"/>
+          <wire name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[4]" tap_mode="probeonly"/>
+          <wire name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[5]" tap_mode="probeonly"/>
+          <wire name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[6]" tap_mode="probeonly"/>
+          <wire name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[7]" tap_mode="probeonly"/>
+        </data_input_vec>
+        <storage_qualifier_input_vec>
+          <wire name="mnSingleDualProcDrv:inst|alteraOpenmacTop:openmac_0|ins_macIrq_irq" tap_mode="probeonly"/>
+          <wire name="mnSingleDualProcDrv:inst|alteraOpenmacTop:openmac_0|openmacTop:THEOPENMACTOP|openmacTimer:THEOPENMACTIMER|irq_s" tap_mode="probeonly"/>
+          <wire name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[0]" tap_mode="probeonly"/>
+          <wire name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[1]" tap_mode="probeonly"/>
+          <wire name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[2]" tap_mode="probeonly"/>
+          <wire name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[3]" tap_mode="probeonly"/>
+          <wire name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[4]" tap_mode="probeonly"/>
+          <wire name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[5]" tap_mode="probeonly"/>
+          <wire name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[6]" tap_mode="probeonly"/>
+          <wire name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[7]" tap_mode="probeonly"/>
+        </storage_qualifier_input_vec>
+      </signal_vec>
+      <presentation>
+        <unified_setup_data_view>
+          <node data_index="0" duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_selected="false" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="mnSingleDualProcDrv:inst|alteraOpenmacTop:openmac_0|ins_macIrq_irq" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="0" tap_mode="probeonly" trigger_index="0" type="unknown"/>
+          <node data_index="1" duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_selected="false" is_storage_input="true" is_trigger_input="true" level-0="rising edge" name="mnSingleDualProcDrv:inst|alteraOpenmacTop:openmac_0|openmacTop:THEOPENMACTOP|openmacTimer:THEOPENMACTIMER|irq_s" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="1" tap_mode="probeonly" trigger_index="1" type="unknown"/>
+          <node is_selected="false" level-0="alt_or" name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[0..7]" order="lsb_to_msb" pwr_level-0="alt_or" state="expand" storage-0="alt_or" storage-1="alt_or" storage-2="alt_or" type="register">
+            <node data_index="1" duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_selected="false" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[0]" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="2" tap_mode="probeonly" trigger_index="2" type="unknown"/>
+            <node data_index="2" duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_selected="false" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[1]" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="3" tap_mode="probeonly" trigger_index="3" type="unknown"/>
+            <node data_index="3" duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_selected="false" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[2]" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="4" tap_mode="probeonly" trigger_index="4" type="unknown"/>
+            <node data_index="4" duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_selected="false" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[3]" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="5" tap_mode="probeonly" trigger_index="5" type="unknown"/>
+            <node data_index="5" duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_selected="false" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[4]" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="6" tap_mode="probeonly" trigger_index="6" type="unknown"/>
+            <node data_index="6" duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_selected="false" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[5]" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="7" tap_mode="probeonly" trigger_index="7" type="unknown"/>
+            <node data_index="7" duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_selected="false" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[6]" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="8" tap_mode="probeonly" trigger_index="8" type="unknown"/>
+            <node data_index="8" duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_selected="false" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[7]" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="9" tap_mode="probeonly" trigger_index="9" type="unknown"/>
+          </node>
+        </unified_setup_data_view>
+        <data_view>
+          <net data_index="0" duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_selected="false" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="mnSingleDualProcDrv:inst|alteraOpenmacTop:openmac_0|ins_macIrq_irq" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="0" tap_mode="probeonly" trigger_index="0" type="unknown"/>
+          <net data_index="1" duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_selected="false" is_storage_input="true" is_trigger_input="true" level-0="rising edge" name="mnSingleDualProcDrv:inst|alteraOpenmacTop:openmac_0|openmacTop:THEOPENMACTOP|openmacTimer:THEOPENMACTIMER|irq_s" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="1" tap_mode="probeonly" trigger_index="1" type="unknown"/>
+          <bus is_selected="false" level-0="alt_or" name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[0..7]" order="lsb_to_msb" pwr_level-0="alt_or" state="expand" storage-0="alt_or" storage-1="alt_or" storage-2="alt_or" type="register">
+            <net data_index="2" duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_selected="false" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[0]" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="2" tap_mode="probeonly" trigger_index="2" type="unknown"/>
+            <net data_index="3" duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_selected="false" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[1]" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="3" tap_mode="probeonly" trigger_index="3" type="unknown"/>
+            <net data_index="4" duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_selected="false" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[2]" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="4" tap_mode="probeonly" trigger_index="4" type="unknown"/>
+            <net data_index="5" duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_selected="false" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[3]" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="5" tap_mode="probeonly" trigger_index="5" type="unknown"/>
+            <net data_index="6" duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_selected="false" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[4]" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="6" tap_mode="probeonly" trigger_index="6" type="unknown"/>
+            <net data_index="7" duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_selected="false" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[5]" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="7" tap_mode="probeonly" trigger_index="7" type="unknown"/>
+            <net data_index="8" duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_selected="false" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[6]" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="8" tap_mode="probeonly" trigger_index="8" type="unknown"/>
+            <net data_index="9" duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_selected="false" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[7]" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="9" tap_mode="probeonly" trigger_index="9" type="unknown"/>
+          </bus>
+        </data_view>
+        <setup_view>
+          <net data_index="0" duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_selected="false" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="mnSingleDualProcDrv:inst|alteraOpenmacTop:openmac_0|ins_macIrq_irq" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="0" tap_mode="probeonly" trigger_index="0" type="unknown"/>
+          <net data_index="1" duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_selected="false" is_storage_input="true" is_trigger_input="true" level-0="rising edge" name="mnSingleDualProcDrv:inst|alteraOpenmacTop:openmac_0|openmacTop:THEOPENMACTOP|openmacTimer:THEOPENMACTIMER|irq_s" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="1" tap_mode="probeonly" trigger_index="1" type="unknown"/>
+          <bus is_selected="false" level-0="alt_or" name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[0..7]" order="lsb_to_msb" pwr_level-0="alt_or" state="expand" storage-0="alt_or" storage-1="alt_or" storage-2="alt_or" type="register">
+            <net data_index="2" duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_selected="false" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[0]" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="2" tap_mode="probeonly" trigger_index="2" type="unknown"/>
+            <net data_index="3" duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_selected="false" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[1]" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="3" tap_mode="probeonly" trigger_index="3" type="unknown"/>
+            <net data_index="4" duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_selected="false" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[2]" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="4" tap_mode="probeonly" trigger_index="4" type="unknown"/>
+            <net data_index="5" duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_selected="false" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[3]" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="5" tap_mode="probeonly" trigger_index="5" type="unknown"/>
+            <net data_index="6" duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_selected="false" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[4]" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="6" tap_mode="probeonly" trigger_index="6" type="unknown"/>
+            <net data_index="7" duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_selected="false" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[5]" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="7" tap_mode="probeonly" trigger_index="7" type="unknown"/>
+            <net data_index="8" duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_selected="false" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[6]" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="8" tap_mode="probeonly" trigger_index="8" type="unknown"/>
+            <net data_index="9" duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_selected="false" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[7]" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="9" tap_mode="probeonly" trigger_index="9" type="unknown"/>
+          </bus>
+        </setup_view>
+        <trigger_in_editor/>
+        <trigger_out_editor/>
+      </presentation>
+      <trigger attribute_mem_mode="false" gap_record="true" global_temp="1" name="trigger: 2014/11/29 16:09:24  #1" position="pre" power_up_trigger_mode="false" record_data_gap="true" segment_size="64" storage_mode="off" storage_qualifier_disabled="no" storage_qualifier_port_is_pin="true" storage_qualifier_port_name="auto_stp_external_storage_qualifier" storage_qualifier_port_tap_mode="classic" trigger_type="circular">
+        <power_up_trigger position="pre" storage_qualifier_disabled="no"/>
+        <events use_custom_flow_control="no">
+          <level editor="basic_or" enabled="yes" name="condition1" type="advanced">
+            <power_up enabled="yes">
+              <power_up_expression><![CDATA[alt_reduction(alt_true, {((mbpm('X', 'mnSingleDualProcDrv:inst|alteraOpenmacTop:openmac_0|ins_macIrq_irq') && variable(1))), ((mbpm('X', 'mnSingleDualProcDrv:inst|alteraOpenmacTop:openmac_0|openmacTop:THEOPENMACTOP|openmacTimer:THEOPENMACTIMER|irq_s') && variable(1))), (alt_reduction(alt_false, {(mbpm('X', 'mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[0]') && variable(1)), (mbpm('X', 'mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[1]') && variable(1)), (mbpm('X', 'mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[2]') && variable(1)), (mbpm('X', 'mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[3]') && variable(1)), (mbpm('X', 'mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[4]') && variable(1)), (mbpm('X', 'mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[5]') && variable(1)), (mbpm('X', 'mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[6]') && variable(1)), (mbpm('X', 'mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[7]') && variable(1))}))})]]>
+              </power_up_expression>
+            </power_up>
+            <expression><![CDATA[alt_reduction(alt_or, {((mbpm('X', 'mnSingleDualProcDrv:inst|alteraOpenmacTop:openmac_0|ins_macIrq_irq') && variable(0))), ((mbpm('R', 'mnSingleDualProcDrv:inst|alteraOpenmacTop:openmac_0|openmacTop:THEOPENMACTOP|openmacTimer:THEOPENMACTIMER|irq_s') && variable(1))), (alt_reduction(alt_false, {(mbpm('X', 'mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[0]') && variable(0)), (mbpm('X', 'mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[1]') && variable(0)), (mbpm('X', 'mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[2]') && variable(0)), (mbpm('X', 'mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[3]') && variable(0)), (mbpm('X', 'mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[4]') && variable(0)), (mbpm('X', 'mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[5]') && variable(0)), (mbpm('X', 'mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[6]') && variable(0)), (mbpm('X', 'mnSingleDualProcDrv:inst|mnSingleDualProcDrv_pcp_0:pcp_0|mnSingleDualProcDrv_pcp_0_benchmark_pio:benchmark_pio|data_out[7]') && variable(0))}))})]]>
+            </expression>
+            <op_node/>
+          </level>
+        </events>
+        <storage_qualifier_events>
+          <transitional>1111111111
+            <pwr_up_transitional>1111111111</pwr_up_transitional>
+          </transitional>
+          <storage_qualifier_level type="basic">
+            <power_up>
+            </power_up>
+            <op_node/>
+          </storage_qualifier_level>
+          <storage_qualifier_level type="basic">
+            <power_up>
+            </power_up>
+            <op_node/>
+          </storage_qualifier_level>
+          <storage_qualifier_level type="basic">
+            <power_up>
+            </power_up>
+            <op_node/>
+          </storage_qualifier_level>
+        </storage_qualifier_events>
+      </trigger>
+    </signal_set>
+  </instance>
+  <mnemonics/>
+  <static_plugin_mnemonics/>
+  <global_info>
+    <single attribute="active instance" value="0"/>
+    <single attribute="config widget visible" value="1"/>
+    <single attribute="data log widget visible" value="1"/>
+    <single attribute="hierarchy widget visible" value="1"/>
+    <single attribute="instance widget visible" value="1"/>
+    <single attribute="jtag widget visible" value="1"/>
+    <single attribute="lock mode" value="0"/>
+    <single attribute="sof manager visible" value="0"/>
+    <multi attribute="column width" size="23" value="34,34,220,74,68,78,95,96,98,98,88,88,110,101,101,101,101,101,101,101,101,107,130"/>
+    <multi attribute="frame size" size="2" value="1920,1018"/>
+    <multi attribute="jtag widget size" size="2" value="334,120"/>
+  </global_info>
+</session>
