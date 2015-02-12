@@ -163,7 +163,7 @@ tOplkError dllknode_cleanupLocalNode(tNmtState oldNmtState_p)
 #endif
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
-    if ((ret = edrvcyclic_stopCycle()) != kErrorOk)
+    if ((ret = edrvcyclic_stopCycle(FALSE)) != kErrorOk)
         return ret;
 
     if ((ret = edrvcyclic_regSyncHandler(NULL)) != kErrorOk)

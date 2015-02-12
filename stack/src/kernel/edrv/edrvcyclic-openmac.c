@@ -345,12 +345,14 @@ Exit:
 
 This function stops the cycles.
 
+\param  fKeepCycle_p    if TRUE, just stop transmission (i.e. slot timer),
+                        but keep cycle timer running.
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrvcyclic_stopCycle(void)
+tOplkError edrvcyclic_stopCycle(BOOL fKeepCycle_p)
 {
     return hrestimer_deleteTimer(&instance_l.timerHdlCycle);
 }

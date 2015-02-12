@@ -277,7 +277,7 @@ static tOplkError processNmtMsPreop1(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
     if (dllkInstance_g.dllState != kDllMsNonCyclic)
     {   // stop cycle timer
 
-        ret = edrvcyclic_stopCycle();
+        ret = edrvcyclic_stopCycle(FALSE);
         if (ret != kErrorOk)
             return ret;
 

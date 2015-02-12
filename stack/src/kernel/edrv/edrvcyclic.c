@@ -345,19 +345,28 @@ Exit:
 
 This function stops the cycles.
 
+\param  fKeepCycle_p    if TRUE, just stop transmission (i.e. slot timer),
+                        but keep cycle timer running.
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrvcyclic_stopCycle(void)
+tOplkError edrvcyclic_stopCycle(BOOL fKeepCycle_p)
 {
     tOplkError ret = kErrorOk;
 
-    ret = hrestimer_deleteTimer(&edrvcyclicInstance_l.timerHdlCycle);
+    if (!fKeepCycle_p)
+    {
+        ret = hrestimer_deleteTimer(&edrvcyclicInstance_l.timerHdlCycle);
+    }
 #if (EDRV_USE_TTTX == FALSE)
     ret = hrestimer_deleteTimer(&edrvcyclicInstance_l.timerHdlSlot);
 #endif
+
+    // clear current and next Tx buffer list
+    OPLK_MEMSET(edrvcyclicInstance_l.ppTxBufferList, 0,
+                sizeof(*edrvcyclicInstance_l.ppTxBufferList) * edrvcyclicInstance_l.maxTxBufferCount * 2);
 
 #if CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
     edrvcyclicInstance_l.startCycleTimeStamp = 0;
