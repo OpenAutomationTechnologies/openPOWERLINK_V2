@@ -297,7 +297,7 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
 #if defined(CONFIG_INCLUDE_NMT_RMN)
             if (dllkInstance_g.fRedundancy)
             {
-                ret = edrvcyclic_stopCycle();
+                ret = edrvcyclic_stopCycle(FALSE);
                 if (ret != kErrorOk)
                     return ret;
 
@@ -413,7 +413,7 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
             if ((ret = controlPdokcalSync(FALSE)) != kErrorOk)
                 return ret;
 
-            ret = edrvcyclic_stopCycle();
+            ret = edrvcyclic_stopCycle(FALSE);
             if (ret != kErrorOk)
                 return ret;
 
@@ -499,7 +499,7 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
             if (dllkInstance_g.fRedundancy && (oldNmtState_p == kNmtMsOperational))
             {
                 dllkInstance_g.dllState = kDllCsWaitSoc;
-                ret = edrvcyclic_stopCycle();
+                ret = edrvcyclic_stopCycle(TRUE);
                 if (ret != kErrorOk)
                     return ret;
 

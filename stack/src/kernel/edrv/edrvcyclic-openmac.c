@@ -116,7 +116,7 @@ typedef struct
     UINT                maxTxBufferCount;                           ///< Maximum TX buffer count
     UINT                currrentTxBufferList;                       ///< Current TX buffer list
     UINT                currentTxBufferEntry;                       ///< Current TX buffer entry
-    UINT32              cycleLengthUs;                              ///< Cycle time (µs)
+    UINT32              cycleLengthUs;                              ///< Cycle time (us)
     tTimerHdl           timerHdlCycle;                              ///< Handle of the cycle timer
     tEdrvCyclicCbSync   pfnSyncCb;                                  ///< Function pointer to the sync callback function
     tEdrvCyclicCbError  pfnErrorCb;                                 ///< Function pointer to the error callback function
@@ -345,13 +345,18 @@ Exit:
 
 This function stops the cycles.
 
+\param  fKeepCycle_p    If TRUE, just stop transmission (i.e. slot timer),
+                        but keep cycle timer running.
+
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrvcyclic_stopCycle(void)
+tOplkError edrvcyclic_stopCycle(BOOL fKeepCycle_p)
 {
+    UNUSED_PARAMETER(fKeepCycle_p);
+
     return hrestimer_deleteTimer(&instance_l.timerHdlCycle);
 }
 
