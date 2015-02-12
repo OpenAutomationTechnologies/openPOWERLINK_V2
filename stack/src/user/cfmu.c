@@ -275,9 +275,9 @@ configuration data and time of this CN differ from the expected (local) values.
 \param  nmtState_p      NMT state of the node.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk  Configuration is OK -> continue boot process for this CN.
+\retval kErrorOk        Configuration is OK -> continue boot process for this CN.
 \retval kErrorReject    Defer further processing until configuration process has finished.
-\retval other error     Major error has occurred.
+\retval other           Major error has occurred.
 
 \ingroup module_cfmu
 */
@@ -755,10 +755,8 @@ static tOplkError cbSdoCon(tSdoComFinished* pSdoComFinished_p)
 /**
 \brief  Download cycle length
 
-The function reads the specified entry from the OD of the specified node.
-If this node is a remote node, it performs an SDO transfer, which means this
-function returns kErrorApiTaskDeferred and the application is informed via
-the event callback function when the task is completed.
+The function writes the cycle length (object 0x1006) to the specified node.
+It does nothing if CONFIG_CFM_CONFIGURE_CYCLE_LENGTH is FALSE.
 
 \param  pNodeInfo_p     Node info of the node for which to download the cycle
                         length.
