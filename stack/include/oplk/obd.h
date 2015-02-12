@@ -467,6 +467,8 @@ tOplkError obd_initObd(tObdInitParam MEM* pInitParam_p);
 tOplkError obd_storeLoadObjCallback(tObdStoreLoadCallback pfnCallback_p);
 #endif
 
+tOplkError obd_initWrite(UINT index_p, UINT subIndex_p, void** ppDstData_p, tObdSize size_p);
+
 #ifdef __cplusplus
 }
 #endif

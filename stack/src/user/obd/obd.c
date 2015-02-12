@@ -1068,6 +1068,130 @@ tOplkError obd_storeLoadObjCallback(tObdStoreLoadCallback pfnCallback_p)
 }
 #endif // (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
 
+//------------------------------------------------------------------------------
+/**
+\brief  Initialize write to OD
+
+The function initializes write of data to an OBD entry.
+It is used by SDO command layer to store segmented data.
+
+\param  index_p                 Index of object.
+\param  subIndex_p              Sub-index of object.
+\param  ppDstData_p             Pointer to store object data pointer.
+\param  size_p                  Size of the data to be written.
+
+\return The function returns a tOplkError error code.
+
+\ingroup module_obd
+*/
+//------------------------------------------------------------------------------
+tOplkError obd_initWrite(UINT index_p, UINT subIndex_p, void** ppDstData_p,
+                         tObdSize size_p)
+{
+    tOplkError              ret;
+    tObdEntryPtr            pObdEntry;
+    tObdSubEntryPtr         pSubEntry;
+    tObdAccess              access;
+    void MEM*               pDstData;
+    tObdSize                obdSize;
+    tObdCbParam             cbParam;
+
+#if (CONFIG_OBD_USE_STRING_DOMAIN_IN_RAM != FALSE)
+    tObdVStringDomain MEM   memVStringDomain;
+    void MEM*               pCurrData;
+#endif
+
+    ret = getEntry(index_p, subIndex_p, &pObdEntry, &pSubEntry);
+    if (ret != kErrorOk)
+        return ret;
+
+    access = (tObdAccess)pSubEntry->access;
+    // check access for write
+    if ((access & kObdAccConst) != 0)
+        return kErrorObdAccessViolation;
+
+    // To use the same callback function for ObdWriteEntry as well as for
+    // an SDO download call at first (kObdEvPre...) the callback function
+    // with the argument pointer to object size.
+    cbParam.index    = index_p;
+    cbParam.subIndex = subIndex_p;
+
+    // Because object size and object pointer are adapted by user callback
+    // function, re-read this values.
+    obdSize = getObjectSize(pSubEntry);
+    pDstData = (void MEM*)getObjectDataPtr(pSubEntry);
+
+    // Function obd_writeEntry() calls event kObdEvWrStringDomain for String or
+    // Domain which lets called module directly change the data pointer or size.
+    // This prevents a recursive call to the callback function if it calls getEntry().
+#if (CONFIG_OBD_USE_STRING_DOMAIN_IN_RAM != FALSE)
+    if ((pSubEntry->type == kObdTypeVString) || (pSubEntry->type == kObdTypeDomain) ||
+        (pSubEntry->type == kObdTypeOString))
+    {
+        if (pSubEntry->type == kObdTypeVString)
+        {
+            // reserve one byte for 0-termination
+            size_p += 1;
+        }
+
+        memVStringDomain.downloadSize = size_p;
+        memVStringDomain.objSize      = obdSize;
+        memVStringDomain.pData        = pDstData;
+        cbParam.obdEvent = kObdEvWrStringDomain;
+        cbParam.pArg     = &memVStringDomain;
+        ret = callObjectCallback(pObdEntry->pfnCallback, &cbParam);
+        if (ret != kErrorOk)
+            return ret;
+
+        // write back new settings
+        pCurrData = pSubEntry->pCurrent;
+        if ((pSubEntry->type == kObdTypeVString) || (pSubEntry->type == kObdTypeOString))
+        {
+            ((tObdVString MEM*)pCurrData)->size    = memVStringDomain.objSize;
+            ((tObdVString MEM*)pCurrData)->pString = memVStringDomain.pData;
+        }
+        else
+        {
+            tObdVarEntry MEM*    pVarEntry = NULL;
+
+            ret = getVarEntry(pSubEntry, &pVarEntry);
+            if (ret != kErrorOk)
+                return ret;
+
+            if (pVarEntry == NULL)
+            {
+                return kErrorObdAccessViolation;
+            }
+            pVarEntry->size  = memVStringDomain.objSize;
+            pVarEntry->pData = (void MEM*)memVStringDomain.pData;
+        }
+
+        // Because object size and object pointer are adapted by user callback
+        // function, re-read this values.
+        obdSize  = memVStringDomain.objSize;
+        pDstData = (void MEM*)memVStringDomain.pData;
+    }
+#endif
+
+    // access violation if adress to current value is NULL
+    if (pDstData == NULL)
+       return kErrorObdAccessViolation;
+
+    cbParam.pArg     = &obdSize;
+    cbParam.obdEvent = kObdEvInitWrite;
+    ret = callObjectCallback(pObdEntry->pfnCallback, &cbParam);
+    if (ret != kErrorOk)
+        return ret;
+
+    if (size_p > obdSize)
+        return kErrorObdValueLengthError;
+
+    if (ppDstData_p)
+        *ppDstData_p = pDstData;
+
+    return kErrorOk;
+}
+
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
