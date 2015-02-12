@@ -1763,7 +1763,6 @@ static tOplkError serverInitWriteByIndex(tSdoComCon* pSdoComCon_p, tAsySdoCom* p
     UINT            index;
     UINT            subindex;
     UINT            bytesToTransfer;
-    tObdSize        entrySize;
     tObdAccess      accessType;
     UINT8*          pSrcData;
 
@@ -1886,18 +1885,36 @@ static tOplkError serverInitWriteByIndex(tSdoComCon* pSdoComCon_p, tAsySdoCom* p
     }
     else
     {
-        // get size of the object to check if it fits
-        // because we directly write to the destination memory
-        // d.k. no one calls the user OD callback function
+        // Imitate some user OD callback handling.
+        // This includes checking of OD entry size
+        ret = obd_initWrite(index, subindex, (void*)&pSdoComCon_p->pData, pSdoComCon_p->transferSize);
+        switch (ret)
+        {
+            case kErrorOk:
+                break;
 
-        entrySize = obd_getDataSize(index, subindex);
-        if (entrySize < pSdoComCon_p->transferSize)
-        {   // parameter too big
-            pSdoComCon_p->lastAbortCode = SDO_AC_DATA_TYPE_LENGTH_TOO_HIGH;
+            case kErrorObdAccessViolation:
+                pSdoComCon_p->lastAbortCode = SDO_AC_UNSUPPORTED_ACCESS;
+                // send abort
+                goto Abort;
+                break;
+
+            case kErrorObdValueLengthError:
+                pSdoComCon_p->lastAbortCode = SDO_AC_DATA_TYPE_LENGTH_NOT_MATCH;
+                // send abort
+                goto Abort;
+                break;
+
+            default:
+                pSdoComCon_p->lastAbortCode = SDO_AC_GENERAL_ERROR;
+                // send abort
+                goto Abort;
+                break;
+        }
+        if (pSdoComCon_p->pData == NULL)
+        {
+            pSdoComCon_p->lastAbortCode = SDO_AC_GENERAL_ERROR;
             // send abort
-            // d.k. This is wrong: k.t. not needed send abort on end of write
-            /*pSdoComCon_p->pData = (UINT8*)&abortCode;
-            ret = serverSendFrame(pSdoComCon_p, index, subindex, kSdoComSendTypeAbort);*/
             goto Abort;
         }
 
