@@ -167,6 +167,10 @@ typedef enum
     kNmtEventStartNode              =   0x16,   ///< A StartNode event has occured (NMT_CT7)
     kNmtEventStopNode               =   0x17,   ///< A StopNode event has occured
 
+    // Events triggered by NMT-Requests or application
+    kNmtEventGoToStandby            =   0x18,   ///< GoToStandby request received (NMT_RMT5, NMT_RMT7)
+    kNmtEventGoToStandbyDelayed     =   0x19,   ///< GoToStandby request (with DF flag) received (NMT_RMT5, NMT_RMT7)
+
     // Events triggered by higher layer
     kNmtEventEnterResetApp          =   0x20,   ///< An EnterResetApplication event has occured
     kNmtEventEnterResetCom          =   0x21,   ///< An EnterResetCommunication event has occured

@@ -80,6 +80,7 @@ typedef enum
     kNmtCmdResetCommunication        = 0x29,            ///< NMTResetCommunication command
     kNmtCmdResetConfiguration        = 0x2A,            ///< NMTResetConfiguration command
     kNmtCmdSwReset                   = 0x2B,            ///< NMTSwReset command
+    kNmtCmdGoToStandby               = 0x2C,            ///< NMTGoToStandby command (RMN)
     // extended NMT state commands    0x40..0x5F
     kNmtCmdStartNodeEx               = 0x41,            ///< NMTStartNodeEx command
     kNmtCmdStopNodeEx                = 0x42,            ///< NMTStopNodeEx command

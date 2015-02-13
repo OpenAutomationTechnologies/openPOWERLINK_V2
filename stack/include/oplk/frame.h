@@ -112,6 +112,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define SDO_CMDL_FLAG_SEGMCOMPL      0x30
 #define SDO_CMDL_FLAG_SEGM_MASK      0x30
 
+// defines for NMT command data of NMTGoToStandby
+#define NMT_CMD_DATA_FLAG_DELAY             0x01    // include MNSwitchOverDelay_U32
+
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
