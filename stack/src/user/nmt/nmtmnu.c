@@ -445,7 +445,11 @@ tOplkError nmtmnu_init(tNmtMnuCbNodeEvent pfnCbNodeEvent_p, tNmtMnuCbBootEvent p
     nmtMnuInstance_g.statusRequestDelay = 5000L;
 
     // register NmtMnResponse callback function
-    ret = dllucal_regAsndService(kDllAsndNmtRequest, cbNmtRequest, kDllAsndFilterLocal);
+
+    // NMT requests are targeted to node-ID 240 according to specification.
+    // RMNs have node-IDs unequal 240. So the filter is opened for NMT
+    // requests targeted to any node-ID.
+    ret = dllucal_regAsndService(kDllAsndNmtRequest, cbNmtRequest, kDllAsndFilterAny);
 
     nmtMnuInstance_g.prcPResTimeFirstCorrectionNs =  50;
     nmtMnuInstance_g.prcPResTimeFirstNegOffsetNs  = 500;
