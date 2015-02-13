@@ -280,7 +280,7 @@ tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg a
 
     sev.sigev_notify = SIGEV_SIGNAL;
     sev.sigev_signo = SIGRTMIN;
-    sev.sigev_value.sival_ptr = &pData->timer;
+    sev.sigev_value.sival_ptr = pData;
     if (timer_create(CLOCK_MONOTONIC, &sev, &pData->timer) == -1)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Error creating timer!\n", __func__);
@@ -493,8 +493,12 @@ static void* processThread(void* pArgument_p)
         if (sigwaitinfo(&awaitedSignal, &signalInfo) > 0)
         {
             pTimer = (tTimeruData*)signalInfo.si_value.sival_ptr;
-            /* call callback function of timer */
-            cbTimer((ULONG)pTimer);
+            if (pTimer != NULL)
+                /* call callback function of timer */
+                cbTimer((ULONG)pTimer);
+            else
+                DEBUG_LVL_ERROR_TRACE("%s() sival_ptr==NULL code=%d\n", __func__,
+                                      signalInfo.si_code);
         }
     }
 
