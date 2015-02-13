@@ -170,7 +170,7 @@ int main(void)
     loopMain(&instance_l);
 
 Exit:
-    arp_shutdown();
+    arp_exit();
     shutdownPowerlink(&instance_l);
     shutdownApp();
 
@@ -342,7 +342,8 @@ The function implements the applications stack event handler.
 \ingroup module_demo_cn_embedded
 */
 //------------------------------------------------------------------------------
-static tOplkError eventCbPowerlink(tOplkApiEventType EventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p)
+static tOplkError eventCbPowerlink(tOplkApiEventType EventType_p,
+                                   tOplkApiEventArg* pEventArg_p, void* pUserArg_p)
 {
     tOplkError                      ret = kErrorOk;
     tOplkApiEventReceivedNonPlk*    pFrameInfo = &pEventArg_p->receivedEth;
@@ -375,9 +376,8 @@ static tOplkError eventCbPowerlink(tOplkApiEventType EventType_p, tOplkApiEventA
             break;
 
         case kOplkApiEventReceivedNonPlk:
-            ret = arp_processReceive(pFrameInfo->pFrame, pFrameInfo->frameSize);
-            if (ret != kErrorRetry)
-                return ret;
+            if (arp_processReceive(pFrameInfo->pFrame, pFrameInfo->frameSize) == 0)
+                return kErrorOk;
 
             // If you get here, the received Ethernet frame is no ARP frame.
             // Here you can call other protocol stacks for processing.

@@ -10,7 +10,7 @@ This file implements an ARP demo for demo targets that have no IP stack.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -125,8 +125,8 @@ static tArpInstance arpInstance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError handleReply(tArpFrame* pFrame_p);
-static tOplkError handleRequest(tArpFrame* pFrame_p);
+static void handleReply(tArpFrame* pFrame_p);
+static int  handleRequest(tArpFrame* pFrame_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -140,14 +140,11 @@ The function initializes the ARP module before being used.
 
 \param  nodeId_p    The local node ID
 
-\return The function returns a tOplkError error code.
-
 \ingroup module_app_common
 */
 //------------------------------------------------------------------------------
-tOplkError arp_init(UINT8 nodeId_p)
+void arp_init(UINT8 nodeId_p)
 {
-    tOplkError  ret = kErrorOk;
     tArpFrame*  pFrame;
 
     memset(&arpInstance_l, 0, sizeof(tArpInstance));
@@ -171,8 +168,6 @@ tOplkError arp_init(UINT8 nodeId_p)
 
     // Protocol Address Length
     pFrame->protocolAddressLength = ARP_PROADDR_LENGTH;
-
-    return ret;
 }
 
 //------------------------------------------------------------------------------
@@ -184,8 +179,9 @@ The function shuts down the ARP module.
 \ingroup module_app_common
 */
 //------------------------------------------------------------------------------
-void arp_shutdown(void)
+void arp_exit(void)
 {
+
 }
 
 //------------------------------------------------------------------------------
@@ -196,16 +192,12 @@ The function sets the local node's MAC address.
 
 \param  pMacAddr_p      Pointer to buffer that holds the MAC address to be set
 
-\return The function returns a tOplkError error code.
-
 \ingroup module_app_common
 */
 //------------------------------------------------------------------------------
-tOplkError arp_setMacAddr(UINT8* pMacAddr_p)
+void arp_setMacAddr(UINT8* pMacAddr_p)
 {
     memcpy(&arpInstance_l.aMacAddr, pMacAddr_p, ARP_HWADDR_LENGTH);
-
-    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -216,18 +208,14 @@ The function sets the local node's IP address.
 
 \param  ipAddr_p    IP address to be set
 
-\return The function returns a tOplkError error code.
-
 \ingroup module_app_common
 */
 //------------------------------------------------------------------------------
-tOplkError arp_setIpAddr(UINT32 ipAddr_p)
+void arp_setIpAddr(UINT32 ipAddr_p)
 {
     UINT32 ipAddr = htonl(ipAddr_p); // Swap to get network order
 
     memcpy(arpInstance_l.aIpAddr, (UINT8*)&ipAddr, ARP_PROADDR_LENGTH);
-
-    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -238,12 +226,10 @@ The function sets the default gateway's IP address.
 
 \param  defGateway_p    Default gateway IP address
 
-\return The function returns a tOplkError error code.
-
 \ingroup module_app_common
 */
 //------------------------------------------------------------------------------
-tOplkError arp_setDefGateway(UINT32 defGateway_p)
+void arp_setDefGateway(UINT32 defGateway_p)
 {
     UINT32 defGateway = htonl(defGateway_p); // Swap to get network order
 
@@ -251,8 +237,6 @@ tOplkError arp_setDefGateway(UINT32 defGateway_p)
 
     // Invalidate default gateway's MAC address
     memset(arpInstance_l.aDefaultGwMac, 0, ARP_HWADDR_LENGTH);
-
-    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -263,14 +247,13 @@ The function sends an ARP request to the given POWERLINK node.
 
 \param  ipAddr_p    IP address to destination node
 
-\return The function returns a tOplkError error code.
+\return The function returns 0 if the ARP request has been sent, otherwise -1.
 
 \ingroup module_app_common
 */
 //------------------------------------------------------------------------------
-tOplkError arp_sendRequest(UINT32 ipAddr_p)
+int arp_sendRequest(UINT32 ipAddr_p)
 {
-    tOplkError  ret = kErrorOk;
     tArpFrame   frameBuffer;
     tArpFrame*  pFrame = &frameBuffer;
     UINT32      ipAddr = htonl(ipAddr_p); // Swap to get network order
@@ -296,9 +279,10 @@ tOplkError arp_sendRequest(UINT32 ipAddr_p)
     // Target IP Address
     memcpy(pFrame->aTargetProtocolAddress, &ipAddr, ARP_PROADDR_LENGTH);
 
-    ret = oplk_sendEthFrame((tPlkFrame*)pFrame, sizeof(tArpFrame));
-
-    return ret;
+    if (oplk_sendEthFrame((tPlkFrame*)pFrame, sizeof(tArpFrame)) == kErrorOk)
+        return 0;
+    else
+        return -1;
 }
 
 //------------------------------------------------------------------------------
@@ -310,14 +294,15 @@ The function processes a received Ethernet frame for ARP handling.
 \param  pFrame_p    Pointer to ARP frame
 \param  size_p      Size of the frame
 
-\return The function returns a tOplkError error code.
+\return The function returns 0 if an ARP frame has been received and handled
+        successfully, otherwise -1.
 
 \ingroup module_app_common
 */
 //------------------------------------------------------------------------------
-tOplkError arp_processReceive(tPlkFrame* pFrame_p, UINT size_p)
+int arp_processReceive(tPlkFrame* pFrame_p, UINT size_p)
 {
-    tOplkError  ret = kErrorOk;
+    int         ret = 0;
     tArpFrame*  pFrame = (tArpFrame*)pFrame_p;
 
     // Handle ARP frames: Check etherType and frame size
@@ -333,11 +318,11 @@ tOplkError arp_processReceive(tPlkFrame* pFrame_p, UINT size_p)
             switch (ntohs(pFrame->operation))
             {
                 case ARP_OP_REPLY:
-                    ret = handleReply(pFrame);
+                    handleReply(pFrame);
                     break;
 
                 case ARP_OP_REQUEST:
-                    ret = handleRequest(pFrame);
+                    handleRequest(pFrame);
                     break;
 
                 default:
@@ -348,7 +333,7 @@ tOplkError arp_processReceive(tPlkFrame* pFrame_p, UINT size_p)
     else
     {
         // It is no ARP frame => other protocol shall try...
-        ret = kErrorRetry;
+        ret = -1;
     }
 
     return ret;
@@ -367,14 +352,10 @@ tOplkError arp_processReceive(tPlkFrame* pFrame_p, UINT size_p)
 The function handles an ARP Reply frame.
 
 \param  pFrame_p    Pointer to ARP frame
-
-\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError handleReply(tArpFrame* pFrame_p)
+static void handleReply(tArpFrame* pFrame_p)
 {
-    tOplkError ret = kErrorOk;
-
     PRINTF("ARP: Node with IP Address %d.%d.%d.%d ",
            pFrame_p->aSenderProtocolAddress[0],
            pFrame_p->aSenderProtocolAddress[1],
@@ -397,8 +378,6 @@ static tOplkError handleReply(tArpFrame* pFrame_p)
     }
 
     PRINTF("\n");
-
-    return ret;
 }
 
 //------------------------------------------------------------------------------
@@ -409,12 +388,13 @@ The function handles an ARP Request frame by sending the corresponding ARP reply
 
 \param  pFrame_p    Pointer to ARP frame
 
-\return The function returns a tOplkError error code.
+\return The function returns 0 if the ARP request has been answered successfully,
+        otherwise -1.
 */
 //------------------------------------------------------------------------------
-static tOplkError handleRequest(tArpFrame* pFrame_p)
+static int handleRequest(tArpFrame* pFrame_p)
 {
-    tOplkError  ret = kErrorOk;
+    int ret = 0;
 
     // Reply if the request is addressing us
     if (memcmp(pFrame_p->aTargetProtocolAddress, arpInstance_l.aIpAddr, ARP_PROADDR_LENGTH) == 0)
@@ -445,10 +425,13 @@ static tOplkError handleRequest(tArpFrame* pFrame_p)
         memcpy(pFrame->aTargetHardwareAddress, pRxFrame->aSenderHardwareAddress, ARP_HWADDR_LENGTH);
         memcpy(pFrame->aTargetProtocolAddress, pRxFrame->aSenderProtocolAddress, ARP_PROADDR_LENGTH);
 
-        ret = oplk_sendEthFrame((tPlkFrame*)pFrame, sizeof(tArpFrame));
+        if (oplk_sendEthFrame((tPlkFrame*)pFrame, sizeof(tArpFrame)) == kErrorOk)
+            ret = 0;
+        else
+            ret = -1;
     }
 
-    return kErrorOk;
+    return ret;
 }
 
 /// \}

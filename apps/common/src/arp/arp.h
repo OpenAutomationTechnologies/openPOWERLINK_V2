@@ -9,7 +9,7 @@ This file contains the definitions for the ARP demo.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -60,14 +60,14 @@ extern "C"
 {
 #endif
 
-tOplkError arp_init(UINT8 nodeId_p);
-void       arp_shutdown(void);
-tOplkError arp_setMacAddr(UINT8* pMacAddr_p);
-tOplkError arp_setIpAddr(UINT32 ipAddr_p);
-tOplkError arp_setDefGateway(UINT32 defGateway_p);
+void arp_init(UINT8 nodeId_p);
+void arp_exit(void);
+void arp_setMacAddr(UINT8* pMacAddr_p);
+void arp_setIpAddr(UINT32 ipAddr_p);
+void arp_setDefGateway(UINT32 defGateway_p);
 
-tOplkError arp_sendRequest(UINT32 ipAddr_p);
-tOplkError arp_processReceive(tPlkFrame* pFrame_p, UINT size_p);
+int  arp_sendRequest(UINT32 ipAddr_p);
+int  arp_processReceive(tPlkFrame* pFrame_p, UINT size_p);
 
 #ifdef __cplusplus
 }

@@ -202,7 +202,7 @@ Exit:
 #if (CONFIG_CDC_ON_SD != FALSE)
     sdcard_freeCdcBuffer(&cdcBuffInfo);
 #endif
-    arp_shutdown();
+    arp_exit();
     shutdownPowerlink(&instance_l);
     shutdownApp();
 
@@ -437,12 +437,13 @@ static tOplkError eventCbPowerlink(tOplkApiEventType EventType_p,
         //       \ref oplk_sendEthFrame.
 
         // Forward received frame to ARP processing
-        ret = arp_processReceive(pFrameInfo->pFrame, pFrameInfo->frameSize);
-         if (ret != kErrorRetry)
-             return ret;
+        if (arp_processReceive(pFrameInfo->pFrame, pFrameInfo->frameSize) == 0)
+            return kErrorOk;
 
-         // If you get here, the received Ethernet frame is no ARP frame.
-         // Here you can call other protocol stacks for processing.
+        // If you get here, the received Ethernet frame is no ARP frame.
+        // Here you can call other protocol stacks for processing.
+
+        ret = kErrorOk; // Frame wasn't processed, so simply dump it.
     }
     else if (EventType_p == kOplkApiEventDefaultGwChange)
     {
