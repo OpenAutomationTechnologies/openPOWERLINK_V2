@@ -1,14 +1,14 @@
 /**
 ********************************************************************************
-\file   MainWindow.h
+\file   NmtCommandDialog.h
 
-\brief  Header file for main window class
+\brief  Header file for the dialog to execute local NMT commands/events
 
-This file contains the definitions of the main window class.
+The file contains the definitions for the NMT command dialog
 *******************************************************************************/
 /*------------------------------------------------------------------------------
 Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2015, SYSTEC electronic GmbH
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,88 +34,46 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_MainWindow_H_
-#define _INC_MainWindow_H_
+#ifndef _INC_NmtCommandDialog_H_
+#define _INC_NmtCommandDialog_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <QWidget>
-#include <QTextEdit>
+#include <oplk/oplk.h>
+#include <QDialog>
 
-#include "Api.h"
-#include "State.h"
-#include "Input.h"
-#include "CnState.h"
-#include "Output.h"
+//------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 // class definitions
 //------------------------------------------------------------------------------
+class QLabel;
 class QLineEdit;
 class QPushButton;
-class QToolButton;
-class QLabel;
-class QFrame;
-class QTextEdit;
+
 
 //------------------------------------------------------------------------------
 /**
-\brief  MainWindow class
+\brief  NmtCommandDialog class
 
-Class MainWindow implements the main window class of the demo application.
+The class implements the NMT command/event execution dialog.
 */
 //------------------------------------------------------------------------------
-class MainWindow : public QWidget
+class NmtCommandDialog : public QDialog
 {
-    Q_OBJECT
+
+Q_OBJECT
 
 public:
-    MainWindow(QWidget* parent = 0);
-
-    State*       getStateWidget() {return pState;}
-    Output*      getOutputWidget() {return pOutput;}
-    Input*       getInputWidget() {return pInput;}
-    CnState*     getCnStateWidget() {return pCnState;}
-
-private slots:
-    void         toggleWindowState();
-    void         startPowerlink();
-    void         stopPowerlink();
-    void         printlog(QString str);
-    void         execNmtCmd();
+    NmtCommandDialog(tNmtEvent nmtEvent = kNmtEventNoEvent);
+    tNmtEvent getNmtEvent(void);
 
 private:
-    QHBoxLayout* pHeadRegion;
-    QPixmap*     pLogo;
-    QLabel*      pLabel;
-
-    State*       pState;
-    CnState*     pCnState;
-    Input*       pInput;
-    Output*      pOutput;
-
-    QLineEdit*   pNodeIdEdit;
-
-    QPushButton* pToggleMax;
-    QPushButton* pStartStopOplk;
-    QPushButton* pNmtCmd;
-
-    QFrame*      pFrameSepHeadMiddle;
-    QFrame*      pFrameSepMiddle;
-    QFrame*      pFrameSepMiddle2;
-    QFrame*      pFrameSepMiddleStatus;
-    QFrame*      pFrameSepStatusFoot;
-
-    QTextEdit*   pTextEdit;
-
-    Api*         pApi;
-
-    UINT32       version;
-    QString      devName;
-
-    tNmtEvent    nmtEvent;
+    QLineEdit*  pNmtCmdEdit;
 };
 
-#endif /* _INC_MainWindow_H_ */
+#endif /* _INC_NmtCommandDialog_H_ */
 

@@ -1,14 +1,14 @@
 /**
 ********************************************************************************
-\file   MainWindow.h
+\file   NmtCommandDialog.cpp
 
-\brief  Header file for main window class
+\brief  Implementation of the dialog class to execute local NMT commands/events
 
-This file contains the definitions of the main window class.
+This file contains the implementation of the NMT command dialog class.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
 Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2015, SYSTEC electronic GmbH
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,88 +34,86 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_MainWindow_H_
-#define _INC_MainWindow_H_
-
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <QWidget>
-#include <QTextEdit>
+#include <QtGui>
+#include "NmtCommandDialog.h"
 
-#include "Api.h"
-#include "State.h"
-#include "Input.h"
-#include "CnState.h"
-#include "Output.h"
+//------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 // class definitions
 //------------------------------------------------------------------------------
-class QLineEdit;
-class QPushButton;
-class QToolButton;
-class QLabel;
-class QFrame;
-class QTextEdit;
+
+//============================================================================//
+//            P U B L I C   M E M B E R   F U N C T I O N S                   //
+//============================================================================//
 
 //------------------------------------------------------------------------------
 /**
-\brief  MainWindow class
+\brief  constructor
 
-Class MainWindow implements the main window class of the demo application.
+Constructs an NMT command dialog.
 */
 //------------------------------------------------------------------------------
-class MainWindow : public QWidget
+NmtCommandDialog::NmtCommandDialog(tNmtEvent nmtEvent)
 {
-    Q_OBJECT
+    QVBoxLayout* mainLayout = new QVBoxLayout;
 
-public:
-    MainWindow(QWidget* parent = 0);
+    /* create labels */
+    QLabel*      label = new QLabel("Enter NMT event number (type tNmtEvent):");
+    QPushButton* okButton = new QPushButton("OK");
+    QPushButton* cancelButton = new QPushButton("Cancel");
 
-    State*       getStateWidget() {return pState;}
-    Output*      getOutputWidget() {return pOutput;}
-    Input*       getInputWidget() {return pInput;}
-    CnState*     getCnStateWidget() {return pCnState;}
 
-private slots:
-    void         toggleWindowState();
-    void         startPowerlink();
-    void         stopPowerlink();
-    void         printlog(QString str);
-    void         execNmtCmd();
+    /* create lineedit */
+    pNmtCmdEdit = new QLineEdit(QString::number((uint) nmtEvent, 16).prepend("0x"));
 
-private:
-    QHBoxLayout* pHeadRegion;
-    QPixmap*     pLogo;
-    QLabel*      pLabel;
+    /* create buttons */
+    QHBoxLayout* buttonLayout = new QHBoxLayout();
+    buttonLayout->addStretch(1);
+    buttonLayout->addWidget(okButton);
+    buttonLayout->addWidget(cancelButton);
 
-    State*       pState;
-    CnState*     pCnState;
-    Input*       pInput;
-    Output*      pOutput;
+    connect(okButton, SIGNAL(clicked()), this, SLOT(accept()));
+    connect(cancelButton, SIGNAL(clicked()), this, SLOT(reject()));
 
-    QLineEdit*   pNodeIdEdit;
+    /* create main layout */
+    mainLayout->addWidget(label);
+    mainLayout->addWidget(pNmtCmdEdit);
+    mainLayout->addStretch(0);
+    mainLayout->addLayout(buttonLayout);
 
-    QPushButton* pToggleMax;
-    QPushButton* pStartStopOplk;
-    QPushButton* pNmtCmd;
+    setLayout(mainLayout);
+    setWindowTitle("Select NMT command to execute");
+}
 
-    QFrame*      pFrameSepHeadMiddle;
-    QFrame*      pFrameSepMiddle;
-    QFrame*      pFrameSepMiddle2;
-    QFrame*      pFrameSepMiddleStatus;
-    QFrame*      pFrameSepStatusFoot;
+//------------------------------------------------------------------------------
+/**
+\brief  get NMT event for local execution
 
-    QTextEdit*   pTextEdit;
+returns NMT command/event for local execution by NMT state machine.
 
-    Api*         pApi;
+\return NMT event
+*/
+//------------------------------------------------------------------------------
+tNmtEvent NmtCommandDialog::getNmtEvent(void)
+{
+    bool fConvOk;
+    unsigned int nmtEventId;
 
-    UINT32       version;
-    QString      devName;
+    nmtEventId = pNmtCmdEdit->text().toUInt(&fConvOk, 0);
 
-    tNmtEvent    nmtEvent;
-};
-
-#endif /* _INC_MainWindow_H_ */
+    if (fConvOk)
+    {
+        return (tNmtEvent) nmtEventId;
+    }
+    else
+    {
+        return kNmtEventNoEvent;
+    }
+}
 

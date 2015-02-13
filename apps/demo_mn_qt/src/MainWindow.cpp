@@ -44,6 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Api.h"
 #include "Input.h"
 #include "Output.h"
+#include "NmtCommandDialog.h"
 
 #ifdef CONFIG_USE_PCAP
 #include "InterfaceSelectDialog.h"
@@ -66,6 +67,7 @@ MainWindow::MainWindow(QWidget* parent)
     : QWidget(parent)
 {
     pApi = NULL;
+    nmtEvent = kNmtEventResetNode;
 
     resize(1000, 600);
 
@@ -170,6 +172,11 @@ MainWindow::MainWindow(QWidget* parent)
     pFootRegion->addWidget(pStartStopOplk);
     connect(pStartStopOplk, SIGNAL(clicked()), this, SLOT(startPowerlink()));
 
+    pNmtCmd = new QPushButton(tr("Exec NMT command"));
+    pNmtCmd->setEnabled(false);
+    pFootRegion->addWidget(pNmtCmd);
+    connect(pNmtCmd, SIGNAL(clicked()), this, SLOT(execNmtCmd()));
+
     pFootRegion->addStretch();
 
     pToggleMax = new QPushButton(tr("Full Screen"));
@@ -258,6 +265,8 @@ void MainWindow::startPowerlink()
         nodeId = Api::defaultNodeId();
     }
 
+    pNmtCmd->setEnabled(true);
+
     // change the button to stop
     pStartStopOplk->setText(tr("Stop POWERLINK"));
     pStartStopOplk->disconnect(this, SLOT(startPowerlink()));
@@ -281,6 +290,36 @@ void MainWindow::stopPowerlink()
     pStartStopOplk->disconnect(this, SLOT(stopPowerlink()));
     connect(pStartStopOplk, SIGNAL(clicked()), this, SLOT(startPowerlink()));
     pNodeIdEdit->setEnabled(true);
+    pNmtCmd->setEnabled(false);
+
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Execute NMT command dialog
+
+Execute NMT command/event entered in dialog.
+*/
+//------------------------------------------------------------------------------
+void MainWindow::execNmtCmd()
+{
+    NmtCommandDialog* pDialog = new NmtCommandDialog(nmtEvent);
+
+    if (pDialog->exec() == QDialog::Rejected)
+    {
+        return;
+    }
+
+    nmtEvent = pDialog->getNmtEvent();
+    delete pDialog;
+
+    if (nmtEvent == kNmtEventNoEvent)
+    {
+        return;
+    }
+
+    oplk_execNmtCommand(nmtEvent);
+
 }
 
 //------------------------------------------------------------------------------

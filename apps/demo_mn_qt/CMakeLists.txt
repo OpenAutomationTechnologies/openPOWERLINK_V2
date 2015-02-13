@@ -64,6 +64,7 @@ SET (DEMO_SOURCES
      ${DEMO_SOURCE_DIR}/State.cpp
      ${DEMO_SOURCE_DIR}/Leds.cpp
      ${DEMO_SOURCE_DIR}/NodeState.cpp
+     ${DEMO_SOURCE_DIR}/NmtCommandDialog.cpp
      ${CONTRIB_SOURCE_DIR}/console/printlog.c
      )
 
@@ -80,6 +81,7 @@ SET (DEMO_HEADERS
      ${DEMO_INCLUDE_DIR}/Leds.h
      ${DEMO_INCLUDE_DIR}/MainWindow.h
      ${DEMO_INCLUDE_DIR}/NodeState.h
+     ${DEMO_INCLUDE_DIR}/NmtCommandDialog.h
      )
 
 INCLUDE_DIRECTORIES(
