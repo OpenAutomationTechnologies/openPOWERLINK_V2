@@ -444,7 +444,7 @@ tOplkError nmtmnu_init(tNmtMnuCbNodeEvent pfnCbNodeEvent_p, tNmtMnuCbBootEvent p
     nmtMnuInstance_g.statusRequestDelay = 5000L;
 
     // register NmtMnResponse callback function
-    ret = dllucal_regAsndService(kDllAsndNmtRequest, cbNmtRequest, kDllAsndFilterLocal);
+    ret = dllucal_regAsndService(kDllAsndNmtRequest, cbNmtRequest, kDllAsndFilterAny);
 
     nmtMnuInstance_g.prcPResTimeFirstCorrectionNs =  50;
     nmtMnuInstance_g.prcPResTimeFirstNegOffsetNs  = 500;
