@@ -776,8 +776,6 @@ tOplkError ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
                 UINT8       cmdTarget;
                 tObdSize    obdSize;
                 tNmtState   nmtState;
-                BYTE*       pCmdData;
-                tObdSize    cmdDataSize;
 
                 obdSize = sizeof(UINT8);
                 ret = obd_readEntry(0x1F9F, 2, &cmdId, &obdSize);
@@ -795,44 +793,20 @@ tOplkError ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
                     break;
                 }
 
-                if ((cmdId >= NMT_EXT_COMMAND_START) && (cmdId <= NMT_EXT_COMMAND_END))
-                {
-                    pCmdData = (BYTE*)OPLK_MALLOC(C_MAX_NMT_CMD_DATA_SIZE);
-                    if (pCmdData == NULL)
-                    {
-                        ret = kErrorNoResource;
-                        pParam_p->abortCode = SDO_AC_GENERAL_ERROR;
-                        break;
-                    }
-
-                    cmdDataSize = C_MAX_NMT_CMD_DATA_SIZE;
-                    ret = obd_readEntry(0x1F9F, 4, pCmdData, &cmdDataSize);
-                    if (ret != kErrorOk)
-                    {
-                        OPLK_FREE(pCmdData);
-                        pParam_p->abortCode = SDO_AC_GENERAL_ERROR;
-                        break;
-                    }
-                }
-                else
-                {
-                    cmdDataSize = 0;
-                    pCmdData = NULL;
-                }
-
                 nmtState = nmtu_getNmtState();
 
                 if (nmtState < kNmtMsNotActive)
                 {   // local node is CN
                     // forward the command to the MN
                     // d.k. this is a manufacturer specific feature
-                    ret = nmtcnu_sendNmtRequest(cmdTarget, (tNmtCommand) cmdId);
+                    ret = nmtcnu_sendNmtRequestEx(cmdTarget, (tNmtCommand) cmdId,
+                                                  aCmdData, sizeof(aCmdData));
                 }
                 else
                 {   // local node is MN
                     // directly execute the requested NMT command
                     ret = nmtmnu_requestNmtCommand(cmdTarget, (tNmtCommand) cmdId,
-                                                   pCmdData, cmdDataSize);
+                                                   aCmdData, sizeof(aCmdData));
                 }
                 if (ret != kErrorOk)
                 {
@@ -841,9 +815,6 @@ tOplkError ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
 
                 // reset request flag
                 *((UINT8*)pParam_p->pArg) = 0;
-
-                if (pCmdData != NULL)
-                    OPLK_FREE(pCmdData);
             }
             break;
 #endif
