@@ -40,6 +40,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <stddef.h>
+
 #include <common/oplkinc.h>
 #include <user/nmtmnu.h>
 #include <user/timeru.h>
@@ -1408,7 +1410,11 @@ static tOplkError cbNmtRequest(tFrameInfo* pFrameInfo_p)
     pNmtRequestService = &pFrameInfo_p->pFrame->data.asnd.payload.nmtRequestService;
     nmtCommand = (tNmtCommand)ami_getUint8Le(&pNmtRequestService->nmtCommandId);
     targetNodeId = ami_getUint8Le(&pNmtRequestService->targetNodeId);
-    ret = nmtmnu_requestNmtCommand(targetNodeId, nmtCommand, NULL, 0);
+    ret = nmtmnu_requestNmtCommand(targetNodeId,
+                                    nmtCommand,
+                                    pNmtRequestService->aNmtCommandData,
+                                    min(sizeof (pNmtRequestService->aNmtCommandData),
+                                        pFrameInfo_p->frameSize - offsetof(tPlkFrame, data.asnd.payload.nmtRequestService.aNmtCommandData)));
     if (ret != kErrorOk)
     {   // error -> reply with kNmtCmdInvalidService
         sourceNodeId = ami_getUint8Le(&pFrameInfo_p->pFrame->srcNodeId);
