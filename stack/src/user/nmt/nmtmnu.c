@@ -711,6 +711,23 @@ tOplkError nmtmnu_requestNmtCommand(UINT nodeId_p, tNmtCommand nmtCommand_p,
     if (nodeId_p == 0x00)
         nodeId_p = C_ADR_MN_DEF_NODE_ID;
 
+    if (nmtCommand_p == kNmtCmdGoToStandby)
+    {
+        UINT8       flags = 0;
+        tNmtEvent   nmtEvent;
+
+        if (pNmtCommandData_p && (dataSize_p >= 1))
+            flags = ami_getUint8Le(pNmtCommandData_p);
+
+        if (flags && NMT_CMD_DATA_FLAG_DELAY)
+            nmtEvent = kNmtEventGoToStandbyDelayed;
+        else
+            nmtEvent = kNmtEventGoToStandby;
+
+        ret = nmtu_postNmtEvent(nmtEvent);
+        goto Exit;
+    }
+
     if (nodeId_p == C_ADR_MN_DEF_NODE_ID)
     {   // apply command to local node-ID
         switch (nmtCommand_p)
