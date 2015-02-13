@@ -517,6 +517,12 @@ tOplkError nmtmnu_sendNmtCommandEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
     BOOL                fIsExtNmtCmd;
     UINT                dstNodeCnt;
 
+    if (!NMT_IF_ACTIVE_MN(nmtu_getNmtState()))
+    {
+        ret = kErrorInvalidOperation;
+        goto Exit;
+    }
+
     if ((nodeId_p == 0) || (nodeId_p > C_ADR_BROADCAST))
     {   // invalid node ID specified
         ret = kErrorInvalidNodeId;
@@ -1407,6 +1413,8 @@ static tOplkError cbNmtRequest(tFrameInfo* pFrameInfo_p)
     {   // error -> reply with kNmtCmdInvalidService
         sourceNodeId = ami_getUint8Le(&pFrameInfo_p->pFrame->srcNodeId);
         ret = nmtmnu_sendNmtCommand(sourceNodeId, kNmtCmdInvalidService);
+        if (ret == kErrorInvalidOperation)
+            ret = kErrorOk;
     }
     return ret;
 }
