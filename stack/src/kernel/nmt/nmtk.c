@@ -1321,6 +1321,8 @@ static tOplkError doStateMsPreOperational1(tNmtEvent nmtEvent_p)
         case kNmtEventDllCeSoa:
 #if defined(CONFIG_INCLUDE_NMT_RMN)
         case kNmtEventDllReAmni:
+        case kNmtEventGoToStandby:
+        case kNmtEventGoToStandbyDelayed:
             if (nmtkInstance_g.fRedundancy)
             {
                 nmtkInstance_g.stateIndex = kNmtkCsPreOperational1;
@@ -1423,6 +1425,8 @@ static tOplkError doStateMsPreOperational2(tNmtEvent nmtEvent_p)
         case kNmtEventDllCeSoa:
 #if defined(CONFIG_INCLUDE_NMT_RMN)
         case kNmtEventDllReAmni:
+        case kNmtEventGoToStandby:
+        case kNmtEventGoToStandbyDelayed:
             if (nmtkInstance_g.fRedundancy)
             {
                 nmtkInstance_g.stateIndex = kNmtkCsPreOperational1;
@@ -1504,6 +1508,8 @@ static tOplkError doStateMsReadyToOperate(tNmtEvent nmtEvent_p)
         case kNmtEventDllCeSoa:
 #if defined(CONFIG_INCLUDE_NMT_RMN)
         case kNmtEventDllReAmni:
+        case kNmtEventGoToStandby:
+        case kNmtEventGoToStandbyDelayed:
             if (nmtkInstance_g.fRedundancy)
             {
                 nmtkInstance_g.stateIndex = kNmtkCsPreOperational1;
@@ -1583,6 +1589,8 @@ static tOplkError doStateMsOperational(tNmtEvent nmtEvent_p)
         case kNmtEventDllCeSoa:
 #if defined(CONFIG_INCLUDE_NMT_RMN)
         case kNmtEventDllReAmni:
+        case kNmtEventGoToStandby:
+        case kNmtEventGoToStandbyDelayed:
             if (nmtkInstance_g.fRedundancy)
             {
                 nmtkInstance_g.stateIndex = kNmtkCsOperational;

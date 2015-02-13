@@ -141,8 +141,8 @@ static char* nmtEventStr_l[] =
     "NmtEventEnableReadyToOperate", //
     "NmtEventStartNode",            // NMT_CT7
     "NmtEventStopNode",             //
-    "0x18",                         // reserved
-    "0x19",                         // reserved
+    "NmtEventGoToStandby",          //
+    "NmtEventGoToStandbyDelayed",   //
     "0x1A",                         // reserved
     "0x1B",                         // reserved
     "0x1C",                         // reserved
