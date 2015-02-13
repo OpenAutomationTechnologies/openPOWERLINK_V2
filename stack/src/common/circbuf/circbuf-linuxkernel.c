@@ -85,6 +85,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 typedef struct
 {
     spinlock_t          spinlock;       ///< spinlock used for locking
+    unsigned long       flags;          ///< IRQ flags
 } tCircBufArchInstance;
 
 //------------------------------------------------------------------------------
@@ -251,7 +252,7 @@ void circbuf_lock(tCircBufInstance* pInstance_p)
     tCircBufArchInstance* pArchInstance =
                               (tCircBufArchInstance*)pInstance_p->pCircBufArchInstance;
 
-    spin_lock(&pArchInstance->spinlock);
+    spin_lock_irqsave(&pArchInstance->spinlock, pArchInstance->flags);
 }
 
 //------------------------------------------------------------------------------
@@ -270,7 +271,7 @@ void circbuf_unlock(tCircBufInstance* pInstance_p)
     tCircBufArchInstance* pArchInstance =
                               (tCircBufArchInstance*)pInstance_p->pCircBufArchInstance;
 
-    spin_unlock(&pArchInstance->spinlock);
+    spin_unlock_irqrestore(&pArchInstance->spinlock, pArchInstance->flags);
 }
 
 //============================================================================//
