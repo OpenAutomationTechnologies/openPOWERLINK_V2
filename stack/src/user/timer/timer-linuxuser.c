@@ -277,7 +277,7 @@ tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg a
 
     sev.sigev_notify = SIGEV_SIGNAL;
     sev.sigev_signo = SIGRTMIN;
-    sev.sigev_value.sival_ptr = &pData->timer;
+    sev.sigev_value.sival_ptr = pData;
     if (timer_create(CLOCK_MONOTONIC, &sev, &pData->timer) == -1)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Error creating timer!\n", __func__);
