@@ -264,6 +264,7 @@ typedef struct
 #endif
 #if defined(CONFIG_INCLUDE_NMT_RMN)
     BOOL                    fRedundancy;                            ///< Managing Node Redundancy is enabled
+    tNmtEvent               nmtEventGoToStandby;                    ///< NMT command GoToStandby has been requested
 #endif
 } tDllkInstance;
 
