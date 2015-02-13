@@ -7,6 +7,7 @@
     <tab type="usergroup" title="openPOWERLINK Stack" url="\ref page_openpowerlink">
       <tab type="user" url="\ref page_directories" title="Directory Structure"/>
       <tab type="user" url="\ref page_components" title="Components"/>
+      <tab type="user" url="\ref page_mnredundancy" title="Managing Node Redundancy"/>
       <tab type="usergroup" title="Building">
         <tab type="user" url="\ref page_build" title="Building openPOWERLINK"/>
         <tab type="user" url="\ref page_build_stack" title="Building Stack Libraries"/>
