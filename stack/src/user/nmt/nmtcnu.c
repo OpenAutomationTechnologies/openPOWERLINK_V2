@@ -167,6 +167,28 @@ The function is used to send an NMT-Request to the MN.
 //------------------------------------------------------------------------------
 tOplkError nmtcnu_sendNmtRequest(UINT nodeId_p, tNmtCommand nmtCommand_p)
 {
+    return nmtcnu_sendNmtRequestEx(nodeId_p, nmtCommand_p, NULL, 0);
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Send an NMT-Request with command data to the MN
+
+The function is used to send an NMT-Request to the MN.
+
+\param  nodeId_p            Node ID of the local node.
+\param  nmtCommand_p        NMT command to request from MN.
+\param  pNmtCommandData_p   Pointer to NMT command data (32 Byte).
+\param  dataSize_p          Size of NMT command data.
+
+\return The function returns a tOplkError error code.
+
+\ingroup module_nmtcnu
+*/
+//------------------------------------------------------------------------------
+tOplkError nmtcnu_sendNmtRequestEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
+                                    void* pNmtCommandData_p, UINT dataSize_p)
+{
     tOplkError      ret;
     tFrameInfo      nmtRequestFrameInfo;
     tPlkFrame       nmtRequestFrame;
@@ -184,8 +206,17 @@ tOplkError nmtcnu_sendNmtRequest(UINT nodeId_p, tNmtCommand nmtCommand_p)
                    (BYTE)nmtCommand_p);
     ami_setUint8Le(&nmtRequestFrame.data.asnd.payload.nmtRequestService.targetNodeId,
                    (BYTE)nodeId_p); // target for the nmt command
+
     OPLK_MEMSET(&nmtRequestFrame.data.asnd.payload.nmtRequestService.aNmtCommandData[0], 0x00,
                 sizeof(nmtRequestFrame.data.asnd.payload.nmtRequestService.aNmtCommandData));
+
+    if (pNmtCommandData_p && (dataSize_p != 0))
+    {
+        OPLK_MEMCPY(&nmtRequestFrame.data.asnd.payload.nmtRequestService.aNmtCommandData[0],
+                    pNmtCommandData_p,
+                    min(dataSize_p,
+                        sizeof(nmtRequestFrame.data.asnd.payload.nmtRequestService.aNmtCommandData)));
+    }
 
     // build info-structure
     nmtRequestFrameInfo.pFrame = &nmtRequestFrame;
