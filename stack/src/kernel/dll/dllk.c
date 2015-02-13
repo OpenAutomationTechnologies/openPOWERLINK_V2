@@ -867,8 +867,36 @@ tOplkError dllk_cbCyclicError(tOplkError errorCode_p, tEdrvTxBuffer* pTxBuffer_p
 
     nmtState = dllkInstance_g.nmtState;
     if (!NMT_IF_MN(nmtState))
+    {
+#if defined(CONFIG_INCLUDE_NMT_RMN)
+        if (errorCode_p == kErrorEdrvCurTxListEmpty)
+        {
+            switch (dllkInstance_g.nmtEventGoToStandby)
+            {
+                case kNmtEventGoToStandby:
+                    hrestimer_modifyTimer(&dllkInstance_g.timerHdlSwitchOver,
+                                          (dllkInstance_g.dllConfigParam.switchOverMN_us
+                                           - dllkInstance_g.dllConfigParam.cycleLen) * 1000ULL,
+                                          dllk_cbTimerSwitchOver, 0L, FALSE);
+                    dllkInstance_g.nmtEventGoToStandby = kNmtEventNoEvent;
+                    break;
+
+                case kNmtEventGoToStandbyDelayed:
+                    hrestimer_modifyTimer(&dllkInstance_g.timerHdlSwitchOver,
+                                          (dllkInstance_g.dllConfigParam.delayedSwitchOverMN_us
+                                           - dllkInstance_g.dllConfigParam.cycleLen)  * 1000ULL,
+                                          dllk_cbTimerSwitchOver, 0L, FALSE);
+                    dllkInstance_g.nmtEventGoToStandby = kNmtEventNoEvent;
+                    break;
+
+                default:
+                    break;
+            }
+        }
+#endif
         // ignore errors if not MN
         goto Exit;
+    }
 
     if (pTxBuffer_p != NULL)
     {

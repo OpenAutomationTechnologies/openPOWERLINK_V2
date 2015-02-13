@@ -100,7 +100,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 static tOplkError controlPdokcalSync(BOOL fEnable_p);
 
-static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState OldNmtState_p);
+static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState OldNmtState_p, tNmtEvent nmtEvent_p);
 static tOplkError processNmtEvent(tEvent* pEvent_p);
 static tOplkError processCycleFinish(tNmtState nmtState_p) SECTION_DLLK_PROCESS_CYCFIN;
 static tOplkError processSync(tNmtState nmtState_p) SECTION_DLLK_PROCESS_SYNC;
@@ -147,7 +147,8 @@ tOplkError dllk_process(tEvent* pEvent_p)
         case kEventTypeNmtStateChange:
             pNmtStateChange = (tEventNmtStateChange*)pEvent_p->pEventArg;
             ret = processNmtStateChange(pNmtStateChange->newNmtState,
-                                        pNmtStateChange->oldNmtState);
+                                        pNmtStateChange->oldNmtState,
+                                        pNmtStateChange->nmtEvent);
             break;
 
         case kEventTypeNmtEvent:
@@ -241,13 +242,17 @@ The function processes a NMT state change event.
 
 \param  newNmtState_p           New NMT state of the local node.
 \param  oldNmtState_p           Previous NMT state of the local node.
+\param  nmtEvent_p              NMT event which caused the state change.
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNmtState_p)
+static tOplkError processNmtStateChange(tNmtState newNmtState_p,
+                    tNmtState oldNmtState_p, tNmtEvent nmtEvent_p)
 {
     tOplkError      ret = kErrorOk;
+
+    UNUSED_PARAMETER(nmtEvent_p);
 
     switch (newNmtState_p)
     {
@@ -506,6 +511,13 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
                 hrestimer_modifyTimer(&dllkInstance_g.timerHdlSwitchOver,
                                       dllkInstance_g.dllConfigParam.switchOverMN_us * 1000ULL,
                                       dllk_cbTimerSwitchOver, 0L, FALSE);
+
+                if ((nmtEvent_p == kNmtEventGoToStandby)
+                    || (nmtEvent_p == kNmtEventGoToStandbyDelayed))
+                {   // save event, so cbCyclicError can start switch-over timeout
+                    // appropriately
+                    dllkInstance_g.nmtEventGoToStandby = nmtEvent_p;
+                }
             }
 #endif
             break;
