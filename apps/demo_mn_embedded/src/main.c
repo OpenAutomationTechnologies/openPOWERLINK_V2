@@ -162,8 +162,7 @@ int main(void)
     instance_l.fShutdown        = FALSE;
     instance_l.fGsOff           = FALSE;
 #if (CONFIG_CDC_ON_SD != FALSE)
-    ret = sdcard_getCdcOnSd(pszCdcFilename_g, &cdcBuffInfo);
-    if (ret != kErrorOk)
+    if (sdcard_getCdcOnSd(pszCdcFilename_g, &cdcBuffInfo) != 0)
     {
         goto Exit;
     }
