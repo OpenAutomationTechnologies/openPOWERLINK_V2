@@ -45,6 +45,10 @@ SET(OBJDICT CiA302-4_MN)            # Set object dictionary to use
 FIND_OPLK_LIBRARY("mn")             # Find suitable openPOWERLINK library
 FIND_PACKAGE(Qt4 REQUIRED)          # Find Qt4
 
+SET(CFG_DEMO_PROJECT "Demo_3CN" CACHE STRING
+        "Valid projects are Demo_3CN, RMN_3CN, RMN_3CN.modified")
+SET_PROPERTY(CACHE CFG_DEMO_PROJECT PROPERTY STRINGS Demo_3CN Demo_3CN_BC0083 RMN_3CN RMN_3CN.modified)
+
 SET(CFG_CFM ON CACHE BOOL "Use Configuration Manager (CFM)")
 
 # Set generic sources and include directories for this demo
@@ -146,7 +150,7 @@ SET_PROPERTY(TARGET demo_mn_qt
 
 ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_BINARY_DIR}/mnobd.cdc
                    COMMAND ${CMAKE_COMMAND} -E copy ${OPENCONFIG_PROJ_DIR}/Demo_3CN/output/mnobd.cdc ${CMAKE_BINARY_DIR}/mnobd.cdc
-                   DEPENDS ${OPENCONFIG_PROJ_DIR}/Demo_3CN/output/mnobd.cdc
+                   DEPENDS ${OPENCONFIG_PROJ_DIR}/${CFG_DEMO_PROJECT}/output/mnobd.cdc
                    VERBATIM
                    )
 
