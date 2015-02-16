@@ -115,7 +115,7 @@ OPTION(CFG_HOST_ARM_FRAME_AAPCS "ARM core has Stack frame compliant with AAPCS" 
 MARK_AS_ADVANCED(CFG_HOST_ARM_FRAME_AAPCS)
 
 # ARM core should use 4 byte enums
-OPTION(CFG_HOST_ARM_SHORT_ENUMS "ARM core uses 4-bytes enums" ON)
+OPTION(CFG_HOST_ARM_SHORT_ENUMS "ARM core uses 4-bytes enums" OFF)
 MARK_AS_ADVANCED(CFG_HOST_ARM_SHORT_ENUMS)
 
 ################################################################################
