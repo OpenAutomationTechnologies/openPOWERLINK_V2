@@ -526,6 +526,7 @@ tOplkError ProcessThread::processErrorWarningEvent(tOplkApiEventType EventType_p
                                 .arg(pInternalError->errorArg.eventSource, 2, 16, QLatin1Char('0')));
             break;
 
+        case kEventSourceObdu:
         case kEventSourceDllk:
             // error occurred within the data link layer (e.g. interrupt processing)
             // the DWORD argument contains the DLL state and the NMT event
