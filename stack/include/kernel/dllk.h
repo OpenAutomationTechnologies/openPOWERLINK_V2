@@ -140,7 +140,14 @@ typedef enum
     kDllMsWaitSoaTrig    = 0x08,                        ///< MN: wait for SoA trigger (PRes transmitted)
     kDllMsWaitAsndTrig   = 0x09,                        ///< MN: wait for ASnd trigger (SoA transmitted)
     kDllMsWaitAsnd       = 0x0A,                        ///< MN: wait for ASnd frame if SoA contained invitation
-} tDllState;
+} eDllState;
+
+/**
+\brief DLL node state data type
+
+Data type for the enumerator \ref eDllState.
+*/
+typedef UINT32 tDllState;
 
 //------------------------------------------------------------------------------
 // function prototypes

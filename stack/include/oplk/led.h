@@ -60,6 +60,13 @@ typedef enum
 {
     kLedTypeStatus   = 0x00,    ///< POWERLINK Status LED
     kLedTypeError    = 0x01,    ///< POWERLINK Error LED
-} tLedType;
+} eLedType;
+
+/**
+\brief LED type data type
+
+Data type for the enumerator \ref eLedType.
+*/
+typedef UINT32 tLedType;
 
 #endif /* _INC_oplk_led_H_ */

@@ -70,7 +70,14 @@ typedef enum
     kCircBufAlreadySignaling            = 13,
     kCircBufExceedDataSizeLimit         = 14,
     kCircBufNoResource                  = 20
-} tCircBufError;
+} eCircBufError;
+
+/**
+\brief Circular buffer error code data type
+
+Data type for the enumerator \ref eCircBufError.
+*/
+typedef UINT32 tCircBufError;
 
 /**
 *  \brief Header for circular buffer

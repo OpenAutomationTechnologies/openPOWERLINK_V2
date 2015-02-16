@@ -129,8 +129,12 @@ __Examples:__
 ## Type Definitions {#sect_coding_naming_types}
 Type definitions in C/C++ will be used to define enumerations, structures and
 unions. They will be defined using the keyword 'typedef'. A type definition
-must be prefixed with '_t_'. Enumeration constants must be prefixed with '_k_'.
+must be prefixed with '_t_', except an enumeration type must be prefixed with
+'_e_'. Enumeration constants must be prefixed with '_k_'.
 The name is formatted in lower camel case format.
+Every enumeration type must have an associated fixed-size type that can hold
+the maximum possible enumerator. This avoids size mismatches across different
+architectures.
 
 __Examples:__
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
@@ -140,7 +144,9 @@ typedef enum
         kModByte       = 8,    // byte access
         kModShort      = 16,   // short access
         kModLong       = 32,   // long access
-} tModAccess;
+} eModAccess;
+
+typedef UINT8 tModAccess; // Associated with eModAccess
 
 typedef struct
 {

@@ -99,7 +99,14 @@ typedef enum
     kDllkCalTxQueueSelectGen    = 0,    ///< TxGen is selected
     kDllkCalTxQueueSelectVeth   = 1,    ///< TxVeth is selected
     kDllkCalTxQueueSelectLast,          ///< Dummy enum to get select count
-} tDllkCalTxQueueSelect;
+} eDllkCalTxQueueSelect;
+
+/**
+\brief Asynchronous Tx queue select data type
+
+Data type for the enumerator \ref eDllkCalTxQueueSelect.
+*/
+typedef UINT32 tDllkCalTxQueueSelect;
 
 /**
 \brief DLLk CAL instance type

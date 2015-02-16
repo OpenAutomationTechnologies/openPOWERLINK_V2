@@ -53,8 +53,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // class definitions
 //------------------------------------------------------------------------------
 
-Q_DECLARE_METATYPE(tObdType)
-Q_DECLARE_METATYPE(tSdoType)
+Q_DECLARE_METATYPE(eObdType)
+Q_DECLARE_METATYPE(eSdoType)
 
 //============================================================================//
 //            P U B L I C   M E M B E R   F U N C T I O N S                   //

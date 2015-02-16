@@ -104,7 +104,14 @@ typedef enum
     kDllCalQueueTxGen        = 0x02, ///< TX Generic queue
     kDllCalQueueTxSync       = 0x03, ///< Tx Sync queue
     kDllCalQueueTxVeth       = 0x04, ///< Virtual Ethernet Tx queue
-} tDllCalQueue;
+} eDllCalQueue;
+
+/**
+\brief DLL CAL queue data type
+
+Data type for the enumerator \ref eDllCalQueue.
+*/
+typedef UINT32 tDllCalQueue;
 
 /**
 \brief type for DLL CAL queue instance

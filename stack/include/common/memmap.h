@@ -59,7 +59,14 @@ typedef enum
     kMemMapOk               =  0,   ///< No error/successful run
     kMemMapInvalidArg       =  9,   ///< There was an invalid argument given
     kMemMapNoResource       = 20    ///< The resource could not be created
-} tMemMapReturn;
+} eMemMapReturn;
+
+/**
+\brief Memory map return code data type
+
+Data type for the enumerator \ref eMemMapReturn.
+*/
+typedef UINT32 tMemMapReturn;
 
 //------------------------------------------------------------------------------
 // function prototypes

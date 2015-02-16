@@ -94,7 +94,14 @@ typedef enum
     kSdoTransAuto                       = 0x00,     ///< Automatically select the transfer type
     kSdoTransExpedited                  = 0x01,     ///< SDO expedited transfer
     kSdoTransSegmented                  = 0x02      ///< SDO segmented transfer
-} tSdoTransType;
+} eSdoTransType;
+
+/**
+\brief SDO transfer data type
+
+Data type for the enumerator \ref eSdoTransType.
+*/
+typedef UINT32 tSdoTransType;
 
 /**
 \brief Enumeration for SDO service types (command IDs)
@@ -118,7 +125,14 @@ typedef enum
     kSdoServiceReadMultiByIndex         = 0x32,     ///< SDO Read of multiple objects/sub-objects
     kSdoServiceMaxSegSize               = 0x70      ///< SDO maximum segment size
     // 0x80 - 0xFF manufacturer specific
-} tSdoServiceType;
+} eSdoServiceType;
+
+/**
+\brief SDO service type data type
+
+Data type for the enumerator \ref eSdoServiceType.
+*/
+typedef UINT32 tSdoServiceType;
 
 /**
 \brief  SDO command layer events
@@ -141,7 +155,14 @@ typedef enum
     kSdoComConEventInitCon          = 0x09, ///< Init connection (only client)
     kSdoComConEventAbort            = 0x0A, ///< Abort SDO transfer (only client)
 #endif
-} tSdoComConEvent;
+} eSdoComConEvent;
+
+/**
+\brief SDO command layer event data type
+
+Data type for the enumerator \ref eSdoComConEvent.
+*/
+typedef UINT32 tSdoComConEvent;
 
 /**
 \brief  SDO command layer message types
@@ -154,7 +175,14 @@ typedef enum
     kSdoComSendTypeAckRes           = 0x01,  ///< Send a response without data
     kSdoComSendTypeRes              = 0x02,  ///< Send response with data
     kSdoComSendTypeAbort            = 0x03   ///< Send abort
-} tSdoComSendType;
+} eSdoComSendType;
+
+/**
+\brief SDO command layer message data type
+
+Data type for the enumerator \ref eSdoComSendType.
+*/
+typedef UINT32 tSdoComSendType;
 
 /**
 \brief  SDO command layer states
@@ -173,7 +201,14 @@ typedef enum
     kSdoComStateClientConnected     = 0x11, ///< Server: Connection established
     kSdoComStateClientSegmTrans     = 0x12  ///< Server: Send following frames
 #endif
-} tSdoComState;
+} eSdoComState;
+
+/**
+\brief SDO command layer state data type
+
+Data type for the enumerator \ref eSdoComState.
+*/
+typedef UINT32 tSdoComState;
 
 /**
 \brief  SDO command layer connection control structure

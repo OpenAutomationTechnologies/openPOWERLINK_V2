@@ -110,7 +110,14 @@ typedef enum
     kSdoSeqEventFrameSend=   0x03,   ///< Frame to send
     kSdoSeqEventTimeout  =   0x04,   ///< Timeout for connection
     kSdoSeqEventCloseCon =   0x05    ///< Higher layer closed connection
-} tSdoSeqEvent;
+} eSdoSeqEvent;
+
+/**
+\brief SDO sequence layer event data type
+
+Data type for the enumerator \ref eSdoSeqEvent.
+*/
+typedef UINT32 tSdoSeqEvent;
 
 /**
 \brief  SDO sequence layer connection history
@@ -141,7 +148,14 @@ typedef enum
     kSdoSeqStateInit3       = 0x03,             ///< SDO init 3: scon=2, rcon=1
     kSdoSeqStateConnected   = 0x04,             ///< SDO connection is established
     kSdoSeqStateWaitAck     = 0x05              ///< SDO connection is waiting for an acknowledgement
-} tSdoSeqState;
+} eSdoSeqState;
+
+/**
+\brief SDO sequence layer state data type
+
+Data type for the enumerator \ref eSdoSeqState.
+*/
+typedef UINT32 tSdoSeqState;
 
 /**
 \brief  SDO sequence layer connection control structure

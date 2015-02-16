@@ -90,7 +90,14 @@ typedef enum
     kOpenmacIrqSync     = 0,    ///< Sync timer Irq
     kOpenmacIrqTxRx     = 1,    ///< Mac Irq (Tx and Rx)
     kOpenmacIrqLast             ///< Dummy, count of valid interrupt sources
-} tOpenmacIrqSource;
+} eOpenmacIrqSource;
+
+/**
+\brief openMAC IRQ source data type
+
+Data type for the enumerator \ref eOpenmacIrqSource.
+*/
+typedef UINT32 tOpenmacIrqSource;
 
 //------------------------------------------------------------------------------
 // global variable declarations

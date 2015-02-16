@@ -60,7 +60,7 @@ The structure defines how a command looks like.
 */
 typedef struct sCtrlCmd
 {
-    UINT16              cmd;        ///< The command to execute
+    tCtrlCmdType        cmd;        ///< The command to execute
     UINT16              retVal;     ///< The return value of the command
 } tCtrlCmd;
 
@@ -73,7 +73,7 @@ information between the kernel and the user layer.
 typedef struct
 {
     UINT16              magic;      ///< Magic 0xA5A5 identifies valid struct
-    UINT16              status;     ///< Status of the kernel stack
+    tCtrlKernelStatus   status;     ///< Status of the kernel stack
     UINT16              heartbeat;  ///< Heartbeat counter
     tCtrlCmd            ctrlCmd;    ///< The control command structure
     tCtrlInitParam      initParam;  ///< The initialization parameter structure

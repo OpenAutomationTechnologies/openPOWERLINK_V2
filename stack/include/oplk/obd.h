@@ -90,7 +90,14 @@ typedef enum
     kObdDirLoad             = 0x02,    ///< Load all object values from non volatile memory
     kObdDirRestore          = 0x03,    ///< Deletes non volatile memory (restore)
     kObdDirOBKCheck         = 0xFF     ///< Reserved
-} tObdDir;
+} eObdDir;
+
+/**
+\brief Directions for access to object dictionary data type
+
+Data type for the enumerator \ref eObdDir.
+*/
+typedef UINT32 tObdDir;
 
 /**
 * \brief Valid OD store commands
@@ -106,7 +113,14 @@ typedef enum
     kObdCmdReadObj          = 0x05,
     kObdCmdCloseRead        = 0x06,
     kObdCmdClear            = 0x07,
-} tObdCommand;
+} eObdCommand;
+
+/**
+\brief Valid OD store command data type
+
+Data type for the enumerator \ref eObdCommand.
+*/
+typedef UINT32 tObdCommand;
 
 /**
 * \brief Events of object callback function
@@ -124,7 +138,14 @@ typedef enum
     kObdEvPreWrite          = 0x02,     ///< Called before writing an object. pArg points to: source data buffer from caller
     kObdEvPostWrite         = 0x03,     ///< Called after writing an object. pArg points to: destination data buffer in OD
     kObdEvPostDefault       = 0x08,     ///< Called after setting default values. pArg points to: data buffer in OD
-} tObdEvent;
+} eObdEvent;
+
+/**
+\brief Object callback function event data type
+
+Data type for the enumerator \ref eObdEvent.
+*/
+typedef UINT32 tObdEvent;
 
 typedef unsigned int tObdPart;          ///< Data type for OD part definitions
 
@@ -240,7 +261,14 @@ typedef enum
     kObdTypeUInt56          = 0x001A,      ///< 001A - UNSIGNED56
     kObdTypeUInt64          = 0x001B,      ///< 001B - UNSIGNED64
     kObdTypeMax             = 0x001C
-} tObdType;
+} eObdType;
+
+/**
+\brief Object data type data type
+
+Data type for the enumerator \ref eObdType.
+*/
+typedef UINT32 tObdType;
 
 ///\{
 /**
@@ -281,7 +309,9 @@ typedef enum
     kVarValidSize           = 0x01,
     kVarValidData           = 0x02,
     kVarValidAll            = 0x03          // currently only size and data are implemented and used
-}tVarParamValid;
+} eVarParamValid;
+
+typedef UINT32 tVarParamValid;
 
 typedef struct
 {
@@ -432,7 +462,14 @@ typedef enum
     kObdNodeIdUnknown       = 0x00,         ///< unknown how the node id was set
     kObdNodeIdSoftware      = 0x01,         ///< node id set by software
     kObdNodeIdHardware      = 0x02          ///< node id set by hardware
-}tObdNodeIdType;
+} eObdNodeIdType;
+
+/**
+\brief Node ID setting data type
+
+Data type for the enumerator \ref eObdNodeIdType.
+*/
+typedef UINT32 tObdNodeIdType;
 
 //------------------------------------------------------------------------------
 // function prototypes

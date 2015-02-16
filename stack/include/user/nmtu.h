@@ -106,7 +106,14 @@ typedef enum
     kNmtCmdPublishTime               = 0xB0,            ///< NMTPublishTime command
 
     kNmtCmdInvalidService            = 0xFF             ///< NMTInvalidService command
-} tNmtCommand;
+} eNmtCommand;
+
+/**
+\brief NMT command data type
+
+Data type for the enumerator \ref eNmtCommand.
+*/
+typedef UINT32 tNmtCommand;
 
 typedef tOplkError (*tNmtuStateChangeCallback)(tEventNmtStateChange NmtStateChange_p);
 typedef tOplkError (*tNmtuCheckEventCallback)(tNmtEvent NmtEvent_p);

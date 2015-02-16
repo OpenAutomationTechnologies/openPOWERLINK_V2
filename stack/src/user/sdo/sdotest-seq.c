@@ -97,7 +97,14 @@ typedef enum
 {
     kOplkTestSdoSequConIdle,                 ///< Lower layer connection is unused
     kOplkTestSdoSequConActive,               ///< Lower layer connection is used
-} tSdoTestSeqConState;
+} eSdoTestSeqConState;
+
+/**
+\brief SDO sequence layer state data type
+
+Data type for the enumerator \ref eSdoTestSeqConState.
+*/
+typedef UINT32 tSdoTestSeqConState;
 
 /**
 \brief  SDO sequence layer connection control structure

@@ -108,7 +108,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 /**
-\brief openPOWERLINK funciton error codes
+\brief openPOWERLINK function error codes
 
 The following enumeration specifies the error codes for return values of
 openPOWERLINK functions.
@@ -270,6 +270,13 @@ typedef enum
 
     // area until 0x07FF is reserved
     // area for user application from 0x0800 to 0x7FFF
-} tOplkError;
+} eOplkError;
+
+/**
+\brief openPOWERLINK function error code data type
+
+Data type for the enumerator \ref eOplkError.
+*/
+typedef UINT32 tOplkError;
 
 #endif /* _INC_oplk_errordefs_H_ */

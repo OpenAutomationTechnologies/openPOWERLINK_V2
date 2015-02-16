@@ -72,7 +72,14 @@ typedef enum
     kAsySdoConStateFrameSent            = 0x04,     ///< A frame has been sent
     kAsySdoConStateTimeout              = 0x05,     ///< A timeout has occured
     kAsySdoConStateTransferAbort        = 0x06,     ///< The SDO transfer has been aborted
-} tAsySdoConState;
+} eAsySdoConState;
+
+/**
+\brief SDO connection state data type
+
+Data type for the enumerator \ref eAsySdoConState.
+*/
+typedef UINT32 tAsySdoConState;
 
 /// Data type for handle between asynchronous SDO Sequence Layer and SDO Command Layer
 typedef UINT tSdoSeqConHdl;

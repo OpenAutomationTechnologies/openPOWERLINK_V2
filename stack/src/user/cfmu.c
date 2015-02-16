@@ -108,7 +108,14 @@ typedef enum
     kCfmStateWaitStore,                                     ///< The CFM has issued a store command and is awaiting the acknowledge
     kCfmStateUpToDate,                                      ///< The CN is up-to-date (no configuration download is required)
     kCfmStateInternalAbort,                                 ///< The CFM has aborted due to an internal failure
-} tCfmState;
+} eCfmState;
+
+/**
+\brief CFM state data type
+
+Data type for the enumerator \ref eCfmState.
+*/
+typedef UINT32 tCfmState;
 
 /**
 \brief CFM node information structure

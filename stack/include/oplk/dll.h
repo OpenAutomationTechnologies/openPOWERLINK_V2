@@ -75,7 +75,14 @@ typedef enum
 #if ((CONFIG_DLL_PRES_CHAINING_CN != FALSE) || defined(CONFIG_INCLUDE_NMT_MN))
     kDllAsndSyncResponse     = 0x06                         ///< Send a SyncResponse frame
 #endif
-} tDllAsndServiceId;
+} eDllAsndServiceId;
+
+/**
+\brief ASnd service ID data type
+
+Data type for the enumerator \ref eDllAsndServiceId.
+*/
+typedef UINT8 tDllAsndServiceId;
 
 /**
 \brief Enumeration for ASnd filters
@@ -87,7 +94,14 @@ typedef enum
     kDllAsndFilterNone      = 0x00,                         ///< No filter
     kDllAsndFilterLocal     = 0x01,                         ///< Receive only ASnd frames with local or broadcast node ID
     kDllAsndFilterAny       = 0x02,                         ///< Receive any ASnd frame
-} tDllAsndFilter;
+} eDllAsndFilter;
+
+/**
+\brief ASnd filter data type
+
+Data type for the enumerator \ref eDllAsndFilter.
+*/
+typedef UINT8 tDllAsndFilter;
 
 /**
 \brief Enumeration for request service IDs
@@ -104,7 +118,14 @@ typedef enum
     kDllReqServiceSync       = 0x06,                        ///< Send a SyncRequest frame
 #endif
     kDllReqServiceUnspecified= 0xFF,                        ///< Invite a node for sending a generic asynchronous frame
-} tDllReqServiceId;
+} eDllReqServiceId;
+
+/**
+\brief Request service ID data type
+
+Data type for the enumerator \ref eDllReqServiceId.
+*/
+typedef UINT8 tDllReqServiceId;
 
 /**
 \brief Enumeration for asynchronous request priorities
@@ -121,7 +142,14 @@ typedef enum
     kDllAsyncReqPrio2        = 0x02,            ///< Priority 2 (unused - until WSP 0.1.3: PRIO_ABOVE_GENERIC)
     kDllAsyncReqPrio1        = 0x01,            ///< Priority 1 (unused - until WSP 0.1.3: PRIO_BELOW_GENERIC)
     kDllAsyncReqPrio0        = 0x00,            ///< Priority 0 (unused - until WSP 0.1.3: PRIO_GENERIC_REQUEST)
-} tDllAsyncReqPriority;
+} eDllAsyncReqPriority;
+
+/**
+\brief Asynchronous request priorities data type
+
+Data type for the enumerator \ref eDllAsyncReqPriority.
+*/
+typedef UINT8 tDllAsyncReqPriority;
 
 /**
 \brief Structure for frame information
@@ -234,7 +262,14 @@ typedef enum
     kDllNodeOpTypeFilterPdo          = 0x01,            ///< Filter PDO
     kDllNodeOpTypeFilterHeartbeat    = 0x02,            ///< Filter heartbeat
     kDllNodeOpTypeSoftDelete         = 0x03,            ///< Remove the node via soft delete
-} tDllNodeOpType;
+} eDllNodeOpType;
+
+/**
+\brief Node operations data type
+
+Data type for the enumerator \ref eDllNodeOpType.
+*/
+typedef UINT8 tDllNodeOpType;
 
 /**
 \brief Structure for DLL Node Operation Parameters

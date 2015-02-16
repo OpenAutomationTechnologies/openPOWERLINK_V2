@@ -97,7 +97,14 @@ typedef enum
 {
     kEdrvReleaseRxBufferImmediately = 0x00, ///< Release the Rx buffer immediately
     kEdrvReleaseRxBufferLater       = 0x01  ///< The Rx buffer is released later
-} tEdrvReleaseRxBuffer;
+} eEdrvReleaseRxBuffer;
+
+/**
+\brief Rx buffer release data type
+
+Data type for the enumerator \ref eEdrvReleaseRxBuffer.
+*/
+typedef UINT32 tEdrvReleaseRxBuffer;
 
 /// Callback function pointer for Rx frames
 typedef tEdrvReleaseRxBuffer (*tEdrvRxHandler)(tEdrvRxBuffer* pRxBuffer_p);
@@ -117,7 +124,14 @@ typedef enum
     kEdrvBufferFirstInFrame     = 0x01, ///< First data of frame received
     kEdrvBufferMiddleInFrame    = 0x02, ///< Middle data of frame received
     kEdrvBufferLastInFrame      = 0x04  ///< Last data of frame received
-} tEdrvBufferInFrame;
+} eEdrvBufferInFrame;
+
+/**
+\brief Rx buffer transfer state data type
+
+Data type for the enumerator \ref eEdrvBufferInFrame.
+*/
+typedef UINT32 tEdrvBufferInFrame;
 
 /**
 \brief Union for Tx buffer number

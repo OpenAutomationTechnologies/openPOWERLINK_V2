@@ -157,7 +157,9 @@ typedef enum
     kDllkTxBufFilling,           // just the buffer is being filled
     kDllkTxBufSending,           // the buffer is being transmitted
     kDllkTxBufReady,             // the buffer is ready for transmission
-} tDllkTxBufState;
+} eDllkTxBufState;
+
+typedef UINT32 tDllkTxBufState;
 
 /**
 \brief Structure for handling the report of a loss of SoC to the error handler

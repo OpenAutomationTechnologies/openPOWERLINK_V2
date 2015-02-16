@@ -226,7 +226,14 @@ typedef enum
     kNmtMnuIntNodeEventTimerStateMon        = 0x0C,
     kNmtMnuIntNodeEventTimerLonger          = 0x0D,
     kNmtMnuIntNodeEventError                = 0x0E,
-} tNmtMnuIntNodeEvent;
+} eNmtMnuIntNodeEvent;
+
+/**
+\brief NMT MN internal node event data type
+
+Data type for the enumerator \ref eNmtMnuIntNodeEvent.
+*/
+typedef UINT32 tNmtMnuIntNodeEvent;
 
 typedef enum
 {
@@ -238,7 +245,14 @@ typedef enum
     kNmtMnuNodeStateReadyToOp               = 0x05, // BootStep2 completed
     kNmtMnuNodeStateComChecked              = 0x06, // Communication checked successfully
     kNmtMnuNodeStateOperational             = 0x07, // CN is in NMT state OPERATIONAL
-} tNmtMnuNodeState;
+} eNmtMnuNodeState;
+
+/**
+\brief NMT MN node state data type
+
+Data type for the enumerator \ref eNmtMnuNodeState.
+*/
+typedef UINT32 tNmtMnuNodeState;
 
 typedef INT (*tProcessNodeEventFunc)(UINT nodeId_p, tNmtState nodeNmtState_p,
                                      tNmtState nmtState_p, UINT16 errorCode_p,

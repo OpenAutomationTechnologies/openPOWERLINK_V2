@@ -56,7 +56,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 The following enumeration lists all valid ctrl commands.
 */
-typedef enum eCtrlCmd
+typedef enum
 {
     kCtrlNone = 0,                      ///< No command
     kCtrlInitStack,                     ///< Initialize kernel modules
@@ -66,7 +66,14 @@ typedef enum eCtrlCmd
     kCtrlGetVersionLow,                 ///< Get lower part of kernel stack version
     kCtrlGetFeaturesHigh,               ///< Get higher part of features of kernel stack
     kCtrlGetFeaturesLow,                ///< Get lower part of features of kernel stack
-} tCtrlCmdType;
+} eCtrlCmdType;
+
+/**
+\brief Control command data type
+
+Data type for the enumerator \ref eCtrlCmdType.
+*/
+typedef UINT16 tCtrlCmdType;
 
 /**
 \brief Status of kernel stack
@@ -79,8 +86,14 @@ typedef enum
     kCtrlStatusReady,                   ///< Kernel stack is ready
     kCtrlStatusRunning,                 ///< Kernel stack is running
     kCtrlStatusUnchanged,               ///< State has not changed
-} tCtrlKernelStatus;
+} eCtrlKernelStatus;
 
+/**
+\brief Status of kernel stack data type
+
+Data type for the enumerator \ref eCtrlKernelStatus.
+*/
+typedef UINT16 tCtrlKernelStatus;
 
 typedef struct
 {

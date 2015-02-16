@@ -107,7 +107,14 @@ typedef enum
     kNmtkMsReadyToOperate,
     kNmtkMsOperational,
     kNmtkMsBasicEthernet
-} tNmtkStateIndexes;
+} eNmtkStateIndexes;
+
+/**
+\brief NMT state data type
+
+Data type for the enumerator \ref eNmtkStateIndexes.
+*/
+typedef UINT32 tNmtkStateIndexes;
 
 //------------------------------------------------------------------------------
 // local types

@@ -72,7 +72,14 @@ typedef enum
     kSdoTypeUdp                         = 0x01,     ///< Use SDO via UDP
     kSdoTypeAsnd                        = 0x02,     ///< Use SDO via ASnd
     kSdoTypePdo                         = 0x03      ///< Use SDO via PDO
-} tSdoType;
+} eSdoType;
+
+/**
+\brief SDO type data type
+
+Data type for the enumerator \ref eSdoType.
+*/
+typedef UINT32 tSdoType;
 
 /**
 \brief Enumeration lists valid SDO Command Layer connection states
@@ -87,7 +94,14 @@ typedef enum
     kSdoComTransferRxAborted            = 0x03,     ///< SDO transfer has been aborted by the remote side
     kSdoComTransferFinished             = 0x04,     ///< SDO transfer is finished
     kSdoComTransferLowerLayerAbort      = 0x05      ///< SDO transfer has been aborted by the SDO sequence layer
-} tSdoComConState;
+} eSdoComConState;
+
+/**
+\brief SDO command layer connection state data type
+
+Data type for the enumerator \ref eSdoComConState.
+*/
+typedef UINT32 tSdoComConState;
 
 /**
 \brief Enumeration for SDO access types
@@ -98,7 +112,14 @@ typedef enum
 {
     kSdoAccessTypeRead                  = 0x00,     ///< SDO read access
     kSdoAccessTypeWrite                 = 0x01      ///< SDO write access
-} tSdoAccessType;
+} eSdoAccessType;
+
+/**
+\brief SDO access data type
+
+Data type for the enumerator \ref eSdoAccessType.
+*/
+typedef UINT32 tSdoAccessType;
 
 /**
 \brief Structure for finished SDO transfer

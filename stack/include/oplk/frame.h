@@ -471,6 +471,13 @@ typedef enum
     kMsgTypeAsnd                = 0x06,                     ///< Defines Asynchronous Send Frame
     kMsgTypeAmni                = 0x07,                     ///< Defines Active Managing Node Indication Frame
     kMsgTypeAInv                = 0x0D,                     ///< Defines Asynchronous Invite Frame
-} tMsgType;
+} eMsgType;
+
+/**
+\brief Message type data type
+
+Data type for the enumerator \ref eMsgType.
+*/
+typedef UINT8 tMsgType;
 
 #endif /* _INC_oplk_frame_H_ */

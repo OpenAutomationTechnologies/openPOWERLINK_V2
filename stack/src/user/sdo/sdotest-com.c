@@ -81,8 +81,14 @@ typedef enum
     kOplkTestSdoComStateIdle         = 0x00,     // Idle state
     kOplkTestSdoComStateWaitInit     = 0x10,     // Wait for init connection
     kOplkTestSdoComStateConnected    = 0x11,     // Connection established
-}
-tSdoTestComState;
+} eSdoTestComState;
+
+/**
+\brief SDO command layer state data type
+
+Data type for the enumerator \ref eSdoTestComState.
+*/
+typedef UINT32 tSdoTestComState;
 
 /**
 \brief  SDO command layer connection control structure

@@ -92,7 +92,14 @@ typedef enum
     kLeduModeSingleFlash    = 0x05,
     kLeduModeDoubleFlash    = 0x06,
     kLeduModeTripleFlash    = 0x07,
-} tLeduMode;
+} eLeduMode;
+
+/**
+\brief LED mode data type
+
+Data type for the enumerator \ref eLeduMode.
+*/
+typedef UINT32 tLeduMode;
 
 /**
  * \brief   User LED module instance
