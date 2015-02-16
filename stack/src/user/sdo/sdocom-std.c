@@ -10,7 +10,7 @@ This file contains the standard command layer implementation.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -219,8 +219,7 @@ typedef struct
 // local function prototypes
 //------------------------------------------------------------------------------
 static tOplkError sdoInit(void);
-static tOplkError sdoAddInstance(void);
-static tOplkError sdoDelInstance(void);
+static tOplkError sdoExit(void);
 static tOplkError sdoDefineConnection(tSdoComConHdl* pSdoComConHdl_p, UINT targetNodeId_p,
                                           tSdoType protType_p);
 static tOplkError sdoInitTransferByIndex(tSdoComTransParamByIndex* pSdoComTransParam_p);
@@ -273,8 +272,7 @@ the standard implementation.
 static tSdoComFunctions standardSdoFunctions =
 {
    sdoInit,
-   sdoAddInstance,
-   sdoDelInstance,
+   sdoExit,
 #if defined(CONFIG_INCLUDE_SDOC)
    sdoDefineConnection,
    sdoInitTransferByIndex,
@@ -322,25 +320,11 @@ The function initializes the command layer module.
 //------------------------------------------------------------------------------
 static tOplkError sdoInit(void)
 {
-    return sdoAddInstance();
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Add an instance of the SDO command layer module
-
-The function adds an instance of the command layer module.
-
-\return The function returns a tOplkError error code.
-*/
-//------------------------------------------------------------------------------
-static tOplkError sdoAddInstance(void)
-{
     tOplkError ret = kErrorOk;
 
     OPLK_MEMSET(&sdoComInstance_l, 0x00, sizeof(sdoComInstance_l));
 
-    ret = sdoseq_addInstance(receiveCb, conStateChangeCb);
+    ret = sdoseq_init(receiveCb, conStateChangeCb);
     if (ret != kErrorOk)
         return ret;
 
@@ -353,21 +337,21 @@ static tOplkError sdoAddInstance(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Delete an instance of the SDO command layer module
+\brief  Shut down the SDO command layer
 
-The function deletes an instance of the command layer module.
+The function shuts down the SDO command layer module.
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError sdoDelInstance(void)
+static tOplkError sdoExit(void)
 {
     tOplkError  ret = kErrorOk;
 
 #if defined(WIN32) || defined(_WIN32)
     DeleteCriticalSection(sdoComInstance_l.pCriticalSection);
 #endif
-    ret = sdoseq_delInstance();
+    ret = sdoseq_exit();
     return ret;
 }
 
@@ -2397,4 +2381,4 @@ static tOplkError transferFinished(tSdoComConHdl sdoComConHdl_p, tSdoComCon* pSd
     return ret;
 }
 
-///\}
+/// \}

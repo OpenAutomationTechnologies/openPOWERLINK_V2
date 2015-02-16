@@ -8,7 +8,7 @@ The file contains definitions for the SDO over UDP protocol abstraction layer.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -65,8 +65,7 @@ extern "C"
 #if defined(CONFIG_INCLUDE_SDO_UDP)
 
 tOplkError sdoudp_init(tSequLayerReceiveCb pfnReceiveCb_p);
-tOplkError sdoudp_addInstance(tSequLayerReceiveCb pfnReceiveCb_p);
-tOplkError sdoudp_delInstance(void);
+tOplkError sdoudp_exit(void);
 tOplkError sdoudp_config(ULONG ipAddr_p, UINT port_p);
 tOplkError sdoudp_initCon(tSdoConHdl* pSdoConHandle_p, UINT targetNodeId_p);
 tOplkError sdoudp_sendData(tSdoConHdl sdoConHandle_p, tPlkFrame* pSrcData_p, UINT32 dataSize_p);

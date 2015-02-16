@@ -13,7 +13,7 @@ to get rid of "#ifdef" statements for different platforms!
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -164,24 +164,6 @@ The function initializes the SDO over UDP module.
 //------------------------------------------------------------------------------
 tOplkError sdoudp_init(tSequLayerReceiveCb pfnReceiveCb_p)
 {
-    return sdoudp_addInstance(pfnReceiveCb_p);
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Add an instance of an SDO over UDP module
-
-The function adds an instance of an SDO over UDP module.
-
-\param  pfnReceiveCb_p          Pointer to SDO sequence layer receive callback function.
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_sdo_udp
-*/
-//------------------------------------------------------------------------------
-tOplkError sdoudp_addInstance(tSequLayerReceiveCb pfnReceiveCb_p)
-{
     tOplkError          ret = kErrorOk;
 
 #if (TARGET_SYSTEM == _WIN32_)
@@ -219,9 +201,9 @@ tOplkError sdoudp_addInstance(tSequLayerReceiveCb pfnReceiveCb_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Delete an instance of an SDO over UDP module
+\brief  Shut down the SDO over UDP module
 
-The function deletes an instance of an SDO over UDP module. It deletes the created
+The function shuts down the SDO over UDP module. It deletes the created
 sockets and deletes the listener thread.
 
 \return The function returns a tOplkError error code.
@@ -229,7 +211,7 @@ sockets and deletes the listener thread.
 \ingroup module_sdo_udp
 */
 //------------------------------------------------------------------------------
-tOplkError sdoudp_delInstance(void)
+tOplkError sdoudp_exit(void)
 {
     tOplkError      ret = kErrorOk;
 

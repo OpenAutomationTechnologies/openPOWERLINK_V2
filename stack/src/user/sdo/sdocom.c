@@ -11,7 +11,7 @@ to the SDO stack defined in the api init parameters.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -123,43 +123,22 @@ tOplkError sdocom_init(UINT stackType_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Initialize SDO layer instance
+\brief  Shut down SDO command layer instance
 
-The function initializes the SDO layer
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_sdocom
-*/
-//------------------------------------------------------------------------------
-tOplkError sdocom_addInstance(void)
-{
-    tOplkError ret = kErrorOk;
-
-    if (pSdoComInstance != NULL)
-        ret = pSdoComInstance->pfnAddInstance();
-
-    return ret;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Delete SDO layer instance
-
-The function deletes an instance of the SDO layer.
+The function shuts down the SDO command layer.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_sdocom
 */
 //------------------------------------------------------------------------------
-tOplkError sdocom_delInstance(void)
+tOplkError sdocom_exit(void)
 {
     tOplkError ret = kErrorOk;
 
     if (pSdoComInstance != NULL)
     {
-        ret = pSdoComInstance->pfnDelInstance();
+        ret = pSdoComInstance->pfnExit();
         pSdoComInstance = NULL;
     }
 

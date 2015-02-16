@@ -8,7 +8,7 @@ The file contains definitions for the SDO Command Layer module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -82,9 +82,8 @@ the command layer implementations for the SDO stack defined in the init paramete
 */
 typedef struct
 {
-    tOplkError          (*pfnInit)(void);        ///< Init function pointer
-    tOplkError          (*pfnAddInstance)(void); ///< Add instance function pointer
-    tOplkError          (*pfnDelInstance)(void); ///< Function pointer to the SDO delete instance function
+    tOplkError          (*pfnInit)(void);                                ///< Init function pointer
+    tOplkError          (*pfnExit)(void);                                ///< Exit function pointer
     tOplkError          (*pfnDefineCon)(tSdoComConHdl*, UINT, tSdoType); ///< Define Connection function pointer
     tOplkError          (*pfnTransByIdx)(tSdoComTransParamByIndex*);     ///< Transfer by Index function pointer
     tOplkError          (*pfnDeleteCon)(tSdoComConHdl);                  ///< Delete Connection function pointer
@@ -103,8 +102,7 @@ extern "C"
 #endif
 
 tOplkError sdocom_init(UINT stackType_p);
-tOplkError sdocom_addInstance(void);
-tOplkError sdocom_delInstance(void);
+tOplkError sdocom_exit(void);
 tOplkError sdocom_defineConnection(tSdoComConHdl* pSdoComConHdl_p, UINT targetNodeId_p, tSdoType sdoType_p);
 tOplkError sdocom_initTransferByIndex(tSdoComTransParamByIndex* pSdoComTransParam_p);
 UINT       sdocom_getNodeId(tSdoComConHdl sdoComConHdl_p);

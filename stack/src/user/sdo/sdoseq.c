@@ -10,7 +10,7 @@ This file contains the implementation of the SDO Sequence Layer
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -254,27 +254,6 @@ The function initializes the SDO sequence layer
 //------------------------------------------------------------------------------
 tOplkError sdoseq_init(tSdoComReceiveCb pfnSdoComRecvCb_p, tSdoComConCb pfnSdoComConCb_p)
 {
-    return sdoseq_addInstance(pfnSdoComRecvCb_p, pfnSdoComConCb_p);
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Add SDO sequence layer instance
-
-The function adds an instance of the SDO sequence layer.
-
-\param  pfnSdoComRecvCb_p       Pointer to callback function that informs command
-                                layer about new frames.
-\param  pfnSdoComConCb_p        Pointer to callback function that informs command
-                                layer about connection state.
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_sdo_seq
-*/
-//------------------------------------------------------------------------------
-tOplkError sdoseq_addInstance(tSdoComReceiveCb pfnSdoComRecvCb_p, tSdoComConCb pfnSdoComConCb_p)
-{
     tOplkError      ret = kErrorOk;
 
     if (pfnSdoComRecvCb_p == NULL)
@@ -309,13 +288,13 @@ tOplkError sdoseq_addInstance(tSdoComReceiveCb pfnSdoComRecvCb_p, tSdoComConCb p
 
     // init lower layers
 #if defined(CONFIG_INCLUDE_SDO_UDP)
-    ret = sdoudp_addInstance(receiveCb);
+    ret = sdoudp_init(receiveCb);
     if (ret != kErrorOk)
         return ret;
 #endif
 
 #if defined(CONFIG_INCLUDE_SDO_ASND)
-    ret = sdoasnd_addInstance(receiveCb);
+    ret = sdoasnd_init(receiveCb);
     if (ret != kErrorOk)
         return ret;
 #endif
@@ -325,16 +304,16 @@ tOplkError sdoseq_addInstance(tSdoComReceiveCb pfnSdoComRecvCb_p, tSdoComConCb p
 
 //------------------------------------------------------------------------------
 /**
-\brief  Delete SDO sequence layer instance
+\brief  Shut down SDO sequence layer
 
-The function deletes an instance of the SDO sequence layer.
+The function shuts down the SDO sequence layer.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_sdo_seq
 */
 //------------------------------------------------------------------------------
-tOplkError sdoseq_delInstance(void)
+tOplkError sdoseq_exit(void)
 {
     tOplkError          ret = kErrorOk;
     UINT                count;
@@ -360,10 +339,10 @@ tOplkError sdoseq_delInstance(void)
     OPLK_MEMSET(&sdoSeqInstance_l, 0x00, sizeof(sdoSeqInstance_l));
 
 #if defined(CONFIG_INCLUDE_SDO_UDP)
-    ret = sdoudp_delInstance();
+    ret = sdoudp_exit();
 #endif
 #if defined(CONFIG_INCLUDE_SDO_ASND)
-    ret = sdoasnd_delInstance();
+    ret = sdoasnd_exit();
 #endif
 
     return ret;
@@ -1948,4 +1927,4 @@ static tOplkError setTimer(tSdoSeqCon* pSdoSeqCon_p, ULONG timeout_p)
     return ret;
 }
 
-///\}
+/// \}

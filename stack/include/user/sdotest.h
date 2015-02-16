@@ -8,7 +8,7 @@ This file contains the function declaration for the SDO sequence layer test.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -94,12 +94,12 @@ extern "C"
 #endif
 
 tOplkError sdotestseq_init(sdoApiCbSeqTest sdoSequCbApi_p);
-tOplkError sdotestseq_delInstance(void);
+tOplkError sdotestseq_exit(void);
 tOplkError sdotestseq_sendFrame(UINT nodeId_p, tSdoType sdo_type_p, tAsySdoSeq* pSdoSeq_p, size_t sdoSize_p);
 tOplkError sdotestseq_closeCon(void);
 
 tOplkError sdotestcom_init(sdoApiCbComTest sdoComuCbApi_p);
-tOplkError sdotestcom_delInstance(void);
+tOplkError sdotestcom_exit(void);
 tOplkError sdotestcom_sendFrame(UINT nodeId_p, tSdoType sdo_type_p, tAsySdoCom* pSdoCom_p, size_t sdoSize_p);
 tOplkError sdotestcom_closeCon(void);
 tOplkError sdotestcom_cbEvent(tEvent* pEvent_p);

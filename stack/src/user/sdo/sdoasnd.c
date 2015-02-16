@@ -9,7 +9,7 @@ This file contains the implementation of the SDO over ASnd protocol.
 \ingroup module_sdo_asnd
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -116,27 +116,6 @@ The function initializes a first instance of the SDO over ASnd module.
 //------------------------------------------------------------------------------
 tOplkError sdoasnd_init(tSequLayerReceiveCb pfnReceiveCb_p)
 {
-    tOplkError  ret;
-
-    ret = sdoasnd_addInstance(pfnReceiveCb_p);
-    return ret;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Add instance of SDO over ASnd module
-
-The function adds an instance of the SDO over ASnd module.
-
-\param  pfnReceiveCb_p          Pointer to SDO sequence layer callback function.
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_sdo_asnd
-*/
-//------------------------------------------------------------------------------
-tOplkError sdoasnd_addInstance(tSequLayerReceiveCb pfnReceiveCb_p)
-{
     tOplkError  ret = kErrorOk;
 
     OPLK_MEMSET(&sdoAsndInstance_l, 0x00, sizeof(sdoAsndInstance_l));
@@ -157,16 +136,16 @@ tOplkError sdoasnd_addInstance(tSequLayerReceiveCb pfnReceiveCb_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Delete instance of SDO over ASnd module
+\brief  Shut down SDO over ASnd module
 
-The function deletes an instance of the SDO over ASnd module.
+The function shuts down the SDO over ASnd module.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_sdo_asnd
 */
 //------------------------------------------------------------------------------
-tOplkError sdoasnd_delInstance(void)
+tOplkError sdoasnd_exit(void)
 {
     tOplkError  ret = kErrorOk;
 

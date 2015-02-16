@@ -11,7 +11,7 @@ It is used to avoid SDO access by other modules (i.e. cfm).
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -71,8 +71,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // local function prototypes
 //------------------------------------------------------------------------------
 static tOplkError sdoInit(void);
-static tOplkError sdoAddInstance(void);
-static tOplkError sdoDelInstance(void);
+static tOplkError sdoExit(void);
 static tOplkError sdoDefineConnection(tSdoComConHdl* pSdoComConHdl_p, UINT targetNodeId_p,
                                        tSdoType protType_p);
 static tOplkError sdoInitTransferByIndex(tSdoComTransParamByIndex* pSdoComTransParam_p);
@@ -94,8 +93,7 @@ the dummy implementation.
 static tSdoComFunctions dummySdoFunctions =
 {
     sdoInit,
-    sdoAddInstance,
-    sdoDelInstance,
+    sdoExit,
     sdoDefineConnection,
     sdoInitTransferByIndex,
     sdoUndefineConnection,
@@ -146,28 +144,14 @@ static tOplkError sdoInit(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Add an instance of the SDO command layer module
+\brief  Shut down the SDO command layer module
 
 This function does nothing, except returning kErrorOk.
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError sdoAddInstance(void)
-{
-    return kErrorOk;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Delete an instance of the SDO command layer module
-
-This function does nothing, except returning kErrorOk.
-
-\return The function returns a tOplkError error code.
-*/
-//------------------------------------------------------------------------------
-static tOplkError sdoDelInstance(void)
+static tOplkError sdoExit(void)
 {
     return kErrorOk;
 }

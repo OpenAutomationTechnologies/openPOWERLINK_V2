@@ -443,8 +443,8 @@ tOplkError ctrlu_shutdownStack(void)
 #endif
 
 #if defined(CONFIG_INCLUDE_SDOS) || defined(CONFIG_INCLUDE_SDOC)
-    ret = sdocom_delInstance();
-    DEBUG_LVL_CTRL_TRACE("sdocom_delInstance():  0x%X\n", ret);
+    ret = sdocom_exit();
+    DEBUG_LVL_CTRL_TRACE("sdocom_exit():  0x%X\n", ret);
 #endif
 
 #if defined(CONFIG_INCLUDE_LEDU)

@@ -10,7 +10,7 @@ This file contains the implementation of the SDO Test Sequence Layer.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -78,8 +78,7 @@ This structure defines the connection control structure of the sequence layer.
 typedef struct
 {
     tOplkError (*pfnInit)(tSequLayerReceiveCb     receiveCb_p);    ///< Init function pointer
-    tOplkError (*pfnAddInst)(tSequLayerReceiveCb  receiveCb_p);    ///< Add Instance function pointer
-    tOplkError (*pfnDelInst)(void);                                ///< Delete Instance function pointer
+    tOplkError (*pfnExit)(void);                                   ///< Exit function pointer
     tOplkError (*pfnInitCon)(tSdoConHdl*          sdoConHandle_p,
                              UINT                 targetNodeId_p); ///< Init Connection function pointer
     tOplkError (*pfnSendData)(tSdoConHdl          sdoConHandle_p,  ///< Send Data function pointer
@@ -134,8 +133,7 @@ This array sets the function pointers to the udp functions.
 tSdoTestSeqFunc sdoTestSeqUdpFuncs =
 {
     sdoudp_init,
-    sdoudp_addInstance,
-    sdoudp_delInstance,
+    sdoudp_exit,
     sdoudp_initCon,
     sdoudp_sendData,
     sdoudp_delConnection
@@ -151,8 +149,7 @@ This array sets the function pointers to the asnd functions.
 tSdoTestSeqFunc sdoTestSeqAsndFuncs =
 {
     sdoasnd_init,
-    sdoasnd_addInstance,
-    sdoasnd_delInstance,
+    sdoasnd_exit,
     sdoasnd_initCon,
     sdoasnd_sendData,
     sdoasnd_deleteCon
@@ -209,7 +206,7 @@ tOplkError sdotestseq_init(sdoApiCbSeqTest sdoSequCbApi_p)
     ret = sdoasnd_init(sdotestseq_conCb);
     if (ret != kErrorOk)
     {
-        sdoasnd_delInstance();
+        sdoasnd_exit();
         return ret;
     }
 #endif
@@ -218,7 +215,7 @@ tOplkError sdotestseq_init(sdoApiCbSeqTest sdoSequCbApi_p)
     ret = sdoudp_init(sdotestseq_conCb);
     if (ret != kErrorOk)
     {
-        sdoudp_delInstance();
+        sdoudp_exit();
         return ret;
     }
 #endif
@@ -228,16 +225,16 @@ tOplkError sdotestseq_init(sdoApiCbSeqTest sdoSequCbApi_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Delete the SDO sequence layer instance
+\brief  Shut down the SDO sequence layer
 
-This function deletes an SDO sequence layer instance.
+This function shuts down the SDO sequence layer.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_sdotest_seq
 */
 //------------------------------------------------------------------------------
-tOplkError sdotestseq_delInstance(void)
+tOplkError sdotestseq_exit(void)
 {
     tSdoTestSeqCon* pCon;
 #if defined (CONFIG_INCLUDE_SDO_ASND)
@@ -249,11 +246,11 @@ tOplkError sdotestseq_delInstance(void)
 
     // Shutdown sub modules
 #if defined (CONFIG_INCLUDE_SDO_ASND)
-    retAsnd = sdoasnd_delInstance();
+    retAsnd = sdoasnd_exit();
 #endif
 
 #if defined (CONFIG_INCLUDE_SDO_UDP)
-    retUdp = sdoudp_delInstance();
+    retUdp = sdoudp_exit();
 #endif
 
     // Shutdown connection handling
@@ -402,7 +399,7 @@ tOplkError sdotestseq_sendFrame(UINT nodeId_p, tSdoType sdoType_p, tAsySdoSeq* p
     }
 
     // Get frame buffer
-    pFrame = (tPlkFrame *)OPLK_MALLOC(FrameSize);
+    pFrame = (tPlkFrame*)OPLK_MALLOC(FrameSize);
     if (pFrame == NULL)
     {
         ret = kErrorNoResource;

@@ -10,7 +10,7 @@ This file contains the implementation of the SDO Test Command Layer.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -40,7 +40,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-
 #include <user/sdotest.h>
 
 //------------------------------------------------------------------------------
@@ -122,7 +121,7 @@ static tSdoTestCom   sdoTestComInst;
 
 /// Callback function for receiving and forwarding SDO test command layer frames
 tOplkError  sdotestcom_receiveCb(tSdoComConHdl sdoSeqConHdl_p, tAsySdoCom* pAsySdoCom_p,
-                                     UINT dataSize_p);
+                                 UINT dataSize_p);
 /// Callback function for handling SDO test events
 tOplkError  sdotestcom_conCb(tSdoSeqConHdl sdoSeqConHdl_p, tAsySdoConState sdoConState_p);
 
@@ -136,7 +135,7 @@ tOplkError  sdotestcom_conCb(tSdoSeqConHdl sdoSeqConHdl_p, tAsySdoConState sdoCo
 
 This function initializes the SDO command layer test.
 
-\param  sdoComCbApi_p         pointer to the Commad layer callback function
+\param  sdoComCbApi_p         pointer to the Command layer callback function
 
 \return The function returns a tOplkError error code.
 
@@ -165,7 +164,7 @@ tOplkError sdotestcom_init(sdoApiCbComTest sdoComCbApi_p)
 
     if (kCircBufOk != cbret)
     {
-        (void)sdoseq_delInstance();
+        (void)sdoseq_exit();
         return kErrorInvalidOperation;
     }
 
@@ -174,16 +173,16 @@ tOplkError sdotestcom_init(sdoApiCbComTest sdoComCbApi_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Delete the SDO command layer instance
+\brief  Shut down the SDO command layer
 
-This function deletes an SDO command layer instance.
+This function shuts down the SDO command layer.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_sdotest_com
 */
 //------------------------------------------------------------------------------
-tOplkError sdotestcom_delInstance(void)
+tOplkError sdotestcom_exit(void)
 {
     tOplkError    ret = kErrorOk;
     tOplkError    Sequret;
@@ -193,7 +192,7 @@ tOplkError sdotestcom_delInstance(void)
     Cbret = circbuf_free(sdoTestComInst.tCmdCon.pCbBufInst);
 
     // Release sequence layer resources
-    Sequret = sdoseq_delInstance();
+    Sequret = sdoseq_exit();
 
     if ((kCircBufOk != Cbret) ||
        (kErrorOk != Sequret))
@@ -256,7 +255,7 @@ tOplkError sdotestcom_sendFrame(UINT nodeId_p, tSdoType sdoType_p,
     }
 
     // Get frame buffer
-    pFrame = (tPlkFrame *)OPLK_MALLOC(FrameSize);
+    pFrame = (tPlkFrame*)OPLK_MALLOC(FrameSize);
     if (pFrame == NULL)
     {
         ret = kErrorNoResource;
