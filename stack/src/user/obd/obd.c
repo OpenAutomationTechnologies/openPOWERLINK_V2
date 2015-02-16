@@ -10,7 +10,7 @@ This file contains the implementation of the object dictionary (OD) module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -217,16 +217,16 @@ tOplkError obd_init(tObdInitParam MEM* pInitParam_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief  De-initialize OD module
+\brief  Shutdown OD module
 
-The function de-initializes the OD module.
+The function shuts down the OD module.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tOplkError obd_deleteInstance(void)
+tOplkError obd_exit(void)
 {
     return kErrorOk;
 }

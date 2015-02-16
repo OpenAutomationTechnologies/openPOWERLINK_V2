@@ -496,7 +496,7 @@ tOplkError ctrlu_shutdownStack(void)
     obdcdc_exit();
 #endif
 
-    ret = obd_deleteInstance();
+    ret = obd_exit();
 
     return ret;
 }

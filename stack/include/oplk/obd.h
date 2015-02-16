@@ -8,7 +8,7 @@ This file contains definitions for the OBD module
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
 All rights reserved.
@@ -443,7 +443,7 @@ extern "C"
 #endif
 
 tOplkError obd_init(tObdInitParam MEM* pInitParam_p);
-tOplkError obd_deleteInstance(void);
+tOplkError obd_exit(void);
 tOplkError obd_writeEntry(UINT index_p, UINT subIndex_p, void* pSrcData_p, tObdSize size_p);
 tOplkError obd_readEntry(UINT index_p, UINT subIndex_p, void* pDstData_p, tObdSize* pSize_p);
 tOplkError obd_accessOdPart(tObdPart obdPart_p, tObdDir direction_p);
@@ -472,4 +472,3 @@ tOplkError obd_storeLoadObjCallback(tObdStoreLoadCallback pfnCallback_p);
 #endif
 
 #endif /* _INC_oplk_obd_H_ */
-
