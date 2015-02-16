@@ -11,7 +11,7 @@ userspace. This implementation uses the posix timer interface.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -131,22 +131,6 @@ The function initializes the user timer module.
 //------------------------------------------------------------------------------
 tOplkError timeru_init(void)
 {
-    return timeru_addInstance();
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Add user timer instance
-
-The function adds a user timer instance.
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_timeru
-*/
-//------------------------------------------------------------------------------
-tOplkError timeru_addInstance(void)
-{
     struct sched_param          schedParam;
     INT                         retVal;
 
@@ -187,16 +171,16 @@ tOplkError timeru_addInstance(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Delete user timer instance
+\brief  Shutdown user timer
 
-The function deletes a user timer instance.
+The function shuts down the user timer instance.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_timeru
 */
 //------------------------------------------------------------------------------
-tOplkError timeru_delInstance(void)
+tOplkError timeru_exit(void)
 {
     tTimeruData*     pTimer;
 
@@ -640,4 +624,4 @@ static tTimeruData* getNextTimer(void)
     return pTimer;
 }
 
-///\}
+/// \}

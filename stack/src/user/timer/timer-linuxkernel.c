@@ -11,7 +11,7 @@ kernelspace.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -106,37 +106,21 @@ The function initializes the user timer module.
 //------------------------------------------------------------------------------
 tOplkError timeru_init(void)
 {
-    return timeru_addInstance();
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Add user timer instance
-
-The function adds a user timer instance.
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_timeru
-*/
-//------------------------------------------------------------------------------
-tOplkError timeru_addInstance(void)
-{
     return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Delete user timer instance
+\brief  Shutdown user timer
 
-The function deletes a user timer instance.
+The function shuts down the user timer instance.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_timeru
 */
 //------------------------------------------------------------------------------
-tOplkError timeru_delInstance(void)
+tOplkError timeru_exit(void)
 {
     return kErrorOk;
 }
@@ -285,7 +269,7 @@ tOplkError timeru_deleteTimer(tTimerHdl* pTimerHdl_p)
     if ((tTimeruData*)pData->timer.data != pData)
         return kErrorTimerInvalidHandle;
 
-    del_timer(&pData->timer);         // try to delete the timer
+    del_timer(&pData->timer);           // try to delete the timer
     kfree(pData);                       // free memory in any case
 
     *pTimerHdl_p = 0;                   // uninitialize handle
@@ -370,4 +354,4 @@ static void cbTimer(ULONG parameter_p)
     // d.k. do not free memory, user has to call timeru_deleteTimer()
 }
 
-///\}
+/// \}

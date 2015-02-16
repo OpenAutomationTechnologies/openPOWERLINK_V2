@@ -11,7 +11,7 @@ generic timer list. It is used for Windows and non OS targets.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -139,22 +139,6 @@ The function initializes the user timer module.
 //------------------------------------------------------------------------------
 tOplkError timeru_init(void)
 {
-    return timeru_addInstance();
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Add user timer instance
-
-The function adds a user timer instance.
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_timeru
-*/
-//------------------------------------------------------------------------------
-tOplkError timeru_addInstance(void)
-{
     int             nIdx;
 
     // reset instance structure
@@ -199,21 +183,20 @@ tOplkError timeru_addInstance(void)
 #endif
 
     return kErrorOk;
-
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Delete user timer instance
+\brief  Shutdown user timer
 
-The function deletes a user timer instance.
+The function shuts down the user timer instance.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_timeru
 */
 //------------------------------------------------------------------------------
-tOplkError timeru_delInstance(void)
+tOplkError timeru_exit(void)
 {
 #if (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_)
     SetEvent(timeruInstance_l.ahEvents[TIMERU_EVENT_SHUTDOWN]);
@@ -591,4 +574,4 @@ Exit:
 
 #endif
 
-///\}
+/// \}

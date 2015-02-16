@@ -10,7 +10,7 @@ This file contains the implementation of the user stack control module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -482,8 +482,8 @@ tOplkError ctrlu_shutdownStack(void)
     ret = errhndu_exit();
     DEBUG_LVL_CTRL_TRACE("errhndu_exit():  0x%X\n", ret);
 
-    ret = timeru_delInstance();
-    DEBUG_LVL_CTRL_TRACE("timeru_delInstance():  0x%X\n", ret);
+    ret = timeru_exit();
+    DEBUG_LVL_CTRL_TRACE("timeru_exit():  0x%X\n", ret);
 
     ret = eventu_exit();
     DEBUG_LVL_CTRL_TRACE("eventu_exit():  0x%X\n", ret);

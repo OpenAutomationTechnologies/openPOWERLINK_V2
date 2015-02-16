@@ -8,7 +8,7 @@ This file contains definitions for the user timer module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -72,8 +72,7 @@ extern "C"
 #endif
 
 tOplkError timeru_init(void);
-tOplkError timeru_addInstance(void);
-tOplkError timeru_delInstance(void);
+tOplkError timeru_exit(void);
 tOplkError timeru_process(void);
 tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg argument_p);
 tOplkError timeru_modifyTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg argument_p);

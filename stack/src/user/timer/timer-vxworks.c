@@ -4,13 +4,13 @@
 
 \brief  Implementation of user timer module for VxWorks
 
-This file contains the implementation of the user timer module for VxWorks
+This file contains the implementation of the user timer module for VxWorks.
 
 \ingroup module_timeru
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -131,22 +131,6 @@ The function initializes the user timer module.
 //------------------------------------------------------------------------------
 tOplkError timeru_init(void)
 {
-    return timeru_addInstance();
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Add user timer instance
-
-The function adds a user timer instance.
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_timeru
-*/
-//------------------------------------------------------------------------------
-tOplkError timeru_addInstance(void)
-{
     OPLK_MEMSET(&timeruInstance_l, 0, sizeof(timeruInstance_l));
 
     /* initialize message queue */
@@ -172,16 +156,16 @@ tOplkError timeru_addInstance(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Delete user timer instance
+\brief  Shutdown user timer
 
-The function deletes a user timer instance.
+The function shuts down the user timer instance.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_timeru
 */
 //------------------------------------------------------------------------------
-tOplkError timeru_delInstance(void)
+tOplkError timeru_exit(void)
 {
     ULONG               msg;
     tTimeruData*        pTimer;
@@ -362,7 +346,7 @@ tOplkError timeru_modifyTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerAr
     }
 
     // copy the TimerArg after the timer is restarted,
-    // so that a timer occured immediately before hrtimer_settime
+    // so that a timer occurred immediately before hrtimer_settime
     // won't use the new timerArg and
     // therefore the old timer cannot be distinguished from the new one.
     // But if the new timer is too fast, it may get lost.
@@ -588,4 +572,4 @@ static tTimeruData* getNextTimer(void)
     return pTimer;
 }
 
-///\}
+/// \}
