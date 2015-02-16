@@ -12,7 +12,7 @@ for handliny SyncReq/SyncResp frames used with PollResponse Chaining.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -107,22 +107,6 @@ The function initializes an instance of the sync module
 //------------------------------------------------------------------------------
 tOplkError syncu_init(void)
 {
-    return syncu_addInstance();
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Add sync module instance
-
-The function adds a sync module instance
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_syncu
-*/
-//------------------------------------------------------------------------------
-tOplkError syncu_addInstance(void)
-{
     tOplkError ret = kErrorOk;
 
     OPLK_MEMSET(&syncuInstance_g, 0, sizeof(syncuInstance_g));
@@ -134,20 +118,21 @@ tOplkError syncu_addInstance(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Delete sync module instance
+\brief  Shut down sync module instance
 
-The function deletes a sync module instance
+The function shuts down the sync module instance
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_syncu
 */
 //------------------------------------------------------------------------------
-tOplkError syncu_delInstance(void)
+tOplkError syncu_exit(void)
 {
     tOplkError  ret;
 
     ret = dllucal_regAsndService(kDllAsndSyncResponse, NULL, kDllAsndFilterNone);
+
     return ret;
 }
 

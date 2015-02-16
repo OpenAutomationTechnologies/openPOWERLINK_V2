@@ -10,7 +10,7 @@ This file contains the definitions for the syncu module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -66,8 +66,7 @@ extern "C"
 #endif
 
 tOplkError syncu_init(void);
-tOplkError syncu_addInstance(void);
-tOplkError syncu_delInstance(void);
+tOplkError syncu_exit(void);
 tOplkError syncu_reset(void);
 tOplkError syncu_requestSyncResponse(tSyncuCbResponse pfnCbResponse_p,
                                      tDllSyncRequest* pSyncRequestData_p,

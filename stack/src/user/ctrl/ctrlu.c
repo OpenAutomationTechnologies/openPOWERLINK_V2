@@ -453,23 +453,23 @@ tOplkError ctrlu_shutdownStack(void)
 #endif
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
-    ret = nmtmnu_delInstance();
-    DEBUG_LVL_CTRL_TRACE("nmtmnu_delInstance():  0x%X\n", ret);
+    ret = nmtmnu_exit();
+    DEBUG_LVL_CTRL_TRACE("nmtmnu_exit():  0x%X\n", ret);
 
-    ret = identu_delInstance();
-    DEBUG_LVL_CTRL_TRACE("identu_delInstance():  0x%X\n", ret);
+    ret = identu_exit();
+    DEBUG_LVL_CTRL_TRACE("identu_exit():  0x%X\n", ret);
 
-    ret = statusu_delInstance();
-    DEBUG_LVL_CTRL_TRACE("statusu_delInstance():  0x%X\n", ret);
+    ret = statusu_exit();
+    DEBUG_LVL_CTRL_TRACE("statusu_exit():  0x%X\n", ret);
 
-    ret = syncu_delInstance();
+    ret = syncu_exit();
 #endif
 
-    ret = nmtcnu_delInstance();
-    DEBUG_LVL_CTRL_TRACE("nmtcnu_delInstance():  0x%X\n", ret);
+    ret = nmtcnu_exit();
+    DEBUG_LVL_CTRL_TRACE("nmtcnu_exit():  0x%X\n", ret);
 
-    ret = nmtu_delInstance();
-    DEBUG_LVL_CTRL_TRACE("nmtu_delInstance():    0x%X\n", ret);
+    ret = nmtu_exit();
+    DEBUG_LVL_CTRL_TRACE("nmtu_exit():    0x%X\n", ret);
 
 #if defined(CONFIG_INCLUDE_PDO)
     ret = pdou_exit();
@@ -928,7 +928,7 @@ static tOplkError initNmtu(tOplkApiInitParam* pInitParam_p)
 
     // initialize NmtCnu module
     DEBUG_LVL_CTRL_TRACE("Initialize NMT_CN module...\n");
-    ret = nmtcnu_addInstance(pInitParam_p->nodeId);
+    ret = nmtcnu_init(pInitParam_p->nodeId);
     if (ret != kErrorOk)
         goto Exit;
 

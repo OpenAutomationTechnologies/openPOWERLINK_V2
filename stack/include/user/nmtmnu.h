@@ -10,7 +10,7 @@ This file contains the definitions for the nmtmnu module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -83,8 +83,7 @@ extern "C"
 #endif
 
 tOplkError nmtmnu_init(tNmtMnuCbNodeEvent pfnCbNodeEvent_p, tNmtMnuCbBootEvent pfnCbBootEvent_p);
-tOplkError nmtmnu_addInstance(tNmtMnuCbNodeEvent pfnCbNodeEvent_p, tNmtMnuCbBootEvent pfnCbBootEvent_p);
-tOplkError nmtmnu_delInstance(void);
+tOplkError nmtmnu_exit(void);
 tOplkError nmtmnu_processEvent(tEvent* pEvent_p);
 tOplkError nmtmnu_sendNmtCommand(UINT nodeId_p, tNmtCommand  nmtCommand_p);
 tOplkError nmtmnu_sendNmtCommandEx(UINT nodeId_p, tNmtCommand nmtCommand_p,

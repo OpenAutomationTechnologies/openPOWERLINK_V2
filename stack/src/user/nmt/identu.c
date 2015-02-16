@@ -11,7 +11,7 @@ This file contains the implementation of the ident module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -106,22 +106,6 @@ The function initializes an instance of the ident module
 //------------------------------------------------------------------------------
 tOplkError identu_init(void)
 {
-    return identu_addInstance();
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Add ident module instance
-
-The function adds an ident module instance
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_identu
-*/
-//------------------------------------------------------------------------------
-tOplkError identu_addInstance(void)
-{
     tOplkError ret = kErrorOk;
 
     OPLK_MEMSET(&instance_g, 0, sizeof(instance_g));
@@ -134,16 +118,16 @@ tOplkError identu_addInstance(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Delete ident module instance
+\brief  Shut down ident module instance
 
-The function deletes an ident module instance
+The function shuts down the ident module instance
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_identu
 */
 //------------------------------------------------------------------------------
-tOplkError identu_delInstance(void)
+tOplkError identu_exit(void)
 {
     tOplkError  ret = kErrorOk;
 
@@ -151,8 +135,8 @@ tOplkError identu_delInstance(void)
     dllucal_regAsndService(kDllAsndIdentResponse, NULL, kDllAsndFilterNone);
 
     ret = identu_reset();
-    return ret;
 
+    return ret;
 }
 
 //------------------------------------------------------------------------------

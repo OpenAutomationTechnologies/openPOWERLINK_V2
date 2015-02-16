@@ -11,7 +11,7 @@ This file contains the implementation of the NMT MNU module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -423,28 +423,6 @@ The function initializes an instance of the nmtmnu module
 //------------------------------------------------------------------------------
 tOplkError nmtmnu_init(tNmtMnuCbNodeEvent pfnCbNodeEvent_p, tNmtMnuCbBootEvent pfnCbBootEvent_p)
 {
-    tOplkError ret;
-    ret = nmtmnu_addInstance(pfnCbNodeEvent_p, pfnCbBootEvent_p);
-    return ret;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Add nmtmnu module instance
-
-The function adds a nmtmnu module instance.
-
-\param  pfnCbNodeEvent_p        Pointer to node event callback function.
-\param  pfnCbBootEvent_p        Pointer to boot event callback function.
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_nmtmnu
-*/
-//------------------------------------------------------------------------------
-tOplkError nmtmnu_addInstance(tNmtMnuCbNodeEvent pfnCbNodeEvent_p,
-                              tNmtMnuCbBootEvent pfnCbBootEvent_p)
-{
     tOplkError ret = kErrorOk;
 
     OPLK_MEMSET(&nmtMnuInstance_g, 0, sizeof(nmtMnuInstance_g));
@@ -470,16 +448,16 @@ Exit:
 
 //------------------------------------------------------------------------------
 /**
-\brief  Delete nmtmnu module instance
+\brief  Shutdown nmtmnu module instance
 
-The function deletes an nmtmnu module instance.
+The function shuts down the nmtmnu module instance.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_nmtmnu
 */
 //------------------------------------------------------------------------------
-tOplkError nmtmnu_delInstance(void)
+tOplkError nmtmnu_exit(void)
 {
     tOplkError  ret = kErrorOk;
 

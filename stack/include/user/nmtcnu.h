@@ -10,7 +10,7 @@ This file contains the definitions for the nmtcnu module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -63,8 +63,7 @@ extern "C"
 #endif
 
 tOplkError nmtcnu_init(UINT nodeId_p);
-tOplkError nmtcnu_addInstance(UINT nodeId_p);
-tOplkError nmtcnu_delInstance(void);
+tOplkError nmtcnu_exit(void);
 tOplkError nmtcnu_sendNmtRequest(UINT nodeId_p, tNmtCommand nmtCommand_p);
 tOplkError nmtcnu_registerCheckEventCb(tNmtuCheckEventCallback pfnNmtCheckEventCb_p);
 

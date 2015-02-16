@@ -11,7 +11,7 @@ This file contains the implementation of the NMT CNU module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -113,24 +113,6 @@ The function initializes an instance of the nmtcnu module
 //------------------------------------------------------------------------------
 tOplkError nmtcnu_init(UINT nodeId_p)
 {
-    return nmtcnu_addInstance(nodeId_p);
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Add nmtcnu module instance
-
-The function adds a nmtcnu module instance.
-
-\param  nodeId_p                Node ID of the local node
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_nmtcnu
-*/
-//------------------------------------------------------------------------------
-tOplkError nmtcnu_addInstance(UINT nodeId_p)
-{
     tOplkError ret = kErrorOk;
 
     OPLK_MEMSET(&nmtCnuInstance_g, 0, sizeof(nmtCnuInstance_g));
@@ -150,16 +132,16 @@ tOplkError nmtcnu_addInstance(UINT nodeId_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Delete nmtcnu module instance
+\brief  Shut down nmtcnu module instance
 
-The function deletes an nmtcnu module instance.
+The function shuts down the nmtcnu module instance.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_nmtcnu
 */
 //------------------------------------------------------------------------------
-tOplkError nmtcnu_delInstance(void)
+tOplkError nmtcnu_exit(void)
 {
     tOplkError ret = kErrorOk;
 

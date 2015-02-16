@@ -10,7 +10,7 @@ This file contains the definitions for the nmtu module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -120,8 +120,7 @@ extern "C"
 #endif
 
 tOplkError      nmtu_init(void);
-tOplkError      nmtu_addInstance(void);
-tOplkError      nmtu_delInstance(void);
+tOplkError      nmtu_exit(void);
 tOplkError      nmtu_postNmtEvent(tNmtEvent nmtEvent_p);
 tNmtState       nmtu_getNmtState(void);
 tOplkError      nmtu_processEvent(tEvent* pEvent_p);

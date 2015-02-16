@@ -9,7 +9,7 @@ This file contains the definitions for the statusu module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -63,8 +63,7 @@ extern "C"
 #endif
 
 tOplkError statusu_init(void);
-tOplkError statusu_addInstance(void);
-tOplkError statusu_delInstance(void);
+tOplkError statusu_exit(void);
 tOplkError statusu_reset(void);
 tOplkError statusu_requestStatusResponse(UINT nodeId_p, tStatusuCbResponse pfnCbResponse_p);
 

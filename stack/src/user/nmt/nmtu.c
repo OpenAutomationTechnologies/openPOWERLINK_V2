@@ -11,7 +11,7 @@ This file contains the implementation of the NMT user module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -122,38 +122,22 @@ The function initializes an instance of the NMT user module
 //------------------------------------------------------------------------------
 tOplkError nmtu_init(void)
 {
-    return nmtu_addInstance();
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Add NMT user module instance
-
-The function adds an NMT user module instance
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_nmtu
-*/
-//------------------------------------------------------------------------------
-tOplkError nmtu_addInstance(void)
-{
     nmtuInstance_g.pfnNmtChangeCb = NULL;
     return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Delete NMT user module instance
+\brief  Shut down NMT user module instance
 
-The function deletes an NMT user module instance
+The function shuts down the NMT user module instance
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_nmtu
 */
 //------------------------------------------------------------------------------
-tOplkError nmtu_delInstance(void)
+tOplkError nmtu_exit(void)
 {
     tOplkError ret = kErrorOk;
 

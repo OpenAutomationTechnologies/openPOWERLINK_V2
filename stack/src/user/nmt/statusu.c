@@ -11,7 +11,7 @@ This file contains the implementation of the status module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -105,26 +105,6 @@ The function initializes an instance of the status module
 //------------------------------------------------------------------------------
 tOplkError statusu_init(void)
 {
-    tOplkError  ret;
-
-    ret = statusu_addInstance();
-
-    return ret;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Add status module instance
-
-The function adds an status module instance
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_statusu
-*/
-//------------------------------------------------------------------------------
-tOplkError statusu_addInstance(void)
-{
     tOplkError  ret = kErrorOk;
 
     OPLK_MEMSET(&instance_g, 0, sizeof(instance_g));
@@ -134,21 +114,20 @@ tOplkError statusu_addInstance(void)
                                  kDllAsndFilterAny);
 
     return ret;
-
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Delete status module instance
+\brief  Shut down status module instance
 
-The function deletes a status module instance
+The function shuts down the status module instance
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_statusu
 */
 //------------------------------------------------------------------------------
-tOplkError statusu_delInstance(void)
+tOplkError statusu_exit(void)
 {
     tOplkError  ret = kErrorOk;
 

@@ -10,7 +10,7 @@ This file contains the definitions for the identu modules.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -64,8 +64,7 @@ extern "C"
 #endif
 
 tOplkError identu_init(void);
-tOplkError identu_addInstance(void);
-tOplkError identu_delInstance(void);
+tOplkError identu_exit(void);
 tOplkError identu_reset(void);
 tOplkError identu_getIdentResponse(UINT nodeId_p, tIdentResponse** ppIdentResponse_p);
 tOplkError identu_requestIdentResponse(UINT nodeId_p, tIdentuCbResponse pfnCbResponse_p);
