@@ -10,7 +10,7 @@ This file contains the implementation of the VxWorks MUX Ethernet driver.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -288,7 +288,7 @@ Exit:
 
 //------------------------------------------------------------------------------
 /**
-\brief  Ethernet driver shutdown
+\brief  Shut down Ethernet driver
 
 This function shuts down the Ethernet driver.
 
@@ -297,7 +297,7 @@ This function shuts down the Ethernet driver.
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_shutdown(void)
+tOplkError edrv_exit(void)
 {
     // signal shutdown to the thread
     muxUnbind(edrvInstance_l.pCookie, MUX_PROTO_PROMISC,

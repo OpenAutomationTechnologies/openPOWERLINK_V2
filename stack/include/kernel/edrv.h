@@ -8,7 +8,7 @@ This file contains definitions for the Ethernet driver module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -244,7 +244,7 @@ extern "C"
 #endif
 
 tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p);
-tOplkError edrv_shutdown(void);
+tOplkError edrv_exit(void);
 UINT8*     edrv_getMacAddr(void);
 tOplkError edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p);
 tOplkError edrv_clearRxMulticastMacAddr(UINT8* pMacAddr_p);
@@ -259,7 +259,7 @@ tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p, UINT entryC
 int edrv_getDiagnostics(char* pBuffer_p, INT size_p);
 
 tOplkError edrvcyclic_init(void);
-tOplkError edrvcyclic_shutdown(void);
+tOplkError edrvcyclic_exit(void);
 tOplkError edrvcyclic_setCycleTime(UINT32 cycleTimeUs_p);
 tOplkError edrvcyclic_startCycle(void);
 tOplkError edrvcyclic_stopCycle(void);

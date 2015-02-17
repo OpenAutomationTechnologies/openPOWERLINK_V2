@@ -448,10 +448,10 @@ static tOplkError shutdownStack(void)
 
 #if defined (CONFIG_INCLUDE_NMT_MN)
     // DLL and events are shutdown, now it's save to shutdown edrvcyclic
-    edrvcyclic_shutdown();
+    edrvcyclic_exit();
 #endif
 
-    edrv_shutdown();
+    edrv_exit();
 
     errhndk_exit();
 

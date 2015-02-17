@@ -12,7 +12,7 @@ It implements time-triggered transmission of frames necessary for MN.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -166,7 +166,7 @@ tOplkError edrvcyclic_init(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Cyclic Ethernet driver shutdown
+\brief  Shut down cyclic Ethernet driver
 
 This function shuts down the cyclic Ethernet driver.
 
@@ -175,7 +175,7 @@ This function shuts down the cyclic Ethernet driver.
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrvcyclic_shutdown(void)
+tOplkError edrvcyclic_exit(void)
 {
     if (edrvcyclicInstance_l.ppTxBufferList != NULL)
     {

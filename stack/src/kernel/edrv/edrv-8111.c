@@ -12,6 +12,7 @@ Realtek 8111/8168.
 
 /* ------------------------------------------------------------------------------
 Copyright (c) 2014, Kalycito Infotech Private Limited
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -655,7 +656,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     if (edrvInstance_l.pPciDev == NULL)
     {
         printk("%s pPciDev=NULL\n", __FUNCTION__);
-        ret = edrv_shutdown();
+        ret = edrv_exit();
         ret = kErrorNoResource;
         goto Exit;
     }
@@ -676,7 +677,7 @@ Exit:
 
 //------------------------------------------------------------------------------
 /**
-\brief  Ethernet driver shutdown
+\brief  Shut down Ethernet driver
 
 This function shuts down the Ethernet driver.
 
@@ -685,7 +686,7 @@ This function shuts down the Ethernet driver.
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_shutdown(void)
+tOplkError edrv_exit(void)
 {
     // unregister PCI driver
     printk("%s calling pci_unregister_driver()\n", __FUNCTION__);

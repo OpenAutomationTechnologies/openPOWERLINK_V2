@@ -12,6 +12,7 @@ the EMACPS Gigabit Ethernet Controller (GEM) on the Xilinx Zynq SoC.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2014, Kalycito Infotech Pvt. Ltd.
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -376,7 +377,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Ethernet driver shutdown
+\brief  Shut down Ethernet driver
 
 This function shuts down the Ethernet driver.
 
@@ -385,7 +386,7 @@ This function shuts down the Ethernet driver.
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_shutdown(void)
+tOplkError edrv_exit(void)
 {
     printk("%s calling platform_driver_unregister()\n", __FUNCTION__);
     platform_driver_unregister(&edrvDriver_l);
