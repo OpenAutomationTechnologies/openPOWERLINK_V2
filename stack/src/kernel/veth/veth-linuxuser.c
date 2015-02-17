@@ -5,13 +5,13 @@
 \brief  Implementation of virtual Ethernet for Linux userspace
 
 This file contains the the virtual Ethernet driver for the Linux userspace
-implementation. It uses a TUN/TAP device as virtual ethernet driver.
+implementation. It uses a TUN/TAP device as virtual Ethernet driver.
 
 \ingroup module_veth
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -129,9 +129,9 @@ static void* vethRecvThread(void* pArg_p);
 
 //------------------------------------------------------------------------------
 /**
-\brief  Add virtual Ethernet instance
+\brief  Initialize virtual Ethernet
 
-The function adds a virtual Ethernet instance.
+The function initializes the virtual Ethernet module.
 
 \param  aSrcMac_p       MAC address to set for virtual Ethernet interface.
 
@@ -140,7 +140,7 @@ The function adds a virtual Ethernet instance.
 \ingroup module_veth
 */
 //------------------------------------------------------------------------------
-tOplkError veth_addInstance(const UINT8 aSrcMac_p[6])
+tOplkError veth_init(const UINT8 aSrcMac_p[6])
 {
     tOplkError          ret = kErrorOk;
     struct ifreq        ifr;
@@ -185,16 +185,16 @@ tOplkError veth_addInstance(const UINT8 aSrcMac_p[6])
 
 //------------------------------------------------------------------------------
 /**
-\brief  Delete virtual Ethernet instance
+\brief  Shut down virtual Ethernet
 
-The function deletes a virtual ethernet instance.
+The function shuts down the virtual Ethernet module.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_veth
 */
 //------------------------------------------------------------------------------
-tOplkError veth_delInstance(void)
+tOplkError veth_exit(void)
 {
     // stop receive thread by setting its stop flag
     vethInstance_l.fStop = TRUE;
@@ -359,4 +359,4 @@ static void* vethRecvThread(void* pArg_p)
     return NULL;
 }
 
-///\}
+/// \}

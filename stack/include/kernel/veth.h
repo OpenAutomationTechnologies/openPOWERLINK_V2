@@ -10,7 +10,7 @@ This file contains the definitions for the virtual Ethernet module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -61,8 +61,8 @@ extern "C"
 {
 #endif
 
-tOplkError veth_addInstance(const UINT8 aSrcMac_p[6]);
-tOplkError veth_delInstance(void);
+tOplkError veth_init(const UINT8 aSrcMac_p[6]);
+tOplkError veth_exit(void);
 
 #ifdef __cplusplus
 }

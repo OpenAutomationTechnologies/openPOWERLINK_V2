@@ -12,7 +12,7 @@ implementation.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -135,9 +135,9 @@ static const struct net_device_ops oplk_netdev_ops =
 
 //------------------------------------------------------------------------------
 /**
-\brief  Add virtual Ethernet instance
+\brief  Initialize virtual Ethernet
 
-The function adds a virtual Ethernet instance.
+The function initializes the virtual Ethernet module.
 
 \param  aSrcMac_p       MAC address to set for virtual Ethernet interface.
 
@@ -146,7 +146,7 @@ The function adds a virtual Ethernet instance.
 \ingroup module_veth
 */
 //------------------------------------------------------------------------------
-tOplkError veth_addInstance(const UINT8 aSrcMac_p[6])
+tOplkError veth_init(const UINT8 aSrcMac_p[6])
 {
     // allocate net device structure with priv pointing to stats structure
     pVEthNetDevice_g = alloc_netdev(sizeof(struct net_device_stats), PLK_VETH_NAME,
@@ -164,25 +164,25 @@ tOplkError veth_addInstance(const UINT8 aSrcMac_p[6])
 
     //register VEth to the network subsystem
     if (register_netdev(pVEthNetDevice_g))
-        DEBUG_LVL_VETH_TRACE("veth_addInstance: Could not register VEth...\n");
+        DEBUG_LVL_VETH_TRACE("veth_init: Could not register VEth...\n");
     else
-        DEBUG_LVL_VETH_TRACE("veth_addInstance: Register VEth successfull...\n");
+        DEBUG_LVL_VETH_TRACE("veth_init: Register VEth successful...\n");
 
     return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Delete virtual Ethernet instance
+\brief  Shut down virtual Ethernet
 
-The function deletes a virtual Ethernet instance.
+The function shuts down the virtual Ethernet module.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_veth
 */
 //------------------------------------------------------------------------------
-tOplkError veth_delInstance(void)
+tOplkError veth_exit(void)
 {
     if (pVEthNetDevice_g != NULL)
     {
@@ -389,4 +389,4 @@ Exit:
     return ret;
 }
 
-///\}
+/// \}

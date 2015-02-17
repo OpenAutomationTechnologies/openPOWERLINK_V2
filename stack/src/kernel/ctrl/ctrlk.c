@@ -409,7 +409,7 @@ static tOplkError initStack(void)
 
     // initialize Virtual Ethernet Driver
 #if defined(CONFIG_INCLUDE_VETH)
-    if ((ret = veth_addInstance(instance_l.initParam.aMacAddress)) != kErrorOk)
+    if ((ret = veth_init(instance_l.initParam.aMacAddress)) != kErrorOk)
         return ret;
 #endif
 
@@ -431,7 +431,7 @@ static tOplkError shutdownStack(void)
 {
 
 #if defined(CONFIG_INCLUDE_VETH)
-    veth_delInstance();
+    veth_exit();
 #endif
 
 #if defined(CONFIG_INCLUDE_PDO)
