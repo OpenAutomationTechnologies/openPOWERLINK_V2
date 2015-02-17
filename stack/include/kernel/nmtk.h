@@ -10,7 +10,7 @@ This file contains the definitions for the NMT kernel module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -63,7 +63,7 @@ extern "C"
 #endif
 
 tOplkError nmtk_init(void);
-tOplkError nmtk_delInstance(void);
+tOplkError nmtk_exit(void);
 tOplkError nmtk_process(tEvent* pEvent_p);
 
 #ifdef __cplusplus

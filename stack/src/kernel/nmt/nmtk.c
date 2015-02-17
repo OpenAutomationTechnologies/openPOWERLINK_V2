@@ -11,7 +11,7 @@ This file contains the implementation of the NMT kernel module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -217,16 +217,16 @@ tOplkError nmtk_init(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Delete NMT kernel module instance
+\brief  Shut down NMT kernel module
 
-The function deletes the NMT kernel module instance
+The function shuts down the NMT kernel module.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_nmtk
 */
 //------------------------------------------------------------------------------
-tOplkError nmtk_delInstance(void)
+tOplkError nmtk_exit(void)
 {
     nmtkInstance_g.stateIndex = kNmtkGsOff;
     return kErrorOk;
@@ -1511,4 +1511,4 @@ static tOplkError doStateMsBasicEthernet(tNmtEvent nmtEvent_p)
 
 #endif
 
-///\}
+/// \}

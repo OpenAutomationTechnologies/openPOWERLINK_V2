@@ -12,7 +12,7 @@ stack. Additionally, it provides status information to the user part.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -438,7 +438,7 @@ static tOplkError shutdownStack(void)
     pdok_exit();
 #endif
 
-    nmtk_delInstance();
+    nmtk_exit();
 
     dllk_delInstance();
 
