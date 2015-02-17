@@ -10,7 +10,7 @@ This file contains the definitions for the DLL kernel module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -150,8 +150,8 @@ extern "C"
 {
 #endif
 
-tOplkError dllk_addInstance(void);
-tOplkError dllk_delInstance(void);
+tOplkError dllk_init(void);
+tOplkError dllk_exit(void);
 tOplkError dllk_config(tDllConfigParam* pDllConfigParam_p);
 tOplkError dllk_setIdentity(tDllIdentParam* pDllIdentParam_p);
 tOplkError dllk_regAsyncHandler(tDllkCbAsync pfnDllkCbAsync_p);

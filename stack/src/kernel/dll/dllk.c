@@ -115,16 +115,16 @@ static tOplkError cbCnPresFallbackTimeout(void);
 
 //------------------------------------------------------------------------------
 /**
-\brief  Add DLL kernel module instance
+\brief  Initialize DLL kernel module
 
-The function adds a DLL kernel module instance.
+The function initializes the DLL kernel module.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_dllk
 */
 //------------------------------------------------------------------------------
-tOplkError dllk_addInstance(void)
+tOplkError dllk_init(void)
 {
     tOplkError      ret = kErrorOk;
     UINT            index;
@@ -188,16 +188,16 @@ tOplkError dllk_addInstance(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Delete DLL kernel module instance
+\brief  Shut down DLL kernel module
 
-The function deletes a DLL kernel module instance.
+The function shuts down the DLL kernel module.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_dllk
 */
 //------------------------------------------------------------------------------
-tOplkError dllk_delInstance(void)
+tOplkError dllk_exit(void)
 {
     tOplkError      ret = kErrorOk;
 

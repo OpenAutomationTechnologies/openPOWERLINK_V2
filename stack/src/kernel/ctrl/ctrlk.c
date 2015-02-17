@@ -370,7 +370,7 @@ static tOplkError initStack(void)
     if ((ret = nmtk_init()) != kErrorOk)
         return ret;
 
-    ret = dllk_addInstance();
+    ret = dllk_init();
     if (ret != kErrorOk)
         return ret;
 
@@ -440,7 +440,7 @@ static tOplkError shutdownStack(void)
 
     nmtk_exit();
 
-    dllk_delInstance();
+    dllk_exit();
 
     dllkcal_exit();
 
