@@ -12,7 +12,7 @@ timer module for Windows.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -142,22 +142,6 @@ The function initializes the high-resolution timer module
 //------------------------------------------------------------------------------
 tOplkError hrestimer_init(void)
 {
-    return hrestimer_addInstance();
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief    Add instance of high-resolution timer module
-
-The function adds an instance of the high-resolution timer module.
-
-\return Returns a tOplkError error code.
-
-\ingroup module_hrestimer
-*/
-//------------------------------------------------------------------------------
-tOplkError hrestimer_addInstance(void)
-{
     tOplkError      ret = kErrorOk;
     LONG            winRet = 0;
     ULONG           min = ~0UL;
@@ -205,16 +189,16 @@ tOplkError hrestimer_addInstance(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief    Delete instance of high-resolution timer module
+\brief    Shut down high-resolution timer module
 
-The function deletes an instance of the high-resolution timer module.
+The function shuts down the high-resolution timer module.
 
 \return Returns a tOplkError error code.
 
 \ingroup module_hrestimer
 */
 //------------------------------------------------------------------------------
-tOplkError hrestimer_delInstance(void)
+tOplkError hrestimer_exit(void)
 {
     tOplkError      ret = kErrorOk;
     LONG            winRet = 0;

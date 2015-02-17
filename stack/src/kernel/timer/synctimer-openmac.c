@@ -12,7 +12,7 @@ module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -190,7 +190,7 @@ This function initializes the synchronization timer module.
 \ingroup module_synctimer
 */
 //------------------------------------------------------------------------------
-tOplkError synctimer_addInstance(void)
+tOplkError synctimer_init(void)
 {
     tOplkError ret = kErrorOk;
 
@@ -210,16 +210,16 @@ tOplkError synctimer_addInstance(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Synchronization timer delete module
+\brief  Shut down synchronization timer module
 
-This function deletes the synchronization timer module.
+This function shuts down the synchronization timer module.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_synctimer
 */
 //------------------------------------------------------------------------------
-tOplkError synctimer_delInstance(void)
+tOplkError synctimer_exit(void)
 {
     tOplkError ret = kErrorOk;
 

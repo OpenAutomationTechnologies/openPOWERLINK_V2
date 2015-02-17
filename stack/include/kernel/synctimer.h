@@ -10,7 +10,7 @@ This file contains the definitions for the synchronization timer module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -63,8 +63,8 @@ extern "C"
 {
 #endif
 
-tOplkError synctimer_addInstance(void);
-tOplkError synctimer_delInstance(void);
+tOplkError synctimer_init(void);
+tOplkError synctimer_exit(void);
 tOplkError synctimer_registerHandler(tSyncTimerCbSync pfnTimerSynckCbSync_p);
 tOplkError synctimer_registerLossOfSyncHandler(tSyncTimerCbLossOfSync pfnTimerSynckCbLossOfSync_p);
 tOplkError synctimer_registerLossOfSyncHandler2(tSyncTimerCbLossOfSync pfnTimerSynckCbLossOfSync2_p);

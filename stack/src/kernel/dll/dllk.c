@@ -11,7 +11,7 @@ This file contains the implementation of the DLL kernel module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -139,7 +139,7 @@ tOplkError dllk_addInstance(void)
 #endif
 
 #if (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER)
-    if ((ret = synctimer_addInstance()) != kErrorOk)
+    if ((ret = synctimer_init()) != kErrorOk)
         return ret;
 
     if ((ret = synctimer_registerHandler(cbCnTimerSync)) != kErrorOk)
@@ -205,11 +205,11 @@ tOplkError dllk_delInstance(void)
     dllkInstance_g.dllState = kDllGsInit;
 
 #if (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER)
-    ret = synctimer_delInstance();
+    ret = synctimer_exit();
 #endif
 
 #if CONFIG_TIMER_USE_HIGHRES != FALSE
-    ret = hrestimer_delInstance();
+    ret = hrestimer_exit();
 #endif
 
     return ret;

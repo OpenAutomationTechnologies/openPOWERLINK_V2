@@ -11,7 +11,7 @@ This file contains the implementation of the openMAC high-resolution timer modul
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -127,22 +127,6 @@ This function initializes the high-resolution timer module.
 //------------------------------------------------------------------------------
 tOplkError hrestimer_init(void)
 {
-    return hrestimer_addInstance();
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Add instance of high-resolution timer module
-
-The function adds an instance of the high-resolution timer module.
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_hrestimer
-*/
-//------------------------------------------------------------------------------
-tOplkError hrestimer_addInstance(void)
-{
     tOplkError ret = kErrorOk;
 
     OPLK_MEMSET(&instance_l, 0, sizeof(instance_l));
@@ -157,16 +141,16 @@ tOplkError hrestimer_addInstance(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief    Delete instance of high-resolution timer module
+\brief    Shut down high-resolution timer module
 
-The function deletes an instance of the high-resolution timer module.
+The function shuts down the high-resolution timer module.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_hrestimer
 */
 //------------------------------------------------------------------------------
-tOplkError hrestimer_delInstance(void)
+tOplkError hrestimer_exit(void)
 {
     tOplkError ret = kErrorOk;
 
