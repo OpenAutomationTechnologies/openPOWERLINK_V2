@@ -54,6 +54,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "../dll/dllkframe.h"
 
+#if CONFIG_TIMER_USE_HIGHRES != FALSE
+#include <kernel/hrestimer.h>
+#endif
+
+#if (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER)
+#include <kernel/synctimer.h>
+#endif
+
 #if defined(CONFIG_INCLUDE_VETH)
 #include <kernel/veth.h>
 #endif
@@ -370,6 +378,17 @@ static tOplkError initStack(void)
     if ((ret = nmtk_init()) != kErrorOk)
         return ret;
 
+    //jba able to work without hresk?
+#if CONFIG_TIMER_USE_HIGHRES != FALSE
+    if ((ret = hrestimer_init()) != kErrorOk)
+        return ret;
+#endif
+
+#if (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER)
+    if ((ret = synctimer_init()) != kErrorOk)
+        return ret;
+#endif
+
     ret = dllk_init();
     if (ret != kErrorOk)
         return ret;
@@ -441,6 +460,14 @@ static tOplkError shutdownStack(void)
     nmtk_exit();
 
     dllk_exit();
+
+#if CONFIG_TIMER_USE_HIGHRES != FALSE
+    hrestimer_exit();
+#endif
+
+#if (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER)
+    synctimer_exit();
+#endif
 
     dllkcal_exit();
 
