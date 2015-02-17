@@ -13,14 +13,14 @@
         <ProfileTechnology>Powerlink</ProfileTechnology>
       </ISO15745Reference>
     </ProfileHeader>
-    <ProfileBody xsi:type="ProfileBody_Device_Powerlink" fileName="00000000_POWERLINK_CiA302-4_MN.xdd" fileCreator="SYSTEC electronic GmbH" fileCreationDate="2009-09-18" fileCreationTime="15:50:00+01:00" fileModificationDate="2014-10-09" fileModificationTime="09:00:00+02:00" fileModifiedBy="Bernecker+Rainer Industrie-Elektronik Ges.m.b.H." fileVersion="01.00" supportedLanguages="en">
+    <ProfileBody xsi:type="ProfileBody_Device_Powerlink" fileName="00000000_POWERLINK_CiA302-4_MN.xdd" fileCreator="SYSTEC electronic GmbH" fileCreationDate="2009-09-18" fileCreationTime="15:50:00+01:00" fileModificationDate="2015-02-05" fileModificationTime="17:22:00+01:00" fileModifiedBy="Bernecker+Rainer Industrie-Elektronik Ges.m.b.H." fileVersion="01.00" supportedLanguages="en">
       <DeviceIdentity>
         <vendorName>Unknown vendor</vendorName>
         <vendorID>0x00000000</vendorID>
         <productName>openPOWERLINK device</productName>
         <version versionType="HW">1.00</version>
         <version versionType="SW">1.00</version>
-        <version versionType="FW">OPLK V2.1.0</version>
+        <version versionType="FW">OPLK V2.1.1</version>
       </DeviceIdentity>
       <DeviceFunction>
         <capabilities>
@@ -51,7 +51,7 @@
         <ProfileTechnology>Powerlink</ProfileTechnology>
       </ISO15745Reference>
     </ProfileHeader>
-    <ProfileBody xsi:type="ProfileBody_CommunicationNetwork_Powerlink" fileName="00000000_POWERLINK_CiA302-4_MN.xdd" fileCreator="SYSTEC electronic GmbH" fileCreationDate="2009-09-18" fileCreationTime="15:50:00+01:00" fileModificationDate="2014-10-09" fileModificationTime="09:00:00+02:00" fileModifiedBy="Bernecker+Rainer Industrie-Elektronik Ges.m.b.H." fileVersion="01.00" supportedLanguages="en">
+    <ProfileBody xsi:type="ProfileBody_CommunicationNetwork_Powerlink" fileName="00000000_POWERLINK_CiA302-4_MN.xdd" fileCreator="SYSTEC electronic GmbH" fileCreationDate="2009-09-18" fileCreationTime="15:50:00+01:00" fileModificationDate="2015-02-05" fileModificationTime="17:22:00+01:00" fileModifiedBy="Bernecker+Rainer Industrie-Elektronik Ges.m.b.H." fileVersion="01.00" supportedLanguages="en">
       <ApplicationLayers>
         <identity>
           <vendorID>0x00000000</vendorID>
@@ -146,10 +146,10 @@
           <!-- Communication Profile Area (0x1000 - 0x1FFF): defined by EPSG 301 -->
           <Object index="1000" name="NMT_DeviceType_U32" objectType="7" dataType="0007" accessType="const" PDOmapping="no" defaultValue="0x00000000"/>
           <Object index="1001" name="ERR_ErrorRegister_U8" objectType="7" dataType="0005" accessType="ro" PDOmapping="optional" defaultValue="0"/>
-          <Object index="1006" name="NMT_CycleLen_U32" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" actualValue="0XC350"/>
+          <Object index="1006" name="NMT_CycleLen_U32" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" actualValue="0xC350"/>
           <Object index="1008" name="NMT_ManufactDevName_VS" objectType="7" dataType="0009" accessType="const" PDOmapping="no" defaultValue="openPOWERLINK device"/>
           <Object index="1009" name="NMT_ManufactHwVers_VS" objectType="7" dataType="0009" accessType="const" PDOmapping="no" defaultValue="1.00"/>
-          <Object index="100A" name="NMT_ManufactSwVers_VS" objectType="7" dataType="0009" accessType="const" PDOmapping="no" defaultValue="OPLK V2.1.0"/>
+          <Object index="100A" name="NMT_ManufactSwVers_VS" objectType="7" dataType="0009" accessType="const" PDOmapping="no" defaultValue="OPLK V2.1.1"/>
           <Object index="1018" name="NMT_IdentityObject_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="4"/>
             <SubObject subIndex="01" name="VendorId_U32" objectType="7" dataType="0007" accessType="const" PDOmapping="no" defaultValue="0x00000000"/>
@@ -21400,8 +21400,8 @@
           </Object>
           <Object index="1C02" name="DLL_MNCycTimeExceed_REC" objectType="9" dataType="0424">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="3"/>
-            <SubObject subIndex="01" name="CumulativeCnt_U32" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0" actualValue="40"/>
-            <SubObject subIndex="02" name="ThresholdCnt_U32" objectType="7" dataType="0007" accessType="ro" PDOmapping="no" defaultValue="0" actualValue="40"/>
+            <SubObject subIndex="01" name="CumulativeCnt_U32" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0"/>
+            <SubObject subIndex="02" name="ThresholdCnt_U32" objectType="7" dataType="0007" accessType="ro" PDOmapping="no" defaultValue="0"/>
             <SubObject subIndex="03" name="Threshold_U32" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="15" actualValue="40"/>
           </Object>
           <Object index="1C07" name="DLL_MNCNLossPResCumCnt_AU32" objectType="8" dataType="0007">
@@ -22461,7 +22461,7 @@
           </Object>
           <Object index="1F26" name="CFM_ExpConfDateList_AU32" objectType="8" dataType="0007">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="254"/>
-            <SubObject subIndex="01" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0" actualValue="11342"/>
+            <SubObject subIndex="01" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0" actualValue="11371"/>
             <SubObject subIndex="02" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0"/>
             <SubObject subIndex="03" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0"/>
             <SubObject subIndex="04" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0"/>
@@ -22492,7 +22492,7 @@
             <SubObject subIndex="1D" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0"/>
             <SubObject subIndex="1E" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0"/>
             <SubObject subIndex="1F" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0"/>
-            <SubObject subIndex="20" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0" actualValue="11342"/>
+            <SubObject subIndex="20" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0" actualValue="11371"/>
             <SubObject subIndex="21" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0"/>
             <SubObject subIndex="22" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0"/>
             <SubObject subIndex="23" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0"/>
@@ -22570,7 +22570,7 @@
             <SubObject subIndex="6B" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0"/>
             <SubObject subIndex="6C" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0"/>
             <SubObject subIndex="6D" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0"/>
-            <SubObject subIndex="6E" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0" actualValue="11342"/>
+            <SubObject subIndex="6E" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0" actualValue="11371"/>
             <SubObject subIndex="6F" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0"/>
             <SubObject subIndex="70" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0"/>
             <SubObject subIndex="71" name="CNConfigurationDate" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0"/>
@@ -22718,7 +22718,7 @@
           </Object>
           <Object index="1F27" name="CFM_ExpConfTimeList_AU32" objectType="8" dataType="0007">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="254"/>
-            <SubObject subIndex="01" name="CNConfigurationTime" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0" actualValue="34221000"/>
+            <SubObject subIndex="01" name="CNConfigurationTime" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0" actualValue="61152000"/>
             <SubObject subIndex="02" name="CNConfigurationTime" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0"/>
             <SubObject subIndex="03" name="CNConfigurationTime" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0"/>
             <SubObject subIndex="04" name="CNConfigurationTime" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0"/>
@@ -22749,7 +22749,7 @@
             <SubObject subIndex="1D" name="CNConfigurationTime" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0"/>
             <SubObject subIndex="1E" name="CNConfigurationTime" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0"/>
             <SubObject subIndex="1F" name="CNConfigurationTime" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0"/>
-            <SubObject subIndex="20" name="CNConfigurationTime" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0" actualValue="34221000"/>
+            <SubObject subIndex="20" name="CNConfigurationTime" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0" actualValue="61152000"/>
             <SubObject subIndex="21" name="CNConfigurationTime" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0"/>
             <SubObject subIndex="22" name="CNConfigurationTime" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0"/>
             <SubObject subIndex="23" name="CNConfigurationTime" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0"/>
@@ -22827,7 +22827,7 @@
             <SubObject subIndex="6B" name="CNConfigurationTime" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0"/>
             <SubObject subIndex="6C" name="CNConfigurationTime" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0"/>
             <SubObject subIndex="6D" name="CNConfigurationTime" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0"/>
-            <SubObject subIndex="6E" name="CNConfigurationTime" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0" actualValue="34221000"/>
+            <SubObject subIndex="6E" name="CNConfigurationTime" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0" actualValue="61152000"/>
             <SubObject subIndex="6F" name="CNConfigurationTime" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0"/>
             <SubObject subIndex="70" name="CNConfigurationTime" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0"/>
             <SubObject subIndex="71" name="CNConfigurationTime" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0"/>
@@ -23501,7 +23501,7 @@
           <Object index="1F8A" name="NMT_MNCycleTiming_REC" objectType="9" dataType="042F">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" defaultValue="2"/>
             <SubObject subIndex="01" name="WaitSoCPReq_U32" objectType="7" dataType="0007" accessType="rw" defaultValue="1000"/>
-            <SubObject subIndex="02" name="AsyncSlotTimeout_U32" objectType="7" dataType="0007" accessType="rw" defaultValue="100000"/>
+            <SubObject subIndex="02" name="AsyncSlotTimeout_U32" objectType="7" dataType="0007" accessType="rw" defaultValue="100000" actualValue="0x7A120"/>
           </Object>
           <Object index="1F8B" name="NMT_MNPReqPayloadLimitList_AU16" objectType="8" dataType="0006">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="254"/>
