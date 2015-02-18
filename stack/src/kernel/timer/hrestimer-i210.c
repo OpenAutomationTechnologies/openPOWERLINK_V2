@@ -45,7 +45,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
 #include <kernel/hrestimer.h>
-#include <kernel/edrv.h>          // using definition of tHresCallback
 
 #include <linux/module.h>
 #include <linux/kernel.h>
@@ -93,8 +92,6 @@ void TgtDbgPostTraceValue(UINT32 dwTraceValue_p);
 //------------------------------------------------------------------------------
 // global function prototypes
 //------------------------------------------------------------------------------
-tOplkError edrv_getMacTime(UINT64* pCurtime_p);
-void edrv_setCyclicFrequency(UINT32 frequency);
 tOplkError edrv_startTimer(tTimerHdl* pTimerHdl_p, UINT32 frequency_p);
 tOplkError edrv_stopTimer(tTimerHdl* pTimerHdl_p);
 tOplkError edrv_restartTimer(tTimerHdl* pTimerHdl_p);

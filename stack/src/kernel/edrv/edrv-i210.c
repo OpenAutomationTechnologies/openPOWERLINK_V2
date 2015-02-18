@@ -54,6 +54,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
 #include <kernel/edrv.h>
+#include <kernel/hrestimer.h>           // using definition of tHresCallback
 
 #include <linux/pci.h>
 #include <linux/interrupt.h>

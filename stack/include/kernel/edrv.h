@@ -42,8 +42,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-#include <oplk/frame.h>
-#include <common/timer.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -106,9 +104,6 @@ typedef tEdrvReleaseRxBuffer (*tEdrvRxHandler)(tEdrvRxBuffer* pRxBuffer_p);
 
 /// Callback function pointer for Tx frames
 typedef void (*tEdrvTxHandler)(tEdrvTxBuffer* pTxBuffer_p);
-
-/// Callback function pointer for hres timer callback function
-typedef void (*tHresCallback)(tTimerHdl* pTimerHdl_p);
 
 /**
 \brief Enumeration for Rx buffer transfer state
@@ -215,7 +210,7 @@ tOplkError edrv_setTxBufferReady(tEdrvTxBuffer* pBuffer_p);
 tOplkError edrv_startTxBuffer(tEdrvTxBuffer* pBuffer_p);
 tOplkError edrv_releaseRxBuffer(tEdrvRxBuffer* pBuffer_p);
 tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p, UINT entryChanged_p, UINT changeFlags_p);
-int edrv_getDiagnostics(char* pBuffer_p, INT size_p);
+int        edrv_getDiagnostics(char* pBuffer_p, INT size_p);
 
 #if EDRV_USE_TTTX == TRUE
 tOplkError edrv_getMacTime(UINT64* pCurtime_p);

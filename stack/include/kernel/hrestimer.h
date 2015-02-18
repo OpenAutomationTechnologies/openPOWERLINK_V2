@@ -63,6 +63,9 @@ This type defines a function pointer to a timer callback function.
 */
 typedef tOplkError (*tTimerkCallback)(tTimerEventArg* pEventArg_p);
 
+/// Callback function pointer for hres timer callback function
+typedef void (*tHresCallback)(tTimerHdl* pTimerHdl_p);
+
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
