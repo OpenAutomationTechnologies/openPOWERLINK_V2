@@ -46,6 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/ctrlkcal.h>
 #include <kernel/dllk.h>
 #include <kernel/dllkcal.h>
+#include <kernel/edrv.h>
 #include <kernel/eventk.h>
 #include <kernel/eventkcal.h>
 #include <kernel/errhndk.h>
@@ -60,6 +61,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #if (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER)
 #include <kernel/synctimer.h>
+#endif
+
+#if defined(CONFIG_INCLUDE_NMT_MN)
+#include <kernel/edrvcyclic.h>
 #endif
 
 #if defined(CONFIG_INCLUDE_VETH)

@@ -2,7 +2,7 @@
 #
 # File lists for openPOWERLINK stack sources
 #
-# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # Copyright (c) 2014, Kalycito Infotech Private Limited
 # All rights reserved.
 #
@@ -615,6 +615,7 @@ SET(KERNEL_HEADERS
     ${STACK_INCLUDE_DIR}/kernel/pdokcal.h
     ${STACK_INCLUDE_DIR}/kernel/veth.h
     ${STACK_INCLUDE_DIR}/kernel/edrv.h
+    ${STACK_INCLUDE_DIR}/kernel/edrvcyclic.h
     )
 
 SET(OBJDICT_HEADERS
