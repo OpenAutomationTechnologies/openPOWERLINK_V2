@@ -123,7 +123,6 @@ static tOplkError checkAndSetSyncEvent(BOOL fPrcSlotFinished_p, UINT nodeId_p);
 static tOplkError updateNode(tDllkNodeInfo* pIntNodeInfo_p, UINT nodeId_p, tNmtState nodeNmtState_p);
 static tOplkError searchNodeInfo(UINT nodeId_p, tDllkNodeInfo** ppIntNodeInfo_p, BOOL* pfPrcSlotFinished_p);
 static void       handleErrorSignaling(tPlkFrame* pFrame_p, UINT nodeId_p);
-static tOplkError updateAsnycPendingRequests(UINT nodeId_p, UINT8 flag_p);
 #endif
 
 #if CONFIG_TIMER_USE_HIGHRES != FALSE
@@ -1923,6 +1922,7 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
         {   // or process PRes frames in MsWaitPres
             UINT8                   flag2;
             BOOL                    fPrcSlotFinished = FALSE;
+            tDllAsyncReqPriority    asyncReqPrio;
 
             if ((ret = searchNodeInfo(nodeId, &pIntNodeInfo, &fPrcSlotFinished)) != kErrorOk)
                 return ret;
@@ -1937,7 +1937,8 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
 
             // forward Flag2 to asynchronous scheduler
             flag2 = ami_getUint8Le(&pFrame->data.asnd.payload.statusResponse.flag2);
-            ret = updateAsnycPendingRequests(nodeId, flag2);
+            asyncReqPrio = (tDllAsyncReqPriority)((flag2 & PLK_FRAME_FLAG2_PR) >> PLK_FRAME_FLAG2_PR_SHIFT);
+            ret = dllkcal_setAsyncPendingRequests(nodeId, asyncReqPrio, flag2 & PLK_FRAME_FLAG2_RS);
             if (ret != kErrorOk)
                 return ret;
 
@@ -2476,7 +2477,9 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
 
                 // forward Flag2 to asynchronous scheduler
                 flag1 = ami_getUint8Le(&pFrame->data.asnd.payload.statusResponse.flag2);
-                ret = updateAsnycPendingRequests(nodeId, flag1);
+                ret = dllkcal_setAsyncPendingRequests(nodeId,
+                    ((tDllAsyncReqPriority)((flag1 & PLK_FRAME_FLAG2_PR) >> PLK_FRAME_FLAG2_PR_SHIFT)),
+                    (flag1 & PLK_FRAME_FLAG2_RS));
                 if (ret != kErrorOk)
                     goto Exit;
                 break;
@@ -2865,45 +2868,6 @@ static void handleErrorSignaling(tPlkFrame* pFrame_p, UINT nodeId_p)
     }
 }
 
-//------------------------------------------------------------------------------
-/**
-\brief  Update pending asynchronous requests
-
-This function updates the pending asynchronous requests for the given node with
-the received flag field.
-In addition it is checked if the node is invited in the current cycle's
-asynchronous slot. If so, the request count is decremented by one.
-
-\param  nodeId_p        Node ID from which a frame is received.
-\param  flag_p          Request field of the received frame.
-
-\return The function returns a tOplkError error code.
-*/
-//------------------------------------------------------------------------------
-static tOplkError updateAsnycPendingRequests(UINT nodeId_p, UINT8 flag_p)
-{
-    tOplkError              ret = kErrorOk;
-    tDllAsyncReqPriority    asyncReqPrio;
-    UINT                    count;
-
-    asyncReqPrio = (tDllAsyncReqPriority)((flag_p & PLK_FRAME_FLAG2_PR) >> PLK_FRAME_FLAG2_PR_SHIFT);
-    count = flag_p & PLK_FRAME_FLAG2_RS;
-
-    // First, update the current node's pending requests.
-    ret = dllkcal_setAsyncPendingRequests(nodeId_p, asyncReqPrio, count);
-    if (ret != kErrorOk)
-        goto Exit;
-
-    // Then, acknowledge the node's async pending requests in DLLKCAL module.
-    if (dllkInstance_g.aLastTargetNodeId[dllkInstance_g.curLastSoaReq] == nodeId_p)
-    {
-        ret = dllkcal_ackAsyncRequest(nodeId_p,
-                                      dllkInstance_g.aLastReqServiceId[dllkInstance_g.curLastSoaReq]);
-    }
-
-Exit:
-    return ret;
-}
 #endif
 
 #if CONFIG_TIMER_USE_HIGHRES != FALSE
