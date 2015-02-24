@@ -11,6 +11,7 @@ from an SD card.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2014, Kalycito Infotech Private Limited
 All rights reserved.
 
@@ -95,14 +96,14 @@ This function is used to read the CDC file from an SD card.
 \param  pszCdcFilename_p    CDC file name to be read
 \param  pCdcBuffInfo_p      Pointer to file buffer providing the file
 
-\return The function returns a tEplKernel error code.
+\return The function returns 0 if the file was read successfully, otherwise -1.
 
 \ingroup module_demo
 */
 //------------------------------------------------------------------------------
-tOplkError sdcard_getCdcOnSd(char* pszCdcFilename_p, tCdcBuffInfo* pCdcBuffInfo_p)
+int sdcard_getCdcOnSd(char* pszCdcFilename_p, tCdcBuffInfo* pCdcBuffInfo_p)
 {
-    tOplkError      ret = kErrorOk;
+    int             ret = 0;
     INT             result = 0;
     UINT            cdcSize;
     UINT            readSize;
@@ -122,7 +123,7 @@ tOplkError sdcard_getCdcOnSd(char* pszCdcFilename_p, tCdcBuffInfo* pCdcBuffInfo_
     {
         // error occurred
         PRINTF("%s Error Initializing SD Card \n", __func__);
-        ret = kErrorNoResource;
+        ret = -1;
         goto Exit;
     }
 
@@ -131,7 +132,7 @@ tOplkError sdcard_getCdcOnSd(char* pszCdcFilename_p, tCdcBuffInfo* pCdcBuffInfo_
     {
         // error occurred
         PRINTF("%s Error opening file \n", __func__);
-        ret = kErrorNoResource;
+        ret = -1;
         goto Exit;
     }
     cdcSize = sd_get_fsize(&file);
@@ -142,7 +143,7 @@ tOplkError sdcard_getCdcOnSd(char* pszCdcFilename_p, tCdcBuffInfo* pCdcBuffInfo_
     if (pCdcBuffInfo_p->pCdcBuffer == NULL)
     {
         PRINTF("Memory Allocation failed for CDC\n");
-        ret = kErrorNoResource;
+        ret = -1;
         goto ExitAndClose;
     }
 
@@ -150,7 +151,7 @@ tOplkError sdcard_getCdcOnSd(char* pszCdcFilename_p, tCdcBuffInfo* pCdcBuffInfo_
     if (readSize != cdcSize || result != XST_SUCCESS)
     {
         PRINTF("%s CDC Read failed \n", __func__);
-        ret = kErrorNoResource;
+        ret = -1;
         goto ExitAndClose;
     }
 
@@ -190,4 +191,4 @@ void sdcard_freeCdcBuffer(tCdcBuffInfo* pCdcBuffInfo_p)
 //============================================================================//
 /// \name Private Functions
 /// \{
-///\}
+/// \}

@@ -5,6 +5,49 @@ Revision history of openPOWERLINK Protocol Stack {#page_revision_history}
 
 # Release 2 {#sect_revision_v2}
 
+## V2.1.1 {#sect_revision_v2_1_1}
+
+This is the latest release of the V2.1 release series. This release is a stable
+release, it contains fixes and optimizations.
+
+Following is a summary of changes in V2.1.1. For a detailed revision history
+refer to the Git source code history.
+
+### Fixes:
+- Fix segmentation fault in sdocom.c
+- Fix NULL pointer crash in edrvcyclic
+- Fix stack shutdown which can cause crashes in Linux kernel module
+- Fix Linux mutex initialization
+- Fix I210 driver initialization
+- Fix MN assignment of unrequested asynchronous slots
+- Fix update of StatusResponse TX buffer
+- Fix uninitialized function pointer access in dllcal
+- Fix wrong string compare for emacps driver in CMakeLists.txt
+- Remove declaration of non-existing ledu_addInstance() function
+- Uncomment prescaler object in CiA302-4_MN XDD
+- Change number of tErrHistoryEntry elements
+- Cosmetic code cleanups
+- Fix wrong parameter documentation
+
+### Additions:
+- Add documentation for POWERLINK frame structures
+- Add improved error output in demos
+
+### Removals:
+- Remove unused openCONFIGURATOR projects
+
+### Changes:
+- Upgrade openCONFIGURATOR projects for openCONFIGURATOR 1.4.1
+- Increase number of TX buffers in Ethernet drivers
+- Enable deferred release for Linux Ethernet drivers
+- Optimize initialization values of WaitSocPreq_U32 in demos
+- Restructure hardware build documentation
+- Improve documentation
+
+### Known Issues:
+- Xilinx Zynq MN (see 2.1.0)
+
+
 ## V2.1.0 {#sect_revision_v2_1_0}
 
 This is the first release of the V2.1 release series. It contains new features

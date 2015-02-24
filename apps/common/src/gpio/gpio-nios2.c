@@ -11,7 +11,7 @@ applications.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
 All rights reserved.
@@ -42,12 +42,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplk.h>
-
-#include "gpio.h"
-
 #include <system.h>
 #include <altera_avalon_pio_regs.h>
+#include <oplk/oplk.h>
+#include "gpio.h"
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -95,16 +93,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /**
 \brief  Initialize GPIO module
 
-The function initializes the GPIO module before being used.
-
-\return Returns 0 if successful
+The function initializes the GPIO module.
 
 \ingroup module_app_common
 */
 //------------------------------------------------------------------------------
-int gpio_init(void)
+void gpio_init(void)
 {
-    return 0;
+
 }
 
 //------------------------------------------------------------------------------
@@ -116,7 +112,7 @@ The function shuts down the GPIO module.
 \ingroup module_app_common
 */
 //------------------------------------------------------------------------------
-void gpio_shutdown(void)
+void gpio_exit(void)
 {
 
 }
@@ -135,6 +131,7 @@ The function returns the node ID set by the node switches.
 UINT8 gpio_getNodeid(void)
 {
     UINT8 nodeid;
+
 #ifdef NODE_SWITCH_PIO_BASE
     nodeid = IORD_ALTERA_AVALON_PIO_DATA(NODE_SWITCH_PIO_BASE);
 #else
@@ -196,6 +193,7 @@ The function returns application inputs.
 UINT8 gpio_getAppInput(void)
 {
     UINT8 key;
+
 #ifdef KEY_PIO_BASE
     key = IORD_ALTERA_AVALON_PIO_DATA(KEY_PIO_BASE);
 #else
@@ -231,5 +229,4 @@ void gpio_setAppOutputs(UINT32 val_p)
 /// \name Private Functions
 /// \{
 
-///\}
-
+/// \}

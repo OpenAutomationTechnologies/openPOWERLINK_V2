@@ -75,16 +75,26 @@ Follow the steps below to build the stack library on your host platform:
 * Creating debug libraries
 
       > cd <openPOWERLINK_directory>\stack\build\xilinx-microblaze
-      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Debug
+      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Debug -DCFG_COMPILE_LIB_[LIB_NAME]=ON -DCFG_COMPILE_LIB_[LIB_NAME]_LIB_DIR=[PATH_TO_HW_LIB]
       > make all
       > make install
+
+  This will create the `[LIB_NAME]` stack library (debug) for the hardware library in `[PATH_TO_HW_LIB]`.
+  Multiple stack libraries can be built together by passing the define pairs (`CFG_COMPILE_LIB_[LIB_NAME]`
+  and `CFG_COMPILE_LIB_[LIB_NAME]_LIB_DIR`) for each stack library to CMake.
+  Refer to \ref sect_build_stack_options_noos_microblaze for details!
 
 * Creating release libraries
 
       > cd <openPOWERLINK_directory>\stack\build\xilinx-microblaze
-      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Release
+      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Release -DCFG_COMPILE_LIB_[LIB_NAME]=ON -DCFG_COMPILE_LIB_[LIB_NAME]_LIB_DIR=[PATH_TO_HW_LIB]
       > make all
       > make install
+
+  This will create the `[LIB_NAME]` stack library for the hardware library in `[PATH_TO_HW_LIB]`.
+  Multiple stack libraries can be built together by passing the define pairs (`CFG_COMPILE_LIB_[LIB_NAME]`
+  and `CFG_COMPILE_LIB_[LIB_NAME]_LIB_DIR`) for each stack library to CMake.
+  Refer to \ref sect_build_stack_options_noos_microblaze for details!
 
 The default library installation path is:
 `<openPOWERLINK_DIR>/stack/lib/generic/microblaze/<BOARD_NAME>/<DEMO_NAME>`
@@ -101,16 +111,26 @@ Follow the steps below to build the stack library on your host platform:
 * Creating debug libraries
 
       > cd <openPOWERLINK_directory>\stack\build\xilinx-zynqarm
-      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-zynqarm-eabi-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Debug
+      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-zynqarm-eabi-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Debug -DCFG_COMPILE_LIB_[LIB_NAME]=ON -DCFG_COMPILE_LIB_[LIB_NAME]_LIB_DIR=[PATH_TO_HW_LIB]
       > make all
       > make install
+
+  This will create the `[LIB_NAME]` stack library (debug) for the hardware library in `[PATH_TO_HW_LIB]`.
+  Multiple stack libraries can be built together by passing the define pairs (`CFG_COMPILE_LIB_[LIB_NAME]`
+  and `CFG_COMPILE_LIB_[LIB_NAME]_LIB_DIR`) for each stack library to CMake.
+  Refer to \ref sect_build_stack_options_noos_zynqarm for details!
 
 * Creating release libraries
 
       > cd <openPOWERLINK_directory>\stack\build\xilinx-zynqarm
-      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../toolchain-xilinx-zynqarm-eabi-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Release
+      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../toolchain-xilinx-zynqarm-eabi-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Release -DCFG_COMPILE_LIB_[LIB_NAME]=ON -DCFG_COMPILE_LIB_[LIB_NAME]_LIB_DIR=[PATH_TO_HW_LIB]
       > make all
       > make install
+
+  This will create the `[LIB_NAME]` stack library for the hardware library in `[PATH_TO_HW_LIB]`.
+  Multiple stack libraries can be built together by passing the define pairs (`CFG_COMPILE_LIB_[LIB_NAME]`
+  and `CFG_COMPILE_LIB_[LIB_NAME]_LIB_DIR`) for each stack library to CMake.
+  Refer to \ref sect_build_stack_options_noos_zynqarm for details!
 
 The default library installation path is:
 `<openPOWERLINK_DIR>/stack/lib/generic/xilinx-zynqarm/<BOARD_NAME>/<DEMO_NAME>`
@@ -218,9 +238,9 @@ the configuration options on the command line (-DCFG_XXX=XXX) or
   driver which is using the WinPCAP library for accessing the network. It is
   configured to contain only CN functionality.
 
-## Options for embedded systems (No-OS)
+## Options for embedded systems (No-OS) {#sect_build_stack_options_noos}
 
-### Microblaze Configuration Options
+### Microblaze Configuration Options {#sect_build_stack_options_noos_microblaze}
 
 - **CFG_COMPILE_LIB_CN**
 
@@ -247,7 +267,7 @@ the configuration options on the command line (-DCFG_XXX=XXX) or
   The path to the hardware platform should point to the export folder of the hardware
   project. (e.g: `<openPOWERLINK_DIR>/hardware/lib/generic/microblaze/<BOARD_NAME>/<DEMO_NAME>`)
 
-### Xilinx Zynq ARM Configuration Options
+### Xilinx Zynq ARM Configuration Options {#sect_build_stack_options_noos_zynqarm}
 
 - **CFG_COMPILE_LIB_MNAPP_DUALPROCSHM**
 

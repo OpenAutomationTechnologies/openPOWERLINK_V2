@@ -1,15 +1,15 @@
 /**
 ********************************************************************************
-\file       lcd-16207.c
+\file       lcdl-16207.c
 
-\brief      LCD functions for Altera Avalon LCD IP-Core with HD44780
+\brief      Low-level LCD functions for Altera Avalon LCD IP-Core with HD44780
 
 This implementation uses the Altera Avalon LCD 16207 IP-Core to handle the
 display controller HD44780 - available e.g. on the Terasic DE2-115 board.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.
 All rights reserved.
@@ -101,12 +101,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //------------------------------------------------------------------------------
 /**
-\brief  Initialize the LCD
+\brief  Initialize the low-level LCD module
 
 This function writes a sequence of initialization parameters to the LCD.
 */
 //------------------------------------------------------------------------------
-int lcdl_init(void)
+void lcdl_init(void)
 {
     LCDL_WRCMD(0x38);
     usleep(2000);
@@ -118,13 +118,11 @@ int lcdl_init(void)
     usleep(2000);
     LCDL_WRCMD(0x80);
     usleep(2000);
-
-    return 0;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Exit the LCD instance
+\brief  Shutdown the low-level LCD module
 
 This function exits the LCD instance.
 */
@@ -155,7 +153,8 @@ Changes to specified line of the LCD
 
 \param  line_p      Specifies the line
 
-\return The function returns 0 if the line is changed successfully, -1 otherwise.
+\return The function returns 0 if the line is changed successfully,
+        otherwise -1.
 */
 //------------------------------------------------------------------------------
 int lcdl_changeToLine(unsigned int line_p)
@@ -214,5 +213,4 @@ void lcdl_printText(const char* sText_p)
 /// \name Private Functions
 /// \{
 
-///\}
-
+/// \}

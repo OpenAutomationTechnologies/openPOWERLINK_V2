@@ -8,6 +8,7 @@ This header file contains definitions for the SD card support functions.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2014, Kalycito Infotech Private Limited
 All rights reserved.
 
@@ -40,6 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <oplk/oplk.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -52,7 +54,7 @@ typedef struct
 {
     unsigned char*      pCdcBuffer;
     UINT32              cdcSize;
-}tCdcBuffInfo;
+} tCdcBuffInfo;
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -63,8 +65,8 @@ extern "C"
 {
 #endif
 
-tOplkError  sdcard_getCdcOnSd(char* pszCdcFilename_p, tCdcBuffInfo* pCdcBuffInfo_p);
-void        sdcard_freeCdcBuffer(tCdcBuffInfo* pCdcBuffInfo_p);
+int  sdcard_getCdcOnSd(char* pszCdcFilename_p, tCdcBuffInfo* pCdcBuffInfo_p);
+void sdcard_freeCdcBuffer(tCdcBuffInfo* pCdcBuffInfo_p);
 
 #ifdef __cplusplus
 }

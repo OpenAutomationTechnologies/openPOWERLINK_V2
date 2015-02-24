@@ -260,7 +260,7 @@ typedef struct
     UINT8                   nmtStatus;                      ///< Reports the current status of the CN’s NMT state machine. (Offset 20)
     UINT8                   reserved1[3];                   ///< Reserved
     UINT64                  staticErrorLe;                  ///< Includes specific bits, which are set to indicate pending errors at the CN.
-    tErrHistoryEntry        aErrorHistoryEntry[14];         ///< Contains a list of errors, that have occurred at the CN.
+    tErrHistoryEntry        aErrorHistoryEntry[13];         ///< Contains a list of errors, that have occurred at the CN.
 } PACK_STRUCT tStatusResponse;
 
 /**

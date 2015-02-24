@@ -11,7 +11,7 @@ application.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
 All rights reserved.
@@ -129,6 +129,8 @@ int main(void)
     UINT8       nodeid;
     UINT32      version;
 
+    // Initialize helper modules
+    gpio_init();
     lcd_init();
 
     // get node ID from input
@@ -156,7 +158,7 @@ int main(void)
     PRINTF("----------------------------------------------------\n");
 
     PRINTF("NODEID=0x%02X\n", instance_l.nodeId);
-    lcd_printNodeId((WORD)instance_l.nodeId);
+    lcd_printNodeId(instance_l.nodeId);
 
     if ((ret = initPowerlink(&instance_l)) != kErrorOk)
         goto Exit;
@@ -170,9 +172,13 @@ int main(void)
     loopMain(&instance_l);
 
 Exit:
-    arp_shutdown();
+    arp_exit();
     shutdownPowerlink(&instance_l);
     shutdownApp();
+
+    // Shutdown helper modules
+    lcd_exit();
+    gpio_exit();
 
     return 0;
 }
@@ -338,7 +344,8 @@ The function implements the applications stack event handler.
 \ingroup module_demo_cn_embedded
 */
 //------------------------------------------------------------------------------
-static tOplkError eventCbPowerlink(tOplkApiEventType EventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p)
+static tOplkError eventCbPowerlink(tOplkApiEventType EventType_p,
+                                   tOplkApiEventArg* pEventArg_p, void* pUserArg_p)
 {
     tOplkError                      ret = kErrorOk;
     tOplkApiEventReceivedNonPlk*    pFrameInfo = &pEventArg_p->receivedEth;
@@ -371,9 +378,8 @@ static tOplkError eventCbPowerlink(tOplkApiEventType EventType_p, tOplkApiEventA
             break;
 
         case kOplkApiEventReceivedNonPlk:
-            ret = arp_processReceive(pFrameInfo->pFrame, pFrameInfo->frameSize);
-            if (ret != kErrorRetry)
-                return ret;
+            if (arp_processReceive(pFrameInfo->pFrame, pFrameInfo->frameSize) == 0)
+                return kErrorOk;
 
             // If you get here, the received Ethernet frame is no ARP frame.
             // Here you can call other protocol stacks for processing.
@@ -394,5 +400,4 @@ static tOplkError eventCbPowerlink(tOplkApiEventType EventType_p, tOplkApiEventA
     return ret;
 }
 
-///\}
-
+/// \}

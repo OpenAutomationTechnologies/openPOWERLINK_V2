@@ -8,7 +8,7 @@ This file contains definitions and declarations of the user LED module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -65,7 +65,6 @@ extern "C"
 #endif
 
 tOplkError ledu_init(tLeduStateChangeCallback pfnCbStateChange_p);
-tOplkError ledu_addInstance(tLeduStateChangeCallback pfnCbStateChange_p);
 tOplkError ledu_exit(void);
 tOplkError ledu_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p);
 tOplkError ledu_processEvent(tEvent* pEvent_p);

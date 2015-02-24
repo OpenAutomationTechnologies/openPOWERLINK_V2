@@ -401,6 +401,10 @@ void dllkframe_processTransmittedNmtReq(tEdrvTxBuffer* pTxBuffer_p)
         dllkInstance_g.flag2--;
         dllkInstance_g.updateTxFrame = DLLK_UPDATE_BOTH;
     }
+
+    ret = dllkframe_updateFrameAsyncRes(nmtState);
+    if (ret != kErrorOk)
+        goto Exit;
 #endif
 
     // post event to DLL
@@ -473,6 +477,10 @@ void dllkframe_processTransmittedNonPlk(tEdrvTxBuffer* pTxBuffer_p)
         dllkInstance_g.flag2--;
         dllkInstance_g.updateTxFrame = DLLK_UPDATE_BOTH;
     }
+
+    ret = dllkframe_updateFrameAsyncRes(nmtState);
+    if (ret != kErrorOk)
+        goto Exit;
 #endif
 
     // post event to DLL
@@ -613,6 +621,57 @@ tOplkError dllkframe_updateFramePres(tEdrvTxBuffer* pTxBuffer_p,
         ret = edrv_updateTxBuffer(pTxBuffer_p);
     }
 #endif
+
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Update CN asynchronous response frames
+
+The function updates the CN asynchronous response frames Status Response and
+Ident Response depending on \ref dllkInstance_g.updateTxFrame.
+
+\param  nmtState_p              NMT state of the node.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+tOplkError dllkframe_updateFrameAsyncRes(tNmtState nmtState_p)
+{
+    tOplkError      ret = kErrorOk;
+    tEdrvTxBuffer*  pTxBuffer;
+
+    switch (dllkInstance_g.updateTxFrame)
+    {
+        case DLLK_UPDATE_BOTH:
+            dllkInstance_g.curTxBufferOffsetIdentRes ^= 1;
+            pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_IDENTRES +
+                                                  dllkInstance_g.curTxBufferOffsetIdentRes];
+            if (pTxBuffer->pBuffer != NULL)
+            {   // IdentRes does exist
+                if ((ret = dllkframe_updateFrameIdentRes(pTxBuffer, nmtState_p)) != kErrorOk)
+                    return ret;
+            }
+            // fall-through
+
+        case DLLK_UPDATE_STATUS:
+            dllkInstance_g.curTxBufferOffsetStatusRes ^= 1;
+            pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_STATUSRES +
+                                                  dllkInstance_g.curTxBufferOffsetStatusRes];
+            if (pTxBuffer->pBuffer != NULL)
+            {   // StatusRes does exist
+                if ((ret = dllkframe_updateFrameStatusRes(pTxBuffer, nmtState_p)) != kErrorOk)
+                    return ret;
+            }
+
+            // reset signal variable
+            dllkInstance_g.updateTxFrame = DLLK_UPDATE_NONE;
+            break;
+
+        default:
+            break;
+    }
 
     return ret;
 }

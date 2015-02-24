@@ -8,7 +8,7 @@ This is the low-level interface definition for specific LCDs.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.
 All rights reserved.
@@ -60,10 +60,10 @@ extern "C"
 {
 #endif
 
-int lcdl_init(void);
+void lcdl_init(void);
 void lcdl_exit(void);
 void lcdl_clear(void);
-int lcdl_changeToLine(unsigned int line_p);
+int  lcdl_changeToLine(unsigned int line_p);
 void lcdl_printText(const char* pText_p);
 
 #ifdef __cplusplus
@@ -71,4 +71,3 @@ void lcdl_printText(const char* pText_p);
 #endif
 
 #endif /* _INC_lcdl_H_ */
-

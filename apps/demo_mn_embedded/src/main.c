@@ -11,7 +11,7 @@ application.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
 All rights reserved.
@@ -91,7 +91,7 @@ static char*            pszCdcFilename_g = "mnobd.cdc";
 #else
 const unsigned char     aCdcBuffer[] =
 {
-    #include "mnobd.txt"
+    #include "mnobd_char.txt"
 };
 
 #endif
@@ -148,6 +148,9 @@ int main(void)
 #if (CONFIG_CDC_ON_SD != FALSE)
     tCdcBuffInfo    cdcBuffInfo;
 #endif
+
+    // Initialize helper modules
+    gpio_init();
     lcd_init();
 
     // get node ID from input
@@ -161,8 +164,7 @@ int main(void)
     instance_l.fShutdown        = FALSE;
     instance_l.fGsOff           = FALSE;
 #if (CONFIG_CDC_ON_SD != FALSE)
-    ret = sdcard_getCdcOnSd(pszCdcFilename_g, &cdcBuffInfo);
-    if (ret != kErrorOk)
+    if (sdcard_getCdcOnSd(pszCdcFilename_g, &cdcBuffInfo) != 0)
     {
         goto Exit;
     }
@@ -186,7 +188,7 @@ int main(void)
     PRINTF("----------------------------------------------------\n");
 
     PRINTF("NODEID=0x%02X\n", instance_l.nodeId);
-    lcd_printNodeId((WORD)instance_l.nodeId);
+    lcd_printNodeId(instance_l.nodeId);
 
     if ((ret = initPowerlink(&instance_l)) != kErrorOk)
         goto Exit;
@@ -203,9 +205,13 @@ Exit:
 #if (CONFIG_CDC_ON_SD != FALSE)
     sdcard_freeCdcBuffer(&cdcBuffInfo);
 #endif
-    arp_shutdown();
+    arp_exit();
     shutdownPowerlink(&instance_l);
     shutdownApp();
+
+    // Shutdown helper modules
+    lcd_exit();
+    gpio_exit();
 
     return 0;
 }
@@ -434,12 +440,13 @@ static tOplkError eventCbPowerlink(tOplkApiEventType EventType_p,
         //       \ref oplk_sendEthFrame.
 
         // Forward received frame to ARP processing
-        ret = arp_processReceive(pFrameInfo->pFrame, pFrameInfo->frameSize);
-         if (ret != kErrorRetry)
-             return ret;
+        if (arp_processReceive(pFrameInfo->pFrame, pFrameInfo->frameSize) == 0)
+            return kErrorOk;
 
-         // If you get here, the received Ethernet frame is no ARP frame.
-         // Here you can call other protocol stacks for processing.
+        // If you get here, the received Ethernet frame is no ARP frame.
+        // Here you can call other protocol stacks for processing.
+
+        ret = kErrorOk; // Frame wasn't processed, so simply dump it.
     }
     else if (EventType_p == kOplkApiEventDefaultGwChange)
     {
@@ -452,4 +459,4 @@ static tOplkError eventCbPowerlink(tOplkApiEventType EventType_p,
     return ret;
 }
 
-///\}
+/// \}

@@ -119,8 +119,6 @@ static tOplkError cbCnPresFallbackTimeout(void);
 
 The function adds a DLL kernel module instance.
 
-\param  pInitParam_p            Initialization parameters for DLL.
-
 \return The function returns a tOplkError error code.
 
 \ingroup module_dllk
