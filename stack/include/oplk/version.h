@@ -52,9 +52,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //             min        = minor version (will be set to 0 if major version will be incremented)
 //                 build  = current build (will be set to 0 if minor version will be incremented)
 //
-#define PLK_DEFINED_STACK_VERSION   PLK_STACK_VERSION   (2, 1, 1)
-#define PLK_DEFINED_OBJ1018_VERSION PLK_OBJ1018_VERSION (2, 1, 1)
-#define PLK_DEFINED_STRING_VERSION  PLK_STRING_VERSION  (2, 1, 1)
+#define PLK_DEFINED_STACK_VERSION   PLK_STACK_VERSION   (2, 2, 0)
+#define PLK_DEFINED_OBJ1018_VERSION PLK_OBJ1018_VERSION (2, 2, 0)
+#define PLK_DEFINED_STRING_VERSION  PLK_STRING_VERSION  (2, 2, 0)
 
 
 // -----------------------------------------------------------------------------
