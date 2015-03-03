@@ -108,30 +108,32 @@ typedef struct
     tHresTimerInfo      aTimerInfo[TIMER_COUNT];    ///< Array with timer information for a set of timers
     HANDLE              threadHandle;               ///< Handle of the hrtimer worker thread
     HANDLE              aHandle[HRTIMER_HDL_COUNT]; ///< Array of event handles of the hrtimer
-    HINSTANCE           hInstLibNtDll;              ///< Instance handle of the loaded NT kernel DLL
 } tHresTimerInstance;
 
-
-// function types from NTDLL.DLL
-typedef LONG (NTAPI* NTQUERYTIMERRESOLUTION)(OUT PULONG MinimumResolution,
-                                             OUT PULONG MaximumResolution,
-                                             OUT PULONG CurrentResolution);
-typedef LONG (NTAPI* NTSETTIMERRESOLUTION)(IN ULONG DesiredResolution,
-                                           IN BOOLEAN SetResolution,
-                                           OUT PULONG CurrentResolution);
+// Function prototypes for undocumented ntdll.dll functions
+typedef LONG (NTAPI* tNtQueryTimerResolution)(OUT PULONG MinimumResolution,
+                                              OUT PULONG MaximumResolution,
+                                              OUT PULONG CurrentResolution);
+typedef LONG (NTAPI* tNtSetTimerResolution)(IN ULONG DesiredResolution,
+                                            IN BOOLEAN SetResolution,
+                                            OUT PULONG CurrentResolution);
 
 //------------------------------------------------------------------------------
 // module local vars
 //------------------------------------------------------------------------------
-static tHresTimerInstance   hresTimerInstance_l;
-// function pointers to NTDLL.DLL
-NTQUERYTIMERRESOLUTION      NtQueryTimerResolution;
-NTSETTIMERRESOLUTION        NtSetTimerResolution;
+static tHresTimerInstance       hresTimerInstance_l;
+static HINSTANCE                hInstLibNtDll_l;            ///< Instance handle of the loaded NT kernel DLL
+
+// Function pointers to undocumented ntdll.dll functions
+static tNtQueryTimerResolution  NtQueryTimerResolution;
+static tNtSetTimerResolution    NtSetTimerResolution;
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static void callTimerCb(UINT index_p);
+static tOplkError   setMaxTimerResolution(void);
+static void         restoreTimerResolution(void);
+static void         callTimerCb(UINT index_p);
 static DWORD WINAPI timerThread(LPVOID pArgument_p);
 
 //============================================================================//
@@ -152,48 +154,15 @@ The function initializes the high-resolution timer module
 tOplkError hrestimer_init(void)
 {
     tOplkError      ret = kErrorOk;
-    LONG            winRet = 0;
-    ULONG           min = ~0UL;
-    ULONG           max = ~0UL;
-    ULONG           current = ~0UL;
     DWORD           threadId;
 
+    // Set the system timer to maximum resolution
+    ret = setMaxTimerResolution();
+    if (ret != kErrorOk)
+        return ret;
+
+    // Clear the module instance strucutre
     OPLK_MEMSET(&hresTimerInstance_l, 0, sizeof(hresTimerInstance_l));
-
-    // load NTDLL.DLL
-    hresTimerInstance_l.hInstLibNtDll = LoadLibrary("ntdll.dll");
-    if (hresTimerInstance_l.hInstLibNtDll == NULL)
-    {
-        DEBUG_LVL_ERROR_TRACE("LoadLibrary(ntdll.dll) failed (%d)\n", GetLastError());
-        return kErrorNoResource;
-    }
-
-    // load proc address of NtQueryTimerResolution
-    NtQueryTimerResolution = (NTQUERYTIMERRESOLUTION)GetProcAddress(hresTimerInstance_l.hInstLibNtDll,
-                                                                    "NtQueryTimerResolution");
-    if (NtQueryTimerResolution == NULL)
-    {
-        DEBUG_LVL_ERROR_TRACE("GetProcAddress(NtQueryTimerResolution) failed (%d)\n", GetLastError());
-        return kErrorNoResource;
-    }
-
-    // load proc address of NtSetTimerResolution
-    NtSetTimerResolution = (NTSETTIMERRESOLUTION)GetProcAddress(hresTimerInstance_l.hInstLibNtDll,
-                                                                "NtSetTimerResolution");
-    if (NtSetTimerResolution == NULL)
-    {
-        DEBUG_LVL_ERROR_TRACE("GetProcAddress(NtSetTimerResolution) failed (%d)\n", GetLastError());
-        return kErrorNoResource;
-    }
-
-    // query actual timer resolution
-    NtQueryTimerResolution(&min, &max, &current);
-    DEBUG_LVL_ERROR_TRACE("TimerResolution Min = %lu, Max = %lu, Cur = %lu\n", min, max, current);
-
-    // set timer resolution to maximum
-    winRet = NtSetTimerResolution(max, TRUE, &current);
-    DEBUG_LVL_ERROR_TRACE("NtSetTimerResolution returnd %ld, current resolution = %lu\n", winRet, current);
-
 
     // Create two unnamed waitable timers
     hresTimerInstance_l.aHandle[HRTIMER_HDL_TIMER0] = CreateWaitableTimer(NULL, FALSE, NULL);
@@ -235,8 +204,6 @@ The function shuts down the high-resolution timer module.
 tOplkError hrestimer_exit(void)
 {
     tOplkError      ret = kErrorOk;
-    LONG            winRet = 0;
-    ULONG           current = ~0UL;
 
     // Signal shutdown to the thread and wait for it to terminate
     SetEvent(hresTimerInstance_l.aHandle[HRTIMER_HDL_EVENT]);
@@ -254,12 +221,7 @@ tOplkError hrestimer_exit(void)
     OPLK_MEMSET(&hresTimerInstance_l, 0, sizeof(hresTimerInstance_l));
 
     // Restore the standard timer resolution
-    winRet = NtSetTimerResolution(0, FALSE, &current);
-    DEBUG_LVL_TIMERH_TRACE("NtSetTimerResolution returnd %ld, current resolution = %lu\n", winRet, current);
-
-    // free library NTDLL.DLL
-    FreeLibrary(hresTimerInstance_l.hInstLibNtDll);
-    hresTimerInstance_l.hInstLibNtDll = NULL;
+    restoreTimerResolution();
 
     return ret;
 }
@@ -432,6 +394,79 @@ tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
 //============================================================================//
 /// \name Private Functions
 /// \{
+
+//------------------------------------------------------------------------------
+/**
+\brief  Set maximum timer resolution
+
+This function sets the system timer to the maximum possible resolution.
+
+\return Returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError setMaxTimerResolution(void)
+{
+    tOplkError ret = kErrorOk;
+    LONG       winRet = 0;
+    ULONG      min = ~0UL;
+    ULONG      max = ~0UL;
+    ULONG      current = ~0UL;
+
+    // Load ntdll.dll
+    hInstLibNtDll_l = LoadLibrary("ntdll.dll");
+    if (hInstLibNtDll_l == NULL)
+    {
+        DEBUG_LVL_ERROR_TRACE("LoadLibrary(ntdll.dll) failed (%d)\n", GetLastError());
+        return kErrorNoResource;
+    }
+
+    // Load address of NtQueryTimerResolution() function
+    NtQueryTimerResolution = (tNtQueryTimerResolution)GetProcAddress(hInstLibNtDll_l, "NtQueryTimerResolution");
+    if (NtQueryTimerResolution == NULL)
+    {
+        DEBUG_LVL_ERROR_TRACE("GetProcAddress(NtQueryTimerResolution) failed (%d)\n", GetLastError());
+        return kErrorNoResource;
+    }
+
+    // Load address of NtSetTimerResolution() function
+    NtSetTimerResolution = (tNtSetTimerResolution)GetProcAddress(hInstLibNtDll_l, "NtSetTimerResolution");
+    if (NtSetTimerResolution == NULL)
+    {
+        DEBUG_LVL_ERROR_TRACE("GetProcAddress(NtSetTimerResolution) failed (%d)\n", GetLastError());
+        return kErrorNoResource;
+    }
+
+    // Query current timer resolution
+    NtQueryTimerResolution(&min, &max, &current);
+    DEBUG_LVL_ERROR_TRACE("TimerResolution Min = %lu, Max = %lu, Cur = %lu\n", min, max, current);
+
+    // Set timer resolution to maximum
+    winRet = NtSetTimerResolution(max, TRUE, &current);
+    DEBUG_LVL_ERROR_TRACE("NtSetTimerResolution returned %ld, current resolution = %lu\n", winRet, current);
+
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Restore standard timer resolution
+
+This function resets the system timer resolution to the standard value.
+*/
+//------------------------------------------------------------------------------
+static void restoreTimerResolution(void)
+{
+    LONG  winRet = 0;
+    ULONG current = ~0UL;
+
+    // Reset timer resolution to old value
+    winRet = NtSetTimerResolution(0, FALSE, &current);
+    DEBUG_LVL_TIMERH_TRACE("NtSetTimerResolution returnd %ld, current resolution = %lu\n", winRet, current);
+
+    // Free library NTDLL.DLL
+    FreeLibrary(hInstLibNtDll_l);
+    hInstLibNtDll_l = NULL;
+}
 
 //------------------------------------------------------------------------------
 /**
