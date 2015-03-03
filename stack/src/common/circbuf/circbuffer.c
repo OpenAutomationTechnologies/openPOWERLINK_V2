@@ -137,7 +137,7 @@ tCircBufError circbuf_alloc(UINT8 id_p, size_t size_p, tCircBufInstance** ppInst
         return kCircBufInvalidArg;
     }
 
-    if ((pInstance  = circbuf_createInstance(id_p)) == NULL)
+    if ((pInstance  = circbuf_createInstance(id_p, TRUE)) == NULL)
         return kCircBufNoResource;
 
     alignedSize = (size_p + (CIRCBUF_BLOCK_ALIGNMENT - 1)) & ~(CIRCBUF_BLOCK_ALIGNMENT - 1);
@@ -207,7 +207,7 @@ tCircBufError circbuf_connect(UINT8 id_p, tCircBufInstance** ppInstance_p)
     if (id_p >= NR_OF_CIRC_BUFFERS)
         return kCircBufInvalidArg;
 
-    if ((pInstance  = circbuf_createInstance(id_p)) == NULL)
+    if ((pInstance  = circbuf_createInstance(id_p, FALSE)) == NULL)
         return kCircBufNoResource;
 
     if ((ret = circbuf_connectBuffer(pInstance)) != kCircBufOk)

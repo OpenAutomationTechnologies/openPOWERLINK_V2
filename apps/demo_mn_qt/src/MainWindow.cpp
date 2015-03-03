@@ -220,12 +220,11 @@ void MainWindow::startPowerlink()
 {
     bool fConvOk;
     unsigned int nodeId;
-    QString devName;
 
 #if defined(CONFIG_USE_PCAP)
     // start the selection dialog
     InterfaceSelectDialog* pInterfaceDialog = new InterfaceSelectDialog();
-    if (pInterfaceDialog->fillList() < 0)
+    if (pInterfaceDialog->fillList(devName) < 0)
     {
         QMessageBox::warning(this, "PCAP not working!",
                              "No PCAP interfaces found!\n"

@@ -108,6 +108,8 @@ private:
     QTextEdit*   pTextEdit;
 
     Api*         pApi;
+
+    QString      devName;
 };
 
 #endif /* _INC_MainWindow_H_ */

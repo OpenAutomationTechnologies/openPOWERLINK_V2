@@ -70,7 +70,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #elif (TARGET_SYSTEM == _LINUX_)
 
     #include <unistd.h>
-    #include <sys/vfs.h>
     #include <sys/types.h>
     #include <sys/timeb.h>
     #include <utime.h>
@@ -320,7 +319,7 @@ static tOplkError loadCdcFile(char* pCdcFilename_p)
     cdcInfo.handle.fdCdcFile = open(pCdcFilename_p, O_RDONLY | O_BINARY, 0666);
     if (!IS_FD_VALID(cdcInfo.handle.fdCdcFile))
     {   // error occurred
-        errno = (UINT32)errno;
+        error = (UINT32)errno;
         ret = eventu_postError(kEventSourceObdu, kErrorObdErrnoSet, sizeof(UINT32), &error);
         return ret;
     }

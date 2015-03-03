@@ -40,6 +40,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <stddef.h>
+
 #include <common/oplkinc.h>
 #include <user/nmtmnu.h>
 #include <user/timeru.h>
@@ -516,6 +518,12 @@ tOplkError nmtmnu_sendNmtCommandEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
     tOplkError          retGetNodeId;
     BOOL                fIsExtNmtCmd;
     UINT                dstNodeCnt;
+
+    if (!NMT_IF_ACTIVE_MN(nmtu_getNmtState()))
+    {
+        ret = kErrorInvalidOperation;
+        goto Exit;
+    }
 
     if ((nodeId_p == 0) || (nodeId_p > C_ADR_BROADCAST))
     {   // invalid node ID specified
@@ -1203,8 +1211,8 @@ tOplkError nmtmnu_processEvent(tEvent* pEvent_p)
                 retGetNodeId = getNodeIdFromCmd(nodeId, nmtCommand, pCmdData, &nodeListOp, &tempNodeId);
                 while (retGetNodeId == kErrorRetry)
                 {
-                    if ((NMTMNU_GET_NODEINFO(tempNodeId)->nodeCfg &
-                        (NMT_NODEASSIGN_NODE_IS_CN | NMT_NODEASSIGN_NODE_EXISTS)) != 0)
+                    if ((~NMTMNU_GET_NODEINFO(tempNodeId)->nodeCfg &
+                        (NMT_NODEASSIGN_NODE_IS_CN | NMT_NODEASSIGN_NODE_EXISTS)) == 0)
                     {
                         ret = processInternalEvent(tempNodeId, (tNmtState)(bNmtState | NMT_TYPE_CS),
                                                    0, kNmtMnuIntNodeEventNmtCmdSent);
@@ -1402,11 +1410,17 @@ static tOplkError cbNmtRequest(tFrameInfo* pFrameInfo_p)
     pNmtRequestService = &pFrameInfo_p->pFrame->data.asnd.payload.nmtRequestService;
     nmtCommand = (tNmtCommand)ami_getUint8Le(&pNmtRequestService->nmtCommandId);
     targetNodeId = ami_getUint8Le(&pNmtRequestService->targetNodeId);
-    ret = nmtmnu_requestNmtCommand(targetNodeId, nmtCommand, NULL, 0);
+    ret = nmtmnu_requestNmtCommand(targetNodeId,
+                                    nmtCommand,
+                                    pNmtRequestService->aNmtCommandData,
+                                    min(sizeof (pNmtRequestService->aNmtCommandData),
+                                        pFrameInfo_p->frameSize - offsetof(tPlkFrame, data.asnd.payload.nmtRequestService.aNmtCommandData)));
     if (ret != kErrorOk)
     {   // error -> reply with kNmtCmdInvalidService
         sourceNodeId = ami_getUint8Le(&pFrameInfo_p->pFrame->srcNodeId);
         ret = nmtmnu_sendNmtCommand(sourceNodeId, kNmtCmdInvalidService);
+        if (ret == kErrorInvalidOperation)
+            ret = kErrorOk;
     }
     return ret;
 }
@@ -1698,7 +1712,7 @@ static tOplkError startBootStep1(BOOL fNmtResetAllIssued_p)
             pNodeInfo->nodeCfg = nodeCfg;
             pNodeInfo->nodeState = kNmtMnuNodeStateUnknown;
 
-            if ((nodeCfg & (NMT_NODEASSIGN_NODE_IS_CN | NMT_NODEASSIGN_NODE_EXISTS)) != 0)
+            if ((~nodeCfg & (NMT_NODEASSIGN_NODE_IS_CN | NMT_NODEASSIGN_NODE_EXISTS)) == 0)
             {   // node is configured as CN
                 if (fNmtResetAllIssued_p == FALSE)
                 {
@@ -1722,7 +1736,7 @@ static tOplkError startBootStep1(BOOL fNmtResetAllIssued_p)
         }
         else
         {   // subindex of MN
-            if ((nodeCfg & (NMT_NODEASSIGN_MN_PRES | NMT_NODEASSIGN_NODE_EXISTS)) != 0)
+            if ((~nodeCfg & (NMT_NODEASSIGN_MN_PRES | NMT_NODEASSIGN_NODE_EXISTS)) == 0)
             {   // MN shall send PRes
                 ret = addNodeIsochronous(localNodeId);
             }

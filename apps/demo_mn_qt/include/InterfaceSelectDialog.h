@@ -69,7 +69,7 @@ Q_OBJECT
 
 public:
     InterfaceSelectDialog();
-    int fillList(void);
+    int fillList(QString devName_p);
     QString getDevName(void);
 
 private slots:
