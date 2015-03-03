@@ -58,9 +58,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define EDRV_HANDLE_EVENT       0
 #define EDRV_HANDLE_PCAP        1
-#define EDRV_HANDLE_TIMER0      2
-#define EDRV_HANDLE_TIMER1      3
-#define EDRV_HANDLE_COUNT       4
+#define EDRV_HANDLE_COUNT       2
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -69,7 +67,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // global function prototypes
 //------------------------------------------------------------------------------
-void hresTimerCb(UINT index_p);
 
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //
@@ -212,21 +209,6 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     // get event handle for pcap instance
     edrInstance_l.aHandle[EDRV_HANDLE_PCAP] = pcap_getevent(edrInstance_l.pcap);
 
-    // Create two unnamed waitable timers for hrestimer sub-module.
-    edrInstance_l.aHandle[EDRV_HANDLE_TIMER0] = CreateWaitableTimer(NULL, FALSE, NULL);
-    if (edrInstance_l.aHandle[EDRV_HANDLE_TIMER0] == NULL)
-    {
-        DEBUG_LVL_ERROR_TRACE("CreateWaitableTimer failed (%d)\n", GetLastError());
-        return kErrorEdrvInit;
-    }
-
-    edrInstance_l.aHandle[EDRV_HANDLE_TIMER1] = CreateWaitableTimer(NULL, FALSE, NULL);
-    if (edrInstance_l.aHandle[EDRV_HANDLE_TIMER1] == NULL)
-    {
-        DEBUG_LVL_ERROR_TRACE("CreateWaitableTimer failed (%d)\n", GetLastError());
-        return kErrorEdrvInit;
-    }
-
     // create event for signalling shutdown
     edrInstance_l.aHandle[EDRV_HANDLE_EVENT] = CreateEvent(NULL, FALSE, FALSE, NULL);
 
@@ -262,8 +244,6 @@ tOplkError edrv_exit(void)
     pcap_close(edrInstance_l.pcap);
 
     CloseHandle(edrInstance_l.aHandle[EDRV_HANDLE_EVENT]);
-    CloseHandle(edrInstance_l.aHandle[EDRV_HANDLE_TIMER0]);
-    CloseHandle(edrInstance_l.aHandle[EDRV_HANDLE_TIMER1]);
 
     DeleteCriticalSection(&edrInstance_l.criticalSection);
 
@@ -463,32 +443,6 @@ tOplkError edrv_setRxMulticastMacAddr (BYTE* pMacAddr_p)
     return kErrorOk;
 }
 
-//------------------------------------------------------------------------------
-/**
-\brief  Return timer handle
-
-Currently the edrv module creates the timer for the high-resolution timer
-module. This is done to be able to use a single thread for handling timers
-and Ethernet packets. This dependancy should be removed.
-
-\param  index_p  Index in array.
-
-\return The function returns a timer handle
-*/
-//------------------------------------------------------------------------------
-HANDLE edrv_getTimerHandle(UINT index_p)
-{
-    index_p += EDRV_HANDLE_TIMER0;
-    if (index_p > EDRV_HANDLE_COUNT)
-    {
-        return NULL;
-    }
-    else
-    {
-        return edrInstance_l.aHandle[index_p];
-    }
-}
-
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
@@ -604,18 +558,6 @@ static DWORD WINAPI edrvWorkerThread(LPVOID pArgument_p)
                 break;
             }
 
-            case WAIT_OBJECT_0 + EDRV_HANDLE_TIMER0:
-            {   // timer 0 triggered
-                hresTimerCb(0);
-                break;
-            }
-
-            case WAIT_OBJECT_0 + EDRV_HANDLE_TIMER1:
-            {   // timer 1 triggered
-                hresTimerCb(1);
-                break;
-            }
-
             default:
             case WAIT_FAILED:
             {
@@ -627,4 +569,4 @@ static DWORD WINAPI edrvWorkerThread(LPVOID pArgument_p)
     return 0;
 }
 
-///\}
+/// \}

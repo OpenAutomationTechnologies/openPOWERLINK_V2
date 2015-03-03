@@ -56,6 +56,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define TIMERHDL_MASK               0x0FFFFFFF
 #define TIMERHDL_SHIFT              28
 
+#define HRTIMER_HDL_EVENT     0
+#define HRTIMER_HDL_TIMER0    1
+#define HRTIMER_HDL_TIMER1    2
+#define HRTIMER_HDL_COUNT     3
+
 //------------------------------------------------------------------------------
 // module global vars
 //------------------------------------------------------------------------------
@@ -63,10 +68,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // global function prototypes
 //------------------------------------------------------------------------------
-
-/* Currently, timers will be created in edrv module. Therefore, we need to
-   get the timer handle. This dependancy should be removed! */
-HANDLE edrv_getTimerHandle(UINT index_p);
 
 //============================================================================//
 //          P R I V A T E   D E F I N I T I O N S                             //
@@ -100,6 +101,8 @@ The structure defines a high-resolution timer module instance.
 typedef struct
 {
     tHresTimerInfo      aTimerInfo[TIMER_COUNT];    ///< Array with timer information for a set of timers
+    HANDLE              threadHandle;               ///< Handle of the hrtimer worker thread
+    HANDLE              aHandle[HRTIMER_HDL_COUNT]; ///< Array of event handles of the hrtimer
     HINSTANCE           hInstLibNtDll;              ///< Instance handle of the loaded NT kernel DLL
 } tHresTimerInstance;
 
@@ -123,7 +126,8 @@ NTSETTIMERRESOLUTION        NtSetTimerResolution;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-
+static void callTimerCb(UINT index_p);
+static DWORD WINAPI timerThread(LPVOID pArgument_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -147,6 +151,7 @@ tOplkError hrestimer_init(void)
     ULONG           min = ~0UL;
     ULONG           max = ~0UL;
     ULONG           current = ~0UL;
+    DWORD           threadId;
 
     OPLK_MEMSET(&hresTimerInstance_l, 0, sizeof(hresTimerInstance_l));
 
@@ -184,6 +189,30 @@ tOplkError hrestimer_init(void)
     winRet = NtSetTimerResolution(max, TRUE, &current);
     DEBUG_LVL_ERROR_TRACE("NtSetTimerResolution returnd %ld, current resolution = %lu\n", winRet, current);
 
+
+    // Create two unnamed waitable timers
+    hresTimerInstance_l.aHandle[HRTIMER_HDL_TIMER0] = CreateWaitableTimer(NULL, FALSE, NULL);
+    if (hresTimerInstance_l.aHandle[HRTIMER_HDL_TIMER0] == NULL)
+    {
+        DEBUG_LVL_ERROR_TRACE("CreateWaitableTimer failed (%d)\n", GetLastError());
+        return kErrorNoResource;
+    }
+
+    hresTimerInstance_l.aHandle[HRTIMER_HDL_TIMER1] = CreateWaitableTimer(NULL, FALSE, NULL);
+    if (hresTimerInstance_l.aHandle[HRTIMER_HDL_TIMER1] == NULL)
+    {
+        DEBUG_LVL_ERROR_TRACE("CreateWaitableTimer failed (%d)\n", GetLastError());
+        return kErrorNoResource;
+    }
+
+    // create event for signalling shutdown
+    hresTimerInstance_l.aHandle[HRTIMER_HDL_EVENT] = CreateEvent(NULL, FALSE, FALSE, NULL);
+
+    // Create the thread to begin execution on its own
+    hresTimerInstance_l.threadHandle = CreateThread(NULL, 0, timerThread, &hresTimerInstance_l, 0, &threadId);
+    if (hresTimerInstance_l.threadHandle == NULL)
+         return kErrorNoResource;
+
     return ret;
 }
 
@@ -203,6 +232,16 @@ tOplkError hrestimer_exit(void)
     tOplkError      ret = kErrorOk;
     LONG            winRet = 0;
     ULONG           current = ~0UL;
+
+    // signal shutdown to the thread
+    SetEvent(hresTimerInstance_l.aHandle[HRTIMER_HDL_EVENT]);
+    WaitForSingleObject(hresTimerInstance_l.threadHandle, INFINITE);
+    CloseHandle(hresTimerInstance_l.threadHandle);
+
+    CloseHandle(hresTimerInstance_l.aHandle[HRTIMER_HDL_EVENT]);
+    CloseHandle(hresTimerInstance_l.aHandle[HRTIMER_HDL_TIMER0]);
+    CloseHandle(hresTimerInstance_l.aHandle[HRTIMER_HDL_TIMER1]);
+
 
     // set timer resolution to old value
     winRet = NtSetTimerResolution(0, FALSE, &current);
@@ -303,7 +342,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
     *pTimerHdl_p = pTimerInfo->eventArg.timerHdl;
 
     // configure timer
-    hTimer = edrv_getTimerHandle(index);
+    hTimer = hresTimerInstance_l.aHandle[index + HRTIMER_HDL_TIMER0];
 
     fRet = SetWaitableTimer(hTimer, &dueTime, 0L, NULL, NULL, 0);
     if (!fRet)
@@ -361,14 +400,14 @@ tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
     *pTimerHdl_p = 0;
 
     // cancel timer
-    hTimer = edrv_getTimerHandle(index);
+    hTimer = hresTimerInstance_l.aHandle[index + HRTIMER_HDL_TIMER0];
     CancelWaitableTimer(hTimer);
     return ret;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief    Timer callback function
+\brief    Call a timer callback function
 
 The function implements the timer callback function. It is called when a timer
 expires.
@@ -376,7 +415,7 @@ expires.
 \param  index_p     Index of timer (0 or 1)
 */
 //------------------------------------------------------------------------------
-void hresTimerCb(UINT index_p)
+static void callTimerCb(UINT index_p)
 {
     tHresTimerInfo* pTimerInfo;
 
@@ -391,7 +430,7 @@ void hresTimerCb(UINT index_p)
         BOOL    fRet;
 
         // configure timer
-        hTimer = edrv_getTimerHandle(index_p);
+        hTimer = hresTimerInstance_l.aHandle[index_p + HRTIMER_HDL_TIMER0];
 
         fRet = SetWaitableTimer(hTimer, &pTimerInfo->dueTime, 0L, NULL, NULL, 0);
         if (!fRet)
@@ -405,5 +444,60 @@ void hresTimerCb(UINT index_p)
     {
         pTimerInfo->pfnCallback(&pTimerInfo->eventArg);
     }
-    return;
 }
+
+//------------------------------------------------------------------------------
+/**
+\brief  hrestimer worker thread
+
+This function implements the hrestimer worker thread. It is responsible to handle
+timer events.
+
+\param  pArgument_p    Thread argument
+
+\return The function returns a thread return code
+*/
+//------------------------------------------------------------------------------
+static DWORD WINAPI timerThread(LPVOID pArgument_p)
+{
+    tHresTimerInstance*  pInstance = (tHresTimerInstance*)pArgument_p;
+    UINT32               waitRet;
+
+    // increase priority
+    SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
+
+    for (;;)
+    {
+        // Wait for events
+        waitRet = WaitForMultipleObjects(HRTIMER_HDL_COUNT, pInstance->aHandle, FALSE, INFINITE);
+        switch (waitRet)
+        {
+            case WAIT_OBJECT_0 + HRTIMER_HDL_EVENT:
+            {   // shutdown was signalled
+                return 0;
+            }
+
+            case WAIT_OBJECT_0 + HRTIMER_HDL_TIMER0:
+            {   // timer 0 triggered
+                callTimerCb(0);
+                break;
+            }
+
+            case WAIT_OBJECT_0 + HRTIMER_HDL_TIMER1:
+            {   // timer 1 triggered
+                callTimerCb(1);
+                break;
+            }
+
+            default:
+            case WAIT_FAILED:
+            {
+                DEBUG_LVL_ERROR_TRACE("WaitForMultipleObjects failed (%d)\n", GetLastError());
+                break;
+            }
+        }
+    }
+    return 0;
+}
+
+/// \}
