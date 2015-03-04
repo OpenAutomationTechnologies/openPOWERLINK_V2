@@ -2,9 +2,9 @@
 ********************************************************************************
 \file   edrv-pcap_win.c
 
-\brief  Implementation of WinPCAP Ethernet driver
+\brief  Implementation of WinPcap Ethernet driver
 
-This file contains the implementation of the WinPCAP Ethernet driver.
+This file contains the implementation of the WinPcap Ethernet driver.
 
 \ingroup module_edrv
 *******************************************************************************/
@@ -54,7 +54,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define EDRV_MAX_FRAME_SIZE     0x600
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -71,6 +70,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+#define EDRV_MAX_FRAME_SIZE     0x600
 
 //------------------------------------------------------------------------------
 // local types
@@ -101,6 +101,10 @@ static tEdrvInstance edrvInstance_l;
 static void packetHandler(u_char* pParam_p, const struct pcap_pkthdr* pHeader_p, const u_char* pPktData_p);
 static DWORD WINAPI edrvWorkerThread(LPVOID pArgument_p);
 
+//============================================================================//
+//            P U B L I C   F U N C T I O N S                                 //
+//============================================================================//
+
 //------------------------------------------------------------------------------
 /**
 \brief  Ethernet driver initialization
@@ -116,9 +120,8 @@ This function initializes the Ethernet driver.
 //------------------------------------------------------------------------------
 tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
 {
-    tOplkError          ret = kErrorOk;
+    char                errorMessage[PCAP_ERRBUF_SIZE];
     DWORD               threadId;
-    char                sErr_Msg[PCAP_ERRBUF_SIZE];
     // variables for IPHLPAPI
     ULONG               outBufLen;
     PIP_ADAPTER_INFO    pAdapterInfo;
@@ -181,11 +184,18 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
 
     // save the init data (with updated MAC address)
     edrvInstance_l.initParam = *pEdrvInitParam_p;
-    edrvInstance_l.pPcap = pcap_open_live(pEdrvInitParam_p->hwParam.pDevName,
-                                          65535, 1, 1, sErr_Msg);
+
+    edrvInstance_l.pPcap = pcap_open_live(
+                        edrvInstance_l.initParam.hwParam.pDevName,
+                        65535,  // snaplen
+                        1,      // promiscuous mode
+                        1,      // milli seconds read timeout
+                        errorMessage
+                    );
+
     if (edrvInstance_l.pPcap == NULL)
     {
-        DEBUG_LVL_ERROR_TRACE("Error!! Can't open pcap: %s\n", sErr_Msg);
+        DEBUG_LVL_ERROR_TRACE("%s() Error!! Can't open pcap: %s\n", __func__, errorMessage);
         return kErrorEdrvInit;
     }
 
@@ -201,9 +211,9 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     // Create the thread to begin execution on its own.
     edrvInstance_l.hThread = CreateThread(NULL, 0, edrvWorkerThread, &edrvInstance_l, 0, &threadId);
     if (edrvInstance_l.hThread == NULL)
-         return kErrorEdrvInit;
+        return kErrorEdrvInit;
 
-    return ret;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -230,10 +240,10 @@ tOplkError edrv_exit(void)
     CloseHandle(edrvInstance_l.hThread);
     DeleteCriticalSection(&edrvInstance_l.criticalSection);
 
-    // clear instance structure
+    // Clear instance structure
     OPLK_MEMSET(&edrvInstance_l, 0, sizeof(edrvInstance_l));
 
-    return kErrorOk; //assuming no problems with closing the handle
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -267,15 +277,12 @@ This function sends the Tx buffer.
 //------------------------------------------------------------------------------
 tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-    tOplkError  ret = kErrorOk;
-    int         iRet;
+    int         pcapRet;
 
     //TRACE("%s: TxB=%p (%02X), last TxB=%p\n", __func__, pBuffer_p, (UINT)pBuffer_p->pBuffer[5], edrvInstance_l.pTransmittedTxBufferLastEntry);
 
     if (pBuffer_p->txBufferNumber.pArg != NULL)
-    {
         return kErrorInvalidOperation;
-    }
 
     EnterCriticalSection(&edrvInstance_l.criticalSection);
     if (edrvInstance_l.pTransmittedTxBufferLastEntry == NULL)
@@ -290,13 +297,16 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
     }
     LeaveCriticalSection(&edrvInstance_l.criticalSection);
 
-    iRet = pcap_sendpacket(edrvInstance_l.pPcap, pBuffer_p->pBuffer, (int)pBuffer_p->txFrameSize);
-    if (iRet != 0)
+    pcapRet = pcap_sendpacket(edrvInstance_l.pPcap, pBuffer_p->pBuffer,
+                              (int)pBuffer_p->txFrameSize);
+    if (pcapRet != 0)
     {
-        DEBUG_LVL_ERROR_TRACE("%s pcap_sendpacket returned %d (%s)\n", __func__, iRet, pcap_geterr(edrvInstance_l.pPcap));
-        ret = kErrorInvalidOperation;
+        DEBUG_LVL_EDRV_TRACE("%s() pcap_sendpacket returned %d (%s)\n",
+                             __func__, pcapRet, pcap_geterr(edrvInstance_l.pPcap));
+        return kErrorInvalidOperation;
     }
-    return ret;
+
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -314,22 +324,17 @@ This function allocates a Tx buffer.
 //------------------------------------------------------------------------------
 tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-    tOplkError ret = kErrorOk;
-
     if (pBuffer_p->maxBufferSize > EDRV_MAX_FRAME_SIZE)
-    {
         return kErrorEdrvNoFreeBufEntry;
-    }
 
     // allocate buffer with malloc
     pBuffer_p->pBuffer = (UINT8*)OPLK_MALLOC(pBuffer_p->maxBufferSize);
     if (pBuffer_p->pBuffer == NULL)
-    {
         return kErrorEdrvNoFreeBufEntry;
-    }
 
     pBuffer_p->txBufferNumber.pArg = NULL;
-    return ret;
+
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -347,12 +352,12 @@ This function releases the Tx buffer.
 //------------------------------------------------------------------------------
 tOplkError edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-    BYTE* pbBuffer = pBuffer_p->pBuffer;
+    UINT8* pBuffer = pBuffer_p->pBuffer;
 
     // mark buffer as free, before actually freeing it
     pBuffer_p->pBuffer = NULL;
 
-    OPLK_FREE(pbBuffer);
+    OPLK_FREE(pBuffer);
 
     return kErrorOk;
 }
@@ -385,6 +390,7 @@ tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
     UNUSED_PARAMETER(count_p);
     UNUSED_PARAMETER(entryChanged_p);
     UNUSED_PARAMETER(changeFlags_p);
+
     return kErrorOk;
 }
 
@@ -401,9 +407,10 @@ This function removes the multicast entry from the Ethernet controller.
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_clearRxMulticastMacAddr(BYTE* pMacAddr_p)
+tOplkError edrv_clearRxMulticastMacAddr(UINT8* pMacAddr_p)
 {
     UNUSED_PARAMETER(pMacAddr_p);
+
     return kErrorOk;
 }
 
@@ -420,9 +427,10 @@ This function sets a multicast entry into the Ethernet controller.
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_setRxMulticastMacAddr (BYTE* pMacAddr_p)
+tOplkError edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p)
 {
     UNUSED_PARAMETER(pMacAddr_p);
+
     return kErrorOk;
 }
 
@@ -446,15 +454,15 @@ This function is the packet handler forwarding the frames to the dllk.
 static void packetHandler(u_char* pParam_p, const struct pcap_pkthdr* pHeader_p, const u_char* pPktData_p)
 {
     tEdrvInstance*  pInstance = (tEdrvInstance*)pParam_p;
-    tEdrvRxBuffer   RxBuffer;
+    tEdrvRxBuffer   rxBuffer;
 
     if (OPLK_MEMCMP(pPktData_p + 6, pInstance->initParam.aMacAddr, 6) != 0)
     {   // filter out self generated traffic
-        RxBuffer.bufferInFrame = kEdrvBufferLastInFrame;
-        RxBuffer.rxFrameSize = pHeader_p->caplen;
-        RxBuffer.pBuffer = (BYTE*)pPktData_p;
+        rxBuffer.bufferInFrame = kEdrvBufferLastInFrame;
+        rxBuffer.rxFrameSize = pHeader_p->caplen;
+        rxBuffer.pBuffer = (UINT8*)pPktData_p;
 
-        pInstance->initParam.pfnRxHandler(&RxBuffer);
+        pInstance->initParam.pfnRxHandler(&rxBuffer);
     }
     else
     {   // self generated traffic
@@ -462,19 +470,22 @@ static void packetHandler(u_char* pParam_p, const struct pcap_pkthdr* pHeader_p,
         {
             tEdrvTxBuffer* pTxBuffer = pInstance->pTransmittedTxBufferFirstEntry;
 
-//            TRACE("%s: (%02X) first TxB=%p (%02X), last TxB=%p\n", __func__, (UINT)pkt_data[5], pTxBuffer, (UINT)pTxBuffer->pBuffer[5], edrvInstance_l.pTransmittedTxBufferLastEntry);
-
+            //TRACE("%s: (%02X) first TxB=%p (%02X), last TxB=%p\n", __func__,
+            //      (UINT)pPktData_p[5],
+            //      pTxBuffer,
+            //      (UINT)pTxBuffer->pBuffer[5],
+            //      edrvInstance_l.pTransmittedTxBufferLastEntry);
             if (pTxBuffer->pBuffer != NULL)
             {
                 if (OPLK_MEMCMP(pPktData_p, pTxBuffer->pBuffer, 6) == 0)
                 {
-                    EnterCriticalSection(&edrvInstance_l.criticalSection);
+                    EnterCriticalSection(&pInstance->criticalSection);
                     pInstance->pTransmittedTxBufferFirstEntry = (tEdrvTxBuffer*)pInstance->pTransmittedTxBufferFirstEntry->txBufferNumber.pArg;
                     if (pInstance->pTransmittedTxBufferFirstEntry == NULL)
                     {
                         pInstance->pTransmittedTxBufferLastEntry = NULL;
                     }
-                    LeaveCriticalSection(&edrvInstance_l.criticalSection);
+                    LeaveCriticalSection(&pInstance->criticalSection);
 
                     pTxBuffer->txBufferNumber.pArg = NULL;
 
@@ -486,18 +497,33 @@ static void packetHandler(u_char* pParam_p, const struct pcap_pkthdr* pHeader_p,
                 else
                 {
                     TRACE("%s: no matching TxB: DstMAC=%02X%02X%02X%02X%02X%02X\n",
-                        __func__, (UINT)pPktData_p[0], (UINT)pPktData_p[1], (UINT)pPktData_p[2],
-                                  (UINT)pPktData_p[3], (UINT)pPktData_p[4], (UINT)pPktData_p[5]);
+                          __func__,
+                          (UINT)pPktData_p[0],
+                          (UINT)pPktData_p[1],
+                          (UINT)pPktData_p[2],
+                          (UINT)pPktData_p[3],
+                          (UINT)pPktData_p[4],
+                          (UINT)pPktData_p[5]);
                     TRACE("   current TxB %p: DstMAC=%02X%02X%02X%02X%02X%02X\n",
-                        pTxBuffer, (UINT)pTxBuffer->pBuffer[0], (UINT)pTxBuffer->pBuffer[1], (UINT)pTxBuffer->pBuffer[2],
-                                   (UINT)pTxBuffer->pBuffer[3], (UINT)pTxBuffer->pBuffer[4], (UINT)pTxBuffer->pBuffer[5]);
+                          (void*)pTxBuffer,
+                          (UINT)pTxBuffer->pBuffer[0],
+                          (UINT)pTxBuffer->pBuffer[1],
+                          (UINT)pTxBuffer->pBuffer[2],
+                          (UINT)pTxBuffer->pBuffer[3],
+                          (UINT)pTxBuffer->pBuffer[4],
+                          (UINT)pTxBuffer->pBuffer[5]);
                 }
             }
         }
         else
         {
             TRACE("%s: no TxB: DstMAC=%02X%02X%02X%02X%02X%02X\n", __func__,
-                  pPktData_p[0], pPktData_p[1], pPktData_p[2], pPktData_p[3], pPktData_p[4], pPktData_p[5]);
+                  pPktData_p[0],
+                  pPktData_p[1],
+                  pPktData_p[2],
+                  pPktData_p[3],
+                  pPktData_p[4],
+                  pPktData_p[5]);
         }
     }
 }
