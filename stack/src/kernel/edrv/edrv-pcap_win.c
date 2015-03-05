@@ -550,47 +550,47 @@ This function gets the interface's MAC address.
 //------------------------------------------------------------------------------
 static void getMacAdrs(const char* pIfName_p, UINT8* pMacAddr_p)
 {
-    ULONG               outBufLen;
-    PIP_ADAPTER_INFO    pAdapterInfo;
-    PIP_ADAPTER_INFO    pAdapter = NULL;
-    UINT32              retVal = 0;
+    ULONG                 outBufLen;
+    PIP_ADAPTER_ADDRESSES pAdapterAddresses;
+    PIP_ADAPTER_ADDRESSES pAdapter = NULL;
+    UINT32                retVal = 0;
 
     // search for the corresponding MAC address via IPHLPAPI
-    outBufLen = sizeof(IP_ADAPTER_INFO);
-    pAdapterInfo = (IP_ADAPTER_INFO*)OPLK_MALLOC(sizeof(IP_ADAPTER_INFO));
-    if (pAdapterInfo == NULL)
+    outBufLen = sizeof(IP_ADAPTER_ADDRESSES);
+    pAdapterAddresses = (IP_ADAPTER_ADDRESSES*)OPLK_MALLOC(sizeof(IP_ADAPTER_ADDRESSES));
+    if (pAdapterAddresses == NULL)
     {
-        DEBUG_LVL_ERROR_TRACE("Error allocating memory needed to call GetAdaptersinfo\n");
+        DEBUG_LVL_ERROR_TRACE("Error allocating memory needed to call GetAdaptersAdresses\n");
         goto Exit;
     }
 
-    // Make an initial call to GetAdaptersInfo to get
+    // Make an initial call to GetAdaptersAdresses to get
     // the necessary size into the outBufLen variable
-    retVal = GetAdaptersInfo(pAdapterInfo, &outBufLen);
+    retVal = GetAdaptersAddresses(AF_UNSPEC, 0, NULL, pAdapterAddresses, &outBufLen);
     if (retVal == ERROR_BUFFER_OVERFLOW)
     {
-        OPLK_FREE(pAdapterInfo);
+        OPLK_FREE(pAdapterAddresses);
 
-        pAdapterInfo = (IP_ADAPTER_INFO*)OPLK_MALLOC(outBufLen);
-        if (pAdapterInfo == NULL)
+        pAdapterAddresses = (IP_ADAPTER_ADDRESSES*)OPLK_MALLOC(outBufLen);
+        if (pAdapterAddresses == NULL)
         {
-            DEBUG_LVL_ERROR_TRACE("Error allocating memory needed to call GetAdaptersinfo\n");
+            DEBUG_LVL_ERROR_TRACE("Error allocating memory needed to call GetAdaptersAdresses\n");
             goto Exit;
         }
     }
 
     // Get the real values
-    retVal = GetAdaptersInfo(pAdapterInfo, &outBufLen);
+    retVal = GetAdaptersAddresses(AF_UNSPEC, 0, NULL, pAdapterAddresses, &outBufLen);
     if (retVal == NO_ERROR)
     {
-        pAdapter = pAdapterInfo;
+        pAdapter = pAdapterAddresses;
         while (pAdapter)
         {
-            if (pAdapter->Type == MIB_IF_TYPE_ETHERNET)
+            if (pAdapter->IfType == IF_TYPE_ETHERNET_CSMACD)
             {
                 if (strstr(pIfName_p, pAdapter->AdapterName) != NULL)
                 {   // corresponding adapter found
-                    OPLK_MEMCPY(pMacAddr_p, pAdapter->Address, min(pAdapter->AddressLength, 6));
+                    OPLK_MEMCPY(pMacAddr_p, pAdapter->PhysicalAddress, min(pAdapter->PhysicalAddressLength, 6));
                     break;
                 }
             }
@@ -599,11 +599,11 @@ static void getMacAdrs(const char* pIfName_p, UINT8* pMacAddr_p)
     }
     else
     {
-        DEBUG_LVL_ERROR_TRACE("GetAdaptersInfo failed with error: %d\n", retVal);
+        DEBUG_LVL_ERROR_TRACE("GetAdaptersAddresses failed with error: %d\n", retVal);
     }
 
-    if (pAdapterInfo)
-        OPLK_FREE(pAdapterInfo);
+    if (pAdapterAddresses)
+        OPLK_FREE(pAdapterAddresses);
 
 Exit:
     return;
