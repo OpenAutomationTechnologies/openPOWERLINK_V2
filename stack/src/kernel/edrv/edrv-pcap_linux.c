@@ -2,9 +2,9 @@
 ********************************************************************************
 \file   edrv-pcap_linux.c
 
-\brief  Implementation of Linux Pcap Ethernet driver
+\brief  Implementation of Linux pcap Ethernet driver
 
-This file contains the implementation of the Linux Pcap Ethernet driver
+This file contains the implementation of the Linux pcap Ethernet driver.
 
 \ingroup module_edrv
 *******************************************************************************/
@@ -133,18 +133,14 @@ This function initializes the Ethernet driver.
 //------------------------------------------------------------------------------
 tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
 {
-    tOplkError          ret = kErrorOk;
-    char                aErrorMessage[PCAP_ERRBUF_SIZE];
+    char                errorMessage[PCAP_ERRBUF_SIZE];
     struct sched_param  schedParam;
 
     // clear instance structure
     OPLK_MEMSET(&edrvInstance_l, 0, sizeof(edrvInstance_l));
 
     if (pEdrvInitParam_p->hwParam.pDevName == NULL)
-    {
-        ret = kErrorEdrvInit;
-        goto Exit;
-    }
+        return kErrorEdrvInit;
 
     /* if no MAC address was specified read MAC address of used
      * Ethernet interface
@@ -168,44 +164,38 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
                         65535,  // snaplen
                         1,      // promiscuous mode
                         1,      // milli seconds read timeout
-                        aErrorMessage
+                        errorMessage
                     );
 
     if (edrvInstance_l.pPcap == NULL)
     {
-        DEBUG_LVL_ERROR_TRACE("%s() Error!! Can't open pcap: %s\n", __func__,
-                                aErrorMessage);
-        ret = kErrorEdrvInit;
-        goto Exit;
+        DEBUG_LVL_ERROR_TRACE("%s() Error!! Can't open pcap: %s\n", __func__, errorMessage);
+        return kErrorEdrvInit;
     }
 
     if (pcap_setdirection(edrvInstance_l.pPcap, PCAP_D_OUT) < 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s() couldn't set PCAP direction\n", __func__);
-        ret = kErrorEdrvInit;
-        goto Exit;
+        return kErrorEdrvInit;
     }
 
     if (pthread_mutex_init(&edrvInstance_l.mutex, NULL) != 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s() couldn't init mutex\n", __func__);
-        ret = kErrorEdrvInit;
-        goto Exit;
+        return kErrorEdrvInit;
     }
 
     if (sem_init(&edrvInstance_l.syncSem, 0, 0) != 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s() couldn't init semaphore\n", __func__);
-        ret = kErrorEdrvInit;
-        goto Exit;
+        return kErrorEdrvInit;
     }
 
     if (pthread_create(&edrvInstance_l.hThread, NULL,
                        workerThread,  &edrvInstance_l) != 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Couldn't create worker thread!\n", __func__);
-        ret = kErrorEdrvInit;
-        goto Exit;
+        return kErrorEdrvInit;
     }
 
     schedParam.__sched_priority = CONFIG_THREAD_PRIORITY_MEDIUM;
@@ -222,8 +212,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     /* wait until thread is started */
     sem_wait(&edrvInstance_l.syncSem);
 
-Exit:
-    return ret;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -239,21 +228,20 @@ This function shuts down the Ethernet driver.
 //------------------------------------------------------------------------------
 tOplkError edrv_exit(void)
 {
-    // signal shutdown to the thread
-    //pthread_cancel(edrvInstance_l.hThread);
+    // End the pcap loop and wait for the worker thread to terminate
     pcap_breakloop(edrvInstance_l.pPcapThread);
-
-    // wait for thread to terminate
     pthread_join(edrvInstance_l.hThread, NULL);
 
+    // Close pcap instance
     pcap_close(edrvInstance_l.pPcap);
 
+    // Destroy the mutex
     pthread_mutex_destroy(&edrvInstance_l.mutex);
 
-    // clear instance structure
+    // Clear instance structure
     OPLK_MEMSET(&edrvInstance_l, 0, sizeof(edrvInstance_l));
 
-    return kErrorOk; //assuming no problems with closing the handle
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -287,16 +275,12 @@ This function sends the Tx buffer.
 //------------------------------------------------------------------------------
 tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-    tOplkError  ret = kErrorOk;
-    INT         pcapRet;
+    int         pcapRet;
 
     FTRACE_MARKER("%s", __func__);
 
     if (pBuffer_p->txBufferNumber.pArg != NULL)
-    {
-        ret = kErrorInvalidOperation;
-        goto Exit;
-    }
+        return kErrorInvalidOperation;
 
     if (getLinkStatus(edrvInstance_l.initParam.hwParam.pDevName) == FALSE)
     {
@@ -323,17 +307,16 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
         pthread_mutex_unlock(&edrvInstance_l.mutex);
 
         pcapRet = pcap_sendpacket(edrvInstance_l.pPcap, pBuffer_p->pBuffer,
-                                  (INT)pBuffer_p->txFrameSize);
+                                  (int)pBuffer_p->txFrameSize);
         if (pcapRet != 0)
         {
             DEBUG_LVL_EDRV_TRACE("%s() pcap_sendpacket returned %d (%s)\n",
-                    __func__, pcapRet, pcap_geterr(edrvInstance_l.pPcap));
-            ret = kErrorInvalidOperation;
+                                 __func__, pcapRet, pcap_geterr(edrvInstance_l.pPcap));
+            return kErrorInvalidOperation;
         }
     }
 
-Exit:
-    return ret;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -351,26 +334,17 @@ This function allocates a Tx buffer.
 //------------------------------------------------------------------------------
 tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-    tOplkError ret = kErrorOk;
-
     if (pBuffer_p->maxBufferSize > EDRV_MAX_FRAME_SIZE)
-    {
-        ret = kErrorEdrvNoFreeBufEntry;
-        goto Exit;
-    }
+        return kErrorEdrvNoFreeBufEntry;
 
     // allocate buffer with malloc
     pBuffer_p->pBuffer = (UINT8*)OPLK_MALLOC(pBuffer_p->maxBufferSize);
     if (pBuffer_p->pBuffer == NULL)
-    {
-        ret = kErrorEdrvNoFreeBufEntry;
-        goto Exit;
-    }
+        return kErrorEdrvNoFreeBufEntry;
 
     pBuffer_p->txBufferNumber.pArg = NULL;
 
-Exit:
-    return ret;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -492,7 +466,7 @@ static void packetHandler(u_char* pParam_p, const struct pcap_pkthdr* pHeader_p,
     tEdrvInstance*  pInstance = (tEdrvInstance*)pParam_p;
     tEdrvRxBuffer   rxBuffer;
 
-    if (OPLK_MEMCMP (pPktData_p + 6, pInstance->initParam.aMacAddr, 6) != 0)
+    if (OPLK_MEMCMP(pPktData_p + 6, pInstance->initParam.aMacAddr, 6) != 0)
     {   // filter out self generated traffic
         rxBuffer.bufferInFrame = kEdrvBufferLastInFrame;
         rxBuffer.rxFrameSize = pHeader_p->caplen;
@@ -514,9 +488,7 @@ static void packetHandler(u_char* pParam_p, const struct pcap_pkthdr* pHeader_p,
                 if (OPLK_MEMCMP(pPktData_p, pTxBuffer->pBuffer, 6) == 0)
                 {
                     pthread_mutex_lock(&pInstance->mutex);
-                    pInstance->pTransmittedTxBufferFirstEntry =
-                        pInstance->pTransmittedTxBufferFirstEntry->txBufferNumber.pArg;
-
+                    pInstance->pTransmittedTxBufferFirstEntry = (tEdrvTxBuffer*)pInstance->pTransmittedTxBufferFirstEntry->txBufferNumber.pArg;
                     if (pInstance->pTransmittedTxBufferFirstEntry == NULL)
                     {
                         pInstance->pTransmittedTxBufferLastEntry = NULL;
@@ -533,28 +505,33 @@ static void packetHandler(u_char* pParam_p, const struct pcap_pkthdr* pHeader_p,
                 else
                 {
                     TRACE("%s: no matching TxB: DstMAC=%02X%02X%02X%02X%02X%02X\n",
-                        __func__,
-                        (UINT)pPktData_p[0],
-                        (UINT)pPktData_p[1],
-                        (UINT)pPktData_p[2],
-                        (UINT)pPktData_p[3],
-                        (UINT)pPktData_p[4],
-                        (UINT)pPktData_p[5]);
+                          __func__,
+                          (UINT)pPktData_p[0],
+                          (UINT)pPktData_p[1],
+                          (UINT)pPktData_p[2],
+                          (UINT)pPktData_p[3],
+                          (UINT)pPktData_p[4],
+                          (UINT)pPktData_p[5]);
                     TRACE("   current TxB %p: DstMAC=%02X%02X%02X%02X%02X%02X\n",
-                        (void*)pTxBuffer,
-                        (UINT)pTxBuffer->pBuffer[0],
-                        (UINT)pTxBuffer->pBuffer[1],
-                        (UINT)pTxBuffer->pBuffer[2],
-                        (UINT)pTxBuffer->pBuffer[3],
-                        (UINT)pTxBuffer->pBuffer[4],
-                        (UINT)pTxBuffer->pBuffer[5]);
+                          (void*)pTxBuffer,
+                          (UINT)pTxBuffer->pBuffer[0],
+                          (UINT)pTxBuffer->pBuffer[1],
+                          (UINT)pTxBuffer->pBuffer[2],
+                          (UINT)pTxBuffer->pBuffer[3],
+                          (UINT)pTxBuffer->pBuffer[4],
+                          (UINT)pTxBuffer->pBuffer[5]);
                 }
             }
         }
         else
         {
-            //TRACE("%s: no TxB: DstMAC=%02X%02X%02X%02X%02X%02X\n", __func__, pPktData_p[0], pPktData_p[1],
-            //      pPktData_p[2], pPktData_p[3], pPktData_p[4], pPktData_p[5]);
+            TRACE("%s: no TxB: DstMAC=%02X%02X%02X%02X%02X%02X\n", __func__,
+                  pPktData_p[0],
+                  pPktData_p[1],
+                  pPktData_p[2],
+                  pPktData_p[3],
+                  pPktData_p[4],
+                  pPktData_p[5]);
         }
     }
 }
@@ -563,10 +540,8 @@ static void packetHandler(u_char* pParam_p, const struct pcap_pkthdr* pHeader_p,
 /**
 \brief  Edrv worker thread
 
-This function is the Edrv worker thread processing several events. It processes
-Pcap and timer events in one single thread as emulation of non-reentrant
-interrupt processing. The receive, transmit and timer callback functions of the
-DLL are mutual exclusive.
+This function implements the edrv worker thread. It is responsible to handle
+pcap events.
 
 \param  pArgument_p     User specific pointer pointing to the instance structure
 
@@ -575,9 +550,9 @@ DLL are mutual exclusive.
 //------------------------------------------------------------------------------
 static void* workerThread(void* pArgument_p)
 {
-    INT             pcapRet;
     tEdrvInstance*  pInstance = (tEdrvInstance*)pArgument_p;
-    char            aErrorMessage[PCAP_ERRBUF_SIZE];
+    int             pcapRet;
+    char            errorMessage[PCAP_ERRBUF_SIZE];
 
     DEBUG_LVL_EDRV_TRACE("%s(): ThreadId:%ld\n", __func__, syscall(SYS_gettid));
 
@@ -586,12 +561,11 @@ static void* workerThread(void* pArgument_p)
                        65535,  // snaplen
                        1,      // promiscuous mode
                        1,      // milli seconds read timeout
-                       aErrorMessage);
+                       errorMessage);
 
    if (pInstance->pPcapThread == NULL)
    {
-       DEBUG_LVL_ERROR_TRACE("%s() Error!! Can't open pcap: %s\n", __func__,
-                               aErrorMessage);
+       DEBUG_LVL_ERROR_TRACE("%s() Error!! Can't open pcap: %s\n", __func__, errorMessage);
        return NULL;
    }
 
@@ -697,4 +671,4 @@ static INT getLinkStatus(const char* pIfName_p)
     return fRunning;
 }
 
-///\}
+/// \}
