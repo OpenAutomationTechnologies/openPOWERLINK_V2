@@ -881,11 +881,11 @@ tOplkError dllkcal_getSoaRequest(tDllReqServiceId* pReqServiceId_p,
     tOplkError      ret = kErrorOk;
     UINT            count;
 
-#if (CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC == TRUE && defined(CONFIG_EDRV_ASND_DEFFERRED_RX_BUFFERS))
+#if (CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC == TRUE && defined(CONFIG_EDRV_ASND_DEFERRED_RX_BUFFERS))
     // At the same time another frame could be waiting in the Rx queue of the MAC,
     // which is not yet handled by the software layers. This case is considered
     // by correcting the curRxFrameCount.
-    if (instance_l.statistics.curRxFrameCount + 1 >= CONFIG_EDRV_ASND_DEFFERRED_RX_BUFFERS)
+    if (instance_l.statistics.curRxFrameCount + 1 >= CONFIG_EDRV_ASND_DEFERRED_RX_BUFFERS)
     {
         // Edrv has no more asynchronous Rx buffers, thus, do not assign the
         // next asynchronous phase to any node. Otherwise the MAC would drop

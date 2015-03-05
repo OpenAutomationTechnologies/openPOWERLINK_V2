@@ -84,10 +84,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CONFIG_EDRV_AUTO_RESPONSE                   TRUE
 
 // Number of deferred Rx buffers
-#define CONFIG_EDRV_ASND_DEFFERRED_RX_BUFFERS       6
+#define CONFIG_EDRV_ASND_DEFERRED_RX_BUFFERS        6
 
 // Number of deferred Rx buffers
-#define CONFIG_EDRV_VETH_DEFFERRED_RX_BUFFERS       5
+#define CONFIG_EDRV_VETH_DEFERRED_RX_BUFFERS        5
 
 // openMAC supports auto-response delay
 #define CONFIG_EDRV_AUTO_RESPONSE_DELAY             TRUE
