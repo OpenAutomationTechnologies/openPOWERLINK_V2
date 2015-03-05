@@ -100,6 +100,7 @@ static tEdrvInstance edrvInstance_l;
 //------------------------------------------------------------------------------
 static void packetHandler(u_char* pParam_p, const struct pcap_pkthdr* pHeader_p, const u_char* pPktData_p);
 static DWORD WINAPI edrvWorkerThread(LPVOID pArgument_p);
+static void getMacAdrs(const char* pIfName_p, UINT8* pMacAddr_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -122,11 +123,6 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
 {
     char                errorMessage[PCAP_ERRBUF_SIZE];
     DWORD               threadId;
-    // variables for IPHLPAPI
-    ULONG               outBufLen;
-    PIP_ADAPTER_INFO    pAdapterInfo;
-    PIP_ADAPTER_INFO    pAdapter = NULL;
-    UINT32              retVal = 0;
 
     // clear instance structure
     OPLK_MEMSET(&edrvInstance_l, 0, sizeof(edrvInstance_l));
@@ -134,53 +130,19 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     if (pEdrvInitParam_p->hwParam.pDevName == NULL)
         return kErrorEdrvInit;
 
-    // search for the corresponding MAC address via IPHLPAPI
-    outBufLen = sizeof(IP_ADAPTER_INFO);
-    pAdapterInfo = (IP_ADAPTER_INFO*)OPLK_MALLOC(sizeof(IP_ADAPTER_INFO));
-    if (pAdapterInfo == NULL)
-    {
-        DEBUG_LVL_ERROR_TRACE("Error allocating memory needed to call GetAdaptersinfo\n");
-        return kErrorNoResource;
+    /* if no MAC address was specified read MAC address of used
+     * Ethernet interface
+     */
+    if ((pEdrvInitParam_p->aMacAddr[0] == 0) &&
+        (pEdrvInitParam_p->aMacAddr[1] == 0) &&
+        (pEdrvInitParam_p->aMacAddr[2] == 0) &&
+        (pEdrvInitParam_p->aMacAddr[3] == 0) &&
+        (pEdrvInitParam_p->aMacAddr[4] == 0) &&
+        (pEdrvInitParam_p->aMacAddr[5] == 0))
+    {   // read MAC address from controller
+        getMacAdrs(pEdrvInitParam_p->hwParam.pDevName,
+                   pEdrvInitParam_p->aMacAddr);
     }
-
-    // Make an initial call to GetAdaptersInfo to get
-    // the necessary size into the outBufLen variable
-    retVal = GetAdaptersInfo(pAdapterInfo, &outBufLen);
-    if (retVal == ERROR_BUFFER_OVERFLOW)
-    {
-        OPLK_FREE(pAdapterInfo);
-        pAdapterInfo = (IP_ADAPTER_INFO*)OPLK_MALLOC(outBufLen);
-        if (pAdapterInfo == NULL)
-        {
-            DEBUG_LVL_ERROR_TRACE("Error allocating memory needed to call GetAdaptersinfo\n");
-            return kErrorNoResource;
-        }
-    }
-
-    retVal = GetAdaptersInfo(pAdapterInfo, &outBufLen);
-    if (retVal == NO_ERROR)
-    {
-        pAdapter = pAdapterInfo;
-        while (pAdapter)
-        {
-            if (pAdapter->Type == MIB_IF_TYPE_ETHERNET)
-            {
-                if (strstr(pEdrvInitParam_p->hwParam.pDevName, pAdapter->AdapterName) != NULL)
-                {   // corresponding adapter found
-                    OPLK_MEMCPY(pEdrvInitParam_p->aMacAddr, pAdapter->Address,
-                                min(pAdapter->AddressLength, sizeof(pEdrvInitParam_p->aMacAddr)));
-                    break;
-                }
-            }
-            pAdapter = pAdapter->Next;
-        }
-    }
-    else
-    {
-        DEBUG_LVL_ERROR_TRACE("GetAdaptersInfo failed with error: %d\n", retVal);
-    }
-    if (pAdapterInfo)
-        OPLK_FREE(pAdapterInfo);
 
     // save the init data (with updated MAC address)
     edrvInstance_l.initParam = *pEdrvInitParam_p;
@@ -574,6 +536,77 @@ static DWORD WINAPI edrvWorkerThread(LPVOID pArgument_p)
     }
 
     return 0;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Get Edrv MAC address
+
+This function gets the interface's MAC address.
+
+\param  pIfName_p   Ethernet interface device name
+\param  pMacAddr_p  Pointer to store MAC address
+*/
+//------------------------------------------------------------------------------
+static void getMacAdrs(const char* pIfName_p, UINT8* pMacAddr_p)
+{
+    ULONG               outBufLen;
+    PIP_ADAPTER_INFO    pAdapterInfo;
+    PIP_ADAPTER_INFO    pAdapter = NULL;
+    UINT32              retVal = 0;
+
+    // search for the corresponding MAC address via IPHLPAPI
+    outBufLen = sizeof(IP_ADAPTER_INFO);
+    pAdapterInfo = (IP_ADAPTER_INFO*)OPLK_MALLOC(sizeof(IP_ADAPTER_INFO));
+    if (pAdapterInfo == NULL)
+    {
+        DEBUG_LVL_ERROR_TRACE("Error allocating memory needed to call GetAdaptersinfo\n");
+        goto Exit;
+    }
+
+    // Make an initial call to GetAdaptersInfo to get
+    // the necessary size into the outBufLen variable
+    retVal = GetAdaptersInfo(pAdapterInfo, &outBufLen);
+    if (retVal == ERROR_BUFFER_OVERFLOW)
+    {
+        OPLK_FREE(pAdapterInfo);
+
+        pAdapterInfo = (IP_ADAPTER_INFO*)OPLK_MALLOC(outBufLen);
+        if (pAdapterInfo == NULL)
+        {
+            DEBUG_LVL_ERROR_TRACE("Error allocating memory needed to call GetAdaptersinfo\n");
+            goto Exit;
+        }
+    }
+
+    // Get the real values
+    retVal = GetAdaptersInfo(pAdapterInfo, &outBufLen);
+    if (retVal == NO_ERROR)
+    {
+        pAdapter = pAdapterInfo;
+        while (pAdapter)
+        {
+            if (pAdapter->Type == MIB_IF_TYPE_ETHERNET)
+            {
+                if (strstr(pIfName_p, pAdapter->AdapterName) != NULL)
+                {   // corresponding adapter found
+                    OPLK_MEMCPY(pMacAddr_p, pAdapter->Address, min(pAdapter->AddressLength, 6));
+                    break;
+                }
+            }
+            pAdapter = pAdapter->Next;
+        }
+    }
+    else
+    {
+        DEBUG_LVL_ERROR_TRACE("GetAdaptersInfo failed with error: %d\n", retVal);
+    }
+
+    if (pAdapterInfo)
+        OPLK_FREE(pAdapterInfo);
+
+Exit:
+    return;
 }
 
 /// \}
