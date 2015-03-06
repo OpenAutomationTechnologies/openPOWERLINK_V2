@@ -59,12 +59,18 @@ class QWidget;
 Class Api implements the API interface to the openPOWERLINK stack.
 */
 //------------------------------------------------------------------------------
-class Api
+class Api : public QObject
 {
+    Q_OBJECT
+
 public:
     Api(MainWindow* pMainWindow_p, UINT uiNodeId_p, QString devName_p);
     ~Api();
     static UINT defaultNodeId();
+
+signals:
+    void              userDefEvent(void* pUserArg_p);
+    void              sdoFinished(tSdoComFinished sdoInfo_p);
 
 private:
     tOplkApiInitParam   initParam;

@@ -353,7 +353,15 @@ tOplkError ProcessThread::processEvent(tOplkApiEventType EventType_p,
         case kOplkApiEventSdo:
             ret = processSdoEvent(EventType_p, pEventArg_p, pUserArg_p);
             break;
+#else
+        case kOplkApiEventSdo:
+            emit sdoFinished(pEventArg_p->sdoInfo);
+            break;
 #endif
+
+        case kOplkApiEventUserDef:
+            emit userDefEvent(pEventArg_p->pUserArg);
+
         default:
             break;
     }

@@ -94,6 +94,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define CYCLE_LEN   5000                /* org val 5000 */
 
+Q_DECLARE_METATYPE(tSdoComFinished)
+
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
@@ -170,6 +172,11 @@ Api::Api(MainWindow* pMainWindow_p, UINT nodeId_p, QString devName_p)
     QObject::connect(pProcessThread, SIGNAL(printLog(const QString&)),
                      pMainWindow_p, SLOT(printlog(const QString&)));
 
+    QObject::connect(pProcessThread, SIGNAL(userDefEvent(void*)),
+                     this, SIGNAL(userDefEvent(void*)),
+                     Qt::DirectConnection);
+    QObject::connect(pProcessThread, SIGNAL(sdoFinished(tSdoComFinished)),
+                     this, SIGNAL(sdoFinished(tSdoComFinished)));
 
     pDataInOutThread = new DataInOutThread;
     QObject::connect(pDataInOutThread, SIGNAL(processImageOutChanged(int, int)),
