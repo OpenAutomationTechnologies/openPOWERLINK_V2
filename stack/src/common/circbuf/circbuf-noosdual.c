@@ -174,7 +174,7 @@ tCircBufError circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t* pSize_p
     tCircBufArchInstance*   pArch = (tCircBufArchInstance*)pInstance_p->pCircBufArchInstance;
     size = *pSize_p + sizeof(tCircBufHeader);
 
-    dualProcDrvInst = dualprocshm_getDrvInst(kDualProcFirst);
+    dualProcDrvInst = dualprocshm_getLocalProcDrvInst();
 
     if (dualProcDrvInst == NULL)
     {
@@ -248,7 +248,7 @@ tCircBufError circbuf_connectBuffer(tCircBufInstance* pInstance_p)
     UINT8*                  pBuffAddr;
     tCircBufArchInstance*   pArch = (tCircBufArchInstance*)pInstance_p->pCircBufArchInstance;
 
-    dualProcDrvInst = dualprocshm_getDrvInst(kDualProcSecond);
+    dualProcDrvInst = dualprocshm_getLocalProcDrvInst();
 
     if (dualProcDrvInst == NULL)
     {

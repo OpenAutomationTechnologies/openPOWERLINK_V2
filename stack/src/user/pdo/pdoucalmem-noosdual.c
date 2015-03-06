@@ -114,7 +114,7 @@ start of the stack.
 //------------------------------------------------------------------------------
 tOplkError pdoucal_openMem(void)
 {
-    tDualprocDrvInstance    pInstance = dualprocshm_getDrvInst(kDualProcSecond);
+    tDualprocDrvInstance    pInstance = dualprocshm_getLocalProcDrvInst();
 
     if (pInstance == NULL)
     {

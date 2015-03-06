@@ -90,6 +90,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // local types
 //------------------------------------------------------------------------------
 
+/**
+\brief Structure for the dualprocshm instance
+
+This structure holds the current configured instance of the dual processor
+shared memory library.
+*/
+typedef struct sDualProcShmInst
+{
+    tDualProcInstance       localProcessor;         ///< Local processor instance
+    tDualProcInstance       remoteProcessor;        ///< Remote processor instance
+}tDualProcShmInst;
+
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
@@ -102,7 +114,7 @@ Stores the configuration settings for the dynamic buffers.
 static tDualprocDynResConfig    aDynResInit[MAX_DYNAMIC_BUFF_COUNT];
 
 /**
-\brief Instance array
+\brief Driver instance array
 
 This array holds all dual processor library instances available.
 */
@@ -111,11 +123,21 @@ static tDualProcDrv*            paDualProcDrvInstance[DUALPROC_INSTANCE_COUNT] =
     NULL, NULL
 };
 
+/**
+\brief current instance of dual processor shared memory library
+
+This variable holds the current configured instance of dual processor shared
+memory library.
+*/
+static tDualProcShmInst         instance_l = {kDualProcLast, kDualProcLast};
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static void     setDynBuffAddr(tDualprocDrvInstance pDrvInst_p, UINT16 index_p, UINT32 addr_p);
-static UINT32   getDynBuffAddr(tDualprocDrvInstance pDrvInst_p, UINT16 index_p);
+static void             setDynBuffAddr(tDualprocDrvInstance pDrvInst_p,
+                                       UINT16 index_p, UINT32 addr_p);
+static UINT32           getDynBuffAddr(tDualprocDrvInstance pDrvInst_p,
+                                       UINT16 index_p);
+tDualprocDrvInstance    getDrvInst(tDualProcInstance procInstance_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -179,7 +201,15 @@ tDualprocReturn dualprocshm_create(tDualprocConfig* pConfig_p, tDualprocDrvInsta
     if (pConfig_p->procInstance == kDualProcFirst)
     {
         DUALPROCSHM_MEMSET(pDrvInst->pAddrTableBase, 0, (MAX_DYNAMIC_BUFF_COUNT * 4));
+        instance_l.localProcessor = kDualProcFirst;
+        instance_l.remoteProcessor = kDualProcSecond;
     }
+    else
+    {
+        instance_l.localProcessor = kDualProcSecond;
+        instance_l.remoteProcessor = kDualProcFirst;
+    }
+
     pDrvInst->iMaxDynBuffEntries = MAX_DYNAMIC_BUFF_COUNT;
     pDrvInst->pDynResTbl = (tDualprocDynResConfig*)aDynResInit;
 
@@ -265,33 +295,50 @@ tDualprocReturn dualprocshm_delete(tDualprocDrvInstance pInstance_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Returns the driver instance of the given processor instance
+\brief  Returns the driver instance of the local processor
 
-If the instance is not found, NULL is returned.
+This function returns the dualprocshm driver instance of the local processor.
 
-\param  instance_p              Processor instance
-
-\return This returns the driver instance requested, if found.
+\return This returns the driver instance requested, if found; else returns NULL.
 
 \ingroup module_dualprocshm
 */
 //------------------------------------------------------------------------------
-tDualprocDrvInstance dualprocshm_getDrvInst(tDualProcInstance instance_p)
+tDualprocDrvInstance dualprocshm_getLocalProcDrvInst(void)
 {
-    tDualProcDrv*   pDrvInst = NULL;
-    INT             iIndex;
+    return getDrvInst(instance_l.localProcessor);
+}
 
-    for (iIndex = 0; iIndex < DUALPROC_INSTANCE_COUNT; iIndex++)
-    {
-        pDrvInst = (tDualProcDrv*)paDualProcDrvInstance[iIndex];
+//------------------------------------------------------------------------------
+/**
+\brief  Returns the local processor instance
 
-        if (instance_p == pDrvInst->config.procInstance)
-        {
-            break;
-        }
-    }
+If the instance is not initialized last processor instance is returned.
 
-    return pDrvInst;
+\return This returns the local processor instance.
+
+\ingroup module_dualprocshm
+*/
+//------------------------------------------------------------------------------
+tDualProcInstance dualprocshm_getLocalProcInst(void)
+{
+    return instance_l.localProcessor;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Returns the remote processor instance
+
+If the instance is not initialized last processor instance is returned.
+
+\return This returns the remote processor instance.
+
+\ingroup module_dualprocshm
+*/
+//------------------------------------------------------------------------------
+tDualProcInstance dualprocshm_getRemoteProcInst(void)
+{
+    return instance_l.remoteProcessor;
 }
 
 //------------------------------------------------------------------------------
@@ -662,6 +709,36 @@ tDualprocReturn dualprocshm_releaseBuffLock(tDualprocDrvInstance pInstance_p, UI
 //============================================================================//
 /// \name Private Functions
 /// \{
+
+//------------------------------------------------------------------------------
+/**
+\brief  Returns the driver instance of the given processor instance
+
+This function returns the dualprocshm driver instance of the specified processor.
+
+\param  procInstance_p          Processor instance
+
+\return This returns the driver instance requested, if found; else returns NULL.
+
+*/
+//------------------------------------------------------------------------------
+tDualprocDrvInstance getDrvInst(tDualProcInstance procInstance_p)
+{
+    tDualProcDrv*   pDrvInst = NULL;
+    INT             index;
+
+    for (index = 0; index < DUALPROC_INSTANCE_COUNT; index++)
+    {
+        pDrvInst = (tDualProcDrv*)paDualProcDrvInstance[index];
+
+        if (procInstance_p == pDrvInst->config.procInstance)
+        {
+            break;
+        }
+    }
+
+    return pDrvInst;
+}
 
 //------------------------------------------------------------------------------
 /**

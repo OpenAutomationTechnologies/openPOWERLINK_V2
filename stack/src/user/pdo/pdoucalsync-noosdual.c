@@ -105,7 +105,7 @@ The function initializes the PDO user CAL sync module
 tOplkError pdoucal_initSync(tSyncCb pfnSyncCb_p)
 {
     tDualprocReturn         dualRet;
-    tDualprocDrvInstance    pInstance = dualprocshm_getDrvInst(kDualProcSecond);
+    tDualprocDrvInstance    pInstance = dualprocshm_getLocalProcDrvInst();
 
     if (pInstance == NULL)
     {
@@ -137,7 +137,7 @@ The function cleans up the PDO user CAL sync module
 //------------------------------------------------------------------------------
 void pdoucal_exitSync(void)
 {
-    tDualprocDrvInstance    pInstance = dualprocshm_getDrvInst(kDualProcSecond);
+    tDualprocDrvInstance    pInstance = dualprocshm_getLocalProcDrvInst();
 
     if (pInstance == NULL)
     {
