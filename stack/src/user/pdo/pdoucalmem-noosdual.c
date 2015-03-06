@@ -45,6 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <oplk/oplkinc.h>
 #include <common/pdo.h>
+#include <common/target.h>
 
 #include <dualprocshm.h>
 
@@ -71,7 +72,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define DUALPROCSHM_BUFF_ID_PDO    13
+#define DUALPROCSHM_BUFF_ID_PDO             13
+#define DUALPROCSHM_ADDR_READ_TIMEOUT_MS    1000
 
 //------------------------------------------------------------------------------
 // local types
@@ -114,7 +116,7 @@ start of the stack.
 //------------------------------------------------------------------------------
 tOplkError pdoucal_openMem(void)
 {
-    tDualprocDrvInstance    pInstance = dualprocshm_getDrvInst(kDualProcSecond);
+    tDualprocDrvInstance    pInstance = dualprocshm_getLocalProcDrvInst();
 
     if (pInstance == NULL)
     {
@@ -162,12 +164,22 @@ The function allocates shared memory for the kernel needed to transfer the PDOs.
 //------------------------------------------------------------------------------
 tOplkError pdoucal_allocateMem(size_t memSize_p, UINT8** ppPdoMem_p)
 {
-    tDualprocReturn    dualRet;
+    tDualprocReturn     dualRet;
+    INT                 loopCount = 0;
 
-    dualRet = dualprocshm_getMemory(memPdo_l.pDrvInstance,
-                                    DUALPROCSHM_BUFF_ID_PDO, ppPdoMem_p,
-                                    &memSize_p, FALSE);
-    if (dualRet != kDualprocSuccessful)
+    for (loopCount = 0; loopCount < DUALPROCSHM_ADDR_READ_TIMEOUT_MS; loopCount++)
+    {
+        dualRet = dualprocshm_getMemory(memPdo_l.pDrvInstance,
+                                        DUALPROCSHM_BUFF_ID_PDO, ppPdoMem_p,
+                                        &memSize_p, FALSE);
+
+        if (dualRet == kDualprocSuccessful)
+            break;
+
+        target_msleep(1);
+    }
+
+    if (loopCount == DUALPROCSHM_ADDR_READ_TIMEOUT_MS)
     {
         DEBUG_LVL_ERROR_TRACE("%s() couldn't allocate Pdo buffer (%d)\n",
                               __func__, dualRet);

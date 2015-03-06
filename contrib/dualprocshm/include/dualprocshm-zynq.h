@@ -9,7 +9,7 @@ This header file provides specific macros for Xilinx Zynq platform .
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014 Kalycito Infotech Private Limited
+Copyright (c) 2015, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -38,21 +38,20 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _INC_dualprocshm_ZYNQ_H_
 #define _INC_dualprocshm_ZYNQ_H_
 
+//------------------------------------------------------------------------------
+// includes
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
 #define OPLK_OPTIMIZE               TRUE                        ///< Optimize the dualprocessor library for openPOWERLINK stack on non-OS
 
-/* SIZE */
-#define MAX_COMMON_MEM_SIZE         2048                        ///< Max common memory size
-#define MAX_DYNAMIC_BUFF_COUNT      15                          ///< Number of maximum dynamic buffers
-#define MAX_DYNAMIC_BUFF_SIZE       MAX_DYNAMIC_BUFF_COUNT * 4  ///< Max dynamic buffer size
 
 /* BASE ADDRESSES */
 #if defined(__MICROBLAZE__)
 #include "dualprocshm-microblaze.h"
 
-// TODO : gks check if this can be retrieved from hardware configuration
-#define COMMON_MEM_BASE             0x2C000000
-#define MEM_ADDR_TABLE_BASE         COMMON_MEM_BASE + MAX_COMMON_MEM_SIZE
-#define MEM_INTR_BASE               MEM_ADDR_TABLE_BASE + MAX_DYNAMIC_BUFF_SIZE
 
 #define TARGET_SYNC_IRQ_ID         -1
 #define TARGET_SYNC_IRQ            -1
@@ -65,10 +64,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #elif defined(__xilinx_arm__)
 #include "dualprocshm-arm.h"
 
-// TODO : gks check if this can be retrieved from hardware configuration
-#define COMMON_MEM_BASE             0x2C000000
-#define MEM_ADDR_TABLE_BASE         COMMON_MEM_BASE + MAX_COMMON_MEM_SIZE
-#define MEM_INTR_BASE               MEM_ADDR_TABLE_BASE + MAX_DYNAMIC_BUFF_SIZE
 
 #define TARGET_SYNC_IRQ_ID         XPAR_PS7_SCUGIC_0_DEVICE_ID
 #define TARGET_SYNC_IRQ            XPAR_FABRIC_AXI_OPENMAC_0_TIMER_IRQ_INTR
@@ -86,6 +81,22 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #error "unknown target for Zynq"
 
+#endif
+
+//------------------------------------------------------------------------------
+// typedef
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// function prototypes
+//------------------------------------------------------------------------------
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif //_INC_dualprocshm_ZYNQ_H_

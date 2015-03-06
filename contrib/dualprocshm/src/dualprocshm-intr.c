@@ -11,7 +11,7 @@ the dual processor library.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014 Kalycito Infotech Private Limited
+Copyright (c) 2015, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -138,7 +138,7 @@ tDualprocReturn dualprocshm_initInterrupts(tDualprocDrvInstance pInstance_p)
     }
 
     if (pDrvInst->config.procInstance == kDualProcFirst)
-        memset(intrInst_l.intrReg, 0, sizeof(tDualProcShmIntrReg));
+        DUALPROCSHM_MEMSET(intrInst_l.intrReg, 0, sizeof(tDualProcShmIntrReg));
 
     dualprocshm_regSyncIrqHdl(targetInterruptHandler, (void*)pInstance_p);
 

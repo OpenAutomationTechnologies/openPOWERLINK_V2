@@ -11,7 +11,7 @@ information of processors part of the platform.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014 Kalycito Infotech Private Limited
+Copyright (c) 2015, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -88,7 +88,11 @@ set to those provided by stdint.h.
 */
 /**@{*/
 #ifndef INT
-#define INT         int32_t
+#define INT         int
+#endif
+
+#ifndef UINT
+#define UINT        unsigned int
 #endif
 
 #ifndef UINT8
@@ -124,6 +128,31 @@ set to those provided by stdint.h.
 #define TRACE(...)
 #endif
 
+/**
+\name Memory operations
+
+If the following memory operations are not defined by the target, then they are
+set to the following by default.
+*/
+/**@{*/
+#ifndef DUALPROCSHM_MALLOC
+#define DUALPROCSHM_MALLOC(size_p)          malloc(size_p)
+#endif
+
+#ifndef DUALPROCSHM_FREE
+#define DUALPROCSHM_FREE(ptr_p)             free(ptr_p)
+#endif
+
+#ifndef DUALPROCSHM_MEMSET
+#define DUALPROCSHM_MEMSET(dst, val, siz)   memset((dst), (val), (siz))
+#endif
+
+#ifndef DUALPROCSHM_MEMCPY
+#define DUALPROCSHM_MEMCPY(dst, src, siz)   memcpy((dst), (src), (siz))
+
+#endif
+/**@}*/
+
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
@@ -142,6 +171,7 @@ typedef void (*targetSyncHdl)(void*);
 extern "C" {
 #endif
 UINT8*  dualprocshm_getCommonMemAddr(UINT16* pSize_p);
+UINT8*  dualprocshm_getSharedMemInst(UINT32* pSize_p);
 UINT8*  dualprocshm_getDynMapTableAddr(void);
 UINT8*  dualprocshm_getIntrMemAddr(void);
 void    dualprocshm_releaseIntrMemAddr();

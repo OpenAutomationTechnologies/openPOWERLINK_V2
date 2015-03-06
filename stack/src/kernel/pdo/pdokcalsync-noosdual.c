@@ -103,7 +103,7 @@ The function initializes the kernel PDO CAL sync module.
 //------------------------------------------------------------------------------
 tOplkError pdokcal_initSync(void)
 {
-    tDualprocDrvInstance    pInstance = dualprocshm_getDrvInst(kDualProcFirst);
+    tDualprocDrvInstance    pInstance = dualprocshm_getLocalProcDrvInst();
     tDualprocReturn         dualRet;
 
     if (pInstance == NULL)
@@ -134,7 +134,7 @@ The function cleans up the PDO CAL sync module
 //------------------------------------------------------------------------------
 void pdokcal_exitSync(void)
 {
-    tDualprocDrvInstance    pInstance = dualprocshm_getDrvInst(kDualProcFirst);
+    tDualprocDrvInstance    pInstance = dualprocshm_getLocalProcDrvInst();
 
     if (pInstance == NULL)
     {
@@ -158,7 +158,7 @@ The function sends a sync event.
 //------------------------------------------------------------------------------
 tOplkError pdokcal_sendSyncEvent(void)
 {
-    tDualprocDrvInstance    pInstance = dualprocshm_getDrvInst(kDualProcFirst);
+    tDualprocDrvInstance    pInstance = dualprocshm_getLocalProcDrvInst();
     tDualprocReturn         dualRet;
 
     if (pInstance == NULL)
@@ -193,7 +193,7 @@ The function enables sync events.
 //------------------------------------------------------------------------------
 tOplkError pdokcal_controlSync(BOOL fEnable_p)
 {
-    tDualprocDrvInstance    pInstance = dualprocshm_getDrvInst(kDualProcFirst);
+    tDualprocDrvInstance    pInstance = dualprocshm_getLocalProcDrvInst();
     tDualprocReturn         dualRet;
 
     if (pInstance == NULL)

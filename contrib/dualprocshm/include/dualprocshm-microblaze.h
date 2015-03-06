@@ -9,7 +9,7 @@ This header file provides specific macros for Xilinx Microblaze CPU.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014 Kalycito Infotech Private Limited
+Copyright (c) 2015, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <xil_io.h>
 #include <xparameters.h>
 #include <targetsection.h>
+#include <dualprocshm-mem.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -59,7 +60,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DUALPROCSHM_FREE(ptr)       free(ptr)
 
 // Sleep
-#define DUALPROCSHM_USLEEP(x)       usleep((unsigned int)x)
+#define DUALPROCSHM_USLEEP(x)       usleep((UINT32)x)
 
 // IO operations
 #define DPSHM_READ8(base)           Xil_In8((UINT32)base);
