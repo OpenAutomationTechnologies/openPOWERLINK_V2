@@ -124,6 +124,27 @@ void dualprocshm_releaseCommonMemAddr(UINT16 pSize_p)
 
 //------------------------------------------------------------------------------
 /**
+\brief  Get shared memory base address
+
+Target specific routine to retrieve the base address of shared memory region
+between two processors.
+
+\return Pointer to base address of common memory.
+
+\ingroup module_dualprocshm
+ */
+//------------------------------------------------------------------------------
+UINT8*  dualprocshm_getSharedMemBaseAddr(void)
+{
+    UINT8*   pAddr;
+
+    pAddr = (UINT8*) (SHARED_MEM_BASE);
+
+    return pAddr;
+}
+
+//------------------------------------------------------------------------------
+/**
 \brief  Get dynamic mapping table base address
 
 Target specific routine to retrieve the base address for storing the

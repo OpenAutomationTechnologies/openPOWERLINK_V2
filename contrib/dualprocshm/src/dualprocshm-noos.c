@@ -25,7 +25,7 @@ routines for memory initialization and data exchange.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014 Kalycito Infotech Private Limited
+Copyright (c) 2015 Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -154,14 +154,14 @@ tDualprocReturn dualprocshm_create(tDualprocConfig* pConfig_p, tDualprocDrvInsta
     }
 
     //create driver instance
-    pDrvInst = (tDualProcDrv*)malloc(sizeof(tDualProcDrv));
+    pDrvInst = (tDualProcDrv*) DUALPROCSHM_MALLOC(sizeof(tDualProcDrv));
 
     if (pDrvInst == NULL)
     {
         return kDualprocNoResource;
     }
 
-    memset(pDrvInst, 0, sizeof(tDualProcDrv));
+    DUALPROCSHM_MEMSET(pDrvInst, 0, sizeof(tDualProcDrv));
 
     // store the configuration
     pDrvInst->config = *pConfig_p;
@@ -171,14 +171,14 @@ tDualprocReturn dualprocshm_create(tDualprocConfig* pConfig_p, tDualprocDrvInsta
 
     if (pConfig_p->procInstance == kDualProcFirst)
     {
-        memset(pDrvInst->pCommMemBase, 0, MAX_COMMON_MEM_SIZE);
+        DUALPROCSHM_MEMSET(pDrvInst->pCommMemBase, 0, MAX_COMMON_MEM_SIZE);
     }
     // get the address to store address mapping table
     pDrvInst->pAddrTableBase = dualprocshm_getDynMapTableAddr();
 
     if (pConfig_p->procInstance == kDualProcFirst)
     {
-        memset(pDrvInst->pAddrTableBase, 0, (MAX_DYNAMIC_BUFF_COUNT * 4));
+        DUALPROCSHM_MEMSET(pDrvInst->pAddrTableBase, 0, (MAX_DYNAMIC_BUFF_COUNT * 4));
     }
     pDrvInst->iMaxDynBuffEntries = MAX_DYNAMIC_BUFF_COUNT;
     pDrvInst->pDynResTbl = (tDualprocDynResConfig*)aDynResInit;
@@ -258,7 +258,7 @@ tDualprocReturn dualprocshm_delete(tDualprocDrvInstance pInstance_p)
         }
     }
 
-    free(pDrvInst);
+    DUALPROCSHM_FREE(pDrvInst);
 
     return kDualprocSuccessful;
 }
@@ -341,7 +341,7 @@ tDualprocReturn dualprocshm_getMemory(tDualprocDrvInstance pInstance_p, UINT8 id
         if (pMemBase == NULL)
             return kDualprocNoResource;
 
-        memset(pMemBase, 0, (*pSize_p + sizeof(tDualprocMemInst)));
+        DUALPROCSHM_MEMSET(pMemBase, 0, (*pSize_p + sizeof(tDualprocMemInst)));
 
         pDrvInst->pDynResTbl[id_p].memInst = (tDualprocMemInst*) pMemBase;
         pDrvInst->pDynResTbl[id_p].pBase = pMemBase + sizeof(tDualprocMemInst);
@@ -403,7 +403,7 @@ tDualprocReturn dualprocshm_freeMemory(tDualprocDrvInstance pInstance_p, UINT8 i
         pDrvInst->pDynResTbl[id_p].pfnSetDynAddr(pDrvInst, id_p, 0);
         pMemBase = (UINT8*)pDrvInst->pDynResTbl[id_p].memInst;
         pDrvInst->pDynResTbl[id_p].pBase = NULL;
-        free(pMemBase);
+        DUALPROCSHM_FREE(pMemBase);
     }
     else
     {
@@ -678,9 +678,16 @@ static void setDynBuffAddr(tDualprocDrvInstance pInstance_p, UINT16 index_p, UIN
     tDualProcDrv*   pDrvInst = (tDualProcDrv*) pInstance_p;
     UINT8*          tableBase = pDrvInst->pAddrTableBase;
     UINT32          tableEntryOffs = index_p * DYN_MEM_TABLE_ENTRY_SIZE;
+    UINT32          offset = 0;
+    UINT32          sharedMemBaseAddr = (UINT32) dualprocshm_getSharedMemBaseAddr();
 
+    if (addr_p <= sharedMemBaseAddr)
+        // failed
+        return;
+
+    offset = addr_p - sharedMemBaseAddr;
     dualprocshm_targetWriteData(tableBase + tableEntryOffs,
-                                DYN_MEM_TABLE_ENTRY_SIZE, (UINT8*)&addr_p);
+                                DYN_MEM_TABLE_ENTRY_SIZE, (UINT8*)&offset);
 }
 
 //------------------------------------------------------------------------------
@@ -699,10 +706,14 @@ static UINT32 getDynBuffAddr(tDualprocDrvInstance pInstance_p, UINT16 index_p)
     tDualProcDrv*   pDrvInst = (tDualProcDrv*) pInstance_p;
     UINT8*          tableBase = pDrvInst->pAddrTableBase;
     UINT32          tableEntryOffs = index_p * DYN_MEM_TABLE_ENTRY_SIZE;
+    UINT32          buffoffset = 0x00;
     UINT32          buffAddr;
+    UINT32          sharedMemBaseAddr = (UINT32) dualprocshm_getSharedMemBaseAddr();
 
-    dualprocshm_targetReadData(tableBase + tableEntryOffs,
-                               DYN_MEM_TABLE_ENTRY_SIZE, (UINT8*)&buffAddr);
+    while (buffoffset == 0)
+        dualprocshm_targetReadData(tableBase + tableEntryOffs,
+                                   DYN_MEM_TABLE_ENTRY_SIZE, (UINT8*)&buffoffset);
+    buffAddr = (sharedMemBaseAddr + buffoffset);
     return buffAddr;
 }
 
