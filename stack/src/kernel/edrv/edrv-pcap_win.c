@@ -56,10 +56,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #define EDRV_MAX_FRAME_SIZE     0x600
 
-#define EDRV_HANDLE_EVENT       0
-#define EDRV_HANDLE_PCAP        1
-#define EDRV_HANDLE_COUNT       2
-
 //------------------------------------------------------------------------------
 // module global vars
 //------------------------------------------------------------------------------
@@ -91,7 +87,6 @@ typedef struct
     tEdrvTxBuffer*      pTransmittedTxBufferFirstEntry;     ///< Pointer to the first entry of the transmitted Tx buffer
     CRITICAL_SECTION    criticalSection;                    ///< Critical section locking variable
     pcap_t*             pPcap;                              ///< Pointer to the pcap interface instance
-    HANDLE              aHandle[EDRV_HANDLE_COUNT];         ///< Array of event handles of the pcap interface
     HANDLE              hThread;                            ///< Handle of the worker thread
 } tEdrvInstance;
 
@@ -200,24 +195,14 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
         DEBUG_LVL_ERROR_TRACE("pcap_setmintocopy failed\n");
     }
 
-    // put pcap into nonblocking mode
-    if (pcap_setnonblock(edrvInstance_l.pPcap, 1, sErr_Msg) != 0)
-    {
-        DEBUG_LVL_ERROR_TRACE("Can't put pcap into nonblocking mode: %s\n", sErr_Msg);
-    }
-
-    // get event handle for pcap instance
-    edrvInstance_l.aHandle[EDRV_HANDLE_PCAP] = pcap_getevent(edrvInstance_l.pPcap);
-
-    // create event for signalling shutdown
-    edrvInstance_l.aHandle[EDRV_HANDLE_EVENT] = CreateEvent(NULL, FALSE, FALSE, NULL);
+    // Initialize critical section
+    InitializeCriticalSection(&edrvInstance_l.criticalSection);
 
     // Create the thread to begin execution on its own.
     edrvInstance_l.hThread = CreateThread(NULL, 0, edrvWorkerThread, &edrvInstance_l, 0, &threadId);
     if (edrvInstance_l.hThread == NULL)
          return kErrorEdrvInit;
 
-    InitializeCriticalSection(&edrvInstance_l.criticalSection);
     return ret;
 }
 
@@ -234,17 +219,15 @@ This function shuts down the Ethernet driver.
 //------------------------------------------------------------------------------
 tOplkError edrv_exit(void)
 {
-    // signal shutdown to the thread
-    SetEvent(edrvInstance_l.aHandle[EDRV_HANDLE_EVENT]);
-
+    // End the pcap loop and wait for the worker thread to terminate
+    pcap_breakloop(edrvInstance_l.pPcap);
     WaitForSingleObject(edrvInstance_l.hThread, INFINITE);
 
-    CloseHandle(edrvInstance_l.hThread);
-
+    // Close pcap instance
     pcap_close(edrvInstance_l.pPcap);
 
-    CloseHandle(edrvInstance_l.aHandle[EDRV_HANDLE_EVENT]);
-
+    // Close the thread handle and delete the critical section
+    CloseHandle(edrvInstance_l.hThread);
     DeleteCriticalSection(&edrvInstance_l.criticalSection);
 
     // clear instance structure
@@ -524,48 +507,46 @@ static void packetHandler(u_char* pParam_p, const struct pcap_pkthdr* pHeader_p,
 \brief  Edrv worker thread
 
 This function implements the edrv worker thread. It is responsible to handle
-pcap and timer events.
+pcap events.
 
 \param  pArgument_p    Thread argument
 
-\return The function returns a thread return code
+\return The function returns a thread error code
 */
 //------------------------------------------------------------------------------
 static DWORD WINAPI edrvWorkerThread(LPVOID pArgument_p)
 {
     tEdrvInstance*  pInstance = (tEdrvInstance*)pArgument_p;
     int             pcapRet;
-    UINT32          waitRet;
 
-    // increase priority
+    // Increase thread priority
     SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
 
-    for (;;)
+    // Start the pcap capturing loop
+    // This function is blocking and returns only, if the loop is broken,
+    // e.g. because of calling pcap_breakloop()
+    pcapRet = pcap_loop(pInstance->pPcap, -1, packetHandler, (u_char*)pInstance);
+
+    // Evaluate the reason of a loop break
+    switch (pcapRet)
     {
-        // Wait for events
-        waitRet = WaitForMultipleObjects(EDRV_HANDLE_COUNT, pInstance->aHandle, FALSE, INFINITE);
-        switch (waitRet)
-        {
-            case WAIT_OBJECT_0 + EDRV_HANDLE_EVENT:
-            {   // shutdown was signalled
-                return 0;
-            }
+        case 0:
+            DEBUG_LVL_ERROR_TRACE("%s(): pcap_loop ended because 'cnt' is exhausted.\n", __func__);
+            break;
 
-            case WAIT_OBJECT_0 + EDRV_HANDLE_PCAP:
-            {   // frames were received
-                // process all frames, that are available
-                pcapRet = pcap_dispatch(pInstance->pPcap, -1, packetHandler, (u_char*)pInstance);
-                break;
-            }
+        case -1:
+            DEBUG_LVL_ERROR_TRACE("%s(): pcap_loop ended because of an error!\n", __func__);
+            break;
 
-            default:
-            case WAIT_FAILED:
-            {
-                DEBUG_LVL_ERROR_TRACE("WaitForMultipleObjects failed (%d)\n", GetLastError());
-                break;
-            }
-        }
+        case -2:
+            DEBUG_LVL_ERROR_TRACE("%s(): pcap_loop ended normally.\n", __func__);
+            break;
+
+        default:
+            DEBUG_LVL_ERROR_TRACE("%s(): pcap_loop ended (unknown return value).\n", __func__);
+            break;
     }
+
     return 0;
 }
 
