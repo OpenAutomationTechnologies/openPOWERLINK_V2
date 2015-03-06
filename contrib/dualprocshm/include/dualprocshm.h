@@ -67,6 +67,11 @@ typedef enum eDualprocReturn
     kDualprocBufferOverflow     = 0x0005,   ///< Buffer size overflow
     kDualprocBufferEmpty        = 0x0006,   ///< Buffer is empty
     kDualprocBufferError        = 0x0007,   ///< Buffer is faulty
+    kDualprocHwReadError        = 0x0008,   ///< Read from hardware failed
+    kDualprocInvalidCommHeader  = 0x0009,   ///< Common memory header data is invalid
+    kDualprocInvalidInstance    = 0x000A,   ///< DualprocShm instance is not configured
+    kDualprocBridgeEnabled      = 0x000B,   ///< DualprocShm bridge is in enabled state
+    kDualprocBridgeDisabled     = 0x000C,   ///< DualprocShm bridge is in disabled state
 
     kDualprocUnspecError        = 0xFFFF    ///< Unspecified error
 } tDualprocReturn;
@@ -192,16 +197,39 @@ typedef struct sDualprocDynRes
 } tDualprocDynResConfig;
 
 /**
-\brief Dual Processor Instance
+\brief Header structure for dual processor library
+
+Currently holds the address of shared memory on the first processor.
+
+*/
+typedef struct sDualprocHeader
+{
+    UINT16      dpshmBridge;                        ///< Dualprocshm bridge. It is used to indicate the interface state.
+    UINT32      sharedMemBase[kDualProcLast];       ///< Shared memory addresses of both processors
+} tDualprocHeader;
+
+/**
+\brief Dual Processor common memory instance
+
+Holds the individual segment configuration details, inside common memory
+*/
+typedef struct sCommMemInst
+{
+    tDualprocHeader*    pCommMemHeader;             ///< Pointer to the common memory header segment
+    UINT8*              pCommMemBase;               ///< Pointer to the common memory data segment.
+}tCommMemInst;
+
+/**
+\brief Dual Processor instance
 
 Holds the configuration passed to the instance at creation.
 */
 typedef struct sDualProcDrv
 {
     tDualprocConfig             config;             ///< Copy of configuration
-    UINT8*                      pCommMemBase;       ///< Base address of the common memory
+    tCommMemInst                commMemInst;        ///< Common memory instance
     UINT8*                      pAddrTableBase;     ///< Pointer to dynamic memory address table
-    int                         iMaxDynBuffEntries; ///< Number of dynamic buffers (Pcp/Host)
+    INT                         maxDynBuffEntries;  ///< Number of dynamic buffers (Pcp/Host)
     tDualprocDynResConfig*      pDynResTbl;         ///< Dynamic buffer table (Pcp/Host)
 } tDualProcDrv;
 
@@ -230,7 +258,11 @@ tDualprocReturn         dualprocshm_readDataCommon(tDualprocDrvInstance pInstanc
                                                    size_t Size_p, UINT8* pData_p);
 tDualprocReturn         dualprocshm_writeDataCommon(tDualprocDrvInstance pInstance_p, UINT32 offset_p,
                                                     size_t Size_p, UINT8* pData_p);
-
+tDualprocReturn         dualprocshm_enableBridge(tDualprocDrvInstance pInstance_p);
+tDualprocReturn         dualprocshm_checkBridgeState(tDualprocDrvInstance pInstance_p);
+tDualprocReturn         dualprocshm_getSharedMemAddr(tDualprocDrvInstance pInstance_p,
+                                                     tDualProcInstance procInstance_p,
+                                                     UINT8* pShmBaseAddr_p);
 tDualprocReturn         dualprocshm_acquireBuffLock(tDualprocDrvInstance pInstance_p, UINT8 id_p) SECTION_DUALPROCSHM_RE_BUFF_LOCK;
 tDualprocReturn         dualprocshm_releaseBuffLock(tDualprocDrvInstance pInstance_p, UINT8 id_p) SECTION_DUALPROCSHM_RE_BUFF_LOCK;
 

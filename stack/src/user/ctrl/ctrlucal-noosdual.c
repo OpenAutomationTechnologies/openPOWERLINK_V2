@@ -58,7 +58,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define CMD_TIMEOUT_SEC     20 // command timeout in seconds
+#define CMD_TIMEOUT_SEC                 20      // command timeout in seconds
+#define BRIDGE_ENABLE_TIMEOUT_SEC       10      // wait for bridge enable time out
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -120,6 +121,7 @@ tOplkError ctrlucal_init(void)
 {
     tDualprocReturn     dualRet;
     tDualprocConfig     dualProcConfig;
+    INT                 loopCount = 0;
 
     OPLK_MEMSET(&instance_l, 0, sizeof(tCtrluCalInstance));
 
@@ -134,6 +136,23 @@ tOplkError ctrlucal_init(void)
         DEBUG_LVL_ERROR_TRACE("%s Could not create dual processor driver instance (0x%X)\n",
                               __func__, dualRet);
         dualprocshm_delete(instance_l.dualProcDrvInst);
+        return kErrorNoResource;
+    }
+
+    for (loopCount = 0; loopCount <= BRIDGE_ENABLE_TIMEOUT_SEC; loopCount++)
+    {
+        target_msleep(1000U);
+        dualRet = dualprocshm_checkBridgeState(instance_l.dualProcDrvInst);
+        if (dualRet == kDualprocBridgeDisabled)
+            continue;
+        else
+            break;
+    }
+
+    if (dualRet != kDualprocBridgeEnabled)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s dualprocshm  bridge is not enabled (0x%X)\n",
+                              __func__, dualRet);
         return kErrorNoResource;
     }
 
