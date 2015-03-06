@@ -52,6 +52,24 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // typedef
 //------------------------------------------------------------------------------
 
+/**
+\brief Type for ctrlk pre-execute command callback
+
+This type defines a function pointer to the kernel layer driver which is called
+if a command is received from the user layer control module.
+The callback is invoked before the ctrlk module executes the command.
+
+\param  cmd_p               The command to be executed.
+\param  pRet_p              Pointer to store the return value.
+\param  pStatus_p           Pointer to store the kernel stack status. (if not NULL)
+\param  pfExit_p            Pointer to store the exit flag. (if not NULL)
+
+\return The function returns a BOOL.
+\retval TRUE                Execution completed in callback.
+\retval FALSE               Execution needed in ctrlk module.
+*/
+typedef BOOL (*tCtrlkExecuteCmdCb)(tCtrlCmdType cmd_p, UINT16* pRet_p, UINT16* pStatus_p, BOOL* pfExit_p);
+
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
@@ -61,7 +79,7 @@ extern "C"
 {
 #endif
 
-tOplkError ctrlk_init(void);
+tOplkError ctrlk_init(tCtrlkExecuteCmdCb pfnExecuteCmdCb_p);
 void       ctrlk_exit(void);
 BOOL       ctrlk_process(void);
 tOplkError ctrlk_executeCmd(tCtrlCmdType cmd, UINT16* pRet_p, UINT16* pStatus_p,

@@ -108,6 +108,7 @@ typedef struct
     tCtrlInitParam      initParam;          ///< Initialization parameters
     UINT16              heartbeat;          ///< Heartbeat counter
     UINT32              features;           ///< Features provided by the kernel stack
+    tCtrlkExecuteCmdCb  pfnExecuteCmdCb;    ///< Command execution callback
 } tCtrlkInstance;
 
 //------------------------------------------------------------------------------
@@ -132,12 +133,14 @@ static void setupKernelFeatures(void);
 
 The function initializes the kernel control module.
 
+\param  pfnExecuteCmdCb_p   Command execution callback
+
 \return The function returns a tOplkError error code.
 
 \ingroup module_ctrlk
 */
 //------------------------------------------------------------------------------
-tOplkError ctrlk_init(void)
+tOplkError ctrlk_init(tCtrlkExecuteCmdCb pfnExecuteCmdCb_p)
 {
     tOplkError      ret = kErrorOk;
     if ((ret = ctrlkcal_init()) != kErrorOk)
@@ -150,6 +153,8 @@ tOplkError ctrlk_init(void)
     instance_l.heartbeat = 1;
 
     setupKernelFeatures();
+
+    instance_l.pfnExecuteCmdCb = pfnExecuteCmdCb_p;
 
     return kErrorOk;
 
@@ -169,6 +174,8 @@ The function cleans up the kernel control module.
 //------------------------------------------------------------------------------
 void ctrlk_exit(void)
 {
+    instance_l.pfnExecuteCmdCb = NULL;
+
     ctrlkcal_exit();
 }
 
@@ -248,6 +255,12 @@ tOplkError ctrlk_executeCmd(tCtrlCmdType cmd_p, UINT16* pRet_p,
     tCtrlKernelStatus   status;
     BOOL                fExit;
     tOplkError          retVal;
+
+    if (instance_l.pfnExecuteCmdCb != NULL)
+    {
+        if (instance_l.pfnExecuteCmdCb(cmd_p, pRet_p, pStatus_p, pfExit_p))
+            return kErrorOk;
+    }
 
     switch (cmd_p)
     {

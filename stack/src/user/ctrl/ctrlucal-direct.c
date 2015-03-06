@@ -107,7 +107,7 @@ tOplkError ctrlucal_init(void)
 
     // For the single process solution we are responsible that the kernel
     // control module is correctly initialized.
-    return ctrlk_init();
+    return ctrlk_init(NULL);
 }
 
 //------------------------------------------------------------------------------

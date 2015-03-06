@@ -159,7 +159,7 @@ static tOplkError initPlk(void)
 {
     tOplkError ret;
 
-    ret = ctrlk_init();
+    ret = ctrlk_init(NULL);
 
     if (ret != kErrorOk)
     {

@@ -285,7 +285,7 @@ static int powerlinkOpen(struct inode* pDeviceFile_p, struct file* pInstance_p)
 
     init_timer(&heartbeatTimer_g);
 
-    if (ctrlk_init() != kErrorOk)
+    if (ctrlk_init(NULL) != kErrorOk)
     {
         atomic_dec(&openCount_g);
         return -EIO;

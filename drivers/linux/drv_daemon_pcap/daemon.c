@@ -168,7 +168,7 @@ int  main (int argc, char** argv)
     PRINTF("using openPOWERLINK Stack: %s\n", PLK_DEFINED_STRING_VERSION);
     PRINTF("----------------------------------------------------\n");
 
-    ret = ctrlk_init();
+    ret = ctrlk_init(NULL);
     if (ret != kErrorOk)
     {
         TRACE("Could not initialize control module\n");
