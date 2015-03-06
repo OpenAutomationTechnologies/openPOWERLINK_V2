@@ -59,7 +59,7 @@
          type = "String";
       }
    }
-   element epcs_flash_controller_0.epcs_control_port
+   element epcs_flash_controller.epcs_control_port
    {
       datum baseAddress
       {
@@ -67,7 +67,7 @@
          type = "String";
       }
    }
-   element epcs_flash_controller_0
+   element epcs_flash_controller
    {
       datum _sortIndex
       {
@@ -89,7 +89,7 @@
    {
       datum _sortIndex
       {
-         value = "9";
+         value = "10";
          type = "int";
       }
    }
@@ -113,7 +113,7 @@
    {
       datum _sortIndex
       {
-         value = "8";
+         value = "9";
          type = "int";
       }
    }
@@ -142,15 +142,36 @@
    {
       datum _sortIndex
       {
-         value = "10";
+         value = "11";
          type = "int";
+      }
+   }
+   element remote_update
+   {
+      datum _sortIndex
+      {
+         value = "6";
+         type = "int";
+      }
+      datum sopceditor_expanded
+      {
+         value = "0";
+         type = "boolean";
+      }
+   }
+   element remote_update.s1
+   {
+      datum baseAddress
+      {
+         value = "4352";
+         type = "String";
       }
    }
    element sram_0
    {
       datum _sortIndex
       {
-         value = "6";
+         value = "7";
          type = "int";
       }
       datum sopceditor_expanded
@@ -176,7 +197,7 @@
    {
       datum _sortIndex
       {
-         value = "7";
+         value = "8";
          type = "int";
       }
       datum sopceditor_expanded
@@ -213,7 +234,7 @@
  <parameter name="projectName">mn-single-hostif-drv.qpf</parameter>
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1397034746744" />
+ <parameter name="timeStamp" value="1423058096029" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk50" internal="clk50.clk_in" type="clock" dir="end" />
@@ -231,7 +252,7 @@
  <interface name="powerlink_0_mii1" internal="pcp_0.powerlink_0_mii1" />
  <interface
    name="epcs_flash"
-   internal="epcs_flash_controller_0.external"
+   internal="epcs_flash_controller.external"
    type="conduit"
    dir="end" />
  <interface
@@ -256,6 +277,16 @@
    type="conduit"
    dir="end" />
  <interface name="prl0" internal="prlSlave_0.prl0" type="conduit" dir="end" />
+ <interface
+   name="openmac_0_mactimerout"
+   internal="openmac_0.macTimerOut"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="pcp_0_cpu_resetrequest"
+   internal="pcp_0.cpu_resetrequest"
+   type="conduit"
+   dir="end" />
  <module kind="clock_source" version="13.0" enabled="1" name="clk50">
   <parameter name="clockFrequency" value="50000000" />
   <parameter name="clockFrequencyKnown" value="true" />
@@ -309,12 +340,12 @@
    kind="altera_avalon_epcs_flash_controller"
    version="13.0.1.99.2"
    enabled="1"
-   name="epcs_flash_controller_0">
+   name="epcs_flash_controller">
   <parameter name="autoSelectASMIAtom" value="true" />
   <parameter name="useASMIAtom" value="false" />
   <parameter name="clockRate" value="50000000" />
   <parameter name="deviceFamilyString" value="Cyclone IV E" />
-  <parameter name="autoInitializationFileName">$${FILENAME}_epcs_flash_controller_0</parameter>
+  <parameter name="autoInitializationFileName">$${FILENAME}_epcs_flash_controller</parameter>
  </module>
  <module
    kind="altera_generic_tristate_controller"
@@ -414,10 +445,18 @@
   <parameter name="AUTO_PKTCLK_CLOCK_RATE" value="-1" />
  </module>
  <module kind="prlSlave" version="1.0.2" enabled="1" name="prlSlave_0">
+  <parameter name="sys_clk" value="100000000" />
   <parameter name="gui_enableMux" value="true" />
   <parameter name="gui_dataWidth" value="16" />
   <parameter name="gui_addrWidth" value="17" />
-  <parameter name="AUTO_C0_CLOCK_RATE" value="100000000" />
+ </module>
+ <module
+   kind="altera_avalon_remote_update_cycloneiii"
+   version="13.0"
+   enabled="1"
+   name="remote_update">
+  <parameter name="clockFrequency" value="25000000" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone IV E" />
  </module>
  <connection
    kind="reset"
@@ -490,22 +529,22 @@
    kind="clock"
    version="13.0"
    start="clk50.clk"
-   end="epcs_flash_controller_0.clk" />
+   end="epcs_flash_controller.clk" />
  <connection
    kind="reset"
    version="13.0"
    start="clk50.clk_reset"
-   end="epcs_flash_controller_0.reset" />
+   end="epcs_flash_controller.reset" />
  <connection
    kind="reset"
    version="13.0"
    start="clk100.clk_reset"
-   end="epcs_flash_controller_0.reset" />
+   end="epcs_flash_controller.reset" />
  <connection
    kind="reset"
    version="13.0"
    start="clk25.clk_reset"
-   end="epcs_flash_controller_0.reset" />
+   end="epcs_flash_controller.reset" />
  <connection
    kind="tristate_conduit"
    version="13.0"
@@ -567,15 +606,6 @@
    end="hostinterface_0.pcp">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x0800" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="13.0"
-   start="pcp_0.slow_bridge"
-   end="epcs_flash_controller_0.epcs_control_port">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0000" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -702,6 +732,56 @@
    version="13.0"
    start="clk25.clk_reset"
    end="prlSlave_0.r0" />
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="pcp_0.flash_bridge"
+   end="epcs_flash_controller.epcs_control_port">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="interrupt"
+   version="13.0"
+   start="pcp_0.gp_irq"
+   end="epcs_flash_controller.irq">
+  <parameter name="irqNumber" value="0" />
+ </connection>
+ <connection
+   kind="clock"
+   version="13.0"
+   start="clk25.clk"
+   end="remote_update.global_signals_clock" />
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="pcp_0.slow_bridge"
+   end="remote_update.s1">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x1100" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk50.clk_reset"
+   end="remote_update.global_signals_clock_reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk100.clk_reset"
+   end="remote_update.global_signals_clock_reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk25.clk_reset"
+   end="remote_update.global_signals_clock_reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="pcp_0.jtag_reset"
+   end="epcs_flash_controller.reset" />
  <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
  <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="1" />
 </system>

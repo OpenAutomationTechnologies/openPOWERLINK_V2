@@ -106,16 +106,16 @@ architecture rtl of toplevel is
             epcs_flash_sce                      : out   std_logic;
             epcs_flash_sdo                      : out   std_logic;
             epcs_flash_data0                    : in    std_logic                     := 'X';
-            host_0_sdram_0_addr                 : out   std_logic_vector(12 downto 0);
-            host_0_sdram_0_ba                   : out   std_logic_vector(1 downto 0);
-            host_0_sdram_0_cas_n                : out   std_logic;
-            host_0_sdram_0_cke                  : out   std_logic;
-            host_0_sdram_0_cs_n                 : out   std_logic;
-            host_0_sdram_0_dq                   : inout std_logic_vector(31 downto 0) := (others => 'X');
-            host_0_sdram_0_dqm                  : out   std_logic_vector(3 downto 0);
-            host_0_sdram_0_ras_n                : out   std_logic;
-            host_0_sdram_0_we_n                 : out   std_logic;
-            host_0_irq_irq                      : in    std_logic                     := 'X';
+            sdram_0_addr                        : out   std_logic_vector(12 downto 0);
+            sdram_0_ba                          : out   std_logic_vector(1 downto 0);
+            sdram_0_cas_n                       : out   std_logic;
+            sdram_0_cke                         : out   std_logic;
+            sdram_0_cs_n                        : out   std_logic;
+            sdram_0_dq                          : inout std_logic_vector(31 downto 0) := (others => 'X');
+            sdram_0_dqm                         : out   std_logic_vector(3 downto 0);
+            sdram_0_ras_n                       : out   std_logic;
+            sdram_0_we_n                        : out   std_logic;
+            sync_irq_irq                        : in    std_logic                     := 'X';
             lcd_data                            : inout std_logic_vector(7 downto 0)  := (others => 'X');
             lcd_E                               : out   std_logic;
             lcd_RS                              : out   std_logic;
@@ -201,15 +201,15 @@ begin
             epcs_flash_sdo                  => EPCS_SDO,
             epcs_flash_data0                => EPCS_DATA0,
 
-            host_0_sdram_0_addr             => SDRAM_ADDR,
-            host_0_sdram_0_ba               => SDRAM_BA,
-            host_0_sdram_0_cas_n            => SDRAM_CAS_n,
-            host_0_sdram_0_cke              => SDRAM_CKE,
-            host_0_sdram_0_cs_n             => SDRAM_CS_n,
-            host_0_sdram_0_dq               => SDRAM_DQ,
-            host_0_sdram_0_dqm              => SDRAM_DQM,
-            host_0_sdram_0_ras_n            => SDRAM_RAS_n,
-            host_0_sdram_0_we_n             => SDRAM_WE_n,
+            sdram_0_addr                    => SDRAM_ADDR,
+            sdram_0_ba                      => SDRAM_BA,
+            sdram_0_cas_n                   => SDRAM_CAS_n,
+            sdram_0_cke                     => SDRAM_CKE,
+            sdram_0_cs_n                    => SDRAM_CS_n,
+            sdram_0_dq                      => SDRAM_DQ,
+            sdram_0_dqm                     => SDRAM_DQM,
+            sdram_0_ras_n                   => SDRAM_RAS_n,
+            sdram_0_we_n                    => SDRAM_WE_n,
 
             prl0_oPrlMst_cs                 => hostifCs,
             prl0_iPrlMst_ad_i               => hostifAd_i,
@@ -221,7 +221,7 @@ begin
             prl0_oPrlMst_rd                 => hostifRd,
             prl0_iPrlMst_ack                => hostifAck,
 
-            host_0_irq_irq                  => hostifIrq,
+            sync_irq_irq                    => hostifIrq,
 
             lcd_data                        => LCD_DQ,
             lcd_E                           => LCD_E,
