@@ -93,6 +93,8 @@ signals:
     void              allNodesRemoved();
     void              nodeStatusChanged(int iNodeId_p, int iStatus_p);
     void              printLog(const QString &strState_p);
+    void              userDefEvent(void* pUserArg_p);
+    void              sdoFinished(tSdoComFinished sdoInfo_p);
 
 private:
     static tOplkError appCbEvent(tOplkApiEventType EventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);

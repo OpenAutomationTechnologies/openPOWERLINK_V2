@@ -50,6 +50,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <oplk/debugstr.h>
 
+Q_DECLARE_METATYPE(tSdoComFinished)
+
 //------------------------------------------------------------------------------
 // global variables
 //------------------------------------------------------------------------------
@@ -100,6 +102,7 @@ Constructs a ProcessThread object
 //------------------------------------------------------------------------------
 ProcessThread::ProcessThread(MainWindow* pMainWindow_p)
 {
+    qRegisterMetaType<tSdoComFinished>();
     pProcessThread_g = this;
     pMainWindow = pMainWindow_p;
 
@@ -353,7 +356,15 @@ tOplkError ProcessThread::processEvent(tOplkApiEventType EventType_p,
         case kOplkApiEventSdo:
             ret = processSdoEvent(EventType_p, pEventArg_p, pUserArg_p);
             break;
+#else
+        case kOplkApiEventSdo:
+            emit sdoFinished(pEventArg_p->sdoInfo);
+            break;
 #endif
+
+        case kOplkApiEventUserDef:
+            emit userDefEvent(pEventArg_p->pUserArg);
+
         default:
             break;
     }
