@@ -137,11 +137,12 @@ tCircBufInstance        instance_l[NR_OF_CIRC_BUFFERS];
 /**
 \brief  Create circular buffer instance
 
-The function creates the circular buffer instance.
+The function allocates the memory needed for the circular buffer instance.
 
 \param  id_p                ID of the circular buffer.
-\param  fNew_p              TRUE: Create new instance.
-                            FALSE: Connect to existing instance.
+\param  fNew_p              The parameter determines if a new circular buffer
+                            instance should be created (TRUE) or if it should
+                            connect to an existing instance (FALSE).
 
 \return The function returns the pointer to the buffer instance or NULL on error.
 
@@ -185,7 +186,7 @@ tCircBufInstance* circbuf_createInstance(UINT8 id_p, BOOL fNew_p)
 /**
 \brief  Free circular buffer instance
 
-The function frees the circular buffer instance.
+The function frees the allocated memory used by the circular buffer instance.
 
 \param  pInstance_p         Pointer to circular buffer instance.
 

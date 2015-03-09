@@ -107,8 +107,9 @@ typedef struct
 The function allocates the memory needed for the circular buffer instance.
 
 \param  id_p                ID of the circular buffer.
-\param  fNew_p              TRUE: Create new instance.
-                            FALSE: Connect to existing instance.
+\param  fNew_p              The parameter determines if a new circular buffer
+                            instance should be created (TRUE) or if it should
+                            connect to an existing instance (FALSE).
 
 \return The function returns the pointer to the buffer instance or NULL on error.
 
