@@ -170,6 +170,10 @@ MainWindow::MainWindow(QWidget* parent)
     pFootRegion->addWidget(pStartStopOplk);
     connect(pStartStopOplk, SIGNAL(clicked()), this, SLOT(startPowerlink()));
 
+    pShowSdoDialog = new QPushButton(tr("SDO..."));
+    pFootRegion->addWidget(pShowSdoDialog);
+    connect(pShowSdoDialog, SIGNAL(clicked()), this, SLOT(showSdoDialog()));
+
     pFootRegion->addStretch();
 
     pToggleMax = new QPushButton(tr("Full Screen"));
@@ -265,6 +269,14 @@ void MainWindow::startPowerlink()
 
     pApi = new Api(this, nodeId, devName);
 
+    if (pSdoDialog)
+    {
+        QObject::connect(pApi, SIGNAL(userDefEvent(void*)),
+                         pSdoDialog, SLOT(userDefEvent(void*)),
+                         Qt::DirectConnection);
+        QObject::connect(pApi, SIGNAL(sdoFinished(tSdoComFinished)),
+                         pSdoDialog, SLOT(sdoFinished(tSdoComFinished)));
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -281,6 +293,39 @@ void MainWindow::stopPowerlink()
     pStartStopOplk->disconnect(this, SLOT(stopPowerlink()));
     connect(pStartStopOplk, SIGNAL(clicked()), this, SLOT(startPowerlink()));
     pNodeIdEdit->setEnabled(true);
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Show SDO dialog
+
+Show dialog to perform SDO transfers.
+*/
+//------------------------------------------------------------------------------
+void MainWindow::showSdoDialog()
+{
+    if (!pSdoDialog)
+    {
+        pSdoDialog = new SdoDialog();
+        if (pApi)
+        {
+            QObject::connect(pApi, SIGNAL(userDefEvent(void*)),
+                             pSdoDialog, SLOT(userDefEvent(void*)),
+                             Qt::DirectConnection);
+            QObject::connect(pApi, SIGNAL(sdoFinished(tSdoComFinished)),
+                             pSdoDialog, SLOT(sdoFinished(tSdoComFinished)));
+        }
+    }
+    if (pSdoDialog->isVisible())
+    {
+        pSdoDialog->showNormal();
+        pSdoDialog->activateWindow();
+        pSdoDialog->raise();
+    }
+    else
+    {
+        pSdoDialog->show();
+    }
 }
 
 //------------------------------------------------------------------------------

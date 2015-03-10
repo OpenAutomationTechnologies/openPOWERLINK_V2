@@ -1,14 +1,13 @@
 /**
 ********************************************************************************
-\file   MainWindow.h
+\file   SdoDialog.h
 
-\brief  Header file for main window class
+\brief  Header file for SDO execution dialog
 
-This file contains the definitions of the main window class.
+The file contains the definitions for the SDO execution dialog
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2015, SYSTEC electronic GmbH
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,89 +33,73 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_MainWindow_H_
-#define _INC_MainWindow_H_
+#ifndef _INC_SdoDialog_H_
+#define _INC_SdoDialog_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <QWidget>
-#include <QTextEdit>
+#include <oplk/oplk.h>
+#include <QDialog>
+#include <QString>
 
-#include "Api.h"
-#include "State.h"
-#include "Input.h"
-#include "CnState.h"
-#include "Output.h"
-#include "SdoDialog.h"
+//------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 // class definitions
 //------------------------------------------------------------------------------
-class QLineEdit;
-class QPushButton;
-class QToolButton;
 class QLabel;
-class QFrame;
-class QTextEdit;
+class QLineEdit;
+class QListWidget;
+class QListWidgetItem;
+class QPushButton;
+class QComboBox;
 
 //------------------------------------------------------------------------------
 /**
-\brief  MainWindow class
+\brief  SdoDialog class
 
-Class MainWindow implements the main window class of the demo application.
+The class implements the SDO execution dialog.
 */
 //------------------------------------------------------------------------------
-class MainWindow : public QWidget
+class SdoDialog : public QDialog
 {
-    Q_OBJECT
+
+Q_OBJECT
 
 public:
-    MainWindow(QWidget* parent = 0);
+    SdoDialog();
 
-    State*       getStateWidget() {return pState;}
-    Output*      getOutputWidget() {return pOutput;}
-    Input*       getInputWidget() {return pInput;}
-    CnState*     getCnStateWidget() {return pCnState;}
+signals:
+    void            sigUpdateData(const QString& abortCode_p);
 
 private slots:
-    void         toggleWindowState();
-    void         startPowerlink();
-    void         stopPowerlink();
-    void         showSdoDialog();
-    void         printlog(QString str);
+    void            startWrite();
+    void            startRead();
+    void            dataTypeChanged(int index);
+    void            userDefEvent(void* pUserArg_p);
+    void            sdoFinished(tSdoComFinished sdoInfo_p);
+    void            updateData(const QString& abortCode_p);
 
 private:
-    QHBoxLayout* pHeadRegion;
-    QPixmap*     pLogo;
-    QLabel*      pLabel;
+    QPushButton*    readButton;
+    QPushButton*    writeButton;
+    QLineEdit*      pNodeIdEdit;
+    QLineEdit*      pObjectEdit;
+    QLineEdit*      pDataEdit;
+    QComboBox*      pDataTypeBox;
+    QComboBox*      pSdoTypeBox;
+    QLabel*         pAbortCodeLabel;
+    QByteArray      data;
+    UINT            targetNodeId;
+    UINT            targetIndex;
+    UINT            targetSubindex;
+    tSdoType        sdoType;
 
-    State*       pState;
-    CnState*     pCnState;
-    Input*       pInput;
-    Output*      pOutput;
-
-    QLineEdit*   pNodeIdEdit;
-
-    QPushButton* pToggleMax;
-    QPushButton* pShowSdoDialog;
-    QPushButton* pStartStopOplk;
-
-    QFrame*      pFrameSepHeadMiddle;
-    QFrame*      pFrameSepMiddle;
-    QFrame*      pFrameSepMiddle2;
-    QFrame*      pFrameSepMiddleStatus;
-    QFrame*      pFrameSepStatusFoot;
-
-    QTextEdit*   pTextEdit;
-
-    Api*         pApi;
-    SdoDialog*   pSdoDialog;
-
-    UINT32       version;
-
-    QString      devName;
+    void            enableFields(bool enable_p);
+    bool            readFields(void);
 };
 
-#endif /* _INC_MainWindow_H_ */
-
+#endif /* _INC_SdoDialog_H_ */
