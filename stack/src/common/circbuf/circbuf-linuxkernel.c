@@ -85,6 +85,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 typedef struct
 {
     spinlock_t          spinlock;       ///< spinlock used for locking
+    unsigned long       flags;          ///< IRQ flags
 } tCircBufArchInstance;
 
 //------------------------------------------------------------------------------
@@ -107,16 +108,21 @@ typedef struct
 The function allocates the memory needed for the circular buffer instance.
 
 \param  id_p                ID of the circular buffer.
+\param  fNew_p              The parameter determines if a new circular buffer
+                            instance should be created (TRUE) or if it should
+                            connect to an existing instance (FALSE).
 
 \return The function returns the pointer to the buffer instance or NULL on error.
 
 \ingroup module_lib_circbuf
 */
 //------------------------------------------------------------------------------
-tCircBufInstance* circbuf_createInstance(UINT8 id_p)
+tCircBufInstance* circbuf_createInstance(UINT8 id_p, BOOL fNew_p)
 {
     tCircBufInstance*           pInstance;
     tCircBufArchInstance*       pArch;
+
+    UNUSED_PARAMETER(fNew_p);
 
     if ((pInstance = OPLK_MALLOC(sizeof(tCircBufInstance) +
                                  sizeof(tCircBufArchInstance))) == NULL)
@@ -247,7 +253,7 @@ void circbuf_lock(tCircBufInstance* pInstance_p)
     tCircBufArchInstance* pArchInstance =
                               (tCircBufArchInstance*)pInstance_p->pCircBufArchInstance;
 
-    spin_lock(&pArchInstance->spinlock);
+    spin_lock_irqsave(&pArchInstance->spinlock, pArchInstance->flags);
 }
 
 //------------------------------------------------------------------------------
@@ -266,7 +272,7 @@ void circbuf_unlock(tCircBufInstance* pInstance_p)
     tCircBufArchInstance* pArchInstance =
                               (tCircBufArchInstance*)pInstance_p->pCircBufArchInstance;
 
-    spin_unlock(&pArchInstance->spinlock);
+    spin_unlock_irqrestore(&pArchInstance->spinlock, pArchInstance->flags);
 }
 
 //============================================================================//

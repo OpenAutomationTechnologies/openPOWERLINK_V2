@@ -127,9 +127,9 @@ static char* nmtEventStr_l[] =
     "NmtEventDllCePreq",            //
     "NmtEventDllCePres",            //
     "NmtEventDllCeSoa",             //
+    "NmtEventDllCeAInv",            //
     "NmtEventDllCeAsnd",            //
     "NmtEventDllCeFrameTimeout",    //
-    "0xd",                          // reserved
     "0xe",                          // reserved
     "0xf",                          // reserved
     "NmtEventSwReset",              // NMT_GT1, NMT_GT2, NMT_GT8

@@ -52,8 +52,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fcntl.h>
 #include <pthread.h>
 #include <semaphore.h>
-#include <linux/errno.h>
-
+#include <common/target.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -157,11 +156,11 @@ tOplkError eventucal_init(void)
     if (pthread_create(&instance_l.threadId, NULL, eventThread, (void*)&instance_l) != 0)
         goto Exit;
 
-    schedParam.__sched_priority = USER_EVENT_THREAD_PRIORITY;
+    schedParam.sched_priority = USER_EVENT_THREAD_PRIORITY;
     if (pthread_setschedparam(instance_l.threadId, SCHED_FIFO, &schedParam) != 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s(): couldn't set thread scheduling parameters! %d\n",
-                              __func__, schedParam.__sched_priority);
+                              __func__, schedParam.sched_priority);
     }
 
 #if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 12)

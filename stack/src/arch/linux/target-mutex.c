@@ -108,6 +108,12 @@ tOplkError target_createMutex(char* mutexName_p, OPLK_MUTEX_T* pMutex_p)
 {
     OPLK_MUTEX_T      lockSem;
 
+    // unlink any existing semaphore,
+    // so it will be created with the correct init state
+    // WARNING: target_createMutex() will create a new independent mutex on each
+    //          call, even if the very same name is specified.
+    sem_unlink(mutexName_p);
+
     if ((lockSem = sem_open(mutexName_p, O_CREAT | O_RDWR, S_IRWXG, 1)) == SEM_FAILED)
         return kErrorNoFreeInstance;
 

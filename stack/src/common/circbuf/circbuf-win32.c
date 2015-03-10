@@ -102,17 +102,22 @@ tCircBufHeader*         pHeader_l[NR_OF_CIRC_BUFFERS];
 The function allocates the memory needed for the circular buffer instance.
 
 \param  id_p                ID of the circular buffer.
+\param  fNew_p              The parameter determines if a new circular buffer
+                            instance should be created (TRUE) or if it should
+                            connect to an existing instance (FALSE).
 
 \return The function returns the pointer to the buffer instance or NULL on error.
 
 \ingroup module_lib_circbuf
 */
 //------------------------------------------------------------------------------
-tCircBufInstance* circbuf_createInstance(UINT8 id_p)
+tCircBufInstance* circbuf_createInstance(UINT8 id_p, BOOL fNew_p)
 {
     tCircBufInstance*           pInstance;
     tCircBufArchInstance*       pArch;
     TCHAR                       mutexName[MAX_PATH];
+
+    UNUSED_PARAMETER(fNew_p);
 
     if ((pInstance = OPLK_MALLOC(sizeof(tCircBufInstance) +
                                  sizeof(tCircBufArchInstance))) == NULL)
@@ -141,7 +146,7 @@ tCircBufInstance* circbuf_createInstance(UINT8 id_p)
 /**
 \brief  Free circular buffer instance
 
-The function frees the allocated memory used by the circular buffer.
+The function frees the allocated memory used by the circular buffer instance.
 
 \param  pInstance_p         Pointer to circular buffer instance.
 

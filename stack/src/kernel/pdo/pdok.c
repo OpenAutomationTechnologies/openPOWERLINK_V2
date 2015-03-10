@@ -430,6 +430,12 @@ tOplkError pdok_processRxPdo(tPlkFrame* pFrame_p, UINT frameSize_p)
         channelId = pdokInstance_g.aRpdoChannelIdLut[nodeId];
         pPdoChannel = &pdokInstance_g.pdoChannels.pRxPdoChannel[channelId];
 
+        if (pPdoChannel->nodeId != nodeId)
+        {   // we received a PDO which we aren't interested in
+            // discard it
+            goto Exit;
+        }
+
         // retrieve PDO version from frame
         frameData = ami_getUint8Le(&pFrame_p->data.pres.pdoVersion);
         if ((pPdoChannel->mappingVersion & PLK_VERSION_MAIN) != (frameData & PLK_VERSION_MAIN))
@@ -607,7 +613,8 @@ static tOplkError copyTxPdo(tPlkFrame* pFrame_p, UINT frameSize_p, BOOL fReadyFl
         pPdoChannel = &pdokInstance_g.pdoChannels.pTxPdoChannel[channelId];
 
         // valid TPDO found
-        if ((unsigned int)(pPdoChannel->pdoSize + 24) <= frameSize_p)
+        if ((pPdoChannel->nodeId == nodeId) &&
+            ((unsigned int)(pPdoChannel->pdoSize + 24) <= frameSize_p))
         {
             /*
             TRACE("%s() Channel:%d Node:%d MapObjectCnt:%d PdoSize:%d\n",
@@ -625,7 +632,7 @@ static tOplkError copyTxPdo(tPlkFrame* pFrame_p, UINT frameSize_p, BOOL fReadyFl
             pdoSize = pPdoChannel->pdoSize;
         }
         else
-        {   // TPDO is too short
+        {   // TPDO is too short or invalid
             // $$$ raise PDO error, set ret
             pdoSize = 0;
         }

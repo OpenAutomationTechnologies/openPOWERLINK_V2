@@ -1919,7 +1919,7 @@ static tOplkError serverInitWriteByIndex(tSdoComCon* pSdoComCon_p, tAsySdoCom* p
         }
 
         bytesToTransfer = ami_getUint16Le(&pSdoCom_p->segmentSizeLe);
-        bytesToTransfer -= (SDO_CMDL_HDR_FIXED_SIZE + SDO_CMDL_HDR_VAR_SIZE + SDO_CMDL_HDR_WRITEBYINDEX_SIZE);
+        bytesToTransfer -= (SDO_CMDL_HDR_VAR_SIZE + SDO_CMDL_HDR_WRITEBYINDEX_SIZE);
         pSdoComCon_p->pData = (UINT8*)obd_getObjectDataPtr(index, subindex);    // get pointer to object entry
         if (pSdoComCon_p->pData == NULL)
         {

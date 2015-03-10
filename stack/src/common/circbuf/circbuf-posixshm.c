@@ -107,13 +107,16 @@ typedef struct
 The function allocates the memory needed for the circular buffer instance.
 
 \param  id_p                ID of the circular buffer.
+\param  fNew_p              The parameter determines if a new circular buffer
+                            instance should be created (TRUE) or if it should
+                            connect to an existing instance (FALSE).
 
 \return The function returns the pointer to the buffer instance or NULL on error.
 
 \ingroup module_lib_circbuf
 */
 //------------------------------------------------------------------------------
-tCircBufInstance* circbuf_createInstance(UINT8 id_p)
+tCircBufInstance* circbuf_createInstance(UINT8 id_p, BOOL fNew_p)
 {
     tCircBufInstance*           pInstance;
     tCircBufArchInstance*       pArch;
@@ -132,6 +135,12 @@ tCircBufInstance* circbuf_createInstance(UINT8 id_p)
     pArch = (tCircBufArchInstance*)pInstance->pCircBufArchInstance;
 
     sprintf(semName, "/semCircbuf-%d", id_p);
+
+    if (fNew_p)
+    {
+        sem_unlink(semName);
+    }
+
     if ((pArch->lockSem = sem_open(semName, O_CREAT, S_IRWXG, 1)) == SEM_FAILED)
     {
         DEBUG_LVL_ERROR_TRACE("%s() open sem failed!\n", __func__);
