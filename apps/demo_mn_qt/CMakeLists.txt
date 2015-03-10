@@ -51,6 +51,7 @@ SET(CFG_CFM ON CACHE BOOL "Use Configuration Manager (CFM)")
 SET (DEMO_SOURCES
      ${DEMO_SOURCE_DIR}/main.cpp
      ${DEMO_SOURCE_DIR}/MainWindow.cpp
+     ${DEMO_SOURCE_DIR}/SdoDialog.cpp
      ${DEMO_SOURCE_DIR}/Api.cpp
      ${DEMO_SOURCE_DIR}/CnState.cpp
      ${DEMO_SOURCE_DIR}/DataInOutThread.cpp
@@ -75,6 +76,7 @@ SET (DEMO_HEADERS
      ${DEMO_INCLUDE_DIR}/State.h
      ${DEMO_INCLUDE_DIR}/Leds.h
      ${DEMO_INCLUDE_DIR}/MainWindow.h
+     ${DEMO_INCLUDE_DIR}/SdoDialog.h
      ${DEMO_INCLUDE_DIR}/NodeState.h
      )
 

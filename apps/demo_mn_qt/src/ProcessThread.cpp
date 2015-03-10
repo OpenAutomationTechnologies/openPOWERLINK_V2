@@ -50,6 +50,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <oplk/debugstr.h>
 
+Q_DECLARE_METATYPE(tSdoComFinished)
+
 //------------------------------------------------------------------------------
 // global variables
 //------------------------------------------------------------------------------
@@ -100,6 +102,7 @@ Constructs a ProcessThread object
 //------------------------------------------------------------------------------
 ProcessThread::ProcessThread(MainWindow* pMainWindow_p)
 {
+    qRegisterMetaType<tSdoComFinished>();
     pProcessThread_g = this;
     pMainWindow = pMainWindow_p;
 
