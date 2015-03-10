@@ -1944,7 +1944,7 @@ UINT32 getRequiredKernelFeatures(void)
 #endif
 
 #if (CONFIG_DLL_PRES_CHAINING_CN == TRUE)
-    ctrlInstance_l.requiredKernelFeatures |= OPLK_KERNEL_PRES_CHAINING_CN;
+    requiredKernelFeatures |= OPLK_KERNEL_PRES_CHAINING_CN;
 #endif
 
     return requiredKernelFeatures;
