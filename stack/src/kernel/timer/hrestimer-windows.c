@@ -53,13 +53,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 #define TIMER_COUNT           2            ///< number of high-resolution timers
-#define TIMERHDL_MASK         0x0FFFFFFF
-#define TIMERHDL_SHIFT        28
 
 #define HRTIMER_HDL_EVENT     0
 #define HRTIMER_HDL_TIMER0    1
 #define HRTIMER_HDL_TIMER1    2
 #define HRTIMER_HDL_COUNT     3
+
+/* macros for timer handles */
+#define TIMERHDL_MASK         0x0FFFFFFF
+#define TIMERHDL_SHIFT        28
+#define HDL_TO_IDX(Hdl)       ((Hdl >> TIMERHDL_SHIFT) - 1)
+#define HDL_INIT(Idx)         ((Idx + 1) << TIMERHDL_SHIFT)
+#define HDL_INC(Hdl)          (((Hdl + 1) & TIMERHDL_MASK) | (Hdl & ~TIMERHDL_MASK))
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -319,10 +324,11 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
             DEBUG_LVL_ERROR_TRACE("%s() Invalid timer index: %d\n", __func__, index);
             return kErrorTimerNoTimerCreated;
         }
+        pTimerInfo->eventArg.timerHdl = HDL_INIT(index);
     }
     else
     {
-        index = (UINT)(*pTimerHdl_p >> TIMERHDL_SHIFT) - 1;
+        index = (UINT)HDL_TO_IDX(*pTimerHdl_p);
         if (index >= TIMER_COUNT)
         {   // invalid handle
             DEBUG_LVL_ERROR_TRACE("%s() Invalid timer index: %d\n", __func__, index);
@@ -333,8 +339,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
 
     // increment timer handle (if timer expires right after this statement,
     // the user would detect an unknown timer handle and discard it)
-    pTimerInfo->eventArg.timerHdl = ((pTimerInfo->eventArg.timerHdl + 1) & TIMERHDL_MASK) |
-                                    ((index + 1) << TIMERHDL_SHIFT);
+    pTimerInfo->eventArg.timerHdl = HDL_INC(pTimerInfo->eventArg.timerHdl);
 
     // calculate duetime [100 ns] (negative value = relative time)
     dueTime.QuadPart = (LONGLONG)time_p / -100LL;
@@ -401,7 +406,7 @@ tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
     }
     else
     {
-        index = (UINT)(*pTimerHdl_p >> TIMERHDL_SHIFT) - 1;
+        index = (UINT)HDL_TO_IDX(*pTimerHdl_p);
         if (index >= TIMER_COUNT)
         {   // invalid handle
             return kErrorTimerInvalidHandle;
