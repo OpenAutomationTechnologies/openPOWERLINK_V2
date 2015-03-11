@@ -52,9 +52,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 
-#define TIMER_COUNT                 2
-#define TIMERHDL_MASK               0x0FFFFFFF
-#define TIMERHDL_SHIFT              28
+#define TIMER_COUNT           2            ///< number of high-resolution timers
+#define TIMERHDL_MASK         0x0FFFFFFF
+#define TIMERHDL_SHIFT        28
 
 #define HRTIMER_HDL_EVENT     0
 #define HRTIMER_HDL_TIMER0    1
@@ -205,11 +205,11 @@ tOplkError hrestimer_init(void)
         return kErrorNoResource;
     }
 
-    // create event for signalling shutdown
+    // Create event for signalling shutdown
     hresTimerInstance_l.aHandle[HRTIMER_HDL_EVENT] = CreateEvent(NULL, FALSE, FALSE, NULL);
 
     // Create the thread to begin execution on its own
-    hresTimerInstance_l.threadHandle = CreateThread(NULL, 0, timerThread, &hresTimerInstance_l, 0, &threadId);
+    hresTimerInstance_l.threadHandle = CreateThread(NULL, 0, timerThread, NULL, 0, &threadId);
     if (hresTimerInstance_l.threadHandle == NULL)
          return kErrorNoResource;
 
@@ -233,17 +233,22 @@ tOplkError hrestimer_exit(void)
     LONG            winRet = 0;
     ULONG           current = ~0UL;
 
-    // signal shutdown to the thread
+    // Signal shutdown to the thread and wait for it to terminate
     SetEvent(hresTimerInstance_l.aHandle[HRTIMER_HDL_EVENT]);
     WaitForSingleObject(hresTimerInstance_l.threadHandle, INFINITE);
-    CloseHandle(hresTimerInstance_l.threadHandle);
 
+    // Close the thread and the signal event handle
+    CloseHandle(hresTimerInstance_l.threadHandle);
     CloseHandle(hresTimerInstance_l.aHandle[HRTIMER_HDL_EVENT]);
+
+    // Close the timer handles
     CloseHandle(hresTimerInstance_l.aHandle[HRTIMER_HDL_TIMER0]);
     CloseHandle(hresTimerInstance_l.aHandle[HRTIMER_HDL_TIMER1]);
 
+    // Clear instance structure
+    OPLK_MEMSET(&hresTimerInstance_l, 0, sizeof(hresTimerInstance_l));
 
-    // set timer resolution to old value
+    // Restore the standard timer resolution
     winRet = NtSetTimerResolution(0, FALSE, &current);
     DEBUG_LVL_TIMERH_TRACE("NtSetTimerResolution returnd %ld, current resolution = %lu\n", winRet, current);
 
@@ -291,25 +296,36 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
     HANDLE                      hTimer;
     LARGE_INTEGER               dueTime;
 
+    // check pointer to handle
     if (pTimerHdl_p == NULL)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() Invalid timer handle\n", __func__);
         return kErrorTimerInvalidHandle;
+    }
 
     if (*pTimerHdl_p == 0)
-    {   // no timer created yet - search free timer info structure
+    {   // no timer created yet -> search free timer info structure
         pTimerInfo = &hresTimerInstance_l.aTimerInfo[0];
         for (index = 0; index < TIMER_COUNT; index++, pTimerInfo++)
         {
             if (pTimerInfo->pfnCallback == NULL)
-                break;      // free structure found
+            {   // free structure found
+                break;
+            }
         }
+
         if (index >= TIMER_COUNT)
+        {   // no free structure found
+            DEBUG_LVL_ERROR_TRACE("%s() Invalid timer index: %d\n", __func__, index);
             return kErrorTimerNoTimerCreated;
+        }
     }
     else
     {
         index = (UINT)(*pTimerHdl_p >> TIMERHDL_SHIFT) - 1;
         if (index >= TIMER_COUNT)
         {   // invalid handle
+            DEBUG_LVL_ERROR_TRACE("%s() Invalid timer index: %d\n", __func__, index);
             return kErrorTimerInvalidHandle;
         }
         pTimerInfo = &hresTimerInstance_l.aTimerInfo[index];
@@ -341,15 +357,15 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
 
     *pTimerHdl_p = pTimerInfo->eventArg.timerHdl;
 
-    // configure timer
+    // Configure timer
     hTimer = hresTimerInstance_l.aHandle[index + HRTIMER_HDL_TIMER0];
-
     fRet = SetWaitableTimer(hTimer, &dueTime, 0L, NULL, NULL, 0);
     if (!fRet)
     {
         DEBUG_LVL_ERROR_TRACE("SetWaitableTimer failed (%d)\n", GetLastError());
         return kErrorTimerNoTimerCreated;
     }
+
     return ret;
 }
 
@@ -374,18 +390,20 @@ tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
     tHresTimerInfo*             pTimerInfo;
     HANDLE                      hTimer;
 
+    DEBUG_LVL_TIMERH_TRACE("%s() Deleting timer: %lx\n", __func__, *pTimerHdl_p);
+
     if (pTimerHdl_p == NULL)
         return kErrorTimerInvalidHandle;
 
     if (*pTimerHdl_p == 0)
-    {
-        return ret;      // no timer created yet
+    {   // no timer created yet
+        return ret;
     }
     else
     {
         index = (UINT)(*pTimerHdl_p >> TIMERHDL_SHIFT) - 1;
         if (index >= TIMER_COUNT)
-        {
+        {   // invalid handle
             return kErrorTimerInvalidHandle;
         }
         pTimerInfo = &hresTimerInstance_l.aTimerInfo[index];
@@ -396,14 +414,19 @@ tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
     }
 
     pTimerInfo->pfnCallback = NULL;
-
     *pTimerHdl_p = 0;
 
-    // cancel timer
+    // Cancel timer
     hTimer = hresTimerInstance_l.aHandle[index + HRTIMER_HDL_TIMER0];
     CancelWaitableTimer(hTimer);
     return ret;
 }
+
+//============================================================================//
+//            P R I V A T E   F U N C T I O N S                               //
+//============================================================================//
+/// \name Private Functions
+/// \{
 
 //------------------------------------------------------------------------------
 /**
@@ -419,19 +442,17 @@ static void callTimerCb(UINT index_p)
 {
     tHresTimerInfo* pTimerInfo;
 
-    if (index_p > TIMER_COUNT)
-        return;     // invalid handle
-
+    // Get the timer info according to the index
     pTimerInfo = &hresTimerInstance_l.aTimerInfo[index_p];
 
+    // Check if the timer is a periodic timer
     if (pTimerInfo->dueTime.QuadPart != 0)
-    {   // periodic timer
+    {
         HANDLE  hTimer;
         BOOL    fRet;
 
-        // configure timer
+        // Set up the timer again
         hTimer = hresTimerInstance_l.aHandle[index_p + HRTIMER_HDL_TIMER0];
-
         fRet = SetWaitableTimer(hTimer, &pTimerInfo->dueTime, 0L, NULL, NULL, 0);
         if (!fRet)
         {
@@ -440,6 +461,7 @@ static void callTimerCb(UINT index_p)
         }
     }
 
+    // If a callback function is given, call it
     if (pTimerInfo->pfnCallback != NULL)
     {
         pTimerInfo->pfnCallback(&pTimerInfo->eventArg);
@@ -453,50 +475,48 @@ static void callTimerCb(UINT index_p)
 This function implements the hrestimer worker thread. It is responsible to handle
 timer events.
 
-\param  pArgument_p    Thread argument
+\param  pArgument_p    Thread argument (unused!)
 
 \return The function returns a thread return code
 */
 //------------------------------------------------------------------------------
 static DWORD WINAPI timerThread(LPVOID pArgument_p)
 {
-    tHresTimerInstance*  pInstance = (tHresTimerInstance*)pArgument_p;
     UINT32               waitRet;
 
-    // increase priority
+    UNUSED_PARAMETER(pArgument_p);
+
+    // Increase thread priority
     SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
 
-    for (;;)
+    // Loop forever until thread is canceled
+    while (TRUE)
     {
         // Wait for events
-        waitRet = WaitForMultipleObjects(HRTIMER_HDL_COUNT, pInstance->aHandle, FALSE, INFINITE);
+        waitRet = WaitForMultipleObjects(HRTIMER_HDL_COUNT, hresTimerInstance_l.aHandle, FALSE, INFINITE);
         switch (waitRet)
         {
             case WAIT_OBJECT_0 + HRTIMER_HDL_EVENT:
-            {   // shutdown was signalled
+                // Shutdown was signalled
                 return 0;
-            }
 
             case WAIT_OBJECT_0 + HRTIMER_HDL_TIMER0:
-            {   // timer 0 triggered
+                // Timer 0 triggered
                 callTimerCb(0);
                 break;
-            }
 
             case WAIT_OBJECT_0 + HRTIMER_HDL_TIMER1:
-            {   // timer 1 triggered
+                // Timer 1 triggered
                 callTimerCb(1);
                 break;
-            }
 
             default:
             case WAIT_FAILED:
-            {
                 DEBUG_LVL_ERROR_TRACE("WaitForMultipleObjects failed (%d)\n", GetLastError());
                 break;
-            }
         }
     }
+
     return 0;
 }
 
