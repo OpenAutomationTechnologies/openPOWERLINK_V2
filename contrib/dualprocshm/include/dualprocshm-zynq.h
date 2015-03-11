@@ -62,7 +62,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define TARGET_IRQ_IC_DIST_BASE    -1
 
 
-#elif defined(__arm__)
+#elif defined(__xilinx_arm__)
 #include "dualprocshm-arm.h"
 
 // TODO : gks check if this can be retrieved from hardware configuration

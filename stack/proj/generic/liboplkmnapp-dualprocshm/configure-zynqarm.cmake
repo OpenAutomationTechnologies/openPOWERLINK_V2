@@ -74,7 +74,7 @@ INCLUDE_DIRECTORIES(
 ADD_DEFINITIONS("${XIL_HOST_CFLAGS} -fmessage-length=0 -mcpu=${CFG_HOST_CPU_VERSION} -ffunction-sections -fdata-sections -fno-inline")
 
 IF(DEFINED CFG_DEMO_BOARD_ZYNQ AND CFG_DEMO_BOARD_ZYNQ)
-ADD_DEFINITIONS("-D__ZYNQ__ ")
+ADD_DEFINITIONS("-D__ZYNQ__ -D__xilinx_arm__")
 ENDIF()
 ################################################################################
 

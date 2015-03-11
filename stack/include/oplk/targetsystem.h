@@ -156,11 +156,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define TARGET_SYSTEM   _VXWORKS_
 #define DEV_SYSTEM      _DEV_VXWORKS_
 
-#elif defined (__arm__)
-// FIXME: Xilinx Zyqn ARM identification can only be done with __arm__.
-//        There is no other way to identify Xilinx Zynq ARM.
-//        To identify another ARM platform, a specific platform dependent
-//        identifier would have to be used.
+#elif defined (__xilinx_arm__)
+
 #define TARGET_SYSTEM   _NO_OS_
 #define DEV_SYSTEM      _DEV_ARM_XILINX_EABI_
 
@@ -214,10 +211,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #if (DEV_SYSTEM == _DEV_NIOS2_)
 #include <oplk/targetdefs/nios2.h>
+
 #elif (DEV_SYSTEM == _DEV_MICROBLAZE_BIG_ || DEV_SYSTEM == _DEV_MICROBLAZE_LITTLE_)
 #include <oplk/targetdefs/microblaze.h>
+
 #elif (DEV_SYSTEM == _DEV_ARM_XILINX_EABI_)
 #include <oplk/targetdefs/zynqarm.h>
+
+#else
+#error "ERROR Target no OS System is not supported"
+
 #endif
 
 #elif (TARGET_SYSTEM == _WIN32_)
@@ -227,6 +230,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #elif (TARGET_SYSTEM == _WINCE_)
 
 #include <oplk/targetdefs/wince.h>
+
+#else
+#error "ERROR Target platform is not supported"
 
 #endif
 
