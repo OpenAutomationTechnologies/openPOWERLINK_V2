@@ -193,7 +193,7 @@ tDualprocReturn dualprocshm_registerHandler(tDualprocDrvInstance pInstance_p,
 {
     UINT16    irqEnableVal;
 
-    if (irqId_p > TARGET_MAX_INTERRUPTS || pInstance_p == NULL)
+    if (irqId_p >= TARGET_MAX_INTERRUPTS || pInstance_p == NULL)
         return kDualprocInvalidParameter;
 
     if (intrInst_l.intrReg == NULL)
@@ -237,7 +237,7 @@ tDualprocReturn dualprocshm_enableIrq(tDualprocDrvInstance pInstance_p,
 {
     UINT16    irqEnableVal;
 
-    if (irqId_p > TARGET_MAX_INTERRUPTS || pInstance_p == NULL)
+    if (irqId_p >= TARGET_MAX_INTERRUPTS || pInstance_p == NULL)
         return kDualprocInvalidParameter;
 
     if (intrInst_l.intrReg == NULL)
