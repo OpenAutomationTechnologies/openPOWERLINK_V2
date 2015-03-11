@@ -43,8 +43,9 @@ SET(CFG_DEMO_BOARD_ZYNQ "TRUE")
 # Bus system used in the demo
 SET(CFG_DEMO_BUS_SYSTEM "axi")
 
-# Enable CDC file on SDCARD
-SET(CFG_CDC_ONSDCARD "TRUE")
+# Enable FAT FS support library build
+# Useful when reading CDC file from SDCARD
+SET(CFG_FAT_SUPPORT TRUE)
 
 ################################################################################
 # P R O C E S S O R   F E A T U R E S   ( P C P )

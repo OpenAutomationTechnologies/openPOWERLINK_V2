@@ -128,7 +128,7 @@ FOREACH(BOARD_DIR IN ITEMS ${BOARD_DIRS})
                         ENDIF()
 
                         # Create targets for building SDCARD FAT16 library
-                        IF( NOT ${CFG_CDC_ONSDCARD} STREQUAL "" AND ${PROC_INST_NAME} STREQUAL HOST)
+                        IF(CFG_FAT_SUPPORT AND ${PROC_INST_NAME} STREQUAL HOST)
                             IF(DEFINED CFG_HOST_NAME  OR (NOT ${CFG_HOST_NAME} STREQUAL ""))
                                 SET(SEL_CPU_NAME ${${CFG_PREFIX}_NAME})
                                 ADD_SUBDIRECTORY(${SDFAT16_BASE_DIR} ${SDFAT16_BUILD_DIR}/${BOARD_NAME}/${EXAMPLE_NAME}/${CFG_HOST_NAME})
