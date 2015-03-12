@@ -164,6 +164,7 @@ ${KERNEL_SOURCE_DIR}/event/eventk.c \
 ${KERNEL_SOURCE_DIR}/nmt/nmtk.c \
 ${KERNEL_SOURCE_DIR}/pdo/pdok.c \
 ${KERNEL_SOURCE_DIR}/pdo/pdokcal.c \
+${KERNEL_SOURCE_DIR}/pdo/pdoklut.c \
 ${KERNEL_SOURCE_DIR}/pdo/pdokcal-triplebufshm.c \
 ${KERNEL_SOURCE_DIR}/errhnd/errhndk.c \
 ${KERNEL_SOURCE_DIR}/ctrl/ctrlk.c \

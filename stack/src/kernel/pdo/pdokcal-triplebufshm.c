@@ -268,8 +268,8 @@ tOplkError pdokcal_readTxPdo(UINT channelId_p, BYTE* pPayload_p, UINT16 pdoSize_
         OPLK_DCACHE_FLUSH(&(pPdoMem_l->txChannelInfo[channelId_p].newData), sizeof(UINT8));
     }
 
-    /*TRACE("%s() pPdo_p:%p pPayload:%p size:%d value:%d\n", __func__,
-            pPdo_p, pPayload_p, pdoSize_p, *pPdo_p);*/
+    //TRACE("%s() pPdo_p:%p pPayload:%p size:%d value:%d\n", __func__,
+    //        pPdo_p, pPayload_p, pdoSize_p, *pPdo_p);
     //TRACE("%s() chan:%d ri:%d\n", __func__, channelId_p, pPdoMem_l->txChannelInfo[channelId_p].readBuf);
     pPdo = pTripleBuf_l[pPdoMem_l->txChannelInfo[channelId_p].readBuf] +
            pPdoMem_l->txChannelInfo[channelId_p].channelOffset;
@@ -317,7 +317,7 @@ static void setupPdoMemInfo(tPdoChannelSetup* pPdoChannels_p, tPdoMemRegion* pPd
         pPdoMemRegion_p->rxChannelInfo[channelId].writeBuf = 1;
         pPdoMemRegion_p->rxChannelInfo[channelId].cleanBuf = 2;
         pPdoMemRegion_p->rxChannelInfo[channelId].newData = 0;
-        offset += pPdoChannel->pdoSize;
+        offset += pPdoChannel->nextChannelOffset - pPdoChannel->offset;
     }
 
     for (channelId = 0, pPdoChannel = pPdoChannels_p->pTxPdoChannel;
@@ -330,7 +330,7 @@ static void setupPdoMemInfo(tPdoChannelSetup* pPdoChannels_p, tPdoMemRegion* pPd
         pPdoMemRegion_p->txChannelInfo[channelId].writeBuf = 1;
         pPdoMemRegion_p->txChannelInfo[channelId].cleanBuf = 2;
         pPdoMemRegion_p->txChannelInfo[channelId].newData = 0;
-        offset += pPdoChannel->pdoSize;
+        offset += pPdoChannel->nextChannelOffset - pPdoChannel->offset;
     }
     pPdoMemRegion_p->pdoMemSize = offset;
 

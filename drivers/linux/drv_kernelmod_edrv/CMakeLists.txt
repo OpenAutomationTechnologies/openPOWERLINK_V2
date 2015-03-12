@@ -207,6 +207,7 @@ SET(MODULE_SOURCE_FILES
     ${KERNEL_SOURCE_DIR}/nmt/nmtk.c
     ${KERNEL_SOURCE_DIR}/pdo/pdok.c
     ${KERNEL_SOURCE_DIR}/pdo/pdokcal.c
+    ${KERNEL_SOURCE_DIR}/pdo/pdoklut.c
     ${KERNEL_SOURCE_DIR}/pdo/pdokcal-triplebufshm.c
     ${KERNEL_SOURCE_DIR}/pdo/pdokcalmem-linuxkernel.c
     ${KERNEL_SOURCE_DIR}/pdo/pdokcalsync-linuxkernel.c

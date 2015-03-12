@@ -241,6 +241,7 @@ SET(KERNEL_SOURCES
     ${KERNEL_SOURCE_DIR}/pdo/pdok.c
     ${KERNEL_SOURCE_DIR}/pdo/pdokcal.c
     ${KERNEL_SOURCE_DIR}/pdo/pdokcal-triplebufshm.c
+    ${KERNEL_SOURCE_DIR}/pdo/pdoklut.c
     ${KERNEL_SOURCE_DIR}/errhnd/errhndk.c
     ${KERNEL_SOURCE_DIR}/ctrl/ctrlk.c
     )
@@ -613,6 +614,7 @@ SET(KERNEL_HEADERS
     ${STACK_INCLUDE_DIR}/kernel/nmtk.h
     ${STACK_INCLUDE_DIR}/kernel/pdok.h
     ${STACK_INCLUDE_DIR}/kernel/pdokcal.h
+    ${STACK_INCLUDE_DIR}/kernel/pdoklut.h
     ${STACK_INCLUDE_DIR}/kernel/veth.h
     ${STACK_INCLUDE_DIR}/kernel/edrv.h
     ${STACK_INCLUDE_DIR}/kernel/edrvcyclic.h

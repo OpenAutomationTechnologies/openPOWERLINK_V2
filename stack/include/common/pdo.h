@@ -85,9 +85,10 @@ typedef struct
     */
     UINT                nodeId;
     void*               pVar;                   ///< Pointer to frame data
-    WORD                pdoSize;                ///< Size of this PDO
-    BYTE                mappingVersion;         ///< The mapping version of this PDO
-    unsigned int        mappObjectCount;        ///< The actual number of used mapped objects
+    UINT16              offset;                 ///< Offset of PDO channel (first mapped object) in bytes
+    UINT16              nextChannelOffset;      ///< Offset of the following PDO channel
+    UINT8               mappingVersion;         ///< The mapping version of this PDO
+    UINT32              mappObjectCount;        ///< The actual number of used mapped objects
 } tPdoChannel;
 
 /**
