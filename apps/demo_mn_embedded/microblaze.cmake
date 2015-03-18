@@ -94,12 +94,12 @@ SET(DEMO_ARCH_SOURCES
     ${DEMO_ARCHSOURCES}
     ${COMMON_SOURCE_DIR}/gpio/gpio-microblaze.c
     ${COMMON_SOURCE_DIR}/lcd/lcdl-null.c
+    ${COMMON_SOURCE_DIR}/system/system-microblaze.c
    )
 
 INCLUDE_DIRECTORIES(
                     ${XIL_BSP_DIR}/include
                     ${OPLK_ROOT_DIR}/stack/src/arch/xilinx_microblaze
-                    ${COMMON_SOURCE_DIR}/gpio
                    )
 
 ################################################################################

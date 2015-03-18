@@ -47,8 +47,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplk/debugstr.h>
 
 #include "event.h"
-#include <gpio.h>
-#include <lcd.h>
+#include <gpio/gpio.h>
+#include <lcd/lcd.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
