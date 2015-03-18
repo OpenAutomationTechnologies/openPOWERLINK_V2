@@ -35,6 +35,7 @@ APP_SOURCES="\
 ${OPLK_BASE_DIR}/apps/common/src/lcd/lcd.c \
 ${OPLK_BASE_DIR}/apps/common/src/lcd/lcdl-16207.c \
 ${OPLK_BASE_DIR}/apps/common/src/gpio/gpio-nios2.c \
+${OPLK_BASE_DIR}/apps/common/src/system/system-nios2.c \
 ${OPLK_BASE_DIR}/apps/common/src/arp/arp.c \
 ${OPLK_BASE_DIR}/apps/demo_mn_embedded/src/app.c \
 ${OPLK_BASE_DIR}/apps/demo_mn_embedded/src/event.c \
@@ -42,9 +43,7 @@ ${OPLK_BASE_DIR}/apps/demo_mn_embedded/src/main.c \
 "
 
 APP_INCLUDES="\
-${OPLK_BASE_DIR}/apps/common/src/gpio \
-${OPLK_BASE_DIR}/apps/common/src/lcd \
-${OPLK_BASE_DIR}/apps/common/src/arp \
+${OPLK_BASE_DIR}/apps/common/src \
 ${OPLK_BASE_DIR}/stack/include \
 "
 
