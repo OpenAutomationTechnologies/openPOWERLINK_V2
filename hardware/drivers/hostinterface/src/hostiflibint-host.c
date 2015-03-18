@@ -62,6 +62,9 @@ modules.
 // const defines
 //------------------------------------------------------------------------------
 
+#ifndef HOSTIF_BRIDGE_INIT_TIMEOUT_MS
+#define HOSTIF_BRIDGE_INIT_TIMEOUT_MS 10000     // 10 seconds
+#endif
 //------------------------------------------------------------------------------
 // module global vars
 //------------------------------------------------------------------------------
@@ -119,12 +122,24 @@ tHostifReturn hostif_createInt(tHostif* pHostif_p)
     tHostifReturn       ret = kHostifSuccessful;
     UINT32              pcpAddr;
     tHostifInitParam*   pInitParam;
-    UINT                i;
+    UINT                loopCnt;
 
     // Busy wait for enabled bridge
-    while (getBridgeEnabled(pHostif_p) == FALSE)
+    for (loopCnt = HOSTIF_BRIDGE_INIT_TIMEOUT_MS; loopCnt > 0; loopCnt--)
     {
-        //jz Use timeout?
+        if (getBridgeEnabled(pHostif_p) == TRUE)
+        {
+            break;
+        }
+
+        HOSTIF_USLEEP(1000);
+    }
+
+    if (loopCnt == 0)
+    {
+        // Timeout waiting for bridge enable
+        ret = kHostifBridgeDisabled;
+        goto Exit;
     }
 
     // Get init param address in pcp memory space and write it to dyn buf 0
@@ -142,10 +157,10 @@ tHostifReturn hostif_createInt(tHostif* pHostif_p)
     }
 
     // And now, get the stuff
-    for (i = 0; i < pInitParam->initMemLength; i++)
+    for (loopCnt = 0; loopCnt < pInitParam->initMemLength; loopCnt++)
     {
-        pHostif_p->aBufMap[i].pBase = pHostif_p->pBase + pInitParam->aInitMem[i].offset;
-        pHostif_p->aBufMap[i].span = pInitParam->aInitMem[i].span;
+        pHostif_p->aBufMap[loopCnt].pBase = pHostif_p->pBase + pInitParam->aInitMem[loopCnt].offset;
+        pHostif_p->aBufMap[loopCnt].span = pInitParam->aInitMem[loopCnt].span;
     }
 
     // register isr in system
