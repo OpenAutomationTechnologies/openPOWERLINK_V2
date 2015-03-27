@@ -195,7 +195,8 @@ static tOplkError initPowerlink(UINT32 cycleLen_p, char* pszCdcFileName_p,
     printf("Initializing openPOWERLINK stack...\n");
 
 #if defined(CONFIG_USE_PCAP)
-    selectPcapDevice(devName);
+    if (selectPcapDevice(devName) != 0)
+		return -1;
 #endif
 
     memset(&initParam, 0, sizeof(initParam));
