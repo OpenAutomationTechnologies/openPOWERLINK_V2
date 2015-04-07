@@ -99,7 +99,7 @@ typedef struct
 \brief Boot event
 
 The following structure specifies a boot event. It is used to inform the application
-about events concerning the entire boot-up process of the MN.
+about events concerning the entire boot-up process of the node.
 */
 typedef struct
 {
