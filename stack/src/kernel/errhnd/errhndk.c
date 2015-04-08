@@ -614,7 +614,7 @@ static tOplkError handleInvalidFormat(tEvent* pEvent_p)
     BENCHMARK_MOD_02_TOGGLE(7);
 
 #ifdef CONFIG_INCLUDE_NMT_MN
-    if (pErrorHandlerEvent->nmtState >= kNmtMsNotActive)
+    if (NMT_IF_ACTIVE_MN(pErrorHandlerEvent->nmtState))
     {   // MN is active
         if (pErrorHandlerEvent->nodeId != 0)
         {

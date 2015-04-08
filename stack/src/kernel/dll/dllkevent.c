@@ -11,7 +11,7 @@ This file contains the event handling functions of the kernel DLL module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2015, SYSTEC electronic GmbH
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -100,7 +100,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 static tOplkError controlPdokcalSync(BOOL fEnable_p);
 
-static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState OldNmtState_p);
+static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState OldNmtState_p, tNmtEvent nmtEvent_p);
 static tOplkError processNmtEvent(tEvent* pEvent_p);
 static tOplkError processCycleFinish(tNmtState nmtState_p) SECTION_DLLK_PROCESS_CYCFIN;
 static tOplkError processSync(tNmtState nmtState_p) SECTION_DLLK_PROCESS_SYNC;
@@ -147,7 +147,8 @@ tOplkError dllk_process(tEvent* pEvent_p)
         case kEventTypeNmtStateChange:
             pNmtStateChange = (tEventNmtStateChange*)pEvent_p->pEventArg;
             ret = processNmtStateChange(pNmtStateChange->newNmtState,
-                                        pNmtStateChange->oldNmtState);
+                                        pNmtStateChange->oldNmtState,
+                                        pNmtStateChange->nmtEvent);
             break;
 
         case kEventTypeNmtEvent:
@@ -241,13 +242,17 @@ The function processes a NMT state change event.
 
 \param  newNmtState_p           New NMT state of the local node.
 \param  oldNmtState_p           Previous NMT state of the local node.
+\param  nmtEvent_p              NMT event which caused the state change.
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNmtState_p)
+static tOplkError processNmtStateChange(tNmtState newNmtState_p,
+                    tNmtState oldNmtState_p, tNmtEvent nmtEvent_p)
 {
     tOplkError      ret = kErrorOk;
+
+    UNUSED_PARAMETER(nmtEvent_p);
 
     switch (newNmtState_p)
     {
@@ -279,6 +284,7 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
         // node listens for POWERLINK frames and check timeout
         case kNmtMsNotActive:
         case kNmtCsNotActive:
+        case kNmtRmsNotActive:
             if (oldNmtState_p <= kNmtGsResetConfiguration)
             {
                 // setup DLL and create frames
@@ -292,6 +298,20 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
             if ((ret = hrestimer_deleteTimer(&dllkInstance_g.timerHdlCycle)) != kErrorOk)
                 return ret;
 #endif
+
+#if defined(CONFIG_INCLUDE_NMT_RMN)
+            if (dllkInstance_g.fRedundancy)
+            {
+                ret = edrvcyclic_stopCycle(FALSE);
+                if (ret != kErrorOk)
+                    return ret;
+
+                hrestimer_modifyTimer(&dllkInstance_g.timerHdlSwitchOver,
+                                      dllkInstance_g.dllConfigParam.reducedSwitchOverMN_us * 1000ULL,
+                                      dllk_cbTimerSwitchOver, 0L, FALSE);
+            }
+#endif
+
             // deactivate sync generation
             if ((ret = controlPdokcalSync(FALSE)) != kErrorOk)
                 return ret;
@@ -398,9 +418,34 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
             if ((ret = controlPdokcalSync(FALSE)) != kErrorOk)
                 return ret;
 
-            ret = edrvcyclic_stopCycle();
+            ret = edrvcyclic_stopCycle(FALSE);
             if (ret != kErrorOk)
                 return ret;
+
+#if defined(CONFIG_INCLUDE_NMT_RMN)
+            if (dllkInstance_g.fRedundancy)
+            {
+                if ((ret = hrestimer_deleteTimer(&dllkInstance_g.timerHdlSwitchOver)) != kErrorOk)
+                    return ret;
+
+                if (oldNmtState_p == kNmtRmsNotActive)
+                {   // send AMNI
+                    ret = edrv_sendTxBuffer(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_AMNI]);
+                    if (ret != kErrorOk)
+                        return ret;
+                }
+
+                // initialize cycle counter
+                if (dllkInstance_g.dllConfigParam.fAsyncOnly == FALSE)
+                {
+                    dllkInstance_g.cycleCount = 0;
+                }
+                else
+                {   // it is an async-only CN -> fool changeState() to think that PRes was not expected
+                    dllkInstance_g.cycleCount = 1;
+                }
+            }
+#endif
 
             // update IdentRes and StatusRes
             ret = dllkframe_updateFrameIdentRes(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_IDENTRES +
@@ -424,6 +469,22 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
         case kNmtMsOperational:
             // signal update of IdentRes and StatusRes on SoA
             dllkInstance_g.updateTxFrame = DLLK_UPDATE_BOTH;
+
+#if defined(CONFIG_INCLUDE_NMT_RMN)
+            if (dllkInstance_g.fRedundancy && (oldNmtState_p == kNmtCsOperational))
+            {
+                dllkInstance_g.dllState = kDllMsWaitSocTrig;
+                if ((ret = hrestimer_deleteTimer(&dllkInstance_g.timerHdlSwitchOver)) != kErrorOk)
+                    return ret;
+
+                dllkInstance_g.relativeTime += dllkInstance_g.dllConfigParam.cycleLen;
+                // initialize SoAReq number for ProcessSync (cycle preparation)
+                dllkInstance_g.syncLastSoaReq = dllkInstance_g.curLastSoaReq;
+                // trigger synchronous task for cycle preparation
+                dllkInstance_g.fSyncProcessed = TRUE;
+                ret = dllk_postEvent(kEventTypeSync);
+            }
+#endif
             break;
 
 #endif
@@ -432,13 +493,33 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNm
             /// activate sync generation
             if ((ret = controlPdokcalSync(TRUE)) != kErrorOk)
                 return ret;
-
-            // NOTE: This fall through is intended since IdentRes and StatusRes
-            //       on SoA require update in ReadyToOperate state as well!
+            // signal update of IdentRes and StatusRes on SoA
+            dllkInstance_g.updateTxFrame = DLLK_UPDATE_BOTH;
+            break;
 
         case kNmtCsOperational:
             // signal update of IdentRes and StatusRes on SoA
             dllkInstance_g.updateTxFrame = DLLK_UPDATE_BOTH;
+#if defined(CONFIG_INCLUDE_NMT_RMN)
+            if (dllkInstance_g.fRedundancy && (oldNmtState_p == kNmtMsOperational))
+            {
+                dllkInstance_g.dllState = kDllCsWaitSoc;
+                ret = edrvcyclic_stopCycle(TRUE);
+                if (ret != kErrorOk)
+                    return ret;
+
+                hrestimer_modifyTimer(&dllkInstance_g.timerHdlSwitchOver,
+                                      dllkInstance_g.dllConfigParam.switchOverMN_us * 1000ULL,
+                                      dllk_cbTimerSwitchOver, 0L, FALSE);
+
+                if ((nmtEvent_p == kNmtEventGoToStandby)
+                    || (nmtEvent_p == kNmtEventGoToStandbyDelayed))
+                {   // save event, so cbCyclicError can start switch-over timeout
+                    // appropriately
+                    dllkInstance_g.nmtEventGoToStandby = nmtEvent_p;
+                }
+            }
+#endif
             break;
 
         // node stopped by MN
@@ -737,7 +818,7 @@ static tOplkError processCycleFinish(tNmtState nmtState_p)
     if (ret != kErrorOk)
         goto Exit;
 
-    ret = errhndk_decrementCounters((nmtState_p >= kNmtMsNotActive));
+    ret = errhndk_decrementCounters(NMT_IF_ACTIVE_MN(nmtState_p));
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
     if (dllkInstance_g.dllState > kDllMsNonCyclic)
@@ -781,7 +862,7 @@ static tOplkError processSync(tNmtState nmtState_p)
 
     // do cycle preparation
 #if defined(CONFIG_INCLUDE_NMT_MN)
-    if (nmtState_p >= kNmtMsNotActive)
+    if (NMT_IF_ACTIVE_MN(nmtState_p))
     {   // local node is MN
         ret = processSyncMn(nmtState_p, fReadyFlag);
     }

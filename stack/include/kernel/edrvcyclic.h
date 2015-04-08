@@ -9,7 +9,7 @@ This file contains definitions for the cyclic Ethernet driver module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2015, SYSTEC electronic GmbH
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -107,7 +107,7 @@ tOplkError edrvcyclic_init(void);
 tOplkError edrvcyclic_exit(void);
 tOplkError edrvcyclic_setCycleTime(UINT32 cycleTimeUs_p);
 tOplkError edrvcyclic_startCycle(void);
-tOplkError edrvcyclic_stopCycle(void);
+tOplkError edrvcyclic_stopCycle(BOOL fKeepCycle_p);
 tOplkError edrvcyclic_setMaxTxBufferListSize(UINT maxListSize_p);
 tOplkError edrvcyclic_setNextTxBufferList(tEdrvTxBuffer** ppTxBuffer_p, UINT txBufferCount_p) SECTION_EDRVCYC_SET_NEXT_TX;
 tOplkError edrvcyclic_regSyncHandler(tEdrvCyclicCbSync pfnEdrvCyclicCbSync_p);

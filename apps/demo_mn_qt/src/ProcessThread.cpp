@@ -242,6 +242,10 @@ void ProcessThread::sigNmtState(tNmtState State_p)
             strState = "MN Basic Ethernet";
             break;
 
+        case kNmtRmsNotActive:
+            strState = "RMN Not Active";
+            break;
+
         default:
             strState = "??? (0x";
             strState += QString::number(State_p, 16);
@@ -418,6 +422,24 @@ tOplkError ProcessThread::processStateChangeEvent(tOplkApiEventType EventType_p,
 #if !defined(CONFIG_INCLUDE_CFM)
             ret = setDefaultNodeAssignment();
 #endif
+            DWORD       nodeAssignment;
+
+            // add RMNs to node list (This should be done by openCONFIGURATOR in the future)
+            nodeAssignment = (NMT_NODEASSIGN_NODE_IS_CN | NMT_NODEASSIGN_NODE_EXISTS);    // 0x00000003L
+            ret = oplk_writeLocalObject(0x1F81, 0xF1, &nodeAssignment, sizeof(nodeAssignment));
+            ret = oplk_writeLocalObject(0x1F81, 0xF2, &nodeAssignment, sizeof(nodeAssignment));
+            ret = oplk_writeLocalObject(0x1F81, 0xF3, &nodeAssignment, sizeof(nodeAssignment));
+            ret = oplk_writeLocalObject(0x1F81, 0xF4, &nodeAssignment, sizeof(nodeAssignment));
+
+            DWORD       presTimeout;
+
+            // configure PResTimeout for RMNs (This should be done by openCONFIGURATOR in the future)
+            presTimeout = 1000000;
+            ret = oplk_writeLocalObject(0x1F92, 0xF1, &presTimeout, sizeof(presTimeout));
+            ret = oplk_writeLocalObject(0x1F92, 0xF2, &presTimeout, sizeof(presTimeout));
+            ret = oplk_writeLocalObject(0x1F92, 0xF3, &presTimeout, sizeof(presTimeout));
+            ret = oplk_writeLocalObject(0x1F92, 0xF4, &presTimeout, sizeof(presTimeout));
+
             pProcessThread_g->sigOplkStatus(1);
             break;
 
@@ -443,6 +465,7 @@ tOplkError ProcessThread::processStateChangeEvent(tOplkApiEventType EventType_p,
 
         case kNmtCsNotActive:
         case kNmtMsNotActive:
+        case kNmtRmsNotActive:
         case kNmtGsInitialising:
         case kNmtGsResetApplication:
         case kNmtCsPreOperational1:
@@ -712,6 +735,7 @@ tOplkError ProcessThread::processNodeEvent(tOplkApiEventType EventType_p,
                     break;
 
                 case kNmtCsOperational:
+                    pProcessThread_g->sigNodeAppeared(pEventArg_p->nodeEvent.nodeId);
                     pProcessThread_g->sigNodeStatus(pEventArg_p->nodeEvent.nodeId, 2);
                     break;
 
@@ -729,6 +753,11 @@ tOplkError ProcessThread::processNodeEvent(tOplkApiEventType EventType_p,
                                 .arg(pEventArg_p->nodeEvent.nodeId, 0, 10)
                                 .arg(debugstr_getEmergErrCodeStr(pEventArg_p->nodeEvent.errorCode))
                                 .arg(pEventArg_p->nodeEvent.errorCode, 4, 16, QLatin1Char('0')));
+            break;
+
+        case kNmtNodeEventAmniRecvd:
+            sigPrintLog(QString("AppCbEvent (Node=%1): received ActiveManagingNodeIndication")
+                                .arg(pEventArg_p->nodeEvent.nodeId, 0, 10));
             break;
 
         default:

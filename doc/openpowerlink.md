@@ -20,6 +20,9 @@ openPOWERLINK {#page_openpowerlink}
 - Supports target platforms with and without operating system
 - Event-driven Communication Abstraction Layer
 - Provides Generic API for user-application
+- Supports the POWERLINK High Availability extension
+  [Managing Node Redundancy](\ref page_mnredundancy)
+  according to EPSG 302-A V 1.1.0 Section 3
 
 # openPOWERLINK Release V 2.X {#sect_opl_releases2}
 

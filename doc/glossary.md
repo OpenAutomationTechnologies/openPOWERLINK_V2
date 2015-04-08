@@ -4,6 +4,8 @@ Glossary                                                        {#page_glossary}
 Abbreviation            | Description
 ----------------------  | -------------------------------------------------------
 AMI                     | Abstract memory interface
+AMN                     | Active Managing Node, i.e. device which is currently running as master in the POWERLINK network
+AMNI                    | POWERLINK frame type: Active Managing Node Indication
 ASnd                    | POWERLINK frame type: Asynchronous Send, which may contain SDO or NMT messages
 CAL                     | Communication Abstraction Layer openPOWERLINK stack module
 CDC                     | Concise Device Configuration File
@@ -23,8 +25,10 @@ OD                      | Object dictionary
 PDO                     | Process Data Object
 PReq                    | POWERLINK frame type: Poll Request
 PRes                    | POWERLINK frame type: Poll Response
+RMN                     | Redundant Managing Node, i.e. device which can be AMN or SMN in the POWERLINK network
 RPDO                    | Receive PDO
 SDO                     | Service Data Object
+SMN                     | Standby Managing Node, i.e. device which is currently running as slave in the POWERLINK network
 SoA                     | POWERLINK frame type: Start of Asynchronous
 SoC                     | POWERLINK frame type: Start of Cyclic
 TCP                     | Transmission Control Protocol

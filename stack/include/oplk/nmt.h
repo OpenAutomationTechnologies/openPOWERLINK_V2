@@ -8,7 +8,7 @@ This file is the global include file for all NMT modules
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2015, SYSTEC electronic GmbH
 Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
@@ -58,6 +58,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define NMT_TYPE_UNDEFINED          0x0000  // type of NMT state is still undefined
 #define NMT_TYPE_CS                 0x0100  // CS type of NMT state
 #define NMT_TYPE_MS                 0x0200  // MS type of NMT state
+#define NMT_TYPE_RMS                0x0300  // RMS type of NMT state
 #define NMT_TYPE_MASK               0x0300  // mask to select type of NMT state (i.e. CS or MS)
 
 #define NMT_STATE_GS_INITIALISING           0x0019
@@ -72,6 +73,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define NMT_STATE_XX_OPERATIONAL            0x00FD
 #define NMT_STATE_XX_STOPPED                0x004D
 #define NMT_STATE_XX_BASIC_ETHERNET         0x001E
+
+#define NMT_IF_CN_OR_RMN(NmtState)  ((NmtState) & NMT_TYPE_CS)
+#define NMT_IF_CN(NmtState)         (((NmtState) & NMT_TYPE_MASK) == NMT_TYPE_CS)
+#define NMT_IF_ACTIVE_CN(NmtState)  (((NmtState) & (NMT_TYPE_MASK | NMT_SUPERSTATE_MASK)) \
+                                    == (NMT_TYPE_CS | NMT_CS_PLKMODE))
+#define NMT_IF_MN(NmtState)         (((NmtState) & NMT_TYPE_MASK) == NMT_TYPE_MS)
+#define NMT_IF_MN_OR_RMN(NmtState)  ((NmtState) & NMT_TYPE_MS)
+#define NMT_IF_ACTIVE_MN(NmtState)  (((NmtState) & (NMT_TYPE_MASK | NMT_SUPERSTATE_MASK)) \
+                                    == (NMT_TYPE_MS | NMT_MS_PLKMODE))
+#define NMT_IF_ACTIVE(NmtState)     (((NmtState) & NMT_SUPERSTATE_MASK) \
+                                    == NMT_CS_PLKMODE)
 
 //------------------------------------------------------------------------------
 // typedef
@@ -114,6 +126,7 @@ typedef enum
     kNmtMsReadyToOperate            = 0x026D,   ///< NMT_MS_READY_TO_OPERATE
     kNmtMsOperational               = 0x02FD,   ///< NMT_MS_OPERATIONAL
     kNmtMsBasicEthernet             = 0x021E,   ///< NMT_MS_BASIC_ETHERNET
+    kNmtRmsNotActive                = 0x031C,   ///< NMT_RMS_NOT_ACTIVE
     kNmtStateInvalid                = 0xFFFF    ///< Dummy state to detect invalid states (garbage)
 } tNmtState;
 
@@ -141,6 +154,8 @@ typedef enum
     kNmtEventDllCeAInv              =   0x0B,   ///< An AInv event has occured on the CN
     kNmtEventDllCeAsnd              =   0x0C,   ///< An ASnd event has occured on the CN
     kNmtEventDllCeFrameTimeout      =   0x0D,   ///< A frame timeout has occured on the CN
+    kNmtEventDllReAmni              =   0x0E,   ///< NMT_RMT5, NMT_RMT7
+    kNmtEventDllReSwitchOverTimeout =   0x0F,   ///< NMT_RMT4, NMT_RMT6
 
     // Events triggered by NMT-Commands
     kNmtEventSwReset                =   0x10,   ///< A SwReset event has occured (NMT_GT1, NMT_GT2, NMT_GT8)
@@ -151,6 +166,10 @@ typedef enum
     kNmtEventEnableReadyToOperate   =   0x15,   ///< An EnableReadyToOperate event has occured
     kNmtEventStartNode              =   0x16,   ///< A StartNode event has occured (NMT_CT7)
     kNmtEventStopNode               =   0x17,   ///< A StopNode event has occured
+
+    // Events triggered by NMT-Requests or application
+    kNmtEventGoToStandby            =   0x18,   ///< GoToStandby request received (NMT_RMT5, NMT_RMT7)
+    kNmtEventGoToStandbyDelayed     =   0x19,   ///< GoToStandby request (with DF flag) received (NMT_RMT5, NMT_RMT7)
 
     // Events triggered by higher layer
     kNmtEventEnterResetApp          =   0x20,   ///< An EnterResetApplication event has occured
@@ -168,6 +187,7 @@ typedef enum
     kNmtEventEnterMsOperational     =   0x2C,   ///< enter Operational on MN
     kNmtEventSwitchOff              =   0x2D,   ///< enter state Off
     kNmtEventCriticalError          =   0x2E,   ///< enter state Off because of critical error
+    kNmtEventEnterRmsNotActive      =   0x2F,   ///< enter RMS NotActive state, because Bit 14 in object 0x1F80
 } tNmtEvent;
 
 /**
@@ -210,6 +230,7 @@ typedef enum
     kNmtNodeEventReadyToStart       = 0x05,     ///< Issued if NMT_STARTUP_NO_STARTNODE set, application must call oplk_execNmtCommand(kErrorNmtCmdStartNode) manually.
     kNmtNodeEventNmtState           = 0x06,     ///< Issued if the NMT state of the CN has changed.
     kNmtNodeEventError              = 0x07,     ///< NMT error of the CN.
+    kNmtNodeEventAmniRecvd          = 0x08,     ///< AMNI frame received.
 } tNmtNodeEvent;
 
 /**

@@ -11,6 +11,7 @@ of openPOWERLINK enumerations and error codes into descriptive strings.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
+Copyright (c) 2015, SYSTEC electronic GmbH
 Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2010, E. Dumas
 All rights reserved.
@@ -130,8 +131,8 @@ static char* nmtEventStr_l[] =
     "NmtEventDllCeAInv",            //
     "NmtEventDllCeAsnd",            //
     "NmtEventDllCeFrameTimeout",    //
-    "0xe",                          // reserved
-    "0xf",                          // reserved
+    "NmtEventDllReAmni",            //
+    "NmtEventDllReSwitchOverTimeout",// reserved
     "NmtEventSwReset",              // NMT_GT1, NMT_GT2, NMT_GT8
     "NmtEventResetNode",            //
     "NmtEventResetCom",             //
@@ -140,8 +141,8 @@ static char* nmtEventStr_l[] =
     "NmtEventEnableReadyToOperate", //
     "NmtEventStartNode",            // NMT_CT7
     "NmtEventStopNode",             //
-    "0x18",                         // reserved
-    "0x19",                         // reserved
+    "NmtEventGoToStandby",          //
+    "NmtEventGoToStandbyDelayed",   //
     "0x1A",                         // reserved
     "0x1B",                         // reserved
     "0x1C",                         // reserved
@@ -163,6 +164,7 @@ static char* nmtEventStr_l[] =
     "NmtEventEnterMsOperational",   // enter Operational on MN
     "NmtEventSwitchOff",            // enter state Off
     "NmtEventCriticalError",        // enter state Off because of critical error
+    "NmtEventEnterRmsNotActive",    //
 };
 
 // text strings for POWERLINK event sources
@@ -289,6 +291,7 @@ static tNmtStateInfo nmtStateInfo_l[] =
     { kNmtMsReadyToOperate,      "NmtMsReadyToOperate"       },
     { kNmtMsOperational,         "NmtMsOperational"          },
     { kNmtMsBasicEthernet,       "NmtMsBasicEthernet"        },
+    { kNmtRmsNotActive,          "NmtRmsNotActive"           },
     { kNmtStateInvalid,          "Invalid NMT State"         },
 };
 

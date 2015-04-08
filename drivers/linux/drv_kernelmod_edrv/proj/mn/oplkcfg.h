@@ -57,6 +57,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // These macros define all modules which are included
 #define CONFIG_INCLUDE_NMT_MN
+#define CONFIG_INCLUDE_NMT_RMN
 #define CONFIG_INCLUDE_PDO
 #define CONFIG_INCLUDE_VETH
 #define CONFIG_INCLUDE_CFM

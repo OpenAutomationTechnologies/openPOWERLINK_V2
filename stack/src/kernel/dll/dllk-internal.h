@@ -10,7 +10,7 @@ files.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2015, SYSTEC electronic GmbH
 Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
@@ -80,6 +80,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #error "PRes Chaining CN support requires CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER."
 #endif
 
+#if defined(CONFIG_INCLUDE_NMT_RMN) && CONFIG_TIMER_USE_HIGHRES == FALSE
+#error "RMN support needs CONFIG_TIMER_USE_HIGHRES == TRUE"
+#endif
+
+#if defined(CONFIG_INCLUDE_NMT_RMN) && !defined(CONFIG_INCLUDE_NMT_MN)
+#error "RMN support needs CONFIG_INCLUDE_NMT_MN"
+#endif
+
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
@@ -117,8 +125,13 @@ void  TgtDbgPostTraceValue (DWORD dwTraceValue_p);
   #define DLLK_TXFRAME_SOC          (DLLK_TXFRAME_PRES + 2)   // SoC on MN
   #define DLLK_TXFRAME_SOA          (DLLK_TXFRAME_SOC + 2)    // SoA on MN
   #define DLLK_TXFRAME_PREQ         (DLLK_TXFRAME_SOA + 2)    // PReq on MN
-  #define DLLK_TXFRAME_COUNT        (DLLK_TXFRAME_PREQ + (2 * (D_NMT_MaxCNNumber_U8 + 2)))
+#if defined(CONFIG_INCLUDE_NMT_RMN)
+  #define DLLK_TXFRAME_AMNI         (DLLK_TXFRAME_PREQ + 2)    // PReq on MN
+  #define DLLK_TXFRAME_COUNT        (DLLK_TXFRAME_AMNI + (2 * (NMT_MAX_NODE_ID + 2)))
                                     // on MN: 7 + MaxPReq of regular CNs + 1 Diag + 1 Router
+#else
+#define DLLK_TXFRAME_COUNT        (DLLK_TXFRAME_PREQ + (2 * (D_NMT_MaxCNNumber_U8 + 2)))
+#endif
 #else
   #define DLLK_TXFRAME_COUNT        (DLLK_TXFRAME_PRES + 2)
 #endif
@@ -224,6 +237,9 @@ typedef struct
 
 #if CONFIG_TIMER_USE_HIGHRES != FALSE
     tTimerHdl               timerHdlCycle;                          ///< Timer handle used for POWERLINK cycle monitoring on CN and generation on MN
+#if defined(CONFIG_INCLUDE_NMT_RMN)
+    tTimerHdl               timerHdlSwitchOver;             // used for monitoring of missing SoC/SoA/AMNI (Redundancy)
+#endif
 #if defined(CONFIG_INCLUDE_NMT_MN)
     tTimerHdl               timerHdlResponse;                       ///< Timer handle used for CN response monitoring
 #endif
@@ -246,6 +262,10 @@ typedef struct
 #if defined(CONFIG_INCLUDE_NMT_MN) && defined(CONFIG_INCLUDE_PRES_FORWARD)
     tDllkPresFw             aPresForward[NMT_MAX_NODE_ID];
 #endif
+#if defined(CONFIG_INCLUDE_NMT_RMN)
+    BOOL                    fRedundancy;                            ///< Managing Node Redundancy is enabled
+    tNmtEvent               nmtEventGoToStandby;                    ///< NMT command GoToStandby has been requested
+#endif
 } tDllkInstance;
 
 //------------------------------------------------------------------------------
@@ -266,6 +286,10 @@ extern "C"
 //------------------------------------------------------------------------------
 /* Helper functions */
 tOplkError dllk_postEvent(tEventType EventType_p);
+
+#if defined(CONFIG_INCLUDE_NMT_RMN)
+tOplkError dllk_cbTimerSwitchOver(tTimerEventArg* pEventArg_p);
+#endif
 
 #ifdef __cplusplus
 }

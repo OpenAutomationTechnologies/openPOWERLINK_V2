@@ -12,7 +12,7 @@ the DLL kernel module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2015, SYSTEC electronic GmbH
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -210,6 +210,7 @@ tOplkError dllkstatemachine_changeState(tNmtEvent nmtEvent_p,
 
         case kNmtCsNotActive:
         case kNmtCsPreOperational1:
+        case kNmtRmsNotActive:
             if (nmtEvent_p == kNmtEventDllCeSoc)
                 dllkInstance_g.dllState = kDllCsWaitPreq;       // SoC received - enter DLL_CS_WAIT_PREQ
             else
@@ -276,7 +277,7 @@ static tOplkError processNmtMsPreop1(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
     if (dllkInstance_g.dllState != kDllMsNonCyclic)
     {   // stop cycle timer
 
-        ret = edrvcyclic_stopCycle();
+        ret = edrvcyclic_stopCycle(FALSE);
         if (ret != kErrorOk)
             return ret;
 
@@ -361,6 +362,9 @@ static tOplkError processNmtMsFullCycle(tNmtState nmtState_p, tNmtEvent nmtEvent
 
                     if ((ret = edrvcyclic_startCycle()) != kErrorOk)
                         return ret;
+
+                    // initialize cycle counter
+                    dllkInstance_g.cycleCount = 0;
 
                     dllkInstance_g.dllState = kDllMsWaitSocTrig;
                     // initialize SoAReq number for ProcessSync (cycle preparation)

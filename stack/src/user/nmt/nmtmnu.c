@@ -10,7 +10,7 @@ This file contains the implementation of the NMT MNU module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2015, SYSTEC electronic GmbH
 Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
@@ -175,6 +175,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define NMTMNU_FLAG_PRC_ADD_SCHEDULED           0x0008  // at least one node is scheduled
                                                         // for addition to isochronous phase
 #define NMTMNU_FLAG_PRC_ADD_IN_PROGRESS         0x0010  // add-PRC-node process is in progress
+#define NMTMNU_FLAG_REDUNDANCY                  0x0020  // redundancy flag
 
 // return pointer to node info structure for specified node ID
 // d.k. may be replaced by special (hash) function if node ID array is smaller than 254
@@ -300,6 +301,10 @@ static tOplkError checkNmtState(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p,
                                 tNmtState localNmtState_p);
 static tOplkError addNodeIsochronous(UINT nodeId_p);
 static tOplkError startBootStep1(BOOL fNmtResetAllIssued_p);
+#if defined(CONFIG_INCLUDE_NMT_RMN)
+static tOplkError resetRedundancy(void);
+static tOplkError switchoverRedundancy(void);
+#endif
 static tOplkError startBootStep2(void);
 static tOplkError startCheckCom(void);
 static tOplkError nodeBootStep2(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p);
@@ -439,7 +444,7 @@ tOplkError nmtmnu_init(tNmtMnuCbNodeEvent pfnCbNodeEvent_p, tNmtMnuCbBootEvent p
     nmtMnuInstance_g.statusRequestDelay = 5000L;
 
     // register NmtMnResponse callback function
-    ret = dllucal_regAsndService(kDllAsndNmtRequest, cbNmtRequest, kDllAsndFilterLocal);
+    ret = dllucal_regAsndService(kDllAsndNmtRequest, cbNmtRequest, kDllAsndFilterAny);
 
     nmtMnuInstance_g.prcPResTimeFirstCorrectionNs =  50;
     nmtMnuInstance_g.prcPResTimeFirstNegOffsetNs  = 500;
@@ -496,6 +501,12 @@ tOplkError nmtmnu_sendNmtCommandEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
     tOplkError          retGetNodeId;
     BOOL                fIsExtNmtCmd;
     UINT                dstNodeCnt;
+
+    if (!NMT_IF_ACTIVE_MN(nmtu_getNmtState()))
+    {
+        ret = kErrorInvalidOperation;
+        goto Exit;
+    }
 
     if ((nodeId_p == 0) || (nodeId_p > C_ADR_BROADCAST))
     {   // invalid node ID specified
@@ -684,7 +695,7 @@ tOplkError nmtmnu_requestNmtCommand(UINT nodeId_p, tNmtCommand nmtCommand_p,
     tNmtState       nmtState;
 
     nmtState = nmtu_getNmtState();
-    if (nmtState <= kNmtMsNotActive)
+    if (!NMT_IF_ACTIVE_MN(nmtState))
     {
         ret = kErrorInvalidOperation;
         goto Exit;
@@ -698,6 +709,23 @@ tOplkError nmtmnu_requestNmtCommand(UINT nodeId_p, tNmtCommand nmtCommand_p,
 
     if (nodeId_p == 0x00)
         nodeId_p = C_ADR_MN_DEF_NODE_ID;
+
+    if (nmtCommand_p == kNmtCmdGoToStandby)
+    {
+        UINT8       flags = 0;
+        tNmtEvent   nmtEvent;
+
+        if (pNmtCommandData_p && (dataSize_p >= 1))
+            flags = ami_getUint8Le(pNmtCommandData_p);
+
+        if (flags && NMT_CMD_DATA_FLAG_DELAY)
+            nmtEvent = kNmtEventGoToStandbyDelayed;
+        else
+            nmtEvent = kNmtEventGoToStandby;
+
+        ret = nmtu_postNmtEvent(nmtEvent);
+        goto Exit;
+    }
 
     if (nodeId_p == C_ADR_MN_DEF_NODE_ID)
     {   // apply command to local node-ID
@@ -873,6 +901,10 @@ tOplkError nmtmnu_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
                 UINT32          timeout;
                 tObdSize        obdSize;
 
+#if defined(CONFIG_INCLUDE_NMT_RMN)
+                nmtMnuInstance_g.flags &= ~NMTMNU_FLAG_REDUNDANCY;
+#endif
+
                 // read object 0x1F80 NMT_StartUp_U32
                 obdSize = 4;
                 ret = obd_readEntry(0x1F80, 0, &nmtMnuInstance_g.nmtStartup, &obdSize);
@@ -941,6 +973,13 @@ tOplkError nmtmnu_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
 
         // normal work state
         case kNmtMsOperational:
+#if defined(CONFIG_INCLUDE_NMT_RMN)
+            if (nmtStateChange_p.oldNmtState == kNmtCsOperational)
+            {
+                switchoverRedundancy();
+                break;
+            }
+#endif
             // send StartNode to CNs
             // wait for NMT state change of CNs
             ret = startNodes();
@@ -950,6 +989,17 @@ tOplkError nmtmnu_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
         // -> normal ethernet communication
         case kNmtMsBasicEthernet:
             break;
+
+#if defined(CONFIG_INCLUDE_NMT_RMN)
+        case kNmtRmsNotActive:
+            nmtMnuInstance_g.flags |= NMTMNU_FLAG_REDUNDANCY;
+            break;
+        case kNmtCsPreOperational1:
+            if (!(nmtMnuInstance_g.flags & NMTMNU_FLAG_REDUNDANCY))
+                break;
+            resetRedundancy();
+            break;
+#endif
 
         default:
             break;
@@ -1294,6 +1344,15 @@ tOplkError nmtmnu_processEvent(tEvent* pEvent_p)
             }
             break;
 
+        case kEventTypeReceivedAmni:
+            {
+                UINT        nodeId;
+                nodeId = *((UINT*)pEvent_p->pEventArg);
+                ret = nmtMnuInstance_g.pfnCbNodeEvent(nodeId, kNmtNodeEventAmniRecvd,
+                                                        kNmtGsOff, 0, FALSE);
+            }
+            break;
+
         default:
             ret = kErrorNmtInvalidEvent;
             break;
@@ -1391,6 +1450,8 @@ static tOplkError cbNmtRequest(tFrameInfo* pFrameInfo_p)
     {   // error -> reply with kNmtCmdInvalidService
         sourceNodeId = ami_getUint8Le(&pFrameInfo_p->pFrame->srcNodeId);
         ret = nmtmnu_sendNmtCommand(sourceNodeId, kNmtCmdInvalidService);
+        if (ret == kErrorInvalidOperation)
+            ret = kErrorOk;
     }
     return ret;
 }
@@ -1723,6 +1784,143 @@ static tOplkError startBootStep1(BOOL fNmtResetAllIssued_p)
 Exit:
     return ret;
 }
+
+#if defined(CONFIG_INCLUDE_NMT_RMN)
+//------------------------------------------------------------------------------
+/**
+\brief  Prepares BootStep1 if running as Standby Managing Node
+
+The function prepares the BootStep1, so the switch-over to Active Managing Node
+can take place seamlessly.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError resetRedundancy(void)
+{
+    tOplkError          ret = kErrorOk;
+    UINT                subIndex;
+    UINT                localNodeId;
+    UINT32              nodeCfg;
+    tObdSize            obdSize;
+    tNmtMnuNodeInfo*    pNodeInfo;
+    UINT8               count;
+
+    ret = identu_reset();
+    ret = statusu_reset();
+    ret = syncu_reset();
+    ret = reset(); // reset timers
+
+    // read number of nodes from object 0x1F81/0
+    obdSize = sizeof(count);
+    ret = obd_readEntry(0x1F81, 0, &count, &obdSize);
+    if (ret != kErrorOk)
+        return ret;
+    if (count > tabentries(nmtMnuInstance_g.aNodeInfo))
+    {
+        count = tabentries(nmtMnuInstance_g.aNodeInfo);
+    }
+
+    nmtMnuInstance_g.mandatorySlaveCount = 0;
+    nmtMnuInstance_g.signalSlaveCount = 0;
+    // check 0x1F81
+    localNodeId = obd_getNodeId();
+
+    pNodeInfo = nmtMnuInstance_g.aNodeInfo;
+    for (subIndex = 1; subIndex <= count; subIndex++, pNodeInfo++)
+    {
+        obdSize = 4;
+        ret = obd_readEntry(0x1F81, subIndex, &nodeCfg, &obdSize);
+        if (ret != kErrorOk)
+            goto Exit;
+
+        if (subIndex != localNodeId)
+        {
+            // reset flags "not scanned" and "isochronous"
+            pNodeInfo->flags &= ~(NMTMNU_NODE_FLAG_ISOCHRON | NMTMNU_NODE_FLAG_NOT_SCANNED);
+
+            // Reset all PRC flags and PRC related values
+            pNodeInfo->prcFlags = 0;
+            pNodeInfo->pResTimeFirstNs = 0;
+            pNodeInfo->relPropagationDelayNs = 0;
+
+            if (subIndex == C_ADR_DIAG_DEF_NODE_ID)
+            {   // diagnostic node must be scanned by MN in any case
+                nodeCfg |= (NMT_NODEASSIGN_NODE_IS_CN | NMT_NODEASSIGN_NODE_EXISTS);
+                // and it must be isochronously accessed
+                nodeCfg &= ~NMT_NODEASSIGN_ASYNCONLY_NODE;
+            }
+
+            // save node config in local node info structure
+            pNodeInfo->nodeCfg = nodeCfg;
+            pNodeInfo->nodeState = kNmtMnuNodeStateUnknown;
+        }
+        else
+        {   // subindex of MN
+            if ((~nodeCfg & (NMT_NODEASSIGN_MN_PRES | NMT_NODEASSIGN_NODE_EXISTS)) == 0)
+            {   // MN shall send PRes
+                ret = addNodeIsochronous(localNodeId);
+            }
+        }
+    }
+
+    for (; subIndex <= tabentries(nmtMnuInstance_g.aNodeInfo); subIndex++, pNodeInfo++)
+    {   // clear node structure of unused entries
+        OPLK_MEMSET(pNodeInfo, 0, sizeof(*pNodeInfo));
+    }
+
+Exit:
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Performs the switch-over from SMN to AMN
+
+The function performs the switch-over from SMN to AMN, when in OPERATIONAL.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError switchoverRedundancy(void)
+{
+    tOplkError          ret = kErrorOk;
+    UINT                subIndex;
+    tNmtMnuNodeInfo*    pNodeInfo;
+    UINT                localNodeId;
+    UINT8               destinationNmtState;
+
+    pNodeInfo = nmtMnuInstance_g.aNodeInfo;
+    localNodeId = obd_getNodeId();
+    for (subIndex = 1;
+         subIndex <= tabentries(nmtMnuInstance_g.aNodeInfo);
+         subIndex++, pNodeInfo++)
+    {
+        // identify the node
+        if (((~pNodeInfo->nodeCfg & (NMT_NODEASSIGN_NODE_IS_CN | NMT_NODEASSIGN_NODE_EXISTS)) == 0)
+            && (localNodeId != subIndex))
+        {   // node is configured as CN
+            if (pNodeInfo->nodeState != kNmtMnuNodeStateOperational)
+            {
+                destinationNmtState = (UINT8) kNmtCsNotActive;
+                ret = nmtmnu_sendNmtCommand(subIndex, kNmtCmdResetNode);
+                if (ret != kErrorOk)
+                    goto Exit;
+            }
+            else
+            {
+                destinationNmtState = (UINT8) kNmtCsOperational;
+            }
+
+            // write object 0x1F8F NMT_MNNodeExpState_AU8
+            ret = obd_writeEntry(0x1F8F, subIndex, &destinationNmtState, 1);
+        }
+    }
+
+Exit:
+    return ret;
+}
+#endif
 
 //------------------------------------------------------------------------------
 /**
@@ -3000,6 +3198,48 @@ static tOplkError processInternalEvent(UINT nodeId_p, tNmtState nodeNmtState_p,
     tNmtState           nmtState;
 
     nmtState = nmtu_getNmtState();
+#if defined(CONFIG_INCLUDE_NMT_RMN)
+    if (NMT_IF_ACTIVE_CN(nmtState))
+    {
+        if (nmtMnuInstance_g.flags & NMTMNU_FLAG_REDUNDANCY)
+        {
+            if (nodeEvent_p == kNmtMnuIntNodeEventHeartbeat)
+            {
+                tNmtMnuNodeInfo* pNodeInfo;
+                UINT8           nodeNmtState;
+
+                pNodeInfo = NMTMNU_GET_NODEINFO(nodeId_p);
+
+                nodeNmtState = nodeNmtState_p;
+                // update object 0x1F8E NMT_MNNodeCurrState_AU8
+                ret = obd_writeEntry(0x1F8E, nodeId_p, &nodeNmtState, 1);
+                if (ret != kErrorOk)
+                {
+                    goto Exit;
+                }
+                ret = nmtMnuInstance_g.pfnCbNodeEvent(nodeId_p, kNmtNodeEventNmtState,
+                                                            nodeNmtState_p, 0,
+                                                            (pNodeInfo->nodeCfg & NMT_NODEASSIGN_MANDATORY_CN) != 0);
+
+                if (nodeNmtState_p == kNmtCsOperational)
+                {
+                    addNodeIsochronous(nodeId_p);
+                    pNodeInfo->nodeState = kNmtMnuNodeStateOperational;
+                }
+                else
+                {
+                    tDllNodeOpParam nodeOpParam;
+                    nodeOpParam.nodeId = nodeId_p;
+                    nodeOpParam.opNodeType = kDllNodeOpTypeIsochronous;
+                    ret = dllucal_deleteNode(&nodeOpParam);
+                    pNodeInfo->nodeState = kNmtMnuNodeStateUnknown;
+                }
+            }
+        }
+        goto Exit;
+    }
+    else
+#endif
     if (nmtState <= kNmtMsNotActive)        // MN is not active
         goto Exit;
 
