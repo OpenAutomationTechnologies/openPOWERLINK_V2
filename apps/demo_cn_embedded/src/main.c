@@ -372,6 +372,15 @@ static tOplkError eventCbPowerlink(tOplkApiEventType EventType_p,
                     arp_sendRequest((0xFFFFFF00 & IP_ADDR) | C_ADR_MN_DEF_NODE_ID);
                     break;
 
+                case kNmtCsPreOperational2:
+                     // automatic change to kEplNmtCsReadyToOperate can be
+                     // prevented with:
+                     // ret = kErrorReject;
+                     // As soon as application is ready for OPERATIONAL state,
+                     // execute the following function call:
+                     // oplk_execNmtCommand(kNmtEventEnterReadyToOperate);
+                     break;
+
                 default:
                     break;
             }
