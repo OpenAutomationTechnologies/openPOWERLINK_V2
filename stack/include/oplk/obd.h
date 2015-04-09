@@ -160,7 +160,7 @@ typedef unsigned int tObdPart;          ///< Data type for OD part definitions
 #define kObdPartApp         (              kObdPartMan | kObdPartDev | kObdPartUsr)   ///< Manufacturer, device part and user OD
 #define kObdPartAll         (kObdPartGen | kObdPartMan | kObdPartDev | kObdPartUsr)   ///< The whole OD
 
-typedef unsigned int tObdAccess;        ///< Data type for OD access types
+typedef UINT16 tObdAccess;        ///< Data type for OD access types
 
 
 ///\{
@@ -268,7 +268,7 @@ typedef enum
 
 Data type for the enumerator \ref eObdType.
 */
-typedef UINT32 tObdType;
+typedef UINT16 tObdType;
 
 ///\{
 /**
