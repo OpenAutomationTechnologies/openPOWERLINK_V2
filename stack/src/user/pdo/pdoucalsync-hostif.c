@@ -185,7 +185,10 @@ static void hostifIrqSyncCb(void* pArg_p)
 {
     UNUSED_PARAMETER(pArg_p);
 
-    pfnSyncCb_l();
+    if (pfnSyncCb_l != NULL)
+    {
+        pfnSyncCb_l();
+    }
 }
 
 ///\}
