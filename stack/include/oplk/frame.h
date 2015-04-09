@@ -119,6 +119,32 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // typedef
 //------------------------------------------------------------------------------
 
+/**
+* \brief Message type
+*
+* This enumeration defines the POWERLINK message type IDs.
+*
+* For more information consult the POWERLINK specification document "EPSG DS 301 V1.2.0" on page 349.
+*/
+typedef enum
+{
+    kMsgTypeNonPowerlink        = 0x00,                     ///< Defines non POWERLINK Frame
+    kMsgTypeSoc                 = 0x01,                     ///< Defines Start of Cycle Frame
+    kMsgTypePreq                = 0x03,                     ///< Defines Poll Request Frame
+    kMsgTypePres                = 0x04,                     ///< Defines Poll Response Frame
+    kMsgTypeSoa                 = 0x05,                     ///< Defines Start of Asynchronous Cycle Frame
+    kMsgTypeAsnd                = 0x06,                     ///< Defines Asynchronous Send Frame
+    kMsgTypeAmni                = 0x07,                     ///< Defines Active Managing Node Indication Frame
+    kMsgTypeAInv                = 0x0D,                     ///< Defines Asynchronous Invite Frame
+} eMsgType;
+
+/**
+\brief Message type data type
+
+Data type for the enumerator \ref eMsgType.
+*/
+typedef UINT8 tMsgType;
+
 // byte-align structures
 #ifdef _MSC_VER
 #pragma pack(push, packing)
@@ -443,7 +469,7 @@ typedef struct
     UINT8                   aDstMac[6];                     ///< Contains the MAC address of the addressed nodes (Offset 0)
     UINT8                   aSrcMac[6];                     ///< Contains the MAC address of the transmitting node (Offset 6)
     UINT16                  etherType;                      ///< Contains the Ethernet message type (big endian) (Offset 12)
-    UINT8                   messageType;                    ///< Contains the POWERLINK message type (Offset 14)
+    tMsgType                messageType;                    ///< Contains the POWERLINK message type (Offset 14)
     UINT8                   dstNodeId;                      ///< Contains the POWERLINK node ID of the addressed nodes (Offset 15)
     UINT8                   srcNodeId;                      ///< Contains the POWERLINK node ID of the transmitting node (Offset 16)
     tFrameData              data;                           ///< Contains the Frame Data (Offset 17)
@@ -453,31 +479,5 @@ typedef struct
 #ifdef _MSC_VER
 #pragma pack(pop, packing)
 #endif
-
-/**
-* \brief Message type
-*
-* This enumeration defines the POWERLINK message type IDs.
-*
-* For more information consult the POWERLINK specification document "EPSG DS 301 V1.2.0" on page 349.
-*/
-typedef enum
-{
-    kMsgTypeNonPowerlink        = 0x00,                     ///< Defines non POWERLINK Frame
-    kMsgTypeSoc                 = 0x01,                     ///< Defines Start of Cycle Frame
-    kMsgTypePreq                = 0x03,                     ///< Defines Poll Request Frame
-    kMsgTypePres                = 0x04,                     ///< Defines Poll Response Frame
-    kMsgTypeSoa                 = 0x05,                     ///< Defines Start of Asynchronous Cycle Frame
-    kMsgTypeAsnd                = 0x06,                     ///< Defines Asynchronous Send Frame
-    kMsgTypeAmni                = 0x07,                     ///< Defines Active Managing Node Indication Frame
-    kMsgTypeAInv                = 0x0D,                     ///< Defines Asynchronous Invite Frame
-} eMsgType;
-
-/**
-\brief Message type data type
-
-Data type for the enumerator \ref eMsgType.
-*/
-typedef UINT8 tMsgType;
 
 #endif /* _INC_oplk_frame_H_ */
