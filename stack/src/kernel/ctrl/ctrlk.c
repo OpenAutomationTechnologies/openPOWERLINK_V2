@@ -190,7 +190,7 @@ BOOL ctrlk_process(void)
 {
     tOplkError          ret = kErrorOk;
     UINT16              fRet;
-    UINT16              status;
+    tCtrlKernelStatus   status;
     tCtrlCmdType        cmd = kCtrlNone;
     BOOL                fExit = FALSE;
 
@@ -241,11 +241,11 @@ pointer to the status and exit flag is not NULL the appropriate data is stored.
 \ingroup module_ctrlk
 */
 //------------------------------------------------------------------------------
-tOplkError ctrlk_executeCmd(tCtrlCmdType cmd_p, UINT16* pRet_p, UINT16* pStatus_p,
-                            BOOL* pfExit_p)
+tOplkError ctrlk_executeCmd(tCtrlCmdType cmd_p, UINT16* pRet_p,
+                            tCtrlKernelStatus* pStatus_p, BOOL* pfExit_p)
 {
     tOplkError          ret = kErrorOk;
-    UINT16              status;
+    tCtrlKernelStatus   status;
     BOOL                fExit;
     tOplkError          retVal;
 

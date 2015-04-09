@@ -194,7 +194,7 @@ it tries to shutdown.
 //------------------------------------------------------------------------------
 tOplkError ctrlucal_checkKernelStack(void)
 {
-    UINT16              kernelStatus;
+    tCtrlKernelStatus   kernelStatus;
     tOplkError          ret;
     UINT16              retVal;
 
@@ -250,12 +250,12 @@ The function gets the status of the kernel stack
 \ingroup module_ctrlucal
 */
 //------------------------------------------------------------------------------
-UINT16 ctrlucal_getStatus(void)
+tCtrlKernelStatus ctrlucal_getStatus(void)
 {
-    UINT16          status;
+    tCtrlKernelStatus   status;
 
     if ((ctrlcal_readData(&status, offsetof(tCtrlBuf, status),
-                          sizeof(UINT16))) == kErrorOk)
+                          sizeof(tCtrlKernelStatus))) == kErrorOk)
         return status;
     else
         return kCtrlStatusUnavailable;

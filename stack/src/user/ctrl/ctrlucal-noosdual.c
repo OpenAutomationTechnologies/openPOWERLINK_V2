@@ -254,13 +254,13 @@ it tries to shutdown.
 //------------------------------------------------------------------------------
 tOplkError ctrlucal_checkKernelStack(void)
 {
-    tDualprocReturn dualRet;
-    UINT16          kernelStatus;
-    tOplkError      ret;
-    UINT16          magic;
-    UINT16          retVal;
-    UINT32          timeout = 0;
-    BOOL            fExit = FALSE;
+    tDualprocReturn     dualRet;
+    tCtrlKernelStatus   kernelStatus;
+    tOplkError          ret;
+    UINT16              magic;
+    UINT16              retVal;
+    UINT32              timeout = 0;
+    BOOL                fExit = FALSE;
 
     DEBUG_LVL_CTRL_TRACE("Checking for kernel stack...\n");
 
@@ -330,10 +330,10 @@ The function gets the status of the kernel stack
 \ingroup module_ctrlucal
 */
 //------------------------------------------------------------------------------
-UINT16 ctrlucal_getStatus(void)
+tCtrlKernelStatus ctrlucal_getStatus(void)
 {
-    tDualprocReturn dualRet;
-    UINT16          status;
+    tDualprocReturn     dualRet;
+    tCtrlKernelStatus   status;
 
     dualRet = dualprocshm_readDataCommon(instance_l.dualProcDrvInst,
                                          offsetof(tCtrlBuf, status),

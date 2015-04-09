@@ -226,13 +226,13 @@ block to execute a kernel control function.
 //------------------------------------------------------------------------------
 tOplkError ctrlkcal_getCmd(tCtrlCmdType* pCmd_p)
 {
-    UINT16    cmd;
+    tCtrlCmdType    cmd;
 
     if (dualprocshm_readDataCommon(instance_l.dualProcDrvInst, offsetof(tCtrlBuf, ctrlCmd.cmd),
                                    sizeof(cmd), (UINT8*)&cmd) != kDualprocSuccessful)
         return kErrorGeneralError;
 
-    *pCmd_p = (tCtrlCmdType)cmd;
+    *pCmd_p = cmd;
 
     return kErrorOk;
 }
@@ -271,7 +271,7 @@ The function stores the status of the kernel stack in the control memory block.
 \ingroup module_ctrlkcal
 */
 //------------------------------------------------------------------------------
-void ctrlkcal_setStatus(UINT16 status_p)
+void ctrlkcal_setStatus(tCtrlKernelStatus status_p)
 {
     dualprocshm_writeDataCommon(instance_l.dualProcDrvInst, offsetof(tCtrlBuf, status),
                                 sizeof(status_p), (UINT8*)&status_p);

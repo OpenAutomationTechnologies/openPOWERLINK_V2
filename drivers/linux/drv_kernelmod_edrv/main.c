@@ -532,9 +532,9 @@ module using the ioctl interface..
 //------------------------------------------------------------------------------
 static int executeCmd(unsigned long arg)
 {
-    tCtrlCmd        ctrlCmd;
-    UINT16          ret;
-    UINT16          status;
+    tCtrlCmd            ctrlCmd;
+    UINT16              ret;
+    tCtrlKernelStatus   status;
 
     if (copy_from_user(&ctrlCmd, (const void __user *)arg, sizeof(tCtrlCmd)))
         return -EFAULT;

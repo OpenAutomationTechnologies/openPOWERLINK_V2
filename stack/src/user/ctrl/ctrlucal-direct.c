@@ -163,7 +163,7 @@ tOplkError ctrlucal_executeCmd(tCtrlCmdType cmd_p, UINT16* pRetVal_p)
 {
     tOplkError          ret;
     UINT16              fRet;
-    UINT16              status;
+    tCtrlKernelStatus   status;
 
     if ((ret = ctrlk_executeCmd(cmd_p, &fRet, &status, NULL)) != kErrorOk)
         return ret;
@@ -207,7 +207,7 @@ The function gets the status of the kernel stack
 \ingroup module_ctrlucal
 */
 //------------------------------------------------------------------------------
-UINT16 ctrlucal_getStatus(void)
+tCtrlKernelStatus ctrlucal_getStatus(void)
 {
     return ctrlkcal_getStatus();
 }

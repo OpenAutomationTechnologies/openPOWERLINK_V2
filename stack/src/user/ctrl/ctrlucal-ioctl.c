@@ -247,10 +247,10 @@ The function gets the status of the kernel stack
 \ingroup module_ctrlucal
 */
 //------------------------------------------------------------------------------
-UINT16 ctrlucal_getStatus(void)
+tCtrlKernelStatus ctrlucal_getStatus(void)
 {
-    int         ret;
-    UINT16      status;
+    int                 ret;
+    tCtrlKernelStatus   status;
 
     if ((ret = ioctl(fd_l, PLK_CMD_CTRL_GET_STATUS, &status)) != 0)
     {

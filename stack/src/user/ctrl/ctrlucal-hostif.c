@@ -277,11 +277,11 @@ it tries to shutdown.
 //------------------------------------------------------------------------------
 tOplkError ctrlucal_checkKernelStack(void)
 {
-    tOplkError ret;
-    UINT16 kernelStatus;
-    BOOL fExit = FALSE;
-    int timeout = 0;
-    UINT16 retVal;
+    tOplkError          ret;
+    tCtrlKernelStatus   kernelStatus;
+    BOOL                fExit = FALSE;
+    int                 timeout = 0;
+    UINT16              retVal;
 
     DEBUG_LVL_CTRL_TRACE("Check Kernel Stack...\n");
 
@@ -339,10 +339,10 @@ The function gets the status of the kernel stack
 \ingroup module_ctrlucal
 */
 //------------------------------------------------------------------------------
-UINT16 ctrlucal_getStatus(void)
+tCtrlKernelStatus ctrlucal_getStatus(void)
 {
-    tHostifReturn hifret;
-    UINT16 status;
+    tHostifReturn       hifret;
+    tCtrlKernelStatus   status;
 
     hifret = hostif_getState(instance_l.hifInstance, (tHostifState*)&status);
     if (hifret != kHostifSuccessful)

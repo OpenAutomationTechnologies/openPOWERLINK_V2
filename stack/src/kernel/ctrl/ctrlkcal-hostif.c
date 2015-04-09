@@ -262,7 +262,7 @@ The function stores the status of the kernel stack in the control memory block.
 \ingroup module_ctrlkcal
 */
 //------------------------------------------------------------------------------
-void ctrlkcal_setStatus(UINT16 status_p)
+void ctrlkcal_setStatus(tCtrlKernelStatus status_p)
 {
     tHostifState hifsta = (tHostifState)status_p;
 

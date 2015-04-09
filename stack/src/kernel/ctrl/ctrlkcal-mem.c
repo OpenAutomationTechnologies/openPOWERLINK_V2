@@ -167,13 +167,13 @@ block to execute a kernel control function.
 //------------------------------------------------------------------------------
 tOplkError ctrlkcal_getCmd(tCtrlCmdType* pCmd_p)
 {
-    UINT16      cmd;
-    tOplkError  ret;
+    tCtrlCmdType    cmd;
+    tOplkError      ret;
 
-    ret = ctrlcal_readData(&cmd, offsetof(tCtrlBuf, ctrlCmd.cmd), sizeof(UINT16));
+    ret = ctrlcal_readData(&cmd, offsetof(tCtrlBuf, ctrlCmd.cmd), sizeof(tCtrlCmdType));
     if (ret == kErrorOk)
     {
-        *pCmd_p = (tCtrlCmdType)cmd;
+        *pCmd_p = cmd;
     }
     return ret;
 }
@@ -211,9 +211,9 @@ The function stores the status of the kernel stack in the control memory block.
 \ingroup module_ctrlkcal
 */
 //------------------------------------------------------------------------------
-void ctrlkcal_setStatus(UINT16 status_p)
+void ctrlkcal_setStatus(tCtrlKernelStatus status_p)
 {
-    ctrlcal_writeData(offsetof(tCtrlBuf, status), &status_p, sizeof(UINT16));
+    ctrlcal_writeData(offsetof(tCtrlBuf, status), &status_p, sizeof(tCtrlKernelStatus));
 }
 
 //------------------------------------------------------------------------------

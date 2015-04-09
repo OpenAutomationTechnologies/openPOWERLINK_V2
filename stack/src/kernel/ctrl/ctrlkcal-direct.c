@@ -76,7 +76,7 @@ tCtrlInitParam kernelInitParam_g;
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static UINT16 status_l;
+static tCtrlKernelStatus status_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -192,7 +192,7 @@ The function stores the status of the kernel stack in the control memory block.
 \ingroup module_ctrlkcal
 */
 //------------------------------------------------------------------------------
-void ctrlkcal_setStatus(UINT16 status_p)
+void ctrlkcal_setStatus(tCtrlKernelStatus status_p)
 {
     status_l = status_p;
 }
@@ -208,7 +208,7 @@ The function gets the status of the kernel stack.
 \ingroup module_ctrlkcal
 */
 //------------------------------------------------------------------------------
-UINT16 ctrlkcal_getStatus(void)
+tCtrlKernelStatus ctrlkcal_getStatus(void)
 {
     return status_l;
 }
