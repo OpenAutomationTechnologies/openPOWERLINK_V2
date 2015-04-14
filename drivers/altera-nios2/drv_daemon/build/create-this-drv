@@ -65,8 +65,13 @@ if [ -z "${OPLK_BASE_DIR}" ]; then
     OPLK_BASE_DIR=$(readlink -f "${SCRIPTDIR}/../../../..")
 fi
 
+# include functions
+. ${OPLK_BASE_DIR}/tools/altera-nios2/shell_functions
+
 if [ -z "${BOARD_PATH}" ]; then
-    BOARD_PATH=${OPLK_BASE_DIR}/hardware/boards/terasic-de2-115/mn-dual-hostif-gpio
+    # user selects from existing boards
+    BOARD_PATH=`select_dir_abs ${OPLK_BASE_DIR}/hardware/boards 'board.settings' 'grep -e dual -e drv'`
+    test $? -ne 0 && echo "$0 failed!" && exit
 fi
 
 chmod +x ${OPLK_BASE_DIR}/tools/altera-nios2/drivers.sh
