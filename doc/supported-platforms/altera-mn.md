@@ -132,7 +132,7 @@ Steps 1-5 can be carried out by executing `$ make all` in a
 
 # How to import the project into Nios II Software Build Tools for Eclipse for debugging purposes {#sect_altera-mn_import}
 
-Requirement: Steps in the previous section *How to build the binary* are completed.
+Requirement: Steps in the previous section *How to build the binaries* are completed.
 
 1. Start the Nios II Software Build Tools for Eclipse\n
    Note: It is recommended to place the workspace location outside the openPOWERLINK directory.
@@ -148,7 +148,32 @@ Requirement: Steps in the previous section *How to build the binary* are complet
 
 # How to write the program to local flash {#sect_altera-mn_flash}
 
-This feature is not supported by now.
+Requirement: Steps in the previous section *How to build the binaries* are
+completed.
+
+## Driver (PCP)
+
+The driver Nios II processor is connected to the EPCS flash controller. The EPCS
+stores the FPGA configuration (.sof) and the driver software (.elf).
+To create and program the flash image follow the instructions:
+
+1. After successfully building the design use the makefile to program the
+   flash:\n
+   `$ make program-epcs`
+
+## App (Host)
+
+The host Nios II processor is equipped with a CFI flash which stores the
+software (.elf). Use the Nios II flash programmer tool to load the image to the
+CFI flash.
+
+1. After successfully building the design open the Nios II flash programmer:\n
+   `$ nios2-flash-programmer-gui`
+2. Select the design's SOPCINFO file which includes the host Nios II instance.
+3. Select *host_0_cpu_1* as Master CPU name.
+4. Add the host processor ELF (`demo_mn_embedded.elf`) to the file list.
+5. Make sure that a valid connection to the host Nios II instance is established
+   (use `Connections...`).
 
 # How to use MN configuration file {#sect_altera-mn_config}
 

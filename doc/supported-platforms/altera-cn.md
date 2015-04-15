@@ -127,7 +127,7 @@ Note: You can combine step 2-3 by typing the following into the
 
 # How to import the project into Nios II Software Build Tools for Eclipse for debugging purposes {#sect_altera-cn_import}
 
-Requirement: Steps in the previous section "How to build the binary" are
+Requirement: Steps in the previous section *How to build the binaries* are
 completed.
 1. Start the Nios II Software Build Tools for Eclipse\n
    Note: It is recommended to place the workspace location outside the openPOWERLINK directory
@@ -141,7 +141,7 @@ completed.
 
 # How to write the program to local flash  {#sect_altera-cn_flash}
 
-Requirement: Steps in the previous section _How to build the binary_ are
+Requirement: Steps in the previous section *How to build the binaries* are
 completed.
 
 1. After successfully building the design use the makefile to program the

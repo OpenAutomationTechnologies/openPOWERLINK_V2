@@ -83,6 +83,7 @@ fi
 # Let's source the board.settings (null.settings before)
 BOARD_SETTINGS_FILE=${BOARD_PATH}/board.settings
 CFG_DRV_CPU_NAME=
+CFG_DRV_EPCS=
 CFG_JTAG_CABLE=
 CFG_DRV_MAX_HEAP_BYTES=
 if [ -f ${BOARD_SETTINGS_FILE} ]; then
@@ -177,6 +178,7 @@ DRV_GEN_ARGS="\
 --set CREATE_OBJDUMP 0 \
 --set QSYS_SUB_CPU ${CFG_DRV_PROC_NAME} \
 --set QUARTUS_PROJECT_DIR=${BOARD_PATH}/quartus \
+--set OPLK_BASE_DIR=${OPLK_BASE_DIR} \
 ${CFG_DRV_ARGS} \
 "
 
@@ -224,5 +226,11 @@ fi
 
 chmod +x ${OPLK_BASE_DIR}/tools/altera-nios2/fix-app-makefile
 ${OPLK_BASE_DIR}/tools/altera-nios2/fix-app-makefile ${OUT_PATH}/Makefile
+
+# Add EPCS flash makefile rules
+if [ -n "${CFG_DRV_EPCS}" ]; then
+    chmod +x ${OPLK_BASE_DIR}/tools/altera-nios2/add-app-makefile-epcs
+    ${OPLK_BASE_DIR}/tools/altera-nios2/add-app-makefile-epcs ${OUT_PATH}/Makefile
+fi
 
 exit 0
