@@ -58,6 +58,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/synctimer.h>
 #endif
 
+#if defined(CONFIG_INCLUDE_NMT_RMN)
+#include <kernel/hrestimer.h>
+#endif
+
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
