@@ -77,3 +77,6 @@ CFG_OPENMAC=1
 CFG_HOSTINTERFACE=1
 # Type of POWERLINK node supported by this platform
 CFG_NODE=CN
+
+# EPCS flash is not present
+# CFG_APP_EPCS=1

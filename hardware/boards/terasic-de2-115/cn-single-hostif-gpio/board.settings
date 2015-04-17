@@ -55,3 +55,9 @@ CFG_APP_BSP_OPT_LEVEL=-O2
 CFG_HOSTINTERFACE=1
 # Type of POWERLINK node supported by this platform
 CFG_NODE=CN
+
+# EPCS flash is present
+CFG_APP_EPCS=1
+
+# JTAG Cable
+CFG_JTAG_CABLE="USB-Blaster [USB-1]"
