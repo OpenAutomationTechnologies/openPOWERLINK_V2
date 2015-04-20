@@ -46,6 +46,10 @@ FIND_OPLK_LIBRARY("mn")         # Find suitable openPOWERLINK library
 
 SET(CFG_CFM ON CACHE BOOL "Use Configuration Manager (CFM)")
 
+SET(CFG_DEMO_PROJECT "Demo_3CN" CACHE STRING
+        "Valid projects are Demo_3CN, Demo_RMN_3CN")
+SET_PROPERTY(CACHE CFG_DEMO_PROJECT PROPERTY STRINGS Demo_3CN Demo_RMN_3CN)
+
 # Set generic sources and include directories for this demo
 SET(DEMO_SOURCES
     ${DEMO_SOURCE_DIR}/main.c
@@ -109,8 +113,8 @@ SET_PROPERTY(TARGET demo_mn_console
              PROPERTY COMPILE_DEFINITIONS_DEBUG DEBUG;DEF_DEBUG_LVL=${CFG_DEBUG_LVL})
 
 ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_BINARY_DIR}/mnobd.cdc
-                   COMMAND ${CMAKE_COMMAND} -E copy ${OPENCONFIG_PROJ_DIR}/Demo_3CN/output/mnobd.cdc ${CMAKE_BINARY_DIR}/mnobd.cdc
-                   DEPENDS ${OPENCONFIG_PROJ_DIR}/Demo_3CN/output/mnobd.cdc
+                   COMMAND ${CMAKE_COMMAND} -E copy ${OPENCONFIG_PROJ_DIR}/${CFG_DEMO_PROJECT}/output/mnobd.cdc ${CMAKE_BINARY_DIR}/mnobd.cdc
+                   DEPENDS ${OPENCONFIG_PROJ_DIR}/${CFG_DEMO_PROJECT}/output/mnobd.cdc
                    VERBATIM
                    )
 

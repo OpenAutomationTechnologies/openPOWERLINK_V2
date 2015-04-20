@@ -435,6 +435,10 @@ static tOplkError processNodeEvent(tOplkApiEventType EventType_p,
             console_printlog("NodeEvent: (Node=%u, Found)\n", pNode->nodeId);
             break;
 
+        case kNmtNodeEventAmniReceived:
+            console_printlog("NodeEvent: (Node=%u): Received ActiveManagingNodeIndication)\n", pNode->nodeId);
+            break;
+
         default:
             break;
     }
