@@ -153,7 +153,7 @@ SET_PROPERTY(TARGET demo_mn_qt
              PROPERTY COMPILE_DEFINITIONS_DEBUG DEBUG;DEF_DEBUG_LVL=${CFG_DEBUG_LVL})
 
 ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_BINARY_DIR}/mnobd.cdc
-                   COMMAND ${CMAKE_COMMAND} -E copy ${OPENCONFIG_PROJ_DIR}/Demo_3CN/output/mnobd.cdc ${CMAKE_BINARY_DIR}/mnobd.cdc
+                   COMMAND ${CMAKE_COMMAND} -E copy ${OPENCONFIG_PROJ_DIR}/${CFG_DEMO_PROJECT}/output/mnobd.cdc ${CMAKE_BINARY_DIR}/mnobd.cdc
                    DEPENDS ${OPENCONFIG_PROJ_DIR}/${CFG_DEMO_PROJECT}/output/mnobd.cdc
                    VERBATIM
                    )
