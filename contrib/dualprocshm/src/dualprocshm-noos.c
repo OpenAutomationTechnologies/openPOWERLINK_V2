@@ -139,7 +139,7 @@ static tDualProcShmInst         instance_l = {kDualProcLast,
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static void             setDynBuffAddr(tDualprocDrvInstance pDrvInst_p,
+static int              setDynBuffAddr(tDualprocDrvInstance pDrvInst_p,
                                        UINT16 index_p, UINT32 addr_p);
 static UINT32           getDynBuffAddr(tDualprocDrvInstance pDrvInst_p,
                                        UINT16 index_p);
@@ -410,7 +410,7 @@ tDualprocReturn dualprocshm_getMemory(tDualprocDrvInstance pInstance_p, UINT8 id
 
     if (fAlloc_p)
     {
-        // allocate dynamic buffer
+        // Allocate dynamic buffer
         pMemBase = DUALPROCSHM_MALLOC(*pSize_p + sizeof(tDualprocMemInst));
 
         if (pMemBase == NULL)
@@ -422,8 +422,9 @@ tDualprocReturn dualprocshm_getMemory(tDualprocDrvInstance pInstance_p, UINT8 id
         pDrvInst->pDynResTbl[id_p].pBase = pMemBase + sizeof(tDualprocMemInst);
         pDrvInst->pDynResTbl[id_p].memInst->span = (UINT16)*pSize_p;
 
-        // write the address in mapping table
-        pDrvInst->pDynResTbl[id_p].pfnSetDynAddr(pDrvInst, id_p, (UINT32)pMemBase);
+        // Write the address in mapping table
+        if (pDrvInst->pDynResTbl[id_p].pfnSetDynAddr(pDrvInst, id_p, (UINT32)pMemBase) != 0)
+            return kDualprocNoResource;
     }
     else
     {
@@ -907,23 +908,42 @@ tDualprocDrvInstance getDrvInst(tDualProcInstance procInstance_p)
 \param  index_p      Buffer index.
 \param  addr_p       Address of the buffer.
 
+\return The function returns an integer return code.
+\retval 0       Buffer address was successfully written.
+\retval -1      Buffer address could not be written.
+
 */
 //------------------------------------------------------------------------------
-static void setDynBuffAddr(tDualprocDrvInstance pInstance_p, UINT16 index_p, UINT32 addr_p)
+static int setDynBuffAddr(tDualprocDrvInstance pInstance_p, UINT16 index_p, UINT32 addr_p)
 {
     tDualProcDrv*   pDrvInst = (tDualProcDrv*) pInstance_p;
     UINT8*          tableBase = pDrvInst->pAddrTableBase;
     UINT32          tableEntryOffs = index_p * DYN_MEM_TABLE_ENTRY_SIZE;
     UINT32          offset = 0;
-    UINT32          sharedMemBaseAddr = (UINT32) dualprocshm_getSharedMemBaseAddr();
+    UINT32          sharedMemSize = 0;
+    UINT32          sharedMemBaseAddr = (UINT32) dualprocshm_getSharedMemInst(&sharedMemSize);
 
     if (addr_p <= sharedMemBaseAddr)
-        // failed
-        return;
+    {
+        TRACE("The buffer address(0x%X) lies below the shared memory region start address(0x%X)\n"
+                , addr_p, sharedMemBaseAddr);
+        return -1;
+    }
+    else
+    {
+        offset = addr_p - sharedMemBaseAddr;
 
-    offset = addr_p - sharedMemBaseAddr;
+        if (offset >= sharedMemSize)
+        {
+            TRACE("The buffer address(0x%X) lies above the shared memory region end address(0x%X)\n"
+                    , addr_p, sharedMemBaseAddr + sharedMemSize);
+            return -1;
+        }
+    }
+
     dualprocshm_targetWriteData(tableBase + tableEntryOffs,
                                 DYN_MEM_TABLE_ENTRY_SIZE, (UINT8*)&offset);
+    return 0;
 }
 
 //------------------------------------------------------------------------------
@@ -934,6 +954,7 @@ static void setDynBuffAddr(tDualprocDrvInstance pInstance_p, UINT16 index_p, UIN
 \param  index_p      Buffer index.
 
 \return Address of the buffer requested.
+\retval 0       Invalid buffer address read.
 
 */
 //------------------------------------------------------------------------------
@@ -942,14 +963,29 @@ static UINT32 getDynBuffAddr(tDualprocDrvInstance pInstance_p, UINT16 index_p)
     tDualProcDrv*   pDrvInst = (tDualProcDrv*) pInstance_p;
     UINT8*          tableBase = pDrvInst->pAddrTableBase;
     UINT32          tableEntryOffs = index_p * DYN_MEM_TABLE_ENTRY_SIZE;
-    UINT32          buffoffset = 0x00;
+    UINT32          offset = 0x00;
     UINT32          buffAddr;
-    UINT32          sharedMemBaseAddr = (UINT32) dualprocshm_getSharedMemBaseAddr();
+    UINT32          sharedMemSize = 0;
+    UINT32          sharedMemBaseAddr = (UINT32) dualprocshm_getSharedMemInst(&sharedMemSize);
 
-    while (buffoffset == 0)
-        dualprocshm_targetReadData(tableBase + tableEntryOffs,
-                                   DYN_MEM_TABLE_ENTRY_SIZE, (UINT8*)&buffoffset);
-    buffAddr = (sharedMemBaseAddr + buffoffset);
+    dualprocshm_targetReadData(tableBase + tableEntryOffs,
+                               DYN_MEM_TABLE_ENTRY_SIZE, (UINT8*)&offset);
+
+    if (offset == 0)
+    {
+        return 0;
+    }
+    else
+    {
+        buffAddr = (sharedMemBaseAddr + offset);
+        
+        if ((buffAddr <= sharedMemBaseAddr) || (buffAddr >= sharedMemBaseAddr + sharedMemSize))
+        {
+            TRACE("The buffer address(0x%X) lies outside the shared memory region(0x%X to 0x%X)\n"
+                    , buffAddr, sharedMemBaseAddr, sharedMemBaseAddr + sharedMemSize);
+            buffAddr = 0;
+        }
+    }
     return buffAddr;
 }
 
@@ -974,7 +1010,8 @@ The header can not be written if dualprocshm instance is not initialized.
 static tDualprocReturn configureCommMemHeader(tDualProcInstance procInstance_p,
                                               tDualprocHeader* pCommMemHeader_p)
 {
-    UINT32      shmemBaseAddr = (UINT32) dualprocshm_getSharedMemBaseAddr();
+    UINT32      sharedMemSize = 0;
+    UINT32      sharedMemBaseAddr = (UINT32) dualprocshm_getSharedMemInst(&sharedMemSize);
     UINT8       dpshmInstState = instance_l.fInitialized;
 
     if (pCommMemHeader_p == NULL || procInstance_p >= kDualProcLast)
@@ -984,7 +1021,7 @@ static tDualprocReturn configureCommMemHeader(tDualProcInstance procInstance_p,
     if (dpshmInstState == TRUE)
     {
         dualprocshm_targetWriteData((UINT8*) (&pCommMemHeader_p->sharedMemBase[procInstance_p]),
-                                    sizeof(UINT32), (UINT8*) (&shmemBaseAddr));
+                                    sizeof(UINT32), (UINT8*) (&sharedMemBaseAddr));
     }
     else
         return kDualprocInvalidInstance;

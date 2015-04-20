@@ -166,7 +166,7 @@ register for a dynamic buffer.
 \param  index_p     Index to select the dynamic buffer
 \param  addr_p      Address to the memory space referenced by the dynamic buffer
 */
-typedef void (*tSetDynRes)(tDualprocDrvInstance pDrvInst_p, UINT16 index_p, UINT32 addr_p);
+typedef int (*tSetDynRes)(tDualprocDrvInstance pDrvInst_p, UINT16 index_p, UINT32 addr_p);
 
 /**
 \brief Function type to get the address of a Buffer

@@ -40,21 +40,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define OPLK_OPTIMIZE               TRUE                        ///< Optimize the dualprocessor library for openPOWERLINK stack on non-OS
 
-/* SIZE */
-#define MAX_COMMON_MEM_SIZE         2048                        ///< Max common memory size
-#define MAX_DYNAMIC_BUFF_COUNT      15                          ///< Number of maximum dynamic buffers
-#define MAX_DYNAMIC_BUFF_SIZE       MAX_DYNAMIC_BUFF_COUNT * 4  ///< Max dynamic buffer size
 
 /* BASE ADDRESSES */
 #if defined(__MICROBLAZE__)
 #include "dualprocshm-microblaze.h"
 
-// TODO : gks check if this can be retrieved from hardware configuration
-#define COMMON_MEM_BASE             0x2C000000
-#define MEM_ADDR_TABLE_BASE         COMMON_MEM_BASE + MAX_COMMON_MEM_SIZE
-#define MEM_INTR_BASE               MEM_ADDR_TABLE_BASE + MAX_DYNAMIC_BUFF_SIZE
 
-#define SHARED_MEM_BASE            0x0             ///< Shared memory base address
 #define TARGET_SYNC_IRQ_ID         -1
 #define TARGET_SYNC_IRQ            -1
 
@@ -66,12 +57,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #elif defined(__arm__)
 #include "dualprocshm-arm.h"
 
-// TODO : gks check if this can be retrieved from hardware configuration
-#define COMMON_MEM_BASE             0x2C000000
-#define MEM_ADDR_TABLE_BASE         COMMON_MEM_BASE + MAX_COMMON_MEM_SIZE
-#define MEM_INTR_BASE               MEM_ADDR_TABLE_BASE + MAX_DYNAMIC_BUFF_SIZE
 
-#define SHARED_MEM_BASE            0x0             ///< Shared memory base address
 #define TARGET_SYNC_IRQ_ID         XPAR_PS7_SCUGIC_0_DEVICE_ID
 #define TARGET_SYNC_IRQ            XPAR_FABRIC_AXI_OPENMAC_0_TIMER_IRQ_INTR
 

@@ -142,6 +142,10 @@ set to the following by default.
 #ifndef DUALPROCSHM_MEMSET
 #define DUALPROCSHM_MEMSET(...)         memset(__VA_ARGS__)
 #endif
+
+#ifndef DUALPROCSHM_MEMCPY
+#define DUALPROCSHM_MEMCPY(...)         memcpy(__VA_ARGS__)
+#endif
 /**@}*/
 
 //------------------------------------------------------------------------------
@@ -162,7 +166,7 @@ typedef void (*targetSyncHdl)(void*);
 extern "C" {
 #endif
 UINT8*  dualprocshm_getCommonMemAddr(UINT16* pSize_p);
-UINT8*  dualprocshm_getSharedMemBaseAddr(void);
+UINT8*  dualprocshm_getSharedMemInst(UINT32* pSize_p);
 UINT8*  dualprocshm_getDynMapTableAddr(void);
 UINT8*  dualprocshm_getIntrMemAddr(void);
 void    dualprocshm_releaseIntrMemAddr();
