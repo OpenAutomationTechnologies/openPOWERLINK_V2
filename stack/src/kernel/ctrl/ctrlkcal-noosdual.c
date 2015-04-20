@@ -143,10 +143,10 @@ tOplkError ctrlkcal_init(void)
         goto Exit;
     }
 
-    dualRet = dualprocshm_enableBridge(instance_l.dualProcDrvInst);
+    dualRet = dualprocshm_enableShmIntf(instance_l.dualProcDrvInst);
     if (dualRet != kDualprocSuccessful)
     {
-        DEBUG_LVL_ERROR_TRACE("{%s} Error Enabling Bridge %x\n ", __func__, dualRet);
+        DEBUG_LVL_ERROR_TRACE("{%s} Error Enabling dualprocshm interface %x\n ", __func__, dualRet);
         ret = kErrorNoResource;
         goto Exit;
     }

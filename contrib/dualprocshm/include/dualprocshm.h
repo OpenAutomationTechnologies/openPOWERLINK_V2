@@ -70,8 +70,8 @@ typedef enum eDualprocReturn
     kDualprocHwReadError        = 0x0008,   ///< Read from hardware failed
     kDualprocInvalidCommHeader  = 0x0009,   ///< Common memory header data is invalid
     kDualprocInvalidInstance    = 0x000A,   ///< DualprocShm instance is not configured
-    kDualprocBridgeEnabled      = 0x000B,   ///< DualprocShm bridge is in enabled state
-    kDualprocBridgeDisabled     = 0x000C,   ///< DualprocShm bridge is in disabled state
+    kDualprocshmIntfEnabled     = 0x000B,   ///< DualprocShm interface is enabled/ active
+    kDualprocshmIntfDisabled    = 0x000C,   ///< DualprocShm interface is disabled/ not active
 
     kDualprocUnspecError        = 0xFFFF    ///< Unspecified error
 } tDualprocReturn;
@@ -125,7 +125,7 @@ Structure to hold the configuration driver instance.
 typedef struct sDualprocConfig
 {
     tDualProcInstance       procInstance;   ///< Processor instance
-    UINT16                  commMemSize;    ///< Minimum size of common memory
+    UINT16                  commonMemSize;  ///< Minimum size of common memory
     UINT8                   procId;         ///< Processor Id
 } tDualprocConfig;
 
@@ -204,7 +204,8 @@ Currently holds the address of shared memory on the first processor.
 */
 typedef struct sDualprocHeader
 {
-    UINT16      dpshmBridge;                        ///< Dualprocshm bridge. It is used to indicate the interface state.
+    UINT16      shmMagic;                           ///< Dualprocshm interface magic field. This is used to indicate valid header data
+    UINT16      shmIntfState;                       ///< Dualprocshm interface state indicator field
     UINT32      sharedMemBase[kDualProcLast];       ///< Shared memory addresses of both processors
 } tDualprocHeader;
 
@@ -213,11 +214,11 @@ typedef struct sDualprocHeader
 
 Holds the individual segment configuration details, inside common memory
 */
-typedef struct sCommMemInst
+typedef struct sCommonMemInst
 {
-    tDualprocHeader*    pCommMemHeader;             ///< Pointer to the common memory header segment
-    UINT8*              pCommMemBase;               ///< Pointer to the common memory data segment.
-}tCommMemInst;
+    tDualprocHeader*    pCommonMemHeader;           ///< Pointer to the common memory header segment
+    UINT8*              pCommonMemBase;             ///< Pointer to the common memory data segment.
+} tDualprocCommonMemInst;
 
 /**
 \brief Dual Processor instance
@@ -227,10 +228,10 @@ Holds the configuration passed to the instance at creation.
 typedef struct sDualProcDrv
 {
     tDualprocConfig             config;             ///< Copy of configuration
-    tCommMemInst                commMemInst;        ///< Common memory instance
+    tDualprocCommonMemInst      commonMemInst;      ///< Common memory instance
     UINT8*                      pAddrTableBase;     ///< Pointer to dynamic memory address table
-    INT                         maxDynBuffEntries;  ///< Number of dynamic buffers (Pcp/Host)
-    tDualprocDynResConfig*      pDynResTbl;         ///< Dynamic buffer table (Pcp/Host)
+    INT                         maxDynBuffEntries;  ///< Number of dynamic buffers (First & Second processor)
+    tDualprocDynResConfig*      pDynResTbl;         ///< Dynamic buffer table (First & Second processor)
 } tDualProcDrv;
 
 //------------------------------------------------------------------------------
@@ -258,8 +259,8 @@ tDualprocReturn         dualprocshm_readDataCommon(tDualprocDrvInstance pInstanc
                                                    size_t Size_p, UINT8* pData_p);
 tDualprocReturn         dualprocshm_writeDataCommon(tDualprocDrvInstance pInstance_p, UINT32 offset_p,
                                                     size_t Size_p, UINT8* pData_p);
-tDualprocReturn         dualprocshm_enableBridge(tDualprocDrvInstance pInstance_p);
-tDualprocReturn         dualprocshm_checkBridgeState(tDualprocDrvInstance pInstance_p);
+tDualprocReturn         dualprocshm_enableShmIntf(tDualprocDrvInstance pInstance_p);
+tDualprocReturn         dualprocshm_checkShmIntfState(tDualprocDrvInstance pInstance_p);
 tDualprocReturn         dualprocshm_getSharedMemAddr(tDualprocDrvInstance pInstance_p,
                                                      tDualProcInstance procInstance_p,
                                                      UINT8* pShmBaseAddr_p);

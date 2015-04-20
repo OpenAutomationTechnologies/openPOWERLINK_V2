@@ -59,7 +59,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 #define CMD_TIMEOUT_SEC                 20      // command timeout in seconds
-#define BRIDGE_ENABLE_TIMEOUT_SEC       10      // wait for bridge enable time out
+#define DPSHM_ENABLE_TIMEOUT_SEC        10      // wait for dpshm interface enable time out
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -139,19 +139,19 @@ tOplkError ctrlucal_init(void)
         return kErrorNoResource;
     }
 
-    for (loopCount = 0; loopCount <= BRIDGE_ENABLE_TIMEOUT_SEC; loopCount++)
+    for (loopCount = 0; loopCount <= DPSHM_ENABLE_TIMEOUT_SEC; loopCount++)
     {
         target_msleep(1000U);
-        dualRet = dualprocshm_checkBridgeState(instance_l.dualProcDrvInst);
-        if (dualRet == kDualprocBridgeDisabled)
+        dualRet = dualprocshm_checkShmIntfState(instance_l.dualProcDrvInst);
+        if (dualRet == kDualprocshmIntfDisabled)
             continue;
         else
             break;
     }
 
-    if (dualRet != kDualprocBridgeEnabled)
+    if (dualRet != kDualprocshmIntfEnabled)
     {
-        DEBUG_LVL_ERROR_TRACE("%s dualprocshm  bridge is not enabled (0x%X)\n",
+        DEBUG_LVL_ERROR_TRACE("%s dualprocshm  interface is not enabled (0x%X)\n",
                               __func__, dualRet);
         return kErrorNoResource;
     }

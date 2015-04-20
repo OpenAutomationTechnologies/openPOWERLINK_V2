@@ -85,7 +85,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define BRIDGE_ENABLED    0xAB12
+#define DPSHM_MAGIC    0xAB12
 
 //------------------------------------------------------------------------------
 // local types
@@ -102,7 +102,7 @@ typedef struct sDualProcShmInst
     tDualProcInstance       localProcessor;         ///< Local processor instance
     tDualProcInstance       remoteProcessor;        ///< Remote processor instance
     BOOL                    fInitialized;           ///< Flag for driver init state
-    BOOL                    fBridgeEnabled;         ///< Flag for hardware bridge state
+    BOOL                    fShmEnabled;            ///< Flag for dpshm interface state
 } tDualProcShmInst;
 
 //------------------------------------------------------------------------------
@@ -129,9 +129,7 @@ static tDualProcDrv*            apDualProcDrvInstance_l[DUALPROC_INSTANCE_COUNT]
 This variable holds the current configured instance of dual processor shared
 memory library.
 */
-static tDualProcShmInst         instance_l = {kDualProcLast,
-                                              kDualProcLast,
-                                              FALSE, FALSE};
+static tDualProcShmInst         instance_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -140,8 +138,8 @@ static int              setDynBuffAddr(tDualprocDrvInstance pDrvInst_p,
                                        UINT16 index_p, UINT32 addr_p);
 static UINT32           getDynBuffAddr(tDualprocDrvInstance pDrvInst_p,
                                        UINT16 index_p);
-static tDualprocReturn  configureCommMemHeader(tDualProcInstance procInstance_p,
-                                               tDualprocHeader* pCommMemHeader_p);
+static tDualprocReturn  configureCommonMemHeader(tDualProcInstance procInstance_p,
+                                                 tDualprocHeader* pCommonMemHeader_p);
 tDualprocDrvInstance    getDrvInst(tDualProcInstance procInstance_p);
 
 //============================================================================//
@@ -180,7 +178,7 @@ tDualprocReturn dualprocshm_create(tDualprocConfig* pConfig_p, tDualprocDrvInsta
         return kDualprocInvalidParameter;
     }
 
-    //create driver instance
+    // Create driver instance
     pDrvInst = (tDualProcDrv*) DUALPROCSHM_MALLOC(sizeof(tDualProcDrv));
 
     if (pDrvInst == NULL)
@@ -188,25 +186,31 @@ tDualprocReturn dualprocshm_create(tDualprocConfig* pConfig_p, tDualprocDrvInsta
         return kDualprocNoResource;
     }
 
+    // Initialize the global driver instance variables
     DUALPROCSHM_MEMSET(pDrvInst, 0, sizeof(tDualProcDrv));
     DUALPROCSHM_MEMSET(apDualProcDrvInstance_l, 0, sizeof(apDualProcDrvInstance_l));
 
-    // store the configuration
+    instance_l.localProcessor = kDualProcLast;
+    instance_l.remoteProcessor = kDualProcLast;
+    instance_l.fInitialized = FALSE;
+    instance_l.fShmEnabled = FALSE;
+
+    // Store the configuration
     pDrvInst->config = *pConfig_p;
 
-    // get the common memory address
-    pDrvInst->commMemInst.pCommMemHeader = (tDualprocHeader*) dualprocshm_getCommonMemAddr(&pDrvInst->config.commMemSize);
+    // Get the common memory address
+    pDrvInst->commonMemInst.pCommonMemHeader = (tDualprocHeader*) dualprocshm_getCommonMemAddr(&pDrvInst->config.commonMemSize);
 
     if (pConfig_p->procInstance == kDualProcFirst)
     {
-        DUALPROCSHM_MEMSET(pDrvInst->commMemInst.pCommMemHeader, 0, MAX_COMMON_MEM_SIZE);
+        DUALPROCSHM_MEMSET(pDrvInst->commonMemInst.pCommonMemHeader, 0, MAX_COMMON_MEM_SIZE);
     }
 
-    // get the control segment base address
-    pDrvInst->commMemInst.pCommMemBase =
-        (UINT8*) ((UINT32) pDrvInst->commMemInst.pCommMemHeader + sizeof(tDualprocHeader));
+    // Get the control segment base address
+    pDrvInst->commonMemInst.pCommonMemBase =
+        (UINT8*) ((UINT32) pDrvInst->commonMemInst.pCommonMemHeader + sizeof(tDualprocHeader));
 
-    // get the address to store address mapping table
+    // Get the address to store address mapping table
     pDrvInst->pAddrTableBase = dualprocshm_getDynMapTableAddr();
 
     if (pConfig_p->procInstance == kDualProcFirst)
@@ -230,12 +234,12 @@ tDualprocReturn dualprocshm_create(tDualprocConfig* pConfig_p, tDualprocDrvInsta
         pDrvInst->pDynResTbl[index].pfnGetDynAddr = getDynBuffAddr;
     }
 
-    // store driver instance in array
+    // Store driver instance in array
     for (index = 0; index < DUALPROC_INSTANCE_COUNT; index++)
     {
         if (apDualProcDrvInstance_l[index] == NULL)
         {
-            // free entry found
+            // Free entry found
             apDualProcDrvInstance_l[index] = pDrvInst;
 
             break;
@@ -261,8 +265,8 @@ tDualprocReturn dualprocshm_create(tDualprocConfig* pConfig_p, tDualprocDrvInsta
     // Set the driver instance init status to TRUE
     instance_l.fInitialized = TRUE;
 
-    ret = configureCommMemHeader(pConfig_p->procInstance,
-                                 pDrvInst->commMemInst.pCommMemHeader);
+    ret = configureCommonMemHeader(pConfig_p->procInstance,
+                                   pDrvInst->commonMemInst.pCommonMemHeader);
     if (ret != kDualprocSuccessful)
     {
         ret = kDualprocInvalidCommHeader;
@@ -301,7 +305,7 @@ tDualprocReturn dualprocshm_delete(tDualprocDrvInstance pInstance_p)
     }
 
     // release common memory and address mapping table
-    dualprocshm_releaseCommonMemAddr(pDrvInst->config.commMemSize);
+    dualprocshm_releaseCommonMemAddr(pDrvInst->config.commonMemSize);
     dualprocshm_releaseDynMapTableAddr();
 
     for (index = 0; index < DUALPROC_INSTANCE_COUNT; index++)
@@ -597,7 +601,7 @@ tDualprocReturn dualprocshm_readDataCommon(tDualprocDrvInstance pInstance_p,
                                            UINT32 offset_p, size_t size_p, UINT8* pData_p)
 {
     tDualProcDrv*   pDrvInst = (tDualProcDrv*) pInstance_p;
-    UINT8*          base = pDrvInst->commMemInst.pCommMemBase;
+    UINT8*          base = pDrvInst->commonMemInst.pCommonMemBase;
 
     if (pInstance_p == NULL || pData_p == NULL)
         return kDualprocInvalidParameter;
@@ -629,7 +633,7 @@ tDualprocReturn dualprocshm_writeDataCommon(tDualprocDrvInstance pInstance_p,
                                             UINT32 offset_p, size_t size_p, UINT8* pData_p)
 {
     tDualProcDrv*   pDrvInst = (tDualProcDrv*) pInstance_p;
-    UINT8*          base = pDrvInst->commMemInst.pCommMemBase;
+    UINT8*          base = pDrvInst->commonMemInst.pCommonMemBase;
 
     if (pInstance_p == NULL || pData_p == NULL)
         return kDualprocInvalidParameter;
@@ -641,10 +645,10 @@ tDualprocReturn dualprocshm_writeDataCommon(tDualprocDrvInstance pInstance_p,
 
 //------------------------------------------------------------------------------
 /**
-\brief  Enable dual processor bridge in common memory header
+\brief  Enable dual processor shared memory interface in common memory header
 
-The function enables the dual processor shared memory bridge in the
-common memory header, to indicate that the memory is initialized
+The function enables the dual processor shared memory interface
+in the common memory header, to indicate that the memory is initialized
 
 \param  pInstance_p  Driver instance.
 
@@ -656,52 +660,61 @@ common memory header, to indicate that the memory is initialized
 
 */
 //------------------------------------------------------------------------------
-tDualprocReturn dualprocshm_enableBridge(tDualprocDrvInstance pInstance_p)
+tDualprocReturn dualprocshm_enableShmIntf(tDualprocDrvInstance pInstance_p)
 {
     tDualProcDrv*       pDrvInst = (tDualProcDrv*) pInstance_p;
-    tDualprocHeader*    pCommMemHeader = NULL;
-    UINT16              bridgeState = BRIDGE_ENABLED;
+    tDualprocHeader*    pCommonMemHeader = NULL;
+    UINT16              shmMagic = DPSHM_MAGIC;
+    UINT16              shmIntfState = 0x1;
 
     if (pInstance_p == NULL)
         return kDualprocInvalidParameter;
     else if (instance_l.fInitialized != TRUE)
         return kDualprocInvalidInstance;
 
-    pCommMemHeader = pDrvInst->commMemInst.pCommMemHeader;
+    pCommonMemHeader = pDrvInst->commonMemInst.pCommonMemHeader;
 
-    dualprocshm_targetWriteData((UINT8*) (&pCommMemHeader->dpshmBridge),
-                                sizeof(pCommMemHeader->dpshmBridge),
-                                (UINT8*) (&bridgeState));
+    // Write the dpshm magic
+    dualprocshm_targetWriteData((UINT8*) (&pCommonMemHeader->shmMagic),
+                                sizeof(pCommonMemHeader->shmMagic),
+                                (UINT8*) (&shmMagic));
 
-    instance_l.fBridgeEnabled = TRUE;
+    // Enable the dual processor shared memory interface
+    dualprocshm_targetWriteData((UINT8*) (&pCommonMemHeader->shmIntfState),
+                                sizeof(pCommonMemHeader->shmIntfState),
+                                (UINT8*) (&shmIntfState));
+
+    instance_l.fShmEnabled = TRUE;
 
     return kDualprocSuccessful;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Check the state of dual processor bridge in common memory header
+\brief  Check the state of dual processor shared memory interface
 
-The function checks the dual processor shared memory bridge state in the
-common memory header, used to wait for the bridge to be initialized.
+The function checks the dual processor shared memory shared memory interface state
+in the common memory header, used to wait for the shared memory interface to be
+initialized.
 
 \param  pInstance_p  Driver instance.
 
 \return The function returns a tDualprocReturn error code.
-\retval kDualprocBridgeEnabled    The common memory bridge is enabled.
-\retval kDualprocBridgeDisabled   The common memory bridge is disabled.
-\retval kDualprocInvalidParameter The caller has provided incorrect parameters.
-\retval kDualprocInvalidInstance  This dpshm instance is invalid.
+\retval kDualprocshmIntfEnabled     The dualprocshm interface is enabled.
+\retval kDualprocshmIntfDisabled    The dualprocshm interface is disabled.
+\retval kDualprocInvalidParameter   The caller has provided incorrect parameters.
+\retval kDualprocInvalidInstance    This dualprocshm instance is invalid.
 
 \ingroup module_dualprocshm
 
 */
 //------------------------------------------------------------------------------
-tDualprocReturn dualprocshm_checkBridgeState(tDualprocDrvInstance pInstance_p)
+tDualprocReturn dualprocshm_checkShmIntfState(tDualprocDrvInstance pInstance_p)
 {
     tDualProcDrv*       pDrvInst = (tDualProcDrv*) pInstance_p;
-    tDualprocHeader*    pCommMemHeader = NULL;
-    UINT16              bridgeState = 0x0;
+    tDualprocHeader*    pCommonMemHeader = NULL;
+    UINT16              shmMagic = 0x0;
+    UINT16              shmIntfState = 0x0;
 
     if (pInstance_p == NULL)
         return kDualprocInvalidParameter;
@@ -709,21 +722,35 @@ tDualprocReturn dualprocshm_checkBridgeState(tDualprocDrvInstance pInstance_p)
     else if (instance_l.fInitialized != TRUE)
         return kDualprocInvalidInstance;
 
-    pCommMemHeader = pDrvInst->commMemInst.pCommMemHeader;
+    pCommonMemHeader = pDrvInst->commonMemInst.pCommonMemHeader;
 
-    dualprocshm_targetReadData((UINT8*) (&pCommMemHeader->dpshmBridge),
-                               sizeof(pCommMemHeader->dpshmBridge),
-                               (UINT8*) (&bridgeState));
+    dualprocshm_targetReadData((UINT8*) (&pCommonMemHeader->shmMagic),
+                               sizeof(pCommonMemHeader->shmMagic),
+                               (UINT8*) (&shmMagic));
 
-    if (bridgeState == BRIDGE_ENABLED)
+    // Read the dpshm magic to check validity of header data
+    if (shmMagic == DPSHM_MAGIC)
     {
-        instance_l.fBridgeEnabled = TRUE;
-        return kDualprocBridgeEnabled;
+        // Read the dpshm interface state
+        dualprocshm_targetReadData((UINT8*) (&pCommonMemHeader->shmIntfState),
+                                   sizeof(pCommonMemHeader->shmIntfState),
+                                   (UINT8*) (&shmIntfState));
+
+        if (shmIntfState == 0x0)
+        {
+            instance_l.fShmEnabled = FALSE;
+            return kDualprocshmIntfDisabled;
+        }
+        else
+        {
+            instance_l.fShmEnabled = TRUE;
+            return kDualprocshmIntfEnabled;
+        }
     }
     else
     {
-        instance_l.fBridgeEnabled = FALSE;
-        return kDualprocBridgeDisabled;
+        instance_l.fShmEnabled = FALSE;
+        return kDualprocInvalidCommHeader;
     }
 }
 
@@ -751,7 +778,7 @@ tDualprocReturn dualprocshm_getSharedMemAddr(tDualprocDrvInstance pInstance_p,
                                              UINT8* pShmBaseAddr_p)
 {
     tDualProcDrv*       pDrvInst = (tDualProcDrv*) pInstance_p;
-    tDualprocHeader*    pCommMemHeader = NULL;
+    tDualprocHeader*    pCommonMemHeader = NULL;
 
     if (pInstance_p == NULL || pShmBaseAddr_p == NULL ||
         procInstance_p >= kDualProcLast)
@@ -759,12 +786,12 @@ tDualprocReturn dualprocshm_getSharedMemAddr(tDualprocDrvInstance pInstance_p,
     else if (instance_l.fInitialized != TRUE)   // Check if driver instance is initialized
         return kDualprocInvalidInstance;
     else if ((procInstance_p != instance_l.localProcessor) &&
-             (instance_l.fBridgeEnabled != TRUE)) // For remote processor's shmem base address,
-        return kDualprocBridgeDisabled;           // bridge has to be enabled.
+             (instance_l.fShmEnabled != TRUE))    // For remote processor's shmem base address,
+        return kDualprocshmIntfDisabled;          // dpshm interface has to be enabled.
 
-    pCommMemHeader = pDrvInst->commMemInst.pCommMemHeader;
+    pCommonMemHeader = pDrvInst->commonMemInst.pCommonMemHeader;
 
-    dualprocshm_targetReadData((UINT8*) &pCommMemHeader->sharedMemBase[procInstance_p],
+    dualprocshm_targetReadData((UINT8*) &pCommonMemHeader->sharedMemBase[procInstance_p],
                                sizeof(UINT32), pShmBaseAddr_p);
 
     return kDualprocSuccessful;
@@ -998,7 +1025,7 @@ Writes the header data as per the configured dualprocshm instance.
 The header can not be written if dualprocshm instance is not initialized.
 
 \param  procInstance_p        Driver instance.
-\param  pCommMemHeader_p      Common memory header address.
+\param  pCommonMemHeader_p    Common memory header address.
 
 \return The function returns a tDualprocReturn error code.
 \retval kDualprocSuccessful         The common memory header segment was
@@ -1008,20 +1035,20 @@ The header can not be written if dualprocshm instance is not initialized.
 
 */
 //------------------------------------------------------------------------------
-static tDualprocReturn configureCommMemHeader(tDualProcInstance procInstance_p,
-                                              tDualprocHeader* pCommMemHeader_p)
+static tDualprocReturn configureCommonMemHeader(tDualProcInstance procInstance_p,
+                                                tDualprocHeader* pCommonMemHeader_p)
 {
     UINT32      sharedMemSize = 0;
     UINT32      sharedMemBaseAddr = (UINT32) dualprocshm_getSharedMemInst(&sharedMemSize);
     UINT8       dpshmInstState = instance_l.fInitialized;
 
-    if (pCommMemHeader_p == NULL || procInstance_p >= kDualProcLast)
+    if (pCommonMemHeader_p == NULL || procInstance_p >= kDualProcLast)
         return kDualprocInvalidParameter;
 
     // Check if the driver is already initialized
     if (dpshmInstState == TRUE)
     {
-        dualprocshm_targetWriteData((UINT8*) (&pCommMemHeader_p->sharedMemBase[procInstance_p]),
+        dualprocshm_targetWriteData((UINT8*) (&pCommonMemHeader_p->sharedMemBase[procInstance_p]),
                                     sizeof(UINT32), (UINT8*) (&sharedMemBaseAddr));
     }
     else
