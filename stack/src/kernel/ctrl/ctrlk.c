@@ -525,6 +525,11 @@ void setupKernelFeatures(void)
     instance_l.features |= OPLK_KERNEL_VETH;
 #endif
 
+#if defined(CONFIG_INCLUDE_NMT_RMN)
+    // We contain the code of the redundancy MN (RMN).
+    instance_l.features |= OPLK_KERNEL_RMN;
+#endif
+
 #if (CONFIG_DLL_PRES_CHAINING_CN == TRUE)
     instance_l.features |= OPLK_KERNEL_PRES_CHAINING_CN;
 #endif

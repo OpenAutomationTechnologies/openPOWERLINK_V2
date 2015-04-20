@@ -1993,6 +1993,11 @@ UINT32 getRequiredKernelFeatures(void)
     requiredKernelFeatures |= OPLK_KERNEL_VETH;
 #endif
 
+#if defined(CONFIG_INCLUDE_NMT_RMN)
+    // We contain the code for the redundancy MN (RMN)
+    requiredKernelFeatures |= OPLK_KERNEL_RMN;
+#endif
+
 #if (CONFIG_DLL_PRES_CHAINING_CN == TRUE)
     requiredKernelFeatures |= OPLK_KERNEL_PRES_CHAINING_CN;
 #endif
