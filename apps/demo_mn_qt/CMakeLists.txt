@@ -36,7 +36,7 @@ MESSAGE(STATUS "Configuring demo_mn_qt")
 
 CMAKE_MINIMUM_REQUIRED (VERSION 2.8.7)
 
-INCLUDE(../common/cmake/options.cmake)
+INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/../common/cmake/options.cmake)
 
 ################################################################################
 # Setup project files and definitions
@@ -63,7 +63,7 @@ SET (DEMO_SOURCES
      ${CONTRIB_SOURCE_DIR}/console/printlog.c
      )
 
-SET (DEMO_RESOURCES ${CMAKE_SOURCE_DIR}/resources/resources.qrc)
+SET (DEMO_RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/resources/resources.qrc)
 
 SET (DEMO_HEADERS
      ${DEMO_INCLUDE_DIR}/Api.h
@@ -140,12 +140,12 @@ SOURCE_GROUP("openPOWERLINK Header Files" FILES ${OPLK_HEADERS})
 ################################################################################
 # Set the executable
 ADD_EXECUTABLE (demo_mn_qt ${DEMO_SOURCES} ${DEMO_ARCH_SOURCES} ${DEMO_HEADERS} ${DEMO_HEADERS_MOC}
-                           ${DEMO_FORMS_HEADERS} ${DEMO_RESOURCES_RCC} ${CMAKE_BINARY_DIR}/mnobd.cdc)
+                           ${DEMO_FORMS_HEADERS} ${DEMO_RESOURCES_RCC} ${CMAKE_CURRENT_BINARY_DIR}/mnobd.cdc)
 SET_PROPERTY(TARGET demo_mn_qt
              PROPERTY COMPILE_DEFINITIONS_DEBUG DEBUG;DEF_DEBUG_LVL=${CFG_DEBUG_LVL})
 
-ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_BINARY_DIR}/mnobd.cdc
-                   COMMAND ${CMAKE_COMMAND} -E copy ${OPENCONFIG_PROJ_DIR}/Demo_3CN/output/mnobd.cdc ${CMAKE_BINARY_DIR}/mnobd.cdc
+ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/mnobd.cdc
+                   COMMAND ${CMAKE_COMMAND} -E copy ${OPENCONFIG_PROJ_DIR}/Demo_3CN/output/mnobd.cdc ${CMAKE_CURRENT_BINARY_DIR}/mnobd.cdc
                    DEPENDS ${OPENCONFIG_PROJ_DIR}/Demo_3CN/output/mnobd.cdc
                    VERBATIM
                    )
@@ -160,4 +160,4 @@ TARGET_LINK_LIBRARIES(demo_mn_qt ${ARCH_LIBRARIES} ${QT_LIBRARIES})
 # Installation rules
 
 INSTALL(TARGETS demo_mn_qt RUNTIME DESTINATION ${CMAKE_PROJECT_NAME})
-INSTALL(FILES ${CMAKE_BINARY_DIR}/mnobd.cdc DESTINATION ${CMAKE_PROJECT_NAME})
+INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/mnobd.cdc DESTINATION ${CMAKE_PROJECT_NAME})
