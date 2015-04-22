@@ -630,7 +630,7 @@ tOplkError dllkframe_updateFramePres(tEdrvTxBuffer* pTxBuffer_p,
 \brief  Update CN asynchronous response frames
 
 The function updates the CN asynchronous response frames Status Response and
-Ident Response depending on \ref dllkInstance_g.updateTxFrame.
+Ident Response depending on dllkInstance_g.updateTxFrame.
 
 \param  nmtState_p              NMT state of the node.
 

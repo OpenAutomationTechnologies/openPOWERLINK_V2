@@ -332,6 +332,8 @@ The function writes to the sync response queue to store a callback for the given
 node.
 
 \param  nodeId_p                Node ID of the sync response
+\param  pfnCbResp_p             Pointer to the SyncResponse callback function
+                                to be called.
 
 \return The function returns a tOplkError error code.
 */
