@@ -127,7 +127,7 @@ OBD_BEGIN ()
             OBD_SUBINDEX_RAM_VAR(0x1601, 0x19, kObdTypeUInt64, kObdAccRW, tObdUnsigned64, ObjectMapping, 0x00LL)
         OBD_END_INDEX(0x1601)
 
-		// Object 1602h: PDO_RxMappParam_02h_AU64
+        // Object 1602h: PDO_RxMappParam_02h_AU64
         OBD_BEGIN_INDEX_RAM(0x1602, 0x1A, pdou_cbObdAccess)
             OBD_SUBINDEX_RAM_VAR(0x1602, 0x00, kObdTypeUInt8, kObdAccRW, tObdUnsigned8, NumberOfEntries, 0x00)
             OBD_SUBINDEX_RAM_VAR(0x1602, 0x01, kObdTypeUInt64, kObdAccRW, tObdUnsigned64, ObjectMapping, 0x00LL)
@@ -231,20 +231,20 @@ OBD_BEGIN ()
             OBD_SUBINDEX_RAM_USERDEF(0x6400, 0x04, kObdTypeInt8, kObdAccVPR, tObdInteger8, AnalogueInput, 0x00)
         OBD_END_INDEX(0x6400)
 
-		// AnalogueInput_00h_AI16
+        // AnalogueInput_00h_AI16
         OBD_BEGIN_INDEX_RAM(0x6401, 0x03, NULL)
             OBD_SUBINDEX_RAM_VAR(0x6401, 0x00, kObdTypeUInt8, kObdAccConst, tObdUnsigned8, NumberOfEntries, 0x02)
             OBD_SUBINDEX_RAM_USERDEF(0x6401, 0x01, kObdTypeInt16, kObdAccVPR, tObdInteger16, AnalogueInput, 0x0000)
             OBD_SUBINDEX_RAM_USERDEF(0x6401, 0x02, kObdTypeInt16, kObdAccVPR, tObdInteger16, AnalogueInput, 0x0000)
         OBD_END_INDEX(0x6401)
 
-		// AnalogueInput_00h_AI32
+        // AnalogueInput_00h_AI32
         OBD_BEGIN_INDEX_RAM(0x6402, 0x02, NULL)
             OBD_SUBINDEX_RAM_VAR(0x6402, 0x00, kObdTypeUInt8, kObdAccConst, tObdUnsigned8, NumberOfEntries, 0x01)
             OBD_SUBINDEX_RAM_USERDEF(0x6402, 0x01, kObdTypeInt32, kObdAccVPR, tObdInteger32, AnalogueInput, 0x00000000)
         OBD_END_INDEX(0x6402)
 
-		// AnalogueOutput_00h_AI8
+        // AnalogueOutput_00h_AI8
         OBD_BEGIN_INDEX_RAM(0x6410, 0x05, NULL)
             OBD_SUBINDEX_RAM_VAR(0x6410, 0x00, kObdTypeUInt8, kObdAccConst, tObdUnsigned8, NumberOfEntries, 0x04)
             OBD_SUBINDEX_RAM_USERDEF(0x6410, 0x01, kObdTypeInt8, kObdAccVPRW, tObdInteger8, AnalogueOutput, 0x00)
@@ -253,14 +253,14 @@ OBD_BEGIN ()
             OBD_SUBINDEX_RAM_USERDEF(0x6410, 0x04, kObdTypeInt8, kObdAccVPRW, tObdInteger8, AnalogueOutput, 0x00)
         OBD_END_INDEX(0x6410)
 
-		// AnalogueOutput_00h_AI16
+        // AnalogueOutput_00h_AI16
         OBD_BEGIN_INDEX_RAM(0x6411, 0x03, NULL)
             OBD_SUBINDEX_RAM_VAR(0x6411, 0x00, kObdTypeUInt8, kObdAccConst, tObdUnsigned8, NumberOfEntries, 0x02)
             OBD_SUBINDEX_RAM_USERDEF(0x6411, 0x01, kObdTypeInt16, kObdAccVPRW, tObdInteger16, AnalogueOutput, 0x0000)
             OBD_SUBINDEX_RAM_USERDEF(0x6411, 0x02, kObdTypeInt16, kObdAccVPRW, tObdInteger16, AnalogueOutput, 0x0000)
         OBD_END_INDEX(0x6411)
 
-		// AnalogueOutput_00h_AI32
+        // AnalogueOutput_00h_AI32
         OBD_BEGIN_INDEX_RAM(0x6412, 0x02, NULL)
             OBD_SUBINDEX_RAM_VAR(0x6412, 0x00, kObdTypeUInt8, kObdAccConst, tObdUnsigned8, NumberOfEntries, 0x01)
             OBD_SUBINDEX_RAM_USERDEF(0x6412, 0x01, kObdTypeInt32, kObdAccVPRW, tObdInteger32, AnalogueOutput, 0x00000000)

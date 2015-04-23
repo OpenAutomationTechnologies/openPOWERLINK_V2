@@ -1,3 +1,9 @@
-*
-.*
-!.gitignore
+.metadata/
+.settings
+.project
+.cproject
+*~
+*.orig
+*.bak
+*.o
+*.d

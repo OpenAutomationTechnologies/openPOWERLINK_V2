@@ -645,7 +645,7 @@ tOplkError dllkframe_updateFramePres(tEdrvTxBuffer* pTxBuffer_p,
 \brief  Update CN asynchronous response frames
 
 The function updates the CN asynchronous response frames Status Response and
-Ident Response depending on \ref dllkInstance_g.updateTxFrame.
+Ident Response depending on dllkInstance_g.updateTxFrame.
 
 \param  nmtState_p              NMT state of the node.
 
@@ -1179,8 +1179,6 @@ void dllkframe_processTransmittedSoa(tEdrvTxBuffer* pTxBuffer_p)
 
     TGT_DLLK_DECLARE_FLAGS
 
-    UNUSED_PARAMETER(pTxBuffer_p);
-
     TGT_DLLK_ENTER_CRITICAL_SECTION()
 
     nmtState = dllkInstance_g.nmtState;
@@ -1256,6 +1254,16 @@ void dllkframe_processTransmittedSoa(tEdrvTxBuffer* pTxBuffer_p)
 
         // ASnd frame was sent, remove the request
         dllkInstance_g.aLastReqServiceId[dllkInstance_g.curLastSoaReq] = kDllReqServiceNo;
+    }
+    else
+    {
+        tPlkFrame*          pFrame = (tPlkFrame*)pTxBuffer_p->pBuffer;
+        UINT                nodeId = ami_getUint8Le(&(pFrame->data.soa.reqServiceTarget));
+        tDllReqServiceId    serviceId = ami_getUint8Le(&(pFrame->data.soa.reqServiceId));
+
+        ret = dllkcal_ackAsyncRequest(nodeId, serviceId);
+        if (ret != kErrorOk)
+                goto Exit;
     }
 
     // reprogram timer in PREOP1

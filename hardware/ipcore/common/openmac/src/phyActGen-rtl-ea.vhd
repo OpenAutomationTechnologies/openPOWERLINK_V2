@@ -75,11 +75,11 @@ architecture rtl of phyActGen is
     constant cCntMaxValue   : natural := gClkFreq / gActivityFreq;
     --! Obtain counter width
     constant cCntWidth      : natural := logDualis(cCntMaxValue);
-    --! Constant for counter value zero
-    constant cCntIsZero     : std_logic_vector(cCntWidth downto 0) := (others => cInactivated);
 
     --! The counter
     signal counter          : std_logic_vector(cCntWidth-1 downto 0);
+    --! Constant for counter value zero
+    constant cCntIsZero     : std_logic_vector(counter'range) := (others => cInactivated);
     --! Terminal counter
     signal counterTc        : std_logic;
     --! Trigger activity in next cycle due to packet activity

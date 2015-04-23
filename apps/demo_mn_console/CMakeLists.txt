@@ -108,12 +108,12 @@ SOURCE_GROUP("Architecture Specific Sources" FILES ${DEMO_ARCH_SOURCES})
 ################################################################################
 # Set the executable
 
-ADD_EXECUTABLE(demo_mn_console ${DEMO_SOURCES} ${DEMO_ARCH_SOURCES} ${CMAKE_BINARY_DIR}/mnobd.cdc)
+ADD_EXECUTABLE(demo_mn_console ${DEMO_SOURCES} ${DEMO_ARCH_SOURCES} ${CMAKE_CURRENT_BINARY_DIR}/mnobd.cdc)
 SET_PROPERTY(TARGET demo_mn_console
              PROPERTY COMPILE_DEFINITIONS_DEBUG DEBUG;DEF_DEBUG_LVL=${CFG_DEBUG_LVL})
 
-ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_BINARY_DIR}/mnobd.cdc
-                   COMMAND ${CMAKE_COMMAND} -E copy ${OPENCONFIG_PROJ_DIR}/${CFG_DEMO_PROJECT}/output/mnobd.cdc ${CMAKE_BINARY_DIR}/mnobd.cdc
+ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/mnobd.cdc
+                   COMMAND ${CMAKE_COMMAND} -E copy ${OPENCONFIG_PROJ_DIR}/${CFG_DEMO_PROJECT}/output/mnobd.cdc ${CMAKE_CURRENT_BINARY_DIR}/mnobd.cdc
                    DEPENDS ${OPENCONFIG_PROJ_DIR}/${CFG_DEMO_PROJECT}/output/mnobd.cdc
                    VERBATIM
                    )
@@ -128,5 +128,5 @@ TARGET_LINK_LIBRARIES(demo_mn_console ${ARCH_LIBRARIES})
 # Installation rules
 
 INSTALL(TARGETS demo_mn_console RUNTIME DESTINATION ${CMAKE_PROJECT_NAME})
-INSTALL(FILES ${CMAKE_BINARY_DIR}/mnobd.cdc DESTINATION ${CMAKE_PROJECT_NAME})
+INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/mnobd.cdc DESTINATION ${CMAKE_PROJECT_NAME})
 

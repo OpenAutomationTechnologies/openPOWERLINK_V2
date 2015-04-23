@@ -256,7 +256,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
 
 #if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC != FALSE
     // initialize Rx hook for Asnd frames with pending allowed
-    edrvInstance_l.pRxAsndHookInst = omethHookCreate(edrvInstance_l.pMacInst, rxHook, CONFIG_EDRV_ASND_DEFFERRED_RX_BUFFERS);
+    edrvInstance_l.pRxAsndHookInst = omethHookCreate(edrvInstance_l.pMacInst, rxHook, CONFIG_EDRV_ASND_DEFERRED_RX_BUFFERS);
     if (edrvInstance_l.pRxAsndHookInst == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Rx hook creation for Asnd frames failed!\n", __func__);
@@ -267,7 +267,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
 
 #if defined(CONFIG_INCLUDE_VETH)
     // initialize Rx hook for Veth frames with pending allowed
-    edrvInstance_l.pRxVethHookInst = omethHookCreate(edrvInstance_l.pMacInst, rxHook, CONFIG_EDRV_VETH_DEFFERRED_RX_BUFFERS);
+    edrvInstance_l.pRxVethHookInst = omethHookCreate(edrvInstance_l.pMacInst, rxHook, CONFIG_EDRV_VETH_DEFERRED_RX_BUFFERS);
     if (edrvInstance_l.pRxVethHookInst == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Rx hook creation for Veth frames failed!\n", __func__);

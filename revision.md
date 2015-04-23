@@ -5,6 +5,51 @@ Revision history of openPOWERLINK Protocol Stack {#page_revision_history}
 
 # Release 2 {#sect_revision_v2}
 
+## V2.1.2 {#sect_revision_v2_1_2}
+
+This is the latest release of the V2.1 release series. This release is a stable
+release, it contains fixes and optimizations.
+
+Following is a summary of changes in V2.1.2. For a detailed revision history
+refer to the Git source code history.
+
+### Fixes:
+- Fix deferred Rx buffer macro name
+- Limit async scheduler by deferred Rx buffer
+- Fix MN assigns unrequested async slots
+- Fix CiA401 CN XDD conformance issue
+- Fix the maximum interrupt id check in dualprocshm
+- Avoid null pointer call in hostifIrqSyncCb()
+- Fix activity LED generation for openMAC
+- Fix  pcap driver crash in demo apps
+- Discard invalid PDOs
+- Fix check of multiple bits in nmtmnu.c
+- Process NMT command data in received NMT request frames
+- Fix payload of first segment of WriteByIndex
+- Reset fDoStore in CFM NodeInfo structure if not required
+- Initialize and reset error for CN progress call back in CFM
+- Use correct node linked list on deletion of local node
+- Fix possible use after free of Tx buffer list in dllknode.c
+- Use IRQ-aware spinlocks in circbuf-linuxkernel.c
+- Unlink Linux semaphores before creating new ones
+- Mask real-time signals in QT demo main() before QApplication
+- Add fixes in timer-linuxuser
+
+- Several source code and documentation cleanups
+
+### Additions:
+- Add new AInv event to debugstr.c
+
+### Changes:
+- Store sync response callback functions queue-based
+- Improve object related debug print
+- Change demo_mn_qt to show argument on errors from OBD module
+- Add improvements for edrv8111
+- Change stack and app CMake files to work when called by a top-level CMake file
+
+### Known Issues:
+- Xilinx Zynq MN (see 2.1.0)
+
 ## V2.1.1 {#sect_revision_v2_1_1}
 
 This is the latest release of the V2.1 release series. This release is a stable

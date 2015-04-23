@@ -404,10 +404,12 @@ tOplkError dllkcal_process(tEvent* pEvent_p)
             ret = dllk_config(pConfigParam);
             break;
 
-#if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC != FALSE || CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC != FALSE
+#if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC == TRUE
         case kEventTypeReleaseRxFrame:
             pFrameInfo = (tFrameInfo*)pEvent_p->pEventArg;
             ret = dllk_releaseRxFrame(pFrameInfo->pFrame, pFrameInfo->frameSize);
+            if (ret == kErrorOk)
+                instance_l.statistics.curRxFrameCount--;
             break;
 #endif
 
@@ -561,17 +563,17 @@ tOplkError dllkcal_asyncFrameReceived(tFrameInfo* pFrameInfo_p)
 #endif
 
     ret = eventk_postEvent(&event);
-    if (ret != kErrorOk)
+#if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC == TRUE
+    if (ret == kErrorOk)
     {
+        // Update statistics to track number of Rx frames in kernel-to-user queue
         instance_l.statistics.curRxFrameCount++;
-    }
-    else
-    {
-        instance_l.statistics.maxRxFrameCount++;
-#if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC != FALSE
+        if (instance_l.statistics.curRxFrameCount > instance_l.statistics.maxRxFrameCount)
+            instance_l.statistics.maxRxFrameCount = instance_l.statistics.curRxFrameCount;
+
         ret = kErrorReject; // Signalizes dllk to release buffer later
-#endif
     }
+#endif
 
     return ret;
 }
@@ -879,6 +881,19 @@ tOplkError dllkcal_getSoaRequest(tDllReqServiceId* pReqServiceId_p,
     tOplkError      ret = kErrorOk;
     UINT            count;
 
+#if (CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC == TRUE && defined(CONFIG_EDRV_ASND_DEFERRED_RX_BUFFERS))
+    // At the same time another frame could be waiting in the Rx queue of the MAC,
+    // which is not yet handled by the software layers. This case is considered
+    // by correcting the curRxFrameCount.
+    if (instance_l.statistics.curRxFrameCount + 1 >= CONFIG_EDRV_ASND_DEFERRED_RX_BUFFERS)
+    {
+        // Edrv has no more asynchronous Rx buffers, thus, do not assign the
+        // next asynchronous phase to any node. Otherwise the MAC would drop
+        // those asynchronous frames anyway.
+        goto Exit;
+    }
+#endif
+
     for (count = DLLKCAL_MAX_QUEUES; count > 0; count--)
     {
         switch (instance_l.nextRequestQueue)
@@ -976,6 +991,47 @@ tOplkError dllkcal_setAsyncPendingRequests(UINT nodeId_p,
 
     return ret;
 }
+
+//------------------------------------------------------------------------------
+/**
+\brief Acknowledge a pending asynchronous request
+
+The function acknowledges a pending asynchronous frame request of the specified
+node.
+
+\param  nodeId_p                Specifies the node to acknowledge the request.
+\param  reqServiceId_p          The request service ID.
+
+\return The function returns a tOplkError error code.
+
+\ingroup module_dllkcal
+*/
+//------------------------------------------------------------------------------
+tOplkError dllkcal_ackAsyncRequest(UINT nodeId_p, tDllReqServiceId reqServiceId_p)
+{
+    tOplkError  ret = kErrorOk;
+    UINT*       pLocalRequestCnt;
+
+    switch (reqServiceId_p)
+    {
+        case kDllReqServiceNmtRequest:
+            pLocalRequestCnt = &instance_l.aCnRequestCntNmt[nodeId_p-1];
+            break;
+
+        case kDllReqServiceUnspecified:
+            pLocalRequestCnt = &instance_l.aCnRequestCntGen[nodeId_p-1];
+            break;
+
+        default:
+            // No need to handle other requests
+            return ret;
+    }
+
+    if (*pLocalRequestCnt > 0)
+        (*pLocalRequestCnt)--;
+
+    return ret;
+}
 #endif
 
 //============================================================================//
@@ -1018,7 +1074,7 @@ static BOOL getCnGenRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p)
             {
                 *pNodeId_p = rxNodeId;
                 *pReqServiceId_p = kDllReqServiceUnspecified;
-                instance_l.aCnRequestCntGen[rxNodeId-1]--;
+                // dllkcal_ackAsyncRequest() will decrement the request count!
 
                 return TRUE;
             }
@@ -1064,7 +1120,7 @@ static BOOL getCnNmtRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p)
             {
                 *pNodeId_p = rxNodeId;
                 *pReqServiceId_p = kDllReqServiceNmtRequest;
-                instance_l.aCnRequestCntNmt[rxNodeId-1]--;
+                // dllkcal_ackAsyncRequest() will decrement the request count!
 
                 return TRUE;
             }

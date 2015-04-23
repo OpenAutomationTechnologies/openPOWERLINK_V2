@@ -34,11 +34,11 @@ MESSAGE(STATUS "CMAKE_SYSTEM_PROCESSOR is ${CMAKE_SYSTEM_PROCESSOR}")
 ################################################################################
 # Set global directories
 ################################################################################
-SET(OPLK_ROOT_DIR ${CMAKE_SOURCE_DIR}/../..)
-SET(DEMO_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src)
-SET(DEMO_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
-SET(COMMON_SOURCE_DIR ${CMAKE_SOURCE_DIR}/../common/src)
-SET(OPENCONFIG_PROJ_DIR ${CMAKE_SOURCE_DIR}/../common/openCONFIGURATOR_projects)
+SET(OPLK_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../..)
+SET(DEMO_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
+SET(DEMO_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
+SET(COMMON_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../common/src)
+SET(OPENCONFIG_PROJ_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../common/openCONFIGURATOR_projects)
 SET(CONTRIB_SOURCE_DIR ${OPLK_ROOT_DIR}/contrib)
 SET(OPLK_INCLUDE_DIR ${OPLK_ROOT_DIR}/stack/include)
 SET(TOOLS_DIR ${OPLK_ROOT_DIR}/tools)
@@ -47,7 +47,7 @@ SET(BOARDS_DIR ${OPLK_ROOT_DIR}/hardware/boards)
 ################################################################################
 # Include CMake Modules
 ################################################################################
-SET(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/../common/cmake ${CMAKE_MODULE_PATH})
+SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../common/cmake ${CMAKE_MODULE_PATH})
 
 # include standard cmake modules
 INCLUDE(CMakeDependentOption)

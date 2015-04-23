@@ -40,7 +40,7 @@ STRING(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" SYSTEM_PROCESSOR_DIR)
 
 IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   SET(CMAKE_INSTALL_PREFIX
-    ${CMAKE_SOURCE_DIR}/lib/${SYSTEM_NAME_DIR}/${SYSTEM_PROCESSOR_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/${SYSTEM_NAME_DIR}/${SYSTEM_PROCESSOR_DIR}
     CACHE PATH "openPOWERLINK library install prefix" FORCE
     )
 ENDIF()
@@ -75,7 +75,7 @@ ENDIF()
 # Set global definitions
 ################################################################################
 
-SET(OPLK_BASE_DIR ${CMAKE_SOURCE_DIR}/..)
+SET(OPLK_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
 INCLUDE(cmake/directories.cmake)
 INCLUDE(cmake/stackfiles.cmake)

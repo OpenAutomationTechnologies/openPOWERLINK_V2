@@ -5,7 +5,7 @@
 \brief  Implementation of user sync module
 
 This file contains the implementation of the sync module which is responsible
-for handliny SyncReq/SyncResp frames used with PollResponse Chaining.
+for handling SyncReq/SyncResp frames used with PollResponse Chaining.
 
 \ingroup module_syncu
 *******************************************************************************/
@@ -71,13 +71,34 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+#define SYNCU_RESPQUEUE_LENGTH      8
 
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
+
+/**
+\brief Sync Response Queue
+
+This struct defines the queue storing the callback functions to be called when
+a sync response frame is received.
+*/
 typedef struct
 {
-    tSyncuCbResponse        apfnCbResponse[254];
+    tSyncuCbResponse    apfnCallback[SYNCU_RESPQUEUE_LENGTH];   ///< Array storing the callbacks
+    UINT8               writeIndex;                             ///< Queue write index
+    UINT8               readIndex;                              ///< Queue read index
+    UINT8               level;                                  ///< Queue fill level
+} tSyncuResponseQueue;
+
+/**
+\brief User sync module instance
+
+The following structure defines the instance variable of the user sync module.
+*/
+typedef struct
+{
+    tSyncuResponseQueue aSyncRespQueue[NMT_MAX_NODE_ID];    ///< Sync response queue
 } tSyncuInstance;
 
 //------------------------------------------------------------------------------
@@ -88,7 +109,9 @@ static tSyncuInstance   syncuInstance_g;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError syncu_cbSyncResponse(tFrameInfo* pFrameInfo_p);
+static tOplkError syncResponseCb(tFrameInfo* pFrameInfo_p);
+static tSyncuCbResponse readResponseQueue(UINT nodeId_p);
+static tOplkError writeResponseQueue(UINT nodeId_p, tSyncuCbResponse pfnCbResp_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -110,7 +133,7 @@ tOplkError syncu_init(void)
     tOplkError ret = kErrorOk;
 
     OPLK_MEMSET(&syncuInstance_g, 0, sizeof(syncuInstance_g));
-    ret = dllucal_regAsndService(kDllAsndSyncResponse, syncu_cbSyncResponse,
+    ret = dllucal_regAsndService(kDllAsndSyncResponse, syncResponseCb,
                                  kDllAsndFilterAny);
 
     return ret;
@@ -173,10 +196,10 @@ tOplkError syncu_requestSyncResponse(tSyncuCbResponse pfnCbResponse_p,
                                      tDllSyncRequest* pSyncRequestData_p,
                                      UINT size_p)
 {
-    tOplkError      ret;
-    UINT            nodeId;
+    tOplkError  ret = kErrorOk;
+    UINT        nodeId;
+    UINT        index;
 
-    ret = kErrorOk;
     nodeId = pSyncRequestData_p->nodeId;
 
     if (nodeId == 0)
@@ -184,17 +207,13 @@ tOplkError syncu_requestSyncResponse(tSyncuCbResponse pfnCbResponse_p,
         return kErrorInvalidNodeId;
     }
 
-    // decrement node ID, because array is zero based
-    nodeId--;
-    if (nodeId < tabentries(syncuInstance_g.apfnCbResponse))
+    index = nodeId - 1;
+
+    if (index < tabentries(syncuInstance_g.aSyncRespQueue))
     {
-        if (syncuInstance_g.apfnCbResponse[nodeId] != NULL)
-        {   // request already issued (maybe by someone else)
-            ret = kErrorNmtSyncReqRejected;
-        }
-        else
+        ret = writeResponseQueue(nodeId, pfnCbResponse_p);
+        if (ret == kErrorOk)
         {
-            syncuInstance_g.apfnCbResponse[nodeId] = pfnCbResponse_p;
             ret = dllucal_issueSyncRequest(pSyncRequestData_p, size_p);
         }
     }
@@ -223,32 +242,26 @@ SyncResponse is received.
                                 the received SyncResponse frame.
 
 \return The function returns a tOplkError error code.
-
-\ingroup module_identu
 */
 //------------------------------------------------------------------------------
-static tOplkError syncu_cbSyncResponse(tFrameInfo* pFrameInfo_p)
+static tOplkError syncResponseCb(tFrameInfo* pFrameInfo_p)
 {
-    tOplkError          ret;
+    tOplkError          ret = kErrorOk;
     UINT                nodeId;
     UINT                index;
     tSyncuCbResponse    pfnCbResponse;
 
-    ret = kErrorOk;
-
     nodeId = ami_getUint8Le(&pFrameInfo_p->pFrame->srcNodeId);
     index  = nodeId - 1;
 
-    if (index < tabentries(syncuInstance_g.apfnCbResponse))
+    if (index < tabentries(syncuInstance_g.aSyncRespQueue))
     {
         // memorize pointer to callback function
-        pfnCbResponse = syncuInstance_g.apfnCbResponse[index];
+        pfnCbResponse = readResponseQueue(nodeId);
         if (pfnCbResponse == NULL)
         {   // response was not requested
             return ret;
         }
-        // reset callback function pointer so that caller may issue next request
-        syncuInstance_g.apfnCbResponse[index] = NULL;
 
         if (pFrameInfo_p->frameSize < C_DLL_MINSIZE_SYNCRES)
         {   // SyncResponse not received or it has invalid size
@@ -260,6 +273,74 @@ static tOplkError syncu_cbSyncResponse(tFrameInfo* pFrameInfo_p)
         }
     }
     return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Read from sync response queue
+
+The function reads from the sync response queue to get a callback for the given
+node.
+
+\param  nodeId_p                Node ID of the sync response
+
+\return The function returns the callback function.
+\retval NULL        No callback function was read from the queue.
+*/
+//------------------------------------------------------------------------------
+static tSyncuCbResponse readResponseQueue(UINT nodeId_p)
+{
+    tSyncuCbResponse        pfnRet;
+    tSyncuResponseQueue*    pSyncRespQueue;
+
+    pSyncRespQueue = &syncuInstance_g.aSyncRespQueue[nodeId_p - 1];
+
+    if (pSyncRespQueue->level == 0)
+        return NULL; // No queue entry available
+
+    pfnRet = pSyncRespQueue->apfnCallback[pSyncRespQueue->readIndex];
+
+    pSyncRespQueue->readIndex++;
+    if (pSyncRespQueue->readIndex == SYNCU_RESPQUEUE_LENGTH)
+        pSyncRespQueue->readIndex = 0;
+
+    pSyncRespQueue->level--;
+
+    return pfnRet;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Write to sync response queue
+
+The function writes to the sync response queue to store a callback for the given
+node.
+
+\param  nodeId_p                Node ID of the sync response
+\param  pfnCbResp_p             Pointer to the SyncResponse callback function
+                                to be called.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError writeResponseQueue(UINT nodeId_p, tSyncuCbResponse pfnCbResp_p)
+{
+    tSyncuResponseQueue*    pSyncRespQueue;
+
+    pSyncRespQueue = &syncuInstance_g.aSyncRespQueue[nodeId_p - 1];
+
+    if (pSyncRespQueue->level == SYNCU_RESPQUEUE_LENGTH)
+        return kErrorNmtSyncReqRejected; // Queue is full
+
+    pSyncRespQueue->apfnCallback[pSyncRespQueue->writeIndex] = pfnCbResp_p;
+
+    pSyncRespQueue->writeIndex++;
+    if (pSyncRespQueue->writeIndex == SYNCU_RESPQUEUE_LENGTH)
+        pSyncRespQueue->writeIndex = 0;
+
+    pSyncRespQueue->level++;
+
+    return kErrorOk;
 }
 
 ///\}

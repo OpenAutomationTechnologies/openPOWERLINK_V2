@@ -36,7 +36,7 @@ MESSAGE(STATUS "Configuring demo_cn_console")
 
 CMAKE_MINIMUM_REQUIRED (VERSION 2.8.7)
 
-INCLUDE(../common/cmake/options.cmake)
+INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/../common/cmake/options.cmake)
 
 ################################################################################
 # Setup project files and definitions
