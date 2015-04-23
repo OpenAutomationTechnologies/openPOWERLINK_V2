@@ -497,8 +497,10 @@ static void* processThread(void* pArgument_p)
                 /* call callback function of timer */
                 cbTimer((ULONG)pTimer);
             else
+            {
                 DEBUG_LVL_ERROR_TRACE("%s() sival_ptr==NULL code=%d\n", __func__,
                                       signalInfo.si_code);
+            }
         }
     }
 
