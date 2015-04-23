@@ -54,6 +54,7 @@ INCLUDE(CMakeDependentOption)
 
 # include project specific modules
 INCLUDE(findoplklib)
+INCLUDE(linkoplklib)
 
 ################################################################################
 # Set options

@@ -120,8 +120,7 @@ ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/mnobd.cdc
 
 ################################################################################
 # Libraries to link
-
-TARGET_LINK_LIBRARIES(demo_mn_console optimized ${OPLKLIB} debug ${OPLKLIB_DEBUG})
+OPLK_LINK_LIBRARIES(demo_mn_console)
 TARGET_LINK_LIBRARIES(demo_mn_console ${ARCH_LIBRARIES})
 
 ################################################################################

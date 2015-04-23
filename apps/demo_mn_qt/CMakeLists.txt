@@ -161,7 +161,7 @@ ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/mnobd.cdc
 ################################################################################
 # Libraries to link
 
-TARGET_LINK_LIBRARIES(demo_mn_qt optimized ${OPLKLIB} debug ${OPLKLIB_DEBUG})
+OPLK_LINK_LIBRARIES(demo_mn_qt)
 TARGET_LINK_LIBRARIES(demo_mn_qt ${ARCH_LIBRARIES} ${QT_LIBRARIES})
 
 ################################################################################

@@ -106,7 +106,7 @@ SET_PROPERTY(TARGET demo_cn_console
 ################################################################################
 # Libraries to link
 
-TARGET_LINK_LIBRARIES(demo_cn_console optimized ${OPLKLIB} debug ${OPLKLIB_DEBUG})
+OPLK_LINK_LIBRARIES(demo_cn_console)
 TARGET_LINK_LIBRARIES(demo_cn_console ${ARCH_LIBRARIES})
 
 ################################################################################

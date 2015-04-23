@@ -9,10 +9,13 @@ The following section describes how the delivered demo applications can be
 built. The demo applications are located in the directory `apps`. The default
 binary installation path is: `<openPOWERLINK_DIR>/bin/<platform>/<ARCH>`
 
-__NOTE:__ In order to be able to build an application, both, the Debug and the
-Release library versions must be available. If one of the libraries is missing
-you get an OPLKLIB-NOTFOUND or OPLKLIB_DEBUG-NOTFOUND error in the demos
-CMake configuration.
+__NOTE:__ In order to be able to build an application, the Debug or the
+Release library versions must be available, depending on your CMAKE_BUILD_TYPE.
+If the needed library is missing you get an OPLKLIB-NOTFOUND or
+OPLKLIB_DEBUG-NOTFOUND error in the demos CMake configuration.
+If you use the Visual Studio generator on Windows, both libraries must be
+available as you can swith between Debug and Release inside the Visual Studio
+solution.
 
 
 ## Building on Linux {#sect_build_demos_build_linux}

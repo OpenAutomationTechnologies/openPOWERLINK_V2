@@ -94,7 +94,7 @@ SET_PROPERTY(TARGET ${EXECUTABLE_NAME}
 ################################################################################
 # Libraries to link
 
-TARGET_LINK_LIBRARIES(${EXECUTABLE_NAME} optimized ${OPLKLIB} debug ${OPLKLIB_DEBUG})
+OPLK_LINK_LIBRARIES(${EXECUTABLE_NAME})
 TARGET_LINK_LIBRARIES(${EXECUTABLE_NAME} ${ARCH_LIBRARIES})
 
 ################################################################################
