@@ -14,7 +14,7 @@ PollResponse Chaining mode of operation, dynamic and static PDO mapping, SDO
 via ASnd and SDO via UDP, as well as asynchronous communication via a Virtual
 Ethernet interface.
 
-Latest stable version: [2.1.1](\ref sect_revision_v2_1_1)
+Latest stable version: [2.1.2](\ref sect_revision_v2_1_2)
 
 ## License
 
@@ -58,7 +58,7 @@ Support on openPOWERLINK is available via the online discussion forums:
 openPOWERLINK can be downloaded from its SourceForge project site:
 
 * Sourcecode: [tar.gz](http://sourceforge.net/projects/openpowerlink/files/
-openPOWERLINK/V2.1.1/openPOWERLINK-V2.1.1.tar.gz)
+openPOWERLINK/V2.1.2/openPOWERLINK-V2.1.2.tar.gz)
 
 
 ## Contributors
