@@ -120,16 +120,15 @@ FOREACH(BOARD_DIR IN ITEMS ${BOARD_DIRS})
                         IF(DEFINED ${CFG_PREFIX}_HOSTIF_ENABLE  OR (NOT ${${CFG_PREFIX}HOSTIF_ENABLE} STREQUAL ""))
                             SET(SEL_CPU_NAME ${${CFG_PREFIX}_NAME})
                             ADD_SUBDIRECTORY(${HOSTIF_BASE_DIR} ${HOSTIF_BUILD_DIR}/${BOARD_NAME}/${EXAMPLE_NAME}/${${CFG_PREFIX}_NAME})
-                        ENDIF()
 
                         # Create targets for building the dual processor library
-                        IF(DEFINED ${CFG_PREFIX}_DUALPROCSHM_ENABLE  OR (NOT ${${CFG_PREFIX}_DUALPROCSHM_ENABLE} STREQUAL ""))
+                        ELSEIF(DEFINED ${CFG_PREFIX}_DUALPROCSHM_ENABLE  OR (NOT ${${CFG_PREFIX}_DUALPROCSHM_ENABLE} STREQUAL ""))
                             SET(SEL_CPU_NAME ${${CFG_PREFIX}_NAME})
                             ADD_SUBDIRECTORY(${DUALPROCSHM_BASE_DIR} ${DUALPROCSHM_BUILD_DIR}/${BOARD_NAME}/${EXAMPLE_NAME}/${${CFG_PREFIX}_NAME})
                         ENDIF()
 
                         # Create targets for building SDCARD FAT16 library
-                        IF( NOT ${CFG_CDC_ONSDCARD} STREQUAL "" AND ${PROC_INST_NAME} STREQUAL HOST)
+                        IF(CFG_FAT_SUPPORT AND ${PROC_INST_NAME} STREQUAL HOST)
                             IF(DEFINED CFG_HOST_NAME  OR (NOT ${CFG_HOST_NAME} STREQUAL ""))
                                 SET(SEL_CPU_NAME ${${CFG_PREFIX}_NAME})
                                 ADD_SUBDIRECTORY(${SDFAT16_BASE_DIR} ${SDFAT16_BUILD_DIR}/${BOARD_NAME}/${EXAMPLE_NAME}/${CFG_HOST_NAME})

@@ -44,7 +44,7 @@ SET(LIB_ARCH_INCS
 ADD_DEFINITIONS(${XIL_${PROC_INST_NAME}_FLAGS} "-fmessage-length=0 -mcpu=${CFG_${PROC_INST_NAME}_CPU_VERSION} -ffunction-sections -fdata-sections -fno-inline")
 
 IF(DEFINED CFG_DEMO_BOARD_ZYNQ AND CFG_DEMO_BOARD_ZYNQ)
-    ADD_DEFINITIONS("-D__ZYNQ__")
+    ADD_DEFINITIONS("-D__ZYNQ__ -D__xilinx_arm__")
 ENDIF()
 
 ################################################################################
