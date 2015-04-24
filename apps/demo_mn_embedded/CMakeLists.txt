@@ -44,10 +44,10 @@ INCLUDE(../common/cmake/options.cmake)
 SET(OBJDICT CiA302-4_MN)              # Set object dictionary to use
 FIND_OPLK_LIBRARY("mn")
 
-IF (NOT DEFINED CFG_CDC_ONSDCARD)
-    SET(CFG_CDC_ON_SD OFF CACHE BOOL "CDC is compiled with application")
+IF (CFG_FAT_SUPPORT)
+    SET(CFG_CDC_ON_SD ON CACHE BOOL "CDC on external SD card; to compile the cdc with application uncheck this option.")
 ELSE()
-    SET(CFG_CDC_ON_SD ON CACHE BOOL "CDC on external SDCARD")
+    UNSET(CFG_CDC_ON_SD)
 ENDIF()
 
 SET(CFG_CFM ON CACHE BOOL "Use Configuration Manager (CFM)")
