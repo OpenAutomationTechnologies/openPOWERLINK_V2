@@ -2183,27 +2183,31 @@ static tOplkError processReceivedAmni(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtS
     event.pEventArg = &nodeId;
     ret = eventk_postEvent(&event);
 
-    if (!NMT_IF_ACTIVE(nmtState_p))
-    {   // not in POWERLINK mode
+    if (!NMT_IF_ACTIVE_CN(nmtState_p))
+    {   // not a Standby Managing Node
         return ret;
     }
 
     // reprogram timer
     if (dllkInstance_g.fRedundancy)
     {
-        if ((nmtState_p == kNmtCsPreOperational1) ||
-            (nmtState_p == kNmtMsPreOperational1))
+        ULONGLONG   switchOverTime;
+
+        switch (nmtState_p)
         {
-            hrestimer_modifyTimer(&dllkInstance_g.timerHdlSwitchOver,
-                                  dllkInstance_g.dllConfigParam.reducedSwitchOverTimeMn * 1000ULL,
-                                  dllk_cbTimerSwitchOver, 0L, FALSE);
+            case kNmtCsPreOperational1:
+                switchOverTime = dllkInstance_g.dllConfigParam.reducedSwitchOverTimeMn * 1000ULL;
+                break;
+            case kNmtCsOperational:
+                switchOverTime = dllkInstance_g.dllConfigParam.switchOverTimeMn * 1000ULL;
+                break;
+            default:
+                switchOverTime = dllkInstance_g.dllConfigParam.delayedSwitchOverTimeMn * 1000ULL;
+                break;
         }
-        else
-        {
-            hrestimer_modifyTimer(&dllkInstance_g.timerHdlSwitchOver,
-                                  dllkInstance_g.dllConfigParam.switchOverTimeMn * 1000ULL,
-                                  dllk_cbTimerSwitchOver, 0L, FALSE);
-        }
+
+        hrestimer_modifyTimer(&dllkInstance_g.timerHdlSwitchOver, switchOverTime,
+                              dllk_cbTimerSwitchOver, 0L, FALSE);
     }
     return ret;
 }
