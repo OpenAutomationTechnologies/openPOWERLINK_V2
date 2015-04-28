@@ -196,11 +196,11 @@ tOplkError synctimer_init(void)
 
     OPLK_MEMSET(&instance_l, 0, sizeof(instance_l));
 
-    openmac_timerIrqDisable(HWTIMER_SYNC);
-    openmac_timerSetCompareValue(HWTIMER_SYNC, 0);
+    OPENMAC_TIMERIRQDISABLE(HWTIMER_SYNC);
+    OPENMAC_TIMERSETCOMPAREVALUE(HWTIMER_SYNC, 0);
 #ifdef TIMER_USE_EXT_SYNC_INT
-    openmac_timerIrqDisable(HWTIMER_EXT_SYNC);
-    openmac_timerSetCompareValue(HWTIMER_EXT_SYNC, 0);
+    OPENMAC_TIMERIRQDISABLE(HWTIMER_EXT_SYNC);
+    OPENMAC_TIMERSETCOMPAREVALUE(HWTIMER_EXT_SYNC, 0);
 #endif //TIMER_USE_EXT_SYNC_INT
 
     ret = openmac_isrReg(kOpenmacIrqSync, drvInterruptHandler, NULL);
@@ -223,11 +223,11 @@ tOplkError synctimer_exit(void)
 {
     tOplkError ret = kErrorOk;
 
-    openmac_timerIrqDisable(HWTIMER_SYNC);
-    openmac_timerSetCompareValue(HWTIMER_SYNC, 0);
+    OPENMAC_TIMERIRQDISABLE(HWTIMER_SYNC);
+    OPENMAC_TIMERSETCOMPAREVALUE(HWTIMER_SYNC, 0);
 #ifdef TIMER_USE_EXT_SYNC_INT
-    openmac_timerIrqDisable(HWTIMER_EXT_SYNC);
-    openmac_timerSetCompareValue(HWTIMER_EXT_SYNC, 0);
+    OPENMAC_TIMERIRQDISABLE(HWTIMER_EXT_SYNC);
+    OPENMAC_TIMERSETCOMPAREVALUE(HWTIMER_EXT_SYNC, 0);
 #endif //TIMER_USE_EXT_SYNC_INT
 
     openmac_isrReg(kOpenmacIrqSync, NULL, NULL);
@@ -497,7 +497,7 @@ void synctimer_enableExtSyncIrq(UINT32 syncIntCycle_p, UINT32 pulseWidth_p)
     instance_l.fExtSyncEnable = TRUE;
     instance_l.syncIntCycle = syncIntCycle_p;
 
-    openmac_timerIrqEnable(HWTIMER_EXT_SYNC, pulseWidth_p);
+    OPENMAC_TIMERIRQENABLEPW(HWTIMER_EXT_SYNC, pulseWidth_p);
 }
 
 //------------------------------------------------------------------------------
@@ -516,7 +516,7 @@ void synctimer_disableExtSyncIrq(void)
     instance_l.fExtSyncEnable = FALSE;
     instance_l.syncIntCycle = 0;
 
-    openmac_timerIrqDisable(HWTIMER_EXT_SYNC);
+    OPENMAC_TIMERIRQDISABLE(HWTIMER_EXT_SYNC);
 }
 #endif //TIMER_USE_EXT_SYNC_INT
 
@@ -893,7 +893,7 @@ static void drvConfigureShortestTimer(void)
     UINT32      targetAbsoluteTime;
     UINT32      currentTime;
 
-    openmac_timerIrqDisable(HWTIMER_SYNC);
+    OPENMAC_TIMERIRQDISABLE(HWTIMER_SYNC);
 
     nextTimerHdl = drvFindShortestTimer();
     if (nextTimerHdl != TIMER_HDL_INVALID)
@@ -903,20 +903,20 @@ static void drvConfigureShortestTimer(void)
         instance_l.activeTimerHdl = nextTimerHdl;
         targetAbsoluteTime = pTimerInfo->absoluteTime;
 
-        currentTime = openmac_timerGetTimeValue(HWTIMER_SYNC);
+        currentTime = OPENMAC_TIMERGETTIMEVALUE();
         if ((LONG)(targetAbsoluteTime - currentTime) < TIMER_DRV_MIN_TIME_DIFF)
         {
             targetAbsoluteTime = currentTime + TIMER_DRV_MIN_TIME_DIFF;
         }
 
-        openmac_timerSetCompareValue(HWTIMER_SYNC, targetAbsoluteTime);
+        OPENMAC_TIMERSETCOMPAREVALUE(HWTIMER_SYNC, targetAbsoluteTime);
 
         // enable timer
-        openmac_timerIrqEnable(HWTIMER_SYNC, 0);
+        OPENMAC_TIMERIRQENABLE(HWTIMER_SYNC);
     }
     else
     {
-        openmac_timerSetCompareValue(HWTIMER_SYNC, 0);
+        OPENMAC_TIMERSETCOMPAREVALUE(HWTIMER_SYNC, 0);
 
         instance_l.activeTimerHdl = TIMER_HDL_INVALID;
     }
@@ -942,7 +942,7 @@ static void drvCalcExtSyncIrqValue(void)
         pTimerInfo = &instance_l.aTimerInfo[TIMER_HDL_SYNC];
         targetAbsoluteTime = pTimerInfo->absoluteTime;
 
-        openmac_timerSetCompareValue(HWTIMER_EXT_SYNC,
+        OPENMAC_TIMERSETCOMPAREVALUE(HWTIMER_EXT_SYNC,
                                      targetAbsoluteTime -
                                      instance_l.meanTimeDiff +    // minus one cycle
                                      instance_l.advanceShift);    // plus sync shift
@@ -989,7 +989,7 @@ static void drvInterruptHandler(void* pArg_p)
             pTimerInfo = &instance_l.aTimerInfo[timerHdl];
 
             if ((pTimerInfo->fEnable != FALSE) &&
-                ((LONG)(pTimerInfo->absoluteTime - openmac_timerGetTimeValue(HWTIMER_SYNC)) < TIMER_DRV_MIN_TIME_DIFF))
+                ((LONG)(pTimerInfo->absoluteTime - OPENMAC_TIMERGETTIMEVALUE()) < TIMER_DRV_MIN_TIME_DIFF))
             {
                 pTimerInfo->absoluteTime = ctrlGetNextAbsoluteTime(nextTimerHdl, pTimerInfo->absoluteTime);
 

@@ -131,8 +131,8 @@ tOplkError hrestimer_init(void)
 
     OPLK_MEMSET(&instance_l, 0, sizeof(instance_l));
 
-    openmac_timerIrqDisable(HWTIMER_SYNC);
-    openmac_timerSetCompareValue(HWTIMER_SYNC, 0);
+    OPENMAC_TIMERIRQDISABLE(HWTIMER_SYNC);
+    OPENMAC_TIMERSETCOMPAREVALUE(HWTIMER_SYNC, 0);
 
     ret = openmac_isrReg(kOpenmacIrqSync, drvInterruptHandler, NULL);
 
@@ -154,8 +154,8 @@ tOplkError hrestimer_exit(void)
 {
     tOplkError ret = kErrorOk;
 
-    openmac_timerIrqDisable(HWTIMER_SYNC);
-    openmac_timerSetCompareValue(HWTIMER_SYNC, 0);
+    OPENMAC_TIMERIRQDISABLE(HWTIMER_SYNC);
+    OPENMAC_TIMERSETCOMPAREVALUE(HWTIMER_SYNC, 0);
 
     openmac_isrReg(kOpenmacIrqSync, NULL, NULL);
 
@@ -234,7 +234,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
 
     // modify slice timer
     pTimerInfo = &instance_l.timerInfo;
-    openmac_timerIrqDisable(HWTIMER_SYNC);
+    OPENMAC_TIMERIRQDISABLE(HWTIMER_SYNC);
 
     // increment timer handle (if timer expires right after this statement,
     // the user would detect an unknown timer handle and discard it)
@@ -264,11 +264,11 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
 
     timeSteps = OMETH_NS_2_TICKS(timeNs);
 
-    timeSteps += openmac_timerGetTimeValue(HWTIMER_SYNC);
-    openmac_timerSetCompareValue(HWTIMER_SYNC, timeSteps);
+    timeSteps += OPENMAC_TIMERGETTIMEVALUE();
+    OPENMAC_TIMERSETCOMPAREVALUE(HWTIMER_SYNC, timeSteps);
 
     // enable timer
-    openmac_timerIrqEnable(HWTIMER_SYNC, 0);
+    OPENMAC_TIMERIRQENABLE(HWTIMER_SYNC);
 
 Exit:
     return ret;
@@ -325,8 +325,8 @@ tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
 
     *pTimerHdl_p = 0;
 
-    openmac_timerIrqDisable(HWTIMER_SYNC);
-    openmac_timerSetCompareValue(HWTIMER_SYNC, 0);
+    OPENMAC_TIMERIRQDISABLE(HWTIMER_SYNC);
+    OPENMAC_TIMERSETCOMPAREVALUE(HWTIMER_SYNC, 0);
 
 Exit:
     return ret;
@@ -353,8 +353,8 @@ static void drvInterruptHandler(void* pArg_p)
 
     BENCHMARK_MOD_24_SET(4);
 
-    openmac_timerSetCompareValue(HWTIMER_SYNC, 0);
-    openmac_timerIrqDisable(HWTIMER_SYNC);
+    OPENMAC_TIMERSETCOMPAREVALUE(HWTIMER_SYNC, 0);
+    OPENMAC_TIMERIRQDISABLE(HWTIMER_SYNC);
 
     if (instance_l.timerInfo.pfnCb != NULL)
     {

@@ -1,10 +1,11 @@
 /**
 ********************************************************************************
-\file   openmac.h
+\file   openmac-nios2.h
 
-\brief  Definition for openMAC drivers
+\brief  Definition for openMAC drivers on Nios II
 
-This file contains definitions used by openMAC Ethernet and timer drivers.
+This file contains definitions used by openMAC Ethernet and timer drivers
+specific to Nios II targets.
 
 *******************************************************************************/
 
@@ -35,8 +36,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-#ifndef _INC_openmac_H_
-#define _INC_openmac_H_
+#ifndef _INC_openmac_nios2_H_
+#define _INC_openmac_nios2_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -45,67 +46,35 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <openmac_cfg.h>
 #include <omethlib.h>
 
-#if (DEV_SYSTEM == _DEV_NIOS2_)
-#include "openmac-nios2.h"
-#elif ((DEV_SYSTEM == _DEV_MICROBLAZE_LITTLE_) || (DEV_SYSTEM == _DEV_MICROBLAZE_BIG_))
-#include "openmac-microblaze.h"
-#else
-#error "Target-specific implementation for openMAC not available!"
-#endif
+#include <sys/alt_cache.h>
+#include <io.h>
+#include <unistd.h>
 
 //------------------------------------------------------------------------------
 // check for correct compilation options
 //------------------------------------------------------------------------------
-//TODO: Check here OPENMAC_PKTLOCTX and OPENMAC_PKTLOCRX configuration
-//      (OPENMAC_PKTBUF_LOCAL and OPENMAC_PKTBUF_EXTERN)
-
-#if (OPENMAC_PKTLOCRX == OPENMAC_PKTBUF_LOCAL && OPENMAC_PKTLOCTX == OPENMAC_PKTBUF_EXTERN)
-#error "This Packet Buffer configuration is not supported!"
-#endif
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define EDRV_PHY_RST_PULSE_MS       10      ///< Phy reset pulse [ms]
-#define EDRV_PHY_RST_READY_MS       5       ///< Phy ready after reset [ms]
 
-#define EDRV_MAX_BUFFER_SIZE        1518    ///< MTU
-#define EDRV_MAX_RX_BUFFERS         16      ///< Number of supported Rx buffers
-#define EDRV_MAX_FILTERS            16      ///< Number of supported Rx Filters
-#define EDRV_MAX_AUTO_RESPONSES     14      ///< Number of supported auto-response
+#define OPENMAC_TIMER_TIMEVAL_OFFSET                        0
+#define OPENMAC_TIMER_CMPVAL_OFFSET(timer_p)                (timer_p * 8 + 0)
+#define OPENMAC_TIMER_CTRL_OFFSET(timer_p)                  (timer_p * 8 + 4)
 
-#define HWTIMER_SYNC            0   ///< Sync hardware timer
-#define HWTIMER_EXT_SYNC        1   ///< External sync hardware timer
-
-#if (OPENMAC_TIMERCNT > 1)
-#define TIMER_USE_EXT_SYNC_INT
-#endif
-
-// borrowed from omethlibint.h
-#define GET_TYPE_BASE(typ, element, ptr)    \
-    ((typ*)( ((size_t)ptr) - (size_t)&((typ*)0)->element ))
+#define OPENMAC_MEMUNCACHED(pMem_p, size_p)                 (UINT8*)alt_remap_uncached(pMem_p, size_p)
+#define OPENMAC_FLUSHDATACACHE(pMem_p, size_p)
+#define OPENMAC_INVALIDATEDATACACHE(pMem_p, size_p)
+#define OPENMAC_GETDMAOBSERVER()                            IORD_16DIRECT(OPENMAC_DOB_BASE, 0)
+#define OPENMAC_TIMERIRQDISABLE(timer_p)                    IOWR_32DIRECT(OPENMAC_TIMER_BASE, OPENMAC_TIMER_CTRL_OFFSET(timer_p), 0)
+#define OPENMAC_TIMERIRQENABLE(timer_p)                     IOWR_32DIRECT(OPENMAC_TIMER_BASE, OPENMAC_TIMER_CTRL_OFFSET(timer_p), 1)
+#define OPENMAC_TIMERIRQENABLEPW(timer_p, pulseWidthNs_p)   IOWR_32DIRECT(OPENMAC_TIMER_BASE, OPENMAC_TIMER_CTRL_OFFSET(timer_p), 1 | OMETH_NS_2_TICKS(pulseWidthNs_p) << 1)
+#define OPENMAC_TIMERSETCOMPAREVALUE(timer_p, val_p)        IOWR_32DIRECT(OPENMAC_TIMER_BASE, OPENMAC_TIMER_CMPVAL_OFFSET(timer_p), val_p)
+#define OPENMAC_TIMERGETTIMEVALUE()                         IORD_32DIRECT(OPENMAC_TIMER_BASE, OPENMAC_TIMER_TIMEVAL_OFFSET)
 
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-typedef void (*tOpenmacIrqCb) (void* pArg_p);
-
-/**
-\brief openMAC IRQ sources
-*/
-typedef enum
-{
-    kOpenmacIrqSync     = 0,    ///< Sync timer Irq
-    kOpenmacIrqTxRx     = 1,    ///< Mac Irq (Tx and Rx)
-    kOpenmacIrqLast             ///< Dummy, count of valid interrupt sources
-} eOpenmacIrqSource;
-
-/**
-\brief openMAC IRQ source data type
-
-Data type for the enumerator \ref eOpenmacIrqSource.
-*/
-typedef UINT32 tOpenmacIrqSource;
 
 //------------------------------------------------------------------------------
 // global variable declarations
@@ -120,13 +89,8 @@ extern "C"
 {
 #endif
 
-tOplkError openmac_isrReg(tOpenmacIrqSource irqSource_p, tOpenmacIrqCb pfnIsrCb_p, void* pArg_p);
-
-UINT8* openmac_uncachedMalloc(UINT size_p);
-void openmac_uncachedFree(UINT8* pMem_p);
-
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_openmac_H_ */
+#endif /* _INC_openmac_nios2_H_ */

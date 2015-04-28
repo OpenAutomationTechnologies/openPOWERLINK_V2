@@ -453,7 +453,7 @@ static tOplkError timerHdlCycleCb(tTimerEventArg* pEventArg_p)
     BENCHMARK_MOD_01_SET(0);
 
     //get timer tick before calling TX Process
-    macTime1 = openmac_timerGetTimeValue(HWTIMER_SYNC);
+    macTime1 = OPENMAC_TIMERGETTIMEVALUE();
 
     ret = processTxBufferList();
 
@@ -463,7 +463,7 @@ static tOplkError timerHdlCycleCb(tTimerEventArg* pEventArg_p)
     }
 
     //get timer tick after calling TX Process
-    macTime2 = openmac_timerGetTimeValue(HWTIMER_SYNC);
+    macTime2 = OPENMAC_TIMERGETTIMEVALUE();
 
     //obtain absolute difference
     macTimeDiff = macTime2 - macTime1;
@@ -527,7 +527,7 @@ static tOplkError processTxBufferList(void)
     tEdrvTxBuffer*  pTxBuffer = NULL;
     UINT32          absoluteTime; //absolute time accumulator
     BOOL            fFirstPkt = TRUE; //flag to identify first packet
-    UINT32          macTimeFctCall = openmac_timerGetTimeValue(HWTIMER_SYNC); //MAC TIME AT FUNCTION CALL
+    UINT32          macTimeFctCall = OPENMAC_TIMERGETTIMEVALUE(); //MAC TIME AT FUNCTION CALL
     UINT32          cycleMin = 0; //absolute minimum cycle time
     UINT32          cycleMax = 0; //absolute maximum cycle time
     UINT32          nextOffsetNs = 0; //next earliest tx time

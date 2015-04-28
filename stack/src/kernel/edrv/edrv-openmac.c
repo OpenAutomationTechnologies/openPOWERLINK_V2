@@ -287,7 +287,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     edrvInstance_l.pTxBufferBase = omethGetTxBufBase(edrvInstance_l.pMacInst);
 #elif OPENMAC_PKTLOCTX == OPENMAC_PKTBUF_LOCAL
     //get tx buffer base
-    edrvInstance_l.pTxBufferBase = openmac_memUncached((void*)OPENMAC_PKT_BASE, OPENMAC_PKT_SPAN);
+    edrvInstance_l.pTxBufferBase = OPENMAC_MEMUNCACHED((void*)OPENMAC_PKT_BASE, OPENMAC_PKT_SPAN);
 #endif
 
     omethStart(edrvInstance_l.pMacInst, TRUE);
@@ -518,7 +518,7 @@ tOplkError edrv_updateTxBuffer(tEdrvTxBuffer* pBuffer_p)
     pPacket->length = pBuffer_p->txFrameSize;
 
     // Flush data cache before handing over the packet buffer to openMAC.
-    openmac_flushDataCache((UINT8*)pPacket, pPacket->length);
+    OPENMAC_FLUSHDATACACHE((UINT8*)pPacket, pPacket->length);
 
     // Update autoresponse buffer
     edrvInstance_l.apTxBuffer[pBuffer_p->txBufferNumber.value] = pBuffer_p;
@@ -1075,7 +1075,7 @@ static ometh_packet_typ* allocTxMsgBufferIntern(tEdrvTxBuffer* pBuffer_p)
 {
     ometh_packet_typ*   pPacket;
     UINT                bufferSize;
-    void*               pBufferBase = openmac_memUncached((void*)OPENMAC_PKT_BASE, OPENMAC_PKT_SPAN);
+    void*               pBufferBase = OPENMAC_MEMUNCACHED((void*)OPENMAC_PKT_BASE, OPENMAC_PKT_SPAN);
 
     // Initialize if no buffer is allocated
     if (edrvInstance_l.txBufferCount == 0)
@@ -1164,7 +1164,7 @@ static void irqHandler(void* pArg_p)
 {
     BENCHMARK_MOD_01_SET(1);
 #if OPENMAC_DMAOBSERV != 0
-    UINT16 dmaObservVal = openmac_getDmaObserver(0);
+    UINT16 dmaObservVal = OPENMAC_GETDMAOBSERVER();
 
     //read DMA observer feature
     if (dmaObservVal != 0)
@@ -1273,7 +1273,7 @@ static INT rxHook(void* pArg_p, ometh_packet_typ* pPacket_p, OMETH_BUF_FREE_FCT*
 
     // Before handing over the Rx packet to the stack invalidate the packet's
     // memory range.
-    openmac_invalidateDataCache((UINT8*)pPacket_p, pPacket_p->length);
+    OPENMAC_INVALIDATEDATACACHE((UINT8*)pPacket_p, pPacket_p->length);
 
     releaseRxBuffer = edrvInstance_l.initParam.pfnRxHandler(&rxBuffer); //pass frame to Powerlink Stack
 
