@@ -349,7 +349,7 @@ tOplkError dllkcal_process(tEvent* pEvent_p)
     tDllNodeOpParam*            pNodeOpParam;
 #endif
 
-#if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC != FALSE || CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC != FALSE
+#if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC == TRUE
     tFrameInfo* pFrameInfo;
 #endif
 
