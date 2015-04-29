@@ -2183,25 +2183,30 @@ static tOplkError processReceivedAmni(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtS
     event.pEventArg = &nodeId;
     ret = eventk_postEvent(&event);
 
-    if (!NMT_IF_ACTIVE(nmtState_p))
-    {   // not in POWERLINK mode
+    if (!NMT_IF_ACTIVE_CN(nmtState_p))
+    {   // not a Standby Managing Node
         return ret;
     }
 
     // reprogram timer
     if (dllkInstance_g.fRedundancy)
     {
-        if ((nmtState_p == kNmtCsPreOperational1) ||
-            (nmtState_p == kNmtMsPreOperational1))
+        if (nmtState_p == kNmtCsPreOperational1)
         {
             hrestimer_modifyTimer(&dllkInstance_g.timerHdlSwitchOver,
                                   dllkInstance_g.dllConfigParam.reducedSwitchOverTimeMn * 1000ULL,
                                   dllk_cbTimerSwitchOver, 0L, FALSE);
         }
-        else
+        else if (nmtState_p == kNmtCsOperational)
         {
             hrestimer_modifyTimer(&dllkInstance_g.timerHdlSwitchOver,
                                   dllkInstance_g.dllConfigParam.switchOverTimeMn * 1000ULL,
+                                  dllk_cbTimerSwitchOver, 0L, FALSE);
+        }
+        else
+        {
+            hrestimer_modifyTimer(&dllkInstance_g.timerHdlSwitchOver,
+                                  dllkInstance_g.dllConfigParam.delayedSwitchOverTimeMn * 1000ULL,
                                   dllk_cbTimerSwitchOver, 0L, FALSE);
         }
     }
