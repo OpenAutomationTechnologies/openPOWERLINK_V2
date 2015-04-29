@@ -748,7 +748,8 @@ add_interface_port      macTimer avs_macTimer_chipselect chipselect Input 1
 add_interface_port      macTimer avs_macTimer_write write Input 1
 add_interface_port      macTimer avs_macTimer_read read Input 1
 add_interface_port      macTimer avs_macTimer_waitrequest waitrequest Output 1
-add_interface_port      macTimer avs_macTimer_address address Input 2
+add_interface_port      macTimer avs_macTimer_address address Input 3
+add_interface_port      macTimer avs_macTimer_byteenable byteenable Input 4
 add_interface_port      macTimer avs_macTimer_writedata writedata Input 32
 add_interface_port      macTimer avs_macTimer_readdata readdata Output 32
 

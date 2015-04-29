@@ -242,7 +242,7 @@ package openmacPkg is
     constant cMacRegDataWidth   : natural := 16;
 
     --! MAC TIMER address width
-    constant cMacTimerAddrWidth : natural := 4;
+    constant cMacTimerAddrWidth : natural := 5;
     --! MAC TIMER data width
     constant cMacTimerDataWidth : natural := 32;
 

@@ -160,6 +160,8 @@ entity openmacTop is
         oMacTimer_waitrequest   : out   std_logic;
         --! MM slave MAC TIMER address
         iMacTimer_address       : in    std_logic_vector(cMacTimerAddrWidth-1 downto 0);
+        --! MM slave MAC TIMER byteenable
+        iMacTimer_byteenable    : in    std_logic_vector(cMacTimerDataWidth/cByteLength-1 downto 0);
         --! MM slave MAC TIMER writedata
         iMacTimer_writedata     : in    std_logic_vector(cMacTimerDataWidth-1 downto 0);
         --! MM slave MAC TIMER readdata
@@ -333,7 +335,8 @@ architecture rtl of openmacTop is
         rst         : std_logic;
         clk         : std_logic;
         write       : std_logic;
-        address     : std_logic_vector(3 downto 2);
+        address     : std_logic_vector(cMacTimerAddrWidth-1 downto 2);
+        byteenable  : std_logic_vector(3 downto 0);
         writedata   : std_logic_vector(31 downto 0);
         readdata    : std_logic_vector(31 downto 0);
         macTime     : std_logic_vector(cMacTimeWidth-1 downto 0);
@@ -804,11 +807,12 @@ begin
         -----------------------------------------------------------------------
         -- The openMAC timer
         -----------------------------------------------------------------------
-        inst_openmacTimer.clk       <= iClk;
-        inst_openmacTimer.rst       <= iRst;
-        inst_openmacTimer.write     <= iMacTimer_write and iMacTimer_chipselect;
-        inst_openmacTimer.address   <= iMacTimer_address(inst_openmacTimer.address'range);
-        inst_openmacTimer.writedata <= iMacTimer_writedata;
+        inst_openmacTimer.clk           <= iClk;
+        inst_openmacTimer.rst           <= iRst;
+        inst_openmacTimer.write         <= iMacTimer_write and iMacTimer_chipselect;
+        inst_openmacTimer.address       <= iMacTimer_address(inst_openmacTimer.address'range);
+        inst_openmacTimer.byteenable    <= iMacTimer_byteenable;
+        inst_openmacTimer.writedata     <= iMacTimer_writedata;
 
         -- this is the mac time
         inst_openmacTimer.macTime   <= inst_openmac.macTime;
@@ -1074,6 +1078,7 @@ begin
             iClk        => inst_openmacTimer.clk,
             iWrite      => inst_openmacTimer.write,
             iAddress    => inst_openmacTimer.address,
+            iByteenable => inst_openmacTimer.byteenable,
             iWritedata  => inst_openmacTimer.writedata,
             oReaddata   => inst_openmacTimer.readdata,
             iMacTime    => inst_openmacTimer.macTime,

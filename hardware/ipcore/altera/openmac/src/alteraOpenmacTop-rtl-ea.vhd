@@ -159,6 +159,8 @@ entity alteraOpenmacTop is
         avs_macTimer_waitrequest    : out   std_logic;
         --! MM slave MAC TIMER address
         avs_macTimer_address        : in    std_logic_vector(cMacTimerAddrWidth-1 downto 2);
+        --! MM slave MAC TIMER byteenable
+        avs_macTimer_byteenable     : in    std_logic_vector(cMacTimerDataWidth/cByteLength-1 downto 0);
         --! MM slave MAC TIMER writedata
         avs_macTimer_writedata      : in    std_logic_vector(cMacTimerDataWidth-1 downto 0);
         --! MM slave MAC TIMER readdata
@@ -382,6 +384,7 @@ begin
         iMacTimer_read          => avs_macTimer_read,
         oMacTimer_waitrequest   => avs_macTimer_waitrequest,
         iMacTimer_address       => macTimer_address,
+        iMacTimer_byteenable    => avs_macTimer_byteenable,
         iMacTimer_writedata     => avs_macTimer_writedata,
         oMacTimer_readdata      => avs_macTimer_readdata,
         iPktBuf_chipselect      => avs_pktBuf_chipselect,

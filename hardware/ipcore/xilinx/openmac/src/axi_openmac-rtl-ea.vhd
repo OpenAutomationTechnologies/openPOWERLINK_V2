@@ -465,6 +465,7 @@ architecture rtl of axi_openmac is
         read        : std_logic;
         waitrequest : std_logic;
         address     : std_logic_vector(cMacTimerAddrWidth-1 downto 0);
+        byteenable  : std_logic_vector(cPktBufDataWidth/cByteLength-1 downto 0);
         writedata   : std_logic_vector(cMacTimerDataWidth-1 downto 0);
         readdata    : std_logic_vector(cMacTimerDataWidth-1 downto 0);
     end record;
@@ -888,6 +889,7 @@ begin
     intf_macTimer.write         <= not xing_macReg.slow.rnw;
     intf_macTimer.read          <= xing_macReg.slow.rnw;
     intf_macTimer.address       <= ipif_macReg.ipif_addr(intf_macTimer.address'range);
+    intf_macTimer.byteenable    <= ipif_macReg.ipif_be;
     intf_macTimer.writedata     <= ipif_macReg.ipif_wrdata;
 
     -- MAC PKT --> ipif_pktBuf
@@ -1050,6 +1052,7 @@ begin
             iMacTimer_read          => intf_macTimer.read,
             oMacTimer_waitrequest   => intf_macTimer.waitrequest,
             iMacTimer_address       => intf_macTimer.address,
+            iMacTimer_byteenable    => intf_macTimer.byteenable,
             iMacTimer_writedata     => intf_macTimer.writedata,
             oMacTimer_readdata      => intf_macTimer.readdata,
             iPktBuf_chipselect      => intf_pktBuf.chipselect,

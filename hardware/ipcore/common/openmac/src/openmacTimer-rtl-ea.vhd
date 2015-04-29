@@ -73,7 +73,9 @@ entity openmacTimer is
         --! Write
         iWrite      : in    std_logic;
         --! Address (dword addressing!)
-        iAddress    : in    std_logic_vector(3 downto 2);
+        iAddress    : in    std_logic_vector(4 downto 2);
+        --! Byteenable
+        iByteenable : in    std_logic_vector(3 downto 0);
         --! Write data
         iWritedata  : in    std_logic_vector(31 downto 0);
         --! Read data
@@ -144,22 +146,53 @@ begin
             --memory mapping
             if iWrite = '1' then
                 case iAddress is
-                    when "00" =>
-                        cmp_value <= iWritedata;
-                        irq_s <= '0';
-                    when "01" =>
-                        cmp_enable <= iWritedata(0);
-                    when "10" =>
+                    when "000" => -- 0x00
+                        -- Enable/disable at offset 0x0
+                        if iByteenable(0) = cActivated then
+                            cmp_enable <= iWritedata(0);
+                        end if;
+
+                        -- Ack at offset 0x1
+                        if iByteenable(1) = cActivated and iWritedata(8) = cActivated then
+                            irq_s <= '0';
+                        end if;
+
+                    when "001" => -- 0x04
+                        for i in cmp_value'range loop
+                            if iByteenable(i / cByteLength) = cActivated then
+                                cmp_value(i)    <= iWritedata(i);
+                                irq_s           <= '0';
+                            end if;
+                        end loop;
+
+                    when "010" => -- 0x08
+                        null; -- reserved
+
+                    when "011" => -- 0x0C
+                        null; -- RO (MACTIME)
+
+                    when "100" => -- 0x10
+                        if gMacTimer_2ndTimer = TRUE then
+                            if iByteenable(0) = cActivated then
+                                tog_enable <= iWritedata(0);
+                            end if;
+                        end if;
+
+                    when "101" => -- 0x14
                         if gMacTimer_2ndTimer = TRUE then
                             tog_value <= iWritedata;
                         end if;
-                    when "11" =>
+
+                    when "110" => -- 0x18
                         if gMacTimer_2ndTimer = TRUE then
-                            tog_enable <= iWritedata(0);
                             if gTimerEnablePulseWidth = TRUE then
-                                tog_counter_preset <= iWritedata(gTimerPulseRegWidth downto 1);
+                                tog_counter_preset <= iWritedata(gTimerPulseRegWidth-1 downto 0);
                             end if;
                         end if;
+
+                    when "111" => -- 0x1C
+                        null; -- RO (MACTIME)
+
                     when others =>
                         assert (FALSE)
                         report "Write in forbidden area?"
@@ -170,33 +203,49 @@ begin
     end process REGPROC;
 
     ASSIGN_RD : process (
-        iAddress,
-        iMacTime,
-        irq_s,
-        cmp_enable,
-        tog_value,
-        toggle_s,
-        tog_enable
+        iAddress, iMacTime,
+        irq_s, cmp_enable, cmp_value,
+        toggle_s, tog_enable, tog_value, tog_counter_preset
     )
     begin
         --default is all zero
         oReaddata <= (others => cInactivated);
 
         case iAddress is
-            when "00" =>
-                oReaddata           <= iMacTime;
-            when "01" =>
-                oReaddata(1)        <= irq_s;
-                oReaddata(0)        <= cmp_enable;
-            when "10" =>
-                if gMacTimer_2ndTimer = TRUE then
-                    oReaddata       <= tog_value;
-                end if;
-            when "11" =>
+            when "000" => -- 0x00
+                oReaddata(1)    <= irq_s;
+                oReaddata(0)    <= cmp_enable;
+
+            when "001" => -- 0x04
+                oReaddata(cmp_value'range)  <= cmp_value;
+
+            when "010" => -- 0x08
+                null;
+
+            when "011" => -- 0x0C
+                oReaddata(iMacTime'range)   <= iMacTime;
+
+            when "100" => -- 0x10
                 if gMacTimer_2ndTimer = TRUE then
                     oReaddata(1)    <= toggle_s;
                     oReaddata(0)    <= tog_enable;
                 end if;
+
+            when "101" => -- 0x14
+                if gMacTimer_2ndTimer = TRUE then
+                    oReaddata       <= tog_value;
+                end if;
+
+            when "110" => -- 0x18
+                if gMacTimer_2ndTimer = TRUE and gTimerEnablePulseWidth = TRUE then
+                    oReaddata(tog_counter_preset'range) <= tog_counter_preset;
+                end if;
+
+            when "111" => -- 0x1C
+                if gMacTimer_2ndTimer = TRUE then
+                    oReaddata(iMacTime'range)   <= iMacTime;
+                end if;
+
             when others =>
                 NULL; --this is okay, since default assignment is above!
         end case;
