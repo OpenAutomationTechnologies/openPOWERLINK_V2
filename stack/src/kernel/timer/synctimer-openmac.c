@@ -197,7 +197,7 @@ tOplkError synctimer_init(void)
     OPLK_MEMSET(&instance_l, 0, sizeof(instance_l));
 
     OPENMAC_TIMERIRQDISABLE(HWTIMER_SYNC);
-    OPENMAC_TIMERSETCOMPAREVALUE(HWTIMER_SYNC, 0);
+    OPENMAC_TIMERIRQACK(HWTIMER_SYNC);
 #ifdef TIMER_USE_EXT_SYNC_INT
     OPENMAC_TIMERIRQDISABLE(HWTIMER_EXT_SYNC);
     OPENMAC_TIMERSETCOMPAREVALUE(HWTIMER_EXT_SYNC, 0);
@@ -224,7 +224,7 @@ tOplkError synctimer_exit(void)
     tOplkError ret = kErrorOk;
 
     OPENMAC_TIMERIRQDISABLE(HWTIMER_SYNC);
-    OPENMAC_TIMERSETCOMPAREVALUE(HWTIMER_SYNC, 0);
+    OPENMAC_TIMERIRQACK(HWTIMER_SYNC);
 #ifdef TIMER_USE_EXT_SYNC_INT
     OPENMAC_TIMERIRQDISABLE(HWTIMER_EXT_SYNC);
     OPENMAC_TIMERSETCOMPAREVALUE(HWTIMER_EXT_SYNC, 0);
@@ -497,7 +497,8 @@ void synctimer_enableExtSyncIrq(UINT32 syncIntCycle_p, UINT32 pulseWidth_p)
     instance_l.fExtSyncEnable = TRUE;
     instance_l.syncIntCycle = syncIntCycle_p;
 
-    OPENMAC_TIMERIRQENABLEPW(HWTIMER_EXT_SYNC, pulseWidth_p);
+    OPENMAC_TIMERIRQENABLE(HWTIMER_EXT_SYNC);
+    OPENMAC_TIMERIRQSETPULSE(HWTIMER_EXT_SYNC, pulseWidth_p);
 }
 
 //------------------------------------------------------------------------------
@@ -916,7 +917,7 @@ static void drvConfigureShortestTimer(void)
     }
     else
     {
-        OPENMAC_TIMERSETCOMPAREVALUE(HWTIMER_SYNC, 0);
+        OPENMAC_TIMERIRQACK(HWTIMER_SYNC);
 
         instance_l.activeTimerHdl = TIMER_HDL_INVALID;
     }

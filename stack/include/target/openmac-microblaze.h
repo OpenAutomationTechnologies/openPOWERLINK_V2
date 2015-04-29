@@ -53,19 +53,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 
-#define OPENMAC_TIMER_TIMEVAL_OFFSET                        0
-#define OPENMAC_TIMER_CMPVAL_OFFSET(timer_p)                (timer_p * 8 + 0)
-#define OPENMAC_TIMER_CTRL_OFFSET(timer_p)                  (timer_p * 8 + 4)
-
 #define OPENMAC_MEMUNCACHED(pMem_p, size_p)                 pMem_p
 #define OPENMAC_FLUSHDATACACHE(pMem_p, size_p)              microblaze_flush_dcache_range((UINT32)pMem_p, size_p)
 #define OPENMAC_INVALIDATEDATACACHE(pMem_p, size_p)         microblaze_invalidate_dcache_range((UINT32)pMem_p, size_p)
 #define OPENMAC_GETDMAOBSERVER()                            Xil_In16(OPENMAC_DOB_BASE)
-#define OPENMAC_TIMERIRQDISABLE(timer_p)                    Xil_Out32(OPENMAC_TIMER_BASE + OPENMAC_TIMER_CTRL_OFFSET(timer_p), 0)
-#define OPENMAC_TIMERIRQENABLE(timer_p)                     Xil_Out32(OPENMAC_TIMER_BASE + OPENMAC_TIMER_CTRL_OFFSET(timer_p), 1)
-#define OPENMAC_TIMERIRQENABLEPW(timer_p, pulseWidthNs_p)   Xil_Out32(OPENMAC_TIMER_BASE + OPENMAC_TIMER_CTRL_OFFSET(timer_p), 1 | OMETH_NS_2_TICKS(pulseWidthNs_p) << 1)
-#define OPENMAC_TIMERSETCOMPAREVALUE(timer_p, val_p)        Xil_Out32(OPENMAC_TIMER_BASE + OPENMAC_TIMER_CMPVAL_OFFSET(timer_p), val_p)
-#define OPENMAC_TIMERGETTIMEVALUE()                         Xil_In32(OPENMAC_TIMER_BASE + OPENMAC_TIMER_TIMEVAL_OFFSET)
+
+#define OPENMAC_TIMER_OFFSET(timer_p)                       (timer_p << 4)
+
+#define OPENMAC_TIMERIRQDISABLE(timer_p)                    Xil_Out8(OPENMAC_TIMER_BASE + OPENMAC_TIMER_OFFSET(timer_p) + 0x0, 0)
+#define OPENMAC_TIMERIRQENABLE(timer_p)                     Xil_Out8(OPENMAC_TIMER_BASE + OPENMAC_TIMER_OFFSET(timer_p) + 0x0, 1)
+#define OPENMAC_TIMERIRQACK(timer_p)                        Xil_Out8(OPENMAC_TIMER_BASE + OPENMAC_TIMER_OFFSET(timer_p) + 0x1, 1)
+#define OPENMAC_TIMERSETCOMPAREVALUE(timer_p, val_p)        Xil_Out32(OPENMAC_TIMER_BASE + OPENMAC_TIMER_OFFSET(timer_p) + 0x4, val_p)
+#define OPENMAC_TIMERIRQSETPULSE(timer_p, pulseWidthNs_p)   Xil_Out32(OPENMAC_TIMER_BASE + OPENMAC_TIMER_OFFSET(timer_p) + 0x8, OMETH_NS_2_TICKS(pulseWidthNs_p))
+#define OPENMAC_TIMERGETTIMEVALUE()                         Xil_In32(OPENMAC_TIMER_BASE + 0xC)
 
 //------------------------------------------------------------------------------
 // typedef

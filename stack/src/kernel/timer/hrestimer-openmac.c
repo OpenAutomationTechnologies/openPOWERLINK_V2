@@ -132,7 +132,7 @@ tOplkError hrestimer_init(void)
     OPLK_MEMSET(&instance_l, 0, sizeof(instance_l));
 
     OPENMAC_TIMERIRQDISABLE(HWTIMER_SYNC);
-    OPENMAC_TIMERSETCOMPAREVALUE(HWTIMER_SYNC, 0);
+    OPENMAC_TIMERIRQACK(HWTIMER_SYNC);
 
     ret = openmac_isrReg(kOpenmacIrqSync, drvInterruptHandler, NULL);
 
@@ -155,7 +155,7 @@ tOplkError hrestimer_exit(void)
     tOplkError ret = kErrorOk;
 
     OPENMAC_TIMERIRQDISABLE(HWTIMER_SYNC);
-    OPENMAC_TIMERSETCOMPAREVALUE(HWTIMER_SYNC, 0);
+    OPENMAC_TIMERIRQACK(HWTIMER_SYNC);
 
     openmac_isrReg(kOpenmacIrqSync, NULL, NULL);
 
@@ -326,7 +326,7 @@ tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
     *pTimerHdl_p = 0;
 
     OPENMAC_TIMERIRQDISABLE(HWTIMER_SYNC);
-    OPENMAC_TIMERSETCOMPAREVALUE(HWTIMER_SYNC, 0);
+    OPENMAC_TIMERIRQACK(HWTIMER_SYNC);
 
 Exit:
     return ret;
@@ -353,7 +353,7 @@ static void drvInterruptHandler(void* pArg_p)
 
     BENCHMARK_MOD_24_SET(4);
 
-    OPENMAC_TIMERSETCOMPAREVALUE(HWTIMER_SYNC, 0);
+    OPENMAC_TIMERIRQACK(HWTIMER_SYNC);
     OPENMAC_TIMERIRQDISABLE(HWTIMER_SYNC);
 
     if (instance_l.timerInfo.pfnCb != NULL)
