@@ -59,10 +59,25 @@ area from 0x1B00 - 0x1FFF.
             OBD_SUBINDEX_RAM_USERDEF(0x1C0F, 0x03, kObdTypeUInt32, kObdAccSRW, tObdUnsigned32, Threshold_U32, 15)
         OBD_END_INDEX(0x1C0F)
 
+#if defined(CONFIG_INCLUDE_NMT_MN)
+        // Object 1C12h: DLL_MNCycleSuspendNumber_U32
+        OBD_BEGIN_INDEX_RAM(0x1C12, 0x01, NULL)
+            OBD_SUBINDEX_RAM_VAR(0x1C12, 0x00, kObdTypeUInt32, kObdAccRW, tObdUnsigned32, MNCycleSuspendNumber, 1)
+        OBD_END_INDEX(0x1C12)
+#endif
+
         // Object 1C14h: DLL_LossOfSocTolerance_U32 in [ns]
         OBD_BEGIN_INDEX_RAM(0x1C14, 0x01, ctrlu_cbObdAccess)
             OBD_SUBINDEX_RAM_VAR(0x1C14, 0x00, kObdTypeUInt32, kObdAccSRW, tObdUnsigned32, LossOfSocTolerance, 100000)
         OBD_END_INDEX(0x1C14)
+
+#if defined(CONFIG_INCLUDE_NMT_MN)
+        // Object 1C16h: DLL_MNLossStatusResThrCnt_AU32
+        OBD_RAM_INDEX_RAM_ARRAY(0x1C16, NMT_MAX_NODE_ID, NULL, kObdTypeUInt32, kObdAccR, tObdUnsigned32, DLL_MNLossStatusResThrCnt_AU32, 0)
+
+        // Object 1C17h: DLL_MNLossStatusResThreshold_AU32
+        OBD_RAM_INDEX_RAM_ARRAY(0x1C17, NMT_MAX_NODE_ID, NULL, kObdTypeUInt32, kObdAccSRW, tObdUnsigned32, DLL_MNLossStatusResThreshold_AU32, 15)
+#endif
 
 #if defined(CONFIG_INCLUDE_VETH)
         // Object 1E40h: NWL_IpAddrTable_0h_REC
@@ -74,6 +89,14 @@ area from 0x1B00 - 0x1FFF.
             OBD_SUBINDEX_RAM_VAR(0x1E40, 0x04, kObdTypeUInt16, kObdAccR, tObdUnsigned16, ReasmMaxSize_U16, 50000)
             OBD_SUBINDEX_RAM_VAR(0x1E40, 0x05, kObdTypeUInt32, kObdAccSRW, tObdUnsigned32, DefaultGateway_IPAD, 0xC0A864FE)
         OBD_END_INDEX(0x1E40)
+
+        // Object 1E4Ah: NWL_IpGroup_REC
+        OBD_BEGIN_INDEX_RAM(0x1E4A, 0x06, NULL)
+            OBD_SUBINDEX_RAM_VAR(0x1E4A, 0x00, kObdTypeUInt8, kObdAccConst, tObdUnsigned8, NumberOfEntries, 0x03)
+            OBD_SUBINDEX_RAM_VAR(0x1E4A, 0x01, kObdTypeBool, kObdAccSRW, tObdBoolean, Forwarding_BOOL, 0x00)
+            OBD_SUBINDEX_RAM_VAR(0x1E4A, 0x02, kObdTypeUInt16, kObdAccSRW, tObdUnsigned16, DefaultTTL_U16, 64)
+            OBD_SUBINDEX_RAM_VAR(0x1E4A, 0x03, kObdTypeUInt32, kObdAccR, tObdUnsigned32, ForwardDatagrams_U32, 0x00000000)
+        OBD_END_INDEX(0x1E4A)
 #endif
 
 #if defined(CONFIG_INCLUDE_CFM)
@@ -215,4 +238,3 @@ area from 0x1B00 - 0x1FFF.
             OBD_SUBINDEX_RAM_DOMAIN(0x1F9F, 0x04, kObdAccVRW, CmdData_DOM)
         OBD_END_INDEX(0x1F9F)
 #endif
-
