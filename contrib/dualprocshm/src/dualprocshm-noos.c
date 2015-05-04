@@ -134,7 +134,7 @@ static tDualProcShmInst         instance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static int              setDynBuffAddr(tDualprocDrvInstance pDrvInst_p,
+static BOOL             setDynBuffAddr(tDualprocDrvInstance pDrvInst_p,
                                        UINT16 index_p, UINT32 addr_p);
 static UINT32           getDynBuffAddr(tDualprocDrvInstance pDrvInst_p,
                                        UINT16 index_p);
@@ -936,13 +936,13 @@ tDualprocDrvInstance getDrvInst(tDualProcInstance procInstance_p)
 \param  index_p      Buffer index.
 \param  addr_p       Address of the buffer.
 
-\return The function returns an integer return code.
+\return The function returns a pass or fail boolean value.
 \retval 0       Buffer address was successfully written.
-\retval -1      Buffer address could not be written.
+\retval 1       Buffer address could not be written.
 
 */
 //------------------------------------------------------------------------------
-static int setDynBuffAddr(tDualprocDrvInstance pInstance_p, UINT16 index_p, UINT32 addr_p)
+static BOOL setDynBuffAddr(tDualprocDrvInstance pInstance_p, UINT16 index_p, UINT32 addr_p)
 {
     tDualProcDrv*   pDrvInst = (tDualProcDrv*) pInstance_p;
     UINT8*          tableBase = pDrvInst->pAddrTableBase;
@@ -955,7 +955,7 @@ static int setDynBuffAddr(tDualprocDrvInstance pInstance_p, UINT16 index_p, UINT
     {
         TRACE("The buffer address(0x%X) lies below the shared memory region start address(0x%X)\n"
                 , addr_p, sharedMemBaseAddr);
-        return -1;
+        return 1;
     }
     else
     {
@@ -965,7 +965,7 @@ static int setDynBuffAddr(tDualprocDrvInstance pInstance_p, UINT16 index_p, UINT
         {
             TRACE("The buffer address(0x%X) lies above the shared memory region end address(0x%X)\n"
                     , addr_p, sharedMemBaseAddr + sharedMemSize);
-            return -1;
+            return 1;
         }
     }
 

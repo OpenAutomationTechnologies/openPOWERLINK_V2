@@ -165,8 +165,12 @@ register for a dynamic buffer.
 \param  pDrvInst_p  The dual processor driver instance
 \param  index_p     Index to select the dynamic buffer
 \param  addr_p      Address to the memory space referenced by the dynamic buffer
+
+\return The function returns a pass or fail boolean value.
+\retval 0   Successfully set the address of the buffer.
+\retval 1   Failed to set the address of the buffer.
 */
-typedef int (*tSetDynRes)(tDualprocDrvInstance pDrvInst_p, UINT16 index_p, UINT32 addr_p);
+typedef BOOL (*tSetDynRes)(tDualprocDrvInstance pDrvInst_p, UINT16 index_p, UINT32 addr_p);
 
 /**
 \brief Function type to get the address of a Buffer
