@@ -336,6 +336,7 @@ static tOplkError loadCdcFile(char* pCdcFilename_p)
     if (!IS_FD_VALID(cdcInfo.handle.fdCdcFile))
     {   // error occurred
         error = (UINT32)errno;
+        DEBUG_LVL_OBD_TRACE("%s: failed to open '%s'\n", __func__, pCdcFilename_p);
         ret = eventu_postError(kEventSourceObdu, kErrorObdErrnoSet, sizeof(UINT32), &error);
         return ret;
     }
