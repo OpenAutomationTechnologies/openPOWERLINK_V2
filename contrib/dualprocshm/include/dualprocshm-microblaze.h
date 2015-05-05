@@ -49,7 +49,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <xil_io.h>
 #include <xparameters.h>
 #include <targetsection.h>
-
+#include <dualprocshm-mem.h>
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------

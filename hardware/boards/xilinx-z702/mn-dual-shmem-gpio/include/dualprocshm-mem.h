@@ -1,15 +1,15 @@
 /**
 ********************************************************************************
-\file   dualprocshm-arm.h
+\file   dualprocshm-mem.h
 
-\brief  Dual Processor Library Target support Header - For ARM target
+\brief  Board specific memory definitions for dualprocshm library
 
-This header file provides specific macros for Zynq ARM CPU.
-
+This file contains the definitions for memory offsets for dualprocshm library
+for a specific platform.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014 Kalycito Infotech Private Limited
+Copyright (c) 2014, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,68 +35,51 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_dualprocshm_arm_H_
-#define _INC_dualprocshm_arm_H_
+#ifndef _INC_dualprocshm_mem_H_
+#define _INC_dualprocshm_mem_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <stdint.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <xil_cache.h>
-#include <xscugic.h>
-#include <xil_exception.h>
-#include <unistd.h>
-#include <xil_io.h>
-#include <xparameters.h>
-#include <xil_types.h>
-#include <dualprocshm-mem.h>
+
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+/* Memory size */
+#define MAX_COMMON_MEM_SIZE         2048                         ///< Max common memory size
+#define MAX_DYNAMIC_BUFF_COUNT      20                           ///< Number of maximum dynamic buffers
+#define MAX_DYNAMIC_BUFF_SIZE       MAX_DYNAMIC_BUFF_COUNT * 4   ///< Max dynamic buffer size
 
-// memory
-#define DUALPROCSHM_MALLOC(size)    malloc(size)
-#define DUALPROCSHM_FREE(ptr)       free(ptr)
+/* BASE ADDRESSES */
 
-// sleep
-#define DUALPROCSHM_USLEEP(x)       usleep((UINT32)x)
+#if defined(__arm__)
+    // TODO : gks check if this can be retrieved from hardware configuration
+    #define COMMON_MEM_BASE             0x2C000000
 
-// IO operations
-#define DPSHM_READ8(base)           Xil_In8((UINT32)base);
-#define DPSHM_WRITE8(base, val)     Xil_Out8((UINT32)base, val);
-#define DPSHM_READ16(base)          Xil_In16((UINT32)base);
-#define DPSHM_WRITE16(base, val)    Xil_Out16((UINT32)base, val);
+    #if defined(XPAR_PS7_DDR_0_S_AXI_HP0_BASEADDR) && defined (XPAR_PS7_DDR_0_S_AXI_HP0_HIGHADDR)
+        #define SHARED_MEM_BASE         (XPAR_PS7_DDR_0_S_AXI_HP0_BASEADDR + 0x20000000)
+        #define SHARED_MEM_SPAN         (XPAR_PS7_DDR_0_S_AXI_HP0_HIGHADDR \
+                                        - SHARED_MEM_BASE)
+    #else
+        #error "Shared memory base address(SHARED_MEM_BASE) could not be set!"
+    #endif
+#elif defined(__MICROBLAZE__)
+    // TODO : gks check if this can be retrieved from hardware configuration
+    #define COMMON_MEM_BASE             0x2C000000
 
-// Memory barrier
-#define DPSHM_DMB()                 dmb()
-
-// cache handling
-#define DUALPROCSHM_FLUSH_DCACHE_RANGE(base, range) \
-    Xil_DCacheFlushRange((UINT32)base, range);
-
-#define DUALPROCSHM_INVALIDATE_DCACHE_RANGE(base, range) \
-    Xil_DCacheInvalidateRange((UINT32)base, range);
-
-#define DPSHM_REG_SYNC_INTR(callback, arg)                       \
-    XScuGic_RegisterHandler(TARGET_IRQ_IC_BASE, TARGET_SYNC_IRQ, \
-                           (Xil_InterruptHandler) callback, arg);\
-    XScuGic_EnableIntr(TARGET_IRQ_IC_DIST_BASE, TARGET_SYNC_IRQ)
-
-#define DPSHM_ENABLE_SYNC_INTR() \
-    XScuGic_EnableIntr(TARGET_SYNC_IRQ_ID, TARGET_SYNC_IRQ)
-
-#define DPSHM_DISABLE_SYNC_INTR() \
-    XScuGic_DisableIntr(TARGET_SYNC_IRQ_ID, TARGET_SYNC_IRQ)
-
-#ifndef TRACE
-#ifndef NDEBUG
-#define TRACE(...) printf(__VA_ARGS__)
+    #if defined(XPAR_PS7_DDR_0_S_AXI_HP0_BASEADDR) && defined (XPAR_PS7_DDR_0_S_AXI_HP0_HIGHADDR)
+        #define SHARED_MEM_BASE         (XPAR_PS7_DDR_0_S_AXI_HP0_BASEADDR + 0x20000000)
+        #define SHARED_MEM_SPAN         (XPAR_PS7_DDR_0_S_AXI_HP0_HIGHADDR \
+                                        - SHARED_MEM_BASE)
+    #else
+        #error "Shared memory base address(SHARED_MEM_BASE) could not be set!"
+    #endif
 #else
-#define TRACE(...)
+    #error "Processor not supported!!"
 #endif
-#endif
+
+#define MEM_ADDR_TABLE_BASE         (COMMON_MEM_BASE + MAX_COMMON_MEM_SIZE)
+#define MEM_INTR_BASE               (MEM_ADDR_TABLE_BASE + MAX_DYNAMIC_BUFF_SIZE)
 
 //------------------------------------------------------------------------------
 // typedef
@@ -109,8 +92,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_DUALPROCSHM_ARM_H_ */
+#endif /* _INC_dualprocshm_mem_H_ */

@@ -124,6 +124,39 @@ void dualprocshm_releaseCommonMemAddr(UINT16 pSize_p)
 
 //------------------------------------------------------------------------------
 /**
+\brief  Get shared memory base address and size
+
+Target specific routine to retrieve the base address of shared memory region
+between two processors.
+
+\param  pSize_p      Minimum size of the shared memory, returns the
+                     actual size of shared memory.
+
+\return Pointer to base address of shared memory.
+
+\ingroup module_dualprocshm
+ */
+//------------------------------------------------------------------------------
+UINT8*  dualprocshm_getSharedMemInst(UINT32* pSize_p)
+{
+    UINT8*   pAddr;
+
+    if (*pSize_p > SHARED_MEM_SPAN )
+    {
+        TRACE("%s Shared memory not available\n", __func__);
+        *pSize_p = 0;
+        return NULL;
+    }
+
+    pAddr = (UINT8*) (SHARED_MEM_BASE);
+
+    *pSize_p = SHARED_MEM_SPAN;
+
+    return pAddr;
+}
+
+//------------------------------------------------------------------------------
+/**
 \brief  Get dynamic mapping table base address
 
 Target specific routine to retrieve the base address for storing the
@@ -217,7 +250,7 @@ void dualprocshm_targetReadData(UINT8* pBase_p, UINT16 size_p, UINT8* pData_p)
 
     DUALPROCSHM_INVALIDATE_DCACHE_RANGE((UINT32)pBase_p, size_p);
 
-    memcpy(pData_p, pBase_p, size_p);
+    DUALPROCSHM_MEMCPY(pData_p, pBase_p, size_p);
 }
 
 //------------------------------------------------------------------------------
@@ -241,7 +274,7 @@ void dualprocshm_targetWriteData(UINT8* pBase_p, UINT16 size_p, UINT8* pData_p)
         return;
     }
 
-    memcpy(pBase_p, pData_p, size_p);
+    DUALPROCSHM_MEMCPY(pBase_p, pData_p, size_p);
 
     DUALPROCSHM_FLUSH_DCACHE_RANGE((UINT32)pBase_p, size_p);
 }

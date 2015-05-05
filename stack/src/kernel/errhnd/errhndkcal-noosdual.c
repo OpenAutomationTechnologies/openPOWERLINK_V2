@@ -104,7 +104,7 @@ The function initializes the kernel layer CAL module of the error handler.
 tOplkError errhndkcal_init(void)
 {
     tDualprocReturn         dualRet;
-    tDualprocDrvInstance    pInstance = dualprocshm_getDrvInst(kDualProcFirst);
+    tDualprocDrvInstance    pInstance = dualprocshm_getLocalProcDrvInst();
     UINT8*                  pBase;
     size_t                  span;
 
@@ -151,7 +151,7 @@ CAL module of the error handler.
 //------------------------------------------------------------------------------
 void errhndkcal_exit(void)
 {
-    tDualprocDrvInstance    pInstance = dualprocshm_getDrvInst(kDualProcFirst);
+    tDualprocDrvInstance    pInstance = dualprocshm_getLocalProcDrvInst();
     if (pErrHndMem_l != NULL)
     {
         dualprocshm_freeMemory(pInstance, DUALPROCSHM_BUFF_ID_ERRHDLR, TRUE);

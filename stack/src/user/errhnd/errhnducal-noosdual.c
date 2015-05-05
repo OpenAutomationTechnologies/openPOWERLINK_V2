@@ -109,7 +109,7 @@ The function initializes the user layer CAL module of the error handler.
 tOplkError errhnducal_init(tErrHndObjects* pLocalObjects_p)
 {
     tDualprocReturn         dualRet;
-    tDualprocDrvInstance    pInstance = dualprocshm_getDrvInst(kDualProcSecond);
+    tDualprocDrvInstance    pInstance = dualprocshm_getLocalProcDrvInst();
     UINT8*                  pBase;
     size_t                  span;
 
@@ -156,7 +156,7 @@ CAL module of the error handler.
 //------------------------------------------------------------------------------
 void errhnducal_exit(void)
 {
-    tDualprocDrvInstance    pInstance = dualprocshm_getDrvInst(kDualProcSecond);
+    tDualprocDrvInstance    pInstance = dualprocshm_getLocalProcDrvInst();
 
     if (pErrHndMem_l != NULL)
     {
