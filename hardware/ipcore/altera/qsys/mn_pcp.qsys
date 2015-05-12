@@ -322,9 +322,32 @@
  <parameter name="projectName" value="" />
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1423058178417" />
+ <parameter name="timeStamp" value="1431446281217" />
  <parameter name="useTestBenchNamingPattern" value="false" />
- <instanceScript></instanceScript>
+ <instanceParameter
+   name="cpu0_resetCpuBridge"
+   displayName="Reset vector bridge for Nios II (cpu_0)"
+   type="string"
+   defaultValue="flash_bridge"
+   legalRanges="flash_bridge cpu_bridge"
+   description="" />
+ <instanceScript><![CDATA[# request a specific version of the scripting API
+package require -exact qsys 13.0
+
+# Set the name of the procedure to manipulate parameters
+set_module_property COMPOSITION_CALLBACK compose
+
+proc compose {} {
+    # manipulate parameters in here
+    set selBridge [ get_parameter_value cpu0_resetCpuBridge ]
+    if { $selBridge == "flash_bridge" } {
+        set_instance_parameter_value cpu_0 resetOffset "0x00400000"
+    } else {
+        set_instance_parameter_value cpu_0 resetOffset "0x00000000"
+    }
+    send_message info "Reset vector set to $selBridge"
+}
+]]></instanceScript>
  <interface name="clk50" internal="clk50.clk_in" type="clock" dir="end" />
  <interface name="rst_clk50" internal="clk50.clk_in_reset" type="reset" dir="end" />
  <interface name="clk100" internal="clk100.clk_in" type="clock" dir="end" />
