@@ -50,7 +50,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #ifdef NDEBUG
-#define ALT_INTERNAL_RAM                    __attribute__((section(".tc_i_mem")))
+#define ALT_INTERNAL_RAM
 #else
 #define ALT_INTERNAL_RAM
 #endif
