@@ -106,6 +106,9 @@ MACRO(GENERATE_BSP EXAMPLE_NAME ALT_DEMO_DIR ALT_BSP_TARGET_DIR PROCESSOR_NAME T
         TARGET ${EXAMPLE_NAME}-${UBOOT_TARGET}
         POST_BUILD
         COMMAND make
+        COMMAND chmod +x ${ARCH_TOOLS_DIR}/configure-uboot.sh
+        COMMAND ${ARCH_TOOLS_DIR}/configure-uboot.sh ${SPL_PATH}
+        COMMAND make clean && make
         WORKING_DIRECTORY ${SPL_PATH}
     )
 
