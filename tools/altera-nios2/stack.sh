@@ -161,8 +161,13 @@ if [ "${CPU_NAME}" == "${CFG_APP_CPU_NAME}" ]; then
 elif [ "${CPU_NAME}" == "${CFG_DRV_CPU_NAME}" ]; then
     # The bsp's cpu matches to the drv part
     CFG_TCI_MEM_NAME=${CFG_DRV_TCI_MEM_NAME}
-    if [ "${CFG_NODE}" == "MN" ] && [ -n "${CFG_OPENMAC}" ] && [ -n "${CFG_HOSTINTERFACE}" ]; then
+    if [ "${CFG_NODE}" == "MN" ] && [ -n "${CFG_OPENMAC}" ] && [ -n "${CFG_HOSTINTERFACE}" ] && [ ${CFG_HOSTINTERFACE} -ne 0 ]; then
+        echo "INFO: Compiling stack for Hostinterface design"
         LIB_NAME=oplkmndrv-hostif
+        LIB_SOURCES=${HW_COMMON_PATH}/drivers/openmac/omethlib_phycfg.c
+    else
+        echo "INFO: Compiling stack for Dual Processor Shared memory design"
+        LIB_NAME=oplkmndrv-dualprocshm
         LIB_SOURCES=${HW_COMMON_PATH}/drivers/openmac/omethlib_phycfg.c
     fi
 else
