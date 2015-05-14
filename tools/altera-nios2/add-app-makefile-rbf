@@ -1,0 +1,31 @@
+#!/bin/bash
+# $ ./add-app-makefile-rbf [MAKEFILE]
+# Add .rbf generation targets to APP Makefile for Qsys processors.
+
+MAKE_FILE=$1
+
+cat >> ${MAKE_FILE} <<'Heredoc'
+
+# Rules for converting sof to rbf
+SOF_TO_RBF_SUFFIX := -rbf
+SOF_FILE := $(wildcard $(QUARTUS_SOF_DIR)/*.sof)
+RBF_NAME := fpga
+RBF_FILE := $(QUARTUS_SOF_DIR)/$(RBF_NAME).rbf
+SOF_TO_RBF_TARGET := $(addsuffix $(SOF_TO_RBF_SUFFIX), $(RBF_NAME))
+
+.PHONY : sof-to-rbf
+sof-to-rbf : $(SOF_TO_RBF_TARGET)
+
+.PHONY : $(SOF_TO_RBF_TARGET)
+$(SOF_TO_RBF_TARGET) : $(SOF_FILE)
+	@$(ECHO) Info: Converting $(SOF_FILE) to $(RBF_FILE)
+	quartus_cpf -c $(SOF_FILE) $(RBF_FILE)
+	cp $(RBF_FILE) $(RBF_NAME).rbf
+
+# Rule for sof-to-rbf help output
+help::
+	@$(ECHO)
+	@$(ECHO) "  sof-to-rbf targets:"
+	@$(ECHO) "    sof-to-rbf      - Convert FPGA configuration binary from .sof to .rbf format"
+
+Heredoc
