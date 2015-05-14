@@ -1,0 +1,74 @@
+################################################################################
+#
+# Board settings for openPOWERLINK stack on Altera Nios II
+#
+# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2015, Kalycito Infotech Private Limited
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#     * Redistributions of source code must retain the above copyright
+#       notice, this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above copyright
+#       notice, this list of conditions and the following disclaimer in the
+#       documentation and/or other materials provided with the distribution.
+#     * Neither the name of the copyright holders nor the
+#       names of its contributors may be used to endorse or promote products
+#       derived from this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+# DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+# ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+################################################################################
+
+################################################################################
+# DRIVER PROCESSOR
+
+# Qsys sub of processor that processes drv
+CFG_DRV_SUB_NAME=pcp
+# Processor that processes drv
+CFG_DRV_PROC_NAME=cpu_0
+# -> Build complete name
+CFG_DRV_CPU_NAME=${CFG_DRV_SUB_NAME}_${CFG_DRV_PROC_NAME}
+
+# System timer
+CFG_DRV_SYS_TIMER_NAME=${CFG_DRV_SUB_NAME}_timer_0
+# Tightly coupled instruction memory
+CFG_DRV_TCI_MEM_NAME=${CFG_DRV_SUB_NAME}_tc_i_mem
+
+# BSP type
+CFG_DRV_BSP_TYPE=hal
+# BSP optimization
+CFG_DRV_BSP_OPT_LEVEL=-O2
+
+################################################################################
+# OTHER SETTINGS
+
+# FLAH USED
+CFG_DRV_EPCQ=1
+
+# OPENMAC is present
+CFG_OPENMAC=1
+# HOSTINTERFACE is present
+CFG_HOSTINTERFACE=0
+# Type of POWERLINK node supported by this platform
+CFG_NODE=MN
+
+# JTAG Cable
+CFG_JTAG_CABLE="USB-BlasterII [USB-1]"
+
+CFG_DEVICE_ID=2
+
+# Driver Arguments
+CFG_PLATFORM_CFLAGS=-D__C5SOC__
+
+# Driver Interface Configuration
+CFG_DRV_BUS="INT BUS"
