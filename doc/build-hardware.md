@@ -94,3 +94,40 @@ hardware-dependant drivers.
 
 The default hardware platform installation path is:
 `<openPOWERLINK_DIR>/hardware/lib/generic/<CMAKE_SYSTEM_PROCESSOR>/<BOARD_NAME>/<DEMO_NAME>`
+
+## Target Altera Cyclone V SoC ARM {#sect_build_hardware_build_altera_arm}
+
+For Altera Cyclone V SoC, FPGA bitstream is generated from the NIOSII command shell.
+For Cyclone V SoC ARM bsp and preloader generation, execute the following steps below.
+hardware-dependant drivers.
+
+-# Open a "SoC embedded command shell".
+
+-# Initialize the hardware platform build system
+
+        > cd openPOWERLINK/hardware/build/altera-c5socarm
+        > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-altera-c5socarm-eabi-gnu.cmake ../..
+
+  After this command CMake will search for available hardware platforms and
+  report all found platforms by the following messages:
+
+        Found hardware platform: DEMO_C5SOC_MN_SOC_SHMEM_GPIO set to OFF!
+        Found hardware platform: DEMO_[BOARD_NAME]_[DEMO_NAME] set to OFF!
+
+-# Building hardware platform with all driver libraries set to debug
+
+        > cmake ../.. -DCMAKE_BUILD_TYPE=Debug -DDEMO_[BOARD_NAME]_[DEMO_NAME]=ON
+        > make
+        > make install
+
+  This will build the hardware platform for the demo `DEMO_[BOARD_NAME]_[DEMO_NAME]`.
+  Multiple platforms can be built together by passing each platform define to CMake.
+
+-# Building hardware platforms with all driver libraries set to release
+
+        > cmake ../.. -DCMAKE_BUILD_TYPE=Release -DDEMO_[BOARD_NAME]_[DEMO_NAME]=ON
+        > make
+        > make install
+
+The default hardware platform installation path is:
+`<openPOWERLINK_DIR>/hardware/lib/generic/<CMAKE_SYSTEM_PROCESSOR>/<BOARD_NAME>/<DEMO_NAME>`

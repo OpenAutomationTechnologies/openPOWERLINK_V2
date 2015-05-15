@@ -21,6 +21,7 @@
           <tab type="user" url="\ref page_platform_zynq" title="Xilinx Zynq"/>
           <tab type="user" url="\ref page_platform_altera-mn" title="Altera Nios II (MN)"/>
           <tab type="user" url="\ref page_platform_altera-cn" title="Altera Nios II (CN)"/>
+          <tab type="user" url="\ref page_platform_altera-soc" title="Altera Cyclone V SoC"/>
       </tab>
       <tab type="usergroup" title="Supported Operating Systems" url="\ref page_platforms">
           <tab type="user" url="\ref page_platform_linux" title="Linux"/>

@@ -9,12 +9,13 @@ If your platform is not supported, please follow the
 [openPOWERLINK Porting Guide](\ref page_porting-guide) for information on how
 to port openPOWERLINK to your platform.
 
-| Platform           | Linux         | Windows  | Non-OS  |
-| ------------------ |:-------------:|:--------:|:-------:|
-| X86                | X             | X        |         |
-| Altera NiosII      |               |          | X       |
-| Xilinx Microblaze  |               |          | X       |
-| Xilinx Zynq        | X             |          |         |
+| Platform             | Linux         | Windows  | Non-OS  |
+| -------------------- |:-------------:|:--------:|:-------:|
+| X86                  | X             | X        |         |
+| Altera NiosII        |               |          | X       |
+| Xilinx Microblaze    |               |          | X       |
+| Xilinx Zynq          | X             |          | X       |
+| Altera Cyclone V SoC |               |          | X       |
 
 ## Supported Operating Systems
 - \ref page_platform_linux
@@ -27,3 +28,4 @@ to port openPOWERLINK to your platform.
         - \ref page_platform_altera-cn
 - \ref page_platform_xilinx
 - \ref page_platform_zynq
+- \ref page_platform_altera-soc
