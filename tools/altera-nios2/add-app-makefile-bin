@@ -1,0 +1,30 @@
+#!/bin/bash
+# $ ./add-app-makefile-bin [MAKEFILE]
+# Add .bin generation targets to app Makefile for Qsys processors.
+
+MAKE_FILE=$1
+
+cat >> ${MAKE_FILE} <<'Heredoc'
+
+# Rules for converting elf to bin
+ELF_TO_BIN_SUFFIX := -bin
+DRV_NAME := $(basename $(ELF))
+BIN_NAME := $(addsuffix .bin, $(DRV_NAME))
+BIN := $(BIN_NAME)
+ELF_TO_BIN_TARGET := $(addsuffix $(ELF_TO_BIN_SUFFIX), $(DRV_NAME))
+
+.PHONY : elf-to-bin
+elf-to-bin : $(ELF_TO_BIN_TARGET)
+
+.PHONY : $(ELF_TO_BIN_TARGET)
+$(ELF_TO_BIN_TARGET) : $(ELF)
+	@$(ECHO) Info: Converting $(ELF) to $(BIN_NAME)
+	$(OBJCOPY) -O binary $(ELF) $(BIN)
+
+# Rule for elf-to-bin help output
+help::
+	@$(ECHO)
+	@$(ECHO) "  elf-to-bin targets:"
+	@$(ECHO) "    elf-to-bin      - Convert NIOS2 binary from .elf to .bin format"
+
+Heredoc

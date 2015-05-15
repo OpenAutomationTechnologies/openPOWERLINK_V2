@@ -32,6 +32,7 @@ PROJECT(Hardware NONE)
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0)
 
+MESSAGE(STATUS "Hardware Build Process Starting..")
 ################################################################################
 # Handle includes
 SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
@@ -66,6 +67,8 @@ IF(${CMAKE_SYSTEM_NAME} STREQUAL "Generic" AND ${CMAKE_SYSTEM_PROCESSOR} STREQUA
     INCLUDE(configure-microblaze)
 ELSEIF(${CMAKE_SYSTEM_NAME} STREQUAL "Generic" AND ${CMAKE_SYSTEM_PROCESSOR} STREQUAL "zynqarm")
     INCLUDE(configure-zynqarm)
+ELSEIF(${CMAKE_SYSTEM_NAME} STREQUAL "Generic" AND ${CMAKE_SYSTEM_PROCESSOR} STREQUAL "alterac5arm")
+    INCLUDE(configure-alterac5arm)
 ELSE()
     MESSAGE(FATAL_ERROR "Unknown platform selected!")
 ENDIF()

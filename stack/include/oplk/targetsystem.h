@@ -60,6 +60,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _DEV_BIT32_             0x00000300L     // 32 bit
 
 // compilers
+#define _DEV_GNUC_ARM_ALTERA_   0x00000024L     // Altera toolchain mentor ARM EABI GCC
 #define _DEV_GNUC_ARM_XILINX_   0x00000023L     // Xilinx ARM EABI GCC
 #define _DEV_GNUC_MICROBLAZE_   0x00000020L     // Xilinx Microblaze GCC
 #define _DEV_GNUC_NIOS2_        0x0000001FL     // Altera Nios II GCC
@@ -89,7 +90,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _DEV_MICROBLAZE_BIG_    (_DEV_BIT32_ | _DEV_GNUC_MICROBLAZE_ | _DEV_BIGEND_ | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_ | _DEV_ONLY_INT_MAIN_ | _DEV_ALIGNMENT_4_ )
 #define _DEV_MICROBLAZE_LITTLE_ (_DEV_BIT32_ | _DEV_GNUC_MICROBLAZE_                | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_ | _DEV_ONLY_INT_MAIN_ | _DEV_ALIGNMENT_4_ )
 #define _DEV_ARM_XILINX_EABI_   (_DEV_BIT32_ | _DEV_GNUC_ARM_XILINX_                | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_ | _DEV_ONLY_INT_MAIN_)
-
+#define _DEV_ARM_ALTERA_EABI_   (_DEV_BIT32_ | _DEV_GNUC_ARM_ALTERA_                | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_ | _DEV_ONLY_INT_MAIN_)
 //------------------------------------------------------------------------------
 //  useful macros
 
@@ -156,6 +157,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define TARGET_SYSTEM   _VXWORKS_
 #define DEV_SYSTEM      _DEV_VXWORKS_
 
+#elif defined (__altera_arm__)
+
+#define TARGET_SYSTEM   _NO_OS_
+#define DEV_SYSTEM      _DEV_ARM_ALTERA_EABI_
+
 #elif defined (__xilinx_arm__)
 
 #define TARGET_SYSTEM   _NO_OS_
@@ -214,6 +220,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #elif (DEV_SYSTEM == _DEV_MICROBLAZE_BIG_ || DEV_SYSTEM == _DEV_MICROBLAZE_LITTLE_)
 #include <oplk/targetdefs/microblaze.h>
+
+#elif (DEV_SYSTEM == _DEV_ARM_ALTERA_EABI_)
+#include <oplk/targetdefs/altera_arm.h>
 
 #elif (DEV_SYSTEM == _DEV_ARM_XILINX_EABI_)
 #include <oplk/targetdefs/zynqarm.h>
