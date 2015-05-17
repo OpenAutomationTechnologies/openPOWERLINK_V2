@@ -103,13 +103,18 @@ BSP_PATH=${OUT_PATH}/bsp-${CFG_DRV_CPU_NAME}
 
 BSP_GEN_ARGS="${CFG_DRV_BSP_TYPE} ${BSP_PATH} ${BOARD_PATH}/quartus \
 --set hal.enable_c_plus_plus false \
---set hal.linker.enable_alt_load_copy_exceptions false \
 --set hal.enable_clean_exit false \
 --set hal.enable_exit false \
 --cpu-name ${CFG_DRV_CPU_NAME} \
 --set hal.sys_clk_timer ${CFG_DRV_SYS_TIMER_NAME} \
---cmd add_section_mapping .tc_i_mem ${CFG_DRV_TCI_MEM_NAME} \
 "
+
+if [ -n "${CFG_DRV_TCI_MEM_NAME}" ];
+then
+    BSP_GEN_ARGS+="--cmd add_section_mapping .tc_i_mem ${CFG_DRV_TCI_MEM_NAME} \
+                   --set hal.linker.enable_alt_load_copy_exceptions false "
+    echo "INFO: tc_i_mem is used by the system!"
+fi
 
 if [ -n "${CFG_DRV_MAX_HEAP_BYTES}" ];
 then

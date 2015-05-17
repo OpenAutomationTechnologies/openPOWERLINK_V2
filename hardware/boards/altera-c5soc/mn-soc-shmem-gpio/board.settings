@@ -41,8 +41,8 @@ CFG_DRV_CPU_NAME=${CFG_DRV_SUB_NAME}_${CFG_DRV_PROC_NAME}
 
 # System timer
 CFG_DRV_SYS_TIMER_NAME=${CFG_DRV_SUB_NAME}_timer_0
-# Tightly coupled instruction memory
-CFG_DRV_TCI_MEM_NAME=${CFG_DRV_SUB_NAME}_tc_i_mem
+# Tightly coupled instruction memory is not used
+CFG_DRV_TCI_MEM_NAME=
 
 # BSP type
 CFG_DRV_BSP_TYPE=hal
