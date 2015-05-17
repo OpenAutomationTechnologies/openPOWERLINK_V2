@@ -251,6 +251,15 @@ elif [ -n "${CFG_DRV_EPCQ}" ]; then
     ${OPLK_BASE_DIR}/tools/altera-nios2/add-app-makefile-epcq ${OUT_PATH}/Makefile
 fi
 
+# Add ELF to BIN makefile rules
+chmod +x ${OPLK_BASE_DIR}/tools/altera-nios2/add-app-makefile-bin
+${OPLK_BASE_DIR}/tools/altera-nios2/add-app-makefile-bin ${OUT_PATH}/Makefile
+
+# Add SOF to RBF makefile rules
+chmod +x ${OPLK_BASE_DIR}/tools/altera-nios2/add-app-makefile-rbf
+${OPLK_BASE_DIR}/tools/altera-nios2/add-app-makefile-rbf ${OUT_PATH}/Makefile
+
+
 #TODO: use trap instead of multiple cleanup checks
 if [ -n "${CFG_DEVICE_ID}" ];
 then
