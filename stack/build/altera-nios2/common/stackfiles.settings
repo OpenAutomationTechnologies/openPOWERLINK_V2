@@ -101,6 +101,10 @@ CTRL_UCAL_HOSTIF_SOURCES="\
 ${USER_SOURCE_DIR}/ctrl/ctrlucal-hostif.c \
 "
 
+CTRL_UCAL_DUALPROCSHM_SOURCES="\
+${USER_SOURCE_DIR}/ctrl/ctrlucal-noosdual.c \
+"
+
 ################################################################################
 # User DLL CAL sources
 
@@ -119,6 +123,10 @@ ERRHND_UCAL_HOSTIF_SOURCES="\
 ${USER_SOURCE_DIR}/errhnd/errhnducal-hostif.c \
 "
 
+ERRHND_UCAL_DUALPROCSHM_SOURCES="\
+${USER_SOURCE_DIR}/errhnd/errhnducal-noosdual.c \
+"
+
 ################################################################################
 # User event CAL sources
 
@@ -132,6 +140,11 @@ ${USER_SOURCE_DIR}/event/eventucalintf-circbuf.c \
 ${USER_SOURCE_DIR}/event/eventucal-nooshostif.c \
 "
 
+EVENT_UCAL_DUALPROCSHM_SOURCES="\
+${USER_SOURCE_DIR}/event/eventucal-noosdual.c \
+${USER_SOURCE_DIR}/event/eventucalintf-circbuf.c \
+"
+
 ################################################################################
 # User PDO CAL sources
 
@@ -143,6 +156,11 @@ ${USER_SOURCE_DIR}/pdo/pdoucalsync-null.c \
 PDO_UCAL_HOSTIF_SOURCES="\
 ${USER_SOURCE_DIR}/pdo/pdoucalmem-hostif.c \
 ${USER_SOURCE_DIR}/pdo/pdoucalsync-hostif.c \
+"
+
+PDO_UCAL_DUALPROCSHM_SOURCES="\
+${USER_SOURCE_DIR}/pdo/pdoucalmem-noosdual.c \
+${USER_SOURCE_DIR}/pdo/pdoucalsync-noosdual.c \
 "
 
 ################################################################################
@@ -181,6 +199,10 @@ CTRL_KCAL_HOSTIF_SOURCES="\
 ${KERNEL_SOURCE_DIR}/ctrl/ctrlkcal-hostif.c \
 "
 
+CTRL_KCAL_DUALPROCSHM_SOURCES="\
+${KERNEL_SOURCE_DIR}/ctrl/ctrlkcal-noosdual.c \
+"
+
 ################################################################################
 # Kernel DLL CAL sources
 
@@ -199,6 +221,10 @@ ERRHND_KCAL_HOSTIF_SOURCES="\
 ${KERNEL_SOURCE_DIR}/errhnd/errhndkcal-hostif.c \
 "
 
+ERRHND_KCAL_DUALPROCSHM_SOURCES="\
+${KERNEL_SOURCE_DIR}/errhnd/errhndkcal-noosdual.c \
+"
+
 ################################################################################
 # Kernel event CAL sources
 
@@ -212,6 +238,11 @@ ${KERNEL_SOURCE_DIR}/event/eventkcalintf-circbuf.c \
 ${KERNEL_SOURCE_DIR}/event/eventkcal-nooshostif.c \
 "
 
+EVENT_KCAL_DUALPROCSHM_SOURCES="\
+${KERNEL_SOURCE_DIR}/event/eventkcalintf-circbuf.c \
+${KERNEL_SOURCE_DIR}/event/eventkcal-noosdual.c \
+"
+
 ################################################################################
 # Kernel PDO CAL sources
 
@@ -223,6 +254,11 @@ ${KERNEL_SOURCE_DIR}/pdo/pdokcalsync-null.c \
 PDO_KCAL_HOSTIF_SOURCES="\
 ${KERNEL_SOURCE_DIR}/pdo/pdokcalmem-hostif.c \
 ${KERNEL_SOURCE_DIR}/pdo/pdokcalsync-hostif.c \
+"
+
+PDO_KCAL_DUALPROCSHM_SOURCES="\
+${KERNEL_SOURCE_DIR}/pdo/pdokcalmem-noosdual.c \
+${KERNEL_SOURCE_DIR}/pdo/pdokcalsync-noosdual.c \
 "
 
 ################################################################################
@@ -265,6 +301,10 @@ CIRCBUF_NOOSHOSTIF_SOURCES="\
 ${COMMON_SOURCE_DIR}/circbuf/circbuffer.c \
 ${COMMON_SOURCE_DIR}/circbuf/circbuf-nooshostif.c \
 "
+CIRCBUF_DUALPROCSHM_SOURCES="\
+${COMMON_SOURCE_DIR}/circbuf/circbuffer.c \
+${COMMON_SOURCE_DIR}/circbuf/circbuf-noosdual.c \
+"
 
 ################################################################################
 # Memory Mapping sources
@@ -299,6 +339,18 @@ HOSTIF_KERNEL_SOURCES="\
 ${HW_DRIVERS_DIR}/hostinterface/src/hostiflibint-pcp.c \
 "
 
+################################################################################
+# Dual Processor Shared Memory Interface Sources
+################################################################################
+
+DUALPROCSHM_COMMON_SOURCES="\
+${CONTRIB_SOURCE_DIR}/dualprocshm/src/dualprocshm-intr.c \
+${CONTRIB_SOURCE_DIR}/dualprocshm/src/dualprocshm-noos.c \
+"
+
+DUALPROCSHM_DRIVER_SOURCES="\
+${CONTRIB_SOURCE_DIR}/dualprocshm/src/dualprocshm-c5soc.c \
+"
 ################################################################################
 # Target system specific sources
 ################################################################################
