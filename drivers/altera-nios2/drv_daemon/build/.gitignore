@@ -2,6 +2,8 @@ bsp*/
 lib*/
 Makefile
 *.elf
+*.bin
+*.rbf
 *orig
 *.bak
 *.objdump
