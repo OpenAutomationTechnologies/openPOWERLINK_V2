@@ -1,0 +1,31 @@
+#!/bin/bash
+# $ ./add-app-makefile-rbf [MAKEFILE]
+# Add .rbf preparation targets to APP Makefile for Qsys processors.
+
+MAKE_FILE=$1
+
+cat >> ${MAKE_FILE} <<'Heredoc'
+
+# Rules for preparing rbf
+SOF_FILE := $(wildcard $(QUARTUS_SOF_DIR)/*.sof)
+INPUT_RBF_NAME := $(basename  $(notdir $(SOF_FILE)))
+
+INPUT_RBF_FILE := $(QUARTUS_SOF_DIR)/$(INPUT_RBF_NAME).rbf
+OUTPUT_RBF_NAME := fpga
+
+
+.PHONY : $(OUTPUT_RBF_NAME)-rbf
+$(OUTPUT_RBF_NAME)-rbf : $(INPUT_RBF_FILE)
+	cp $(INPUT_RBF_FILE) $(OUTPUT_RBF_NAME).rbf
+
+$(INPUT_RBF_FILE) : $(SOF_FILE)
+	@$(ECHO) Info: Converting $(SOF_FILE) to $(INPUT_RBF_FILE)
+	quartus_cpf -c $(SOF_FILE) $(INPUT_RBF_FILE)
+
+# Rule for fpga-rbf help output
+help::
+	@$(ECHO)
+	@$(ECHO) "  fpga-rbf targets:"
+	@$(ECHO) "    fpga-rbf      - Preparing FPGA .rbf configuration"
+
+Heredoc
