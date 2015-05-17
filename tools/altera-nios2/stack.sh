@@ -162,7 +162,12 @@ elif [ "${CPU_NAME}" == "${CFG_DRV_CPU_NAME}" ]; then
     # The bsp's cpu matches to the drv part
     CFG_TCI_MEM_NAME=${CFG_DRV_TCI_MEM_NAME}
     if [ "${CFG_NODE}" == "MN" ] && [ -n "${CFG_OPENMAC}" ] && [ -n "${CFG_HOSTINTERFACE}" ]; then
+        echo "INFO: Compiling stack for Hostinterface design"
         LIB_NAME=oplkmndrv-hostif
+        LIB_SOURCES=${HW_COMMON_PATH}/drivers/openmac/omethlib_phycfg.c
+    elif [ "${CFG_NODE}" == "MN" ] && [ -n "${CFG_OPENMAC}" ] && [ -n "${CFG_DUALPROCSHM}" ]; then
+        echo "INFO: Compiling stack for Dual Processor Shared memory design"
+        LIB_NAME=oplkmndrv-dualprocshm
         LIB_SOURCES=${HW_COMMON_PATH}/drivers/openmac/omethlib_phycfg.c
     fi
 else
@@ -192,6 +197,22 @@ fi
 
 LIB_SOURCES+=" ${CFG_LIB_SOURCES}"
 LIB_INCLUDES+=" ${CFG_LIB_INCLUDES} ${BOARD_INCLUDE_PATH}"
+
+# Add design specific source files to the stack library
+if [ "${CFG_NODE}" == "MN" ] && [ -n "${CFG_DUALPROCSHM}" ]; then
+    if [ -z "${CFG_DRV_BUS}" ]; then
+        # For internal bus usage between two processors using dualprocshm interface
+        LIB_SOURCES+=" ${DUALPROCSHM_DRIVER_SOURCES}"
+        CFG_LIB_CFLAGS+=" -D__INT_BUS__"
+    elif [ "${CFG_DRV_BUS}" == "INT BUS" ]; then
+        # For internal bus usage between two processors using dualprocshm interface
+        LIB_SOURCES+=" ${DUALPROCSHM_DRIVER_SOURCES}"
+        CFG_LIB_CFLAGS+=" -D__INT_BUS__"
+    else
+        echo "ERROR: Dualprocshm with ${CFG_DRV_BUS} interface for NIOS driver is not supported"
+        exit 1
+    fi
+fi
 
 if [ -n "${DEBUG}" ]; then
     LIB_OPT_LEVEL=-O0

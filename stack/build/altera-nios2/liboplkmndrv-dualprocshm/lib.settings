@@ -1,0 +1,78 @@
+################################################################################
+#
+# Library creation settings file for Altera Nios II
+#
+# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2015, Kalycito Infotech Private Limited
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#     * Redistributions of source code must retain the above copyright
+#       notice, this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above copyright
+#       notice, this list of conditions and the following disclaimer in the
+#       documentation and/or other materials provided with the distribution.
+#     * Neither the name of the copyright holders nor the
+#       names of its contributors may be used to endorse or promote products
+#       derived from this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+# DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+# ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+################################################################################
+
+source ${OPLK_BASE_DIR}/stack/build/altera-nios2/common/directories.settings
+source ${OPLK_BASE_DIR}/stack/build/altera-nios2/common/stackfiles.settings
+
+LIB_NAME=oplkmndrv-dualprocshm
+
+# Library sources
+CFG_LIB_SOURCES="\
+${KERNEL_SOURCES} \
+${CTRL_KCAL_DUALPROCSHM_SOURCES} \
+${ERRHND_KCAL_DUALPROCSHM_SOURCES} \
+${EVENT_KCAL_DUALPROCSHM_SOURCES} \
+${PDO_KCAL_DUALPROCSHM_SOURCES} \
+${COMMON_SOURCES} \
+${COMMON_NOOS_SOURCES} \
+${CIRCBUF_DUALPROCSHM_SOURCES} \
+${DLL_KCAL_CIRCBUF_SOURCES} \
+${ARCH_LE_SOURCES} \
+${TARGET_NIOS2_SOURCES} \
+${TARGET_NIOS2_DUAL_SOURCES} \
+${TARGET_NIOS2_OPENMAC_SOURCES} \
+${HARDWARE_DRIVER_OPENMAC_SOURCES} \
+${HARDWARE_DRIVER_OPENMAC_MN_SOURCES} \
+${DUALPROCSHM_COMMON_SOURCES} \
+"
+
+CFG_LIB_CFLAGS=
+
+CFG_LIB_INCLUDES="\
+${OPLK_BASE_DIR}/stack/proj/generic/lib${LIB_NAME} \
+${STACK_INCLUDE_DIR} \
+${STACK_SOURCE_DIR} \
+${ARCH_SOURCE_DIR}/altera_nios2 \
+${HW_DRIVERS_DIR}/openmac/include \
+${HW_DRIVERS_DIR}/openmac/src \
+${CONTRIB_SOURCE_DIR}/dualprocshm/include \
+"
+
+CFG_LIB_CFLAGS="\
+${CFG_LIB_CFLAGS} \
+${CFG_PLATFORM_CFLAGS} \
+-DCONFIG_DUALPROCSHM_PCP=TRUE \
+"
+
+CFG_LIB_ARGS="\
+"
+
+CFG_LIB_OPT_LEVEL=-O2
