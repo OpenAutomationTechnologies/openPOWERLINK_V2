@@ -34,6 +34,9 @@ MESSAGE(STATUS "Adding CMake configuration options for ARM")
 ################################################################################
 # Handle includes
 SET(CMAKE_MODULE_PATH "${OPLK_BASE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+INCLUDE(geneclipsefilelist)
+INCLUDE(geneclipseincludelist)
+INCLUDE(geneclipseflaglist)
 
 ################################################################################
 # Set Paths
