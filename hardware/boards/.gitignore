@@ -4,6 +4,7 @@
 ## Dirs
 .qsys_edit/
 db/
+/**/quartus/*/*
 incremental_db/
 ## Files
 *.bak
@@ -18,10 +19,12 @@ incremental_db/
 *.rpt
 *.smsg
 *.sof
+*.rbf
 *.sopcinfo
 *.summary
 *.pof
 *.txt
+*.csv
 
 # Xilinx Platform Studio
 ## Dirs

@@ -1,0 +1,33 @@
+# Reset and stop the system.
+reset system
+stop
+wait 30s
+
+# Disable semihosting.
+set semihosting enabled false
+
+#
+# Load the SPL preloader into memory.
+#
+loadfile "$sdir/u-boot-spl" 0x0
+
+
+
+# Delete any existing breakpoints.
+delete
+
+# Set a breakpoint in the SPL function spl_boot_device(). This function is
+# called right before the SPL tries to load the next stage in the preloader.
+tbreak spl_boot_device
+
+# Set the PC to the entry point and go.
+run
+
+# Wait for the breakpoint.
+wait
+
+# Load the demo program.
+loadfile "$sdir/${PROJECT_NAME}.axf" 0x0
+
+# Run the target and break at main().
+start
