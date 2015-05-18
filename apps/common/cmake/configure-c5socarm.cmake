@@ -34,6 +34,10 @@
 SET(CMAKE_MODULE_PATH "${OPLK_ROOT_DIR}/cmake" ${CMAKE_MODULE_PATH})
 INCLUDE(setalteraarmboardconfig)
 INCLUDE(listdir)
+INCLUDE(geneclipsefilelist)
+INCLUDE(geneclipseincludelist)
+INCLUDE(geneclipseflaglist)
+INCLUDE(geneclipselibrarylist)
 
 ################################################################################
 # Path to the hardware library folder of your board example

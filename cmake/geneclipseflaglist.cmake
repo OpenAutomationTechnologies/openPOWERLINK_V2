@@ -1,8 +1,8 @@
 ################################################################################
 #
-# CMake options for openPOWERLINK stack on Altera Cyclone V ARM
+# CMake macro for generating a include list suitable for a SDK eclipse .cproject
+# file
 #
-# Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # Copyright (c) 2015, Kalycito Infotech Private Limited
 # All rights reserved.
 #
@@ -28,36 +28,13 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
+MACRO(GEN_ECLIPSE_FLAG_LIST FLAG_LIST RES_FLAG_LIST)
 
-MESSAGE(STATUS "Adding CMake configuration options for ARM")
+    SET(TMP_RESULT "")
+    FOREACH(FLAG IN ITEMS ${FLAG_LIST})
+        SET(TMP_RESULT "${TMP_RESULT}\t\t\t\t\t\t\t\t\t<listOptionValue builtIn=\"false\" value=\"${FLAG}\"/>\r")
+    ENDFOREACH()
 
-################################################################################
-# Handle includes
-SET(CMAKE_MODULE_PATH "${OPLK_BASE_DIR}/cmake" ${CMAKE_MODULE_PATH})
-INCLUDE(geneclipsefilelist)
-INCLUDE(geneclipseincludelist)
-INCLUDE(geneclipseflaglist)
-
-################################################################################
-# Set Paths
-SET(ALT_HW_LIB_DIR ${OPLK_BASE_DIR}/hardware/lib/${SYSTEM_NAME_DIR}/${SYSTEM_PROCESSOR_DIR})
-SET(ALT_TOOLS_DIR ${TOOLS_DIR}/altera-arm)
-
-################################################################################
-# Options for MN libraries
-OPTION(CFG_COMPILE_LIB_MNAPP_DUALPROCSHM "Compile openPOWERLINK MN library for application using dual processor shared memory" OFF)
-
-################################################################################
-# Add library subdirectories and hardware library path
-
-# MN libraries
-IF(CFG_COMPILE_LIB_MNAPP_DUALPROCSHM)
-      # Path to the hardware library folder of your board example
-    SET(CFG_COMPILE_LIB_MN_HW_LIB_DIR ${ALT_HW_LIB_DIR}/altera-c5soc/mn-soc-shmem-gpio
-              CACHE PATH "Path to the hardware library folder for the dual processor MN library")
-
-    ADD_SUBDIRECTORY(proj/generic/liboplkmnapp-dualprocshm)
-
-ELSE()
-    UNSET(CFG_COMPILE_LIB_MN_HW_LIB_DIR CACHE)
-ENDIF()
+    # Add to result list
+    SET(${RES_FLAG_LIST} ${TMP_RESULT})
+ENDMACRO()

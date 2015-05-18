@@ -2,7 +2,7 @@
 #
 # CMake boards configuration file for Altera Cyclone V ARM
 #
-# Copyright (c) 2014, Kalycito Infotech Private Limited
+# Copyright (c) 2015, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -35,6 +35,9 @@ MESSAGE(STATUS "INFO: Altera Cyclone V SoC platform selected")
 SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/altera" ${CMAKE_MODULE_PATH})
 SET(CMAKE_MODULE_PATH "${OPLK_BASE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
+INCLUDE(geneclipsefilelist)
+INCLUDE(geneclipseincludelist)
+INCLUDE(geneclipseflaglist)
 INCLUDE(setalteraarmboardconfig)
 
 ################################################################################
