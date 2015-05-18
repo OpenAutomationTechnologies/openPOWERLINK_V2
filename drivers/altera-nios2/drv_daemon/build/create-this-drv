@@ -70,7 +70,7 @@ fi
 
 if [ -z "${BOARD_PATH}" ]; then
     # user selects from existing boards
-    BOARD_PATH=`select_dir_abs ${OPLK_BASE_DIR}/hardware/boards 'board.settings' 'grep -e dual -e drv'`
+    BOARD_PATH=`select_dir_abs ${OPLK_BASE_DIR}/hardware/boards 'board.settings' 'grep -e dual -e drv -e soc'`
     test $? -ne 0 && echo "$0 failed!" && exit
 fi
 

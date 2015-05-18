@@ -37,6 +37,7 @@ ${OPLK_BASE_DIR}/drivers/altera-nios2/drv_daemon/daemon.c \
 
 DRV_INCLUDES="\
 ${OPLK_BASE_DIR}/stack/include \
+${OPLK_BASE_DIR}/stack/src/arch/altera_nios2 \
 ${OPLK_BASE_DIR}/stack/include/kernel \
 "
 
