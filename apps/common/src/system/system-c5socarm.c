@@ -98,6 +98,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 static INT initializeFpga(void);
 static INT initializeTimer(void);
 static INT cleanupTimer(void);
+#ifdef __BOOT_FROM_SD__
+static INT initializeDriver(void);
+#endif
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -138,6 +141,15 @@ INT system_init(void)
         DEBUG_LVL_ERROR_TRACE("H2F initialization Failed!!\n");
         goto Exit;
     }
+
+#ifdef __BOOT_FROM_SD__
+    // Initialize the driver processor
+    if(initializeDriver() != 0)
+    {
+        DEBUG_LVL_ERROR_TRACE("Initializing the driver failed!!\n");
+        return -1;
+    }
+#endif
 
 Exit:
     return oplkRet;
@@ -307,6 +319,68 @@ static INT initializeFpga(void)
 Exit:
     return ret;
 }
+
+#ifdef __BOOT_FROM_SD__
+//------------------------------------------------------------------------------
+/**
+\brief Initialize the openPOWERLINK driver from the hard processor system
+
+The function resets the driver processor, copies the driver binary to the
+processor's memory and releases the processor out of reset.
+
+\return The function returns an integer
+\retval 0                   Success
+\retval -1                  Failure
+*/
+//------------------------------------------------------------------------------
+static INT initializeDriver(void)
+{
+    ALT_STATUS_CODE     halRet = ALT_E_SUCCESS;
+    /* Symbol name for the driver binary file contents linked in. */
+    extern char         _binary_drv_daemon_bin_start;
+    extern char         _binary_drv_daemon_bin_end;
+    /* Use the above symbols to extract the driver binary information */
+    const char *        driverBinary = &_binary_drv_daemon_bin_start;
+    const UINT32        driverBinarySize = &_binary_drv_daemon_bin_end - &_binary_drv_daemon_bin_start;
+    char *              driverExecutableStartAddress = (char*)DDR3_EMIF_0_BASE;
+
+    // Trace the driver image information.
+    DEBUG_LVL_ALWAYS_TRACE("INFO: driver Image binary at %p.\n", driverBinary);
+    DEBUG_LVL_ALWAYS_TRACE("INFO: driver Image size is %u bytes.\n", driverBinarySize);
+    DEBUG_LVL_ALWAYS_TRACE("INFO: driver Executable start is %p\n", driverExecutableStartAddress);
+
+    // Release driver processor in reset
+    halRet = alt_fpga_gpo_write(0x00000001, 0x00000001);
+    if (halRet != ALT_E_SUCCESS)
+    {
+        return -1;
+    }
+
+    while(alt_fpga_gpi_read(0x00000001) != 0);
+
+    // Copy the driver image
+    memcpy(driverExecutableStartAddress, driverBinary, driverBinarySize);
+
+    // Reset the driver processor
+    halRet = alt_fpga_gpo_write(0x00000001, 0x00000000);
+    if (halRet != ALT_E_SUCCESS)
+    {
+        return -1;
+    }
+
+    while(alt_fpga_gpi_read(0x00000001) == 0);
+
+    // Release the driver processor from reset
+    halRet = alt_fpga_gpo_write(0x00000001, 0x00000001);
+    if (halRet != ALT_E_SUCCESS)
+    {
+        return -1;
+    }
+
+    while(alt_fpga_gpi_read(0x00000001) != 0);
+    return 0;
+}
+#endif
 
 //------------------------------------------------------------------------------
 /**
