@@ -66,6 +66,8 @@ IF(${CMAKE_SYSTEM_NAME} STREQUAL "Generic" AND ${CMAKE_SYSTEM_PROCESSOR} STREQUA
     INCLUDE(configure-microblaze)
 ELSEIF(${CMAKE_SYSTEM_NAME} STREQUAL "Generic" AND ${CMAKE_SYSTEM_PROCESSOR} STREQUAL "zynqarm")
     INCLUDE(configure-zynqarm)
+ELSEIF(${CMAKE_SYSTEM_NAME} STREQUAL "Generic" AND ${CMAKE_SYSTEM_PROCESSOR} STREQUAL "alterac5arm")
+    INCLUDE(configure-c5socarm)
 ELSE()
     MESSAGE(FATAL_ERROR "Unknown platform selected!")
 ENDIF()
