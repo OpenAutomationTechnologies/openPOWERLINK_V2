@@ -49,6 +49,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "dualprocshm-zynq.h"
 
+#elif defined(__C5SOC__)
+
+#include "dualprocshm-c5soc.h"
+
 #else
 
 #error "Platform is not supported! Please point the target platform file in dualprocshm-target.h "
