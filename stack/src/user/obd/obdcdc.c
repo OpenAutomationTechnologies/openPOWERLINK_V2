@@ -81,6 +81,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     #include <unistd.h>
 #endif
 
+#if ((TARGET_SYSTEM == _NO_OS_) && (DEV_SYSTEM == _DEV_ARM_ALTERA_EABI_))
+    #include <sys/unistd.h>
+#endif
+
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
@@ -123,6 +127,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #if (TARGET_SYSTEM == _NO_OS_ && DEV_SYSTEM == _DEV_NIOS2_)
+#define OBDCDC_DISABLE_FILE_SUPPORT     TRUE
+#endif
+
+#if ((TARGET_SYSTEM == _NO_OS_) && (DEV_SYSTEM == _DEV_ARM_ALTERA_EABI_))
 #define OBDCDC_DISABLE_FILE_SUPPORT     TRUE
 #endif
 
