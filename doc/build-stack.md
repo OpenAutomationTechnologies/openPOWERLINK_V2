@@ -135,6 +135,39 @@ Follow the steps below to build the stack library on your host platform:
 The default library installation path is:
 `<openPOWERLINK_DIR>/stack/lib/generic/xilinx-zynqarm/<BOARD_NAME>/<DEMO_NAME>`
 
+### Altera Cyclone V SoC ARM {#sect_build_stack_build_c5socarm-altera}
+
+Follow the steps below to build the stack library on your host platform:
+
+* Open SoC embedded command shell.
+
+* Create debug libraries
+
+      > cd <openPOWERLINK_directory>\stack\build\altera-c5socarm
+      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-altera-c5socarm-eabi-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Debug -DCFG_COMPILE_LIB_[LIB_NAME]=ON -DCFG_COMPILE_LIB_[LIB_NAME]_LIB_DIR=[PATH_TO_HW_LIB]
+      > make all
+      > make install
+
+  This will create the `[LIB_NAME]` stack library (debug) for the hardware library in `[PATH_TO_HW_LIB]`.
+  Multiple stack libraries can be built together by passing the define pairs (`CFG_COMPILE_LIB_[LIB_NAME]`
+  and `CFG_COMPILE_LIB_[LIB_NAME]_LIB_DIR`) for each stack library to CMake.
+  Refer to \ref sect_build_stack_options_noos_c5socarm for details!
+
+* Create release libraries
+
+      > cd <openPOWERLINK_directory>\stack\build\altera-c5socarm
+      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../toolchain-altera-c5socarm-eabi-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Release -DCFG_COMPILE_LIB_[LIB_NAME]=ON -DCFG_COMPILE_LIB_[LIB_NAME]_LIB_DIR=[PATH_TO_HW_LIB]
+      > make all
+      > make install
+
+  This will create the `[LIB_NAME]` stack library for the hardware library in `[PATH_TO_HW_LIB]`.
+  Multiple stack libraries can be built together by passing the define pairs (`CFG_COMPILE_LIB_[LIB_NAME]`
+  and `CFG_COMPILE_LIB_[LIB_NAME]_LIB_DIR`) for each stack library to CMake.
+  Refer to \ref sect_build_stack_options_noos_c5socarm for details!
+
+The default library installation path is:
+`<openPOWERLINK_DIR>/stack/lib/generic/alterac5arm/<BOARD_NAME>/<DEMO_NAME>`
+
 # Configuration Options {#sect_build_stack_options}
 
 If you would like to change the configuration options you have to provide
@@ -284,3 +317,23 @@ the configuration options on the command line (-DCFG_XXX=XXX) or
   Specify the path to the hardware platform the application library should refer to.
   The path to the hardware platform should point to the export folder of the hardware
   project. (e.g: `<openPOWERLINK_DIR>/hardware/lib/generic/zynqarm/<BOARD_NAME>/<DEMO_NAME>`)
+
+### Altera Cyclone V SoC ARM Configuration Options {#sect_build_stack_options_noos_c5socarm}
+
+- **CFG_COMPILE_LIB_MNAPP_DUALPROCSHM**
+
+  Compile the openPOWERLINK MN application library for Altera Cyclone V SoC ARM.
+  The library contains the openPOWERLINK user layer with CAL modules for
+  accessing the dual processor shared memory library. The dual processor
+  shared memory library is used to communicate with the kernel part of
+  openPOWERLINK. The library can be used to implement an application
+  designed to run on non-OS C5SoC ARM processor communicating with the
+  openPOWERLINK kernel layer running on a separate processor connected
+  via a shared memory.
+
+    - __CFG_COMPILE_LIB_MN_HW_LIB_DIR__
+
+  Specifies the path to the hardware platform the application library should refer to.
+  The path to the hardware platform should point to the export folder of the hardware
+  project. (e.g: `<openPOWERLINK_DIR>/hardware/lib/generic/alterac5arm/<BOARD_NAME>/<DEMO_NAME>`)
+

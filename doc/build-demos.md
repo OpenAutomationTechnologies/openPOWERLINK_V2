@@ -72,6 +72,18 @@ Follow the steps below to cross compile your demo application for Zynq ARM:
       > make all
       > make install
 
+### Building for target Altera ARM {#sect_build_demos_build_altera_arm}
+
+Follow the steps below to cross compile your demo application for Altera Cyclone V SoC ARM:
+
+* Open an "SoC embedded shell".
+* Create the executable
+
+      > cd <openPOWERLINK_dir>/apps/<demo_dir>/build/altera-c5socarm
+      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../../cmake/toolchain-altera-c5socarm-eabi-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=[Debug,Release]
+      > make all
+      > make install
+
 # Configuration Options {#sect_build_demos_options}
 
 ## Generic Options {#sect_build_demos_generic_options}
@@ -175,6 +187,39 @@ Follow the steps below to cross compile your demo application for Zynq ARM:
     to the kernel daemon running on a separate processor. It uses the dual processor
     shared memory library to communicate with the kernel part of the openPOWERLINK
     running on the second processor.
+
+### Altera Cyclone V SoC ARM Specific Options  {#sect_build_demos_altera-arm_options}
+
+- **CFG_HW_LIB_DIR**
+
+  Path to the hardware platform install directory that the application should refer to.
+  (e.g: `<openPOWERLINK_DIR>/hardware/lib/generic/alterac5arm/<BOARD_NAME>/<DEMO_NAME>`)
+
+- **CFG_BUILD_KERNEL_STACK**
+
+  Determines how to build the kernel stack. The following option is available and
+  automatically (implicitly) pre-selected:
+
+  - __PCP Daemon using shared memory__
+
+    The library liboplk[mn,cn]app-dualprocshm.a will be used. It contains the interface
+    to the kernel daemon running on a separate processor. It uses the dual processor
+    shared memory library to communicate with the kernel part of the openPOWERLINK
+    stack running on the second processor.
+
+- **CFG_DRV_BLD_PATH**
+
+  Path to the driver daemon build location that the application should refer to.
+   (e.g: `<openPOWERLINK_DIR>/drivers/altera-nios2/drv_daemon/build`)
+
+- **CFG_DRV_BIN**
+
+  Driver daemon binary for the NIOSII.
+  (default: `drv_daemon.bin`)
+
+- **CFG_FPGA_RBF**
+  FPGA configuration file in rbf format.
+  (default: `fpga.rbf`)
 
 ## Application Specific Options {#sect_build_demos_app_options}
 
