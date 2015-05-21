@@ -111,6 +111,14 @@ BSP_GEN_ARGS="${CFG_DRV_BSP_TYPE} ${BSP_PATH} ${BOARD_PATH}/quartus \
 --cmd add_section_mapping .tc_i_mem ${CFG_DRV_TCI_MEM_NAME} \
 "
 
+if [ -z "${CFG_DRV_DEF_MEM_NAME}" ];
+then
+    BSP_GEN_ARGS+=""
+else
+    BSP_GEN_ARGS+="--default_sections_mapping ${CFG_DRV_DEF_MEM_NAME} "
+    echo "INFO: The default memory is changed to ${CFG_DRV_DEF_MEM_NAME}"
+fi
+
 if [ -n "${CFG_DRV_MAX_HEAP_BYTES}" ];
 then
     BSP_GEN_ARGS+="--set hal.make.bsp_cflags_user_flags -DALT_MAX_HEAP_BYTES=${CFG_DRV_MAX_HEAP_BYTES} "
