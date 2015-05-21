@@ -88,6 +88,13 @@ IF(DEFINED CFG_DEMO_BOARD_ZYNQ AND CFG_DEMO_BOARD_ZYNQ)
         ${DUALPROCSHM_LIB_SRCS}
         ${PROJECT_SOURCE_DIR}/src/dualprocshm-zynq.c
        )
+ELSEIF(DEFINED CFG_DEMO_BOARD_NAME AND (CFG_DEMO_BOARD_NAME STREQUAL "altera-c5soc"))
+    SET(DUALPROCSHM_LIB_SRCS
+        ${DUALPROCSHM_LIB_SRCS}
+        ${PROJECT_SOURCE_DIR}/src/dualprocshm-c5soc.c
+       )
+ELSE()
+    MESSAGE(FATAL_ERROR "Dual Processor Shared Memory Interface is not supported on ${CFG_DEMO_BOARD_NAME} platform!!")
 ENDIF()
 
 ########################################################################
@@ -113,6 +120,8 @@ IF(CMAKE_SYSTEM_NAME STREQUAL "Generic" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "Mic
     include(configure-microblaze)
 ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "Generic" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "zynqarm")
     include(configure-zynqarm)
+ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "Generic" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "alterac5arm")
+    include(configure-c5socarm)
 ELSE()
     MESSAGE(FATAL_ERROR "System ${CMAKE_SYSTEM_NAME} with processor ${CMAKE_SYSTEM_PROCESSOR} is not supported!")
 ENDIF()

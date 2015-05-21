@@ -49,6 +49,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "dualprocshm-zynq.h"
 
+#elif defined(__C5SOC__)
+
+#include "dualprocshm-c5soc.h"
+
 #else
 
 #error "Platform is not supported! Please point the target platform file in dualprocshm-target.h "
@@ -93,6 +97,10 @@ set to those provided by stdint.h.
 
 #ifndef UINT
 #define UINT        unsigned int
+#endif
+
+#ifndef ULONG
+#define ULONG        unsigned long
 #endif
 
 #ifndef UINT8
