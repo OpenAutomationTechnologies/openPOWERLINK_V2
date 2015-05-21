@@ -103,12 +103,27 @@ MACRO(GENERATE_BSP EXAMPLE_NAME ALT_DEMO_DIR ALT_BSP_TARGET_DIR PROCESSOR_NAME T
         WORKING_DIRECTORY ${SPL_PATH}
     )
 
-    ADD_CUSTOM_COMMAND(
-        TARGET ${EXAMPLE_NAME}-${UBOOT_TARGET}
-        POST_BUILD
-        COMMAND make
-        WORKING_DIRECTORY ${SPL_PATH}
-    )
+    IF(DEFINED CFG_${PROC_INST_NAME}_BOOT_FROM_SDCARD AND CFG_${PROC_INST_NAME}_BOOT_FROM_SDCARD)
+        ADD_CUSTOM_COMMAND(
+            TARGET ${EXAMPLE_NAME}-${UBOOT_TARGET}
+            POST_BUILD
+            COMMAND make
+            COMMAND chmod +x ${ARCH_TOOLS_DIR}/configure-uboot.sh
+            COMMAND ${ARCH_TOOLS_DIR}/configure-uboot.sh ${SPL_PATH}
+            COMMAND make clean all
+            COMMAND make
+            WORKING_DIRECTORY ${SPL_PATH}
+        )
+
+    ELSE()
+        ADD_CUSTOM_COMMAND(
+            TARGET ${EXAMPLE_NAME}-${UBOOT_TARGET}
+            POST_BUILD
+            COMMAND make
+            WORKING_DIRECTORY ${SPL_PATH}
+        )
+
+    ENDIF()
 
     ENDIF()
 
