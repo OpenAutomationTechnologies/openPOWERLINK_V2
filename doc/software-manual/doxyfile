@@ -784,6 +784,7 @@ INPUT                  = ../../stack/src \
                          ../supported-platforms/altera-cn.md \
                          ../supported-platforms/xilinx.md \
                          ../supported-platforms/zynq.md \
+                         ../supported-platforms/altera-soc.md \
                          ../../readme.md \
                          ../../license.md \
                          ../../revision.md
