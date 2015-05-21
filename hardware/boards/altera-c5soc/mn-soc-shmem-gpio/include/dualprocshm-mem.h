@@ -61,7 +61,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #elif defined(__NIOS2__)
 
 #define COMMON_MEM_BASE             COM_MEM_BASE
-#define SHARED_MEM_BASE             ADDRESS_SPAN_EXTENDER_0_BASE
+#define SHARED_MEM_BASE             ADDRESS_SPAN_EXTENDER_CPU_BRIDGE_BASE
 #define SHARED_MEM_SPAN             0x400000    // Limited by the PCP bridge width
 
 #else

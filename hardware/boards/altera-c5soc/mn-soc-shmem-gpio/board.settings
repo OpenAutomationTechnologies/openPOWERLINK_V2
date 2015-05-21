@@ -44,6 +44,9 @@ CFG_DRV_SYS_TIMER_NAME=${CFG_DRV_SUB_NAME}_timer_0
 # Tightly coupled instruction memory
 CFG_DRV_TCI_MEM_NAME=${CFG_DRV_SUB_NAME}_tc_i_mem
 
+# Default Use Memory
+CFG_DRV_DEF_MEM_NAME=address_span_extender_cpu_bridge
+
 # BSP type
 CFG_DRV_BSP_TYPE=hal
 # BSP optimization

@@ -12,11 +12,19 @@
    element $${FILENAME}
    {
    }
-   element address_span_extender_0
+   element address_span_extender_cpu_bridge
    {
       datum _sortIndex
       {
          value = "3";
+         type = "int";
+      }
+   }
+   element address_span_extender_flash_bridge
+   {
+      datum _sortIndex
+      {
+         value = "4";
          type = "int";
       }
    }
@@ -50,7 +58,7 @@
    {
       datum _sortIndex
       {
-         value = "10";
+         value = "11";
          type = "int";
       }
       datum sopceditor_expanded
@@ -76,7 +84,7 @@
    {
       datum _sortIndex
       {
-         value = "8";
+         value = "9";
          type = "int";
       }
       datum sopceditor_expanded
@@ -89,7 +97,7 @@
    {
       datum _sortIndex
       {
-         value = "6";
+         value = "7";
          type = "int";
       }
       datum sopceditor_expanded
@@ -102,7 +110,7 @@
    {
       datum _sortIndex
       {
-         value = "9";
+         value = "10";
          type = "int";
       }
       datum sopceditor_expanded
@@ -123,7 +131,7 @@
    {
       datum _sortIndex
       {
-         value = "7";
+         value = "8";
          type = "int";
       }
       datum sopceditor_expanded
@@ -136,7 +144,7 @@
    {
       datum _sortIndex
       {
-         value = "4";
+         value = "5";
          type = "int";
       }
       datum sopceditor_expanded
@@ -145,19 +153,19 @@
          type = "boolean";
       }
    }
-   element led_pio.s1
-   {
-      datum baseAddress
-      {
-         value = "26880";
-         type = "String";
-      }
-   }
    element com_mem.s1
    {
       datum baseAddress
       {
          value = "0";
+         type = "String";
+      }
+   }
+   element led_pio.s1
+   {
+      datum baseAddress
+      {
+         value = "26880";
          type = "String";
       }
    }
@@ -173,7 +181,7 @@
    {
       datum _sortIndex
       {
-         value = "5";
+         value = "6";
          type = "int";
       }
       datum sopceditor_expanded
@@ -307,11 +315,6 @@
    internal="pcp.cpu_resetrequest"
    type="conduit"
    dir="end" />
- <interface
-   name="pcp_flash_bridge"
-   internal="pcp.flash_bridge"
-   type="avalon"
-   dir="start" />
  <module
    kind="altera_mem_if_ddr3_emif"
    version="14.0"
@@ -755,7 +758,7 @@
    kind="altera_address_span_extender"
    version="14.0"
    enabled="1"
-   name="address_span_extender_0">
+   name="address_span_extender_cpu_bridge">
   <parameter name="DATA_WIDTH" value="32" />
   <parameter name="MASTER_ADDRESS_WIDTH" value="27" />
   <parameter name="SLAVE_ADDRESS_WIDTH" value="20" />
@@ -765,6 +768,22 @@
   <parameter name="TERMINATE_SLAVE_PORT" value="false" />
   <parameter name="MAX_PENDING_READS" value="1" />
   <parameter name="AUTO_CLOCK_CLOCK_RATE" value="100000000" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone V" />
+ </module>
+ <module
+   kind="altera_address_span_extender"
+   version="14.0"
+   enabled="1"
+   name="address_span_extender_flash_bridge">
+  <parameter name="DATA_WIDTH" value="32" />
+  <parameter name="MASTER_ADDRESS_WIDTH" value="27" />
+  <parameter name="SLAVE_ADDRESS_WIDTH" value="20" />
+  <parameter name="BURSTCOUNT_WIDTH" value="1" />
+  <parameter name="SUB_WINDOW_COUNT" value="1" />
+  <parameter name="MASTER_ADDRESS_DEF" value="4194304" />
+  <parameter name="TERMINATE_SLAVE_PORT" value="false" />
+  <parameter name="MAX_PENDING_READS" value="1" />
+  <parameter name="AUTO_CLOCK_CLOCK_RATE" value="50000000" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone V" />
  </module>
  <connection
@@ -1077,7 +1096,7 @@
    kind="avalon"
    version="14.0"
    start="pcp.cpu_bridge"
-   end="address_span_extender_0.windowed_slave">
+   end="address_span_extender_cpu_bridge.windowed_slave">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x0000" />
   <parameter name="defaultConnection" value="false" />
@@ -1085,7 +1104,7 @@
  <connection
    kind="avalon"
    version="14.0"
-   start="address_span_extender_0.expanded_master"
+   start="address_span_extender_cpu_bridge.expanded_master"
    end="ddr3_emif_0.avl_0">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x0000" />
@@ -1095,17 +1114,50 @@
    kind="clock"
    version="14.0"
    start="clk_100.clk"
-   end="address_span_extender_0.clock" />
+   end="address_span_extender_cpu_bridge.clock" />
  <connection
    kind="reset"
    version="14.0"
    start="clk_50.clk_reset"
-   end="address_span_extender_0.reset" />
+   end="address_span_extender_cpu_bridge.reset" />
  <connection
    kind="reset"
    version="14.0"
    start="clk_100.clk_reset"
-   end="address_span_extender_0.reset" />
+   end="address_span_extender_cpu_bridge.reset" />
+ <connection
+   kind="clock"
+   version="14.0"
+   start="clk_50.clk"
+   end="address_span_extender_flash_bridge.clock" />
+ <connection
+   kind="reset"
+   version="14.0"
+   start="clk_50.clk_reset"
+   end="address_span_extender_flash_bridge.reset" />
+ <connection
+   kind="reset"
+   version="14.0"
+   start="clk_100.clk_reset"
+   end="address_span_extender_flash_bridge.reset" />
+ <connection
+   kind="avalon"
+   version="14.0"
+   start="pcp.flash_bridge"
+   end="address_span_extender_flash_bridge.windowed_slave">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="14.0"
+   start="address_span_extender_flash_bridge.expanded_master"
+   end="ddr3_emif_0.avl_0">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
  <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
  <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="1" />
  <interconnectRequirement for="$system" name="qsys_mm.insertDefaultSlave" value="false" />
