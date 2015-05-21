@@ -7,7 +7,11 @@ MAKE_FILE=$1
 # FIX CPU NAME ISSUE
 chmod u+rw ${MAKE_FILE}
 sed -i 's/ --cpu_name=$(CPU_NAME) / --cpu_name=$(QSYS_SUB_CPU) /g' ${MAKE_FILE}
-
+# FIX JTAG device ID issue
+if [ -n "{(CFG_DEVICE_ID}" ]; then
+    sed -i 's/ --cpu_name=$(QSYS_SUB_CPU) $(DOWNLOAD_CABLE_FLAG) / --cpu_name=$(QSYS_SUB_CPU) $(DOWNLOAD_CABLE_FLAG)  $(DOWNLOAD_DEVICE_FLAG) /g' ${MAKE_FILE}
+    sed -i 's/nios2-configure-sof $(DOWNLOAD_CABLE_FLAG) /nios2-configure-sof $(DOWNLOAD_CABLE_FLAG)  $(DOWNLOAD_DEVICE_FLAG) /g' ${MAKE_FILE}
+fi
 # Enable additional help output
 sed -i 's/help :/help ::/g' ${MAKE_FILE}
 
@@ -16,7 +20,7 @@ cat >> ${MAKE_FILE} <<'Heredoc'
 # Rule for downloading the FPGA bitstream to the target
 .PHONY : download-bits
 download-bits:
-	nios2-configure-sof $(DOWNLOAD_CABLE_FLAG) -C $(QUARTUS_PROJECT_DIR)
+	nios2-configure-sof $(DOWNLOAD_CABLE_FLAG) $(DOWNLOAD_DEVICE_FLAG) -C $(QUARTUS_SOF_DIR)
 
 # Rule for doing magic
 .PHONY: download-all
