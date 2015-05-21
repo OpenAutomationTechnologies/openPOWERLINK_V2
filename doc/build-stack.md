@@ -19,14 +19,14 @@ CMake configuration.
 Follow the steps below to build the stack on a Linux system. On Linux, CMake
 generates Makefiles by default.
 
-* Creating debug libraries
+* Create debug libraries
 
       > cd openPOWERLINK/stack/build/linux
       > cmake -DCMAKE_BUILD_TYPE=Debug ../..
       > make
       > make install
 
-* Creating release libraries
+* Create release libraries
 
       > cd openPOWERLINK/stack/build/linux
       > cmake -DCMAKE_BUILD_TYPE=Release ../..
@@ -41,14 +41,14 @@ The default library installation path is: `<openPOWERLINK_DIR>/lib/linux/<ARCH>`
 Follow the steps below to build the stack on a Windows system using NMake.
 Open a Visual Studio command line and enter the following commands:
 
-* Creating debug libraries
+* Create debug libraries
 
       > cd <openPOWERLINK_directory>\stack\build\windows
       > cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Debug ..\..
       > nmake
       > nmake install
 
-* Creating release libraries
+* Create release libraries
 
       > cd <openPOWERLINK_directory>\stack\build\windows
       > cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release ..\..
@@ -72,7 +72,7 @@ Follow the steps below to build the stack library on your host platform:
   - On a Linux host platform execute the script `<ISE_ROOT_DIR>/settings[32,64].sh>`
     to configure your current shell.
 
-* Creating debug libraries
+* Create debug libraries
 
       > cd <openPOWERLINK_directory>\stack\build\xilinx-microblaze
       > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Debug -DCFG_COMPILE_LIB_[LIB_NAME]=ON -DCFG_COMPILE_LIB_[LIB_NAME]_LIB_DIR=[PATH_TO_HW_LIB]
@@ -84,7 +84,7 @@ Follow the steps below to build the stack library on your host platform:
   and `CFG_COMPILE_LIB_[LIB_NAME]_LIB_DIR`) for each stack library to CMake.
   Refer to \ref sect_build_stack_options_noos_microblaze for details!
 
-* Creating release libraries
+* Create release libraries
 
       > cd <openPOWERLINK_directory>\stack\build\xilinx-microblaze
       > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Release -DCFG_COMPILE_LIB_[LIB_NAME]=ON -DCFG_COMPILE_LIB_[LIB_NAME]_LIB_DIR=[PATH_TO_HW_LIB]
@@ -108,7 +108,7 @@ Follow the steps below to build the stack library on your host platform:
   - On a Linux host platform execute the script `<ISE_ROOT_DIR>/settings[32,64].sh>`
     to configure your current shell.
 
-* Creating debug libraries
+* Create debug libraries
 
       > cd <openPOWERLINK_directory>\stack\build\xilinx-zynqarm
       > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-zynqarm-eabi-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Debug -DCFG_COMPILE_LIB_[LIB_NAME]=ON -DCFG_COMPILE_LIB_[LIB_NAME]_LIB_DIR=[PATH_TO_HW_LIB]
@@ -120,7 +120,7 @@ Follow the steps below to build the stack library on your host platform:
   and `CFG_COMPILE_LIB_[LIB_NAME]_LIB_DIR`) for each stack library to CMake.
   Refer to \ref sect_build_stack_options_noos_zynqarm for details!
 
-* Creating release libraries
+* Create release libraries
 
       > cd <openPOWERLINK_directory>\stack\build\xilinx-zynqarm
       > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../toolchain-xilinx-zynqarm-eabi-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Release -DCFG_COMPILE_LIB_[LIB_NAME]=ON -DCFG_COMPILE_LIB_[LIB_NAME]_LIB_DIR=[PATH_TO_HW_LIB]

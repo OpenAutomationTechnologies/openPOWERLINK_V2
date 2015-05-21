@@ -37,7 +37,7 @@ hardware-dependant drivers.
         Found hardware platform: DEMO_S6PLKEB_CN_SINGLE_GPIO set to OFF!
         Found hardware platform: DEMO_[BOARD_NAME]_[DEMO_NAME] set to OFF!
 
--# Building hardware platform with all driver libraries set to debug
+-# Build hardware platform with all driver libraries set to debug
 
         > cmake ../.. -DCMAKE_BUILD_TYPE=Debug -DDEMO_[BOARD_NAME]_[DEMO_NAME]=ON
         > make
@@ -46,7 +46,7 @@ hardware-dependant drivers.
   This will build the hardware platform for the demo `DEMO_[BOARD_NAME]_[DEMO_NAME]`.
   Multiple platforms can be built together by passing each platform define to CMake.
 
--# Building hardware platforms with all driver libraries set to release
+-# Build hardware platforms with all driver libraries set to release
 
         > cmake ../.. -DCMAKE_BUILD_TYPE=Release -DDEMO_[BOARD_NAME]_[DEMO_NAME]=ON
         > make
@@ -77,7 +77,7 @@ hardware-dependant drivers.
         Found hardware platform: DEMO_Z702_MN_DUAL_SHMEM_GPIO set to OFF!
         Found hardware platform: DEMO_[BOARD_NAME]_[DEMO_NAME] set to OFF!
 
--# Building hardware platform with all driver libraries set to debug
+-# Build hardware platform with all driver libraries set to debug
 
         > cmake ../.. -DCMAKE_BUILD_TYPE=Debug -DDEMO_[BOARD_NAME]_[DEMO_NAME]=ON
         > make
@@ -86,7 +86,7 @@ hardware-dependant drivers.
   This will build the hardware platform for the demo `DEMO_[BOARD_NAME]_[DEMO_NAME]`.
   Multiple platforms can be built together by passing each platform define to CMake.
 
--# Building hardware platforms with all driver libraries set to release
+-# Build hardware platforms with all driver libraries set to release
 
         > cmake ../.. -DCMAKE_BUILD_TYPE=Release -DDEMO_[BOARD_NAME]_[DEMO_NAME]=ON
         > make
