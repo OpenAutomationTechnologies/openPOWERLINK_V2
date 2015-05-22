@@ -40,7 +40,7 @@ SET(LIB_ARCH_INCS
                    )
 
 # Set architecture specific definitions
-ADD_DEFINITIONS(${XIL_${PROC_INST_NAME}_CFLAGS} "-fmessage-length=0 -mcpu=${CFG_${PROC_INST_NAME}_CPU_VERSION} -ffunction-sections -fdata-sections")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${XIL_${PROC_INST_NAME}_CFLAGS} -fmessage-length=0 -mcpu=${CFG_${PROC_INST_NAME}_CPU_VERSION} -ffunction-sections -fdata-sections")
 
 ################################################################################
 # Set architecture specific installation files

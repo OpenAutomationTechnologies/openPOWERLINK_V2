@@ -75,7 +75,7 @@ SET(OMETH_LIB_INCS
    )
 
 # Configure compile definitions
-ADD_DEFINITIONS("-Wall -Wextra -pedantic -std=c99")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic -std=c99")
 
 ########################################################################
 # Setup the architecture specific definitions

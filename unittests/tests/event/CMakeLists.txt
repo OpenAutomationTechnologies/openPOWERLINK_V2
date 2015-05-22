@@ -63,10 +63,10 @@ INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR})
 ################################################################################
 
 # additional compiler flags
-ADD_DEFINITIONS(-Wall -Wextra -pedantic -std=c99 -pthread -D_GNU_SOURCE -D_POSIX_C_SOURCE=200112L)
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic -std=c99 -pthread")
 
 # Add openPOWERLINK configuration options
-ADD_DEFINITIONS(-DCONFIG_MN)
+ADD_DEFINITIONS(-DCONFIG_MN -D_GNU_SOURCE -D_POSIX_C_SOURCE=200112L)
 
 ################################################################################
 # set sources of event test

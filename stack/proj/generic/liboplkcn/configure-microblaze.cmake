@@ -68,7 +68,7 @@ INCLUDE_DIRECTORIES(
 
 ################################################################################
 # Set additional target specific compile flags
-ADD_DEFINITIONS("${XIL_PCP_CFLAGS} -fmessage-length=0 -mcpu=${CFG_PCP_CPU_VERSION} -ffunction-sections -fdata-sections")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${XIL_PCP_CFLAGS} -fmessage-length=0 -mcpu=${CFG_PCP_CPU_VERSION} -ffunction-sections -fdata-sections")
 
 ################################################################################
 # Deactivate optimization for usleep

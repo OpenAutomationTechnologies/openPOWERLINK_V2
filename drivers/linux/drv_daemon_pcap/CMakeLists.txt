@@ -109,8 +109,8 @@ FIND_LIBRARY(OPLKLIB NAME ${LIB_NAME}${BUILD_TYPE_EXT}
                      HINTS ${OPLKLIB_DIR})
 INCLUDE_DIRECTORIES(${OPLKLIB_INCDIR})
 
-ADD_DEFINITIONS(-Wall -Wextra -pedantic -std=c99 -pthread -D_GNU_SOURCE
-                -D_POSIX_C_SOURCE=200112L -fno-strict-aliasing)
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic -std=c99 -pthread -fno-strict-aliasing")
+ADD_DEFINITIONS(-D_GNU_SOURCE -D_POSIX_C_SOURCE=200112L)
 IF(CFG_OPLK_MN)
     ADD_DEFINITIONS(-DCONFIG_MN)
 ENDIF()
