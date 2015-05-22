@@ -156,7 +156,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define TARGET_SYSTEM   _VXWORKS_
 #define DEV_SYSTEM      _DEV_VXWORKS_
 
-#elif defined (__xilinx_arm__)
+#elif defined (__XILINX_ARM__)
 
 #define TARGET_SYSTEM   _NO_OS_
 #define DEV_SYSTEM      _DEV_ARM_XILINX_EABI_

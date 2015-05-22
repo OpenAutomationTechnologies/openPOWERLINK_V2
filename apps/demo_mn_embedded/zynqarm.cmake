@@ -108,7 +108,7 @@ ENDIF()
 ################################################################################
 # Set architecture specific definitions
 ADD_DEFINITIONS(${XIL_HOST_CFLAGS} "-fmessage-length=0 -mcpu=${CFG_HOST_CPU_VERSION} -ffunction-sections -fdata-sections -fno-inline")
-ADD_DEFINITIONS(-D__xilinx_arm__)
+ADD_DEFINITIONS(-D__XILINX_ARM__)
 ################################################################################
 # Set architecture specific linker flags
 SET(ARCH_LINKER_FLAGS "${XIL_HOST_PLAT_ENDIAN} -mcpu=${CFG_HOST_CPU_VERSION} -Wl,-T -Wl,${LSSCRIPT} -Wl,-Map,${PROJECT_NAME}.map " )
