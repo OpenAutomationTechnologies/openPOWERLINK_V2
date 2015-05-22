@@ -81,7 +81,7 @@ INCLUDE_DIRECTORIES(
                    )
 
 # set flags of the openPOWERLINK library
-ADD_DEFINITIONS("-Wall -Wextra -pedantic -std=c99")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic -std=c99")
 
 # set macro to change mapping to internal memory
 ADD_DEFINITIONS(-DCONFIG_CN -DCONFIG_PCP=TRUE)

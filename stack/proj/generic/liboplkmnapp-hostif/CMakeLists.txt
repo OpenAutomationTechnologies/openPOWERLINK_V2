@@ -80,7 +80,7 @@ INCLUDE_DIRECTORIES(
                    )
 
 # set flags of the openPOWERLINK library
-ADD_DEFINITIONS("-Wall -Wextra -pedantic -std=c99")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic -std=c99")
 ADD_DEFINITIONS(-DCONFIG_HOSTIF_PCP=FALSE -DCONFIG_PCP=FALSE)
 
 ################################################################################
