@@ -61,7 +61,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define TARGET_IRQ_IC_DIST_BASE    -1
 
 
-#elif defined(__xilinx_arm__)
+#elif defined(__XILINX_ARM__)
 #include "dualprocshm-arm.h"
 
 
@@ -92,7 +92,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 #ifdef __cplusplus

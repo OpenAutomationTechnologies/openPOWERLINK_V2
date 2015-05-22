@@ -168,7 +168,8 @@ typedef void (*targetSyncHdl)(void*);
 //------------------------------------------------------------------------------
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 UINT8*  dualprocshm_getCommonMemAddr(UINT16* pSize_p);
 UINT8*  dualprocshm_getSharedMemInst(UINT32* pSize_p);

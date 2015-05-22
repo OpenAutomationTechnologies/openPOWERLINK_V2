@@ -161,7 +161,7 @@ INCLUDE_DIRECTORIES(
 
 ################################################################################
 # Set architecture specific definitions
-ADD_DEFINITIONS(${XIL_PCP_CFLAGS} "-fmessage-length=0 -mcpu=${CFG_PCP_CPU_VERSION} -ffunction-sections -fdata-sections")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${XIL_PCP_CFLAGS} -fmessage-length=0 -mcpu=${CFG_PCP_CPU_VERSION} -ffunction-sections -fdata-sections")
 
 ################################################################################
 # Set architecture specific linker flags

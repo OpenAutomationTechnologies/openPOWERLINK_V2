@@ -105,8 +105,8 @@ SET(HOSTIF_LIB_INCS
 ########################################################################
 # Configure compile definitions
 ########################################################################
-ADD_DEFINITIONS("-Wall -Wextra -pedantic -std=c99")
-ADD_DEFINITIONS("${HOSTIF_CFLAGS} -DCONFIG_HOSTIF_PCP=${CFG_HOSTIF_PCP}")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic -std=c99 ${HOSTIF_CFLAGS}")
+ADD_DEFINITIONS(-DCONFIG_HOSTIF_PCP=${CFG_HOSTIF_PCP})
 
 ########################################################################
 # Setup the architecture specific definitions

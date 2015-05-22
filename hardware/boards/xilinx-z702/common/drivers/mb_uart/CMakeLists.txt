@@ -76,8 +76,8 @@ SET(MB_UART_LIB_INCS
 ########################################################################
 # Configure compile definitions
 ########################################################################
-ADD_DEFINITIONS("-Wall -Wextra -pedantic -std=c99")
-ADD_DEFINITIONS(${XIL_${PROC_INST_NAME}_CFLAGS} "-fmessage-length=0 -mcpu=${CFG_${PROC_INST_NAME}_CPU_VERSION} -ffunction-sections -fdata-sections")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic -std=c99")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${XIL_${PROC_INST_NAME}_CFLAGS} -fmessage-length=0 -mcpu=${CFG_${PROC_INST_NAME}_CPU_VERSION} -ffunction-sections -fdata-sections")
 ########################################################################
 # Build library
 ########################################################################

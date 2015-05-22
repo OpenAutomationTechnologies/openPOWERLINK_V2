@@ -31,8 +31,8 @@
 ################################################################################
 # Set architecture specific definitions
 
-ADD_DEFINITIONS(-Wall -Wextra -pedantic -std=c99 -pthread -D_GNU_SOURCE
-                -D_POSIX_C_SOURCE=200112L)
+ADD_DEFINITIONS(-D_GNU_SOURCE -D_POSIX_C_SOURCE=200112L)
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic -std=c99 -pthread")
 
 ################################################################################
 # Set architecture specific sources and include directories

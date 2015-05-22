@@ -80,8 +80,8 @@ INCLUDE_DIRECTORIES(
 ########################################################################
 # Configure compile definitions
 ########################################################################
-ADD_DEFINITIONS("-Wall -Wextra -pedantic -std=c99")
-ADD_DEFINITIONS("${SDFAT16_CFLAGS}")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic -std=c99")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${SDFAT16_CFLAGS}")
 
 ########################################################################
 # Setup the architecture specific definitions
