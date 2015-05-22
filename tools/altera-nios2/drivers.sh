@@ -110,6 +110,12 @@ BSP_GEN_ARGS="${CFG_DRV_BSP_TYPE} ${BSP_PATH} ${BOARD_PATH}/quartus \
 --cmd add_section_mapping .tc_i_mem ${CFG_DRV_TCI_MEM_NAME} \
 "
 
+if [ -n "${CFG_DRV_DEF_MEM_NAME}" ];
+then
+    BSP_GEN_ARGS+="--default_sections_mapping ${CFG_DRV_DEF_MEM_NAME} "
+    echo "INFO: The default memory is changed to ${CFG_DRV_DEF_MEM_NAME}"
+fi
+
 if [ -n "${CFG_DRV_MAX_HEAP_BYTES}" ];
 then
     BSP_GEN_ARGS+="--set hal.make.bsp_cflags_user_flags -DALT_MAX_HEAP_BYTES=${CFG_DRV_MAX_HEAP_BYTES} "
@@ -201,6 +207,15 @@ then
     echo "INFO: Set JTAG Cable to ${CFG_JTAG_CABLE}."
 fi
 
+if [ -n "${CFG_DEVICE_ID}" ];
+then
+    DRV_GEN_ARGS+="--set DOWNLOAD_DEVICE_FLAG=\"--device=${CFG_DEVICE_ID}\" "
+    echo "INFO: Set JTAG Chain device Id to ${CFG_DEVICE_ID}."
+    export CFG_DEVICE_ID
+else
+    DRV_GEN_ARGS+="--set DOWNLOAD_DEVICE_FLAG=\"--device=1\" "
+fi
+
 # And add stack library
 LIB_STACK_DIR=$(find ${OUT_PATH} -type d -name "liboplk*")
 
@@ -221,6 +236,10 @@ RET=$?
 
 if [ ${RET} -ne 0 ]; then
     echo "ERROR: Application generation returned with error ${RET}!"
+    if [ -n "${CFG_DEVICE_ID}" ];
+    then
+        unset CFG_DEVICE_ID
+    fi
     exit ${RET}
 fi
 
@@ -231,6 +250,12 @@ ${OPLK_BASE_DIR}/tools/altera-nios2/fix-app-makefile ${OUT_PATH}/Makefile
 if [ -n "${CFG_DRV_EPCS}" ]; then
     chmod +x ${OPLK_BASE_DIR}/tools/altera-nios2/add-app-makefile-epcs
     ${OPLK_BASE_DIR}/tools/altera-nios2/add-app-makefile-epcs ${OUT_PATH}/Makefile
+fi
+
+#TODO: use trap instead of multiple cleanup checks
+if [ -n "${CFG_DEVICE_ID}" ];
+then
+    unset CFG_DEVICE_ID
 fi
 
 exit 0
