@@ -865,6 +865,9 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
 
     wmb();
 
+    // 8168 fix: TxPoll requests are lost when the Tx packets are too close.
+    while ((EDRV_REGB_READ(RW_REGB_TX_PRIO_POLL) & RW_REGB_TX_PRIO_POLL_HI_PRIO_SEND) != 0);
+
     // Notify the MAC about the pending Tx
     EDRV_REGB_WRITE(RW_REGB_TX_PRIO_POLL, RW_REGB_TX_PRIO_POLL_HI_PRIO_SEND);
 
