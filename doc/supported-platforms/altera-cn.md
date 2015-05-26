@@ -39,8 +39,7 @@ The software project for the PCP can be found in `apps`:
 - Development Board TERASIC_DE2-115 (INK Board)
 
 - Altera Quartus II v13.0 SP1 (Web Edition is also possible)
-  - <https://www.altera.com/download/archives/arc-index.jsp>
-  - <ftp://ftp.altera.com/outgoing/release/>
+  - <https://www.altera.com/downloads/download-center.html#>
 
 - Experience with this development environment is required.
 
