@@ -45,7 +45,7 @@ header:
 	@echo ""
 	@echo -e "\033[33m  # dd if=${SOCEDS_DEST_ROOT}/embeddedsw/socfpga/prebuilt_images/sd_card_linux_boot_image.img of=/dev/<sd_card_drive> bs=1M"
 	@echo ""
-	@echo "  \$$ alt-boot-disk-util.exe -p preloader-mkpimage.bin -a write -d <sd_card_path>"
+	@echo "  \$$ alt-boot-disk-util -p preloader-mkpimage.bin -a write -d <sd_card_path>"
 	@echo ""
 	@echo -e "  \$$ cp BOOT.bin <sd_card_path>"
 	@echo ""

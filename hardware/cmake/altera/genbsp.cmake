@@ -98,8 +98,8 @@ MACRO(GENERATE_BSP EXAMPLE_NAME ALT_DEMO_DIR ALT_BSP_TARGET_DIR PROCESSOR_NAME T
         DEPENDS ${SPL_SRC_DIR}/${CFG_HOST_PROC_IP_NAME}.xml
         OUTPUT ${SPL_PATH}/settings.bsp
         COMMAND chmod -R +rwx ${SPL_PATH}
-        COMMAND bsp-create-settings.exe  ${SPL_GEN_ARGS}
-        COMMAND bsp-generate-files.exe --settings ${SPL_PATH}/settings.bsp --bsp-dir ${SPL_PATH}
+        COMMAND bsp-create-settings  ${SPL_GEN_ARGS}
+        COMMAND bsp-generate-files --settings ${SPL_PATH}/settings.bsp --bsp-dir ${SPL_PATH}
         WORKING_DIRECTORY ${SPL_PATH}
     )
 
