@@ -25,6 +25,8 @@ incremental_db/
 *.pof
 *.txt
 *.csv
+*.hex
+*.mif
 
 # Xilinx Platform Studio
 ## Dirs

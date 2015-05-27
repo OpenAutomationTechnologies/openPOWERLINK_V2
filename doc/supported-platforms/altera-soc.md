@@ -74,22 +74,20 @@ To build the driver daemon for Altera Cyclone V SoC follow the steps below:
 1. Open "Nios II Command Shell".
 2. Use the software design available in the openPOWERLINK subdirectory \n
    `drivers/altera-nios2/drv_daemon/build`. \n
-3. Run the script *create-this-drv* to create the Makefile for the driver daemon. \n
-   `$ ./create-this-drv --board ../../../../hardware/boards/altera-c5soc/mn-soc-shmem-gpio` \n
+3. Run the script *create-this-app* to create the Makefile for the driver daemon. \n
+   `$ ./create-this-app --board ../../../../hardware/boards/altera-c5soc/mn-soc-shmem-gpio` \n
 4. Run make to build the ELF file after changing the sources. \n
    `$ make`
-5. Run following command to generate the daemon in .bin format. \n
-   `$ make elf-to-bin`
-6. Run following command to prepare the FPGA configuration file.\n
-   `$ make fpga-rbf`
+5. Run following command to generate the daemon and FPGA boot files. \n
+   `$ make fpgaboot`
 
 Some additional commands to rebuild, debug and get help information.
 * After Nios II Design is changed inside Qsys, rebuild the Makefile using following command. \n
-   `$ ./create-this-drv --rebuild --board ../../../../hardware/boards/altera-c5soc/mn-soc-shmem-gpio`
+   `$ ./create-this-app --rebuild --board ../../../../hardware/boards/altera-c5soc/mn-soc-shmem-gpio`
 * If you want to debug the demo by enabling prints in NIOSII, use the `--debug` option. \n
-   `$ ./create-this-drv --debug --board ../../../../hardware/boards/altera-c5soc/mn-soc-shmem-gpio`
+   `$ ./create-this-app --debug --board ../../../../hardware/boards/altera-c5soc/mn-soc-shmem-gpio`
 * The script's help message can be printed with `--help`. \n
-   `$ ./create-this-drv --help`
+   `$ ./create-this-app --help`
 
 ## Building the embedded MN demo application
 

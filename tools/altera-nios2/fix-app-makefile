@@ -16,6 +16,9 @@ fi
 # Enable additional help output
 sed -i 's/help :/help ::/g' ${MAKE_FILE}
 
+# Enable additional clean output
+sed -i 's/clean :/clean ::/g' ${MAKE_FILE}
+
 cat >> ${MAKE_FILE} <<'Heredoc'
 
 # Rule for downloading the FPGA bitstream to the target

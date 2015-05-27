@@ -50,8 +50,12 @@ CFG_DRV_DEF_MEM_NAME=address_span_extender_cpu_bridge
 
 # BSP type
 CFG_DRV_BSP_TYPE=hal
+
 # BSP optimization
 CFG_DRV_BSP_OPT_LEVEL=-O2
+
+# Hosted boot
+CFG_DRV_HOSTED_BOOT=1
 
 ################################################################################
 # OTHER SETTINGS

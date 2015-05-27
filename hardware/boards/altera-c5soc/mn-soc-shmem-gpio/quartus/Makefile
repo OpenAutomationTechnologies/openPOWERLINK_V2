@@ -58,6 +58,8 @@ asm: smart.log $(PROJECT).asm.rpt
 sta: smart.log $(PROJECT).sta.rpt
 smart: smart.log
 
+update-mif: smart.log update_mif $(PROJECT).asm.rpt
+
 ###################################################################
 # Executable Configuration
 ###################################################################
@@ -94,6 +96,10 @@ $(PROJECT).sta.rpt: sta.chg $(PROJECT).fit.rpt
 
 smart.log: $(ASSIGNMENT_FILES)
 	quartus_sh --determine_smart_action $(PROJECT) > smart.log
+
+update_mif:
+	quartus_cdb $(PROJECT) --update_mif
+	$(STAMP) asm.chg
 
 ###################################################################
 # Project initialization

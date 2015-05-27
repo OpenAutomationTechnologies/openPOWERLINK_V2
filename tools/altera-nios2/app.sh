@@ -115,6 +115,7 @@ case ${APP_TYPE} in
         SEL_MAX_HEAP_BYTES=${CFG_APP_MAX_HEAP_BYTES}
         SEL_EPCS=${CFG_APP_EPCS}
         SEL_DEF_MEM_NAME=${CFG_APP_DEF_MEM_NAME}
+        SEL_HOSTED_BOOT=${CFG_APP_HOSTED_BOOT}
         ;;
     drv)
         echo "INFO: Generate application for driver."
@@ -128,6 +129,7 @@ case ${APP_TYPE} in
         SEL_MAX_HEAP_BYTES=${CFG_DRV_MAX_HEAP_BYTES}
         SEL_EPCS=${CFG_DRV_EPCS}
         SEL_DEF_MEM_NAME=${CFG_DRV_DEF_MEM_NAME}
+        SEL_HOSTED_BOOT=${CFG_DRV_HOSTED_BOOT}
         ;;
     *)
         echo "ERROR: No APP_TYPE specified in ${APP_SETTINGS_FILE}!"
@@ -328,13 +330,11 @@ if [ -n "${SEL_EPCS}" ]; then
     ${OPLK_BASE_DIR}/tools/altera-nios2/add-app-makefile-epcs ${OUT_PATH}/Makefile
 fi
 
-# Add ELF to BIN makefile rules
-chmod +x ${OPLK_BASE_DIR}/tools/altera-nios2/add-app-makefile-bin
-${OPLK_BASE_DIR}/tools/altera-nios2/add-app-makefile-bin ${OUT_PATH}/Makefile
-
-# Add SOF to RBF makefile rules
-chmod +x ${OPLK_BASE_DIR}/tools/altera-nios2/add-app-makefile-rbf
-${OPLK_BASE_DIR}/tools/altera-nios2/add-app-makefile-rbf ${OUT_PATH}/Makefile
+if [ -n "${SEL_HOSTED_BOOT}" ]; then
+    # Add C5 SoC hosted boot makefile rules
+    chmod +x ${OPLK_BASE_DIR}/tools/altera-nios2/add-app-makefile-c5socboot
+    ${OPLK_BASE_DIR}/tools/altera-nios2/add-app-makefile-c5socboot ${OUT_PATH}/Makefile
+fi
 
 #TODO: use trap instead of multiple cleanup checks
 if [ -n "${CFG_DEVICE_ID}" ];
