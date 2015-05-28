@@ -5,6 +5,50 @@ Revision history of openPOWERLINK Protocol Stack {#page_revision_history}
 
 # Release 2 {#sect_revision_v2}
 
+## V2.2.0 {#sect_revision_v2_2_0}
+
+This is the first release of the V2.2 release series. It contains new features
+and functionalities. For productive environments it is recommended to use the
+latest stable release of the V2.1 series (\ref sect_revision_v2_1_2)
+
+Following is a summary of changes in V2.2.0. For a detailed revision history
+refer to the Git source code history.
+
+### New Features:
+- POWERLINK Master redundancy according to EPSG DS 302-A
+- New platform Altera C5 SoC
+- Mapping of more than 254 PDOs per node (multiple PDO channels)
+- New dialog for SDO transfers in demo_mn_qt
+- New dialog to execute local NMT commands in demo_mn_qt
+
+### Fixes:
+- Fix shutdown crash in RealTek 8111
+- Fix openMAC descriptor DPRAM conflicts
+- Several code cleanups and fixes
+
+### Changes:
+- Rework openMAC timer register map
+- Optimize openMAC target modules
+- Reduce Nios II BSP memory footprint
+- Rework Altera Nios II tools
+- Add selection of reset vector in MN PCP subsystem
+- Revise EPCS Flash programming
+- Revise Altera Qsys subsystems
+- Rework time triggered Tx config of openMAC edrv
+- Rework Quartus project makefiles
+- Add board specific cflags to Nios II stack libraries
+- Add heap size limit in Nios II tools
+- Rework type definitions used by user and kernel layer to be cross compatible
+  between different architectures
+
+### Known Issues:
+- Xilinx Zynq MN (see 2.1.0)
+- Altera C5 SoC MN
+    - The C5 SoC sometimes fails to boot at power-on successfully. In order to
+      force a successful start-up press the "WARM RESETn" button (S8) on the
+      Altera C5 SoC development board.
+      This re-triggers configuration of the FPGA and download of the Nios II elf.
+
 ## V2.1.2 {#sect_revision_v2_1_2}
 
 This is the latest release of the V2.1 release series. This release is a stable
