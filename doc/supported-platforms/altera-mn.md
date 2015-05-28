@@ -46,8 +46,7 @@ The software projects for the PCP and the host processor are split into
 # Requirements {#sect_altera-mn_requirements}
 
 - Altera Quartus II v13.0 SP1 (Web Edition is also possible)
-  - <https://www.altera.com/download/archives/arc-index.jsp>
-  - <ftp://ftp.altera.com/outgoing/release/>
+  - <https://www.altera.com/downloads/download-center.html#>
 - Experience with this development environment is required.
 - Development Board TERASIC_DE2-115 (INK Board)
 - Optional: Second development Board TERASIC_DE2-115 (INK Board)
