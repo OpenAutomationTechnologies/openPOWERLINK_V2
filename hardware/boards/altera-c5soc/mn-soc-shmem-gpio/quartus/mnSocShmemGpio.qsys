@@ -67,6 +67,14 @@
          type = "boolean";
       }
    }
+   element sysid_qsys.control_slave
+   {
+      datum baseAddress
+      {
+         value = "27136";
+         type = "String";
+      }
+   }
    element ddr3_emif_0
    {
       datum _sortIndex
@@ -835,7 +843,7 @@
    start="host_0.lw_bridge_m0"
    end="sysid_qsys.control_slave">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x6810" />
+  <parameter name="baseAddress" value="0x6a00" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection kind="clock" version="14.0" start="clk_100.clk" end="host_0.clk100" />
@@ -1022,7 +1030,7 @@
    start="pcp_0.slow_bridge"
    end="sysid_qsys.control_slave">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x6810" />
+  <parameter name="baseAddress" value="0x6a00" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
