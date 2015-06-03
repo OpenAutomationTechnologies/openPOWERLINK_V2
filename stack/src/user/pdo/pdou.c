@@ -1549,7 +1549,7 @@ The function sets up the mapping objects of a PDO channel.
 \param  pAbortCode_p            Pointer to store the abort code.
 \param  pOffset_p               Pointer to store the calculated offset
                                 of the first object in the PDO channel.
-\param  pNextObjectOffset_p     Pointer to store the offset of the next PDO
+\param  pNextChannelOffset_p    Pointer to store the offset of the next PDO
                                 channel.
 \param  pCount_p                Pointer to store number of mapped objects.
 

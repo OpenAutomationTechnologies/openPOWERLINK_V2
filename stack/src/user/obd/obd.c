@@ -1046,6 +1046,7 @@ tOplkError obd_searchVarEntry(UINT index_p, UINT subIndex_p, tObdVarEntry MEM** 
     return ret;
 }
 
+#if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
 //------------------------------------------------------------------------------
 /**
 \brief  Set callback function for load/store command
@@ -1059,7 +1060,6 @@ The function sets the callback function for the load/store command.
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-#if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
 tOplkError obd_storeLoadObjCallback(tObdStoreLoadCallback pfnCallback_p)
 {
     // set new address of callback function

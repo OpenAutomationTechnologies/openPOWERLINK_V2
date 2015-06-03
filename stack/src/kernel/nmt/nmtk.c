@@ -86,6 +86,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 
+/**
+\brief NMT state enumeration
+
+Enumeration for NMT states.
+*/
 typedef enum
 {
     kNmtkGsOff,

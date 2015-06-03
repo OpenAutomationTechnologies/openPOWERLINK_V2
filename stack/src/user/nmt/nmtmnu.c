@@ -205,9 +205,13 @@ typedef struct
     tNmtNodeCommand     nodeCommand;
 } tNmtMnuNodeCmd;
 
-/*
-Do not change the constants as the array with function pointers to the
-handlers depends on these constants!
+/**
+* \brief Enumeration for internal node events
+*
+* This enumaration specifies all internal node events.
+*
+* Do not change the constants as the array with function pointers to the
+* handlers depends on these constants!
 */
 typedef enum
 {
@@ -235,6 +239,12 @@ Data type for the enumerator \ref eNmtMnuIntNodeEvent.
 */
 typedef UINT32 tNmtMnuIntNodeEvent;
 
+
+/**
+* \brief Enumeration for node states
+*
+* This enumaration lists valid node states.
+*/
 typedef enum
 {
     kNmtMnuNodeStateUnknown                 = 0x00,

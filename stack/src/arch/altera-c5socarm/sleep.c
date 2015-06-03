@@ -106,9 +106,11 @@ static inline UINT64 getTimerTicksFromScaled(ALT_GPT_TIMER_t timerId_p,
 
 //------------------------------------------------------------------------------
 /**
-\brief    Sleep until limit of microseconds is reached
+\brief  Sleep until limit of microseconds is reached
 
 \param  usecs_p                Count of microseconds to sleep
+
+\return Returns always 0.
 
 \ingroup module_target
 */
@@ -135,6 +137,8 @@ The function makes the calling thread sleep until the number of specified
 milliseconds have elapsed.
 
 \param  milliSeconds_p      Number of milliseconds to sleep
+
+\return Returns always 0.
 
 \ingroup module_target
 */
