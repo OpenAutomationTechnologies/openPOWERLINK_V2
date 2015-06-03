@@ -46,6 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string.h>
 #include <alt_types.h>
 #include <io.h>
+#include <system.h>
 
 #include <oplk/basictypes.h>
 
@@ -94,6 +95,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Target lock
 #define OPLK_LOCK_T                 UINT8
 
+#if defined(ATOMICMODIFY_0_BASE)
+// Use atomic ipcore for exchange
+#define OPLK_ATOMIC_T    alt_u8
+#define OPLK_ATOMIC_INIT(base)
+#define OPLK_ATOMIC_EXCHANGE(address, newval, oldval) \
+                        IOWR_8DIRECT(address + ATOMICMODIFY_0_BASE, 0, newval); \
+                        oldval = IORD_8DIRECT(address + ATOMICMODIFY_0_BASE, 0)
+#else
 /* NOTE:
  * Nios II does not support atomic instructions, hence, pseudo atomic
  * macro is applied with locking.
@@ -107,6 +116,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                         oldval = IORD_8DIRECT(address, 0); \
                         IOWR_8DIRECT(address, 0, newval); \
                         target_unlock()
+#endif
 
 #define OPLK_MUTEX_T    alt_u8
 
