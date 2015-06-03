@@ -82,9 +82,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
          offset;                                                               \
      })
 
-// Sleep
-#define DUALPROCSHM_USLEEP(x)           usleep((UINT)x)
-
 // IO operations
 #define DPSHM_READ8(base)               IORD_8DIRECT((UINT32)base, 0)
 #define DPSHM_WRITE8(base, val)         IOWR_8DIRECT((UINT32)base, 0, val)

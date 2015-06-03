@@ -78,9 +78,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define HOSTIF_UNCACHED_MALLOC(size)  alt_uncached_malloc(size)
 #define HOSTIF_UNCACHED_FREE(ptr)     alt_uncached_free(ptr)
 
-/// sleep
-#define HOSTIF_USLEEP(x)              usleep((useconds_t)x)
-
 /// hw access
 #define HOSTIF_RD32(base, offset)         IORD_32DIRECT(base, offset)
 #define HOSTIF_RD16(base, offset)         IORD_16DIRECT(base, offset)

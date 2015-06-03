@@ -82,8 +82,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
          offset;                         \
      })
 
-// sleep
-#define DUALPROCSHM_USLEEP(x)           usleep((UINT32)x)
 #define DPSHM_DMB()                     // no data barriers used
 
 // IO operations
