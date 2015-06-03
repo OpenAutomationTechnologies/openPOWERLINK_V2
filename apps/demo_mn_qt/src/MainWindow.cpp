@@ -67,6 +67,7 @@ MainWindow::MainWindow(QWidget* parent)
     : QWidget(parent)
 {
     pApi = NULL;
+    pSdoDialog = NULL;
     nmtEvent = kNmtEventResetNode;
 
     resize(1000, 600);
