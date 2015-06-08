@@ -105,7 +105,7 @@ static tInstance instance_l;
 static tOplkError initPowerlink(tInstance* pInstance_p);
 static tOplkError loopMain(tInstance* pInstance_p);
 static void shutdownPowerlink(tInstance* pInstance_p);
-static tOplkError eventCbPowerlink(tOplkApiEventType EventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
+static tOplkError eventCbPowerlink(tOplkApiEventType eventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -335,7 +335,7 @@ static void shutdownPowerlink(tInstance* pInstance_p)
 
 The function implements the applications stack event handler.
 
-\param  EventType_p         Type of event
+\param  eventType_p         Type of event
 \param  pEventArg_p         Pointer to union which describes the event in detail
 \param  pUserArg_p          User specific argument
 
@@ -344,7 +344,7 @@ The function implements the applications stack event handler.
 \ingroup module_demo_cn_embedded
 */
 //------------------------------------------------------------------------------
-static tOplkError eventCbPowerlink(tOplkApiEventType EventType_p,
+static tOplkError eventCbPowerlink(tOplkApiEventType eventType_p,
                                    tOplkApiEventArg* pEventArg_p, void* pUserArg_p)
 {
     tOplkError                      ret = kErrorOk;
@@ -352,7 +352,7 @@ static tOplkError eventCbPowerlink(tOplkApiEventType EventType_p,
 
     UNUSED_PARAMETER(pUserArg_p);
 
-    switch (EventType_p)
+    switch (eventType_p)
     {
         case kOplkApiEventNmtStateChange:
             lcd_printNmtState(pEventArg_p->nmtStateChange.newNmtState);

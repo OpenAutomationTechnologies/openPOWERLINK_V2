@@ -226,7 +226,7 @@ static FD_TYPE hAppFdTracingEnabled_g;
 tEplKernel PUBLIC  EplObdInitRam (tEplObdInitParam MEM* pInitParam_p);
 
 tEplKernel PUBLIC AppCbEvent(
-    tEplApiEventType        EventType_p,   // IN: event type (enum)
+    tEplApiEventType        eventType_p,   // IN: event type (enum)
     tEplApiEventArg*        pEventArg_p,   // IN: event argument (union)
     void GENERIC*           pUserArg_p);
 
@@ -468,7 +468,7 @@ tEplKernel          EplRet;
 // Description: event callback function called by EPL API layer within
 //              user part (low priority).
 //
-// Parameters:  EventType_p     = event type
+// Parameters:  eventType_p     = event type
 //              pEventArg_p     = pointer to union, which describes
 //                                the event in detail
 //              pUserArg_p      = user specific argument
@@ -483,7 +483,7 @@ tEplKernel          EplRet;
 //---------------------------------------------------------------------------
 
 tEplKernel PUBLIC AppCbEvent(
-    tEplApiEventType        EventType_p,   // IN: event type (enum)
+    tEplApiEventType        eventType_p,   // IN: event type (enum)
     tEplApiEventArg*        pEventArg_p,   // IN: event argument (union)
     void GENERIC*           pUserArg_p)
 {
@@ -492,7 +492,7 @@ tEplKernel          EplRet = kEplSuccessful;
     UNUSED_PARAMETER(pUserArg_p);
 
     // check if NMT_GS_OFF is reached
-    switch (EventType_p)
+    switch (eventType_p)
     {
         case kEplApiEventNmtStateChange:
         {

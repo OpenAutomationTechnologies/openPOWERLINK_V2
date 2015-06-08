@@ -121,7 +121,7 @@ static tInstance    instance_l;
 static tOplkError   initPowerlink(tInstance* pInstance_p);
 static tOplkError   loopMain(tInstance* pInstance_p);
 static void         shutdownPowerlink(tInstance* pInstance_p);
-static tOplkError   eventCbPowerlink(tOplkApiEventType EventType_p,
+static tOplkError   eventCbPowerlink(tOplkApiEventType eventType_p,
                                      tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
 
 //============================================================================//
@@ -403,14 +403,14 @@ static void shutdownPowerlink(tInstance* pInstance_p)
 
 The function implements the applications stack event handler.
 
-\param  EventType_p         Type of event
+\param  eventType_p         Type of event
 \param  pEventArg_p         Pointer to union which describes the event in detail
 \param  pUserArg_p          User specific argument
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError eventCbPowerlink(tOplkApiEventType EventType_p,
+static tOplkError eventCbPowerlink(tOplkApiEventType eventType_p,
                                    tOplkApiEventArg* pEventArg_p, void* pUserArg_p)
 {
     tOplkError ret = kErrorOk;
@@ -422,7 +422,7 @@ static tOplkError eventCbPowerlink(tOplkApiEventType EventType_p,
     //   to this node. There is no timeout handling done.
     // - If an Ethernet frame is received, it is forwarded to process reply.
     //   The function prints the ARP reply information.
-    if (EventType_p == kOplkApiEventNode)
+    if (eventType_p == kOplkApiEventNode)
     {
         tOplkApiEventNode* pNode = &pEventArg_p->nodeEvent;
 
@@ -432,7 +432,7 @@ static tOplkError eventCbPowerlink(tOplkApiEventType EventType_p,
             arp_sendRequest((0xFFFFFF00 & IP_ADDR) | pNode->nodeId);
         }
     }
-    else if (EventType_p == kOplkApiEventReceivedNonPlk)
+    else if (eventType_p == kOplkApiEventReceivedNonPlk)
     {
         tOplkApiEventReceivedNonPlk* pFrameInfo = &pEventArg_p->receivedEth;
 
@@ -451,7 +451,7 @@ static tOplkError eventCbPowerlink(tOplkApiEventType EventType_p,
 
         ret = kErrorOk; // Frame wasn't processed, so simply dump it.
     }
-    else if (EventType_p == kOplkApiEventDefaultGwChange)
+    else if (eventType_p == kOplkApiEventDefaultGwChange)
     {
         // ARP demo: Set default gateway and send request
         arp_setDefGateway(pEventArg_p->defaultGwChange.defaultGateway);

@@ -62,7 +62,7 @@ extern "C"
 #endif
 
 void initEvents(BOOL* pfGsOff_p);
-tOplkError processEvents(tOplkApiEventType EventType_p,
+tOplkError processEvents(tOplkApiEventType eventType_p,
                          tOplkApiEventArg* pEventArg_p,
                          void* pUserArg_p);
 

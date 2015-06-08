@@ -50,7 +50,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-typedef tOplkError (*tEventCb)(tOplkApiEventType EventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
+typedef tOplkError (*tEventCb)(tOplkApiEventType eventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -62,7 +62,7 @@ extern "C"
 #endif
 
 void initEvents(tEventCb pfnEventCb_p);
-tOplkError processEvents(tOplkApiEventType EventType_p,
+tOplkError processEvents(tOplkApiEventType eventType_p,
                          tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
 
 #ifdef __cplusplus

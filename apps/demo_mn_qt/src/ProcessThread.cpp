@@ -73,7 +73,7 @@ static DWORD   cycleLen_g;
 
 The function processes state change events.
 
-\param  EventType_p         Type of event
+\param  eventType_p         Type of event
 \param  pEventArg_p         Pointer to union which describes the event in detail
 \param  pUserArg_p          User specific argument
 
@@ -81,10 +81,10 @@ The function processes state change events.
 */
 //------------------------------------------------------------------------------
 
-tOplkError ProcessThread::appCbEvent(tOplkApiEventType EventType_p,
+tOplkError ProcessThread::appCbEvent(tOplkApiEventType eventType_p,
                                      tOplkApiEventArg* pEventArg_p, void* pUserArg_p)
 {
-    return pProcessThread_g->processEvent(EventType_p, pEventArg_p, pUserArg_p);
+    return pProcessThread_g->processEvent(eventType_p, pEventArg_p, pUserArg_p);
 }
 
 //============================================================================//
@@ -312,53 +312,53 @@ tOplkApiCbEvent ProcessThread::getEventCbFunc(void)
 
 AppCbEvent() implements the openPOWERLINKs event callback function.
 
-\param  EventType_p         Type of event
+\param  eventType_p         Type of event
 \param  pEventArg_p         Argument of event
 \param  pUserArg_p          User argument
 */
 //------------------------------------------------------------------------------
-tOplkError ProcessThread::processEvent(tOplkApiEventType EventType_p,
+tOplkError ProcessThread::processEvent(tOplkApiEventType eventType_p,
                                        tOplkApiEventArg* pEventArg_p,
                                        void* pUserArg_p)
 {
     tOplkError  ret = kErrorOk;
 
-    switch (EventType_p)
+    switch (eventType_p)
     {
         case kOplkApiEventNmtStateChange:
-            ret = processStateChangeEvent(EventType_p, pEventArg_p, pUserArg_p);
+            ret = processStateChangeEvent(eventType_p, pEventArg_p, pUserArg_p);
             break;
 
         case kOplkApiEventCriticalError:
         case kOplkApiEventWarning:
-            ret = processErrorWarningEvent(EventType_p, pEventArg_p, pUserArg_p);
+            ret = processErrorWarningEvent(eventType_p, pEventArg_p, pUserArg_p);
             break;
 
         case kOplkApiEventHistoryEntry:
-            ret = processHistoryEvent(EventType_p, pEventArg_p, pUserArg_p);
+            ret = processHistoryEvent(eventType_p, pEventArg_p, pUserArg_p);
             break;
 
         case kOplkApiEventNode:
-            ret = processNodeEvent(EventType_p, pEventArg_p, pUserArg_p);
+            ret = processNodeEvent(eventType_p, pEventArg_p, pUserArg_p);
             break;
 
         case kOplkApiEventPdoChange:
-            ret = processPdoChangeEvent(EventType_p, pEventArg_p, pUserArg_p);
+            ret = processPdoChangeEvent(eventType_p, pEventArg_p, pUserArg_p);
             break;
 
         case kOplkApiEventCfmProgress:
-            ret = processCfmProgressEvent(EventType_p, pEventArg_p, pUserArg_p);
+            ret = processCfmProgressEvent(eventType_p, pEventArg_p, pUserArg_p);
             break;
 
         case kOplkApiEventCfmResult:
-            ret = processCfmResultEvent(EventType_p, pEventArg_p, pUserArg_p);
+            ret = processCfmResultEvent(eventType_p, pEventArg_p, pUserArg_p);
             break;
 
 #if !defined(CONFIG_INCLUDE_CFM)
         // Configuration Manager is not available,
         // so process SDO events
         case kOplkApiEventSdo:
-            ret = processSdoEvent(EventType_p, pEventArg_p, pUserArg_p);
+            ret = processSdoEvent(eventType_p, pEventArg_p, pUserArg_p);
             break;
 #else
         case kOplkApiEventSdo:
@@ -386,14 +386,14 @@ tOplkError ProcessThread::processEvent(tOplkApiEventType EventType_p,
 
 The function processes state change events.
 
-\param  EventType_p         Type of event
+\param  eventType_p         Type of event
 \param  pEventArg_p         Pointer to union which describes the event in detail
 \param  pUserArg_p          User specific argument
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError ProcessThread::processStateChangeEvent(tOplkApiEventType EventType_p,
+tOplkError ProcessThread::processStateChangeEvent(tOplkApiEventType eventType_p,
                                                   tOplkApiEventArg* pEventArg_p,
                                                   void* pUserArg_p)
 {
@@ -404,7 +404,7 @@ tOplkError ProcessThread::processStateChangeEvent(tOplkApiEventType EventType_p,
 #endif
     QString                     str;
 
-    UNUSED_PARAMETER(EventType_p);
+    UNUSED_PARAMETER(eventType_p);
     UNUSED_PARAMETER(pUserArg_p);
 
     sigNmtState(pNmtStateChange->newNmtState);
@@ -492,20 +492,20 @@ tOplkError ProcessThread::processStateChangeEvent(tOplkApiEventType EventType_p,
 
 The function processes error and warning events.
 
-\param  EventType_p         Type of event
+\param  eventType_p         Type of event
 \param  pEventArg_p         Pointer to union which describes the event in detail
 \param  pUserArg_p          User specific argument
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError ProcessThread::processErrorWarningEvent(tOplkApiEventType EventType_p,
+tOplkError ProcessThread::processErrorWarningEvent(tOplkApiEventType eventType_p,
                                                    tOplkApiEventArg* pEventArg_p,
                                                    void* pUserArg_p)
 {
     tEventError*            pInternalError = &pEventArg_p->internalError;
 
-    UNUSED_PARAMETER(EventType_p);
+    UNUSED_PARAMETER(eventType_p);
     UNUSED_PARAMETER(pUserArg_p);
 
     sigPrintLog(QString("Err/Warn: Source = %1 (0x%2) OplkError = %3 (0x%4)")
@@ -545,14 +545,14 @@ tOplkError ProcessThread::processErrorWarningEvent(tOplkApiEventType EventType_p
 
 The function processes error and warning events.
 
-\param  EventType_p         Type of event
+\param  eventType_p         Type of event
 \param  pEventArg_p         Pointer to union which describes the event in detail
 \param  pUserArg_p          User specific argument
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError ProcessThread::processPdoChangeEvent(tOplkApiEventType EventType_p,
+tOplkError ProcessThread::processPdoChangeEvent(tOplkApiEventType eventType_p,
                                                 tOplkApiEventArg* pEventArg_p,
                                                 void* pUserArg_p)
 {
@@ -562,7 +562,7 @@ tOplkError ProcessThread::processPdoChangeEvent(tOplkApiEventType EventType_p,
     tOplkError                  ret;
     UINT                        varLen;
 
-    UNUSED_PARAMETER(EventType_p);
+    UNUSED_PARAMETER(eventType_p);
     UNUSED_PARAMETER(pUserArg_p);
 
     sigPrintLog(QString("PDO change event: (%1PDO = 0x%2 to node 0x%3 with %4 objects %5)")
@@ -599,20 +599,20 @@ tOplkError ProcessThread::processPdoChangeEvent(tOplkApiEventType EventType_p,
 
 The function processes history events.
 
-\param  EventType_p         Type of event
+\param  eventType_p         Type of event
 \param  pEventArg_p         Pointer to union which describes the event in detail
 \param  pUserArg_p          User specific argument
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError ProcessThread::processHistoryEvent(tOplkApiEventType EventType_p,
+tOplkError ProcessThread::processHistoryEvent(tOplkApiEventType eventType_p,
                                               tOplkApiEventArg* pEventArg_p,
                                               void* pUserArg_p)
 {
     tErrHistoryEntry*    pHistoryEntry = &pEventArg_p->errorHistoryEntry;
 
-    UNUSED_PARAMETER(EventType_p);
+    UNUSED_PARAMETER(eventType_p);
     UNUSED_PARAMETER(pUserArg_p);
 
     sigPrintLog(QString("HistoryEntry: Type=0x%1 Code=0x%2 (0x%3 %4 %5 %6 %7 %8 %9 %10)")
@@ -636,21 +636,21 @@ tOplkError ProcessThread::processHistoryEvent(tOplkApiEventType EventType_p,
 
 The function processes node events.
 
-\param  EventType_p         Type of event
+\param  eventType_p         Type of event
 \param  pEventArg_p         Pointer to union which describes the event in detail
 \param  pUserArg_p          User specific argument
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError ProcessThread::processNodeEvent(tOplkApiEventType EventType_p,
+tOplkError ProcessThread::processNodeEvent(tOplkApiEventType eventType_p,
                                            tOplkApiEventArg* pEventArg_p,
                                            void* pUserArg_p)
 {
     tOplkApiEventNode*   pNode = &pEventArg_p->nodeEvent;
     tOplkError           ret = kErrorOk;
 
-    UNUSED_PARAMETER(EventType_p);
+    UNUSED_PARAMETER(eventType_p);
     UNUSED_PARAMETER(pUserArg_p);
     // printf("AppCbEvent(Node): NodeId=%u Event=0x%02X\n",
     //        pEventArg_p->nodeEvent.nodeId, pEventArg_p->nodeEvent.nodeEvent);
@@ -765,20 +765,20 @@ tOplkError ProcessThread::processNodeEvent(tOplkApiEventType EventType_p,
 
 The function processes CFM progress events.
 
-\param  EventType_p         Type of event
+\param  eventType_p         Type of event
 \param  pEventArg_p         Pointer to union which describes the event in detail
 \param  pUserArg_p          User specific argument
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError ProcessThread::processCfmProgressEvent(tOplkApiEventType EventType_p,
+tOplkError ProcessThread::processCfmProgressEvent(tOplkApiEventType eventType_p,
                                                   tOplkApiEventArg* pEventArg_p,
                                                   void* pUserArg_p)
 {
     tCfmEventCnProgress*     pCfmProgress = &pEventArg_p->cfmProgress;
 
-    UNUSED_PARAMETER(EventType_p);
+    UNUSED_PARAMETER(eventType_p);
     UNUSED_PARAMETER(pUserArg_p);
 
     sigPrintLog(QString("CFM Progress: (Node=%1, CFM-Progress: Object 0x%2/%3,  %4/%5 Bytes")
@@ -804,20 +804,20 @@ tOplkError ProcessThread::processCfmProgressEvent(tOplkApiEventType EventType_p,
 
 The function processes CFM result events.
 
-\param  EventType_p         Type of event
+\param  eventType_p         Type of event
 \param  pEventArg_p         Pointer to union which describes the event in detail
 \param  pUserArg_p          User specific argument
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError ProcessThread::processCfmResultEvent(tOplkApiEventType EventType_p,
+tOplkError ProcessThread::processCfmResultEvent(tOplkApiEventType eventType_p,
                                                 tOplkApiEventArg* pEventArg_p,
                                                 void* pUserArg_p)
 {
     tOplkApiEventCfmResult*       pCfmResult = &pEventArg_p->cfmResult;
 
-    UNUSED_PARAMETER(EventType_p);
+    UNUSED_PARAMETER(eventType_p);
     UNUSED_PARAMETER(pUserArg_p);
 
     switch (pCfmResult->nodeCommand)
@@ -853,21 +853,21 @@ tOplkError ProcessThread::processCfmResultEvent(tOplkApiEventType EventType_p,
 
 The function processes SDO events.
 
-\param  EventType_p         Type of event
+\param  eventType_p         Type of event
 \param  pEventArg_p         Pointer to union which describes the event in detail
 \param  pUserArg_p          User specific argument
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError ProcessThread::processSdoEvent(tOplkApiEventType EventType_p,
+tOplkError ProcessThread::processSdoEvent(tOplkApiEventType eventType_p,
                                           tOplkApiEventArg* pEventArg_p,
                                           void* pUserArg_p)
 {
     tSdoComFinished*          pSdo = &pEventArg_p->sdoInfo;
     tOplkError                ret = kErrorOk;
 
-    UNUSED_PARAMETER(EventType_p);
+    UNUSED_PARAMETER(eventType_p);
     UNUSED_PARAMETER(pUserArg_p);
 
     // SDO transfer finished
