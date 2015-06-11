@@ -353,18 +353,6 @@ static INT initializeDriver(void)
     DEBUG_LVL_ALWAYS_TRACE("INFO: driver Image size is %u bytes.\n", driverBinarySize);
     DEBUG_LVL_ALWAYS_TRACE("INFO: driver Executable start is %p\n", driverExecutableStartAddress);
 
-    // Release driver processor in reset
-    halRet = alt_fpga_gpo_write(0x00000001, 0x00000001);
-    if (halRet != ALT_E_SUCCESS)
-    {
-        return -1;
-    }
-
-    while (alt_fpga_gpi_read(0x00000001) != 0);
-
-    // Copy the driver image
-    memcpy(driverExecutableStartAddress, driverBinary, driverBinarySize);
-
     // Reset the driver processor
     halRet = alt_fpga_gpo_write(0x00000001, 0x00000000);
     if (halRet != ALT_E_SUCCESS)
@@ -373,6 +361,9 @@ static INT initializeDriver(void)
     }
 
     while (alt_fpga_gpi_read(0x00000001) == 0);
+
+    // Copy the driver image
+    memcpy(driverExecutableStartAddress, driverBinary, driverBinarySize);
 
     // Release the driver processor from reset
     halRet = alt_fpga_gpo_write(0x00000001, 0x00000001);
