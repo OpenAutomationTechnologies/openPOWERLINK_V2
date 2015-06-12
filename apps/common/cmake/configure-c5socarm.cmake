@@ -31,7 +31,7 @@
 
 ################################################################################
 # Handle includes
-SET(CMAKE_MODULE_PATH "${OPLK_ROOT_DIR}/cmake" ${CMAKE_MODULE_PATH})
+SET(CMAKE_MODULE_PATH "${OPLK_BASE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 INCLUDE(setalteraarmboardconfig)
 INCLUDE(listdir)
 INCLUDE(geneclipsefilelist)
@@ -41,7 +41,7 @@ INCLUDE(geneclipselibrarylist)
 
 ################################################################################
 # Path to the hardware library folder of your board example
-SET(CFG_HW_LIB_PATH ${OPLK_ROOT_DIR}/hardware/lib/${SYSTEM_NAME_DIR}/${SYSTEM_PROCESSOR_DIR}
+SET(CFG_HW_LIB_PATH ${OPLK_BASE_DIR}/hardware/lib/${SYSTEM_NAME_DIR}/${SYSTEM_PROCESSOR_DIR}
         CACHE PATH "Path to the hardware library folder")
 
 SET(CPU_INST_NAME HOST)
@@ -61,7 +61,7 @@ SET_BOARD_CONFIGURATION(${CFG_HW_LIB_DIR})
 ################################################################################
 # Get the driver binary and fpga bitstream files for booting from SD card
 IF (DEFINED CFG_${CPU_INST_NAME}_BOOT_FROM_SDCARD AND CFG_${CPU_INST_NAME}_BOOT_FROM_SDCARD)
-    SET(CFG_DRV_BLD_PATH ${OPLK_ROOT_DIR}/drivers/altera-nios2/drv_daemon/build
+    SET(CFG_DRV_BLD_PATH ${OPLK_BASE_DIR}/drivers/altera-nios2/drv_daemon/build
         CACHE STRING "openPOWERLINK driver build path")
     SET(CFG_DRV_BIN ${CFG_DRV_BLD_PATH}/drv_daemon.bin
         CACHE STRING "openPOWERLINK driver executable")

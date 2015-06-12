@@ -55,15 +55,15 @@ ENDMACRO(ADD_UNIT_TEST)
 
 ################################################################################
 # Set general directories
-SET(OPLK_ROOT_DIR ${CMAKE_SOURCE_DIR}/..)
-SET(OPLK_SOURCE_DIR ${OPLK_ROOT_DIR}/stack/src)
-SET(OPLK_INCLUDE_DIR ${OPLK_ROOT_DIR}/stack/include)
+SET(OPLK_BASE_DIR ${CMAKE_SOURCE_DIR}/..)
+SET(OPLK_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src)
+SET(OPLK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include)
 SET(TEST_COMMON_SOURCE_DIR ${CMAKE_SOURCE_DIR}/common)
 
 # We need a oplkcfg.h file for compiling the sources
 # We are using the project for the complete MN library
 SET(OPLK_LIB_NAME oplkmn)
-SET(OPLK_PROJ_DIR ${OPLK_ROOT_DIR}/stack/proj/${SYSTEM_NAME_DIR}/lib${OPLK_LIB_NAME})
+SET(OPLK_PROJ_DIR ${OPLK_BASE_DIR}/stack/proj/${SYSTEM_NAME_DIR}/lib${OPLK_LIB_NAME})
 
 # general unit test includes
 INCLUDE_DIRECTORIES (/usr/include)
@@ -76,7 +76,7 @@ INCLUDE_DIRECTORIES (${OPLK_PROJ_DIR})
 
 IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   SET(CMAKE_INSTALL_PREFIX
-    ${OPLK_ROOT_DIR}/bin/${SYSTEM_NAME_DIR}/${SYSTEM_PROCESSOR_DIR}/unittests CACHE PATH "openPOWERLINK unittest install prefix" FORCE
+    ${OPLK_BASE_DIR}/bin/${SYSTEM_NAME_DIR}/${SYSTEM_PROCESSOR_DIR}/unittests CACHE PATH "openPOWERLINK unittest install prefix" FORCE
     )
 ENDIF()
 
