@@ -765,6 +765,8 @@ static tOplkError handleRxAsyncFrameInfo(tFrameInfo* pFrameInfo_p)
     // Set reference to kernel buffer for processing
     pFrameInfo_p->pFrame = pAcqBuffer;
 
+    // Invalidate cache region of acquired buffer before processing it
+    OPLK_DCACHE_INVALIDATE(pFrameInfo_p->pFrame, pFrameInfo_p->frameSize);
     // Now handle the async frame
     ret = handleRxAsyncFrame(pFrameInfo_p);
 
