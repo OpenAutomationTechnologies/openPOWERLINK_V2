@@ -153,12 +153,26 @@ typedef struct
 #if defined(CONFIG_INCLUDE_VETH)
     OMETH_HOOK_H        pRxVethHookInst;                        ///< Pointer to virtual Ethernet receive hook
 #endif
+#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
+    UINT                asyncFrameDropCount;
+    UINT                vethFrameDropCount;
+    UINT                asyncBufFreedCount;
+    UINT                vethBufFreedCount;
+    UINT                asyncBufAcquiredCount;
+    UINT                vethBufAcquiredCount;
+#endif
 } tEdrvInstance;
 
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
 static tEdrvInstance edrvInstance_l;
+#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
+static BYTE*    apASyncBufAddr[CONFIG_EDRV_ASND_DEFERRED_RX_BUFFERS] = {0};
+static BYTE*    apVEthBufAddr[CONFIG_EDRV_VETH_DEFERRED_RX_BUFFERS] = {0};
+static INT      asyncBufIdx = 0;
+static INT      vethBufIdx = 0;
+#endif
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -350,6 +364,18 @@ tOplkError edrv_exit(void)
         }
         DEBUG_LVL_EDRV_TRACE("\n");
     }
+
+#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
+    DEBUG_LVL_EDRV_TRACE(" ---    edrvDiagnostics    ---\n");
+    DEBUG_LVL_EDRV_TRACE(" ----  ASND Late Release  ----\n");
+    DEBUG_LVL_EDRV_TRACE("  Acquired ASync buffers = %u\n", edrvInstance_l.asyncBufAcquiredCount);
+    DEBUG_LVL_EDRV_TRACE("  Acquired ASync buffers = %u\n", edrvInstance_l.asyncBufFreedCount);
+    DEBUG_LVL_EDRV_TRACE("  Acquired VEth  buffers = %u\n", edrvInstance_l.vethBufAcquiredCount);
+    DEBUG_LVL_EDRV_TRACE("  Acquired VEth  buffers = %u\n", edrvInstance_l.vethBufFreedCount);
+    DEBUG_LVL_EDRV_TRACE("  Predicted ASync  frame drop count = %u\n", edrvInstance_l.asyncFrameDropCount);
+    DEBUG_LVL_EDRV_TRACE("  Predicted VEth  frame drop count = %u\n", edrvInstance_l.vethFrameDropCount);
+    DEBUG_LVL_EDRV_TRACE("\n");
+#endif
 
 #if OPENMAC_DMAOBSERV != 0
     if (edrvInstance_l.fDmaError == TRUE)
@@ -917,9 +943,42 @@ tOplkError edrv_releaseRxBuffer(tEdrvRxBuffer* pRxBuffer_p)
 {
     tOplkError          ret = kErrorOk;
     ometh_packet_typ*   pPacket = NULL;
+#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
+    INT                 i = 0;
+#endif
 
     pPacket = GET_TYPE_BASE(ometh_packet_typ, data, pRxBuffer_p->pBuffer);
     pPacket->length = pRxBuffer_p->rxFrameSize;
+
+#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
+    for (i = 0; i < CONFIG_EDRV_ASND_DEFERRED_RX_BUFFERS; i++)
+    {
+        if (apASyncBufAddr[i] == pPacket)
+        {
+            edrvInstance_l.asyncBufFreedCount++;
+            apASyncBufAddr[i] = 0;
+            break;
+        }
+    }
+
+    if (i >= CONFIG_EDRV_ASND_DEFERRED_RX_BUFFERS)
+    {
+        for (i = 0; i < CONFIG_EDRV_VETH_DEFERRED_RX_BUFFERS; i++)
+        {
+            if (apVEthBufAddr[i] == pPacket)
+            {
+                edrvInstance_l.vethBufFreedCount++;
+                apVEthBufAddr[i] = 0;
+                break;
+            }
+        }
+
+        if (i >= CONFIG_EDRV_VETH_DEFERRED_RX_BUFFERS)
+        {
+            DEBUG_LVL_ERROR_TRACE("Unknown buffer packet released!!\n");
+        }
+    }
+#endif
 
     if (pPacket->length != 0)
     {
@@ -1278,7 +1337,46 @@ static INT rxHook(void* pArg_p, ometh_packet_typ* pPacket_p, OMETH_BUF_FREE_FCT*
     releaseRxBuffer = edrvInstance_l.initParam.pfnRxHandler(&rxBuffer); //pass frame to Powerlink Stack
 
     if (releaseRxBuffer == kEdrvReleaseRxBufferLater)
+    {
+#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
+        // Store packet address in an array
+        if (DLLK_FILTER_ASND == (int)pArg_p)
+        {
+            if (apASyncBufAddr[asyncBufIdx] != 0)
+            {
+                edrvInstance_l.asyncFrameDropCount++;
+                DEBUG_LVL_EDRV_TRACE("The previous ASync buffer(0x%08X) @index %d is not freed!!\n", apASyncBufAddr[asyncBufIdx], asyncBufIdx);
+            }
+
+            apASyncBufAddr[asyncBufIdx++] = (BYTE*)pPacket_p;
+            edrvInstance_l.asyncBufAcquiredCount++;
+            if (asyncBufIdx >= CONFIG_EDRV_ASND_DEFERRED_RX_BUFFERS)
+            {
+                asyncBufIdx = 0;
+            }
+        }
+        else if ((DLLK_FILTER_VETH_BROADCAST== (int)pArg_p) || (DLLK_FILTER_VETH_UNICAST == (int)pArg_p))
+        {
+            if (apVEthBufAddr[vethBufIdx] != 0)
+            {
+                edrvInstance_l.vethFrameDropCount++;
+                DEBUG_LVL_EDRV_TRACE("The previous VEth buffer(0x%08X) @index %d is not freed!!\n", apVEthBufAddr[vethBufIdx], vethBufIdx);
+            }
+
+            apVEthBufAddr[vethBufIdx++] = (BYTE*)pPacket_p;
+            edrvInstance_l.vethBufAcquiredCount++;
+            if (vethBufIdx >= CONFIG_EDRV_VETH_DEFERRED_RX_BUFFERS)
+            {
+                vethBufIdx = 0;
+            }
+        }
+        else
+        {
+            DEBUG_LVL_EDRV_TRACE("Unrecognized ASND frame received!!\n");
+        }
+#endif
         ret = 0; // Packet is deferred, openMAC may not use this buffer!
+    }
     else
         ret = -1; // Packet processing is done, returns to openMAC again
 
