@@ -82,7 +82,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
          offset;                         \
      })
 
-#define DPSHM_DMB()                     // no data barriers used
+#define DPSHM_DMB()                     __asm("dmb")
 
 // IO operations
 #define DPSHM_READ8(base)               alt_read_byte((UINT32)base)
