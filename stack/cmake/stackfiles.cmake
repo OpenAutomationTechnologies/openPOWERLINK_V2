@@ -463,6 +463,10 @@ SET(MEMMAP_NULL_SOURCES
     ${COMMON_SOURCE_DIR}/memmap/memmap-null.c
     )
 
+SET(MEMMAP_DUALPROCSHM_SOURCES
+    ${COMMON_SOURCE_DIR}/memmap/memmap-noosdual.c
+    )
+
 ################################################################################
 # Target system specific sources
 ################################################################################
