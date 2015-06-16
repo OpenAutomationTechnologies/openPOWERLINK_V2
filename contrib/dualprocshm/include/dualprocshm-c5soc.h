@@ -38,8 +38,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _INC_dualprocshm_c5soc_H_
 #define _INC_dualprocshm_c5soc_H_
 
-#define OPLK_OPTIMIZE               TRUE                            ///< Optimize the dualprocessor library for openPOWERLINK stack on non-OS
-
 /* BASE ADDRESSES */
 #if defined(__NIOS2__)
 

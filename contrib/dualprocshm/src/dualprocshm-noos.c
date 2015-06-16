@@ -824,31 +824,13 @@ tDualprocReturn dualprocshm_acquireBuffLock(tDualprocDrvInstance pInstance_p, UI
 
     if (pInstance_p == NULL)
         return kDualprocInvalidParameter;
+
     // Enter critical region
     target_enableGlobalInterrupt(FALSE);
 
-#if (OPLK_OPTIMIZE == TRUE)
-    // Acquire lock only for shared queues
-    switch (id_p)
-    {
-        case kDualprocUsertoKernelQ:
-        case kDualprocKerneltoUserQ:
-        case kDualprocDllCalTxGenQ:
-        case kDualprocDllCalTxNmtQ:
-        case kDualprocDllCalTxSyncQ:
-        case kDualprocErrorHandlerBuff:
-        case kDualprocPdoBuff:
-            dualprocshm_targetAcquireLock(&pDrvInst->pDynResTbl[id_p].memInst->lock,
-                                          pDrvInst->config.procId);
-            break;
-        default:
-            // No memory lock needed do nothing
-            break;
-    }
-#else
     dualprocshm_targetAcquireLock(&pDrvInst->pDynResTbl[id_p].memInst->lock,
                                   pDrvInst->config.procId);
-#endif
+
     return kDualprocSuccessful;
 }
 
@@ -872,28 +854,11 @@ tDualprocReturn dualprocshm_releaseBuffLock(tDualprocDrvInstance pInstance_p, UI
 {
     tDualProcDrv*   pDrvInst = (tDualProcDrv*)pInstance_p;
 
-#if (OPLK_OPTIMIZE != FALSE)
-    // Acquire lock only for shared queues
-    switch (id_p)
-    {
-        case kDualprocUsertoKernelQ:
-        case kDualprocKerneltoUserQ:
-        case kDualprocDllCalTxGenQ:
-        case kDualprocDllCalTxNmtQ:
-        case kDualprocDllCalTxSyncQ:
-        case kDualprocErrorHandlerBuff:
-        case kDualprocPdoBuff:
-            dualprocshm_targetReleaseLock(&pDrvInst->pDynResTbl[id_p].memInst->lock);
-            break;
-        default:
-            // No memory lock needed do nothing
-            break;
-    }
-#else
     dualprocshm_targetReleaseLock(&pDrvInst->pDynResTbl[id_p].memInst->lock);
-#endif
+
     // Exit critical region
     target_enableGlobalInterrupt(TRUE);
+
     return kDualprocSuccessful;
 }
 

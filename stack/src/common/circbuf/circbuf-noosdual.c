@@ -75,18 +75,21 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-
-/**
-* \brief Architecture specific part of circular buffer instance
-*
-* The structure defines architecture specific parts needed for the dualprocshm
-* instance.
-*/
-typedef struct
+const BOOL afCircBufUseDualprocshm[NR_OF_CIRC_BUFFERS] =
 {
-    tDualprocDrvInstance    dualProcDrvInstance;    ///< Dual processor driver instance
-    BOOL                    fAlloc;                 ///< Allocation flag for buffer
-}tCircBufArchInstance;
+        TRUE,   ///< User-to-kernel event queue
+        TRUE,   ///< Kernel-to-user event queue
+        FALSE,  ///< Kernel internal event queue
+        FALSE,  ///< User internal event queue
+        TRUE,   ///< Queue for sending generic requests in the DLLCAL
+        TRUE,   ///< Queue for sending NMT requests in the DLLCAL
+        TRUE,   ///< Queue for sending sync requests in the DLLCAL
+        FALSE,  ///< NMT request queue for MN asynchronous scheduler
+        FALSE,  ///< Generic request queue for MN asynchronous scheduler
+        FALSE,  ///< Ident request queue for MN asynchronous scheduler
+        FALSE,  ///< Status request queue for MN asynchronous scheduler
+        TRUE,   ///< Queue for sending virtual Ethernet frames in the DLLCAL
+};
 
 //------------------------------------------------------------------------------
 // local types
@@ -124,17 +127,27 @@ The function allocates the memory needed for the circular buffer instance.
 tCircBufInstance* circbuf_createInstance(UINT8 id_p, BOOL fNew_p)
 {
     tCircBufInstance*       pInstance;
-    tCircBufArchInstance*   pArch;
 
     UNUSED_PARAMETER(fNew_p);
 
-    pArch = OPLK_MALLOC(sizeof(tCircBufArchInstance));
-
-    OPLK_MEMSET(pArch, 0, sizeof(tCircBufArchInstance));
-
     pInstance = &instance_l[id_p];
 
-    pInstance->pCircBufArchInstance = pArch;
+    if (afCircBufUseDualprocshm[id_p])
+    {
+        // Queue uses memory provided by dualprocshm
+        pInstance->pCircBufArchInstance = (void*)dualprocshm_getLocalProcDrvInst();
+        if (pInstance->pCircBufArchInstance == NULL)
+        {
+            DEBUG_LVL_ERROR_TRACE("%s getting dualprocshm instance failed!\n", __func__);
+            return NULL;
+        }
+    }
+    else
+    {
+        // Queue uses local memory resources
+        pInstance->pCircBufArchInstance = NULL;
+    }
+
     pInstance->bufferId = id_p;
 
     return pInstance;
@@ -153,7 +166,7 @@ The function frees the allocated memory used by the circular buffer instance.
 //------------------------------------------------------------------------------
 void circbuf_freeInstance(tCircBufInstance* pInstance_p)
 {
-    OPLK_FREE(pInstance_p->pCircBufArchInstance);
+    UNUSED_PARAMETER(pInstance_p);
 }
 
 //------------------------------------------------------------------------------
@@ -173,34 +186,33 @@ The function allocates the memory needed for the circular buffer.
 //------------------------------------------------------------------------------
 tCircBufError circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t* pSize_p)
 {
-    tDualprocReturn         ret;
-    size_t                  size;
-    tDualprocDrvInstance    dualProcDrvInst;
-    UINT8*                  pBuffAddr;
-    tCircBufArchInstance*   pArch = (tCircBufArchInstance*)pInstance_p->pCircBufArchInstance;
-    size = *pSize_p + sizeof(tCircBufHeader);
+    size_t size = *pSize_p + sizeof(tCircBufHeader);
 
-    dualProcDrvInst = dualprocshm_getLocalProcDrvInst();
-
-    if (dualProcDrvInst == NULL)
+    if (pInstance_p->pCircBufArchInstance != NULL)
     {
-        return kCircBufNoResource;
+        // Queue uses memory provided by dualprocshm
+        tDualprocReturn ret;
+        UINT8*          pBuffAddr;
+
+        ret = dualprocshm_getMemory(pInstance_p->pCircBufArchInstance, pInstance_p->bufferId,
+                                    &pBuffAddr, &size, TRUE);
+        if ((ret != kDualprocSuccessful) || (pBuffAddr == NULL))
+        {
+            DEBUG_LVL_ERROR_TRACE("%s() Memory Not available error %X!\n", __func__, ret);
+            return kCircBufNoResource;
+        }
+
+        pInstance_p->pCircBufHeader = (tCircBufHeader*)pBuffAddr;
     }
-
-    pArch->dualProcDrvInstance = dualProcDrvInst;
-    pArch->fAlloc = TRUE;
-    ret = dualprocshm_getMemory(pArch->dualProcDrvInstance, pInstance_p->bufferId, &pBuffAddr, &size, pArch->fAlloc);
-    if (ret != kDualprocSuccessful)
+    else
     {
-        TRACE("%s() Memory Not available error %X!\n", __func__, ret);
-        return kCircBufNoResource;
-    }
-
-    pInstance_p->pCircBufHeader = (tCircBufHeader*)pBuffAddr;
-
-    if (pInstance_p->pCircBufHeader == NULL)
-    {
-        return kCircBufNoResource;
+        // Queue uses local memory resources
+        pInstance_p->pCircBufHeader = (tCircBufHeader*)OPLK_MALLOC(size);
+        if (pInstance_p->pCircBufHeader == NULL)
+        {
+            DEBUG_LVL_ERROR_TRACE("%s() malloc failed!\n", __func__);
+            return kCircBufNoResource;
+        }
     }
 
     pInstance_p->pCircBuf = ((UINT8*)pInstance_p->pCircBufHeader) + sizeof(tCircBufHeader);
@@ -221,13 +233,22 @@ The function frees the allocated memory used by the circular buffer.
 //------------------------------------------------------------------------------
 void circbuf_freeBuffer(tCircBufInstance* pInstance_p)
 {
-    tDualprocReturn         ret;
-    tCircBufArchInstance*   pArch = (tCircBufArchInstance*)pInstance_p->pCircBufArchInstance;
-
-    ret = dualprocshm_freeMemory(pArch->dualProcDrvInstance, pInstance_p->bufferId, pArch->fAlloc);
-    if (ret != kDualprocSuccessful)
+    if (pInstance_p->pCircBufArchInstance != NULL)
     {
-        TRACE("%s() unable to free Memory error %X!\n", __func__, ret);
+        // Queue uses memory provided by dualprocshm
+        tDualprocReturn ret;
+
+        ret = dualprocshm_freeMemory(pInstance_p->pCircBufArchInstance,
+                                     pInstance_p->bufferId, TRUE);
+        if (ret != kDualprocSuccessful)
+        {
+            DEBUG_LVL_ERROR_TRACE("%s() Memory cannot be freed %X!\n", __func__, ret);
+        }
+    }
+    else
+    {
+        // Queue uses local memory resources
+        OPLK_FREE(pInstance_p->pCircBufHeader);
     }
 
     pInstance_p->pCircBufHeader = NULL;
@@ -248,35 +269,24 @@ The function connects the calling thread to the circular buffer.
 //------------------------------------------------------------------------------
 tCircBufError circbuf_connectBuffer(tCircBufInstance* pInstance_p)
 {
-    tDualprocReturn         ret;
-    size_t                  size;
-    tDualprocDrvInstance    dualProcDrvInst;
-    UINT8*                  pBuffAddr;
-    tCircBufArchInstance*   pArch = (tCircBufArchInstance*)pInstance_p->pCircBufArchInstance;
-
-    dualProcDrvInst = dualprocshm_getLocalProcDrvInst();
-
-    if (dualProcDrvInst == NULL)
+    if (pInstance_p->pCircBufArchInstance != NULL)
     {
-        return kCircBufNoResource;
-    }
+        // Queue uses memory provided by dualprocshm
+        tDualprocReturn ret;
+        UINT8*          pBuffAddr;
+        size_t          size;
 
-    pArch->dualProcDrvInstance = dualProcDrvInst;
-    pArch->fAlloc = FALSE;
-    ret = dualprocshm_getMemory(pArch->dualProcDrvInstance, pInstance_p->bufferId, &pBuffAddr, &size, pArch->fAlloc);
-    if (ret != kDualprocSuccessful)
-    {
-        TRACE("%s() Memory Not available error %X!\n", __func__, ret);
-        return kCircBufNoResource;
-    }
+        ret = dualprocshm_getMemory(pInstance_p->pCircBufArchInstance,
+                                    pInstance_p->bufferId, &pBuffAddr, &size, FALSE);
+        if ((ret != kDualprocSuccessful) || (pBuffAddr == NULL))
+        {
+            DEBUG_LVL_ERROR_TRACE("%s() Memory Not available error %X!\n", __func__, ret);
+            return kCircBufNoResource;
+        }
 
-    pInstance_p->pCircBufHeader = (tCircBufHeader*)pBuffAddr;
-    if (pInstance_p->pCircBufHeader == NULL)
-    {
-        return kCircBufNoResource;
+        pInstance_p->pCircBufHeader = (tCircBufHeader*)pBuffAddr;
+        pInstance_p->pCircBuf = ((UINT8*)pInstance_p->pCircBufHeader) + sizeof(tCircBufHeader);
     }
-
-    pInstance_p->pCircBuf = ((UINT8*)pInstance_p->pCircBufHeader) + sizeof(tCircBufHeader);
 
     return kCircBufOk;
 }
@@ -294,7 +304,20 @@ The function disconnects the calling thread from the circular buffer.
 //------------------------------------------------------------------------------
 void circbuf_disconnectBuffer(tCircBufInstance* pInstance_p)
 {
-    pInstance_p->pCircBufHeader = NULL;
+    if (pInstance_p->pCircBufArchInstance != NULL)
+    {
+        // Queue uses memory provided by dualprocshm
+        tDualprocReturn ret;
+
+        ret = dualprocshm_freeMemory(pInstance_p->pCircBufArchInstance,
+                                     pInstance_p->bufferId, FALSE);
+        if (ret != kDualprocSuccessful)
+        {
+            DEBUG_LVL_ERROR_TRACE("%s() Memory cannot be freed %X!\n", __func__, ret);
+        }
+
+        pInstance_p->pCircBufHeader = NULL;
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -310,14 +333,23 @@ The function enters a locked section of the circular buffer.
 //------------------------------------------------------------------------------
 void circbuf_lock(tCircBufInstance* pInstance_p)
 {
-    tDualprocReturn         ret;
-    tCircBufArchInstance*   pArch = (tCircBufArchInstance*)pInstance_p->pCircBufArchInstance;
-
-    ret = dualprocshm_acquireBuffLock(pArch->dualProcDrvInstance, pInstance_p->bufferId);
-    if (ret != kDualprocSuccessful)
+    if (pInstance_p->pCircBufArchInstance != NULL)
     {
-        TRACE("%s() Failed to acquire lock for bufffer 0x%X error 0x%X!\n", \
-              __func__, pInstance_p->bufferId, ret);
+        // Queue uses memory provided by dualprocshm
+        tDualprocReturn ret;
+
+        ret = dualprocshm_acquireBuffLock(pInstance_p->pCircBufArchInstance,
+                                          pInstance_p->bufferId);
+        if (ret != kDualprocSuccessful)
+        {
+            DEBUG_LVL_ERROR_TRACE("%s() Failed to acquire lock for buffer 0x%X error 0x%X!\n",
+                                  __func__, pInstance_p->bufferId, ret);
+        }
+    }
+    else
+    {
+        // Queue uses local memory resources
+        target_enableGlobalInterrupt(FALSE);
     }
 }
 
@@ -334,9 +366,24 @@ The function leaves a locked section of the circular buffer.
 //------------------------------------------------------------------------------
 void circbuf_unlock(tCircBufInstance* pInstance_p)
 {
-    tCircBufArchInstance*   pArch = (tCircBufArchInstance*)pInstance_p->pCircBufArchInstance;
+    if (pInstance_p->pCircBufArchInstance != NULL)
+    {
+        // Queue uses memory provided by dualprocshm
+        tDualprocReturn ret;
 
-    dualprocshm_releaseBuffLock(pArch->dualProcDrvInstance, pInstance_p->bufferId);
+        ret = dualprocshm_releaseBuffLock(pInstance_p->pCircBufArchInstance,
+                                          pInstance_p->bufferId);
+        if (ret != kDualprocSuccessful)
+        {
+            DEBUG_LVL_ERROR_TRACE("%s() Failed to release lock for buffer 0x%X error 0x%X!\n",
+                                  __func__, pInstance_p->bufferId, ret);
+        }
+    }
+    else
+    {
+        // Queue uses local memory resources
+        target_enableGlobalInterrupt(TRUE);
+    }
 }
 
 //============================================================================//
