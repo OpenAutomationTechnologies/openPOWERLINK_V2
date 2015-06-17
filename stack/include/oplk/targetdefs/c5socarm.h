@@ -121,7 +121,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OPLK_IO_RD8(base, offset)           alt_read_byte((UINT)base + (UINT)offset)
 
 // Target memory barrier function
-#define OPLK_MEMBAR()
+#define OPLK_MEMBAR()                       __asm("dmb")
 
 /* NOTE:
  * ARM does not support atomic instructions, hence, pseudo atomic
