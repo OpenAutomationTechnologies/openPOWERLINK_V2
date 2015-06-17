@@ -187,12 +187,16 @@ void* memmap_mapKernelBuffer(void* pKernelBuffer_p)
 
     tempAddr = (UINT32)pKernelBuffer_p;
 
-    if (tempAddr < memMapInstance_l.remoteProcSharedMemBaseAddr)
-        pBuffer = NULL;
-    else
+    if (tempAddr >= memMapInstance_l.remoteProcSharedMemBaseAddr)
+    {
+        // Get the offset address of the kernel buffer from the remote
+        // processor's shared memory base address and add it to the local
+        // processor's shared memory base address.
         pBuffer = (void*)(tempAddr -
                           memMapInstance_l.remoteProcSharedMemBaseAddr +
                           memMapInstance_l.localProcSharedMemBaseAddr);
+    }
+    // else the kernel buffer address is not valid
 
     return pBuffer;
 }
