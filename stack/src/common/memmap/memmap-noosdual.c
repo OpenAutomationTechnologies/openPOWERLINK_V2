@@ -186,9 +186,11 @@ void* memmap_mapKernelBuffer(void* pKernelBuffer_p, UINT bufferSize_p)
     void*       pBuffer = NULL;
     UINT32      tempAddr = 0;
 
-    UNUSED_PARAMETER(bufferSize_p);
     tempAddr = (UINT32)pKernelBuffer_p;
 
+    /*TODO Check if the kernel buffer(base + size) is within the span
+           of shared memory. Get the shared memory span also from dualprocshm.
+    */
     if (tempAddr >= memMapInstance_l.remoteProcSharedMemBaseAddr)
     {
         // Get the offset address of the kernel buffer from the remote
@@ -197,6 +199,9 @@ void* memmap_mapKernelBuffer(void* pKernelBuffer_p, UINT bufferSize_p)
         pBuffer = (void*)(tempAddr -
                           memMapInstance_l.remoteProcSharedMemBaseAddr +
                           memMapInstance_l.localProcSharedMemBaseAddr);
+
+        // Invalidate the remapped memory address data cache
+        OPLK_DCACHE_INVALIDATE(pBuffer, bufferSize_p);
     }
     // else the kernel buffer address is not valid
 
