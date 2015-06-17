@@ -755,7 +755,7 @@ static tOplkError handleRxAsyncFrameInfo(tFrameInfo* pFrameInfo_p)
     tPlkFrame*      pAcqBuffer;
 
     // Get Rx buffer from kernel layer
-    pAcqBuffer = memmap_mapKernelBuffer(pKernelBuffer);
+    pAcqBuffer = memmap_mapKernelBuffer(pKernelBuffer, pFrameInfo_p->frameSize);
     if (pAcqBuffer == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s Getting the Rx buffer from kernel failed!\n", __func__);

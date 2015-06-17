@@ -125,14 +125,16 @@ tMemMapReturn memmap_shutdown(void)
 The function maps a kernel buffer address.
 
 \param  pKernelBuffer_p     The pointer to the kernel buffer.
+\param  bufferSize_p        The size of the kernel buffer.
 
 \return The function returns NULL in order to regret calling that function.
 
 \ingroup module_lib_memmap
 */
 //------------------------------------------------------------------------------
-void* memmap_mapKernelBuffer(void* pKernelBuffer_p)
+void* memmap_mapKernelBuffer(void* pKernelBuffer_p, UINT bufferSize_p)
 {
+    UNUSED_PARAMETER(bufferSize_p);
     UNUSED_PARAMETER(pKernelBuffer_p);
 
     // The function returns NULL in order to fail.
