@@ -98,7 +98,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 // Memory barrier
-#define DPSHM_DMB()                     // not used for NIOS2
+#define DPSHM_DMB()                     __asm("sync")
 
 // Cache hadling. NIOS2 supports only uncached memory regions.
 #define DUALPROCSHM_FLUSH_DCACHE_RANGE(base, range) \
