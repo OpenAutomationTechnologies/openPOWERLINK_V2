@@ -141,18 +141,20 @@ tMemMapReturn memmap_shutdown(void)
 The function maps a kernel buffer address.
 
 \param  pKernelBuffer_p     The pointer to the kernel buffer.
+\param  bufferSize_p        The size of the kernel buffer.
 
 \return The functions returns the pointer to the mapped kernel buffer.
 
 \ingroup module_lib_memmap
 */
 //------------------------------------------------------------------------------
-void* memmap_mapKernelBuffer(void* pKernelBuffer_p)
+void* memmap_mapKernelBuffer(void* pKernelBuffer_p, UINT bufferSize_p)
 {
     tHostifReturn       ret;
     tHostifInstance*    pHif = memMapInstance_l.pHifInstance;
     UINT8*              pBuffer;
 
+    UNUSED_PARAMETER(bufferSize_p);
     ret = hostif_dynBufAcquire(pHif, (UINT32)pKernelBuffer_p, &pBuffer);
 
     if (ret != kHostifSuccessful)

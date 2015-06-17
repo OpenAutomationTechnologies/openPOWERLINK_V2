@@ -80,7 +80,7 @@ extern "C"
 tMemMapReturn memmap_init(void);
 tMemMapReturn memmap_shutdown(void);
 
-void* memmap_mapKernelBuffer(void* pKernelBuffer_p);
+void* memmap_mapKernelBuffer(void* pKernelBuffer_p, UINT bufferSize_p);
 void  memmap_unmapKernelBuffer(void* pBuffer_p);
 
 #ifdef __cplusplus
