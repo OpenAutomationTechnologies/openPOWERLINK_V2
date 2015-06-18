@@ -56,11 +56,11 @@ use libcommon.global.all;
 entity axi_hostinterface is
     generic (
         --! PCP AXI Slave Data Width
-        C_S_AXI_DATA_WIDTH          : integer               := 32;
+        C_S_AXI_PCP_DATA_WIDTH          : integer               := 32;
         --! PCP AXI Slave Address width
-        C_S_AXI_ADDR_WIDTH          : integer               := 32;
+        C_S_AXI_PCP_ADDR_WIDTH          : integer               := 32;
         --! PCP AXI Min Address range size (64Kb limited by scripts)
-        C_S_AXI_MIN_SIZE            : std_logic_vector      := X"0001FFFF";
+        C_S_AXI_PCP_MIN_SIZE            : std_logic_vector      := X"0001FFFF";
         --! PCP AXI Slave Base Address
         C_BASEADDR                  : std_logic_vector      := X"FFFFFFFF";
         --! PCP AXI Slave High Address
@@ -68,11 +68,11 @@ entity axi_hostinterface is
         --! PCP AXI IP Family
         C_FAMILY                    : string                := "virtex6";
         --! Host AXI Slave Data Width
-        C_S_HOST_AXI_DATA_WIDTH     : integer               := 32;
+        C_S_AXI_HOST_DATA_WIDTH     : integer               := 32;
         --! Host AXI Address Width
-        C_S_HOST_AXI_ADDR_WIDTH     : integer               := 32;
+        C_S_AXI_HOST_ADDR_WIDTH     : integer               := 32;
         --! HOST AXI Min Address range size
-        C_S_HOST_AXI_MIN_SIZE       : std_logic_vector      := X"0001FFFF";
+        C_S_AXI_HOST_MIN_SIZE       : std_logic_vector      := X"0001FFFF";
         --! HOST AXI Slave Base Address
         C_HOST_BASEADDR             : std_logic_vector      := X"FFFFFFFF";
         --! HOST AXI Slave High Address
@@ -128,13 +128,13 @@ entity axi_hostinterface is
         --! AXI PCP slave PCP Reset Active low
         S_AXI_PCP_ARESETN           : in    std_logic;
         --! AXI PCP slave PCP Address
-        S_AXI_PCP_AWADDR            : in    std_logic_vector(C_S_AXI_ADDR_WIDTH-1 downto 0);
+        S_AXI_PCP_AWADDR            : in    std_logic_vector(C_S_AXI_PCP_ADDR_WIDTH-1 downto 0);
         --! AXI PCP slave PCP Address Valid
         S_AXI_PCP_AWVALID           : in    std_logic;
         --! AXI PCP slave Write Data
-        S_AXI_PCP_WDATA             : in    std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0);
+        S_AXI_PCP_WDATA             : in    std_logic_vector(C_S_AXI_PCP_DATA_WIDTH-1 downto 0);
         --! AXI PCP slave Write Strobe
-        S_AXI_PCP_WSTRB             : in    std_logic_vector((C_S_AXI_DATA_WIDTH/8)-1 downto 0);
+        S_AXI_PCP_WSTRB             : in    std_logic_vector((C_S_AXI_PCP_DATA_WIDTH/8)-1 downto 0);
         --! AXI PCP slave Write Valid
         S_AXI_PCP_WVALID            : in    std_logic;
         --! AXI PCP slave Write Response Ready
@@ -144,7 +144,7 @@ entity axi_hostinterface is
         --! AXI PCP slave Write Response
         S_AXI_PCP_BRESP             : out   std_logic_vector(1 downto 0);
         --! AXI PCP slave Read Address
-        S_AXI_PCP_ARADDR            : in    std_logic_vector(C_S_AXI_ADDR_WIDTH-1 downto 0);
+        S_AXI_PCP_ARADDR            : in    std_logic_vector(C_S_AXI_PCP_ADDR_WIDTH-1 downto 0);
         --! AXI PCP slave Address Valid
         S_AXI_PCP_ARVALID           : in    std_logic;
         --! AXI PCP slave Read Ready
@@ -152,7 +152,7 @@ entity axi_hostinterface is
         --! AXI PCP slave Read Address Ready
         S_AXI_PCP_ARREADY           : out   std_logic;
         --! AXI PCP slave Read Data
-        S_AXI_PCP_RDATA             : out   std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0);
+        S_AXI_PCP_RDATA             : out   std_logic_vector(C_S_AXI_PCP_DATA_WIDTH-1 downto 0);
         --! AXI PCP slave Read Response
         S_AXI_PCP_RRESP             : out   std_logic_vector(1 downto 0);
         --! AXI PCP slave Read Valid
@@ -167,19 +167,19 @@ entity axi_hostinterface is
         --! AXI Host Slave Reset active low
         S_AXI_HOST_ARESETN          : in    std_logic;
         --! AXI Host Slave Write Address
-        S_AXI_HOST_AWADDR           : in    std_logic_vector(C_S_AXI_ADDR_WIDTH-1 downto 0);
+        S_AXI_HOST_AWADDR           : in    std_logic_vector(C_S_AXI_PCP_ADDR_WIDTH-1 downto 0);
         --! AXI Host Slave Write Address valid
         S_AXI_HOST_AWVALID          : in    std_logic;
         --! AXI Host Slave Write Data
-        S_AXI_HOST_WDATA            : in    std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0);
+        S_AXI_HOST_WDATA            : in    std_logic_vector(C_S_AXI_PCP_DATA_WIDTH-1 downto 0);
         --! AXI Host Slave Write strobe
-        S_AXI_HOST_WSTRB            : in    std_logic_vector((C_S_AXI_DATA_WIDTH/8)-1 downto 0);
+        S_AXI_HOST_WSTRB            : in    std_logic_vector((C_S_AXI_PCP_DATA_WIDTH/8)-1 downto 0);
         --! AXI Host Slave write Valid
         S_AXI_HOST_WVALID           : in    std_logic;
         --! AXI Host Slave Response Ready
         S_AXI_HOST_BREADY           : in    std_logic;
         --! AXI Host Slave Read Address
-        S_AXI_HOST_ARADDR           : in    std_logic_vector(C_S_AXI_ADDR_WIDTH-1 downto 0);
+        S_AXI_HOST_ARADDR           : in    std_logic_vector(C_S_AXI_PCP_ADDR_WIDTH-1 downto 0);
         --! AXI Host Slave Read Address Valid
         S_AXI_HOST_ARVALID          : in    std_logic;
         --! AXI Host Slave Read Ready
@@ -187,7 +187,7 @@ entity axi_hostinterface is
         --! AXI Host Slave Read Address Ready
         S_AXI_HOST_ARREADY          : out   std_logic;
         --! AXI Host SlaveRead Data
-        S_AXI_HOST_RDATA            : out   std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0);
+        S_AXI_HOST_RDATA            : out   std_logic_vector(C_S_AXI_PCP_DATA_WIDTH-1 downto 0);
         --! AXI Host Slave Read Response
         S_AXI_HOST_RRESP            : out   std_logic_vector(1 downto 0);
         --! AXI Host Slave Read Valid
