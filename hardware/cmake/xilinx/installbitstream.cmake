@@ -54,9 +54,7 @@ MACRO(INSTALL_BITSTREAM EXAMPLE_ROOT BITS_DESTINATION SKIP_BITSTREAM)
 
     # Additional initialization modules generated for ARM on Zynq
     IF(DEFINED CFG_DEMO_BOARD_ZYNQ AND CFG_DEMO_BOARD_ZYNQ)
-        SET(ZYNQ_XML ${EXAMPLE_ROOT}/sdk)
-
-        INSTALL(FILES ${SDK_EXPORT}/ps7_init.tcl ${SDK_EXPORT}/ps7_init.c ${SDK_EXPORT}/ps7_init.h ${ZYNQ_XML}/system.xml
+        INSTALL(FILES ${SDK_EXPORT}/ps7_init.tcl ${SDK_EXPORT}/ps7_init.c ${SDK_EXPORT}/ps7_init.h ${SDK_EXPORT}/system.xml
                 DESTINATION ${BITS_DESTINATION}
                )
     ENDIF()
