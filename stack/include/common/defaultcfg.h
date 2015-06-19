@@ -230,6 +230,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CONFIG_VETH_SET_DEFAULT_GATEWAY                 FALSE
 #endif
 
+#if defined(CONFIG_INCLUDE_IP) && !defined(CONFIG_INCLUDE_VETH)
+#error "CONFIG_INCLUDE_VETH needs to be enabled for using IP objects!"
+#endif
+
 // rough approximation of max. number of timer entries for module user/timer-generic
 #ifndef TIMERU_MAX_ENTRIES
 #if defined(CONFIG_INCLUDE_NMT_MN)

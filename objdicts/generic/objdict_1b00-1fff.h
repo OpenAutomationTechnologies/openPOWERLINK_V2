@@ -79,7 +79,7 @@ area from 0x1B00 - 0x1FFF.
         OBD_RAM_INDEX_RAM_ARRAY(0x1C17, NMT_MAX_NODE_ID, NULL, kObdTypeUInt32, kObdAccSRW, tObdUnsigned32, DLL_MNLossStatusResThreshold_AU32, 15)
 #endif
 
-#if defined(CONFIG_INCLUDE_VETH)
+#if defined(CONFIG_INCLUDE_IP)
         // Object 1E40h: NWL_IpAddrTable_0h_REC
         OBD_BEGIN_INDEX_RAM(0x1E40, 0x06, ctrlu_cbObdAccess)
             OBD_SUBINDEX_RAM_VAR(0x1E40, 0x00, kObdTypeUInt8, kObdAccConst, tObdUnsigned8, NumberOfEntries, 0x05)
@@ -221,7 +221,7 @@ area from 0x1B00 - 0x1FFF.
             OBD_SUBINDEX_RAM_VAR(0x1F99, 0x00, kObdTypeUInt32, kObdAccSRW, tObdUnsigned32, NMT_CNBasicEthernetTimeout_U32, 5000000)  // in [us]
         OBD_END_INDEX(0x1F99)
 
-#if defined(CONFIG_INCLUDE_VETH)
+#if defined(CONFIG_INCLUDE_IP)
         // Object 1F9Ah: NMT_HostName_VSTR
         OBD_BEGIN_INDEX_RAM(0x1F9A, 0x01, NULL)
            OBD_SUBINDEX_RAM_VSTRING(0x1F9A, 0x00, kObdAccSRW, NMT_HostName_VSTR, 34, "")
