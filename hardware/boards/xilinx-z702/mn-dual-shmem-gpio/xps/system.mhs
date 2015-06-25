@@ -50,6 +50,8 @@
  PORT axi_openmac_0_ioSmi_dio_pin = axi_openmac_0_ioSmi_dio, DIR = IO, VEC = [1:0]
  PORT axi_powerlink_0_PHY0_PWRDWN_INT_n_pin = net_vcc, DIR = O
  PORT axi_powerlink_0_PHY1_PWRDWN_INT_n_pin = net_vcc, DIR = O
+ PORT pcp_benchmark_pin = BENCHMARK_PIO_IO, DIR = O, VEC = [7:0]
+ PORT host_benchmark_pin = HOST_BENCHMARK_PIO_IO, DIR = O, VEC = [7:0]
 
 
 BEGIN processing_system7
