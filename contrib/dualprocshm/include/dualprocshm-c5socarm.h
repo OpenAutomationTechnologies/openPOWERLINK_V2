@@ -141,7 +141,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
          }                                                                                    \
          else                                                                                 \
          {                                                                                    \
-             if (alt_int_dist_trigger_set(SYNC_IRQ, ALT_INT_TRIGGER_LEVEL) != ALT_E_SUCCESS)  \
+             if (alt_int_dist_trigger_set(SYNC_IRQ, ALT_INT_TRIGGER_EDGE) != ALT_E_SUCCESS)  \
              {                                                                                \
                  ret = -1;                                                                    \
                  TRACE("Sync IRQ trigger set failed\n");                                      \
