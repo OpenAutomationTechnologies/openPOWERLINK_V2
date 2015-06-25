@@ -737,7 +737,6 @@ tOplkError dllknode_setupSyncPhase(tNmtState nmtState_p, BOOL fReadyFlag_p,
     tOplkError          ret = kErrorOk;
     BYTE*               pCnNodeId;
     UINT32              accFrameLenNs = 0;
-    UINT                nextTimeOffsetNs = 0;
     tPlkFrame*          pTxFrame;
     tEdrvTxBuffer*      pTxBuffer;
     tFrameInfo          FrameInfo;
@@ -814,7 +813,7 @@ tOplkError dllknode_setupSyncPhase(tNmtState nmtState_p, BOOL fReadyFlag_p,
                 *pNextTimeOffsetNs_p = pIntNodeInfo->presTimeoutNs;
             }
 
-            if (nextTimeOffsetNs == 0)
+            if (*pNextTimeOffsetNs_p == 0)
             {   // add SoC frame length
                 accFrameLenNs += C_DLL_T_PREAMBLE +
                                  (pTxBuffer->txFrameSize * C_DLL_T_BITTIME) + C_DLL_T_IFG;
