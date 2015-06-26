@@ -47,6 +47,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <omethlib.h>
 
 #include <sys/alt_cache.h>
+#include <sys/alt_irq.h>
 #include <io.h>
 #include <unistd.h>
 
@@ -62,6 +63,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OPENMAC_FLUSHDATACACHE(pMem_p, size_p)
 #define OPENMAC_INVALIDATEDATACACHE(pMem_p, size_p)
 #define OPENMAC_GETDMAOBSERVER()                            IORD_16DIRECT(OPENMAC_DOB_BASE, 0)
+#define OPENMAC_GETPENDINGIRQ()                             alt_irq_pending()
 
 #define OPENMAC_TIMER_OFFSET(timer_p)                       (timer_p << 4)
 

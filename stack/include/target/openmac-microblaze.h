@@ -57,6 +57,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OPENMAC_FLUSHDATACACHE(pMem_p, size_p)              microblaze_flush_dcache_range((UINT32)pMem_p, size_p)
 #define OPENMAC_INVALIDATEDATACACHE(pMem_p, size_p)         microblaze_invalidate_dcache_range((UINT32)pMem_p, size_p)
 #define OPENMAC_GETDMAOBSERVER()                            Xil_In16(OPENMAC_DOB_BASE)
+#define OPENMAC_GETPENDINGIRQ()                             0
+//FIXME: Test IRQ timing on Xilinx, and implement OPENMAC_GETPENDINGIRQ macro if required
 
 #define OPENMAC_TIMER_OFFSET(timer_p)                       (timer_p << 4)
 

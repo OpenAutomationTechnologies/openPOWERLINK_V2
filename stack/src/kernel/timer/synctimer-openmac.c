@@ -179,6 +179,7 @@ static tOplkError drvModifyTimerAbs(UINT timerHdl_p, UINT32 absoluteTime_p);
 static tOplkError drvModifyTimerRel(UINT timerHdl_p, INT timeAdjustment_p,
                                     UINT32* pAbsoluteTime_p,
                                     BOOL* pfAbsoluteTimeAlreadySet_p);
+static inline void drvBlockUntilAcknowledged(BYTE irqNum_p);
 
 static tOplkError drvDeleteTimer(UINT timerHdl_p);
 
@@ -838,6 +839,25 @@ Exit:
 
 //------------------------------------------------------------------------------
 /**
+\brief  wait blocking until interrupt is acknowledged
+
+This function blocks further processing until a certain IRQ number
+is no longer pending, which ensures proper timer setup even if the
+hardware delays the IRQ acknowledging. However, it introduces an additional
+but necessary delay.
+
+\param  irqNum_p    IRQ number
+
+*/
+//------------------------------------------------------------------------------
+static inline void drvBlockUntilAcknowledged(BYTE irqNum_p)
+{
+    while (OPENMAC_GETPENDINGIRQ() & (1 << irqNum_p));
+}
+
+
+//------------------------------------------------------------------------------
+/**
 \brief  Delete sync timer
 
 This function deletes the timer handle.
@@ -1069,6 +1089,7 @@ static void drvInterruptHandler(void* pArg_p)
     }
 
     drvConfigureShortestTimer();
+    drvBlockUntilAcknowledged(HWTIMER_SYNC);
 
     target_setInterruptContextFlag(FALSE);
 
