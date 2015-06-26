@@ -518,7 +518,7 @@ tOplkError edrv_updateTxBuffer(tEdrvTxBuffer* pBuffer_p)
     pPacket->length = pBuffer_p->txFrameSize;
 
     // Flush data cache before handing over the packet buffer to openMAC.
-    OPENMAC_FLUSHDATACACHE((UINT8*)pPacket, pPacket->length);
+    OPENMAC_FLUSHDATACACHE((UINT8*)pBuffer_p->pBuffer, pBuffer_p->txFrameSize);
 
     // Update autoresponse buffer
     edrvInstance_l.apTxBuffer[pBuffer_p->txBufferNumber.value] = pBuffer_p;
@@ -557,6 +557,9 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
     tOplkError          ret = kErrorOk;
     ometh_packet_typ*   pPacket = NULL;
     ULONG               txLength;
+
+    // Flush data cache before sending the frame to the network
+    OPENMAC_FLUSHDATACACHE((UINT8*)pBuffer_p->pBuffer, pBuffer_p->txFrameSize);
 
     pPacket = GET_TYPE_BASE(ometh_packet_typ, data, pBuffer_p->pBuffer);
 
@@ -1273,7 +1276,7 @@ static INT rxHook(void* pArg_p, ometh_packet_typ* pPacket_p, OMETH_BUF_FREE_FCT*
 
     // Before handing over the Rx packet to the stack invalidate the packet's
     // memory range.
-    OPENMAC_INVALIDATEDATACACHE((UINT8*)pPacket_p, pPacket_p->length);
+    OPENMAC_INVALIDATEDATACACHE((UINT8*)rxBuffer.pBuffer, rxBuffer.rxFrameSize);
 
     releaseRxBuffer = edrvInstance_l.initParam.pfnRxHandler(&rxBuffer); //pass frame to Powerlink Stack
 
