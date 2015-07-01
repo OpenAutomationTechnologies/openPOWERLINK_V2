@@ -208,6 +208,15 @@ tOplkError target_init(void)
         goto Exit;
     }
 
+    // Enable global interrupt master
+    halRet = alt_int_global_enable();
+    if (halRet != ALT_E_SUCCESS)
+    {
+        DEBUG_LVL_ERROR_TRACE("enabling global interrupt receiver failed\n");
+        oplkRet = kErrorGeneralError;
+        goto Exit;
+    }
+
 Exit:
     return oplkRet;
 }
@@ -228,6 +237,8 @@ tOplkError target_cleanup(void)
     ALT_STATUS_CODE     halRet = ALT_E_SUCCESS;
 
     disableInterruptMaster();
+    // Disable all interrupts from the distributor
+    alt_int_global_disable();
     alt_int_cpu_uninit();
     alt_int_global_uninit();
     halRet = alt_cache_system_disable();
@@ -329,15 +340,6 @@ static inline INT enableInterruptMaster(void)
     ALT_STATUS_CODE     retStatus = ALT_E_SUCCESS;
     INT                 ret = 0;
 
-    // Enable global interrupt master
-    retStatus = alt_int_global_enable();
-    if (retStatus != ALT_E_SUCCESS)
-    {
-        DEBUG_LVL_ERROR_TRACE("enabling global interrupt receiver failed\n");
-        ret = -1;
-        goto Exit;
-    }
-
     // CPU interface global enable
     retStatus = alt_int_cpu_enable();
     if (retStatus != ALT_E_SUCCESS)
@@ -367,14 +369,6 @@ static inline INT disableInterruptMaster(void)
 {
     ALT_STATUS_CODE     retStatus = ALT_E_SUCCESS;
     INT                 ret = 0;
-
-    // Disable all interrupts from the distributor
-    retStatus = alt_int_global_disable();
-    if (retStatus != ALT_E_SUCCESS)
-    {
-        ret = -1;
-        goto Exit;
-    }
 
     // Reset the CPU interface
     retStatus = alt_int_cpu_disable();
