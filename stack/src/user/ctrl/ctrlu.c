@@ -655,11 +655,11 @@ tOplkError ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
     tOplkError          ret = kErrorOk;
 
 #if (API_OBD_FORWARD_EVENT != FALSE)
-    tOplkApiEventArg     eventArg;
+    tOplkApiEventArg     obdCbEventArg;
 
     // call user callback
-    eventArg.obdCbParam = *pParam_p;
-    ret = ctrlu_callUserEventCallback(kOplkApiEventObdAccess, &eventArg);
+    obdCbEventArg.obdCbParam = *pParam_p;
+    ret = ctrlu_callUserEventCallback(kOplkApiEventObdAccess, &obdCbEventArg);
     if (ret != kErrorOk)
     {   // do not do any further processing on this object
         if (ret == kErrorReject)
@@ -755,11 +755,11 @@ tOplkError ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
         case 0x1E40:    // NWL_IpAddrTable_0h_REC
             if ((pParam_p->obdEvent == kObdEvPostWrite) && (pParam_p->subIndex == 5))
             {
-                tOplkApiEventArg    eventArg;
+                tOplkApiEventArg    vethEventArg;
 
-                eventArg.defaultGwChange.defaultGateway = *((UINT32*)pParam_p->pArg);
+                vethEventArg.defaultGwChange.defaultGateway = *((UINT32*)pParam_p->pArg);
 
-                ret = ctrlu_callUserEventCallback(kOplkApiEventDefaultGwChange, &eventArg);
+                ret = ctrlu_callUserEventCallback(kOplkApiEventDefaultGwChange, &vethEventArg);
                 if (ret == kErrorReject)
                     ret = kErrorOk; // Ignore reject
             }
