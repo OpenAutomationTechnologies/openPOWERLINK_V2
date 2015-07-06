@@ -249,6 +249,43 @@ eventucal-win32.c
 - Use the predefined macros located in oplk/basictypes.h for standard data types
   (e.g. BOOL, INT, UINT, INT8, UINT8,  INT16, UINT16, DOUBLE, ...)
 
+# Structure padding {#sect_coding_naming_padding}
+
+Additional variables should be included in structures shared across different
+processor architectures to avoid alignment and packing problems arising from
+the inherent architectural difference of the processors or compilers.
+
+These variables should be named `padding` suffixed with the padding variable
+count.
+
+__Examples:__
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
+typedef struct
+{
+    UINT32          uint32Var;                   // Unsigned integer variable
+    UINT64          uint64Var;                   // Unsigned 64 bit integer variable
+} tSharedStruct;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+On 64 bit processor, a padding of 4 bytes will be included by the compiler in the
+structure `tSharedStruct` to align it on processor word boundary i.e. 8 bytes,
+increasing the size of the structure to 16 bytes.
+
+On 32 bit system, with a word alignment of 4 bytes, `tSharedStruct` will have a
+total size of 12 bytes.
+
+To make the size equal across the processors, a variable of 4 bytes should be included
+after the `uint32Var` variable to increase the size to 16 bytes on both processors.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
+typedef struct
+{
+    UINT32          uint32Var;                   // Unsigned integer variable
+    UINT32          padding1;                    // Padding variable 1
+    UINT64          uint64Var;                   // Unsigned 64 bit integer variable
+} tSharedStruct;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 # Comments {#sect_coding_comments}
 
 ## Doxygen tags {#sect_coding_comments_doxygen}
