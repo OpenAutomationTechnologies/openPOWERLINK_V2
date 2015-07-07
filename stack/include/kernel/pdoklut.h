@@ -77,7 +77,7 @@ extern "C"
 
 void       pdoklut_clear(tPdoklutEntry* pLut_p, UINT32 numEntries_p);
 tOplkError pdoklut_addChannel(tPdoklutEntry* pLut_p, tPdoChannel* pPdoChannel_p, UINT channelId_p);
-UINT       pdoklut_getChannel(tPdoklutEntry* pLut_p, UINT8 searchIndex_p, UINT8 nodeId_p);
+UINT       pdoklut_getChannel(tPdoklutEntry* pLut_p, UINT8 searchIndex_p, UINT8 nodeId_p) SECTION_PDOKLUT_GETCHANNEL;
 
 #ifdef __cplusplus
 }
