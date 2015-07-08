@@ -98,8 +98,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // local function prototypes
 //------------------------------------------------------------------------------
 
-static inline INT       enableInterruptMaster(void);
-static inline INT       disableInterruptMaster(void);
+static inline INT       enableCpuIrqInterface(void);
+static inline INT       disableCpuIrqInterface(void);
 
 static inline UINT64    getTimerMaxScaledCount(ALT_GPT_TIMER_t timerId_p,
                                                UINT32 scalingFactor_p);
@@ -146,14 +146,14 @@ void target_enableGlobalInterrupt(UINT8 fEnable_p)
     {
         if (--lockCount == 0)
         {
-            enableInterruptMaster();
+            enableCpuIrqInterface();
         }
     }
     else
     {                       // disable interrupts
         if (lockCount == 0)
         {
-            disableInterruptMaster();
+            disableCpuIrqInterface();
         }
 
         lockCount++;
@@ -236,7 +236,7 @@ tOplkError target_cleanup(void)
 {
     ALT_STATUS_CODE     halRet = ALT_E_SUCCESS;
 
-    disableInterruptMaster();
+    disableCpuIrqInterface();
     // Disable all interrupts from the distributor
     alt_int_global_disable();
     alt_int_cpu_uninit();
@@ -256,7 +256,7 @@ milliseconds have elapsed.
 \param  milliSeconds_p            Number of milliseconds to sleep
 
 \ingroup module_target
-*/
+*/f
 //------------------------------------------------------------------------------
 void target_msleep(UINT32 milliSeconds_p)
 {
@@ -325,17 +325,17 @@ tOplkError target_setDefaultGateway(UINT32 defaultGateway_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief Enable the global interrupt master
+\brief Enable the CPU interrupt interface
 
-The function enables interrupt reception in the global and target processor
-interrupt interfaces.
+The function enables interrupt reception in the target processor
+interrupt interface.
 
 \return The function returns an integer
 \retval 0                   Success
 \retval -1                  Failure
 */
 //------------------------------------------------------------------------------
-static inline INT enableInterruptMaster(void)
+static inline INT enableCpuIrqInterface(void)
 {
     ALT_STATUS_CODE     retStatus = ALT_E_SUCCESS;
     INT                 ret = 0;
@@ -355,17 +355,17 @@ Exit:
 
 //------------------------------------------------------------------------------
 /**
-\brief Disable the global interrupt master
+\brief Disable the CPU interrupt interface
 
-The function disables interrupt reception in the global and target processor
-interrupt interfaces.
+The function disables interrupt reception in the target processor
+interrupt interface.
 
 \return The function returns an integer
 \retval 0                   Success
 \retval -1                  Failure
 */
 //------------------------------------------------------------------------------
-static inline INT disableInterruptMaster(void)
+static inline INT disableCpuIrqInterface(void)
 {
     ALT_STATUS_CODE     retStatus = ALT_E_SUCCESS;
     INT                 ret = 0;
