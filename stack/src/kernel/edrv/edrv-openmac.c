@@ -1303,6 +1303,9 @@ This function is invoked by the Ethernet controller interrupt.
 static void irqHandler(void* pArg_p)
 {
     BENCHMARK_MOD_01_SET(1);
+
+    target_setInterruptContextFlag(TRUE);
+
 #if OPENMAC_DMAOBSERV != 0
     UINT16 dmaObservVal = OPENMAC_GETDMAOBSERVER();
 
@@ -1349,6 +1352,8 @@ static void irqHandler(void* pArg_p)
 #endif
 
     omethRxTxIrqHandlerMux();
+
+    target_setInterruptContextFlag(FALSE);
 
     BENCHMARK_MOD_01_RESET(1);
 }

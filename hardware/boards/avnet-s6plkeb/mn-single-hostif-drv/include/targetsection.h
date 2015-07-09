@@ -56,6 +56,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define SECTION_OMETHLIB_TX_IRQ_HDL         XIL_INTERNAL_RAM
 #define SECTION_OMETHLIB_RXTX_IRQ_MUX       XIL_INTERNAL_RAM
 #define SECTION_OMETHLIB_TX_TIME            XIL_INTERNAL_RAM
+#define SECTION_TARGET_SET_INTCONT          XIL_INTERNAL_RAM
+#define SECTION_TARGET_GET_INTCONT          XIL_INTERNAL_RAM
 
 //------------------------------------------------------------------------------
 // typedef

@@ -68,6 +68,8 @@ tOplkError target_setIpAdrs(char* ifName_p, UINT32 ipAddress_p, UINT32 subnetMas
 tOplkError target_setDefaultGateway(UINT32 defaultGateway_p);
 ULONGLONG  target_getCurrentTimestamp(void);
 void       target_enableGlobalInterrupt(BYTE fEnable_p) SECTION_TARGET_GLOBAL_INT;
+void       target_setInterruptContextFlag(BOOL fEnable_p) SECTION_TARGET_SET_INTCONT;
+BOOL       target_getInterruptContextFlag(void) SECTION_TARGET_GET_INTCONT;
 UINT32     target_getTickCount(void);
 
 /* functions for mutex implementation */

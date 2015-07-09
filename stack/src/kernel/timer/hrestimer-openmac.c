@@ -41,6 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
+#include <common/target.h>
 #include <kernel/hrestimer.h>
 #include <target/openmac.h>
 #include <omethlib.h>
@@ -353,6 +354,8 @@ static void drvInterruptHandler(void* pArg_p)
 
     BENCHMARK_MOD_24_SET(4);
 
+    target_setInterruptContextFlag(TRUE);
+
     OPENMAC_TIMERIRQACK(HWTIMER_SYNC);
     OPENMAC_TIMERIRQDISABLE(HWTIMER_SYNC);
 
@@ -360,6 +363,8 @@ static void drvInterruptHandler(void* pArg_p)
     {
         instance_l.timerInfo.pfnCb(&instance_l.timerInfo.eventArg);
     }
+
+    target_setInterruptContextFlag(FALSE);
 
     BENCHMARK_MOD_24_RESET(4);
 }

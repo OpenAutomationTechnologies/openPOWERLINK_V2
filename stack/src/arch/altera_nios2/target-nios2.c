@@ -87,6 +87,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
+static BOOL fInterruptContextFlag_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -154,6 +155,41 @@ static int              iLockCount = 0;
 
 //------------------------------------------------------------------------------
 /**
+\brief    Set interrupt context flag
+
+This function enables/disables the interrupt context flag. The flag has to be
+set when the CPU enters the interrupt context. The flag has to be cleared when
+the interrupt context is left.
+
+\param  fEnable_p               TRUE = enable interrupt context flag
+                                FALSE = disable interrupt context flag
+
+\ingroup module_target
+*/
+//------------------------------------------------------------------------------
+void target_setInterruptContextFlag(BOOL fEnable_p)
+{
+    fInterruptContextFlag_l = fEnable_p;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief    Get interrupt context flag
+
+This function returns the interrupt context flag.
+
+\return The function returns the state of the interrupt context flag.
+
+\ingroup module_target
+*/
+//------------------------------------------------------------------------------
+BOOL target_getInterruptContextFlag(void)
+{
+    return fInterruptContextFlag_l;
+}
+
+//------------------------------------------------------------------------------
+/**
 \brief  Initialize target specific stuff
 
 The function initialize target specific stuff which is needed to run the
@@ -164,6 +200,7 @@ openPOWERLINK stack.
 //------------------------------------------------------------------------------
 tOplkError target_init(void)
 {
+    fInterruptContextFlag_l = FALSE;
     return kErrorOk;
 }
 
@@ -178,6 +215,7 @@ The function cleans up target specific stuff.
 //------------------------------------------------------------------------------
 tOplkError target_cleanup(void)
 {
+    fInterruptContextFlag_l = FALSE;
     return kErrorOk;
 }
 

@@ -42,6 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
+#include <common/target.h>
 #include <kernel/synctimer.h>
 #include <target/openmac.h>
 #include <omethlib.h>
@@ -975,6 +976,8 @@ static void drvInterruptHandler(void* pArg_p)
 
     UNUSED_PARAMETER(pArg_p);
 
+    target_setInterruptContextFlag(TRUE);
+
     timerHdl = instance_l.activeTimerHdl;
     if (timerHdl < TIMER_COUNT)
     {
@@ -1041,6 +1044,8 @@ static void drvInterruptHandler(void* pArg_p)
     }
 
     drvConfigureShortestTimer();
+
+    target_setInterruptContextFlag(FALSE);
 
     BENCHMARK_MOD_24_RESET(4);
 }
