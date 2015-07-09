@@ -203,20 +203,23 @@ tEdrvReleaseRxBuffer dllkframe_processFrameReceived(tEdrvRxBuffer* pRxBuffer_p)
                     pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES +
                                                           dllkInstance_g.curTxBufferOffsetCycle];
 #if (CONFIG_DLL_PRES_READY_AFTER_SOA != FALSE) || (CONFIG_DLL_PRES_READY_AFTER_SOC != FALSE)
-                    Ret = edrv_startTxBuffer(pTxBuffer);
+                    ret = edrv_startTxBuffer(pTxBuffer);
 #else
-                    pTxFrame = (tPlkFrame*)pTxBuffer->pBuffer;
-                    // update frame (NMT state, RD, RS, PR, MS, EN flags)
-                    ami_setUint8Le(&pTxFrame->data.pres.nmtStatus, (BYTE)nmtState);
-                    ami_setUint8Le(&pTxFrame->data.pres.flag2, dllkInstance_g.flag2);
-                    if (nmtState != kNmtCsOperational)
-                    {   // mark PDO as invalid in NMT state Op
-                        // $$$ reset only RD flag; set other flags appropriately
-                        ami_setUint8Le(&pTxFrame->data.pres.flag1, 0);
+                    {
+                        tPlkFrame* pTxFrame = (tPlkFrame*)pTxBuffer->pBuffer;
+
+                        // update frame (NMT state, RD, RS, PR, MS, EN flags)
+                        ami_setUint8Le(&pTxFrame->data.pres.nmtStatus, (BYTE)nmtState);
+                        ami_setUint8Le(&pTxFrame->data.pres.flag2, dllkInstance_g.flag2);
+                        if (nmtState != kNmtCsOperational)
+                        {   // mark PDO as invalid in NMT state Op
+                            // $$$ reset only RD flag; set other flags appropriately
+                            ami_setUint8Le(&pTxFrame->data.pres.flag1, 0);
+                        }
+                        // $$$ make function that updates Pres, StatusRes
+                        // send PRes frame
+                        ret = edrv_sendTxBuffer(pTxBuffer);
                     }
-                    // $$$ make function that updates Pres, StatusRes
-                    // send PRes frame
-                    Ret = edrv_sendTxBuffer(pTxBuffer);
 #endif
                 }
             }
