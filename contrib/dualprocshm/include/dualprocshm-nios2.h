@@ -90,7 +90,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DPSHM_WRITE16(base, val)        IOWR_16DIRECT((UINT32)base, 0, val)
 #define DPSHM_READ32(base)              IORD_32DIRECT((UINT32)base, 0)
 #define DPSHM_WRITE32(base, val)        IOWR_32DIRECT((UINT32)base, 0, val)
-#define DPSHM_ENABLE_INTR(fEnable)      target_enableGlobalInterrupt(fEnable)
 
 #ifdef __INT_BUS__
 

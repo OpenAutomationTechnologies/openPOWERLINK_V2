@@ -849,9 +849,6 @@ tDualprocReturn dualprocshm_acquireBuffLock(tDualprocDrvInstance pInstance_p, UI
     if (pInstance_p == NULL)
         return kDualprocInvalidParameter;
 
-    // Enter critical region
-    DPSHM_ENABLE_INTR(FALSE);
-
     dualprocshm_targetAcquireLock(&pDrvInst->pDynResTbl[id_p].memInst->lock,
                                   pDrvInst->config.procId);
 
@@ -879,9 +876,6 @@ tDualprocReturn dualprocshm_releaseBuffLock(tDualprocDrvInstance pInstance_p, UI
     tDualProcDrv*   pDrvInst = (tDualProcDrv*)pInstance_p;
 
     dualprocshm_targetReleaseLock(&pDrvInst->pDynResTbl[id_p].memInst->lock);
-
-    // Exit critical region
-    DPSHM_ENABLE_INTR(TRUE);
 
     return kDualprocSuccessful;
 }

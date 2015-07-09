@@ -74,7 +74,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DPSHM_MAKE_NONCACHEABLE(ptr)    (void*)(((unsigned long)ptr))
 #define DUALPROCSHM_MALLOC(size)        malloc(size)
 #define DUALPROCSHM_FREE(ptr)           free(ptr)
-#define DPSHM_ENABLE_INTR(fEnable)      target_enableGlobalInterrupt(fEnable)
 
 #define CALC_OFFSET(addr_p, baseAddr_p)  \
     ({                                   \

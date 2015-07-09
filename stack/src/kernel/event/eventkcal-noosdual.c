@@ -91,12 +91,14 @@ typedef struct
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static tEventkCalInstance    instance_l;        ///< Instance variable of kernel event CAL module
+static tEventkCalInstance   instance_l;        ///< Instance variable of kernel event CAL module
+static UINT8                aRxBuffer_l[sizeof(tEvent) + MAX_EVENT_ARG_SIZE];
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
 static BOOL checkForwardEventToKint(tEvent* pEvent_p);
+static BOOL eventSinkIsKernel(tEventSink eventSink_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -186,17 +188,16 @@ tOplkError eventkcal_postKernelEvent(tEvent* pEvent_p)
 {
     tOplkError    ret = kErrorOk;
 
-    if (!checkForwardEventToKint(pEvent_p)) // Forward event with direct call
+    if (target_getInterruptContextFlag() && checkForwardEventToKint(pEvent_p))
     {
-        target_enableGlobalInterrupt(FALSE);
-
-        ret = eventk_process(pEvent_p);
-
-        target_enableGlobalInterrupt(TRUE);
+        // CPU is in interrupt context and forward to kernel-internal queue
+        ret = eventkcal_postEventCircbuf(kEventQueueKInt, pEvent_p);
     }
     else
-    {   // Forward event to kernel internal queue
-        ret = eventkcal_postEventCircbuf(kEventQueueKInt, pEvent_p);
+    {
+        // CPU is not in interrupt context and kernel-internal queue post is not
+        // needed -> direct processing!
+        ret = eventk_process(pEvent_p);
     }
 
     return ret;
@@ -221,7 +222,18 @@ tOplkError eventkcal_postUserEvent(tEvent* pEvent_p)
 {
     tOplkError    ret = kErrorOk;
 
-    ret = eventkcal_postEventCircbuf(kEventQueueK2U, pEvent_p);
+    if (target_getInterruptContextFlag())
+    {
+        // CPU is in interrupt context
+        // -> Post to kernel-internal queue first
+        ret = eventkcal_postEventCircbuf(kEventQueueKInt, pEvent_p);
+    }
+    else
+    {
+        // CPU is outside of any interrupt context (background loop)
+        // -> Post to kernel-to-user queue
+        ret = eventkcal_postEventCircbuf(kEventQueueK2U, pEvent_p);
+    }
 
     return ret;
 }
@@ -237,17 +249,54 @@ This function will be called by the systems process function.
 //------------------------------------------------------------------------------
 void eventkcal_process(void)
 {
+    tOplkError          ret;
+    tEvent*             pEvent;
+    size_t              readSize = sizeof(aRxBuffer_l);
+
     if (instance_l.fInitialized == FALSE)
         return;
 
-    if (eventkcal_getEventCountCircbuf(kEventQueueU2K) > 0)
-    {
-        eventkcal_processEventCircbuf(kEventQueueU2K);
-    }
-
     if (eventkcal_getEventCountCircbuf(kEventQueueKInt) > 0)
     {
-        eventkcal_processEventCircbuf(kEventQueueKInt);
+        ret = eventkcal_getEventCircbuf(kEventQueueKInt, aRxBuffer_l, &readSize);
+
+        if (ret == kErrorOk)
+        {
+            pEvent = (tEvent*)aRxBuffer_l;
+            pEvent->eventArgSize = (readSize - sizeof(tEvent));
+
+            if (pEvent->eventArgSize > 0)
+                pEvent->eventArg.pEventArg = &aRxBuffer_l[sizeof(tEvent)];
+            else
+                pEvent->eventArg.pEventArg = NULL;
+
+            if (!eventSinkIsKernel(pEvent->eventSink))
+            {
+                // Events from the kernel-internal queue to the user layer
+                // have to be posted to the kernel-to-user queue finally.
+                ret = eventkcal_postEventCircbuf(kEventQueueK2U, pEvent);
+                if (ret != kErrorOk)
+                {
+                    tEventQueue eventQueue = kEventQueueK2U;
+                    // Forward error to api
+                    eventk_postError(kEventSourceEventk, ret,
+                                     sizeof(eventQueue), &eventQueue);
+                }
+            }
+            else
+            {
+                // Events from the kernel-internal queue to kernel event sinks
+                // can be processed directly.
+                ret = eventk_process(pEvent);
+            }
+        }
+    }
+    else
+    {
+        if (eventkcal_getEventCountCircbuf(kEventQueueU2K) > 0)
+        {
+            ret = eventkcal_processEventCircbuf(kEventQueueU2K);
+        }
     }
 }
 
@@ -283,6 +332,37 @@ static BOOL checkForwardEventToKint(tEvent* pEvent_p)
 
         default:
             return TRUE;
+    }
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Check if the given event sink is in kernel layer
+
+This function checks if the given event sink lives in the kernel layer.
+
+\param  eventSink_p     Event sink of interest
+
+\return The function returns a BOOL.
+\retval TRUE    The event sink is in kernel layer.
+\retval FALSE   The event sink is NOT in kernel layer.
+*/
+//------------------------------------------------------------------------------
+static BOOL eventSinkIsKernel(tEventSink eventSink_p)
+{
+    switch (eventSink_p)
+    {
+        case kEventSinkSync:
+        case kEventSinkNmtk:
+        case kEventSinkDllk:
+        case kEventSinkDllkCal:
+        case kEventSinkPdok:
+        case kEventSinkPdokCal:
+        case kEventSinkErrk:
+            return TRUE;
+
+        default:
+            return FALSE;
     }
 }
 

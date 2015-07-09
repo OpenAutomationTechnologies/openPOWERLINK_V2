@@ -366,8 +366,6 @@ The function enters a locked section of the circular buffer.
 //------------------------------------------------------------------------------
 void circbuf_lock(tCircBufInstance* pInstance_p)
 {
-    target_enableGlobalInterrupt(FALSE);
-
     if (pInstance_p->pCircBufArchInstance != NULL)
     {
         tCircBufHostiBuffer*    pHostifBuf = GET_QUEUE_BUF_BASE(pInstance_p->pCircBufHeader);
@@ -384,6 +382,11 @@ void circbuf_lock(tCircBufInstance* pInstance_p)
                 continue;
             }
         } while (lockValue != CIRCBUF_HOSTIF_LOCK);
+    }
+    else
+    {
+        // Global interrupt disable only for local queues
+        target_enableGlobalInterrupt(FALSE);
     }
 }
 
@@ -407,8 +410,10 @@ void circbuf_unlock(tCircBufInstance* pInstance_p)
         // Write unlock value to queue
         HOSTIF_WR8(&(pHostifBuf->lock), 0, CIRCBUF_HOSTIF_UNLOCK);
     }
-
-    target_enableGlobalInterrupt(TRUE);
+    else
+    {
+        target_enableGlobalInterrupt(TRUE);
+    }
 }
 
 //============================================================================//
