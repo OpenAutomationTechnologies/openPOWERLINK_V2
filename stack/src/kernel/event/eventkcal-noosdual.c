@@ -273,29 +273,17 @@ queue.
 //------------------------------------------------------------------------------
 static BOOL checkForwardEventToKint(tEvent* pEvent_p)
 {
-    BOOL    fRet = FALSE;
-
-    switch (pEvent_p->eventSink)
+    switch (pEvent_p->eventType)
     {
-        case kEventSinkDllk:
-            switch (pEvent_p->eventType)
-            {
-                case kEventTypeDllkFillTx:
-                    // Fill Tx events shall be forwarded by internal queue.
-                    // This enables filling async Tx frames in background.
-                    fRet = TRUE;
-                    break;
-
-                default:
-                    break;
-            }
-            break;
+        case kEventTypePdoRx:
+        case kEventTypePdokControlSync:
+        case kEventTypeDllkCycleFinish:
+        case kEventTypeSync:
+            return FALSE;
 
         default:
-            break;
+            return TRUE;
     }
-
-    return fRet;
 }
 
 /// \}
