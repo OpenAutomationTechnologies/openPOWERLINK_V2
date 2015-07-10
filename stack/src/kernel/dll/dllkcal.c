@@ -136,6 +136,11 @@ typedef struct
 
     tDllkCalStatistics      statistics;             ///< DLL CAL statistics
 
+#if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC == TRUE
+    UINT                    asyncFrameReceived;     ///< Asynchronous frames received counter
+    UINT                    asyncFrameFreed;        ///< Asynchronous frames freed counter
+#endif
+
 #if defined(CONFIG_INCLUDE_NMT_MN)
     tCircBufInstance*       pQueueIdentReq;         ///< IdentRequest queue with the CN node IDs
     tCircBufInstance*       pQueueStatusReq;        ///< StatusRequest queue with the CN node IDs
@@ -416,7 +421,11 @@ tOplkError dllkcal_process(tEvent* pEvent_p)
             pFrameInfo = (tFrameInfo*)pEvent_p->pEventArg;
             ret = dllk_releaseRxFrame(pFrameInfo->pFrame, pFrameInfo->frameSize);
             if (ret == kErrorOk)
-                instance_l.statistics.curRxFrameCount--;
+            {
+                instance_l.asyncFrameFreed++;
+
+                instance_l.statistics.curRxFrameCount = instance_l.asyncFrameReceived - instance_l.asyncFrameFreed;
+            }
             break;
 #endif
 
@@ -573,8 +582,9 @@ tOplkError dllkcal_asyncFrameReceived(tFrameInfo* pFrameInfo_p)
 #if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC == TRUE
     if (ret == kErrorOk)
     {
-        // Update statistics to track number of Rx frames in kernel-to-user queue
-        instance_l.statistics.curRxFrameCount++;
+        instance_l.asyncFrameReceived++;
+
+        instance_l.statistics.curRxFrameCount = instance_l.asyncFrameReceived - instance_l.asyncFrameFreed;
         if (instance_l.statistics.curRxFrameCount > instance_l.statistics.maxRxFrameCount)
             instance_l.statistics.maxRxFrameCount = instance_l.statistics.curRxFrameCount;
 
@@ -889,10 +899,12 @@ tOplkError dllkcal_getSoaRequest(tDllReqServiceId* pReqServiceId_p,
     UINT            count;
 
 #if (CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC == TRUE && defined(CONFIG_EDRV_ASND_DEFERRED_RX_BUFFERS))
+    UINT            rxCount = instance_l.asyncFrameReceived - instance_l.asyncFrameFreed;
+
     // At the same time another frame could be waiting in the Rx queue of the MAC,
     // which is not yet handled by the software layers. This case is considered
-    // by correcting the curRxFrameCount.
-    if (instance_l.statistics.curRxFrameCount + 1 >= CONFIG_EDRV_ASND_DEFERRED_RX_BUFFERS)
+    // by correcting the rxCount.
+    if (rxCount + 1 >= CONFIG_EDRV_ASND_DEFERRED_RX_BUFFERS)
     {
         // Edrv has no more asynchronous Rx buffers, thus, do not assign the
         // next asynchronous phase to any node. Otherwise the MAC would drop
