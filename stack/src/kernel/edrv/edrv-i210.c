@@ -622,7 +622,8 @@ static void removeOnePciDev(struct pci_dev* pPciDev_p);
 //---------------------------------------------------------------------------
 static struct pci_device_id aEdrvPciTbl[] =
 {
-    { 0x8086, 0x1533, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },   //I210
+    { 0x8086, 0x1533, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },   //I210 (copper only)
+    { 0x8086, 0x157B, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },   //I210 (Flash-less, copper only)
     { 0, }
 };
 
