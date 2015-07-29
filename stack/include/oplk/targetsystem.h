@@ -109,24 +109,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _WINCE_             (32 + 0x20000)
 
 //------------------------------------------------------------------------------
-//  definitions for function inlining
-
-#define INLINE_FUNCTION             // empty define
-#undef  INLINE_ENABLED              // disable actual inlining of functions
-#undef  INLINE_FUNCTION_DEF         // disable inlining for all compilers per default
-
-//------------------------------------------------------------------------------
 //  To determine the system, first check for used compiler
 
 #if defined (__GNUC__)
-
-// GNU C compiler supports function inlining
-#define INLINE_FUNCTION_DEF extern inline
-
-// to actually enable inlining just include the following three lines
-// #undef INLINE_FUNCTION
-// #define INLINE_FUNCTION     INLINE_FUNCTION_DEF
-// #define INLINE_ENABLED      TRUE
 
 //------------------------------------------------------------------------------
 // define target system

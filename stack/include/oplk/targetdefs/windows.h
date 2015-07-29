@@ -63,9 +63,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define UNUSED_PARAMETER(par) (void)par
 
-// MS Visual C++ compiler supports function inlining
-#define INLINE_FUNCTION_DEF __forceinline
-
 // QWORD will not be set for windows
 #ifndef QWORD
 #define QWORD unsigned long long int

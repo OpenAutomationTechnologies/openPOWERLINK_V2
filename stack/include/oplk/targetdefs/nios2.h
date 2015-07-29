@@ -66,13 +66,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define UNUSED_PARAMETER(par)   (void)par
 
-#if !defined(__OPTIMIZE__)
-//restore default: disable inlining if optimization is disabled
-#define INLINE_FUNCTION
-#undef  INLINE_ENABLED
-#undef  INLINE_FUNCTION_DEF
-#endif
-
 #ifndef NDEBUG
 #define PRINTF(...)                 printf(__VA_ARGS__)
 #else
