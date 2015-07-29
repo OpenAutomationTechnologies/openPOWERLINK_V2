@@ -61,6 +61,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CONST const             // variables mapped to ROM (i.e. flash)
 #endif
 
+#define INLINE
+
 #define UNUSED_PARAMETER(par) (void)par
 
 // QWORD will not be set for windows

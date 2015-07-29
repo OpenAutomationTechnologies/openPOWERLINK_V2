@@ -62,6 +62,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #undef ASSERTMSG
 #endif
 
+#define INLINE
+
 #define UNUSED_PARAMETER(par)   (void)par
 
 #define __func__ __FUNCTION__

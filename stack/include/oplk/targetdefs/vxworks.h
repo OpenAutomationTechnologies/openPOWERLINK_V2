@@ -60,6 +60,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define OPLKDLLEXPORT
 
+#define INLINE
+
 #define UNUSED_PARAMETER(par)   (void)par
 
 #define PRINTF(...)                      printf(__VA_ARGS__)

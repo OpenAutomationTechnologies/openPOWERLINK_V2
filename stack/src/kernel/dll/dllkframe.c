@@ -119,8 +119,8 @@ static tOplkError processReceivedAmni(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtS
 static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtState_p);
 static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* pRxBuffer_p,
                                       tNmtState nmtState_p, tEdrvReleaseRxBuffer* pReleaseRxBuffer_p);
-static tOplkError forwardRpdo(tFrameInfo* pFrameInfo_p);
-static void       postInvalidFormatError(UINT nodeId_p, tNmtState nmtState_p);
+static INLINE tOplkError forwardRpdo(tFrameInfo* pFrameInfo_p);
+static INLINE void       postInvalidFormatError(UINT nodeId_p, tNmtState nmtState_p);
 static BOOL       presFrameFormatIsInvalid(tFrameInfo* pFrameInfo_p, tDllkNodeInfo* pIntNodeInfo_p,
                                            tNmtState nodeNmtState_p);
 
