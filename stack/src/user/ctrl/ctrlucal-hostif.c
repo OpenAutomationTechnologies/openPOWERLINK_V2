@@ -237,9 +237,9 @@ tOplkError ctrlucal_executeCmd(tCtrlCmdType cmd_p, UINT16* pRetVal_p)
     hostif_setCommand(instance_l.hifInstance, hifcmd);
 
     /* wait for response */
-    for (timeout = 0; timeout < CMD_TIMEOUT_SEC; timeout++)
+    for (timeout = 0; timeout < CMD_TIMEOUT_SEC*100; timeout++)
     {
-        target_msleep(1000U);
+        target_msleep(10U);
 
         hifret = hostif_getCommand(instance_l.hifInstance, &hifcmd);
         if (hifret != kHostifSuccessful)
