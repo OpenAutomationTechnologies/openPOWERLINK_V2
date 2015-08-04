@@ -252,11 +252,6 @@
    type="conduit"
    dir="end" />
  <interface
-   name="openmac_0_mactimerout"
-   internal="openmac_0.macTimerOut"
-   type="conduit"
-   dir="end" />
- <interface
    name="hps_0_f2h_cold_reset_req"
    internal="host_0.hps_0_f2h_cold_reset_req"
    type="reset"
@@ -671,7 +666,7 @@
   <parameter name="gui_rxBufLoc" value="2" />
   <parameter name="gui_rxBufSize" value="1" />
   <parameter name="gui_rxBurstSize" value="8" />
-  <parameter name="gui_tmrCount" value="1" />
+  <parameter name="gui_tmrPulse" value="true" />
   <parameter name="gui_tmrPulseEn" value="false" />
   <parameter name="gui_tmrPulseWdt" value="10" />
   <parameter name="gui_actEn" value="false" />
@@ -943,13 +938,6 @@
    start="clk_100.clk_reset"
    end="com_mem.reset2" />
  <connection
-   kind="interrupt"
-   version="14.0"
-   start="host_0.hostif_irq_i"
-   end="openmac_0.timerIrq">
-  <parameter name="irqNumber" value="0" />
- </connection>
- <connection
    kind="reset"
    version="14.0"
    start="clk_50.clk_reset"
@@ -1079,6 +1067,13 @@
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x7000" />
   <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="interrupt"
+   version="14.0"
+   start="host_0.hostif_irq_i"
+   end="openmac_0.timerPulse">
+  <parameter name="irqNumber" value="0" />
  </connection>
  <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
  <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="1" />

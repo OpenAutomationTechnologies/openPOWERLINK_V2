@@ -299,7 +299,6 @@ architecture rtl of toplevel is
             openmac_0_smi_nPhyRst                               : out   std_logic_vector(0 downto 0);
             openmac_0_smi_clk                                   : out   std_logic_vector(0 downto 0);
             openmac_0_smi_dio                                   : inout std_logic_vector(0 downto 0)  := (others => 'X');
-            openmac_0_mactimerout_export                        : out   std_logic_vector(0 downto 0);
             host_0_hps_0_h2f_gp_gp_in                           : in    std_logic_vector(31 downto 0) := (others => 'X');
             host_0_hps_0_h2f_gp_gp_out                          : out   std_logic_vector(31 downto 0);
             host_0_hps_0_h2f_cold_reset_reset_n                 : out   std_logic;
@@ -448,7 +447,6 @@ architecture rtl of toplevel is
             openmac_0_smi_nPhyRst                 =>  PLNK_SMI_PHYRSTN,
             openmac_0_smi_clk                     =>  PLNK_SMI_CLK,
             openmac_0_smi_dio                     =>  PLNK_SMI_DIO,
-            openmac_0_mactimerout_export          =>  open,
             host_0_hps_0_h2f_gp_gp_in             =>  h2f_gp_in,
             host_0_hps_0_h2f_gp_gp_out            =>  h2f_gp_out,
             host_0_hps_0_h2f_cold_reset_reset_n   =>  h2f_cold_reset_n,

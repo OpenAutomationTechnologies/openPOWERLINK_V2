@@ -147,7 +147,7 @@ BEGIN processing_system7
  PORT S_AXI_GP0_ACLK = clk_100_0000MHz
  PORT S_AXI_HP0_ACLK = clk_100_0000MHz
  PORT FCLK_RESET0_N = processing_system7_0_FCLK_RESET0_N
- PORT IRQ_F2P = axi_openmac_0_TIMER_IRQ
+ PORT IRQ_F2P = axi_openmac_0_TIMER_PULSE_IRQ
 END
 
 BEGIN axi_interconnect
@@ -382,6 +382,7 @@ BEGIN axi_openmac
  PARAMETER gui_extraSmi = 1
  PARAMETER gui_txBufSize = 16
  PARAMETER gui_rxBufLoc = 2
+ PARAMETER gui_tmrPulse = 1
  PARAMETER C_S_AXI_MAC_PKT_BASEADDR = 0x60a00000
  PARAMETER C_S_AXI_MAC_PKT_HIGHADDR = 0x60a0ffff
  PARAMETER C_S_AXI_MAC_REG_RNG0_BASEADDR = 0x78800000
@@ -405,6 +406,7 @@ BEGIN axi_openmac
  PORT ioSmi_dio = axi_openmac_0_ioSmi_dio
  PORT MAC_IRQ = axi_openmac_0_MAC_IRQ
  PORT TIMER_IRQ = axi_openmac_0_TIMER_IRQ
+ PORT TIMER_PULSE_IRQ = axi_openmac_0_TIMER_PULSE_IRQ
  PORT iClk50 = clk_50_0000MHz
  PORT S_AXI_MAC_PKT_ACLK = clk_100_0000MHz
 END

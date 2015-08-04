@@ -289,7 +289,7 @@
  <parameter name="projectName" value="cn-single-gpio.qpf" />
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1439533833808" />
+ <parameter name="timeStamp" value="1438676423869" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk50" internal="clk50.clk_in" type="clock" dir="end" />
@@ -348,11 +348,6 @@
  <interface
    name="epcs_flash"
    internal="epcs_flash_controller.external"
-   type="conduit"
-   dir="end" />
- <interface
-   name="openmac_0_mactimerout"
-   internal="openmac_0.macTimerOut"
    type="conduit"
    dir="end" />
  <interface
@@ -569,7 +564,7 @@
   <parameter name="gui_rxBufLoc" value="2" />
   <parameter name="gui_rxBufSize" value="1" />
   <parameter name="gui_rxBurstSize" value="1" />
-  <parameter name="gui_tmrCount" value="1" />
+  <parameter name="gui_tmrPulse" value="false" />
   <parameter name="gui_tmrPulseEn" value="false" />
   <parameter name="gui_tmrPulseWdt" value="10" />
   <parameter name="gui_actEn" value="false" />

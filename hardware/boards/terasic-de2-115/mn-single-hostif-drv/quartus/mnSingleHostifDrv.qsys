@@ -234,7 +234,7 @@
  <parameter name="projectName">mn-single-hostif-drv.qpf</parameter>
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1439533327135" />
+ <parameter name="timeStamp" value="1438676907113" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk50" internal="clk50.clk_in" type="clock" dir="end" />
@@ -277,11 +277,6 @@
    type="conduit"
    dir="end" />
  <interface name="prl0" internal="prlSlave_0.prl0" type="conduit" dir="end" />
- <interface
-   name="openmac_0_mactimerout"
-   internal="openmac_0.macTimerOut"
-   type="conduit"
-   dir="end" />
  <interface
    name="pcp_0_cpu_resetrequest"
    internal="pcp_0.cpu_resetrequest"
@@ -441,7 +436,7 @@
   <parameter name="gui_rxBufLoc" value="2" />
   <parameter name="gui_rxBufSize" value="1" />
   <parameter name="gui_rxBurstSize" value="1" />
-  <parameter name="gui_tmrCount" value="1" />
+  <parameter name="gui_tmrPulse" value="true" />
   <parameter name="gui_tmrPulseEn" value="false" />
   <parameter name="gui_tmrPulseWdt" value="10" />
   <parameter name="gui_actEn" value="false" />
@@ -676,13 +671,6 @@
   <parameter name="irqNumber" value="0" />
  </connection>
  <connection
-   kind="interrupt"
-   version="13.0"
-   start="hostinterface_0.irqSync"
-   end="openmac_0.timerIrq">
-  <parameter name="irqNumber" value="0" />
- </connection>
- <connection
    kind="reset"
    version="13.0"
    start="clk50.clk_reset"
@@ -787,6 +775,13 @@
    version="13.0"
    start="pcp_0.jtag_reset"
    end="epcs_flash_controller.reset" />
+ <connection
+   kind="interrupt"
+   version="13.0"
+   start="hostinterface_0.irqSync"
+   end="openmac_0.timerPulse">
+  <parameter name="irqNumber" value="0" />
+ </connection>
  <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
  <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="1" />
 </system>

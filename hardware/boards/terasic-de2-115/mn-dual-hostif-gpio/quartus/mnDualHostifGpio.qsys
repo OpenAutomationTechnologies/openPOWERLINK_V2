@@ -342,7 +342,7 @@
  <parameter name="projectName">mn-dual-hostif-gpio.qpf</parameter>
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1439532312476" />
+ <parameter name="timeStamp" value="1438676907514" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk50" internal="clk50.clk_in" type="clock" dir="end" />
@@ -387,11 +387,6 @@
  <interface
    name="key_pio"
    internal="key_pio.external_connection"
-   type="conduit"
-   dir="end" />
- <interface
-   name="openmac_0_mactimerout"
-   internal="openmac_0.macTimerOut"
    type="conduit"
    dir="end" />
  <interface
@@ -576,7 +571,7 @@
   <parameter name="gui_rxBufLoc" value="2" />
   <parameter name="gui_rxBufSize" value="1" />
   <parameter name="gui_rxBurstSize" value="1" />
-  <parameter name="gui_tmrCount" value="1" />
+  <parameter name="gui_tmrPulse" value="true" />
   <parameter name="gui_tmrPulseEn" value="false" />
   <parameter name="gui_tmrPulseWdt" value="10" />
   <parameter name="gui_actEn" value="false" />
@@ -996,13 +991,6 @@
    version="13.0"
    start="clk25.clk_reset"
    end="openmac_0.dmaRst" />
- <connection
-   kind="interrupt"
-   version="13.0"
-   start="hostinterface_0.irqSync"
-   end="openmac_0.timerIrq">
-  <parameter name="irqNumber" value="0" />
- </connection>
  <connection kind="clock" version="13.0" start="clk50.clk" end="key_pio.clk" />
  <connection
    kind="avalon"
@@ -1203,6 +1191,13 @@
    version="13.0"
    start="pcp_0.jtag_reset"
    end="sram_0.reset" />
+ <connection
+   kind="interrupt"
+   version="13.0"
+   start="hostinterface_0.irqSync"
+   end="openmac_0.timerPulse">
+  <parameter name="irqNumber" value="0" />
+ </connection>
  <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
  <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="1" />
 </system>
