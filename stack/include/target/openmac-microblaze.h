@@ -64,7 +64,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OPENMAC_TIMERIRQENABLE(timer_p)                     Xil_Out8(OPENMAC_TIMER_BASE + OPENMAC_TIMER_OFFSET(timer_p) + 0x0, 1)
 #define OPENMAC_TIMERIRQACK(timer_p)                        Xil_Out8(OPENMAC_TIMER_BASE + OPENMAC_TIMER_OFFSET(timer_p) + 0x1, 1)
 #define OPENMAC_TIMERSETCOMPAREVALUE(timer_p, val_p)        Xil_Out32(OPENMAC_TIMER_BASE + OPENMAC_TIMER_OFFSET(timer_p) + 0x4, val_p)
-#define OPENMAC_TIMERIRQSETPULSE(timer_p, pulseWidthNs_p)   Xil_Out32(OPENMAC_TIMER_BASE + OPENMAC_TIMER_OFFSET(timer_p) + 0x8, OMETH_NS_2_TICKS(pulseWidthNs_p))
+
+#if (OPENMAC_TIMERPULSECONTROL != 0)
+#define OPENMAC_TIMERIRQSETPULSE(timer_p, pulseWidth_p)     Xil_Out32(OPENMAC_TIMER_BASE + OPENMAC_TIMER_OFFSET(timer_p) + 0x8, pulseWidth_p)
+#endif
+
 #define OPENMAC_TIMERGETTIMEVALUE()                         Xil_In32(OPENMAC_TIMER_BASE + 0xC)
 
 //------------------------------------------------------------------------------

@@ -60,6 +60,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define TIMER_SYNC_SECOND_LOSS_OF_SYNC      FALSE
 #endif
 
+#ifndef CONFIG_EXT_SYNC_PULSE_NS
+#define CONFIG_EXT_SYNC_PULSE_NS            0 // default one clock cycle pulse
+#endif
+
 //------------------------------------------------------------------------------
 // module global vars
 //------------------------------------------------------------------------------
@@ -92,6 +96,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define PROPORTIONAL_FRACTION       (1 << PROPORTIONAL_FRACTION_SHIFT)
 
 #define TIMER_DRV_MIN_TIME_DIFF     500
+
+#define EXT_SYNC_PULSE_MAX       ((1 << OPENMAC_TIMERPULSEREGWIDTH)-1)
 
 //------------------------------------------------------------------------------
 // local types
@@ -193,7 +199,10 @@ This function initializes the synchronization timer module.
 //------------------------------------------------------------------------------
 tOplkError synctimer_init(void)
 {
-    tOplkError ret = kErrorOk;
+    tOplkError  ret = kErrorOk;
+#if (OPENMAC_TIMERPULSECONTROL != 0)
+    UINT32      pulseWidth;
+#endif
 
     OPLK_MEMSET(&instance_l, 0, sizeof(instance_l));
 
@@ -203,6 +212,14 @@ tOplkError synctimer_init(void)
     OPENMAC_TIMERIRQDISABLE(HWTIMER_EXT_SYNC);
     OPENMAC_TIMERSETCOMPAREVALUE(HWTIMER_EXT_SYNC, 0);
 #endif //TIMER_USE_EXT_SYNC_INT
+
+#if (OPENMAC_TIMERPULSECONTROL != 0)
+    pulseWidth = OMETH_NS_2_TICKS(CONFIG_EXT_SYNC_PULSE_NS);
+    if (pulseWidth > EXT_SYNC_PULSE_MAX)
+        pulseWidth = EXT_SYNC_PULSE_MAX;
+
+    OPENMAC_TIMERIRQSETPULSE(HWTIMER_EXT_SYNC, pulseWidth);
+#endif
 
     ret = openmac_isrReg(kOpenmacIrqSync, drvInterruptHandler, NULL);
 
@@ -230,6 +247,10 @@ tOplkError synctimer_exit(void)
     OPENMAC_TIMERIRQDISABLE(HWTIMER_EXT_SYNC);
     OPENMAC_TIMERSETCOMPAREVALUE(HWTIMER_EXT_SYNC, 0);
 #endif //TIMER_USE_EXT_SYNC_INT
+
+#if (OPENMAC_TIMERPULSECONTROL != 0)
+    OPENMAC_TIMERIRQSETPULSE(HWTIMER_EXT_SYNC, 0);
+#endif
 
     openmac_isrReg(kOpenmacIrqSync, NULL, NULL);
 
@@ -476,51 +497,34 @@ tOplkError synctimer_stopSync(void)
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Control external synchronization interrupt
 
+This function enables/disables the external synchronization interrupt if the
+needed hardware resources are available. Otherwise the call is ignored.
+The external synchronization is used for the host processor.
+
+\param  fEnable_p       Flag determines if sync should be enabled or disabled.
+
+\ingroup module_synctimer
+*/
+//------------------------------------------------------------------------------
+void synctimer_controlExtSyncIrq(BOOL fEnable_p)
+{
 #ifdef TIMER_USE_EXT_SYNC_INT
-//------------------------------------------------------------------------------
-/**
-\brief  Enable second sync interrupt
-
-This function enables the external sync interrupt of 2nd CMP timer
-
-\param  syncIntCycle_p      Trigger external sync int every nth cycle
-\param  pulseWidth_p        Pulse width of external sync interrupt in nanoseconds.
-                            If 0 external sync int is just toggled.
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_synctimer
-*/
-//------------------------------------------------------------------------------
-void synctimer_enableExtSyncIrq(UINT32 syncIntCycle_p, UINT32 pulseWidth_p)
-{
-    instance_l.fExtSyncEnable = TRUE;
-    instance_l.syncIntCycle = syncIntCycle_p;
-
-    OPENMAC_TIMERIRQENABLE(HWTIMER_EXT_SYNC);
-    OPENMAC_TIMERIRQSETPULSE(HWTIMER_EXT_SYNC, pulseWidth_p);
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Disable second sync interrupt
-
-This function disables the external sync interrupt of 2nd CMP timer
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_synctimer
-*/
-//------------------------------------------------------------------------------
-void synctimer_disableExtSyncIrq(void)
-{
-    instance_l.fExtSyncEnable = FALSE;
-    instance_l.syncIntCycle = 0;
-
-    OPENMAC_TIMERIRQDISABLE(HWTIMER_EXT_SYNC);
-}
+    if (fEnable_p)
+    {
+        OPENMAC_TIMERIRQENABLE(HWTIMER_EXT_SYNC);
+    }
+    else
+    {
+        OPENMAC_TIMERIRQDISABLE(HWTIMER_EXT_SYNC);
+    }
+#else
+    UNUSED_PARAMETER(fEnable_p);
 #endif //TIMER_USE_EXT_SYNC_INT
+}
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //

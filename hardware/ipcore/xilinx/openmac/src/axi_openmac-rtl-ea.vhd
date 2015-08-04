@@ -182,8 +182,8 @@ entity axi_openmac is
         -----------------------------------------------------------------------
         -- MAC timer configuration
         -----------------------------------------------------------------------
-        --! Number of timers
-        gTimerCount             : natural := 2;
+        --! Enable pulse timer
+        gTimerEnablePulse       : natural := cFalse;
         --! Enable timer pulse width control
         gTimerEnablePulseWidth  : natural := cFalse;
         --! Timer pulse width register width
@@ -353,6 +353,8 @@ entity axi_openmac is
         TIMER_IRQ                   : out   std_logic;
         --! MAC interrupt
         MAC_IRQ                     : out   std_logic;
+        --! MAC TIMER pulse interrupt
+        TIMER_PULSE_IRQ             : out   std_logic;
         -----------------------------------------------------------------------
         -- Rmii Phy ports
         -----------------------------------------------------------------------
@@ -403,9 +405,7 @@ entity axi_openmac is
         -- Other ports
         -----------------------------------------------------------------------
         --! Packet activity (enabled with gEnableActivity)
-        oPktActivity                : out   std_logic;
-        --! MAC TIMER outputs
-        oMacTimerOut                : out   std_logic_vector(gTimerCount-1 downto 0)
+        oPktActivity                : out   std_logic
     );
 end axi_openmac;
 
@@ -1027,7 +1027,7 @@ begin
             gPacketBufferLocTx      => gPacketBufferLocTx,
             gPacketBufferLocRx      => gPacketBufferLocRx,
             gPacketBufferLog2Size   => gPacketBufferLog2Size,
-            gTimerCount             => gTimerCount,
+            gTimerEnablePulse       => gTimerEnablePulse,
             gTimerEnablePulseWidth  => gTimerEnablePulseWidth,
             gTimerPulseRegWidth     => gTimerPulseRegWidth
         )
@@ -1074,6 +1074,7 @@ begin
             oDma_writedata          => intf_dma.writedata,
             iDma_readdata           => intf_dma.readdata,
             oMacTimer_interrupt     => TIMER_IRQ,
+            oMacTimer_pulse         => TIMER_PULSE_IRQ,
             oMacTx_interrupt        => macTx_interrupt,
             oMacRx_interrupt        => macRx_interrupt,
             iRmii_Rx                => rmiiRx,
@@ -1089,8 +1090,7 @@ begin
             oSmi_data_outEnable     => smi_data_outEnable,
             oSmi_data_out           => smi_data_out,
             iSmi_data_in            => smi_data_in,
-            oActivity               => oPktActivity,
-            oMacTimer               => oMacTimerOut
+            oActivity               => oPktActivity
         );
 
     --! The MAC REG AXI lite IPIF converts the AXI interface to IPIF.

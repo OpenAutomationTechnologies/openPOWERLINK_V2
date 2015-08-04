@@ -10,7 +10,7 @@ proc generationCallback { instName tgtDir bspDir } {
     # Path of generate header file
     set filePath    $tgtDir
     # List of cmacros set in sopcinfo
-    set lst_name    [list PHYCNT DMAOBSERV PKTLOCTX PKTLOCRX PKTBUFSIZE TIMERCNT TIMERPULSE TIMERPULSEREGWIDTH]
+    set lst_name    [list PHYCNT DMAOBSERV PKTLOCTX PKTLOCRX PKTBUFSIZE TIMERPULSE TIMERPULSECONTROL TIMERPULSEREGWIDTH]
 
     # Get writeFile_* functions by relative path
     source "${thisFileLoc}/../../../common/util/tcl/writeFile.tcl"

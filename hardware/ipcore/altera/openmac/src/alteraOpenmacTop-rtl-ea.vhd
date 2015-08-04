@@ -102,8 +102,8 @@ entity alteraOpenmacTop is
         -----------------------------------------------------------------------
         -- MAC timer configuration
         -----------------------------------------------------------------------
-        --! Number of timers
-        gTimerCount             : natural := 2;
+        --! Enable pulse timer
+        gTimerEnablePulse       : natural := cFalse;
         --! Enable timer pulse width control
         gTimerEnablePulseWidth  : natural := cFalse;
         --! Timer pulse width register width
@@ -212,6 +212,8 @@ entity alteraOpenmacTop is
         ins_timerIrq_irq            : out   std_logic;
         --! MAC interrupt
         ins_macIrq_irq              : out   std_logic;
+        --! MAC Timer pulse interrupt
+        ins_timerPulse_irq          : out   std_logic;
         -----------------------------------------------------------------------
         -- Rmii Phy ports
         -----------------------------------------------------------------------
@@ -256,9 +258,7 @@ entity alteraOpenmacTop is
         -- Other ports
         -----------------------------------------------------------------------
         --! Packet activity (enabled with gEnableActivity)
-        coe_pktActivity         : out   std_logic;
-        --! MAC TIMER outputs
-        coe_macTimerOut         : out   std_logic_vector(gTimerCount-1 downto 0)
+        coe_pktActivity         : out   std_logic
     );
 end alteraOpenmacTop;
 
@@ -359,7 +359,7 @@ begin
         gPacketBufferLocTx      => gPacketBufferLocTx,
         gPacketBufferLocRx      => gPacketBufferLocRx,
         gPacketBufferLog2Size   => gPacketBufferLog2Size,
-        gTimerCount             => gTimerCount,
+        gTimerEnablePulse       => gTimerEnablePulse,
         gTimerEnablePulseWidth  => gTimerEnablePulseWidth,
         gTimerPulseRegWidth     => gTimerPulseRegWidth
     )
@@ -406,6 +406,7 @@ begin
         oDma_writedata          => avm_dma_writedata,
         iDma_readdata           => avm_dma_readdata,
         oMacTimer_interrupt     => ins_timerIrq_irq,
+        oMacTimer_pulse         => ins_timerPulse_irq,
         oMacTx_interrupt        => macTx_interrupt,
         oMacRx_interrupt        => macRx_interrupt,
         iRmii_Rx                => rmiiRx,
@@ -421,7 +422,6 @@ begin
         oSmi_data_outEnable     => smi_data_outEnable,
         oSmi_data_out           => smi_data_out,
         iSmi_data_in            => smi_data_in,
-        oActivity               => coe_pktActivity,
-        oMacTimer               => coe_macTimerOut
+        oActivity               => coe_pktActivity
     );
 end rtl;

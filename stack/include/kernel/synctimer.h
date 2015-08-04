@@ -74,8 +74,7 @@ tOplkError synctimer_setLossOfSyncTolerance(UINT32 lossOfSyncTolerance_p);
 tOplkError synctimer_setLossOfSyncTolerance2(UINT32 lossOfSyncTolerance2_p);
 tOplkError synctimer_syncTriggerAtTimeStamp(tTimestamp* pTimeStamp_p);
 tOplkError synctimer_stopSync(void);
-void       synctimer_enableExtSyncIrq(UINT32 syncIntCycle_p, UINT32 pulseWidth_p);
-void       synctimer_disableExtSyncIrq(void);
+void       synctimer_controlExtSyncIrq(BOOL fEnable_p);
 
 #ifdef __cplusplus
 }

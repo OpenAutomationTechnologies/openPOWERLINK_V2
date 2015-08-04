@@ -103,8 +103,8 @@ entity openmacTop is
         -----------------------------------------------------------------------
         -- MAC timer configuration
         -----------------------------------------------------------------------
-        --! Number of timers
-        gTimerCount             : natural := 2;
+        --! Enable pulse timer
+        gTimerEnablePulse       : natural := cFalse;
         --! Enable timer pulse width control
         gTimerEnablePulseWidth  : natural := cFalse;
         --! Timer pulse width register width
@@ -213,6 +213,8 @@ entity openmacTop is
         -----------------------------------------------------------------------
         --! MAC TIMER interrupt
         oMacTimer_interrupt     : out   std_logic;
+        --! MAC TIMER pulse
+        oMacTimer_pulse         : out   std_logic;
         --! MAC Tx interrupt
         oMacTx_interrupt        : out   std_logic;
         --! MAC Rx interrupt
@@ -256,9 +258,7 @@ entity openmacTop is
         -- Other ports
         -----------------------------------------------------------------------
         --! Packet activity (enabled with gEnableActivity)
-        oActivity               : out   std_logic;
-        --! MAC TIMER outputs
-        oMacTimer               : out   std_logic_vector(gTimerCount-1 downto 0)
+        oActivity               : out   std_logic
     );
 end openmacTop;
 
@@ -341,7 +341,7 @@ architecture rtl of openmacTop is
         readdata    : std_logic_vector(31 downto 0);
         macTime     : std_logic_vector(cMacTimeWidth-1 downto 0);
         interrupt   : std_logic;
-        toggle      : std_logic;
+        pulse       : std_logic;
     end record;
 
     --! openHUB port type
@@ -475,7 +475,7 @@ architecture rtl of openmacTop is
     end function macTimer_gen2ndTimer;
 
     --! MAC Timer generate second compare timer
-    constant cMacTimer_2ndTimer : boolean := macTimer_gen2ndTimer(gTimerCount);
+    constant cMacTimer_2ndTimer : boolean := (gTimerEnablePulse = cTrue);
 
     ---------------------------------------------------------------------------
     -- Memory map
@@ -635,6 +635,7 @@ begin
                                 (others => cInactivated);
 
         oMacTimer_interrupt <= inst_openmacTimer.interrupt;
+        oMacTimer_pulse     <= inst_openmacTimer.pulse;
         oMacTx_interrupt    <= not inst_openmac.nTxInterrupt;
         oMacRx_interrupt    <= not inst_openmac.nRxInterrupt;
 
@@ -650,22 +651,6 @@ begin
 
         oActivity <=    inst_activity.activity when gEnableActivity = cTrue else
                         cInactivated;
-
-        ASSIGNMACTIMER : process (
-            inst_openmacTimer
-        )
-        begin
-            for i in oMacTimer'range loop
-                if i = 0 then
-                    oMacTimer(i) <= inst_openmacTimer.interrupt;
-                elsif i = 1 then
-                    oMacTimer(i) <= inst_openmacTimer.toggle;
-                else
-                    -- unsupported timer assigned to zero
-                    oMacTimer(i) <= cInactivated;
-                end if;
-            end loop;
-        end process ASSIGNMACTIMER;
     end block TOPLEVELMAP;
 
     ---------------------------------------------------------------------------
@@ -1083,7 +1068,7 @@ begin
             oReaddata   => inst_openmacTimer.readdata,
             iMacTime    => inst_openmacTimer.macTime,
             oIrq        => inst_openmacTimer.interrupt,
-            oToggle     => inst_openmacTimer.toggle
+            oPulse      => inst_openmacTimer.pulse
         );
 
     ---------------------------------------------------------------------------
