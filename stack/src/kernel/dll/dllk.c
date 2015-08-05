@@ -796,7 +796,7 @@ tOplkError dllk_cbTimerSwitchOver(tTimerEventArg* pEventArg_p)
     TGT_DLLK_ENTER_CRITICAL_SECTION();
 
 #if CONFIG_TIMER_USE_HIGHRES != FALSE
-    if (pEventArg_p->timerHdl != dllkInstance_g.timerHdlSwitchOver)
+    if (pEventArg_p->timerHdl.handle != dllkInstance_g.timerHdlSwitchOver)
     {   // zombie callback - just exit
         goto Exit;
     }

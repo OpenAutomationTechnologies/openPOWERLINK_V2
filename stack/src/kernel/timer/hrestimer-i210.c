@@ -185,10 +185,10 @@ tOplkError hrestimer_exit(void)
         pTimerInfo = &hresTimerInstance_l.aTimerInfo[index];
         pTimerInfo->pfnCallback = NULL;
 
-        ret = edrv_stopTimer(&pTimerInfo->eventArg.timerHdl);
+        ret = edrv_stopTimer(&pTimerInfo->eventArg.timerHdl.handle);
         if (ret != kErrorOk)
             break;
-        pTimerInfo->eventArg.timerHdl = 0;
+        pTimerInfo->eventArg.timerHdl.handle = 0;
     }
     return ret;
 }
@@ -238,14 +238,14 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
         pTimerInfo = &hresTimerInstance_l.aTimerInfo[0];
         for (index = 0; index < TIMER_COUNT; index++, pTimerInfo++)
         {
-            if (pTimerInfo->eventArg.timerHdl == 0)
+            if (pTimerInfo->eventArg.timerHdl.handle == 0)
                 break;      // free structure found
         }
 
         if (index >= TIMER_COUNT)
             return kErrorTimerNoTimerCreated;    // no free structure found
 
-        pTimerInfo->eventArg.timerHdl = HDL_INIT(index);
+        pTimerInfo->eventArg.timerHdl.handle = HDL_INIT(index);
     }
     else
     {
@@ -259,8 +259,8 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
     /* increment timer handle
      * (if timer expires right after this statement, the user
      * would detect an unknown timer handle and discard it) */
-    pTimerInfo->eventArg.timerHdl = HDL_INC(pTimerInfo->eventArg.timerHdl);
-    *pTimerHdl_p = pTimerInfo->eventArg.timerHdl;
+    pTimerInfo->eventArg.timerHdl.handle = HDL_INC(pTimerInfo->eventArg.timerHdl.handle);
+    *pTimerHdl_p = pTimerInfo->eventArg.timerHdl.handle;
 
     if (fContinue_p != FALSE)
     {
@@ -283,7 +283,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
         return ret;
 
     timerFreq = (UINT32)(time_p);
-    ret = edrv_startTimer(&pTimerInfo->eventArg.timerHdl, timerFreq);
+    ret = edrv_startTimer(&pTimerInfo->eventArg.timerHdl.handle, timerFreq);
 
     return ret;
 }
@@ -322,14 +322,14 @@ tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
             return kErrorTimerInvalidHandle;       // invalid handle
 
         pTimerInfo = &hresTimerInstance_l.aTimerInfo[index];
-        if (pTimerInfo->eventArg.timerHdl != *pTimerHdl_p)
+        if (pTimerInfo->eventArg.timerHdl.handle != *pTimerHdl_p)
             return ret;     // invalid handle
     }
 
     edrv_stopTimer(pTimerHdl_p);
 
     *pTimerHdl_p = 0;
-    pTimerInfo->eventArg.timerHdl = 0;
+    pTimerInfo->eventArg.timerHdl.handle = 0;
     pTimerInfo->pfnCallback = NULL;
 
     return ret;
@@ -372,7 +372,7 @@ static void timerCallback(tTimerHdl* pTimerHdl_p)
         pTimerInfo->pfnCallback(&pTimerInfo->eventArg);
     }
 
-    if (orgTimerHdl != pTimerInfo->eventArg.timerHdl)
+    if (orgTimerHdl != pTimerInfo->eventArg.timerHdl.handle)
         return;
 
     if (pTimerInfo->fContinuously)

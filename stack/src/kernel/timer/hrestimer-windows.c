@@ -286,7 +286,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
             DEBUG_LVL_ERROR_TRACE("%s() Invalid timer index: %d\n", __func__, index);
             return kErrorTimerNoTimerCreated;
         }
-        pTimerInfo->eventArg.timerHdl = HDL_INIT(index);
+        pTimerInfo->eventArg.timerHdl.handle = HDL_INIT(index);
     }
     else
     {
@@ -301,7 +301,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
 
     // increment timer handle (if timer expires right after this statement,
     // the user would detect an unknown timer handle and discard it)
-    pTimerInfo->eventArg.timerHdl = HDL_INC(pTimerInfo->eventArg.timerHdl);
+    pTimerInfo->eventArg.timerHdl.handle = HDL_INC(pTimerInfo->eventArg.timerHdl.handle);
 
     // calculate duetime [100 ns] (negative value = relative time)
     dueTime.QuadPart = (LONGLONG)time_p / -100LL;
@@ -322,7 +322,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
     pTimerInfo->eventArg.argument.value = argument_p;
     pTimerInfo->pfnCallback = pfnCallback_p;
 
-    *pTimerHdl_p = pTimerInfo->eventArg.timerHdl;
+    *pTimerHdl_p = pTimerInfo->eventArg.timerHdl.handle;
 
     // Configure timer
     hTimer = hresTimerInstance_l.aHandle[index + HRTIMER_HDL_TIMER0];
@@ -374,7 +374,7 @@ tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
             return kErrorTimerInvalidHandle;
         }
         pTimerInfo = &hresTimerInstance_l.aTimerInfo[index];
-        if (pTimerInfo->eventArg.timerHdl != *pTimerHdl_p)
+        if (pTimerInfo->eventArg.timerHdl.handle != *pTimerHdl_p)
         {   // invalid handle
             return ret;
         }

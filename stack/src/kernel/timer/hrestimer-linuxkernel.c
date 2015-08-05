@@ -214,7 +214,7 @@ tOplkError hrestimer_exit(void)
     {
         pTimerInfo = &hresTimerInstance_l.aTimerInfo[0];
         pTimerInfo->pfnCallback = NULL;
-        pTimerInfo->eventArg.timerHdl = 0;
+        pTimerInfo->eventArg.timerHdl.handle = 0;
         /* In this case we can not just try to cancel the timer.
          * We actually have to wait until its callback function
          * has returned. */
@@ -267,13 +267,13 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
         pTimerInfo = &hresTimerInstance_l.aTimerInfo[0];
         for (index = 0; index < TIMER_COUNT; index++, pTimerInfo++)
         {
-            if (pTimerInfo->eventArg.timerHdl == 0)
+            if (pTimerInfo->eventArg.timerHdl.handle == 0)
                 break;      // free structure found
         }
         if (index >= TIMER_COUNT)
             return kErrorTimerNoTimerCreated;     // no free structure found
 
-        pTimerInfo->eventArg.timerHdl = HDL_INIT(index);
+        pTimerInfo->eventArg.timerHdl.handle = HDL_INIT(index);
     }
     else
     {
@@ -287,8 +287,8 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
     /* increment timer handle
      * (if timer expires right after this statement, the user
      * would detect an unknown timer handle and discard it) */
-    pTimerInfo->eventArg.timerHdl = HDL_INC(pTimerInfo->eventArg.timerHdl);
-    *pTimerHdl_p = pTimerInfo->eventArg.timerHdl;
+    pTimerInfo->eventArg.timerHdl.handle = HDL_INC(pTimerInfo->eventArg.timerHdl.handle);
+    *pTimerHdl_p = pTimerInfo->eventArg.timerHdl.handle;
 
     // increase too small time values
     if (fContinue_p != FALSE)
@@ -355,14 +355,14 @@ tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
         }
 
         pTimerInfo = &hresTimerInstance_l.aTimerInfo[index];
-        if (pTimerInfo->eventArg.timerHdl != *pTimerHdl_p)
+        if (pTimerInfo->eventArg.timerHdl.handle != *pTimerHdl_p)
         {   // invalid handle
             return ret;
         }
     }
 
     *pTimerHdl_p = 0;
-    pTimerInfo->eventArg.timerHdl = 0;
+    pTimerInfo->eventArg.timerHdl.handle = 0;
     pTimerInfo->pfnCallback = NULL;
 
     /*
@@ -413,13 +413,13 @@ enum hrtimer_restart timerCallback(struct hrtimer* pTimer_p)
 
     ret        = HRTIMER_NORESTART;
     pTimerInfo = container_of(pTimer_p, tHresTimerInfo, timer);
-    index      = HDL_TO_IDX(pTimerInfo->eventArg.timerHdl);
+    index      = HDL_TO_IDX(pTimerInfo->eventArg.timerHdl.handle);
     if (index >= TIMER_COUNT)
         goto Exit;      // invalid handle
 
     /* We store the timer handle before calling the callback function
      * as the timer can be modified inside it. */
-    orgTimerHdl = pTimerInfo->eventArg.timerHdl;
+    orgTimerHdl = pTimerInfo->eventArg.timerHdl.handle;
 
     if (pTimerInfo->pfnCallback != NULL)
         pTimerInfo->pfnCallback(&pTimerInfo->eventArg);
@@ -432,7 +432,7 @@ enum hrtimer_restart timerCallback(struct hrtimer* pTimer_p)
     ULONG           overruns;
 #endif
 
-        if (orgTimerHdl != pTimerInfo->eventArg.timerHdl)
+        if (orgTimerHdl != pTimerInfo->eventArg.timerHdl.handle)
         {
             /* modified timer has already been restarted */
             goto Exit;
@@ -445,7 +445,7 @@ enum hrtimer_restart timerCallback(struct hrtimer* pTimer_p)
         if (overruns > 1)
         {
             printk("hrestimer callback: Continuous timer (handle 0x%lX) had to skip %lu interval(s)!\n",
-                   pTimerInfo->eventArg.timerHdl, overruns-1);
+                   pTimerInfo->eventArg.timerHdl.handle, overruns-1);
         }
 #else
         pTimer_p->expires = ktime_add_ns(pTimer_p->expires,

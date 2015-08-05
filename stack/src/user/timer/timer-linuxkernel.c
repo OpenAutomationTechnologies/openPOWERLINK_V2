@@ -341,7 +341,7 @@ static void cbTimer(ULONG parameter_p)
     pData = (tTimeruData*)parameter_p;
 
     // call event function
-    timerEventArg.timerHdl = (tTimerHdl)pData;
+    timerEventArg.timerHdl.handle = (tTimerHdl)pData;
     OPLK_MEMCPY(&timerEventArg.argument, &pData->timerArgument.argument, sizeof(timerEventArg.argument));
 
     event.eventSink = pData->timerArgument.eventSink;
