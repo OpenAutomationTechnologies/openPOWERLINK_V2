@@ -903,7 +903,7 @@ tOplkError oplk_postUserEvent(void* pUserArg_p)
     event.netTime.nsec = 0;
     event.netTime.sec = 0;
     event.eventType = kEventTypeApiUserDef;
-    event.pEventArg = &pUserArg_p;
+    event.eventArg.pEventArg = &pUserArg_p;
     event.eventArgSize = sizeof(pUserArg_p);
 
     ret = eventu_postEvent(&event);
@@ -1225,7 +1225,7 @@ tOplkError oplk_triggerPresForward(UINT nodeId_p)
     event.netTime.nsec  = 0;
     event.netTime.sec   = 0;
     event.eventType     = kEventTypeRequPresForward;
-    event.pEventArg     = &nodeId_p;
+    event.eventArg.pEventArg = &nodeId_p;
     event.eventArgSize  = sizeof(nodeId_p);
 
     return eventu_postEvent(&event);

@@ -275,11 +275,11 @@ tOplkError nmtk_process(tEvent* pEvent_p)
     switch (pEvent_p->eventType)
     {
         case kEventTypeNmtEvent:
-            nmtEvent = *((tNmtEvent*)pEvent_p->pEventArg);
+            nmtEvent = *((tNmtEvent*)pEvent_p->eventArg.pEventArg);
             break;
 
         case kEventTypeTimer:
-            nmtEvent = (tNmtEvent)((tTimerEventArg*)pEvent_p->pEventArg)->argument.value;
+            nmtEvent = (tNmtEvent)((tTimerEventArg*)pEvent_p->eventArg.pEventArg)->argument.value;
             break;
 
         default:
@@ -306,7 +306,7 @@ tOplkError nmtk_process(tEvent* pEvent_p)
         nmtStateChange.nmtEvent = nmtEvent;
         event.eventType = kEventTypeNmtStateChange;
         OPLK_MEMSET(&event.netTime, 0x00, sizeof(event.netTime));
-        event.pEventArg = &nmtStateChange;
+        event.eventArg.pEventArg = &nmtStateChange;
         event.eventArgSize = sizeof(nmtStateChange);
 
         // inform DLLk module about state change

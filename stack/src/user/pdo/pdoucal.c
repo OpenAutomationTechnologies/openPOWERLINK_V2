@@ -147,7 +147,7 @@ tOplkError pdoucal_postPdokChannelAlloc(tPdoAllocationParam* pAllocationParam_p)
 
     Event.eventSink = kEventSinkPdokCal;
     Event.eventType = kEventTypePdokAlloc;
-    Event.pEventArg = pAllocationParam_p;
+    Event.eventArg.pEventArg = pAllocationParam_p;
     Event.eventArgSize = sizeof(*pAllocationParam_p);
 
     Ret = eventu_postEvent(&Event);
@@ -176,7 +176,7 @@ tOplkError pdoucal_postConfigureChannel(tPdoChannelConf* pChannelConf_p)
 
     Event.eventSink = kEventSinkPdokCal;
     Event.eventType = kEventTypePdokConfig;
-    Event.pEventArg = pChannelConf_p;
+    Event.eventArg.pEventArg = pChannelConf_p;
     Event.eventArgSize = sizeof(tPdoChannelConf);
     ret = eventu_postEvent(&Event);
 
@@ -208,7 +208,7 @@ tOplkError pdoucal_postSetupPdoBuffers(size_t rxPdoMemSize_p, size_t txPdoMemSiz
     pdoMemSize.txPdoMemSize = txPdoMemSize_p;
     Event.eventSink = kEventSinkPdokCal;
     Event.eventType = kEventTypePdokSetupPdoBuf;
-    Event.pEventArg = &pdoMemSize;
+    Event.eventArg.pEventArg = &pdoMemSize;
     Event.eventArgSize = sizeof(tPdoMemSize);
     Ret = eventu_postEvent(&Event);
 

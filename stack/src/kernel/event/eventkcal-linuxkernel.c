@@ -336,12 +336,12 @@ int eventkcal_postEventFromUser(ULONG arg)
             return -EIO;
 
         //TRACE("%s() allocated %d Bytes at %p\n", __func__, event.eventArgSize, pArg);
-        if (copy_from_user(pArg, (const void __user *)event.pEventArg, event.eventArgSize))
+        if (copy_from_user(pArg, (const void __user *)event.eventArg.pEventArg, event.eventArgSize))
         {
             free_pages((ULONG)pArg, order);
             return -EFAULT;
         }
-        event.pEventArg = pArg;
+        event.eventArg.pEventArg = pArg;
     }
 
     switch (event.eventSink)

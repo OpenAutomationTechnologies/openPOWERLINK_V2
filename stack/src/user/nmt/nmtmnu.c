@@ -890,7 +890,7 @@ tOplkError nmtmnu_triggerStateChange(UINT nodeId_p, tNmtNodeCommand nodeCommand_
     event.eventSink = kEventSinkNmtMnu;
     event.eventType = kEventTypeNmtMnuNodeCmd;
     OPLK_MEMSET(&event.netTime, 0x00, sizeof(event.netTime));
-    event.pEventArg = &nodeCmd;
+    event.eventArg.pEventArg = &nodeCmd;
     event.eventArgSize = sizeof(nodeCmd);
     ret = eventu_postEvent(&event);
 
@@ -1084,7 +1084,7 @@ tOplkError nmtmnu_processEvent(tEvent* pEvent_p)
         // timer event
         case kEventTypeTimer:
             {
-                tTimerEventArg*  pTimerEventArg = (tTimerEventArg*)pEvent_p->pEventArg;
+                tTimerEventArg*  pTimerEventArg = (tTimerEventArg*)pEvent_p->eventArg.pEventArg;
                 UINT             nodeId;
 
                 nodeId = (UINT)(pTimerEventArg->argument.value & NMTMNU_TIMERARG_NODE_MASK);
@@ -1189,7 +1189,7 @@ tOplkError nmtmnu_processEvent(tEvent* pEvent_p)
 
         case kEventTypeHeartbeat:
             {
-                tHeartbeatEvent* pHeartbeatEvent = (tHeartbeatEvent*)pEvent_p->pEventArg;
+                tHeartbeatEvent* pHeartbeatEvent = (tHeartbeatEvent*)pEvent_p->eventArg.pEventArg;
                 ret = processInternalEvent(pHeartbeatEvent->nodeId, pHeartbeatEvent->nmtState,
                                            pHeartbeatEvent->errorCode, kNmtMnuIntNodeEventHeartbeat);
             }
@@ -1197,7 +1197,7 @@ tOplkError nmtmnu_processEvent(tEvent* pEvent_p)
 
         case kEventTypeNmtMnuNmtCmdSent:
             {
-                tPlkFrame*          pFrame = (tPlkFrame*)pEvent_p->pEventArg;
+                tPlkFrame*          pFrame = (tPlkFrame*)pEvent_p->eventArg.pEventArg;
                 UINT                nodeId;
                 tNmtCommand         nmtCommand;
                 UINT8               bNmtState;
@@ -1313,7 +1313,7 @@ tOplkError nmtmnu_processEvent(tEvent* pEvent_p)
 
         case kEventTypeNmtMnuNodeCmd:
             {
-                tNmtMnuNodeCmd*      pNodeCmd = (tNmtMnuNodeCmd*)pEvent_p->pEventArg;
+                tNmtMnuNodeCmd*      pNodeCmd = (tNmtMnuNodeCmd*)pEvent_p->eventArg.pEventArg;
                 tNmtMnuIntNodeEvent  NodeEvent;
                 tObdSize             ObdSize;
                 UINT8                bNmtState;
@@ -1369,7 +1369,7 @@ tOplkError nmtmnu_processEvent(tEvent* pEvent_p)
         case kEventTypeNmtMnuNodeAdded:
             {
                 UINT        nodeId;
-                nodeId = *((UINT*)pEvent_p->pEventArg);
+                nodeId = *((UINT*)pEvent_p->eventArg.pEventArg);
                 ret = cbNodeAdded(nodeId);
             }
             break;
@@ -1377,7 +1377,7 @@ tOplkError nmtmnu_processEvent(tEvent* pEvent_p)
         case kEventTypeReceivedAmni:
             {
                 UINT        nodeId;
-                nodeId = *((UINT*)pEvent_p->pEventArg);
+                nodeId = *((UINT*)pEvent_p->eventArg.pEventArg);
                 ret = nmtMnuInstance_g.pfnCbNodeEvent(nodeId, kNmtNodeEventAmniReceived,
                                                       kNmtGsOff, 0, FALSE);
             }
@@ -1991,7 +1991,7 @@ static tOplkError doPreop1(tEventNmtStateChange nmtStateChange_p)
     event.eventSink = kEventSinkDllk;
     event.eventType = kEventTypeDllkStartReducedCycle;
     OPLK_MEMSET(&event.netTime, 0x00, sizeof(event.netTime));
-    event.pEventArg = NULL;
+    event.eventArg.pEventArg = NULL;
     event.eventArgSize = 0;
     ret = eventu_postEvent(&event);
     if (ret != kErrorOk)

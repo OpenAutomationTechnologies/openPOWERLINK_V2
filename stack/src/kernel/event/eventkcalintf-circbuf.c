@@ -246,7 +246,7 @@ tOplkError eventkcal_postEventCircbuf(tEventQueue eventQueue_p, tEvent* pEvent_p
     else
     {
         circError = circbuf_writeMultipleData(instance_l[eventQueue_p], pEvent_p, sizeof(tEvent),
-                                              pEvent_p->pEventArg, (ULONG)pEvent_p->eventArgSize);
+                                              pEvent_p->eventArg.pEventArg, (ULONG)pEvent_p->eventArgSize);
     }
 
     if (circError != kCircBufOk)
@@ -312,9 +312,9 @@ tOplkError eventkcal_processEventCircbuf(tEventQueue eventQueue_p)
     pEvent->eventArgSize = (readSize - sizeof(tEvent));
 
     if (pEvent->eventArgSize > 0)
-        pEvent->pEventArg = &aRxBuffer_l[eventQueue_p][sizeof(tEvent)];
+        pEvent->eventArg.pEventArg = &aRxBuffer_l[eventQueue_p][sizeof(tEvent)];
     else
-        pEvent->pEventArg = NULL;
+        pEvent->eventArg.pEventArg = NULL;
 
     /*TRACE("Process Kernel  type:%s(%d) sink:%s(%d) size:%d!\n",
            debugstr_getEventTypeStr(pEvent->eventType), pEvent->eventType,

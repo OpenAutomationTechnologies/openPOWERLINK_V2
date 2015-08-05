@@ -145,7 +145,7 @@ tOplkError dllk_process(tEvent* pEvent_p)
     switch (pEvent_p->eventType)
     {
         case kEventTypeNmtStateChange:
-            pNmtStateChange = (tEventNmtStateChange*)pEvent_p->pEventArg;
+            pNmtStateChange = (tEventNmtStateChange*)pEvent_p->eventArg.pEventArg;
             ret = processNmtStateChange(pNmtStateChange->newNmtState,
                                         pNmtStateChange->oldNmtState,
                                         pNmtStateChange->nmtEvent);
@@ -156,7 +156,7 @@ tOplkError dllk_process(tEvent* pEvent_p)
             break;
 
         case kEventTypeDllkFillTx:
-            ret = processFillTx(*((tDllAsyncReqPriority*)pEvent_p->pEventArg),
+            ret = processFillTx(*((tDllAsyncReqPriority*)pEvent_p->eventArg.pEventArg),
                                 dllkInstance_g.nmtState);
             break;
 
@@ -181,7 +181,7 @@ tOplkError dllk_process(tEvent* pEvent_p)
 
 #if defined(CONFIG_INCLUDE_PRES_FORWARD)
         case kEventTypeRequPresForward:
-            ret = requestPresForward(*((UINT*)pEvent_p->pEventArg));
+            ret = requestPresForward(*((UINT*)pEvent_p->eventArg.pEventArg));
             break;
 #endif
 
@@ -228,7 +228,7 @@ static tOplkError controlPdokcalSync(BOOL fEnable_p)
 
     event.eventSink = kEventSinkPdokCal;
     event.eventType = kEventTypePdokControlSync;
-    event.pEventArg = &fEnable;
+    event.eventArg.pEventArg = &fEnable;
     event.eventArgSize = sizeof(fEnable);
 
     return eventk_postEvent(&event);
@@ -591,7 +591,7 @@ static tOplkError processNmtEvent(tEvent* pEvent_p)
     tNmtEvent*      pNmtEvent;
     tNmtState       NmtState;
 
-    pNmtEvent = (tNmtEvent*)pEvent_p->pEventArg;
+    pNmtEvent = (tNmtEvent*)pEvent_p->eventArg.pEventArg;
 
     switch (*pNmtEvent)
     {

@@ -537,7 +537,7 @@ tOplkError dllknode_addNodeIsochronous(tDllkNodeInfo* pIntNodeInfo_p)
             event.eventSink = kEventSinkNmtMnu;
             event.eventType = kEventTypeNmtMnuNodeAdded;
             event.eventArgSize = sizeof(pIntNodeInfo_p->nodeId);
-            event.pEventArg = &pIntNodeInfo_p->nodeId;
+            event.eventArg.pEventArg = &pIntNodeInfo_p->nodeId;
             ret = eventk_postEvent(&event);
             if (ret != kErrorOk)
                 goto Exit;
@@ -874,7 +874,7 @@ tOplkError dllknode_issueLossOfPres(UINT nodeId_p)
             event.eventType = kEventTypeDllkDelNode;
             // $$$ d.k. set Event.netTime to current time
             event.eventArgSize = sizeof(nodeOpParam);
-            event.pEventArg = &nodeOpParam;
+            event.eventArg.pEventArg = &nodeOpParam;
             eventk_postEvent(&event);
         }
     }

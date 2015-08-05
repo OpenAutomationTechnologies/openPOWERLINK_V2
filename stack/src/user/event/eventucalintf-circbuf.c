@@ -285,9 +285,9 @@ tOplkError eventucal_processEventCircbuf(tEventQueue eventQueue_p)
     pEvent->eventArgSize = (readSize - sizeof(tEvent));
 
     if (pEvent->eventArgSize > 0)
-        pEvent->pEventArg = &aRxBuffer[sizeof(tEvent)];
+        pEvent->eventArg.pEventArg = &aRxBuffer[sizeof(tEvent)];
     else
-        pEvent->pEventArg = NULL;
+        pEvent->eventArg.pEventArg = NULL;
 
     ret = eventu_process(pEvent);
     return ret;
@@ -378,7 +378,7 @@ static tOplkError postEvent(tCircBufInstance* pCircBufInstance_p, tEvent* pEvent
     else
     {
         circError = circbuf_writeMultipleData(pCircBufInstance_p, pEvent_p, sizeof(tEvent),
-                                              pEvent_p->pEventArg, (ULONG)pEvent_p->eventArgSize);
+                                              pEvent_p->eventArg.pEventArg, (ULONG)pEvent_p->eventArgSize);
     }
     if (circError != kCircBufOk)
     {
