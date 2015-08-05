@@ -1,20 +1,19 @@
 /**
 ********************************************************************************
-\file   pdokcalsync-noosdual.c
+\file   timesynckcal-bsdsem.c
 
-\brief  Dual Processor PDO CAL kernel sync module
+\brief  CAL kernel timesync module using BSD semaphores
 
-This file contains an implementation for the kernel PDO CAL sync module which
-uses the dualprocshm interrupt feature for synchronisation.
+This file contains an implementation for the kernel CAL timesync module which
+uses BSD semaphores for synchronisation.
 
-The sync module is responsible to notify the user layer that new PDO data
-can be transferred.
+The sync module is responsible to synchronize the user layer.
 
-\ingroup module_pdokcal
+\ingroup module_timesynckcal
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Kalycito Infotech Private Limited
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -43,11 +42,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
-#include <common/pdo.h>
-#include <kernel/pdokcal.h>
+#include <common/oplkinc.h>
+#include <common/timesync.h>
+#include <kernel/timesynckcal.h>
 
-#include <dualprocshm.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <semaphore.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -65,6 +66,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // global function prototypes
 //------------------------------------------------------------------------------
 
+
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //
 //============================================================================//
@@ -72,7 +74,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define TARGET_SYNC_INTERRUPT_ID    1
 
 //------------------------------------------------------------------------------
 // local types
@@ -81,6 +82,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
+static sem_t*           syncSem_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -92,57 +94,40 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //------------------------------------------------------------------------------
 /**
-\brief  Initialize kernel PDO CAL sync module
+\brief  Initialize kernel CAL timesync module
 
-The function initializes the kernel PDO CAL sync module.
+The function initializes the kernel CAL timesync module.
 
 \return The function returns a tOplkError error code.
 
-\ingroup module_pdokcal
+\ingroup module_timesynckcal
 */
 //------------------------------------------------------------------------------
-tOplkError pdokcal_initSync(void)
+tOplkError timesynckcal_init(void)
 {
-    tDualprocDrvInstance    pInstance = dualprocshm_getLocalProcDrvInst();
-    tDualprocReturn         dualRet;
+    sem_unlink(TIMESYNC_SYNC_BSDSEM);
 
-    if (pInstance == NULL)
+    if ((syncSem_l = sem_open(TIMESYNC_SYNC_BSDSEM, O_CREAT, S_IRWXG, 1)) == SEM_FAILED)
     {
-        DEBUG_LVL_ERROR_TRACE("%s() couldn't get PCP dual proc driver instance\n",
-                              __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() creating sem failed!\n", __func__);
         return kErrorNoResource;
     }
-
-    dualRet = dualprocshm_enableIrq(pInstance, TARGET_SYNC_INTERRUPT_ID, FALSE);
-
-    if (dualRet != kDualprocSuccessful)
-    {
-        return kErrorNoResource;
-    }
-
     return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Clean up PDO CAL sync module
+\brief  Clean up CAL timesync module
 
-The function cleans up the PDO CAL sync module
+The function cleans up the CAL timesync module
 
-\ingroup module_pdokcal
+\ingroup module_timesynckcal
 */
 //------------------------------------------------------------------------------
-void pdokcal_exitSync(void)
+void timesynckcal_exit(void)
 {
-    tDualprocDrvInstance    pInstance = dualprocshm_getLocalProcDrvInst();
-
-    if (pInstance == NULL)
-    {
-        DEBUG_LVL_ERROR_TRACE("%s() couldn't get PCP dual proc driver instance\n",
-                              __func__);
-    }
-
-    dualprocshm_enableIrq(pInstance, TARGET_SYNC_INTERRUPT_ID, FALSE);
+    sem_close(syncSem_l);
+    sem_unlink(TIMESYNC_SYNC_BSDSEM);
 }
 
 //------------------------------------------------------------------------------
@@ -153,28 +138,12 @@ The function sends a sync event.
 
 \return The function returns a tOplkError error code.
 
-\ingroup module_pdokcal
+\ingroup module_timesynckcal
 */
 //------------------------------------------------------------------------------
-tOplkError pdokcal_sendSyncEvent(void)
+tOplkError timesynckcal_sendSyncEvent(void)
 {
-    tDualprocDrvInstance    pInstance = dualprocshm_getLocalProcDrvInst();
-    tDualprocReturn         dualRet;
-
-    if (pInstance == NULL)
-    {
-        DEBUG_LVL_ERROR_TRACE("%s() couldn't get PCP dual proc driver instance\n",
-                              __func__);
-        return kErrorNoResource;
-    }
-
-    dualRet = dualprocshm_setIrq(pInstance, TARGET_SYNC_INTERRUPT_ID, TRUE);
-
-    if (dualRet != kDualprocSuccessful)
-    {
-        return kErrorNoResource;
-    }
-
+    sem_post(syncSem_l);
     return kErrorOk;
 }
 
@@ -184,32 +153,16 @@ tOplkError pdokcal_sendSyncEvent(void)
 
 The function enables sync events.
 
-\param  fEnable_p               enable/disable sync event
+\param  fEnable_p               Enable/disable sync event
 
 \return The function returns a tOplkError error code.
 
-\ingroup module_pdokcal
+\ingroup module_timesynckcal
 */
 //------------------------------------------------------------------------------
-tOplkError pdokcal_controlSync(BOOL fEnable_p)
+tOplkError timesynckcal_controlSync(BOOL fEnable_p)
 {
-    tDualprocDrvInstance    pInstance = dualprocshm_getLocalProcDrvInst();
-    tDualprocReturn         dualRet;
-
-    if (pInstance == NULL)
-    {
-        DEBUG_LVL_ERROR_TRACE("%s() couldn't get PCP dual proc driver instance\n",
-                              __func__);
-        return kErrorNoResource;
-    }
-
-    dualRet = dualprocshm_enableIrq(pInstance, TARGET_SYNC_INTERRUPT_ID, fEnable_p);
-
-    if (dualRet != kDualprocSuccessful)
-    {
-        return kErrorNoResource;
-    }
-
+    UNUSED_PARAMETER(fEnable_p);
     return kErrorOk;
 }
 

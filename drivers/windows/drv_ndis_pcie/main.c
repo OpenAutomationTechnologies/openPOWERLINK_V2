@@ -493,7 +493,7 @@ NTSTATUS powerlinkIoctl(PDEVICE_OBJECT pDeviceObject_p, PIRP pIrp_p)
             break;
         }
 
-        case PLK_CMD_PDO_SYNC:
+        case PLK_CMD_TIMESYNC_SYNC:
         {
             if (!pIrp_p->Cancel)
             {

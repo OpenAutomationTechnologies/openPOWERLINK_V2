@@ -1,13 +1,12 @@
 /**
 ********************************************************************************
-\file   pdokcalsync-hostif.c
+\file   timesyncucal-null.c
 
-\brief  Host interface PDO CAL kernel sync module
+\brief  Empty sync implementation for the user CAL timesync module
 
-The sync module is responsible to notify the user layer that new PDO data
-can be transfered.
+This file contains an empty sync implementation for the user CAL timesync module.
 
-\ingroup module_pdokcal
+\ingroup module_timesyncucal
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -41,9 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-#include <kernel/pdokcal.h>
-
-#include <hostiflib.h>
+#include <user/timesyncucal.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -77,12 +74,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static tHostifInstance pHifInstance_l;
+static tSyncCb      pfnSyncCb_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError enableSyncIrq(BOOL fEnable_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -90,117 +86,85 @@ static tOplkError enableSyncIrq(BOOL fEnable_p);
 
 //------------------------------------------------------------------------------
 /**
-\brief  Initialize kernel PDO CAL sync module
+\brief  Initialize user CAL timesync module
 
-The function initializes the kernel PDO CAL sync module.
+The function initializes the user CAL timesync module
 
-\return The function returns a tOplkError error code.
-
-\ingroup module_pdokcal
-*/
-//------------------------------------------------------------------------------
-tOplkError pdokcal_initSync(void)
-{
-    pHifInstance_l = hostif_getInstance(0);
-
-    if (pHifInstance_l == NULL)
-    {
-        DEBUG_LVL_ERROR_TRACE("%s: Could not find hostif instance!\n", __func__);
-        return kErrorNoResource;
-    }
-
-    return enableSyncIrq(FALSE);
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Clean up PDO CAL sync module
-
-The function cleans up the PDO CAL sync module
-
-\ingroup module_pdokcal
-*/
-//------------------------------------------------------------------------------
-void pdokcal_exitSync(void)
-{
-    if (pHifInstance_l == NULL)
-    {
-        DEBUG_LVL_ERROR_TRACE("%s: Could not find hostif instance!\n", __func__);
-        return;
-    }
-
-    enableSyncIrq(FALSE);
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Send a sync event
-
-The function sends a sync event.
+\param  pfnSyncCb_p             Function that is called in case of sync event
 
 \return The function returns a tOplkError error code.
 
-\ingroup module_pdokcal
+\ingroup module_timesyncucal
 */
 //------------------------------------------------------------------------------
-tOplkError pdokcal_sendSyncEvent(void)
+tOplkError timesyncucal_init(tSyncCb pfnSyncCb_p)
 {
+    pfnSyncCb_l = pfnSyncCb_p;
     return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Enable sync events
+\brief  Clean up user CAL timesync module
 
-The function enables sync events.
+The function cleans up the user CAL timesync module
 
-\param  fEnable_p               enable/disable sync event
+\ingroup module_timesyncucal
+*/
+//------------------------------------------------------------------------------
+void timesyncucal_exit(void)
+{
+
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Wait for a sync event
+
+The function waits for a sync event.
+
+\param  timeout_p       Specifies a timeout in microseconds. If 0 it waits
+                        forever.
+
+\return The function returns a tOplkError error code.
+\retval kErrorOk              Successfully received sync event
+\retval kErrorGeneralError    Error while waiting on sync event
+
+\ingroup module_timesyncucal
+*/
+//------------------------------------------------------------------------------
+tOplkError timesyncucal_waitSyncEvent(ULONG timeout_p)
+{
+    UNUSED_PARAMETER(timeout_p);
+
+    return kErrorOk;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Call sync callback function
+
+The function calls the registered sync callback function
 
 \return The function returns a tOplkError error code.
 
-\ingroup module_pdokcal
+\ingroup module_timesyncucal
 */
 //------------------------------------------------------------------------------
-tOplkError pdokcal_controlSync(BOOL fEnable_p)
+tOplkError timesyncucal_callSyncCb(void)
 {
-    if (pHifInstance_l == NULL)
+    if (pfnSyncCb_l != NULL)
     {
-        DEBUG_LVL_ERROR_TRACE("%s: Could not find hostif instance!\n", __func__);
-        return kErrorNoResource;
+        return pfnSyncCb_l();
     }
-
-    return enableSyncIrq(fEnable_p);
+    return kErrorOk;
 }
+
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
 /// \name Private Functions
 /// \{
-
-//------------------------------------------------------------------------------
-/**
-\brief  Enable sync interrupt source in host interface IP-Core
-
-\param  fEnable_p               enable/disable sync interrupt source
-
-\return The function returns a tOplkError error code.
-*/
-//------------------------------------------------------------------------------
-static tOplkError enableSyncIrq(BOOL fEnable_p)
-{
-    tHostifReturn hifRet;
-
-    hifRet = hostif_irqSourceEnable(pHifInstance_l, kHostifIrqSrcSync, fEnable_p);
-
-    if (hifRet != kHostifSuccessful)
-    {
-        DEBUG_LVL_ERROR_TRACE("%s irq not possible (%d)!\n",
-                   fEnable_p ? "enable" : "disable", hifRet);
-        return kErrorNoResource;
-    }
-
-    return kErrorOk;
-}
 
 ///\}

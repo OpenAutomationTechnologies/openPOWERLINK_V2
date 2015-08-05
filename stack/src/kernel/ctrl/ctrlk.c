@@ -52,6 +52,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/errhndk.h>
 #include <kernel/nmtk.h>
 #include <kernel/pdok.h>
+#include <kernel/timesynck.h>
 
 #include "../dll/dllkframe.h"
 
@@ -484,7 +485,10 @@ static tOplkError initStack(void)
         return ret;
 #endif
 
-    dllk_regSyncHandler(pdok_sendSyncEvent);
+    if ((ret = timesynck_init()) != kErrorOk)
+        return ret;
+
+    dllk_regSyncHandler(timesynck_sendSyncEvent);
 
     // initialize dllkcal module
     if ((ret = dllkcal_init()) != kErrorOk)
@@ -545,6 +549,8 @@ static tOplkError shutdownStack(void)
     dllkcal_exit();
 
     eventk_exit();
+
+    timesynck_exit();
 
 #if defined (CONFIG_INCLUDE_NMT_MN)
     // DLL and events are shutdown, now it's save to shutdown edrvcyclic

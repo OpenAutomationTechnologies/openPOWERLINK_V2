@@ -1,17 +1,16 @@
 /**
 ********************************************************************************
-\file   pdoucalsync-noosdual.c
+\file   timesynckcal-hostif.c
 
-\brief  Dual Processor PDO CAL user sync module
+\brief  Host interface CAL kernel timesync module
 
-This file contains the dualprocshm sync implementation for the PDO user CAL
-module.
+The sync module is responsible to synchronize the user layer.
 
-\ingroup module_pdoucal
+\ingroup module_timesynckcal
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014 Kalycito Infotech Private Limited
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -40,11 +39,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
-#include <common/pdo.h>
-#include <user/pdoucal.h>
+#include <common/oplkinc.h>
+#include <kernel/timesynckcal.h>
 
-#include <dualprocshm.h>
+#include <hostiflib.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -62,6 +60,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // global function prototypes
 //------------------------------------------------------------------------------
 
+
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //
 //============================================================================//
@@ -69,7 +68,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define TARGET_SYNC_INTERRUPT_ID    1
 
 //------------------------------------------------------------------------------
 // local types
@@ -78,12 +76,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static tSyncCb    pfnSyncCb_l = NULL;
+static tHostifInstance pHifInstance_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static void irqSyncCb(void);
+static tOplkError enableSyncIrq(BOOL fEnable_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -91,84 +89,86 @@ static void irqSyncCb(void);
 
 //------------------------------------------------------------------------------
 /**
-\brief  Initialize PDO user CAL sync module
+\brief  Initialize kernel CAL timesync module
 
-The function initializes the PDO user CAL sync module
-
-\param  pfnSyncCb_p             Function that is called in case of sync event
+The function initializes the kernel CAL timesync module.
 
 \return The function returns a tOplkError error code.
 
-\ingroup module_pdoucal
+\ingroup module_timesynckcal
 */
 //------------------------------------------------------------------------------
-tOplkError pdoucal_initSync(tSyncCb pfnSyncCb_p)
+tOplkError timesynckcal_init(void)
 {
-    tDualprocReturn         dualRet;
-    tDualprocDrvInstance    pInstance = dualprocshm_getLocalProcDrvInst();
+    pHifInstance_l = hostif_getInstance(0);
 
-    if (pInstance == NULL)
+    if (pHifInstance_l == NULL)
     {
-        DEBUG_LVL_ERROR_TRACE("%s() couldn't get Host dual proc driver instance\n",
-                              __func__);
+        DEBUG_LVL_ERROR_TRACE("%s: Could not find hostif instance!\n", __func__);
         return kErrorNoResource;
     }
 
-    dualRet = dualprocshm_registerHandler(pInstance, TARGET_SYNC_INTERRUPT_ID, irqSyncCb);
-    if (dualRet != kDualprocSuccessful)
-    {
-        DEBUG_LVL_ERROR_TRACE("%s: Enable irq not possible!\n", __func__);
-        return kErrorNoResource;
-    }
-
-    pfnSyncCb_l = pfnSyncCb_p;
-
-    return kErrorOk;
+    return enableSyncIrq(FALSE);
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Cleanup PDO user CAL sync module
+\brief  Clean up CAL timesync module
 
-The function cleans up the PDO user CAL sync module
+The function cleans up the CAL timesync module
 
-\ingroup module_pdoucal
+\ingroup module_timesynckcal
 */
 //------------------------------------------------------------------------------
-void pdoucal_exitSync(void)
+void timesynckcal_exit(void)
 {
-    tDualprocDrvInstance    pInstance = dualprocshm_getLocalProcDrvInst();
-
-    if (pInstance == NULL)
+    if (pHifInstance_l == NULL)
     {
-        DEBUG_LVL_ERROR_TRACE("%s() couldn't get Host dual proc driver instance\n",
-                              __func__);
+        DEBUG_LVL_ERROR_TRACE("%s: Could not find hostif instance!\n", __func__);
         return;
     }
 
-    dualprocshm_registerHandler(pInstance, TARGET_SYNC_INTERRUPT_ID, NULL);
+    enableSyncIrq(FALSE);
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Wait for a sync event
+\brief  Send a sync event
 
-The function waits for a sync event.
-
-\param  timeout_p       Specifies a timeout in microseconds. If 0 it waits
-                        forever.
+The function sends a sync event.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk              Successfully received sync event
-\retval kErrorGeneralError    Error while waiting on sync event
 
-\ingroup module_pdoucal
+\ingroup module_timesynckcal
 */
 //------------------------------------------------------------------------------
-tOplkError pdoucal_waitSyncEvent(ULONG timeout_p)
+tOplkError timesynckcal_sendSyncEvent(void)
 {
-    UNUSED_PARAMETER(timeout_p);
     return kErrorOk;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Enable sync events
+
+The function enables sync events.
+
+\param  fEnable_p               Enable/disable sync event
+
+\return The function returns a tOplkError error code.
+
+\ingroup module_timesynckcal
+*/
+//------------------------------------------------------------------------------
+tOplkError timesynckcal_controlSync(BOOL fEnable_p)
+{
+    if (pHifInstance_l == NULL)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s: Could not find hostif instance!\n", __func__);
+        return kErrorNoResource;
+    }
+
+    return enableSyncIrq(fEnable_p);
 }
 
 //============================================================================//
@@ -176,17 +176,30 @@ tOplkError pdoucal_waitSyncEvent(ULONG timeout_p)
 //============================================================================//
 /// \name Private Functions
 /// \{
+
 //------------------------------------------------------------------------------
 /**
-\brief  Synchronization callback
+\brief  Enable sync interrupt source in host interface IP-Core
 
-This function is called for synchronization by the dualprocshm instance.
+\param  fEnable_p               enable/disable sync interrupt source
 
+\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static void irqSyncCb(void)
+static tOplkError enableSyncIrq(BOOL fEnable_p)
 {
-    pfnSyncCb_l();
+    tHostifReturn hifRet;
+
+    hifRet = hostif_irqSourceEnable(pHifInstance_l, kHostifIrqSrcSync, fEnable_p);
+
+    if (hifRet != kHostifSuccessful)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s irq not possible (%d)!\n",
+                   fEnable_p ? "enable" : "disable", hifRet);
+        return kErrorNoResource;
+    }
+
+    return kErrorOk;
 }
 
 ///\}

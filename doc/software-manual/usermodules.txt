@@ -328,3 +328,22 @@ modules like the NMT module for time triggered tasks.
 \ingroup user_layer
 */
 //------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+\defgroup module_timesyncu timesyncu
+
+\brief User timesync module
+
+The user timesync module is in charge of handling the time synchronization of the
+application to the POWERLINK network. It is responsible for notifying the
+application at the configured synchronization point by using the communication
+abstraction layer module (timesync CAL).
+
+\see module_timesynck
+\see module_timesyncucal
+\see module_timesynckcal
+
+\ingroup user_layer
+*/
+//------------------------------------------------------------------------------

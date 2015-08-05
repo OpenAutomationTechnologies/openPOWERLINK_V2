@@ -1,16 +1,17 @@
 /**
 ********************************************************************************
-\file   pdoucalsync-hostif.c
+\file   timesyncucal-winioctl.c
 
-\brief  Host interface sync implementation for the PDO user CAL module
+\brief  Sync implementation for the user CAL timesync module using Windows IOCTL
 
-This file contains the hostif sync implementation for the PDO user CAL module.
+This files implements the user CAL timesync module for synchronization using
+Windows IOCTL for communication between user and kernel layer of the stack.
 
-\ingroup module_pdoucal
+\ingroup module_timesyncucal
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -39,10 +40,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <common/oplkinc.h>
-#include <user/pdoucal.h>
+#include <oplk/oplkinc.h>
+#include <user/timesyncucal.h>
+#include <user/ctrlucal.h>
 
-#include <hostiflib.h>
+#include <common/driver.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -60,7 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // global function prototypes
 //------------------------------------------------------------------------------
 
-
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //
 //============================================================================//
@@ -72,16 +73,26 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
+/**
+\brief Local instance for PDO synchronization module
+
+The structure holds the global parameters for PDO synchronization module.
+*/
+typedef struct
+{
+    OPLK_FILE_HANDLE    hGlobalFileHandle;        ///< Global file handle to POWERLINK driver
+    HANDLE              hSyncFileHandle;          ///< File handle to driver for synchronization
+    BOOL                fIntialized;              ///< Flag to mark module initialization
+} tTimesyncuCalInstance;
 
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static tSyncCb pfnSyncCb_l = NULL;
+static tTimesyncuCalInstance timesyncuInstance_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static void hostifIrqSyncCb(void* pArg_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -89,63 +100,72 @@ static void hostifIrqSyncCb(void* pArg_p);
 
 //------------------------------------------------------------------------------
 /**
-\brief  Initialize PDO user CAL sync module
+\brief  Initialize user CAL timesync module
 
-The function initializes the PDO user CAL sync module
+The function initializes the user CAL timesync module
 
 \param  pfnSyncCb_p             Function that is called in case of sync event
 
 \return The function returns a tOplkError error code.
 
-\ingroup module_pdoucal
+\ingroup module_timesyncucal
 */
 //------------------------------------------------------------------------------
-tOplkError pdoucal_initSync(tSyncCb pfnSyncCb_p)
+tOplkError timesyncucal_init(tSyncCb pfnSyncCb_p)
 {
-    tHostifReturn hifRet;
-    tHostifInstance pHifInstance = hostif_getInstance(0);
+    UINT    errNum = 0;
 
-    if (pHifInstance == NULL)
+    UNUSED_PARAMETER(pfnSyncCb_p);
+
+    timesyncuInstance_l.hGlobalFileHandle = ctrlucal_getFd();
+    timesyncuInstance_l.hSyncFileHandle = CreateFile(PLK_DEV_FILE,                        // Name of the NT "device" to open
+                                                     GENERIC_READ | GENERIC_WRITE,        // Access rights requested
+                                                     FILE_SHARE_READ | FILE_SHARE_WRITE,  // Share access - NONE
+                                                     NULL,                                // Security attributes - not used!
+                                                     OPEN_EXISTING,                       // Device must exist to open it.
+                                                     FILE_ATTRIBUTE_NORMAL,               // Open for overlapped I/O
+                                                     NULL);
+
+    if (timesyncuInstance_l.hSyncFileHandle == INVALID_HANDLE_VALUE)
     {
-        DEBUG_LVL_ERROR_TRACE("%s: Could not find hostif instance!\n", __func__);
-        return kErrorNoResource;
+        errNum = GetLastError();
+
+        if (!(errNum == ERROR_FILE_NOT_FOUND ||
+              errNum == ERROR_PATH_NOT_FOUND))
+        {
+            DEBUG_LVL_ERROR_TRACE("%s() createFile failed!  ERROR_FILE_NOT_FOUND = %d\n",
+                                  __func__, errNum);
+            return kErrorNoResource;
+        }
     }
 
-    hifRet = hostif_irqRegHdl(pHifInstance, kHostifIrqSrcSync, hostifIrqSyncCb);
-    if (hifRet != kHostifSuccessful)
-    {
-        DEBUG_LVL_ERROR_TRACE("%s: Enable irq not possible!\n", __func__);
-        return kErrorNoResource;
-    }
-
-    pfnSyncCb_l = pfnSyncCb_p;
-
+    timesyncuInstance_l.fIntialized = TRUE;
     return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Clean up PDO user CAL sync module
+\brief  Clean up user CAL timesync module
 
-The function cleans up the PDO user CAL sync module
+The function cleans up the user CAL timesync module
+
+\ingroup module_timesyncucal
 */
 //------------------------------------------------------------------------------
-void pdoucal_exitSync(void)
+void timesyncucal_exit(void)
 {
-    tHostifReturn hifRet;
-    tHostifInstance pHifInstance = hostif_getInstance(0);
+    ULONG    bytesReturned;
 
-    if (pHifInstance == NULL)
+    // Clean resources acquired in kernel driver for synchronization.
+    if (!DeviceIoControl(timesyncuInstance_l.hGlobalFileHandle, PLK_CMD_CLEAN,
+                         0, 0, 0, 0, &bytesReturned, NULL))
     {
-        DEBUG_LVL_ERROR_TRACE("%s: Could not find hostif instance!\n", __func__);
-        return;
+        DEBUG_LVL_ERROR_TRACE("%s():Error in IOCTL %d\n", __func__, GetLastError());
     }
 
-    hifRet = hostif_irqRegHdl(pHifInstance, kHostifIrqSrcSync, NULL);
-    if (hifRet != kHostifSuccessful)
-    {
-        DEBUG_LVL_ERROR_TRACE("%s: Disable irq not possible (%d)!\n", __func__, hifRet);
-    }
+    CloseHandle(timesyncuInstance_l.hSyncFileHandle);
+
+    timesyncuInstance_l.fIntialized = FALSE;
 }
 
 //------------------------------------------------------------------------------
@@ -160,11 +180,25 @@ The function waits for a sync event.
 \return The function returns a tOplkError error code.
 \retval kErrorOk              Successfully received sync event
 \retval kErrorGeneralError    Error while waiting on sync event
+
+\ingroup module_timesyncucal
 */
 //------------------------------------------------------------------------------
-tOplkError pdoucal_waitSyncEvent(ULONG timeout_p)
+tOplkError timesyncucal_waitSyncEvent(ULONG timeout_p)
 {
-    UNUSED_PARAMETER(timeout_p);
+    ULONG    bytesReturned;
+
+    if (!timesyncuInstance_l.fIntialized)
+        return kErrorNoResource;
+
+    if (!DeviceIoControl(timesyncuInstance_l.hSyncFileHandle, PLK_CMD_TIMESYNC_SYNC,
+                         &timeout_p, sizeof(ULONG),
+                         0, 0, &bytesReturned, NULL))
+    {
+        DEBUG_LVL_ERROR_TRACE("%s():Error in IOCTL %d\n", __func__, GetLastError());
+        return kErrorGeneralError;
+    }
+
     return kErrorOk;
 }
 
@@ -174,21 +208,4 @@ tOplkError pdoucal_waitSyncEvent(ULONG timeout_p)
 /// \name Private Functions
 /// \{
 
-//------------------------------------------------------------------------------
-/**
-\brief  Synchronization callback called by Host Interface library
-
-\param  pArg_p                  Argument pointer provides hostif instance
-*/
-//------------------------------------------------------------------------------
-static void hostifIrqSyncCb(void* pArg_p)
-{
-    UNUSED_PARAMETER(pArg_p);
-
-    if (pfnSyncCb_l != NULL)
-    {
-        pfnSyncCb_l();
-    }
-}
-
-///\}
+/// \}

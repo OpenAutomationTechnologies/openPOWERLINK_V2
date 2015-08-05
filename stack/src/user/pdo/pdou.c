@@ -206,14 +206,12 @@ static tOplkError copyVarFromPdo(BYTE* pPayload_p, tPdoMappObject* pMappObject_p
 
 The function initializes the PDO user module.
 
-\param  pfnSyncCb_p             function that is called in case of sync event
-
 \return The function returns a tOplkError error code.
 
 \ingroup module_pdou
 **/
 //------------------------------------------------------------------------------
-tOplkError pdou_init(tSyncCb pfnSyncCb_p)
+tOplkError pdou_init(void)
 {
     tOplkError          ret;
 
@@ -224,7 +222,7 @@ tOplkError pdou_init(tSyncCb pfnSyncCb_p)
     if (target_createMutex("/pdoMutex", &pdouInstance_g.lockMutex) != kErrorOk)
         return kErrorNoFreeInstance;
 
-    ret = pdoucal_init(pfnSyncCb_p);
+    ret = pdoucal_init();
     pdouInstance_g.fInitialized = TRUE;
 
     return ret;

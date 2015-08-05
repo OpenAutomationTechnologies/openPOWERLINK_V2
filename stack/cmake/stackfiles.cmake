@@ -100,6 +100,7 @@ SET(USER_SOURCES
     ${USER_SOURCE_DIR}/sdo/sdoseq.c
     ${USER_SOURCE_DIR}/sdo/sdoasnd.c
     ${USER_SOURCE_DIR}/sdo/sdoudp.c
+    ${USER_SOURCE_DIR}/timesync/timesyncu.c
     ${USER_SOURCE_DIR}/errhnd/errhndu.c
     ${USER_SOURCE_DIR}/ctrl/ctrlu.c
     )
@@ -215,31 +216,31 @@ SET(EVENT_UCAL_WINDOWSPCIE_SOURCES
 # User PDO CAL sources
 SET(PDO_UCAL_LOCAL_SOURCES
     ${USER_SOURCE_DIR}/pdo/pdoucalmem-local.c
-    ${USER_SOURCE_DIR}/pdo/pdoucalsync-null.c
+    ${USER_SOURCE_DIR}/timesync/timesyncucal-null.c
     )
 
 SET(PDO_UCAL_POSIX_SOURCES
     ${USER_SOURCE_DIR}/pdo/pdoucalmem-posixshm.c
-    ${USER_SOURCE_DIR}/pdo/pdoucalsync-bsdsem.c
+    ${USER_SOURCE_DIR}/timesync/timesyncucal-bsdsem.c
     )
 
 SET(PDO_UCAL_LINUXMMAPIOCTL_SOURCES
-    ${USER_SOURCE_DIR}/pdo/pdoucalsync-ioctl.c
+    ${USER_SOURCE_DIR}/timesync/timesyncucal-ioctl.c
     ${USER_SOURCE_DIR}/pdo/pdoucalmem-linuxmmap.c
     )
 
 SET(PDO_UCAL_HOSTIF_SOURCES
-    ${USER_SOURCE_DIR}/pdo/pdoucalsync-hostif.c
+    ${USER_SOURCE_DIR}/timesync/timesyncucal-hostif.c
     ${USER_SOURCE_DIR}/pdo/pdoucalmem-hostif.c
     )
 
 SET(PDO_UCAL_DUALPROCSHM_SOURCES
     ${USER_SOURCE_DIR}/pdo/pdoucalmem-noosdual.c
-    ${USER_SOURCE_DIR}/pdo/pdoucalsync-noosdual.c
+    ${USER_SOURCE_DIR}/timesync/timesyncucal-noosdual.c
     )
 
 SET(PDO_UCAL_WINDOWSMMAPIOCTL_SOURCES
-    ${USER_SOURCE_DIR}/pdo/pdoucalsync-winioctl.c
+    ${USER_SOURCE_DIR}/timesync/timesyncucal-winioctl.c
     ${USER_SOURCE_DIR}/pdo/pdoucalmem-winioctl.c
     )
 
@@ -264,6 +265,7 @@ SET(KERNEL_SOURCES
     ${KERNEL_SOURCE_DIR}/pdo/pdokcal.c
     ${KERNEL_SOURCE_DIR}/pdo/pdokcal-triplebufshm.c
     ${KERNEL_SOURCE_DIR}/pdo/pdoklut.c
+    ${KERNEL_SOURCE_DIR}/timesync/timesynck.c
     ${KERNEL_SOURCE_DIR}/errhnd/errhndk.c
     ${KERNEL_SOURCE_DIR}/ctrl/ctrlk.c
     ${KERNEL_SOURCE_DIR}/led/ledk.c
@@ -362,27 +364,27 @@ SET(EVENT_KCAL_DUALPROCSHM_SOURCES
 
 SET(PDO_KCAL_LOCAL_SOURCES
     ${KERNEL_SOURCE_DIR}/pdo/pdokcalmem-local.c
-    ${KERNEL_SOURCE_DIR}/pdo/pdokcalsync-null.c
+    ${KERNEL_SOURCE_DIR}/timesync/timesynckcal-null.c
     )
 
 SET(PDO_KCAL_POSIXMEM_SOURCES
     ${KERNEL_SOURCE_DIR}/pdo/pdokcalmem-posixshm.c
-    ${KERNEL_SOURCE_DIR}/pdo/pdokcalsync-bsdsem.c
+    ${KERNEL_SOURCE_DIR}/timesync/timesynckcal-bsdsem.c
     )
 
 SET(PDO_KCAL_LINUXKERNEL_SOURCES
     ${KERNEL_SOURCE_DIR}/pdo/pdokcalmem-linuxkernel.c
-    ${KERNEL_SOURCE_DIR}/pdo/pdokcalsync-linuxkernel.c
+    ${KERNEL_SOURCE_DIR}/timesync/timesynckcal-linuxkernel.c
     )
 
 SET(PDO_KCAL_HOSTIF_SOURCES
     ${KERNEL_SOURCE_DIR}/pdo/pdokcalmem-hostif.c
-    ${KERNEL_SOURCE_DIR}/pdo/pdokcalsync-hostif.c
+    ${KERNEL_SOURCE_DIR}/timesync/timesynckcal-hostif.c
     )
 
 SET(PDO_KCAL_DUALPROCSHM_SOURCES
     ${KERNEL_SOURCE_DIR}/pdo/pdokcalmem-noosdual.c
-    ${KERNEL_SOURCE_DIR}/pdo/pdokcalsync-noosdual.c
+    ${KERNEL_SOURCE_DIR}/timesync/timesynckcal-noosdual.c
     )
 
 ################################################################################
@@ -610,6 +612,7 @@ SET(STACK_HEADERS
     ${STACK_INCLUDE_DIR}/common/target.h
     ${STACK_INCLUDE_DIR}/common/ftracedebug.h
     ${STACK_INCLUDE_DIR}/common/timer.h
+    ${STACK_INCLUDE_DIR}/common/timersync.h
     )
 
 SET(USER_HEADERS
@@ -637,6 +640,8 @@ SET(USER_HEADERS
     ${STACK_INCLUDE_DIR}/user/statusu.h
     ${STACK_INCLUDE_DIR}/user/syncu.h
     ${STACK_INCLUDE_DIR}/user/timeru.h
+    ${STACK_INCLUDE_DIR}/user/timesyncu.h
+    ${STACK_INCLUDE_DIR}/user/timesyncucal.h
     )
 
 SET(KERNEL_HEADERS
@@ -660,6 +665,8 @@ SET(KERNEL_HEADERS
     ${STACK_INCLUDE_DIR}/kernel/veth.h
     ${STACK_INCLUDE_DIR}/kernel/edrv.h
     ${STACK_INCLUDE_DIR}/kernel/edrvcyclic.h
+    ${STACK_INCLUDE_DIR}/kernel/timesynck.h
+    ${STACK_INCLUDE_DIR}/kernel/timesynckcal.h
     )
 
 SET(OBJDICT_HEADERS

@@ -1,16 +1,15 @@
 /**
 ********************************************************************************
-\file   pdokcal.c
+\file   timesyncucalsync-hostif.c
 
-\brief  Implementation of kernel PDO CAL module
+\brief  Host interface sync implementation for the user CAL timesync module
 
-This file contains the implementation of the kernel PDO CAL module.
+This file contains the hostif sync implementation for the user CAL timesync module.
 
-\ingroup module_pdokcal
+\ingroup module_timesyncucal
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, SYSTEC electronic GmbH
 Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
@@ -41,11 +40,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-#include <kernel/pdokcal.h>
-#include <kernel/pdok.h>
-#include <kernel/dllk.h>
-#include <kernel/eventk.h>
-#include <common/ami.h>
+#include <user/timesyncucal.h>
+
+#include <hostiflib.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -63,6 +60,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // global function prototypes
 //------------------------------------------------------------------------------
 
+
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //
 //============================================================================//
@@ -78,12 +76,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
+static tSyncCb pfnSyncCb_l = NULL;
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError cbProcessRpdo(tFrameInfo* pFrameInfo_p) SECTION_PDOK_PROCESS_RPDO;
-
+static void hostifIrqSyncCb(void* pArg_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -91,107 +89,87 @@ static tOplkError cbProcessRpdo(tFrameInfo* pFrameInfo_p) SECTION_PDOK_PROCESS_R
 
 //------------------------------------------------------------------------------
 /**
-\brief  Initialize the PDO kernel CAL module
+\brief  Initialize user CAL timesync module
 
-The function initializes the PDO user CAL module.
+The function initializes the user CAL timesync module
 
-\return The function returns a tOplkError error code.
-
-\ingroup module_pdokcal
-*/
-//------------------------------------------------------------------------------
-tOplkError pdokcal_init(void)
-{
-    tOplkError      Ret = kErrorOk;
-
-    if ((Ret = pdokcal_openMem()) != kErrorOk)
-        return Ret;
-
-    dllk_regRpdoHandler(cbProcessRpdo);
-
-    return Ret;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Clean up PDO kernel CAL module
-
-The function de-initializes the PDO kernel CAL module.
+\param  pfnSyncCb_p             Function that is called in case of sync event
 
 \return The function returns a tOplkError error code.
 
-\ingroup module_pdokcal
+\ingroup module_timesyncucal
 */
 //------------------------------------------------------------------------------
-tOplkError pdokcal_exit(void)
+tOplkError timesyncucal_init(tSyncCb pfnSyncCb_p)
 {
-    pdokcal_closeMem();
+    tHostifReturn hifRet;
+    tHostifInstance pHifInstance = hostif_getInstance(0);
+
+    if (pHifInstance == NULL)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s: Could not find hostif instance!\n", __func__);
+        return kErrorNoResource;
+    }
+
+    hifRet = hostif_irqRegHdl(pHifInstance, kHostifIrqSrcSync, hostifIrqSyncCb);
+    if (hifRet != kHostifSuccessful)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s: Enable irq not possible!\n", __func__);
+        return kErrorNoResource;
+    }
+
+    pfnSyncCb_l = pfnSyncCb_p;
+
     return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Process events from PdouCal module.
+\brief  Clean up user CAL timesync module
 
-\param  pEvent_p                Pointer to event structure
+The function cleans up the user CAL timesync module
+
+\ingroup module_timesyncucal
+*/
+//------------------------------------------------------------------------------
+void timesyncucal_exit(void)
+{
+    tHostifReturn hifRet;
+    tHostifInstance pHifInstance = hostif_getInstance(0);
+
+    if (pHifInstance == NULL)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s: Could not find hostif instance!\n", __func__);
+        return;
+    }
+
+    hifRet = hostif_irqRegHdl(pHifInstance, kHostifIrqSrcSync, NULL);
+    if (hifRet != kHostifSuccessful)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s: Disable irq not possible (%d)!\n", __func__, hifRet);
+    }
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Wait for a sync event
+
+The function waits for a sync event.
+
+\param  timeout_p       Specifies a timeout in microseconds. If 0 it waits
+                        forever.
 
 \return The function returns a tOplkError error code.
+\retval kErrorOk              Successfully received sync event
+\retval kErrorGeneralError    Error while waiting on sync event
 
-\ingroup module_pdokcal
-**/
+\ingroup module_timesyncucal
+*/
 //------------------------------------------------------------------------------
-tOplkError pdokcal_process(tEvent* pEvent_p)
+tOplkError timesyncucal_waitSyncEvent(ULONG timeout_p)
 {
-    tOplkError                  Ret = kErrorOk;
-
-    switch (pEvent_p->eventType)
-    {
-        case kEventTypePdokAlloc:
-            {
-                tPdoAllocationParam* pAllocationParam;
-                pAllocationParam = (tPdoAllocationParam*)pEvent_p->eventArg.pEventArg;
-                Ret = pdok_allocChannelMem(pAllocationParam);
-            }
-            break;
-
-        case kEventTypePdokConfig:
-            {
-                tPdoChannelConf* pChannelConf;
-                pChannelConf = (tPdoChannelConf*)pEvent_p->eventArg.pEventArg;
-                Ret = pdok_configureChannel(pChannelConf);
-            }
-            break;
-
-        case kEventTypePdokSetupPdoBuf:
-            {
-                tPdoMemSize*     pPdoMemSize;
-                pPdoMemSize = (tPdoMemSize*)pEvent_p->eventArg.pEventArg;
-                Ret = pdok_setupPdoBuffers(pPdoMemSize->rxPdoMemSize,
-                                           pPdoMemSize->txPdoMemSize);
-            }
-            break;
-
-        case kEventTypePdoRx:
-            {
-#if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC != FALSE
-                tFrameInfo*  pFrameInfo;
-                pFrameInfo = (tFrameInfo*)pEvent_p->eventArg.pEventArg;
-                Ret = pdok_processRxPdo(pFrameInfo->frame.pBuffer, pFrameInfo->frameSize);
-#else
-                tPlkFrame* pFrame;
-
-                pFrame = (tPlkFrame*)pEvent_p->eventArg.pEventArg;
-
-                Ret = pdok_processRxPdo(pFrame, pEvent_p->eventArgSize);
-#endif
-            }
-            break;
-
-        default:
-            Ret = kErrorInvalidEvent;
-            break;
-    }
-    return Ret;
+    UNUSED_PARAMETER(timeout_p);
+    return kErrorOk;
 }
 
 //============================================================================//
@@ -202,43 +180,19 @@ tOplkError pdokcal_process(tEvent* pEvent_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Process received PDO
+\brief  Synchronization callback called by Host Interface library
 
-This function is called by the DLL if a PRes or a PReq frame have been received.
-It posts the frame to the event queue. It is called in states
-NMT_CS_READY_TO_OPERATE and NMT_CS_OPERATIONAL. The passed PDO needs not to be
-valid.
-
-\param  pFrameInfo_p            pointer to frame info structure
-
-\return The function returns a tOplkError error code.
-**/
+\param  pArg_p                  Argument pointer provides hostif instance
+*/
 //------------------------------------------------------------------------------
-static tOplkError cbProcessRpdo(tFrameInfo* pFrameInfo_p)
+static void hostifIrqSyncCb(void* pArg_p)
 {
-    tOplkError      ret = kErrorOk;
-    tEvent          event;
+    UNUSED_PARAMETER(pArg_p);
 
-    event.eventSink = kEventSinkPdokCal;
-    event.eventType = kEventTypePdoRx;
-#if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC != FALSE
-    event.eventArgSize   = sizeof(tFrameInfo);
-    event.eventArg.pEventArg = pFrameInfo_p;
-#else
-    // limit copied data to size of PDO (because from some CNs the frame is larger than necessary)
-    event.eventArgSize = ami_getUint16Le(&pFrameInfo_p->frame.pBuffer->data.pres.sizeLe) +
-                                         PLK_FRAME_OFFSET_PDO_PAYLOAD; // pFrameInfo_p->frameSize;
-    event.eventArg.pEventArg = pFrameInfo_p->frame.pBuffer;
-#endif
-    ret = eventk_postEvent(&event);
-#if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC != FALSE
-    if (ret == kErrorOk)
+    if (pfnSyncCb_l != NULL)
     {
-        ret = kErrorReject; // Reject release of rx buffer
+        pfnSyncCb_l();
     }
-#endif
-
-    return ret;
 }
 
 ///\}

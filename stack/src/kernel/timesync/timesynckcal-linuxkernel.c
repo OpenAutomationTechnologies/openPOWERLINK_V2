@@ -1,12 +1,15 @@
 /**
 ********************************************************************************
-\file   pdoucalsync-null.c
+\file   timesynckcal-linuxkernel.c
 
-\brief  Empty sync implementation for the PDO user CAL module
+\brief  CAL kernel timesync module using the openPOWERLINK Linux kernel driver
 
-This file contains an empty sync implementation for the PDU user CAL module.
+This file contains an implementation for the kernel CAL timesync module which
+uses the openPOWERLINK Linux kernel driver interface.
 
-\ingroup module_pdoucal
+The sync module is responsible to synchronize the user layer.
+
+\ingroup module_timesynckcal
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -40,7 +43,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-#include <user/pdoucal.h>
+#include <kernel/timesynckcal.h>
+
+#include <linux/slab.h>
+#include <linux/sched.h>
+#include <linux/wait.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -70,11 +77,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
+typedef struct
+{
+    wait_queue_head_t       syncWaitQueue;
+    BOOL                    fSync;
+    BOOL                    fInitialized;
+} tTimesynckCalInstance;
 
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static tSyncCb      pfnSyncCb_l;
+static tTimesynckCalInstance instance_l; ///< Instance variable of kernel timesync module
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -86,72 +99,107 @@ static tSyncCb      pfnSyncCb_l;
 
 //------------------------------------------------------------------------------
 /**
-\brief  Initialize PDO user CAL sync module
+\brief  Initialize kernel CAL timesync module
 
-The function initializes the PDO user CAL sync module
-
-\param  pfnSyncCb_p             Function that is called in case of sync event
+The function initializes the kernel CAL timesync module.
 
 \return The function returns a tOplkError error code.
+
+\ingroup module_timesynckcal
 */
 //------------------------------------------------------------------------------
-tOplkError pdoucal_initSync(tSyncCb pfnSyncCb_p)
+tOplkError timesynckcal_init(void)
 {
-    pfnSyncCb_l = pfnSyncCb_p;
+    OPLK_MEMSET(&instance_l, 0, sizeof(tTimesynckCalInstance));
+
+    init_waitqueue_head(&instance_l.syncWaitQueue);
+    instance_l.fInitialized = TRUE;
+
     return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Clean up PDO user CAL sync module
+\brief  Clean up CAL timesync module
 
-The function cleans up the PDO user CAL sync module
+The function cleans up the CAL timesync module
+
+\ingroup module_timesynckcal
 */
 //------------------------------------------------------------------------------
-void pdoucal_exitSync(void)
+void timesynckcal_exit(void)
 {
+    instance_l.fInitialized = FALSE;
+}
 
+//------------------------------------------------------------------------------
+/**
+\brief  Send a sync event
+
+The function sends a sync event.
+
+\return The function returns a tOplkError error code.
+
+\ingroup module_timesynckcal
+*/
+//------------------------------------------------------------------------------
+tOplkError timesynckcal_sendSyncEvent(void)
+{
+    if (instance_l.fInitialized)
+    {
+        instance_l.fSync = TRUE;
+        wake_up_interruptible(&instance_l.syncWaitQueue);
+    }
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
 /**
 \brief  Wait for a sync event
 
-The function waits for a sync event.
-
-\param  timeout_p       Specifies a timeout in microseconds. If 0, it waits
-                        forever.
+The function waits for a sync event
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk              Successfully received sync event
-\retval kErrorGeneralError    Error while waiting on sync event
+
+\ingroup module_timesynckcal
 */
 //------------------------------------------------------------------------------
-tOplkError pdoucal_waitSyncEvent(ULONG timeout_p)
+tOplkError timesynckcal_waitSyncEvent(void)
 {
-    UNUSED_PARAMETER(timeout_p);
+    int                 ret;
+    int                 timeout = 1000 * HZ / 1000;
 
+    if (!instance_l.fInitialized)
+        return kErrorNoResource;
+
+    ret = wait_event_interruptible_timeout(instance_l.syncWaitQueue,
+                                           instance_l.fSync == TRUE, timeout);
+    if (ret == 0)
+        return kErrorRetry;
+
+    instance_l.fSync = FALSE;
     return kErrorOk;
 }
+
 
 //------------------------------------------------------------------------------
 /**
-\brief  Call sync callback function
+\brief  Enable sync events
 
-The function calls the registered sync callback function
+The function enables sync events.
+
+\param  fEnable_p               Enable/disable sync event
 
 \return The function returns a tOplkError error code.
+
+\ingroup module_timesynckcal
 */
 //------------------------------------------------------------------------------
-tOplkError pdoucal_callSyncCb(void)
+tOplkError timesynckcal_controlSync(BOOL fEnable_p)
 {
-    if (pfnSyncCb_l != NULL)
-    {
-        return pfnSyncCb_l();
-    }
+    UNUSED_PARAMETER(fEnable_p);
     return kErrorOk;
 }
-
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //

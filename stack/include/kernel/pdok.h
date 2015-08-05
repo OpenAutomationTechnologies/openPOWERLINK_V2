@@ -70,7 +70,6 @@ tOplkError pdok_deAllocChannelMem(void);
 tOplkError pdok_allocChannelMem(tPdoAllocationParam* pAllocationParam_p);
 tOplkError pdok_configureChannel(tPdoChannelConf* pChannelConf_p);
 tOplkError pdok_setupPdoBuffers(size_t rxPdoMemSize_p, size_t txPdoMemSize_p);
-tOplkError pdok_sendSyncEvent(void);
 
 #ifdef __cplusplus
 }

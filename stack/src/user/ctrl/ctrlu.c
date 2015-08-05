@@ -53,6 +53,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <common/target.h>
 #include <oplk/obd.h>
 #include <oplk/dll.h>
+#include <user/timesyncu.h>
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
 #include <user/nmtmnu.h>
@@ -371,7 +372,7 @@ tOplkError ctrlu_initStack(tOplkApiInitParam* pInitParam_p)
 
 #if defined(CONFIG_INCLUDE_PDO)
     DEBUG_LVL_CTRL_TRACE("Initialize Pdou module...\n");
-    ret = pdou_init(ctrlInstance_l.initParam.pfnCbSync);
+    ret = pdou_init();
     if (ret != kErrorOk)
     {
         goto Exit;
@@ -383,6 +384,11 @@ tOplkError ctrlu_initStack(tOplkApiInitParam* pInitParam_p)
         goto Exit;
     }
 #endif
+
+    DEBUG_LVL_CTRL_TRACE("Initialize Timesync module...\n");
+    ret = timesyncu_init(ctrlInstance_l.initParam.pfnCbSync);
+    if (ret != kErrorOk)
+        goto Exit;
 
     if ((ret = initNmtu(&ctrlInstance_l.initParam)) != kErrorOk)
         goto Exit;
@@ -463,6 +469,9 @@ tOplkError ctrlu_shutdownStack(void)
 
     ret = nmtu_exit();
     DEBUG_LVL_CTRL_TRACE("nmtu_exit():    0x%X\n", ret);
+
+    timesyncu_exit();
+    DEBUG_LVL_CTRL_TRACE("timesyncu_exit()\n");
 
 #if defined(CONFIG_INCLUDE_PDO)
     ret = pdou_exit();

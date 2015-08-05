@@ -325,7 +325,7 @@ static BOOL checkForwardEventToKint(tEvent* pEvent_p)
     switch (pEvent_p->eventType)
     {
         case kEventTypePdoRx:
-        case kEventTypePdokControlSync:
+        case kEventTypeTimesynckControl:
         case kEventTypeDllkCycleFinish:
         case kEventTypeSync:
             return FALSE;

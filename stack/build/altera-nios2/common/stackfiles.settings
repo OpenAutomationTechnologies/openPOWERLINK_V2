@@ -86,6 +86,7 @@ ${USER_SOURCE_DIR}/sdo/sdocom-dummy.c \
 ${USER_SOURCE_DIR}/sdo/sdotest-com.c \
 ${USER_SOURCE_DIR}/sdo/sdotest-seq.c \
 ${USER_SOURCE_DIR}/sdo/sdocom.c \
+${USER_SOURCE_DIR}/timesync/timesyncu.c \
 ${USER_SOURCE_DIR}/errhnd/errhndu.c \
 ${USER_SOURCE_DIR}/ctrl/ctrlu.c \
 "
@@ -150,17 +151,17 @@ ${USER_SOURCE_DIR}/event/eventucalintf-circbuf.c \
 
 PDO_UCAL_LOCAL_SOURCES="\
 ${USER_SOURCE_DIR}/pdo/pdoucalmem-local.c \
-${USER_SOURCE_DIR}/pdo/pdoucalsync-null.c \
+${USER_SOURCE_DIR}/timesync/timesyncucal-null.c \
 "
 
 PDO_UCAL_HOSTIF_SOURCES="\
 ${USER_SOURCE_DIR}/pdo/pdoucalmem-hostif.c \
-${USER_SOURCE_DIR}/pdo/pdoucalsync-hostif.c \
+${USER_SOURCE_DIR}/timesync/timesyncucal-hostif.c \
 "
 
 PDO_UCAL_DUALPROCSHM_SOURCES="\
 ${USER_SOURCE_DIR}/pdo/pdoucalmem-noosdual.c \
-${USER_SOURCE_DIR}/pdo/pdoucalsync-noosdual.c \
+${USER_SOURCE_DIR}/timesync/timesyncucal-noosdual.c \
 "
 
 ################################################################################
@@ -184,6 +185,7 @@ ${KERNEL_SOURCE_DIR}/pdo/pdok.c \
 ${KERNEL_SOURCE_DIR}/pdo/pdokcal.c \
 ${KERNEL_SOURCE_DIR}/pdo/pdoklut.c \
 ${KERNEL_SOURCE_DIR}/pdo/pdokcal-triplebufshm.c \
+${KERNEL_SOURCE_DIR}/timesync/timesynck.c \
 ${KERNEL_SOURCE_DIR}/errhnd/errhndk.c \
 ${KERNEL_SOURCE_DIR}/ctrl/ctrlk.c \
 ${KERNEL_SOURCE_DIR}/led/ledk.c \
@@ -250,17 +252,17 @@ ${KERNEL_SOURCE_DIR}/event/eventkcal-noosdual.c \
 
 PDO_KCAL_LOCAL_SOURCES="\
 ${KERNEL_SOURCE_DIR}/pdo/pdokcalmem-local.c \
-${KERNEL_SOURCE_DIR}/pdo/pdokcalsync-null.c \
+${KERNEL_SOURCE_DIR}/timesync/timesynckcal-null.c \
 "
 
 PDO_KCAL_HOSTIF_SOURCES="\
 ${KERNEL_SOURCE_DIR}/pdo/pdokcalmem-hostif.c \
-${KERNEL_SOURCE_DIR}/pdo/pdokcalsync-hostif.c \
+${KERNEL_SOURCE_DIR}/timesync/timesynckcal-hostif.c \
 "
 
 PDO_KCAL_DUALPROCSHM_SOURCES="\
 ${KERNEL_SOURCE_DIR}/pdo/pdokcalmem-noosdual.c \
-${KERNEL_SOURCE_DIR}/pdo/pdokcalsync-noosdual.c \
+${KERNEL_SOURCE_DIR}/timesync/timesynckcal-noosdual.c \
 "
 
 ################################################################################

@@ -1,16 +1,14 @@
 /**
 ********************************************************************************
-\file   pdokcalsync-bsdsem.c
+\file   timesynckcal-null.c
 
-\brief  PDO CAL kernel sync module using BSD semaphores
+\brief  Empty CAL kernel timesync module
 
-This file contains an implementation for the kernel PDO CAL sync module which
-uses BSD semaphores for synchronisation.
+This file contains an empty implementation for the kernel CAL timesync module.
 
-The sync module is responsible to notify the user layer that new PDO data
-can be transfered.
+The sync module is responsible to synchronize the user layer.
 
-\ingroup module_pdokcal
+\ingroup module_timesynckcal
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -44,11 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-#include <kernel/pdokcal.h>
-
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <semaphore.h>
+#include <kernel/timesynckcal.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -65,7 +59,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // global function prototypes
 //------------------------------------------------------------------------------
-
+extern tOplkError timesyncucal_callSyncCb(void);
 
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //
@@ -82,7 +76,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static sem_t*           syncSem_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -94,40 +87,32 @@ static sem_t*           syncSem_l;
 
 //------------------------------------------------------------------------------
 /**
-\brief  Initialize kernel PDO CAL sync module
+\brief  Initialize kernel CAL timesync module
 
-The function initializes the kernel PDO CAL sync module.
+The function initializes the kernel CAL timesync module.
 
 \return The function returns a tOplkError error code.
 
-\ingroup module_pdokcal
+\ingroup module_timesynckcal
 */
 //------------------------------------------------------------------------------
-tOplkError pdokcal_initSync(void)
+tOplkError timesynckcal_init(void)
 {
-    sem_unlink(PDO_SYNC_BSDSEM);
-
-    if ((syncSem_l = sem_open(PDO_SYNC_BSDSEM, O_CREAT, S_IRWXG, 1)) == SEM_FAILED)
-    {
-        DEBUG_LVL_ERROR_TRACE("%s() creating sem failed!\n", __func__);
-        return kErrorNoResource;
-    }
     return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Clean up PDO CAL sync module
+\brief  Clean up CAL timesync module
 
-The function cleans up the PDO CAL sync module.
+The function cleans up the CAL timesync module
 
-\ingroup module_pdokcal
+\ingroup module_timesynckcal
 */
 //------------------------------------------------------------------------------
-void pdokcal_exitSync(void)
+void timesynckcal_exit(void)
 {
-    sem_close(syncSem_l);
-    sem_unlink(PDO_SYNC_BSDSEM);
+
 }
 
 //------------------------------------------------------------------------------
@@ -138,13 +123,12 @@ The function sends a sync event.
 
 \return The function returns a tOplkError error code.
 
-\ingroup module_pdokcal
+\ingroup module_timesynckcal
 */
 //------------------------------------------------------------------------------
-tOplkError pdokcal_sendSyncEvent(void)
+tOplkError timesynckcal_sendSyncEvent(void)
 {
-    sem_post(syncSem_l);
-    return kErrorOk;
+    return timesyncucal_callSyncCb();
 }
 
 //------------------------------------------------------------------------------
@@ -153,14 +137,14 @@ tOplkError pdokcal_sendSyncEvent(void)
 
 The function enables sync events.
 
-\param  fEnable_p               enable/disable sync event
+\param  fEnable_p               Enable/disable sync event
 
 \return The function returns a tOplkError error code.
 
-\ingroup module_pdokcal
+\ingroup module_timesynckcal
 */
 //------------------------------------------------------------------------------
-tOplkError pdokcal_controlSync(BOOL fEnable_p)
+tOplkError timesynckcal_controlSync(BOOL fEnable_p)
 {
     UNUSED_PARAMETER(fEnable_p);
     return kErrorOk;

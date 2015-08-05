@@ -1,13 +1,13 @@
 /**
 ********************************************************************************
-\file   pdoucalsync-bsdsem.c
+\file   timesyncucal-ioctl.c
 
-\brief  Sync implementation for the PDO user CAL module using BSD semaphores
+\brief  Sync implementation for the user CAL timesync module using Linux ioctl
 
-This file contains a sync implementation for the PDU user CAL module. It
-uses BSD semaphores for synchronisation.
+This file contains a sync implementation for the user CAL timesync module. It
+uses a Linux ioctl call for synchronisation.
 
-\ingroup module_pdoucal
+\ingroup module_timesyncucal
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -41,12 +41,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-#include <user/pdoucal.h>
+#include <user/timesyncucal.h>
+#include <user/ctrlucal.h>
+#include <common/driver.h>
 
-#include <errno.h>
 #include <fcntl.h>
 #include <sys/stat.h>
-#include <semaphore.h>
+#include <sys/ioctl.h>
 #include <time.h>
 
 //============================================================================//
@@ -81,7 +82,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static sem_t*           syncSem_l;
+static OPLK_FILE_HANDLE fd_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -93,37 +94,36 @@ static sem_t*           syncSem_l;
 
 //------------------------------------------------------------------------------
 /**
-\brief  Initialize PDO user CAL sync module
+\brief  Initialize user CAL timesync module
 
-The function initializes the PDO user CAL sync module
+The function initializes the user CAL timesync module
 
 \param  pfnSyncCb_p             Function that is called in case of sync event
 
 \return The function returns a tOplkError error code.
+
+\ingroup module_timesyncucal
 */
 //------------------------------------------------------------------------------
-tOplkError pdoucal_initSync(tSyncCb pfnSyncCb_p)
+tOplkError timesyncucal_init(tSyncCb pfnSyncCb_p)
 {
     UNUSED_PARAMETER(pfnSyncCb_p);
 
-    if ((syncSem_l = sem_open(PDO_SYNC_BSDSEM, O_CREAT, S_IRWXG, 1)) == SEM_FAILED)
-    {
-        DEBUG_LVL_ERROR_TRACE("%s() creating sem failed!\n", __func__);
-        return kErrorNoResource;
-    }
+    fd_l = ctrlucal_getFd();
     return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Clean up PDO user CAL sync module
+\brief  Clean up user CAL timesync module
 
-The function cleans up the PDO user CAL sync module
+The function cleans up the user CAL timesync module
+
+\ingroup module_timesyncucal
 */
 //------------------------------------------------------------------------------
-void pdoucal_exitSync(void)
+void timesyncucal_exit(void)
 {
-    sem_close(syncSem_l);
 }
 
 //------------------------------------------------------------------------------
@@ -138,39 +138,20 @@ The function waits for a sync event.
 \return The function returns a tOplkError error code.
 \retval kErrorOk              Successfully received sync event
 \retval kErrorGeneralError    Error while waiting on sync event
+
+\ingroup module_timesyncucal
 */
 //------------------------------------------------------------------------------
-tOplkError pdoucal_waitSyncEvent(ULONG timeout_p)
+tOplkError timesyncucal_waitSyncEvent(ULONG timeout_p)
 {
-    int                 semRet;
-    struct timespec     currentTime;
-    struct timespec     semTimeout;
+    int         ret;
 
-    if (timeout_p != 0)
+    ret = ioctl(fd_l, PLK_CMD_TIMESYNC_SYNC, timeout_p);
+    if (ret == 0)
     {
-        if (timeout_p >= 1000000)
-        {
-            semTimeout.tv_sec = (timeout_p / 1000000);
-            semTimeout.tv_nsec = (timeout_p % 1000000) * 1000;
-        }
-        else
-        {
-            semTimeout.tv_sec = 0;
-            semTimeout.tv_nsec = timeout_p * 1000;
-        }
-        clock_gettime(CLOCK_REALTIME, &currentTime);
-        TIMESPECADD(&semTimeout, &currentTime);
-        semRet = sem_timedwait(syncSem_l, &semTimeout);
-    }
-    else
-    {
-        semRet = sem_wait(syncSem_l);
-    }
-
-    if (semRet == 0)
         return kErrorOk;
-    else
-        return kErrorGeneralError;
+    }
+    return kErrorGeneralError;
 }
 
 //============================================================================//

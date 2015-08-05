@@ -98,7 +98,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError controlPdokcalSync(BOOL fEnable_p);
+static tOplkError controlTimeSync(BOOL fEnable_p);
 
 static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState OldNmtState_p, tNmtEvent nmtEvent_p);
 static tOplkError processNmtEvent(tEvent* pEvent_p);
@@ -211,9 +211,9 @@ tOplkError dllk_process(tEvent* pEvent_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Control PDOK CAL sync function
+\brief  Control CAL timesync function
 
-This function controls the kernel PDO CAL sync function. It enables/disables
+This function controls the kernel CAL timesync function. It enables/disables
 the sync function by sending the appropriate event.
 
 \param  fEnable_p       Flag determines if sync should be enabled or disabled.
@@ -221,13 +221,13 @@ the sync function by sending the appropriate event.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError controlPdokcalSync(BOOL fEnable_p)
+static tOplkError controlTimeSync(BOOL fEnable_p)
 {
     tEvent event;
     BOOL fEnable = fEnable_p;
 
-    event.eventSink = kEventSinkPdokCal;
-    event.eventType = kEventTypePdokControlSync;
+    event.eventSink = kEventSinkTimesynck;
+    event.eventType = kEventTypeTimesynckControl;
     event.eventArg.pEventArg = &fEnable;
     event.eventArgSize = sizeof(fEnable);
 
@@ -315,7 +315,7 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p,
 #endif
 
             // deactivate sync generation
-            if ((ret = controlPdokcalSync(FALSE)) != kErrorOk)
+            if ((ret = controlTimeSync(FALSE)) != kErrorOk)
                 return ret;
 
 #if (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER)
@@ -417,7 +417,7 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p,
                 return ret;
 #endif
             /// deactivate sync generation
-            if ((ret = controlPdokcalSync(FALSE)) != kErrorOk)
+            if ((ret = controlTimeSync(FALSE)) != kErrorOk)
                 return ret;
 
             ret = edrvcyclic_stopCycle(FALSE);
@@ -463,7 +463,7 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p,
 
         case kNmtMsReadyToOperate:
             /// activate sync generation
-            if ((ret = controlPdokcalSync(TRUE)) != kErrorOk)
+            if ((ret = controlTimeSync(TRUE)) != kErrorOk)
                 return ret;
             break;
 
@@ -493,7 +493,7 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p,
 
         case kNmtCsReadyToOperate:
             /// activate sync generation
-            if ((ret = controlPdokcalSync(TRUE)) != kErrorOk)
+            if ((ret = controlTimeSync(TRUE)) != kErrorOk)
                 return ret;
             // signal update of IdentRes and StatusRes on SoA
             dllkInstance_g.updateTxFrame = DLLK_UPDATE_BOTH;

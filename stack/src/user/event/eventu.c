@@ -271,6 +271,7 @@ tOplkError eventu_postEvent(tEvent* pEvent_p)
         case kEventSinkPdok:
         case kEventSinkPdokCal:
         case kEventSinkErrk:
+        case kEventSinkTimesynck:
             ret = eventucal_postKernelEvent(pEvent_p);
             break;
 

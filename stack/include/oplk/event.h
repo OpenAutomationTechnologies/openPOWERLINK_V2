@@ -96,7 +96,7 @@ typedef enum
     kEventTypeGw309AsciiReq         = 0x23,     ///< GW309ASCII request (arg is pointer to pointer of tGw309AsciiRequest)
     kEventTypeNmtMnuNodeAdded       = 0x24,     ///< node was added to isochronous phase by DLL (arg is pointer to unsigned int containing the node-ID)
     kEventTypePdokSetupPdoBuf       = 0x25,     ///< dealloc PDOs
-    kEventTypePdokControlSync       = 0x26,     ///< enable/disable the pdokcal sync trigger (arg is pointer to BOOL)
+    kEventTypeTimesynckControl      = 0x26,     ///< Enable/disable the timesync trigger (arg is pointer to BOOL)
     kEventTypeReleaseRxFrame        = 0x27,     ///< Free receive buffer (arg is pointer to the buffer to release)
     kEventTypeAsndNotRx             = 0x28,     ///< Didn't receive ASnd frame for DLL user module (arg is pointer to tDllAsndNotRx)
     kEventTypeAsndRxInfo            = 0x29,     ///< Received ASnd frame for DLL user module (arg is pointer to tFrameInfo)
@@ -136,6 +136,7 @@ typedef enum
     kEventSinkGw309Ascii            = 0x0E,     ///< events for GW309ASCII module
     kEventSinkApi                   = 0x0F,     ///< events for API module
     kEventSinkSdoTest               = 0x10,     ///< events for SDO testing module
+    kEventSinkTimesynck             = 0x11,     ///< events for Timesynck module
 
     kEventSinkInvalid               = 0xFF      ///< Identifies an invalid sink
 } eEventSink;
@@ -181,6 +182,7 @@ typedef enum
     kEventSourceGw309Ascii          = 0x1E,     ///< Events from GW309ASCII module
     kEventSourceErru                = 0x1F,     ///< Events from User Error handler module
     kEventSourceSdoTest             = 0x20,     ///< Events from SDO testing module
+    kEventSourceTimesynck           = 0x21,     ///< events from Timesynck module
 
     kEventSourceInvalid             = 0xFF      ///< Identifies an invalid event source
 } eEventSource;

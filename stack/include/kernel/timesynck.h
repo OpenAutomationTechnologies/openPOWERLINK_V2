@@ -1,14 +1,13 @@
 /**
 ********************************************************************************
-\file   pdokcal.h
+\file   kernel/timesynck.h
 
-\brief  Include file for kernel PDO CAL module
+\brief  Include file for kernel timesync module
 
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,15 +33,14 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_PDOKCAL_H_
-#define _INC_PDOKCAL_H_
+#ifndef _INC_TIMESYNCK_H_
+#define _INC_TIMESYNCK_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-#include <common/pdo.h>
-#include <oplk/event.h>
+#include <kernel/eventk.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -60,27 +58,13 @@ extern "C"
 {
 #endif
 
-tOplkError pdokcal_init(void);
-tOplkError pdokcal_exit(void);
-tOplkError pdokcal_process(tEvent* pEvent_p) SECTION_PDOKCAL_PROCESS;
-
-// PDO memory functions
-tOplkError pdokcal_openMem(void);
-tOplkError pdokcal_closeMem(void);
-tOplkError pdokcal_allocateMem(size_t memSize_p, BYTE** pPdoMem_p);
-tOplkError pdokcal_freeMem(BYTE* pMem_p, size_t memSize_p);
-
-// PDO buffer functions
-tOplkError pdokcal_initPdoMem(tPdoChannelSetup* pPdoChannels, size_t rxPdoMemSize_p,
-                              size_t txPdoMemSize_p);
-void       pdokcal_cleanupPdoMem(void);
-BYTE*      pdokcal_getPdoMemRegion(void);
-tOplkError pdokcal_writeRxPdo(UINT channelId_p, BYTE* pPayload_p, UINT16 pdoSize_p) SECTION_PDOKCAL_WRITE_RPDO;
-tOplkError pdokcal_readTxPdo(UINT channelId_p, BYTE* pPayload_p, UINT16 pdoSize_p) SECTION_PDOKCAL_READ_TPDO;
-BYTE*      pdokcal_getPdoPointer(BOOL fTxPdo_p, UINT offset_p, UINT16 pdoSize_p);
+tOplkError timesynck_init(void);
+void       timesynck_exit(void);
+tOplkError timesynck_sendSyncEvent(void);
+tOplkError timesynck_process(tEvent* pEvent_p);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif  // #ifndef _INC_PDOKCAL_H_
+#endif  /* _INC_TIMESYNCK_H_ */

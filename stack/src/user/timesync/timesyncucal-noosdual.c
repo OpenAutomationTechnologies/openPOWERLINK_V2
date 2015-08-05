@@ -1,18 +1,17 @@
 /**
 ********************************************************************************
-\file   pdoucalsync-winioctl.c
+\file   timesyncucal-noosdual.c
 
-\brief  Sync implementation for the PDO user CAL module using Windows IOCTL
+\brief  Dual Processor CAL user timesync module
 
-This files implements the user PDO CAL module for synchronization of PDO
-exchange on a system using Windows IOCTL for communication between user and
-kernel layer of the stack.
+This file contains the dualprocshm sync implementation for the user timesync CAL
+module.
 
-\ingroup module_pdoucal
+\ingroup module_timesyncucal
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2014 Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -42,11 +41,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <oplk/oplkinc.h>
-#include <common/pdo.h>
-#include <user/pdoucal.h>
-#include <user/ctrlucal.h>
+#include <user/timesyncucal.h>
 
-#include <common/driver.h>
+#include <dualprocshm.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -71,30 +68,21 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+#define TARGET_SYNC_INTERRUPT_ID    1
 
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
-/**
-\brief Local instance for PDO synchronization module
-
-The structure holds the global parameters for PDO synchronization module.
-*/
-typedef struct
-{
-    OPLK_FILE_HANDLE    hGlobalFileHandle;        ///< Global file handle to POWERLINK driver
-    HANDLE              hSyncFileHandle;          ///< File handle to driver for synchronization
-    BOOL                fIntialized;              ///< Flag to mark module initialization
-} tPdoInstance;
 
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static tPdoInstance    pdoInstance_l;
+static tSyncCb    pfnSyncCb_l = NULL;
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
+static void irqSyncCb(void);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -102,69 +90,62 @@ static tPdoInstance    pdoInstance_l;
 
 //------------------------------------------------------------------------------
 /**
-\brief  Initialize PDO user CAL sync module
+\brief  Initialize user CAL timesync module
 
-The function initializes the PDO user CAL sync module
+The function initializes the user CAL timesync module
 
 \param  pfnSyncCb_p             Function that is called in case of sync event
 
 \return The function returns a tOplkError error code.
+
+\ingroup module_timesyncucal
 */
 //------------------------------------------------------------------------------
-tOplkError pdoucal_initSync(tSyncCb pfnSyncCb_p)
+tOplkError timesyncucal_init(tSyncCb pfnSyncCb_p)
 {
-    UINT    errNum = 0;
+    tDualprocReturn         dualRet;
+    tDualprocDrvInstance    pInstance = dualprocshm_getLocalProcDrvInst();
 
-    UNUSED_PARAMETER(pfnSyncCb_p);
-
-    pdoInstance_l.hGlobalFileHandle = ctrlucal_getFd();
-    pdoInstance_l.hSyncFileHandle = CreateFile(PLK_DEV_FILE,                        // Name of the NT "device" to open
-                                               GENERIC_READ | GENERIC_WRITE,        // Access rights requested
-                                               FILE_SHARE_READ | FILE_SHARE_WRITE,  // Share access - NONE
-                                               NULL,                                // Security attributes - not used!
-                                               OPEN_EXISTING,                       // Device must exist to open it.
-                                               FILE_ATTRIBUTE_NORMAL,               // Open for overlapped I/O
-                                               NULL
-                                              );
-
-    if (pdoInstance_l.hSyncFileHandle == INVALID_HANDLE_VALUE)
+    if (pInstance == NULL)
     {
-        errNum = GetLastError();
-
-        if (!(errNum == ERROR_FILE_NOT_FOUND ||
-              errNum == ERROR_PATH_NOT_FOUND))
-        {
-            DEBUG_LVL_ERROR_TRACE("%s() createFile failed!  ERROR_FILE_NOT_FOUND = %d\n",
-                                  __func__, errNum);
-            return kErrorNoResource;
-        }
+        DEBUG_LVL_ERROR_TRACE("%s() couldn't get Host dual proc driver instance\n",
+                              __func__);
+        return kErrorNoResource;
     }
 
-    pdoInstance_l.fIntialized = TRUE;
+    dualRet = dualprocshm_registerHandler(pInstance, TARGET_SYNC_INTERRUPT_ID, irqSyncCb);
+    if (dualRet != kDualprocSuccessful)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s: Enable irq not possible!\n", __func__);
+        return kErrorNoResource;
+    }
+
+    pfnSyncCb_l = pfnSyncCb_p;
+
     return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Clean up PDO user CAL sync module
+\brief  Clean up user CAL timesync module
 
-The function cleans up the PDO user CAL sync module
+The function cleans up the user CAL timesync module
+
+\ingroup module_timesyncucal
 */
 //------------------------------------------------------------------------------
-void pdoucal_exitSync(void)
+void timesyncucal_exit(void)
 {
-    ULONG    bytesReturned;
+    tDualprocDrvInstance    pInstance = dualprocshm_getLocalProcDrvInst();
 
-    // Clean resources acquired in kernel driver for synchronization.
-    if (!DeviceIoControl(pdoInstance_l.hGlobalFileHandle, PLK_CMD_CLEAN,
-                         0, 0, 0, 0, &bytesReturned, NULL))
+    if (pInstance == NULL)
     {
-        DEBUG_LVL_ERROR_TRACE("%s():Error in IOCTL %d\n", __func__, GetLastError());
+        DEBUG_LVL_ERROR_TRACE("%s() couldn't get Host dual proc driver instance\n",
+                              __func__);
+        return;
     }
 
-    CloseHandle(pdoInstance_l.hSyncFileHandle);
-
-    pdoInstance_l.fIntialized = FALSE;
+    dualprocshm_registerHandler(pInstance, TARGET_SYNC_INTERRUPT_ID, NULL);
 }
 
 //------------------------------------------------------------------------------
@@ -179,23 +160,13 @@ The function waits for a sync event.
 \return The function returns a tOplkError error code.
 \retval kErrorOk              Successfully received sync event
 \retval kErrorGeneralError    Error while waiting on sync event
+
+\ingroup module_timesyncucal
 */
 //------------------------------------------------------------------------------
-tOplkError pdoucal_waitSyncEvent(ULONG timeout_p)
+tOplkError timesyncucal_waitSyncEvent(ULONG timeout_p)
 {
-    ULONG    bytesReturned;
-
-    if (!pdoInstance_l.fIntialized)
-        return kErrorNoResource;
-
-    if (!DeviceIoControl(pdoInstance_l.hSyncFileHandle, PLK_CMD_PDO_SYNC,
-                         &timeout_p, sizeof(ULONG),
-                         0, 0, &bytesReturned, NULL))
-    {
-        DEBUG_LVL_ERROR_TRACE("%s():Error in IOCTL %d\n", __func__, GetLastError());
-        return kErrorGeneralError;
-    }
-
+    UNUSED_PARAMETER(timeout_p);
     return kErrorOk;
 }
 
@@ -204,5 +175,17 @@ tOplkError pdoucal_waitSyncEvent(ULONG timeout_p)
 //============================================================================//
 /// \name Private Functions
 /// \{
+//------------------------------------------------------------------------------
+/**
+\brief  Synchronization callback
 
-/// \}
+This function is called for synchronization by the dualprocshm instance.
+
+*/
+//------------------------------------------------------------------------------
+static void irqSyncCb(void)
+{
+    pfnSyncCb_l();
+}
+
+///\}

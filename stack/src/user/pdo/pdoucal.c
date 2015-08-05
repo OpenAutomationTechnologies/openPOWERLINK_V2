@@ -90,21 +90,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 The function initializes the PDO user CAL module.
 
-\param  pfnSyncCb_p             function that is called in case of sync event
-
 \return The function returns a tOplkError error code.
 
 \ingroup module_pdoucal
 */
 //------------------------------------------------------------------------------
-tOplkError pdoucal_init(tSyncCb pfnSyncCb_p)
+tOplkError pdoucal_init(void)
 {
     tOplkError      ret;
 
-    if ((ret = pdoucal_openMem()) != kErrorOk)
-        return ret;
+    ret = pdoucal_openMem();
 
-    return pdoucal_initSync(pfnSyncCb_p);
+    return ret;
 }
 
 //------------------------------------------------------------------------------
@@ -121,7 +118,6 @@ The function cleans up the PDO user CAL module.
 tOplkError pdoucal_exit(void)
 {
     pdoucal_closeMem();
-    pdoucal_exitSync();
     return kErrorOk;
 }
 

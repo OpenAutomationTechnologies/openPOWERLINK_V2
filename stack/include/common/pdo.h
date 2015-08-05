@@ -45,7 +45,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define PDO_SYNC_BSDSEM                 "/semPdoSync"
 #define PDO_SHMEM_NAME                  "/pdoShm"
 
 // invalid PDO-NodeId

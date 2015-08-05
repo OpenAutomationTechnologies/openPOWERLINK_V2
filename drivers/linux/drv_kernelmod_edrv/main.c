@@ -63,6 +63,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/ctrlkcal.h>
 #include <kernel/dllkcal.h>
 #include <kernel/pdokcal.h>
+#include <kernel/timesynckcal.h>
 
 #include <kernel/eventk.h>
 #include <kernel/eventkcal.h>
@@ -429,8 +430,8 @@ static int  powerlinkIoctl(struct inode* dev, struct file* filp,
             ret = readErrorObject(arg);
             break;
 
-        case PLK_CMD_PDO_SYNC:
-            if ((oplRet = pdokcal_waitSyncEvent()) == kErrorRetry)
+        case PLK_CMD_TIMESYNC_SYNC:
+            if ((oplRet = timesynckcal_waitSyncEvent()) == kErrorRetry)
                 ret = -ERESTARTSYS;
             else
                 ret = 0;

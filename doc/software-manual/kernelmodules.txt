@@ -177,3 +177,22 @@ The timestamp module provides some helper functions for handling timestamps.
 \ingroup kernel_layer
 */
 //------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+\defgroup module_timesynck timesynck
+
+\brief Kernel timesync module
+
+The kernel timesync module is in charge of handling the time synchronization
+to the POWERLINK network in the openPOWERLINK kernel layer. It is responsible for
+notifying the user side at the configured synchronization point by using the
+communication abstraction layer module (timesync CAL).
+
+\see module_timesyncu
+\see module_timesynckcal
+\see module_timesyncucal
+
+\ingroup kernel_layer
+*/
+//------------------------------------------------------------------------------

@@ -213,7 +213,8 @@ SET(MODULE_SOURCE_FILES
     ${KERNEL_SOURCE_DIR}/pdo/pdoklut.c
     ${KERNEL_SOURCE_DIR}/pdo/pdokcal-triplebufshm.c
     ${KERNEL_SOURCE_DIR}/pdo/pdokcalmem-linuxkernel.c
-    ${KERNEL_SOURCE_DIR}/pdo/pdokcalsync-linuxkernel.c
+    ${KERNEL_SOURCE_DIR}/timesync/timesynck.c
+    ${KERNEL_SOURCE_DIR}/timesync/timesynckcal-linuxkernel.c
     ${KERNEL_SOURCE_DIR}/errhnd/errhndk.c
     ${KERNEL_SOURCE_DIR}/errhnd/errhndkcal-local.c
     ${KERNEL_SOURCE_DIR}/veth/veth-linuxkernel.c

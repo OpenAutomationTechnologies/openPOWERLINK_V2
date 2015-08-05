@@ -1,21 +1,16 @@
 /**
 ********************************************************************************
-\file   pdokcalsync-null.c
+\file   timesyncu.c
 
-\brief  Empty PDO CAL kernel sync module
+\brief  User timesync module
 
-This file contains an empty implementation for the kernel PDO CAL sync module.
+This file contains the main implementation of the user timesync module.
 
-The sync module is responsible to notify the user layer that new PDO data
-could be transfered.
-However, for a single process solution this is not necessary since the AppCbSync
-is called by Dllk!
-
-\ingroup module_pdokcal
+\ingroup module_timesyncu
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -45,7 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-#include <kernel/pdokcal.h>
+#include <user/timesyncucal.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -62,7 +57,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // global function prototypes
 //------------------------------------------------------------------------------
-extern tOplkError pdoucal_callSyncCb(void);
+
 
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //
@@ -90,67 +85,34 @@ extern tOplkError pdoucal_callSyncCb(void);
 
 //------------------------------------------------------------------------------
 /**
-\brief  Initialize kernel PDO CAL sync module
+\brief  Initialize user timesync module
 
-The function initializes the kernel PDO CAL sync module.
+The function initializes the user timesync module.
+
+\param  pfnSyncCb_p             Function that is called in case of sync event
 
 \return The function returns a tOplkError error code.
 
-\ingroup module_pdokcal
+\ingroup module_timesyncu
 */
 //------------------------------------------------------------------------------
-tOplkError pdokcal_initSync(void)
+tOplkError timesyncu_init(tSyncCb pfnSyncCb_p)
 {
-    return kErrorOk;
+    return timesyncucal_init(pfnSyncCb_p);
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Cleanup PDO CAL sync module
+\brief  Cleanup timesync module
 
-The function cleans up the PDO CAL sync module.
+The function cleans up the timesync module.
 
-\ingroup module_pdokcal
+\ingroup module_timesyncu
 */
 //------------------------------------------------------------------------------
-void pdokcal_exitSync(void)
+void timesyncu_exit(void)
 {
-
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Send a sync event
-
-The function sends a sync event.
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_pdokcal
-*/
-//------------------------------------------------------------------------------
-tOplkError pdokcal_sendSyncEvent(void)
-{
-    return pdoucal_callSyncCb();
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Enable sync events
-
-The function enables sync events
-
-\param  fEnable_p               enable/disable sync event
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_pdokcal
-*/
-//------------------------------------------------------------------------------
-tOplkError pdokcal_controlSync(BOOL fEnable_p)
-{
-    UNUSED_PARAMETER(fEnable_p);
-    return kErrorOk;
+    timesyncucal_exit();
 }
 
 //============================================================================//
@@ -159,4 +121,4 @@ tOplkError pdokcal_controlSync(BOOL fEnable_p)
 /// \name Private Functions
 /// \{
 
-///\}
+/// \}

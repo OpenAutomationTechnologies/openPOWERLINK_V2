@@ -50,9 +50,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/nmtu.h>
 #include <user/dllucal.h>
 #include <user/eventu.h>
-#include <user/pdoucal.h>
 #include <oplk/obd.h>
 #include <oplk/sdo.h>
+#include <user/timesyncucal.h>
 
 #if defined(CONFIG_INCLUDE_CFM)
 #include <user/cfmu.h>
@@ -1307,7 +1307,7 @@ tOplkError oplk_waitSyncEvent(ULONG timeout_p)
     if (!ctrlu_stackIsInitialized())
         return kErrorApiNotInitialized;
 
-    return pdoucal_waitSyncEvent(timeout_p);
+    return timesyncucal_waitSyncEvent(timeout_p);
 }
 
 //------------------------------------------------------------------------------

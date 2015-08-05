@@ -1,17 +1,16 @@
 /**
 ********************************************************************************
-\file   pdokcal.c
+\file   timesynck.c
 
-\brief  Implementation of kernel PDO CAL module
+\brief  Kernel timesync module
 
-This file contains the implementation of the kernel PDO CAL module.
+This file contains the main implementation of the kernel timesync module.
 
-\ingroup module_pdokcal
+\ingroup module_timesynck
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -41,11 +40,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-#include <kernel/pdokcal.h>
-#include <kernel/pdok.h>
-#include <kernel/dllk.h>
-#include <kernel/eventk.h>
-#include <common/ami.h>
+#include <kernel/timesynck.h>
+#include <kernel/timesynckcal.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -82,8 +78,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError cbProcessRpdo(tFrameInfo* pFrameInfo_p) SECTION_PDOK_PROCESS_RPDO;
-
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -91,107 +85,79 @@ static tOplkError cbProcessRpdo(tFrameInfo* pFrameInfo_p) SECTION_PDOK_PROCESS_R
 
 //------------------------------------------------------------------------------
 /**
-\brief  Initialize the PDO kernel CAL module
+\brief  Initialize kernel timesync module
 
-The function initializes the PDO user CAL module.
+The function initializes the kernel timesync module.
 
 \return The function returns a tOplkError error code.
 
-\ingroup module_pdokcal
+\ingroup module_timesynck
 */
 //------------------------------------------------------------------------------
-tOplkError pdokcal_init(void)
+tOplkError timesynck_init(void)
 {
-    tOplkError      Ret = kErrorOk;
-
-    if ((Ret = pdokcal_openMem()) != kErrorOk)
-        return Ret;
-
-    dllk_regRpdoHandler(cbProcessRpdo);
-
-    return Ret;
+    return timesynckcal_init();
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Clean up PDO kernel CAL module
+\brief  Cleanup timesync module
 
-The function de-initializes the PDO kernel CAL module.
+The function cleans up the timesync module.
 
-\return The function returns a tOplkError error code.
-
-\ingroup module_pdokcal
+\ingroup module_timesynck
 */
 //------------------------------------------------------------------------------
-tOplkError pdokcal_exit(void)
+void timesynck_exit(void)
 {
-    pdokcal_closeMem();
-    return kErrorOk;
+    timesynckcal_exit();
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Process events from PdouCal module.
+\brief  Send sync event
 
-\param  pEvent_p                Pointer to event structure
+The function sends a synchronization event to the user layer.
 
 \return The function returns a tOplkError error code.
 
-\ingroup module_pdokcal
-**/
+\ingroup module_timesynck
+*/
 //------------------------------------------------------------------------------
-tOplkError pdokcal_process(tEvent* pEvent_p)
+tOplkError timesynck_sendSyncEvent(void)
 {
-    tOplkError                  Ret = kErrorOk;
+    return timesynckcal_sendSyncEvent();
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Process events for timesync
+
+The function processes events intended for the kernel timesync module.
+
+\parma  pEvent_p        Pointer to event
+
+\return The function returns a tOplkError error code.
+
+\ingroup module_timesynck
+*/
+//------------------------------------------------------------------------------
+tOplkError timesynck_process(tEvent* pEvent_p)
+{
+    tOplkError ret = kErrorOk;
 
     switch (pEvent_p->eventType)
     {
-        case kEventTypePdokAlloc:
-            {
-                tPdoAllocationParam* pAllocationParam;
-                pAllocationParam = (tPdoAllocationParam*)pEvent_p->eventArg.pEventArg;
-                Ret = pdok_allocChannelMem(pAllocationParam);
-            }
-            break;
-
-        case kEventTypePdokConfig:
-            {
-                tPdoChannelConf* pChannelConf;
-                pChannelConf = (tPdoChannelConf*)pEvent_p->eventArg.pEventArg;
-                Ret = pdok_configureChannel(pChannelConf);
-            }
-            break;
-
-        case kEventTypePdokSetupPdoBuf:
-            {
-                tPdoMemSize*     pPdoMemSize;
-                pPdoMemSize = (tPdoMemSize*)pEvent_p->eventArg.pEventArg;
-                Ret = pdok_setupPdoBuffers(pPdoMemSize->rxPdoMemSize,
-                                           pPdoMemSize->txPdoMemSize);
-            }
-            break;
-
-        case kEventTypePdoRx:
-            {
-#if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC != FALSE
-                tFrameInfo*  pFrameInfo;
-                pFrameInfo = (tFrameInfo*)pEvent_p->eventArg.pEventArg;
-                Ret = pdok_processRxPdo(pFrameInfo->frame.pBuffer, pFrameInfo->frameSize);
-#else
-                tPlkFrame* pFrame;
-
-                pFrame = (tPlkFrame*)pEvent_p->eventArg.pEventArg;
-
-                Ret = pdok_processRxPdo(pFrame, pEvent_p->eventArgSize);
-#endif
-            }
+        case kEventTypeTimesynckControl:
+            ret = timesynckcal_controlSync(*((BOOL*)pEvent_p->eventArg.pEventArg));
             break;
 
         default:
-            Ret = kErrorInvalidEvent;
+            ret = kErrorInvalidEvent;
             break;
     }
-    return Ret;
+
+    return ret;
 }
 
 //============================================================================//
@@ -200,45 +166,4 @@ tOplkError pdokcal_process(tEvent* pEvent_p)
 /// \name Private Functions
 /// \{
 
-//------------------------------------------------------------------------------
-/**
-\brief  Process received PDO
-
-This function is called by the DLL if a PRes or a PReq frame have been received.
-It posts the frame to the event queue. It is called in states
-NMT_CS_READY_TO_OPERATE and NMT_CS_OPERATIONAL. The passed PDO needs not to be
-valid.
-
-\param  pFrameInfo_p            pointer to frame info structure
-
-\return The function returns a tOplkError error code.
-**/
-//------------------------------------------------------------------------------
-static tOplkError cbProcessRpdo(tFrameInfo* pFrameInfo_p)
-{
-    tOplkError      ret = kErrorOk;
-    tEvent          event;
-
-    event.eventSink = kEventSinkPdokCal;
-    event.eventType = kEventTypePdoRx;
-#if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC != FALSE
-    event.eventArgSize   = sizeof(tFrameInfo);
-    event.eventArg.pEventArg = pFrameInfo_p;
-#else
-    // limit copied data to size of PDO (because from some CNs the frame is larger than necessary)
-    event.eventArgSize = ami_getUint16Le(&pFrameInfo_p->frame.pBuffer->data.pres.sizeLe) +
-                                         PLK_FRAME_OFFSET_PDO_PAYLOAD; // pFrameInfo_p->frameSize;
-    event.eventArg.pEventArg = pFrameInfo_p->frame.pBuffer;
-#endif
-    ret = eventk_postEvent(&event);
-#if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC != FALSE
-    if (ret == kErrorOk)
-    {
-        ret = kErrorReject; // Reject release of rx buffer
-    }
-#endif
-
-    return ret;
-}
-
-///\}
+/// \}

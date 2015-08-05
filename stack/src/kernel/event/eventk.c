@@ -50,6 +50,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/dllk.h>
 #include <kernel/dllkcal.h>
 #include <kernel/errhndk.h>
+#include <kernel/timesynck.h>
 #include <oplk/benchmark.h>
 
 #if defined(CONFIG_INCLUDE_PDO)
@@ -202,6 +203,11 @@ tOplkError eventk_process(tEvent* pEvent_p)
             eventSource = kEventSourceErrk;
             break;
 
+        case kEventSinkTimesynck:
+            ret = timesynck_process(pEvent_p);
+            eventSource = kEventSourceTimesynck;
+            break;
+
         default:
             // Unknown sink, provide error event to API layer
             eventk_postError(kEventSourceEventk, ret,
@@ -260,6 +266,7 @@ tOplkError eventk_postEvent(tEvent* pEvent_p)
         case kEventSinkPdok:
         case kEventSinkPdokCal:
         case kEventSinkErrk:
+        case kEventSinkTimesynck:
             ret = eventkcal_postKernelEvent(pEvent_p);
             break;
 
