@@ -258,7 +258,7 @@ tOplkError errhndk_postError(tEventDllError* pErrEvent_p)
     Event.eventSink = kEventSinkErrk;
     Event.eventType = kEventTypeDllError;
     Event.eventArgSize = sizeof(tEventDllError);
-    Event.pEventArg = pErrEvent_p;
+    Event.eventArg.pEventArg = pErrEvent_p;
     Ret = eventk_postEvent(&Event);
 
     return Ret;
@@ -420,7 +420,7 @@ to the NMT.
 static tOplkError handleCnLossSoc(tEvent* pEvent_p)
 {
     tOplkError              ret = kErrorOk;
-    tEventDllError*         pErrorHandlerEvent = (tEventDllError*)pEvent_p->pEventArg;
+    tEventDllError*         pErrorHandlerEvent = (tEventDllError*)pEvent_p->eventArg.pEventArg;
     UINT32                  threshold, thresholdCnt, cumulativeCnt;
 
     // Check if loss of SoC event occurred
@@ -471,7 +471,7 @@ to the NMT.
 static tOplkError handleCnLossPreq(tEvent* pEvent_p)
 {
     tOplkError              ret;
-    tEventDllError*         pErrorHandlerEvent = (tEventDllError*)pEvent_p->pEventArg;
+    tEventDllError*         pErrorHandlerEvent = (tEventDllError*)pEvent_p->eventArg.pEventArg;
     UINT32                  threshold, thresholdCnt, cumulativeCnt;
 
     // check if loss of PReq event occurred
@@ -518,7 +518,7 @@ appropriate error counter will be decremented.
 //------------------------------------------------------------------------------
 static void handleCorrectPreq(tEvent* pEvent_p)
 {
-    tEventDllError*         pErrorHandlerEvent = (tEventDllError*)pEvent_p->pEventArg;
+    tEventDllError*         pErrorHandlerEvent = (tEventDllError*)pEvent_p->eventArg.pEventArg;
     UINT32                  thresholdCnt;
 
     errhndkcal_getLossPreqThresholdCnt(&thresholdCnt);
@@ -548,7 +548,7 @@ to the NMT.
 static tOplkError handleCnCrc(tEvent* pEvent_p)
 {
     tOplkError              ret;
-    tEventDllError*         pErrorHandlerEvent = (tEventDllError*)pEvent_p->pEventArg;
+    tEventDllError*         pErrorHandlerEvent = (tEventDllError*)pEvent_p->eventArg.pEventArg;
     UINT32                  threshold, thresholdCnt, cumulativeCnt;
 
     // Check if CRC error event occurred
@@ -599,7 +599,7 @@ is removed from the isochronous phase.
 static tOplkError handleInvalidFormat(tEvent* pEvent_p)
 {
     tOplkError              ret;
-    tEventDllError*         pErrorHandlerEvent = (tEventDllError*)pEvent_p->pEventArg;
+    tEventDllError*         pErrorHandlerEvent = (tEventDllError*)pEvent_p->eventArg.pEventArg;
 
     // check if invalid format error occurred (only direct reaction)
     if ((pErrorHandlerEvent->dllErrorEvents & DLL_ERR_INVALID_FORMAT) == 0)
@@ -662,7 +662,7 @@ to the NMT.
 static tOplkError handleMnCrc(tEvent* pEvent_p)
 {
     tOplkError              ret;
-    tEventDllError*         pErrorHandlerEvent = (tEventDllError*)pEvent_p->pEventArg;
+    tEventDllError*         pErrorHandlerEvent = (tEventDllError*)pEvent_p->eventArg.pEventArg;
     UINT32                  threshold, thresholdCnt, cumulativeCnt;
 
     // check if CRC error event occurred
@@ -708,7 +708,7 @@ static tOplkError handleMnCycTimeExceed(tEvent* pEvent_p)
 {
     tOplkError              ret = kErrorOk;
     tEventDllError*         pErrorHandlerEvent =
-                            (tEventDllError*)pEvent_p->pEventArg;
+                            (tEventDllError*)pEvent_p->eventArg.pEventArg;
     UINT32                  threshold, thresholdCnt, cumulativeCnt;
 
     // check if cycle time exceeded event occurred
@@ -771,7 +771,7 @@ static tOplkError handleMnCnLossPres(tEvent* pEvent_p)
     tOplkError              ret;
     UINT                    nodeIdx;
     tDllNodeOpParam         nodeOpParam;
-    tEventDllError*         pErrorHandlerEvent = (tEventDllError*)pEvent_p->pEventArg;
+    tEventDllError*         pErrorHandlerEvent = (tEventDllError*)pEvent_p->eventArg.pEventArg;
     UINT32                  threshold, thresholdCnt, cumulativeCnt;
 
     if ((pErrorHandlerEvent->dllErrorEvents & DLL_ERR_MN_CN_LOSS_PRES) == 0)
@@ -912,7 +912,7 @@ static tOplkError postHeartbeatEvent(UINT nodeId_p, tNmtState state_p,
     event.eventSink = kEventSinkNmtMnu;
     event.eventType = kEventTypeHeartbeat;
     event.eventArgSize = sizeof(heartbeatEvent);
-    event.pEventArg = &heartbeatEvent;
+    event.eventArg.pEventArg = &heartbeatEvent;
     ret = eventk_postEvent(&event);
     return ret;
 }
@@ -937,7 +937,7 @@ static tOplkError postHistoryEntryEvent(tErrHistoryEntry* pHistoryEntry_p)
     event.eventSink = kEventSinkApi;
     event.eventType = kEventTypeHistoryEntry;
     event.eventArgSize = sizeof(*pHistoryEntry_p);
-    event.pEventArg = pHistoryEntry_p;
+    event.eventArg.pEventArg = pHistoryEntry_p;
     ret = eventk_postEvent(&event);
 
     return ret;
@@ -1061,7 +1061,7 @@ static tOplkError postNmtEvent(tNmtEvent nmtEvent_p)
     nmtEvent = nmtEvent_p;
     event.eventSink = kEventSinkNmtk;
     event.eventType = kEventTypeNmtEvent;
-    event.pEventArg = &nmtEvent;
+    event.eventArg.pEventArg = &nmtEvent;
     event.eventArgSize = sizeof(nmtEvent);
     ret = eventk_postEvent(&event);
     return ret;

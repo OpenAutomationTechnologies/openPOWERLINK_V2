@@ -319,7 +319,7 @@ static void* eventThread(void* arg_p)
                     pEvent->eventType, debugstr_getEventTypeStr(pEvent->eventType),
                     pEvent->eventSink, debugstr_getEventSinkStr(pEvent->eventSink));*/
             if (pEvent->eventArgSize != 0)
-                pEvent->pEventArg = (char*)pEvent + sizeof(tEvent);
+                pEvent->eventArg.pEventArg = (char*)pEvent + sizeof(tEvent);
 
             ret = eventu_process(pEvent);
         }

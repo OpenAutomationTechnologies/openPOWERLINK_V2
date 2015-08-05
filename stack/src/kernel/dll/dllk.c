@@ -766,7 +766,7 @@ tOplkError dllk_postEvent(tEventType eventType_p)
     event.eventSink = kEventSinkDllk;
     event.eventType = eventType_p;
     event.eventArgSize = 0;
-    event.pEventArg = NULL;
+    event.eventArg.pEventArg = NULL;
     ret = eventk_postEvent(&event);
     return ret;
 }
@@ -817,7 +817,7 @@ tOplkError dllk_cbTimerSwitchOver(tTimerEventArg* pEventArg_p)
     event.eventSink = kEventSinkNmtk;
     event.eventType = kEventTypeNmtEvent;
     event.eventArgSize = sizeof(nmtEvent);
-    event.pEventArg = &nmtEvent;
+    event.eventArg.pEventArg = &nmtEvent;
     ret = eventk_postEvent(&event);
 
 Exit:

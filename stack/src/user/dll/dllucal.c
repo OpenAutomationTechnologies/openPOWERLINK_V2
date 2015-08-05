@@ -260,7 +260,7 @@ tOplkError dllucal_process(tEvent* pEvent_p)
     {
         case kEventTypeAsndRx:
             // Argument pointer is frame
-            FrameInfo.pFrame = (tPlkFrame*)pEvent_p->pEventArg;
+            FrameInfo.pFrame = (tPlkFrame*)pEvent_p->eventArg.pEventArg;
             FrameInfo.frameSize = pEvent_p->eventArgSize;
             pFrameInfo = &FrameInfo;
             ret = handleRxAsyncFrame(pFrameInfo);
@@ -268,13 +268,13 @@ tOplkError dllucal_process(tEvent* pEvent_p)
 
         case kEventTypeAsndRxInfo:
             // Argument pointer is frame info
-            pFrameInfo = (tFrameInfo*)pEvent_p->pEventArg;
+            pFrameInfo = (tFrameInfo*)pEvent_p->eventArg.pEventArg;
 
             ret = handleRxAsyncFrameInfo(pFrameInfo);
             break;
 
         case kEventTypeAsndNotRx:
-            pAsndNotRx = (tDllAsndNotRx*)pEvent_p->pEventArg;
+            pAsndNotRx = (tDllAsndNotRx*)pEvent_p->eventArg.pEventArg;
             ret = handleNotRxAsndFrame(pAsndNotRx);
             break;
 
@@ -306,7 +306,7 @@ tOplkError dllucal_config(tDllConfigParam* pDllConfigParam_p)
 
     event.eventSink = kEventSinkDllkCal;
     event.eventType = kEventTypeDllkConfig;
-    event.pEventArg = pDllConfigParam_p;
+    event.eventArg.pEventArg = pDllConfigParam_p;
     event.eventArgSize = sizeof(*pDllConfigParam_p);
     ret = eventu_postEvent(&event);
 
@@ -334,7 +334,7 @@ tOplkError dllucal_setIdentity(tDllIdentParam* pDllIdentParam_p)
 
     event.eventSink = kEventSinkDllkCal;
     event.eventType = kEventTypeDllkIdentity;
-    event.pEventArg = pDllIdentParam_p;
+    event.eventArg.pEventArg = pDllIdentParam_p;
     event.eventArgSize = sizeof(*pDllIdentParam_p);
     ret = eventu_postEvent(&event);
     return ret;
@@ -452,7 +452,7 @@ tOplkError dllucal_sendAsyncFrame(tFrameInfo* pFrameInfo_p,
     event.eventSink = kEventSinkDllk;
     event.eventType = kEventTypeDllkFillTx;
     OPLK_MEMSET(&event.netTime, 0x00, sizeof(event.netTime));
-    event.pEventArg = &priority_p;
+    event.eventArg.pEventArg = &priority_p;
     event.eventArgSize = sizeof(priority_p);
     ret = eventu_postEvent(&event);
 
@@ -494,7 +494,7 @@ tOplkError dllucal_issueRequest(tDllReqServiceId service_p, UINT nodeId_p,
             issueReq.service = service_p;
             issueReq.nodeId = nodeId_p;
             issueReq.soaFlag1 = soaFlag1_p;
-            event.pEventArg = &issueReq;
+            event.eventArg.pEventArg = &issueReq;
             event.eventArgSize = sizeof(issueReq);
             ret = eventu_postEvent(&event);
             break;
@@ -555,7 +555,7 @@ tOplkError dllucal_configNode(tDllNodeInfo* pNodeInfo_p)
 
     event.eventSink = kEventSinkDllkCal;
     event.eventType = kEventTypeDllkConfigNode;
-    event.pEventArg = pNodeInfo_p;
+    event.eventArg.pEventArg = pNodeInfo_p;
     event.eventArgSize = sizeof(*pNodeInfo_p);
 
     ret = eventu_postEvent(&event);
@@ -584,7 +584,7 @@ tOplkError dllucal_addNode(tDllNodeOpParam* pNodeOpParam_p)
 
     event.eventSink = kEventSinkDllkCal;
     event.eventType = kEventTypeDllkAddNode;
-    event.pEventArg = pNodeOpParam_p;
+    event.eventArg.pEventArg = pNodeOpParam_p;
     event.eventArgSize = sizeof(*pNodeOpParam_p);
 
     ret = eventu_postEvent(&event);
@@ -613,7 +613,7 @@ tOplkError dllucal_deleteNode(tDllNodeOpParam* pNodeOpParam_p)
 
     event.eventSink = kEventSinkDllkCal;
     event.eventType = kEventTypeDllkDelNode;
-    event.pEventArg = pNodeOpParam_p;
+    event.eventArg.pEventArg = pNodeOpParam_p;
     event.eventArgSize = sizeof(*pNodeOpParam_p);
 
     ret = eventu_postEvent(&event);
@@ -652,7 +652,7 @@ static tOplkError SetAsndServiceIdFilter(tDllAsndServiceId serviceId_p,
     event.eventType = kEventTypeDllkServFilter;
     servFilter.serviceId = serviceId_p;
     servFilter.filter = filter_p;
-    event.pEventArg = &servFilter;
+    event.eventArg.pEventArg = &servFilter;
     event.eventArgSize = sizeof(servFilter);
     ret = eventu_postEvent(&event);
 
@@ -778,7 +778,7 @@ static tOplkError handleRxAsyncFrameInfo(tFrameInfo* pFrameInfo_p)
     event.eventSink = kEventSinkDllkCal;
     event.eventType = kEventTypeReleaseRxFrame;
     event.eventArgSize = sizeof(tFrameInfo);
-    event.pEventArg = pFrameInfo_p;
+    event.eventArg.pEventArg = pFrameInfo_p;
 
     eventu_postEvent(&event);
 

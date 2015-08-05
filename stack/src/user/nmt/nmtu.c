@@ -169,7 +169,7 @@ tOplkError nmtu_postNmtEvent(tNmtEvent nmtEvent_p)
     event.netTime.nsec = 0;
     event.netTime.sec = 0;
     event.eventType = kEventTypeNmtEvent;
-    event.pEventArg = &nmtEvent_p;
+    event.eventArg.pEventArg = &nmtEvent_p;
     event.eventArgSize = sizeof(nmtEvent_p);
 
     ret = eventu_postEvent(&event);
@@ -216,7 +216,7 @@ tOplkError nmtu_processEvent(tEvent* pEvent_p)
         // state change of NMT-Module
         case kEventTypeNmtStateChange:
             ret = timeru_deleteTimer(&nmtuInstance_g.timerHdl);
-            pNmtStateChange = (tEventNmtStateChange*)pEvent_p->pEventArg;
+            pNmtStateChange = (tEventNmtStateChange*)pEvent_p->eventArg.pEventArg;
             nmtuInstance_g.localNmtState = pNmtStateChange->newNmtState;
 
             // call cb-functions to inform higher layer
