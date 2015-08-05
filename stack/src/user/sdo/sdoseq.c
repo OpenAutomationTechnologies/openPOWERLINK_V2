@@ -552,7 +552,7 @@ tOplkError sdoseq_processEvent(tEvent* pEvent_p)
 
     // get timer handle
     pTimerEventArg = (tTimerEventArg*)pEvent_p->pEventArg;
-    timerHdl = pTimerEventArg->timerHdl;
+    timerHdl = pTimerEventArg->timerHdl.handle;
     // get pointer to intern control structure of connection
     if (pTimerEventArg->argument.pValue == NULL)
         return ret;
