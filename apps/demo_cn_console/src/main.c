@@ -133,7 +133,6 @@ int main (int argc, char** argv)
 {
     tOplkError                  ret = kErrorOk;
     tOptions                    opts;
-    UINT32                      version;
 
     getOptions(argc, argv, &opts);
 
@@ -145,10 +144,9 @@ int main (int argc, char** argv)
 
     initEvents(&fGsOff_l);
 
-    version = oplk_getVersion();
     printf("----------------------------------------------------\n");
     printf("openPOWERLINK console CN DEMO application\n");
-    printf("using openPOWERLINK Stack: %x.%x.%x\n", PLK_STACK_VER(version), PLK_STACK_REF(version), PLK_STACK_REL(version));
+    printf("using openPOWERLINK Stack: %s\n", oplk_getVersionString());
     printf("----------------------------------------------------\n");
 
     if ((ret = initPowerlink(CYCLE_LEN, aMacAddr_l, opts.nodeId))

@@ -503,6 +503,7 @@ OPLKDLLEXPORT tOplkError oplk_getEthMacAddr(UINT8* pMacAddr_p);
 OPLKDLLEXPORT BOOL       oplk_checkKernelStack(void);
 OPLKDLLEXPORT tOplkError oplk_waitSyncEvent(ULONG timeout_p);
 OPLKDLLEXPORT UINT32     oplk_getVersion(void);
+OPLKDLLEXPORT char*      oplk_getVersionString(void);
 OPLKDLLEXPORT UINT32     oplk_getStackConfiguration(void);
 
 // Process image API functions

@@ -45,16 +45,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // NOTE:
 // All version macros should contain the same version number. But do not use
 // defines instead of the numbers. Because the macro PLK_STRING_VERSION() can not
-// convert a define to a string.
+// convert a define to a string. In case of a release candidate (rc) version
+// the PLK_STRING_VERSION() must be replaced with PLK_STRING_VERSION_RC() in order
+// to add the "-rc" suffix.
 //
-// Format: maj.min.build
-//         maj            = major version
-//             min        = minor version (will be set to 0 if major version will be incremented)
-//                 build  = current build (will be set to 0 if minor version will be incremented)
+// Format: maj.min.build-rc
+//         maj                  = major version
+//             min              = minor version (will be set to 0 if major version will be incremented)
+//                 build        = current build (will be set to 0 if minor version will be incremented)
+//                       rc     = release candidate (will be set to 0 if final version created)
 //
-#define PLK_DEFINED_STACK_VERSION   PLK_STACK_VERSION   (2, 2, 1)
-#define PLK_DEFINED_OBJ1018_VERSION PLK_OBJ1018_VERSION (2, 2, 1)
-#define PLK_DEFINED_STRING_VERSION  PLK_STRING_VERSION  (2, 2, 1)
+#define PLK_DEFINED_STACK_VERSION   PLK_STACK_VERSION       (2, 2, 1, 0)
+#define PLK_DEFINED_OBJ1018_VERSION PLK_OBJ1018_VERSION     (2, 2, 1, 0)
+#define PLK_DEFINED_STRING_VERSION  PLK_STRING_VERSION      (2, 2, 1, 0)
 
 // -----------------------------------------------------------------------------
 #define PLK_PRODUCT_NAME            "OPLK"

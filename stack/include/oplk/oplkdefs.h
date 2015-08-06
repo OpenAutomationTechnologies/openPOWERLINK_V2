@@ -51,12 +51,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /// \name Version macros
 /// \{
 #define PLK_SPEC_VERSION                                0x20                                                    ///< Ethernet POWERLINK V 2.0
-#define PLK_STACK_VERSION(ver, rev, rel)                (((((UINT32)(ver)) & 0xFF) << 24) | ((((UINT32)(rev)) & 0xFF) << 16) | (((UINT32)(rel)) & 0xFFFF))      ///< Version in UINT32 format
-#define PLK_OBJ1018_VERSION(ver, rev, rel)              ((((UINT32)(ver))<<16) | (((UINT32)(rev)) & 0xFFFF))    ///< Version in UINT32 format for Object 0x1018 which contains general information about a device.
-#define PLK_STRING_VERSION(ver, rev, rel)               "V" #ver "." #rev "." #rel                              ///< Version in string format
+#define PLK_STACK_VERSION(ver, rev, rel, rc)            (((((UINT32)(ver)) & 0xFF) << 24) | ((((UINT32)(rev)) & 0xFF) << 16) | ((((UINT32)(rel)) & 0xFF) << 8) | ((((UINT32)(rc)) & 0xFF) << 0))      ///< Version in UINT32 format
+#define PLK_OBJ1018_VERSION(ver, rev, rel, rc)          ((((UINT32)(ver))<<16) | (((UINT32)(rev)) & 0xFFFF))    ///< Version in UINT32 format for Object 0x1018 which contains general information about a device.
+#define PLK_STRING_VERSION(ver, rev, rel, rc)           "V" #ver "." #rev "." #rel                              ///< Version in string format
+#define PLK_STRING_VERSION_RC(ver, rev, rel, rc)        "V" #ver "." #rev "." #rel "-rc" #rc                    ///< Release candidate version in string format
 #define PLK_STACK_VER(ver)                              ((UINT32)ver & 0xFF000000) >> 24                        ///< Parses the 32 bit version number and returns the major number.
 #define PLK_STACK_REF(ver)                              ((UINT32)ver & 0x00FF0000) >> 16                        ///< Parses the 32 bit version number and returns the minor number.
-#define PLK_STACK_REL(ver)                              ((UINT32)ver & 0x0000FFFF)                              ///< Parses the 32 bit version number and returns the build number.
+#define PLK_STACK_REL(ver)                              ((UINT32)ver & 0x0000FF00) >> 8                         ///< Parses the 32 bit version number and returns the build number.
+#define PLK_STACK_RC(ver)                               ((UINT32)ver & 0x000000FF) >> 0                         ///< Parses the 32 bit version number and returns the rc number.
 /// \}
 
 //------------------------------------------------------------------------------

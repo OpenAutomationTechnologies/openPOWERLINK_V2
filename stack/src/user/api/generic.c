@@ -1071,18 +1071,40 @@ BOOL oplk_checkKernelStack(void)
 \brief Get openPOWERLINK Version
 
 The function identifies the openPOWERLINK version of the stack.
-The version is represented by a 32 bit number, which contains the major-, minor- and build-number.
-Additionally the macros \ref PLK_STACK_VER, \ref PLK_STACK_REF and \ref PLK_STACK_REL can be used
-to get the respective value of the major-, minor- or build-number.
+The version is represented by a 32 bit number, which contains the major-, minor-,
+build- and release-candidate-number.
+Additionally the macros \ref PLK_STACK_VER, \ref PLK_STACK_REF,
+\ref PLK_STACK_REL and \ref PLK_STACK_RC can be used to get the respective value
+of the major-, minor-, build- or release-candidate-number.
 
 \return Returns the openPOWERLINK version
-\retval Returns a 32 bit number, which contains the major-, minor- and build-number.
+\retval Returns a 32 bit number, which contains the major-, minor-, build- and
+        release-candidate-number.
 
 */
 //------------------------------------------------------------------------------
 UINT32 oplk_getVersion(void)
 {
     return PLK_DEFINED_STACK_VERSION;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief Get openPOWERLINK Version string
+
+The function identifies the openPOWERLINK version of the stack.
+The version is represented by a string, which contains the major-, minor-,
+build- and release-candidate-number.
+
+\return Returns the openPOWERLINK version string
+
+*/
+//------------------------------------------------------------------------------
+char* oplk_getVersionString(void)
+{
+    static char* pVersionString = PLK_DEFINED_STRING_VERSION;
+
+    return pVersionString;
 }
 
 //------------------------------------------------------------------------------
