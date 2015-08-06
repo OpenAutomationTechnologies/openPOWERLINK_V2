@@ -1194,7 +1194,7 @@ static tOplkError processUserEvent(tEvent* pEvent_p)
     {
         // error event
         case kEventTypeError:
-            pEventError = (tEventError*)pEvent_p->pEventArg;
+            pEventError = (tEventError*)pEvent_p->eventArg.pEventArg;
             switch (pEventError->eventSource)
             {
                 // treat the errors from the following sources as critical
@@ -1226,13 +1226,13 @@ static tOplkError processUserEvent(tEvent* pEvent_p)
                 break;
             }
             eventType = kOplkApiEventHistoryEntry;
-            ret = ctrlu_callUserEventCallback(eventType, (tOplkApiEventArg*)pEvent_p->pEventArg);
+            ret = ctrlu_callUserEventCallback(eventType, (tOplkApiEventArg*)pEvent_p->eventArg.pEventArg);
             break;
 
         // user-defined event
         case kEventTypeApiUserDef:
             eventType = kOplkApiEventUserDef;
-            apiEventArg.pUserArg = *(void**)pEvent_p->pEventArg;
+            apiEventArg.pUserArg = *(void**)pEvent_p->eventArg.pEventArg;
             ret = ctrlu_callUserEventCallback(eventType, &apiEventArg);
             break;
 
@@ -1243,7 +1243,7 @@ static tOplkError processUserEvent(tEvent* pEvent_p)
                 tDllEventReceivedPres*      pDllData;
 
                 pApiData = &apiEventArg.receivedPres;
-                pDllData = (tDllEventReceivedPres*)pEvent_p->pEventArg;
+                pDllData = (tDllEventReceivedPres*)pEvent_p->eventArg.pEventArg;
 
                 pApiData->nodeId = pDllData->nodeId;
                 pApiData->frameSize = pDllData->frameSize;

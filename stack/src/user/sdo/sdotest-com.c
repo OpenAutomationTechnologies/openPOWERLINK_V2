@@ -312,7 +312,7 @@ tOplkError sdotestcom_sendFrame(UINT nodeId_p, tSdoType sdoType_p,
                 // just trigger frame send event
                 OPLK_MEMSET(&Event.netTime, 0x00, sizeof(Event.netTime));
                 Event.eventType    = kEventTypeSdoAsySend;
-                Event.pEventArg    = pCmdCon;
+                Event.eventArg.pEventArg    = pCmdCon;
                 Event.eventArgSize = sizeof(*pCmdCon);
                 Event.eventSink    = kEventSinkSdoTest;
                 ret = eventu_postEvent(&Event);
@@ -397,7 +397,7 @@ tOplkError sdotestcom_cbEvent(tEvent* pOplkEvent_p)
             // Check parameter
             if (sizeof(*pCmdCon) == pOplkEvent_p->eventArgSize)
             {
-                pCmdCon = (tSdoTestComCon*)pOplkEvent_p->pEventArg;
+                pCmdCon = (tSdoTestComCon*)pOplkEvent_p->eventArg.pEventArg;
             }
             else
             {
@@ -526,7 +526,7 @@ tOplkError sdotestcom_conCb(tSdoSeqConHdl sdoSeqConHdl_p,
             // Trigger frame send event
             OPLK_MEMSET(&Event.netTime, 0x00, sizeof(Event.netTime));
             Event.eventType    = kEventTypeSdoAsySend;
-            Event.pEventArg    = pCmdCon;
+            Event.eventArg.pEventArg = pCmdCon;
             Event.eventArgSize = sizeof(*pCmdCon);
             Event.eventSink    = kEventSinkSdoTest;
 

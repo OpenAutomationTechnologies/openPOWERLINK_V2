@@ -331,7 +331,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
         pTimerInfo = &hresTimerInstance_l.aTimerInfo[0];
         for (index = 0; index < TIMER_COUNT; index++, pTimerInfo++)
         {
-            if (pTimerInfo->eventArg.timerHdl == 0)
+            if (pTimerInfo->eventArg.timerHdl.handle == 0)
             {
                 // free structure found
                 break;
@@ -343,7 +343,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
             return kErrorTimerNoTimerCreated;
         }
 
-        pTimerInfo->eventArg.timerHdl = HDL_INIT(index);
+        pTimerInfo->eventArg.timerHdl.handle = HDL_INIT(index);
     }
     else
     {
@@ -359,8 +359,8 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
 
     // increment timer handle (if timer expires right after this statement,
     // the user would detect an unknown timer handle and discard it)
-    pTimerInfo->eventArg.timerHdl = HDL_INC(pTimerInfo->eventArg.timerHdl);
-    *pTimerHdl_p = pTimerInfo->eventArg.timerHdl;
+    pTimerInfo->eventArg.timerHdl.handle = HDL_INC(pTimerInfo->eventArg.timerHdl.handle);
+    *pTimerHdl_p = pTimerInfo->eventArg.timerHdl.handle;
 
     // Adjust the Timeout if its to small
     if (fContinue_p != FALSE)
@@ -475,7 +475,7 @@ tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
             return kErrorTimerInvalidHandle;
         }
         pTimerInfo = &hresTimerInstance_l.aTimerInfo[index];
-        if (pTimerInfo->eventArg.timerHdl != *pTimerHdl_p)
+        if (pTimerInfo->eventArg.timerHdl.handle != *pTimerHdl_p)
         {
             // invalid handle
             return ret;
@@ -483,7 +483,7 @@ tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
     }
 
     *pTimerHdl_p = 0;
-    pTimerInfo->eventArg.timerHdl = 0;
+    pTimerInfo->eventArg.timerHdl.handle = 0;
     pTimerInfo->pfnCallback = NULL;
 
     // Disable the interrupt for this timer
@@ -532,7 +532,7 @@ static irqreturn_t timerCounterIsr(INT irqNum_p, void* pDevInstData_p)
     }
     // Acknowledge the Interrupt
     XTTCPSS_WRITE_REG(pTimerInfo->index, XTTCPSS_ISR_OFFSET, reg);
-    index = HDL_TO_IDX(pTimerInfo->eventArg.timerHdl);
+    index = HDL_TO_IDX(pTimerInfo->eventArg.timerHdl.handle);
 
     if (index >= TIMER_COUNT)
     {

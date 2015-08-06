@@ -322,7 +322,7 @@ tEdrvReleaseRxBuffer dllkframe_processFrameReceived(tEdrvRxBuffer* pRxBuffer_p)
             event.eventSink = kEventSinkNmtk;
             event.eventType = kEventTypeNmtEvent;
             event.eventArgSize = sizeof(nmtEvent);
-            event.pEventArg = &nmtEvent;
+            event.eventArg.pEventArg = &nmtEvent;
             ret = eventk_postEvent(&event);
         }
     }
@@ -388,8 +388,8 @@ void dllkframe_processTransmittedNmtReq(tEdrvTxBuffer* pTxBuffer_p)
             event.eventSink = kEventSinkNmtMnu;
             event.eventType = kEventTypeNmtMnuNmtCmdSent;
             event.eventArgSize = pTxBuffer_p->txFrameSize;
-            event.pEventArg = pTxFrame;
-            //PRINTF("%s TxB=%p, TxF=%p, s=%u\n", __func__, pTxBuffer_p, event.pEventArg, event.eventArgSize);
+            event.eventArg.pEventArg = pTxFrame;
+            //PRINTF("%s TxB=%p, TxF=%p, s=%u\n", __func__, pTxBuffer_p, event.eventArg, event.eventArgSize);
             ret = eventk_postEvent(&event);
             if (ret != kErrorOk)
                 goto Exit;
@@ -427,7 +427,7 @@ void dllkframe_processTransmittedNmtReq(tEdrvTxBuffer* pTxBuffer_p)
     event.eventSink = kEventSinkDllk;
     event.eventType = kEventTypeDllkFillTx;
     OPLK_MEMSET(&event.netTime, 0x00, sizeof(event.netTime));
-    event.pEventArg = &priority;
+    event.eventArg.pEventArg = &priority;
     event.eventArgSize = sizeof(priority);
     ret = eventk_postEvent(&event);
     if (ret != kErrorOk)
@@ -503,7 +503,7 @@ void dllkframe_processTransmittedNonPlk(tEdrvTxBuffer* pTxBuffer_p)
     event.eventSink = kEventSinkDllk;
     event.eventType = kEventTypeDllkFillTx;
     OPLK_MEMSET(&event.netTime, 0x00, sizeof(event.netTime));
-    event.pEventArg = &priority;
+    event.eventArg.pEventArg = &priority;
     event.eventArgSize = sizeof(priority);
     ret = eventk_postEvent(&event);
 
@@ -1537,7 +1537,7 @@ tOplkError dllkframe_asyncFrameNotReceived(tDllReqServiceId reqServiceId_p,
 
                 event.eventSink = kEventSinkDlluCal;
                 event.eventType = kEventTypeAsndNotRx;
-                event.pEventArg = (void*)&asndNotRx;
+                event.eventArg.pEventArg = (void*)&asndNotRx;
                 event.eventArgSize = sizeof(tDllAsndNotRx);
 
                 // Post event with dummy frame
@@ -1574,7 +1574,7 @@ tOplkError dllkframe_cbMnTimerCycle(tTimerEventArg* pEventArg_p)
     TGT_DLLK_ENTER_CRITICAL_SECTION();
 
 #if CONFIG_TIMER_USE_HIGHRES != FALSE
-    if (pEventArg_p->timerHdl != dllkInstance_g.timerHdlCycle)
+    if (pEventArg_p->timerHdl.handle != dllkInstance_g.timerHdlCycle)
     {   // zombie callback - just exit
         goto Exit;
     }
@@ -1928,7 +1928,7 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
         event.eventSink = kEventSinkApi;
         event.eventType = kEventTypeReceivedPres;
         event.eventArgSize = sizeof(presEvent);
-        event.pEventArg = &presEvent;
+        event.eventArg.pEventArg = &presEvent;
 
         ret = eventk_postEvent(&event);
         pPresFw->numResponse++;
@@ -2180,7 +2180,7 @@ static tOplkError processReceivedAmni(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtS
     event.eventSink = kEventSinkNmtMnu;
     event.eventType = kEventTypeReceivedAmni;
     event.eventArgSize = sizeof(nodeId);
-    event.pEventArg = &nodeId;
+    event.eventArg.pEventArg = &nodeId;
     ret = eventk_postEvent(&event);
 
     if (!NMT_IF_ACTIVE_CN(nmtState_p))
@@ -2818,7 +2818,7 @@ static tOplkError updateNode(tDllkNodeInfo* pIntNodeInfo_p, UINT nodeId_p,
             event.eventSink = kEventSinkNmtMnu;
             event.eventType = kEventTypeHeartbeat;
             event.eventArgSize = sizeof(heartbeatEvent);
-            event.pEventArg = &heartbeatEvent;
+            event.eventArg.pEventArg = &heartbeatEvent;
         }
         else
         {   // CN shall be deleted softly, so remove it now without issuing any error
@@ -2829,7 +2829,7 @@ static tOplkError updateNode(tDllkNodeInfo* pIntNodeInfo_p, UINT nodeId_p,
             event.eventType = kEventTypeDllkDelNode;
             // $$$ d.k. set Event.netTime to current time
             event.eventArgSize = sizeof(nodeOpParam);
-            event.pEventArg = &nodeOpParam;
+            event.eventArg.pEventArg = &nodeOpParam;
         }
 
         if ((ret = eventk_postEvent(&event)) != kErrorOk)
@@ -3007,7 +3007,7 @@ static void handleErrorSignaling(tPlkFrame* pFrame_p, UINT nodeId_p)
         issueReq.service = kDllReqServiceStatus;
         issueReq.nodeId = pIntNodeInfo->nodeId;
         issueReq.soaFlag1 = pIntNodeInfo->soaFlag1;
-        event.pEventArg = &issueReq;
+        event.eventArg.pEventArg = &issueReq;
         event.eventArgSize = sizeof(tDllCalIssueRequest);
         if ((ret = eventk_postEvent(&event)) != kErrorOk)
         {
@@ -3041,7 +3041,7 @@ static tOplkError cbCnTimer(tTimerEventArg* pEventArg_p)
 
     TGT_DLLK_ENTER_CRITICAL_SECTION();
 
-    if (pEventArg_p->timerHdl != dllkInstance_g.timerHdlCycle)
+    if (pEventArg_p->timerHdl.handle != dllkInstance_g.timerHdlCycle)
     {   // zombie callback - just exit
         goto Exit;
     }

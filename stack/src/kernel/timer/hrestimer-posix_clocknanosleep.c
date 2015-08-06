@@ -229,7 +229,7 @@ tOplkError hrestimer_exit(void)
     {
         pTimerInfo = &hresTimerInstance_l.aTimerInfo[index];
 
-        pTimerInfo->eventArg.timerHdl = 0;
+        pTimerInfo->eventArg.timerHdl.handle = 0;
 
         /* send exit signal to thread */
         pTimerInfo->fContinue = 0;
@@ -293,7 +293,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
         pTimerInfo = &hresTimerInstance_l.aTimerInfo[0];
         for (index = 0; index < TIMER_COUNT; index++, pTimerInfo++)
         {
-            if (pTimerInfo->eventArg.timerHdl == 0)
+            if (pTimerInfo->eventArg.timerHdl.handle == 0)
             {   // free structure found
                 break;
             }
@@ -303,7 +303,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
             return kErrorTimerNoTimerCreated;
         }
 
-        pTimerInfo->eventArg.timerHdl = HDL_INIT(index);
+        pTimerInfo->eventArg.timerHdl.handle = HDL_INIT(index);
     }
     else
     {
@@ -331,8 +331,8 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
     /* increment timer handle
      * (if timer expires right after this statement, the user
      * would detect an unknown timer handle and discard it) */
-    pTimerInfo->eventArg.timerHdl = HDL_INC(pTimerInfo->eventArg.timerHdl);
-    *pTimerHdl_p = pTimerInfo->eventArg.timerHdl;
+    pTimerInfo->eventArg.timerHdl.handle = HDL_INC(pTimerInfo->eventArg.timerHdl.handle);
+    *pTimerHdl_p = pTimerInfo->eventArg.timerHdl.handle;
 
     /* initialize timer info */
     pTimerInfo->eventArg.argument.value = argument_p;
@@ -382,7 +382,7 @@ tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
             return kErrorTimerInvalidHandle;
         }
         pTimerInfo = &hresTimerInstance_l.aTimerInfo[index];
-        if (pTimerInfo->eventArg.timerHdl != *pTimerHdl_p)
+        if (pTimerInfo->eventArg.timerHdl.handle != *pTimerHdl_p)
         {   // invalid handle
             return ret;
         }
@@ -390,7 +390,7 @@ tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
 
     pTimerInfo->fContinue = FALSE;
     *pTimerHdl_p = 0;
-    pTimerInfo->eventArg.timerHdl = 0;
+    pTimerInfo->eventArg.timerHdl.handle = 0;
     pTimerInfo->pfnCallback = NULL;
 
     return ret;
@@ -452,7 +452,7 @@ static void* timerThread(void* pArgument_p)
         {
             /* save timer information into local variables */
             startTime = pTimerInfo->startTime;
-            timerHdl = pTimerInfo->eventArg.timerHdl;
+            timerHdl = pTimerInfo->eventArg.timerHdl.handle;
             period = pTimerInfo->time;
 
             /* calculate the timeout value for the timer cycle */
@@ -494,7 +494,7 @@ static void* timerThread(void* pArgument_p)
 #endif
 
                 /* check if timer handle is valid */
-                if (timerHdl == pTimerInfo->eventArg.timerHdl)
+                if (timerHdl == pTimerInfo->eventArg.timerHdl.handle)
                 {
                     /* call callback function */
                     if (pTimerInfo->pfnCallback != NULL)
@@ -504,7 +504,7 @@ static void* timerThread(void* pArgument_p)
                 }
 
                 /* check if timer handle is still valid. Could be modified in callback! */
-                if (timerHdl == pTimerInfo->eventArg.timerHdl)
+                if (timerHdl == pTimerInfo->eventArg.timerHdl.handle)
                 {
                     if (pTimerInfo->fContinue)
                     {
@@ -513,7 +513,7 @@ static void* timerThread(void* pArgument_p)
                     }
                 }
             } while ((pTimerInfo->fContinue) &&
-                     (timerHdl == pTimerInfo->eventArg.timerHdl));
+                     (timerHdl == pTimerInfo->eventArg.timerHdl.handle));
         }
     }
     return NULL;

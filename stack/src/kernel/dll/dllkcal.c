@@ -363,14 +363,14 @@ tOplkError dllkcal_process(tEvent* pEvent_p)
     switch (pEvent_p->eventType)
     {
         case kEventTypeDllkServFilter:
-            pServFilter = (tDllCalAsndServiceIdFilter*)pEvent_p->pEventArg;
+            pServFilter = (tDllCalAsndServiceIdFilter*)pEvent_p->eventArg.pEventArg;
             ret = dllk_setAsndServiceIdFilter(pServFilter->serviceId,
                                               pServFilter->filter);
             break;
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
         case kEventTypeDllkIssueReq:
-            pIssueReq = (tDllCalIssueRequest*)pEvent_p->pEventArg;
+            pIssueReq = (tDllCalIssueRequest*)pEvent_p->eventArg.pEventArg;
             ret = dllkcal_issueRequest(pIssueReq->service, pIssueReq->nodeId,
                                        pIssueReq->soaFlag1);
             break;
@@ -378,23 +378,23 @@ tOplkError dllkcal_process(tEvent* pEvent_p)
 
 #if NMT_MAX_NODE_ID > 0
         case kEventTypeDllkConfigNode:
-            pNodeInfo = (tDllNodeInfo*)pEvent_p->pEventArg;
+            pNodeInfo = (tDllNodeInfo*)pEvent_p->eventArg.pEventArg;
             ret = dllk_configNode(pNodeInfo);
             break;
 
         case kEventTypeDllkAddNode:
-            pNodeOpParam = (tDllNodeOpParam*)pEvent_p->pEventArg;
+            pNodeOpParam = (tDllNodeOpParam*)pEvent_p->eventArg.pEventArg;
             ret = dllk_addNode(pNodeOpParam);
             break;
 
         case kEventTypeDllkDelNode:
-            pNodeOpParam = (tDllNodeOpParam*)pEvent_p->pEventArg;
+            pNodeOpParam = (tDllNodeOpParam*)pEvent_p->eventArg.pEventArg;
             ret = dllk_deleteNode(pNodeOpParam);
             break;
 #endif // NMT_MAX_NODE_ID > 0
 
         case kEventTypeDllkIdentity:
-            pIdentParam = (tDllIdentParam*)pEvent_p->pEventArg;
+            pIdentParam = (tDllIdentParam*)pEvent_p->eventArg.pEventArg;
             if (pIdentParam->sizeOfStruct > pEvent_p->eventArgSize)
             {
                 pIdentParam->sizeOfStruct = pEvent_p->eventArgSize;
@@ -403,7 +403,7 @@ tOplkError dllkcal_process(tEvent* pEvent_p)
             break;
 
         case kEventTypeDllkConfig:
-            pConfigParam = (tDllConfigParam*)pEvent_p->pEventArg;
+            pConfigParam = (tDllConfigParam*)pEvent_p->eventArg.pEventArg;
             if (pConfigParam->sizeOfStruct > pEvent_p->eventArgSize)
             {
                 pConfigParam->sizeOfStruct = pEvent_p->eventArgSize;
@@ -413,7 +413,7 @@ tOplkError dllkcal_process(tEvent* pEvent_p)
 
 #if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC == TRUE
         case kEventTypeReleaseRxFrame:
-            pFrameInfo = (tFrameInfo*)pEvent_p->pEventArg;
+            pFrameInfo = (tFrameInfo*)pEvent_p->eventArg.pEventArg;
             ret = dllk_releaseRxFrame(pFrameInfo->pFrame, pFrameInfo->frameSize);
             if (ret == kErrorOk)
                 instance_l.statistics.curRxFrameCount--;
@@ -560,12 +560,12 @@ tOplkError dllkcal_asyncFrameReceived(tFrameInfo* pFrameInfo_p)
 #if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC == FALSE
     // Copy the frame into event queue
     event.eventType = kEventTypeAsndRx;
-    event.pEventArg = pFrameInfo_p->pFrame;
+    event.eventArg.pEventArg = pFrameInfo_p->pFrame;
     event.eventArgSize = pFrameInfo_p->frameSize;
 #else
     // Only copy frame info into event queue
     event.eventType = kEventTypeAsndRxInfo;
-    event.pEventArg = pFrameInfo_p;
+    event.eventArg.pEventArg = pFrameInfo_p;
     event.eventArgSize = sizeof(tFrameInfo);
 #endif
 
@@ -629,7 +629,7 @@ tOplkError dllkcal_sendAsyncFrame(tFrameInfo* pFrameInfo_p,
     event.eventSink = kEventSinkDllk;
     event.eventType = kEventTypeDllkFillTx;
     OPLK_MEMSET(&event.netTime, 0x00, sizeof(event.netTime));
-    event.pEventArg = &priority_p;
+    event.eventArg.pEventArg = &priority_p;
     event.eventArgSize = sizeof(priority_p);
     ret = eventk_postEvent(&event);
 

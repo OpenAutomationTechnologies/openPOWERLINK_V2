@@ -314,7 +314,7 @@ tOplkError ledu_processEvent(tEvent* pEvent_p)
     {
         // timer event
         case kEventTypeTimer:
-            pTimerEventArg = (tTimerEventArg*)pEvent_p->pEventArg;
+            pTimerEventArg = (tTimerEventArg*)pEvent_p->eventArg.pEventArg;
 
             if (pTimerEventArg->argument.value != leduInstance_g.timerArg)
             {   // zombie timer, ignore it

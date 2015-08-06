@@ -310,7 +310,7 @@ tOplkError eventk_postError(tEventSource eventSource_p, tOplkError oplkError_p,
     oplkEvent.eventSink = kEventSinkApi;
     OPLK_MEMSET(&oplkEvent.netTime, 0x00, sizeof(oplkEvent.netTime));
     oplkEvent.eventArgSize = offsetof(tEventError, errorArg) + argSize_p;
-    oplkEvent.pEventArg = &eventError;
+    oplkEvent.eventArg.pEventArg = &eventError;
 
     ret = eventk_postEvent(&oplkEvent);
 
@@ -344,7 +344,7 @@ static tOplkError handleNmtEventinDll(tEvent* pEvent_p)
     BENCHMARK_MOD_27_RESET(0);
 
     if ((pEvent_p->eventType == kEventTypeNmtEvent) &&
-        (*((tNmtEvent*)pEvent_p->pEventArg) == kNmtEventDllCeSoa))
+        (*((tNmtEvent*)pEvent_p->eventArg.pEventArg) == kNmtEventDllCeSoa))
     {
         BENCHMARK_MOD_27_SET(0);
         // forward SoA event to DLLk module for cycle preprocessing

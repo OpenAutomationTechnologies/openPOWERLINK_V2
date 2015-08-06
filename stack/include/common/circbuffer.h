@@ -88,10 +88,10 @@ typedef UINT32 tCircBufError;
 */
 typedef struct
 {
-    size_t              bufferSize;         ///< Total size of circular buffer
+    UINT32              bufferSize;         ///< Total size of circular buffer
     UINT32              writeOffset;        ///< The write offset
     UINT32              readOffset;         ///< The read offset
-    size_t              freeSize;           ///< Available space in buffer
+    UINT32              freeSize;           ///< Available space in buffer
     UINT32              dataCount;          ///< The entry count
 #ifdef DEBUG_CIRCBUF_SIZE_CHECK
     UINT32              maxSize;            ///< Maximum used space in circular buffer
