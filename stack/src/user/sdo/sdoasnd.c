@@ -256,7 +256,7 @@ tOplkError sdoasnd_sendData(tSdoConHdl sdoConHandle_p, tPlkFrame* pSrcData_p, UI
 
     // send function of DLL
     frameInfo.frameSize = dataSize_p;
-    frameInfo.pFrame = pSrcData_p;
+    frameInfo.frame.pBuffer = pSrcData_p;
 
     ret = dllucal_sendAsyncFrame(&frameInfo, kDllAsyncReqPrioGeneric);
     if (ret == kErrorDllAsyncTxBufferFull)
@@ -325,7 +325,7 @@ static tOplkError sdoAsndCb(tFrameInfo* pFrameInfo_p)
     tSdoConHdl      sdoConHdl;
     tPlkFrame*      pFrame;
 
-    pFrame = pFrameInfo_p->pFrame;
+    pFrame = pFrameInfo_p->frame.pBuffer;
     nodeId = ami_getUint8Le(&pFrame->srcNodeId);
 
     // search corresponding entry in control structure

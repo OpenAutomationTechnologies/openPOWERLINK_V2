@@ -219,7 +219,7 @@ tOplkError nmtcnu_sendNmtRequestEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
     }
 
     // build info-structure
-    nmtRequestFrameInfo.pFrame = &nmtRequestFrame;
+    nmtRequestFrameInfo.frame.pBuffer = &nmtRequestFrame;
     nmtRequestFrameInfo.frameSize = C_DLL_MINSIZE_NMTREQ; // sizeof(nmtRequestFrame);
 
     // send NMT request
@@ -316,7 +316,7 @@ static tOplkError commandCb(tFrameInfo* pFrameInfo_p)
         // extended NMT state commands
         case kNmtCmdStartNodeEx:
             // check if own nodeid is in the POWERLINK node list
-            fNodeIdInList = checkNodeIdList(&(pFrameInfo_p->pFrame->data.asnd.payload.nmtCommandService.aNmtCommandData[0]));
+            fNodeIdInList = checkNodeIdList(&(pFrameInfo_p->frame.pBuffer->data.asnd.payload.nmtCommandService.aNmtCommandData[0]));
             if (fNodeIdInList != FALSE)
             {   // own nodeid in list
                 // send event to process command
@@ -326,7 +326,7 @@ static tOplkError commandCb(tFrameInfo* pFrameInfo_p)
 
         case kNmtCmdStopNodeEx:
             // check if own nodeid is in the POWERLINK node list
-            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->pFrame->data.asnd.payload.nmtCommandService.aNmtCommandData[0]);
+            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->frame.pBuffer->data.asnd.payload.nmtCommandService.aNmtCommandData[0]);
             if (fNodeIdInList != FALSE)
             {   // own nodeid in list
                 // send event to process command
@@ -336,7 +336,7 @@ static tOplkError commandCb(tFrameInfo* pFrameInfo_p)
 
         case kNmtCmdEnterPreOperational2Ex:
             // check if own nodeid is in the POWERLINK node list
-            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->pFrame->data.asnd.payload.nmtCommandService.aNmtCommandData[0]);
+            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->frame.pBuffer->data.asnd.payload.nmtCommandService.aNmtCommandData[0]);
             if (fNodeIdInList != FALSE)
             {   // own nodeid in list
                 // send event to process command
@@ -346,7 +346,7 @@ static tOplkError commandCb(tFrameInfo* pFrameInfo_p)
 
         case kNmtCmdEnableReadyToOperateEx:
             // check if own nodeid is in the POWERLINK node list
-            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->pFrame->data.asnd.payload.nmtCommandService.aNmtCommandData[0]);
+            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->frame.pBuffer->data.asnd.payload.nmtCommandService.aNmtCommandData[0]);
             if (fNodeIdInList != FALSE)
             {   // own nodeid in list
                 // send event to process command
@@ -356,7 +356,7 @@ static tOplkError commandCb(tFrameInfo* pFrameInfo_p)
 
         case kNmtCmdResetNodeEx:
             // check if own nodeid is in the POWERLINK node list
-            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->pFrame->data.asnd.payload.nmtCommandService.aNmtCommandData[0]);
+            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->frame.pBuffer->data.asnd.payload.nmtCommandService.aNmtCommandData[0]);
             if (fNodeIdInList != FALSE)
             {   // own nodeid in list
                 // send event to process command
@@ -366,7 +366,7 @@ static tOplkError commandCb(tFrameInfo* pFrameInfo_p)
 
         case kNmtCmdResetCommunicationEx:
             // check if own nodeid is in the POWERLINK node list
-            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->pFrame->data.asnd.payload.nmtCommandService.aNmtCommandData[0]);
+            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->frame.pBuffer->data.asnd.payload.nmtCommandService.aNmtCommandData[0]);
             if (fNodeIdInList != FALSE)
             {   // own nodeid in list
                 // send event to process command
@@ -376,7 +376,7 @@ static tOplkError commandCb(tFrameInfo* pFrameInfo_p)
 
         case kNmtCmdResetConfigurationEx:
             // check if own nodeid is in the POWERLINK node list
-            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->pFrame->data.asnd.payload.nmtCommandService.aNmtCommandData[0]);
+            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->frame.pBuffer->data.asnd.payload.nmtCommandService.aNmtCommandData[0]);
             if (fNodeIdInList != FALSE)
             {   // own nodeid in list
                 // send event to process command
@@ -386,7 +386,7 @@ static tOplkError commandCb(tFrameInfo* pFrameInfo_p)
 
         case kNmtCmdSwResetEx:
             // check if own nodeid is in the POWERLINK node list
-            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->pFrame->data.asnd.payload.nmtCommandService.aNmtCommandData[0]);
+            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->frame.pBuffer->data.asnd.payload.nmtCommandService.aNmtCommandData[0]);
             if (fNodeIdInList != FALSE)
             {   // own nodeid in list
                 // send event to process command
@@ -483,7 +483,7 @@ static tNmtCommand getNmtCommand(tFrameInfo* pFrameInfo_p)
     tNmtCommand          nmtCommand;
     tNmtCommandService*  pNmtCommandService;
 
-    pNmtCommandService = &pFrameInfo_p->pFrame->data.asnd.payload.nmtCommandService;
+    pNmtCommandService = &pFrameInfo_p->frame.pBuffer->data.asnd.payload.nmtCommandService;
     nmtCommand = (tNmtCommand)ami_getUint8Le(&pNmtCommandService->nmtCommandId);
 
     return nmtCommand;

@@ -233,7 +233,7 @@ tEdrvReleaseRxBuffer dllkframe_processFrameReceived(tEdrvRxBuffer* pRxBuffer_p)
     }
 #endif
 
-    frameInfo.pFrame = pFrame;
+    frameInfo.frame.pBuffer = pFrame;
     frameInfo.frameSize = pRxBuffer_p->rxFrameSize;
 
     if (ami_getUint16Be(&pFrame->etherType) != C_DLL_ETHERTYPE_EPL)
@@ -1748,7 +1748,7 @@ static tOplkError processReceivedPreq(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
     tPlkFrame*      pFrame;
     BYTE            bFlag1;
 
-    pFrame = pFrameInfo_p->pFrame;
+    pFrame = pFrameInfo_p->frame.pBuffer;
 
     if (!NMT_IF_ACTIVE_CN(nmtState_p))
     {   // MN is active -> wrong msg type
@@ -1847,7 +1847,7 @@ The function checks if a PRes frame is invalid.
 static BOOL presFrameFormatIsInvalid(tFrameInfo* pFrameInfo_p, tDllkNodeInfo* pIntNodeInfo_p,
                                      tNmtState nodeNmtState_p)
 {
-    tPlkFrame*  pFrame = pFrameInfo_p->pFrame;
+    tPlkFrame*  pFrame = pFrameInfo_p->frame.pBuffer;
     size_t      frameSize = pFrameInfo_p->frameSize;
     size_t      payloadSize = ami_getUint16Le(&pFrame->data.pres.sizeLe);
 
@@ -1904,7 +1904,7 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
     tDllkPresFw*    pPresFw;
 #endif
 
-    pFrame = pFrameInfo_p->pFrame;
+    pFrame = pFrameInfo_p->frame.pBuffer;
     nodeId = ami_getUint8Le(&pFrame->srcNodeId);
 
 #if defined(CONFIG_INCLUDE_NMT_MN) && defined(CONFIG_INCLUDE_PRES_FORWARD)
@@ -2573,7 +2573,7 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
     UNUSED_PARAMETER(pRxBuffer_p);
 #endif
 
-    pFrame = pFrameInfo_p->pFrame;
+    pFrame = pFrameInfo_p->frame.pBuffer;
 
     // ASnd service registered?
     asndServiceId = (UINT)ami_getUint8Le(&pFrame->data.asnd.serviceId);
