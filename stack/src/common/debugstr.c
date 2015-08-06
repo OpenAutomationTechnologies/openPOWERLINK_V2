@@ -104,6 +104,12 @@ typedef struct
     char*               sAbortCode;
 } tAbortCodeInfo;
 
+typedef struct
+{
+    tNmtNodeCommand     nodeCommand;
+    char*               sNodeCommand;
+} tNmtNodeCommandInfo;
+
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
@@ -606,6 +612,18 @@ static tAbortCodeInfo abortCodeInfo_g[] =
     { 0,                                        "SDO_AC_OK" }
 };
 
+static tNmtNodeCommandInfo nmtNodeCommandInfo_l[] =
+{
+    { kNmtNodeCommandBoot,         "NmtNodeCommandBoot" },
+    { kNmtNodeCommandSwOk,         "NmtNodeCommandSwOk" },
+    { kNmtNodeCommandSwUpdated,    "NmtNodeCommandSwUpdated" },
+    { kNmtNodeCommandConfOk,       "NmtNodeCommandConfOk" },
+    { kNmtNodeCommandConfRestored, "NmtNodeCommandConfRestored" },
+    { kNmtNodeCommandConfReset,    "NmtNodeCommandConfReset" },
+    { kNmtNodeCommandConfErr,      "NmtNodeCommandConfErr" },
+    { kNmtNodeCommandStart,        "NmtNodeCommandStart" },
+};
+
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
 //============================================================================//
@@ -808,6 +826,31 @@ char* debugstr_getNmtBootEventTypeStr(tNmtBootEvent BootEventType_p)
     {
         return OplkNmtBootEvtTypeStr_g[BootEventType_p];
     }
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Return the string of the specified NMT node command
+
+The function returns the string describing the specified NMT node command.
+
+\param  nodeCommand_p         NMT node command to print
+
+\return The function returns a string describing the specified NMT node command.
+
+\ingroup module_debugstr
+*/
+//------------------------------------------------------------------------------
+char* debugstr_getNmtNodeCommandTypeStr(tNmtNodeCommand nodeCommand_p)
+{
+    UINT         i;
+
+    for (i = 0; i < tabentries(nmtNodeCommandInfo_l); i++)
+    {
+        if (nmtNodeCommandInfo_l[i].nodeCommand == nodeCommand_p)
+            return (nmtNodeCommandInfo_l[i].sNodeCommand);
+    }
+    return invalidStr_l;
 }
 
 //------------------------------------------------------------------------------

@@ -70,6 +70,7 @@ OPLKDLLEXPORT char* debugstr_getNmtStateStr(tNmtState nmtState_p);
 OPLKDLLEXPORT char* debugstr_getApiEventStr(tOplkApiEventType ApiEvent_p);
 OPLKDLLEXPORT char* debugstr_getNmtNodeEventTypeStr(tNmtNodeEvent NodeEventType_p);
 OPLKDLLEXPORT char* debugstr_getNmtBootEventTypeStr(tNmtBootEvent BootEventType_p);
+OPLKDLLEXPORT char* debugstr_getNmtNodeCommandTypeStr(tNmtNodeCommand nodeCommand_p);
 OPLKDLLEXPORT char* debugstr_getSdoComConStateStr(tSdoComConState SdoComConState_p);
 OPLKDLLEXPORT char* debugstr_getRetValStr(tOplkError OplkError_p);
 OPLKDLLEXPORT char* debugstr_getEmergErrCodeStr(UINT16 EmergErrCode_p);
