@@ -727,16 +727,16 @@ tOplkError oplk_sendAsndFrame(UINT8 dstNodeId_p, tAsndFrame* pAsndFrame_p,
 
     // Set up frame info
     frameInfo.frameSize = frameSize;
-    frameInfo.pFrame = (tPlkFrame*)buffer;
+    frameInfo.frame.pBuffer = (tPlkFrame*)buffer;
 
     // Copy Asnd data
-    OPLK_MEMSET(frameInfo.pFrame, 0x00, frameInfo.frameSize);
-    OPLK_MEMCPY(&frameInfo.pFrame->data.asnd, pAsndFrame_p, asndSize_p);
+    OPLK_MEMSET(frameInfo.frame.pBuffer, 0x00, frameInfo.frameSize);
+    OPLK_MEMCPY(&frameInfo.frame.pBuffer->data.asnd, pAsndFrame_p, asndSize_p);
 
     // Fill in additional data (SrcNodeId is filled by DLL if it is set to 0)
-    ami_setUint8Le(&frameInfo.pFrame->messageType, (UINT8)kMsgTypeAsnd);
-    ami_setUint8Le(&frameInfo.pFrame->dstNodeId, (UINT8)dstNodeId_p);
-    ami_setUint8Le(&frameInfo.pFrame->srcNodeId, (UINT8)0);
+    ami_setUint8Le(&frameInfo.frame.pBuffer->messageType, (UINT8)kMsgTypeAsnd);
+    ami_setUint8Le(&frameInfo.frame.pBuffer->dstNodeId, (UINT8)dstNodeId_p);
+    ami_setUint8Le(&frameInfo.frame.pBuffer->srcNodeId, (UINT8)0);
 
     // Request frame transmission
     ret = dllucal_sendAsyncFrame(&frameInfo, kDllAsyncReqPrioGeneric);
@@ -781,7 +781,7 @@ tOplkError oplk_sendEthFrame(tPlkFrame* pFrame_p, UINT frameSize_p)
 
     // Set frame info
     frameInfo.frameSize = frameSize_p;
-    frameInfo.pFrame = pFrame_p;
+    frameInfo.frame.pBuffer = pFrame_p;
 
     // Forward frame to DLLuCAL
     ret = dllucal_sendAsyncFrame(&frameInfo, kDllAsyncReqPrioGeneric);
@@ -1293,7 +1293,7 @@ static tOplkError cbReceivedAsnd(tFrameInfo* pFrameInfo_p)
         return kErrorReject;
 
     // Forward received ASnd frame
-    apiEventArg.receivedAsnd.pFrame = pFrameInfo_p->pFrame;
+    apiEventArg.receivedAsnd.pFrame = pFrameInfo_p->frame.pBuffer;
     apiEventArg.receivedAsnd.frameSize = pFrameInfo_p->frameSize;
 
     eventType = kOplkApiEventReceivedAsnd;
@@ -1319,7 +1319,7 @@ static tOplkError cbReceivedEth(tFrameInfo* pFrameInfo_p)
     tOplkError          ret = kErrorOk;
     tOplkApiEventArg    eventArg;
 
-    eventArg.receivedEth.pFrame = pFrameInfo_p->pFrame;
+    eventArg.receivedEth.pFrame = pFrameInfo_p->frame.pBuffer;
     eventArg.receivedEth.frameSize = pFrameInfo_p->frameSize;
 
     ret = ctrlu_callUserEventCallback(kOplkApiEventReceivedNonPlk, &eventArg);

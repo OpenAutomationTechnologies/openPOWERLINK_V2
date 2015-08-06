@@ -775,7 +775,7 @@ tOplkError dllknode_setupSyncPhase(tNmtState nmtState_p, BOOL fReadyFlag_p,
             ami_setUint8Le(&pTxFrame->data.preq.flag1, flag1);
 
             // process TPDO
-            FrameInfo.pFrame = pTxFrame;
+            FrameInfo.frame.pBuffer = pTxFrame;
             FrameInfo.frameSize = pTxBuffer->txFrameSize;
             ret = dllkframe_processTpdo(&FrameInfo, fReadyFlag_p);
             if (ret != kErrorOk)

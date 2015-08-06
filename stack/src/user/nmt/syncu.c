@@ -251,7 +251,7 @@ static tOplkError syncResponseCb(tFrameInfo* pFrameInfo_p)
     UINT                index;
     tSyncuCbResponse    pfnCbResponse;
 
-    nodeId = ami_getUint8Le(&pFrameInfo_p->pFrame->srcNodeId);
+    nodeId = ami_getUint8Le(&pFrameInfo_p->frame.pBuffer->srcNodeId);
     index  = nodeId - 1;
 
     if (index < tabentries(syncuInstance_g.aSyncRespQueue))
@@ -269,7 +269,7 @@ static tOplkError syncResponseCb(tFrameInfo* pFrameInfo_p)
         }
         else
         {   // SyncResponse received
-            ret = pfnCbResponse(nodeId, &pFrameInfo_p->pFrame->data.asnd.payload.syncResponse);
+            ret = pfnCbResponse(nodeId, &pFrameInfo_p->frame.pBuffer->data.asnd.payload.syncResponse);
         }
     }
     return ret;

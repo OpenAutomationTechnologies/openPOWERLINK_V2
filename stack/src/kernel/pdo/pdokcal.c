@@ -180,7 +180,7 @@ tOplkError pdokcal_process(tEvent* pEvent_p)
 #if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC != FALSE
                 tFrameInfo*  pFrameInfo;
                 pFrameInfo = (tFrameInfo*)pEvent_p->eventArg.pEventArg;
-                Ret = pdok_processRxPdo(pFrameInfo->pFrame, pFrameInfo->frameSize);
+                Ret = pdok_processRxPdo(pFrameInfo->frame.pBuffer, pFrameInfo->frameSize);
 #else
                 tPlkFrame* pFrame;
 
@@ -234,9 +234,9 @@ static tOplkError cbProcessRpdo(tFrameInfo* pFrameInfo_p)
     event.eventArg.pEventArg = pFrameInfo_p;
 #else
     // limit copied data to size of PDO (because from some CNs the frame is larger than necessary)
-    event.eventArgSize = ami_getUint16Le(&pFrameInfo_p->pFrame->data.pres.sizeLe) +
+    event.eventArgSize = ami_getUint16Le(&pFrameInfo_p->frame.pBuffer->data.pres.sizeLe) +
                                          PLK_FRAME_OFFSET_PDO_PAYLOAD; // pFrameInfo_p->frameSize;
-    event.eventArg.pEventArg = pFrameInfo_p->pFrame;
+    event.eventArg.pEventArg = pFrameInfo_p->frame.pBuffer;
 #endif
     ret = eventk_postEvent(&event);
 #if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC != FALSE

@@ -414,7 +414,7 @@ tOplkError dllkcal_process(tEvent* pEvent_p)
 #if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC == TRUE
         case kEventTypeReleaseRxFrame:
             pFrameInfo = (tFrameInfo*)pEvent_p->eventArg.pEventArg;
-            ret = dllk_releaseRxFrame(pFrameInfo->pFrame, pFrameInfo->frameSize);
+            ret = dllk_releaseRxFrame(pFrameInfo->frame.pBuffer, pFrameInfo->frameSize);
             if (ret == kErrorOk)
                 instance_l.statistics.curRxFrameCount--;
             break;
@@ -556,18 +556,22 @@ tOplkError dllkcal_asyncFrameReceived(tFrameInfo* pFrameInfo_p)
     tOplkError  ret = kErrorOk;
     tEvent      event;
 
-    event.eventSink = kEventSinkDlluCal;
 #if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC == FALSE
     // Copy the frame into event queue
     event.eventType = kEventTypeAsndRx;
-    event.eventArg.pEventArg = pFrameInfo_p->pFrame;
+    event.eventArg.pEventArg = pFrameInfo_p->frame.pBuffer;
     event.eventArgSize = pFrameInfo_p->frameSize;
 #else
-    // Only copy frame info into event queue
+    tPlkFrame*  pTempFrame;
+    // Clear padding before forwarding the event to user layer.
+    pTempFrame = pFrameInfo_p->frame.pBuffer;
+    pFrameInfo_p->frame.padding2 = 0;
+    pFrameInfo_p->frame.pBuffer = pTempFrame;
     event.eventType = kEventTypeAsndRxInfo;
     event.eventArg.pEventArg = pFrameInfo_p;
     event.eventArgSize = sizeof(tFrameInfo);
 #endif
+    event.eventSink = kEventSinkDlluCal;
 
     ret = eventk_postEvent(&event);
 #if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC == TRUE
@@ -611,7 +615,7 @@ tOplkError dllkcal_sendAsyncFrame(tFrameInfo* pFrameInfo_p,
         case kDllAsyncReqPrioNmt:    // NMT request priority
             ret = instance_l.pTxNmtFuncs->pfnInsertDataBlock(
                                         instance_l.dllCalQueueTxNmt,
-                                        (BYTE*)pFrameInfo_p->pFrame,
+                                        (BYTE*)pFrameInfo_p->frame.pBuffer,
                                         &(pFrameInfo_p->frameSize));
             break;
 
@@ -660,21 +664,21 @@ tOplkError dllkcal_writeAsyncFrame(tFrameInfo* pFrameInfo_p, tDllCalQueue dllQue
         case kDllCalQueueTxNmt:    // NMT request priority
             ret = instance_l.pTxNmtFuncs->pfnInsertDataBlock(
                                         instance_l.dllCalQueueTxNmt,
-                                        (BYTE*)pFrameInfo_p->pFrame,
+                                        (BYTE*)pFrameInfo_p->frame.pBuffer,
                                         &(pFrameInfo_p->frameSize));
             break;
 
         case kDllCalQueueTxGen:    // generic priority
             ret = instance_l.pTxGenFuncs->pfnInsertDataBlock(
                                         instance_l.dllCalQueueTxGen,
-                                        (BYTE*)pFrameInfo_p->pFrame,
+                                        (BYTE*)pFrameInfo_p->frame.pBuffer,
                                         &(pFrameInfo_p->frameSize));
             break;
 #if defined(CONFIG_INCLUDE_NMT_MN)
         case kDllCalQueueTxSync:   // sync request priority
             ret = instance_l.pTxSyncFuncs->pfnInsertDataBlock(
                                         instance_l.dllCalQueueTxSync,
-                                        (BYTE*)pFrameInfo_p->pFrame,
+                                        (BYTE*)pFrameInfo_p->frame.pBuffer,
                                         &(pFrameInfo_p->frameSize));
             break;
 #endif
@@ -682,7 +686,7 @@ tOplkError dllkcal_writeAsyncFrame(tFrameInfo* pFrameInfo_p, tDllCalQueue dllQue
         case kDllCalQueueTxVeth:   // virtual Ethernet
             ret = instance_l.pTxVethFuncs->pfnInsertDataBlock(
                                         instance_l.dllCalQueueTxVeth,
-                                        (UINT8*)pFrameInfo_p->pFrame,
+                                        (UINT8*)pFrameInfo_p->frame.pBuffer,
                                         &(pFrameInfo_p->frameSize));
             break;
 #endif
@@ -1358,13 +1362,13 @@ Ethernet Tx queue.
 static tOplkError sendGenericAsyncFrame(tFrameInfo* pFrameInfo_p)
 {
     tOplkError  ret = kErrorOk;
-    UINT16      etherType = ami_getUint16Be(&pFrameInfo_p->pFrame->etherType);
+    UINT16      etherType = ami_getUint16Be(&pFrameInfo_p->frame.pBuffer->etherType);
 
     if (etherType == 0 || etherType == C_DLL_ETHERTYPE_EPL)
     {
         ret = instance_l.pTxGenFuncs->pfnInsertDataBlock(
                                     instance_l.dllCalQueueTxGen,
-                                    (UINT8*)pFrameInfo_p->pFrame,
+                                    (UINT8*)pFrameInfo_p->frame.pBuffer,
                                     &(pFrameInfo_p->frameSize));
     }
     else
@@ -1372,7 +1376,7 @@ static tOplkError sendGenericAsyncFrame(tFrameInfo* pFrameInfo_p)
 #if defined(CONFIG_INCLUDE_VETH)
         ret = instance_l.pTxVethFuncs->pfnInsertDataBlock(
                                     instance_l.dllCalQueueTxVeth,
-                                    (UINT8*)pFrameInfo_p->pFrame,
+                                    (UINT8*)pFrameInfo_p->frame.pBuffer,
                                     &(pFrameInfo_p->frameSize));
 #else
         // Return error since virtual Ethernet is not existing!

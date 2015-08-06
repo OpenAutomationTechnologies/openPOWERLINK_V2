@@ -160,7 +160,17 @@ typedef struct
 {
     UINT            frameSize;                      ///< Size of the frame
     UINT32          padding1;                       ///< Padding variable 1
-    tPlkFrame*      pFrame;                         ///< Pointer to the frame
+    // Use a union of tPlkFrame pointer variable and 64 bit
+    // variable to avoid corruption of pointer variable in
+    // heterogeneous processor system. The padding2 variable is
+    // used to reserve 8 bytes memory for pBuffer and
+    // to ensure that garbage value is cleared before sharing
+    // the pointer variable.
+    union
+    {
+        tPlkFrame*      pBuffer;                   ///< Pointer to the frame buffer
+        UINT64          padding2;                  ///< 64 bit place holder
+    } frame;
 } tFrameInfo;
 
 /**

@@ -272,12 +272,12 @@ static tOplkError veth_receiveFrame(tFrameInfo* pFrameInfo_p,
 
     // replace the MAC address of the POWERLINK Ethernet interface with virtual
     // Ethernet MAC address before forwarding it into the virtual Ethernet interface
-    if (OPLK_MEMCMP(pFrameInfo_p->pFrame->aDstMac, vethInstance_l.macAdrs, ETHER_ADDR_LEN) == 0)
+    if (OPLK_MEMCMP(pFrameInfo_p->frame.pBuffer->aDstMac, vethInstance_l.macAdrs, ETHER_ADDR_LEN) == 0)
     {
-        OPLK_MEMCPY(pFrameInfo_p->pFrame->aDstMac, vethInstance_l.tapMacAdrs, ETHER_ADDR_LEN);
+        OPLK_MEMCPY(pFrameInfo_p->frame.pBuffer->aDstMac, vethInstance_l.tapMacAdrs, ETHER_ADDR_LEN);
     }
 
-    nwrite = write(vethInstance_l.fd, pFrameInfo_p->pFrame, pFrameInfo_p->frameSize);
+    nwrite = write(vethInstance_l.fd, pFrameInfo_p->frame.pBuffer, pFrameInfo_p->frameSize);
     if (nwrite != pFrameInfo_p->frameSize)
     {
         DEBUG_LVL_VETH_TRACE("Error writing data to virtual Ethernet interface!\n");
@@ -342,7 +342,7 @@ static void* vethRecvThread(void* pArg_p)
                     // replace src MAC address with MAC address of virtual Ethernet interface
                     OPLK_MEMCPY(&buffer[6], pInstance->macAdrs, ETHER_ADDR_LEN);
 
-                    frameInfo.pFrame = (tPlkFrame *)buffer;
+                    frameInfo.frame.pBuffer = (tPlkFrame *)buffer;
                     frameInfo.frameSize = nread;
                     ret = dllkcal_sendAsyncFrame(&frameInfo, kDllAsyncReqPrioGeneric);
                     if (ret != kErrorOk)

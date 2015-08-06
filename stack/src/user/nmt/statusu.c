@@ -240,7 +240,7 @@ static tOplkError statusu_cbStatusResponse(tFrameInfo* pFrameInfo_p)
     UINT                index;
     tStatusuCbResponse  pfnCbResponse;
 
-    nodeId = ami_getUint8Le(&pFrameInfo_p->pFrame->srcNodeId);
+    nodeId = ami_getUint8Le(&pFrameInfo_p->frame.pBuffer->srcNodeId);
     index = nodeId - 1;
 
     if (index < tabentries(instance_g.apfnCbResponse))
@@ -260,7 +260,7 @@ static tOplkError statusu_cbStatusResponse(tFrameInfo* pFrameInfo_p)
         }
         else
         {   // StatusResponse received
-            ret = pfnCbResponse(nodeId, &pFrameInfo_p->pFrame->data.asnd.payload.statusResponse);
+            ret = pfnCbResponse(nodeId, &pFrameInfo_p->frame.pBuffer->data.asnd.payload.statusResponse);
         }
     }
 

@@ -908,7 +908,7 @@ static tOplkError processSyncCn(tNmtState nmtState_p, BOOL fReadyFlag_p)
         if (nmtState_p != kNmtCsOperational)
             fReadyFlag_p = FALSE;
 
-        FrameInfo.pFrame = pTxFrame;
+        FrameInfo.frame.pBuffer = pTxFrame;
         FrameInfo.frameSize = pTxBuffer->txFrameSize;
         ret = dllkframe_processTpdo(&FrameInfo, fReadyFlag_p);
         if (ret != kErrorOk)

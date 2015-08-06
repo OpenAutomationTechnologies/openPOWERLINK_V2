@@ -544,7 +544,7 @@ NMT_CS_OPERATIONAL.
 static tOplkError cbProcessTpdo(tFrameInfo* pFrameInfo_p, BOOL fReadyFlag_p)
 {
     tOplkError      Ret = kErrorOk;
-    Ret = copyTxPdo(pFrameInfo_p->pFrame, pFrameInfo_p->frameSize, fReadyFlag_p);
+    Ret = copyTxPdo(pFrameInfo_p->frame.pBuffer, pFrameInfo_p->frameSize, fReadyFlag_p);
     return Ret;
 }
 
