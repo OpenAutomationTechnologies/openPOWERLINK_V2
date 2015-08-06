@@ -153,6 +153,19 @@ typedef struct
 #if defined(CONFIG_INCLUDE_VETH)
     OMETH_HOOK_H        pRxVethHookInst;                        ///< Pointer to virtual Ethernet receive hook
 #endif
+#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
+    UINT                asyncFrameLostCount;                    ///< Number of ASync frame not released to openMAC
+    UINT                vethFrameLostCount;                     ///< Number of VEth frame not released to openMAC
+    UINT                asyncBufFreedCount;                     ///< Number of ASync buffers released to openMAC
+    UINT                vethBufFreedCount;                      ///< Number of VEth buffers released to openMAC
+    UINT                unknwnBufFreedCount;                    ///< Number of unidentified buffers released to openMAC
+    UINT                asyncBufAcquiredCount;                  ///< Number of ASync buffers acquired from openMAC for processing
+    UINT                vethBufAcquiredCount;                   ///< Number of VEth buffers acquired from openMAC for processing
+    BYTE*               apASyncBufAddr[CONFIG_EDRV_ASND_DEFERRED_RX_BUFFERS];   ///< Pointer array to hold the addresses of ASync buffers acquired from openMAC
+    BYTE*               apVEthBufAddr[CONFIG_EDRV_VETH_DEFERRED_RX_BUFFERS];    ///< Pointer array to hold the addresses of VEth buffers acquired from openMAC
+    INT                 asyncBufIdx;                            ///< Index pointing to the next location to store ASync buffer address
+    INT                 vethBufIdx;                             ///< Index pointing to the next location to store VEth buffer address
+#endif
 } tEdrvInstance;
 
 //------------------------------------------------------------------------------
@@ -168,6 +181,12 @@ static tOplkError initRxFilters(void);
 #if (OPENMAC_PKTLOCTX == OPENMAC_PKTBUF_LOCAL)
 static ometh_packet_typ* allocTxMsgBufferIntern(tEdrvTxBuffer* pBuffer_p);
 static void freeTxMsgBufferIntern(tEdrvTxBuffer* pBuffer_p);
+#endif
+
+// Diagnostic functions
+#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
+static void diagnoseAcquiredAsndFrame(INT openMacFilterId_p, void* pAsndFrame_p);
+static void diagnoseReleasedAsndFrame(void* pAsndFrame_p);
 #endif
 
 // RX Hook function
@@ -350,6 +369,19 @@ tOplkError edrv_exit(void)
         }
         DEBUG_LVL_EDRV_TRACE("\n");
     }
+
+#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
+    DEBUG_LVL_EDRV_TRACE(" ---    edrvDiagnostics    ---\n");
+    DEBUG_LVL_EDRV_TRACE(" ----  ASND Late Release  ----\n");
+    DEBUG_LVL_EDRV_TRACE("  Acquired ASync buffers = %u\n", edrvInstance_l.asyncBufAcquiredCount);
+    DEBUG_LVL_EDRV_TRACE("  Released ASync buffers = %u\n", edrvInstance_l.asyncBufFreedCount);
+    DEBUG_LVL_EDRV_TRACE("  Acquired VEth  buffers = %u\n", edrvInstance_l.vethBufAcquiredCount);
+    DEBUG_LVL_EDRV_TRACE("  Released VEth  buffers = %u\n", edrvInstance_l.vethBufFreedCount);
+    DEBUG_LVL_EDRV_TRACE("  Predicted lost ASync  frame count = %u\n", edrvInstance_l.asyncFrameLostCount);
+    DEBUG_LVL_EDRV_TRACE("  Predicted lost VEth   frame count = %u\n", edrvInstance_l.vethFrameLostCount);
+    DEBUG_LVL_EDRV_TRACE("  Released unidentified frame count = %u\n", edrvInstance_l.unknwnBufFreedCount++;);
+    DEBUG_LVL_EDRV_TRACE("\n");
+#endif
 
 #if OPENMAC_DMAOBSERV != 0
     if (edrvInstance_l.fDmaError == TRUE)
@@ -921,6 +953,10 @@ tOplkError edrv_releaseRxBuffer(tEdrvRxBuffer* pRxBuffer_p)
     pPacket = GET_TYPE_BASE(ometh_packet_typ, data, pRxBuffer_p->pBuffer);
     pPacket->length = pRxBuffer_p->rxFrameSize;
 
+#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
+    diagnoseReleasedAsndFrame((void*)pPacket);
+#endif
+
     if (pPacket->length != 0)
     {
         target_enableGlobalInterrupt(FALSE);
@@ -1151,6 +1187,107 @@ static void freeTxMsgBufferIntern(tEdrvTxBuffer* pBuffer_p)
 }
 #endif /* OPENMAC_PKTLOCTX == OPENMAC_PKTBUF_LOCAL */
 
+#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
+//------------------------------------------------------------------------------
+/**
+\brief  Diagnose the acquired ASND frame from openMAC
+
+This function stores addresses of acquired ASND frames from openMAC, in an array
+and updates the corresponding diagnostic information.
+
+\param  openMacFilterId_p   openMAC filter id as used by DLL.
+\param  pAsndFrame_p        Pointer to the acquired ASND frame.
+*/
+//------------------------------------------------------------------------------
+static void diagnoseAcquiredAsndFrame(INT openMacFilterId_p, void* pAsndFrame_p)
+{
+    // Store packet address in an array
+    if (DLLK_FILTER_ASND == (INT)openMacFilterId_p)
+    {
+        if (edrvInstance_l.apASyncBufAddr[edrvInstance_l.asyncBufIdx] != 0)
+        {
+            edrvInstance_l.asyncFrameLostCount++;
+            DEBUG_LVL_EDRV_TRACE("The previous ASync buffer(0x%08X) @index %d is not freed!!\n",
+            edrvInstance_l.apASyncBufAddr[edrvInstance_l.asyncBufIdx], edrvInstance_l.asyncBufIdx);
+        }
+
+        edrvInstance_l.apASyncBufAddr[edrvInstance_l.asyncBufIdx++] = (BYTE*)pAsndFrame_p;
+        edrvInstance_l.asyncBufAcquiredCount++;
+        if (edrvInstance_l.asyncBufIdx >= CONFIG_EDRV_ASND_DEFERRED_RX_BUFFERS)
+        {
+            edrvInstance_l.asyncBufIdx = 0;
+        }
+    }
+    else
+    {
+        if ((DLLK_FILTER_VETH_BROADCAST == (INT)openMacFilterId_p) || (DLLK_FILTER_VETH_UNICAST == (INT)openMacFilterId_p))
+        {
+            if (edrvInstance_l.apVEthBufAddr[edrvInstance_l.vethBufIdx] != 0)
+            {
+                edrvInstance_l.vethFrameLostCount++;
+                DEBUG_LVL_EDRV_TRACE("The previous VEth buffer(0x%08X) @index %d is not freed!!\n",
+                edrvInstance_l.apVEthBufAddr[edrvInstance_l.vethBufIdx], edrvInstance_l.vethBufIdx);
+            }
+
+            edrvInstance_l.apVEthBufAddr[edrvInstance_l.vethBufIdx++] = (BYTE*)pAsndFrame_p;
+            edrvInstance_l.vethBufAcquiredCount++;
+            if (edrvInstance_l.vethBufIdx >= CONFIG_EDRV_VETH_DEFERRED_RX_BUFFERS)
+            {
+                edrvInstance_l.vethBufIdx = 0;
+            }
+        }
+        else
+        {
+            DEBUG_LVL_EDRV_TRACE("Unrecognized ASND frame received!!\n");
+        }
+    }
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Diagnose the released ASND frame to openMAC
+
+This function searches the addresses of the ASND frames to be released to openMAC,
+in the array which stores the buffer addresses during acquisition and updates
+corresponding diagnostic information.
+
+\param  pAsndFrame_p        Pointer to the acquired ASND frame.
+*/
+//------------------------------------------------------------------------------
+static void diagnoseReleasedAsndFrame(void* pAsndFrame_p)
+{
+    INT         i = 0;
+
+    for (i = 0; i < CONFIG_EDRV_ASND_DEFERRED_RX_BUFFERS; i++)
+    {
+        if (edrvInstance_l.apASyncBufAddr[i] == pAsndFrame_p)
+        {
+            edrvInstance_l.asyncBufFreedCount++;
+            edrvInstance_l.apASyncBufAddr[i] = 0;
+            break;
+        }
+    }
+
+    if (i >= CONFIG_EDRV_ASND_DEFERRED_RX_BUFFERS)
+    {
+        for (i = 0; i < CONFIG_EDRV_VETH_DEFERRED_RX_BUFFERS; i++)
+        {
+            if (edrvInstance_l.apVEthBufAddr[i] == pAsndFrame_p)
+            {
+                edrvInstance_l.vethBufFreedCount++;
+                edrvInstance_l.apVEthBufAddr[i] = 0;
+                break;
+            }
+        }
+
+        if (i >= CONFIG_EDRV_VETH_DEFERRED_RX_BUFFERS)
+        {
+            edrvInstance_l.unknwnBufFreedCount++;
+        }
+    }
+}
+#endif
+
 //------------------------------------------------------------------------------
 /**
 \brief  Ethernet driver interrupt handler
@@ -1278,7 +1415,12 @@ static INT rxHook(void* pArg_p, ometh_packet_typ* pPacket_p, OMETH_BUF_FREE_FCT*
     releaseRxBuffer = edrvInstance_l.initParam.pfnRxHandler(&rxBuffer); //pass frame to Powerlink Stack
 
     if (releaseRxBuffer == kEdrvReleaseRxBufferLater)
+    {
+#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
+    diagnoseAcquiredAsndFrame((INT)pArg_p, (void*) pPacket_p);
+#endif
         ret = 0; // Packet is deferred, openMAC may not use this buffer!
+    }
     else
         ret = -1; // Packet processing is done, returns to openMAC again
 
