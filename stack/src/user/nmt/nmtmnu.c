@@ -1466,10 +1466,10 @@ static tOplkError cbNmtRequest(tFrameInfo* pFrameInfo_p)
     UINT                    sourceNodeId;
     UINT                    commandSize;
 
-    if ((pFrameInfo_p == NULL) || (pFrameInfo_p->pFrame == NULL))
+    if ((pFrameInfo_p == NULL) || (pFrameInfo_p->frame.pBuffer == NULL))
         return kErrorNmtInvalidFramePointer;
 
-    pNmtRequestService = &pFrameInfo_p->pFrame->data.asnd.payload.nmtRequestService;
+    pNmtRequestService = &pFrameInfo_p->frame.pBuffer->data.asnd.payload.nmtRequestService;
     nmtCommand = (tNmtCommand)ami_getUint8Le(&pNmtRequestService->nmtCommandId);
     targetNodeId = ami_getUint8Le(&pNmtRequestService->targetNodeId);
     commandSize = min(sizeof(pNmtRequestService->aNmtCommandData),
@@ -1478,7 +1478,7 @@ static tOplkError cbNmtRequest(tFrameInfo* pFrameInfo_p)
                                    pNmtRequestService->aNmtCommandData, commandSize);
     if (ret != kErrorOk)
     {   // error -> reply with kNmtCmdInvalidService
-        sourceNodeId = ami_getUint8Le(&pFrameInfo_p->pFrame->srcNodeId);
+        sourceNodeId = ami_getUint8Le(&pFrameInfo_p->frame.pBuffer->srcNodeId);
         ret = nmtmnu_sendNmtCommand(sourceNodeId, kNmtCmdInvalidService);
         if (ret == kErrorInvalidOperation)
             ret = kErrorOk;
@@ -4759,7 +4759,7 @@ static tOplkError sendNmtCommand(UINT nodeId_p, tNmtCommand nmtCommand_p,
     }
 
     // build info structure
-    frameInfo.pFrame = pFrame;
+    frameInfo.frame.pBuffer = pFrame;
     frameInfo.frameSize = sizeof(aBuffer);
 
     // send NMT-Request

@@ -663,7 +663,7 @@ static int sendAsyncFrame(unsigned long arg)
     }
 
     //TRACE("%s() Received frame size:%d\n", __func__, asyncFrame.size);
-    frameInfo.pFrame = (tPlkFrame*)pBuf;
+    frameInfo.frame.pBuffer = (tPlkFrame*)pBuf;
     frameInfo.frameSize = asyncFrameInfo.size;
 
     dllkcal_writeAsyncFrame(&frameInfo, asyncFrameInfo.queue);
