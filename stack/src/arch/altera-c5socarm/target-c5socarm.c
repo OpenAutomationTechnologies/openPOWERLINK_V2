@@ -256,7 +256,7 @@ milliseconds have elapsed.
 \param  milliSeconds_p            Number of milliseconds to sleep
 
 \ingroup module_target
-*/
+*/f
 //------------------------------------------------------------------------------
 void target_msleep(UINT32 milliSeconds_p)
 {
