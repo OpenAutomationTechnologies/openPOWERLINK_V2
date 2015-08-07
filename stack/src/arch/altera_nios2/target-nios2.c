@@ -45,6 +45,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sys/alt_alarm.h>
 #include <common/oplkinc.h>
 #include <common/target.h>
+#include <system.h>
+#include <altera_avalon_pio_regs.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -54,6 +56,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 #define TGTCONIO_MS_IN_US(x)    (x * 1000U)
+
+#define GPIO_STATUS_LED_BIT     1
+#define GPIO_ERROR_LED_BIT      2
+
+#ifdef PCP_0_POWERLINK_LED_BASE
+#define TARGET_POWERLINK_LED_BASE PCP_0_POWERLINK_LED_BASE
+#else
+#define TARGET_POWERLINK_LED_BASE 0
+#endif
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -82,6 +93,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
+static void setStatusLed(BOOL fOn_p);
+static void setErrorLed(BOOL fOn_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -241,6 +254,87 @@ tOplkError target_setDefaultGateway(UINT32 defaultGateway_p)
     return kErrorOk;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Call state change function
+
+The function calls the type and state of LED.
+
+\param  ledType_p           The type of LED.
+\param  fLedOn_p            The state of the LED.
+\param  modetype            The type of LED mode.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+tOplkError target_setLed(tLedType ledType_p, BOOL fLedOn_p, tLedMode modetype)
+{
+    tOplkError ret = kErrorOk;
+
+    switch (ledType_p)
+     {
+         case kLedTypeStatus:
+            setStatusLed(fLedOn_p);
+            break;
+
+         case kLedTypeError:
+            setErrorLed(fLedOn_p);
+            break;
+
+         default:
+            return kErrorIllegalInstance;
+            break;
+     }
+
+    return ret;
+}
+
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+/// \name Private Functions
+/// \{
+
+//------------------------------------------------------------------------------
+/*
+\brief  Sets the status LED
+
+The function sets the POWERLINK status LED.
+
+\param  fOn_p               Determines the LED state.
+
+\ingroup module_drv_common
+*/
+//------------------------------------------------------------------------------
+static void setStatusLed(BOOL fOn_p)
+{
+#ifdef TARGET_POWERLINK_LED_BASE
+    if (fOn_p != FALSE)
+        IOWR_ALTERA_AVALON_PIO_SET_BITS(TARGET_POWERLINK_LED_BASE, GPIO_STATUS_LED_BIT);
+    else
+        IOWR_ALTERA_AVALON_PIO_CLEAR_BITS(TARGET_POWERLINK_LED_BASE, GPIO_STATUS_LED_BIT);
+#endif
+}
+
+//------------------------------------------------------------------------------
+/*
+\brief  Sets the error LED
+
+The function sets the POWERLINK error LED.
+
+\param  fOn_p               Determines the LED state.
+
+\ingroup module_drv_common
+*/
+//------------------------------------------------------------------------------
+static void setErrorLed(BOOL fOn_p)
+{
+#ifdef TARGET_POWERLINK_LED_BASE
+    if (fOn_p != FALSE)
+        IOWR_ALTERA_AVALON_PIO_SET_BITS(TARGET_POWERLINK_LED_BASE, GPIO_ERROR_LED_BIT);
+    else
+        IOWR_ALTERA_AVALON_PIO_CLEAR_BITS(TARGET_POWERLINK_LED_BASE, GPIO_ERROR_LED_BIT);
+#endif
+}
+
+/// \}
