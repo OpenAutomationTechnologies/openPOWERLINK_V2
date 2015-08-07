@@ -5,6 +5,32 @@ Revision history of openPOWERLINK Protocol Stack {#page_revision_history}
 
 # Release 2 {#sect_revision_v2}
 
+## V2.2.1 {#sect_revision_v2_2_1}
+
+This is the latest release of the V2.2 release series. This release is a stable
+release, it contains fixes and optimizations.
+
+Following is a summary of changes in V2.2.1. For a detailed revision history
+refer to the Git source code history.
+
+### Fixes:
+- Fix C5 SoC misses synchronization interrupts
+- Fix C5 SoC boot issue
+- Fix asynchronous Rx count in DLLKCAL
+- Fix openMAC Ethernet driver cache handling
+- Fix compilation on Linux kernels > 3.17
+- Fix CMake configuration errors for applications on windows
+- Fix mnobd.cdc for redundancy demo Demo_RMN_3CN
+- Several code cleanups and fixes
+
+### Additions:
+- Add guidance to fix Xilinx standalone BSP for Zynq ARM
+- Add additional PCI ID for Intel I210 derivative
+
+### Known Issues:
+- Xilinx Zynq MN (see 2.1.0)
+- The redundancy MN does not work with the Intel i210 Linux kernel driver.
+
 ## V2.2.0 {#sect_revision_v2_2_0}
 
 This is the first release of the V2.2 release series. It contains new features
