@@ -58,6 +58,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplk/debug.h>
 #include <common/target.h>
 #include "sleep.h"
+
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
@@ -83,9 +84,30 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #define SECS_TO_MILLISECS    1000
 
+#if defined(CONFIG_INCLUDE_LEDK)
+#define GPIO_STATUS_LED_BIT     1
+#define GPIO_ERROR_LED_BIT      2
+#endif
+
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
+#if defined(CONFIG_INCLUDE_LEDK)
+/**
+ * \brief   Kernel LED module instance
+ *
+ * The structure defines the instance data of the kernel LED module.
+ */
+typedef struct
+{
+    tLedMode                    statusLedMode;          ///< Mode of the status LED
+    UINT                        statusLedState;         ///< State of the status LED
+    UINT32                      startTimeInMs;          ///< Holds the start time value of the current led state
+    UINT32                      timeoutInMs;            ///< Holds the time out value of the current led state
+    UINT32                      plkStatusErrorLeds;     ///< Local copy of the state of the POWERLINK status LEDs
+} tTargetLedInstance;
+#endif
+
 //------------------------------------------------------------------------------
 // external vars
 //------------------------------------------------------------------------------
@@ -93,6 +115,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
+#if defined(CONFIG_INCLUDE_LEDK)
+static tTargetLedInstance   targetledInstance_l;
+#endif
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -105,6 +130,11 @@ static inline UINT64    getTimerMaxScaledCount(ALT_GPT_TIMER_t timerId_p,
                                                UINT32 scalingFactor_p);
 static inline UINT64    getTimerCurrentScaledCount(ALT_GPT_TIMER_t timerId_p,
                                                    UINT32 scalingFactor_p);
+
+#if defined(CONFIG_INCLUDE_LEDK)
+static void setStatusLed(BOOL fOn_p);
+static void setErrorLed(BOOL fOn_p);
+#endif
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -208,6 +238,10 @@ tOplkError target_init(void)
         goto Exit;
     }
 
+#if defined(CONFIG_INCLUDE_LEDK)
+    targetledInstance_l.startTimeInMs = 0;
+    targetledInstance_l.timeoutInMs = 0;
+#endif
 Exit:
     return oplkRet;
 }
@@ -305,6 +339,245 @@ tOplkError target_setDefaultGateway(UINT32 defaultGateway_p)
 
     return kErrorOk;
 }
+
+#if defined(CONFIG_INCLUDE_LEDK)
+//------------------------------------------------------------------------------
+/**
+\brief  update Led State
+
+The function handles the led status mode.
+
+\return The function returns a tOplkError error code.
+
+\ingroup module_target
+*/
+//------------------------------------------------------------------------------
+tOplkError target_updateLedState(void)
+{
+    INT                 timeout = 0;
+    BOOL                fLedOn = FALSE;
+    tOplkError          ret = kErrorOk;
+
+    // Setting the new timeout value
+    timeout = target_getTickCount() - targetledInstance_l.startTimeInMs;
+
+    if (timeout >= targetledInstance_l.timeoutInMs && timeout > 0)
+    {
+        targetledInstance_l.statusLedState++;
+
+        // select timeout and new LED state corresponding to mode
+        switch (targetledInstance_l.statusLedMode)
+        {
+            case kLedModeInit:
+            case kLedModeOn:
+            case kLedModeOff:
+                goto Exit;      // should not occur
+                break;
+
+            case kLedModeFlickering:
+                if (targetledInstance_l.statusLedState >= kLedModeOn)
+                {   // reset state
+                    targetledInstance_l.statusLedState = kLedModeInit;
+                    fLedOn = FALSE;
+                }
+                else
+                {
+                    fLedOn = TRUE;
+                }
+
+                timeout = LED_DURATION_FLICKERING;
+                break;
+
+            case kLedModeBlinking:
+                if (targetledInstance_l.statusLedState >= kLedModeOn)
+                {   // reset state
+                    targetledInstance_l.statusLedState = kLedModeInit;
+                    fLedOn = FALSE;
+                }
+                else
+                {
+                    fLedOn = TRUE;
+                }
+
+                timeout = LED_DURATION_BLINKING;
+                break;
+
+            case kLedModeSingleFlash:
+                if (targetledInstance_l.statusLedState >= kLedModeOn)
+                {   // reset state
+                    targetledInstance_l.statusLedState = kLedModeInit;
+                    timeout = LED_DURATION_FLASH_OFF;
+                    fLedOn = FALSE;
+                }
+                else
+                {
+                    timeout = LED_DURATION_FLASH_ON;
+                    fLedOn = ((targetledInstance_l.statusLedState & 0x01) != 0x00) ?
+                        TRUE : FALSE;
+                }
+
+                break;
+
+            case kLedModeDoubleFlash:
+                if (targetledInstance_l.statusLedState >= kLedModeBlinking)
+                {   // reset state
+                    targetledInstance_l.statusLedState = kLedModeInit;
+                    timeout = LED_DURATION_FLASH_OFF;
+                    fLedOn = FALSE;
+                }
+                else
+                {
+                    timeout = LED_DURATION_FLASH_ON;
+                    fLedOn = ((targetledInstance_l.statusLedState & 0x01) != 0x00) ?
+                        TRUE : FALSE;
+                }
+
+                break;
+
+            case kLedModeTripleFlash:
+                if (targetledInstance_l.statusLedState >= kLedModeDoubleFlash)
+                {   // reset state
+                    targetledInstance_l.statusLedState = kLedModeInit;
+                    timeout = LED_DURATION_FLASH_OFF;
+                    fLedOn = FALSE;
+                }
+                else
+                {
+                    timeout = LED_DURATION_FLASH_ON;
+                    fLedOn = ((targetledInstance_l.statusLedState & 0x01) != 0x00) ?
+                        TRUE : FALSE;
+                }
+
+                break;
+        }
+
+        targetledInstance_l.timeoutInMs = timeout;
+        targetledInstance_l.startTimeInMs += targetledInstance_l.timeoutInMs;
+        ret = target_setLed(kLedTypeStatus, fLedOn);
+    }
+
+Exit:
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Change the LED mode
+
+The function changes the LED mode.
+
+\param  ledType_p           The type of LED.
+\param  newMode_p           The new mode to set.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+tOplkError target_setLedMode(tLedType ledType_p, tLedMode newMode_p)
+{
+    tOplkError      ret = kErrorOk;
+    tLedMode        oldMode;
+    UINT32          timeout;
+    BOOL            fLedOn = ((targetledInstance_l.plkStatusErrorLeds &
+                              (1 << GPIO_STATUS_LED_BIT)) == 0) ? FALSE : TRUE;
+
+    oldMode = targetledInstance_l.statusLedMode;
+    if (oldMode != newMode_p)
+    {   // state changed -> save new mode
+        targetledInstance_l.statusLedMode = newMode_p;
+
+         // select timeout corresponding to mode
+        switch (newMode_p)
+        {
+            case kLedModeOn:
+                timeout = 0;
+                fLedOn = TRUE;
+                break;
+
+            case kLedModeOff:
+                timeout = 0;
+                fLedOn = FALSE;
+                break;
+
+            case kLedModeFlickering:
+                timeout = LED_DURATION_FLICKERING;
+                break;
+
+            case kLedModeBlinking:
+                timeout = LED_DURATION_BLINKING;
+                break;
+
+            case kLedModeSingleFlash:
+            case kLedModeDoubleFlash:
+            case kLedModeTripleFlash:
+                if (fLedOn == FALSE)
+                    timeout = LED_DURATION_FLASH_OFF;
+                else
+                    timeout = LED_DURATION_FLASH_ON;
+                break;
+
+            default:
+                return ret;      // should not occur
+                break;
+        }
+
+        // Where are we coming from?
+        if (oldMode == kLedModeOff)
+        {   // status LED was off -> switch LED on
+            fLedOn = TRUE;
+            targetledInstance_l.statusLedState = 0xFF;
+        }
+        else if (oldMode == kLedModeOn)
+        {   // status LED was on -> switch LED off
+            fLedOn = FALSE;
+            targetledInstance_l.statusLedState = 0;
+        }
+        else
+        {   // timer is handled in target_updateLedState
+            goto Exit;
+        }
+
+    //Timeout value
+    targetledInstance_l.timeoutInMs = timeout;
+    }
+
+Exit:
+    ret = target_setLed(ledType_p, fLedOn);
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Call state change function
+
+The function calls the type and state of LED.
+
+\param  ledType_p           The type of LED.
+\param  fLedOn_p            The state of the LED.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+tOplkError target_setLed(tLedType ledType_p, BOOL fLedOn_p)
+{
+    tOplkError ret = kErrorOk;
+
+    switch (ledType_p)
+     {
+         case kLedTypeStatus:
+            return setStatusLed(fLedOn_p);
+            break;
+
+         case kLedTypeError:
+            return setErrorLed(fLedOn_p);
+            break;
+
+         default:
+            break;
+     }
+
+    return ret;
+}
+#endif
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
@@ -496,4 +769,38 @@ Exit:
     return maxScaledTime;
 }
 
-///\}
+#if defined(CONFIG_INCLUDE_LEDK)
+//------------------------------------------------------------------------------
+/*
+\brief  Sets the status LED
+
+The function sets the POWERLINK status LED.
+
+\param  fOn_p               Determines the LED state.
+
+\ingroup module_drv_common
+*/
+//------------------------------------------------------------------------------
+static void setStatusLed(BOOL fOn_p)
+{
+    UNUSED_PARAMETER(fOn_p);
+}
+
+//------------------------------------------------------------------------------
+/*
+\brief  Sets the error LED
+
+The function sets the POWERLINK error LED.
+
+\param  fOn_p               Determines the LED state.
+
+\ingroup module_drv_common
+*/
+//------------------------------------------------------------------------------
+static void setErrorLed(BOOL fOn_p)
+{
+    UNUSED_PARAMETER(fOn_p);
+}
+#endif
+
+/// \}
