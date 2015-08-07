@@ -40,7 +40,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplk.h>
+#include <common/oplkinc.h>
+#include <common/target.h>
+
 #include <xscugic.h>
 #include <xtime_l.h>
 #include <xil_cache.h>
@@ -277,6 +279,31 @@ tOplkError target_setDefaultGateway(UINT32 defaultGateway_p)
 
     //Note: The given parameters are ignored because the application must set
     //      these settings to the used IP stack by itself!
+
+    return kErrorOk;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Set POWERLINK status/error LED
+
+The function sets the POWERLINK status/error LED.
+
+\param  ledType_p       Determines which LED shall be set/reset.
+\param  fLedOn_p        Set the addressed LED on (TRUE) or off (FALSE).
+
+\return The function returns a tOplkError error code.
+
+\ingroup module_target
+*/
+//------------------------------------------------------------------------------
+tOplkError target_setLed(tLedType ledType_p, BOOL fLedOn_p)
+{
+    UNUSED_PARAMETER(ledType_p);
+    UNUSED_PARAMETER(fLedOn_p);
+
+    //Note: This function is not yet implemented since there is no design with
+    //      the C5 SoC ARM executing the kernel layer.
 
     return kErrorOk;
 }

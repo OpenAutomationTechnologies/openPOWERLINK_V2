@@ -317,6 +317,31 @@ tOplkError target_setDefaultGateway(UINT32 defaultGateway_p)
     return kErrorOk;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Set POWERLINK status/error LED
+
+The function sets the POWERLINK status/error LED.
+
+\param  ledType_p       Determines which LED shall be set/reset.
+\param  fLedOn_p        Set the addressed LED on (TRUE) or off (FALSE).
+
+\return The function returns a tOplkError error code.
+
+\ingroup module_target
+*/
+//------------------------------------------------------------------------------
+tOplkError target_setLed(tLedType ledType_p, BOOL fLedOn_p)
+{
+    UNUSED_PARAMETER(ledType_p);
+    UNUSED_PARAMETER(fLedOn_p);
+
+    //Note: This function is not yet implemented since there is no design with
+    //      the C5 SoC ARM executing the kernel layer.
+
+    return kErrorOk;
+}
+
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//

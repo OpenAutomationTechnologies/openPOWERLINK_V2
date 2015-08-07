@@ -1,14 +1,14 @@
 /**
 ********************************************************************************
-\file   ledu.h
+\file   common/led.h
 
-\brief  Definitions for user LED module
+\brief  Common definitions for LED module
 
-This file contains definitions and declarations of the user LED module.
+This file contains common definitions for the LED module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -35,16 +35,13 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_ledu_H_
-#define _INC_ledu_H_
+#ifndef _INC_common_led_H_
+#define _INC_common_led_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <common/oplkinc.h>
-#include <oplk/led.h>
-#include <oplk/nmt.h>
-#include <oplk/event.h>
+#include <oplk/oplkinc.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -53,24 +50,46 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-typedef tOplkError (*tLeduStateChangeCallback)(tLedType ledType_p, BOOL fOn_p);
 
-//------------------------------------------------------------------------------
-// function prototypes
-//------------------------------------------------------------------------------
-
-#ifdef __cplusplus
-extern "C"
+/**
+ * \brief   Enumeration for valid LED modes
+ *
+ * The enumeration lists all valid LED modes.
+ */
+typedef enum
 {
-#endif
+    kLedModeInit           = 0x00,  ///< LED Initilization.
+    kLedModeOff            = 0x01,  ///< LED off.
+    kLedModeOn             = 0x02,  ///< LED on.
+    kLedModeFlickering     = 0x03,  ///< LED on for 50ms and off for 50ms.
+    kLedModeBlinking       = 0x04,  ///< LED on for 200ms and off for 200ms.
+    kLedModeSingleFlash    = 0x05,  ///< LED on for 200ms and then it switch off.
+    kLedModeDoubleFlash    = 0x06,  ///< LED on for 200ms and off for 1000ms, repeat twice.
+    kLedModeTripleFlash    = 0x07,  ///< LED on for 200ms and off for 1000ms, repeat thrice.
+} eLedMode;
 
-tOplkError ledu_init(tLeduStateChangeCallback pfnCbStateChange_p);
-tOplkError ledu_exit(void);
-tOplkError ledu_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p);
-tOplkError ledu_processEvent(tEvent* pEvent_p);
+/**
+\brief LED mode data type
 
-#ifdef __cplusplus
-}
-#endif
+Data type for the enumerator \ref eLedMode.
+*/
+typedef UINT32 tLedMode;
+/**
+ * \brief   Valid LED types
+ *
+ * The structure defines all valid LED types used by POWERLINK.
+ */
+typedef enum
+{
+    kLedTypeStatus   = 0x00,    ///< POWERLINK Status LED
+    kLedTypeError    = 0x01,    ///< POWERLINK Error LED
+} eLedType;
 
-#endif /* _INC_ledu_H_ */
+/**
+\brief LED type data type
+
+Data type for the enumerator \ref eLedType.
+*/
+typedef UINT32 tLedType;
+
+#endif /* _INC_common_led_H_ */

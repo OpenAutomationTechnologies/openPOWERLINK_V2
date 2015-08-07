@@ -234,7 +234,7 @@
  <parameter name="projectName">mn-single-hostif-drv.qpf</parameter>
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1423058096029" />
+ <parameter name="timeStamp" value="1439533327135" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk50" internal="clk50.clk_in" type="clock" dir="end" />
@@ -285,6 +285,11 @@
  <interface
    name="pcp_0_cpu_resetrequest"
    internal="pcp_0.cpu_resetrequest"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="powerlink_led"
+   internal="pcp_0.powerlink_led"
    type="conduit"
    dir="end" />
  <module kind="clock_source" version="13.0" enabled="1" name="clk50">

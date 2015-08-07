@@ -131,7 +131,7 @@ typedef enum
     kEventSinkErru                  = 0x08,     ///< events for Error signaling module
     kEventSinkSdoAsySeq             = 0x09,     ///< events for asyncronous SDO Sequence Layer module
     kEventSinkNmtMnu                = 0x0A,     ///< events for NmtMnu module
-    kEventSinkLedu                  = 0x0B,     ///< events for Ledu module
+    // Reserved (0x0B)
     kEventSinkPdokCal               = 0x0C,     ///< events for PdokCal module
     kEventSinkGw309Ascii            = 0x0E,     ///< events for GW309ASCII module
     kEventSinkApi                   = 0x0F,     ///< events for API module
@@ -177,7 +177,7 @@ typedef enum
     kEventSourceCfgMau              = 0x1A,     ///< Events from CfgMau module
     kEventSourceEventu              = 0x1B,     ///< Events from Eventu module
     kEventSourceOplkApi             = 0x1C,     ///< Events from Api module
-    kEventSourceLedu                = 0x1D,     ///< Events from Ledu module
+    // Reserved (0x1D)
     kEventSourceGw309Ascii          = 0x1E,     ///< Events from GW309ASCII module
     kEventSourceErru                = 0x1F,     ///< Events from User Error handler module
     kEventSourceSdoTest             = 0x20,     ///< Events from SDO testing module

@@ -40,6 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
+#include <common/target.h>
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -105,4 +106,26 @@ This function returns the current system tick determined by the system timer.
 UINT32 target_getTickCount(void)
 {
     return GetTickCount();
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Set POWERLINK status/error LED
+
+The function sets the POWERLINK status/error LED.
+
+\param  ledType_p       Determines which LED shall be set/reset.
+\param  fLedOn_p        Set the addressed LED on (TRUE) or off (FALSE).
+
+\return The function returns a tOplkError error code.
+
+\ingroup module_target
+*/
+//------------------------------------------------------------------------------
+tOplkError target_setLed(tLedType ledType_p, BOOL fLedOn_p)
+{
+    UNUSED_PARAMETER(ledType_p);
+    UNUSED_PARAMETER(fLedOn_p);
+
+    return kErrorOk;
 }

@@ -80,6 +80,19 @@ different event queues.
 
 //------------------------------------------------------------------------------
 /**
+\defgroup module_ledk ledk
+
+\brief Kernel LED module
+
+The kernel LED module is responsible to control the POWERLIK status and error
+LEDs. The LEDs reflect the current status of the stack.
+
+\ingroup kernel_layer
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
 \defgroup module_pdok pdok
 
 \brief Kernel PDO module

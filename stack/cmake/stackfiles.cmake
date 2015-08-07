@@ -101,7 +101,6 @@ SET(USER_SOURCES
     ${USER_SOURCE_DIR}/sdo/sdoudp.c
     ${USER_SOURCE_DIR}/errhnd/errhndu.c
     ${USER_SOURCE_DIR}/ctrl/ctrlu.c
-    ${USER_SOURCE_DIR}/ledu.c
     )
 
 ################################################################################
@@ -266,6 +265,8 @@ SET(KERNEL_SOURCES
     ${KERNEL_SOURCE_DIR}/pdo/pdoklut.c
     ${KERNEL_SOURCE_DIR}/errhnd/errhndk.c
     ${KERNEL_SOURCE_DIR}/ctrl/ctrlk.c
+    ${KERNEL_SOURCE_DIR}/led/ledk.c
+    ${KERNEL_SOURCE_DIR}/led/ledktimer.c
     )
 
 ################################################################################
@@ -575,7 +576,6 @@ SET(OPLK_HEADERS
     ${STACK_INCLUDE_DIR}/oplk/version.h
     ${STACK_INCLUDE_DIR}/oplk/event.h
     ${STACK_INCLUDE_DIR}/oplk/basictypes.h
-    ${STACK_INCLUDE_DIR}/oplk/led.h
     ${STACK_INCLUDE_DIR}/oplk/nmt.h
     ${STACK_INCLUDE_DIR}/oplk/obd.h
     ${STACK_INCLUDE_DIR}/oplk/obdcdc.h
@@ -603,6 +603,7 @@ SET(STACK_HEADERS
     ${STACK_INCLUDE_DIR}/common/defaultcfg.h
     ${STACK_INCLUDE_DIR}/common/dllcal.h
     ${STACK_INCLUDE_DIR}/common/errhnd.h
+    ${STACK_INCLUDE_DIR}/common/led.h
     ${STACK_INCLUDE_DIR}/common/oplkinc.h
     ${STACK_INCLUDE_DIR}/common/pdo.h
     ${STACK_INCLUDE_DIR}/common/target.h

@@ -1,15 +1,14 @@
 /**
 ********************************************************************************
-\file   oplk/led.h
+\file   ledk.h
 
-\brief  Definitions for user LED module
+\brief  Definitions for kernel LED module
 
-This file contains definitions for the user LED module.
+This file contains definitions and declarations of the kernel LED module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2015, Kalycito Infotech Private Limited.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,38 +34,49 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_oplk_led_H_
-#define _INC_oplk_led_H_
+#ifndef _INC_ledk_H_
+#define _INC_ledk_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
+#include <oplk/nmt.h>
+#include <oplk/event.h>
+#include <common/led.h>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+#define LEDK_DURATION_FLICKERING    50      // [ms]
+#define LEDK_DURATION_BLINKING      200     // [ms]
+#define LEDK_DURATION_FLASH_ON      200     // [ms]
+#define LEDK_DURATION_FLASH_OFF     1000    // [ms]
 
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
 
-/**
- * \brief   Valid LED types
- *
- * The structure defines all valid LED types used by POWERLINK.
- */
-typedef enum
+//------------------------------------------------------------------------------
+// function prototypes
+//------------------------------------------------------------------------------
+
+#ifdef __cplusplus
+extern "C"
 {
-    kLedTypeStatus   = 0x00,    ///< POWERLINK Status LED
-    kLedTypeError    = 0x01,    ///< POWERLINK Error LED
-} eLedType;
+#endif
+//ledk functions
+tOplkError ledk_init(void);
+tOplkError ledk_exit(void);
+tOplkError ledk_handleNmtStateChange(tEventNmtStateChange nmtStateChange_p);
+tOplkError ledk_process(void);
 
-/**
-\brief LED type data type
+//ledktimer functions
+tOplkError ledk_updateLedState(void);
+tOplkError ledk_setLedMode(tLedType ledType_p, tLedMode newMode_p);
 
-Data type for the enumerator \ref eLedType.
-*/
-typedef UINT32 tLedType;
+#ifdef __cplusplus
+}
+#endif
 
-#endif /* _INC_oplk_led_H_ */
+#endif /* _INC_ledk_H_ */

@@ -46,7 +46,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplk/frame.h>
 #include <oplk/sdo.h>
 #include <oplk/obd.h>
-#include <oplk/led.h>
 #include <oplk/cfm.h>
 #include <oplk/event.h>
 
@@ -115,20 +114,6 @@ typedef struct
     tNmtBootEvent               bootEvent;      ///< Boot event that occured
     UINT16                      errorCode;      ///< Contains an error code if bootEvent == \ref kNmtBootEventError
 } tOplkApiEventBoot;
-
-
-/**
-\brief LED event
-
-This structure specifies a LED event. It contains change events for the POWERLINK
-status and error LEDs. It allows the application to change the status and error
-LEDs on the device according to the specification.
-*/
-typedef struct
-{
-    tLedType                    ledType;        ///< Determines the type of the LED
-    BOOL                        fOn;            ///< The state of the LED
-} tOplkApiEventLed;
 
 /**
 \brief CFM result event
@@ -286,11 +271,6 @@ typedef enum
     (\ref tObdCbParam). */
     kOplkApiEventObdAccess          = 0x69,
 
-    /** Status and error LED event. The event allows the application to perform
-    the signaling of the POWERLINK LEDs according to the specification. The event
-    argument contains a LED event (\ref kOplkApiEventLed). */
-    kOplkApiEventLed                = 0x70,
-
     /** CFM progress event. This event informs the application about the progress
     of the configuration of a specific CN. The event argument contains the CN
     progress information (\ref tCfmEventCnProgress). */
@@ -360,7 +340,6 @@ typedef union
     tObdCbParam                 obdCbParam;         ///< OBD callback parameter (\ref kOplkApiEventObdAccess)
     tOplkApiEventNode           nodeEvent;          ///< Node event information (\ref kOplkApiEventNode)
     tOplkApiEventBoot           bootEvent;          ///< Boot event information (\ref kOplkApiEventBoot)
-    tOplkApiEventLed            ledEvent;           ///< LED event information (\ref kOplkApiEventLed)
     tCfmEventCnProgress         cfmProgress;        ///< CFM progress information (\ref kOplkApiEventCfmProgress)
     tOplkApiEventCfmResult      cfmResult;          ///< CFM result information (\ref kOplkApiEventCfmResult)
     tErrHistoryEntry            errorHistoryEntry;  ///< Error history entry (\ref kOplkApiEventHistoryEntry)

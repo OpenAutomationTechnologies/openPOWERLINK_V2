@@ -69,8 +69,6 @@ entity toplevel is
         SDRAM_DQ            : inout std_logic_vector(31 downto 0);
         -- NODE_SWITCH
         NODE_SWITCH         : in    std_logic_vector(7 downto 0);
-        -- LED green
-        LEDG                : out   std_logic_vector(1 downto 0);
         -- Low active KEY
         KEY_n               : in    std_logic_vector(3 downto 0);
         -- HEX LED
@@ -111,8 +109,6 @@ architecture rtl of toplevel is
             reset_reset_n                               : in    std_logic                     := 'X';
 
             host_0_benchmark_pio_export                 : out   std_logic_vector(7 downto 0);
-
-            status_led_pio_export                       : out   std_logic_vector(1 downto 0);
 
             key_pio_export                              : in    std_logic_vector(3 downto 0);
 
@@ -217,7 +213,6 @@ begin
             reset_reset_n                               => pllLocked,
 
             node_switch_pio_export                      => NODE_SWITCH,
-            status_led_pio_export                       => LEDG,
 
             hex_pio_export                              => hex,
             key_pio_export                              => key,

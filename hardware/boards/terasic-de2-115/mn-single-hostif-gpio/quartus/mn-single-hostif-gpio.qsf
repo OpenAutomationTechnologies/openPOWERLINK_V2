@@ -90,9 +90,6 @@ set_location_assignment PIN_P3      -to EPCS_DCLK
 set_location_assignment PIN_E2      -to EPCS_SCE
 set_location_assignment PIN_F4      -to EPCS_SDO
 
-set_location_assignment PIN_E22     -to LEDG[1]
-set_location_assignment PIN_E21     -to LEDG[0]
-
 set_location_assignment PIN_M23     -to KEY_n[0]
 set_location_assignment PIN_M21     -to KEY_n[1]
 set_location_assignment PIN_N21     -to KEY_n[2]

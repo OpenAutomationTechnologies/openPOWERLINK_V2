@@ -58,7 +58,7 @@
    {
       datum _sortIndex
       {
-         value = "10";
+         value = "9";
          type = "int";
       }
       datum sopceditor_expanded
@@ -101,19 +101,6 @@
          type = "boolean";
       }
    }
-   element led_pio
-   {
-      datum _sortIndex
-      {
-         value = "9";
-         type = "int";
-      }
-      datum sopceditor_expanded
-      {
-         value = "1";
-         type = "boolean";
-      }
-   }
    element openmac_0.macTimer
    {
       datum baseAddress
@@ -146,14 +133,6 @@
       {
          value = "1";
          type = "boolean";
-      }
-   }
-   element led_pio.s1
-   {
-      datum baseAddress
-      {
-         value = "26880";
-         type = "String";
       }
    }
    element com_mem.s1
@@ -245,8 +224,8 @@
    type="clock"
    dir="end" />
  <interface
-   name="led_pio_external_connection"
-   internal="led_pio.external_connection"
+   name="powerlink_led"
+   internal="pcp_0.powerlink_led"
    type="conduit"
    dir="end" />
  <interface
@@ -700,20 +679,6 @@
   <parameter name="AUTO_DMACLK_CLOCK_RATE" value="100000000" />
   <parameter name="AUTO_PKTCLK_CLOCK_RATE" value="50000000" />
  </module>
- <module kind="altera_avalon_pio" version="14.0" enabled="1" name="led_pio">
-  <parameter name="bitClearingEdgeCapReg" value="false" />
-  <parameter name="bitModifyingOutReg" value="true" />
-  <parameter name="captureEdge" value="false" />
-  <parameter name="direction" value="Output" />
-  <parameter name="edgeType" value="RISING" />
-  <parameter name="generateIRQ" value="false" />
-  <parameter name="irqType" value="LEVEL" />
-  <parameter name="resetValue" value="0" />
-  <parameter name="simDoTestBenchWiring" value="false" />
-  <parameter name="simDrivenValue" value="0" />
-  <parameter name="width" value="4" />
-  <parameter name="clockRate" value="50000000" />
- </module>
  <module
    kind="altera_avalon_onchip_memory2"
    version="14.0"
@@ -936,26 +901,6 @@
    start="pcp_0.sync_irq"
    end="openmac_0.timerIrq">
   <parameter name="irqNumber" value="0" />
- </connection>
- <connection kind="clock" version="14.0" start="clk_50.clk" end="led_pio.clk" />
- <connection
-   kind="reset"
-   version="14.0"
-   start="clk_50.clk_reset"
-   end="led_pio.reset" />
- <connection
-   kind="reset"
-   version="14.0"
-   start="clk_100.clk_reset"
-   end="led_pio.reset" />
- <connection
-   kind="avalon"
-   version="14.0"
-   start="host_0.lw_bridge_m0"
-   end="led_pio.s1">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x6900" />
-  <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
    kind="avalon"

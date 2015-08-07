@@ -55,6 +55,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "../dll/dllkframe.h"
 
+#if defined(CONFIG_INCLUDE_LEDK)
+#include <kernel/ledk.h>
+#endif
+
 #if CONFIG_TIMER_USE_HIGHRES != FALSE
 #include <kernel/hrestimer.h>
 #endif
@@ -219,6 +223,10 @@ BOOL ctrlk_process(void)
     }
 
     eventkcal_process();
+
+#if defined(CONFIG_INCLUDE_LEDK)
+    ledk_process();
+#endif
 
     ret = ctrlkcal_process();
     if (ret != kErrorOk)
@@ -487,6 +495,10 @@ static tOplkError initStack(void)
         return ret;
 #endif
 
+#if defined(CONFIG_INCLUDE_LEDK)
+    ret = ledk_init();
+#endif
+
     // initialize Virtual Ethernet Driver
 #if defined(CONFIG_INCLUDE_VETH)
     if ((ret = veth_init(instance_l.initParam.aMacAddress)) != kErrorOk)
@@ -537,6 +549,10 @@ static tOplkError shutdownStack(void)
 #if defined (CONFIG_INCLUDE_NMT_MN)
     // DLL and events are shutdown, now it's save to shutdown edrvcyclic
     edrvcyclic_exit();
+#endif
+
+#if defined(CONFIG_INCLUDE_LEDK)
+    ledk_exit();
 #endif
 
     edrv_exit();
