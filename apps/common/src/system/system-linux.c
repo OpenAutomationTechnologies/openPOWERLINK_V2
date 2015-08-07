@@ -47,6 +47,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <errno.h>
 #include <pthread.h>
 #include <signal.h>
+#include <sys/time.h>
 
 #include "system.h"
 
