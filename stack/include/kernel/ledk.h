@@ -1,15 +1,14 @@
 /**
 ********************************************************************************
-\file   ledu.h
+\file   ledk.h
 
-\brief  Definitions for user LED module
+\brief  Definitions for kernel LED module
 
-This file contains definitions and declarations of the user LED module.
+This file contains definitions and declarations of the kernel LED module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2015, Kalycito Infotech Private Limited.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,8 +34,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_ledu_H_
-#define _INC_ledu_H_
+#ifndef _INC_ledk_H_
+#define _INC_ledk_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -53,7 +52,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-typedef tOplkError (*tLeduStateChangeCallback)(tLedType ledType_p, BOOL fOn_p);
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -64,13 +62,13 @@ extern "C"
 {
 #endif
 
-tOplkError ledu_init(tLeduStateChangeCallback pfnCbStateChange_p);
-tOplkError ledu_exit(void);
-tOplkError ledu_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p);
-tOplkError ledu_processEvent(tEvent* pEvent_p);
+ tOplkError ledk_init(void);
+ tOplkError ledk_exit(void);
+ tOplkError ledk_handleNmtStateChange(tEventNmtStateChange nmtStateChange_p);
+ tOplkError ledk_process(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_ledu_H_ */
+#endif /* _INC_ledk_H_ */

@@ -65,10 +65,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/pdou.h>
 #endif
 
-#if defined(CONFIG_INCLUDE_LEDU)
-#include <user/ledu.h>
-#endif
-
 #if defined(CONFIG_INCLUDE_SDOS) || defined(CONFIG_INCLUDE_SDOC)
 #include <user/sdoseq.h>
 #include <user/sdocom.h>
@@ -181,10 +177,6 @@ static tOplkError linkDomainObjects(tLinkObjectRequest* pLinkRequest_p,
 
 static tOplkError cbBootEvent(tNmtBootEvent BootEvent_p, tNmtState NmtState_p,
                               UINT16 errorCode_p);
-
-#if defined(CONFIG_INCLUDE_LEDU)
-static tOplkError cbLedStateChange(tLedType LedType_p, BOOL fOn_p);
-#endif
 
 #if defined(CONFIG_INCLUDE_CFM)
 static tOplkError cbCfmEventCnProgress(tCfmEventCnProgress* pEventCnProgress_p);
@@ -381,14 +373,6 @@ tOplkError ctrlu_initStack(tOplkApiInitParam* pInitParam_p)
     if ((ret = initNmtu(&ctrlInstance_l.initParam)) != kErrorOk)
         goto Exit;
 
-#if defined(CONFIG_INCLUDE_LEDU)
-    ret = ledu_init(cbLedStateChange);
-    if (ret != kErrorOk)
-    {
-        goto Exit;
-    }
-#endif
-
 #if defined(CONFIG_INCLUDE_SDOS) || defined(CONFIG_INCLUDE_SDOC)
     // init sdo command layer
     DEBUG_LVL_CTRL_TRACE("Initialize SdoCom module...\n");
@@ -445,11 +429,6 @@ tOplkError ctrlu_shutdownStack(void)
 #if defined(CONFIG_INCLUDE_SDOS) || defined(CONFIG_INCLUDE_SDOC)
     ret = sdocom_exit();
     DEBUG_LVL_CTRL_TRACE("sdocom_exit():  0x%X\n", ret);
-#endif
-
-#if defined(CONFIG_INCLUDE_LEDU)
-    ret = ledu_exit();
-    DEBUG_LVL_CTRL_TRACE("ledu_exit():    0x%X\n", ret);
 #endif
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
@@ -1140,13 +1119,6 @@ static tOplkError cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
             break;
     }
 
-#if defined(CONFIG_INCLUDE_LEDU)
-    // forward event to Led module
-    ret = ledu_cbNmtStateChange(nmtStateChange_p);
-    if (ret != kErrorOk)
-        return ret;
-#endif
-
 #if defined(CONFIG_INCLUDE_PDO)
     // forward event to Pdou module
     ret = pdou_cbNmtStateChange(nmtStateChange_p);
@@ -1770,37 +1742,6 @@ static tOplkError cbBootEvent(tNmtBootEvent bootEvent_p, tNmtState nmtState_p,
     ret = ctrlu_callUserEventCallback(kOplkApiEventBoot, &eventArg);
     return ret;
 }
-
-#if defined(CONFIG_INCLUDE_LEDU)
-//------------------------------------------------------------------------------
-/**
-\brief  Callback function for LED change events
-
-The function implements the callback function for LED change events.
-
-\param  ledType_p       Type of LED.
-\param  fOn_p           State of LED. TRUE = on, FALSE = off
-
-\return The function returns a tOplkError error code.
-*/
-//------------------------------------------------------------------------------
-static tOplkError cbLedStateChange(tLedType ledType_p, BOOL fOn_p)
-{
-    tOplkError              ret;
-    tOplkApiEventArg        eventArg;
-
-    ret = kErrorOk;
-
-    // call user callback
-    eventArg.ledEvent.ledType = ledType_p;
-    eventArg.ledEvent.fOn = fOn_p;
-
-    ret = ctrlu_callUserEventCallback(kOplkApiEventLed, &eventArg);
-
-    return ret;
-}
-#endif
-
 
 #if defined(CONFIG_INCLUDE_CFM)
 //------------------------------------------------------------------------------

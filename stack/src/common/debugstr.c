@@ -199,7 +199,6 @@ static char* eventSourceStr_l[] =
     "EventSourceCfgMau",        // CfgMau module
     "EventSourceEventu",        // Eventu module
     "EventSourceOplkApi",       // Api module
-    "EventSourceLedu",          // Ledu module
     "EventSourceGw309Ascii",    // GW309ASCII module
     "EventSourceErru"           // User error module
 };
@@ -218,7 +217,6 @@ static char* eventSinkStr_l[] =
     "EventSinkErru",
     "EventSinkSdoAsySeq",
     "EventSinkNmtMnu",
-    "EventSinkLedu",
     "EventSinkPdokCal",
     "EventSinkGw309Ascii",
     "EventSinkApi"
@@ -307,7 +305,6 @@ static tApiEventInfo apiEventInfo_l[] =
     { kOplkApiEventBoot,             "Boot event"                        },
     { kOplkApiEventSdo,              "SDO event"                         },
     { kOplkApiEventObdAccess,        "OBD access"                        },
-    { kOplkApiEventLed,              "LED event"                         },
     { kOplkApiEventCfmProgress,      "CFM progress"                      },
     { kOplkApiEventCfmResult,        "CFM result"                        },
     { kOplkApiEventReceivedAsnd,     "Received ASnd"                     },
