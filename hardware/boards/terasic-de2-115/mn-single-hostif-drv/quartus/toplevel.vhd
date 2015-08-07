@@ -84,7 +84,9 @@ entity toplevel is
         HOSTIF_RD_n     : in    std_logic;
         HOSTIF_ALE_n    : in    std_logic;
         HOSTIF_ACK_n    : out   std_logic;
-        HOSTIF_IRQ_n    : out   std_logic
+        HOSTIF_IRQ_n    : out   std_logic;
+        -- LED green
+        LEDG            : out   std_logic_vector(1 downto 0)
     );
 end toplevel;
 
@@ -132,7 +134,9 @@ architecture rtl of toplevel is
             prl0_oPrlSlv_ad_oen                         : out   std_logic;
             -- CPU RESET REQUEST
             pcp_0_cpu_resetrequest_resetrequest         : in    std_logic                     := 'X';
-            pcp_0_cpu_resetrequest_resettaken           : out   std_logic
+            pcp_0_cpu_resetrequest_resettaken           : out   std_logic;
+            -- LED green
+            status_led_pio_export                       : out   std_logic_vector(1 downto 0)
         );
     end component mnSingleHostifDrv;
 
@@ -229,7 +233,9 @@ begin
             prl0_iPrlSlv_be                             => HOSTIF_BE,
             prl0_oPrlSlv_ad_o                           => parHost_ad_o,
             prl0_iPrlSlv_ad_i                           => parHost_ad_i,
-            prl0_oPrlSlv_ad_oen                         => parHost_ad_oen
+            prl0_oPrlSlv_ad_oen                         => parHost_ad_oen,
+
+            status_led_pio_export                       => LEDG
         );
 
     -- Pll Instance
