@@ -167,19 +167,19 @@ entity axi_hostinterface is
         --! AXI Host Slave Reset active low
         S_AXI_HOST_ARESETN          : in    std_logic;
         --! AXI Host Slave Write Address
-        S_AXI_HOST_AWADDR           : in    std_logic_vector(C_S_AXI_PCP_ADDR_WIDTH-1 downto 0);
+        S_AXI_HOST_AWADDR           : in    std_logic_vector(C_S_AXI_HOST_ADDR_WIDTH-1 downto 0);
         --! AXI Host Slave Write Address valid
         S_AXI_HOST_AWVALID          : in    std_logic;
         --! AXI Host Slave Write Data
-        S_AXI_HOST_WDATA            : in    std_logic_vector(C_S_AXI_PCP_DATA_WIDTH-1 downto 0);
+        S_AXI_HOST_WDATA            : in    std_logic_vector(C_S_AXI_HOST_DATA_WIDTH-1 downto 0);
         --! AXI Host Slave Write strobe
-        S_AXI_HOST_WSTRB            : in    std_logic_vector((C_S_AXI_PCP_DATA_WIDTH/8)-1 downto 0);
+        S_AXI_HOST_WSTRB            : in    std_logic_vector((C_S_AXI_HOST_DATA_WIDTH/8)-1 downto 0);
         --! AXI Host Slave write Valid
         S_AXI_HOST_WVALID           : in    std_logic;
         --! AXI Host Slave Response Ready
         S_AXI_HOST_BREADY           : in    std_logic;
         --! AXI Host Slave Read Address
-        S_AXI_HOST_ARADDR           : in    std_logic_vector(C_S_AXI_PCP_ADDR_WIDTH-1 downto 0);
+        S_AXI_HOST_ARADDR           : in    std_logic_vector(C_S_AXI_HOST_ADDR_WIDTH-1 downto 0);
         --! AXI Host Slave Read Address Valid
         S_AXI_HOST_ARVALID          : in    std_logic;
         --! AXI Host Slave Read Ready
@@ -187,7 +187,7 @@ entity axi_hostinterface is
         --! AXI Host Slave Read Address Ready
         S_AXI_HOST_ARREADY          : out   std_logic;
         --! AXI Host SlaveRead Data
-        S_AXI_HOST_RDATA            : out   std_logic_vector(C_S_AXI_PCP_DATA_WIDTH-1 downto 0);
+        S_AXI_HOST_RDATA            : out   std_logic_vector(C_S_AXI_HOST_DATA_WIDTH-1 downto 0);
         --! AXI Host Slave Read Response
         S_AXI_HOST_RRESP            : out   std_logic_vector(1 downto 0);
         --! AXI Host Slave Read Valid
