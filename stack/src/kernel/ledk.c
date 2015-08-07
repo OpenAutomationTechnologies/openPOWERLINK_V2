@@ -1,17 +1,16 @@
 /**
 ********************************************************************************
-\file   gpio-microblaze.c
+\file   ledk.c
 
-\brief  GPIOs for Xilinx microblaze
+\brief  Implementation of kernel LED module
 
-The file implements the GPIOs on Xilinx microblaze used by openPOWERLINK demo
-applications.
+This file contains the implementation of the kernel LED module.
 
-\ingroup module_app_common
+\ingroup module_ledk
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Kalycito Infotech Private Limited.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -40,10 +39,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <xparameters.h>
-#include <xgpio_l.h>
-#include <oplk/oplk.h>
-#include "gpio.h"
+#include <common/oplkinc.h>
+#include <kernel/ledk.h>
+#include <common/target.h>
+
+#if defined(CONFIG_INCLUDE_LEDK)
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -61,6 +61,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // global function prototypes
 //------------------------------------------------------------------------------
 
+
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //
 //============================================================================//
@@ -68,18 +69,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-
-#ifdef XPAR_NODE_SWITCHES_BASEADDR
-#define NODE_SWITCH_BASE    XPAR_NODE_SWITCHES_BASEADDR
-#endif // XPAR_NODE_SWITCHES_BASEADDR
-
-#ifdef XPAR_GPIO_INPUTS_BASEADDR
-#define GPIO_INPUTS_BASE XPAR_GPIO_INPUTS_BASEADDR
-#endif // XPAR_GPIO_INPUTS_BASEADDR
-
-#ifdef XPAR_GPIO_OUTPUTS_BASEADDR
-#define GPIO_OUTPUTS_BASE XPAR_GPIO_OUTPUTS_BASEADDR
-#endif // XPAR_GPIO_OUTPUTS_BASEADDR
 
 //------------------------------------------------------------------------------
 // local types
@@ -99,98 +88,154 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //------------------------------------------------------------------------------
 /**
-\brief  Initialize GPIO module
+\brief  Initialize kernel LED module
 
-The function initializes the GPIO module.
+The function initializes the kernel LED module.
 
-\ingroup module_app_common
+\return The function returns a tOplkError error code.
+
+\ingroup module_ledk
 */
 //------------------------------------------------------------------------------
-void gpio_init(void)
-{
 
+tOplkError ledk_init(void)
+{
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Shutdown GPIO module
+\brief  Deinitialize kernel LED module
 
-The function shuts down the GPIO module.
+The function deinitializes the kernel LED module.
 
-\ingroup module_app_common
+\return The function returns a tOplkError error code.
+
+\ingroup module_ledk
 */
 //------------------------------------------------------------------------------
-void gpio_exit(void)
-{
 
+tOplkError ledk_exit(void)
+{
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Gets the node switch value
+\brief  Update status led mode as per the NMT state change
 
-The function returns the node ID set by the node switches.
+The function handles the NMT state changes and updates the target
+LED mode.
 
-\return Returns the set node ID
+\param  nmtStateChange_p    NMT state change event.
 
-\ingroup module_app_common
+\return The function returns a tOplkError error code.
+
+\ingroup module_ledk
 */
 //------------------------------------------------------------------------------
-UINT8 gpio_getNodeid(void)
+
+tOplkError ledk_handleNmtStateChange(tEventNmtStateChange nmtStateChange_p)
 {
-    UINT8 nodeid;
+    tOplkError      ret = kErrorOk;
 
-#ifdef NODE_SWITCH_BASE
-    nodeid = XGpio_ReadReg(NODE_SWITCH_BASE, 0);
-#else
-    nodeid = 0;
-#endif
+    // activate status LED according to NMT state
+    switch (nmtStateChange_p.newNmtState)
+    {
+        // status LED off
+        case kNmtGsOff:
+        case kNmtGsInitialising:
+        case kNmtGsResetApplication:
+        case kNmtGsResetCommunication:
+        case kNmtGsResetConfiguration:
+        case kNmtCsNotActive:
+        case kNmtMsNotActive:
+        case kNmtRmsNotActive:
+            ret = ledk_setLedMode(kLedTypeStatus, kLedModeOff);
+            break;
 
-    return nodeid;
+        // status LED single flashing
+        case kNmtCsPreOperational1:
+        case kNmtMsPreOperational1:
+            ret = ledk_setLedMode(kLedTypeStatus, kLedModeSingleFlash);
+            break;
+
+        // status LED double flashing
+        case kNmtCsPreOperational2:
+        case kNmtMsPreOperational2:
+            ret = ledk_setLedMode(kLedTypeStatus, kLedModeDoubleFlash);
+            break;
+
+        // status LED triple flashing
+        case kNmtCsReadyToOperate:
+        case kNmtMsReadyToOperate:
+            ret = ledk_setLedMode(kLedTypeStatus, kLedModeTripleFlash);
+            break;
+
+        // status LED on
+        case kNmtCsOperational:
+        case kNmtMsOperational:
+            ret = ledk_setLedMode(kLedTypeStatus, kLedModeOn);
+            break;
+
+        // status LED blinking
+        case kNmtCsStopped:
+            ret = ledk_setLedMode(kLedTypeStatus, kLedModeBlinking);
+            break;
+
+        // status LED flickering
+        case kNmtCsBasicEthernet:
+        case kNmtMsBasicEthernet:
+            ret = ledk_setLedMode(kLedTypeStatus, kLedModeFlickering);
+            break;
+
+        default:
+            break;
+    }
+
+    // activate error LED according to NMT event
+    switch (nmtStateChange_p.nmtEvent)
+    {
+        // error LED off
+        case kNmtEventSwReset:               // NMT_GT2
+        case kNmtEventStartNode:             // NMT_CT7
+        case kNmtEventTimerBasicEthernet:    // NMT_CT3
+        case kNmtEventEnterMsOperational:    // NMT_MT5
+            ret = target_setLed(kLedTypeError, FALSE, kLedModeOff);
+            break;
+
+        // error LED on
+        case kNmtEventNmtCycleError:     // NMT_CT11, NMT_MT6
+        case kNmtEventInternComError:    // NMT_GT6
+            ret = target_setLed(kLedTypeError, TRUE, kLedModeOn);
+            break;
+
+        default:
+            // do nothing
+            break;
+    }
+
+    return ret;
 }
+
 
 //------------------------------------------------------------------------------
 /**
-\brief  Gets the application input
+\brief  Process to update states
 
-The function returns application inputs.
+The function is called in loop from the ctrlk module to process led state change.
 
-\return Returns the application inputs.
+\return The function returns a tOplkError error code.
 
-\ingroup module_app_common
+\ingroup module_ledu
 */
 //------------------------------------------------------------------------------
-UINT8 gpio_getAppInput(void)
+
+tOplkError ledk_process(void)
 {
-    UINT8 key;
-
-#ifdef GPIO_INPUTS_BASE
-    key = XGpio_ReadReg(GPIO_INPUTS_BASE, 0);
-#else
-    key = 0;
-#endif
-
-    return key;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Sets the application output
-
-The function sets the application outputs.
-
-\param  val_p               Determines the value to be set to the output
-
-\ingroup module_app_common
-*/
-//------------------------------------------------------------------------------
-void gpio_setAppOutputs(UINT32 val_p)
-{
-#ifdef GPIO_OUTPUTS_BASE
-    XGpio_WriteReg(GPIO_OUTPUTS_BASE, XGPIO_DATA_OFFSET, val_p);
-#else
-    UNUSED_PARAMETER(val_p);
-#endif
+    tOplkError      ret;
+    ret = ledk_updateLedState();
+    return ret;
 }
 
 //============================================================================//
@@ -200,3 +245,5 @@ void gpio_setAppOutputs(UINT32 val_p)
 /// \{
 
 /// \}
+
+#endif

@@ -77,10 +77,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define NODE_SWITCH_BASE        XPAR_NODE_SWITCHES_BASEADDR
 #endif  // XPAR_NODE_SWITCHES_BASEADDR
 
-#ifdef XPAR_POWERLINK_LED_BASEADDR
-#define STATUS_LEDS_BASE        XPAR_POWERLINK_LED_BASEADDR
-#endif  // XPAR_POWERLINK_LED_BASEADDR
-
 #ifdef XPAR_GPIO_INPUTS_BASEADDR
 #define GPIO_INPUTS_BASE        XPAR_GPIO_INPUTS_BASEADDR
 #endif  // XPAR_GPIO_INPUTS_BASEADDR
@@ -96,7 +92,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static UINT32    plkStatusLeds_l = 0; ///< Local copy of the state of the POWERLINK status LEDs
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -156,52 +151,6 @@ UINT8 gpio_getNodeid(void)
 #endif
 
     return nodeid;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Sets the status LED
-
-The function sets the POWERLINK status LED.
-
-\param  fOn_p               Determines the LED state
-
-\ingroup module_app_common
-*/
-//------------------------------------------------------------------------------
-void gpio_setStatusLed(BOOL fOn_p)
-{
-    if (fOn_p != FALSE)
-        plkStatusLeds_l |= (1 << GPIO_STATUS_LED_BIT);
-    else
-        plkStatusLeds_l &= ~(1 << GPIO_STATUS_LED_BIT);
-
-#ifdef STATUS_LEDS_BASE
-    XGpio_WriteReg(STATUS_LEDS_BASE, XGPIO_DATA_OFFSET, plkStatusLeds_l);
-#endif
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Sets the error LED
-
-The function sets the POWERLINK error LED.
-
-\param  fOn_p               Determines the LED state
-
-\ingroup module_app_common
-*/
-//------------------------------------------------------------------------------
-void gpio_setErrorLed(BOOL fOn_p)
-{
-    if (fOn_p != FALSE)
-        plkStatusLeds_l |= (1 << GPIO_ERROR_LED_BIT);
-    else
-        plkStatusLeds_l &= ~(1 << GPIO_ERROR_LED_BIT);
-
-#ifdef STATUS_LEDS_BASE
-    XGpio_WriteReg(STATUS_LEDS_BASE, XGPIO_DATA_OFFSET, plkStatusLeds_l);
-#endif
 }
 
 //------------------------------------------------------------------------------

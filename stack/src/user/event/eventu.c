@@ -56,10 +56,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/sdotest.h>
 #endif
 
-#if defined(CONFIG_INCLUDE_LEDU)
-#include <user/ledu.h>
-#endif
-
 #include <stddef.h>
 
 //============================================================================//
@@ -211,13 +207,6 @@ tOplkError eventu_process(tEvent* pEvent_p)
             break;
 #endif
 
-        case kEventSinkLedu:
-#if defined(CONFIG_INCLUDE_LEDU)
-            ret = ledu_processEvent(pEvent_p);
-            eventSource = kEventSourceLedu;
-#endif
-            break;
-
         case kEventSinkErru:
             break;
 
@@ -293,7 +282,6 @@ tOplkError eventu_postEvent(tEvent* pEvent_p)
         case kEventSinkSdoTest:
         case kEventSinkDlluCal:
         case kEventSinkErru:
-        case kEventSinkLedu:
             ret = eventucal_postUserEvent(pEvent_p);
             break;
 

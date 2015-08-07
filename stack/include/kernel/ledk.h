@@ -1,15 +1,14 @@
 /**
 ********************************************************************************
-\file   ledu.h
+\file   ledk.h
 
-\brief  Definitions for user LED module
+\brief  Definitions for kernel LED module
 
-This file contains definitions and declarations of the user LED module.
+This file contains definitions and declarations of the kernel LED module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2015, Kalycito Infotech Private Limited.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,25 +34,28 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_ledu_H_
-#define _INC_ledu_H_
+#ifndef _INC_ledk_H_
+#define _INC_ledk_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-#include <oplk/led.h>
 #include <oplk/nmt.h>
 #include <oplk/event.h>
+#include <oplk/led.h>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+#define LEDK_DURATION_FLICKERING    50      // [ms]
+#define LEDK_DURATION_BLINKING      200     // [ms]
+#define LEDK_DURATION_FLASH_ON      200     // [ms]
+#define LEDK_DURATION_FLASH_OFF     1000    // [ms]
 
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-typedef tOplkError (*tLeduStateChangeCallback)(tLedType ledType_p, BOOL fOn_p);
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -63,14 +65,18 @@ typedef tOplkError (*tLeduStateChangeCallback)(tLedType ledType_p, BOOL fOn_p);
 extern "C"
 {
 #endif
+//ledk functions
+tOplkError ledk_init(void);
+tOplkError ledk_exit(void);
+tOplkError ledk_handleNmtStateChange(tEventNmtStateChange nmtStateChange_p);
+tOplkError ledk_process(void);
 
-tOplkError ledu_init(tLeduStateChangeCallback pfnCbStateChange_p);
-tOplkError ledu_exit(void);
-tOplkError ledu_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p);
-tOplkError ledu_processEvent(tEvent* pEvent_p);
+//ledktimer functions
+tOplkError ledk_updateLedState(void);
+tOplkError ledk_setLedMode(tLedType ledType_p, tLedMode newMode_p);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_ledu_H_ */
+#endif /* _INC_ledk_H_ */
