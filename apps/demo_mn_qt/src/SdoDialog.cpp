@@ -203,7 +203,7 @@ bool SdoDialog::readFields(void)
         return false;
     }
 
-    sdoType = pSdoTypeBox->itemData(pSdoTypeBox->currentIndex()).value<tSdoType>();
+    sdoType = pSdoTypeBox->itemData(pSdoTypeBox->currentIndex()).value<eSdoType>();
 
     return true;
 }
@@ -217,14 +217,14 @@ Start SDO transfer within stack event thread.
 //------------------------------------------------------------------------------
 void SdoDialog::startRead()
 {
-    tObdType obdType;
+    eObdType obdType;
     int size = 0;
     tOplkError ret;
 
     enableFields(false);
     readFields();
 
-    obdType = pDataTypeBox->itemData(pDataTypeBox->currentIndex()).value<tObdType>();
+    obdType = pDataTypeBox->itemData(pDataTypeBox->currentIndex()).value<eObdType>();
 
     switch (obdType)
     {
@@ -271,14 +271,14 @@ Start SDO transfer within stack event thread.
 //------------------------------------------------------------------------------
 void SdoDialog::startWrite()
 {
-    tObdType obdType;
+    eObdType obdType;
     int size = 0;
     tOplkError ret;
 
     enableFields(false);
     readFields();
 
-    obdType = pDataTypeBox->itemData(pDataTypeBox->currentIndex()).value<tObdType>();
+    obdType = pDataTypeBox->itemData(pDataTypeBox->currentIndex()).value<eObdType>();
 
     switch (obdType)
     {
@@ -392,14 +392,14 @@ void SdoDialog::dataTypeChanged(int index)
 void SdoDialog::updateData(const QString& abortCode_p)
 {
     QString dataString;
-    tObdType obdType;
+    eObdType obdType;
 
     if (abortCode_p != "")
     {
         pAbortCodeLabel->setText(abortCode_p);
     }
 
-    obdType = pDataTypeBox->itemData(pDataTypeBox->currentIndex()).value<tObdType>();
+    obdType = pDataTypeBox->itemData(pDataTypeBox->currentIndex()).value<eObdType>();
 
     switch (obdType)
     {
@@ -544,7 +544,7 @@ void SdoDialog::userDefEvent(void* pUserArg_p)
         ret = oplk_readObject(&SdoComConHdl, targetNodeId,
                                targetIndex, targetSubindex,
                                data.data(), &obdSize,
-                               sdoType, NULL);
+                               (tSdoType) sdoType, NULL);
         if (ret == kErrorApiTaskDeferred)
         {   // SDO transfer started
             return;
@@ -569,7 +569,7 @@ void SdoDialog::userDefEvent(void* pUserArg_p)
         ret = oplk_writeObject(&SdoComConHdl, targetNodeId,
                                targetIndex, targetSubindex,
                                data.data(), obdSize,
-                               sdoType, NULL);
+                               (tSdoType) sdoType, NULL);
         if (ret == kErrorApiTaskDeferred)
         {   // SDO transfer started
             return;
