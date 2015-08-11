@@ -46,6 +46,7 @@
  PORT axi_openmac_0_iMii_rxData_pin = axi_openmac_0_iMii_rxData, DIR = I, VEC = [7:0]
  PORT axi_openmac_0_iMii_rxError_pin = axi_openmac_0_iMii_rxError, DIR = I, VEC = [1:0]
  PORT axi_openmac_0_iMii_rxClk_pin = axi_openmac_0_iMii_rxClk, DIR = I, VEC = [1:0], SIGIS = CLK
+ PORT POWERLINK_LED_GPIO_IO_O_pin = POWERLINK_LED_GPIO_IO_O, DIR = O, VEC = [1:0]
 
 BEGIN proc_sys_reset
  PARAMETER INSTANCE = proc_sys_reset_0
@@ -501,4 +502,15 @@ BEGIN axi_gpio
  PORT S_AXI_ACLK = clk_100_0000MHzPLL0
  PORT GPIO_IO_O = HOST_BENCHMARK_GPIO_IO_O
  PORT GPIO_IO_I = HOST_BENCHMARK_GPIO_IO_O
+END
+
+BEGIN axi_gpio
+ PARAMETER INSTANCE = POWERLINK_LED
+ PARAMETER HW_VER = 1.01.b
+ PARAMETER C_GPIO_WIDTH = 2
+ PARAMETER C_BASEADDR = 0x41000000
+ PARAMETER C_HIGHADDR = 0x4100FFFF
+ BUS_INTERFACE S_AXI = axi4lite_pcp
+ PORT S_AXI_ACLK = clk_100_0000MHzPLL0
+ PORT GPIO_IO_O = POWERLINK_LED_GPIO_IO_O
 END
