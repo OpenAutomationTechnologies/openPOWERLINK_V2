@@ -53,5 +53,5 @@ SET (ARCH_LIBRARIES ${ARCH_LIBRARIES} pthread rt)
 ################################################################################
 # Set architecture specific installation files
 
-INSTALL(PROGRAMS ${TOOLS_DIR}/linux/set_prio DESTINATION ${CMAKE_PROJECT_NAME})
+INSTALL(PROGRAMS ${TOOLS_DIR}/linux/set_prio DESTINATION ${PROJECT_NAME})
 

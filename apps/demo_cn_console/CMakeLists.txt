@@ -112,6 +112,6 @@ TARGET_LINK_LIBRARIES(demo_cn_console ${ARCH_LIBRARIES})
 ################################################################################
 # Installation rules
 
-INSTALL(TARGETS demo_cn_console RUNTIME DESTINATION ${CMAKE_PROJECT_NAME})
+INSTALL(TARGETS demo_cn_console RUNTIME DESTINATION ${PROJECT_NAME})
 
 
