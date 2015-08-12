@@ -126,6 +126,6 @@ TARGET_LINK_LIBRARIES(demo_mn_console ${ARCH_LIBRARIES})
 ################################################################################
 # Installation rules
 
-INSTALL(TARGETS demo_mn_console RUNTIME DESTINATION ${CMAKE_PROJECT_NAME})
-INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/mnobd.cdc DESTINATION ${CMAKE_PROJECT_NAME})
+INSTALL(TARGETS demo_mn_console RUNTIME DESTINATION ${PROJECT_NAME})
+INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/mnobd.cdc DESTINATION ${PROJECT_NAME})
 
