@@ -254,13 +254,16 @@ The function starts the thread used for synchronous data handling.
 //------------------------------------------------------------------------------
 void system_startSyncThread(tSyncCb pfnSync_p)
 {
+    int ret;
     syncThreadInstance_l.pfnSyncCb = pfnSync_p;
     syncThreadInstance_l.fTerminate = FALSE;
 
     // create sync thread
-    if (pthread_create(&syncThreadId_l, NULL, &powerlinkSyncThread,
-                       &syncThreadInstance_l) != 0)
+    ret = pthread_create(&syncThreadId_l, NULL, &powerlinkSyncThread,
+                         &syncThreadInstance_l);
+    if (ret != 0)
     {
+        fprintf(stderr, "pthread_create() failed with \"%d\"\n", ret);
         return;
     }
 
