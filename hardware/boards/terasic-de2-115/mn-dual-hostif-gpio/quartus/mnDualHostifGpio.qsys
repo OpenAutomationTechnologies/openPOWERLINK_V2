@@ -228,7 +228,7 @@
    {
       datum baseAddress
       {
-         value = "2048";
+         value = "4128";
          type = "String";
       }
    }
@@ -362,7 +362,7 @@
  <parameter name="projectName">mn-dual-hostif-gpio.qpf</parameter>
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1423058080414" />
+ <parameter name="timeStamp" value="1438938316611" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk50" internal="clk50.clk_in" type="clock" dir="end" />
@@ -508,7 +508,7 @@
    enabled="1"
    name="status_led_pio">
   <parameter name="bitClearingEdgeCapReg" value="false" />
-  <parameter name="bitModifyingOutReg" value="false" />
+  <parameter name="bitModifyingOutReg" value="true" />
   <parameter name="captureEdge" value="false" />
   <parameter name="direction" value="Output" />
   <parameter name="edgeType" value="RISING" />
@@ -870,10 +870,10 @@
  <connection
    kind="avalon"
    version="13.0"
-   start="host_0.slow_bridge"
+   start="pcp_0.slow_bridge"
    end="status_led_pio.s1">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0800" />
+  <parameter name="baseAddress" value="0x1020" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection

@@ -180,6 +180,19 @@
          type = "boolean";
       }
    }
+   element status_led_pio
+   {
+      datum _sortIndex
+      {
+         value = "12";
+         type = "int";
+      }
+      datum sopceditor_expanded
+      {
+         value = "0";
+         type = "boolean";
+      }
+   }
    element sysid
    {
       datum _sortIndex
@@ -234,7 +247,7 @@
  <parameter name="projectName">mn-single-hostif-drv.qpf</parameter>
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1423058096029" />
+ <parameter name="timeStamp" value="1438938142606" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk50" internal="clk50.clk_in" type="clock" dir="end" />
@@ -285,6 +298,11 @@
  <interface
    name="pcp_0_cpu_resetrequest"
    internal="pcp_0.cpu_resetrequest"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="status_led_pio"
+   internal="status_led_pio.external_connection"
    type="conduit"
    dir="end" />
  <module kind="clock_source" version="13.0" enabled="1" name="clk50">
@@ -457,6 +475,24 @@
    name="remote_update">
   <parameter name="clockFrequency" value="25000000" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone IV E" />
+ </module>
+ <module
+   kind="altera_avalon_pio"
+   version="13.0.1.99.2"
+   enabled="1"
+   name="status_led_pio">
+  <parameter name="bitClearingEdgeCapReg" value="false" />
+  <parameter name="bitModifyingOutReg" value="true" />
+  <parameter name="captureEdge" value="false" />
+  <parameter name="direction" value="Output" />
+  <parameter name="edgeType" value="RISING" />
+  <parameter name="generateIRQ" value="false" />
+  <parameter name="irqType" value="LEVEL" />
+  <parameter name="resetValue" value="0" />
+  <parameter name="simDoTestBenchWiring" value="false" />
+  <parameter name="simDrivenValue" value="0" />
+  <parameter name="width" value="2" />
+  <parameter name="clockRate" value="50000000" />
  </module>
  <connection
    kind="reset"
@@ -782,6 +818,35 @@
    version="13.0"
    start="pcp_0.jtag_reset"
    end="epcs_flash_controller.reset" />
+ <connection
+   kind="clock"
+   version="13.0"
+   start="clk50.clk"
+   end="status_led_pio.clk" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk100.clk_reset"
+   end="status_led_pio.reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk25.clk_reset"
+   end="status_led_pio.reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk50.clk_reset"
+   end="status_led_pio.reset" />
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="pcp_0.slow_bridge"
+   end="status_led_pio.s1">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
  <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
  <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="1" />
 </system>

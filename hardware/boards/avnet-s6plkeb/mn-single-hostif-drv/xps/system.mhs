@@ -54,6 +54,7 @@
  PORT axi_hostinterface_0_iParHost_address_pin = axi_hostinterface_0_iParHost_address, DIR = I, VEC = [15:0]
  PORT axi_hostinterface_0_ioParHost_data_io_pin = axi_hostinterface_0_ioParHost_data_io, DIR = IO, VEC = [15:0]
  PORT axi_hostinterface_0_irqOut_irq_pin = axi_hostinterface_0_irqOut_irq, DIR = O, SIGIS = INTERRUPT
+ PORT Status_Leds_GPIO_IO_O_pin = Status_Leds_GPIO_IO_O, DIR = O, VEC = [1:0]
 
 BEGIN proc_sys_reset
  PARAMETER INSTANCE = proc_sys_reset_0
@@ -374,3 +375,15 @@ BEGIN axi_hostinterface
  PORT irqSync_irq = axi_openmac_0_TIMER_IRQ
  PORT irqOut_irq = axi_hostinterface_0_irqOut_irq
 END
+
+BEGIN axi_gpio
+ PARAMETER INSTANCE = Status_Leds
+ PARAMETER HW_VER = 1.01.b
+ PARAMETER C_GPIO_WIDTH = 2
+ PARAMETER C_BASEADDR = 0x40000000
+ PARAMETER C_HIGHADDR = 0x4000ffff
+ BUS_INTERFACE S_AXI = axi4lite
+ PORT S_AXI_ACLK = clk_50_0000MHzPLL0
+ PORT GPIO_IO_O = Status_Leds_GPIO_IO_O
+END
+

@@ -47,6 +47,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/eventk.h>
 #include <common/timer.h>
 
+#if defined(CONFIG_INCLUDE_LEDK)
+#include <kernel/ledk.h>
+#endif
+
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
@@ -308,6 +312,11 @@ tOplkError nmtk_process(tEvent* pEvent_p)
         OPLK_MEMSET(&event.netTime, 0x00, sizeof(event.netTime));
         event.eventArg.pEventArg = &nmtStateChange;
         event.eventArgSize = sizeof(nmtStateChange);
+
+#if defined(CONFIG_INCLUDE_LEDK)
+        //ledk state change
+        ledk_handleNmtStateChange(nmtStateChange);
+#endif
 
         // inform DLLk module about state change
         event.eventSink = kEventSinkDllk;

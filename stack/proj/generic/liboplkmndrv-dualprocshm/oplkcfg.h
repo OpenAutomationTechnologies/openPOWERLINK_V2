@@ -58,6 +58,7 @@ The generic defines are valid for the whole openPOWERLINK stack.
 #define CONFIG_INCLUDE_NMT_MN
 #define CONFIG_INCLUDE_SDOS
 #define CONFIG_INCLUDE_SDOC
+#define CONFIG_INCLUDE_LEDK
 #define CONFIG_INCLUDE_SDO_ASND
 #define CONFIG_INCLUDE_VETH
 

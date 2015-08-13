@@ -308,66 +308,6 @@ UINT8 gpio_getNodeid(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Sets the status LED
-
-The function sets the POWERLINK status LED.
-
-\param  fOn_p               Determines the LED state
-
-\ingroup module_app_common
-*/
-//------------------------------------------------------------------------------
-void gpio_setStatusLed(BOOL fOn_p)
-{
-    ALT_STATUS_CODE     halRet = ALT_E_SUCCESS;
-    UINT32              ledStatus = 0x0;
-
-    ledStatus = alt_gpio_port_data_read(ALT_GPIO_PORTB, HPS_LED_ALL_BIT_MASK);
-
-    if (fOn_p)
-    {
-        ledStatus &= (UINT32)(~HPS_LED_1_TURN_OFF & HPS_LED_ALL_BIT_MASK);
-        halRet = alt_gpio_port_data_write(ALT_GPIO_PORTB, HPS_LED_ALL_BIT_MASK, ledStatus);
-    }
-    else
-    {
-        ledStatus |= HPS_LED_1_TURN_OFF;
-        halRet = alt_gpio_port_data_write(ALT_GPIO_PORTB, HPS_LED_ALL_BIT_MASK, ledStatus);
-    }
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Sets the error LED
-
-The function sets the POWERLINK error LED.
-
-\param  fOn_p               Determines the LED state
-
-\ingroup module_app_common
-*/
-//------------------------------------------------------------------------------
-void gpio_setErrorLed(BOOL fOn_p)
-{
-    ALT_STATUS_CODE     halRet = ALT_E_SUCCESS;
-    UINT32              ledStatus = 0x0;
-
-    ledStatus = alt_gpio_port_data_read(ALT_GPIO_PORTB, HPS_LED_ALL_BIT_MASK);
-
-    if (fOn_p)
-    {
-        ledStatus &= (UINT32)(~HPS_LED_0_TURN_OFF & HPS_LED_ALL_BIT_MASK);
-        halRet = alt_gpio_port_data_write(ALT_GPIO_PORTB, HPS_LED_ALL_BIT_MASK, ledStatus);
-    }
-    else
-    {
-        ledStatus |= HPS_LED_0_TURN_OFF;
-        halRet = alt_gpio_port_data_write(ALT_GPIO_PORTB, HPS_LED_ALL_BIT_MASK, ledStatus);
-    }
-}
-
-//------------------------------------------------------------------------------
-/**
 \brief  Gets the application input
 
 The function returns application inputs.

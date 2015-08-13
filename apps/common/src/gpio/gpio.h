@@ -65,8 +65,6 @@ extern "C"
 void  gpio_init(void);
 void  gpio_exit(void);
 UINT8 gpio_getNodeid(void);
-void  gpio_setStatusLed(BOOL fOn_p);
-void  gpio_setErrorLed(BOOL fOn_p);
 UINT8 gpio_getAppInput(void);
 void  gpio_setAppOutputs(UINT32 val_p);
 
