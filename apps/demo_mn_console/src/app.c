@@ -44,6 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <oplk/oplk.h>
+#include <oplk/debugstr.h>
 
 #include "app.h"
 #include "xap.h"
@@ -153,7 +154,14 @@ The function shuts down the synchronous data application
 //------------------------------------------------------------------------------
 void shutdownApp(void)
 {
-    oplk_freeProcessImage();
+    tOplkError          ret = kErrorOk;
+
+    ret = oplk_freeProcessImage();
+    if (ret != kErrorOk)
+    {
+        fprintf(stderr, "oplk_freeProcessImage() failed with \"%s\" (0x%04x)\n",
+                debugstr_getRetValStr(ret), ret);
+    }
 }
 
 //------------------------------------------------------------------------------
