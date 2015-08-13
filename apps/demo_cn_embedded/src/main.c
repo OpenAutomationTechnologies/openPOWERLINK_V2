@@ -173,8 +173,8 @@ int main(void)
 
 Exit:
     arp_exit();
-    shutdownPowerlink(&instance_l);
     shutdownApp();
+    shutdownPowerlink(&instance_l);
 
     // Shutdown helper modules
     lcd_exit();
