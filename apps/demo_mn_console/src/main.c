@@ -162,8 +162,8 @@ int main(int argc, char** argv)
     loopMain();
 
 Exit:
-    shutdownPowerlink();
     shutdownApp();
+    shutdownPowerlink();
     system_exit();
 
     return 0;
@@ -295,6 +295,8 @@ static void loopMain(void)
     ret = oplk_execNmtCommand(kNmtEventSwReset);
     if (ret != kErrorOk)
     {
+        fprintf(stderr, "oplk_execNmtCommand() failed with \"%s\" (0x%04x)\n",
+                debugstr_getRetValStr(ret), ret);
         return;
     }
 
@@ -314,6 +316,8 @@ static void loopMain(void)
                     ret = oplk_execNmtCommand(kNmtEventSwReset);
                     if (ret != kErrorOk)
                     {
+                        fprintf(stderr, "oplk_execNmtCommand() failed with \"%s\" (0x%04x)\n",
+                                debugstr_getRetValStr(ret), ret);
                         fExit = TRUE;
                     }
                     break;
@@ -322,6 +326,8 @@ static void loopMain(void)
                     ret = oplk_execNmtCommand(kNmtEventNmtCycleError);
                     if (ret != kErrorOk)
                     {
+                        fprintf(stderr, "oplk_execNmtCommand() failed with \"%s\" (0x%04x)\n",
+                                debugstr_getRetValStr(ret), ret);
                         fExit = TRUE;
                     }
                     break;
@@ -372,6 +378,7 @@ The function shuts down the demo application.
 static void shutdownPowerlink(void)
 {
     UINT                i;
+    tOplkError          ret = kErrorOk;
 
     // NMT_GS_OFF state has not yet been reached
     fGsOff_l = FALSE;
@@ -382,7 +389,12 @@ static void shutdownPowerlink(void)
 #endif
 
     // halt the NMT state machine so the processing of POWERLINK frames stops
-    oplk_execNmtCommand(kNmtEventSwitchOff);
+    ret = oplk_execNmtCommand(kNmtEventSwitchOff);
+    if (ret != kErrorOk)
+    {
+        fprintf(stderr, "oplk_execNmtCommand() failed with \"%s\" (0x%04x)\n",
+                debugstr_getRetValStr(ret), ret);
+    }
 
     // small loop to implement timeout waiting for thread to terminate
     for (i = 0; i < 1000; i++)
@@ -392,7 +404,12 @@ static void shutdownPowerlink(void)
     }
 
     printf("Stack is in state off ... Shutdown\n");
-    oplk_shutdown();
+    ret = oplk_shutdown();
+    if (ret != kErrorOk)
+    {
+        fprintf(stderr, "oplk_shutdown() failed with \"%s\" (0x%04x)\n",
+                debugstr_getRetValStr(ret), ret);
+    }
 }
 
 //------------------------------------------------------------------------------
