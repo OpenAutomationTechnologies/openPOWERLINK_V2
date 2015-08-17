@@ -31,7 +31,7 @@
 
 ################################################################################
 # Handle includes
-SET(CMAKE_MODULE_PATH "${OPLK_ROOT_DIR}/cmake" ${CMAKE_MODULE_PATH})
+SET(CMAKE_MODULE_PATH "${OPLK_BASE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 INCLUDE(geneclipsefilelist)
 INCLUDE(geneclipseincludelist)
 INCLUDE(setmicroblazeboardconfig)
@@ -39,7 +39,7 @@ INCLUDE(listdir)
 
 ################################################################################
 # Path to the hardware library folder of your board example
-SET(CFG_HW_LIB_PATH ${OPLK_ROOT_DIR}/hardware/lib/${SYSTEM_NAME_DIR}/${SYSTEM_PROCESSOR_DIR}
+SET(CFG_HW_LIB_PATH ${OPLK_BASE_DIR}/hardware/lib/${SYSTEM_NAME_DIR}/${SYSTEM_PROCESSOR_DIR}
         CACHE PATH "Path to the hardware library folder")
 
 # Get subdirectories (board/demo)

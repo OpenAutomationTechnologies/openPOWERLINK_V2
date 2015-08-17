@@ -50,6 +50,23 @@ solution:
   can be acquired from the `Xilinx Licensing Site` and is free for an evaluation
   product.
 
+#### Patch Standalone BSP V3.11.a
+The ARM Cortex 9 standalone BSP V3.11.a provided with ISE has a bug in data cache
+handling. It fails to correctly invalidate the data cache, leading to inconsistent
+data communicated between the ARM Cortex 9 and the Microblaze soft-core.
+
+Xilinx has provided a patch, which is available at:
+http://www.xilinx.com/support/answers/60671.html
+
+Follow the instructions to patch the standalone BSP in the Xilinx ISE installation:
+* Download the ar60671.zip from the given link
+  (direct link: http://www.xilinx.com/Attachment/ar60671.zip)
+* Browse to the faulty standalone BSP in the Xilinx installation
+  path: `<XILINX_ISE_PATH>/EDK/sw/lib/bsp/standalone_v3_11_a`
+* Backup the standalone BSP of the Xilinx installation
+* Extract the BSP from the downloaded zip file (`xps/bsp/standalone_v3_11_a`) and
+  copy it into the Xilinx installation path replacing all existing files and folders
+
 ### CMake
 
 For building the openPOWERLINK stack and demo applications, the Open Source

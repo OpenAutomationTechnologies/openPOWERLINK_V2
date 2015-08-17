@@ -103,9 +103,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define HOSTIF_UNCACHED_MALLOC(size)        malloc(size)
 #define HOSTIF_UNCACHED_FREE(ptr)           free(ptr)
 
-// sleep
-#define HOSTIF_USLEEP(x)                    usleep(x)
-
 // hw access
 #define HOSTIF_RD32(base, offset)           cachemem_invAndRead32(base, offset)
 #define HOSTIF_RD16(base, offset)           cachemem_invAndRead16(base, offset)

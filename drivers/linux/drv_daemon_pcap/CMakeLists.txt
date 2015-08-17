@@ -57,11 +57,11 @@ MESSAGE(STATUS "Configuring ${EXE_NAME}")
 ###############################################################################
 # Set global directories
 ###############################################################################
-SET(OPLK_ROOT_DIR ${CMAKE_SOURCE_DIR}/../../..)
+SET(OPLK_BASE_DIR ${CMAKE_SOURCE_DIR}/../../..)
 SET(DRV_SOURCE_DIR ${CMAKE_SOURCE_DIR})
-SET(CONTRIB_SOURCE_DIR ${OPLK_ROOT_DIR}/contrib)
-SET(OPLK_INCLUDE_DIR ${OPLK_ROOT_DIR}/stack/include)
-SET(TOOLS_DIR ${OPLK_ROOT_DIR}/tools)
+SET(CONTRIB_SOURCE_DIR ${OPLK_BASE_DIR}/contrib)
+SET(OPLK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include)
+SET(TOOLS_DIR ${OPLK_BASE_DIR}/tools)
 
 ###############################################################################
 # Include CMake Modules
@@ -73,7 +73,7 @@ INCLUDE(CMakeDependentOption)
 
 IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   SET(CMAKE_INSTALL_PREFIX
-    ${OPLK_ROOT_DIR}/bin/${SYSTEM_NAME_DIR}/${SYSTEM_PROCESSOR_DIR} CACHE PATH "openPOWERLINK drivers install prefix" FORCE
+    ${OPLK_BASE_DIR}/bin/${SYSTEM_NAME_DIR}/${SYSTEM_PROCESSOR_DIR} CACHE PATH "openPOWERLINK drivers install prefix" FORCE
     )
 ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
@@ -101,8 +101,8 @@ ELSE()
     SET(LIB_NAME oplkcndrv-pcap)
 ENDIF()
 
-SET(OPLKLIB_DIR ${OPLK_ROOT_DIR}/stack/lib/${SYSTEM_NAME_DIR}/${SYSTEM_PROCESSOR_DIR})
-SET(OPLKLIB_INCDIR ${OPLK_ROOT_DIR}/stack/proj/${SYSTEM_NAME_DIR}/lib${LIB_NAME})
+SET(OPLKLIB_DIR ${OPLK_BASE_DIR}/stack/lib/${SYSTEM_NAME_DIR}/${SYSTEM_PROCESSOR_DIR})
+SET(OPLKLIB_INCDIR ${OPLK_BASE_DIR}/stack/proj/${SYSTEM_NAME_DIR}/lib${LIB_NAME})
 
 UNSET(OPLKLIB CACHE)
 FIND_LIBRARY(OPLKLIB NAME ${LIB_NAME}${BUILD_TYPE_EXT}

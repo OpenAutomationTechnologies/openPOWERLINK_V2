@@ -142,11 +142,11 @@ int  main (int argc, char** argv)
     {
         DEBUG_LVL_ERROR_TRACE("%s() couldn't set nice value! (%s)\n", __func__, strerror(errno));
     }
-    schedParam.__sched_priority = MAIN_THREAD_PRIORITY;
+    schedParam.sched_priority = MAIN_THREAD_PRIORITY;
     if (pthread_setschedparam(pthread_self(), SCHED_RR, &schedParam) != 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s() couldn't set thread scheduling parameters! %d\n",
-                              __func__, schedParam.__sched_priority);
+                              __func__, schedParam.sched_priority);
     }
 
 #ifdef SET_CPU_AFFINITY

@@ -30,7 +30,7 @@
 ################################################################################
 
 # Set paths
-SET(CMAKE_MODULE_PATH "${OPLK_ROOT_DIR}/cmake" ${CMAKE_MODULE_PATH})
+SET(CMAKE_MODULE_PATH "${OPLK_BASE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
 INCLUDE(geneclipsefilelist)
 INCLUDE(geneclipseincludelist)
@@ -39,7 +39,7 @@ INCLUDE(listdir)
 
 ################################################################################
 # Path to the hardware library folder of your board example
-SET(XIL_HW_LIB_DIR ${OPLK_ROOT_DIR}/hardware/lib/${SYSTEM_NAME_DIR}/${SYSTEM_PROCESSOR_DIR})
+SET(XIL_HW_LIB_DIR ${OPLK_BASE_DIR}/hardware/lib/${SYSTEM_NAME_DIR}/${SYSTEM_PROCESSOR_DIR})
 
 # Get subdirectories (board/demo)
 LIST_SUBDIRECTORIES(HW_BOARD_DEMOS ${XIL_HW_LIB_DIR} 2)
@@ -153,7 +153,7 @@ SET(DEMO_ARCH_SOURCES
 
 INCLUDE_DIRECTORIES(
                     ${XIL_BSP_DIR}/include
-                    ${OPLK_ROOT_DIR}/stack/src/arch/xilinx_microblaze
+                    ${OPLK_BASE_DIR}/stack/src/arch/xilinx_microblaze
                     ${OPLK_INCLUDE_DIR}
                     ${PROJECT_SOURCE_DIR}
                     ${CFG_HW_LIB_DIR}/include

@@ -96,7 +96,7 @@ private:
     UINT            targetNodeId;
     UINT            targetIndex;
     UINT            targetSubindex;
-    tSdoType        sdoType;
+    eSdoType        sdoType;
 
     void            enableFields(bool enable_p);
     bool            readFields(void);

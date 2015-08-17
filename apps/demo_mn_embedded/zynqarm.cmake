@@ -89,7 +89,7 @@ SET(DEMO_ARCH_SOURCES
 
 INCLUDE_DIRECTORIES(
                     ${XIL_BSP_DIR}/include
-                    ${OPLK_ROOT_DIR}/stack/src/arch/xilinx-zynqarm
+                    ${OPLK_BASE_DIR}/stack/src/arch/xilinx-zynqarm
                    )
 
 IF(CFG_CDC_ON_SD)

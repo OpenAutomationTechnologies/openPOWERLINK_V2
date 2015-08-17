@@ -77,7 +77,7 @@ ENDIF()
 SET(ARCH_HWLIB_PATH ${SOC_EDS_ROOT_PATH}/ip/altera/hps/altera_hps/hwlib)
 SET(ARCH_SOC_TOOLS_PATH ${SOC_EDS_ROOT_PATH}/host_tools/altera/preloadergen)
 SET(ARM_HWLIB_PATH ${ARCH_HWLIB_PATH})
-SET(ARCH_TOOLS_PATH ${OPLK_ROOT_DIR}/tools/altera-arm)
+SET(ARCH_TOOLS_PATH ${OPLK_BASE_DIR}/tools/altera-arm)
 SET(DEMO_ARCH_SOURCES
     ${DEMO_ARCHSOURCES}
     ${COMMON_SOURCE_DIR}/gpio/gpio-c5socarm.c
@@ -125,7 +125,7 @@ ENDIF (DEFINED CFG_${CPU_INST_NAME}_BOOT_FROM_SDCARD AND CFG_${CPU_INST_NAME}_BO
 # Set the platform specific include directories
 INCLUDE_DIRECTORIES(
                     ${ALT_BSP_DIR}/include
-                    ${OPLK_ROOT_DIR}/stack/src/arch/altera-c5socarm
+                    ${OPLK_BASE_DIR}/stack/src/arch/altera-c5socarm
                    )
 
 ################################################################################

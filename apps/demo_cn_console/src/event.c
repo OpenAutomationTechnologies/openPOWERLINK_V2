@@ -83,15 +83,15 @@ static BOOL*    pfGsOff_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError processStateChangeEvent(tOplkApiEventType EventType_p,
+static tOplkError processStateChangeEvent(tOplkApiEventType eventType_p,
                                           tOplkApiEventArg* pEventArg_p,
                                           void* pUserArg_p);
 
-static tOplkError processErrorWarningEvent(tOplkApiEventType EventType_p,
+static tOplkError processErrorWarningEvent(tOplkApiEventType eventType_p,
                                            tOplkApiEventArg* pEventArg_p,
                                            void* pUserArg_p);
 
-static tOplkError processPdoChangeEvent(tOplkApiEventType EventType_p,
+static tOplkError processPdoChangeEvent(tOplkApiEventType eventType_p,
                                         tOplkApiEventArg* pEventArg_p,
                                         void* pUserArg_p);
 
@@ -122,7 +122,7 @@ void initEvents(BOOL* pfGsOff_p)
 
 The function implements the application's stack event handler.
 
-\param  EventType_p         Type of event
+\param  eventType_p         Type of event
 \param  pEventArg_p         Pointer to union which describes the event in detail
 \param  pUserArg_p          User specific argument
 
@@ -131,7 +131,7 @@ The function implements the application's stack event handler.
 \ingroup module_demo_cn_console
 */
 //------------------------------------------------------------------------------
-tOplkError processEvents(tOplkApiEventType EventType_p,
+tOplkError processEvents(tOplkApiEventType eventType_p,
                          tOplkApiEventArg* pEventArg_p,
                          void* pUserArg_p)
 {
@@ -139,19 +139,19 @@ tOplkError processEvents(tOplkApiEventType EventType_p,
 
     UNUSED_PARAMETER(pUserArg_p);
 
-    switch (EventType_p)
+    switch (eventType_p)
     {
         case kOplkApiEventNmtStateChange:
-            ret = processStateChangeEvent(EventType_p, pEventArg_p, pUserArg_p);
+            ret = processStateChangeEvent(eventType_p, pEventArg_p, pUserArg_p);
             break;
 
         case kOplkApiEventCriticalError:
         case kOplkApiEventWarning:
-            ret = processErrorWarningEvent(EventType_p, pEventArg_p, pUserArg_p);
+            ret = processErrorWarningEvent(eventType_p, pEventArg_p, pUserArg_p);
             break;
 
         case kOplkApiEventPdoChange:
-            ret = processPdoChangeEvent(EventType_p, pEventArg_p, pUserArg_p);
+            ret = processPdoChangeEvent(eventType_p, pEventArg_p, pUserArg_p);
             break;
 
         default:
@@ -172,21 +172,21 @@ tOplkError processEvents(tOplkApiEventType EventType_p,
 
 The function processes state change events.
 
-\param  EventType_p         Type of event
+\param  eventType_p         Type of event
 \param  pEventArg_p         Pointer to union which describes the event in detail
 \param  pUserArg_p          User specific argument
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError processStateChangeEvent(tOplkApiEventType EventType_p,
+static tOplkError processStateChangeEvent(tOplkApiEventType eventType_p,
                                           tOplkApiEventArg* pEventArg_p,
                                           void* pUserArg_p)
 {
     tOplkError                  ret = kErrorOk;
     tEventNmtStateChange*       pNmtStateChange = &pEventArg_p->nmtStateChange;
 
-    UNUSED_PARAMETER(EventType_p);
+    UNUSED_PARAMETER(eventType_p);
     UNUSED_PARAMETER(pUserArg_p);
 
     if (pfGsOff_l == NULL)
@@ -237,14 +237,14 @@ static tOplkError processStateChangeEvent(tOplkApiEventType EventType_p,
 
 The function processes error and warning events.
 
-\param  EventType_p         Type of event
+\param  eventType_p         Type of event
 \param  pEventArg_p         Pointer to union which describes the event in detail
 \param  pUserArg_p          User specific argument
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError processErrorWarningEvent(tOplkApiEventType EventType_p,
+static tOplkError processErrorWarningEvent(tOplkApiEventType eventType_p,
                                            tOplkApiEventArg* pEventArg_p,
                                            void* pUserArg_p)
 {
@@ -253,7 +253,7 @@ static tOplkError processErrorWarningEvent(tOplkApiEventType EventType_p,
 
     tEventError*            pInternalError = &pEventArg_p->internalError;
 
-    UNUSED_PARAMETER(EventType_p);
+    UNUSED_PARAMETER(eventType_p);
     UNUSED_PARAMETER(pUserArg_p);
 
     console_printlog("Err/Warn: Source = %s (%02X) OplkError = %s (0x%03X)\n",
@@ -294,14 +294,14 @@ static tOplkError processErrorWarningEvent(tOplkApiEventType EventType_p,
 
 The function processes PDO change events.
 
-\param  EventType_p         Type of event
+\param  eventType_p         Type of event
 \param  pEventArg_p         Pointer to union which describes the event in detail
 \param  pUserArg_p          User specific argument
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError processPdoChangeEvent(tOplkApiEventType EventType_p,
+static tOplkError processPdoChangeEvent(tOplkApiEventType eventType_p,
                                         tOplkApiEventArg* pEventArg_p,
                                         void* pUserArg_p)
 {
@@ -311,7 +311,7 @@ static tOplkError processPdoChangeEvent(tOplkApiEventType EventType_p,
     tOplkError                  ret;
     UINT                        varLen;
 
-    UNUSED_PARAMETER(EventType_p);
+    UNUSED_PARAMETER(eventType_p);
     UNUSED_PARAMETER(pUserArg_p);
 
     console_printlog("PDO change event: (%sPDO = 0x%X to node 0x%X with %d objects %s)\n",

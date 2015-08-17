@@ -57,17 +57,20 @@ SET(ARCH_LIBRARIES wpcap iphlpapi)
 
 ################################################################################
 # Set architecture specific installation files
-IF(NOT (${OPLKDLL} STREQUAL "OPLKDLL-NOTFOUND"))
-    INSTALL(FILES ${OPLKDLL}
-            DESTINATION ${CMAKE_PROJECT_NAME}
-            CONFIGURATIONS "Release"
-            )
+IF (DEFINED OPLKDLL)
+    IF(NOT (${OPLKDLL} STREQUAL "OPLKDLL-NOTFOUND"))
+        INSTALL(FILES ${OPLKDLL}
+                DESTINATION ${CMAKE_PROJECT_NAME}
+                CONFIGURATIONS "Release"
+                )
+    ENDIF()
 ENDIF()
 
-IF(NOT (${OPLKDLL_DEBUG} STREQUAL "OPLKDLL_DEBUG-NOTFOUND"))
-    INSTALL(FILES ${OPLKDLL_DEBUG}
-            DESTINATION ${CMAKE_PROJECT_NAME}
-            CONFIGURATIONS "Debug"
-            )
+IF (DEFINED OPLKDLL_DEBUG)
+    IF(NOT (${OPLKDLL_DEBUG} STREQUAL "OPLKDLL_DEBUG-NOTFOUND"))
+        INSTALL(FILES ${OPLKDLL_DEBUG}
+                DESTINATION ${CMAKE_PROJECT_NAME}
+                CONFIGURATIONS "Debug"
+                )
+    ENDIF()
 ENDIF()
-

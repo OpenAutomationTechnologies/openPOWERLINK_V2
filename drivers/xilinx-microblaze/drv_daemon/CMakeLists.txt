@@ -90,18 +90,18 @@ ENDIF ()
 ################################################################################
 # Set global directories
 ################################################################################
-SET(OPLK_ROOT_DIR ${CMAKE_SOURCE_DIR}/../../..)
-SET(CONTRIB_SOURCE_DIR ${OPLK_ROOT_DIR}/contrib)
-SET(STACK_SOURCE_DIR ${OPLK_ROOT_DIR}/stack/src)
-SET(COMMON_SOURCE_DIR ${OPLK_ROOT_DIR}/stack/src/common)
-SET(KERNEL_SOURCE_DIR ${OPLK_ROOT_DIR}/stack/src/kernel)
-SET(EDRV_SOURCE_DIR ${OPLK_ROOT_DIR}/stack/src/kernel/edrv)
-SET(OPLK_INCLUDE_DIR ${OPLK_ROOT_DIR}/stack/include)
-SET(TOOLS_DIR ${OPLK_ROOT_DIR}/tools)
+SET(OPLK_BASE_DIR ${CMAKE_SOURCE_DIR}/../../..)
+SET(CONTRIB_SOURCE_DIR ${OPLK_BASE_DIR}/contrib)
+SET(STACK_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src)
+SET(COMMON_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/common)
+SET(KERNEL_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/kernel)
+SET(EDRV_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/kernel/edrv)
+SET(OPLK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include)
+SET(TOOLS_DIR ${OPLK_BASE_DIR}/tools)
 
 IF (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   SET(CMAKE_INSTALL_PREFIX
-    ${OPLK_ROOT_DIR}/bin/${SYSTEM_NAME_DIR}/${SYSTEM_PROCESSOR_DIR}/
+    ${OPLK_BASE_DIR}/bin/${SYSTEM_NAME_DIR}/${SYSTEM_PROCESSOR_DIR}/
     CACHE PATH "openPOWERLINK kernel driver install prefix" FORCE
     )
 ENDIF ()

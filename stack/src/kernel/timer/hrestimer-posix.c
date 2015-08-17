@@ -171,7 +171,7 @@ tOplkError hrestimer_init(void)
         return kErrorNoResource;
     }
 
-    schedParam.__sched_priority = CONFIG_THREAD_PRIORITY_HIGH;
+    schedParam.sched_priority = CONFIG_THREAD_PRIORITY_HIGH;
     if (pthread_setschedparam(hresTimerInstance_l.threadId, SCHED_FIFO, &schedParam) != 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Couldn't set thread scheduling parameters!\n", __func__);

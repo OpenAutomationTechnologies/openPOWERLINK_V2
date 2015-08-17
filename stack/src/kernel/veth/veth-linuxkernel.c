@@ -148,9 +148,17 @@ The function initializes the virtual Ethernet module.
 //------------------------------------------------------------------------------
 tOplkError veth_init(const UINT8 aSrcMac_p[6])
 {
+
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(3, 17, 0))
     // allocate net device structure with priv pointing to stats structure
     pVEthNetDevice_g = alloc_netdev(sizeof(struct net_device_stats), PLK_VETH_NAME,
                                     ether_setup);
+#else
+    // allocate net device structure with priv pointing to stats structure
+    pVEthNetDevice_g = alloc_netdev(sizeof(struct net_device_stats), PLK_VETH_NAME,
+                                    NET_NAME_UNKNOWN, ether_setup);
+#endif
+
 
     if (pVEthNetDevice_g == NULL)
         return kErrorNoResource;

@@ -82,9 +82,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
          offset;                         \
      })
 
-// sleep
-#define DUALPROCSHM_USLEEP(x)           usleep((UINT32)x)
-#define DPSHM_DMB()                     // no data barriers used
+#define DPSHM_DMB()                     __asm("dmb")
 
 // IO operations
 #define DPSHM_READ8(base)               alt_read_byte((UINT32)base)
@@ -141,7 +139,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
          }                                                                                    \
          else                                                                                 \
          {                                                                                    \
-             if (alt_int_dist_trigger_set(SYNC_IRQ, ALT_INT_TRIGGER_LEVEL) != ALT_E_SUCCESS)  \
+             if (alt_int_dist_trigger_set(SYNC_IRQ, ALT_INT_TRIGGER_EDGE) != ALT_E_SUCCESS)  \
              {                                                                                \
                  ret = -1;                                                                    \
                  TRACE("Sync IRQ trigger set failed\n");                                      \

@@ -207,10 +207,8 @@ tOplkError DataInOutThread::setupProcessImage()
     pProcessImageOut_l = (PI_OUT*)oplk_getProcessImageOut();
 
     ret = oplk_setupProcessImage();
-    if (ret != kErrorOk)
-    {
-        return ret;
-    }
+
+    return ret;
 }
 
 //------------------------------------------------------------------------------

@@ -30,14 +30,14 @@
 
 ################################################################################
 # Handle includes
-SET(CMAKE_MODULE_PATH "${OPLK_ROOT_DIR}/cmake" ${CMAKE_MODULE_PATH})
+SET(CMAKE_MODULE_PATH "${OPLK_BASE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 INCLUDE(geneclipsefilelist)
 INCLUDE(geneclipseincludelist)
 INCLUDE(setzynqarmboardconfig)
 
 ################################################################################
 # Path to the hardware library folder of your board example
-SET(CFG_HW_LIB_DIR ${OPLK_ROOT_DIR}/hardware/lib/${SYSTEM_NAME_DIR}/${SYSTEM_PROCESSOR_DIR}/xilinx-z702/mn-dual-shmem-gpio
+SET(CFG_HW_LIB_DIR ${OPLK_BASE_DIR}/hardware/lib/${SYSTEM_NAME_DIR}/${SYSTEM_PROCESSOR_DIR}/xilinx-z702/mn-dual-shmem-gpio
         CACHE PATH "Path to the hardware library folder of your demo application")
 
 # Include demo specific settings file

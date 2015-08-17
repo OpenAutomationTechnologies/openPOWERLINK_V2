@@ -180,7 +180,7 @@ area from 0x1B00 - 0x1FFF.
         OBD_RAM_INDEX_RAM_ARRAY(0x1F8F, 254, NULL, kObdTypeUInt8, kObdAccR, tObdUnsigned8, NMT_MNNodeExpState_AU8, 0x1C)
 
         // Object 1F92h: NMT_MNCNPResTimeout_AU32 in [ns]
-        OBD_RAM_INDEX_RAM_ARRAY_ALT(0x1F92, 254, NULL, kObdTypeUInt32, kObdAccSRW, tObdUnsigned32, NMT_MNCNPResTimeout_AU32, 140000) // in [ns]
+        OBD_RAM_INDEX_RAM_ARRAY_ALT(0x1F92, 254, NULL, kObdTypeUInt32, kObdAccSRW, tObdUnsigned32, NMT_MNCNPResTimeout_AU32, 25000) // in [ns]
 #endif
 
         // Object 1F93h: NMT_EPLNodeID_REC

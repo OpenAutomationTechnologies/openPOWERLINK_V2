@@ -43,6 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fcntl.h>
 #include <signal.h>
 #include <time.h>
+#include <sys/time.h>
 
 #include <common/oplkinc.h>
 #include <common/ftracedebug.h>
