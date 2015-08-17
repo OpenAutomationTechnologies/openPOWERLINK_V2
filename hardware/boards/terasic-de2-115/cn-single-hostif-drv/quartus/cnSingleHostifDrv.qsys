@@ -239,7 +239,7 @@
  <parameter name="projectName">cn-single-hostif-drv.qpf</parameter>
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1434560796441" />
+ <parameter name="timeStamp" value="1439536210734" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk50" internal="clk50.clk_in" type="clock" dir="end" />
@@ -291,6 +291,11 @@
    type="interrupt"
    dir="end" />
  <interface name="prl0" internal="prlSlave_0.prl0" type="conduit" dir="end" />
+ <interface
+   name="powerlink_led"
+   internal="pcp_0.powerlink_led"
+   type="conduit"
+   dir="end" />
  <module kind="clock_source" version="13.0" enabled="1" name="clk50">
   <parameter name="clockFrequency" value="50000000" />
   <parameter name="clockFrequencyKnown" value="true" />

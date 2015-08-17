@@ -146,7 +146,7 @@ architecture rtl of toplevel is
             -- NODE SWITCH
             node_switch_pio_export                          : in    std_logic_vector(7 downto 0)  := (others => 'X');
             -- STATUS ERROR LED
-            status_led_pio_export                           : out   std_logic_vector(1 downto 0);
+            powerlink_led_export                            : out   std_logic_vector(1 downto 0);
             -- HEX
             hex_pio_export                                  : out   std_logic_vector(31 downto 0);
             -- LEDR
@@ -231,7 +231,7 @@ begin
             epcs_flash_data0                                => EPCS_DATA0,
 
             node_switch_pio_export                          => NODE_SWITCH,
-            status_led_pio_export                           => plk_status_error,
+            powerlink_led_export                            => plk_status_error,
 
             lcd_data                                        => LCD_DQ,
             lcd_E                                           => LCD_E,

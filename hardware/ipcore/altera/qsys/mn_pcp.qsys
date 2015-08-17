@@ -12,6 +12,19 @@
    element $${FILENAME}
    {
    }
+   element POWERLINK_LED
+   {
+      datum _sortIndex
+      {
+         value = "15";
+         type = "int";
+      }
+      datum sopceditor_expanded
+      {
+         value = "0";
+         type = "boolean";
+      }
+   }
    element jtag_uart_0.avalon_jtag_slave
    {
       datum baseAddress
@@ -213,6 +226,14 @@
          type = "String";
       }
    }
+   element POWERLINK_LED.s1
+   {
+      datum baseAddress
+      {
+         value = "4128";
+         type = "String";
+      }
+   }
    element tc_i_mem.s1
    {
       datum _lockedAddress
@@ -322,7 +343,7 @@
  <parameter name="projectName" value="" />
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1431446281217" />
+ <parameter name="timeStamp" value="1439531533008" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceParameter
    name="cpu0_resetCpuBridge"
@@ -397,6 +418,11 @@ proc compose {} {
    internal="jtag_reset_bridge.out_reset"
    type="reset"
    dir="start" />
+ <interface
+   name="powerlink_led"
+   internal="POWERLINK_LED.external_connection"
+   type="conduit"
+   dir="end" />
  <module kind="clock_source" version="13.0" enabled="1" name="clk100">
   <parameter name="clockFrequency" value="100000000" />
   <parameter name="clockFrequencyKnown" value="true" />
@@ -505,7 +531,7 @@ proc compose {} {
   <parameter name="tightlyCoupledInstructionMaster2AddrWidth" value="1" />
   <parameter name="tightlyCoupledInstructionMaster3AddrWidth" value="1" />
   <parameter name="instSlaveMapParam"><![CDATA[<address-map><slave name='cpu_0.jtag_debug_module' start='0x2002800' end='0x2003000' /></address-map>]]></parameter>
-  <parameter name="dataSlaveMapParam"><![CDATA[<address-map><slave name='cpu_0.jtag_debug_module' start='0x2002800' end='0x2003000' /><slave name='tc_i_mem.s2' start='0x8000000' end='0x8005000' /><slave name='timer_0.s1' start='0x20000000' end='0x20000020' /><slave name='benchmark_pio.s1' start='0x20000020' end='0x20000040' /><slave name='jtag_uart_0.avalon_jtag_slave' start='0x20000040' end='0x20000048' /></address-map>]]></parameter>
+  <parameter name="dataSlaveMapParam"><![CDATA[<address-map><slave name='cpu_0.jtag_debug_module' start='0x2002800' end='0x2003000' /><slave name='tc_i_mem.s2' start='0x8000000' end='0x8005000' /><slave name='timer_0.s1' start='0x20000000' end='0x20000020' /><slave name='benchmark_pio.s1' start='0x20000020' end='0x20000040' /><slave name='jtag_uart_0.avalon_jtag_slave' start='0x20000040' end='0x20000048' /><slave name='POWERLINK_LED.s1' start='0x20001020' end='0x20001040' /></address-map>]]></parameter>
   <parameter name="clockFrequency" value="100000000" />
   <parameter name="deviceFamilyName" value="Cyclone IV E" />
   <parameter name="internalIrqMaskSystemInfo" value="255" />
@@ -699,6 +725,24 @@ proc compose {} {
   <parameter name="SYNCHRONOUS_EDGES" value="both" />
   <parameter name="NUM_RESET_OUTPUTS" value="1" />
   <parameter name="AUTO_CLK_CLOCK_RATE" value="100000000" />
+ </module>
+ <module
+   kind="altera_avalon_pio"
+   version="13.0.1.99.2"
+   enabled="1"
+   name="POWERLINK_LED">
+  <parameter name="bitClearingEdgeCapReg" value="false" />
+  <parameter name="bitModifyingOutReg" value="true" />
+  <parameter name="captureEdge" value="false" />
+  <parameter name="direction" value="Output" />
+  <parameter name="edgeType" value="RISING" />
+  <parameter name="generateIRQ" value="false" />
+  <parameter name="irqType" value="LEVEL" />
+  <parameter name="resetValue" value="0" />
+  <parameter name="simDoTestBenchWiring" value="false" />
+  <parameter name="simDrivenValue" value="0" />
+  <parameter name="width" value="2" />
+  <parameter name="clockRate" value="50000000" />
  </module>
  <connection
    kind="avalon"
@@ -1111,6 +1155,31 @@ proc compose {} {
    version="13.0"
    start="cpu_0.jtag_debug_module_reset"
    end="jtag_reset_bridge.in_reset" />
+ <connection kind="clock" version="13.0" start="clk50.clk" end="POWERLINK_LED.clk" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk100.clk_reset"
+   end="POWERLINK_LED.reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk50.clk_reset"
+   end="POWERLINK_LED.reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="cpu_0.jtag_debug_module_reset"
+   end="POWERLINK_LED.reset" />
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="clock_crossing_0.m0"
+   end="POWERLINK_LED.s1">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x1020" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
  <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
  <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="0" />
 </system>

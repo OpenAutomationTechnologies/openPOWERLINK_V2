@@ -99,9 +99,6 @@ set_location_assignment PIN_AB23    -to NODE_SWITCH[2]
 set_location_assignment PIN_AB24    -to NODE_SWITCH[1]
 set_location_assignment PIN_AC24    -to NODE_SWITCH[0]
 
-set_location_assignment PIN_E22     -to LEDG[1]
-set_location_assignment PIN_E21     -to LEDG[0]
-
 set_location_assignment PIN_AD17    -to HEX7[0]
 set_location_assignment PIN_AE17    -to HEX7[1]
 set_location_assignment PIN_AG17    -to HEX7[2]
