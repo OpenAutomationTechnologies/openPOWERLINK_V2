@@ -20,7 +20,7 @@ proc timing_sram { clkSRAM } {
 
     # FPGA's IO timing
     # -> tco depends on FPGA (refer to www.altera.com IO spreadsheet)
-    set fpga_tco        7.5
+    set fpga_tco        5.5
     set fpga_tsu        [expr $sram_tperRd - $sram_taa - $fpga_tco - 2*$sram_tpcb]
     set fpga_th         0.0
     set fpga_tcomin     0.0
