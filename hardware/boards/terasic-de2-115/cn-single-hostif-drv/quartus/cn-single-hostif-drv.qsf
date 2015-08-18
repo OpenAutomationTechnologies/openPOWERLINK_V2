@@ -127,6 +127,23 @@ set_location_assignment PIN_AE8     -to SRAM_WE_n
 set_location_assignment PIN_AC4     -to SRAM_BE_n[1]
 set_location_assignment PIN_AD4     -to SRAM_BE_n[0]
 
+set_instance_assignment -name FAST_INPUT_REGISTER           ON  -to SRAM_DQ[*]
+set_instance_assignment -name FAST_OUTPUT_REGISTER          ON  -to SRAM_DQ[*]
+set_instance_assignment -name FAST_OUTPUT_ENABLE_REGISTER   ON  -to SRAM_DQ[*]
+set_instance_assignment -name FAST_OUTPUT_REGISTER          ON  -to SRAM_ADDR[*]
+set_instance_assignment -name FAST_OUTPUT_ENABLE_REGISTER   ON  -to SRAM_ADDR[*]
+set_instance_assignment -name FAST_OUTPUT_REGISTER          ON  -to SRAM_BE_n[*]
+set_instance_assignment -name FAST_OUTPUT_ENABLE_REGISTER   ON  -to SRAM_BE_n[*]
+set_instance_assignment -name FAST_OUTPUT_REGISTER          ON  -to SRAM_CE_n
+set_instance_assignment -name FAST_OUTPUT_ENABLE_REGISTER   ON  -to SRAM_CE_n
+set_instance_assignment -name FAST_OUTPUT_REGISTER          ON  -to SRAM_OE_n
+set_instance_assignment -name FAST_OUTPUT_ENABLE_REGISTER   ON  -to SRAM_OE_n
+set_instance_assignment -name FAST_OUTPUT_REGISTER          ON  -to SRAM_WE_n
+set_instance_assignment -name FAST_OUTPUT_ENABLE_REGISTER   ON  -to SRAM_WE_n
+
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to SRAM_OE_n
+set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to SRAM_WE_n
+
 set_location_assignment PIN_N7      -to EPCS_DATA0
 set_location_assignment PIN_P3      -to EPCS_DCLK
 set_location_assignment PIN_E2      -to EPCS_SCE
