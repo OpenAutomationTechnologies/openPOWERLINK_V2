@@ -55,7 +55,7 @@ SET (LIB_SOURCES
      ${COMMON_SOURCES}
      ${COMMON_WINDOWS_SOURCES}
      ${TARGET_WINDOWS_SOURCES}
-     ${MEMMAP_NULL_SOURCES}
+     ${MEMMAP_WINIOCTL_SOURCES}
      ${ARCH_X86_SOURCES}
      ${CIRCBUF_WINDOWS_SOURCES}
      )
@@ -96,6 +96,7 @@ SOURCE_GROUP("Source Files\\Common Source Files" FILES
 
 SOURCE_GROUP("Source Files\\Architecture Source Files" FILES
     ${ARCH_X86_SOURCES}
+    ${MEMMAP_WINIOCTL_SOURCES}
     )
 
 SOURCE_GROUP("Header Files\\External Header Files" FILES ${OPLK_HEADERS})

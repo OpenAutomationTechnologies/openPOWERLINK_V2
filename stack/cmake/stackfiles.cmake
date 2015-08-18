@@ -481,6 +481,10 @@ SET(MEMMAP_NOOSHOSTIF_SOURCES
     ${COMMON_SOURCE_DIR}/memmap/memmap-nooshostif.c
     )
 
+SET(MEMMAP_WINIOCTL_SOURCES
+    ${COMMON_SOURCE_DIR}/memmap/memmap-winioctl.c
+    )
+
 SET(MEMMAP_NULL_SOURCES
     ${COMMON_SOURCE_DIR}/memmap/memmap-null.c
     )
