@@ -53,7 +53,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 #define OPLK_INF_NAME          "drv_ndis_pcie.inf"
-#define OPLK_DEVICE_ID         "PCI\\VEN_1677&DEV_E53F"
+#define OPLK_DEVICE_ID         "PCI\\VEN_1677&DEV_E809"
 #define OPLK_PROVIDER_STRING   "Kalycito Infotech Private Limited"
 #define OPLK_FLAG_FORCE         0x00000001
 

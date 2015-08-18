@@ -60,6 +60,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "dualprocshm-pcie.h"
 
+#elif defined (__BR_OPLK_PCIe_IF__)
+
+#include "dualprocshm-pcie.h"
+
 #else
 
 #error "Platform is not supported! Please point the target platform file in dualprocshm-target.h "
