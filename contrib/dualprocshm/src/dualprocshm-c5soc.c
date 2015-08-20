@@ -53,10 +53,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #define DEFAULT_LOCK_ID    0x00             ///< Default lock Id
 
-#ifndef DPSHM_MAKE_NONCACHEABLE
-#define DPSHM_MAKE_NONCACHEABLE(pHdl_p)    pHdl_p
-#endif
-
 //------------------------------------------------------------------------------
 // module global vars
 //------------------------------------------------------------------------------

@@ -127,6 +127,18 @@ typedef struct sDualprocMemInst
 } tDualprocMemInst;
 
 /**
+\brief Shared memory instance
+
+Structure to hold shared memory information.
+
+*/
+typedef struct sDualprocSharedMemInst
+{
+    UINT64      baseAddr;         ///< Base address of the shared memory.
+    UINT32      span;             ///< Size of the shared memory.
+} tDualprocSharedMemInst;
+
+/**
 \brief Dual processor driver instance
 
 This type defines the driver instance.
@@ -153,7 +165,7 @@ register for a dynamic buffer.
 
 \return The function returns 0 if the address has been set successfully, otherwise -1.
 */
-typedef INT (*tSetDynRes)(tDualprocDrvInstance pDrvInst_p, UINT16 index_p, UINT32 addr_p);
+typedef INT (*tSetDynRes)(tDualprocDrvInstance pDrvInst_p, UINT16 index_p, UINT64 addr_p);
 
 /**
 \brief Function type to get the address of a Buffer
@@ -167,7 +179,7 @@ buffer address register.
 \return The function returns the address to the memory space referenced by the
         dynamic buffer.
 */
-typedef UINT32 (*tGetDynRes)(tDualprocDrvInstance pDrvInst_p, UINT16 index_p);
+typedef UINT8* (*tGetDynRes)(tDualprocDrvInstance pDrvInst_p, UINT16 index_p);
 
 /**
 \brief Structure for dual processor dynamic resources (buffers)
@@ -193,7 +205,8 @@ typedef struct sDualprocHeader
 {
     UINT16      shmMagic;                           ///< Dualprocshm interface magic field. This is used to indicate valid header data
     UINT16      shmIntfState;                       ///< Dualprocshm interface state indicator field
-    UINT32      sharedMemBase[kDualProcLast];       ///< Shared memory addresses of both processors
+    UINT32      span;                               ///< Size of the shared memory.
+    UINT64      sharedMemBase[kDualProcLast];       ///< Shared memory addresses of both processors
 } tDualprocHeader;
 
 /**
@@ -226,7 +239,8 @@ typedef struct sDualProcDrv
 //------------------------------------------------------------------------------
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 tDualprocReturn         dualprocshm_create(tDualprocConfig* pConfig_p, tDualprocDrvInstance* ppInstance_p);
@@ -248,12 +262,11 @@ tDualprocReturn         dualprocshm_writeDataCommon(tDualprocDrvInstance pInstan
                                                     size_t Size_p, UINT8* pData_p);
 tDualprocReturn         dualprocshm_enableShmIntf(tDualprocDrvInstance pInstance_p);
 tDualprocReturn         dualprocshm_checkShmIntfState(tDualprocDrvInstance pInstance_p);
-tDualprocReturn         dualprocshm_getSharedMemAddr(tDualprocDrvInstance pInstance_p,
+tDualprocReturn         dualprocshm_getSharedMemInfo(tDualprocDrvInstance pInstance_p,
                                                      tDualProcInstance procInstance_p,
-                                                     UINT8* pShmBaseAddr_p);
+                                                     tDualprocSharedMemInst* pShmMemInst_p);
 tDualprocReturn         dualprocshm_acquireBuffLock(tDualprocDrvInstance pInstance_p, UINT8 id_p) SECTION_DUALPROCSHM_RE_BUFF_LOCK;
 tDualprocReturn         dualprocshm_releaseBuffLock(tDualprocDrvInstance pInstance_p, UINT8 id_p) SECTION_DUALPROCSHM_RE_BUFF_LOCK;
-
 tDualprocReturn         dualprocshm_initInterrupts(tDualprocDrvInstance pInstance_p);
 tDualprocReturn         dualprocshm_freeInterrupts(tDualprocDrvInstance pInstance_p);
 tDualprocReturn         dualprocshm_registerHandler(tDualprocDrvInstance pInstance_p,

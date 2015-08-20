@@ -62,8 +62,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DPSHM_MAKE_NONCACHEABLE(ptr) \
     (void*)(((unsigned long)ptr) | NIOS2_BYPASS_DCACHE_MASK)
 
-#define DUALPROCSHM_MALLOC(size)        alt_uncached_malloc(size)
-#define DUALPROCSHM_FREE(ptr)           alt_uncached_free(ptr)
+#define DUALPROCSHM_MALLOC(size)              alt_uncached_malloc(size)
+#define DUALPROCSHM_FREE(ptr)                 alt_uncached_free(ptr)
+#define DUALPROCSHM_MEMCPY(dest, src, siz)    memcpy(dest, src, siz)
 #define DPSHM_UNREG_SYNC_INTR(callback, arg)
 #define DPSHM_CLEAR_SYNC_IRQ()
 
@@ -92,7 +93,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DPSHM_ENABLE_INTR(fEnable)      target_enableGlobalInterrupt(fEnable)
 
 #ifdef __INT_BUS__
-#define DPSHM_ENABLE_HOST_SYNC_IRQ()
+
+#define DPSHM_CONNECT_SYNC_IRQ()
+#define DPSHM_DISCONNECT_SYNC_IRQ()
+
+#elif defined(__PCIE__)
+
+#define DPSHM_CONNECT_SYNC_IRQ()    \
+                    DPSHM_WRITE8(TARGET_SYNC_INT_BASE, 0x1)
+#define DPSHM_DISCONNECT_SYNC_IRQ()   \
+                    DPSHM_WRITE8(TARGET_SYNC_INT_BASE, 0x0)
+
 #else
 #error "Currently only Internal Bus between shared memory and driver is supported!!"
 #endif
@@ -100,12 +111,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Memory barrier
 #define DPSHM_DMB()                     __asm("sync")
 
-// Cache hadling. NIOS2 supports only uncached memory regions.
+// Cache handling. NIOS2 supports only uncached memory regions.
 #define DUALPROCSHM_FLUSH_DCACHE_RANGE(base, range) \
-    ((void)0);
+    ((void)0)
 
 #define DUALPROCSHM_INVALIDATE_DCACHE_RANGE(base, range) \
-    ((void)0);
+    ((void)0)
 
 #define DPSHM_REG_SYNC_INTR(pfnIrqCb_p, pArg_p)                         \
     ({                                                                  \

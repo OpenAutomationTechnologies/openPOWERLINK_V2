@@ -86,6 +86,7 @@ typedef struct
     tDualProcInstance       remoteProcInst;                 ///< Remote processor instance
     UINT32                  localProcSharedMemBaseAddr;     ///< Base address shared memory in local processor's address space
     UINT32                  remoteProcSharedMemBaseAddr;    ///< Base address shared memory in remote processor's address space
+    UINT32                  sharedMemSpan;
 } tMemMapInstance;
 
 //------------------------------------------------------------------------------
@@ -116,6 +117,7 @@ tMemMapReturn memmap_init(void)
 {
     tDualprocReturn         ret = kDualprocSuccessful;
     tDualprocDrvInstance*   pDrvInst = NULL;
+    tDualprocSharedMemInst  sharedMemInst;
 
     OPLK_MEMSET(&memMapInstance_l, 0, sizeof(tMemMapInstance));
     memMapInstance_l.localProcInst = dualprocshm_getLocalProcInst();
@@ -129,22 +131,27 @@ tMemMapReturn memmap_init(void)
     }
 
     // read the local processor's shared memory base address
-    ret = dualprocshm_getSharedMemAddr(pDrvInst, memMapInstance_l.localProcInst,
-                                       (UINT8*)(&memMapInstance_l.localProcSharedMemBaseAddr));
+    ret = dualprocshm_getSharedMemInfo(pDrvInst, memMapInstance_l.localProcInst,
+                                       &sharedMemInst);
     if (ret != kDualprocSuccessful)
     {
         DEBUG_LVL_ERROR_TRACE("%s DPSHM local shared memory read failed!\n", __func__);
         return kMemMapNoResource;
     }
 
+    memMapInstance_l.localProcSharedMemBaseAddr = (UINT32)sharedMemInst.baseAddr;
+
     // Bridge is initialized in ctrl module, so no wait to read the shared memory
-    ret = dualprocshm_getSharedMemAddr(pDrvInst, memMapInstance_l.remoteProcInst,
-                                       (UINT8*)(&memMapInstance_l.remoteProcSharedMemBaseAddr));
+    ret = dualprocshm_getSharedMemInfo(pDrvInst, memMapInstance_l.remoteProcInst,
+                                       &sharedMemInst);
     if (ret != kDualprocSuccessful)
     {
         DEBUG_LVL_ERROR_TRACE("%s DPSHM remote shared memory read failed!\n", __func__);
         return kMemMapNoResource;
     }
+
+    memMapInstance_l.remoteProcSharedMemBaseAddr = (UINT32)sharedMemInst.baseAddr;
+    memMapInstance_l.sharedMemSpan = sharedMemInst.span;
 
     return kMemMapOk;
 }
@@ -185,25 +192,23 @@ void* memmap_mapKernelBuffer(void* pKernelBuffer_p, UINT bufferSize_p)
 {
     void*       pBuffer = NULL;
     UINT32      tempAddr = 0;
+    UINT32      kernelBase = (UINT32)memMapInstance_l.remoteProcSharedMemBaseAddr;
+    UINT32      userBase = (UINT32)memMapInstance_l.localProcSharedMemBaseAddr;
 
     tempAddr = (UINT32)pKernelBuffer_p;
 
-    /*TODO Check if the kernel buffer(base + size) is within the span
-           of shared memory. Get the shared memory span also from dualprocshm.
-    */
-    if (tempAddr >= memMapInstance_l.remoteProcSharedMemBaseAddr)
+    if (tempAddr > kernelBase ||
+        ((tempAddr + bufferSize_p) <= (kernelBase + memMapInstance_l.sharedMemSpan)))
     {
         // Get the offset address of the kernel buffer from the remote
         // processor's shared memory base address and add it to the local
         // processor's shared memory base address.
-        pBuffer = (void*)(tempAddr -
-                          memMapInstance_l.remoteProcSharedMemBaseAddr +
-                          memMapInstance_l.localProcSharedMemBaseAddr);
+        pBuffer = (void*)((tempAddr - kernelBase) + userBase);
 
         // Invalidate the remapped memory address data cache
         OPLK_DCACHE_INVALIDATE(pBuffer, bufferSize_p);
     }
-    // else the kernel buffer address is not valid
+    // else error in the buffer.
 
     return pBuffer;
 }

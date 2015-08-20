@@ -58,15 +58,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 // memory
-#define DUALPROCSHM_MALLOC(size)    malloc(size)
-#define DUALPROCSHM_FREE(ptr)       free(ptr)
+#define DUALPROCSHM_MALLOC(size)              malloc(size)
+#define DUALPROCSHM_FREE(ptr)                 free(ptr)
+#define DUALPROCSHM_MEMCPY(dest, src, siz)    memcpy(dest, src, siz)
 
 // IO operations
-#define DPSHM_READ8(base)           Xil_In8((UINT32)base);
-#define DPSHM_WRITE8(base, val)     Xil_Out8((UINT32)base, val);
-#define DPSHM_READ16(base)          Xil_In16((UINT32)base);
-#define DPSHM_WRITE16(base, val)    Xil_Out16((UINT32)base, val);
-
+#define DPSHM_READ8(base)           Xil_In8((UINT32)base)
+#define DPSHM_WRITE8(base, val)     Xil_Out8((UINT32)base, val)
+#define DPSHM_READ16(base)          Xil_In16((UINT32)base)
+#define DPSHM_WRITE16(base, val)    Xil_Out16((UINT32)base, val)
+#define DPSHM_READ32(base)          Xil_In32((UINT32)base)
+#define DPSHM_WRITE32(base, val)    Xil_Out32((UINT32)base, val)
+#define DPSHM_ENABLE_INTR(fEnable)  target_enableGlobalInterrupt(fEnable)
 // Memory barrier
 #define DPSHM_DMB()                 dmb()
 
@@ -87,6 +90,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define DPSHM_DISABLE_SYNC_INTR() \
     XScuGic_DisableIntr(TARGET_SYNC_IRQ_ID, TARGET_SYNC_IRQ)
+
+
+#define DPSHM_CONNECT_SYNC_IRQ()
+#define DPSHM_DISCONNECT_SYNC_IRQ()
 
 #ifndef TRACE
 #ifndef NDEBUG
@@ -112,4 +119,4 @@ extern "C"
 }
 #endif
 
-#endif /* _INC_DUALPROCSHM_ARM_H_ */
+#endif /* _INC_dualprocshm_arm_H_ */

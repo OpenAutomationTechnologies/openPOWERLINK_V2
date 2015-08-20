@@ -51,7 +51,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define DEFAULT_LOCK_ID    0x00             ///< Default lock Id
+#define DEFAULT_LOCK_ID             0x00    ///< Default lock Id
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -98,7 +98,7 @@ UINT8* dualprocshm_getCommonMemAddr(UINT16* pSize_p)
         return NULL;
     }
 
-    pAddr = (UINT8*)(COMMON_MEM_BASE);
+    pAddr = (UINT8*)DPSHM_MAKE_NONCACHEABLE(COMMON_MEM_BASE);
 
     *pSize_p = MAX_COMMON_MEM_SIZE - 1;
 
@@ -171,7 +171,7 @@ UINT8* dualprocshm_getDynMapTableAddr(void)
 {
     UINT8*   pAddr;
 
-    pAddr = (UINT8*)MEM_ADDR_TABLE_BASE;
+    pAddr = (UINT8*)DPSHM_MAKE_NONCACHEABLE(MEM_ADDR_TABLE_BASE);
 
     return pAddr;
 }
@@ -207,7 +207,7 @@ UINT8* dualprocshm_getIntrMemAddr(void)
 {
     UINT8*   pAddr;
 
-    pAddr = (UINT8*)MEM_INTR_BASE;
+    pAddr = (UINT8*)DPSHM_MAKE_NONCACHEABLE(MEM_INTR_BASE);
 
     return pAddr;
 }
@@ -388,4 +388,5 @@ void dualprocshm_enableSyncIrq(BOOL fEnable_p)
 //============================================================================//
 /// \name Private Functions
 /// \{
+
 /// \}

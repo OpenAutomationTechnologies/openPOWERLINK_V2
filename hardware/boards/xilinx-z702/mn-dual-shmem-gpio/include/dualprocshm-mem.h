@@ -5,7 +5,7 @@
 \brief  Board specific memory definitions for dualprocshm library
 
 This file contains the definitions for memory offsets for dualprocshm library
-for a specific platform.
+for a Xilinx ZC702 board.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -58,8 +58,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
     #if defined(XPAR_PS7_DDR_0_S_AXI_HP0_BASEADDR) && defined (XPAR_PS7_DDR_0_S_AXI_HP0_HIGHADDR)
         #define SHARED_MEM_BASE         (XPAR_PS7_DDR_0_S_AXI_HP0_BASEADDR + 0x20000000)
-        #define SHARED_MEM_SPAN         (XPAR_PS7_DDR_0_S_AXI_HP0_HIGHADDR \
-                                        - SHARED_MEM_BASE)
+        #define SHARED_MEM_SPAN         (XPAR_PS7_DDR_0_S_AXI_HP0_HIGHADDR - \
+                                         SHARED_MEM_BASE)
     #else
         #error "Shared memory base address(SHARED_MEM_BASE) could not be set!"
     #endif
@@ -69,8 +69,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
     #if defined(XPAR_PS7_DDR_0_S_AXI_HP0_BASEADDR) && defined (XPAR_PS7_DDR_0_S_AXI_HP0_HIGHADDR)
         #define SHARED_MEM_BASE         (XPAR_PS7_DDR_0_S_AXI_HP0_BASEADDR + 0x20000000)
-        #define SHARED_MEM_SPAN         (XPAR_PS7_DDR_0_S_AXI_HP0_HIGHADDR \
-                                        - SHARED_MEM_BASE)
+        #define SHARED_MEM_SPAN         (XPAR_PS7_DDR_0_S_AXI_HP0_HIGHADDR - \
+                                         SHARED_MEM_BASE)
     #else
         #error "Shared memory base address(SHARED_MEM_BASE) could not be set!"
     #endif
@@ -90,7 +90,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 #ifdef __cplusplus

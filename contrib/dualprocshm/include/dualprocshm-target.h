@@ -43,7 +43,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <stdint.h>
 
 #if defined(__ZYNQ__)
 
@@ -100,7 +99,7 @@ set to those provided by stdint.h.
 #endif
 
 #ifndef ULONG
-#define ULONG        unsigned long
+#define ULONG       unsigned long
 #endif
 
 #ifndef UINT8
@@ -113,6 +112,10 @@ set to those provided by stdint.h.
 
 #ifndef UINT32
 #define UINT32      uint32_t
+#endif
+
+#ifndef UINT64
+#define UINT64      uint64_t
 #endif
 
 #ifndef BOOL
@@ -136,6 +139,10 @@ set to those provided by stdint.h.
 #define TRACE(...)
 #endif
 
+#ifndef PTR_T
+#define PTR_T          unsigned long
+#endif
+
 /**
 \name Memory operations
 
@@ -157,9 +164,41 @@ set to the following by default.
 
 #ifndef DUALPROCSHM_MEMCPY
 #define DUALPROCSHM_MEMCPY(dst, src, siz)   memcpy((dst), (src), (siz))
-
 #endif
+
+#ifndef DPSHM_MAKE_NONCACHEABLE
+#define DPSHM_MAKE_NONCACHEABLE(pHdl_p)     pHdl_p
+#endif
+
 /**@}*/
+
+#ifndef MAX_COMMON_MEM_SIZE
+#define MAX_COMMON_MEM_SIZE        2048                         ///< Max common memory size
+#endif
+
+#ifndef MAX_DYNAMIC_BUFF_COUNT
+#define MAX_DYNAMIC_BUFF_COUNT     20                           ///< Number of maximum dynamic buffers
+#endif
+
+#ifndef MAX_DYNAMIC_BUFF_COUNT
+#define MAX_DYNAMIC_BUFF_SIZE      MAX_DYNAMIC_BUFF_COUNT * 4   ///< Max dynamic buffer size
+#endif
+
+#ifndef SHARED_MEM_BASE
+#error "Shared memory base not defined!!!"
+#endif
+
+#ifndef COMMON_MEM_BASE
+#error "Common memory base not defined!!!"
+#endif
+
+#ifndef MEM_ADDR_TABLE_BASE
+#error "Dynamic memory address table base not defined!!!"
+#endif
+
+#ifndef MEM_INTR_BASE
+#error "Interrupt memory address not defined!!!"
+#endif
 
 //------------------------------------------------------------------------------
 // typedef
