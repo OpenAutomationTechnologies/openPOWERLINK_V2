@@ -2,7 +2,7 @@
 ********************************************************************************
 \file   dualprocshm-target.h
 
-\brief  Dual Processor Library - Target header file
+\brief  Dual processor library - Target header file
 
 This header file defines platform specific macros (e.g. data types) and selects
 the platform specific header files (e.g. dualprocshm-zynq.h) which contains the
@@ -52,6 +52,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "dualprocshm-c5soc.h"
 
+#elif defined(_KERNEL_MODE)
+
+#include "dualprocshm-pcie.h"
+
+#elif defined (__DE2i_150__)
+
+#include "dualprocshm-pcie.h"
+
 #else
 
 #error "Platform is not supported! Please point the target platform file in dualprocshm-target.h "
@@ -90,6 +98,7 @@ If the following data types are not defined in the environment, then they are
 set to those provided by stdint.h.
 */
 /**@{*/
+#ifndef _NTDEF_        // defined in ntdef.H, included by dualprocshm-winkernel.h
 #ifndef INT
 #define INT         int
 #endif
@@ -103,33 +112,39 @@ set to those provided by stdint.h.
 #endif
 
 #ifndef UINT8
-#define UINT8       uint8_t
+#define UINT8     uint8_t
 #endif
 
 #ifndef UINT16
-#define UINT16      uint16_t
+#define UINT16    uint16_t
 #endif
 
 #ifndef UINT32
-#define UINT32      uint32_t
+#define UINT32    uint32_t
 #endif
 
 #ifndef UINT64
 #define UINT64      uint64_t
 #endif
-
-#ifndef BOOL
-#define BOOL        uint8_t
-#endif
 /**@}*/
 
 #ifndef FALSE
-#define FALSE       0x00
+#define FALSE     0x00
 #endif
 
 #ifndef TRUE
-#define TRUE        0xFF
+#define TRUE      0xFF
 #endif
+
+#endif // _NTDEF_
+
+#ifndef BOOL
+#if defined(_WIN32) || defined(_WIN64)
+#define BOOL      unsigned char
+#else
+#define BOOL      uint8_t
+#endif // _WIN32
+#endif // BOOL
 
 #ifndef UNUSED_PARAMETER
 #define UNUSED_PARAMETER(par)    (void)par
