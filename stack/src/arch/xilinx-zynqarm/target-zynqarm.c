@@ -304,12 +304,11 @@ The function calls the type and state of LED.
 
 \param  ledType_p           The type of LED.
 \param  fLedOn_p            The state of the LED.
-\param  modetype            The type of LED mode.
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError target_setLed(tLedType ledType_p, BOOL fLedOn_p, tLedkMode modetype)
+tOplkError target_setLed(tLedType ledType_p, BOOL fLedOn_p)
 {
     tOplkError ret = kErrorOk;
 

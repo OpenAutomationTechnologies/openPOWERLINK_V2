@@ -82,7 +82,7 @@ int target_lock(void);
 int target_unlock(void);
 
 /* function for LED*/
-tOplkError target_setLed(tLedType ledType_p, BOOL fLedOn_p, tLedMode modetype);
+tOplkError target_setLed(tLedType ledType_p, BOOL fLedOn_p);
 
 #ifdef __cplusplus
 }
