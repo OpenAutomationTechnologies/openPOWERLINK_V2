@@ -105,9 +105,9 @@ tOplkError ledk_init(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Deinitialize kernel LED module
+\brief  Cleanup kernel LED module
 
-The function deinitializes the kernel LED module.
+The function cleans up the kernel LED module.
 
 \return The function returns a tOplkError error code.
 
@@ -122,7 +122,7 @@ tOplkError ledk_exit(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Update status led mode as per the NMT state change
+\brief  Update status LED mode as per the NMT state change
 
 The function handles the NMT state changes and updates the target
 LED mode.
@@ -201,13 +201,13 @@ tOplkError ledk_handleNmtStateChange(tEventNmtStateChange nmtStateChange_p)
         case kNmtEventStartNode:             // NMT_CT7
         case kNmtEventTimerBasicEthernet:    // NMT_CT3
         case kNmtEventEnterMsOperational:    // NMT_MT5
-            ret = target_setLed(kLedTypeError, FALSE, kLedModeOff);
+            ret = target_setLed(kLedTypeError, FALSE);
             break;
 
         // error LED on
         case kNmtEventNmtCycleError:     // NMT_CT11, NMT_MT6
         case kNmtEventInternComError:    // NMT_GT6
-            ret = target_setLed(kLedTypeError, TRUE, kLedModeOn);
+            ret = target_setLed(kLedTypeError, TRUE);
             break;
 
         default:

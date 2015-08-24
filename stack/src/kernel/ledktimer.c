@@ -2,9 +2,10 @@
 ********************************************************************************
 \file   ledktimer.c
 
-\brief  Implementation of kernel LED module
+\brief  Implementation of status LED handling by target timer.
 
-This file contains the implementation of the kernel LED module.
+This file contains the implementation of status LED handling by target timer.
+Target timer will configure the timeout value for blinking.
 
 \ingroup module_ledk
 *******************************************************************************/
@@ -101,9 +102,9 @@ static tLedkInstance   ledkInstance_l;
 #if defined(CONFIG_INCLUDE_LEDK)
 //------------------------------------------------------------------------------
 /**
-\brief  update Led State
+\brief  Update Led State
 
-The function handles the led status mode.
+This function updates the status LED state. The blinking is achieved by using the system timer ticks
 
 \return The function returns a tOplkError error code.
 
@@ -211,7 +212,7 @@ tOplkError ledk_updateLedState(void)
 
         ledkInstance_l.timeoutInMs = timeout;
         ledkInstance_l.startTimeInMs += ledkInstance_l.timeoutInMs;
-        ret = target_setLed(kLedTypeStatus, fLedOn, ledkInstance_l.statusLedMode);
+        ret = target_setLed(kLedTypeStatus, fLedOn);
     }
 
 Exit:
@@ -220,9 +221,9 @@ Exit:
 
 //------------------------------------------------------------------------------
 /**
-\brief  Change the LED mode
+\brief  Set the LED mode
 
-The function changes the LED mode.
+The function sets the LED mode.
 
 \param  ledType_p           The type of LED.
 \param  newMode_p           The new mode to set.
@@ -290,8 +291,6 @@ tOplkError ledk_setLedMode(tLedType ledType_p, tLedMode newMode_p)
                 ledkInstance_l.statusLedState = 0;
                 break;
             default:
-                // timer is handled in ledk_updateLedState
-                goto Exit;
                 break;
         }
 
@@ -299,8 +298,7 @@ tOplkError ledk_setLedMode(tLedType ledType_p, tLedMode newMode_p)
         ledkInstance_l.timeoutInMs = timeout;
     }
 
-Exit:
-    ret = target_setLed(ledType_p, fLedOn, newMode_p);
+    ret = target_setLed(ledType_p, fLedOn);
     return ret;
 }
 #endif
