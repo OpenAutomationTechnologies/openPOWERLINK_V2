@@ -47,6 +47,9 @@ MESSAGE(STATUS "CMAKE_SYSTEM_PROCESSOR is ${CMAKE_SYSTEM_PROCESSOR}")
 STRING(TOLOWER "${CMAKE_SYSTEM_NAME}" SYSTEM_NAME_DIR)
 STRING(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" SYSTEM_PROCESSOR_DIR)
 
+# Since 3.14 kernel Werror=date-time is automatically used if the compiler supports it.
+SET(MODULE_DEFS "${MODULE_DEFS} -Wno-date-time")
+
 ################################################################################
 # Configuration options
 
