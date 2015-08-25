@@ -64,6 +64,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define INLINE
 
+#define OPLK_FILE_HANDLE        HANDLE
+
 #define UNUSED_PARAMETER(par) (void)par
 
 // QWORD will not be set for windows

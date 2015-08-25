@@ -83,7 +83,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static int                  fd_l;
+static OPLK_FILE_HANDLE fd_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes

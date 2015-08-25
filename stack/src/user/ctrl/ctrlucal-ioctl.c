@@ -86,7 +86,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static int fd_l;           // file descriptor for powerlink device
+static OPLK_FILE_HANDLE fd_l;           // file descriptor for powerlink device
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -344,7 +344,7 @@ The function returns the file descriptor of the kernel module.
 \ingroup module_ctrlucal
 */
 //------------------------------------------------------------------------------
-int ctrlucal_getFd(void)
+OPLK_FILE_HANDLE ctrlucal_getFd(void)
 {
     return fd_l;
 }

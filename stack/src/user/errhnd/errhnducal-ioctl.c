@@ -92,7 +92,7 @@ implementation of the user error handler CAL moduel.
 */
 typedef struct
 {
-    int                         fd;                     ///< POWERLINK file descriptor
+    OPLK_FILE_HANDLE            fd;                     ///< POWERLINK file descriptor
     tErrHndObjects              errorObjects;           ///< Error objects
 } tErrIoctlInstance;
 

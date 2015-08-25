@@ -61,16 +61,16 @@ extern "C"
 {
 #endif
 
-tOplkError ctrlucal_init(void);
-void       ctrlucal_exit(void);
-tOplkError ctrlucal_process(void);
-UINT16     ctrlucal_getStatus(void);
-UINT16     ctrlucal_getHeartbeat(void);
-tOplkError ctrlucal_executeCmd(tCtrlCmdType cmd_p, UINT16* pRetVal_p);
-tOplkError ctrlucal_checkKernelStack(void);
-void       ctrlucal_storeInitParam(tCtrlInitParam* pInitParam_p);
-tOplkError ctrlucal_readInitParam(tCtrlInitParam* pInitParam_p);
-int        ctrlucal_getFd(void);
+tOplkError          ctrlucal_init(void);
+void                ctrlucal_exit(void);
+tOplkError          ctrlucal_process(void);
+UINT16              ctrlucal_getStatus(void);
+UINT16              ctrlucal_getHeartbeat(void);
+tOplkError          ctrlucal_executeCmd(tCtrlCmdType cmd_p, UINT16* pRetVal_p);
+tOplkError          ctrlucal_checkKernelStack(void);
+void                ctrlucal_storeInitParam(tCtrlInitParam* pInitParam_p);
+tOplkError          ctrlucal_readInitParam(tCtrlInitParam* pInitParam_p);
+OPLK_FILE_HANDLE    ctrlucal_getFd(void);
 
 #ifdef __cplusplus
 }

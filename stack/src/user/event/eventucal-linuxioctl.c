@@ -95,7 +95,7 @@ CAL module.
 */
 typedef struct
 {
-    int                 fd;
+    OPLK_FILE_HANDLE    fd;
     pthread_t           threadId;
     BOOL                fStopThread;
 } tEventuCalInstance;
