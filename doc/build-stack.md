@@ -271,6 +271,16 @@ the configuration options on the command line (-DCFG_XXX=XXX) or
   driver which is using the WinPCAP library for accessing the network. It is
   configured to contain only CN functionality.
 
+- **CFG_COMPILE_LIB_MNAPP_PCIEINTF**
+
+  Compile openPOWERLINK MN application library which contains the interface to
+  the openPOWERLINK driver running on an external PCIe device. It is used together
+  with an NDIS PCIe miniport driver in the Windows kernel space. The NDIS PCIe
+  miniport driver is used as the communication interface between the application
+  library and the PCIe device running the openPOWERLINK kernel layer. The NDIS
+  PCIe driver uses shared memory for status/control information and data
+  exchange between application library and the PCIe device.
+
 ## Options for embedded systems (No-OS) {#sect_build_stack_options_noos}
 
 ### Microblaze Configuration Options {#sect_build_stack_options_noos_microblaze}
