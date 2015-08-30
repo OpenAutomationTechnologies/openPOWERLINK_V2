@@ -42,6 +42,34 @@ To build the kernel driver (e.g. for a MN using the Intel 82573 network interfac
       > make
       > make install
 
+## Building a Windows NDIS PCIe miniport driver {#sect_build_drivers_build_windows_ndis_pcie}
+
+To build Windows kernel space driver, appropriate Windows Driver Kit (WDK) version
+having support for the target Windows version should be installed on your system.
+
+__NOTE__: Currently available Windows PCIe driver is supported for Windows 7 64bit
+and requires Windows Driver Kit (WDK) 8.1 for compilation.
+
+Follow the steps below to build the stack on a Windows system using MSbuild.
+Open a Visual Studio command line and enter the following commands:
+
+* Build driver for Windows 7 64bit in debug mode
+
+      > cd <openPOWERLINK_directory>\drivers\windows\drv_ndis_pcie\build
+      > cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Debug ..\
+      > msbuild /t:build /p:Platform=x64 /p:Configuration="Win7 Debug"
+
+* Build driver for Windows 7 64bit in release mode
+
+      > cd <openPOWERLINK_directory>\drivers\windows\drv_ndis_pcie\build
+      > cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release ..\
+      > msbuild /t:build /p:Platform=x64 /p:Configuration="Win7 Release"
+
+`Platform` and `Configuration` parameters can be modified to compile driver for
+a different platform and Windows version.
+
+The default driver installation path is: `<openPOWERLINK_DIR>\bin\windows\<ARCH>\drv_ndis_pcie_package`
+
 ## Building a PCP daemon for Microblaze {#sect_build_drivers_build_daemon_microblaze}
 
 This section will explain the steps to build the PCP daemon for a Microblaze

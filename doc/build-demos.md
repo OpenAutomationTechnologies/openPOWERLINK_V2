@@ -142,13 +142,20 @@ Follow the steps below to cross compile your demo application for Altera Cyclone
 
 - **CFG_BUILD_KERNEL_STACK**
 
-  Determines how to build the kernel stack. The following option is available and
-  automatically (implicitly) pre-selected:
+  Determines how to build the kernel stack. The following options are available:
 
   - __Link to Application__
 
     The openPOWERLINK kernel part will be directly linked to the user part and
     application. WinPCAP will be used as Ethernet driver.
+
+  - __Stack on PCIe__
+
+    The library `liboplkmnapp-pcieintf.lib` will be used. It contains the interface
+    to an external PCIe device interfaced through the NDIS PCIe miniport driver.
+    The kernel part of the openPOWERLINK stack is located on the external PCIe device.
+    Shared memory is used for status/control and data exchange between the user
+    and kernel layers of the openPOWERLINK stack.
 
 ## Options for embedded platforms (Non-OS) {#sect_build_demos_noos_options}
 
