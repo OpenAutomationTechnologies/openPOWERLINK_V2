@@ -90,10 +90,11 @@ The OBD defines determine the Object Dictionary.
 #define CONFIG_OBD_USE_STRING_DOMAIN_IN_RAM        TRUE
     ///< support variable subindex
 #define CONFIG_OBD_INCLUDE_A000_TO_DEVICE_PART     TRUE
-#define CONFIG_OBD_USE_LOAD_CONCISEDCF             TRUE
 /**@}*/
 
+#if defined(CONFIG_INCLUDE_CFM)
 #define CONFIG_CFM_CONFIGURE_CYCLE_LENGTH          TRUE
+#endif
 
 /**
 \name Service Date Object defines

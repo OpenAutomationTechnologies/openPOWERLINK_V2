@@ -56,6 +56,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #if defined(CONFIG_INCLUDE_CFM)
 #include <user/cfmu.h>
+#include <oplk/obdcdc.h>
 #endif
 
 #if defined(CONFIG_INCLUDE_SDOC)
@@ -69,11 +70,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <common/target.h>
 #include <common/memmap.h>
-
-#if (CONFIG_OBD_USE_LOAD_CONCISEDCF != FALSE)
-#include <oplk/obdcdc.h>
-#endif
-
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -976,7 +972,7 @@ tOplkError oplk_setCdcBuffer(BYTE* pCdc_p, UINT cdcSize_p)
     if (!ctrlu_stackIsInitialized())
         return kErrorApiNotInitialized;
 
-#if (CONFIG_OBD_USE_LOAD_CONCISEDCF != FALSE)
+#if defined(CONFIG_INCLUDE_CFM)
     obdcdc_setBuffer(pCdc_p, cdcSize_p);
     return kErrorOk;
 #else
@@ -1015,7 +1011,7 @@ tOplkError oplk_setCdcFilename(char* pCdcFilename_p)
     if (!ctrlu_stackIsInitialized())
         return kErrorApiNotInitialized;
 
-#if (CONFIG_OBD_USE_LOAD_CONCISEDCF != FALSE)
+#if defined(CONFIG_INCLUDE_CFM)
     obdcdc_setFilename(pCdcFilename_p);
     return kErrorOk;
 #else

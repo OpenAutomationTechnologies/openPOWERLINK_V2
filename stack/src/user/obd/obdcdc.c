@@ -49,7 +49,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <common/ami.h>
 #include <user/eventu.h>
 
-#if (CONFIG_OBD_USE_LOAD_CONCISEDCF != FALSE)
+#if defined(CONFIG_INCLUDE_CFM)
 
 #include <sys/stat.h>
 #include <assert.h>
