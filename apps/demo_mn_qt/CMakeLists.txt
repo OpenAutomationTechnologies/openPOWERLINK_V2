@@ -49,8 +49,6 @@ SET(CFG_DEMO_PROJECT "Demo_3CN" CACHE STRING
         "Valid projects are Demo_3CN, Demo_RMN_3CN")
 SET_PROPERTY(CACHE CFG_DEMO_PROJECT PROPERTY STRINGS Demo_3CN Demo_RMN_3CN)
 
-SET(CFG_CFM ON CACHE BOOL "Use Configuration Manager (CFM)")
-
 # Set generic sources and include directories for this demo
 SET (DEMO_SOURCES
      ${DEMO_SOURCE_DIR}/main.cpp
@@ -93,10 +91,6 @@ INCLUDE_DIRECTORIES(
 
 ################################################################################
 # Setup compile definitions depending on configuration
-
-IF(CFG_CFM)
-    ADD_DEFINITIONS(-DCONFIG_INCLUDE_CFM)
-ENDIF()
 
 IF (CFG_KERNEL_STACK_DIRECTLINK OR CFG_KERNEL_STACK_USERSPACE_DAEMON)
     SET (DEMO_SOURCES ${DEMO_SOURCES} ${DEMO_SOURCE_DIR}/InterfaceSelectDialog.cpp)
