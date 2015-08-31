@@ -150,7 +150,7 @@ BSP_GEN_ARGS="${SEL_BSP_TYPE} ${BSP_PATH} ${BOARD_PATH}/quartus \
 --set hal.enable_clean_exit false \
 --set hal.enable_exit false \
 --set hal.enable_reduced_device_drivers true \
---set hal.enable_small_c_library true \
+--set hal.enable_small_c_library false \
 --set hal.enable_lightweight_device_driver_api true \
 --cpu-name ${SEL_CPU_NAME} \
 --set hal.sys_clk_timer ${SEL_SYS_TIMER_NAME} \
