@@ -97,8 +97,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifdef XPAR_POWERLINK_LED_BASEADDR
 #define TARGET_POWERLINK_LED_BASE XPAR_POWERLINK_LED_BASEADDR
-#else
-#define TARGET_POWERLINK_LED_BASE 0
 #endif
 
 //------------------------------------------------------------------------------
@@ -405,6 +403,8 @@ static void setStatusLed(BOOL fOn_p)
 
 #ifdef TARGET_POWERLINK_LED_BASE
     XGpio_WriteReg(TARGET_POWERLINK_LED_BASE, XGPIO_DATA_OFFSET, plkStatusErrorLeds_l);
+#else
+    UNUSED_PARAMETER(fOn_p);
 #endif
 }
 
@@ -428,6 +428,8 @@ static void setErrorLed(BOOL fOn_p)
 
 #ifdef TARGET_POWERLINK_LED_BASE
     XGpio_WriteReg(TARGET_POWERLINK_LED_BASE, XGPIO_DATA_OFFSET, plkStatusErrorLeds_l);
+#else
+    UNUSED_PARAMETER(fOn_p);
 #endif
 }
 
