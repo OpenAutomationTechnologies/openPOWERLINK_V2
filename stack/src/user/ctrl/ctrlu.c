@@ -227,31 +227,6 @@ tOplkError ctrlu_init(void)
         goto Exit;
     }
 
-    ctrlInstance_l.requiredKernelFeatures = getRequiredKernelFeatures();
-    if ((ret = ctrlu_getKernelInfo(&ctrlInstance_l.kernelInfo)) != kErrorOk)
-    {
-        ctrlucal_exit();
-        goto Exit;
-    }
-
-    if ((ctrlInstance_l.kernelInfo.featureFlags == ctrlInstance_l.requiredKernelFeatures) &&
-        (ctrlInstance_l.kernelInfo.version == PLK_DEFINED_STACK_VERSION))
-    {
-        DEBUG_LVL_ALWAYS_TRACE("Kernel features: 0x%08x\n", ctrlInstance_l.kernelInfo.featureFlags);
-        DEBUG_LVL_ALWAYS_TRACE("Kernel version: 0x%08x\n", ctrlInstance_l.kernelInfo.version);
-        return kErrorOk;
-    }
-    else
-    {
-        DEBUG_LVL_ERROR_TRACE("Kernel feature/version mismatch:\n");
-        DEBUG_LVL_ERROR_TRACE("  Version: Is:%08x - required:%08x\n",
-                              ctrlInstance_l.kernelInfo.version, PLK_DEFINED_STACK_VERSION);
-        DEBUG_LVL_ERROR_TRACE("  Features: Is:%08x - required:%08x\n",
-                              ctrlInstance_l.kernelInfo.featureFlags, ctrlInstance_l.requiredKernelFeatures);
-        ctrlucal_exit();
-        return kErrorFeatureMismatch;
-    }
-
 Exit:
     return ret;
 }
@@ -270,6 +245,48 @@ The function cleans up the user control module.
 void ctrlu_exit(void)
 {
     ctrlucal_exit();
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Check kernel stack information
+
+The function checks the kernel stack version and feature flags.
+
+\return The function returns a tOplkError error code.
+
+\ingroup module_ctrlu
+*/
+//------------------------------------------------------------------------------
+tOplkError ctrlu_checkKernelStackInfo(void)
+{
+    tOplkError          ret;
+
+    ctrlInstance_l.requiredKernelFeatures = getRequiredKernelFeatures();
+    if ((ret = ctrlu_getKernelInfo(&ctrlInstance_l.kernelInfo)) != kErrorOk)
+    {
+        goto Exit;
+    }
+
+    if ((ctrlInstance_l.kernelInfo.featureFlags == ctrlInstance_l.requiredKernelFeatures) &&
+        (ctrlInstance_l.kernelInfo.version == PLK_DEFINED_STACK_VERSION))
+    {
+        DEBUG_LVL_ALWAYS_TRACE("Kernel features: 0x%08x\n", ctrlInstance_l.kernelInfo.featureFlags);
+        DEBUG_LVL_ALWAYS_TRACE("Kernel version: 0x%08x\n", ctrlInstance_l.kernelInfo.version);
+        ret = kErrorOk;
+    }
+    else
+    {
+        DEBUG_LVL_ERROR_TRACE("Kernel feature/version mismatch:\n");
+        DEBUG_LVL_ERROR_TRACE("  Version: Is:%08x - required:%08x\n",
+                              ctrlInstance_l.kernelInfo.version, PLK_DEFINED_STACK_VERSION);
+        DEBUG_LVL_ERROR_TRACE("  Features: Is:%08x - required:%08x\n",
+                              ctrlInstance_l.kernelInfo.featureFlags, ctrlInstance_l.requiredKernelFeatures);
+        ret = kErrorFeatureMismatch;
+    }
+
+Exit:
+    return ret;
 }
 
 //------------------------------------------------------------------------------

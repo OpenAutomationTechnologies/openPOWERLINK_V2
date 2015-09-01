@@ -186,8 +186,11 @@ tOplkError oplk_create(tOplkApiInitParam* pInitParam_p)
 {
     tOplkError  ret;
 
-    ret = ctrlu_initStack(pInitParam_p);
+    ret = ctrlu_checkKernelStackInfo();
+    if (ret != kErrorOk)
+        return ret;
 
+    ret = ctrlu_initStack(pInitParam_p);
     if (ret == kErrorOk)
         fStackInitialized_l = TRUE;
 

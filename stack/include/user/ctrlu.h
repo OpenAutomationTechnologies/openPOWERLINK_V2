@@ -65,6 +65,7 @@ extern "C"
 
 tOplkError ctrlu_init(void);
 void       ctrlu_exit(void);
+tOplkError ctrlu_checkKernelStackInfo(void);
 tOplkError ctrlu_initStack(tOplkApiInitParam* pInitParam_p);
 tOplkError ctrlu_shutdownStack(void);
 tOplkError ctrlu_processStack(void);
