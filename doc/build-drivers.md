@@ -44,13 +44,16 @@ To build the kernel driver (e.g. for a MN using the Intel 82573 network interfac
 
 ## Building a Windows NDIS PCIe miniport driver {#sect_build_drivers_build_windows_ndis_pcie}
 
-To build Windows kernel space driver, appropriate Windows Driver Kit (WDK) version
-having support for the target Windows version should be installed on your system.
+To build the Windows NDIS PCIe miniport driver, appropriate Windows Driver Kit (WDK)
+version which supports the Windows version of the host system should be installed
+on the development system.
 
-__NOTE__: Currently available Windows PCIe driver is supported for Windows 7 64bit
-and requires Windows Driver Kit (WDK) 8.1 for compilation.
+__NOTE__: Windows PCIe driver currently provided with the openPOWERLINK, can be used
+with Windows 7 64bit and requires Windows Driver Kit (WDK) 8.1 for compilation.
+(<http://www.microsoft.com/en-us/download/details.aspx?id=42273>)
 
-Follow the steps below to build the stack on a Windows system using MSbuild.
+
+Follow the steps below to build the NDIS PCIe driver on a Windows system using MSbuild.
 Open a Visual Studio command line and enter the following commands:
 
 * Build driver for Windows 7 64bit in debug mode

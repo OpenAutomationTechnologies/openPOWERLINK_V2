@@ -7,10 +7,10 @@ openPOWERLINK on Windows {#page_platform_windows}
 
 This file contains documentation for the openPOWERLINK stack on Windows.
 
-__NOTE:__ Because Windows does not provide real-time behavior, openPOWERLINK
-solutions completly running on Windows, can only be run with cycle times above 10ms.
-The achievable minimum cycle time depends very much on the used system and
-cannot be guaranteed!
+__NOTE:__ Because Windows does not provide real-time behavior, purely
+software-based openPOWERLINK solutions running on Windows, can only be
+run with cycle times above 10ms. The achievable minimum cycle time
+depends very much on the used system and cannot be guaranteed!
 
 # Requirements {#sect_windows_require}
 
@@ -145,7 +145,7 @@ Follow the steps below to build the Windows PCIe driver installer.
         > cd <openPOWERLINK_directory>\tools\windows\installer-pcie\build\installer-pcie
         > msbuild /t:build /p:Platform=x64 /p:Configuration="Release"
 
-  - Build un-installer application
+  - Build uninstaller application
 
         > cd <openPOWERLINK_directory>\tools\windows\uninstaller-pcie\build\uninstaller-pcie
         > msbuild /t:build /p:Platform=x64 /p:Configuration="Release"
@@ -153,7 +153,7 @@ Follow the steps below to build the Windows PCIe driver installer.
 * Copy the required Visual C++ Redistributable executable to `tools/windows/installer`
 directory.
 
-  Visual C++ Redistributable Package is required to run the installer and unistaller applications
+  Visual C++ Redistributable Package is required to run the installer and uninstaller applications
   on the target machine.
 
   The Visual C++ Redistributable Packages for Visual Studio 2013 can be downloaded from:
