@@ -129,6 +129,49 @@ size_t oplk_serviceGetFileChunkSize(void)
     return ctrlu_getMaxFileChunkSize();
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Execute firmware reconfiguration
+
+The function executes a firmware reconfiguration of the kernel stack.
+
+\note   Make sure to shut down the stack with \ref oplk_exit after triggering
+        the firmware reconfiguration.
+
+\param  fFactory_p      Determines if the firmware shall reconfigure to factory
+                        image/configuration.
+
+\return The function returns a \ref tOplkError error code.
+
+\ingroup module_service
+*/
+//------------------------------------------------------------------------------
+tOplkError oplk_serviceExecFirmwareReconfig(BOOL fFactory_p)
+{
+    tOplkError      ret;
+    UINT16          retval;
+    tCtrlCmdType    cmd;
+
+    cmd = (fFactory_p) ? kCtrlReconfigFactoryImage : kCtrlReconfigUpdateImage;
+
+    ret = ctrlucal_executeCmd(cmd, &retval);
+    if (ret != kErrorOk)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s reconfigure to %s image failed with 0x%X\n",
+               __func__, (fFactory_p) ? "factory" : "update", ret);
+        return ret;
+    }
+
+    if ((tOplkError)retval != kErrorOk)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s reconfigure to %s image rejected by kernel stack (0x%X)!\n",
+               __func__, (fFactory_p) ? "factory" : "update", (tOplkError)retval);
+        return (tOplkError)retval;
+    }
+
+    return kErrorOk;
+}
+
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//

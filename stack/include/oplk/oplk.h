@@ -558,6 +558,7 @@ OPLKDLLEXPORT tOplkError oplk_testSdoSeqDelCon(void);
 OPLKDLLEXPORT tOplkError oplk_serviceWriteFileChunk(tOplkApiFileChunkDesc* pDesc_p,
                                                     UINT8* pChunkData_p);
 OPLKDLLEXPORT size_t     oplk_serviceGetFileChunkSize(void);
+OPLKDLLEXPORT tOplkError oplk_serviceExecFirmwareReconfig(BOOL fFactory_p);
 
 #ifdef __cplusplus
 }
