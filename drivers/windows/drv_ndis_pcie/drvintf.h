@@ -94,6 +94,8 @@ tOplkError drv_getBenchmarkMem(UINT8** ppBenchmarkMem_p);
 void       drv_freeBenchmarkMem(UINT8* pBenchmarkMem_p);
 tOplkError drv_mapKernelMem(UINT8** ppKernelMem_p, UINT8** ppUserMem_p, UINT32* pSize_p);
 void       drv_unmapKernelMem(UINT8* pUserMem_p);
+tOplkError drv_writeFileBuffer(tIoctlFileChunk* pIoctlFileChunk_p);
+size_t     drv_getFileBufferSize(void);
 
 #ifdef __cplusplus
 }

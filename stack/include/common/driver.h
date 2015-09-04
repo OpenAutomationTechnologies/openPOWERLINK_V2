@@ -72,6 +72,18 @@ typedef struct
 } tErrHndIoctl;
 
 /**
+\brief IOCTL file chunk structure
+
+The structure is used to forward a file chunk to the kernel stack. The descriptor
+holds information about the current file chunk and the transfer progress.
+*/
+typedef struct
+{
+    tOplkApiFileChunkDesc   desc;       ///< File chunk descriptor
+    void*                   pData;      ///< Pointer to file chunk
+} tIoctlFileChunk;
+
+/**
 \brief PDO memory structure
 
 The structure is used to retrieve the PDO memory allocated by openPOWERLINK

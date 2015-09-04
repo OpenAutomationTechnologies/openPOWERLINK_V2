@@ -588,6 +588,29 @@ NTSTATUS powerlinkIoctl(PDEVICE_OBJECT pDeviceObject_p, PIRP pIrp_p)
             break;
         }
 
+        case PLK_CMD_CTRL_WRITE_FILE_BUFFER:
+        {
+            tIoctlFileChunk* pFileChunk = (tIoctlFileChunk*)pIrp_p->AssociatedIrp.SystemBuffer;
+
+            oplkRet = drv_writeFileBuffer(pFileChunk);
+            if (oplkRet != kErrorOk)
+                pIrp_p->IoStatus.Information = 0;
+            else
+                pIrp_p->IoStatus.Information = sizeof(tIoctlFileChunk);
+
+            status = STATUS_SUCCESS;
+            break;
+        }
+
+        case PLK_CMD_CTRL_GET_FILE_BUFFER_SIZE:
+        {
+            size_t* pFileBufferSize = (size_t*)pIrp_p->AssociatedIrp.SystemBuffer;
+            *pFileBufferSize = drv_getFileBufferSize();
+            pIrp_p->IoStatus.Information = sizeof(size_t);
+            status = STATUS_SUCCESS;
+            break;
+        }
+
         default:
             DEBUG_LVL_ERROR_TRACE("PLK: - Invalid cmd (cmd=%d)\n",
                                   irpStack->Parameters.DeviceIoControl.IoControlCode);

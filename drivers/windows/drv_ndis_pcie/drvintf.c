@@ -787,6 +787,77 @@ void drv_unmapKernelMem(UINT8* pUserMem_p)
     pUserMem_p = NULL;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Write file chunk
+
+This function writes the given file chunk to the file transfer buffer
+
+\param  pIoctlFileChunk_p   IOCTL file chunk buffer
+
+\return The function returns a tOplkError error code.
+
+\ingroup module_driver_ndispcie
+*/
+//------------------------------------------------------------------------------
+tOplkError drv_writeFileBuffer(tIoctlFileChunk* pIoctlFileChunk_p)
+{
+    tDualprocReturn    dualRet;
+
+    if (pIoctlFileChunk_p == NULL)
+        return kErrorNoResource;
+
+    if (!drvInstance_l.fDriverActive)
+        return kErrorNoResource;
+
+    if (pIoctlFileChunk_p->desc.length > CONFIG_CTRL_FILE_CHUNK_SIZE)
+    {
+        DEBUG_LVL_ERROR_TRACE("File chunk size exceeds limit!\n");
+        return kErrorNoResource;
+    }
+
+    // Write descriptor
+    dualRet = dualprocshm_writeDataCommon(drvInstance_l.pDualProcDrvInst,
+                                          FIELD_OFFSET(tCtrlBuf, fileChunkDesc),
+                                          sizeof(tOplkApiFileChunkDesc),
+                                          (UINT8*)&pIoctlFileChunk_p->desc);
+    if (dualRet != kDualprocSuccessful)
+    {
+        DEBUG_LVL_ERROR_TRACE("Cannot store file chunk descriptor (0x%X)\n", dualRet);
+        return kErrorGeneralError;
+    }
+
+    // Write file chunk data into buffer
+    dualRet = dualprocshm_writeDataCommon(drvInstance_l.pDualProcDrvInst,
+                                          FIELD_OFFSET(tCtrlBuf, aFileChunkBuffer),
+                                          pIoctlFileChunk_p->desc.length,
+                                          (UINT8*)&pIoctlFileChunk_p->pData);
+    if (dualRet != kDualprocSuccessful)
+    {
+        DEBUG_LVL_ERROR_TRACE("Cannot store file chunk data (0x%X)\n", dualRet);
+        return kErrorGeneralError;
+    }
+
+    return kErrorOk;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Get maximum supported file chunk size
+
+This function returns the maximum file chunk size which is supported by the
+CAL implementation.
+
+\return The function returns the supported file chunk size.
+
+\ingroup module_driver_ndispcie
+*/
+//------------------------------------------------------------------------------
+size_t drv_getFileBufferSize(void)
+{
+    return CONFIG_CTRL_FILE_CHUNK_SIZE;
+}
+
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
