@@ -975,6 +975,8 @@ static void drvInterruptHandler(void* pArg_p)
 
     UNUSED_PARAMETER(pArg_p);
 
+    OPENMAC_TIMERIRQACK(HWTIMER_SYNC);
+
     timerHdl = instance_l.activeTimerHdl;
     if (timerHdl < TIMER_COUNT)
     {
