@@ -268,6 +268,46 @@ tOplkError ctrlucal_readInitParam(tCtrlInitParam* pInitParam_p)
     return kErrorOk;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Write file chunk
+
+This function writes the given file chunk to the file transfer buffer
+
+\param  pDesc_p             Descriptor for the file chunk.
+\param  pBuffer_p           Buffer holding the file chunk.
+
+\return The function returns a tOplkError error code.
+
+\ingroup module_ctrlucal
+*/
+//------------------------------------------------------------------------------
+tOplkError ctrlucal_writeFileBuffer(tOplkApiFileChunkDesc* pDesc_p, UINT8* pBuffer_p)
+{
+    UNUSED_PARAMETER(pDesc_p);
+    UNUSED_PARAMETER(pBuffer_p);
+
+    // This CAL is not supporting that feature -> return no resource available.
+    return kErrorNoResource;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Get maximum supported file chunk size
+
+This function returns the maximum file chunk size which is supported by the
+CAL implementation.
+
+\return The function returns the supported file chunk size.
+
+\ingroup module_ctrlucal
+*/
+//------------------------------------------------------------------------------
+size_t ctrlucal_getFileBufferSize(void)
+{
+    // This CAL is not supporting that feature -> return zero size.
+    return 0;
+}
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //

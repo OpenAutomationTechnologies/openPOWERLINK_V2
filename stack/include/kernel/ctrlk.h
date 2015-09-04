@@ -86,6 +86,9 @@ tOplkError ctrlk_executeCmd(tCtrlCmdType cmd, UINT16* pRet_p, UINT16* pStatus_p,
                             BOOL* pfExit_p);
 void       ctrlk_updateHeartbeat(void);
 UINT16     ctrlk_getHeartbeat(void);
+tOplkError ctrlk_readFileChunk(tOplkApiFileChunkDesc* pDesc_p,
+                               size_t size_p, UINT8* pBuffer_p);
+size_t     ctrlk_getMaxFileChunkSize(void);
 
 #ifdef __cplusplus
 }

@@ -368,6 +368,49 @@ UINT16 ctrlk_getHeartbeat(void)
     return instance_l.heartbeat;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Read file chunk
+
+The function reads the file chunk descriptor and data from the file transfer
+buffer. The caller must provide a sufficiently large buffer to store a data
+chunk. The maximum chunk size can be obtained by calling
+\ref ctrlk_getMaxFileChunkSize.
+
+\param  pDesc_p         Pointer to buffer for storing the chunk descriptor
+\param  bufferSize_p    Size of buffer for storing the chunk data
+\param  pBuffer_p       Pointer to buffer for storing the chunk data
+
+\return The function returns a tOplkError code.
+
+\ingroup module_ctrlk
+*/
+//------------------------------------------------------------------------------
+tOplkError ctrlk_readFileChunk(tOplkApiFileChunkDesc* pDesc_p,
+                               size_t bufferSize_p, UINT8* pBuffer_p)
+{
+    if (pDesc_p == NULL || bufferSize_p == 0 || pBuffer_p == NULL)
+        return kErrorInvalidInstanceParam;
+
+    return ctrlkcal_readFileChunk(pDesc_p, bufferSize_p, pBuffer_p);
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Get maximum file chunk size
+
+The function returns the maximum file chunk size supported by the kernel stack.
+
+\return The function returns the maximum file chunk size.
+
+\ingroup module_ctrlk
+*/
+//------------------------------------------------------------------------------
+size_t ctrlk_getMaxFileChunkSize(void)
+{
+    return ctrlkcal_getMaxFileChunkSize();
+}
+
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//

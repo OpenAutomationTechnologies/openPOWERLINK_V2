@@ -465,6 +465,21 @@ typedef struct
     UINT           imageSize;                       ///< Size of the process image
 } tOplkApiProcessImage;
 
+/**
+\brief  File chunk descriptor
+
+This structure defines the file chunk descriptor used for transferring a file
+to the kernel stack.
+*/
+typedef struct
+{
+    UINT8           fFirst;     ///< Start flag to identify the first chunk of the file
+    UINT8           fLast;      ///< Last flag to identify the last chunk of the file
+    UINT16          reserved;
+    UINT32          length;     ///< Length of the chunk
+    UINT32          offset;     ///< Offset of the chunk in the file
+} tOplkApiFileChunkDesc;
+
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
@@ -538,6 +553,11 @@ OPLKDLLEXPORT tOplkError oplk_testSdoComDelCon(void);
 OPLKDLLEXPORT tOplkError oplk_testSdoSeqSend(UINT uiNodeId_p, tSdoType SdoType_p,
                                               tAsySdoSeq* pSdoCom_p, size_t SdoSize_p);
 OPLKDLLEXPORT tOplkError oplk_testSdoSeqDelCon(void);
+
+// Service API functions
+OPLKDLLEXPORT tOplkError oplk_serviceWriteFileChunk(tOplkApiFileChunkDesc* pDesc_p,
+                                                    UINT8* pChunkData_p);
+OPLKDLLEXPORT size_t     oplk_serviceGetFileChunkSize(void);
 
 #ifdef __cplusplus
 }

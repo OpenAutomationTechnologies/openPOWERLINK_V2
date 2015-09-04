@@ -66,6 +66,7 @@ typedef enum
     kCtrlGetVersionLow          = 0x0005,   ///< Get lower part of kernel stack version
     kCtrlGetFeaturesHigh        = 0x0006,   ///< Get higher part of features of kernel stack
     kCtrlGetFeaturesLow         = 0x0007,   ///< Get lower part of features of kernel stack
+    kCtrlWriteFileChunk         = 0x0008,   ///< Write file chunk to kernel stack
 } eCtrlCmdType;
 
 /**

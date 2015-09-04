@@ -893,6 +893,53 @@ UINT32 ctrlu_getFeatureFlags(void)
     return getRequiredKernelFeatures();
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Write file chunk
+
+This function writes the given file chunk to the kernel stack.
+
+\param  pDesc_p             Descriptor for the file chunk.
+\param  pBuffer_p           Buffer holding the file chunk.
+
+\return The function returns a \ref tOplkError error code.
+
+\ingroup module_ctrlu
+*/
+//------------------------------------------------------------------------------
+tOplkError ctrlu_writeFileChunk(tOplkApiFileChunkDesc* pDesc_p, UINT8* pBuffer_p)
+{
+    tOplkError      ret;
+    UINT16          retval;
+
+    ret = ctrlucal_writeFileBuffer(pDesc_p, pBuffer_p);
+    if (ret != kErrorOk)
+        return ret;
+
+    ret = ctrlucal_executeCmd(kCtrlWriteFileChunk, &retval);
+    if (ret != kErrorOk)
+        return ret;
+
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Get maximum supported file chunk size
+
+This function returns the maximum file chunk size which is supported by the
+stack.
+
+\return The function returns the supported file chunk size.
+
+\ingroup module_ctrlu
+*/
+//------------------------------------------------------------------------------
+size_t ctrlu_getMaxFileChunkSize(void)
+{
+    return ctrlucal_getFileBufferSize();
+}
+
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//

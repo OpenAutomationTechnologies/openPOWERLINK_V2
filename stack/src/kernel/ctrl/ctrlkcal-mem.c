@@ -272,6 +272,51 @@ tOplkError ctrlkcal_readInitParam(tCtrlInitParam* pInitParam_p)
                             sizeof(tCtrlInitParam));
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Read file chunk
+
+The function reads the file chunk descriptor and data from the file transfer
+buffer.
+
+\param  pDesc_p         Pointer to buffer for storing the chunk descriptor
+\param  bufferSize_p    Size of buffer for storing the chunk data
+\param  pBuffer_p       Pointer to buffer for storing the chunk data
+
+\return The function returns a tOplkError code.
+
+\ingroup module_ctrlk
+*/
+//------------------------------------------------------------------------------
+tOplkError ctrlkcal_readFileChunk(tOplkApiFileChunkDesc* pDesc_p,
+                                  size_t bufferSize_p, UINT8* pBuffer_p)
+{
+    UNUSED_PARAMETER(pDesc_p);
+    UNUSED_PARAMETER(bufferSize_p);
+    UNUSED_PARAMETER(pBuffer_p);
+
+    // This CAL is not supporting that feature -> return no resource available.
+    return kErrorNoResource;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Get maximum file chunk size
+
+The function returns the maximum file chunk size supported by the ctrl cal
+implementation.
+
+\return The function returns the maximum file chunk size.
+
+\ingroup module_ctrlk
+*/
+//------------------------------------------------------------------------------
+size_t ctrlkcal_getMaxFileChunkSize(void)
+{
+    // This CAL is not supporting that feature -> return zero size.
+    return 0;
+}
+
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
