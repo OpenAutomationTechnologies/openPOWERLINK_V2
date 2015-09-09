@@ -1144,7 +1144,7 @@ static tOplkError mapMemory(tMemInfo* pMemInfo_p)
     // Map the memory in user space and get the address
     pMemInfo_p->pUserVa = MmMapLockedPagesSpecifyCache(pMemInfo_p->pMdl,       // MDL
                                                        UserMode,               // Mode
-                                                       MmCached,               // Caching
+                                                       MmNonCached,            // Caching
                                                        NULL,                   // Address
                                                        FALSE,                  // Bugcheck?
                                                        NormalPagePriority);    // Priority
