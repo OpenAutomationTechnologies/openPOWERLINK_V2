@@ -390,10 +390,10 @@ typedef tOplkError (*tOplkApiCbEvent)(tOplkApiEventType eventType_p, tOplkApiEve
 \brief openPOWERLINK initialization parameters
 
 The structure defines the openPOWERLINK initialization parameters. The openPOWERLINK
-stack will be initialized with these parameters when oplk_init() is called. Most
+stack will be initialized with these parameters when oplk_create() is called. Most
 of the parameters will be stored in the object dictionary. Some of these objects
 are constant (read-only) objects and the initialization parameters are the only way of
-setting their values. Writable objects could be overwritten later at the boot-up
+setting their values. Writeable objects could be overwritten later at the boot-up
 process. This could be done by reading a CDC file for an MN or by configuration
 of a CN from an MN via SDO transfers.
 
@@ -474,8 +474,12 @@ extern "C"
 #endif
 
 // Generic API functions
-OPLKDLLEXPORT tOplkError oplk_init(tOplkApiInitParam* pInitParam_p);
-OPLKDLLEXPORT tOplkError oplk_shutdown(void);
+OPLKDLLEXPORT tOplkError oplk_initialize(void);
+OPLKDLLEXPORT tOplkError oplk_create(tOplkApiInitParam* pInitParam_p);
+OPLKDLLEXPORT tOplkError oplk_destroy(void);
+OPLKDLLEXPORT void       oplk_exit(void);
+OPLKDLLEXPORT DEPRECATED tOplkError oplk_init(tOplkApiInitParam* pInitParam_p);
+OPLKDLLEXPORT DEPRECATED tOplkError oplk_shutdown(void);
 OPLKDLLEXPORT tOplkError oplk_execNmtCommand(tNmtEvent NmtEvent_p);
 OPLKDLLEXPORT tOplkError oplk_linkObject(UINT objIndex_p, void* pVar_p, UINT* pVarEntries_p,
                                          tObdSize* pEntrySize_p, UINT firstSubindex_p);

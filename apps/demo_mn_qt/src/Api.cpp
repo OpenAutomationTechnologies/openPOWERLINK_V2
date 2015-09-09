@@ -234,11 +234,22 @@ Api::Api(MainWindow* pMainWindow_p, UINT nodeId_p, QString devName_p)
 #endif
 
     // init POWERLINK
-    ret = oplk_init(&initParam);
+    ret = oplk_initialize();
     if (ret != kErrorOk)
     {
         QMessageBox::critical(0, "POWERLINK demo",
                               QString("Initialization of openPOWERLINK Stack failed.\n") +
+                                      "Error code: 0x"+ QString::number(ret, 16) +
+                                      "\n\"" + debugstr_getRetValStr(ret) + "\""
+                                      "\nFor further information please consult the manual.");
+        goto Exit;
+    }
+
+    ret = oplk_create(&initParam);
+    if (ret != kErrorOk)
+    {
+        QMessageBox::critical(0, "POWERLINK demo",
+                              QString("Creation of openPOWERLINK Stack failed.\n") +
                                       "Error code: 0x"+ QString::number(ret, 16) +
                                       "\n\"" + debugstr_getRetValStr(ret) + "\""
                                       "\nThe most common error source are an unsupported Ethernet controller or the kernel module is not loaded."
@@ -305,7 +316,8 @@ Api::~Api()
     ret = oplk_execNmtCommand(kNmtEventSwitchOff);
     pProcessThread->waitForNmtStateOff();
     ret = oplk_freeProcessImage();
-    ret = oplk_shutdown();
+    ret = oplk_destroy();
+    oplk_exit();
 }
 
 /**

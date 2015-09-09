@@ -281,10 +281,17 @@ static tOplkError initPowerlink(tInstance* pInstance_p)
     initParam.pfnCbSync  = processSync;
 
     // initialize POWERLINK stack
-    ret = oplk_init(&initParam);
+    ret = oplk_initialize();
     if (ret != kErrorOk)
     {
-        PRINTF("oplk_init() failed with \"%s\"\n(Error:0x%x!)\n", debugstr_getRetValStr(ret), ret);
+        PRINTF("oplk_initialize() failed with \"%s\"\n(Error:0x%x!)\n", debugstr_getRetValStr(ret), ret);
+        return ret;
+    }
+
+    ret = oplk_create(&initParam);
+    if (ret != kErrorOk)
+    {
+        PRINTF("oplk_create() failed with \"%s\"\n(Error:0x%x!)\n", debugstr_getRetValStr(ret), ret);
         return ret;
     }
 
@@ -392,7 +399,8 @@ static void shutdownPowerlink(tInstance* pInstance_p)
 
     PRINTF("Shut down DEMO\n");
 
-    oplk_shutdown();
+    oplk_destroy();
+    oplk_exit();
 }
 
 //------------------------------------------------------------------------------

@@ -107,6 +107,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
+static BOOL fStackInitialized_l = FALSE;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -126,26 +127,22 @@ static tOplkError cbReceivedEth(tFrameInfo* pFrameInfo_p);
 
 //------------------------------------------------------------------------------
 /**
-\brief  Initialize the openPOWERLINK stack
+\brief  Initialize openPOWERLINK environment
 
-The function initializes the openPOWERLINK stack. After the stack is initialized
-the application must start it by performing a software reset. This is done by
-sending the NMT event \ref kNmtEventSwReset. The event can be sent by calling
-\b oplk_execNmtCommand(kNmtEventSwReset).
-
-\param  pInitParam_p            Pointer to the init parameters. The init
-                                parameters must be set by the application.
+The function initializes the necessary environment for openPOWERLINK. After this
+function is called successfully the openPOWERLINK stack can be created by
+calling \ref oplk_create.
 
 \return The function returns a \ref tOplkError error code.
-\retval kErrorOk                Stack was successfully initialized.
-\retval Other                   Error occurred while initializing the openPOWERLINK stack.
+\retval kErrorOk                Initialization was successful.
+\retval Other                   Error occurred during initialization.
 
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tOplkError oplk_init(tOplkApiInitParam* pInitParam_p)
+tOplkError oplk_initialize(void)
 {
-    tOplkError          ret;
+    tOplkError  ret;
 
     target_init();
 
@@ -161,9 +158,129 @@ tOplkError oplk_init(tOplkApiInitParam* pInitParam_p)
         return kErrorNoResource;
     }
 
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Create openPOWERLINK stack
+
+The function creates the openPOWERLINK stack with the given initialization
+parameters. Before creating the stack it is required to call
+\ref oplk_initialize!
+After the stack is initialized the application must start it by performing a
+software reset. This is done by sending the NMT event \ref kNmtEventSwReset.
+The event can be sent by calling \b oplk_execNmtCommand(kNmtEventSwReset).
+
+\param  pInitParam_p            Pointer to the initialization parameters which
+                                must be set by the application.
+
+\return The function returns a \ref tOplkError error code.
+\retval kErrorOk                Stack initialization was successful.
+\retval Other                   Error occurred during stack initialization.
+
+\ingroup module_api
+*/
+//------------------------------------------------------------------------------
+tOplkError oplk_create(tOplkApiInitParam* pInitParam_p)
+{
+    tOplkError  ret;
+
     ret = ctrlu_initStack(pInitParam_p);
+
+    if (ret == kErrorOk)
+        fStackInitialized_l = TRUE;
+
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Destroy openPOWERLINK stack
+
+The function shuts down the openPOWERLINK stack without cleaning up the stack
+environment. Before calling this function it is recommended to stop the stack
+by sending the NMT command kNmtEventSwitchOff. The command can be sent by calling
+\b oplk_execNmtCommand(kNmtEventSwitchOff).
+
+\note   After cleaning up the openPOWERLINK stack with calling this function it
+        is possible to re-create the openPOWERLINK stack with \ref oplk_create.
+
+\return The function returns a \ref tOplkError error code.
+\retval kErrorOk          Stack was successfully shut down.
+\retval Other             Error occurred while shutting down the openPOWERLINK stack.
+
+\ingroup module_api
+*/
+//------------------------------------------------------------------------------
+tOplkError oplk_destroy(void)
+{
+    tOplkError  ret;
+
+    fStackInitialized_l = FALSE;
+
+    ret = ctrlu_shutdownStack();
+
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Shut down openPOWERLINK environment
+
+The function shuts down the environment used by openPOWERLINK.
+
+\note   If the openPOWERLINK stack wasn't cleaned up before with calling
+        \ref oplk_destroy, this function also cleans up the stack.
+
+\ingroup module_api
+*/
+//------------------------------------------------------------------------------
+void oplk_exit(void)
+{
+    if (fStackInitialized_l)
+    {
+        fStackInitialized_l = FALSE;
+        ctrlu_shutdownStack();
+    }
+
+    ctrlu_exit();
+    memmap_shutdown();
+    target_cleanup();
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Initialize the openPOWERLINK stack
+
+The function initializes the openPOWERLINK stack. After the stack is initialized
+the application must start it by performing a software reset. This is done by
+sending the NMT event \ref kNmtEventSwReset. The event can be sent by calling
+\b oplk_execNmtCommand(kNmtEventSwReset).
+
+\deprecated The initialization function is replaced by \ref oplk_initialize and
+            \ref oplk_create. It is recommended using the new functions for
+            stack initialization!
+
+\param  pInitParam_p            Pointer to the init parameters. The init
+                                parameters must be set by the application.
+
+\return The function returns a \ref tOplkError error code.
+\retval kErrorOk                Stack was successfully initialized.
+\retval Other                   Error occurred while initializing the openPOWERLINK stack.
+
+\ingroup module_api
+*/
+//------------------------------------------------------------------------------
+tOplkError oplk_init(tOplkApiInitParam* pInitParam_p)
+{
+    tOplkError          ret;
+
+    ret = oplk_initialize();
     if (ret != kErrorOk)
         return ret;
+
+    ret = oplk_create(pInitParam_p);
 
     return ret;
 }
@@ -176,6 +293,10 @@ The function shuts down the openPOWERLINK stack. Before shutting down the stack
 it should be stopped by sending the NMT command kNmtEventSwitchOff. The command
 can be sent by calling oplk_execNmtCommand(kNmtEventSwitchOff);
 
+\deprecated The shutdown function is replaced by \ref oplk_destroy and
+            \ref oplk_exit. It is recommended using the new functions for
+            stack shutdown!
+
 \return The function returns a \ref tOplkError error code.
 \retval kErrorOk          Stack was successfully shut down.
 \retval Other             Error occurred while shutting down the openPOWERLINK stack.
@@ -187,10 +308,9 @@ tOplkError oplk_shutdown(void)
 {
     tOplkError          ret = kErrorApiNotInitialized;
 
-    ret = ctrlu_shutdownStack();
-    ctrlu_exit();
-    memmap_shutdown();
-    target_cleanup();
+    ret = oplk_destroy();
+    oplk_exit();
+
     return ret;
 }
 

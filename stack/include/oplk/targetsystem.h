@@ -158,6 +158,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endif
 
+#define DEPRECATED      __attribute__((deprecated))
+
 #elif defined(_MSC_VER)
 
 #if _MSC_VER < 1400         // requires visual studio 2005 or higher
@@ -183,7 +185,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endif
 
-#define __func__ __FUNCTION__
+#define __func__        __FUNCTION__
+#define DEPRECATED      __declspec(deprecated)
 
 #endif /*#elif defined (_MSC_VER) */
 
