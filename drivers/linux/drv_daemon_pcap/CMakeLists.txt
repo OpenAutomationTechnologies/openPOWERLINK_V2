@@ -38,6 +38,8 @@ PROJECT(oplkd-pcap C)
 MESSAGE(STATUS "CMAKE_SYSTEM_NAME is ${CMAKE_SYSTEM_NAME}")
 MESSAGE(STATUS "CMAKE_SYSTEM_PROCESSOR is ${CMAKE_SYSTEM_PROCESSOR}")
 
+SET(CFG_OPLK_LIB OFF CACHE BOOL "Disable oplk libraries search")
+
 IF(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     CMAKE_MINIMUM_REQUIRED (VERSION 2.8.7)
 ELSE()
@@ -57,8 +59,8 @@ MESSAGE(STATUS "Configuring ${EXE_NAME}")
 ###############################################################################
 # Set global directories
 ###############################################################################
-SET(OPLK_BASE_DIR ${CMAKE_SOURCE_DIR}/../../..)
-SET(DRV_SOURCE_DIR ${CMAKE_SOURCE_DIR})
+SET(OPLK_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../..)
+SET(DRV_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 SET(CONTRIB_SOURCE_DIR ${OPLK_BASE_DIR}/contrib)
 SET(OPLK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include)
 SET(TOOLS_DIR ${OPLK_BASE_DIR}/tools)
@@ -66,7 +68,7 @@ SET(TOOLS_DIR ${OPLK_BASE_DIR}/tools)
 ###############################################################################
 # Include CMake Modules
 ###############################################################################
-SET(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/../../cmake ${CMAKE_MODULE_PATH})
+SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../cmake ${CMAKE_MODULE_PATH})
 
 # include standard cmake modules
 INCLUDE(CMakeDependentOption)
@@ -104,9 +106,18 @@ ENDIF()
 SET(OPLKLIB_DIR ${OPLK_BASE_DIR}/stack/lib/${SYSTEM_NAME_DIR}/${SYSTEM_PROCESSOR_DIR})
 SET(OPLKLIB_INCDIR ${OPLK_BASE_DIR}/stack/proj/${SYSTEM_NAME_DIR}/lib${LIB_NAME})
 
-UNSET(OPLKLIB CACHE)
-FIND_LIBRARY(OPLKLIB NAME ${LIB_NAME}${BUILD_TYPE_EXT}
-                     HINTS ${OPLKLIB_DIR})
+# Don't look for oplk libraries for a top level build
+IF(CFG_OPLK_LIB)
+
+    SET(OPLKLIB ${LIB_NAME}${BUILD_TYPE_EXT})
+
+ELSE(CFG_OPLK_LIB)
+
+    UNSET(OPLKLIB CACHE)
+    FIND_LIBRARY(OPLKLIB NAME ${LIB_NAME}${BUILD_TYPE_EXT}
+                        HINTS ${OPLKLIB_DIR})
+ENDIF(CFG_OPLK_LIB)
+
 INCLUDE_DIRECTORIES(${OPLKLIB_INCDIR})
 
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic -std=c99 -pthread -fno-strict-aliasing")
@@ -136,5 +147,5 @@ SET_PROPERTY(TARGET ${EXE_NAME} PROPERTY COMPILE_DEFINITIONS_DEBUG DEBUG;DEF_DEB
 TARGET_LINK_LIBRARIES(${EXE_NAME} ${OPLKLIB} ${ARCH_LIBRARIES})
 
 # add installation rules
-INSTALL(TARGETS ${EXE_NAME} RUNTIME DESTINATION ${CMAKE_PROJECT_NAME})
+INSTALL(TARGETS ${EXE_NAME} RUNTIME DESTINATION ${PROJECT_NAME})
 

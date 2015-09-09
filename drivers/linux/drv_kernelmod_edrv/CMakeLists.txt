@@ -75,7 +75,7 @@ SET_PROPERTY(CACHE CFG_POWERLINK_EDRV PROPERTY STRINGS 8139 82573 8255x i210 811
 ################################################################################
 # Set global directories
 ################################################################################
-SET(OPLK_BASE_DIR ${CMAKE_SOURCE_DIR}/../../..)
+SET(OPLK_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../..)
 SET(CONTRIB_SOURCE_DIR ${OPLK_BASE_DIR}/contrib)
 SET(STACK_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src)
 SET(COMMON_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/common)
@@ -152,10 +152,10 @@ IF(CFG_OPLK_MN)
     ENDIF()
     SET(MODULE_DEFS "${MODULE_DEFS} -DCONFIG_MN")
     SET(MODULE_NAME "${MODULE_NAME}mn")
-    INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/proj/mn)
+    INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/proj/mn)
 ELSE()
     SET(MODULE_NAME "${MODULE_NAME}cn")
-    INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/proj/cn)
+    INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/proj/cn)
 ENDIF()
 
 ###############################################################################
@@ -191,7 +191,7 @@ ENDFOREACH()
 #
 SET(MODULE_SOURCE_FILES
     ${MODULE_SOURCE_FILES}
-    ${CMAKE_SOURCE_DIR}/main.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/main.c
     ${CONTRIB_SOURCE_DIR}/trace/trace-printk.c
     ${EDRV_SOURCE_DIR}/edrvcyclic.c
     ${KERNEL_SOURCE_DIR}/ctrl/ctrlk.c
@@ -303,8 +303,8 @@ ADD_CUSTOM_TARGET(
 ################################################################################
 # add installation rules
 
-INSTALL(FILES ${MODULE_OUTPUT_DIR}/${MODULE_NAME}.ko DESTINATION ${CMAKE_PROJECT_NAME})
-INSTALL(FILES ${TOOLS_DIR}/linux/50-openPOWERLINK.rules DESTINATION ${CMAKE_PROJECT_NAME})
-INSTALL(PROGRAMS ${TOOLS_DIR}/linux/plkload DESTINATION ${CMAKE_PROJECT_NAME})
-INSTALL(PROGRAMS ${TOOLS_DIR}/linux/plkunload DESTINATION ${CMAKE_PROJECT_NAME})
-INSTALL(PROGRAMS ${TOOLS_DIR}/linux/devices.txt DESTINATION ${CMAKE_PROJECT_NAME})
+INSTALL(FILES ${MODULE_OUTPUT_DIR}/${MODULE_NAME}.ko DESTINATION ${PROJECT_NAME})
+INSTALL(FILES ${TOOLS_DIR}/linux/50-openPOWERLINK.rules DESTINATION ${PROJECT_NAME})
+INSTALL(PROGRAMS ${TOOLS_DIR}/linux/plkload DESTINATION ${PROJECT_NAME})
+INSTALL(PROGRAMS ${TOOLS_DIR}/linux/plkunload DESTINATION ${PROJECT_NAME})
+INSTALL(PROGRAMS ${TOOLS_DIR}/linux/devices.txt DESTINATION ${PROJECT_NAME})
