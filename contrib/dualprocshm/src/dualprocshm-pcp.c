@@ -306,6 +306,7 @@ void dualprocshm_targetAcquireLock(UINT8* pBase_p, UINT8 lockToken_p)
         {
             DPSHM_WRITE8((UINT32)pBase_p, lockToken_p);
             DUALPROCSHM_FLUSH_DCACHE_RANGE((UINT32)pBase_p, 1);
+            DPSHM_DMB();
             continue;
         }
     } while (lock != lockToken_p);
