@@ -3,7 +3,7 @@
 #
 
 EXTRA_CFLAGS := ${MODULE_INCLUDES}
-EXTRA_CFLAGS += ${MODULE_DEFS}
+EXTRA_CFLAGS += ${MODULE_EDRV_DEFS}
 
 # object files for kernel object with relative paths
 MODULEOBJS      = ${MODULE_OBJS}
