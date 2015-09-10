@@ -287,15 +287,19 @@ This routine provides support for a token based lock using the common memory.
 The caller needs to pass the base address and the token for locking a resource
 such as memory buffers.
 
-\param  pBase_p         Base address of the lock memory.
-\param  lockToken_p     Token to be used for locking.
+\param  pBase_p           Base address of the lock memory.
+\param  lockToken_p       Token to be used for locking.
+\param  procInstance_p    Processor instance of the calling processor.
 
 \ingroup module_dualprocshm
  */
 //------------------------------------------------------------------------------
-void dualprocshm_targetAcquireLock(UINT8* pBase_p, UINT8 lockToken_p)
+void dualprocshm_targetAcquireLock(tDualprocLock* pBase_p, UINT8 lockToken_p,
+                                   tDualProcInstance procInstance_p)
 {
     volatile UINT8    lock = 0;
+
+    UNUSED_PARAMETER(procInstance_p);
 
     if (pBase_p == NULL)
     {
@@ -327,14 +331,17 @@ void dualprocshm_targetAcquireLock(UINT8* pBase_p, UINT8 lockToken_p)
 
 This routine is used to release a lock acquired before at a address specified.
 
-\param  pBase_p         Base address of the lock memory.
+\param  pBase_p           Base address of the lock memory.
+\param  procInstance_p    Processor instance of the calling processor.
 
 \ingroup module_dualprocshm
  */
 //------------------------------------------------------------------------------
-void dualprocshm_targetReleaseLock(UINT8* pBase_p)
+void dualprocshm_targetReleaseLock(tDualprocLock* pBase_p, tDualProcInstance procInstance_p)
 {
     volatile UINT8    defaultlock = DEFAULT_LOCK_ID;
+
+    UNUSED_PARAMETER(procInstance_p);
 
     if (pBase_p == NULL)
     {

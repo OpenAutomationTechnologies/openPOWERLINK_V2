@@ -67,7 +67,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 #define DUALPROC_INSTANCE_COUNT    2    ///< Number of supported instances
-#define MEM_LOCK_SIZE              1    ///< Memory lock size
 #define DYN_MEM_TABLE_ENTRY_SIZE   4    ///< Size of Dynamic table entry
 
 //------------------------------------------------------------------------------
@@ -429,9 +428,9 @@ tDualprocReturn dualprocshm_getMemory(tDualprocDrvInstance pInstance_p, UINT8 id
 
         DUALPROCSHM_MEMSET(pMemBase, 0, (*pSize_p + sizeof(tDualprocMemInst)));
 
-        pDrvInst->pDynResTbl[id_p].memInst = (tDualprocMemInst*)pMemBase;
+        pDrvInst->pDynResTbl[id_p].pMemInst = (tDualprocMemInst*)pMemBase;
         pDrvInst->pDynResTbl[id_p].pBase = pMemBase + sizeof(tDualprocMemInst);
-        pDrvInst->pDynResTbl[id_p].memInst->span = (UINT16)*pSize_p;
+        pDrvInst->pDynResTbl[id_p].pMemInst->span = (UINT16)*pSize_p;
 
         // Write the address in mapping table
         if (pDrvInst->pDynResTbl[id_p].pfnSetDynAddr(pDrvInst, id_p, (UINT64)((PTR_T)pMemBase)) != 0)
@@ -444,9 +443,9 @@ tDualprocReturn dualprocshm_getMemory(tDualprocDrvInstance pInstance_p, UINT8 id
         if (pMemBase == NULL)
             return kDualprocNoResource;
 
-        pDrvInst->pDynResTbl[id_p].memInst = (tDualprocMemInst*)pMemBase;
+        pDrvInst->pDynResTbl[id_p].pMemInst = (tDualprocMemInst*)pMemBase;
         pDrvInst->pDynResTbl[id_p].pBase = pMemBase + sizeof(tDualprocMemInst);
-        *pSize_p = (size_t)pDrvInst->pDynResTbl[id_p].memInst->span;
+        *pSize_p = (size_t)pDrvInst->pDynResTbl[id_p].pMemInst->span;
     }
 
     *ppAddr_p = pDrvInst->pDynResTbl[id_p].pBase;
@@ -488,13 +487,13 @@ tDualprocReturn dualprocshm_freeMemory(tDualprocDrvInstance pInstance_p, UINT8 i
     if (fFree_p)
     {
         pDrvInst->pDynResTbl[id_p].pfnSetDynAddr(pDrvInst, id_p, 0);
-        pMemBase = (UINT8*)pDrvInst->pDynResTbl[id_p].memInst;
+        pMemBase = (UINT8*)pDrvInst->pDynResTbl[id_p].pMemInst;
         pDrvInst->pDynResTbl[id_p].pBase = NULL;
         DUALPROCSHM_FREE(pMemBase);
     }
     else
     {
-        pDrvInst->pDynResTbl[id_p].memInst = NULL;
+        pDrvInst->pDynResTbl[id_p].pMemInst = NULL;
         pDrvInst->pDynResTbl[id_p].pBase = NULL;
     }
 
@@ -532,7 +531,7 @@ tDualprocReturn dualprocshm_readData(tDualprocDrvInstance pInstance_p, UINT8 id_
         return kDualprocInvalidParameter;
 
     base = pDrvInst->pDynResTbl[id_p].pBase;
-    highAddr = (UINT32)(base + pDrvInst->pDynResTbl[id_p].memInst->span);
+    highAddr = (UINT32)(base + pDrvInst->pDynResTbl[id_p].pMemInst->span);
 
     if ((offset_p + size_p) > highAddr)
     {
@@ -575,7 +574,7 @@ tDualprocReturn dualprocshm_writeData(tDualprocDrvInstance pInstance_p, UINT8 id
         return kDualprocInvalidParameter;
 
     base = pDrvInst->pDynResTbl[id_p].pBase;
-    highAddr = (UINT32)(base + pDrvInst->pDynResTbl[id_p].memInst->span);
+    highAddr = (UINT32)(base + pDrvInst->pDynResTbl[id_p].pMemInst->span);
 
     if ((offset_p + size_p) > highAddr)
         return kDualprocNoResource;
@@ -852,9 +851,9 @@ tDualprocReturn dualprocshm_acquireBuffLock(tDualprocDrvInstance pInstance_p, UI
     // Enter critical region
     DPSHM_ENABLE_INTR(FALSE);
 
-    dualprocshm_targetAcquireLock(&pDrvInst->pDynResTbl[id_p].memInst->lock,
-                                  pDrvInst->config.procId);
-
+    dualprocshm_targetAcquireLock(&pDrvInst->pDynResTbl[id_p].pMemInst->lock.lockBase,
+                                  pDrvInst->config.procId,
+                                  pDrvInst->config.procInstance);
     return kDualprocSuccessful;
 }
 
@@ -878,7 +877,8 @@ tDualprocReturn dualprocshm_releaseBuffLock(tDualprocDrvInstance pInstance_p, UI
 {
     tDualProcDrv*   pDrvInst = (tDualProcDrv*)pInstance_p;
 
-    dualprocshm_targetReleaseLock(&pDrvInst->pDynResTbl[id_p].memInst->lock);
+    dualprocshm_targetReleaseLock(&pDrvInst->pDynResTbl[id_p].pMemInst->lock.lockBase,
+                                  pDrvInst->config.procInstance);
 
     // Exit critical region
     DPSHM_ENABLE_INTR(TRUE);
