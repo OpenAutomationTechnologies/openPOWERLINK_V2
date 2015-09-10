@@ -74,4 +74,27 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endif
 
+//------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
+#define DUALPROCSHM_MAX_PROC                  2
+
+//------------------------------------------------------------------------------
+// typedef
+//------------------------------------------------------------------------------
+
+/**
+\brief Dual processor lock
+
+The structure holds the locking parameters used for the
+locking mechanism in dual processor shared memory library.
+
+*/
+typedef struct sDualprocLock
+{
+    unsigned char   turn;                            ///< Flag to determine the processor holding or requesting the lock
+    unsigned char   afFlag[DUALPROCSHM_MAX_PROC];    ///< Flag to request lock for the processor
+    unsigned char   resv;
+} tDualprocLock;
+
 #endif //_INC_dualprocshm_pcie_H_
