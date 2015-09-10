@@ -54,17 +54,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DUALPROCSHM_MEMCPY(dest, src, siz)    NdisMoveMemory(dest, src, siz)
 
 /// IO operations
-#define DPSHM_READ8(base)                     READ_REGISTER_UCHAR((UINT8*)base);
-#define DPSHM_WRITE8(base, val)               WRITE_REGISTER_UCHAR((UINT8*)base, val);
-#define DPSHM_READ16(base)                    READ_REGISTER_USHORT((UINT16*)base);
-#define DPSHM_WRITE16(base, val)              WRITE_REGISTER_USHORT((UINT16*)base, val);
-#define DPSHM_READ32(base)                    READ_REGISTER_ULONG((UINT32*)base);
-#define DPSHM_WRITE32(base, val)              WRITE_REGISTER_ULONG((UINT32*)base, val);
+#define DPSHM_READ8(base)                     READ_REGISTER_UCHAR((UINT8*)base)
+#define DPSHM_WRITE8(base, val)               WRITE_REGISTER_UCHAR((UINT8*)base, val)
+#define DPSHM_READ16(base)                    READ_REGISTER_USHORT((UINT16*)base)
+#define DPSHM_WRITE16(base, val)              WRITE_REGISTER_USHORT((UINT16*)base, val)
+#define DPSHM_READ32(base)                    READ_REGISTER_ULONG((UINT32*)base)
+#define DPSHM_WRITE32(base, val)              WRITE_REGISTER_ULONG((UINT32*)base, val)
 
 /// cache handling
-#define DUALPROCSHM_FLUSH_DCACHE_RANGE(base, range)
+#define DUALPROCSHM_FLUSH_DCACHE_RANGE(base, range)         ((void)0)
 
-#define DUALPROCSHM_INVALIDATE_DCACHE_RANGE(base, range)
+#define DUALPROCSHM_INVALIDATE_DCACHE_RANGE(base, range)    ((void)0)
 
 #define DPSHM_REG_SYNC_INTR(callback, arg)
 
