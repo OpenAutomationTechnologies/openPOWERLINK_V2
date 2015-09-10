@@ -192,7 +192,7 @@ typedef struct sDualprocDynRes
     tSetDynRes          pfnSetDynAddr;              ///< This function sets the dynamic buffer base to hardware
     tGetDynRes          pfnGetDynAddr;              ///< This function gets the dynamic buffer base from hardware
     UINT8*              pBase;                      ///< Base of the dynamic buffer
-    tDualprocMemInst*   memInst;                    ///< Pointer to memory instance
+    tDualprocMemInst*   pMemInst;                   ///< Pointer to memory instance
 } tDualprocDynResConfig;
 
 /**

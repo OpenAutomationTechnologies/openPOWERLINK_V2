@@ -67,7 +67,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 #define DUALPROC_INSTANCE_COUNT    2    ///< Number of supported instances
-#define MEM_LOCK_SIZE              1    ///< Memory lock size
 #define DYN_MEM_TABLE_ENTRY_SIZE   4    ///< Size of Dynamic table entry
 
 //------------------------------------------------------------------------------
@@ -174,17 +173,13 @@ tDualprocReturn dualprocshm_create(tDualprocConfig* pConfig_p, tDualprocDrvInsta
     INT                 index;
 
     if (pConfig_p->procInstance != kDualProcFirst && pConfig_p->procInstance != kDualProcSecond)
-    {
         return kDualprocInvalidParameter;
-    }
 
     // Create driver instance
     pDrvInst = (tDualProcDrv*)DUALPROCSHM_MALLOC(sizeof(tDualProcDrv));
 
     if (pDrvInst == NULL)
-    {
         return kDualprocNoResource;
-    }
 
     // Initialize the global driver instance variables
     DUALPROCSHM_MEMSET(pDrvInst, 0, sizeof(tDualProcDrv));
@@ -208,9 +203,7 @@ tDualprocReturn dualprocshm_create(tDualprocConfig* pConfig_p, tDualprocDrvInsta
     }
 
     if (pConfig_p->procInstance == kDualProcFirst)
-    {
         DUALPROCSHM_MEMSET(pDrvInst->commonMemInst.pCommonMemHeader, 0, MAX_COMMON_MEM_SIZE);
-    }
 
     // Get the control segment base address
     pDrvInst->commonMemInst.pCommonMemBase =
@@ -306,9 +299,7 @@ tDualprocReturn dualprocshm_delete(tDualprocDrvInstance pInstance_p)
     INT             index;
 
     if (pInstance_p == NULL)
-    {
         return kDualprocInvalidParameter;
-    }
 
     // release common memory and address mapping table
     dualprocshm_releaseCommonMemAddr(pDrvInst->config.commonMemSize);
@@ -415,9 +406,7 @@ tDualprocReturn dualprocshm_getMemory(tDualprocDrvInstance pInstance_p, UINT8 id
         return kDualprocInvalidParameter;
 
     if (id_p > MAX_DYNAMIC_BUFF_COUNT)
-    {
         return kDualprocInvalidParameter;
-    }
 
     if (fAlloc_p)
     {
@@ -429,9 +418,9 @@ tDualprocReturn dualprocshm_getMemory(tDualprocDrvInstance pInstance_p, UINT8 id
 
         DUALPROCSHM_MEMSET(pMemBase, 0, (*pSize_p + sizeof(tDualprocMemInst)));
 
-        pDrvInst->pDynResTbl[id_p].memInst = (tDualprocMemInst*)pMemBase;
+        pDrvInst->pDynResTbl[id_p].pMemInst = (tDualprocMemInst*)pMemBase;
         pDrvInst->pDynResTbl[id_p].pBase = pMemBase + sizeof(tDualprocMemInst);
-        pDrvInst->pDynResTbl[id_p].memInst->span = (UINT16)*pSize_p;
+        pDrvInst->pDynResTbl[id_p].pMemInst->span = (UINT16)*pSize_p;
 
         // Write the address in mapping table
         if (pDrvInst->pDynResTbl[id_p].pfnSetDynAddr(pDrvInst, id_p, (UINT64)((PTR_T)pMemBase)) != 0)
@@ -444,9 +433,9 @@ tDualprocReturn dualprocshm_getMemory(tDualprocDrvInstance pInstance_p, UINT8 id
         if (pMemBase == NULL)
             return kDualprocNoResource;
 
-        pDrvInst->pDynResTbl[id_p].memInst = (tDualprocMemInst*)pMemBase;
+        pDrvInst->pDynResTbl[id_p].pMemInst = (tDualprocMemInst*)pMemBase;
         pDrvInst->pDynResTbl[id_p].pBase = pMemBase + sizeof(tDualprocMemInst);
-        *pSize_p = (size_t)pDrvInst->pDynResTbl[id_p].memInst->span;
+        *pSize_p = (size_t)pDrvInst->pDynResTbl[id_p].pMemInst->span;
     }
 
     *ppAddr_p = pDrvInst->pDynResTbl[id_p].pBase;
@@ -488,13 +477,13 @@ tDualprocReturn dualprocshm_freeMemory(tDualprocDrvInstance pInstance_p, UINT8 i
     if (fFree_p)
     {
         pDrvInst->pDynResTbl[id_p].pfnSetDynAddr(pDrvInst, id_p, 0);
-        pMemBase = (UINT8*)pDrvInst->pDynResTbl[id_p].memInst;
+        pMemBase = (UINT8*)pDrvInst->pDynResTbl[id_p].pMemInst;
         pDrvInst->pDynResTbl[id_p].pBase = NULL;
         DUALPROCSHM_FREE(pMemBase);
     }
     else
     {
-        pDrvInst->pDynResTbl[id_p].memInst = NULL;
+        pDrvInst->pDynResTbl[id_p].pMemInst = NULL;
         pDrvInst->pDynResTbl[id_p].pBase = NULL;
     }
 
@@ -525,21 +514,19 @@ tDualprocReturn dualprocshm_readData(tDualprocDrvInstance pInstance_p, UINT8 id_
                                      UINT32 offset_p, size_t size_p, UINT8* pData_p)
 {
     tDualProcDrv*   pDrvInst = (tDualProcDrv*)pInstance_p;
-    UINT8*          base;
+    UINT8*          pBase;
     UINT32          highAddr;
 
     if (pInstance_p == NULL ||  id_p > MAX_DYNAMIC_BUFF_COUNT || pData_p == NULL)
         return kDualprocInvalidParameter;
 
-    base = pDrvInst->pDynResTbl[id_p].pBase;
-    highAddr = (UINT32)(base + pDrvInst->pDynResTbl[id_p].memInst->span);
+    pBase = pDrvInst->pDynResTbl[id_p].pBase;
+    highAddr = (UINT32)(pBase + pDrvInst->pDynResTbl[id_p].pMemInst->span);
 
     if ((offset_p + size_p) > highAddr)
-    {
         return kDualprocNoResource;
-    }
 
-    dualprocshm_targetReadData(base + offset_p, (UINT16)size_p, pData_p);
+    dualprocshm_targetReadData(pBase + offset_p, (UINT16)size_p, pData_p);
 
     return kDualprocSuccessful;
 }
@@ -568,19 +555,19 @@ tDualprocReturn dualprocshm_writeData(tDualprocDrvInstance pInstance_p, UINT8 id
                                       UINT32 offset_p, size_t size_p, UINT8* pData_p)
 {
     tDualProcDrv*   pDrvInst = (tDualProcDrv*)pInstance_p;
-    UINT8*          base;
+    UINT8*          pBase;
     UINT32          highAddr;
 
     if (pInstance_p == NULL ||  id_p > MAX_DYNAMIC_BUFF_COUNT || pData_p == NULL)
         return kDualprocInvalidParameter;
 
-    base = pDrvInst->pDynResTbl[id_p].pBase;
-    highAddr = (UINT32)(base + pDrvInst->pDynResTbl[id_p].memInst->span);
+    pBase = pDrvInst->pDynResTbl[id_p].pBase;
+    highAddr = (UINT32)(pBase + pDrvInst->pDynResTbl[id_p].pMemInst->span);
 
     if ((offset_p + size_p) > highAddr)
         return kDualprocNoResource;
 
-    dualprocshm_targetWriteData(base + offset_p, (UINT16)size_p, pData_p);
+    dualprocshm_targetWriteData(pBase + offset_p, (UINT16)size_p, pData_p);
 
     return kDualprocSuccessful;
 }
@@ -616,7 +603,7 @@ tDualprocReturn dualprocshm_readDataCommon(tDualprocDrvInstance pInstance_p,
     if ((pReadBase + size_p) > (pCommMemBase + pDrvInst->config.commonMemSize))
         return kDualprocBufferError;
 
-    dualprocshm_targetReadData(pReadBase, (UINT16) size_p, pData_p);
+    dualprocshm_targetReadData(pReadBase, (UINT16)size_p, pData_p);
 
     return kDualprocSuccessful;
 }
@@ -852,7 +839,7 @@ tDualprocReturn dualprocshm_acquireBuffLock(tDualprocDrvInstance pInstance_p, UI
     // Enter critical region
     DPSHM_ENABLE_INTR(FALSE);
 
-    dualprocshm_targetAcquireLock(&pDrvInst->pDynResTbl[id_p].memInst->lock,
+    dualprocshm_targetAcquireLock(&pDrvInst->pDynResTbl[id_p].pMemInst->lock,
                                   pDrvInst->config.procId);
 
     return kDualprocSuccessful;
@@ -878,7 +865,7 @@ tDualprocReturn dualprocshm_releaseBuffLock(tDualprocDrvInstance pInstance_p, UI
 {
     tDualProcDrv*   pDrvInst = (tDualProcDrv*)pInstance_p;
 
-    dualprocshm_targetReleaseLock(&pDrvInst->pDynResTbl[id_p].memInst->lock);
+    dualprocshm_targetReleaseLock(&pDrvInst->pDynResTbl[id_p].pMemInst->lock);
 
     // Exit critical region
     DPSHM_ENABLE_INTR(TRUE);
