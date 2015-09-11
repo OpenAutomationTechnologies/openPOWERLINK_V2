@@ -38,7 +38,7 @@ EDRV_SOURCE_DIR=${OPLK_BASE_DIR}/stack/src/kernel/edrv
 CONTRIB_SOURCE_DIR=${OPLK_BASE_DIR}/contrib
 
 # Include file directories
-STACK_INCLUDE_DIR=${OPLK_BASE_DIR}/stack/include
+OPLK_INCLUDE_DIR=${OPLK_BASE_DIR}/stack/include
 
 # Other directories
 OBJDICT_DIR=${OPLK_BASE_DIR}/objdicts
