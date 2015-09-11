@@ -74,4 +74,26 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endif
 
+//------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
+#define DUALPROC_INSTANCE_COUNT    2    ///< Number of supported instances
+
+//------------------------------------------------------------------------------
+// typedef
+//------------------------------------------------------------------------------
+
+/**
+\brief Dual processor lock
+
+The structure holds the locking parameters used for the
+locking mechanism in dual processor shared memory library.
+
+*/
+typedef struct sDualprocLock
+{
+    unsigned char   lockToken;      ///< Locking token
+    unsigned char   aPadding1[3];   ///< Padding array variable 1
+} tDualprocLock;
+
 #endif //_INC_dualprocshm_pcie_H_

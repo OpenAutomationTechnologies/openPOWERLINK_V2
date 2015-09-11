@@ -289,62 +289,81 @@ void dualprocshm_targetWriteData(UINT8* pBase_p, UINT16 size_p, UINT8* pData_p)
 /**
 \brief  Target specific memory lock routine(acquire)
 
-This routine provides support for a token based lock using the shared memory
-between two processors/processes. The caller needs to pass the base address
-and the token for locking a resource such as memory buffers.
+This routine implements a target specific locking mechanism using the shared
+memory between two processors/processes. The caller needs to pass the base
+address and processor instance of the calling processor.
 
-\param  pBase_p         Base address of the lock memory
-\param  lockToken_p     Token to be used for locking
+\param  pBase_p           Base address of the lock memory
+\param  procInstance_p    Processor instance of the calling processor
 
 \ingroup module_dualprocshm
  */
 //------------------------------------------------------------------------------
-void dualprocshm_targetAcquireLock(UINT8* pBase_p, UINT8 lockToken_p)
+void dualprocshm_targetAcquireLock(tDualprocLock* pBase_p, tDualProcInstance procInstance_p)
 {
-    UINT8    lock = 0;
+    volatile UINT8    lock = 0;
+    UINT8             lockToken;
 
     if (pBase_p == NULL)
     {
         TRACE("%s Invalid parameters\n", __FUNCTION__);
         return;
+    }
+
+    switch (procInstance_p)
+    {
+        case kDualProcFirst:
+        case kDualProcSecond:
+            lockToken = procInstance_p + 1;
+            break;
+
+        default:
+            TRACE("Invalid processor instance\n");
+            return;
     }
 
     // spin till the passed token is written into memory
     do
     {
-        lock = DPSHM_READ8(pBase_p);
+        DUALPROCSHM_INVALIDATE_DCACHE_RANGE((UINT32)&pBase_p->lockToken, 1);
+        lock = DPSHM_READ8((UINT32)&pBase_p->lockToken);
 
         if (lock == DEFAULT_LOCK_ID)
         {
-            DPSHM_WRITE8(pBase_p, lockToken_p);
+            DPSHM_WRITE8((UINT32)&pBase_p->lockToken, lockToken);
+            DUALPROCSHM_FLUSH_DCACHE_RANGE((UINT32)&pBase_p->lockToken, 1);
             DPSHM_DMB();
             continue;
         }
-    } while (lock != lockToken_p);
+    } while (lock != lockToken);
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Target specific memory lock routine(release)
+\brief  Target specific memory unlock routine (release)
 
-This routine is used to release a lock acquired at a specified address.
+This routine is used to release a lock acquired before at a address specified.
 
-\param  pBase_p         Base address of the lock memory
+\param  pBase_p           Base address of the lock memory.
+\param  procInstance_p    Processor instance of the calling processor.
 
 \ingroup module_dualprocshm
  */
 //------------------------------------------------------------------------------
-void dualprocshm_targetReleaseLock(UINT8* pBase_p)
+void dualprocshm_targetReleaseLock(tDualprocLock* pBase_p, tDualProcInstance procInstance_p)
 {
-    UINT8    defaultlock = DEFAULT_LOCK_ID;
+    volatile UINT8    defaultlock = DEFAULT_LOCK_ID;
+
+    UNUSED_PARAMETER(procInstance_p);
 
     if (pBase_p == NULL)
     {
-        TRACE("%s Invalid parameters\n", __FUNCTION__);
         return;
     }
 
-    DPSHM_WRITE8(pBase_p, defaultlock);
+    DPSHM_WRITE8((UINT32)&pBase_p->lockToken, defaultlock);
+
+    DUALPROCSHM_FLUSH_DCACHE_RANGE((UINT32)&pBase_p->lockToken, sizeof(UINT8));
 }
 
 //------------------------------------------------------------------------------

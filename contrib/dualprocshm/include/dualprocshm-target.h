@@ -229,6 +229,25 @@ This function callback is called by the synchronization event.
 */
 typedef void (*targetSyncHdl)(void*);
 
+/**
+\brief Processor instance
+
+The processor instance determines if the caller is the Pcp or the Host.
+*/
+typedef enum
+{
+    kDualProcFirst = 0,              ///< Instance on first processor
+    kDualProcSecond = 1,             ///< Instance on second processor
+    kDualProcLast = 2,               ///< End of list flag
+} eDualProcInstance;
+
+/**
+\brief Processor instance data type
+
+Data type for the enumerator \ref eDualProcInstance.
+*/
+typedef UINT8 tDualProcInstance;
+
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
@@ -246,8 +265,8 @@ void    dualprocshm_targetReadData(UINT8* pBase_p, UINT16 size_p, UINT8* pData_p
 void    dualprocshm_targetWriteData(UINT8* pBase_p, UINT16 size_p, UINT8* pData_p);
 void    dualprocshm_releaseCommonMemAddr(UINT16 pSize_p);
 void    dualprocshm_releaseDynMapTableAddr(void);
-void    dualprocshm_targetAcquireLock(UINT8* pBase_p, UINT8 lockToken_p) SECTION_DUALPROCSHM_ACQUIRE_LOCK;
-void    dualprocshm_targetReleaseLock(UINT8* pBase_p) SECTION_DUALPROCSHM_RELEASE_LOCK;
+void    dualprocshm_targetAcquireLock(tDualprocLock* pBase_p, tDualProcInstance procInstance_p) SECTION_DUALPROCSHM_ACQUIRE_LOCK;
+void    dualprocshm_targetReleaseLock(tDualprocLock* pBase_p, tDualProcInstance procInstance_p) SECTION_DUALPROCSHM_RELEASE_LOCK;
 void    dualprocshm_regSyncIrqHdl(targetSyncHdl callback_p, void* pArg_p);
 void    dualprocshm_enableSyncIrq(BOOL fEnable_p);
 #ifdef __cplusplus

@@ -63,7 +63,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define PROC_ID                        0xFA
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -884,7 +883,6 @@ static tOplkError initDualProcShm(void)
     OPLK_MEMSET(&dualProcConfig, 0, sizeof(tDualprocConfig));
 
     dualProcConfig.procInstance = kDualProcSecond;
-    dualProcConfig.procId = PROC_ID;
 
     dualRet = dualprocshm_create(&dualProcConfig, &drvInstance_l.pDualProcDrvInst);
     if (dualRet != kDualprocSuccessful)
