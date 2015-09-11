@@ -66,7 +66,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define DUALPROC_INSTANCE_COUNT    2    ///< Number of supported instances
 #define DYN_MEM_TABLE_ENTRY_SIZE   4    ///< Size of Dynamic table entry
 
 //------------------------------------------------------------------------------
@@ -840,8 +839,7 @@ tDualprocReturn dualprocshm_acquireBuffLock(tDualprocDrvInstance pInstance_p, UI
     DPSHM_ENABLE_INTR(FALSE);
 
     dualprocshm_targetAcquireLock(&pDrvInst->pDynResTbl[id_p].pMemInst->lock,
-                                  pDrvInst->config.procId);
-
+                                  pDrvInst->config.procInstance);
     return kDualprocSuccessful;
 }
 
@@ -865,7 +863,8 @@ tDualprocReturn dualprocshm_releaseBuffLock(tDualprocDrvInstance pInstance_p, UI
 {
     tDualProcDrv*   pDrvInst = (tDualProcDrv*)pInstance_p;
 
-    dualprocshm_targetReleaseLock(&pDrvInst->pDynResTbl[id_p].pMemInst->lock);
+    dualprocshm_targetReleaseLock(&pDrvInst->pDynResTbl[id_p].pMemInst->lock,
+                                  pDrvInst->config.procInstance);
 
     // Exit critical region
     DPSHM_ENABLE_INTR(TRUE);

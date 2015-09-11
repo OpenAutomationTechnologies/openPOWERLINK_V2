@@ -73,7 +73,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define CTRL_PROC_ID    0xFB                    ///< Processor Id for kernel layer
 
 //------------------------------------------------------------------------------
 // local types
@@ -127,7 +126,6 @@ tOplkError ctrlkcal_init(void)
     OPLK_MEMSET(&dualProcConfig, 0, sizeof(tDualprocConfig));
 
     dualProcConfig.procInstance = kDualProcFirst;
-    dualProcConfig.procId = CTRL_PROC_ID;
 
     dualRet = dualprocshm_create(&dualProcConfig, &instance_l.dualProcDrvInst);
     if (dualRet != kDualprocSuccessful)

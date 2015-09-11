@@ -76,7 +76,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define CTRL_PROC_ID        0xFA
 
 //------------------------------------------------------------------------------
 // local types
@@ -128,7 +127,6 @@ tOplkError ctrlucal_init(void)
     OPLK_MEMSET(&dualProcConfig, 0, sizeof(tDualprocConfig));
 
     dualProcConfig.procInstance = kDualProcSecond;
-    dualProcConfig.procId = CTRL_PROC_ID;
 
     dualRet = dualprocshm_create(&dualProcConfig, &instance_l.dualProcDrvInst);
     if (dualRet != kDualprocSuccessful)
