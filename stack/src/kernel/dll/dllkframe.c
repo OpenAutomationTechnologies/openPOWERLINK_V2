@@ -2025,9 +2025,6 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
             return ret;
         }
 
-        if ((nmtState_p != kNmtCsOperational) && (nmtState_p != kNmtMsOperational))
-            ami_setUint8Le(&pFrame->data.pres.flag1, 0);    // Reset RD flag, this that doesn't matter, because it was processed above
-
         if ((ret = forwardRpdo(pFrameInfo_p)) != kErrorOk)
         {
             if (ret == kErrorReject)
