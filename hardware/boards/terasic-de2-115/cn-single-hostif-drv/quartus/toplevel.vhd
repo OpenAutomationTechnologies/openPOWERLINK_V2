@@ -69,6 +69,8 @@ entity toplevel is
         EPCS_SCE            : out   std_logic;
         EPCS_SDO            : out   std_logic;
         EPCS_DATA0          : in    std_logic;
+        -- LED green
+        LEDG                : out   std_logic_vector(1 downto 0);
         -- 2 MB SRAM
         SRAM_CE_n           : out   std_logic;
         SRAM_OE_n           : out   std_logic;
@@ -116,6 +118,8 @@ architecture rtl of toplevel is
             openmac_0_smi_clk                           : out   std_logic_vector(1 downto 0);
             openmac_0_smi_dio                           : inout std_logic_vector(1 downto 0)  := (others => 'X');
             openmac_0_mactimerout_export                : out   std_logic_vector(0 downto 0);
+
+            powerlink_led_export                        : out   std_logic_vector(1 downto 0);
 
             epcs_flash_dclk                             : out   std_logic;
             epcs_flash_sce                              : out   std_logic;
@@ -231,7 +235,9 @@ begin
             prl0_iPrlSlv_be                             => HOSTIF_BE,
             prl0_oPrlSlv_ad_o                           => parHost_ad_o,
             prl0_iPrlSlv_ad_i                           => parHost_ad_i,
-            prl0_oPrlSlv_ad_oen                         => parHost_ad_oen
+            prl0_oPrlSlv_ad_oen                         => parHost_ad_oen,
+
+            powerlink_led_export                        => LEDG
         );
 
     -- Pll Instance

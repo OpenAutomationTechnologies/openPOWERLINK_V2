@@ -144,7 +144,6 @@ tOplkError eventkcal_postEvent (tEvent *pEvent_p)
         case kEventSinkApi:
         case kEventSinkDlluCal:
         case kEventSinkErru:
-        case kEventSinkLedu:
             ret = kErrorOk;
             break;
 

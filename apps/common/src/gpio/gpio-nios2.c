@@ -70,8 +70,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define GPIO_STATUS_LED_BIT     1
-#define GPIO_ERROR_LED_BIT      2
 
 //------------------------------------------------------------------------------
 // local types
@@ -139,44 +137,6 @@ UINT8 gpio_getNodeid(void)
 #endif
 
     return nodeid;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Sets the status LED
-
-The function sets the POWERLINK status LED.
-
-\param  fOn_p               Determines the LED state
-
-\ingroup module_app_common
-*/
-//------------------------------------------------------------------------------
-void gpio_setStatusLed(BOOL fOn_p)
-{
-    if (fOn_p != FALSE)
-        IOWR_ALTERA_AVALON_PIO_SET_BITS(STATUS_LED_PIO_BASE, GPIO_STATUS_LED_BIT);
-    else
-        IOWR_ALTERA_AVALON_PIO_CLEAR_BITS(STATUS_LED_PIO_BASE, GPIO_STATUS_LED_BIT);
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Sets the error LED
-
-The function sets the POWERLINK error LED.
-
-\param  fOn_p               Determines the LED state
-
-\ingroup module_app_common
-*/
-//------------------------------------------------------------------------------
-void gpio_setErrorLed(BOOL fOn_p)
-{
-    if (fOn_p != FALSE)
-        IOWR_ALTERA_AVALON_PIO_SET_BITS(STATUS_LED_PIO_BASE, GPIO_ERROR_LED_BIT);
-    else
-        IOWR_ALTERA_AVALON_PIO_CLEAR_BITS(STATUS_LED_PIO_BASE, GPIO_ERROR_LED_BIT);
 }
 
 //------------------------------------------------------------------------------

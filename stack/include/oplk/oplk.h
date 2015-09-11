@@ -286,11 +286,6 @@ typedef enum
     (\ref tObdCbParam). */
     kOplkApiEventObdAccess          = 0x69,
 
-    /** Status and error LED event. The event allows the application to perform
-    the signaling of the POWERLINK LEDs according to the specification. The event
-    argument contains a LED event (\ref kOplkApiEventLed). */
-    kOplkApiEventLed                = 0x70,
-
     /** CFM progress event. This event informs the application about the progress
     of the configuration of a specific CN. The event argument contains the CN
     progress information (\ref tCfmEventCnProgress). */

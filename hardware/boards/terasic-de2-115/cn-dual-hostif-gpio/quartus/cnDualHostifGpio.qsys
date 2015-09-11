@@ -16,7 +16,7 @@
    {
       datum _sortIndex
       {
-         value = "18";
+         value = "17";
          type = "int";
       }
       datum sopceditor_expanded
@@ -110,7 +110,7 @@
    {
       datum _sortIndex
       {
-         value = "16";
+         value = "15";
          type = "int";
       }
       datum sopceditor_expanded
@@ -152,7 +152,7 @@
    {
       datum _sortIndex
       {
-         value = "14";
+         value = "13";
          type = "int";
       }
       datum sopceditor_expanded
@@ -165,7 +165,7 @@
    {
       datum _sortIndex
       {
-         value = "15";
+         value = "14";
          type = "int";
       }
       datum megawizard_uipreferences
@@ -274,19 +274,12 @@
          type = "String";
       }
    }
-   element status_led_pio.s1
-   {
-      datum baseAddress
-      {
-         value = "2048";
-         type = "String";
-      }
-   }
+
    element sdram_0
    {
       datum _sortIndex
       {
-         value = "17";
+         value = "16";
          type = "int";
       }
       datum sopceditor_expanded
@@ -300,19 +293,6 @@
       datum _sortIndex
       {
          value = "5";
-         type = "int";
-      }
-      datum sopceditor_expanded
-      {
-         value = "0";
-         type = "boolean";
-      }
-   }
-   element status_led_pio
-   {
-      datum _sortIndex
-      {
-         value = "13";
          type = "int";
       }
       datum sopceditor_expanded
@@ -351,7 +331,7 @@
    {
       datum _sortIndex
       {
-         value = "19";
+         value = "18";
          type = "int";
       }
       datum sopceditor_expanded
@@ -396,7 +376,7 @@
  <parameter name="projectName">cn-dual-hostif-gpio.qpf</parameter>
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1434560513550" />
+ <parameter name="timeStamp" value="1439534435598" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk50" internal="clk50.clk_in" type="clock" dir="end" />
@@ -420,11 +400,6 @@
  <interface
    name="epcs_flash"
    internal="epcs_flash_controller.external"
-   type="conduit"
-   dir="end" />
- <interface
-   name="status_led_pio"
-   internal="status_led_pio.external_connection"
    type="conduit"
    dir="end" />
  <interface
@@ -472,6 +447,11 @@
  <interface
    name="hex_pio"
    internal="hex_pio.external_connection"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="powerlink_led"
+   internal="pcp_0.powerlink_led"
    type="conduit"
    dir="end" />
  <module kind="clock_source" version="13.0" enabled="1" name="clk50">
@@ -545,24 +525,6 @@
   <parameter name="clockRate" value="50000000" />
   <parameter name="deviceFamilyString" value="Cyclone IV E" />
   <parameter name="autoInitializationFileName">$${FILENAME}_epcs_flash_controller</parameter>
- </module>
- <module
-   kind="altera_avalon_pio"
-   version="13.0.1.99.2"
-   enabled="1"
-   name="status_led_pio">
-  <parameter name="bitClearingEdgeCapReg" value="false" />
-  <parameter name="bitModifyingOutReg" value="true" />
-  <parameter name="captureEdge" value="false" />
-  <parameter name="direction" value="Output" />
-  <parameter name="edgeType" value="RISING" />
-  <parameter name="generateIRQ" value="false" />
-  <parameter name="irqType" value="LEVEL" />
-  <parameter name="resetValue" value="0" />
-  <parameter name="simDoTestBenchWiring" value="false" />
-  <parameter name="simDrivenValue" value="0" />
-  <parameter name="width" value="2" />
-  <parameter name="clockRate" value="50000000" />
  </module>
  <module
    kind="altera_generic_tristate_controller"
@@ -942,35 +904,6 @@
    version="13.0"
    start="clk25.clk_reset"
    end="epcs_flash_controller.reset" />
- <connection
-   kind="clock"
-   version="13.0"
-   start="clk50.clk"
-   end="status_led_pio.clk" />
- <connection
-   kind="avalon"
-   version="13.0"
-   start="host_0.slow_bridge"
-   end="status_led_pio.s1">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0800" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk50.clk_reset"
-   end="status_led_pio.reset" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk100.clk_reset"
-   end="status_led_pio.reset" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk25.clk_reset"
-   end="status_led_pio.reset" />
  <connection
    kind="tristate_conduit"
    version="13.0"

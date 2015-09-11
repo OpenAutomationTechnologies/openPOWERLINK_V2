@@ -154,7 +154,7 @@ architecture rtl of toplevel is
             openmac_0_smi_dio                           : inout std_logic_vector(1 downto 0)  := (others => 'X');
             openmac_0_mactimerout_export                : out   std_logic_vector(0 downto 0);
             host_0_benchmark_pio_export                 : out   std_logic_vector(7 downto 0);
-            status_led_pio_export                       : out   std_logic_vector(1 downto 0);
+            powerlink_led_export                        : out   std_logic_vector(1 downto 0);
             key_pio_export                              : in    std_logic_vector(3 downto 0);
             node_switch_pio_export                      : in    std_logic_vector(7 downto 0)  := (others => 'X');
             hex_pio_export                              : out   std_logic_vector(31 downto 0);
@@ -260,7 +260,7 @@ begin
             pcp_0_benchmark_pio_export                  => BENCHMARK,
 
             node_switch_pio_export                      => NODE_SWITCH,
-            status_led_pio_export                       => LEDG,
+            powerlink_led_export                        => LEDG,
 
             hex_pio_export                              => hex,
             key_pio_export                              => key,

@@ -52,6 +52,29 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 /**
+ * \brief   Enumeration for valid LED modes
+ *
+ * The enumeration lists all valid LED modes.
+ */
+typedef enum
+{
+    kLedModeInit           = 0x00,  ///< LED Initilization.
+    kLedModeOff            = 0x01,  ///< LED off.
+    kLedModeOn             = 0x02,  ///< LED on.
+    kLedModeFlickering     = 0x03,  ///< LED on for 50ms and off for 50ms.
+    kLedModeBlinking       = 0x04,  ///< LED on for 200ms and off for 200ms.
+    kLedModeSingleFlash    = 0x05,  ///< LED on for 200ms and then it switch off.
+    kLedModeDoubleFlash    = 0x06,  ///< LED on for 200ms and off for 1000ms, repeat twice.
+    kLedModeTripleFlash    = 0x07,  ///< LED on for 200ms and off for 1000ms, repeat thrice.
+} eLedMode;
+
+/**
+\brief LED mode data type
+
+Data type for the enumerator \ref eLedMode.
+*/
+typedef UINT32 tLedMode;
+/**
  * \brief   Valid LED types
  *
  * The structure defines all valid LED types used by POWERLINK.

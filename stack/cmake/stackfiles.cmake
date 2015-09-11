@@ -101,7 +101,6 @@ SET(USER_SOURCES
     ${USER_SOURCE_DIR}/sdo/sdoudp.c
     ${USER_SOURCE_DIR}/errhnd/errhndu.c
     ${USER_SOURCE_DIR}/ctrl/ctrlu.c
-    ${USER_SOURCE_DIR}/ledu.c
     )
 
 ################################################################################
@@ -266,6 +265,8 @@ SET(KERNEL_SOURCES
     ${KERNEL_SOURCE_DIR}/pdo/pdoklut.c
     ${KERNEL_SOURCE_DIR}/errhnd/errhndk.c
     ${KERNEL_SOURCE_DIR}/ctrl/ctrlk.c
+    ${KERNEL_SOURCE_DIR}/ledk.c
+    ${KERNEL_SOURCE_DIR}/ledktimer.c
     )
 
 ################################################################################

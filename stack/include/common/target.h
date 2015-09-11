@@ -42,6 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
+#include <oplk/led.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -50,7 +51,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -80,6 +80,9 @@ void       target_destroyMutex(OPLK_MUTEX_T mutexId_p);
 int target_initLock(OPLK_LOCK_T* pSlock_p);
 int target_lock(void);
 int target_unlock(void);
+
+/* function for LED*/
+tOplkError target_setLed(tLedType ledType_p, BOOL fLedOn_p);
 
 #ifdef __cplusplus
 }

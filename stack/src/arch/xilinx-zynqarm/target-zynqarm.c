@@ -44,6 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <xscugic.h>
 #include <xtime_l.h>
 #include <xil_cache.h>
+#include <xgpio_l.h>
 #include <xil_types.h>
 #include <xil_io.h>
 #include <xil_exception.h>
@@ -90,6 +91,12 @@ extern XScuGic_Config XScuGic_ConfigTable[];
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+#define GPIO_STATUS_LED_BIT     1
+#define GPIO_ERROR_LED_BIT      2
+
+#ifdef XPAR_POWERLINK_LED_BASEADDR
+#define TARGET_POWERLINK_LED_BASE XPAR_POWERLINK_LED_BASEADDR
+#endif
 
 //------------------------------------------------------------------------------
 // local types
@@ -98,7 +105,8 @@ extern XScuGic_Config XScuGic_ConfigTable[];
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static XScuGic gicInstance_l;
+static XScuGic              gicInstance_l;
+static UINT32               plkStatusErrorLeds_l;  ///< Local copy of the state of the POWERLINK status LEDs
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -106,6 +114,9 @@ static XScuGic gicInstance_l;
 static void enableInterruptMaster(void);
 static void disableInterruptMaster(void);
 static void initInterrupts(void);
+
+static void setStatusLed(BOOL fOn_p);
+static void setErrorLed(BOOL fOn_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -190,6 +201,8 @@ tOplkError target_init(void)
 
     // Initialize Interrupts
     initInterrupts();
+
+    plkStatusErrorLeds_l = 0;
 
     return kErrorOk;
 }
@@ -281,6 +294,40 @@ tOplkError target_setDefaultGateway(UINT32 defaultGateway_p)
     return kErrorOk;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Call state change function
+
+The function calls the type and state of LED.
+
+\param  ledType_p           The type of LED.
+\param  fLedOn_p            The state of the LED.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+tOplkError target_setLed(tLedType ledType_p, BOOL fLedOn_p)
+{
+    tOplkError ret = kErrorOk;
+
+    switch (ledType_p)
+     {
+         case kLedTypeStatus:
+            setStatusLed(fLedOn_p);
+            break;
+
+         case kLedTypeError:
+            setErrorLed(fLedOn_p);
+            break;
+
+         default:
+            return kErrorIllegalInstance;
+            break;
+     }
+
+    return ret;
+}
+
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
@@ -360,4 +407,54 @@ static void initInterrupts(void)
     Xil_ExceptionEnable();
 }
 
-///\}
+//------------------------------------------------------------------------------
+/**
+\brief  Sets the status LED
+
+The function sets the POWERLINK status LED.
+
+\param  fOn_p               Determines the LED state.
+
+\ingroup module_app_common
+*/
+//------------------------------------------------------------------------------
+static void setStatusLed(BOOL fOn_p);
+{
+    if (fOn_p != FALSE)
+        plkStatusErrorLeds_l |= (1 << GPIO_STATUS_LED_BIT);
+    else
+        plkStatusErrorLeds_l &= ~(1 << GPIO_STATUS_LED_BIT);
+
+#ifdef TARGET_POWERLINK_LED_BASE
+    XGpio_WriteReg(TARGET_POWERLINK_LED_BASE, XGPIO_DATA_OFFSET, plkStatusErrorLeds_l);
+#else
+    UNUSED_PARAMETER(fOn_p);
+#endif
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Sets the error LED
+
+The function sets the POWERLINK error LED.
+
+\param  fOn_p               Determines the LED state.
+
+\ingroup module_app_common
+*/
+//------------------------------------------------------------------------------
+static void setErrorLed(BOOL fOn_p);
+{
+    if (fOn_p != FALSE)
+        plkStatusErrorLeds_l |= (1 << GPIO_ERROR_LED_BIT);
+    else
+        plkStatusErrorLeds_l &= ~(1 << GPIO_ERROR_LED_BIT);
+
+#ifdef TARGET_POWERLINK_LED_BASE
+    XGpio_WriteReg(TARGET_POWERLINK_LED_BASE, XGPIO_DATA_OFFSET, plkStatusErrorLeds_l);
+#else
+    UNUSED_PARAMETER(fOn_p);
+#endif
+}
+
+/// \}

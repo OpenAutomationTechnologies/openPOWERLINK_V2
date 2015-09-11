@@ -50,6 +50,12 @@ NET axi_openmac_0_oSmi_clk_pin<1>       LOC = "G19";
 NET axi_openmac_0_oSmi_nPhyRst_pin<1>   LOC = "H17" | TIG;
 #NET axi_powerlink_0_phy1_link_pin      LOC = "F12";
 
+######################
+# POWERLINK LED      #
+######################
+Net POWERLINK_LED_GPIO_IO_O_pin<0> LOC = M18 | IOSTANDARD = LVCMOS33 | TIG; # PL STATUS LED
+Net POWERLINK_LED_GPIO_IO_O_pin<1> LOC = L19 | IOSTANDARD = LVCMOS33 | TIG; # PL ERROR LED
+
 #
 # additional constraints
 ###############################################################################

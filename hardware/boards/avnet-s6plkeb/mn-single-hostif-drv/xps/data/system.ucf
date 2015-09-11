@@ -30,6 +30,12 @@ Net fpga_0_RS232_RX_pin LOC = V8 | IOSTANDARD = LVCMOS33;
 Net fpga_0_RS232_TX_pin LOC = U8 | IOSTANDARD = LVCMOS33;
 
 ######################
+# POWERLINK LED      #
+######################
+Net POWERLINK_LED_GPIO_IO_O_pin<0> LOC = D4 | IOSTANDARD = LVCMOS33 | TIG; # PL STATUS LED
+Net POWERLINK_LED_GPIO_IO_O_pin<1> LOC = C4 | IOSTANDARD = LVCMOS33 | TIG; # PL ERROR LED
+
+######################
 # Parallel Interface for Host Processor (16 bit)       #
 ######################
 Net axi_hostinterface_0_iParHost_chipselect_pin LOC = U13 | PULLDOWN | IOSTANDARD = LVCMOS33;
