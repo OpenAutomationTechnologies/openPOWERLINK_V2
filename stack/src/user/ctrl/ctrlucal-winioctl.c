@@ -496,7 +496,7 @@ the provided offset and returns the address back.
 
 \param  kernelOffs_p            Offset of the memory in kernel.
 \param  size_p                  Size of the memory.
-\parame ppUserMem_p             Pointer to the user memory.
+\param  ppUserMem_p             Pointer to the user memory.
 
 \return The function returns a tOplkError error code.
 \retval kErrorOk                The memory was successfully returned.
