@@ -83,7 +83,7 @@ INCLUDE(cmake/stackfiles.cmake)
 # set global include directories
 INCLUDE_DIRECTORIES (
     ${OPLK_INCLUDE_DIR}
-    ${STACK_SOURCE_DIR}
+    ${OPLK_SOURCE_DIR}
     ${CONTRIB_SOURCE_DIR}
 )
 

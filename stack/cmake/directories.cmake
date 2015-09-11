@@ -29,7 +29,7 @@
 ################################################################################
 
 # Source directories
-SET(STACK_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src)
+SET(OPLK_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src)
 SET(USER_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/user)
 SET(KERNEL_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/kernel)
 SET(COMMON_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/common)

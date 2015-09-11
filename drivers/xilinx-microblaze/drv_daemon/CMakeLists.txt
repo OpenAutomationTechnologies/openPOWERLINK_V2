@@ -92,7 +92,7 @@ ENDIF ()
 ################################################################################
 SET(OPLK_BASE_DIR ${CMAKE_SOURCE_DIR}/../../..)
 SET(CONTRIB_SOURCE_DIR ${OPLK_BASE_DIR}/contrib)
-SET(STACK_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src)
+SET(OPLK_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src)
 SET(COMMON_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/common)
 SET(KERNEL_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/kernel)
 SET(EDRV_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/kernel/edrv)
