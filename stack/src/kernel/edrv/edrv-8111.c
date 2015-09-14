@@ -1762,7 +1762,7 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p,
     }
 
     // Set Dma mask size to 32 bits
-    printk("enable DMA- size: %lu\n", sizeof(dma_addr_t));
+    printk("enable DMA- size: %lu\n", (ULONG)sizeof(dma_addr_t));
     result = pci_set_dma_mask(pPciDev_p, DMA_BIT_MASK(32));
     if (result != 0)
     {
