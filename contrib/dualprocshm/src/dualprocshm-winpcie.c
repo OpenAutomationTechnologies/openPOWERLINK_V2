@@ -52,7 +52,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define DEFAULT_LOCK_ID             0x00    ///< Default lock Id
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -293,6 +292,9 @@ This routine implements a target specific locking mechanism using the shared
 memory between two processors/processes. The caller needs to pass the base
 address and processor instance of the calling processor.
 
+The locking is achieved using Peterson's algorithm
+\ref https://en.wikipedia.org/wiki/Peterson's_algorithm
+
 \param  pBase_p           Base address of the lock memory
 \param  procInstance_p    Processor instance of the calling processor
 
@@ -301,20 +303,20 @@ address and processor instance of the calling processor.
 //------------------------------------------------------------------------------
 void dualprocshm_targetAcquireLock(tDualprocLock* pBase_p, tDualProcInstance procInstance_p)
 {
-    volatile UINT8    lock = 0;
-    UINT8             lockToken;
+    tDualprocLock*      pLock = (tDualprocLock*)pBase_p;
+    tDualProcInstance   otherProcInstance;
 
-    if (pBase_p == NULL)
-    {
-        TRACE("%s Invalid parameters\n", __FUNCTION__);
+    if (pLock == NULL)
         return;
-    }
 
     switch (procInstance_p)
     {
         case kDualProcFirst:
+            otherProcInstance = kDualProcSecond;
+            break;
+
         case kDualProcSecond:
-            lockToken = procInstance_p + 1;
+            otherProcInstance = kDualProcFirst;
             break;
 
         default:
@@ -322,48 +324,46 @@ void dualprocshm_targetAcquireLock(tDualprocLock* pBase_p, tDualProcInstance pro
             return;
     }
 
-    // spin till the passed token is written into memory
+    DUALPROCSHM_INVALIDATE_DCACHE_RANGE(pLock, sizeof(tDualprocLock));
+
+    DPSHM_WRITE8(&pLock->afFlag[procInstance_p], 1);
+    DUALPROCSHM_FLUSH_DCACHE_RANGE(&pLock->afFlag[procInstance_p],
+                                   sizeof(pLock->afFlag[procInstance_p]));
+
+    DPSHM_WRITE8(&pLock->turn, otherProcInstance);
+    DUALPROCSHM_FLUSH_DCACHE_RANGE(&pLock->turn, sizeof(pLock->turn));
+
+    DPSHM_DMB();
+
     do
     {
-        DUALPROCSHM_INVALIDATE_DCACHE_RANGE((UINT32)&pBase_p->lockToken, 1);
-        lock = DPSHM_READ8((UINT32)&pBase_p->lockToken);
-
-        if (lock == DEFAULT_LOCK_ID)
-        {
-            DPSHM_WRITE8((UINT32)&pBase_p->lockToken, lockToken);
-            DUALPROCSHM_FLUSH_DCACHE_RANGE((UINT32)&pBase_p->lockToken, 1);
-            DPSHM_DMB();
-            continue;
-        }
-    } while (lock != lockToken);
+        DUALPROCSHM_INVALIDATE_DCACHE_RANGE(pLock, sizeof(tDualprocLock));
+    } while (DPSHM_READ8(&pLock->afFlag[otherProcInstance]) &&
+             (DPSHM_READ8(&pLock->turn) == otherProcInstance));
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Target specific memory unlock routine (release)
+\brief  Target specific memory lock routine(release)
 
-This routine is used to release a lock acquired before at a address specified.
+This routine is used to release a lock acquired at a specified address.
 
-\param  pBase_p           Base address of the lock memory.
-\param  procInstance_p    Processor instance of the calling processor.
+\param  pBase_p           Base address of the lock memory
+\param  procInstance_p    Processor instance of the calling processor
 
 \ingroup module_dualprocshm
  */
 //------------------------------------------------------------------------------
 void dualprocshm_targetReleaseLock(tDualprocLock* pBase_p, tDualProcInstance procInstance_p)
 {
-    volatile UINT8    defaultlock = DEFAULT_LOCK_ID;
+    tDualprocLock*  pLock = (tDualprocLock*)pBase_p;
 
-    UNUSED_PARAMETER(procInstance_p);
-
-    if (pBase_p == NULL)
-    {
+    if (pLock == NULL)
         return;
-    }
 
-    DPSHM_WRITE8((UINT32)&pBase_p->lockToken, defaultlock);
-
-    DUALPROCSHM_FLUSH_DCACHE_RANGE((UINT32)&pBase_p->lockToken, sizeof(UINT8));
+    DPSHM_WRITE8(&pLock->afFlag[procInstance_p], 0);
+    DUALPROCSHM_FLUSH_DCACHE_RANGE(&pLock->afFlag[procInstance_p],
+                                   sizeof(pLock->afFlag[procInstance_p]));
 }
 
 //------------------------------------------------------------------------------
