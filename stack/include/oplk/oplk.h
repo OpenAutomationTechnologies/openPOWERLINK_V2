@@ -472,8 +472,8 @@ OPLKDLLEXPORT tOplkError oplk_initialize(void);
 OPLKDLLEXPORT tOplkError oplk_create(tOplkApiInitParam* pInitParam_p);
 OPLKDLLEXPORT tOplkError oplk_destroy(void);
 OPLKDLLEXPORT void       oplk_exit(void);
-OPLKDLLEXPORT DEPRECATED tOplkError oplk_init(tOplkApiInitParam* pInitParam_p);
-OPLKDLLEXPORT DEPRECATED tOplkError oplk_shutdown(void);
+OPLKDLLEXPORT OPLK_DEPRECATED tOplkError oplk_init(tOplkApiInitParam* pInitParam_p);
+OPLKDLLEXPORT OPLK_DEPRECATED tOplkError oplk_shutdown(void);
 OPLKDLLEXPORT tOplkError oplk_execNmtCommand(tNmtEvent NmtEvent_p);
 OPLKDLLEXPORT tOplkError oplk_linkObject(UINT objIndex_p, void* pVar_p, UINT* pVarEntries_p,
                                          tObdSize* pEntrySize_p, UINT firstSubindex_p);
