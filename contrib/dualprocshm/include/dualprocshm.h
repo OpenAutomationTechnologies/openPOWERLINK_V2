@@ -84,25 +84,6 @@ Data type for the enumerator \ref eDualprocReturn.
 typedef UINT16 tDualprocReturn;
 
 /**
-\brief Processor instance
-
-The processor instance determines if the caller is the Pcp or the Host.
-*/
-typedef enum
-{
-    kDualProcFirst        = 0,              ///< Instance on first processor
-    kDualProcSecond       = 1,              ///< Instance on second processor
-    kDualProcLast         = 2,              ///< End of list flag
-} eDualProcInstance;
-
-/**
-\brief Processor instance data type
-
-Data type for the enumerator \ref eDualProcInstance.
-*/
-typedef UINT8 tDualProcInstance;
-
-/**
 \brief Driver instance configuration
 
 Structure to hold the configuration driver instance.
@@ -111,7 +92,7 @@ typedef struct sDualprocConfig
 {
     tDualProcInstance       procInstance;   ///< Processor instance
     UINT16                  commonMemSize;  ///< Minimum size of common memory
-    UINT8                   procId;         ///< Processor Id
+    UINT8                   resv;           ///< Reserved
 } tDualprocConfig;
 
 /**
@@ -121,9 +102,9 @@ Holds information of a dynamic memory.
 */
 typedef struct sDualprocMemInst
 {
-    UINT16      span;                       ///< Span of the dynamic buffer
-    UINT8       lock;                       ///< Lock for memory
-    UINT8       resv;                       ///< Reserved byte;
+    UINT16          span;         ///< Span of the dynamic buffer
+    UINT16          padding1;     ///< Padding variable 1
+    tDualprocLock   lock;         ///< Lock for memory
 } tDualprocMemInst;
 
 /**
@@ -192,7 +173,7 @@ typedef struct sDualprocDynRes
     tSetDynRes          pfnSetDynAddr;              ///< This function sets the dynamic buffer base to hardware
     tGetDynRes          pfnGetDynAddr;              ///< This function gets the dynamic buffer base from hardware
     UINT8*              pBase;                      ///< Base of the dynamic buffer
-    tDualprocMemInst*   memInst;                    ///< Pointer to memory instance
+    tDualprocMemInst*   pMemInst;                   ///< Pointer to memory instance
 } tDualprocDynResConfig;
 
 /**

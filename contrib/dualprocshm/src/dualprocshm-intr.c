@@ -369,4 +369,4 @@ static void targetInterruptHandler(void* pArg_p)
     }
 }
 
-///\}
+/// \}
