@@ -103,9 +103,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // callback function (called event kObdEvWrStringDomain)
 #define CONFIG_OBD_USE_STRING_DOMAIN_IN_RAM             TRUE
 
-#define CONFIG_OBD_USE_LOAD_CONCISEDCF                  TRUE
+#if defined(CONFIG_INCLUDE_CFM)
 #define CONFIG_OBD_DEF_CONCISEDCF_FILENAME              "mnobd.cdc"
 #define CONFIG_CFM_CONFIGURE_CYCLE_LENGTH               TRUE
+#endif
 
 // Configure if the range from 0xA000 is used for mapping client objects.
 // openCONFIGURATOR uses this range for mapping objects.

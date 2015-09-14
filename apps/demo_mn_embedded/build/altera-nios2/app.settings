@@ -50,7 +50,7 @@ ${OPLK_BASE_DIR}/stack/include \
 "
 
 APP_CFLAGS="\
--G4 -DCONFIG_INCLUDE_CFM \
+-G4 \
 "
 
 APP_OPT_LEVEL=-O2

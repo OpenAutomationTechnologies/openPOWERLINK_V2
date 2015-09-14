@@ -47,6 +47,9 @@ MESSAGE(STATUS "CMAKE_SYSTEM_PROCESSOR is ${CMAKE_SYSTEM_PROCESSOR}")
 STRING(TOLOWER "${CMAKE_SYSTEM_NAME}" SYSTEM_NAME_DIR)
 STRING(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" SYSTEM_PROCESSOR_DIR)
 
+# Since 3.14 kernel Werror=date-time is automatically used if the compiler supports it.
+SET(MODULE_DEFS "${MODULE_DEFS} -Wno-date-time")
+
 ################################################################################
 # Configuration options
 
@@ -263,11 +266,17 @@ CONFIGURE_FILE(${TOOLS_DIR}/linux/Kbuild.in ${MODULE_OUTPUT_DIR}/Kbuild)
 IF(CMAKE_CROSSCOMPILING)
     IF(DEFINED MAKE_KERNEL_ARCH)
         SET(MAKE_KERNEL_CROSSCOMPILING_PARAMS ARCH=${MAKE_KERNEL_ARCH})
+    ELSE()
+        MESSAGE(WARNING "ARCH is not set while cross-compiling !\n"
+            "Set MAKE_KERNEL_ARCH with your target architecture.")
     ENDIF()
 
     IF(DEFINED MAKE_KERNEL_CROSS_COMPILE)
         SET(MAKE_KERNEL_CROSSCOMPILING_PARAMS
                 ${MAKE_KERNEL_CROSSCOMPILING_PARAMS} CROSS_COMPILE=${MAKE_KERNEL_CROSS_COMPILE})
+    ELSE()
+        MESSAGE(WARNING "CROSS_COMPILE is not set while cross-compiling !\n"
+            "Set MAKE_KERNEL_CROSS_COMPILE with your toolchain prefix")
     ENDIF()
 ENDIF()
 

@@ -50,8 +50,6 @@ ELSE()
     UNSET(CFG_CDC_ON_SD)
 ENDIF()
 
-SET(CFG_CFM ON CACHE BOOL "Use Configuration Manager (CFM)")
-
 # Set generic sources and include directories for this demo
 SET(DEMO_SOURCES
     ${DEMO_SOURCE_DIR}/main.c
@@ -68,10 +66,6 @@ INCLUDE_DIRECTORIES(
 
 ################################################################################
 # Setup the architecture specific definitions
-
-IF(CFG_CFM)
-    ADD_DEFINITIONS(-DCONFIG_INCLUDE_CFM)
-ENDIF()
 
 IF (CMAKE_SYSTEM_NAME STREQUAL "Generic" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "Microblaze")
     include(microblaze.cmake)

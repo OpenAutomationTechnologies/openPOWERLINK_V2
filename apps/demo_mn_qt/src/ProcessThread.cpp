@@ -57,12 +57,6 @@ Q_DECLARE_METATYPE(tSdoComFinished)
 //------------------------------------------------------------------------------
 ProcessThread* pProcessThread_g;
 
-#if !defined(CONFIG_INCLUDE_CFM)
-// Configuration Manager is not available,
-// so store local CycleLen for configuration of remote CNs
-static DWORD   cycleLen_g;
-#endif
-
 //============================================================================//
 //            S T A T I C    M E M B E R    F U N C T I O N S                 //
 //============================================================================//
@@ -354,17 +348,9 @@ tOplkError ProcessThread::processEvent(tOplkApiEventType eventType_p,
             ret = processCfmResultEvent(eventType_p, pEventArg_p, pUserArg_p);
             break;
 
-#if !defined(CONFIG_INCLUDE_CFM)
-        // Configuration Manager is not available,
-        // so process SDO events
-        case kOplkApiEventSdo:
-            ret = processSdoEvent(eventType_p, pEventArg_p, pUserArg_p);
-            break;
-#else
         case kOplkApiEventSdo:
             emit sdoFinished(pEventArg_p->sdoInfo);
             break;
-#endif
 
         case kOplkApiEventUserDef:
             emit userDefEvent(pEventArg_p->pUserArg);
@@ -399,9 +385,6 @@ tOplkError ProcessThread::processStateChangeEvent(tOplkApiEventType eventType_p,
 {
     tOplkError                  ret = kErrorOk;
     tEventNmtStateChange*       pNmtStateChange = &pEventArg_p->nmtStateChange;
-#if !defined(CONFIG_INCLUDE_CFM)
-    UINT                        varLen;
-#endif
     QString                     str;
 
     UNUSED_PARAMETER(eventType_p);
@@ -430,29 +413,10 @@ tOplkError ProcessThread::processStateChangeEvent(tOplkApiEventType eventType_p,
             break;
 
         case kNmtGsResetCommunication:
-#if !defined(CONFIG_INCLUDE_CFM)
-            ret = setDefaultNodeAssignment();
-#endif
             pProcessThread_g->sigOplkStatus(1);
             break;
 
         case kNmtGsResetConfiguration:
-#if !defined(CONFIG_INCLUDE_CFM)
-        // Configuration Manager is not available,
-        // so fetch object 0x1006 NMT_CycleLen_U32 from local OD
-        // (in little endian byte order)
-        // for configuration of remote CN
-            varLen = sizeof(UINT32);
-            ret = oplk_readObject(NULL, 0, 0x1006, 0x00, &cycleLen_g,
-                                  &varLen, kSdoTypeAsnd, NULL);
-            if (ret != kErrorOk)
-            {
-                sigPrintLog(QString("  oplk_readObject() failed with 0x%1\n\"2\"")
-                                    .arg(ret)
-                                    .arg(debugstr_getRetValStr(ret)));
-                break;
-            }
-#endif
             sigOplkStatus(1);
             break;
 
@@ -658,43 +622,6 @@ tOplkError ProcessThread::processNodeEvent(tOplkApiEventType eventType_p,
     switch (pEventArg_p->nodeEvent.nodeEvent)
     {
         case kNmtNodeEventCheckConf:
-#if !defined(CONFIG_INCLUDE_CFM)
-            // Configuration Manager is not available,
-            // so configure CycleLen (object 0x1006) on CN
-            tSdoComConHdl SdoComConHdl;
-
-            // update object 0x1006 on CN
-            ret = oplk_writeObject(&SdoComConHdl, pEventArg_p->nodeEvent.nodeId,
-                                   0x1006, 0x00, &cycleLen_g, 4,
-                                   kSdoTypeAsnd, NULL);
-            if (ret == kErrorApiTaskDeferred)
-            {   // SDO transfer started
-                ret = kErrorReject;
-            }
-            else if (ret == kErrorOk)
-            {   // local OD access (should not occur)
-                printf("AppCbEvent(Node) write to local OD\n");
-            }
-            else
-            {   // error occured
-
-                ret = oplk_freeSdoChannel(SdoComConHdl);
-                SdoComConHdl = 0;
-
-                ret = oplk_writeObject(&SdoComConHdl, pEventArg_p->nodeEvent.nodeId,
-                                       0x1006, 0x00, &cycleLen_g, 4,
-                                       kSdoTypeAsnd, NULL);
-                if (ret == kErrorApiTaskDeferred)
-                {   // SDO transfer started
-                    ret = kErrorReject;
-                }
-                else
-                {
-                    printf("AppCbEvent(Node): oplk_writeObject() returned 0x%03X", ret);
-                }
-            }
-#endif
-
             sigPrintLog(QString("Node Event: (Node=%2, CheckConf)")
                                 .arg(pEventArg_p->nodeEvent.nodeId, 0, 10));
             break;

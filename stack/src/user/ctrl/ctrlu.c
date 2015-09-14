@@ -72,9 +72,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #if defined(CONFIG_INCLUDE_CFM)
 #include <user/cfmu.h>
-#endif
-
-#if (CONFIG_OBD_USE_LOAD_CONCISEDCF != FALSE)
 #include <oplk/obdcdc.h>
 #endif
 
@@ -488,7 +485,7 @@ tOplkError ctrlu_shutdownStack(void)
     ret = ctrlucal_executeCmd(kCtrlCleanupStack, &retVal);
     DEBUG_LVL_CTRL_TRACE("shoutdown kernel modules():  0x%X\n", ret);
 
-#if (CONFIG_OBD_USE_LOAD_CONCISEDCF != FALSE)
+#if defined(CONFIG_INCLUDE_CFM)
     obdcdc_exit();
 #endif
 
@@ -1019,7 +1016,7 @@ static tOplkError initObd(tOplkApiInitParam* pInitParam_p)
     if (ret != kErrorOk)
         return ret;
 
-#if (CONFIG_OBD_USE_LOAD_CONCISEDCF != FALSE)
+#if defined(CONFIG_INCLUDE_CFM)
     ret = obdcdc_init();
 #endif
 
@@ -1089,7 +1086,7 @@ static tOplkError cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
             if (ret != kErrorOk)
                 return ret;
 
-#if (CONFIG_OBD_USE_LOAD_CONCISEDCF != FALSE)
+#if defined(CONFIG_INCLUDE_CFM)
             ret = obdcdc_loadCdc();
             if (ret != kErrorOk)
                 return ret;

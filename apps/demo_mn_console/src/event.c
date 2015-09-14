@@ -104,7 +104,6 @@ static tOplkError processPdoChangeEvent(tOplkApiEventType eventType_p,
                                         tOplkApiEventArg* pEventArg_p,
                                         void* pUserArg_p);
 
-#ifdef CONFIG_INCLUDE_CFM
 static tOplkError processCfmProgressEvent(tOplkApiEventType eventType_p,
                                           tOplkApiEventArg* pEventArg_p,
                                           void* pUserArg_p);
@@ -112,12 +111,6 @@ static tOplkError processCfmProgressEvent(tOplkApiEventType eventType_p,
 static tOplkError processCfmResultEvent(tOplkApiEventType eventType_p,
                                         tOplkApiEventArg* pEventArg_p,
                                         void* pUserArg_p);
-#else
-static tOplkError setDefaultNodeAssignment(void);
-static tOplkError processSdoEvent(tOplkApiEventType eventType_p,
-                                  tOplkApiEventArg* pEventArg_p,
-                                  void* pUserArg_p);
-#endif
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -189,7 +182,6 @@ tOplkError processEvents(tOplkApiEventType eventType_p,
             ret = processPdoChangeEvent(eventType_p, pEventArg_p, pUserArg_p);
             break;
 
-#ifdef CONFIG_INCLUDE_CFM
         case kOplkApiEventCfmProgress:
             ret = processCfmProgressEvent(eventType_p, pEventArg_p, pUserArg_p);
             break;
@@ -197,13 +189,6 @@ tOplkError processEvents(tOplkApiEventType eventType_p,
         case kOplkApiEventCfmResult:
             ret = processCfmResultEvent(eventType_p, pEventArg_p, pUserArg_p);
             break;
-#else
-        // Configuration Manager is not available,
-        // so process SDO events
-        case kOplkApiEventSdo:
-            ret = processSdoEvent(eventType_p, pEventArg_p, pUserArg_p);
-            break;
-#endif
 
         default:
             break;
@@ -263,9 +248,6 @@ static tOplkError processStateChangeEvent(tOplkApiEventType eventType_p,
             break;
 
         case kNmtGsResetCommunication:
-#ifndef CONFIG_INCLUDE_CFM
-            ret = setDefaultNodeAssignment();
-#endif
             break;
 
         case kNmtGsResetConfiguration:
@@ -442,7 +424,6 @@ static tOplkError processPdoChangeEvent(tOplkApiEventType eventType_p,
     return kErrorOk;
 }
 
-#ifdef CONFIG_INCLUDE_CFM
 //------------------------------------------------------------------------------
 /**
 \brief  Process CFM progress events
@@ -513,81 +494,5 @@ static tOplkError processCfmResultEvent(tOplkApiEventType eventType_p,
     }
     return kErrorOk;
 }
-
-#else
-
-//------------------------------------------------------------------------------
-/**
-\brief  Process SDO events
-
-The function processes SDO events.
-
-\param  eventType_p         Type of event
-\param  pEventArg_p         Pointer to union which describes the event in detail
-\param  pUserArg_p          User specific argument
-
-\return The function returns a tOplkError error code.
-*/
-//------------------------------------------------------------------------------
-static tOplkError processSdoEvent(tOplkApiEventType eventType_p,
-                                  tOplkApiEventArg* pEventArg_p,
-                                  void* pUserArg_p)
-{
-    tSdoComFinished*          pSdo = &pEventArg_p->sdoInfo;
-    tOplkError                ret = kErrorOk;
-
-    UNUSED_PARAMETER(eventType_p);
-    UNUSED_PARAMETER(pUserArg_p);
-
-    // SDO transfer finished
-    if ((ret = oplk_freeSdoChannel(pSdo->sdoAccessType)) != kErrorOk)
-    {
-        return ret;
-    }
-
-    if (pSdo->sdoComConState == kSdoComTransferFinished)
-    {   // continue boot-up of CN with NMT command Reset Configuration
-        ret = oplk_triggerMnStateChange(pSdo->nodeId, kNmtNodeCommandConfReset);
-    }
-    else
-    {   // indicate configuration error CN
-        ret = oplk_triggerMnStateChange(pSdo->nodeId, kNmtNodeCommandConfErr);
-    }
-    return ret;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Set default node assignment
-
-Set default node assignment in object dictionary if configuration manager is
-not available.
-
-\return The function returns a tOplkError error code.
-*/
-//------------------------------------------------------------------------------
-static tOplkError setDefaultNodeAssignment(void)
-{
-    tOplkError  ret = kErrorOk;
-    DWORD       nodeAssignment;
-
-    nodeAssignment = (NMT_NODEASSIGN_NODE_IS_CN | NMT_NODEASSIGN_NODE_EXISTS);    // 0x00000003L
-    ret = oplk_writeLocalObject(0x1F81, 0x01, &nodeAssignment, sizeof(nodeAssignment));
-    ret = oplk_writeLocalObject(0x1F81, 0x02, &nodeAssignment, sizeof(nodeAssignment));
-    ret = oplk_writeLocalObject(0x1F81, 0x03, &nodeAssignment, sizeof(nodeAssignment));
-    ret = oplk_writeLocalObject(0x1F81, 0x04, &nodeAssignment, sizeof(nodeAssignment));
-    ret = oplk_writeLocalObject(0x1F81, 0x05, &nodeAssignment, sizeof(nodeAssignment));
-    ret = oplk_writeLocalObject(0x1F81, 0x06, &nodeAssignment, sizeof(nodeAssignment));
-    ret = oplk_writeLocalObject(0x1F81, 0x07, &nodeAssignment, sizeof(nodeAssignment));
-    ret = oplk_writeLocalObject(0x1F81, 0x08, &nodeAssignment, sizeof(nodeAssignment));
-    ret = oplk_writeLocalObject(0x1F81, 0x20, &nodeAssignment, sizeof(nodeAssignment));
-    ret = oplk_writeLocalObject(0x1F81, 0xFE, &nodeAssignment, sizeof(nodeAssignment));
-    ret = oplk_writeLocalObject(0x1F81, 0x6E, &nodeAssignment, sizeof(nodeAssignment));
-
-    nodeAssignment = (NMT_NODEASSIGN_MN_PRES | NMT_NODEASSIGN_NODE_EXISTS);    // 0x00010001L
-    ret = oplk_writeLocalObject(0x1F81, 0xF0, &nodeAssignment, sizeof(nodeAssignment));
-    return ret;
-}
-#endif
 
 /// \}

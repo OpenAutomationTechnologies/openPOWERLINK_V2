@@ -185,13 +185,17 @@ tOplkError timeru_exit(void)
 {
     tTimeruData*     pTimer;
 
-    /* cancel thread */
-    pthread_cancel(timeruInstance_g.processThread);
-    DEBUG_LVL_TIMERU_TRACE("%s() Waiting for thread to exit...\n", __func__);
+    /* Check if the processThread exist */
+    if (timeruInstance_g.processThread != 0)
+    {
+        /* cancel thread */
+        pthread_cancel(timeruInstance_g.processThread);
+        DEBUG_LVL_TIMERU_TRACE("%s() Waiting for thread to exit...\n", __func__);
 
-    /* wait for thread to terminate */
-    pthread_join(timeruInstance_g.processThread, NULL);
-    DEBUG_LVL_TIMERU_TRACE("%s()Thread exited\n", __func__);
+        /* wait for thread to terminate */
+        pthread_join(timeruInstance_g.processThread, NULL);
+        DEBUG_LVL_TIMERU_TRACE("%s()Thread exited\n", __func__);
+    }
 
     /* free up timer list */
     resetTimerList();

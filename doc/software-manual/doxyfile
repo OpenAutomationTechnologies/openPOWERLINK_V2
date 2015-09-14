@@ -1998,7 +1998,7 @@ PREDEFINED             = CONFIG_INCLUDE_NMT_MN \
                          CONFIG_TIMER_USE_HIGHRES:=1 \
                          OBD_DEFINE_MACRO \
                          PACK_STRUCT= \
-                         SECTION_DLLK_MN_SYNC_CB:= \ # fix otherwise we get a warning in dllnode.c!
+                         SECTION_DLLK_MN_SYNC_CB:= \
                          DOXYGEN_PARSER
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this

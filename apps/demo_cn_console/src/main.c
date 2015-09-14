@@ -159,8 +159,8 @@ int main (int argc, char** argv)
     loopMain();
 
 Exit:
-    shutdownPowerlink();
     shutdownApp();
+    shutdownPowerlink();
     system_exit();
 
     return 0;
