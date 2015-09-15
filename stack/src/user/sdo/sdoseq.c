@@ -1105,7 +1105,6 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
             // check if data frame or ack
             if (pData_p == NULL)
             {   // send ack, increment scon
-                // jba ?? pSdoSeqCon_p->recvSeqNum += 4;
                 ret = sendFrame(pSdoSeqCon_p, 0, NULL, FALSE);
                 if (ret != kErrorOk)
                     return ret;
