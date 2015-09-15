@@ -711,7 +711,7 @@ tOplkError drv_mapKernelMem(UINT8** ppKernelMem_p, UINT8** ppUserMem_p, UINT32* 
     tMemInfo*               pKernel2UserMemInfo = &drvInstance_l.kernel2UserMem;
     tDualprocSharedMemInst  sharedMemInst;
 
-    if (*ppKernelMem_p == NULL || *ppUserMem_p == NULL)
+    if (ppKernelMem_p == NULL || ppUserMem_p == NULL)
         return kErrorNoResource;
 
     dualRet = dualprocshm_getSharedMemInfo(drvInstance_l.pDualProcDrvInst,
