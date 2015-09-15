@@ -329,8 +329,8 @@ static tOplkError processPdoChangeEvent(tOplkApiEventType eventType_p,
                              pPdoChange->mappParamIndex, subIndex, ret, debugstr_getRetValStr(ret));
             continue;
         }
-        PRINTF("  %d. mapped object 0x%llX/%lld\n", subIndex, mappObject & 0x00FFFFULL,
-                         (mappObject & 0xFF0000ULL) >> 16);
+        PRINTF("  %d. mapped object 0x%llX/", subIndex, mappObject & 0x00FFFFULL);
+        PRINTF("%lld\n", (mappObject & 0xFF0000ULL) >> 16);
     }
 
     return kErrorOk;
