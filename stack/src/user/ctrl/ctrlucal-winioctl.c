@@ -130,6 +130,8 @@ tOplkError ctrlucal_init(void)
         return kErrorNoResource;
     }
 
+    OPLK_MEMSET(&inMemStruc, 0, sizeof(inMemStruc));
+
     if (!DeviceIoControl(hFileHandle_l, PLK_CMD_MAP_MEM,
         &inMemStruc, sizeof(tMemStruc), pOutMemStruc, sizeof(tMemStruc),
         &bytesReturned, NULL))

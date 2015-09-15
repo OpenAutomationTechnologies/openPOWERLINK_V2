@@ -123,6 +123,8 @@ tMemMapReturn memmap_init(void)
     tMemStruc   inMemStruc;
     tMemStruc*  pOutMemStruc = &memMapInstance_l.memStruc;
 
+    OPLK_MEMSET(&inMemStruc, 0, sizeof(inMemStruc));
+
     memMapInstance_l.hFileHandle = ctrlucal_getFd();
 
     if (memMapInstance_l.hFileHandle == NULL)
