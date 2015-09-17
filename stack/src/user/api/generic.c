@@ -1245,6 +1245,39 @@ UINT32 oplk_getStackConfiguration(void)
 }
 
 //------------------------------------------------------------------------------
+/**
+\brief  Get stack information
+
+The function obtains the stack information.
+
+\param  pStackInfo_p    Pointer to memory where the stack info should be stored.
+
+\return The function returns a \ref tOplkError error code.
+
+\ingroup module_api
+*/
+//------------------------------------------------------------------------------
+tOplkError oplk_getStackInfo(tOplkApiStackInfo* pStackInfo_p)
+{
+    tOplkError      ret;
+    tCtrlKernelInfo kernelInfo;
+
+    if (pStackInfo_p == NULL)
+        return kErrorApiInvalidParam;
+
+    ret = ctrlu_getKernelInfo(&kernelInfo);
+    if (ret != kErrorOk)
+        return ret;
+
+    pStackInfo_p->userVersion = PLK_DEFINED_STACK_VERSION;
+    pStackInfo_p->userFeature = ctrlu_getFeatureFlags();
+    pStackInfo_p->kernelVersion = kernelInfo.version;
+    pStackInfo_p->kernelFeature = kernelInfo.featureFlags;
+
+    return ret;
+}
+
+//------------------------------------------------------------------------------
 
 /**
 \brief Wait for sync event

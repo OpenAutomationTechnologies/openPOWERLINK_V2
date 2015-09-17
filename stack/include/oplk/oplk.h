@@ -459,6 +459,19 @@ typedef struct
     UINT32          offset;     ///< Offset of the chunk in the file
 } tOplkApiFileChunkDesc;
 
+/**
+\brief  Stack information structure
+
+This structure provides information about the kernel and user stack.
+*/
+typedef struct
+{
+    UINT32          userVersion;                    ///< User stack version
+    UINT32          userFeature;                    ///< User stack feature bit mask
+    UINT32          kernelVersion;                  ///< Kernel stack version
+    UINT32          kernelFeature;                  ///< Kernel stack feature bit mask
+} tOplkApiStackInfo;
+
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
@@ -503,6 +516,7 @@ OPLKDLLEXPORT tOplkError oplk_waitSyncEvent(ULONG timeout_p);
 OPLKDLLEXPORT UINT32     oplk_getVersion(void);
 OPLKDLLEXPORT char*      oplk_getVersionString(void);
 OPLKDLLEXPORT UINT32     oplk_getStackConfiguration(void);
+OPLKDLLEXPORT tOplkError oplk_getStackInfo(tOplkApiStackInfo* pStackInfo_p);
 
 // Process image API functions
 OPLKDLLEXPORT tOplkError oplk_allocProcessImage(UINT sizeProcessImageIn_p, UINT sizeProcessImageOut_p);
