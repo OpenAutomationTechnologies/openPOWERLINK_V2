@@ -11,7 +11,7 @@ application.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
 All rights reserved.
@@ -50,6 +50,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <system/system.h>
 #include <getopt/getopt.h>
 #include <console/console.h>
+
+#include <eventlog/eventlog.h>
 
 #if defined(CONFIG_USE_PCAP)
 #include <pcap/pcap-console.h>
@@ -95,8 +97,10 @@ static BOOL fGsOff_l;
 //------------------------------------------------------------------------------
 typedef struct
 {
-    UINT32      nodeId;
-    char*       pLogFile;
+    UINT32          nodeId;
+    tEventlogFormat logFormat;
+    UINT32          logLevel;
+    UINT32          logCategory;
 } tOptions;
 
 //------------------------------------------------------------------------------
@@ -134,7 +138,8 @@ int main (int argc, char** argv)
     tOplkError                  ret = kErrorOk;
     tOptions                    opts;
 
-    getOptions(argc, argv, &opts);
+    if (getOptions(argc, argv, &opts) < 0)
+        return 0;
 
     if (system_init() != 0)
     {
@@ -142,12 +147,18 @@ int main (int argc, char** argv)
         return 0;
     }
 
+    eventlog_init(opts.logFormat, opts.logLevel, opts.logCategory, (tEventlogOutputCb)console_printlogadd);
+
     initEvents(&fGsOff_l);
 
     printf("----------------------------------------------------\n");
     printf("openPOWERLINK console CN DEMO application\n");
     printf("using openPOWERLINK Stack: %s\n", oplk_getVersionString());
     printf("----------------------------------------------------\n");
+
+    eventlog_printMessage(kEventlogLevelInfo, kEventlogCategoryGeneric,
+                          "demo_cn_console: Stack Version:%s Stack Configuration:0x%08X",
+                          oplk_getVersionString(), oplk_getStackConfiguration());
 
     if ((ret = initPowerlink(CYCLE_LEN, aMacAddr_l, opts.nodeId))
         != kErrorOk)
@@ -191,8 +202,12 @@ static tOplkError initPowerlink(UINT32 cycleLen_p, const BYTE* macAddr_p, UINT32
     static char                 devName[128];
 
     printf("Initializing openPOWERLINK stack...\n");
+    eventlog_printMessage(kEventlogLevelInfo, kEventlogCategoryControl,
+                          "Initializing openPOWERLINK stack");
 
 #if defined(CONFIG_USE_PCAP)
+    eventlog_printMessage(kEventlogLevelInfo, kEventlogCategoryGeneric,
+                         "Using libpcap for network access");
     selectPcapDevice(devName);
 #endif
 
@@ -249,6 +264,7 @@ static tOplkError initPowerlink(UINT32 cycleLen_p, const BYTE* macAddr_p, UINT32
     if (ret != kErrorOk)
     {
         fprintf(stderr, "oplk_initialize() failed with \"%s\" (0x%04x)\n", debugstr_getRetValStr(ret), ret);
+        eventlog_printMessage(kEventlogLevelFatal, kEventlogCategoryControl, "oplk_initialize() failed with \"%s\" (0x%04x)\n", debugstr_getRetValStr(ret), ret);
         return ret;
     }
 
@@ -256,6 +272,7 @@ static tOplkError initPowerlink(UINT32 cycleLen_p, const BYTE* macAddr_p, UINT32
     if (ret != kErrorOk)
     {
         fprintf(stderr, "oplk_create() failed with \"%s\" (0x%04x)\n", debugstr_getRetValStr(ret), ret);
+        eventlog_printMessage(kEventlogLevelFatal, kEventlogCategoryControl, "oplk_create() failed with \"%s\" (0x%04x)\n", debugstr_getRetValStr(ret), ret);
         return ret;
     }
 
@@ -348,12 +365,14 @@ static void loopMain(void)
         {
             fExit = TRUE;
             printf("Received termination signal, exiting...\n");
+            eventlog_printMessage(kEventlogLevelInfo, kEventlogCategoryControl, "Received termination signal, exiting...");
         }
 
         if (oplk_checkKernelStack() == FALSE)
         {
             fExit = TRUE;
             fprintf(stderr, "Kernel stack has gone! Exiting...\n");
+            eventlog_printMessage(kEventlogLevelFatal, kEventlogCategoryControl, "Kernel stack has gone! Exiting...");
         }
 
 #if defined(CONFIG_USE_SYNCTHREAD) || defined(CONFIG_KERNELSTACK_DIRECTLINK)
@@ -400,6 +419,9 @@ static void shutdownPowerlink(void)
     }
 
     printf("Stack is in state off ... Shutdown\n");
+    eventlog_printMessage(kEventlogLevelInfo, kEventlogCategoryControl,
+                          "Stack is in state off ... Shutdown openPOWERLINK");
+
     oplk_destroy();
     oplk_exit();
 }
@@ -426,10 +448,12 @@ static int getOptions(int argc_p, char** argv_p, tOptions* pOpts_p)
 
     /* setup default parameters */
     pOpts_p->nodeId = NODEID;
-    pOpts_p->pLogFile = NULL;
+    pOpts_p->logFormat = kEventlogFormatReadable;
+    pOpts_p->logCategory = 0xffffffff;
+    pOpts_p->logLevel = 0xffffffff;
 
     /* get command line parameters */
-    while ((opt = getopt(argc_p, argv_p, "n:l:")) != -1)
+    while ((opt = getopt(argc_p, argv_p, "n:pv:t:")) != -1)
     {
         switch (opt)
         {
@@ -437,12 +461,24 @@ static int getOptions(int argc_p, char** argv_p, tOptions* pOpts_p)
                 pOpts_p->nodeId = strtoul(optarg, NULL, 10);
                 break;
 
-            case 'l':
-                pOpts_p->pLogFile = optarg;
+            case 'p':
+                pOpts_p->logFormat = kEventlogFormatParsable;
+                break;
+
+           case 'v':
+                pOpts_p->logLevel = strtoul(optarg, NULL, 16);
+                break;
+
+           case 't':
+                pOpts_p->logCategory = strtoul(optarg, NULL, 16);
                 break;
 
             default: /* '?' */
-                printf("Usage: %s [-n NODE_ID] [-l LOGFILE]\n", argv_p[0]);
+                printf("Usage: %s [-n NODE_ID] [-l LOGFILE] [-v LOGLEVEL] [-t LOGCATEGORY] [-p]\n", argv_p[0]);
+                printf(" -p: Use parsable log format\n");
+                printf(" -v LOGLEVEL: A bit mask with log levels to be printed in the event logger\n");
+                printf(" -t LOGCATEGORY: A bit mask with log categories to be printed in the event logger\n");
+
                 return -1;
         }
     }
