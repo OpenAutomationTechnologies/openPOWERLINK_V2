@@ -896,6 +896,9 @@ tOplkError ctrlu_writeFileChunk(tOplkApiFileChunkDesc* pDesc_p, UINT8* pBuffer_p
     if (ret != kErrorOk)
         return ret;
 
+    if (retval != kErrorOk)
+        return (tOplkError)retval;
+
     return ret;
 }
 
