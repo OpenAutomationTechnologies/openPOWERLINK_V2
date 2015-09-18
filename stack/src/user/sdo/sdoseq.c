@@ -1858,9 +1858,10 @@ static tOplkError readFromHistory(tSdoSeqCon* pSdoSeqCon_p, tPlkFrame** ppFrame_
         pHistory->readIndex = pHistory->ackIndex;
     }
 
-    // check if entries are available for reading
+    // history buffer not empty and end of read iteration not yet reached
     if ((pHistory->freeEntries < SDO_HISTORY_SIZE) &&
-        (pHistory->writeIndex != pHistory->readIndex))
+        ((pHistory->writeIndex != pHistory->readIndex) ||
+        ((pHistory->freeEntries == 0) && fInitRead_p)))
     {
         DEBUG_LVL_SDO_TRACE("readFromHistory(): init = %d, read = %u, write = %u, ack = %u",
                              (int)fInitRead_p, (WORD)pHistory->readIndex,
