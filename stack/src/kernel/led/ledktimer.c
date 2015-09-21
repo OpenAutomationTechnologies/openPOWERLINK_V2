@@ -101,6 +101,39 @@ static tLedkInstance   ledkInstance_l;
 
 //------------------------------------------------------------------------------
 /**
+\brief  Initialize kernel LED timer module
+
+The function initializes the kernel LED timer module.
+
+\return The function returns a tOplkError error code.
+
+\ingroup module_ledk
+*/
+//------------------------------------------------------------------------------
+tOplkError ledk_timerInit(void)
+{
+    OPLK_MEMSET(&ledkInstance_l, 0, sizeof(tLedkInstance));
+    return kErrorOk;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Cleanup kernel LED timer module
+
+The function cleans up the kernel LED timer module.
+
+\return The function returns a tOplkError error code.
+
+\ingroup module_ledk
+*/
+//------------------------------------------------------------------------------
+tOplkError ledk_timerExit(void)
+{
+    return kErrorOk;
+}
+
+//------------------------------------------------------------------------------
+/**
 \brief  Update Led State
 
 This function updates the status LED state. The blinking is achieved by using the system timer ticks
@@ -113,11 +146,13 @@ This function updates the status LED state. The blinking is achieved by using th
 tOplkError ledk_updateLedState(void)
 {
     UINT                timeout = 0;
+    UINT32              tickCount = 0;
     BOOL                fLedOn = FALSE;
     tOplkError          ret = kErrorOk;
 
     // Setting the new timeout value
-    timeout = target_getTickCount() - ledkInstance_l.startTimeInMs;
+    tickCount = target_getTickCount();
+    timeout = tickCount - ledkInstance_l.startTimeInMs;
 
     if (timeout >= ledkInstance_l.timeoutInMs && timeout > 0)
     {
@@ -210,7 +245,7 @@ tOplkError ledk_updateLedState(void)
         }
 
         ledkInstance_l.timeoutInMs = timeout;
-        ledkInstance_l.startTimeInMs += ledkInstance_l.timeoutInMs;
+        ledkInstance_l.startTimeInMs = tickCount;
         ret = target_setLed(kLedTypeStatus, fLedOn);
     }
 

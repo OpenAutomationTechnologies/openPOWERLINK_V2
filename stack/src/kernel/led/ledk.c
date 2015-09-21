@@ -99,7 +99,7 @@ The function initializes the kernel LED module.
 //------------------------------------------------------------------------------
 tOplkError ledk_init(void)
 {
-    return kErrorOk;
+    return ledk_timerInit();
 }
 
 //------------------------------------------------------------------------------
@@ -115,7 +115,7 @@ The function cleans up the kernel LED module.
 //------------------------------------------------------------------------------
 tOplkError ledk_exit(void)
 {
-    return kErrorOk;
+    return ledk_timerExit();
 }
 
 //------------------------------------------------------------------------------

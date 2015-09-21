@@ -63,9 +63,9 @@ typedef enum
     kLedModeOn             = 0x02,  ///< LED on.
     kLedModeFlickering     = 0x03,  ///< LED on for 50ms and off for 50ms.
     kLedModeBlinking       = 0x04,  ///< LED on for 200ms and off for 200ms.
-    kLedModeSingleFlash    = 0x05,  ///< LED on for 200ms and then it switch off.
-    kLedModeDoubleFlash    = 0x06,  ///< LED on for 200ms and off for 1000ms, repeat twice.
-    kLedModeTripleFlash    = 0x07,  ///< LED on for 200ms and off for 1000ms, repeat thrice.
+    kLedModeSingleFlash    = 0x05,  ///< LED on for 200ms and then off for 1000ms.
+    kLedModeDoubleFlash    = 0x06,  ///< Blink twice and then off for 1000ms.
+    kLedModeTripleFlash    = 0x07,  ///< Blink thrice and then off for 1000ms.
 } eLedMode;
 
 /**
