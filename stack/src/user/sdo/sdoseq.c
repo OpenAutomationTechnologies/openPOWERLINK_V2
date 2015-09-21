@@ -126,12 +126,16 @@ This structure defines the SDO sequence layer connection history buffer.
 */
 typedef struct
 {
-    UINT8           freeEntries;    ///< Number of free history entries
-    UINT8           writeIndex;     ///< Index of the next free buffer entry
-    UINT8           ackIndex;       ///< Index of the next message which should become acknowledged
-    UINT8           readIndex;      ///< Index between ackIndex and writeIndex to the next message for retransmission
-    UINT8           aHistoryFrame[SDO_HISTORY_SIZE][SDO_SEQ_HISTROY_FRAME_SIZE];    ///< Array of the history frames
-    UINT            aFrameSize[SDO_HISTORY_SIZE];                                   ///< Array of sizes of the history frames
+    UINT8   freeEntries;    ///< Number of free history entries
+    UINT8   writeIndex;     ///< Index of the next free buffer entry
+    UINT8   ackIndex;       ///< Index of the next message which should become acknowledged
+    UINT8   readIndex;      ///< Index between ackIndex and writeIndex to the next message for retransmission
+    UINT8   aHistoryFrame[SDO_HISTORY_SIZE][SDO_SEQ_HISTROY_FRAME_SIZE];    ///< Array of the history frames
+    UINT    aFrameSize[SDO_HISTORY_SIZE];           ///< Array of sizes of the history frames
+    BOOL    afFrameFirstTxFailed[SDO_HISTORY_SIZE]; ///< Array of flags tagging frame as unsent
+                                                    /**< Array of flags indicating that the first attempt to
+                                                         forward a frame to a lower layer send function failed
+                                                         due to buffer overflow e.g. and should be repeated later */
 } tSdoSeqConHistory;
 
 /**
@@ -235,7 +239,8 @@ static tOplkError receiveCb(tSdoConHdl conHdl_p, tAsySdoSeq* pSdoSeqData_p, UINT
 
 static tOplkError initHistory(tSdoSeqCon* pSdoSeqCon_p);
 
-static tOplkError addFrameToHistory(tSdoSeqCon* pSdoSeqCon_p, tPlkFrame* pFrame_p, UINT size_p);
+static tOplkError addFrameToHistory(tSdoSeqCon* pSdoSeqCon_p, tPlkFrame* pFrame_p,
+                                    UINT size_p, BOOL fTxFailed_p);
 
 static tOplkError deleteAckedFrameFromHistory(tSdoSeqCon* pSdoSeqCon_p, UINT8 recvSeqNumber_p);
 
@@ -1166,16 +1171,22 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
 
                         // error response (retransmission request) - resend frames from history
                         ret = readFromHistory(pSdoSeqCon_p, &pFrame, &frameSize, TRUE);
+                        if (ret == kErrorRetry)
+                            ret = kErrorOk; // ignore unsent frames info
                         if (ret != kErrorOk)
                             return ret;
 
                         while ((pFrame != NULL) && (frameSize != 0))
                         {
                             ret = sendToLowerLayer(pSdoSeqCon_p, frameSize, pFrame);
+                            if (ret == kErrorDllAsyncTxBufferFull)
+                                ret = kErrorOk; // ignore unsent frames
                             if (ret != kErrorOk)
                                 return ret;
 
                             ret = readFromHistory(pSdoSeqCon_p, &pFrame, &frameSize, FALSE);
+                            if (ret == kErrorRetry)
+                                ret = kErrorOk; // ignore unsent frames info
                             if (ret != kErrorOk)
                                 return ret;
                         } // end of while((pabFrame != NULL)
@@ -1254,6 +1265,8 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
                 ret = setTimer(pSdoSeqCon_p, sdoSeqInstance_l.sdoSeqTimeout);
                 // read first frame from history
                 ret = readFromHistory(pSdoSeqCon_p, &pFrame, &frameSize, TRUE);
+                if (ret == kErrorRetry)
+                    ret = kErrorOk; // ignore unsent frames info
                 if (ret != kErrorOk)
                     return ret;
 
@@ -1264,6 +1277,8 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
                                    ami_getUint8Le(&pFrame->data.asnd.payload.sdoSequenceFrame.sendSeqNumCon) | 0x03);
 
                     ret = sendToLowerLayer(pSdoSeqCon_p, frameSize, pFrame);
+                    if (ret == kErrorDllAsyncTxBufferFull)
+                        ret = kErrorOk; // ignore unsent frames
                     if (ret != kErrorOk)
                         return ret;
                 }
@@ -1387,13 +1402,19 @@ static tOplkError processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sd
                 {
                     // error ack, resend frames from history
                     ret = readFromHistory(pSdoSeqCon_p, &pFrame, &frameSize, TRUE);
+                    if (ret == kErrorRetry)
+                        ret = kErrorOk; // ignore unsent frames info
                     while ((pFrame != NULL) && (frameSize != 0))
                     {
                         ret = sendToLowerLayer(pSdoSeqCon_p, frameSize, pFrame);
+                        if (ret == kErrorDllAsyncTxBufferFull)
+                            ret = kErrorOk; // ignore unsent frames
                         if (ret != kErrorOk)
                             return ret;
                         // read next frame
                         ret = readFromHistory(pSdoSeqCon_p, &pFrame, &frameSize, FALSE);
+                        if (ret == kErrorRetry)
+                            ret = kErrorOk; // ignore unsent frames info
                     }
                 }
                 break;
@@ -1523,6 +1544,8 @@ static tOplkError sendFrame(tSdoSeqCon* pSdoSeqCon_p, UINT dataSize_p,
     tOplkError      ret;
     UINT8           aFrame[SDO_SEQ_FRAME_SIZE];
     tPlkFrame*      pFrame;
+    tPlkFrame*      pFrameResend;
+    UINT            frameSizeResend;
     UINT            freeEntries = 0;
 
     if (pData_p == NULL)
@@ -1552,16 +1575,39 @@ static tOplkError sendFrame(tSdoSeqCon* pSdoSeqCon_p, UINT dataSize_p,
     ami_setUint8Le(&pFrame->data.asnd.payload.sdoSequenceFrame.sendSeqNumCon, pSdoSeqCon_p->recvSeqNum);
     dataSize_p += SDO_SEQ_HEADER_SIZE;
 
+    if (fFrameInHistory_p != FALSE)
+    {
+        // send unsent frames from history first to prevent retransmission request
+        // caused by newer frames "overtaking" unsent frames
+        ret = readFromHistory(pSdoSeqCon_p, &pFrameResend, &frameSizeResend, TRUE);
+        while ((pFrameResend != NULL) && (frameSizeResend != 0))
+        {
+            if ((ret == kErrorRetry))
+            { // resend unsent frame
+                ret = sendToLowerLayer(pSdoSeqCon_p, frameSizeResend, pFrameResend);
+                if (ret == kErrorDllAsyncTxBufferFull)
+                    ret = kErrorOk; // ignore unsent frames
+                if (ret != kErrorOk)
+                    return ret;
+            }
+            // read next frame
+            ret = readFromHistory(pSdoSeqCon_p, &pFrameResend, &frameSizeResend, FALSE);
+        }
+    }
+
     ret = sendToLowerLayer(pSdoSeqCon_p, dataSize_p, pFrame);
-    if ((ret == kErrorOk) && (fFrameInHistory_p != FALSE))
+    if (((ret == kErrorOk) || (ret == kErrorDllAsyncTxBufferFull)) &&
+        (fFrameInHistory_p != FALSE)                                  )
     {
         // set own scon to 2 if needed
         if ((pSdoSeqCon_p->recvSeqNum & 0x03) == 0x03)
         {
             pSdoSeqCon_p->recvSeqNum--;
         }
+
         // save frame to history
-        ret = addFrameToHistory(pSdoSeqCon_p, pFrame, dataSize_p);
+        ret = addFrameToHistory(pSdoSeqCon_p, pFrame, dataSize_p,
+                                (ret == kErrorDllAsyncTxBufferFull));
         if ((ret == kErrorSdoSeqNoFreeHistory) || (freeEntries <= 1))
         {
             ret = kErrorSdoSeqRequestAckNeeded;       // request Ack needed
@@ -1731,12 +1777,14 @@ The function adds a frame to the history buffer.
 \param  pSdoSeqCon_p        Pointer to connection control structure.
 \param  pFrame_p            Pointer to frame to be stored in history buffer.
 \param  size_p              Size of frame (without headers).
+\param  fTxFailed_p         Flag indicating that lower layer send function failed
+                            e.g. due to buffer overflow and should be repeated later
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 static tOplkError addFrameToHistory(tSdoSeqCon* pSdoSeqCon_p, tPlkFrame* pFrame_p,
-                                    UINT size_p)
+                                    UINT size_p, BOOL fTxFailed_p)
 {
     tOplkError              ret = kErrorOk;
     tSdoSeqConHistory*      pHistory;
@@ -1754,6 +1802,7 @@ static tOplkError addFrameToHistory(tSdoSeqCon* pSdoSeqCon_p, tPlkFrame* pFrame_
         OPLK_MEMCPY(&((tPlkFrame*)pHistory->aHistoryFrame[pHistory->writeIndex])->messageType,
                     &pFrame_p->messageType, size_p + ASND_HEADER_SIZE);
         pHistory->aFrameSize[pHistory->writeIndex] = size_p;
+        pHistory->afFrameFirstTxFailed[pHistory->writeIndex] = fTxFailed_p;
         pHistory->freeEntries--;
         pHistory->writeIndex++;
         if (pHistory->writeIndex == SDO_HISTORY_SIZE)    // check if write-index ran over array-border
@@ -1803,6 +1852,7 @@ static tOplkError deleteAckedFrameFromHistory(tSdoSeqCon* pSdoSeqCon_p, UINT8 re
             if (((recvSeqNumber_p - currentSeqNum) & SEQ_NUM_MASK) < SDO_SEQ_NUM_THRESHOLD)
             {
                 pHistory->aFrameSize[ackIndex] = 0;
+                pHistory->afFrameFirstTxFailed[ackIndex] = FALSE;
                 ackIndex++;
                 pHistory->freeEntries++;
                 if (ackIndex == SDO_HISTORY_SIZE)
@@ -1836,10 +1886,12 @@ The function reads a frame from the history buffer.
 \param  pSdoSeqCon_p        Pointer to connection control structure.
 \param  ppFrame_p           Pointer to store the pointer of the frame.
 \param  pSize_p             Pointer to store the size of the frame
-\param  fInitRead_p         Indicates the start of a retransmission. IF TRUE,
+\param  fInitRead_p         Indicates the start of a retransmission. If TRUE,
                             it returns the last, not acknowledged frame.
 
 \return The function returns a tOplkError error code.
+\retval kErrorOk            No error
+\retval kErrorRetry         If the frame has never been sent successfully
 */
 //------------------------------------------------------------------------------
 static tOplkError readFromHistory(tSdoSeqCon* pSdoSeqCon_p, tPlkFrame** ppFrame_p,
@@ -1863,6 +1915,13 @@ static tOplkError readFromHistory(tSdoSeqCon* pSdoSeqCon_p, tPlkFrame** ppFrame_
     if ((pHistory->freeEntries < SDO_HISTORY_SIZE) &&
         (pHistory->writeIndex != pHistory->readIndex))
     {
+        // inform caller about unsent frame
+        if (pHistory->afFrameFirstTxFailed[pHistory->readIndex])
+        {
+            // signal caller, that this frame has not been sent successfully yet
+            ret = kErrorRetry;
+        }
+
         DEBUG_LVL_SDO_TRACE("readFromHistory(): init = %d, read = %u, write = %u, ack = %u",
                              (int)fInitRead_p, (WORD)pHistory->readIndex,
                              (WORD)pHistory->writeIndex, (WORD)pHistory->ackIndex);
@@ -1880,8 +1939,8 @@ static tOplkError readFromHistory(tSdoSeqCon* pSdoSeqCon_p, tPlkFrame** ppFrame_
     }
     else
     {
-        DEBUG_LVL_SDO_TRACE("readFromHistory(): read = %u, ack = %u, free entries = %u, no frame\n",
-                            (WORD)pHistory->readIndex, (WORD)pHistory->ackIndex, (WORD)pHistory->freeEntries);
+        DEBUG_LVL_SDO_TRACE("readFromHistory(): read = %u, write = %u, ack = %u, free entries = %u, no frame\n",
+                            (WORD)pHistory->readIndex, (WORD)pHistory->writeIndex, (WORD)pHistory->ackIndex, (WORD)pHistory->freeEntries);
 
         // no more frames to send - return null pointer
         *ppFrame_p = NULL;

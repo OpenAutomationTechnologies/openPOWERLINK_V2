@@ -259,10 +259,6 @@ tOplkError sdoasnd_sendData(tSdoConHdl sdoConHandle_p, tPlkFrame* pSrcData_p, UI
     frameInfo.frame.pBuffer = pSrcData_p;
 
     ret = dllucal_sendAsyncFrame(&frameInfo, kDllAsyncReqPrioGeneric);
-    if (ret == kErrorDllAsyncTxBufferFull)
-    {   // ignore TxBufferFull errors
-        ret = kErrorOk;
-    }
 
     return ret;
 }
