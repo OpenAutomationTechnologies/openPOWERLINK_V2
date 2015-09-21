@@ -70,6 +70,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CONFIG_SDO_MAX_CONNECTION_UDP  5
 #endif
 
+// Size of max. UDP payload for a UDP frame transmitted over POWERLINK
+// Header for calculation: 20 (IPv4) + 8 (UDP) = 28 bytes
+#define SDO_MAX_RX_FRAME_SIZE_UDP      (C_DLL_MAX_ASYNC_MTU - 28)
+
 //------------------------------------------------------------------------------
 // module global vars
 //------------------------------------------------------------------------------
@@ -507,7 +511,7 @@ static void receiveFromSocket(tSdoUdpInstance* pInstance_p)
     INT                 error;
     INT                 count;
     INT                 freeEntry;
-    UINT8               aBuffer[SDO_MAX_REC_FRAME_SIZE];
+    UINT8               aBuffer[SDO_MAX_RX_FRAME_SIZE_UDP];
     UINT                size;
     tSdoConHdl          sdoConHdl;
 
@@ -556,8 +560,8 @@ static void receiveFromSocket(tSdoUdpInstance* pInstance_p)
                 sdoConHdl = freeEntry;
                 sdoConHdl |= SDO_UDP_HANDLE;
 
-                // offset 4 -> start of SDO Sequence header
-                ret = pInstance_p->pfnSdoAsySeqCb(sdoConHdl, (tAsySdoSeq*)&aBuffer[4], (error - 4));
+                // offset 4 (ASnd header) -> start of SDO Sequence header
+                ret = pInstance_p->pfnSdoAsySeqCb(sdoConHdl, (tAsySdoSeq*)&aBuffer[ASND_HEADER_SIZE], (error - ASND_HEADER_SIZE));
                 if (ret != kErrorOk)
                 {
                     DEBUG_LVL_ERROR_TRACE("%s new con: ip=%lX, port=%u, Ret=0x%X\n", __func__,
@@ -581,8 +585,8 @@ static void receiveFromSocket(tSdoUdpInstance* pInstance_p)
 #if (TARGET_SYSTEM == _WIN32_)
             LeaveCriticalSection(sdoUdpInstance_l.pCriticalSection);
 #endif
-            // offset 4 -> start of SDO Sequence header
-            ret = pInstance_p->pfnSdoAsySeqCb(sdoConHdl, (tAsySdoSeq*)&aBuffer[4], (error - 4));
+            // offset 4 (ASnd header) -> start of SDO Sequence header
+            ret = pInstance_p->pfnSdoAsySeqCb(sdoConHdl, (tAsySdoSeq*)&aBuffer[ASND_HEADER_SIZE], (error - ASND_HEADER_SIZE));
             if (ret != kErrorOk)
             {
                 DEBUG_LVL_ERROR_TRACE("%s known con: ip=%lX, port=%u, Ret=0x%X\n", __func__,

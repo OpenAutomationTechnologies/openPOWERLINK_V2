@@ -89,10 +89,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define C_DLL_ASND_PRIO_NMTRQST                         7                   ///< Increased ASnd request priority to be used by NMT Requests
 #define C_DLL_ASND_PRIO_STD                             0                   ///< Standard ASnd request priority
 #define C_DLL_ETHERTYPE_EPL                             0x88AB              ///< POWERLINK ethertype
-#define C_DLL_ISOCHR_MAX_PAYL                           1490                ///< Maximum size of PReq and PRes payload data, requires C_IP_MAX_MTU
+#define C_DLL_ISOCHR_MAX_PAYL                           1490                ///< Maximum size of PReq and PRes payload data
 #define C_DLL_MAX_ASYNC_MTU                             1500                ///< Maximum asynchronous payload in bytes
 #define C_DLL_MAX_ETH_FRAME                             1514                ///< Maximum Ethernet frame in bytes without checksum
-#define C_DLL_MAX_PAYL_OFFSET                           1499                ///< Maximum offset of Ethernet frame payload, requires C_IP_MAX_MTU
+#define C_DLL_MAX_PAYL_OFFSET                           1499                ///< Maximum offset of Ethernet frame payload
 #define C_DLL_MAX_RS                                    7                   ///< Maximum number of pending requests
 #define C_DLL_MIN_ASYNC_MTU                             300                 ///< Minimum asynchronous payload in bytes.
 #define C_DLL_MIN_PAYL_OFFSET                           45                  ///< Minimum offset of Ethernet frame payload
@@ -113,8 +113,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define C_IP_ADR_INVALID                                0x00000000L         ///< Invalid IP address (0.0.0.0) used to indicate no change
 #define C_IP_INVALID_MTU                                0                   ///< Invalid MTU size used to indicate no change [Byte]
-#define C_IP_MAX_MTU                                    1518                ///< Maximum size in bytes of the IP stack which must be processed [Byte]
-#define C_IP_MIN_MTU                                    300                 ///< Minimum size in bytes of the IP stack which must be processed [Byte]
 
 #define C_NMT_STATE_TOLERANCE                           5                   ///< Maximum reaction time to NMT state commands [cycles]
 #define C_NMT_STATREQ_CYCLE                             5                   ///< StatusRequest cycle time to be applied to AsyncOnly CNs [sec]

@@ -50,7 +50,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define DLLCALDIRECT_TXBUF_SIZE     C_IP_MAX_MTU        ///< TX buffer size
+#define DLLCALDIRECT_TXBUF_SIZE     C_DLL_MAX_ETH_FRAME ///< TX buffer size
 #define DLLCALDIRECT_TXBUF_EMPTY    0                   ///< TX buffer marked as empty
 #define DLLCALDIRECT_TXBUF_FILLING  1                   ///< TX buffer makred as being filled
 

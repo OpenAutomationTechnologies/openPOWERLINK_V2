@@ -48,12 +48,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 
-// size for send buffer and history
-#define SDO_MAX_FRAME_SIZE          C_IP_MIN_MTU
-// size for receive frame
-// -> needed because SND-Kit sends up to 1518 Byte
-//    without Sdo-Command: Maximum Segment Size
-#define SDO_MAX_REC_FRAME_SIZE      C_IP_MAX_MTU
+// size for complete SDO send frame (without CRC)
+// valid range: [C_DLL_MIN_ASYNC_MTU .. C_DLL_MAX_ASYNC_MTU] + Eth. header
+#define SDO_MAX_TX_FRAME_SIZE           314
+
 
 //------------------------------------------------------------------------------
 // Type definitions

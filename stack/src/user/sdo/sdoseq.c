@@ -65,13 +65,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CONFIG_SDO_MAX_CONNECTION_SEQ             5
 #endif
 
-#define SDO_SEQ_DEFAULT_TIMEOUT     5000                    // in [ms] => 5 sec
-#define SDO_SEQ_RETRY_COUNT         5                       // => max. Timeout 30 sec
-#define SDO_SEQ_NUM_THRESHOLD       100                     // threshold which distinguishes between old and new sequence numbers
-#define SDO_SEQ_FRAME_SIZE          24                      // frame with size of Asnd-Header-, SDO Sequence header size, SDO Command header and Ethernet-header size
-#define SDO_SEQ_HEADER_SIZE         4                       // size of the header of the SDO Sequence layer
-#define SDO_SEQ_HISTROY_FRAME_SIZE  SDO_MAX_FRAME_SIZE      // buffersize for one frame in history
-#define SDO_CON_MASK                0x03                    // mask to get scon and rcon
+#define SDO_SEQ_DEFAULT_TIMEOUT     5000                        // in [ms] => 5 sec
+#define SDO_SEQ_RETRY_COUNT         5                           // => max. Timeout 30 sec
+#define SDO_SEQ_NUM_THRESHOLD       100                         // threshold which distinguishes between old and new sequence numbers
+#define SDO_SEQ_FRAME_SIZE          24                          // frame with size of Asnd-Header-, SDO Sequence header size, SDO Command header and Ethernet-header size
+#define SDO_SEQ_HEADER_SIZE         4                           // size of the header of the SDO Sequence layer
+#define SDO_SEQ_TX_HISTORY_FRAME_SIZE  SDO_MAX_TX_FRAME_SIZE    // buffersize for one frame in history
+#define SDO_CON_MASK                0x03                        // mask to get scon and rcon
 
 #define SEQ_NUM_MASK                0xFC
 
@@ -130,7 +130,7 @@ typedef struct
     UINT8   writeIndex;     ///< Index of the next free buffer entry
     UINT8   ackIndex;       ///< Index of the next message which should become acknowledged
     UINT8   readIndex;      ///< Index between ackIndex and writeIndex to the next message for retransmission
-    UINT8   aHistoryFrame[SDO_HISTORY_SIZE][SDO_SEQ_HISTROY_FRAME_SIZE];    ///< Array of the history frames
+    UINT8   aHistoryFrame[SDO_HISTORY_SIZE][SDO_SEQ_TX_HISTORY_FRAME_SIZE];    ///< Array of the history frames
     UINT    aFrameSize[SDO_HISTORY_SIZE];           ///< Array of sizes of the history frames
     BOOL    afFrameFirstTxFailed[SDO_HISTORY_SIZE]; ///< Array of flags tagging frame as unsent
                                                     /**< Array of flags indicating that the first attempt to
@@ -1791,7 +1791,7 @@ static tOplkError addFrameToHistory(tSdoSeqCon* pSdoSeqCon_p, tPlkFrame* pFrame_
 
     // add frame to history buffer
     // check size - SDO_SEQ_HISTORY_FRAME_SIZE includes the header size, but size_p does not!
-    if (size_p > SDO_SEQ_HISTROY_FRAME_SIZE)
+    if (size_p > SDO_SEQ_TX_HISTORY_FRAME_SIZE)
         return kErrorSdoSeqFrameSizeError;
 
     pHistory = &pSdoSeqCon_p->sdoSeqConHistory;      // save pointer to history

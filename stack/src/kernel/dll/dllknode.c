@@ -372,7 +372,7 @@ tOplkError dllknode_setupLocalNode(tNmtState nmtState_p)
     }
 
     // NMT request
-    frameSize = C_IP_MAX_MTU;
+    frameSize = C_DLL_MAX_ETH_FRAME;
     ret = dllkframe_createTxFrame(&handle, &frameSize, kMsgTypeAsnd, kDllAsndNmtRequest);
     if (ret != kErrorOk)
         return ret;
@@ -386,7 +386,7 @@ tOplkError dllknode_setupLocalNode(tNmtState nmtState_p)
     dllkInstance_g.pTxBuffer[handle].pfnTxHandler = dllkframe_processTransmittedNmtReq;
 
     // non-POWERLINK frame
-    frameSize = C_IP_MAX_MTU;
+    frameSize = C_DLL_MAX_ETH_FRAME;
     ret = dllkframe_createTxFrame(&handle, &frameSize, kMsgTypeNonPowerlink, kDllAsndNotDefined);
     if (ret != kErrorOk)
         return ret;
