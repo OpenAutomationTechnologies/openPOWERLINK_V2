@@ -5,6 +5,47 @@ Revision history of openPOWERLINK Protocol Stack {#page_revision_history}
 
 # Release 2 {#sect_revision_v2}
 
+## V2.3.0-rc1 {#sect_revision_v2_3_0_rc1}
+
+This is the release candidate for the upcoming 2.3.0 release.
+
+Following is a summary of changes in V2.3.0-rc1. For a detailed revision history
+refer to the Git source code history.
+
+### New Features:
+- Add late release support to dualprocshm
+- Add dual processor CN designs for TERASIC DE2-115 board
+- Add IP-Core to enable atomic exchange on Altera Nios II
+- Add Windows PCIe solution for B&R APC/PPC2100 (Platform with Altera Cyclone 4
+  FPGA and Intel Atom)
+- Enhance debugstr to print NMT node commands
+- Add eventlog library
+- Add file transfer capability
+
+### Fixes:
+- Exclude objects if IP is not supported
+
+### Changes:
+- Update stack to support heterogeneous systems (64 bit support)
+- Rework stack initialization
+- Move LED module to kernel layer
+- Rework kernel event handling for FPGA drivers
+- Use Peterson's lock for Windows PCIe solution
+
+### Known Issues:
+- Xilinx Zynq MN (see 2.1.0)
+- Redundancy MN (see 2.2.1)
+
+### Outlook:
+This release candidate is not feature complete. The following features are
+expected to be released with the final 2.3.0 revision:
+- Forward SoC time stamp to application layer
+- Configuration storage (generic implementation)
+- NDIS intermediate driver for Windows
+- Linux PCIe solution for B&R APC/PPC2100
+- Virtual Ethernet for PCIe solution
+- MN demo design on TERASIC DE2i-150 board
+
 ## V2.2.1 {#sect_revision_v2_2_1}
 
 This is the latest release of the V2.2 release series. This release is a stable
