@@ -72,6 +72,8 @@ tOplkError ledk_handleNmtStateChange(tEventNmtStateChange nmtStateChange_p);
 tOplkError ledk_process(void);
 
 //ledktimer functions
+tOplkError ledk_timerInit(void);
+tOplkError ledk_timerExit(void);
 tOplkError ledk_updateLedState(void);
 tOplkError ledk_setLedMode(tLedType ledType_p, tLedMode newMode_p);
 
