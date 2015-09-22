@@ -159,6 +159,14 @@ static tOplkError initNmtu(tOplkApiInitParam* pInitParam_p);
 static tOplkError initObd(tOplkApiInitParam* pInitParam_p);
 static tOplkError updateDllConfig(tOplkApiInitParam* pInitParam_p, BOOL fUpdateIdentity_p);
 static tOplkError updateObd(tOplkApiInitParam* pInitParam_p, BOOL fDisableUpdateStoredConf_p);
+static tOplkError handleObdLossOfFrameTolerance(tObdCbParam MEM* pParam_p);
+static tOplkError handleObdVerifyConf(tObdCbParam MEM* pParam_p);
+static tOplkError handleObdResetCmd(tObdCbParam MEM* pParam_p);
+
+#if defined(CONFIG_INCLUDE_IP)
+static tOplkError handleObdIpAddrTable(tObdCbParam MEM* pParam_p);
+#endif
+
 static tOplkError processUserEvent(tEvent* pEvent_p);
 static tOplkError cbCnCheckEvent(tNmtEvent NmtEvent_p);
 static tOplkError cbNmtStateChange(tEventNmtStateChange nmtStateChange_p);
@@ -179,6 +187,7 @@ static tOplkError cbNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p,
                               BOOL fMandatory_p);
 static tOplkError linkDomainObjects(tLinkObjectRequest* pLinkRequest_p,
                                     size_t requestCnt_p);
+static tOplkError handleObdRequestCmd(tObdCbParam MEM* pParam_p);
 #endif
 
 static tOplkError cbBootEvent(tNmtBootEvent BootEvent_p, tNmtState NmtState_p,
@@ -734,152 +743,27 @@ tOplkError ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
 
     switch (pParam_p->index)
     {
-        //case 0x1006:    // NMT_CycleLen_U32 (valid on reset)
         case 0x1C14:    // DLL_LossOfFrameTolerance_U32
-        //case 0x1F98:    // NMT_CycleTiming_REC (valid on reset)
-            if (pParam_p->obdEvent == kObdEvPostWrite)
-            {
-                // update DLL configuration
-                ret = updateDllConfig(&ctrlInstance_l.initParam, FALSE);
-            }
+            ret = handleObdLossOfFrameTolerance(pParam_p);
             break;
 
-        case 0x1020:    // CFM_VerifyConfiguration_REC.ConfId_U32 != 0
-            if ((pParam_p->obdEvent == kObdEvPostWrite) &&
-                (pParam_p->subIndex == 3) &&
-                (*((UINT32*)pParam_p->pArg) != 0))
-            {
-                UINT32      verifyConfInvalid = 0;
-                // set CFM_VerifyConfiguration_REC.VerifyConfInvalid_U32 to 0
-                ret = obd_writeEntry(0x1020, 4, &verifyConfInvalid, 4);
-                // ignore any error because this objekt is optional
-                ret = kErrorOk;
-            }
+        case 0x1020:    // CFM_VerifyConfiguration_REC
+            ret = handleObdVerifyConf(pParam_p);
             break;
 
         case 0x1F9E:    // NMT_ResetCmd_U8
-            if (pParam_p->obdEvent == kObdEvPreWrite)
-            {
-                UINT8    nmtCommand;
-
-                nmtCommand = *((UINT8*)pParam_p->pArg);
-                // check value range
-                switch ((tNmtCommand)nmtCommand)
-                {
-                    case kNmtCmdResetNode:
-                    case kNmtCmdResetCommunication:
-                    case kNmtCmdResetConfiguration:
-                    case kNmtCmdSwReset:
-                    case kNmtCmdInvalidService:
-                        // valid command identifier specified
-                        break;
-
-                    default:
-                        pParam_p->abortCode = SDO_AC_VALUE_RANGE_EXCEEDED;
-                        ret = kErrorObdAccessViolation;
-                        break;
-                }
-            }
-            else if (pParam_p->obdEvent == kObdEvPostWrite)
-            {
-                UINT8    nmtCommand;
-
-                nmtCommand = *((UINT8*)pParam_p->pArg);
-                // check value range
-                switch ((tNmtCommand)nmtCommand)
-                {
-                    case kNmtCmdResetNode:
-                        ret = nmtu_postNmtEvent(kNmtEventResetNode);
-                        break;
-
-                    case kNmtCmdResetCommunication:
-                        ret = nmtu_postNmtEvent(kNmtEventResetCom);
-                        break;
-
-                    case kNmtCmdResetConfiguration:
-                        ret = nmtu_postNmtEvent(kNmtEventResetConfig);
-                        break;
-
-                    case kNmtCmdSwReset:
-                        ret = nmtu_postNmtEvent(kNmtEventSwReset);
-                        break;
-
-                    case kNmtCmdInvalidService:
-                        break;
-
-                    default:
-                        pParam_p->abortCode = SDO_AC_VALUE_RANGE_EXCEEDED;
-                        ret = kErrorObdAccessViolation;
-                        break;
-                }
-            }
+            ret = handleObdResetCmd(pParam_p);
             break;
 
-#if defined(CONFIG_INCLUDE_VETH)
+#if defined(CONFIG_INCLUDE_IP)
         case 0x1E40:    // NWL_IpAddrTable_0h_REC
-            if ((pParam_p->obdEvent == kObdEvPostWrite) && (pParam_p->subIndex == 5))
-            {
-                tOplkApiEventArg    vethEventArg;
-
-                vethEventArg.defaultGwChange.defaultGateway = *((UINT32*)pParam_p->pArg);
-
-                ret = ctrlu_callUserEventCallback(kOplkApiEventDefaultGwChange, &vethEventArg);
-                if (ret == kErrorReject)
-                    ret = kErrorOk; // Ignore reject
-            }
+            ret = handleObdIpAddrTable(pParam_p);
             break;
 #endif
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
         case 0x1F9F:    // NMT_RequestCmd_REC
-            if ((pParam_p->obdEvent == kObdEvPostWrite) &&
-                (pParam_p->subIndex == 1) &&
-                (*((UINT8*)pParam_p->pArg) != 0))
-            {
-                UINT8       cmdId;
-                UINT8       cmdTarget;
-                tObdSize    obdSize;
-                tNmtState   nmtState;
-
-                obdSize = sizeof(UINT8);
-                ret = obd_readEntry(0x1F9F, 2, &cmdId, &obdSize);
-                if (ret != kErrorOk)
-                {
-                    pParam_p->abortCode = SDO_AC_GENERAL_ERROR;
-                    break;
-                }
-
-                obdSize = sizeof (cmdTarget);
-                ret = obd_readEntry(0x1F9F, 3, &cmdTarget, &obdSize);
-                if (ret != kErrorOk)
-                {
-                    pParam_p->abortCode = SDO_AC_GENERAL_ERROR;
-                    break;
-                }
-
-                nmtState = nmtu_getNmtState();
-
-                if (NMT_IF_CN_OR_RMN(nmtState))
-                {   // local node is CN
-                    // forward the command to the MN
-                    // d.k. this is a manufacturer specific feature
-                    ret = nmtcnu_sendNmtRequestEx(cmdTarget, (tNmtCommand) cmdId,
-                                                  aCmdData, sizeof(aCmdData));
-                }
-                else
-                {   // local node is MN
-                    // directly execute the requested NMT command
-                    ret = nmtmnu_requestNmtCommand(cmdTarget, (tNmtCommand) cmdId,
-                                                   aCmdData, sizeof(aCmdData));
-                }
-                if (ret != kErrorOk)
-                {
-                    pParam_p->abortCode = SDO_AC_GENERAL_ERROR;
-                }
-
-                // reset request flag
-                *((UINT8*)pParam_p->pArg) = 0;
-            }
+            ret = handleObdRequestCmd(pParam_p);
             break;
 #endif
 
@@ -1835,6 +1719,181 @@ static tOplkError updateObd(tOplkApiInitParam* pInitParam_p, BOOL fDisableUpdate
     return kErrorOk;
 }
 
+
+//------------------------------------------------------------------------------
+/**
+\brief  Handle an access to the LossOfFrameTolerance object
+
+This function handles an access to the LossOfFrameTolerance object in the object
+dictionary.
+
+\param  pParam_p            OBD callback parameter.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError handleObdLossOfFrameTolerance(tObdCbParam MEM* pParam_p)
+{
+    tOplkError  ret = kErrorOk;
+
+    if (pParam_p->obdEvent == kObdEvPostWrite)
+    {
+        // Update DLL configuration
+        // NOTE: This is not fully correct, since it triggers a re-read of all
+        //       (i.e. including the "valid on reset") objects!
+        ret = updateDllConfig(&ctrlInstance_l.initParam, FALSE);
+    }
+
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Handle an access to the VerifyConfiguration object
+
+This function handles an access to the VerifyConfiguration object in the object
+dictionary.
+
+\param  pParam_p            OBD callback parameter.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError handleObdVerifyConf(tObdCbParam MEM* pParam_p)
+{
+    tOplkError  ret = kErrorOk;
+
+    // Check if a value unequal to 0 has been written to subindex 3
+    // (CFM_VerifyConfiguration_REC.ConfId_U32)
+    if ((pParam_p->obdEvent == kObdEvPostWrite) &&
+        (pParam_p->subIndex == 3) &&
+        (*((UINT32*)pParam_p->pArg) != 0))
+    {
+        UINT32  verifyConfInvalid = 0;
+
+        // Set CFM_VerifyConfiguration_REC.VerifyConfInvalid_U32 to 0
+        ret = obd_writeEntry(0x1020, 4, &verifyConfInvalid, 4);
+
+        // ignore any error because this object is optional
+        ret = kErrorOk;
+    }
+
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Handle an access to the NMT ResetCommand object
+
+This function handles an access to the NMT ResetCommand object in the object
+dictionary.
+
+\param  pParam_p            OBD callback parameter.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError handleObdResetCmd(tObdCbParam MEM* pParam_p)
+{
+    tOplkError  ret = kErrorOk;
+    tNmtCommand nmtCommand;
+
+    switch (pParam_p->obdEvent)
+    {
+        case kObdEvPreWrite:
+            // Check if a valid command is being passed
+            nmtCommand = (tNmtCommand)(*((UINT8*)pParam_p->pArg));
+            switch (nmtCommand)
+            {
+                case kNmtCmdResetNode:
+                case kNmtCmdResetCommunication:
+                case kNmtCmdResetConfiguration:
+                case kNmtCmdSwReset:
+                case kNmtCmdInvalidService:
+                    // Valid command identifier found
+                    break;
+
+                default:
+                    // Invalid command identifier passed
+                    pParam_p->abortCode = SDO_AC_VALUE_RANGE_EXCEEDED;
+                    ret = kErrorObdAccessViolation;
+                    break;
+            }
+            break;
+
+        case kObdEvPostWrite:
+            // Execute the NMT command
+            nmtCommand = (tNmtCommand)(*((UINT8*)pParam_p->pArg));
+            switch (nmtCommand)
+            {
+                case kNmtCmdResetNode:
+                    ret = nmtu_postNmtEvent(kNmtEventResetNode);
+                    break;
+
+                case kNmtCmdResetCommunication:
+                    ret = nmtu_postNmtEvent(kNmtEventResetCom);
+                    break;
+
+                case kNmtCmdResetConfiguration:
+                    ret = nmtu_postNmtEvent(kNmtEventResetConfig);
+                    break;
+
+                case kNmtCmdSwReset:
+                    ret = nmtu_postNmtEvent(kNmtEventSwReset);
+                    break;
+
+                case kNmtCmdInvalidService:
+                    break;
+
+                default:
+                    pParam_p->abortCode = SDO_AC_VALUE_RANGE_EXCEEDED;
+                    ret = kErrorObdAccessViolation;
+                    break;
+            }
+            break;
+    }
+
+    return ret;
+}
+
+#if defined(CONFIG_INCLUDE_IP)
+
+//------------------------------------------------------------------------------
+/**
+\brief  Handle an access to the IpAddrTable object
+
+This function handles an access to the IpAddrTable in the object dictionary.
+
+\param  pParam_p            OBD callback parameter.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError handleObdIpAddrTable(tObdCbParam MEM* pParam_p)
+{
+    tOplkError  ret = kErrorOk;
+
+    // Check if a value has been written to subindex 5
+    // (NWL_IpAddrTable_Xh_REC.DefaultGateway_IPAD)
+    if ((pParam_p->obdEvent == kObdEvPostWrite) && (pParam_p->subIndex == 5))
+    {
+        tOplkApiEventArg    vethEventArg;
+
+        // Copy the new IP gateway into the event argument
+        vethEventArg.defaultGwChange.defaultGateway = *((UINT32*)pParam_p->pArg);
+
+        // Inform the user about the IP gateway change
+        ret = ctrlu_callUserEventCallback(kOplkApiEventDefaultGwChange, &vethEventArg);
+        if (ret == kErrorReject)
+            ret = kErrorOk; // Ignore reject
+    }
+
+    return ret;
+}
+
+#endif
+
+
 #if defined(CONFIG_INCLUDE_NMT_MN)
 //------------------------------------------------------------------------------
 /**
@@ -2081,6 +2140,84 @@ static tOplkError linkDomainObjects(tLinkObjectRequest* pLinkRequest_p,
     }
     return ret;
 }
+
+//------------------------------------------------------------------------------
+/**
+\brief  Handle an access to the NMT RequestCommand object
+
+This function handles an access to the NMT RequestCommand object in the object
+dictionary.
+
+\param  pParam_p            OBD callback parameter.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError handleObdRequestCmd(tObdCbParam MEM* pParam_p)
+{
+    tOplkError      ret = kErrorOk;
+
+    // Check if a value unequal to 0 has been written to subindex 1
+    // (NMT_RequestCmd_REC.Release_BOOL)
+    if ((pParam_p->obdEvent == kObdEvPostWrite) &&
+        (pParam_p->subIndex == 1) &&
+        (*((UINT8*)pParam_p->pArg) != 0))
+    {
+        UINT8       cmdId;
+        UINT8       cmdTarget;
+        tObdSize    obdSize;
+        tNmtState   nmtState;
+
+        // Read value of subindex 2 (NMT_RequestCmd_REC.CmdID_U8)
+        obdSize = sizeof(cmdId);
+        ret = obd_readEntry(0x1F9F, 2, &cmdId, &obdSize);
+        if (ret != kErrorOk)
+        {
+            pParam_p->abortCode = SDO_AC_GENERAL_ERROR;
+            return ret;
+        }
+
+        // Read value of subindex 3 (NMT_RequestCmd_REC.CmdTarget_U8)
+        obdSize = sizeof(cmdTarget);
+        ret = obd_readEntry(0x1F9F, 3, &cmdTarget, &obdSize);
+        if (ret != kErrorOk)
+        {
+            pParam_p->abortCode = SDO_AC_GENERAL_ERROR;
+            return ret;
+        }
+
+        // Subindex 4 (NMT_RequestCmd_REC.CmdData_DOM) is directly linked
+        // to the static variable aCmdData
+
+        // Check whether the command can be issued directly (we are MN)
+        // or needs to be forwarded (we are CN)
+        nmtState = nmtu_getNmtState();
+
+        if (NMT_IF_CN_OR_RMN(nmtState))
+        {   // Local node is CN
+            // Forward the command to the MN
+            // (this is a manufacturer specific feature)
+            ret = nmtcnu_sendNmtRequestEx(cmdTarget, (tNmtCommand)cmdId,
+                                          aCmdData, sizeof(aCmdData));
+        }
+        else
+        {   // Local node is MN
+            // Directly execute the requested NMT command
+            ret = nmtmnu_requestNmtCommand(cmdTarget, (tNmtCommand)cmdId,
+                                           aCmdData, sizeof(aCmdData));
+        }
+
+        // Return an error via SDO, if problem has occured
+        if (ret != kErrorOk)
+            pParam_p->abortCode = SDO_AC_GENERAL_ERROR;
+
+        // Reset the release flag (subindex 1)
+        *((UINT8*)pParam_p->pArg) = 0;
+    }
+
+    return ret;
+}
+
 #endif
 
 //------------------------------------------------------------------------------
