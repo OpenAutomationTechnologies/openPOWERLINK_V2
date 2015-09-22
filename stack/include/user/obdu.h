@@ -120,7 +120,7 @@ typedef tOplkError (ROM *tObdStoreLoadCallback)(tObdCbStoreParam MEM* pCbStorePa
 \brief Enumeration for Node ID setting types
 
 This structure defines constants for the types of setting the node ID.
-They are used in the function obd_setNodeId()
+They are used in the function obdu_setNodeId()
 */
 typedef enum
 {
@@ -145,35 +145,35 @@ extern "C"
 {
 #endif
 
-tOplkError obd_init(tObdInitParam MEM* pInitParam_p);
-tOplkError obd_exit(void);
-tOplkError obd_writeEntry(UINT index_p, UINT subIndex_p, void* pSrcData_p, tObdSize size_p);
-tOplkError obd_readEntry(UINT index_p, UINT subIndex_p, void* pDstData_p, tObdSize* pSize_p);
-tOplkError obd_accessOdPart(tObdPart obdPart_p, tObdDir direction_p);
-tOplkError obd_defineVar(tVarParam MEM* pVarParam_p);
-void*      obd_getObjectDataPtr(UINT index_p, UINT subIndex_p);
-tOplkError obd_registerUserOd(tObdEntryPtr pUserOd_p);
-void       obd_initVarEntry(tObdVarEntry MEM* pVarEntry_p, tObdType type_p, tObdSize obdSize_p);
-tObdSize   obd_getDataSize(UINT index_p, UINT subIndex_p);
-UINT       obd_getNodeId(void);
-tOplkError obd_setNodeId(UINT nodeId_p, tObdNodeIdType nodeIdType_p);
-tOplkError obd_isNumerical(UINT index_p, UINT subIndex_p, BOOL* pfEntryNumerical_p);
-tOplkError obd_getType(UINT index_p, UINT subIndex_p, tObdType* pType_p);
-tOplkError obd_writeEntryFromLe(UINT index_p, UINT subIndex_p, void* pSrcData_p, tObdSize size_p);
-tOplkError obd_readEntryToLe(UINT index_p, UINT subIndex_p, void* pDstData_p, tObdSize* pSize_p);
-tOplkError obd_getAccessType(UINT index_p, UINT subIndex_p, tObdAccess* pAccessType_p);
-tOplkError obd_searchVarEntry(UINT index_p, UINT subindex_p, tObdVarEntry MEM** ppVarEntry_p);
+tOplkError obdu_init(tObdInitParam MEM* pInitParam_p);
+tOplkError obdu_exit(void);
+tOplkError obdu_writeEntry(UINT index_p, UINT subIndex_p, void* pSrcData_p, tObdSize size_p);
+tOplkError obdu_readEntry(UINT index_p, UINT subIndex_p, void* pDstData_p, tObdSize* pSize_p);
+tOplkError obdu_accessOdPart(tObdPart obdPart_p, tObdDir direction_p);
+tOplkError obdu_defineVar(tVarParam MEM* pVarParam_p);
+void*      obdu_getObjectDataPtr(UINT index_p, UINT subIndex_p);
+tOplkError obdu_registerUserOd(tObdEntryPtr pUserOd_p);
+void       obdu_initVarEntry(tObdVarEntry MEM* pVarEntry_p, tObdType type_p, tObdSize obdSize_p);
+tObdSize   obdu_getDataSize(UINT index_p, UINT subIndex_p);
+UINT       obdu_getNodeId(void);
+tOplkError obdu_setNodeId(UINT nodeId_p, tObdNodeIdType nodeIdType_p);
+tOplkError obdu_isNumerical(UINT index_p, UINT subIndex_p, BOOL* pfEntryNumerical_p);
+tOplkError obdu_getType(UINT index_p, UINT subIndex_p, tObdType* pType_p);
+tOplkError obdu_writeEntryFromLe(UINT index_p, UINT subIndex_p, void* pSrcData_p, tObdSize size_p);
+tOplkError obdu_readEntryToLe(UINT index_p, UINT subIndex_p, void* pDstData_p, tObdSize* pSize_p);
+tOplkError obdu_getAccessType(UINT index_p, UINT subIndex_p, tObdAccess* pAccessType_p);
+tOplkError obdu_searchVarEntry(UINT index_p, UINT subindex_p, tObdVarEntry MEM** ppVarEntry_p);
 
 #if defined(CONFIG_OBD_USE_STORE_RESTORE) && (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
-tOplkError obd_storeLoadObjCallback(tObdStoreLoadCallback pfnCallback_p);
+tOplkError obdu_storeLoadObjCallback(tObdStoreLoadCallback pfnCallback_p);
 #endif
 
 #if defined(CONFIG_OBD_CALC_OD_SIGNATURE) && (CONFIG_OBD_CALC_OD_SIGNATURE != FALSE)
-UINT32     obd_getOdSignature(tObdPart odPart_p);
+UINT32     obdu_getOdSignature(tObdPart odPart_p);
 #endif
 
-tOplkError obd_processWrite(tSdoObdConHdl* pSdoObdConHdl_p);
-tOplkError obd_processRead(tSdoObdConHdl* pSdoObdConHdl_p);
+tOplkError obdu_processWrite(tSdoObdConHdl* pSdoObdConHdl_p);
+tOplkError obdu_processRead(tSdoObdConHdl* pSdoObdConHdl_p);
 
 #ifdef __cplusplus
 }

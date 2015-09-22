@@ -208,7 +208,7 @@ tOplkError obdal_processSdoWrite(tSdoObdConHdl* pSdoHdl_p,
         goto Exit;
     }
 
-    ret = obd_processWrite(pSdoHdl_p);
+    ret = obdu_processWrite(pSdoHdl_p);
 
     if (ret == kErrorObdIndexNotExist)
     {   // object not in the default object dictionary,
@@ -261,7 +261,7 @@ tOplkError obdal_processSdoRead(tSdoObdConHdl* pSdoHdl_p,
         goto Exit;
     }
 
-    ret = obd_processRead(pSdoHdl_p);
+    ret = obdu_processRead(pSdoHdl_p);
 
     if (ret == kErrorObdIndexNotExist)
     {   // object not in the default object dictionary,

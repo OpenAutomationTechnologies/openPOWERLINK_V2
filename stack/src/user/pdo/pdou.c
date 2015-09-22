@@ -617,7 +617,7 @@ static tOplkError callPdoChangeCb(BOOL fActivated_p, UINT nodeId_p, UINT mappPar
     {
         obdSize = sizeof(mappObjectCount_p);
         // read PDO mapping version
-        ret = obd_readEntry(mappParamIndex_p, 0x00, &mappObjectCount_p, &obdSize);
+        ret = obdu_readEntry(mappParamIndex_p, 0x00, &mappObjectCount_p, &obdSize);
         if (ret != kErrorOk)
         {   // other fatal error occurred
             return ret;
@@ -682,7 +682,7 @@ static tOplkError setupRxPdoChannelTables(
     {
         // read node ID from OD (ID:0x14XX Sub:1)
         obdSize = sizeof(nodeId);
-        ret = obd_readEntry(commParamIndex, 0x01, &nodeId, &obdSize);
+        ret = obdu_readEntry(commParamIndex, 0x01, &nodeId, &obdSize);
         switch (ret)
         {
             case kErrorObdIndexNotExist:
@@ -754,7 +754,7 @@ static tOplkError setupTxPdoChannelTables(
     {
         obdSize = sizeof(bNodeId);
         // read node ID from OD (ID:0x18XX Sub:1)
-        ret = obd_readEntry(commParamIndex, 0x01, &bNodeId, &obdSize);
+        ret = obdu_readEntry(commParamIndex, 0x01, &bNodeId, &obdSize);
         switch (ret)
         {
             case kErrorObdIndexNotExist:
@@ -1025,7 +1025,7 @@ static tOplkError checkAndConfigurePdos(UINT16 mappParamIndex_p, UINT channelCou
 
         obdSize = sizeof(mappObjectCount);
         // read mapping object count from OD
-        ret = obd_readEntry(mappParamIndex, 0x00, &mappObjectCount, &obdSize);
+        ret = obdu_readEntry(mappParamIndex, 0x00, &mappObjectCount, &obdSize);
         if (ret != kErrorOk)
             return ret;
 
@@ -1094,7 +1094,7 @@ static tOplkError checkAndConfigurePdo(UINT16 mappParamIndex_p,
 
     // read node ID from OD
     obdSize = sizeof(nodeId);
-    ret = obd_readEntry(commParamIndex, 0x01, &nodeId, &obdSize);
+    ret = obdu_readEntry(commParamIndex, 0x01, &nodeId, &obdSize);
     if (ret != kErrorOk)
     {   // fatal error occurred
         goto Exit;
@@ -1132,8 +1132,8 @@ static tOplkError checkAndConfigurePdo(UINT16 mappParamIndex_p,
 
     obdSize = sizeof(pdoChannelConf.pdoChannel.mappingVersion);
     // read PDO mapping version
-    ret = obd_readEntry(commParamIndex, 0x02,
-                        &pdoChannelConf.pdoChannel.mappingVersion, &obdSize);
+    ret = obdu_readEntry(commParamIndex, 0x02,
+                         &pdoChannelConf.pdoChannel.mappingVersion, &obdSize);
     if (ret != kErrorOk)
     {   // other fatal error occurred
         goto Exit;
@@ -1257,7 +1257,7 @@ static tOplkError getMaxPdoSize(BYTE nodeId_p, BOOL fTxPdo_p,
             payloadLimitIndex = 0x1F8B;   // NMT_MNPReqPayloadLimitList_AU16
             payloadLimitSubIndex = nodeId_p;
             obdSize = sizeof(subIndexCount);
-            ret = obd_readEntry(payloadLimitIndex, 0, &subIndexCount, &obdSize);
+            ret = obdu_readEntry(payloadLimitIndex, 0, &subIndexCount, &obdSize);
             if (ret != kErrorOk)
             {   // other fatal error occurred
                 *pAbortCode_p = SDO_AC_GENERAL_ERROR;
@@ -1282,7 +1282,7 @@ static tOplkError getMaxPdoSize(BYTE nodeId_p, BOOL fTxPdo_p,
             payloadLimitIndex = 0x1F8D;   // NMT_PResPayloadLimitList_AU16
             payloadLimitSubIndex = nodeId_p;
             obdSize = sizeof(subIndexCount);
-            ret = obd_readEntry(payloadLimitIndex, 0, &subIndexCount, &obdSize);
+            ret = obdu_readEntry(payloadLimitIndex, 0, &subIndexCount, &obdSize);
             if (ret != kErrorOk)
              {   // other fatal error occurred
                  *pAbortCode_p = SDO_AC_GENERAL_ERROR;
@@ -1298,8 +1298,8 @@ static tOplkError getMaxPdoSize(BYTE nodeId_p, BOOL fTxPdo_p,
 
     // fetch maximum PDO size from OD
     obdSize = sizeof(maxPdoSize);
-    ret = obd_readEntry(payloadLimitIndex, payloadLimitSubIndex,
-                        &maxPdoSize, &obdSize);
+    ret = obdu_readEntry(payloadLimitIndex, payloadLimitSubIndex,
+                         &maxPdoSize, &obdSize);
     if (ret != kErrorOk)
     {   // other fatal error occurred
         *pAbortCode_p = SDO_AC_GENERAL_ERROR;
@@ -1367,7 +1367,7 @@ static tOplkError checkPdoValidity(UINT mappParamIndex_p, UINT32* pAbortCode_p)
         // outside from NMT reset states the PDO should have been disabled before changing it
         obdSize = sizeof(mappObjectCount);
         // read number of mapped objects from OD; this indicates if the PDO is valid
-        ret = obd_readEntry(mappParamIndex_p, 0x00, &mappObjectCount, &obdSize);
+        ret = obdu_readEntry(mappParamIndex_p, 0x00, &mappObjectCount, &obdSize);
         if (ret != kErrorOk)
         {   // other fatal error occurred
             *pAbortCode_p = SDO_AC_GEN_INTERNAL_INCOMPATIBILITY;
@@ -1439,7 +1439,7 @@ static tOplkError checkAndSetObjectMapping(QWORD objectMapping_p,
         goto Exit;
     }
 
-    ret = obd_getType(index, subIndex, &obdType);
+    ret = obdu_getType(index, subIndex, &obdType);
     if (ret != kErrorOk)
     {   // entry doesn't exist
         *pAbortCode_p = SDO_AC_OBJECT_NOT_EXIST;
@@ -1456,7 +1456,7 @@ static tOplkError checkAndSetObjectMapping(QWORD objectMapping_p,
     }
 
     // check access type
-    ret = obd_getAccessType(index, subIndex, &accessType);
+    ret = obdu_getAccessType(index, subIndex, &accessType);
     if (ret != kErrorOk)
     {   // entry doesn't exist
         *pAbortCode_p = SDO_AC_OBJECT_NOT_EXIST;
@@ -1487,7 +1487,7 @@ static tOplkError checkAndSetObjectMapping(QWORD objectMapping_p,
         byteSize = (bitSize >> 3);
     }
 
-    obdSize = obd_getDataSize(index, subIndex);
+    obdSize = obdu_getDataSize(index, subIndex);
     if (obdSize < byteSize)
     {   // object does not exist or has smaller size
         *pAbortCode_p = SDO_AC_GENERAL_ERROR;
@@ -1495,7 +1495,7 @@ static tOplkError checkAndSetObjectMapping(QWORD objectMapping_p,
         // todo really don't want to exit here?
     }
 
-    ret = obd_isNumerical(index, subIndex, &fNumerical);
+    ret = obdu_isNumerical(index, subIndex, &fNumerical);
     if (ret != kErrorOk)
     {   // entry doesn't exist
         *pAbortCode_p = SDO_AC_OBJECT_NOT_EXIST;
@@ -1511,7 +1511,7 @@ static tOplkError checkAndSetObjectMapping(QWORD objectMapping_p,
         goto Exit;
     }
 
-    pVar = obd_getObjectDataPtr(index, subIndex);
+    pVar = obdu_getObjectDataPtr(index, subIndex);
     if (pVar == NULL)
     {   // entry doesn't exist
         *pAbortCode_p = SDO_AC_OBJECT_NOT_EXIST;
@@ -1579,8 +1579,8 @@ static tOplkError setupMappingObjects(tPdoMappObject* pMappObject_p,
     {
         // read object mapping from OD
         obdSize = sizeof(objectMapping); //&pdouInstance_g.pRxPdoChannel[0] QWORD
-        ret = obd_readEntry(mappParamIndex_p, mappSubindex, &objectMapping,
-                            &obdSize);
+        ret = obdu_readEntry(mappParamIndex_p, mappSubindex, &objectMapping,
+                             &obdSize);
         if (ret != kErrorOk)
         {   // other fatal error occurred
             *pAbortCode_p = SDO_AC_GENERAL_ERROR;

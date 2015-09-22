@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   obd.c
+\file   obdu.c
 
 \brief  Implementation of object dictionary (OD) module
 
@@ -210,7 +210,7 @@ The function initializes the OD module.
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tOplkError obd_init(tObdInitParam MEM* pInitParam_p)
+tOplkError obdu_init(tObdInitParam MEM* pInitParam_p)
 {
     tOplkError      ret;
 
@@ -230,7 +230,7 @@ tOplkError obd_init(tObdInitParam MEM* pInitParam_p)
 
     // initialize object dictionary
     // so all all VarEntries will be initialized to trash object and default values will be set to current data
-    ret = obd_accessOdPart(kObdPartAll, kObdDirInit);
+    ret = obdu_accessOdPart(kObdPartAll, kObdDirInit);
 
     return ret;
 }
@@ -246,7 +246,7 @@ The function shuts down the OD module.
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tOplkError obd_exit(void)
+tOplkError obdu_exit(void)
 {
     return kErrorOk;
 }
@@ -268,7 +268,7 @@ character.
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tOplkError obd_writeEntry(UINT index_p, UINT subIndex_p, void* pSrcData_p, tObdSize size_p)
+tOplkError obdu_writeEntry(UINT index_p, UINT subIndex_p, void* pSrcData_p, tObdSize size_p)
 {
     tOplkError              ret;
     tObdEntryPtr            pObdEntry;
@@ -305,7 +305,7 @@ transfers.
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tOplkError obd_readEntry(UINT index_p, UINT subIndex_p, void* pDstData_p, tObdSize* pSize_p)
+tOplkError obdu_readEntry(UINT index_p, UINT subIndex_p, void* pDstData_p, tObdSize* pSize_p)
 {
     tOplkError                      ret;
     tObdEntryPtr                    pObdEntry;
@@ -377,7 +377,7 @@ restores default values of one part of OD
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tOplkError obd_accessOdPart(tObdPart obdPart_p, tObdDir direction_p)
+tOplkError obdu_accessOdPart(tObdPart obdPart_p, tObdDir direction_p)
 {
     tOplkError      ret = kErrorOk;
     BOOL            fPartFount;
@@ -442,7 +442,7 @@ The function defines an OD variable.
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tOplkError obd_defineVar(tVarParam MEM* pVarParam_p)
+tOplkError obdu_defineVar(tVarParam MEM* pVarParam_p)
 {
     tOplkError              ret;
     tObdVarEntry MEM*       pVarEntry;
@@ -504,7 +504,7 @@ constant object it returns the default pointer.
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-void* obd_getObjectDataPtr(UINT index_p, UINT subIndex_p)
+void* obdu_getObjectDataPtr(UINT index_p, UINT subIndex_p)
 {
     tOplkError          ret;
     void*               pData;
@@ -543,7 +543,7 @@ The function registers a user object dictionary.
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tOplkError obd_registerUserOd(tObdEntryPtr pUserOd_p)
+tOplkError obdu_registerUserOd(tObdEntryPtr pUserOd_p)
 {
     obdInitParam_l.m_pUserPart = pUserOd_p;
     return kErrorOk;
@@ -564,7 +564,7 @@ The function will not be used for strings.
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-void obd_initVarEntry(tObdVarEntry MEM* pVarEntry_p, tObdType type_p, tObdSize obdSize_p)
+void obdu_initVarEntry(tObdVarEntry MEM* pVarEntry_p, tObdType type_p, tObdSize obdSize_p)
 {
     if ((type_p == kObdTypeDomain))
     {
@@ -577,7 +577,7 @@ void obd_initVarEntry(tObdVarEntry MEM* pVarEntry_p, tObdType type_p, tObdSize o
     else
     {
         // set address to variable data to trash object
-        // This prevents an access violation if user forgets to call obd_defineVar()
+        // This prevents an access violation if user forgets to call obdu_defineVar()
         // for this variable but mappes it in a PDO.
         pVarEntry_p->pData = &obdInstance_l.obdTrashObject[0];
         pVarEntry_p->size  = obdSize_p;
@@ -599,7 +599,7 @@ string length without terminating null-character.
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tObdSize obd_getDataSize(UINT index_p, UINT subIndex_p)
+tObdSize obdu_getDataSize(UINT index_p, UINT subIndex_p)
 {
     tOplkError          ret;
     tObdSize            obdSize;
@@ -635,7 +635,7 @@ The function gets the node ID which is stored in object 0x1F93.
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-UINT obd_getNodeId(void)
+UINT obdu_getNodeId(void)
 {
     tOplkError      ret;
     tObdSize        obdSize;
@@ -643,7 +643,7 @@ UINT obd_getNodeId(void)
 
     nodeId = 0;
     obdSize = sizeof(nodeId);
-    ret = obd_readEntry(OBD_NODE_ID_INDEX, OBD_NODE_ID_SUBINDEX, &nodeId, &obdSize);
+    ret = obdu_readEntry(OBD_NODE_ID_INDEX, OBD_NODE_ID_SUBINDEX, &nodeId, &obdSize);
     if (ret != kErrorOk)
     {
         nodeId = C_ADR_INVALID;
@@ -665,7 +665,7 @@ The function sets the node ID in object 0x1F93.
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tOplkError obd_setNodeId(UINT nodeId_p, tObdNodeIdType nodeIdType_p)
+tOplkError obdu_setNodeId(UINT nodeId_p, tObdNodeIdType nodeIdType_p)
 {
     tOplkError  ret;
     tObdSize    obdSize;
@@ -677,7 +677,7 @@ tOplkError obd_setNodeId(UINT nodeId_p, tObdNodeIdType nodeIdType_p)
 
     nodeId = (UINT8)nodeId_p;
     obdSize = sizeof(UINT8);
-    ret = obd_writeEntry(OBD_NODE_ID_INDEX, OBD_NODE_ID_SUBINDEX, &nodeId, obdSize);
+    ret = obdu_writeEntry(OBD_NODE_ID_INDEX, OBD_NODE_ID_SUBINDEX, &nodeId, obdSize);
     if (ret != kErrorOk)
         return ret;
 
@@ -703,7 +703,7 @@ tOplkError obd_setNodeId(UINT nodeId_p, tObdNodeIdType nodeIdType_p)
     }
 
     obdSize = sizeof(fHwBool);
-    ret = obd_writeEntry(OBD_NODE_ID_INDEX, OBD_NODE_ID_HWBOOL_SUBINDEX, &fHwBool, obdSize);
+    ret = obdu_writeEntry(OBD_NODE_ID_INDEX, OBD_NODE_ID_HWBOOL_SUBINDEX, &fHwBool, obdSize);
     return ret;
 }
 
@@ -723,7 +723,7 @@ The function checks if a entry is numerical or not.
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tOplkError obd_isNumerical(UINT index_p, UINT subIndex_p, BOOL* pfEntryNumerical_p)
+tOplkError obdu_isNumerical(UINT index_p, UINT subIndex_p, BOOL* pfEntryNumerical_p)
 {
     tOplkError          ret;
     tObdEntryPtr        pObdEntry;
@@ -757,7 +757,7 @@ The function returns the data type of the specified entry.
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tOplkError obd_getType(UINT index_p, UINT subIndex_p, tObdType* pType_p)
+tOplkError obdu_getType(UINT index_p, UINT subIndex_p, tObdType* pType_p)
 {
     tOplkError          ret;
     tObdEntryPtr        pObdEntry;
@@ -798,8 +798,8 @@ not set. The attribute is only checked on SDO transfers.
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tOplkError obd_readEntryToLe(UINT index_p, UINT subIndex_p, void* pDstData_p,
-                             tObdSize* pSize_p)
+tOplkError obdu_readEntryToLe(UINT index_p, UINT subIndex_p, void* pDstData_p,
+                              tObdSize* pSize_p)
 {
     tOplkError                      ret;
     tObdEntryPtr                    pObdEntry;
@@ -928,8 +928,8 @@ be performed. Strings are stored with added '\0' character.
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tOplkError obd_writeEntryFromLe(UINT index_p, UINT subIndex_p, void* pSrcData_p,
-                                tObdSize size_p)
+tOplkError obdu_writeEntryFromLe(UINT index_p, UINT subIndex_p, void* pSrcData_p,
+                                 tObdSize size_p)
 {
     tOplkError              ret;
     tObdEntryPtr            pObdEntry;
@@ -1020,7 +1020,7 @@ The function gets the access type of the entry.
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tOplkError obd_getAccessType(UINT index_p, UINT subIndex_p, tObdAccess* pAccessType_p)
+tOplkError obdu_getAccessType(UINT index_p, UINT subIndex_p, tObdAccess* pAccessType_p)
 {
     tOplkError          ret;
     tObdEntryPtr        pObdEntry;
@@ -1053,7 +1053,7 @@ The function gets the VarEntry structure of an object.
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tOplkError obd_searchVarEntry(UINT index_p, UINT subIndex_p, tObdVarEntry MEM** ppVarEntry_p)
+tOplkError obdu_searchVarEntry(UINT index_p, UINT subIndex_p, tObdVarEntry MEM** ppVarEntry_p)
 {
     tOplkError           ret;
     tObdSubEntryPtr      pSubIndexEntry;
@@ -1082,7 +1082,7 @@ archive file.
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-UINT32 obd_getOdSignature(tObdPart odPart_p)
+UINT32 obdu_getOdSignature(tObdPart odPart_p)
 {
     UINT32 odCrc = (UINT32)~0U;
 
@@ -1119,7 +1119,7 @@ The function sets the callback function for the load/store command.
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tOplkError obd_storeLoadObjCallback(tObdStoreLoadCallback pfnCallback_p)
+tOplkError obdu_storeLoadObjCallback(tObdStoreLoadCallback pfnCallback_p)
 {
     // set new address of callback function
     obdInstance_l.pfnStoreLoadObjectCb = pfnCallback_p;
@@ -1140,7 +1140,7 @@ The function processes an WriteByIndex command layer of an SDO server.
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tOplkError obd_processWrite(tSdoObdConHdl* pSdoHdl_p)
+tOplkError obdu_processWrite(tSdoObdConHdl* pSdoHdl_p)
 {
     tOplkError      ret = kErrorOk;
 
@@ -1177,7 +1177,7 @@ The function processes an ReadByIndex command layer of an SDO server.
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tOplkError obd_processRead(tSdoObdConHdl* pSdoHdl_p)
+tOplkError obdu_processRead(tSdoObdConHdl* pSdoHdl_p)
 {
     tOplkError      ret = kErrorOk;
 
@@ -1259,7 +1259,7 @@ static tOplkError initWrite(UINT        index_p,
     obdSize = getObjectSize(pSubEntry);
     pDstData = (void MEM*)getObjectDataPtr(pSubEntry);
 
-    // Function obd_writeEntry() calls event kObdEvWrStringDomain for String or
+    // Function obdu_writeEntry() calls event kObdEvWrStringDomain for String or
     // Domain which lets called module directly change the data pointer or size.
     // This prevents a recursive call to the callback function if it calls getEntry().
 #if (CONFIG_OBD_USE_STRING_DOMAIN_IN_RAM != FALSE)
@@ -1349,7 +1349,7 @@ static tOplkError writeByIdxInit(tSdoObdConHdl* pSdoHdl_p)
     tObdAccess      accessType;
     BOOL            fObjIsNumerical;
 
-    ret = obd_getAccessType(pSdoHdl_p->index, pSdoHdl_p->subIndex, &accessType);
+    ret = obdu_getAccessType(pSdoHdl_p->index, pSdoHdl_p->subIndex, &accessType);
     if (ret == kErrorObdSubindexNotExist)
     {
         goto Exit;
@@ -1371,7 +1371,7 @@ static tOplkError writeByIdxInit(tSdoObdConHdl* pSdoHdl_p)
         goto Exit;
     }
 
-    ret = obd_isNumerical(pSdoHdl_p->index,
+    ret = obdu_isNumerical(pSdoHdl_p->index,
                           pSdoHdl_p->subIndex,
                           &fObjIsNumerical);
     if (ret != kErrorOk)
@@ -1381,7 +1381,7 @@ static tOplkError writeByIdxInit(tSdoObdConHdl* pSdoHdl_p)
 
     if (fObjIsNumerical)
     {   // copy fixed size to object -> consider endianness
-        ret = obd_writeEntryFromLe(pSdoHdl_p->index,
+        ret = obdu_writeEntryFromLe(pSdoHdl_p->index,
                                    pSdoHdl_p->subIndex,
                                    pSdoHdl_p->pSrcData,
                                    pSdoHdl_p->totalPendSize);
@@ -1493,7 +1493,7 @@ static tOplkError readByIdxInit(tSdoObdConHdl* pSdoHdl_p)
         return kErrorObdOutOfMemory;
     }
 
-    ret = obd_getAccessType(pSdoHdl_p->index, pSdoHdl_p->subIndex, &accessType);
+    ret = obdu_getAccessType(pSdoHdl_p->index, pSdoHdl_p->subIndex, &accessType);
     if (ret == kErrorObdSubindexNotExist)
     {
         goto Exit;
@@ -1519,11 +1519,11 @@ static tOplkError readByIdxInit(tSdoObdConHdl* pSdoHdl_p)
     }
 
     // get size of object and pointer to start of object
-    pSdoHdl_p->totalPendSize = obd_getDataSize(pSdoHdl_p->index,
+    pSdoHdl_p->totalPendSize = obdu_getDataSize(pSdoHdl_p->index,
                                                pSdoHdl_p->subIndex);
     if (pSdoHdl_p->totalPendSize > pSdoHdl_p->dataSize)
     {   // provided buffer to small -> fill only max size
-        pSrcData = obd_getObjectDataPtr(pSdoHdl_p->index,
+        pSrcData = obdu_getObjectDataPtr(pSdoHdl_p->index,
                                         pSdoHdl_p->subIndex);
         OPLK_MEMCPY(pSdoHdl_p->pDstData, pSrcData, pSdoHdl_p->dataSize);
         // pSdoHdl_p->dataSize unchanged, no update necessary
@@ -1531,7 +1531,7 @@ static tOplkError readByIdxInit(tSdoObdConHdl* pSdoHdl_p)
     else
     {   // whole object size fits into the buffer
         // -> copy optionally with endianness consideration
-        ret = obd_readEntryToLe(pSdoHdl_p->index,
+        ret = obdu_readEntryToLe(pSdoHdl_p->index,
                                 pSdoHdl_p->subIndex,
                                 pSdoHdl_p->pDstData,
                                 (tObdSize*)&pSdoHdl_p->dataSize);
@@ -1570,7 +1570,7 @@ static tOplkError readByIdxSegm(tSdoObdConHdl* pSdoHdl_p)
         return kErrorObdOutOfMemory;
     }
 
-    pSrcData = obd_getObjectDataPtr(pSdoHdl_p->index,
+    pSrcData = obdu_getObjectDataPtr(pSdoHdl_p->index,
                                     pSdoHdl_p->subIndex);
     if (pSrcData == NULL)
     {   // entry doesn't exist
@@ -1651,7 +1651,7 @@ static tOplkError writeEntryPre(UINT index_p, UINT subIndex_p, void* pSrcData_p,
     obdSize = getObjectSize(pSubEntry);
     pDstData = (void MEM*)getObjectDataPtr(pSubEntry);
 
-    // Function obd_writeEntry() calls event kObdEvWrStringDomain for String or
+    // Function obdu_writeEntry() calls event kObdEvWrStringDomain for String or
     // Domain which lets called module directly change the data pointer or size.
     // This prevents a recursive call to the callback function if it calls getEntry().
 #if (CONFIG_OBD_USE_STRING_DOMAIN_IN_RAM != FALSE)
@@ -2571,7 +2571,7 @@ static tOplkError accessOdPartition(tObdPart currentOdPart_p, tObdEntryPtr pObdE
                         if ((access & kObdAccVar) != 0)
                         {
                             getVarEntry(pSubIndex, &pVarEntry);
-                            obd_initVarEntry(pVarEntry, pSubIndex->type, objSize);
+                            obdu_initVarEntry(pVarEntry, pSubIndex->type, objSize);
                             // at this time no application variable is defined therefore data can not be copied!
                             break;
                         }
@@ -2588,7 +2588,7 @@ static tOplkError accessOdPartition(tObdPart currentOdPart_p, tObdEntryPtr pObdE
                                 pDstData = (void MEM*)((tObdVStringDef ROM*)pSubIndex->pDefault)->pString;
                                 objSize  = ((tObdVStringDef ROM*)pSubIndex->pDefault)->size;
 
-                                ((tObdVString MEM*)pSubIndex->pCurrent)->pString = pDstData;
+                                ((tObdVString MEM*)pSubIndex->pCurrent)->pString = (char*)pDstData;
                                 ((tObdVString MEM*)pSubIndex->pCurrent)->size    = objSize;
                             }
                         }
@@ -2601,7 +2601,7 @@ static tOplkError accessOdPartition(tObdPart currentOdPart_p, tObdEntryPtr pObdE
                                 pDstData = (void MEM*)((tObdOStringDef ROM*)pSubIndex->pDefault)->pString;
                                 objSize  = ((tObdOStringDef ROM*)pSubIndex->pDefault)->size;
 
-                                ((tObdOString MEM*)pSubIndex->pCurrent)->pString = pDstData;
+                                ((tObdOString MEM*)pSubIndex->pCurrent)->pString = (BYTE*)pDstData;
                                 ((tObdOString MEM*)pSubIndex->pCurrent)->size    = objSize;
                             }
                         }

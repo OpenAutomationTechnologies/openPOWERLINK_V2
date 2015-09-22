@@ -451,8 +451,8 @@ static tOplkError processCdc(tObdCdcInfo* pCdcInfo_p)
             return ret;
         }
 
-        ret = obd_writeEntryFromLe(objectIndex, objectSubIndex, pCdcInfo_p->pCurBuffer,
-                                   (tObdSize)curDataSize);
+        ret = obdu_writeEntryFromLe(objectIndex, objectSubIndex, pCdcInfo_p->pCurBuffer,
+                                    (tObdSize)curDataSize);
         if (ret != kErrorOk)
         {
             tEventObdError          obdError;

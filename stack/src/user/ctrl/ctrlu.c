@@ -367,7 +367,7 @@ tOplkError ctrlu_initStack(tOplkApiInitParam* pInitParam_p)
     }
 
     // Register store/restore callback function
-    ret = obd_storeLoadObjCallback(cbStoreLoadObject);
+    ret = obdu_storeLoadObjCallback(cbStoreLoadObject);
     if (ret != kErrorOk)
     {
         goto Exit;
@@ -561,7 +561,7 @@ tOplkError ctrlu_shutdownStack(void)
     DEBUG_LVL_CTRL_TRACE("obdal_exit():  0x%X\n", ret);
 
 #if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
-    ret = obd_storeLoadObjCallback(NULL);
+    ret = obdu_storeLoadObjCallback(NULL);
     obdconf_exit();
 #endif
 
@@ -569,7 +569,7 @@ tOplkError ctrlu_shutdownStack(void)
     obdcdc_exit();
 #endif
 
-    ret = obd_exit();
+    ret = obdu_exit();
 
     return ret;
 }
@@ -1011,7 +1011,7 @@ static tOplkError initObd(tOplkApiInitParam* pInitParam_p)
     if (ret != kErrorOk)
         return ret;
 
-    ret = obd_init(&ObdInitParam);
+    ret = obdu_init(&ObdInitParam);
     if (ret != kErrorOk)
         return ret;
 
@@ -1045,7 +1045,7 @@ static tOplkError cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
 
     // save NMT state in OD
     nmtState = (UINT8)nmtStateChange_p.newNmtState;
-    ret = obd_writeEntry(0x1F8C, 0, &nmtState, 1);
+    ret = obdu_writeEntry(0x1F8C, 0, &nmtState, 1);
     if (ret != kErrorOk)
         return ret;
 
@@ -1072,7 +1072,7 @@ static tOplkError cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
         // standardised device profile area
         case kNmtGsResetApplication:
             // reset application part of OD
-            ret = obd_accessOdPart(kObdPartApp, kObdDirLoad);
+            ret = obdu_accessOdPart(kObdPartApp, kObdDirLoad);
             if (ret != kErrorOk)
                 return ret;
             break;
@@ -1080,7 +1080,7 @@ static tOplkError cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
         // init of the communication profile area
         case kNmtGsResetCommunication:
             // reset communication part of OD
-            ret = obd_accessOdPart(kObdPartGen, kObdDirLoad);
+            ret = obdu_accessOdPart(kObdPartGen, kObdDirLoad);
             if (ret != kErrorOk)
                 return ret;
 
@@ -1088,7 +1088,7 @@ static tOplkError cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
 
             // Check if non-volatile memory of OD archive is valid, if no then set the force update flag to TRUE
 #if (CONFIG_OBD_CALC_OD_SIGNATURE != FALSE)
-            signature = (UINT32)obd_getOdSignature(kObdPartGen);
+            signature = (UINT32)obdu_getOdSignature(kObdPartGen);
 #endif
             ret = obdconf_getPartArchiveState(kObdPartGen, signature);
             if (ret == kErrorOk)
@@ -1126,7 +1126,7 @@ static tOplkError cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
         case kNmtCsNotActive:
             // indicate completion of reset in NMT_ResetCmd_U8
             nmtState = (UINT8)kNmtCmdInvalidService;
-            ret = obd_writeEntry(0x1F9E, 0, &nmtState, 1);
+            ret = obdu_writeEntry(0x1F9E, 0, &nmtState, 1);
             if (ret != kErrorOk)
                 return ret;
             break;
@@ -1333,16 +1333,16 @@ static tOplkError updateDllConfig(tOplkApiInitParam* pInitParam_p, BOOL fUpdateI
 
     // configure Dll
     OPLK_MEMSET(&dllConfigParam, 0, sizeof(dllConfigParam));
-    dllConfigParam.nodeId = obd_getNodeId();
+    dllConfigParam.nodeId = obdu_getNodeId();
 
     // Cycle Length (0x1006: NMT_CycleLen_U32) in [us]
     obdSize = 4;
-    if ((ret = obd_readEntry(0x1006, 0, &dllConfigParam.cycleLen, &obdSize)) != kErrorOk)
+    if ((ret = obdu_readEntry(0x1006, 0, &dllConfigParam.cycleLen, &obdSize)) != kErrorOk)
         return ret;
 
     // 0x1F82: NMT_FeatureFlags_U32
     obdSize = 4;
-    if ((ret = obd_readEntry(0x1F82, 0, &dllConfigParam.featureFlags, &obdSize)) != kErrorOk)
+    if ((ret = obdu_readEntry(0x1F82, 0, &dllConfigParam.featureFlags, &obdSize)) != kErrorOk)
         return ret;
 
     // d.k. There is no dependence between FeatureFlags and async-only CN
@@ -1350,58 +1350,58 @@ static tOplkError updateDllConfig(tOplkApiInitParam* pInitParam_p, BOOL fUpdateI
 
     // 0x1C14: DLL_LossOfFrameTolerance_U32 in [ns]
     obdSize = 4;
-    if ((ret = obd_readEntry(0x1C14, 0, &dllConfigParam.lossOfFrameTolerance, &obdSize)) != kErrorOk)
+    if ((ret = obdu_readEntry(0x1C14, 0, &dllConfigParam.lossOfFrameTolerance, &obdSize)) != kErrorOk)
         return ret;
 
     // 0x1F98: NMT_CycleTiming_REC, 0x1F98.1: IsochrTxMaxPayload_U16
     obdSize = 2;
-    if ((ret = obd_readEntry(0x1F98, 1, &wTemp, &obdSize)) != kErrorOk)
+    if ((ret = obdu_readEntry(0x1F98, 1, &wTemp, &obdSize)) != kErrorOk)
         return ret;
     dllConfigParam.isochrTxMaxPayload = wTemp;
 
     // 0x1F98.2: IsochrRxMaxPayload_U16
     obdSize = 2;
-    if ((ret = obd_readEntry(0x1F98, 2, &wTemp, &obdSize)) != kErrorOk)
+    if ((ret = obdu_readEntry(0x1F98, 2, &wTemp, &obdSize)) != kErrorOk)
         return ret;
     dllConfigParam.isochrRxMaxPayload = wTemp;
 
     // 0x1F98.3: PResMaxLatency_U32
     obdSize = 4;
-    if ((ret = obd_readEntry(0x1F98, 3, &dllConfigParam.presMaxLatency, &obdSize)) != kErrorOk)
+    if ((ret = obdu_readEntry(0x1F98, 3, &dllConfigParam.presMaxLatency, &obdSize)) != kErrorOk)
         return ret;
 
     // 0x1F98.4: PReqActPayloadLimit_U16
     obdSize = 2;
-    if ((ret = obd_readEntry(0x1F98, 4, &wTemp, &obdSize)) != kErrorOk)
+    if ((ret = obdu_readEntry(0x1F98, 4, &wTemp, &obdSize)) != kErrorOk)
         return ret;
     dllConfigParam.preqActPayloadLimit = wTemp;
 
     // 0x1F98.5: PResActPayloadLimit_U16
     obdSize = 2;
-    if ((ret = obd_readEntry(0x1F98, 5, &wTemp, &obdSize)) != kErrorOk)
+    if ((ret = obdu_readEntry(0x1F98, 5, &wTemp, &obdSize)) != kErrorOk)
         return ret;
     dllConfigParam.presActPayloadLimit = wTemp;
 
     // 0x1F98.6: ASndMaxLatency_U32
     obdSize = 4;
-    if ((ret = obd_readEntry(0x1F98, 6, &dllConfigParam.asndMaxLatency, &obdSize)) != kErrorOk)
+    if ((ret = obdu_readEntry(0x1F98, 6, &dllConfigParam.asndMaxLatency, &obdSize)) != kErrorOk)
         return ret;
 
     // 0x1F98.7: MultiplCycleCnt_U8
     obdSize = 1;
-    if ((ret = obd_readEntry(0x1F98, 7, &bTemp, &obdSize)) != kErrorOk)
+    if ((ret = obdu_readEntry(0x1F98, 7, &bTemp, &obdSize)) != kErrorOk)
         return ret;
     dllConfigParam.multipleCycleCnt = bTemp;
 
     // 0x1F98.8: AsyncMTU_U16
     obdSize = 2;
-    if ((ret = obd_readEntry(0x1F98, 8, &wTemp, &obdSize)) != kErrorOk)
+    if ((ret = obdu_readEntry(0x1F98, 8, &wTemp, &obdSize)) != kErrorOk)
         return ret;
     dllConfigParam.asyncMtu = wTemp;
 
     // 0x1F98.9: Prescaler_U16
     obdSize = 2;
-    if ((ret = obd_readEntry(0x1F98, 9, &wTemp, &obdSize)) != kErrorOk)
+    if ((ret = obdu_readEntry(0x1F98, 9, &wTemp, &obdSize)) != kErrorOk)
         return ret;
     //User value passed from application will already be updated by now in updateObd
     dllConfigParam.prescaler = wTemp;
@@ -1409,12 +1409,12 @@ static tOplkError updateDllConfig(tOplkApiInitParam* pInitParam_p, BOOL fUpdateI
 #if defined(CONFIG_INCLUDE_NMT_MN)
     // 0x1F8A.1: WaitSoCPReq_U32 in [ns]
     obdSize = 4;
-    if ((ret = obd_readEntry(0x1F8A, 1, &dllConfigParam.waitSocPreq, &obdSize)) != kErrorOk)
+    if ((ret = obdu_readEntry(0x1F8A, 1, &dllConfigParam.waitSocPreq, &obdSize)) != kErrorOk)
         return ret;
 
     // 0x1F8A.2: AsyncSlotTimeout_U32 in [ns] (optional)
     obdSize = 4;
-    obd_readEntry(0x1F8A, 2, &dllConfigParam.asyncSlotTimeout, &obdSize);
+    obdu_readEntry(0x1F8A, 2, &dllConfigParam.asyncSlotTimeout, &obdSize);
 #endif
 
 #if CONFIG_DLL_PRES_CHAINING_CN != FALSE
@@ -1429,15 +1429,15 @@ static tOplkError updateDllConfig(tOplkApiInitParam* pInitParam_p, BOOL fUpdateI
         UINT32 mnWaitNotAct = 0;
 
         obdSize = 4;
-        if ((ret = obd_readEntry(0x1F89, 0x0a, &mnSwitchOverPriority, &obdSize)) != kErrorOk)
+        if ((ret = obdu_readEntry(0x1F89, 0x0a, &mnSwitchOverPriority, &obdSize)) != kErrorOk)
             return ret;
 
         obdSize = 4;
-        if ((ret = obd_readEntry(0x1F89, 0x0b, &mnSwitchOverDelay, &obdSize)) != kErrorOk)
+        if ((ret = obdu_readEntry(0x1F89, 0x0b, &mnSwitchOverDelay, &obdSize)) != kErrorOk)
             return ret;
 
         obdSize = 4;
-        if ((ret = obd_readEntry(0x1F89, 0x0c, &mnSwitchOverCycleDivider, &obdSize)) != kErrorOk)
+        if ((ret = obdu_readEntry(0x1F89, 0x0c, &mnSwitchOverCycleDivider, &obdSize)) != kErrorOk)
             return ret;
 
         dllConfigParam.switchOverTimeMn = (UINT32)(dllConfigParam.cycleLen +
@@ -1449,7 +1449,7 @@ static tOplkError updateDllConfig(tOplkApiInitParam* pInitParam_p, BOOL fUpdateI
                 mnSwitchOverCycleDivider));
 
         obdSize = 4;
-        if ((ret = obd_readEntry(0x1F89, 0x01, &mnWaitNotAct, &obdSize)) != kErrorOk)
+        if ((ret = obdu_readEntry(0x1F89, 0x01, &mnWaitNotAct, &obdSize)) != kErrorOk)
             return ret;
 
         dllConfigParam.reducedSwitchOverTimeMn = mnWaitNotAct;
@@ -1470,30 +1470,30 @@ static tOplkError updateDllConfig(tOplkApiInitParam* pInitParam_p, BOOL fUpdateI
         OPLK_MEMSET(&dllIdentParam, 0, sizeof(dllIdentParam));
 
         obdSize = 4;
-        if ((ret = obd_readEntry(0x1000, 0, &dllIdentParam.deviceType, &obdSize)) != kErrorOk)
+        if ((ret = obdu_readEntry(0x1000, 0, &dllIdentParam.deviceType, &obdSize)) != kErrorOk)
             return ret;
 
         obdSize = 4;
-        if ((ret = obd_readEntry(0x1018, 1, &dllIdentParam.vendorId, &obdSize)) != kErrorOk)
+        if ((ret = obdu_readEntry(0x1018, 1, &dllIdentParam.vendorId, &obdSize)) != kErrorOk)
             return ret;
 
         obdSize = 4;
-        if ((ret = obd_readEntry(0x1018, 2, &dllIdentParam.productCode, &obdSize)) != kErrorOk)
+        if ((ret = obdu_readEntry(0x1018, 2, &dllIdentParam.productCode, &obdSize)) != kErrorOk)
             return ret;
 
         obdSize = 4;
-        if ((ret = obd_readEntry(0x1018, 3, &dllIdentParam.revisionNumber, &obdSize)) != kErrorOk)
+        if ((ret = obdu_readEntry(0x1018, 3, &dllIdentParam.revisionNumber, &obdSize)) != kErrorOk)
             return ret;
 
         obdSize = 4;
-        if ((ret = obd_readEntry(0x1018, 4, &dllIdentParam.serialNumber, &obdSize)) != kErrorOk)
+        if ((ret = obdu_readEntry(0x1018, 4, &dllIdentParam.serialNumber, &obdSize)) != kErrorOk)
             return ret;
 
         dllIdentParam.ipAddress = pInitParam_p->ipAddress;
         dllIdentParam.subnetMask = pInitParam_p->subnetMask;
 
         obdSize = sizeof(dllIdentParam.defaultGateway);
-        ret = obd_readEntry(0x1E40, 5, &dllIdentParam.defaultGateway, &obdSize);
+        ret = obdu_readEntry(0x1E40, 5, &dllIdentParam.defaultGateway, &obdSize);
         if (ret != kErrorOk)
         {   // NWL_IpAddrTable_Xh_REC.DefaultGateway_IPAD seams to not exist,
             // so use the one supplied in the init parameter
@@ -1515,18 +1515,18 @@ static tOplkError updateDllConfig(tOplkApiInitParam* pInitParam_p, BOOL fUpdateI
 #endif
 
         obdSize = sizeof(dllIdentParam.sHostname);
-        if ((ret = obd_readEntry(0x1F9A, 0, &dllIdentParam.sHostname[0], &obdSize)) != kErrorOk)
+        if ((ret = obdu_readEntry(0x1F9A, 0, &dllIdentParam.sHostname[0], &obdSize)) != kErrorOk)
         {   // NMT_HostName_VSTR seams to not exist,
             // so use the one supplied in the init parameter
             OPLK_MEMCPY(dllIdentParam.sHostname, pInitParam_p->sHostname, sizeof(dllIdentParam.sHostname));
         }
 
         obdSize = 4;
-        obd_readEntry(0x1020, 1, &dllIdentParam.verifyConfigurationDate, &obdSize);
+        obdu_readEntry(0x1020, 1, &dllIdentParam.verifyConfigurationDate, &obdSize);
         // ignore any error, because this object is optional
 
         obdSize = 4;
-        obd_readEntry(0x1020, 2, &dllIdentParam.verifyConfigurationTime, &obdSize);
+        obdu_readEntry(0x1020, 2, &dllIdentParam.verifyConfigurationTime, &obdSize);
         // ignore any error, because this object is optional
 
         dllIdentParam.applicationSwDate = pInitParam_p->applicationSwDate;
@@ -1561,7 +1561,7 @@ static tOplkError updateSdoConfig(void)
     DWORD               sdoSequTimeout;
 
     obdSize = sizeof(sdoSequTimeout);
-    ret = obd_readEntry(0x1300, 0, &sdoSequTimeout, &obdSize);
+    ret = obdu_readEntry(0x1300, 0, &sdoSequTimeout, &obdSize);
     if (ret != kErrorOk)
         return ret;
 
@@ -1592,78 +1592,68 @@ static tOplkError updateObd(tOplkApiInitParam* pInitParam_p, BOOL fDisableUpdate
     BYTE                bTemp;
 
     // set node id in OD
-    ret = obd_setNodeId(pInitParam_p->nodeId,    // node id
-                        kObdNodeIdHardware);     // set by hardware
+    ret = obdu_setNodeId(pInitParam_p->nodeId,    // node id
+                        kObdNodeIdHardware);      // set by hardware
     if (ret != kErrorOk)
         return ret;
 
     if ((!fDisableUpdateStoredConf_p) && (pInitParam_p->cycleLen != UINT_MAX))
-    {
-        obd_writeEntry(0x1006, 0, &pInitParam_p->cycleLen, 4);
-    }
+        obdu_writeEntry(0x1006, 0, &pInitParam_p->cycleLen, 4);
 
     if ((!fDisableUpdateStoredConf_p) && (pInitParam_p->lossOfFrameTolerance != UINT_MAX))
-    {
-        obd_writeEntry(0x1C14, 0, &pInitParam_p->lossOfFrameTolerance, 4);
-    }
+        obdu_writeEntry(0x1C14, 0, &pInitParam_p->lossOfFrameTolerance, 4);
 
     // d.k. There is no dependance between FeatureFlags and async-only CN.
     if (pInitParam_p->featureFlags != UINT_MAX)
-    {
-        obd_writeEntry(0x1F82, 0, &pInitParam_p->featureFlags, 4);
-    }
+        obdu_writeEntry(0x1F82, 0, &pInitParam_p->featureFlags, 4);
 
     wTemp = (WORD)pInitParam_p->isochrTxMaxPayload;
-    obd_writeEntry(0x1F98, 1, &wTemp, 2);
+    obdu_writeEntry(0x1F98, 1, &wTemp, 2);
 
     wTemp = (WORD)pInitParam_p->isochrRxMaxPayload;
-    obd_writeEntry(0x1F98, 2, &wTemp, 2);
+    obdu_writeEntry(0x1F98, 2, &wTemp, 2);
 
-    obd_writeEntry(0x1F98, 3, &pInitParam_p->presMaxLatency, 4);
+    obdu_writeEntry(0x1F98, 3, &pInitParam_p->presMaxLatency, 4);
 
     if (((!fDisableUpdateStoredConf_p) && pInitParam_p->preqActPayloadLimit <= C_DLL_ISOCHR_MAX_PAYL))
     {
         wTemp = (WORD)pInitParam_p->preqActPayloadLimit;
-        obd_writeEntry(0x1F98, 4, &wTemp, 2);
+        obdu_writeEntry(0x1F98, 4, &wTemp, 2);
     }
 
     if (((!fDisableUpdateStoredConf_p) && pInitParam_p->presActPayloadLimit <= C_DLL_ISOCHR_MAX_PAYL))
     {
         wTemp = (WORD)pInitParam_p->presActPayloadLimit;
-        obd_writeEntry(0x1F98, 5, &wTemp, 2);
+        obdu_writeEntry(0x1F98, 5, &wTemp, 2);
     }
 
-    obd_writeEntry(0x1F98, 6, &pInitParam_p->asndMaxLatency, 4);
+    obdu_writeEntry(0x1F98, 6, &pInitParam_p->asndMaxLatency, 4);
 
     if ((!fDisableUpdateStoredConf_p) && (pInitParam_p->multiplCylceCnt <= 0xFF))
     {
         bTemp = (BYTE)pInitParam_p->multiplCylceCnt;
-        obd_writeEntry(0x1F98, 7, &bTemp, 1);
+        obdu_writeEntry(0x1F98, 7, &bTemp, 1);
     }
 
     if ((!fDisableUpdateStoredConf_p) && (pInitParam_p->asyncMtu <= C_DLL_MAX_ASYNC_MTU))
     {
         wTemp = (WORD)pInitParam_p->asyncMtu;
-        obd_writeEntry(0x1F98, 8, &wTemp, 2);
+        obdu_writeEntry(0x1F98, 8, &wTemp, 2);
     }
 
     if ((!fDisableUpdateStoredConf_p) && (pInitParam_p->prescaler <= 1000))
     {
         wTemp = (WORD)pInitParam_p->prescaler;
-        obd_writeEntry(0x1F98, 9, &wTemp, 2);
+        obdu_writeEntry(0x1F98, 9, &wTemp, 2);
     }
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
     if ((!fDisableUpdateStoredConf_p) && (pInitParam_p->waitSocPreq != UINT_MAX))
-    {
-        obd_writeEntry(0x1F8A, 1, &pInitParam_p->waitSocPreq, 4);
-    }
+        obdu_writeEntry(0x1F8A, 1, &pInitParam_p->waitSocPreq, 4);
 
     if ((!fDisableUpdateStoredConf_p) && (pInitParam_p->asyncSlotTimeout != 0) &&
         (pInitParam_p->asyncSlotTimeout != UINT_MAX))
-    {
-        obd_writeEntry(0x1F8A, 2, &pInitParam_p->asyncSlotTimeout, 4);
-    }
+        obdu_writeEntry(0x1F8A, 2, &pInitParam_p->asyncSlotTimeout, 4);
 #endif
 
 #if defined(CONFIG_INCLUDE_NMT_RMN)
@@ -1673,76 +1663,66 @@ static tOplkError updateObd(tOplkApiInitParam* pInitParam_p, BOOL fDisableUpdate
         if (pInitParam_p->nodeId > C_ADR_MN_DEF_NODE_ID)
         {
             switchOverPriority = pInitParam_p->nodeId - C_ADR_MN_DEF_NODE_ID;
-            obd_writeEntry(0x1F89, 0x0a, &switchOverPriority, 4);
+            obdu_writeEntry(0x1F89, 0x0a, &switchOverPriority, 4);
         }
     }
 #endif
 
     // configure Identity
     if (pInitParam_p->deviceType != UINT_MAX)
-    {
-        obd_writeEntry(0x1000, 0, &pInitParam_p->deviceType, 4);
-    }
+        obdu_writeEntry(0x1000, 0, &pInitParam_p->deviceType, 4);
 
     if (pInitParam_p->vendorId != UINT_MAX)
-    {
-        obd_writeEntry(0x1018, 1, &pInitParam_p->vendorId, 4);
-    }
+        obdu_writeEntry(0x1018, 1, &pInitParam_p->vendorId, 4);
 
     if (pInitParam_p->productCode != UINT_MAX)
-    {
-        obd_writeEntry(0x1018, 2, &pInitParam_p->productCode, 4);
-    }
+        obdu_writeEntry(0x1018, 2, &pInitParam_p->productCode, 4);
 
     if (pInitParam_p->revisionNumber != UINT_MAX)
-    {
-        obd_writeEntry(0x1018, 3, &pInitParam_p->revisionNumber, 4);
-    }
+        obdu_writeEntry(0x1018, 3, &pInitParam_p->revisionNumber, 4);
 
     if (pInitParam_p->serialNumber != UINT_MAX)
-    {
-        obd_writeEntry(0x1018, 4, &pInitParam_p->serialNumber, 4);
-    }
+        obdu_writeEntry(0x1018, 4, &pInitParam_p->serialNumber, 4);
 
     if (pInitParam_p->pDevName != NULL)
     {
         // write Device Name (0x1008)
-        obd_writeEntry(0x1008, 0, (void*)pInitParam_p->pDevName,
-                       (tObdSize)strlen(pInitParam_p->pDevName));
+        obdu_writeEntry(0x1008, 0, (void*)pInitParam_p->pDevName,
+                        (tObdSize)strlen(pInitParam_p->pDevName));
     }
 
     if (pInitParam_p->pHwVersion != NULL)
     {
         // write Hardware version (0x1009)
-        obd_writeEntry(0x1009, 0, (void*)pInitParam_p->pHwVersion,
-                       (tObdSize)strlen(pInitParam_p->pHwVersion));
+        obdu_writeEntry(0x1009, 0, (void*)pInitParam_p->pHwVersion,
+                        (tObdSize)strlen(pInitParam_p->pHwVersion));
     }
 
     if (pInitParam_p->pSwVersion != NULL)
     {
         // write Software version (0x100A)
-        obd_writeEntry(0x100A, 0, (void*)pInitParam_p->pSwVersion,
-                       (tObdSize)strlen(pInitParam_p->pSwVersion));
+        obdu_writeEntry(0x100A, 0, (void*)pInitParam_p->pSwVersion,
+                        (tObdSize)strlen(pInitParam_p->pSwVersion));
     }
 
 #if defined(CONFIG_INCLUDE_VETH)
     // write NMT_HostName_VSTR (0x1F9A)
-    obd_writeEntry(0x1F9A, 0, (void*)&pInitParam_p->sHostname[0],
-                   sizeof(pInitParam_p->sHostname));
+    obdu_writeEntry(0x1F9A, 0, (void*)&pInitParam_p->sHostname[0],
+                    sizeof(pInitParam_p->sHostname));
 
     //DEBUG_LVL_CTRL_TRACE("%s: write NMT_HostName_VSTR %d\n", __func__, Ret);
 
     // write NWL_IpAddrTable_Xh_REC.Addr_IPAD (0x1E40/2)
-    obd_writeEntry(0x1E40, 2, (void*)&pInitParam_p->ipAddress,
-                   sizeof(pInitParam_p->ipAddress));
+    obdu_writeEntry(0x1E40, 2, (void*)&pInitParam_p->ipAddress,
+                    sizeof(pInitParam_p->ipAddress));
 
     // write NWL_IpAddrTable_Xh_REC.NetMask_IPAD (0x1E40/3)
-    obd_writeEntry(0x1E40, 3, (void*)&pInitParam_p->subnetMask,
-                   sizeof(pInitParam_p->subnetMask));
+    obdu_writeEntry(0x1E40, 3, (void*)&pInitParam_p->subnetMask,
+                    sizeof(pInitParam_p->subnetMask));
 
     // write NWL_IpAddrTable_Xh_REC.DefaultGateway_IPAD (0x1E40/5)
-    obd_writeEntry(0x1E40, 5, (void*)&pInitParam_p->defaultGateway,
-                   sizeof(pInitParam_p->defaultGateway));
+    obdu_writeEntry(0x1E40, 5, (void*)&pInitParam_p->defaultGateway,
+                    sizeof(pInitParam_p->defaultGateway));
 #endif
 
     // ignore return code
@@ -1802,7 +1782,7 @@ static tOplkError handleObdVerifyConf(tObdCbParam MEM* pParam_p)
         UINT32  verifyConfInvalid = 0;
 
         // Set CFM_VerifyConfiguration_REC.VerifyConfInvalid_U32 to 0
-        ret = obd_writeEntry(0x1020, 4, &verifyConfInvalid, 4);
+        ret = obdu_writeEntry(0x1020, 4, &verifyConfInvalid, 4);
 
         // ignore any error because this object is optional
         ret = kErrorOk;
@@ -2200,7 +2180,7 @@ static tOplkError handleObdRequestCmd(tObdCbParam MEM* pParam_p)
 
         // Read value of subindex 2 (NMT_RequestCmd_REC.CmdID_U8)
         obdSize = sizeof(cmdId);
-        ret = obd_readEntry(0x1F9F, 2, &cmdId, &obdSize);
+        ret = obdu_readEntry(0x1F9F, 2, &cmdId, &obdSize);
         if (ret != kErrorOk)
         {
             pParam_p->abortCode = SDO_AC_GENERAL_ERROR;
@@ -2209,7 +2189,7 @@ static tOplkError handleObdRequestCmd(tObdCbParam MEM* pParam_p)
 
         // Read value of subindex 3 (NMT_RequestCmd_REC.CmdTarget_U8)
         obdSize = sizeof(cmdTarget);
-        ret = obd_readEntry(0x1F9F, 3, &cmdTarget, &obdSize);
+        ret = obdu_readEntry(0x1F9F, 3, &cmdTarget, &obdSize);
         if (ret != kErrorOk)
         {
             pParam_p->abortCode = SDO_AC_GENERAL_ERROR;
@@ -2381,7 +2361,7 @@ static tOplkError storeOdPart(tObdCbParam MEM* pParam_p)
 
         // Read all storable objects of selected OD part and store the
         // current object values to non-volatile memory
-        ret = obd_accessOdPart(odPart, kObdDirStore);
+        ret = obdu_accessOdPart(odPart, kObdDirStore);
         if (ret != kErrorOk)
         {
             // Abort SDO because access failed
@@ -2471,7 +2451,7 @@ static tOplkError restoreOdPart(tObdCbParam MEM* pParam_p)
             goto Exit;
         }
 
-        ret = obd_accessOdPart(odPart, kObdDirRestore);
+        ret = obdu_accessOdPart(odPart, kObdDirRestore);
         if (ret != kErrorOk)
         {
             // abort SDO
@@ -2525,7 +2505,7 @@ static tOplkError cbStoreLoadObject(tObdCbStoreParam MEM* pCbStoreParam_p)
         case kObdCmdOpenWrite:
             // Create archive to write all objects of this OD part
 #if (CONFIG_OBD_CALC_OD_SIGNATURE != FALSE)
-            signature = (UINT32)obd_getOdSignature(odPart);
+            signature = (UINT32)obdu_getOdSignature(odPart);
 #endif
             ret = obdconf_createPart(odPart, signature);
             break;
@@ -2545,7 +2525,7 @@ static tOplkError cbStoreLoadObject(tObdCbStoreParam MEM* pCbStoreParam_p)
         case kObdCmdOpenRead:
             // Check signature for data valid on medium for this OD part
 #if (CONFIG_OBD_CALC_OD_SIGNATURE != FALSE)
-            signature = (UINT32)obd_getOdSignature(odPart);
+            signature = (UINT32)obdu_getOdSignature(odPart);
 #endif
             archiveState = obdconf_getPartArchiveState(odPart, signature);
             if ((archiveState == kErrorOk) || ((archiveState == kErrorObdStoreDataObsolete)))
@@ -2608,7 +2588,7 @@ static tOplkError initDefaultOdPartArchive(void)
             case kObdPartMan:
             case kObdPartDev:
 #if (CONFIG_OBD_CALC_OD_SIGNATURE != FALSE)
-            signature = (UINT32)obd_getOdSignature(curOdPart);
+            signature = (UINT32)obdu_getOdSignature(curOdPart);
 #endif
                 if (obdconf_getPartArchiveState(curOdPart, signature) == kErrorObdStoreHwError)
                 {

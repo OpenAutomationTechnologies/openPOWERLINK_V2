@@ -408,7 +408,7 @@ tOplkError oplk_linkObject(UINT objIndex_p, void* pVar_p, UINT* pVarEntries_p,
         // because user wants to link a variable to a subindex unequal 0x00
         // read number of entries
         entrySize = (tObdSize)sizeof(indexEntries);
-        ret = obd_readEntry(objIndex_p, 0x00, (void*)&indexEntries, &entrySize);
+        ret = obdu_readEntry(objIndex_p, 0x00, (void*)&indexEntries, &entrySize);
         if ((ret != kErrorOk) || (indexEntries == 0x00))
         {
             // Object doesn't exist or invalid entry number
@@ -435,7 +435,7 @@ tOplkError oplk_linkObject(UINT objIndex_p, void* pVar_p, UINT* pVarEntries_p,
         // if passed entry size is 0, then get size from OD
         if (*pEntrySize_p == 0x00)
         {
-            if ((entrySize = obd_getDataSize(objIndex_p, subindex)) == 0x00)
+            if ((entrySize = obdu_getDataSize(objIndex_p, subindex)) == 0x00)
             {
                 // invalid entry size (maybe object doesn't exist or entry of type DOMAIN is empty)
                 return kErrorObdSubindexNotExist;
@@ -453,7 +453,7 @@ tOplkError oplk_linkObject(UINT objIndex_p, void* pVar_p, UINT* pVarEntries_p,
         usedSize += entrySize;
         pData += entrySize;
 
-        if ((ret = obd_defineVar(&varParam)) != kErrorOk)
+        if ((ret = obdu_defineVar(&varParam)) != kErrorOk)
             break;
     }
 
@@ -514,10 +514,10 @@ tOplkError oplk_readObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT i
     if ((index_p == 0) || (pDstData_le_p == NULL) || (pSize_p == NULL) || (*pSize_p == 0))
         return kErrorApiInvalidParam;
 
-    if (nodeId_p == 0 || nodeId_p == obd_getNodeId())
+    if (nodeId_p == 0 || nodeId_p == obdu_getNodeId())
     {   // local OD access can be performed
         obdSize = (tObdSize)*pSize_p;
-        ret = obd_readEntryToLe(index_p, subindex_p, pDstData_le_p, &obdSize);
+        ret = obdu_readEntryToLe(index_p, subindex_p, pDstData_le_p, &obdSize);
         *pSize_p = (UINT)obdSize;
     }
     else
@@ -611,9 +611,9 @@ tOplkError oplk_writeObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT 
     if ((index_p == 0) || (pSrcData_le_p == NULL) || (size_p == 0))
         return kErrorApiInvalidParam;
 
-    if (nodeId_p == 0 || nodeId_p == obd_getNodeId())
+    if (nodeId_p == 0 || nodeId_p == obdu_getNodeId())
     {   // local OD access can be performed
-        ret = obd_writeEntryFromLe(index_p, subindex_p, pSrcData_le_p, size_p);
+        ret = obdu_writeEntryFromLe(index_p, subindex_p, pSrcData_le_p, size_p);
     }
     else
     {   // perform SDO transfer
@@ -849,7 +849,7 @@ tOplkError oplk_readLocalObject(UINT index_p, UINT subindex_p, void* pDstData_p,
         return kErrorApiNotInitialized;
 
     obdSize = (tObdSize)*pSize_p;
-    ret = obd_readEntry(index_p, subindex_p, pDstData_p, &obdSize);
+    ret = obdu_readEntry(index_p, subindex_p, pDstData_p, &obdSize);
     *pSize_p = (UINT)obdSize;
 
     return ret;
@@ -880,7 +880,7 @@ tOplkError oplk_writeLocalObject(UINT index_p, UINT subindex_p, void* pSrcData_p
     if (!ctrlu_stackIsInitialized())
         return kErrorApiNotInitialized;
 
-    return obd_writeEntry(index_p, subindex_p, pSrcData_p, (tObdSize)size_p);
+    return obdu_writeEntry(index_p, subindex_p, pSrcData_p, (tObdSize)size_p);
 }
 
 //------------------------------------------------------------------------------
@@ -929,7 +929,7 @@ tOplkError oplk_sendAsndFrame(UINT8 dstNodeId_p, tAsndFrame* pAsndFrame_p,
 
     // Check size against configured AsyncMTU value
     obdSize = sizeof(UINT16);
-    ret = obd_readEntry(0x1F98, 8, &asyncMtu, &obdSize);
+    ret = obdu_readEntry(0x1F98, 8, &asyncMtu, &obdSize);
     if (ret != kErrorOk)
         return kErrorReject;
 

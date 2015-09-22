@@ -79,7 +79,7 @@ SET(USER_SOURCES
     ${USER_SOURCE_DIR}/api/processimage.c
     ${USER_SOURCE_DIR}/api/sdotest.c
     ${USER_SOURCE_DIR}/api/service.c
-    ${USER_SOURCE_DIR}/obd/obd.c
+    ${USER_SOURCE_DIR}/obd/obdu.c
     ${USER_SOURCE_DIR}/obd/obdcreate.c
     ${USER_SOURCE_DIR}/obd/obdal.c
     ${USER_SOURCE_DIR}/dll/dllucal.c

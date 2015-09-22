@@ -352,19 +352,19 @@ static tOplkError linkErrorCounter(tErrorObject* pErrorCounter_p, UINT index_p)
 
     varParam.pData = &(pErrorCounter_p->cumulativeCnt);
     varParam.subindex = 0x01;
-    ret = obd_defineVar(&varParam);
+    ret = obdu_defineVar(&varParam);
     if (ret != kErrorOk)
         return ret;
 
     varParam.pData = &(pErrorCounter_p->thresholdCnt);
     varParam.subindex = 0x02;
-    ret = obd_defineVar(&varParam);
+    ret = obdu_defineVar(&varParam);
     if (ret != kErrorOk)
         return ret;
 
     varParam.pData = &(pErrorCounter_p->threshold);
     varParam.subindex = 0x03;
-    ret = obd_defineVar(&varParam);
+    ret = obdu_defineVar(&varParam);
     return ret;
 }
 
@@ -394,7 +394,7 @@ static tOplkError checkErrorObject(UINT index_p, BYTE* pEntries_p)
     BYTE            indexEntries;
 
     entrySize = (tObdSize)sizeof(indexEntries);
-    ret = obd_readEntry(index_p, 0x00, (void*)&indexEntries, &entrySize);
+    ret = obdu_readEntry(index_p, 0x00, (void*)&indexEntries, &entrySize);
 
     if ((ret != kErrorOk) || (indexEntries == 0x00))
     {
@@ -458,21 +458,21 @@ static tOplkError linkMnCnLossPresErrors(tErrHndObjects* pError_p)
         // CumulativeCnt
         varParam.index = OID_DLL_MNCN_LOSSPRES_CUMCNT_AU32;
         varParam.pData = &(pErrCnt->cumulativeCnt);
-        ret = obd_defineVar(&varParam);
+        ret = obdu_defineVar(&varParam);
         if (ret != kErrorOk)
             break;
 
         // ThresholdCnt 1C08
         varParam.index = OID_DLL_MNCN_LOSSPRES_THRCNT_AU32;
         varParam.pData = &(pErrCnt->thresholdCnt);
-        ret = obd_defineVar(&varParam);
+        ret = obdu_defineVar(&varParam);
         if (ret != kErrorOk)
             break;
 
         // Threshold 1C09
         varParam.index = OID_DLL_MNCN_LOSSPRES_THRESHOLD_AU32;
         varParam.pData = &(pErrCnt->threshold);
-        ret = obd_defineVar(&varParam);
+        ret = obdu_defineVar(&varParam);
         if (ret != kErrorOk)
             break;
 

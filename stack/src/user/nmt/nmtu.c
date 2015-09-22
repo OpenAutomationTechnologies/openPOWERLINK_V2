@@ -309,7 +309,7 @@ static tOplkError configureDll(void)
 
     // read number of nodes from object 0x1F81/0
     obdSize = sizeof(count);
-    ret = obd_readEntry(0x1F81, 0, &count, &obdSize);
+    ret = obdu_readEntry(0x1F81, 0, &count, &obdSize);
     if ((ret == kErrorObdIndexNotExist) || (ret == kErrorObdSubindexNotExist))
     {
         return kErrorOk;
@@ -322,7 +322,7 @@ static tOplkError configureDll(void)
     for (index = 1; index <= count; index++)
     {
         obdSize = sizeof(nodeCfg);
-        ret = obd_readEntry(0x1F81, index, &nodeCfg, &obdSize);
+        ret = obdu_readEntry(0x1F81, index, &nodeCfg, &obdSize);
         if (ret == kErrorObdSubindexNotExist)
         {   // not all subindexes of object 0x1F81 have to exist
             continue;
@@ -337,7 +337,7 @@ static tOplkError configureDll(void)
             dllNodeInfo.nodeId = index;
 
             obdSize = sizeof(dllNodeInfo.presPayloadLimit);
-            ret = obd_readEntry(0x1F8D, index, &dllNodeInfo.presPayloadLimit, &obdSize);
+            ret = obdu_readEntry(0x1F8D, index, &dllNodeInfo.presPayloadLimit, &obdSize);
             if ((ret == kErrorObdIndexNotExist) || (ret == kErrorObdSubindexNotExist))
             {
                 dllNodeInfo.presPayloadLimit = 0;
@@ -351,12 +351,12 @@ static tOplkError configureDll(void)
             if ((nodeCfg & (NMT_NODEASSIGN_NODE_IS_CN | NMT_NODEASSIGN_PRES_CHAINING)) == NMT_NODEASSIGN_NODE_IS_CN)
             {   // node is CN
                 obdSize = sizeof(dllNodeInfo.preqPayloadLimit);
-                ret = obd_readEntry(0x1F8B, index, &dllNodeInfo.preqPayloadLimit, &obdSize);
+                ret = obdu_readEntry(0x1F8B, index, &dllNodeInfo.preqPayloadLimit, &obdSize);
                 if (ret != kErrorOk)
                     return ret;
 
                 obdSize = sizeof(dllNodeInfo.presTimeoutNs);
-                ret = obd_readEntry(0x1F92, index, &dllNodeInfo.presTimeoutNs, &obdSize);
+                ret = obdu_readEntry(0x1F92, index, &dllNodeInfo.presTimeoutNs, &obdSize);
                 if (ret != kErrorOk)
                     return ret;
             }
@@ -435,7 +435,7 @@ static BOOL processGeneralStateChange(tNmtState newNmtState_p, tOplkError* pRet_
 
 #if defined(CONFIG_INCLUDE_NMT_RMN)
             obdSize = sizeof(startUp);
-            ret = obd_readEntry(0x1F80, 0x00, &startUp, &obdSize);
+            ret = obdu_readEntry(0x1F80, 0x00, &startUp, &obdSize);
             if (ret != kErrorOk)
                 break;
 
@@ -446,7 +446,7 @@ static BOOL processGeneralStateChange(tNmtState newNmtState_p, tOplkError* pRet_
             }
 #endif
             // get node ID from OD
-            nodeId = obd_getNodeId();
+            nodeId = obdu_getNodeId();
             //check node ID if not should be master or slave
             if (nodeId == C_ADR_MN_DEF_NODE_ID)
             {   // node shall be MN
@@ -501,7 +501,7 @@ static BOOL processMnStateChange(tNmtState newNmtState_p, tOplkError* pRet_p)
             // create timer to switch automatically to BasicEthernet/PreOp1 if no other MN active in network
             // check NMT_StartUp_U32.Bit13
             obdSize = sizeof(startUp);
-            ret = obd_readEntry(0x1F80, 0x00, &startUp, &obdSize);
+            ret = obdu_readEntry(0x1F80, 0x00, &startUp, &obdSize);
             if (ret != kErrorOk)
                 break;
 
@@ -514,7 +514,7 @@ static BOOL processMnStateChange(tNmtState newNmtState_p, tOplkError* pRet_p)
         case kNmtRmsNotActive:
             // read NMT_BootTime_REC.MNWaitNotAct_U32 from OD
             obdSize = sizeof(waitTime);
-            ret = obd_readEntry(0x1F89, 0x01, &waitTime, &obdSize);
+            ret = obdu_readEntry(0x1F89, 0x01, &waitTime, &obdSize);
             if (ret != kErrorOk)
                 break;
 
@@ -528,7 +528,7 @@ static BOOL processMnStateChange(tNmtState newNmtState_p, tOplkError* pRet_p)
 
             // read NMT_BootTime_REC.MNWaitPreOp1_U32 from OD
             obdSize = sizeof(waitTime);
-            ret = obd_readEntry(0x1F89, 0x03, &waitTime, &obdSize);
+            ret = obdu_readEntry(0x1F89, 0x03, &waitTime, &obdSize);
             if (ret != kErrorOk)
             {
                 // ignore error, because this timeout is optional
@@ -599,7 +599,7 @@ static BOOL processCnStateChange(tNmtState newNmtState_p, tOplkError* pRet_p)
             // is available in the network
             // read NMT_CNBasicEthernetTimeout_U32 from OD
             obdSize = sizeof(basicEthernetTimeout);
-            ret = obd_readEntry(0x1F99, 0x00, &basicEthernetTimeout, &obdSize);
+            ret = obdu_readEntry(0x1F99, 0x00, &basicEthernetTimeout, &obdSize);
             if (ret != kErrorOk)
                 break;
 
