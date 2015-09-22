@@ -801,6 +801,14 @@ tOplkError ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
             break;
 #endif
         default:
+#if defined(CONFIG_INCLUDE_PDO)
+            // PDO mapping objects
+            if (((pParam_p->index >= 0x1400) && (pParam_p->index <= 0x14FF)) ||
+                ((pParam_p->index >= 0x1600) && (pParam_p->index <= 0x16FF)) ||
+                ((pParam_p->index >= 0x1800) && (pParam_p->index <= 0x18FF)) ||
+                ((pParam_p->index >= 0x1A00) && (pParam_p->index <= 0x1AFF)))
+                ret = pdou_cbObdAccess(pParam_p);
+#endif
             break;
     }
 
