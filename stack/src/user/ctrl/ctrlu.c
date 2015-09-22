@@ -767,6 +767,12 @@ tOplkError ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
             break;
 #endif
 
+#if defined(CONFIG_INCLUDE_CFM)
+        case 0x1F22:    // CFM_ConciseDcfList_ADOM
+            ret = cfmu_cbObdAccess(pParam_p);
+            break;
+#endif
+
 #if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
         case 0x1010:    // NMT_StoreParam_REC
             // Call back for Store action

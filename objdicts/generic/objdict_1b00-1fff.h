@@ -100,7 +100,7 @@ area from 0x1B00 - 0x1FFF.
 #endif
 
 #if defined(CONFIG_INCLUDE_CFM)
-        OBD_RAM_INDEX_RAM_VARARRAY_NOINIT(0x1F22, NMT_MAX_NODE_ID, cfmu_cbObdAccess, kObdTypeDomain, kObdAccSRW, Domain, CFM_ConciseDcfList_ADOM)
+        OBD_RAM_INDEX_RAM_VARARRAY_NOINIT(0x1F22, NMT_MAX_NODE_ID, ctrlu_cbObdAccess, kObdTypeDomain, kObdAccSRW, Domain, CFM_ConciseDcfList_ADOM)
         OBD_RAM_INDEX_RAM_ARRAY(0x1F26, NMT_MAX_NODE_ID, NULL, kObdTypeUInt32, kObdAccSRW, tObdUnsigned32, CFM_ExpConfDateList_AU32, 0)
         OBD_RAM_INDEX_RAM_ARRAY(0x1F27, NMT_MAX_NODE_ID, NULL, kObdTypeUInt32, kObdAccSRW, tObdUnsigned32, CFM_ExpConfTimeList_AU32, 0)
 #endif
