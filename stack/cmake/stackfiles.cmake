@@ -710,6 +710,7 @@ SET(USER_HEADERS
     ${STACK_INCLUDE_DIR}/user/nmtmnu.h
     ${STACK_INCLUDE_DIR}/user/nmtu.h
     ${STACK_INCLUDE_DIR}/user/obdconf.h
+    ${STACK_INCLUDE_DIR}/user/obdu.h
     ${STACK_INCLUDE_DIR}/user/pdou.h
     ${STACK_INCLUDE_DIR}/user/pdoucal.h
     ${STACK_INCLUDE_DIR}/user/sdocom.h

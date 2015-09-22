@@ -49,7 +49,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/sdocom.h>
 #include <user/identu.h>
 #include <user/nmtu.h>
-#include <oplk/obd.h>
+#include <user/obdu.h>
 
 #if !defined(CONFIG_INCLUDE_SDOC)
 #error "CFM module needs openPOWERLINK module SDO client!"

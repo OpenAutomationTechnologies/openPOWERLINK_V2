@@ -44,7 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/nmtu.h>
 #include <user/timeru.h>
 #include <user/eventu.h>
-#include <oplk/obd.h>
+#include <user/obdu.h>
 
 #if NMT_MAX_NODE_ID > 0
 #include <user/dllucal.h>

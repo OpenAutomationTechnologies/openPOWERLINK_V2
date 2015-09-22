@@ -51,7 +51,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/nmtu.h>
 #include <user/nmtcnu.h>
 #include <common/target.h>
-#include <oplk/obd.h>
+#include <user/obdu.h>
 #include <user/obdal.h>
 #include <oplk/dll.h>
 #include <user/timesyncu.h>

@@ -54,10 +54,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OBD_TRUE                                    0x01
 #define OBD_FALSE                                   0x00
 
-#define OBD_NODE_ID_INDEX                           0x1F93      // default OD index for Node id
-#define OBD_NODE_ID_SUBINDEX                        0x01        // default subindex for NodeId in OD
-#define OBD_NODE_ID_HWBOOL_SUBINDEX                 0x02        // default subindex for NodeIDByHW_BOOL
-
 // object IDs of error handling objects
 #define OID_DLL_MN_CRCERROR_REC                     0x1C00
 #define OID_DLL_MN_CYCTIME_EXCEED_REC               0x1C02
@@ -77,51 +73,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-
-/**
-* \brief Directions for access to object dictionary
-*
-* This enumeration defines valid "directions" for accesses to the object
-* dictionary.
-*/
-typedef enum
-{
-    kObdDirInit             = 0x00,    ///< Initialising after power on
-    kObdDirStore            = 0x01,    ///< Store all object values to non volatile memory
-    kObdDirLoad             = 0x02,    ///< Load all object values from non volatile memory
-    kObdDirRestore          = 0x03,    ///< Deletes non volatile memory (restore)
-    kObdDirOBKCheck         = 0xFF     ///< Reserved
-} eObdDir;
-
-/**
-\brief Directions for access to object dictionary data type
-
-Data type for the enumerator \ref eObdDir.
-*/
-typedef UINT32 tObdDir;
-
-/**
-* \brief Valid OD store commands
-*
-* This enumeration defines valid store commands for the OD
-*/
-typedef enum
-{
-    kObdCmdOpenWrite        = 0x01,
-    kObdCmdWriteObj         = 0x02,
-    kObdCmdCloseWrite       = 0x03,
-    kObdCmdOpenRead         = 0x04,
-    kObdCmdReadObj          = 0x05,
-    kObdCmdCloseRead        = 0x06,
-    kObdCmdClear            = 0x07,
-} eObdCommand;
-
-/**
-\brief Valid OD store command data type
-
-Data type for the enumerator \ref eObdCommand.
-*/
-typedef UINT32 tObdCommand;
 
 /**
 * \brief Events of object callback function
@@ -428,49 +379,13 @@ struct _tObdInitParam
     UINT32              numManufacturer;        ///< Number of entries in manufacturer partition
     tObdEntryPtr        pDevicePart;            ///< Pointer to device part of OD
     UINT32              numDevice;              ///< Number of entries in device partition
-#if (defined (OBD_USER_OD) && (OBD_USER_OD != FALSE))
+#if (defined(OBD_USER_OD) && (OBD_USER_OD != FALSE))
     tObdEntryPtr        pUserPart;              ///< Pointer to user part of OD
     UINT32              numUser;                ///< Number of entries in user partition
 #endif
 };
 
 typedef struct _tObdInitParam tObdInitParam;
-
-/**
-\brief Structure for parameters of the store/restore commands
-
-This structure specifies the parameters for the store/restore commands.
-*/
-typedef struct
-{
-    tObdCommand         command;
-    tObdPart            currentOdPart;
-    void MEM*           pData;
-    tObdSize            objSize;
-} tObdCbStoreParam;
-
-typedef tOplkError (ROM *tInitTabEntryCallback)(void MEM* pTabEntry_p, UINT uiObjIndex_p);
-typedef tOplkError (ROM *tObdStoreLoadCallback)(tObdCbStoreParam MEM* pCbStoreParam_p);
-
-/**
-\brief Enumeration for Node ID setting types
-
-This structure defines constants for the types of setting the node ID.
-They are used in the function obd_setNodeId()
-*/
-typedef enum
-{
-    kObdNodeIdUnknown       = 0x00,         ///< unknown how the node id was set
-    kObdNodeIdSoftware      = 0x01,         ///< node id set by software
-    kObdNodeIdHardware      = 0x02          ///< node id set by hardware
-} eObdNodeIdType;
-
-/**
-\brief Node ID setting data type
-
-Data type for the enumerator \ref eObdNodeIdType.
-*/
-typedef UINT32 tObdNodeIdType;
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -480,37 +395,7 @@ extern "C"
 {
 #endif
 
-tOplkError obd_init(tObdInitParam MEM* pInitParam_p);
-tOplkError obd_exit(void);
-tOplkError obd_writeEntry(UINT index_p, UINT subIndex_p, void* pSrcData_p, tObdSize size_p);
-tOplkError obd_readEntry(UINT index_p, UINT subIndex_p, void* pDstData_p, tObdSize* pSize_p);
-tOplkError obd_accessOdPart(tObdPart obdPart_p, tObdDir direction_p);
-tOplkError obd_defineVar(tVarParam MEM* pVarParam_p);
-void*      obd_getObjectDataPtr(UINT index_p, UINT subIndex_p);
-tOplkError obd_registerUserOd(tObdEntryPtr pUserOd_p);
-void       obd_initVarEntry(tObdVarEntry MEM* pVarEntry_p, tObdType type_p, tObdSize obdSize_p);
-tObdSize   obd_getDataSize(UINT index_p, UINT subIndex_p);
-UINT       obd_getNodeId(void);
-tOplkError obd_setNodeId(UINT nodeId_p, tObdNodeIdType nodeIdType_p);
-tOplkError obd_isNumerical(UINT index_p, UINT subIndex_p, BOOL* pfEntryNumerical_p);
-tOplkError obd_getType(UINT index_p, UINT subIndex_p, tObdType* pType_p);
-tOplkError obd_writeEntryFromLe(UINT index_p, UINT subIndex_p, void* pSrcData_p, tObdSize size_p);
-tOplkError obd_readEntryToLe(UINT index_p, UINT subIndex_p, void* pDstData_p, tObdSize* pSize_p);
-tOplkError obd_getAccessType(UINT index_p, UINT subIndex_p, tObdAccess* pAccessType_p);
-tOplkError obd_searchVarEntry(UINT index_p, UINT subindex_p, tObdVarEntry MEM** ppVarEntry_p);
-
 tOplkError obd_initObd(tObdInitParam MEM* pInitParam_p);
-
-#if defined(CONFIG_OBD_CALC_OD_SIGNATURE) && (CONFIG_OBD_CALC_OD_SIGNATURE != FALSE)
-UINT32     obd_getOdSignature(tObdPart odPart_p);
-#endif
-
-#if defined(CONFIG_OBD_USE_STORE_RESTORE) && (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
-tOplkError obd_storeLoadObjCallback(tObdStoreLoadCallback pfnCallback_p);
-#endif
-
-tOplkError obd_processWrite(tSdoObdConHdl* pSdoObdConHdl_p);
-tOplkError obd_processRead(tSdoObdConHdl* pSdoObdConHdl_p);
 
 #ifdef __cplusplus
 }

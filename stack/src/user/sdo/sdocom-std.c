@@ -42,6 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <user/sdocom.h>
 #include <user/sdoseq.h>
+#include <user/obdu.h>
 #include <common/ami.h>
 
 

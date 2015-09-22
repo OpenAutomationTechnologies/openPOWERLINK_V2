@@ -44,7 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _CRT_NONSTDC_NO_WARNINGS    // for MSVC 2005 or higher
 
 #include <common/oplkinc.h>
-#include <oplk/obd.h>
+#include <user/obdu.h>
 #include <oplk/obdcdc.h>
 #include <common/ami.h>
 #include <user/eventu.h>

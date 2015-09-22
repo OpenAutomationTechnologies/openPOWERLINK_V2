@@ -50,7 +50,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/nmtu.h>
 #include <user/dllucal.h>
 #include <user/eventu.h>
-#include <oplk/obd.h>
+#include <user/obdu.h>
 #include <oplk/sdo.h>
 #include <user/timesyncucal.h>
 #include <user/timesyncu.h>

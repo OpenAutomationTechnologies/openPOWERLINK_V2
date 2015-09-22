@@ -41,7 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-#include <oplk/obd.h>
+#include <user/obdu.h>
 #include <common/ami.h>
 
 #if (CONFIG_OBD_CALC_OD_SIGNATURE != FALSE)

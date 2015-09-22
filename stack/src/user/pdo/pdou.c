@@ -47,7 +47,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <common/target.h>
 #include <common/ami.h>
 #include <oplk/sdoabortcodes.h>
-#include <oplk/obd.h>
+#include <user/obdu.h>
 
 #include <limits.h>
 

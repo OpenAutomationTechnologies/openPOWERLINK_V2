@@ -51,7 +51,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/syncu.h>
 #include <user/eventu.h>
 #include <common/ami.h>
-#include <oplk/obd.h>
+#include <user/obdu.h>
 #include <oplk/frame.h>
 #include <oplk/benchmark.h>
 

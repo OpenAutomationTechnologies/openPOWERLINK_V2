@@ -47,7 +47,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
 #include <user/errhndu.h>
-#include <oplk/obd.h>
+#include <user/obdu.h>
 #include "errhnducal.h"
 
 //============================================================================//
