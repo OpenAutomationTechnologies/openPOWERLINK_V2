@@ -762,6 +762,22 @@ tOplkError ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
 #endif
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
+        case 0x1C00:    // DLL_MNCRCError_REC
+        case 0x1C02:    // DLL_MNCycTimeExceed_REC
+#endif
+        case 0x1C0B:    // DLL_CNLossSoC_REC
+        case 0x1C0D:    // DLL_CNLossPReq_REC
+        case 0x1C0F:    // DLL_CNCRCError_REC
+            ret = errhndu_cbObdAccess(pParam_p);
+            break;
+
+#if defined(CONFIG_INCLUDE_NMT_MN)
+        case 0x1C07:    // DLL_MNCNLossPResCumCnt_AU32
+        case 0x1C08:    // DLL_MNCNLossPResThrCnt_AU32
+        case 0x1C09:    // DLL_MNCNLossPResThreshold_AU32
+            ret = errhndu_mnCnLossPresCbObdAccess(pParam_p);
+            break;
+
         case 0x1F9F:    // NMT_RequestCmd_REC
             ret = handleObdRequestCmd(pParam_p);
             break;
