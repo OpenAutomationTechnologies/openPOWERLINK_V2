@@ -194,7 +194,7 @@ printf style format string for printing.
 //------------------------------------------------------------------------------
 void eventlog_createMessageString(char* message_p, size_t messageSize_p,
                                   tEventlogLevel level_p, tEventlogCategory category_p,
-                                  char* fmt_p, va_list arg_p)
+                                  const char* fmt_p, va_list arg_p)
 {
     size_t              len;
 

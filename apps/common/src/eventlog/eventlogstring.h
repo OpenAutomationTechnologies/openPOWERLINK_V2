@@ -137,7 +137,7 @@ extern "C"
 {
 #endif
 
-void eventlog_createMessageString(char* message_p, size_t messageSize_p, tEventlogLevel level_p, tEventlogCategory category_p, char* fmt_p, va_list arg_p);
+void eventlog_createMessageString(char* message_p, size_t messageSize_p, tEventlogLevel level_p, tEventlogCategory category_p, const char* fmt_p, va_list arg_p);
 void eventlog_createNodeEventString(tOplkApiEventNode* pNodeEvent_p, tEventlogFormat format_p, char* message_p, size_t messageSize_p);
 void eventlog_createStateEventString(tEventNmtStateChange* pStateChangeEvent_p, tEventlogFormat format_p, char* message_p, size_t messageSize_p);
 void eventlog_createCfmResultEventString(UINT8 nodeId_p, tNmtNodeCommand nodeCommand_p, tEventlogFormat format_p, char* message_p, size_t messageSize_p);
