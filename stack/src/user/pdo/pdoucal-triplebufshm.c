@@ -232,8 +232,8 @@ tOplkError pdoucal_setTxPdo(UINT channelId_p, BYTE* pPdo_p, WORD pdoSize_p)
     pPdoMem_l->txChannelInfo[channelId_p].newData = 1;
 
     // Flush data cache for variables changed in this function
-    OPLK_DCACHE_FLUSH(&(pPdoMem_l->rxChannelInfo[channelId_p].writeBuf), sizeof(OPLK_ATOMIC_T));
-    OPLK_DCACHE_FLUSH(&(pPdoMem_l->rxChannelInfo[channelId_p].newData), sizeof(UINT8));
+    OPLK_DCACHE_FLUSH(&(pPdoMem_l->txChannelInfo[channelId_p].writeBuf), sizeof(OPLK_ATOMIC_T));
+    OPLK_DCACHE_FLUSH(&(pPdoMem_l->txChannelInfo[channelId_p].newData), sizeof(UINT8));
 
     //TRACE("%s() chan:%d new wi:%d\n", __func__, channelId_p, pPdoMem_l->txChannelInfo[channelId_p].writeBuf);
 
