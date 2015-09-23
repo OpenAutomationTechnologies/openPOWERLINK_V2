@@ -46,6 +46,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QMutex>
 #include <QWaitCondition>
 
+#include <EventLog.h>
+
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
@@ -71,6 +73,7 @@ class ProcessThread : public QThread
 
 public:
     ProcessThread(MainWindow* pMainWindow_p);
+    ~ProcessThread();
 
     void              run();
     void              sigOplkStatus(int status_p);
@@ -113,6 +116,7 @@ private:
     QMutex            Mutex;
     QWaitCondition    NmtStateOff;
     MainWindow*       pMainWindow;
+    EventLog*         pEventLog;
 
     int               status;
 };
