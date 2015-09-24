@@ -360,7 +360,7 @@ void eventlog_printErrorEvent(tEventError* pError_p)
     char                logMsg[EVENTLOG_MAX_LENGTH];
 
     if (!((eventlogInstance_l.filterLevel & (1 << kEventlogLevelEvent)) &&
-          (eventlogInstance_l.filterCategory & (1 << kEventlogCategoryHistoryEvent))))
+          (eventlogInstance_l.filterCategory & (1 << kEventlogCategoryErrorEvent))))
         return;
 
     eventlog_createErrorEventString(pError_p, eventlogInstance_l.format, logMsg,
