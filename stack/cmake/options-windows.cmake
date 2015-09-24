@@ -40,6 +40,8 @@ OPTION(CFG_WINDOWS_DLL              "Build openPOWERLINK library as DLL" OFF)
 # Options for library features
 
 OPTION (CFG_INCLUDE_MN_REDUNDANCY               "Compile MN redundancy functions into MN libraries" OFF)
+CMAKE_DEPENDENT_OPTION (CFG_STORE_RESTORE       "Support storing of OD in non-volatile memory (file system)" ON
+                                                "CFG_COMPILE_LIB_CN" OFF)
 
 # MN libraries
 IF(CFG_COMPILE_LIB_MN)
