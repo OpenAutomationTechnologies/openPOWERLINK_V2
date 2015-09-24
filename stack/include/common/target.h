@@ -48,6 +48,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 
+// If running as Linux kernel module the CRC functions provided by the kernel
+// may be used.
+// As further alternative a hardware-accelerated implementation may be used.
+#ifndef OPLK_CALCULATE_CRC16
+#define OPLK_CALCULATE_CRC16(crc_p, pData_p, size_p) target_calculateCrc16(crc_p, pData_p, size_p)
+#endif
+
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
@@ -85,6 +92,9 @@ int target_unlock(void);
 
 /* function for LED */
 tOplkError target_setLed(tLedType ledType_p, BOOL fLedOn_p);
+
+/* functions for crc and file-io implementation */
+UINT16 target_calculateCrc16(UINT16 crc_p, UINT8* pData_p, UINT32 size_p);
 
 #ifdef __cplusplus
 }
