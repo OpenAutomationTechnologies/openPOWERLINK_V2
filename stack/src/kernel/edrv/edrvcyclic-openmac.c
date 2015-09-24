@@ -532,6 +532,7 @@ static tOplkError processTxBufferList(void)
     UINT32          cycleMax = 0; //absolute maximum cycle time
     UINT32          nextOffsetNs = 0; //next earliest tx time
     UINT32          nextTimerIrqNs = instance_l.cycleLengthUs * 1000UL; //time of next timer irq
+    tTimestamp      extSyncTime;
 
     if (instance_l.fNextCycleTimeValid == FALSE)
     {
@@ -584,6 +585,10 @@ static tOplkError processTxBufferList(void)
             goto CycleDone;
         }
     }
+
+    // Forward next SoC time to timer module
+    extSyncTime.timeStamp = instance_l.nextCycleTime;
+    hrestimer_setExtSyncIrqTime(extSyncTime);
 
     //set accumulator for cycle window calculation
     absoluteTime = instance_l.nextCycleTime; //get cycle start time

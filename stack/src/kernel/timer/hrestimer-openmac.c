@@ -333,6 +333,56 @@ Exit:
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Control external synchronization interrupt
+
+This function enables/disables the external synchronization interrupt. If the
+external synchronization interrupt is not supported, the call is ignored.
+
+\param  fEnable_p       Flag determines if sync should be enabled or disabled.
+
+\ingroup module_hrestimer
+*/
+//------------------------------------------------------------------------------
+void hrestimer_controlExtSyncIrq(BOOL fEnable_p)
+{
+#ifdef TIMER_USE_EXT_SYNC_INT
+    if (fEnable_p)
+    {
+        OPENMAC_TIMERIRQENABLE(HWTIMER_EXT_SYNC);
+    }
+    else
+    {
+        OPENMAC_TIMERIRQDISABLE(HWTIMER_EXT_SYNC);
+    }
+#else
+    UNUSED_PARAMETER(fEnable_p);
+#endif //TIMER_USE_EXT_SYNC_INT
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Set external synchronization interrupt time
+
+This function sets the time when the external synchronization interrupt shall
+be triggered to synchronize the host processor. If the external synchronization
+interrupt is not supported, the call is ignored.
+
+\param  time_p          Time when the sync shall be triggered
+
+\ingroup module_hrestimer
+*/
+//------------------------------------------------------------------------------
+void hrestimer_setExtSyncIrqTime(tTimestamp time_p)
+{
+#ifdef TIMER_USE_EXT_SYNC_INT
+    OPENMAC_TIMERSETCOMPAREVALUE(HWTIMER_EXT_SYNC, time_p.timeStamp);
+#else
+    UNUSED_PARAMETER(time_p);
+#endif //TIMER_USE_EXT_SYNC_INT
+}
+
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//

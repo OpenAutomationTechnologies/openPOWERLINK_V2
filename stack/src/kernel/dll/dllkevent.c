@@ -242,6 +242,14 @@ static tOplkError controlTimeSync(BOOL fEnable_p)
     }
 #endif
 
+#if CONFIG_TIMER_USE_HIGHRES == TRUE
+    if (ret == kErrorOk)
+    {
+        // Activate/deactivate external synchronization interrupt
+        hrestimer_controlExtSyncIrq(fEnable);
+    }
+#endif
+
     return ret;
 }
 

@@ -81,6 +81,8 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
                                  tTimerkCallback pfnCallback_p, ULONG argument_p,
                                  BOOL fContinue_p) SECTION_HRTIMER_MODTIMER;
 tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p);
+void       hrestimer_controlExtSyncIrq(BOOL fEnable_p);
+void       hrestimer_setExtSyncIrqTime(tTimestamp time_p);
 
 #ifdef __cplusplus
 }
