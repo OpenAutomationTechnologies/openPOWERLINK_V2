@@ -144,8 +144,8 @@ typedef struct
     tTimerInfo                  aTimerInfo[TIMER_COUNT];            ///< Array with timer information for a set of timers
     UINT                        activeTimerHdl;                     ///< Handle of the active timer
 #ifdef TIMER_USE_EXT_SYNC_INT
-    BOOL                        fExtSyncEnable;                     ///< Flag to enable the external synchronization interrupt
-    UINT32                      syncIntCycle;                       ///< Cycle time of the external synchronization interrupt
+    BOOL                        fExtSyncIntEnable;                  ///< Flag to enable the external synchronization interrupt
+    UINT32                      extSyncIntCycle;                    ///< Cycle time of the external synchronization interrupt
 #endif //TIMER_USE_EXT_SYNC_INT
 } tTimerInstance;
 
@@ -211,6 +211,7 @@ tOplkError synctimer_init(void)
 #ifdef TIMER_USE_EXT_SYNC_INT
     OPENMAC_TIMERIRQDISABLE(HWTIMER_EXT_SYNC);
     OPENMAC_TIMERSETCOMPAREVALUE(HWTIMER_EXT_SYNC, 0);
+    instance_l.extSyncIntCycle = 1; // Every cycle (default)
 #endif //TIMER_USE_EXT_SYNC_INT
 
 #if (OPENMAC_TIMERPULSECONTROL != 0)
@@ -521,6 +522,8 @@ void synctimer_controlExtSyncIrq(BOOL fEnable_p)
     {
         OPENMAC_TIMERIRQDISABLE(HWTIMER_EXT_SYNC);
     }
+
+    instance_l.fExtSyncIntEnable = fEnable_p;
 #else
     UNUSED_PARAMETER(fEnable_p);
 #endif //TIMER_USE_EXT_SYNC_INT
@@ -942,7 +945,7 @@ static void drvCalcExtSyncIrqValue(void)
     UINT32          targetAbsoluteTime;
     static UINT32   cycleCnt = 0;
 
-    if ((++cycleCnt == instance_l.syncIntCycle))
+    if ((++cycleCnt == instance_l.extSyncIntCycle))
     {
         // get absolute time from sync timer
         pTimerInfo = &instance_l.aTimerInfo[TIMER_HDL_SYNC];
@@ -954,7 +957,7 @@ static void drvCalcExtSyncIrqValue(void)
                                      instance_l.advanceShift);    // plus sync shift
         cycleCnt = 0;
     }
-    else if (cycleCnt > instance_l.syncIntCycle)
+    else if (cycleCnt > instance_l.extSyncIntCycle)
     {
          cycleCnt = 0;
     }
@@ -1013,7 +1016,7 @@ static void drvInterruptHandler(void* pArg_p)
             case TIMER_HDL_SYNC:
 #ifdef TIMER_USE_EXT_SYNC_INT
                 BENCHMARK_MOD_24_SET(0);
-                if (instance_l.fExtSyncEnable != FALSE)
+                if (instance_l.fExtSyncIntEnable != FALSE)
                 {
                     drvCalcExtSyncIrqValue();
                 }

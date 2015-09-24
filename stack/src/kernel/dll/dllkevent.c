@@ -223,15 +223,26 @@ the sync function by sending the appropriate event.
 //------------------------------------------------------------------------------
 static tOplkError controlTimeSync(BOOL fEnable_p)
 {
-    tEvent event;
-    BOOL fEnable = fEnable_p;
+    tOplkError  ret = kErrorOk;
+    tEvent      event;
+    BOOL        fEnable = fEnable_p;
 
     event.eventSink = kEventSinkTimesynck;
     event.eventType = kEventTypeTimesynckControl;
     event.eventArg.pEventArg = &fEnable;
     event.eventArgSize = sizeof(fEnable);
 
-    return eventk_postEvent(&event);
+    ret = eventk_postEvent(&event);
+
+#if CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER
+    if (ret == kErrorOk)
+    {
+        // Activate/deactivate external synchronization interrupt
+        synctimer_controlExtSyncIrq(fEnable);
+    }
+#endif
+
+    return ret;
 }
 
 //------------------------------------------------------------------------------
