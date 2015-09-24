@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   timesyncucalsync-hostif.c
+\file   timesyncucal-hostif.c
 
 \brief  Host interface sync implementation for the user CAL timesync module
 

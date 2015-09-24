@@ -135,7 +135,7 @@ tOplkError timesynck_sendSyncEvent(void)
 
 The function processes events intended for the kernel timesync module.
 
-\parma  pEvent_p        Pointer to event
+\param  pEvent_p        Pointer to event
 
 \return The function returns a tOplkError error code.
 
