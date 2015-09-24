@@ -55,6 +55,8 @@ OPTION (CFG_COMPILE_SHARED_LIBRARY              "Build openPOWERLINK library as 
 # Options for library features
 
 OPTION (CFG_INCLUDE_MN_REDUNDANCY               "Compile MN redundancy functions into MN libraries" OFF)
+CMAKE_DEPENDENT_OPTION (CFG_STORE_RESTORE       "Support storing of OD in non-volatile memory (file system)" ON
+                                                "CFG_COMPILE_LIB_CN OR CFG_COMPILE_LIB_CNAPP_USERINTF OR CFG_COMPILE_LIB_CNAPP_KERNELINTF" OFF)
 
 ################################################################################
 # Add library subdirectories
