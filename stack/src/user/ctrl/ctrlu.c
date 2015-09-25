@@ -1002,16 +1002,13 @@ The function initializes the object dictionary
 static tOplkError initObd(tOplkApiInitParam* pInitParam_p)
 {
     tOplkError          ret = kErrorOk;
-    tObdInitParam       ObdInitParam;
-
-    UNUSED_PARAMETER(pInitParam_p);
 
     DEBUG_LVL_CTRL_TRACE("Initialize OBD module...\n");
-    ret = obd_initObd(&ObdInitParam);
+    ret = obd_initObd(&pInitParam_p->obdInitParam);
     if (ret != kErrorOk)
         return ret;
 
-    ret = obdu_init(&ObdInitParam);
+    ret = obdu_init(&pInitParam_p->obdInitParam);
     if (ret != kErrorOk)
         return ret;
 

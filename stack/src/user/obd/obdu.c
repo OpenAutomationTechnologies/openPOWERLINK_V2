@@ -214,8 +214,12 @@ tOplkError obdu_init(tObdInitParam MEM* pInitParam_p)
 {
     tOplkError      ret;
 
-    if (pInitParam_p == NULL)
-        return kErrorOk;
+    // Make sure that the OD has been initialized before
+    if ((pInitParam_p == NULL) ||
+        (pInitParam_p->pGenericPart == NULL) ||
+        (pInitParam_p->pManufacturerPart == NULL) ||
+        (pInitParam_p->pDevicePart == NULL))
+        return kErrorApiInvalidParam;
 
     OPLK_MEMCPY(&obdInstance_l.initParam, pInitParam_p, sizeof(tObdInitParam));
 

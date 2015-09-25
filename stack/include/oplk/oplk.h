@@ -458,6 +458,7 @@ typedef struct
                                                     /**< This parameter configures the period of synchronization events triggered by the openPOWERLINK stack.
                                                          Note that the resulting synchronization period can only be a multiple of the configured cycle lenght.
                                                          If this value is set to 0, no minimum synchronization period is specified. */
+    tObdInitParam       obdInitParam;               ///< Initialization parameters for the object dictionary
 } tOplkApiInitParam;
 
 /**
