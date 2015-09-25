@@ -10,7 +10,7 @@ and definitions.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -46,7 +46,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplkcfg.h>                 // Stack configuration file
 #include <oplk/oplk.h>
 #include <common/defaultcfg.h>
-#include <common/featureflags.h>
 #include <common/section.h>
 
 //------------------------------------------------------------------------------

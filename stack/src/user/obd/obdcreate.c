@@ -20,7 +20,7 @@ the next table.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -51,15 +51,182 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-#include <oplk/obd.h>             // function prototypes of the obd module
-#include <user/cfmu.h>            // function prototypes of the cfm module
-#include <user/pdou.h>            // function prototype of OD callback function
-#include <user/errhndu.h>         // function prototype of error handler od callback functions
-#include <user/ctrlu.h>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+
+// Generate NMT_FeatureFlags_U32 depending on configuration values
+
+// Set to true if this node is able to communicate synchronously
+#if defined(CONFIG_INCLUDE_PDO)
+#define CONFIG_FF_ISOCHR                    (NMT_FEATUREFLAGS_ISOCHR)
+#else
+#define CONFIG_FF_ISOCHR                    0
+#endif
+
+// Set to true SDO via UDP is implemented
+#if defined(CONFIG_INCLUDE_SDO_UDP)
+#define CONFIG_FF_SDO_UDP                   (NMT_FEATUREFLAGS_SDO_UDP)
+#else
+#define CONFIG_FF_SDO_UDP                   0
+#endif
+
+// Set to true SDO via ASnd is implemented
+#if defined(CONFIG_INCLUDE_SDO_ASND)
+#define CONFIG_FF_SDO_ASND                  (NMT_FEATUREFLAGS_SDO_ASND)
+#else
+#define CONFIG_FF_SDO_ASND                  0
+#endif
+
+// Set to true if SDO/PDO is used (not implemented in the stack)
+#if 0
+#define CONFIG_FF_SDO_PDO                   (NMT_FEATUREFLAGS_SDO_PDO)
+#else
+#define CONFIG_FF_SDO_PDO                   0
+#endif
+
+// Set to true if NMT Info Services are used (not implemented in the stack)
+#if 0
+#define CONFIG_FF_NMT_INFO                  (NMT_FEATUREFLAGS_NMT_INFO)
+#else
+#define CONFIG_FF_NMT_INFO                  0
+#endif
+
+// Set to true if NMT Extended Commands are supported (always implemented in the stack)
+#define CONFIG_FF_NMT_EXT                   (NMT_FEATUREFLAGS_NMT_EXT)
+
+// Set to true if dynamic mapping is used (by default always true)
+#if defined(CONFIG_INCLUDE_PDO)
+#define CONFIG_FF_PDO_DYN                   (NMT_FEATUREFLAGS_PDO_DYN)
+#else
+#define CONFIG_FF_PDO_DYN                   0
+#endif
+
+// Set to true if NMT Services via UDP are used (not implemented in the stack)
+#if 0
+#define CONFIG_FF_NMT_UDP                   (NMT_FEATUREFLAGS_NMT_UDP)
+#else
+#define CONFIG_FF_NMT_UDP                   0
+#endif
+
+// Set to true if Configuration Manager is implemented on the MN
+#if defined(CONFIG_INCLUDE_CFM)
+#define CONFIG_FF_CFM                       (NMT_FEATUREFLAGS_CFM)
+#else
+#define CONFIG_FF_CFM                       0
+#endif
+
+// Multiplexing CN is implemented (always implemented in the stack)
+#define CONFIG_FF_MUX_CN                    (NMT_FEATUREFLAGS_MUX_CN)
+
+// Set to true if Node ID setup by SW is used
+#if 0
+#define CONFIG_FF_NODEID_SW                 (NMT_FEATUREFLAGS_NODEID_SW)
+#else
+#define CONFIG_FF_NODEID_SW                 0
+#endif
+
+// Set to true if Basic Ethernet mode is supported on an MN
+#if 0
+#define CONFIG_FF_BASIC_ETH_MN              (NMT_FEATUREFLAGS_BASIC_ETH_MN)
+#else
+#define CONFIG_FF_BASIC_ETH_MN              0
+#endif
+
+// Set to true if Routing Type 1 is supported
+#if 0
+#define CONFIG_FF_RT1                       (NMT_FEATUREFLAGS_RT1)
+#else
+#define CONFIG_FF_RT1                       0
+#endif
+
+// Set to true if Routing Type 2 is supported
+#if 0
+#define CONFIG_FF_RT2                       (NMT_FEATUREFLAGS_RT2)
+#else
+#define CONFIG_FF_RT2                       0
+#endif
+
+// Set to true if SDO Read/Write All By Index is used (not implemented in the stack)
+#if 0
+#define CONFIG_FF_SDO_RW_ALL                (NMT_FEATUREFLAGS_SDO_RW_ALL)
+#else
+#define CONFIG_FF_SDO_RW_ALL                0
+#endif
+
+// Set to true if SDO Read/Write Multiple Parameter By Index is used (not implemented in the stack)
+#if 0
+#define CONFIG_FF_SDO_RW_MULTIPLE           (NMT_FEATUREFLAGS_SDO_RW_MULTIPLE)
+#else
+#define CONFIG_FF_SDO_RW_MULTIPLE           0
+#endif
+
+// Set to true if Multiple ASnd (DS302-B) is implemented
+#if defined(CONFIG_INCLUDE_MASND)
+#define CONFIG_FF_MASND                     (NMT_FEATUREFLAGS_MASND)
+#else
+#define CONFIG_FF_MASND                     0
+#endif
+
+// Set to true if Ring Redundancy Manager (DS302-A) is used (not implemented in the stack)
+#if 0
+#define CONFIG_FF_RR_MN                     (NMT_FEATUREFLAGS_RR_MN)
+#else
+#define CONFIG_FF_RR_MN                     0
+#endif
+
+// Set to true if PResChaining on the CN (DS302-C) is used
+#if CONFIG_DLL_PRES_CHAINING_CN != FALSE
+#define CONFIG_FF_PRC                       (NMT_FEATUREFLAGS_PRC)
+#else
+#define CONFIG_FF_PRC                       0
+#endif
+
+// Set to true if Multiple PReq/PRes (DS302-D) is used (not implemented in the stack)
+#if 0
+#define CONFIG_FF_MULTI_PREQ_PRES           (NMT_FEATUREFLAGS_MULTI_PREQ_PRES)
+#else
+#define CONFIG_FF_MULTI_PREQ_PRES           0
+#endif
+
+// Set to true if Dynamic Node Allocation (DS302-E) is used (not implemented in the stack)
+#if 0
+#define CONFIG_FF_DNA                       (NMT_FEATUREFLAGS_DNA)
+#else
+#define CONFIG_FF_DNA                       0
+#endif
+
+// Set to true if a modular device (DS302-F) is created
+#if 0
+#define CONFIG_FF_MODULAR_DEVICE            (NMT_FEATUREFLAGS_MODULAR_DEVICE)
+#else
+#define CONFIG_FF_MODULAR_DEVICE            0
+#endif
+
+#define PLK_DEF_FEATURE_FLAGS (CONFIG_FF_ISOCHR             | \
+                               CONFIG_FF_SDO_UDP            | \
+                               CONFIG_FF_SDO_ASND           | \
+                               CONFIG_FF_SDO_PDO            | \
+                               CONFIG_FF_NMT_INFO           | \
+                               CONFIG_FF_NMT_EXT            | \
+                               CONFIG_FF_PDO_DYN            | \
+                               CONFIG_FF_NMT_UDP            | \
+                               CONFIG_FF_CFM                | \
+                               CONFIG_FF_MUX_CN             | \
+                               CONFIG_FF_NODEID_SW          | \
+                               CONFIG_FF_BASIC_ETH_MN       | \
+                               CONFIG_FF_RT1                | \
+                               CONFIG_FF_RT2                | \
+                               CONFIG_FF_SDO_RW_ALL         | \
+                               CONFIG_FF_SDO_RW_MULTIPLE    | \
+                               CONFIG_FF_MASND              | \
+                               CONFIG_FF_RR_MN              | \
+                               CONFIG_FF_PRC                | \
+                               CONFIG_FF_MULTI_PREQ_PRES    | \
+                               CONFIG_FF_DNA                | \
+                               CONFIG_FF_MODULAR_DEVICE)
+
 
 // macros to help building OD
 
@@ -70,7 +237,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if ((DEV_SYSTEM & _DEV_COMMA_EXT_) != 0)
     #define OBD_END_SUBINDEX()
     #define OBD_MAX_ARRAY_SUBENTRIES    2
-
 #else
     #define OBD_END_SUBINDEX()          {0, 0, 0, NULL, NULL}
     #define OBD_MAX_ARRAY_SUBENTRIES    3

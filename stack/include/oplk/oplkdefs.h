@@ -9,7 +9,7 @@ openPOWERLINK stack.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2015, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -211,5 +211,29 @@ These constants determine the different queue implementations.
 #define NMT_NODEASSIGN_PRES_CHAINING                    0x00004000L
 #define NMT_NODEASSIGN_VALID                            0x80000000L
 
-#endif /* _INC_oplk_oplkdefs_H_ */
+//------------------------------------------------------------------------------
+// Defines for object 0x1F82 NMT_FeatureFlags_AU32
+#define NMT_FEATUREFLAGS_ISOCHR                         0x00000001
+#define NMT_FEATUREFLAGS_SDO_UDP                        0x00000002
+#define NMT_FEATUREFLAGS_SDO_ASND                       0x00000004
+#define NMT_FEATUREFLAGS_SDO_PDO                        0x00000008
+#define NMT_FEATUREFLAGS_NMT_INFO                       0x00000010
+#define NMT_FEATUREFLAGS_NMT_EXT                        0x00000020
+#define NMT_FEATUREFLAGS_PDO_DYN                        0x00000040
+#define NMT_FEATUREFLAGS_NMT_UDP                        0x00000080
+#define NMT_FEATUREFLAGS_CFM                            0x00000100
+#define NMT_FEATUREFLAGS_MUX_CN                         0x00000200
+#define NMT_FEATUREFLAGS_NODEID_SW                      0x00000400
+#define NMT_FEATUREFLAGS_BASIC_ETH_MN                   0x00000800
+#define NMT_FEATUREFLAGS_RT1                            0x00001000
+#define NMT_FEATUREFLAGS_RT2                            0x00002000
+#define NMT_FEATUREFLAGS_SDO_RW_ALL                     0x00004000
+#define NMT_FEATUREFLAGS_SDO_RW_MULTIPLE                0x00008000
+#define NMT_FEATUREFLAGS_MASND                          0x00010000
+#define NMT_FEATUREFLAGS_RR_MN                          0x00020000
+#define NMT_FEATUREFLAGS_PRC                            0x00040000
+#define NMT_FEATUREFLAGS_MULTI_PREQ_PRES                0x00080000
+#define NMT_FEATUREFLAGS_DNA                            0x00100000
+#define NMT_FEATUREFLAGS_MODULAR_DEVICE                 0x00200000
 
+#endif /* _INC_oplk_oplkdefs_H_ */

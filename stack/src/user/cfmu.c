@@ -12,7 +12,7 @@ This file contains the implementation of the configuration file manager (CFM).
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -382,7 +382,7 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtS
     }
 
 #if defined(CONFIG_INCLUDE_NMT_RMN)
-    if (ami_getUint32Le(&pIdentResponse->featureFlagsLe) & PLK_FEATURE_CFM)
+    if (ami_getUint32Le(&pIdentResponse->featureFlagsLe) & NMT_FEATUREFLAGS_CFM)
     {
         UINT subindex;
 
@@ -942,7 +942,7 @@ static tOplkError downloadNetConf(tCfmNodeInfo* pNodeInfo_p)
             return kErrorInvalidNodeId;
         }
 
-        if (ami_getUint32Le(&pIdentResponse->featureFlagsLe) & PLK_FEATURE_CFM)
+        if (ami_getUint32Le(&pIdentResponse->featureFlagsLe) & NMT_FEATUREFLAGS_CFM)
         {
             pNodeInfo_p->cfmState = kCfmStateDownloadNetConf;
             pNodeInfo_p->entriesRemaining = NMT_MAX_NODE_ID;
