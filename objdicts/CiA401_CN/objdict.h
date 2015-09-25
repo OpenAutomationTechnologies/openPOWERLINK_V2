@@ -47,28 +47,28 @@ OBD_BEGIN ()
         #include "../generic/objdict_1000-13ff.h"
 
         // Object 1400h: PDO_RxCommParam_00h_REC
-        OBD_BEGIN_INDEX_RAM(0x1400, 0x03, ctrlu_cbObdAccess)
+        OBD_BEGIN_INDEX_RAM(0x1400, 0x03, oplk_cbGenericObdAccess)
             OBD_SUBINDEX_RAM_VAR(0x1400, 0x00, kObdTypeUInt8, kObdAccConst, tObdUnsigned8, NumberOfEntries, 0x02)
             OBD_SUBINDEX_RAM_VAR_RG(0x1400, 0x01, kObdTypeUInt8, kObdAccGRW, tObdUnsigned8, NodeID_U8, 0x00, 0, 254)
             OBD_SUBINDEX_RAM_VAR(0x1400, 0x02, kObdTypeUInt8, kObdAccRW, tObdUnsigned8, MappingVersion_U8, 0x00)
         OBD_END_INDEX(0x1400)
 
         // Object 1401h: PDO_RxCommParam_01h_REC
-        OBD_BEGIN_INDEX_RAM(0x1401, 0x03, ctrlu_cbObdAccess)
+        OBD_BEGIN_INDEX_RAM(0x1401, 0x03, oplk_cbGenericObdAccess)
             OBD_SUBINDEX_RAM_VAR(0x1401, 0x00, kObdTypeUInt8, kObdAccConst, tObdUnsigned8, NumberOfEntries, 0x02)
             OBD_SUBINDEX_RAM_VAR_RG(0x1401, 0x01, kObdTypeUInt8, kObdAccGRW, tObdUnsigned8, NodeID_U8, 0x00, 0, 254)
             OBD_SUBINDEX_RAM_VAR(0x1401, 0x02, kObdTypeUInt8, kObdAccRW, tObdUnsigned8, MappingVersion_U8, 0x00)
         OBD_END_INDEX(0x1401)
 
         // Object 1402h: PDO_RxCommParam_02h_REC
-        OBD_BEGIN_INDEX_RAM(0x1402, 0x03, ctrlu_cbObdAccess)
+        OBD_BEGIN_INDEX_RAM(0x1402, 0x03, oplk_cbGenericObdAccess)
             OBD_SUBINDEX_RAM_VAR(0x1402, 0x00, kObdTypeUInt8, kObdAccConst, tObdUnsigned8, NumberOfEntries, 0x02)
             OBD_SUBINDEX_RAM_VAR_RG(0x1402, 0x01, kObdTypeUInt8, kObdAccGRW, tObdUnsigned8, NodeID_U8, 0x00, 0, 254)
             OBD_SUBINDEX_RAM_VAR(0x1402, 0x02, kObdTypeUInt8, kObdAccRW, tObdUnsigned8, MappingVersion_U8, 0x00)
         OBD_END_INDEX(0x1402)
 
         // Object 1600h: PDO_RxMappParam_00h_AU64
-        OBD_BEGIN_INDEX_RAM(0x1600, 0x1A, ctrlu_cbObdAccess)
+        OBD_BEGIN_INDEX_RAM(0x1600, 0x1A, oplk_cbGenericObdAccess)
             OBD_SUBINDEX_RAM_VAR(0x1600, 0x00, kObdTypeUInt8, kObdAccRW, tObdUnsigned8, NumberOfEntries, 0x00)
             OBD_SUBINDEX_RAM_VAR(0x1600, 0x01, kObdTypeUInt64, kObdAccRW, tObdUnsigned64, ObjectMapping, 0x00LL)
             OBD_SUBINDEX_RAM_VAR(0x1600, 0x02, kObdTypeUInt64, kObdAccRW, tObdUnsigned64, ObjectMapping, 0x00LL)
@@ -98,7 +98,7 @@ OBD_BEGIN ()
         OBD_END_INDEX(0x1600)
 
         // Object 1601h: PDO_RxMappParam_01h_AU64
-        OBD_BEGIN_INDEX_RAM(0x1601, 0x1A, ctrlu_cbObdAccess)
+        OBD_BEGIN_INDEX_RAM(0x1601, 0x1A, oplk_cbGenericObdAccess)
             OBD_SUBINDEX_RAM_VAR(0x1601, 0x00, kObdTypeUInt8, kObdAccRW, tObdUnsigned8, NumberOfEntries, 0x00)
             OBD_SUBINDEX_RAM_VAR(0x1601, 0x01, kObdTypeUInt64, kObdAccRW, tObdUnsigned64, ObjectMapping, 0x00LL)
             OBD_SUBINDEX_RAM_VAR(0x1601, 0x02, kObdTypeUInt64, kObdAccRW, tObdUnsigned64, ObjectMapping, 0x00LL)
@@ -128,7 +128,7 @@ OBD_BEGIN ()
         OBD_END_INDEX(0x1601)
 
         // Object 1602h: PDO_RxMappParam_02h_AU64
-        OBD_BEGIN_INDEX_RAM(0x1602, 0x1A, ctrlu_cbObdAccess)
+        OBD_BEGIN_INDEX_RAM(0x1602, 0x1A, oplk_cbGenericObdAccess)
             OBD_SUBINDEX_RAM_VAR(0x1602, 0x00, kObdTypeUInt8, kObdAccRW, tObdUnsigned8, NumberOfEntries, 0x00)
             OBD_SUBINDEX_RAM_VAR(0x1602, 0x01, kObdTypeUInt64, kObdAccRW, tObdUnsigned64, ObjectMapping, 0x00LL)
             OBD_SUBINDEX_RAM_VAR(0x1602, 0x02, kObdTypeUInt64, kObdAccRW, tObdUnsigned64, ObjectMapping, 0x00LL)
@@ -158,14 +158,14 @@ OBD_BEGIN ()
         OBD_END_INDEX(0x1602)
 
         // Object 1800h: PDO_TxCommParam_00h_REC
-        OBD_BEGIN_INDEX_RAM(0x1800, 0x03, ctrlu_cbObdAccess)
+        OBD_BEGIN_INDEX_RAM(0x1800, 0x03, oplk_cbGenericObdAccess)
             OBD_SUBINDEX_RAM_VAR(0x1800, 0x00, kObdTypeUInt8, kObdAccConst, tObdUnsigned8, NumberOfEntries, 0x02)
             OBD_SUBINDEX_RAM_VAR_RG(0x1800, 0x01, kObdTypeUInt8, kObdAccGRW, tObdUnsigned8, NodeID_U8, 0x00, 0, 254)
             OBD_SUBINDEX_RAM_VAR(0x1800, 0x02, kObdTypeUInt8, kObdAccRW, tObdUnsigned8, MappingVersion_U8, 0x00)
         OBD_END_INDEX(0x1800)
 
         // Object 1A00h: PDO_TxMappParam_00h_AU64
-        OBD_BEGIN_INDEX_RAM(0x1A00, 0x1A, ctrlu_cbObdAccess)
+        OBD_BEGIN_INDEX_RAM(0x1A00, 0x1A, oplk_cbGenericObdAccess)
             OBD_SUBINDEX_RAM_VAR(0x1A00, 0x00, kObdTypeUInt8, kObdAccRW, tObdUnsigned8, NumberOfEntries, 0x0)
             OBD_SUBINDEX_RAM_VAR(0x1A00, 0x01, kObdTypeUInt64, kObdAccRW, tObdUnsigned64, ObjectMapping, 0x00LL)
             OBD_SUBINDEX_RAM_VAR(0x1A00, 0x02, kObdTypeUInt64, kObdAccRW, tObdUnsigned64, ObjectMapping, 0x00LL)

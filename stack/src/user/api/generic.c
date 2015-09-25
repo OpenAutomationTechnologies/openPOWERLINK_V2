@@ -348,6 +348,25 @@ tOplkError oplk_execNmtCommand(tNmtEvent nmtEvent_p)
 
 //------------------------------------------------------------------------------
 /**
+\brief  Handle access to stack-internal objects of the object dictionary.
+
+This function is used to declare objects in the object dictionary to which an
+access is handled by the stack itself.
+
+\param  pParam_p            OD callback parameters
+
+\return The function returns a \ref tOplkError error code.
+
+\ingroup module_api
+*/
+//------------------------------------------------------------------------------
+tOplkError oplk_cbGenericObdAccess(tObdCbParam MEM* pParam_p)
+{
+    return ctrlu_cbObdAccess(pParam_p);
+}
+
+//------------------------------------------------------------------------------
+/**
 \brief  Link application variable into the OD
 
 The function links an array of application variables onto the specified object

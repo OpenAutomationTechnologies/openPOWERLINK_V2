@@ -101,7 +101,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         OBD_END_INDEX(0x1018)
 
         // Object 1020h: CFM_VerifyConfiguration_REC
-        OBD_BEGIN_INDEX_RAM(0x1020, 0x03, ctrlu_cbObdAccess)
+        OBD_BEGIN_INDEX_RAM(0x1020, 0x03, oplk_cbGenericObdAccess)
             OBD_SUBINDEX_RAM_VAR(0x1020, 0x00, kObdTypeUInt8, kObdAccConst, tObdUnsigned8, NumberOfEntries, 0x02)
             OBD_SUBINDEX_RAM_VAR(0x1020, 0x01, kObdTypeUInt32, kObdAccSRW, tObdUnsigned32, ConfDate_U32, 0)
             OBD_SUBINDEX_RAM_VAR(0x1020, 0x02, kObdTypeUInt32, kObdAccSRW, tObdUnsigned32, ConfTime_U32, 0)
