@@ -54,6 +54,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplk/obd.h>
 #include <oplk/dll.h>
 
+#if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
+#include <oplk/obdconf.h>
+#endif
+
 #if defined(CONFIG_INCLUDE_NMT_MN)
 #include <user/nmtmnu.h>
 #include <user/identu.h>
@@ -151,7 +155,7 @@ tLinkObjectRequest    linkObjectRequestsMn[]  =
 static tOplkError initNmtu(tOplkApiInitParam* pInitParam_p);
 static tOplkError initObd(tOplkApiInitParam* pInitParam_p);
 static tOplkError updateDllConfig(tOplkApiInitParam* pInitParam_p, BOOL fUpdateIdentity_p);
-static tOplkError updateObd(tOplkApiInitParam* pInitParam_p);
+static tOplkError updateObd(tOplkApiInitParam* pInitParam_p, BOOL fForceUpdateStoredConf_p);
 static tOplkError processUserEvent(tEvent* pEvent_p);
 static tOplkError cbCnCheckEvent(tNmtEvent NmtEvent_p);
 static tOplkError cbNmtStateChange(tEventNmtStateChange nmtStateChange_p);
@@ -180,6 +184,13 @@ static tOplkError cbCfmEventCnProgress(tCfmEventCnProgress* pEventCnProgress_p);
 static tOplkError cbCfmEventCnResult(unsigned int uiNodeId_p, tNmtNodeCommand NodeCommand_p);
 #endif
 UINT32 getRequiredKernelFeatures(void);
+
+#if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
+static tOplkError storeOdPart(tObdCbParam MEM* pParam_p);
+static tOplkError restoreOdPart(tObdCbParam MEM* pParam_p);
+static tOplkError cbStoreLoadObject(tObdCbStoreParam MEM* pCbStoreParam_p);
+static tOplkError initDefaultOdPartArchive(void);
+#endif
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -318,6 +329,31 @@ tOplkError ctrlu_initStack(tOplkApiInitParam* pInitParam_p)
 
     if ((ret = initObd(&ctrlInstance_l.initParam)) != kErrorOk)
         goto Exit;
+
+#if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
+
+    // Initialize target-specific obdconf module
+    ret = obdconf_init();
+    if (ret != kErrorOk)
+    {
+        goto Exit;
+    }
+
+    // Check the state of each OD part archive; create blank archives for non-existent ones
+    ret = initDefaultOdPartArchive();
+    if (ret != kErrorOk)
+    {
+        goto Exit;
+    }
+
+    // Register store/restore callback function
+    ret = obd_storeLoadObjCallback(cbStoreLoadObject);
+    if (ret != kErrorOk)
+    {
+        goto Exit;
+    }
+
+#endif // (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
     ret = linkDomainObjects(linkObjectRequestsMn, tabentries(linkObjectRequestsMn));
@@ -484,6 +520,11 @@ tOplkError ctrlu_shutdownStack(void)
     /* shutdown kernel stack */
     ret = ctrlucal_executeCmd(kCtrlCleanupStack, &retVal);
     DEBUG_LVL_CTRL_TRACE("shoutdown kernel modules():  0x%X\n", ret);
+
+#if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
+    ret = obd_storeLoadObjCallback(NULL);
+    obdconf_exit();
+#endif
 
 #if defined(CONFIG_INCLUDE_CFM)
     obdcdc_exit();
@@ -812,6 +853,17 @@ tOplkError ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
             break;
 #endif
 
+#if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
+        case 0x1010:    // NMT_StoreParam_REC
+            // Call back for Store action
+            ret = storeOdPart(pParam_p);
+            break;
+
+        case 0x1011:    // NMT_RestoreDefParam_REC
+            // Call back for Restore action
+            ret = restoreOdPart(pParam_p);
+            break;
+#endif
         default:
             break;
     }
@@ -1042,6 +1094,10 @@ static tOplkError cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
     tOplkError          ret = kErrorOk;
     BYTE                nmtState;
     tOplkApiEventArg    eventArg;
+    BOOL                fForceUpdateStoredConf = FALSE;
+#if (CONFIG_OBD_CALC_OD_SIGNATURE != FALSE)
+    UINT32              signature = 0;
+#endif
 
     // save NMT state in OD
     nmtState = (UINT8)nmtStateChange_p.newNmtState;
@@ -1084,8 +1140,18 @@ static tOplkError cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
             if (ret != kErrorOk)
                 return ret;
 
-            // $$$ d.k.: update OD only if OD was not loaded from non-volatile memory
-            ret = updateObd(&ctrlInstance_l.initParam);
+#if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
+
+            // Check if non-volatile memory of OD archive is valid, if no then set the force update flag to TRUE
+#if (CONFIG_OBD_CALC_OD_SIGNATURE != FALSE)
+            signature = (UINT32)obd_getOdSignature(kObdPartGen);
+#endif
+            ret = obdconf_getPartArchiveState(kObdPartGen, signature);
+            if (ret != kErrorOk)
+                fForceUpdateStoredConf = TRUE;
+#endif
+            // From 1.8.x: $$$ d.k.: update OD only if OD was not loaded from non-volatile memory
+            ret = updateObd(&ctrlInstance_l.initParam, fForceUpdateStoredConf);
             if (ret != kErrorOk)
                 return ret;
 
@@ -1566,12 +1632,15 @@ static tOplkError updateSdoConfig(void)
 The function updates the object dictionary from the stack initialization
 parameters.
 
-\param  pInitParam_p        Pointer to the stack initialization parameters.
+\param  pInitParam_p                Pointer to the stack initialization parameters.
+\param  fForceUpdateStoredConf_p    Flag to indicate whether or not to overwrite
+                                    the configuration parameters stored in
+                                    non-volatile memory.
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError updateObd(tOplkApiInitParam* pInitParam_p)
+static tOplkError updateObd(tOplkApiInitParam* pInitParam_p, BOOL fForceUpdateStoredConf_p)
 {
     tOplkError          ret = kErrorOk;
     WORD                wTemp;
@@ -1583,12 +1652,12 @@ static tOplkError updateObd(tOplkApiInitParam* pInitParam_p)
     if (ret != kErrorOk)
         return ret;
 
-    if (pInitParam_p->cycleLen != UINT_MAX)
+    if ((fForceUpdateStoredConf_p) && (pInitParam_p->cycleLen != UINT_MAX))
     {
         obd_writeEntry(0x1006, 0, &pInitParam_p->cycleLen, 4);
     }
 
-    if (pInitParam_p->lossOfFrameTolerance != UINT_MAX)
+    if ((fForceUpdateStoredConf_p) && (pInitParam_p->lossOfFrameTolerance != UINT_MAX))
     {
         obd_writeEntry(0x1C14, 0, &pInitParam_p->lossOfFrameTolerance, 4);
     }
@@ -1607,13 +1676,13 @@ static tOplkError updateObd(tOplkApiInitParam* pInitParam_p)
 
     obd_writeEntry(0x1F98, 3, &pInitParam_p->presMaxLatency, 4);
 
-    if (pInitParam_p->preqActPayloadLimit <= C_DLL_ISOCHR_MAX_PAYL)
+    if (((fForceUpdateStoredConf_p) && pInitParam_p->preqActPayloadLimit <= C_DLL_ISOCHR_MAX_PAYL))
     {
         wTemp = (WORD)pInitParam_p->preqActPayloadLimit;
         obd_writeEntry(0x1F98, 4, &wTemp, 2);
     }
 
-    if (pInitParam_p->presActPayloadLimit <= C_DLL_ISOCHR_MAX_PAYL)
+    if (((fForceUpdateStoredConf_p) && pInitParam_p->presActPayloadLimit <= C_DLL_ISOCHR_MAX_PAYL))
     {
         wTemp = (WORD)pInitParam_p->presActPayloadLimit;
         obd_writeEntry(0x1F98, 5, &wTemp, 2);
@@ -1621,31 +1690,32 @@ static tOplkError updateObd(tOplkApiInitParam* pInitParam_p)
 
     obd_writeEntry(0x1F98, 6, &pInitParam_p->asndMaxLatency, 4);
 
-    if (pInitParam_p->multiplCylceCnt <= 0xFF)
+    if ((fForceUpdateStoredConf_p) && (pInitParam_p->multiplCylceCnt <= 0xFF))
     {
         bTemp = (BYTE)pInitParam_p->multiplCylceCnt;
         obd_writeEntry(0x1F98, 7, &bTemp, 1);
     }
 
-    if (pInitParam_p->asyncMtu <= C_DLL_MAX_ASYNC_MTU)
+    if ((fForceUpdateStoredConf_p) && (pInitParam_p->asyncMtu <= C_DLL_MAX_ASYNC_MTU))
     {
         wTemp = (WORD)pInitParam_p->asyncMtu;
         obd_writeEntry(0x1F98, 8, &wTemp, 2);
     }
 
-    if (pInitParam_p->prescaler <= 1000)
+    if ((fForceUpdateStoredConf_p) && (pInitParam_p->prescaler <= 1000))
     {
         wTemp = (WORD)pInitParam_p->prescaler;
         obd_writeEntry(0x1F98, 9, &wTemp, 2);
     }
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
-    if (pInitParam_p->waitSocPreq != UINT_MAX)
+    if ((fForceUpdateStoredConf_p) && (pInitParam_p->waitSocPreq != UINT_MAX))
     {
         obd_writeEntry(0x1F8A, 1, &pInitParam_p->waitSocPreq, 4);
     }
 
-    if ((pInitParam_p->asyncSlotTimeout != 0) && (pInitParam_p->asyncSlotTimeout != UINT_MAX))
+    if ((fForceUpdateStoredConf_p) && (pInitParam_p->asyncSlotTimeout != 0) &&
+        (pInitParam_p->asyncSlotTimeout != UINT_MAX))
     {
         obd_writeEntry(0x1F8A, 2, &pInitParam_p->asyncSlotTimeout, 4);
     }
@@ -2009,5 +2079,346 @@ UINT32 getRequiredKernelFeatures(void)
 
     return requiredKernelFeatures;
 }
+
+#if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
+//----------------------------------------------------------------------------
+/**
+\brief  Restore OD part archive
+
+This is the callback function called when there is an access to object 0x1010
+Writing will only be done if following conditions are met:
+    - The signature 'save' is correct.
+    - The selected part of OD supports the writing to non-volatile memory
+      by command. If the device does not support saving parameters then
+      abort transfer with abort code 0x08000020. If device supports only
+      autonomously writing then abort transfer with abort code 0x08000021.
+    - The memory device is ready for writing or the device is in the right
+      state for writing. If this condition not fullfilled abort transfer
+      (0x08000022).
+
+\param      pParam_p        OBD callback parameter.
+
+\return The function returns a tOplkError error code.
+*/
+//----------------------------------------------------------------------------
+static tOplkError storeOdPart(tObdCbParam MEM* pParam_p)
+{
+    tOplkError          ret        = kErrorOk;
+    tObdPart            odPart     = kObdPartNo;
+    UINT32              devCap     = 0;
+
+    if ((pParam_p->subIndex == 0) ||
+        ((pParam_p->obdEvent != kObdEvPreWrite) &&
+         (pParam_p->obdEvent != kObdEvPostRead)))
+    {
+        goto Exit;
+    }
+
+    ret = obdconf_getTargetCapabilities(pParam_p->index, pParam_p->subIndex,
+                                        &odPart, &devCap);
+    if (ret != kErrorOk)
+    {
+        pParam_p->abortCode = SDO_AC_DATA_NOT_TRANSF_DUE_DEVICE_STATE;
+        goto Exit;
+    }
+
+    // Function is called before writing to OD
+    if (pParam_p->obdEvent == kObdEvPreWrite)
+    {
+        // Check if signature "save" will be written to object 0x1010
+        if (*((UINT32*)pParam_p->pArg) != 0x65766173L)
+        {
+            // Abort SDO because wrong signature
+            pParam_p->abortCode = SDO_AC_DATA_NOT_TRANSF_OR_STORED;
+            ret = kErrorWrongSignature;
+            goto Exit;
+        }
+
+        // Does device support saving by command?
+        if ((devCap & OBD_STORE_ON_COMMAND) == 0)
+        {
+            // Device does not support saving parameters or not by command
+            if ((devCap & OBD_STORE_AUTONOMOUSLY) != 0)
+            {
+                // Device saves parameters autonomously.
+                pParam_p->abortCode = SDO_AC_DATA_NOT_TRANSF_DUE_LOCAL_CONTROL;
+            }
+            else
+            {
+                // Device does not support saving parameters.
+                pParam_p->abortCode = SDO_AC_DATA_NOT_TRANSF_OR_STORED;
+            }
+
+            ret = kErrorObdStoreInvalidState;
+            goto Exit;
+        }
+
+        // Read all storable objects of selected OD part and store the
+        // current object values to non-volatile memory
+        ret = obd_accessOdPart(odPart, kObdDirStore);
+        if (ret != kErrorOk)
+        {
+            // Abort SDO because access failed
+            pParam_p->abortCode = SDO_AC_ACCESS_FAILED_DUE_HW_ERROR;
+            goto Exit;
+        }
+    }
+    else
+    {
+        // Function is called after reading from OD
+        if (pParam_p->obdEvent == kObdEvPostRead)
+        {
+            // From 1.8.x:
+            // WARNING: This does not work on big endian machines!
+            //          The SDO adoptable object handling feature provides a clean
+            //          way to implement it.
+            *((UINT32*)pParam_p->pArg) = devCap;
+        }
+    }
+
+Exit:
+    return ret;
+}
+
+//----------------------------------------------------------------------------
+/**
+\brief  Restore OD part archive
+
+This is the callback function called when there is an access to object 0x1011.
+Reseting default parameters will only be done if following conditions are met:
+    - The signature 'load' is correct.
+    - The selected part of OD supports the restoring parameters by command.
+      If the device does not support restoring parameters then abort transfer
+      with abort code 0x08000020.
+    - The memory device is ready for restoring or the device is in the right
+      state for restoring. If this condition not fulfilled abort transfer
+      (0x08000022).
+    - Restoring is done by declaring the stored parameters as invalid.
+      The function does not load the default parameters. This is only done
+      by command reset node or reset communication or power-on.
+
+\param      pParam_p        OBD callback parameter.
+
+\return The function returns a tOplkError error code.
+*/
+//----------------------------------------------------------------------------
+static tOplkError restoreOdPart(tObdCbParam MEM* pParam_p)
+{
+    tOplkError          ret        = kErrorOk;
+    tObdPart            odPart     = kObdPartNo;
+    UINT32              devCap     = 0;
+
+    if ((pParam_p->subIndex == 0) ||
+        ((pParam_p->obdEvent != kObdEvPreWrite) &&
+         (pParam_p->obdEvent != kObdEvPostRead)))
+    {
+        goto Exit;
+    }
+
+    ret = obdconf_getTargetCapabilities(pParam_p->index, pParam_p->subIndex,
+                                        &odPart, &devCap);
+    if (ret != kErrorOk)
+    {
+        pParam_p->abortCode = SDO_AC_DATA_NOT_TRANSF_DUE_DEVICE_STATE;
+        goto Exit;
+    }
+
+    // Was this function called before writing to OD
+    if (pParam_p->obdEvent == kObdEvPreWrite)
+    {
+        // Check if signature "load" will be written to object 0x1010 subindex X
+        if (*((UINT32*)pParam_p->pArg) != 0x64616F6CL)
+        {
+            // Abort SDO
+            pParam_p->abortCode = SDO_AC_DATA_NOT_TRANSF_OR_STORED;
+            ret = kErrorWrongSignature;
+            goto Exit;
+        }
+
+        // Does device support saving by command?
+        if ((devCap & OBD_STORE_ON_COMMAND) == 0)
+        {
+            // Device does not support saving parameters.
+            pParam_p->abortCode = SDO_AC_DATA_NOT_TRANSF_OR_STORED;
+
+            ret = kErrorObdStoreInvalidState;
+            goto Exit;
+        }
+
+        ret = obd_accessOdPart(odPart, kObdDirRestore);
+        if (ret != kErrorOk)
+        {
+            // abort SDO
+            pParam_p->abortCode = SDO_AC_ACCESS_FAILED_DUE_HW_ERROR;
+            goto Exit;
+        }
+    }
+    else
+    {
+        // Was this function called after reading from OD
+        if (pParam_p->obdEvent == kObdEvPostRead)
+        {
+            // WARNING: This does not work on big endian machines!
+            //          The SDO adoptable object handling feature provides a clean
+            //          way to implement it.
+            *((UINT32*)pParam_p->pArg) = devCap;
+        }
+    }
+
+Exit:
+    return ret;
+}
+
+//----------------------------------------------------------------------------
+/**
+\brief  Callback for OD store load object
+
+This is the callback function, called by OBD module, that notifies of
+commands STORE or LOAD.
+The function is called with the selected OD part. For each part the function
+creates an archive and saves the parameters. Following command sequence is used:
+              1. kEplObdCommOpenWrite(Read)  --> create archive (set last archive invalid)
+              2. kEplObdCommWrite(Read)Obj   --> write data to archive
+              3. kEplObdCommCloseWrite(Read) --> close archive (set archive valid)
+
+\param  pCbStoreParam_p     Callback instance parameters
+
+\return The function returns a tOplkError error code.
+*/
+//----------------------------------------------------------------------------
+static tOplkError cbStoreLoadObject(tObdCbStoreParam MEM* pCbStoreParam_p)
+{
+    tOplkError      ret = kErrorOk;
+    tOplkError      archiveState = kErrorOk;
+    tObdPart        odPart = pCbStoreParam_p->currentOdPart; // only one bit is set!
+    UINT32          signature = 0;
+
+    // Which event is notified
+    switch (pCbStoreParam_p->command)
+    {
+        case kObdCmdOpenWrite:
+            // Create archive to write all objects of this OD part
+#if (CONFIG_OBD_CALC_OD_SIGNATURE != FALSE)
+            signature = (UINT32)obd_getOdSignature(odPart);
+#endif
+            ret = obdconf_createPart(odPart, signature);
+            break;
+
+        case kObdCmdWriteObj:
+            // Store value from pData_p (with size ObjSize_p) to memory medium
+            ret = obdconf_storePart(odPart,
+                                    (UINT8*)pCbStoreParam_p->pData,
+                                    pCbStoreParam_p->objSize);
+            break;
+
+        case kObdCmdCloseRead:
+        case kObdCmdCloseWrite:
+            ret = obdconf_closePart(odPart);
+            break;
+
+        case kObdCmdOpenRead:
+            // Check signature for data valid on medium for this OD part
+#if (CONFIG_OBD_CALC_OD_SIGNATURE != FALSE)
+            signature = (UINT32)obd_getOdSignature(odPart);
+#endif
+            archiveState = obdconf_getPartArchiveState(odPart, signature);
+            if ((archiveState == kErrorOk) || ((archiveState == kErrorObdStoreDataObsolete)))
+            {
+                if ((ret = obdconf_openReadPart(odPart)) == kErrorOk)
+                    ret = archiveState;
+            }
+
+            break;
+
+        case kObdCmdReadObj:
+            ret = obdconf_loadPart(odPart,
+                                   (UINT8*)pCbStoreParam_p->pData,
+                                   pCbStoreParam_p->objSize);
+            break;
+
+        case kObdCmdClear:
+            ret = obdconf_deletePart(odPart);
+            break;
+
+        default:
+            ret = kErrorInvalidOperation;
+            break;
+    }
+
+    return ret;
+}
+
+//----------------------------------------------------------------------------
+/**
+\brief  Initialize default OD part archives
+
+The function checks if the specified OD archive part in non-volatile memory
+is valid.
+
+\param  odPart_p    OD part type to check
+
+\return The function returns a tOplkError error code.
+*/
+//----------------------------------------------------------------------------
+static tOplkError initDefaultOdPartArchive(void)
+{
+    tOplkError              ret = kErrorOk;
+    tObdPart                curOdPart = kObdPartNo;
+    tObdPart                nextOdPart = kObdPartNo;
+    BOOL                    fExit = FALSE;
+#if (CONFIG_OBD_CALC_OD_SIGNATURE != FALSE)
+    UINT32                  signature = 0;
+#endif
+
+    while (fExit != TRUE)
+    {
+        switch (curOdPart)
+        {
+            case kObdPartNo:
+                nextOdPart = kObdPartGen;
+                break;
+
+            case kObdPartGen:
+            case kObdPartMan:
+            case kObdPartDev:
+#if (CONFIG_OBD_CALC_OD_SIGNATURE != FALSE)
+            signature = (UINT32)obd_getOdSignature(curOdPart);
+#endif
+                if (obdconf_getPartArchiveState(curOdPart, signature) == kErrorObdStoreHwError)
+                {
+                    // Create a part archive marked obsolete
+                    if ((ret = obdconf_createPart(curOdPart, (UINT32)~0)) != kErrorOk)
+                    {
+                        fExit = TRUE;
+                        break;
+                    }
+
+                    if ((ret = obdconf_closePart(curOdPart)) != kErrorOk)
+                        fExit = TRUE;
+                }
+
+                nextOdPart = curOdPart << 1;
+                break;
+
+            case kObdPartUsr:
+                nextOdPart = kObdPartApp;
+                break;
+
+            case kObdPartApp:
+                nextOdPart = kObdPartAll;
+                break;
+            case kObdPartAll:
+            default:
+                fExit = TRUE;
+                break;
+        }
+
+        // switch to the next OD part
+        curOdPart = nextOdPart;
+    }
+
+    return ret;
+}
+#endif
 
 /// \}

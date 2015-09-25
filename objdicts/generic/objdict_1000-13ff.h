@@ -71,6 +71,26 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
            OBD_SUBINDEX_RAM_VSTRING(0x100A, 0x00, kObdAccR, software_version, OBD_MAX_STRING_SIZE, PLK_PRODUCT_NAME" "PLK_PRODUCT_VERSION)
         OBD_END_INDEX(0x100A)
 
+#if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
+        // Object 1010h: NMT_StoreParam_REC
+        OBD_BEGIN_INDEX_RAM(0x1010, 0x05, ctrlu_cbObdAccess)
+            OBD_SUBINDEX_RAM_VAR(0x1010, 0x00, kObdTypeUInt8, kObdAccConst, tObdUnsigned8, NumberOfEntries, 0x04)
+            OBD_SUBINDEX_RAM_VAR_NOINIT(0x1010, 0x01, kObdTypeUInt32, kObdAccRW, tObdUnsigned32, AllParam_U32)
+            OBD_SUBINDEX_RAM_VAR_NOINIT(0x1010, 0x02, kObdTypeUInt32, kObdAccRW, tObdUnsigned32, CommunicationParam_U32)
+            OBD_SUBINDEX_RAM_VAR_NOINIT(0x1010, 0x03, kObdTypeUInt32, kObdAccRW, tObdUnsigned32, ApplicationParam_U32)
+            OBD_SUBINDEX_RAM_VAR_NOINIT(0x1010, 0x04, kObdTypeUInt32, kObdAccRW, tObdUnsigned32, ManufacturerParam_U32)
+        OBD_END_INDEX(0x1010)
+
+        // Object 1011h: NMT_RestoreDefParam_REC
+        OBD_BEGIN_INDEX_RAM(0x1011, 0x05, ctrlu_cbObdAccess)
+            OBD_SUBINDEX_RAM_VAR(0x1011, 0x00, kObdTypeUInt8, kObdAccConst, tObdUnsigned8, NumberOfEntries, 0x04)
+            OBD_SUBINDEX_RAM_VAR_NOINIT(0x1011, 0x01, kObdTypeUInt32, kObdAccRW, tObdUnsigned32, AllParam_U32)
+            OBD_SUBINDEX_RAM_VAR_NOINIT(0x1011, 0x02, kObdTypeUInt32, kObdAccRW, tObdUnsigned32, CommunicationParam_U32)
+            OBD_SUBINDEX_RAM_VAR_NOINIT(0x1011, 0x03, kObdTypeUInt32, kObdAccRW, tObdUnsigned32, ApplicationParam_U32)
+            OBD_SUBINDEX_RAM_VAR_NOINIT(0x1011, 0x04, kObdTypeUInt32, kObdAccRW, tObdUnsigned32, ManufacturerParam_U32)
+        OBD_END_INDEX(0x1011)
+#endif
+
         // Object 1018h: NMT_IdentityObject_REC
         OBD_BEGIN_INDEX_RAM(0x1018, 0x05, NULL)
             OBD_SUBINDEX_RAM_VAR(0x1018, 0x00, kObdTypeUInt8, kObdAccConst, tObdUnsigned8, NumberOfEntries, 0x04)
