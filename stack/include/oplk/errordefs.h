@@ -253,6 +253,12 @@ typedef enum
     kErrorCfmNoConfigData           = 0x00C6,       ///< No configuration data present
     kErrorCfmUnsuppDatatypeDcf      = 0x00C7,       ///< Unsupported datatype found in dcf -> this entry was not configured
 
+    // area for OD configuration store restore module 0x0D0 - 0x0DF
+    kErrorObdStoreHwError           = 0x00D0,       ///< HW error while accessing non-volatile memory
+    kErrorObdStoreInvalidState      = 0x00D1,       ///< Non-volatile memory is in invalid state (nothing saved)
+    kErrorObdStoreDataLimitExceeded = 0x00D2,       ///< Data count is less than the expected size
+    kErrorObdStoreDataObsolete      = 0x00D3,       ///< Data stored in the archive is obsolete
+
     kErrorApiTaskDeferred           = 0x0140,       ///< openPOWERLINK performs task in background and informs the application (or vice-versa), when it is finished
     kErrorApiInvalidParam           = 0x0142,       ///< Passed invalid parameters to a function (e.g. invalid node id)
     kErrorApiNoObdInitRam           = 0x0143,       ///< No function pointer for ObdInitRam supplied

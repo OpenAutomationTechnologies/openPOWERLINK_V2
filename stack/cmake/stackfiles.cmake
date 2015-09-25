@@ -105,6 +105,16 @@ SET(USER_SOURCES
     )
 
 ################################################################################
+# User obd configuration archive sources
+SET(OBD_CONF_LINUXUSER_SOURCES
+    ${USER_SOURCE_DIR}/obd/obdconf-fileio.c
+    )
+
+SET(OBD_CONF_WINDOWSUSER_SOURCES
+    ${USER_SOURCE_DIR}/obd/obdconf-fileio.c
+    )
+
+################################################################################
 # User control CAL sources
 
 SET(CTRL_UCAL_LINUXIOCTL_SOURCES
@@ -579,6 +589,7 @@ SET(OPLK_HEADERS
     ${STACK_INCLUDE_DIR}/oplk/basictypes.h
     ${STACK_INCLUDE_DIR}/oplk/nmt.h
     ${STACK_INCLUDE_DIR}/oplk/obd.h
+    ${STACK_INCLUDE_DIR}/oplk/obdconf.h
     ${STACK_INCLUDE_DIR}/oplk/obdcdc.h
     ${STACK_INCLUDE_DIR}/oplk/obdmacro.h
     ${STACK_INCLUDE_DIR}/oplk/powerlink-module.h

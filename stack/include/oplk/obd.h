@@ -500,6 +500,10 @@ tOplkError obd_searchVarEntry(UINT index_p, UINT subindex_p, tObdVarEntry MEM** 
 
 tOplkError obd_initObd(tObdInitParam MEM* pInitParam_p);
 
+#if defined(CONFIG_OBD_CALC_OD_SIGNATURE) && (CONFIG_OBD_CALC_OD_SIGNATURE != FALSE)
+UINT32 obd_getOdSignature(tObdPart odPart_p);
+#endif
+
 #if defined(CONFIG_OBD_USE_STORE_RESTORE) && (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
 tOplkError obd_storeLoadObjCallback(tObdStoreLoadCallback pfnCallback_p);
 #endif

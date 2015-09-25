@@ -44,6 +44,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplk/obd.h>
 #include <common/ami.h>
 
+#if (CONFIG_OBD_CALC_OD_SIGNATURE != FALSE)
+#include <common/target.h>
+#endif
+
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
@@ -88,6 +92,9 @@ typedef struct
 {
     tObdInitParam                   initParam;
     tObdStoreLoadCallback           pfnStoreLoadObjectCb;
+#if (CONFIG_OBD_CALC_OD_SIGNATURE != FALSE)
+    UINT32                          aOdSignature[3];
+#endif
     UINT8                           obdTrashObject[8];
 } tObdInstance;
 
@@ -205,6 +212,10 @@ tOplkError obd_init(tObdInitParam MEM* pInitParam_p)
 
     // clear callback function for command LOAD and STORE
     obdInstance_l.pfnStoreLoadObjectCb = NULL;
+
+#if (CONFIG_OBD_CALC_OD_SIGNATURE != FALSE)
+    OPLK_MEMSET(obdInstance_l.aOdSignature, -1, sizeof(obdInstance_l.aOdSignature));
+#endif
 
     calcOdIndexNum(&obdInstance_l.initParam);
 
@@ -1045,6 +1056,45 @@ tOplkError obd_searchVarEntry(UINT index_p, UINT subIndex_p, tObdVarEntry MEM** 
     }
     return ret;
 }
+
+#if (CONFIG_OBD_CALC_OD_SIGNATURE != FALSE)
+//------------------------------------------------------------------------------
+/**
+\brief  Get OD part archive signature
+
+The function reads the OD signature for checking valid OD part in Store/Restore
+archive file.
+
+\param  odPart_p        The OD part specifier.
+
+\return The function returns the OD part archive signature.
+\retVal UINT32_MAX      The OD part parameter is invalid
+
+\ingroup module_obd
+*/
+//------------------------------------------------------------------------------
+UINT32 obd_getOdSignature(tObdPart odPart_p)
+{
+    UINT32 odCrc = (UINT32)~0U;
+
+    switch (odPart_p)
+    {
+        case kObdPartGen:
+            odCrc = obdInstance_l.aOdSignature[0];
+            break;
+        case kObdPartMan:
+            odCrc = obdInstance_l.aOdSignature[1];
+            break;
+        case kObdPartDev:
+            odCrc = obdInstance_l.aOdSignature[2];
+            break;
+        default:
+            break;
+    }
+
+    return odCrc;
+}
+#endif
 
 #if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
 //------------------------------------------------------------------------------
@@ -2116,6 +2166,10 @@ static tOplkError accessOdPartition(tObdPart currentOdPart_p, tObdEntryPtr pObdE
     UNUSED_PARAMETER(currentOdPart_p);
 #endif
 
+#if (CONFIG_OBD_CALC_OD_SIGNATURE != FALSE)
+    UINT32                      odCrc = 0;
+#endif
+
 #if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
 
     // prepare structure for STORE RESTORE callback function
@@ -2137,12 +2191,29 @@ static tOplkError accessOdPartition(tObdPart currentOdPart_p, tObdEntryPtr pObdE
             pSubIndex = pObdEntry_p->pSubIndex;
             nSubIndexCount = pObdEntry_p->count;
 
+#if (CONFIG_OBD_CALC_OD_SIGNATURE != FALSE)
+            if (direction_p == kObdDirInit)
+            {
+                odCrc = OPLK_CALCULATE_CRC16(odCrc, (UINT8*)&pObdEntry_p->index, sizeof(pObdEntry_p->index));
+                odCrc = OPLK_CALCULATE_CRC16(odCrc, (UINT8*)&pObdEntry_p->count, sizeof(pObdEntry_p->count));
+            }
+#endif
+
             while (nSubIndexCount != 0)                         // walk through sub-index table till all sub-indices were restored
             {
                 access = (tObdAccess)pSubIndex->access;
                 pDefault = getObjectDefaultPtr(pSubIndex);
                 pDstData = getObjectCurrentPtr(pSubIndex);
                 objSize  = getObjectSize(pSubIndex);
+
+#if (CONFIG_OBD_CALC_OD_SIGNATURE != FALSE)
+                if (direction_p == kObdDirInit)
+                {
+                    odCrc = OPLK_CALCULATE_CRC16(odCrc, (UINT8*)&pSubIndex->subIndex, sizeof(pSubIndex->subIndex));
+                    odCrc = OPLK_CALCULATE_CRC16(odCrc, (UINT8*)&pSubIndex->type, sizeof(pSubIndex->type));
+                    odCrc = OPLK_CALCULATE_CRC16(odCrc, (UINT8*)&pSubIndex->access, sizeof(pSubIndex->access));
+                }
+#endif
 
                 switch (direction_p)
                 {
@@ -2241,6 +2312,27 @@ static tOplkError accessOdPartition(tObdPart currentOdPart_p, tObdEntryPtr pObdE
             pObdEntry_p++;                          // next index entry
         }
     }
+
+#if (CONFIG_OBD_CALC_OD_SIGNATURE != FALSE)
+    // Save the calculated CRC for writing when the archive is being closed
+    if (direction_p == kObdDirInit)
+    {
+        switch (currentOdPart_p)
+        {
+            case kObdPartGen:
+                obdInstance_l.aOdSignature[0] = odCrc;
+                break;
+            case kObdPartMan:
+                obdInstance_l.aOdSignature[1] = odCrc;
+                break;
+            case kObdPartDev:
+                obdInstance_l.aOdSignature[2] = odCrc;
+                break;
+            default:
+                break;
+        }
+    }
+#endif
 
     // command of last action depends on direction to access
 #if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
