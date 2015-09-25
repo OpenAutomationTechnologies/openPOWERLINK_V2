@@ -508,6 +508,7 @@ OPLKDLLEXPORT tOplkError oplk_postUserEvent(void* pUserArg_p);
 OPLKDLLEXPORT tOplkError oplk_triggerMnStateChange(UINT nodeId_p, tNmtNodeCommand nodeCommand_p);
 OPLKDLLEXPORT tOplkError oplk_setCdcBuffer(BYTE* pbCdc_p, UINT cdcSize_p);
 OPLKDLLEXPORT tOplkError oplk_setCdcFilename(char* pszCdcFilename_p);
+OPLKDLLEXPORT tOplkError oplk_setOdArchivePath(const char* pBackupPath_p);
 OPLKDLLEXPORT tOplkError oplk_process(void);
 OPLKDLLEXPORT tOplkError oplk_getIdentResponse(UINT nodeId_p, tIdentResponse** ppIdentResponse_p);
 OPLKDLLEXPORT tOplkError oplk_getEthMacAddr(UINT8* pMacAddr_p);

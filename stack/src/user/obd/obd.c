@@ -2162,6 +2162,7 @@ static tOplkError accessOdPartition(tObdPart currentOdPart_p, tObdEntryPtr pObdE
 
 #if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
     tObdCbStoreParam MEM        cbStore;
+    tOplkError                  archiveState = kErrorOk;
 #else
     UNUSED_PARAMETER(currentOdPart_p);
 #endif
@@ -2178,8 +2179,9 @@ static tOplkError accessOdPartition(tObdPart currentOdPart_p, tObdEntryPtr pObdE
     cbStore.objSize         = 0;
 
     // command of first action depends on direction to access
-    if ((ret = prepareStoreRestore(direction_p, &cbStore)) != kErrorOk)
-        return ret;
+    archiveState = prepareStoreRestore(direction_p, &cbStore);
+    if ((archiveState != kErrorOk) && (archiveState != kErrorObdStoreDataObsolete))
+        return archiveState;
 #endif
 
     // we should not restore the OD values here
@@ -2268,14 +2270,22 @@ static tOplkError accessOdPartition(tObdPart currentOdPart_p, tObdEntryPtr pObdE
                         copyObjectData(pDstData, pDefault, objSize, pSubIndex->type);
                         callPostDefault(pDstData, pObdEntry_p, pSubIndex);
 #if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
-                        doStoreRestore(access, &cbStore, pDstData, objSize);
+                        if (archiveState == kErrorOk)
+                        {
+                            ret = doStoreRestore(access, &cbStore, pDstData, objSize);
+                            if (ret != kErrorOk)
+                                goto Exit;
+
+                        }
 #endif
                         break;
 
                     // objects with attribute kObdAccStore has to be stored in EEPROM or in a file
                     case kObdDirStore:
 #if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
-                        doStoreRestore(access, &cbStore, pDstData, objSize);
+                        ret = doStoreRestore(access, &cbStore, pDstData, objSize);
+                        if (ret != kErrorOk)
+                            goto Exit;
 #endif
                         break;
 
@@ -2334,12 +2344,14 @@ static tOplkError accessOdPartition(tObdPart currentOdPart_p, tObdEntryPtr pObdE
     }
 #endif
 
-    // command of last action depends on direction to access
 #if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
-    return cleanupStoreRestore(direction_p, &cbStore);
-#else
-    return ret;
+Exit:
+    // command of last action depends on direction to access
+    archiveState = cleanupStoreRestore(direction_p, &cbStore);
+    if (ret == kErrorOk)
+        ret = archiveState;
 #endif
+    return ret;
 }
 
 //------------------------------------------------------------------------------
@@ -2730,7 +2742,7 @@ The functions cleans up a store/restore command.
 //------------------------------------------------------------------------------
 static tOplkError cleanupStoreRestore(tObdDir direction_p, tObdCbStoreParam MEM* pCbStore_p)
 {
-    tOplkError          ret;
+    tOplkError          ret = kErrorOk;
 
     if (direction_p == kObdDirOBKCheck)
     {
