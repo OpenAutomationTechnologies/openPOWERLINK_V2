@@ -106,6 +106,18 @@ SET(USER_SOURCES
     )
 
 ################################################################################
+# User obd configuration archive sources
+SET(OBD_CONF_LINUXUSER_SOURCES
+    ${USER_SOURCE_DIR}/obd/obdconf-fileio.c
+    ${USER_SOURCE_DIR}/obd/obdconfcrc-generic.c
+    )
+
+SET(OBD_CONF_WINDOWSUSER_SOURCES
+    ${USER_SOURCE_DIR}/obd/obdconf-fileio.c
+    ${USER_SOURCE_DIR}/obd/obdconfcrc-generic.c
+    )
+
+################################################################################
 # User control CAL sources
 
 SET(CTRL_UCAL_LINUXIOCTL_SOURCES
@@ -629,6 +641,7 @@ SET(USER_HEADERS
     ${STACK_INCLUDE_DIR}/user/nmtcnu.h
     ${STACK_INCLUDE_DIR}/user/nmtmnu.h
     ${STACK_INCLUDE_DIR}/user/nmtu.h
+    ${STACK_INCLUDE_DIR}/user/obdconf.h
     ${STACK_INCLUDE_DIR}/user/pdou.h
     ${STACK_INCLUDE_DIR}/user/pdoucal.h
     ${STACK_INCLUDE_DIR}/user/sdocom.h
