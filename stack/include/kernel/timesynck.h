@@ -60,6 +60,7 @@ extern "C"
 
 tOplkError timesynck_init(void);
 void       timesynck_exit(void);
+tOplkError timesynck_setCycleTime(UINT32 cycleLen_p, UINT32 minSyncTime_p);
 tOplkError timesynck_sendSyncEvent(void);
 tOplkError timesynck_process(tEvent* pEvent_p);
 

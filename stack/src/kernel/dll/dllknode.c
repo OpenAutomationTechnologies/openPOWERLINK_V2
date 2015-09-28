@@ -51,6 +51,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/edrv.h>
 #include <kernel/eventk.h>
 #include <kernel/errhndk.h>
+#include <kernel/timesynck.h>
 #include <common/ami.h>
 #include <oplk/benchmark.h>
 
@@ -420,6 +421,11 @@ tOplkError dllknode_setupLocalNode(tNmtState nmtState_p)
         ret = edrv_setRxMulticastMacAddr(aMulticastMac);
     }
 #endif
+
+    ret = timesynck_setCycleTime(dllkInstance_g.dllConfigParam.cycleLen,
+                                 dllkInstance_g.dllConfigParam.minSyncTime);
+    if (ret != kErrorOk)
+        return ret;
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
     if (NMT_IF_MN_OR_RMN(nmtState_p))

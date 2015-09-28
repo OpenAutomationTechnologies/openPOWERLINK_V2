@@ -70,10 +70,20 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
+/**
+\brief Timesync instance
+
+The following structure defines the instance variable of the kernel timesync module.
+*/
+typedef struct
+{
+    UINT32      syncEventCycle;     ///< Synchronization event cycle
+} tTimesynckInstance;
 
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
+static tTimesynckInstance   timesynckInstance_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -96,6 +106,10 @@ The function initializes the kernel timesync module.
 //------------------------------------------------------------------------------
 tOplkError timesynck_init(void)
 {
+    OPLK_MEMSET(&timesynckInstance_l, 0, sizeof(timesynckInstance_l));
+
+    timesynckInstance_l.syncEventCycle = 1; // Default every cycle
+
     return timesynckcal_init();
 }
 
@@ -115,6 +129,39 @@ void timesynck_exit(void)
 
 //------------------------------------------------------------------------------
 /**
+\brief  Set cycle time to timesync module
+
+The function sets the POWERLINK cycle time to the timesync module
+
+\param  cycleLen_p      POWERLINK Cycle time [us]
+\param  minSyncTime_p   Minimum period for sending sync event [us]
+
+\return The function returns a tOplkError error code.
+
+\ingroup module_timesynck
+*/
+//------------------------------------------------------------------------------
+tOplkError timesynck_setCycleTime(UINT32 cycleLen_p, UINT32 minSyncTime_p)
+{
+    tOplkError  ret = kErrorOk;
+
+    if ((cycleLen_p == 0) || (minSyncTime_p == 0))
+    {
+        // - Handle a cycle time of 0 (avoids div by 0)
+        // - Handle not configured minimum sync period
+        timesynckInstance_l.syncEventCycle = 1;
+    }
+    else
+    {
+        // Calculate synchronization event cycle
+        timesynckInstance_l.syncEventCycle = ((minSyncTime_p + cycleLen_p - 1) / cycleLen_p);
+    }
+
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
 \brief  Send sync event
 
 The function sends a synchronization event to the user layer.
@@ -126,7 +173,21 @@ The function sends a synchronization event to the user layer.
 //------------------------------------------------------------------------------
 tOplkError timesynck_sendSyncEvent(void)
 {
-    return timesynckcal_sendSyncEvent();
+    tOplkError      ret = kErrorOk;
+    static UINT32   cycleCnt = 0;
+
+    if ((++cycleCnt == timesynckInstance_l.syncEventCycle))
+    {
+        ret = timesynckcal_sendSyncEvent();
+
+        cycleCnt = 0;
+    }
+    else if (cycleCnt > timesynckInstance_l.syncEventCycle)
+    {
+        cycleCnt = 0;
+    }
+
+    return ret;
 }
 
 //------------------------------------------------------------------------------

@@ -431,6 +431,10 @@ typedef struct
     tOplkApiSdoStack    sdoStackType;               ///< Specifies the SDO stack that should be used.
                                                     /**< It is used for switching between the standard SDO stack and alternative SDO stacks. The available SDO stacks are defined by the \ref tOplkApiSdoStack enumeration.
                                                          If the standard SDO stack is used it must be initialized with 0x00.*/
+    UINT32              minSyncTime;                ///< Minimum synchronization period supported by the application [us]
+                                                    /**< This parameter configures the period of synchronization events triggered by the openPOWERLINK stack.
+                                                         Note that the resulting synchronization period can only be a multiple of the configured cycle lenght.
+                                                         If this value is set to 0, no minimum synchronization period is specified. */
 } tOplkApiInitParam;
 
 /**

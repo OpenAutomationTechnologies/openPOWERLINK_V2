@@ -218,6 +218,7 @@ typedef struct
     UINT32              reducedSwitchOverTimeMn;    ///< Switch over time when CS_PREOPERATIONAL1 in [us]
     UINT32              delayedSwitchOverTimeMn;    ///< Switch over time otherwise in [us]
 #endif
+    UINT32              minSyncTime;                ///< Minimum synchronization period supported by the application [us]
 } tDllConfigParam;
 
 /**

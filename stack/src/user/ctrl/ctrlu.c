@@ -1523,6 +1523,7 @@ static tOplkError updateDllConfig(tOplkApiInitParam* pInitParam_p, BOOL fUpdateI
 
     dllConfigParam.fSyncOnPrcNode = pInitParam_p->fSyncOnPrcNode;
     dllConfigParam.syncNodeId = pInitParam_p->syncNodeId;
+    dllConfigParam.minSyncTime = pInitParam_p->minSyncTime;
 
     dllConfigParam.sizeOfStruct = sizeof(dllConfigParam);
     if ((ret = dllucal_config(&dllConfigParam)) != kErrorOk)
