@@ -63,9 +63,9 @@ The generic defines are valid for the whole openPOWERLINK stack.
 #define CONFIG_INCLUDE_LEDK
 #define CONFIG_INCLUDE_SDO_ASND
 
-// TODO: PCIe interface does not support virtual Ethernet
-//       Add it through conditional compilation
-//#define CONFIG_INCLUDE_VETH
+#ifndef CONFIG_PCIE
+#define CONFIG_INCLUDE_VETH
+#endif
 
 #ifndef BENCHMARK_MODULES
 #define BENCHMARK_MODULES                   (0 |\
