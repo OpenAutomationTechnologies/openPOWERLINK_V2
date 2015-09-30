@@ -3,6 +3,7 @@
         <file>ledgreen.png</file>
         <file>ledred.png</file>
         <file>ledyellow.png</file>
+        <file>ledgray.png</file>
         <file>powerlink_open_source.png</file>
     </qresource>
 </RCC>

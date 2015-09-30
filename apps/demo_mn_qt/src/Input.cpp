@@ -157,6 +157,7 @@ void Input::addNode(int nodeId_p)
     if ((nodeId_p >= 0) && (nodeId_p <= NODE_ID_MAX))
     {
         ppLeds[nodeId_p]->show();
+        ppLeds[nodeId_p]->disableLeds();
         //apNodes[iNodeId_p]->setFixedSize(NODE_WIDTH, NODE_HEIGHT);
         pInputLayout->update();
     }

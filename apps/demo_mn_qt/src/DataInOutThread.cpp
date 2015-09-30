@@ -97,10 +97,10 @@ DataInOutThread::DataInOutThread()
         period[i] = 0;
     }
 
-    fStop = FALSE;
+    fStop = false;
+    fMnActive = false;
     pDataInOutThread_g = this;
 }
-
 
 //------------------------------------------------------------------------------
 /**
@@ -131,55 +131,64 @@ tOplkError DataInOutThread::processSync(void)
 
     for (i = 0; (i < MAX_NODES) && (usedNodeIds_g[i] != 0); i++)
     {
-        /* Running Leds */
-        /* period for LED flashing determined by inputs */
-        period[i] = (input[i] == 0) ? 1 : (input[i] * 20);
-        if (cnt % period[i] == 0)
+
+        // If we are not in an active MN state we don't need to
+        // do the processing of the outputs!
+        if (fMnActive)
         {
-            if (leds[i] == 0x00)
+            /* Running Leds */
+            /* period for LED flashing determined by inputs */
+            period[i] = (input[i] == 0) ? 1 : (input[i] * 20);
+            if (cnt % period[i] == 0)
             {
-                leds[i] = 0x1;
-                toggle[i] = 1;
-            }
-            else
-            {
-                if (toggle[i])
+                if (leds[i] == 0x00)
                 {
-                    leds[i] <<= 1;
-                    if (leds[i] == APP_LED_MASK_1)
-                    {
-                        toggle[i] = 0;
-                    }
+                    leds[i] = 0x1;
+                    toggle[i] = 1;
                 }
                 else
                 {
-                    leds[i] >>= 1;
-                    if (leds[i] == 0x01)
+                    if (toggle[i])
                     {
-                        toggle[i] = 1;
+                        leds[i] <<= 1;
+                        if (leds[i] == APP_LED_MASK_1)
+                        {
+                            toggle[i] = 0;
+                        }
+                    }
+                    else
+                    {
+                        leds[i] >>= 1;
+                        if (leds[i] == 0x01)
+                        {
+                            toggle[i] = 1;
+                        }
                     }
                 }
             }
-        }
 
-        if (input[i] != inputOld[i])
-        {
-            inChanged(input[i], usedNodeIds_g[i]);
-            inputOld[i] = input[i];
-        }
-
-        if (leds[i] != ledsOld[i])
-        {
             outChanged(leds[i], usedNodeIds_g[i]);
             ledsOld[i] = leds[i];
         }
+        else
+        {
+            // We are not controlling the outputs. We show this, by disable the output Leds.
+            emit disableOutputs(usedNodeIds_g[i]);
+        }
+
+        inChanged(input[i], usedNodeIds_g[i]);
+        inputOld[i] = input[i];
     }
 
-    pProcessImageIn_l->CN1_M00_DigitalOutput_00h_AU8_DigitalOutput = leds[0];
-    pProcessImageIn_l->CN32_M00_DigitalOutput_00h_AU8_DigitalOutput = leds[1];
-    pProcessImageIn_l->CN110_M00_DigitalOutput_00h_AU8_DigitalOutput = leds[2];
+    // If we are not in an active MN state we don't need to update the outputs
+    if (fMnActive)
+    {
+        pProcessImageIn_l->CN1_M00_DigitalOutput_00h_AU8_DigitalOutput = leds[0];
+        pProcessImageIn_l->CN32_M00_DigitalOutput_00h_AU8_DigitalOutput = leds[1];
+        pProcessImageIn_l->CN110_M00_DigitalOutput_00h_AU8_DigitalOutput = leds[2];
 
-    ret = oplk_exchangeProcessImageIn();
+        ret = oplk_exchangeProcessImageIn();
+    }
 
     return ret;
 }
@@ -252,7 +261,7 @@ void DataInOutThread::run()
 {
     tOplkError  ret;
 
-    this->fStop = FALSE;
+    this->fStop = false;
     while (!this->fStop)
     {
         if (oplk_waitSyncEvent(10000) != kErrorOk)
@@ -289,5 +298,18 @@ The function stops the synchronous data thread.
 //------------------------------------------------------------------------------
 void DataInOutThread::stop()
 {
-    this->fStop = TRUE;
+    this->fStop = true;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Set MN Active flag
+
+The function sets the MN active flag which shows if the MN is in an
+active state and therefore controlling the synchronous output data.
+*/
+//------------------------------------------------------------------------------
+void DataInOutThread::setMnActiveFlag(bool fMnActive_p)
+{
+    this->fMnActive = fMnActive_p;
 }

@@ -69,11 +69,13 @@ class Leds : public QWidget
 public:
     Leds(int count_p, QWidget* parent = 0);
     void setLeds(UINT dataIn_p);
+    void disableLeds(void);
 
 private:
     QLabel**        ppLedLabels;
     QPixmap*        pActiveLed;
     QPixmap*        pInactiveLed;
+    QPixmap*        pNoLed;
     int             count;
 };
 

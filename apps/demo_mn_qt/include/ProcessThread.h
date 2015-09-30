@@ -78,6 +78,7 @@ public:
     void              run();
     void              sigOplkStatus(int status_p);
     void              sigNmtState(tNmtState State_p);
+    void              sigMnActive(bool fMnActive_p);
     void              sigPrintLog(QString log_p);
     void              sigNodeAppeared(int nodeId_p) { emit nodeAppeared(nodeId_p); };
     void              sigNodeDisappeared(int nodeId_p) { emit nodeDisappeared(nodeId_p); };
@@ -91,6 +92,7 @@ public:
 signals:
     void              oplkStatusChanged(int status_p);
     void              nmtStateChanged(const QString& strState_p);
+    void              isMnActive(bool fMnActive_p);
     void              nodeAppeared(int nodeId_p);
     void              nodeDisappeared(int nodeId_p);
     void              allNodesRemoved();
@@ -119,6 +121,8 @@ private:
     EventLog*         pEventLog;
 
     int               status;
+    tNmtState         currentNmtState;
+    bool              fMnActive;
 };
 
 #endif /* _INC_ProcessThread_H_ */

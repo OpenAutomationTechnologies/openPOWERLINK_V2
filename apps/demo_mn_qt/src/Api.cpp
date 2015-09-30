@@ -183,6 +183,10 @@ Api::Api(MainWindow* pMainWindow_p, UINT nodeId_p, QString devName_p)
                      pOutput, SLOT(setValue(int, int)));
     QObject::connect(pDataInOutThread, SIGNAL(processImageInChanged(int, int)),
                      pInput, SLOT(setLeds(int, int)));
+    QObject::connect(pDataInOutThread, SIGNAL(disableOutputs(int)),
+                     pOutput, SLOT(disable(int)));
+    QObject::connect(pProcessThread, SIGNAL(isMnActive(bool)),
+                     pDataInOutThread, SLOT(setMnActiveFlag(bool)));
 
     memset(&initParam, 0, sizeof(initParam));
     initParam.sizeOfInitParam = sizeof(initParam);

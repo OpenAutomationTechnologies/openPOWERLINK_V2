@@ -81,9 +81,13 @@ public:
     static tOplkError AppCbSync(void);
     void stop();
 
+public slots:
+    void setMnActiveFlag(bool fMnActive_p);
+
 signals:
     void processImageInChanged(int data_p, int nodeId_p);
     void processImageOutChanged(int data_p, int nodeId_p);
+    void disableOutputs(int nodeId_p);
 
 private:
     //    volatile UINT   ackCount;
@@ -95,8 +99,8 @@ private:
     UINT            inputOld[MAX_NODES];
     UINT            period[MAX_NODES];
     int             toggle[MAX_NODES];
-    BOOL            fStop;
-
+    bool            fStop;
+    bool            fMnActive;
 };
 
 #endif //_INC_DataInOutThread_H_

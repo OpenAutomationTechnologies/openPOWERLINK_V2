@@ -79,11 +79,12 @@ Leds::Leds(int count_p, QWidget* parent_p)
 
     pActiveLed  = new QPixmap(":/img/ledred.png");
     pInactiveLed = new QPixmap(":/img/ledgreen.png");
+    pNoLed = new QPixmap(":/img/ledgray.png");
 
     for (nIdx = 0; nIdx < count_p; nIdx++)
     {
         ppLedLabels[nIdx] = new QLabel(parent_p);
-        ppLedLabels[nIdx]->setPixmap(*pInactiveLed);
+        ppLedLabels[nIdx]->setPixmap(*pNoLed);
         pLedsLayout->addWidget(ppLedLabels[nIdx]);
     }
     pLedsLayout->update();
@@ -112,6 +113,16 @@ void Leds::setLeds(UINT dataIn_p)
         {
             ppLedLabels[nIdx]->setPixmap(*pInactiveLed);
         }
+    }
+}
+
+void Leds::disableLeds(void)
+{
+    int nIdx;
+
+    for (nIdx = 0; nIdx < count; ++nIdx)
+    {
+        ppLedLabels[nIdx]->setPixmap(*pNoLed);
     }
 }
 

@@ -105,6 +105,8 @@ ProcessThread::ProcessThread(MainWindow* pMainWindow_p)
                      pMainWindow, SLOT(printlog(const QString&)));
 
     status = -1;
+    currentNmtState = kNmtGsOff;
+    fMnActive = false;
 }
 
 //------------------------------------------------------------------------------
@@ -271,6 +273,24 @@ void ProcessThread::sigNmtState(tNmtState State_p)
 
 //------------------------------------------------------------------------------
 /**
+\brief  Signal active MN state
+
+The function signals if it is in an active MN state.
+
+\param  fMnActive_p       If true it is in an active MN state otherwise not.
+*/
+//------------------------------------------------------------------------------
+void ProcessThread::sigMnActive(bool fMnActive_p)
+{
+    if (fMnActive_p != fMnActive)
+    {
+        emit isMnActive(fMnActive_p);
+        fMnActive = fMnActive_p;
+    }
+}
+
+//------------------------------------------------------------------------------
+/**
 \brief  Wait for NMT state off
 
 waitForNmtStateOff() waits until the NMT state NMT_STATE_OFF is reached
@@ -406,6 +426,8 @@ tOplkError ProcessThread::processStateChangeEvent(tOplkApiEventType eventType_p,
     UNUSED_PARAMETER(eventType_p);
     UNUSED_PARAMETER(pUserArg_p);
 
+
+    currentNmtState = pNmtStateChange->newNmtState;
     sigNmtState(pNmtStateChange->newNmtState);
 
     pEventLog->printEvent(pNmtStateChange);
@@ -423,14 +445,17 @@ tOplkError ProcessThread::processStateChangeEvent(tOplkApiEventType eventType_p,
             oplk_freeProcessImage(); //jba do we need it here?
 
             reachedNmtStateOff();
+            sigMnActive(false);
             break;
 
         case kNmtGsResetCommunication:
             pProcessThread_g->sigOplkStatus(1);
+            sigMnActive(false);
             break;
 
         case kNmtGsResetConfiguration:
             sigOplkStatus(1);
+            sigMnActive(false);
             break;
 
         case kNmtCsNotActive:
@@ -443,20 +468,27 @@ tOplkError ProcessThread::processStateChangeEvent(tOplkApiEventType eventType_p,
         case kNmtCsPreOperational2:
         case kNmtMsPreOperational2:
         case kNmtCsReadyToOperate:
-        case kNmtMsReadyToOperate:
         case kNmtCsBasicEthernet:
         case kNmtMsBasicEthernet:
             sigOplkStatus(1);
+            sigMnActive(false);
             break;
 
         case kNmtCsOperational:
+            sigOplkStatus(2);
+            sigMnActive(false);
+            break;
+
+        case kNmtMsReadyToOperate:
         case kNmtMsOperational:
             sigOplkStatus(2);
+            sigMnActive(true);
             break;
 
 
         default:
             sigOplkStatus(-1);
+            sigMnActive(false);
             break;
     }
 
