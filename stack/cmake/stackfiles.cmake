@@ -118,6 +118,17 @@ SET(OBD_CONF_WINDOWSUSER_SOURCES
     )
 
 ################################################################################
+# SDO Stack Target specific sources
+
+SET(SDO_LINUX_SOURCES
+    ${USER_SOURCE_DIR}/sdo/sdoudp-linux.c
+    )
+
+SET(SDO_WINDOWS_SOURCES
+    ${USER_SOURCE_DIR}/sdo/sdoudp-windows.c
+    )
+
+################################################################################
 # User control CAL sources
 
 SET(CTRL_UCAL_LINUXIOCTL_SOURCES
