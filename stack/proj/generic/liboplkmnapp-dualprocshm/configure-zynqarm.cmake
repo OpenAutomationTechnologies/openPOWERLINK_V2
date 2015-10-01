@@ -53,11 +53,8 @@ ENDIF()
 # Set architecture specific sources
 SET(LIB_ARCH_SOURCES
                      ${TARGET_XILINX_ARM_SOURCES}
-   )
-
-SET(LIB_ARCH_SOURCES
-                     ${TARGET_XILINX_ARM_SOURCES}
                      ${TARGET_XILINX_ARM_DUAL_SOURCES}
+                     ${SDO_SOCKETWRAPPER_SOURCES}
    )
 
 ################################################################################
@@ -65,6 +62,7 @@ SET(LIB_ARCH_SOURCES
 INCLUDE_DIRECTORIES(
                     ${XIL_LIB_BSP_INC}
                     ${ARCH_SOURCE_DIR}/xilinx-zynqarm
+                    ${CONTRIB_SOURCE_DIR}/socketwrapper
                     ${CONTRIB_SOURCE_DIR}/dualprocshm/include
                     ${CFG_COMPILE_LIB_MN_HW_LIB_DIR}/include
                    )

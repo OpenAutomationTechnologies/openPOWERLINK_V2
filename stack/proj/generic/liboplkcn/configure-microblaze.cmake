@@ -55,6 +55,7 @@ SET(LIB_ARCH_SOURCES
                      ${TARGET_MICROBLAZE_SOURCES}
                      ${TARGET_MICROBLAZE_LOCAL_SOURCES}
                      ${TARGET_MICROBLAZE_OPENMAC_SOURCES}
+                     ${SDO_SOCKETWRAPPER_SOURCES}
     )
 
 ################################################################################
@@ -62,6 +63,7 @@ SET(LIB_ARCH_SOURCES
 INCLUDE_DIRECTORIES(
                     ${XIL_LIB_BSP_INC}
                     ${ARCH_SOURCE_DIR}/xilinx_microblaze
+                    ${CONTRIB_SOURCE_DIR}/socketwrapper
                     ${CFG_COMPILE_LIB_CN_HW_LIB_DIR}/libomethlib/include
                     ${CFG_COMPILE_LIB_CN_HW_LIB_DIR}/include
                    )

@@ -55,6 +55,7 @@ ENDIF()
 SET(LIB_ARCH_SOURCES
                      ${TARGET_ALTERA_ARM_SOURCES}
                      ${TARGET_ALTERA_ARM_DUAL_SOURCES}
+                     ${SDO_SOCKETWRAPPER_SOURCES}
    )
 
 ################################################################################
@@ -67,6 +68,7 @@ SET_SOURCE_FILES_PROPERTIES(${ARCH_SOURCE_DIR}/altera-c5socarm/sleep.c
 INCLUDE_DIRECTORIES(
                     ${ALT_LIB_BSP_INC}
                     ${ARCH_SOURCE_DIR}/altera-c5socarm
+                    ${CONTRIB_SOURCE_DIR}/socketwrapper
                     ${CONTRIB_SOURCE_DIR}/dualprocshm/include
                     ${CFG_COMPILE_LIB_MN_HW_LIB_DIR}/include
                    )

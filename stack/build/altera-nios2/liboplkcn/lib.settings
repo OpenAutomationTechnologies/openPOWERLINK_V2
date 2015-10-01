@@ -39,6 +39,7 @@ OBJDICT=CiA401_CN
 # Library sources
 CFG_LIB_SOURCES="\
 ${USER_SOURCES} \
+${SDO_SOCKETWRAPPER_SOURCES} \
 ${COMMON_CAL_DIRECT_SOURCES} \
 ${CTRL_UCAL_DIRECT_SOURCES} \
 ${DLL_UCAL_CIRCBUF_SOURCES} \
@@ -72,6 +73,7 @@ ${OBJDICT_DIR}/${OBJDICT} \
 ${ARCH_SOURCE_DIR}/altera_nios2 \
 ${HW_DRIVERS_DIR}/openmac/include \
 ${HW_DRIVERS_DIR}/openmac/src \
+${OPLK_BASE_DIR}/contrib/socketwrapper \
 "
 
 CFG_LIB_OPT_LEVEL=-O2

@@ -128,6 +128,10 @@ SET(SDO_WINDOWS_SOURCES
     ${USER_SOURCE_DIR}/sdo/sdoudp-windows.c
     )
 
+SET(SDO_SOCKETWRAPPER_SOURCES
+    ${USER_SOURCE_DIR}/sdo/sdoudp-socketwrapper.c
+    )
+
 ################################################################################
 # User control CAL sources
 

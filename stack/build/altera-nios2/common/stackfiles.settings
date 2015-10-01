@@ -92,6 +92,13 @@ ${USER_SOURCE_DIR}/ctrl/ctrlu.c \
 "
 
 ################################################################################
+# SDO Stack Target specific sources
+
+SDO_SOCKETWRAPPER_SOURCES="\
+${USER_SOURCE_DIR}/sdo/sdoudp-socketwrapper.c \
+"
+
+################################################################################
 # User control CAL sources
 
 CTRL_UCAL_DIRECT_SOURCES="\
