@@ -197,7 +197,9 @@ int main(void)
         goto Exit;
 
     if ((ret = oplk_setNonPlkForward(TRUE)) != kErrorOk)
-        goto Exit;
+    {
+        PRINTF("WARNING:oplk_setNonPlkForward() failed with error (0x%X)\n", ret);
+    }
 
     loopMain(&instance_l);
 
