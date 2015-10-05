@@ -149,3 +149,27 @@ tOplkError target_setLed(tLedType ledType_p, BOOL fLedOn_p)
 
     return kErrorOk;
 }
+
+//------------------------------------------------------------------------------
+/**
+\brief  Calculate CRC16 for buffer data
+
+\note The function is not implemented for Windows kernel targets.
+
+\param  crc_p           Initialized value of CRC.
+\param  pData_p         Pointer to the data buffer.
+\param  size_p          Size of data in the buffer, in bytes.
+
+\return The function always returns UINT16_MAX.
+
+\ingroup module_target
+*/
+//------------------------------------------------------------------------------
+UINT16 target_calculateCrc16(UINT16 crc_p, UINT8* pData_p, UINT32 size_p)
+{
+    UNUSED_PARAMETER(crc_p);
+    UNUSED_PARAMETER(pData_p);
+    UNUSED_PARAMETER(size_p);
+
+    return (UINT16)~0U;
+}

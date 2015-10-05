@@ -54,6 +54,7 @@ SET (LIB_SOURCES
      ${COMMON_SOURCES}
      ${COMMON_LINUXUSER_SOURCES}
      ${TARGET_LINUX_SOURCES}
+     ${OBD_CONF_LINUXUSER_SOURCES}
      ${CIRCBUF_POSIX_SOURCES}
      ${MEMMAP_NULL_SOURCES}
      )
@@ -69,6 +70,10 @@ ENDIF()
 # Configure compile definitions
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic -std=c99 -pthread -fno-strict-aliasing")
 ADD_DEFINITIONS(-D_GNU_SOURCE -D_POSIX_C_SOURCE=200112L)
+
+IF(CFG_STORE_RESTORE)
+    ADD_DEFINITIONS(-DCONFIG_STORE_RESTORE)
+ENDIF()
 
 # Additional include directories
 INCLUDE_DIRECTORIES(
