@@ -13,7 +13,7 @@ The sync module is responsible to synchronize the user layer.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
+#include <common/target.h>
 #include <kernel/timesynckcal.h>
 
 //============================================================================//
@@ -56,6 +57,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // module global vars
 //------------------------------------------------------------------------------
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+/// Shared timesync structure
+tTimesyncSharedMemory   timesynckcal_sharedMemory_g;
+#endif
 
 //------------------------------------------------------------------------------
 // global function prototypes
@@ -150,6 +155,24 @@ tOplkError timesynckcal_controlSync(BOOL fEnable_p)
     UNUSED_PARAMETER(fEnable_p);
     return kErrorOk;
 }
+
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+//------------------------------------------------------------------------------
+/**
+\brief  Get timesync shared memory
+
+The function returns the reference to the timesync shared memory.
+
+\return The function returns a pointer to the timesync shared memory.
+
+\ingroup module_timesynckcal
+*/
+//------------------------------------------------------------------------------
+tTimesyncSharedMemory* timesynckcal_getSharedMemory(void)
+{
+    return &timesynckcal_sharedMemory_g;
+}
+#endif
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //

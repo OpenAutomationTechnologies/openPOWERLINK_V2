@@ -2087,6 +2087,10 @@ UINT32 getRequiredKernelFeatures(void)
     requiredKernelFeatures |= OPLK_KERNEL_PRES_CHAINING_CN;
 #endif
 
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    requiredKernelFeatures |= OPLK_KERNEL_SOC_TIME_FORWARD;
+#endif
+
     return requiredKernelFeatures;
 }
 

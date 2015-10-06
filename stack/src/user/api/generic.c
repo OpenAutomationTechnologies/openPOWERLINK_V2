@@ -53,6 +53,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplk/obd.h>
 #include <oplk/sdo.h>
 #include <user/timesyncucal.h>
+#include <user/timesyncu.h>
 
 #if defined(CONFIG_INCLUDE_CFM)
 #include <user/cfmu.h>
@@ -1313,6 +1314,42 @@ tOplkError oplk_getStackInfo(tOplkApiStackInfo* pStackInfo_p)
     pStackInfo_p->kernelFeature = kernelInfo.featureFlags;
 
     return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Get SoC time information
+
+The function obtains the most recent SoC time stamp provided by the kernel stack.
+
+The latest received SoC time information is available at the second half of the
+POWERLINK cycle if the node is configured as Controlled Node (CN).
+If the node is configured as Managing Node (MN), the obtained SoC time information
+is sent to the network in the next POWERLINK cycle.
+
+\param  pTimeInfo_p     Pointer to memory where the SoC time info should be stored.
+
+\return The function returns a \ref tOplkError error code.
+\retval kErrorOk                The SoC time information was obtained successfully.
+\retval kErrorApiNotSupported   Forwarding the SoC time information is not supported
+                                by the kernel stack.
+\retval Other                   Error occurred while obtaining the SoC time information.
+
+\ingroup module_api
+*/
+//------------------------------------------------------------------------------
+tOplkError oplk_getSocTime(tOplkApiSocTimeInfo* pTimeInfo_p)
+{
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    if (pTimeInfo_p == NULL)
+        return kErrorApiInvalidParam;
+
+    return timesyncu_getSocTime(pTimeInfo_p);
+#else
+    UNUSED_PARAMETER(pTimeInfo_p);
+
+    return kErrorApiNotSupported;
+#endif
 }
 
 //------------------------------------------------------------------------------

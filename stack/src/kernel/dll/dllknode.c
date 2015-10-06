@@ -277,6 +277,9 @@ tOplkError dllknode_cleanupLocalNode(tNmtState oldNmtState_p)
     ami_setUint48Be(&aMulticastMac[0], C_DLL_MULTICAST_ASND);
     ret = edrv_clearRxMulticastMacAddr(aMulticastMac);
 
+    // Reset relative time validation flag
+    dllkInstance_g.socTime.fRelTimeValid = FALSE;
+
     return ret;
 }
 

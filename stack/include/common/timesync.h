@@ -49,5 +49,46 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
+/**
+\brief  SoC time
+
+This structure defines the SoC time information.
+*/
+typedef struct
+{
+    tNetTime                netTime;        ///< Net time in IEEE 1588 format
+    UINT64                  relTime;        ///< Relative time in us
+    UINT8                   fRelTimeValid;  ///< TRUE if relTime is valid
+    UINT8                   aReserved[3];   ///< Reserved
+    UINT32                  padding1;       ///< Padding to achieve 64 bit alignment
+} tTimesyncSocTime;
+
+/**
+\brief  Triple buffer for SoC time transfer
+
+This structure defines the triple buffer memory to transfer the SoC time
+information from the kernel to the user layer. The triple buffer mechanism
+allows the application to access the SoC time information asynchronously.
+*/
+typedef struct
+{
+    OPLK_ATOMIC_T           write;          ///< Write buffer (current producer)
+    OPLK_ATOMIC_T           read;           ///< Read buffer (current consumer)
+    OPLK_ATOMIC_T           clean;          ///< Clean buffer
+    UINT8                   newData;        ///< Signalizes new data
+    UINT32                  padding1;       ///< Padding to achieve 64 bit alignment
+    tTimesyncSocTime        aTripleBuf[3];  ///< Triple buffer
+} tTimesyncSocTimeTripleBuf;
+
+/**
+\brief  Timesync shared memory
+
+This structure defines the timesync module shared memory. It is used to
+transfer time information from the kernel to the user layer.
+*/
+typedef struct
+{
+    tTimesyncSocTimeTripleBuf   socTime;    ///< Buffer to transfer SoC time
+} tTimesyncSharedMemory;
 
 #endif /* _INC_common_timesync_H_ */

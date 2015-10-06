@@ -40,6 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
+#include <common/timesync.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -60,6 +61,7 @@ extern "C"
 
 tOplkError timesyncu_init(tSyncCb pfnSyncCb_p);
 void       timesyncu_exit(void);
+tOplkError timesyncu_getSocTime(tOplkApiSocTimeInfo* pSocTime_p);
 
 #ifdef __cplusplus
 }

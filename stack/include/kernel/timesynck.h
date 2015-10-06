@@ -41,6 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
 #include <kernel/eventk.h>
+#include <common/timesync.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -63,6 +64,9 @@ void       timesynck_exit(void);
 tOplkError timesynck_setCycleTime(UINT32 cycleLen_p, UINT32 minSyncTime_p);
 tOplkError timesynck_sendSyncEvent(void);
 tOplkError timesynck_process(tEvent* pEvent_p);
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+tOplkError timesynck_setSocTime(tTimesyncSocTime* pSocTime_p);
+#endif
 
 #ifdef __cplusplus
 }

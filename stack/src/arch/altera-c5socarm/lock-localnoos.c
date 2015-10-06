@@ -119,6 +119,8 @@ lock is freed.
 //------------------------------------------------------------------------------
 INT target_lock(void)
 {
+    target_enableGlobalInterrupt(FALSE);
+
     return 0;
 }
 
@@ -135,6 +137,8 @@ This function frees the given lock.
 //------------------------------------------------------------------------------
 INT target_unlock(void)
 {
+    target_enableGlobalInterrupt(TRUE);
+
     return 0;
 }
 

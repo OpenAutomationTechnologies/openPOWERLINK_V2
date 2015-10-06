@@ -61,6 +61,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/synctimer.h>
 #endif
 
+#include <kernel/timesynck.h>
+
 #include <common/ami.h>
 #include <oplk/benchmark.h>
 
@@ -2074,6 +2076,7 @@ static tOplkError processReceivedSoc(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
 {
     tOplkError      ret = kErrorOk;
     tPlkFrame*      pFrame;
+    UINT64          relTime;
 #if CONFIG_DLL_PRES_READY_AFTER_SOC != FALSE
     tEdrvTxBuffer*  pTxBuffer = NULL;
 #endif
@@ -2088,7 +2091,6 @@ static tOplkError processReceivedSoc(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
     }
 
     pFrame = (tPlkFrame*)pRxBuffer_p->pBuffer;
-    dllkInstance_g.relativeTime = ami_getUint64Le(&pFrame->data.soc.relativeTimeLe);
 
 #if CONFIG_DLL_PRES_READY_AFTER_SOC != FALSE
     // post PRes to transmit FIFO of the ethernet controller, but don't start
@@ -2121,6 +2123,28 @@ static tOplkError processReceivedSoc(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
             dllkInstance_g.cycleCount = (dllkInstance_g.cycleCount + 1) %
                             dllkInstance_g.dllConfigParam.multipleCycleCnt;
         }
+
+        // Get SoC time stamps
+        relTime = ami_getUint64Le(&pFrame->data.soc.relativeTimeLe);
+        dllkInstance_g.socTime.netTime.nsec = ami_getUint32Le(&pFrame->data.soc.netTimeLe.nsec);
+        dllkInstance_g.socTime.netTime.sec = ami_getUint32Le(&pFrame->data.soc.netTimeLe.sec);
+
+        // Validate locally stored SoC time
+        if (!dllkInstance_g.socTime.fRelTimeValid)
+        {
+            // From the first change in the SoC time stamp it is considered valid
+            if (dllkInstance_g.socTime.relTime != relTime)
+                dllkInstance_g.socTime.fRelTimeValid = TRUE;
+        }
+
+        dllkInstance_g.socTime.relTime = relTime;
+
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+        // Forward Soc time stamp to timesync modules
+        ret = timesynck_setSocTime(&dllkInstance_g.socTime);
+        if (ret != kErrorOk)
+            return ret;
+#endif
     }
 
     // reprogram timer

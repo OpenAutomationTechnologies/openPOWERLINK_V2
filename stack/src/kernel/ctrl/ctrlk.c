@@ -611,6 +611,10 @@ void setupKernelFeatures(void)
 #if (CONFIG_DLL_PRES_CHAINING_CN == TRUE)
     instance_l.features |= OPLK_KERNEL_PRES_CHAINING_CN;
 #endif
+
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    instance_l.features |= OPLK_KERNEL_SOC_TIME_FORWARD;
+#endif
 }
 
 /// \}

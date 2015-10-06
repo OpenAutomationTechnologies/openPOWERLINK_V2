@@ -40,6 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
+#include <common/target.h>
 #include <kernel/timesynck.h>
 #include <kernel/timesynckcal.h>
 
@@ -77,7 +78,10 @@ The following structure defines the instance variable of the kernel timesync mod
 */
 typedef struct
 {
-    UINT32      syncEventCycle;     ///< Synchronization event cycle
+    UINT32                  syncEventCycle;     ///< Synchronization event cycle
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    tTimesyncSharedMemory*  pSharedMemory;      ///< Time sync shared memory
+#endif
 } tTimesynckInstance;
 
 //------------------------------------------------------------------------------
@@ -106,11 +110,33 @@ The function initializes the kernel timesync module.
 //------------------------------------------------------------------------------
 tOplkError timesynck_init(void)
 {
+    tOplkError  ret;
+
     OPLK_MEMSET(&timesynckInstance_l, 0, sizeof(timesynckInstance_l));
 
     timesynckInstance_l.syncEventCycle = 1; // Default every cycle
 
-    return timesynckcal_init();
+    ret = timesynckcal_init();
+    if (ret != kErrorOk)
+        return ret;
+
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    timesynckInstance_l.pSharedMemory = timesynckcal_getSharedMemory();
+    if (timesynckInstance_l.pSharedMemory == NULL)
+        return kErrorNoResource;
+
+    // Initialize shared memory
+    OPLK_MEMSET(timesynckInstance_l.pSharedMemory, 0, sizeof(*timesynckInstance_l.pSharedMemory));
+
+    // Initialize triple buffer
+    timesynckInstance_l.pSharedMemory->socTime.clean = 0;
+    timesynckInstance_l.pSharedMemory->socTime.read = 1;
+    timesynckInstance_l.pSharedMemory->socTime.write = 2;
+
+    OPLK_DCACHE_FLUSH(timesynckInstance_l.pSharedMemory, sizeof(*timesynckInstance_l.pSharedMemory));
+#endif
+
+    return ret;
 }
 
 //------------------------------------------------------------------------------
@@ -125,6 +151,9 @@ The function cleans up the timesync module.
 void timesynck_exit(void)
 {
     timesynckcal_exit();
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    timesynckInstance_l.pSharedMemory = NULL;
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -220,6 +249,59 @@ tOplkError timesynck_process(tEvent* pEvent_p)
 
     return ret;
 }
+
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+//------------------------------------------------------------------------------
+/**
+\brief  Set SoC time
+
+The function sets the given SoC time to the timesync module.
+
+\param  pSocTime_p      Pointer to SoC time information structure
+
+\return The function returns a tOplkError error code.
+
+\ingroup module_timesynck
+*/
+//------------------------------------------------------------------------------
+tOplkError timesynck_setSocTime(tTimesyncSocTime* pSocTime_p)
+{
+    tTimesyncSocTimeTripleBuf*  pTripleBuf;
+    OPLK_ATOMIC_T               writeBuf;
+    tTimesyncSocTime*           pBuffer;
+
+    if (pSocTime_p == NULL)
+        return kErrorNoResource;
+
+    if (timesynckInstance_l.pSharedMemory == NULL)
+    {
+        // Looks like the CAL has no SoC time forward support, but feature is
+        // enabled!
+        DEBUG_LVL_ERROR_TRACE("%s Pointer to shared memory is invalid!\n",
+                              __func__);
+        return kErrorNoResource;
+    }
+
+    pTripleBuf = &timesynckInstance_l.pSharedMemory->socTime;
+
+    OPLK_DCACHE_INVALIDATE(pTripleBuf, sizeof(*pTripleBuf));
+
+    writeBuf = pTripleBuf->write;
+    pBuffer = &pTripleBuf->aTripleBuf[writeBuf];
+
+    OPLK_MEMCPY(pBuffer, pSocTime_p, sizeof(*pBuffer));
+
+    OPLK_ATOMIC_EXCHANGE(&pTripleBuf->clean, writeBuf, pTripleBuf->write);
+
+    pTripleBuf->newData = 1;
+
+    OPLK_DCACHE_FLUSH(&pTripleBuf->clean, sizeof(pTripleBuf->clean));
+    OPLK_DCACHE_FLUSH(&pTripleBuf->write, sizeof(pTripleBuf->write));
+    OPLK_DCACHE_FLUSH(&pTripleBuf->newData, sizeof(pTripleBuf->newData));
+
+    return kErrorOk;
+}
+#endif
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //

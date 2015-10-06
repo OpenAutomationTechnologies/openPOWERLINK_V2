@@ -40,6 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
+#include <common/timesync.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -62,6 +63,10 @@ void       timesynckcal_exit(void);
 tOplkError timesynckcal_controlSync(BOOL fEnable_p);
 tOplkError timesynckcal_waitSyncEvent(void);
 tOplkError timesynckcal_sendSyncEvent(void);
+
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+tTimesyncSharedMemory* timesynckcal_getSharedMemory(void);
+#endif
 
 #ifdef __cplusplus
 }

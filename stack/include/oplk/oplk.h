@@ -476,6 +476,18 @@ typedef struct
     UINT32          kernelFeature;                  ///< Kernel stack feature bit mask
 } tOplkApiStackInfo;
 
+/**
+\brief  SoC time information structure
+
+This structure provides the SoC time information to the API.
+*/
+typedef struct
+{
+    tNetTime        netTime;                        ///< Net time given in IEEE 1588 format
+    UINT64          relTime;                        ///< Relative time given in us
+    BOOL            fValidRelTime;                  ///< TRUE if relative time is validated
+} tOplkApiSocTimeInfo;
+
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
@@ -522,6 +534,7 @@ OPLKDLLEXPORT UINT32     oplk_getVersion(void);
 OPLKDLLEXPORT char*      oplk_getVersionString(void);
 OPLKDLLEXPORT UINT32     oplk_getStackConfiguration(void);
 OPLKDLLEXPORT tOplkError oplk_getStackInfo(tOplkApiStackInfo* pStackInfo_p);
+OPLKDLLEXPORT tOplkError oplk_getSocTime(tOplkApiSocTimeInfo* pTimeInfo_p);
 
 // Process image API functions
 OPLKDLLEXPORT tOplkError oplk_allocProcessImage(UINT sizeProcessImageIn_p, UINT sizeProcessImageOut_p);

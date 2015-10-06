@@ -273,6 +273,7 @@ typedef enum
     kErrorApiPIInvalidPIPointer     = 0x014C,       ///< Process image: pointer to application's process image is invalid
     kErrorApiPINonBlockingNotSupp   = 0x014D,       ///< Process image: non-blocking copy jobs are not supported on this target
     kErrorApiNotInitialized         = 0x014E,       ///< API called but stack is not initialized/running
+    kErrorApiNotSupported           = 0x014F,       ///< API call requires unsupported feature
 
     // area until 0x07FF is reserved
     // area for user application from 0x0800 to 0x7FFF

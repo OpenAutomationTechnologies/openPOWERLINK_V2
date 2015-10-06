@@ -811,7 +811,7 @@ tOplkError dllk_cbTimerSwitchOver(tTimerEventArg* pEventArg_p)
         goto Exit;
 
     // increment relativeTime for missing SoC
-    dllkInstance_g.relativeTime += dllkInstance_g.dllConfigParam.cycleLen;
+    dllkInstance_g.socTime.relTime += dllkInstance_g.dllConfigParam.cycleLen;
 
     nmtEvent = kNmtEventDllReSwitchOverTimeout;
     event.eventSink = kEventSinkNmtk;

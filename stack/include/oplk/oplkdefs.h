@@ -73,6 +73,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OPLK_KERNEL_VETH                                0x00000008      ///< Virtual ethernet module
 #define OPLK_KERNEL_PRES_FORWARD                        0x00000010      ///< PRES forwarding module (used for diagnosis)
 #define OPLK_KERNEL_RMN                                 0x00000020      ///< Redundancy MN (RMN)
+#define OPLK_KERNEL_SOC_TIME_FORWARD                    0x00000040      ///< SoC time forwarding capability
 
 /// \}
 

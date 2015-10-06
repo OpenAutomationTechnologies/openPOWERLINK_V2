@@ -50,6 +50,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/errhndk.h>
 #include <common/ami.h>
 
+#include <kernel/timesynck.h>
+
 #if CONFIG_TIMER_USE_HIGHRES != FALSE
 #include <kernel/hrestimer.h>
 #endif
@@ -279,7 +281,7 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p,
     {
         case kNmtGsOff:
         case kNmtGsInitialising:
-            dllkInstance_g.relativeTime = 0;
+            dllkInstance_g.socTime.relTime = 0;
             // set EC flag in Flag 1, so the MN can detect a reboot and
             // will initialize the Error Signaling.
             dllkInstance_g.flag1 = PLK_FRAME_FLAG1_EC;
@@ -498,7 +500,7 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p,
                 if ((ret = hrestimer_deleteTimer(&dllkInstance_g.timerHdlSwitchOver)) != kErrorOk)
                     return ret;
 
-                dllkInstance_g.relativeTime += dllkInstance_g.dllConfigParam.cycleLen;
+                dllkInstance_g.socTime.relTime += dllkInstance_g.dllConfigParam.cycleLen;
                 // initialize SoAReq number for ProcessSync (cycle preparation)
                 dllkInstance_g.syncLastSoaReq = dllkInstance_g.curLastSoaReq;
                 // trigger synchronous task for cycle preparation
@@ -972,9 +974,23 @@ static tOplkError processSyncMn(tNmtState nmtState_p, BOOL fReadyFlag_p)
     pTxBuffer->timeOffsetNs = nextTimeOffsetNs;
     pTxFrame = (tPlkFrame*)pTxBuffer->pBuffer;
 
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    // Forward SoC time information to timesync module. Note that this SoC time
+    // info is sent after the current cycle is completed (due to double buffers)!
+    ret = timesynck_setSocTime(&dllkInstance_g.socTime);
+    if (ret != kErrorOk)
+        return ret;
+#endif
+
     // Set SoC relative time
-    ami_setUint64Le(&pTxFrame->data.soc.relativeTimeLe, dllkInstance_g.relativeTime);
-    dllkInstance_g.relativeTime += dllkInstance_g.dllConfigParam.cycleLen;
+    ami_setUint64Le(&pTxFrame->data.soc.relativeTimeLe, dllkInstance_g.socTime.relTime);
+    dllkInstance_g.socTime.relTime += dllkInstance_g.dllConfigParam.cycleLen;
+
+    if (!dllkInstance_g.socTime.fRelTimeValid)
+    {
+        // SoC time information is valid from now on...
+        dllkInstance_g.socTime.fRelTimeValid = TRUE;
+    }
 
     // Update SOC Prescaler Flag
     ami_setUint8Le(&pTxFrame->data.soc.flag1, dllkInstance_g.mnFlag1 & (PLK_FRAME_FLAG1_PS | PLK_FRAME_FLAG1_MC));
