@@ -43,8 +43,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplk.h>
 #include <oplkcfg.h>                 // Stack configuration file
+#include <oplk/oplk.h>
 #include <common/defaultcfg.h>
 #include <common/featureflags.h>
 #include <common/section.h>
