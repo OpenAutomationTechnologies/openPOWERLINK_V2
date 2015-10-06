@@ -1178,6 +1178,33 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
                             return ret;
                     }
 
+                    // workaround for missing trigger of segmented ReadByIndex
+                    // transmission on server for last segments
+                    if (((ami_getUint8Le(&pRecvFrame_p->recvSeqNumCon) & SEQ_NUM_MASK) != (pSdoSeqCon_p->recvSeqNum & SEQ_NUM_MASK)) &&
+                        ((ami_getUint8Le(&pRecvFrame_p->recvSeqNumCon) & SDO_CON_MASK) == 2))
+                    {   // old acknowledge of receiver
+                        // Use this as trigger for last segments, since they
+                        // don't get a trigger otherwise, except a timeout.
+
+                        // send oldest history frame
+                        ret = readFromHistory(pSdoSeqCon_p, &pFrame, &frameSize, TRUE);
+                        if (ret == kErrorRetry)
+                            ret = kErrorOk; // ignore unsent frames info
+                        if (ret != kErrorOk)
+                            return ret;
+
+                        if ((pFrame != NULL) && (frameSize != 0))
+                        {
+                            ret = sendToLowerLayer(pSdoSeqCon_p, frameSize, pFrame);
+                            if (ret == kErrorDllAsyncTxBufferFull)
+                            {
+                                ret = kErrorOk; // ignore unsent frame
+                            }
+                            if (ret != kErrorOk)
+                                return ret;
+                        }
+                    }
+
                     if (((pSdoSeqCon_p->sendSeqNum + 4) & SEQ_NUM_MASK) == (sendSeqNumCon & SEQ_NUM_MASK))
                     {   // next frame of sequence received (new command layer data)
 
