@@ -107,7 +107,7 @@ UINT8* dualprocshm_getCommonMemAddr(UINT16* pSize_p)
 /**
 \brief  Free common memory address
 
-Target specific to routine to release the base address of
+Target specific routine to release the base address of
 common memory.
 
 \param  pSize_p      Size of the common memory
@@ -133,7 +133,7 @@ between two processors.
 \return Pointer to base address of shared memory.
 
 \ingroup module_dualprocshm
- */
+*/
 //------------------------------------------------------------------------------
 UINT8*  dualprocshm_getSharedMemInst(UINT32* pSize_p)
 {
@@ -390,7 +390,7 @@ void dualprocshm_regSyncIrqHdl(targetSyncHdl callback_p, void* pArg_p)
 
 The function is used to enable or disable the sync interrupt.
 
-\param  fEnable_p              enable if TRUE, disable if FALSE
+\param  fEnable_p              Enable if TRUE, disable if FALSE.
 
 \ingroup module_dualprocshm
 */
