@@ -1,10 +1,11 @@
 /**
 ********************************************************************************
-\file   timesynckcal-null.c
+\file   timesynckcal-local.c
 
-\brief  Empty CAL kernel timesync module
+\brief  Local CAL kernel timesync module
 
-This file contains an empty implementation for the kernel CAL timesync module.
+This file contains a local implementation for the kernel CAL timesync module.
+This implementation is used if user and kernel layer run in the same domain.
 
 The sync module is responsible to synchronize the user layer.
 

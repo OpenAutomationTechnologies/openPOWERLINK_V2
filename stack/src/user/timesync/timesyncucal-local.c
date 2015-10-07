@@ -1,10 +1,11 @@
 /**
 ********************************************************************************
-\file   timesyncucal-null.c
+\file   timesyncucal-local.c
 
 \brief  Empty sync implementation for the user CAL timesync module
 
-This file contains an empty sync implementation for the user CAL timesync module.
+This file contains a local implementation for the user CAL timesync module.
+This implementation is used if user and kernel layer run in the same domain.
 
 \ingroup module_timesyncucal
 *******************************************************************************/

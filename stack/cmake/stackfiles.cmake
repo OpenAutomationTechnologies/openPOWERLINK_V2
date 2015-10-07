@@ -216,7 +216,7 @@ SET(EVENT_UCAL_WINDOWSPCIE_SOURCES
 # User PDO CAL sources
 SET(PDO_UCAL_LOCAL_SOURCES
     ${USER_SOURCE_DIR}/pdo/pdoucalmem-local.c
-    ${USER_SOURCE_DIR}/timesync/timesyncucal-null.c
+    ${USER_SOURCE_DIR}/timesync/timesyncucal-local.c
     )
 
 SET(PDO_UCAL_POSIX_SOURCES
@@ -364,7 +364,7 @@ SET(EVENT_KCAL_DUALPROCSHM_SOURCES
 
 SET(PDO_KCAL_LOCAL_SOURCES
     ${KERNEL_SOURCE_DIR}/pdo/pdokcalmem-local.c
-    ${KERNEL_SOURCE_DIR}/timesync/timesynckcal-null.c
+    ${KERNEL_SOURCE_DIR}/timesync/timesynckcal-local.c
     )
 
 SET(PDO_KCAL_POSIXMEM_SOURCES

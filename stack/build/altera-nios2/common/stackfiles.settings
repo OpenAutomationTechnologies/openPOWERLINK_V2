@@ -151,7 +151,7 @@ ${USER_SOURCE_DIR}/event/eventucalintf-circbuf.c \
 
 PDO_UCAL_LOCAL_SOURCES="\
 ${USER_SOURCE_DIR}/pdo/pdoucalmem-local.c \
-${USER_SOURCE_DIR}/timesync/timesyncucal-null.c \
+${USER_SOURCE_DIR}/timesync/timesyncucal-local.c \
 "
 
 PDO_UCAL_HOSTIF_SOURCES="\
@@ -252,7 +252,7 @@ ${KERNEL_SOURCE_DIR}/event/eventkcal-noosdual.c \
 
 PDO_KCAL_LOCAL_SOURCES="\
 ${KERNEL_SOURCE_DIR}/pdo/pdokcalmem-local.c \
-${KERNEL_SOURCE_DIR}/timesync/timesynckcal-null.c \
+${KERNEL_SOURCE_DIR}/timesync/timesynckcal-local.c \
 "
 
 PDO_KCAL_HOSTIF_SOURCES="\
