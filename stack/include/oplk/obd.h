@@ -43,6 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <oplk/oplkinc.h>
+#include <oplk/sdo.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -508,7 +509,8 @@ UINT32     obd_getOdSignature(tObdPart odPart_p);
 tOplkError obd_storeLoadObjCallback(tObdStoreLoadCallback pfnCallback_p);
 #endif
 
-tOplkError obd_initWrite(UINT index_p, UINT subIndex_p, void** ppDstData_p, tObdSize size_p);
+tOplkError obd_proccessWrite(tSdoObdConHdl* pSdoObdConHdl_p);
+tOplkError obd_proccessRead(tSdoObdConHdl* pSdoObdConHdl_p);
 
 #ifdef __cplusplus
 }

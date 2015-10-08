@@ -99,7 +99,9 @@ The function initializes the SDO stack.
 \ingroup module_sdocom
 */
 //------------------------------------------------------------------------------
-tOplkError sdocom_init(UINT stackType_p)
+tOplkError sdocom_init(UINT stackType_p,
+                       tComdLayerObdCb pfnObdWrite_p,
+                       tComdLayerObdCb pfnObdRead_p)
 {
     tOplkError ret = kErrorOk;
 
@@ -116,7 +118,7 @@ tOplkError sdocom_init(UINT stackType_p)
            break;
     }
 
-    ret = pSdoComInstance->pfnInit();
+    ret = pSdoComInstance->pfnInit(pfnObdWrite_p, pfnObdRead_p);
 
     return ret;
 }
@@ -145,6 +147,7 @@ tOplkError sdocom_exit(void)
     return ret;
 }
 
+#if defined (CONFIG_INCLUDE_SDOC)
 //------------------------------------------------------------------------------
 /**
 \brief  Initialize a SDO layer connection
@@ -293,3 +296,4 @@ tOplkError sdocom_undefineConnection(tSdoComConHdl sdoComConHdl_p)
 
     return ret;
 }
+#endif // defined (CONFIG_INCLUDE_SDOC)

@@ -498,6 +498,12 @@ tOplkError oplk_readObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT i
                            UINT subindex_p, void* pDstData_le_p, UINT* pSize_p,
                            tSdoType sdoType_p, void* pUserArg_p)
 {
+#if !defined(CONFIG_INCLUDE_SDOC)
+    // Ignore unused parameters
+    UNUSED_PARAMETER(pSdoComConHdl_p);
+    UNUSED_PARAMETER(sdoType_p);
+    UNUSED_PARAMETER(pUserArg_p);
+#endif
     tOplkError      ret = kErrorOk;
     tObdSize        obdSize;
 
@@ -549,7 +555,8 @@ tOplkError oplk_readObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT i
         ret = kErrorApiTaskDeferred;
 
 #else
-        ret = kErrorApiInvalidParam;
+        // no SDO client implemented, only local access possible!
+        ret = kErrorInvalidNodeId;
 #endif
     }
     return ret;
@@ -589,6 +596,12 @@ tOplkError oplk_writeObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT 
                             UINT subindex_p, void* pSrcData_le_p, UINT size_p,
                             tSdoType sdoType_p, void* pUserArg_p)
 {
+#if !defined(CONFIG_INCLUDE_SDOC)
+    // Ignore unused parameters
+    UNUSED_PARAMETER(pSdoComConHdl_p);
+    UNUSED_PARAMETER(sdoType_p);
+    UNUSED_PARAMETER(pUserArg_p);
+#endif
     tOplkError      ret = kErrorOk;
 
     if (!ctrlu_stackIsInitialized())
@@ -640,7 +653,8 @@ tOplkError oplk_writeObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT 
         ret = kErrorApiTaskDeferred;
 
 #else
-        ret = kErrorApiInvalidParam;
+        // no SDO client implemented, only local access possible!
+        ret = kErrorInvalidNodeId;
 #endif
     }
     return ret;
@@ -653,6 +667,7 @@ tOplkError oplk_writeObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT 
 The function frees the specified SDO channel. It must be called when the SDO
 channel to a remote node is not needed anymore. This may be done in the event
 callback function when the last SDO transfer to a remote node has completed.
+This function requires access to an SDO client.
 
 \param  sdoComConHdl_p      The SDO connection handle.
 
@@ -665,6 +680,10 @@ callback function when the last SDO transfer to a remote node has completed.
 //------------------------------------------------------------------------------
 tOplkError oplk_freeSdoChannel(tSdoComConHdl sdoComConHdl_p)
 {
+#if !defined(CONFIG_INCLUDE_SDOC)
+    // Ignore unused parameters
+    UNUSED_PARAMETER(sdoComConHdl_p);
+#endif
     tOplkError      ret = kErrorOk;
 
     if (!ctrlu_stackIsInitialized())
@@ -684,7 +703,8 @@ tOplkError oplk_freeSdoChannel(tSdoComConHdl sdoComConHdl_p)
         ret = sdocom_undefineConnection(sdoComConHdl_p);
     }
 #else
-    ret = kErrorApiInvalidParam;
+    // no SDO client implemented
+    ret = kErrorIllegalInstance;
 #endif
     return ret;
 }
@@ -694,6 +714,7 @@ tOplkError oplk_freeSdoChannel(tSdoComConHdl sdoComConHdl_p)
 \brief  Abort an SDO transfer
 
 The function aborts the running SDO transfer on the specified SDO channel.
+This function requires access to an SDO client.
 
 \param  sdoComConHdl_p      The SDO connection handle.
 \param  abortCode_p         The abort code which shall be sent to the remote
@@ -708,6 +729,11 @@ The function aborts the running SDO transfer on the specified SDO channel.
 //------------------------------------------------------------------------------
 tOplkError oplk_abortSdo(tSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p)
 {
+#if !defined(CONFIG_INCLUDE_SDOC)
+    // Ignore unused parameters
+    UNUSED_PARAMETER(sdoComConHdl_p);
+    UNUSED_PARAMETER(abortCode_p);
+#endif
     tOplkError      ret = kErrorOk;
 
     if (!ctrlu_stackIsInitialized())
@@ -726,7 +752,8 @@ tOplkError oplk_abortSdo(tSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p)
         ret = sdocom_abortTransfer(sdoComConHdl_p, abortCode_p);
     }
 #else
-    ret = kErrorApiInvalidParam;
+    // no SDO client implemented
+    ret = kErrorIllegalInstance;
 #endif
 
     return ret;

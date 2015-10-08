@@ -137,4 +137,34 @@ typedef struct
     void*               pUserArg;                   ///< The user defined argument pointer
 } tSdoComFinished;
 
+/**
+\brief Structure for SDO command layer connection to object dictionary
+
+This structure is used to transfer data from the SDO command layer to the
+object dictionary and vice versa (SDO Write-/ReadbyIndex). It it only applied
+for the SDO server, which requires a connection to an object dictionary.
+*/
+typedef struct
+{
+    UINT index;         ///< Index to read/write
+    UINT subIndex;      ///< Sub-index to read/write
+    void* pSrcData;     ///< Pointer to data which should be transfered
+    void* pDstData;     ///< Pointer to storage destination
+    UINT totalPendSize; ///< Total pending SDO command layer transfer size
+    UINT dataSize;      ///< SDO command layer segment size (payload)
+    UINT dataOffset;    ///< Payload offset of SDO command layer data
+} tSdoObdConHdl;
+
+/**
+\brief Callback for SDO read or write access to the object dictionary
+
+This callback function is used for the SDO command layer server to process
+ an object dictionary access.
+
+\param tSdoObdConHdl    SDO command layer connection to the object dictionary
+
+\return The function returns a tOplkError error code.
+*/
+typedef tOplkError (*tComdLayerObdCb)(tSdoObdConHdl* conSdoObd_p);
+
 #endif /* _INC_oplk_sdo_H_ */

@@ -82,14 +82,16 @@ the command layer implementations for the SDO stack defined in the init paramete
 */
 typedef struct
 {
-    tOplkError          (*pfnInit)(void);                                ///< Init function pointer
-    tOplkError          (*pfnExit)(void);                                ///< Exit function pointer
+    tOplkError          (*pfnInit)(tComdLayerObdCb, tComdLayerObdCb);   ///< Init function pointer
+    tOplkError          (*pfnExit)(void);                               ///< Exit function pointer
+#if defined (CONFIG_INCLUDE_SDOC)
     tOplkError          (*pfnDefineCon)(tSdoComConHdl*, UINT, tSdoType); ///< Define Connection function pointer
     tOplkError          (*pfnTransByIdx)(tSdoComTransParamByIndex*);     ///< Transfer by Index function pointer
     tOplkError          (*pfnDeleteCon)(tSdoComConHdl);                  ///< Delete Connection function pointer
     tOplkError          (*pfnGetState)(tSdoComConHdl, tSdoComFinished*); ///< Get State function pointer
     UINT                (*pfnGetNodeId)(tSdoComConHdl);                  ///< Get Node Id function pointer
     tOplkError          (*pfnSdoAbort)(tSdoComConHdl, UINT32);           ///< SDO abort function pointer
+#endif // defined (CONFIG_INCLUDE_SDOC)
 } tSdoComFunctions;
 
 //------------------------------------------------------------------------------
@@ -101,14 +103,18 @@ extern "C"
 {
 #endif
 
-tOplkError sdocom_init(UINT stackType_p);
+tOplkError sdocom_init(UINT stackType_p,
+                       tComdLayerObdCb pfnObdWrite_p,
+                       tComdLayerObdCb pfnObdRead_p);
 tOplkError sdocom_exit(void);
+#if defined (CONFIG_INCLUDE_SDOC)
 tOplkError sdocom_defineConnection(tSdoComConHdl* pSdoComConHdl_p, UINT targetNodeId_p, tSdoType sdoType_p);
 tOplkError sdocom_initTransferByIndex(tSdoComTransParamByIndex* pSdoComTransParam_p);
 UINT       sdocom_getNodeId(tSdoComConHdl sdoComConHdl_p);
 tOplkError sdocom_undefineConnection(tSdoComConHdl sdoComConHdl_p);
 tOplkError sdocom_getState(tSdoComConHdl sdoComConHdl_p, tSdoComFinished* pSdoComFinished_p);
 tOplkError sdocom_abortTransfer(tSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p);
+#endif // defined (CONFIG_INCLUDE_SDOC)
 
 #ifdef __cplusplus
 }

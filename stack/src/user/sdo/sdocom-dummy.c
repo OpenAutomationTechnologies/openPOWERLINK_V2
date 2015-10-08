@@ -70,8 +70,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError sdoInit(void);
+static tOplkError sdoInit(tComdLayerObdCb pfnObdWrite_p,
+                          tComdLayerObdCb pfnObdRead_p);
 static tOplkError sdoExit(void);
+#if defined (CONFIG_INCLUDE_SDOC)
 static tOplkError sdoDefineConnection(tSdoComConHdl* pSdoComConHdl_p, UINT targetNodeId_p,
                                        tSdoType protType_p);
 static tOplkError sdoInitTransferByIndex(tSdoComTransParamByIndex* pSdoComTransParam_p);
@@ -79,6 +81,7 @@ static tOplkError sdoUndefineConnection(tSdoComConHdl sdoComConHdl_p);
 static tOplkError sdoGetState(tSdoComConHdl sdoComConHdl_p, tSdoComFinished* pSdoComFinished_p);
 static UINT       sdoGetNodeId(tSdoComConHdl sdoComConHdl_p);
 static tOplkError sdoAbortTransfer(tSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p);
+#endif // defined (CONFIG_INCLUDE_SDOC)
 
 //------------------------------------------------------------------------------
 // local vars
@@ -94,12 +97,14 @@ static tSdoComFunctions dummySdoFunctions =
 {
     sdoInit,
     sdoExit,
+#if defined (CONFIG_INCLUDE_SDOC)
     sdoDefineConnection,
     sdoInitTransferByIndex,
     sdoUndefineConnection,
     sdoGetState,
     sdoGetNodeId,
     sdoAbortTransfer,
+#endif // defined (CONFIG_INCLUDE_SDOC)
 };
 
 //============================================================================//
@@ -137,8 +142,12 @@ This function does nothing, except returning kErrorOk.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError sdoInit(void)
+static tOplkError sdoInit(tComdLayerObdCb pfnObdWrite_p,
+                          tComdLayerObdCb pfnObdRead_p)
 {
+    UNUSED_PARAMETER(pfnObdWrite_p);
+    UNUSED_PARAMETER(pfnObdRead_p);
+
     return kErrorOk;
 }
 
@@ -156,6 +165,7 @@ static tOplkError sdoExit(void)
     return kErrorOk;
 }
 
+#if defined (CONFIG_INCLUDE_SDOC)
 //------------------------------------------------------------------------------
 /**
 \brief  Define a command layer connection
@@ -282,5 +292,6 @@ static tOplkError sdoAbortTransfer(tSdoComConHdl sdoComConHdl_p,
 
     return kErrorOk;
 }
+#endif // defined (CONFIG_INCLUDE_SDOC)
 
 /// \}
