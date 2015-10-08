@@ -5,7 +5,22 @@
 \brief  Implemetation of generic CRC calculation for object dictionary (OD).
 
 This file implements generic CRC calculation function for the object dictionary
-(OD) without any hardware support.
+(OD) without any hardware support. The CRC16 calculator functions and table are
+generated using pycrc v0.8.
+
+Refer \ref http://www.tty1.net/pycrc/ for license information.
+
+ Generated on Wed Jan  9 14:34:53 2013,
+ by pycrc v0.8, http://www.tty1.net/pycrc/
+ using the configuration:
+    Model        = ccitt
+    Width        = 16
+    Poly         = 0x1021
+    XorIn        = 0xffff
+    ReflectIn    = False
+    XorOut       = 0x0000
+    ReflectOut   = False
+    Algorithm    = table-driven
 
 \ingroup module_obdconf
 *******************************************************************************/
@@ -126,18 +141,6 @@ static const UINT16 aCrc16Table_l[256] =
 
 The function calculates CRC16 for the data in the passed buffer.
 This CRC16 version is used in CANopen for SDO CRC calculation.
-
- Generated on Wed Jan  9 14:34:53 2013,
- by pycrc v0.8, http://www.tty1.net/pycrc/
- using the configuration:
-    Model        = ccitt
-    Width        = 16
-    Poly         = 0x1021
-    XorIn        = 0xffff
-    ReflectIn    = False
-    XorOut       = 0x0000
-    ReflectOut   = False
-    Algorithm    = table-driven
 
 \param  crc_p           Initialized value of CRC.
 \param  pData_p         Pointer to the data buffer.
