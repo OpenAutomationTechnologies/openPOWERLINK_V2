@@ -58,6 +58,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //---------------------------------------------------------------------------
 // function prototypes
 //---------------------------------------------------------------------------
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 tOplkError obdconf_init(void);
 tOplkError obdconf_exit(void);
 tOplkError obdconf_createPart(tObdPart odPart_p, UINT32 odPartSignature_p);
@@ -72,6 +76,9 @@ tOplkError obdconf_getPartArchiveState(tObdPart odPart_p,
                                        UINT32 odPartSignature_p);
 tOplkError obdconf_setBackupArchivePath(const char* pBackupPath_p);
 UINT16 obdconf_calculateCrc16(UINT16 crc_p, UINT8* pData_p, UINT32 size_p);
+#ifdef __cplusplus
+}
+#endif
 
 #endif // if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
 #endif  // #ifndef _INC_oplk_obdconf_H_
