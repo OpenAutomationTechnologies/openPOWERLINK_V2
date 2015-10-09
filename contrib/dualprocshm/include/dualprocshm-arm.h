@@ -78,6 +78,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     Xil_DCacheInvalidateRange((UINT32)base, range);
 
 #define DPSHM_REG_SYNC_INTR(callback, arg)                       \
+    XScuGic_SetPriTrigTypeByDistAddr(TARGET_IRQ_IC_DIST_BASE, TARGET_SYNC_IRQ, 0xA0, 0x3); \
     XScuGic_RegisterHandler(TARGET_IRQ_IC_BASE, TARGET_SYNC_IRQ, \
                            (Xil_InterruptHandler) callback, arg);\
     XScuGic_EnableIntr(TARGET_IRQ_IC_DIST_BASE, TARGET_SYNC_IRQ)
