@@ -1,19 +1,19 @@
 /**
 ********************************************************************************
-\file   xilinx_microblaze/target-mutex.c
+\file   xilinx-microblaze/lock-dualprocnoos.c
 
-\brief  Architecture specific mutex implementation
+\brief  Locks for Microblaze without OS in dual processor system
 
-This file contains the mutex implementation for Xilinx Microblaze.
-
-\note As there is no mutli-threading environment on Microblaze, the functions are
-only dummy functions.
+This target depending module provides lock functionality in dual processor
+system with shared memory.
 
 \ingroup module_target
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Kalycito Infotech Private Limited.
+
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <common/oplkinc.h>
+#include <common/target.h>
+
+#include <stdlib.h>
+#include <xparameters.h>
+#include <xil_io.h>
+#include <mb_interface.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -60,7 +65,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // global function prototypes
 //------------------------------------------------------------------------------
 
-
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //
 //============================================================================//
@@ -68,6 +72,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+#define LOCK_LOCAL_ID    (XPAR_CPU_ID + 1)
+
+// Define unlock value or take predefined one...
+#ifndef LOCK_UNLOCKED_C
+#define LOCK_UNLOCKED_C     0
+#endif
+
+#if (LOCK_LOCAL_ID == LOCK_UNLOCKED_C)
+#error "Change the to LOCK_LOCAL_ID to some unique BYTE value unequal 0x0!"
+#endif
 
 //------------------------------------------------------------------------------
 // local types
@@ -76,6 +90,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
+static OPLK_LOCK_T*   pLock_l = NULL;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -87,85 +102,85 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //------------------------------------------------------------------------------
 /**
-\brief  Create Mutex
+\brief    Initializes given lock
 
-The function creates a mutex.
+This function initializes the lock instance.
 
-\param  mutexName_p             The name of the mutex to create.
-\param  pMutex_p                Pointer to store the created mutex.
+\param  pLock_p                Reference to lock
 
-\return The function returns a tOplkError error code.
-\retval kErrorOk                Mutex was successfully created.
-\retval kErrorNoFreeInstance    An error occured while creating the mutex.
+\return The function returns 0 when successful.
 
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-tOplkError target_createMutex(char* mutexName_p, OPLK_MUTEX_T* pMutex_p)
+int target_initLock(OPLK_LOCK_T*pLock_p)
 {
-    UNUSED_PARAMETER(mutexName_p);
-    UNUSED_PARAMETER(pMutex_p);
+    if (pLock_p == NULL)
+        return -1;
 
-    return kErrorOk;
+    pLock_l = pLock_p;
+
+    return 0;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Destroy Mutex
+\brief    Lock the given lock
 
-The function destroys a mutex.
+This function tries to lock the given lock, otherwise it spins until the
+lock is freed.
 
-\param  mutexId_p               The ID of the mutex to destroy.
+\return The function returns 0 when successful.
 
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-void target_destroyMutex(OPLK_MUTEX_T mutexId_p)
+int target_lock(void)
 {
-    UNUSED_PARAMETER(mutexId_p);
+    u8    val;
+
+    if (pLock_l == NULL)
+        return -1;
+
+    // spin if id is not written to shared memory
+    do
+    {
+        microblaze_invalidate_dcache_range((u32)pLock_l, 1);
+        val = Xil_In8((u32)pLock_l);
+
+        // write local id if unlocked
+        if (val == LOCK_UNLOCKED_C)
+        {
+            Xil_Out8(pLock_l, LOCK_LOCAL_ID);
+            microblaze_flush_dcache_range((u32)pLock_l, 1);
+            continue; // return to top of loop to check again
+        }
+    } while (val != LOCK_LOCAL_ID);
+
+    return 0;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Lock Mutex
+\brief    Unlock the given lock
 
-The function locks a mutex.
+This function frees the given lock.
 
-\param  mutexId_p               The ID of the mutex to lock.
-
-\return The function returns a tOplkError error code.
-\retval kErrorOk                Mutex was successfully locked.
-\retval kErrorNoFreeInstance    An error occured while locking the mutex.
+\return The function returns 0 when successful.
 
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-tOplkError target_lockMutex(OPLK_MUTEX_T mutexId_p)
+int target_unlock(void)
 {
-    UNUSED_PARAMETER(mutexId_p);
-    return kErrorOk;
-}
+    if (pLock_l == NULL)
+        return -1;
 
-//------------------------------------------------------------------------------
-/**
-\brief  Unlock Mutex
-
-The function unlocks a mutex.
-
-\param  mutexId_p               The ID of the mutex to unlock.
-
-\ingroup module_target
-*/
-//------------------------------------------------------------------------------
-void target_unlockMutex(OPLK_MUTEX_T mutexId_p)
-{
-    UNUSED_PARAMETER(mutexId_p);
+    Xil_Out8(pLock_l, LOCK_UNLOCKED_C);
+    microblaze_flush_dcache_range((u32)pLock_l, 1);
+    return 0;
 }
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
-/// \name Private Functions
-/// \{
-
-///\}

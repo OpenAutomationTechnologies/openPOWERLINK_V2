@@ -1,8 +1,8 @@
 /**
 ********************************************************************************
-\file   xilinx_microblaze/systemtimer.h
+\file   xilinx-microblaze/usleep.h
 
-\brief  Implements the system timer of openPOWERLINK stack for microblaze
+\brief  Inexact usleep implementation for Microblaze
 
 *******************************************************************************/
 
@@ -34,14 +34,12 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_xilinx_microblaze_systemtimer_H_
-#define _INC_xilinx_microblaze_systemtimer_H_
+#ifndef _INC_xilinx_microblaze_usleep_H_
+#define _INC_xilinx_microblaze_usleep_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-
-#include <common/oplkinc.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -62,11 +60,10 @@ extern "C"
 {
 #endif
 
-void timer_init(void);
-UINT32 timer_getMSCount(void);
+void usleep(unsigned long int usecs_p);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_xilinx_microblaze_systemtimer_H_ */
+#endif /* _INC_xilinx_microblaze_usleep_H_ */

@@ -63,7 +63,7 @@ ${OPLK_BASE_DIR}/stack/proj/generic/lib${LIB_NAME} \
 ${STACK_INCLUDE_DIR} \
 ${STACK_SOURCE_DIR} \
 ${OBJDICT_DIR}/${OBJDICT} \
-${ARCH_SOURCE_DIR}/altera_nios2 \
+${ARCH_SOURCE_DIR}/altera-nios2 \
 ${HW_DRIVERS_DIR}/hostinterface/include \
 ${HW_DRIVERS_DIR}/hostinterface/src \
 ${OPLK_BASE_DIR}/contrib/socketwrapper \

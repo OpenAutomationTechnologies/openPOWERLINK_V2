@@ -1,17 +1,19 @@
 /**
 ********************************************************************************
-\file   xilinx_microblaze/openmac-microblaze.c
+\file   xilinx-microblaze/target-mutex.c
 
-\brief  Implementation of openMAC drivers
+\brief  Architecture specific mutex implementation
 
-This file contains the implementation of the openMAC driver.
+This file contains the mutex implementation for Xilinx Microblaze.
 
-\ingroup module_openmac
+\note As there is no mutli-threading environment on Microblaze, the functions are
+only dummy functions.
+
+\ingroup module_target
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -41,11 +43,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-#include <target/openmac.h>
-
-#include <xparameters.h>
-#include <xintc_l.h>
-#include <xio.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -63,6 +60,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // global function prototypes
 //------------------------------------------------------------------------------
 
+
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //
 //============================================================================//
@@ -70,12 +68,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define INTC_BASE   XPAR_PCP_INTC_BASEADDR
-
-#define OPENMAC_SYNC_IRQ        XPAR_PCP_INTC_AXI_OPENMAC_0_TIMER_IRQ_INTR
-#define OPENMAC_SYNC_IRQ_MASK   XPAR_AXI_OPENMAC_0_TIMER_IRQ_MASK
-#define OPENMAC_TXRX_IRQ        XPAR_PCP_INTC_AXI_OPENMAC_0_MAC_IRQ_INTR
-#define OPENMAC_TXRX_IRQ_MASK   XPAR_AXI_OPENMAC_0_MAC_IRQ_MASK
 
 //------------------------------------------------------------------------------
 // local types
@@ -95,89 +87,79 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //------------------------------------------------------------------------------
 /**
-\brief  Register interrupt callback for openMAC
+\brief  Create Mutex
 
-This function registers a callback for a specific interrupt source.
+The function creates a mutex.
 
-\param  irqSource_p     Specified interrupt source
-\param  pfnIsrCb_p      Interrupt service routine callback
-\param  pArg_p          Argument given to the callback
+\param  mutexName_p             The name of the mutex to create.
+\param  pMutex_p                Pointer to store the created mutex.
 
 \return The function returns a tOplkError error code.
+\retval kErrorOk                Mutex was successfully created.
+\retval kErrorNoFreeInstance    An error occured while creating the mutex.
 
-\ingroup module_openmac
+\ingroup module_target
 */
 //------------------------------------------------------------------------------
-tOplkError openmac_isrReg(tOpenmacIrqSource irqSource_p, tOpenmacIrqCb pfnIsrCb_p, void* pArg_p)
+tOplkError target_createMutex(char* mutexName_p, OPLK_MUTEX_T* pMutex_p)
 {
-    tOplkError  ret = kErrorOk;
-    UINT32      irqId;
-    UINT32      irqMask;
-    UINT32      intcMask;
+    UNUSED_PARAMETER(mutexName_p);
+    UNUSED_PARAMETER(pMutex_p);
 
-    switch (irqSource_p)
-    {
-        case kOpenmacIrqSync:
-            irqId = OPENMAC_SYNC_IRQ;
-            irqMask = OPENMAC_SYNC_IRQ_MASK;
-            break;
-
-        case kOpenmacIrqTxRx:
-            irqId = OPENMAC_TXRX_IRQ;
-            irqMask = OPENMAC_TXRX_IRQ_MASK;
-            break;
-
-        default:
-            ret = kErrorNoResource;
-            goto Exit;
-    }
-
-    // Get Interrupt controller's current mask
-    intcMask = Xil_In32(INTC_BASE + XIN_IER_OFFSET);
-
-    // Register interrupt callback
-    XIntc_RegisterHandler(INTC_BASE, irqId, (XInterruptHandler)pfnIsrCb_p, (void*)pArg_p);
-
-    // Enable interrupt by or'ing with controllers mask
-    XIntc_EnableIntr(INTC_BASE, irqMask | intcMask);
-
-Exit:
-    return ret;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Allocated uncached memory
+\brief  Destroy Mutex
 
-This function allocates memory.
-Since the packet buffers are allocated in cached memory, no uncaching is implemented.
+The function destroys a mutex.
 
-\param  size_p      Size of uncached memory to be allocated
+\param  mutexId_p               The ID of the mutex to destroy.
 
-\return The function returns the base address of the allocated, uncached memory.
-
-\ingroup module_openmac
+\ingroup module_target
 */
 //------------------------------------------------------------------------------
-UINT8* openmac_uncachedMalloc(UINT size_p)
+void target_destroyMutex(OPLK_MUTEX_T mutexId_p)
 {
-    return (UINT8*)malloc(size_p);
+    UNUSED_PARAMETER(mutexId_p);
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Free uncached memory
+\brief  Lock Mutex
 
-This function frees the memory pMem_p.
+The function locks a mutex.
 
-\param  pMem_p      Uncached memory to be freed
+\param  mutexId_p               The ID of the mutex to lock.
 
-\ingroup module_openmac
+\return The function returns a tOplkError error code.
+\retval kErrorOk                Mutex was successfully locked.
+\retval kErrorNoFreeInstance    An error occured while locking the mutex.
+
+\ingroup module_target
 */
 //------------------------------------------------------------------------------
-void openmac_uncachedFree(UINT8* pMem_p)
+tOplkError target_lockMutex(OPLK_MUTEX_T mutexId_p)
 {
-    free(pMem_p);
+    UNUSED_PARAMETER(mutexId_p);
+    return kErrorOk;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Unlock Mutex
+
+The function unlocks a mutex.
+
+\param  mutexId_p               The ID of the mutex to unlock.
+
+\ingroup module_target
+*/
+//------------------------------------------------------------------------------
+void target_unlockMutex(OPLK_MUTEX_T mutexId_p)
+{
+    UNUSED_PARAMETER(mutexId_p);
 }
 
 //============================================================================//

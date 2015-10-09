@@ -587,22 +587,22 @@ SET(TARGET_LINUX_SOURCES
     )
 
 SET(TARGET_MICROBLAZE_SOURCES
-    ${ARCH_SOURCE_DIR}/xilinx_microblaze/systemtimer.c
-    ${ARCH_SOURCE_DIR}/xilinx_microblaze/usleep.c
-    ${ARCH_SOURCE_DIR}/xilinx_microblaze/target-microblaze.c
-    ${ARCH_SOURCE_DIR}/xilinx_microblaze/target-mutex.c
+    ${ARCH_SOURCE_DIR}/xilinx-microblaze/systemtimer.c
+    ${ARCH_SOURCE_DIR}/xilinx-microblaze/usleep.c
+    ${ARCH_SOURCE_DIR}/xilinx-microblaze/target-microblaze.c
+    ${ARCH_SOURCE_DIR}/xilinx-microblaze/target-mutex.c
     )
 
 SET(TARGET_MICROBLAZE_LOCAL_SOURCES
-    ${ARCH_SOURCE_DIR}/xilinx_microblaze/lock-localnoos.c
+    ${ARCH_SOURCE_DIR}/xilinx-microblaze/lock-localnoos.c
     )
 
 SET(TARGET_MICROBLAZE_DUAL_SOURCES
-    ${ARCH_SOURCE_DIR}/xilinx_microblaze/lock-dualprocnoos.c
+    ${ARCH_SOURCE_DIR}/xilinx-microblaze/lock-dualprocnoos.c
     )
 
 SET(TARGET_MICROBLAZE_OPENMAC_SOURCES
-    ${ARCH_SOURCE_DIR}/xilinx_microblaze/openmac-microblaze.c
+    ${ARCH_SOURCE_DIR}/xilinx-microblaze/openmac-microblaze.c
     )
 
 SET(TARGET_XILINX_ARM_SOURCES

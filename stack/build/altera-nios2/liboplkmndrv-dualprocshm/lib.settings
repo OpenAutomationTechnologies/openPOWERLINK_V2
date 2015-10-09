@@ -60,7 +60,7 @@ CFG_LIB_INCLUDES="\
 ${OPLK_BASE_DIR}/stack/proj/generic/lib${LIB_NAME} \
 ${STACK_INCLUDE_DIR} \
 ${STACK_SOURCE_DIR} \
-${ARCH_SOURCE_DIR}/altera_nios2 \
+${ARCH_SOURCE_DIR}/altera-nios2 \
 ${HW_DRIVERS_DIR}/openmac/include \
 ${HW_DRIVERS_DIR}/openmac/src \
 ${CONTRIB_SOURCE_DIR}/dualprocshm/include \

@@ -1,18 +1,17 @@
 /**
 ********************************************************************************
-\file   xilinx_microblaze/target-microblaze.c
+\file   altera-nios2/target-nios2.c
 
-\brief  Target specific functions for Microblaze without OS
+\brief  target specific functions for Nios II without OS
 
 This target depending module provides several functions that are necessary for
-systems without OS and not using shared buffer library.
+systems without shared buffer and any OS.
 
 \ingroup module_target
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2014, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -41,20 +40,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <unistd.h>
+#include <sys/alt_irq.h>
+#include <sys/alt_alarm.h>
 #include <common/oplkinc.h>
 #include <common/target.h>
+#include <system.h>
+#include <altera_avalon_pio_regs.h>
 
-#include "usleep.h"
-#include "systemtimer.h"
-
-#include <xparameters.h>
-#include <xgpio_l.h>
-#include <xintc.h>         // interrupt controller
-
-#include <common/target.h>
-#ifdef __ZYNQ__
-#include <mb_uart.h>
-#endif
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
@@ -64,18 +57,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #define TGTCONIO_MS_IN_US(x)    (x * 1000U)
 
-#ifndef CONFIG_PCP
-#error "CONFIG_PCP is needed for this implementation!"
-#endif
+#define GPIO_STATUS_LED_BIT     1
+#define GPIO_ERROR_LED_BIT      2
 
-#if (CONFIG_PCP == FALSE)
-#define TGT_INTC_BASE           XPAR_HOST_INTC_BASEADDR
-
-#elif (CONFIG_PCP == TRUE)
-#define TGT_INTC_BASE           XPAR_PCP_INTC_BASEADDR
-
-#else
-#error  "Unable to determine the processor instance"
+#ifdef PCP_0_POWERLINK_LED_BASE
+#define TARGET_POWERLINK_LED_BASE PCP_0_POWERLINK_LED_BASE
 #endif
 
 //------------------------------------------------------------------------------
@@ -93,12 +79,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define GPIO_STATUS_LED_BIT     1
-#define GPIO_ERROR_LED_BIT      2
-
-#ifdef XPAR_POWERLINK_LED_BASEADDR
-#define TARGET_POWERLINK_LED_BASE XPAR_POWERLINK_LED_BASEADDR
-#endif
 
 //------------------------------------------------------------------------------
 // local types
@@ -107,15 +87,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static UINT32      plkStatusErrorLeds_l;  ///< Local copy of the state of the POWERLINK status LEDs
-static BOOL        fInterruptContextFlag_l;
+static BOOL fInterruptContextFlag_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static void enableInterruptMaster(void);
-static void disableInterruptMaster(void);
-
 static void setStatusLed(BOOL fOn_p);
 static void setErrorLed(BOOL fOn_p);
 
@@ -136,18 +112,18 @@ This function returns the current system tick determined by the system timer.
 //------------------------------------------------------------------------------
 UINT32 target_getTickCount(void)
 {
-    UINT32    ticks;
+    UINT32 ticks;
 
-    ticks = timer_getMSCount();
+    ticks = alt_nticks();
 
     return ticks;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief    enables global interrupt
+\brief    Enable global interrupt
 
-This function enables/disables global interrupts.
+This function enabels/disables global interrupts.
 
 \param  fEnable_p               TRUE = enable interrupts
                                 FALSE = disable interrupts
@@ -155,24 +131,25 @@ This function enables/disables global interrupts.
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-void target_enableGlobalInterrupt(UINT8 fEnable_p)
+void target_enableGlobalInterrupt(BYTE fEnable_p)
 {
-    static INT    lockCount = 0;
+static alt_irq_context  irq_context = 0;
+static int              iLockCount = 0;
 
-    if (fEnable_p != FALSE) // restore interrupts
-    {
-        if (--lockCount == 0)
+    if (fEnable_p != FALSE)
+    {   // restore interrupts
+        if (--iLockCount == 0)
         {
-            enableInterruptMaster();
+            alt_irq_enable_all(irq_context);
         }
     }
     else
-    {                       // disable interrupts
-        if (lockCount == 0)
+    {   // disable interrupts
+        if (iLockCount == 0)
         {
-            disableInterruptMaster();
+            irq_context = alt_irq_disable_all();
         }
-        lockCount++;
+        iLockCount++;
     }
 }
 
@@ -223,34 +200,7 @@ openPOWERLINK stack.
 //------------------------------------------------------------------------------
 tOplkError target_init(void)
 {
-    // initialize microblaze caches
-#if XPAR_MICROBLAZE_USE_ICACHE
-    microblaze_invalidate_icache();
-    microblaze_enable_icache();
-#endif
-
-#if XPAR_MICROBLAZE_USE_DCACHE
-    microblaze_invalidate_dcache();
-    microblaze_enable_dcache();
-#endif
-
     fInterruptContextFlag_l = FALSE;
-
-    //enable microblaze interrupts
-    microblaze_enable_interrupts();
-
-    // initialize system timer
-    timer_init();
-
-#ifdef __ZYNQ__
-    uart_init();
-#endif
-
-    // enable the interrupt master
-    enableInterruptMaster();
-
-    plkStatusErrorLeds_l = 0;
-
     return kErrorOk;
 }
 
@@ -265,25 +215,7 @@ The function cleans up target specific stuff.
 //------------------------------------------------------------------------------
 tOplkError target_cleanup(void)
 {
-    // disable microblaze caches
-#if XPAR_MICROBLAZE_USE_DCACHE
-    microblaze_invalidate_dcache();
-    microblaze_disable_dcache();
-#endif
-
-#if XPAR_MICROBLAZE_USE_ICACHE
-    microblaze_invalidate_icache();
-    microblaze_disable_icache();
-#endif
-
-    //disable microblaze interrupts
-    microblaze_disable_interrupts();
-
-    // disable the interrupt master
-    disableInterruptMaster();
-
     fInterruptContextFlag_l = FALSE;
-
     return kErrorOk;
 }
 
@@ -291,17 +223,17 @@ tOplkError target_cleanup(void)
 /**
 \brief Sleep for the specified number of milliseconds
 
-The function makes the calling thread sleep until the number of specified
+The function makes the calling thread sleep, until the number of specified
 milliseconds has elapsed.
 
-\param  milliSeconds_p      Number of milliseconds to sleep
+\param  milliSecond_p       Number of milliseconds to sleep
 
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-void target_msleep(UINT32 milliSeconds_p)
+void target_msleep(unsigned int milliSecond_p)
 {
-    usleep(TGTCONIO_MS_IN_US(milliSeconds_p));
+    usleep(TGTCONIO_MS_IN_US(milliSecond_p));
 }
 
 //------------------------------------------------------------------------------
@@ -400,76 +332,46 @@ tOplkError target_setLed(tLedType ledType_p, BOOL fLedOn_p)
 /// \{
 
 //------------------------------------------------------------------------------
-/**
-\brief Enable the global interrupt master
-
-\ingroup module_target
-*/
-//------------------------------------------------------------------------------
-static void enableInterruptMaster(void)
-{
-    //enable global interrupt master
-    XIntc_MasterEnable(TGT_INTC_BASE);
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief Disable the global interrupt master
-
-\ingroup module_target
-*/
-//------------------------------------------------------------------------------
-static void disableInterruptMaster(void)
-{
-    //disable global interrupt master
-    XIntc_MasterDisable(TGT_INTC_BASE);
-}
-
-//------------------------------------------------------------------------------
-/**
+/*
 \brief  Sets the status LED
 
 The function sets the POWERLINK status LED.
 
 \param  fOn_p               Determines the LED state.
 
-\ingroup module_app_common
+\ingroup module_drv_common
 */
 //------------------------------------------------------------------------------
 static void setStatusLed(BOOL fOn_p)
 {
-    if (fOn_p)
-        plkStatusErrorLeds_l |= (1 << GPIO_STATUS_LED_BIT);
-    else
-        plkStatusErrorLeds_l &= ~(1 << GPIO_STATUS_LED_BIT);
-
 #ifdef TARGET_POWERLINK_LED_BASE
-    XGpio_WriteReg(TARGET_POWERLINK_LED_BASE, XGPIO_DATA_OFFSET, plkStatusErrorLeds_l);
+    if (fOn_p)
+        IOWR_ALTERA_AVALON_PIO_SET_BITS(TARGET_POWERLINK_LED_BASE, GPIO_STATUS_LED_BIT);
+    else
+        IOWR_ALTERA_AVALON_PIO_CLEAR_BITS(TARGET_POWERLINK_LED_BASE, GPIO_STATUS_LED_BIT);
 #else
     UNUSED_PARAMETER(fOn_p);
 #endif
 }
 
 //------------------------------------------------------------------------------
-/**
+/*
 \brief  Sets the error LED
 
 The function sets the POWERLINK error LED.
 
 \param  fOn_p               Determines the LED state.
 
-\ingroup module_app_common
+\ingroup module_drv_common
 */
 //------------------------------------------------------------------------------
 static void setErrorLed(BOOL fOn_p)
 {
-    if (fOn_p)
-        plkStatusErrorLeds_l |= (1 << GPIO_ERROR_LED_BIT);
-    else
-        plkStatusErrorLeds_l &= ~(1 << GPIO_ERROR_LED_BIT);
-
 #ifdef TARGET_POWERLINK_LED_BASE
-    XGpio_WriteReg(TARGET_POWERLINK_LED_BASE, XGPIO_DATA_OFFSET, plkStatusErrorLeds_l);
+    if (fOn_p)
+        IOWR_ALTERA_AVALON_PIO_SET_BITS(TARGET_POWERLINK_LED_BASE, GPIO_ERROR_LED_BIT);
+    else
+        IOWR_ALTERA_AVALON_PIO_CLEAR_BITS(TARGET_POWERLINK_LED_BASE, GPIO_ERROR_LED_BIT);
 #else
     UNUSED_PARAMETER(fOn_p);
 #endif

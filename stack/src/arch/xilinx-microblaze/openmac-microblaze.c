@@ -1,17 +1,17 @@
 /**
 ********************************************************************************
-\file   altera_nios2/lock-dualprocnoos.c
+\file   xilinx-microblaze/openmac-microblaze.c
 
-\brief  Locks for Nios II without OS in dual processor system
+\brief  Implementation of openMAC drivers
 
-This target depending module provides lock functionality in dual processor
-system with shared memory.
+This file contains the implementation of the openMAC driver.
 
-\ingroup module_target
+\ingroup module_openmac
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -40,11 +40,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <common/target.h>
+#include <common/oplkinc.h>
+#include <target/openmac.h>
 
-#include <stdlib.h>
-#include <system.h>
-#include <io.h>
+#include <xparameters.h>
+#include <xintc_l.h>
+#include <xio.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -69,16 +70,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define LOCK_LOCAL_ID       ALT_CPU_CPU_ID_VALUE
+#define INTC_BASE   XPAR_PCP_INTC_BASEADDR
 
-// Define unlock value or take predefined one...
-#ifndef LOCK_UNLOCKED_C
-#define LOCK_UNLOCKED_C     0
-#endif
-
-#if (LOCK_LOCAL_ID == LOCK_UNLOCKED_C)
-#error "Change the Nios II CPU ID to some unique BYTE value unequal 0x0!"
-#endif
+#define OPENMAC_SYNC_IRQ        XPAR_PCP_INTC_AXI_OPENMAC_0_TIMER_IRQ_INTR
+#define OPENMAC_SYNC_IRQ_MASK   XPAR_AXI_OPENMAC_0_TIMER_IRQ_MASK
+#define OPENMAC_TXRX_IRQ        XPAR_PCP_INTC_AXI_OPENMAC_0_MAC_IRQ_INTR
+#define OPENMAC_TXRX_IRQ_MASK   XPAR_AXI_OPENMAC_0_MAC_IRQ_MASK
 
 //------------------------------------------------------------------------------
 // local types
@@ -87,7 +84,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static OPLK_LOCK_T* pLock_l = NULL;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -99,84 +95,95 @@ static OPLK_LOCK_T* pLock_l = NULL;
 
 //------------------------------------------------------------------------------
 /**
-\brief    Initializes given lock
+\brief  Register interrupt callback for openMAC
 
-This function initializes the lock instance.
+This function registers a callback for a specific interrupt source.
 
-\param  pLock_p                Reference to lock
+\param  irqSource_p     Specified interrupt source
+\param  pfnIsrCb_p      Interrupt service routine callback
+\param  pArg_p          Argument given to the callback
 
-\return The function returns 0 when successful.
+\return The function returns a tOplkError error code.
 
-\ingroup module_target
+\ingroup module_openmac
 */
 //------------------------------------------------------------------------------
-int target_initLock(OPLK_LOCK_T* pLock_p)
+tOplkError openmac_isrReg(tOpenmacIrqSource irqSource_p, tOpenmacIrqCb pfnIsrCb_p, void* pArg_p)
 {
-    if (pLock_p == NULL)
-        return -1;
+    tOplkError  ret = kErrorOk;
+    UINT32      irqId;
+    UINT32      irqMask;
+    UINT32      intcMask;
 
-    pLock_l = pLock_p;
-
-    return 0;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief    Lock the given lock
-
-This function tries to lock the given lock, otherwise it spins until the
-lock is freed.
-
-\return The function returns 0 when successful.
-
-\ingroup module_target
-*/
-//------------------------------------------------------------------------------
-int target_lock(void)
-{
-    alt_u8  val;
-
-    if (pLock_l == NULL)
-        return -1;
-
-    // spin if id is not written to shared memory
-    do
+    switch (irqSource_p)
     {
-        val = IORD_8DIRECT(pLock_l, 0);
+        case kOpenmacIrqSync:
+            irqId = OPENMAC_SYNC_IRQ;
+            irqMask = OPENMAC_SYNC_IRQ_MASK;
+            break;
 
-        // write local id if unlocked
-        if (val == LOCK_UNLOCKED_C)
-        {
-            IOWR_8DIRECT(pLock_l, 0, LOCK_LOCAL_ID);
-            continue; // return to top of loop to check again
-        }
-    } while (val != LOCK_LOCAL_ID);
+        case kOpenmacIrqTxRx:
+            irqId = OPENMAC_TXRX_IRQ;
+            irqMask = OPENMAC_TXRX_IRQ_MASK;
+            break;
 
-    return 0;
+        default:
+            ret = kErrorNoResource;
+            goto Exit;
+    }
+
+    // Get Interrupt controller's current mask
+    intcMask = Xil_In32(INTC_BASE + XIN_IER_OFFSET);
+
+    // Register interrupt callback
+    XIntc_RegisterHandler(INTC_BASE, irqId, (XInterruptHandler)pfnIsrCb_p, (void*)pArg_p);
+
+    // Enable interrupt by or'ing with controllers mask
+    XIntc_EnableIntr(INTC_BASE, irqMask | intcMask);
+
+Exit:
+    return ret;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief    Unlock the given lock
+\brief  Allocated uncached memory
 
-This function frees the given lock.
+This function allocates memory.
+Since the packet buffers are allocated in cached memory, no uncaching is implemented.
 
-\return The function returns 0 when successful.
+\param  size_p      Size of uncached memory to be allocated
 
-\ingroup module_target
+\return The function returns the base address of the allocated, uncached memory.
+
+\ingroup module_openmac
 */
 //------------------------------------------------------------------------------
-int target_unlock(void)
+UINT8* openmac_uncachedMalloc(UINT size_p)
 {
-    if (pLock_l == NULL)
-        return -1;
+    return (UINT8*)malloc(size_p);
+}
 
-    IOWR_8DIRECT(pLock_l, 0, LOCK_UNLOCKED_C);
+//------------------------------------------------------------------------------
+/**
+\brief  Free uncached memory
 
-    return 0;
+This function frees the memory pMem_p.
+
+\param  pMem_p      Uncached memory to be freed
+
+\ingroup module_openmac
+*/
+//------------------------------------------------------------------------------
+void openmac_uncachedFree(UINT8* pMem_p)
+{
+    free(pMem_p);
 }
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+/// \name Private Functions
+/// \{
 
+///\}

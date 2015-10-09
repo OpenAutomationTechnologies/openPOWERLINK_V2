@@ -1,8 +1,8 @@
 /**
 ********************************************************************************
-\file   xilinx_microblaze/lock-dualprocnoos.c
+\file   altera-nios2/lock-dualprocnoos.c
 
-\brief  Locks for Microblaze without OS in dual processor system
+\brief  Locks for Nios II without OS in dual processor system
 
 This target depending module provides lock functionality in dual processor
 system with shared memory.
@@ -11,9 +11,7 @@ system with shared memory.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2014, Kalycito Infotech Private Limited.
-
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -45,9 +43,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <common/target.h>
 
 #include <stdlib.h>
-#include <xparameters.h>
-#include <xil_io.h>
-#include <mb_interface.h>
+#include <system.h>
+#include <io.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -72,7 +69,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define LOCK_LOCAL_ID    (XPAR_CPU_ID + 1)
+#define LOCK_LOCAL_ID       ALT_CPU_CPU_ID_VALUE
 
 // Define unlock value or take predefined one...
 #ifndef LOCK_UNLOCKED_C
@@ -80,7 +77,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #if (LOCK_LOCAL_ID == LOCK_UNLOCKED_C)
-#error "Change the to LOCK_LOCAL_ID to some unique BYTE value unequal 0x0!"
+#error "Change the Nios II CPU ID to some unique BYTE value unequal 0x0!"
 #endif
 
 //------------------------------------------------------------------------------
@@ -90,7 +87,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static OPLK_LOCK_T*   pLock_l = NULL;
+static OPLK_LOCK_T* pLock_l = NULL;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -113,7 +110,7 @@ This function initializes the lock instance.
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-int target_initLock(OPLK_LOCK_T*pLock_p)
+int target_initLock(OPLK_LOCK_T* pLock_p)
 {
     if (pLock_p == NULL)
         return -1;
@@ -137,7 +134,7 @@ lock is freed.
 //------------------------------------------------------------------------------
 int target_lock(void)
 {
-    u8    val;
+    alt_u8  val;
 
     if (pLock_l == NULL)
         return -1;
@@ -145,14 +142,12 @@ int target_lock(void)
     // spin if id is not written to shared memory
     do
     {
-        microblaze_invalidate_dcache_range((u32)pLock_l, 1);
-        val = Xil_In8((u32)pLock_l);
+        val = IORD_8DIRECT(pLock_l, 0);
 
         // write local id if unlocked
         if (val == LOCK_UNLOCKED_C)
         {
-            Xil_Out8(pLock_l, LOCK_LOCAL_ID);
-            microblaze_flush_dcache_range((u32)pLock_l, 1);
+            IOWR_8DIRECT(pLock_l, 0, LOCK_LOCAL_ID);
             continue; // return to top of loop to check again
         }
     } while (val != LOCK_LOCAL_ID);
@@ -176,8 +171,8 @@ int target_unlock(void)
     if (pLock_l == NULL)
         return -1;
 
-    Xil_Out8(pLock_l, LOCK_UNLOCKED_C);
-    microblaze_flush_dcache_range((u32)pLock_l, 1);
+    IOWR_8DIRECT(pLock_l, 0, LOCK_UNLOCKED_C);
+
     return 0;
 }
 

@@ -1,17 +1,17 @@
 /**
 ********************************************************************************
-\file   xilinx_microblaze/systemtimer.c
+\file   xilinx-microblaze/lock-localnoos.c
 
-\brief  Implement system timer by using a periodic millisecond counter
+\brief  Locks for Microblaze without OS in single-thread-system
 
-Initialize the system timer and count the milliseconds
+This target depending module provides lock functionality in single threaded
+Microblaze system. Note that the functions are empty calls!
 
 \ingroup module_target
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2014, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -40,12 +40,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <common/target.h>
 
-#include "systemtimer.h"
-
-#include <xintc.h>           //interrupt controller higher level
-#include <mb_interface.h>
-#include <xparameters.h>
+#include <common/oplkinc.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -54,23 +51,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#ifndef CONFIG_PCP
-#error "CONFIG_PCP is needed for this implementation!"
-#endif
-
-#if (CONFIG_PCP == FALSE)
-#define TGT_INTC_BASE           XPAR_INTC_0_BASEADDR
-#define TGT_TIMER_INTR          XPAR_HOST_INTC_FIT_TIMER_0_INTERRUPT_INTR
-
-#elif (CONFIG_PCP == TRUE)
-#define TGT_INTC_BASE           XPAR_INTC_0_BASEADDR
-#define TGT_TIMER_INTR          XPAR_PCP_INTC_FIT_TIMER_0_INTERRUPT_INTR
-
-#else
-#error  "Unable to determine the processor instance"
-#endif
-
-#define TGT_TIMER_INTR_MASK     XPAR_FIT_TIMER_0_INTERRUPT_MASK
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -87,6 +67,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+// Define unlock value or take predefined one...
+#ifndef LOCK_UNLOCKED_C
+#define LOCK_UNLOCKED_C     0
+#endif
 
 //------------------------------------------------------------------------------
 // local types
@@ -96,13 +80,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // local vars
 //------------------------------------------------------------------------------
 
-static UINT32    msCount_l = 0;
-
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-
-static void irqHandler(void* pArg_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -110,56 +90,61 @@ static void irqHandler(void* pArg_p);
 
 //------------------------------------------------------------------------------
 /**
-\brief    Initialize system timer
+\brief    Initializes given lock
+
+This function initializes the lock instance.
+
+\param  pLock_p                Reference to lock
+
+\return The function returns 0, if successful.
 
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-void timer_init(void)
+int target_initLock(OPLK_LOCK_T* pLock_p)
 {
-    //register fit interrupt handler
-    XIntc_RegisterHandler(TGT_INTC_BASE, TGT_TIMER_INTR,
-                          (XInterruptHandler)irqHandler, 0);
+    UNUSED_PARAMETER(pLock_p);
 
-    //enable the fit interrupt
-    XIntc_EnableIntr(TGT_INTC_BASE, TGT_TIMER_INTR_MASK);
+    return 0;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief    Get current timer in ms
+\brief    Lock the given lock
 
-\return The timer in ms
+This function tries to lock the given lock, otherwise it spins until the
+lock is freed.
+
+\return The function returns 0, if successful.
 
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-UINT32 timer_getMSCount(void)
+int target_lock(void)
 {
-    return msCount_l;
+    target_enableGlobalInterrupt(FALSE);
+
+    return 0;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief    Unlock the given lock
+
+This function frees the given lock.
+
+\return The function returns 0, if successful.
+
+\ingroup module_target
+*/
+//------------------------------------------------------------------------------
+int target_unlock(void)
+{
+    target_enableGlobalInterrupt(TRUE);
+
+    return 0;
 }
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
-
-/// \name Private Functions
-/// \{
-
-//------------------------------------------------------------------------------
-/**
-\brief    User timer interrupt handler
-
-\param pArg_p       Interrupt handler argument
-
-\ingroup module_target
-*/
-//------------------------------------------------------------------------------
-static void irqHandler(void* pArg_p)
-{
-    UNUSED_PARAMETER(pArg_p);
-
-    msCount_l++;
-}
-
-///\}

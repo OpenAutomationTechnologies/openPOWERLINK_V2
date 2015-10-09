@@ -1,11 +1,12 @@
 /**
 ********************************************************************************
-\file   altera_nios2/lock-localnoos.c
+\file   xilinx-microblaze/usleep.c
 
-\brief  Locks for Nios II without OS in single-thread-system
+\brief  Inexact usleep implementation for Microblaze
 
-This target depending module provides lock functionality in single threaded
-Nios II system. Note that the functions are empty calls!
+Waits an amount of microseconds. This implementation is without a hardware timer
+and therefore only an approximation. It is recommended to put the sleep function
+into BRAM blocks to increase the accuracy.
 
 \ingroup module_target
 *******************************************************************************/
@@ -40,9 +41,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <common/target.h>
 
-#include <common/oplkinc.h>
+#include "usleep.h"
+
+#include "xil_types.h"
+#include "xparameters.h"
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -67,10 +70,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-// Define unlock value or take predefined one...
-#ifndef LOCK_UNLOCKED_C
-#define LOCK_UNLOCKED_C     0
+
+#ifdef XPAR_MICROBLAZE_CORE_CLOCK_FREQ_HZ
+    #define CPU_SPEED_TICKS XPAR_MICROBLAZE_CORE_CLOCK_FREQ_HZ
+#else
+    #error "There is no CPU speed available! Please check xparameters.h"
 #endif
+
+#define CPU_SPEED_MHZ (CPU_SPEED_TICKS / 1000000)     ///< CPU speed in Mhz
+
+#define SMALL_LOOP_SPEED (10 * (CPU_SPEED_MHZ / 50))  ///< The small loop always takes 1us -> it is adjusted to need 10 iterations with 50Mhz
 
 //------------------------------------------------------------------------------
 // local types
@@ -84,67 +93,45 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // local function prototypes
 //------------------------------------------------------------------------------
 
+void usleep(u32 usecs_p) __attribute__((section(".local_memory")));
+
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
 //============================================================================//
 
 //------------------------------------------------------------------------------
 /**
-\brief    Initializes given lock
+\brief    Sleep until limit of microseconds is reached
 
-This function initializes the lock instance.
-
-\param  pLock_p                Reference to lock
-
-\return The function returns 0 when successful.
+\param  usecs_p                Count of microseconds to sleep
 
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-int target_initLock(OPLK_LOCK_T* pLock_p)
+void usleep(u32 usecs_p)
 {
-    UNUSED_PARAMETER(pLock_p);
+    u16 smallLoop = SMALL_LOOP_SPEED;
 
-    return 0;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief    Lock the given lock
-
-This function tries to lock the given lock, otherwise it spins until the
-lock is freed.
-
-\return The function returns 0 when successful.
-
-\ingroup module_target
-*/
-//------------------------------------------------------------------------------
-int target_lock(void)
-{
-    target_enableGlobalInterrupt(FALSE);
-
-    return 0;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief    Unlock the given lock
-
-This function frees the given lock.
-
-\return The function returns 0 when successful.
-
-\ingroup module_target
-*/
-//------------------------------------------------------------------------------
-int target_unlock(void)
-{
-    target_enableGlobalInterrupt(TRUE);
-
-    return 0;
+    __asm
+    (
+      "       addik r11, r0, 1         \n\t"    // fill r11 with decrement value
+      "outerLoop: rsub %0, r11, %0     \n\t"
+      "innerLoop: rsub %1, r11, %1     \n\t"    //1 cycle
+      "       nop                      \n\t"    //1 cycle
+      "       bnei %1, innerLoop       \n\t"    //3 cycles
+      "       add %1, r0, %2           \n\t"
+      "       bnei %0, outerLoop       \n\t"
+          : /* no output registers */
+          : "r"(usecs_p), "r"(smallLoop), "r"(smallLoop)
+          : "r11"
+    );
 }
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+
+/// \name Private Functions
+/// \{
+
+///\}

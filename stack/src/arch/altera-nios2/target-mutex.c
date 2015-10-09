@@ -1,12 +1,13 @@
 /**
 ********************************************************************************
-\file   xilinx_microblaze/usleep.c
+\file   altera-nios2/target-mutex.c
 
-\brief  Inexact usleep implementation for Microblaze
+\brief  Architecture specific mutex implementation
 
-Waits an amount of microseconds. This implementation is without a hardware timer
-and therefore only an approximation. It is recommended to put the sleep function
-into BRAM blocks to increase the accuracy.
+This file contains the mutex implementation for Altera Nios II.
+
+\note As there is no mutli-threading environment on Nios II, the functions are
+only dummy functions.
 
 \ingroup module_target
 *******************************************************************************/
@@ -41,11 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-
-#include "usleep.h"
-
-#include "xil_types.h"
-#include "xparameters.h"
+#include <common/oplkinc.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -63,6 +60,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // global function prototypes
 //------------------------------------------------------------------------------
 
+
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //
 //============================================================================//
@@ -70,16 +68,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-
-#ifdef XPAR_MICROBLAZE_CORE_CLOCK_FREQ_HZ
-    #define CPU_SPEED_TICKS XPAR_MICROBLAZE_CORE_CLOCK_FREQ_HZ
-#else
-    #error "There is no CPU speed available! Please check xparameters.h"
-#endif
-
-#define CPU_SPEED_MHZ (CPU_SPEED_TICKS / 1000000)     ///< CPU speed in Mhz
-
-#define SMALL_LOOP_SPEED (10 * (CPU_SPEED_MHZ / 50))  ///< The small loop always takes 1us -> it is adjusted to need 10 iterations with 50Mhz
 
 //------------------------------------------------------------------------------
 // local types
@@ -93,46 +81,91 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // local function prototypes
 //------------------------------------------------------------------------------
 
-void usleep(u32 usecs_p) __attribute__((section(".local_memory")));
-
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
 //============================================================================//
 
 //------------------------------------------------------------------------------
 /**
-\brief    Sleep until limit of microseconds is reached
+\brief  Create Mutex
 
-\param  usecs_p                Count of microseconds to sleep
+The function creates a mutex.
+
+\param  mutexName_p             The name of the mutex to create.
+\param  pMutex_p                Pointer to store the created mutex.
+
+\return The function returns a tOplkError error code.
+\retval kErrorOk                Mutex was successfully created.
+\retval kErrorNoFreeInstance    An error occured while creating the mutex.
 
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-void usleep(u32 usecs_p)
+tOplkError target_createMutex(char* mutexName_p, OPLK_MUTEX_T* pMutex_p)
 {
-    u16 smallLoop = SMALL_LOOP_SPEED;
+    UNUSED_PARAMETER(mutexName_p);
+    UNUSED_PARAMETER(pMutex_p);
 
-    __asm
-    (
-      "       addik r11, r0, 1         \n\t"    // fill r11 with decrement value
-      "outerLoop: rsub %0, r11, %0     \n\t"
-      "innerLoop: rsub %1, r11, %1     \n\t"    //1 cycle
-      "       nop                      \n\t"    //1 cycle
-      "       bnei %1, innerLoop       \n\t"    //3 cycles
-      "       add %1, r0, %2           \n\t"
-      "       bnei %0, outerLoop       \n\t"
-          : /* no output registers */
-          : "r"(usecs_p), "r"(smallLoop), "r"(smallLoop)
-          : "r11"
-    );
+    return kErrorOk;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Destroy Mutex
+
+The function destroys a mutex.
+
+\param  mutexId_p               The ID of the mutex to destroy.
+
+\ingroup module_target
+*/
+//------------------------------------------------------------------------------
+void target_destroyMutex(OPLK_MUTEX_T mutexId_p)
+{
+    UNUSED_PARAMETER(mutexId_p);
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Lock Mutex
+
+The function locks a mutex.
+
+\param  mutexId_p               The ID of the mutex to lock.
+
+\return The function returns a tOplkError error code.
+\retval kErrorOk                Mutex was successfully locked.
+\retval kErrorNoFreeInstance    An error occured while locking the mutex.
+
+\ingroup module_target
+*/
+//------------------------------------------------------------------------------
+tOplkError target_lockMutex(OPLK_MUTEX_T mutexId_p)
+{
+    UNUSED_PARAMETER(mutexId_p);
+    return kErrorOk;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Unlock Mutex
+
+The function unlocks a mutex.
+
+\param  mutexId_p               The ID of the mutex to unlock.
+
+\ingroup module_target
+*/
+//------------------------------------------------------------------------------
+void target_unlockMutex(OPLK_MUTEX_T mutexId_p)
+{
+    UNUSED_PARAMETER(mutexId_p);
 }
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
-
 /// \name Private Functions
 /// \{
 
 ///\}
-

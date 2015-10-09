@@ -1,16 +1,16 @@
 /**
 ********************************************************************************
-\file   altera_nios2/openmac-nios2.c
+\file   altera-nios2/lock-localnoos.c
 
-\brief  Implementation of openMAC drivers
+\brief  Locks for Nios II without OS in single-thread-system
 
-This file contains the implementation of the openMAC driver.
+This target depending module provides lock functionality in single threaded
+Nios II system. Note that the functions are empty calls!
 
-\ingroup module_openmac
+\ingroup module_target
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
@@ -40,12 +40,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <common/target.h>
+
 #include <common/oplkinc.h>
-#include <target/openmac.h>
-
-#include <sys/alt_cache.h>
-#include <sys/alt_irq.h>
-
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -70,9 +67,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define OPENMAC_SYNC_IRQ    0
-#define OPENMAC_TXRX_IRQ    1
-#define OPENMAC_IRQ_IC_ID   0
+// Define unlock value or take predefined one...
+#ifndef LOCK_UNLOCKED_C
+#define LOCK_UNLOCKED_C     0
+#endif
 
 //------------------------------------------------------------------------------
 // local types
@@ -92,89 +90,61 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //------------------------------------------------------------------------------
 /**
-\brief  Register interrupt callback for openMAC
+\brief    Initializes given lock
 
-This function registers a callback for a specific interrupt source.
+This function initializes the lock instance.
 
-\param  irqSource_p     Specified interrupt source
-\param  pfnIsrCb_p      Interrupt service routine callback
-\param  pArg_p          Argument given to the callback
+\param  pLock_p                Reference to lock
 
-\return The function returns a tOplkError error code.
+\return The function returns 0 when successful.
 
-\ingroup module_openmac
+\ingroup module_target
 */
 //------------------------------------------------------------------------------
-tOplkError openmac_isrReg(tOpenmacIrqSource irqSource_p, tOpenmacIrqCb pfnIsrCb_p, void* pArg_p)
+int target_initLock(OPLK_LOCK_T* pLock_p)
 {
-    tOplkError  ret = kErrorOk;
-    UINT32      irqId;
-    UINT32      icId;
+    UNUSED_PARAMETER(pLock_p);
 
-    icId = OPENMAC_IRQ_IC_ID;
-
-    switch (irqSource_p)
-    {
-        case kOpenmacIrqSync:
-            irqId = OPENMAC_SYNC_IRQ;
-            break;
-
-        case kOpenmacIrqTxRx:
-            irqId = OPENMAC_TXRX_IRQ;
-            break;
-
-        default:
-            ret = kErrorNoResource;
-            goto Exit;
-    }
-
-    if (alt_ic_isr_register(icId, irqId, pfnIsrCb_p, (void*)pArg_p, NULL))
-    {
-        return kErrorNoResource;
-    }
-
-Exit:
-    return ret;
+    return 0;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Allocated uncached memory
+\brief    Lock the given lock
 
-This function allocates memory and marks it as uncached.
+This function tries to lock the given lock, otherwise it spins until the
+lock is freed.
 
-\param  size_p      Size of uncached memory to be allocated
+\return The function returns 0 when successful.
 
-\return The function returns the base address of the allocated, uncached memory.
-
-\ingroup module_openmac
+\ingroup module_target
 */
 //------------------------------------------------------------------------------
-UINT8* openmac_uncachedMalloc(UINT size_p)
+int target_lock(void)
 {
-    return (UINT8*)alt_uncached_malloc(size_p);
+    target_enableGlobalInterrupt(FALSE);
+
+    return 0;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Free uncached memory
+\brief    Unlock the given lock
 
-This function frees the uncached memory pMem_p.
+This function frees the given lock.
 
-\param  pMem_p      Uncached memory to be freed
+\return The function returns 0 when successful.
 
-\ingroup module_openmac
+\ingroup module_target
 */
 //------------------------------------------------------------------------------
-void openmac_uncachedFree(UINT8* pMem_p)
+int target_unlock(void)
 {
-    alt_uncached_free(pMem_p);
+    target_enableGlobalInterrupt(TRUE);
+
+    return 0;
 }
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
-/// \name Private Functions
-/// \{
-
-///\}
