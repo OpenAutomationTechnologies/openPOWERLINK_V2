@@ -1,18 +1,24 @@
 /**
 ********************************************************************************
-\file   pdokcalmem-posixshm.c
+\file   pdokcalmem-winkernel.c
 
-\brief  PDO kernel CAL shared-memory module using Posix shared memory
+\brief  PDO kernel CAL shared-memory module using the Windows kernel module
 
-This file contains an implementation for the kernel PDO CAL shared-memroy module
-which uses Posix shared-memory. The shared memory is used to transfer PDO data
-between user and kernel layer.
+This file contains the implementation for the kernel PDO CAL module for Windows
+kernel space.
+
+The PDO memory is allocated in the kernel layer and mapped into user space for
+sharing. The access to the user stack is provided by passing the address of the
+mapped memory in a IOCTL call.
+
+User and kernel stack access the memory directly once it is initialized and
+mapped.
 
 \ingroup module_pdokcal
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -37,18 +43,15 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
+
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <common/oplkinc.h>
+#include <oplk/oplkinc.h>
+#include <common/pdo.h>
 #include <kernel/pdokcal.h>
 
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-
+#include <ndis.h>
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
@@ -65,7 +68,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // global function prototypes
 //------------------------------------------------------------------------------
 
-
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //
 //============================================================================//
@@ -77,11 +79,25 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
+/**
+/brief PDO CAL local instance
+
+The structure contains the variables used by PDO memory module for providing
+memory access.
+
+*/
+typedef struct
+{
+    PMDL      pMdl;                 ///< Memory descriptor list describing the PDO memory.
+    size_t    memSize;              ///< Size of PDO memory.
+    void*     pKernelVa;            ///< Pointer to PDO memory in kernel space.
+    void*     pUserVa;              ///< Pointer to PDO memory mapped in user space.
+} tPdoCalInstance;
 
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static int                  fd_l;
+static tPdoCalInstance    instance_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -95,10 +111,10 @@ static int                  fd_l;
 /**
 \brief  Open PDO shared memory
 
-The function performs all actions needed to setup the shared memory at
-the start of the stack.
+The function performs all actions needed to setup the shared memory at the
+start of the stack.
 
-For the Posix shared-memory implementation it opens the shared memory segment.
+For the Windows kernel nothing needs to be done.
 
 \return The function returns a tOplkError error code.
 
@@ -107,10 +123,6 @@ For the Posix shared-memory implementation it opens the shared memory segment.
 //------------------------------------------------------------------------------
 tOplkError pdokcal_openMem(void)
 {
-    if ((fd_l = shm_open(PDO_SHMEM_NAME, O_RDWR | O_CREAT, 0)) == -1)
-    {
-        return kErrorNoResource;
-    }
     return kErrorOk;
 }
 
@@ -121,7 +133,7 @@ tOplkError pdokcal_openMem(void)
 The function performs all actions needed to clean up the shared memory at
 shutdown.
 
-For the Posix shared-memory implementation it unlinks the shared memory segment.
+For the Windows kernel nothing needs to be done.
 
 \return The function returns a tOplkError error code.
 
@@ -130,7 +142,6 @@ For the Posix shared-memory implementation it unlinks the shared memory segment.
 //------------------------------------------------------------------------------
 tOplkError pdokcal_closeMem(void)
 {
-    shm_unlink(PDO_SHMEM_NAME);
     return kErrorOk;
 }
 
@@ -140,7 +151,7 @@ tOplkError pdokcal_closeMem(void)
 
 The function allocates shared memory for the kernel needed to transfer the PDOs.
 
-\param  memSize_p               Size of PDO memory
+\param  memSize_p               Size of PDO memory.
 \param  ppPdoMem_p              Pointer to store the PDO memory pointer.
 
 \return The function returns a tOplkError error code.
@@ -148,22 +159,19 @@ The function allocates shared memory for the kernel needed to transfer the PDOs.
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tOplkError pdokcal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
+tOplkError pdokcal_allocateMem(size_t memSize_p, UINT8** ppPdoMem_p)
 {
-    DEBUG_LVL_PDO_TRACE("%s()\n", __func__);
-    if (ftruncate(fd_l, memSize_p) < 0)
-        return kErrorNoResource;
+    instance_l.pKernelVa = OPLK_MALLOC(memSize_p);
 
-    *ppPdoMem_p = mmap(NULL, memSize_p, PROT_READ | PROT_WRITE, MAP_SHARED, fd_l, 0);
-    if (*ppPdoMem_p == MAP_FAILED)
+    if (instance_l.pKernelVa == NULL)
     {
-        DEBUG_LVL_ERROR_TRACE("%s() mmap failed!\n", __func__);
-        *ppPdoMem_p = NULL;
+        DEBUG_LVL_ERROR_TRACE("%s() Unable to allocate PDO memory !\n", __func__);
         return kErrorNoResource;
     }
 
-    DEBUG_LVL_PDO_TRACE("%s() Allocated memory for PDO at %p size:%d\n",
-                        __func__, *ppPdoMem_p, memSize_p);
+    *ppPdoMem_p = instance_l.pKernelVa;
+    instance_l.memSize = memSize_p;
+
     return kErrorOk;
 }
 
@@ -172,7 +180,7 @@ tOplkError pdokcal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
 \brief  Free PDO shared memory
 
 The function frees shared memory which was allocated in the kernel layer for
-transfering the PDOs.
+transferring the PDOs.
 
 \param  pMem_p                  Pointer to the shared memory segment
 \param  memSize_p               Size of PDO memory
@@ -182,60 +190,18 @@ transfering the PDOs.
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tOplkError pdokcal_freeMem(BYTE* pMem_p, size_t memSize_p)
+tOplkError pdokcal_freeMem(UINT8* pMem_p, size_t memSize_p)
 {
-    DEBUG_LVL_PDO_TRACE("%s()\n", __func__);
-
-    if (munmap(pMem_p, memSize_p) != 0)
-    {
-        DEBUG_LVL_ERROR_TRACE("%s() munmap failed!\n", __func__);
-        return kErrorGeneralError;
-    }
-    return kErrorOk;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Map PDO shared memory
-
-This routine maps the PDO memory allocated in the kernel layer of the openPOWERLINK
-stack. This allows user stack to access the PDO memory directly.
-
-\param  ppKernelMem_p           Double pointer to the shared memory segment in kernel space.
-\param  ppUserMem_p             Double pointer to the shared memory segment in user space.
-\param  pMemSize_p              Pointer to size of PDO memory.
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_pdokcal
-*/
-//------------------------------------------------------------------------------
-tOplkError pdokcal_mapMem(UINT8** ppKernelMem_p, UINT8** ppUserMem_p, size_t* pMemSize_p)
-{
-    UNUSED_PARAMETER(ppKernelMem_p);
-    UNUSED_PARAMETER(ppUserMem_p);
-    UNUSED_PARAMETER(pMemSize_p);
-
-    return kErrorOk;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Unmap PDO shared memory
-
-Unmap the PDO memory shared with the user layer. The memory will be freed in
-pdokcal_freeMem().
-
-\param  pMem_p                  Pointer to the shared memory segment.
-\param  memSize_p               Size of PDO memory.
-
-\ingroup module_pdokcal
-*/
-//------------------------------------------------------------------------------
-void pdokcal_unMapMem(UINT8* pMem_p, size_t memSize_p)
-{
-    UNUSED_PARAMETER(pMem_p);
     UNUSED_PARAMETER(memSize_p);
+    UNUSED_PARAMETER(pMem_p);
+
+    if (instance_l.pKernelVa != NULL)
+    {
+        OPLK_FREE(instance_l.pKernelVa);
+        instance_l.pKernelVa = NULL;
+    }
+
+    return kErrorOk;
 }
 
 //============================================================================//

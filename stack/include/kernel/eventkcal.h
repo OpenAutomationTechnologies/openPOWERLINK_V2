@@ -74,6 +74,12 @@ void       eventkcal_process(void);
 /* functions used in eventkcal-linuxkernel.c */
 int        eventkcal_postEventFromUser(ULONG arg);
 int        eventkcal_getEventForUser(ULONG arg);
+#elif (TARGET_SYSTEM == _WIN32_) && defined (_KERNEL_MODE)
+
+// TODO: Check if they can be revised to merge with Linux APIs
+void eventkcal_postEventFromUser(void* pEvent_p);
+void eventkcal_getEventForUser(void* pEvent_p, size_t* pSize_p);
+
 #endif
 
 #ifdef __cplusplus
