@@ -69,6 +69,8 @@ tOplkError pdokcal_openMem(void);
 tOplkError pdokcal_closeMem(void);
 tOplkError pdokcal_allocateMem(size_t memSize_p, BYTE** pPdoMem_p);
 tOplkError pdokcal_freeMem(BYTE* pMem_p, size_t memSize_p);
+tOplkError pdokcal_mapMem(UINT8** ppKernelMem_p, UINT8** ppUserMem_p, size_t* pMemSize_p);
+void       pdokcal_unMapMem(UINT8* pMem_p, size_t memSize_p);
 
 // PDO buffer functions
 tOplkError pdokcal_initPdoMem(tPdoChannelSetup* pPdoChannels, size_t rxPdoMemSize_p,

@@ -371,6 +371,11 @@ SET(EVENT_KCAL_LINUXKERNEL_SOURCES
     ${KERNEL_SOURCE_DIR}/event/eventkcalintf-circbuf.c
     )
 
+SET(EVENT_KCAL_WINKERNEL_SOURCES
+    ${KERNEL_SOURCE_DIR}/event/eventkcal-winkernel.c
+    ${KERNEL_SOURCE_DIR}/event/eventkcalintf-circbuf.c
+    )
+
 SET(EVENT_KCAL_NOOSKERNEL_SOURCES
     ${KERNEL_SOURCE_DIR}/event/eventkcalintf-circbuf.c
     ${KERNEL_SOURCE_DIR}/event/eventkcal-nooscircbuf.c
@@ -404,6 +409,11 @@ SET(PDO_KCAL_LINUXKERNEL_SOURCES
     ${KERNEL_SOURCE_DIR}/timesync/timesynckcal-linuxkernel.c
     )
 
+SET(PDO_KCAL_LINUXKERNEL_SOURCES
+    ${KERNEL_SOURCE_DIR}/pdo/pdokcalmem-winkernel.c
+    ${KERNEL_SOURCE_DIR}/pdo/pdokcalsync-winkernel.c
+    )
+
 SET(PDO_KCAL_HOSTIF_SOURCES
     ${KERNEL_SOURCE_DIR}/pdo/pdokcalmem-hostif.c
     ${KERNEL_SOURCE_DIR}/timesync/timesynckcal-hostif.c
@@ -434,6 +444,13 @@ SET(HARDWARE_DRIVER_LINUXKERNEL_SOURCES
      ${KERNEL_SOURCE_DIR}/veth/veth-linuxkernel.c
      ${KERNEL_SOURCE_DIR}/timer/hrestimer-linuxkernel.c
      ${EDRV_SOURCE_DIR}/edrvcyclic.c
+     )
+
+SET(HARDWARE_DRIVER_WINNDISIM_SOURCES
+     ${KERNEL_SOURCE_DIR}/veth/veth-ndisintemediate.c
+     ${KERNEL_SOURCE_DIR}/timer/hrestimer-ndistimer.c
+     ${EDRV_SOURCE_DIR}/edrvcyclic.c
+     ${EDRV_SOURCE_DIR}/edrv-ndisintermediate.c
      )
 
 SET(HARDWARE_DRIVER_OPENMAC_SOURCES
@@ -483,6 +500,11 @@ SET(CIRCBUF_WINDOWS_SOURCES
 SET(CIRCBUF_LINUXKERNEL_SOURCES
     ${COMMON_SOURCE_DIR}/circbuf/circbuffer.c
     ${COMMON_SOURCE_DIR}/circbuf/circbuf-linuxkernel.c
+    )
+
+SET(CIRCBUF_WINKERNEL_SOURCES
+    ${COMMON_SOURCE_DIR}/circbuf/circbuffer.c
+    ${COMMON_SOURCE_DIR}/circbuf/circbuf-winkernel.c
     )
 
 SET(CIRCBUF_NOOS_SOURCES
