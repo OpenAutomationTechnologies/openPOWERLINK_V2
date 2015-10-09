@@ -1,18 +1,21 @@
 /**
 ********************************************************************************
-\file   pdokcalmem-linuxkernel.c
+\file   timesynckcal-winkernel.c
 
-\brief  PDO kernel CAL shared-memory module using the openPOWERLINK Linux kernel driver
+\brief  Windows kernel driver timesync module
 
-This file contains an implementation for the kernel PDO CAL module which uses
-the Linux kernel driver to provide its kernel memory to the user layer by
-the mmap device operation.
+This file contains the implementation for kernel CAL timesync module
+for Windows kernel. The timesync module is responsible to synchronize
+data exchange with user layer.
 
-\ingroup module_pdokcal
+The module uses NDIS events to get notification of new data and pass it to the
+user layer by completing pending IOCTLs.
+
+\ingroup module_timesynckcal
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -37,13 +40,15 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
+
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-#include <kernel/pdokcal.h>
+#include <kernel/timesynckcal.h>
 
-#include <linux/slab.h>
+#include <ndisintermediate/ndis-intf.h>
+#include <ndis.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -52,6 +57,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+#define TIMERSYNCK_TAG    'knsT'
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -60,7 +66,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // global function prototypes
 //------------------------------------------------------------------------------
-
 
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //
@@ -73,10 +78,22 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
+/**
+/brief  Timesync module instance structure
+
+Local variables and flags used by timesync module.
+
+*/
+typedef struct
+{
+    NDIS_EVENT        syncWaitEvent;    ///< NDIS event for synchronization events.
+    BOOL              fInitialized;     ///< Flag to identify initialization status of module.
+} tTimesynckCalInstance;
 
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
+static tTimesynckCalInstance*   instance_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -88,136 +105,115 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //------------------------------------------------------------------------------
 /**
-\brief  Open PDO shared memory
+\brief  Initialize kernel CAL timesync module
 
-The function performs all actions needed to setup the shared memory at the
-start of the stack.
-
-For the linux kernel mmap implementation nothing needs to be done.
+The function initializes the kernel CAL timesync module.
 
 \return The function returns a tOplkError error code.
 
-\ingroup module_pdokcal
+\ingroup module_timesynckcal
 */
 //------------------------------------------------------------------------------
-tOplkError pdokcal_openMem(void)
+tOplkError timesynckcal_init(void)
 {
-    return kErrorOk;
-}
+    NDIS_HANDLE    adapterHandle = ndis_getAdapterHandle();
 
-//------------------------------------------------------------------------------
-/**
-\brief  Close PDO shared memory
+    instance_l = NdisAllocateMemoryWithTagPriority(adapterHandle, sizeof(tTimesynckCalInstance),
+                                                   TIMERSYNCK_TAG, NormalPoolPriority);
 
-The function performs all actions needed to clean up the shared memory at
-shutdown.
-
-For the linux kernel mmap implementation nothing needs to be done.
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_pdokcal
-*/
-//------------------------------------------------------------------------------
-tOplkError pdokcal_closeMem(void)
-{
-    return kErrorOk;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Allocate PDO shared memory
-
-The function allocates shared memory for the kernel needed to transfer the PDOs.
-
-\param  memSize_p               Size of PDO memory
-\param  ppPdoMem_p              Pointer to store the PDO memory pointer
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_pdokcal
-*/
-//------------------------------------------------------------------------------
-tOplkError pdokcal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
-{
-    ULONG         order;
-
-    order = get_order(memSize_p);
-    if ((*ppPdoMem_p = (BYTE*)__get_free_pages(GFP_KERNEL, order)) == NULL)
-    {
+    if (instance_l == NULL)
         return kErrorNoResource;
+
+    NdisInitializeEvent(&instance_l->syncWaitEvent);
+
+    instance_l->fInitialized = TRUE;
+
+    return kErrorOk;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Clean up CAL timesync module
+
+The function cleans up the CAL timesync module.
+
+\ingroup module_timesynckcal
+*/
+//------------------------------------------------------------------------------
+void timesynckcal_exit(void)
+{
+    if (instance_l != NULL)
+        NdisFreeMemory(instance_l, 0, 0);
+
+    instance_l->fInitialized = FALSE;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Send a sync event
+
+The function sends a sync event.
+
+\return The function returns a tOplkError error code.
+
+\ingroup module_timesynckcal
+*/
+//------------------------------------------------------------------------------
+tOplkError timesynckcal_sendSyncEvent(void)
+{
+    return kErrorOk;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Wait for a sync event
+
+The function waits for a sync event
+
+\return The function returns a tOplkError error code.
+
+\ingroup module_timesynckcal
+*/
+//------------------------------------------------------------------------------
+tOplkError timesynckcal_waitSyncEvent(void)
+{
+    INT        timeout = 1000;
+    BOOLEAN    fRet;
+
+    if (!instance_l->fInitialized)
+        return kErrorNoResource;
+
+    fRet = NdisWaitEvent(&instance_l->syncWaitEvent, timeout);
+
+    if (fRet)
+    {
+        NdisResetEvent(&instance_l->syncWaitEvent);
     }
-    DEBUG_LVL_PDO_TRACE("%s() Allocated memory for PDO at %p size:%d/%d\n",
-                        __func__, *ppPdoMem_p, memSize_p, order);
+    else
+    {
+        return kErrorRetry;
+    }
+
     return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Free PDO shared memory
+\brief  Enable sync events
 
-The function frees shared memory which was allocated in the kernel layer for
-transfering the PDOs.
+The function enables sync events.
 
-\param  pMem_p                  Pointer to the shared memory segment
-\param  memSize_p               Size of PDO memory
+\param  fEnable_p               Enable/disable sync event.
 
 \return The function returns a tOplkError error code.
 
-\ingroup module_pdokcal
+\ingroup module_timesynckcal
 */
 //------------------------------------------------------------------------------
-tOplkError pdokcal_freeMem(BYTE* pMem_p, size_t memSize_p)
+tOplkError timesynckcal_controlSync(BOOL fEnable_p)
 {
-    ULONG         order;
-
-    order = get_order(memSize_p);
-    free_pages((ULONG)pMem_p, order);
+    UNUSED_PARAMETER(fEnable_p);
     return kErrorOk;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Map PDO shared memory
-
-This routine maps the PDO memory allocated in the kernel layer of the openPOWERLINK
-stack. This allows user stack to access the PDO memory directly.
-
-\param  ppKernelMem_p           Double pointer to the shared memory segment in kernel space.
-\param  ppUserMem_p             Double pointer to the shared memory segment in user space.
-\param  memSize_p               Pointer to size of PDO memory.
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_pdokcal
-*/
-//------------------------------------------------------------------------------
-tOplkError pdokcal_mapMem(UINT8** ppKernelMem_p, UINT8** ppUserMem_p, size_t* pMemSize_p)
-{
-    UNUSED_PARAMETER(ppKernelMem_p);
-    UNUSED_PARAMETER(ppUserMem_p);
-    UNUSED_PARAMETER(pMemSize_p);
-
-    return kErrorOk;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Unmap PDO shared memory
-
-Unmap the PDO memory shared with the user layer. The memory will be freed in
-pdokcal_freeMem().
-
-\param  pMem_p                  Pointer to the shared memory segment.
-\param  memSize_p               Size of PDO memory.
-
-\ingroup module_pdokcal
-*/
-//------------------------------------------------------------------------------
-void pdokcal_unMapMem(UINT8* pMem_p, size_t memSize_p)
-{
-    UNUSED_PARAMETER(pMem_p);
-    UNUSED_PARAMETER(memSize_p);
 }
 
 //============================================================================//

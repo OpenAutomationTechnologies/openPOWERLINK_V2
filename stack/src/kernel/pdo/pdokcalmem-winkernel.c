@@ -1,18 +1,24 @@
 /**
 ********************************************************************************
-\file   pdokcalmem-linuxkernel.c
+\file   pdokcalmem-winkernel.c
 
-\brief  PDO kernel CAL shared-memory module using the openPOWERLINK Linux kernel driver
+\brief  PDO kernel CAL shared-memory module using the Windows kernel module
 
-This file contains an implementation for the kernel PDO CAL module which uses
-the Linux kernel driver to provide its kernel memory to the user layer by
-the mmap device operation.
+This file contains the implementation for the kernel PDO CAL module for windows
+kernel space.
+
+The PDO memory is allocated in the kernel layer and mapped into user space for
+sharing. The access to the user stack is provided by passing the address of the
+mapped memory in a IOCTL call.
+
+User and kernel stack access the memory directly once it is initialized and
+mapped.
 
 \ingroup module_pdokcal
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -37,14 +43,15 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
+
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <common/oplkinc.h>
+#include <oplk/oplkinc.h>
+#include <common/pdo.h>
 #include <kernel/pdokcal.h>
 
-#include <linux/slab.h>
-
+#include <ndis.h>
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
@@ -61,7 +68,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // global function prototypes
 //------------------------------------------------------------------------------
 
-
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //
 //============================================================================//
@@ -73,10 +79,25 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
+/**
+/brief PDO CAL local instance
+
+The structure contains the variables used by PDO memory module for providing
+memory access.
+
+*/
+typedef struct
+{
+    PMDL      pMdl;                 ///< Memory descriptor list describing the PDO memory.
+    size_t    memSize;              ///< Size of PDO memory.
+    void*     pKernelVa;            ///< Pointer to PDO memory in kernel space.
+    void*     pUserVa;              ///< Pointer to PDO memory mapped in user space.
+} tPdoCalInstance;
 
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
+static tPdoCalInstance    instance_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -93,7 +114,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 The function performs all actions needed to setup the shared memory at the
 start of the stack.
 
-For the linux kernel mmap implementation nothing needs to be done.
+For the Windows kernel nothing needs to be done.
 
 \return The function returns a tOplkError error code.
 
@@ -112,7 +133,7 @@ tOplkError pdokcal_openMem(void)
 The function performs all actions needed to clean up the shared memory at
 shutdown.
 
-For the linux kernel mmap implementation nothing needs to be done.
+For the Windows kernel nothing needs to be done.
 
 \return The function returns a tOplkError error code.
 
@@ -130,25 +151,27 @@ tOplkError pdokcal_closeMem(void)
 
 The function allocates shared memory for the kernel needed to transfer the PDOs.
 
-\param  memSize_p               Size of PDO memory
-\param  ppPdoMem_p              Pointer to store the PDO memory pointer
+\param  memSize_p               Size of PDO memory.
+\param  ppPdoMem_p              Pointer to store the PDO memory pointer.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tOplkError pdokcal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
+tOplkError pdokcal_allocateMem(size_t memSize_p, UINT8** ppPdoMem_p)
 {
-    ULONG         order;
+    instance_l.pKernelVa = OPLK_MALLOC(memSize_p);
 
-    order = get_order(memSize_p);
-    if ((*ppPdoMem_p = (BYTE*)__get_free_pages(GFP_KERNEL, order)) == NULL)
+    if (instance_l.pKernelVa == NULL)
     {
+        DEBUG_LVL_ERROR_TRACE("%s() Unable to allocate PDO memory !\n", __func__);
         return kErrorNoResource;
     }
-    DEBUG_LVL_PDO_TRACE("%s() Allocated memory for PDO at %p size:%d/%d\n",
-                        __func__, *ppPdoMem_p, memSize_p, order);
+
+    *ppPdoMem_p = instance_l.pKernelVa;
+    instance_l.memSize = memSize_p;
+
     return kErrorOk;
 }
 
@@ -157,7 +180,7 @@ tOplkError pdokcal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
 \brief  Free PDO shared memory
 
 The function frees shared memory which was allocated in the kernel layer for
-transfering the PDOs.
+transferring the PDOs.
 
 \param  pMem_p                  Pointer to the shared memory segment
 \param  memSize_p               Size of PDO memory
@@ -167,12 +190,13 @@ transfering the PDOs.
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tOplkError pdokcal_freeMem(BYTE* pMem_p, size_t memSize_p)
+tOplkError pdokcal_freeMem(UINT8* pMem_p, size_t memSize_p)
 {
-    ULONG         order;
+    if (instance_l.pKernelVa != NULL)
+    {
+        OPLK_FREE(instance_l.pKernelVa);
+    }
 
-    order = get_order(memSize_p);
-    free_pages((ULONG)pMem_p, order);
     return kErrorOk;
 }
 
@@ -194,10 +218,50 @@ stack. This allows user stack to access the PDO memory directly.
 //------------------------------------------------------------------------------
 tOplkError pdokcal_mapMem(UINT8** ppKernelMem_p, UINT8** ppUserMem_p, size_t* pMemSize_p)
 {
-    UNUSED_PARAMETER(ppKernelMem_p);
-    UNUSED_PARAMETER(ppUserMem_p);
-    UNUSED_PARAMETER(pMemSize_p);
+    if (*pMemSize_p > instance_l.memSize)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() Higher Memory requested (Kernel-%d User-%d) !\n",
+                              __func__, instance_l.memSize, *pMemSize_p);
+        *pMemSize_p = 0;
+        return kErrorNoResource;
+    }
 
+    // Allocate new MDL pointing to PDO memory
+    instance_l.pMdl = IoAllocateMdl(instance_l.pKernelVa, instance_l.memSize, FALSE, FALSE,
+                                    NULL);
+
+    if (instance_l.pMdl == NULL)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() Error allocating MDL !\n", __func__);
+        return kErrorNoResource;
+    }
+
+    // Update the MDL with physical addresses
+    MmBuildMdlForNonPagedPool(instance_l.pMdl);
+
+    // Map the memory in user space and get the address
+    instance_l.pUserVa = MmMapLockedPagesSpecifyCache(instance_l.pMdl,      // MDL
+                                                      UserMode,             // Mode
+                                                      MmCached,             // Caching
+                                                      NULL,                 // Address
+                                                      FALSE,                // Bug-check?
+                                                      NormalPagePriority);  // Priority
+
+    if (instance_l.pUserVa == NULL)
+    {
+        MmUnmapLockedPages(instance_l.pUserVa, instance_l.pMdl);
+        IoFreeMdl(instance_l.pMdl);
+        DEBUG_LVL_ERROR_TRACE("%s() Error mapping MDL !\n", __func__);
+        return kErrorNoResource;
+    }
+
+    *ppKernelMem_p = instance_l.pKernelVa;
+    *ppUserMem_p = instance_l.pUserVa;
+    *pMemSize_p = instance_l.memSize;
+
+    TRACE("Mapped memory info U:%p K:%p size %x", instance_l.pUserVa,
+                                                     (UINT8*)instance_l.pKernelVa,
+                                                     instance_l.memSize);
     return kErrorOk;
 }
 
@@ -216,8 +280,19 @@ pdokcal_freeMem().
 //------------------------------------------------------------------------------
 void pdokcal_unMapMem(UINT8* pMem_p, size_t memSize_p)
 {
-    UNUSED_PARAMETER(pMem_p);
-    UNUSED_PARAMETER(memSize_p);
+    if (instance_l.pMdl == NULL)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() MDL already deleted !\n", __func__);
+        return;
+    }
+
+    if (instance_l.pUserVa != NULL)
+    {
+        MmUnmapLockedPages(instance_l.pUserVa, instance_l.pMdl);
+        IoFreeMdl(instance_l.pMdl);
+    }
+
+    pMem_p = NULL;
 }
 
 //============================================================================//

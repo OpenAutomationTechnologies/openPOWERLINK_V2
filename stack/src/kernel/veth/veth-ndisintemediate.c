@@ -1,18 +1,20 @@
 /**
 ********************************************************************************
-\file   pdokcalmem-linuxkernel.c
+\file   veth-winkernel.c
 
-\brief  PDO kernel CAL shared-memory module using the openPOWERLINK Linux kernel driver
+\brief  Implementation of virtual Ethernet for Windows kernel
 
-This file contains an implementation for the kernel PDO CAL module which uses
-the Linux kernel driver to provide its kernel memory to the user layer by
-the mmap device operation.
+This file contains implementation for virtual Ethernet interface for openPOWERLINK
+stack in Windows kernel.
 
-\ingroup module_pdokcal
+The module uses the NDIS driver library for Tx and Rx packet exchange from
+application layer into POWERLINK network.
+
+\ingroup module_veth
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -37,13 +39,17 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
+
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <common/oplkinc.h>
-#include <kernel/pdokcal.h>
+#include <kernel/veth.h>
+#include <kernel/dllkcal.h>
+#include <kernel/dllk.h>
+#include <common/ami.h>
 
-#include <linux/slab.h>
+#include <ndisintermediate/ndis-intf.h>
+
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -81,6 +87,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
+static void        veth_xmit(void* pVEthTxData_p, size_t size_p);
+static tOplkError  veth_receiveFrame(tFrameInfo* pFrameInfo_p,
+                                     tEdrvReleaseRxBuffer* pReleaseRxBuffer_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -88,136 +97,54 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //------------------------------------------------------------------------------
 /**
-\brief  Open PDO shared memory
+\brief  Initialize virtual Ethernet
 
-The function performs all actions needed to setup the shared memory at the
-start of the stack.
+The function initializes the virtual Ethernet module.
 
-For the linux kernel mmap implementation nothing needs to be done.
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_pdokcal
-*/
-//------------------------------------------------------------------------------
-tOplkError pdokcal_openMem(void)
-{
-    return kErrorOk;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Close PDO shared memory
-
-The function performs all actions needed to clean up the shared memory at
-shutdown.
-
-For the linux kernel mmap implementation nothing needs to be done.
+\param  aSrcMac_p       MAC address to set for virtual Ethernet interface.
 
 \return The function returns a tOplkError error code.
 
-\ingroup module_pdokcal
+\ingroup module_veth
 */
 //------------------------------------------------------------------------------
-tOplkError pdokcal_closeMem(void)
+tOplkError veth_init(const UINT8 aSrcMac_p[6])
 {
-    return kErrorOk;
-}
+    tOplkError  ret = kErrorOk;
 
-//------------------------------------------------------------------------------
-/**
-\brief  Allocate PDO shared memory
+    UNUSED_PARAMETER(aSrcMac_p);
 
-The function allocates shared memory for the kernel needed to transfer the PDOs.
+    // Register Transmit routine for non-EPL packets
+    ndis_registerVethHandler(veth_xmit);
 
-\param  memSize_p               Size of PDO memory
-\param  ppPdoMem_p              Pointer to store the PDO memory pointer
+    // register callback function in DLL
+    ret = dllk_regAsyncHandler(veth_receiveFrame);
 
-\return The function returns a tOplkError error code.
-
-\ingroup module_pdokcal
-*/
-//------------------------------------------------------------------------------
-tOplkError pdokcal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
-{
-    ULONG         order;
-
-    order = get_order(memSize_p);
-    if ((*ppPdoMem_p = (BYTE*)__get_free_pages(GFP_KERNEL, order)) == NULL)
+    if (ret != kErrorOk)
     {
-        return kErrorNoResource;
+        DEBUG_LVL_VETH_TRACE("veth_open: dllk_regAsyncHandler returned 0x%02X\n", ret);
+        return ret;
     }
-    DEBUG_LVL_PDO_TRACE("%s() Allocated memory for PDO at %p size:%d/%d\n",
-                        __func__, *ppPdoMem_p, memSize_p, order);
+
     return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Free PDO shared memory
+\brief  Shut down virtual Ethernet
 
-The function frees shared memory which was allocated in the kernel layer for
-transfering the PDOs.
-
-\param  pMem_p                  Pointer to the shared memory segment
-\param  memSize_p               Size of PDO memory
+The function shuts down the virtual Ethernet module.
 
 \return The function returns a tOplkError error code.
 
-\ingroup module_pdokcal
+\ingroup module_veth
 */
 //------------------------------------------------------------------------------
-tOplkError pdokcal_freeMem(BYTE* pMem_p, size_t memSize_p)
+tOplkError veth_exit(void)
 {
-    ULONG         order;
-
-    order = get_order(memSize_p);
-    free_pages((ULONG)pMem_p, order);
-    return kErrorOk;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Map PDO shared memory
-
-This routine maps the PDO memory allocated in the kernel layer of the openPOWERLINK
-stack. This allows user stack to access the PDO memory directly.
-
-\param  ppKernelMem_p           Double pointer to the shared memory segment in kernel space.
-\param  ppUserMem_p             Double pointer to the shared memory segment in user space.
-\param  memSize_p               Pointer to size of PDO memory.
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_pdokcal
-*/
-//------------------------------------------------------------------------------
-tOplkError pdokcal_mapMem(UINT8** ppKernelMem_p, UINT8** ppUserMem_p, size_t* pMemSize_p)
-{
-    UNUSED_PARAMETER(ppKernelMem_p);
-    UNUSED_PARAMETER(ppUserMem_p);
-    UNUSED_PARAMETER(pMemSize_p);
+    ndis_registerVethHandler(NULL);
 
     return kErrorOk;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Unmap PDO shared memory
-
-Unmap the PDO memory shared with the user layer. The memory will be freed in
-pdokcal_freeMem().
-
-\param  pMem_p                  Pointer to the shared memory segment.
-\param  memSize_p               Size of PDO memory.
-
-\ingroup module_pdokcal
-*/
-//------------------------------------------------------------------------------
-void pdokcal_unMapMem(UINT8* pMem_p, size_t memSize_p)
-{
-    UNUSED_PARAMETER(pMem_p);
-    UNUSED_PARAMETER(memSize_p);
 }
 
 //============================================================================//
@@ -225,5 +152,77 @@ void pdokcal_unMapMem(UINT8* pMem_p, size_t memSize_p)
 //============================================================================//
 /// \name Private Functions
 /// \{
+
+//------------------------------------------------------------------------------
+/**
+\brief  Transmit entry point of virtual Ethernet driver
+
+The function contains the transmit function for the virtual Ethernet driver.
+
+\param  pVEthTxData_p          Pointer to the packet which has to be transmitted.
+\param  size_p                 Size of the packet.
+
+*/
+//------------------------------------------------------------------------------
+static void veth_xmit(void* pVEthTxData_p, size_t size_p)
+{
+    tOplkError      ret = kErrorOk;
+    tFrameInfo      frameInfo;
+    INT             count;
+    unsigned char*  pData = (unsigned char*)pVEthTxData_p;
+
+    if (pVEthTxData_p == NULL)
+        return;
+
+    frameInfo.frame.pBuffer = (tPlkFrame*)pVEthTxData_p;
+    frameInfo.frameSize = size_p;
+
+    //call send on DLL
+    ret = dllkcal_sendAsyncFrame(&frameInfo, kDllAsyncReqPrioGeneric);
+    if (ret != kErrorOk)
+    {
+        DEBUG_LVL_VETH_TRACE("veth_xmit: dllkcal_sendAsyncFrame returned 0x%02X\n", ret);
+        goto Exit;
+    }
+    else
+    {
+        DEBUG_LVL_VETH_TRACE("veth_xmit: frame passed to DLL\n");
+    }
+
+Exit:
+    return;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Receive frame from virtual Ethernet interface
+
+The function receives a frame from the virtual Ethernet interface.
+
+\param  pFrameInfo_p        Pointer to frame information of received frame.
+\param  pReleaseRxBuffer_p  Pointer to buffer release flag. The function must
+                            set this flag to determine if the RxBuffer could be
+                            released immediately.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError veth_receiveFrame(tFrameInfo* pFrameInfo_p,
+                                    tEdrvReleaseRxBuffer* pReleaseRxBuffer_p)
+{
+    tNdisErrorStatus status = kNdisStatusSuccess;
+
+    status = ndis_vethReceive((void*)pFrameInfo_p->frame.pBuffer,
+                              pFrameInfo_p->frameSize);
+    if (status != kNdisStatusSuccess)
+    {
+        DEBUG_LVL_VETH_TRACE("%s() Unable to indicate received frames error 0x%2X\n",
+                             __func__, status);
+        return kErrorNoResource;
+    }
+
+    *pReleaseRxBuffer_p = kEdrvReleaseRxBufferImmediately;
+    return kErrorOk;
+}
 
 /// \}
