@@ -229,6 +229,9 @@ static tOplkError insertDataBlock(tDllCalQueueInstance pDllCalQueue_p,
 
     ioctlAsyncFrame.size = *pDataSize_p;
     ioctlAsyncFrame.queue = pInstance->dllCalQueue;
+    // Set the data pointer as NULL to specify that the ASync frame is copied
+    // at the end of the buffer.
+    ioctlAsyncFrame.pData = NULL;
 
     OPLK_MEMCPY(pIoctlAsyncBuf, &ioctlAsyncFrame, sizeof(tIoctlDllCalAsync));
     OPLK_MEMCPY((pIoctlAsyncBuf + sizeof(tIoctlDllCalAsync)), pData_p, *pDataSize_p);

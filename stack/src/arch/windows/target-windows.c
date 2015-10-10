@@ -156,8 +156,31 @@ tOplkError target_setIpAdrs(char* ifName_p, UINT32 ipAddress_p, UINT32 subnetMas
     UNUSED_PARAMETER(subnetMask_p);
     UNUSED_PARAMETER(mtu_p);
 
-    // Note: On a Windows system, the IP address for the VEth interface should be assigned
-    //       using network properties page.
+    //Note: The given parameters are ignored because the application must set
+    //      these settings to the used IP stack by itself!
+
+    return kErrorOk;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Set default gateway for Ethernet interface
+
+The function sets the default gateway of an Ethernet interface.
+
+\param  defaultGateway_p            Default gateway to set.
+
+\return The function returns a tOplkError error code.
+
+\ingroup module_target
+*/
+//------------------------------------------------------------------------------
+tOplkError target_setDefaultGateway(UINT32 defaultGateway_p)
+{
+    UNUSED_PARAMETER(defaultGateway_p);
+
+    //Note: The given parameters are ignored because the application must set
+    //      these settings to the used IP stack by itself!
 
     return kErrorOk;
 }

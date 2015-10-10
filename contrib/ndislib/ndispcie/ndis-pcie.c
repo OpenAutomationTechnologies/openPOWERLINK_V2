@@ -277,6 +277,70 @@ void ndis_registerIntrHandler(tIntrHandler pfnIntrCb_p)
     vethInstance_g.pfnIntrCb = pfnIntrCb_p;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Register VEth Tx callback
+
+Register VEth Tx callback to NDIS driver.
+
+\param  pfnVEthTxCb_p      Pointer to Tx callback routine.
+
+\ingroup module_ndis
+*/
+//------------------------------------------------------------------------------
+void ndis_registerVethHandler(tVEthSendCb pfnVEthTxCb_p)
+{
+    vethInstance_g.pfnVEthSendCb = pfnVEthTxCb_p;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Receive packet handler for non-PLK packets
+
+This routine can be invoked from the caller to indicate the reception of non-PLK
+packet to the operating system.
+
+\param  pData_p      Pointer to frame received.
+\param  size_p       Size of the received packet.
+
+\return Returns a tNdisErrorStatus error code.
+
+\ingroup module_ndis
+*/
+//------------------------------------------------------------------------------
+tNdisErrorStatus ndis_vethReceive(void* pData_p, size_t size_p)
+{
+    NDIS_STATUS     status = NDIS_STATUS_SUCCESS;
+
+    if (pData_p == NULL)
+        return kNdisStatusInvalidParams;
+
+    status = miniport_handleReceive(pData_p, size_p);
+
+    if (status != NDIS_STATUS_SUCCESS)
+    {
+        return kNdisStatusTxError;
+    }
+
+    return kNdisStatusSuccess;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Update adapter state
+
+This routine forwards the media state change requests to miniport section.
+
+\param state_p  New state to set.
+
+\ingroup module_ndis
+*/
+//------------------------------------------------------------------------------
+void ndis_setAdapterState(ULONG state_p)
+{
+    miniport_setAdapterState(state_p);
+}
+
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
@@ -308,4 +372,4 @@ NDIS_STATUS miniportSetOptions(NDIS_HANDLE driverHandle_p, NDIS_HANDLE driverCon
     return NDIS_STATUS_SUCCESS;
 }
 
-///\}
+/// \}

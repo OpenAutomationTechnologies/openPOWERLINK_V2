@@ -121,6 +121,15 @@ called from ISR.
 */
 typedef void (*tIntrHandler)(void);
 
+/**
+\brief VEth send callback handler
+
+\param pVEthTxData_p    Pointer to the VEth send buffer.
+\param size_p           Size of the receive buffer.
+
+*/
+typedef void (*tVEthSendCb)(void* pVEthTxData_p, size_t size_p);
+
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
@@ -138,7 +147,10 @@ void             ndis_closeDrvIntf(void);
 NDIS_HANDLE      ndis_getAdapterHandle(void);
 PULONG           ndis_getBarAddr(ULONG barId_p);
 ULONG            ndis_getBarLength(ULONG barId_p);
-void             ndis_registerIntrHandler(tIntrHandler pfnIntrCb);
+void             ndis_registerIntrHandler(tIntrHandler pfnIntrCb_p);
+tNdisErrorStatus ndis_vethReceive(void* pData_p, size_t size_p);
+void             ndis_registerVethHandler(tVEthSendCb pfnVEthTxCb_p);
+void             ndis_setAdapterState(ULONG state_p);
 
 #ifdef __cplusplus
 }

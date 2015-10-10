@@ -426,9 +426,13 @@ NTSTATUS powerlinkIoctl(PDEVICE_OBJECT pDeviceObject_p, PIRP pIrp_p)
 
         case PLK_CMD_POST_EVENT:
         {
-            pInBuffer = pIrp_p->AssociatedIrp.SystemBuffer;
+            tEvent* pEvent = (tEvent*)pIrp_p->AssociatedIrp.SystemBuffer;
+            if (pEvent->eventArgSize != 0)
+                pEvent->eventArg.pEventArg = (void*)((UINT8*)pEvent + sizeof(tEvent));
+            else
+                pEvent->eventArg.pEventArg = NULL;
 
-            oplkRet = drv_postEvent(pInBuffer);
+            oplkRet = drv_postEvent(pEvent);
 
             if (oplkRet != kErrorOk)
                 pIrp_p->IoStatus.Information = 0;
