@@ -144,10 +144,126 @@ static BOOLEAN     interruptHandler(NDIS_HANDLE interruptContext_p, ULONG messag
 static void        interruptDpc(NDIS_HANDLE interruptContext_p, ULONG messageId_p,
                                 PVOID dpcContext_p, PULONG reserved1_p,
                                 PULONG reserved2_p);
+static void        miniportFreeVethRxBuff(void);
+static NDIS_STATUS miniportAllocateVEthRxBuff(void);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
 //============================================================================//
+
+//------------------------------------------------------------------------------
+/**
+\brief  Frame receive handler
+
+This is the receive handler for the NDIS miniport. The receive handler forwards
+the received frames to the protocol drivers enabled on this miniport.
+
+\param  pDataBuff_p     Pointer to the received frame buffer.
+\param  size_p          Size of the received frame.
+
+\return The function returns an NDIS_STATUS error code.
+
+\ingroup module_ndis
+*/
+//------------------------------------------------------------------------------
+NDIS_STATUS miniport_handleReceive(UINT8* pDataBuff_p, size_t size_p)
+{
+    PLIST_ENTRY        pRxLink;
+    tVEthRxBufInfo*    pVethRxInfo = NULL;
+    PNET_BUFFER        pNetBuffer = NULL;
+
+    if (pDataBuff_p == NULL || size_p == 0)
+        return NDIS_STATUS_INVALID_PACKET;
+
+    if (IsListEmpty(&vethInstance_g.rxList))
+    {
+        return NDIS_STATUS_RESOURCES;
+    }
+
+    pRxLink = NdisInterlockedRemoveHeadList(&vethInstance_g.rxList,
+                                            &vethInstance_g.rxListLock);
+
+    if (pRxLink == NULL)
+        return NDIS_STATUS_RESOURCES;
+
+    pVethRxInfo = CONTAINING_RECORD(pRxLink, tVEthRxBufInfo, rxLink);
+
+    if (pVethRxInfo->pData == NULL || pVethRxInfo == NULL)
+        return NDIS_STATUS_RESOURCES;
+
+    NdisMoveMemory(pVethRxInfo->pData, pDataBuff_p, size_p);
+
+    // Update the size
+    pNetBuffer = NET_BUFFER_LIST_FIRST_NB(pVethRxInfo->pNbl);
+    NET_BUFFER_DATA_LENGTH(pNetBuffer) = size_p;
+
+    // Indicate the received packet to upper layer protocols
+    NdisMIndicateReceiveNetBufferLists(vethInstance_g.miniportAdapterHandle,
+                                       pVethRxInfo->pNbl, 0, 1, 0);
+
+    vethInstance_g.receiveIndication++;
+
+    return NDIS_STATUS_SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Set binding state for miniport
+
+This routine handles the media state change requests from the callers.
+Based on the state change, the routine prepares an NDIS status indication request
+and forwards it to the operating system to indicate the change in adapter status.
+
+\param  state_p     New state to which adapter should move.
+
+\ingroup module_ndis
+*/
+//------------------------------------------------------------------------------
+void miniport_setAdapterState(ULONG state_p)
+{
+    NDIS_LINK_STATE         linkState;
+    NDIS_STATUS_INDICATION  statusIndication;
+
+    NdisZeroMemory(&statusIndication, sizeof(NDIS_STATUS_INDICATION));
+    switch (state_p)
+    {
+        case kNdisBindingPaused:
+        case kNdisBindingPausing:
+        case kNdisBindingReady:
+            linkState.MediaConnectState = MediaConnectStateDisconnected;
+            break;
+
+        case kNdisBindingRunning:
+            linkState.MediaConnectState = MediaConnectStateConnected;
+            break;
+
+        default:
+            linkState.MediaConnectState = MediaConnectStateUnknown;
+    }
+
+    if (vethInstance_g.lastLinkState.MediaConnectState != linkState.MediaConnectState)
+    {
+        linkState.Header.Revision = NDIS_LINK_STATE_REVISION_1;
+        linkState.Header.Type = NDIS_OBJECT_TYPE_DEFAULT;
+        linkState.Header.Size = sizeof(NDIS_LINK_STATE);
+        linkState.MediaDuplexState = MediaDuplexStateHalf;
+        linkState.XmitLinkSpeed = linkState.RcvLinkSpeed = OPLK_LINK_SPEED;
+
+        statusIndication.Header.Type = NDIS_OBJECT_TYPE_STATUS_INDICATION;
+        statusIndication.Header.Revision = NDIS_STATUS_INDICATION_REVISION_1;
+        statusIndication.Header.Size = sizeof(NDIS_STATUS_INDICATION);
+        statusIndication.SourceHandle = vethInstance_g.miniportAdapterHandle;
+        statusIndication.StatusCode = NDIS_STATUS_LINK_STATE;
+        statusIndication.StatusBuffer = (PVOID)&linkState;
+        statusIndication.StatusBufferSize = sizeof(linkState);
+        statusIndication.DestinationHandle = NULL;
+
+        // Post the status indication:
+        NdisMIndicateStatusEx(vethInstance_g.miniportAdapterHandle, &statusIndication);
+        NdisMoveMemory(&vethInstance_g.lastLinkState, &linkState,
+                       sizeof(NDIS_LINK_STATE));
+    }
+}
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
@@ -294,6 +410,15 @@ NDIS_STATUS miniportInitialize(NDIS_HANDLE adapterHandle_p,
         goto Exit;
     }
 
+    // Allocate buffers
+    status = miniportAllocateVEthRxBuff();
+
+    if (status != NDIS_STATUS_SUCCESS)
+    {
+        TRACE("%s() Unable to allocate VEth resources\n", __FUNCTION__);
+        goto Exit;
+    }
+
     vethInstance_g.state = kNdisBindingReady;
 
 Exit:
@@ -369,6 +494,8 @@ VOID miniportHalt(NDIS_HANDLE adapterContext_p, NDIS_HALT_ACTION haltAction_p)
     UNREFERENCED_PARAMETER(haltAction_p);
 
     vethInstance_g.miniportHalting = TRUE;
+
+    miniportFreeVethRxBuff();
 
     releaseHardware();
 
@@ -524,35 +651,117 @@ VOID miniportSendNetBufferLists(NDIS_HANDLE adapterContext_p, PNET_BUFFER_LIST n
     tVEthInstance*      pVEthInstance = (tVEthInstance*)adapterContext_p;
     NDIS_STATUS         status = NDIS_STATUS_SUCCESS;
     PNET_BUFFER_LIST    currentNbl = netBufferLists_p;
+    PNET_BUFFER_LIST    returnNbl = NULL;
+    PNET_BUFFER_LIST    lastReturnNbl = NULL;
     ULONG               completeFlags = 0;
+    PUCHAR              pVethTxBuff;
+    PUCHAR              pVethData;
+    PMDL                pMdl;
     ULONG               totalLength, txLength;
-    ULONG               offset = 0;
-    PNET_BUFFER_LIST    tempNetBufferList;
+    ULONG               offset = 0;                 // CurrentMdlOffset
 
     UNREFERENCED_PARAMETER(portNumber_p);
 
-    // Send requests are not handled currently in the driver.
-    // Mark all the NET_BUFFER_LISTS handled and complete the send request
-    // without processing the buffers.
-    for (tempNetBufferList = currentNbl;
-         tempNetBufferList != NULL;
-         tempNetBufferList = NET_BUFFER_LIST_NEXT_NBL(tempNetBufferList))
+    if (pVEthInstance->pfnVEthSendCb == NULL)
     {
-        NET_BUFFER_LIST_STATUS(tempNetBufferList) = status;
+        PNET_BUFFER_LIST    tempNetBufferList;
+
+        for (tempNetBufferList = currentNbl;
+             tempNetBufferList != NULL;
+             tempNetBufferList = NET_BUFFER_LIST_NEXT_NBL(tempNetBufferList))
+        {
+            NET_BUFFER_LIST_STATUS(tempNetBufferList) = status;
+        }
+
+        if (NDIS_TEST_SEND_AT_DISPATCH_LEVEL(sendFlags_p))
+        {
+            NDIS_SET_SEND_COMPLETE_FLAG(completeFlags, NDIS_SEND_COMPLETE_FLAGS_DISPATCH_LEVEL);
+        }
+
+        NdisMSendNetBufferListsComplete(pVEthInstance->miniportAdapterHandle,
+                                        currentNbl,
+                                        completeFlags);
+        goto Exit;
     }
 
-    if (NDIS_TEST_SEND_AT_DISPATCH_LEVEL(sendFlags_p))
+    pVethTxBuff = NdisAllocateMemoryWithTagPriority(driverInstance_g.pMiniportHandle,
+                                                    OPLK_MAX_FRAME_SIZE,
+                                                    OPLK_MEM_TAG, NormalPoolPriority);
+
+    if (pVethTxBuff == NULL)
     {
-        NDIS_SET_SEND_COMPLETE_FLAG(completeFlags, NDIS_SEND_COMPLETE_FLAGS_DISPATCH_LEVEL);
+        DbgPrint("%s() Failed to allocate memory for VEth Tx frame ", __FUNCTION__);
+        status = NDIS_STATUS_RESOURCES;
+        goto Exit;
     }
 
-    // TODO: Handle the NET_BUFFER_LISTs here and pass the packets to openPOWERLINK kernel layer
-    //       for async scheduling.
+    while (netBufferLists_p != NULL)
+    {
+        ULONG                   bytesAvailable = 0;
+        PUCHAR                  pRxDataSrc;
+        ULONG                   bytesToCopy = 0;
 
-    NdisMSendNetBufferListsComplete(pVEthInstance->miniportAdapterHandle,
-                                    currentNbl,
-                                    completeFlags);
+        pVethData = pVethTxBuff;
+        currentNbl = netBufferLists_p;
+        netBufferLists_p = NET_BUFFER_LIST_NEXT_NBL(netBufferLists_p);
+        NET_BUFFER_LIST_NEXT_NBL(currentNbl) = NULL;
 
+        pVEthInstance->sendRequests++;
+
+        pMdl = NET_BUFFER_CURRENT_MDL(NET_BUFFER_LIST_FIRST_NB(currentNbl));
+        txLength = totalLength = NET_BUFFER_DATA_LENGTH(NET_BUFFER_LIST_FIRST_NB(currentNbl));
+
+        if (totalLength > OPLK_MAX_FRAME_SIZE)
+        {
+            break;
+        }
+
+        offset = NET_BUFFER_CURRENT_MDL_OFFSET(NET_BUFFER_LIST_FIRST_NB(currentNbl));
+
+        while ((pMdl != NULL) && (totalLength > 0))
+        {
+            pRxDataSrc = NULL;
+            NdisQueryMdl(pMdl, &pRxDataSrc, &bytesAvailable, NormalPagePriority);
+            if (pRxDataSrc == NULL)
+            {
+                break;
+            }
+
+            bytesToCopy = bytesAvailable - offset;
+            bytesToCopy = min(bytesToCopy, totalLength);
+            pRxDataSrc = pRxDataSrc + offset;
+
+            NdisMoveMemory(pVethData, pRxDataSrc, bytesToCopy);
+            pVethData = (PUCHAR)((ULONG_PTR)pVethData + bytesToCopy);
+            totalLength -= bytesToCopy;
+
+            offset = 0;
+            NdisGetNextMdl(pMdl, &pMdl);
+        }
+
+        pVEthInstance->pfnVEthSendCb(pVethTxBuff, txLength);
+
+        // We don't pend the requests so decrease the send counter.
+        pVEthInstance->sendRequests--;
+
+        NET_BUFFER_LIST_STATUS(currentNbl) = status;
+
+        if (NDIS_TEST_SEND_AT_DISPATCH_LEVEL(sendFlags_p))
+        {
+            NDIS_SET_SEND_COMPLETE_FLAG(completeFlags, NDIS_SEND_COMPLETE_FLAGS_DISPATCH_LEVEL);
+        }
+
+        NdisMSendNetBufferListsComplete(pVEthInstance->miniportAdapterHandle,
+                                        currentNbl,
+                                        completeFlags);
+    }
+
+    if (pVethTxBuff != NULL)
+    {
+        NdisFreeMemory(pVethTxBuff, 0, 0);
+    }
+
+Exit:
     return;
 }
 
@@ -574,10 +783,26 @@ packet that was indicated up and was queued to be freed later.
 VOID miniportReturnNetBufferLists(NDIS_HANDLE adapterContext_p,
                                   PNET_BUFFER_LIST netBufferLists_p, ULONG returnFlags_p)
 {
+    tVEthRxBufInfo*    pVethRxInfo = NULL;
+
     UNREFERENCED_PARAMETER(adapterContext_p);
-    UNREFERENCED_PARAMETER(netBufferLists_p);
     UNREFERENCED_PARAMETER(returnFlags_p);
-    // TODO: Handle returned NET_BUFFER_LISTs
+
+    while (netBufferLists_p != NULL)
+    {
+        pVethRxInfo = VETHINFO_FROM_NBL(netBufferLists_p);
+
+        if (pVethRxInfo != NULL)
+        {
+            NdisInterlockedInsertTailList(&vethInstance_g.rxList,
+                                          &pVethRxInfo->rxLink,
+                                          &vethInstance_g.rxListLock);
+
+            vethInstance_g.receiveIndication--;
+        }
+
+        netBufferLists_p = NET_BUFFER_LIST_NEXT_NBL(netBufferLists_p);
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -590,7 +815,7 @@ then it should be dequeued and NdisMSendCompleteNetBufferLists should be called
 for all such packets with a status of NDIS_STATUS_REQUEST_ABORTED.
 
 \param  adapterContext_p    Pointer to the adapter structure.
-\param  cancelId_p          ID of NetBufferLists to be cancelled.
+\param  cancelId_p          ID of NetBufferLists to be canceled.
 
 */
 //------------------------------------------------------------------------------
@@ -608,7 +833,7 @@ VOID miniportCancelSendNetBufferLists(NDIS_HANDLE adapterContext_p, PVOID cancel
 The miniport entry point to handle cancellation of an OID request.
 
 \param  adapterContext_p    Pointer to the adapter structure.
-\param  requestId_p         RequestId to be cancelled.
+\param  requestId_p         RequestId to be canceled.
 
 */
 //------------------------------------------------------------------------------
@@ -839,4 +1064,167 @@ static void interruptDpc(NDIS_HANDLE interruptContext_p, ULONG messageId_p,
     }
 }
 
-///\}
+//------------------------------------------------------------------------------
+/**
+\brief Allocate VEth receive buffers
+
+This routine allocates all the receive resources required for VETH interface.
+The receive buffers are prepared and stored in a linked list.
+
+\return The function returns an NDIS_STATUS error code.
+
+*/
+//------------------------------------------------------------------------------
+static NDIS_STATUS miniportAllocateVEthRxBuff(void)
+{
+    UINT                               index;
+    NDIS_STATUS                        status = NDIS_STATUS_SUCCESS;
+    NET_BUFFER_LIST_POOL_PARAMETERS    poolParameters;
+
+    NdisInitializeListHead(&vethInstance_g.rxList);
+    NdisAllocateSpinLock(&vethInstance_g.rxListLock);
+
+    NdisZeroMemory(&poolParameters, sizeof(NET_BUFFER_LIST_POOL_PARAMETERS));
+
+    poolParameters.Header.Type = NDIS_OBJECT_TYPE_DEFAULT;
+    poolParameters.Header.Revision = NET_BUFFER_LIST_POOL_PARAMETERS_REVISION_1;
+    poolParameters.Header.Size = sizeof(poolParameters);
+    poolParameters.ProtocolId = NDIS_PROTOCOL_ID_DEFAULT;       // Sequenced Packet exchanger
+    poolParameters.ContextSize = 0;
+    poolParameters.fAllocateNetBuffer = TRUE;
+    poolParameters.PoolTag = OPLK_MEM_TAG;
+
+    vethInstance_g.receiveNblPool = NdisAllocateNetBufferListPool(driverInstance_g.pMiniportHandle,
+                                                                  &poolParameters);
+    if (vethInstance_g.receiveNblPool == NULL)
+    {
+        DbgPrint("%s(): failed to alloc send net buffer list pool\n", __FUNCTION__);
+        status = NDIS_STATUS_RESOURCES;
+        goto Exit;
+    }
+
+    // Allocate Tx memory
+    vethInstance_g.pReceiveBuf = NdisAllocateMemoryWithTagPriority(driverInstance_g.pProtocolHandle,
+                                                                   (OPLK_MAX_FRAME_SIZE * OPLK_MAX_VETH_BUFF),
+                                                                   OPLK_MEM_TAG, NormalPoolPriority);
+    if (vethInstance_g.pReceiveBuf == NULL)
+    {
+        DbgPrint("%s() Failed to allocate VETH Rx buffers\n", __FUNCTION__);
+        status = NDIS_STATUS_RESOURCES;
+        goto Exit;
+    }
+
+    vethInstance_g.pReceiveBufInfo = NdisAllocateMemoryWithTagPriority(driverInstance_g.pProtocolHandle,
+                                                                       (sizeof(tVEthRxBufInfo) * OPLK_MAX_VETH_BUFF),
+                                                                       OPLK_MEM_TAG, NormalPoolPriority);
+    if (vethInstance_g.pReceiveBufInfo == NULL)
+    {
+        DbgPrint("%s() Failed to allocate VETH Rx buffers info\n", __FUNCTION__);
+        status = NDIS_STATUS_RESOURCES;
+        goto Exit;
+    }
+
+    // Initialize the queue
+    for (index = 0; index < OPLK_MAX_VETH_BUFF; index++)
+    {
+        tVEthRxBufInfo*   pVethRxInfo = &vethInstance_g.pReceiveBufInfo[index];
+
+        if (pVethRxInfo != NULL)
+        {
+            pVethRxInfo->free = TRUE;
+            pVethRxInfo->maxLength = OPLK_MAX_FRAME_SIZE;
+            pVethRxInfo->pData = (void*)(((UCHAR*)vethInstance_g.pReceiveBuf) +
+                                         (OPLK_MAX_FRAME_SIZE * index));
+
+            // Allocate MDL to define the buffers
+            pVethRxInfo->pMdl = NdisAllocateMdl(vethInstance_g.miniportAdapterHandle,
+                                                pVethRxInfo->pData, OPLK_MAX_FRAME_SIZE);
+
+            if (pVethRxInfo->pMdl == NULL)
+            {
+                DbgPrint("%s() Error Allocating MDL\n", __FUNCTION__);
+                status = NDIS_STATUS_RESOURCES;
+                goto Exit;
+            }
+
+            // Allocate empty NetBufferLists
+            pVethRxInfo->pNbl = NdisAllocateNetBufferAndNetBufferList(vethInstance_g.receiveNblPool,
+                                                                      0, 0, pVethRxInfo->pMdl, 0, 0);
+
+            if (pVethRxInfo->pNbl == NULL)
+            {
+                DbgPrint("%s() Failed to allocate Tx NBL\n", __FUNCTION__);
+                status = NDIS_STATUS_RESOURCES;
+                goto Exit;
+            }
+
+            // Mark the NetBufferList as allocated by this protocol driver
+            NBL_SET_PROT_RSVD_FLAG(pVethRxInfo->pNbl, OPLK_ALLOCATED_NBL);
+            pVethRxInfo->pNbl->SourceHandle = vethInstance_g.miniportAdapterHandle;
+            VETHINFO_FROM_NBL(pVethRxInfo->pNbl) = pVethRxInfo;
+            NdisInterlockedInsertTailList(&vethInstance_g.rxList, &pVethRxInfo->rxLink,
+                                          &vethInstance_g.rxListLock);
+        }
+    }
+
+Exit:
+    if (status != NDIS_STATUS_SUCCESS)
+    {
+        miniportFreeVethRxBuff();
+    }
+
+    return status;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief Free VEth receive buffers
+
+This routine frees all the receive resources allocated during initialization.
+
+*/
+//------------------------------------------------------------------------------
+static void miniportFreeVethRxBuff(void)
+{
+    PLIST_ENTRY         pRxLink;
+    tVEthRxBufInfo*     pRxBufInfo;
+
+    if (vethInstance_g.rxList.Flink != NULL)
+    {
+        while (!IsListEmpty(&vethInstance_g.rxList))
+        {
+            pRxLink = NdisInterlockedRemoveHeadList(&vethInstance_g.rxList,
+                                                    &vethInstance_g.rxListLock);
+            pRxBufInfo = CONTAINING_RECORD(pRxLink, tVEthRxBufInfo, rxLink);
+            if (pRxBufInfo->pNbl != NULL)
+            {
+                NdisFreeNetBufferList(pRxBufInfo->pNbl);
+            }
+
+            if (pRxBufInfo->pMdl != NULL)
+            {
+                NdisFreeMdl(pRxBufInfo->pMdl);
+            }
+        }
+    }
+
+    if (vethInstance_g.receiveNblPool != NULL)
+    {
+        NdisFreeNetBufferListPool(vethInstance_g.receiveNblPool);
+        vethInstance_g.receiveNblPool = NULL;
+    }
+
+    if (vethInstance_g.pReceiveBufInfo != NULL)
+    {
+        NdisFreeMemory(vethInstance_g.pReceiveBufInfo, 0, 0);
+    }
+
+    if (vethInstance_g.pReceiveBuf != NULL)
+    {
+        NdisFreeMemory(vethInstance_g.pReceiveBuf, 0, 0);
+    }
+
+    NdisFreeSpinLock(&vethInstance_g.rxListLock);
+}
+
+/// \}

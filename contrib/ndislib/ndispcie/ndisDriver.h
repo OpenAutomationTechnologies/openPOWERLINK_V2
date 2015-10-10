@@ -53,6 +53,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OPLK_MTU_SIZE          1500                 ///< Bytes
 #define OPLK_LINK_SPEED        100000000            ///< 100 Mbps Rx and Tx
 #define OPLK_MAX_BAR_COUNT     6
+#define OPLK_ALLOCATED_NBL     0x10000000
+#define OPLK_MAX_VETH_BUFF     40
 
 //------------------------------------------------------------------------------
 // typedef
@@ -86,6 +88,24 @@ typedef struct
 } tBarInfo;
 
 /**
+\brief VEth receive buffer information
+
+Virtual Ethernet receive buffer information structure for
+NDIS driver.
+
+*/
+typedef struct
+{
+    LIST_ENTRY          rxLink;             ///< List entry for the receive buffer.
+    PNET_BUFFER_LIST    pNbl;               ///< Pointer to NetBufferList for the buffer.
+    PMDL                pMdl;               ///< MDL describing the receive buffer.
+    BOOLEAN             free;               ///< Flag to identify buffer access status.
+    ULONG               maxLength;          ///< Max length of the buffer.
+    ULONG               length;             ///< Length of the receive frame.
+    void*               pData;              ///< Pointer to receive data.
+} tVEthRxBufInfo;
+
+/**
 \brief NDIS miniport driver instance
 
 Structure to hold the global variables used by miniport driver instance.
@@ -109,6 +129,13 @@ typedef struct
     PIO_INTERRUPT_MESSAGE_INFO    intrMsgInfo;                  ///< Message interrupt information.
     tBarInfo                      barInfo[OPLK_MAX_BAR_COUNT];  ///< PCIe BAR information for all available BARs.
     ULONG                         msiVector;                    ///< MSI vector assigned for the miniport.
+    tVEthSendCb                   pfnVEthSendCb;                ///< Callback routine for VEth transmit.
+    NDIS_HANDLE                   receiveNblPool;               ///< Receive NetBufferLists pool.
+    tVEthRxBufInfo*               pReceiveBufInfo;              ///< Pointer to receive buffer information.
+    void*                         pReceiveBuf;                  ///< Pointer to the memory for received VEth frame.
+    LIST_ENTRY                    rxList;                       ///< List entry for VEth receive queue.
+    NDIS_SPIN_LOCK                rxListLock;                   ///< Spin lock for VEth receive queue.
+    NDIS_LINK_STATE               lastLinkState;                ///< Last link state change.
 } tVEthInstance;
 
 //------------------------------------------------------------------------------
@@ -126,6 +153,8 @@ extern tVEthInstance                       vethInstance_g;
 #define TRACE(...)
 #endif
 
+#define VETHINFO_FROM_NBL(_NBL)    ((tVEthRxBufInfo*)((_NBL)->MiniportReserved[0]))
+
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
@@ -135,23 +164,25 @@ extern "C"
 #endif
 
 // Miniport driver prototypes
-DRIVER_DISPATCH                            miniportIoDispatch;
-DRIVER_DISPATCH                            miniportDeviceIoControl;
-MINIPORT_SET_OPTIONS                       miniportSetOptions;
-MINIPORT_INITIALIZE                        miniportInitialize;
-MINIPORT_HALT                              miniportHalt;
-MINIPORT_UNLOAD                            miniportUnload;
-MINIPORT_PAUSE                             miniportPause;
-MINIPORT_RESTART                           miniportRestart;
-MINIPORT_OID_REQUEST                       miniportOidRequest;
-MINIPORT_SEND_NET_BUFFER_LISTS             miniportSendNetBufferLists;
-MINIPORT_RETURN_NET_BUFFER_LISTS           miniportReturnNetBufferLists;
-MINIPORT_CANCEL_SEND                       miniportCancelSendNetBufferLists;
-MINIPORT_DEVICE_PNP_EVENT_NOTIFY           miniportPnpEventNotify;
-MINIPORT_SHUTDOWN                          miniportShutdown;
-MINIPORT_CANCEL_OID_REQUEST                miniportCancelOidRequest;
-MINIPORT_CHECK_FOR_HANG                    miniportCheckForHang;
-MINIPORT_RESET                             miniportReset;
+DRIVER_DISPATCH                     miniportIoDispatch;
+DRIVER_DISPATCH                     miniportDeviceIoControl;
+MINIPORT_SET_OPTIONS                miniportSetOptions;
+MINIPORT_INITIALIZE                 miniportInitialize;
+MINIPORT_HALT                       miniportHalt;
+MINIPORT_UNLOAD                     miniportUnload;
+MINIPORT_PAUSE                      miniportPause;
+MINIPORT_RESTART                    miniportRestart;
+MINIPORT_OID_REQUEST                miniportOidRequest;
+MINIPORT_SEND_NET_BUFFER_LISTS      miniportSendNetBufferLists;
+MINIPORT_RETURN_NET_BUFFER_LISTS    miniportReturnNetBufferLists;
+MINIPORT_CANCEL_SEND                miniportCancelSendNetBufferLists;
+MINIPORT_DEVICE_PNP_EVENT_NOTIFY    miniportPnpEventNotify;
+MINIPORT_SHUTDOWN                   miniportShutdown;
+MINIPORT_CANCEL_OID_REQUEST         miniportCancelOidRequest;
+MINIPORT_CHECK_FOR_HANG             miniportCheckForHang;
+MINIPORT_RESET                      miniportReset;
+NDIS_STATUS                         miniport_handleReceive(UINT8* pDataBuff_p, size_t size_p);
+void                                miniport_setAdapterState(ULONG state_p);
 
 #ifdef __cplusplus
 }

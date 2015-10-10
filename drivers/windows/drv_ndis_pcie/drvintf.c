@@ -52,9 +52,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <errhndkcal.h>
 #include <dualprocshm.h>
 #include <common/circbuffer.h>
+#include <common/ami.h>
 
 #include <drvintf.h>
-#include <ndis.h>
+#include <ndis-intf.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -117,6 +118,7 @@ typedef struct
     tMemInfo                pdoMem;                                 ///< PDO memory information mapped to user space.
     tMemInfo                benchmarkMem;                           ///< Benchmark memory information mapped to user space.
     tMemInfo                kernel2UserMem;                         ///< Kernel to user mapped memory.
+    UINT64                  remoteProcBase;                         ///< Base address for the shared memory of the second processor.
     BOOL                    fDriverActive;                          ///< Flag to identify status of driver interface.
 } tDriverInstance;
 
@@ -140,6 +142,11 @@ static tOplkError insertDataBlock(tCircBufInstance* pDllCircBuffInst_p,
                                   UINT8* pData_p, UINT* pDataSize_p);
 static tOplkError mapMemory(tMemInfo* pMemInfo_p);
 static void       unmapMemory(tMemInfo* pMemInfo_p);
+#if defined(CONFIG_INCLUDE_VETH)
+static tOplkError getMemory(UINT8* pPCIeBuf_p, UINT8** ppKernelMem_p, UINT32 size_p);
+static tOplkError nonPlkFrameSendCb(void* pBuffer_p, size_t size_p);
+static tOplkError receiveNonPlkFrame(void* pEvent_p);
+#endif
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -151,7 +158,7 @@ static void       unmapMemory(tMemInfo* pMemInfo_p);
 
 This function initializes necessary resources required for driver interface.
 
-\return Returns tOplkError error code.
+\return Returns a tOplkError error code.
 
 \ingroup module_driver_ndispcie
 */
@@ -173,6 +180,9 @@ tOplkError drv_init(void)
         return ret;
     }
 
+#if defined(CONFIG_INCLUDE_VETH)
+    ndis_registerVethHandler(nonPlkFrameSendCb);
+#endif
     drvInstance_l.fDriverActive = TRUE;
 
     TRACE(" OK\n");
@@ -197,7 +207,10 @@ void drv_exit(void)
     if (drvInstance_l.fDriverActive)
     {
         drvInstance_l.fDriverActive = FALSE;
-
+#if defined(CONFIG_INCLUDE_VETH)
+        // Clear VEth Handler
+        ndis_registerVethHandler(NULL);
+#endif
         // Close dualprocshm library interface
         exitDualProcShm();
     }
@@ -214,7 +227,7 @@ control structure.
 
 \param  pCtrlCmd_p       Pointer to control command structure.
 
-\return Returns tOplkError error code.
+\return Returns a tOplkError error code.
 
 \ingroup module_driver_ndispcie
 */
@@ -281,6 +294,9 @@ tOplkError drv_executeCmd(tCtrlCmd* pCtrlCmd_p)
             DEBUG_LVL_ERROR_TRACE("Dll Queues Initialization Failed (0x%X)\n", ret);
             return ret;
         }
+
+        // Enable the upper binding of the virtual Ethernet interface
+        ndis_setAdapterState(kNdisBindingRunning);
     }
 
     return kErrorOk;
@@ -294,7 +310,7 @@ Read the initialization parameters from the kernel stack.
 
 \param  pInitParam_p       Pointer to initialization parameters structure.
 
-\return Returns tOplkError error code.
+\return Returns a tOplkError error code.
 
 \ingroup module_driver_ndispcie
 */
@@ -325,7 +341,7 @@ Write the initialization parameters from the user layer into kernel memory.
 
 \param  pInitParam_p       Pointer to initialization parameters structure.
 
-\return Returns tOplkError error code.
+\return Returns a tOplkError error code.
 
 \ingroup module_driver_ndispcie
 */
@@ -356,7 +372,7 @@ Returns the current status of kernel stack.
 
 \param  pStatus_p       Pointer to status variable to return.
 
-\return Returns tOplkError error code.
+\return Returns a tOplkError error code.
 
 \ingroup module_driver_ndispcie
 */
@@ -384,7 +400,7 @@ Return the current heartbeat value in kernel.
 
 \param  pHeartbeat_p       Pointer to heartbeat variable to return.
 
-\return Returns tOplkError error code.
+\return Returns a tOplkError error code.
 
 \ingroup module_driver_ndispcie
 */
@@ -413,7 +429,7 @@ it into the specified DLL queue for processing by openPOWERLINK kernel layer.
 
 \param  pArg_p       Pointer to IOCTL buffer.
 
-\return Returns tOplkError error code.
+\return Returns a tOplkError error code.
 
 \ingroup module_driver_ndispcie
 */
@@ -427,7 +443,14 @@ tOplkError drv_sendAsyncFrame(tIoctlDllCalAsync* pAsyncFrameInfo_p)
         return kErrorNoResource;
 
     frameInfo.frameSize = pAsyncFrameInfo_p->size;
-    frameInfo.frame.pBuffer = (tPlkFrame*)((UINT8*)pAsyncFrameInfo_p + sizeof(tIoctlDllCalAsync));
+    if (pAsyncFrameInfo_p->pData == NULL)
+    {
+        frameInfo.frame.pBuffer = (tPlkFrame*)((UINT8*)pAsyncFrameInfo_p + sizeof(tIoctlDllCalAsync));
+    }
+    else
+    {
+        frameInfo.frame.pBuffer = (tPlkFrame*)pAsyncFrameInfo_p->pData;
+    }
 
     ret = insertDataBlock(drvInstance_l.apDllQueueInst[pAsyncFrameInfo_p->queue],
                           (UINT8*)frameInfo.frame.pBuffer,
@@ -451,7 +474,7 @@ from user layer.
 
 \param  pWriteObject_p       Pointer to writeobject to update.
 
-\return Returns tOplkError error code.
+\return Returns a tOplkError error code.
 
 \ingroup module_driver_ndispcie
 */
@@ -477,7 +500,7 @@ layer.
 
 \param  pWriteObject_p       Pointer to pReadObject_p to fetch.
 
-\return Returns tOplkError error code.
+\return Returns a tOplkError error code.
 
 \ingroup module_driver_ndispcie
 */
@@ -502,7 +525,7 @@ Copies the event from user layer into user to kernel event queue.
 
 \param  pEvent_p    Pointer to event.
 
-\return Returns tOplkError error code.
+\return Returns a tOplkError error code.
 
 \ingroup module_driver_ndispcie
 */
@@ -550,7 +573,7 @@ Retrieves an event from kernel to user event queue for the user layer.
 \param  pEvent_p    Pointer to event memory.
 \param  pSize_p     Size of the event buffer.
 
-\return Returns tOplkError error code and the size of the read data.
+\return Returns a tOplkError error code and the size of the read data.
 
 \ingroup module_driver_ndispcie
 */
@@ -558,6 +581,7 @@ Retrieves an event from kernel to user event queue for the user layer.
 tOplkError drv_getEvent(void* pEvent_p, size_t* pSize_p)
 {
     tCircBufInstance*   pCircBufInstance = drvInstance_l.apEventQueueInst[kEventQueueK2U];
+    tOplkError          ret = kErrorOk;
 
     if ((pEvent_p == NULL) || (pSize_p == NULL) || !drvInstance_l.fDriverActive)
         return kErrorNoResource;
@@ -572,7 +596,29 @@ tOplkError drv_getEvent(void* pEvent_p, size_t* pSize_p)
         *pSize_p = 0;
     }
 
-    return kErrorOk;
+#if defined(CONFIG_INCLUDE_VETH)
+
+    if (*pSize_p != 0)
+    {
+        ret = receiveNonPlkFrame(pEvent_p);
+        if (ret == kErrorOk)
+        {
+            *pSize_p = 0;
+        }
+        else
+        {
+            if (ret == kErrorReject)
+            {
+                ret = kErrorOk;
+            }
+            else
+            {
+                DEBUG_LVL_ERROR_TRACE("Error handling non-PLK frame (0x%X)\n", ret);
+            }
+        }
+    }
+#endif
+    return ret;
 }
 
 //------------------------------------------------------------------------------
@@ -585,7 +631,7 @@ with user application.
 \param  pPdoMemOffs_p    Pointer to PDO memory offset value.
 \param  memSize_p        Size of the PDO memory.
 
-\return Returns tOplkError error code.
+\return Returns a tOplkError error code.
 
 \ingroup module_driver_ndispcie
 */
@@ -626,7 +672,7 @@ address space for providing access to user layer.
 
 \param  ppBenchmarkMem_p    Pointer to benchmark memory.
 
-\return Returns tOplkError error code.
+\return Returns a tOplkError error code and the benchmark base address.
 
 \ingroup module_driver_ndispcie
 */
@@ -700,7 +746,8 @@ the driver.
 \param  ppUserMem_p      Double pointer to kernel memory mapped in user layer.
 \param  pSize_p          Size of the shared memory.
 
-\return Returns tOplkError error code.
+\return Returns tOplkError error code and the pointer to the memory mapped in
+        user space.
 
 \ingroup module_driver_ndispcie
 */
@@ -755,6 +802,7 @@ Exit:
         return kErrorNoResource;
     }
 
+    drvInstance_l.remoteProcBase = sharedMemInst.baseAddr;
     *ppUserMem_p = pKernel2UserMemInfo->pUserVa;
     *ppKernelMem_p = (UINT8*)sharedMemInst.baseAddr;
     *pSize_p = pKernel2UserMemInfo->memSize;
@@ -869,7 +917,7 @@ size_t drv_getFileBufferSize(void)
 
 This routine initializes the driver instance of dualprocshm for HOST processor.
 
-\return Returns tOplkError error code.
+\return Returns a tOplkError error code.
 
 \ingroup module_driver_ndispcie
 */
@@ -951,7 +999,7 @@ The memory for the queues are allocated in PCIe memory and is retrieved
 using dualprocshm library. The circular buffer library is used to manage the
 queues.
 
-\return Returns tOplkError error code.
+\return Returns a tOplkError error code.
 
 */
 //------------------------------------------------------------------------------
@@ -985,8 +1033,6 @@ static tOplkError initEvent(void)
 
 Close event queues initialized earlier.
 
-\return Returns tOplkError error code.
-
 */
 //------------------------------------------------------------------------------
 static void exitEvent(void)
@@ -1005,7 +1051,7 @@ static void exitEvent(void)
 Retrieves the shared memory for the error handler module. This memory is only
 accessible to user space through IOCTL calls.
 
-\return Returns tOplkError error code.
+\return Returns a tOplkError error code.
 
 */
 //------------------------------------------------------------------------------
@@ -1065,7 +1111,7 @@ This routine initializes the DLL queues shared between user and kernel stack.
 The memories for the queue are located in PCIe memory and is accessed using
 circular buffer and dualprocshm library.
 
-\return Returns tOplkError error code.
+\return Returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 static tOplkError initDllQueues(void)
@@ -1096,15 +1142,14 @@ static tOplkError initDllQueues(void)
         return kErrorNoResource;
     }
 
-    //TODO: VETH to be integrated later
-    /*    circError = circbuf_connect(CIRCBUF_DLLCAL_TXVETH, &drvInstance_l.dllQueueInst[kDllCalQueueTxVeth]);
-
-        if (circError != kCircBufOk)
-        {
+#if defined(CONFIG_INCLUDE_VETH)
+    circError = circbuf_connect(CIRCBUF_DLLCAL_TXVETH, &drvInstance_l.apDllQueueInst[kDllCalQueueTxVeth]);
+    if (circError != kCircBufOk)
+    {
         TRACE("PLK : Could not allocate CIRCBUF_DLLCAL_TXVETH circbuffer\n");
         return kErrorNoResource;
-        }
-        */
+    }
+#endif
 
     return kErrorOk;
 }
@@ -1125,11 +1170,12 @@ static void exitDllQueues(void)
 
     if (drvInstance_l.apDllQueueInst[kDllCalQueueTxSync] != NULL)
         circbuf_disconnect(drvInstance_l.apDllQueueInst[kDllCalQueueTxSync]);
-    /*
-    //TODO: VETH to be integrated later
-    if (drvInstance_l.dllQueueInst[kDllCalQueueTxVeth] != NULL)
-        circbuf_disconnect(drvInstance_l.dllQueueInst[kDllCalQueueTxVeth]);
-    */
+
+#if defined(CONFIG_INCLUDE_VETH)
+    if (drvInstance_l.apDllQueueInst[kDllCalQueueTxVeth] != NULL)
+        circbuf_disconnect(drvInstance_l.apDllQueueInst[kDllCalQueueTxVeth]);
+
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -1142,7 +1188,7 @@ Writes the data into specified DLL queue shared between user and kernel.
 \param  pData_p             Pointer to the data to be inserted.
 \param  pDataSize_p         Pointer to size of data.
 
-\return Returns tOplkError error code.
+\return Returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 static tOplkError insertDataBlock(tCircBufInstance* pDllCircBuffInst_p,
@@ -1190,7 +1236,7 @@ Maps the specified memory into user space.
 \param  pMemInfo_p          Pointer to memory map information structure for the
                             memory to be mapped.
 
-\return Returns tOplkError error code.
+\return Returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 static tOplkError mapMemory(tMemInfo* pMemInfo_p)
@@ -1238,7 +1284,7 @@ Unmap the specified memory mapped into user space.
 \param  pMemInfo_p          Pointer to memory map information structure for the
                             memory to unmap.
 
-\return Returns tOplkError error code.
+\return Returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 static void unmapMemory(tMemInfo* pMemInfo_p)
@@ -1255,5 +1301,180 @@ static void unmapMemory(tMemInfo* pMemInfo_p)
         IoFreeMdl(pMemInfo_p->pMdl);
     }
 }
+
+#if defined(CONFIG_INCLUDE_VETH)
+//------------------------------------------------------------------------------
+/**
+\brief  Get kernel memory
+
+The routine calculates the offset for the specified PCIe buffer and returns
+the corresponding base address for the buffer in kernel virtual memory.
+
+\param  pPCIeBuf_p       Pointer to PCIe memory.
+\param  ppKernelMem_p    Double pointer to the kernel virtual memory for PCIe
+                         buffer.
+\param  size_p           Size of the memory
+
+\return Returns a tOplkError error code and base address for the PCIe buffer
+        in kernel space.
+*/
+//------------------------------------------------------------------------------
+static tOplkError getMemory(UINT8* pPCIeBuf_p, UINT8** ppKernelMem_p, UINT32 size_p)
+{
+    tMemInfo*    pKernel2UserMemInfo = &drvInstance_l.kernel2UserMem;
+    UINT32       buffOffset;
+
+    if (pKernel2UserMemInfo->pKernelVa == NULL || ppKernelMem_p == NULL)
+        return kErrorNoResource;
+
+    if ((pPCIeBuf_p < (UINT8*)drvInstance_l.remoteProcBase) ||
+        ((pPCIeBuf_p + size_p) >
+        ((UINT8*)pKernel2UserMemInfo->pKernelVa + pKernel2UserMemInfo->memSize)))
+        return kErrorNoResource;
+
+    buffOffset = (UINT32)(pPCIeBuf_p - (UINT8*)drvInstance_l.remoteProcBase);
+
+    *ppKernelMem_p = (UINT8*)pKernel2UserMemInfo->pKernelVa + buffOffset;
+
+    return kErrorOk;
+}
+
+///-----------------------------------------------------------------------------
+/**
+\brief  Send callback for virtual Ethernet frame
+
+The routine forwards the virtual frame to kernel stack.
+
+\param  pBuffer_p       Pointer to frame buffer.
+\param  size_p          Size of the frame.
+
+\return Returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError nonPlkFrameSendCb(void* pBuffer_p, size_t size_p)
+{
+    tOplkError              ret = kErrorOk;
+    tIoctlDllCalAsync       asyncFrameInfo;
+    tDllAsyncReqPriority    priority = kDllAsyncReqPrioGeneric;
+    tCircBufInstance*       pCircBufInstance = drvInstance_l.apEventQueueInst[kEventQueueU2K];
+    tCircBufError           circError;
+    UINT8                   aEventBuf[sizeof(tEvent) + sizeof(tDllAsyncReqPriority)];
+    tEvent*                 pEvent = (tEvent*)aEventBuf;
+
+    if (!drvInstance_l.fDriverActive || pBuffer_p == NULL || size_p == 0)
+        return kErrorNoResource;
+
+    asyncFrameInfo.size = size_p;
+    asyncFrameInfo.pData = pBuffer_p;
+    asyncFrameInfo.queue = kDllCalQueueTxVeth;
+
+    ret = drv_sendAsyncFrame(&asyncFrameInfo);
+    if (ret != kErrorOk)
+    {
+        DEBUG_LVL_ERROR_TRACE("Error sending VEth frame queue %d\n",
+                              asyncFrameInfo.queue);
+        return ret;
+    }
+
+    OPLK_MEMSET(pEvent, 0, (sizeof(tEvent) + sizeof(tDllAsyncReqPriority)));
+
+    // post event to DLL
+    pEvent->eventSink = kEventSinkDllk;
+    pEvent->eventType = kEventTypeDllkFillTx;
+    OPLK_MEMCPY(((UINT8*)pEvent + sizeof(tEvent)), (UINT8*)&priority, sizeof(tDllAsyncReqPriority));
+    pEvent->eventArgSize = sizeof(tDllAsyncReqPriority);
+
+    ret = drv_postEvent(pEvent);
+
+    return ret;
+}
+
+///------------------------------------------------------------------------------
+/**
+\brief  Handle non-PLK frame
+
+This routine parses the received event to identify the receipt of non-PLK frames
+and forwards it to NDIS miniport section for processing.
+
+\param  pEvent_p       Pointer to event.
+
+\return The function returns a tOplkError error code.
+\retval kErrorOk, If the event contains a non-PLK frame and it was successfully
+                  handled.
+\retval kErrorReject, If the event does not contain a non-PLK frame.
+*/
+//------------------------------------------------------------------------------
+static tOplkError receiveNonPlkFrame(void* pEvent_p)
+{
+    tEvent*              pEvent;
+    UINT16               etherType;
+    tFrameInfo*          pFrameInfo = NULL;
+    tPlkFrame*           pBuffer;
+    UINT32               frameSize;
+
+    if (pEvent_p == NULL)
+        return kErrorNoResource;
+
+    pEvent = (tEvent*)pEvent_p;
+    if (pEvent->eventArgSize != 0)
+        pEvent->eventArg.pEventArg = (void*)((UINT8*)pEvent_p + sizeof(tEvent));
+    else
+        return kErrorReject;
+
+    switch (pEvent->eventType)
+    {
+        case kEventTypeAsndRx:
+            pBuffer = (tPlkFrame*)pEvent->eventArg.pEventArg;
+            frameSize = pEvent->eventArgSize;
+            break;
+
+        case kEventTypeAsndRxInfo:
+            pFrameInfo = (tFrameInfo*)pEvent->eventArg.pEventArg;
+
+            if (getMemory((UINT8*)pFrameInfo->frame.pBuffer, (UINT8**)&pBuffer, pFrameInfo->frameSize) != kErrorOk)
+            {
+                DEBUG_LVL_ERROR_TRACE("Failed to get kernel memory\n");
+                return kErrorNoResource;
+            }
+
+            frameSize = pFrameInfo->frameSize;
+            break;
+
+        default:
+            return kErrorReject;
+    }
+
+    if (pBuffer == NULL)
+        return kErrorNoResource;
+
+    etherType = ami_getUint16Be(&pBuffer->etherType);
+    if (etherType != C_DLL_ETHERTYPE_EPL)
+    {
+        ndis_vethReceive((void*)pBuffer, frameSize);
+
+        if (pFrameInfo != NULL)
+        {
+            // Post event to release ASync frame
+            UINT8       aEventBuf[sizeof(tEvent) + sizeof(tFrameInfo)];
+            tEvent*     pEvent = (tEvent*)aEventBuf;
+
+            OPLK_MEMSET(pEvent, 0, (sizeof(tEvent) + sizeof(tFrameInfo)));
+
+            // Post the event to free the ASync frame buffer
+            pEvent->eventSink = kEventSinkDllkCal;
+            pEvent->eventType = kEventTypeReleaseRxFrame;
+            pEvent->eventArgSize = sizeof(tFrameInfo);
+            OPLK_MEMCPY(((UINT8*)pEvent + sizeof(tEvent)), (UINT8*)pFrameInfo, sizeof(tFrameInfo));
+            drv_postEvent(pEvent);
+        }
+        else
+            return kErrorNoResource;
+    }
+    else
+        return kErrorReject;
+
+    return kErrorOk;
+}
+#endif
 
 /// \}

@@ -138,7 +138,7 @@ tOplkError target_setLed(tLedType ledType_p, BOOL fLedOn_p)
 The function sets the IP address, subnetMask and MTU of an Ethernet
 interface.
 
-\param  ifName_p                Name of Ethernet interface.
+\param  pIfName_p               Name of Ethernet interface.
 \param  ipAddress_p             IP address to set for interface.
 \param  subnetMask_p            Subnet mask to set for interface.
 \param  mtu_p                   MTU to set for interface.
@@ -148,16 +148,39 @@ interface.
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-tOplkError target_setIpAdrs(char* ifName_p, UINT32 ipAddress_p, UINT32 subnetMask_p,
+tOplkError target_setIpAdrs(UINT8* pIfName_p, UINT32 ipAddress_p, UINT32 subnetMask_p,
                             UINT16 mtu_p)
 {
-    UNUSED_PARAMETER(ifName_p);
+    UNUSED_PARAMETER(pIfName_p);
     UNUSED_PARAMETER(ipAddress_p);
     UNUSED_PARAMETER(subnetMask_p);
     UNUSED_PARAMETER(mtu_p);
 
-    // Note: On a Windows system, the IP address for the VEth interface should be assigned
-    //       using network properties page.
+    //Note: The given parameters are ignored because the application must set
+    //      these settings to the used IP stack by itself!
+
+    return kErrorOk;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Set default gateway for Ethernet interface
+
+The function sets the default gateway of an Ethernet interface.
+
+\param  defaultGateway_p            Default gateway to set.
+
+\return The function returns a tOplkError error code.
+
+\ingroup module_target
+*/
+//------------------------------------------------------------------------------
+tOplkError target_setDefaultGateway(UINT32 defaultGateway_p)
+{
+    UNUSED_PARAMETER(defaultGateway_p);
+
+    //Note: The given parameters are ignored because the application must set
+    //      these settings to the used IP stack by itself!
 
     return kErrorOk;
 }
