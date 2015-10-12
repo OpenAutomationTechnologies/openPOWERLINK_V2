@@ -1227,7 +1227,8 @@ static tOplkError setupLocalNodeMn(void)
     if (ret != kErrorOk)
         return ret;
 
-    ret = edrvcyclic_setCycleTime(dllkInstance_g.dllConfigParam.cycleLen);
+    ret = edrvcyclic_setCycleTime(dllkInstance_g.dllConfigParam.cycleLen,
+                                  dllkInstance_g.dllConfigParam.minSyncTime);
     if (ret != kErrorOk)
         return ret;
 

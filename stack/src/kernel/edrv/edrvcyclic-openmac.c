@@ -117,6 +117,7 @@ typedef struct
     UINT                currrentTxBufferList;                       ///< Current TX buffer list
     UINT                currentTxBufferEntry;                       ///< Current TX buffer entry
     UINT32              cycleLengthUs;                              ///< Cycle time (us)
+    UINT32              syncEventCycle;                             ///< Synchronization event cycle
     tTimerHdl           timerHdlCycle;                              ///< Handle of the cycle timer
     tEdrvCyclicCbSync   pfnSyncCb;                                  ///< Function pointer to the sync callback function
     tEdrvCyclicCbError  pfnErrorCb;                                 ///< Function pointer to the error callback function
@@ -138,6 +139,7 @@ static tEdrvCyclicInstance instance_l;
 static tOplkError timerHdlCycleCb(tTimerEventArg* pEventArg_p) SECTION_EDRVCYC_TIMER_CB;
 static tOplkError processTxBufferList(void);
 static tOplkError processCycleViolation(UINT32 nextTimerIrqNs_p);
+static void       handleExtSync(UINT32* pNextSocTime_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -158,6 +160,8 @@ tOplkError edrvcyclic_init(void)
 {
     // clear instance structure
     OPLK_MEMSET(&instance_l, 0, sizeof(instance_l));
+
+    instance_l.syncEventCycle = 1; // Default every cycle
 
     return kErrorOk;
 }
@@ -279,15 +283,28 @@ Exit:
 This function sets the cycle time controlled by the cyclic Edrv.
 
 \param  cycleTimeUs_p   Cycle time [us]
+\param  minSyncTime_p   Minimum period for sending sync events to the api [us]
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrvcyclic_setCycleTime(UINT32 cycleTimeUs_p)
+tOplkError edrvcyclic_setCycleTime(UINT32 cycleTimeUs_p, UINT32 minSyncTime_p)
 {
     instance_l.cycleLengthUs = cycleTimeUs_p;
+
+    if ((cycleTimeUs_p == 0) || (minSyncTime_p == 0))
+    {
+        // - Handle a cycle time of 0 (avoids div by 0)
+        // - Handle not configured minimum sync period
+        instance_l.syncEventCycle = 1;
+    }
+    else
+    {
+        // Calculate synchronization event cycle
+        instance_l.syncEventCycle = ((minSyncTime_p + cycleTimeUs_p -1 ) / cycleTimeUs_p);
+    }
 
     return kErrorOk;
 }
@@ -532,7 +549,6 @@ static tOplkError processTxBufferList(void)
     UINT32          cycleMax = 0; //absolute maximum cycle time
     UINT32          nextOffsetNs = 0; //next earliest tx time
     UINT32          nextTimerIrqNs = instance_l.cycleLengthUs * 1000UL; //time of next timer irq
-    tTimestamp      extSyncTime;
 
     if (instance_l.fNextCycleTimeValid == FALSE)
     {
@@ -586,9 +602,7 @@ static tOplkError processTxBufferList(void)
         }
     }
 
-    // Forward next SoC time to timer module
-    extSyncTime.timeStamp = instance_l.nextCycleTime;
-    hrestimer_setExtSyncIrqTime(extSyncTime);
+    handleExtSync(&instance_l.nextCycleTime);
 
     //set accumulator for cycle window calculation
     absoluteTime = instance_l.nextCycleTime; //get cycle start time
@@ -704,4 +718,33 @@ Exit:
     return ret;
 }
 
-///\}
+//------------------------------------------------------------------------------
+/**
+\brief  Handle external synchronization
+
+This function handles the external synchronization interrupt.
+
+\param  pNextSocTime_p      Pointer to next SoC send time
+
+*/
+//------------------------------------------------------------------------------
+static void handleExtSync(UINT32* pNextSocTime_p)
+{
+    tTimestamp      extSyncTime;
+    static UINT32   extCycleCnt = 0;
+
+    if ((++extCycleCnt == instance_l.syncEventCycle))
+    {
+        // Forward next SoC time to timer module
+        extSyncTime.timeStamp = *pNextSocTime_p;
+        hrestimer_setExtSyncIrqTime(extSyncTime);
+
+        extCycleCnt = 0;
+    }
+    else if (extCycleCnt > instance_l.syncEventCycle)
+    {
+        extCycleCnt = 0;
+    }
+}
+
+/// \}

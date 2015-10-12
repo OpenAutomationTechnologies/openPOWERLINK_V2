@@ -283,14 +283,19 @@ Exit:
 This function sets the cycle time controlled by the cyclic Edrv.
 
 \param  cycleTimeUs_p   Cycle time [us]
+\param  minSyncTime_p   Minimum period for sending sync events to the api [us]
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrvcyclic_setCycleTime(UINT32 cycleTimeUs_p)
+tOplkError edrvcyclic_setCycleTime(UINT32 cycleTimeUs_p, UINT32 minSyncTime_p)
 {
+    // This edrvcyclic is not triggering the synchronization of the application,
+    // therefore the minimum synchronization time can be ignored.
+    UNUSED_PARAMETER(minSyncTime_p);
+
     edrvcyclicInstance_l.cycleTimeUs = cycleTimeUs_p;
 
     return kErrorOk;
