@@ -357,18 +357,34 @@ tOplkError synctimer_setSyncShift(UINT32 advanceShift_p)
 This function sets the cycle time.
 
 \param  cycleLen_p      Cycle time in mircroseconds
+\param  minSyncTime_p   Minimum period for sending sync event [us]
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_synctimer
 */
 //------------------------------------------------------------------------------
-tOplkError synctimer_setCycleLen(UINT32 cycleLen_p)
+tOplkError synctimer_setCycleLen(UINT32 cycleLen_p, UINT32 minSyncTime_p)
 {
     tOplkError ret = kErrorOk;
 
     ctrlSetConfiguredTimeDiff(OMETH_US_2_TICKS(cycleLen_p));
 
+#ifdef TIMER_USE_EXT_SYNC_INT
+    if ((cycleLen_p == 0) || (minSyncTime_p == 0))
+    {
+        // - Handle a cycle time of 0 (avoids div by 0)
+        // - Handle not configured minimum sync period
+        instance_l.extSyncIntCycle = 1;
+    }
+    else
+    {
+        // Calculate synchronization event cycle
+        instance_l.extSyncIntCycle = ((minSyncTime_p + cycleLen_p - 1) / cycleLen_p);
+    }
+#else
+    UNUSED_PARAMETER(minSyncTime_p);
+#endif //TIMER_USE_EXT_SYNC_INT
     return ret;
 }
 

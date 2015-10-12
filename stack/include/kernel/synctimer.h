@@ -69,7 +69,7 @@ tOplkError synctimer_registerHandler(tSyncTimerCbSync pfnTimerSynckCbSync_p);
 tOplkError synctimer_registerLossOfSyncHandler(tSyncTimerCbLossOfSync pfnTimerSynckCbLossOfSync_p);
 tOplkError synctimer_registerLossOfSyncHandler2(tSyncTimerCbLossOfSync pfnTimerSynckCbLossOfSync2_p);
 tOplkError synctimer_setSyncShift(UINT32 advanceShift_p);
-tOplkError synctimer_setCycleLen(UINT32 cycleLen_p);
+tOplkError synctimer_setCycleLen(UINT32 cycleLen_p, UINT32 minSyncTime_p);
 tOplkError synctimer_setLossOfSyncTolerance(UINT32 lossOfSyncTolerance_p);
 tOplkError synctimer_setLossOfSyncTolerance2(UINT32 lossOfSyncTolerance2_p);
 tOplkError synctimer_syncTriggerAtTimeStamp(tTimestamp* pTimeStamp_p);

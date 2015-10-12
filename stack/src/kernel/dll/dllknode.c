@@ -1138,7 +1138,8 @@ static tOplkError setupLocalNodeCn(void)
 #endif
 
 #if (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER)
-    ret = synctimer_setCycleLen(dllkInstance_g.dllConfigParam.cycleLen);
+    ret = synctimer_setCycleLen(dllkInstance_g.dllConfigParam.cycleLen,
+                                dllkInstance_g.dllConfigParam.minSyncTime);
     if (ret != kErrorOk)
         return ret;
 
