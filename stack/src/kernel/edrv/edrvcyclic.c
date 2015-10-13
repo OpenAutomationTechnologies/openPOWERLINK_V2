@@ -134,7 +134,7 @@ static tOplkError timerHdlCycleCb(tTimerEventArg* pEventArg_p);
 #if (EDRV_USE_TTTX != TRUE)
 static tOplkError timerHdlSlotCb(tTimerEventArg* pEventArg_p);
 #endif
-static tOplkError processTxBufferList(void);
+static tOplkError processTxBufferList(BOOL fCallSyncCb_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -499,15 +499,10 @@ static tOplkError timerHdlCycleCb(tTimerEventArg* pEventArg_p)
         goto Exit;
     }
 
-    ret = processTxBufferList();
+    ret = processTxBufferList(TRUE);
     if (ret != kErrorOk)
     {
         goto Exit;
-    }
-
-    if (edrvcyclicInstance_l.pfnSyncCb != NULL)
-    {
-        ret = edrvcyclicInstance_l.pfnSyncCb();
     }
 
 #if CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
@@ -640,7 +635,7 @@ static tOplkError timerHdlSlotCb(tTimerEventArg* pEventArg_p)
 
     edrvcyclicInstance_l.curTxBufferEntry++;
 
-    ret = processTxBufferList();
+    ret = processTxBufferList(FALSE);
 
 Exit:
     if (ret != kErrorOk)
@@ -660,10 +655,12 @@ Exit:
 
 This function processes the cycle Tx buffer list provided by dllk.
 
+\param  fCallSyncCb_p   Call Sync callback function if TRUE
+
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError processTxBufferList(void)
+static tOplkError processTxBufferList(BOOL fCallSyncCb_p)
 {
     tOplkError          ret = kErrorOk;
     tEdrvTxBuffer*      pTxBuffer = NULL;
@@ -727,6 +724,15 @@ static tOplkError processTxBufferList(void)
 
         pTxBuffer->launchTime = 0;
         edrvcyclicInstance_l.curTxBufferEntry++;
+
+        if (fCallSyncCb_p)
+        {
+            if (edrvcyclicInstance_l.pfnSyncCb != NULL)
+            {
+                ret = edrvcyclicInstance_l.pfnSyncCb();
+            }
+            fCallSyncCb_p = FALSE;
+        }
     }
 
 #else
@@ -753,6 +759,15 @@ static tOplkError processTxBufferList(void)
         }
 
         edrvcyclicInstance_l.curTxBufferEntry++;
+
+        if (fCallSyncCb_p)
+        {
+            if (edrvcyclicInstance_l.pfnSyncCb != NULL)
+            {
+                ret = edrvcyclicInstance_l.pfnSyncCb();
+            }
+            fCallSyncCb_p = FALSE;
+        }
     }
 #endif
 
