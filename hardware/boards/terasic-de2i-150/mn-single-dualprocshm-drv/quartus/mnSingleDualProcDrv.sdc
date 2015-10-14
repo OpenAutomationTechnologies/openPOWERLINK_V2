@@ -2,7 +2,7 @@
 # SDC for TERASIC DE2I-150 development board
 # ------------------------------------------------------------------------------
 
-source ../../common/timing/sram.sdc
+source ../../common/timing/ssram.sdc
 source ../../common/timing/jtag.sdc
 
 # ------------------------------------------------------------------------------
@@ -26,7 +26,7 @@ set_false_path -from * -to [get_ports ENET_GTX_CLK]
 # ------------------------------------------------------------------------------
 # SRAM definitions
 
-timing_sram $clk100
+timing_ssram $clk100
 
 # ------------------------------------------------------------------------------
 # JTAG definitions

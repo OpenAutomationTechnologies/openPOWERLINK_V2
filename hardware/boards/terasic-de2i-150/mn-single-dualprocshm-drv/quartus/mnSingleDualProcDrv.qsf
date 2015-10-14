@@ -173,7 +173,7 @@ set_location_assignment PIN_AJ22 -to SSRAM_BE[2]
 set_location_assignment PIN_AF21 -to SSRAM_BE[3]
 set_location_assignment PIN_AF24 -to SSRAM_CLK
 set_location_assignment PIN_AK23 -to SSRAM_GW_N
-set_location_assignment PIN_AG19 -to FL_CE_N[0]
+set_location_assignment PIN_AG19 -to FL_CE_N
 set_location_assignment PIN_AG23 -to SSRAM1_CE_N[0]
 
 set_location_assignment PIN_G16 -to BENCHMARK_PCP[0]
@@ -216,8 +216,6 @@ set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to BENCHMARK_PCIE[5]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to BENCHMARK_PCIE[6]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to BENCHMARK_PCIE[7]
 
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to CLOCK2_50
-set_instance_assignment -name IO_STANDARD "2.5 V" -to CLOCK3_50
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to CLOCK_50
 set_instance_assignment -name IO_STANDARD "2.5 V" -to ENET_GTX_CLK
 set_instance_assignment -name IO_STANDARD "2.5 V" -to ENET_INT_N
@@ -323,10 +321,10 @@ set_location_assignment PIN_C14 -to ENET_RST_N[0]
 set_instance_assignment -name IO_STANDARD "2.5 V" -to ENET_RST_N[0]
 set_location_assignment PIN_C16 -to ENET_MDC[0]
 set_instance_assignment -name IO_STANDARD "2.5 V" -to ENET_MDC[0]
-set_location_assignment PIN_AJ21 -to SSRAM0_CE_N[0]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SSRAM0_CE_N[0]
-set_location_assignment PIN_AG23 -to SSRAM1_CE_N[0]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SSRAM1_CE_N[0]
+set_location_assignment PIN_AJ21 -to SSRAM0_CE_N
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SSRAM0_CE_N
+set_location_assignment PIN_AG23 -to SSRAM1_CE_N
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SSRAM1_CE_N
 set_location_assignment PIN_AK25 -to SSRAM_ADSC_N[0]
 set_location_assignment PIN_AG24 -to SSRAM_OE_N[0]
 set_location_assignment PIN_AK24 -to SSRAM_WE_N[0]

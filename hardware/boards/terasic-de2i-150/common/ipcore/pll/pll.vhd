@@ -17,7 +17,6 @@
 -- 13.0.1 Build 232 06/12/2013 SP 1 SJ Web Edition
 -- ************************************************************
 
-
 --Copyright (C) 1991-2013 Altera Corporation
 --Your use of Altera Corporation's design tools, logic functions
 --and other software and tools, and its AMPP partner logic
@@ -49,7 +48,6 @@ ENTITY pll IS
     );
 END pll;
 
-
 ARCHITECTURE SYN OF pll IS
 
     SIGNAL sub_wire0    : STD_LOGIC_VECTOR (4 DOWNTO 0);
@@ -61,8 +59,6 @@ ARCHITECTURE SYN OF pll IS
     SIGNAL sub_wire6    : STD_LOGIC_VECTOR (1 DOWNTO 0);
     SIGNAL sub_wire7_bv : BIT_VECTOR (0 DOWNTO 0);
     SIGNAL sub_wire7    : STD_LOGIC_VECTOR (0 DOWNTO 0);
-
-
 
     COMPONENT altpll
     GENERIC (
@@ -79,7 +75,6 @@ ARCHITECTURE SYN OF pll IS
         clk2_duty_cycle         : NATURAL;
         clk2_multiply_by        : NATURAL;
         clk2_phase_shift        : STRING;
-        compensate_clock        : STRING;
         inclk0_input_frequency  : NATURAL;
         intended_device_family  : STRING;
         lpm_hint                : STRING;
@@ -165,12 +160,11 @@ BEGIN
         clk2_duty_cycle => 50,
         clk2_multiply_by => 5,
         clk2_phase_shift => "0",
-        compensate_clock => "CLK0",
         inclk0_input_frequency => 20000,
         intended_device_family => "Cyclone IV GX",
         lpm_hint => "CBX_MODULE_PREFIX=pll",
         lpm_type => "altpll",
-        operation_mode => "NORMAL",
+        operation_mode => "NO_COMPENSATION",
         pll_type => "AUTO",
         port_activeclock => "PORT_UNUSED",
         port_areset => "PORT_UNUSED",
@@ -222,8 +216,6 @@ BEGIN
         locked => sub_wire2
     );
 
-
-
 END SYN;
 
 -- ============================================================
@@ -239,7 +231,7 @@ END SYN;
 -- Retrieval info: PRIVATE: CLKBAD_SWITCHOVER_CHECK STRING "0"
 -- Retrieval info: PRIVATE: CLKLOSS_CHECK STRING "0"
 -- Retrieval info: PRIVATE: CLKSWITCH_CHECK STRING "0"
--- Retrieval info: PRIVATE: CNX_NO_COMPENSATE_RADIO STRING "0"
+-- Retrieval info: PRIVATE: CNX_NO_COMPENSATE_RADIO STRING "1"
 -- Retrieval info: PRIVATE: CREATE_CLKBAD_CHECK STRING "0"
 -- Retrieval info: PRIVATE: CREATE_INCLK1_CHECK STRING "0"
 -- Retrieval info: PRIVATE: CUR_DEDICATED_CLK STRING "c0"
@@ -282,14 +274,14 @@ END SYN;
 -- Retrieval info: PRIVATE: MIRROR_CLK2 STRING "0"
 -- Retrieval info: PRIVATE: MULT_FACTOR0 NUMERIC "1"
 -- Retrieval info: PRIVATE: MULT_FACTOR1 NUMERIC "2"
--- Retrieval info: PRIVATE: MULT_FACTOR2 NUMERIC "1"
--- Retrieval info: PRIVATE: NORMAL_MODE_RADIO STRING "1"
+-- Retrieval info: PRIVATE: MULT_FACTOR2 NUMERIC "5"
+-- Retrieval info: PRIVATE: NORMAL_MODE_RADIO STRING "0"
 -- Retrieval info: PRIVATE: OUTPUT_FREQ0 STRING "100.00000000"
 -- Retrieval info: PRIVATE: OUTPUT_FREQ1 STRING "100.00000000"
 -- Retrieval info: PRIVATE: OUTPUT_FREQ2 STRING "125.00000000"
 -- Retrieval info: PRIVATE: OUTPUT_FREQ_MODE0 STRING "0"
 -- Retrieval info: PRIVATE: OUTPUT_FREQ_MODE1 STRING "0"
--- Retrieval info: PRIVATE: OUTPUT_FREQ_MODE2 STRING "1"
+-- Retrieval info: PRIVATE: OUTPUT_FREQ_MODE2 STRING "0"
 -- Retrieval info: PRIVATE: OUTPUT_FREQ_UNIT0 STRING "MHz"
 -- Retrieval info: PRIVATE: OUTPUT_FREQ_UNIT1 STRING "MHz"
 -- Retrieval info: PRIVATE: OUTPUT_FREQ_UNIT2 STRING "MHz"
@@ -351,11 +343,10 @@ END SYN;
 -- Retrieval info: CONSTANT: CLK2_DUTY_CYCLE NUMERIC "50"
 -- Retrieval info: CONSTANT: CLK2_MULTIPLY_BY NUMERIC "5"
 -- Retrieval info: CONSTANT: CLK2_PHASE_SHIFT STRING "0"
--- Retrieval info: CONSTANT: COMPENSATE_CLOCK STRING "CLK0"
 -- Retrieval info: CONSTANT: INCLK0_INPUT_FREQUENCY NUMERIC "20000"
 -- Retrieval info: CONSTANT: INTENDED_DEVICE_FAMILY STRING "Cyclone IV GX"
 -- Retrieval info: CONSTANT: LPM_TYPE STRING "altpll"
--- Retrieval info: CONSTANT: OPERATION_MODE STRING "NORMAL"
+-- Retrieval info: CONSTANT: OPERATION_MODE STRING "NO_COMPENSATION"
 -- Retrieval info: CONSTANT: PLL_TYPE STRING "AUTO"
 -- Retrieval info: CONSTANT: PORT_ACTIVECLOCK STRING "PORT_UNUSED"
 -- Retrieval info: CONSTANT: PORT_ARESET STRING "PORT_UNUSED"
