@@ -467,6 +467,10 @@ SET(HARDWARE_DRIVER_WINNDISIM_SOURCES
      ${EDRV_SOURCE_DIR}/edrv-ndisintermediate.c
      )
 
+SET(HARDWARE_DRIVER_LINUXPCIE_SOURCES
+     ${KERNEL_SOURCE_DIR}/veth/veth-linuxpcie.c
+     )
+
 SET(HARDWARE_DRIVER_OPENMAC_SOURCES
      ${KERNEL_SOURCE_DIR}/timer/timestamp-openmac.c
      ${KERNEL_SOURCE_DIR}/edrv/edrv-openmac.c

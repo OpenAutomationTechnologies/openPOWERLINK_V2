@@ -55,6 +55,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
+#if defined(CONFIG_INCLUDE_VETH)
+/**
+\brief Type for VEth frame receive callback function pointer
+
+This type defines a function pointer to the VEth frame received
+callback function.
+
+\param  pFrameInfo_p        Frame info of the received frame.
+
+\return The function returns a tOplkError error code.
+*/
+typedef tOplkError (*tDrvIntfCbVeth)(tFrameInfo* pFrameInfo_p);
+#endif
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -83,6 +96,10 @@ tOplkError drvintf_freeBenchmarkMem(UINT8** ppBenchmarkMem_p);
 tOplkError drvintf_mapKernelMem(UINT8* pKernelMem_p, UINT8** ppUserMem_p, size_t size_p);
 void       drvintf_unmapKernelMem(UINT8** ppUserMem_p);
 tOplkError drvintf_waitSyncEvent(void);
+#if defined(CONFIG_INCLUDE_VETH)
+tOplkError drvintf_regVethHandler(tDrvIntfCbVeth pfnDrvIntfCbVeth_p);
+tOplkError drvintf_sendVethFrame(tFrameInfo* pFrameInfo_p);
+#endif
 
 #ifdef __cplusplus
 }
