@@ -128,7 +128,14 @@ typedef struct
 // include architecture specific definitions
 //------------------------------------------------------------------------------
 #if (TARGET_SYSTEM == _LINUX_)
+
+#ifdef __PCIE__
+#include <common/driver-linuxpcie.h>
+#else
+
 #include <common/driver-linux.h>
+#endif
+
 #elif (TARGET_SYSTEM == _WIN32_)
 #include <common/driver-windows.h>
 #endif

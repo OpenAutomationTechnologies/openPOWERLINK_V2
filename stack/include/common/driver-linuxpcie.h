@@ -1,16 +1,16 @@
 /**
 ********************************************************************************
-\file   linuxkernel/target-linuxkernel.c
+\file   common/driver-linuxpcie.h
 
-\brief  Target specific functions for Linux kernel
+\brief  Header file for openPOWERLINK PCIe driver interface for Linux kernel
 
-The file implements target specific functions used in the openPOWERLINK stack.
-
-\ingroup module_target
+This file contains the necessary definitions for using the openPOWERLINK
+PCIe driver interface for Linux kernel.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -36,107 +36,44 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
+#ifndef _INC_common_driver_linux_pcie_H_
+#define _INC_common_driver_linux_pcie_H_
+
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <common/oplkinc.h>
-#include <common/target.h>
-#include <linux/hrtimer.h>
-
-#include <linux/sched.h>
-#include <linux/delay.h>
-
-//============================================================================//
-//            P U B L I C   F U N C T I O N S                                 //
-//============================================================================//
 
 //------------------------------------------------------------------------------
-/**
-\brief  Get current timestamp
-
-The function returns the current timestamp in nanoseconds.
-
-\return The function returns the timestamp in nanoseconds
-*/
+// const defines
 //------------------------------------------------------------------------------
-ULONGLONG target_getCurrentTimestamp(void)
-{
-    ULONGLONG  timeStamp;
-
-    timeStamp = ktime_to_ns(ktime_get());
-    return timeStamp;
-}
-
+#define PLK_CLASS_NAME    "plk"
+#define PLK_DEV_NAME      "plk" // used for "/dev" and "/proc" entry
+#define PLK_DRV_NAME      "plk"
+#define PLK_DEV_FILE      "/dev/plk"
+#define PLK_IOC_MAGIC     '='
 
 //------------------------------------------------------------------------------
-/**
-\brief Sleep for the specified number of milliseconds
-
-The function makes the calling thread sleep until the number of specified
-milliseconds have elapsed.
-
-\param  milliSeconds_p      Number of milliseconds to sleep
-
-\ingroup module_target
-*/
+//  Commands for <ioctl>
 //------------------------------------------------------------------------------
-void target_msleep(UINT32 milliSeconds_p)
-{
-    msleep(milliSeconds_p);
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief    Get current system tick
-
-This function returns the current system tick determined by the system timer.
-
-\return Returns the system tick in milliseconds
-
-\ingroup module_target
-*/
-//------------------------------------------------------------------------------
-UINT32 target_getTickCount(void)
-{
-    return jiffies * 1000 / HZ;
-}
+#define PLK_CMD_CTRL_EXECUTE_CMD                _IOWR(PLK_IOC_MAGIC, 0, tCtrlCmd)
+#define PLK_CMD_CTRL_STORE_INITPARAM            _IOW (PLK_IOC_MAGIC, 1, tCtrlInitParam)
+#define PLK_CMD_CTRL_READ_INITPARAM             _IOR (PLK_IOC_MAGIC, 2, tCtrlInitParam)
+#define PLK_CMD_CTRL_GET_STATUS                 _IOR (PLK_IOC_MAGIC, 3, UINT16)
+#define PLK_CMD_CTRL_GET_HEARTBEAT              _IOR (PLK_IOC_MAGIC, 4, UINT16)
+#define PLK_CMD_POST_EVENT                      _IOW (PLK_IOC_MAGIC, 5, tEvent)
+#define PLK_CMD_GET_EVENT                       _IOR (PLK_IOC_MAGIC, 6, tEvent)
+#define PLK_CMD_DLLCAL_ASYNCSEND                _IO  (PLK_IOC_MAGIC, 7)
+#define PLK_CMD_ERRHND_WRITE                    _IOW (PLK_IOC_MAGIC, 8, tErrHndIoctl)
+#define PLK_CMD_ERRHND_READ                     _IOR (PLK_IOC_MAGIC, 9, tErrHndIoctl)
+#define PLK_CMD_TIMESYNC_SYNC                   _IO  (PLK_IOC_MAGIC, 10)
+#define PLK_CMD_PDO_MAP_OFFSET                  _IOR (PLK_IOC_MAGIC, 11, ULONG)
 
 //------------------------------------------------------------------------------
-/**
-\brief    Enable global interrupt
-
-This function enables/disables global interrupts.
-
-\param  fEnable_p               TRUE = enable interrupts
-                                FALSE = disable interrupts
-
-\ingroup module_target
-*/
+// typedef
 //------------------------------------------------------------------------------
-void target_enableGlobalInterrupt(BYTE fEnable_p)
-{
-    // Nothing to do here
-    UNUSED_PARAMETER(fEnable_p);
-}
 
 //------------------------------------------------------------------------------
-/**
-\brief  Set POWERLINK status/error LED
-
-The function sets the POWERLINK status/error LED.
-
-\param  ledType_p       Determines which LED shall be set/reset.
-\param  fLedOn_p        Set the addressed LED on (TRUE) or off (FALSE).
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_target
-*/
+// function prototypes
 //------------------------------------------------------------------------------
-tOplkError target_setLed(tLedType ledType_p, BOOL fLedOn_p)
-{
-    UNUSED_PARAMETER(ledType_p);
-    UNUSED_PARAMETER(fLedOn_p);
 
-    return kErrorOk;
-}
+#endif /* _INC_common_driver_linux_pcie_H_ */
