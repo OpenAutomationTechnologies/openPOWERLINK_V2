@@ -156,7 +156,7 @@ tLinkObjectRequest    linkObjectRequestsMn[]  =
 static tOplkError initNmtu(tOplkApiInitParam* pInitParam_p);
 static tOplkError initObd(tOplkApiInitParam* pInitParam_p);
 static tOplkError updateDllConfig(tOplkApiInitParam* pInitParam_p, BOOL fUpdateIdentity_p);
-static tOplkError updateObd(tOplkApiInitParam* pInitParam_p, BOOL fForceUpdateStoredConf_p);
+static tOplkError updateObd(tOplkApiInitParam* pInitParam_p, BOOL fDisableUpdateStoredConf_p);
 static tOplkError processUserEvent(tEvent* pEvent_p);
 static tOplkError cbCnCheckEvent(tNmtEvent NmtEvent_p);
 static tOplkError cbNmtStateChange(tEventNmtStateChange nmtStateChange_p);
@@ -1103,7 +1103,7 @@ static tOplkError cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
     tOplkError          ret = kErrorOk;
     BYTE                nmtState;
     tOplkApiEventArg    eventArg;
-    BOOL                fForceUpdateStoredConf = FALSE;
+    BOOL                fDisableUpdateStoredConf = FALSE;
 #if (CONFIG_OBD_CALC_OD_SIGNATURE != FALSE)
     UINT32              signature = 0;
 #endif
@@ -1156,11 +1156,11 @@ static tOplkError cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
             signature = (UINT32)obd_getOdSignature(kObdPartGen);
 #endif
             ret = obdconf_getPartArchiveState(kObdPartGen, signature);
-            if (ret != kErrorOk)
-                fForceUpdateStoredConf = TRUE;
+            if (ret == kErrorOk)
+                fDisableUpdateStoredConf = TRUE;
 #endif
             // From 1.8.x: $$$ d.k.: update OD only if OD was not loaded from non-volatile memory
-            ret = updateObd(&ctrlInstance_l.initParam, fForceUpdateStoredConf);
+            ret = updateObd(&ctrlInstance_l.initParam, fDisableUpdateStoredConf);
             if (ret != kErrorOk)
                 return ret;
 
@@ -1642,14 +1642,14 @@ The function updates the object dictionary from the stack initialization
 parameters.
 
 \param  pInitParam_p                Pointer to the stack initialization parameters.
-\param  fForceUpdateStoredConf_p    Flag to indicate whether or not to overwrite
-                                    the configuration parameters stored in
+\param  fDisableUpdateStoredConf_p  Flag to disable update to object entries which
+                                    are set from the stored configuration in
                                     non-volatile memory.
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError updateObd(tOplkApiInitParam* pInitParam_p, BOOL fForceUpdateStoredConf_p)
+static tOplkError updateObd(tOplkApiInitParam* pInitParam_p, BOOL fDisableUpdateStoredConf_p)
 {
     tOplkError          ret = kErrorOk;
     WORD                wTemp;
@@ -1661,12 +1661,12 @@ static tOplkError updateObd(tOplkApiInitParam* pInitParam_p, BOOL fForceUpdateSt
     if (ret != kErrorOk)
         return ret;
 
-    if ((fForceUpdateStoredConf_p) && (pInitParam_p->cycleLen != UINT_MAX))
+    if ((!fDisableUpdateStoredConf_p) && (pInitParam_p->cycleLen != UINT_MAX))
     {
         obd_writeEntry(0x1006, 0, &pInitParam_p->cycleLen, 4);
     }
 
-    if ((fForceUpdateStoredConf_p) && (pInitParam_p->lossOfFrameTolerance != UINT_MAX))
+    if ((!fDisableUpdateStoredConf_p) && (pInitParam_p->lossOfFrameTolerance != UINT_MAX))
     {
         obd_writeEntry(0x1C14, 0, &pInitParam_p->lossOfFrameTolerance, 4);
     }
@@ -1685,13 +1685,13 @@ static tOplkError updateObd(tOplkApiInitParam* pInitParam_p, BOOL fForceUpdateSt
 
     obd_writeEntry(0x1F98, 3, &pInitParam_p->presMaxLatency, 4);
 
-    if (((fForceUpdateStoredConf_p) && pInitParam_p->preqActPayloadLimit <= C_DLL_ISOCHR_MAX_PAYL))
+    if (((!fDisableUpdateStoredConf_p) && pInitParam_p->preqActPayloadLimit <= C_DLL_ISOCHR_MAX_PAYL))
     {
         wTemp = (WORD)pInitParam_p->preqActPayloadLimit;
         obd_writeEntry(0x1F98, 4, &wTemp, 2);
     }
 
-    if (((fForceUpdateStoredConf_p) && pInitParam_p->presActPayloadLimit <= C_DLL_ISOCHR_MAX_PAYL))
+    if (((!fDisableUpdateStoredConf_p) && pInitParam_p->presActPayloadLimit <= C_DLL_ISOCHR_MAX_PAYL))
     {
         wTemp = (WORD)pInitParam_p->presActPayloadLimit;
         obd_writeEntry(0x1F98, 5, &wTemp, 2);
@@ -1699,31 +1699,31 @@ static tOplkError updateObd(tOplkApiInitParam* pInitParam_p, BOOL fForceUpdateSt
 
     obd_writeEntry(0x1F98, 6, &pInitParam_p->asndMaxLatency, 4);
 
-    if ((fForceUpdateStoredConf_p) && (pInitParam_p->multiplCylceCnt <= 0xFF))
+    if ((!fDisableUpdateStoredConf_p) && (pInitParam_p->multiplCylceCnt <= 0xFF))
     {
         bTemp = (BYTE)pInitParam_p->multiplCylceCnt;
         obd_writeEntry(0x1F98, 7, &bTemp, 1);
     }
 
-    if ((fForceUpdateStoredConf_p) && (pInitParam_p->asyncMtu <= C_DLL_MAX_ASYNC_MTU))
+    if ((!fDisableUpdateStoredConf_p) && (pInitParam_p->asyncMtu <= C_DLL_MAX_ASYNC_MTU))
     {
         wTemp = (WORD)pInitParam_p->asyncMtu;
         obd_writeEntry(0x1F98, 8, &wTemp, 2);
     }
 
-    if ((fForceUpdateStoredConf_p) && (pInitParam_p->prescaler <= 1000))
+    if ((!fDisableUpdateStoredConf_p) && (pInitParam_p->prescaler <= 1000))
     {
         wTemp = (WORD)pInitParam_p->prescaler;
         obd_writeEntry(0x1F98, 9, &wTemp, 2);
     }
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
-    if ((fForceUpdateStoredConf_p) && (pInitParam_p->waitSocPreq != UINT_MAX))
+    if ((!fDisableUpdateStoredConf_p) && (pInitParam_p->waitSocPreq != UINT_MAX))
     {
         obd_writeEntry(0x1F8A, 1, &pInitParam_p->waitSocPreq, 4);
     }
 
-    if ((fForceUpdateStoredConf_p) && (pInitParam_p->asyncSlotTimeout != 0) &&
+    if ((!fDisableUpdateStoredConf_p) && (pInitParam_p->asyncSlotTimeout != 0) &&
         (pInitParam_p->asyncSlotTimeout != UINT_MAX))
     {
         obd_writeEntry(0x1F8A, 2, &pInitParam_p->asyncSlotTimeout, 4);
