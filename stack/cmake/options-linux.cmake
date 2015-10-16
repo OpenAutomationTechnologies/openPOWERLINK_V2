@@ -36,6 +36,7 @@ MESSAGE(STATUS "Adding CMAKE configuration options for Linux")
 OPTION (CFG_COMPILE_LIB_MN                      "Compile openPOWERLINK MN library" ON)
 OPTION (CFG_COMPILE_LIB_MNAPP_USERINTF          "Compile openPOWERLINK MN application library for userspace" ON)
 OPTION (CFG_COMPILE_LIB_MNAPP_KERNELINTF        "Compile openPOWERLINK MN application library for kernel interface" ON)
+OPTION (CFG_COMPILE_LIB_MNAPP_PCIEINTF          "Compile openPOWERLINK MN application library for pcie interface" ON)
 OPTION (CFG_COMPILE_LIB_MNDRV_PCAP              "Compile openPOWERLINK MN driver library for linux userspace (pcap)" ON)
 
 ################################################################################
@@ -74,6 +75,10 @@ IF(CFG_COMPILE_LIB_MNAPP_KERNELINTF)
     ADD_SUBDIRECTORY(proj/linux/liboplkmnapp-kernelintf)
 ENDIF()
 
+IF(CFG_COMPILE_LIB_MNAPP_PCIEINTF)
+    ADD_SUBDIRECTORY(proj/linux/liboplkmnapp-kernelpcie)
+ENDIF()
+
 IF(CFG_COMPILE_LIB_MNDRV_PCAP)
     ADD_SUBDIRECTORY(proj/linux/liboplkmndrv-pcap)
 ENDIF()
@@ -94,7 +99,3 @@ ENDIF()
 IF(CFG_COMPILE_LIB_CNDRV_PCAP)
     ADD_SUBDIRECTORY(proj/linux/liboplkcndrv-pcap)
 ENDIF()
-
-
-
-
