@@ -42,6 +42,21 @@ To build the kernel driver (e.g. for a MN using the Intel 82573 network interfac
       > make
       > make install
 
+## Building a Linux Kernel PCIe Interface Driver {#sect_build_drivers_build_linux_pcie}
+
+To build the kernel space driver, the appropriate kernel sources must be installed
+on your system. The path to the kernel sources can be configured by
+__CFG_KERNEL_DIR__.
+
+To build the kernel PCIe interface driver:
+
+      > cd <openPOWERLINK_dir>/drivers/linux/drv_kernelmod_pcie/build
+      > cmake -DCFG_OPLK_MN=TRUE
+      > make
+      > make install
+
+The default driver installation path is: `<openPOWERLINK_DIR>\bin\linux\<ARCH>\oplkdrv_kernelmodule_pcie`
+
 ## Building a Windows NDIS PCIe miniport driver {#sect_build_drivers_build_windows_ndis_pcie}
 
 To build the Windows NDIS PCIe miniport driver, an appropriate Windows Driver Kit (WDK)

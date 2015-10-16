@@ -252,6 +252,13 @@ the configuration options on the command line (-DCFG_XXX=XXX) or
   the network. It is used by the Linux user space daemon driver. It is configured
   to contain only CN functionality.
 
+- **CFG_COMPILE_LIB_MNAPP_PCIEINTF**
+
+  Compile openPOWERLINK MN application library which contains the interface to
+  a Linux kernel PCIe interface driver. It is used along with a Linux kernel
+  PCIe interface driver, for status/control and data exchage with the kernel
+  stack which runs on an external PCIe device.
+
 
 ## Windows Configuration Options
 

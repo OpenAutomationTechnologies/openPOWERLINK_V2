@@ -157,6 +157,17 @@ system the following configurations are possible:
   - `stack/proj/linux/liboplkmnapp-kernelintf` (liboplkmnapp-kernelintf.a)
   - `stack/proj/linux/liboplkcnapp-kernelintf` (liboplkcnapp-kernelintf.a)
 
+- __Linux Kernel PCIe Interface__
+
+  The application is linked to an application library which contains
+  the interface to a Linux kernel space PCIe interface driver.
+  The kernel part of openPOWERLINK runs on an external PCIe device. The PCIe
+  interface driver handles the status/control and data exchange between the
+  user and kernel layers of the stack.
+
+  _Libraries:_
+  - `stack/proj/linux/liboplkmnapp-kernelpcie` (liboplkmnapp-kernelpcie.a)
+
 ## Drivers {#sect_linux_components_drivers}
 
 ### Linux User Space Daemon using PCAP
@@ -177,6 +188,21 @@ solution provides the best performance, but is limited to the available
 openPOWERLINK network card drivers.
 
 The driver is located in: `drivers/linux/drv_kernelmod_edrv`
+
+### Linux Kernel PCIe Interface
+
+The openPOWERLINK kernel part may be executed on an external PCIe
+device which handles the time critical sections of the openPOWERLINK
+stack. This solution provides the best performance with lowest possible system
+resource utilization.
+
+A Linux kernel PCIe interface driver is used as a communication interface
+between the openPOWERLINK application library and the openPOWERLINK kernel
+stack, running on the PCIe device. The PCIe interface driver handles the
+status/control and data exchange between the user and kernel layers of
+the stack.
+
+The driver is located in: `drivers/linux/drv_kernelmod_pcie`
 
 ## Demo Applications
 
