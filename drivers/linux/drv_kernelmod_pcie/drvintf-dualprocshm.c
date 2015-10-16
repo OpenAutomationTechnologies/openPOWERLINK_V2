@@ -52,6 +52,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <drvintf.h>
 #include <kernel/pdokcal.h>
 #include <common/timer.h>
+#if defined(CONFIG_INCLUDE_VETH)
+#include <kernel/veth.h>
+#include <common/ami.h>
+#endif
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -97,10 +101,14 @@ interface module during runtime.
 typedef struct
 {
     tDualprocDrvInstance    dualProcDrvInst;                    ///< Dual processor driver instance.
-    tCircBufInstance*       apEventQueueInst[kEventQueueNum];       ///< Event queue instances.
+    tCircBufInstance*       apEventQueueInst[kEventQueueNum];   ///< Event queue instances.
     tCircBufInstance*       apDllQueueInst[kDllCalQueueTxVeth + 1]; ///< DLL queue instances.
     tErrHndObjects*         pErrorObjects;                      ///< Pointer to error objects.
     BOOL                    fDriverActive;                      ///< Flag to identify status of driver interface.
+#if defined(CONFIG_INCLUDE_VETH)
+    BOOL                    fVEthActive;                        ///< Flag to indicate whether the VEth interface is intialized.
+    tDrvIntfCbVeth          pfnCbVeth;                          ///< Callback function to the VEth interface.
+#endif
     ULONG                   shmMemLocal;                        ///< Shared memory base address for local processor (OS).
     ULONG                   shmMemRemote;                       ///< Shared memory base address for remote processor (PCP).
     size_t                  shmSize;                            ///< Shared memory span.
@@ -205,7 +213,7 @@ copying it into the common control structure.
 //------------------------------------------------------------------------------
 tOplkError drvintf_executeCmd(tCtrlCmd* pCtrlCmd_p)
 {
-    tOplkError      ret = kErrorOk;
+    tOplkError    ret = kErrorOk;
     UINT16          cmd = pCtrlCmd_p->cmd;
     INT             timeout;
 
@@ -285,6 +293,7 @@ Read the initialization parameters from the kernel stack.
 tOplkError drvintf_readInitParam(tCtrlInitParam* pInitParam_p)
 {
     tDualprocReturn    dualRet;
+    tOplkError         ret = kErrorOk;
 
     if (!drvIntfInstance_l.fDriverActive)
         return kErrorNoResource;
@@ -300,7 +309,22 @@ tOplkError drvintf_readInitParam(tCtrlInitParam* pInitParam_p)
         return kErrorNoResource;
     }
 
-    return kErrorOk;
+#if defined(CONFIG_INCLUDE_VETH)
+    // Initialize virtual Ethernet interface
+    if (drvIntfInstance_l.fVEthActive == FALSE)
+    {
+        ret = veth_init((UINT8*)(tCtrlInitParam*)pInitParam_p->aMacAddress);
+        if (ret != kErrorOk)
+        {
+            DEBUG_LVL_ERROR_TRACE("VEth Initialization Failed %x\n", ret);
+            return ret;
+        }
+
+        drvIntfInstance_l.fVEthActive = TRUE;
+    }
+#endif
+
+    return ret;
 }
 
 //------------------------------------------------------------------------------
@@ -397,7 +421,70 @@ tOplkError drvintf_getHeartbeat(UINT16* pHeartbeat_p)
     return kErrorOk;
 }
 
+#if defined(CONFIG_INCLUDE_VETH)
+///------------------------------------------------------------------------------
+/**
+\brief  Write virtual Ethernet frame
+
+This routines extracts the non POWERLINK Ethernet frame data from the passed
+frame structure and uses the async data write function to post it into the DLL
+VEth queue for processing by kernel stack.
+
+\param  pFrameInfo_p    Pointer to the VEth frame buffer.
+
+\ingroup module_driver_linux_kernel_pcie
+*/
 //------------------------------------------------------------------------------
+tOplkError drvintf_sendVethFrame(tFrameInfo* pFrameInfo_p)
+{
+    tOplkError              ret = kErrorOk;
+    tEvent                  event;
+    tDllAsyncReqPriority    priority = kDllAsyncReqPrioGeneric;
+
+    if (!drvIntfInstance_l.fDriverActive)
+        return kErrorNoResource;
+
+    ret = drvintf_sendAsyncFrame(kDllCalQueueTxVeth, pFrameInfo_p->frameSize,
+                                 pFrameInfo_p->frame.pBuffer);
+    if (ret != kErrorOk)
+    {
+        DEBUG_LVL_ERROR_TRACE("Error sending VEth frame queue %d\n",
+                              kDllCalQueueTxVeth);
+        return ret;
+    }
+
+    // post event to DLL
+    event.eventSink = kEventSinkDllk;
+    event.eventType = kEventTypeDllkFillTx;
+    OPLK_MEMSET(&event.netTime, 0x00, sizeof(event.netTime));
+    event.eventArg.pEventArg = &priority;
+    event.eventArgSize = sizeof(priority);
+    ret = drvintf_postEvent(&event);
+
+    return ret;
+}
+
+///------------------------------------------------------------------------------
+/**
+\brief  Register VEth Rx handler
+
+This routines saves the callback function to be called when a non POWERLINK
+frame us received by the driver. If NULL is passed to this function, no callback
+is not called.
+
+\param  pfnDrvIntfCbVeth_p  Pointer to callback function.
+
+\ingroup module_driver_linux_kernel_pcie
+*/
+//------------------------------------------------------------------------------
+tOplkError drvintf_regVethHandler(tDrvIntfCbVeth pfnDrvIntfCbVeth_p)
+{
+    drvIntfInstance_l.pfnCbVeth = pfnDrvIntfCbVeth_p;
+    return kErrorOk;
+}
+#endif
+
+///------------------------------------------------------------------------------
 /**
 \brief  Write asynchronous frame
 
@@ -546,8 +633,16 @@ Retrieves an event from kernel to user event(K2U) queue for the user layer.
 //------------------------------------------------------------------------------
 tOplkError drvintf_getEvent(tEvent* pK2UEvent_p, size_t* pSize_p)
 {
-    tCircBufError       circBufErr = kCircBufOk;
-    tCircBufInstance*   pCircBufInstance = drvIntfInstance_l.apEventQueueInst[kEventQueueK2U];
+    tCircBufError           circBufErr = kCircBufOk;
+    tCircBufInstance*       pCircBufInstance = drvIntfInstance_l.apEventQueueInst[kEventQueueK2U];
+    tOplkError              ret = kErrorOk;
+#if defined(CONFIG_INCLUDE_VETH)
+    tFrameInfo*             pFrameInfo;
+    tFrameInfo              frameInfo;
+    UINT16                  etherType;
+    UINT8*                  pBuffer;
+    tEvent                  u2kEvent;
+#endif
 
     if ((pK2UEvent_p == NULL) || (pSize_p == NULL) ||
         (!drvIntfInstance_l.fDriverActive))
@@ -558,20 +653,90 @@ tOplkError drvintf_getEvent(tEvent* pK2UEvent_p, size_t* pSize_p)
         circBufErr = circbuf_readData(pCircBufInstance, (void*)pK2UEvent_p,
                                       sizeof(tEvent) + MAX_EVENT_ARG_SIZE,
                                       pSize_p);
+        if ((circBufErr != kCircBufOk) && (circBufErr != kCircBufNoReadableData))
+        {
+            *pSize_p = 0;
+            DEBUG_LVL_ERROR_TRACE("Error in reading circular buffer event data!!\n");
+            return kErrorInvalidInstanceParam;
+        }
+
+#if defined(CONFIG_INCLUDE_VETH)
+        if (drvIntfInstance_l.pfnCbVeth != NULL)
+        {
+            // Check if this is a VEth event
+            switch (pK2UEvent_p->eventType)
+            {
+                case kEventTypeAsndRxInfo:
+                    // Get the event argument from the copied data buffer
+                    pK2UEvent_p->eventArg.pEventArg = (char*)pK2UEvent_p + sizeof(tEvent);
+                    pFrameInfo = (tFrameInfo*)pK2UEvent_p->eventArg.pEventArg;
+                    pBuffer = (UINT8*)pFrameInfo->frame.pBuffer;
+
+                    // Get the bus address for the data buffer
+                    ret = drvintf_mapKernelMem((UINT8*)pBuffer,
+                                               (UINT8**)&pFrameInfo->frame.pBuffer,
+                                               (size_t)pFrameInfo->frameSize);
+                    if (ret != kErrorOk)
+                    {
+                        return ret;
+                    }
+
+                    // Check if the frame is of non POWERLINK type
+                    etherType = ami_getUint16Be(&pFrameInfo->frame.pBuffer->etherType);
+                    if (etherType != C_DLL_ETHERTYPE_EPL)
+                    {
+                        ret = drvIntfInstance_l.pfnCbVeth(pFrameInfo);
+
+                        // Indicate that this event is not to be posted to the user layer
+                        *pSize_p = 0;
+
+                        // Restore frame info for releasing Rx frame
+                        pFrameInfo->frame.pBuffer = (tPlkFrame*)pBuffer;
+
+                        // Post the event to free the veth frame buffer
+                        u2kEvent.eventSink = kEventSinkDllkCal;
+                        u2kEvent.eventType = kEventTypeReleaseRxFrame;
+                        u2kEvent.eventArgSize = sizeof(tFrameInfo);
+                        u2kEvent.eventArg.pEventArg = pFrameInfo;
+
+                        drvintf_postEvent(&u2kEvent);
+                    }
+
+                    break;
+
+                case kEventTypeAsndRx:
+                    // Get the event argument from the copied data buffer
+                    pK2UEvent_p->eventArg.pEventArg = (char*)pK2UEvent_p + sizeof(tEvent);
+                    // Argument pointer is frame
+                    frameInfo.frame.pBuffer = (tPlkFrame*)pK2UEvent_p->eventArg.pEventArg;
+                    frameInfo.frameSize = pK2UEvent_p->eventArgSize;
+                    pFrameInfo = &frameInfo;
+
+                    // Check if the frame is of non POWERLINK type
+                    etherType = ami_getUint16Be(&pFrameInfo->frame.pBuffer->etherType);
+                    if (etherType != C_DLL_ETHERTYPE_EPL)
+                    {
+                        ret = drvIntfInstance_l.pfnCbVeth(pFrameInfo);
+
+                        // Indicate that this event is not to be posted to the user layer
+                        *pSize_p = 0;
+                    }
+
+                    break;
+
+                default:
+                    // Nothing to be done
+                    break;
+            }
+        }
+#endif
     }
     else
     {
         *pSize_p = 0;
     }
 
-    if ((circBufErr != kCircBufOk) && (circBufErr != kCircBufNoReadableData))
-    {
-        *pSize_p = 0;
-        DEBUG_LVL_ERROR_TRACE("Error in reading circular buffer event data!!\n");
-        return kErrorInvalidInstanceParam;
-    }
-
-    return kErrorOk;
+    return ret;
 }
 
 //------------------------------------------------------------------------------
@@ -920,6 +1085,12 @@ static tOplkError initStackInterface(void)
         return ret;
     }
 
+#if defined(CONFIG_INCLUDE_VETH)
+    // Mark the VEth interface initialization state as pending
+    // This will be completed when the MAC address is read from the PCP
+    drvIntfInstance_l.fVEthActive = FALSE;
+#endif
+
     return kErrorOk;
 }
 
@@ -971,6 +1142,11 @@ This function closes the stack dualprocshm interface to PCP, initialized earlier
 //------------------------------------------------------------------------------
 static void exitStackInterface(void)
 {
+#if defined(CONFIG_INCLUDE_VETH)
+    // Mark the VEth interface as inactive
+    veth_exit();
+    drvIntfInstance_l.fVEthActive = FALSE;
+#endif
     exitDllQueueInterface();
     exitErrHandleInterface();
     exitEventInterface();
@@ -1096,6 +1272,16 @@ static tOplkError initDllQueueInterface(void)
         return kErrorNoResource;
     }
 
+#if defined(CONFIG_INCLUDE_VETH)
+    circError = circbuf_connect(CIRCBUF_DLLCAL_TXVETH,
+                                &drvIntfInstance_l.apDllQueueInst[kDllCalQueueTxVeth]);
+    if (circError != kCircBufOk)
+    {
+        DEBUG_LVL_DRVINTF_TRACE("PLK : Could not allocate CIRCBUF_DLLCAL_TXVETH circbuffer\n");
+        return kErrorNoResource;
+    }
+#endif
+
     return kErrorOk;
 }
 
@@ -1115,6 +1301,11 @@ static void exitDllQueueInterface(void)
 
     if (drvIntfInstance_l.apDllQueueInst[kDllCalQueueTxSync] != NULL)
     circbuf_disconnect(drvIntfInstance_l.apDllQueueInst[kDllCalQueueTxSync]);
+
+#if defined(CONFIG_INCLUDE_VETH)
+    if (drvIntfInstance_l.apDllQueueInst[kDllCalQueueTxVeth] != NULL)
+    circbuf_disconnect(drvIntfInstance_l.apDllQueueInst[kDllCalQueueTxVeth]);
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -1166,4 +1357,4 @@ Exit:
     return ret;
 }
 
-/// \}
+///\}

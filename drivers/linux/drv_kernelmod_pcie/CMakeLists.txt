@@ -154,6 +154,7 @@ SET(MODULE_SOURCE_FILES
     ${CONTRIB_SOURCE_DIR}/trace/trace-printk.c
     ${KERNEL_SOURCE_DIR}/timesync/timesynck.c
     ${KERNEL_SOURCE_DIR}/timesync/timesynckcal-linuxkernel.c
+    ${KERNEL_SOURCE_DIR}/veth/veth-linuxpcie.c
     ${ARCH_SOURCE_DIR}/target-linuxkernel.c
     )
 
