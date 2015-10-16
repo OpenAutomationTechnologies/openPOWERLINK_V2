@@ -84,6 +84,10 @@ ELSE (CFG_KERNEL_STACK_DIRECTLINK)
     ENDIF (CFG_DEMO_MN_CONSOLE_USE_SYNCTHREAD)
 ENDIF (CFG_KERNEL_STACK_DIRECTLINK)
 
+IF (CFG_KERNEL_STACK_PCIE_INTF)
+    ADD_DEFINITIONS(-D__PCIE__)
+ENDIF()
+
 ################################################################################
 # Setup the architecture specific definitions
 
@@ -124,4 +128,3 @@ TARGET_LINK_LIBRARIES(demo_mn_console ${ARCH_LIBRARIES})
 
 INSTALL(TARGETS demo_mn_console RUNTIME DESTINATION ${PROJECT_NAME})
 INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/mnobd.cdc DESTINATION ${PROJECT_NAME})
-
