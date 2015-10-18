@@ -112,13 +112,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CONFIG_OBD_INCLUDE_A000_TO_DEVICE_PART          TRUE
 
 //==============================================================================
-// Timer module specific defines
-//==============================================================================
-
-// if TRUE the high resolution timer module will be used
-#define CONFIG_TIMER_USE_HIGHRES                        TRUE
-
-//==============================================================================
 // SDO module specific defines
 //==============================================================================
 

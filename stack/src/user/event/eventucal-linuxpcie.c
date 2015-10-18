@@ -356,6 +356,7 @@ interface to the PCIe driver to wait for an event to be posted from the PCP.
 
 \param  pArg_p              Thread argument.
 
+\return The function returns a NULL pointer.
 */
 //------------------------------------------------------------------------------
 static void* eventKThread(void* pArg_p)
@@ -404,6 +405,7 @@ event to be posted to the circular buffer and then processes it, once signalled.
 
 \param  pArg_p              Thread argument.
 
+\return The function returns a NULL pointer.
 */
 //------------------------------------------------------------------------------
 static void* eventUThread(void* pArg_p)

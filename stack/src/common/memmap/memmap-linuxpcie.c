@@ -144,9 +144,8 @@ tMemMapReturn memmap_shutdown(void)
 /**
 \brief  Map kernel buffer
 
-The function maps a kernel buffer address.
-\note   This implementation uses the ioctl interface to the PCIe driver to copy
-        the data from kernel space to the user space.
+The function maps a kernel layer buffer address into user application
+virtual address space which is of the size specified by \p bufferSize_p.
 
 \param  pKernelBuffer_p     The pointer to the kernel buffer.
 \param  bufferSize_p        The size of the kernel buffer.
