@@ -77,11 +77,4 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC    FALSE
 #define CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC   TRUE
 
-//==============================================================================
-// Timer module specific defines
-//==============================================================================
-
-// if TRUE the high resolution timer module will be used (must always be TRUE!)
-#define CONFIG_TIMER_USE_HIGHRES                    TRUE
-
 #endif // _INC_oplkcfg_H_

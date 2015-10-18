@@ -49,7 +49,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-typedef tOplkError (*irqCallback)(void); ///< Function signature of PCIe ISR callback for upper layer
+typedef tOplkError (*tIrqCallback)(void);   ///< Function signature of PCIe ISR callback for upper layer
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -64,7 +64,7 @@ tOplkError  pciedrv_shutdown(void);
 ULONG       pciedrv_getBarLength(ULONG barCount_p);
 ULONG       pciedrv_getBarAddr(UINT8 barCount_p);
 ULONG       pciedrv_getBarPhyAddr(UINT8 barCount_p);
-tOplkError  pciedrv_regSyncHandler(irqCallback cbSync_p);
+tOplkError  pciedrv_regSyncHandler(tIrqCallback cbSync_p);
 tOplkError  pciedrv_enableSync(BOOL fEnable_p);
 #ifdef __cplusplus
 }

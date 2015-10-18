@@ -252,7 +252,7 @@ tOplkError drvintf_executeCmd(tCtrlCmd* pCtrlCmd_p)
         ret = initStackInterface();
         if (ret != kErrorOk)
         {
-            DEBUG_LVL_ERROR_TRACE("Stack interace initialization to PCP Failed (0x%X)\n", ret);
+            DEBUG_LVL_ERROR_TRACE("Stack interface initialization to PCP Failed (0x%X)\n", ret);
             pCtrlCmd_p->retVal = ret;
             return ret;
         }
@@ -570,7 +570,7 @@ tOplkError drvintf_readErrorObject(UINT32 offset_p, UINT32* pErrVal_p)
     if (!drvIntfInstance_l.fDriverActive)
         return kErrorNoResource;
 
-    *pErrVal_p = *((UINT32*)((char*)errorObjects + offset_p));
+    *pErrVal_p = *((UINT32*)((UINT8*)errorObjects + offset_p));
     return kErrorOk;
 }
 
@@ -762,6 +762,9 @@ tOplkError drvintf_getPdoMem(UINT8** ppPdoMem_p, size_t* pMemSize_p)
     if (!drvIntfInstance_l.fDriverActive)
         return kErrorNoResource;
 
+    if ((ppPdoMem_p == NULL) || (pMemSize_p == NULL))
+        return kErrorInvalidInstanceParam;
+
     dualRet = dualprocshm_getMemory(drvIntfInstance_l.dualProcDrvInst,
                                     DUALPROCSHM_BUFF_ID_PDO, &pPdoMem,
                                     pMemSize_p, FALSE);
@@ -799,6 +802,9 @@ tOplkError drvintf_freePdoMem(UINT8** ppPdoMem_p, size_t memSize_p)
 
     if (!drvIntfInstance_l.fDriverActive)
         return kErrorNoResource;
+
+    if (ppPdoMem_p == NULL)
+        return kErrorInvalidInstanceParam;
 
     dualRet = dualprocshm_freeMemory(drvIntfInstance_l.dualProcDrvInst,
                                      DUALPROCSHM_BUFF_ID_PDO, FALSE);
@@ -948,6 +954,9 @@ Unmap and free the kernel to user memory mapped before.
 //------------------------------------------------------------------------------
 void drvintf_unmapKernelMem(UINT8** ppUserMem_p)
 {
+    if (ppUserMem_p == NULL)
+        return kErrorInvalidInstanceParam;
+
     *ppUserMem_p = NULL;
 }
 
@@ -987,9 +996,9 @@ static tOplkError initDualProcShmDriver(void)
         return kErrorNoResource;
     }
 
-    for (loopCount = 0; loopCount <= DPSHM_ENABLE_TIMEOUT_SEC; loopCount++)
+    for (loopCount = 0; loopCount <= (DPSHM_ENABLE_TIMEOUT_SEC * 100); loopCount++)
     {
-        msleep(1000U);
+        msleep(10U);
         dualRet = dualprocshm_checkShmIntfState(drvIntfInstance_l.dualProcDrvInst);
         if (dualRet != kDualprocshmIntfDisabled)
             break;
@@ -1163,10 +1172,10 @@ Close event queues initialized earlier.
 static void exitEventInterface(void)
 {
     if (drvIntfInstance_l.apEventQueueInst[kEventQueueK2U] != NULL)
-    circbuf_disconnect(drvIntfInstance_l.apEventQueueInst[kEventQueueK2U]);
+        circbuf_disconnect(drvIntfInstance_l.apEventQueueInst[kEventQueueK2U]);
 
     if (drvIntfInstance_l.apEventQueueInst[kEventQueueU2K] != NULL)
-    circbuf_disconnect(drvIntfInstance_l.apEventQueueInst[kEventQueueU2K]);
+        circbuf_disconnect(drvIntfInstance_l.apEventQueueInst[kEventQueueU2K]);
 }
 
 //------------------------------------------------------------------------------
@@ -1294,17 +1303,17 @@ static tOplkError initDllQueueInterface(void)
 static void exitDllQueueInterface(void)
 {
     if (drvIntfInstance_l.apDllQueueInst[kDllCalQueueTxGen] != NULL)
-    circbuf_disconnect(drvIntfInstance_l.apDllQueueInst[kDllCalQueueTxGen]);
+        circbuf_disconnect(drvIntfInstance_l.apDllQueueInst[kDllCalQueueTxGen]);
 
     if (drvIntfInstance_l.apDllQueueInst[kDllCalQueueTxNmt] != NULL)
-    circbuf_disconnect(drvIntfInstance_l.apDllQueueInst[kDllCalQueueTxNmt]);
+        circbuf_disconnect(drvIntfInstance_l.apDllQueueInst[kDllCalQueueTxNmt]);
 
     if (drvIntfInstance_l.apDllQueueInst[kDllCalQueueTxSync] != NULL)
-    circbuf_disconnect(drvIntfInstance_l.apDllQueueInst[kDllCalQueueTxSync]);
+        circbuf_disconnect(drvIntfInstance_l.apDllQueueInst[kDllCalQueueTxSync]);
 
 #if defined(CONFIG_INCLUDE_VETH)
     if (drvIntfInstance_l.apDllQueueInst[kDllCalQueueTxVeth] != NULL)
-    circbuf_disconnect(drvIntfInstance_l.apDllQueueInst[kDllCalQueueTxVeth]);
+        circbuf_disconnect(drvIntfInstance_l.apDllQueueInst[kDllCalQueueTxVeth]);
 #endif
 }
 

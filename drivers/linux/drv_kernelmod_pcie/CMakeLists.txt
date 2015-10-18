@@ -55,8 +55,6 @@ IF(NOT CMAKE_BUILD_TYPE)
 ENDIF()
 
 OPTION (CFG_OPLK_MN "Compile openPOWERLINK MN (Otherwise CN)" ON)
-#CMAKE_DEPENDENT_OPTION(CFG_INCLUDE_MN_REDUNDANCY "Compile MN redundancy functions into MN driver" OFF
-#                       "CFG_OPLK_MN" OFF)
 
 SET(CFG_DEBUG_LVL "0xEC000000L" CACHE STRING "Debug Level for debug output")
 
@@ -88,10 +86,7 @@ ENDIF()
 # Configure depending selected mode
 #
 IF(CFG_OPLK_MN)
-    IF(CFG_INCLUDE_MN_REDUNDANCY)
-         ADD_DEFINITIONS(-DCONFIG_INCLUDE_NMT_RMN)
-    ENDIF()
-
+# Export C defines needed to identify the Linux PCIe MN design
     ADD_DEFINITIONS(-D__PCIE__ -DCONFIG_MN)
     SET(MODULE_NAME "${MODULE_NAME}mn")
     INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/proj/mn)

@@ -124,8 +124,8 @@ The structure holds the information of this PCIe driver instance.
 typedef struct
 {
     struct pci_dev*     pPciDev;                        ///< Pointer to PCI device structure.
-    tBarInfo            barInfo[OPLK_MAX_BAR_COUNT];    ///< Bar instances of the PCIe interface.
-    irqCallback         cbSync;                         ///< Sync irq callback function of the upper user layer.
+    tBarInfo            aBarInfo[OPLK_MAX_BAR_COUNT];   ///< Bar instances of the PCIe interface.
+    tIrqCallback        pfnCbSync;                      ///< Sync irq callback function of the upper user layer.
     BOOL                fSyncEnabled;                   ///< Flag to check if sync irq for user has been enabled.
 } tPcieDrvInstance;
 
@@ -247,7 +247,7 @@ ULONG pciedrv_getBarAddr(UINT8 barCount_p)
         return 0;
     }
 
-    return pcieDrvInstance_l.barInfo[barCount_p].virtualAddr;
+    return pcieDrvInstance_l.aBarInfo[barCount_p].virtualAddr;
 }
 
 //------------------------------------------------------------------------------
@@ -270,7 +270,7 @@ ULONG pciedrv_getBarPhyAddr(UINT8 barCount_p)
         return 0;
     }
 
-    return pcieDrvInstance_l.barInfo[barCount_p].busAddr;
+    return pcieDrvInstance_l.aBarInfo[barCount_p].busAddr;
 }
 
 //------------------------------------------------------------------------------
@@ -291,7 +291,7 @@ ULONG pciedrv_getBarLength(ULONG barCount_p)
         return 0;
     }
 
-    return pcieDrvInstance_l.barInfo[barCount_p].length;
+    return pcieDrvInstance_l.aBarInfo[barCount_p].length;
 }
 
 //------------------------------------------------------------------------------
@@ -308,9 +308,9 @@ the PCIe sync ISR.
 \ingroup module_driver_linux_kernel_pcie
 */
 //------------------------------------------------------------------------------
-tOplkError pciedrv_regSyncHandler(irqCallback cbSync_p)
+tOplkError pciedrv_regSyncHandler(tIrqCallback cbSync_p)
 {
-    pcieDrvInstance_l.cbSync = cbSync_p;
+    pcieDrvInstance_l.pfnCbSync = cbSync_p;
     return kErrorOk;
 }
 
@@ -361,11 +361,11 @@ static irqreturn_t pcieDrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
 
     // Currently only sync interrupt is produced by the PCIe, check if the user
     // wants the irq to be forwarded
-    if ((pcieDrvInstance_l.cbSync != NULL) &&
+    if ((pcieDrvInstance_l.pfnCbSync != NULL) &&
         (pcieDrvInstance_l.fSyncEnabled == TRUE))
     {
         // User wants the interrupt, forward it without any argument
-        pcieDrvInstance_l.cbSync();
+        pcieDrvInstance_l.pfnCbSync();
     }
 
     return ret;
@@ -423,7 +423,7 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p,
     // Ignoring whether or not any BAR is accessible
     for (barCount = 0; barCount < OPLK_MAX_BAR_COUNT; barCount++)
     {
-        pBarInfo = &pcieDrvInstance_l.barInfo[barCount];
+        pBarInfo = &pcieDrvInstance_l.aBarInfo[barCount];
 
         if (pBarInfo->virtualAddr != (ULONG)NULL)
         {
@@ -528,7 +528,7 @@ static void removeOnePciDev(struct pci_dev* pPciDev_p)
     // unmap controller's register space
     for (barCount = 0; barCount < OPLK_MAX_BAR_COUNT; barCount++)
     {
-        pBarInfo = &pcieDrvInstance_l.barInfo[barCount];
+        pBarInfo = &pcieDrvInstance_l.aBarInfo[barCount];
 
         if (pBarInfo->virtualAddr != (ULONG)NULL)
         {

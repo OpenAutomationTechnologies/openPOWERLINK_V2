@@ -281,7 +281,7 @@ The function implements openPOWERLINK kernel pcie interface module open function
 \param  pInstance_p     Pointer to the device file object.
 
 \return The function returns an integer value.
-\retval 0           Successful.
+\retval 0               Successful.
 \retval -ENOTTY         One instance of the driver is already active.
 \retval -EIO            Unable to initialize the driver.
 
