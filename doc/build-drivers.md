@@ -55,7 +55,7 @@ To build the kernel PCIe interface driver:
       > make
       > make install
 
-The default driver installation path is: `<openPOWERLINK_DIR>\bin\linux\<ARCH>\oplkdrv_kernelmodule_pcie`
+The default driver installation path is: `<openPOWERLINK_DIR>/bin/linux/<ARCH>/oplkdrv_kernelmodule_pcie`
 
 ## Building a Windows NDIS PCIe miniport driver {#sect_build_drivers_build_windows_ndis_pcie}
 

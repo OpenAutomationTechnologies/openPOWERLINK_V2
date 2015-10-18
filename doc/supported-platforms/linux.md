@@ -157,7 +157,7 @@ system the following configurations are possible:
   - `stack/proj/linux/liboplkmnapp-kernelintf` (liboplkmnapp-kernelintf.a)
   - `stack/proj/linux/liboplkcnapp-kernelintf` (liboplkcnapp-kernelintf.a)
 
-- __Linux Kernel PCIe Interface__
+- __Stack on PCIe__
 
   The application is linked to an application library which contains
   the interface to a Linux kernel space PCIe interface driver.
