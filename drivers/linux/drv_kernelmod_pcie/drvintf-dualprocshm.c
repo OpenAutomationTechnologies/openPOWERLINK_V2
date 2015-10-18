@@ -426,7 +426,7 @@ tOplkError drvintf_getHeartbeat(UINT16* pHeartbeat_p)
 /**
 \brief  Write virtual Ethernet frame
 
-This routines extracts the non POWERLINK Ethernet frame data from the passed
+This routine extracts the non POWERLINK Ethernet frame data from the passed
 frame structure and uses the async data write function to post it into the DLL
 VEth queue for processing by kernel stack.
 
@@ -640,7 +640,8 @@ tOplkError drvintf_getEvent(tEvent* pK2UEvent_p, size_t* pSize_p)
     tFrameInfo*             pFrameInfo;
     tFrameInfo              frameInfo;
     UINT16                  etherType;
-    UINT8*                  pBuffer;
+    UINT8*                  pKernelMemBuffer = NULL;
+    UINT8*                  pUserMemBuffer = NULL;
     tEvent                  u2kEvent;
 #endif
 
@@ -670,16 +671,18 @@ tOplkError drvintf_getEvent(tEvent* pK2UEvent_p, size_t* pSize_p)
                     // Get the event argument from the copied data buffer
                     pK2UEvent_p->eventArg.pEventArg = (char*)pK2UEvent_p + sizeof(tEvent);
                     pFrameInfo = (tFrameInfo*)pK2UEvent_p->eventArg.pEventArg;
-                    pBuffer = (UINT8*)pFrameInfo->frame.pBuffer;
+                    pKernelMemBuffer = (UINT8*)pFrameInfo->frame.pBuffer;
 
                     // Get the bus address for the data buffer
-                    ret = drvintf_mapKernelMem((UINT8*)pBuffer,
-                                               (UINT8**)&pFrameInfo->frame.pBuffer,
+                    ret = drvintf_mapKernelMem((UINT8*)pKernelMemBuffer,
+                                               (UINT8**)&pUserMemBuffer,
                                                (size_t)pFrameInfo->frameSize);
                     if (ret != kErrorOk)
                     {
                         return ret;
                     }
+
+                    pFrameInfo->frame.pBuffer = (tPlkFrame*)pUserMemBuffer;
 
                     // Check if the frame is of non POWERLINK type
                     etherType = ami_getUint16Be(&pFrameInfo->frame.pBuffer->etherType);
@@ -691,7 +694,7 @@ tOplkError drvintf_getEvent(tEvent* pK2UEvent_p, size_t* pSize_p)
                         *pSize_p = 0;
 
                         // Restore frame info for releasing Rx frame
-                        pFrameInfo->frame.pBuffer = (tPlkFrame*)pBuffer;
+                        pFrameInfo->frame.pBuffer = (tPlkFrame*)pKernelMemBuffer;
 
                         // Post the event to free the veth frame buffer
                         u2kEvent.eventSink = kEventSinkDllkCal;
@@ -701,6 +704,9 @@ tOplkError drvintf_getEvent(tEvent* pK2UEvent_p, size_t* pSize_p)
 
                         drvintf_postEvent(&u2kEvent);
                     }
+
+                    // Unmap the memory mapped previosly
+                    drvintf_unmapKernelMem(pUserMemBuffer);
 
                     break;
 

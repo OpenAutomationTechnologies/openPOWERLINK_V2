@@ -73,7 +73,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 #ifndef VETH_TX_TIMEOUT
-//#define VETH_TX_TIMEOUT (2*HZ)
 #define VETH_TX_TIMEOUT 0       // d.k.: we use no timeout
 #endif
 
@@ -169,9 +168,13 @@ tOplkError veth_init(const UINT8 aSrcMac_p[6])
 
     // Register VEth to the network subsystem
     if (register_netdev(pVEthNetDevice_g))
+    {
         DEBUG_LVL_VETH_TRACE("veth_init: Could not register VEth...\n");
+    }
     else
+    {
         DEBUG_LVL_VETH_TRACE("veth_init: Register VEth successful...\n");
+    }
 
     return kErrorOk;
 }
@@ -285,7 +288,6 @@ static int veth_xmit(struct sk_buff* pSkb_p, struct net_device* pNetDevice_p)
     {
         DEBUG_LVL_VETH_TRACE("veth_xmit: drvintf_sendVethFrame returned 0x%02X\n", ret);
         netif_stop_queue(pNetDevice_p);
-        goto Exit;
     }
     else
     {
@@ -297,7 +299,6 @@ static int veth_xmit(struct sk_buff* pSkb_p, struct net_device* pNetDevice_p)
         pStats->tx_bytes += frameInfo.frameSize;
     }
 
-Exit:
     return 0;
 }
 
