@@ -162,7 +162,7 @@ tOplkError pdoucal_allocateMem(size_t memSize_p, UINT8** ppPdoMem_p)
     fIoctlRet = DeviceIoControl(hFileHandle_l, PLK_CMD_PDO_GET_MEM,
                                 &inPdoMem, sizeof(tPdoMem), &outPdoMem, sizeof(tPdoMem),
                                 &bytesReturned, NULL);
-    if (!fIoctlRet || (bytesReturned == 0) || (outPdoMem.pdoMemOffset == 0))
+    if (!fIoctlRet || (bytesReturned == 0))
     {
         *ppPdoMem_p = NULL;
         return kErrorNoResource;
