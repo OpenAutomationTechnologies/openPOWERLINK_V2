@@ -62,10 +62,7 @@ The generic defines are valid for the whole openPOWERLINK stack.
 #define CONFIG_INCLUDE_SDOC
 #define CONFIG_INCLUDE_LEDK
 #define CONFIG_INCLUDE_SDO_ASND
-
-#ifndef CONFIG_PCIE
 #define CONFIG_INCLUDE_VETH
-#endif
 
 #ifndef BENCHMARK_MODULES
 #define BENCHMARK_MODULES                   (0 |\
