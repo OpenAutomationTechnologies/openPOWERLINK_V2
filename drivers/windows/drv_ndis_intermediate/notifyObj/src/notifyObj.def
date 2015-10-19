@@ -1,0 +1,15 @@
+;
+;\file   notifyObj.def
+;
+;\brief  Declares the module parameters
+;
+; This is tool generated module definition file for notify object DLL.
+
+LIBRARY
+
+EXPORTS
+    DllCanUnloadNow     PRIVATE
+    DllGetClassObject   PRIVATE
+    DllRegisterServer   PRIVATE
+    DllUnregisterServer PRIVATE
+    DllInstall          PRIVATE
