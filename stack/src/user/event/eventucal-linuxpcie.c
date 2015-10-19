@@ -60,7 +60,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 
-#define USER_EVENT_THREAD_PRIORITY    20
+#define KERNEL_EVENT_FETCH_THREAD_PRIORITY      20  // Priority of the kernel event fetch thread
+#define EVENT_PROCESS_THREAD_PRIORITY           30  // Priority of the process event thread; higher than fetch thread to avoid event drops
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -91,14 +92,18 @@ CAL module.
 typedef struct
 {
     OPLK_FILE_HANDLE    fd;                     ///< File descriptor for the kernel PCIe driver.
-    pthread_t           kernelEventThreadId;    ///< K2U event processing thread Id.
-    pthread_t           userEventThreadId;      ///< UInt event processing thread Id.
-    pthread_mutex_t     userEventMutex;         ///< Mutex for accessing pending user event counter.
-    pthread_cond_t      userEventCondition;     ///< Conditional variable for signalling UInt event.
-    OPLK_ATOMIC_T       userEventCount;         ///< Pending user event counter.
+    pthread_t           kernelEventThreadId;    ///< K2U event fetching thread Id.
+    pthread_t           processEventThreadId;   ///< Event processing thread Id.
+    pthread_mutex_t     processEventMutex;      ///< Mutex for accessing pending events counter.
+    pthread_cond_t      processEventCondition;  ///< Conditional variable for signalling pending events to be processed.
+    pthread_mutex_t     k2uEventMutex;          ///< Mutex for accessing pending kernel events flag.
+    pthread_cond_t      k2uEventCondition;      ///< Conditional variable for signalling completion of processing of kernel events.
+    OPLK_ATOMIC_T       pendingEventCount;      ///< Pending events counter.
     BOOL                fStopKernelThread;      ///< Flag to start stop K2U event thread.
-    BOOL                fStopUserThread;        ///< Flag to start stop UInt event thread.
+    BOOL                fStopProcessThread;     ///< Flag to start stop UInt event thread.
+    BOOL                fK2UEventPending;       ///< Flag to indicate pending kernel events to be processed.
     BOOL                fInitialized;           ///< Flag indicate the valid state of this module.
+    UINT8               aEventBuf[sizeof(tEvent) + MAX_EVENT_ARG_SIZE]; ///< Buffer to hold the kernel to user event.
 } tEventuCalInstance;
 
 //------------------------------------------------------------------------------
@@ -109,9 +114,9 @@ static tEventuCalInstance    instance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static void         signalUserEvent(void);
-static void*        eventKThread(void* pArg_p);
-static void*        eventUThread(void* pArg_p);
+static void         signalUIntEvent(void);
+static void*        k2uEventFetchThread(void* pArg_p);
+static void*        eventProcessThread(void* pArg_p);
 static tOplkError   postEvent(tEvent* pEvent_p);
 
 //============================================================================//
@@ -137,30 +142,34 @@ tOplkError eventucal_init(void)
 {
     tOplkError                  ret = kErrorOk;
     struct sched_param          schedParam;
-    const pthread_mutex_t       userEventMutex = PTHREAD_MUTEX_INITIALIZER;
-    const pthread_cond_t        userEventCondition = PTHREAD_COND_INITIALIZER;
+    const pthread_mutex_t       newEventMutex = PTHREAD_MUTEX_INITIALIZER;
+    const pthread_cond_t        newEventCondition = PTHREAD_COND_INITIALIZER;
 
     OPLK_MEMSET(&instance_l, 0, sizeof(tEventuCalInstance));
 
     instance_l.fd = ctrlucal_getFd();
     instance_l.fStopKernelThread = FALSE;
-    instance_l.fStopUserThread = FALSE;
+    instance_l.fStopProcessThread = FALSE;
 
-    OPLK_MEMCPY(&instance_l.userEventMutex, &userEventMutex, sizeof(pthread_mutex_t));
-    OPLK_MEMCPY(&instance_l.userEventCondition, &userEventCondition, sizeof(pthread_cond_t));
-    instance_l.userEventCount = 0;
+    OPLK_MEMCPY(&instance_l.processEventMutex, &newEventMutex, sizeof(pthread_mutex_t));
+    OPLK_MEMCPY(&instance_l.processEventCondition, &newEventCondition, sizeof(pthread_cond_t));
+    instance_l.pendingEventCount = 0;
+
+    OPLK_MEMCPY(&instance_l.k2uEventMutex, &newEventMutex, sizeof(pthread_mutex_t));
+    OPLK_MEMCPY(&instance_l.k2uEventCondition, &newEventCondition, sizeof(pthread_cond_t));
+    instance_l.fK2UEventPending = FALSE;
 
     if (eventucal_initQueueCircbuf(kEventQueueUInt) != kErrorOk)
         goto Exit;
 
-    if (eventucal_setSignalingCircbuf(kEventQueueUInt, signalUserEvent) != kErrorOk)
+    if (eventucal_setSignalingCircbuf(kEventQueueUInt, signalUIntEvent) != kErrorOk)
         goto Exit;
 
     // Create thread for signalling new user data from kernel
-    if (pthread_create(&instance_l.kernelEventThreadId, NULL, eventKThread, NULL) != 0)
+    if (pthread_create(&instance_l.kernelEventThreadId, NULL, k2uEventFetchThread, NULL) != 0)
         goto Exit;
 
-    schedParam.__sched_priority = USER_EVENT_THREAD_PRIORITY;
+    schedParam.__sched_priority = KERNEL_EVENT_FETCH_THREAD_PRIORITY;
     if (pthread_setschedparam(instance_l.kernelEventThreadId, SCHED_FIFO, &schedParam) != 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s(): couldn't set K2U thread scheduling parameters! %d\n",
@@ -168,22 +177,22 @@ tOplkError eventucal_init(void)
     }
 
 #if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 12)
-    pthread_setname_np(instance_l.kernelEventThreadId, "oplk-eventu");
+    pthread_setname_np(instance_l.kernelEventThreadId, "oplk-eventufetch");
 #endif
 
     // Create thread for signalling new user internal data
-    if (pthread_create(&instance_l.userEventThreadId, NULL, eventUThread, NULL) != 0)
+    if (pthread_create(&instance_l.processEventThreadId, NULL, eventProcessThread, NULL) != 0)
         goto Exit;
 
-    schedParam.__sched_priority = USER_EVENT_THREAD_PRIORITY;
-    if (pthread_setschedparam(instance_l.userEventThreadId, SCHED_FIFO, &schedParam) != 0)
+    schedParam.__sched_priority = EVENT_PROCESS_THREAD_PRIORITY;
+    if (pthread_setschedparam(instance_l.processEventThreadId, SCHED_FIFO, &schedParam) != 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s(): couldn't set UInt thread scheduling parameters! %d\n",
                               __func__, schedParam.__sched_priority);
     }
 
 #if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 12)
-    pthread_setname_np(instance_l.userEventThreadId, "oplk-eventuint");
+    pthread_setname_np(instance_l.processEventThreadId, "oplk-eventuprocess");
 #endif
 
     return kErrorOk;
@@ -214,6 +223,7 @@ tOplkError eventucal_exit(void)
     if (instance_l.kernelEventThreadId != 0)
     {
         instance_l.fStopKernelThread = TRUE;
+        pthread_cond_signal(&instance_l.k2uEventCondition);
         while (instance_l.fStopKernelThread == TRUE)
         {
             target_msleep(10);
@@ -226,11 +236,11 @@ tOplkError eventucal_exit(void)
     }
 
     timeout = 0;
-    if (instance_l.userEventThreadId != 0)
+    if (instance_l.processEventThreadId != 0)
     {
-        instance_l.fStopUserThread = TRUE;
-        pthread_cond_signal(&instance_l.userEventCondition);
-        while (instance_l.fStopUserThread == TRUE)
+        instance_l.fStopProcessThread = TRUE;
+        pthread_cond_signal(&instance_l.processEventCondition);
+        while (instance_l.fStopProcessThread == TRUE)
         {
             target_msleep(10);
             if (timeout++ > 1000)
@@ -353,25 +363,26 @@ static tOplkError postEvent(tEvent* pEvent_p)
 
 This function implements the K2U event thread. The thread uses the ioctl
 interface to the PCIe driver to wait for an event to be posted from the PCP.
+Once an event has been retrieved, this function signals the process event thread
+to process the event.
 
 \param  pArg_p              Thread argument.
 
 \return The function returns a NULL pointer.
 */
 //------------------------------------------------------------------------------
-static void* eventKThread(void* pArg_p)
+static void* k2uEventFetchThread(void* pArg_p)
 {
     tEvent*     pEvent;
     INT         ret;
-    char        eventBuf[sizeof(tEvent) + MAX_EVENT_ARG_SIZE];
 
     UNUSED_PARAMETER(pArg_p);
 
-    pEvent = (tEvent*)eventBuf;
+    pEvent = (tEvent*)instance_l.aEventBuf;
 
     while (!instance_l.fStopKernelThread)
     {
-        ret = ioctl(instance_l.fd, PLK_CMD_GET_EVENT, eventBuf);
+        ret = ioctl(instance_l.fd, PLK_CMD_GET_EVENT, instance_l.aEventBuf);
         if (ret == 0)
         {
             /*
@@ -379,16 +390,27 @@ static void* eventKThread(void* pArg_p)
                     pEvent->eventType, debugstr_getEventTypeStr(pEvent->eventType),
                     pEvent->eventSink, debugstr_getEventSinkStr(pEvent->eventSink));*/
             if (pEvent->eventArgSize != 0)
-                pEvent->eventArg.pEventArg = (char*)pEvent + sizeof(tEvent);
+                pEvent->eventArg.pEventArg = (UINT8*)pEvent + sizeof(tEvent);
 
-            ret = eventu_process(pEvent);
+            // Signal the event process thread and wait for it to be processed
+            pthread_mutex_lock(&instance_l.processEventMutex);
+            instance_l.pendingEventCount++;
+            pthread_mutex_unlock(&instance_l.processEventMutex);
+
+            pthread_mutex_lock(&instance_l.k2uEventMutex);
+            instance_l.fK2UEventPending = TRUE;
+            pthread_cond_signal(&instance_l.processEventCondition);
+            while ((instance_l.fK2UEventPending == TRUE) &&
+                   (!instance_l.fStopKernelThread))
+                pthread_cond_wait(&instance_l.k2uEventCondition, &instance_l.k2uEventMutex);
+
+            pthread_mutex_unlock(&instance_l.k2uEventMutex);
         }
         else
         {
             // Ignore errors from kernel
             DEBUG_LVL_EVENTK_TRACE("Error in retrieving kernel to user event!!\n");
         }
-
     }
 
     instance_l.fStopKernelThread = FALSE;
@@ -400,54 +422,77 @@ static void* eventKThread(void* pArg_p)
 /**
 \brief    Event thread function
 
-This function implements the UInt event thread. The thread waits for an user
-event to be posted to the circular buffer and then processes it, once signalled.
+This function implements the event processing thread. The thread waits for a user
+or kernel event to be fetched and then processes it, once signalled.
 
 \param  pArg_p              Thread argument.
 
 \return The function returns a NULL pointer.
 */
 //------------------------------------------------------------------------------
-static void* eventUThread(void* pArg_p)
+static void* eventProcessThread(void* pArg_p)
 {
+    OPLK_ATOMIC_T       processedEventCount = 0;
+    tEvent*             pEvent = (tEvent*)instance_l.aEventBuf;
+
     UNUSED_PARAMETER(pArg_p);
 
-    while (!instance_l.fStopUserThread)
+    while (!instance_l.fStopProcessThread)
     {
-        pthread_mutex_lock(&instance_l.userEventMutex);
-        instance_l.userEventCount = 0;  // Reset the pending event count
-        while ((instance_l.userEventCount <= 0) && (!instance_l.fStopUserThread))
-            pthread_cond_wait(&instance_l.userEventCondition, &instance_l.userEventMutex);
-
-        pthread_mutex_unlock(&instance_l.userEventMutex);
-        if (instance_l.fStopUserThread)
-            break;
-
-        while (eventucal_getEventCountCircbuf(kEventQueueUInt) > 0)
+        pthread_mutex_lock(&instance_l.processEventMutex);
+        if (instance_l.pendingEventCount == processedEventCount)
         {
-            eventucal_processEventCircbuf(kEventQueueUInt);
+            processedEventCount = 0;
+            instance_l.pendingEventCount = 0;  // Reset the pending event count
+            while ((instance_l.pendingEventCount <= 0) &&
+                   (!instance_l.fStopProcessThread))
+                pthread_cond_wait(&instance_l.processEventCondition, &instance_l.processEventMutex);
+        }
+
+        pthread_mutex_unlock(&instance_l.processEventMutex);
+        // Process all pending events including the oned posted during processing
+        while((instance_l.pendingEventCount != processedEventCount) &&
+              (!instance_l.fStopProcessThread))
+        {
+            // Process the kernel event and signal the kernel event thread to wake up
+            if (instance_l.fK2UEventPending)
+            {
+                ret = eventu_process(pEvent);
+                processedEventCount++;
+                pthread_mutex_lock(&instance_l.k2uEventMutex);
+                instance_l.fK2UEventPending = FALSE;
+                pthread_mutex_unlock(&instance_l.k2uEventMutex);
+                pthread_cond_signal(&instance_l.k2uEventCondition);
+            }
+
+            // Process user internal events
+            while (eventucal_getEventCountCircbuf(kEventQueueUInt) > 0)
+            {
+                processedEventCount++;
+                eventucal_processEventCircbuf(kEventQueueUInt);
+            }
         }
     }
 
-    instance_l.fStopUserThread = FALSE;
+    instance_l.fStopProcessThread = FALSE;
 
     return NULL;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Signal a user event
+\brief  Signal a user internal event
 
 This function signals that a user event was posted. It will be registered in
 the circular buffer library as signal callback function.
 */
 //------------------------------------------------------------------------------
-static void signalUserEvent(void)
+static void signalUIntEvent(void)
 {
-    pthread_mutex_lock(&instance_l.userEventMutex);
-    instance_l.userEventCount++;
-    pthread_mutex_unlock(&instance_l.userEventMutex);
-    pthread_cond_signal(&instance_l.userEventCondition);
+    pthread_mutex_lock(&instance_l.processEventMutex);
+    instance_l.pendingEventCount++;
+    pthread_mutex_unlock(&instance_l.processEventMutex);
+    pthread_cond_signal(&instance_l.processEventCondition);
 }
 
 /// \}
