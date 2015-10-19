@@ -1,0 +1,124 @@
+;
+; oplk_ndisimp.inf
+;
+; openPOWERLINK NDIS intermediate driver protocol INF file.
+;
+; This file contains the installation definitions and configuration
+; for openPOWERLINK protocol service installed as a part of
+; NDIS intermediate driver.
+;
+;/*------------------------------------------------------------------------------
+;Copyright (c) 2015, Kalycito Infotech Private Limited
+;All rights reserved.
+;
+;Redistribution and use in source and binary forms, with or without
+;modification, are permitted provided that the following conditions are met:
+;    * Redistributions of source code must retain the above copyright
+;      notice, this list of conditions and the following disclaimer.
+;    * Redistributions in binary form must reproduce the above copyright
+;      notice, this list of conditions and the following disclaimer in the
+;      documentation and/or other materials provided with the distribution.
+;    * Neither the name of the copyright holders nor the
+;      names of its contributors may be used to endorse or promote products
+;      derived from this software without specific prior written permission.
+;
+;THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+;ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+;WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+;DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+;DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+;(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+;LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+;ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+;(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+;SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+;------------------------------------------------------------------------------*/
+
+[Version]
+Signature   = "$Windows NT$"
+Class       = NetTrans
+ClassGUID   = {4D36E975-E325-11CE-BFC1-08002BE10318}
+Provider    = %ManufacturerName%
+DriverVer=26/05/2015,2.3.0.0
+CatalogFile=drv_ndis_intermediate.cat
+
+[Manufacturer]
+%ManufacturerName%  =OPLK, NT$ARCH$
+
+[OPLK.NT$ARCH$]
+%OPLK.DevDesc% = PLKP.ndi, MS_PLKP
+
+; Note:
+; 1. The NCF_* flags are defined in netcfgx.h
+; 2. NCF_HAS_UI (0x80) is required for custom property pages.
+;
+
+[PLKP.ndi]
+AddReg          = PLKP.ndi.AddReg
+Characteristics = 0x80 ; NCF_HAS_UI
+copyfiles       = PLKP.CopyFiles.DLL, PLKP.CopyFiles.sys
+CopyInf         = oplk_ndisim_mp.inf
+
+[SourceDisksNames]
+1=%DiskDescription%,"",,
+
+[SourceDisksFiles]
+drv_ndis_intermediate.sys     = 1
+notifyObj.dll     = 1
+
+
+[DestinationDirs]
+DefaultDestDir      = 12
+PLKP.CopyFiles.DLL  = 11   ; %windir%\System32
+PLKP.CopyFiles.Sys  = 12   ; %windir%\System32\drivers
+
+[PLKP.CopyFiles.Sys]
+drv_ndis_intermediate.sys,,,2
+
+[PLKP.CopyFiles.DLL]
+notifyObj.dll,,,2
+
+
+;-----------------------------------------------------------------------
+;  Install parameters
+;
+
+[PLKP.ndi.AddReg]
+HKR, Ndi,            ClsID,         0, {B31E902A-23E9-40B7-ADE3-FDA2962DAE8F}
+HKR, Ndi,            ComponentDll,   , notifyObj.dll
+HKR, Ndi,            HelpText,      0,          "%OPLKP_HELP%"
+HKR, Ndi,            Service,       0,          "PLKP"
+HKR, Ndi\Interfaces, UpperRange,    0,          "noupper"
+HKR, Ndi\Interfaces, LowerRange,    0,          "ndis5"
+
+
+[PLKP.ndi.Services]
+AddService = PLKP, , PLKP.AddService, PLKP.AddEventLog
+
+[PLKP.AddService]
+DisplayName     = %OPLKP.Service.DispName%
+ServiceType     = 1 ;SERVICE_KERNEL_DRIVER
+StartType       = 3 ;SERVICE_DEMAND_START
+ErrorControl    = 1 ;SERVICE_ERROR_NORMAL
+ServiceBinary   = %12%\drv_ndis_intermediate.sys
+Description     = %OPLKP.Service.DispName%
+
+[PLKP.AddEventLog]
+AddReg = PLKP.AddEventLog.AddReg
+
+[PLKP.AddEventLog.AddReg]
+HKR, , EventMessageFile, 0x20000, "%%SystemRoot%%\System32\netevent.dll"
+HKR, , TypesSupported,   0x10001, 7
+
+[PLKP.ndi.Remove.Services]
+DelService = PLKP
+
+[PLKP.ndi.Remove]
+DelFiles = PLKP.CopyFiles.DLL, PLKP.CopyFiles.sys
+
+[Strings]
+ManufacturerName = "Kalycito Infotech Private Limited"
+OPLK.DevDesc = "POWERLINK NDIS Intermediate Device"
+OPLKP.Service.DispName = "POWERLINK NDIS Protocol Service"
+OPLKP_HELP = "POWERLINK NDIS Protocol Instance"
+VlanID = "VLAN ID"

@@ -32,12 +32,12 @@ MACRO(GEN_VS_FILTER_LIST IN_SRC_LIST FOLDER_PREFIX RES_FILTER_LIST)
 
     SET(TMP_RESULT "  <ItemGroup>\n")
 
-    FOREACH(SRC_FILE IN ITEMS ${IN_SRC_LIST})
+    FOREACH (SRC_FILE IN ITEMS ${IN_SRC_LIST})
         GET_FILENAME_COMPONENT(SRC_NAME ${SRC_FILE} NAME)
-        IF("${FOLDER_PREFIX}" STREQUAL "")
+        IF ("${FOLDER_PREFIX}" STREQUAL "")
             SET(TMP_RESULT "${TMP_RESULT}    <ClCompile Include=\"${SRC_FILE}\" >\n      <Filter>Source Files</Filter>\n    </ClCompile>\n")
         ELSE()
-            SET(TMP_RESULT "${TMP_RESULT}    <ClCompile Include=\"${SRC_FILE}\" >\n      <Filter>${FOLDER_PREFIX}</Filter>\n    </ClCompile>\n")
+            SET(TMP_RESULT "${TMP_RESULT}    <ClCompile Include=\"${SRC_FILE}\" >\n      <Filter>Source Files\\${FOLDER_PREFIX}</Filter>\n    </ClCompile>\n")
         ENDIF("${FOLDER_PREFIX}" STREQUAL "")
     ENDFOREACH()
 
