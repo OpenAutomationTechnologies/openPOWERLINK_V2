@@ -87,6 +87,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #define CMD_TIMEOUT_CNT                 500 // Loop count for command timeout in units of 10ms
 #define DPSHM_ENABLE_TIMEOUT_SEC        10  // Wait for dpshm interface enable time out
+#define DRV_DLLCALTXQUEUE_INSTCNT       (kDllCalQueueTxVeth + 1)    // Number of queue instances in dllcal. The indices from 1 to
+                                                                    // kDllCalQueueTxVeth are used for storing the correspoding queue instance.
+                                                                    // Zeroeth index is unused.
 
 //------------------------------------------------------------------------------
 // local types
@@ -102,7 +105,7 @@ typedef struct
 {
     tDualprocDrvInstance    dualProcDrvInst;                    ///< Dual processor driver instance.
     tCircBufInstance*       apEventQueueInst[kEventQueueNum];   ///< Event queue instances.
-    tCircBufInstance*       apDllQueueInst[kDllCalQueueTxVeth + 1]; ///< DLL queue instances.
+    tCircBufInstance*       apDllQueueInst[DRV_DLLCALTXQUEUE_INSTCNT]; ///< DLL queue instances.
     tErrHndObjects*         pErrorObjects;                      ///< Pointer to error objects.
     BOOL                    fDriverActive;                      ///< Flag to identify status of driver interface.
 #if defined(CONFIG_INCLUDE_VETH)
@@ -511,7 +514,7 @@ tOplkError drvintf_sendAsyncFrame(tDllCalQueue queue_p,
 
     ret = insertAsyncDataBlock(drvIntfInstance_l.apDllQueueInst[queue_p],
                                (UINT8*)pData_p,
-                               &(size_p));
+                               (UINT*)&(size_p));
 
     if (ret != kErrorOk)
     {

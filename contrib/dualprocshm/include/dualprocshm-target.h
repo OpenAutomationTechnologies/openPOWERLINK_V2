@@ -64,7 +64,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "dualprocshm-pcie.h"
 
-#elif defined (__PCIE__)
+#elif defined (__LINUX_PCIE__)
 
 #include "dualprocshm-pcie.h"
 

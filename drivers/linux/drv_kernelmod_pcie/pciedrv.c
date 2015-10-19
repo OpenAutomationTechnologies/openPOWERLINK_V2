@@ -518,7 +518,7 @@ static void removeOnePciDev(struct pci_dev* pPciDev_p)
     }
 
     // Remove interrupt handler
-    if (pPciDev_p->irq != (INT)NULL)
+    if (pPciDev_p->irq != 0)
         free_irq(pPciDev_p->irq, pPciDev_p);
 
     // Disable Message Signaled Interrupt

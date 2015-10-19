@@ -114,7 +114,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define OPLK_ATOMIC_T    UINT8
 
-#ifdef __PCIE__
+#ifdef __LINUX_PCIE__
 #define ATOMIC_MEM_OFFSET           0x80000 // $$ Get the atomic memory base address from config header
 #define OPLK_ATOMIC_INIT(base)
 #define OPLK_ATOMIC_EXCHANGE(address, newval, oldval) \

@@ -87,7 +87,7 @@ ENDIF()
 #
 IF(CFG_OPLK_MN)
 # Export C defines needed to identify the Linux PCIe MN design
-    ADD_DEFINITIONS(-D__PCIE__ -DCONFIG_MN)
+    ADD_DEFINITIONS(-D__LINUX_PCIE__ -DCONFIG_MN)
     SET(MODULE_NAME "${MODULE_NAME}mn")
     INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/proj/mn)
 ELSE()

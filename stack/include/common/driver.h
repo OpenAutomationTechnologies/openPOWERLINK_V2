@@ -129,7 +129,7 @@ typedef struct
 //------------------------------------------------------------------------------
 #if (TARGET_SYSTEM == _LINUX_)
 
-#ifdef __PCIE__
+#ifdef __LINUX_PCIE__
 #include <common/driver-linuxpcie.h>
 #else
 
