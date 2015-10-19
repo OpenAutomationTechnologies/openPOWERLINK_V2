@@ -85,7 +85,7 @@ ELSE (CFG_KERNEL_STACK_DIRECTLINK)
 ENDIF (CFG_KERNEL_STACK_DIRECTLINK)
 
 IF (CFG_KERNEL_STACK_PCIE_INTF)
-    ADD_DEFINITIONS(-D__PCIE__)
+    ADD_DEFINITIONS(-D__LINUX_PCIE__)
 ENDIF()
 
 ################################################################################
