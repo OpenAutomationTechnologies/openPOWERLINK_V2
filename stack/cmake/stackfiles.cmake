@@ -235,6 +235,10 @@ SET(EVENT_UCAL_WINDOWSPCIE_SOURCES
     ${USER_SOURCE_DIR}/event/eventucal-winpcie.c
     )
 
+SET(EVENT_UCAL_WINDOWSIOCTL_SOURCES
+    ${USER_SOURCE_DIR}/event/eventucal-winioctl.c
+    )
+
 ################################################################################
 # User PDO CAL sources
 SET(PDO_UCAL_LOCAL_SOURCES
@@ -527,6 +531,10 @@ SET(MEMMAP_DUALPROCSHM_SOURCES
 SET(TARGET_WINDOWS_SOURCES
     ${ARCH_SOURCE_DIR}/windows/target-windows.c
     ${ARCH_SOURCE_DIR}/windows/target-mutex.c
+    )
+
+SET(TARGET_WINDOWS_DUAL_SOURCES
+    ${ARCH_SOURCE_DIR}/windows/lock-dualprocnoos.c
     )
 
 SET(TARGET_LINUX_SOURCES
