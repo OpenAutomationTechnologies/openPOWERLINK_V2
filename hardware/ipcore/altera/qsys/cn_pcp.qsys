@@ -418,7 +418,7 @@
   <parameter name="initMemContent" value="true" />
   <parameter name="initializationFileName" value="tc_i_mem" />
   <parameter name="instanceID" value="NONE" />
-  <parameter name="memorySize" value="4096" />
+  <parameter name="memorySize" value="24576" />
   <parameter name="readDuringWriteMode" value="DONT_CARE" />
   <parameter name="simAllowMRAMContentsFile" value="false" />
   <parameter name="simMemInitOnlyFilename" value="0" />
@@ -603,7 +603,7 @@
   <parameter name="tightlyCoupledInstructionMaster2AddrWidth" value="1" />
   <parameter name="tightlyCoupledInstructionMaster3AddrWidth" value="1" />
   <parameter name="instSlaveMapParam"><![CDATA[<address-map><slave name='cpu_0.jtag_debug_module' start='0x2002800' end='0x2003000' /></address-map>]]></parameter>
-  <parameter name="dataSlaveMapParam"><![CDATA[<address-map><slave name='cpu_0.jtag_debug_module' start='0x2002800' end='0x2003000' /><slave name='tc_i_mem.s2' start='0x8000000' end='0x8001000' /><slave name='timer_0.s1' start='0x20000000' end='0x20000020' /><slave name='benchmark_pio.s1' start='0x20000020' end='0x20000040' /><slave name='jtag_uart_0.avalon_jtag_slave' start='0x20000040' end='0x20000048' /><slave name='POWERLINK_LED.s1' start='0x20001020' end='0x20001040' /></address-map>]]></parameter>
+  <parameter name="dataSlaveMapParam"><![CDATA[<address-map><slave name='cpu_0.jtag_debug_module' start='0x2002800' end='0x2003000' /><slave name='tc_i_mem.s2' start='0x8000000' end='0x8006000' /><slave name='timer_0.s1' start='0x20000000' end='0x20000020' /><slave name='benchmark_pio.s1' start='0x20000020' end='0x20000040' /><slave name='jtag_uart_0.avalon_jtag_slave' start='0x20000040' end='0x20000048' /><slave name='POWERLINK_LED.s1' start='0x20001020' end='0x20001040' /></address-map>]]></parameter>
   <parameter name="clockFrequency" value="100000000" />
   <parameter name="deviceFamilyName" value="Cyclone IV E" />
   <parameter name="internalIrqMaskSystemInfo" value="255" />
@@ -613,7 +613,7 @@
   <parameter name="tightlyCoupledDataMaster1MapParam" value="" />
   <parameter name="tightlyCoupledDataMaster2MapParam" value="" />
   <parameter name="tightlyCoupledDataMaster3MapParam" value="" />
-  <parameter name="tightlyCoupledInstructionMaster0MapParam"><![CDATA[<address-map><slave name='tc_i_mem.s1' start='0x8000000' end='0x8001000' /></address-map>]]></parameter>
+  <parameter name="tightlyCoupledInstructionMaster0MapParam"><![CDATA[<address-map><slave name='tc_i_mem.s1' start='0x8000000' end='0x8006000' /></address-map>]]></parameter>
   <parameter name="tightlyCoupledInstructionMaster1MapParam" value="" />
   <parameter name="tightlyCoupledInstructionMaster2MapParam" value="" />
   <parameter name="tightlyCoupledInstructionMaster3MapParam" value="" />
