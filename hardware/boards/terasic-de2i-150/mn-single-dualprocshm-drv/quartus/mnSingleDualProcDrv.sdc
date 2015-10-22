@@ -24,7 +24,7 @@ derive_clock_uncertainty
 set_false_path -from * -to [get_ports ENET_GTX_CLK]
 
 # ------------------------------------------------------------------------------
-# SRAM definitions
+# SSRAM definitions
 
 timing_ssram $clk100
 
@@ -42,6 +42,14 @@ set_false_path -from [get_registers *]      -to [get_ports oFlash_DI]
 set_false_path -from [get_ports iFlash_DO]  -to [get_registers *]
 
 # ------------------------------------------------------------------------------
-# LEDs
+# other I/Os
 # -> Cut path
-#set_false_path -from *                          -to [get_ports LEDG]
+set_false_path -from [get_registers *]      -to [get_ports LEDG[*]]
+set_false_path -from [get_registers *]      -to [get_ports BENCHMARK_PCP[*]]
+set_false_path -from [get_registers *]      -to [get_ports BENCHMARK_PCIE[*]]
+
+#--------------------------------------------------------------------------------
+# PCIE
+# -> Cut path
+set_false_path -from [get_ports PCIE_PERST_N]  -to [get_registers *]
+

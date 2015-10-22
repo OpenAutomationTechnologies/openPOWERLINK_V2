@@ -3,9 +3,13 @@
 # -> SSRAM: IS61LPS51236A-200TQLI
 # ------------------------------------------------------------------------------
 
-proc timing_ssram { SSRAM_CLK } {
+proc timing_ssram { clkSSRAM } {
     # Virtual clock for SSRAM generated with SSRAM_CLK
-    create_generated_clock -name clkSSRAM_virt -source ${SSRAM_CLK}
+    create_generated_clock -name clkSSRAM_virt -source [get_pins ${clkSSRAM}] [get_ports SSRAM_CLK]
+
+    # Set maximum delay from PLL output to pin
+    set_max_delay -from [get_pins ${clkSSRAM}] -to [get_ports SSRAM_CLK] 7.0
+    set_min_delay -from [get_pins ${clkSSRAM}] -to [get_ports SSRAM_CLK] 0
 
     #The following I/O timing is noted from the perspective of the memory (http://www.issi.com/WW/pdf/61VPS_LPS-51236A_102418A.pdf)
     set Max_clock_to_out  3.1
@@ -37,13 +41,10 @@ proc timing_ssram { SSRAM_CLK } {
     set_output_delay -clock clkSSRAM_virt -max $delay_out_max [get_ports SSRAM_WE_N[*]]
     set_output_delay -clock clkSSRAM_virt -min $delay_out_min [get_ports SSRAM_WE_N[*]]
 
-    # Consider multicycle due to Tri-state bridge and SSRAM virtual clock
-    # -> Read path
-    set_multicycle_path -from [get_clocks clkSSRAM_virt] -to [get_clocks ${SSRAM_CLK}] -setup -end 2
-    set_multicycle_path -from [get_clocks clkSSRAM_virt] -to [get_clocks ${SSRAM_CLK}] -hold -end 1
-    # -> Write path
-    set_multicycle_path -from [get_clocks ${SSRAM_CLK}] -to [get_clocks clkSSRAM_virt] -setup -end 2
-    set_multicycle_path -from [get_clocks ${SSRAM_CLK}] -to [get_clocks clkSSRAM_virt] -hold -end 1
+    # SSRAM
+    # -> Cut path
+    set_false_path -from [get_registers *] -to [get_ports SSRAM0_CE_N[0]]
+    set_false_path -from [get_registers *] -to [get_ports SSRAM_ADSC_N[0]]
 
     return 0
 }

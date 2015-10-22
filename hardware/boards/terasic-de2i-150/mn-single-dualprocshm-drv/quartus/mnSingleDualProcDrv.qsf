@@ -294,7 +294,7 @@ set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to PCIE_RX_P[1]
 set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to PCIE_TX_P[0]
 set_instance_assignment -name IO_STANDARD "1.5-V PCML" -to PCIE_TX_P[1]
 set_instance_assignment -name IO_STANDARD "2.5 V" -to PCIE_WAKE_N
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SSRAM_ADSC_N
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SSRAM_ADSC_N[0]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SSRAM_ADSP_N
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SSRAM_ADV_N
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SSRAM_BE[0]
@@ -321,8 +321,8 @@ set_location_assignment PIN_C14 -to ENET_RST_N[0]
 set_instance_assignment -name IO_STANDARD "2.5 V" -to ENET_RST_N[0]
 set_location_assignment PIN_C16 -to ENET_MDC[0]
 set_instance_assignment -name IO_STANDARD "2.5 V" -to ENET_MDC[0]
-set_location_assignment PIN_AJ21 -to SSRAM0_CE_N
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SSRAM0_CE_N
+set_location_assignment PIN_AJ21 -to SSRAM0_CE_N[0]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SSRAM0_CE_N[0]
 set_location_assignment PIN_AG23 -to SSRAM1_CE_N
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SSRAM1_CE_N
 set_location_assignment PIN_AK25 -to SSRAM_ADSC_N[0]
