@@ -42,36 +42,40 @@ To build the kernel driver (e.g. for a MN using the Intel 82573 network interfac
       > make
       > make install
 
-## Building a Windows NDIS PCIe miniport driver {#sect_build_drivers_build_windows_ndis_pcie}
+## Building a Windows NDIS driver {#sect_build_drivers_build_windows_ndis}
 
-To build the Windows NDIS PCIe miniport driver, an appropriate Windows Driver Kit (WDK)
-version which supports the Windows version of the host system has to be installed
+To build a Windows NDIS driver, an appropriate version of Windows Driver Kit (WDK),
+which supports the version of Windows on the host system has to be installed
 on the development system.
 
-__NOTE__: The Windows PCIe driver currently provided with openPOWERLINK, can be used
-with Windows 7 (64 bit) and requires Windows Driver Kit (WDK) 8.1 for compilation.
+__NOTE__: The Windows PCIe driver and NDIS intermediate driver currently
+provided with openPOWERLINK can be used with Windows 7 (64 bit) and requires
+Windows Driver Kit (WDK) 8.1 for compilation.
 (<http://www.microsoft.com/en-us/download/details.aspx?id=42273>)
 
+  _NDIS drivers:_
+  - `drivers\windows\drv_ndis_pcie` (NDIS PCIe miniport driver)
+  - `drivers\windows\drv_ndis_intermediate` (NDIS intermediate driver)
 
-Follow the steps below to build the NDIS PCIe driver on a Windows system using MSbuild.
+Follow the steps below to build the NDIS driver on a Windows system using MSbuild.
 Open a Visual Studio command line and enter the following commands:
 
 * Build driver for Windows 7 (64 bit) in debug mode
 
-      > cd <openPOWERLINK_directory>\drivers\windows\drv_ndis_pcie\build
+      > cd <openPOWERLINK_directory>\drivers\windows\drv_ndis_[pcie;intermediate]\build
       > cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Debug ..
       > msbuild /t:build /p:Platform=x64 /p:Configuration="Win7 Debug"
 
 * Build driver for Windows 7 (64 bit) in release mode
 
-      > cd <openPOWERLINK_directory>\drivers\windows\drv_ndis_pcie\build
+      > cd <openPOWERLINK_directory>\drivers\windows\drv_ndis_[pcie;intermediate]\build
       > cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release ..
       > msbuild /t:build /p:Platform=x64 /p:Configuration="Win7 Release"
 
 `Platform` and `Configuration` parameters can be modified to compile the driver for
 a different platform and Windows version.
 
-The default driver installation path is: `<openPOWERLINK_DIR>\bin\windows\<ARCH>\drv_ndis_pcie_package`
+The default driver installation path is: `<openPOWERLINK_DIR>\bin\windows\<ARCH>\drv_ndis_[pcie;intermediate]_package`
 
 ## Building a PCP daemon for Microblaze {#sect_build_drivers_build_daemon_microblaze}
 
