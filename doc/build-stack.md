@@ -281,6 +281,14 @@ the configuration options on the command line (-DCFG_XXX=XXX) or
   PCIe driver uses shared memory for status/control information and data
   exchange between application library and the PCIe device.
 
+- **CFG_COMPILE_LIB_MNAPP_KERNELINTF**
+
+  Compile openPOWERLINK MN application library which contains interface to the
+  NDIS intermediate driver running in Windows kernel space. The kernel layer of
+  the stack is located in the NDIS intermediate driver. The NDIS driver
+  communicates with the native NIC miniport driver to access the network
+  interface.
+
 ## Options for embedded systems (No-OS) {#sect_build_stack_options_noos}
 
 ### Microblaze Configuration Options {#sect_build_stack_options_noos_microblaze}
