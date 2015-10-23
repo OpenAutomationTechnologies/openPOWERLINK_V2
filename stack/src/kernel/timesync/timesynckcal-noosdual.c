@@ -70,15 +70,30 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define TARGET_SYNC_INTERRUPT_ID    1
+#define TARGET_SYNC_INTERRUPT_ID        1
+#define DUALPROCSHM_BUFF_ID_TIMESYNC    14
 
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
+/**
+\brief Memory instance for kernel timesync module
+
+The structure contains all necessary information needed by the timesync CAL
+module for no-OS dual processor design.
+*/
+typedef struct
+{
+    tDualprocDrvInstance    pDrvInstance;   ///< Pointer to dual processor driver instance
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    tTimesyncSharedMemory*  pSharedMemory;  ///< Pointer to shared memory
+#endif
+} tTimesynckcalInstance;
 
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
+static tTimesynckcalInstance    instance_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -101,22 +116,39 @@ The function initializes the kernel CAL timesync module.
 //------------------------------------------------------------------------------
 tOplkError timesynckcal_init(void)
 {
-    tDualprocDrvInstance    pInstance = dualprocshm_getLocalProcDrvInst();
     tDualprocReturn         dualRet;
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    UINT8*                  pBuffer;
+    size_t                  memSize = sizeof(tTimesyncSharedMemory);
+#endif
 
-    if (pInstance == NULL)
+    instance_l.pDrvInstance = dualprocshm_getLocalProcDrvInst();
+    if (instance_l.pDrvInstance == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s() couldn't get PCP dual proc driver instance\n",
                               __func__);
         return kErrorNoResource;
     }
 
-    dualRet = dualprocshm_enableIrq(pInstance, TARGET_SYNC_INTERRUPT_ID, FALSE);
+    dualRet = dualprocshm_enableIrq(instance_l.pDrvInstance, TARGET_SYNC_INTERRUPT_ID, FALSE);
 
     if (dualRet != kDualprocSuccessful)
     {
         return kErrorNoResource;
     }
+
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    dualRet = dualprocshm_getMemory(instance_l.pDrvInstance, DUALPROCSHM_BUFF_ID_TIMESYNC,
+                                    &pBuffer, &memSize, TRUE);
+    if (dualRet != kDualprocSuccessful)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() couldn't allocate timesync buffer (%d)\n",
+                              __func__, dualRet);
+        return kErrorNoResource;
+    }
+
+    instance_l.pSharedMemory = (tTimesyncSharedMemory*)pBuffer;
+#endif
 
     return kErrorOk;
 }
@@ -132,15 +164,18 @@ The function cleans up the CAL timesync module
 //------------------------------------------------------------------------------
 void timesynckcal_exit(void)
 {
-    tDualprocDrvInstance    pInstance = dualprocshm_getLocalProcDrvInst();
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    instance_l.pSharedMemory = NULL;
+#endif
 
-    if (pInstance == NULL)
+    if (instance_l.pDrvInstance == NULL)
     {
-        DEBUG_LVL_ERROR_TRACE("%s() couldn't get PCP dual proc driver instance\n",
-                              __func__);
+        // Simply skip here because the next calls won't work anyway...
+        return;
     }
 
-    dualprocshm_enableIrq(pInstance, TARGET_SYNC_INTERRUPT_ID, FALSE);
+    dualprocshm_enableIrq(instance_l.pDrvInstance, TARGET_SYNC_INTERRUPT_ID, FALSE);
+    dualprocshm_freeMemory(instance_l.pDrvInstance, DUALPROCSHM_BUFF_ID_TIMESYNC, TRUE);
 }
 
 //------------------------------------------------------------------------------
@@ -156,17 +191,16 @@ The function sends a sync event.
 //------------------------------------------------------------------------------
 tOplkError timesynckcal_sendSyncEvent(void)
 {
-    tDualprocDrvInstance    pInstance = dualprocshm_getLocalProcDrvInst();
     tDualprocReturn         dualRet;
 
-    if (pInstance == NULL)
+    if (instance_l.pDrvInstance == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s() couldn't get PCP dual proc driver instance\n",
                               __func__);
         return kErrorNoResource;
     }
 
-    dualRet = dualprocshm_setIrq(pInstance, TARGET_SYNC_INTERRUPT_ID, TRUE);
+    dualRet = dualprocshm_setIrq(instance_l.pDrvInstance, TARGET_SYNC_INTERRUPT_ID, TRUE);
 
     if (dualRet != kDualprocSuccessful)
     {
@@ -191,17 +225,16 @@ The function enables sync events.
 //------------------------------------------------------------------------------
 tOplkError timesynckcal_controlSync(BOOL fEnable_p)
 {
-    tDualprocDrvInstance    pInstance = dualprocshm_getLocalProcDrvInst();
     tDualprocReturn         dualRet;
 
-    if (pInstance == NULL)
+    if (instance_l.pDrvInstance == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s() couldn't get PCP dual proc driver instance\n",
                               __func__);
         return kErrorNoResource;
     }
 
-    dualRet = dualprocshm_enableIrq(pInstance, TARGET_SYNC_INTERRUPT_ID, fEnable_p);
+    dualRet = dualprocshm_enableIrq(instance_l.pDrvInstance, TARGET_SYNC_INTERRUPT_ID, fEnable_p);
 
     if (dualRet != kDualprocSuccessful)
     {
@@ -210,6 +243,24 @@ tOplkError timesynckcal_controlSync(BOOL fEnable_p)
 
     return kErrorOk;
 }
+
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+//------------------------------------------------------------------------------
+/**
+\brief  Get timesync shared memory
+
+The function returns the reference to the timesync shared memory.
+
+\return The function returns a pointer to the timesync shared memory.
+
+\ingroup module_timesynckcal
+*/
+//------------------------------------------------------------------------------
+tTimesyncSharedMemory* timesynckcal_getSharedMemory(void)
+{
+    return instance_l.pSharedMemory;
+}
+#endif
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //

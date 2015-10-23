@@ -67,6 +67,9 @@ The generic defines are valid for the whole openPOWERLINK stack.
 #define CONFIG_INCLUDE_VETH
 #endif
 
+// Enable feature manually if the platform is supporting it (only C5 SoC and Zynq).
+//#define CONFIG_INCLUDE_SOC_TIME_FORWARD
+
 #ifndef BENCHMARK_MODULES
 #define BENCHMARK_MODULES                   (0 |\
                                              BENCHMARK_MOD_01 | \

@@ -42,6 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <oplk/oplkinc.h>
 #include <user/timesyncucal.h>
+#include <common/target.h>
 
 #include <dualprocshm.h>
 
@@ -68,16 +69,33 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define TARGET_SYNC_INTERRUPT_ID    1
+#define TARGET_SYNC_INTERRUPT_ID            1
+#define DUALPROCSHM_BUFF_ID_TIMESYNC        14
+
+#define DUALPROCSHM_ADDR_READ_TIMEOUT_MS    1000
 
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
+/**
+\brief Memory instance for kernel timesync module
+
+The structure contains all necessary information needed by the timesync CAL
+module for no-OS dual processor design.
+*/
+typedef struct
+{
+    tDualprocDrvInstance    pDrvInstance;   ///< Pointer to dual processor driver instance
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    tTimesyncSharedMemory*  pSharedMemory;  ///< Pointer to shared memory
+#endif
+    tSyncCb                 pfnSyncCb;      ///< Synchronization callback
+} tTimesynckcalInstance;
 
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static tSyncCb    pfnSyncCb_l = NULL;
+static tTimesynckcalInstance    instance_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -104,23 +122,53 @@ The function initializes the user CAL timesync module
 tOplkError timesyncucal_init(tSyncCb pfnSyncCb_p)
 {
     tDualprocReturn         dualRet;
-    tDualprocDrvInstance    pInstance = dualprocshm_getLocalProcDrvInst();
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    UINT8*                  pBuffer;
+    size_t                  memSize = sizeof(tTimesyncSharedMemory);
+    INT                     loopCount = 0;
+#endif
 
-    if (pInstance == NULL)
+    OPLK_MEMSET(&instance_l, 0, sizeof(instance_l));
+
+    instance_l.pDrvInstance = dualprocshm_getLocalProcDrvInst();
+    if (instance_l.pDrvInstance == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s() couldn't get Host dual proc driver instance\n",
                               __func__);
         return kErrorNoResource;
     }
 
-    dualRet = dualprocshm_registerHandler(pInstance, TARGET_SYNC_INTERRUPT_ID, irqSyncCb);
+    dualRet = dualprocshm_registerHandler(instance_l.pDrvInstance, TARGET_SYNC_INTERRUPT_ID, irqSyncCb);
     if (dualRet != kDualprocSuccessful)
     {
         DEBUG_LVL_ERROR_TRACE("%s: Enable irq not possible!\n", __func__);
         return kErrorNoResource;
     }
 
-    pfnSyncCb_l = pfnSyncCb_p;
+    instance_l.pfnSyncCb = pfnSyncCb_p;
+
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    for (loopCount = 0; loopCount < DUALPROCSHM_ADDR_READ_TIMEOUT_MS; loopCount++)
+    {
+        dualRet = dualprocshm_getMemory(instance_l.pDrvInstance,
+                                        DUALPROCSHM_BUFF_ID_TIMESYNC, &pBuffer,
+                                        &memSize, FALSE);
+
+        if (dualRet == kDualprocSuccessful)
+            break;
+
+        target_msleep(1);
+    }
+
+    if (loopCount == DUALPROCSHM_ADDR_READ_TIMEOUT_MS)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() couldn't allocate timesync buffer (%d)\n",
+                              __func__, dualRet);
+        return kErrorNoResource;
+    }
+
+    instance_l.pSharedMemory = (tTimesyncSharedMemory*)pBuffer;
+#endif
 
     return kErrorOk;
 }
@@ -136,16 +184,19 @@ The function cleans up the user CAL timesync module
 //------------------------------------------------------------------------------
 void timesyncucal_exit(void)
 {
-    tDualprocDrvInstance    pInstance = dualprocshm_getLocalProcDrvInst();
+    instance_l.pfnSyncCb = NULL;
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    instance_l.pSharedMemory = NULL;
+#endif
 
-    if (pInstance == NULL)
+    if (instance_l.pDrvInstance == NULL)
     {
-        DEBUG_LVL_ERROR_TRACE("%s() couldn't get Host dual proc driver instance\n",
-                              __func__);
+        // Simply skip here because the next calls won't work anyway...
         return;
     }
 
-    dualprocshm_registerHandler(pInstance, TARGET_SYNC_INTERRUPT_ID, NULL);
+    dualprocshm_registerHandler(instance_l.pDrvInstance, TARGET_SYNC_INTERRUPT_ID, NULL);
+    dualprocshm_freeMemory(instance_l.pDrvInstance, DUALPROCSHM_BUFF_ID_TIMESYNC, FALSE);
 }
 
 //------------------------------------------------------------------------------
@@ -170,6 +221,24 @@ tOplkError timesyncucal_waitSyncEvent(ULONG timeout_p)
     return kErrorOk;
 }
 
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+//------------------------------------------------------------------------------
+/**
+\brief  Get timesync shared memory
+
+The function returns the reference to the timesync shared memory.
+
+\return The function returns a pointer to the timesync shared memory.
+
+\ingroup module_timesynckcal
+*/
+//------------------------------------------------------------------------------
+tTimesyncSharedMemory* timesyncucal_getSharedMemory(void)
+{
+    return instance_l.pSharedMemory;
+}
+#endif
+
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
@@ -185,7 +254,8 @@ This function is called for synchronization by the dualprocshm instance.
 //------------------------------------------------------------------------------
 static void irqSyncCb(void)
 {
-    pfnSyncCb_l();
+    if (instance_l.pfnSyncCb != NULL)
+        instance_l.pfnSyncCb();
 }
 
-///\}
+/// \}
