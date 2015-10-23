@@ -231,7 +231,7 @@
  <parameter name="projectName">mnSingleDualProcDrv.qpf</parameter>
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1445583633403" />
+ <parameter name="timeStamp" value="1445584380946" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk50" internal="clk50.clk_in" type="clock" dir="end" />
@@ -460,7 +460,7 @@
   <parameter name="gui_rxBufLoc" value="2" />
   <parameter name="gui_rxBufSize" value="1" />
   <parameter name="gui_rxBurstSize" value="1" />
-  <parameter name="gui_tmrPulse" value="false" />
+  <parameter name="gui_tmrPulse" value="true" />
   <parameter name="gui_tmrPulseEn" value="false" />
   <parameter name="gui_tmrPulseWdt" value="10" />
   <parameter name="gui_actEn" value="false" />
@@ -616,13 +616,6 @@
    version="13.0"
    start="pcp_0.mac_irq"
    end="openmac_0.macIrq">
-  <parameter name="irqNumber" value="0" />
- </connection>
- <connection
-   kind="interrupt"
-   version="13.0"
-   start="pcie_subsytem.sync_irq"
-   end="openmac_0.timerIrq">
   <parameter name="irqNumber" value="0" />
  </connection>
  <connection
@@ -783,6 +776,13 @@
    version="13.0"
    start="pcp_0.jtag_reset"
    end="remote_update.global_signals_clock_reset" />
+ <connection
+   kind="interrupt"
+   version="13.0"
+   start="pcie_subsytem.sync_irq"
+   end="openmac_0.timerPulse">
+  <parameter name="irqNumber" value="0" />
+ </connection>
  <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
  <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="1" />
 </system>
