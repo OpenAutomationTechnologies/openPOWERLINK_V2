@@ -460,6 +460,7 @@ The function implements openPOWERLINK kernel module mmap function.
 static int powerlinkMmap(struct file* filp, struct vm_area_struct* vma)
 {
     BYTE*       pPdoMem;
+    tOplkError  ret = kErrorOk;
 
     DEBUG_LVL_ALWAYS_TRACE("%s() vma: vm_start:%lX vm_end:%lX vm_pgoff:%lX\n",
                            __func__, vma->vm_start, vma->vm_end, vma->vm_pgoff);
@@ -467,7 +468,9 @@ static int powerlinkMmap(struct file* filp, struct vm_area_struct* vma)
     vma->vm_flags |= VM_RESERVED;
     vma->vm_ops = &powerlinkVmOps;
 
-    if ((pPdoMem = pdokcal_getPdoMemRegion()) == NULL)
+    ret = pdokcal_getPdoMemRegion(&pPdoMem, NULL);
+
+    if (ret != kErrorOk || pPdoMem == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s() no pdo memory allocated!\n", __func__);
         return -ENOMEM;
