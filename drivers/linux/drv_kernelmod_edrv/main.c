@@ -467,7 +467,7 @@ static int powerlinkMmap(struct file* filp, struct vm_area_struct* vma)
     vma->vm_flags |= VM_RESERVED;
     vma->vm_ops = &powerlinkVmOps;
 
-    if ((pPdoMem = pdokcal_getPdoMemRegion()) == NULL)
+    if ((pPdoMem = pdokcal_getPdoMemRegion(NULL)) == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s() no pdo memory allocated!\n", __func__);
         return -ENOMEM;
