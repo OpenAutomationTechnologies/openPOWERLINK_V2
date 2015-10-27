@@ -259,4 +259,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CONFIG_EDRV_AUTO_RESPONSE_DELAY                 FALSE
 #endif
 
+#ifndef CONFIG_PDO_SETUP_WAIT_TIME
+#define CONFIG_PDO_SETUP_WAIT_TIME                      500
+#endif
+
 #endif /* _INC_common_defaultcfg_H_ */
