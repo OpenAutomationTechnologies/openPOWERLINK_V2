@@ -366,10 +366,13 @@ stack. This allows user stack to access the PDO memory directly.
 tOplkError drv_mapPdoMem(UINT8** ppKernelMem_p, UINT8** ppUserMem_p,
                          size_t* pMemSize_p)
 {
-    // Get PDO memory
-    pdoMemInfo_l.pKernelVa = pdokcal_getPdoMemRegion(&pdoMemInfo_l.memSize);
+    tOplkError      ret;
 
-    if (pdoMemInfo_l.pKernelVa == NULL)
+    // Get PDO memory
+    ret = pdokcal_getPdoMemRegion((UINT8**)&pdoMemInfo_l.pKernelVa,
+                                  &pdoMemInfo_l.memSize);
+
+    if (ret != kErrorOk || pdoMemInfo_l.pKernelVa == NULL)
         return kErrorNoResource;
 
     if (*pMemSize_p > pdoMemInfo_l.memSize)
