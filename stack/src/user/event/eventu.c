@@ -94,6 +94,7 @@ The user event instance holds the Api process callback function pointer.
 typedef struct
 {
     tProcessEventCb         pfnApiProcessEventCb;  ///< Callback for generic api events
+    BOOL                    fInitialized;          ///< Flag to determine status of eventu module
 } tEventuInstance;
 
 //------------------------------------------------------------------------------
@@ -130,9 +131,14 @@ tOplkError eventu_init(tProcessEventCb pfnApiProcessEventCb_p)
 {
     tOplkError ret = kErrorOk;
 
+    OPLK_MEMSET(&instance_l, 0, sizeof(tEventuInstance));
+
     instance_l.pfnApiProcessEventCb = pfnApiProcessEventCb_p;
 
     ret = eventucal_init();
+
+    if (ret == kErrorOk)
+        instance_l.fInitialized = TRUE;
 
     return ret;
 }
@@ -155,6 +161,8 @@ tOplkError eventu_exit(void)
     tOplkError ret = kErrorOk;
 
     ret = eventucal_exit();
+
+    instance_l.fInitialized = FALSE;
 
     return ret;
 }
@@ -180,6 +188,12 @@ tOplkError eventu_process(tEvent* pEvent_p)
 {
     tOplkError              ret = kErrorOk;
     tEventSource            eventSource;
+
+    if (!instance_l.fInitialized)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() Eventu module is not initialized\n");
+        return kErrorNoResource;
+    }
 
     switch (pEvent_p->eventSink)
     {
@@ -259,6 +273,12 @@ CAL module which distributes the event to the suitable event queue.
 tOplkError eventu_postEvent(tEvent* pEvent_p)
 {
     tOplkError ret = kErrorOk;
+
+    if (!instance_l.fInitialized)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() Eventu module is not initialized\n");
+        return kErrorNoResource;
+    }
 
     // Split event post to user internal and user to kernel
     switch (pEvent_p->eventSink)
