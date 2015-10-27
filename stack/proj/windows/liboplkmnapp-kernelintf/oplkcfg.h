@@ -100,4 +100,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CONFIG_SDO_MAX_CONNECTION_COM               100
 #define CONFIG_SDO_MAX_CONNECTION_UDP               50
 
+// Increase the PDO buffer setup time to 5 secs
+#define CONFIG_PDO_SETUP_WAIT_TIME                  5000
+
 #endif // _INC_oplkcfg_H_
