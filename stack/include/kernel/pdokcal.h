@@ -76,7 +76,7 @@ void       pdokcal_unMapMem(UINT8* pMem_p, size_t memSize_p);
 tOplkError pdokcal_initPdoMem(tPdoChannelSetup* pPdoChannels, size_t rxPdoMemSize_p,
                               size_t txPdoMemSize_p);
 void       pdokcal_cleanupPdoMem(void);
-UINT8*     pdokcal_getPdoMemRegion(size_t* pPdoMemSize_p);
+tOplkError pdokcal_getPdoMemRegion(UINT8** ppPdoMemBase, size_t* pPdoMemSize_p);
 tOplkError pdokcal_writeRxPdo(UINT channelId_p, BYTE* pPayload_p, UINT16 pdoSize_p) SECTION_PDOKCAL_WRITE_RPDO;
 tOplkError pdokcal_readTxPdo(UINT channelId_p, BYTE* pPayload_p, UINT16 pdoSize_p) SECTION_PDOKCAL_READ_TPDO;
 BYTE*      pdokcal_getPdoPointer(BOOL fTxPdo_p, UINT offset_p, UINT16 pdoSize_p);

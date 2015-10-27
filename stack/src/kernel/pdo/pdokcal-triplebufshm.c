@@ -102,19 +102,27 @@ static void setupPdoMemInfo(tPdoChannelSetup* pPdoChannels_p, tPdoMemRegion* pPd
 
 The function returns the address of the PDO memory region.
 
+\param ppPdoMemBase     Double pointer to the PDO memory.
 \param pPdoMemSize_p    Pointer to the size of PDO memory.
+
+\note pPdoMemSize_p is optional, caller can specify NULL if the size is not required.
 
 \return Returns the address of the PDO memory region.
 
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-UINT8* pdokcal_getPdoMemRegion(size_t* pPdoMemSize_p)
+tOplkError pdokcal_getPdoMemRegion(UINT8** ppPdoMemBase, size_t* pPdoMemSize_p)
 {
+    if (ppPdoMemBase == NULL)
+        return kErrorInvalidOperation;
+
     if (pPdoMemSize_p != NULL)
         *pPdoMemSize_p = pdoMemRegionSize_l;
 
-    return (UINT8*)pPdoMem_l;
+    *ppPdoMemBase = (UINT8*)pPdoMem_l;
+
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
