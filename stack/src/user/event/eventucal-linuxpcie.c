@@ -98,7 +98,7 @@ typedef struct
     pthread_cond_t      processEventCondition;  ///< Conditional variable for signalling pending events to be processed.
     pthread_mutex_t     k2uEventMutex;          ///< Mutex for accessing pending kernel events flag.
     pthread_cond_t      k2uEventCondition;      ///< Conditional variable for signalling completion of processing of kernel events.
-    OPLK_ATOMIC_T       pendingEventCount;      ///< Pending events counter.
+    UINT32              pendingEventCount;      ///< Pending events counter.
     BOOL                fStopKernelThread;      ///< Flag to start stop K2U event thread.
     BOOL                fStopProcessThread;     ///< Flag to start stop UInt event thread.
     BOOL                fK2UEventPending;       ///< Flag to indicate pending kernel events to be processed.
@@ -432,8 +432,9 @@ or kernel event to be fetched and then processes it, once signalled.
 //------------------------------------------------------------------------------
 static void* eventProcessThread(void* pArg_p)
 {
-    OPLK_ATOMIC_T       processedEventCount = 0;
+    UINT32              processedEventCount = 0;
     tEvent*             pEvent = (tEvent*)instance_l.aEventBuf;
+    tOplkError          ret = kErrorOk;
 
     UNUSED_PARAMETER(pArg_p);
 
@@ -450,7 +451,7 @@ static void* eventProcessThread(void* pArg_p)
         }
 
         pthread_mutex_unlock(&instance_l.processEventMutex);
-        // Process all pending events including the oned posted during processing
+        // Process all pending events including the one posted during processing
         while((instance_l.pendingEventCount != processedEventCount) &&
               (!instance_l.fStopProcessThread))
         {
@@ -458,6 +459,9 @@ static void* eventProcessThread(void* pArg_p)
             if (instance_l.fK2UEventPending)
             {
                 ret = eventu_process(pEvent);
+                if (ret != kErrorOk)
+                    return NULL;
+
                 processedEventCount++;
                 pthread_mutex_lock(&instance_l.k2uEventMutex);
                 instance_l.fK2UEventPending = FALSE;
@@ -466,7 +470,7 @@ static void* eventProcessThread(void* pArg_p)
             }
 
             // Process user internal events
-            while (eventucal_getEventCountCircbuf(kEventQueueUInt) > 0)
+            if (eventucal_getEventCountCircbuf(kEventQueueUInt) > 0)
             {
                 processedEventCount++;
                 eventucal_processEventCircbuf(kEventQueueUInt);
