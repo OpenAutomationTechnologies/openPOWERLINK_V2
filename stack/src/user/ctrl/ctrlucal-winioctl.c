@@ -497,7 +497,6 @@ the provided offset and returns the address back.
 tOplkError ctrlucal_getMappedMem(UINT32 kernelOffs_p, UINT32 size_p,
                                  UINT8** ppUserMem_p)
 {
-    tOplkError  ret = kErrorOk;
     tMemStruc   inMemStruc;
     tMemStruc*  pOutMemStruc = &sharedMemStruc_l;
     ULONG       bytesReturned;
