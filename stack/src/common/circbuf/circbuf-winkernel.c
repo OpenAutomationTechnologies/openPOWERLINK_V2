@@ -44,7 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 
 #include "circbuf-arch.h"
 
@@ -121,8 +121,8 @@ tCircBufInstance* circbuf_createInstance(UINT8 id_p, BOOL fNew_p)
 
     UNUSED_PARAMETER(fNew_p);
 
-    if ((pInstance = OPLK_MALLOC(sizeof(tCircBufInstance) +
-                                 sizeof(tCircBufArchInstance))) == NULL)
+    pInstance = OPLK_MALLOC(sizeof(tCircBufInstance) + sizeof(tCircBufArchInstance));
+    if (pInstance == NULL)
         return NULL;
 
     OPLK_MEMSET(pInstance, 0, sizeof(tCircBufInstance) + sizeof(tCircBufArchInstance));

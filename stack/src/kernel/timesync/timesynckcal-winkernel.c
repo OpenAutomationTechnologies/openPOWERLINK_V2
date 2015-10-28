@@ -47,7 +47,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <common/oplkinc.h>
 #include <kernel/timesynckcal.h>
 
-#include <ndisintermediate/ndis-intf.h>
+#include <ndisintermediate/ndis-im.h>
 #include <ndis.h>
 
 //============================================================================//

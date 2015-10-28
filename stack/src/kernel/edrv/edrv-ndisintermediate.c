@@ -52,7 +52,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <common/ami.h>
 #include <kernel/edrv.h>
 
-#include <ndisintermediate/ndis-intf.h>
+#include <ndisintermediate/ndis-im.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //

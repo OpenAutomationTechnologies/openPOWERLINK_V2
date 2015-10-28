@@ -48,7 +48,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/dllk.h>
 #include <common/ami.h>
 
-#include <ndisintermediate/ndis-intf.h>
+#include <ndisintermediate/ndis-im.h>
 
 
 //============================================================================//

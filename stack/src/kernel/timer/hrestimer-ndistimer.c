@@ -45,7 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/hrestimer.h>
 #include <oplk/benchmark.h>
 
-#include <ndisintermediate/ndis-intf.h>
+#include <ndisintermediate/ndis-im.h>
 #include <ndis.h>
 
 //============================================================================//
