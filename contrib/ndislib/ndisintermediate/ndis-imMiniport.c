@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   ndis_imMiniport.c
+\file   ndis-imMiniport.c
 
 \brief  Miniport implementation of NDIS intermediate driver
 
@@ -51,7 +51,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include "ndisDriver.h"
+#include "ndis-imInternal.h"
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -173,7 +173,7 @@ NDIS_STATUS miniport_handleReceive(UINT8* pDataBuff_p, size_t size_p)
     tVEthRcvBufInfo*   pVethRxInfo = NULL;
     PNET_BUFFER        pNetBuffer = NULL;
 
-    if (pDataBuff_p == NULL || size_p <= 0)
+    if (pDataBuff_p == NULL || size_p == 0)
         return NDIS_STATUS_INVALID_PACKET;
 
     if (pVEthInstance_l == NULL)
@@ -261,7 +261,7 @@ NDIS_STATUS miniportInitialize(NDIS_HANDLE adapterHandle_p,
 
     TRACE("%s()... \n", __FUNCTION__);
 
-    if (fInitialize_l == TRUE)
+    if (fInitialize_l)
         return NDIS_STATUS_SUCCESS;
 
     pVEthInstance = (tVEthInstance*)initParams_p->IMDeviceInstanceContext;
@@ -539,15 +539,15 @@ This handler is called to notify us of PnP events directed to our miniport
 device object.
 
 \param  adapterContext_p    Pointer to the adapter structure.
-\param  pnpEvent_p          Pointer to the PNP event.
+\param  pPnpEvent_p         Pointer to the PNP event.
 
 */
 //------------------------------------------------------------------------------
-VOID miniportPnpEventNotify(NDIS_HANDLE adapterContext_p, PNET_DEVICE_PNP_EVENT pnpEvent_p)
+VOID miniportPnpEventNotify(NDIS_HANDLE adapterContext_p, PNET_DEVICE_PNP_EVENT pPnpEvent_p)
 {
     // Not a real device
     UNREFERENCED_PARAMETER(adapterContext_p);
-    UNREFERENCED_PARAMETER(pnpEvent_p);
+    UNREFERENCED_PARAMETER(pPnpEvent_p);
 }
 
 //------------------------------------------------------------------------------
@@ -714,7 +714,7 @@ VOID miniportSendNetBufferLists(NDIS_HANDLE adapterContext_p,
 
     // Allocate a new buffer to copy the transmit frame.
     pVethTxBuff = NdisAllocateMemoryWithTagPriority(driverInstance_g.hMiniportHandle,
-                                                    (OPLK_MAX_FRAME_SIZE),
+                                                    OPLK_MAX_FRAME_SIZE,
                                                     OPLK_MEM_TAG, NormalPoolPriority);
 
     if (pVethTxBuff == NULL)

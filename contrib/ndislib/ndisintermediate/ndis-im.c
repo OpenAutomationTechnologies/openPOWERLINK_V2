@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   ndis_intermediate.c
+\file   ndis-im.c
 
 \brief  NDIS library interface routines for NDIS Intermediate driver
 
@@ -42,7 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 
-#include "ndisDriver.h"
+#include "ndis-imInternal.h"
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //

@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   ndisdriver.h
+\file   ndis-imInternal.h
 
 \brief  Internal header file for NDIS driver
 
@@ -35,14 +35,14 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_ndisdriver_H_
-#define _INC_ndisdriver_H_
+#ifndef _INC_ndis_imInternal_H_
+#define _INC_ndis_imInternal_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 #include <ndis.h>
-#include "ndis-intf.h"
+#include "ndis-im.h"
 
 //------------------------------------------------------------------------------
 // const defines
@@ -290,4 +290,4 @@ NDIS_STATUS miniport_handleReceive(UINT8* pDataBuff_p, size_t size_p);
 }
 #endif
 
-#endif /* _INC_ndisdriver_H_ */
+#endif /* _INC_ndis_imInternal_H_ */

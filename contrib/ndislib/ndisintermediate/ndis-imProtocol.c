@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   ndis_imProtocol.c
+\file   ndis-imProtocol.c
 
 \brief  Protocol driver implementation for NDIS intermediate driver
 
@@ -43,7 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <ndis.h>
 
-#include "ndisdriver.h"
+#include "ndis-imInternal.h"
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -52,7 +52,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define VETH_EXIT_TIMEOUT       100
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -88,7 +87,7 @@ static BOOLEAN              fBinding_l = FALSE;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static NDIS_STATUS startVEth(PNDIS_STRING instanceName_p);
+static NDIS_STATUS startVEth(PNDIS_STRING pInstanceName_p);
 static void        freeVEthInstance(tVEthInstance* pVEthInstance_p);
 static void        stopVEth(tVEthInstance* pVEthInstance_p);
 static NDIS_STATUS allocateTxRxBuf(ULONG txBufCount, ULONG rxBufCount);
@@ -808,7 +807,7 @@ instance and close the binding to lower miniport.
 NDIS_STATUS protocolUnbindAdapter(NDIS_HANDLE unbindContext_p,
                                   NDIS_HANDLE protocolBindingContext_p)
 {
-    NDIS_STATUS      Status = NDIS_STATUS_SUCCESS;
+    NDIS_STATUS      status = NDIS_STATUS_SUCCESS;
     tVEthInstance*   pVEthInstance = NULL;
     INT              waitCount;
 
@@ -821,15 +820,7 @@ NDIS_STATUS protocolUnbindAdapter(NDIS_HANDLE unbindContext_p,
     {
         pVEthInstance = (tVEthInstance*)protocolInstance_l.pVEthInstance;
         stopVEth(pVEthInstance);
-    }
-
-    for (waitCount = 0; waitCount < VETH_EXIT_TIMEOUT; waitCount++)
-    {
-        if (pVEthInstance == NULL)
-            break;
-
-        // Wait for VEth module to close
-        NdisMSleep(20);
+        protocolInstance_l.pVEthInstance = NULL;
     }
 
     // Close the binding to the lower adapter.
@@ -840,12 +831,12 @@ NDIS_STATUS protocolUnbindAdapter(NDIS_HANDLE unbindContext_p,
     else
     {
         // Binding handle can not be NULL at this point.
-        Status = NDIS_STATUS_FAILURE;
+        status = NDIS_STATUS_FAILURE;
         ASSERT(0);
     }
 
     TRACE("%s() - OK\n", __FUNCTION__);
-    return NDIS_STATUS_SUCCESS;
+    return status;
 }
 
 //------------------------------------------------------------------------------
@@ -874,20 +865,20 @@ VOID protocolCloseAdapterComplete(NDIS_HANDLE protocolBindingContext_p)
 Completion handler for an NDIS request sent to a lower miniport.
 
 \param  protocolBindingContext_p    Pointer to the protocol instance structure.
-\param  ndisRequest_p               The completed request.
+\param  pNdisRequest_p              The completed request.
 \param  status_p                    Completion status.
 
 */
 //------------------------------------------------------------------------------
 VOID protocolRequestComplete(NDIS_HANDLE protocolBindingContext_p,
-                             PNDIS_OID_REQUEST ndisRequest_p,
+                             PNDIS_OID_REQUEST pNdisRequest_p,
                              NDIS_STATUS status_p)
 {
     tNdisOidRequest*   pNdisOidRequest = NULL;
 
     UNREFERENCED_PARAMETER(protocolBindingContext_p);
 
-    pNdisOidRequest = CONTAINING_RECORD(ndisRequest_p, tNdisOidRequest, oidRequest);
+    pNdisOidRequest = CONTAINING_RECORD(pNdisRequest_p, tNdisOidRequest, oidRequest);
 
     // Complete the request
     pNdisOidRequest->status = status_p;
@@ -916,14 +907,14 @@ Handle a status indication of the lower binding. If this is a media status
 indication, we also pass this on to VEth.
 
 \param  protocolBindingContext_p    Pointer to the protocol instance structure.
-\param  statusIndication_p          Status buffer.
+\param  pStatusIndication_p         Status buffer.
 
 */
 //------------------------------------------------------------------------------
 VOID protocolStatus(NDIS_HANDLE protocolBindingContext_p,
-                    PNDIS_STATUS_INDICATION statusIndication_p)
+                    PNDIS_STATUS_INDICATION pStatusIndication_p)
 {
-    NDIS_STATUS               generalStatus = statusIndication_p->StatusCode;
+    NDIS_STATUS               generalStatus = pStatusIndication_p->StatusCode;
     NDIS_STATUS_INDICATION    newStatusIndication;
     tVEthInstance*            pVEthinstance = (tVEthInstance*)protocolInstance_l.pVEthInstance;
 
@@ -942,19 +933,19 @@ VOID protocolStatus(NDIS_HANDLE protocolBindingContext_p,
         return;
     }
 
-    protocolInstance_l.lastLinkState = *((PNDIS_LINK_STATE)(statusIndication_p->StatusBuffer));
+    protocolInstance_l.lastLinkState = *((PNDIS_LINK_STATE)(pStatusIndication_p->StatusBuffer));
 
     if (pVEthinstance->fMiniportHalting || (pVEthinstance->hMiniportAdapterHandle == NULL))
     {
         pVEthinstance->pendingStatusIndication = generalStatus;
-        pVEthinstance->lastPendingLinkState = *((PNDIS_LINK_STATE)(statusIndication_p->StatusBuffer));
+        pVEthinstance->lastPendingLinkState = *((PNDIS_LINK_STATE)(pStatusIndication_p->StatusBuffer));
         return;
     }
 
     pVEthinstance->lastLinkStatus = generalStatus;
     if (generalStatus != NDIS_STATUS_LINK_STATE)
     {
-        pVEthinstance->lastLinkState = *((PNDIS_LINK_STATE)(statusIndication_p->StatusBuffer));
+        pVEthinstance->lastLinkState = *((PNDIS_LINK_STATE)(pStatusIndication_p->StatusBuffer));
     }
 
     // Allocate a new status indication and pass it to protocols bound to VEth
@@ -964,12 +955,12 @@ VOID protocolStatus(NDIS_HANDLE protocolBindingContext_p,
     newStatusIndication.Header.Revision = NDIS_STATUS_INDICATION_REVISION_1;
     newStatusIndication.Header.Size = sizeof(NDIS_STATUS_INDICATION);
 
-    newStatusIndication.StatusCode = statusIndication_p->StatusCode;
+    newStatusIndication.StatusCode = pStatusIndication_p->StatusCode;
     newStatusIndication.SourceHandle = pVEthinstance->hMiniportAdapterHandle;
     newStatusIndication.DestinationHandle = NULL;
 
-    newStatusIndication.StatusBuffer = statusIndication_p->StatusBuffer;
-    newStatusIndication.StatusBufferSize = statusIndication_p->StatusBufferSize;
+    newStatusIndication.StatusBuffer = pStatusIndication_p->StatusBuffer;
+    newStatusIndication.StatusBufferSize = pStatusIndication_p->StatusBufferSize;
 
     NdisMIndicateStatusEx(pVEthinstance->hMiniportAdapterHandle, &newStatusIndication);
 
@@ -1077,10 +1068,9 @@ VOID protocolReceiveNbl(NDIS_HANDLE protocolBindingContext_p,
                         ULONG receiveFlags_p)
 {
     PNET_BUFFER_LIST    pCurrentNbl = NULL;
-    PNET_BUFFER_LIST    returnNbl = NULL;
-    PNET_BUFFER_LIST    lastReturnNbl = NULL;
+    PNET_BUFFER_LIST    pReturnNbl = NULL;
+    PNET_BUFFER_LIST    pLastReturnNbl = NULL;
     ULONG               returnFlags = 0;
-    BOOLEAN             bReturnNbl;
     PMDL                pMdl;
     ULONG               offset = 0;
     ULONG               totalLength;
@@ -1122,7 +1112,6 @@ VOID protocolReceiveNbl(NDIS_HANDLE protocolBindingContext_p,
         NET_BUFFER_LIST_NEXT_NBL(pCurrentNbl) = NULL;
 
         rxBufInfo = &protocolInstance_l.pReceiveBufInfo[protocolInstance_l.receiveHead];
-        bReturnNbl = TRUE;
         pMdl = NET_BUFFER_CURRENT_MDL(NET_BUFFER_LIST_FIRST_NB(pCurrentNbl));
         totalLength = NET_BUFFER_DATA_LENGTH(NET_BUFFER_LIST_FIRST_NB(pCurrentNbl));
         if (rxBufInfo->maxLength >= totalLength)
@@ -1163,17 +1152,17 @@ VOID protocolReceiveNbl(NDIS_HANDLE protocolBindingContext_p,
 
         if (NDIS_TEST_RECEIVE_CAN_PEND(receiveFlags_p) == TRUE)
         {
-            if (returnNbl == NULL)
+            if (pReturnNbl == NULL)
             {
-                returnNbl = pCurrentNbl;
+                pReturnNbl = pCurrentNbl;
             }
             else
             {
-                NET_BUFFER_LIST_NEXT_NBL(lastReturnNbl) = pCurrentNbl;
+                NET_BUFFER_LIST_NEXT_NBL(pLastReturnNbl) = pCurrentNbl;
             }
 
-            lastReturnNbl = pCurrentNbl;
-            NET_BUFFER_LIST_NEXT_NBL(lastReturnNbl) = NULL;
+            pLastReturnNbl = pCurrentNbl;
+            NET_BUFFER_LIST_NEXT_NBL(pLastReturnNbl) = NULL;
         }
         else
         {
@@ -1182,10 +1171,10 @@ VOID protocolReceiveNbl(NDIS_HANDLE protocolBindingContext_p,
         }
     }
 
-    if (returnNbl != NULL)
+    if (pReturnNbl != NULL)
     {
         NdisReturnNetBufferLists(protocolInstance_l.hBindingHandle,
-                                 returnNbl,
+                                 pReturnNbl,
                                  returnFlags);
     }
 }
@@ -1296,18 +1285,18 @@ Creates the necessary resources for the VEth adapter and initializes the VEth
 interface using NdisIMInitializeDeviceInstanceEx() routine. This results in
 a call to Miniport initialize routine of the Miniport section.
 
-\param  instanceName_p      Instance name to be used to open the VEth interface.
+\param  pInstanceName_p      Instance name to be used to open the VEth interface.
 
 \return Returns NDIS_STATUS error code.
 
 */
 //------------------------------------------------------------------------------
-static NDIS_STATUS startVEth(PNDIS_STRING instanceName_p)
+static NDIS_STATUS startVEth(PNDIS_STRING pInstanceName_p)
 {
     NDIS_STATUS                      status = NDIS_STATUS_SUCCESS;
     tVEthInstance*                   pVEthInstance = NULL;
     NDIS_HANDLE                      adapterConfigHandle;
-    PNDIS_CONFIGURATION_PARAMETER    configParam;
+    PNDIS_CONFIGURATION_PARAMETER    pConfigParam;
     NDIS_STRING                      upperBindingStr = NDIS_STRING_CONST("UpperBindings");
     PWSTR                            devName;
     NDIS_CONFIGURATION_OBJECT        configObject;
@@ -1344,7 +1333,7 @@ static NDIS_STATUS startVEth(PNDIS_STRING instanceName_p)
     // this list and initialize the virtual miniports.
 
     NdisReadConfiguration(&status,
-                          &configParam,
+                          &pConfigParam,
                           adapterConfigHandle,
                           &upperBindingStr,
                           NdisParameterMultiString);
@@ -1355,7 +1344,7 @@ static NDIS_STATUS startVEth(PNDIS_STRING instanceName_p)
         return status;
     }
 
-    devName = configParam->ParameterData.StringData.Buffer;
+    devName = pConfigParam->ParameterData.StringData.Buffer;
 
     while (*devName != L'\0')
     {
@@ -1364,7 +1353,7 @@ static NDIS_STATUS startVEth(PNDIS_STRING instanceName_p)
 
         NdisInitUnicodeString(&devString, devName);
 
-        if (instanceName_p != NULL)
+        if (pInstanceName_p != NULL)
         {
                 length = sizeof(tVEthInstance) + devString.Length + sizeof(WCHAR);
                 // Allocate a new VEth instance
@@ -1472,7 +1461,6 @@ static void freeVEthInstance(tVEthInstance* pVEthInstance_p)
         NdisFreeSpinLock(&pVEthInstance_p->pauseLock);
         NdisFreeSpinLock(&pVEthInstance_p->miniportLock);
         NdisFreeMemory(pVEthInstance_p, 0, 0);
-        pVEthInstance_p = NULL;
     }
 }
 

@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   ndis-intf.h
+\file   ndis-im.h
 
 \brief  NDIS intermediate driver interface header
 
@@ -34,8 +34,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_ndis_intf_H_
-#define _INC_ndis_intf_H_
+#ifndef _INC_ndis_im_H_
+#define _INC_ndis_im_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -170,4 +170,4 @@ tNdisErrorStatus ndis_vethReceive(void* pData_p, size_t size_p);
 }
 #endif
 
-#endif /* _INC_ndis-intf_H_ */
+#endif /* _INC_ndis_im_H_ */
