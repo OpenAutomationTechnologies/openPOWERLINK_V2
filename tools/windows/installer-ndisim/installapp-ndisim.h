@@ -70,8 +70,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 // Driver INF File and PnP ID Names
-#define PLK_SERVICE_PNP_DEVICE_ID_A      "MS_OPLKP"
-#define PLK_SERVICE_PNP_DEVICE_ID_W      L"MS_OPLKP"
+#define PLK_SERVICE_PNP_DEVICE_ID_A      "MS_PLKP"
+#define PLK_SERVICE_PNP_DEVICE_ID_W      L"MS_PLKP"
 
 #define PLK_SERVICE_INF_FILE_A           "oplk_ndisimp"
 #define PLK_SERVICE_INF_FILE_W           L"oplk_ndisimp"
