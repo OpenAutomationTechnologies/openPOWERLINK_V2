@@ -62,20 +62,20 @@ Open a Visual Studio command line and enter the following commands:
 
 * Build driver for Windows 7 (64 bit) in debug mode
 
-      > cd <openPOWERLINK_directory>\drivers\windows\drv_ndis_<pcie/intermediate>\build
+      > cd <openPOWERLINK_directory>\drivers\windows\drv_ndis_[pcie;intermediate]\build
       > cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Debug ..
       > msbuild /t:build /p:Platform=x64 /p:Configuration="Win7 Debug"
 
 * Build driver for Windows 7 (64 bit) in release mode
 
-      > cd <openPOWERLINK_directory>\drivers\windows\drv_ndis_<pcie/intermediate>\build
+      > cd <openPOWERLINK_directory>\drivers\windows\drv_ndis_[pcie;intermediate]\build
       > cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release ..
       > msbuild /t:build /p:Platform=x64 /p:Configuration="Win7 Release"
 
 `Platform` and `Configuration` parameters can be modified to compile the driver for
 a different platform and Windows version.
 
-The default driver installation path is: `<openPOWERLINK_DIR>\bin\windows\<ARCH>\drv_ndis_<pcie/intermediate>_package`
+The default driver installation path is: `<openPOWERLINK_DIR>\bin\windows\<ARCH>\drv_ndis_[pcie;intermediate]_package`
 
 ## Building a PCP daemon for Microblaze {#sect_build_drivers_build_daemon_microblaze}
 
