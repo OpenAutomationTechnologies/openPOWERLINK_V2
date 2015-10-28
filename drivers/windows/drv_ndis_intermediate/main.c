@@ -49,7 +49,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/timesynckcal.h>
 #include <errhndkcal.h>
 
-#include <ndisintermediate/ndis-intf.h>
+#include <ndisintermediate/ndis-im.h>
 #include <drvintf.h>
 
 //============================================================================//
@@ -534,6 +534,7 @@ NTSTATUS powerlinkIoctl(PDEVICE_OBJECT pDeviceObject_p, PIRP pIrp_p)
             pPdoMem->pdoMemOffset = 0;
             pIrp_p->IoStatus.Information = sizeof(tPdoMem);
             status = STATUS_SUCCESS;
+            break;
         }
 
         case PLK_CMD_CLEAN:

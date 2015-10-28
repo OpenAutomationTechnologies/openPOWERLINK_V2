@@ -94,8 +94,6 @@ CNotify::CNotify(VOID) : pInetComponent(NULL),
 CNotify::~CNotify(VOID)
 {
     CPhyAdapter*        pPhyAdapter = NULL;
-    GUID                adaptGuid;
-    WCHAR               aAdapterGuid[MAX_PATH + 1];;
 
     TRACE(L"----->~CNotify.\n");
 
@@ -615,7 +613,6 @@ HRESULT CNotify::addMiniport(CPhyAdapter* pPhyAdapter_p, GUID* pAdapterGuid_p,
                              INetCfgComponent* pInetComponent_p)
 {
     CVEthMiniport*          pMiniport = NULL;
-    INetCfgComponent*       pInetAdapter = NULL;
     HRESULT                 hret = S_OK;
     WCHAR                   szGuidString[MAX_PATH + 1];
 

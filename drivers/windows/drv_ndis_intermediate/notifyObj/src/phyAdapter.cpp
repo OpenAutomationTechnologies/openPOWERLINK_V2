@@ -255,12 +255,8 @@ HRESULT CPhyAdapter::ApplyRegistryChanges()
     HKEY                    adapterListKey;
     HKEY                    adapterGuidKey;
     WCHAR                   aAdapterGuid[MAX_PATH + 1];
-    CVEthMiniport*          pMiniportInst = NULL;
-    DWORD                   miniportCount;
     DWORD                   disposition;
-    DWORD                   i;
     LONG                    result;
-    HRESULT                 hret;
 
     StringFromGUID2(this->guidAdapter, aAdapterGuid, (MAX_PATH + 1));
 

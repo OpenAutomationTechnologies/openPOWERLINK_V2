@@ -294,7 +294,7 @@ HRESULT CVEthMiniport::ApplyRegistryChanges(VOID)
                                        REG_SZ,
                                        (LPBYTE)pDevice,
                                        (wcslen(pDevice) + 1) *
-                                       sizeof(WCHAR)
+                                       (DWORD)sizeof(WCHAR)
                                        );
                 if (result != ERROR_SUCCESS)
                 {
@@ -384,6 +384,8 @@ HRESULT CVEthMiniport::ApplyRegistryChanges(VOID)
 HRESULT CVEthMiniport::ApplyPnpChanges(INetCfgPnpReconfigCallback* pfnCallback)
 {
     TRACE(L"CVEthMiniport::ApplyPnpChanges.\n");
+
+    UNREFERENCED_PARAMETER(pfnCallback);
     return S_OK;
 }
 

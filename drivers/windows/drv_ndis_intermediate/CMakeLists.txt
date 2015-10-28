@@ -95,9 +95,9 @@ SET(ARCH_SOURCE_FILES
     )
 
 SET(NDIS_SOURCE_FILES
-    ${NDISLIB_SOURCE_DIR}/ndisintermediate/ndis_imMiniport.c
-    ${NDISLIB_SOURCE_DIR}/ndisintermediate/ndis_imProtocol.c
-    ${NDISLIB_SOURCE_DIR}/ndisintermediate/ndis_intermediate.c
+    ${NDISLIB_SOURCE_DIR}/ndisintermediate/ndis-imMiniport.c
+    ${NDISLIB_SOURCE_DIR}/ndisintermediate/ndis-imProtocol.c
+    ${NDISLIB_SOURCE_DIR}/ndisintermediate/ndis-im.c
     )
 
 SET(DRIVER_SOURCE_FILES
