@@ -1542,6 +1542,7 @@ static tOplkError sendFrame(tSdoSeqCon* pSdoSeqCon_p, UINT dataSize_p,
                             tPlkFrame* pData_p, BOOL fFrameInHistory_p)
 {
     tOplkError      ret;
+    tOplkError      retReplace = kErrorOk;
     UINT8           aFrame[SDO_SEQ_FRAME_SIZE];
     tPlkFrame*      pFrame;
     tPlkFrame*      pFrameResend;
@@ -1558,16 +1559,6 @@ static tOplkError sendFrame(tSdoSeqCon* pSdoSeqCon_p, UINT dataSize_p,
         pFrame = pData_p;
     }
 
-    if (fFrameInHistory_p != FALSE)
-    {
-        // check if only one free entry in history buffer
-        freeEntries = getFreeHistoryEntries(pSdoSeqCon_p);
-        if (freeEntries <= 1)
-        {   // request an acknowledge in dataframe - own scon = 3
-            pSdoSeqCon_p->recvSeqNum |= 0x03;
-        }
-    }
-
     // filling header informations
     ami_setUint8Le(&pFrame->data.asnd.serviceId, 0x05);
     ami_setUint8Le(&pFrame->data.asnd.payload.sdoSequenceFrame.aReserved, 0x00);
@@ -1577,6 +1568,19 @@ static tOplkError sendFrame(tSdoSeqCon* pSdoSeqCon_p, UINT dataSize_p,
 
     if (fFrameInHistory_p != FALSE)
     {
+        // save frame to history
+        ret = addFrameToHistory(pSdoSeqCon_p, pFrame, dataSize_p, TRUE);
+        if (ret != kErrorOk)
+            goto Exit;
+
+        // check if only one free entry in history buffer
+        freeEntries = getFreeHistoryEntries(pSdoSeqCon_p);
+        if (freeEntries <= 1)
+        {   // request an acknowledge in dataframe - own scon = 3
+            pSdoSeqCon_p->recvSeqNum |= 0x03;
+            retReplace = kErrorSdoSeqRequestAckNeeded;
+        }
+
         // send unsent frames from history first to prevent retransmission request
         // caused by newer frames "overtaking" unsent frames
         ret = readFromHistory(pSdoSeqCon_p, &pFrameResend, &frameSizeResend, TRUE);
@@ -1591,32 +1595,27 @@ static tOplkError sendFrame(tSdoSeqCon* pSdoSeqCon_p, UINT dataSize_p,
                     break;          // stop sending old frames
                 }
                 if (ret != kErrorOk)
-                    return ret;
+                    goto Exit;
             }
             // read next frame
             ret = readFromHistory(pSdoSeqCon_p, &pFrameResend, &frameSizeResend, FALSE);
         }
-    }
 
-    // calling send function is necessary for size check before storing it
-    // to the history buffer, even if lower layer Tx buffer is full
-    ret = sendToLowerLayer(pSdoSeqCon_p, dataSize_p, pFrame);
-    if (((ret == kErrorOk) || (ret == kErrorDllAsyncTxBufferFull)) &&
-        (fFrameInHistory_p != FALSE)                                  )
-    {
         // set own scon to 2 if needed
         if ((pSdoSeqCon_p->recvSeqNum & 0x03) == 0x03)
         {
             pSdoSeqCon_p->recvSeqNum--;
         }
+    }
+    else
+    {   // frame not stored to history
+        ret = sendToLowerLayer(pSdoSeqCon_p, dataSize_p, pFrame);
+    }
 
-        // save frame to history
-        ret = addFrameToHistory(pSdoSeqCon_p, pFrame, dataSize_p,
-                                (ret == kErrorDllAsyncTxBufferFull));
-        if ((ret == kErrorSdoSeqNoFreeHistory) || (freeEntries <= 1))
-        {
-            ret = kErrorSdoSeqRequestAckNeeded;       // request Ack needed
-        }
+Exit:
+    if (ret == kErrorOk)
+    {
+        ret = retReplace;
     }
     return ret;
 }
@@ -1783,7 +1782,7 @@ The function adds a frame to the history buffer.
 
 \param  pSdoSeqCon_p        Pointer to connection control structure.
 \param  pFrame_p            Pointer to frame to be stored in history buffer.
-\param  size_p              Size of frame (without headers).
+\param  size_p              Size of sequence layer frame
 \param  fTxFailed_p         Flag indicating that lower layer send function failed
                             e.g. due to buffer overflow and should be repeated later
 
@@ -1798,7 +1797,7 @@ static tOplkError addFrameToHistory(tSdoSeqCon* pSdoSeqCon_p, tPlkFrame* pFrame_
 
     // add frame to history buffer
     // check size - SDO_SEQ_HISTORY_FRAME_SIZE includes the header size, but size_p does not!
-    if (size_p > SDO_SEQ_TX_HISTORY_FRAME_SIZE)
+    if ((size_p + ASND_HEADER_SIZE) > SDO_SEQ_TX_HISTORY_FRAME_SIZE)
         return kErrorSdoSeqFrameSizeError;
 
     pHistory = &pSdoSeqCon_p->sdoSeqConHistory;      // save pointer to history
