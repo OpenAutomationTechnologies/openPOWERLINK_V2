@@ -229,6 +229,57 @@ The default installation location for the openPOWERLINK driver installer executa
 
 __NOTE:__ Currently the script supports creation of executable only for 64-bit Windows.
 
+# Windows driver signing for NDIS drivers
+
+Starting with 64-bit versions of Windows Vista and later versions of Windows, driver
+code signing policy requires that all driver code have a digital signature.
+
+This section will give a brief overview of the driver signing requirements on Windows
+and explain the steps to use a test-signed driver installation package on test system.
+
+## Driver signing
+
+The Windows device installation system verifies the integrity of device drivers and
+the authenticity of the publishers. This requires the publishers to associate a digital
+signature with the driver package through driver signing.
+
+Some of the key components required for driver signing are:
+
+- Software Publisher Certificate (SPC) issued by a commercial certificate authority (CA).
+- Catalog file with digital signature.
+
+For detailed steps to aquire a certificate, create a catalog and sign the driver, users can
+refer the driver signing steps at
+<https://msdn.microsoft.com/en-us/library/windows/hardware/ff544865%28v=vs.85%29.aspx>
+
+## Steps for test-signing device drivers during development
+
+Test-signing refers to using a test certificate to sign a pre-release version of a driver
+package for use on test computers. In particular, this allows developers to sign kernel-mode
+binaries by using self-signed certificates. The tool 'MakeCert' is one of the options to
+generate self-signed certificates.
+
+openPOWERLINK Windows NDIS drivers are already configured to produce test-signed drivers
+for builds in Debug mode using 'MakeCert' generated certificate.
+
+Please follow the steps below to enable use of test signed driver on a test system:
+
+  - Open a command prompt as an admin and type following commands
+
+        > bcdedit -set loadoptions DISABLE_INTEGRITY_CHECKS
+        > bcdedit -set TESTSIGNING ON
+
+  - Reboot the system.
+  - Install the openPOWERLINK drivers using the installer.
+
+During the installation of the driver, following message will be displayed to confirm
+security exception to allow use of software from an unknown publisher.
+
+![Driver signature warning message.](\ref driver_signature_warn.jpg)
+
+Please select *Install this driver software anyway* to complete the driver installation
+successfully.
+
 # Running openPOWERLINK {#sect_windows_running}
 
 The demo applications can be directly started by double-clicking the according
