@@ -60,7 +60,7 @@
     <ClInclude Include="..\..\notifyObj\include\phyAdapter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\notifyObj\include\Resource.h">
+    <ClInclude Include="..\..\notifyObj\include\resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\notifyObj\include\stdafx.h">

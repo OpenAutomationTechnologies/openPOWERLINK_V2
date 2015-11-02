@@ -230,7 +230,7 @@
     <ClInclude Include="..\..\notifyObj\include\dllmain.h" />
     <ClInclude Include="..\..\notifyObj\include\notify.h" />
     <ClInclude Include="..\..\notifyObj\include\phyAdapter.h" />
-    <ClInclude Include="..\..\notifyObj\include\Resource.h" />
+    <ClInclude Include="..\..\notifyObj\include\resource.h" />
     <ClInclude Include="..\..\notifyObj\include\stdafx.h" />
     <ClInclude Include="..\..\notifyObj\include\targetver.h" />
     <ClInclude Include="..\..\notifyObj\include\vethMiniport.h" />
