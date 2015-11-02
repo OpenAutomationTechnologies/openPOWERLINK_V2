@@ -89,7 +89,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define SECTION_DLLK_PROCESS_CYCFIN         ALT_INTERNAL_RAM
 #define SECTION_DLLK_PROCESS_SYNC           ALT_INTERNAL_RAM
 #define SECTION_DLLKCAL_ASYNCRX             ALT_INTERNAL_RAM
-#define SECTION_LEDK_PROCESS                ALT_INTERNAL_RAM
 #endif
 
 //------------------------------------------------------------------------------
