@@ -201,10 +201,54 @@ tOplkError pdokcal_freeMem(BYTE* pMem_p, size_t memSize_p)
     return kErrorOk;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Map PDO shared memory
+
+This routine maps the PDO memory allocated in the kernel layer of the openPOWERLINK
+stack. This allows user stack to access the PDO memory directly.
+
+\param  ppKernelMem_p           Double pointer to the shared memory segment in kernel space.
+\param  ppUserMem_p             Double pointer to the shared memory segment in user space.
+\param  memSize_p               Pointer to size of PDO memory.
+
+\return The function returns a tOplkError error code.
+
+\ingroup module_pdokcal
+*/
+//------------------------------------------------------------------------------
+tOplkError pdokcal_mapMem(UINT8** ppKernelMem_p, UINT8** ppUserMem_p, size_t* pMemSize_p)
+{
+    UNUSED_PARAMETER(ppKernelMem_p);
+    UNUSED_PARAMETER(ppUserMem_p);
+    UNUSED_PARAMETER(pMemSize_p);
+
+    return kErrorOk;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Unmap PDO shared memory
+
+Unmap the PDO memory shared with the user layer. The memory will be freed in
+pdokcal_freeMem().
+
+\param  pMem_p                  Pointer to the shared memory segment.
+\param  memSize_p               Size of PDO memory.
+
+\ingroup module_pdokcal
+*/
+//------------------------------------------------------------------------------
+void pdokcal_unMapMem(UINT8* pMem_p, size_t memSize_p)
+{
+    UNUSED_PARAMETER(pMem_p);
+    UNUSED_PARAMETER(memSize_p);
+}
+
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
 /// \name Private Functions
 /// \{
 
-///\}
+/// \}

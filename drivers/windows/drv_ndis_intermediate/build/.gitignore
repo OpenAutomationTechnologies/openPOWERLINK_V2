@@ -1,0 +1,12 @@
+!.gitignore
+Debug
+Release
+*.obj
+x64
+*.suo
+*.tlb
+*.sdf
+*.opensdf
+ipch
+*.vcxproj.user
+*.dir

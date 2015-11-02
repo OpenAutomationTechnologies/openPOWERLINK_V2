@@ -235,6 +235,10 @@ SET(EVENT_UCAL_WINDOWSPCIE_SOURCES
     ${USER_SOURCE_DIR}/event/eventucal-winpcie.c
     )
 
+SET(EVENT_UCAL_WINDOWSIOCTL_SOURCES
+    ${USER_SOURCE_DIR}/event/eventucal-winioctl.c
+    )
+
 ################################################################################
 # User PDO CAL sources
 SET(PDO_UCAL_LOCAL_SOURCES
@@ -367,6 +371,11 @@ SET(EVENT_KCAL_LINUXKERNEL_SOURCES
     ${KERNEL_SOURCE_DIR}/event/eventkcalintf-circbuf.c
     )
 
+SET(EVENT_KCAL_WINKERNEL_SOURCES
+    ${KERNEL_SOURCE_DIR}/event/eventkcal-winkernel.c
+    ${KERNEL_SOURCE_DIR}/event/eventkcalintf-circbuf.c
+    )
+
 SET(EVENT_KCAL_NOOSKERNEL_SOURCES
     ${KERNEL_SOURCE_DIR}/event/eventkcalintf-circbuf.c
     ${KERNEL_SOURCE_DIR}/event/eventkcal-nooscircbuf.c
@@ -400,6 +409,11 @@ SET(PDO_KCAL_LINUXKERNEL_SOURCES
     ${KERNEL_SOURCE_DIR}/timesync/timesynckcal-linuxkernel.c
     )
 
+SET(PDO_KCAL_LINUXKERNEL_SOURCES
+    ${KERNEL_SOURCE_DIR}/pdo/pdokcalmem-winkernel.c
+    ${KERNEL_SOURCE_DIR}/pdo/pdokcalsync-winkernel.c
+    )
+
 SET(PDO_KCAL_HOSTIF_SOURCES
     ${KERNEL_SOURCE_DIR}/pdo/pdokcalmem-hostif.c
     ${KERNEL_SOURCE_DIR}/timesync/timesynckcal-hostif.c
@@ -430,6 +444,13 @@ SET(HARDWARE_DRIVER_LINUXKERNEL_SOURCES
      ${KERNEL_SOURCE_DIR}/veth/veth-linuxkernel.c
      ${KERNEL_SOURCE_DIR}/timer/hrestimer-linuxkernel.c
      ${EDRV_SOURCE_DIR}/edrvcyclic.c
+     )
+
+SET(HARDWARE_DRIVER_WINNDISIM_SOURCES
+     ${KERNEL_SOURCE_DIR}/veth/veth-ndisintemediate.c
+     ${KERNEL_SOURCE_DIR}/timer/hrestimer-ndistimer.c
+     ${EDRV_SOURCE_DIR}/edrvcyclic.c
+     ${EDRV_SOURCE_DIR}/edrv-ndisintermediate.c
      )
 
 SET(HARDWARE_DRIVER_OPENMAC_SOURCES
@@ -481,6 +502,11 @@ SET(CIRCBUF_LINUXKERNEL_SOURCES
     ${COMMON_SOURCE_DIR}/circbuf/circbuf-linuxkernel.c
     )
 
+SET(CIRCBUF_WINKERNEL_SOURCES
+    ${COMMON_SOURCE_DIR}/circbuf/circbuffer.c
+    ${COMMON_SOURCE_DIR}/circbuf/circbuf-winkernel.c
+    )
+
 SET(CIRCBUF_NOOS_SOURCES
     ${COMMON_SOURCE_DIR}/circbuf/circbuffer.c
     ${COMMON_SOURCE_DIR}/circbuf/circbuf-noos.c
@@ -527,6 +553,10 @@ SET(MEMMAP_DUALPROCSHM_SOURCES
 SET(TARGET_WINDOWS_SOURCES
     ${ARCH_SOURCE_DIR}/windows/target-windows.c
     ${ARCH_SOURCE_DIR}/windows/target-mutex.c
+    )
+
+SET(TARGET_WINDOWS_DUAL_SOURCES
+    ${ARCH_SOURCE_DIR}/windows/lock-dualprocnoos.c
     )
 
 SET(TARGET_LINUX_SOURCES

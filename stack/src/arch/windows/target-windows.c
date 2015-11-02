@@ -10,6 +10,7 @@ The file implements target specific functions used in the openPOWERLINK stack.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
+Copyright (c) 2015, Kalycito Infotech Private Limited
 Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
@@ -126,6 +127,37 @@ tOplkError target_setLed(tLedType ledType_p, BOOL fLedOn_p)
 {
     UNUSED_PARAMETER(ledType_p);
     UNUSED_PARAMETER(fLedOn_p);
+
+    return kErrorOk;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Set IP address of specified Ethernet interface
+
+The function sets the IP address, subnetMask and MTU of an Ethernet
+interface.
+
+\param  pIfName_p                Name of Ethernet interface.
+\param  ipAddress_p             IP address to set for interface.
+\param  subnetMask_p            Subnet mask to set for interface.
+\param  mtu_p                   MTU to set for interface.
+
+\return The function returns a tOplkError error code.
+
+\ingroup module_target
+*/
+//------------------------------------------------------------------------------
+tOplkError target_setIpAdrs(char* pIfName_p, UINT32 ipAddress_p, UINT32 subnetMask_p,
+                            UINT16 mtu_p)
+{
+    UNUSED_PARAMETER(pIfName_p);
+    UNUSED_PARAMETER(ipAddress_p);
+    UNUSED_PARAMETER(subnetMask_p);
+    UNUSED_PARAMETER(mtu_p);
+
+    // Note: On a Windows system, the IP address for the VEth interface should be assigned
+    //       using network properties page.
 
     return kErrorOk;
 }

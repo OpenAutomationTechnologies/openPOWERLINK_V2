@@ -1,0 +1,93 @@
+;
+; oplk_ndisim_mp.inf
+;
+; openPOWERLINK NDIS intermediate driver miniport INF file.
+;
+; This file contains the installation definitions and configuration
+; for openPOWERLINK virtual miniport device installed as a part of
+; NDIS intermediate driver.
+;
+;/*------------------------------------------------------------------------------
+;Copyright (c) 2015, Kalycito Infotech Private Limited
+;All rights reserved.
+;
+;Redistribution and use in source and binary forms, with or without
+;modification, are permitted provided that the following conditions are met:
+;    * Redistributions of source code must retain the above copyright
+;      notice, this list of conditions and the following disclaimer.
+;    * Redistributions in binary form must reproduce the above copyright
+;      notice, this list of conditions and the following disclaimer in the
+;      documentation and/or other materials provided with the distribution.
+;    * Neither the name of the copyright holders nor the
+;      names of its contributors may be used to endorse or promote products
+;      derived from this software without specific prior written permission.
+;
+;THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+;ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+;WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+;DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+;DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+;(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+;LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+;ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+;(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+;SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+;------------------------------------------------------------------------------*/
+
+[Version]
+Signature   = "$Windows NT$"
+Class       = Net
+ClassGUID   = {4d36e972-e325-11ce-bfc1-08002be10318}
+Provider    = %ManufacturerName%
+DriverVer=26/05/2015,2.3.0.0
+CatalogFile=drv_ndis_intermediate.cat
+
+[ControlFlags]
+ExcludeFromSelect = MS_PLKMP
+
+[Manufacturer]
+%ManufacturerName%  =OPLK, NT$ARCH$
+
+[OPLK.NT$ARCH$]
+%OPLK.DevDesc% = PLKMP.ndi, MS_PLKMP
+
+[PLKMP.ndi]
+AddReg  = PLKMP.ndi.AddReg
+Characteristics = 0xA1 ;NCF_NOT_USER_REMOVABLE | NCF_VIRTUAL | NCF_HAS_UI
+*IfType         = 6             ; IF_TYPE_ETHERNET_CSMACD
+*MediaType      = 0             ; NdisMedium802_3
+*PhysicalMediaType = 0          ; NdisPhysicalMediumUnspecified
+
+
+[PLKMP.ndi.AddReg]
+HKR, Ndi, Service,  0,  PLKMP
+HKR, Ndi, HelpText, 0,  "%PLKMP_HELP%"
+HKR, Ndi\Interfaces,    UpperRange, 0,  "ndis5"
+HKR, Ndi\Interfaces,    LowerRange, 0,  "ethernet"
+
+HKR, Ndi\params\VlanID,     ParamDesc,       0, %VlanID%
+HKR, Ndi\params\VlanID,     default,         0, "0"
+HKR, Ndi\params\VlanID,     type,            0, "long"
+HKR, Ndi\params\VlanID,     min,             0, "0"
+HKR, Ndi\params\VlanID,     max,             0, "4095"
+HKR, Ndi\params\VlanID,     step,            0, "1"
+HKR, Ndi\params\VlanID,     ParamDesc,       0, %VlanID%
+
+[PLKMP.ndi.Services]
+AddService = PLKMP, 2, PLKMP.AddService
+
+[PLKMP.AddService]
+DisplayName     = %OPLK.Service.DispName%
+ServiceType     = 1 ;SERVICE_KERNEL_DRIVER
+StartType       = 3 ;SERVICE_DEMAND_START
+ErrorControl    = 1 ;SERVICE_ERROR_NORMAL
+ServiceBinary   = %12%\drv_ndis_intermediate.sys
+Description     = %OPLK.Service.DispName%
+
+
+[Strings]
+ManufacturerName = "Kalycito Infotech Private Limited"
+OPLK.DevDesc = "POWERLINK NDIS Intermediate Device"
+OPLK.Service.DispName = "POWERLINK NDIS miniport Service"
+PLKMP_HELP = "POWERLINK NDIS Miniport Instance"
+VlanID = "VLAN ID"
