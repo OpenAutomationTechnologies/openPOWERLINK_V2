@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Driver Files">
+      <UniqueIdentifier>{8E41214B-6785-4CFE-B992-037D68949A14}</UniqueIdentifier>
+      <Extensions>inf;inv;inx;mof;mc;</Extensions>
+    </Filter>
+    <Filter Include="Source Files\Common Source Files">
+      <UniqueIdentifier>{a8fdcc80-1773-41e7-a8ec-281c9a80df4d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Architecture Source Files">
+      <UniqueIdentifier>{9537d249-4943-4150-9a49-85a7444da866}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Kernel Source Files">
+      <UniqueIdentifier>{90d7ba3e-16ae-4b0a-b689-3ab7e7f6fdf7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Ndis Intermediate Source">
+      <UniqueIdentifier>{3295dadc-4570-484e-87e2-e9e04917baf1}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <Import Project="filters.targets" />
+  <ItemGroup>
+    <Inf Include="oplk_ndisim_mp.inf">
+      <Filter>Driver Files</Filter>
+    </Inf>
+    <Inf Include="oplk_ndisimp.inf">
+      <Filter>Driver Files</Filter>
+    </Inf>
+  </ItemGroup>
+</Project>

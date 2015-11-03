@@ -14,7 +14,7 @@ Release library versions must be available, depending on your CMAKE_BUILD_TYPE.
 If the needed library is missing you get an OPLKLIB-NOTFOUND or
 OPLKLIB_DEBUG-NOTFOUND error in the demos CMake configuration.
 If you use the Visual Studio generator on Windows, both libraries must be
-available as you can swith between Debug and Release inside the Visual Studio
+available as you can switch between Debug and Release inside the Visual Studio
 solution.
 
 
@@ -156,6 +156,13 @@ Follow the steps below to cross compile your demo application for Altera Cyclone
     The kernel part of the openPOWERLINK stack is located on the external PCIe device.
     Shared memory is used for status/control and data exchange between the user
     and kernel layers of the openPOWERLINK stack.
+
+  - __Windows Kernel Module__
+
+    The library `liboplkmnapp-kernelintf.lib` will be used. It contains the interface
+    to the NDIS intermediate driver running in the Windows kernel space. The kernel part
+    is located in the NDIS intermediate driver. The NDIS intermediate driver uses native
+    NIC miniport driver to access network interface.
 
 ## Options for embedded platforms (Non-OS) {#sect_build_demos_noos_options}
 

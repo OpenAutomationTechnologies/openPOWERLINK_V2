@@ -42,7 +42,8 @@ SET (DEMO_ARCH_SOURCES
      ${CONTRIB_SOURCE_DIR}/console/console-windows.c
      )
 
-INCLUDE_DIRECTORIES(${CONTRIB_SOURCE_DIR}/pcap/windows/WpdPack/Include)
+INCLUDE_DIRECTORIES(${CONTRIB_SOURCE_DIR}/pcap/windows/WpdPack/Include
+                    ${ARCH_SOURCE_DIR}/windows)
 
 ################################################################################
 # Set architecture specific libraries

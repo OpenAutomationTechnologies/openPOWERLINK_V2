@@ -123,7 +123,7 @@ This function enables/disables global interrupts.
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-void target_enableGlobalInterrupt(BYTE fEnable_p)
+void target_enableGlobalInterrupt(UINT8 fEnable_p)
 {
     // Nothing to do here
 }

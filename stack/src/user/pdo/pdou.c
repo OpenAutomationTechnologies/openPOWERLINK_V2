@@ -986,7 +986,7 @@ static tOplkError configureAllPdos(void)
     pdoucal_postSetupPdoBuffers(rxPdoMemSize, txPdoMemSize);
 
     // TODO how to be sure that kernel is ready before starting??
-    target_msleep(500);
+    target_msleep(5000);
 
     ret = pdoucal_initPdoMem(&pdouInstance_g.pdoChannels, rxPdoMemSize,
                              txPdoMemSize);
