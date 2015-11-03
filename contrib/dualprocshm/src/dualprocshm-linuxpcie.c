@@ -1,17 +1,17 @@
 /**
 ********************************************************************************
-\file   dualprocshm-winpcie.c
+\file   dualprocshm-linuxpcie.c
 
-\brief  Dual processor library - Windows PCIe
+\brief  Dual Processor Library Support File - Linux PCIe
 
-This file provides specific function definitions to support the PCIe interface
-using dual processor library.
+This file provides target specific function definitions to support
+dual processor shared memory interface via PCIe on Linux.
 
 \ingroup module_dualprocshm
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015 Kalycito Infotech Private Limited
+Copyright (c) 2015, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -41,9 +41,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 
-#include <dualprocshm-target.h>
-
-#include <ndis-intf.h>
+#include <pciedrv.h>
+#include <dualprocshm.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -72,12 +71,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
 //============================================================================//
+
 //------------------------------------------------------------------------------
 /**
 \brief  Get common memory address for platform
 
-Target specific routine to retrieve the base address of the common memory shared
-between the two processors.
+Target specific routine to retrieve the base address of common memory between
+two processors.
 
 \param  pSize_p      Minimum size of the common memory on input, returns the
                      actual size of common memory as output.
@@ -94,7 +94,7 @@ UINT8* dualprocshm_getCommonMemAddr(UINT16* pSize_p)
     if (*pSize_p > MAX_COMMON_MEM_SIZE )
         return NULL;
 
-    pAddr = (UINT8*)ndis_getBarAddr(OPLK_PCIEBAR_COMM_MEM);
+    pAddr = (UINT8*)pciedrv_getBarAddr(OPLK_PCIEBAR_COMM_MEM);
 
     if (pAddr == NULL)
         return NULL;
@@ -110,7 +110,7 @@ UINT8* dualprocshm_getCommonMemAddr(UINT16* pSize_p)
 Target specific routine to release the base address of
 common memory.
 
-\param  pSize_p      Size of the common memory
+\param  pSize_p      Size of the common memory.
 
 \ingroup module_dualprocshm
  */
@@ -122,13 +122,12 @@ void dualprocshm_releaseCommonMemAddr(UINT16 pSize_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Get shared memory base address and size
+\brief  Get shared memory information for platform
 
-Target specific routine to retrieve the base address of the shared memory region
-between two processors.
+Target specific routine to retrieve the shared memory base and size.
 
-\param  pSize_p     Pointer to the minimum size of the shared memory,
-                    returns the actual size of shared memory.
+\param  pSize_p      Minimum size of the shared memory, returns the
+                     actual size of shared memory.
 
 \return Pointer to base address of shared memory.
 
@@ -138,7 +137,7 @@ between two processors.
 UINT8*  dualprocshm_getSharedMemInst(UINT32* pSize_p)
 {
     UINT8*   pAddr;
-    ULONG    shmLength = ndis_getBarLength(OPLK_PCIEBAR_SHM);
+    ULONG    shmLength = pciedrv_getBarLength(OPLK_PCIEBAR_SHM);
 
     if (*pSize_p > shmLength)
     {
@@ -147,8 +146,7 @@ UINT8*  dualprocshm_getSharedMemInst(UINT32* pSize_p)
         return NULL;
     }
 
-    pAddr = (UINT8*)(ndis_getBarAddr(OPLK_PCIEBAR_SHM));
-
+    pAddr = (UINT8*)(pciedrv_getBarAddr(OPLK_PCIEBAR_SHM));
     *pSize_p = shmLength;
 
     return pAddr;
@@ -168,7 +166,7 @@ dynamic mapping table.
 //------------------------------------------------------------------------------
 UINT8* dualprocshm_getDynMapTableAddr(void)
 {
-    UINT8*     pAddr = (UINT8*)ndis_getBarAddr(OPLK_PCIEBAR_COMM_MEM);
+    UINT8*     pAddr = (UINT8*)pciedrv_getBarAddr(OPLK_PCIEBAR_COMM_MEM);
 
     if (pAddr == NULL)
         return NULL;
@@ -190,7 +188,7 @@ dynamic mapping table.
 //------------------------------------------------------------------------------
 void dualprocshm_releaseDynMapTableAddr(void)
 {
-    // nothing to be done on Windows
+    // nothing to be done on Linux
 }
 
 //------------------------------------------------------------------------------
@@ -207,7 +205,7 @@ interrupt synchronization registers.
 //------------------------------------------------------------------------------
 UINT8* dualprocshm_getIntrMemAddr(void)
 {
-    UINT8*     pAddr = (UINT8*)ndis_getBarAddr(OPLK_PCIEBAR_COMM_MEM);
+    UINT8*     pAddr = (UINT8*)pciedrv_getBarAddr(OPLK_PCIEBAR_COMM_MEM);
 
     if (pAddr == NULL)
         return NULL;
@@ -219,9 +217,9 @@ UINT8* dualprocshm_getIntrMemAddr(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Free interrupt synchronization address
+\brief  Free interrupt synchronization base address
 
-Target specific routine to free the address used for storing
+Target specific routine to free the base address used for storing
 interrupt synchronization registers.
 
 \ingroup module_dualprocshm
@@ -229,7 +227,7 @@ interrupt synchronization registers.
 //------------------------------------------------------------------------------
 void dualprocshm_releaseIntrMemAddr()
 {
-    // nothing to be done for Windows
+    // nothing to be done for Linux
 }
 
 //------------------------------------------------------------------------------
@@ -238,9 +236,9 @@ void dualprocshm_releaseIntrMemAddr()
 
 Target specific memory read routine.
 
-\param  pBase_p    Address to be read
-\param  size_p     No of bytes to be read
-\param  pData_p    Pointer to receive the read data
+\param  pBase_p    Address to read data from.
+\param  size_p     Number of bytes to be read.
+\param  pData_p    Pointer to store the read data.
 
 \ingroup module_dualprocshm
  */
@@ -264,9 +262,9 @@ void dualprocshm_targetReadData(UINT8* pBase_p, UINT16 size_p, UINT8* pData_p)
 
 Target specific routine used to write data to the specified memory address.
 
-\param  pBase_p      Address to be written
-\param  size_p       No of bytes to write
-\param  pData_p      Pointer to memory containing data to written
+\param  pBase_p      Address to write data to.
+\param  size_p       Number of bytes to be written.
+\param  pData_p      Pointer to memory containing data to be written.
 
 \ingroup module_dualprocshm
  */
@@ -371,10 +369,10 @@ void dualprocshm_targetReleaseLock(tDualprocLock* pBase_p, tDualProcInstance pro
 \brief Register synchronization interrupt handler
 
 The function registers the ISR for the target specific synchronization interrupt
-used by the application for PDO and event synchronization.
+used by the application for synchronization.
 
-\param  callback_p              Interrupt handler
-\param  pArg_p                  Argument to be passed while calling the handler
+\param  callback_p              Interrupt handler.
+\param  pArg_p                  Argument to be passed when calling the handler.
 
 \ingroup module_dualprocshm
 */
@@ -398,9 +396,9 @@ The function is used to enable or disable the sync interrupt.
 void dualprocshm_enableSyncIrq(BOOL fEnable_p)
 {
     if (fEnable_p)
-        DPSHM_ENABLE_SYNC_INTR();
+        pciedrv_enableSync(TRUE);
     else
-        DPSHM_DISABLE_SYNC_INTR();
+        pciedrv_enableSync(FALSE);
 }
 
 //============================================================================//

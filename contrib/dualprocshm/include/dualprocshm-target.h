@@ -64,6 +64,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "dualprocshm-pcie.h"
 
+#elif defined (__LINUX_PCIE__)
+
+#include "dualprocshm-pcie.h"
+
 #else
 
 #error "Platform is not supported! Please point the target platform file in dualprocshm-target.h "
@@ -260,7 +264,7 @@ UINT8*  dualprocshm_getCommonMemAddr(UINT16* pSize_p);
 UINT8*  dualprocshm_getSharedMemInst(UINT32* pSize_p);
 UINT8*  dualprocshm_getDynMapTableAddr(void);
 UINT8*  dualprocshm_getIntrMemAddr(void);
-void    dualprocshm_releaseIntrMemAddr();
+void    dualprocshm_releaseIntrMemAddr(void);
 void    dualprocshm_targetReadData(UINT8* pBase_p, UINT16 size_p, UINT8* pData_p);
 void    dualprocshm_targetWriteData(UINT8* pBase_p, UINT16 size_p, UINT8* pData_p);
 void    dualprocshm_releaseCommonMemAddr(UINT16 pSize_p);

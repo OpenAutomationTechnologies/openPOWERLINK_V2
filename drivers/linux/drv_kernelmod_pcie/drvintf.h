@@ -1,10 +1,10 @@
 /**
 ********************************************************************************
-\file   dualprocshm-arm.h
+\file   drv_kernelmod_pcie/drvintf.h
 
-\brief  Dual Processor Library Target support Header - For ARM target
+\brief  openPOWERLINK PCIe driver Driver interface header file
 
-This header file provides specific macros for Zynq ARM CPU.
+openPOWERLINK PCIe driver interface to PCP - Header file
 
 *******************************************************************************/
 
@@ -35,78 +35,39 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_dualprocshm_arm_H_
-#define _INC_dualprocshm_arm_H_
+#ifndef _INC_drvintf_H_
+#define _INC_drvintf_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <xil_cache.h>
-#include <xscugic.h>
-#include <xil_exception.h>
-#include <unistd.h>
-#include <xil_io.h>
-#include <xparameters.h>
-#include <xil_types.h>
-#include <dualprocshm-mem.h>
+#include <common/driver.h>
+#include <common/ctrl.h>
+#include <common/target.h>
+#include <kernel/timesynckcal.h>
+#include <common/ctrlcal-mem.h>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-
-// memory
-#define DUALPROCSHM_MALLOC(size)              malloc(size)
-#define DUALPROCSHM_FREE(ptr)                 free(ptr)
-#define DUALPROCSHM_MEMCPY(dest, src, siz)    memcpy(dest, src, siz)
-
-// IO operations
-#define DPSHM_READ8(base)           Xil_In8((UINT32)base)
-#define DPSHM_WRITE8(base, val)     Xil_Out8((UINT32)base, val)
-#define DPSHM_READ16(base)          Xil_In16((UINT32)base)
-#define DPSHM_WRITE16(base, val)    Xil_Out16((UINT32)base, val)
-#define DPSHM_READ32(base)          Xil_In32((UINT32)base)
-#define DPSHM_WRITE32(base, val)    Xil_Out32((UINT32)base, val)
-
-// Memory barrier
-#define DPSHM_DMB()                 dmb()
-
-// cache handling
-#define DUALPROCSHM_FLUSH_DCACHE_RANGE(base, range) \
-    Xil_DCacheFlushRange((UINT32)base, range);
-
-#define DUALPROCSHM_INVALIDATE_DCACHE_RANGE(base, range) \
-    Xil_DCacheInvalidateRange((UINT32)base, range);
-
-#define DPSHM_REG_SYNC_INTR(callback, arg)                       \
-    XScuGic_RegisterHandler(TARGET_IRQ_IC_BASE, TARGET_SYNC_IRQ, \
-                           (Xil_InterruptHandler) callback, arg);\
-    XScuGic_EnableIntr(TARGET_IRQ_IC_DIST_BASE, TARGET_SYNC_IRQ)
-
-#define DPSHM_ENABLE_SYNC_INTR() \
-    XScuGic_EnableIntr(TARGET_SYNC_IRQ_ID, TARGET_SYNC_IRQ)
-
-#define DPSHM_DISABLE_SYNC_INTR() \
-    XScuGic_DisableIntr(TARGET_SYNC_IRQ_ID, TARGET_SYNC_IRQ)
-
-
-#define DPSHM_CONNECT_SYNC_IRQ()
-#define DPSHM_DISCONNECT_SYNC_IRQ()
-
-#ifndef TRACE
-#ifndef NDEBUG
-#define TRACE(...) printf(__VA_ARGS__)
-#else
-#define TRACE(...)
-#endif
-#endif
+#define FIELD_OFFSET(...)                       offsetof(__VA_ARGS__)
 
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
+#if defined(CONFIG_INCLUDE_VETH)
+/**
+\brief Type for VEth frame receive callback function pointer
+
+This type defines a function pointer to the VEth frame received
+callback function.
+
+\param  pFrameInfo_p        Frame info of the received frame.
+
+\return The function returns a tOplkError error code.
+*/
+typedef tOplkError (*tDrvIntfCbVeth)(tFrameInfo* pFrameInfo_p);
+#endif
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -116,8 +77,32 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C"
 {
 #endif
+tOplkError drvintf_init(void);
+void       drvintf_exit(void);
+tOplkError drvintf_executeCmd(tCtrlCmd* ctrlCmd_p);
+tOplkError drvintf_readInitParam(tCtrlInitParam* pInitParam_p);
+tOplkError drvintf_storeInitParam(tCtrlInitParam* pInitParam_p);
+tOplkError drvintf_getStatus(UINT16* pStatus_p);
+tOplkError drvintf_getHeartbeat(UINT16* pHeartbeat_p);
+tOplkError drvintf_postEvent(tEvent* pEvent_p);
+tOplkError drvintf_getEvent(tEvent* pK2UEvent_p, size_t* pSize_p);
+tOplkError drvintf_sendAsyncFrame(tDllCalQueue queue_p, size_t size_p, void* pData_p);
+tOplkError drvintf_writeErrorObject(UINT32 offset_p, UINT32 errVal_p);
+tOplkError drvintf_readErrorObject(UINT32 offset_p, UINT32* pErrVal_p);
+tOplkError drvintf_getPdoMem(UINT8** ppPdoMem_p, size_t* pMemSize_p);
+tOplkError drvintf_freePdoMem(UINT8** ppPdoMem_p, size_t memSize_p);
+tOplkError drvintf_getBenchmarkMem(UINT8** ppBenchmarkMem_p);
+tOplkError drvintf_freeBenchmarkMem(UINT8** ppBenchmarkMem_p);
+tOplkError drvintf_mapKernelMem(UINT8* pKernelMem_p, UINT8** ppUserMem_p, size_t size_p);
+void       drvintf_unmapKernelMem(UINT8** ppUserMem_p);
+tOplkError drvintf_waitSyncEvent(void);
+#if defined(CONFIG_INCLUDE_VETH)
+tOplkError drvintf_regVethHandler(tDrvIntfCbVeth pfnDrvIntfCbVeth_p);
+tOplkError drvintf_sendVethFrame(tFrameInfo* pFrameInfo_p);
+#endif
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_dualprocshm_arm_H_ */
+#endif /* _INC_drvintf_H_ */

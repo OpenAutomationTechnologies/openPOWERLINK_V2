@@ -1,14 +1,15 @@
 /**
 ********************************************************************************
-\file   dualprocshm-arm.h
+\file   common/driver-linuxpcie.h
 
-\brief  Dual Processor Library Target support Header - For ARM target
+\brief  Header file for openPOWERLINK PCIe driver interface for Linux kernel
 
-This header file provides specific macros for Zynq ARM CPU.
-
+This file contains the necessary definitions for using the openPOWERLINK
+PCIe driver interface for Linux kernel.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
+Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2015, Kalycito Infotech Private Limited
 All rights reserved.
 
@@ -35,74 +36,37 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_dualprocshm_arm_H_
-#define _INC_dualprocshm_arm_H_
+#ifndef _INC_common_driver_linux_pcie_H_
+#define _INC_common_driver_linux_pcie_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <xil_cache.h>
-#include <xscugic.h>
-#include <xil_exception.h>
-#include <unistd.h>
-#include <xil_io.h>
-#include <xparameters.h>
-#include <xil_types.h>
-#include <dualprocshm-mem.h>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+#define PLK_CLASS_NAME    "plk"
+#define PLK_DEV_NAME      "plk" // used for "/dev" and "/proc" entry
+#define PLK_DRV_NAME      "plk"
+#define PLK_DEV_FILE      "/dev/plk"
+#define PLK_IOC_MAGIC     '='
 
-// memory
-#define DUALPROCSHM_MALLOC(size)              malloc(size)
-#define DUALPROCSHM_FREE(ptr)                 free(ptr)
-#define DUALPROCSHM_MEMCPY(dest, src, siz)    memcpy(dest, src, siz)
-
-// IO operations
-#define DPSHM_READ8(base)           Xil_In8((UINT32)base)
-#define DPSHM_WRITE8(base, val)     Xil_Out8((UINT32)base, val)
-#define DPSHM_READ16(base)          Xil_In16((UINT32)base)
-#define DPSHM_WRITE16(base, val)    Xil_Out16((UINT32)base, val)
-#define DPSHM_READ32(base)          Xil_In32((UINT32)base)
-#define DPSHM_WRITE32(base, val)    Xil_Out32((UINT32)base, val)
-
-// Memory barrier
-#define DPSHM_DMB()                 dmb()
-
-// cache handling
-#define DUALPROCSHM_FLUSH_DCACHE_RANGE(base, range) \
-    Xil_DCacheFlushRange((UINT32)base, range);
-
-#define DUALPROCSHM_INVALIDATE_DCACHE_RANGE(base, range) \
-    Xil_DCacheInvalidateRange((UINT32)base, range);
-
-#define DPSHM_REG_SYNC_INTR(callback, arg)                       \
-    XScuGic_RegisterHandler(TARGET_IRQ_IC_BASE, TARGET_SYNC_IRQ, \
-                           (Xil_InterruptHandler) callback, arg);\
-    XScuGic_EnableIntr(TARGET_IRQ_IC_DIST_BASE, TARGET_SYNC_IRQ)
-
-#define DPSHM_ENABLE_SYNC_INTR() \
-    XScuGic_EnableIntr(TARGET_SYNC_IRQ_ID, TARGET_SYNC_IRQ)
-
-#define DPSHM_DISABLE_SYNC_INTR() \
-    XScuGic_DisableIntr(TARGET_SYNC_IRQ_ID, TARGET_SYNC_IRQ)
-
-
-#define DPSHM_CONNECT_SYNC_IRQ()
-#define DPSHM_DISCONNECT_SYNC_IRQ()
-
-#ifndef TRACE
-#ifndef NDEBUG
-#define TRACE(...) printf(__VA_ARGS__)
-#else
-#define TRACE(...)
-#endif
-#endif
+//------------------------------------------------------------------------------
+//  Commands for <ioctl>
+//------------------------------------------------------------------------------
+#define PLK_CMD_CTRL_EXECUTE_CMD                _IOWR(PLK_IOC_MAGIC, 0, tCtrlCmd)
+#define PLK_CMD_CTRL_STORE_INITPARAM            _IOW (PLK_IOC_MAGIC, 1, tCtrlInitParam)
+#define PLK_CMD_CTRL_READ_INITPARAM             _IOR (PLK_IOC_MAGIC, 2, tCtrlInitParam)
+#define PLK_CMD_CTRL_GET_STATUS                 _IOR (PLK_IOC_MAGIC, 3, UINT16)
+#define PLK_CMD_CTRL_GET_HEARTBEAT              _IOR (PLK_IOC_MAGIC, 4, UINT16)
+#define PLK_CMD_POST_EVENT                      _IOW (PLK_IOC_MAGIC, 5, tEvent)
+#define PLK_CMD_GET_EVENT                       _IOR (PLK_IOC_MAGIC, 6, tEvent)
+#define PLK_CMD_DLLCAL_ASYNCSEND                _IO  (PLK_IOC_MAGIC, 7)
+#define PLK_CMD_ERRHND_WRITE                    _IOW (PLK_IOC_MAGIC, 8, tErrHndIoctl)
+#define PLK_CMD_ERRHND_READ                     _IOR (PLK_IOC_MAGIC, 9, tErrHndIoctl)
+#define PLK_CMD_TIMESYNC_SYNC                   _IO  (PLK_IOC_MAGIC, 10)
+#define PLK_CMD_PDO_MAP_OFFSET                  _IOR (PLK_IOC_MAGIC, 11, ULONG)
 
 //------------------------------------------------------------------------------
 // typedef
@@ -112,12 +76,4 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // function prototypes
 //------------------------------------------------------------------------------
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* _INC_dualprocshm_arm_H_ */
+#endif /* _INC_common_driver_linux_pcie_H_ */

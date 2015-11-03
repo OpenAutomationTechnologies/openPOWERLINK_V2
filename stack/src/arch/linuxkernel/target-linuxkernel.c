@@ -44,6 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <linux/hrtimer.h>
 
 #include <linux/sched.h>
+#include <linux/delay.h>
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -66,6 +67,24 @@ ULONGLONG target_getCurrentTimestamp(void)
     return timeStamp;
 }
 
+
+//------------------------------------------------------------------------------
+/**
+\brief Sleep for the specified number of milliseconds
+
+The function makes the calling thread sleep until the number of specified
+milliseconds have elapsed.
+
+\param  milliSeconds_p      Number of milliseconds to sleep
+
+\ingroup module_target
+*/
+//------------------------------------------------------------------------------
+void target_msleep(UINT32 milliSeconds_p)
+{
+    msleep(milliSeconds_p);
+}
+
 //------------------------------------------------------------------------------
 /**
 \brief    Get current system tick
@@ -80,6 +99,24 @@ This function returns the current system tick determined by the system timer.
 UINT32 target_getTickCount(void)
 {
     return jiffies * 1000 / HZ;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief    Enable global interrupt
+
+This function enables/disables global interrupts.
+
+\param  fEnable_p               TRUE = enable interrupts
+                                FALSE = disable interrupts
+
+\ingroup module_target
+*/
+//------------------------------------------------------------------------------
+void target_enableGlobalInterrupt(BYTE fEnable_p)
+{
+    // Nothing to do here
+    UNUSED_PARAMETER(fEnable_p);
 }
 
 //------------------------------------------------------------------------------

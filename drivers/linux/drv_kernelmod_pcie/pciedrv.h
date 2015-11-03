@@ -1,10 +1,10 @@
 /**
 ********************************************************************************
-\file   dualprocshm-arm.h
+\file   drv_kernelmod_pcie/pciedrv.h
 
-\brief  Dual Processor Library Target support Header - For ARM target
+\brief  openPOWERLINK PCIe driver header file
 
-This header file provides specific macros for Zynq ARM CPU.
+openPOWERLINK PCIe driver for Linux kernel - Header file
 
 *******************************************************************************/
 
@@ -35,78 +35,21 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_dualprocshm_arm_H_
-#define _INC_dualprocshm_arm_H_
+#ifndef _INC_pciedrv_H_
+#define _INC_pciedrv_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <xil_cache.h>
-#include <xscugic.h>
-#include <xil_exception.h>
-#include <unistd.h>
-#include <xil_io.h>
-#include <xparameters.h>
-#include <xil_types.h>
-#include <dualprocshm-mem.h>
-
+#include <oplk/oplk.h>
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
 
-// memory
-#define DUALPROCSHM_MALLOC(size)              malloc(size)
-#define DUALPROCSHM_FREE(ptr)                 free(ptr)
-#define DUALPROCSHM_MEMCPY(dest, src, siz)    memcpy(dest, src, siz)
-
-// IO operations
-#define DPSHM_READ8(base)           Xil_In8((UINT32)base)
-#define DPSHM_WRITE8(base, val)     Xil_Out8((UINT32)base, val)
-#define DPSHM_READ16(base)          Xil_In16((UINT32)base)
-#define DPSHM_WRITE16(base, val)    Xil_Out16((UINT32)base, val)
-#define DPSHM_READ32(base)          Xil_In32((UINT32)base)
-#define DPSHM_WRITE32(base, val)    Xil_Out32((UINT32)base, val)
-
-// Memory barrier
-#define DPSHM_DMB()                 dmb()
-
-// cache handling
-#define DUALPROCSHM_FLUSH_DCACHE_RANGE(base, range) \
-    Xil_DCacheFlushRange((UINT32)base, range);
-
-#define DUALPROCSHM_INVALIDATE_DCACHE_RANGE(base, range) \
-    Xil_DCacheInvalidateRange((UINT32)base, range);
-
-#define DPSHM_REG_SYNC_INTR(callback, arg)                       \
-    XScuGic_RegisterHandler(TARGET_IRQ_IC_BASE, TARGET_SYNC_IRQ, \
-                           (Xil_InterruptHandler) callback, arg);\
-    XScuGic_EnableIntr(TARGET_IRQ_IC_DIST_BASE, TARGET_SYNC_IRQ)
-
-#define DPSHM_ENABLE_SYNC_INTR() \
-    XScuGic_EnableIntr(TARGET_SYNC_IRQ_ID, TARGET_SYNC_IRQ)
-
-#define DPSHM_DISABLE_SYNC_INTR() \
-    XScuGic_DisableIntr(TARGET_SYNC_IRQ_ID, TARGET_SYNC_IRQ)
-
-
-#define DPSHM_CONNECT_SYNC_IRQ()
-#define DPSHM_DISCONNECT_SYNC_IRQ()
-
-#ifndef TRACE
-#ifndef NDEBUG
-#define TRACE(...) printf(__VA_ARGS__)
-#else
-#define TRACE(...)
-#endif
-#endif
-
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
+typedef tOplkError (*tIrqCallback)(void);   ///< Function signature of PCIe ISR callback for upper layer
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -116,8 +59,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C"
 {
 #endif
+tOplkError  pciedrv_init(void);
+tOplkError  pciedrv_shutdown(void);
+ULONG       pciedrv_getBarLength(ULONG barCount_p);
+ULONG       pciedrv_getBarAddr(UINT8 barCount_p);
+ULONG       pciedrv_getBarPhyAddr(UINT8 barCount_p);
+tOplkError  pciedrv_regSyncHandler(tIrqCallback cbSync_p);
+tOplkError  pciedrv_enableSync(BOOL fEnable_p);
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_dualprocshm_arm_H_ */
+#endif /* _INC_pciedrv_H_ */

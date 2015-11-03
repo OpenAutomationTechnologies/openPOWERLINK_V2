@@ -1,10 +1,11 @@
 /**
 ********************************************************************************
-\file   dualprocshm-arm.h
+\file   dualprocshm-linuxkernel.h
 
-\brief  Dual Processor Library Target support Header - For ARM target
+\brief  Dual processor library - target support header for Linux kernel target
 
-This header file provides specific macros for Zynq ARM CPU.
+This header file provides specific macros for dual processor shared memory
+interface in Linux kernel.
 
 *******************************************************************************/
 
@@ -35,74 +36,62 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_dualprocshm_arm_H_
-#define _INC_dualprocshm_arm_H_
+#ifndef _INC_dualprocshm_linuxkernel_H_
+#define _INC_dualprocshm_linuxkernel_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <xil_cache.h>
-#include <xscugic.h>
-#include <xil_exception.h>
-#include <unistd.h>
-#include <xil_io.h>
-#include <xparameters.h>
-#include <xil_types.h>
-#include <dualprocshm-mem.h>
+
+#include <linux/types.h>
+#include <linux/delay.h>
+#include <linux/kernel.h>
+#include <asm/io.h>
+#include <linux/gfp.h>
+#include <linux/slab.h>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
 
-// memory
-#define DUALPROCSHM_MALLOC(size)              malloc(size)
-#define DUALPROCSHM_FREE(ptr)                 free(ptr)
-#define DUALPROCSHM_MEMCPY(dest, src, siz)    memcpy(dest, src, siz)
-
-// IO operations
-#define DPSHM_READ8(base)           Xil_In8((UINT32)base)
-#define DPSHM_WRITE8(base, val)     Xil_Out8((UINT32)base, val)
-#define DPSHM_READ16(base)          Xil_In16((UINT32)base)
-#define DPSHM_WRITE16(base, val)    Xil_Out16((UINT32)base, val)
-#define DPSHM_READ32(base)          Xil_In32((UINT32)base)
-#define DPSHM_WRITE32(base, val)    Xil_Out32((UINT32)base, val)
-
-// Memory barrier
-#define DPSHM_DMB()                 dmb()
-
-// cache handling
-#define DUALPROCSHM_FLUSH_DCACHE_RANGE(base, range) \
-    Xil_DCacheFlushRange((UINT32)base, range);
-
-#define DUALPROCSHM_INVALIDATE_DCACHE_RANGE(base, range) \
-    Xil_DCacheInvalidateRange((UINT32)base, range);
-
-#define DPSHM_REG_SYNC_INTR(callback, arg)                       \
-    XScuGic_RegisterHandler(TARGET_IRQ_IC_BASE, TARGET_SYNC_IRQ, \
-                           (Xil_InterruptHandler) callback, arg);\
-    XScuGic_EnableIntr(TARGET_IRQ_IC_DIST_BASE, TARGET_SYNC_IRQ)
-
-#define DPSHM_ENABLE_SYNC_INTR() \
-    XScuGic_EnableIntr(TARGET_SYNC_IRQ_ID, TARGET_SYNC_IRQ)
-
-#define DPSHM_DISABLE_SYNC_INTR() \
-    XScuGic_DisableIntr(TARGET_SYNC_IRQ_ID, TARGET_SYNC_IRQ)
-
-
-#define DPSHM_CONNECT_SYNC_IRQ()
-#define DPSHM_DISCONNECT_SYNC_IRQ()
-
 #ifndef TRACE
 #ifndef NDEBUG
-#define TRACE(...) printf(__VA_ARGS__)
+#define TRACE(...)                              printk(__VA_ARGS__)
 #else
 #define TRACE(...)
 #endif
 #endif
+
+/// memory
+#define DPSHM_MAKE_NONCACHEABLE(ptr)            (void*)(((unsigned long)ptr))
+#define DUALPROCSHM_MALLOC(size)                kmalloc(size, GFP_KERNEL)
+#define DUALPROCSHM_FREE(ptr)                   kfree(ptr)
+#define DUALPROCSHM_MEMCPY(dest, src, siz)      memcpy(dest, src, siz)
+
+/// IO operations
+#define DPSHM_READ8(base)                       readb((UINT8*)base)
+#define DPSHM_WRITE8(base, val)                 writeb(val, (UINT8*)base)
+#define DPSHM_READ16(base)                      readw((UINT16*)base)
+#define DPSHM_WRITE16(base, val)                writew(val, (UINT16*)base)
+#define DPSHM_READ32(base)                      readl((UINT32*)base)
+#define DPSHM_WRITE32(base, val)                writel(val, (UINT32*)base)
+#define DPSHM_ENABLE_INTR(fEnable)              // No operations on Linux host
+#define DPSHM_DMB()                             mb()
+
+/// cache handling
+#define DUALPROCSHM_FLUSH_DCACHE_RANGE(base, range)
+
+#define DUALPROCSHM_INVALIDATE_DCACHE_RANGE(base, range)
+
+#define DPSHM_REG_SYNC_INTR(callback, arg)      // No operation on Linux host as irq is handled through the PCIe driver
+#define DPSHM_UNREG_SYNC_INTR(callback, arg)    // No operation on Linux host
+
+#define DPSHM_ENABLE_SYNC_INTR()                // Not used on Linux host
+#define DPSHM_DISABLE_SYNC_INTR()               // Not used on Linux host
+#define DPSHM_CLEAR_SYNC_IRQ()                  // No operation on Linux host
+
+#define DPSHM_CONNECT_SYNC_IRQ()                // No operations on Linux host
+#define DPSHM_DISCONNECT_SYNC_IRQ()             // No operations on Linux host
 
 //------------------------------------------------------------------------------
 // typedef
@@ -112,12 +101,4 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // function prototypes
 //------------------------------------------------------------------------------
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* _INC_dualprocshm_arm_H_ */
+#endif /* _INC_dualprocshm_linuxkernel_H_ */
