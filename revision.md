@@ -5,6 +5,63 @@ Revision history of openPOWERLINK Protocol Stack {#page_revision_history}
 
 # Release 2 {#sect_revision_v2}
 
+## V2.3.0 {#sect_revision_v2_3_0}
+
+This is the first release of the V2.3 release series. It contains new features
+and functionalities. For productive environments it is recommended to use the
+latest stable release of the V2.2 series (\ref sect_revision_v2_2_2)
+
+Following is a summary of changes in V2.3.0. For a detailed revision history
+refer to the Git source code history.
+
+### New Features:
+- Introduce timesync module (replacing PDO sync implementation)
+- Add application synchronization period configuration
+- Add SoC time forwarding to application
+- Add store restore feature for OS based CN
+- Improve display of LEDs in demo_mn_qt
+- Optimize the Altera FPGA CN performance
+- Add TERASIC DE2i-150 MN design
+- Add Windows NDIS intermediate driver
+- Add Linux PCIe solution for B&R APC/PPC2100 and TERASIC DE2i-150
+
+### Fixes:
+- Fix SDO command layer dependencies
+- Fix compiler warnings
+- Avoid error in embedded demos if virtual Ethernet is disabled
+- Fix application hangs with Windows kernel drivers
+- Fix crashes happening during shutdown
+
+### Changes:
+- Improve SDO sequence layer segmented transfer
+- Update host interface IP-Core description
+- Rework openMAC second timer resources
+- Revise Zynq MN address map and remove system.xml workaround
+- Rework SDO over UDP module
+- Export benchmark pins to FMC2 on ZC702 demo
+
+### Known Issues:
+- DE2i-150 board:
+    - Programming the firmware onto the serial Flash device is not supported. Use
+      JTAG to download the FPGA bitstream and Nios II elf manually.
+- Windows PCIe:
+    - Windows network device actions such as disable, restart and enable network
+      adapter are not supported.
+- Linux PCIe:
+    - During kernel module insertion driver signing warnings are raised on systems
+      with CONFIG_MODULE_SIG enabled in the Linux kernel configuration. The
+      warnings can be ignored.
+    - High CPU load could be caused because of low POWERLINK cycle times and
+      high PDO sizes. Use the application synchronization period configuration
+      (\ref tOplkApiInitParam::minSyncTime) to reduce the frequency of
+      synchronization processing.
+- NDIS intermediate driver:
+    - In a system with multiple network adapters it is not possible to select
+      the adapter to be used. The driver is configured to automatically select
+      the first driver for network communication.
+- Xilinx Zynq MN (see 2.1.0)
+- Redundancy MN (see 2.2.1)
+
 ## V2.3.0-rc1 {#sect_revision_v2_3_0_rc1}
 
 This is the release candidate for the upcoming 2.3.0 release.
