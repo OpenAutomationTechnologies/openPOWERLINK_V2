@@ -33,7 +33,7 @@ SET (CFG_BUILD_KERNEL_STACK "Link to Application"
     CACHE STRING "Configure how to build the kernel stack")
 
 SET (KernelStackBuildTypes
-    "Link to Application;Stack on PCIe;Windows Kernel Module;None"
+    "Link to Application;Kernel stack on PCIe card;Windows Kernel Module;None"
     CACHE INTERNAL
     "List of possible kernel stack build types")
 
@@ -48,7 +48,7 @@ IF (CFG_BUILD_KERNEL_STACK STREQUAL "Link to Application")
     UNSET (CFG_KERNEL_STACK_PCIE CACHE)
     UNSET (CFG_KERNEL_STACK_KERNEL_MODULE CACHE)
 
-ELSEIF (CFG_BUILD_KERNEL_STACK STREQUAL "Stack on PCIe")
+ELSEIF (CFG_BUILD_KERNEL_STACK STREQUAL "Kernel stack on PCIe card")
     SET (CFG_KERNEL_STACK_PCIE ON CACHE INTERNAL
          "Build kernel stack on PCIe card")
     UNSET (CFG_KERNEL_STACK_USERSPACE_DAEMON CACHE)

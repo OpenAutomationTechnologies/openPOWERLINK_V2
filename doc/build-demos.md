@@ -138,7 +138,7 @@ Follow the steps below to cross compile your demo application for Altera Cyclone
     to a Linux kernel module. The kernel part of the openPOWERLINK stack is
     located in the separate kernel module driver.
 
-  - __Stack on PCIe__
+  - __Kernel stack on PCIe card__
 
     The library `liboplkappmn-kernelpcie.a` will be used. It contains the interface
     to a Linux kernel PCIe interface driver.
@@ -157,7 +157,7 @@ Follow the steps below to cross compile your demo application for Altera Cyclone
     The openPOWERLINK kernel part will be directly linked to the user part and
     application. WinPCAP will be used as Ethernet driver.
 
-  - __Stack on PCIe__
+  - __Kernel stack on PCIe card__
 
     The library `liboplkmnapp-pcieintf.lib` will be used. It contains the interface
     to an external PCIe device via an NDIS PCIe miniport driver.

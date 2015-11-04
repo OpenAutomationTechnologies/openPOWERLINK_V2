@@ -32,7 +32,7 @@ SET(CFG_BUILD_KERNEL_STACK "Link to Application"
     CACHE STRING "Configure how to build the kernel stack")
 
 SET(KernelStackBuildTypes
-    "Link to Application;Linux Userspace Daemon;Linux Kernel Module;Stack on PCIe;None"
+    "Link to Application;Linux Userspace Daemon;Linux Kernel Module;Kernel stack on PCIe card;None"
     CACHE INTERNAL
     "List of possible kernel stack build types")
 
@@ -63,7 +63,7 @@ ELSEIF (CFG_BUILD_KERNEL_STACK STREQUAL "Linux Kernel Module")
     UNSET (CFG_KERNEL_STACK_DIRECTLINK CACHE)
     UNSET (CFG_KERNEL_STACK_PCIE_INTF CACHE)
 
-ELSEIF (CFG_BUILD_KERNEL_STACK STREQUAL "Stack on PCIe")
+ELSEIF (CFG_BUILD_KERNEL_STACK STREQUAL "Kernel stack on PCIe card")
 
     SET (CFG_KERNEL_STACK_PCIE_INTF ON CACHE INTERNAL
          "Build kernel stack on an external PCIe device")

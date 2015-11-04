@@ -94,7 +94,7 @@ system the following configurations are possible:
   - `stack/proj/windows/liboplkmn` (liboplkmn.lib)
   - `stack/proj/windows/liboplkcn` (liboplkcn.lib)
 
-- __Stack on PCIe__
+- __Kernel stack on PCIe card__
 
   The application is linked to an application library which contains the interface
   to an external PCIe device running the kernel part of the openPOWERLINK stack.
