@@ -68,6 +68,28 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define TARGET_IRQ_IC_DIST_BASE    -1
 
 #include "dualprocshm-nios2.h"
+
+#elif defined(__linux__)
+
+#include <dualprocshm-linuxkernel.h>
+
+// The base addresses are retrieved dynamically after
+// BAR mapping.
+#define SHARED_MEM_BASE
+#define COMMON_MEM_BASE
+#define MEM_ADDR_TABLE_BASE
+#define MEM_INTR_BASE
+
+/* Memory size */
+#define MAX_COMMON_MEM_SIZE        3072                         ///< Max common memory size
+#define MAX_DYNAMIC_BUFF_COUNT     20                           ///< Number of maximum dynamic buffers
+#define MAX_DYNAMIC_BUFF_SIZE      (MAX_DYNAMIC_BUFF_COUNT * 4) ///< Max dynamic buffer size
+
+#define MEM_ADDR_TABLE_OFFSET      MAX_COMMON_MEM_SIZE          ///< Offset of the address table from the start of common memory
+#define MEM_INTR_OFFSET            (MAX_COMMON_MEM_SIZE + MAX_DYNAMIC_BUFF_SIZE) ///< Offset of the interrupt register from the start of common memory
+#define OPLK_PCIEBAR_SHM           0                            ///< BAR id to access the shared memory segment
+#define OPLK_PCIEBAR_COMM_MEM      1                            ///< BAR id to access the common memory segment
+
 #else
 
 #error "unknown target for external PCIe solutions"
