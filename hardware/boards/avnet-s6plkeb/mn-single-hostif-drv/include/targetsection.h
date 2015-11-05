@@ -8,7 +8,7 @@ This header file defines macros for Xilinx Microblaze targets to link specific
 functions to local memory (BRAM).
 
 Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2014, Kalycito Infotech Private Ltd.
+Copyright (c) 2015, Kalycito Infotech Private Ltd.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -51,11 +51,56 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define XIL_INTERNAL_RAM
 #endif
 
-//FIXME: Add function to improve performance!
+#define SECTION_CIRCBUF_WRITE_DATA          XIL_INTERNAL_RAM
+#define SECTION_CIRCBUF_WRITE_MULT_DATA     XIL_INTERNAL_RAM
+#define SECTION_CIRCBUF_READ_DATA           XIL_INTERNAL_RAM
+#define SECTION_CIRCBUF_LOCK                XIL_INTERNAL_RAM
+#define SECTION_CIRCBUF_UNLOCK              XIL_INTERNAL_RAM
 #define SECTION_OMETHLIB_RX_IRQ_HDL         XIL_INTERNAL_RAM
 #define SECTION_OMETHLIB_TX_IRQ_HDL         XIL_INTERNAL_RAM
 #define SECTION_OMETHLIB_RXTX_IRQ_MUX       XIL_INTERNAL_RAM
 #define SECTION_OMETHLIB_TX_TIME            XIL_INTERNAL_RAM
+#define SECTION_TARGET_SET_INTCONT          XIL_INTERNAL_RAM
+#define SECTION_TARGET_GET_INTCONT          XIL_INTERNAL_RAM
+#define SECTION_DLLK_PROCESS                XIL_INTERNAL_RAM
+#define SECTION_DLLK_PROCESS_CYCFIN         XIL_INTERNAL_RAM
+#define SECTION_DLLK_PROCESS_SYNC           XIL_INTERNAL_RAM
+#define SECTION_DLLK_CHANGE_STATE           XIL_INTERNAL_RAM
+#define SECTION_DLLKCAL_ASYNCRX             XIL_INTERNAL_RAM
+#define SECTION_DLLKCAL_GETSOAREQ           XIL_INTERNAL_RAM
+#define SECTION_DLLKCAL_GETPENREQ           XIL_INTERNAL_RAM
+#define SECTION_DLLK_FRAME_UPDATE_SOA       XIL_INTERNAL_RAM
+#define SECTION_DLLK_FRAME_ASYNC_NRX        XIL_INTERNAL_RAM
+#define SECTION_DLLK_PROCESS_TX_SOA         XIL_INTERNAL_RAM
+#define SECTION_DLLK_PROCESS_TX_SOC         XIL_INTERNAL_RAM
+#define SECTION_DLLK_PROCESS_TX_NMT         XIL_INTERNAL_RAM
+#define SECTION_DLLK_MN_SYNC_CB             XIL_INTERNAL_RAM
+#define SECTION_DLLK_PROCESS_TX_NPLK        XIL_INTERNAL_RAM
+
+//FIXME: Following sections can also be enabled to further improve the performance.
+//       But as there are limited BRAM available in the current design, these
+//       sections are not included.
+
+//#define SECTION_EDRVOPENMAC_RX_HOOK         XIL_INTERNAL_RAM
+//#define SECTION_EDRVOPENMAC_IRQ_HDL         XIL_INTERNAL_RAM
+//#define SECTION_DLLK_FRAME_RCVD_CB          XIL_INTERNAL_RAM
+//#define SECTION_EVENTK_PROCESS              XIL_INTERNAL_RAM
+//#define SECTION_EVENTK_POST                 XIL_INTERNAL_RAM
+//#define SECTION_EVENTKCAL_POST              XIL_INTERNAL_RAM
+//#define SECTION_EVENTKCAL_CIRCBUF_POST      XIL_INTERNAL_RAM
+//#define SECTION_EVENTKCAL_CIRCBUF_PROCESS   XIL_INTERNAL_RAM
+//#define SECTION_PDOK_PROCESS_TPDO_CB        XIL_INTERNAL_RAM
+//#define SECTION_PDOKCAL_READ_TPDO           XIL_INTERNAL_RAM
+//#define SECTION_PDOK_PROCESS_RPDO           XIL_INTERNAL_RAM
+//#define SECTION_PDOKCAL_WRITE_RPDO          XIL_INTERNAL_RAM
+//#define SECTION_PDOKCAL_PROCESS             XIL_INTERNAL_RAM
+//#define SECTION_EDRVCYC_TIMER_CB            XIL_INTERNAL_RAM
+//#define SECTION_HRTIMER_IRQ_HDL             XIL_INTERNAL_RAM
+//#define SECTION_HRTIMER_MODTIMER            XIL_INTERNAL_RAM
+//#define SECTION_EDRVCYC_SET_NEXT_TX         XIL_INTERNAL_RAM
+//#define SECTION_DLLK_MN_SYNC_CB             XIL_INTERNAL_RAM
+//#define SECTION_TARGET_GLOBAL_INT           XIL_INTERNAL_RAM
+//#define SECTION_ERRHNDK_DECRCNTERS          XIL_INTERNAL_RAM
 
 //------------------------------------------------------------------------------
 // typedef
