@@ -514,6 +514,9 @@ tOplkError ctrlu_shutdownStack(void)
     DEBUG_LVL_CTRL_TRACE("pdou_exit():    0x%X\n", ret);
 #endif
 
+    ret = eventu_exit();
+    DEBUG_LVL_CTRL_TRACE("eventu_exit():  0x%X\n", ret);
+
     ret = dllucal_exit();
     DEBUG_LVL_CTRL_TRACE("dllucal_exit(): 0x%X\n", ret);
 
@@ -522,9 +525,6 @@ tOplkError ctrlu_shutdownStack(void)
 
     ret = timeru_exit();
     DEBUG_LVL_CTRL_TRACE("timeru_exit():  0x%X\n", ret);
-
-    ret = eventu_exit();
-    DEBUG_LVL_CTRL_TRACE("eventu_exit():  0x%X\n", ret);
 
     /* shutdown kernel stack */
     ret = ctrlucal_executeCmd(kCtrlCleanupStack, &retVal);
