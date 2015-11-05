@@ -45,12 +45,12 @@
 lib libcommon all
 
 lib axi_hostinterface_v1_02_a ../../../../../../common/hostinterface/src/hostInterfacePkg.vhd vhdl
-lib axi_hostinterface_v1_02_a ../../../../../../common/hostinterface/src/hostInterfaceRtl.vhd vhdl
-lib axi_hostinterface_v1_02_a ../../../../../../common/hostinterface/src/dynamicBridgeRtl.vhd vhdl
 lib axi_hostinterface_v1_02_a ../../../../../../common/hostinterface/src/irqGenRtl.vhd vhdl
 lib axi_hostinterface_v1_02_a ../../../../../../common/hostinterface/src/statusControlRegRtl.vhd vhdl
 lib axi_hostinterface_v1_02_a ../../../../../../common/memory/src/dpRam-e.vhd vhdl
 lib axi_hostinterface_v1_02_a ../../../../../../xilinx/memory/src/dpRam-rtl-a.vhd vhdl
+lib axi_hostinterface_v1_02_a ../../../../../../common/hostinterface/src/dynamicBridgeRtl.vhd vhdl
+lib axi_hostinterface_v1_02_a ../../../../../../common/hostinterface/src/hostInterfaceRtl.vhd vhdl
 lib axi_hostinterface_v1_02_a ../../../../../../common/axiwrapper/src/axiLiteSlaveWrapper-rtl-ea.vhd vhdl
 lib axi_hostinterface_v1_02_a ../../../../../../common/axiwrapper/src/axiLiteMasterWrapper-rtl-ea.vhd vhdl
 lib axi_hostinterface_v1_02_a ../../../../../../xilinx/parallelinterface/src/parallelInterface-rtl-ea.vhd vhdl

@@ -118,29 +118,29 @@ PARAMETER gBaseRes      = 0x0E000,  DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = ca
 PARAMETER gTotalMem     = 49152,    DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_total_memory, TYPE = NON_HDL
 
 ###############################################################################
-PARAMETER Size_KB_DynBuf0       = 2,     DT = INTEGER, RANGE = (2)
-PARAMETER Size_KB_DynBuf1       = 2,     DT = INTEGER, RANGE = (2)
-PARAMETER Size_B_ErrorCounter   = 3108,  DT = INTEGER, RANGE = (36,3108,1024,2048,4096,8192), VALUES = (36= "CN" , 3108 = "MN", 1024 = "1024", 2048 = "2048", 4096 = "4096", 8192 = "8192")
-PARAMETER Size_KB_TxNmtQ        = 2,     DT = INTEGER, RANGE = (1,2,4,8,16,32,64)
-PARAMETER Size_KB_TxGenQ        = 2,     DT = INTEGER, RANGE = (1,2,4,8,16,32,64)
-PARAMETER Size_KB_TxSynQ        = 2,     DT = INTEGER, RANGE = (1,2,4,8,16,32,64)
-PARAMETER Size_KB_TxVetQ        = 2,     DT = INTEGER, RANGE = (1,2,4,8,16,32,64)
-PARAMETER Size_KB_RxVetQ        = 1,     DT = INTEGER, RANGE = (1,2,4,8,16,32,64)
-PARAMETER Size_KB_K2UQ          = 8,     DT = INTEGER, RANGE = (1,2,4,8,16,32,64)
-PARAMETER Size_KB_U2KQ          = 8,     DT = INTEGER, RANGE = (1,2,4,8,16,32,64)
-PARAMETER Size_B_Pdo            = 12288, DT = INTEGER
+PARAMETER Size_KB_DynBuf0       = 2,     DT = INTEGER, RANGE = (2), TYPE = NON_HDL
+PARAMETER Size_KB_DynBuf1       = 2,     DT = INTEGER, RANGE = (2), TYPE = NON_HDL
+PARAMETER Size_B_ErrorCounter   = 3108,  DT = INTEGER, RANGE = (36,3108,1024,2048,4096,8192), VALUES = (36= "CN" , 3108 = "MN", 1024 = "1024", 2048 = "2048", 4096 = "4096", 8192 = "8192"), TYPE = NON_HDL
+PARAMETER Size_KB_TxNmtQ        = 2,     DT = INTEGER, RANGE = (1,2,4,8,16,32,64), TYPE = NON_HDL
+PARAMETER Size_KB_TxGenQ        = 2,     DT = INTEGER, RANGE = (1,2,4,8,16,32,64), TYPE = NON_HDL
+PARAMETER Size_KB_TxSynQ        = 2,     DT = INTEGER, RANGE = (1,2,4,8,16,32,64), TYPE = NON_HDL
+PARAMETER Size_KB_TxVetQ        = 2,     DT = INTEGER, RANGE = (1,2,4,8,16,32,64), TYPE = NON_HDL
+PARAMETER Size_KB_RxVetQ        = 1,     DT = INTEGER, RANGE = (1,2,4,8,16,32,64), TYPE = NON_HDL
+PARAMETER Size_KB_K2UQ          = 8,     DT = INTEGER, RANGE = (1,2,4,8,16,32,64), TYPE = NON_HDL
+PARAMETER Size_KB_U2KQ          = 8,     DT = INTEGER, RANGE = (1,2,4,8,16,32,64), TYPE = NON_HDL
+PARAMETER Size_B_Pdo            = 12288, DT = INTEGER, TYPE = NON_HDL
 ###############################################################################
-PARAMETER Conv_Size_KB_DynBuf0      = 2,     DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_size_dbuf0
-PARAMETER Conv_Size_KB_DynBuf1      = 2,     DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_size_dbuf0
-PARAMETER Conv_Size_B_ErrorCounter  = 3108,  DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_size_Errcntr
-PARAMETER Conv_Size_KB_TxNmtQ       = 2,     DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_size_TxNmtQ
-PARAMETER Conv_Size_KB_TxGenQ       = 2,     DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_size_TxGenQ
-PARAMETER Conv_Size_KB_TxSynQ       = 2,     DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_size_TxSynQ
-PARAMETER Conv_Size_KB_TxVetQ       = 2,     DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_size_TxVetQ
-PARAMETER Conv_Size_KB_RxVetQ       = 1,     DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_size_RxVetQ
-PARAMETER Conv_Size_KB_K2UQ         = 8,     DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_size_K2UQ
-PARAMETER Conv_Size_KB_U2KQ         = 8,     DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_size_U2KQ
-PARAMETER Conv_Size_B_Pdo           = 12288, DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_size_Pdo
+PARAMETER Conv_Size_KB_DynBuf0      = 2,     DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_size_dbuf0, TYPE = NON_HDL
+PARAMETER Conv_Size_KB_DynBuf1      = 2,     DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_size_dbuf0, TYPE = NON_HDL
+PARAMETER Conv_Size_B_ErrorCounter  = 3108,  DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_size_Errcntr, TYPE = NON_HDL
+PARAMETER Conv_Size_KB_TxNmtQ       = 2,     DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_size_TxNmtQ, TYPE = NON_HDL
+PARAMETER Conv_Size_KB_TxGenQ       = 2,     DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_size_TxGenQ, TYPE = NON_HDL
+PARAMETER Conv_Size_KB_TxSynQ       = 2,     DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_size_TxSynQ, TYPE = NON_HDL
+PARAMETER Conv_Size_KB_TxVetQ       = 2,     DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_size_TxVetQ, TYPE = NON_HDL
+PARAMETER Conv_Size_KB_RxVetQ       = 1,     DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_size_RxVetQ, TYPE = NON_HDL
+PARAMETER Conv_Size_KB_K2UQ         = 8,     DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_size_K2UQ, TYPE = NON_HDL
+PARAMETER Conv_Size_KB_U2KQ         = 8,     DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_size_U2KQ, TYPE = NON_HDL
+PARAMETER Conv_Size_B_Pdo           = 12288, DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_size_Pdo, TYPE = NON_HDL
 ###############################################################################
 ## Ports
 ## Host Interface IP PCP Ports
