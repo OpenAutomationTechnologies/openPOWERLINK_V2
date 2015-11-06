@@ -230,6 +230,8 @@ static tOplkError initPowerlink(UINT32 cycleLen_p, char* pszCdcFileName_p,
     {
         strncpy(devName, devName_p, 128);
     }
+#else
+    UNUSED_PARAMETER(devName_p);
 #endif
 
     memset(&initParam, 0, sizeof(initParam));
