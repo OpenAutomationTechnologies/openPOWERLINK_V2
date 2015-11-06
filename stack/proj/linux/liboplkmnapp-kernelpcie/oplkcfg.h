@@ -68,8 +68,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CONFIG_INCLUDE_SDOC
 #define CONFIG_INCLUDE_SDO_ASND
 #define CONFIG_INCLUDE_SDO_UDP
-#define CONFIG_INCLUDE_VETH
 #define CONFIG_INCLUDE_CFM
+
+// Enable feature manually if it is also enabled in kernel stack.
+//#define CONFIG_INCLUDE_VETH
 
 #define CONFIG_DLLCAL_QUEUE                             IOCTL_QUEUE
 
