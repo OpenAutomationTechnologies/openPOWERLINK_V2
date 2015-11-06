@@ -410,6 +410,11 @@ tOplkError pdok_processRxPdo(tPlkFrame* pFrame_p, UINT frameSize_p)
     tPdoChannel*        pPdoChannel;
     UINT                channelId;
     UINT8               index;
+    UINT16              pdoPayloadSize;
+
+#if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC == FALSE
+    UNUSED_PARAMETER(frameSize_p);
+#endif
 
     // check if received RPDO is valid
     frameData = ami_getUint8Le(&pFrame_p->data.pres.flag1);
@@ -443,15 +448,16 @@ tOplkError pdok_processRxPdo(tPlkFrame* pFrame_p, UINT frameSize_p)
             frameData = ami_getUint8Le(&pFrame_p->data.pres.pdoVersion);
             if ((pPdoChannel->mappingVersion & PLK_VERSION_MAIN) != (frameData & PLK_VERSION_MAIN))
             {   // PDO versions do not match
-                // $$$ raise PDO error
+                // $$$ raise PDO error E_PDO_MAP_VERS
                 // terminate processing of this RPDO
                 goto Exit;
             }
 
             // valid RPDO found
-            if ((unsigned int)(pPdoChannel->nextChannelOffset + PLK_FRAME_OFFSET_PDO_PAYLOAD) > frameSize_p)
+            pdoPayloadSize = ami_getUint16Le(&pFrame_p->data.pres.sizeLe);
+            if (pPdoChannel->nextChannelOffset > pdoPayloadSize)
             {   // RPDO is too short
-                // $$$ raise PDO error, set Ret
+                // $$$ raise PDO error E_PDO_SHORT_RX, set Ret
                 goto Exit;
             }
 

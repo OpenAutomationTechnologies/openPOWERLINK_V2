@@ -51,6 +51,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <linux/errno.h>
 #include <linux/wait.h>
 #include <linux/delay.h>
+#include <linux/sched.h>
+#include <linux/cpumask.h>
 #include <asm/uaccess.h>
 #include <asm/atomic.h>
 
@@ -164,7 +166,7 @@ tOplkError eventkcal_init(void)
 
     instance_l.threadId = kthread_run(eventThread, NULL, "EventkThread");
 
-    set_cpus_allowed(instance_l.threadId, cpumask_of_cpu(1));
+    set_cpus_allowed_ptr(instance_l.threadId, cpumask_of(1));
 
     instance_l.fInitialized = TRUE;
 

@@ -46,6 +46,41 @@ expected to be released with the final 2.3.0 revision:
 - Virtual Ethernet for PCIe solution
 - MN demo design on TERASIC DE2i-150 board
 
+## V2.2.2 {#sect_revision_v2_2_2}
+
+This is the latest release of the V2.2 release series. This release is a stable
+release, it contains fixes and optimizations.
+
+Following is a summary of changes in V2.2.2. For a detailed revision history
+refer to the Git source code history.
+
+### Fixes:
+- timer-linuxuser: Avoid segfault on oplk_init() failure
+- demo_mn_console: Improve error handling and fix compiler warnings
+- Free process image before oplk_shutdown()
+- Fix DE2-115 SRAM timing issues
+- Warn if ARCH or CROSS_COMPILE are not set when cross-compiling
+- Disable Werror=date-time for kernel >= 3.14
+- Fix CFM feature mismatch between demo and stack
+- Remove RPDO update rejection in READY_TO_OPERATE state
+- Fix doxygen warnings
+- eventkcal-linuxkernel: Use cpumask APIv2
+- Repair SDO sequence layer histroy buffer
+- Avoid corrupted print for embedded cn example
+- Reduce timeout steps in ctrlucal_executeCmd
+- Fix wrong data cache flush in pdoucal-triplebufshm.c
+- Correct error check for incompatible mapping
+- Set interrupt source to edge-triggered for Zynq ARM
+- Fix Linux kernel module loading error when using plkload
+
+### Changes:
+- Remove configuration option CONFIG_OBD_USE_LOAD_CONCISEDCF
+- Acknowledge openMAC synctimer at beginning of ISR
+
+### Known Issues:
+- Xilinx Zynq MN (see 2.1.0)
+- The redundancy MN does not work with the Intel i210 Linux kernel driver.
+
 ## V2.2.1 {#sect_revision_v2_2_1}
 
 This is the latest release of the V2.2 release series. This release is a stable

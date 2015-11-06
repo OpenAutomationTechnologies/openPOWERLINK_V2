@@ -999,6 +999,8 @@ static void drvInterruptHandler(void* pArg_p)
 
     UNUSED_PARAMETER(pArg_p);
 
+    OPENMAC_TIMERIRQACK(HWTIMER_SYNC);
+
     target_setInterruptContextFlag(TRUE);
 
     timerHdl = instance_l.activeTimerHdl;
