@@ -61,8 +61,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // These macros define all modules which are included
 #define CONFIG_INCLUDE_NMT_MN
 #define CONFIG_INCLUDE_PDO
-#define CONFIG_INCLUDE_VETH
 #define CONFIG_INCLUDE_CFM
+
+// Enable feature manually if it is also enabled in kernel stack.
+//#define CONFIG_INCLUDE_VETH
 
 #define CONFIG_DLLCAL_QUEUE                         CIRCBUF_QUEUE
 
