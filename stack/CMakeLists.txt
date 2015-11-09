@@ -103,3 +103,8 @@ ELSEIF((CMAKE_SYSTEM_NAME STREQUAL "Generic") AND (CMAKE_SYSTEM_PROCESSOR STREQU
 ELSE()
     MESSAGE(FATAL_ERROR "Unknown Platform and processor combination ${CMAKE_SYSTEM_NAME} and ${CMAKE_SYSTEM_PROCESSOR}!!")
 ENDIF()
+
+################################################################################
+# Install oplk headers files
+################################################################################
+INSTALL(DIRECTORY ${STACK_INCLUDE_DIR}/oplk DESTINATION "include")
