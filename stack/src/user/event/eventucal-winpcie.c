@@ -8,8 +8,10 @@ This file implements the event CAL module for Windows userspace platform which u
 IOCTLs to communicate with the openPOWERLINK kernel layer running on an external PCIe.
 
 The event user module uses the circular buffer library interface for the creation
-and management for event queues. A single thread is used to poll the user-internal and
-kernel-to-user queue and processes events in background.
+and management of event queues. Separate user and kernel thread routines are used.
+The kernel thread receives events from the kernel layer and posts them into the
+user-internal event queue. The user thread processes all events received from
+the user-internal event queue.
 
 \ingroup module_eventucal
 *******************************************************************************/
@@ -91,8 +93,11 @@ typedef struct
 {
     OPLK_FILE_HANDLE    hSendfileHandle;               ///< Handle to driver for sending events
     HANDLE              hRcvfileHandle;                ///< Handle to driver for receiving events
-    HANDLE              hEventProcThread;              ///< Event thread handle
-    BOOL                fStopEventThread;              ///< Flag to synchronize user thread exit
+    HANDLE              hEventProcThread;              ///< User event thread handle
+    HANDLE              hKernelThread;                 ///< Kernel event thread handle
+    HANDLE              hSemUserData;                  ///< Semaphore to synchronize main and user thread access
+    BOOL                fStopKernelThread;             ///< Flag to synchronize kernel thread exit
+    BOOL                fStopUserThread;               ///< Flag to synchronize user thread exit
     BOOL                fInitialized;                  ///< Flag to indicate module initialization
 } tEventuCalInstance;
 
@@ -104,7 +109,9 @@ static tEventuCalInstance    instance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
+static void         signalUserEvent(void);
 static DWORD WINAPI eventProcess(LPVOID pArg_p);
+static DWORD WINAPI kernelEventThread(LPVOID pArg_p);
 static tOplkError   postEvent(tEvent* pEvent_p);
 
 //============================================================================//
@@ -128,15 +135,19 @@ implementations and calls the appropriate init functions.
 //------------------------------------------------------------------------------
 tOplkError eventucal_init(void)
 {
-    tOplkError    ret = kErrorOk;
-
     OPLK_MEMSET(&instance_l, 0, sizeof(tEventuCalInstance));
 
     instance_l.hSendfileHandle = ctrlucal_getFd();
-    instance_l.fStopEventThread = FALSE;
+    instance_l.fStopKernelThread = FALSE;
+    instance_l.fStopUserThread = FALSE;
+
+    if ((instance_l.hSemUserData = CreateSemaphore(NULL, 0, 100, "Local\\semUserEvent")) == NULL)
+        goto Exit;
 
     if (eventucal_initQueueCircbuf(kEventQueueUInt) != kErrorOk)
         goto Exit;
+
+    eventucal_setSignalingCircbuf(kEventQueueUInt, signalUserEvent);
 
     instance_l.hEventProcThread = CreateThread(NULL,         // Default security attributes
                                                0,            // Use Default stack size
@@ -153,9 +164,17 @@ tOplkError eventucal_init(void)
         goto Exit;
     }
 
-    if (!SetThreadPriority(instance_l.hEventProcThread, THREAD_PRIORITY_TIME_CRITICAL))
+    instance_l.hKernelThread = CreateThread(NULL,               // Default security attributes
+                                            0,                  // Use Default stack size
+                                            kernelEventThread,  // Thread routine
+                                            NULL,               // Argument to the thread routine
+                                            0,                  // Use default creation flags
+                                            NULL                // Returned thread Id
+                                            );
+
+    if (instance_l.hKernelThread == NULL)
     {
-        DEBUG_LVL_ERROR_TRACE("%s() Failed to boost thread priority with error: 0x%X\n",
+        DEBUG_LVL_ERROR_TRACE("%s() Failed to create kernel thread with error: 0x%X\n",
                               __func__, GetLastError());
         goto Exit;
     }
@@ -190,7 +209,16 @@ tOplkError eventucal_exit(void)
 
     if (instance_l.fInitialized)
     {
-        instance_l.fStopEventThread = TRUE;
+        instance_l.fStopKernelThread = TRUE;
+        instance_l.fStopUserThread = TRUE;
+
+        ReleaseSemaphore(instance_l.hSemUserData, 1, NULL);
+
+        waitResult = WaitForSingleObject(instance_l.hKernelThread, 10000);
+        if (waitResult == WAIT_TIMEOUT)
+        {
+            TRACE("Kernel event thread is not terminating, continue shutdown...!\n");
+        }
 
         waitResult = WaitForSingleObject(instance_l.hEventProcThread, 10000);
         if (waitResult == WAIT_TIMEOUT)
@@ -200,6 +228,12 @@ tOplkError eventucal_exit(void)
     }
 
     eventucal_exitQueueCircbuf(kEventQueueUInt);
+
+    if (instance_l.hSemUserData != NULL)
+        CloseHandle(instance_l.hSemUserData);
+
+    if (instance_l.hKernelThread != NULL)
+        CloseHandle(instance_l.hKernelThread);
 
     if (instance_l.hEventProcThread != NULL)
         CloseHandle(instance_l.hEventProcThread);
@@ -328,13 +362,78 @@ This function contains the main function for the user event handler thread.
 //------------------------------------------------------------------------------
 static DWORD WINAPI eventProcess(LPVOID pArg_p)
 {
-    tEvent*     pEvent;
-    BOOL        fIoctlRet;
-    ULONG       bytesReturned;
-    UINT        errNum = 0;
-    UINT8       aEventBuf[sizeof(tEvent) + MAX_EVENT_ARG_SIZE];
+    DWORD   waitResult;
 
     UNUSED_PARAMETER(pArg_p);
+
+    if (!SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL))
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() Failed to boost thread priority with error: 0x%X\n",
+                              __func__, GetLastError());
+        DEBUG_LVL_ERROR_TRACE("%s() The thread will execute with normal priority\n");
+    }
+
+    DEBUG_LVL_EVENTU_TRACE("User event thread %d waiting for events...\n", GetCurrentThreadId());
+
+    while (!instance_l.fStopUserThread)
+    {
+        waitResult = WaitForSingleObject(instance_l.hSemUserData, 5000);
+        switch (waitResult)
+        {
+            case WAIT_OBJECT_0:
+                if (eventucal_getEventCountCircbuf(kEventQueueUInt) > 0)
+                {
+                    eventucal_processEventCircbuf(kEventQueueUInt);
+                }
+                break;
+
+            case WAIT_TIMEOUT:
+                break;
+
+            default:
+                DEBUG_LVL_ERROR_TRACE("%s() Semaphore wait unknown error! Error:(0x%X)\n",
+                                      __func__, GetLastError());
+                if (GetLastError() == ERROR_INVALID_HANDLE)
+                    instance_l.fStopUserThread = TRUE;
+                break;
+        }
+    }
+
+    instance_l.fStopUserThread = FALSE;
+    DEBUG_LVL_EVENTU_TRACE("User Event Thread is exiting!\n");
+    return 0;
+
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Kernel event handler thread function
+
+This function contains the main function for the kernel event handler thread.
+
+\param  pArg_p    Thread parameter. Not used!
+
+\return The function returns the thread exit code.
+
+*/
+//------------------------------------------------------------------------------
+static DWORD WINAPI kernelEventThread(LPVOID pArg_p)
+{
+    UINT8       aEventBuf[sizeof(tEvent) + MAX_EVENT_ARG_SIZE];
+    tEvent*     pEvent = (tEvent*)aEventBuf;
+    BOOL        fIoctlRet;
+    UINT32      eventBufSize = sizeof(aEventBuf);
+    ULONG       bytesReturned;
+    UINT        errNum = 0;
+
+    UNUSED_PARAMETER(pArg_p);
+
+    if (!SetThreadPriority(GetCurrentThread(), (THREAD_PRIORITY_TIME_CRITICAL - 1)))
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() Failed to boost thread priority with error: 0x%X\n",
+                              __func__, GetLastError());
+        DEBUG_LVL_ERROR_TRACE("%s() The thread will execute with normal priority\n");
+    }
 
     instance_l.hRcvfileHandle = CreateFile(PLK_DEV_FILE,                        // Name of the NT "device" to open
                                            GENERIC_READ | GENERIC_WRITE,        // Access rights requested
@@ -362,14 +461,12 @@ static DWORD WINAPI eventProcess(LPVOID pArg_p)
         return kErrorNoResource;
     }
 
-    DEBUG_LVL_EVENTU_TRACE("User event thread %d waiting for events...\n", GetCurrentThreadId());
-
-    while (!instance_l.fStopEventThread)
+    while (!instance_l.fStopKernelThread)
     {
-        target_msleep(10);
+        target_msleep(1);
         fIoctlRet = DeviceIoControl(instance_l.hRcvfileHandle, PLK_CMD_GET_EVENT,
-                                    NULL, 0, aEventBuf, sizeof(tEvent) + MAX_EVENT_ARG_SIZE,
-                                    &bytesReturned, NULL);
+                              NULL, 0, aEventBuf, eventBufSize,
+                              &bytesReturned, NULL);
         if (!fIoctlRet)
         {
             if (GetLastError() == DEVICE_CLOSE_IO)
@@ -386,23 +483,36 @@ static DWORD WINAPI eventProcess(LPVOID pArg_p)
 
         if (bytesReturned > 0)
         {
-            pEvent = (tEvent*)aEventBuf;
-            if (pEvent->eventArgSize != 0)
+            if (pEvent->eventArgSize == 0)
+                pEvent->eventArg.pEventArg = NULL;
+            else
                 pEvent->eventArg.pEventArg = (void*)((UINT8*)pEvent + sizeof(tEvent));
 
-            eventu_process(pEvent);
-        }
-
-        if (eventucal_getEventCountCircbuf(kEventQueueUInt) > 0)
-        {
-            eventucal_processEventCircbuf(kEventQueueUInt);
+            eventucal_postEventCircbuf(kEventQueueUInt, pEvent);
         }
     }
 
-    instance_l.fStopEventThread = FALSE;
-    DEBUG_LVL_EVENTU_TRACE("User Event Thread is exiting!\n");
+    CloseHandle(instance_l.hRcvfileHandle);
+    instance_l.fStopKernelThread = FALSE;
 
     return 0;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Signal a user event
+
+This function signals that a user event was posted. It will be registered in
+the circular buffer library as signal callback function
+*/
+//------------------------------------------------------------------------------
+static void signalUserEvent(void)
+{
+    if (!ReleaseSemaphore(instance_l.hSemUserData, 1, NULL))
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() Failed to signal user event (0x%X)\n",
+                              GetLastError());
+    }
 }
 
 /// \}
