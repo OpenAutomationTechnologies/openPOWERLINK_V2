@@ -65,8 +65,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CONFIG_SDO_MAX_CONNECTION_SEQ             5
 #endif
 
-#define SDO_SEQ_DEFAULT_TIMEOUT     5000                        // in [ms] => 5 sec
-#define SDO_SEQ_RETRY_COUNT         5                           // => max. Timeout 30 sec
+#define SDO_SEQ_RETRY_COUNT         2                           // number of ack requests before close (final timeout)
 #define SDO_SEQ_NUM_THRESHOLD       100                         // threshold which distinguishes between old and new sequence numbers
 #define SDO_SEQ_FRAME_SIZE          24                          // frame with size of Asnd-Header-, SDO Sequence header size, SDO Command header and Ethernet-header size
 #define SDO_SEQ_HEADER_SIZE         4                           // size of the header of the SDO Sequence layer
@@ -191,7 +190,7 @@ typedef struct
     tSdoSeqCon              aSdoSeqCon[CONFIG_SDO_MAX_CONNECTION_SEQ];  ///< Array of sequence layer connections
     tSdoComReceiveCb        pfnSdoComRecvCb;                            ///< Pointer to receive callback function
     tSdoComConCb            pfnSdoComConCb;                             ///< Pointer to connection callback function
-    UINT32                  sdoSeqTimeout;                              ///< Configured Sequence layer timeout
+    UINT32                  sdoSeqTimeout;                              ///< Configured Sequence layer sub-timeout
 
 #if defined(WIN32) || defined(_WIN32)
     LPCRITICAL_SECTION      pCriticalSection;
@@ -336,7 +335,7 @@ tOplkError sdoseq_init(tSdoComReceiveCb pfnSdoComRecvCb_p, tSdoComConCb pfnSdoCo
     if (ret != kErrorOk)
         return ret;
 #endif
-    sdoSeqInstance_l.sdoSeqTimeout = SDO_SEQ_DEFAULT_TIMEOUT;
+
     return ret;
 }
 
@@ -686,7 +685,8 @@ The function sets the sequence layer timeout.
 tOplkError sdoseq_setTimeout(UINT32 timeout_p)
 {
     // Adopt new SDO sequence layer timeout (truncated to an upper bound)
-    sdoSeqInstance_l.sdoSeqTimeout = min(timeout_p, SDO_SEQU_MAX_TIMEOUT_MS);
+    sdoSeqInstance_l.sdoSeqTimeout = min(timeout_p, SDO_SEQU_MAX_TIMEOUT_MS) /
+                                     (SDO_SEQ_RETRY_COUNT + 1);
     return kErrorOk;
 }
 
