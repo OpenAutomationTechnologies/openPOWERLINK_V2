@@ -146,12 +146,12 @@ machine.
 */
 typedef enum
 {
-    kSdoSeqStateIdle        = 0x00,             ///< SDO connection is idle (closed)
-    kSdoSeqStateInit1       = 0x01,             ///< SDO init 1: scon=1, rcon=0
-    kSdoSeqStateInit2       = 0x02,             ///< SDO init 2: scon=1, rcon=1
-    kSdoSeqStateInit3       = 0x03,             ///< SDO init 3: scon=2, rcon=1
-    kSdoSeqStateConnected   = 0x04,             ///< SDO connection is established
-    kSdoSeqStateWaitAck     = 0x05              ///< SDO connection is waiting for an acknowledgment
+    kSdoSeqStateIdle                = 0x00, ///< SDO connection is idle (closed)
+    kSdoSeqStateInit1               = 0x01, ///< SDO init 1: scon=1, rcon=0
+    kSdoSeqStateInit2               = 0x02, ///< SDO init 2: scon=1, rcon=1
+    kSdoSeqStateInit3               = 0x03, ///< SDO init 3: scon=2, rcon=1
+    kSdoSeqStateConnected           = 0x04, ///< SDO connection is established
+    kSdoSeqStateWaitAck             = 0x05, ///< SDO connection is waiting for an acknowledgment
 } eSdoSeqState;
 
 /**
@@ -178,6 +178,7 @@ typedef struct
     tTimerHdl               timerHandle;        ///< Timer handle
     UINT                    retryCount;         ///< Retry counter
     UINT                    useCount;           ///< One sequence layer connection may be used by multiple command layer connections
+    BOOL                    fForceFlowControl;  ///< If enabled, Rx sequences will not be forwarded to command layer
 } tSdoSeqCon;
 
 /**
@@ -266,6 +267,8 @@ static BOOL       checkHistoryAcked(tSdoSeqCon* pSdoSeqCon_p, UINT8 recvSeqNumbe
 static BOOL       checkConnectionAckValid(tSdoSeqCon* pSdoSeqCon_p, UINT8 recvSeqNumber_p);
 
 static tOplkError sendHistoryOldestSegm(tSdoSeqCon* pSdoSeqCon_p, UINT8 recvSeqNumber_p);
+
+static void       forceRetransmissionRequest(tSdoSeqCon* pSdoSeqCon_p, BOOL fEnable_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -540,6 +543,10 @@ tOplkError sdoseq_sendData(tSdoSeqConHdl sdoSeqConHdl_p, UINT dataSize_p, tPlkFr
             return kErrorSdoSeqConnectionBusy;
         }
     }
+
+    // calling send function from application counts as reset of flow control
+    forceRetransmissionRequest(&sdoSeqInstance_l.aSdoSeqCon[handle], FALSE);
+
     ret = processState(handle, dataSize_p, pData_p, NULL, kSdoSeqEventFrameSend);
     return ret;
 }
@@ -717,7 +724,7 @@ static tOplkError processStateIdle(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSe
             ret = sendFrame(pSdoSeqCon_p, 0, NULL, FALSE);
             if (ret != kErrorOk)
                 return ret;
-
+            forceRetransmissionRequest(pSdoSeqCon_p, FALSE);
             pSdoSeqCon_p->sdoSeqState = kSdoSeqStateInit1; // change state
             ret = setTimer(pSdoSeqCon_p, sdoSeqInstance_l.sdoSeqTimeout);
             break;
@@ -1145,7 +1152,16 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
                 }
                 else
                 {
-                    sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateFrameSent);
+                    ret = sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateFrameSent);
+                    if (ret == kErrorSdoComHandleBusy)
+                    {
+                        ret = kErrorOk;
+                        forceRetransmissionRequest(pSdoSeqCon_p, TRUE);
+                    }
+                    else
+                    {
+                        forceRetransmissionRequest(pSdoSeqCon_p, FALSE);
+                    }
                 }
             }
             break;
@@ -1195,7 +1211,7 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
                         ret = setTimer(pSdoSeqCon_p, sdoSeqInstance_l.sdoSeqTimeout);
                         // reset timeout counter
                         pSdoSeqCon_p->retryCount = 0;
-                        ret= sendAllTxHistory(pSdoSeqCon_p);
+                        ret = sendAllTxHistory(pSdoSeqCon_p);
                         if (ret != kErrorOk)
                             return ret;
                     }
@@ -1208,14 +1224,26 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
                     if (((pSdoSeqCon_p->sendSeqNum + 4) & SEQ_NUM_MASK) == (sendSeqNumCon & SEQ_NUM_MASK))
                     {   // next frame of sequence received (new command layer data)
 
-                        // save send sequence number (without ack request)
-                        pSdoSeqCon_p->sendSeqNum = sendSeqNumCon & ~0x01;
+                        if (!pSdoSeqCon_p->fForceFlowControl)
+                        {
+                            // save send sequence number (without ack request)
+                            pSdoSeqCon_p->sendSeqNum = sendSeqNumCon & ~0x01;
+                            // forward Rx frame to command layer
+                            ret = sdoSeqInstance_l.pfnSdoComRecvCb(sdoSeqConHdl_p,
+                                                ((tAsySdoCom*)&pRecvFrame_p->sdoSeqPayload),
+                                                (dataSize_p - SDO_SEQ_HEADER_SIZE));
+                            if (ret == kErrorSdoComHandleBusy)
+                            {
+                                ret = kErrorOk;
+                                forceRetransmissionRequest(pSdoSeqCon_p, TRUE);
+                            }
+                            else
+                            {
+                                forceRetransmissionRequest(pSdoSeqCon_p, FALSE);
+                            }
 
-                        // forward Rx frame to command layer
-                        sdoSeqInstance_l.pfnSdoComRecvCb(sdoSeqConHdl_p,
-                                            ((tAsySdoCom*)&pRecvFrame_p->sdoSeqPayload),
-                                            (dataSize_p - SDO_SEQ_HEADER_SIZE));
-                        sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateFrameReceived);
+                            sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateFrameReceived);
+                        }
                     }
                     else if (((sendSeqNumCon - pSdoSeqCon_p->sendSeqNum - 4) & SEQ_NUM_MASK) < SDO_SEQ_NUM_THRESHOLD)
                     {   // frame of sequence was lost,
@@ -1225,7 +1253,7 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
                         pSdoSeqCon_p->sendSeqNum |= 0x03;
                         ret = sendFrame(pSdoSeqCon_p, 0, NULL, FALSE);
                         // restore rcon = 2
-                        pSdoSeqCon_p->sendSeqNum = (pSdoSeqCon_p->sendSeqNum & SEQ_NUM_MASK) | 0x02;
+                        pSdoSeqCon_p->sendSeqNum--;
                         if (ret != kErrorOk)
                             return ret;
 
@@ -1236,7 +1264,17 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
 
                     if ((sendSeqNumCon & SDO_CON_MASK) == 3)
                     {   // ack request received
-                        // create ack with own scon = 2
+                        if (pSdoSeqCon_p->fForceFlowControl)
+                        {   // other node is about to close the connection
+                            // -> reset timer of other node with
+                            // retransmission request
+                            pSdoSeqCon_p->sendSeqNum |= 0x03;
+                        }
+                        else
+                        {   // create ack with own scon = 2
+                            pSdoSeqCon_p->sendSeqNum |= 0x03;
+                            pSdoSeqCon_p->sendSeqNum--;
+                        }
                         ret = sendFrame(pSdoSeqCon_p, 0, NULL, FALSE);
                         if (ret != kErrorOk)
                             return ret;
@@ -1260,7 +1298,6 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
             // sdoSeqInstance_l.pfnSdoComConCb(SdoSeqConHdl, kAsySdoConStateInitError);
             break;
 
-        // timeout
         case kSdoSeqEventTimeout:
             processTimeoutEvent(pSdoSeqCon_p, sdoSeqConHdl_p);
             if (ret != kErrorOk)
@@ -1345,24 +1382,45 @@ static tOplkError processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sd
 
                     // change state
                     pSdoSeqCon_p->sdoSeqState = kSdoSeqStateConnected;
-                    sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateAckReceived);
+                    ret = sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateAckReceived);
+                    if (ret == kErrorSdoComHandleBusy)
+                    {
+                        ret = kErrorOk;
+                        forceRetransmissionRequest(pSdoSeqCon_p, TRUE);
+                    }
+                    else
+                    {
+                        forceRetransmissionRequest(pSdoSeqCon_p, FALSE);
+                    }
                 }
 
                 // send data to higher layer if needed
                 if (((pSdoSeqCon_p->sendSeqNum + 4) & SEQ_NUM_MASK) == (sendSeqNumCon & SEQ_NUM_MASK))
                 {   // next frame of sequence received (new command layer data)
 
-                    // save send sequence number (without ack request)
-                    pSdoSeqCon_p->sendSeqNum = sendSeqNumCon & ~0x01;
+                    if (!pSdoSeqCon_p->fForceFlowControl)
+                    {
+                        // save send sequence number (without ack request)
+                        pSdoSeqCon_p->sendSeqNum = sendSeqNumCon & ~0x01;
 
-                    // forward Rx frame to command layer
-                    sdoSeqInstance_l.pfnSdoComRecvCb(sdoSeqConHdl_p,
-                                                    ((tAsySdoCom*)&pRecvFrame_p->sdoSeqPayload),
-                                                    (dataSize_p - SDO_SEQ_HEADER_SIZE));
-                    // Note: Posting "kAsySdoConStateFrameReceived" to higher layer not necessary
-                    //       here, because if we are server it is an initial transfer and will
-                    //       not be processed. If we are client, it doesn't happen since the other
-                    //       node would need to be a client also.
+                        // forward Rx frame to command layer
+                        ret = sdoSeqInstance_l.pfnSdoComRecvCb(sdoSeqConHdl_p,
+                                                        ((tAsySdoCom*)&pRecvFrame_p->sdoSeqPayload),
+                                                        (dataSize_p - SDO_SEQ_HEADER_SIZE));
+                        if (ret == kErrorSdoComHandleBusy)
+                        {
+                            ret = kErrorOk;
+                            forceRetransmissionRequest(pSdoSeqCon_p, TRUE);
+                        }
+                        else
+                        {
+                            forceRetransmissionRequest(pSdoSeqCon_p, FALSE);
+                        }
+                        // Note: Posting "kAsySdoConStateFrameReceived" to higher layer not necessary
+                        //       here, because if we are server it is an initial transfer and will
+                        //       not be processed. If we are client, it doesn't happen since the other
+                        //       node would need to be a client also.
+                    }
                 }
 
                 // trigger segmented Tx before timeout does (speed-up transmission)
@@ -1384,7 +1442,16 @@ static tOplkError processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sd
 
                     // change state
                     pSdoSeqCon_p->sdoSeqState = kSdoSeqStateConnected;
-                    sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateAckReceived);
+                    ret = sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateAckReceived);
+                    if (ret == kErrorSdoComHandleBusy)
+                    {
+                        ret = kErrorOk;
+                        forceRetransmissionRequest(pSdoSeqCon_p, TRUE);
+                    }
+                    else
+                    {
+                        forceRetransmissionRequest(pSdoSeqCon_p, FALSE);
+                    }
                 }
 
                 // reset timeout counter
@@ -1403,26 +1470,35 @@ static tOplkError processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sd
                     if (((pSdoSeqCon_p->sendSeqNum + 4) & SEQ_NUM_MASK) == (sendSeqNumCon & SEQ_NUM_MASK))
                     {   // next frame of sequence received (new command layer data)
 
-                        // save send sequence number (without ack request)
-                        pSdoSeqCon_p->sendSeqNum = sendSeqNumCon & ~0x01;
+                        if (!pSdoSeqCon_p->fForceFlowControl)
+                        {
+                            // save send sequence number (without ack request)
+                            pSdoSeqCon_p->sendSeqNum = sendSeqNumCon & ~0x01;
 
-                        // forward Rx frame to command layer
-                        sdoSeqInstance_l.pfnSdoComRecvCb(sdoSeqConHdl_p,
-                                                        ((tAsySdoCom*)&pRecvFrame_p->sdoSeqPayload),
-                                                        (dataSize_p - SDO_SEQ_HEADER_SIZE));
-                        // Note: Posting "kAsySdoConStateFrameReceived" to higher layer not necessary
-                        //       here, because if we are server it is an initial transfer and will
-                        //       not be processed. If we are client, it doesn't happen since the other
-                        //       node would need to be a client also.
+                            // forward Rx frame to command layer
+                            ret = sdoSeqInstance_l.pfnSdoComRecvCb(sdoSeqConHdl_p,
+                                                            ((tAsySdoCom*)&pRecvFrame_p->sdoSeqPayload),
+                                                            (dataSize_p - SDO_SEQ_HEADER_SIZE));
+                            if (ret == kErrorSdoComHandleBusy)
+                            {
+                                ret = kErrorOk;
+                                forceRetransmissionRequest(pSdoSeqCon_p, TRUE);
+                            }
+                            else
+                            {
+                                forceRetransmissionRequest(pSdoSeqCon_p, FALSE);
+                            }
+                            // Note: Posting "kAsySdoConStateFrameReceived" to higher layer not necessary
+                            //       here, because if we are server it is an initial transfer and will
+                            //       not be processed. If we are client, it doesn't happen since the other
+                            //       node would need to be a client also.
+                        }
                     }
                     else
                     {   // send empty ack
-                        // save sequence numbers for sending
-                        pSdoSeqCon_p->recvSeqNum = recvSeqNumCon | 0x03;
-                        pSdoSeqCon_p->sendSeqNum = sendSeqNumCon & ~0x01;
                         // create answer own rcon = 2, since history is empty
+                        pSdoSeqCon_p->recvSeqNum = recvSeqNumCon | 0x03;
                         pSdoSeqCon_p->recvSeqNum--;
-
                         ret = sendFrame(pSdoSeqCon_p, 0, NULL, FALSE);
                         if (ret != kErrorOk)
                             return ret;
@@ -1439,7 +1515,7 @@ static tOplkError processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sd
 
     }
     else if (event_p == kSdoSeqEventTimeout)
-    {   // error -> Close
+    {
         processTimeoutEvent(pSdoSeqCon_p, sdoSeqConHdl_p);
         if (ret != kErrorOk)
             return ret;
@@ -2100,8 +2176,21 @@ static tOplkError processSubTimeout(tSdoSeqCon* pSdoSeqCon_p)
     tOplkError  ret = kErrorOk;
     UINT        frameSize;
     tPlkFrame*  pFrame;
+    UINT8       recvSeqNumCon;
 
     DEBUG_LVL_SDO_TRACE("SDO temporary timeout!\n");
+
+    if (pSdoSeqCon_p->fForceFlowControl)
+    {   // other node is about to close the connection
+        // -> reset timer of other node with
+        // retransmission request
+        pSdoSeqCon_p->sendSeqNum |= 0x03;
+    }
+    else
+    {   // create ack with own scon = 2
+        pSdoSeqCon_p->sendSeqNum |= 0x03;
+        pSdoSeqCon_p->sendSeqNum--;
+    }
 
     // resend data with acknowledge request
     pSdoSeqCon_p->retryCount++;
@@ -2119,9 +2208,31 @@ static tOplkError processSubTimeout(tSdoSeqCon* pSdoSeqCon_p)
         ami_setUint8Le(&pFrame->data.asnd.payload.sdoSequenceFrame.sendSeqNumCon,
                        ami_getUint8Le(&pFrame->data.asnd.payload.sdoSequenceFrame.sendSeqNumCon) | 0x03);
 
+        if (pSdoSeqCon_p->fForceFlowControl)
+        {   // other node is about to close the connection
+            // -> reset timer of other node with retransmission request in rcon
+            ami_setUint8Le(&pFrame->data.asnd.payload.sdoSequenceFrame.recvSeqNumCon,
+                           ami_getUint8Le(&pFrame->data.asnd.payload.sdoSequenceFrame.recvSeqNumCon) | 0x03);
+        }
+        else
+        {   // create ack with own scon = 2
+            ami_setUint8Le(&pFrame->data.asnd.payload.sdoSequenceFrame.recvSeqNumCon,
+                            (ami_getUint8Le(&pFrame->data.asnd.payload.sdoSequenceFrame.recvSeqNumCon)
+                             & SEQ_NUM_MASK) | 0x02);
+        }
+
         ret = sendToLowerLayer(pSdoSeqCon_p, frameSize, pFrame);
         if (ret == kErrorDllAsyncTxBufferFull)
             ret = kErrorOk; // ignore unsent frames
+        if (ret != kErrorOk)
+            return ret;
+    }
+    else
+    {   // send empty frame with ack request in own scon
+        recvSeqNumCon = pSdoSeqCon_p->recvSeqNum; // save sequence number
+        pSdoSeqCon_p->recvSeqNum |= 0x03;
+        ret = sendFrame(pSdoSeqCon_p, 0, NULL, FALSE);
+        pSdoSeqCon_p->recvSeqNum = recvSeqNumCon; // restore sequence number
         if (ret != kErrorOk)
             return ret;
     }
@@ -2144,12 +2255,9 @@ The function processes and signals a sequence layer timeout event.
 static tOplkError processTimeoutEvent(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSeqConHdl_p)
 {
     tOplkError  ret = kErrorOk;
-    UINT        freeEntries;
 
-    freeEntries = getFreeHistoryEntries(pSdoSeqCon_p);
-    if ((freeEntries < SDO_HISTORY_SIZE) &&
-        (pSdoSeqCon_p->retryCount < SDO_SEQ_RETRY_COUNT))
-    {   // unacknowledged frames in history and retry counter not exceeded
+    if ((pSdoSeqCon_p->retryCount < SDO_SEQ_RETRY_COUNT))
+    {   // retry counter not exceeded
         ret = processSubTimeout(pSdoSeqCon_p);
         if (ret != kErrorOk)
             return ret;
@@ -2270,6 +2378,29 @@ static tOplkError sendHistoryOldestSegm(tSdoSeqCon* pSdoSeqCon_p, UINT8 recvSeqN
     }
 
     return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief Use retransmission request to control flow and keep connection alive
+
+Flow control possibility for application by dropping newly received sequences
+in the sequence layer and not forwarding them to the command layer until
+the command layer sends a "delayed" response.
+The sequence layer will keep the connection alive (resetting timeout of other
+node) by responding on an acknowledge request with a retransmission request.
+The own timeout will occur, if the command layer does not respond.
+
+\param  pSdoSeqCon_p     Pointer to connection control structure.
+\param  fEnable_p        TRUE: enable manipulation. FALSE: disable manipulation
+
+*/
+//------------------------------------------------------------------------------
+static void forceRetransmissionRequest(tSdoSeqCon* pSdoSeqCon_p, BOOL fEnable_p)
+{
+    pSdoSeqCon_p->fForceFlowControl = fEnable_p;
+    DEBUG_LVL_SDO_TRACE("%s: %d\n", __func__, fEnable_p);
+    return;
 }
 
 /// \}
