@@ -1137,7 +1137,7 @@ The function processes an WriteByIndex command layer of an SDO server.
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tOplkError obd_proccessWrite(tSdoObdConHdl* pSdoHdl_p)
+tOplkError obd_processWrite(tSdoObdConHdl* pSdoHdl_p)
 {
     tOplkError      ret = kErrorOk;
 
@@ -1169,7 +1169,7 @@ The function processes an ReadByIndex command layer of an SDO server.
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tOplkError obd_proccessRead(tSdoObdConHdl* pSdoHdl_p)
+tOplkError obd_processRead(tSdoObdConHdl* pSdoHdl_p)
 {
     tOplkError      ret = kErrorOk;
 
@@ -1554,6 +1554,11 @@ static tOplkError readByIdxSegm(tSdoObdConHdl* pSdoHdl_p)
 
     pSrcData = obd_getObjectDataPtr(pSdoHdl_p->index,
                                     pSdoHdl_p->subIndex);
+    if (pSrcData == NULL)
+    {   // entry doesn't exist
+        return kErrorObdIndexNotExist;
+    }
+
     pSrcData = pSrcData + pSdoHdl_p->dataOffset;
 
     if (pSdoHdl_p->totalPendSize > pSdoHdl_p->dataSize)

@@ -54,7 +54,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-tOplkError obdal_proccessRead(tSdoObdConHdl* pSdoHdl_p);
-tOplkError obdal_proccessWrite(tSdoObdConHdl* pSdoHdl_p);
+tOplkError obdal_processRead(tSdoObdConHdl* pSdoHdl_p,
+                              tCmdLayerObdFinishedCb pfnFinishSdoCb_p);
+tOplkError obdal_processWrite(tSdoObdConHdl* pSdoHdl_p,
+                               tCmdLayerObdFinishedCb pfnFinishSdoCb_p);
 
 #endif /* _INC_obdal_H_ */

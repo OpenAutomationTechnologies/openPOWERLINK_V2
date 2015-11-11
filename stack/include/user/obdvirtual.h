@@ -54,7 +54,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-tOplkError obdvrtl_proccessRead(tSdoObdConHdl* pSdoHdl_p);
-tOplkError obdvrtl_proccessWrite(tSdoObdConHdl* pSdoHdl_p);
+tOplkError obdvrtl_processRead(tSdoObdConHdl* pSdoHdl_p,
+                                tCmdLayerObdFinishedCb pfnFinishSdoCb_p);
+tOplkError obdvrtl_processWrite(tSdoObdConHdl* pSdoHdl_p,
+                                 tCmdLayerObdFinishedCb pfnFinishSdoCb_p);
 
 #endif /* _INC_obdvirtual_H_ */

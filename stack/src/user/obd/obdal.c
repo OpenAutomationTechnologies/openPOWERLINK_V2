@@ -90,22 +90,25 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 The function processes an WriteByIndex command layer of an SDO server.
 
-\param  pSdoHdl_p       Connection handle to SDO server
+\param  pSdoHdl_p           Connection handle to SDO server
+\param  pfnFinishSdoCb_p    Callback for object dictionary to finish a read or
+                            write access from SDO
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tOplkError obdal_proccessWrite(tSdoObdConHdl* pSdoHdl_p)
+tOplkError obdal_processWrite(tSdoObdConHdl* pSdoHdl_p,
+                               tCmdLayerObdFinishedCb pfnFinishSdoCb_p)
 {
     tOplkError      ret = kErrorOk;
 
-    ret = obd_proccessWrite(pSdoHdl_p);
+    ret = obd_processWrite(pSdoHdl_p);
 
     if ((ret == kErrorObdIndexNotExist))
     {   // object not in the default obd, try the virtual obd
-        ret = obdvrtl_proccessRead(pSdoHdl_p);
+        ret = obdvrtl_processWrite(pSdoHdl_p, pfnFinishSdoCb_p);
     }
 
     return ret;
@@ -117,25 +120,29 @@ tOplkError obdal_proccessWrite(tSdoObdConHdl* pSdoHdl_p)
 
 The function processes an ReadByIndex command layer of an SDO server.
 
-\param  pSdoHdl_p       Connection handle to SDO server
-                        returns:
-                         - totalPendSize, only for initial transfer: object size
-                         - dataSize: size of copied data to provided buffer
+\param  pSdoHdl_p           Connection handle to SDO server
+                            returns:
+                            - totalPendSize, only for initial transfer: object
+                              size
+                            - dataSize: size of copied data to provided buffer
+\param  pfnFinishSdoCb_p    Callback for object dictionary to finish a read or
+                            write access from SDO
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tOplkError obdal_proccessRead(tSdoObdConHdl* pSdoHdl_p)
+tOplkError obdal_processRead(tSdoObdConHdl* pSdoHdl_p,
+                              tCmdLayerObdFinishedCb pfnFinishSdoCb_p)
 {
     tOplkError      ret = kErrorOk;
 
-    ret = obd_proccessRead(pSdoHdl_p);
+    ret = obd_processRead(pSdoHdl_p);
 
     if ((ret == kErrorObdIndexNotExist))
     {   // object not in the default obd, try the virtual obd
-        ret = obdvrtl_proccessRead(pSdoHdl_p);
+        ret = obdvrtl_processRead(pSdoHdl_p, pfnFinishSdoCb_p);
     }
 
     return ret;

@@ -172,6 +172,7 @@ typedef enum
     kErrorObdInvalidDcf             = 0x003C,       ///< The device configuration file (CDC) is not valid
     kErrorObdOutOfMemory            = 0x003D,       ///< Out of memory
     kErrorObdNoConfigData           = 0x003E,       ///< No configuration data present (CDC is empty)
+    kErrorObdAccessPending          = 0x003F,       ///< Obd access will not be completed immediately, but by callback
 
     // area for NMT module 0x0040 - 0x004F
     kErrorNmtUnknownCommand         = 0x0040,       ///< Unknown NMT command

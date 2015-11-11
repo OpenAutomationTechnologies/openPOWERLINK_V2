@@ -509,8 +509,8 @@ UINT32     obd_getOdSignature(tObdPart odPart_p);
 tOplkError obd_storeLoadObjCallback(tObdStoreLoadCallback pfnCallback_p);
 #endif
 
-tOplkError obd_proccessWrite(tSdoObdConHdl* pSdoObdConHdl_p);
-tOplkError obd_proccessRead(tSdoObdConHdl* pSdoObdConHdl_p);
+tOplkError obd_processWrite(tSdoObdConHdl* pSdoObdConHdl_p);
+tOplkError obd_processRead(tSdoObdConHdl* pSdoObdConHdl_p);
 
 #ifdef __cplusplus
 }
