@@ -159,13 +159,14 @@ typedef enum
     kSdoComConEventConEstablished   = 0x02, ///< Connection established
     kSdoComConEventConClosed        = 0x03, ///< Connection closed
     kSdoComConEventAckReceived      = 0x04, ///< Acknowledge received by lower layer -> continue sending
-    kSdoComConEventFrameSent        = 0x05, ///< Lower layer has sent a frame
-    kSdoComConEventInitError        = 0x06, ///< Error during initialization of the connection
-    kSdoComConEventTimeout          = 0x07, ///< Timeout in lower layer
-    kSdoComConEventTransferAbort    = 0x08, ///< Transfer abort by lower layer
+    kSdoComConEventFrameReceived    = 0x05, ///< Lower layer has received a command layer frame
+    kSdoComConEventFrameSent        = 0x06, ///< Lower layer has sent a command layer frame
+    kSdoComConEventInitError        = 0x07, ///< Error during initialization of the connection
+    kSdoComConEventTimeout          = 0x08, ///< Timeout in lower layer
+    kSdoComConEventTransferAbort    = 0x09, ///< Transfer abort by lower layer
 #if defined(CONFIG_INCLUDE_SDOC)
-    kSdoComConEventInitCon          = 0x09, ///< Init connection (only client)
-    kSdoComConEventAbort            = 0x0A, ///< Abort SDO transfer (only client)
+    kSdoComConEventInitCon          = 0x0A, ///< Init connection (only client)
+    kSdoComConEventAbort            = 0x0B, ///< Abort SDO transfer (only client)
 #endif
 } eSdoComConEvent;
 
@@ -535,6 +536,12 @@ static tOplkError conStateChangeCb(tSdoSeqConHdl sdoSeqConHdl_p,
             // to continue transmission
             break;
 
+        case kAsySdoConStateFrameReceived:
+            DEBUG_LVL_SDO_TRACE("One Frame received\n");
+            sdoComConEvent = kSdoComConEventFrameReceived;
+            // to continue transmission
+            break;
+
         case kAsySdoConStateTimeout:
             DEBUG_LVL_SDO_TRACE("Timeout\n");
             sdoComConEvent = kSdoComConEventTimeout;
@@ -550,6 +557,10 @@ static tOplkError conStateChangeCb(tSdoSeqConHdl sdoSeqConHdl_p,
     }
 
     ret = processCmdLayerConnection(sdoSeqConHdl_p, sdoComConEvent, (tAsySdoCom*)NULL);
+    if (ret == kErrorObdAccessPending)
+    {   // modify error code, since sequence layer doesn't know about Obd
+        ret = kErrorSdoComHandleBusy;
+    }
     return ret;
 }
 
@@ -1139,6 +1150,7 @@ static tOplkError serverFinishInitReadByIndex(tSdoComCon* pSdoComCon_p,
     if (pSdoComCon_p->transferSize > pSdoComCon_p->pendingTransferSize)
     {
         pSdoComCon_p->sdoTransferType = kSdoTransSegmented;
+        pSdoComCon_p->sdoComState = kSdoComStateServerSegmTrans;
     }
     else
     {
@@ -1159,10 +1171,6 @@ static tOplkError serverFinishInitReadByIndex(tSdoComCon* pSdoComCon_p,
     {   // already finished -> stay idle
         pSdoComCon_p->sdoComState = kSdoComStateIdle;
         pSdoComCon_p->lastAbortCode = 0;
-    }
-    else
-    {   // segmented transfer
-        pSdoComCon_p->sdoComState = kSdoComStateServerSegmTrans;
     }
 
     return ret;
@@ -1194,7 +1202,7 @@ static tOplkError serverObdFinishInitReadByIndexCb(tSdoObdConHdl* pObdHdl_p)
     ret = serverObdSearchConnection(pObdHdl_p->sdoHdl, &pSdoComCon);
     if (ret != kErrorOk)
     {
-        return ret;
+        pObdHdl_p->plkError = ret;
     }
 
     // Start of command layer data (in little endian format)
@@ -1205,6 +1213,8 @@ static tOplkError serverObdFinishInitReadByIndexCb(tSdoObdConHdl* pObdHdl_p)
     {
         assignSdoErrorCode(pObdHdl_p->plkError, &pSdoComCon->lastAbortCode);
         ret = serverAbortTransfer(pSdoComCon, pSdoComCon->lastAbortCode);
+        ret = sdoseq_deleteCon(pSdoComCon->sdoSeqConHdl);
+        OPLK_MEMSET(pSdoComCon, 0x00, sizeof(tSdoComCon));
         return ret;
     }
 
@@ -1251,6 +1261,12 @@ static tOplkError serverProcessResponseReadByIndex(tSdoComCon* pSdoComCon_p)
     obdHdl.dataSize = maxReadBuffSize;
     obdHdl.dataOffset = pSdoComCon_p->transferredBytes;
     obdHdl.totalPendSize = pSdoComCon_p->transferSize;
+    ret = serverSaveObdConnectionHdl(pSdoComCon_p);
+    if (ret != kErrorOk)
+    {
+        return ret;
+    }
+    obdHdl.sdoHdl = pSdoComCon_p->sdoObdConHdl;
     ret = sdoComInstance_l.pfnProcessObdRead(&obdHdl, serverObdFinishReadByIndexCb);
     assignSdoErrorCode(ret, &pSdoComCon_p->lastAbortCode);
     if (ret == kErrorObdAccessPending)
@@ -1351,7 +1367,7 @@ static tOplkError serverObdFinishReadByIndexCb(tSdoObdConHdl* pObdHdl_p)
     ret = serverObdSearchConnection(pObdHdl_p->sdoHdl, &pSdoComCon);
     if (ret != kErrorOk)
     {
-        return ret;
+        pObdHdl_p->plkError = ret;
     }
 
     // Start of command layer data to be copied by SDO server
@@ -1361,6 +1377,8 @@ static tOplkError serverObdFinishReadByIndexCb(tSdoObdConHdl* pObdHdl_p)
     {
         assignSdoErrorCode(pObdHdl_p->plkError, &pSdoComCon->lastAbortCode);
         ret = serverAbortTransfer(pSdoComCon, pSdoComCon->lastAbortCode);
+        ret = sdoseq_deleteCon(pSdoComCon->sdoSeqConHdl);
+        OPLK_MEMSET(pSdoComCon, 0x00, sizeof(tSdoComCon));
         return ret;
     }
 
@@ -1878,13 +1896,15 @@ static tOplkError serverObdFinishInitWriteByIndexCb(tSdoObdConHdl* pObdHdl_p)
     ret = serverObdSearchConnection(pObdHdl_p->sdoHdl, &pSdoComCon);
     if (ret != kErrorOk)
     {
-        return ret;
+        pObdHdl_p->plkError = ret;
     }
 
     if (pObdHdl_p->plkError != kErrorOk)
     {
         assignSdoErrorCode(pObdHdl_p->plkError, &pSdoComCon->lastAbortCode);
         ret = serverAbortTransfer(pSdoComCon, pSdoComCon->lastAbortCode);
+        ret = sdoseq_deleteCon(pSdoComCon->sdoSeqConHdl);
+        OPLK_MEMSET(pSdoComCon, 0x00, sizeof(tSdoComCon));
         return ret;
     }
 
@@ -1942,7 +1962,12 @@ static tOplkError serverProcessResponseWriteByIndex(tSdoComCon* pSdoComCon_p, tA
     {   // transfer finished
         pSdoComCon_p->transferSize = 0;
     }
-
+    ret = serverSaveObdConnectionHdl(pSdoComCon_p);
+    if (ret != kErrorOk)
+    {
+        return ret;
+    }
+    obdHdl.sdoHdl = pSdoComCon_p->sdoObdConHdl;
     ret = sdoComInstance_l.pfnProcessObdWrite(&obdHdl, serverObdFinishWriteByIndexCb);
     assignSdoErrorCode(ret, &pSdoComCon_p->lastAbortCode);
     if (ret == kErrorObdAccessPending)
@@ -2039,13 +2064,15 @@ static tOplkError serverObdFinishWriteByIndexCb(tSdoObdConHdl* pObdHdl_p)
     ret = serverObdSearchConnection(pObdHdl_p->sdoHdl, &pSdoComCon);
     if (ret != kErrorOk)
     {
-        return ret;
+        pObdHdl_p->plkError = ret;
     }
 
     if (pObdHdl_p->plkError != kErrorOk)
     {
         assignSdoErrorCode(pObdHdl_p->plkError, &pSdoComCon->lastAbortCode);
         ret = serverAbortTransfer(pSdoComCon, pSdoComCon->lastAbortCode);
+        ret = sdoseq_deleteCon(pSdoComCon->sdoSeqConHdl);
+        OPLK_MEMSET(pSdoComCon, 0x00, sizeof(tSdoComCon));
         return ret;
     }
 
@@ -2091,8 +2118,10 @@ static tOplkError serverProcessStateServerSegmTrans(tSdoComConHdl sdoComConHdl_p
         case kSdoComConEventAckReceived:
         case kSdoComConEventFrameSent:
             // check if it is a read
-            if (pSdoComCon->sdoServiceType == kSdoServiceReadByIndex)
+            if ((pSdoComCon->sdoServiceType == kSdoServiceReadByIndex) &&
+                (pSdoComCon->transferSize != 0)                          )
             {
+                // ignore info about last sent segment
                 ret = serverProcessResponseReadByIndex(pSdoComCon);
             }
             break;
@@ -2607,6 +2636,7 @@ static tOplkError clientProcessStateConnected(tSdoComConHdl sdoComConHdl_p, tSdo
         // send a frame
         case kSdoComConEventSendFirst:
         case kSdoComConEventAckReceived:
+        case kSdoComConEventFrameReceived:
         case kSdoComConEventFrameSent:
             ret = clientSend(pSdoComCon);
             if (ret != kErrorOk)
@@ -2731,6 +2761,7 @@ static tOplkError clientProcessStateSegmTransfer(tSdoComConHdl sdoComConHdl_p, t
     {
         case kSdoComConEventSendFirst:
         case kSdoComConEventAckReceived:
+        case kSdoComConEventFrameReceived:
         case kSdoComConEventFrameSent:
             ret = clientSend(pSdoComCon);
             if (ret != kErrorOk)

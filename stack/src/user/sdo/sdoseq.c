@@ -171,7 +171,9 @@ typedef struct
     tSdoConHdl              conHandle;          ///< Connection handle
     tSdoSeqState            sdoSeqState;        ///< State of the connection
     UINT8                   recvSeqNum;         ///< Receive sequence number
-    UINT8                   sendSeqNum;         ///< Send sequence number
+                                                /**< Expected receive sequence number (acknowledge) of other node,
+                                                     updated on every segment Tx with new command data layer data */
+    UINT8                   sendSeqNum;         ///< Send sequence number of communication partner, updated on Rx
     tSdoSeqConHistory       sdoSeqConHistory;   ///< Connection history buffer
     tTimerHdl               timerHandle;        ///< Timer handle
     UINT                    retryCount;         ///< Retry counter
@@ -241,6 +243,8 @@ static tOplkError initHistory(tSdoSeqCon* pSdoSeqCon_p);
 
 static tOplkError addFrameToHistory(tSdoSeqCon* pSdoSeqCon_p, tPlkFrame* pFrame_p,
                                     UINT size_p, BOOL fTxFailed_p);
+
+static tOplkError sendAllTxHistory(tSdoSeqCon* pSdoSeqCon_p);
 
 static tOplkError deleteAckedFrameFromHistory(tSdoSeqCon* pSdoSeqCon_p, UINT8 recvSeqNumber_p);
 
@@ -495,9 +499,9 @@ The function sends data via an existing sequence layer connection.
 
 \param  sdoSeqConHdl_p          Sequence layer connection handle to use for
                                 transfer.
-\param  dataSize_p              Size of frame to send. The size contains only
-                                the sequence layer payload (without headers!).
-\param  pData_p                 Pointer to the data to be sent.
+\param  dataSize_p              Size of sequence layer frame (without higher
+                                layer headers)
+\param  pData_p                 Pointer to the data to send.
 
 \return The function returns a tOplkError error code.
 
@@ -1084,8 +1088,8 @@ The function processes the sequence layer state: kSdoSeqStateConnected
 \param  sdoSeqConHdl_p      Handle of sequence layer connection.
 \param  event_p             Event to be processed.
 \param  pRecvFrame_p        Pointer to received frame (can be NULL).
-\param  dataSize_p          Size of frame to be sent. Contains only the payload
-                            without headers!
+\param  dataSize_p          Size of sequence layer frame (without higher layer
+                            headers).
 \param  pData_p             Pointer to frame to be sent (can be NULL).
 
 \return The function returns a tOplkError error code.
@@ -1151,6 +1155,7 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
                     sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateConClosed);
                     break;
 
+                // init
                 case 1:
                     pSdoSeqCon_p->sdoSeqState = kSdoSeqStateIdle;   // return to idle
                     timeru_deleteTimer(&pSdoSeqCon_p->timerHandle);
@@ -1160,50 +1165,32 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
                     ret = kErrorRetry;
                     break;
 
-                // Request Ack or Error Ack - possible contain data
+                // acknowledge request (signaling lost ack) - possibly contains data
                 case 3:
-                // normal frame
+                // connection valid
                 case 2:
                     if ((ami_getUint8Le(&pRecvFrame_p->recvSeqNumCon) & SDO_CON_MASK) == 3)
-                    {
-                        // TRACE("sdoseq: error response received\n");
+                    {   // retransmission request (signaling lost segments)
 
-                        // error response (retransmission request) - resend frames from history
-                        ret = readFromHistory(pSdoSeqCon_p, &pFrame, &frameSize, TRUE);
-                        if (ret == kErrorRetry)
-                            ret = kErrorOk; // ignore unsent frames info
+                        // TRACE("sdoseq: error response received\n");
+                        ret= sendAllTxHistory(pSdoSeqCon_p);
                         if (ret != kErrorOk)
                             return ret;
-
-                        while ((pFrame != NULL) && (frameSize != 0))
-                        {
-                            ret = sendToLowerLayer(pSdoSeqCon_p, frameSize, pFrame);
-                            if (ret == kErrorDllAsyncTxBufferFull)
-                                ret = kErrorOk; // ignore unsent frames
-                            if (ret != kErrorOk)
-                                return ret;
-
-                            ret = readFromHistory(pSdoSeqCon_p, &pFrame, &frameSize, FALSE);
-                            if (ret == kErrorRetry)
-                                ret = kErrorOk; // ignore unsent frames info
-                            if (ret != kErrorOk)
-                                return ret;
-                        } // end of while((pabFrame != NULL)
-                    }   // end of if (error response)
+                    }
 
                     if (((pSdoSeqCon_p->sendSeqNum + 4) & SEQ_NUM_MASK) == (sendSeqNumCon & SEQ_NUM_MASK))
-                    {   // next frame of sequence received
+                    {   // next frame of sequence received (new command layer data)
+
                         // save send sequence number (without ack request)
                         pSdoSeqCon_p->sendSeqNum = sendSeqNumCon & ~0x01;
 
                         // check if ack or data-frame, ignore ack -> already processed
                         if (dataSize_p > SDO_SEQ_HEADER_SIZE)
-                        {
+                        {   // forward Rx frame to command layer
                             sdoSeqInstance_l.pfnSdoComRecvCb(sdoSeqConHdl_p,
                                                 ((tAsySdoCom*)&pRecvFrame_p->sdoSeqPayload),
                                                 (dataSize_p - SDO_SEQ_HEADER_SIZE));
-
-                            sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateFrameSent);
+                            sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateFrameReceived);
                         }
                         else
                         {
@@ -1313,8 +1300,8 @@ The function processes the sequence layer state: kSdoSeqStateWaitAck
 \param  sdoSeqConHdl_p      Handle of sequence layer connection.
 \param  event_p             Event to be processed.
 \param  pRecvFrame_p        Pointer to received frame.
-\param  dataSize_p          Size of frame to be sent. Contains only the payload
-                            without headers!
+\param  dataSize_p          Size of sequence layer frame (without higher layer
+                            headers).
 
 \return The function returns a tOplkError error code.
 */
@@ -1324,8 +1311,6 @@ static tOplkError processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sd
                                       UINT dataSize_p)
 {
     tOplkError          ret = kErrorOk;
-    UINT                frameSize;
-    tPlkFrame*          pFrame;
 
     DEBUG_LVL_SDO_TRACE("sdoseq: processStateWaitAck\n");
 
@@ -1362,21 +1347,23 @@ static tOplkError processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sd
                 sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateAckReceived);
                 // send data to higher layer if needed
                 if (dataSize_p > SDO_SEQ_HEADER_SIZE)
-                {
+                {   // forward Rx frame to command layer
                     sdoSeqInstance_l.pfnSdoComRecvCb(sdoSeqConHdl_p,
                                                      ((tAsySdoCom*)&pRecvFrame_p->sdoSeqPayload),
                                                      (dataSize_p - SDO_SEQ_HEADER_SIZE));
                 }
                 break;
 
-            // Request Ack or Error Ack
+            // retransmission request (error response)
             case 3:
                 if (pRecvFrame_p->recvSeqNumCon == pSdoSeqCon_p->recvSeqNum)
-                {
+                {   // previously, an ack request was sent, and also now a
+                    // retransmission request is received, but now new data
+                    // is requested (all send segments are already acknowledged)
                     // -> change to state kSdoSeqStateConnected
                     pSdoSeqCon_p->sdoSeqState = kSdoSeqStateConnected;
 
-                    // ack request -> send ack
+                    // send ack
                     // save sequence numbers
                     pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->recvSeqNumCon);
                     pSdoSeqCon_p->sendSeqNum = ami_getUint8Le(&pRecvFrame_p->sendSeqNumCon);
@@ -1384,11 +1371,12 @@ static tOplkError processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sd
                     pSdoSeqCon_p->recvSeqNum--;
                     // check if ack or data-frame
                     if (dataSize_p > SDO_SEQ_HEADER_SIZE)
-                    {
+                    {   // forward Rx frame to command layer
+                        // TODO: why not checking for new send sequence number?
                         sdoSeqInstance_l.pfnSdoComRecvCb(sdoSeqConHdl_p,
                                                          ((tAsySdoCom*)&pRecvFrame_p->sdoSeqPayload),
                                                          (dataSize_p - SDO_SEQ_HEADER_SIZE));
-                        sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateFrameSent);
+                        sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateFrameReceived);
                     }
                     else
                     {
@@ -1399,22 +1387,8 @@ static tOplkError processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sd
                 }
                 else
                 {
-                    // error ack, resend frames from history
-                    ret = readFromHistory(pSdoSeqCon_p, &pFrame, &frameSize, TRUE);
-                    if (ret == kErrorRetry)
-                        ret = kErrorOk; // ignore unsent frames info
-                    while ((pFrame != NULL) && (frameSize != 0))
-                    {
-                        ret = sendToLowerLayer(pSdoSeqCon_p, frameSize, pFrame);
-                        if (ret == kErrorDllAsyncTxBufferFull)
-                            ret = kErrorOk; // ignore unsent frames
-                        if (ret != kErrorOk)
-                            return ret;
-                        // read next frame
-                        ret = readFromHistory(pSdoSeqCon_p, &pFrame, &frameSize, FALSE);
-                        if (ret == kErrorRetry)
-                            ret = kErrorOk; // ignore unsent frames info
-                    }
+                    // retransmit all frames from history
+                    ret = sendAllTxHistory(pSdoSeqCon_p);
                 }
                 break;
         }
@@ -1439,8 +1413,8 @@ static tOplkError processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sd
 The function processes the internal SDO sequence layer state machine.
 
 \param  handle_p            Index of the control structure of the connection
-\param  dataSize_p          Size of frame to be sent. Contains only the payload
-                            without headers!
+\param  dataSize_p          Size of sequence layer frame (without higher layer
+                            headers).
 \param  pData_p             Pointer to frame to be sent (can be NULL).
 \param  pRecvFrame_p        Pointer to received frame.
 \param  event_p             Event to be processed.
@@ -1529,8 +1503,8 @@ The function creates and sends a frame. If dataSize_p is 0 it creates a frame
 with information from pSdoSeqCon_p.
 
 \param  pSdoSeqCon_p        Pointer to control structure of connection.
-\param  dataSize_p          Size of frame to be sent. Contains only the payload
-                            without headers!
+\param  dataSize_p          Size of sequence layer frame (without higher layer
+                            headers).
 \param  pData_p             Pointer to frame to be sent (can be NULL).
 \param  fFrameInHistory_p   If TRUE, the frame is saved into the history buffer.
 
@@ -1585,7 +1559,10 @@ static tOplkError sendFrame(tSdoSeqCon* pSdoSeqCon_p, UINT dataSize_p,
             { // resend unsent frame
                 ret = sendToLowerLayer(pSdoSeqCon_p, frameSizeResend, pFrameResend);
                 if (ret == kErrorDllAsyncTxBufferFull)
+                {
                     ret = kErrorOk; // ignore unsent frames
+                    break;          // stop sending old frames
+                }
                 if (ret != kErrorOk)
                     return ret;
             }
@@ -1594,6 +1571,8 @@ static tOplkError sendFrame(tSdoSeqCon* pSdoSeqCon_p, UINT dataSize_p,
         }
     }
 
+    // calling send function is necessary for size check before storing it
+    // to the history buffer, even if lower layer Tx buffer is full
     ret = sendToLowerLayer(pSdoSeqCon_p, dataSize_p, pFrame);
     if (((ret == kErrorOk) || (ret == kErrorDllAsyncTxBufferFull)) &&
         (fFrameInHistory_p != FALSE)                                  )
@@ -1622,8 +1601,8 @@ static tOplkError sendFrame(tSdoSeqCon* pSdoSeqCon_p, UINT dataSize_p,
 The function sends an already created fram to the lower layer.
 
 \param  pSdoSeqCon_p        Pointer to control structure of connection.
-\param  dataSize_p          Size of frame to be sent. Contains only the payload
-                            without headers!
+\param  dataSize_p          Size of sequence layer frame (without higher layer
+                            headers).
 \param  pFrame_p            Pointer to frame to be sent (can be NULL).
 
 \return The function returns a tOplkError error code.
@@ -1649,6 +1628,7 @@ static tOplkError sendToLowerLayer(tSdoSeqCon* pSdoSeqCon_p, UINT dataSize_p,
 
         case SDO_ASND_HANDLE:
 #if defined(CONFIG_INCLUDE_SDO_ASND)
+
             ret = sdoasnd_sendData(pSdoSeqCon_p->conHandle, pFrame_p, dataSize_p);
 #else
             ret = kErrorSdoSeqUnsupportedProt;
@@ -1672,7 +1652,8 @@ frames from the lower layer.
 
 \param  conHdl_p            SDO connection handle of the connection.
 \param  pSdoSeqData_p       Pointer to information structure of received frame.
-\param  dataSize_p          Size of received frame.
+\param  dataSize_p          Size of sequence layer payload (without any
+                            headers).
 
 \return The function returns a tOplkError error code.
 */
@@ -1814,6 +1795,51 @@ static tOplkError addFrameToHistory(tSdoSeqCon* pSdoSeqCon_p, tPlkFrame* pFrame_
         ret = kErrorSdoSeqNoFreeHistory;
     }
 
+
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Send the whole history buffer
+
+The function send all frames stored in the Tx history buffer to lower layer.
+
+\param  pSdoSeqCon_p        Pointer to sequence layer connection information.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError sendAllTxHistory(tSdoSeqCon* pSdoSeqCon_p)
+{
+    tOplkError          ret = kErrorOk;
+    UINT                frameSize;
+    tPlkFrame*          pFrame;
+
+    ret = readFromHistory(pSdoSeqCon_p, &pFrame, &frameSize, TRUE);
+    if (ret == kErrorRetry)
+        ret = kErrorOk; // ignore unsent frames info
+    if (ret != kErrorOk)
+        return ret;
+
+    while ((pFrame != NULL) && (frameSize != 0))
+    {
+        ret = sendToLowerLayer(pSdoSeqCon_p, frameSize, pFrame);
+        if (ret == kErrorDllAsyncTxBufferFull)
+        {
+            ret = kErrorOk; // ignore unsent frames but stop sending since
+            break;          // following tries will also fail
+        }
+        if (ret != kErrorOk)
+            return ret;
+
+        ret = readFromHistory(pSdoSeqCon_p, &pFrame, &frameSize, FALSE);
+        if (ret == kErrorRetry)
+            ret = kErrorOk; // ignore unsent frames info
+        if (ret != kErrorOk)
+            return ret;
+    }
+
     return ret;
 }
 
@@ -1871,6 +1897,7 @@ static tOplkError deleteAckedFrameFromHistory(tSdoSeqCon* pSdoSeqCon_p, UINT8 re
 
         // store local read-index to global var
         pHistory->ackIndex = ackIndex;
+
     }
 
     return ret;
