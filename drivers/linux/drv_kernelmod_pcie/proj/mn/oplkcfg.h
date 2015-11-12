@@ -61,7 +61,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // These macros define all modules which are included
 #define CONFIG_INCLUDE_NMT_MN
 #define CONFIG_INCLUDE_PDO
-#define CONFIG_INCLUDE_VETH
+//#define CONFIG_INCLUDE_VETH // Enable feature manually if the platform is supporting it (not Windows PCIe)
 #define CONFIG_INCLUDE_CFM
 
 #define CONFIG_DLLCAL_QUEUE                         CIRCBUF_QUEUE
