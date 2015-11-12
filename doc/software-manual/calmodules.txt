@@ -418,6 +418,8 @@ synchronization point so that the application can handle the isochronous data.
 There are several timesync modules implemented for different architectures and
 platforms. Only one timesync module pair can be compiled into the stack at a time!
 
+![](\ref timesynccal_architecture.png "Architecture of timesync CAL interface")
+
 \ingroup cal_layer
 */
 //------------------------------------------------------------------------------
