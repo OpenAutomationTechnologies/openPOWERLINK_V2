@@ -58,8 +58,7 @@ Support on openPOWERLINK is available via the online discussion forums:
 
 openPOWERLINK can be downloaded from its SourceForge project site:
 
-* Sourcecode: [tar.gz](http://sourceforge.net/projects/openpowerlink/files/
-openPOWERLINK/V2.3.0/openPOWERLINK-V2.3.0.tar.gz)
+* Sourcecode: [tar.gz](http://downloads.sourceforge.net/project/openpowerlink/openPOWERLINK/V2.3.0/openPOWERLINK_V2.3.0.tar.gz)
 
 
 ## Contributors
