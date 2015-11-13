@@ -284,3 +284,16 @@ successfully.
 
 The demo applications can be directly started by double-clicking the according
 .exe file in Windows explorer.
+
+# Troubleshooting {#sect_windows_trouble}
+
+## Windows NDIS driver
+
+- Visual Studio fails to load
+
+  Make sure that all Visual Studio specific files (e.g. *.sln and *.vcxproj)
+  have Windows line endings.
+
+- Driver build fails
+
+  Make sure that the driver INF file has Windows line endings.
