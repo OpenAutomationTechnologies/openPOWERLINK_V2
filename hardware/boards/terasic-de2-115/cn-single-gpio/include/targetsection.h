@@ -46,17 +46,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 
-#ifndef ALT_TCIMEM_SIZE
-#define ALT_TCIMEM_SIZE                     0
+#ifndef ALT_TCMEM_SIZE
+#define ALT_TCMEM_SIZE                      0
 #endif
 
 #ifdef NDEBUG
-#define ALT_INTERNAL_RAM    __attribute__((section(".tc_i_mem")))
+#define ALT_INTERNAL_RAM    __attribute__((section(".tc_mem")))
 #else
 #define ALT_INTERNAL_RAM
 #endif
 
-#if (ALT_TCIMEM_SIZE >= 2048)
+#if (ALT_TCMEM_SIZE >= 2048)
 #define SECTION_EVENTK_POST                 ALT_INTERNAL_RAM
 #define SECTION_EVENTK_PROCESS              ALT_INTERNAL_RAM
 #define SECTION_EDRVOPENMAC_IRQ_HDL         ALT_INTERNAL_RAM
@@ -66,12 +66,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define SECTION_OMETHLIB_RXTX_IRQ_MUX       ALT_INTERNAL_RAM
 #endif
 
-#if (ALT_TCIMEM_SIZE >= 4096)
+#if (ALT_TCMEM_SIZE >= 4096)
 #define SECTION_EDRVOPENMAC_RX_HOOK         ALT_INTERNAL_RAM
 #define SECTION_DLLK_CHANGE_STATE           ALT_INTERNAL_RAM
 #endif
 
-#if (ALT_TCIMEM_SIZE >= 8192)
+#if (ALT_TCMEM_SIZE >= 8192)
 #define SECTION_CIRCBUF_WRITE_DATA          ALT_INTERNAL_RAM
 #define SECTION_CIRCBUF_WRITE_MULT_DATA     ALT_INTERNAL_RAM
 #define SECTION_CIRCBUF_READ_DATA           ALT_INTERNAL_RAM

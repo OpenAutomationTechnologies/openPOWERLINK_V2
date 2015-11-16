@@ -44,12 +44,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 
-#ifndef ALT_TCIMEM_SIZE
-#define ALT_TCIMEM_SIZE                     0
+#ifndef ALT_TCMEM_SIZE
+#define ALT_TCMEM_SIZE                      0
 #endif
 
 #ifdef NDEBUG
-#define ALT_INTERNAL_RAM    __attribute__((section(".tc_i_mem")))
+#define ALT_INTERNAL_RAM    __attribute__((section(".tc_mem")))
 #else
 #define ALT_INTERNAL_RAM
 #endif

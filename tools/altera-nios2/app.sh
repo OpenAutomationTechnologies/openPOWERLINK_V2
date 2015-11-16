@@ -109,7 +109,7 @@ case ${APP_TYPE} in
         SEL_PROC_NAME=${CFG_APP_PROC_NAME}
         SEL_CPU_NAME=${CFG_APP_CPU_NAME}
         SEL_SYS_TIMER_NAME=${CFG_APP_SYS_TIMER_NAME}
-        SEL_TCI_MEM_NAME=${CFG_APP_TCI_MEM_NAME}
+        SEL_TC_MEM_NAME=${CFG_APP_TC_MEM_NAME}
         SEL_BSP_TYPE=${CFG_APP_BSP_TYPE}
         SEL_BSP_OPT_LEVEL=${CFG_APP_BSP_OPT_LEVEL}
         SEL_MAX_HEAP_BYTES=${CFG_APP_MAX_HEAP_BYTES}
@@ -123,7 +123,7 @@ case ${APP_TYPE} in
         SEL_PROC_NAME=${CFG_DRV_PROC_NAME}
         SEL_CPU_NAME=${CFG_DRV_CPU_NAME}
         SEL_SYS_TIMER_NAME=${CFG_DRV_SYS_TIMER_NAME}
-        SEL_TCI_MEM_NAME=${CFG_DRV_TCI_MEM_NAME}
+        SEL_TC_MEM_NAME=${CFG_DRV_TC_MEM_NAME}
         SEL_BSP_TYPE=${CFG_DRV_BSP_TYPE}
         SEL_BSP_OPT_LEVEL=${CFG_DRV_BSP_OPT_LEVEL}
         SEL_MAX_HEAP_BYTES=${CFG_DRV_MAX_HEAP_BYTES}
@@ -156,11 +156,11 @@ BSP_GEN_ARGS="${SEL_BSP_TYPE} ${BSP_PATH} ${BOARD_PATH}/quartus \
 --set hal.sys_clk_timer ${SEL_SYS_TIMER_NAME} \
 "
 
-if [ -n "${SEL_TCI_MEM_NAME}" ];
+if [ -n "${SEL_TC_MEM_NAME}" ];
 then
-    BSP_GEN_ARGS+="--cmd add_section_mapping .tc_i_mem ${SEL_TCI_MEM_NAME} \
+    BSP_GEN_ARGS+="--cmd add_section_mapping .tc_mem ${SEL_TC_MEM_NAME} \
                    --set hal.linker.enable_alt_load_copy_exceptions false "
-    echo "INFO: tc_i_mem is used by the system!"
+    echo "INFO: tc_mem is used by the system!"
 fi
 
 # Add flag for explicitly using EPCS flash.
