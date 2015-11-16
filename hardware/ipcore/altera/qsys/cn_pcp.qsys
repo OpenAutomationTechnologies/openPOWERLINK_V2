@@ -343,9 +343,25 @@
  <parameter name="projectName" value="" />
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1439531030238" />
+ <parameter name="timeStamp" value="1447668394909" />
  <parameter name="useTestBenchNamingPattern" value="false" />
- <instanceScript></instanceScript>
+ <instanceParameter
+   name="tcmemSize"
+   displayName="Tightly Coupled Memory Size"
+   type="integer"
+   defaultValue="24576"
+   legalRanges=""
+   description="Size of Nios II tightly coupled memory in bytes." />
+ <instanceScript><![CDATA[# request a specific version of the scripting API
+package require -exact qsys 13.0
+
+# Set the name of the procedure to manipulate parameters
+set_module_property COMPOSITION_CALLBACK compose
+
+proc compose {} {
+    set_instance_parameter_value tc_mem memorySize [get_parameter_value tcmemSize]
+}
+]]></instanceScript>
  <interface name="clk50" internal="clk50.clk_in" type="clock" dir="end" />
  <interface name="rst_clk50" internal="clk50.clk_in_reset" type="reset" dir="end" />
  <interface name="clk100" internal="clk100.clk_in" type="clock" dir="end" />

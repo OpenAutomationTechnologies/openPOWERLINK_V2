@@ -343,7 +343,7 @@
  <parameter name="projectName" value="" />
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1439531533008" />
+ <parameter name="timeStamp" value="1447668385885" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceParameter
    name="cpu0_resetCpuBridge"
@@ -352,6 +352,13 @@
    defaultValue="flash_bridge"
    legalRanges="flash_bridge cpu_bridge"
    description="" />
+ <instanceParameter
+   name="tcmemSize"
+   displayName="Tightly Coupled Memory Size"
+   type="integer"
+   defaultValue="20480"
+   legalRanges=""
+   description="Size of Nios II tightly coupled memory in bytes." />
  <instanceScript><![CDATA[# request a specific version of the scripting API
 package require -exact qsys 13.0
 
@@ -359,7 +366,8 @@ package require -exact qsys 13.0
 set_module_property COMPOSITION_CALLBACK compose
 
 proc compose {} {
-    # manipulate parameters in here
+    set_instance_parameter_value tc_mem memorySize [get_parameter_value tcmemSize]
+
     set selBridge [ get_parameter_value cpu0_resetCpuBridge ]
     if { $selBridge == "flash_bridge" } {
         set_instance_parameter_value cpu_0 resetOffset "0x00400000"

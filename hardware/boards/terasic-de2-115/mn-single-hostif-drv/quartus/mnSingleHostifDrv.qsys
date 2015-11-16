@@ -234,7 +234,7 @@
  <parameter name="projectName">mn-single-hostif-drv.qpf</parameter>
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1438676907113" />
+ <parameter name="timeStamp" value="1447668490712" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk50" internal="clk50.clk_in" type="clock" dir="end" />
@@ -335,6 +335,8 @@
   <parameter name="AUTO_CLK100_CLOCK_RATE" value="100000000" />
   <parameter name="AUTO_CLK100_CLOCK_DOMAIN" value="1" />
   <parameter name="AUTO_CLK100_RESET_DOMAIN" value="1" />
+  <parameter name="cpu0_resetCpuBridge" value="flash_bridge" />
+  <parameter name="tcmemSize" value="20480" />
  </module>
  <module
    kind="altera_avalon_epcs_flash_controller"
