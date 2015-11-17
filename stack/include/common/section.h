@@ -56,6 +56,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 // Create empty defines for undefined macros (no special function placement)
+#ifndef SECTION_AMI_GETUINT16LE
+#define SECTION_AMI_GETUINT16LE
+#endif
+#ifndef SECTION_AMI_GETUINT16BE
+#define SECTION_AMI_GETUINT16BE
+#endif
 #ifndef SECTION_CIRCBUF_WRITE_DATA
 #define SECTION_CIRCBUF_WRITE_DATA
 #endif
