@@ -31,10 +31,6 @@ PROGRAM_EPCS_OVERRIDE := --override=$(OPLK_BASE_DIR)/tools/altera-nios2/nios2-fl
 PROG_DIR_REL := $(QUARTUS_PROJECT_DIR)/../../common/prog
 PROG_DIR := $(realpath $(PROG_DIR_REL))
 
-ifneq ("$(DOWNLOAD_CABLE_FLAG)","")
-	PROG_CABLE_ARG := --cable '$(DOWNLOAD_CABLE_FLAG)'
-endif
-
 .PHONY : program-epcs
 program-epcs : $(PROGRAM_EPCS_TARGET)
 
@@ -46,7 +42,7 @@ $(PROGRAM_EPCS_TARGET) : $(ELF)
 	@$(ECHO) Info: Using prog directory $(PROG_DIR)
 	@if [ -n "$($(basename $@)_EPCS_FLAGS)" ]; \
 	then \
-		$(OPLK_BASE_DIR)/tools/altera-nios2/program-epcs.sh $(SOF_FILE) $(ELF) --prog $(PROG_DIR) $(PROG_CABLE_ARG); \
+		$(OPLK_BASE_DIR)/tools/altera-nios2/program-epcs.sh $(SOF_FILE) $(ELF) --prog $(PROG_DIR) $(DOWNLOAD_CABLE_FLAG); \
 	fi
 
 # Rule for epcs help output

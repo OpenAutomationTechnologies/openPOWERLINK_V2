@@ -20,7 +20,9 @@ do
             ;;
         --cable)
             shift
-            CABLE_NAME=$1
+            # delete spaces and store parameter
+            CABLE_NAME=$(echo "$1$2" | sed 's/[[:blank:]]//g')
+            shift
             ;;
         --noprog)
             NOPROG=1
@@ -132,11 +134,12 @@ fi
 # Program EPCS with jic file
 CMD="quartus_pgm ${PGM_FILE}"
 
+
 if [ -n "${CABLE_NAME}" ];
 then
     echo
     echo "INFO: Use cable ${CABLE_NAME} to program EPCS."
-    CMD="${CMD} \"-c ${CABLE_NAME}\" "
+    CMD="${CMD} -c ${CABLE_NAME}"
 fi
 
 echo
