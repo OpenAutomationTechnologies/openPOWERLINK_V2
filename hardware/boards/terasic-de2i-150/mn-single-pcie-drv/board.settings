@@ -44,6 +44,11 @@ CFG_DRV_SYS_TIMER_NAME=${CFG_DRV_SUB_NAME}_timer_0
 # Tightly coupled instruction memory
 CFG_DRV_TC_MEM_NAME=${CFG_DRV_SUB_NAME}_tc_mem
 
+# Exception stack memory
+CFG_DRV_EXCEPTION_STACK_MEM=${CFG_DRV_TC_MEM_NAME}
+# Exception stack size
+CFG_DRV_EXCEPTION_STACK_SIZE=2048
+
 # EPCS flash is present
 CFG_DRV_EPCS=1
 

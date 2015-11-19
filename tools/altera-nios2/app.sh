@@ -116,6 +116,8 @@ case ${APP_TYPE} in
         SEL_EPCS=${CFG_APP_EPCS}
         SEL_DEF_MEM_NAME=${CFG_APP_DEF_MEM_NAME}
         SEL_HOSTED_BOOT=${CFG_APP_HOSTED_BOOT}
+        SEL_EXCEPTION_STACK_MEM=${CFG_APP_EXCEPTION_STACK_MEM}
+        SEL_EXCEPTION_STACK_SIZE=${CFG_APP_EXCEPTION_STACK_SIZE}
         ;;
     drv)
         echo "INFO: Generate application for driver."
@@ -130,6 +132,8 @@ case ${APP_TYPE} in
         SEL_EPCS=${CFG_DRV_EPCS}
         SEL_DEF_MEM_NAME=${CFG_DRV_DEF_MEM_NAME}
         SEL_HOSTED_BOOT=${CFG_DRV_HOSTED_BOOT}
+        SEL_EXCEPTION_STACK_MEM=${CFG_DRV_EXCEPTION_STACK_MEM}
+        SEL_EXCEPTION_STACK_SIZE=${CFG_DRV_EXCEPTION_STACK_SIZE}
         ;;
     *)
         echo "ERROR: No APP_TYPE specified in ${APP_SETTINGS_FILE}!"
@@ -161,6 +165,22 @@ then
     BSP_GEN_ARGS+="--cmd add_section_mapping .tc_mem ${SEL_TC_MEM_NAME} \
                    --set hal.linker.enable_alt_load_copy_exceptions false "
     echo "INFO: tc_mem is used by the system!"
+fi
+
+if [ -z "${DEBUG}" ]; then
+    # Exception stack only handled in release...
+    if [ -n "${SEL_EXCEPTION_STACK_MEM}" ]; then
+        BSP_GEN_ARGS+="--set hal.linker.enable_exception_stack true \
+                       --set hal.linker.exception_stack_memory_region_name ${SEL_EXCEPTION_STACK_MEM} "
+        echo "INFO: Enable exception stack on memory ${SEL_EXCEPTION_STACK_MEM}!"
+
+        if [ -n "${SEL_EXCEPTION_STACK_SIZE}" ]; then
+            BSP_GEN_ARGS+="--set hal.linker.exception_stack_size ${SEL_EXCEPTION_STACK_SIZE} "
+            echo "INFO: Exception stack size is set to ${SEL_EXCEPTION_STACK_SIZE}!"
+        else
+            echo "INFO: Exception stack size is set to default value (1024)!"
+        fi
+    fi
 fi
 
 # Add flag for explicitly using EPCS flash.
