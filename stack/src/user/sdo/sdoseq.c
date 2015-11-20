@@ -947,6 +947,18 @@ static tOplkError processStateInit2(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
                 pSdoSeqCon_p->sdoSeqState = kSdoSeqStateInit3;
 
             }
+            // check scon == 1 and rcon == 0 (InitReq from client)
+            else if (((pRecvFrame_p->recvSeqNumCon & SDO_CON_MASK) == 0x00) &&
+                     ((pRecvFrame_p->sendSeqNumCon & SDO_CON_MASK) == 0x01))
+            {
+                pSdoSeqCon_p->sdoSeqState = kSdoSeqStateIdle;   // return to idle
+                timeru_deleteTimer(&pSdoSeqCon_p->timerHandle);
+                sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateTransferAbort);
+                // restart immediately with initialization request
+                DEBUG_LVL_SDO_TRACE("sdoseq: Reinit immediately\n");
+                ret = kErrorRetry;
+                break;
+            }
             else
             {   // error -> Close
                 pSdoSeqCon_p->sdoSeqState = kSdoSeqStateIdle;
@@ -1053,6 +1065,18 @@ static tOplkError processStateInit3(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
                 ret = setTimer(pSdoSeqCon_p, sdoSeqInstance_l.sdoSeqTimeout);
 
                 sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateConnected);
+            }
+            // check scon == 1 and rcon == 0 (InitReq from client)
+            else if (((pRecvFrame_p->recvSeqNumCon & SDO_CON_MASK) == 0x00) &&
+                     ((pRecvFrame_p->sendSeqNumCon & SDO_CON_MASK) == 0x01))
+            {
+                pSdoSeqCon_p->sdoSeqState = kSdoSeqStateIdle;   // return to idle
+                timeru_deleteTimer(&pSdoSeqCon_p->timerHandle);
+                sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateTransferAbort);
+                // restart immediately with initialization request
+                DEBUG_LVL_SDO_TRACE("sdoseq: Reinit immediately\n");
+                ret = kErrorRetry;
+                break;
             }
             else
             {   // error -> Close
