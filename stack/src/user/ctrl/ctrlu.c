@@ -132,6 +132,7 @@ typedef struct
     tOplkApiInitParam   initParam;              ///< Stack initialization parameters
     tCtrlKernelInfo     kernelInfo;             ///< Information about kernel stack
     UINT32              requiredKernelFeatures; ///< Kernel stack features we need to run correctly
+    UINT32              usableKernelFeatures;   ///< Kernel stack features we use
     BOOL                fInitialized;           ///< Flag determines if stack is initialized/ready
 } tCtrluInstance;
 
@@ -269,10 +270,16 @@ tOplkError ctrlu_checkKernelStackInfo(void)
         goto Exit;
     }
 
-    if ((ctrlInstance_l.kernelInfo.featureFlags == ctrlInstance_l.requiredKernelFeatures) &&
+    // Obtain the usable features by masking the kernel stack feature with the
+    // required feature flags.
+    ctrlInstance_l.usableKernelFeatures = ctrlInstance_l.requiredKernelFeatures &
+                                          ctrlInstance_l.kernelInfo.featureFlags;
+
+    if ((ctrlInstance_l.usableKernelFeatures == ctrlInstance_l.requiredKernelFeatures) &&
         (ctrlInstance_l.kernelInfo.version == PLK_DEFINED_STACK_VERSION))
     {
         DEBUG_LVL_ALWAYS_TRACE("Kernel features: 0x%08x\n", ctrlInstance_l.kernelInfo.featureFlags);
+        DEBUG_LVL_ALWAYS_TRACE("Usable features: 0x%08x\n", ctrlInstance_l.usableKernelFeatures);
         DEBUG_LVL_ALWAYS_TRACE("Kernel version: 0x%08x\n", ctrlInstance_l.kernelInfo.version);
         ret = kErrorOk;
     }
