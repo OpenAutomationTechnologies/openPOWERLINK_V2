@@ -62,9 +62,7 @@ The generic defines are valid for the whole openPOWERLINK stack.
 #define CONFIG_INCLUDE_SDOC
 #define CONFIG_INCLUDE_LEDK
 #define CONFIG_INCLUDE_SDO_ASND
-
-// Enable feature manually if the platform is supporting it (not Windows PCIe).
-//#define CONFIG_INCLUDE_VETH
+#define CONFIG_INCLUDE_VETH
 
 // Enable feature manually if the platform is supporting it (only C5 SoC and Zynq).
 //#define CONFIG_INCLUDE_SOC_TIME_FORWARD
