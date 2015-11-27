@@ -46,6 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplk/frame.h>
 #include <oplk/sdo.h>
 #include <oplk/obd.h>
+#include <oplk/obdal.h>
 #include <oplk/cfm.h>
 #include <oplk/event.h>
 
@@ -431,6 +432,8 @@ typedef struct
     tOplkApiSdoStack    sdoStackType;               ///< Specifies the SDO stack that should be used.
                                                     /**< It is used for switching between the standard SDO stack and alternative SDO stacks. The available SDO stacks are defined by the \ref tOplkApiSdoStack enumeration.
                                                          If the standard SDO stack is used it must be initialized with 0x00.*/
+    tComdLayerObdCb     pfnSdoSrvProcessObdWrite;   ///< Function pointer for SDO server write access to the object dictionary
+    tComdLayerObdCb     pfnSdoSrvProcessObdRead;    ///< Function pointer for SDO server read access to the object dictionary
     UINT32              minSyncTime;                ///< Minimum synchronization period supported by the application [us]
                                                     /**< This parameter configures the period of synchronization events triggered by the openPOWERLINK stack.
                                                          Note that the resulting synchronization period can only be a multiple of the configured cycle lenght.

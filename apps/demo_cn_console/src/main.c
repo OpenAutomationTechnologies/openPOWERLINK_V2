@@ -252,6 +252,8 @@ static tOplkError initPowerlink(UINT32 cycleLen_p, const BYTE* macAddr_p, UINT32
 
     // set callback functions
     initParam.pfnCbEvent = processEvents;
+    initParam.pfnSdoSrvProcessObdWrite = obdal_proccessWrite;
+    initParam.pfnSdoSrvProcessObdRead = obdal_proccessRead;
 
 #if defined(CONFIG_KERNELSTACK_DIRECTLINK)
     initParam.pfnCbSync = processSync;

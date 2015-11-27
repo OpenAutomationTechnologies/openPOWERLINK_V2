@@ -437,8 +437,8 @@ tOplkError ctrlu_initStack(tOplkApiInitParam* pInitParam_p)
     // init sdo command layer
     DEBUG_LVL_CTRL_TRACE("Initialize SdoCom module...\n");
     ret = sdocom_init(pInitParam_p->sdoStackType,
-                      obd_proccessWrite,
-                      obd_proccessRead);
+                      pInitParam_p->pfnSdoSrvProcessObdWrite,
+                      pInitParam_p->pfnSdoSrvProcessObdRead);
     if (ret != kErrorOk)
     {
         goto Exit;

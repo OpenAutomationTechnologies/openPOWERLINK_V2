@@ -274,6 +274,10 @@ static tOplkError initPowerlink(UINT32 cycleLen_p, char* pszCdcFileName_p,
 
     // set callback functions
     initParam.pfnCbEvent = processEvents;
+#if defined(CONFIG_INCLUDE_SDOS)
+    initParam.pfnSdoSrvProcessObdWrite = obdal_proccessWrite;
+    initParam.pfnSdoSrvProcessObdRead = obdal_proccessRead;
+#endif
 
 #if defined(CONFIG_KERNELSTACK_DIRECTLINK)
     initParam.pfnCbSync  = processSync;

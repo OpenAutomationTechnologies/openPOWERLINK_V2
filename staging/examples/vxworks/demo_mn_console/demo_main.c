@@ -267,6 +267,10 @@ int openPowerlinkInit (char *pszEthName, unsigned int uiDevNumber)
     // set callback functions
     EplApiInitParam.m_pfnCbEvent = AppCbEvent;
     EplApiInitParam.m_pfnCbSync  = AppCbSync;
+#if defined(CONFIG_INCLUDE_SDOS)
+    initParam.pfnSdoSrvProcessObdWrite = obdal_proccessWrite;
+    initParam.pfnSdoSrvProcessObdRead = obdal_proccessRead;
+#endif
 
     printf("\n\n Hello, I'm a VxWorks POWERLINK node running as %s!\n"
            "(build: %s / %s)\n\n",

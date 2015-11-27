@@ -282,6 +282,10 @@ static tOplkError initPowerlink(tInstance* pInstance_p)
     // set callback functions
     initParam.pfnCbEvent = processEvents;
     initParam.pfnCbSync  = processSync;
+#if defined(CONFIG_INCLUDE_SDOS)
+    initParam.pfnSdoSrvProcessObdWrite = obdal_proccessWrite;
+    initParam.pfnSdoSrvProcessObdRead = obdal_proccessRead;
+#endif
 
     // initialize POWERLINK stack
     ret = oplk_initialize();
