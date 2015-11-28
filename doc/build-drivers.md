@@ -38,7 +38,7 @@ __CFG_KERNEL_DIR__.
 To build the kernel driver (e.g. for a MN using the Intel 82573 network interface):
 
       > cd <openPOWERLINK_dir>/drivers/linux/drv_kernelmod_edrv/build
-      > cmake -DCFG_OPLK_MN=TRUE -DCFG_POWERLINK_EDRV=82573 ..
+      > cmake -DCFG_OPLK_MN=TRUE -DCFG_POWERLINK_EDRV_82573=TRUE ..
       > make
       > make install
 
@@ -154,7 +154,7 @@ To build the PCP daemon (e.g. for Microblaze in Zynq SoC's programming logic (PL
   If enabled, the openPOWERLINK stack will be compiled with MN functionality,
   otherwise it will be compiled only with CN functionality.
 
-- **CFG_POWERLINK_EDRV**
+- **CFG_POWERLINK_EDRV_<driver name>**
 
   Selects the Ethernet driver used for the kernel-based stack and demos.
   Valid options are:
@@ -165,6 +165,14 @@ To build the PCP daemon (e.g. for Microblaze in Zynq SoC's programming logic (PL
   - **82573**: Intel 82573-based network interface cards (1 GBit/s)
   - **i210**: Intel I210-based network interface cards (1 GBit/s)
   - **emacps**: Zynq Emac network interface controller (1 GBit/s)
+
+  Several kernel driver can be build at once, just append another
+  CFG_POWERLINK_EDRV_<driver name> to the cmake command:
+
+  > cmake -DCFG_OPLK_MN=TRUE -DCFG_POWERLINK_EDRV_82573=TRUE -DCFG_POWERLINK_EDRV_I210=TRUE
+
+  __NOTE__: Only one of them can be loaded at runtime since openPOWERLINK doesn't support
+  several stack instances.
 
 ## PCP daemon on Microblaze {#sect_build_drivers_options_pcp_daemon}
 
