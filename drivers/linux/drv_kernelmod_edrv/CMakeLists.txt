@@ -218,6 +218,7 @@ SET(MODULE_SOURCE_FILES
     ${KERNEL_SOURCE_DIR}/veth/veth-linuxkernel.c
     ${COMMON_SOURCE_DIR}/circbuf/circbuffer.c
     ${COMMON_SOURCE_DIR}/circbuf/circbuf-linuxkernel.c
+    ${COMMON_SOURCE_DIR}/bufalloc/bufalloc.c
     ${COMMON_SOURCE_DIR}/debugstr.c
     ${ARCH_SOURCE_DIR}/target-linuxkernel.c
     )
