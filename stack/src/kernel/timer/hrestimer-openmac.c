@@ -73,6 +73,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define TIMER_COUNT                 1   // only slice timer supported
 #define TIMER_STEP_NS               20
 
+#define TIMER_MIN_NS                10000
+
 #define TIMERHDL_MASK               0x0FFFFFFF
 #define TIMERHDL_SHIFT              28
 
@@ -109,6 +111,9 @@ static tTimerInstance instance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
+static INLINE tOplkError setupTimerInfo(tTimerHdl* pTimerHdl_p,
+                                        tTimerkCallback pfnCallback_p,
+                                        ULONG argument_p);
 static void drvInterruptHandler(void* pArg_p) SECTION_HRTIMER_IRQ_HDL;
 
 //============================================================================//
@@ -196,8 +201,6 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
                                  BOOL fContinue_p)
 {
     tOplkError  ret = kErrorOk;
-    UINT        index;
-    tTimerInfo* pTimerInfo;
     UINT32      timeNs;
     UINT32      timeSteps;
 
@@ -214,39 +217,9 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
         goto Exit;
     }
 
-    if (*pTimerHdl_p == 0)
-    {   // no timer created yet
-        index = 0;
-        if (instance_l.timerInfo.pfnCb != NULL)
-        {   // no free structure found
-            ret = kErrorTimerNoTimerCreated;
-            goto Exit;
-        }
-    }
-    else
-    {
-        index = (*pTimerHdl_p >> TIMERHDL_SHIFT) - 1;
-        if (index >= TIMER_COUNT)
-        {   // invalid handle
-            ret = kErrorTimerInvalidHandle;
-            goto Exit;
-        }
-    }
-
-    // modify slice timer
-    pTimerInfo = &instance_l.timerInfo;
-    OPENMAC_TIMERIRQDISABLE(HWTIMER_SYNC);
-
-    // increment timer handle (if timer expires right after this statement,
-    // the user would detect an unknown timer handle and discard it)
-    // => unused in this implementation, as the timer can always be stopped
-    pTimerInfo->eventArg.timerHdl.handle = ((pTimerInfo->eventArg.timerHdl.handle + 1) & TIMERHDL_MASK) |
-                                    ((index + 1) << TIMERHDL_SHIFT);
-
-    *pTimerHdl_p = pTimerInfo->eventArg.timerHdl.handle;
-
-    pTimerInfo->eventArg.argument.value = argument_p;
-    pTimerInfo->pfnCb = pfnCallback_p;
+    ret = setupTimerInfo(pTimerHdl_p, pfnCallback_p, argument_p);
+    if (ret != kErrorOk)
+        goto Exit;
 
     // calculate counter
     if (time_p > 0xFFFFFFFF)
@@ -258,15 +231,74 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
         timeNs = (UINT32)time_p;
     }
 
-    if (timeNs < 10000)
+    if (timeNs < TIMER_MIN_NS)
     {   // time is too less, so increase it to the minimum time
-        timeNs = 10000;
+        timeNs = TIMER_MIN_NS;
     }
 
     timeSteps = OMETH_NS_2_TICKS(timeNs);
 
     timeSteps += OPENMAC_TIMERGETTIMEVALUE();
     OPENMAC_TIMERSETCOMPAREVALUE(HWTIMER_SYNC, timeSteps);
+
+    // enable timer
+    OPENMAC_TIMERIRQENABLE(HWTIMER_SYNC);
+
+Exit:
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Set high-resolution timer to absolute time
+
+The function sets the timer to an absolute timestamp value with the specified
+handle. If the handle to which the pointer points to is zero, the timer must be
+created first. If it is not possible to stop the old timer, this function always
+assures that the old timer does not trigger the callback function with the same
+handle as the new timer. That means the callback function must check the passed
+handle with the one returned by this function. If these are unequal, the call
+can be discarded.
+
+\param  pTimerHdl_p     Pointer to timer handle.
+\param  time_p          Absolute timestamp when the timer shall expire.
+\param  pfnCallback_p   Callback function which is called when the timer expires.
+                        (The function is called mutually exclusive with the Edrv
+                        callback functions (Rx and Tx)).
+\param  argument_p      User-specific argument.
+
+\return Returns a tOplkError error code.
+
+\ingroup module_hrestimer
+*/
+//------------------------------------------------------------------------------
+tOplkError hrestimer_setAbsoluteTimer(tTimerHdl* pTimerHdl_p, tTimestamp time_p,
+                                      tTimerkCallback pfnCallback_p, ULONG argument_p)
+{
+    tOplkError  ret = kErrorOk;
+    INT32       timeDiff;
+
+    // check pointer to handle
+    if (pTimerHdl_p == NULL)
+    {
+        ret = kErrorTimerInvalidHandle;
+        goto Exit;
+    }
+
+    ret = setupTimerInfo(pTimerHdl_p, pfnCallback_p, argument_p);
+    if (ret != kErrorOk)
+        goto Exit;
+
+    // Get current time and check if due time expires too soon.
+    timeDiff = time_p.timeStamp - OPENMAC_TIMERGETTIMEVALUE();
+
+    if (timeDiff < (INT32)OMETH_NS_2_TICKS(TIMER_MIN_NS))
+    {
+        // Timer would expire too soon, therefore shift away due time!
+        time_p.timeStamp += OMETH_NS_2_TICKS(TIMER_MIN_NS);
+    }
+
+    OPENMAC_TIMERSETCOMPAREVALUE(HWTIMER_SYNC, time_p.timeStamp);
 
     // enable timer
     OPENMAC_TIMERIRQENABLE(HWTIMER_SYNC);
@@ -388,6 +420,66 @@ void hrestimer_setExtSyncIrqTime(tTimestamp time_p)
 //============================================================================//
 /// \name Private Functions
 /// \{
+
+//------------------------------------------------------------------------------
+/**
+\brief  Set up timer info
+
+The function sets up the timer info of the given handle. If the handle is zero,
+the timer must be created first.
+
+\param  pTimerHdl_p     Pointer to timer handle.
+\param  pfnCallback_p   Callback function which is called when the timer expires.
+\param  argument_p      User-specific argument.
+
+\return Returns a tOplkError error code.
+
+*/
+//------------------------------------------------------------------------------
+static tOplkError setupTimerInfo(tTimerHdl* pTimerHdl_p, tTimerkCallback pfnCallback_p,
+                                 ULONG argument_p)
+{
+    tOplkError  ret = kErrorOk;
+    UINT        index;
+    tTimerInfo* pTimerInfo;
+
+    if (*pTimerHdl_p == 0)
+    {   // no timer created yet
+        index = 0;
+        if (instance_l.timerInfo.pfnCb != NULL)
+        {   // no free structure found
+            ret = kErrorTimerNoTimerCreated;
+            goto Exit;
+        }
+    }
+    else
+    {
+        index = (*pTimerHdl_p >> TIMERHDL_SHIFT) - 1;
+        if (index >= TIMER_COUNT)
+        {   // invalid handle
+            ret = kErrorTimerInvalidHandle;
+            goto Exit;
+        }
+    }
+
+    // modify slice timer
+    pTimerInfo = &instance_l.timerInfo;
+    OPENMAC_TIMERIRQDISABLE(HWTIMER_SYNC);
+
+    // increment timer handle (if timer expires right after this statement,
+    // the user would detect an unknown timer handle and discard it)
+    // => unused in this implementation, as the timer can always be stopped
+    pTimerInfo->eventArg.timerHdl.handle = ((pTimerInfo->eventArg.timerHdl.handle + 1) & TIMERHDL_MASK) |
+                                    ((index + 1) << TIMERHDL_SHIFT);
+
+    *pTimerHdl_p = pTimerInfo->eventArg.timerHdl.handle;
+
+    pTimerInfo->eventArg.argument.value = argument_p;
+    pTimerInfo->pfnCb = pfnCallback_p;
+
+Exit:
+    return ret;
+}
 
 //------------------------------------------------------------------------------
 /**
