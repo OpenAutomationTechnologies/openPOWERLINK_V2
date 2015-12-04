@@ -307,8 +307,8 @@
   <parameter name="gui_sizeTxSyncQ" value="8" />
   <parameter name="gui_sizeTxVethQ" value="2" />
   <parameter name="gui_sizeRxVethQ" value="2" />
-  <parameter name="gui_sizeK2UQ" value="16" />
-  <parameter name="gui_sizeU2KQ" value="16" />
+  <parameter name="gui_sizeK2UQ" value="4" />
+  <parameter name="gui_sizeU2KQ" value="4" />
   <parameter name="gui_sizePdo" value="49152" />
   <parameter name="AUTO_C0_CLOCK_RATE" value="100000000" />
  </module>
