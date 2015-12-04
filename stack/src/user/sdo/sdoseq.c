@@ -66,6 +66,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #define SDO_SEQ_RETRY_COUNT         2                           // number of ack requests before close (final timeout)
+#define SDO_SEQ_CMDL_INACTIVE_THLD  2                           // number of seq. layer sub timeouts before close if command layer is not active
 #define SDO_SEQ_NUM_THRESHOLD       100                         // threshold which distinguishes between old and new sequence numbers
 #define SDO_SEQ_FRAME_SIZE          24                          // frame with size of Asnd-Header-, SDO Sequence header size, SDO Command header and Ethernet-header size
 #define SDO_SEQ_HEADER_SIZE         4                           // size of the header of the SDO Sequence layer
@@ -178,6 +179,7 @@ typedef struct
     UINT                    retryCount;         ///< Retry counter
     UINT                    useCount;           ///< One sequence layer connection may be used by multiple command layer connections
     BOOL                    fForceFlowControl;  ///< If enabled, Rx sequences will not be forwarded to command layer
+    UINT                    countCmdLayerInactive;    ///< Counter of an inactive command layer using timeout events
 } tSdoSeqCon;
 
 /**
@@ -1150,6 +1152,9 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
     {
         // frame to send
         case kSdoSeqEventFrameSend:
+
+            pSdoSeqCon_p->countCmdLayerInactive = 0;
+
             // set timer
             ret = setTimer(pSdoSeqCon_p, sdoSeqInstance_l.sdoSeqTimeout);
             // check if data frame or ack
@@ -1176,6 +1181,7 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
                 }
                 else
                 {
+                    pSdoSeqCon_p->countCmdLayerInactive = 0;
                     ret = sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateFrameSent);
                     if (ret == kErrorSdoComHandleBusy)
                     {
@@ -1247,6 +1253,8 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
 
                     if (((pSdoSeqCon_p->sendSeqNum + 4) & SEQ_NUM_MASK) == (sendSeqNumCon & SEQ_NUM_MASK))
                     {   // next frame of sequence received (new command layer data)
+
+                        pSdoSeqCon_p->countCmdLayerInactive = 0;
 
                         if (!pSdoSeqCon_p->fForceFlowControl)
                         {
@@ -1422,6 +1430,8 @@ static tOplkError processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sd
                 if (((pSdoSeqCon_p->sendSeqNum + 4) & SEQ_NUM_MASK) == (sendSeqNumCon & SEQ_NUM_MASK))
                 {   // next frame of sequence received (new command layer data)
 
+                    pSdoSeqCon_p->countCmdLayerInactive = 0;
+
                     if (!pSdoSeqCon_p->fForceFlowControl)
                     {
                         // save send sequence number (without ack request)
@@ -1493,6 +1503,8 @@ static tOplkError processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sd
                     // send data to higher layer if needed
                     if (((pSdoSeqCon_p->sendSeqNum + 4) & SEQ_NUM_MASK) == (sendSeqNumCon & SEQ_NUM_MASK))
                     {   // next frame of sequence received (new command layer data)
+
+                        pSdoSeqCon_p->countCmdLayerInactive = 0;
 
                         if (!pSdoSeqCon_p->fForceFlowControl)
                         {
@@ -2280,6 +2292,23 @@ static tOplkError processTimeoutEvent(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sd
 {
     tOplkError  ret = kErrorOk;
 
+    // monitor inactive command layer
+    if (!pSdoSeqCon_p->fForceFlowControl)
+    {
+        if (pSdoSeqCon_p->countCmdLayerInactive < SDO_SEQ_CMDL_INACTIVE_THLD)
+        {
+            pSdoSeqCon_p->countCmdLayerInactive++;
+        }
+        else
+        {   // sequence layer connection might be valid, but no command layer
+            // activity happens => Close connection to save bandwidth.
+            processFinalTimeout(pSdoSeqCon_p, sdoSeqConHdl_p);
+            return ret;
+        }
+
+    }
+
+    // sequence layer timeout
     if ((pSdoSeqCon_p->retryCount < SDO_SEQ_RETRY_COUNT))
     {   // retry counter not exceeded
         ret = processSubTimeout(pSdoSeqCon_p);
