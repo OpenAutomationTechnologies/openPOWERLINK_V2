@@ -128,7 +128,7 @@ The timer defines determine the high resolution timer module.
     ///< use high resolution timer
 /**@}*/
 
-#define CONFIG_EVENT_SIZE_CIRCBUF_KERNEL_INTERNAL   2048
+#define CONFIG_EVENT_SIZE_CIRCBUF_KERNEL_INTERNAL   16384
 
 //------------------------------------------------------------------------------
 // typedef

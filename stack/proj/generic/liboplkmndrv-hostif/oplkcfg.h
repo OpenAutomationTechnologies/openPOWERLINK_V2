@@ -136,7 +136,7 @@ These defines are set by the host interface ipcore settings
 #define CONFIG_DLLCAL_BUFFER_SIZE_TX_VETH           HOSTIF_SIZE_TXVETHQ
 /**@}*/
 
-#define CONFIG_EVENT_SIZE_CIRCBUF_KERNEL_INTERNAL   2048
+#define CONFIG_EVENT_SIZE_CIRCBUF_KERNEL_INTERNAL   16384
 
 //------------------------------------------------------------------------------
 // typedef
