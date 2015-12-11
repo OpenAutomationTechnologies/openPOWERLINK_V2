@@ -2411,8 +2411,7 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
 
                 PrcCycleTiming.pResTimeFirstNs = ami_getUint32Le(&pFrame->data.soa.payload.syncRequest.presTimeFirstLe);
 
-                if ((syncControl & PLK_SYNC_PRES_TIME_FIRST_VALID) &&
-                    (dllkInstance_g.prcPResTimeFirst != PrcCycleTiming.pResTimeFirstNs))
+                if (syncControl & PLK_SYNC_PRES_TIME_FIRST_VALID)
                 {
                     dllkInstance_g.prcPResTimeFirst = PrcCycleTiming.pResTimeFirstNs;
 
