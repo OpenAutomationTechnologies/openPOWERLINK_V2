@@ -72,21 +72,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-
-#if (CONFIG_EDRV_AUTO_RESPONSE == FALSE)
-    #undef EDRV_MAX_AUTO_RESPONSES
-    #define EDRV_MAX_AUTO_RESPONSES 0 //no auto-response used
-#endif
-
 #ifndef CONFIG_EDRV_TIME_TRIG_TX
 #define CONFIG_EDRV_TIME_TRIG_TX FALSE
-#endif
-
-#if (CONFIG_EDRV_AUTO_RESPONSE == FALSE && CONFIG_EDRV_TIME_TRIG_TX == FALSE)
-    #error "Please enable CONFIG_EDRV_AUTO_RESPONSE in oplkcfg.h to use openMAC for CN!"
-#endif
-#if (CONFIG_EDRV_AUTO_RESPONSE != FALSE && CONFIG_EDRV_TIME_TRIG_TX != FALSE)
-#error "Please disable CONFIG_EDRV_AUTO_RESPONSE in oplkcfg.h to use openMAC for MN!"
 #endif
 
 #ifndef CONFIG_EDRV_MAX_TX2_BUFFERS

@@ -86,8 +86,9 @@ Note: The settings are specific for MN with openMAC!
     ///< fast TX support by Edrv
 #define CONFIG_EDRV_EARLY_RX_INT            FALSE
     ///< support TX handler call when DMA transfer finished
-#define CONFIG_EDRV_AUTO_RESPONSE           FALSE
+#define CONFIG_EDRV_AUTO_RESPONSE           TRUE
     ///< support auto-response (e.g. openMAC)
+#define CONFIG_EDRV_AUTO_RESPONSE_DELAY     TRUE
 #define CONFIG_EDRV_TIME_TRIG_TX            TRUE
     ///< support time triggered transmission (e.g. openMAC)
 #define CONFIG_EDRV_MAX_TX2_BUFFERS         64
