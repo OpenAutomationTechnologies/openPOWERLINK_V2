@@ -130,6 +130,12 @@ typedef struct
 #define MAC_HW_TYP_01_NB_RXDESC        16
 #define MAC_HW_TYP_01_NB_TXDESC        16
 
+//-------------------- hardware type 02 --------------------
+// Typ 02 has 16 filters, 32 rx descriptors and 32 tx descriptors
+#define MAC_HW_TYP_02_NB_FILTER        16
+#define MAC_HW_TYP_02_NB_RXDESC        32
+#define MAC_HW_TYP_02_NB_TXDESC        32
+
 //-------------------- register flags ------------------------
 #define OMETH_REG_IE              0x8000        // irq enable
 #define OMETH_REG_SOFTIRQ         0x4000        // software IRQ
@@ -244,6 +250,8 @@ struct OMETH_TYP
     unsigned short       rxLen;            // data length of rx buffers
     unsigned char        nbFilter;        // number of filters
     unsigned char        nbFilterX;        // number of filters for x-node functionality
+    unsigned char        nbTxDesc;
+    unsigned char        nbRxDesc;
     unsigned char        txQueueEnable;    // will be set to 0 if upper layer switches queue sending off
 
     unsigned char        cntTxQueueIn,cntTxQueueOut;        // counter to evaluate the number of pending tx descriptors

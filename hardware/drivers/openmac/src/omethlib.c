@@ -473,7 +473,7 @@ static OMETH_H        omethCreateInt
 
     // clear all bits in tx status except the hub-enable
     pRegBase->txStatus.clrBit        = ~(unsigned short)OMETH_REG_HALF;
-    pRegBase->txStatus.setDescriptor = 0x0008;    // for MAC_TYP_03 .. reset queue index for 2nd tx queue
+    pRegBase->txStatus.setDescriptor = 0;
 
     // only halfduplex is allowed ... no fullduplex -> set half-bit in mac register (which also enables the HUB)
     if (((pEthConfig->mode & OMETH_MODE_HALFDUPLEX) != 0) && ((pEthConfig->mode & OMETH_MODE_FULLDUPLEX) == 0))
@@ -653,6 +653,44 @@ static OMETH_H        omethCreateInt
             hEth->pTxInfo[0]->pDesc = (ometh_desc_typ*)((size_t)hEth->config.pRamBase + len);
 
             len = len + sizeof(ometh_desc_typ) * nbTxDesc[0];
+
+            hEth->nbRxDesc = MAC_HW_TYP_01_NB_RXDESC;
+            hEth->nbTxDesc = MAC_HW_TYP_01_NB_TXDESC;
+            break;
+
+        case OMETH_MAC_TYPE_02:
+            hEth->nbFilter = MAC_HW_TYP_02_NB_FILTER;
+
+            len = sizeof(ometh_filter_typ) * hEth->nbFilter;
+
+            // too many rx buffers configured (hardware dependent)
+            if(hEth->config.rxBuffers > MAC_HW_TYP_02_NB_RXDESC)
+                return hEth;
+
+            // allocate structure with rx info
+            hEth->pRxInfo    = calloc(hEth->config.rxBuffers, sizeof(ometh_rx_info_typ));
+            if(hEth->pRxInfo == 0)
+                return hEth;
+
+            // write ptr to first rx descriptor to first info structure
+            hEth->pRxInfo->pDesc = (ometh_desc_typ*)((size_t)hEth->config.pRamBase + len);
+
+            len = len + sizeof(ometh_desc_typ) * (MAC_HW_TYP_02_NB_RXDESC);
+
+            // allocate structure with tx info
+            nbTxDesc[0] = MAC_HW_TYP_02_NB_TXDESC;
+
+            hEth->pTxInfo[0] = calloc(nbTxDesc[0] , sizeof(ometh_tx_info_typ));
+            if(hEth->pTxInfo[0] == 0)
+                return hEth;
+
+            // write ptr to first tx descriptor to first info structure
+            hEth->pTxInfo[0]->pDesc = (ometh_desc_typ*)((size_t)hEth->config.pRamBase + len);
+
+            len = len + sizeof(ometh_desc_typ) * nbTxDesc[0];
+
+            hEth->nbRxDesc = MAC_HW_TYP_02_NB_RXDESC;
+            hEth->nbTxDesc = MAC_HW_TYP_02_NB_TXDESC;
             break;
 
         default:
@@ -2323,7 +2361,7 @@ void            omethStart
         while(hEth->pRegBase->rxStatus.value & OMETH_REG_PENDING) hEth->pRegBase->rxStatus.clrBit = OMETH_REG_IQUIT;
         while(hEth->pRegBase->txStatus.value & OMETH_REG_PENDING) hEth->pRegBase->txStatus.clrBit = OMETH_REG_IQUIT;
 
-        hEth->pRxNext = &hEth->pRxInfo[hEth->pRegBase->rxStatus.value & 0x0f]; // set pRxNext descriptor info
+        hEth->pRxNext = &hEth->pRxInfo[hEth->pRegBase->rxStatus.value & (hEth->nbRxDesc-1)]; // set pRxNext descriptor info
     }
 
     hEth->pRegBase->rxStatus.clrBit = OMETH_REG_LOST;

@@ -999,7 +999,7 @@ static ometh_config_typ getMacConfig(UINT adapter_p)
     OPLK_MEMSET(&config, 0, sizeof(config));
 
     config.adapter = adapter_p;
-    config.macType = OMETH_MAC_TYPE_01;
+    config.macType = OMETH_MAC_TYPE_02;
 
     config.mode = 0 |
                   OMETH_MODE_HALFDUPLEX |         // Half-duplex

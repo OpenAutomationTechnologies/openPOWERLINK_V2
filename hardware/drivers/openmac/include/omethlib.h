@@ -133,6 +133,7 @@ typedef struct OMETH_FILTER*    OMETH_FILTER_H;    // handle for receive filter
 #include <omethlib_target.h>    // target specific defines (BIG/LITTLE endian)
 
 #define OMETH_MAC_TYPE_01        0x01    // 16 filters,16 rx,16 tx
+#define OMETH_MAC_TYPE_02        0x02    // 16 filters, 32 rx and 32 tx
 
 #define OMETH_MODE_HALFDUPLEX        0x0001    // half duplex supported
 #define OMETH_MODE_FULLDUPLEX        0x0002    // full duplex supported
