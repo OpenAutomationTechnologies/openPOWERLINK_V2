@@ -145,8 +145,7 @@ typedef struct
 #define OMETH_REG_IQUIT          0x0100        // quit interrupt (only valid on clear port)
 #define OMETH_REG_RUN            0x0080        // run bit
 #define OMETH_REG_TX_BEG         0x0040        // quit tx beg irq
-#define OMETH_REG_RX_NOMATCH     0x0040        // quit interrupt -> nomatch
-#define OMETH_REG_LOST           0x0010        // lost flag (rx-control)
+#define OMETH_REG_LOST           0x0040        // lost flag (rx-control)
 #define OMETH_REG_RXIDLE         0x0020        // rx-idle flag
 #define OMETH_REG_SET_RES_IPG    0x4000        // flag to set response inter package gap
 

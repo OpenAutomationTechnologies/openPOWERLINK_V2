@@ -807,11 +807,8 @@ end process pTxControl;
 
     Tx_Idle <= '1'    when    Sm_Tx = sIdle and Dsm = sIdle else '0';
 
-    Tx_Reg(15 downto 4) <= Tx_Ie & Tx_SoftInt & Tx_Half & Tx_Wait & (Tx_Icnt(4) or Tx_Icnt(3)) & Tx_Icnt(2 downto 0)
-                         & Tx_On &  Tx_BegInt & Tx_Idle & "0" ;
-
-    Tx_Reg( 3 downto 0) <=  Tx_Desc;
-
+    Tx_Reg <= Tx_Ie & Tx_SoftInt & Tx_Half & Tx_Wait & (Tx_Icnt(4) or Tx_Icnt(3)) & Tx_Icnt(2 downto 0) &
+              Tx_On &  Tx_BegInt & Tx_Idle & '0' & Tx_Desc;
 
     Sel_TxH <= '1'    when inWrite = '0' and iSelectCont = '1' and iAddress(3) = '0' and    Ram_Be(1) = '1'    else    '0';
     Sel_TxL <= '1'    when inWrite = '0' and iSelectCont = '1' and iAddress(3) = '0' and    Ram_Be(0) = '1'    else    '0';
@@ -1315,10 +1312,8 @@ end process pRxControl;
 
     Rx_Idle <= '1'    when    Sm_Rx = sIdle else '0';
 
-    Rx_Reg(15 downto 4) <= Rx_Ie & '0' & "0"      & '0'     & (Rx_Icnt(4) or Rx_Icnt(3)) & Rx_Icnt(2 downto 0)
-                         & Rx_On & "0" & Rx_Idle & Rx_Lost;
-
-    Rx_Reg( 3 downto 0) <= Rx_Desc;
+    Rx_Reg <= Rx_Ie & "000" & (Rx_Icnt(4) or Rx_Icnt(3)) & Rx_Icnt(2 downto 0) &
+              Rx_On & Rx_Lost & Rx_Idle & '0' & Rx_Desc;
 
 bFilter: block
     signal Ram_Addr     : std_logic_vector(7 downto 0);

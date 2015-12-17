@@ -484,9 +484,6 @@ static OMETH_H        omethCreateInt
     // clear all pending rx irqs
     while(pRegBase->rxStatus.value & OMETH_REG_PENDING) pRegBase->rxStatus.clrBit = OMETH_REG_IQUIT;
 
-    // clear all pending rx-fail irq's
-    while(pRegBase->rxStatus.value & OMETH_REG_RX_NOMATCH) pRegBase->rxStatus.clrBit = OMETH_REG_RX_NOMATCH;
-
     // clear all pending rx irqs
     while(pRegBase->txStatus.value & OMETH_REG_PENDING) pRegBase->txStatus.clrBit = OMETH_REG_IQUIT;
 
@@ -2441,30 +2438,6 @@ ometh_stat_typ    *omethStatistics
         pSetClrBit[1] = clrBitValue;
     }
 #endif
-
-/*****************************************************************************
-*
-* omethNoFilterMatchIrqHandler - no filter match irq handler
-*
-*    Calls the function OMETH_NOFILTERMATCHIRQ_HOOK_FCT() which must be defined
-*    in ometh_target.h if a received frame does not match any filter and the
-*    NoMatch-IRQ is enabled.
-*
-*/
-void            omethNoFilterMatchIrqHandler
-(
- OMETH_H        hEth        /* handle of ethernet driver, see omethCreate() */
-)
-{
-    if ((hEth->pRegBase->rxStatus.value & OMETH_REG_RX_NOMATCH) != OMETH_REG_RX_NOMATCH) return;    // no irq
-
-    #ifdef OMETH_NOFILTERMATCHIRQ_HOOK_FCT
-        if (OMETH_NOFILTERMATCHIRQ_HOOK_P != 0)    OMETH_NOFILTERMATCHIRQ_HOOK_FCT((void*)hEth->pRxNext->pDesc->pData);
-    #endif
-
-    hEth->pRegBase->rxStatus.clrBit = OMETH_REG_RX_NOMATCH;    // clear pending irq
-}
-
 
 // free function which calls the real free function only if p is not 0
 static void freePtr(void *p)
