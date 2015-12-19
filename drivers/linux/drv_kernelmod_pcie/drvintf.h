@@ -100,6 +100,8 @@ tOplkError drvintf_waitSyncEvent(void);
 tOplkError drvintf_regVethHandler(tDrvIntfCbVeth pfnDrvIntfCbVeth_p);
 tOplkError drvintf_sendVethFrame(tFrameInfo* pFrameInfo_p);
 #endif
+tOplkError drvintf_writeFileBuffer(tOplkApiFileChunkDesc desc_p, UINT8* pBuf_p);
+ULONG      drvintf_getFileBufferSize(void);
 
 #ifdef __cplusplus
 }

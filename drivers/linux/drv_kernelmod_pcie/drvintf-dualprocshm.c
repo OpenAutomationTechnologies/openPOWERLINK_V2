@@ -969,6 +969,75 @@ void drvintf_unmapKernelMem(UINT8** ppUserMem_p)
     *ppUserMem_p = NULL;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Write file chunk
+
+This function writes the given file chunk to the file transfer buffer.
+
+\param  desc_p   File chunk descriptor.
+\param  pBuf_p   Pointer to file chunk.
+
+\return The function returns a tOplkError error code.
+
+\ingroup module_driver_linux_kernel_pcie
+*/
+//------------------------------------------------------------------------------
+tOplkError drvintf_writeFileBuffer(tOplkApiFileChunkDesc desc_p, UINT8* pBuf_p)
+{
+    tDualprocReturn    dualRet;
+
+    if ((pBuf_p == NULL) || (!drvIntfInstance_l.fDriverActive))
+        return kErrorNoResource;
+
+    if (desc_p.length > CONFIG_CTRL_FILE_CHUNK_SIZE)
+    {
+        DEBUG_LVL_ERROR_TRACE("File chunk size exceeds limit!\n");
+        return kErrorNoResource;
+    }
+
+    // Write descriptor
+    dualRet = dualprocshm_writeDataCommon(drvIntfInstance_l.dualProcDrvInst,
+                                          FIELD_OFFSET(tCtrlBuf, fileChunkDesc),
+                                          sizeof(tOplkApiFileChunkDesc),
+                                          (UINT8*)&desc_p);
+    if (dualRet != kDualprocSuccessful)
+    {
+        DEBUG_LVL_ERROR_TRACE("Cannot store file chunk descriptor (0x%X)\n", dualRet);
+        return kErrorGeneralError;
+    }
+
+    // Write file chunk data into buffer
+    dualRet = dualprocshm_writeDataCommon(drvIntfInstance_l.dualProcDrvInst,
+                                          FIELD_OFFSET(tCtrlBuf, aFileChunkBuffer),
+                                          desc_p.length,
+                                          (UINT8*)pBuf_p);
+    if (dualRet != kDualprocSuccessful)
+    {
+        DEBUG_LVL_ERROR_TRACE("Cannot store file chunk data (0x%X)\n", dualRet);
+        return kErrorGeneralError;
+    }
+
+    return kErrorOk;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Get maximum supported file chunk size
+
+This function returns the maximum file chunk size which is supported by the
+CAL implementation.
+
+\return The function returns the supported file chunk size.
+
+\ingroup module_driver_linux_kernel_pcie
+*/
+//------------------------------------------------------------------------------
+ULONG drvintf_getFileBufferSize(void)
+{
+    return CONFIG_CTRL_FILE_CHUNK_SIZE;
+}
+
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//

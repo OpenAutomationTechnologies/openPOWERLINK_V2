@@ -162,6 +162,8 @@ static INT          writeErrorObject(ULONG arg_p);
 static INT          readErrorObject(ULONG arg_p);
 static INT          getEventForUser(ULONG arg_p);
 static INT          postEventFromUser(ULONG arg_p);
+static INT          writeFileBuffer(ULONG arg_p);
+static INT          getFileBufferSize(ULONG arg_p);
 
 //------------------------------------------------------------------------------
 //  Kernel module specific data structures
@@ -524,6 +526,14 @@ static INT  plkIntfIoctl(struct inode* pDev_p, struct file* pFile_p,
             else
                 ret = 0;
 
+            break;
+
+        case PLK_CMD_CTRL_WRITE_FILE_BUFFER:
+            ret = writeFileBuffer(arg_p);
+            break;
+
+        case PLK_CMD_CTRL_GET_FILE_BUFFER_SIZE:
+            ret = getFileBufferSize(arg_p);
             break;
 
         default:
@@ -1045,6 +1055,75 @@ static INT readErrorObject(ULONG arg_p)
         return -EFAULT;
 
     if (copy_to_user((void __user*)arg_p, &errorObject, sizeof(tErrHndIoctl)))
+        return -EFAULT;
+
+    return 0;
+}
+
+
+//------------------------------------------------------------------------------
+/**
+\brief Write file chunk ioctl
+
+The function implements the ioctl for writing the given file chunk to the
+file transfer buffer.
+
+\param arg_p    Pointer to the file chunk argument passed by the ioctl interface.
+
+\return The function returns Linux error code.
+*/
+//------------------------------------------------------------------------------
+static INT writeFileBuffer(ULONG arg_p)
+{
+    UINT8*                  pBuf;
+    tIoctlFileChunk         ioctlFileChunk;
+    INT                     order;
+    INT                     ret = 0;
+
+    order = get_order(drvintf_getFileBufferSize());
+    pBuf = (UINT8*)__get_free_pages(GFP_KERNEL, order);
+
+    if (copy_from_user(&ioctlFileChunk, (const void __user*)arg_p, sizeof(tIoctlFileChunk)))
+    {
+        free_pages((ULONG)pBuf, order);
+        return -EFAULT;
+    }
+
+    if (copy_from_user(pBuf, (const void __user*)ioctlFileChunk.pData, ioctlFileChunk.desc.length))
+    {
+        free_pages((ULONG)pBuf, order);
+        return -EFAULT;
+    }
+
+    ioctlFileChunk.pData = pBuf;
+    if (drvintf_writeFileBuffer(ioctlFileChunk.desc, ioctlFileChunk.pData) != kErrorOk)
+        return -EFAULT;
+
+    free_pages((ULONG)pBuf, order);
+
+    return 0;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief Get maximum supported file chunk size ioctl
+
+The function implements the ioctl for returning the maximum file chunk size
+which is supported by the CAL implementation.
+
+\param arg_p    Pointer to the file chunk size argument passed by the ioctl
+                interface.
+
+\return The function returns Linux error code.
+*/
+//------------------------------------------------------------------------------
+static INT getFileBufferSize(ULONG arg_p)
+{
+    ULONG               fileBufferSize = 0;
+
+    fileBufferSize = drvintf_getFileBufferSize();
+
+    if (copy_to_user((void __user*)arg_p, &fileBufferSize, sizeof(ULONG)))
         return -EFAULT;
 
     return 0;
