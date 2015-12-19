@@ -139,6 +139,10 @@ SET(CTRL_UCAL_LINUXIOCTL_SOURCES
     ${USER_SOURCE_DIR}/ctrl/ctrlucal-ioctl.c
     )
 
+SET(CTRL_UCAL_LINUXPCIE_SOURCES
+    ${USER_SOURCE_DIR}/ctrl/ctrlucal-pcie.c
+    )
+
 SET(CTRL_UCAL_POSIXMEM_SOURCES
     ${USER_SOURCE_DIR}/ctrl/ctrlucal-mem.c
     ${COMMON_SOURCE_DIR}/ctrl/ctrlcal-posixshm.c
