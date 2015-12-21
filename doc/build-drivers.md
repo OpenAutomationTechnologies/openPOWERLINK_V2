@@ -38,9 +38,17 @@ __CFG_KERNEL_DIR__.
 To build the kernel driver (e.g. for a MN using the Intel 82573 network interface):
 
       > cd <openPOWERLINK_dir>/drivers/linux/drv_kernelmod_edrv/build
-      > cmake -DCFG_OPLK_MN=TRUE -DCFG_POWERLINK_EDRV=82573 ..
+      > cmake -DCFG_OPLK_MN=TRUE -DCFG_POWERLINK_EDRV_82573=TRUE ..
       > make
       > make install
+
+Several kernel driver can be build at once, just append another
+CFG_POWERLINK_EDRV_<driver name> to the cmake command:
+
+      > cmake -DCFG_OPLK_MN=TRUE -DCFG_POWERLINK_EDRV_82573=TRUE -DCFG_POWERLINK_EDRV_I210=TRUE
+
+__NOTE__: Only one of them can be loaded at runtime since openPOWERLINK doesn't support
+several stack instances.
 
 ## Building a Linux Kernel PCIe Interface Driver {#sect_build_drivers_build_linux_pcie}
 
