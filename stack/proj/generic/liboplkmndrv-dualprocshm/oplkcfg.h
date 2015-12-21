@@ -44,6 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // Include memory file to override default queue sizes
 #include <dualprocshm-mem.h>
+#include <oplkcfg-board.h> // Board specific configuration
 
 //------------------------------------------------------------------------------
 // const defines
@@ -128,8 +129,6 @@ The timer defines determine the high resolution timer module.
 #define CONFIG_TIMER_USE_HIGHRES               TRUE
     ///< use high resolution timer
 /**@}*/
-
-#define CONFIG_EVENT_SIZE_CIRCBUF_KERNEL_INTERNAL   2048
 
 //------------------------------------------------------------------------------
 // typedef
