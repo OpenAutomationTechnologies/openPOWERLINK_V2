@@ -900,7 +900,11 @@ static tOplkError downloadObject(tCfmNodeInfo* pNodeInfo_p)
     }
     else
     {   // download finished
+#if defined(CONFIG_INCLUDE_NMT_RMN)
+        ret = downloadNetConf(pNodeInfo_p);
+#else
         ret = finishDownload(pNodeInfo_p);
+#endif
         if (ret != kErrorOk)
             return ret;
     }
