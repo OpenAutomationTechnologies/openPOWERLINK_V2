@@ -58,7 +58,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 
-#define TIMER_COUNT             1
+#define TIMER_COUNT             2
 #define TIMER_MIN_VAL_SINGLE    5000             /* min 5us */
 #define TIMER_MIN_VAL_CYCLE     100000           /* min 100us */
 
@@ -92,9 +92,9 @@ void TgtDbgPostTraceValue(UINT32 dwTraceValue_p);
 //------------------------------------------------------------------------------
 // global function prototypes
 //------------------------------------------------------------------------------
-tOplkError edrv_startTimer(tTimerHdl* pTimerHdl_p, UINT32 frequency_p);
-tOplkError edrv_stopTimer(tTimerHdl* pTimerHdl_p);
-tOplkError edrv_restartTimer(tTimerHdl* pTimerHdl_p);
+tOplkError edrv_startTimer(tTimerHdl* pTimerHdl_p, UINT32 index_p, UINT64 frequency_p);
+tOplkError edrv_stopTimer(tTimerHdl* pTimerHdl_p, UINT32 index_p);
+tOplkError edrv_restartTimer(tTimerHdl* pTimerHdl_p, UINT32 index_p, UINT64 frequency_p);
 tOplkError edrv_registerHresCallback(tHresCallback pfnHighResCb_p);
 
 //============================================================================//
@@ -185,11 +185,16 @@ tOplkError hrestimer_exit(void)
         pTimerInfo = &hresTimerInstance_l.aTimerInfo[index];
         pTimerInfo->pfnCallback = NULL;
 
-        ret = edrv_stopTimer(&pTimerInfo->eventArg.timerHdl.handle);
+        ret = edrv_stopTimer(&pTimerInfo->eventArg.timerHdl.handle,
+                             HDL_TO_IDX(pTimerInfo->eventArg.timerHdl.handle));
         if (ret != kErrorOk)
             break;
         pTimerInfo->eventArg.timerHdl.handle = 0;
     }
+
+    // De-register the default timer callback
+    ret = edrv_registerHresCallback(NULL);
+
     return ret;
 }
 
@@ -226,7 +231,6 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
     tOplkError          ret = kErrorOk;
     UINT                index;
     tHresTimerInfo*     pTimerInfo;
-    UINT32              timerFreq;
 
     if (pTimerHdl_p == NULL)
         return kErrorTimerInvalidHandle;
@@ -278,12 +282,17 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
     pTimerInfo->period = time_p;
     pTimerInfo->fContinuously = fContinue_p;
 
+    // Register the default timer callback
     ret = edrv_registerHresCallback(timerCallback);
     if (ret != kErrorOk)
+    {
+        printk("Failed to register timer callback\n");
         return ret;
+    }
 
-    timerFreq = (UINT32)(time_p);
-    ret = edrv_startTimer(&pTimerInfo->eventArg.timerHdl.handle, timerFreq);
+    ret = edrv_startTimer(&pTimerInfo->eventArg.timerHdl.handle,
+                          HDL_TO_IDX(pTimerInfo->eventArg.timerHdl.handle),
+                          time_p);
 
     return ret;
 }
@@ -326,7 +335,7 @@ tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
             return ret;     // invalid handle
     }
 
-    edrv_stopTimer(pTimerHdl_p);
+    edrv_stopTimer(pTimerHdl_p, HDL_TO_IDX(*pTimerHdl_p));
 
     *pTimerHdl_p = 0;
     pTimerInfo->eventArg.timerHdl.handle = 0;
@@ -401,6 +410,7 @@ static void timerCallback(tTimerHdl* pTimerHdl_p)
     pTimerInfo = &hresTimerInstance_l.aTimerInfo[index];
 
     orgTimerHdl = *pTimerHdl_p;
+
     if (pTimerInfo->pfnCallback != NULL)
     {
         pTimerInfo->pfnCallback(&pTimerInfo->eventArg);
@@ -411,11 +421,11 @@ static void timerCallback(tTimerHdl* pTimerHdl_p)
 
     if (pTimerInfo->fContinuously)
     {
-        edrv_restartTimer(pTimerHdl_p);
+        edrv_restartTimer(pTimerHdl_p, HDL_TO_IDX(*pTimerHdl_p), pTimerInfo->period);
     }
     else
     {
-        edrv_stopTimer(pTimerHdl_p);
+        edrv_stopTimer(pTimerHdl_p, HDL_TO_IDX(*pTimerHdl_p));
     }
     return;
 }
