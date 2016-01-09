@@ -66,8 +66,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define TIMER_MIN_VAL_SINGLE                5000        // min 5us
 #define TIMER_MIN_VAL_CYCLE                 100000      // min 100us
 
-#define TTC_RESOLUTION_FACTOR               144         // Resolution factor for counter
-
 #define XTTC_BASE                           0xf8002000  // base addr of TTC1
 #define SIZE                                0x00001000
 #define XTTC1_TIMERBASE                     0x00000000  // offset of counter 0
@@ -104,11 +102,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /* Setup the timers to use pre-scaling, using a fixed value for now that will work
  * across most input frequency, but it may need to be more dynamic
  */
-#define PRESCALE_EXPONENT                   4   // 2 ^ PRESCALE_EXPONENT = PRESCALE
-#define PRESCALE                            16  // The exponent must match this
+#define PRESCALE_EXPONENT                   8       // 2 ^ PRESCALE_EXPONENT = PRESCALE
+#define PRESCALE                            256     // The exponent must match this
 #define CLK_CNTRL_PRESCALE                  (((PRESCALE_EXPONENT - 1) << 1) | 0x1)
+#define TTC_RESOLUTION_FACTOR               2304    // Resolution factor for counter. This depends on the source clock frequency for the TTC and the prescaler value.
+                                                    // Current design uses a source clock frequency of 111 MHz.
 
-#define USEC_TO_COUNT(timeout)                      ((UINT)timeout / TTC_RESOLUTION_FACTOR)
+#define NSEC_TO_COUNT(timeout)                      ((UINT)timeout / TTC_RESOLUTION_FACTOR)
 
 #define XTTCPSS_READ_REG(index, offset)             __raw_readl(pTtcBaseAddr_l[index] + offset)
 
@@ -377,7 +377,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
     }
 
     // Get the counter value from the timeout
-    counter = (ULONGLONG)USEC_TO_COUNT(time_p);
+    counter = (ULONGLONG)NSEC_TO_COUNT(time_p);
     if (counter > 0xFFFF)
     {
         return kErrorTimerNoTimerCreated;
