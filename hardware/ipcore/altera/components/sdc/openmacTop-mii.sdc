@@ -73,8 +73,17 @@ proc createRegisterTiming { lst_reg_in hubPorts dir tclk tmax tmin} {
         }
 
         for {set i 0} {$i < $hubPorts} {incr i} {
-            set tmpClk [lindex $lstClk $i]
             set numOffset [expr $i * $numReg / $hubPorts]
+
+                # Get clock name for creating the virtual Clock
+                if {$i < $numClk} {
+                    # Every port has its own clock
+                    set tmpClk [lindex $lstClk $i]
+                } else {
+                    # There are not enough clocks for each port. Simply take the last one!
+                    # Usually this happens if there is a single clock source for all ports.
+                    set tmpClk [lindex $lstClk [expr $numClk - 1]]
+                }
 
             # Just build the virtual clock name again...
             set tmpVirtClk virt_${tmpClk}

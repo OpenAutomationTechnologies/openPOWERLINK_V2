@@ -333,7 +333,9 @@ set_location_assignment PIN_AH30    -to PLNK_MII_RXCLK[1]
 set_location_assignment PIN_AJ1     -to PLNK_SMI_PHYRSTN[0]
 set_location_assignment PIN_H13     -to PLNK_SMI_DIO[0]
 set_location_assignment PIN_H12     -to PLNK_SMI_CLK[0]
+set_location_assignment PIN_AA16    -to PLNK_PHY_CLK
 
+set_instance_assignment -name IO_STANDARD "1.5 V" -to PLNK_PHY_CLK
 set_instance_assignment -name IO_STANDARD "1.5 V" -to pcp_led[1]
 set_instance_assignment -name IO_STANDARD "1.5 V" -to pcp_led[0]
 set_instance_assignment -name IO_STANDARD "1.5 V" -to fpga_dipsw_pio[0]
