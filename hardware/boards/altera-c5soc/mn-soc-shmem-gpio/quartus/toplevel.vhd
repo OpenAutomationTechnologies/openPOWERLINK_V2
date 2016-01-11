@@ -32,6 +32,9 @@ library libcommon;
 use libcommon.global.all;
 
 entity toplevel is
+    generic (
+        gBoardRev               :       string := "D"
+    );
     port (
         -- FPGA peripherals ports
         fpga_dipsw_pio          : in    std_logic_vector (3 downto 0);
@@ -138,6 +141,7 @@ entity toplevel is
        fpga_clk_50              : in    std_logic;
        PLNK_MII_TXEN            : out   std_logic_vector(1 downto 0);-- txEnable
        PLNK_MII_TXD             : out   std_logic_vector(7 downto 0);-- txData
+       PLNK_PHY_CLK             : in    std_logic;
        PLNK_MII_TXCLK           : in    std_logic_vector(1 downto 0)  := (others => 'X'); -- txClk
        PLNK_MII_RXERR           : in    std_logic_vector(1 downto 0)  := (others => 'X'); -- rxError
        PLNK_MII_RXDV            : in    std_logic_vector(1 downto 0)  := (others => 'X'); -- rxDataValid
@@ -164,6 +168,7 @@ architecture rtl of toplevel is
   signal h2f_gp_in              : std_logic_vector(31 downto 0);
   signal h2f_gp_out             : std_logic_vector(31 downto 0);
 
+  signal miiTxClk               : std_logic_vector(1 downto 0);
 
   component mnSocShmemGpio is
         port (
@@ -439,7 +444,7 @@ architecture rtl of toplevel is
             oct_rzqin                             =>  fpga_oct_rzqin,
             openmac_0_mii_txEnable                =>  PLNK_MII_TXEN,
             openmac_0_mii_txData                  =>  PLNK_MII_TXD,
-            openmac_0_mii_txClk                   =>  PLNK_MII_TXCLK,
+            openmac_0_mii_txClk                   =>  miiTxClk,
             openmac_0_mii_rxError                 =>  PLNK_MII_RXERR,
             openmac_0_mii_rxDataValid             =>  PLNK_MII_RXDV,
             openmac_0_mii_rxData                  =>  PLNK_MII_RXD,
@@ -458,6 +463,21 @@ architecture rtl of toplevel is
 
     -- Remove NIOS out of reset after DDR3 and PLL ready to operate
     hps_fpga_reset_n <= pllLocked and ddr3_afi_resetn and h2f_cold_reset_n;
+
+    -- Select Phy Tx clock source
+    process(PLNK_PHY_CLK, PLNK_MII_TXCLK)
+    begin
+        case gBoardRev is
+            when "C" =>
+                miiTxClk    <= PLNK_MII_TXCLK;
+
+            when "D" =>
+                miiTxClk    <= PLNK_PHY_CLK & PLNK_PHY_CLK;
+
+            when others =>
+                assert (false) report "The board revision is unknown!" severity failure;
+        end case;
+    end process;
 
     -- PLL for Qsys
     pllInst : pll
