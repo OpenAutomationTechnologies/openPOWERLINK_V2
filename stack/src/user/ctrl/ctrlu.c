@@ -363,9 +363,6 @@ tOplkError ctrlu_initStack(tOplkApiInitParam* pInitParam_p)
 
 #endif // (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
 
-#if defined(CONFIG_INCLUDE_NMT_MN)
-    ret = linkDomainObjects(linkObjectRequestsMn, tabentries(linkObjectRequestsMn));
-#endif
 
     DEBUG_LVL_CTRL_TRACE("Initializing kernel modules ...\n");
     OPLK_MEMCPY(ctrlParam.aMacAddress, ctrlInstance_l.initParam.aMacAddress, 6);
@@ -460,6 +457,11 @@ tOplkError ctrlu_initStack(tOplkApiInitParam* pInitParam_p)
     // and thereby the whole POWERLINK stack
 
     ctrlInstance_l.fInitialized = TRUE;
+
+    // linkDomainObjects requires an initialized stack
+#if defined(CONFIG_INCLUDE_NMT_MN)
+    ret = linkDomainObjects(linkObjectRequestsMn, tabentries(linkObjectRequestsMn));
+#endif
 
 Exit:
     return ret;
