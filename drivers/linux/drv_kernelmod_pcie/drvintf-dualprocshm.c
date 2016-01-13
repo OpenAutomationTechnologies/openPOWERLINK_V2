@@ -975,7 +975,7 @@ void drvintf_unmapKernelMem(UINT8** ppUserMem_p)
 
 This function writes the given file chunk to the file transfer buffer.
 
-\param  desc_p   File chunk descriptor.
+\param  pDesc_p  Pointer to the file chunk descriptor.
 \param  pBuf_p   Pointer to file chunk.
 
 \return The function returns a tOplkError error code.
@@ -983,14 +983,14 @@ This function writes the given file chunk to the file transfer buffer.
 \ingroup module_driver_linux_kernel_pcie
 */
 //------------------------------------------------------------------------------
-tOplkError drvintf_writeFileBuffer(tOplkApiFileChunkDesc desc_p, UINT8* pBuf_p)
+tOplkError drvintf_writeFileBuffer(tOplkApiFileChunkDesc* pDesc_p, UINT8* pBuf_p)
 {
     tDualprocReturn    dualRet;
 
     if ((pBuf_p == NULL) || (!drvIntfInstance_l.fDriverActive))
         return kErrorNoResource;
 
-    if (desc_p.length > CONFIG_CTRL_FILE_CHUNK_SIZE)
+    if (pDesc_p->length > CONFIG_CTRL_FILE_CHUNK_SIZE)
     {
         DEBUG_LVL_ERROR_TRACE("File chunk size exceeds limit!\n");
         return kErrorNoResource;
@@ -1000,7 +1000,7 @@ tOplkError drvintf_writeFileBuffer(tOplkApiFileChunkDesc desc_p, UINT8* pBuf_p)
     dualRet = dualprocshm_writeDataCommon(drvIntfInstance_l.dualProcDrvInst,
                                           FIELD_OFFSET(tCtrlBuf, fileChunkDesc),
                                           sizeof(tOplkApiFileChunkDesc),
-                                          (UINT8*)&desc_p);
+                                          (UINT8*)pDesc_p);
     if (dualRet != kDualprocSuccessful)
     {
         DEBUG_LVL_ERROR_TRACE("Cannot store file chunk descriptor (0x%X)\n", dualRet);
@@ -1010,7 +1010,7 @@ tOplkError drvintf_writeFileBuffer(tOplkApiFileChunkDesc desc_p, UINT8* pBuf_p)
     // Write file chunk data into buffer
     dualRet = dualprocshm_writeDataCommon(drvIntfInstance_l.dualProcDrvInst,
                                           FIELD_OFFSET(tCtrlBuf, aFileChunkBuffer),
-                                          desc_p.length,
+                                          pDesc_p->length,
                                           (UINT8*)pBuf_p);
     if (dualRet != kDualprocSuccessful)
     {

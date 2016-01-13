@@ -1096,7 +1096,7 @@ static INT writeFileBuffer(ULONG arg_p)
     }
 
     ioctlFileChunk.pData = pBuf;
-    if (drvintf_writeFileBuffer(ioctlFileChunk.desc, ioctlFileChunk.pData) != kErrorOk)
+    if (drvintf_writeFileBuffer(&ioctlFileChunk.desc, ioctlFileChunk.pData) != kErrorOk)
         return -EFAULT;
 
     free_pages((ULONG)pBuf, order);
