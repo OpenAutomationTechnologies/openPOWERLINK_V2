@@ -53,6 +53,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
+#include <common/bufalloc.h>
 #include <kernel/edrv.h>
 #include <kernel/hrestimer.h>           // using definition of tHresCallback
 
@@ -632,7 +633,7 @@ static struct pci_device_id aEdrvPciTbl[] =
 MODULE_DEVICE_TABLE(pci, aEdrvPciTbl);
 
 tEdrvInstance edrvInstance_l;
-
+static tBufAlloc* pBufAlloc_l;
 static struct pci_driver edrvDriver_l =
 {
      .name      = DRIVER_NAME,
@@ -697,6 +698,18 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
         goto Exit;
     }
 
+    // init and fill buffer allocation instance
+    if ((pBufAlloc_l = bufalloc_init(EDRV_MAX_TX_BUFFERS)) == NULL)
+    {
+        ret = kErrorNoResource;
+        goto Exit;
+    }
+
+    for (index = 0; index < EDRV_MAX_TX_BUFFERS; index++)
+    {
+        bufalloc_addBuffer(pBufAlloc_l, edrvInstance_l.pTxBuf + (index * EDRV_MAX_FRAME_SIZE), index);
+    }
+
     // local MAC address might have been changed in EdrvInitOne
     printk("%s local MAC = ", __FUNCTION__);
     for (index = 0; index < 6; index++)
@@ -705,7 +718,8 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     }
     printk("\n");
 
-    Exit: return ret;
+Exit:
+    return ret;
 }
 
 //------------------------------------------------------------------------------
@@ -725,6 +739,8 @@ tOplkError edrv_exit(void)
     {
         printk("%s calling pci_unregister_driver()\n", __FUNCTION__);
         pci_unregister_driver (&edrvDriver_l);
+        // clear buffer allocation
+        bufalloc_exit(pBufAlloc_l);
         // clear driver structure
         OPLK_MEMSET(&edrvDriver_l, 0, sizeof (edrvDriver_l));
     }
@@ -898,7 +914,7 @@ This function allocates a Tx buffer.
 tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
     tOplkError          ret = kErrorOk;
-    UINT32              channel;
+    tBufData*           pBufData;
 
     if (pBuffer_p->maxBufferSize > EDRV_MAX_FRAME_SIZE)
     {
@@ -913,24 +929,16 @@ tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
         goto Exit;
     }
 
-    for (channel = 0; channel < EDRV_MAX_TX_BUFFERS; channel++)
-    {
-        if (edrvInstance_l.afTxBufUsed[channel] == FALSE)
-        {
-            // free channel found
-            edrvInstance_l.afTxBufUsed[channel] = TRUE;
-            pBuffer_p->txBufferNumber.value = channel;
-            pBuffer_p->pBuffer = edrvInstance_l.pTxBuf + (channel * EDRV_MAX_FRAME_SIZE);
-            pBuffer_p->maxBufferSize = EDRV_MAX_FRAME_SIZE;
-            break;
-        }
-    }
-
-    if (channel >= EDRV_MAX_TX_BUFFERS)
+    // get a free Tx buffer from the allocation instance
+    if ((pBufData = bufalloc_getBuffer(pBufAlloc_l)) == NULL)
     {
         ret = kErrorEdrvNoFreeBufEntry;
         goto Exit;
     }
+
+    pBuffer_p->pBuffer = pBufData->pBuffer;
+    pBuffer_p->txBufferNumber.value = pBufData->bufferNumber;
+    edrvInstance_l.afTxBufUsed[pBufData->bufferNumber] = TRUE;
 
 Exit:
     return ret;
@@ -951,16 +959,8 @@ This function releases the Tx buffer.
 //------------------------------------------------------------------------------
 tOplkError edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-    UINT bufferNumber;
-
-    bufferNumber = pBuffer_p->txBufferNumber.value;
-
-    if (bufferNumber < EDRV_MAX_TX_BUFFERS)
-    {
-        edrvInstance_l.afTxBufUsed[bufferNumber] = FALSE;
-    }
-
-    return kErrorOk;
+    edrvInstance_l.afTxBufUsed[pBuffer_p->txBufferNumber.value] = FALSE;
+    return bufalloc_releaseBuffer(pBufAlloc_l, pBuffer_p->pBuffer, pBuffer_p->txBufferNumber.value);
 }
 
 //------------------------------------------------------------------------------
