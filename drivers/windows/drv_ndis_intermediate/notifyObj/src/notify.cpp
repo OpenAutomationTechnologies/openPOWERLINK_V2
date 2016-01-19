@@ -492,7 +492,6 @@ HRESULT CNotify::initalizeAdapters(VOID)
 
         result = RegEnumKey(adapterListKey, index, aAdapterGuid,
                             MAX_PATH + 1);
-        result = ERROR_INVALID_FUNCTION;
     }
 
     result = ERROR_SUCCESS;
