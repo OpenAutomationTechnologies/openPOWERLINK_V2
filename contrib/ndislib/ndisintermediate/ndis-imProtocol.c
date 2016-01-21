@@ -835,6 +835,8 @@ NDIS_STATUS protocolUnbindAdapter(NDIS_HANDLE unbindContext_p,
         ASSERT(0);
     }
 
+    fBinding_l = FALSE;
+
     TRACE("%s() - OK\n", __FUNCTION__);
     return status;
 }
