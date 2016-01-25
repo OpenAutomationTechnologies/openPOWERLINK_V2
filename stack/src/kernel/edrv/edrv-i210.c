@@ -63,9 +63,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <linux/init.h>
 #include <linux/delay.h>
 
-#if (EDRV_USE_TTTX == FALSE)
-#warning edrv-i210 is configured not to use time triggered sending (EDRV_USE_TTTX = FALSE)! X86 MN uses TTTX on i210!
-#endif
+//TODO The openPOWERLINK i210 Linux MN uses time triggered sending (TTTX) feature of i210 NIC.
+// The i210 Linux CN does not work with TTTX feature enabled; so in the current design, the CN demo is not
+// compatible with the MN driver. This issue shall be fixed in a future release.
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
