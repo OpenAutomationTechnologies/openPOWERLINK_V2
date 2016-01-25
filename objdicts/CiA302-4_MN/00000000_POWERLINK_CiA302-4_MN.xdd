@@ -24045,7 +24045,7 @@
           <Object index="1F8A" name="NMT_MNCycleTiming_REC" objectType="9" dataType="042F">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" defaultValue="2"/>
             <SubObject subIndex="01" name="WaitSoCPReq_U32" objectType="7" dataType="0007" accessType="rw" defaultValue="1000"/>
-            <SubObject subIndex="02" name="AsyncSlotTimeout_U32" objectType="7" dataType="0007" accessType="rw" defaultValue="100000"/>
+            <SubObject subIndex="02" name="AsyncSlotTimeout_U32" objectType="7" dataType="0007" accessType="rw" lowLimit="250" defaultValue="100000"/>
           </Object>
           <Object index="1F8B" name="NMT_MNPReqPayloadLimitList_AU16" objectType="8" dataType="0006">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="254"/>
