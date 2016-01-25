@@ -5,6 +5,52 @@ Revision history of openPOWERLINK Protocol Stack {#page_revision_history}
 
 # Release 2 {#sect_revision_v2}
 
+## V2.3.1 {#sect_revision_v2_3_1}
+
+This is the latest release of the V2.3 release series. This release is a stable
+release, it contains fixes and optimizations.
+
+Following is a summary of changes in V2.3.1. For a detailed revision history
+refer to the Git source code history.
+
+### Fixes:
+- Fix Tx errors on Altera C5 SoC board
+- Fix NMT request frame size
+- Fix startup domain objects linking
+- Fix Zynq Linux MN wrong cycle time issue for large cycle times
+- Fix the distribution of the network configuration
+- Prevent race in DLL when running as MN
+- Fix startup problem with CNs using PRes Chaining
+- Fix full kernel-internal queue on FPGA MN targets
+- Call openMAC IRQ handler before handling 2nd Tx queue
+- Several fixes in xdd and OD
+- Fix Altera EPCS programming target
+- Fix filter generation issues for Windows PCIe driver
+- Fix line endings for Windows specific files
+- Fix Linux i210 CN configuration error
+- Fix different NMT state in PRes and Ident/StatusResponse
+
+### Additions:
+- Rework user stack event handling for Linux and Windows PCIe solutions
+- Add troubleshooting information for CRC error on Altera C5 SoC
+- Extend the maximum cycle time operation for Zynq Linux MN
+- Mitigate feature check at stack start
+- Cleanup stack cmake files
+- Enable EPCS in DE2-115 CN dual design for PCP
+- Enable virtual Ethernet feature in dualprocshm platforms
+
+### Known Issues:
+- Linux i210:
+    - The Linux kernel space module with i210 must be compiled for CN explicitly
+      if a CN application is used. If the kernel space module is compiled as MN,
+      the application must initialize the stack as MN (node ID 0xF0).
+- DE2i-150 board (see 2.3.0)
+- Windows PCIe (see 2.3.0)
+- Linux PCIe (see 2.3.0)
+- NDIS intermediate driver (see 2.3.0)
+- Xilinx Zynq MN (see 2.1.0)
+- Redundancy MN (see 2.2.1)
+
 ## V2.3.0 {#sect_revision_v2_3_0}
 
 This is the first release of the V2.3 release series. It contains new features
