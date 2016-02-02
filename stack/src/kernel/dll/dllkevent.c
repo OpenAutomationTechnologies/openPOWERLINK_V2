@@ -415,18 +415,8 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p,
 
         // node processes isochronous and asynchronous frames
         case kNmtCsPreOperational2:
-            // update IdentRes and StatusRes immediately
-            ret = dllkframe_updateFrameStatusRes(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_STATUSRES +
-                                                 dllkInstance_g.curTxBufferOffsetStatusRes],
-                                                 newNmtState_p);
-            if (ret != kErrorOk)
-                return ret;
-
-            ret = dllkframe_updateFrameIdentRes(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_IDENTRES +
-                                                dllkInstance_g.curTxBufferOffsetIdentRes],
-                                                newNmtState_p);
-            if (ret != kErrorOk)
-                return ret;
+            // signal update of IdentRes and StatusRes on SoA
+            dllkInstance_g.updateTxFrame = DLLK_UPDATE_BOTH;
 
             // enable PRes (necessary if coming from Stopped)
 #if (CONFIG_EDRV_AUTO_RESPONSE != FALSE)
@@ -531,19 +521,8 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p,
             break;
 
         case kNmtCsOperational:
-            // update IdentRes and StatusRes immediately
-            ret = dllkframe_updateFrameStatusRes(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_STATUSRES +
-                                                 dllkInstance_g.curTxBufferOffsetStatusRes],
-                                                 newNmtState_p);
-            if (ret != kErrorOk)
-                return ret;
-
-            ret = dllkframe_updateFrameIdentRes(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_IDENTRES +
-                                                dllkInstance_g.curTxBufferOffsetIdentRes],
-                                                newNmtState_p);
-            if (ret != kErrorOk)
-                return ret;
-
+            // signal update of IdentRes and StatusRes on SoA
+            dllkInstance_g.updateTxFrame = DLLK_UPDATE_BOTH;
 #if defined(CONFIG_INCLUDE_NMT_RMN)
             if (dllkInstance_g.fRedundancy && (oldNmtState_p == kNmtMsOperational))
             {
