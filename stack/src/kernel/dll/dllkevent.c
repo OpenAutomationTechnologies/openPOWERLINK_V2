@@ -390,14 +390,14 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p,
 
             // update PRes (for sudden changes to PreOp2)
             ret = dllkframe_updateFramePres(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES +
-                                                (dllkInstance_g.curTxBufferOffsetCycle ^ 1)],
-                                            newNmtState_p);
+                                            (dllkInstance_g.curTxBufferOffsetCycle ^ 1)],
+                                            kNmtCsPreOperational2);
             if (ret != kErrorOk)
                 return ret;
 
             ret = dllkframe_updateFramePres(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES +
-                                                dllkInstance_g.curTxBufferOffsetCycle],
-                                            newNmtState_p);
+                                            dllkInstance_g.curTxBufferOffsetCycle],
+                                            kNmtCsPreOperational2);
             if (ret != kErrorOk)
                 return ret;
 

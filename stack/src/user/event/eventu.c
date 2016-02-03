@@ -191,7 +191,7 @@ tOplkError eventu_process(tEvent* pEvent_p)
 
     if (!instance_l.fInitialized)
     {
-        DEBUG_LVL_ERROR_TRACE("%s() Eventu module is not initialized\n");
+        DEBUG_LVL_ERROR_TRACE("%s() Eventu module is not initialized\n", __func__);
         return kErrorNoResource;
     }
 
@@ -276,7 +276,7 @@ tOplkError eventu_postEvent(tEvent* pEvent_p)
 
     if (!instance_l.fInitialized)
     {
-        DEBUG_LVL_ERROR_TRACE("%s() Eventu module is not initialized\n");
+        DEBUG_LVL_ERROR_TRACE("%s() Eventu module is not initialized\n", __func__);
         return kErrorNoResource;
     }
 

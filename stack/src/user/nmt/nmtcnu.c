@@ -189,11 +189,14 @@ The function is used to send an NMT-Request to the MN.
 tOplkError nmtcnu_sendNmtRequestEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
                                     void* pNmtCommandData_p, UINT dataSize_p)
 {
-    tOplkError      ret;
+    tOplkError      ret = kErrorOk;
     tFrameInfo      nmtRequestFrameInfo;
     tPlkFrame       nmtRequestFrame;
+    UINT            nmtCmdDataSize;
 
-    ret = kErrorOk;
+    nmtCmdDataSize = sizeof(nmtRequestFrame.data.asnd.payload.nmtRequestService.aNmtCommandData);
+    if (dataSize_p > nmtCmdDataSize)
+        dataSize_p = nmtCmdDataSize; // n.b. truncate size of aCmdData[C_MAX_NMT_CMD_DATA_SIZE]
 
     // build frame
     OPLK_MEMSET(&nmtRequestFrame.aDstMac[0], 0x00, sizeof(nmtRequestFrame.aDstMac)); // set by DLL
@@ -207,20 +210,14 @@ tOplkError nmtcnu_sendNmtRequestEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
     ami_setUint8Le(&nmtRequestFrame.data.asnd.payload.nmtRequestService.targetNodeId,
                    (BYTE)nodeId_p); // target for the nmt command
 
-    OPLK_MEMSET(&nmtRequestFrame.data.asnd.payload.nmtRequestService.aNmtCommandData[0], 0x00,
-                sizeof(nmtRequestFrame.data.asnd.payload.nmtRequestService.aNmtCommandData));
-
     if (pNmtCommandData_p && (dataSize_p != 0))
     {
         OPLK_MEMCPY(&nmtRequestFrame.data.asnd.payload.nmtRequestService.aNmtCommandData[0],
-                    pNmtCommandData_p,
-                    min(dataSize_p,
-                        sizeof(nmtRequestFrame.data.asnd.payload.nmtRequestService.aNmtCommandData)));
+                    pNmtCommandData_p, dataSize_p);
     }
-
     // build info-structure
     nmtRequestFrameInfo.frame.pBuffer = &nmtRequestFrame;
-    nmtRequestFrameInfo.frameSize = C_DLL_MINSIZE_NMTREQ; // sizeof(nmtRequestFrame);
+    nmtRequestFrameInfo.frameSize = C_DLL_MINSIZE_NMTREQ + dataSize_p;
 
     // send NMT request
     ret = dllucal_sendAsyncFrame(&nmtRequestFrameInfo, kDllAsyncReqPrioNmt);

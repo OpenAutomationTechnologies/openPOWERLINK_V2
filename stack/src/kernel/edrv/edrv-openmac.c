@@ -1317,6 +1317,8 @@ static void irqHandler(void* pArg_p)
     }
 #endif
 
+    omethRxTxIrqHandlerMux();
+
 #if CONFIG_EDRV_TIME_TRIG_TX != FALSE
     //observe additional TX queue and send packet if necessary
     while ((edrvInstance_l.txQueueWriteIndex - edrvInstance_l.txQueueReadIndex) &&
@@ -1347,8 +1349,6 @@ static void irqHandler(void* pArg_p)
         }
     }
 #endif
-
-    omethRxTxIrqHandlerMux();
 
     target_setInterruptContextFlag(FALSE);
 

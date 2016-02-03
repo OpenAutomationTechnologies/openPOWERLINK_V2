@@ -22,7 +22,7 @@ source for the high-resolution timer module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Kalycito Infotech Private Limited
+Copyright (c) 2015, Kalycito Infotech Private Limited
 Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
@@ -63,9 +63,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <linux/init.h>
 #include <linux/delay.h>
 
-#if (EDRV_USE_TTTX == FALSE)
-#error edrv-i210 only works with time triggered sending (EDRV_USE_TTTX)!
-#endif
+//TODO The openPOWERLINK i210 Linux MN uses time triggered sending (TTTX) feature of i210 NIC.
+// The i210 Linux CN does not work with TTTX feature enabled; so in the current design, the CN demo is not
+// compatible with the MN driver. This issue shall be fixed in a future release.
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -611,7 +611,9 @@ static void freeRxBuffers(void);
 static tOplkError initRxQueue(tEdrvQueue* pRxQueue_p);
 static tOplkError allocateRxBuffer(tEdrvQueue* pRxQueue_p);
 static void configureRxQueue(tEdrvQueue* pRxQueue_p);
+#if EDRV_USE_TTTX != FALSE
 static void initQavMode(void);
+#endif
 static void writeIvarRegister(INT vector_p, INT index_p, INT offset_p);
 static INT requestMsixIrq(void);
 static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* pId_p);
@@ -1019,6 +1021,8 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
     curTime = pBuffer_p->launchTime - (launchTime * SEC_TO_NSEC);
     do_div(curTime, 32);
     pTtxDesc->ctxtDesc.launchTime = curTime;
+#else
+    pTtxDesc->ctxtDesc.launchTime = 0;
 #endif
 
     // Set descriptor type
@@ -2152,6 +2156,7 @@ static void configureRxQueue(tEdrvQueue* pRxQueue_p)
         printk("....Done\n");
 }
 
+#if EDRV_USE_TTTX != FALSE
 //------------------------------------------------------------------------------
 /**
 \brief  Initialize Qav mode
@@ -2173,9 +2178,6 @@ static void initQavMode(void)
     dwRxpbsize |= EDRV_RXPBSIZE_DEF;
     EDRV_REGDW_WRITE(EDRV_RXPBSIZE_REG, dwRxpbsize);
 
-    // DMA configuration
-    EDRV_REGDW_WRITE(EDRV_DTX_MAX_PKTSZ_REG, EDRV_MAX_FRAME_SIZE/64);
-
     // Configure Q0 as SR queue
     dwTqavcc0 = EDRV_TQAVCC_QUEUE_MODE_SR; /* no idle slope */
     EDRV_REGDW_WRITE(EDRV_TQAVCC(0), dwTqavcc0);
@@ -2196,6 +2198,7 @@ static void initQavMode(void)
     EDRV_REGDW_WRITE(EDRV_LAUNCH_OSO, dwLaunchOff);
 
 }
+#endif
 
 //------------------------------------------------------------------------------
 /**
@@ -2609,8 +2612,13 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
         }
     }
 
+#if EDRV_USE_TTTX != FALSE
     // Configure device for Qav mode
     initQavMode();
+#endif
+
+    // DMA configuration
+    EDRV_REGDW_WRITE(EDRV_DTX_MAX_PKTSZ_REG, EDRV_MAX_FRAME_SIZE/64);
 
     // Setup Tx Configuration
 

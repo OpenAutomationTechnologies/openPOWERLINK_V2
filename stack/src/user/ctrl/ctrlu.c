@@ -132,6 +132,7 @@ typedef struct
     tOplkApiInitParam   initParam;              ///< Stack initialization parameters
     tCtrlKernelInfo     kernelInfo;             ///< Information about kernel stack
     UINT32              requiredKernelFeatures; ///< Kernel stack features we need to run correctly
+    UINT32              usableKernelFeatures;   ///< Kernel stack features we use
     BOOL                fInitialized;           ///< Flag determines if stack is initialized/ready
 } tCtrluInstance;
 
@@ -269,10 +270,16 @@ tOplkError ctrlu_checkKernelStackInfo(void)
         goto Exit;
     }
 
-    if ((ctrlInstance_l.kernelInfo.featureFlags == ctrlInstance_l.requiredKernelFeatures) &&
+    // Obtain the usable features by masking the kernel stack feature with the
+    // required feature flags.
+    ctrlInstance_l.usableKernelFeatures = ctrlInstance_l.requiredKernelFeatures &
+                                          ctrlInstance_l.kernelInfo.featureFlags;
+
+    if ((ctrlInstance_l.usableKernelFeatures == ctrlInstance_l.requiredKernelFeatures) &&
         (ctrlInstance_l.kernelInfo.version == PLK_DEFINED_STACK_VERSION))
     {
         DEBUG_LVL_ALWAYS_TRACE("Kernel features: 0x%08x\n", ctrlInstance_l.kernelInfo.featureFlags);
+        DEBUG_LVL_ALWAYS_TRACE("Usable features: 0x%08x\n", ctrlInstance_l.usableKernelFeatures);
         DEBUG_LVL_ALWAYS_TRACE("Kernel version: 0x%08x\n", ctrlInstance_l.kernelInfo.version);
         ret = kErrorOk;
     }
@@ -356,9 +363,6 @@ tOplkError ctrlu_initStack(tOplkApiInitParam* pInitParam_p)
 
 #endif // (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
 
-#if defined(CONFIG_INCLUDE_NMT_MN)
-    ret = linkDomainObjects(linkObjectRequestsMn, tabentries(linkObjectRequestsMn));
-#endif
 
     DEBUG_LVL_CTRL_TRACE("Initializing kernel modules ...\n");
     OPLK_MEMCPY(ctrlParam.aMacAddress, ctrlInstance_l.initParam.aMacAddress, 6);
@@ -453,6 +457,11 @@ tOplkError ctrlu_initStack(tOplkApiInitParam* pInitParam_p)
     // and thereby the whole POWERLINK stack
 
     ctrlInstance_l.fInitialized = TRUE;
+
+    // linkDomainObjects requires an initialized stack
+#if defined(CONFIG_INCLUDE_NMT_MN)
+    ret = linkDomainObjects(linkObjectRequestsMn, tabentries(linkObjectRequestsMn));
+#endif
 
 Exit:
     return ret;

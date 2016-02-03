@@ -114,8 +114,7 @@ On the Zynq SoC, openPOWERLINK runs on a Linux OS which is running on the
 ARM Cortex A9 processing system (PS) of the SoC. The following section contains
 additional information about the openPOWERLINK Linux implementation on the Zynq SoC.
 
-For general information about running openPOWERLINK on Linux refer to
-["openPOWERLINK on Linux"](\ref page_platform_linux).
+For general information about running openPOWERLINK on Linux refer to \ref page_platform_linux.
 
 __NOTE__: Third-party libraries such as libpcap, and libqt etc. must also be
           cross-compiled for Zynq ARM apart from openPOWERLINK.

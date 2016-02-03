@@ -4,6 +4,7 @@
 #
 # Copyright (c) 2013, SYSTEC electronik GmbH
 # Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2015, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -117,8 +118,13 @@ ELSEIF(CFG_POWERLINK_EDRV STREQUAL "8255x")
 ELSEIF(CFG_POWERLINK_EDRV STREQUAL "i210")
 
     SET(MODULE_NAME "oplki210")
-    SET(MODULE_DEFS "${MODULE_DEFS} -DCONFIG_EDRV=210 -DEDRV_USE_TTTX=TRUE")
+    SET(MODULE_DEFS "${MODULE_DEFS} -DCONFIG_EDRV=210")
     SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} ${EDRV_SOURCE_DIR}/edrv-i210.c)
+    IF(CFG_OPLK_MN)
+        SET(MODULE_DEFS "${MODULE_DEFS} -DEDRV_USE_TTTX=TRUE")
+    ELSE()
+        SET(MODULE_DEFS "${MODULE_DEFS} -DEDRV_USE_TTTX=FALSE")
+    ENDIF()
 
 ELSEIF(CFG_POWERLINK_EDRV STREQUAL "8111")
 
