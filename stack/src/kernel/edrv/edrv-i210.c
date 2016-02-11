@@ -617,8 +617,10 @@ static void writeIvarRegister(INT vector_p, INT index_p, INT offset_p);
 static INT requestMsixIrq(void);
 static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* pId_p);
 static void removeOnePciDev(struct pci_dev* pPciDev_p);
+static tOplkError sendNormalBuffer(tEdrvTxBuffer* pBuffer_p);
 #if EDRV_USE_TTTX != FALSE
 static tOplkError getMacTime(UINT64* pCurtime_p);
+static tOplkError sendTimeTrigBuffer(tEdrvTxBuffer* pBuffer_p);
 #endif
 
 //---------------------------------------------------------------------------
@@ -982,10 +984,6 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
     tOplkError      ret = kErrorOk;
     UINT            bufferNumber;
-    tEdrvQueue*     pTxQueue;
-    INT             queue = 0;
-    INT             index = 0;
-    dma_addr_t      txDma;
 
     bufferNumber = pBuffer_p->txBufferNumber.value;
 
@@ -997,130 +995,10 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
 
 #if EDRV_USE_TTTX != FALSE
     if (pBuffer_p->fLaunchTimeValid)
-    {
-        // Send packet using time triggered send
-        tEdrvTtxDesc*   pTtxDesc;
-        UINT64          launchTime;
-        UINT64          curTime;
-
-        pTxQueue = edrvInstance_l.pTxQueue[queue];
-        index = pTxQueue->nextDesc;
-
-        if (((index + 1) & EDRV_MAX_TTX_DESC_LEN) == pTxQueue->nextWb)
-        {
-            ret = kErrorEdrvNoFreeTxDesc;
-            goto Exit;
-        }
-
-        pTtxDesc = EDRV_GET_TTX_DESC(pTxQueue, index);
-
-        pTtxDesc->ctxtDesc.idxL4lenMss = 0;
-        pTtxDesc->ctxtDesc.ipMaclenVlan = 0;
-        launchTime = pBuffer_p->launchTime.nanoSeconds;
-
-        if (launchTime == 0)
-        {
-            getMacTime(&launchTime);
-            pBuffer_p->launchTime.nanoSeconds = launchTime;
-        }
-        // Scale the launch time to 32 nsecs unit
-        do_div(launchTime, SEC_TO_NSEC);
-        curTime = pBuffer_p->launchTime.nanoSeconds - (launchTime * SEC_TO_NSEC);
-        do_div(curTime, 32);
-
-        pTtxDesc->ctxtDesc.launchTime = curTime;
-
-        // Always reset the launch time
-        pBuffer_p->launchTime.nanoSeconds = 0;
-
-        // Set descriptor type
-        pTtxDesc->ctxtDesc.tucmdType = (EDRV_TDESC_CMD_DEXT | EDRV_TDESC_DTYP_CTXT);
-
-        txDma = dma_map_single(&edrvInstance_l.pPciDev->dev, pBuffer_p->pBuffer,
-                               pBuffer_p->txFrameSize, DMA_TO_DEVICE);
-
-        if (dma_mapping_error(&edrvInstance_l.pPciDev->dev, txDma))
-        {
-            ret = kErrorEdrvNoFreeBufEntry;
-            goto Exit;
-        }
-
-        // Store TxBuffer for reference in ISR
-        pTxQueue->apTxBuffer[index] = pBuffer_p;
-
-        EDRV_COUNT_SEND;
-        // Store DMA address, length and virtual address for reference
-        pTxQueue->pPktBuff[index].dmaAddr = txDma;
-        pTxQueue->pPktBuff[index].pVirtAddr = pBuffer_p->pBuffer;
-        pTxQueue->pPktBuff[index].len = pBuffer_p->txFrameSize;
-
-        pTtxDesc->advDesc.sRead.bufferAddrLe = cpu_to_le64(txDma);
-        pTtxDesc->advDesc.sRead.cmdTypeLen = (UINT)pBuffer_p->txFrameSize;
-        pTtxDesc->advDesc.sRead.cmdTypeLen |= (EDRV_TDESC_CMD_DEXT | EDRV_TDESC_DTYP_ADV |
-                                               EDRV_TDESC_CMD_EOP | EDRV_TDESC_CMD_IFCS |
-                                               EDRV_TDESC_CMD_RS);
-
-        pTtxDesc->advDesc.sRead.statusIdxPaylen = (pBuffer_p->txFrameSize << 14);
-
-        index = ((index + 1) & EDRV_MAX_TTX_DESC_LEN);
-
-        // increment Tx descriptor queue tail pointer
-        pTxQueue->nextDesc = index;
-        // Handle the frame to Hw
-        EDRV_REGDW_WRITE(EDRV_TDTAIL(queue), (index * 2));
-
-    }
+        ret = sendTimeTrigBuffer(pBuffer_p);
     else
 #endif
-    {
-        // Send packet using normal Tx
-        tEdrvAdvTxDesc*    pTxDesc;
-        queue = 1;
-
-        pTxQueue = edrvInstance_l.pTxQueue[queue];
-        index = pTxQueue->nextDesc;
-
-        if (((index + 1) & EDRV_MAX_TX_DESC_LEN) == pTxQueue->nextWb)
-        {
-            ret = kErrorEdrvNoFreeTxDesc;
-            goto Exit;
-        }
-
-        pTxDesc = EDRV_GET_TX_DESC(pTxQueue, index);
-
-        txDma = dma_map_single(&edrvInstance_l.pPciDev->dev, pBuffer_p->pBuffer,
-                               pBuffer_p->txFrameSize, DMA_TO_DEVICE);
-
-        if (dma_mapping_error(&edrvInstance_l.pPciDev->dev, txDma))
-        {
-            ret = kErrorEdrvNoFreeBufEntry;
-            goto Exit;
-        }
-
-        // Store TxBuffer for reference in ISR
-        pTxQueue->apTxBuffer[index] = pBuffer_p;
-
-        EDRV_COUNT_SEND;
-        // Store DMA address, length and virtual address for reference
-        pTxQueue->pPktBuff[index].dmaAddr = txDma;
-        pTxQueue->pPktBuff[index].pVirtAddr = pBuffer_p->pBuffer;
-        pTxQueue->pPktBuff[index].len = pBuffer_p->txFrameSize;
-
-        pTxDesc->sRead.bufferAddrLe = cpu_to_le64(txDma);
-        pTxDesc->sRead.cmdTypeLen = (UINT)pBuffer_p->txFrameSize;
-        pTxDesc->sRead.cmdTypeLen |= (EDRV_TDESC_CMD_DEXT | EDRV_TDESC_DTYP_ADV |
-                                      EDRV_TDESC_CMD_EOP | EDRV_TDESC_CMD_IFCS |
-                                      EDRV_TDESC_CMD_RS);
-
-        pTxDesc->sRead.statusIdxPaylen = (pBuffer_p->txFrameSize << 14);
-
-        index = ((index + 1) & EDRV_MAX_TX_DESC_LEN);
-
-        // increment Tx descriptor queue tail pointer
-        pTxQueue->nextDesc = index;
-        // Handle the frame to Hw
-        EDRV_REGDW_WRITE(EDRV_TDTAIL(queue), index);
-    }
+        ret = sendNormalBuffer(pBuffer_p);
 
 Exit:
     return ret;
@@ -2310,7 +2188,7 @@ static void initQavMode(void)
     UINT32 launchOff;
     UINT32 tqavcc0 = 0;
     UINT32 txpbsize;
-    UINT32 txpbsize;
+    UINT32 rxpbsize;
 
     // reconfigure the rx packet buffer allocation to 30k
     rxpbsize = EDRV_REGDW_READ(EDRV_RXPBSIZE_REG);
@@ -2429,6 +2307,175 @@ static INT requestMsixIrq(void)
     }
     return ret;
 }
+
+//------------------------------------------------------------------------------
+/**
+\brief  Send a buffer using normal transmission queue
+
+This function queues the frame to be transmitted using normal transmission.
+Queue 1 is used for transmitting frames in normal mode.
+
+\param  pBuffer_p   Pointer to the Tx buffer to transmit.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError sendNormalBuffer(tEdrvTxBuffer* pBuffer_p)
+{
+    tOplkError          ret = kErrorOk;
+    tEdrvAdvTxDesc*     pTxDesc;
+    tEdrvQueue*         pTxQueue;
+    INT                 queue = 1;
+    INT                 index = 0;
+    dma_addr_t          txDma;
+
+    pTxQueue = edrvInstance_l.pTxQueue[queue];
+    index = pTxQueue->nextDesc;
+
+    if (((index + 1) & EDRV_MAX_TX_DESC_LEN) == pTxQueue->nextWb)
+    {
+        ret = kErrorEdrvNoFreeTxDesc;
+        goto Exit;
+    }
+
+    pTxDesc = EDRV_GET_TX_DESC(pTxQueue, index);
+
+    txDma = dma_map_single(&edrvInstance_l.pPciDev->dev, pBuffer_p->pBuffer,
+                           pBuffer_p->txFrameSize, DMA_TO_DEVICE);
+
+    if (dma_mapping_error(&edrvInstance_l.pPciDev->dev, txDma))
+    {
+        ret = kErrorEdrvNoFreeBufEntry;
+        goto Exit;
+    }
+
+    // Store TxBuffer for reference in ISR
+    pTxQueue->apTxBuffer[index] = pBuffer_p;
+
+    EDRV_COUNT_SEND;
+    // Store DMA address, length and virtual address for reference
+    pTxQueue->pPktBuff[index].dmaAddr = txDma;
+    pTxQueue->pPktBuff[index].pVirtAddr = pBuffer_p->pBuffer;
+    pTxQueue->pPktBuff[index].len = pBuffer_p->txFrameSize;
+
+    pTxDesc->sRead.bufferAddrLe = cpu_to_le64(txDma);
+    pTxDesc->sRead.cmdTypeLen = (UINT)pBuffer_p->txFrameSize;
+    pTxDesc->sRead.cmdTypeLen |= (EDRV_TDESC_CMD_DEXT | EDRV_TDESC_DTYP_ADV |
+                                  EDRV_TDESC_CMD_EOP | EDRV_TDESC_CMD_IFCS |
+                                  EDRV_TDESC_CMD_RS);
+
+    pTxDesc->sRead.statusIdxPaylen = (pBuffer_p->txFrameSize << 14);
+
+    index = ((index + 1) & EDRV_MAX_TX_DESC_LEN);
+
+    // increment Tx descriptor queue tail pointer
+    pTxQueue->nextDesc = index;
+    // Handle the frame to Hw
+    EDRV_REGDW_WRITE(EDRV_TDTAIL(queue), index);
+
+Exit:
+    return ret;
+}
+
+#if EDRV_USE_TTTX != FALSE
+//------------------------------------------------------------------------------
+/**
+\brief  Send a buffer using time triggered send
+
+This function queues the frame to be transmitted using valid launch time based
+transmission. Queue 0 is used to transmit time triggered frames.
+
+\param  pBuffer_p   Pointer to the Tx buffer to transmit.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError sendTimeTrigBuffer(tEdrvTxBuffer* pBuffer_p)
+{
+    tOplkError      ret = kErrorOk;
+    tEdrvTtxDesc*   pTtxDesc;
+    UINT64          launchTime;
+    UINT64          curTime;
+    tEdrvQueue*     pTxQueue;
+    INT             queue = 0;
+    INT             index = 0;
+    dma_addr_t      txDma;
+
+    pTxQueue = edrvInstance_l.pTxQueue[queue];
+    index = pTxQueue->nextDesc;
+
+    if (((index + 1) & EDRV_MAX_TTX_DESC_LEN) == pTxQueue->nextWb)
+    {
+        ret = kErrorEdrvNoFreeTxDesc;
+        goto Exit;
+    }
+
+    pTtxDesc = EDRV_GET_TTX_DESC(pTxQueue, index);
+
+    pTtxDesc->ctxtDesc.idxL4lenMss = 0;
+    pTtxDesc->ctxtDesc.ipMaclenVlan = 0;
+    launchTime = pBuffer_p->launchTime.nanoSeconds;
+
+    // Check if launch time is Zero
+    if (launchTime == 0)
+    {
+        // Get the current MAC time and use it for the frame
+        // transmission. The i210 controller will misinterpret
+        // the launch time outside the SYSTIML + 0.5 sec  to
+        // SYSTIML -0.5 range.
+        getMacTime(&launchTime);
+        pBuffer_p->launchTime.nanoSeconds = launchTime;
+    }
+    // Scale the launch time to 32 nsecs unit
+    do_div(launchTime, SEC_TO_NSEC);
+    curTime = pBuffer_p->launchTime.nanoSeconds - (launchTime * SEC_TO_NSEC);
+    do_div(curTime, 32);
+
+    pTtxDesc->ctxtDesc.launchTime = curTime;
+
+    // Always reset the launch time
+    pBuffer_p->launchTime.nanoSeconds = 0;
+
+    // Set descriptor type
+    pTtxDesc->ctxtDesc.tucmdType = (EDRV_TDESC_CMD_DEXT | EDRV_TDESC_DTYP_CTXT);
+
+    txDma = dma_map_single(&edrvInstance_l.pPciDev->dev, pBuffer_p->pBuffer,
+                           pBuffer_p->txFrameSize, DMA_TO_DEVICE);
+
+    if (dma_mapping_error(&edrvInstance_l.pPciDev->dev, txDma))
+    {
+        ret = kErrorEdrvNoFreeBufEntry;
+        goto Exit;
+    }
+
+    // Store TxBuffer for reference in ISR
+    pTxQueue->apTxBuffer[index] = pBuffer_p;
+
+    EDRV_COUNT_SEND;
+    // Store DMA address, length and virtual address for reference
+    pTxQueue->pPktBuff[index].dmaAddr = txDma;
+    pTxQueue->pPktBuff[index].pVirtAddr = pBuffer_p->pBuffer;
+    pTxQueue->pPktBuff[index].len = pBuffer_p->txFrameSize;
+
+    pTtxDesc->advDesc.sRead.bufferAddrLe = cpu_to_le64(txDma);
+    pTtxDesc->advDesc.sRead.cmdTypeLen = (UINT)pBuffer_p->txFrameSize;
+    pTtxDesc->advDesc.sRead.cmdTypeLen |= (EDRV_TDESC_CMD_DEXT | EDRV_TDESC_DTYP_ADV |
+                                           EDRV_TDESC_CMD_EOP | EDRV_TDESC_CMD_IFCS |
+                                           EDRV_TDESC_CMD_RS);
+
+    pTtxDesc->advDesc.sRead.statusIdxPaylen = (pBuffer_p->txFrameSize << 14);
+
+    index = ((index + 1) & EDRV_MAX_TTX_DESC_LEN);
+
+    // increment Tx descriptor queue tail pointer
+    pTxQueue->nextDesc = index;
+    // Handle the frame to Hw
+    EDRV_REGDW_WRITE(EDRV_TDTAIL(queue), (index * 2));
+
+Exit:
+    return ret;
+}
+#endif
 
 //------------------------------------------------------------------------------
 /**
