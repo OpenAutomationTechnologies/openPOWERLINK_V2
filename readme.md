@@ -76,6 +76,9 @@ openPOWERLINK can be downloaded from its SourceForge project site:
 (c) Kalycito Infotech Private Limited,
     <http://www.kalycito.com>
 
+(c) Weidmueller Interface GmbH & Co. KG, 2016
+    <www.weidmueller.de>
+
 (c) Open Wide Ingenierie,
     a Smile group company,
     20 rue des Jardins,

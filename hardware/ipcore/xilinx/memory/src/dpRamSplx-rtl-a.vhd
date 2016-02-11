@@ -114,7 +114,7 @@ begin
         generic map (
             gWordWidth      => cDprWordWidth,
             gNumberOfWords  => cDprWords,
-            gInitFile       => "unused"
+            gInitFile       => "UNUSED"
         )
         port map (
             iClk_A          => iClk_A,
