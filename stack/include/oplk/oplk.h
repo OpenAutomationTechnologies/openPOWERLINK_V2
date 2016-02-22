@@ -218,6 +218,18 @@ typedef struct
 } tOplkApiEventReceivedSdoSeq;
 
 /**
+\brief User specific OD access event
+
+This structure specifies the event for a user specific object access.
+It is used to forward an access to an object which doesn't exist in the default
+object dictionary to the API.
+*/
+typedef struct
+{
+    tObdAlConHdl*               pUserObdAccHdl; ///< Pointer to handle for user specific OD access
+} tOplkApiEventUserObdAccess;
+
+/**
 \brief Application event types
 
 This enumeration specifies the valid application events which can be
@@ -268,7 +280,7 @@ typedef enum
     kOplkApiEventSdo                = 0x62,
 
     /** Object dictionary access. This event informs about an access of the
-    object dictionary. The event argument contains an OBD callback parameter
+    object dictionary. The event argument contains an OD callback parameter
     (\ref tObdCbParam). */
     kOplkApiEventObdAccess          = 0x69,
 
@@ -308,14 +320,23 @@ typedef enum
 
     /** Received SDO command layer. This event informs the application about
     a received SDO command layer. This event argument contains information on the
-    received SDO command layer. (\ref tOplkApiEventReceivedSdoCom). */
+    received SDO command layer (\ref tOplkApiEventReceivedSdoCom). */
     kOplkApiEventReceivedSdoCom     = 0x83,
 
     /** Received SDO sequence layer. This event informs the application about
     a received SDO sequence layer. This event argument contains information on the
-    received SDO sequence layer. (\ref tOplkApiEventReceivedSdoSeq). */
+    received SDO sequence layer (\ref tOplkApiEventReceivedSdoSeq). */
     kOplkApiEventReceivedSdoSeq     = 0x84,
 
+    /** User specific OD access. This event informs the application about
+    an object access to a non-existing object in the default OD. The event
+    argument contains information about the accessed object and used data, thus
+    the OD access can be processed in this event (\ref tOplkApiEventUserObdAccess).
+    Per default, this event is disabled. It can be enabled with
+    \ref oplk_enableUserObdAccess. Either, the processing finishes within the
+    event function call, or \ref kErrorReject has to be returned, whereas the
+    processing must finish with a call to \ref oplk_finishUserObdAccess. */
+    kOplkApiEventUserObdAccess       = 0x85,
 } eOplkApiEventType;
 
 /**
@@ -338,7 +359,7 @@ typedef union
     tEventNmtStateChange        nmtStateChange;     ///< NMT state change information (\ref kOplkApiEventNmtStateChange)
     tEventError                 internalError;      ///< Internal stack error (\ref kOplkApiEventCriticalError, \ref kOplkApiEventWarning)
     tSdoComFinished             sdoInfo;            ///< SDO information (\ref kOplkApiEventSdo)
-    tObdCbParam                 obdCbParam;         ///< OBD callback parameter (\ref kOplkApiEventObdAccess)
+    tObdCbParam                 obdCbParam;         ///< OD callback parameter (\ref kOplkApiEventObdAccess)
     tOplkApiEventNode           nodeEvent;          ///< Node event information (\ref kOplkApiEventNode)
     tOplkApiEventBoot           bootEvent;          ///< Boot event information (\ref kOplkApiEventBoot)
     tCfmEventCnProgress         cfmProgress;        ///< CFM progress information (\ref kOplkApiEventCfmProgress)
@@ -351,6 +372,7 @@ typedef union
     tOplkApiEventDefaultGwChange defaultGwChange;   ///< Default gateway change event (\ref kOplkApiEventDefaultGwChange)
     tOplkApiEventReceivedSdoCom receivedSdoCom;     ///< Received SDO command layer (\ref kOplkApiEventReceivedSdoCom)
     tOplkApiEventReceivedSdoSeq receivedSdoSeq;     ///< Received SDO sequence layer (\ref kOplkApiEventReceivedSdoSeq)
+    tOplkApiEventUserObdAccess  userObdAccess;      ///< Access to user specific object (\ref kOplkApiEventUserObdAccess)
 } tOplkApiEventArg;
 
 /**
@@ -432,8 +454,6 @@ typedef struct
     tOplkApiSdoStack    sdoStackType;               ///< Specifies the SDO stack that should be used.
                                                     /**< It is used for switching between the standard SDO stack and alternative SDO stacks. The available SDO stacks are defined by the \ref tOplkApiSdoStack enumeration.
                                                          If the standard SDO stack is used it must be initialized with 0x00.*/
-    tComdLayerObdCb     pfnSdoSrvProcessObdWrite;    ///< Function pointer for SDO server write access to the object dictionary
-    tComdLayerObdCb     pfnSdoSrvProcessObdRead;     ///< Function pointer for SDO server read access to the object dictionary
     UINT32              minSyncTime;                ///< Minimum synchronization period supported by the application [us]
                                                     /**< This parameter configures the period of synchronization events triggered by the openPOWERLINK stack.
                                                          Note that the resulting synchronization period can only be a multiple of the configured cycle lenght.
@@ -515,6 +535,8 @@ OPLKDLLEXPORT tOplkError oplk_readObject(tSdoComConHdl* pSdoComConHdl_p, UINT no
 OPLKDLLEXPORT tOplkError oplk_writeObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT index_p,
                                           UINT subindex_p, void* pSrcData_le_p, UINT size_p,
                                           tSdoType sdoType_p, void* pUserArg_p);
+OPLKDLLEXPORT tOplkError oplk_finishUserObdAccess(tObdAlConHdl* pUserObdConHdl_p);
+OPLKDLLEXPORT tOplkError oplk_enableUserObdAccess(BOOL fEnable_p);
 OPLKDLLEXPORT tOplkError oplk_freeSdoChannel(tSdoComConHdl sdoComConHdl_p);
 OPLKDLLEXPORT tOplkError oplk_abortSdo(tSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p);
 OPLKDLLEXPORT tOplkError oplk_readLocalObject(UINT index_p, UINT subindex_p, void* pDstData_p, UINT* pSize_p);

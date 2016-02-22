@@ -106,7 +106,10 @@ static tObdInstance                 obdInstance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError   initWrite(UINT index_p, UINT subIndex_p, void** ppDstData_p, tObdSize size_p);
+static tOplkError   initWrite(UINT        index_p,
+                              UINT        subIndex_p,
+                              void**      ppDstData_p,
+                              tObdSize    size_p);
 static tOplkError   writeSegm(tSdoObdConHdl* pSdoHdl_p);
 static tOplkError   writeByIdxSegm(tSdoObdConHdl* pSdoHdl_p);
 static tOplkError   writeByIdxInit(tSdoObdConHdl* pSdoHdl_p);
@@ -1141,16 +1144,19 @@ tOplkError obd_processWrite(tSdoObdConHdl* pSdoHdl_p)
 {
     tOplkError      ret = kErrorOk;
 
+    if (pSdoHdl_p == NULL)
+    {
+        ret = kErrorApiInvalidParam;
+        goto Exit;
+    }
+
     if (pSdoHdl_p->dataOffset == 0)
-    {
         ret = writeByIdxInit(pSdoHdl_p);
-        return ret;
-    }
     else
-    {
         ret = writeByIdxSegm(pSdoHdl_p);
-        return ret;
-    }
+
+Exit:
+    return ret;
 }
 
 //------------------------------------------------------------------------------
@@ -1159,10 +1165,12 @@ tOplkError obd_processWrite(tSdoObdConHdl* pSdoHdl_p)
 
 The function processes an ReadByIndex command layer of an SDO server.
 
-\param  pSdoHdl_p       Connection handle to SDO server
-                        returns:
-                         - totalPendSize, only for initial transfer: object size
-                         - dataSize: size of copied data to provided buffer
+\param  pSdoHdl_p       Connection handle to SDO server. Used members:
+        \li [out] \ref  tSdoObdConHdl::totalPendSize
+                        Object size, only for initial transfer
+        \li [out] \ref  tSdoObdConHdl::dataSize
+                        Size of copied data to provided buffer
+        \li [in] all other members of \ref tSdoObdConHdl
 
 \return The function returns a tOplkError error code.
 
@@ -1173,16 +1181,23 @@ tOplkError obd_processRead(tSdoObdConHdl* pSdoHdl_p)
 {
     tOplkError      ret = kErrorOk;
 
+    if (pSdoHdl_p == NULL)
+    {
+        ret = kErrorApiInvalidParam;
+        goto Exit;
+    }
+
     if (pSdoHdl_p->dataOffset == 0)
     {
         ret = readByIdxInit(pSdoHdl_p);
-        return ret;
     }
     else
     {
         ret = readByIdxSegm(pSdoHdl_p);
-        return ret;
     }
+
+Exit:
+    return ret;
 }
 
 //============================================================================//
@@ -1206,8 +1221,10 @@ It is used by SDO command layer to store segmented data.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError initWrite(UINT index_p, UINT subIndex_p, void** ppDstData_p,
-                         tObdSize size_p)
+static tOplkError initWrite(UINT        index_p,
+                            UINT        subIndex_p,
+                            void**      ppDstData_p,
+                            tObdSize    size_p)
 {
     tOplkError              ret;
     tObdEntryPtr            pObdEntry;
@@ -1347,13 +1364,10 @@ static tOplkError writeByIdxInit(tSdoObdConHdl* pSdoHdl_p)
     if ((accessType & kObdAccWrite) == 0)
     {
         if ((accessType & kObdAccRead) != 0)
-        {
             ret = kErrorObdWriteViolation;
-        }
         else
-        {
             ret = kErrorObdAccessViolation;
-        }
+
         goto Exit;
     }
 
@@ -1404,9 +1418,9 @@ payload segments.
 //------------------------------------------------------------------------------
 static tOplkError writeByIdxSegm(tSdoObdConHdl* pSdoHdl_p)
 {
-   // object and size checks already done for initial segment
+    // object and size checks already done for initial segment
 
-   // copy non-fixed size to (e.g. domain) object -> don't consider endianness
+    // copy non-fixed size to (e.g. domain) object -> don't consider endianness
     return writeSegm(pSdoHdl_p);
 }
 
@@ -1425,11 +1439,11 @@ payload segments for non-numerical objects.
 static tOplkError writeSegm(tSdoObdConHdl* pSdoHdl_p)
 {
     tOplkError      ret = kErrorOk;
-    BYTE MEM*       pDstData = NULL;
+    void*           pDstData = NULL;
 
     ret = initWrite(pSdoHdl_p->index,
                     pSdoHdl_p->subIndex,
-                    (void**) &pDstData,
+                    &pDstData,
                     pSdoHdl_p->totalPendSize);
     if (ret != kErrorOk)
     {
@@ -1438,11 +1452,11 @@ static tOplkError writeSegm(tSdoObdConHdl* pSdoHdl_p)
 
     if (pDstData == NULL)
     {
-        ret = kErrorGeneralError;
+        ret = kErrorInvalidInstanceParam;
         goto Exit;
     }
 
-    pDstData = pDstData + pSdoHdl_p->dataOffset;
+    pDstData = (BYTE*)pDstData + pSdoHdl_p->dataOffset;
 
     OPLK_MEMCPY(pDstData, pSdoHdl_p->pSrcData, pSdoHdl_p->dataSize);
 
@@ -1454,12 +1468,14 @@ Exit:
 /**
 \brief  Process an object read access from SDO server
 
-The function processes an ReadByIndex command layer of an SDO server.
+The function processes a ReadByIndex command layer of an SDO server.
 
-\param  pSdoHdl_p       Connection handle to SDO server
-                        returns:
-                         - totalPendSize, only for initial transfer: object size
-                         - dataSize: size of copied data to provided buffer
+\param  pSdoHdl_p       Connection handle to SDO server. Used members:
+        \li [out] \ref  tSdoObdConHdl::totalPendSize
+                        Object size, only for initial transfer
+        \li [out] \ref  tSdoObdConHdl::dataSize
+                        Size of copied data to provided buffer
+        \li [in] all other members of \ref tSdoObdConHdl
 
 \return The function returns a tOplkError error code.
 
@@ -1533,9 +1549,11 @@ Exit:
 
 The function processes an ReadByIndex command layer of an SDO server.
 
-\param  pSdoHdl_p       Connection handle to SDO server
-                        returns:
-                         - dataSize: size of copied data to provided buffer
+\param  pSdoHdl_p       Connection handle to SDO server. Used members:
+        \li [out] \ref  tSdoObdConHdl::dataSize
+                        Size of copied data to provided buffer
+        \li [in] all other members of \ref tSdoObdConHdl
+
 
 \return The function returns a tOplkError error code.
 

@@ -146,12 +146,12 @@ machine.
 */
 typedef enum
 {
-    kSdoSeqStateIdle                = 0x00, ///< SDO connection is idle (closed)
-    kSdoSeqStateInit1               = 0x01, ///< SDO init 1: scon=1, rcon=0
-    kSdoSeqStateInit2               = 0x02, ///< SDO init 2: scon=1, rcon=1
-    kSdoSeqStateInit3               = 0x03, ///< SDO init 3: scon=2, rcon=1
-    kSdoSeqStateConnected           = 0x04, ///< SDO connection is established
-    kSdoSeqStateWaitAck             = 0x05, ///< SDO connection is waiting for an acknowledgment
+    kSdoSeqStateIdle        = 0x00, ///< SDO connection is idle (closed)
+    kSdoSeqStateInit1       = 0x01, ///< SDO init 1: scon=1, rcon=0
+    kSdoSeqStateInit2       = 0x02, ///< SDO init 2: scon=1, rcon=1
+    kSdoSeqStateInit3       = 0x03, ///< SDO init 3: scon=2, rcon=1
+    kSdoSeqStateConnected   = 0x04, ///< SDO connection is established
+    kSdoSeqStateWaitAck     = 0x05, ///< SDO connection is waiting for an acknowledgment
 } eSdoSeqState;
 
 /**
@@ -168,18 +168,18 @@ This structure is used by the SDO sequence layer to save connection information.
 */
 typedef struct
 {
-    tSdoConHdl              conHandle;          ///< Connection handle
-    tSdoSeqState            sdoSeqState;        ///< State of the connection
-    UINT8                   recvSeqNum;         ///< Receive sequence number
-                                                /**< Expected receive sequence number (acknowledge) of other node,
-                                                     updated on every segment Tx with new command data layer data */
-    UINT8                   sendSeqNum;         ///< Send sequence number of communication partner, updated on Rx
-    tSdoSeqConHistory       sdoSeqConHistory;   ///< Connection history buffer
-    tTimerHdl               timerHandle;        ///< Timer handle
-    UINT                    retryCount;         ///< Retry counter
-    UINT                    useCount;           ///< One sequence layer connection may be used by multiple command layer connections
-    BOOL                    fForceFlowControl;  ///< If enabled, Rx sequences will not be forwarded to command layer
-    UINT                    countCmdLayerInactive;    ///< Counter of an inactive command layer using timeout events
+    tSdoConHdl              conHandle;              ///< Connection handle
+    tSdoSeqState            sdoSeqState;            ///< State of the connection
+    UINT8                   recvSeqNum;             ///< Receive sequence number
+                                                    /**< Expected receive sequence number (acknowledge) of other node,
+                                                         updated on every segment Tx with new command data layer data */
+    UINT8                   sendSeqNum;             ///< Send sequence number of communication partner, updated on Rx
+    tSdoSeqConHistory       sdoSeqConHistory;       ///< Connection history buffer
+    tTimerHdl               timerHandle;            ///< Timer handle
+    UINT                    retryCount;             ///< Retry counter
+    UINT                    useCount;               ///< One sequence layer connection may be used by multiple command layer connections
+    BOOL                    fForceFlowControl;      ///< If enabled, Rx sequences will not be forwarded to command layer
+    UINT                    countCmdLayerInactive;  ///< Counter of an inactive command layer using timeout events
 } tSdoSeqCon;
 
 /**
@@ -1152,7 +1152,6 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
     {
         // frame to send
         case kSdoSeqEventFrameSend:
-
             pSdoSeqCon_p->countCmdLayerInactive = 0;
 
             // set timer
@@ -1225,7 +1224,7 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl 
                 // connection valid
                 case 2:
                     if (checkConnectionAckValid(pSdoSeqCon_p, recvSeqNumCon & SEQ_NUM_MASK) ||
-                       checkHistoryAcked(pSdoSeqCon_p, recvSeqNumCon & SEQ_NUM_MASK)    )
+                        checkHistoryAcked(pSdoSeqCon_p, recvSeqNumCon & SEQ_NUM_MASK))
                     {
                         ret = setTimer(pSdoSeqCon_p, sdoSeqInstance_l.sdoSeqTimeout);
                         // reset timeout counter
@@ -1943,7 +1942,7 @@ static tOplkError addFrameToHistory(tSdoSeqCon* pSdoSeqCon_p, tPlkFrame* pFrame_
 /**
 \brief  Send the whole history buffer
 
-The function send all frames stored in the Tx history buffer to lower layer.
+The function sends all frames stored in the Tx history buffer to lower layer.
 
 \param  pSdoSeqCon_p        Pointer to sequence layer connection information.
 
@@ -1959,6 +1958,7 @@ static tOplkError sendAllTxHistory(tSdoSeqCon* pSdoSeqCon_p)
     ret = readFromHistory(pSdoSeqCon_p, &pFrame, &frameSize, TRUE);
     if (ret == kErrorRetry)
         ret = kErrorOk; // ignore unsent frames info
+
     if (ret != kErrorOk)
         return ret;
 
@@ -1976,6 +1976,7 @@ static tOplkError sendAllTxHistory(tSdoSeqCon* pSdoSeqCon_p)
         ret = readFromHistory(pSdoSeqCon_p, &pFrame, &frameSize, FALSE);
         if (ret == kErrorRetry)
             ret = kErrorOk; // ignore unsent frames info
+
         if (ret != kErrorOk)
             return ret;
     }
@@ -1992,7 +1993,7 @@ The function deletes an acknowledged frame from the history buffer.
 \param  pSdoSeqCon_p        Pointer to connection control structure.
 \param  recvSeqNumber_p     Receive sequence number of frame to delete.
 
-\return The function returns kErrorOk
+\return The function returns kErrorOk.
 */
 //------------------------------------------------------------------------------
 static tOplkError deleteAckedFrameFromHistory(tSdoSeqCon* pSdoSeqCon_p, UINT8 recvSeqNumber_p)
@@ -2037,7 +2038,6 @@ static tOplkError deleteAckedFrameFromHistory(tSdoSeqCon* pSdoSeqCon_p, UINT8 re
 
         // store local read-index to global var
         pHistory->ackIndex = ackIndex;
-
     }
 
     return ret;
@@ -2171,8 +2171,8 @@ static tOplkError setTimer(tSdoSeqCon* pSdoSeqCon_p, ULONG timeout_p)
 /**
 \brief  Processes final sequence layer timeout
 
-The function processes and signals and the final sequence layer timeout,
-causing the connection to be closed.
+The function processes and signals the final sequence layer timeout, causing the
+connection to be closed.
 
 \param  pSdoSeqCon_p        Pointer to connection control structure.
 \param  sdoSeqConHdl_p      Handle of sequence layer connection.
@@ -2309,7 +2309,7 @@ static tOplkError processTimeoutEvent(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sd
     }
 
     // sequence layer timeout
-    if ((pSdoSeqCon_p->retryCount < SDO_SEQ_RETRY_COUNT))
+    if (pSdoSeqCon_p->retryCount < SDO_SEQ_RETRY_COUNT)
     {   // retry counter not exceeded
         ret = processSubTimeout(pSdoSeqCon_p);
         if (ret != kErrorOk)
@@ -2327,7 +2327,7 @@ static tOplkError processTimeoutEvent(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sd
 /**
 \brief  Check if a history frame was acknowledged by the receiver
 
-The function checks if the receiver send an acknowledge for a frame existing
+The function checks if the receiver sent an acknowledge for a frame existing
 in the (Tx) history buffer.
 
 \param  pSdoSeqCon_p        Pointer to connection control structure.
@@ -2365,7 +2365,7 @@ range due to an overflowing sequence number counter.
 \param  pSdoSeqCon_p        Pointer to connection control structure.
 \param  recvSeqNumber_p     Receive sequence number of frame to delete.
 
-\return The function returns TRUE if the receiver sent a ack. Otherwise FALSE.
+\return The function returns TRUE if the receiver sent an ack. Otherwise FALSE.
 */
 //------------------------------------------------------------------------------
 static BOOL checkConnectionAckValid(tSdoSeqCon* pSdoSeqCon_p, UINT8 recvSeqNumber_p)
@@ -2373,7 +2373,7 @@ static BOOL checkConnectionAckValid(tSdoSeqCon* pSdoSeqCon_p, UINT8 recvSeqNumbe
     UINT8                   currentSeqNum;
 
     // get expected receive sequence number
-    currentSeqNum =  pSdoSeqCon_p->recvSeqNum & SEQ_NUM_MASK;
+    currentSeqNum = pSdoSeqCon_p->recvSeqNum & SEQ_NUM_MASK;
 
     if (((currentSeqNum - recvSeqNumber_p) & SEQ_NUM_MASK) < SDO_SEQ_NUM_THRESHOLD)
     {   // acknowledges a sequence frame within a valid range (considering overflow)
@@ -2453,7 +2453,6 @@ static void forceRetransmissionRequest(tSdoSeqCon* pSdoSeqCon_p, BOOL fEnable_p)
 {
     pSdoSeqCon_p->fForceFlowControl = fEnable_p;
     DEBUG_LVL_SDO_TRACE("%s: %d\n", __func__, fEnable_p);
-    return;
 }
 
 /// \}

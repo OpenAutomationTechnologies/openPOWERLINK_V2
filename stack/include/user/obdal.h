@@ -1,10 +1,10 @@
 /**
 ********************************************************************************
-\file   obdvirtual.h
+\file   user/obdal.h
 
-\brief  Header file of virtual object dictionary
+\brief  Header file for object dictionary abstraction layer
 
-This file provides the interface functions and constants for the virtual
+This file provides the interface functions and constants for the abstracted
 object dictionary access.
 *******************************************************************************/
 
@@ -35,8 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_obdvirtual_H_
-#define _INC_obdvirtual_H_
+#ifndef _INC_user_obdal_H_
+#define _INC_user_obdal_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -50,13 +50,37 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
+/**
+\brief Callback for accessing the user defined object dictionary
+
+This callback is used to access the user defined object dictionary.
+
+\param tObdAlConHdl     Connection handle for user defined OD
+
+\return The function returns a tOplkError error code.
+*/
+typedef tOplkError (*tObdAlUserObdAccessCb)(tObdAlConHdl*);
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-tOplkError obdvrtl_processRead(tSdoObdConHdl* pSdoHdl_p,
-                                tCmdLayerObdFinishedCb pfnFinishSdoCb_p);
-tOplkError obdvrtl_processWrite(tSdoObdConHdl* pSdoHdl_p,
-                                 tCmdLayerObdFinishedCb pfnFinishSdoCb_p);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
-#endif /* _INC_obdvirtual_H_ */
+tOplkError obdal_processSdoRead(tSdoObdConHdl* pSdoHdl_p,
+                                tCmdLayerObdFinishedCb pfnFinishSdoCb_p);
+tOplkError obdal_processSdoWrite(tSdoObdConHdl* pSdoHdl_p,
+                                 tCmdLayerObdFinishedCb pfnFinishSdoCb_p);
+tOplkError obdal_init(tObdAlUserObdAccessCb pfnUserObdAccess_p);
+tOplkError obdal_exit(void);
+tOplkError obdal_enableUserObdAccess(BOOL fEnable_p);
+tOplkError obdal_finishUserObdAccess(tObdAlConHdl* pUserObdConHdl_p);
+
+#ifdef __cplusplus
+}
+#endif
+
+
+#endif /* _INC_user_obdal_H_ */

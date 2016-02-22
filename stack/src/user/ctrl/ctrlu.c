@@ -52,6 +52,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/nmtcnu.h>
 #include <common/target.h>
 #include <oplk/obd.h>
+#include <user/obdal.h>
 #include <oplk/dll.h>
 #include <user/timesyncu.h>
 
@@ -165,6 +166,8 @@ static tOplkError cbNmtStateChange(tEventNmtStateChange nmtStateChange_p);
 #if defined(CONFIG_INCLUDE_SDOS) || defined(CONFIG_INCLUDE_SDOC)
 static tOplkError updateSdoConfig(void);
 #endif
+
+static tOplkError cbEventUserObdAccess(tObdAlConHdl* pObdAlConHdl_p);
 
 #if defined(CONFIG_INCLUDE_PDO)
 static tOplkError cbEventPdoChange(tPdoEventPdoChange* pEventPdoChange_p);
@@ -364,6 +367,10 @@ tOplkError ctrlu_initStack(tOplkApiInitParam* pInitParam_p)
 #endif // (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
 
 
+    ret = obdal_init(cbEventUserObdAccess);
+    if (ret != kErrorOk)
+        goto Exit;
+
     DEBUG_LVL_CTRL_TRACE("Initializing kernel modules ...\n");
     OPLK_MEMCPY(ctrlParam.aMacAddress, ctrlInstance_l.initParam.aMacAddress, 6);
     strncpy(ctrlParam.szEthDevName, ctrlInstance_l.initParam.hwParam.pDevName, 127);
@@ -437,8 +444,8 @@ tOplkError ctrlu_initStack(tOplkApiInitParam* pInitParam_p)
     // init sdo command layer
     DEBUG_LVL_CTRL_TRACE("Initialize SdoCom module...\n");
     ret = sdocom_init(pInitParam_p->sdoStackType,
-                      pInitParam_p->pfnSdoSrvProcessObdWrite,
-                      pInitParam_p->pfnSdoSrvProcessObdRead);
+                      obdal_processSdoWrite,
+                      obdal_processSdoRead);
     if (ret != kErrorOk)
     {
         goto Exit;
@@ -540,6 +547,9 @@ tOplkError ctrlu_shutdownStack(void)
     /* shutdown kernel stack */
     ret = ctrlucal_executeCmd(kCtrlCleanupStack, &retVal);
     DEBUG_LVL_CTRL_TRACE("shoutdown kernel modules():  0x%X\n", ret);
+
+    ret = obdal_exit();
+    DEBUG_LVL_CTRL_TRACE("obdal_exit():  0x%X\n", ret);
 
 #if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
     ret = obd_storeLoadObjCallback(NULL);
@@ -697,7 +707,7 @@ tOplkError ctrlu_callUserEventCallback(tOplkApiEventType eventType_p, tOplkApiEv
 The function implements the standard OD callback function. It contains basic
 actions for system objects.
 
-\param      pParam_p        OBD callback parameter.
+\param      pParam_p        OD callback parameter.
 
 \return The function returns a tOplkError error code.
 
@@ -1981,6 +1991,30 @@ static tOplkError cbCnCheckEvent(tNmtEvent nmtEvent_p)
         default:
             break;
     }
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Callback function for user specific object access
+
+The function posts accesses to non-existing objects in the default OD directly
+to the API layer.
+
+\param  pObdAlConHdl_p       Pointer to OD abstraction layer handle.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError cbEventUserObdAccess(tObdAlConHdl* pObdAlConHdl_p)
+{
+    tOplkError          ret = kErrorOk;
+    tOplkApiEventArg    eventArg;
+
+    eventArg.userObdAccess.pUserObdAccHdl = pObdAlConHdl_p;
+
+    ret = ctrlu_callUserEventCallback(kOplkApiEventUserObdAccess, &eventArg);
+
     return ret;
 }
 

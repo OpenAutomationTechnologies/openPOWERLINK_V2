@@ -92,7 +92,9 @@ static tSdoComFunctions* pSdoComInstance = NULL;
 
 The function initializes the SDO stack.
 
-\param stackType_p             variable that defines which SDO stack to use.
+\param stackType_p      Variable that defines which SDO stack to use.
+\param pfnObdWrite_p    Callback function for OD write access
+\param pfnObdRead_p     Callback function for OD read access
 
 \return The function returns a tOplkError error code.
 
@@ -147,7 +149,7 @@ tOplkError sdocom_exit(void)
     return ret;
 }
 
-#if defined (CONFIG_INCLUDE_SDOC)
+#if defined(CONFIG_INCLUDE_SDOC)
 //------------------------------------------------------------------------------
 /**
 \brief  Initialize a SDO layer connection
@@ -296,4 +298,4 @@ tOplkError sdocom_undefineConnection(tSdoComConHdl sdoComConHdl_p)
 
     return ret;
 }
-#endif // defined (CONFIG_INCLUDE_SDOC)
+#endif // defined(CONFIG_INCLUDE_SDOC)
