@@ -703,18 +703,18 @@ static tOplkError processTxBufferList(BOOL fCallSyncCb_p)
 
         if (fFirstPacket)
         {
-            pTxBuffer->tttx.launchTime = launchTime;
-            pTxBuffer->fTimeTrig = TRUE;
+            pTxBuffer->launchTime.nanoSeconds = launchTime;
+            pTxBuffer->fLaunchTimeValid = TRUE;
             fFirstPacket = FALSE;
         }
         else
         {
             launchTime = launchTime + (UINT64)pTxBuffer->timeOffsetNs;
-            pTxBuffer->tttx.launchTime = launchTime;
-            pTxBuffer->fTimeTrig = TRUE;
+            pTxBuffer->launchTime.nanoSeconds = launchTime;
+            pTxBuffer->fLaunchTimeValid = TRUE;
         }
 
-        if ((pTxBuffer->tttx.launchTime - cycleMin) > (cycleMax - cycleMin))
+        if ((pTxBuffer->launchTime.nanoSeconds - cycleMin) > (cycleMax - cycleMin))
         {
             ret = kErrorEdrvTxListNotFinishedYet;
             goto Exit;
@@ -724,8 +724,8 @@ static tOplkError processTxBufferList(BOOL fCallSyncCb_p)
         if (ret != kErrorOk)
             goto Exit;
 
-        pTxBuffer->tttx.launchTime = 0;
-        pTxBuffer->fTimeTrig = FALSE;
+        pTxBuffer->launchTime.nanoSeconds = 0;
+        pTxBuffer->fLaunchTimeValid = FALSE;
 
         edrvcyclicInstance_l.curTxBufferEntry++;
 

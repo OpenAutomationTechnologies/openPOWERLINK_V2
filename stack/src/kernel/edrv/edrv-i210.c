@@ -996,7 +996,7 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
     }
 
 #if EDRV_USE_TTTX != FALSE
-    if (pBuffer_p->fTimeTrig)
+    if (pBuffer_p->fLaunchTimeValid)
     {
         // Send packet using time triggered send
         tEdrvTtxDesc*   pTtxDesc;
@@ -1016,22 +1016,22 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
 
         pTtxDesc->ctxtDesc.idxL4lenMss = 0;
         pTtxDesc->ctxtDesc.ipMaclenVlan = 0;
-        launchTime = pBuffer_p->tttx.launchTime;
+        launchTime = pBuffer_p->launchTime.nanoSeconds;
 
         if (launchTime == 0)
         {
             getMacTime(&launchTime);
-            pBuffer_p->tttx.launchTime = launchTime;
+            pBuffer_p->launchTime.nanoSeconds = launchTime;
         }
         // Scale the launch time to 32 nsecs unit
         do_div(launchTime, SEC_TO_NSEC);
-        curTime = pBuffer_p->tttx.launchTime - (launchTime * SEC_TO_NSEC);
+        curTime = pBuffer_p->launchTime.nanoSeconds - (launchTime * SEC_TO_NSEC);
         do_div(curTime, 32);
 
         pTtxDesc->ctxtDesc.launchTime = curTime;
 
         // Always reset the launch time
-        pBuffer_p->tttx.launchTime = 0;
+        pBuffer_p->launchTime.nanoSeconds = 0;
 
         // Set descriptor type
         pTtxDesc->ctxtDesc.tucmdType = (EDRV_TDESC_CMD_DEXT | EDRV_TDESC_DTYP_CTXT);

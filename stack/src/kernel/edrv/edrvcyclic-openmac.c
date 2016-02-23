@@ -537,10 +537,10 @@ static tOplkError processTxBufferList(void)
             absoluteTime += OMETH_NS_2_TICKS(pTxBuffer->timeOffsetNs);
         }
 
-        // set the absolute Tx start time, and the fTimeTrig = TRUE, to
+        // set the absolute Tx start time, and the fLaunchTimeValid = TRUE, to
         // use time triggered send
-        pTxBuffer->tttx.timeOffsetAbs = absoluteTime;
-        pTxBuffer->fTimeTrig = TRUE; // Enables time triggered send
+        pTxBuffer->launchTime.ticks = absoluteTime;
+        pTxBuffer->fLaunchTimeValid = TRUE; // Enables time triggered send
 
         ret = edrv_sendTxBuffer(pTxBuffer);
         if (ret != kErrorOk)
@@ -548,10 +548,9 @@ static tOplkError processTxBufferList(void)
             goto Exit;
         }
 
-        // set fTimeTrig flag to FALSE
+        // set fLaunchTimeValid flag to FALSE
         // -> If the Tx buffer is reused as manual Tx, edrv_sendTxBuffer will send it normally!
-        pTxBuffer->tttx.timeOffsetAbs = 0;
-        pTxBuffer->fTimeTrig = FALSE;
+        pTxBuffer->fLaunchTimeValid = FALSE;
 
         nextOffsetNs = (EDRVCYC_PREAMB_SIZE + EDRV_ETH_CRC_SIZE) * EDRVCYC_BYTETIME_NS;
 
