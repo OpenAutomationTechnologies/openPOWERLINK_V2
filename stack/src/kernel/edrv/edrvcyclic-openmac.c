@@ -537,8 +537,10 @@ static tOplkError processTxBufferList(void)
             absoluteTime += OMETH_NS_2_TICKS(pTxBuffer->timeOffsetNs);
         }
 
-        // Set the absolute Tx start time, and OR the lowest bit to give Edrv a hint
-        pTxBuffer->timeOffsetAbs = absoluteTime | 1; // Lowest bit enables time triggered send
+        // set the absolute Tx start time, and the fTimeTrig = TRUE, to
+        // use time triggered send
+        pTxBuffer->tttx.timeOffsetAbs = absoluteTime;
+        pTxBuffer->fTimeTrig = TRUE; // Enables time triggered send
 
         ret = edrv_sendTxBuffer(pTxBuffer);
         if (ret != kErrorOk)
@@ -546,9 +548,10 @@ static tOplkError processTxBufferList(void)
             goto Exit;
         }
 
-        // Set the absolute Tx start time to zero
-        // -> If the Tx buffer is reused as manual Tx, edrv_sendTxBuffer is not confused!
-        pTxBuffer->timeOffsetAbs = 0;
+        // set fTimeTrig flag to FALSE
+        // -> If the Tx buffer is reused as manual Tx, edrv_sendTxBuffer will send it normally!
+        pTxBuffer->tttx.timeOffsetAbs = 0;
+        pTxBuffer->fTimeTrig = FALSE;
 
         nextOffsetNs = (EDRVCYC_PREAMB_SIZE + EDRV_ETH_CRC_SIZE) * EDRVCYC_BYTETIME_NS;
 
