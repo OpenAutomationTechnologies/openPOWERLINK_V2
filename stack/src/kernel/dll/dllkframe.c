@@ -2709,7 +2709,8 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
                                           __func__);
                     ret = kErrorInvalidOperation;
                 }
-                else if (ret != kErrorOk)
+
+                if (ret != kErrorOk)
                     goto Exit;
             }
         }

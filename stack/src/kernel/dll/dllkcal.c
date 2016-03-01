@@ -602,19 +602,6 @@ tOplkError dllkcal_asyncFrameReceived(tFrameInfo* pFrameInfo_p)
     event.eventSink = kEventSinkDlluCal;
 
     ret = eventk_postEvent(&event);
-    // Depending on the Asnd service ID, Asnd frames are forwarded to the NMTK module.
-    asndServiceId = (unsigned int)ami_getUint8Le(&pFrameInfo_p->frame.pBuffer->data.asnd.serviceId);
-    if (asndServiceId == kDllAsndNmtCommand)
-    {
-        nmtEvent = commandTranslator(pFrameInfo_p);
-        event.eventSink = kEventSinkNmtk;
-        event.netTime.nsec = 0;
-        event.netTime.sec = 0;
-        event.eventType = kEventTypeNmtEvent;
-        event.eventArg.pEventArg = &nmtEvent;
-        event.eventArgSize = sizeof(nmtEvent);
-        ret = eventk_postEvent(&event);
-    }
 #if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC == TRUE
     if (ret == kErrorOk)
     {
