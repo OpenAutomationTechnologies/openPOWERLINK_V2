@@ -395,7 +395,9 @@ tOplkError dllucal_regAsndService(tDllAsndServiceId serviceId_p,
 
         if (pfnDlluCbAsnd_p == NULL)
         {   // close filter
-            filter_p = kDllAsndFilterNone;
+            // Allow registering NULL callback for AsndNmtCommand service.
+            if (serviceId_p != kDllAsndNmtCommand)
+                filter_p = kDllAsndFilterNone;
         }
 
         // set filter in DLL module in kernel part

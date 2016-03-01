@@ -61,60 +61,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // typedef
 //------------------------------------------------------------------------------
 
-/**
-* \brief    NMT commands
-*
-* This enumeration defines all valid NMT commands.
-*/
-typedef enum
-{
-    // requestable ASnd ServiceIds    0x01..0x1F
-    kNmtCmdIdentResponse             = 0x01,            ///< IdentResponse command
-    kNmtCmdStatusResponse            = 0x02,            ///< StatusResponse command
-    // plain NMT state commands       0x20..0x3F
-    kNmtCmdStartNode                 = 0x21,            ///< NMTStartNode command
-    kNmtCmdStopNode                  = 0x22,            ///< NMTStopNode command
-    kNmtCmdEnterPreOperational2      = 0x23,            ///< NMTEnterPreOperational2 command
-    kNmtCmdEnableReadyToOperate      = 0x24,            ///< NMTEnableReadyToOperate command
-    kNmtCmdResetNode                 = 0x28,            ///< NMTResetNode command
-    kNmtCmdResetCommunication        = 0x29,            ///< NMTResetCommunication command
-    kNmtCmdResetConfiguration        = 0x2A,            ///< NMTResetConfiguration command
-    kNmtCmdSwReset                   = 0x2B,            ///< NMTSwReset command
-    kNmtCmdGoToStandby               = 0x2C,            ///< NMTGoToStandby command (RMN)
-    // extended NMT state commands    0x40..0x5F
-    kNmtCmdStartNodeEx               = 0x41,            ///< NMTStartNodeEx command
-    kNmtCmdStopNodeEx                = 0x42,            ///< NMTStopNodeEx command
-    kNmtCmdEnterPreOperational2Ex    = 0x43,            ///< NMTEnterPreOperational2Ex command
-    kNmtCmdEnableReadyToOperateEx    = 0x44,            ///< NMTEnableReadyToOperateEx command
-    kNmtCmdResetNodeEx               = 0x48,            ///< NMTResetNodeEx command
-    kNmtCmdResetCommunicationEx      = 0x49,            ///< NMTResetCommunicationEx command
-    kNmtCmdResetConfigurationEx      = 0x4A,            ///< NMTResetConfigurationEx command
-    kNmtCmdSwResetEx                 = 0x4B,            ///< NMTSwResetEx command
-    // NMT managing commands          0x60..0x7F
-    kNmtCmdNetHostNameSet            = 0x62,            ///< NMTNetHostNameSet command
-    kNmtCmdFlushArpEntry             = 0x63,            ///< NMTFlushArpEntry command
-    // NMT info services              0x80..0xBF
-    kNmtCmdPublishConfiguredCN       = 0x80,            ///< NMTPublishConfiguredNodes command
-    kNmtCmdPublishActiveCN           = 0x90,            ///< NMTPublishActiveNodes command
-    kNmtCmdPublishPreOperational1    = 0x91,            ///< NMTPublishPreOperational1 command
-    kNmtCmdPublishPreOperational2    = 0x92,            ///< NMTPublishPreOperational2 command
-    kNmtCmdPublishReadyToOperate     = 0x93,            ///< NMTPublishReadyToOperate command
-    kNmtCmdPublishOperational        = 0x94,            ///< NMTPublishOperational command
-    kNmtCmdPublishStopped            = 0x95,            ///< NMTPublishStopped command
-    kNmtCmdPublishNodeStates         = 0x96,            ///< NMTPublishNodeStates command
-    kNmtCmdPublishEmergencyNew       = 0xA0,            ///< NMTPublishEmergencyNew command
-    kNmtCmdPublishTime               = 0xB0,            ///< NMTPublishTime command
-
-    kNmtCmdInvalidService            = 0xFF             ///< NMTInvalidService command
-} eNmtCommand;
-
-/**
-\brief NMT command data type
-
-Data type for the enumerator \ref eNmtCommand.
-*/
-typedef UINT32 tNmtCommand;
-
 typedef tOplkError (*tNmtuStateChangeCallback)(tEventNmtStateChange NmtStateChange_p);
 typedef tOplkError (*tNmtuCheckEventCallback)(tNmtEvent NmtEvent_p);
 

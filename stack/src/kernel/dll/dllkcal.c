@@ -43,6 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <common/ami.h>
 #include <common/dllcal.h>
+#include <common/nmt.h>
 #include <kernel/dllkcal.h>
 #include <kernel/dllk.h>
 
@@ -109,6 +110,19 @@ Data type for the enumerator \ref eDllkCalTxQueueSelect.
 typedef UINT32 tDllkCalTxQueueSelect;
 
 /**
+\brief Node instance
+
+This structure contains local parameters for node, used to
+identify extended NMT commands.
+*/
+typedef struct
+{
+    UINT                        nodeId;                 ///< Node ID
+    UINT                        extNmtCmdByteOffset;    ///< Extended NMT command byte offset
+    UINT8                       extNmtCmdBitMask;       ///< Extended NMT command Bit mask
+} tDllkNodeInstance;
+
+/**
 \brief DLLk CAL instance type
 
 This structure defines an instance of the POWERLINK Data Link Layer
@@ -152,13 +166,13 @@ typedef struct
 
     UINT                    nextRequestQueue;       ///< Number of next request queue to be scheduled
 #endif
-} tDllkCalInstance;
 
+    tDllkNodeInstance       nodeInfo;               ///< Initialize the node instance
+} tDllkCalInstance;
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
 static tDllkCalInstance     instance_l;
-
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -173,8 +187,12 @@ static BOOL getMnSyncRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p,
                              tSoaPayload* pSoaPayload_p);
 #endif
 
-static tOplkError sendGenericAsyncFrame(tFrameInfo* pFrameInfo_p);
-static tOplkError getGenericAsyncFrame(UINT8* pFrame_p, UINT* pFrameSize_p);
+static tOplkError  sendGenericAsyncFrame(tFrameInfo* pFrameInfo_p);
+static tOplkError  getGenericAsyncFrame(UINT8* pFrame_p, UINT* pFrameSize_p);
+static tNmtEvent   commandTranslator(tFrameInfo* pFrameInfo_p);
+static tNmtCommand getNmtCommand(tFrameInfo* pFrameInfo_p);
+static BOOL        checkNodeIdList(UINT8* pbNmtCommandDate_p);
+static void        initNodeInstance(tDllNodeInfo* pNodeInfo);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -385,6 +403,7 @@ tOplkError dllkcal_process(tEvent* pEvent_p)
         case kEventTypeDllkConfigNode:
             pNodeInfo = (tDllNodeInfo*)pEvent_p->eventArg.pEventArg;
             ret = dllk_configNode(pNodeInfo);
+            initNodeInstance(pNodeInfo);
             break;
 
         case kEventTypeDllkAddNode:
@@ -562,8 +581,11 @@ only for frames with registered AsndServiceIds.
 //------------------------------------------------------------------------------
 tOplkError dllkcal_asyncFrameReceived(tFrameInfo* pFrameInfo_p)
 {
-    tOplkError  ret = kErrorOk;
-    tEvent      event;
+    tOplkError      ret = kErrorOk;
+    tEvent          event;
+    tNmtCommand     nmtCommand;
+    UINT32          asndServiceId;
+    tNmtEvent       nmtEvent;
 
 #if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC == FALSE
     // Copy the frame into event queue
@@ -583,6 +605,19 @@ tOplkError dllkcal_asyncFrameReceived(tFrameInfo* pFrameInfo_p)
     event.eventSink = kEventSinkDlluCal;
 
     ret = eventk_postEvent(&event);
+    // Depending on the Asnd service ID, Asnd frames are forwarded to the NMTK module.
+    asndServiceId = (unsigned int)ami_getUint8Le(&pFrameInfo_p->frame.pBuffer->data.asnd.serviceId);
+    if (asndServiceId == kDllAsndNmtCommand)
+    {
+        nmtEvent = commandTranslator(pFrameInfo_p);
+        event.eventSink = kEventSinkNmtk;
+        event.netTime.nsec = 0;
+        event.netTime.sec = 0;
+        event.eventType = kEventTypeNmtEvent;
+        event.eventArg.pEventArg = &nmtEvent;
+        event.eventArgSize = sizeof(nmtEvent);
+        ret = eventk_postEvent(&event);
+    }
 #if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC == TRUE
     if (ret == kErrorOk)
     {
@@ -1403,8 +1438,8 @@ static tOplkError sendGenericAsyncFrame(tFrameInfo* pFrameInfo_p)
 /**
 \brief  Get current asynchronous frame with generic priority
 
-\param  pFrame_p             Pointer to the asynchronous frame
-\param  pFrameSize_p         Size of the asynchronous frame
+\param  pFrame_p             Pointer to the asynchronous frame.
+\param  pFrameSize_p         Size of the asynchronous frame.
 
 \return The function returns a tOplkError error code.
 */
@@ -1457,4 +1492,269 @@ static tOplkError getGenericAsyncFrame(UINT8* pFrame_p, UINT* pFrameSize_p)
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Command translator function for NMT commands
+
+The function translates NMT commands to the corresponding NMT events.
+
+\param  pFrameInfo_p        Pointer to frame containing the NMT command.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tNmtEvent commandTranslator(tFrameInfo* pFrameInfo_p)
+{
+    tNmtCommand     nmtCommand;
+    BOOL            fNodeIdInList;
+    tNmtEvent       nmtEvent = kNmtEventNoEvent;
+
+    if (pFrameInfo_p == NULL)
+        return kErrorNmtInvalidFramePointer;
+
+    nmtCommand = getNmtCommand(pFrameInfo_p);
+    switch (nmtCommand)
+    {
+        //------------------------------------------------------------------------
+        // plain NMT state commands
+        case kNmtCmdStartNode:
+            nmtEvent = kNmtEventStartNode;
+            break;
+
+        case kNmtCmdStopNode:
+            nmtEvent = kNmtEventStopNode;
+            break;
+
+        case kNmtCmdEnterPreOperational2:
+            nmtEvent = kNmtEventEnterPreOperational2;
+            break;
+
+        case kNmtCmdEnableReadyToOperate:
+            nmtEvent = kNmtEventEnableReadyToOperate;
+            break;
+
+        case kNmtCmdResetNode:
+            nmtEvent = kNmtEventResetNode;
+            break;
+
+        case kNmtCmdResetCommunication:
+            nmtEvent = kNmtEventResetCom;
+            break;
+
+        case kNmtCmdResetConfiguration:
+            nmtEvent = kNmtEventResetConfig;
+            break;
+
+        case kNmtCmdSwReset:
+            nmtEvent = kNmtEventSwReset;
+            break;
+
+        //------------------------------------------------------------------------
+        // extended NMT state commands
+        case kNmtCmdStartNodeEx:
+            // check if own nodeid is in the POWERLINK node list
+            fNodeIdInList = checkNodeIdList(&(pFrameInfo_p->frame.pBuffer->data.asnd.payload.nmtCommandService.aNmtCommandData[0]));
+            if (fNodeIdInList != FALSE)
+            {   // own nodeid in list
+                // send event to process command
+                nmtEvent = kNmtEventStartNode;
+            }
+            break;
+
+        case kNmtCmdStopNodeEx:
+            // check if own nodeid is in the POWERLINK node list
+            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->frame.pBuffer->data.asnd.payload.nmtCommandService.aNmtCommandData[0]);
+            if (fNodeIdInList != FALSE)
+            {   // own nodeid in list
+                // send event to process command
+                nmtEvent = kNmtEventStopNode;
+            }
+            break;
+
+        case kNmtCmdEnterPreOperational2Ex:
+            // check if own nodeid is in the POWERLINK node list
+            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->frame.pBuffer->data.asnd.payload.nmtCommandService.aNmtCommandData[0]);
+            if (fNodeIdInList != FALSE)
+            {   // own nodeid in list
+                // send event to process command
+                nmtEvent = kNmtEventEnterPreOperational2;
+            }
+            break;
+
+        case kNmtCmdEnableReadyToOperateEx:
+            // check if own nodeid is in the POWERLINK node list
+            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->frame.pBuffer->data.asnd.payload.nmtCommandService.aNmtCommandData[0]);
+            if (fNodeIdInList != FALSE)
+            {   // own nodeid in list
+                // send event to process command
+                nmtEvent = kNmtEventEnableReadyToOperate;
+            }
+            break;
+
+        case kNmtCmdResetNodeEx:
+            // check if own nodeid is in the POWERLINK node list
+            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->frame.pBuffer->data.asnd.payload.nmtCommandService.aNmtCommandData[0]);
+            if (fNodeIdInList != FALSE)
+            {   // own nodeid in list
+                // send event to process command
+                nmtEvent = kNmtEventResetNode;
+            }
+            break;
+
+        case kNmtCmdResetCommunicationEx:
+            // check if own nodeid is in the POWERLINK node list
+            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->frame.pBuffer->data.asnd.payload.nmtCommandService.aNmtCommandData[0]);
+            if (fNodeIdInList != FALSE)
+            {   // own nodeid in list
+                // send event to process command
+                nmtEvent = kNmtEventResetCom;
+            }
+            break;
+
+        case kNmtCmdResetConfigurationEx:
+            // check if own nodeid is in the POWERLINK node list
+            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->frame.pBuffer->data.asnd.payload.nmtCommandService.aNmtCommandData[0]);
+            if (fNodeIdInList != FALSE)
+            {   // own nodeid in list
+                // send event to process command
+                nmtEvent = kNmtEventResetConfig;
+            }
+            break;
+
+        case kNmtCmdSwResetEx:
+            // check if own nodeid is in the POWERLINK node list
+            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->frame.pBuffer->data.asnd.payload.nmtCommandService.aNmtCommandData[0]);
+            if (fNodeIdInList != FALSE)
+            {   // own nodeid in list
+                // send event to process command
+                nmtEvent = kNmtEventSwReset;
+            }
+            break;
+
+        //------------------------------------------------------------------------
+        // NMT managing commands
+        // TODO: add functions to process managing command (optional)
+        case kNmtCmdNetHostNameSet:
+            break;
+
+        case kNmtCmdFlushArpEntry:
+            break;
+
+        //------------------------------------------------------------------------
+        // NMT info services
+        // TODO: forward event with infos to the application (optional)
+        case kNmtCmdPublishConfiguredCN:
+            break;
+
+        case kNmtCmdPublishActiveCN:
+            break;
+
+        case kNmtCmdPublishPreOperational1:
+            break;
+
+        case kNmtCmdPublishPreOperational2:
+            break;
+
+        case kNmtCmdPublishReadyToOperate:
+            break;
+
+        case kNmtCmdPublishOperational:
+            break;
+
+        case kNmtCmdPublishStopped:
+            break;
+
+        case kNmtCmdPublishEmergencyNew:
+            break;
+
+        case kNmtCmdPublishTime:
+            break;
+
+        //-----------------------------------------------------------------------
+        // error from MN
+        // -> requested command not supported by MN
+        case kNmtCmdInvalidService:
+            // TODO: error event to application
+            break;
+
+        //------------------------------------------------------------------------
+        // default
+        default:
+            return kErrorNmtUnknownCommand;
+            break;
+    } // end of switch (nmtCommand)
+
+    return nmtEvent;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Get NMT command
+
+The function extracts the NMT command from the frame.
+
+\param  pFrameInfo_p        Pointer to frame containing the NMT command.
+
+\return The function returns the extracted NMT command.
+*/
+//------------------------------------------------------------------------------
+static tNmtCommand getNmtCommand(tFrameInfo* pFrameInfo_p)
+{
+    tNmtCommand          nmtCommand;
+    tNmtCommandService*  pNmtCommandService;
+
+    pNmtCommandService = &pFrameInfo_p->frame.pBuffer->data.asnd.payload.nmtCommandService;
+    nmtCommand = (tNmtCommand)ami_getUint8Le(&pNmtCommandService->nmtCommandId);
+
+    return nmtCommand;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Init local node Id
+
+The function initializes an node Id.
+
+\param  pNodeInfo        Node informantion of the local node.
+
+\return The function returns the extracted NMT command.
+*/
+//------------------------------------------------------------------------------
+static void initNodeInstance(tDllNodeInfo* pNodeInfo)
+{
+    instance_l.nodeInfo.nodeId = pNodeInfo->nodeId;
+
+    // Byte offset --> nodeid divide by 8
+    // Bit offset  --> 2 ^ (nodeid AND 0b111)
+    instance_l.nodeInfo.extNmtCmdByteOffset = (UINT)(pNodeInfo->nodeId >> 3);
+    instance_l.nodeInfo.extNmtCmdBitMask = 1 << ((UINT8)pNodeInfo->nodeId & 7);
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Check node ID list
+
+The function checks if the own node ID is set in the node list.
+
+\param  pbNmtCommandDate_p        Pointer to the date of the NMT command.
+
+\return The function returns \b TRUE if the node is found in the node list or
+        \b FALSE if it is not found in the node list.
+*/
+//------------------------------------------------------------------------------
+static BOOL checkNodeIdList(UINT8* pbNmtCommandDate_p)
+{
+    BOOL            fNodeIdInList;
+    UINT            byteOffset = instance_l.nodeInfo.extNmtCmdByteOffset;
+    UINT8           bitMask = instance_l.nodeInfo.extNmtCmdBitMask;
+    UINT8           nodeListByte;
+
+    nodeListByte = ami_getUint8Le(&pbNmtCommandDate_p[byteOffset]);
+    if ((nodeListByte & bitMask) == 0)
+        fNodeIdInList = FALSE;
+    else
+        fNodeIdInList = TRUE;
+
+    return fNodeIdInList;
+}
 /// \}
