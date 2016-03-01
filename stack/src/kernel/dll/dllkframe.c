@@ -2694,6 +2694,26 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
             dllkInstance_g.syncReqPrevNodeId = 0;
         }
 #endif
+        nodeId = ami_getUint8Le(&pFrame->dstNodeId);
+
+        // Processing of NMT commands in kernel layer
+        if (nodeId == dllkInstance_g.dllConfigParam.nodeId)
+        {
+            if (asndServiceId == kDllAsndNmtCommand)
+            {
+                // Forward NMT command
+                ret = dllkcal_nmtCmdReceived(&pFrame->data.asnd.payload.nmtCommandService);
+                if (ret == kErrorReject)
+                {
+                    DEBUG_LVL_ERROR_TRACE("%s kErrorReject is not allowed in this situation!",
+                                          __func__);
+                    ret = kErrorInvalidOperation;
+                }
+
+                if (ret != kErrorOk)
+                    goto Exit;
+            }
+        }
 
         if (dllkInstance_g.aAsndFilter[asndServiceId] == kDllAsndFilterAny)
         {   // ASnd service ID is registered
@@ -2710,7 +2730,6 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
         else if (dllkInstance_g.aAsndFilter[asndServiceId] == kDllAsndFilterLocal)
         {   // ASnd service ID is registered, but only local node ID or broadcasts
             // shall be forwarded
-            nodeId = ami_getUint8Le(&pFrame->dstNodeId);
             if ((nodeId == dllkInstance_g.dllConfigParam.nodeId) || (nodeId == C_ADR_BROADCAST))
             {   // ASnd frame is intended for us
                 // forward frame via async receive FIFO to userspace
