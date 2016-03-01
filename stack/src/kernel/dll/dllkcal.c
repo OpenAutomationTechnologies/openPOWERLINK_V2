@@ -191,7 +191,7 @@ static tOplkError  sendGenericAsyncFrame(tFrameInfo* pFrameInfo_p);
 static tOplkError  getGenericAsyncFrame(UINT8* pFrame_p, UINT* pFrameSize_p);
 static tNmtEvent   commandTranslator(tFrameInfo* pFrameInfo_p);
 static tNmtCommand getNmtCommand(tFrameInfo* pFrameInfo_p);
-static BOOL        checkNodeIdList(UINT8* pbNmtCommandDate_p);
+static BOOL        checkNodeIdList(UINT8* pNmtCommandDate_p);
 static void        initNodeInstance(tDllNodeInfo* pNodeInfo);
 
 //============================================================================//
@@ -583,9 +583,6 @@ tOplkError dllkcal_asyncFrameReceived(tFrameInfo* pFrameInfo_p)
 {
     tOplkError      ret = kErrorOk;
     tEvent          event;
-    tNmtCommand     nmtCommand;
-    UINT32          asndServiceId;
-    tNmtEvent       nmtEvent;
 
 #if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC == FALSE
     // Copy the frame into event queue
@@ -630,6 +627,44 @@ tOplkError dllkcal_asyncFrameReceived(tFrameInfo* pFrameInfo_p)
         ret = kErrorReject; // Signalizes dllk to release buffer later
     }
 #endif
+
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief Handle received NMT command
+
+The function parses the received NMT commands and pass the corresponding NMT
+event to the NMTK module for NMT command handling.
+
+\param  pFrameInfo_p            Pointer to frame info of received frame.
+
+\return The function returns a tOplkError error code.
+
+\ingroup module_dllkcal
+*/
+//------------------------------------------------------------------------------
+tOplkError dllkcal_nmtCmdReceived(tFrameInfo* pFrameInfo_p)
+{
+    tOplkError        ret = kErrorOk;
+    tEvent            event;
+    tDllAsndServiceId asndServiceId;
+    tNmtEvent         nmtEvent;
+
+    // Depending on the Asnd service ID, Asnd frames are forwarded to the NMTK module.
+    asndServiceId = (tDllAsndServiceId)ami_getUint8Le(&pFrameInfo_p->frame.pBuffer->data.asnd.serviceId);
+    if (asndServiceId == kDllAsndNmtCommand)
+    {
+        nmtEvent = commandTranslator(pFrameInfo_p);
+        event.eventSink = kEventSinkNmtk;
+        event.netTime.nsec = 0;
+        event.netTime.sec = 0;
+        event.eventType = kEventTypeNmtEvent;
+        event.eventArg.pEventArg = &nmtEvent;
+        event.eventArgSize = sizeof(nmtEvent);
+        ret = eventk_postEvent(&event);
+    }
 
     return ret;
 }
@@ -1736,20 +1771,20 @@ static void initNodeInstance(tDllNodeInfo* pNodeInfo)
 
 The function checks if the own node ID is set in the node list.
 
-\param  pbNmtCommandDate_p        Pointer to the date of the NMT command.
+\param  pNmtCommandDate_p        Pointer to the date of the NMT command.
 
 \return The function returns \b TRUE if the node is found in the node list or
         \b FALSE if it is not found in the node list.
 */
 //------------------------------------------------------------------------------
-static BOOL checkNodeIdList(UINT8* pbNmtCommandDate_p)
+static BOOL checkNodeIdList(UINT8* pNmtCommandDate_p)
 {
     BOOL            fNodeIdInList;
     UINT            byteOffset = instance_l.nodeInfo.extNmtCmdByteOffset;
     UINT8           bitMask = instance_l.nodeInfo.extNmtCmdBitMask;
     UINT8           nodeListByte;
 
-    nodeListByte = ami_getUint8Le(&pbNmtCommandDate_p[byteOffset]);
+    nodeListByte = ami_getUint8Le(&pNmtCommandDate_p[byteOffset]);
     if ((nodeListByte & bitMask) == 0)
         fNodeIdInList = FALSE;
     else

@@ -121,9 +121,6 @@ tOplkError nmtcnu_init(UINT nodeId_p)
     nmtCnuInstance_g.extNmtCmdByteOffset = (UINT)(nodeId_p >> 3);
     nmtCnuInstance_g.extNmtCmdBitMask = 1 << ((UINT8)nodeId_p & 7);
 
-    // register callback-function for NMT-commands
-    ret = dllucal_regAsndService(kDllAsndNmtCommand, NULL, kDllAsndFilterLocal);
-
     return ret;
 }
 

@@ -2,9 +2,9 @@
 ********************************************************************************
 \file   common/nmt.h
 
-\brief  Global include file for NMT modules
+\brief  Common include file for NMT modules
 
-This file is the global include file for all NMT modules
+This file is the common include file for all NMT modules
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
