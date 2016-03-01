@@ -2702,7 +2702,7 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
             if (asndServiceId == kDllAsndNmtCommand)
             {
                 // Forward NMT command
-                ret = dllkcal_nmtCmdReceived(pFrameInfo_p);
+                ret = dllkcal_nmtCmdReceived(&pFrame->data.asnd.payload.nmtCommandService);
                 if (ret == kErrorReject)
                 {
                     DEBUG_LVL_ERROR_TRACE("%s kErrorReject is not allowed in this situation!",

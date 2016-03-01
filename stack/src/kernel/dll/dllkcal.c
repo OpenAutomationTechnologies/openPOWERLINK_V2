@@ -189,9 +189,8 @@ static BOOL getMnSyncRequest(tDllReqServiceId* pReqServiceId_p, UINT* pNodeId_p,
 
 static tOplkError  sendGenericAsyncFrame(tFrameInfo* pFrameInfo_p);
 static tOplkError  getGenericAsyncFrame(UINT8* pFrame_p, UINT* pFrameSize_p);
-static tNmtEvent   commandTranslator(tFrameInfo* pFrameInfo_p);
-static tNmtCommand getNmtCommand(tFrameInfo* pFrameInfo_p);
-static BOOL        checkNodeIdList(UINT8* pNmtCommandDate_p);
+static tNmtEvent   commandTranslator(tNmtCommandService* pNmtCommand_p);
+static BOOL        checkNodeIdList(tNmtCommandService* pNmtCommand_p);
 static void        initNodeInstance(tDllNodeInfo* pNodeInfo);
 
 //============================================================================//
@@ -625,33 +624,28 @@ tOplkError dllkcal_asyncFrameReceived(tFrameInfo* pFrameInfo_p)
 The function parses the received NMT commands and pass the corresponding NMT
 event to the NMTK module for NMT command handling.
 
-\param  pFrameInfo_p            Pointer to frame info of received frame.
+\param  pNmtCommand_p            Pointer to the NMT command service info.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_dllkcal
 */
 //------------------------------------------------------------------------------
-tOplkError dllkcal_nmtCmdReceived(tFrameInfo* pFrameInfo_p)
+tOplkError dllkcal_nmtCmdReceived(tNmtCommandService* pNmtCommand_p)
 {
     tOplkError        ret = kErrorOk;
     tEvent            event;
-    tDllAsndServiceId asndServiceId;
     tNmtEvent         nmtEvent;
 
-    // Depending on the Asnd service ID, Asnd frames are forwarded to the NMTK module.
-    asndServiceId = (tDllAsndServiceId)ami_getUint8Le(&pFrameInfo_p->frame.pBuffer->data.asnd.serviceId);
-    if (asndServiceId == kDllAsndNmtCommand)
-    {
-        nmtEvent = commandTranslator(pFrameInfo_p);
-        event.eventSink = kEventSinkNmtk;
-        event.netTime.nsec = 0;
-        event.netTime.sec = 0;
-        event.eventType = kEventTypeNmtEvent;
-        event.eventArg.pEventArg = &nmtEvent;
-        event.eventArgSize = sizeof(nmtEvent);
-        ret = eventk_postEvent(&event);
-    }
+    // Parse the NMT command and get the corresponding NMT event.
+    nmtEvent = commandTranslator(pNmtCommand_p);
+    event.eventSink = kEventSinkNmtk;
+    event.netTime.nsec = 0;
+    event.netTime.sec = 0;
+    event.eventType = kEventTypeNmtEvent;
+    event.eventArg.pEventArg = &nmtEvent;
+    event.eventArgSize = sizeof(nmtEvent);
+    ret = eventk_postEvent(&event);
 
     return ret;
 }
@@ -1520,21 +1514,21 @@ static tOplkError getGenericAsyncFrame(UINT8* pFrame_p, UINT* pFrameSize_p)
 
 The function translates NMT commands to the corresponding NMT events.
 
-\param  pFrameInfo_p        Pointer to frame containing the NMT command.
+\param  pNmtCommand_p        Pointer to the NMT command service info.
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tNmtEvent commandTranslator(tFrameInfo* pFrameInfo_p)
+static tNmtEvent commandTranslator(tNmtCommandService* pNmtCommand_p)
 {
     tNmtCommand     nmtCommand;
     BOOL            fNodeIdInList;
     tNmtEvent       nmtEvent = kNmtEventNoEvent;
 
-    if (pFrameInfo_p == NULL)
+    if (pNmtCommand_p == NULL)
         return kErrorNmtInvalidFramePointer;
 
-    nmtCommand = getNmtCommand(pFrameInfo_p);
+    nmtCommand = (tNmtCommand)ami_getUint8Le(&pNmtCommand_p->nmtCommandId);
     switch (nmtCommand)
     {
         //------------------------------------------------------------------------
@@ -1575,8 +1569,8 @@ static tNmtEvent commandTranslator(tFrameInfo* pFrameInfo_p)
         // extended NMT state commands
         case kNmtCmdStartNodeEx:
             // check if own nodeid is in the POWERLINK node list
-            fNodeIdInList = checkNodeIdList(&(pFrameInfo_p->frame.pBuffer->data.asnd.payload.nmtCommandService.aNmtCommandData[0]));
-            if (fNodeIdInList != FALSE)
+            fNodeIdInList = checkNodeIdList(pNmtCommand_p);
+            if (fNodeIdInList)
             {   // own nodeid in list
                 // send event to process command
                 nmtEvent = kNmtEventStartNode;
@@ -1585,8 +1579,8 @@ static tNmtEvent commandTranslator(tFrameInfo* pFrameInfo_p)
 
         case kNmtCmdStopNodeEx:
             // check if own nodeid is in the POWERLINK node list
-            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->frame.pBuffer->data.asnd.payload.nmtCommandService.aNmtCommandData[0]);
-            if (fNodeIdInList != FALSE)
+            fNodeIdInList = checkNodeIdList(pNmtCommand_p);
+            if (fNodeIdInList)
             {   // own nodeid in list
                 // send event to process command
                 nmtEvent = kNmtEventStopNode;
@@ -1595,8 +1589,8 @@ static tNmtEvent commandTranslator(tFrameInfo* pFrameInfo_p)
 
         case kNmtCmdEnterPreOperational2Ex:
             // check if own nodeid is in the POWERLINK node list
-            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->frame.pBuffer->data.asnd.payload.nmtCommandService.aNmtCommandData[0]);
-            if (fNodeIdInList != FALSE)
+            fNodeIdInList = checkNodeIdList(pNmtCommand_p);
+            if (fNodeIdInList)
             {   // own nodeid in list
                 // send event to process command
                 nmtEvent = kNmtEventEnterPreOperational2;
@@ -1605,8 +1599,8 @@ static tNmtEvent commandTranslator(tFrameInfo* pFrameInfo_p)
 
         case kNmtCmdEnableReadyToOperateEx:
             // check if own nodeid is in the POWERLINK node list
-            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->frame.pBuffer->data.asnd.payload.nmtCommandService.aNmtCommandData[0]);
-            if (fNodeIdInList != FALSE)
+            fNodeIdInList = checkNodeIdList(pNmtCommand_p);
+            if (fNodeIdInList)
             {   // own nodeid in list
                 // send event to process command
                 nmtEvent = kNmtEventEnableReadyToOperate;
@@ -1615,8 +1609,8 @@ static tNmtEvent commandTranslator(tFrameInfo* pFrameInfo_p)
 
         case kNmtCmdResetNodeEx:
             // check if own nodeid is in the POWERLINK node list
-            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->frame.pBuffer->data.asnd.payload.nmtCommandService.aNmtCommandData[0]);
-            if (fNodeIdInList != FALSE)
+            fNodeIdInList = checkNodeIdList(pNmtCommand_p);
+            if (fNodeIdInList)
             {   // own nodeid in list
                 // send event to process command
                 nmtEvent = kNmtEventResetNode;
@@ -1625,8 +1619,8 @@ static tNmtEvent commandTranslator(tFrameInfo* pFrameInfo_p)
 
         case kNmtCmdResetCommunicationEx:
             // check if own nodeid is in the POWERLINK node list
-            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->frame.pBuffer->data.asnd.payload.nmtCommandService.aNmtCommandData[0]);
-            if (fNodeIdInList != FALSE)
+            fNodeIdInList = checkNodeIdList(pNmtCommand_p);
+            if (fNodeIdInList)
             {   // own nodeid in list
                 // send event to process command
                 nmtEvent = kNmtEventResetCom;
@@ -1635,8 +1629,8 @@ static tNmtEvent commandTranslator(tFrameInfo* pFrameInfo_p)
 
         case kNmtCmdResetConfigurationEx:
             // check if own nodeid is in the POWERLINK node list
-            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->frame.pBuffer->data.asnd.payload.nmtCommandService.aNmtCommandData[0]);
-            if (fNodeIdInList != FALSE)
+            fNodeIdInList = checkNodeIdList(pNmtCommand_p);
+            if (fNodeIdInList)
             {   // own nodeid in list
                 // send event to process command
                 nmtEvent = kNmtEventResetConfig;
@@ -1645,8 +1639,8 @@ static tNmtEvent commandTranslator(tFrameInfo* pFrameInfo_p)
 
         case kNmtCmdSwResetEx:
             // check if own nodeid is in the POWERLINK node list
-            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->frame.pBuffer->data.asnd.payload.nmtCommandService.aNmtCommandData[0]);
-            if (fNodeIdInList != FALSE)
+            fNodeIdInList = checkNodeIdList(pNmtCommand_p);
+            if (fNodeIdInList)
             {   // own nodeid in list
                 // send event to process command
                 nmtEvent = kNmtEventSwReset;
@@ -1711,28 +1705,6 @@ static tNmtEvent commandTranslator(tFrameInfo* pFrameInfo_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Get NMT command
-
-The function extracts the NMT command from the frame.
-
-\param  pFrameInfo_p        Pointer to frame containing the NMT command.
-
-\return The function returns the extracted NMT command.
-*/
-//------------------------------------------------------------------------------
-static tNmtCommand getNmtCommand(tFrameInfo* pFrameInfo_p)
-{
-    tNmtCommand          nmtCommand;
-    tNmtCommandService*  pNmtCommandService;
-
-    pNmtCommandService = &pFrameInfo_p->frame.pBuffer->data.asnd.payload.nmtCommandService;
-    nmtCommand = (tNmtCommand)ami_getUint8Le(&pNmtCommandService->nmtCommandId);
-
-    return nmtCommand;
-}
-
-//------------------------------------------------------------------------------
-/**
 \brief  Init local node Id
 
 The function initializes an node Id.
@@ -1758,20 +1730,20 @@ static void initNodeInstance(tDllNodeInfo* pNodeInfo)
 
 The function checks if the own node ID is set in the node list.
 
-\param  pNmtCommandDate_p        Pointer to the date of the NMT command.
+\param  pNmtCommand_p        Pointer to the NMT command service info.
 
 \return The function returns \b TRUE if the node is found in the node list or
         \b FALSE if it is not found in the node list.
 */
 //------------------------------------------------------------------------------
-static BOOL checkNodeIdList(UINT8* pNmtCommandDate_p)
+static BOOL checkNodeIdList(tNmtCommandService* pNmtCommand_p)
 {
     BOOL            fNodeIdInList;
     UINT            byteOffset = instance_l.nodeInfo.extNmtCmdByteOffset;
     UINT8           bitMask = instance_l.nodeInfo.extNmtCmdBitMask;
     UINT8           nodeListByte;
 
-    nodeListByte = ami_getUint8Le(&pNmtCommandDate_p[byteOffset]);
+    nodeListByte = ami_getUint8Le(&pNmtCommand_p->aNmtCommandData[byteOffset]);
     if ((nodeListByte & bitMask) == 0)
         fNodeIdInList = FALSE;
     else
