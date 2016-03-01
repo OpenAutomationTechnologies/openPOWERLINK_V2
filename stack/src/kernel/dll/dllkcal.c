@@ -167,7 +167,7 @@ typedef struct
     UINT                    nextRequestQueue;       ///< Number of next request queue to be scheduled
 #endif
 
-    tDllkNodeInstance       nodeInfo;               ///< Initialize the node instance
+    tDllkNodeInstance       nodeInstance;           ///< Initialize the node instance
 } tDllkCalInstance;
 //------------------------------------------------------------------------------
 // local vars
@@ -191,7 +191,7 @@ static tOplkError  sendGenericAsyncFrame(tFrameInfo* pFrameInfo_p);
 static tOplkError  getGenericAsyncFrame(UINT8* pFrame_p, UINT* pFrameSize_p);
 static tNmtEvent   commandTranslator(tNmtCommandService* pNmtCommand_p);
 static BOOL        checkNodeIdList(tNmtCommandService* pNmtCommand_p);
-static void        initNodeInstance(tDllNodeInfo* pNodeInfo);
+static void        initNodeInstance(UINT nodeId_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -432,6 +432,7 @@ tOplkError dllkcal_process(tEvent* pEvent_p)
                 pConfigParam->sizeOfStruct = pEvent_p->eventArgSize;
             }
             ret = dllk_config(pConfigParam);
+            initNodeInstance(pConfigParam->nodeId);
             break;
 
 #if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC == TRUE
@@ -1709,19 +1710,17 @@ static tNmtEvent commandTranslator(tNmtCommandService* pNmtCommand_p)
 
 The function initializes an node Id.
 
-\param  pNodeInfo        Node informantion of the local node.
-
-\return The function returns the extracted NMT command.
+\param  nodeId_p        Local node ID.
 */
 //------------------------------------------------------------------------------
-static void initNodeInstance(tDllNodeInfo* pNodeInfo)
+static void initNodeInstance(UINT nodeId_p)
 {
-    instance_l.nodeInfo.nodeId = pNodeInfo->nodeId;
+    instance_l.nodeInstance.nodeId = nodeId_p;
 
     // Byte offset --> nodeid divide by 8
     // Bit offset  --> 2 ^ (nodeid AND 0b111)
-    instance_l.nodeInfo.extNmtCmdByteOffset = (UINT)(pNodeInfo->nodeId >> 3);
-    instance_l.nodeInfo.extNmtCmdBitMask = 1 << ((UINT8)pNodeInfo->nodeId & 7);
+    instance_l.nodeInstance.extNmtCmdByteOffset = (UINT)(nodeId_p >> 3);
+    instance_l.nodeInstance.extNmtCmdBitMask = 1 << ((UINT8)nodeId_p & 7);
 }
 
 //------------------------------------------------------------------------------
@@ -1739,8 +1738,8 @@ The function checks if the own node ID is set in the node list.
 static BOOL checkNodeIdList(tNmtCommandService* pNmtCommand_p)
 {
     BOOL            fNodeIdInList;
-    UINT            byteOffset = instance_l.nodeInfo.extNmtCmdByteOffset;
-    UINT8           bitMask = instance_l.nodeInfo.extNmtCmdBitMask;
+    UINT            byteOffset = instance_l.nodeInstance.extNmtCmdByteOffset;
+    UINT8           bitMask = instance_l.nodeInstance.extNmtCmdBitMask;
     UINT8           nodeListByte;
 
     nodeListByte = ami_getUint8Le(&pNmtCommand_p->aNmtCommandData[byteOffset]);
@@ -1751,4 +1750,5 @@ static BOOL checkNodeIdList(tNmtCommandService* pNmtCommand_p)
 
     return fNodeIdInList;
 }
+
 /// \}
