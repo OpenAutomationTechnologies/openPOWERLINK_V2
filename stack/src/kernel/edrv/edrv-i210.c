@@ -938,6 +938,7 @@ tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
 
     pBuffer_p->pBuffer = pBufData->pBuffer;
     pBuffer_p->txBufferNumber.value = pBufData->bufferNumber;
+    pBuffer_p->maxBufferSize = EDRV_MAX_FRAME_SIZE;
     edrvInstance_l.afTxBufUsed[pBufData->bufferNumber] = TRUE;
 
 Exit:
