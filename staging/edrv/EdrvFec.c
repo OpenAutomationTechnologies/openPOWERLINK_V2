@@ -81,7 +81,7 @@
 #endif
 
 
-#include "edrv.h"
+#include "kernel/edrv.h"
 
 
 /* ---------------------------------------------------------------------------
@@ -465,8 +465,8 @@ static void fec_enet_rx(void);
 static void fec_restart(int duplex);
 static void fec_stop(void);
 
-static int __devinit fec_probe(struct platform_device *pdev);
-static int __devexit fec_remove(struct platform_device *pdev);
+static int fec_probe(struct platform_device *pdev);
+static int fec_remove(struct platform_device *pdev);
 static int fec_suspend(struct platform_device *dev, pm_message_t state);
 static int fec_resume(struct platform_device *dev);
 
@@ -477,43 +477,46 @@ static struct platform_driver fec_driver = {
 		.owner	 = THIS_MODULE,
 	},
 	.probe   = fec_probe,
-	.remove  = __devexit_p(fec_remove),
+	.remove  = fec_remove,
 	.suspend = fec_suspend,
 	.resume  = fec_resume,
 };
 
 
-tEplKernel  EdrvInit (tEdrvInitParam* pEdrvInitParam_p)
+tOplkError  edrv_init(tEdrvInitParam* pEdrvInitParam_p)
 {
-tEplKernel  Ret;
+tOplkError  Ret;
 int         iRes;
 int         iIndex;
 
-    Ret = kEplSuccessful;
+    Ret = kErrorOk;
 
     // clear instance structure
-    EPL_MEMSET(&fec_enet_private, 0, sizeof (fec_enet_private));
+    OPLK_MEMSET(&fec_enet_private, 0, sizeof (fec_enet_private));
 
     // save the init data
     fec_enet_private.m_InitParam = *pEdrvInitParam_p;
+
+    printk("(%s) Registering the driver to the kernel...", __func__);
 
     // register platform driver
     iRes = platform_driver_register(&fec_driver);
     if (iRes)
     {
         printk("%s: platform_driver_register() failed (returned %d)\n", EDRV_DEV_NAME, iRes);
-        Ret = kEplNoResource;
+        Ret = kErrorNoResource;
         goto Exit;
     }
 
     // local MAC address might have been changed in fec_probe()
-    EPL_MEMCPY(pEdrvInitParam_p->m_abMyMacAddr, fec_enet_private.m_InitParam.m_abMyMacAddr, ETH_ALEN);
+//    OPLK_MEMCPY(pEdrvInitParam_p->aMacAddr, fec_enet_private.m_InitParam.aMacAddr, ETH_ALEN);
 
     printk(KERN_INFO "%s: FEC ethernet driver initialized\n", EDRV_DEV_NAME);
     printk(KERN_INFO "%s: MAC = ", EDRV_DEV_NAME);
+
     for (iIndex = 0; iIndex < ETH_ALEN; iIndex++)
     {
-        printk("%02x", (unsigned int) pEdrvInitParam_p->m_abMyMacAddr[iIndex]);
+        printk("%02x", (unsigned int) pEdrvInitParam_p->aMacAddr[iIndex]);
         if (iIndex < ETH_ALEN - 1)
         {
             printk(":");
@@ -526,7 +529,7 @@ Exit:
 }
 
 
-tEplKernel EdrvShutdown(void)
+tOplkError edrv_exit(void)
 {
     printk("%s entered\n", __FUNCTION__);
 
@@ -534,17 +537,28 @@ tEplKernel EdrvShutdown(void)
     platform_driver_unregister(&fec_driver);
     printk("%s: platform_driver_unregister() done\n", __FUNCTION__);
 
-    return kEplSuccessful;
+    return kErrorOk;
 }
+
+
+static void __inline__ fec_get_mac(unsigned char *dev_addr);
+
+UINT8* edrv_getMacAddr(void)
+{
+	fec_get_mac(fec_enet_private.m_InitParam.aMacAddr);
+	return fec_enet_private.m_InitParam.aMacAddr;
+
+}
+
 
 
 #define HASH_BITS	6		/* #bits in hash */
 #define CRC32_POLY	0xEDB88320
 
-tEplKernel  EdrvDefineRxMacAddrEntry (BYTE* pbMacAddr_p)
+tOplkError  edrv_setRxMulticastMacAddr(BYTE* pbMacAddr_p)
 {
 	struct fec_enet_private_t *fep = &fec_enet_private;
-	tEplKernel Ret;
+	tOplkError Ret;
 #if 0
 	struct netdev_hw_addr *ha;
 	unsigned int i, bit, data, crc, tmp;
@@ -553,7 +567,7 @@ tEplKernel  EdrvDefineRxMacAddrEntry (BYTE* pbMacAddr_p)
 	unsigned int tmp;
 #endif
 
-	Ret = kEplSuccessful;
+	Ret = kErrorOk;
 
 	/* The following code origins from former function set_multicast_list() */
 
@@ -628,41 +642,41 @@ tEplKernel  EdrvDefineRxMacAddrEntry (BYTE* pbMacAddr_p)
 }
 
 
-tEplKernel  EdrvUndefineRxMacAddrEntry (BYTE* pbMacAddr_p)
+tOplkError  edrv_clearRxMulticastMacAddr(BYTE* pbMacAddr_p)
 {
-tEplKernel  Ret = kEplSuccessful;
+tOplkError  Ret = kErrorOk;
 
 #warning "To be done"
     return Ret;
 }
 
 
-tEplKernel  EdrvChangeFilter(tEdrvFilter*    pFilter_p,
+tOplkError  edrv_changeRxFilter(tEdrvFilter*    pFilter_p,
                              unsigned int    uiCount_p,
                              unsigned int    uiEntryChanged_p,
                              unsigned int    uiChangeFlags_p)
 {
-    return kEplSuccessful;
+    return kErrorOk;
 }
 
 
-tEplKernel  EdrvAllocTxMsgBuffer (tEdrvTxBuffer* pTxBuffer_p)
+tOplkError  edrv_allocTxBuffer (tEdrvTxBuffer* pTxBuffer_p)
 {
-tEplKernel   Ret;
+tOplkError   Ret;
 unsigned int i;
 
-    Ret = kEplSuccessful;
+    Ret = kErrorOk;
 
-    if (pTxBuffer_p->m_uiMaxBufferLen > EDRV_MAX_FRAME_SIZE)
+    if (pTxBuffer_p->maxBufferSize > EDRV_MAX_FRAME_SIZE)
     {
-        Ret = kEplEdrvNoFreeBufEntry;
+        Ret = kErrorEdrvNoFreeBufEntry;
         goto Exit;
     }
 
     if (fec_enet_private.m_pbTxBufferBase == NULL)
     {
         printk("%s: Tx buffers currently not allocated\n", EDRV_DEV_NAME);
-        Ret = kEplEdrvNoFreeBufEntry;
+        Ret = kErrorEdrvNoFreeBufEntry;
         goto Exit;
     }
 
@@ -673,16 +687,16 @@ unsigned int i;
         {
             // free channel found
             fec_enet_private.m_afTxBufferUsed[i] = TRUE;
-            pTxBuffer_p->m_BufferNumber.m_uiVal = i;
-            pTxBuffer_p->m_pbBuffer = fec_enet_private.m_pbTxBufferBase + (i * EDRV_MAX_FRAME_SIZE);
-            pTxBuffer_p->m_uiMaxBufferLen = EDRV_MAX_FRAME_SIZE;
+            pTxBuffer_p->txBufferNumber.value = i;
+            pTxBuffer_p->pBuffer = fec_enet_private.m_pbTxBufferBase + (i * EDRV_MAX_FRAME_SIZE);
+            pTxBuffer_p->maxBufferSize = EDRV_MAX_FRAME_SIZE;
             break;
         }
     }
 
     if (i >= EDRV_MAX_TX_BUFFERS)
     {
-        Ret = kEplEdrvNoFreeBufEntry;
+        Ret = kErrorEdrvNoFreeBufEntry;
         goto Exit;
     }
 
@@ -692,18 +706,18 @@ Exit:
 }
 
 
-tEplKernel  EdrvReleaseTxMsgBuffer (tEdrvTxBuffer * pTxBuffer_p)
+tOplkError  edrv_freeTxBuffer (tEdrvTxBuffer * pTxBuffer_p)
 {
 unsigned int uiBufferNumber;
 
-    uiBufferNumber = pTxBuffer_p->m_BufferNumber.m_uiVal;
+    uiBufferNumber = pTxBuffer_p->txBufferNumber.value;
 
     if (uiBufferNumber < EDRV_MAX_TX_BUFFERS)
     {
         fec_enet_private.m_afTxBufferUsed[uiBufferNumber] = FALSE;
     }
 
-    return kEplSuccessful;
+    return kErrorOk;
 
 }
 
@@ -722,24 +736,24 @@ static void *swap_buffer(void *bufaddr, int len)
 #endif
 
 
-tEplKernel  EdrvSendTxMsg (tEdrvTxBuffer* pTxBuffer_p)
+tOplkError  edrv_sendTxBuffer (tEdrvTxBuffer* pTxBuffer_p)
 {
 	struct fec_enet_private_t *fep = &fec_enet_private;
 	struct bufdesc *bdp;
 	void *bufaddr;
 	unsigned short	status;
 	unsigned long   flags;
-	tEplKernel      Ret;
+	tOplkError      Ret;
 	unsigned int    uiBufferNumber;
 
-	Ret = kEplSuccessful;
+	Ret = kErrorOk;
 
-	uiBufferNumber = pTxBuffer_p->m_BufferNumber.m_uiVal;
+	uiBufferNumber = pTxBuffer_p->txBufferNumber.value;
 
 	if ((uiBufferNumber >= EDRV_MAX_TX_BUFFERS) ||
 	    (fec_enet_private.m_afTxBufferUsed[uiBufferNumber] == FALSE))
 	{
-		Ret = kEplEdrvBufNotExisting;
+		Ret = kErrorEdrvBufNotExisting;
 		goto Exit;
 	}
 
@@ -750,7 +764,7 @@ tEplKernel  EdrvSendTxMsg (tEdrvTxBuffer* pTxBuffer_p)
 #if 0
 	if (!fep->link) {
 		/* Link is down or autonegotiation is in progress. */
-		Ret = kEplEdrvNoLink;
+		Ret = kErrorEdrvNoLink;
 		goto Exit;
 	}
 #endif
@@ -763,7 +777,7 @@ tEplKernel  EdrvSendTxMsg (tEdrvTxBuffer* pTxBuffer_p)
 
 	if (status & BD_ENET_TX_READY) {
 		spin_unlock_irqrestore(&fep->hw_lock, flags);
-                Ret = kEplEdrvNoFreeTxDesc;
+                Ret = kErrorEdrvNoFreeTxDesc;
 		goto Exit;
 	}
 
@@ -771,11 +785,11 @@ tEplKernel  EdrvSendTxMsg (tEdrvTxBuffer* pTxBuffer_p)
 	status &= ~BD_ENET_TX_STATS;
 
 	/* Set buffer length and buffer pointer */
-	bufaddr = (void*) pTxBuffer_p->m_pbBuffer;
-	bdp->cbd_datlen = pTxBuffer_p->m_uiTxMsgLen;
+	bufaddr = (void*) pTxBuffer_p->pBuffer;
+	bdp->cbd_datlen = pTxBuffer_p->txFrameSize;
 
 #ifdef CONFIG_ARCH_MXS
-	swap_buffer(bufaddr, pTxBuffer_p->m_uiTxMsgLen);
+	swap_buffer(bufaddr, pTxBuffer_p->txFrameSize);
 #endif
 	/* Save pointer to buffer structure for TxHandler */
 	fep->m_apTxBuffer[fep->txb_cur] = pTxBuffer_p;
@@ -898,21 +912,21 @@ int iUsedSize = 0;
 #endif
 
 
-tEplKernel  EdrvReleaseRxBuffer (tEdrvRxBuffer* pRxBuffer_p)
+tOplkError  edrv_releaseRxBuffer (tEdrvRxBuffer* pRxBuffer_p)
 {
-tEplKernel Ret;
+tOplkError Ret;
 
-    Ret = kEplEdrvInvalidRxBuf;
+    Ret = kErrorEdrvInvalidRxBuf;
 
     if (fec_enet_private.m_iFreeRxBufferTop < (EDRV_MAX_RX_BUFFERS-1))
     {
     unsigned long   ulFlags;
 
         spin_lock_irqsave(&fec_enet_private.m_SpinLockRxBufferRelease, ulFlags);
-        fec_enet_private.m_apbFreeRxBuffer[++fec_enet_private.m_iFreeRxBufferTop] = pRxBuffer_p->m_pbBuffer;
+        fec_enet_private.m_apbFreeRxBuffer[++fec_enet_private.m_iFreeRxBufferTop] = pRxBuffer_p->pBuffer;
         spin_unlock_irqrestore(&fec_enet_private.m_SpinLockRxBufferRelease, ulFlags);
 
-        Ret = kEplSuccessful;
+        Ret = kErrorOk;
     }
 
     return Ret; 
@@ -1027,9 +1041,9 @@ static void  fec_enet_tx (void)
 		pTxBuffer = fep->m_apTxBuffer[fep->txb_dirty];
 		fep->m_apTxBuffer[fep->txb_dirty] = NULL;
 
-                if ((pTxBuffer != NULL) && (pTxBuffer->m_pfnTxHandler != NULL))
+                if ((pTxBuffer != NULL) && (pTxBuffer->pfnTxHandler != NULL))
 			// Call Tx handler of Data link layer
-                        pTxBuffer->m_pfnTxHandler(pTxBuffer);
+                        pTxBuffer->pfnTxHandler(pTxBuffer);
 
 		fep->txb_dirty = (fep->txb_dirty + 1) & TX_RING_MOD_MASK;
 
@@ -1121,9 +1135,9 @@ static void  fec_enet_rx (void)
 		data = (__u8*)__va(bdp->cbd_bufaddr);
 
 		/* The packet length includes FCS */
-		RxBuffer.m_uiRxMsgLen    = pkt_len - 4;
-		RxBuffer.m_pbBuffer      = data;
-		RxBuffer.m_BufferInFrame = kEdrvBufferLastInFrame;
+		RxBuffer.rxFrameSize    = pkt_len - 4;
+		RxBuffer.pBuffer      = data;
+		RxBuffer.bufferInFrame = kEdrvBufferLastInFrame;
 
 		dma_sync_single_for_cpu(&fep->pdev->dev, bdp->cbd_bufaddr,
 				EDRV_RX_BUFFER_SIZE, DMA_FROM_DEVICE);
@@ -1133,7 +1147,7 @@ static void  fec_enet_rx (void)
 #endif
 
 		/* Call Rx handler of Data link layer */
-		RetReleaseRxBuffer = fep->m_InitParam.m_pfnRxHandler(&RxBuffer);
+		RetReleaseRxBuffer = fep->m_InitParam.pfnRxHandler(&RxBuffer);
 		if (RetReleaseRxBuffer == kEdrvReleaseRxBufferLater)
 		{
 			if (fep->m_iFreeRxBufferTop >= 0)
@@ -1359,9 +1373,14 @@ static int fec_enet_mii_probe(void)
 	}
 
 	/* attach the mac to the phy */
-	phy_dev = phy_connect(fep->pdev, dev_name(&phy_dev->dev),
-			     (void (*)(struct net_device*)) fec_enet_adjust_link, 0,
-			     fep->phy_interface);
+// pnf@mar2016
+	//phy_dev = phy_connect(fep->pdev,
+	phy_dev = phy_connect(phy_dev->attached_dev,
+			dev_name(&phy_dev->dev),
+			(void (*)(struct net_device*)) fec_enet_adjust_link,
+		//	0,
+			fep->phy_interface);
+
 	if (IS_ERR(phy_dev)) {
 		printk(KERN_ERR "%s: Could not attach to PHY\n", EDRV_DEV_NAME);
 		return PTR_ERR(phy_dev);
@@ -1630,7 +1649,7 @@ static int fec_mac_addr_setup(char *mac_addr)
 			*ptr++ = '\0';
 
 		if (strlen(p)) {
-			ret = strict_strtoul(p, 16, &tmp);
+			ret = kstrtoul(p, 16, &tmp);
 			if (ret < 0 || tmp > 0xff)
 				break;
 			fec_mac_default[i++] = tmp;
@@ -1661,7 +1680,7 @@ static void  fec_restart (int duplex)
 	udelay(10);
 
 	/* Reset fec will reset MAC to zero, reconfig it again */
-	memcpy(&temp_mac, fec_enet_private.m_InitParam.m_abMyMacAddr, ETH_ALEN);
+	memcpy(&temp_mac, fec_enet_private.m_InitParam.aMacAddr, ETH_ALEN);
 	writel(cpu_to_be32(temp_mac[0]), fep->hwp + FEC_ADDR_LOW);
 	writel(cpu_to_be32(temp_mac[1]), fep->hwp + FEC_ADDR_HIGH);
 
@@ -1794,7 +1813,10 @@ static void  fec_stop (void)
 	writel(FEC_DEFAULT_IMASK, fep->hwp + FEC_IMASK);
 }
 
-static int __devinit
+// pnf@mar2016
+#define IRQF_DISABLED           0x00000020
+
+static int
 fec_probe(struct platform_device *pdev)
 {
 	struct fec_enet_private_t *fep = &fec_enet_private;
@@ -1857,13 +1879,14 @@ fec_probe(struct platform_device *pdev)
 	clk_enable(fep->clk);
 
 	/* PHY reset should be done during clock on */
-	if (pdata && pdata->init) {
-		ret = pdata->init();
-		if (ret) {
-			printk("%s: platform_data init() failed (returned %u)\n", EDRV_DEV_NAME, ret);
-			goto failed_platform_init;
-		}
-	}
+// pnf@mar2016
+//	if (pdata && pdata->init) {
+//		ret = pdata->init();
+//		if (ret) {
+//			printk("%s: platform_data init() failed (returned %u)\n", EDRV_DEV_NAME, ret);
+//			goto failed_platform_init;
+//		}
+//	}
 
 	/*
 	 * The priority for getting MAC address is:
@@ -1890,7 +1913,7 @@ fec_probe(struct platform_device *pdev)
 	spin_lock_init(&fep->hw_lock);
 
 	/* Set the Ethernet address */
-	fec_get_mac(fec_enet_private.m_InitParam.m_abMyMacAddr);
+	fec_get_mac(fec_enet_private.m_InitParam.aMacAddr);
 
 	/* Set receive and transmit descriptor base. */
 	fep->rx_bd_base = cbd_base;
@@ -1975,7 +1998,7 @@ failed_platform_init:
 	return ret;
 }
 
-static int __devexit
+static int
 fec_remove(struct platform_device *pdev)
 {
 	struct fec_enet_private_t *fep = &fec_enet_private;
@@ -1999,8 +2022,9 @@ fec_remove(struct platform_device *pdev)
 	clk_disable(fep->clk);
 	fec_enet_mii_remove();
 	printk("%s: fec_enet_mii_remove() done\n", __FUNCTION__);
-	if (pdata && pdata->uninit)
-		pdata->uninit();
+// pnf@mar2016
+//	if (pdata && pdata->uninit)
+//		pdata->uninit();
 	clk_disable(fep->clk);
 	clk_put(fep->clk);
 
