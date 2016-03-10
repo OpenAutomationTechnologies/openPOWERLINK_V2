@@ -73,20 +73,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 
-#if (CONFIG_EDRV_AUTO_RESPONSE == FALSE)
-    #undef EDRV_MAX_AUTO_RESPONSES
-    #define EDRV_MAX_AUTO_RESPONSES 0 //no auto-response used
+#ifndef CONFIG_EDRV_RX_BUFFERS
+#define CONFIG_EDRV_RX_BUFFERS      16
+#endif
+
+#if CONFIG_EDRV_RX_BUFFERS > EDRV_MAX_RX_BUFFERS
+#error "The number of Rx buffers exceeds the limit!"
 #endif
 
 #ifndef CONFIG_EDRV_TIME_TRIG_TX
 #define CONFIG_EDRV_TIME_TRIG_TX FALSE
-#endif
-
-#if (CONFIG_EDRV_AUTO_RESPONSE == FALSE && CONFIG_EDRV_TIME_TRIG_TX == FALSE)
-    #error "Please enable CONFIG_EDRV_AUTO_RESPONSE in oplkcfg.h to use openMAC for CN!"
-#endif
-#if (CONFIG_EDRV_AUTO_RESPONSE != FALSE && CONFIG_EDRV_TIME_TRIG_TX != FALSE)
-#error "Please disable CONFIG_EDRV_AUTO_RESPONSE in oplkcfg.h to use openMAC for MN!"
 #endif
 
 #ifndef CONFIG_EDRV_MAX_TX2_BUFFERS
@@ -218,6 +214,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
 
     DEBUG_LVL_EDRV_TRACE("*** %s ***\n", __func__);
     DEBUG_LVL_EDRV_TRACE(" PHY_NUM = %d\n", OPENMAC_PHYCNT);
+    DEBUG_LVL_EDRV_TRACE(" RX_BUFFERS = %d\n", CONFIG_EDRV_RX_BUFFERS);
     DEBUG_LVL_EDRV_TRACE(" MAX_RX_BUFFERS = %d\n", EDRV_MAX_RX_BUFFERS);
     DEBUG_LVL_EDRV_TRACE(" PKTLOCTX = %d\n", OPENMAC_PKTLOCTX);
     DEBUG_LVL_EDRV_TRACE(" PKTLOCRX = %d\n", OPENMAC_PKTLOCRX);
@@ -999,7 +996,7 @@ static ometh_config_typ getMacConfig(UINT adapter_p)
     OPLK_MEMSET(&config, 0, sizeof(config));
 
     config.adapter = adapter_p;
-    config.macType = OMETH_MAC_TYPE_01;
+    config.macType = OMETH_MAC_TYPE_02;
 
     config.mode = 0 |
                   OMETH_MODE_HALFDUPLEX |         // Half-duplex
@@ -1007,7 +1004,7 @@ static ometh_config_typ getMacConfig(UINT adapter_p)
                   OMETH_MODE_DIS_AUTO_NEG       // Disable Phy auto-negotiation
             ;
 
-    config.rxBuffers = EDRV_MAX_RX_BUFFERS;
+    config.rxBuffers = CONFIG_EDRV_RX_BUFFERS;
     config.rxMtu = EDRV_MAX_BUFFER_SIZE;
 
     config.pPhyBase = (void*)OPENMAC_PHY_BASE;

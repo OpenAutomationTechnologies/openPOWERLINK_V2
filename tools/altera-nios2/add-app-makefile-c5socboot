@@ -12,7 +12,7 @@ DRV_NAME := $(basename $(ELF))
 BIN_NAME := $(addsuffix .bin, $(DRV_NAME))
 BIN := $(BIN_NAME)
 ELF_TO_BIN_TARGET := $(addsuffix $(ELF_TO_BIN_SUFFIX), $(DRV_NAME))
-REMOVE_SECTION_ARG := -R .tc_i_mem -R .exceptions
+REMOVE_SECTION_ARG := -R .tc_mem -R .exceptions
 
 .PHONY : fpgaboot_bin
 fpgaboot_bin : $(ELF_TO_BIN_TARGET)

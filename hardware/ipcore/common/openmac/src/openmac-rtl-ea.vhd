@@ -123,7 +123,7 @@ end entity openmac;
 architecture struct OF openmac is
     signal Rx_Dv                        : std_logic;
     signal R_Req                        : std_logic;
-    signal Auto_Desc                    : std_logic_vector( 3 downto 0);
+    signal Auto_Desc                    : std_logic_vector( 4 downto 0);
     signal Zeit                         : std_logic_vector(31 downto 0);
     signal Tx_Dma_Req                   : std_logic;
     signal Rx_Dma_Req                   : std_logic;
@@ -214,7 +214,7 @@ begin
             Zeit <= Zeit + 1;
         end if;
 
-        Sel_Tx_Ram  <= iAddress(8);
+        Sel_Tx_Ram  <= iAddress(9);
         Sel_Tx_Reg  <= not iAddress(3);
 
         if        iDmaAck = '0'    then
@@ -504,8 +504,6 @@ bTxDesc:    block
     signal Ram_Be       : std_logic_vector( 1 downto 0);
     signal Ram_Wr       : std_logic;
     signal Desc_We      : std_logic;
-    signal Desc_Addr    : std_logic_vector( 7 downto 0);
-    signal DescIdx      : std_logic_vector( 2 downto 0);
     signal Last_Desc    : std_logic;
     signal ZeitL        : std_logic_vector(15 downto 0);
     signal Tx_Ie        : std_logic;
@@ -516,9 +514,11 @@ bTxDesc:    block
     signal Tx_Del       : std_logic;
     signal Ext_Tx       : std_logic;
     signal Ext_Ack      : std_logic;
-    signal Tx_Desc      : std_logic_vector( 3 downto 0);
-    signal Tx_Desc_One  : std_logic_vector( 3 downto 0);
-    signal Ext_Desc     : std_logic_vector( 3 downto 0);
+    signal Tx_Desc      : std_logic_vector(Auto_Desc'range);
+    signal Tx_Desc_One  : std_logic_vector(Tx_Desc'range);
+    signal Ext_Desc     : std_logic_vector(Tx_Desc'range);
+    signal DescIdx      : std_logic_vector( 2 downto 0);
+    signal Desc_Addr    : std_logic_vector(Tx_Desc'length + DescIdx'length - 1 downto 0);
     signal Tx_Icnt      : std_logic_vector( 4 downto 0);
     signal Tx_SoftInt   : std_logic;
     signal Sel_TxH      : std_logic;
@@ -546,7 +546,7 @@ begin
 
     Tx_Dma_Very1stOverflow <= cActivated when Dibl_Cnt = "01" and Sm_Tx = sPre and Tx_Timer(7) = '1' else cInactivated;
 
-    Ram_Wr    <= '1' when    inWrite = '0' and iSelectRam = '1' and iAddress(10) = '1'    else '0';
+    Ram_Wr    <= '1' when    inWrite = '0' and iSelectRam = '1' and iAddress(10 downto 9) = "11"    else '0';
     Ram_Be(1) <= '1' when    inWrite = '1' or inByteenable(1) = '0'                        else '0';
     Ram_Be(0) <= '1' when    inWrite = '1' or inByteenable(0) = '0'                        else '0';
 
@@ -572,8 +572,8 @@ begin
 
     Desc_We <= '1' when  Dsm = sTimL or Dsm = sTimH or Dsm = sStat    else   '0';
 
-    Desc_Addr <= '1' & Tx_Desc  & DescIdx    when    Ext_Tx = '0'    else
-                 '1' & Ext_Desc & DescIdx;
+    Desc_Addr <= Tx_Desc  & DescIdx    when    Ext_Tx = '0'    else
+                 Ext_Desc & DescIdx;
 
 gTxTime:    if gTimerEnable generate
     DescRam_In <= Zeit(15 downto 0)            when    Dsm  = sTimH    else
@@ -807,11 +807,8 @@ end process pTxControl;
 
     Tx_Idle <= '1'    when    Sm_Tx = sIdle and Dsm = sIdle else '0';
 
-    Tx_Reg(15 downto 4) <= Tx_Ie & Tx_SoftInt & Tx_Half & Tx_Wait & (Tx_Icnt(4) or Tx_Icnt(3)) & Tx_Icnt(2 downto 0)
-                         & Tx_On &  Tx_BegInt & Tx_Idle & "0" ;
-
-    Tx_Reg( 3 downto 0) <=  Tx_Desc;
-
+    Tx_Reg <= Tx_Ie & Tx_SoftInt & Tx_Half & Tx_Wait & (Tx_Icnt(4) or Tx_Icnt(3)) & Tx_Icnt(2 downto 0) &
+              Tx_On &  Tx_BegInt & Tx_Idle & Tx_Desc;
 
     Sel_TxH <= '1'    when inWrite = '0' and iSelectCont = '1' and iAddress(3) = '0' and    Ram_Be(1) = '1'    else    '0';
     Sel_TxL <= '1'    when inWrite = '0' and iSelectCont = '1' and iAddress(3) = '0' and    Ram_Be(0) = '1'    else    '0';
@@ -844,9 +841,9 @@ begin
 
         onTxBegIrq <= not Tx_BegInt;
 
-        if    Sel_TxL = '1' and iAddress(2 downto 1) = "11"                then    Tx_Desc_One <= iWritedata( 3 downto 0);
+        if    Sel_TxL = '1' and iAddress(2 downto 1) = "11"                then    Tx_Desc_One <= iWritedata(Tx_Desc_One'range);
         elsif    Dsm = sStat and Ext_Tx = '0'     then
-            if        Last_Desc = '1'                                    then    Tx_Desc_One <= x"0";
+            if        Last_Desc = '1'                                    then    Tx_Desc_One <= (others => '0');
             else                                                            Tx_Desc_One <= Tx_Desc + 1;
             end if;
         end if;
@@ -1100,19 +1097,19 @@ bRxDesc:    block
     signal Ram_Be       : std_logic_vector(1 downto 0);
     signal Ram_Wr       : std_logic;
     signal Desc_We      : std_logic;
-    signal Desc_Addr    : std_logic_vector(7 downto 0);
     signal ZeitL        : std_logic_vector(15 downto 0);
     signal Rx_On        : std_logic;
     signal Rx_Ie        : std_logic;
     signal Sel_RxH      : std_logic;
     signal Sel_RxL      : std_logic;
-    signal Rx_Desc      : std_logic_vector(3 downto 0);
-    signal Match_Desc   : std_logic_vector(3 downto 0);
+    signal Rx_Desc      : std_logic_vector(4 downto 0);
+    signal DescIdx      : std_logic_vector(2 downto 0);
+    signal Desc_Addr    : std_logic_vector(Rx_Desc'length + DescIdx'length - 1 downto 0);
+    signal Match_Desc   : std_logic_vector(3 downto 0); -- The matching filter index
     signal Rx_Icnt      : std_logic_vector(4 downto 0);
     signal Rx_Lost      : std_logic;
     signal Last_Desc    : std_logic;
     signal Answer_Tx    : std_logic;
-    signal DescIdx      : std_logic_vector( 2 downto 0);
     signal Rx_Count     : std_logic_vector(11 downto 0);
     signal Rx_Limit     : std_logic_vector(11 downto 0);
     signal Match        : std_logic;
@@ -1152,7 +1149,7 @@ begin
 
     WrDescStat <= '1' when Dsm = sStat    else '0';
 
-    Ram_Wr    <= '1' when    inWrite = '0' and iSelectRam = '1' and iAddress(10) = '1'    else '0';
+    Ram_Wr    <= '1' when    inWrite = '0' and iSelectRam = '1' and iAddress(10 downto 9) = "10"    else '0';
     Ram_Be(1) <= '1' when    inWrite = '1' or inByteenable(1) = '0'                        else '0';
     Ram_Be(0) <= '1' when    inWrite = '1' or inByteenable(0) = '0'                        else '0';
 
@@ -1171,7 +1168,7 @@ begin
     Desc_We <= '1'    when   Dsm = sTimL or Dsm = sTimH                    else
                '1'    when  (Dsm = sLenW or Dsm = sStat) and Match = '1'  else    '0';
 
-    Desc_Addr <= "0" & Rx_Desc & DescIdx;
+    Desc_Addr <= Rx_Desc & DescIdx;
 
 gRxTime:    if gTimerEnable generate
     DescRam_In <= Zeit(15 downto 0)                when    Dsm = sTimH        else
@@ -1315,10 +1312,8 @@ end process pRxControl;
 
     Rx_Idle <= '1'    when    Sm_Rx = sIdle else '0';
 
-    Rx_Reg(15 downto 4) <= Rx_Ie & '0' & "0"      & '0'     & (Rx_Icnt(4) or Rx_Icnt(3)) & Rx_Icnt(2 downto 0)
-                         & Rx_On & "0" & Rx_Idle & Rx_Lost;
-
-    Rx_Reg( 3 downto 0) <= Rx_Desc;
+    Rx_Reg <= Rx_Ie & "000" & (Rx_Icnt(4) or Rx_Icnt(3)) & Rx_Icnt(2 downto 0) &
+              Rx_On & Rx_Lost & Rx_Idle & Rx_Desc;
 
 bFilter: block
     signal Ram_Addr     : std_logic_vector(7 downto 0);
@@ -1340,10 +1335,10 @@ bFilter: block
     alias  ON_1         : std_logic is Filter_Out_H(22);
     alias  ON_2         : std_logic is Filter_Out_L(6);
     alias  ON_3         : std_logic is Filter_Out_L(22);
-    alias  DESC_0       : std_logic_vector(3 downto 0) is Filter_Out_H(3 downto 0);
-    alias  DESC_1       : std_logic_vector(3 downto 0) is Filter_Out_H(19 downto 16);
-    alias  DESC_2       : std_logic_vector(3 downto 0) is Filter_Out_L(3 downto 0);
-    alias  DESC_3       : std_logic_vector(3 downto 0) is Filter_Out_L(19 downto 16);
+    alias  DESC_0       : std_logic_vector(Auto_Desc'range) is Filter_Out_H(Auto_Desc'left downto Auto_Desc'right);
+    alias  DESC_1       : std_logic_vector(Auto_Desc'range) is Filter_Out_H(Auto_Desc'left+16 downto Auto_Desc'right+16); --(19 downto 16);
+    alias  DESC_2       : std_logic_vector(Auto_Desc'range) is Filter_Out_L(Auto_Desc'left downto Auto_Desc'right);
+    alias  DESC_3       : std_logic_vector(Auto_Desc'range) is Filter_Out_L(Auto_Desc'left+16 downto Auto_Desc'right+16); --(19 downto 16);
     signal Byte_Cnt     : std_logic_vector(4 downto 0) := (others => '0');
     signal Erg0         : std_logic_vector(7 downto 0);
     signal Erg1         : std_logic_vector(7 downto 0);
@@ -1460,7 +1455,7 @@ begin
 
         if        Dsm = sTimL                        then    Match <= '0';
         elsif    Found = '1'                        then    Match <= '1';        Match_Desc <= Filt_Idx & M_Prio(1 downto 0);
-            if        M_Prio(1 downto 0) = "00"    then    Answer_Tx <= TX_0;    Auto_Desc  <= DESC_0;
+            if       M_Prio(1 downto 0) = "00"    then    Answer_Tx <= TX_0;    Auto_Desc  <= DESC_0;
             elsif    M_Prio(1 downto 0) = "01"    then    Answer_Tx <= TX_1;    Auto_Desc  <= DESC_1;
             elsif    M_Prio(1 downto 0) = "10"    then    Answer_Tx <= TX_2;    Auto_Desc  <= DESC_2;
             elsif    M_Prio(1 downto 0) = "11"    then    Answer_Tx <= TX_3;    Auto_Desc  <= DESC_3;
@@ -1510,12 +1505,12 @@ begin
         end if;
 
         if        Rx_Beg  = '1' and (RX_OWN = '0' or Rx_On = '0')                    then    Rx_Lost  <= '1';
-        elsif    Sel_RxL = '1' and iAddress(2 downto 1) = "10" and iWritedata( 4) = '1'    then    Rx_Lost  <= '0';
+        elsif    Sel_RxL = '1' and iAddress(2 downto 1) = "10" and iWritedata( 6) = '1'    then    Rx_Lost  <= '0';
         end if;
 
-        if        Sel_RxL = '1' and iAddress(2 downto 1) = "11"            then    Rx_Desc <= iWritedata( 3 downto 0);
+        if        Sel_RxL = '1' and iAddress(2 downto 1) = "11"            then    Rx_Desc <= iWritedata(Rx_Desc'range);
         elsif    Dsm = sLenW and Desc_We = '1'  then
-            if        Last_Desc = '1'                                    then    Rx_Desc <= x"0";
+            if        Last_Desc = '1'                                    then    Rx_Desc <= (others => '0');
             else                                                            Rx_Desc <= Rx_Desc + 1;
             end if;
         end if;

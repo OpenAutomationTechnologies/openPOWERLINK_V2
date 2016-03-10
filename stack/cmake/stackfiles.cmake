@@ -81,6 +81,7 @@ SET(USER_SOURCES
     ${USER_SOURCE_DIR}/api/service.c
     ${USER_SOURCE_DIR}/obd/obd.c
     ${USER_SOURCE_DIR}/obd/obdcreate.c
+    ${USER_SOURCE_DIR}/obd/obdal.c
     ${USER_SOURCE_DIR}/dll/dllucal.c
     ${USER_SOURCE_DIR}/event/eventu.c
     ${USER_SOURCE_DIR}/nmt/nmtu.c
@@ -137,6 +138,10 @@ SET(SDO_SOCKETWRAPPER_SOURCES
 
 SET(CTRL_UCAL_LINUXIOCTL_SOURCES
     ${USER_SOURCE_DIR}/ctrl/ctrlucal-ioctl.c
+    )
+
+SET(CTRL_UCAL_LINUXPCIE_SOURCES
+    ${USER_SOURCE_DIR}/ctrl/ctrlucal-pcie.c
     )
 
 SET(CTRL_UCAL_POSIXMEM_SOURCES

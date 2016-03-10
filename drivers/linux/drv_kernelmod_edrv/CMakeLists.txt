@@ -83,6 +83,7 @@ SET(COMMON_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/common)
 SET(ARCH_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/arch/linuxkernel)
 SET(KERNEL_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/kernel)
 SET(EDRV_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/kernel/edrv)
+SET(STAGING_SOURCE_DIR ${OPLK_BASE_DIR}/staging/edrv)
 SET(OPLK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include)
 SET(TOOLS_DIR ${OPLK_BASE_DIR}/tools)
 
@@ -141,6 +142,15 @@ ELSEIF(CFG_POWERLINK_EDRV STREQUAL "emacps")
     ELSE()
         MESSAGE(FATAL_ERROR "EmacPs supported only for ARM processor")
     ENDIF()
+
+# Added this to test the UDOO Quad network card - pnf@mar2016
+ELSEIF(CFG_POWERLINK_EDRV STREQUAL "Fec")
+
+    SET(MODULE_NAME "demo_powerlinkfec")
+    SET(MODULE_DEFS "${MODULE_DEFS} -DCONFIG_EDRV=0 -DEDRV_USE_DIAGNOSTICS=0")
+#    SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} ${POWERLINK_SOURCE_DIR}/Edrv/
+    SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} ${STAGING_SOURCE_DIR}/EdrvFec.c)
+
 ELSE()
 
     message(FATAL_ERROR
@@ -224,6 +234,7 @@ SET(MODULE_SOURCE_FILES
     ${KERNEL_SOURCE_DIR}/veth/veth-linuxkernel.c
     ${COMMON_SOURCE_DIR}/circbuf/circbuffer.c
     ${COMMON_SOURCE_DIR}/circbuf/circbuf-linuxkernel.c
+    ${COMMON_SOURCE_DIR}/bufalloc/bufalloc.c
     ${COMMON_SOURCE_DIR}/debugstr.c
     ${ARCH_SOURCE_DIR}/target-linuxkernel.c
     )

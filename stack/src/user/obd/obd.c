@@ -106,6 +106,15 @@ static tObdInstance                 obdInstance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
+static tOplkError   initWrite(UINT        index_p,
+                              UINT        subIndex_p,
+                              void**      ppDstData_p,
+                              tObdSize    size_p);
+static tOplkError   writeSegm(tSdoObdConHdl* pSdoHdl_p);
+static tOplkError   writeByIdxSegm(tSdoObdConHdl* pSdoHdl_p);
+static tOplkError   writeByIdxInit(tSdoObdConHdl* pSdoHdl_p);
+static tOplkError   readByIdxInit(tSdoObdConHdl* pSdoHdl_p);
+static tOplkError   readByIdxSegm(tSdoObdConHdl* pSdoHdl_p);
 static tOplkError   writeEntryPre(UINT uiIndex_p, UINT subIndex_p, void* pSrcData_p, void** ppDstData_p,
                                   tObdSize size_p, tObdEntryPtr* ppObdEntry_p, tObdSubEntryPtr* ppSubEntry_p,
                                   tObdCbParam MEM* pCbParam_p, tObdSize* pObdSize_p);
@@ -1120,6 +1129,85 @@ tOplkError obd_storeLoadObjCallback(tObdStoreLoadCallback pfnCallback_p)
 
 //------------------------------------------------------------------------------
 /**
+\brief  Process an object write access from SDO server
+
+The function processes an WriteByIndex command layer of an SDO server.
+
+\param  pSdoHdl_p       Connection handle to SDO server
+
+\return The function returns a tOplkError error code.
+
+\ingroup module_obd
+*/
+//------------------------------------------------------------------------------
+tOplkError obd_processWrite(tSdoObdConHdl* pSdoHdl_p)
+{
+    tOplkError      ret = kErrorOk;
+
+    if (pSdoHdl_p == NULL)
+    {
+        ret = kErrorApiInvalidParam;
+        goto Exit;
+    }
+
+    if (pSdoHdl_p->dataOffset == 0)
+        ret = writeByIdxInit(pSdoHdl_p);
+    else
+        ret = writeByIdxSegm(pSdoHdl_p);
+
+Exit:
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Process an object read access from SDO server
+
+The function processes an ReadByIndex command layer of an SDO server.
+
+\param  pSdoHdl_p       Connection handle to SDO server. Used members:
+        \li [out] \ref  tSdoObdConHdl::totalPendSize
+                        Object size, only for initial transfer
+        \li [out] \ref  tSdoObdConHdl::dataSize
+                        Size of copied data to provided buffer
+        \li [in] all other members of \ref tSdoObdConHdl
+
+\return The function returns a tOplkError error code.
+
+\ingroup module_obd
+*/
+//------------------------------------------------------------------------------
+tOplkError obd_processRead(tSdoObdConHdl* pSdoHdl_p)
+{
+    tOplkError      ret = kErrorOk;
+
+    if (pSdoHdl_p == NULL)
+    {
+        ret = kErrorApiInvalidParam;
+        goto Exit;
+    }
+
+    if (pSdoHdl_p->dataOffset == 0)
+    {
+        ret = readByIdxInit(pSdoHdl_p);
+    }
+    else
+    {
+        ret = readByIdxSegm(pSdoHdl_p);
+    }
+
+Exit:
+    return ret;
+}
+
+//============================================================================//
+//            P R I V A T E   F U N C T I O N S                               //
+//============================================================================//
+/// \name Private Functions
+/// \{
+
+//------------------------------------------------------------------------------
+/**
 \brief  Initialize write to OD
 
 The function initializes write of data to an OBD entry.
@@ -1131,12 +1219,12 @@ It is used by SDO command layer to store segmented data.
 \param  size_p                  Size of the data to be written.
 
 \return The function returns a tOplkError error code.
-
-\ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tOplkError obd_initWrite(UINT index_p, UINT subIndex_p, void** ppDstData_p,
-                         tObdSize size_p)
+static tOplkError initWrite(UINT        index_p,
+                            UINT        subIndex_p,
+                            void**      ppDstData_p,
+                            tObdSize    size_p)
 {
     tOplkError              ret;
     tObdEntryPtr            pObdEntry;
@@ -1242,11 +1330,268 @@ tOplkError obd_initWrite(UINT index_p, UINT subIndex_p, void** ppDstData_p,
     return kErrorOk;
 }
 
-//============================================================================//
-//            P R I V A T E   F U N C T I O N S                               //
-//============================================================================//
-/// \name Private Functions
-/// \{
+//------------------------------------------------------------------------------
+/**
+\brief Process initial write object access from SDO server
+
+The function processes the first WriteByIndex command layer segment.
+It is also used for expedited transfers. For numerical objects, the SDO command
+layer payload endianness will be considered for the copy operation.
+
+\param  pSdoHdl_p       Connection handle to SDO server
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError writeByIdxInit(tSdoObdConHdl* pSdoHdl_p)
+{
+    tOplkError      ret = kErrorOk;
+    tObdAccess      accessType;
+    BOOL            fObjIsNumerical;
+
+    ret = obd_getAccessType(pSdoHdl_p->index, pSdoHdl_p->subIndex, &accessType);
+    if (ret == kErrorObdSubindexNotExist)
+    {
+        goto Exit;
+    }
+    else if (ret != kErrorOk)
+    {   // entry doesn't exist
+        ret = kErrorObdIndexNotExist;
+        goto Exit;
+    }
+
+    // compare access type, must be writeable
+    if ((accessType & kObdAccWrite) == 0)
+    {
+        if ((accessType & kObdAccRead) != 0)
+            ret = kErrorObdWriteViolation;
+        else
+            ret = kErrorObdAccessViolation;
+
+        goto Exit;
+    }
+
+    ret = obd_isNumerical(pSdoHdl_p->index,
+                          pSdoHdl_p->subIndex,
+                          &fObjIsNumerical);
+    if (ret != kErrorOk)
+    {
+        goto Exit;
+    }
+
+    if (fObjIsNumerical)
+    {   // copy fixed size to object -> consider endianness
+        ret = obd_writeEntryFromLe(pSdoHdl_p->index,
+                                   pSdoHdl_p->subIndex,
+                                   pSdoHdl_p->pSrcData,
+                                   pSdoHdl_p->totalPendSize);
+        if (ret != kErrorOk)
+        {
+            goto Exit;
+        }
+    }
+    else
+    {   // copy non-fixed size to (e.g. domain) object -> don't consider endianness
+        pSdoHdl_p->dataOffset = 0;  // first segment
+        ret = writeSegm(pSdoHdl_p);
+        if (ret != kErrorOk)
+        {
+            goto Exit;
+        }
+    }
+
+Exit:
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief Process non-initial write object access from SDO server
+
+The function processes the second and following WriteByIndex command layer
+payload segments.
+
+\param  pSdoHdl_p       Connection handle to SDO server
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError writeByIdxSegm(tSdoObdConHdl* pSdoHdl_p)
+{
+    // object and size checks already done for initial segment
+
+    // copy non-fixed size to (e.g. domain) object -> don't consider endianness
+    return writeSegm(pSdoHdl_p);
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief Write a segment received from SDO server to an object dictionary
+
+The function copies data of all SDO WriteByIndex command layer
+payload segments for non-numerical objects.
+
+\param  pSdoHdl_p       Connection handle to SDO server
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError writeSegm(tSdoObdConHdl* pSdoHdl_p)
+{
+    tOplkError      ret = kErrorOk;
+    void*           pDstData = NULL;
+
+    ret = initWrite(pSdoHdl_p->index,
+                    pSdoHdl_p->subIndex,
+                    &pDstData,
+                    pSdoHdl_p->totalPendSize);
+    if (ret != kErrorOk)
+    {
+        goto Exit;
+    }
+
+    if (pDstData == NULL)
+    {
+        ret = kErrorInvalidInstanceParam;
+        goto Exit;
+    }
+
+    pDstData = (BYTE*)pDstData + pSdoHdl_p->dataOffset;
+
+    OPLK_MEMCPY(pDstData, pSdoHdl_p->pSrcData, pSdoHdl_p->dataSize);
+
+Exit:
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Process an object read access from SDO server
+
+The function processes a ReadByIndex command layer of an SDO server.
+
+\param  pSdoHdl_p       Connection handle to SDO server. Used members:
+        \li [out] \ref  tSdoObdConHdl::totalPendSize
+                        Object size, only for initial transfer
+        \li [out] \ref  tSdoObdConHdl::dataSize
+                        Size of copied data to provided buffer
+        \li [in] all other members of \ref tSdoObdConHdl
+
+\return The function returns a tOplkError error code.
+
+\ingroup module_obd
+*/
+//------------------------------------------------------------------------------
+static tOplkError readByIdxInit(tSdoObdConHdl* pSdoHdl_p)
+{
+    tOplkError      ret = kErrorOk;
+    tObdAccess      accessType;
+    void*           pSrcData;
+
+    if ((pSdoHdl_p->pDstData == NULL) || (pSdoHdl_p->dataSize == 0))
+    {
+        return kErrorObdOutOfMemory;
+    }
+
+    ret = obd_getAccessType(pSdoHdl_p->index, pSdoHdl_p->subIndex, &accessType);
+    if (ret == kErrorObdSubindexNotExist)
+    {
+        goto Exit;
+    }
+    else if (ret != kErrorOk)
+    {   // entry doesn't exist
+        ret = kErrorObdIndexNotExist;
+        goto Exit;
+    }
+
+    // access type must be readable or constant
+    if (((accessType & kObdAccRead) == 0) && ((accessType & kObdAccConst) == 0))
+    {
+        if ((accessType & kObdAccWrite) != 0)
+        {
+            ret = kErrorObdReadViolation;
+        }
+        else
+        {
+            ret = kErrorObdAccessViolation;
+        }
+        goto Exit;
+    }
+
+    // get size of object and pointer to start of object
+    pSdoHdl_p->totalPendSize = obd_getDataSize(pSdoHdl_p->index,
+                                               pSdoHdl_p->subIndex);
+    if (pSdoHdl_p->totalPendSize > pSdoHdl_p->dataSize)
+    {   // provided buffer to small -> fill only max size
+        pSrcData = obd_getObjectDataPtr(pSdoHdl_p->index,
+                                        pSdoHdl_p->subIndex);
+        OPLK_MEMCPY(pSdoHdl_p->pDstData, pSrcData, pSdoHdl_p->dataSize);
+        // pSdoHdl_p->dataSize unchanged, no update necessary
+    }
+    else
+    {   // whole object size fits into the buffer
+        // -> copy optionally with endianness consideration
+        ret = obd_readEntryToLe(pSdoHdl_p->index,
+                                pSdoHdl_p->subIndex,
+                                pSdoHdl_p->pDstData,
+                                (tObdSize*)&pSdoHdl_p->dataSize);
+        if (ret != kErrorOk)
+            return ret;
+    }
+
+Exit:
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Process an object read access from SDO server
+
+The function processes an ReadByIndex command layer of an SDO server.
+
+\param  pSdoHdl_p       Connection handle to SDO server. Used members:
+        \li [out] \ref  tSdoObdConHdl::dataSize
+                        Size of copied data to provided buffer
+        \li [in] all other members of \ref tSdoObdConHdl
+
+
+\return The function returns a tOplkError error code.
+
+\ingroup module_obd
+*/
+//------------------------------------------------------------------------------
+static tOplkError readByIdxSegm(tSdoObdConHdl* pSdoHdl_p)
+{
+    tOplkError      ret = kErrorOk;
+    BYTE MEM*       pSrcData;
+
+    if ((pSdoHdl_p->pDstData == NULL) || (pSdoHdl_p->dataSize == 0))
+    {
+        return kErrorObdOutOfMemory;
+    }
+
+    pSrcData = obd_getObjectDataPtr(pSdoHdl_p->index,
+                                    pSdoHdl_p->subIndex);
+    if (pSrcData == NULL)
+    {   // entry doesn't exist
+        return kErrorObdIndexNotExist;
+    }
+
+    pSrcData = pSrcData + pSdoHdl_p->dataOffset;
+
+    if (pSdoHdl_p->totalPendSize > pSdoHdl_p->dataSize)
+    {   // provided buffer to small -> fill only max size
+
+        OPLK_MEMCPY(pSdoHdl_p->pDstData, pSrcData, pSdoHdl_p->dataSize);
+    }
+    else
+    {   // fill remaining size
+        OPLK_MEMCPY(pSdoHdl_p->pDstData, pSrcData, pSdoHdl_p->totalPendSize);
+        pSdoHdl_p->dataSize = pSdoHdl_p->totalPendSize;
+    }
+
+    return ret;
+}
 
 //------------------------------------------------------------------------------
 /**

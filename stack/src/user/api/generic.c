@@ -54,6 +54,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplk/sdo.h>
 #include <user/timesyncucal.h>
 #include <user/timesyncu.h>
+#include <user/obdal.h>
 
 #if defined(CONFIG_INCLUDE_CFM)
 #include <user/cfmu.h>
@@ -500,6 +501,12 @@ tOplkError oplk_readObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT i
 {
     tOplkError      ret = kErrorOk;
     tObdSize        obdSize;
+#if !defined(CONFIG_INCLUDE_SDOC)
+    // Ignore unused parameters
+    UNUSED_PARAMETER(pSdoComConHdl_p);
+    UNUSED_PARAMETER(sdoType_p);
+    UNUSED_PARAMETER(pUserArg_p);
+#endif
 
     if (!ctrlu_stackIsInitialized())
         return kErrorApiNotInitialized;
@@ -549,7 +556,8 @@ tOplkError oplk_readObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT i
         ret = kErrorApiTaskDeferred;
 
 #else
-        ret = kErrorApiInvalidParam;
+        // no SDO client implemented, only local access possible!
+        ret = kErrorInvalidNodeId;
 #endif
     }
     return ret;
@@ -590,6 +598,12 @@ tOplkError oplk_writeObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT 
                             tSdoType sdoType_p, void* pUserArg_p)
 {
     tOplkError      ret = kErrorOk;
+#if !defined(CONFIG_INCLUDE_SDOC)
+    // Ignore unused parameters
+    UNUSED_PARAMETER(pSdoComConHdl_p);
+    UNUSED_PARAMETER(sdoType_p);
+    UNUSED_PARAMETER(pUserArg_p);
+#endif
 
     if (!ctrlu_stackIsInitialized())
         return kErrorApiNotInitialized;
@@ -640,10 +654,68 @@ tOplkError oplk_writeObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT 
         ret = kErrorApiTaskDeferred;
 
 #else
-        ret = kErrorApiInvalidParam;
+        // no SDO client implemented, only local access possible!
+        ret = kErrorInvalidNodeId;
 #endif
     }
     return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Finish a user specific object access
+
+The function finishes a user specific object access event
+(\ref kOplkApiEventUserObdAccess) which returned kOplkErrorReject on the
+beginning of the access to signal a delayed answer.
+
+\parblock
+\param  pUserObdConHdl_p    Connection handle to user OD. Used members:
+        \li \ref tObdAlConHdl::obdAlHdl
+        \li \ref tObdAlConHdl::plkError
+        \li \ref tObdAlConHdl::origin
+
+        Only used for \ref tObdAlConHdl::accessTyp = kObdAlAccessTypeRead:
+        \li tObdAlConHdl::pSrcData
+        \li tObdAlConHdl::dataSize      Data size to be copied
+
+        Only used for initial read or write access (dataOffset = 0):
+        \li tObdAlConHdl::totalPendSize object size
+\endparblock
+
+\return The function returns a tOplkError error code.
+
+\ingroup module_api
+*/
+//------------------------------------------------------------------------------
+tOplkError oplk_finishUserObdAccess(tObdAlConHdl* pUserObdConHdl_p)
+{
+    return obdal_finishUserObdAccess(pUserObdConHdl_p);
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief Enables or disables forwarding object accesses to non-existing objects
+
+This function enables or disables forwarding of object accesses to objects which
+do not exist in the default object dictionary. Those accesses are forwarded
+to the API with the event \ref kOplkApiEventUserObdAccess if the feature is
+activated, the API needs to handle those accesses appropriately.
+
+\param fEnable_p    Flag for object access forwarding feature enabling: TRUE =
+                    enable, FALSE = disable
+
+\return The function returns a tOplkError error code.
+
+\ingroup module_api
+*/
+//------------------------------------------------------------------------------
+tOplkError oplk_enableUserObdAccess(BOOL fEnable_p)
+{
+    if (!ctrlu_stackIsInitialized())
+        return kErrorApiNotInitialized;
+
+    return obdal_enableUserObdAccess(fEnable_p);
 }
 
 //------------------------------------------------------------------------------
@@ -653,12 +725,14 @@ tOplkError oplk_writeObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT 
 The function frees the specified SDO channel. It must be called when the SDO
 channel to a remote node is not needed anymore. This may be done in the event
 callback function when the last SDO transfer to a remote node has completed.
+This function requires access to an SDO client.
 
 \param  sdoComConHdl_p      The SDO connection handle.
 
 \return The function returns a \ref tOplkError error code.
-\retval kErrorOk          SDO channel was successfully freed.
-\retval Other             Error occurred while freeing the SDO channel.
+\retval kErrorOk                SDO channel was successfully freed.
+\retval kErrorIllegalInstance   No SDO client implemented.
+\retval Other                   Error occurred while freeing the SDO channel.
 
 \ingroup module_api
 */
@@ -666,6 +740,10 @@ callback function when the last SDO transfer to a remote node has completed.
 tOplkError oplk_freeSdoChannel(tSdoComConHdl sdoComConHdl_p)
 {
     tOplkError      ret = kErrorOk;
+#if !defined(CONFIG_INCLUDE_SDOC)
+    // Ignore unused parameters
+    UNUSED_PARAMETER(sdoComConHdl_p);
+#endif
 
     if (!ctrlu_stackIsInitialized())
         return kErrorApiNotInitialized;
@@ -684,7 +762,8 @@ tOplkError oplk_freeSdoChannel(tSdoComConHdl sdoComConHdl_p)
         ret = sdocom_undefineConnection(sdoComConHdl_p);
     }
 #else
-    ret = kErrorApiInvalidParam;
+    // no SDO client implemented
+    ret = kErrorIllegalInstance;
 #endif
     return ret;
 }
@@ -694,14 +773,16 @@ tOplkError oplk_freeSdoChannel(tSdoComConHdl sdoComConHdl_p)
 \brief  Abort an SDO transfer
 
 The function aborts the running SDO transfer on the specified SDO channel.
+This function requires access to an SDO client.
 
 \param  sdoComConHdl_p      The SDO connection handle.
 \param  abortCode_p         The abort code which shall be sent to the remote
                             node.
 
 \return The function returns a \ref tOplkError error code.
-\retval kErrorOk          SDO transfer was successfully freed.
-\retval Other             Error occurred while aborting the SDO transfer.
+\retval kErrorOk                SDO channel was successfully freed.
+\retval kErrorIllegalInstance   No SDO client implemented.
+\retval Other                   Error occurred while aborting the SDO transfer.
 
 \ingroup module_api
 */
@@ -709,6 +790,11 @@ The function aborts the running SDO transfer on the specified SDO channel.
 tOplkError oplk_abortSdo(tSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p)
 {
     tOplkError      ret = kErrorOk;
+#if !defined(CONFIG_INCLUDE_SDOC)
+    // Ignore unused parameters
+    UNUSED_PARAMETER(sdoComConHdl_p);
+    UNUSED_PARAMETER(abortCode_p);
+#endif
 
     if (!ctrlu_stackIsInitialized())
         return kErrorApiNotInitialized;
@@ -726,7 +812,8 @@ tOplkError oplk_abortSdo(tSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p)
         ret = sdocom_abortTransfer(sdoComConHdl_p, abortCode_p);
     }
 #else
-    ret = kErrorApiInvalidParam;
+    // no SDO client implemented
+    ret = kErrorIllegalInstance;
 #endif
 
     return ret;

@@ -70,7 +70,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EDRV_PHY_RST_READY_MS       5       ///< Phy ready after reset [ms]
 
 #define EDRV_MAX_BUFFER_SIZE        1518    ///< MTU
-#define EDRV_MAX_RX_BUFFERS         16      ///< Number of supported Rx buffers
+#define EDRV_MAX_RX_BUFFERS         32      ///< Number of supported Rx buffers
 #define EDRV_MAX_FILTERS            16      ///< Number of supported Rx Filters
 #define EDRV_MAX_AUTO_RESPONSES     14      ///< Number of supported auto-response
 

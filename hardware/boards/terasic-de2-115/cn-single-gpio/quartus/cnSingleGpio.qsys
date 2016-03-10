@@ -289,7 +289,7 @@
  <parameter name="projectName" value="cn-single-gpio.qpf" />
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1438676423869" />
+ <parameter name="timeStamp" value="1447668488901" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk50" internal="clk50.clk_in" type="clock" dir="end" />
@@ -412,6 +412,7 @@
   <parameter name="AUTO_CLK100_CLOCK_RATE" value="100000000" />
   <parameter name="AUTO_CLK100_CLOCK_DOMAIN" value="1" />
   <parameter name="AUTO_CLK100_RESET_DOMAIN" value="1" />
+  <parameter name="tcmemSize" value="24576" />
  </module>
  <module
    kind="altera_avalon_sysid_qsys"
