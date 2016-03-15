@@ -100,6 +100,9 @@ common ground level.
 
 ![Settings for POWERLINK CN example designs on the INK Board.](\ref a_cn_devboard-terasic-de2-115.png)
 
+\note The application inputs are mapped to object number 0x6000 with subindex
+0x01. The application outputs are mapped to object number 0x6200 with subindex 0x01.
+
 #### PCP with an external parallel interface
 
 There are two hardware examples available in the `<OPLK_BASE_DIR>/hardware/boards/terasic-de2-115`
