@@ -157,7 +157,7 @@ struct sEdrvTxBuffer
     union
     {
         UINT32          ticks;              ///< Launch time of the frame in ticks
-        UINT64          nanoSeconds;        ///< Launch time of the frame in nano seconds
+        UINT64          nanoseconds;        ///< Launch time of the frame in nano seconds
     } launchTime;
 
     tEdrvTxHandler      pfnTxHandler;       ///< Tx callback function
