@@ -64,10 +64,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <linux/init.h>
 #include <linux/delay.h>
 
-//TODO The openPOWERLINK i210 Linux MN uses time triggered sending (TTTX) feature of i210 NIC.
-// The i210 Linux CN does not work with TTTX feature enabled; so in the current design, the CN demo is not
-// compatible with the MN driver. This issue shall be fixed in a future release.
-
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
@@ -619,7 +615,6 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
 static void removeOnePciDev(struct pci_dev* pPciDev_p);
 static tOplkError sendNormalBuffer(tEdrvTxBuffer* pBuffer_p);
 #if EDRV_USE_TTTX != FALSE
-static tOplkError getMacTime(UINT64* pCurtime_p);
 static tOplkError sendTimeTrigBuffer(tEdrvTxBuffer* pBuffer_p);
 #endif
 
@@ -1039,16 +1034,24 @@ The function retrieves the current MAC time.
 //------------------------------------------------------------------------------
 tOplkError edrv_getMacTime(UINT64* pCurtime_p)
 {
-    UINT64      curtime;
-    tOplkError  ret;
+    UINT32      timh;
+    UINT32      timl;
+    UINT32      reg;
 
-    ret = getMacTime(&curtime);
-    if (ret != kErrorOk)
-        return ret;
+    if (pCurtime_p == NULL)
+        return kErrorNoResource;
 
-    *pCurtime_p = curtime;
+    // Sample the current SYSTIM time in Auxiliary registers
+    reg = EDRV_REGDW_READ(EDRV_TSAUXC);
+    reg |= EDRV_TSAUXC_SAMP_AUTO;
+    EDRV_REGDW_WRITE(EDRV_TSAUXC, reg);
 
-    return ret;
+    timl = EDRV_REGDW_READ(EDRV_AUXSTMPL0);
+    timh = EDRV_REGDW_READ(EDRV_AUXSTMPH0);
+
+    *pCurtime_p = (UINT64)timh * SEC_TO_NSEC + (UINT64)timl;
+
+    return kErrorOk;
 }
 #endif
 
@@ -1486,41 +1489,6 @@ static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
 Exit:
     return handled;
 }
-
-#if EDRV_USE_TTTX != FALSE
-//------------------------------------------------------------------------------
-/**
-\brief  Retrieve current MAC time
-
-The function retrieves the current MAC time.
-
-\param  pCurtime_p    Pointer to store the current MAC time.
-
-\return The function returns a tOplkError error code.
-*/
-//------------------------------------------------------------------------------
-static tOplkError getMacTime(UINT64* pCurtime_p)
-{
-    UINT32      timh;
-    UINT32      timl;
-    UINT32      reg;
-
-    if (pCurtime_p == NULL)
-        return kErrorNoResource;
-
-    // Sample the current SYSTIM time in Auxiliary registers
-    reg = EDRV_REGDW_READ(EDRV_TSAUXC);
-    reg |= EDRV_TSAUXC_SAMP_AUTO;
-    EDRV_REGDW_WRITE(EDRV_TSAUXC, reg);
-
-    timl = EDRV_REGDW_READ(EDRV_AUXSTMPL0);
-    timh = EDRV_REGDW_READ(EDRV_AUXSTMPH0);
-
-    *pCurtime_p = (UINT64)timh * SEC_TO_NSEC + (UINT64)timl;
-
-    return kErrorOk;
-}
-#endif
 
 //------------------------------------------------------------------------------
 /**
@@ -2416,16 +2384,6 @@ static tOplkError sendTimeTrigBuffer(tEdrvTxBuffer* pBuffer_p)
     pTtxDesc->ctxtDesc.ipMaclenVlan = 0;
     launchTime = pBuffer_p->launchTime.nanoSeconds;
 
-    // Check if launch time is Zero
-    if (launchTime == 0)
-    {
-        // Get the current MAC time and use it for the frame
-        // transmission. The i210 controller will misinterpret
-        // the launch time outside the SYSTIML + 0.5 sec  to
-        // SYSTIML -0.5 range.
-        getMacTime(&launchTime);
-        pBuffer_p->launchTime.nanoSeconds = launchTime;
-    }
     // Scale the launch time to 32 nsecs unit
     do_div(launchTime, SEC_TO_NSEC);
     curTime = pBuffer_p->launchTime.nanoSeconds - (launchTime * SEC_TO_NSEC);
