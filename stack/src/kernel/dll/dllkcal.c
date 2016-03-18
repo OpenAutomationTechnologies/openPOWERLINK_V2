@@ -402,6 +402,7 @@ tOplkError dllkcal_process(tEvent* pEvent_p)
         case kEventTypeDllkConfigNode:
             pNodeInfo = (tDllNodeInfo*)pEvent_p->eventArg.pEventArg;
             ret = dllk_configNode(pNodeInfo);
+            initNodeInstance(pNodeInfo);
             break;
 
         case kEventTypeDllkAddNode:
