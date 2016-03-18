@@ -703,16 +703,18 @@ static tOplkError processTxBufferList(BOOL fCallSyncCb_p)
 
         if (fFirstPacket)
         {
-            pTxBuffer->launchTime = launchTime;
+            pTxBuffer->launchTime.nanoseconds = launchTime;
+            pTxBuffer->fLaunchTimeValid = TRUE;
             fFirstPacket = FALSE;
         }
         else
         {
             launchTime = launchTime + (UINT64)pTxBuffer->timeOffsetNs;
-            pTxBuffer->launchTime = launchTime;
+            pTxBuffer->launchTime.nanoseconds = launchTime;
+            pTxBuffer->fLaunchTimeValid = TRUE;
         }
 
-        if ((pTxBuffer->launchTime - cycleMin) > (cycleMax - cycleMin))
+        if ((pTxBuffer->launchTime.nanoseconds - cycleMin) > (cycleMax - cycleMin))
         {
             ret = kErrorEdrvTxListNotFinishedYet;
             goto Exit;
@@ -722,7 +724,9 @@ static tOplkError processTxBufferList(BOOL fCallSyncCb_p)
         if (ret != kErrorOk)
             goto Exit;
 
-        pTxBuffer->launchTime = 0;
+        pTxBuffer->launchTime.nanoseconds = 0;
+        pTxBuffer->fLaunchTimeValid = FALSE;
+
         edrvcyclicInstance_l.curTxBufferEntry++;
 
         if (fCallSyncCb_p)
@@ -782,4 +786,4 @@ Exit:
     return ret;
 }
 
-///\}
+/// \}
