@@ -594,11 +594,11 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
 
     pPacket->length = pBuffer_p->txFrameSize;
 #if CONFIG_EDRV_TIME_TRIG_TX != FALSE
-    if ((pBuffer_p->timeOffsetAbs & 1) == 1)
+    if (pBuffer_p->fLaunchTimeValid)
     {
         //free tx descriptors available
         txLength = omethTransmitTime(edrvInstance_l.pMacInst, pPacket,
-                        txAckCb, pBuffer_p, pBuffer_p->timeOffsetAbs);
+                        txAckCb, pBuffer_p, pBuffer_p->launchTime.ticks);
 
         if (txLength == 0)
         {
@@ -614,7 +614,7 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
             {
                 tEdrv2ndTxQueue* pTxqueue = &edrvInstance_l.txQueue[edrvInstance_l.txQueueWriteIndex & (CONFIG_EDRV_MAX_TX2_BUFFERS-1)];
                 pTxqueue->pBuffer = pBuffer_p;
-                pTxqueue->timeOffsetAbs = pBuffer_p->timeOffsetAbs;
+                pTxqueue->timeOffsetAbs = pBuffer_p->launchTime.ticks;
 
                 edrvInstance_l.txQueueWriteIndex++;
                 ret = kErrorOk;
@@ -1445,4 +1445,4 @@ static INT rxHook(void* pArg_p, ometh_packet_typ* pPacket_p, OMETH_BUF_FREE_FCT*
     return ret;
 }
 
-///\}
+/// \}

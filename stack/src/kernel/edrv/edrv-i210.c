@@ -612,13 +612,12 @@ static void freeRxBuffers(void);
 static tOplkError initRxQueue(tEdrvQueue* pRxQueue_p);
 static tOplkError allocateRxBuffer(tEdrvQueue* pRxQueue_p);
 static void configureRxQueue(tEdrvQueue* pRxQueue_p);
-#if EDRV_USE_TTTX != FALSE
 static void initQavMode(void);
-#endif
 static void writeIvarRegister(INT vector_p, INT index_p, INT offset_p);
 static INT requestMsixIrq(void);
 static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* pId_p);
 static void removeOnePciDev(struct pci_dev* pPciDev_p);
+static tOplkError getMacTime(UINT64* pCurtime_p);
 
 //---------------------------------------------------------------------------
 // module global vars
@@ -986,11 +985,8 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
     INT             index = 0;
     dma_addr_t      txDma;
     tEdrvTtxDesc*   pTtxDesc;
-
-#if EDRV_USE_TTTX != FALSE
     UINT64          launchTime;
     UINT64          curTime;
-#endif
 
     bufferNumber = pBuffer_p->txBufferNumber.value;
 
@@ -1014,17 +1010,23 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
     pTtxDesc->ctxtDesc.idxL4lenMss = 0;
     pTtxDesc->ctxtDesc.ipMaclenVlan = 0;
 
-#if EDRV_USE_TTTX != FALSE
-    launchTime = pBuffer_p->launchTime;
+    launchTime = pBuffer_p->launchTime.nanoseconds;
+
+    if (!pBuffer_p->fLaunchTimeValid)
+    {
+        getMacTime(&launchTime);
+        pBuffer_p->launchTime.nanoseconds = launchTime;
+    }
 
     // Scale the launch time to 32 nsecs unit
     do_div(launchTime, SEC_TO_NSEC);
-    curTime = pBuffer_p->launchTime - (launchTime * SEC_TO_NSEC);
+    curTime = pBuffer_p->launchTime.nanoseconds - (launchTime * SEC_TO_NSEC);
     do_div(curTime, 32);
+
     pTtxDesc->ctxtDesc.launchTime = curTime;
-#else
-    pTtxDesc->ctxtDesc.launchTime = 0;
-#endif
+
+    // Always reset the launch time
+    pBuffer_p->launchTime.nanoseconds = 0;
 
     // Set descriptor type
     pTtxDesc->ctxtDesc.tucmdType = (EDRV_TDESC_CMD_DEXT | EDRV_TDESC_DTYP_CTXT);
@@ -1100,24 +1102,16 @@ The function retrieves the current MAC time.
 //------------------------------------------------------------------------------
 tOplkError edrv_getMacTime(UINT64* pCurtime_p)
 {
-    UINT32      timh;
-    UINT32      timl;
-    UINT32      reg;
+    UINT64      curtime;
+    tOplkError  ret;
 
-    if (pCurtime_p == NULL)
-        return kErrorNoResource;
+    ret = getMacTime(&curtime);
+    if (ret != kErrorOk)
+        return ret;
 
-    // Sample the current SYSTIM time in Auxiliary registers
-    reg = EDRV_REGDW_READ(EDRV_TSAUXC);
-    reg |= EDRV_TSAUXC_SAMP_AUTO;
-    EDRV_REGDW_WRITE(EDRV_TSAUXC, reg);
+    *pCurtime_p = curtime;
 
-    timl = EDRV_REGDW_READ(EDRV_AUXSTMPL0);
-    timh = EDRV_REGDW_READ(EDRV_AUXSTMPH0);
-
-    *pCurtime_p = (UINT64)timh * SEC_TO_NSEC + (UINT64)timl;
-
-    return kErrorOk;
+    return ret;
 }
 
 //------------------------------------------------------------------------------
@@ -1500,6 +1494,39 @@ static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
 
 Exit:
     return handled;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Retrieve current MAC time
+
+The function retrieves the current MAC time.
+
+\param  pCurtime_p    Pointer to store the current MAC time.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError getMacTime(UINT64* pCurtime_p)
+{
+    UINT32      timh;
+    UINT32      timl;
+    UINT32      reg;
+
+    if (pCurtime_p == NULL)
+        return kErrorNoResource;
+
+    // Sample the current SYSTIM time in Auxiliary registers
+    reg = EDRV_REGDW_READ(EDRV_TSAUXC);
+    reg |= EDRV_TSAUXC_SAMP_AUTO;
+    EDRV_REGDW_WRITE(EDRV_TSAUXC, reg);
+
+    timl = EDRV_REGDW_READ(EDRV_AUXSTMPL0);
+    timh = EDRV_REGDW_READ(EDRV_AUXSTMPH0);
+
+    *pCurtime_p = (UINT64)timh * SEC_TO_NSEC + (UINT64)timl;
+
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -2157,7 +2184,6 @@ static void configureRxQueue(tEdrvQueue* pRxQueue_p)
         printk("....Done\n");
 }
 
-#if EDRV_USE_TTTX != FALSE
 //------------------------------------------------------------------------------
 /**
 \brief  Initialize Qav mode
@@ -2199,7 +2225,6 @@ static void initQavMode(void)
     EDRV_REGDW_WRITE(EDRV_LAUNCH_OSO, dwLaunchOff);
 
 }
-#endif
 
 //------------------------------------------------------------------------------
 /**
@@ -2613,10 +2638,8 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
         }
     }
 
-#if EDRV_USE_TTTX != FALSE
     // Configure device for Qav mode
     initQavMode();
-#endif
 
     // DMA configuration
     EDRV_REGDW_WRITE(EDRV_DTX_MAX_PKTSZ_REG, EDRV_MAX_FRAME_SIZE/64);
@@ -2868,4 +2891,4 @@ Exit:
     return;
 }
 
-///\}
+/// \}
