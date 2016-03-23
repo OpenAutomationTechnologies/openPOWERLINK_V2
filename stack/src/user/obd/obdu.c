@@ -109,7 +109,14 @@ static tObdInstance                 obdInstance_l;
 static tOplkError   initWrite(UINT        index_p,
                               UINT        subIndex_p,
                               void**      ppDstData_p,
-                              tObdSize    size_p);
+                              tObdSize    size_p,
+                              UINT        segmOffset_p);
+static tOplkError   reallocStringDomainObj(tObdSubEntryPtr    pSubEntry_p,
+                                           tObdEntryPtr       pObdEntry_p,
+                                           tObdSize*          pTotalTransSize_p,
+                                           tObdSize*          pObdSize_p,
+                                           tObdCbParam*       pCbParam_p,
+                                           void MEM**         ppDstData_p);
 static tOplkError   writeSegm(tSdoObdConHdl* pSdoHdl_p);
 static tOplkError   writeByIdxSegm(tSdoObdConHdl* pSdoHdl_p);
 static tOplkError   writeByIdxInit(tSdoObdConHdl* pSdoHdl_p);
@@ -1221,6 +1228,7 @@ It is used by SDO command layer to store segmented data.
 \param  subIndex_p              Sub-index of object.
 \param  ppDstData_p             Pointer to store object data pointer.
 \param  size_p                  Size of the data to be written.
+\param  segmOffset_p            Segmentation offset (0 means initial segment)
 
 \return The function returns a tOplkError error code.
 */
@@ -1228,7 +1236,8 @@ It is used by SDO command layer to store segmented data.
 static tOplkError initWrite(UINT        index_p,
                             UINT        subIndex_p,
                             void**      ppDstData_p,
-                            tObdSize    size_p)
+                            tObdSize    size_p,
+                            UINT        segmOffset_p)
 {
     tOplkError              ret;
     tObdEntryPtr            pObdEntry;
@@ -1237,11 +1246,6 @@ static tOplkError initWrite(UINT        index_p,
     void MEM*               pDstData;
     tObdSize                obdSize;
     tObdCbParam             cbParam;
-
-#if (CONFIG_OBD_USE_STRING_DOMAIN_IN_RAM != FALSE)
-    tObdVStringDomain MEM   memVStringDomain;
-    void MEM*               pCurrData;
-#endif
 
     ret = getEntry(index_p, subIndex_p, &pObdEntry, &pSubEntry);
     if (ret != kErrorOk)
@@ -1263,57 +1267,18 @@ static tOplkError initWrite(UINT        index_p,
     obdSize = getObjectSize(pSubEntry);
     pDstData = (void MEM*)getObjectDataPtr(pSubEntry);
 
-    // Function obdu_writeEntry() calls event kObdEvWrStringDomain for String or
-    // Domain which lets called module directly change the data pointer or size.
-    // This prevents a recursive call to the callback function if it calls getEntry().
-#if (CONFIG_OBD_USE_STRING_DOMAIN_IN_RAM != FALSE)
-    if ((pSubEntry->type == kObdTypeVString) || (pSubEntry->type == kObdTypeDomain) ||
-        (pSubEntry->type == kObdTypeOString))
-    {
-        if (pSubEntry->type == kObdTypeVString)
-        {
-            // reserve one byte for 0-termination
-            size_p += 1;
-        }
+    if (segmOffset_p == 0)
+    {  // call storage modification only for first segment
 
-        memVStringDomain.downloadSize = size_p;
-        memVStringDomain.objSize      = obdSize;
-        memVStringDomain.pData        = pDstData;
-        cbParam.obdEvent = kObdEvWrStringDomain;
-        cbParam.pArg     = &memVStringDomain;
-        ret = callObjectCallback(pObdEntry->pfnCallback, &cbParam);
-        if (ret != kErrorOk)
-            return ret;
-
-        // write back new settings
-        pCurrData = pSubEntry->pCurrent;
-        if ((pSubEntry->type == kObdTypeVString) || (pSubEntry->type == kObdTypeOString))
-        {
-            ((tObdVString MEM*)pCurrData)->size    = memVStringDomain.objSize;
-            ((tObdVString MEM*)pCurrData)->pString = memVStringDomain.pData;
-        }
-        else
-        {
-            tObdVarEntry MEM*    pVarEntry = NULL;
-
-            ret = getVarEntry(pSubEntry, &pVarEntry);
-            if (ret != kErrorOk)
-                return ret;
-
-            if (pVarEntry == NULL)
-            {
-                return kErrorObdAccessViolation;
-            }
-            pVarEntry->size  = memVStringDomain.objSize;
-            pVarEntry->pData = (void MEM*)memVStringDomain.pData;
-        }
-
-        // Because object size and object pointer are adapted by user callback
-        // function, re-read this values.
-        obdSize  = memVStringDomain.objSize;
-        pDstData = (void MEM*)memVStringDomain.pData;
+        ret = reallocStringDomainObj(pSubEntry,
+                                     pObdEntry,
+                                     &size_p,
+                                     &obdSize,
+                                     &cbParam,
+                                     &pDstData);
+         if (ret != kErrorOk)
+             return ret;
     }
-#endif
 
     // access violation if adress to current value is NULL
     if (pDstData == NULL)
@@ -1331,6 +1296,87 @@ static tOplkError initWrite(UINT        index_p,
     if (ppDstData_p)
         *ppDstData_p = pDstData;
 
+    return kErrorOk;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Reallocates object size and pointer for non-numeric objects
+
+This function calls event kObdEvWrStringDomain for string or domain which lets
+called module (OD callback function) directly change the data pointer or size.
+This prevents a recursive call to the callback function if it calls getEntry().
+
+\param[in]      pSubEntry_p         Pointer to sub-index structure of object.
+\param[in]      pObdEntry_p         Pointer to index structure of object.
+\param[in,out]  pTotalTransSize_p   Pointer to total write transfer size.
+\param[in,out]  pObdSize_p          Pointer to current object size.
+\param[in,out]  ppDstData_p         Pointer to current object storage.
+\param[in,out]  pCbParam_p          Pointer to OD callback argument structure.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError reallocStringDomainObj(tObdSubEntryPtr    pSubEntry_p,
+                                         tObdEntryPtr       pObdEntry_p,
+                                         tObdSize*          pTotalTransSize_p,
+                                         tObdSize*          pObdSize_p,
+                                         tObdCbParam*       pCbParam_p,
+                                         void MEM**         ppDstData_p)
+{
+    tOplkError              ret;
+#if (CONFIG_OBD_USE_STRING_DOMAIN_IN_RAM != FALSE)
+    tObdVStringDomain MEM   memVStringDomain;
+    void MEM*               pCurrData;
+
+    if ((pSubEntry_p->type == kObdTypeVString) ||
+        (pSubEntry_p->type == kObdTypeDomain) ||
+        (pSubEntry_p->type == kObdTypeOString))
+    {
+        if (pSubEntry_p->type == kObdTypeVString)
+        {
+            // reserve one byte for 0-termination
+            *pTotalTransSize_p += 1;
+        }
+
+        memVStringDomain.downloadSize = *pTotalTransSize_p;
+        memVStringDomain.objSize      = *pObdSize_p;
+        memVStringDomain.pData        = *ppDstData_p;
+        pCbParam_p->obdEvent = kObdEvWrStringDomain;
+        pCbParam_p->pArg     = &memVStringDomain;
+        ret = callObjectCallback(pObdEntry_p->pfnCallback, pCbParam_p);
+        if (ret != kErrorOk)
+            return ret;
+
+        // write back new settings
+        pCurrData = pSubEntry_p->pCurrent;
+        if ((pSubEntry_p->type == kObdTypeVString) || (pSubEntry_p->type == kObdTypeOString))
+        {
+            ((tObdVString MEM*)pCurrData)->size    = memVStringDomain.objSize;
+            ((tObdVString MEM*)pCurrData)->pString = memVStringDomain.pData;
+        }
+        else
+        {
+            tObdVarEntry MEM*    pVarEntry = NULL;
+
+            ret = getVarEntry(pSubEntry_p, &pVarEntry);
+            if (ret != kErrorOk)
+                return ret;
+
+            if (pVarEntry == NULL)
+            {
+                return kErrorObdAccessViolation;
+            }
+            pVarEntry->size  = memVStringDomain.objSize;
+            pVarEntry->pData = (void MEM*)memVStringDomain.pData;
+        }
+
+        // Because object size and object pointer are adapted by user callback
+        // function, re-read this values.
+        *pObdSize_p  = memVStringDomain.objSize;
+        *ppDstData_p = (void MEM*)memVStringDomain.pData;
+    }
+#endif
     return kErrorOk;
 }
 
@@ -1448,7 +1494,8 @@ static tOplkError writeSegm(tSdoObdConHdl* pSdoHdl_p)
     ret = initWrite(pSdoHdl_p->index,
                     pSdoHdl_p->subIndex,
                     &pDstData,
-                    pSdoHdl_p->totalPendSize);
+                    pSdoHdl_p->totalPendSize,
+                    pSdoHdl_p->dataOffset);
     if (ret != kErrorOk)
     {
         goto Exit;
@@ -1630,11 +1677,6 @@ static tOplkError writeEntryPre(UINT index_p, UINT subIndex_p, void* pSrcData_p,
     tObdSize                obdSize;
     BOOL                    fEntryNumerical;
 
-#if (CONFIG_OBD_USE_STRING_DOMAIN_IN_RAM != FALSE)
-    tObdVStringDomain MEM   memVStringDomain;
-    void MEM*               pCurrData;
-#endif
-
     ret = getEntry(index_p, subIndex_p, &pObdEntry, &pSubEntry);
     if (ret != kErrorOk)
         return ret;
@@ -1655,57 +1697,14 @@ static tOplkError writeEntryPre(UINT index_p, UINT subIndex_p, void* pSrcData_p,
     obdSize = getObjectSize(pSubEntry);
     pDstData = (void MEM*)getObjectDataPtr(pSubEntry);
 
-    // Function obdu_writeEntry() calls event kObdEvWrStringDomain for String or
-    // Domain which lets called module directly change the data pointer or size.
-    // This prevents a recursive call to the callback function if it calls getEntry().
-#if (CONFIG_OBD_USE_STRING_DOMAIN_IN_RAM != FALSE)
-    if ((pSubEntry->type == kObdTypeVString) || (pSubEntry->type == kObdTypeDomain) ||
-        (pSubEntry->type == kObdTypeOString))
-    {
-        if (pSubEntry->type == kObdTypeVString)
-        {
-            // reserve one byte for 0-termination
-            size_p += 1;
-        }
-
-        memVStringDomain.downloadSize = size_p;
-        memVStringDomain.objSize      = obdSize;
-        memVStringDomain.pData        = pDstData;
-        pCbParam_p->obdEvent = kObdEvWrStringDomain;
-        pCbParam_p->pArg     = &memVStringDomain;
-        ret = callObjectCallback(pObdEntry->pfnCallback, pCbParam_p);
-        if (ret != kErrorOk)
-            return ret;
-
-        // write back new settings
-        pCurrData = pSubEntry->pCurrent;
-        if ((pSubEntry->type == kObdTypeVString) || (pSubEntry->type == kObdTypeOString))
-        {
-            ((tObdVString MEM*)pCurrData)->size    = memVStringDomain.objSize;
-            ((tObdVString MEM*)pCurrData)->pString = memVStringDomain.pData;
-        }
-        else
-        {
-            tObdVarEntry MEM*    pVarEntry = NULL;
-
-            ret = getVarEntry(pSubEntry, &pVarEntry);
-            if (ret != kErrorOk)
-                return ret;
-
-            if (pVarEntry == NULL)
-            {
-                return kErrorObdAccessViolation;
-            }
-            pVarEntry->size  = memVStringDomain.objSize;
-            pVarEntry->pData = (void MEM*)memVStringDomain.pData;
-        }
-
-        // Because object size and object pointer are adapted by user callback
-        // function, re-read this values.
-        obdSize  = memVStringDomain.objSize;
-        pDstData = (void MEM*)memVStringDomain.pData;
-    }
-#endif
+    ret = reallocStringDomainObj(pSubEntry,
+                                 pObdEntry,
+                                 &size_p,
+                                 &obdSize,
+                                 pCbParam_p,
+                                 &pDstData);
+     if (ret != kErrorOk)
+         return ret;
 
     // access violation if adress to current value is NULL
     if (pDstData == NULL)
