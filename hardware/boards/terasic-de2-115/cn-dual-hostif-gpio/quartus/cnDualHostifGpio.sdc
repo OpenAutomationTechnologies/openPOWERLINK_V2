@@ -45,8 +45,14 @@ set_false_path -from [get_registers *]      -to [get_ports EPCS_SDO]
 set_false_path -from [get_ports EPCS_DATA0] -to [get_registers *]
 
 # ------------------------------------------------------------------------------
+# Node switch
+# -> Cut path
+set_false_path -from [get_ports NODE_SWITCH[*]] -to [get_registers *]
+
+# ------------------------------------------------------------------------------
 # Other IOs
 set_false_path -from [get_registers *]      -to [get_ports LEDG[*]]
+set_false_path -from [get_registers *]      -to [get_ports HEX?[*]]
 set_false_path -from [get_registers *]      -to [get_ports LCD_*]
 set_false_path -from [get_registers *]      -to [get_ports LCD_DQ[*]]
 set_false_path -from [get_registers *]      -to [get_ports BENCHMARK[*]]

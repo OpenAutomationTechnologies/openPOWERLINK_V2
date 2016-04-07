@@ -40,3 +40,4 @@ set_false_path -from [get_ports EPCS_DATA0] -to [get_registers *]
 # ------------------------------------------------------------------------------
 # Other IOs
 set_false_path -from [get_registers *]      -to [get_ports HOSTIF_IRQ_n]
+set_false_path -from [get_registers *]      -to [get_ports LEDG[*]]
