@@ -150,17 +150,17 @@ The function returns application inputs.
 \ingroup module_app_common
 */
 //------------------------------------------------------------------------------
-UINT8 gpio_getAppInput(void)
+UINT32 gpio_getAppInput(void)
 {
-    UINT8 key;
+    UINT32 input;
 
-#ifdef KEY_PIO_BASE
-    key = IORD_ALTERA_AVALON_PIO_DATA(KEY_PIO_BASE);
+#ifdef APP_PIO_BASE
+    input = IORD_ALTERA_AVALON_PIO_DATA(APP_PIO_BASE);
 #else
-    key = 0;
+    input = 0;
 #endif
 
-    return key;
+    return input;
 }
 
 //------------------------------------------------------------------------------
@@ -176,8 +176,8 @@ The function sets the application outputs.
 //------------------------------------------------------------------------------
 void gpio_setAppOutputs(UINT32 val_p)
 {
-#ifdef HEX_PIO_BASE
-    IOWR_ALTERA_AVALON_PIO_DATA(HEX_PIO_BASE, val_p);
+#ifdef APP_PIO_BASE
+    IOWR_ALTERA_AVALON_PIO_DATA(APP_PIO_BASE, val_p);
 #else
     UNUSED_PARAMETER(val_p);
 #endif

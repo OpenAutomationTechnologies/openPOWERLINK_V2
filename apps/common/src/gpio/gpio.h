@@ -62,11 +62,11 @@ extern "C"
 {
 #endif
 
-void  gpio_init(void);
-void  gpio_exit(void);
-UINT8 gpio_getNodeid(void);
-UINT8 gpio_getAppInput(void);
-void  gpio_setAppOutputs(UINT32 val_p);
+void   gpio_init(void);
+void   gpio_exit(void);
+UINT8  gpio_getNodeid(void);
+UINT32 gpio_getAppInput(void);
+void   gpio_setAppOutputs(UINT32 val_p);
 
 #ifdef __cplusplus
 }

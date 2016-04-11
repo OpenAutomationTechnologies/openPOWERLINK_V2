@@ -69,8 +69,11 @@ entity toplevel is
         SDRAM_DQ            : inout std_logic_vector(31 downto 0);
         -- NODE_SWITCH
         NODE_SWITCH         : in    std_logic_vector(7 downto 0);
-        -- Low active KEY
+        -- KEY
         KEY_n               : in    std_logic_vector(3 downto 0);
+        -- LED
+        LEDG                : out   std_logic_vector(7 downto 0);
+        LEDR                : out   std_logic_vector(15 downto 0);
         -- HEX LED
         HEX0                : out   std_logic_vector(6 downto 0);
         HEX1                : out   std_logic_vector(6 downto 0);
@@ -110,11 +113,7 @@ architecture rtl of toplevel is
 
             host_0_benchmark_pio_export                 : out   std_logic_vector(7 downto 0);
 
-            key_pio_export                              : in    std_logic_vector(3 downto 0);
-
             node_switch_pio_export                      : in    std_logic_vector(7 downto 0)  := (others => 'X');
-
-            hex_pio_export                              : out   std_logic_vector(31 downto 0);
 
             epcs_flash_dclk                             : out   std_logic;
             epcs_flash_sce                              : out   std_logic;
@@ -146,7 +145,10 @@ architecture rtl of toplevel is
             prl0_oPrlMst_ale                            : out   std_logic;
             prl0_oPrlMst_wr                             : out   std_logic;
             prl0_oPrlMst_rd                             : out   std_logic;
-            prl0_iPrlMst_ack                            : in    std_logic                     := 'X'
+            prl0_iPrlMst_ack                            : in    std_logic                     := 'X';
+            -- Application ports
+            app_pio_in_port                             : in    std_logic_vector(31 downto 0) := (others => 'X');
+            app_pio_out_port                            : out   std_logic_vector(31 downto 0)
         );
     end component cnSingleHostifGpio;
 
@@ -179,17 +181,16 @@ architecture rtl of toplevel is
 
     signal hostifIrq    : std_logic;
 
-    signal key          : std_logic_vector(KEY_n'range);
-
     type tSevenSegArray is array (natural range <>) of std_logic_vector(6 downto 0);
     constant cNumberOfHex   : natural := 8;
     signal hex              : std_logic_vector(cNumberOfHex*4-1 downto 0);
     signal sevenSegArray    : tSevenSegArray(cNumberOfHex-1 downto 0);
+
+    signal app_input        : std_logic_vector(31 downto 0);
+    signal app_output       : std_logic_vector(31 downto 0);
 begin
     LCD_ON      <= '1';
     LCD_BLON    <= '1';
-
-    key         <= not KEY_n;
 
     SDRAM_CLK   <= clk100_p;
 
@@ -205,6 +206,26 @@ begin
 
     hostifIrq       <= not HOSTIF_IRQ_n;
 
+    ---------------------------------------------------------------------------
+    -- Green LED assignments
+    LEDG        <= (others => '0'); -- Reserved
+    ---------------------------------------------------------------------------
+
+    ---------------------------------------------------------------------------
+    -- Red LED assignments
+    LEDR        <= (others => '0'); -- Reserved
+    ---------------------------------------------------------------------------
+
+    ---------------------------------------------------------------------------
+    -- Application Input and Output assignments
+
+    -- Input: Map KEY nibble to Application Input
+    app_input   <= x"0000000" & not KEY_n;
+
+    -- Output: Map Application Output to HEX LEDs
+    hex         <= app_output;
+    ---------------------------------------------------------------------------
+
     inst : component cnSingleHostifGpio
         port map (
             clk25_clk                                   => clk25,
@@ -213,9 +234,6 @@ begin
             reset_reset_n                               => pllLocked,
 
             node_switch_pio_export                      => NODE_SWITCH,
-
-            hex_pio_export                              => hex,
-            key_pio_export                              => key,
 
             host_0_benchmark_pio_export                 => open,
 
@@ -249,7 +267,10 @@ begin
             prl0_oPrlMst_rd                             => hostifRd,
             prl0_iPrlMst_ack                            => hostifAck,
 
-            sync_irq_irq                                => hostifIrq
+            sync_irq_irq                                => hostifIrq,
+
+            app_pio_in_port                             => app_input,
+            app_pio_out_port                            => app_output
         );
 
     -- Pll Instance

@@ -53,6 +53,7 @@ entity toplevel is
         EXT_CLK         : in    std_logic;
         -- PHY Interfaces
         PHY_GXCLK       : out   std_logic_vector(1 downto 0);
+        PHY_LINK_n      : in    std_logic_vector(1 downto 0);
         PHY_RXCLK       : in    std_logic_vector(1 downto 0);
         PHY_RXER        : in    std_logic_vector(1 downto 0);
         PHY_RXDV        : in    std_logic_vector(1 downto 0);
@@ -85,8 +86,9 @@ entity toplevel is
         HOSTIF_ALE_n    : in    std_logic;
         HOSTIF_ACK_n    : out   std_logic;
         HOSTIF_IRQ_n    : out   std_logic;
-        -- LED green
-        LEDG            : out   std_logic_vector(1 downto 0)
+        -- LED
+        LEDG            : out   std_logic_vector(7 downto 0);
+        LEDR            : out   std_logic_vector(15 downto 0)
     );
 end toplevel;
 
@@ -117,6 +119,8 @@ architecture rtl of toplevel is
             openmac_0_smi_nPhyRst                       : out   std_logic_vector(1 downto 0);
             openmac_0_smi_clk                           : out   std_logic_vector(1 downto 0);
             openmac_0_smi_dio                           : inout std_logic_vector(1 downto 0)  := (others => 'X');
+            openmac_0_pktactivity_export                : out   std_logic;
+
             epcs_flash_dclk                             : out   std_logic;
             epcs_flash_sce                              : out   std_logic;
             epcs_flash_sdo                              : out   std_logic;
@@ -157,6 +161,8 @@ architecture rtl of toplevel is
     signal clk100_p     : std_logic;
     signal pllLocked    : std_logic;
     signal sramAddr     : std_logic_vector(SRAM_ADDR'high downto 0);
+    signal plk_status_error : std_logic_vector(1 downto 0);
+    signal openmac_activity : std_logic;
 
     signal parHost_chipselect           : std_logic;
     signal parHost_read                 : std_logic;
@@ -186,6 +192,23 @@ begin
     HOSTIF_AD <= parHost_ad_o when parHost_ad_oen = '1' else (others => 'Z');
     parHost_ad_i <= HOSTIF_AD;
 
+    ---------------------------------------------------------------------------
+    -- Green LED assignments
+    LEDG        <= plk_status_error(0) &  -- POWERLINK Status LED
+                   "000" &  -- Reserved
+                   (openmac_activity and not PHY_LINK_n(0)) & -- Gated activity
+                   not PHY_LINK_n(0) & -- Link
+                   (openmac_activity and not PHY_LINK_n(1)) & -- Gated activity
+                   not PHY_LINK_n(1); -- Link
+    ---------------------------------------------------------------------------
+
+    ---------------------------------------------------------------------------
+    -- Red LED assignments
+    LEDR        <= x"000" & -- Reserved
+                   "000" & -- Reserved
+                   plk_status_error(1); -- POWERLINK Error LED
+    ---------------------------------------------------------------------------
+
     inst : component mnSingleHostifDrv
         port map (
             clk25_clk                                   => clk25,
@@ -206,6 +229,7 @@ begin
             openmac_0_smi_nPhyRst                       => PHY_RESET_n,
             openmac_0_smi_clk                           => PHY_MDC,
             openmac_0_smi_dio                           => PHY_MDIO,
+            openmac_0_pktactivity_export                => openmac_activity,
 
             tri_state_0_tcm_address_out                 => sramAddr,
             tri_state_0_tcm_read_n_out                  => SRAM_OE_n,
@@ -233,7 +257,7 @@ begin
             prl0_iPrlSlv_ad_i                           => parHost_ad_i,
             prl0_oPrlSlv_ad_oen                         => parHost_ad_oen,
 
-            powerlink_led_export                        => LEDG
+            powerlink_led_export                        => plk_status_error
         );
 
     -- Pll Instance

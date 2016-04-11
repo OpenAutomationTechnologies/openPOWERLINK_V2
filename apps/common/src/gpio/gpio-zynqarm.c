@@ -164,17 +164,17 @@ The function returns application inputs.
 \ingroup module_app_common
 */
 //------------------------------------------------------------------------------
-UINT8 gpio_getAppInput(void)
+UINT32 gpio_getAppInput(void)
 {
-    UINT8 key;
+    UINT32 input;
 
 #ifdef GPIO_INPUTS_BASE
-    key = XGpio_ReadReg(GPIO_INPUTS_BASE, 0);
+    input = XGpio_ReadReg(GPIO_INPUTS_BASE, 0);
 #else
-    key = 0;
+    input = 0;
 #endif
 
-    return key;
+    return input;
 }
 
 //------------------------------------------------------------------------------
