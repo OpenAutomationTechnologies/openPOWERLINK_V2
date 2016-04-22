@@ -155,7 +155,7 @@ area from 0x1B00 - 0x1FFF.
         OBD_BEGIN_INDEX_RAM(0x1F8A, 0x03, NULL)
             OBD_SUBINDEX_RAM_VAR(0x1F8A, 0x00, kObdTypeUInt8, kObdAccConst, tObdUnsigned8, NumberOfEntries, 0x02)
             OBD_SUBINDEX_RAM_VAR(0x1F8A, 0x01, kObdTypeUInt32, kObdAccSRW, tObdUnsigned32, WaitSoCPReq_U32, 1000)    // in [ns]
-            OBD_SUBINDEX_RAM_VAR(0x1F8A, 0x02, kObdTypeUInt32, kObdAccSRW, tObdUnsigned32, AsyncSlotTimeout_U32, 100000) // in [ns]
+            OBD_SUBINDEX_RAM_VAR_RG(0x1F8A, 0x02, kObdTypeUInt32, kObdAccSRW, tObdUnsigned32, AsyncSlotTimeout_U32, 100000, 250, 0xFFFFFFFF) // in [ns]
         OBD_END_INDEX(0x1F8A)
 
         // Object 1F8Bh: NMT_MNPReqPayloadLimitList_AU16

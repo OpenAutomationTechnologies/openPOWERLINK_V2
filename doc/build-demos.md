@@ -126,7 +126,7 @@ Follow the steps below to cross compile your demo application for Altera Cyclone
     The openPOWERLINK kernel part will be directly linked to the user part and
     application. libpcap will be used as Ethernet driver.
 
-  - __Linux User Space Daemon__
+  - __Linux Userspace Daemon__
 
     The library `liboplkappXn-userintf.a` will be used. It contains the interface
     to a Linux user space daemon. The kernel part of the openPOWERLINK stack is
