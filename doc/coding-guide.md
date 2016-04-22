@@ -39,11 +39,11 @@ code remains maintainable.
   space between the operator and the variable.
 - Put the opening brace immediately after the function name and add a space between a
   control statement (if, switch, for, ...) and the opening brace.
-- Always put a linebreak after a conditional statement, even if the body is only
+- Always put a line break after a conditional statement, even if the body is only
   a return or other simple action.
 - Keep line length below 80 characters. This enables to view and compare two
   files side by side on the screen. However, this is not a strict rule! If the
-  line is only some characters longer and a linebreak would decrease
+  line is only some characters longer and a line break would decrease
   readability than you should keep it on a single line. If a line must be split
   the following rules should be followed:
     + Break after a comma.

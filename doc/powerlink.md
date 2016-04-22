@@ -50,7 +50,7 @@ the application software and the POWERLINK stack, which enables data to be
 exchanged with an application over the POWERLINK network. POWERLINK defines the
 services and communication objects for the access to the OD entries.
 
-The OD of POWERLINK is modeled after the one of CANopen. Each entry is addressed
+The OD of POWERLINK is modelled after the one of CANopen. Each entry is addressed
 by index and sub index. The properties of an entry in the OD are defined by type
 (UINT8, UIN16, REAL32, Visible String, Domain,...) and by attribute (read-only,
 write-only, const, read-write, mappable).

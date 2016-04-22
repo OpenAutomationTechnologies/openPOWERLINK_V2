@@ -278,7 +278,7 @@ The following build steps are necessary to run the demo on the evaluation board.
 3. Connect your POWERLINK slave to a POWERLINK network.
 
 
-### Programm the bitstream to the FPGA
+### Program the bitstream to the FPGA
 
 There are two possibilities to program the bitstream to the FPGA:
 
@@ -374,7 +374,7 @@ quartus/<hardware_design_name>.sopcinfo has been modified since the BSP was gene
 
 \note `Generate the BSP to update the Makefile, and then build again.`
 
-\note `To genrate from Eclipse:`
+\note `To generate from Eclipse:`
   `1. Right-click the BSP project.`
   `2. In the Nios II Menu, click Generate BSP.`
 
@@ -397,7 +397,7 @@ Tools Project" and click "Next"
 directory.
 ![Import the pcp directIO project into the Nios II EDS](\ref a_cn_ec_import_app.png)
 
-6. Choose an approprate project name (e.g. "DirectIO") and set
+6. Choose an appropriate project name (e.g. "DirectIO") and set
 "MinGW Nios II GCC4"(Windows default) or "Linux Nios II GCC4"(Linux default) as toolchain.
 
 7. Click the "Finish" button.

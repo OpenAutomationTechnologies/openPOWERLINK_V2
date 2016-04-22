@@ -84,7 +84,7 @@ Node Redundancy extension.
 - Ethernet driver for Intel i210 (untested)
 - POWERLINK extension PollResponse Chaining (the specifications EPSG 302-C and 302-A are incompatible)
 - NMT command NMTFlushArpEntry is not transmitted after switch-over as
-  recommanded by the specification. Currently, this command isn't implemented at
+  recommended by the specification. Currently, this command isn't implemented at
   all.
 - Possibility of application to reject NMT request GoToStandby. Currently, there
   is no API to ask application about NMT requests at all.

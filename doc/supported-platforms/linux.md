@@ -290,4 +290,3 @@ thread, you have to specify the used Ethernet interface. For example:
 - Linux kernel space: Check the kernel log
 
       $ dmesg
-

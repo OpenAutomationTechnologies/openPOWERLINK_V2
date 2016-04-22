@@ -251,7 +251,7 @@ image or a bit stream.
 The FSBL for the openPOWERLINK demo on Zynq is compiled by importing the project
 files from the Xilinx installation directory into the bootloader project
 directory and setting up the necessary configuration to build the bootloader
-using CMake configution files.
+using CMake configuration files.
 Follow the steps below to compile Zynq FSBL for demos:
 
 * Open a shell where the Xilinx ISE 14.7 Toolchain is configured.
@@ -269,7 +269,7 @@ Follow the steps below to compile Zynq FSBL for demos:
 
 ## Building {#sect_zynq_noos_build}
 
-For building openPOWERLINK for FPGA based non-OS systema on Zynq SoC, refer to the
+For building openPOWERLINK for FPGA based non-OS system on Zynq SoC, refer to the
 [generic build instructions](\ref page_build) and execute all required build
 steps from this section. The following build steps can be carried out:
 

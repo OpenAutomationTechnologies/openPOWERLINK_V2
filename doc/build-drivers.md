@@ -159,12 +159,12 @@ To build the PCP daemon (e.g. for Microblaze in Zynq SoC's programming logic (PL
   Selects the Ethernet driver used for the kernel-based stack and demos.
   Valid options are:
 
-  - **8139**:  Realtek 8139-based network interface cards (100 MBit/s)
-  - **8111**:  Realtek 8111/8168 network interface cards (1 GBit/s)
+  - **8139**: Realtek 8139-based network interface cards (100 MBit/s)
+  - **8111**: Realtek 8111/8168 network interface cards (1 GBit/s)
   - **8255x**: Intel 8255x-based network interface cards (100 MBit/s)
   - **82573**: Intel 82573-based network interface cards (1 GBit/s)
-  - **i210**:  Intel I210-based network interface cards (1 GBit/s)
-  - **emacps**:Zynq Emac network interface controller (1 GBit/s)
+  - **i210**: Intel I210-based network interface cards (1 GBit/s)
+  - **emacps**: Zynq Emac network interface controller (1 GBit/s)
 
 ## PCP daemon on Microblaze {#sect_build_drivers_options_pcp_daemon}
 
