@@ -5,6 +5,21 @@ Revision history of openPOWERLINK Protocol Stack {#page_revision_history}
 
 # Release 2 {#sect_revision_v2}
 
+## V2.3.2 {#sect_revision_v2_3_2}
+
+This is the latest release of the V2.3 release series. This release is a stable
+release, it contains fixes and optimizations.
+
+For a detailed revision history refer to the Git source code history.
+
+### Known Issues:
+- Linux i210 (see 2.3.1)
+- DE2i-150 board (see 2.3.0)
+- Windows PCIe (see 2.3.0)
+- Linux PCIe (see 2.3.0)
+- NDIS intermediate driver (see 2.3.0)
+- Redundancy MN (see 2.2.1)
+
 ## V2.3.1 {#sect_revision_v2_3_1}
 
 This is the latest release of the V2.3 release series. This release is a stable
