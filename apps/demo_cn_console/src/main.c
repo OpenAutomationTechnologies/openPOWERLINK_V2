@@ -101,6 +101,7 @@ typedef struct
     tEventlogFormat logFormat;
     UINT32          logLevel;
     UINT32          logCategory;
+    char            devName[128];
 } tOptions;
 
 //------------------------------------------------------------------------------
@@ -111,7 +112,7 @@ typedef struct
 // local function prototypes
 //------------------------------------------------------------------------------
 static int getOptions(int argc_p, char** argv_p, tOptions* pOpts_p);
-static tOplkError initPowerlink(UINT32 cycleLen_p, const BYTE* macAddr_p, UINT32 nodeId_p);
+static tOplkError initPowerlink(UINT32 cycleLen_p, char* devName_p, const BYTE* macAddr_p, UINT32 nodeId_p);
 static void loopMain(void);
 static void shutdownPowerlink(void);
 
@@ -160,7 +161,7 @@ int main (int argc, char** argv)
                           "demo_cn_console: Stack Version:%s Stack Configuration:0x%08X",
                           oplk_getVersionString(), oplk_getStackConfiguration());
 
-    if ((ret = initPowerlink(CYCLE_LEN, aMacAddr_l, opts.nodeId))
+    if ((ret = initPowerlink(CYCLE_LEN, opts.devName, aMacAddr_l, opts.nodeId))
         != kErrorOk)
         goto Exit;
 
@@ -195,7 +196,7 @@ The function initializes the openPOWERLINK stack.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError initPowerlink(UINT32 cycleLen_p, const BYTE* macAddr_p, UINT32 nodeId_p)
+static tOplkError initPowerlink(UINT32 cycleLen_p, char* devName_p, const BYTE* macAddr_p, UINT32 nodeId_p)
 {
     tOplkError                  ret = kErrorOk;
     static tOplkApiInitParam    initParam;
@@ -208,7 +209,17 @@ static tOplkError initPowerlink(UINT32 cycleLen_p, const BYTE* macAddr_p, UINT32
 #if defined(CONFIG_USE_PCAP)
     eventlog_printMessage(kEventlogLevelInfo, kEventlogCategoryGeneric,
                          "Using libpcap for network access");
-    selectPcapDevice(devName);
+    if (devName_p[0] == '\0')
+    {
+        if (selectPcapDevice(devName) < 0)
+            return kErrorIllegalInstance;
+    }
+    else
+    {
+        strncpy(devName, devName_p, 128);
+    }
+#else
+    UNUSED_PARAMETER(devName_p);
 #endif
 
     memset(&initParam, 0, sizeof(initParam));
@@ -447,18 +458,23 @@ static int getOptions(int argc_p, char** argv_p, tOptions* pOpts_p)
     int                         opt;
 
     /* setup default parameters */
+    strncpy(pOpts_p->devName, "\0", 128);
     pOpts_p->nodeId = NODEID;
     pOpts_p->logFormat = kEventlogFormatReadable;
     pOpts_p->logCategory = 0xffffffff;
     pOpts_p->logLevel = 0xffffffff;
 
     /* get command line parameters */
-    while ((opt = getopt(argc_p, argv_p, "n:pv:t:")) != -1)
+    while ((opt = getopt(argc_p, argv_p, "n:pv:t:d:")) != -1)
     {
         switch (opt)
         {
             case 'n':
                 pOpts_p->nodeId = strtoul(optarg, NULL, 10);
+                break;
+
+            case 'd':
+                strncpy(pOpts_p->devName, optarg, 128);
                 break;
 
             case 'p':
@@ -474,7 +490,12 @@ static int getOptions(int argc_p, char** argv_p, tOptions* pOpts_p)
                 break;
 
             default: /* '?' */
+#if defined(CONFIG_USE_PCAP)
+                printf("Usage: %s [-n NODE_ID] [-l LOGFILE] [-d DEV_NAME] [-v LOGLEVEL] [-t LOGCATEGORY] [-p]\n", argv_p[0]);
+                printf(" -d DEV_NAME: Ethernet device name to use e.g. eth1\n");
+#else
                 printf("Usage: %s [-n NODE_ID] [-l LOGFILE] [-v LOGLEVEL] [-t LOGCATEGORY] [-p]\n", argv_p[0]);
+#endif
                 printf(" -p: Use parsable log format\n");
                 printf(" -v LOGLEVEL: A bit mask with log levels to be printed in the event logger\n");
                 printf(" -t LOGCATEGORY: A bit mask with log categories to be printed in the event logger\n");
