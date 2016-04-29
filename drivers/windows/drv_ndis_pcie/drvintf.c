@@ -530,29 +530,23 @@ Copies the event from user layer into user to kernel event queue.
 \ingroup module_driver_ndispcie
 */
 //------------------------------------------------------------------------------
-tOplkError drv_postEvent(void* pEvent_p)
+tOplkError drv_postEvent(tEvent* pEvent_p)
 {
     tOplkError          ret = kErrorOk;
     tCircBufError       circError;
-    tEvent              event;
     tCircBufInstance*   pCircBufInstance = drvInstance_l.apEventQueueInst[kEventQueueU2K];
 
     if ((pEvent_p == NULL) || !drvInstance_l.fDriverActive)
         return kErrorNoResource;
 
-    OPLK_MEMCPY(&event, pEvent_p, sizeof(tEvent));
-
-    if (event.eventArgSize != 0)
-        event.eventArg.pEventArg = (void*)((UINT8*)pEvent_p + sizeof(tEvent));
-
-    if (event.eventArgSize == 0)
+    if (pEvent_p->eventArgSize == 0)
     {
-        circError = circbuf_writeData(pCircBufInstance, &event, sizeof(tEvent));
+        circError = circbuf_writeData(pCircBufInstance, pEvent_p, sizeof(tEvent));
     }
     else
     {
         circError = circbuf_writeMultipleData(pCircBufInstance, pEvent_p, sizeof(tEvent),
-                                              event.eventArg.pEventArg, event.eventArgSize);
+                                              pEvent_p->eventArg.pEventArg, pEvent_p->eventArgSize);
     }
 
     if (circError != kCircBufOk)
@@ -1358,8 +1352,7 @@ static tOplkError nonPlkFrameSendCb(void* pBuffer_p, size_t size_p)
     tDllAsyncReqPriority    priority = kDllAsyncReqPrioGeneric;
     tCircBufInstance*       pCircBufInstance = drvInstance_l.apEventQueueInst[kEventQueueU2K];
     tCircBufError           circError;
-    UINT8                   aEventBuf[sizeof(tEvent) + sizeof(tDllAsyncReqPriority)];
-    tEvent*                 pEvent = (tEvent*)aEventBuf;
+    tEvent                  event;
 
     if (!drvInstance_l.fDriverActive || pBuffer_p == NULL || size_p == 0)
         return kErrorNoResource;
@@ -1376,15 +1369,13 @@ static tOplkError nonPlkFrameSendCb(void* pBuffer_p, size_t size_p)
         return ret;
     }
 
-    OPLK_MEMSET(pEvent, 0, (sizeof(tEvent) + sizeof(tDllAsyncReqPriority)));
-
     // post event to DLL
-    pEvent->eventSink = kEventSinkDllk;
-    pEvent->eventType = kEventTypeDllkFillTx;
-    OPLK_MEMCPY(((UINT8*)pEvent + sizeof(tEvent)), (UINT8*)&priority, sizeof(tDllAsyncReqPriority));
-    pEvent->eventArgSize = sizeof(tDllAsyncReqPriority);
+    event.eventSink = kEventSinkDllk;
+    event.eventType = kEventTypeDllkFillTx;
+    event.eventArg.pEventArg = &priority;
+    event.eventArgSize = sizeof(tDllAsyncReqPriority);
 
-    ret = drv_postEvent(pEvent);
+    ret = drv_postEvent(&event);
 
     return ret;
 }
@@ -1455,17 +1446,14 @@ static tOplkError receiveNonPlkFrame(void* pEvent_p)
         if (pFrameInfo != NULL)
         {
             // Post event to release ASync frame
-            UINT8       aEventBuf[sizeof(tEvent) + sizeof(tFrameInfo)];
-            tEvent*     pEvent = (tEvent*)aEventBuf;
-
-            OPLK_MEMSET(pEvent, 0, (sizeof(tEvent) + sizeof(tFrameInfo)));
+            tEvent      event;
 
             // Post the event to free the ASync frame buffer
-            pEvent->eventSink = kEventSinkDllkCal;
-            pEvent->eventType = kEventTypeReleaseRxFrame;
-            pEvent->eventArgSize = sizeof(tFrameInfo);
-            OPLK_MEMCPY(((UINT8*)pEvent + sizeof(tEvent)), (UINT8*)pFrameInfo, sizeof(tFrameInfo));
-            drv_postEvent(pEvent);
+            event.eventSink = kEventSinkDllkCal;
+            event.eventType = kEventTypeReleaseRxFrame;
+            event.eventArgSize = sizeof(tFrameInfo);
+            event.eventArg.pEventArg = (void*)pFrameInfo;
+            drv_postEvent(&event);
         }
         else
             return kErrorNoResource;
