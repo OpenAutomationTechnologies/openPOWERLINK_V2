@@ -69,6 +69,21 @@ typedef struct
     IO_REMOVE_LOCK    driverAccessLock;     ///< Driver lock for IO access.
 } tFileContext;
 
+#if defined(CONFIG_INCLUDE_VETH)
+/**
+\brief Type for VEth frame receive callback function pointer
+
+This type defines a function pointer to the VEth frame receive
+callback function.
+
+\param  pBuffer_p    Pointer to the received frame.
+\param  size_p       Size of the received frame.
+
+\return The function returns a tOplkError error code.
+*/
+typedef tOplkError (*tDrvIntfCbVethRcv)(void* pBuffer_p, UINT32 size_p);
+#endif
+
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------

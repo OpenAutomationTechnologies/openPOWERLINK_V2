@@ -49,4 +49,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DEF_DEBUG_LVL                               (0xC00000000L)
 #endif
 
+#define CONFIG_INCLUDE_VETH
+
 #endif // _INC_oplkcfg_H_
