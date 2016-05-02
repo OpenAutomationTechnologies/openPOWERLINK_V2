@@ -85,6 +85,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EDRV_MAX_TX_QUEUES       2
 #define EDRV_MAX_QUEUE_VECTOR    2
 #define EDRV_SR_QUEUE            0
+#define EDRV_MAX_TIMER_COUNT     2
 
 #define INTERRUPT_STRING_SIZE    25
 #define SEC_TO_NSEC              1000000000
@@ -182,7 +183,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EDRV_TCTL_EN                     0x00000002        // Transmit Enable
 #define EDRV_TCTL_PSP                    0x00000008        // Pad short packets
 #define EDRV_TCTL_RTLC                   0x01000000        // Re-Transmit on Late collision
-#define EDRV_TCTL_EXT_COLD_CLEAR         0x000FFC00        // Clear Collison threshold
+#define EDRV_TCTL_EXT_COLD_CLEAR         0x000FFC00        // Clear Collision threshold
 #define EDRV_TCTL_EXT_COLD               0x0003F000        // default value as per 802.3 spec
 #define EDRV_TXDCTL_PTHRESH              0                 // Prefetch threshold
 #define EDRV_TXDCTL_HTHRESH              0                 // Host threshold
@@ -194,7 +195,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EDRV_TQAVCTRL_FETCH_ARB          (1 << 4)          // Data Fetch arbitration
 #define EDRV_TQAVCTRL_DTRANSARB          (1 << 8)          // Data Transmit arbitration
 #define EDRV_TQAVCTRL_TRANSTIM           (1 << 9)          // Data Launch time valid
-#define EDRV_TQAVCTRL_SP_WAIT_SR         (1 << 10)         // SP queues wait for SR queue to quarantee SR launch time
+#define EDRV_TQAVCTRL_SP_WAIT_SR         (1 << 10)         // SP queues wait for SR queue to guarantee SR launch time
 #define EDRV_TQAVCTRL_1588_STAT_EN       (1 << 2)          // Report DMA transmit time in WB descriptors
 #define EDRV_TQAVCC_QUEUE_MODE_SR        (1 << 31)         // Queue mode Strict Reservation (Launch time based)
 #define EDRV_TQAVCTRL_FETCH_TM_SHIFT     16                // Fetch time shift
@@ -207,8 +208,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // Receive Register offset and defines
 //------------------------------------------------------------------------------
-#define EDRV_RCTL_REG            0x00100         // Rx Control
-#define EDRV_RXPBSIZE_REG        0x02404         // Rx Packet Buffer Size
+#define EDRV_RCTL_REG            0x00100                   // Rx Control
+#define EDRV_RXPBSIZE_REG        0x02404                   // Rx Packet Buffer Size
 #define EDRV_SRRCTL(n)           ((n < 4) ? (0x0C00C + 0x40 * n) :\
                                  (0x0C00C + 0x40 * (n - 4)))            // Split and Replication Receive Control Register Queue
 #define EDRV_RDBAL(n)            ((n < 4) ? (0x0C000 + 0x40 * n) :\
@@ -270,34 +271,31 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Time Sync Register offset and defines
 //------------------------------------------------------------------------------
 #define EDRV_LAUNCH_OSO                  0x03578           // Launch Time Offset Register 0
-#define EDRV_FREQOUT0                    0x0B654           // Frequency Out 0 Control Register
+#define EDRV_FREQOUT(n)                  (0x0B654 +\
+                                         ((n) * 4))        // Frequency Out Control Register
 #define EDRV_TSIM                        0x0B674           // Time Sync Interrupt Mask Register
 #define EDRV_TSICR                       0x0B66C           // Time Sync Interrupt Cause Register
 #define EDRV_TSAUXC                      0x0B640           // Auxiliary Control Register
 #define EDRV_AUXSTMPL0                   0x0B65C           // Auxiliary Time Stamp 0 Reg - Low
 #define EDRV_AUXSTMPH0                   0x0B660           // Auxiliary Time Stamp 0 Reg - High
-#define EDRV_TRGTTIML0                   0x0B644           // Target Time Register 0 Low
-#define EDRV_TRGTTIMH0                   0x0B648           // Target Time Register 0 High
+#define EDRV_TRGTTIML(n)                 (0x0B644 +\
+                                         ((n) * 8))        // Target Time Register (n) Low
+#define EDRV_TRGTTIMH(n)                 (0x0B648 +\
+                                         ((n) * 8))        // Target Time Register (n) High
 #define EDRV_TSSDP                       0x0003C           // Time Sync SDP Configuration Register
-#define	EDRV_TSIM_TT0                    (1 << 3)          // Target time 0 Trigger Mask.
-#define	EDRV_TSIM_TT1                    (1 << 4)          // Target time 1 Trigger Mask.
+#define	EDRV_TSIM_TT(n)                  (1 << (3 + (n)))  // Target time (n) Trigger Mask.
 #define EDRV_TSAUXC_SAMP_AUTO            0x00000008        // Sample SYSTIM into AUXSTMP0 register
-#define EDRV_TSAUXC_EN_TT0               (1 << 0)          // Enable target time 0
-#define EDRV_TSAUXC_EN_TT1               (1 << 1)          // Enable target time 1
-#define EDRV_TSAUXC_EN_CLK0              (1 << 2)          // Enable Configurable Frequency Clock 0
-#define EDRV_TSAUXC_ST0                  (1 << 4)          // Start Clock 0 Toggle on Target Time 0
-#define EDRV_TSSDP_TS_SDP3_SEL_CLK0      (2 << 15)         // Freq clock 0 is output on SDP3
-#define EDRV_TSSDP_TS_SDP3_EN            (1 << 17)         // SDP3 is assigned to Tsync
-#define EDRV_TSSDP_TS_SDP0_SEL_CLK0      (2 << 6)          // Freq clock 0 is output on SDP0
-#define EDRV_TSSDP_TS_SDP0_EN            (1 << 8)          // SDP0 is assigned to Tsync
-#define SDP0_SET_DIR_OUT                 0x00400000        // Set direction Out for SDP0
-#define SDP0_SET_HIGH                    0x00040000        // Set SDP0 High
-#define SDP1_SET_DIR_OUT                 0x00800000        // Set direction Out for SDP1
-#define SDP1_SET_HIGH                    0x00080000        // Set SDP1 High
-#define SDP2_SET_DIR_OUT                 0x00000400        // Set direction Out for SDP2
-#define SDP2_SET_HIGH                    0x00000040        // Set SDP2 High
-#define SDP3_SET_DIR_OUT                 0x00000800        // Set direction Out for SDP3
-#define SDP3_SET_HIGH                    0x00000080        // Set SDP3 High
+#define EDRV_TSAUXC_EN_TT(n)             (1 << (n))        // Enable target time n
+#define EDRV_TSAUXC_EN_CLK(n)            (5 << ((3 * (n)) + 2))   // Enable Configurable Frequency Clock 0
+#define EDRV_TSSDP_TS_EN_SDP(n)          (1 << (8 +\
+                                         (3 * (n))))       // SDP(n) is assigned to Tsync
+#define EDRV_TSSDP_TS_SEL_SDP(n,m)       ((m) << (6 +\
+                                         (3 * (n))))       // SDP(n) allocation to Tsync(m) event
+#define SET_DIR_OUT_SDP(n)               (1 << (22 + (n))) // Set direction Out for SDP0 and SDP1
+#define EDRV_TSICR_TT0                   (1 << 3)          // Target time 0 interrupt cause
+#define EDRV_TSICR_TT1                   (1 << 4)          // Target time 1 interrupt cause
+#define EDRV_TSICR_SYSTIM                (1 << 0)          // Wrap around interrupt cause
+
 //------------------------------------------------------------------------------
 // MDIC specific defines
 //------------------------------------------------------------------------------
@@ -578,9 +576,10 @@ typedef struct
     struct msix_entry*  pMsixEntry;                         ///< Pointer to the MSI-X structure
 
     // Timer related members
-    tTimerHdl           timerHdl;                           ///< Timer handle
+    tTimerHdl           aTimerHdl[EDRV_MAX_TIMER_COUNT];    ///< Array for timer handle
     tHresCallback       hresTimerCb;                        ///< Timer callback
     BOOL                fInitialized;                       ///< Flag determines if module is initialized
+    struct timespec     aTimeOut[EDRV_MAX_TIMER_COUNT];     ///< Array to hold the timeout values for a cyclic timer
 } tEdrvInstance;
 
 //---------------------------------------------------------------------------
@@ -1057,74 +1056,80 @@ tOplkError edrv_getMacTime(UINT64* pCurtime_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Set the cycle frequency
-
-The function configure the cycle frequency in the I210 timer.
-
-\param  frequency       The cycle frequency to store into the timer.
-*/
-//------------------------------------------------------------------------------
-void edrv_setCyclicFrequency(UINT32 frequency)
-{
-
-    if (!edrvInstance_l.fInitialized)
-        return;
-
-    EDRV_REGDW_WRITE(EDRV_FREQOUT0, frequency);
-}
-
-//------------------------------------------------------------------------------
-/**
 \brief  Start timer
 
 The function starts the timer in the I210.
 
+\param  index_p         Index of the timer.
 \param  pTimerHdl_p     Timer handle of the timer to start.
 \param  frequency_p     Cycle time (frequency).
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_startTimer(tTimerHdl* pTimerHdl_p, UINT32 frequency_p)
+tOplkError edrv_startTimer(UINT32 index_p, tTimerHdl* pTimerHdl_p, UINT64 frequency_p)
 {
     UINT32              reg;
     struct timespec     ts;
+    struct timespec*    pTimeout = NULL;
+    UINT64              seconds, nanoseconds, rem;
 
     if (!edrvInstance_l.fInitialized)
         return kErrorOk;
 
-    if (pTimerHdl_p == NULL)
+    if ((pTimerHdl_p == NULL) || (index_p >= EDRV_MAX_TIMER_COUNT))
     {
-        printk("%s() invalid parameter for timer handle\n", __FUNCTION__);
-        return kErrorTimerNoTimerCreated;
+        printk("%s() Invalid parameters for the timer\n", __FUNCTION__);
+        return kErrorTimerInvalidHandle;
     }
 
-    edrvInstance_l.timerHdl = *pTimerHdl_p;
+    pTimeout = &edrvInstance_l.aTimeOut[index_p];
+
+    edrvInstance_l.aTimerHdl[index_p] = *pTimerHdl_p;
 
     reg = 0;
-    reg |= (EDRV_TSSDP_TS_SDP0_SEL_CLK0 | EDRV_TSSDP_TS_SDP0_EN);
+    reg = EDRV_REGDW_READ(EDRV_TSSDP);
+    reg |= (EDRV_TSSDP_TS_SEL_SDP(index_p, index_p) | EDRV_TSSDP_TS_EN_SDP(index_p));
+
     EDRV_REGDW_WRITE(EDRV_TSSDP, reg);
 
-    readSystimRegister(&ts);
-    ts.tv_nsec = ts.tv_nsec + frequency_p;
-    EDRV_REGDW_WRITE(EDRV_TRGTTIML0, ts.tv_nsec);
-    EDRV_REGDW_WRITE(EDRV_TRGTTIMH0, ts.tv_sec);
+    reg = 0;
+    reg = EDRV_REGDW_READ(EDRV_TSAUXC);
+    reg &= ~(EDRV_TSAUXC_EN_TT(index_p));
+    EDRV_REGDW_WRITE(EDRV_TSAUXC, reg);
 
-    edrv_setCyclicFrequency(frequency_p);
+    readSystimRegister(&ts);
+
+    // Calculate the timeouts considering the roll over
+    seconds = ts.tv_nsec + frequency_p;
+    rem = do_div(seconds, 1000000000);
+    ts.tv_sec += seconds;
+
+    nanoseconds = (ts.tv_nsec + frequency_p);
+    rem = do_div(nanoseconds, 1000000000);
+    ts.tv_nsec = rem;
+
+    EDRV_REGDW_WRITE(EDRV_TRGTTIML(index_p), ts.tv_nsec);
+    EDRV_REGDW_WRITE(EDRV_TRGTTIMH(index_p), ts.tv_sec);
+
+    // Store the last time out values to be used for calculating
+    // the restart timeouts.
+    pTimeout->tv_sec = ts.tv_sec;
+    pTimeout->tv_nsec = ts.tv_nsec;
 
     reg = 0;
     reg = EDRV_REGDW_READ(EDRV_CTRL_REG);
-    reg |= SDP0_SET_DIR_OUT;
+    reg |= SET_DIR_OUT_SDP(index_p);
     EDRV_REGDW_WRITE(EDRV_CTRL_REG, reg);
 
     reg = 0;
     reg = EDRV_REGDW_READ(EDRV_TSAUXC);
-    reg |= (EDRV_TSAUXC_EN_CLK0 | EDRV_TSAUXC_EN_TT0 | EDRV_TSAUXC_ST0);
+    reg |= EDRV_TSAUXC_EN_TT(index_p);
     EDRV_REGDW_WRITE(EDRV_TSAUXC, reg);
 
     reg = 0;
     reg = EDRV_REGDW_READ(EDRV_TSIM);
-    reg |= (EDRV_TSIM_TT0);
+    reg |= (EDRV_TSIM_TT(index_p) | EDRV_TSICR_SYSTIM);
     EDRV_REGDW_WRITE(EDRV_TSIM, reg);
 
     return kErrorOk;
@@ -1137,29 +1142,34 @@ tOplkError edrv_startTimer(tTimerHdl* pTimerHdl_p, UINT32 frequency_p)
 The function stop the timer in the I210.
 
 \param  pTimerHdl_p     Handle of the timer to stop.
+\param  index_p         Index of the timer.
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_stopTimer(tTimerHdl* pTimerHdl_p)
+tOplkError edrv_stopTimer(tTimerHdl* pTimerHdl_p, UINT32 index_p)
 {
     UINT32      reg;
 
     if (!edrvInstance_l.fInitialized)
         return kErrorOk;
 
-    if (*pTimerHdl_p != edrvInstance_l.timerHdl)
+    if (index_p >= EDRV_MAX_TIMER_COUNT || index_p < 0)
         return kErrorTimerInvalidHandle;
 
-    edrvInstance_l.timerHdl = 0;
+    if (*pTimerHdl_p != edrvInstance_l.aTimerHdl[index_p])
+        return kErrorTimerInvalidHandle;
+
+    edrvInstance_l.aTimerHdl[index_p] = 0;
+
     reg = 0;
     reg = EDRV_REGDW_READ(EDRV_TSIM);
-    reg &= ~(EDRV_TSIM_TT0);
+    reg &= ~(EDRV_TSIM_TT(index_p));
     EDRV_REGDW_WRITE(EDRV_TSIM, reg);
 
     reg = 0;
     reg = EDRV_REGDW_READ(EDRV_TSAUXC);
-    reg &= ~(EDRV_TSAUXC_EN_CLK0);
+    reg &= ~(EDRV_TSAUXC_EN_TT(index_p));
     EDRV_REGDW_WRITE(EDRV_TSAUXC, reg);
 
     return kErrorOk;
@@ -1171,27 +1181,54 @@ tOplkError edrv_stopTimer(tTimerHdl* pTimerHdl_p)
 
 The function restarts the timer on the I210
 
-\param  pTimerHdl_p     Handle of the timer to restart
+\param  pTimerHdl_p     Handle of the timer to restart.
+\param  index_p         Index of the timer.
+\param  frequency_p     Cycle time (frequency of the repetition).
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_restartTimer(tTimerHdl* pTimerHdl_p)
+tOplkError edrv_restartTimer(tTimerHdl* pTimerHdl_p, UINT32 index_p, UINT64 frequency_p)
 {
-    UINT32          reg;
-    struct timespec ts;
+    UINT32              reg;
+    struct timespec     ts;
+    struct timespec*    pTimeout = NULL;
+    UINT64              seconds, nanoseconds, rem;
 
     if (!edrvInstance_l.fInitialized)
         return kErrorOk;
 
-    readSystimRegister(&ts);
-    if (*pTimerHdl_p != edrvInstance_l.timerHdl)
+    if (pTimerHdl_p == NULL)
         return kErrorTimerInvalidHandle;
+
+    pTimeout = &edrvInstance_l.aTimeOut[index_p];
+    edrvInstance_l.aTimerHdl[index_p] = *pTimerHdl_p;
 
     reg = 0;
     reg = EDRV_REGDW_READ(EDRV_TSAUXC);
-    reg |= (EDRV_TSAUXC_EN_TT0);
+    reg &= ~(EDRV_TSAUXC_EN_TT(index_p));
     EDRV_REGDW_WRITE(EDRV_TSAUXC, reg);
+
+    // Update the timeouts considering the roll over
+    seconds = pTimeout->tv_nsec + frequency_p;
+    rem = do_div(seconds, 1000000000);
+    ts.tv_sec = pTimeout->tv_sec + seconds;
+
+    nanoseconds = (pTimeout->tv_nsec + frequency_p);
+    rem = do_div(nanoseconds, 1000000000);
+    ts.tv_nsec = rem;
+
+    EDRV_REGDW_WRITE(EDRV_TRGTTIML(index_p), ts.tv_nsec);
+    EDRV_REGDW_WRITE(EDRV_TRGTTIMH(index_p), ts.tv_sec);
+
+    reg = 0;
+    reg = EDRV_REGDW_READ(EDRV_TSAUXC);
+    reg |= (EDRV_TSAUXC_EN_TT(index_p));
+    EDRV_REGDW_WRITE(EDRV_TSAUXC, reg);
+
+    // Store the timeout for the next call
+    pTimeout->tv_sec = ts.tv_sec;
+    pTimeout->tv_nsec = ts.tv_nsec;
 
     return kErrorOk;
 }
@@ -1211,7 +1248,7 @@ timer.
 tOplkError edrv_registerHresCallback(tHresCallback pfnHighResCb_p)
 {
     if (pfnHighResCb_p == NULL)
-        return kErrorTimerThreadError;
+        return kErrorIllegalInstance;
 
     edrvInstance_l.hresTimerCb = pfnHighResCb_p;
     return kErrorOk;
@@ -1242,6 +1279,7 @@ static irqreturn_t edrvTimerInterrupt(INT irqNum_p, void* ppDevInstData_p)
     UINT32          status;
     UINT32          reg;
     INT             handled = IRQ_HANDLED;
+    UINT32          index;
 
     if (ppDevInstData_p != edrvInstance_l.pPciDev)
     {
@@ -1262,13 +1300,36 @@ static irqreturn_t edrvTimerInterrupt(INT irqNum_p, void* ppDevInstData_p)
     EDRV_REGDW_WRITE(EDRV_INTR_SET_REG, status);
     reg = EDRV_REGDW_READ(EDRV_TSICR);
 
+    if (reg & EDRV_TSICR_SYSTIM)
+    {
+        return handled;
+    }
+
+    if (reg & EDRV_TSICR_TT0)
+    {
+        // Timer 0
+        index = 0;
 #if EDRV_USE_TTTX != FALSE
     // Call timer CallBack
-    if (edrvInstance_l.hresTimerCb != NULL)
+    if (edrvInstance_l.hresTimerCb != NULL && edrvInstance_l.aTimerHdl[index] != 0)
     {
-        edrvInstance_l.hresTimerCb(&edrvInstance_l.timerHdl);
+        edrvInstance_l.hresTimerCb(&edrvInstance_l.aTimerHdl[index]);
     }
 #endif
+    }
+
+    if (reg & EDRV_TSICR_TT1)
+    {
+        // Timer 1
+        index = 1;
+#if EDRV_USE_TTTX != FALSE
+    // Call timer CallBack
+    if (edrvInstance_l.hresTimerCb != NULL && edrvInstance_l.aTimerHdl[index] != 0)
+    {
+        edrvInstance_l.hresTimerCb(&edrvInstance_l.aTimerHdl[index]);
+    }
+#endif
+    }
 
 Exit:
     return handled;
@@ -2624,10 +2685,14 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
     edrvInstance_l.rxMaxQueue = EDRV_MAX_RX_QUEUES;
     edrvInstance_l.numQVectors = EDRV_MAX_QUEUE_VECTOR;
 
-    //Initialise the SYSTIM timer with current system time
-    EDRV_REGDW_WRITE(EDRV_TSAUXC, 0x0);
     sysTime = ktime_to_timespec(ktime_get_real());
     writeSystimRegister(&sysTime);
+
+    //Initialise the SYSTIM timer with current system time
+    reg = 0;
+    reg = EDRV_REGDW_READ(EDRV_TSAUXC);
+    reg &= ~(1 << 31);
+    EDRV_REGDW_WRITE(EDRV_TSAUXC, reg);
 
     // Clear the statistic register
     reg = EDRV_REGDW_READ(EDRV_STAT_TPT);
@@ -2912,10 +2977,10 @@ static void removeOnePciDev(struct pci_dev* pPciDev_p)
     EDRV_REGDW_WRITE(EDRV_INTR_ACK_AUTO_MASK, 0);
     reg = EDRV_REGDW_READ(EDRV_INTR_READ_REG);
 
-    // Stop the timer
+    // Stop the timers
     reg = 0;
     reg = EDRV_REGDW_READ(EDRV_TSAUXC);
-    reg &= ~(EDRV_TSAUXC_EN_CLK0);
+    reg &= ~(EDRV_TSAUXC_EN_TT(0) | EDRV_TSAUXC_EN_TT(1));
     EDRV_REGDW_WRITE(EDRV_TSAUXC, reg);
 
     if (edrvInstance_l.pMsixEntry)
