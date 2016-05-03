@@ -1078,7 +1078,6 @@ static INT writeFileBuffer(ULONG arg_p)
     UINT8*                  pBuf;
     tIoctlFileChunk         ioctlFileChunk;
     INT                     order;
-    INT                     ret = 0;
 
     order = get_order(drvintf_getFileBufferSize());
     pBuf = (UINT8*)__get_free_pages(GFP_KERNEL, order);
