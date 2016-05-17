@@ -2,7 +2,7 @@
 #
 # File lists for openPOWERLINK stack sources
 #
-# Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # Copyright (c) 2015, Kalycito Infotech Private Limited
 # All rights reserved.
 #
@@ -80,7 +80,6 @@ SET(USER_SOURCES
     ${USER_SOURCE_DIR}/api/sdotest.c
     ${USER_SOURCE_DIR}/api/service.c
     ${USER_SOURCE_DIR}/obd/obdu.c
-    ${USER_SOURCE_DIR}/obd/obdcreate.c
     ${USER_SOURCE_DIR}/obd/obdal.c
     ${USER_SOURCE_DIR}/dll/dllucal.c
     ${USER_SOURCE_DIR}/event/eventu.c
@@ -662,7 +661,6 @@ SET(OPLK_HEADERS
     ${STACK_INCLUDE_DIR}/oplk/nmt.h
     ${STACK_INCLUDE_DIR}/oplk/obd.h
     ${STACK_INCLUDE_DIR}/oplk/obdcdc.h
-    ${STACK_INCLUDE_DIR}/oplk/obdmacro.h
     ${STACK_INCLUDE_DIR}/oplk/powerlink-module.h
     ${STACK_INCLUDE_DIR}/oplk/sdo.h
     ${STACK_INCLUDE_DIR}/oplk/sdoabortcodes.h
@@ -749,9 +747,4 @@ SET(KERNEL_HEADERS
     ${STACK_INCLUDE_DIR}/kernel/edrvcyclic.h
     ${STACK_INCLUDE_DIR}/kernel/timesynck.h
     ${STACK_INCLUDE_DIR}/kernel/timesynckcal.h
-    )
-
-SET(OBJDICT_HEADERS
-    ${OBJDICT_DIR}/generic/objdict_1000-13ff.h
-    ${OBJDICT_DIR}/generic/objdict_1b00-1fff.h
     )

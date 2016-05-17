@@ -2,7 +2,7 @@
 #
 # CMake file for openPOWERLINK Linux userspace driver library
 #
-# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -72,7 +72,6 @@ SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic -std=c99 -pthread -f
 # Additional include directories
 INCLUDE_DIRECTORIES(
     .
-    ${OBJDICT_DIR}/${OBJDICT}
     )
 
 # Define library and installation rules

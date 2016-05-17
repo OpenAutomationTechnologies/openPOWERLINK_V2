@@ -2,7 +2,7 @@
 #
 # Directory list for stack cmake build system
 #
-# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -41,5 +41,4 @@ SET(CONTRIB_SOURCE_DIR ${OPLK_BASE_DIR}/contrib)
 SET(STACK_INCLUDE_DIR ${OPLK_STACK_DIR}/include)
 
 # Other directories
-SET(OBJDICT_DIR ${OPLK_BASE_DIR}/objdicts)
 SET(TOOLS_DIR ${OPLK_BASE_DIR}/tools)

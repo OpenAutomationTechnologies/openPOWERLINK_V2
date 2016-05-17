@@ -7,7 +7,7 @@
 This file implements the openPOWERLINK API class.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -44,6 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QString>
 #include <QMessageBox>
 #include <oplk/debugstr.h>
+#include <obdcreate/obdcreate.h>
 
 #include "Api.h"
 #include "State.h"
@@ -236,6 +237,18 @@ Api::Api(MainWindow* pMainWindow_p, UINT nodeId_p, QString devName_p)
 #else
     initParam.pfnCbSync  =    NULL;
 #endif
+
+    // Initialize object dictionary
+    ret = obdcreate_initObd(&initParam.obdInitParam);
+    if (ret != kErrorOk)
+    {
+        QMessageBox::critical(0, "POWERLINK demo",
+                              QString("Initialization of openPOWERLINK Stack failed.\n") +
+                                      "Error code: 0x"+ QString::number(ret, 16) +
+                                      "\n\"" + debugstr_getRetValStr(ret) + "\""
+                                      "\nFor further information please consult the manual.");
+        goto Exit;
+    }
 
     // init POWERLINK
     ret = oplk_initialize();

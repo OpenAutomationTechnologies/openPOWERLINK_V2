@@ -281,7 +281,8 @@ typedef enum
 
     /** Object dictionary access. This event informs about an access of the
     object dictionary. It happens only, if \ref oplk_cbGenericObdAccess is
-    assigned as function pointer to the concerning object in \ref objdict.h.
+    assigned as function pointer to the concerning object in the object dictionary
+    definition.
     The event argument contains an OD callback parameter (\ref tObdCbParam). */
     kOplkApiEventObdAccess          = 0x69,
 

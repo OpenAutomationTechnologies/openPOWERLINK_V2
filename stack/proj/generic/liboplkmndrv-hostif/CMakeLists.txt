@@ -3,7 +3,7 @@
 # CMake file for openPOWERLINK MN driver/PCP library on embedded-noos
 # using host-interface
 #
-# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # Copyright (c) 2014, Kalycito Infotech Private Limited
 # All rights reserved.
 #
@@ -34,8 +34,6 @@ PROJECT(oplkmndrv-hostif C)
 MESSAGE(STATUS "Configuring ${PROJECT_NAME}")
 
 ################################################################################
-# Select object dictionary
-SET(OBJDICT CiA302-4_MN)
 
 # set sources of POWERLINK library
 SET(LIB_KERNEL_SOURCES
@@ -50,7 +48,7 @@ SET(LIB_KERNEL_SOURCES
     )
 
 SET(LIB_USER_SOURCES
-    ${USER_MN_SOURCES}
+     ${USER_MN_SOURCES}
      ${USER_SOURCES}
      ${CTRL_UCAL_HOSTIF_SOURCES}
      ${DLL_UCAL_CIRCBUF_SOURCES}

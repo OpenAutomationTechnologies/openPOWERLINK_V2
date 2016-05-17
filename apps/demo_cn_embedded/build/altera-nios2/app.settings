@@ -2,7 +2,7 @@
 #
 # Application creation settings file for Altera Nios II
 #
-# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -32,8 +32,12 @@ APP_TYPE=app
 
 APP_NAME=demo_cn_embedded
 
-# Library sources
+# Used object dictionary
+OBJDICT=CiA401_CN
+
+# Application sources
 APP_SOURCES="\
+${OPLK_BASE_DIR}/apps/common/src/obdcreate/obdcreate.c \
 ${OPLK_BASE_DIR}/apps/common/src/lcd/lcd.c \
 ${OPLK_BASE_DIR}/apps/common/src/lcd/lcdl-16207.c \
 ${OPLK_BASE_DIR}/apps/common/src/gpio/gpio-nios2.c \
@@ -44,13 +48,21 @@ ${OPLK_BASE_DIR}/apps/demo_cn_embedded/src/main.c \
 "
 
 APP_INCLUDES="\
-${OPLK_BASE_DIR}/apps/common/src/gpio \
-${OPLK_BASE_DIR}/apps/common/src/lcd \
-${OPLK_BASE_DIR}/apps/common/src/arp \
+${OPLK_BASE_DIR}/apps/common/src \
+${OPLK_BASE_DIR}/apps/common/objdicts/${OBJDICT} \
 ${OPLK_BASE_DIR}/stack/include \
 "
 
 APP_CFLAGS="\
+-DCONFIG_DLL_PRES_CHAINING_CN \
+-DNMT_MAX_NODE_ID=254 \
+-DCONFIG_INCLUDE_PDO \
+-DCONFIG_INCLUDE_SDO_ASND \
+-DCONFIG_INCLUDE_MASND \
 "
+# If supported, add following features
+# -DCONFIG_INCLUDE_IP
+# -DCONFIG_INCLUDE_SDO_UDP
+# -DCONFIG_OBD_USE_STORE_RESTORE
 
 APP_OPT_LEVEL=-O2

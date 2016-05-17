@@ -2,7 +2,7 @@
 #
 # CMake file of CiA302 MN embedded demo application
 #
-# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # Copyright (c) 2014, Kalycito Infotech Private Limited
 # All rights reserved.
 #
@@ -34,7 +34,7 @@
 PROJECT(demo_mn_embedded C)
 MESSAGE(STATUS "Configuring ${PROJECT_NAME}")
 
-CMAKE_MINIMUM_REQUIRED (VERSION 2.8.7)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.7)
 
 INCLUDE(../common/cmake/options.cmake)
 
@@ -43,6 +43,8 @@ INCLUDE(../common/cmake/options.cmake)
 
 SET(OBJDICT CiA302-4_MN)              # Set object dictionary to use
 FIND_OPLK_LIBRARY("mn")
+
+OPTION(CFG_IP_STACK "Is an IP stack available (support of SDO/UDP)" OFF)
 
 IF (CFG_FAT_SUPPORT)
     SET(CFG_CDC_ON_SD ON CACHE BOOL "CDC on external SD card; to compile the cdc with application uncheck this option.")
@@ -55,14 +57,34 @@ SET(DEMO_SOURCES
     ${DEMO_SOURCE_DIR}/main.c
     ${DEMO_SOURCE_DIR}/app.c
     ${DEMO_SOURCE_DIR}/event.c
+    ${COMMON_SOURCE_DIR}/obdcreate/obdcreate.c
     ${COMMON_SOURCE_DIR}/lcd/lcd.c
     ${COMMON_SOURCE_DIR}/arp/arp.c
     )
 
 INCLUDE_DIRECTORIES(
                     ${DEMO_SOURCE_DIR}
+                    ${OBJDICT_DIR}/${OBJDICT}
                     ${COMMON_SOURCE_DIR}
                    )
+
+ADD_DEFINITIONS(-DNMT_MAX_NODE_ID=254)
+ADD_DEFINITIONS(-DCONFIG_INCLUDE_PDO)
+ADD_DEFINITIONS(-DCONFIG_INCLUDE_SDO_ASND)
+
+IF(CFG_IP_STACK)
+    ADD_DEFINITIONS(-DCONFIG_INCLUDE_IP)
+    ADD_DEFINITIONS(-DCONFIG_INCLUDE_SDO_UDP)
+ENDIF(CFG_IP_STACK)
+
+ADD_DEFINITIONS(-DCONFIG_INCLUDE_CFM)
+
+# Redundant MN is not supported on embedded targets (yet)
+#ADD_DEFINITIONS(-DCONFIG_INCLUDE_NMT_RMN)
+
+#ADD_DEFINITIONS(-DCONFIG_OBD_USE_STORE_RESTORE)
+#ADD_DEFINITIONS(-DCONFIG_DLL_PRES_CHAINING_CN)
+#ADD_DEFINITIONS(-DCONFIG_INCLUDE_MASND)
 
 ################################################################################
 # Setup the architecture specific definitions

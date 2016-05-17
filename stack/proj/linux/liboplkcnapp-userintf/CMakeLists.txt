@@ -2,7 +2,7 @@
 #
 # CMake file for openPOWERLINK application CN library with userspace interface
 #
-# Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -38,9 +38,6 @@ IF(CFG_COMPILE_SHARED_LIBRARY)
 ELSE()
     SET(LIB_TYPE "STATIC")
 ENDIF()
-
-# Select object dictionary
-SET(OBJDICT CiA401_CN)
 
 # set sources of POWERLINK library
 SET (LIB_SOURCES
@@ -79,7 +76,6 @@ ENDIF()
 # Additional include directories
 INCLUDE_DIRECTORIES(
     .
-    ${OBJDICT_DIR}/${OBJDICT}
     )
 
 # Define library and installation rules

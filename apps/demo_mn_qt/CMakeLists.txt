@@ -2,7 +2,7 @@
 #
 # CMake file of CiA 302 MN QT demo application
 #
-# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -38,6 +38,9 @@ CMAKE_MINIMUM_REQUIRED (VERSION 2.8.7)
 
 INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/../common/cmake/options.cmake)
 
+OPTION(CFG_IP_STACK "Is an IP stack available (support of SDO/UDP)" OFF)
+OPTION(CFG_INCLUDE_MN_REDUNDANCY "Use MN redundancy functions (if compiled into the libraries)" OFF)
+
 ################################################################################
 # Setup project files and definitions
 
@@ -65,6 +68,7 @@ SET (DEMO_SOURCES
      ${DEMO_SOURCE_DIR}/NodeState.cpp
      ${DEMO_SOURCE_DIR}/NmtCommandDialog.cpp
      ${DEMO_SOURCE_DIR}/EventLog.cpp
+     ${COMMON_SOURCE_DIR}/obdcreate/obdcreate.c
      ${CONTRIB_SOURCE_DIR}/console/printlog.c
      ${COMMON_SOURCE_DIR}/eventlog/eventlogstring.c
      )
@@ -89,8 +93,28 @@ SET (DEMO_HEADERS
 
 INCLUDE_DIRECTORIES(
     ${DEMO_INCLUDE_DIR}
+    ${OBJDICT_DIR}/${OBJDICT}
     ${CMAKE_CURRENT_BINARY_DIR}
     )
+
+ADD_DEFINITIONS(-DNMT_MAX_NODE_ID=254)
+ADD_DEFINITIONS(-DCONFIG_INCLUDE_PDO)
+ADD_DEFINITIONS(-DCONFIG_INCLUDE_SDO_ASND)
+
+IF(CFG_IP_STACK)
+    ADD_DEFINITIONS(-DCONFIG_INCLUDE_IP)
+    ADD_DEFINITIONS(-DCONFIG_INCLUDE_SDO_UDP)
+ENDIF(CFG_IP_STACK)
+
+ADD_DEFINITIONS(-DCONFIG_INCLUDE_CFM)
+
+IF(CFG_INCLUDE_MN_REDUNDANCY)
+    ADD_DEFINITIONS(-DCONFIG_INCLUDE_NMT_RMN)
+ENDIF(CFG_INCLUDE_MN_REDUNDANCY)
+
+#ADD_DEFINITIONS(-DCONFIG_OBD_USE_STORE_RESTORE)
+#ADD_DEFINITIONS(-DCONFIG_DLL_PRES_CHAINING_CN)
+#ADD_DEFINITIONS(-DCONFIG_INCLUDE_MASND)
 
 ################################################################################
 # Setup compile definitions depending on configuration
@@ -124,7 +148,7 @@ ELSE()
 ENDIF()
 
 INCLUDE (${QT_USE_FILE})
-ADD_DEFINITIONS (${QT_DEFINITIONS} -DCONFIG_MN)
+ADD_DEFINITIONS (${QT_DEFINITIONS})
 
 ################################################################################
 #
@@ -141,6 +165,11 @@ SOURCE_GROUP("Source Files" FILES ${DEMO_SOURCES})
 SOURCE_GROUP("QT-generated Files" FILES ${DEMO_HEADERS_MOC} ${DEMO_RESOURCES_RCC})
 SOURCE_GROUP("Header Files" FILES ${DEMO_HEADERS})
 SOURCE_GROUP("openPOWERLINK Header Files" FILES ${OPLK_HEADERS})
+SOURCE_GROUP("Object Dictionary" FILES
+    ${COMMON_SOURCE_DIR}/obdcreate/obdcreate.c
+    ${COMMON_SOURCE_DIR}/obdcreate/obdcreate.h
+    ${OBJDICT_DIR}/${OBJDICT}/objdict.h
+    )
 
 ################################################################################
 # Set the executable

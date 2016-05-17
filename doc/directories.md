@@ -16,7 +16,6 @@ contrib                       | Additional libraries used by the openPOWERLINK s
 doc                           | Documentation of the openPOWERLINK stack
 drivers                       | openPOWERLINK drivers (kernel layer of a split-stack design)
 hardware                      | Hardware specific sources like IP cores, VHDL code and board specific software
-objdicts                      | CANopen object dictionaries used by the stack
 stack                         | openPOWERLINK stack sources
 tools                         | Miscellaneous tools and utilities
 unittests                     | CUnit Unit test framework
@@ -35,6 +34,7 @@ demo_mn_console               | Console application which implements an MN
 demo_mn_embedded              | Application which implements an MN on an embedded board
 demo_mn_qt                    | QT based application which implements an MN
 common                        | Contains common configuration and source code used by all demos
+common/objdicts               | CANopen object dictionaries used by the demos
 
 
 ## Additional Libraries {#sect_directories_libraries}
@@ -54,7 +54,7 @@ ndislib                       | NDIS library for Windows kernel space drivers
 
 ## Object dictionaries {#sect_directories_objdict}
 
-The directory contains the CANopen object dictionaries used by the stack.
+The directory contains the CANopen object dictionaries used by the demos.
 
 Directory                     | Description
 ----------------------------- | -----------------------------------------------

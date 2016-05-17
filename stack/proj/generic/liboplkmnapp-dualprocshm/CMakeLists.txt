@@ -4,6 +4,7 @@
 # hardcore(ARM)/soft-core(Microblaze) processor
 #
 # Copyright (c) 2014, Kalycito Infotech Private Limited.
+# Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,8 +34,6 @@ PROJECT(oplkmnapp-dualprocshm C)
 MESSAGE(STATUS "Configuring ${PROJECT_NAME}")
 
 ################################################################################
-# Select object dictionary
-SET(OBJDICT CiA302-4_MN)
 
 SET(LIB_USER_SOURCES
      ${USER_SOURCES}
@@ -64,7 +63,6 @@ SET(LIB_SOURCES
 # set includes of POWERLINK library
 INCLUDE_DIRECTORIES(
                     ${PROJECT_SOURCE_DIR}
-                    ${OBJDICT_DIR}/${OBJDICT}
                    )
 
 # set flags of the openPOWERLINK library

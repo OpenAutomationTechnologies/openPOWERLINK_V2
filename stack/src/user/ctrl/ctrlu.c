@@ -10,7 +10,7 @@ This file contains the implementation of the user stack control module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2015, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -1004,10 +1004,6 @@ static tOplkError initObd(tOplkApiInitParam* pInitParam_p)
     tOplkError          ret = kErrorOk;
 
     DEBUG_LVL_CTRL_TRACE("Initialize OBD module...\n");
-    ret = obd_initObd(&pInitParam_p->obdInitParam);
-    if (ret != kErrorOk)
-        return ret;
-
     ret = obdu_init(&pInitParam_p->obdInitParam);
     if (ret != kErrorOk)
         return ret;

@@ -45,6 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplk/oplk.h>
 #include <oplk/debugstr.h>
 
+#include <obdcreate/obdcreate.h>
 #include <gpio/gpio.h>
 #include <lcd/lcd.h>
 #include <arp/arp.h>
@@ -282,6 +283,14 @@ static tOplkError initPowerlink(tInstance* pInstance_p)
     // set callback functions
     initParam.pfnCbEvent = processEvents;
     initParam.pfnCbSync  = processSync;
+
+    // Initialize object dictionary
+    ret = obdcreate_initObd(&initParam.obdInitParam);
+    if (ret != kErrorOk)
+    {
+        PRINTF("obdcreate_initObd() failed with \"%s\" (0x%04x)\n", debugstr_getRetValStr(ret), ret);
+        return ret;
+    }
 
     // initialize POWERLINK stack
     ret = oplk_initialize();

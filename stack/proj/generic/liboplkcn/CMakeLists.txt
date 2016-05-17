@@ -2,7 +2,7 @@
 #
 # CMake file for openPOWERLINK CN library on Linux userspace
 #
-# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # Copyright (c) 2014, Kalycito Infotech Private Limited
 # All rights reserved.
 #
@@ -33,8 +33,6 @@ PROJECT(oplkcn C)
 MESSAGE(STATUS "Configuring ${PROJECT_NAME}")
 
 ################################################################################
-# Select object dictionary
-SET(OBJDICT CiA401_CN)
 
 # set sources of POWERLINK library
 SET(LIB_KERNEL_SOURCES
@@ -77,7 +75,6 @@ SET(LIB_SOURCES
 # set includes of POWERLINK library
 INCLUDE_DIRECTORIES(
                     ${PROJECT_SOURCE_DIR}
-                    ${OBJDICT_DIR}/${OBJDICT}
                    )
 
 # set flags of the openPOWERLINK library

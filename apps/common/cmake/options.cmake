@@ -2,7 +2,7 @@
 #
 # Generic CMake options openPOWERLINK demo applications
 #
-# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,7 @@ SET(CONTRIB_SOURCE_DIR ${OPLK_BASE_DIR}/contrib)
 SET(OPLK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include)
 SET(TOOLS_DIR ${OPLK_BASE_DIR}/tools)
 SET(BOARDS_DIR ${OPLK_BASE_DIR}/hardware/boards)
+SET(OBJDICT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../common/objdicts)
 
 ################################################################################
 # Include CMake Modules
@@ -86,6 +87,7 @@ INCLUDE_DIRECTORIES (
     ${OPLK_INCLUDE_DIR}
     ${CONTRIB_SOURCE_DIR}
     ${COMMON_SOURCE_DIR}
+    ${OBJDICT_DIR}
 )
 
 IF(CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -99,4 +101,3 @@ ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "Generic" AND CMAKE_SYSTEM_PROCESSOR STREQUAL 
 ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "Generic" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "alterac5arm")
     INCLUDE(configure-c5socarm)
 ENDIF()
-

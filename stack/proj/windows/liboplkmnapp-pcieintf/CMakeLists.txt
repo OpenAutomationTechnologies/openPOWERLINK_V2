@@ -3,6 +3,7 @@
 # CMake file of openPOWERLINK application MN library with PCIe interface
 #
 # Copyright (c) 2015, Kalycito Infotech Private Limited
+# Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -39,9 +40,6 @@ ELSE()
     SET(LIB_TYPE "STATIC")
 ENDIF()
 
-# Select object dictionary
-SET(OBJDICT CiA302-4_MN)
-
 # set general sources of POWERLINK library
 SET (LIB_SOURCES
      ${USER_SOURCES}
@@ -72,7 +70,6 @@ ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)
 # Additional include directories
 INCLUDE_DIRECTORIES(
     .
-    ${OBJDICT_DIR}/${OBJDICT}
     ${ARCH_SOURCE_DIR}/windows
     )
 
@@ -104,10 +101,7 @@ SOURCE_GROUP("Source Files\\Architecture Source Files" FILES
 SOURCE_GROUP("Header Files\\External Header Files" FILES ${OPLK_HEADERS})
 SOURCE_GROUP("Header Files\\Internal Header Files" FILES ${STACK_HEADERS})
 SOURCE_GROUP("Header Files\\User Header Files" FILES ${USER_HEADERS})
-SOURCE_GROUP("Object Dictionary" FILES
-    ${OBJDICT_HEADERS}
-    ${OBJDICT_DIR}/${OBJDICT}/objdict.h
-    )
+
 # Define library and installation rules
 ADD_LIBRARY(${LIB_NAME} ${LIB_TYPE} ${LIB_SOURCES})
 TARGET_LINK_LIBRARIES(${LIB_NAME} ${ARCH_LIBRARIES})

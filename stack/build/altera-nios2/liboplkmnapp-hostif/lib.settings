@@ -2,7 +2,7 @@
 #
 # Library creation settings file for Altera Nios II
 #
-# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,9 +33,6 @@ source ${OPLK_BASE_DIR}/stack/build/altera-nios2/common/stackfiles.settings
 
 LIB_NAME=oplkmnapp-hostif
 
-# Library object dictionary used
-OBJDICT=CiA302-4_MN
-
 # Library sources
 CFG_LIB_SOURCES="\
 ${USER_SOURCES} \
@@ -63,7 +60,6 @@ CFG_LIB_INCLUDES="\
 ${OPLK_BASE_DIR}/stack/proj/generic/lib${LIB_NAME} \
 ${STACK_INCLUDE_DIR} \
 ${STACK_SOURCE_DIR} \
-${OBJDICT_DIR}/${OBJDICT} \
 ${ARCH_SOURCE_DIR}/altera-nios2 \
 ${HW_DRIVERS_DIR}/hostinterface/include \
 ${HW_DRIVERS_DIR}/hostinterface/src \

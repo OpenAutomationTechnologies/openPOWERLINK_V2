@@ -46,7 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplk/oplk.h>
 #include <oplk/debugstr.h>
 
-#include <gpio.h>
+#include <gpio/gpio.h>
 #include "event.h"
 
 //============================================================================//

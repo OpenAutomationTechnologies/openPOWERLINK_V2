@@ -2,7 +2,7 @@
 #
 # CMake file of CiA 401 CN embedded demo application
 #
-# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -34,12 +34,7 @@
 PROJECT(demo_cn_embedded C)
 MESSAGE(STATUS "Configuring ${PROJECT_NAME}")
 
-IF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    # ensure working support of VS.NET 2010
-    CMAKE_MINIMUM_REQUIRED (VERSION 2.8.4)
-ELSE ()
-    CMAKE_MINIMUM_REQUIRED (VERSION 2.8.0)
-ENDIF()
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.7)
 
 INCLUDE(../common/cmake/options.cmake)
 
@@ -49,20 +44,39 @@ INCLUDE(../common/cmake/options.cmake)
 SET(OBJDICT CiA401_CN)              # Set object dictionary to use
 FIND_OPLK_LIBRARY("cn")
 
+OPTION(CFG_IP_STACK "Is an IP stack available (support of SDO/UDP)" OFF)
+
 # Set generic sources and include directories for this demo
 SET(DEMO_SOURCES
     ${DEMO_SOURCE_DIR}/main.c
     ${DEMO_SOURCE_DIR}/app.c
     ${DEMO_SOURCE_DIR}/event.c
+    ${COMMON_SOURCE_DIR}/obdcreate/obdcreate.c
     ${COMMON_SOURCE_DIR}/lcd/lcd.c
     ${COMMON_SOURCE_DIR}/arp/arp.c
     )
 
 INCLUDE_DIRECTORIES(
                     ${DEMO_SOURCE_DIR}
+                    ${OBJDICT_DIR}/${OBJDICT}
                     ${COMMON_SOURCE_DIR}/lcd
                     ${COMMON_SOURCE_DIR}/arp
                    )
+
+
+ADD_DEFINITIONS(-DCONFIG_DLL_PRES_CHAINING_CN)
+ADD_DEFINITIONS(-DNMT_MAX_NODE_ID=254)
+ADD_DEFINITIONS(-DCONFIG_INCLUDE_PDO)
+ADD_DEFINITIONS(-DCONFIG_INCLUDE_SDO_ASND)
+ADD_DEFINITIONS(-DCONFIG_INCLUDE_MASND)
+
+IF(CFG_IP_STACK)
+    ADD_DEFINITIONS(-DCONFIG_INCLUDE_IP)
+    ADD_DEFINITIONS(-DCONFIG_INCLUDE_SDO_UDP)
+ENDIF(CFG_IP_STACK)
+
+# Store/restore is not available on embedded targets (yet)
+#ADD_DEFINITIONS(-DCONFIG_OBD_USE_STORE_RESTORE)
 
 ################################################################################
 # Setup the architecture specific definitions

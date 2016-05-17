@@ -8,7 +8,7 @@ This file defines openPOWERLINK default configuration values.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -196,10 +196,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // when application resides in other address space as the stack
 #ifndef API_OBD_FORWARD_EVENT
 #define API_OBD_FORWARD_EVENT                           TRUE
-#endif
-
-#ifndef OBD_MAX_STRING_SIZE
-#define OBD_MAX_STRING_SIZE                             32                  // is used for objects 0x1008/0x1009/0x100A
 #endif
 
 #ifndef CONFIG_OBD_USE_STORE_RESTORE

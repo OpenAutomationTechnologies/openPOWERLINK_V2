@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   obdcreate.c
+\file   obdcreate/obdcreate.c
 
 \brief  Object dictionary creation
 
@@ -50,13 +50,20 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <common/oplkinc.h>
+#include "obdcreate.h"
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
 
-// Generate NMT_FeatureFlags_U32 depending on configuration values
+// Definitions according to the stack configuration (needed for the OD)
+#define OBD_MAX_STRING_SIZE                 32                  // used for objects 0x1008/0x1009/0x100A
+
+#define PLK_PRODUCT_NAME                    "OPLK"
+#define PLK_PRODUCT_VERSION                 PLK_DEFINED_STRING_VERSION
+
+
+// generate NMT_FeatureFlags_U32 depending on configuration values
 
 // Set to true if this node is able to communicate synchronously
 #if defined(CONFIG_INCLUDE_PDO)
@@ -177,7 +184,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 // Set to true if PResChaining on the CN (DS302-C) is used
-#if CONFIG_DLL_PRES_CHAINING_CN != FALSE
+#if defined(CONFIG_DLL_PRES_CHAINING_CN)
 #define CONFIG_FF_PRC                       (NMT_FEATUREFLAGS_PRC)
 #else
 #define CONFIG_FF_PRC                       0
@@ -284,7 +291,7 @@ The function initializes the object dictionary data structures.
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tOplkError obd_initObd(tObdInitParam MEM* pInitParam_p)
+tOplkError obdcreate_initObd(tObdInitParam MEM* pInitParam_p)
 {
 // Doxygen is confused by the inclusion of objdict.h in this function, therefore
 // we exclude the function body from parsing by doxygen!
@@ -297,7 +304,7 @@ tOplkError obd_initObd(tObdInitParam MEM* pInitParam_p)
     if (pInitParam != NULL)
     {
         // at first delete all parameters (all pointers will be set to NULL)
-        OPLK_MEMSET(pInitParam, 0, sizeof(tObdInitParam));
+        memset(pInitParam, 0, sizeof(tObdInitParam));
 
         #define OBD_CREATE_INIT_FUNCTION
         {

@@ -755,7 +755,6 @@ WARN_LOGFILE           =
 
 INPUT                  = ../../stack/src \
                          ../../stack/include \
-                         ../../objdicts \
                          calmodules.txt \
                          usermodules.txt \
                          kernelmodules.txt \
@@ -1966,8 +1965,7 @@ SEARCH_INCLUDES        = YES
 
 INCLUDE_PATH           = ../../stack/proj/linux/liboplkmn \
                          ../../contrib \
-                         ../../stack/include \
-                         ../../objdicts/CiA302-4_MN
+                         ../../stack/include
 
 # You can use the INCLUDE_FILE_PATTERNS tag to specify one or more wildcard
 # patterns (like *.h and *.hpp) to filter out the header-files in the

@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   oplk/obdmacro.h
+\file   obdcreate/obdmacro.h
 
 \brief  Macros for OD creation
 
@@ -44,7 +44,7 @@ ROM as well as in RAM.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -84,7 +84,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #if defined(OBD_DEFINE_MACRO)
 
-#if defined (OBD_CREATE_ROM_DATA)
+#if defined(OBD_CREATE_ROM_DATA)
 //------------------------------------------------------------------------------
 // Macros for generating the ROM tables of the OD are used now
 //------------------------------------------------------------------------------
@@ -125,7 +125,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OBD_SUBINDEX_RAM_USERDEF_RG(ind, sub, typ, acc, dtyp, name, val, low, high) static CONST dtyp ROM xDef##ind##_##sub##_g[3] = {val, low, high};
 #define OBD_SUBINDEX_RAM_USERDEF_NOINIT(ind, sub, typ, acc, dtyp, name)
 
-#elif defined (OBD_CREATE_RAM_DATA)
+#elif defined(OBD_CREATE_RAM_DATA)
 //------------------------------------------------------------------------------
 // Macros for generating the RAM tables of the OD are used now
 //------------------------------------------------------------------------------
@@ -161,7 +161,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OBD_SUBINDEX_RAM_USERDEF_RG(ind, sub, typ, acc, dtyp, name, val, low, high)  static tObdVarEntry MEM VarEntry##ind##_##sub##_g;
 #define OBD_SUBINDEX_RAM_USERDEF_NOINIT(ind, sub, typ, acc, dtyp, name)              static tObdVarEntry MEM VarEntry##ind##_##sub##_g;
 
-#elif defined (OBD_CREATE_SUBINDEX_TAB)
+#elif defined(OBD_CREATE_SUBINDEX_TAB)
 //------------------------------------------------------------------------------
 // Macros for generating the sub-index tables of the OD are used now
 //------------------------------------------------------------------------------
@@ -212,7 +212,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OBD_SUBINDEX_RAM_USERDEF_NOINIT(ind, sub, typ, acc, dtyp, name)              {sub, typ,             (acc) | kObdAccVar,                NULL,                      &VarEntry##ind##_##sub##_g},
 
 
-#elif defined (OBD_CREATE_INDEX_TAB)
+#elif defined(OBD_CREATE_INDEX_TAB)
 //------------------------------------------------------------------------------
 // Macros for generating the index tables of the OD are used now
 //------------------------------------------------------------------------------
@@ -247,7 +247,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OBD_SUBINDEX_RAM_USERDEF_RG(ind, sub, typ, acc, dtyp, name, val, low, high)
 #define OBD_SUBINDEX_RAM_USERDEF_NOINIT(ind, sub, typ, acc, dtyp, name)
 
-#elif defined (OBD_CREATE_INIT_FUNCTION)
+#elif defined(OBD_CREATE_INIT_FUNCTION)
 //------------------------------------------------------------------------------
 // Macros for generating the initialization functions are used now
 //------------------------------------------------------------------------------
@@ -607,7 +607,7 @@ objects.
 
 #endif
 
-#elif defined (OBD_UNDEFINE_MACRO)
+#elif defined(OBD_UNDEFINE_MACRO)
 //------------------------------------------------------------------------------
 // Undefine the macros now
 //------------------------------------------------------------------------------
@@ -647,4 +647,3 @@ objects.
 #error "Please define the type of initialization before including this file!"
 
 #endif
-

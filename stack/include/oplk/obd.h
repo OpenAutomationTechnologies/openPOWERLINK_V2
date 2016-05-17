@@ -8,7 +8,7 @@ This file contains definitions for the OBD module
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
 All rights reserved.
@@ -394,8 +394,6 @@ typedef struct _tObdInitParam tObdInitParam;
 extern "C"
 {
 #endif
-
-tOplkError obd_initObd(tObdInitParam MEM* pInitParam_p);
 
 #ifdef __cplusplus
 }

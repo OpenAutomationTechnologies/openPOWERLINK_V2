@@ -2,7 +2,7 @@
 #
 # CMake file for openPOWERLINK CN library on Windows
 #
-# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -39,13 +39,10 @@ ELSE()
     SET(LIB_TYPE "STATIC")
 ENDIF()
 
-# Select object dictionary
-SET(OBJDICT CiA401_CN)
-
 # set sources of POWERLINK library
 SET (LIB_SOURCES
      ${USER_SOURCES}
-    ${OBD_CONF_WINDOWSUSER_SOURCES}
+     ${OBD_CONF_WINDOWSUSER_SOURCES}
      ${SDO_WINDOWS_SOURCES}
      ${CTRL_UCAL_DIRECT_SOURCES}
      ${DLL_UCAL_CIRCBUF_SOURCES}
@@ -114,10 +111,6 @@ SOURCE_GROUP("Header Files\\External Header Files" FILES ${OPLK_HEADERS})
 SOURCE_GROUP("Header Files\\Internal Header Files" FILES ${STACK_HEADERS})
 SOURCE_GROUP("Header Files\\Kernel Header Files" FILES ${KERNEL_HEADERS})
 SOURCE_GROUP("Header Files\\User Header Files" FILES ${USER_HEADERS})
-SOURCE_GROUP("Object Dictionary" FILES
-    ${OBJDICT_HEADERS}
-    ${OBJDICT_DIR}/${OBJDICT}/objdict.h
-    )
 
 IF(CFG_STORE_RESTORE)
     ADD_DEFINITIONS(-DCONFIG_STORE_RESTORE)
@@ -127,7 +120,6 @@ ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)
 # Additional include directories
 INCLUDE_DIRECTORIES(
     .
-    ${OBJDICT_DIR}/${OBJDICT}
     ${CONTRIB_SOURCE_DIR}/pcap/windows/WpdPack/Include
     )
 

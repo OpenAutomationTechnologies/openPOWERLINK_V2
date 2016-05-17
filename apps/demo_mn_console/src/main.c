@@ -11,7 +11,7 @@ application.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
 All rights reserved.
@@ -50,6 +50,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplk/debugstr.h>
 
 #include <system/system.h>
+#include <obdcreate/obdcreate.h>
 #include <getopt/getopt.h>
 #include <console/console.h>
 
@@ -280,6 +281,14 @@ static tOplkError initPowerlink(UINT32 cycleLen_p, char* pszCdcFileName_p,
 #else
     initParam.pfnCbSync  = NULL;
 #endif
+
+    // Initialize object dictionary
+    ret = obdcreate_initObd(&initParam.obdInitParam);
+    if (ret != kErrorOk)
+    {
+        eventlog_printMessage(kEventlogLevelFatal, kEventlogCategoryControl, "obdcreate_initObd() failed with \"%s\" (0x%04x)\n", debugstr_getRetValStr(ret), ret);
+        return ret;
+    }
 
     // initialize POWERLINK stack
     ret = oplk_initialize();

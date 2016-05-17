@@ -1,10 +1,11 @@
 /**
 ********************************************************************************
-\file   oplk/version.h
+\file   obdcreate/obdcreate.h
 
-\brief  openPOWERLINK version definitions
+\brief  Object dictionary creation
 
-The file contains definitions describing the openPOWERLINK version.
+This file contains the definitions for the creation of a static object
+dictionary.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -35,28 +36,35 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_oplk_version_H_
-#define _INC_oplk_version_H_
+#ifndef _INC_obdcreate_obdcreate_H_
+#define _INC_obdcreate_obdcreate_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <oplk/oplk.h>
 
-// NOTE:
-// All version macros should contain the same version number. But do not use
-// defines instead of the numbers. Because the macro PLK_STRING_VERSION() can not
-// convert a define to a string. In case of a release candidate (rc) version
-// the PLK_STRING_VERSION() must be replaced with PLK_STRING_VERSION_RC() in order
-// to add the "-rc" suffix.
-//
-// Format: maj.min.build-rc
-//         maj                  = major version
-//             min              = minor version (will be set to 0 if major version will be incremented)
-//                 build        = current build (will be set to 0 if minor version will be incremented)
-//                       rc     = release candidate (will be set to 0 if final version created)
-//
-#define PLK_DEFINED_STACK_VERSION   PLK_STACK_VERSION       (2, 4, 1, 1)
-#define PLK_DEFINED_OBJ1018_VERSION PLK_OBJ1018_VERSION     (2, 4, 1, 1)
-#define PLK_DEFINED_STRING_VERSION  PLK_STRING_VERSION_RC   (2, 4, 1, 1)
+//------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
 
-#endif /* _INC_oplk_version_H_ */
+//------------------------------------------------------------------------------
+// typedef
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// function prototypes
+//------------------------------------------------------------------------------
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+tOplkError obdcreate_initObd(tObdInitParam MEM* pInitParam_p);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* _INC_obdcreate_obdcreate_H_ */
