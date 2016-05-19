@@ -721,8 +721,6 @@ void drv_freeBenchmarkMem(UINT8* pBenchmarkMem_p)
     tMemInfo*   pBenchmarkMemInfo = &drvInstance_l.benchmarkMem;
 
     unmapMemory(pBenchmarkMemInfo);
-
-    pBenchmarkMem_p = NULL;
 }
 
 //------------------------------------------------------------------------------
@@ -825,8 +823,6 @@ void drv_unmapKernelMem(UINT8* pUserMem_p)
 
     if (pKernel2UserMemInfo != NULL)
         unmapMemory(pKernel2UserMemInfo);
-
-    pUserMem_p = NULL;
 }
 
 //------------------------------------------------------------------------------

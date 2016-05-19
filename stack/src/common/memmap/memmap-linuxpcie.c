@@ -217,7 +217,6 @@ void memmap_unmapKernelBuffer(void* pBuffer_p)
                               __func__, strerror(errno));
     }
 
-    pBuffer_p = NULL;
     OPLK_MEMSET(&memmapInstance_l, 0, sizeof(memmapInstance_l));
 }
 

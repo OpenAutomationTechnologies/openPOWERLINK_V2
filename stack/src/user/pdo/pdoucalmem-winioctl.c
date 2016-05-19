@@ -201,8 +201,6 @@ tOplkError pdoucal_freeMem(UINT8* pMem_p, size_t memSize_p)
     if (hFileHandle_l == NULL)
         return kErrorNoResource;
 
-    pMem_p = NULL;
-
     return kErrorOk;
 }
 
