@@ -2697,7 +2697,7 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
         nodeId = ami_getUint8Le(&pFrame->dstNodeId);
 
         // Processing of NMT commands in kernel layer
-        if (nodeId == dllkInstance_g.dllConfigParam.nodeId)
+        if ((nodeId == dllkInstance_g.dllConfigParam.nodeId) || (nodeId == C_ADR_BROADCAST))
         {
             if (asndServiceId == kDllAsndNmtCommand)
             {
