@@ -10,7 +10,7 @@ This source file contains the implementation of the process image functions.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -371,6 +371,27 @@ void* oplk_getProcessImageOut(void)
         return NULL;
 
     return instance_l.outputImage.pImage;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Setup process image
+
+The function sets up the process image according to the CiA302-4 profile.
+
+\deprecated The process image setup has to be done in the application since the
+            object dictionary is defined in the application.
+
+\return The function returns a \ref tOplkError error code.
+\retval kErrorApiNotSupported       This call is not supported.
+
+\ingroup module_api
+*/
+//------------------------------------------------------------------------------
+tOplkError oplk_setupProcessImage(void)
+{
+    DEBUG_LVL_ALWAYS_TRACE("Since openPOWERLINK 2.5.0 the process image setup is done in the application.\n");
+    return kErrorApiNotSupported;
 }
 
 //============================================================================//

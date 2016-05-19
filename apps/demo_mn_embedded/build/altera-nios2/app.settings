@@ -38,6 +38,7 @@ OBJDICT=CiA302-4_MN
 # Application sources
 APP_SOURCES="\
 ${OPLK_BASE_DIR}/apps/common/src/obdcreate/obdcreate.c \
+${OPLK_BASE_DIR}/apps/common/objdicts/${OBJDICT}/obdpi.c \
 ${OPLK_BASE_DIR}/apps/common/src/lcd/lcd.c \
 ${OPLK_BASE_DIR}/apps/common/src/lcd/lcdl-16207.c \
 ${OPLK_BASE_DIR}/apps/common/src/gpio/gpio-nios2.c \

@@ -1,17 +1,16 @@
 /**
 ********************************************************************************
-\file   processimage-cia302.c
+\file   obdpi.c
 
 \brief  Process image setup function for CiA302-4
 
 This file contains the implementation of the process image setup functions
 for the CiA profile 302-4.
 
-\ingroup module_api
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -41,8 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <common/oplkinc.h>
-#include <oplk/obd.h>
+#include "obdpi.h"
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -69,6 +67,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 #define PI_SUBINDEX_COUNT    252
+
+#ifndef tabentries
+#define tabentries(aVar_p)  (sizeof(aVar_p) / sizeof(*(aVar_p)))
+#endif
+
 
 //------------------------------------------------------------------------------
 // local types
@@ -119,9 +122,9 @@ tProcessImageLink processImageLink_l[] =
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError linkProcessImageRange(UINT objIndexStart_p, UINT objIndexEnd_p,
-                                        UINT offsetPI_p, BOOL fOutputPI_p, tObdSize entrySize_p,
-                                        UINT subindexCountPerIndex_p);
+static UINT linkProcessImageRange(UINT objIndexStart_p, UINT objIndexEnd_p,
+                                  UINT offsetPI_p, BOOL fOutputPI_p, tObdSize entrySize_p,
+                                  UINT subindexCountPerIndex_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -131,16 +134,15 @@ static tOplkError linkProcessImageRange(UINT objIndexStart_p, UINT objIndexEnd_p
 /**
 \brief    Setup process image
 
-The function sets up a process image according to the CiA profile 302_4.
+The function sets up a process image according to the CiA profile 302-4.
 
-\return The function returns a tOplkError error code.
-
-\ingroup module_api
+\return The function returns the number of the index that failed to link or 0,
+        if no error occurred.
 */
 //------------------------------------------------------------------------------
-tOplkError oplk_setupProcessImage(void)
+UINT obdpi_setupProcessImage(void)
 {
-    tOplkError                  ret = kErrorOk;
+    UINT                        errorIndex = 0;
     size_t                      i;
     tProcessImageLink*          pLink;
 
@@ -148,14 +150,14 @@ tOplkError oplk_setupProcessImage(void)
 
     for (i = 0; i < tabentries(processImageLink_l); i++, pLink++)
     {
-        ret = linkProcessImageRange(pLink->objIndexStart, pLink->objIndexEnd,
-                                    pLink->offsetPI, pLink->fOutputPI,
-                                    pLink->entrySize, pLink->subindexCountPerIndex);
-        if (ret != kErrorOk)
+        errorIndex = linkProcessImageRange(pLink->objIndexStart, pLink->objIndexEnd,
+                                           pLink->offsetPI, pLink->fOutputPI,
+                                           pLink->entrySize, pLink->subindexCountPerIndex);
+        if (errorIndex != 0)
             break;
     }
 
-    return ret;
+    return errorIndex;
 }
 
 //============================================================================//
@@ -178,7 +180,8 @@ The function links a range of variables to the object dictionary.
 \param  entrySize_p             The size of one process variable.
 \param  subindexCountPerIndex_p Number of subindexes per index to be linked.
 
-\return The function returns a tOplkError error code.
+\return The function returns the number of the index that failed to link or 0,
+        if no error occurred.
 */
 //------------------------------------------------------------------------------
 static tOplkError linkProcessImageRange(UINT objIndexStart_p, UINT objIndexEnd_p,
@@ -186,6 +189,7 @@ static tOplkError linkProcessImageRange(UINT objIndexStart_p, UINT objIndexEnd_p
                                         tObdSize entrySize_p, UINT subindexCountPerIndex_p)
 {
     tOplkError      ret = kErrorOk;
+    UINT            errorIndex = 0;
     UINT            varEntries;
 
     for (; objIndexStart_p <= objIndexEnd_p; objIndexStart_p++,
@@ -197,18 +201,18 @@ static tOplkError linkProcessImageRange(UINT objIndexStart_p, UINT objIndexEnd_p
         if (((ret == kErrorOk) && (varEntries < subindexCountPerIndex_p)) ||
             (ret == kErrorApiPISizeExceeded))
         {
-            ret = kErrorOk;
+            errorIndex = 0;
             break;
         }
+
         if (ret != kErrorOk)
         {
-            DEBUG_LVL_ERROR_TRACE("oplk_linkProcessImageObject returned: %xh for index %xh\n",
-                                  ret, objIndexStart_p);
+            errorIndex = objIndexStart_p;
             break;
         }
     }
 
-    return ret;
+    return errorIndex;
 }
 
 /// \}

@@ -9,7 +9,7 @@ API.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -576,7 +576,7 @@ OPLKDLLEXPORT void*      oplk_getProcessImageIn(void);
 OPLKDLLEXPORT void*      oplk_getProcessImageOut(void);
 
 // objdict specific process image functions
-OPLKDLLEXPORT tOplkError oplk_setupProcessImage(void);
+OPLKDLLEXPORT OPLK_DEPRECATED tOplkError oplk_setupProcessImage(void);
 
 // Request forwarding of Pres frame from DLL -> API
 OPLKDLLEXPORT tOplkError oplk_triggerPresForward(UINT nodeId_p);

@@ -53,7 +53,6 @@ ${COMMON_SOURCE_DIR}/dll/dllcal-direct.c \
 
 USER_MN_SOURCES="\
 ${USER_SOURCE_DIR}/obd/obdcdc.c \
-${USER_SOURCE_DIR}/api/processimage-cia302.c \
 ${USER_SOURCE_DIR}/cfmu.c \
 "
 

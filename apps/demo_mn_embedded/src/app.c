@@ -44,6 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <oplk/oplk.h>
+#include <obdpi.h>
 #include "app.h"
 #include "xap.h"
 
@@ -252,6 +253,7 @@ The function initializes the process image of the application.
 static tOplkError initProcessImage(void)
 {
     tOplkError      ret = kErrorOk;
+    UINT            errorIndex = 0;
 
     PRINTF("Initializing process image...\n");
     PRINTF("Size of input process image: %d\n", (UINT32)sizeof(PI_IN));
@@ -265,10 +267,14 @@ static tOplkError initProcessImage(void)
     pProcessImageIn_l = oplk_getProcessImageIn();
     pProcessImageOut_l = oplk_getProcessImageOut();
 
-    ret = oplk_setupProcessImage();
+    errorIndex = obdpi_setupProcessImage();
+    if (errorIndex != 0)
+    {
+        PRINTF("Setup process image failed at index 0x%04x\n", errorIndex);
+        ret = kErrorApiPINotAllocated;
+    }
 
     return ret;
 }
 
-///\}
-
+/// \}

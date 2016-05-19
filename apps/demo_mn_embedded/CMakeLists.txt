@@ -58,6 +58,7 @@ SET(DEMO_SOURCES
     ${DEMO_SOURCE_DIR}/app.c
     ${DEMO_SOURCE_DIR}/event.c
     ${COMMON_SOURCE_DIR}/obdcreate/obdcreate.c
+    ${OBJDICT_DIR}/${OBJDICT}/obdpi.c
     ${COMMON_SOURCE_DIR}/lcd/lcd.c
     ${COMMON_SOURCE_DIR}/arp/arp.c
     )

@@ -69,6 +69,7 @@ SET (DEMO_SOURCES
      ${DEMO_SOURCE_DIR}/NmtCommandDialog.cpp
      ${DEMO_SOURCE_DIR}/EventLog.cpp
      ${COMMON_SOURCE_DIR}/obdcreate/obdcreate.c
+     ${OBJDICT_DIR}/${OBJDICT}/obdpi.c
      ${CONTRIB_SOURCE_DIR}/console/printlog.c
      ${COMMON_SOURCE_DIR}/eventlog/eventlogstring.c
      )
@@ -169,6 +170,8 @@ SOURCE_GROUP("Object Dictionary" FILES
     ${COMMON_SOURCE_DIR}/obdcreate/obdcreate.c
     ${COMMON_SOURCE_DIR}/obdcreate/obdcreate.h
     ${OBJDICT_DIR}/${OBJDICT}/objdict.h
+    ${OBJDICT_DIR}/${OBJDICT}/obdpi.c
+    ${OBJDICT_DIR}/${OBJDICT}/obdpi.h
     )
 
 ################################################################################

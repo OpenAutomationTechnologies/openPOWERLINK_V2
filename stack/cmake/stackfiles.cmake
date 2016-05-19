@@ -67,7 +67,6 @@ SET(COMMON_CAL_DIRECT_SOURCES
 
 SET(USER_MN_SOURCES
     ${USER_SOURCE_DIR}/obd/obdcdc.c
-    ${USER_SOURCE_DIR}/api/processimage-cia302.c
     ${USER_SOURCE_DIR}/cfmu.c
     )
 

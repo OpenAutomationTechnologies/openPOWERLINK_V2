@@ -41,6 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QThread>
 #include <QString>
 
+#include <obdpi.h>
 #include "Api.h"
 
 //------------------------------------------------------------------------------
@@ -205,6 +206,7 @@ The function sets up the process image used by the application.
 tOplkError DataInOutThread::setupProcessImage()
 {
     tOplkError          ret;
+    UINT                errorIndex = 0;
 
     ret = oplk_allocProcessImage(sizeof(PI_IN), sizeof(PI_OUT));
     if (ret != kErrorOk)
@@ -215,7 +217,11 @@ tOplkError DataInOutThread::setupProcessImage()
     pProcessImageIn_l = (PI_IN*)oplk_getProcessImageIn();
     pProcessImageOut_l = (PI_OUT*)oplk_getProcessImageOut();
 
-    ret = oplk_setupProcessImage();
+    errorIndex = obdpi_setupProcessImage();
+    if (errorIndex != 0)
+    {
+        ret = kErrorApiPINotAllocated;
+    }
 
     return ret;
 }
