@@ -220,8 +220,12 @@ tOplkError obdal_processSdoWrite(tSdoObdConHdl* pSdoHdl_p,
                 ret = kErrorApiSdoBusyIntern;
                 goto Exit;
             }
-            instance_l.pfnCbFinishSdo = pfnFinishSdoCb_p;
+
             ret = accessUserObdfromSdo(pSdoHdl_p, kObdAlAccessTypeWrite);
+            if (ret == kErrorReject)
+            {   // save callback for delayed answer
+                instance_l.pfnCbFinishSdo = pfnFinishSdoCb_p;
+            }
         }
     }
 
@@ -273,8 +277,12 @@ tOplkError obdal_processSdoRead(tSdoObdConHdl* pSdoHdl_p,
                 ret = kErrorApiSdoBusyIntern;
                 goto Exit;
             }
-            instance_l.pfnCbFinishSdo = pfnFinishSdoCb_p;
+
             ret = accessUserObdfromSdo(pSdoHdl_p, kObdAlAccessTypeRead);
+            if (ret == kErrorReject)
+            {   // save callback for delayed answer
+                instance_l.pfnCbFinishSdo = pfnFinishSdoCb_p;
+            }
         }
     }
 
@@ -287,7 +295,7 @@ Exit:
 \brief  Finish a user specific object access
 
 The function finishes a user specific object access, which returned
-kOplkErrorReject at the beginning of the access to signal a delayed answer.
+kErrorReject at the beginning of the access to signal a delayed answer.
 
 \param  pUserObdConHdl_p  Connection handle from user OD
 
@@ -374,6 +382,10 @@ static tOplkError accessUserObdfromSdo(tSdoObdConHdl* pSdoHdl_p,
             pSdoHdl_p->dataSize = userObdConHdl.dataSize;
         }
     }
+    else
+    {   // No access to user OD means object does not exist
+        ret = kErrorObdIndexNotExist;
+    }
 
     return ret;
 }
@@ -383,7 +395,7 @@ static tOplkError accessUserObdfromSdo(tSdoObdConHdl* pSdoHdl_p,
 \brief  Finish a user specific object access originated by SDO
 
 The function finishes a user specific object access, originated by SDO,
-which returned kOplkErrorReject on the beginning of the access to signal a
+which returned kErrorReject on the beginning of the access to signal a
 delayed answer.
 
 \param  pUserObdConHdl_p  Connection handle from user OD

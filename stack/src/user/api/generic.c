@@ -685,7 +685,7 @@ tOplkError oplk_writeObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT 
 \brief  Finish a user specific object access
 
 The function finishes a user specific object access event
-(\ref kOplkApiEventUserObdAccess) which returned kOplkErrorReject on the
+(\ref kOplkApiEventUserObdAccess) which returned kErrorReject on the
 beginning of the access to signal a delayed answer.
 
 \parblock
