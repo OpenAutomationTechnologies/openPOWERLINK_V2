@@ -140,7 +140,9 @@ tBufAlloc* bufalloc_init(UINT maxBuffer_p)
         goto Exit;
     }
 
+    pBufAlloc->maxSize = maxBuffer_p;
     pBufAlloc->pBufData = pBufData;
+    pBufAlloc->pBufDataBegin = (void*)pBufData;
     pBufAlloc->allocatedBufCnt = 0;
     pBufAlloc->releasedBufCnt = 0;
     strncpy(pBufAlloc->checkId, BUFALLOC_CHECKID, 9);
@@ -167,7 +169,7 @@ The function deletes the buffer allocation instance.
 tOplkError bufalloc_exit(tBufAlloc* pBufAlloc_p)
 {
     tOplkError          ret = kErrorGeneralError;
-    tBufData*           pBufData;
+    tBufData*           pBufDataBegin = NULL;
 
     if (pBufAlloc_p == NULL)
     {
@@ -177,13 +179,13 @@ tOplkError bufalloc_exit(tBufAlloc* pBufAlloc_p)
     // Check if pBufAlloc is a valid buffer allocation instance.
     if (strncmp(pBufAlloc_p->checkId, BUFALLOC_CHECKID, 9) == 0)
     {
-        pBufData = pBufAlloc_p->pBufData;
-        OPLK_FREE(pBufAlloc_p);
-        if (pBufData != NULL)
+        pBufDataBegin = pBufAlloc_p->pBufDataBegin;
+        if (pBufDataBegin != NULL)
         {
-            OPLK_FREE(pBufData);
+            OPLK_FREE(pBufDataBegin);
             ret = kErrorOk;
         }
+        OPLK_FREE(pBufAlloc_p);
     }
 Exit:
     return ret;
@@ -287,7 +289,6 @@ tOplkError bufalloc_releaseBuffer(tBufAlloc* pBufAlloc_p, void* pFreeBuf_p, UINT
         pBufAlloc_p->pBufData->bufferNumber = bufferNumber_p;
         pBufAlloc_p->pBufData++;
         pBufAlloc_p->releasedBufCnt++;
-
         ret = kErrorOk;
     }
 Exit:

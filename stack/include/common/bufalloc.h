@@ -70,8 +70,9 @@ typedef struct
     UINT        maxSize;                    ///< Maximum amount of buffers
     UINT        releasedBufCnt;             ///< Counter of released buffer
     UINT        allocatedBufCnt;            ///< Counter of allocated buffer
+    void*       pBufDataBegin;              ///< Pointer to the start of the buffer array
     char        checkId[9];                 ///< Verification string
-    tBufData*   pBufData;                    ///< Pointer to the array of stored buffers
+    tBufData*   pBufData;                   ///< Pointer to the next available buffer
 } tBufAlloc;
 
 //------------------------------------------------------------------------------
@@ -88,7 +89,6 @@ tOplkError  bufalloc_addBuffer(tBufAlloc* pBufAlloc_p, void* pfreeBuf_p, UINT bu
 tBufData*   bufalloc_getBuffer(tBufAlloc* pBufAlloc_p);
 tOplkError  bufalloc_releaseBuffer(tBufAlloc* pBufAlloc_p, void* pfreeBuf_p, UINT bufferNumber_p);
 tOplkError  bufalloc_exit(tBufAlloc* pBufAlloc_p);
-
 #ifdef __cplusplus
 }
 #endif
