@@ -1159,10 +1159,12 @@ int                    omethPhyRead
  unsigned short        *pValue        /* ptr to read value */
 )
 {
-    ometh_mii_typ    *pMII = hEth->config.pPhyBase;
+    ometh_mii_typ    *pMII;
     unsigned short    dataBackup;
 
     if(hEth==0) return -1;
+
+    pMII = hEth->config.pPhyBase;
 
     while(pMII->cmd.ack & 1);    // wait until busy = 0
     dataBackup = pMII->data;    // backup data in case omethPeriodic() was waiting for a register
@@ -1206,10 +1208,12 @@ int                    omethPhyWrite
  unsigned short        value        /* value */
 )
 {
-    ometh_mii_typ *pMII = hEth->config.pPhyBase;
+    ometh_mii_typ *pMII;
     unsigned short    dataBackup;
 
     if(hEth==0) return -1;
+
+    pMII = hEth->config.pPhyBase;
 
     while(pMII->cmd.ack & 1);    // wait until busy = 0
     dataBackup = pMII->data;    // backup data in case omethPeriodic() was waiting for a register
