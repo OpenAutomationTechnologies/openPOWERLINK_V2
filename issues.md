@@ -49,3 +49,18 @@ the first driver for network communication.
 
 ## Workaround
 Select first adapter for openPOWERLINK.
+
+# Linux kernel module with edrv-i210 unhandled IRQ {#sect_known_issues_linkern_i210}
+
+## Description
+For the configuration of openPOWERLINK MN which uses edrv-i210 kernel module,
+after stopping the MN application, the Linux kernel reports a warning for 'unhandled IRQ'
+for the interrupt pin assigned to Intel's i210 NIC. The warning message is
+
+`irq XX: nobody cared (try booting with the "irqpoll" option)`
+
+This occurs on PCs where Intel's i210 NIC card shares an interrupt pin with any
+of the other devices such as USB hub controller.
+
+## Workaround
+The warning can be ignored as it does not affect the functionality and performance.
