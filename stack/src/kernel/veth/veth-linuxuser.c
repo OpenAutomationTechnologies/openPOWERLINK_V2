@@ -61,7 +61,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <arpa/inet.h>
 #include <linux/if.h>
 #include <linux/if_tun.h>
-#include <netinet/if_ether.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -71,6 +70,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 #define TUN_DEV_NAME        "/dev/net/tun"
+
 //------------------------------------------------------------------------------
 // module global vars
 //------------------------------------------------------------------------------
@@ -248,7 +248,7 @@ static void getMacAdrs(UINT8* pMac_p)
 
     close(sock);
 
-    OPLK_MEMCPY(pMac_p, &ifr.ifr_hwaddr.sa_data[0], ETHER_ADDR_LEN);
+    OPLK_MEMCPY(pMac_p, &ifr.ifr_hwaddr.sa_data[0], ETH_ALEN);
 }
 
 //------------------------------------------------------------------------------
@@ -272,9 +272,9 @@ static tOplkError veth_receiveFrame(tFrameInfo* pFrameInfo_p,
 
     // replace the MAC address of the POWERLINK Ethernet interface with virtual
     // Ethernet MAC address before forwarding it into the virtual Ethernet interface
-    if (OPLK_MEMCMP(pFrameInfo_p->frame.pBuffer->aDstMac, vethInstance_l.macAdrs, ETHER_ADDR_LEN) == 0)
+    if (OPLK_MEMCMP(pFrameInfo_p->frame.pBuffer->aDstMac, vethInstance_l.macAdrs, ETH_ALEN) == 0)
     {
-        OPLK_MEMCPY(pFrameInfo_p->frame.pBuffer->aDstMac, vethInstance_l.tapMacAdrs, ETHER_ADDR_LEN);
+        OPLK_MEMCPY(pFrameInfo_p->frame.pBuffer->aDstMac, vethInstance_l.tapMacAdrs, ETH_ALEN);
     }
 
     nwrite = write(vethInstance_l.fd, pFrameInfo_p->frame.pBuffer, pFrameInfo_p->frameSize);
@@ -302,7 +302,7 @@ to be used as a thread which does a blocking read in a while loop.
 //------------------------------------------------------------------------------
 static void* vethRecvThread(void* pArg_p)
 {
-    UINT8               buffer[ETHERMTU];
+    UINT8               buffer[ETH_DATA_LEN];
     UINT                nread;
     tFrameInfo          frameInfo;
     tOplkError          ret = kErrorOk;
@@ -331,7 +331,7 @@ static void* vethRecvThread(void* pArg_p)
                 break;
 
             default:    // data from tun/tap ready for read
-                nread = read(pInstance->fd, buffer, ETHERMTU);
+                nread = read(pInstance->fd, buffer, ETH_DATA_LEN);
                 if (nread > 0)
                 {
                     DEBUG_LVL_VETH_TRACE("VETH:Read %d bytes from the tap interface\n", nread);
@@ -340,7 +340,7 @@ static void* vethRecvThread(void* pArg_p)
                     DEBUG_LVL_VETH_TRACE("DST MAC: %02X:%02X:%02x:%02X:%02X:%02x\n",
                                           buffer[0], buffer[1], buffer[2], buffer[3], buffer[4], buffer[5]);
                     // replace src MAC address with MAC address of virtual Ethernet interface
-                    OPLK_MEMCPY(&buffer[6], pInstance->macAdrs, ETHER_ADDR_LEN);
+                    OPLK_MEMCPY(&buffer[6], pInstance->macAdrs, ETH_ALEN);
 
                     frameInfo.frame.pBuffer = (tPlkFrame *)buffer;
                     frameInfo.frameSize = nread;
