@@ -39,18 +39,22 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <Api.h>
+
+#include <QMetaType>
 #include <QWidget>
-#include <QThread>
-#include <QString>
 #include <QMessageBox>
+
+#include <MainWindow.h>
+#include <ProcessThread.h>
+#include <DataInOutThread.h>
+#include <State.h>
+#include <Output.h>
+#include <Input.h>
+#include <CnState.h>
+
 #include <oplk/debugstr.h>
 #include <obdcreate/obdcreate.h>
-
-#include "Api.h"
-#include "State.h"
-#include "Input.h"
-#include "Output.h"
-#include "MainWindow.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -349,4 +353,3 @@ UINT Api::defaultNodeId()
 {
     return NODEID;
 }
-

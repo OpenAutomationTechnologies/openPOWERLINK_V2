@@ -7,7 +7,7 @@
 This file contains the implementation of the main window class.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -38,17 +38,30 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <QtGui>
+#include <MainWindow.h>
 
-#include "MainWindow.h"
-#include "State.h"
-#include "Api.h"
-#include "Input.h"
-#include "Output.h"
-#include "NmtCommandDialog.h"
+#include <QHBoxLayout>
+#include <QPixmap>
+#include <QLabel>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QFrame>
+#include <QTextEdit>
+#include <QMessageBox>
+
+
+#include <State.h>
+#include <Output.h>
+#include <Input.h>
+#include <CnState.h>
+#include <Api.h>
+#include <SdoDialog.h>
+#include <NmtCommandDialog.h>
 
 #ifdef CONFIG_USE_PCAP
-#include "InterfaceSelectDialog.h"
+#include <InterfaceSelectDialog.h>
 #endif
+
 
 //============================================================================//
 //            P U B L I C    M E M B E R    F U N C T I O N S                 //
@@ -381,4 +394,3 @@ void MainWindow::printlog(QString str)
 {
     pTextEdit->append(str);
 }
-

@@ -7,7 +7,7 @@
 This file implements the data Input/Output thread clas.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -37,9 +37,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <QWidget>
-#include <QThread>
-#include <QString>
+#include <DataInOutThread.h>
+#include <xap.h>
 
 #include <obdpi.h>
 #include "Api.h"

@@ -7,7 +7,7 @@
 This file contains the definitions of the CnState class.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -40,7 +40,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplk.h>
 #include <QWidget>
 
 //------------------------------------------------------------------------------
@@ -52,7 +51,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Class declarations
 //------------------------------------------------------------------------------
 class QVBoxLayout;
-class QLabel;
 class NodeState;
 
 //------------------------------------------------------------------------------
@@ -81,4 +79,3 @@ private:
 };
 
 #endif // _INC_CnState_h_
-

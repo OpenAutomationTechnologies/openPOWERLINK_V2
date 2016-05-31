@@ -7,7 +7,7 @@
 The file contains the definitions for the POWERLINK process thread.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -43,10 +43,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplk/oplk.h>
 
 #include <QThread>
+#include <QString>
 #include <QMutex>
 #include <QWaitCondition>
-
-#include <EventLog.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -56,8 +55,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // class definitions
 //------------------------------------------------------------------------------
 class QWidget;
-class QString;
 class MainWindow;
+class EventLog;
 
 //------------------------------------------------------------------------------
 /**
@@ -126,4 +125,3 @@ private:
 };
 
 #endif /* _INC_ProcessThread_H_ */
-

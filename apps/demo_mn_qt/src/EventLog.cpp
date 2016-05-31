@@ -7,7 +7,7 @@
 This file implements the data event logger class.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <EventLog.h>
-#include <QString>
 
 #include <cstdarg>
 
@@ -79,7 +78,7 @@ void EventLog::printEvent(tOplkApiEventNode* pNodeEvent_p)
     eventlog_createNodeEventString(pNodeEvent_p, logFormat, cstring,
                                    EVENTLOG_MAX_LENGTH);
 
-    emit printLog(QString::fromAscii(cstring));
+    emit printLog(QString::fromLatin1(cstring));
 }
 
 //------------------------------------------------------------------------------
@@ -102,7 +101,7 @@ void EventLog::printEvent(tErrHistoryEntry* pHistory_p)
     eventlog_createHistoryEventString(pHistory_p, logFormat, cstring,
                                       EVENTLOG_MAX_LENGTH);
 
-    emit printLog(QString::fromAscii(cstring));
+    emit printLog(QString::fromLatin1(cstring));
 }
 
 //------------------------------------------------------------------------------
@@ -125,7 +124,7 @@ void EventLog::printEvent(tEventError* pError_p)
     eventlog_createErrorEventString(pError_p, logFormat, cstring,
                                     EVENTLOG_MAX_LENGTH);
 
-    emit printLog(QString::fromAscii(cstring));
+    emit printLog(QString::fromLatin1(cstring));
 }
 
 //------------------------------------------------------------------------------
@@ -148,7 +147,7 @@ void EventLog::printEvent(tEventNmtStateChange* pNmtStateChange_p)
     eventlog_createStateEventString(pNmtStateChange_p, logFormat,
                                     cstring, EVENTLOG_MAX_LENGTH);
 
-    emit printLog(QString::fromAscii(cstring));
+    emit printLog(QString::fromLatin1(cstring));
 }
 
 //------------------------------------------------------------------------------
@@ -172,7 +171,7 @@ void EventLog::printEvent(tOplkApiEventPdoChange *pPdoChange_p)
     eventlog_createPdoEventString(pPdoChange_p, logFormat, cstring,
                                   EVENTLOG_MAX_LENGTH);
 
-    emit printLog(QString::fromAscii(cstring));
+    emit printLog(QString::fromLatin1(cstring));
 }
 
 //------------------------------------------------------------------------------
@@ -195,7 +194,7 @@ void EventLog::printEvent(tCfmEventCnProgress *pCfmProgress_p)
     eventlog_createCfmProgressEventString(pCfmProgress_p, logFormat,
                                           cstring, EVENTLOG_MAX_LENGTH);
 
-    emit printLog(QString::fromAscii(cstring));
+    emit printLog(QString::fromLatin1(cstring));
 }
 
 //------------------------------------------------------------------------------
@@ -220,7 +219,7 @@ void EventLog::printEvent(unsigned int nodeId_p, tNmtNodeCommand nodeCommand_p)
     eventlog_createCfmResultEventString(nodeId_p, nodeCommand_p, logFormat,
                                         cstring, EVENTLOG_MAX_LENGTH);
 
-    emit printLog(QString::fromAscii(cstring));
+    emit printLog(QString::fromLatin1(cstring));
 }
 
 //------------------------------------------------------------------------------
@@ -252,7 +251,7 @@ void EventLog::printMessage(tEventlogLevel level_p, tEventlogCategory category_p
                                  fmt_p, arglist);
     va_end(arglist);
 
-    emit printLog(QString::fromAscii(cstring, EVENTLOG_MAX_LENGTH));
+    emit printLog(QString::fromLatin1(cstring, EVENTLOG_MAX_LENGTH));
 }
 
 //------------------------------------------------------------------------------
@@ -277,5 +276,5 @@ void EventLog::printPdoMap(UINT16 mapObject_p, UINT8 subIndex_p, UINT64 mapping_
     eventlog_createPdoMapString(mapObject_p, subIndex_p, mapping_p,
                                 logFormat, cstring, EVENTLOG_MAX_LENGTH);
 
-    emit printLog(QString::fromAscii(cstring));
+    emit printLog(QString::fromLatin1(cstring));
 }

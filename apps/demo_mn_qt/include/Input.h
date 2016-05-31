@@ -7,7 +7,7 @@
 This file contains the definitions for the Input Widget
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
 All rights reserved.
@@ -41,7 +41,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplk.h>
 #include <QWidget>
 
 //------------------------------------------------------------------------------
@@ -53,9 +52,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // class definitions
 //------------------------------------------------------------------------------
-class QToolButton;
 class QVBoxLayout;
-class QLabel;
 class Leds;
 
 //------------------------------------------------------------------------------
@@ -84,4 +81,3 @@ private:
 };
 
 #endif // _INC_Input_H_
-

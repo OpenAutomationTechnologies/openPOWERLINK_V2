@@ -7,7 +7,7 @@
 This file contains the implementation of the interface selection dialog class.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -40,10 +40,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <QtGui>
-#include "InterfaceSelectDialog.h"
+#include <InterfaceSelectDialog.h>
+
+#include <QListWidget>
+#include <QListWidgetItem>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
+#include <QLabel>
+#include <QPushButton>
+
 #include <pcap.h>
-#include <stdio.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -190,4 +196,3 @@ QString InterfaceSelectDialog::getDevName(void)
 {
     return devName;
 }
-

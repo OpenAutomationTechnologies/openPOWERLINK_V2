@@ -8,7 +8,7 @@ This file contains the implementation of the NMT command dialog class.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2015, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -39,7 +39,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <QtGui>
-#include "NmtCommandDialog.h"
+#include <NmtCommandDialog.h>
+
+#include <QLineEdit>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
+#include <QLabel>
+#include <QPushButton>
+
 
 //------------------------------------------------------------------------------
 // const defines

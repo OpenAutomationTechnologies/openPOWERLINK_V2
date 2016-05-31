@@ -7,7 +7,7 @@
 This file implements the header file of the Data Input/Output class.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -43,7 +43,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QThread>
 
 #include <oplk/oplk.h>
-#include "xap.h"
 
 //------------------------------------------------------------------------------
 // const defines
@@ -53,8 +52,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // class definitions
 //------------------------------------------------------------------------------
-class QWidget;
-class QString;
+
 
 //------------------------------------------------------------------------------
 /**
@@ -104,4 +102,3 @@ private:
 };
 
 #endif //_INC_DataInOutThread_H_
-

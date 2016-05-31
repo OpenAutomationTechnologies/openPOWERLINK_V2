@@ -7,7 +7,7 @@
 This file implements the CnState class.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -37,15 +37,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QToolButton>
-#include <QPalette>
-#include <QColor>
-#include <QLabel>
+#include <CnState.h>
+#include <NodeState.h>
 
-#include "CnState.h"
-#include "NodeState.h"
+#include <QVBoxLayout>
+#include <QLabel>
 
 //------------------------------------------------------------------------------
 /**
@@ -154,4 +150,3 @@ void CnState::removeAllNodes(void)
         ppNodeState[nIdx]->hide();
     }
 }
-

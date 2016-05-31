@@ -7,7 +7,7 @@
 The file contains the implementation of the input widget.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -37,17 +37,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplk.h>
+#include <Input.h>
+#include <Leds.h>
 
 #include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QToolButton>
-#include <QPalette>
-#include <QColor>
 #include <QLabel>
 
-#include "Input.h"
-#include "Leds.h"
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -197,4 +192,3 @@ void Input::removeAllNodes()
         ppLeds[nIdx]->hide();
     }
 }
-

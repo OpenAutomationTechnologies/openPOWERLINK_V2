@@ -7,7 +7,7 @@
 This file contains the implementation of the Output class.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -37,11 +37,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <Output.h>
+#include <Leds.h>
+
 #include <QVBoxLayout>
 #include <QLabel>
 
-#include "Output.h"
-#include "Leds.h"
 
 //============================================================================//
 //            P U B L I C    M E M B E R    F U N C T I O N S                 //
@@ -166,4 +167,3 @@ void Output::removeAllNodes()
         ppLeds[nIdx]->hide();
     }
 }
-

@@ -7,7 +7,7 @@
 This file contains the definitions for the POWERLINK MN state widget.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -41,7 +41,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <oplk/oplk.h>
+
 #include <QWidget>
+#include <QString>
+#include <QPalette>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -52,11 +55,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // class definitions
 //------------------------------------------------------------------------------
-class QToolButton;
-class QPalette;
 class QHBoxLayout;
 class QLabel;
+class QToolButton;
 class Leds;
+class QPixmap;
 
 //------------------------------------------------------------------------------
 /**
@@ -100,8 +103,6 @@ private:
     QPixmap*     pRedLed;
     QPixmap*     pYellowLed;
     QPixmap*     pGreenLed;
-
 };
 
 #endif /* _INC_State_H_ */
-

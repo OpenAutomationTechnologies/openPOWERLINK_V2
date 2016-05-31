@@ -7,7 +7,7 @@
 This file contains the definitions for the LED widget.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -40,7 +40,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplk.h>
 #include <QWidget>
 
 //------------------------------------------------------------------------------
@@ -50,10 +49,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // class definitions
 //------------------------------------------------------------------------------
-class QToolButton;
-class QPalette;
-class QHBoxLayout;
 class QLabel;
+class QPixmap;
 
 //------------------------------------------------------------------------------
 /**
@@ -68,7 +65,7 @@ class Leds : public QWidget
 
 public:
     Leds(int count_p, QWidget* parent = 0);
-    void setLeds(UINT dataIn_p);
+    void setLeds(unsigned int dataIn_p);
     void disableLeds(void);
 
 private:
@@ -80,4 +77,3 @@ private:
 };
 
 #endif /* _INC_Leds_H_ */
-

@@ -7,7 +7,7 @@
 This file contains the definitions of the main window class.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -41,24 +41,27 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <QWidget>
-#include <QTextEdit>
+#include <QString>
 
-#include "Api.h"
-#include "State.h"
-#include "Input.h"
-#include "CnState.h"
-#include "Output.h"
-#include "SdoDialog.h"
+#include <oplk/oplk.h>
 
 //------------------------------------------------------------------------------
 // class definitions
 //------------------------------------------------------------------------------
+class QHBoxLayout;
+class QPixmap;
+class QLabel;
 class QLineEdit;
 class QPushButton;
-class QToolButton;
-class QLabel;
 class QFrame;
 class QTextEdit;
+
+class State;
+class Output;
+class Input;
+class CnState;
+class Api;
+class SdoDialog;
 
 //------------------------------------------------------------------------------
 /**
@@ -123,4 +126,3 @@ private:
 };
 
 #endif /* _INC_MainWindow_H_ */
-

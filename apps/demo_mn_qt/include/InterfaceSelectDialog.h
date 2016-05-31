@@ -7,7 +7,7 @@
 The file contains the definitions for the interface selection dialog
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -39,8 +39,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplk.h>
 #include <QDialog>
+#include <QString>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -49,11 +49,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // class definitions
 //------------------------------------------------------------------------------
-class QLabel;
 class QListWidget;
 class QListWidgetItem;
-class QPushButton;
-
 
 //------------------------------------------------------------------------------
 /**
@@ -82,4 +79,3 @@ private:
 };
 
 #endif /* _INC_InterfaceSelectDialog_H_ */
-

@@ -7,7 +7,7 @@
 The file contains the definitions fro the NodeState widget.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -41,7 +41,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.Copyright (c) 2013, 
 // includes
 //------------------------------------------------------------------------------
 #include <oplk/oplk.h>
+
 #include <QWidget>
+#include <QString>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -50,10 +52,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.Copyright (c) 2013, 
 //------------------------------------------------------------------------------
 // class definitions
 //------------------------------------------------------------------------------
-class QToolButton;
-class QPalette;
-class QHBoxLayout;
 class QLabel;
+class QPixmap;
 
 //------------------------------------------------------------------------------
 /**
@@ -81,4 +81,3 @@ private:
 };
 
 #endif /* _INC_NodeState_H_ */
-

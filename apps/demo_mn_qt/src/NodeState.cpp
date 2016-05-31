@@ -7,7 +7,7 @@
 This file contains the implementation of the NodeState class.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -37,14 +37,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QToolButton>
-#include <QPalette>
-#include <QColor>
-#include <QLabel>
+#include <NodeState.h>
 
-#include "NodeState.h"
+#include <QLabel>
+#include <QPixmap>
+#include <QHBoxLayout>
+
 
 //============================================================================//
 //            P U B L I C    M E M B E R    F U N C T I O N S                 //
@@ -117,4 +115,3 @@ void NodeState::setState(int state_p)
             break;
     }
 }
-

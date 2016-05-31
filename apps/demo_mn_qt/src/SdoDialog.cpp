@@ -7,6 +7,7 @@
 This file contains the implementation of the SDO execution dialog class.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2015, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -41,9 +42,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <QtGui>
-#include "SdoDialog.h"
+#include <SdoDialog.h>
+
+#include <QPushButton>
+#include <QLineEdit>
+#include <QComboBox>
+#include <QLabel>
+#include <QFormLayout>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
+#include <QMessageBox>
 #include <QtEndian>
-#include "oplk/debugstr.h"
+
+#include <oplk/debugstr.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -283,11 +294,11 @@ void SdoDialog::startWrite()
     switch (obdType)
     {
         case kObdTypeVString:
-            data = pDataEdit->text().toAscii();
+            data = pDataEdit->text().toLatin1();
             break;
 
         case kObdTypeDomain:
-            data = QByteArray::fromHex(pDataEdit->text().toAscii());
+            data = QByteArray::fromHex(pDataEdit->text().toLatin1());
             break;
 
         default:

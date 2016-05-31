@@ -8,7 +8,7 @@ The file contains the definitions for the NMT command dialog
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2015, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -42,6 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <oplk/oplk.h>
+
 #include <QDialog>
 
 //------------------------------------------------------------------------------
@@ -51,10 +52,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // class definitions
 //------------------------------------------------------------------------------
-class QLabel;
 class QLineEdit;
-class QPushButton;
-
 
 //------------------------------------------------------------------------------
 /**

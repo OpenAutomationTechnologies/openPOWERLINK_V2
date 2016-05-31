@@ -7,7 +7,7 @@
 This file contains the definitions of the openPOWERLINK API class.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -40,17 +40,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplk.h>
+#include <QObject>
+#include <QString>
 
-#include "ProcessThread.h"
-#include "DataInOutThread.h"
+#include <oplk/oplk.h>
 
 //------------------------------------------------------------------------------
 // class declarations
 //------------------------------------------------------------------------------
-class MainWindow;
 class QWidget;
 
+class MainWindow;
+class ProcessThread;
+class DataInOutThread;
 
 //------------------------------------------------------------------------------
 /**
@@ -69,8 +71,8 @@ public:
     static UINT defaultNodeId();
 
 signals:
-    void              userDefEvent(void* pUserArg_p);
-    void              sdoFinished(tSdoComFinished sdoInfo_p);
+    void userDefEvent(void* pUserArg_p);
+    void sdoFinished(tSdoComFinished sdoInfo_p);
 
 private:
     tOplkApiInitParam   initParam;
@@ -80,4 +82,3 @@ private:
 };
 
 #endif /*_INC_Api_H_*/
-

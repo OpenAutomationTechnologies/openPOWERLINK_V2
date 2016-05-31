@@ -9,7 +9,7 @@ The file contains the implementation of the LED widget class.
 \ingroup module_demo_mn_qt
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -39,14 +39,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QToolButton>
-#include <QPalette>
-#include <QColor>
-#include <QLabel>
+#include <Leds.h>
 
-#include "Leds.h"
+#include <QLabel>
+#include <QPixmap>
+#include <QHBoxLayout>
+
 
 //============================================================================//
 //            P U B L I C    M E M B E R    F U N C T I O N S                 //
@@ -99,7 +97,7 @@ setLeds() sets the LEDs according to the data value.
 \param  dataIn_p        Data value to show
 */
 //------------------------------------------------------------------------------
-void Leds::setLeds(UINT dataIn_p)
+void Leds::setLeds(unsigned int dataIn_p)
 {
     int nIdx;
 
@@ -125,4 +123,3 @@ void Leds::disableLeds(void)
         ppLedLabels[nIdx]->setPixmap(*pNoLed);
     }
 }
-

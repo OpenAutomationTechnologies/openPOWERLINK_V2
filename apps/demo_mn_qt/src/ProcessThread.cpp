@@ -7,7 +7,7 @@
 This file contains the implementation of the ProcessThread class.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -37,16 +37,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <QWidget>
-#include <QThread>
-#include <QString>
-#include <QMutex>
-#include <QWaitCondition>
-#include <QDateTime>
-
-#include <MainWindow.h>
+#include <QtGui>
 #include <ProcessThread.h>
-#include <console/console.h>
+#include <MainWindow.h>
+#include <EventLog.h>
+
+#include <QWidget>
+#include <QDateTime>
 
 #include <oplk/debugstr.h>
 
@@ -822,4 +819,3 @@ tOplkError ProcessThread::setDefaultNodeAssignment(void)
 
     return ret;
 }
-
