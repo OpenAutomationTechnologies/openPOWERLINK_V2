@@ -2,7 +2,7 @@
 #
 # Windows definitions for demo_mn_qt application
 #
-# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -55,8 +55,8 @@ SET(ARCH_LIBRARIES ${ARCH_LIBRARIES} wpcap iphlpapi)
 
 ################################################################################
 # Set architecture specific installation files
-IF (DEFINED OPLKDLL)
-    IF(NOT (${OPLKDLL} STREQUAL "OPLKDLL-NOTFOUND"))
+IF(DEFINED OPLKDLL)
+    IF(NOT(${OPLKDLL} STREQUAL "OPLKDLL-NOTFOUND"))
         INSTALL(FILES ${OPLKDLL}
                 DESTINATION ${CMAKE_PROJECT_NAME}
                 CONFIGURATIONS "Release"
@@ -64,8 +64,8 @@ IF (DEFINED OPLKDLL)
     ENDIF()
 ENDIF()
 
-IF (DEFINED OPLKDLL_DEBUG)
-    IF(NOT (${OPLKDLL_DEBUG} STREQUAL "OPLKDLL_DEBUG-NOTFOUND"))
+IF(DEFINED OPLKDLL_DEBUG)
+    IF(NOT(${OPLKDLL_DEBUG} STREQUAL "OPLKDLL_DEBUG-NOTFOUND"))
         INSTALL(FILES ${OPLKDLL_DEBUG}
                 DESTINATION ${CMAKE_PROJECT_NAME}
                 CONFIGURATIONS "Debug"
@@ -73,11 +73,37 @@ IF (DEFINED OPLKDLL_DEBUG)
     ENDIF()
 ENDIF()
 
-INSTALL(FILES ${QT_BINARY_DIR}/QtCore4.dll ${QT_BINARY_DIR}/QtGui4.dll
+GET_TARGET_PROPERTY(QtCore_location Qt5::Core LOCATION)
+GET_FILENAME_COMPONENT(_qtLocation "${QtCore_location}" DIRECTORY)
+
+INSTALL(FILES ${_qtLocation}/Qt5Core.dll
+              ${_qtLocation}/Qt5Gui.dll
+              ${_qtLocation}/Qt5Widgets.dll
+              ${_qtLocation}/icudt54.dll
+              ${_qtLocation}/icuin54.dll
+              ${_qtLocation}/icuuc54.dll
+              ${_qtLocation}/libEGL.dll
+              ${_qtLocation}/libGLESv2.dll
         DESTINATION ${CMAKE_PROJECT_NAME}
         CONFIGURATIONS "Release"
         )
-INSTALL(FILES ${QT_BINARY_DIR}/QtCored4.dll ${QT_BINARY_DIR}/QtGuid4.dll
+INSTALL(FILES ${_qtLocation}/../plugins/platforms/qwindows.dll
+        DESTINATION ${CMAKE_PROJECT_NAME}/platforms
+        CONFIGURATIONS "Release"
+        )
+
+INSTALL(FILES ${_qtLocation}/Qt5Cored.dll
+              ${_qtLocation}/Qt5Guid.dll
+              ${_qtLocation}/Qt5Widgetsd.dll
+              ${_qtLocation}/icudt54.dll
+              ${_qtLocation}/icuin54.dll
+              ${_qtLocation}/icuuc54.dll
+              ${_qtLocation}/libEGLd.dll
+              ${_qtLocation}/libGLESv2d.dll
         DESTINATION ${CMAKE_PROJECT_NAME}
+        CONFIGURATIONS "Debug"
+        )
+INSTALL(FILES ${_qtLocation}/../plugins/platforms/qwindowsd.dll
+        DESTINATION ${CMAKE_PROJECT_NAME}/platforms
         CONFIGURATIONS "Debug"
         )

@@ -30,13 +30,12 @@
 
 ################################################################################
 # Setup project and generic options
-
 PROJECT(demo_mn_qt C CXX)
 MESSAGE(STATUS "Configuring demo_mn_qt")
 
-CMAKE_MINIMUM_REQUIRED (VERSION 2.8.7)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.11)
 
-INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/../common/cmake/options.cmake)
+INCLUDE(../common/cmake/options.cmake)
 
 OPTION(CFG_IP_STACK "Is an IP stack available (support of SDO/UDP)" OFF)
 OPTION(CFG_INCLUDE_MN_REDUNDANCY "Use MN redundancy functions (if compiled into the libraries)" OFF)
@@ -46,51 +45,57 @@ OPTION(CFG_INCLUDE_MN_REDUNDANCY "Use MN redundancy functions (if compiled into 
 
 SET(OBJDICT CiA302-4_MN)            # Set object dictionary to use
 FIND_OPLK_LIBRARY("mn")             # Find suitable openPOWERLINK library
-FIND_PACKAGE(Qt4 REQUIRED)          # Find Qt4
+
+FIND_PACKAGE(Qt5Core REQUIRED)      # Find Qt5
+FIND_PACKAGE(Qt5Gui REQUIRED)
+FIND_PACKAGE(Qt5Widgets REQUIRED)
+
+# Instruct CMake to run moc automatically when needed.
+SET(CMAKE_AUTOMOC ON)
 
 SET(CFG_DEMO_PROJECT "Demo_3CN" CACHE STRING
         "Valid projects are Demo_3CN, Demo_RMN_3CN")
 SET_PROPERTY(CACHE CFG_DEMO_PROJECT PROPERTY STRINGS Demo_3CN Demo_RMN_3CN)
 
 # Set generic sources and include directories for this demo
-SET (DEMO_SOURCES
-     ${DEMO_SOURCE_DIR}/main.cpp
-     ${DEMO_SOURCE_DIR}/MainWindow.cpp
-     ${DEMO_SOURCE_DIR}/SdoDialog.cpp
-     ${DEMO_SOURCE_DIR}/Api.cpp
-     ${DEMO_SOURCE_DIR}/CnState.cpp
-     ${DEMO_SOURCE_DIR}/DataInOutThread.cpp
-     ${DEMO_SOURCE_DIR}/Input.cpp
-     ${DEMO_SOURCE_DIR}/Output.cpp
-     ${DEMO_SOURCE_DIR}/ProcessThread.cpp
-     ${DEMO_SOURCE_DIR}/State.cpp
-     ${DEMO_SOURCE_DIR}/Leds.cpp
-     ${DEMO_SOURCE_DIR}/NodeState.cpp
-     ${DEMO_SOURCE_DIR}/NmtCommandDialog.cpp
-     ${DEMO_SOURCE_DIR}/EventLog.cpp
-     ${COMMON_SOURCE_DIR}/obdcreate/obdcreate.c
-     ${OBJDICT_DIR}/${OBJDICT}/obdpi.c
-     ${CONTRIB_SOURCE_DIR}/console/printlog.c
-     ${COMMON_SOURCE_DIR}/eventlog/eventlogstring.c
-     )
+SET(DEMO_SOURCES
+    ${DEMO_SOURCE_DIR}/main.cpp
+    ${DEMO_SOURCE_DIR}/MainWindow.cpp
+    ${DEMO_SOURCE_DIR}/SdoDialog.cpp
+    ${DEMO_SOURCE_DIR}/Api.cpp
+    ${DEMO_SOURCE_DIR}/CnState.cpp
+    ${DEMO_SOURCE_DIR}/DataInOutThread.cpp
+    ${DEMO_SOURCE_DIR}/Input.cpp
+    ${DEMO_SOURCE_DIR}/Output.cpp
+    ${DEMO_SOURCE_DIR}/ProcessThread.cpp
+    ${DEMO_SOURCE_DIR}/State.cpp
+    ${DEMO_SOURCE_DIR}/Leds.cpp
+    ${DEMO_SOURCE_DIR}/NodeState.cpp
+    ${DEMO_SOURCE_DIR}/NmtCommandDialog.cpp
+    ${DEMO_SOURCE_DIR}/EventLog.cpp
+    ${COMMON_SOURCE_DIR}/obdcreate/obdcreate.c
+    ${OBJDICT_DIR}/${OBJDICT}/obdpi.c
+    ${CONTRIB_SOURCE_DIR}/console/printlog.c
+    ${COMMON_SOURCE_DIR}/eventlog/eventlogstring.c
+    )
 
-SET (DEMO_RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/resources/resources.qrc)
+SET(DEMO_RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/resources/resources.qrc)
 
-SET (DEMO_HEADERS
-     ${DEMO_INCLUDE_DIR}/Api.h
-     ${DEMO_INCLUDE_DIR}/CnState.h
-     ${DEMO_INCLUDE_DIR}/DataInOutThread.h
-     ${DEMO_INCLUDE_DIR}/Input.h
-     ${DEMO_INCLUDE_DIR}/Output.h
-     ${DEMO_INCLUDE_DIR}/ProcessThread.h
-     ${DEMO_INCLUDE_DIR}/State.h
-     ${DEMO_INCLUDE_DIR}/Leds.h
-     ${DEMO_INCLUDE_DIR}/MainWindow.h
-     ${DEMO_INCLUDE_DIR}/SdoDialog.h
-     ${DEMO_INCLUDE_DIR}/NodeState.h
-     ${DEMO_INCLUDE_DIR}/NmtCommandDialog.h
-     ${DEMO_INCLUDE_DIR}/EventLog.h
-     )
+SET(DEMO_HEADERS
+    ${DEMO_INCLUDE_DIR}/Api.h
+    ${DEMO_INCLUDE_DIR}/CnState.h
+    ${DEMO_INCLUDE_DIR}/DataInOutThread.h
+    ${DEMO_INCLUDE_DIR}/Input.h
+    ${DEMO_INCLUDE_DIR}/Output.h
+    ${DEMO_INCLUDE_DIR}/ProcessThread.h
+    ${DEMO_INCLUDE_DIR}/State.h
+    ${DEMO_INCLUDE_DIR}/Leds.h
+    ${DEMO_INCLUDE_DIR}/MainWindow.h
+    ${DEMO_INCLUDE_DIR}/SdoDialog.h
+    ${DEMO_INCLUDE_DIR}/NodeState.h
+    ${DEMO_INCLUDE_DIR}/NmtCommandDialog.h
+    ${DEMO_INCLUDE_DIR}/EventLog.h
+    )
 
 INCLUDE_DIRECTORIES(
     ${DEMO_INCLUDE_DIR}
@@ -120,50 +125,48 @@ ENDIF(CFG_INCLUDE_MN_REDUNDANCY)
 ################################################################################
 # Setup compile definitions depending on configuration
 
-IF (CFG_KERNEL_STACK_DIRECTLINK OR CFG_KERNEL_STACK_USERSPACE_DAEMON)
-    SET (DEMO_SOURCES ${DEMO_SOURCES} ${DEMO_SOURCE_DIR}/InterfaceSelectDialog.cpp)
-    SET (DEMO_HEADERS ${DEMO_HEADERS} ${DEMO_INCLUDE_DIR}/InterfaceSelectDialog.h)
-    ADD_DEFINITIONS (-DCONFIG_USE_PCAP)
-ENDIF (CFG_KERNEL_STACK_DIRECTLINK OR CFG_KERNEL_STACK_USERSPACE_DAEMON)
+IF(CFG_KERNEL_STACK_DIRECTLINK OR CFG_KERNEL_STACK_USERSPACE_DAEMON)
+    SET(DEMO_SOURCES ${DEMO_SOURCES} ${DEMO_SOURCE_DIR}/InterfaceSelectDialog.cpp)
+    SET(DEMO_HEADERS ${DEMO_HEADERS} ${DEMO_INCLUDE_DIR}/InterfaceSelectDialog.h)
+    ADD_DEFINITIONS(-DCONFIG_USE_PCAP)
+ENDIF(CFG_KERNEL_STACK_DIRECTLINK OR CFG_KERNEL_STACK_USERSPACE_DAEMON)
 
 # Setup compile definitions depending on configuration
-IF (CFG_KERNEL_STACK_DIRECTLINK)
+IF(CFG_KERNEL_STACK_DIRECTLINK)
     UNSET (CFG_DEMO_MN_QT_USE_SYNCTHREAD CACHE)
     ADD_DEFINITIONS(-DCONFIG_KERNELSTACK_DIRECTLINK)
-ELSE (CFG_KERNEL_STACK_DIRECTLINK)
+ELSE(CFG_KERNEL_STACK_DIRECTLINK)
     OPTION (CFG_DEMO_MN_QT_USE_SYNCTHREAD "Create separate thread for syncronous data exchange" ON)
-    IF (CFG_DEMO_MN_QT_USE_SYNCTHREAD)
+    IF(CFG_DEMO_MN_QT_USE_SYNCTHREAD)
         ADD_DEFINITIONS(-DCONFIG_USE_SYNCTHREAD)
-    ENDIF (CFG_DEMO_MN_QT_USE_SYNCTHREAD)
-ENDIF (CFG_KERNEL_STACK_DIRECTLINK)
+    ENDIF(CFG_DEMO_MN_QT_USE_SYNCTHREAD)
+ENDIF(CFG_KERNEL_STACK_DIRECTLINK)
 
 ################################################################################
 # Setup the architecture specific definitions
 
 IF(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    include(linux.cmake)
+    INCLUDE(linux.cmake)
 ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    include (windows.cmake)
+    INCLUDE(windows.cmake)
 ELSE()
     MESSAGE(FATAL_ERROR "System ${CMAKE_SYSTEM_NAME} is not supported!")
 ENDIF()
 
-INCLUDE (${QT_USE_FILE})
-ADD_DEFINITIONS (${QT_DEFINITIONS})
+ADD_DEFINITIONS(${QT_DEFINITIONS})
 
 ################################################################################
 #
 
-# Setup QT4 Wrappers
-QT4_WRAP_CPP (DEMO_HEADERS_MOC ${DEMO_HEADERS})
-QT4_WRAP_UI (DEMO_FORMS_HEADERS ${DEMO_FORMS})
-QT4_ADD_RESOURCES (DEMO_RESOURCES_RCC ${DEMO_RESOURCES})
+
+# Setup QT5 Wrappers
+QT5_ADD_RESOURCES(DEMO_RESOURCES_RCC ${DEMO_RESOURCES})
 
 ################################################################################
 # Group Source Files
 
 SOURCE_GROUP("Source Files" FILES ${DEMO_SOURCES})
-SOURCE_GROUP("QT-generated Files" FILES ${DEMO_HEADERS_MOC} ${DEMO_RESOURCES_RCC})
+SOURCE_GROUP("QT-generated Files" FILES ${DEMO_RESOURCES_RCC})
 SOURCE_GROUP("Header Files" FILES ${DEMO_HEADERS})
 SOURCE_GROUP("openPOWERLINK Header Files" FILES ${OPLK_HEADERS})
 SOURCE_GROUP("Object Dictionary" FILES
@@ -176,8 +179,13 @@ SOURCE_GROUP("Object Dictionary" FILES
 
 ################################################################################
 # Set the executable
-ADD_EXECUTABLE (demo_mn_qt ${DEMO_SOURCES} ${DEMO_ARCH_SOURCES} ${DEMO_HEADERS} ${DEMO_HEADERS_MOC}
-                           ${DEMO_FORMS_HEADERS} ${DEMO_RESOURCES_RCC} ${CMAKE_CURRENT_BINARY_DIR}/mnobd.cdc)
+ADD_EXECUTABLE(demo_mn_qt ${DEMO_SOURCES}
+                          ${DEMO_ARCH_SOURCES}
+                          ${DEMO_HEADERS}
+                          ${DEMO_RESOURCES_RCC}
+                          ${CMAKE_CURRENT_BINARY_DIR}/mnobd.cdc
+              )
+
 SET_PROPERTY(TARGET demo_mn_qt
              PROPERTY COMPILE_DEFINITIONS_DEBUG DEBUG;DEF_DEBUG_LVL=${CFG_DEBUG_LVL})
 
@@ -189,12 +197,16 @@ ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/mnobd.cdc
 
 ################################################################################
 # Libraries to link
-
 OPLK_LINK_LIBRARIES(demo_mn_qt)
-TARGET_LINK_LIBRARIES(demo_mn_qt ${ARCH_LIBRARIES} ${QT_LIBRARIES})
+TARGET_LINK_LIBRARIES(demo_mn_qt ${ARCH_LIBRARIES} Qt5::Core Qt5::Widgets Qt5::Gui)
 
 ################################################################################
 # Installation rules
 
-INSTALL(TARGETS demo_mn_qt RUNTIME DESTINATION ${PROJECT_NAME})
-INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/mnobd.cdc DESTINATION ${PROJECT_NAME})
+INSTALL(TARGETS demo_mn_qt
+        RUNTIME DESTINATION ${PROJECT_NAME}
+        ARCHIVE DESTINATION ${PROJECT_NAME}
+        )
+INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/mnobd.cdc
+        DESTINATION ${PROJECT_NAME}
+        )

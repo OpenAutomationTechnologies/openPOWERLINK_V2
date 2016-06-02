@@ -57,10 +57,15 @@ version V2.8.4 or higher is required.
 For a detailed description of CMake look at the
 [cmake section](\ref sect_build_cmake).
 
-### QT4 Development Tools
+### QT5 Development Tools
 
-If you want to build the QT demo application the QT4 development tools must
-be installed on the system (<http://qt.digia.com/>).
+If you want to build the QT demo application the QT5 development tools must
+be installed on the system (<http://www.qt.io/>).
+
+__NOTE:__ In order to automatically deploy the QT dependencies in Windows,
+          the CMake install target contains a hard-coded list of dll files.
+          This list is only verified with QT 5.5.1 and might need adaptation
+          for other QT 5 versions.
 
 ### openCONFIGURATOR
 

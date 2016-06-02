@@ -104,10 +104,10 @@ For a detailed description of CMake look at the
 In order to use the user space POWERLINK stack the libpcap library is needed
 to access the Ethernet interface.
 
-### QT4 Development Tools
+### QT5 Development Tools
 
-If you want to build the QT demo application the QT4 development tools must
-be installed on the system (<http://qt.digia.com/>).
+If you want to build the QT demo application the QT5 development tools must
+be installed on the system (<http://www.qt.io/>).
 
 ### openCONFIGURATOR
 

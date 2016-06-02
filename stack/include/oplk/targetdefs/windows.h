@@ -9,7 +9,7 @@ This file contains target specific definitions for Windows.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Kalycito Infotech Private Limited
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -46,8 +46,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdio.h>
 #include <string.h>
 
-#define _WIN32_WINNT 0x0501     // Windows version must be at least Windows XP
-#define WIN32_LEAN_AND_MEAN     // Do not use extended Win32 API functions
+// Windows version must be at least Windows XP
+#if (defined(_WIN32_WINNT) && (_WIN32_WINNT < 0x0501))
+    #undef _WIN32_WINNT
+#endif
+#if !defined(_WIN32_WINNT)
+    #define _WIN32_WINNT 0x0501
+#endif
+
+// Do not use extended Win32 API functions
+#if !defined(WIN32_LEAN_AND_MEAN)
+    #define WIN32_LEAN_AND_MEAN
+#endif
 #include <Windows.h>
 
 #include <oplk/basictypes.h>
