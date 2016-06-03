@@ -90,3 +90,13 @@ non-POWERLINK communication through the virtual Ethernet interface.
 ## Workaround
 On systems which do not require virtual Ethernet with the Windows PCIe design,
 the issue can be avoided by disabling virtual Ethernet interface (`CONFIG_INCLUDE_VETH`).
+
+# Avnet LX150T MN design initilization {#sect_known_issues_avent-lx150t_initilization}
+
+## Description
+The Avnet LX150T MN design fails to initialize randomly reporting error with
+the host interface initialization.
+
+Problem arises due to unknown bug in the Xilinx ISE 14.7 which results in inconsistent
+placement and routing on modifications to any IP core parameters such as base address,
+and internal register configurations.
