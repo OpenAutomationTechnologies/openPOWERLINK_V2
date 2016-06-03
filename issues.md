@@ -64,3 +64,39 @@ of the other devices such as USB hub controller.
 
 ## Workaround
 The warning can be ignored as it does not affect the functionality and performance.
+
+# MN demo application compilation on 32 bit Windows with NDIS drivers {#sect_know_issues_win32_compilation}
+
+## Description
+The MN demo application (demo_mn_console) fails to compile on a 32 bit Windows system while using the
+`Kernel stack on PCIe card` or `Windows Kernel Module` [stack libraries] (\ref sect_windows_components_libs)
+with following error
+
+        > error LNK1120: 1 unresolved externals
+        > error LNK2019: unresolved external symbol _CancelIoEx referenced in function _system_stopSyncThread
+        > (apps\demo_mn_console\build\windows\system-windows.obj) demo_mn_console
+        > warning C4013: CancelIoEx undefined; assuming extern returning int (apps\common\src\system\system-windows.c) demo_mn_console
+
+The error is produced due to missing compiler options to specify the required 32 bit
+version of the system library which will be resolved in future release.
+
+# Windows PCIe queue corruption with vitual Ethernet {#sect_know_issues_winpcie_veth}
+
+## Description
+The openPOWERLINK solution using Windows PCIe design with vitual Ethernet interface enabled, may
+lead to issues with the queue corruption. The queue corruption is noticed when there is excessive
+non-POWERLINK communication through the virtual Ethernet interface.
+
+## Workaround
+On systems which do not require virtual Ethernet with the Windows PCIe design,
+the issue can be avoided by disabling virtual Ethernet interface (`CONFIG_INCLUDE_VETH`).
+
+# Avnet LX150T MN design initilization {#sect_known_issues_avent-lx150t_initilization}
+
+## Description
+The Avnet LX150T MN design fails to initialize randomly reporting error with
+the host interface initialization.
+
+Problem arises due to unknown bug in the Xilinx ISE 14.7 which results in inconsistent
+placement and routing on modifications to any IP core parameters such as base address,
+and internal register configurations.
