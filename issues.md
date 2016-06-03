@@ -64,3 +64,18 @@ of the other devices such as USB hub controller.
 
 ## Workaround
 The warning can be ignored as it does not affect the functionality and performance.
+
+# MN demo application compilation on 32 bit Windows with NDIS drivers {#sect_know_issues_win32_compilation}
+
+## Description
+The MN demo application (demo_mn_console) fails to compile on a 32 bit Windows system while using the
+`Kernel stack on PCIe card` or `Windows Kernel Module` [stack libraries] (\ref sect_windows_components_libs)
+with following error
+
+        > error LNK1120: 1 unresolved externals
+        > error LNK2019: unresolved external symbol _CancelIoEx referenced in function _system_stopSyncThread
+        > (apps\demo_mn_console\build\windows\system-windows.obj) demo_mn_console
+        > warning C4013: CancelIoEx undefined; assuming extern returning int (apps\common\src\system\system-windows.c) demo_mn_console
+
+The error is produced due to missing compiler options to specify the required 32 bit
+version of the system library which will be resolved in future release.
