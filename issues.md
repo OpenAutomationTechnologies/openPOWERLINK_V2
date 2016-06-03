@@ -79,3 +79,14 @@ with following error
 
 The error is produced due to missing compiler options to specify the required 32 bit
 version of the system library which will be resolved in future release.
+
+# Windows PCIe queue corruption with vitual Ethernet {#sect_know_issues_winpcie_veth}
+
+## Description
+The openPOWERLINK solution using Windows PCIe design with vitual Ethernet interface enabled, may
+lead to issues with the queue corruption. The queue corruption is noticed when there is excessive
+non-POWERLINK communication through the virtual Ethernet interface.
+
+## Workaround
+On systems which do not require virtual Ethernet with the Windows PCIe design,
+the issue can be avoided by disabling virtual Ethernet interface (`CONFIG_INCLUDE_VETH`).
