@@ -162,11 +162,11 @@ tOplkError eventucal_init(void)
     if (pthread_create(&instance_l.kernelEventThreadId, NULL, k2uEventFetchThread, NULL) != 0)
         goto Exit;
 
-    schedParam.__sched_priority = KERNEL_EVENT_FETCH_THREAD_PRIORITY;
+    schedParam.sched_priority = KERNEL_EVENT_FETCH_THREAD_PRIORITY;
     if (pthread_setschedparam(instance_l.kernelEventThreadId, SCHED_FIFO, &schedParam) != 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s(): couldn't set K2U thread scheduling parameters! %d\n",
-                              __func__, schedParam.__sched_priority);
+                              __func__, schedParam.sched_priority);
     }
 
 #if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 12)
@@ -177,11 +177,11 @@ tOplkError eventucal_init(void)
     if (pthread_create(&instance_l.processEventThreadId, NULL, eventProcessThread, NULL) != 0)
         goto Exit;
 
-    schedParam.__sched_priority = EVENT_PROCESS_THREAD_PRIORITY;
+    schedParam.sched_priority = EVENT_PROCESS_THREAD_PRIORITY;
     if (pthread_setschedparam(instance_l.processEventThreadId, SCHED_FIFO, &schedParam) != 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s(): couldn't set event process thread scheduling parameters! %d\n",
-                              __func__, schedParam.__sched_priority);
+                              __func__, schedParam.sched_priority);
     }
 
 #if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 12)
