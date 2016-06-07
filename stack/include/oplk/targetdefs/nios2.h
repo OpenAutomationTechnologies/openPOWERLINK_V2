@@ -122,5 +122,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define OPLK_MUTEX_T    alt_u8
 
+#ifdef NIOS2_EIC_PRESENT
+#if defined(__ALTERA_VIC)
+#include <altera_vic_regs.h>
+#endif
+#endif
+
 #endif /* _INC_targetdefs_nios2_H_ */
 
