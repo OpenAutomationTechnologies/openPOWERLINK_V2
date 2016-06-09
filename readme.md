@@ -76,6 +76,12 @@ openPOWERLINK can be downloaded from its SourceForge project site:
 (c) Kalycito Infotech Private Limited,
     <http://www.kalycito.com>
 
+(c) Open Wide Ingenierie,
+    a Smile group company,
+    20 rue des Jardins,
+    92600 Asnières-sur-Seine,
+    <http://www.smile.fr/>
+    <http://ingenierie.openwide.fr>
 
 ## Links and References
 
