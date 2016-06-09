@@ -1586,6 +1586,10 @@ static tOplkError readByIdxInit(tSdoObdConHdl* pSdoHdl_p)
                                 pSdoHdl_p->subIndex,
                                 pSdoHdl_p->pDstData,
                                 (tObdSize*)&pSdoHdl_p->dataSize);
+        // update final transfer size, since obdu_getDataSize() does not give
+        // the real transfer size for certain object types (e.g. VString)
+        pSdoHdl_p->totalPendSize = pSdoHdl_p->dataSize;
+
         if (ret != kErrorOk)
             return ret;
     }
