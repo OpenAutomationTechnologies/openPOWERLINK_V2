@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <openCONFIGURATORProject xmlns="http://sourceforge.net/projects/openconf/configuration" xmlns:oc="http://sourceforge.net/projects/openconf/configuration" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://sourceforge.net/projects/openconf/configuration openCONFIGURATOR.xsd">
- <Generator vendor="Kalycito Infotech Private Limited &amp; Bernecker + Rainer Industrie Elektronik Ges.m.b.H." toolName="openCONFIGURATOR" toolVersion="1.4.1" createdOn="2015-02-17T16:36:58" modifiedOn="2015-02-19T11:16:17"/>
+ <Generator vendor="Kalycito Infotech Private Limited &amp; Bernecker + Rainer Industrie Elektronik Ges.m.b.H." toolName="openCONFIGURATOR" toolVersion="1.4.1" createdOn="2015-02-17T16:36:58" modifiedOn="2016-06-10T19:24:07"/>
  <IDEConfiguration activeViewSetting="BASIC">
   <ViewSettings type="BASIC">
    <Setting name="default" value="SIMPLE"/>
@@ -23,18 +23,21 @@
     <ForcedObjects>
      <Object index="1F98" subindex="04"/>
      <Object index="1F98" subindex="05"/>
+     <Object index="1F8D" subindex="F0"/>
     </ForcedObjects>
    </CN>
    <CN nodeID="32" name="CN_2" pathToXDC="deviceConfiguration/00000000_POWERLINK_CiA401_CN_32.xdc">
     <ForcedObjects>
      <Object index="1F98" subindex="04"/>
      <Object index="1F98" subindex="05"/>
+     <Object index="1F8D" subindex="F0"/>
     </ForcedObjects>
    </CN>
    <CN nodeID="110" name="CN_3" pathToXDC="deviceConfiguration/00000000_POWERLINK_CiA401_CN_110.xdc">
     <ForcedObjects>
      <Object index="1F98" subindex="04"/>
      <Object index="1F98" subindex="05"/>
+     <Object index="1F8D" subindex="F0"/>
     </ForcedObjects>
    </CN>
   </NodeCollection>
