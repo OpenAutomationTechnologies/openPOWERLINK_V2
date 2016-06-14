@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   openmac-nios2.h
+\file   target/openmac-microblaze.h
 
 \brief  Definition for openMAC drivers on Microblaze
 
@@ -11,7 +11,7 @@ specific to Microblaze targets.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -36,8 +36,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-#ifndef _INC_openmac_microblaze_H_
-#define _INC_openmac_microblaze_H_
+#ifndef _INC_target_openmac_microblaze_H_
+#define _INC_target_openmac_microblaze_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -84,7 +84,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -94,4 +93,4 @@ extern "C"
 }
 #endif
 
-#endif /* _INC_openmac_microblaze_H_ */
+#endif /* _INC_target_openmac_microblaze_H_ */
