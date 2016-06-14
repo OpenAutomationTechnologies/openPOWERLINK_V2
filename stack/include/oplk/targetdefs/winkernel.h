@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   targetdefs/winkernel.h
+\file   oplk/targetdefs/winkernel.h
 
 \brief  Target definitions for Windows kernel
 
@@ -9,6 +9,7 @@ This file contains target specific definitions for Windows kernel.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -33,9 +34,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_targetdefs_winkernel_H_
-#define _INC_targetdefs_winkernel_H_
+#ifndef _INC_oplk_targetdefs_winkernel_H_
+#define _INC_oplk_targetdefs_winkernel_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -82,6 +82,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #undef FALSE
 #endif
 #define FALSE 0
+
 #ifdef TRUE
 #undef TRUE
 #endif
@@ -106,20 +107,20 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OPLK_DCACHE_INVALIDATE(addr, len)   ((void)0)
 
 // Target memory barrier function
-#define OPLK_MEMBAR()                 KeMemoryBarrier()
+#define OPLK_MEMBAR()               KeMemoryBarrier()
 
 // Target lock
 #define OPLK_LOCK_T                 UINT8
 
-#define OPLK_ATOMIC_T    ULONG
+#define OPLK_ATOMIC_T               ULONG
 #define OPLK_ATOMIC_EXCHANGE(address, newval, oldval) \
             oldval = InterlockedExchange(address, newval);
 
-#define OPLK_MEM_TAG                  'negO'
-#define OPLK_MALLOC(siz)              ExAllocatePool(NonPagedPool, (siz))
-#define OPLK_FREE(ptr)                ExFreePool(ptr)
-#define OPLK_MEMSET(dst, val, siz)    NdisFillMemory(dst, siz, val)
+#define OPLK_MEM_TAG                'negO'
+#define OPLK_MALLOC(siz)            ExAllocatePool(NonPagedPool, (siz))
+#define OPLK_FREE(ptr)              ExFreePool(ptr)
+#define OPLK_MEMSET(dst, val, siz)  NdisFillMemory(dst, siz, val)
 
-#define OPLK_MUTEX_T                  HANDLE
+#define OPLK_MUTEX_T                HANDLE
 
-#endif /* _INC_targetdefs_winkernel_H_ */
+#endif /* _INC_oplk_targetdefs_winkernel_H_ */

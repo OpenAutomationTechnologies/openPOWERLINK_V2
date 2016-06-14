@@ -1,15 +1,15 @@
 /**
 ********************************************************************************
-\file   targetdefs/linux.h
+\file   oplk/targetdefs/linux.h
 
-\brief  Target defintions for Linux
+\brief  Target definitions for Linux
 
 This file contains target definitions for Linux systems
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Kalycito Infotech Private Limited
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -35,9 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_targetdefs_linux_H_
-#define _INC_targetdefs_linux_H_
+#ifndef _INC_oplk_targetdefs_linux_H_
+#define _INC_oplk_targetdefs_linux_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -47,7 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdio.h>
 #include <string.h>
 #include <semaphore.h>
-#else
+#else /* __KERNEL__ */
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/init.h>
@@ -55,7 +54,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <linux/major.h>
 #include <linux/version.h>
 #include <linux/slab.h>
-#endif
+#endif /* __KERNEL__ */
 
 #include <oplk/basictypes.h>
 
@@ -77,19 +76,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define INLINE
 
-#define OPLK_FILE_HANDLE        int
+#define OPLK_FILE_HANDLE            int
 
-#define UNUSED_PARAMETER(par)   (void)par
+#define UNUSED_PARAMETER(par)       (void)par
 
 #ifdef __KERNEL__
-#define OPLK_MALLOC(siz)        kmalloc(siz, GFP_KERNEL)
-#define OPLK_FREE(ptr)          kfree(ptr)
+#define OPLK_MALLOC(siz)            kmalloc(siz, GFP_KERNEL)
+#define OPLK_FREE(ptr)              kfree(ptr)
 #endif
 
 #ifdef __KERNEL__
-#define PRINTF(...)             printk(__VA_ARGS__)
+#define PRINTF(...)                 printk(__VA_ARGS__)
 #else
-#define PRINTF(...)             printf(__VA_ARGS__)
+#define PRINTF(...)                 printf(__VA_ARGS__)
 #endif
 
 // Target IO functions
@@ -111,8 +110,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // Target lock
 #define OPLK_LOCK_T                 UINT8
-
-#define OPLK_ATOMIC_T    UINT8
+#define OPLK_ATOMIC_T               UINT8
 
 #ifdef __LINUX_PCIE__
 #define ATOMIC_MEM_OFFSET           0x80000 // $$ Get the atomic memory base address from config header
@@ -120,16 +118,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OPLK_ATOMIC_EXCHANGE(address, newval, oldval) \
                         OPLK_IO_WR8((ULONG)address + ATOMIC_MEM_OFFSET, newval); \
                         oldval = OPLK_IO_RD8((ULONG)address + ATOMIC_MEM_OFFSET)
-#else
+#else /* __LINUX_PCIE__ */
 #define OPLK_ATOMIC_EXCHANGE(address, newval, oldval) \
     oldval = __sync_lock_test_and_set(address, newval);
-#endif
+#endif /* __LINUX_PCIE__ */
 
 #ifndef __KERNEL__
 #define OPLK_MUTEX_T                sem_t*
-#else
+#else /* __KERNEL__ */
 #define OPLK_MUTEX_T                void*
-#endif
+#endif /* __KERNEL__ */
 
-#endif /* _INC_targetdefs_linux_H_ */
-
+#endif /* _INC_oplk_targetdefs_linux_H_ */

@@ -10,7 +10,7 @@ This file contains the definitions for the DLL module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_oplk_dll_H_
 #define _INC_oplk_dll_H_
 
@@ -50,7 +49,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 #ifndef DLL_MAX_ASND_SERVICE_ID
-#define DLL_MAX_ASND_SERVICE_ID (C_DLL_MAX_ASND_SERVICE_IDS + 1)
+#define DLL_MAX_ASND_SERVICE_ID             (C_DLL_MAX_ASND_SERVICE_IDS + 1)
 #endif
 
 #define MAX_PRES_FORWARD_BUFLEN             300
@@ -200,8 +199,8 @@ typedef struct
     UINT                isochrTxMaxPayload;         ///< 0x1F98.1: IsochrTxMaxPayload_U16
     UINT                isochrRxMaxPayload;         ///< 0x1F98.2: IsochrRxMaxPayload_U16
     UINT32              presMaxLatency;             ///< 0x1F98.3: PResMaxLatency_U32 in [ns], only required for IdentRes
-    UINT                preqActPayloadLimit;        ///< 0x1F98.4: PReqActPayloadLimit_U16, required for initialisation (+24 bytes)
-    UINT                presActPayloadLimit;        ///< 0x1F98.5: PResActPayloadLimit_U16, required for initialisation of Pres frame (+24 bytes)
+    UINT                preqActPayloadLimit;        ///< 0x1F98.4: PReqActPayloadLimit_U16, required for initialization (+24 bytes)
+    UINT                presActPayloadLimit;        ///< 0x1F98.5: PResActPayloadLimit_U16, required for initialization of Pres frame (+24 bytes)
     UINT32              asndMaxLatency;             ///< 0x1F98.6: ASndMaxLatency_U32 in [ns], only required for IdentRes
     UINT                multipleCycleCnt;           ///< 0x1F98.7: MultiplCycleCnt_U8, required for error detection
     UINT                asyncMtu;                   ///< 0x1F98.8: AsyncMTU_U16, required to set up max frame size
@@ -235,7 +234,7 @@ typedef struct
     UINT32              productCode;                    ///< NMT_IdentityObject_REC.ProductCode_U32
     UINT32              revisionNumber;                 ///< NMT_IdentityObject_REC.RevisionNo_U32
     UINT32              serialNumber;                   ///< NMT_IdentityObject_REC.SerialNo_U32
-    UINT64              vendorSpecificExt1;             ///< Vendor-specific extenstion field 1
+    UINT64              vendorSpecificExt1;             ///< Vendor-specific extension field 1
     UINT32              verifyConfigurationDate;        ///< CFM_VerifyConfiguration_REC.ConfDate_U32
     UINT32              verifyConfigurationTime;        ///< CFM_VerifyConfiguration_REC.ConfTime_U32
     UINT32              applicationSwDate;              ///< PDL_LocVerApplSw_REC.ApplSwDate_U32 on programmable device or date portion of NMT_ManufactSwVers_VS on non-programmable device
@@ -244,7 +243,7 @@ typedef struct
     UINT32              subnetMask;                     ///< IP subnet mask
     UINT32              defaultGateway;                 ///< IP default gateway address
     UINT8               sHostname[32];                  ///< Hostname
-    UINT8               aVendorSpecificExt2[48];        ///< Vendor-specific extenstion field 2
+    UINT8               aVendorSpecificExt2[48];        ///< Vendor-specific extension field 2
     UINT32              padding1;                       ///< Padding variable 1
 } tDllIdentParam;
 
@@ -321,4 +320,4 @@ typedef struct
     UINT8           frameBuf[MAX_PRES_FORWARD_BUFLEN];  ///< The received PRes frame.
 } tDllEventReceivedPres;
 
-#endif  // #ifndef _INC_oplk_dll_H_
+#endif  /* _INC_oplk_dll_H_ */

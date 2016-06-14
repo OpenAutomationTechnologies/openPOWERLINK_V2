@@ -8,7 +8,7 @@ The file contains definitions used the debugging.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -34,7 +34,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_oplk_debug_H_
 #define _INC_oplk_debug_H_
 
@@ -90,127 +89,127 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //---------------------------------------------------------------------------
 
-// At microcontrollers we do reduce the memory usage by deleting DEBUG_TRACE-lines
+// At micro controllers we do reduce the memory usage by deleting DEBUG_TRACE-lines
 // (compiler does delete the lines).
 // Here the parameter 'lvl' can only be used with one debug-level.
 // Example: DEBUG_TRACE(DEBUG_LVL_ERROR, "error code %d", dwRet);
 
 #if (DEBUG_GLB_LVL & DEBUG_LVL_ALWAYS)
-#define DEBUG_LVL_ALWAYS_TRACE(...)                TRACE(__VA_ARGS__)
+#define DEBUG_LVL_ALWAYS_TRACE(...)     TRACE(__VA_ARGS__)
 #else
 #define DEBUG_LVL_ALWAYS_TRACE(...)
 #endif
 
 #if (DEBUG_GLB_LVL & DEBUG_LVL_ERROR)
-#define DEBUG_LVL_ERROR_TRACE(...)                 TRACE(__VA_ARGS__)
+#define DEBUG_LVL_ERROR_TRACE(...)      TRACE(__VA_ARGS__)
 #else
 #define DEBUG_LVL_ERROR_TRACE(...)
 #endif
 
 #if (DEBUG_GLB_LVL & DEBUG_LVL_ASSERT)
-#define DEBUG_LVL_ASSERT_TRACE(...)                TRACE(__VA_ARGS__)
+#define DEBUG_LVL_ASSERT_TRACE(...)     TRACE(__VA_ARGS__)
 #else
 #define DEBUG_LVL_ASSERT_TRACE(...)
 #endif
 
 #if (DEBUG_GLB_LVL & DEBUG_LVL_EVENTU)
-#define DEBUG_LVL_EVENTU_TRACE(...)                TRACE(__VA_ARGS__)
+#define DEBUG_LVL_EVENTU_TRACE(...)     TRACE(__VA_ARGS__)
 #else
 #define DEBUG_LVL_EVENTU_TRACE(...)
 #endif
 
 #if (DEBUG_GLB_LVL & DEBUG_LVL_EVENTK)
-#define DEBUG_LVL_EVENTK_TRACE(...)                TRACE(__VA_ARGS__)
+#define DEBUG_LVL_EVENTK_TRACE(...)     TRACE(__VA_ARGS__)
 #else
 #define DEBUG_LVL_EVENTK_TRACE(...)
 #endif
 
 #if (DEBUG_GLB_LVL & DEBUG_LVL_VETH)
-#define DEBUG_LVL_VETH_TRACE(...)                  TRACE(__VA_ARGS__)
+#define DEBUG_LVL_VETH_TRACE(...)       TRACE(__VA_ARGS__)
 #else
 #define DEBUG_LVL_VETH_TRACE(...)
 #endif
 
 #if (DEBUG_GLB_LVL & DEBUG_LVL_SDO)
-#define DEBUG_LVL_SDO_TRACE(...)                   TRACE(__VA_ARGS__)
+#define DEBUG_LVL_SDO_TRACE(...)        TRACE(__VA_ARGS__)
 #else
 #define DEBUG_LVL_SDO_TRACE(...)
 #endif
 
 #if (DEBUG_GLB_LVL & DEBUG_LVL_PDO)
-#define DEBUG_LVL_PDO_TRACE(...)                   TRACE(__VA_ARGS__)
+#define DEBUG_LVL_PDO_TRACE(...)        TRACE(__VA_ARGS__)
 #else
 #define DEBUG_LVL_PDO_TRACE(...)
 #endif
 
 #if (DEBUG_GLB_LVL & DEBUG_LVL_TIMERH)
-#define DEBUG_LVL_TIMERH_TRACE(...)                TRACE(__VA_ARGS__)
+#define DEBUG_LVL_TIMERH_TRACE(...)     TRACE(__VA_ARGS__)
 #else
 #define DEBUG_LVL_TIMERH_TRACE(...)
 #endif
 
 #if (DEBUG_GLB_LVL & DEBUG_LVL_CTRL)
-#define DEBUG_LVL_CTRL_TRACE(...)                  TRACE(__VA_ARGS__)
+#define DEBUG_LVL_CTRL_TRACE(...)       TRACE(__VA_ARGS__)
 #else
 #define DEBUG_LVL_CTRL_TRACE(...)
 #endif
 
 #if (DEBUG_GLB_LVL & DEBUG_LVL_DRVINTF)
-#define DEBUG_LVL_DRVINTF_TRACE(...)               TRACE(__VA_ARGS__)
+#define DEBUG_LVL_DRVINTF_TRACE(...)    TRACE(__VA_ARGS__)
 #else
 #define DEBUG_LVL_DRVINTF_TRACE(...)
 #endif
 
 #if (DEBUG_GLB_LVL & DEBUG_LVL_TIMERU)
-#define DEBUG_LVL_TIMERU_TRACE(...)                TRACE(__VA_ARGS__)
+#define DEBUG_LVL_TIMERU_TRACE(...)     TRACE(__VA_ARGS__)
 #else
 #define DEBUG_LVL_TIMERU_TRACE(...)
 #endif
 
 #if (DEBUG_GLB_LVL & DEBUG_LVL_CFM)
-#define DEBUG_LVL_CFM_TRACE(...)                   TRACE(__VA_ARGS__)
+#define DEBUG_LVL_CFM_TRACE(...)        TRACE(__VA_ARGS__)
 #else
 #define DEBUG_LVL_CFM_TRACE(...)
 #endif
 
 #if (DEBUG_GLB_LVL & DEBUG_LVL_NMTMN)
-#define DEBUG_LVL_NMTMN_TRACE(...)                 TRACE(__VA_ARGS__)
+#define DEBUG_LVL_NMTMN_TRACE(...)      TRACE(__VA_ARGS__)
 #else
 #define DEBUG_LVL_NMTMN_TRACE(...)
 #endif
 
 #if (DEBUG_GLB_LVL & DEBUG_LVL_NMTU)
-#define DEBUG_LVL_NMTU_TRACE(...)                  TRACE(__VA_ARGS__)
+#define DEBUG_LVL_NMTU_TRACE(...)       TRACE(__VA_ARGS__)
 #else
 #define DEBUG_LVL_NMTU_TRACE(...)
 #endif
 
 #if (DEBUG_GLB_LVL & DEBUG_LVL_NMTCN)
-#define DEBUG_LVL_NMTCN_TRACE(...)                 TRACE(__VA_ARGS__)
+#define DEBUG_LVL_NMTCN_TRACE(...)      TRACE(__VA_ARGS__)
 #else
 #define DEBUG_LVL_NMTCN_TRACE(...)
 #endif
 
 #if (DEBUG_GLB_LVL & DEBUG_LVL_NMTK)
-#define DEBUG_LVL_NMTK_TRACE(...)                  TRACE(__VA_ARGS__)
+#define DEBUG_LVL_NMTK_TRACE(...)       TRACE(__VA_ARGS__)
 #else
 #define DEBUG_LVL_NMTK_TRACE(...)
 #endif
 
 #if (DEBUG_GLB_LVL & DEBUG_LVL_OBD)
-#define DEBUG_LVL_OBD_TRACE(...)                   TRACE(__VA_ARGS__)
+#define DEBUG_LVL_OBD_TRACE(...)        TRACE(__VA_ARGS__)
 #else
 #define DEBUG_LVL_OBD_TRACE(...)
 #endif
 
 #if (DEBUG_GLB_LVL & DEBUG_LVL_DLL)
-#define DEBUG_LVL_DLL_TRACE(...)                   TRACE(__VA_ARGS__)
+#define DEBUG_LVL_DLL_TRACE(...)        TRACE(__VA_ARGS__)
 #else
 #define DEBUG_LVL_DLL_TRACE(...)
 #endif
 
 #if (DEBUG_GLB_LVL & DEBUG_LVL_EDRV)
-#define DEBUG_LVL_EDRV_TRACE(...)                  TRACE(__VA_ARGS__)
+#define DEBUG_LVL_EDRV_TRACE(...)       TRACE(__VA_ARGS__)
 #else
 #define DEBUG_LVL_EDRV_TRACE(...)
 #endif
@@ -220,11 +219,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //  definition of TRACE
 //------------------------------------------------------------------------------
 #ifndef NDEBUG
+
 #if ((TARGET_SYSTEM == _WIN32_) && defined(_KERNEL_MODE))
 #define TRACE(...)      DbgPrint(__VA_ARGS__)
-#else
+#else /* ((TARGET_SYSTEM == _WIN32_) && defined(_KERNEL_MODE)) */
 #define TRACE(...)      trace(__VA_ARGS__)
-#endif
+#endif /* ((TARGET_SYSTEM == _WIN32_) && defined(_KERNEL_MODE)) */
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -235,26 +236,25 @@ void trace(const char* fmt, ...);
 #ifdef __cplusplus
 }
 #endif
-#else
+
+#else /* NDEBUG */
 
 #define TRACE(...)
 
-#endif
+#endif /* NDEBUG */
 
 
 //------------------------------------------------------------------------------
 //  definition of ASSERT
 //------------------------------------------------------------------------------
 #ifndef ASSERT
-
-#if !defined (__linux__) && !defined (__KERNEL__)
+#if (!defined(__linux__) && !defined(__KERNEL__))
 #include <assert.h>
 #define ASSERT(p)    assert(p)
-#else
+#else /* (!defined(__linux__) && !defined(__KERNEL__)) */
 #define ASSERT(p)
-#endif
-
-#endif
+#endif /* (!defined(__linux__) && !defined(__KERNEL__)) */
+#endif /* ASSERT */
 
 
 //------------------------------------------------------------------------------
@@ -269,7 +269,7 @@ void trace(const char* fmt, ...);
         PRINTF("Assertion failed: " string);\
         for (;;);\
     }
-#else
+#else /* NDEBUG */
 #define ASSERTMSG(expr, string)
 #endif /* NDEBUG */
 #endif /* ASSERTMSG */

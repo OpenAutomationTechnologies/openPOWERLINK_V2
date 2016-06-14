@@ -9,7 +9,7 @@ object dictionary access.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_oplk_obdal_H_
 #define _INC_oplk_obdal_H_
 
@@ -60,7 +59,7 @@ This enumeration lists all valid OD abstraction layer caller modules.
 */
 typedef enum
 {
-    kObdAlOriginSdo             = 0x00,     ///< Caller of Obdal is the SDO module
+    kObdAlOriginSdo             = 0x00,     ///< Caller of obdal is the SDO module
 } eObdAlOrigin;
 
 /**
@@ -116,9 +115,5 @@ typedef struct
     tOplkError          plkError;       ///< Error signaling to and from OD abstraction layer
     tObdAlOrigin        origin;         ///< Originating module of this OD access
 } tObdAlConHdl;
-
-//------------------------------------------------------------------------------
-// function prototypes
-//------------------------------------------------------------------------------
 
 #endif /* _INC_oplk_obdal_H_ */

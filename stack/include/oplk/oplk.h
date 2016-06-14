@@ -35,7 +35,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_oplk_oplk_H_
 #define _INC_oplk_oplk_H_
 
@@ -112,7 +111,7 @@ about events concerning the entire boot-up process of the node.
 typedef struct
 {
     tNmtState                   nmtState;       ///< NMT state of the local node
-    tNmtBootEvent               bootEvent;      ///< Boot event that occured
+    tNmtBootEvent               bootEvent;      ///< Boot event that occurred
     UINT16                      errorCode;      ///< Contains an error code if bootEvent == \ref kNmtBootEventError
 } tOplkApiEventBoot;
 
@@ -397,7 +396,7 @@ The structure defines the openPOWERLINK initialization parameters. The openPOWER
 stack will be initialized with these parameters when oplk_create() is called. Most
 of the parameters will be stored in the object dictionary. Some of these objects
 are constant (read-only) objects and the initialization parameters are the only way of
-setting their values. Writeable objects could be overwritten later at the boot-up
+setting their values. Writable objects could be overwritten later at the boot-up
 process. This could be done by reading a CDC file for an MN or by configuration
 of a CN from an MN via SDO transfers.
 
@@ -458,7 +457,7 @@ typedef struct
                                                          If the standard SDO stack is used it must be initialized with 0x00.*/
     UINT32              minSyncTime;                ///< Minimum synchronization period supported by the application [us]
                                                     /**< This parameter configures the period of synchronization events triggered by the openPOWERLINK stack.
-                                                         Note that the resulting synchronization period can only be a multiple of the configured cycle lenght.
+                                                         Note that the resulting synchronization period can only be a multiple of the configured cycle length.
                                                          If this value is set to 0, no minimum synchronization period is specified. */
     tObdInitParam       obdInitParam;               ///< Initialization parameters for the object dictionary
 } tOplkApiInitParam;
@@ -581,7 +580,7 @@ OPLKDLLEXPORT OPLK_DEPRECATED tOplkError oplk_setupProcessImage(void);
 // Request forwarding of Pres frame from DLL -> API
 OPLKDLLEXPORT tOplkError oplk_triggerPresForward(UINT nodeId_p);
 
-// SDO Test Api functions
+// SDO Test API functions
 OPLKDLLEXPORT void       oplk_testSdoSetVal(tOplkApiInitParam* pInitParam_p);
 OPLKDLLEXPORT tOplkError oplk_testSdoComInit(void);
 OPLKDLLEXPORT tOplkError oplk_testSdoSeqInit(void);
@@ -604,4 +603,4 @@ OPLKDLLEXPORT tOplkError oplk_serviceExecFirmwareReconfig(BOOL fFactory_p);
 }
 #endif
 
-#endif  // #ifndef _INC_oplk_oplk_H_
+#endif  /* _INC_oplk_oplk_H_ */

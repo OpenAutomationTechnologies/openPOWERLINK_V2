@@ -35,7 +35,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_oplk_oplkdefs_H_
 #define _INC_oplk_oplkdefs_H_
 
@@ -70,7 +69,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OPLK_KERNEL_MN                                  0x00000001      ///< NMT functionality compiled in
 #define OPLK_KERNEL_ISOCHR                              0x00000002      ///< PDO module for isochronous transfers
 #define OPLK_KERNEL_PRES_CHAINING_CN                    0x00000004      ///< Feature Poll Response Chaining
-#define OPLK_KERNEL_VETH                                0x00000008      ///< Virtual ethernet module
+#define OPLK_KERNEL_VETH                                0x00000008      ///< Virtual Ethernet module
 #define OPLK_KERNEL_PRES_FORWARD                        0x00000010      ///< PRES forwarding module (used for diagnosis)
 #define OPLK_KERNEL_RMN                                 0x00000020      ///< Redundancy MN (RMN)
 #define OPLK_KERNEL_SOC_TIME_FORWARD                    0x00000040      ///< SoC time forwarding capability
@@ -107,7 +106,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define C_DLL_T_BITTIME                                 10                  ///< Transmission time per bit on 100 Mbit/s network [ns]
 #define C_DLL_T_EPL_PDO_HEADER                          10                  ///< Size of PReq and PRes POWERLINK PDO message header [Byte]
 #define C_DLL_T_ETH2_WRAPPER                            18                  ///< Size of Ethernet type II wrapper consisting of header and checksum [Byte]
-#define C_DLL_T_IFG                                     960                 ///< Ethernet Interframe Gap [ns]
+#define C_DLL_T_IFG                                     960                 ///< Ethernet inter frame gap [ns]
 #define C_DLL_T_MIN_FRAME                               5120                ///< Size of minimum Ethernet frame (without preamble) [ns]
 #define C_DLL_T_PREAMBLE                                640                 ///< Size of Ethernet frame preamble [ns]
 

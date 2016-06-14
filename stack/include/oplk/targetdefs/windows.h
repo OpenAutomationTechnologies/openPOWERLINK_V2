@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   targetdefs/windows.h
+\file   oplk/targetdefs/windows.h
 
 \brief  Target definitions for Windows
 
@@ -35,9 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_targetdefs_windows_H_
-#define _INC_targetdefs_windows_H_
+#ifndef _INC_oplk_targetdefs_windows_H_
+#define _INC_oplk_targetdefs_windows_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -48,15 +47,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // Windows version must be at least Windows XP
 #if (defined(_WIN32_WINNT) && (_WIN32_WINNT < 0x0501))
-    #undef _WIN32_WINNT
+#undef _WIN32_WINNT
 #endif
 #if !defined(_WIN32_WINNT)
-    #define _WIN32_WINNT 0x0501
+#define _WIN32_WINNT 0x0501
 #endif
 
 // Do not use extended Win32 API functions
 #if !defined(WIN32_LEAN_AND_MEAN)
-    #define WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
 #endif
 #include <Windows.h>
 
@@ -76,7 +75,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define OPLK_FILE_HANDLE        HANDLE
 
-#define UNUSED_PARAMETER(par) (void)par
+#define UNUSED_PARAMETER(par)   (void)par
 
 // QWORD will not be set for windows
 #ifndef QWORD
@@ -88,15 +87,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #undef FALSE
 #endif
 #define FALSE 0
+
 #ifdef TRUE
 #undef TRUE
 #endif
 #define TRUE 1
 
 #ifdef _CONSOLE // use standard printf in console applications
-#define PRINTF(...)                      printf(__VA_ARGS__)
+#define PRINTF(...)             printf(__VA_ARGS__)
 #else           // use trace for output in debug window in Windows applications
-#define PRINTF(...)                      TRACE(__VA_ARGS__)
+#define PRINTF(...)             TRACE(__VA_ARGS__)
 #endif
 
 #ifdef ASSERTMSG
@@ -111,9 +111,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #if defined(_DLL)
 #define OPLKDLLEXPORT extern __declspec(dllexport)
-#else
+#else /* defined(_DLL) */
 #define OPLKDLLEXPORT
-#endif
+#endif /* defined(_DLL) */
 
 // Target IO functions
 // - Write
@@ -136,19 +136,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OPLK_LOCK_T                 UINT8
 
 #ifdef CONFIG_PCIE
-#define ATOMIC_MEM_OFFSET           0x80000 //TODO@gks: Retrieve the Atomic memory base address from PCIe headers
+#define ATOMIC_MEM_OFFSET       0x80000 //TODO@gks: Retrieve the Atomic memory base address from PCIe headers
 
-#define OPLK_ATOMIC_T               UINT8
+#define OPLK_ATOMIC_T           UINT8
 #define OPLK_ATOMIC_INIT(base)
 #define OPLK_ATOMIC_EXCHANGE(address, newval, oldval) \
                         OPLK_IO_WR8((address + ATOMIC_MEM_OFFSET), newval); \
                         oldval = OPLK_IO_RD8((address + ATOMIC_MEM_OFFSET))
-#else
-#define OPLK_ATOMIC_T    ULONG
+#else /* CONFIG_PCIE */
+#define OPLK_ATOMIC_T           ULONG
 #define OPLK_ATOMIC_EXCHANGE(address, newval, oldval) \
             oldval = InterlockedExchange(address, newval);
-#endif
+#endif /* CONFIG_PCIE */
 
 #define OPLK_MUTEX_T    HANDLE
 
-#endif /* _INC_targetdefs_windows_H_ */
+#endif /* _INC_oplk_targetdefs_windows_H_ */

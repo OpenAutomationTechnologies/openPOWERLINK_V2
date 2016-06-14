@@ -35,7 +35,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_oplk_obd_H_
 #define _INC_oplk_obd_H_
 
@@ -345,7 +344,7 @@ typedef struct
     tObdType            type;               ///< Data type of the object
     tObdAccess          access;             ///< Access type of the object
     CONST void ROM*     pDefault;           ///< Pointer to default data
-    void  MEM*          pCurrent;           ///< Pointer to data (points always to RAM)
+    void MEM*           pCurrent;           ///< Pointer to data (points always to RAM)
 } tObdSubEntry;
 
 typedef tObdSubEntry* tObdSubEntryPtr;

@@ -8,7 +8,7 @@ This file contains definitions for the OBD CDC module
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -34,7 +34,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_oplk_obdcdc_H_
 #define _INC_oplk_obdcdc_H_
 
@@ -54,16 +53,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
 tOplkError obdcdc_init(void);
-void obdcdc_exit(void);
-void obdcdc_setFilename(char* pCdcFilename_p);
-void obdcdc_setBuffer(UINT8* pCdc_p, size_t cdcSize_p);
+void       obdcdc_exit(void);
+void       obdcdc_setFilename(char* pCdcFilename_p);
+void       obdcdc_setBuffer(UINT8* pCdc_p, size_t cdcSize_p);
 tOplkError obdcdc_loadCdc(void);
 
 #ifdef __cplusplus
@@ -71,4 +69,3 @@ tOplkError obdcdc_loadCdc(void);
 #endif
 
 #endif /* _INC_oplk_obdcdc_H_ */
-

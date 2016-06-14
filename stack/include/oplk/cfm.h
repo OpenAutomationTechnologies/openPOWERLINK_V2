@@ -8,7 +8,7 @@ This file contains global definitions for the CFM module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -34,7 +34,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_oplk_cfm_H_
 #define _INC_oplk_cfm_H_
 
@@ -62,7 +61,7 @@ typedef struct
     UINT                objectIndex;            ///< Index of object to be written
     UINT                objectSubIndex;         ///< Subindex of object to be written
     UINT32              sdoAbortCode;           ///< SDO abort code
-    tOplkError          error;                  ///< Error which occured
+    tOplkError          error;                  ///< Error which occurred
     UINT32              totalNumberOfBytes;     ///< Total number of bytes to transfer
     UINT32              bytesDownloaded;        ///< Number of already downloaded bytes
 } tCfmEventCnProgress;

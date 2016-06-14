@@ -9,7 +9,7 @@ debugging.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -35,7 +35,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_oplk_benchmark_H_
 #define _INC_oplk_benchmark_H_
 
@@ -47,100 +46,105 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#if (TARGET_SYSTEM == _NO_OS_) && (DEV_SYSTEM == _DEV_GNU_CF548X_)
-    #include "common.h"
+#if ((TARGET_SYSTEM == _NO_OS_) && (DEV_SYSTEM == _DEV_GNU_CF548X_))
 
-#elif (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
+#include "common.h"
 
-//    #include <linux/config.h>
-    #include <linux/kernel.h>
+#elif ((TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__))
 
-    #ifdef CONFIG_COLDFIRE
-        #include <asm/coldfire.h>
-        #include <asm/m5485gpio.h>
+// #include <linux/config.h>
+#include <linux/kernel.h>
 
-        #define BENCHMARK_SET(x)    MCF_GPIO_PODR_PCIBG |= (1 << (x))   // (x+1)
-        #define BENCHMARK_RESET(x)  MCF_GPIO_PODR_PCIBG &= ~(1 << (x))  // (x+1)
-        #define BENCHMARK_TOGGLE(x) MCF_GPIO_PODR_PCIBR ^= (1 << (x - 3))
-    #else
-        #undef BENCHMARK_MODULES
-        #define BENCHMARK_MODULES           0x00000000
-    #endif
+#ifdef CONFIG_COLDFIRE
+#include <asm/coldfire.h>
+#include <asm/m5485gpio.h>
 
-#elif (TARGET_SYSTEM == _NO_OS_) && (DEV_SYSTEM == _DEV_NIOS2_)
+#define BENCHMARK_SET(x)    MCF_GPIO_PODR_PCIBG |= (1 << (x))   // (x+1)
+#define BENCHMARK_RESET(x)  MCF_GPIO_PODR_PCIBG &= ~(1 << (x))  // (x+1)
+#define BENCHMARK_TOGGLE(x) MCF_GPIO_PODR_PCIBR ^= (1 << (x - 3))
+#else /* CONFIG_COLDFIRE */
+#undef BENCHMARK_MODULES
+#define BENCHMARK_MODULES                   0x00000000
+#endif /* CONFIG_COLDFIRE */
 
-    #include "system.h"
+#elif ((TARGET_SYSTEM == _NO_OS_) && (DEV_SYSTEM == _DEV_NIOS2_))
 
-    #ifdef BENCHMARK_PIO_BASE
-        #include "altera_avalon_pio_regs.h"       // PIO access
+#include "system.h"
 
-        #if BENCHMARK_PIO_BIT_MODIFYING_OUTPUT_REGISTER == 0
-            #error "Please enable individual bit setting/clearing of output register for benchmark_pio module in SOPC Builder"
-        #endif
-        #define BENCHMARK_SET(x)    IOWR_ALTERA_AVALON_PIO_SET_BITS(BENCHMARK_PIO_BASE, \
-                                    (1 << (x)))
-        #define BENCHMARK_RESET(x)  IOWR_ALTERA_AVALON_PIO_CLEAR_BITS(BENCHMARK_PIO_BASE, \
-                                    (1 << (x)))
-        #define BENCHMARK_TOGGLE(x) IOWR_ALTERA_AVALON_PIO_DATA(BENCHMARK_PIO_BASE, \
-                                    ((IORD_ALTERA_AVALON_PIO_DATA(BENCHMARK_PIO_BASE)) ^ (1 << (x))))
-    #elif defined(PCP_0_BENCHMARK_PIO_BASE)
-        #include "altera_avalon_pio_regs.h"       // PIO access
+#ifdef BENCHMARK_PIO_BASE
+#include "altera_avalon_pio_regs.h"       // PIO access
 
-        #if PCP_0_BENCHMARK_PIO_BIT_MODIFYING_OUTPUT_REGISTER == 0
-            #error "Please enable individual bit setting/clearing of output register for benchmark_pio module in QSYS Builder"
-        #endif
-        #define BENCHMARK_SET(x)    IOWR_ALTERA_AVALON_PIO_SET_BITS(PCP_0_BENCHMARK_PIO_BASE, \
-                                    (1 << (x)))
-        #define BENCHMARK_RESET(x)  IOWR_ALTERA_AVALON_PIO_CLEAR_BITS(PCP_0_BENCHMARK_PIO_BASE, \
-                                    (1 << (x)))
-        #define BENCHMARK_TOGGLE(x) IOWR_ALTERA_AVALON_PIO_DATA(PCP_0_BENCHMARK_PIO_BASE, \
-                                    ((IORD_ALTERA_AVALON_PIO_DATA(PCP_0_BENCHMARK_PIO_BASE)) ^ (1 << (x))))
-    #else
-        #undef BENCHMARK_MODULES
-        #define BENCHMARK_MODULES           0x00000000
-    #endif
-
-#elif (TARGET_SYSTEM == _NO_OS_) && ((DEV_SYSTEM == _DEV_MICROBLAZE_BIG_) || \
-      (DEV_SYSTEM == _DEV_MICROBLAZE_LITTLE_))
-
-    #include "xparameters.h"
-
-    #ifdef XPAR_BENCHMARK_PIO_BASEADDR
-        #include "xgpio_l.h"
-
-        #define BENCHMARK_SET(x)    XGpio_WriteReg(XPAR_BENCHMARK_PIO_BASEADDR, 0, \
-                                    XGpio_ReadReg(XPAR_BENCHMARK_PIO_BASEADDR, 0) | (1<<x))
-        #define BENCHMARK_RESET(x)  XGpio_WriteReg(XPAR_BENCHMARK_PIO_BASEADDR, 0, \
-                                    XGpio_ReadReg(XPAR_BENCHMARK_PIO_BASEADDR, 0) & ~(1<<x))
-        #define BENCHMARK_TOGGLE(x) XGpio_WriteReg(XPAR_BENCHMARK_PIO_BASEADDR, 0, \
-                                    XGpio_ReadReg(XPAR_BENCHMARK_PIO_BASEADDR, 0) ^ (1<<x))
-    #else
-        #undef BENCHMARK_MODULES
-        #define BENCHMARK_MODULES           0x00000000
-    #endif
-
-#elif (TARGET_SYSTEM == _NO_OS_) && (DEV_SYSTEM == _DEV_ARM_XILINX_EABI_)
-
-    #include <xparameters.h>
-
-    #ifdef XPAR_HOST_BENCHMARK_PIO_BASEADDR
-        #include <xgpio_l.h>
-
-        #define BENCHMARK_SET(x)    XGpio_WriteReg(XPAR_HOST_BENCHMARK_PIO_BASEADDR, 0, \
-                                    XGpio_ReadReg(XPAR_HOST_BENCHMARK_PIO_BASEADDR, 0) | (1<<x))
-        #define BENCHMARK_RESET(x)  XGpio_WriteReg(XPAR_HOST_BENCHMARK_PIO_BASEADDR, 0, \
-                                    XGpio_ReadReg(XPAR_HOST_BENCHMARK_PIO_BASEADDR, 0) & ~(1<<x))
-        #define BENCHMARK_TOGGLE(x) XGpio_WriteReg(XPAR_HOST_BENCHMARK_PIO_BASEADDR, 0, \
-                                    XGpio_ReadReg(XPAR_HOST_BENCHMARK_PIO_BASEADDR, 0) ^ (1<<x))
-    #else
-        #undef BENCHMARK_MODULES
-        #define BENCHMARK_MODULES           0x00000000
-    #endif
-#else
-    // disable Benchmarking
-    #undef BENCHMARK_MODULES
-    #define BENCHMARK_MODULES               0x00000000
+#if (BENCHMARK_PIO_BIT_MODIFYING_OUTPUT_REGISTER == 0)
+#error "Please enable individual bit setting/clearing of output register for benchmark_pio module in SOPC Builder"
 #endif
+
+#define BENCHMARK_SET(x)    IOWR_ALTERA_AVALON_PIO_SET_BITS(BENCHMARK_PIO_BASE, \
+                            (1 << (x)))
+#define BENCHMARK_RESET(x)  IOWR_ALTERA_AVALON_PIO_CLEAR_BITS(BENCHMARK_PIO_BASE, \
+                            (1 << (x)))
+#define BENCHMARK_TOGGLE(x) IOWR_ALTERA_AVALON_PIO_DATA(BENCHMARK_PIO_BASE, \
+                            ((IORD_ALTERA_AVALON_PIO_DATA(BENCHMARK_PIO_BASE)) ^ (1 << (x))))
+#elif defined(PCP_0_BENCHMARK_PIO_BASE)
+#include "altera_avalon_pio_regs.h"       // PIO access
+
+#if PCP_0_BENCHMARK_PIO_BIT_MODIFYING_OUTPUT_REGISTER == 0
+#error "Please enable individual bit setting/clearing of output register for benchmark_pio module in QSYS Builder"
+#endif
+#define BENCHMARK_SET(x)    IOWR_ALTERA_AVALON_PIO_SET_BITS(PCP_0_BENCHMARK_PIO_BASE, \
+                            (1 << (x)))
+#define BENCHMARK_RESET(x)  IOWR_ALTERA_AVALON_PIO_CLEAR_BITS(PCP_0_BENCHMARK_PIO_BASE, \
+                            (1 << (x)))
+#define BENCHMARK_TOGGLE(x) IOWR_ALTERA_AVALON_PIO_DATA(PCP_0_BENCHMARK_PIO_BASE, \
+                            ((IORD_ALTERA_AVALON_PIO_DATA(PCP_0_BENCHMARK_PIO_BASE)) ^ (1 << (x))))
+#else /* defined(PCP_0_BENCHMARK_PIO_BASE) */
+#undef BENCHMARK_MODULES
+#define BENCHMARK_MODULES                   0x00000000
+#endif /* defined(PCP_0_BENCHMARK_PIO_BASE) */
+
+#elif ((TARGET_SYSTEM == _NO_OS_) && \
+       ((DEV_SYSTEM == _DEV_MICROBLAZE_BIG_) || (DEV_SYSTEM == _DEV_MICROBLAZE_LITTLE_)))
+
+#include "xparameters.h"
+
+#ifdef XPAR_BENCHMARK_PIO_BASEADDR
+#include "xgpio_l.h"
+
+#define BENCHMARK_SET(x)    XGpio_WriteReg(XPAR_BENCHMARK_PIO_BASEADDR, 0, \
+                            XGpio_ReadReg(XPAR_BENCHMARK_PIO_BASEADDR, 0) | (1<<x))
+#define BENCHMARK_RESET(x)  XGpio_WriteReg(XPAR_BENCHMARK_PIO_BASEADDR, 0, \
+                            XGpio_ReadReg(XPAR_BENCHMARK_PIO_BASEADDR, 0) & ~(1<<x))
+#define BENCHMARK_TOGGLE(x) XGpio_WriteReg(XPAR_BENCHMARK_PIO_BASEADDR, 0, \
+                            XGpio_ReadReg(XPAR_BENCHMARK_PIO_BASEADDR, 0) ^ (1<<x))
+#else /* XPAR_BENCHMARK_PIO_BASEADDR */
+#undef BENCHMARK_MODULES
+#define BENCHMARK_MODULES                   0x00000000
+#endif /* XPAR_BENCHMARK_PIO_BASEADDR */
+
+#elif ((TARGET_SYSTEM == _NO_OS_) && (DEV_SYSTEM == _DEV_ARM_XILINX_EABI_))
+
+#include <xparameters.h>
+
+#ifdef XPAR_HOST_BENCHMARK_PIO_BASEADDR
+#include <xgpio_l.h>
+
+#define BENCHMARK_SET(x)    XGpio_WriteReg(XPAR_HOST_BENCHMARK_PIO_BASEADDR, 0, \
+                            XGpio_ReadReg(XPAR_HOST_BENCHMARK_PIO_BASEADDR, 0) | (1<<x))
+#define BENCHMARK_RESET(x)  XGpio_WriteReg(XPAR_HOST_BENCHMARK_PIO_BASEADDR, 0, \
+                            XGpio_ReadReg(XPAR_HOST_BENCHMARK_PIO_BASEADDR, 0) & ~(1<<x))
+#define BENCHMARK_TOGGLE(x) XGpio_WriteReg(XPAR_HOST_BENCHMARK_PIO_BASEADDR, 0, \
+                            XGpio_ReadReg(XPAR_HOST_BENCHMARK_PIO_BASEADDR, 0) ^ (1<<x))
+#else /* XPAR_HOST_BENCHMARK_PIO_BASEADDR */
+#undef BENCHMARK_MODULES
+#define BENCHMARK_MODULES                   0x00000000
+#endif /* XPAR_HOST_BENCHMARK_PIO_BASEADDR */
+
+#else /* ((TARGET_SYSTEM == _NO_OS_) && (DEV_SYSTEM == _DEV_ARM_XILINX_EABI_)) */
+
+// disable Benchmarking
+#undef BENCHMARK_MODULES
+#define BENCHMARK_MODULES                   0x00000000
+
+#endif /* ((TARGET_SYSTEM == _NO_OS_) && (DEV_SYSTEM == _DEV_ARM_XILINX_EABI_)) */
 
 #ifndef BENCHMARK_MODULES
 #define BENCHMARK_MODULES                   0x00000000
@@ -181,278 +185,277 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #if (BENCHMARK_MODULES & BENCHMARK_MOD_01)
-    #define BENCHMARK_MOD_01_SET(x)         BENCHMARK_SET(x)
-    #define BENCHMARK_MOD_01_RESET(x)       BENCHMARK_RESET(x)
-    #define BENCHMARK_MOD_01_TOGGLE(x)      BENCHMARK_TOGGLE(x)
-#else
-    #define BENCHMARK_MOD_01_SET(x)
-    #define BENCHMARK_MOD_01_RESET(x)
-    #define BENCHMARK_MOD_01_TOGGLE(x)
-#endif
+#define BENCHMARK_MOD_01_SET(x)             BENCHMARK_SET(x)
+#define BENCHMARK_MOD_01_RESET(x)           BENCHMARK_RESET(x)
+#define BENCHMARK_MOD_01_TOGGLE(x)          BENCHMARK_TOGGLE(x)
+#else /* (BENCHMARK_MODULES & BENCHMARK_MOD_01) */
+#define BENCHMARK_MOD_01_SET(x)
+#define BENCHMARK_MOD_01_RESET(x)
+#define BENCHMARK_MOD_01_TOGGLE(x)
+#endif /* (BENCHMARK_MODULES & BENCHMARK_MOD_01) */
 
 #if (BENCHMARK_MODULES & BENCHMARK_MOD_02)
-    #define BENCHMARK_MOD_02_SET(x)         BENCHMARK_SET(x)
-    #define BENCHMARK_MOD_02_RESET(x)       BENCHMARK_RESET(x)
-    #define BENCHMARK_MOD_02_TOGGLE(x)      BENCHMARK_TOGGLE(x)
-#else
-    #define BENCHMARK_MOD_02_SET(x)
-    #define BENCHMARK_MOD_02_RESET(x)
-    #define BENCHMARK_MOD_02_TOGGLE(x)
-#endif
+#define BENCHMARK_MOD_02_SET(x)             BENCHMARK_SET(x)
+#define BENCHMARK_MOD_02_RESET(x)           BENCHMARK_RESET(x)
+#define BENCHMARK_MOD_02_TOGGLE(x)          BENCHMARK_TOGGLE(x)
+#else /* (BENCHMARK_MODULES & BENCHMARK_MOD_02) */
+#define BENCHMARK_MOD_02_SET(x)
+#define BENCHMARK_MOD_02_RESET(x)
+#define BENCHMARK_MOD_02_TOGGLE(x)
+#endif /* (BENCHMARK_MODULES & BENCHMARK_MOD_02) */
 
 #if (BENCHMARK_MODULES & BENCHMARK_MOD_03)
-    #define BENCHMARK_MOD_03_SET(x)         BENCHMARK_SET(x)
-    #define BENCHMARK_MOD_03_RESET(x)       BENCHMARK_RESET(x)
-    #define BENCHMARK_MOD_03_TOGGLE(x)      BENCHMARK_TOGGLE(x)
-#else
-    #define BENCHMARK_MOD_03_SET(x)
-    #define BENCHMARK_MOD_03_RESET(x)
-    #define BENCHMARK_MOD_03_TOGGLE(x)
-#endif
+#define BENCHMARK_MOD_03_SET(x)             BENCHMARK_SET(x)
+#define BENCHMARK_MOD_03_RESET(x)           BENCHMARK_RESET(x)
+#define BENCHMARK_MOD_03_TOGGLE(x)          BENCHMARK_TOGGLE(x)
+#else /* (BENCHMARK_MODULES & BENCHMARK_MOD_03) */
+#define BENCHMARK_MOD_03_SET(x)
+#define BENCHMARK_MOD_03_RESET(x)
+#define BENCHMARK_MOD_03_TOGGLE(x)
+#endif /* (BENCHMARK_MODULES & BENCHMARK_MOD_03) */
 
 #if (BENCHMARK_MODULES & BENCHMARK_MOD_04)
-    #define BENCHMARK_MOD_04_SET(x)         BENCHMARK_SET(x)
-    #define BENCHMARK_MOD_04_RESET(x)       BENCHMARK_RESET(x)
-    #define BENCHMARK_MOD_04_TOGGLE(x)      BENCHMARK_TOGGLE(x)
-#else
-    #define BENCHMARK_MOD_04_SET(x)
-    #define BENCHMARK_MOD_04_RESET(x)
-    #define BENCHMARK_MOD_04_TOGGLE(x)
-#endif
+#define BENCHMARK_MOD_04_SET(x)             BENCHMARK_SET(x)
+#define BENCHMARK_MOD_04_RESET(x)           BENCHMARK_RESET(x)
+#define BENCHMARK_MOD_04_TOGGLE(x)          BENCHMARK_TOGGLE(x)
+#else /* (BENCHMARK_MODULES & BENCHMARK_MOD_04) */
+#define BENCHMARK_MOD_04_SET(x)
+#define BENCHMARK_MOD_04_RESET(x)
+#define BENCHMARK_MOD_04_TOGGLE(x)
+#endif /* (BENCHMARK_MODULES & BENCHMARK_MOD_04) */
 
 #if (BENCHMARK_MODULES & BENCHMARK_MOD_05)
-    #define BENCHMARK_MOD_05_SET(x)         BENCHMARK_SET(x)
-    #define BENCHMARK_MOD_05_RESET(x)       BENCHMARK_RESET(x)
-    #define BENCHMARK_MOD_05_TOGGLE(x)      BENCHMARK_TOGGLE(x)
-#else
-    #define BENCHMARK_MOD_05_SET(x)
-    #define BENCHMARK_MOD_05_RESET(x)
-    #define BENCHMARK_MOD_05_TOGGLE(x)
-#endif
+#define BENCHMARK_MOD_05_SET(x)             BENCHMARK_SET(x)
+#define BENCHMARK_MOD_05_RESET(x)           BENCHMARK_RESET(x)
+#define BENCHMARK_MOD_05_TOGGLE(x)          BENCHMARK_TOGGLE(x)
+#else /* (BENCHMARK_MODULES & BENCHMARK_MOD_05) */
+#define BENCHMARK_MOD_05_SET(x)
+#define BENCHMARK_MOD_05_RESET(x)
+#define BENCHMARK_MOD_05_TOGGLE(x)
+#endif /* (BENCHMARK_MODULES & BENCHMARK_MOD_05) */
 
 #if (BENCHMARK_MODULES & BENCHMARK_MOD_06)
-    #define BENCHMARK_MOD_06_SET(x)         BENCHMARK_SET(x)
-    #define BENCHMARK_MOD_06_RESET(x)       BENCHMARK_RESET(x)
-    #define BENCHMARK_MOD_06_TOGGLE(x)      BENCHMARK_TOGGLE(x)
-#else
-    #define BENCHMARK_MOD_06_SET(x)
-    #define BENCHMARK_MOD_06_RESET(x)
-    #define BENCHMARK_MOD_06_TOGGLE(x)
-#endif
+#define BENCHMARK_MOD_06_SET(x)             BENCHMARK_SET(x)
+#define BENCHMARK_MOD_06_RESET(x)           BENCHMARK_RESET(x)
+#define BENCHMARK_MOD_06_TOGGLE(x)          BENCHMARK_TOGGLE(x)
+#else /* (BENCHMARK_MODULES & BENCHMARK_MOD_06) */
+#define BENCHMARK_MOD_06_SET(x)
+#define BENCHMARK_MOD_06_RESET(x)
+#define BENCHMARK_MOD_06_TOGGLE(x)
+#endif /* (BENCHMARK_MODULES & BENCHMARK_MOD_06) */
 
 #if (BENCHMARK_MODULES & BENCHMARK_MOD_07)
-    #define BENCHMARK_MOD_07_SET(x)         BENCHMARK_SET(x)
-    #define BENCHMARK_MOD_07_RESET(x)       BENCHMARK_RESET(x)
-    #define BENCHMARK_MOD_07_TOGGLE(x)      BENCHMARK_TOGGLE(x)
-#else
-    #define BENCHMARK_MOD_07_SET(x)
-    #define BENCHMARK_MOD_07_RESET(x)
-    #define BENCHMARK_MOD_07_TOGGLE(x)
-#endif
+#define BENCHMARK_MOD_07_SET(x)             BENCHMARK_SET(x)
+#define BENCHMARK_MOD_07_RESET(x)           BENCHMARK_RESET(x)
+#define BENCHMARK_MOD_07_TOGGLE(x)          BENCHMARK_TOGGLE(x)
+#else /* (BENCHMARK_MODULES & BENCHMARK_MOD_07) */
+#define BENCHMARK_MOD_07_SET(x)
+#define BENCHMARK_MOD_07_RESET(x)
+#define BENCHMARK_MOD_07_TOGGLE(x)
+#endif /* (BENCHMARK_MODULES & BENCHMARK_MOD_07) */
 
 #if (BENCHMARK_MODULES & BENCHMARK_MOD_08)
-    #define BENCHMARK_MOD_08_SET(x)         BENCHMARK_SET(x)
-    #define BENCHMARK_MOD_08_RESET(x)       BENCHMARK_RESET(x)
-    #define BENCHMARK_MOD_08_TOGGLE(x)      BENCHMARK_TOGGLE(x)
-#else
-    #define BENCHMARK_MOD_08_SET(x)
-    #define BENCHMARK_MOD_08_RESET(x)
-    #define BENCHMARK_MOD_08_TOGGLE(x)
-#endif
+#define BENCHMARK_MOD_08_SET(x)             BENCHMARK_SET(x)
+#define BENCHMARK_MOD_08_RESET(x)           BENCHMARK_RESET(x)
+#define BENCHMARK_MOD_08_TOGGLE(x)          BENCHMARK_TOGGLE(x)
+#else /* (BENCHMARK_MODULES & BENCHMARK_MOD_08) */
+#define BENCHMARK_MOD_08_SET(x)
+#define BENCHMARK_MOD_08_RESET(x)
+#define BENCHMARK_MOD_08_TOGGLE(x)
+#endif /* (BENCHMARK_MODULES & BENCHMARK_MOD_08) */
 
 #if (BENCHMARK_MODULES & BENCHMARK_MOD_09)
-    #define BENCHMARK_MOD_09_SET(x)         BENCHMARK_SET(x)
-    #define BENCHMARK_MOD_09_RESET(x)       BENCHMARK_RESET(x)
-    #define BENCHMARK_MOD_09_TOGGLE(x)      BENCHMARK_TOGGLE(x)
-#else
-    #define BENCHMARK_MOD_09_SET(x)
-    #define BENCHMARK_MOD_09_RESET(x)
-    #define BENCHMARK_MOD_09_TOGGLE(x)
-#endif
+#define BENCHMARK_MOD_09_SET(x)             BENCHMARK_SET(x)
+#define BENCHMARK_MOD_09_RESET(x)           BENCHMARK_RESET(x)
+#define BENCHMARK_MOD_09_TOGGLE(x)          BENCHMARK_TOGGLE(x)
+#else /* (BENCHMARK_MODULES & BENCHMARK_MOD_09) */
+#define BENCHMARK_MOD_09_SET(x)
+#define BENCHMARK_MOD_09_RESET(x)
+#define BENCHMARK_MOD_09_TOGGLE(x)
+#endif /* (BENCHMARK_MODULES & BENCHMARK_MOD_09) */
 
 #if (BENCHMARK_MODULES & BENCHMARK_MOD_10)
-    #define BENCHMARK_MOD_10_SET(x)         BENCHMARK_SET(x)
-    #define BENCHMARK_MOD_10_RESET(x)       BENCHMARK_RESET(x)
-#else
-    #define BENCHMARK_MOD_10_SET(x)
-    #define BENCHMARK_MOD_10_RESET(x)
-#endif
+#define BENCHMARK_MOD_10_SET(x)             BENCHMARK_SET(x)
+#define BENCHMARK_MOD_10_RESET(x)           BENCHMARK_RESET(x)
+#else /* (BENCHMARK_MODULES & BENCHMARK_MOD_10) */
+#define BENCHMARK_MOD_10_SET(x)
+#define BENCHMARK_MOD_10_RESET(x)
+#endif /* (BENCHMARK_MODULES & BENCHMARK_MOD_10) */
 
 #if (BENCHMARK_MODULES & BENCHMARK_MOD_11)
-    #define BENCHMARK_MOD_11_SET(x)         BENCHMARK_SET(x)
-    #define BENCHMARK_MOD_11_RESET(x)       BENCHMARK_RESET(x)
-#else
-    #define BENCHMARK_MOD_11_SET(x)
-    #define BENCHMARK_MOD_11_RESET(x)
-#endif
+#define BENCHMARK_MOD_11_SET(x)             BENCHMARK_SET(x)
+#define BENCHMARK_MOD_11_RESET(x)           BENCHMARK_RESET(x)
+#else /* (BENCHMARK_MODULES & BENCHMARK_MOD_11) */
+#define BENCHMARK_MOD_11_SET(x)
+#define BENCHMARK_MOD_11_RESET(x)
+#endif /* (BENCHMARK_MODULES & BENCHMARK_MOD_11) */
 
 #if (BENCHMARK_MODULES & BENCHMARK_MOD_12)
-    #define BENCHMARK_MOD_12_SET(x)         BENCHMARK_SET(x)
-    #define BENCHMARK_MOD_12_RESET(x)       BENCHMARK_RESET(x)
-#else
-    #define BENCHMARK_MOD_12_SET(x)
-    #define BENCHMARK_MOD_12_RESET(x)
-#endif
+#define BENCHMARK_MOD_12_SET(x)             BENCHMARK_SET(x)
+#define BENCHMARK_MOD_12_RESET(x)           BENCHMARK_RESET(x)
+#else /* (BENCHMARK_MODULES & BENCHMARK_MOD_12) */
+#define BENCHMARK_MOD_12_SET(x)
+#define BENCHMARK_MOD_12_RESET(x)
+#endif /* (BENCHMARK_MODULES & BENCHMARK_MOD_12) */
 
 #if (BENCHMARK_MODULES & BENCHMARK_MOD_13)
-    #define BENCHMARK_MOD_13_SET(x)         BENCHMARK_SET(x)
-    #define BENCHMARK_MOD_13_RESET(x)       BENCHMARK_RESET(x)
-#else
-    #define BENCHMARK_MOD_13_SET(x)
-    #define BENCHMARK_MOD_13_RESET(x)
-#endif
+#define BENCHMARK_MOD_13_SET(x)             BENCHMARK_SET(x)
+#define BENCHMARK_MOD_13_RESET(x)           BENCHMARK_RESET(x)
+#else /* (BENCHMARK_MODULES & BENCHMARK_MOD_13) */
+#define BENCHMARK_MOD_13_SET(x)
+#define BENCHMARK_MOD_13_RESET(x)
+#endif /* (BENCHMARK_MODULES & BENCHMARK_MOD_13) */
 
 #if (BENCHMARK_MODULES & BENCHMARK_MOD_14)
-    #define BENCHMARK_MOD_14_SET(x)         BENCHMARK_SET(x)
-    #define BENCHMARK_MOD_14_RESET(x)       BENCHMARK_RESET(x)
-#else
-    #define BENCHMARK_MOD_14_SET(x)
-    #define BENCHMARK_MOD_14_RESET(x)
-#endif
+#define BENCHMARK_MOD_14_SET(x)             BENCHMARK_SET(x)
+#define BENCHMARK_MOD_14_RESET(x)           BENCHMARK_RESET(x)
+#else /* (BENCHMARK_MODULES & BENCHMARK_MOD_14) */
+#define BENCHMARK_MOD_14_SET(x)
+#define BENCHMARK_MOD_14_RESET(x)
+#endif /* (BENCHMARK_MODULES & BENCHMARK_MOD_14) */
 
 #if (BENCHMARK_MODULES & BENCHMARK_MOD_15)
-    #define BENCHMARK_MOD_15_SET(x)         BENCHMARK_SET(x)
-    #define BENCHMARK_MOD_15_RESET(x)       BENCHMARK_RESET(x)
-#else
-    #define BENCHMARK_MOD_15_SET(x)
-    #define BENCHMARK_MOD_15_RESET(x)
-#endif
+#define BENCHMARK_MOD_15_SET(x)             BENCHMARK_SET(x)
+#define BENCHMARK_MOD_15_RESET(x)           BENCHMARK_RESET(x)
+#else /* (BENCHMARK_MODULES & BENCHMARK_MOD_15) */
+#define BENCHMARK_MOD_15_SET(x)
+#define BENCHMARK_MOD_15_RESET(x)
+#endif /* (BENCHMARK_MODULES & BENCHMARK_MOD_15) */
 
 #if (BENCHMARK_MODULES & BENCHMARK_MOD_16)
-    #define BENCHMARK_MOD_16_SET(x)         BENCHMARK_SET(x)
-    #define BENCHMARK_MOD_16_RESET(x)       BENCHMARK_RESET(x)
-#else
-    #define BENCHMARK_MOD_16_SET(x)
-    #define BENCHMARK_MOD_16_RESET(x)
-#endif
+#define BENCHMARK_MOD_16_SET(x)             BENCHMARK_SET(x)
+#define BENCHMARK_MOD_16_RESET(x)           BENCHMARK_RESET(x)
+#else /* (BENCHMARK_MODULES & BENCHMARK_MOD_16) */
+#define BENCHMARK_MOD_16_SET(x)
+#define BENCHMARK_MOD_16_RESET(x)
+#endif /* (BENCHMARK_MODULES & BENCHMARK_MOD_16) */
 
 #if (BENCHMARK_MODULES & BENCHMARK_MOD_17)
-    #define BENCHMARK_MOD_17_SET(x)         BENCHMARK_SET(x)
-    #define BENCHMARK_MOD_17_RESET(x)       BENCHMARK_RESET(x)
-#else
-    #define BENCHMARK_MOD_17_SET(x)
-    #define BENCHMARK_MOD_17_RESET(x)
-#endif
+#define BENCHMARK_MOD_17_SET(x)             BENCHMARK_SET(x)
+#define BENCHMARK_MOD_17_RESET(x)           BENCHMARK_RESET(x)
+#else /* (BENCHMARK_MODULES & BENCHMARK_MOD_17) */
+#define BENCHMARK_MOD_17_SET(x)
+#define BENCHMARK_MOD_17_RESET(x)
+#endif /* (BENCHMARK_MODULES & BENCHMARK_MOD_17) */
 
 #if (BENCHMARK_MODULES & BENCHMARK_MOD_18)
-    #define BENCHMARK_MOD_18_SET(x)         BENCHMARK_SET(x)
-    #define BENCHMARK_MOD_18_RESET(x)       BENCHMARK_RESET(x)
-#else
-    #define BENCHMARK_MOD_18_SET(x)
-    #define BENCHMARK_MOD_18_RESET(x)
-#endif
+#define BENCHMARK_MOD_18_SET(x)             BENCHMARK_SET(x)
+#define BENCHMARK_MOD_18_RESET(x)           BENCHMARK_RESET(x)
+#else /* (BENCHMARK_MODULES & BENCHMARK_MOD_18) */
+#define BENCHMARK_MOD_18_SET(x)
+#define BENCHMARK_MOD_18_RESET(x)
+#endif /* (BENCHMARK_MODULES & BENCHMARK_MOD_18) */
 
 #if (BENCHMARK_MODULES & BENCHMARK_MOD_19)
-    #define BENCHMARK_MOD_19_SET(x)         BENCHMARK_SET(x)
-    #define BENCHMARK_MOD_19_RESET(x)       BENCHMARK_RESET(x)
-#else
-    #define BENCHMARK_MOD_19_SET(x)
-    #define BENCHMARK_MOD_19_RESET(x)
-#endif
+#define BENCHMARK_MOD_19_SET(x)             BENCHMARK_SET(x)
+#define BENCHMARK_MOD_19_RESET(x)           BENCHMARK_RESET(x)
+#else /* (BENCHMARK_MODULES & BENCHMARK_MOD_19) */
+#define BENCHMARK_MOD_19_SET(x)
+#define BENCHMARK_MOD_19_RESET(x)
+#endif /* (BENCHMARK_MODULES & BENCHMARK_MOD_19) */
 
 #if (BENCHMARK_MODULES & BENCHMARK_MOD_20)
-    #define BENCHMARK_MOD_20_SET(x)         BENCHMARK_SET(x)
-    #define BENCHMARK_MOD_20_RESET(x)       BENCHMARK_RESET(x)
-#else
-    #define BENCHMARK_MOD_20_SET(x)
-    #define BENCHMARK_MOD_20_RESET(x)
-#endif
+#define BENCHMARK_MOD_20_SET(x)             BENCHMARK_SET(x)
+#define BENCHMARK_MOD_20_RESET(x)           BENCHMARK_RESET(x)
+#else /* (BENCHMARK_MODULES & BENCHMARK_MOD_20) */
+#define BENCHMARK_MOD_20_SET(x)
+#define BENCHMARK_MOD_20_RESET(x)
+#endif /* (BENCHMARK_MODULES & BENCHMARK_MOD_20) */
 
 #if (BENCHMARK_MODULES & BENCHMARK_MOD_21)
-    #define BENCHMARK_MOD_21_SET(x)         BENCHMARK_SET(x)
-    #define BENCHMARK_MOD_21_RESET(x)       BENCHMARK_RESET(x)
-#else
-    #define BENCHMARK_MOD_21_SET(x)
-    #define BENCHMARK_MOD_21_RESET(x)
-#endif
+#define BENCHMARK_MOD_21_SET(x)             BENCHMARK_SET(x)
+#define BENCHMARK_MOD_21_RESET(x)           BENCHMARK_RESET(x)
+#else /* (BENCHMARK_MODULES & BENCHMARK_MOD_21) */
+#define BENCHMARK_MOD_21_SET(x)
+#define BENCHMARK_MOD_21_RESET(x)
+#endif /* (BENCHMARK_MODULES & BENCHMARK_MOD_21) */
 
 #if (BENCHMARK_MODULES & BENCHMARK_MOD_22)
-    #define BENCHMARK_MOD_22_SET(x)         BENCHMARK_SET(x)
-    #define BENCHMARK_MOD_22_RESET(x)       BENCHMARK_RESET(x)
-#else
-    #define BENCHMARK_MOD_22_SET(x)
-    #define BENCHMARK_MOD_22_RESET(x)
-#endif
+#define BENCHMARK_MOD_22_SET(x)             BENCHMARK_SET(x)
+#define BENCHMARK_MOD_22_RESET(x)           BENCHMARK_RESET(x)
+#else /* (BENCHMARK_MODULES & BENCHMARK_MOD_22) */
+#define BENCHMARK_MOD_22_SET(x)
+#define BENCHMARK_MOD_22_RESET(x)
+#endif /* (BENCHMARK_MODULES & BENCHMARK_MOD_22) */
 
 #if (BENCHMARK_MODULES & BENCHMARK_MOD_23)
-    #define BENCHMARK_MOD_23_SET(x)         BENCHMARK_SET(x)
-    #define BENCHMARK_MOD_23_RESET(x)       BENCHMARK_RESET(x)
-#else
-    #define BENCHMARK_MOD_23_SET(x)
-    #define BENCHMARK_MOD_23_RESET(x)
-#endif
+#define BENCHMARK_MOD_23_SET(x)             BENCHMARK_SET(x)
+#define BENCHMARK_MOD_23_RESET(x)           BENCHMARK_RESET(x)
+#else /* (BENCHMARK_MODULES & BENCHMARK_MOD_23) */
+#define BENCHMARK_MOD_23_SET(x)
+#define BENCHMARK_MOD_23_RESET(x)
+#endif /* (BENCHMARK_MODULES & BENCHMARK_MOD_23) */
 
 #if (BENCHMARK_MODULES & BENCHMARK_MOD_24)
-    #define BENCHMARK_MOD_24_SET(x)         BENCHMARK_SET(x)
-    #define BENCHMARK_MOD_24_RESET(x)       BENCHMARK_RESET(x)
-#else
-    #define BENCHMARK_MOD_24_SET(x)
-    #define BENCHMARK_MOD_24_RESET(x)
-#endif
+#define BENCHMARK_MOD_24_SET(x)             BENCHMARK_SET(x)
+#define BENCHMARK_MOD_24_RESET(x)           BENCHMARK_RESET(x)
+#else /* (BENCHMARK_MODULES & BENCHMARK_MOD_24) */
+#define BENCHMARK_MOD_24_SET(x)
+#define BENCHMARK_MOD_24_RESET(x)
+#endif /* (BENCHMARK_MODULES & BENCHMARK_MOD_24) */
 
 #if (BENCHMARK_MODULES & BENCHMARK_MOD_25)
-    #define BENCHMARK_MOD_25_SET(x)         BENCHMARK_SET(x)
-    #define BENCHMARK_MOD_25_RESET(x)       BENCHMARK_RESET(x)
-#else
-    #define BENCHMARK_MOD_25_SET(x)
-    #define BENCHMARK_MOD_25_RESET(x)
-#endif
+#define BENCHMARK_MOD_25_SET(x)             BENCHMARK_SET(x)
+#define BENCHMARK_MOD_25_RESET(x)           BENCHMARK_RESET(x)
+#else /* (BENCHMARK_MODULES & BENCHMARK_MOD_25) */
+#define BENCHMARK_MOD_25_SET(x)
+#define BENCHMARK_MOD_25_RESET(x)
+#endif /* (BENCHMARK_MODULES & BENCHMARK_MOD_25) */
 
 #if (BENCHMARK_MODULES & BENCHMARK_MOD_26)
-    #define BENCHMARK_MOD_26_SET(x)         BENCHMARK_SET(x)
-    #define BENCHMARK_MOD_26_RESET(x)       BENCHMARK_RESET(x)
-#else
-    #define BENCHMARK_MOD_26_SET(x)
-    #define BENCHMARK_MOD_26_RESET(x)
-#endif
+#define BENCHMARK_MOD_26_SET(x)             BENCHMARK_SET(x)
+#define BENCHMARK_MOD_26_RESET(x)           BENCHMARK_RESET(x)
+#else /* (BENCHMARK_MODULES & BENCHMARK_MOD_26) */
+#define BENCHMARK_MOD_26_SET(x)
+#define BENCHMARK_MOD_26_RESET(x)
+#endif /* (BENCHMARK_MODULES & BENCHMARK_MOD_26) */
 
 #if (BENCHMARK_MODULES & BENCHMARK_MOD_27)
-    #define BENCHMARK_MOD_27_SET(x)         BENCHMARK_SET(x)
-    #define BENCHMARK_MOD_27_RESET(x)       BENCHMARK_RESET(x)
-#else
-    #define BENCHMARK_MOD_27_SET(x)
-    #define BENCHMARK_MOD_27_RESET(x)
-#endif
+#define BENCHMARK_MOD_27_SET(x)             BENCHMARK_SET(x)
+#define BENCHMARK_MOD_27_RESET(x)           BENCHMARK_RESET(x)
+#else /* (BENCHMARK_MODULES & BENCHMARK_MOD_27) */
+#define BENCHMARK_MOD_27_SET(x)
+#define BENCHMARK_MOD_27_RESET(x)
+#endif /* (BENCHMARK_MODULES & BENCHMARK_MOD_27) */
 
 #if (BENCHMARK_MODULES & BENCHMARK_MOD_28)
-    #define BENCHMARK_MOD_28_SET(x)         BENCHMARK_SET(x)
-    #define BENCHMARK_MOD_28_RESET(x)       BENCHMARK_RESET(x)
-#else
-    #define BENCHMARK_MOD_28_SET(x)
-    #define BENCHMARK_MOD_28_RESET(x)
-#endif
+#define BENCHMARK_MOD_28_SET(x)             BENCHMARK_SET(x)
+#define BENCHMARK_MOD_28_RESET(x)           BENCHMARK_RESET(x)
+#else /* (BENCHMARK_MODULES & BENCHMARK_MOD_28) */
+#define BENCHMARK_MOD_28_SET(x)
+#define BENCHMARK_MOD_28_RESET(x)
+#endif /* (BENCHMARK_MODULES & BENCHMARK_MOD_28) */
 
 #if (BENCHMARK_MODULES & BENCHMARK_MOD_29)
-    #define BENCHMARK_MOD_29_SET(x)         BENCHMARK_SET(x)
-    #define BENCHMARK_MOD_29_RESET(x)       BENCHMARK_RESET(x)
-#else
-    #define BENCHMARK_MOD_29_SET(x)
-    #define BENCHMARK_MOD_29_RESET(x)
-#endif
+#define BENCHMARK_MOD_29_SET(x)             BENCHMARK_SET(x)
+#define BENCHMARK_MOD_29_RESET(x)           BENCHMARK_RESET(x)
+#else /* (BENCHMARK_MODULES & BENCHMARK_MOD_29) */
+#define BENCHMARK_MOD_29_SET(x)
+#define BENCHMARK_MOD_29_RESET(x)
+#endif /* (BENCHMARK_MODULES & BENCHMARK_MOD_29) */
 
 #if (BENCHMARK_MODULES & BENCHMARK_MOD_30)
-    #define BENCHMARK_MOD_30_SET(x)         BENCHMARK_SET(x)
-    #define BENCHMARK_MOD_30_RESET(x)       BENCHMARK_RESET(x)
-#else
-    #define BENCHMARK_MOD_30_SET(x)
-    #define BENCHMARK_MOD_30_RESET(x)
-#endif
+#define BENCHMARK_MOD_30_SET(x)             BENCHMARK_SET(x)
+#define BENCHMARK_MOD_30_RESET(x)           BENCHMARK_RESET(x)
+#else /* (BENCHMARK_MODULES & BENCHMARK_MOD_30) */
+#define BENCHMARK_MOD_30_SET(x)
+#define BENCHMARK_MOD_30_RESET(x)
+#endif /* (BENCHMARK_MODULES & BENCHMARK_MOD_30) */
 
 #if (BENCHMARK_MODULES & BENCHMARK_MOD_31)
-    #define BENCHMARK_MOD_31_SET(x)         BENCHMARK_SET(x)
-    #define BENCHMARK_MOD_31_RESET(x)       BENCHMARK_RESET(x)
-#else
-    #define BENCHMARK_MOD_31_SET(x)
-    #define BENCHMARK_MOD_31_RESET(x)
-#endif
+#define BENCHMARK_MOD_31_SET(x)             BENCHMARK_SET(x)
+#define BENCHMARK_MOD_31_RESET(x)           BENCHMARK_RESET(x)
+#else /* (BENCHMARK_MODULES & BENCHMARK_MOD_31) */
+#define BENCHMARK_MOD_31_SET(x)
+#define BENCHMARK_MOD_31_RESET(x)
+#endif /* (BENCHMARK_MODULES & BENCHMARK_MOD_31) */
 
 #if (BENCHMARK_MODULES & BENCHMARK_MOD_32)
-    #define BENCHMARK_MOD_32_SET(x)         BENCHMARK_SET(x)
-    #define BENCHMARK_MOD_32_RESET(x)       BENCHMARK_RESET(x)
-#else
-    #define BENCHMARK_MOD_32_SET(x)
-    #define BENCHMARK_MOD_32_RESET(x)
-#endif
+#define BENCHMARK_MOD_32_SET(x)             BENCHMARK_SET(x)
+#define BENCHMARK_MOD_32_RESET(x)           BENCHMARK_RESET(x)
+#else /* (BENCHMARK_MODULES & BENCHMARK_MOD_32) */
+#define BENCHMARK_MOD_32_SET(x)
+#define BENCHMARK_MOD_32_RESET(x)
+#endif /* (BENCHMARK_MODULES & BENCHMARK_MOD_32) */
 
 #endif /* _INC_oplk_benchmark_H_ */
-

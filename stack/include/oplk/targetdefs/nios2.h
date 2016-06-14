@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   targetdefs/nios2.h
+\file   oplk/targetdefs/nios2.h
 
 \brief  Target specific definitions for NIOS2 systems
 
@@ -8,7 +8,7 @@ This file contains target specific definitions for NIOS2 systems.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -34,9 +34,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_targetdefs_nios2_H_
-#define _INC_targetdefs_nios2_H_
+#ifndef _INC_oplk_targetdefs_nios2_H_
+#define _INC_oplk_targetdefs_nios2_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -72,10 +71,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define UNUSED_PARAMETER(par)   (void)par
 
 #ifndef NDEBUG
-#define PRINTF(...)                 printf(__VA_ARGS__)
-#else
+#define PRINTF(...)             printf(__VA_ARGS__)
+#else /* NDEBUG */
 #define PRINTF(...)
-#endif
+#endif /* NDEBUG */
 
 // Target IO functions
 // - Write
@@ -104,11 +103,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OPLK_ATOMIC_EXCHANGE(address, newval, oldval) \
                         IOWR_8DIRECT(address + ATOMICMODIFY_0_BASE, 0, newval); \
                         oldval = IORD_8DIRECT(address + ATOMICMODIFY_0_BASE, 0)
-#else
+#else /* defined(ATOMICMODIFY_0_BASE) */
 /* NOTE:
- * Nios II does not support atomic instructions, hence, pseudo atomic
- * macro is applied with locking.
- */
+* Nios II does not support atomic instructions, hence, pseudo atomic
+* macro is applied with locking.
+*/
 #define OPLK_ATOMIC_T    alt_u8
 #define OPLK_ATOMIC_INIT(base) \
                         if (target_initLock(&base->lock) != 0) \
@@ -118,15 +117,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                         oldval = IORD_8DIRECT(address, 0); \
                         IOWR_8DIRECT(address, 0, newval); \
                         target_unlock()
-#endif
+#endif /* defined(ATOMICMODIFY_0_BASE) */
 
 #define OPLK_MUTEX_T    alt_u8
 
 #ifdef NIOS2_EIC_PRESENT
 #if defined(__ALTERA_VIC)
 #include <altera_vic_regs.h>
-#endif
-#endif
+#endif /* defined(__ALTERA_VIC) */
+#endif /* NIOS2_EIC_PRESENT */
 
 #endif /* _INC_targetdefs_nios2_H_ */
-

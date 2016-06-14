@@ -9,7 +9,7 @@ It includes all necessary files for setting up the basic types and definitions.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -35,7 +35,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_oplk_oplkinc_H_
 #define _INC_oplk_oplkinc_H_
 
@@ -88,12 +87,12 @@ The following structure defines a CANopen time-of-day format.
 #ifndef _TIME_OF_DAY_DEFINED_
 typedef struct
 {
-    ULONG               msec;           ///< Milliseconds after midnight
-    USHORT              days;           ///< Days since January the 1st, 1984
+    ULONG               msec;       ///< Milliseconds after midnight
+    USHORT              days;       ///< Days since January the 1st, 1984
 } tTimeOfDay;
 
 #define _TIME_OF_DAY_DEFINED_
-#endif
+#endif /* _TIME_OF_DAY_DEFINED_ */
 
 //------------------------------------------------------------------------------
 // global macros

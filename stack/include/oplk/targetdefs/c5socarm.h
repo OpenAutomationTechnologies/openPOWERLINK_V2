@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   targetdefs/c5socarm.h
+\file   oplk/targetdefs/c5socarm.h
 
 \brief  Target specific definitions for Altera ARM core systems
 
@@ -34,9 +34,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_targetdefs_c5socarm_H_
-#define _INC_targetdefs_c5socarm_H_
+#ifndef _INC_oplk_targetdefs_c5socarm_H_
+#define _INC_oplk_targetdefs_c5socarm_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -57,7 +56,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MEM                 // Memory attribute to optimize speed and code of pointer access.
 
 #ifndef CONST
-#define CONST       const   // variables mapped to ROM (i.e. flash)
+#define CONST   const       // variables mapped to ROM (i.e. flash)
 #endif
 
 #define OPLKDLLEXPORT
@@ -70,7 +69,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef NDEBUG
 #define PRINTF(...)                             printf(__VA_ARGS__)
-#else
+#else /* NDEBUG */
 #define PRINTF(...)
 #endif
 
@@ -141,26 +140,24 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CACHE_ALIGNED_BYTE_CHECK    (ALT_CACHE_LINE_SIZE - 1)
 
 #ifdef ALTARM_CACHE_ENABLE
-#define OPLK_DCACHE_FLUSH(base, range)                                                                                                          \
-    do                                                                                                                                          \
-    {                                                                                                                                           \
-         UINT32 tempBase = (UINT32) (((UINT32) base) & ~((UINT32) CACHE_ALIGNED_BYTE_CHECK));                                                   \
-         UINT32 tempCeil = (UINT32) ((((UINT32) base + (UINT32) range) + CACHE_ALIGNED_BYTE_CHECK) & ~((UINT32) CACHE_ALIGNED_BYTE_CHECK));     \
-         alt_cache_system_clean((void*) tempBase, (size_t) (tempCeil - tempBase));                                                              \
+#define OPLK_DCACHE_FLUSH(base, range)                                                                                                   \
+    do                                                                                                                                   \
+    {                                                                                                                                    \
+         UINT32 tempBase = (UINT32)(((UINT32) base) & ~((UINT32)CACHE_ALIGNED_BYTE_CHECK));                                              \
+         UINT32 tempCeil = (UINT32)((((UINT32) base + (UINT32)range) + CACHE_ALIGNED_BYTE_CHECK) & ~((UINT32)CACHE_ALIGNED_BYTE_CHECK)); \
+         alt_cache_system_clean((void*)tempBase, (size_t)(tempCeil - tempBase));                                                         \
      } while (0)
 
-#define OPLK_DCACHE_INVALIDATE(base, range)                                                                                                     \
-    do                                                                                                                                          \
-    {                                                                                                                                           \
-         UINT32 tempBase = (UINT32) (((UINT32) base) & ~((UINT32) CACHE_ALIGNED_BYTE_CHECK));                                                   \
-         UINT32 tempCeil = (UINT32) ((((UINT32) base + (UINT32) range) + CACHE_ALIGNED_BYTE_CHECK) & ~((UINT32) CACHE_ALIGNED_BYTE_CHECK));     \
-         alt_cache_system_invalidate((void*) tempBase, (size_t) (tempCeil - tempBase));                                                         \
+#define OPLK_DCACHE_INVALIDATE(base, range)                                                                                              \
+    do                                                                                                                                   \
+    {                                                                                                                                    \
+         UINT32 tempBase = (UINT32)(((UINT32) base) & ~((UINT32)CACHE_ALIGNED_BYTE_CHECK));                                              \
+         UINT32 tempCeil = (UINT32)((((UINT32) base + (UINT32)range) + CACHE_ALIGNED_BYTE_CHECK) & ~((UINT32)CACHE_ALIGNED_BYTE_CHECK)); \
+         alt_cache_system_invalidate((void*)tempBase, (size_t)(tempCeil - tempBase));                                                    \
      } while (0)
-
-#else
-
+#else /* ALTARM_CACHE_ENABLE */
 #define OPLK_DCACHE_FLUSH(base, range)
 #define OPLK_DCACHE_INVALIDATE(base, range)
-#endif
+#endif /* ALTARM_CACHE_ENABLE */
 
-#endif /* _INC_targetdefs_c5socarm_H_ */
+#endif /* _INC_oplk_targetdefs_c5socarm_H_ */

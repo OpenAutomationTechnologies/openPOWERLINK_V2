@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   targetdefs/wince.h
+\file   oplk/targetdefs/wince.h
 
 \brief  Target specific definitions for Windows CE
 
@@ -8,7 +8,7 @@ This file contains target specific definitions for Windows CE systems.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -34,10 +34,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_targetdefs_wince_H_
-#define _INC_targetdefs_wince_H_
-
+#ifndef _INC_oplk_targetdefs_wince_H_
+#define _INC_oplk_targetdefs_wince_H_
 
 #include <oplk/basictypes.h>
 
@@ -56,7 +54,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //#define QWORD long long int   // MSVC .NET can use "long long int" too (like GNU)
 #define QWORD __int64
 #endif
-#endif
+#endif /* NO_QWORD */
 
 #ifdef ASSERTMSG
 #undef ASSERTMSG
@@ -71,7 +69,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define __func__ __FUNCTION__
 
 void trace (const char* fmt, ...);
-#define PRINTF(...)                 TRACE(__VA_ARGS__)
+#define PRINTF(...)             TRACE(__VA_ARGS__)
 
 #ifdef ASSERTMSG
 #undef ASSERTMSG
@@ -87,9 +85,9 @@ void trace (const char* fmt, ...);
 
 #if defined(_DLL)
 #define OPLKDLLEXPORT extern __declspec(dllexport)
-#else
+#else /* defined(_DLL) */
 #define OPLKDLLEXPORT
-#endif
+#endif /* defined(_DLL) */
 
 // Target IO functions
 // - Write
@@ -113,5 +111,4 @@ void trace (const char* fmt, ...);
 
 #define OPLK_MUTEX_T                HANDLE
 
-#endif /* _INC_targetdefs_wince_H_ */
-
+#endif /* _INC_oplk_targetdefs_wince_H_ */
