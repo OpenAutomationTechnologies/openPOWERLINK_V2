@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   nmtmnu.h
+\file   user/nmtmnu.h
 
 \brief  Definitions for nmtmnu module
 
@@ -10,7 +10,7 @@ This file contains the definitions for the nmtmnu module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,9 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_nmtmnu_H_
-#define _INC_nmtmnu_H_
+#ifndef _INC_user_nmtmnu_H_
+#define _INC_user_nmtmnu_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -47,7 +46,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/nmtu.h>
 #include <oplk/event.h>
 
-#if defined(CONFIG_INCLUDE_NMT_MN)
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
@@ -55,7 +53,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-
+#if defined(CONFIG_INCLUDE_NMT_MN)
 typedef tOplkError (*tNmtMnuCbNodeEvent)(UINT nodeId_p, tNmtNodeEvent NodeEvent_p,
                                          tNmtState NmtState_p, UINT16 wErrorCode_p,
                                          BOOL fMandatory_p);
@@ -73,16 +71,17 @@ typedef struct
     UINT32   prcPResTimeFirstCorrectionNs;      ///< First correction time of a PRes in PRC mode (in ns)
     UINT32   prcPResTimeFirstNegOffsetNs;       ///< First negative offset of a PRes in PRC mode (in ns)
 } tNmtMnuConfigParam;
+#endif
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
+#if defined(CONFIG_INCLUDE_NMT_MN)
 tOplkError nmtmnu_init(tNmtMnuCbNodeEvent pfnCbNodeEvent_p, tNmtMnuCbBootEvent pfnCbBootEvent_p);
 tOplkError nmtmnu_exit(void);
 tOplkError nmtmnu_processEvent(tEvent* pEvent_p);
@@ -97,11 +96,10 @@ tOplkError nmtmnu_cbCheckEvent(tNmtEvent NmtEvent_p);
 tOplkError nmtmnu_getDiagnosticInfo(UINT* pMandatorySlaveCount_p, UINT* pSignalSlaveCount_p,
                                     UINT16* pflags_p);
 tOplkError nmtmnu_configPrc(tNmtMnuConfigParam* pConfigParam_p);
+#endif
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif
-
-#endif /* _INC_nmtmnu_H_ */
+#endif /* _INC_user_nmtmnu_H_ */

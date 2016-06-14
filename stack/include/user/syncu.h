@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   syncu.h
+\file   user/syncu.h
 
 \brief  Definitions for sync module
 
@@ -10,7 +10,7 @@ This file contains the definitions for the syncu module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,9 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_syncu_H_
-#define _INC_syncu_H_
+#ifndef _INC_user_syncu_H_
+#define _INC_user_syncu_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -46,7 +45,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplk/dll.h>
 #include <oplk/frame.h>
 
-#if defined(CONFIG_INCLUDE_NMT_MN)
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
@@ -54,28 +52,29 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
+#if defined(CONFIG_INCLUDE_NMT_MN)
 typedef tOplkError (*tSyncuCbResponse)(UINT nodeId_p, tSyncResponse* pSyncResponse_p);
+#endif
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
+#if defined(CONFIG_INCLUDE_NMT_MN)
 tOplkError syncu_init(void);
 tOplkError syncu_exit(void);
 tOplkError syncu_reset(void);
 tOplkError syncu_requestSyncResponse(tSyncuCbResponse pfnCbResponse_p,
                                      tDllSyncRequest* pSyncRequestData_p,
                                      UINT size_p);
+#endif /* #if defined(CONFIG_INCLUDE_NMT_MN) */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif
-
-#endif  /* _INC_syncu_H_ */
+#endif /* _INC_user_syncu_H_ */

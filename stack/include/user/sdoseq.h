@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   sdoseq.h
+\file   user/sdoseq.h
 
 \brief  Definitions for SDO sequence layer module
 
@@ -8,7 +8,7 @@ The file contains definitions for the SDO sequence layer module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -34,9 +34,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_sdoseq_H_
-#define _INC_sdoseq_H_
+#ifndef _INC_user_sdoseq_H_
+#define _INC_user_sdoseq_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -66,7 +65,7 @@ This enumeration lists all valid SDO connection states.
 typedef enum
 {
     kAsySdoConStateConnected            = 0x00,     ///< An SDO connection is established
-    kAsySdoConStateInitError            = 0x01,     ///< An error occured during initialization
+    kAsySdoConStateInitError            = 0x01,     ///< An error occurred during initialization
     kAsySdoConStateConClosed            = 0x02,     ///< The SDO connection is closed
     kAsySdoConStateAckReceived          = 0x03,     ///< An acknowledge has been received
     kAsySdoConStateFrameSent            = 0x04,     /**< A frame with command layer data
@@ -74,7 +73,7 @@ typedef enum
                                                          Tx history buffer */
     kAsySdoConStateFrameReceived        = 0x05,     /**< A frame with command layer data
                                                          was received */
-    kAsySdoConStateTimeout              = 0x06,     ///< A timeout has occured
+    kAsySdoConStateTimeout              = 0x06,     ///< A timeout has occurred
     kAsySdoConStateTransferAbort        = 0x07,     ///< The SDO transfer has been aborted
 } eAsySdoConState;
 
@@ -97,7 +96,6 @@ typedef tOplkError (*tSdoComReceiveCb)(tSdoSeqConHdl sdoSeqConHdl_p, tAsySdoCom*
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -115,4 +113,4 @@ tOplkError sdoseq_setTimeout(UINT32 timeout_p);
 }
 #endif
 
-#endif /* _INC_sdoseq_H_ */
+#endif /* _INC_user_sdoseq_H_ */

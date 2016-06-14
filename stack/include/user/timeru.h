@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   timeru.h
+\file   user/timeru.h
 
 \brief  Definitions for user timer module
 
@@ -8,7 +8,7 @@ This file contains definitions for the user timer module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -34,9 +34,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_timeru_H_
-#define _INC_timeru_H_
+#ifndef _INC_user_timeru_H_
+#define _INC_user_timeru_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -83,4 +82,4 @@ BOOL       timeru_isActive(tTimerHdl timerHdl_p);
 }
 #endif
 
-#endif /* _INC_timeru_H_ */
+#endif /* _INC_user_timeru_H_ */

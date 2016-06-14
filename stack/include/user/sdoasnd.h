@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   sdoasnd.h
+\file   user/sdoasnd.h
 
 \brief  Definitions for SDO over ASnd protocol abstraction layer
 
@@ -8,7 +8,7 @@ The file contains definitions for the SDO over ASnd protocol abstraction layer.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -34,9 +34,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_sdoasnd_H_
-#define _INC_sdoasnd_H_
+#ifndef _INC_user_sdoasnd_H_
+#define _INC_user_sdoasnd_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -56,24 +55,21 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
 #if defined(CONFIG_INCLUDE_SDO_ASND)
-
 tOplkError sdoasnd_init(tSequLayerReceiveCb pfnReceiveCb_p);
 tOplkError sdoasnd_exit(void);
 tOplkError sdoasnd_initCon(tSdoConHdl* pSdoConHandle_p, UINT targetNodeId_p);
 tOplkError sdoasnd_sendData(tSdoConHdl sdoConHandle_p, tPlkFrame* pSrcData_p, UINT32 dataSize_p);
 tOplkError sdoasnd_deleteCon(tSdoConHdl sdoConHandle_p);
-
-#endif
+#endif /* defined(CONFIG_INCLUDE_SDO_ASND) */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_sdoasnd_H_ */
+#endif /* _INC_user_sdoasnd_H_ */

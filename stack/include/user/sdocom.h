@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   sdocom.h
+\file   user/sdocom.h
 
 \brief  Definitions for SDO Command Layer module
 
@@ -8,7 +8,7 @@ The file contains definitions for the SDO Command Layer module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -34,9 +34,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_sdocom_H_
-#define _INC_sdocom_H_
+#ifndef _INC_user_sdocom_H_
+#define _INC_user_sdocom_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -91,13 +90,12 @@ typedef struct
     tOplkError          (*pfnGetState)(tSdoComConHdl, tSdoComFinished*);    ///< Get State function pointer
     UINT                (*pfnGetNodeId)(tSdoComConHdl);                     ///< Get Node Id function pointer
     tOplkError          (*pfnSdoAbort)(tSdoComConHdl, UINT32);              ///< SDO abort function pointer
-#endif // defined(CONFIG_INCLUDE_SDOC)
+#endif /* defined(CONFIG_INCLUDE_SDOC) */
 } tSdoComFunctions;
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -107,6 +105,7 @@ tOplkError sdocom_init(UINT stackType_p,
                        tComdLayerObdCb pfnObdWrite_p,
                        tComdLayerObdCb pfnObdRead_p);
 tOplkError sdocom_exit(void);
+
 #if defined(CONFIG_INCLUDE_SDOC)
 tOplkError sdocom_defineConnection(tSdoComConHdl* pSdoComConHdl_p, UINT targetNodeId_p, tSdoType sdoType_p);
 tOplkError sdocom_initTransferByIndex(tSdoComTransParamByIndex* pSdoComTransParam_p);
@@ -114,10 +113,10 @@ UINT       sdocom_getNodeId(tSdoComConHdl sdoComConHdl_p);
 tOplkError sdocom_undefineConnection(tSdoComConHdl sdoComConHdl_p);
 tOplkError sdocom_getState(tSdoComConHdl sdoComConHdl_p, tSdoComFinished* pSdoComFinished_p);
 tOplkError sdocom_abortTransfer(tSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p);
-#endif // defined(CONFIG_INCLUDE_SDOC)
+#endif /* defined(CONFIG_INCLUDE_SDOC) */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_sdocom_H_ */
+#endif /* _INC_user_sdocom_H_ */

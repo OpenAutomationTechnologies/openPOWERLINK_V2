@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   sdotest.h
+\file   user/sdotest.h
 
 \brief  Definitions for SDO test functions
 
@@ -8,7 +8,7 @@ This file contains the function declaration for the SDO sequence layer test.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -34,9 +34,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_sdotest_H_
-#define _INC_sdotest_H_
+#ifndef _INC_user_sdotest_H_
+#define _INC_user_sdotest_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -87,7 +86,6 @@ typedef tOplkError (*sdoApiCbComTest)(tAsySdoCom* pSdoComData_p, UINT dataSize_p
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -108,4 +106,4 @@ tOplkError sdotestcom_cbEvent(tEvent* pEvent_p);
 }
 #endif
 
-#endif /* _INC_sdotest_H_ */
+#endif /* _INC_user_sdotest_H_ */

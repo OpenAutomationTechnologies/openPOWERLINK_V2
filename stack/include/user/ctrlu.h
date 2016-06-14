@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   ctrlu.h
+\file   user/ctrlu.h
 
 \brief  Definitions for user control module
 
@@ -9,7 +9,7 @@ This file contains the definitions for the user control module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -35,9 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_ctrlu_H_
-#define _INC_ctrlu_H_
+#ifndef _INC_user_ctrlu_H_
+#define _INC_user_ctrlu_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -57,7 +56,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -83,4 +81,4 @@ size_t     ctrlu_getMaxFileChunkSize(void);
 }
 #endif
 
-#endif /* _INC_ctrlu_H_ */
+#endif /* _INC_user_ctrlu_H_ */

@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   eventu.h
+\file   user/eventu.h
 
 \brief  Definitions of the user event CAL module
 
@@ -10,7 +10,7 @@ This file contains definitions for the user CAL module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,9 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_eventu_H_
-#define _INC_eventu_H_
+#ifndef _INC_user_eventu_H_
+#define _INC_user_eventu_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -68,7 +67,6 @@ typedef tOplkError (*tProcessEventCb)(tEvent* pEvent_p);
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -85,4 +83,4 @@ tOplkError eventu_postError(tEventSource EventSource_p, tOplkError error_p,
 }
 #endif
 
-#endif /* _INC_eventu_H_ */
+#endif /* _INC_user_eventu_H_ */

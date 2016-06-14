@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   eventucal.h
+\file   user/eventucal.h
 
 \brief  Include file for user event CAL module
 
@@ -12,7 +12,7 @@ implementations.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -37,9 +37,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_eventucal_H_
-#define _INC_eventucal_H_
+#ifndef _INC_user_eventucal_H_
+#define _INC_user_eventucal_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -58,7 +57,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -74,4 +72,4 @@ void       eventucal_process(void);
 }
 #endif
 
-#endif /* _INC_eventucal_H_ */
+#endif /* _INC_user_eventucal_H_ */

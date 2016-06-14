@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   cfmu.h
+\file   user/cfmu.h
 
 \brief  Include file for configuration file manager (CFM) module
 
@@ -8,7 +8,7 @@ This file contains the definitions of the CFM module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -34,9 +34,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_cfmu_H_
-#define _INC_cfmu_H_
+#ifndef _INC_user_cfmu_H_
+#define _INC_user_cfmu_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -59,7 +58,6 @@ typedef tOplkError (*tCfmCbEventCnResult)(UINT nodeId_p, tNmtNodeCommand nodeCom
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -75,4 +73,4 @@ tOplkError cfmu_cbObdAccess(tObdCbParam MEM* pParam_p);
 }
 #endif
 
-#endif /* _INC_cfmu_H_ */
+#endif /* _INC_user_cfmu_H_ */

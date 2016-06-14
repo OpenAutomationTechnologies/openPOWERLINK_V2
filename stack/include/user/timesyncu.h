@@ -1,13 +1,13 @@
 /**
 ********************************************************************************
-\file   timesyncu.h
+\file   user/timesyncu.h
 
 \brief  Include file for user timesync module
 
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -32,9 +32,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_TIMESYNCU_H_
-#define _INC_TIMESYNCU_H_
+#ifndef _INC_user_timesyncu_H_
+#define _INC_user_timesyncu_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -53,7 +52,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -67,4 +65,4 @@ tOplkError timesyncu_getSocTime(tOplkApiSocTimeInfo* pSocTime_p);
 }
 #endif
 
-#endif /* _INC_TIMESYNCU_H_ */
+#endif /* _INC_user_timesyncu_H_ */

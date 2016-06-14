@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   obdu.h
+\file   user/obdu.h
 
 \brief  Definitions for user OBD module
 
@@ -8,7 +8,7 @@ This file contains definitions for the user OBD module
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
 All rights reserved.
@@ -35,9 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_obdu_H_
-#define _INC_obdu_H_
+#ifndef _INC_user_obdu_H_
+#define _INC_user_obdu_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -63,7 +62,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 typedef enum
 {
-    kObdDirInit             = 0x00,    ///< Initialising after power on
+    kObdDirInit             = 0x00,    ///< Initializing after power on
     kObdDirStore            = 0x01,    ///< Store all object values to non volatile memory
     kObdDirLoad             = 0x02,    ///< Load all object values from non volatile memory
     kObdDirRestore          = 0x03,    ///< Deletes non volatile memory (restore)
@@ -164,11 +163,11 @@ tOplkError obdu_readEntryToLe(UINT index_p, UINT subIndex_p, void* pDstData_p, t
 tOplkError obdu_getAccessType(UINT index_p, UINT subIndex_p, tObdAccess* pAccessType_p);
 tOplkError obdu_searchVarEntry(UINT index_p, UINT subindex_p, tObdVarEntry MEM** ppVarEntry_p);
 
-#if defined(CONFIG_OBD_USE_STORE_RESTORE) && (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
+#if (defined(CONFIG_OBD_USE_STORE_RESTORE) && (CONFIG_OBD_USE_STORE_RESTORE != FALSE))
 tOplkError obdu_storeLoadObjCallback(tObdStoreLoadCallback pfnCallback_p);
 #endif
 
-#if defined(CONFIG_OBD_CALC_OD_SIGNATURE) && (CONFIG_OBD_CALC_OD_SIGNATURE != FALSE)
+#if (defined(CONFIG_OBD_CALC_OD_SIGNATURE) && (CONFIG_OBD_CALC_OD_SIGNATURE != FALSE))
 UINT32     obdu_getOdSignature(tObdPart odPart_p);
 #endif
 
@@ -179,4 +178,4 @@ tOplkError obdu_processRead(tSdoObdConHdl* pSdoObdConHdl_p);
 }
 #endif
 
-#endif /* _INC_obdu_H_ */
+#endif /* _INC_user_obdu_H_ */

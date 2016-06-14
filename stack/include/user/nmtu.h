@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   nmtu.h
+\file   user/nmtu.h
 
 \brief  Definitions for nmtu module
 
@@ -10,7 +10,7 @@ This file contains the definitions for the nmtu module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,9 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_nmtu_H_
-#define _INC_nmtu_H_
+#ifndef _INC_user_nmtu_H_
+#define _INC_user_nmtu_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -55,33 +54,31 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define NMT_EXT_COMMAND_START       0x40        // Start of extended NMT command range
 #define NMT_EXT_COMMAND_END         0x5F        // End of extended NMT command range
 
-#define C_MAX_NMT_CMD_DATA_SIZE (C_DLL_MAX_PAYL_OFFSET - 6)
+#define C_MAX_NMT_CMD_DATA_SIZE     (C_DLL_MAX_PAYL_OFFSET - 6)
 
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-
 typedef tOplkError (*tNmtuStateChangeCallback)(tEventNmtStateChange NmtStateChange_p);
 typedef tOplkError (*tNmtuCheckEventCallback)(tNmtEvent NmtEvent_p);
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-tOplkError      nmtu_init(void);
-tOplkError      nmtu_exit(void);
-tOplkError      nmtu_postNmtEvent(tNmtEvent nmtEvent_p);
-tNmtState       nmtu_getNmtState(void);
-tOplkError      nmtu_processEvent(tEvent* pEvent_p);
-tOplkError      nmtu_registerStateChangeCb(tNmtuStateChangeCallback pfnNmtStateChangeCb_p);
+tOplkError nmtu_init(void);
+tOplkError nmtu_exit(void);
+tOplkError nmtu_postNmtEvent(tNmtEvent nmtEvent_p);
+tNmtState  nmtu_getNmtState(void);
+tOplkError nmtu_processEvent(tEvent* pEvent_p);
+tOplkError nmtu_registerStateChangeCb(tNmtuStateChangeCallback pfnNmtStateChangeCb_p);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif  // #ifndef _INC_nmtu_H_
+#endif  /* _INC_user_nmtu_H_ */
