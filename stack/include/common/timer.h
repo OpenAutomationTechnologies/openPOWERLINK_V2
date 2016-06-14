@@ -8,7 +8,7 @@ This file contains some generic definitions for timer modules.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -34,7 +34,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_common_timer_H_
 #define _INC_common_timer_H_
 
@@ -54,9 +53,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // type for timer handle
 #if (TARGET_SYSTEM == _WIN32_)
 typedef ULONG_PTR tTimerHdl;
-#else
+#else /* (TARGET_SYSTEM == _WIN32_) */
 typedef ULONG tTimerHdl;
-#endif
+#endif /* (TARGET_SYSTEM == _WIN32_) */
 
 /**
 \brief  Structure for timer event arguments
@@ -68,11 +67,11 @@ typedef struct
 {
     // Use a union of tTimerHdl and 64 bit variable to avoid
     // structure size mismatch while sharing the tTimerEventArg
-    // between heteregenous processors.
+    // between heterogeneous processors.
     union
     {
-        tTimerHdl           handle;       ///< Native handle of the expired timer
-        UINT64              padding;      ///< 64 Bit placeholder
+        tTimerHdl           handle;     ///< Native handle of the expired timer
+        UINT64              padding;    ///< 64 Bit placeholder
     } timerHdl;
 
     union

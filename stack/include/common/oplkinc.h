@@ -36,7 +36,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_common_oplkinc_H_
 #define _INC_common_oplkinc_H_
 
@@ -56,30 +55,31 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //  Set default definitions if not already set in target specific section
 
 #ifndef OPLK_MEMCPY
-#define OPLK_MEMCPY(dst, src, siz)    memcpy((dst), (src), (siz))
+#define OPLK_MEMCPY(dst, src, siz)      memcpy((dst), (src), (siz))
 #endif
 
 #ifndef OPLK_MEMSET
-#define OPLK_MEMSET(dst, val, siz)    memset((dst), (val), (siz))
+#define OPLK_MEMSET(dst, val, siz)      memset((dst), (val), (siz))
 #endif
 
 #ifndef OPLK_MEMCMP
-#define OPLK_MEMCMP(src1, src2, siz)  memcmp((src1), (src2), (siz))
+#define OPLK_MEMCMP(src1, src2, siz)    memcmp((src1), (src2), (siz))
 #endif
+
 #ifndef OPLK_MALLOC
-#define OPLK_MALLOC(siz)              malloc(siz)
+#define OPLK_MALLOC(siz)                malloc(siz)
 #endif
 
 #ifndef OPLK_FREE
-#define OPLK_FREE(ptr)                free(ptr)
+#define OPLK_FREE(ptr)                  free(ptr)
 #endif
 
 #ifndef OPLK_ATOMIC_INIT
-#define OPLK_ATOMIC_INIT(ignore)      ((void)0)
+#define OPLK_ATOMIC_INIT(ignore)        ((void)0)
 #endif
 
 #ifndef TIME_STAMP_T
-#define TIME_STAMP_T                  UINT32
+#define TIME_STAMP_T                    UINT32
 #endif
 
 //------------------------------------------------------------------------------
@@ -89,12 +89,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /**
 \brief Timestamp structure
 
-The following structure defines a timestamp value use to store target specific
+The following structure defines a time stamp value use to store target specific
 timestamps.
 */
 typedef struct
 {
-    TIME_STAMP_T        timeStamp;      ///< The timestamp.
+    TIME_STAMP_T        timeStamp;      ///< The time stamp.
 } tTimestamp;
 
 
@@ -102,15 +102,15 @@ typedef struct
 // global macros
 //------------------------------------------------------------------------------
 #ifndef tabentries
-#define tabentries(aVar_p)  (sizeof(aVar_p) / sizeof(*(aVar_p)))
+#define tabentries(aVar_p)      (sizeof(aVar_p) / sizeof(*(aVar_p)))
 #endif
 
 #ifndef min
-#define min(a, b)           (((a) < (b)) ? (a) : (b))
+#define min(a, b)               (((a) < (b)) ? (a) : (b))
 #endif
 
 #ifndef max
-#define max(a, b)           (((a) > (b)) ? (a) : (b))
+#define max(a, b)               (((a) > (b)) ? (a) : (b))
 #endif
 
 /* macro for adding two timespec values */

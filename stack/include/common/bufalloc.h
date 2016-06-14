@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   bufalloc.h
+\file   common/bufalloc.h
 
 \brief  Definitions for buffer allocation library
 
@@ -9,7 +9,7 @@ This file contains the definitions for the buffer allocation library.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,18 +34,19 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_bufalloc_H_
-#define _INC_bufalloc_H_
+#ifndef _INC_common_bufalloc_H_
+#define _INC_common_bufalloc_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
+
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
 #define BUFALLOC_CHECKID                       "bufalloc\0"
+
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
@@ -78,19 +79,19 @@ typedef struct
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-tBufAlloc*  bufalloc_init(UINT maxBuffer_p);
-tOplkError  bufalloc_addBuffer(tBufAlloc* pBufAlloc_p, void* pfreeBuf_p, UINT bufferNumber_p);
-tBufData*   bufalloc_getBuffer(tBufAlloc* pBufAlloc_p);
-tOplkError  bufalloc_releaseBuffer(tBufAlloc* pBufAlloc_p, void* pfreeBuf_p, UINT bufferNumber_p);
-tOplkError  bufalloc_exit(tBufAlloc* pBufAlloc_p);
+tBufAlloc* bufalloc_init(UINT maxBuffer_p);
+tOplkError bufalloc_addBuffer(tBufAlloc* pBufAlloc_p, void* pfreeBuf_p, UINT bufferNumber_p);
+tBufData*  bufalloc_getBuffer(tBufAlloc* pBufAlloc_p);
+tOplkError bufalloc_releaseBuffer(tBufAlloc* pBufAlloc_p, void* pfreeBuf_p, UINT bufferNumber_p);
+tOplkError bufalloc_exit(tBufAlloc* pBufAlloc_p);
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_bufalloc_H_ */
+#endif /* _INC_common_bufalloc_H_ */

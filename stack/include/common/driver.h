@@ -9,7 +9,7 @@ kernel driver modules.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -35,7 +35,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_common_driver_H_
 #define _INC_common_driver_H_
 
@@ -79,8 +78,8 @@ holds information about the current file chunk and the transfer progress.
 */
 typedef struct
 {
-    tOplkApiFileChunkDesc   desc;       ///< File chunk descriptor
-    void*                   pData;      ///< Pointer to file chunk
+    tOplkApiFileChunkDesc   desc;           ///< File chunk descriptor
+    void*                   pData;          ///< Pointer to file chunk
 } tIoctlFileChunk;
 
 /**
@@ -123,21 +122,26 @@ typedef struct
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+#ifdef __cplusplus
+}
+#endif
 
 //------------------------------------------------------------------------------
 // include architecture specific definitions
 //------------------------------------------------------------------------------
 #if (TARGET_SYSTEM == _LINUX_)
-
 #ifdef __LINUX_PCIE__
 #include <common/driver-linuxpcie.h>
-#else
-
+#else /* __LINUX_PCIE__ */
 #include <common/driver-linux.h>
-#endif
-
+#endif /* __LINUX_PCIE__ */
 #elif (TARGET_SYSTEM == _WIN32_)
 #include <common/driver-windows.h>
-#endif
+#endif /* (TARGET_SYSTEM == _WIN32_) */
 
 #endif /* _INC_common_driver_H_ */

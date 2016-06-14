@@ -9,7 +9,7 @@ This file contains the definitions for the ctrl modules.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_common_ctrl_H_
 #define _INC_common_ctrl_H_
 
@@ -112,15 +111,14 @@ between user and kernel stack.
 */
 typedef struct
 {
-    BYTE            aMacAddress[6];     ///< MAC address of the ethernet interface
-    UINT            ethDevNumber;       ///< Device number of the ethernet interface
-    char            szEthDevName[128];  ///< Device name of the ethernet interface
+    BYTE            aMacAddress[6];     ///< MAC address of the Ethernet interface
+    UINT            ethDevNumber;       ///< Device number of the Ethernet interface
+    char            szEthDevName[128];  ///< Device name of the Ethernet interface
 } tCtrlInitParam;
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {

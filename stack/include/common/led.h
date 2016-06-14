@@ -8,7 +8,7 @@ This file contains common definitions for the LED module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -34,7 +34,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_common_led_H_
 #define _INC_common_led_H_
 
@@ -58,7 +57,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 typedef enum
 {
-    kLedModeInit           = 0x00,  ///< LED Initilization.
+    kLedModeInit           = 0x00,  ///< LED initialization.
     kLedModeOff            = 0x01,  ///< LED off.
     kLedModeOn             = 0x02,  ///< LED on.
     kLedModeFlickering     = 0x03,  ///< LED on for 50ms and off for 50ms.
@@ -74,6 +73,7 @@ typedef enum
 Data type for the enumerator \ref eLedMode.
 */
 typedef UINT32 tLedMode;
+
 /**
  * \brief   Valid LED types
  *
