@@ -7,7 +7,7 @@
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -32,9 +32,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_TIMESYNCK_H_
-#define _INC_TIMESYNCK_H_
+#ifndef _INC_kernel_timesynck_H_
+#define _INC_kernel_timesynck_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -64,12 +63,13 @@ void       timesynck_exit(void);
 tOplkError timesynck_setCycleTime(UINT32 cycleLen_p, UINT32 minSyncTime_p);
 tOplkError timesynck_sendSyncEvent(void);
 tOplkError timesynck_process(tEvent* pEvent_p);
+
 #if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
 tOplkError timesynck_setSocTime(tTimesyncSocTime* pSocTime_p);
-#endif
+#endif /* defined(CONFIG_INCLUDE_SOC_TIME_FORWARD) */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif  /* _INC_TIMESYNCK_H_ */
+#endif  /* _INC_kernel_timesynck_H_ */

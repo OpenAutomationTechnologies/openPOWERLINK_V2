@@ -1,13 +1,13 @@
 /**
 ********************************************************************************
-\file   timesynckcal.h
+\file   kernel/timesynckcal.h
 
 \brief  Include file for kernel timesync CAL module
 
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -32,9 +32,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_TIMESYNCKCAL_H_
-#define _INC_TIMESYNCKCAL_H_
+#ifndef _INC_kernel_timesynckcal_H_
+#define _INC_kernel_timesynckcal_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -66,10 +65,10 @@ tOplkError timesynckcal_sendSyncEvent(void);
 
 #if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
 tTimesyncSharedMemory* timesynckcal_getSharedMemory(void);
-#endif
+#endif /* defined(CONFIG_INCLUDE_SOC_TIME_FORWARD) */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif  /* _INC_TIMESYNCKCAL_H_ */
+#endif  /* _INC_kernel_timesynckcal_H_ */

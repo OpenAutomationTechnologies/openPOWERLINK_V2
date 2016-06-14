@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   edrvcyclic.h
+\file   kernel/edrvcyclic.h
 
 \brief  Definitions for cyclic Ethernet driver module
 
@@ -8,7 +8,7 @@ This file contains definitions for the cyclic Ethernet driver module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2015, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -34,9 +34,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_edrvcyclic_H_
-#define _INC_edrvcyclic_H_
+#ifndef _INC_kernel_edrvcyclic_H_
+#define _INC_kernel_edrvcyclic_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -66,7 +65,7 @@ typedef tOplkError (*tEdrvCyclicCbSync)(void);
 typedef tOplkError (*tEdrvCyclicCbError)(tOplkError errorCode_p, tEdrvTxBuffer* pTxBuffer_p);
 
 
-#if CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
+#if (CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE)
 /**
 \brief Structure for cyclic Ethernet driver diagnostics
 
@@ -113,7 +112,7 @@ tOplkError edrvcyclic_setNextTxBufferList(tEdrvTxBuffer** ppTxBuffer_p, UINT txB
 tOplkError edrvcyclic_regSyncHandler(tEdrvCyclicCbSync pfnEdrvCyclicCbSync_p);
 tOplkError edrvcyclic_regErrorHandler(tEdrvCyclicCbError pfnEdrvCyclicCbError_p);
 
-#if CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
+#if (CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE)
 tOplkError edrvcyclic_getDiagnostics(tEdrvCyclicDiagnostics** ppDiagnostics_p);
 #endif
 
@@ -121,4 +120,4 @@ tOplkError edrvcyclic_getDiagnostics(tEdrvCyclicDiagnostics** ppDiagnostics_p);
 }
 #endif
 
-#endif /* _INC_edrvcyclic_H_ */
+#endif /* _INC_kernel_edrvcyclic_H_ */

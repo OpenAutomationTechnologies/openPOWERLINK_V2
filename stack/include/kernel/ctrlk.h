@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   ctrlk.h
+\file   kernel/ctrlk.h
 
 \brief  Definitions for kernel ctrl module
 
@@ -9,7 +9,7 @@ This file contains the definitions for the kernel ctrl module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,9 +34,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_ctrlk_H_
-#define _INC_ctrlk_H_
+#ifndef _INC_kernel_ctrlk_H_
+#define _INC_kernel_ctrlk_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -73,7 +72,6 @@ typedef BOOL (*tCtrlkExecuteCmdCb)(tCtrlCmdType cmd_p, UINT16* pRet_p, UINT16* p
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -94,4 +92,4 @@ size_t     ctrlk_getMaxFileChunkSize(void);
 }
 #endif
 
-#endif /* _INC_ctrlk_H_ */
+#endif /* _INC_kernel_ctrlk_H_ */

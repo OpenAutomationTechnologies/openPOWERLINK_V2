@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   dllk.h
+\file   kernel/dllk.h
 
 \brief  Definitions for DLL kernel module
 
@@ -10,7 +10,7 @@ This file contains the definitions for the DLL kernel module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,9 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_dllk_H_
-#define _INC_dllk_H_
+#ifndef _INC_kernel_dllk_H_
+#define _INC_kernel_dllk_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -100,7 +99,7 @@ struct _tDllkNodeInfo
     struct _tDllkNodeInfo*      pNextNodeInfo;          ///< Next node information structure
     UINT8                       errSigState;            ///< State of error signaling initialization state machine
     UINT8                       errSigReqCnt;           ///< Request counter for error signaling initialization
-#endif
+#endif /* defined(CONFIG_INCLUDE_NMT_MN) */
 };
 typedef struct _tDllkNodeInfo tDllkNodeInfo;
 
@@ -129,7 +128,7 @@ This enumeration defines the DLL node states.
 */
 typedef enum
 {
-    kDllGsInit           = 0x00,                        ///< MN/CN: initialisation (< PreOp2)
+    kDllGsInit           = 0x00,                        ///< MN/CN: initialization (< PreOp2)
     kDllCsWaitPreq       = 0x01,                        ///< CN: wait for PReq frame
     kDllCsWaitSoc        = 0x02,                        ///< CN: wait for SoC frame
     kDllCsWaitSoa        = 0x03,                        ///< CN: wait for SoA frame
@@ -172,21 +171,22 @@ tSyncCb    dllk_regSyncHandler(tSyncCb pfnCbSync_p);
 tOplkError dllk_cbCyclicError(tOplkError errorCode_p, tEdrvTxBuffer* pTxBuffer_p);
 #endif
 
-#if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC != FALSE || CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC != FALSE
+#if ((CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC != FALSE) || \
+     (CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC != FALSE))
 tOplkError dllk_releaseRxFrame(tPlkFrame* pFrame_p, UINT uiFrameSize_p);
 #endif
 
-#if NMT_MAX_NODE_ID > 0
+#if (NMT_MAX_NODE_ID > 0)
 tOplkError dllk_configNode(tDllNodeInfo* pNodeInfo_p);
 tOplkError dllk_addNode(tDllNodeOpParam* pNodeOpParam_p);
 tOplkError dllk_deleteNode(tDllNodeOpParam* pNodeOpParam_p);
-#endif // NMT_MAX_NODE_ID > 0
+#endif /* (NMT_MAX_NODE_ID > 0) */
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
 tOplkError dllk_setFlag1OfNode(UINT nodeId_p, UINT8 soaFlag1_p);
 void       dllk_getCurrentCnNodeIdList(BYTE** ppbCnNodeIdList_p);
 tOplkError dllk_getCnMacAddress(UINT nodeId_p, UINT8* pCnMacAddress_p);
-#endif
+#endif /* defined(CONFIG_INCLUDE_NMT_MN) */
 
 // dllkevent.c
 tOplkError dllk_process(tEvent* pEvent_p) SECTION_DLLK_PROCESS;
@@ -195,4 +195,4 @@ tOplkError dllk_process(tEvent* pEvent_p) SECTION_DLLK_PROCESS;
 }
 #endif
 
-#endif  // #ifndef _INC_dllk_H_
+#endif  /* _INC_kernel_dllk_H_ */

@@ -1,13 +1,13 @@
 /**
 ********************************************************************************
-\file   dllkcal.h
+\file   kernel/dllkcal.h
 
 \brief  Definitions for kernel DLL CAL module
 
 This file contains definitions for the kernel DLL CAL module
 
 Copyright (c) 2012, SYSTEC electronik GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -32,9 +32,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
-
-#ifndef _INC_dllkcal_H_
-#define _INC_dllkcal_H_
+#ifndef _INC_kernel_dllkcal_H_
+#define _INC_kernel_dllkcal_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -71,7 +70,6 @@ typedef struct
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -94,7 +92,6 @@ tOplkError dllkcal_getStatistics(tDllkCalStatistics** ppStatistics);
 tOplkError dllkcal_process(tEvent* pEvent_p);
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
-
 tOplkError dllkcal_clearAsyncQueues(void);
 tOplkError dllkcal_issueRequest(tDllReqServiceId service_p, UINT nodeId_p,
                                 BYTE soaFlag1_p);
@@ -104,11 +101,10 @@ tOplkError dllkcal_setAsyncPendingRequests(UINT nodeId_p, tDllAsyncReqPriority a
                                            UINT count_p) SECTION_DLLKCAL_GETPENREQ;
 tOplkError dllkcal_ackAsyncRequest(UINT nodeId_p, tDllReqServiceId reqServiceId_p)
                                    SECTION_DLLKCAL_GETPENREQ;
-
-#endif
+#endif /* defined(CONFIG_INCLUDE_NMT_MN) */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_dllkcal_H_ */
+#endif /* _INC_kernel_dllkcal_H_ */

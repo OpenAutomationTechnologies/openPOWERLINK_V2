@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   errhndk.h
+\file   kernel/errhndk.h
 
 \brief  External interface of the error handler kernel module
 
@@ -10,7 +10,7 @@ This header provides the external interface of the error handler kernel module
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,9 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_errhndk_H_
-#define _INC_errhndk_H_
+#ifndef _INC_kernel_errhndk_H_
+#define _INC_kernel_errhndk_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -75,16 +74,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-// init function
+// initialization
 tOplkError errhndk_init(void);
 
-// delete instance
+// exit
 tOplkError errhndk_exit(void);
 
 // processes error events
@@ -103,4 +101,4 @@ tOplkError errhndk_resetCnError(UINT nodeId_p);
 }
 #endif
 
-#endif /* _INC_errhndk_H_ */
+#endif /* _INC_kernel_errhndk_H_ */

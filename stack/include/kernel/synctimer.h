@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   synctimer.h
+\file   kernel/synctimer.h
 
 \brief  Definitions for synchronization timer module
 
@@ -10,7 +10,7 @@ This file contains the definitions for the synchronization timer module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,9 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_synctimer_H_
-#define _INC_synctimer_H_
+#ifndef _INC_kernel_synctimer_H_
+#define _INC_kernel_synctimer_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -57,7 +56,6 @@ typedef tOplkError (*tSyncTimerCbLossOfSync)(void);
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -80,4 +78,4 @@ void       synctimer_controlExtSyncIrq(BOOL fEnable_p);
 }
 #endif
 
-#endif /* _INC_synctimer_H_ */
+#endif /* _INC_kernel_synctimer_H_ */

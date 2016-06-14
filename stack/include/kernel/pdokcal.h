@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   pdokcal.h
+\file   kernel/pdokcal.h
 
 \brief  Include file for kernel PDO CAL module
 
@@ -8,7 +8,7 @@
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -33,9 +33,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_PDOKCAL_H_
-#define _INC_PDOKCAL_H_
+#ifndef _INC_kernel_pdokcal_H_
+#define _INC_kernel_pdokcal_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -85,4 +84,4 @@ BYTE*      pdokcal_getPdoPointer(BOOL fTxPdo_p, UINT offset_p, UINT16 pdoSize_p)
 }
 #endif
 
-#endif  // #ifndef _INC_PDOKCAL_H_
+#endif  /* _INC_kernel_pdokcal_H_ */
