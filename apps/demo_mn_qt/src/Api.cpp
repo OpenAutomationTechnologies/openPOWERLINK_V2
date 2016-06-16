@@ -108,7 +108,7 @@ Q_DECLARE_METATYPE(tSdoComFinished)
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-CONST BYTE abMacAddr[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+const BYTE abMacAddr[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 static char*    pszCdcFilename_g = (char*)"mnobd.cdc";
 static char     devName_g[256];
 

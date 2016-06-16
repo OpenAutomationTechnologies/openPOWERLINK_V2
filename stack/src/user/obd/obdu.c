@@ -118,7 +118,7 @@ static tOplkError   reallocStringDomainObj(tObdSubEntryPtr    pSubEntry_p,
                                            tObdSize*          pTotalTransSize_p,
                                            tObdSize*          pObdSize_p,
                                            tObdCbParam*       pCbParam_p,
-                                           void MEM**         ppDstData_p);
+                                           void**             ppDstData_p);
 static tOplkError   writeSegm(tSdoObdConHdl* pSdoHdl_p);
 static tOplkError   writeByIdxSegm(tSdoObdConHdl* pSdoHdl_p);
 static tOplkError   writeByIdxInit(tSdoObdConHdl* pSdoHdl_p);
@@ -126,9 +126,9 @@ static tOplkError   readByIdxInit(tSdoObdConHdl* pSdoHdl_p);
 static tOplkError   readByIdxSegm(tSdoObdConHdl* pSdoHdl_p);
 static tOplkError   writeEntryPre(UINT uiIndex_p, UINT subIndex_p, void* pSrcData_p, void** ppDstData_p,
                                   tObdSize size_p, tObdEntryPtr* ppObdEntry_p, tObdSubEntryPtr* ppSubEntry_p,
-                                  tObdCbParam MEM* pCbParam_p, tObdSize* pObdSize_p);
+                                  tObdCbParam* pCbParam_p, tObdSize* pObdSize_p);
 static tOplkError   writeEntryPost(tObdEntryPtr pObdEntry_p, tObdSubEntryPtr pSubEntry_p,
-                                   tObdCbParam MEM* pCbParam_p, void* pSrcData_p,
+                                   tObdCbParam* pCbParam_p, void* pSrcData_p,
                                    void* pDstData_p, tObdSize obdSize_p);
 static tObdSize     getDataSize(tObdSubEntryPtr pSubIndexEntry_p);
 static tObdSize     getObdStringLen(void* pObjData_p, tObdSize objLen_p, tObdType objType_p);
@@ -136,19 +136,19 @@ static tObdSize     getDomainSize(tObdSubEntryPtr pSubIndexEntry_p);
 static tObdSize     getVstringSize(tObdSubEntryPtr pSubIndexEntry_p);
 static tObdSize     getOstringSize(tObdSubEntryPtr pSubIndexEntry_p);
 static tObdSize     getObjectSize(tObdSubEntryPtr pSubIndexEntry_p);
-static tOplkError   getVarEntry(tObdSubEntryPtr pSubIndexEntry_p, tObdVarEntry MEM** ppVarEntry_p);
+static tOplkError   getVarEntry(tObdSubEntryPtr pSubIndexEntry_p, tObdVarEntry** ppVarEntry_p);
 static tOplkError   getEntry(UINT index_p, UINT subIndex_p, tObdEntryPtr* ppObdEntry_p,
                              tObdSubEntryPtr* ppObdSubEntry_p);
-static CONST void*  getObjectDefaultPtr(tObdSubEntryPtr pSubIndexEntry_p);
-static void MEM*    getObjectCurrentPtr(tObdSubEntryPtr pSubIndexEntry_p);
+static const void*  getObjectDefaultPtr(tObdSubEntryPtr pSubIndexEntry_p);
+static void*        getObjectCurrentPtr(tObdSubEntryPtr pSubIndexEntry_p);
 static void*        getObjectDataPtr(tObdSubEntryPtr pSubIndexEntry_p);
 static tObdEntryPtr searchIndex(tObdEntryPtr pObdEntry_p, UINT32 numEntries_p, UINT index_p);
-static tOplkError   getIndex(tObdInitParam MEM* pInitParam_p, UINT index_p, tObdEntryPtr* ppObdEntry_p);
+static tOplkError   getIndex(tObdInitParam* pInitParam_p, UINT index_p, tObdEntryPtr* ppObdEntry_p);
 static tOplkError   getSubindex(tObdEntryPtr pObdEntry_p, UINT subIndex_p, tObdSubEntryPtr* ppObdSubEntry_p);
 static tOplkError   accessOdPartition(tObdPart currentOdPart_p, tObdEntryPtr pObdEnty_p, tObdDir direction_p);
-static void         copyObjectData(void MEM* pDstData_p, CONST void* pSrcData_p, tObdSize objSize_p,
+static void         copyObjectData(void* pDstData_p, const void* pSrcData_p, tObdSize objSize_p,
                                    tObdType objType_p);
-static tOplkError   callObjectCallback(tObdEntryPtr pObdEntry_p, tObdCbParam MEM* pCbParam_p);
+static tOplkError   callObjectCallback(tObdEntryPtr pObdEntry_p, tObdCbParam* pCbParam_p);
 static tOplkError   callPostDefault(void* pData_p, tObdEntryPtr pObdEntry_p, tObdSubEntryPtr pObdSubEntry_p);
 static tOplkError   isNumerical(tObdSubEntryPtr pObdSubEntry_p, BOOL* pfEntryNumerical_p);
 static UINT32       calcPartitionIndexNum(tObdEntryPtr pObdEntry_p);
@@ -159,11 +159,11 @@ static tOplkError   checkObjectRange(tObdSubEntryPtr pSubIndexEntry_p, void* pDa
 #endif
 
 #if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
-static tOplkError   prepareStoreRestore(tObdDir direction_p, tObdCbStoreParam MEM* pCbStore_p);
-static tOplkError   cleanupStoreRestore(tObdDir direction_p, tObdCbStoreParam MEM* pCbStore_p);
-static tOplkError   doStoreRestore(tObdAccess access_p, tObdCbStoreParam MEM* pCbStore_p,
-                                   void MEM* pObjData_p, tObdSize objSize_p);
-static tOplkError   callStoreCallback(tObdCbStoreParam MEM* pCbStoreParam_p);
+static tOplkError   prepareStoreRestore(tObdDir direction_p, tObdCbStoreParam* pCbStore_p);
+static tOplkError   cleanupStoreRestore(tObdDir direction_p, tObdCbStoreParam* pCbStore_p);
+static tOplkError   doStoreRestore(tObdAccess access_p, tObdCbStoreParam* pCbStore_p,
+                                   void* pObjData_p, tObdSize objSize_p);
+static tOplkError   callStoreCallback(tObdCbStoreParam* pCbStoreParam_p);
 #endif // (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
 
 //------------------------------------------------------------------------------
@@ -219,7 +219,7 @@ The function initializes the OD module.
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tOplkError obdu_init(tObdInitParam MEM* pInitParam_p)
+tOplkError obdu_init(tObdInitParam* pInitParam_p)
 {
     tOplkError      ret;
 
@@ -286,8 +286,8 @@ tOplkError obdu_writeEntry(UINT index_p, UINT subIndex_p, void* pSrcData_p, tObd
     tOplkError              ret;
     tObdEntryPtr            pObdEntry;
     tObdSubEntryPtr         pSubEntry;
-    tObdCbParam MEM         cbParam;
-    void MEM*               pDstData;
+    tObdCbParam             cbParam;
+    void*                   pDstData;
     tObdSize                obdSize;
 
     ret = writeEntryPre(index_p, subIndex_p, pSrcData_p, &pDstData, size_p,
@@ -323,7 +323,7 @@ tOplkError obdu_readEntry(UINT index_p, UINT subIndex_p, void* pDstData_p, tObdS
     tOplkError                      ret;
     tObdEntryPtr                    pObdEntry;
     tObdSubEntryPtr                 pSubEntry;
-    tObdCbParam  MEM                cbParam;
+    tObdCbParam                    cbParam;
     void*                           pSrcData;
     tObdSize                        obdSize;
 
@@ -361,7 +361,7 @@ tOplkError obdu_readEntry(UINT index_p, UINT subIndex_p, void* pDstData_p, tObdS
     {
         if (*pSize_p > obdSize)
         {   // space left to set the terminating null-character
-            ((char MEM*)pDstData_p)[obdSize] = '\0';
+            ((char*)pDstData_p)[obdSize] = '\0';
             obdSize++;
         }
     }
@@ -455,10 +455,10 @@ The function defines an OD variable.
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tOplkError obdu_defineVar(tVarParam MEM* pVarParam_p)
+tOplkError obdu_defineVar(tVarParam* pVarParam_p)
 {
     tOplkError              ret;
-    tObdVarEntry MEM*       pVarEntry;
+    tObdVarEntry*           pVarEntry;
     tVarParamValid          varValid;
     tObdSubEntryPtr         pSubIndexEntry;
 
@@ -577,7 +577,7 @@ The function will not be used for strings.
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-void obdu_initVarEntry(tObdVarEntry MEM* pVarEntry_p, tObdType type_p, tObdSize obdSize_p)
+void obdu_initVarEntry(tObdVarEntry* pVarEntry_p, tObdType type_p, tObdSize obdSize_p)
 {
     if ((type_p == kObdTypeDomain))
     {
@@ -817,7 +817,7 @@ tOplkError obdu_readEntryToLe(UINT index_p, UINT subIndex_p, void* pDstData_p,
     tOplkError                      ret;
     tObdEntryPtr                    pObdEntry;
     tObdSubEntryPtr                 pSubEntry;
-    tObdCbParam  MEM                cbParam;
+    tObdCbParam                     cbParam;
     void*                           pSrcData;
     tObdSize                        obdSize;
 
@@ -856,7 +856,7 @@ tOplkError obdu_readEntryToLe(UINT index_p, UINT subIndex_p, void* pDstData_p,
             {
                 if (*pSize_p > obdSize)
                 {   // space left to set the terminating null-character
-                    ((char MEM*)pDstData_p)[obdSize] = '\0';
+                    ((char*)pDstData_p)[obdSize] = '\0';
                     obdSize++;
                 }
             }
@@ -947,8 +947,8 @@ tOplkError obdu_writeEntryFromLe(UINT index_p, UINT subIndex_p, void* pSrcData_p
     tOplkError              ret;
     tObdEntryPtr            pObdEntry;
     tObdSubEntryPtr         pSubEntry;
-    tObdCbParam MEM         cbParam;
-    void MEM*               pDstData;
+    tObdCbParam             cbParam;
+    void*                   pDstData;
     tObdSize                obdSize;
     UINT64                  buffer;
     void*                   pBuffer = &buffer;
@@ -1066,7 +1066,7 @@ The function gets the VarEntry structure of an object.
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tOplkError obdu_searchVarEntry(UINT index_p, UINT subIndex_p, tObdVarEntry MEM** ppVarEntry_p)
+tOplkError obdu_searchVarEntry(UINT index_p, UINT subIndex_p, tObdVarEntry** ppVarEntry_p)
 {
     tOplkError           ret;
     tObdSubEntryPtr      pSubIndexEntry;
@@ -1245,7 +1245,7 @@ static tOplkError initWrite(UINT        index_p,
     tObdEntryPtr            pObdEntry;
     tObdSubEntryPtr         pSubEntry;
     tObdAccess              access;
-    void MEM*               pDstData;
+    void*                   pDstData;
     tObdSize                obdSize;
     tObdCbParam             cbParam;
 
@@ -1267,7 +1267,7 @@ static tOplkError initWrite(UINT        index_p,
     // Because object size and object pointer are adapted by user callback
     // function, re-read this values.
     obdSize = getObjectSize(pSubEntry);
-    pDstData = (void MEM*)getObjectDataPtr(pSubEntry);
+    pDstData = (void*)getObjectDataPtr(pSubEntry);
 
     if (segmOffset_p == 0)
     {  // call storage modification only for first segment
@@ -1324,12 +1324,12 @@ static tOplkError reallocStringDomainObj(tObdSubEntryPtr    pSubEntry_p,
                                          tObdSize*          pTotalTransSize_p,
                                          tObdSize*          pObdSize_p,
                                          tObdCbParam*       pCbParam_p,
-                                         void MEM**         ppDstData_p)
+                                         void**             ppDstData_p)
 {
     tOplkError              ret;
 #if (CONFIG_OBD_USE_STRING_DOMAIN_IN_RAM != FALSE)
-    tObdVStringDomain MEM   memVStringDomain;
-    void MEM*               pCurrData;
+    tObdVStringDomain       memVStringDomain;
+    void*                   pCurrData;
 
     if ((pSubEntry_p->type == kObdTypeVString) ||
         (pSubEntry_p->type == kObdTypeDomain) ||
@@ -1354,12 +1354,12 @@ static tOplkError reallocStringDomainObj(tObdSubEntryPtr    pSubEntry_p,
         pCurrData = pSubEntry_p->pCurrent;
         if ((pSubEntry_p->type == kObdTypeVString) || (pSubEntry_p->type == kObdTypeOString))
         {
-            ((tObdVString MEM*)pCurrData)->size    = memVStringDomain.objSize;
-            ((tObdVString MEM*)pCurrData)->pString = memVStringDomain.pData;
+            ((tObdVString*)pCurrData)->size    = memVStringDomain.objSize;
+            ((tObdVString*)pCurrData)->pString = memVStringDomain.pData;
         }
         else
         {
-            tObdVarEntry MEM*    pVarEntry = NULL;
+            tObdVarEntry*    pVarEntry = NULL;
 
             ret = getVarEntry(pSubEntry_p, &pVarEntry);
             if (ret != kErrorOk)
@@ -1370,13 +1370,13 @@ static tOplkError reallocStringDomainObj(tObdSubEntryPtr    pSubEntry_p,
                 return kErrorObdAccessViolation;
             }
             pVarEntry->size  = memVStringDomain.objSize;
-            pVarEntry->pData = (void MEM*)memVStringDomain.pData;
+            pVarEntry->pData = (void*)memVStringDomain.pData;
         }
 
         // Because object size and object pointer are adapted by user callback
         // function, re-read this values.
         *pObdSize_p  = memVStringDomain.objSize;
-        *ppDstData_p = (void MEM*)memVStringDomain.pData;
+        *ppDstData_p = (void*)memVStringDomain.pData;
     }
 #endif
     return kErrorOk;
@@ -1620,7 +1620,7 @@ The function processes an ReadByIndex command layer of an SDO server.
 static tOplkError readByIdxSegm(tSdoObdConHdl* pSdoHdl_p)
 {
     tOplkError      ret = kErrorOk;
-    BYTE MEM*       pSrcData;
+    BYTE*           pSrcData;
 
     if ((pSdoHdl_p->pDstData == NULL) || (pSdoHdl_p->dataSize == 0))
     {
@@ -1672,14 +1672,14 @@ added '\0' character.
 //------------------------------------------------------------------------------
 static tOplkError writeEntryPre(UINT index_p, UINT subIndex_p, void* pSrcData_p,
                                 void** ppDstData_p, tObdSize size_p, tObdEntryPtr* ppObdEntry_p,
-                                tObdSubEntryPtr* ppSubEntry_p, tObdCbParam MEM* pCbParam_p,
+                                tObdSubEntryPtr* ppSubEntry_p, tObdCbParam* pCbParam_p,
                                 tObdSize*  pObdSize_p)
 {
     tOplkError              ret;
     tObdEntryPtr            pObdEntry;
     tObdSubEntryPtr         pSubEntry;
     tObdAccess              access;
-    void MEM*               pDstData;
+    void*                   pDstData;
     tObdSize                obdSize;
     BOOL                    fEntryNumerical;
 
@@ -1701,7 +1701,7 @@ static tOplkError writeEntryPre(UINT index_p, UINT subIndex_p, void* pSrcData_p,
     // Because object size and object pointer are adapted by user callback
     // function, re-read this values.
     obdSize = getObjectSize(pSubEntry);
-    pDstData = (void MEM*)getObjectDataPtr(pSubEntry);
+    pDstData = (void*)getObjectDataPtr(pSubEntry);
 
     ret = reallocStringDomainObj(pSubEntry,
                                  pObdEntry,
@@ -1727,7 +1727,7 @@ static tOplkError writeEntryPre(UINT index_p, UINT subIndex_p, void* pSrcData_p,
 
     if (pSubEntry->type == kObdTypeVString)
     {
-        if (((char MEM*)pSrcData_p)[size_p - 1] == '\0')
+        if (((char*)pSrcData_p)[size_p - 1] == '\0')
         {   // last byte of source string contains null character
             // reserve one byte in destination for 0-termination
             size_p -= 1;
@@ -1778,7 +1778,7 @@ added '\0' character.
 */
 //------------------------------------------------------------------------------
 static tOplkError writeEntryPost(tObdEntryPtr pObdEntry_p, tObdSubEntryPtr pSubEntry_p,
-                                 tObdCbParam MEM* pCbParam_p, void* pSrcData_p,
+                                 tObdCbParam* pCbParam_p, void* pSrcData_p,
                                  void* pDstData_p, tObdSize obdSize_p)
 {
     tOplkError              ret;
@@ -1806,7 +1806,7 @@ static tOplkError writeEntryPost(tObdEntryPtr pObdEntry_p, tObdSubEntryPtr pSubE
 
     if (pSubEntry_p->type == kObdTypeVString)
     {
-        ((char MEM*)pDstData_p)[obdSize_p] = '\0';
+        ((char*)pDstData_p)[obdSize_p] = '\0';
     }
 
     // write address of destination to structure of callback parameters
@@ -1832,7 +1832,7 @@ the string length without the terminating null-character.
 static tObdSize getDataSize(tObdSubEntryPtr pSubIndexEntry_p)
 {
     tObdSize    dataSize;
-    void MEM*   pData;
+    void*       pData;
 
     // If OD entry is defined by macro OBD_SUBINDEX_ROM_VSTRING
     // then the current pointer is always NULL. The function
@@ -1842,10 +1842,10 @@ static tObdSize getDataSize(tObdSubEntryPtr pSubIndexEntry_p)
     if (pSubIndexEntry_p->type == kObdTypeVString)
     {
         // The pointer to current value can be received from getObjectCurrentPtr()
-        pData = ((void MEM*)getObjectCurrentPtr(pSubIndexEntry_p));
+        pData = ((void*)getObjectCurrentPtr(pSubIndexEntry_p));
         if (pData != NULL)
         {
-            dataSize = getObdStringLen((void *)pData, dataSize, pSubIndexEntry_p->type);
+            dataSize = getObdStringLen((void*)pData, dataSize, pSubIndexEntry_p->type);
         }
     }
     return dataSize;
@@ -1906,7 +1906,7 @@ The function returns the size of a domain object.
 static tObdSize getDomainSize(tObdSubEntryPtr pSubIndexEntry_p)
 {
     tObdSize                dataSize = 0;
-    tObdVarEntry MEM*       pVarEntry = NULL;
+    tObdVarEntry*           pVarEntry = NULL;
     tOplkError              ret;
 
     ret = getVarEntry(pSubIndexEntry_p, &pVarEntry);
@@ -1937,23 +1937,23 @@ static tObdSize getVstringSize(tObdSubEntryPtr pSubIndexEntry_p)
     // then the current pointer is always NULL. The function
     // returns the length of default string.
     pData = (void*)pSubIndexEntry_p->pCurrent;
-    if ((void MEM*)pData != (void MEM*)NULL)
+    if ((void*)pData != (void*)NULL)
     {
         // The max. size of strings defined by STRING-Macro is stored in
         // tObdVString of current value.
         // (types tObdVString, tObdOString and tObdUString has the same members)
-        dataSize = ((tObdVString MEM*)pData)->size;
+        dataSize = ((tObdVString*)pData)->size;
     }
     else
     {
         // The current position is not declared. The string
         // is located in ROM, therefore use default pointer.
         pData = (void*)pSubIndexEntry_p->pDefault;
-        if ((CONST void ROM*)pData != (CONST void ROM*)NULL)
+        if ((const void*)pData != (const void*)NULL)
         {
            // The max. size of strings defined by STRING-Macro is stored in
            // tObdVString of default value.
-           dataSize = ((CONST tObdVString ROM*)pData)->size;
+           dataSize = ((const tObdVString*)pData)->size;
         }
     }
     return dataSize;
@@ -1976,23 +1976,23 @@ static tObdSize getOstringSize(tObdSubEntryPtr pSubIndexEntry_p)
     void*                   pData;
 
     pData = (void*)pSubIndexEntry_p->pCurrent;
-    if ((void MEM*)pData != (void MEM*)NULL)
+    if ((void*)pData != (void*)NULL)
     {
         // The max. size of strings defined by STRING-Macro is stored in
         // tObdVString of current value.
         // (types tObdVString, tObdOString and tObdUString has the same members)
-        dataSize = ((tObdOString MEM*)pData)->size;
+        dataSize = ((tObdOString*)pData)->size;
     }
     else
     {
         // The current position is not declared. The string
         // is located in ROM, therefore use default pointer.
         pData = (void*)pSubIndexEntry_p->pDefault;
-        if ((CONST void ROM*)pData != (CONST void ROM*)NULL)
+        if ((const void*)pData != (const void*)NULL)
         {
            // The max. size of strings defined by STRING-Macro is stored in
            // tObdVString of default value.
-           dataSize = ((CONST tObdOString ROM*)pData)->size;
+           dataSize = ((const tObdOString*)pData)->size;
         }
     }
     return dataSize;
@@ -2037,7 +2037,7 @@ The function returns the variable entry of an object.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError getVarEntry(tObdSubEntryPtr pSubIndexEntry_p, tObdVarEntry MEM** ppVarEntry_p)
+static tOplkError getVarEntry(tObdSubEntryPtr pSubIndexEntry_p, tObdVarEntry** ppVarEntry_p)
 {
     tOplkError ret = kErrorObdVarEntryNotExist;
 
@@ -2047,11 +2047,11 @@ static tOplkError getVarEntry(tObdSubEntryPtr pSubIndexEntry_p, tObdVarEntry MEM
         // check if object is an array
         if ((pSubIndexEntry_p->access & kObdAccArray) != 0)
         {
-            *ppVarEntry_p = &((tObdVarEntry MEM*)pSubIndexEntry_p->pCurrent)[pSubIndexEntry_p->subIndex - 1];
+            *ppVarEntry_p = &((tObdVarEntry*)pSubIndexEntry_p->pCurrent)[pSubIndexEntry_p->subIndex - 1];
         }
         else
         {
-            *ppVarEntry_p = (tObdVarEntry MEM*)pSubIndexEntry_p->pCurrent;
+            *ppVarEntry_p = (tObdVarEntry*)pSubIndexEntry_p->pCurrent;
         }
         ret = kErrorOk;
     }
@@ -2076,7 +2076,7 @@ static tOplkError getEntry(UINT index_p, UINT subIndex_p, tObdEntryPtr* ppObdEnt
                            tObdSubEntryPtr* ppObdSubEntry_p)
 {
     tObdEntryPtr            pObdEntry;
-    tObdCbParam MEM         cbParam;
+    tObdCbParam             cbParam;
     tOplkError              ret;
 
     ret = getIndex(&obdInstance_l.initParam, index_p, &pObdEntry);
@@ -2118,9 +2118,9 @@ The function returns the default pointer of the object entry.
 \return The function returns the pointer to the default data.
 */
 //------------------------------------------------------------------------------
-static CONST void* getObjectDefaultPtr(tObdSubEntryPtr pSubIndexEntry_p)
+static const void* getObjectDefaultPtr(tObdSubEntryPtr pSubIndexEntry_p)
 {
-    CONST void*     pDefault;
+    const void*     pDefault;
     tObdType        type;
 
     assert(pSubIndexEntry_p != NULL);
@@ -2157,9 +2157,9 @@ The function returns the pointer to the current data of an object.
 \return The function returns the pointer to the current data.
 */
 //------------------------------------------------------------------------------
-static void MEM* getObjectCurrentPtr(tObdSubEntryPtr pSubIndexEntry_p)
+static void* getObjectCurrentPtr(tObdSubEntryPtr pSubIndexEntry_p)
 {
-    void MEM*       pData;
+    void*           pData;
     UINT            arrayIndex;
     tObdSize        size;
 
@@ -2180,20 +2180,20 @@ static void MEM* getObjectCurrentPtr(tObdSubEntryPtr pSubIndexEntry_p)
             {
                 size = getObjectSize(pSubIndexEntry_p);
             }
-            pData = ((BYTE MEM*)pData) + (size * arrayIndex);
+            pData = ((BYTE*)pData) + (size * arrayIndex);
         }
 
         if ((pSubIndexEntry_p->access & kObdAccVar) != 0)
         {
-            pData = ((tObdVarEntry MEM*)pData)->pData;
+            pData = ((tObdVarEntry*)pData)->pData;
         }
         else if (pSubIndexEntry_p->type == kObdTypeVString)
         {
-            pData = (void MEM*)((tObdVString MEM*)pData)->pString;
+            pData = (void*)((tObdVString*)pData)->pString;
         }
         else if (pSubIndexEntry_p->type == kObdTypeOString)
         {
-            pData = (void MEM*)((tObdOString MEM*)pData)->pString;
+            pData = (void*)((tObdOString*)pData)->pString;
         }
     }
     return pData;
@@ -2344,7 +2344,7 @@ The function searches for an index entry in the OD.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError getIndex(tObdInitParam MEM* pInitParam_p, UINT index_p,
+static tOplkError getIndex(tObdInitParam* pInitParam_p, UINT index_p,
                            tObdEntryPtr* ppObdEntry_p)
 {
     tObdEntryPtr    pObdEntry;
@@ -2508,14 +2508,14 @@ static tOplkError accessOdPartition(tObdPart currentOdPart_p, tObdEntryPtr pObdE
     tObdSubEntryPtr             pSubIndex;
     UINT                        nSubIndexCount;
     tObdAccess                  access;
-    void MEM*                   pDstData;
-    CONST void*                 pDefault;
+    void*                       pDstData;
+    const void*                 pDefault;
     tObdSize                    objSize;
     tOplkError                  ret = kErrorOk;
-    tObdVarEntry MEM*           pVarEntry = NULL;
+    tObdVarEntry*               pVarEntry = NULL;
 
 #if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
-    tObdCbStoreParam MEM        cbStore;
+    tObdCbStoreParam            cbStore;
     tOplkError                  archiveState = kErrorOk;
 #else
     UNUSED_PARAMETER(currentOdPart_p);
@@ -2594,11 +2594,11 @@ static tOplkError accessOdPartition(tObdPart currentOdPart_p, tObdEntryPtr pObdE
                             {
                                 // For copying data we have to set the destination pointer to the real RAM string. This
                                 // pointer to RAM string is located in default string info structure.
-                                pDstData = (void MEM*)((tObdVStringDef ROM*)pSubIndex->pDefault)->pString;
-                                objSize  = ((tObdVStringDef ROM*)pSubIndex->pDefault)->size;
+                                pDstData = (void*)((tObdVStringDef*)pSubIndex->pDefault)->pString;
+                                objSize  = ((tObdVStringDef*)pSubIndex->pDefault)->size;
 
-                                ((tObdVString MEM*)pSubIndex->pCurrent)->pString = (char*)pDstData;
-                                ((tObdVString MEM*)pSubIndex->pCurrent)->size    = objSize;
+                                ((tObdVString*)pSubIndex->pCurrent)->pString = (char*)pDstData;
+                                ((tObdVString*)pSubIndex->pCurrent)->size    = objSize;
                             }
                         }
                         else if (pSubIndex->type == kObdTypeOString)
@@ -2607,11 +2607,11 @@ static tOplkError accessOdPartition(tObdPart currentOdPart_p, tObdEntryPtr pObdE
                             {
                                 // For copying data we have to set the destination pointer to the real RAM string. This
                                 // pointer to RAM string is located in default string info structure.
-                                pDstData = (void MEM*)((tObdOStringDef ROM*)pSubIndex->pDefault)->pString;
-                                objSize  = ((tObdOStringDef ROM*)pSubIndex->pDefault)->size;
+                                pDstData = (void*)((tObdOStringDef*)pSubIndex->pDefault)->pString;
+                                objSize  = ((tObdOStringDef*)pSubIndex->pDefault)->size;
 
-                                ((tObdOString MEM*)pSubIndex->pCurrent)->pString = (BYTE*)pDstData;
-                                ((tObdOString MEM*)pSubIndex->pCurrent)->size    = objSize;
+                                ((tObdOString*)pSubIndex->pCurrent)->pString = (BYTE*)pDstData;
+                                ((tObdOString*)pSubIndex->pCurrent)->size    = objSize;
                             }
                         }
 
@@ -2722,7 +2722,7 @@ The functions copies object data.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static void copyObjectData(void MEM* pDstData_p, CONST void* pSrcData_p,
+static void copyObjectData(void* pDstData_p, const void* pSrcData_p,
                            tObdSize objSize_p, tObdType objType_p)
 {
     tObdSize StrSize = 0;
@@ -2751,7 +2751,7 @@ static void copyObjectData(void MEM* pDstData_p, CONST void* pSrcData_p,
             OPLK_MEMCPY(pDstData_p, pSrcData_p, objSize_p);
             if (objType_p == kObdTypeVString)
             {
-                ((char MEM*)pDstData_p)[StrSize] = '\0';
+                ((char*)pDstData_p)[StrSize] = '\0';
             }
         }
     }
@@ -2770,7 +2770,7 @@ The function calls the generic callback function \ref oplk_cbGenericObdAccess
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError callObjectCallback(tObdEntryPtr pObdEntry_p, tObdCbParam MEM* pCbParam_p)
+static tOplkError callObjectCallback(tObdEntryPtr pObdEntry_p, tObdCbParam* pCbParam_p)
 {
     tOplkError           ret = kErrorOk;
 
@@ -3048,7 +3048,7 @@ The functions prepares a store/restore command.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError prepareStoreRestore(tObdDir direction_p, tObdCbStoreParam MEM* pCbStore_p)
+static tOplkError prepareStoreRestore(tObdDir direction_p, tObdCbStoreParam* pCbStore_p)
 {
     tOplkError          ret;
 
@@ -3093,7 +3093,7 @@ The functions cleans up a store/restore command.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError cleanupStoreRestore(tObdDir direction_p, tObdCbStoreParam MEM* pCbStore_p)
+static tOplkError cleanupStoreRestore(tObdDir direction_p, tObdCbStoreParam* pCbStore_p)
 {
     tOplkError          ret = kErrorOk;
 
@@ -3140,8 +3140,8 @@ The functions executes a store/restore command.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError doStoreRestore(tObdAccess access_p, tObdCbStoreParam MEM* pCbStore_p,
-                                 void MEM* pObjData_p, tObdSize objSize_p)
+static tOplkError doStoreRestore(tObdAccess access_p, tObdCbStoreParam* pCbStore_p,
+                                 void* pObjData_p, tObdSize objSize_p)
 {
     tOplkError          ret = kErrorOk;
 
@@ -3170,7 +3170,7 @@ The functions calls the store callback function.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError callStoreCallback(tObdCbStoreParam MEM* pCbStoreParam_p)
+static tOplkError callStoreCallback(tObdCbStoreParam* pCbStoreParam_p)
 {
     tOplkError ret = kErrorOk;
 

@@ -80,7 +80,7 @@ tOplkError pdou_init(void);
 tOplkError pdou_exit(void);
 
 #if defined(CONFIG_INCLUDE_PDO)
-OPLKDLLEXPORT tOplkError pdou_cbObdAccess(tObdCbParam MEM* pParam_p);
+OPLKDLLEXPORT tOplkError pdou_cbObdAccess(tObdCbParam* pParam_p);
 #else
 #define pdou_cbObdAccess        NULL
 #endif

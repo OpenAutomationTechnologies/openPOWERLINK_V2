@@ -52,16 +52,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define ROM_INIT                // variables will be initialized directly in ROM (means no copy from RAM in startup)
-#define ROM                     // code or variables mapped to ROM (i.e. flash)
-                                // usage: CONST BYTE ROM foo = 0x00;
-
-#define MEM                     // Memory attribute to optimize speed and code of pointer access.
-
-#ifndef CONST
-#define CONST const             // variables mapped to ROM (i.e. flash)
-#endif
-
 #define OPLKDLLEXPORT
 
 #define INLINE                  inline

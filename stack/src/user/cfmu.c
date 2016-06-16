@@ -561,7 +561,7 @@ The function implements the callback function which is called on OD accesses.
 \ingroup module_cfmu
 */
 //------------------------------------------------------------------------------
-tOplkError cfmu_cbObdAccess(tObdCbParam MEM* pParam_p)
+tOplkError cfmu_cbObdAccess(tObdCbParam* pParam_p)
 {
     tOplkError              ret = kErrorOk;
     tObdVStringDomain*      pMemVStringDomain;

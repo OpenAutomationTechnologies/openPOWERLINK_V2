@@ -360,7 +360,7 @@ access is handled by the stack itself.
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tOplkError oplk_cbGenericObdAccess(tObdCbParam MEM* pParam_p)
+tOplkError oplk_cbGenericObdAccess(tObdCbParam* pParam_p)
 {
     return ctrlu_cbObdAccess(pParam_p);
 }
@@ -400,7 +400,7 @@ tOplkError oplk_linkObject(UINT objIndex_p, void* pVar_p, UINT* pVarEntries_p,
 {
     UINT8           varEntries;
     UINT8           indexEntries;
-    UINT8 MEM*      pData;
+    UINT8*          pData;
     UINT            subindex;
     tVarParam       varParam;
     tObdSize        entrySize;
@@ -414,7 +414,7 @@ tOplkError oplk_linkObject(UINT objIndex_p, void* pVar_p, UINT* pVarEntries_p,
     if ((pVar_p == NULL) || (pVarEntries_p == NULL) || (*pVarEntries_p == 0) || (pEntrySize_p == NULL))
         return kErrorApiInvalidParam;
 
-    pData      = (UINT8 MEM*)pVar_p;
+    pData      = (UINT8*)pVar_p;
     varEntries = (UINT8)*pVarEntries_p;
     usedSize   = 0;
 

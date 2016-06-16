@@ -270,12 +270,12 @@ typedef struct
     UINT                index;
     UINT                subindex;
     tObdSize            size;
-    void MEM*           pData;
+    void*               pData;
 } tVarParam;
 
 typedef struct
 {
-    void MEM*           pData;
+    void*               pData;
     tObdSize            size;
 } tObdVarEntry;
 
@@ -304,7 +304,7 @@ typedef struct
 typedef struct
 {
     tObdSize            size;
-    CONST char*         pDefString;         // must be same offset as pString in tObdVString
+    const char*         pDefString;         // must be same offset as pString in tObdVString
     char*               pString;
 } tObdVStringDef;
 
@@ -331,7 +331,7 @@ typedef struct
 } tObdCbParam;
 
 // define type for callback function: pParam_p points to tObdCbParam
-typedef tOplkError (ROM* tObdCallback)(tObdCbParam MEM* pParam_p);
+typedef tOplkError (*tObdCallback)(tObdCbParam* pParam_p);
 
 /**
 \brief Structure for subindices
@@ -343,8 +343,8 @@ typedef struct
     UINT                subIndex;           ///< Subindex of the object
     tObdType            type;               ///< Data type of the object
     tObdAccess          access;             ///< Access type of the object
-    CONST void ROM*     pDefault;           ///< Pointer to default data
-    void MEM*           pCurrent;           ///< Pointer to data (points always to RAM)
+    const void*         pDefault;           ///< Pointer to default data
+    void*               pCurrent;           ///< Pointer to data (points always to RAM)
 } tObdSubEntry;
 
 typedef tObdSubEntry* tObdSubEntryPtr;

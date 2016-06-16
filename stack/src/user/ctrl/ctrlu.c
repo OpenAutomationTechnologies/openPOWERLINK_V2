@@ -159,12 +159,12 @@ static tOplkError initNmtu(tOplkApiInitParam* pInitParam_p);
 static tOplkError initObd(tOplkApiInitParam* pInitParam_p);
 static tOplkError updateDllConfig(tOplkApiInitParam* pInitParam_p, BOOL fUpdateIdentity_p);
 static tOplkError updateObd(tOplkApiInitParam* pInitParam_p, BOOL fDisableUpdateStoredConf_p);
-static tOplkError handleObdLossOfFrameTolerance(tObdCbParam MEM* pParam_p);
-static tOplkError handleObdVerifyConf(tObdCbParam MEM* pParam_p);
-static tOplkError handleObdResetCmd(tObdCbParam MEM* pParam_p);
+static tOplkError handleObdLossOfFrameTolerance(tObdCbParam* pParam_p);
+static tOplkError handleObdVerifyConf(tObdCbParam* pParam_p);
+static tOplkError handleObdResetCmd(tObdCbParam* pParam_p);
 
 #if defined(CONFIG_INCLUDE_IP)
-static tOplkError handleObdIpAddrTable(tObdCbParam MEM* pParam_p);
+static tOplkError handleObdIpAddrTable(tObdCbParam* pParam_p);
 #endif
 
 static tOplkError processUserEvent(tEvent* pEvent_p);
@@ -187,7 +187,7 @@ static tOplkError cbNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p,
                               BOOL fMandatory_p);
 static tOplkError linkDomainObjects(tLinkObjectRequest* pLinkRequest_p,
                                     size_t requestCnt_p);
-static tOplkError handleObdRequestCmd(tObdCbParam MEM* pParam_p);
+static tOplkError handleObdRequestCmd(tObdCbParam* pParam_p);
 #endif
 
 static tOplkError cbBootEvent(tNmtBootEvent BootEvent_p, tNmtState NmtState_p,
@@ -200,9 +200,9 @@ static tOplkError cbCfmEventCnResult(unsigned int uiNodeId_p, tNmtNodeCommand No
 UINT32 getRequiredKernelFeatures(void);
 
 #if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
-static tOplkError storeOdPart(tObdCbParam MEM* pParam_p);
-static tOplkError restoreOdPart(tObdCbParam MEM* pParam_p);
-static tOplkError cbStoreLoadObject(tObdCbStoreParam MEM* pCbStoreParam_p);
+static tOplkError storeOdPart(tObdCbParam* pParam_p);
+static tOplkError restoreOdPart(tObdCbParam* pParam_p);
+static tOplkError cbStoreLoadObject(tObdCbStoreParam* pCbStoreParam_p);
 static tOplkError initDefaultOdPartArchive(void);
 #endif
 
@@ -723,7 +723,7 @@ actions for system objects.
 \ingroup module_ctrlu
 */
 //------------------------------------------------------------------------------
-tOplkError ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p)
+tOplkError ctrlu_cbObdAccess(tObdCbParam* pParam_p)
 {
     tOplkError          ret = kErrorOk;
 
@@ -1735,7 +1735,7 @@ dictionary.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError handleObdLossOfFrameTolerance(tObdCbParam MEM* pParam_p)
+static tOplkError handleObdLossOfFrameTolerance(tObdCbParam* pParam_p)
 {
     tOplkError  ret = kErrorOk;
 
@@ -1762,7 +1762,7 @@ dictionary.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError handleObdVerifyConf(tObdCbParam MEM* pParam_p)
+static tOplkError handleObdVerifyConf(tObdCbParam* pParam_p)
 {
     tOplkError  ret = kErrorOk;
 
@@ -1796,7 +1796,7 @@ dictionary.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError handleObdResetCmd(tObdCbParam MEM* pParam_p)
+static tOplkError handleObdResetCmd(tObdCbParam* pParam_p)
 {
     tOplkError  ret = kErrorOk;
     tNmtCommand nmtCommand;
@@ -1872,7 +1872,7 @@ This function handles an access to the IpAddrTable in the object dictionary.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError handleObdIpAddrTable(tObdCbParam MEM* pParam_p)
+static tOplkError handleObdIpAddrTable(tObdCbParam* pParam_p)
 {
     tOplkError  ret = kErrorOk;
 
@@ -2156,7 +2156,7 @@ dictionary.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError handleObdRequestCmd(tObdCbParam MEM* pParam_p)
+static tOplkError handleObdRequestCmd(tObdCbParam* pParam_p)
 {
     tOplkError      ret = kErrorOk;
 
@@ -2300,7 +2300,7 @@ Writing will only be done if following conditions are met:
 \return The function returns a tOplkError error code.
 */
 //----------------------------------------------------------------------------
-static tOplkError storeOdPart(tObdCbParam MEM* pParam_p)
+static tOplkError storeOdPart(tObdCbParam* pParam_p)
 {
     tOplkError          ret        = kErrorOk;
     tObdPart            odPart     = kObdPartNo;
@@ -2401,7 +2401,7 @@ Reseting default parameters will only be done if following conditions are met:
 \return The function returns a tOplkError error code.
 */
 //----------------------------------------------------------------------------
-static tOplkError restoreOdPart(tObdCbParam MEM* pParam_p)
+static tOplkError restoreOdPart(tObdCbParam* pParam_p)
 {
     tOplkError          ret        = kErrorOk;
     tObdPart            odPart     = kObdPartNo;
@@ -2485,7 +2485,7 @@ creates an archive and saves the parameters. Following command sequence is used:
 \return The function returns a tOplkError error code.
 */
 //----------------------------------------------------------------------------
-static tOplkError cbStoreLoadObject(tObdCbStoreParam MEM* pCbStoreParam_p)
+static tOplkError cbStoreLoadObject(tObdCbStoreParam* pCbStoreParam_p)
 {
     tOplkError      ret = kErrorOk;
     tOplkError      archiveState = kErrorOk;

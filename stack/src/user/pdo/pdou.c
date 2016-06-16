@@ -355,7 +355,7 @@ is accessed which belongs to the PDO module.
 \ingroup module_pdou
 **/
 //------------------------------------------------------------------------------
-tOplkError pdou_cbObdAccess(tObdCbParam MEM* pParam_p)
+tOplkError pdou_cbObdAccess(tObdCbParam* pParam_p)
 {
     tOplkError          ret = kErrorOk;
     UINT                indexType;

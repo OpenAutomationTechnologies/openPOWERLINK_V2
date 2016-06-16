@@ -291,13 +291,13 @@ The function initializes the object dictionary data structures.
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tOplkError obdcreate_initObd(tObdInitParam MEM* pInitParam_p)
+tOplkError obdcreate_initObd(tObdInitParam* pInitParam_p)
 {
 // Doxygen is confused by the inclusion of objdict.h in this function, therefore
 // we exclude the function body from parsing by doxygen!
 #if !defined(DOXYGEN_PARSER)
 
-    tObdInitParam MEM* pInitParam = pInitParam_p;
+    tObdInitParam* pInitParam = pInitParam_p;
 
     // check if pointer to parameter structure is valid
     // if not then only copy subindex tables below

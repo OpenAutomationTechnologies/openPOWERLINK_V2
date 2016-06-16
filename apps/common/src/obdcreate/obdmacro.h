@@ -90,7 +90,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 // generic macros
-#define OBD_BEGIN()                                                             static CONST DWORD  dwObd_OBK_g = 0x0000;
+#define OBD_BEGIN()                                                             static const DWORD  dwObd_OBK_g = 0x0000;
 #define OBD_END()
 
 // partition macros
@@ -102,27 +102,27 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // index macros
 #define OBD_BEGIN_INDEX_RAM(ind, cnt, call)
 #define OBD_END_INDEX(ind)
-#define OBD_RAM_INDEX_RAM_ARRAY(ind, cnt, call, typ, acc, dtyp, name, def)          static CONST tObdUnsigned8 ROM xDef##ind##_0x00_g = (cnt); \
-                                                                                    static CONST dtyp ROM xDef##ind##_0x01_g = (def);
-#define OBD_RAM_INDEX_RAM_ARRAY_ALT(ind, cnt, call, typ, acc, dtyp, name, def)      static CONST tObdUnsigned8 ROM xDef##ind##_0x00_g = (cnt); \
-                                                                                    static CONST dtyp ROM xDef##ind##_0x01_g = (def);
-#define OBD_RAM_INDEX_RAM_VARARRAY(ind, cnt, call, typ, acc, dtyp, name, def)       static CONST tObdUnsigned8 ROM xDef##ind##_0x00_g = (cnt); \
-                                                                                    static CONST dtyp ROM xDef##ind##_0x01_g = (def);
-#define OBD_RAM_INDEX_RAM_VARARRAY_NOINIT(ind, cnt, call, typ, acc, dtyp, name)     static CONST tObdUnsigned8 ROM xDef##ind##_0x00_g = (cnt);
-#define OBD_RAM_INDEX_RAM_PDO_MAPPING(ind, cnt, call, acc, name, def)               static CONST tObdUnsigned8 ROM xDef##ind##_0x00_g = 0; \
-                                                                                    static CONST tObdUnsigned64 ROM xDef##ind##_0x01_g = (def);
+#define OBD_RAM_INDEX_RAM_ARRAY(ind, cnt, call, typ, acc, dtyp, name, def)          static const tObdUnsigned8 xDef##ind##_0x00_g = (cnt); \
+                                                                                    static const dtyp xDef##ind##_0x01_g = (def);
+#define OBD_RAM_INDEX_RAM_ARRAY_ALT(ind, cnt, call, typ, acc, dtyp, name, def)      static const tObdUnsigned8 xDef##ind##_0x00_g = (cnt); \
+                                                                                    static const dtyp xDef##ind##_0x01_g = (def);
+#define OBD_RAM_INDEX_RAM_VARARRAY(ind, cnt, call, typ, acc, dtyp, name, def)       static const tObdUnsigned8 xDef##ind##_0x00_g = (cnt); \
+                                                                                    static const dtyp xDef##ind##_0x01_g = (def);
+#define OBD_RAM_INDEX_RAM_VARARRAY_NOINIT(ind, cnt, call, typ, acc, dtyp, name)     static const tObdUnsigned8 xDef##ind##_0x00_g = (cnt);
+#define OBD_RAM_INDEX_RAM_PDO_MAPPING(ind, cnt, call, acc, name, def)               static const tObdUnsigned8 xDef##ind##_0x00_g = 0; \
+                                                                                    static const tObdUnsigned64 xDef##ind##_0x01_g = (def);
 // subindex macros
-#define OBD_SUBINDEX_RAM_VAR(ind, sub, typ, acc, dtyp, name, val)                   static CONST dtyp ROM xDef##ind##_##sub##_g = val;
-#define OBD_SUBINDEX_RAM_VAR_RG(ind, sub, typ, acc, dtyp, name, val, low, high)     static CONST dtyp ROM xDef##ind##_##sub##_g[3] = {val, low, high};
+#define OBD_SUBINDEX_RAM_VAR(ind, sub, typ, acc, dtyp, name, val)                   static const dtyp xDef##ind##_##sub##_g = val;
+#define OBD_SUBINDEX_RAM_VAR_RG(ind, sub, typ, acc, dtyp, name, val, low, high)     static const dtyp xDef##ind##_##sub##_g[3] = {val, low, high};
 #define OBD_SUBINDEX_RAM_VAR_NOINIT(ind, sub, typ, acc, dtyp, name)
-#define OBD_SUBINDEX_RAM_VSTRING(ind, sub, acc, name, size, val)                    static char  MEM szCur##ind##_##sub##_g[size + 1]; \
-                                                                                    static CONST tObdVStringDef ROM xDef##ind##_##sub##_g = {size, val, szCur##ind##_##sub##_g};
+#define OBD_SUBINDEX_RAM_VSTRING(ind, sub, acc, name, size, val)                    static char  szCur##ind##_##sub##_g[size + 1]; \
+                                                                                    static const tObdVStringDef xDef##ind##_##sub##_g = {size, val, szCur##ind##_##sub##_g};
 
-#define OBD_SUBINDEX_RAM_OSTRING(ind, sub, acc, name, size)                         static BYTE  MEM bCur##ind##_##sub##_g[size]; \
-                                                                                    static CONST tObdOStringDef ROM xDef##ind##_##sub##_g = {size, ((BYTE*)""), bCur##ind##_##sub##_g};
+#define OBD_SUBINDEX_RAM_OSTRING(ind, sub, acc, name, size)                         static BYTE  bCur##ind##_##sub##_g[size]; \
+                                                                                    static const tObdOStringDef xDef##ind##_##sub##_g = {size, ((BYTE*)""), bCur##ind##_##sub##_g};
 #define OBD_SUBINDEX_RAM_DOMAIN(ind, sub, acc, name)
-#define OBD_SUBINDEX_RAM_USERDEF(ind, sub, typ, acc, dtyp, name, val)               static CONST dtyp ROM xDef##ind##_##sub##_g = val;
-#define OBD_SUBINDEX_RAM_USERDEF_RG(ind, sub, typ, acc, dtyp, name, val, low, high) static CONST dtyp ROM xDef##ind##_##sub##_g[3] = {val, low, high};
+#define OBD_SUBINDEX_RAM_USERDEF(ind, sub, typ, acc, dtyp, name, val)               static const dtyp xDef##ind##_##sub##_g = val;
+#define OBD_SUBINDEX_RAM_USERDEF_RG(ind, sub, typ, acc, dtyp, name, val, low, high) static const dtyp xDef##ind##_##sub##_g[3] = {val, low, high};
 #define OBD_SUBINDEX_RAM_USERDEF_NOINIT(ind, sub, typ, acc, dtyp, name)
 
 #elif defined(OBD_CREATE_RAM_DATA)
@@ -143,23 +143,23 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // index macros
 #define OBD_BEGIN_INDEX_RAM(ind, cnt, call)
 #define OBD_END_INDEX(ind)
-#define OBD_RAM_INDEX_RAM_ARRAY(ind, cnt, call, typ, acc, dtyp, name, def)           static dtyp           MEM axCur##ind##_g[cnt];
-#define OBD_RAM_INDEX_RAM_ARRAY_ALT(ind, cnt, call, typ, acc, dtyp, name, def)       static tObdUnsigned8  MEM xCur##ind##_0x00_g; \
-                                                                                     static dtyp           MEM axCur##ind##_g[cnt];
-#define OBD_RAM_INDEX_RAM_VARARRAY(ind, cnt, call, typ, acc, dtyp, name, def)        static tObdVarEntry   MEM aVarEntry##ind##_g[cnt];
-#define OBD_RAM_INDEX_RAM_VARARRAY_NOINIT(ind, cnt, call, typ, acc, dtyp, name)      static tObdVarEntry   MEM aVarEntry##ind##_g[cnt];
-#define OBD_RAM_INDEX_RAM_PDO_MAPPING(ind, cnt, call, acc, name, def)                static tObdUnsigned8  MEM xCur##ind##_0x00_g; \
-                                                                                     static tObdUnsigned64 MEM axCur##ind##_g[cnt];
+#define OBD_RAM_INDEX_RAM_ARRAY(ind, cnt, call, typ, acc, dtyp, name, def)           static dtyp           axCur##ind##_g[cnt];
+#define OBD_RAM_INDEX_RAM_ARRAY_ALT(ind, cnt, call, typ, acc, dtyp, name, def)       static tObdUnsigned8  xCur##ind##_0x00_g; \
+                                                                                     static dtyp           axCur##ind##_g[cnt];
+#define OBD_RAM_INDEX_RAM_VARARRAY(ind, cnt, call, typ, acc, dtyp, name, def)        static tObdVarEntry   aVarEntry##ind##_g[cnt];
+#define OBD_RAM_INDEX_RAM_VARARRAY_NOINIT(ind, cnt, call, typ, acc, dtyp, name)      static tObdVarEntry   aVarEntry##ind##_g[cnt];
+#define OBD_RAM_INDEX_RAM_PDO_MAPPING(ind, cnt, call, acc, name, def)                static tObdUnsigned8  xCur##ind##_0x00_g; \
+                                                                                     static tObdUnsigned64 axCur##ind##_g[cnt];
 // subindex macros
-#define OBD_SUBINDEX_RAM_VAR(ind, sub, typ, acc, dtyp, name, val)                    static dtyp         MEM xCur##ind##_##sub##_g;
-#define OBD_SUBINDEX_RAM_VAR_RG(ind, sub, typ, acc, dtyp, name, val, low, high)      static dtyp         MEM xCur##ind##_##sub##_g;
-#define OBD_SUBINDEX_RAM_VSTRING(ind, sub, acc, name, size, val)                     static tObdVString  MEM xCur##ind##_##sub##_g;
-#define OBD_SUBINDEX_RAM_OSTRING(ind, sub, acc, name, size)                          static tObdOString  MEM xCur##ind##_##sub##_g;
-#define OBD_SUBINDEX_RAM_VAR_NOINIT(ind, sub, typ, acc, dtyp, name)                  static dtyp         MEM xCur##ind##_##sub##_g;
-#define OBD_SUBINDEX_RAM_DOMAIN(ind, sub, acc, name)                                 static tObdVarEntry MEM VarEntry##ind##_##sub##_g;
-#define OBD_SUBINDEX_RAM_USERDEF(ind, sub, typ, acc, dtyp, name, val)                static tObdVarEntry MEM VarEntry##ind##_##sub##_g;
-#define OBD_SUBINDEX_RAM_USERDEF_RG(ind, sub, typ, acc, dtyp, name, val, low, high)  static tObdVarEntry MEM VarEntry##ind##_##sub##_g;
-#define OBD_SUBINDEX_RAM_USERDEF_NOINIT(ind, sub, typ, acc, dtyp, name)              static tObdVarEntry MEM VarEntry##ind##_##sub##_g;
+#define OBD_SUBINDEX_RAM_VAR(ind, sub, typ, acc, dtyp, name, val)                    static dtyp         xCur##ind##_##sub##_g;
+#define OBD_SUBINDEX_RAM_VAR_RG(ind, sub, typ, acc, dtyp, name, val, low, high)      static dtyp         xCur##ind##_##sub##_g;
+#define OBD_SUBINDEX_RAM_VSTRING(ind, sub, acc, name, size, val)                     static tObdVString  xCur##ind##_##sub##_g;
+#define OBD_SUBINDEX_RAM_OSTRING(ind, sub, acc, name, size)                          static tObdOString  xCur##ind##_##sub##_g;
+#define OBD_SUBINDEX_RAM_VAR_NOINIT(ind, sub, typ, acc, dtyp, name)                  static dtyp         xCur##ind##_##sub##_g;
+#define OBD_SUBINDEX_RAM_DOMAIN(ind, sub, acc, name)                                 static tObdVarEntry VarEntry##ind##_##sub##_g;
+#define OBD_SUBINDEX_RAM_USERDEF(ind, sub, typ, acc, dtyp, name, val)                static tObdVarEntry VarEntry##ind##_##sub##_g;
+#define OBD_SUBINDEX_RAM_USERDEF_RG(ind, sub, typ, acc, dtyp, name, val, low, high)  static tObdVarEntry VarEntry##ind##_##sub##_g;
+#define OBD_SUBINDEX_RAM_USERDEF_NOINIT(ind, sub, typ, acc, dtyp, name)              static tObdVarEntry VarEntry##ind##_##sub##_g;
 
 #elif defined(OBD_CREATE_SUBINDEX_TAB)
 //------------------------------------------------------------------------------
@@ -177,25 +177,25 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OBD_END_PART()
 
 // index macros
-#define OBD_BEGIN_INDEX_RAM(ind, cnt, call)                                     static tObdSubEntry MEM aObdSubEntry##ind##Ram_g[cnt]= {
+#define OBD_BEGIN_INDEX_RAM(ind, cnt, call)                                     static tObdSubEntry aObdSubEntry##ind##Ram_g[cnt]= {
 #define OBD_END_INDEX(ind)                                                      OBD_END_SUBINDEX()};
-#define OBD_RAM_INDEX_RAM_ARRAY(ind, cnt, call, typ, acc, dtyp, name, def)      static tObdSubEntry MEM aObdSubEntry##ind##Ram_g[]= { \
+#define OBD_RAM_INDEX_RAM_ARRAY(ind, cnt, call, typ, acc, dtyp, name, def)      static tObdSubEntry aObdSubEntry##ind##Ram_g[]= { \
                                                                                 {0, kObdTypeUInt8, kObdAccCR,                        &xDef##ind##_0x00_g, NULL}, \
                                                                                 {1, typ,          (acc) | kObdAccArray,              &xDef##ind##_0x01_g, &axCur##ind##_g[0]}, \
                                                                                 OBD_END_SUBINDEX()};
-#define OBD_RAM_INDEX_RAM_ARRAY_ALT(ind, cnt, call, typ, acc, dtyp, name, def)  static tObdSubEntry MEM aObdSubEntry##ind##Ram_g[]= { \
+#define OBD_RAM_INDEX_RAM_ARRAY_ALT(ind, cnt, call, typ, acc, dtyp, name, def)  static tObdSubEntry aObdSubEntry##ind##Ram_g[]= { \
                                                                                 {0, kObdTypeUInt8, (acc),                             &xDef##ind##_0x00_g, &xCur##ind##_0x00_g}, \
                                                                                 {1, typ,           (acc) | kObdAccArray,              &xDef##ind##_0x01_g, &axCur##ind##_g[0]}, \
                                                                                 OBD_END_SUBINDEX()};
-#define OBD_RAM_INDEX_RAM_VARARRAY(ind, cnt, call, typ, acc, dtyp, name, def)   static tObdSubEntry MEM aObdSubEntry##ind##Ram_g[]= { \
+#define OBD_RAM_INDEX_RAM_VARARRAY(ind, cnt, call, typ, acc, dtyp, name, def)   static tObdSubEntry aObdSubEntry##ind##Ram_g[]= { \
                                                                                 {0, kObdTypeUInt8, kObdAccCR,                        &xDef##ind##_0x00_g, NULL}, \
                                                                                 {1, typ,          (acc) | kObdAccArray | kObdAccVar, &xDef##ind##_0x01_g, &aVarEntry##ind##_g[0]}, \
                                                                                 OBD_END_SUBINDEX()};
-#define OBD_RAM_INDEX_RAM_VARARRAY_NOINIT(ind, cnt, call, typ, acc, dtyp, name) static tObdSubEntry MEM aObdSubEntry##ind##Ram_g[]= { \
+#define OBD_RAM_INDEX_RAM_VARARRAY_NOINIT(ind, cnt, call, typ, acc, dtyp, name) static tObdSubEntry aObdSubEntry##ind##Ram_g[]= { \
                                                                                 {0, kObdTypeUInt8, kObdAccCR,                        &xDef##ind##_0x00_g, NULL}, \
                                                                                 {1, typ,          (acc) | kObdAccArray | kObdAccVar, NULL,                &aVarEntry##ind##_g[0]}, \
                                                                                 OBD_END_SUBINDEX()};
-#define OBD_RAM_INDEX_RAM_PDO_MAPPING(ind, cnt, call, acc, name, def)           static tObdSubEntry MEM aObdSubEntry##ind##Ram_g[]= { \
+#define OBD_RAM_INDEX_RAM_PDO_MAPPING(ind, cnt, call, acc, name, def)           static tObdSubEntry aObdSubEntry##ind##Ram_g[]= { \
                                                                                 {0, kObdTypeUInt8,  (acc),                           &xDef##ind##_0x00_g, &xCur##ind##_0x00_g}, \
                                                                                 {1, kObdTypeUInt64, (acc) | kObdAccArray,            &xDef##ind##_0x01_g, &axCur##ind##_g[0]}, \
                                                                                 OBD_END_SUBINDEX()};

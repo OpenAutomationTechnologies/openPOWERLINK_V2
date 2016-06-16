@@ -206,7 +206,7 @@ PreRead events.
 \return Returns always kErrorOk
 */
 //------------------------------------------------------------------------------
-tOplkError errhndu_cbObdAccess(tObdCbParam MEM* pParam_p)
+tOplkError errhndu_cbObdAccess(tObdCbParam* pParam_p)
 {
     switch (pParam_p->obdEvent)
     {
@@ -269,7 +269,7 @@ PreRead objects.
 \ingroup module_errhndu
 */
 //------------------------------------------------------------------------------
-tOplkError errhndu_mnCnLossPresCbObdAccess(tObdCbParam MEM* pParam_p)
+tOplkError errhndu_mnCnLossPresCbObdAccess(tObdCbParam* pParam_p)
 {
     tOplkError          ret = kErrorOk;
 

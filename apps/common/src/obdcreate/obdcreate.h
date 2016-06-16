@@ -61,7 +61,7 @@ extern "C"
 {
 #endif
 
-tOplkError obdcreate_initObd(tObdInitParam MEM* pInitParam_p);
+tOplkError obdcreate_initObd(tObdInitParam* pInitParam_p);
 
 #ifdef __cplusplus
 }

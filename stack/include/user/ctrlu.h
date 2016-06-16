@@ -70,7 +70,7 @@ tOplkError ctrlu_processStack(void);
 BOOL       ctrlu_checkKernelStack(void);
 tOplkError ctrlu_getKernelInfo(tCtrlKernelInfo* pKernelInfo_p);
 tOplkError ctrlu_callUserEventCallback(tOplkApiEventType eventType_p, tOplkApiEventArg* pEventArg_p);
-tOplkError ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p);
+tOplkError ctrlu_cbObdAccess(tObdCbParam* pParam_p);
 UINT8*     ctrlu_getEthMacAddr(void);
 BOOL       ctrlu_stackIsInitialized(void);
 UINT32     ctrlu_getFeatureFlags(void);

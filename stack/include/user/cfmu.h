@@ -67,7 +67,7 @@ tOplkError cfmu_init(tCfmCbEventCnProgress pfnCbEventCnProgress_p, tCfmCbEventCn
 tOplkError cfmu_exit(void);
 tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtState nmtState_p);
 BOOL       cfmu_isSdoRunning(UINT nodeId_p);
-tOplkError cfmu_cbObdAccess(tObdCbParam MEM* pParam_p);
+tOplkError cfmu_cbObdAccess(tObdCbParam* pParam_p);
 
 #ifdef __cplusplus
 }
