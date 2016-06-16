@@ -12,6 +12,7 @@ to check the time.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -248,7 +249,7 @@ static inline UINT64 getTimerTicksFromScaled(ALT_GPT_TIMER_t timerId_p,
             goto Exit;
         }
 
-        if (alt_clk_freq_get(clkSrc, &freq) == ALT_E_SUCCESS)
+        if (alt_clk_freq_get(clkSrc, (uint32_t*)&freq) == ALT_E_SUCCESS)
         {
             // clock ticks per second
             ticks *= freq;
@@ -265,4 +266,4 @@ Exit:
     return ticks;
 }
 
-///\}
+/// \}

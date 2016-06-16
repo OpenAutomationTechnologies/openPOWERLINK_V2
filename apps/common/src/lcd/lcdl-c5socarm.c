@@ -9,7 +9,7 @@ Altera Cyclone-V development board(D) for handling LCD module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2015, Kalycito Infotech Private Ltd.
 All rights reserved.
@@ -207,7 +207,7 @@ void lcdl_init(void)
         goto Exit;
     }
 
-    if (alt_i2c_master_config_speed_get(deviceHandle_l, &cfg, &speed) != ALT_E_SUCCESS)
+    if (alt_i2c_master_config_speed_get(deviceHandle_l, &cfg, (uint32_t*)&speed) != ALT_E_SUCCESS)
     {
         ret = -1;
         goto Exit;
@@ -221,7 +221,7 @@ void lcdl_init(void)
         goto Exit;
     }
 
-    if (alt_i2c_master_config_speed_get(deviceHandle_l, &cfg, &speed) != ALT_E_SUCCESS)
+    if (alt_i2c_master_config_speed_get(deviceHandle_l, &cfg, (uint32_t*)&speed) != ALT_E_SUCCESS)
     {
         ret = -1;
         goto Exit;
@@ -408,4 +408,4 @@ static inline ALT_STATUS_CODE sendLcdCommand(ALT_I2C_DEV_t* deviceHdl_p,
 
     return halRet;
 }
-///\}
+/// \}
