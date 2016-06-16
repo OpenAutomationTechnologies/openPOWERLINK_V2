@@ -41,12 +41,10 @@ INCLUDE(setmicroblazeboardconfig)
 
 SET(LIB_ARCH_SRCS
         ${PROJECT_SOURCE_DIR}/src/hostiflibint_microblaze.c
-        ${OPLK_BASE_DIR}/contrib/cachemem/cachemem-xilinx.c
     )
 
 SET(LIB_ARCH_INCS
                     ${EXAMPLE_BINARY_DIR}/bsp${CFG_${PROC_INST_NAME}_NAME}/${CFG_${PROC_INST_NAME}_NAME}/include
-                    ${OPLK_BASE_DIR}/contrib
                    )
 
 ################################################################################

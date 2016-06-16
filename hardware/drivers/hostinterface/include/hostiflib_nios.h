@@ -9,7 +9,7 @@ This header file provides specific macros for Altera Nios II soft-core CPU.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -79,13 +79,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define HOSTIF_UNCACHED_FREE(ptr)     alt_uncached_free(ptr)
 
 /// hw access
-#define HOSTIF_RD32(base, offset)         IORD_32DIRECT(base, offset)
-#define HOSTIF_RD16(base, offset)         IORD_16DIRECT(base, offset)
-#define HOSTIF_RD8(base, offset)          IORD_8DIRECT(base, offset)
+#define HOSTIF_RD32(base)             IORD_32DIRECT(base, 0)
+#define HOSTIF_RD16(base)             IORD_16DIRECT(base, 0)
+#define HOSTIF_RD8(base)              IORD_8DIRECT(base, 0)
 
-#define HOSTIF_WR32(base, offset, dword)  IOWR_32DIRECT(base, offset, dword)
-#define HOSTIF_WR16(base, offset, word)   IOWR_16DIRECT(base, offset, word)
-#define HOSTIF_WR8(base, offset, byte)    IOWR_8DIRECT(base, offset, byte)
+#define HOSTIF_WR32(base, dword)      IOWR_32DIRECT(base, 0, dword)
+#define HOSTIF_WR16(base, word)       IOWR_16DIRECT(base, 0, word)
+#define HOSTIF_WR8(base, byte)        IOWR_8DIRECT(base, 0, byte)
+
+#define HOSTIF_DCACHE_FLUSH(base, len)
+#define HOSTIF_DCACHE_INVALIDATE(base, len)
 
 #define HOSTIF_INLINE inline
 //------------------------------------------------------------------------------
