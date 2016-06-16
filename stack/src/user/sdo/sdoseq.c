@@ -711,6 +711,8 @@ tOplkError sdoseq_setTimeout(UINT32 timeout_p)
 \brief  Process Idle state
 
 The function processes the sequence layer state: kSdoSeqStateIdle
+Server: Listens for incoming connection requests (InitReq)
+Client: Sends a connection request (InitReq)
 
 \param  pSdoSeqCon_p        Pointer to sequence layer connection information.
 \param  sdoSeqConHdl_p      Handle of sequence layer connection.
@@ -739,7 +741,7 @@ static tOplkError processStateIdle(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSe
             ret = setTimer(pSdoSeqCon_p, sdoSeqInstance_l.sdoSeqTimeout);
             break;
 
-        // init con from extern, check rcon and scon -> send answer
+        // init con from extern, check rcon and scon -> send answer (InitAck)
         case kSdoSeqEventFrameRec:
             if (pRecvFrame_p == NULL)
                 return kErrorInvalidOperation;
@@ -795,6 +797,10 @@ static tOplkError processStateIdle(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoSe
 \brief  Process state Init1
 
 The function processes the sequence layer state: kSdoSeqStateInit1
+Client: Listens for init request confirmation from server (InitAck)
+        and confirms with an init response frame (InitResp)
+Server: Changes role from client to server, if already in client mode
+        but receiving an initialization (InitReq) request from another client
 
 \param  pSdoSeqCon_p        Pointer to sequence layer connection information.
 \param  sdoSeqConHdl_p      Handle of sequence layer connection.
@@ -902,6 +908,10 @@ static tOplkError processStateInit1(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
 \brief  Process state Init2
 
 The function processes the sequence layer state: kSdoSeqStateInit2
+Server: Listens for init ack confirmation from client (InitResp)
+        and announces a valid connection (Valid)
+Client: Changes role from server to client, if already in server mode, but
+        receiving an initialization confirmation (InitAck) from another server
 
 \param  pSdoSeqCon_p        Pointer to sequence layer connection information.
 \param  sdoSeqConHdl_p      Handle of sequence layer connection.
@@ -1026,6 +1036,9 @@ static tOplkError processStateInit2(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
 \brief  Process state Init3
 
 The function processes the sequence layer state: kSdoSeqStateInit3
+Client: Listens for valid connection announcement from server (Valid)
+        and confirms with a valid connection frame (Valid)
+Server: Never reaches this state
 
 \param  pSdoSeqCon_p        Pointer to sequence layer connection information.
 \param  sdoSeqConHdl_p      Handle of sequence layer connection.
@@ -1064,6 +1077,13 @@ static tOplkError processStateInit3(tSdoSeqCon* pSdoSeqCon_p, tSdoSeqConHdl sdoS
 
                 sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateConnected);
 
+            }
+            // check scon == 1 and rcon == 1
+            else if (((pRecvFrame_p->recvSeqNumCon & SDO_CON_MASK) == 0x01) &&
+                     ((pRecvFrame_p->sendSeqNumCon & SDO_CON_MASK) == 0x01))
+            {   // server repeated an InitAck frame
+                // allow this until timeout -> do nothing and wait for correct frame
+                break;
             }
             // check scon == 2 and rcon == 1
             else if (((pRecvFrame_p->recvSeqNumCon & SDO_CON_MASK) == 0x01) &&
