@@ -12,19 +12,6 @@
    element $${FILENAME}
    {
    }
-   element atomicmodify_0
-   {
-      datum _sortIndex
-      {
-         value = "7";
-         type = "int";
-      }
-      datum sopceditor_expanded
-      {
-         value = "1";
-         type = "boolean";
-      }
-   }
    element pcie_ip.bar0
    {
       datum color
@@ -76,7 +63,7 @@
    {
       datum _sortIndex
       {
-         value = "6";
+         value = "8";
          type = "int";
       }
       datum sopceditor_expanded
@@ -85,19 +72,11 @@
          type = "boolean";
       }
    }
-   element mm_bridge_0
-   {
-      datum _sortIndex
-      {
-         value = "8";
-         type = "int";
-      }
-   }
    element mm_bridge_1
    {
       datum _sortIndex
       {
-         value = "10";
+         value = "6";
          type = "int";
       }
    }
@@ -105,7 +84,7 @@
    {
       datum _sortIndex
       {
-         value = "3";
+         value = "7";
          type = "int";
       }
       datum sopceditor_expanded
@@ -131,7 +110,7 @@
    {
       datum _sortIndex
       {
-         value = "9";
+         value = "5";
          type = "int";
       }
    }
@@ -139,7 +118,7 @@
    {
       datum _sortIndex
       {
-         value = "11";
+         value = "4";
          type = "int";
       }
    }
@@ -147,29 +126,13 @@
    {
       datum _sortIndex
       {
-         value = "5";
+         value = "9";
          type = "int";
       }
       datum sopceditor_expanded
       {
          value = "1";
          type = "boolean";
-      }
-   }
-   element mm_bridge_0.s0
-   {
-      datum baseAddress
-      {
-         value = "0";
-         type = "String";
-      }
-   }
-   element pcie_to_bar0_config_bridge_0.s0
-   {
-      datum baseAddress
-      {
-         value = "0";
-         type = "String";
       }
    }
    element pcp_to_shmem_slow_bridge.s0
@@ -180,16 +143,11 @@
          type = "boolean";
       }
    }
-   element atomicmodify_0.s0
+   element pcie_to_bar0_config_bridge_0.s0
    {
-      datum _lockedAddress
-      {
-         value = "0";
-         type = "boolean";
-      }
       datum baseAddress
       {
-         value = "524288";
+         value = "0";
          type = "String";
       }
    }
@@ -226,7 +184,7 @@
    {
       datum _sortIndex
       {
-         value = "4";
+         value = "3";
          type = "int";
       }
       datum sopceditor_expanded
@@ -258,7 +216,7 @@
  <parameter name="projectName" value="" />
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1444293674519" />
+ <parameter name="timeStamp" value="1466407694775" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceParameter
    name="vendor_id"
@@ -602,28 +560,7 @@ proc compose {} {
   <parameter name="simDoTestBenchWiring" value="false" />
   <parameter name="simDrivenValue" value="0" />
   <parameter name="width" value="8" />
-  <parameter name="clockRate" value="125000000" />
- </module>
- <module kind="atomicmodify" version="1.1.0" enabled="1" name="atomicmodify_0">
-  <parameter name="sys_m0Addrw" value="19" />
-  <parameter name="AUTO_C0_CLOCK_RATE" value="100000000" />
- </module>
- <module
-   kind="altera_avalon_mm_bridge"
-   version="13.0"
-   enabled="1"
-   name="mm_bridge_0">
-  <parameter name="DATA_WIDTH" value="32" />
-  <parameter name="SYMBOL_WIDTH" value="8" />
-  <parameter name="ADDRESS_WIDTH" value="20" />
-  <parameter name="ADDRESS_UNITS" value="SYMBOLS" />
-  <parameter name="MAX_BURST_SIZE" value="1" />
-  <parameter name="MAX_PENDING_RESPONSES" value="1" />
-  <parameter name="LINEWRAPBURSTS" value="0" />
-  <parameter name="PIPELINE_COMMAND" value="0" />
-  <parameter name="PIPELINE_RESPONSE" value="0" />
-  <parameter name="AUTO_CLK_CLOCK_RATE" value="100000000" />
-  <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone IV GX" />
+  <parameter name="clockRate" value="50000000" />
  </module>
  <module
    kind="altera_avalon_mm_bridge"
@@ -632,7 +569,7 @@ proc compose {} {
    name="pcie_to_bar0_config_bridge_0">
   <parameter name="DATA_WIDTH" value="32" />
   <parameter name="SYMBOL_WIDTH" value="8" />
-  <parameter name="ADDRESS_WIDTH" value="19" />
+  <parameter name="ADDRESS_WIDTH" value="20" />
   <parameter name="ADDRESS_UNITS" value="SYMBOLS" />
   <parameter name="MAX_BURST_SIZE" value="1" />
   <parameter name="MAX_PENDING_RESPONSES" value="1" />
@@ -731,11 +668,6 @@ proc compose {} {
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
-   kind="reset"
-   version="13.0"
-   start="pcie_ip.pcie_core_reset"
-   end="onchip_memory.reset1" />
- <connection
    kind="clock"
    version="13.0"
    start="clk50.clk"
@@ -772,69 +704,12 @@ proc compose {} {
    version="13.0"
    start="clk50.clk"
    end="onchip_memory.clk2" />
- <connection
-   kind="clock"
-   version="13.0"
-   start="pcie_ip.pcie_core_clk"
-   end="host_benchmark.clk" />
- <connection
-   kind="clock"
-   version="13.0"
-   start="pcie_ip.pcie_core_clk"
-   end="onchip_memory.clk1" />
  <connection kind="clock" version="13.0" start="clk100.clk" end="sync_irq.clk" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="pcie_ip.pcie_core_reset"
-   end="atomicmodify_0.r0" />
- <connection
-   kind="avalon"
-   version="13.0"
-   start="pcie_ip.bar0"
-   end="mm_bridge_0.s0">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0000" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection kind="clock" version="13.0" start="clk100.clk" end="mm_bridge_0.clk" />
- <connection
-   kind="avalon"
-   version="13.0"
-   start="mm_bridge_0.m0"
-   end="atomicmodify_0.s0">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x00080000" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
  <connection
    kind="clock"
    version="13.0"
    start="clk100.clk"
    end="pcie_to_bar0_config_bridge_0.clk" />
- <connection
-   kind="avalon"
-   version="13.0"
-   start="mm_bridge_0.m0"
-   end="pcie_to_bar0_config_bridge_0.s0">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0000" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="13.0"
-   start="atomicmodify_0.m0"
-   end="pcie_to_bar0_config_bridge_0.s0">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0000" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="clock"
-   version="13.0"
-   start="clk100.clk"
-   end="atomicmodify_0.c0" />
  <connection
    kind="avalon"
    version="13.0"
@@ -910,28 +785,37 @@ proc compose {} {
  <connection
    kind="reset"
    version="13.0"
-   start="clk100.clk_reset"
-   end="mm_bridge_0.reset" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk50.clk_reset"
-   end="mm_bridge_0.reset" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="pcie_ip.pcie_core_reset"
-   end="mm_bridge_0.reset" />
- <connection
-   kind="reset"
-   version="13.0"
    start="pcie_ip.pcie_core_reset"
    end="mm_bridge_1.reset" />
  <connection
+   kind="clock"
+   version="13.0"
+   start="clk50.clk"
+   end="onchip_memory.clk1" />
+ <connection
+   kind="clock"
+   version="13.0"
+   start="clk50.clk"
+   end="host_benchmark.clk" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk100.clk_reset"
+   end="onchip_memory.reset1" />
+ <connection
    kind="reset"
    version="13.0"
    start="pcie_ip.pcie_core_reset"
-   end="pcp_to_pcie_config_bridge_0.reset" />
+   end="pcie_to_bar0_config_bridge_0.reset" />
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="pcie_ip.bar0"
+   end="pcie_to_bar0_config_bridge_0.s0">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
  <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
  <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="1" />
 </system>
