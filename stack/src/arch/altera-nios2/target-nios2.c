@@ -46,7 +46,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <common/oplkinc.h>
 #include <common/target.h>
 #include <system.h>
-#include <altera_avalon_pio_regs.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -61,6 +60,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define GPIO_ERROR_LED_BIT      2
 
 #ifdef PCP_0_POWERLINK_LED_BASE
+#include <altera_avalon_pio_regs.h>
 #define TARGET_POWERLINK_LED_BASE PCP_0_POWERLINK_LED_BASE
 #endif
 
