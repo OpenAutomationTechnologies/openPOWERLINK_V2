@@ -93,6 +93,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define C_DLL_ISOCHR_MAX_PAYL                           1490                ///< Maximum size of PReq and PRes payload data
 #define C_DLL_MAX_ASYNC_MTU                             1500                ///< Maximum asynchronous payload in bytes
 #define C_DLL_MAX_ETH_FRAME                             1514                ///< Maximum Ethernet frame in bytes without checksum
+#define C_DLL_MIN_ETH_FRAME                             60                  ///< Minimum Ethernet frame in bytes without checksum
 #define C_DLL_MAX_PAYL_OFFSET                           1499                ///< Maximum offset of Ethernet frame payload
 #define C_DLL_MAX_RS                                    7                   ///< Maximum number of pending requests
 #define C_DLL_MIN_ASYNC_MTU                             300                 ///< Minimum asynchronous payload in bytes.
