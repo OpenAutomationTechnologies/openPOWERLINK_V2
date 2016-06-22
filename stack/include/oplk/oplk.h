@@ -280,8 +280,9 @@ typedef enum
     kOplkApiEventSdo                = 0x62,
 
     /** Object dictionary access. This event informs about an access of the
-    object dictionary. The event argument contains an OD callback parameter
-    (\ref tObdCbParam). */
+    object dictionary. It happens only, if \ref oplk_cbGenericObdAccess is
+    assigned as function pointer to the concerning object in \ref objdict.h.
+    The event argument contains an OD callback parameter (\ref tObdCbParam). */
     kOplkApiEventObdAccess          = 0x69,
 
     /** CFM progress event. This event informs the application about the progress
