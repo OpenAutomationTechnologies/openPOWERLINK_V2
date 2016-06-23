@@ -41,6 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <oplk/oplkinc.h>
+#include <trace/trace.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -213,34 +214,5 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #else
 #define DEBUG_LVL_EDRV_TRACE(...)
 #endif
-
-
-//------------------------------------------------------------------------------
-//  definition of TRACE
-//------------------------------------------------------------------------------
-#ifndef NDEBUG
-
-#if ((TARGET_SYSTEM == _WIN32_) && defined(_KERNEL_MODE))
-#define TRACE(...)      DbgPrint(__VA_ARGS__)
-#else /* ((TARGET_SYSTEM == _WIN32_) && defined(_KERNEL_MODE)) */
-#define TRACE(...)      trace(__VA_ARGS__)
-#endif /* ((TARGET_SYSTEM == _WIN32_) && defined(_KERNEL_MODE)) */
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
-void trace(const char* fmt, ...);
-
-#ifdef __cplusplus
-}
-#endif
-
-#else /* NDEBUG */
-
-#define TRACE(...)
-
-#endif /* NDEBUG */
 
 #endif /* _INC_oplk_debug_H_ */

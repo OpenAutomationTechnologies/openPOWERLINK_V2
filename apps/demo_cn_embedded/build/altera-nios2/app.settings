@@ -51,6 +51,7 @@ APP_INCLUDES="\
 ${OPLK_BASE_DIR}/apps/common/src \
 ${OPLK_BASE_DIR}/apps/common/objdicts/${OBJDICT} \
 ${OPLK_BASE_DIR}/stack/include \
+${OPLK_BASE_DIR}/contrib \
 "
 
 APP_CFLAGS="\

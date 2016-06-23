@@ -3,7 +3,7 @@
 # CMake file for openPOWERLINK kernel stack (Linux kernel module)
 #
 # Copyright (c) 2013, SYSTEC electronik GmbH
-# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # Copyright (c) 2015, Kalycito Infotech Private Limited
 # Copyright (c) 2016, Romain Naour (Open Wide)
 # All rights reserved.
@@ -224,6 +224,7 @@ ENDIF()
 ###############################################################################
 INCLUDE_DIRECTORIES(${OPLK_INCLUDE_DIR})
 INCLUDE_DIRECTORIES(${STACK_SOURCE_DIR})
+INCLUDE_DIRECTORIES(${CONTRIB_SOURCE_DIR})
 INCLUDE_DIRECTORIES(${COMMON_SOURCE_DIR}/circbuf)
 INCLUDE_DIRECTORIES(${KERNEL_SOURCE_DIR}/errhnd)
 INCLUDE_DIRECTORIES(${KERNEL_SOURCE_DIR}/dll)

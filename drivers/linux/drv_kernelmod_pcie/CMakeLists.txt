@@ -3,7 +3,7 @@
 # CMake file for openPOWERLINK user PCIe interface (Linux kernel PCIe module)
 #
 # Copyright (c) 2013, SYSTEC electronik GmbH
-# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # Copyright (c) 2015, Kalycito Infotech Private Limited
 # All rights reserved.
 #
@@ -129,6 +129,7 @@ INCLUDE_DIRECTORIES(${KERNEL_SOURCE_DIR}/dll)
 INCLUDE_DIRECTORIES(${STACK_INCLUDE_DIR}/target)
 INCLUDE_DIRECTORIES(${STACK_INCLUDE_DIR}/target/linux)
 INCLUDE_DIRECTORIES(${CONTRIB_SOURCE_DIR}/dualprocshm/include)
+INCLUDE_DIRECTORIES(${CONTRIB_SOURCE_DIR})
 
 GET_PROPERTY(DRIVER_INCLUDE_DIRS DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 FOREACH(NEXT_INCLUDE_DIR ${DRIVER_INCLUDE_DIRS})

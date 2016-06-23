@@ -70,6 +70,7 @@ ${ARCH_SOURCE_DIR}/altera-nios2 \
 ${HW_DRIVERS_DIR}/openmac/include \
 ${HW_DRIVERS_DIR}/openmac/src \
 ${OPLK_BASE_DIR}/contrib/socketwrapper \
+${CONTRIB_SOURCE_DIR} \
 "
 
 CFG_LIB_OPT_LEVEL=-O2

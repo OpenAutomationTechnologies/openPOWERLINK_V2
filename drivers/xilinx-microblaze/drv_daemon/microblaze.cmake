@@ -155,6 +155,7 @@ INCLUDE_DIRECTORIES(
                     ${XIL_BSP_DIR}/include
                     ${OPLK_BASE_DIR}/stack/src/arch/xilinx-microblaze
                     ${OPLK_INCLUDE_DIR}
+                    ${CONTRIB_SOURCE_DIR}
                     ${PROJECT_SOURCE_DIR}
                     ${CFG_HW_LIB_DIR}/include
                    )

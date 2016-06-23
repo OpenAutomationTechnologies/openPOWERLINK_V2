@@ -104,6 +104,7 @@ SET(DUALPROCSHM_LIB_INCS
     ${PROJECT_SOURCE_DIR}/include
     ${PROJECT_SOURCE_DIR}/src
     ${OPLK_BASE_DIR}/stack/include
+    ${OPLK_BASE_DIR}/contrib
    )
 
 ########################################################################

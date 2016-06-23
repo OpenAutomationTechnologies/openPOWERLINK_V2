@@ -9,7 +9,8 @@ This header file provides specific macros for Altera NIOS2 CPU.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015 Kalycito Infotech Private Limited
+Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -129,13 +130,5 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define DPSHM_DISABLE_SYNC_INTR() \
         alt_ic_irq_disable(TARGET_SYNC_IRQ_ID, TARGET_SYNC_IRQ)
-
-#ifndef TRACE
-#ifndef NDEBUG
-#define TRACE(...)                      printf(__VA_ARGS__)
-#else
-#define TRACE(...)
-#endif
-#endif
 
 #endif /* _INC_dualprocshm_nios2_H_ */

@@ -11,6 +11,7 @@ interface in Linux kernel.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -53,14 +54,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-
-#ifndef TRACE
-#ifndef NDEBUG
-#define TRACE(...)                              printk(__VA_ARGS__)
-#else
-#define TRACE(...)
-#endif
-#endif
 
 /// memory
 #define DPSHM_MAKE_NONCACHEABLE(ptr)            (void*)(((unsigned long)ptr))

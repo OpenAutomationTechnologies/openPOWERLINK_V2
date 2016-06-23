@@ -42,17 +42,22 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // Windows version must be at least Windows XP
 #if (defined(_WIN32_WINNT) && (_WIN32_WINNT < 0x0501))
-    #undef _WIN32_WINNT
+#undef _WIN32_WINNT
 #endif
 #if !defined(_WIN32_WINNT)
-    #define _WIN32_WINNT 0x0501
+#define _WIN32_WINNT 0x0501
 #endif
 
 // Do not use extended Win32 API functions
 #if !defined(WIN32_LEAN_AND_MEAN)
-    #define WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
 #endif
+
+#if defined(_KERNEL_MODE)
+#include <Wdm.h>
+#else
 #include <Windows.h>
+#endif
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -64,24 +69,27 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 The function prints a debug trace message.
 
-\param  fmt         Format string
-\param  ...         Arguments to print
+\param[in]      fmt                 Format string
+\param[in]      ...                 Arguments to print
 */
 //------------------------------------------------------------------------------
 void trace(const char* fmt, ...)
 {
-    char    Buffer[0x400];
+    char    buffer[0x0400];
     va_list argptr;
 
     va_start(argptr, fmt);
-#if _MSC_VER >= 1400
-    vsprintf_s(Buffer, sizeof(Buffer), fmt, argptr);
+#if (_MSC_VER >= 1400)
+    vsprintf_s(buffer, sizeof(buffer), fmt, argptr);
 #else
-    vsprintf(Buffer, fmt, argptr);
+    vsprintf(buffer, fmt, argptr);
 #endif
     va_end(argptr);
 
-    OutputDebugString((LPSTR)&Buffer);
+#if defined(_KERNEL_MODE)
+    DbgPrint((LPSTR)&buffer);
+#else
+    OutputDebugString((LPSTR)&buffer);
+#endif
 
 }
-

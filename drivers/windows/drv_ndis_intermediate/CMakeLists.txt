@@ -3,6 +3,7 @@
 # CMake file for openPOWERLINK kernel stack (Windows kernel driver)
 #
 # Copyright (c) 2015, Kalycito Infotech Private Limited
+# Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -94,6 +95,10 @@ SET(ARCH_SOURCE_FILES
     ${ARCH_SOURCE_DIR}/target-winkernel.c
     )
 
+SET(CONTRIB_SOURCE_FILES
+    ${CONTRIB_SOURCE_DIR}/trace/trace-windows.c
+    )
+
 SET(NDIS_SOURCE_FILES
     ${NDISLIB_SOURCE_DIR}/ndisintermediate/ndis-imMiniport.c
     ${NDISLIB_SOURCE_DIR}/ndisintermediate/ndis-imProtocol.c
@@ -110,6 +115,7 @@ SET(DRIVER_SOURCE_LIST
     ${KERNEL_SOURCE_FILES}
     ${COMMON_SOURCE_FILES}
     ${ARCH_SOURCE_FILES}
+    ${CONTRIB_SOURCE_FILES}
     ${NDIS_SOURCE_FILES}
     )
 
@@ -123,6 +129,9 @@ GEN_VS_FILTER_LIST("${COMMON_SOURCE_FILES}" "Common Source Files" PART_VS_FILTER
 SET(VS_FILTER_LIST "${VS_FILTER_LIST} ${PART_VS_FILTER_LIST}")
 
 GEN_VS_FILTER_LIST("${ARCH_SOURCE_FILES}" "Architecture Source Files" PART_VS_FILTER_LIST)
+SET(VS_FILTER_LIST "${VS_FILTER_LIST} ${PART_VS_FILTER_LIST}")
+
+GEN_VS_FILTER_LIST("${CONTRIB_SOURCE_FILES}" "Contrib Source" PART_VS_FILTER_LIST)
 SET(VS_FILTER_LIST "${VS_FILTER_LIST} ${PART_VS_FILTER_LIST}")
 
 GEN_VS_FILTER_LIST("${NDIS_SOURCE_FILES}" "Ndis Intermediate Source" PART_VS_FILTER_LIST)

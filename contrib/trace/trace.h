@@ -1,14 +1,14 @@
 /**
 ********************************************************************************
-\file   trace-printf.c
+\file   trace.h
 
-\brief  Trace function using fprintf to stderr
+\brief  Definitions for trace
 
+This file contains definitions for the trace function.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2013, SYSTEC electronik GmbH
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -33,32 +33,28 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
+#ifndef _INC_trace_H_
+#define _INC_trace_H_
+
+#ifndef NDEBUG
+#define TRACE(...)          trace(__VA_ARGS__)
+#else
+#define TRACE(...)
+#endif
 
 //------------------------------------------------------------------------------
-// includes
+// function prototypes
 //------------------------------------------------------------------------------
-#include <stdio.h>
-#include <stdarg.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-//============================================================================//
-//            P U B L I C   F U N C T I O N S                                 //
-//============================================================================//
+#ifndef NDEBUG
+void trace(const char* fmt, ...);
+#endif
 
-//------------------------------------------------------------------------------
-/**
-\brief  Print debug trace message
-
-The function prints a debug trace message using standard printf
-
-\param[in]      fmt                 Format string
-\param[in]      ...                 Arguments to print
-*/
-//------------------------------------------------------------------------------
-void trace(const char* fmt, ...)
-{
-    va_list argptr;
-
-    va_start(argptr, fmt);
-    vfprintf(stderr, fmt, argptr);
-    va_end(argptr);
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* _INC_trace_H_ */

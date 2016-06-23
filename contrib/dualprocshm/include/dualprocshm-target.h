@@ -12,6 +12,7 @@ information of processors part of the platform.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -156,10 +157,6 @@ set to those provided by stdint.h.
 
 #ifndef UNUSED_PARAMETER
 #define UNUSED_PARAMETER(par)    (void)par
-#endif
-
-#ifndef TRACE
-#define TRACE(...)
 #endif
 
 #ifndef PTR_T

@@ -63,6 +63,7 @@ ${ARCH_SOURCE_DIR}/altera-nios2 \
 ${HW_DRIVERS_DIR}/hostinterface/include \
 ${HW_DRIVERS_DIR}/hostinterface/src \
 ${OPLK_BASE_DIR}/contrib/socketwrapper \
+${CONTRIB_SOURCE_DIR} \
 "
 
 CFG_LIB_CFLAGS="\
