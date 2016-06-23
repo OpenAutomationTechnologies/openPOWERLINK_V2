@@ -645,7 +645,6 @@ SET(ARCH_LE_SOURCES
 SET(OPLK_HEADERS
     ${STACK_INCLUDE_DIR}/oplk/benchmark.h
     ${STACK_INCLUDE_DIR}/oplk/cfm.h
-    ${STACK_INCLUDE_DIR}/oplk/debug.h
     ${STACK_INCLUDE_DIR}/oplk/debugstr.h
     ${STACK_INCLUDE_DIR}/oplk/dll.h
     ${STACK_INCLUDE_DIR}/oplk/oplk.h
@@ -681,6 +680,7 @@ SET(STACK_HEADERS
     ${STACK_INCLUDE_DIR}/common/ctrlcal.h
     ${STACK_INCLUDE_DIR}/common/ctrlcal-mem.h
     ${STACK_INCLUDE_DIR}/common/defaultcfg.h
+    ${STACK_INCLUDE_DIR}/common/debug.h
     ${STACK_INCLUDE_DIR}/common/dllcal.h
     ${STACK_INCLUDE_DIR}/common/errhnd.h
     ${STACK_INCLUDE_DIR}/common/led.h

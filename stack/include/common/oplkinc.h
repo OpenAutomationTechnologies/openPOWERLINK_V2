@@ -44,6 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <oplkcfg.h>                 // Stack configuration file
 #include <oplk/oplk.h>
+#include <common/debug.h>
 #include <common/defaultcfg.h>
 #include <common/section.h>
 

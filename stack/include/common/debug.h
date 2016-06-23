@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   oplk/debug.h
+\file   common/debug.h
 
 \brief  Definitions for debugging
 
@@ -34,13 +34,13 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-#ifndef _INC_oplk_debug_H_
-#define _INC_oplk_debug_H_
+#ifndef _INC_common_debug_H_
+#define _INC_common_debug_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <trace/trace.h>
 
 //------------------------------------------------------------------------------
@@ -215,4 +215,4 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DEBUG_LVL_EDRV_TRACE(...)
 #endif
 
-#endif /* _INC_oplk_debug_H_ */
+#endif /* _INC_common_debug_H_ */
