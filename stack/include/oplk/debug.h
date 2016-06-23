@@ -243,35 +243,4 @@ void trace(const char* fmt, ...);
 
 #endif /* NDEBUG */
 
-
-//------------------------------------------------------------------------------
-//  definition of ASSERT
-//------------------------------------------------------------------------------
-#ifndef ASSERT
-#if (!defined(__linux__) && !defined(__KERNEL__))
-#include <assert.h>
-#define ASSERT(p)    assert(p)
-#else /* (!defined(__linux__) && !defined(__KERNEL__)) */
-#define ASSERT(p)
-#endif /* (!defined(__linux__) && !defined(__KERNEL__)) */
-#endif /* ASSERT */
-
-
-//------------------------------------------------------------------------------
-// This macro doesn't print out C-file and line number of the failed assertion
-// but a string, which exactly names the mistake.
-//------------------------------------------------------------------------------
-#ifndef ASSERTMSG
-#ifndef NDEBUG
-#define ASSERTMSG(expr, string) \
-    if (!(expr)) \
-    { \
-        PRINTF("Assertion failed: " string);\
-        for (;;);\
-    }
-#else /* NDEBUG */
-#define ASSERTMSG(expr, string)
-#endif /* NDEBUG */
-#endif /* ASSERTMSG */
-
 #endif /* _INC_oplk_debug_H_ */

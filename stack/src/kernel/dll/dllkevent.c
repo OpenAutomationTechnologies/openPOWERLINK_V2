@@ -198,7 +198,11 @@ tOplkError dllk_process(tEvent* pEvent_p)
 
         default:
             ret = kErrorInvalidEvent;
-            ASSERTMSG(ret != kErrorInvalidEvent, "dllk_process(): unhandled event type!\n");
+            TRACE("dllk_process(): unhandled event type!\n");
+#ifndef NDEBUG
+            // Severe error -> stop execution here
+            for (;;);
+#endif
             break;
     }
 

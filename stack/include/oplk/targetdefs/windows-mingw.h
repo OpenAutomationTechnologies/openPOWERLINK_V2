@@ -86,16 +86,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define PRINTF(...)                 TRACE(__VA_ARGS__)
 #endif
 
-#ifdef ASSERTMSG
-#undef ASSERTMSG
-#define ASSERTMSG(expr, string) \
-    if (!(expr))\
-    { \
-        MessageBox(NULL, string, "Assertion failed", MB_OK | MB_ICONERROR); \
-        exit(-1); \
-    }
-#endif
-
 #if defined(_DLL)
 #define OPLKDLLEXPORT __attribute__((dllexport))
 #else /* defined(_DLL) */

@@ -48,6 +48,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/obdconf.h>
 #endif
 
+#include <assert.h>
+
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
@@ -2121,7 +2123,7 @@ static CONST void* getObjectDefaultPtr(tObdSubEntryPtr pSubIndexEntry_p)
     CONST void*     pDefault;
     tObdType        type;
 
-    ASSERTMSG(pSubIndexEntry_p != NULL, "getObjectDefaultPtr(): pointer to SubEntry not valid!\n");
+    assert(pSubIndexEntry_p != NULL);
 
     // get address to default data from default pointer
     pDefault = pSubIndexEntry_p->pDefault;
@@ -2214,7 +2216,7 @@ static void* getObjectDataPtr(tObdSubEntryPtr pSubIndexEntry_p)
     void*       pData;
     tObdAccess  access;
 
-    ASSERTMSG(pSubIndexEntry_p != NULL, "getObjectDataPtr(): pointer to SubEntry not valid!\n");
+    assert(pSubIndexEntry_p != NULL);
 
     // there are are some objects whose data pointer has to get from other structure
     // get access type for this object

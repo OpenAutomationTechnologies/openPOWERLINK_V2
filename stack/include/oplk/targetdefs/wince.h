@@ -56,10 +56,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 #endif /* NO_QWORD */
 
-#ifdef ASSERTMSG
-#undef ASSERTMSG
-#endif
-
 #define INLINE
 
 #define OPLK_FILE_HANDLE        HANDLE
@@ -70,18 +66,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 void trace (const char* fmt, ...);
 #define PRINTF(...)             TRACE(__VA_ARGS__)
-
-#ifdef ASSERTMSG
-#undef ASSERTMSG
-
-#define ASSERTMSG(expr, string) \
-    if (!(expr))\
-    { \
-    MessageBox(NULL, string, L"Assertion failed", MB_OK | MB_ICONERROR); \
-    exit(-1);\
-    }
-
-#endif
 
 #if defined(_DLL)
 #define OPLKDLLEXPORT extern __declspec(dllexport)
