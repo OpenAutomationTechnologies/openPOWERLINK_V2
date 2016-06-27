@@ -127,17 +127,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                             pfnIrqCb_p, pArg_p, NULL);              \
     } while (0)
 
-#define DPSHM_ENABLE_SYNC_INTR()                                    \
-    do                                                              \
-    {                                                               \
-        alt_ic_irq_enable(TARGET_SYNC_IRQ_ID, TARGET_SYNC_IRQ);     \
-    } while (0)
+#define DPSHM_ENABLE_SYNC_INTR() \
+        alt_ic_irq_enable(TARGET_SYNC_IRQ_ID, TARGET_SYNC_IRQ)
 
-#define DPSHM_DISABLE_SYNC_INTR()                                   \
-    do                                                              \
-    {                                                               \
-        alt_ic_irq_disable(TARGET_SYNC_IRQ_ID, TARGET_SYNC_IRQ);    \
-    } while (0)
+#define DPSHM_DISABLE_SYNC_INTR() \
+        alt_ic_irq_disable(TARGET_SYNC_IRQ_ID, TARGET_SYNC_IRQ)
 
 #ifndef TRACE
 #ifndef NDEBUG
