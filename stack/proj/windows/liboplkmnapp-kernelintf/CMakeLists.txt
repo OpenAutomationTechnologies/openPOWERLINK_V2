@@ -62,6 +62,7 @@ SET (LIB_SOURCES
 
 # Configure compile definitions
 ADD_DEFINITIONS(-DCONFIG_MN)
+ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)
 
 # Additional include directories
 INCLUDE_DIRECTORIES(
