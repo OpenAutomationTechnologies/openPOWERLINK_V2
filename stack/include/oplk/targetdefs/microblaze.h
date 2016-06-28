@@ -92,8 +92,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OPLK_IO_RD32(addr)          Xil_In32(addr)
 
 // Target data cache functions
-#define OPLK_DCACHE_FLUSH(addr, len)        Xil_DCacheFlushRange((unsigned int) addr, len)
-#define OPLK_DCACHE_INVALIDATE(addr, len)   Xil_DCacheInvalidateRange((unsigned int) addr, len)
+#define OPLK_DCACHE_FLUSH(addr, len)        Xil_L1DCacheFlushRange((unsigned int)(addr), len)
+#define OPLK_DCACHE_INVALIDATE(addr, len)   Xil_L1DCacheInvalidateRange((unsigned int)(addr), len)
 
 // Target memory barrier function
 #define OPLK_MEMBAR()               mbar(1)

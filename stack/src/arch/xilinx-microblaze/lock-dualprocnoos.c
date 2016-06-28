@@ -145,14 +145,14 @@ int target_lock(void)
     // spin if id is not written to shared memory
     do
     {
-        microblaze_invalidate_dcache_range((u32)pLock_l, 1);
+        Xil_L1DCacheInvalidateRange((u32)pLock_l, 1);
         val = Xil_In8((u32)pLock_l);
 
         // write local id if unlocked
         if (val == LOCK_UNLOCKED_C)
         {
             Xil_Out8(pLock_l, LOCK_LOCAL_ID);
-            microblaze_flush_dcache_range((u32)pLock_l, 1);
+            Xil_L1DCacheFlushRange((u32)pLock_l, 1);
             continue; // return to top of loop to check again
         }
     } while (val != LOCK_LOCAL_ID);
@@ -177,7 +177,7 @@ int target_unlock(void)
         return -1;
 
     Xil_Out8(pLock_l, LOCK_UNLOCKED_C);
-    microblaze_flush_dcache_range((u32)pLock_l, 1);
+    Xil_L1DCacheFlushRange((u32)pLock_l, 1);
     return 0;
 }
 

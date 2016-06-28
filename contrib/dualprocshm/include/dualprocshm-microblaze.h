@@ -75,10 +75,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // Cache hadling
 #define DUALPROCSHM_FLUSH_DCACHE_RANGE(base, range) \
-    microblaze_flush_dcache_range((UINT32)base, range)
+    Xil_L1DCacheFlushRange((UINT32)(base), range)
 
 #define DUALPROCSHM_INVALIDATE_DCACHE_RANGE(base, range) \
-    microblaze_invalidate_dcache_range((UINT32)base, range)
+    Xil_L1DCacheInvalidateRange((UINT32)(base), range)
 
 #define DPSHM_REG_SYNC_INTR(callback, arg)                     \
     UINT32      intcMask;                                      \
