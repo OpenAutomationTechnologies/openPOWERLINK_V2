@@ -120,12 +120,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DUALPROCSHM_INVALIDATE_DCACHE_RANGE(base, range) \
     ((void)0)
 
-#define DPSHM_REG_SYNC_INTR(pfnIrqCb_p, pArg_p)                     \
-    do                                                              \
-    {                                                               \
-        alt_ic_isr_register(TARGET_SYNC_IRQ_ID, TARGET_SYNC_IRQ,    \
-                            pfnIrqCb_p, pArg_p, NULL);              \
-    } while (0)
+#define DPSHM_REG_SYNC_INTR(pfnIrqCb_p, pArg_p) \
+    UNUSED_PARAMETER(pfnIrqCb_p);               \
+    UNUSED_PARAMETER(pArg_p)
 
 #define DPSHM_ENABLE_SYNC_INTR() \
         alt_ic_irq_enable(TARGET_SYNC_IRQ_ID, TARGET_SYNC_IRQ)
