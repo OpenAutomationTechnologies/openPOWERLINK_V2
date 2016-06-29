@@ -74,7 +74,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DPSHM_WRITE32(base, val)    Xil_Out32((UINT32)base, val)
 
 // Memory barrier
+#ifdef __GNUC__
+// Note: Suppress gcc braced-group warning what is not available in ISO C.
+#define DPSHM_DMB()                 __extension__ mbar(1)
+#else
 #define DPSHM_DMB()                 mbar(1)
+#endif
 
 // Cache hadling
 #define DUALPROCSHM_FLUSH_DCACHE_RANGE(base, range) \

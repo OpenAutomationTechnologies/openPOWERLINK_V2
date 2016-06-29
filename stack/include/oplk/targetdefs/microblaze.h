@@ -96,7 +96,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OPLK_DCACHE_INVALIDATE(addr, len)   Xil_L1DCacheInvalidateRange((unsigned int)(addr), len)
 
 // Target memory barrier function
+#ifdef __GNUC__
+// Note: Suppress gcc braced-group warning what is not available in ISO C.
+#define OPLK_MEMBAR()               __extension__ mbar(1)
+#else
 #define OPLK_MEMBAR()               mbar(1)
+#endif
 
 // Target lock
 #define OPLK_LOCK_T                 UINT8
