@@ -44,6 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include <unistd.h>
 
 #include <system.h>
@@ -63,6 +64,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+
+#ifndef TRACE
+#ifndef NDEBUG
+#define TRACE(...)                      printf(__VA_ARGS__)
+#else
+#define TRACE(...)
+#endif
+#endif
 
 // memory
 #define DPSHM_MAKE_NONCACHEABLE(ptr)    (void*)(((unsigned long)ptr))
@@ -159,14 +168,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define DPSHM_CONNECT_SYNC_IRQ()
 #define DPSHM_DISCONNECT_SYNC_IRQ()
-
-#ifndef TRACE
-#ifndef NDEBUG
-#define TRACE(...)                      printf(__VA_ARGS__)
-#else
-#define TRACE(...)
-#endif
-#endif
 
 //------------------------------------------------------------------------------
 // typedef
