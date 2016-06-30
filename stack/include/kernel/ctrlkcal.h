@@ -68,9 +68,10 @@ void              ctrlkcal_setStatus(tCtrlKernelStatus status_p);
 tCtrlKernelStatus ctrlkcal_getStatus(void);
 void              ctrlkcal_updateHeartbeat(UINT16 heartbeat_p);
 tOplkError        ctrlkcal_readInitParam(tCtrlInitParam* pInitParam_p);
-void              ctrlkcal_storeInitParam(tCtrlInitParam* pInitParam_p);
+void              ctrlkcal_storeInitParam(const tCtrlInitParam* pInitParam_p);
 tOplkError        ctrlkcal_readFileChunk(tOplkApiFileChunkDesc* pDesc_p,
-                                         size_t bufferSize_p, UINT8* pBuffer_p);
+                                         size_t bufferSize_p,
+                                         UINT8* pBuffer_p);
 size_t            ctrlkcal_getMaxFileChunkSize(void);
 
 #ifdef __cplusplus

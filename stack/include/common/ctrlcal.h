@@ -61,7 +61,7 @@ extern "C"
 tOplkError ctrlcal_init(UINT size_p);
 tOplkError ctrlcal_exit(void);
 
-void       ctrlcal_writeData(UINT offset_p, void* pSrc_p, size_t length_p);
+void       ctrlcal_writeData(UINT offset_p, const void* pSrc_p, size_t length_p);
 tOplkError ctrlcal_readData(void* pDest_p, UINT offset_p, size_t length_p);
 
 #ifdef __cplusplus
