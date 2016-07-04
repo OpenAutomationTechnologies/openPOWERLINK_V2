@@ -51,7 +51,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-typedef tOplkError (*tIdentuCbResponse)(UINT nodeId_p, tIdentResponse* pIdentResponse_p);
+typedef tOplkError (*tIdentuCbResponse)(UINT nodeId_p,
+                                        const tIdentResponse* pIdentResponse_p);
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -64,9 +65,10 @@ extern "C"
 tOplkError identu_init(void);
 tOplkError identu_exit(void);
 tOplkError identu_reset(void);
-tOplkError identu_getIdentResponse(UINT nodeId_p, tIdentResponse** ppIdentResponse_p);
-tOplkError identu_requestIdentResponse(UINT nodeId_p, tIdentuCbResponse pfnCbResponse_p);
-UINT32     identu_getRunningRequests(void);
+tOplkError identu_getIdentResponse(UINT nodeId_p,
+                                   const tIdentResponse** ppIdentResponse_p);
+tOplkError identu_requestIdentResponse(UINT nodeId_p,
+                                       tIdentuCbResponse pfnCbResponse_p);
 
 #ifdef __cplusplus
 }

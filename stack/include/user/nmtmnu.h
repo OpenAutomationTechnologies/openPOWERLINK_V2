@@ -54,12 +54,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // typedef
 //------------------------------------------------------------------------------
 #if defined(CONFIG_INCLUDE_NMT_MN)
-typedef tOplkError (*tNmtMnuCbNodeEvent)(UINT nodeId_p, tNmtNodeEvent NodeEvent_p,
-                                         tNmtState NmtState_p, UINT16 wErrorCode_p,
+typedef tOplkError (*tNmtMnuCbNodeEvent)(UINT nodeId_p,
+                                         tNmtNodeEvent nodeEvent_p,
+                                         tNmtState nmtState_p,
+                                         UINT16 errorCode_p,
                                          BOOL fMandatory_p);
-
-typedef tOplkError (*tNmtMnuCbBootEvent)(tNmtBootEvent BootEvent_p,
-                                         tNmtState NmtState_p, UINT16 wErrorCode_p);
+typedef tOplkError (*tNmtMnuCbBootEvent)(tNmtBootEvent bootEvent_p,
+                                         tNmtState nmtState_p,
+                                         UINT16 errorCode_p);
 
 /**
 * \brief NMT MN configuration parameter structure
@@ -82,20 +84,27 @@ extern "C"
 #endif
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
-tOplkError nmtmnu_init(tNmtMnuCbNodeEvent pfnCbNodeEvent_p, tNmtMnuCbBootEvent pfnCbBootEvent_p);
+tOplkError nmtmnu_init(tNmtMnuCbNodeEvent pfnCbNodeEvent_p,
+                       tNmtMnuCbBootEvent pfnCbBootEvent_p);
 tOplkError nmtmnu_exit(void);
-tOplkError nmtmnu_processEvent(tEvent* pEvent_p);
-tOplkError nmtmnu_sendNmtCommand(UINT nodeId_p, tNmtCommand  nmtCommand_p);
-tOplkError nmtmnu_sendNmtCommandEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
-                                   void* pNmtCommandData_p, UINT dataSize_p);
-tOplkError nmtmnu_requestNmtCommand(UINT nodeId_p, tNmtCommand nmtCommand_p,
-                                    void* pNmtCommandData_p, UINT dataSize_p);
-tOplkError nmtmnu_triggerStateChange(UINT nodeId_p, tNmtNodeCommand nodeCommand_p);
+tOplkError nmtmnu_processEvent(const tEvent* pEvent_p);
+tOplkError nmtmnu_sendNmtCommand(UINT nodeId_p,
+                                 tNmtCommand nmtCommand_p);
+tOplkError nmtmnu_sendNmtCommandEx(UINT nodeId_p,
+                                   tNmtCommand nmtCommand_p,
+                                   const void* pNmtCommandData_p,
+                                   size_t dataSize_p);
+tOplkError nmtmnu_requestNmtCommand(UINT nodeId_p,
+                                    tNmtCommand nmtCommand_p,
+                                    const void* pNmtCommandData_p,
+                                    size_t dataSize_p);
+tOplkError nmtmnu_triggerStateChange(UINT nodeId_p,
+                                     tNmtNodeCommand nodeCommand_p);
 tOplkError nmtmnu_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p);
-tOplkError nmtmnu_cbCheckEvent(tNmtEvent NmtEvent_p);
-tOplkError nmtmnu_getDiagnosticInfo(UINT* pMandatorySlaveCount_p, UINT* pSignalSlaveCount_p,
+tOplkError nmtmnu_getDiagnosticInfo(UINT* pMandatorySlaveCount_p,
+                                    UINT* pSignalSlaveCount_p,
                                     UINT16* pflags_p);
-tOplkError nmtmnu_configPrc(tNmtMnuConfigParam* pConfigParam_p);
+tOplkError nmtmnu_configPrc(const tNmtMnuConfigParam* pConfigParam_p);
 #endif
 
 #ifdef __cplusplus

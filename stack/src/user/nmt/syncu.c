@@ -12,7 +12,7 @@ for handling SyncReq/SyncResp frames used with PollResponse Chaining.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -109,9 +109,10 @@ static tSyncuInstance   syncuInstance_g;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError syncResponseCb(const tFrameInfo* pFrameInfo_p);
+static tOplkError       syncResponseCb(const tFrameInfo* pFrameInfo_p);
 static tSyncuCbResponse readResponseQueue(UINT nodeId_p);
-static tOplkError writeResponseQueue(UINT nodeId_p, tSyncuCbResponse pfnCbResp_p);
+static tOplkError       writeResponseQueue(UINT nodeId_p,
+                                           tSyncuCbResponse pfnCbResp_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -130,10 +131,12 @@ The function initializes an instance of the sync module
 //------------------------------------------------------------------------------
 tOplkError syncu_init(void)
 {
-    tOplkError ret = kErrorOk;
+    tOplkError  ret;
 
     OPLK_MEMSET(&syncuInstance_g, 0, sizeof(syncuInstance_g));
-    ret = dllucal_regAsndService(kDllAsndSyncResponse, syncResponseCb,
+
+    ret = dllucal_regAsndService(kDllAsndSyncResponse,
+                                 syncResponseCb,
                                  kDllAsndFilterAny);
 
     return ret;
@@ -173,6 +176,7 @@ The function resets a sync module instance
 tOplkError syncu_reset(void)
 {
     OPLK_MEMSET(&syncuInstance_g, 0, sizeof(syncuInstance_g));
+
     return kErrorOk;
 }
 
@@ -182,10 +186,10 @@ tOplkError syncu_reset(void)
 
 The function requests the SyncResponse for a specified node.
 
-\param  pfnCbResponse_p     Function pointer to callback function which will
-                            be called if SyncResponse is received.
-\param  pSyncRequestData_p  Pointer to SyncRequest data structure
-\param  size_p              Size of the SyncRequest structure.
+\param[in]      pfnCbResponse_p     Function pointer to callback function which will
+                                    be called if SyncResponse is received.
+\param[in]      pSyncRequestData_p  Pointer to SyncRequest data structure
+\param[in]      size_p              Size of the SyncRequest structure.
 
 \return The function returns a tOplkError error code.
 
@@ -193,34 +197,30 @@ The function requests the SyncResponse for a specified node.
 */
 //------------------------------------------------------------------------------
 tOplkError syncu_requestSyncResponse(tSyncuCbResponse pfnCbResponse_p,
-                                     tDllSyncRequest* pSyncRequestData_p,
-                                     UINT size_p)
+                                     const tDllSyncRequest* pSyncRequestData_p,
+                                     size_t size_p)
 {
     tOplkError  ret = kErrorOk;
     UINT        nodeId;
     UINT        index;
 
+    // Check parameter validity
+    ASSERT(pSyncRequestData_p != NULL);
+
     nodeId = pSyncRequestData_p->nodeId;
 
     if (nodeId == 0)
-    {
         return kErrorInvalidNodeId;
-    }
 
     index = nodeId - 1;
-
     if (index < tabentries(syncuInstance_g.aSyncRespQueue))
     {
         ret = writeResponseQueue(nodeId, pfnCbResponse_p);
         if (ret == kErrorOk)
-        {
             ret = dllucal_issueSyncRequest(pSyncRequestData_p, size_p);
-        }
     }
     else
-    {
         ret = kErrorInvalidNodeId;
-    }
 
     return ret;
 }
@@ -238,8 +238,8 @@ tOplkError syncu_requestSyncResponse(tSyncuCbResponse pfnCbResponse_p,
 The function implements the callback function which will be called when a
 SyncResponse is received.
 
-\param  pFrameInfo_p            Pointer to frame information structure describing
-                                the received SyncResponse frame.
+\param[in]      pFrameInfo_p        Pointer to frame information structure describing
+                                    the received SyncResponse frame.
 
 \return The function returns a tOplkError error code.
 */
@@ -272,6 +272,7 @@ static tOplkError syncResponseCb(const tFrameInfo* pFrameInfo_p)
             ret = pfnCbResponse(nodeId, &pFrameInfo_p->frame.pBuffer->data.asnd.payload.syncResponse);
         }
     }
+
     return ret;
 }
 
@@ -282,10 +283,10 @@ static tOplkError syncResponseCb(const tFrameInfo* pFrameInfo_p)
 The function reads from the sync response queue to get a callback for the given
 node.
 
-\param  nodeId_p                Node ID of the sync response
+\param[in]      nodeId_p            Node ID of the sync response
 
 \return The function returns the callback function.
-\retval NULL        No callback function was read from the queue.
+\retval NULL                        No callback function was read from the queue.
 */
 //------------------------------------------------------------------------------
 static tSyncuCbResponse readResponseQueue(UINT nodeId_p)
@@ -316,9 +317,9 @@ static tSyncuCbResponse readResponseQueue(UINT nodeId_p)
 The function writes to the sync response queue to store a callback for the given
 node.
 
-\param  nodeId_p                Node ID of the sync response
-\param  pfnCbResp_p             Pointer to the SyncResponse callback function
-                                to be called.
+\param[in]      nodeId_p            Node ID of the sync response
+\param[in]      pfnCbResp_p         Pointer to the SyncResponse callback function
+                                    to be called.
 
 \return The function returns a tOplkError error code.
 */
@@ -343,6 +344,6 @@ static tOplkError writeResponseQueue(UINT nodeId_p, tSyncuCbResponse pfnCbResp_p
     return kErrorOk;
 }
 
-///\}
+/// \}
 
 #endif

@@ -63,9 +63,12 @@ extern "C"
 
 tOplkError nmtcnu_init(UINT nodeId_p);
 tOplkError nmtcnu_exit(void);
-tOplkError nmtcnu_sendNmtRequest(UINT nodeId_p, tNmtCommand nmtCommand_p);
-tOplkError nmtcnu_sendNmtRequestEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
-                                   void* pNmtCommandData_p, UINT dataSize_p);
+tOplkError nmtcnu_sendNmtRequest(UINT nodeId_p,
+                                 tNmtCommand nmtCommand_p);
+tOplkError nmtcnu_sendNmtRequestEx(UINT nodeId_p,
+                                   tNmtCommand nmtCommand_p,
+                                   const void* pNmtCommandData_p,
+                                   size_t dataSize_p);
 tOplkError nmtcnu_registerCheckEventCb(tNmtuCheckEventCallback pfnNmtCheckEventCb_p);
 
 #ifdef __cplusplus

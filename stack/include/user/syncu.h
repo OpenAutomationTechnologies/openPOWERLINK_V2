@@ -53,7 +53,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // typedef
 //------------------------------------------------------------------------------
 #if defined(CONFIG_INCLUDE_NMT_MN)
-typedef tOplkError (*tSyncuCbResponse)(UINT nodeId_p, tSyncResponse* pSyncResponse_p);
+typedef tOplkError (*tSyncuCbResponse)(UINT nodeId_p,
+                                       const tSyncResponse* pSyncResponse_p);
 #endif
 
 //------------------------------------------------------------------------------
@@ -69,8 +70,8 @@ tOplkError syncu_init(void);
 tOplkError syncu_exit(void);
 tOplkError syncu_reset(void);
 tOplkError syncu_requestSyncResponse(tSyncuCbResponse pfnCbResponse_p,
-                                     tDllSyncRequest* pSyncRequestData_p,
-                                     UINT size_p);
+                                     const tDllSyncRequest* pSyncRequestData_p,
+                                     size_t size_p);
 #endif /* #if defined(CONFIG_INCLUDE_NMT_MN) */
 
 #ifdef __cplusplus

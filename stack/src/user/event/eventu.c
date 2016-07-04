@@ -331,8 +331,8 @@ This function posts an error event to the API module.
 \ingroup module_eventu
 */
 //------------------------------------------------------------------------------
-tOplkError eventu_postError(tEventSource eventSource_p,  tOplkError error_p,
-                            UINT argSize_p, void* pArg_p)
+tOplkError eventu_postError(tEventSource eventSource_p, tOplkError error_p,
+                            UINT argSize_p, const void* pArg_p)
 {
     tOplkError          ret;
     tEventError         eventError;

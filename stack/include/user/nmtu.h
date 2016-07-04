@@ -59,8 +59,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-typedef tOplkError (*tNmtuStateChangeCallback)(tEventNmtStateChange NmtStateChange_p);
-typedef tOplkError (*tNmtuCheckEventCallback)(tNmtEvent NmtEvent_p);
+typedef tOplkError (*tNmtuStateChangeCallback)(tEventNmtStateChange nmtStateChange_p);
+typedef tOplkError (*tNmtuCheckEventCallback)(tNmtEvent nmtEvent_p);
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -74,7 +74,7 @@ tOplkError nmtu_init(void);
 tOplkError nmtu_exit(void);
 tOplkError nmtu_postNmtEvent(tNmtEvent nmtEvent_p);
 tNmtState  nmtu_getNmtState(void);
-tOplkError nmtu_processEvent(tEvent* pEvent_p);
+tOplkError nmtu_processEvent(const tEvent* pEvent_p);
 tOplkError nmtu_registerStateChangeCb(tNmtuStateChangeCallback pfnNmtStateChangeCb_p);
 
 #ifdef __cplusplus

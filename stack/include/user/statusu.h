@@ -50,7 +50,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-typedef tOplkError (*tStatusuCbResponse)(UINT nodeId_p, tStatusResponse* pStatusResponse_p);
+typedef tOplkError (*tStatusuCbResponse)(UINT nodeId_p,
+                                         const tStatusResponse* pStatusResponse_p);
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -63,7 +64,8 @@ extern "C"
 tOplkError statusu_init(void);
 tOplkError statusu_exit(void);
 tOplkError statusu_reset(void);
-tOplkError statusu_requestStatusResponse(UINT nodeId_p, tStatusuCbResponse pfnCbResponse_p);
+tOplkError statusu_requestStatusResponse(UINT nodeId_p,
+                                         tStatusuCbResponse pfnCbResponse_p);
 
 #ifdef __cplusplus
 }

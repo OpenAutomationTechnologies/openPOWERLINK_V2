@@ -304,7 +304,7 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtS
     tObdSize            obdSize;
     UINT32              expConfTime = 0;
     UINT32              expConfDate = 0;
-    tIdentResponse*     pIdentResponse = NULL;
+    const tIdentResponse*   pIdentResponse = NULL;
     BOOL                fDoUpdate = FALSE;
     BOOL                fDoNetConf = FALSE;
 
@@ -933,7 +933,7 @@ static tOplkError downloadNetConf(tCfmNodeInfo* pNodeInfo_p)
 
     if (pNodeInfo_p->cfmState == kCfmStateDownload)
     {
-        tIdentResponse* pIdentResponse = NULL;
+        const tIdentResponse* pIdentResponse = NULL;
 
         identu_getIdentResponse(pNodeInfo_p->eventCnProgress.nodeId, &pIdentResponse);
         if (pIdentResponse == NULL)

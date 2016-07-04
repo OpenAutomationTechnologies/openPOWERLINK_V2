@@ -11,7 +11,7 @@ This file contains the implementation of the NMT CNU module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -85,7 +85,7 @@ typedef struct
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static tNmtCnuInstance   nmtCnuInstance_g;
+static tNmtCnuInstance  nmtCnuInstance_g;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -101,7 +101,7 @@ static tNmtCnuInstance   nmtCnuInstance_g;
 
 The function initializes an instance of the nmtcnu module.
 
-\param  nodeId_p                Node ID of the local node.
+\param[in]      nodeId_p            Node ID of the local node.
 
 \return The function returns a tOplkError error code.
 
@@ -110,7 +110,7 @@ The function initializes an instance of the nmtcnu module.
 //------------------------------------------------------------------------------
 tOplkError nmtcnu_init(UINT nodeId_p)
 {
-    tOplkError ret = kErrorOk;
+    tOplkError  ret = kErrorOk;
 
     OPLK_MEMSET(&nmtCnuInstance_g, 0, sizeof(nmtCnuInstance_g));
 
@@ -137,7 +137,7 @@ The function shuts down the nmtcnu module instance.
 //------------------------------------------------------------------------------
 tOplkError nmtcnu_exit(void)
 {
-    tOplkError ret = kErrorOk;
+    tOplkError  ret;
 
     // deregister callback function from DLL
     ret = dllucal_regAsndService(kDllAsndNmtCommand, NULL, kDllAsndFilterNone);
@@ -151,8 +151,8 @@ tOplkError nmtcnu_exit(void)
 
 The function is used to send an NMT-Request to the MN.
 
-\param  nodeId_p            Node ID of the local node.
-\param  nmtCommand_p        NMT command to request from MN.
+\param[in]      nodeId_p            Node ID of the local node.
+\param[in]      nmtCommand_p        NMT command to request from MN.
 
 \return The function returns a tOplkError error code.
 
@@ -170,23 +170,25 @@ tOplkError nmtcnu_sendNmtRequest(UINT nodeId_p, tNmtCommand nmtCommand_p)
 
 The function is used to send an NMT-Request to the MN.
 
-\param  nodeId_p            Node ID of the local node.
-\param  nmtCommand_p        NMT command to request from MN.
-\param  pNmtCommandData_p   Pointer to NMT command data (32 Byte).
-\param  dataSize_p          Size of NMT command data.
+\param[in]      nodeId_p            Node ID of the local node.
+\param[in]      nmtCommand_p        NMT command to request from MN.
+\param[in]      pNmtCommandData_p   Pointer to NMT command data (32 Byte).
+\param[in]      dataSize_p          Size of NMT command data.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_nmtcnu
 */
 //------------------------------------------------------------------------------
-tOplkError nmtcnu_sendNmtRequestEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
-                                    void* pNmtCommandData_p, UINT dataSize_p)
+tOplkError nmtcnu_sendNmtRequestEx(UINT nodeId_p,
+                                   tNmtCommand nmtCommand_p,
+                                   const void* pNmtCommandData_p,
+                                   size_t dataSize_p)
 {
-    tOplkError      ret = kErrorOk;
-    tFrameInfo      nmtRequestFrameInfo;
-    tPlkFrame       nmtRequestFrame;
-    UINT            nmtCmdDataSize;
+    tOplkError  ret = kErrorOk;
+    tFrameInfo  nmtRequestFrameInfo;
+    tPlkFrame   nmtRequestFrame;
+    size_t      nmtCmdDataSize;
 
     nmtCmdDataSize = sizeof(nmtRequestFrame.data.asnd.payload.nmtRequestService.aNmtCommandData);
     if (dataSize_p > nmtCmdDataSize)
@@ -196,22 +198,23 @@ tOplkError nmtcnu_sendNmtRequestEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
     OPLK_MEMSET(&nmtRequestFrame.aDstMac[0], 0x00, sizeof(nmtRequestFrame.aDstMac)); // set by DLL
     OPLK_MEMSET(&nmtRequestFrame.aSrcMac[0], 0x00, sizeof(nmtRequestFrame.aSrcMac)); // set by DLL
     ami_setUint16Be(&nmtRequestFrame.etherType, C_DLL_ETHERTYPE_EPL);
-    ami_setUint8Le(&nmtRequestFrame.dstNodeId, (BYTE)C_ADR_MN_DEF_NODE_ID); // node id of the MN
-    ami_setUint8Le(&nmtRequestFrame.messageType, (BYTE)kMsgTypeAsnd);
-    ami_setUint8Le(&nmtRequestFrame.data.asnd.serviceId, (BYTE)kDllAsndNmtRequest);
+    ami_setUint8Le(&nmtRequestFrame.dstNodeId, (UINT8)C_ADR_MN_DEF_NODE_ID); // node id of the MN
+    ami_setUint8Le(&nmtRequestFrame.messageType, (UINT8)kMsgTypeAsnd);
+    ami_setUint8Le(&nmtRequestFrame.data.asnd.serviceId, (UINT8)kDllAsndNmtRequest);
     ami_setUint8Le(&nmtRequestFrame.data.asnd.payload.nmtRequestService.nmtCommandId,
-                   (BYTE)nmtCommand_p);
+                   (UINT8)nmtCommand_p);
     ami_setUint8Le(&nmtRequestFrame.data.asnd.payload.nmtRequestService.targetNodeId,
-                   (BYTE)nodeId_p); // target for the nmt command
+                   (UINT8)nodeId_p); // target for the nmt command
 
     if (pNmtCommandData_p && (dataSize_p != 0))
     {
         OPLK_MEMCPY(&nmtRequestFrame.data.asnd.payload.nmtRequestService.aNmtCommandData[0],
-                    pNmtCommandData_p, dataSize_p);
+                    pNmtCommandData_p,
+                    dataSize_p);
     }
     // build info-structure
     nmtRequestFrameInfo.frame.pBuffer = &nmtRequestFrame;
-    nmtRequestFrameInfo.frameSize = C_DLL_MINSIZE_NMTREQ + dataSize_p;
+    nmtRequestFrameInfo.frameSize = C_DLL_MINSIZE_NMTREQ + (UINT)dataSize_p;
 
     // send NMT request
     ret = dllucal_sendAsyncFrame(&nmtRequestFrameInfo, kDllAsyncReqPrioNmt);
@@ -226,7 +229,7 @@ tOplkError nmtcnu_sendNmtRequestEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
 The function registers a callback function to get informed about an
 NMT-Change-State-Event.
 
-\param  pfnNmtCheckEventCb_p        Pointer to check event callback function.
+\param[in]      pfnNmtCheckEventCb_p    Pointer to check event callback function.
 
 \return The function returns a tOplkError error code.
 
@@ -236,6 +239,7 @@ NMT-Change-State-Event.
 tOplkError nmtcnu_registerCheckEventCb(tNmtuCheckEventCallback pfnNmtCheckEventCb_p)
 {
     nmtCnuInstance_g.pfnCheckEventCb = pfnNmtCheckEventCb_p;
+
     return kErrorOk;
 }
 
@@ -245,4 +249,4 @@ tOplkError nmtcnu_registerCheckEventCb(tNmtuCheckEventCallback pfnNmtCheckEventC
 /// \name Private Functions
 /// \{
 
-///\}
+/// \}

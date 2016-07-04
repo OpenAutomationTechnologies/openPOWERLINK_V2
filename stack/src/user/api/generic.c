@@ -1509,7 +1509,7 @@ The function returns the stored IdentResponse frame of the specified node.
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tOplkError oplk_getIdentResponse(UINT nodeId_p, tIdentResponse** ppIdentResponse_p)
+tOplkError oplk_getIdentResponse(UINT nodeId_p, const tIdentResponse** ppIdentResponse_p)
 {
     if (!ctrlu_stackIsInitialized())
         return kErrorApiNotInitialized;
