@@ -378,30 +378,30 @@ This structure describes an instance of the Ethernet driver.
 */
 typedef struct
 {
-    tEdrvInitParam  initParam;                              ///< Init parameters
-    struct pci_dev* pPciDev;                                ///< Pointer to the PCI device structure
-    void*           pIoAddr;                                ///< Pointer to the register space of the Ethernet controller
+    tEdrvInitParam       initParam;                              ///< Init parameters
+    struct pci_dev*      pPciDev;                                ///< Pointer to the PCI device structure
+    void*                pIoAddr;                                ///< Pointer to the register space of the Ethernet controller
 
-    UINT            eepromAddrBits;                         ///< Used to store EEPROM address bits
-    UINT16          multicastAddrByteCnt;                   ///< Number of Bytes used for multicast addresses
+    UINT                 eepromAddrBits;                         ///< Used to store EEPROM address bits
+    UINT16               multicastAddrByteCnt;                   ///< Number of Bytes used for multicast addresses
 
-    UINT8*          pTxBuf;                                 ///< Pointer to the TX buffer
-    dma_addr_t      pTxBufDma;                              ///< Pointer to the DMA of the TX buffer
-    BOOL            afTxBufUsed[EDRV_MAX_TX_BUFFERS];       ///< Array describing whether a TX buffer is used
+    UINT8*               pTxBuf;                                 ///< Pointer to the TX buffer
+    dma_addr_t           pTxBufDma;                              ///< Pointer to the DMA of the TX buffer
+    BOOL                 afTxBufUsed[EDRV_MAX_TX_BUFFERS];       ///< Array describing whether a TX buffer is used
 
-    UINT            headTxDesc;                             ///< Index of the head of the TX descriptor buffer
-    UINT            tailTxDesc;                             ///< Index of the tail of the TX descriptor buffer
-    UINT            headRxDesc;                             ///< Index of the head of the RX descriptor buffer
-    UINT            tailRxDesc;                             ///< Index of the tail of the RX descriptor buffer
+    UINT                 headTxDesc;                             ///< Index of the head of the TX descriptor buffer
+    UINT                 tailTxDesc;                             ///< Index of the tail of the TX descriptor buffer
+    UINT                 headRxDesc;                             ///< Index of the head of the RX descriptor buffer
+    UINT                 tailRxDesc;                             ///< Index of the tail of the RX descriptor buffer
 
-    UINT8*          pCbVirtAdd;                             ///< Virtual address of the command block
-    UINT8*          pRfdVirtAdd;                            ///< Virtual address of the receive descriptors
+    UINT8*               pCbVirtAdd;                             ///< Virtual address of the command block
+    UINT8*               pRfdVirtAdd;                            ///< Virtual address of the receive descriptors
 
-    dma_addr_t      cbDmaHandle;                            ///< Command block DMA handle
-    dma_addr_t      rfdDmaAdd;                              ///< Receive descriptor DMA handle
+    dma_addr_t           cbDmaHandle;                            ///< Command block DMA handle
+    dma_addr_t           rfdDmaAdd;                              ///< Receive descriptor DMA handle
 
-    volatile ULONG  aCbVirtAddrBuf[MAX_CBS];                ///< Array to store virtual address of a TX buffer
-    volatile ULONG  aCbDmaAddrBuf[MAX_CBS];                 ///< Array to store DMA mapped address of a TX buffer
+    volatile ULONG       aCbVirtAddrBuf[MAX_CBS];                ///< Array to store virtual address of a TX buffer
+    volatile dma_addr_t  aCbDmaAddrBuf[MAX_CBS];                 ///< Array to store DMA mapped address of a TX buffer
 } tEdrvInstance;
 
 //------------------------------------------------------------------------------
@@ -810,7 +810,7 @@ static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
     UINT                    statusCommand;
     tRxDescCmdBlock*        pRxDescCmdBlock;
     tEdrvTxBuffer*          pTxBuffer = NULL;
-    tEdrvTxBuffer*          pDmaBuffer = NULL;
+    dma_addr_t              txDmaAddr;
 
     UNUSED_PARAMETER(irqNum_p);
     UNUSED_PARAMETER(ppDevInstData_p);
@@ -906,7 +906,7 @@ static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
                 // that was received in edrv_sendTxBuffer
                 pTxBuffer = (tEdrvTxBuffer*)edrvInstance_l.aCbVirtAddrBuf[edrvInstance_l.headTxDesc];
 
-                pDmaBuffer = (tEdrvTxBuffer*)edrvInstance_l.aCbDmaAddrBuf[edrvInstance_l.headTxDesc];
+                txDmaAddr = edrvInstance_l.aCbDmaAddrBuf[edrvInstance_l.headTxDesc];
 
                 edrvInstance_l.aCbVirtAddrBuf[edrvInstance_l.headTxDesc] = 0;
                 edrvInstance_l.aCbDmaAddrBuf[edrvInstance_l.headTxDesc] = 0;
@@ -914,14 +914,14 @@ static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
                 // Increment Tx descriptor queue head pointer
                 edrvInstance_l.headTxDesc = ((edrvInstance_l.headTxDesc + 1) % MAX_CBS);
 
-                if ((pDmaBuffer != NULL) && (pTxBuffer != NULL))
+                if ((txDmaAddr != 0) && (pTxBuffer != NULL))
                 {
                     // retrieve the address of the DMA handle to
                     // pTxBuffer_p->pBuffer pointer
                     // that was received in edrv_sendTxBuffer
                     // so that the mapping can be correspondingly unmapped
                     pci_unmap_single(edrvInstance_l.pPciDev,
-                                     (dma_addr_t)pDmaBuffer,
+                                     txDmaAddr,
                                      pTxBuffer->txFrameSize, PCI_DMA_TODEVICE);
                 }
 
