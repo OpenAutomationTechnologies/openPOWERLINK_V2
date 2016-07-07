@@ -1254,7 +1254,7 @@ static tOplkError initWrite(UINT        index_p,
     access = (tObdAccess)pSubEntry->access;
     // check access for write
     if ((access & kObdAccConst) != 0)
-        return kErrorObdAccessViolation;
+        return kErrorObdWriteViolation;
 
     // To use the same callback function for ObdWriteEntry as well as for
     // an SDO download call at first (kObdEvPre...) the callback function
@@ -1413,7 +1413,7 @@ static tOplkError writeByIdxInit(tSdoObdConHdl* pSdoHdl_p)
     // compare access type, must be writeable
     if ((accessType & kObdAccWrite) == 0)
     {
-        if ((accessType & kObdAccRead) != 0)
+        if (((accessType & kObdAccRead) | (accessType & kObdAccConst)) != 0)
             ret = kErrorObdWriteViolation;
         else
             ret = kErrorObdAccessViolation;
@@ -1688,7 +1688,7 @@ static tOplkError writeEntryPre(UINT index_p, UINT subIndex_p, void* pSrcData_p,
     access = (tObdAccess)pSubEntry->access;
     // check access for write
     if ((access & kObdAccConst) != 0)
-        return kErrorObdAccessViolation;
+        return kErrorObdWriteViolation;
 
     // To use the same callback function for ObdWriteEntry as well as for
     // an SDO download call at first (kObdEvPre...) the callback function
