@@ -405,8 +405,9 @@ delayed answer.
 //------------------------------------------------------------------------------
 static tOplkError finishSdo(tObdAlConHdl* pUserObdConHdl_p)
 {
-    tOplkError      ret = kErrorOk;
-    tSdoObdConHdl   sdoHdl;
+    tOplkError              ret = kErrorOk;
+    tSdoObdConHdl           sdoHdl;
+    tCmdLayerObdFinishedCb  pfnCbFinishSdo = NULL;
 
     if (instance_l.pfnCbFinishSdo != NULL)
     {
@@ -419,9 +420,11 @@ static tOplkError finishSdo(tObdAlConHdl* pUserObdConHdl_p)
         sdoHdl.dataOffset = pUserObdConHdl_p->dataOffset;
         sdoHdl.sdoHdl = pUserObdConHdl_p->obdAlHdl;
         sdoHdl.plkError = pUserObdConHdl_p->plkError;
-        ret = instance_l.pfnCbFinishSdo(&sdoHdl);
-        // invalidate callback
+        // save and invalidate callback
+        pfnCbFinishSdo =  instance_l.pfnCbFinishSdo;
         instance_l.pfnCbFinishSdo = NULL;
+
+        ret = pfnCbFinishSdo(&sdoHdl);
     }
     else
     {

@@ -1907,6 +1907,7 @@ static tOplkError addFrameToHistory(tSdoSeqCon* pSdoSeqCon_p, tPlkFrame* pFrame_
 {
     tOplkError              ret = kErrorOk;
     tSdoSeqConHistory*      pHistory;
+    tPlkFrame*              pHistoryFrame;
 
     // add frame to history buffer
     // check size - SDO_SEQ_HISTORY_FRAME_SIZE includes the header size, but size_p does not!
@@ -1918,7 +1919,9 @@ static tOplkError addFrameToHistory(tSdoSeqCon* pSdoSeqCon_p, tPlkFrame* pFrame_
     // check if a free entry is available
     if (pHistory->freeEntries > 0)
     {   // write message in free entry
-        OPLK_MEMCPY(&((tPlkFrame*)pHistory->aHistoryFrame[pHistory->writeIndex])->messageType,
+        pHistoryFrame = (tPlkFrame*)pHistory->aHistoryFrame[pHistory->writeIndex];
+
+        OPLK_MEMCPY(&pHistoryFrame->messageType,
                     &pFrame_p->messageType, size_p + ASND_HEADER_SIZE);
         pHistory->aFrameSize[pHistory->writeIndex] = size_p;
         pHistory->afFrameFirstTxFailed[pHistory->writeIndex] = fTxFailed_p;
@@ -2002,6 +2005,7 @@ static tOplkError deleteAckedFrameFromHistory(tSdoSeqCon* pSdoSeqCon_p, UINT8 re
     tSdoSeqConHistory*      pHistory;
     UINT8                   ackIndex;
     UINT8                   currentSeqNum;
+    tPlkFrame*              pHistoryFrame;
 
     // get pointer to history buffer
     pHistory = &pSdoSeqCon_p->sdoSeqConHistory;
@@ -2014,7 +2018,9 @@ static tOplkError deleteAckedFrameFromHistory(tSdoSeqCon* pSdoSeqCon_p, UINT8 re
         ackIndex = pHistory->ackIndex;
         do
         {
-            currentSeqNum = (((tPlkFrame*)pHistory->aHistoryFrame[ackIndex])->data.asnd.payload.sdoSequenceFrame.sendSeqNumCon & SEQ_NUM_MASK);
+            pHistoryFrame = (tPlkFrame*)pHistory->aHistoryFrame[ackIndex];
+
+            currentSeqNum = (pHistoryFrame->data.asnd.payload.sdoSequenceFrame.sendSeqNumCon & SEQ_NUM_MASK);
             if (((recvSeqNumber_p - currentSeqNum) & SEQ_NUM_MASK) < SDO_SEQ_NUM_THRESHOLD)
             {
                 pHistory->aFrameSize[ackIndex] = 0;
@@ -2340,10 +2346,12 @@ static BOOL checkHistoryAcked(tSdoSeqCon* pSdoSeqCon_p, UINT8 recvSeqNumber_p)
 {
     tSdoSeqConHistory*      pHistory;
     UINT8                   currentSeqNum;
+    tPlkFrame*              pHistoryFrame;
 
     // get pointer to history buffer
     pHistory = &pSdoSeqCon_p->sdoSeqConHistory;
-    currentSeqNum = (((tPlkFrame*)pHistory->aHistoryFrame[pHistory->ackIndex])->data.asnd.payload.sdoSequenceFrame.sendSeqNumCon & SEQ_NUM_MASK);
+    pHistoryFrame = (tPlkFrame*)pHistory->aHistoryFrame[pHistory->ackIndex];
+    currentSeqNum = (pHistoryFrame->data.asnd.payload.sdoSequenceFrame.sendSeqNumCon & SEQ_NUM_MASK);
     if (((recvSeqNumber_p - currentSeqNum) & SEQ_NUM_MASK) < SDO_SEQ_NUM_THRESHOLD)
     {   // acknowledges at least the oldest history frame
         return TRUE;

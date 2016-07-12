@@ -12,6 +12,7 @@ Altera SoC ARM without OS.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -243,7 +244,7 @@ tOplkError target_cleanup(void)
     alt_int_global_uninit();
     halRet = alt_cache_system_disable();
 
-    return kErrorOk;
+    return (halRet == ALT_E_SUCCESS) ? kErrorOk : kErrorGeneralError;
 }
 
 //------------------------------------------------------------------------------
@@ -436,7 +437,7 @@ static inline UINT64 getTimerCurrentScaledCount(ALT_GPT_TIMER_t timerId_p,
     {
         if (timerId_p == ALT_GPT_CPU_GLOBAL_TMR)    // Global Timer
         {
-            alt_globaltmr_get((UINT32*)&timeStamp_h, (UINT32*)&timeStamp_l);
+            alt_globaltmr_get((uint32_t*)&timeStamp_h, (uint32_t*)&timeStamp_l);
             clkSrc = ALT_CLK_MPU_PERIPH;
         }
         else
@@ -445,7 +446,7 @@ static inline UINT64 getTimerCurrentScaledCount(ALT_GPT_TIMER_t timerId_p,
             goto Exit;
         }
 
-        if (alt_clk_freq_get(clkSrc, &freq) == ALT_E_SUCCESS)
+        if (alt_clk_freq_get(clkSrc, (uint32_t*)&freq) == ALT_E_SUCCESS)
         {
             timeStamp_l *= (preScaler + 1);
             timeStamp_h *= (preScaler + 1);
@@ -499,7 +500,7 @@ static inline UINT64 getTimerMaxScaledCount(ALT_GPT_TIMER_t timerId_p,
         goto Exit;
     }
 
-    if (alt_clk_freq_get(clkSrc, &freq) == ALT_E_SUCCESS)
+    if (alt_clk_freq_get(clkSrc, (uint32_t*)&freq) == ALT_E_SUCCESS)
     {
         maxTimeStampLow *= (preScaler + 1);
         maxTimeStampHigh *= (preScaler + 1);
@@ -515,4 +516,4 @@ Exit:
     return maxScaledTime;
 }
 
-///\}
+/// \}

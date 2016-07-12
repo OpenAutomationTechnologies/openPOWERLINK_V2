@@ -92,6 +92,13 @@ extern XScuGic_Config XScuGic_ConfigTable[];
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+// Xilinx Exception enable function
+#ifdef __GNUC__
+// Note: Suppress gcc braced-group warning what is not available in ISO C!
+#define XIL_EXCEPTION_ENABLE()  __extension__ ({Xil_ExceptionEnable();})
+#else
+#define XIL_EXCEPTION_ENABLE()  Xil_ExceptionEnable()
+#endif
 
 //------------------------------------------------------------------------------
 // local types
@@ -384,7 +391,7 @@ static void initInterrupts(void)
                                  (Xil_ExceptionHandler)XScuGic_InterruptHandler,
                                  &gicInstance_l);
 
-    Xil_ExceptionEnable();
+    XIL_EXCEPTION_ENABLE();
 }
 
-///\}
+/// \}

@@ -9,7 +9,7 @@ This header file provides specific macros for Altera Cyclone V SoC ARM CPU.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015 Kalycito Infotech Private Limited
+Copyright (c) 2016 Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include <unistd.h>
 
 #include <system.h>
@@ -99,19 +100,21 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // cache handling
 #ifdef ALTARM_CACHE_ENABLE
-#define DUALPROCSHM_FLUSH_DCACHE_RANGE(base, range)                                                                                         \
-    ({                                                                                                                                      \
+#define DUALPROCSHM_FLUSH_DCACHE_RANGE(base, range)                                                                                         \                                                                                        \
+     do                                                                                                                                     \
+     {                                                                                                                                      \
          UINT32 tempBase = (UINT32)(((UINT32)base) & ~((UINT32)CACHE_ALIGNED_BYTE_CHECK));                                                  \
          UINT32 tempCeil = (UINT32)((((UINT32)base + (UINT32)range) + CACHE_ALIGNED_BYTE_CHECK) & ~((UINT32)CACHE_ALIGNED_BYTE_CHECK));     \
          alt_cache_system_clean((void*)tempBase, (size_t)(tempCeil - tempBase));                                                            \
-     })
+     } while (0)
 
 #define DUALPROCSHM_INVALIDATE_DCACHE_RANGE(base, range)                                                                                    \
-    ({                                                                                                                                      \
+     do                                                                                                                                     \
+     {                                                                                                                                      \
          UINT32 tempBase = (UINT32)(((UINT32)base) & ~((UINT32)CACHE_ALIGNED_BYTE_CHECK));                                                  \
          UINT32 tempCeil = (UINT32)((((UINT32)base + (UINT32)range) + CACHE_ALIGNED_BYTE_CHECK) & ~((UINT32)CACHE_ALIGNED_BYTE_CHECK));     \
          alt_cache_system_invalidate((void*)tempBase, (size_t)(tempCeil - tempBase));                                                       \
-     })
+     } while (0)
 #else
 
 #define DUALPROCSHM_FLUSH_DCACHE_RANGE(base, range)
@@ -130,49 +133,38 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DPSHM_CLEAR_SYNC_IRQ()                  alt_int_dist_pending_clear(SYNC_IRQ)
 
 #define DPSHM_ENABLE_SYNC_INTR()                                                              \
-    ({                                                                                        \
-         int ret = 0;                                                                         \
+    do                                                                                        \
+    {                                                                                         \
          alt_int_dist_pending_clear(SYNC_IRQ);                                                \
                                                                                               \
          if (alt_int_dist_target_set(SYNC_IRQ, TARGET_CPU) != ALT_E_SUCCESS)                  \
          {                                                                                    \
-             ret = -1;                                                                        \
              TRACE("Sync IRQ target cpu set failed\n");                                       \
          }                                                                                    \
          else                                                                                 \
          {                                                                                    \
-             if (alt_int_dist_trigger_set(SYNC_IRQ, ALT_INT_TRIGGER_EDGE) != ALT_E_SUCCESS)  \
+             if (alt_int_dist_trigger_set(SYNC_IRQ, ALT_INT_TRIGGER_EDGE) != ALT_E_SUCCESS)   \
              {                                                                                \
-                 ret = -1;                                                                    \
                  TRACE("Sync IRQ trigger set failed\n");                                      \
              }                                                                                \
              else                                                                             \
              {                                                                                \
                  if (alt_int_dist_enable(SYNC_IRQ) != ALT_E_SUCCESS)                          \
                  {                                                                            \
-                     /* Set interrupt distributor target */                                   \
-                     ret = -1;                                                                \
                      TRACE("Sync IRQ could not be enabled in the distributor\n");             \
                  }                                                                            \
-                                                                                              \
              }                                                                                \
          }                                                                                    \
-                                                                                              \
-         ret;                                                                                 \
-     })
+     } while (0)
 
 #define DPSHM_DISABLE_SYNC_INTR()                                          \
-    ({                                                                     \
-         int ret = 0;                                                      \
+    do                                                                     \
+    {                                                                      \
          if (alt_int_dist_disable(SYNC_IRQ) != ALT_E_SUCCESS)              \
          {                                                                 \
-             /* access to any FPGA registers if required */                \
-             ret = -1;                                                     \
              TRACE("Sync IRQ could not be disabled in the distributor\n"); \
          }                                                                 \
-                                                                           \
-         ret;                                                              \
-     })
+     } while (0)
 
 #define DPSHM_CONNECT_SYNC_IRQ()
 #define DPSHM_DISCONNECT_SYNC_IRQ()

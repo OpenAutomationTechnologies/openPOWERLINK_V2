@@ -9,6 +9,7 @@ This file contains target specific definitions for Altera ARM cortex A9 systems.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -140,19 +141,21 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CACHE_ALIGNED_BYTE_CHECK    (ALT_CACHE_LINE_SIZE - 1)
 
 #ifdef ALTARM_CACHE_ENABLE
-#define OPLK_DCACHE_FLUSH(base, range)                                                                                                                \
-    ({                                                                                                                                                \
-         UINT32 tempBase = (UINT32) (((UINT32) base) & ~((UINT32) CACHE_ALIGNED_BYTE_CHECK));                                                 \
-         UINT32 tempCeil = (UINT32) ((((UINT32) base + (UINT32) range) + CACHE_ALIGNED_BYTE_CHECK) & ~((UINT32) CACHE_ALIGNED_BYTE_CHECK)); \
-         alt_cache_system_clean((void*) tempBase, (size_t) (tempCeil - tempBase));                                                                    \
-     })
+#define OPLK_DCACHE_FLUSH(base, range)                                                                                                          \
+    do                                                                                                                                          \
+    {                                                                                                                                           \
+         UINT32 tempBase = (UINT32) (((UINT32) base) & ~((UINT32) CACHE_ALIGNED_BYTE_CHECK));                                                   \
+         UINT32 tempCeil = (UINT32) ((((UINT32) base + (UINT32) range) + CACHE_ALIGNED_BYTE_CHECK) & ~((UINT32) CACHE_ALIGNED_BYTE_CHECK));     \
+         alt_cache_system_clean((void*) tempBase, (size_t) (tempCeil - tempBase));                                                              \
+     } while (0)
 
-#define OPLK_DCACHE_INVALIDATE(base, range)                                                                                                           \
-    ({                                                                                                                                                \
-         UINT32 tempBase = (UINT32) (((UINT32) base) & ~((UINT32) CACHE_ALIGNED_BYTE_CHECK));                                                 \
-         UINT32 tempCeil = (UINT32) ((((UINT32) base + (UINT32) range) + CACHE_ALIGNED_BYTE_CHECK) & ~((UINT32) CACHE_ALIGNED_BYTE_CHECK)); \
-         alt_cache_system_invalidate((void*) tempBase, (size_t) (tempCeil - tempBase));                                                               \
-     })
+#define OPLK_DCACHE_INVALIDATE(base, range)                                                                                                     \
+    do                                                                                                                                          \
+    {                                                                                                                                           \
+         UINT32 tempBase = (UINT32) (((UINT32) base) & ~((UINT32) CACHE_ALIGNED_BYTE_CHECK));                                                   \
+         UINT32 tempCeil = (UINT32) ((((UINT32) base + (UINT32) range) + CACHE_ALIGNED_BYTE_CHECK) & ~((UINT32) CACHE_ALIGNED_BYTE_CHECK));     \
+         alt_cache_system_invalidate((void*) tempBase, (size_t) (tempCeil - tempBase));                                                         \
+     } while (0)
 
 #else
 

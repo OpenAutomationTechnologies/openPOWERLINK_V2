@@ -1203,7 +1203,6 @@ static tOplkError insertDataBlock(tCircBufInstance* pDllCircBuffInst_p,
         case kCircBufOk:
             break;
 
-        case kCircBufExceedDataSizeLimit:
         case kCircBufBufferFull:
             ret = kErrorDllAsyncTxBufferFull;
             break;

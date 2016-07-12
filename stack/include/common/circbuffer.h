@@ -64,11 +64,7 @@ typedef enum
     kCircBufNoReadableData              =  1,
     kCircBufReadsizeTooSmall            =  2,
     kCircBufBufferFull                  =  3,
-    kCircBufOpenMismatch                =  7,
     kCircBufInvalidArg                  =  9,
-    kCircBufOutOfMem                    = 11,
-    kCircBufAlreadySignaling            = 13,
-    kCircBufExceedDataSizeLimit         = 14,
     kCircBufNoResource                  = 20
 } eCircBufError;
 

@@ -305,7 +305,7 @@ tCircBufError circbuf_writeData (tCircBufInstance* pInstance_p, const void* pDat
     if (fullBlockSize > pHeader->freeSize)
     {
         circbuf_unlock(pInstance_p);
-        return kCircBufOutOfMem;
+        return kCircBufBufferFull;
     }
 
     if (pHeader->writeOffset + fullBlockSize <= pHeader->bufferSize)
@@ -398,7 +398,7 @@ tCircBufError circbuf_writeMultipleData(tCircBufInstance* pInstance_p,
     if (fullBlockSize > pHeader->freeSize)
     {
         circbuf_unlock(pInstance_p);
-        return kCircBufOutOfMem;
+        return kCircBufBufferFull;
     }
 
     if (pHeader->writeOffset + fullBlockSize <= pHeader->bufferSize)

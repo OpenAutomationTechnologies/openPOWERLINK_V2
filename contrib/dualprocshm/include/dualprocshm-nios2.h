@@ -41,8 +41,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <stdint.h>
+#include <stdint.h> // For uint*_t
+#include <stdlib.h> // For malloc/free
+#include <string.h> // For memset/memcpy
 #include <stddef.h>
+#include <stdio.h>
 #include <unistd.h>
 #include <alt_types.h>
 #include <sys/alt_cache.h>
@@ -117,32 +120,22 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DUALPROCSHM_INVALIDATE_DCACHE_RANGE(base, range) \
     ((void)0)
 
-#define DPSHM_REG_SYNC_INTR(pfnIrqCb_p, pArg_p)                         \
-    ({                                                                  \
-         INT ret;                                                       \
-                                                                        \
-         ret = alt_ic_isr_register(TARGET_SYNC_IRQ_ID, TARGET_SYNC_IRQ, \
-                                   pfnIrqCb_p, pArg_p, NULL);           \
-         ret;                                                           \
-     })
+#define DPSHM_REG_SYNC_INTR(pfnIrqCb_p, pArg_p) \
+    UNUSED_PARAMETER(pfnIrqCb_p);               \
+    UNUSED_PARAMETER(pArg_p)
 
-#define DPSHM_ENABLE_SYNC_INTR()                                        \
-    ({                                                                  \
-         INT ret;                                                       \
-         ret = alt_ic_irq_enable(TARGET_SYNC_IRQ_ID, TARGET_SYNC_IRQ);  \
-         ret;                                                           \
-     })
-#define DPSHM_DISABLE_SYNC_INTR()                                       \
-    ({                                                                  \
-         INT ret;                                                       \
-         ret = alt_ic_irq_disable(TARGET_SYNC_IRQ_ID, TARGET_SYNC_IRQ); \
-         ret;                                                           \
-     })
+#define DPSHM_ENABLE_SYNC_INTR() \
+        alt_ic_irq_enable(TARGET_SYNC_IRQ_ID, TARGET_SYNC_IRQ)
 
+#define DPSHM_DISABLE_SYNC_INTR() \
+        alt_ic_irq_disable(TARGET_SYNC_IRQ_ID, TARGET_SYNC_IRQ)
+
+#ifndef TRACE
 #ifndef NDEBUG
-#define TRACE(...)                      trace(__VA_ARGS__)
+#define TRACE(...)                      printf(__VA_ARGS__)
 #else
 #define TRACE(...)
+#endif
 #endif
 
 #endif /* _INC_dualprocshm_nios2_H_ */
