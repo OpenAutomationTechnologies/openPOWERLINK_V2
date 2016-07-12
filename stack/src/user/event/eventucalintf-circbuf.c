@@ -154,7 +154,6 @@ tOplkError eventucal_initQueueCircbuf(tEventQueue eventQueue_p)
 
         default:
             return kErrorInvalidInstanceParam;
-            break;
     }
 
     return kErrorOk;
@@ -200,7 +199,6 @@ tOplkError eventucal_exitQueueCircbuf(tEventQueue eventQueue_p)
 
         default:
             return kErrorInvalidInstanceParam;
-            break;
     }
 
     instance_l[eventQueue_p] = NULL;

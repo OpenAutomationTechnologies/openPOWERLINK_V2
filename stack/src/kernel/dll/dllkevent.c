@@ -583,7 +583,6 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p,
 
         default:
             return kErrorNmtInvalidState;
-            break;
 
     }
 

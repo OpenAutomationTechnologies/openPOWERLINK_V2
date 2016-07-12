@@ -168,7 +168,6 @@ tOplkError eventkcal_initQueueCircbuf(tEventQueue eventQueue_p)
 
         default:
             return kErrorInvalidInstanceParam;
-            break;
     }
 
     return kErrorOk;

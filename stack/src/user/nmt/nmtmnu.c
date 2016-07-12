@@ -3570,11 +3570,9 @@ static tOplkError checkNmtState(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p,
             case kNmtCsReadyToOperate:
             case kNmtCsOperational:
                 goto ExitButUpdate;
-                break;
 
             default:
                 goto Exit;
-                break;
         }
     }
 

@@ -382,7 +382,6 @@ tOplkError pdou_cbObdAccess(tObdCbParam MEM* pParam_p)
             ret = checkPdoValidity((PDOU_OBD_IDX_MAPP_PARAM | pParam_p->index),
                                    &pParam_p->abortCode);
             return ret;
-            break;
 
         case PDOU_OBD_IDX_RX_MAPP_PARAM:
             // RPDO mapping parameter accessed
@@ -400,7 +399,6 @@ tOplkError pdou_cbObdAccess(tObdCbParam MEM* pParam_p)
             pParam_p->abortCode = SDO_AC_GENERAL_ERROR;
             ret = kErrorPdoInvalidObjIndex;
             return ret;
-            break;
     }
 
     // RPDO and TPDO mapping parameter accessed
@@ -702,7 +700,6 @@ static tOplkError setupRxPdoChannelTables(
 
             default:
                 return ret;
-                break;
         }
     }
     *pCountChannelIdRx_p = channelCount;
@@ -774,7 +771,6 @@ static tOplkError setupTxPdoChannelTables(
 
             default:
                 return ret;
-                break;
         }
     }
     *pCountChannelIdTx_p = channelCount;

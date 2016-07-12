@@ -819,7 +819,6 @@ tOplkError dllkframe_createTxFrame(UINT* pHandle_p, UINT* pFrameSize_p,
                 case kDllAsndNotDefined:
                     ret = kErrorDllInvalidParam;
                     goto Exit;
-                    break;
 
                 case kDllAsndSdo:
 #if (CONFIG_DLL_PRES_CHAINING_CN == FALSE) && defined(CONFIG_INCLUDE_NMT_MN)
@@ -827,7 +826,6 @@ tOplkError dllkframe_createTxFrame(UINT* pHandle_p, UINT* pFrameSize_p,
 #endif
                     ret = kErrorEdrvBufNotExisting;
                     goto Exit;
-                    break;
             }
             break;
 
@@ -883,7 +881,6 @@ tOplkError dllkframe_createTxFrame(UINT* pHandle_p, UINT* pFrameSize_p,
         default:
             ret = kErrorEdrvBufNotExisting;
             goto Exit;
-            break;
     }
 
     *pHandle_p = handle;
@@ -2327,7 +2324,6 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
                         (dllkInstance_g.mnFlag1 & ~(PLK_FRAME_FLAG1_EA | PLK_FRAME_FLAG1_ER)) | // preserve all flags except EA and ER
                         (flag1 & (PLK_FRAME_FLAG1_EA | PLK_FRAME_FLAG1_ER));                     // set EA and ER flag
                 goto Exit;
-                break;
 
             case kDllReqServiceIdent:
                // IdentRequest
@@ -2349,7 +2345,6 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
                 }
 #endif
                 goto Exit;
-                break;
 
             case kDllReqServiceNmtRequest:
                 // NmtRequest
@@ -2387,7 +2382,6 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
                 }
 #endif
                 goto Exit;
-                break;
 
 #if (CONFIG_DLL_PRES_CHAINING_CN != FALSE) || defined(CONFIG_INCLUDE_NMT_MN)
             case kDllReqServiceSync:
@@ -2478,7 +2472,6 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
 #endif
                 goto Exit;
                 }
-                break;
 #endif
 
             case kDllReqServiceUnspecified:
@@ -2521,7 +2514,6 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
             case kDllReqServiceNo:
                 // no async service requested -> do nothing
                 goto Exit;
-                break;
         }
     }
 

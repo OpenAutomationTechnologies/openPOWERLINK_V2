@@ -422,10 +422,10 @@ tOplkError sdoseq_initCon(tSdoSeqConHdl* pSdoSeqConHdl_p, UINT nodeId_p, tSdoTyp
             ret = sdoudp_initCon(&conHandle, nodeId_p);
             if (ret != kErrorOk)
                 return ret;
+            break;
 #else
             return kErrorSdoSeqUnsupportedProt;
 #endif
-            break;
 
         case kSdoTypeAsnd:
 #if defined(CONFIG_INCLUDE_SDO_ASND)

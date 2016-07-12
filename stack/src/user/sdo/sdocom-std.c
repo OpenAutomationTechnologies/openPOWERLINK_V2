@@ -2200,7 +2200,6 @@ static tOplkError clientSdoDefineConnection(tSdoComConHdl* pSdoComConHdl_p,
         case kSdoTypePdo:       // SDO over PDO -> not supported
         default:
             return kErrorSdoComUnsupportedProt;
-            break;
     }
 
     ret = processState(freeHdl, kSdoComConEventInitCon, NULL);
@@ -2307,7 +2306,6 @@ static tOplkError clientSdoUndefineConnection(tSdoComConHdl sdoComConHdl_p)
             case kSdoTypeAuto:
             default:
                 return kErrorSdoComUnsupportedProt;
-                break;
         }
     }
 
@@ -2486,7 +2484,6 @@ static tOplkError clientProcessStateWaitInit(tSdoComConHdl sdoComConHdl_p, tSdoC
             default:
                 ret = kErrorSdoComUnsupportedProt;
                 return ret;
-                break;
         }
         // d.k.: reset transaction ID, because new sequence layer connection was initialized
         // $$$ d.k. is this really necessary?
@@ -2921,7 +2918,6 @@ static tOplkError clientSend(tSdoComCon* pSdoComCon_p)
                 // for expedited read is nothing to do -> server sends data
                 default:
                     return ret;
-                    break;
             }
         }
     }

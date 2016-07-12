@@ -1697,7 +1697,6 @@ static tNmtEvent commandTranslator(tNmtCommandService* pNmtCommand_p)
         // default
         default:
             return kErrorNmtUnknownCommand;
-            break;
     } // end of switch (nmtCommand)
 
     return nmtEvent;
