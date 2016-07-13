@@ -9,7 +9,7 @@ and including the suitable target specific definitions.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -60,6 +60,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _DEV_BIT32_             0x00000300L     // 32 bit
 
 // compilers
+#define _DEV_GNUC_MINGW_        0x00000025L     // MinGW GCC
 #define _DEV_GNUC_ARM_ALTERA_   0x00000024L     // Altera toolchain mentor ARM EABI GCC
 #define _DEV_GNUC_ARM_XILINX_   0x00000023L     // Xilinx ARM EABI GCC
 #define _DEV_GNUC_MICROBLAZE_   0x00000020L     // Xilinx Microblaze GCC
@@ -82,6 +83,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define _DEV_WIN32_             (_DEV_BIT32_ | _DEV_MSVC32_                         | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_)
 #define _DEV_WIN_CE_            (_DEV_BIT32_ | _DEV_MSEVC_                          | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_)
+#define _DEV_WIN32_MINGW_       (_DEV_BIT32_ | _DEV_GNUC_MINGW_                     | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_)
 #define _DEV_LINUX_             (_DEV_BIT32_ | _DEV_LINUX_GCC_                      | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_)
 #define _DEV_GNU_CF548X_        (_DEV_BIT32_ | _DEV_GNUC_CF_        | _DEV_BIGEND_  | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_)
 #define _DEV_GNU_I386_          (_DEV_BIT32_ | _DEV_GNUC_X86_                       | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_ | _DEV_ONLY_INT_MAIN_)
@@ -151,6 +153,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define TARGET_SYSTEM   _NO_OS_
 #define DEV_SYSTEM      _DEV_ARM_XILINX_EABI_
+
+#elif defined (_WIN32) || defined (__MINGW32__)
+
+#define TARGET_SYSTEM   _WIN32_     // WIN32 definition
+#define DEV_SYSTEM      _DEV_WIN32_MINGW_
 
 #else
 
@@ -222,10 +229,20 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #elif (TARGET_SYSTEM == _WIN32_)
 
+#if (DEV_SYSTEM == _DEV_WIN32_)
+
 #ifdef _KERNEL_MODE
 #include <oplk/targetdefs/winkernel.h>
 #else
 #include <oplk/targetdefs/windows.h>
+#endif
+
+#elif (DEV_SYSTEM == _DEV_WIN32_MINGW_)
+#include <oplk/targetdefs/windows-mingw.h>
+#else
+
+#error "ERROR Development platform is not supported for this target"
+
 #endif
 
 #elif (TARGET_SYSTEM == _WINCE_)

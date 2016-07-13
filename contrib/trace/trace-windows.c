@@ -7,7 +7,7 @@
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronik GmbH
 All rights reserved.
 
@@ -40,7 +40,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdio.h>
 #include <stdarg.h>
 
+#if _WIN32_WINNT < 0x0501
+#undef _WIN32_WINNT
 #define _WIN32_WINNT 0x0501     // Windows version must be at least Windows XP
+#endif
 #define WIN32_LEAN_AND_MEAN     // Do not use extended Win32 API functions
 #include <Windows.h>
 

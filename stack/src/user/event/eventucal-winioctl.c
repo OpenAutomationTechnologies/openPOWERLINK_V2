@@ -15,6 +15,7 @@ are added to process events in background.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2015, Kalycito Infotech Private Limited
 All rights reserved.
 
@@ -92,7 +93,7 @@ typedef struct
     HANDLE    hRcvFileHandle;           ///< Handle to driver for receiving events
     HANDLE    hThreadHandle;            ///< Handle to the event thread
     BOOL      fStopThread;              ///< Flag to identify thread exit
-    UINT32    threadId;                 ///< Thread ID of the event thread
+    DWORD     threadId;                 ///< Thread ID of the event thread
 } tEventuCalInstance;
 
 //------------------------------------------------------------------------------
