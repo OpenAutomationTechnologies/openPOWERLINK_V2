@@ -92,6 +92,8 @@ typedef void (*tOpenmacIrqCb) (void* pArg_p);
 
 /**
 \brief openMAC IRQ sources
+
+This enumerator identifies the possible openMAC interrupt request sources.
 */
 typedef enum
 {
