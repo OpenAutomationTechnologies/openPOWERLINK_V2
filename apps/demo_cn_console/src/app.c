@@ -306,7 +306,7 @@ static tOplkError initProcessImage(void)
 
     /* Allocate process image */
     printf("Initializing process image...\n");
-    printf("Size of process image: Input = %ld Output = %ld\n", sizeof(PI_IN), sizeof(PI_OUT));
+    printf("Size of process image: Input = %lu Output = %lu \n", (ULONG)sizeof(PI_IN), (ULONG)sizeof(PI_OUT));
     eventlog_printMessage(kEventlogLevelInfo, kEventlogCategoryGeneric,
                           "Allocating process image: Input:%d Output:%d", sizeof(PI_IN), sizeof(PI_OUT));
 
