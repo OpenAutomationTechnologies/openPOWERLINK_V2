@@ -1560,7 +1560,7 @@ static tOplkError setupMappingObjects(tPdoMappObject* pMappObject_p,
                                       UINT16* pOffset_p, UINT16* pNextChannelOffset_p,
                                       UINT16* pCount_p)
 {
-    tOplkError          ret;
+    tOplkError          ret = kErrorOk;
     tObdSize            obdSize;
     QWORD               objectMapping;
     UINT                count;
