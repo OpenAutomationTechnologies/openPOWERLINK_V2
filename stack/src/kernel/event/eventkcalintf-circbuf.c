@@ -11,7 +11,7 @@ circular buffers for communication.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/eventkcalintf.h>
 #include <kernel/eventk.h>
 #include <common/circbuffer.h>
-//#include <oplk/debugstr.h>
+#include <oplk/debugstr.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -95,18 +95,18 @@ static BYTE                     aRxBuffer_l[kEventQueueNum][sizeof(tEvent) + MAX
 The function initializes a circular buffer event queue. The queue to initialize
 is specified by eventQueue_p.
 
-\param  eventQueue_p            Event queue to initialize.
+\param[in]      eventQueue_p        Event queue to initialize.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
 tOplkError eventkcal_initQueueCircbuf(tEventQueue eventQueue_p)
 {
-    tCircBufError           circError = kCircBufOk;
+    tCircBufError   circError;
 
     if (eventQueue_p > kEventQueueNum)
     {
@@ -180,11 +180,11 @@ tOplkError eventkcal_initQueueCircbuf(tEventQueue eventQueue_p)
 The function cleans up a circular buffer event queue. The queue to cleanup is
 specified by eventQueue_p.
 
-\param  eventQueue_p            Event queue to cleanup.
+\param[in]      eventQueue_p        Event queue to cleanup.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventkcal
 */
@@ -210,20 +210,24 @@ tOplkError eventkcal_exitQueueCircbuf(tEventQueue eventQueue_p)
 
 This function posts an event to the provided queue instance.
 
-\param  eventQueue_p            Event queue to which the event should be posted.
-\param  pEvent_p                Event to be posted.
+\param[in]      eventQueue_p        Event queue to which the event should be posted.
+\param[in]      pEvent_p            Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tOplkError eventkcal_postEventCircbuf(tEventQueue eventQueue_p, tEvent* pEvent_p)
+tOplkError eventkcal_postEventCircbuf(tEventQueue eventQueue_p,
+                                      const tEvent* pEvent_p)
 {
-    tOplkError          ret = kErrorOk;
-    tCircBufError       circError;
+    tOplkError      ret = kErrorOk;
+    tCircBufError   circError;
+
+    // Check parameter validity
+    ASSERT(pEvent_p != NULL);
 
     if (eventQueue_p > kEventQueueNum)
     {
@@ -237,21 +241,20 @@ tOplkError eventkcal_postEventCircbuf(tEventQueue eventQueue_p, tEvent* pEvent_p
         return kErrorInvalidInstanceParam;
     }
 
-    /*TRACE("%s() Event:%d Sink:%d\n", __func__, pEvent_p->eventType, pEvent_p->eventSink);*/
     if (pEvent_p->eventArgSize == 0)
-    {
         circError = circbuf_writeData(instance_l[eventQueue_p], pEvent_p, sizeof(tEvent));
-    }
     else
     {
-        circError = circbuf_writeMultipleData(instance_l[eventQueue_p], pEvent_p, sizeof(tEvent),
-                                              pEvent_p->eventArg.pEventArg, (ULONG)pEvent_p->eventArgSize);
+        circError = circbuf_writeMultipleData(instance_l[eventQueue_p],
+                                              pEvent_p,
+                                              sizeof(tEvent),
+                                              pEvent_p->eventArg.pEventArg,
+                                              (size_t)pEvent_p->eventArgSize);
     }
 
     if (circError != kCircBufOk)
-    {
         ret = kErrorEventPostError;
-    }
+
     return ret;
 }
 
@@ -262,11 +265,11 @@ tOplkError eventkcal_postEventCircbuf(tEventQueue eventQueue_p, tEvent* pEvent_p
 This function reads a circular buffer event queue and processes the event
 by calling the event handlers process function.
 
-\param  eventQueue_p            Event queue used for reading the event.
+\param[in]      eventQueue_p        Event queue used for reading the event.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other                   Error
+\retval kErrorOk                    Function executes correctly
+\retval other                       Error
 
 \ingroup module_eventkcal
 */
@@ -279,8 +282,6 @@ tOplkError eventkcal_processEventCircbuf(tEventQueue eventQueue_p)
     size_t              readSize;
     tCircBufInstance*   pCircBufInstance;
 
-    //TRACE("%s()\n", __func__);
-
     if (eventQueue_p > kEventQueueNum)
     {
         DEBUG_LVL_ERROR_TRACE("%s() invalid queue %d!\n", __func__, eventQueue_p);
@@ -295,15 +296,19 @@ tOplkError eventkcal_processEventCircbuf(tEventQueue eventQueue_p)
 
     pCircBufInstance = instance_l[eventQueue_p];
 
-    error = circbuf_readData(pCircBufInstance, aRxBuffer_l[eventQueue_p],
-                             sizeof(tEvent) + MAX_EVENT_ARG_SIZE, &readSize);
+    error = circbuf_readData(pCircBufInstance,
+                             aRxBuffer_l[eventQueue_p],
+                             sizeof(tEvent) + MAX_EVENT_ARG_SIZE,
+                             &readSize);
     if (error != kCircBufOk)
     {
         if (error == kCircBufNoReadableData)
             return kErrorOk;
 
-        eventk_postError(kEventSourceEventk, kErrorEventReadError,
-                         sizeof(tCircBufError), &error);
+        eventk_postError(kEventSourceEventk,
+                         kErrorEventReadError,
+                         sizeof(tCircBufError),
+                         &error);
 
         return kErrorGeneralError;
     }
@@ -315,15 +320,16 @@ tOplkError eventkcal_processEventCircbuf(tEventQueue eventQueue_p)
     else
         pEvent->eventArg.pEventArg = NULL;
 
-    /*TRACE("Process Kernel  type:%s(%d) sink:%s(%d) size:%d!\n",
-           debugstr_getEventTypeStr(pEvent->eventType), pEvent->eventType,
-           debugstr_getEventSinkStr(pEvent->eventSink), pEvent->eventSink,
-           pEplEvent->eventArgSize);*/
-
+    DEBUG_LVL_EVENTK_TRACE("Process Kernel  type:%s(%d) sink:%s(%d) size:%d!\n",
+                           debugstr_getEventTypeStr(pEvent->eventType),
+                           pEvent->eventType,
+                           debugstr_getEventSinkStr(pEvent->eventSink),
+                           pEvent->eventSink,
+                           pEvent->eventArgSize);
     ret = eventk_process(pEvent);
+
     return ret;
 }
-
 
 //------------------------------------------------------------------------------
 /**
@@ -332,22 +338,27 @@ tOplkError eventkcal_processEventCircbuf(tEventQueue eventQueue_p)
 This function reads a circular buffer event queue and stores the event data
 at pDataBuffer_p.
 
-\param  eventQueue_p            Event queue used for reading the event.
-\param  pDataBuffer_p           Pointer to store event.
-\param  pReadSize_p             Pointer to store length of event.
+\param[in]      eventQueue_p        Event queue used for reading the event.
+\param[out]     pDataBuffer_p       Pointer to store event.
+\param[out]     pReadSize_p         Pointer to store length of event.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other                   Error
+\retval kErrorOk                    Function executes correctly
+\retval other                       Error
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tOplkError eventkcal_getEventCircbuf(tEventQueue eventQueue_p, BYTE* pDataBuffer_p,
+tOplkError eventkcal_getEventCircbuf(tEventQueue eventQueue_p,
+                                     UINT8* pDataBuffer_p,
                                      size_t* pReadSize_p)
 {
     tCircBufError       error;
     tCircBufInstance*   pCircBufInstance;
+
+    // Check parameter validity
+    ASSERT(pDataBuffer_p != NULL);
+    ASSERT(pReadSize_p != NULL);
 
     if (eventQueue_p > kEventQueueNum)
     {
@@ -363,15 +374,19 @@ tOplkError eventkcal_getEventCircbuf(tEventQueue eventQueue_p, BYTE* pDataBuffer
 
     pCircBufInstance = instance_l[eventQueue_p];
 
-    error = circbuf_readData(pCircBufInstance, pDataBuffer_p,
-                             sizeof(tEvent) + MAX_EVENT_ARG_SIZE, pReadSize_p);
+    error = circbuf_readData(pCircBufInstance,
+                             pDataBuffer_p,
+                             sizeof(tEvent) + MAX_EVENT_ARG_SIZE,
+                             pReadSize_p);
     if (error != kCircBufOk)
     {
         if (error == kCircBufNoReadableData)
             return kErrorOk;
 
-        eventk_postError(kEventSourceEventk, kErrorEventReadError,
-                         sizeof(tCircBufError), &error);
+        eventk_postError(kEventSourceEventk,
+                         kErrorEventReadError,
+                         sizeof(tCircBufError),
+                         &error);
 
         return kErrorGeneralError;
     }
@@ -386,7 +401,7 @@ tOplkError eventkcal_getEventCircbuf(tEventQueue eventQueue_p, BYTE* pDataBuffer
 This function returns the number of events which are currently available in
 the circular buffer event queue.
 
-\param  eventQueue_p            Event queue to read the count from.
+\param[in]      eventQueue_p        Event queue to read the count from.
 
 \return The function returns the number of active events.
 
@@ -417,8 +432,8 @@ UINT eventkcal_getEventCountCircbuf(tEventQueue eventQueue_p)
 This function sets up event signaling for the specified circular buffer event
 queue.
 
-\param  eventQueue_p            Event queue to read the count from.
-\param  pfnSignalCb_p           Pointer to signaling callback function.
+\param[in]      eventQueue_p        Event queue to read the count from.
+\param[in]      pfnSignalCb_p       Pointer to signaling callback function.
 
 \return The function returns the number of active events.
 
@@ -434,6 +449,7 @@ tOplkError eventkcal_setSignalingCircbuf(tEventQueue eventQueue_p, VOIDFUNCPTR p
         return kErrorInvalidInstanceParam;
 
     circBuf_setSignaling(instance_l[eventQueue_p], pfnSignalCb_p);
+
     return kErrorOk;
 }
 

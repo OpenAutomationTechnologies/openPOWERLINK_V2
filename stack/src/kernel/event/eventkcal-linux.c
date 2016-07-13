@@ -13,7 +13,7 @@ userspace platform. It uses the circular buffer interface for all event queues.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -120,8 +120,8 @@ static void  signalUserEvent(void);
 The function initializes the kernel event CAL module on Linux.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventkcal
 */
@@ -162,7 +162,8 @@ tOplkError eventkcal_init(void)
     if (pthread_setschedparam(instance_l.threadId, SCHED_FIFO, &schedParam) != 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s(): couldn't set thread scheduling parameters! %d\n",
-               __func__, schedParam.sched_priority);
+                              __func__,
+                              schedParam.sched_priority);
     }
 
 #if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 12)
@@ -195,15 +196,15 @@ The function cleans up the kernel event CAL module. For cleanup it calls the exi
 functions of the queue implementations for each used queue.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
 tOplkError eventkcal_exit(void)
 {
-    UINT             i = 0;
+    UINT    i = 0;
 
     if (instance_l.fInitialized == TRUE)
     {
@@ -213,7 +214,7 @@ tOplkError eventkcal_exit(void)
             target_msleep(10);
             if (i++ > 100)
             {
-                DEBUG_LVL_EVENTK_TRACE("Event Thread is not terminating, continue shutdown...!\n");
+                DEBUG_LVL_EVENTK_TRACE("Event thread is not terminating, continue shutdown...!\n");
                 break;
             }
         }
@@ -240,18 +241,18 @@ tOplkError eventkcal_exit(void)
 
 This function posts a event to the kernel queue.
 
-\param  pEvent_p                Event to be posted.
+\param[in]      pEvent_p            Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tOplkError eventkcal_postKernelEvent(tEvent* pEvent_p)
+tOplkError eventkcal_postKernelEvent(const tEvent* pEvent_p)
 {
-    tOplkError      ret = kErrorOk;
+    tOplkError  ret;
 
     ret = eventkcal_postEventCircbuf(kEventQueueKInt, pEvent_p);
 
@@ -264,18 +265,18 @@ tOplkError eventkcal_postKernelEvent(tEvent* pEvent_p)
 
 This function posts a event to the user queue.
 
-\param  pEvent_p                Event to be posted.
+\param[in]      pEvent_p            Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tOplkError eventkcal_postUserEvent(tEvent* pEvent_p)
+tOplkError eventkcal_postUserEvent(const tEvent* pEvent_p)
 {
-    tOplkError      ret = kErrorOk;
+    tOplkError  ret;
 
     ret = eventkcal_postEventCircbuf(kEventQueueK2U, pEvent_p);
 
@@ -308,7 +309,7 @@ void eventkcal_process(void)
 
 This function contains the main function for the event handler thread.
 
-\param  arg                     Thread parameter. Not used!
+\param[in,out]  arg                 Thread parameter. Not used!
 
 \return The function returns the thread exit code.
 */

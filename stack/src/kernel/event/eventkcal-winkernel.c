@@ -14,6 +14,7 @@ the Windows kernel. It uses the circular buffer interface for all event queues.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -123,8 +124,8 @@ configuration it gets the function pointer interface of the used queue
 implementations and calls the appropriate init functions.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly.
-\retval other error codes       An error occurred.
+\retval kErrorOk                    Function executes correctly.
+\retval other error codes           An error occurred.
 
 \ingroup module_eventkcal
 */
@@ -163,17 +164,25 @@ tOplkError eventkcal_init(void)
 
     eventkcal_setSignalingCircbuf(kEventQueueKInt, signalKernelEvent);
 
-    InitializeObjectAttributes(&objectAttributes, NULL, OBJ_KERNEL_HANDLE,
-                               NULL, NULL);
+    InitializeObjectAttributes(&objectAttributes,
+                               NULL,
+                               OBJ_KERNEL_HANDLE,
+                               NULL,
+                               NULL);
 
-    ntStatus = PsCreateSystemThread(&instance_l.hThreadHandle, desiredAccess,
-                                    &objectAttributes, NULL, NULL,
-                                    eventThread, &instance_l);
+    ntStatus = PsCreateSystemThread(&instance_l.hThreadHandle,
+                                    desiredAccess,
+                                    &objectAttributes,
+                                    NULL,
+                                    NULL,
+                                    eventThread,
+                                    &instance_l);
 
     if (ntStatus != STATUS_SUCCESS)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Unable to create event thread 0x%X\n",
-                              __func__, ntStatus);
+                              __func__,
+                              ntStatus);
         goto Exit;
     }
 
@@ -199,8 +208,8 @@ The function cleans up the kernel event CAL module. For cleanup it calls the exi
 functions of the queue implementations for each used queue.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly.
-\retval other error codes       An error occurred.
+\retval kErrorOk                    Function executes correctly.
+\retval other error codes           An error occurred.
 
 \ingroup module_eventkcal
 */
@@ -219,7 +228,7 @@ tOplkError eventkcal_exit(void)
         NdisMSleep(10);
         if (i++ > 1000)
         {
-            TRACE("Event Thread is not terminating, continue shutdown...!\n");
+            DEBUG_LVL_EVENTK_TRACE("Event thread is not terminating, continue shutdown...!\n");
             break;
         }
     }
@@ -242,18 +251,21 @@ This function posts an event to a queue. It is called from the generic kernel
 event post function in the event handler. Depending on the sink the appropriate
 queue post function is called.
 
-\param  pEvent_p                Event to be posted.
+\param[in]      pEvent_p            Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tOplkError eventkcal_postUserEvent(tEvent* pEvent_p)
+tOplkError eventkcal_postUserEvent(const tEvent* pEvent_p)
 {
-    tOplkError    ret = kErrorOk;
+    tOplkError  ret;
+
+    // Check parameter validity
+    ASSERT(pEvent_p != NULL);
 
     if (instance_l.fInitialized)
         ret = eventkcal_postEventCircbuf(kEventQueueK2U, pEvent_p);
@@ -271,18 +283,21 @@ This function posts an event to a queue. It is called from the generic kernel
 event post function in the event handler. Depending on the sink the appropriate
 queue post function is called.
 
-\param  pEvent_p                Event to be posted.
+\param[in]      pEvent_p            Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tOplkError eventkcal_postKernelEvent(tEvent* pEvent_p)
+tOplkError eventkcal_postKernelEvent(const tEvent* pEvent_p)
 {
-    tOplkError    ret = kErrorOk;
+    tOplkError  ret;
+
+    // Check parameter validity
+    ASSERT(pEvent_p != NULL);
 
     if (instance_l.fInitialized)
         ret = eventkcal_postEventCircbuf(kEventQueueKInt, pEvent_p);
@@ -310,15 +325,17 @@ void eventkcal_process(void)
 
 This function posts an event from the user layer to a queue.
 
-\param  pEvent_p        Pointer to the event buffer to be posted.
+\param[in]      pEvent_p            Pointer to the event buffer to be posted.
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-void eventkcal_postEventFromUser(void* pEvent_p)
+void eventkcal_postEventFromUser(const void* pEvent_p)
 {
-    tOplkError    ret = kErrorOk;
-    tEvent        event;
+    tEvent  event;
+
+    // Check parameter validity
+    ASSERT(pEvent_p != NULL);
 
     if (!instance_l.fInitialized)
         return;
@@ -328,9 +345,7 @@ void eventkcal_postEventFromUser(void* pEvent_p)
 
     // Assign the event argument which is present after the event memory, if argument valid
     if (event.eventArgSize != 0)
-    {
         event.eventArg.pEventArg = (void*)((UINT8*)pEvent_p + sizeof(tEvent));
-    }
 
     switch (event.eventSink)
     {
@@ -342,11 +357,13 @@ void eventkcal_postEventFromUser(void* pEvent_p)
         case kEventSinkPdokCal:
         case kEventSinkErrk:
         case kEventSinkTimesynck:
-            /*TRACE("U2K  type:%s(%d) sink:%s(%d) size:%d!\n",
-                   debugstr_getEventTypeStr(event.eventType), event.eventType,
-                   debugstr_getEventSinkStr(event.eventSink), event.eventSink,
-                   event.eventArgSize);*/
-            ret = eventkcal_postEventCircbuf(kEventQueueU2K, &event);
+            DEBUG_LVL_EVENTK_TRACE("U2K  type:%s(%d) sink:%s(%d) size:%d!\n",
+                                   debugstr_getEventTypeStr(event.eventType),
+                                   event.eventType,
+                                   debugstr_getEventSinkStr(event.eventSink),
+                                   event.eventSink,
+                                   event.eventArgSize);
+            eventkcal_postEventCircbuf(kEventQueueU2K, &event);
             break;
 
         case kEventSinkNmtMnu:
@@ -355,22 +372,24 @@ void eventkcal_postEventFromUser(void* pEvent_p)
         case kEventSinkApi:
         case kEventSinkDlluCal:
         case kEventSinkErru:
-            /*TRACE("UINT type:%s(%d) sink:%s(%d) size:%d!\n",
-                   debugstr_getEventTypeStr(event.eventType), event.eventType,
-                   debugstr_getEventSinkStr(event.eventSink), event.eventSink,
-                   event.eventArgSize);*/
-            ret = eventkcal_postEventCircbuf(kEventQueueUInt, &event);
+            DEBUG_LVL_EVENTK_TRACE("UINT type:%s(%d) sink:%s(%d) size:%d!\n",
+                                   debugstr_getEventTypeStr(event.eventType),
+                                   event.eventType,
+                                   debugstr_getEventSinkStr(event.eventSink),
+                                   event.eventSink,
+                                   event.eventArgSize);
+            eventkcal_postEventCircbuf(kEventQueueUInt, &event);
             break;
 
         default:
-            TRACE("UNKNOWN Event: Type:%s(%d) sink:%s(%d) size:%d!\n",
-                  debugstr_getEventTypeStr(event.eventType), event.eventType,
-                  debugstr_getEventSinkStr(event.eventSink), event.eventSink,
-                  event.eventArgSize);
+            DEBUG_LVL_EVENTK_TRACE("UNKNOWN Event: Type:%s(%d) sink:%s(%d) size:%d!\n",
+                                   debugstr_getEventTypeStr(event.eventType),
+                                   event.eventType,
+                                   debugstr_getEventSinkStr(event.eventSink),
+                                   event.eventSink,
+                                   event.eventArgSize);
             break;
     }
-
-    return;
 }
 
 //------------------------------------------------------------------------------
@@ -379,8 +398,8 @@ void eventkcal_postEventFromUser(void* pEvent_p)
 
 This function waits for events to the user.
 
-\param  pEvent_p         Buffer pointer to receive event.
-\param  pSize_p          Size of the event.
+\param[in]      pEvent_p            Buffer pointer to receive event.
+\param[in]      pSize_p             Size of the event.
 
 \ingroup module_eventkcal
 */
@@ -390,6 +409,10 @@ void eventkcal_getEventForUser(void* pEvent_p, size_t* pSize_p)
     tOplkError    error;
     BOOL          fRet;
     UINT32        timeout = 500;
+
+    // Check parameter validity
+    ASSERT(pEvent_p != NULL);
+    ASSERT(pSize_p != NULL);
 
     if (!instance_l.fInitialized)
         return;
@@ -410,7 +433,7 @@ void eventkcal_getEventForUser(void* pEvent_p, size_t* pSize_p)
         NdisInterlockedDecrement(&instance_l.userEventCount);
 
         error = eventkcal_getEventCircbuf(kEventQueueK2U, pEvent_p, pSize_p);
-        if (error != kErrorOk || pEvent_p == NULL)
+        if ((error != kErrorOk) || (pEvent_p == NULL))
         {
             DEBUG_LVL_ERROR_TRACE("%s() Error reading K2U events %d!\n", __func__, error);
         }
@@ -442,7 +465,7 @@ void eventkcal_getEventForUser(void* pEvent_p, size_t* pSize_p)
 
 This function contains the main function for the event handler thread.
 
-\param  pArg                     Thread parameter. Not used!
+\param[in,out]  pArg                Thread parameter. Not used!
 
 \return The function returns the thread exit code.
 */

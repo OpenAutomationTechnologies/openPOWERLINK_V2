@@ -64,8 +64,8 @@ extern "C"
 
 tOplkError eventkcal_init(void);
 tOplkError eventkcal_exit(void);
-tOplkError eventkcal_postUserEvent(tEvent* pEvent_p) SECTION_EVENTKCAL_POST;
-tOplkError eventkcal_postKernelEvent(tEvent* pEvent_p) SECTION_EVENTKCAL_POST;
+tOplkError eventkcal_postUserEvent(const tEvent* pEvent_p) SECTION_EVENTKCAL_POST;
+tOplkError eventkcal_postKernelEvent(const tEvent* pEvent_p) SECTION_EVENTKCAL_POST;
 void       eventkcal_process(void);
 
 #if ((TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__))
@@ -74,7 +74,7 @@ int        eventkcal_postEventFromUser(ULONG arg);
 int        eventkcal_getEventForUser(ULONG arg);
 #elif ((TARGET_SYSTEM == _WIN32_) && defined(_KERNEL_MODE))
 // TODO: Check if they can be revised to merge with Linux APIs
-void       eventkcal_postEventFromUser(void* pEvent_p);
+void       eventkcal_postEventFromUser(const void* pEvent_p);
 void       eventkcal_getEventForUser(void* pEvent_p, size_t* pSize_p);
 #endif
 

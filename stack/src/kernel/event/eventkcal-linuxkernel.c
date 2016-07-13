@@ -13,7 +13,7 @@ kernelspace platform. It uses the circular buffer interface for all event queues
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <common/oplkinc.h>
 #include <kernel/eventkcal.h>
 #include <kernel/eventkcalintf.h>
-//#include <oplk/debugstr.h>
+#include <oplk/debugstr.h>
 
 #include <linux/kthread.h>
 #include <linux/errno.h>
@@ -129,8 +129,8 @@ configuration it gets the function pointer interface of the used queue
 implementations and calls the appropriate init functions.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventkcal
 */
@@ -190,15 +190,15 @@ The function cleans up the kernel event CAL module. For cleanup it calls the exi
 functions of the queue implementations for each used queue.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
 tOplkError eventkcal_exit(void)
 {
-    UINT                i = 0;
+    UINT    i = 0;
 
     instance_l.fInitialized = FALSE;
 
@@ -209,7 +209,7 @@ tOplkError eventkcal_exit(void)
         msleep(10);
         if (i++ > 1000)
         {
-            DEBUG_LVL_EVENTK_TRACE("Event Thread is not terminating, continue shutdown...!\n");
+            DEBUG_LVL_EVENTK_TRACE("Event thread is not terminating, continue shutdown...!\n");
             break;
         }
     }
@@ -230,23 +230,25 @@ This function posts a event to a queue. It is called from the generic kernel
 event post function in the event handler. Depending on the sink the appropriate
 queue post function is called.
 
-\param  pEvent_p                Event to be posted.
+\param[in]      pEvent_p            Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tOplkError eventkcal_postUserEvent(tEvent* pEvent_p)
+tOplkError eventkcal_postUserEvent(const tEvent* pEvent_p)
 {
-    tOplkError      ret = kErrorOk;
+    tOplkError  ret;
 
-    /*TRACE("K2U  type:%s(%d) sink:%s(%d) size:%d!\n",
-           debugstr_getEventTypeStr(pEvent_p->eventType), pEvent_p->eventType,
-           debugstr_getEventSinkStr(pEvent_p->eventSink), pEvent_p->eventSink,
-           pEvent_p->eventArgSize);*/
+    DEBUG_LVL_EVENTK_TRACE("K2U  type:%s(%d) sink:%s(%d) size:%d!\n",
+                           debugstr_getEventTypeStr(pEvent_p->eventType),
+                           pEvent_p->eventType,
+                           debugstr_getEventSinkStr(pEvent_p->eventSink),
+                           pEvent_p->eventSink,
+                           pEvent_p->eventArgSize);
 
     if (instance_l.fInitialized)
         ret = eventkcal_postEventCircbuf(kEventQueueK2U, pEvent_p);
@@ -264,23 +266,25 @@ This function posts an event to a queue. It is called from the generic kernel
 event post function in the event handler. Depending on the sink the appropriate
 queue post function is called.
 
-\param  pEvent_p                Event to be posted.
+\param[in]      pEvent_p            Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tOplkError eventkcal_postKernelEvent(tEvent* pEvent_p)
+tOplkError eventkcal_postKernelEvent(const tEvent* pEvent_p)
 {
-    tOplkError      ret = kErrorOk;
+    tOplkError  ret;
 
-    /*TRACE("KINT  type:%s(%d) sink:%s(%d) size:%d!\n",
-           debugstr_getEventTypeStr(pEvent_p->eventType), pEvent_p->eventType,
-           debugstr_getEventSinkStr(pEvent_p->eventSink), pEvent_p->eventSink,
-           pEvent_p->eventArgSize);*/
+    DEBUG_LVL_EVENTK_TRACE("KINT  type:%s(%d) sink:%s(%d) size:%d!\n",
+                           debugstr_getEventTypeStr(pEvent_p->eventType),
+                           pEvent_p->eventType,
+                           debugstr_getEventSinkStr(pEvent_p->eventSink),
+                           pEvent_p->eventSink,
+                           pEvent_p->eventArgSize);
 
     if (instance_l.fInitialized)
         ret = eventkcal_postEventCircbuf(kEventQueueKInt, pEvent_p);
@@ -293,9 +297,11 @@ tOplkError eventkcal_postKernelEvent(tEvent* pEvent_p)
 
 //------------------------------------------------------------------------------
 /**
-dmes\brief  Process function of kernel CAL module
+\brief  Process function of kernel CAL module
 
 This function will be called by the systems process function.
+
+\ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
 void eventkcal_process(void)
@@ -309,7 +315,7 @@ void eventkcal_process(void)
 
 This function posts a event from the user layer to a queue.
 
-\param  arg                Ioctl argument. Contains the event to post.
+\param[in]      arg                 Ioctl argument. Contains the event to post.
 
 \return The function returns Linux error code.
 
@@ -318,10 +324,10 @@ This function posts a event from the user layer to a queue.
 //------------------------------------------------------------------------------
 int eventkcal_postEventFromUser(ULONG arg)
 {
-    tOplkError      ret = kErrorOk;
-    tEvent          event;
-    char*           pArg = NULL;
-    int             order = 0;
+    tOplkError  ret = kErrorOk;
+    tEvent      event;
+    UINT8*      pArg = NULL;
+    int         order = 0;
 
     if (!instance_l.fInitialized)
         return -EIO;
@@ -332,12 +338,12 @@ int eventkcal_postEventFromUser(ULONG arg)
     if (event.eventArgSize != 0)
     {
         order = get_order(event.eventArgSize);
-        pArg = (BYTE*)__get_free_pages(GFP_KERNEL, order);
+        pArg = (UINT8*)__get_free_pages(GFP_KERNEL, order);
 
         if (!pArg)
             return -EIO;
 
-        //TRACE("%s() allocated %d Bytes at %p\n", __func__, event.eventArgSize, pArg);
+        DEBUG_LVL_EVENTK_TRACE("%s() allocated %d Bytes at %p\n", __func__, event.eventArgSize, pArg);
         if (copy_from_user(pArg, (const void __user *)event.eventArg.pEventArg, event.eventArgSize))
         {
             free_pages((ULONG)pArg, order);
@@ -355,10 +361,12 @@ int eventkcal_postEventFromUser(ULONG arg)
         case kEventSinkPdok:
         case kEventSinkPdokCal:
         case kEventSinkErrk:
-            /*TRACE("U2K  type:%s(%d) sink:%s(%d) size:%d!\n",
-                   debugstr_getEventTypeStr(event.eventType), event.eventType,
-                   debugstr_getEventSinkStr(event.eventSink), event.eventSink,
-                   event.eventArgSize);*/
+            DEBUG_LVL_EVENTK_TRACE("U2K  type:%s(%d) sink:%s(%d) size:%d!\n",
+                                   debugstr_getEventTypeStr(event.eventType),
+                                   event.eventType,
+                                   debugstr_getEventSinkStr(event.eventSink),
+                                   event.eventSink,
+                                   event.eventArgSize);
             ret = eventkcal_postEventCircbuf(kEventQueueU2K, &event);
             break;
 
@@ -368,10 +376,12 @@ int eventkcal_postEventFromUser(ULONG arg)
         case kEventSinkApi:
         case kEventSinkDlluCal:
         case kEventSinkErru:
-            /*TRACE("UINT type:%s(%d) sink:%s(%d) size:%d!\n",
-                   debugstr_getEventTypeStr(event.eventType), event.eventType,
-                   debugstr_getEventSinkStr(event.eventSink), event.eventSink,
-                   event.eventArgSize);*/
+            DEBUG_LVL_EVENTK_TRACE("UINT type:%s(%d) sink:%s(%d) size:%d!\n",
+                                   debugstr_getEventTypeStr(event.eventType),
+                                   event.eventType,
+                                   debugstr_getEventSinkStr(event.eventSink),
+                                   event.eventSink,
+                                   event.eventArgSize);
             ret = eventkcal_postEventCircbuf(kEventQueueUInt, &event);
             break;
 
@@ -392,7 +402,7 @@ int eventkcal_postEventFromUser(ULONG arg)
 
 This function waits for events to the user.
 
-\param  arg                Ioctl argument. Contains the received event.
+\param[in]      arg                 Ioctl argument. Contains the received event.
 
 \return The function returns Linux error code.
 
@@ -401,25 +411,26 @@ This function waits for events to the user.
 //------------------------------------------------------------------------------
 int eventkcal_getEventForUser(ULONG arg)
 {
-    tOplkError          error;
-    int                 ret;
-    size_t              readSize;
-    int                 timeout = 500 * HZ / 1000;
+    tOplkError  error;
+    int         ret;
+    size_t      readSize;
+    int         timeout = 500 * HZ / 1000;
 
     if (!instance_l.fInitialized)
         return -EIO;
 
     ret = wait_event_interruptible_timeout(instance_l.userWaitQueue,
-                             (atomic_read(&instance_l.userEventCount) > 0), timeout);
+                                           (atomic_read(&instance_l.userEventCount) > 0),
+                                           timeout);
     if (ret == 0)
     {
-        //TRACE("%s() timeout!\n", __func__);
+        DEBUG_LVL_EVENTK_TRACE("%s() timeout!\n", __func__);
         return -ERESTARTSYS;
     }
 
     if (ret == -ERESTARTSYS)
     {
-        //TRACE("%s() interrupted\n", __func__);
+        DEBUG_LVL_EVENTK_TRACE("%s() interrupted\n", __func__);
         return ret;
     }
 
@@ -437,7 +448,7 @@ int eventkcal_getEventForUser(ULONG arg)
             return -EIO;
         }
 
-        //TRACE("%s() copy kernel event to user: %d Bytes\n", __func__, readSize);
+        DEBUG_LVL_EVENTK_TRACE("%s() copy kernel event to user: %d Bytes\n", __func__, readSize);
         if (copy_to_user((void __user *)arg, instance_l.aK2URxBuffer, readSize))
             return -EFAULT;
 
@@ -457,13 +468,14 @@ int eventkcal_getEventForUser(ULONG arg)
                 return -EIO;
             }
 
-            //TRACE("%s() copy user event to user: %d Bytes\n", __func__, readSize);
+            DEBUG_LVL_EVENTK_TRACE("%s() copy user event to user: %d Bytes\n", __func__, readSize);
             if (copy_to_user((void __user *)arg, instance_l.aUintRxBuffer, readSize))
                 return -EFAULT;
 
             return 0;
         }
     }
+
     return -ERESTARTSYS;
 }
 
@@ -479,7 +491,7 @@ int eventkcal_getEventForUser(ULONG arg)
 
 This function contains the main function for the event handler thread.
 
-\param  arg                     Thread parameter. Not used!
+\param[in,out]  arg                 Thread parameter. Not used!
 
 \return The function returns the thread exit code.
 */
@@ -488,13 +500,13 @@ static int eventThread(void* arg)
 {
     int     timeout = 500 * HZ / 1000;
     int     result;
-#if defined(CONFIG_PREEMPT_RT_FULL) || defined(CONFIG_PREEMPT_RT)
+#if (defined(CONFIG_PREEMPT_RT_FULL) || defined(CONFIG_PREEMPT_RT))
     struct sched_param  rt_prio;
 #endif
 
     set_user_nice(current, -20);
 
-#if defined(CONFIG_PREEMPT_RT_FULL) || defined(CONFIG_PREEMPT_RT)
+#if (defined(CONFIG_PREEMPT_RT_FULL) || defined(CONFIG_PREEMPT_RT))
         rt_prio.sched_priority = 79;
         sched_setscheduler(current, SCHED_FIFO, &rt_prio);
 #endif
@@ -503,7 +515,8 @@ static int eventThread(void* arg)
     while (!kthread_should_stop())
     {
         result = wait_event_interruptible_timeout(instance_l.kernelWaitQueue,
-                                         (atomic_read(&instance_l.kernelEventCount) > 0), timeout);
+                                                  (atomic_read(&instance_l.kernelEventCount) > 0),
+                                                  timeout);
 
         if (kthread_should_stop())
             break;
@@ -526,6 +539,7 @@ static int eventThread(void* arg)
     }
 
     instance_l.fThreadIsRunning = FALSE;
+
     return 0;
 }
 

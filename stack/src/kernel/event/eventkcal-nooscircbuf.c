@@ -14,7 +14,7 @@ event queue and direct calls for the kernel-internal queue.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -96,7 +96,7 @@ static tEventkCalInstance   instance_l;             ///< Instance variable of ke
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static BOOL checkForwardEventToKint(tEvent* pEvent_p);
+static BOOL checkForwardEventToKint(const tEvent* pEvent_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -109,8 +109,8 @@ static BOOL checkForwardEventToKint(tEvent* pEvent_p);
 The function initializes the kernel event CAL module on Linux.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventkcal
 */
@@ -144,8 +144,8 @@ The function cleans up the kernel event CAL module. For cleanup it calls the exi
 functions of the queue implementations for each used queue.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventkcal
 */
@@ -168,18 +168,21 @@ tOplkError eventkcal_exit(void)
 
 This function posts a event to the kernel queue.
 
-\param  pEvent_p                Event to be posted.
+\param[in]      pEvent_p            Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tOplkError eventkcal_postKernelEvent(tEvent* pEvent_p)
+tOplkError eventkcal_postKernelEvent(const tEvent* pEvent_p)
 {
-    tOplkError      ret = kErrorOk;
+    tOplkError  ret;
+
+    // Check parameter validity
+    ASSERT(pEvent_p != NULL);
 
     if (!checkForwardEventToKint(pEvent_p))
     {   // Forward event with direct call
@@ -203,18 +206,21 @@ tOplkError eventkcal_postKernelEvent(tEvent* pEvent_p)
 
 This function posts a event to the user queue.
 
-\param  pEvent_p                Event to be posted.
+\param[in]      pEvent_p            Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tOplkError eventkcal_postUserEvent(tEvent* pEvent_p)
+tOplkError eventkcal_postUserEvent(const tEvent* pEvent_p)
 {
-    tOplkError      ret = kErrorOk;
+    tOplkError  ret;
+
+    // Check parameter validity
+    ASSERT(pEvent_p != NULL);
 
     ret = eventkcal_postEventCircbuf(kEventQueueK2U, pEvent_p);
 
@@ -236,9 +242,7 @@ void eventkcal_process(void)
         return;
 
     if (eventkcal_getEventCountCircbuf(kEventQueueKInt) > 0)
-    {
         eventkcal_processEventCircbuf(kEventQueueKInt);
-    }
 }
 
 //============================================================================//
@@ -254,14 +258,14 @@ void eventkcal_process(void)
 This function checks if the given event shall be forwarded by kernel internal
 queue.
 
-\param  pEvent_p    Pointer to event
+\param[in]      pEvent_p            Pointer to event
 
 \return The function returns a BOOL.
-\retval TRUE    The event shall be forwarded by kernel internal queue.
-\retval FALSE   The event shall be forwarded by direct call.
+\retval TRUE                        The event shall be forwarded by kernel internal queue.
+\retval FALSE                       The event shall be forwarded by direct call.
 */
 //------------------------------------------------------------------------------
-static BOOL checkForwardEventToKint(tEvent* pEvent_p)
+static BOOL checkForwardEventToKint(const tEvent* pEvent_p)
 {
     BOOL fRet = FALSE;
 

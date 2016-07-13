@@ -87,43 +87,43 @@ void  target_enableGlobalInterrupt(BYTE fEnable_p)
     UNUSED_PARAMETER(fEnable_p);
 }
 
-tOplkError nmtk_process(tEvent* pEvent_p)
+tOplkError nmtk_process(const tEvent* pEvent_p)
 {
     UNUSED_PARAMETER(pEvent_p);
     return kErrorOk;
 }
 
-tOplkError dllk_process(tEvent* pEvent_p)
+tOplkError dllk_process(const tEvent* pEvent_p)
 {
     UNUSED_PARAMETER(pEvent_p);
     return kErrorOk;
 }
 
-tOplkError dllkcal_process(tEvent* pEvent_p)
+tOplkError dllkcal_process(const tEvent* pEvent_p)
 {
     UNUSED_PARAMETER(pEvent_p);
     return kErrorOk;
 }
 
-tOplkError errhndk_process(tEvent* pEvent_p)
+tOplkError errhndk_process(const tEvent* pEvent_p)
 {
     UNUSED_PARAMETER(pEvent_p);
     return kErrorOk;
 }
 
-tOplkError pdokcal_process(tEvent* pEvent_p)
+tOplkError pdokcal_process(const tEvent* pEvent_p)
 {
     UNUSED_PARAMETER(pEvent_p);
     return kErrorOk;
 }
 
-tOplkError eventkcal_postUserEvent(tEvent* pEvent_p)
+tOplkError eventkcal_postUserEvent(const tEvent* pEvent_p)
 {
     UNUSED_PARAMETER(pEvent_p);
     return kErrorOk;
 }
 
-tOplkError eventkcal_postKernelEvent(tEvent* pEvent_p)
+tOplkError eventkcal_postKernelEvent(const tEvent* pEvent_p)
 {
     UNUSED_PARAMETER(pEvent_p);
     return kErrorOk;
@@ -132,5 +132,4 @@ tOplkError eventkcal_postKernelEvent(tEvent* pEvent_p)
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
-
 

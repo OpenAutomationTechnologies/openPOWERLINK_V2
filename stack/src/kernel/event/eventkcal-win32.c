@@ -13,7 +13,7 @@ platform. It uses the circular buffer library for all event queues.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -111,16 +111,14 @@ static void signalUserEvent(void);
 The function initializes the kernel event CAL module on Windows.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
 tOplkError eventkcal_init(void)
 {
-    tOplkError      ret = kErrorOk;
-
     OPLK_MEMSET(&instance_l, 0, sizeof(tEventkCalInstance));
 
     if ((instance_l.semUserData = CreateSemaphore(NULL, 0, 100, "Local\\semUserEvent")) == NULL)
@@ -143,8 +141,13 @@ tOplkError eventkcal_init(void)
     eventkcal_setSignalingCircbuf(kEventQueueKInt, signalKernelEvent);
 
     instance_l.fStopThread = FALSE;
-    if ((instance_l.threadHandle = CreateThread(NULL, 0, eventThread, (LPVOID)&instance_l,
-                                                0, NULL)) == NULL)
+    instance_l.threadHandle = CreateThread(NULL,
+                                           0,
+                                           eventThread,
+                                           (LPVOID)&instance_l,
+                                           0,
+                                           NULL);
+    if (instance_l.threadHandle == NULL)
         goto Exit;
 
     SetThreadPriority(instance_l.threadHandle, THREAD_PRIORITY_ABOVE_NORMAL);
@@ -167,7 +170,6 @@ Exit:
     return kErrorNoResource;
 }
 
-
 //------------------------------------------------------------------------------
 /**
 \brief    Clean up kernel event CAL module
@@ -176,8 +178,8 @@ The function cleans up the kernel event CAL module. For cleanup it calls the exi
 functions of the queue implementations for each used queue.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventkcal
 */
@@ -208,18 +210,21 @@ tOplkError eventkcal_exit(void)
 
 This function posts a event to the kernel queue.
 
-\param  pEvent_p                Event to be posted.
+\param[in]      pEvent_p            Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tOplkError eventkcal_postKernelEvent(tEvent* pEvent_p)
+tOplkError eventkcal_postKernelEvent(const tEvent* pEvent_p)
 {
-    tOplkError      ret = kErrorOk;
+    tOplkError  ret;
+
+    // Check parameter validity
+    ASSERT(pEvent_p != NULL);
 
     ret = eventkcal_postEventCircbuf(kEventQueueKInt, pEvent_p);
 
@@ -232,18 +237,21 @@ tOplkError eventkcal_postKernelEvent(tEvent* pEvent_p)
 
 This function posts a event to the user queue.
 
-\param  pEvent_p                Event to be posted.
+\param[in]      pEvent_p            Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventkcal
 */
 //------------------------------------------------------------------------------
-tOplkError eventkcal_postUserEvent (tEvent* pEvent_p)
+tOplkError eventkcal_postUserEvent(const tEvent* pEvent_p)
 {
-    tOplkError      ret = kErrorOk;
+    tOplkError  ret;
+
+    // Check parameter validity
+    ASSERT(pEvent_p != NULL);
 
     ret = eventkcal_postEventCircbuf(kEventQueueK2U, pEvent_p);
 
@@ -276,15 +284,15 @@ void eventkcal_process(void)
 
 This function contains the main function for the event handler thread.
 
-\param  arg                     Thread parameter. Not used!
+\param[in]      arg                 Thread parameter. Used to get the instance structure.
 
 \return The function returns the thread exit code.
 */
 //------------------------------------------------------------------------------
 static DWORD WINAPI eventThread(LPVOID arg)
 {
-    tEventkCalInstance*     pInstance = (tEventkCalInstance*)arg;
-    DWORD                   waitResult;
+    const tEventkCalInstance*   pInstance = (const tEventkCalInstance*)arg;
+    DWORD                       waitResult;
 
     DEBUG_LVL_EVENTK_TRACE("Kernel event thread %d waiting for events...\n", GetCurrentThreadId());
     while (!pInstance->fStopThread)
@@ -308,16 +316,18 @@ static DWORD WINAPI eventThread(LPVOID arg)
                 break;
 
             case WAIT_TIMEOUT:
-                //TRACE("kernel event timeout!\n");
+                DEBUG_LVL_ERROR_TRACE("kernel event timeout!\n");
                 break;
 
             default:
                 DEBUG_LVL_ERROR_TRACE("%s() Semaphore wait unknown error! Error:%ld\n",
-                                      __func__, GetLastError());
+                                      __func__,
+                                      GetLastError());
                 break;
         }
     }
-    DEBUG_LVL_EVENTK_TRACE("Kernel Event Thread is exiting!\n");
+
+    DEBUG_LVL_EVENTK_TRACE("Kernel event thread is exiting!\n");
     return 0;
 }
 
