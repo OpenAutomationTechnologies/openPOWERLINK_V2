@@ -46,7 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define CTRL_MAGIC                      0xA5A5
+#define CTRL_MAGIC          0xA5A5
 
 //------------------------------------------------------------------------------
 // typedef
@@ -59,8 +59,8 @@ The structure defines how a command looks like.
 */
 typedef struct sCtrlCmd
 {
-    tCtrlCmdType        cmd;        ///< The command to execute
-    UINT16              retVal;     ///< The return value of the command
+    tCtrlCmdType            cmd;            ///< The command to execute
+    UINT16                  retVal;         ///< The return value of the command
 } tCtrlCmd;
 
 /**

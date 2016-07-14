@@ -62,16 +62,19 @@ extern "C"
 tOplkError       ctrlucal_init(void);
 void             ctrlucal_exit(void);
 tOplkError       ctrlucal_process(void);
+tOplkError       ctrlucal_executeCmd(tCtrlCmdType cmd_p,
+                                     UINT16* pRetVal_p);
+tOplkError       ctrlucal_checkKernelStack(void);
 UINT16           ctrlucal_getStatus(void);
 UINT16           ctrlucal_getHeartbeat(void);
-tOplkError       ctrlucal_executeCmd(tCtrlCmdType cmd_p, UINT16* pRetVal_p);
-tOplkError       ctrlucal_checkKernelStack(void);
-void             ctrlucal_storeInitParam(tCtrlInitParam* pInitParam_p);
+void             ctrlucal_storeInitParam(const tCtrlInitParam* pInitParam_p);
 tOplkError       ctrlucal_readInitParam(tCtrlInitParam* pInitParam_p);
-tOplkError       ctrlucal_writeFileBuffer(tOplkApiFileChunkDesc* pDesc_p, UINT8* pBuffer_p);
+tOplkError       ctrlucal_writeFileBuffer(const tOplkApiFileChunkDesc* pDesc_p,
+                                          const void* pBuffer_p);
 size_t           ctrlucal_getFileBufferSize(void);
 OPLK_FILE_HANDLE ctrlucal_getFd(void);
-tOplkError       ctrlucal_getMappedMem(UINT32 kernelOffs_p, UINT32 size_p,
+tOplkError       ctrlucal_getMappedMem(UINT32 kernelOffs_p,
+                                       UINT32 size_p,
                                        UINT8** ppUserMem_p);
 #ifdef __cplusplus
 }

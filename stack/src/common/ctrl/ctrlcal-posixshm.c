@@ -56,7 +56,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define CTRL_SHM_NAME     "/shmCtrlCal"
+#define CTRL_SHM_NAME       "/shmCtrlCal"
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -82,7 +82,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // local vars
 //------------------------------------------------------------------------------
 static int          fd_l;
-static BYTE*        pCtrlMem_l;
+static UINT8*       pCtrlMem_l;
 static int          size_l;
 static BOOL         fCreator_l;
 
@@ -197,7 +197,9 @@ The function writes data to the control block.
 \ingroup module_ctrlcal
 */
 //------------------------------------------------------------------------------
-void ctrlcal_writeData(UINT offset_p, const void* pSrc_p, size_t length_p)
+void ctrlcal_writeData(UINT offset_p,
+                       const void* pSrc_p,
+                       size_t length_p)
 {
     // Check parameter validity
     ASSERT(pSrc_p != NULL);
@@ -226,7 +228,9 @@ The function reads data from the control block.
 \ingroup module_ctrlcal
 */
 //------------------------------------------------------------------------------
-tOplkError ctrlcal_readData(void* pDest_p, UINT offset_p, size_t length_p)
+tOplkError ctrlcal_readData(void* pDest_p,
+                            UINT offset_p,
+                            size_t length_p)
 {
     // Check parameter validity
     ASSERT(pDest_p != NULL);

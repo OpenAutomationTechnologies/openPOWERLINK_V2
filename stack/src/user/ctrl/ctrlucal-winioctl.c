@@ -16,6 +16,7 @@ to the openPOWERLINK kernel layer running on an external PCIe card.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -110,7 +111,7 @@ The function initializes the user control CAL module.
 //------------------------------------------------------------------------------
 tOplkError ctrlucal_init(void)
 {
-    UINT32      errCode;
+    UINT32  errCode;
 
     hFileHandle_l = CreateFile(PLK_DEV_FILE,                         // Name of the NT "device" to open
                                GENERIC_READ | GENERIC_WRITE,         // Access rights requested
@@ -123,7 +124,9 @@ tOplkError ctrlucal_init(void)
     if (hFileHandle_l == INVALID_HANDLE_VALUE)
     {
         errCode = GetLastError();
-        DEBUG_LVL_ERROR_TRACE("%s() CreateFile failed with error 0x%x\n", __func__, errCode);
+        DEBUG_LVL_ERROR_TRACE("%s() CreateFile failed with error 0x%x\n",
+                              __func__,
+                              errCode);
         return kErrorNoResource;
     }
 
@@ -144,11 +147,18 @@ void ctrlucal_exit(void)
     tMemStruc*  pMemStruc = &sharedMemStruc_l;
     ULONG       bytesReturned;
 
-    if (!DeviceIoControl(hFileHandle_l, PLK_CMD_UNMAP_MEM,
-        pMemStruc, sizeof(tMemStruc), NULL, 0,
-        &bytesReturned, NULL))
+    if (!DeviceIoControl(hFileHandle_l,
+                         PLK_CMD_UNMAP_MEM,
+                         pMemStruc,
+                         sizeof(tMemStruc),
+                         NULL,
+                         0,
+                         &bytesReturned,
+                         NULL))
     {
-        DEBUG_LVL_ERROR_TRACE("%s() Unable to free mem %d\n", __func__, GetLastError());
+        DEBUG_LVL_ERROR_TRACE("%s() Unable to free mem %d\n",
+                              __func__,
+                              GetLastError());
         return;
     }
 
@@ -182,31 +192,41 @@ tOplkError ctrlucal_process(void)
 
 The function forwards a control command to the kernel stack.
 
-\param  cmd_p            Command to execute.
+\param[in]      cmd_p               Command to execute.
+\param[out]     pRetVal_p           Return value from the control command.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_ctrlucal
 */
 //------------------------------------------------------------------------------
-tOplkError ctrlucal_executeCmd(tCtrlCmdType cmd_p, UINT16* pRetVal_p)
+tOplkError ctrlucal_executeCmd(tCtrlCmdType cmd_p,
+                               UINT16* pRetVal_p)
 {
     tCtrlCmd    ctrlCmd;
     tCtrlCmd    ctrlCmdRes;
     ULONG       bytesReturned;
     BOOL        fIoctlRet;
 
+    // Check parameter validity
+    ASSERT(pRetVal_p != NULL);
+
     ctrlCmd.cmd = cmd_p;
     ctrlCmd.retVal = 0;
 
-    fIoctlRet = DeviceIoControl(hFileHandle_l, PLK_CMD_CTRL_EXECUTE_CMD,
-                                &ctrlCmd, sizeof(tCtrlCmd),
-                                &ctrlCmdRes, sizeof(tCtrlCmd),
-                                &bytesReturned, NULL);
-
-    if (!fIoctlRet || bytesReturned == 0)
+    fIoctlRet = DeviceIoControl(hFileHandle_l,
+                                PLK_CMD_CTRL_EXECUTE_CMD,
+                                &ctrlCmd,
+                                sizeof(tCtrlCmd),
+                                &ctrlCmdRes,
+                                sizeof(tCtrlCmd),
+                                &bytesReturned,
+                                NULL);
+    if (!fIoctlRet || (bytesReturned == 0))
     {
-        DEBUG_LVL_ERROR_TRACE("%s() Error in DeviceIoControl : %d\n", __func__, GetLastError());
+        DEBUG_LVL_ERROR_TRACE("%s() Error in DeviceIoControl : %d\n",
+                              __func__,
+                              GetLastError());
         return kErrorGeneralError;
     }
 
@@ -222,32 +242,31 @@ The function checks the state of the kernel stack. If it is already running
 it tries to shutdown.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk             Kernel stack is initialized
-\retval kErrorNoResource     Kernel stack is not running or in wrong state
+\retval kErrorOk                    Kernel stack is initialized
+\retval kErrorNoResource            Kernel stack is not running or in wrong state
 
 \ingroup module_ctrlucal
 */
 //------------------------------------------------------------------------------
 tOplkError ctrlucal_checkKernelStack(void)
 {
-    UINT16        kernelStatus;
-    tOplkError    ret;
-    UINT16        retVal;
+    UINT16      kernelStatus;
+    tOplkError  ret;
+    UINT16      retVal;
 
     DEBUG_LVL_CTRL_TRACE("Checking for kernel stack...\n");
 
     kernelStatus = ctrlucal_getStatus();
-
     switch (kernelStatus)
     {
         case kCtrlStatusReady:
-            DEBUG_LVL_CTRL_TRACE("-> Kernel Stack is ready\n");
+            DEBUG_LVL_CTRL_TRACE("-> Kernel stack is ready\n");
             ret = kErrorOk;
             break;
 
         case kCtrlStatusRunning:
             /* try to shutdown kernel stack */
-            DEBUG_LVL_CTRL_TRACE("-> Try to shutdown Kernel Stack\n");
+            DEBUG_LVL_CTRL_TRACE("-> Try to shutdown kernel stack\n");
             ret = ctrlucal_executeCmd(kCtrlCleanupStack, &retVal);
             if ((ret != kErrorOk) || ((tOplkError)retVal != kErrorOk))
             {
@@ -285,15 +304,23 @@ The function gets the status of the kernel stack
 //------------------------------------------------------------------------------
 UINT16 ctrlucal_getStatus(void)
 {
-    UINT16    status;
-    ULONG     bytesReturned;
-    BOOL      fIoctlRet;
+    UINT16  status;
+    ULONG   bytesReturned;
+    BOOL    fIoctlRet;
 
-    fIoctlRet = DeviceIoControl(hFileHandle_l, PLK_CMD_CTRL_GET_STATUS, 0, 0,
-                                &status, sizeof(UINT16), &bytesReturned, NULL);
-    if (!fIoctlRet || bytesReturned == 0)
+    fIoctlRet = DeviceIoControl(hFileHandle_l,
+                                PLK_CMD_CTRL_GET_STATUS,
+                                NULL,
+                                0,
+                                &status,
+                                sizeof(UINT16),
+                                &bytesReturned,
+                                NULL);
+    if (!fIoctlRet || (bytesReturned == 0))
     {
-        DEBUG_LVL_ERROR_TRACE("%s() Error in DeviceIoControl : %d\n", __func__, GetLastError());
+        DEBUG_LVL_ERROR_TRACE("%s() Error in DeviceIoControl : %d\n",
+                              __func__,
+                              GetLastError());
         return kCtrlStatusUnavailable;
     }
 
@@ -313,15 +340,23 @@ The function reads the heartbeat generated by the kernel stack.
 //------------------------------------------------------------------------------
 UINT16 ctrlucal_getHeartbeat(void)
 {
-    UINT16    heartbeat;
-    ULONG     bytesReturned;
-    BOOL      fIoctlRet;
+    UINT16  heartbeat;
+    ULONG   bytesReturned;
+    BOOL    fIoctlRet;
 
-    fIoctlRet = DeviceIoControl(hFileHandle_l, PLK_CMD_CTRL_GET_HEARTBEAT, 0, 0,
-                                &heartbeat, sizeof(UINT16), &bytesReturned, NULL);
-    if (!fIoctlRet || bytesReturned == 0)
+    fIoctlRet = DeviceIoControl(hFileHandle_l,
+                                PLK_CMD_CTRL_GET_HEARTBEAT,
+                                NULL,
+                                0,
+                                &heartbeat,
+                                sizeof(UINT16),
+                                &bytesReturned,
+                                NULL);
+    if (!fIoctlRet || (bytesReturned == 0))
     {
-        DEBUG_LVL_ERROR_TRACE("%s() Error in DeviceIoControl : %d\n", __func__, GetLastError());
+        DEBUG_LVL_ERROR_TRACE("%s() Error in DeviceIoControl : %d\n",
+                              __func__,
+                              GetLastError());
         return 0;
     }
 
@@ -335,22 +370,32 @@ UINT16 ctrlucal_getHeartbeat(void)
 The function stores the openPOWERLINK initialization parameter so that they
 can be accessed by the kernel stack.
 
-\param  pInitParam_p        Specifies where to read the init parameters.
+\param[in]      pInitParam_p        Specifies where to read the init parameters.
 
 \ingroup module_ctrlucal
 */
 //------------------------------------------------------------------------------
-void ctrlucal_storeInitParam(tCtrlInitParam* pInitParam_p)
+void ctrlucal_storeInitParam(const tCtrlInitParam* pInitParam_p)
 {
-    ULONG    bytesReturned;
-    BOOL     fIoctlRet;
+    ULONG   bytesReturned;
+    BOOL    fIoctlRet;
 
-    fIoctlRet = DeviceIoControl(hFileHandle_l, PLK_CMD_CTRL_STORE_INITPARAM,
-                                pInitParam_p, sizeof(tCtrlInitParam),
-                                0, 0, &bytesReturned, NULL);
-    if (!fIoctlRet || bytesReturned == 0)
+    // Check parameter validity
+    ASSERT(pInitParam_p != NULL);
+
+    fIoctlRet = DeviceIoControl(hFileHandle_l,
+                                PLK_CMD_CTRL_STORE_INITPARAM,
+                                (LPVOID)pInitParam_p,
+                                sizeof(tCtrlInitParam),
+                                NULL,
+                                0,
+                                &bytesReturned,
+                                NULL);
+    if (!fIoctlRet || (bytesReturned == 0))
     {
-        DEBUG_LVL_ERROR_TRACE("%s() Error in DeviceIoControl : %d\n", __func__, GetLastError());
+        DEBUG_LVL_ERROR_TRACE("%s() Error in DeviceIoControl : %d\n",
+                              __func__,
+                              GetLastError());
     }
 }
 
@@ -360,7 +405,7 @@ void ctrlucal_storeInitParam(tCtrlInitParam* pInitParam_p)
 
 The function reads the initialization parameter from the kernel stack.
 
-\param  pInitParam_p        Specifies where to store the read init parameters.
+\param[out]     pInitParam_p        Specifies where to store the read init parameters.
 
 \return The function returns a tOplkError error code.
 
@@ -369,16 +414,25 @@ The function reads the initialization parameter from the kernel stack.
 //------------------------------------------------------------------------------
 tOplkError ctrlucal_readInitParam(tCtrlInitParam* pInitParam_p)
 {
-    ULONG    bytesReturned;
-    BOOL     fIoctlRet;
+    ULONG   bytesReturned;
+    BOOL    fIoctlRet;
 
-    fIoctlRet = DeviceIoControl(hFileHandle_l, PLK_CMD_CTRL_READ_INITPARAM,
-                                0, 0,
-                                pInitParam_p, sizeof(tCtrlInitParam),
-                                &bytesReturned, NULL);
-    if (!fIoctlRet || bytesReturned == 0)
+    // Check parameter validity
+    ASSERT(pInitParam_p != NULL);
+
+    fIoctlRet = DeviceIoControl(hFileHandle_l,
+                                PLK_CMD_CTRL_READ_INITPARAM,
+                                NULL,
+                                0,
+                                pInitParam_p,
+                                sizeof(tCtrlInitParam),
+                                &bytesReturned,
+                                NULL);
+    if (!fIoctlRet || (bytesReturned == 0))
     {
-        DEBUG_LVL_ERROR_TRACE("%s() Error in DeviceIoControl : %d\n", __func__, GetLastError());
+        DEBUG_LVL_ERROR_TRACE("%s() Error in DeviceIoControl : %d\n",
+                              __func__,
+                              GetLastError());
         return kErrorGeneralError;
     }
 
@@ -391,21 +445,27 @@ tOplkError ctrlucal_readInitParam(tCtrlInitParam* pInitParam_p)
 
 This function writes the given file chunk to the file transfer buffer
 
-\param  pDesc_p             Descriptor for the file chunk.
-\param  pBuffer_p           Buffer holding the file chunk.
+\param[in]      pDesc_p             Descriptor for the file chunk.
+\param[in]      pBuffer_p           Buffer holding the file chunk.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_ctrlucal
 */
 //------------------------------------------------------------------------------
-tOplkError ctrlucal_writeFileBuffer(tOplkApiFileChunkDesc* pDesc_p, UINT8* pBuffer_p)
+tOplkError ctrlucal_writeFileBuffer(const tOplkApiFileChunkDesc* pDesc_p,
+                                    const void* pBuffer_p)
 {
     ULONG               bytesReturned;
     BOOL                fIoctlRet;
     tIoctlFileChunk*    pIoctlFileChunk = NULL;
-    UINT32               ioctlBufferSize = (UINT32)(sizeof(tIoctlFileChunk) + pDesc_p->length);
+    UINT32              ioctlBufferSize;
 
+    // Check parameter validity
+    ASSERT(pDesc_p != NULL);
+    ASSERT(pBuffer_p != NULL);
+
+    ioctlBufferSize = (UINT32)(sizeof(tIoctlFileChunk) + pDesc_p->length);
     pIoctlFileChunk = (tIoctlFileChunk*)OPLK_MALLOC(ioctlBufferSize);
     if (pIoctlFileChunk == NULL)
         return kErrorNoResource;
@@ -413,12 +473,19 @@ tOplkError ctrlucal_writeFileBuffer(tOplkApiFileChunkDesc* pDesc_p, UINT8* pBuff
     OPLK_MEMCPY(&pIoctlFileChunk->desc, pDesc_p, sizeof(tOplkApiFileChunkDesc));
     OPLK_MEMCPY(&pIoctlFileChunk->pData, pBuffer_p, pDesc_p->length);
 
-    fIoctlRet = DeviceIoControl(hFileHandle_l, PLK_CMD_CTRL_WRITE_FILE_BUFFER,
-                                pIoctlFileChunk, ioctlBufferSize, 0, 0,
-                                &bytesReturned, NULL);
-    if (!fIoctlRet || bytesReturned == 0)
+    fIoctlRet = DeviceIoControl(hFileHandle_l,
+                                PLK_CMD_CTRL_WRITE_FILE_BUFFER,
+                                pIoctlFileChunk,
+                                ioctlBufferSize,
+                                NULL,
+                                0,
+                                &bytesReturned,
+                                NULL);
+    if (!fIoctlRet || (bytesReturned == 0))
     {
-        DEBUG_LVL_ERROR_TRACE("%s() Error in DeviceIoControl : %d\n", __func__, GetLastError());
+        DEBUG_LVL_ERROR_TRACE("%s() Error in DeviceIoControl : %d\n",
+                              __func__,
+                              GetLastError());
         OPLK_FREE(pIoctlFileChunk);
         return kErrorGeneralError;
     }
@@ -446,13 +513,20 @@ size_t ctrlucal_getFileBufferSize(void)
     ULONG   bytesReturned;
     size_t  fileBufferSize;
 
-    fIoctlRet = DeviceIoControl(hFileHandle_l, PLK_CMD_CTRL_GET_FILE_BUFFER_SIZE,
-                                0, 0, &fileBufferSize, sizeof(size_t),
-                                &bytesReturned, NULL);
+    fIoctlRet = DeviceIoControl(hFileHandle_l,
+                                PLK_CMD_CTRL_GET_FILE_BUFFER_SIZE,
+                                NULL,
+                                0,
+                                &fileBufferSize,
+                                sizeof(size_t),
+                                &bytesReturned,
+                                NULL);
 
-    if (!fIoctlRet || bytesReturned == 0)
+    if (!fIoctlRet || (bytesReturned == 0))
     {
-        DEBUG_LVL_ERROR_TRACE("%s() Error in DeviceIoControl : %d\n", __func__, GetLastError());
+        DEBUG_LVL_ERROR_TRACE("%s() Error in DeviceIoControl : %d\n",
+                              __func__,
+                              GetLastError());
         return 0;
     }
 
@@ -482,19 +556,20 @@ OPLK_FILE_HANDLE ctrlucal_getFd(void)
 The routine calculates the base address of the memory in user space using
 the provided offset and returns the address back.
 
-\param  kernelOffs_p            Offset of the memory in kernel.
-\param  size_p                  Size of the memory.
-\param  ppUserMem_p             Pointer to the user memory.
+\param[in]      kernelOffs_p        Offset of the memory in kernel.
+\param[in]      size_p              Size of the memory.
+\param[out]     ppUserMem_p         Pointer to the user memory.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                The memory was successfully returned.
-\retval kErrorNoResource        No memory available.
-\retval kErrorInvalidOperation  The provided offset is incorrect.
+\retval kErrorOk                    The memory was successfully returned.
+\retval kErrorNoResource            No memory available.
+\retval kErrorInvalidOperation      The provided offset is incorrect.
 
 \ingroup module_ctrlucal
 */
 //------------------------------------------------------------------------------
-tOplkError ctrlucal_getMappedMem(UINT32 kernelOffs_p, UINT32 size_p,
+tOplkError ctrlucal_getMappedMem(UINT32 kernelOffs_p,
+                                 UINT32 size_p,
                                  UINT8** ppUserMem_p)
 {
     tMemStruc   inMemStruc;
@@ -503,13 +578,23 @@ tOplkError ctrlucal_getMappedMem(UINT32 kernelOffs_p, UINT32 size_p,
     UINT8*      pUserMemHighAddr = NULL;
     UINT8*      pMem = NULL;
 
+    // Check parameter validity
+    ASSERT(ppUserMem_p != NULL);
+
     inMemStruc.size = size_p;
 
-    if (!DeviceIoControl(hFileHandle_l, PLK_CMD_MAP_MEM,
-        &inMemStruc, sizeof(tMemStruc), pOutMemStruc, sizeof(tMemStruc),
-        &bytesReturned, NULL))
+    if (!DeviceIoControl(hFileHandle_l,
+                         PLK_CMD_MAP_MEM,
+                         &inMemStruc,
+                         sizeof(tMemStruc),
+                         pOutMemStruc,
+                         sizeof(tMemStruc),
+                         &bytesReturned,
+                         NULL))
     {
-        DEBUG_LVL_ERROR_TRACE("%s() Failed to get mapped memory. Error 0x%x\n", __func__, GetLastError());
+        DEBUG_LVL_ERROR_TRACE("%s() Failed to get mapped memory. Error 0x%x\n",
+                              __func__,
+                              GetLastError());
         return kErrorNoResource;
     }
 

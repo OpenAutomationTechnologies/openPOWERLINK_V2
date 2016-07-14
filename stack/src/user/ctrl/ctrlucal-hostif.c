@@ -11,7 +11,7 @@ a shared memory block for communication with the kernel layer.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -74,7 +74,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 #define CTRL_HOSTIF_INITPARAM_SIZE  HOSTIF_USER_INIT_PAR_SIZE
-#define CMD_TIMEOUT_SEC     20 // command timeout in seconds
+#define CMD_TIMEOUT_SEC             20 // command timeout in seconds
 
 //------------------------------------------------------------------------------
 // local types
@@ -87,20 +87,20 @@ for the host interface.
 */
 typedef struct
 {
-    tHostifInstance     hifInstance;                        ///< Host interface instance
-    BOOL                fIrqMasterEnable;                   ///< IRQ master enable
-    tHostifInstanceId   dynBufInst;                         ///< Dynamic buffer instance
+    tHostifInstance         hifInstance;                ///< Host interface instance
+    BOOL                    fIrqMasterEnable;           ///< IRQ master enable
+    tHostifInstanceId       dynBufInst;                 ///< Dynamic buffer instance
 } tCtrluCalInstance;
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static tCtrluCalInstance instance_l;
+static tCtrluCalInstance    instance_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
 static UINT8* getDynBuff(UINT32 pcpBase_p);
-static void freeDynBuff(UINT8* pDynBufBase_p);
+static void   freeDynBuff(UINT8* pDynBufBase_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -119,11 +119,10 @@ The function initializes the user control CAL module.
 //------------------------------------------------------------------------------
 tOplkError ctrlucal_init(void)
 {
-    tHostifReturn hifRet;
-    tHostifConfig hifConfig;
+    tHostifReturn   hifRet;
+    tHostifConfig   hifConfig;
 
     OPLK_MEMSET(&instance_l, 0, sizeof(instance_l));
-
     OPLK_MEMSET(&hifConfig, 0, sizeof(hifConfig));
 
     hifConfig.instanceNum = 0;
@@ -135,17 +134,16 @@ tOplkError ctrlucal_init(void)
     hifRet = hostif_create(&hifConfig, &instance_l.hifInstance);
     if (hifRet != kHostifSuccessful)
     {
-        DEBUG_LVL_ERROR_TRACE("Could not initialize Host Interface (0x%X)\n", hifRet);
+        DEBUG_LVL_ERROR_TRACE("Could not initialize host interface (0x%X)\n", hifRet);
         return kErrorNoResource;
     }
 
-    //disable master irq
+    //disable master IRQ
     instance_l.fIrqMasterEnable = FALSE;
-
     hifRet = hostif_irqMasterEnable(instance_l.hifInstance, instance_l.fIrqMasterEnable);
     if (hifRet != kHostifSuccessful)
     {
-        DEBUG_LVL_ERROR_TRACE("Could not disable Master Irq (0x%X)\n", hifRet);
+        DEBUG_LVL_ERROR_TRACE("Could not disable master IRQ (0x%X)\n", hifRet);
         return kErrorNoResource;
     }
 
@@ -163,21 +161,21 @@ The function cleans up the user control CAL module.
 //------------------------------------------------------------------------------
 void ctrlucal_exit(void)
 {
-    tHostifReturn hifRet;
+    tHostifReturn   hifRet;
 
-    //disable master irq
+    //disable master IRQ
     instance_l.fIrqMasterEnable = FALSE;
 
     hifRet = hostif_irqMasterEnable(instance_l.hifInstance, instance_l.fIrqMasterEnable);
     if (hifRet != kHostifSuccessful)
     {
-        DEBUG_LVL_ERROR_TRACE("Could not disable Master Irq (0x%X)\n", hifRet);
+        DEBUG_LVL_ERROR_TRACE("Could not disable Master IRQ (0x%X)\n", hifRet);
     }
 
     hifRet = hostif_delete(instance_l.hifInstance);
     if (hifRet != kHostifSuccessful)
     {
-        DEBUG_LVL_ERROR_TRACE("Could not delete Host Interface (0x%X)\n", hifRet);
+        DEBUG_LVL_ERROR_TRACE("Could not delete host interface instance (0x%X)\n", hifRet);
     }
 }
 
@@ -194,17 +192,16 @@ This function provides processing time for the CAL module.
 //------------------------------------------------------------------------------
 tOplkError ctrlucal_process(void)
 {
-    tHostifReturn hifRet;
+    tHostifReturn   hifRet;
 
     if (instance_l.fIrqMasterEnable == FALSE)
     {
-        //enable master irq
+        //enable master IRQ
         instance_l.fIrqMasterEnable = TRUE;
-
         hifRet = hostif_irqMasterEnable(instance_l.hifInstance, instance_l.fIrqMasterEnable);
         if (hifRet != kHostifSuccessful)
         {
-            DEBUG_LVL_ERROR_TRACE("Could not enable Master Irq (0x%X)\n", hifRet);
+            DEBUG_LVL_ERROR_TRACE("Could not enable master IRQ (0x%X)\n", hifRet);
             return kErrorNoResource;
         }
     }
@@ -218,26 +215,30 @@ tOplkError ctrlucal_process(void)
 
 The function executes a control command in the kernel stack.
 
-\param  cmd_p           Command to execute.
-\param  pRetVal_p       Return value from the control command.
+\param[in]      cmd_p               Command to execute.
+\param[out]     pRetVal_p           Return value from the control command.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_ctrlucal
 */
 //------------------------------------------------------------------------------
-tOplkError ctrlucal_executeCmd(tCtrlCmdType cmd_p, UINT16* pRetVal_p)
+tOplkError ctrlucal_executeCmd(tCtrlCmdType cmd_p,
+                               UINT16* pRetVal_p)
 {
-    tHostifReturn hifret;
-    tHostifCommand hifcmd = (tHostifCommand)cmd_p;
-    tHostifError hiferr = 0;
-    int timeout;
+    tHostifReturn   hifret;
+    tHostifCommand  hifcmd = (tHostifCommand)cmd_p;
+    tHostifError    hiferr = 0;
+    int             timeout;
+
+    // Check parameter validity
+    ASSERT(pRetVal_p != NULL);
 
     hostif_setError(instance_l.hifInstance, hiferr);
     hostif_setCommand(instance_l.hifInstance, hifcmd);
 
     /* wait for response */
-    for (timeout = 0; timeout < CMD_TIMEOUT_SEC*100; timeout++)
+    for (timeout = 0; timeout < CMD_TIMEOUT_SEC * 100; timeout++)
     {
         target_msleep(10U);
 
@@ -269,8 +270,8 @@ The function checks the state of the kernel stack. If it is already running
 it tries to shutdown.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk             Kernel stack is initialized
-\retval kErrorNoResource     Kernel stack is not running or in wrong state
+\retval kErrorOk                    Kernel stack is initialized
+\retval kErrorNoResource            Kernel stack is not running or in wrong state
 
 \ingroup module_ctrlucal
 */
@@ -283,14 +284,14 @@ tOplkError ctrlucal_checkKernelStack(void)
     int                 timeout = 0;
     UINT16              retVal;
 
-    DEBUG_LVL_CTRL_TRACE("Check Kernel Stack...\n");
+    DEBUG_LVL_CTRL_TRACE("Check kernel stack...\n");
 
     while (!fExit)
     {
         switch (kernelStatus = ctrlucal_getStatus())
         {
             case kCtrlStatusReady:
-                DEBUG_LVL_CTRL_TRACE("-> Kernel Stack is ready\n");
+                DEBUG_LVL_CTRL_TRACE("-> Kernel stack is ready\n");
                 fExit = TRUE;
                 ret = kErrorOk;
                 break;
@@ -311,7 +312,7 @@ tOplkError ctrlucal_checkKernelStack(void)
             default:
                 if (timeout == 0)
                 {
-                    DEBUG_LVL_CTRL_TRACE("-> Wait for Kernel Stack\n");
+                    DEBUG_LVL_CTRL_TRACE("-> Wait for kernel stack\n");
                 }
 
                 target_msleep(1000U);
@@ -364,8 +365,8 @@ The function reads the heartbeat generated by the kernel stack.
 //------------------------------------------------------------------------------
 UINT16 ctrlucal_getHeartbeat(void)
 {
-    tHostifReturn hifret;
-    UINT16 heartbeat;
+    tHostifReturn   hifret;
+    UINT16          heartbeat;
 
     hifret = hostif_getHeartbeat(instance_l.hifInstance, &heartbeat);
     if (hifret != kHostifSuccessful)
@@ -381,16 +382,19 @@ UINT16 ctrlucal_getHeartbeat(void)
 The function stores the openPOWERLINK initialization parameter so that they
 can be accessed by the kernel stack.
 
-\param  pInitParam_p        Specifies where to read the init parameters.
+\param[in]      pInitParam_p        Specifies where to read the init parameters.
 
 \ingroup module_ctrlucal
 */
 //------------------------------------------------------------------------------
-void ctrlucal_storeInitParam(tCtrlInitParam* pInitParam_p)
+void ctrlucal_storeInitParam(const tCtrlInitParam* pInitParam_p)
 {
     tHostifReturn   hifret;
     UINT8*          pInitBase;
     UINT8*          pDst;
+
+    // Check parameter validity
+    ASSERT(pInitParam_p != NULL);
 
     hifret = hostif_getInitParam(instance_l.hifInstance, &pInitBase);
     if (hifret != kHostifSuccessful)
@@ -400,7 +404,6 @@ void ctrlucal_storeInitParam(tCtrlInitParam* pInitParam_p)
     }
 
     pDst = getDynBuff((UINT32)pInitBase);
-
     if (pDst != NULL)
         OPLK_MEMCPY(pDst, pInitParam_p, sizeof(tCtrlInitParam));
 
@@ -413,7 +416,7 @@ void ctrlucal_storeInitParam(tCtrlInitParam* pInitParam_p)
 
 The function reads the initialization parameter from the kernel stack.
 
-\param  pInitParam_p        Specifies where to store the read init parameters.
+\param[out]     pInitParam_p        Specifies where to store the read init parameters.
 
 \return The function returns a tOplkError error code. It returns always
         kErrorOk!
@@ -428,6 +431,9 @@ tOplkError ctrlucal_readInitParam(tCtrlInitParam* pInitParam_p)
     UINT8*          pInitBase;
     UINT8*          pSrc;
 
+    // Check parameter validity
+    ASSERT(pInitParam_p != NULL);
+
     hifret = hostif_getInitParam(instance_l.hifInstance, &pInitBase);
     if (hifret != kHostifSuccessful)
     {
@@ -437,7 +443,6 @@ tOplkError ctrlucal_readInitParam(tCtrlInitParam* pInitParam_p)
     }
 
     pSrc = getDynBuff((UINT32)pInitBase);
-
     if (pSrc == NULL)
         return kErrorNoResource;
 
@@ -455,15 +460,16 @@ Exit:
 
 This function writes the given file chunk to the file transfer buffer
 
-\param  pDesc_p             Descriptor for the file chunk.
-\param  pBuffer_p           Buffer holding the file chunk.
+\param[in]      pDesc_p             Descriptor for the file chunk.
+\param[in]      pBuffer_p           Buffer holding the file chunk.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_ctrlucal
 */
 //------------------------------------------------------------------------------
-tOplkError ctrlucal_writeFileBuffer(tOplkApiFileChunkDesc* pDesc_p, UINT8* pBuffer_p)
+tOplkError ctrlucal_writeFileBuffer(const tOplkApiFileChunkDesc* pDesc_p,
+                                    const void* pBuffer_p)
 {
     UNUSED_PARAMETER(pDesc_p);
     UNUSED_PARAMETER(pBuffer_p);
@@ -490,6 +496,52 @@ size_t ctrlucal_getFileBufferSize(void)
     return 0;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Return the file descriptor of the kernel module
+
+The function returns the file descriptor of the kernel module.
+
+\return The function returns the file descriptor.
+
+\ingroup module_ctrlucal
+*/
+//------------------------------------------------------------------------------
+OPLK_FILE_HANDLE ctrlucal_getFd(void)
+{
+    return 0;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Get user memory
+
+The routine calculates the base address of the memory in user space using
+the provided offset and returns the address back.
+
+\param[in]      kernelOffs_p        Offset of the memory in kernel.
+\param[in]      size_p              Size of the memory.
+\param[out]     ppUserMem_p         Pointer to the user memory.
+
+\return The function returns a tOplkError error code.
+\retval kErrorOk                    The memory was successfully returned.
+\retval kErrorNoResource            No memory available.
+\retval kErrorInvalidOperation      The provided offset is incorrect.
+
+\ingroup module_ctrlucal
+*/
+//------------------------------------------------------------------------------
+tOplkError ctrlucal_getMappedMem(UINT32 kernelOffs_p,
+                                 UINT32 size_p,
+                                 UINT8** ppUserMem_p)
+{
+    UNUSED_PARAMETER(kernelOffs_p);
+    UNUSED_PARAMETER(size_p);
+    UNUSED_PARAMETER(ppUserMem_p);
+
+    return kErrorNoResource;
+}
+
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
@@ -500,27 +552,29 @@ size_t ctrlucal_getFileBufferSize(void)
 /**
 \brief  Get a dynamic buffer
 
-This function sets a dynamic buffer to the provided Pcp memory buffer.
+This function sets a dynamic buffer to the provided PCP memory buffer.
 
-\param  pcpBase_p       Address to buffer in Pcp's memory environment
+\param[in]      pcpBase_p           Address to buffer in PCP's memory environment
 
 \return The function returns the acquired dynamic buffer.
-\retval NULL    The dynamic buffer allocation failed.
+\retval NULL                        The dynamic buffer allocation failed.
 */
 //------------------------------------------------------------------------------
 static UINT8* getDynBuff(UINT32 pcpBase_p)
 {
-    tHostifReturn hifret;
-    UINT8* pDynBufBase;
+    tHostifReturn   hifret;
+    UINT8*          pDynBufBase;
 
     hifret = hostif_dynBufAcquire(instance_l.hifInstance, pcpBase_p, &pDynBufBase);
     if (hifret != kHostifSuccessful)
     {
-        DEBUG_LVL_ERROR_TRACE("%s() Acquiring dynamic buffer failed (0x%X)!\n", __func__, hifret);
+        DEBUG_LVL_ERROR_TRACE("%s() Acquiring dynamic buffer failed (0x%X)!\n",
+                              __func__,
+                              hifret);
         pDynBufBase = NULL;
     }
 
-    return (UINT8*)pDynBufBase;
+    return pDynBufBase;
 }
 
 //------------------------------------------------------------------------------
@@ -529,19 +583,20 @@ static UINT8* getDynBuff(UINT32 pcpBase_p)
 
 This function frees a dynamic buffer previously acquired.
 
-\param  pDynBufBase_p   Address to buffer in Pcp's memory environment
+\param  pDynBufBase_p   Address to buffer in PCP's memory environment
 */
 //------------------------------------------------------------------------------
 static void freeDynBuff(UINT8* pDynBufBase_p)
 {
-    tHostifReturn hifret;
+    tHostifReturn   hifret;
 
     hifret = hostif_dynBufFree(instance_l.hifInstance, pDynBufBase_p);
-
     if (hifret != kHostifSuccessful)
     {
-        DEBUG_LVL_ERROR_TRACE("%s() Freeing dynamic buffer failed (0x%X)", __func__, hifret);
+        DEBUG_LVL_ERROR_TRACE("%s() Freeing dynamic buffer failed (0x%X)",
+                              __func__,
+                              hifret);
     }
 }
 
-///\}
+/// \}

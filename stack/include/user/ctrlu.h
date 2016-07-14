@@ -61,21 +61,23 @@ extern "C"
 {
 #endif
 
-tOplkError ctrlu_init(void);
-void       ctrlu_exit(void);
-tOplkError ctrlu_checkKernelStackInfo(void);
-tOplkError ctrlu_initStack(tOplkApiInitParam* pInitParam_p);
-tOplkError ctrlu_shutdownStack(void);
-tOplkError ctrlu_processStack(void);
-BOOL       ctrlu_checkKernelStack(void);
-tOplkError ctrlu_getKernelInfo(tCtrlKernelInfo* pKernelInfo_p);
-tOplkError ctrlu_callUserEventCallback(tOplkApiEventType eventType_p, tOplkApiEventArg* pEventArg_p);
-tOplkError ctrlu_cbObdAccess(tObdCbParam* pParam_p);
-UINT8*     ctrlu_getEthMacAddr(void);
-BOOL       ctrlu_stackIsInitialized(void);
-UINT32     ctrlu_getFeatureFlags(void);
-tOplkError ctrlu_writeFileChunk(tOplkApiFileChunkDesc* pDesc_p, UINT8* pBuffer_p);
-size_t     ctrlu_getMaxFileChunkSize(void);
+tOplkError   ctrlu_init(void);
+void         ctrlu_exit(void);
+tOplkError   ctrlu_checkKernelStackInfo(void);
+tOplkError   ctrlu_initStack(const tOplkApiInitParam* pInitParam_p);
+tOplkError   ctrlu_shutdownStack(void);
+tOplkError   ctrlu_processStack(void);
+BOOL         ctrlu_checkKernelStack(void);
+tOplkError   ctrlu_getKernelInfo(tCtrlKernelInfo* pKernelInfo_p);
+tOplkError   ctrlu_callUserEventCallback(tOplkApiEventType eventType_p,
+                                         const tOplkApiEventArg* pEventArg_p);
+tOplkError   ctrlu_cbObdAccess(tObdCbParam* pParam_p);
+const UINT8* ctrlu_getEthMacAddr(void);
+BOOL         ctrlu_stackIsInitialized(void);
+UINT32       ctrlu_getFeatureFlags(void);
+tOplkError   ctrlu_writeFileChunk(const tOplkApiFileChunkDesc* pDesc_p,
+                                  const void* pBuffer_p);
+size_t       ctrlu_getMaxFileChunkSize(void);
 
 #ifdef __cplusplus
 }

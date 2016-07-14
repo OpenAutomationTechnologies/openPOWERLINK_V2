@@ -12,7 +12,7 @@ both, kernel and user stack running in the same instance.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -151,8 +151,8 @@ tOplkError ctrlucal_process(void)
 
 The function executes a control command in the kernel stack.
 
-\param  cmd_p           Command to execute.
-\param  pRetVal_p       Return value from the control command.
+\param[in]      cmd_p               Command to execute.
+\param[out]     pRetVal_p           Return value from the control command.
 
 \return The function returns a tOplkError error code.
 
@@ -165,7 +165,11 @@ tOplkError ctrlucal_executeCmd(tCtrlCmdType cmd_p, UINT16* pRetVal_p)
     UINT16              fRet;
     tCtrlKernelStatus   status;
 
-    if ((ret = ctrlk_executeCmd(cmd_p, &fRet, &status, NULL)) != kErrorOk)
+    // Check parameter validity
+    ASSERT(pRetVal_p != NULL);
+
+    ret = ctrlk_executeCmd(cmd_p, &fRet, &status, NULL);
+    if (ret != kErrorOk)
         return ret;
 
     if (status != kCtrlStatusUnchanged)
@@ -185,8 +189,8 @@ The function checks the state of the kernel stack.
 for direct calls as the kernel stack runs in the same instance.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk             Kernel stack is initialized
-\retval kErrorNoResource     Kernel stack is not running or in wrong state
+\retval kErrorOk                    Kernel stack is initialized
+\retval kErrorNoResource            Kernel stack is not running or in wrong state
 
 \ingroup module_ctrlucal
 */
@@ -238,13 +242,16 @@ UINT16 ctrlucal_getHeartbeat(void)
 The function stores the openPOWERLINK initialization parameter so that they
 can be accessed by the kernel stack.
 
-\param  pInitParam_p        Specifies where to read the init parameters.
+\param[in]      pInitParam_p        Specifies where to read the init parameters.
 
 \ingroup module_ctrlucal
 */
 //------------------------------------------------------------------------------
-void ctrlucal_storeInitParam(tCtrlInitParam* pInitParam_p)
+void ctrlucal_storeInitParam(const tCtrlInitParam* pInitParam_p)
 {
+    // Check parameter validity
+    ASSERT(pInitParam_p != NULL);
+
     OPLK_MEMCPY(&kernelInitParam_g, pInitParam_p, sizeof(tCtrlInitParam));
 }
 
@@ -254,7 +261,7 @@ void ctrlucal_storeInitParam(tCtrlInitParam* pInitParam_p)
 
 The function reads the initialization parameter from the kernel stack.
 
-\param  pInitParam_p        Specifies where to store the read init parameters.
+\param[out]     pInitParam_p        Specifies where to store the read init parameters.
 
 \return The function returns a tOplkError error code. It returns always
         kErrorOk!
@@ -264,7 +271,11 @@ The function reads the initialization parameter from the kernel stack.
 //------------------------------------------------------------------------------
 tOplkError ctrlucal_readInitParam(tCtrlInitParam* pInitParam_p)
 {
+    // Check parameter validity
+    ASSERT(pInitParam_p != NULL);
+
     OPLK_MEMCPY(pInitParam_p, &kernelInitParam_g, sizeof(tCtrlInitParam));
+
     return kErrorOk;
 }
 
@@ -274,15 +285,16 @@ tOplkError ctrlucal_readInitParam(tCtrlInitParam* pInitParam_p)
 
 This function writes the given file chunk to the file transfer buffer
 
-\param  pDesc_p             Descriptor for the file chunk.
-\param  pBuffer_p           Buffer holding the file chunk.
+\param[in]      pDesc_p             Descriptor for the file chunk.
+\param[in]      pBuffer_p           Buffer holding the file chunk.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_ctrlucal
 */
 //------------------------------------------------------------------------------
-tOplkError ctrlucal_writeFileBuffer(tOplkApiFileChunkDesc* pDesc_p, UINT8* pBuffer_p)
+tOplkError ctrlucal_writeFileBuffer(const tOplkApiFileChunkDesc* pDesc_p,
+                                    const void* pBuffer_p)
 {
     UNUSED_PARAMETER(pDesc_p);
     UNUSED_PARAMETER(pBuffer_p);
@@ -307,6 +319,52 @@ size_t ctrlucal_getFileBufferSize(void)
 {
     // This CAL is not supporting that feature -> return zero size.
     return 0;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Return the file descriptor of the kernel module
+
+The function returns the file descriptor of the kernel module.
+
+\return The function returns the file descriptor.
+
+\ingroup module_ctrlucal
+*/
+//------------------------------------------------------------------------------
+OPLK_FILE_HANDLE ctrlucal_getFd(void)
+{
+    return 0;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Get user memory
+
+The routine calculates the base address of the memory in user space using
+the provided offset and returns the address back.
+
+\param[in]      kernelOffs_p        Offset of the memory in kernel.
+\param[in]      size_p              Size of the memory.
+\param[out]     ppUserMem_p         Pointer to the user memory.
+
+\return The function returns a tOplkError error code.
+\retval kErrorOk                    The memory was successfully returned.
+\retval kErrorNoResource            No memory available.
+\retval kErrorInvalidOperation      The provided offset is incorrect.
+
+\ingroup module_ctrlucal
+*/
+//------------------------------------------------------------------------------
+tOplkError ctrlucal_getMappedMem(UINT32 kernelOffs_p,
+                                 UINT32 size_p,
+                                 UINT8** ppUserMem_p)
+{
+    UNUSED_PARAMETER(kernelOffs_p);
+    UNUSED_PARAMETER(size_p);
+    UNUSED_PARAMETER(ppUserMem_p);
+
+    return kErrorNoResource;
 }
 
 //============================================================================//
