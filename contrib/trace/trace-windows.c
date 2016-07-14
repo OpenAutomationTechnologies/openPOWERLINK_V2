@@ -40,11 +40,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdio.h>
 #include <stdarg.h>
 
-#if _WIN32_WINNT < 0x0501
-#undef _WIN32_WINNT
-#define _WIN32_WINNT 0x0501     // Windows version must be at least Windows XP
+// Windows version must be at least Windows XP
+#if (defined(_WIN32_WINNT) && (_WIN32_WINNT < 0x0501))
+    #undef _WIN32_WINNT
 #endif
-#define WIN32_LEAN_AND_MEAN     // Do not use extended Win32 API functions
+#if !defined(_WIN32_WINNT)
+    #define _WIN32_WINNT 0x0501
+#endif
+
+// Do not use extended Win32 API functions
+#if !defined(WIN32_LEAN_AND_MEAN)
+    #define WIN32_LEAN_AND_MEAN
+#endif
 #include <Windows.h>
 
 //============================================================================//
