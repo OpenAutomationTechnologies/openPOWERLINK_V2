@@ -46,6 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/dllk.h>
 #include <kernel/dllkcal.h>
 
+#if defined(CONFIG_INCLUDE_VETH)
 #include <net/arp.h>
 #include <net/protocol.h>
 #include <net/pkt_sched.h>
@@ -398,3 +399,5 @@ Exit:
 }
 
 /// \}
+
+#endif // CONFIG_INCLUDE_VETH
