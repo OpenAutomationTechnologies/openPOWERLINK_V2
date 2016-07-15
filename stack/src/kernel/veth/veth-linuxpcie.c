@@ -391,4 +391,5 @@ Exit:
 }
 
 /// \}
-#endif
+
+#endif // CONFIG_INCLUDE_VETH

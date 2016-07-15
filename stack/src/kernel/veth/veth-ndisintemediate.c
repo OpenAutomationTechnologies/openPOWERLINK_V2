@@ -50,7 +50,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <ndisintermediate/ndis-im.h>
 
-
+#if defined(CONFIG_INCLUDE_VETH)
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
@@ -226,3 +226,5 @@ static tOplkError veth_receiveFrame(tFrameInfo* pFrameInfo_p,
 }
 
 /// \}
+
+#endif // CONFIG_INCLUDE_VETH

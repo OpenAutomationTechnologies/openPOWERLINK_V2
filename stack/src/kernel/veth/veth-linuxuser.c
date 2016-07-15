@@ -45,6 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/dllk.h>
 #include <kernel/dllkcal.h>
 
+#if defined(CONFIG_INCLUDE_VETH)
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -360,3 +361,5 @@ static void* vethRecvThread(void* pArg_p)
 }
 
 /// \}
+
+#endif // CONFIG_INCLUDE_VETH
