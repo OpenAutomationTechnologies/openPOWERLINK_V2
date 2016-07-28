@@ -168,7 +168,7 @@ void       dllk_regTpdoHandler(tDllkCbProcessTpdo pfnDllkCbProcessTpdo_p);
 tSyncCb    dllk_regSyncHandler(tSyncCb pfnCbSync_p);
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
-tOplkError dllk_cbCyclicError(tOplkError errorCode_p, tEdrvTxBuffer* pTxBuffer_p);
+tOplkError dllk_cbCyclicError(tOplkError errorCode_p, const tEdrvTxBuffer* pTxBuffer_p);
 #endif
 
 #if ((CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC != FALSE) || \

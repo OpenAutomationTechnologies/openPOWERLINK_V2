@@ -62,7 +62,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 typedef tOplkError (*tEdrvCyclicCbSync)(void);
 
 /// Callback function pointer for Edrv cyclic error
-typedef tOplkError (*tEdrvCyclicCbError)(tOplkError errorCode_p, tEdrvTxBuffer* pTxBuffer_p);
+typedef tOplkError (*tEdrvCyclicCbError)(tOplkError errorCode_p, const tEdrvTxBuffer* pTxBuffer_p);
 
 
 #if (CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE)
@@ -104,16 +104,17 @@ extern "C"
 
 tOplkError edrvcyclic_init(void);
 tOplkError edrvcyclic_exit(void);
+tOplkError edrvcyclic_setMaxTxBufferListSize(UINT maxListSize_p);
+tOplkError edrvcyclic_setNextTxBufferList(tEdrvTxBuffer* const* ppTxBuffer_p,
+                                          UINT txBufferCount_p) SECTION_EDRVCYC_SET_NEXT_TX;
 tOplkError edrvcyclic_setCycleTime(UINT32 cycleTimeUs_p, UINT32 minSyncTime_p);
 tOplkError edrvcyclic_startCycle(void);
 tOplkError edrvcyclic_stopCycle(BOOL fKeepCycle_p);
-tOplkError edrvcyclic_setMaxTxBufferListSize(UINT maxListSize_p);
-tOplkError edrvcyclic_setNextTxBufferList(tEdrvTxBuffer** ppTxBuffer_p, UINT txBufferCount_p) SECTION_EDRVCYC_SET_NEXT_TX;
 tOplkError edrvcyclic_regSyncHandler(tEdrvCyclicCbSync pfnEdrvCyclicCbSync_p);
 tOplkError edrvcyclic_regErrorHandler(tEdrvCyclicCbError pfnEdrvCyclicCbError_p);
 
 #if (CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE)
-tOplkError edrvcyclic_getDiagnostics(tEdrvCyclicDiagnostics** ppDiagnostics_p);
+tOplkError edrvcyclic_getDiagnostics(const tEdrvCyclicDiagnostics** ppDiagnostics_p);
 #endif
 
 #ifdef __cplusplus

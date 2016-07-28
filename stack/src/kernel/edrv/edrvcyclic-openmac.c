@@ -12,7 +12,7 @@ It implements time-triggered transmission of frames necessary for MN.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -58,7 +58,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 
-#if CONFIG_TIMER_USE_HIGHRES == FALSE
+#if (CONFIG_TIMER_USE_HIGHRES == FALSE)
 #error "EdrvCyclic needs CONFIG_TIMER_USE_HIGHRES = TRUE"
 #endif
 
@@ -71,8 +71,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #error "Set EDRVCYC_NEG_SHIFT larger 50 us!"
 #endif
 
-#if CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
-#warning "EdrvCyclic Diagnostics is not supported by openMAC!"
+#if (CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE)
+#warning "edrvcyclic diagnostics is not supported by openMAC!"
 #endif
 
 //------------------------------------------------------------------------------
@@ -135,7 +135,7 @@ static tEdrvCyclicInstance instance_l;
 //------------------------------------------------------------------------------
 static tOplkError timerHdlCycleCb(const tTimerEventArg* pEventArg_p) SECTION_EDRVCYC_TIMER_CB;
 static tOplkError processTxBufferList(void);
-static void       handleExtSync(UINT32* pNextSocTime_p);
+static void       handleExtSync(UINT32 nextSocTime_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -191,7 +191,7 @@ tOplkError edrvcyclic_exit(void)
 
 This function determines the maximum size of the cyclic Tx buffer list.
 
-\param  maxListSize_p   Maximum Tx buffer list size
+\param[in]      maxListSize_p       Maximum Tx buffer list size
 
 \return The function returns a tOplkError error code.
 
@@ -231,18 +231,22 @@ tOplkError edrvcyclic_setMaxTxBufferListSize(UINT maxListSize_p)
 
 This function forwards the next cycle Tx buffer list to the cyclic Edrv.
 
-\param  ppTxBuffer_p        Pointer to next cycle Tx buffer list
-\param  txBufferCount_p     Tx buffer list count
+\param[in]      ppTxBuffer_p        Pointer to next cycle Tx buffer list
+\param[in]      txBufferCount_p     Tx buffer list count
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrvcyclic_setNextTxBufferList(tEdrvTxBuffer** ppTxBuffer_p, UINT txBufferCount_p)
+tOplkError edrvcyclic_setNextTxBufferList(tEdrvTxBuffer* const* ppTxBuffer_p,
+                                          UINT txBufferCount_p)
 {
     tOplkError  ret = kErrorOk;
     UINT        nextTxBufferList;
+
+    // Check parameter validity
+    ASSERT(ppTxBuffer_p != NULL);
 
     nextTxBufferList = instance_l.currrentTxBufferList ^ instance_l.maxTxBufferCount;
 
@@ -278,8 +282,8 @@ Exit:
 
 This function sets the cycle time controlled by the cyclic Edrv.
 
-\param  cycleTimeUs_p   Cycle time [us]
-\param  minSyncTime_p   Minimum period for sending sync events to the api [us]
+\param[in]      cycleTimeUs_p       Cycle time [us]
+\param[in]      minSyncTime_p       Minimum period for sending sync events to the api [us]
 
 \return The function returns a tOplkError error code.
 
@@ -348,8 +352,8 @@ Exit:
 
 This function stops the cycles.
 
-\param  fKeepCycle_p    If TRUE, just stop transmission (i.e. slot timer),
-                        but keep cycle timer running.
+\param[in]      fKeepCycle_p        If TRUE, just stop transmission (i.e. slot timer),
+                                    but keep cycle timer running.
 
 \return The function returns a tOplkError error code.
 
@@ -369,7 +373,8 @@ tOplkError edrvcyclic_stopCycle(BOOL fKeepCycle_p)
 
 This function registers the synchronization callback.
 
-\param  pfnCbSync_p     Function pointer called at the configured synchronisation point
+\param[in]      pfnCbSync_p         Function pointer called at the configured
+                                    synchronization point
 
 \return The function returns a tOplkError error code.
 
@@ -389,7 +394,7 @@ tOplkError edrvcyclic_regSyncHandler(tEdrvCyclicCbSync pfnCbSync_p)
 
 This function registers the error callback.
 
-\param  pfnCbError_p    Function pointer called in case of a cycle processing error
+\param[in]      pfnCbError_p        Function pointer called in case of a cycle processing error
 
 \return The function returns a tOplkError error code.
 
@@ -411,11 +416,11 @@ tOplkError edrvcyclic_regErrorHandler(tEdrvCyclicCbError pfnCbError_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Cyclic timer callback
+\brief  Cycle timer callback
 
-This function is called by the cyclic timer. It starts the next cycle.
+This function is called by the timer module. It starts the next cycle.
 
-\param  pEventArg_p     Timer event argument
+\param[in]      pEventArg_p         Timer event argument
 
 \return The function returns a tOplkError error code.
 */
@@ -518,7 +523,7 @@ static tOplkError processTxBufferList(void)
         instance_l.fNextCycleTimeValid = TRUE;
     }
 
-    handleExtSync(&instance_l.nextCycleTime.timeStamp);
+    handleExtSync(instance_l.nextCycleTime.timeStamp);
 
     // Initialize time accumulator to SoC Tx time
     absoluteTime = instance_l.nextCycleTime.timeStamp;
@@ -619,19 +624,19 @@ Exit:
 
 This function handles the external synchronization interrupt.
 
-\param  pNextSocTime_p      Pointer to next SoC send time
+\param[in]      nextSocTime_p       Next SoC send time
 
 */
 //------------------------------------------------------------------------------
-static void handleExtSync(UINT32* pNextSocTime_p)
+static void handleExtSync(UINT32 nextSocTime_p)
 {
     tTimestamp      extSyncTime;
     static UINT32   extCycleCnt = 0;
 
-    if ((++extCycleCnt == instance_l.syncEventCycle))
+    if (++extCycleCnt == instance_l.syncEventCycle)
     {
         // Forward next SoC time to timer module
-        extSyncTime.timeStamp = *pNextSocTime_p;
+        extSyncTime.timeStamp = nextSocTime_p;
         hrestimer_setExtSyncIrqTime(extSyncTime);
 
         extCycleCnt = 0;

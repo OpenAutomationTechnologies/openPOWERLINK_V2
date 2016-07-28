@@ -849,7 +849,7 @@ error occurred.
 \ingroup module_dllk
 */
 //------------------------------------------------------------------------------
-tOplkError dllk_cbCyclicError(tOplkError errorCode_p, tEdrvTxBuffer* pTxBuffer_p)
+tOplkError dllk_cbCyclicError(tOplkError errorCode_p, const tEdrvTxBuffer* pTxBuffer_p)
 {
     tOplkError      ret = kErrorOk;
     tNmtState       nmtState;
