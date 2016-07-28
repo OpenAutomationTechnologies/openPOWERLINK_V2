@@ -225,16 +225,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OBD_BEGIN_PART_GENERIC()                                                static  tObdEntry  aObdTabGeneric_g[]      = {
 #define OBD_BEGIN_PART_MANUFACTURER()                                           static  tObdEntry  aObdTabManufacturer_g[] = {
 #define OBD_BEGIN_PART_DEVICE()                                                 static  tObdEntry  aObdTabDevice_g[]       = {
-#define OBD_END_PART()                                                          {OBD_TABLE_INDEX_END, (tObdSubEntryPtr)(void*)&dwObd_OBK_g, 0, NULL}};
+#define OBD_END_PART()                                                          {OBD_TABLE_INDEX_END, (tObdSubEntryPtr)(void*)&dwObd_OBK_g, 0, FALSE}};
 
 // index macros
-#define OBD_BEGIN_INDEX_RAM(ind, cnt, call)                                     {ind, (tObdSubEntryPtr)&aObdSubEntry##ind##Ram_g[0], cnt, (tObdCallback)call},
+#define OBD_BEGIN_INDEX_RAM(ind, cnt, call)                                     {ind, (tObdSubEntryPtr)&aObdSubEntry##ind##Ram_g[0], cnt, call},
 #define OBD_END_INDEX(ind)
-#define OBD_RAM_INDEX_RAM_ARRAY(ind, cnt, call, typ, acc, dtyp, name, def)      {ind, (tObdSubEntryPtr)&aObdSubEntry##ind##Ram_g[0], (cnt)+1, (tObdCallback)call},
-#define OBD_RAM_INDEX_RAM_ARRAY_ALT(ind, cnt, call, typ, acc, dtyp, name, def)  {ind, (tObdSubEntryPtr)&aObdSubEntry##ind##Ram_g[0], (cnt)+1, (tObdCallback)call},
-#define OBD_RAM_INDEX_RAM_VARARRAY(ind, cnt, call, typ, acc, dtyp, name, def)   {ind, (tObdSubEntryPtr)&aObdSubEntry##ind##Ram_g[0], (cnt)+1, (tObdCallback)call},
-#define OBD_RAM_INDEX_RAM_VARARRAY_NOINIT(ind, cnt, call, typ, acc, dtyp, name) {ind, (tObdSubEntryPtr)&aObdSubEntry##ind##Ram_g[0], (cnt)+1, (tObdCallback)call},
-#define OBD_RAM_INDEX_RAM_PDO_MAPPING(ind, cnt, call, acc, name, def)           {ind, (tObdSubEntryPtr)&aObdSubEntry##ind##Ram_g[0], (cnt)+1, (tObdCallback)call},
+#define OBD_RAM_INDEX_RAM_ARRAY(ind, cnt, call, typ, acc, dtyp, name, def)      {ind, (tObdSubEntryPtr)&aObdSubEntry##ind##Ram_g[0], (cnt)+1, call},
+#define OBD_RAM_INDEX_RAM_ARRAY_ALT(ind, cnt, call, typ, acc, dtyp, name, def)  {ind, (tObdSubEntryPtr)&aObdSubEntry##ind##Ram_g[0], (cnt)+1, call},
+#define OBD_RAM_INDEX_RAM_VARARRAY(ind, cnt, call, typ, acc, dtyp, name, def)   {ind, (tObdSubEntryPtr)&aObdSubEntry##ind##Ram_g[0], (cnt)+1, call},
+#define OBD_RAM_INDEX_RAM_VARARRAY_NOINIT(ind, cnt, call, typ, acc, dtyp, name) {ind, (tObdSubEntryPtr)&aObdSubEntry##ind##Ram_g[0], (cnt)+1, call},
+#define OBD_RAM_INDEX_RAM_PDO_MAPPING(ind, cnt, call, acc, name, def)           {ind, (tObdSubEntryPtr)&aObdSubEntry##ind##Ram_g[0], (cnt)+1, call},
 
 // subindex macros
 #define OBD_SUBINDEX_RAM_VAR(ind, sub, typ, acc, dtyp, name, val)
@@ -337,7 +337,8 @@ with the macro OBD_BEGIN_INDEX_... and ended with OBD_END_INDEX. The suffix
 
 \param ind                  Object index of the entry to be defined
 \param cnt                  Number of sub-indices whithin this index entry
-\param call                 Pointer to the callback function for this index entry.
+\param call                 Flag for enabling the calling of the api function
+                            \ref oplk_cbGenericObdAccess for this index entry.
                             The callback function is always called if an object
                             has been read or written. It doesn’t matter if the
                             access comes from the application or per SDO. The
@@ -359,7 +360,7 @@ needs a little more RAM.
 
 \param ind                  Object index of the entry to be defined
 \param cnt                  Number of sub-indices whithin this index entry
-\param call                 Pointer to the callback function for this index entry
+\param call                 Flag for enabling the generic callback for this index entry
 \param typ                  Coded Object type (see \ref tObdType)
 \param acc                  Access rights for object (see \ref sect_obdAccessRights "access rights")
 \param dtyp                 C Data type definition used for this object
@@ -379,7 +380,7 @@ be modified (sub-index 0 is writable).
 
 \param ind                  Object index of the entry to be defined
 \param cnt                  Number of sub-indices whithin this index entry
-\param call                 Pointer to the callback function for this index entry
+\param call                 Flag for enabling the generic callback for this index entry
 \param typ                  Coded Object type (see \ref tObdType)
 \param acc                  Access rights for object (see \ref sect_obdAccessRights "access rights")
 \param dtyp                 C Data type definition used for this object
@@ -396,7 +397,7 @@ a variable by oplk_linkObject().
 
 \param ind                  Object index of the entry to be defined
 \param cnt                  Number of sub-indices whithin this index entry
-\param call                 Pointer to the callback function for this index entry.
+\param call                 Flag for enabling the generic callback for this index entry.
 \param typ                  Coded Object type (see \ref tObdType)
 \param acc                  Access rights for object (see \ref sect_obdAccessRights "access rights")
 \param dtyp                 C Data type definition used for this object
@@ -413,7 +414,7 @@ value.
 
 \param ind                  Object index of the entry to be defined
 \param cnt                  Number of sub-indices whithin this index entry
-\param call                 Pointer to the callback function for this index entry
+\param call                 Flag for enabling the generic callback for this index entry
 \param typ                  Coded Object type (see \ref tObdType)
 \param acc                  Access rights for object (see \ref sect_obdAccessRights "access rights")
 \param dtyp                 C Data type definition used for this object
@@ -428,7 +429,7 @@ This macro generates an entry for a PDO mapping object.
 
 \param ind                  Object index of the entry to be defined
 \param cnt                  Number of sub-indices whithin this index entry
-\param call                 Pointer to the callback function for this index entry
+\param call                 Flag for enabling the generic callback for this index entry
 \param acc                  Access rights for object (see \ref sect_obdAccessRights "access rights")
 \param name                 Name of object
 \param def                  Default value of object

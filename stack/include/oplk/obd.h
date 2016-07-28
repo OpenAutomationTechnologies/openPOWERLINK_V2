@@ -360,7 +360,7 @@ typedef struct
     UINT                index;              ///< Index of the object
     tObdSubEntryPtr     pSubIndex;          ///< Points to subindex structures of this object
     UINT                count;              ///< number of subindices.
-    tObdCallback        pfnCallback;        ///< function is called back if object access
+    BOOL                fCallGenericCb;     ///< flag enabling the call of the generic callback
 } tObdEntry;
 
 typedef tObdEntry* tObdEntryPtr;

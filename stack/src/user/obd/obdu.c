@@ -146,7 +146,7 @@ static tOplkError   getSubindex(tObdEntryPtr pObdEntry_p, UINT subIndex_p, tObdS
 static tOplkError   accessOdPartition(tObdPart currentOdPart_p, tObdEntryPtr pObdEnty_p, tObdDir direction_p);
 static void         copyObjectData(void MEM* pDstData_p, CONST void* pSrcData_p, tObdSize objSize_p,
                                    tObdType objType_p);
-static tOplkError   callObjectCallback(tObdCallback pfnCallback_p, tObdCbParam MEM* pCbParam_p);
+static tOplkError   callObjectCallback(tObdEntryPtr pObdEntry_p, tObdCbParam MEM* pCbParam_p);
 static tOplkError   callPostDefault(void* pData_p, tObdEntryPtr pObdEntry_p, tObdSubEntryPtr pObdSubEntry_p);
 static tOplkError   isNumerical(tObdSubEntryPtr pObdSubEntry_p, BOOL* pfEntryNumerical_p);
 static UINT32       calcPartitionIndexNum(tObdEntryPtr pObdEntry_p);
@@ -344,7 +344,7 @@ tOplkError obdu_readEntry(UINT index_p, UINT subIndex_p, void* pDstData_p, tObdS
     cbParam.subIndex = subIndex_p;
     cbParam.pArg = pSrcData;
     cbParam.obdEvent = kObdEvPreRead;
-    ret = callObjectCallback(pObdEntry->pfnCallback, &cbParam);
+    ret = callObjectCallback(pObdEntry, &cbParam);
     if (ret != kErrorOk)
         return ret;
 
@@ -369,7 +369,7 @@ tOplkError obdu_readEntry(UINT index_p, UINT subIndex_p, void* pDstData_p, tObdS
     // so callback function can change this data after reading
     cbParam.pArg     = pDstData_p;
     cbParam.obdEvent = kObdEvPostRead;
-    ret = callObjectCallback(pObdEntry->pfnCallback, &cbParam);
+    ret = callObjectCallback(pObdEntry, &cbParam);
     return ret;
 }
 
@@ -833,7 +833,7 @@ tOplkError obdu_readEntryToLe(UINT index_p, UINT subIndex_p, void* pDstData_p,
     cbParam.subIndex =  subIndex_p;
     cbParam.pArg =      pSrcData;
     cbParam.obdEvent =  kObdEvPreRead;
-    ret = callObjectCallback(pObdEntry->pfnCallback, &cbParam);
+    ret = callObjectCallback(pObdEntry, &cbParam);
     if (ret != kErrorOk)
         return ret;
 
@@ -916,7 +916,7 @@ tOplkError obdu_readEntryToLe(UINT index_p, UINT subIndex_p, void* pDstData_p,
     // so callback function can change this data after reading
     cbParam.pArg     = pDstData_p;
     cbParam.obdEvent = kObdEvPostRead;
-    ret = callObjectCallback(pObdEntry->pfnCallback, &cbParam);
+    ret = callObjectCallback(pObdEntry, &cbParam);
     return ret;
 
 }
@@ -1286,7 +1286,7 @@ static tOplkError initWrite(UINT        index_p,
 
     cbParam.pArg     = &obdSize;
     cbParam.obdEvent = kObdEvInitWrite;
-    ret = callObjectCallback(pObdEntry->pfnCallback, &cbParam);
+    ret = callObjectCallback(pObdEntry, &cbParam);
     if (ret != kErrorOk)
         return ret;
 
@@ -1344,7 +1344,7 @@ static tOplkError reallocStringDomainObj(tObdSubEntryPtr    pSubEntry_p,
         memVStringDomain.pData        = *ppDstData_p;
         pCbParam_p->obdEvent = kObdEvWrStringDomain;
         pCbParam_p->pArg     = &memVStringDomain;
-        ret = callObjectCallback(pObdEntry_p->pfnCallback, pCbParam_p);
+        ret = callObjectCallback(pObdEntry_p, pCbParam_p);
         if (ret != kErrorOk)
             return ret;
 
@@ -1716,7 +1716,7 @@ static tOplkError writeEntryPre(UINT index_p, UINT subIndex_p, void* pSrcData_p,
 
     pCbParam_p->pArg     = &obdSize;
     pCbParam_p->obdEvent = kObdEvInitWrite;
-    ret = callObjectCallback(pObdEntry->pfnCallback, pCbParam_p);
+    ret = callObjectCallback(pObdEntry, pCbParam_p);
     if (ret != kErrorOk)
         return ret;
 
@@ -1795,7 +1795,7 @@ static tOplkError writeEntryPost(tObdEntryPtr pObdEntry_p, tObdSubEntryPtr pSubE
     // to structure of callback parameters so callback function can check this data.
     pCbParam_p->pArg     = pSrcData_p;
     pCbParam_p->obdEvent = kObdEvPreWrite;
-    ret = callObjectCallback(pObdEntry_p->pfnCallback, pCbParam_p);
+    ret = callObjectCallback(pObdEntry_p, pCbParam_p);
     if (ret != kErrorOk)
         return ret;
 
@@ -1811,7 +1811,7 @@ static tOplkError writeEntryPost(tObdEntryPtr pObdEntry_p, tObdSubEntryPtr pSubE
     // so callback function can change data subsequently
     pCbParam_p->pArg     = pDstData_p;
     pCbParam_p->obdEvent = kObdEvPostWrite;
-    ret = callObjectCallback(pObdEntry_p->pfnCallback, pCbParam_p);
+    ret = callObjectCallback(pObdEntry_p, pCbParam_p);
     return ret;
 }
 
@@ -2091,7 +2091,7 @@ static tOplkError getEntry(UINT index_p, UINT subIndex_p, tObdEntryPtr* ppObdEnt
     cbParam.subIndex = subIndex_p;
     cbParam.pArg = NULL;
     cbParam.obdEvent = kObdEvCheckExist;
-    ret = callObjectCallback(pObdEntry->pfnCallback, &cbParam);
+    ret = callObjectCallback(pObdEntry, &cbParam);
     if (ret != kErrorOk)
         return kErrorObdIndexNotExist;
 
@@ -2757,25 +2757,24 @@ static void copyObjectData(void MEM* pDstData_p, CONST void* pSrcData_p,
 
 //------------------------------------------------------------------------------
 /**
-\brief  Call object callback function
+\brief  Call callback function with object
 
-The function calls the callback function of an object.
+The function calls the generic callback function \ref oplk_cbGenericObdAccess
+ with an given object, when the according flag is set.
 
-\param  pfnCallback_p           Pointer to the callback function.
+\param  pObdEntry_p             Pointer to the ObdEntry.
 \param  pCbParam_p              Pointer to callback function parameter structure.
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError callObjectCallback(tObdCallback pfnCallback_p, tObdCbParam MEM* pCbParam_p)
+static tOplkError callObjectCallback(tObdEntryPtr pObdEntry_p, tObdCbParam MEM* pCbParam_p)
 {
     tOplkError           ret = kErrorOk;
-    tObdCallback MEM     pfnCallback;
 
-    if (pfnCallback_p != NULL)
+    if (pObdEntry_p->fCallGenericCb != FALSE)
     {
-        pfnCallback = pfnCallback_p;    // Necessary to fix bug for KEIL C51 V6.01!
-        ret = pfnCallback(pCbParam_p);
+        ret = oplk_cbGenericObdAccess(pCbParam_p);
     }
     return ret;
 }
@@ -2803,7 +2802,7 @@ static tOplkError callPostDefault(void* pData_p, tObdEntryPtr pObdEntry_p,
     cbParam.subIndex = pObdSubEntry_p->subIndex;
     cbParam.pArg     = pData_p;
     cbParam.obdEvent = kObdEvPostDefault;
-    ret = callObjectCallback(pObdEntry_p->pfnCallback, &cbParam);
+    ret = callObjectCallback(pObdEntry_p, &cbParam);
     return ret;
 }
 
