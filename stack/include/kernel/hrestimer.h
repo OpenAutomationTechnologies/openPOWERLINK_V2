@@ -56,11 +56,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 This type defines a function pointer to a timer callback function.
 
-\param pEventArg_p       Pointer to timer event argument
+\param[in]      pEventArg_p         Pointer to timer event argument
 
 \return The function returns a tOplkError error code.
 */
-typedef tOplkError (*tTimerkCallback)(tTimerEventArg* pEventArg_p);
+typedef tOplkError (*tTimerkCallback)(const tTimerEventArg* pEventArg_p);
 
 /// Callback function pointer for hres timer callback function
 typedef void (*tHresCallback)(tTimerHdl* pTimerHdl_p);
@@ -75,12 +75,15 @@ extern "C"
 
 tOplkError hrestimer_init(void);
 tOplkError hrestimer_exit(void);
-tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
-                                 tTimerkCallback pfnCallback_p, ULONG argument_p,
+tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p,
+                                 ULONGLONG time_p,
+                                 tTimerkCallback pfnCallback_p,
+                                 ULONG argument_p,
                                  BOOL fContinue_p) SECTION_HRTIMER_MODTIMER;
-tOplkError hrestimer_setAbsoluteTimer(tTimerHdl* pTimerHdl_p, tTimestamp time_p,
-                                      tTimerkCallback pfnCallback_p, ULONG argument_p)
-                                      SECTION_HRTIMER_SETTIMER;
+tOplkError hrestimer_setAbsoluteTimer(tTimerHdl* pTimerHdl_p,
+                                      tTimestamp time_p,
+                                      tTimerkCallback pfnCallback_p,
+                                      ULONG argument_p) SECTION_HRTIMER_SETTIMER;
 tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p);
 void       hrestimer_controlExtSyncIrq(BOOL fEnable_p);
 void       hrestimer_setExtSyncIrqTime(tTimestamp time_p);

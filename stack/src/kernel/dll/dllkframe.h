@@ -106,7 +106,7 @@ tOplkError dllkframe_asyncFrameNotReceived(tDllReqServiceId reqServiceId_p,
            SECTION_DLLK_FRAME_ASYNC_NRX;
 
 /* Cycle/Sync Callback functions */
-tOplkError dllkframe_cbMnTimerCycle(tTimerEventArg* pEventArg_p);
+tOplkError dllkframe_cbMnTimerCycle(const tTimerEventArg* pEventArg_p);
 #endif
 
 /* PRes Chaining functions */

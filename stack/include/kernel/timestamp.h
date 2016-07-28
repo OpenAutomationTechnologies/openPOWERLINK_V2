@@ -59,8 +59,8 @@ extern "C"
 {
 #endif
 
-UINT32 timestamp_calcTimeDiff(tTimestamp* pTimeStampPrevious_p,
-                              tTimestamp* pTimeStampCurrent_p);
+UINT32 timestamp_calcTimeDiff(const tTimestamp* pTimeStampPrevious_p,
+                              const tTimestamp* pTimeStampCurrent_p);
 
 #ifdef __cplusplus
 }

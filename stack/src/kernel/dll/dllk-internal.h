@@ -291,7 +291,7 @@ extern "C"
 tOplkError dllk_postEvent(tEventType eventType_p);
 
 #if defined(CONFIG_INCLUDE_NMT_RMN)
-tOplkError dllk_cbTimerSwitchOver(tTimerEventArg* pEventArg_p);
+tOplkError dllk_cbTimerSwitchOver(const tTimerEventArg* pEventArg_p);
 #endif
 
 #ifdef __cplusplus

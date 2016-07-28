@@ -783,7 +783,7 @@ This function is called by the timer module.
 \return The function returns a pointer to the node Information of the node.
 */
 //------------------------------------------------------------------------------
-tOplkError dllk_cbTimerSwitchOver(tTimerEventArg* pEventArg_p)
+tOplkError dllk_cbTimerSwitchOver(const tTimerEventArg* pEventArg_p)
 {
     tOplkError      ret = kErrorOk;
     tNmtState       nmtState;

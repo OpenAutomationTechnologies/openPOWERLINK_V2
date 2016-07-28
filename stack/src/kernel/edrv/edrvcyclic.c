@@ -130,9 +130,9 @@ static tEdrvcyclicInstance edrvcyclicInstance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError timerHdlCycleCb(tTimerEventArg* pEventArg_p);
+static tOplkError timerHdlCycleCb(const tTimerEventArg* pEventArg_p);
 #if (EDRV_USE_TTTX != TRUE)
-static tOplkError timerHdlSlotCb(tTimerEventArg* pEventArg_p);
+static tOplkError timerHdlSlotCb(const tTimerEventArg* pEventArg_p);
 #endif
 static tOplkError processTxBufferList(BOOL fCallSyncCb_p);
 
@@ -471,7 +471,7 @@ This function is called by the timer module. It starts the next cycle.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError timerHdlCycleCb(tTimerEventArg* pEventArg_p)
+static tOplkError timerHdlCycleCb(const tTimerEventArg* pEventArg_p)
 {
     tOplkError      ret = kErrorOk;
 #if CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
@@ -621,7 +621,7 @@ next frame.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError timerHdlSlotCb(tTimerEventArg* pEventArg_p)
+static tOplkError timerHdlSlotCb(const tTimerEventArg* pEventArg_p)
 {
     tOplkError      ret = kErrorOk;
     tEdrvTxBuffer*  pTxBuffer = NULL;

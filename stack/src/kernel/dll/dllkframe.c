@@ -134,7 +134,7 @@ static void       handleErrorSignaling(tPlkFrame* pFrame_p, UINT nodeId_p);
 #endif
 
 #if CONFIG_TIMER_USE_HIGHRES != FALSE
-static tOplkError cbCnTimer(tTimerEventArg* pEventArg_p);
+static tOplkError cbCnTimer(const tTimerEventArg* pEventArg_p);
 #endif
 
 #if CONFIG_EDRV_AUTO_RESPONSE == TRUE
@@ -1565,7 +1565,7 @@ This function is called by the timer module. It triggers the SoC for an MN.
 \return The function returns a pointer to the node Information of the node.
 */
 //------------------------------------------------------------------------------
-tOplkError dllkframe_cbMnTimerCycle(tTimerEventArg* pEventArg_p)
+tOplkError dllkframe_cbMnTimerCycle(const tTimerEventArg* pEventArg_p)
 {
     tOplkError      ret = kErrorOk;
     tNmtState       nmtState;
@@ -3065,7 +3065,7 @@ when running as CN.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError cbCnTimer(tTimerEventArg* pEventArg_p)
+static tOplkError cbCnTimer(const tTimerEventArg* pEventArg_p)
 {
     tOplkError      ret = kErrorOk;
     tNmtState       nmtState;

@@ -11,7 +11,7 @@ This file contains the implementation of the openMAC high-resolution timer modul
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -182,22 +182,24 @@ as the new timer. That means the callback function must check the passed handle
 with the one returned by this function. If these are unequal, the call can be
 discarded.
 
-\param  pTimerHdl_p     Pointer to timer handle.
-\param  time_p          Relative timeout in [ns].
-\param  pfnCallback_p   Callback function which is called when the timer expires.
-                        (The function is called mutually exclusive with the Edrv
-                        callback functions (Rx and Tx)).
-\param  argument_p      User-specific argument.
-\param  fContinue_p     If TRUE, callback function will be called continuously.
-                        Otherwise, it is a one-shot timer.
+\param[in,out]  pTimerHdl_p         Pointer to timer handle.
+\param[in]      time_p              Relative timeout in [ns].
+\param[in]      pfnCallback_p       Callback function, which is called when timer expires.
+                                    (The function is called mutually exclusive with
+                                    the Edrv callback functions (Rx and Tx)).
+\param[in]      argument_p          User-specific argument.
+\param[in]      fContinue_p         If TRUE, the callback function will be called continuously.
+                                    Otherwise, it is a one-shot timer.
 
 \return Returns a tOplkError error code.
 
 \ingroup module_hrestimer
 */
 //------------------------------------------------------------------------------
-tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
-                                 tTimerkCallback pfnCallback_p, ULONG argument_p,
+tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p,
+                                 ULONGLONG time_p,
+                                 tTimerkCallback pfnCallback_p,
+                                 ULONG argument_p,
                                  BOOL fContinue_p)
 {
     tOplkError  ret = kErrorOk;
@@ -260,20 +262,22 @@ handle as the new timer. That means the callback function must check the passed
 handle with the one returned by this function. If these are unequal, the call
 can be discarded.
 
-\param  pTimerHdl_p     Pointer to timer handle.
-\param  time_p          Absolute timestamp when the timer shall expire.
-\param  pfnCallback_p   Callback function which is called when the timer expires.
-                        (The function is called mutually exclusive with the Edrv
-                        callback functions (Rx and Tx)).
-\param  argument_p      User-specific argument.
+\param[in,out]  pTimerHdl_p         Pointer to timer handle.
+\param[in]      time_p              Absolute timestamp when the timer shall expire.
+\param[in]      pfnCallback_p       Callback function which is called when the timer expires.
+                                    (The function is called mutually exclusive with the Edrv
+                                    callback functions (Rx and Tx)).
+\param[in]      argument_p          User-specific argument.
 
 \return Returns a tOplkError error code.
 
 \ingroup module_hrestimer
 */
 //------------------------------------------------------------------------------
-tOplkError hrestimer_setAbsoluteTimer(tTimerHdl* pTimerHdl_p, tTimestamp time_p,
-                                      tTimerkCallback pfnCallback_p, ULONG argument_p)
+tOplkError hrestimer_setAbsoluteTimer(tTimerHdl* pTimerHdl_p,
+                                      tTimestamp time_p,
+                                      tTimerkCallback pfnCallback_p,
+                                      ULONG argument_p)
 {
     tOplkError  ret = kErrorOk;
     INT32       timeDiff;
@@ -314,9 +318,9 @@ Exit:
 The function deletes a created high-resolution timer. The timer is specified
 by its timer handle. After deleting, the handle is reset to zero.
 
-\param  pTimerHdl_p     Pointer to timer handle
+\param[in,out]  pTimerHdl_p         Pointer to timer handle.
 
-\return The function returns a tOplkError error code.
+\return Returns a tOplkError error code.
 
 \ingroup module_hrestimer
 */
@@ -372,7 +376,7 @@ Exit:
 This function enables/disables the external synchronization interrupt. If the
 external synchronization interrupt is not supported, the call is ignored.
 
-\param  fEnable_p       Flag determines if sync should be enabled or disabled.
+\param[in]      fEnable_p           Flag determines if sync should be enabled or disabled.
 
 \ingroup module_hrestimer
 */
@@ -401,7 +405,7 @@ This function sets the time when the external synchronization interrupt shall
 be triggered to synchronize the host processor. If the external synchronization
 interrupt is not supported, the call is ignored.
 
-\param  time_p          Time when the sync shall be triggered
+\param[in]      time_p              Time when the sync shall be triggered
 
 \ingroup module_hrestimer
 */
@@ -428,15 +432,16 @@ void hrestimer_setExtSyncIrqTime(tTimestamp time_p)
 The function sets up the timer info of the given handle. If the handle is zero,
 the timer must be created first.
 
-\param  pTimerHdl_p     Pointer to timer handle.
-\param  pfnCallback_p   Callback function which is called when the timer expires.
-\param  argument_p      User-specific argument.
+\param[in,out]  pTimerHdl_p         Pointer to timer handle.
+\param[in]      pfnCallback_p       Callback function which is called when the timer expires.
+\param[in]      argument_p          User-specific argument.
 
 \return Returns a tOplkError error code.
 
 */
 //------------------------------------------------------------------------------
-static tOplkError setupTimerInfo(tTimerHdl* pTimerHdl_p, tTimerkCallback pfnCallback_p,
+static tOplkError setupTimerInfo(tTimerHdl* pTimerHdl_p,
+                                 tTimerkCallback pfnCallback_p,
                                  ULONG argument_p)
 {
     tOplkError  ret = kErrorOk;
@@ -487,7 +492,7 @@ Exit:
 
 This function is invoked by the openMAC HW sync timer interrupt.
 
-\param  pArg_p  Interrupt service routine argument
+\param[in,out]  pArg_p              Interrupt service routine argument
 */
 //------------------------------------------------------------------------------
 static void drvInterruptHandler(void* pArg_p)
@@ -511,4 +516,4 @@ static void drvInterruptHandler(void* pArg_p)
     BENCHMARK_MOD_24_RESET(4);
 }
 
-///\}
+/// \}

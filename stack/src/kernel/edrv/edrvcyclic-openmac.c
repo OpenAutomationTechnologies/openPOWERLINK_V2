@@ -133,7 +133,7 @@ static tEdrvCyclicInstance instance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError timerHdlCycleCb(tTimerEventArg* pEventArg_p) SECTION_EDRVCYC_TIMER_CB;
+static tOplkError timerHdlCycleCb(const tTimerEventArg* pEventArg_p) SECTION_EDRVCYC_TIMER_CB;
 static tOplkError processTxBufferList(void);
 static void       handleExtSync(UINT32* pNextSocTime_p);
 
@@ -420,7 +420,7 @@ This function is called by the cyclic timer. It starts the next cycle.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError timerHdlCycleCb(tTimerEventArg* pEventArg_p)
+static tOplkError timerHdlCycleCb(const tTimerEventArg* pEventArg_p)
 {
     tOplkError  ret = kErrorOk;
     tTimestamp  entryTime;
