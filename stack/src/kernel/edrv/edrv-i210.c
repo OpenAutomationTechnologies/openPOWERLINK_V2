@@ -23,7 +23,7 @@ source for the high-resolution timer module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Kalycito Infotech Private Limited
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -68,7 +68,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 19)
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 19))
 #error "Linux Kernel versions older than 2.6.19 are not supported by this driver!"
 #endif
 
@@ -399,8 +399,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // TracePoint support for realtime-debugging
 #ifdef _DBG_TRACE_POINTS_
-void TgtDbgSignalTracePoint (UINT8 bTracePointNumber_p);
-void TgtDbgPostTraceValue (UINT32 dwTraceValue_p);
+void TgtDbgSignalTracePoint(UINT8 bTracePointNumber_p);
+void TgtDbgPostTraceValue(UINT32 dwTraceValue_p);
 #define TGT_DBG_SIGNAL_TRACE_POINT(p)   TgtDbgSignalTracePoint(p)
 #define TGT_DBG_POST_TRACE_VALUE(v)     TgtDbgPostTraceValue(v)
 #else
@@ -596,24 +596,25 @@ static tOplkError acquireSwFwSync(UINT16 mask_p);
 static void releaseSwFwSync(UINT16 mask_p);
 static void writeMdioPhyReg(UINT phyreg_p, USHORT value_p);
 static UINT16 readMdioPhyReg(INT phyreg_p);
-static void freeTxBuffersOfQueue(tEdrvQueue* pTxQueue_p);
+static void freeTxBuffersOfQueue(const tEdrvQueue* pTxQueue_p);
 static void freeTxBuffers(void);
 static void freeTxQueues(void);
 static tOplkError initTxQueue(tEdrvQueue* pTxQueue_p);
-static void configureTxQueue(tEdrvQueue* pTxQueue_p);
+static void configureTxQueue(const tEdrvQueue* pTxQueue_p);
 static void freeRxQueues(void);
-static void freeRxBuffersOfQueue(tEdrvQueue* pRxQueue_p);
+static void freeRxBuffersOfQueue(const tEdrvQueue* pRxQueue_p);
 static void freeRxBuffers(void);
 static tOplkError initRxQueue(tEdrvQueue* pRxQueue_p);
 static tOplkError allocateRxBuffer(tEdrvQueue* pRxQueue_p);
-static void configureRxQueue(tEdrvQueue* pRxQueue_p);
+static void configureRxQueue(const tEdrvQueue* pRxQueue_p);
 static void initQavMode(void);
 static void writeIvarRegister(INT vector_p, INT index_p, INT offset_p);
 static INT requestMsixIrq(void);
 static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* pId_p);
 static void removeOnePciDev(struct pci_dev* pPciDev_p);
 static tOplkError sendNormalBuffer(tEdrvTxBuffer* pBuffer_p);
-#if EDRV_USE_TTTX != FALSE
+
+#if (EDRV_USE_TTTX != FALSE)
 static tOplkError sendTimeTrigBuffer(tEdrvTxBuffer* pBuffer_p);
 #endif
 
@@ -649,31 +650,31 @@ static struct pci_driver edrvDriver_l =
 
 This function initializes the Ethernet driver.
 
-\param  pEdrvInitParam_p    Edrv initialization parameters
+\param[in]      pEdrvInitParam_p    Edrv initialization parameters
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
+tOplkError edrv_init(const tEdrvInitParam* pEdrvInitParam_p)
 {
     tOplkError      ret = kErrorOk;
-    INT             result;
+    int             result;
     INT             index;
     tBufData        bufData;
+
+    // Check parameter validity
+    ASSERT(pEdrvInitParam_p != NULL);
 
     // clear instance structure
     OPLK_MEMSET(&edrvInstance_l, 0, sizeof(edrvInstance_l));
 
-    if (pEdrvInitParam_p != NULL)
-    {
-        edrvInstance_l.initParam = *pEdrvInitParam_p;   // save the init data
-    }
+    // save the init data
+    edrvInstance_l.initParam = *pEdrvInitParam_p;
 
     // clear driver structure
     OPLK_MEMSET(&edrvDriver_l, 0, sizeof(edrvDriver_l));
-
     edrvDriver_l.name         = DRIVER_NAME;
     edrvDriver_l.id_table     = aEdrvPciTbl;
     edrvDriver_l.probe        = initOnePciDev;
@@ -691,7 +692,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     if (edrvInstance_l.pPciDev == NULL)
     {
         printk("%s pPciDev=NULL\n", __FUNCTION__);
-        ret = edrv_exit();
+        edrv_exit();
         ret = kErrorNoResource;
         goto Exit;
     }
@@ -743,12 +744,13 @@ tOplkError edrv_exit(void)
         // clear buffer allocation
         bufalloc_exit(pBufAlloc_l);
         // clear driver structure
-        OPLK_MEMSET(&edrvDriver_l, 0, sizeof (edrvDriver_l));
+        OPLK_MEMSET(&edrvDriver_l, 0, sizeof(edrvDriver_l));
     }
     else
     {
         printk("%s PCI driver for openPOWERLINK already unregistered\n", __FUNCTION__);
     }
+
     return kErrorOk;
 }
 
@@ -763,7 +765,7 @@ This function returns the MAC address of the Ethernet controller
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-UINT8* edrv_getMacAddr(void)
+const UINT8* edrv_getMacAddr(void)
 {
     return edrvInstance_l.initParam.aMacAddr;
 }
@@ -772,20 +774,23 @@ UINT8* edrv_getMacAddr(void)
 /**
 \brief  Set multicast address entry
 
-This function sets a multicast entry in the Ethernet controller.
+This function sets a multicast entry into the Ethernet controller.
 
-\param  pMacAddr_p  Multicast address
+\param[in]      pMacAddr_p          Multicast address.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p)
+tOplkError edrv_setRxMulticastMacAddr(const UINT8* pMacAddr_p)
 {
     tOplkError      ret = kErrorOk;
     UINT32          data;
     INT             index;
+
+    // Check parameter validity
+    ASSERT(pMacAddr_p != NULL);
 
     // entry 0 is used for local MAC address
     for (index = 1; index < 16; index++)
@@ -830,20 +835,23 @@ Exit:
 
 This function removes the multicast entry from the Ethernet controller.
 
-\param  pMacAddr_p  Multicast address
+\param[in]      pMacAddr_p          Multicast address
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_clearRxMulticastMacAddr(UINT8* pMacAddr_p)
+tOplkError edrv_clearRxMulticastMacAddr(const UINT8* pMacAddr_p)
 {
     tOplkError          ret = kErrorOk;
     UINT32              data;
     INT                 index;
     UINT32              addrLow;
     UINT32              addrHigh;
+
+    // Check parameter validity
+    ASSERT(pMacAddr_p != NULL);
 
     addrLow = 0;
     addrLow |= pMacAddr_p[0] << 0;
@@ -869,6 +877,7 @@ tOplkError edrv_clearRxMulticastMacAddr(UINT8* pMacAddr_p)
             }
         }
     }
+
     return ret;
 }
 
@@ -883,19 +892,26 @@ If \p entryChanged_p is equal or larger count_p all Rx filters shall be changed.
 
 \note Rx filters are not supported by this driver!
 
-\param  pFilter_p           Base pointer of Rx filter array
-\param  count_p             Number of Rx filter array entries
-\param  entryChanged_p      Index of Rx filter entry that shall be changed
-\param  changeFlags_p       Bit mask that selects the changing Rx filter property
+\param[in,out]  pFilter_p           Base pointer of Rx filter array
+\param[in]      count_p             Number of Rx filter array entries
+\param[in]      entryChanged_p      Index of Rx filter entry that shall be changed
+\param[in]      changeFlags_p       Bit mask that selects the changing Rx filter property
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
-                               UINT entryChanged_p, UINT changeFlags_p)
+tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p,
+                               UINT count_p,
+                               UINT entryChanged_p,
+                               UINT changeFlags_p)
 {
+    UNUSED_PARAMETER(pFilter_p);
+    UNUSED_PARAMETER(count_p);
+    UNUSED_PARAMETER(entryChanged_p);
+    UNUSED_PARAMETER(changeFlags_p);
+
     return kErrorOk;
 }
 
@@ -905,7 +921,7 @@ tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
 
 This function allocates a Tx buffer.
 
-\param  pBuffer_p           Tx buffer descriptor
+\param[in,out]  pBuffer_p           Tx buffer descriptor
 
 \return The function returns a tOplkError error code.
 
@@ -916,6 +932,9 @@ tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
     tOplkError          ret = kErrorOk;
     tBufData            bufData;
+
+    // Check parameter validity
+    ASSERT(pBuffer_p != NULL);
 
     if (pBuffer_p->maxBufferSize > EDRV_MAX_FRAME_SIZE)
     {
@@ -953,7 +972,7 @@ Exit:
 
 This function releases the Tx buffer.
 
-\param  pBuffer_p           Tx buffer descriptor
+\param[in,out]  pBuffer_p           Tx buffer descriptor
 
 \return The function returns a tOplkError error code.
 
@@ -964,6 +983,9 @@ tOplkError edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
     tOplkError  ret;
     tBufData    bufData;
+
+    // Check parameter validity
+    ASSERT(pBuffer_p != NULL);
 
     bufData.pBuffer = pBuffer_p->pBuffer;
     bufData.bufferNumber = pBuffer_p->txBufferNumber.value;
@@ -980,7 +1002,7 @@ tOplkError edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p)
 
 This function sends the Tx buffer.
 
-\param  pBuffer_p           Tx buffer descriptor
+\param[in,out]  pBuffer_p           Tx buffer descriptor
 
 \return The function returns a tOplkError error code.
 
@@ -992,6 +1014,9 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
     tOplkError      ret = kErrorOk;
     UINT            bufferNumber;
 
+    // Check parameter validity
+    ASSERT(pBuffer_p != NULL);
+
     bufferNumber = pBuffer_p->txBufferNumber.value;
 
     if ((bufferNumber >= EDRV_MAX_TX_BUFFERS) || (edrvInstance_l.afTxBufUsed[bufferNumber] == FALSE))
@@ -1000,7 +1025,7 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
         goto Exit;
     }
 
-#if EDRV_USE_TTTX != FALSE
+#if (EDRV_USE_TTTX != FALSE)
     if (pBuffer_p->fLaunchTimeValid)
         ret = sendTimeTrigBuffer(pBuffer_p);
     else
@@ -1011,13 +1036,14 @@ Exit:
     return ret;
 }
 
+#if ((CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC != FALSE) || (CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC != FALSE))
 //------------------------------------------------------------------------------
 /**
 \brief  Release Rx buffer
 
 This function releases a late release Rx buffer.
 
-\param  pRxBuffer_p     Rx buffer to be released
+\param[in,out]  pRxBuffer_p         Rx buffer to be released
 
 \return The function returns a tOplkError error code.
 
@@ -1026,20 +1052,23 @@ This function releases a late release Rx buffer.
 //------------------------------------------------------------------------------
 tOplkError edrv_releaseRxBuffer(tEdrvRxBuffer* pRxBuffer_p)
 {
+    UNUSED_PARAMETER(pRxBuffer_p);
+
     return kErrorOk;
 }
+#endif
 
 //------------------------------------------------------------------------------
 // Timer helper functions
 //------------------------------------------------------------------------------
-#if EDRV_USE_TTTX != FALSE
+#if (EDRV_USE_TTTX != FALSE)
 //------------------------------------------------------------------------------
 /**
 \brief  Retrieve current MAC time
 
 The function retrieves the current MAC time.
 
-\param  pCurtime_p    Pointer to store the current MAC time.
+\param[out]     pCurtime_p          Pointer to store the current MAC time.
 
 \return The function returns a tOplkError error code.
 */
@@ -1073,14 +1102,14 @@ tOplkError edrv_getMacTime(UINT64* pCurtime_p)
 
 The function starts the timer in the I210.
 
-\param  pTimerHdl_p     Timer handle of the timer to start.
-\param  index_p         Index of the timer.
-\param  frequency_p     Cycle time (frequency).
+\param[in]      pTimerHdl_p         Timer handle of the timer to start.
+\param[in]      index_p             Index of the timer.
+\param[in]      frequency_p         Cycle time (frequency).
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_startTimer(tTimerHdl* pTimerHdl_p, UINT32 index_p, UINT64 frequency_p)
+tOplkError edrv_startTimer(const tTimerHdl* pTimerHdl_p, UINT32 index_p, UINT64 frequency_p)
 {
     UINT32              reg;
     struct timespec     ts;
@@ -1154,15 +1183,18 @@ tOplkError edrv_startTimer(tTimerHdl* pTimerHdl_p, UINT32 index_p, UINT64 freque
 
 The function stop the timer in the I210.
 
-\param  pTimerHdl_p     Handle of the timer to stop.
-\param  index_p         Index of the timer.
+\param[in]      pTimerHdl_p         Handle of the timer to stop.
+\param[in]      index_p             Index of the timer.
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_stopTimer(tTimerHdl* pTimerHdl_p, UINT32 index_p)
+tOplkError edrv_stopTimer(const tTimerHdl* pTimerHdl_p, UINT32 index_p)
 {
     UINT32      reg;
+
+    // Check parameter validity
+    ASSERT(pTimerHdl_p != NULL);
 
     if (!edrvInstance_l.fInitialized)
         return kErrorOk;
@@ -1194,14 +1226,14 @@ tOplkError edrv_stopTimer(tTimerHdl* pTimerHdl_p, UINT32 index_p)
 
 The function restarts the timer on the I210
 
-\param  pTimerHdl_p     Handle of the timer to restart.
-\param  index_p         Index of the timer.
-\param  frequency_p     Cycle time (frequency of the repetition).
+\param[in]      pTimerHdl_p         Handle of the timer to restart.
+\param[in]      index_p             Index of the timer.
+\param[in]      frequency_p         Cycle time (frequency of the repetition).
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_restartTimer(tTimerHdl* pTimerHdl_p, UINT32 index_p, UINT64 frequency_p)
+tOplkError edrv_restartTimer(const tTimerHdl* pTimerHdl_p, UINT32 index_p, UINT64 frequency_p)
 {
     UINT32              reg;
     struct timespec     ts;
@@ -1253,7 +1285,7 @@ tOplkError edrv_restartTimer(tTimerHdl* pTimerHdl_p, UINT32 index_p, UINT64 freq
 The function is used to register a timer callback function for the I210
 timer.
 
-\param  pfnHighResCb_p      Pointer to the callback routine to register
+\param[in]      pfnHighResCb_p      Pointer to the callback routine to register
 
 \return The function returns a tOplkError error code.
 */
@@ -1281,18 +1313,20 @@ The function implements the interrupt service routine for the timer
 interrupt. It calls the timer callback function of the high-resolution
 timer module.
 
-\param  irqNum_p            IRQ number
-\param  ppDevInstData_p     Pointer to private data provided by request_irq
+\param[in]      irqNum_p            IRQ number
+\param[in,out]  ppDevInstData_p     Pointer to private data provided by request_irq
 
 \return The function returns an IRQ handled code.
 */
 //------------------------------------------------------------------------------
-static irqreturn_t edrvTimerInterrupt(INT irqNum_p, void* ppDevInstData_p)
+static irqreturn_t edrvTimerInterrupt(int irqNum_p, void* ppDevInstData_p)
 {
     UINT32          status;
     UINT32          reg;
     INT             handled = IRQ_HANDLED;
     UINT32          index;
+
+    UNUSED_PARAMETER(irqNum_p);
 
     if (ppDevInstData_p != edrvInstance_l.pPciDev)
     {
@@ -1322,7 +1356,7 @@ static irqreturn_t edrvTimerInterrupt(INT irqNum_p, void* ppDevInstData_p)
     {
         // Timer 0
         index = 0;
-#if EDRV_USE_TTTX != FALSE
+#if (EDRV_USE_TTTX != FALSE)
     // Call timer CallBack
     if (edrvInstance_l.hresTimerCb != NULL && edrvInstance_l.aTimerHdl[index] != 0)
     {
@@ -1335,7 +1369,7 @@ static irqreturn_t edrvTimerInterrupt(INT irqNum_p, void* ppDevInstData_p)
     {
         // Timer 1
         index = 1;
-#if EDRV_USE_TTTX != FALSE
+#if (EDRV_USE_TTTX != FALSE)
     // Call timer CallBack
     if (edrvInstance_l.hresTimerCb != NULL && edrvInstance_l.aTimerHdl[index] != 0)
     {
@@ -1354,22 +1388,22 @@ Exit:
 
 This function is the interrupt service routine for the Ethernet driver.
 
-\param  irqNum_p            IRQ number
-\param  ppDevInstData_p     Pointer to private data provided by request_irq
+\param[in]      irqNum_p            IRQ number
+\param[in,out]  ppDevInstData_p     Pointer to private data provided by request_irq
 
 \return The function returns an IRQ handled code.
 */
 //------------------------------------------------------------------------------
-static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
+static irqreturn_t edrvIrqHandler(int irqNum_p, void* ppDevInstData_p)
 {
     DWORD           reg;
-    INT             handled;
+    INT             handled = IRQ_HANDLED;
     INT             index;
     tEdrvQVector*   pQVector = (tEdrvQVector*)ppDevInstData_p;
     tEdrvQueue*     pTxQueue;
     tEdrvQueue*     pRxQueue;
 
-    handled = IRQ_HANDLED;
+    UNUSED_PARAMETER(irqNum_p);
 
     if (edrvInstance_l.pQvector[pQVector->queueIdx] != pQVector)
     {
@@ -1438,7 +1472,7 @@ static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
             pAdvRxDesc->sRead.bufferAddrLe = cpu_to_le64(pRxQueue->pPktBuff[index].dmaAddr);
             pAdvRxDesc->sRead.headerAddrLe = 0;
 
-            // Handle the processed decriptor to Hw
+            // Handle the processed descriptor to Hw
             EDRV_REGDW_WRITE(EDRV_RDTAIL(pRxQueue->index), index);
 
             // Increment the pointer
@@ -1571,8 +1605,8 @@ Exit:
 The function reads the current time from the SYSTIM register in
 struct timespec format.
 
-\param     psTime_p     Pointer to timespec struct where the current time will
-                        be stored.
+\param[out]     psTime_p            Pointer to timespec struct where the current
+                                    time will be stored.
 
 \retval    The function returns the nanoseconds part of the current time.
 */
@@ -1599,7 +1633,7 @@ static UINT32 readSystimRegister(struct timespec* psTime_p)
 
 The function writes the SYSTIM register with the specified time.
 
-\param     psTime_p    Pointer to the time to write into the SYSTIM register.
+\param[in]      psTime_p            Pointer to the time to write into the SYSTIM register.
 */
 //------------------------------------------------------------------------------
 static void writeSystimRegister(const struct timespec* psTime_p)
@@ -1682,7 +1716,7 @@ static void releaseHwSemaphore(void)
 
 The function acquires a Software/Firmware sync semaphore to access the PHY.
 
-\param  mask_p          Specifies which semaphore to acquire.
+\param[in]      mask_p              Specifies which semaphore to acquire.
 
 \return The function returns a tOplkError error code.
 */
@@ -1731,7 +1765,7 @@ static tOplkError acquireSwFwSync(UINT16 mask_p)
 The function releases an acquired software/firmware semaphore used to access
 the PHY.
 
-\param  mask_p          Specifies which semaphore to release.
+\param[in]      mask_p              Specifies which semaphore to release.
 */
 //------------------------------------------------------------------------------
 static void releaseSwFwSync(UINT16 mask_p)
@@ -1753,8 +1787,8 @@ static void releaseSwFwSync(UINT16 mask_p)
 
 The function write into a PHY register via the MDIO interface.
 
-\param  phyreg_p    PHY Register to write.
-\param  value_p     Value to write into register.
+\param[in]      phyreg_p            PHY Register to write.
+\param[in]      value_p             Value to write into register.
 */
 //------------------------------------------------------------------------------
 static void writeMdioPhyReg(UINT phyreg_p, USHORT value_p)
@@ -1784,7 +1818,7 @@ static void writeMdioPhyReg(UINT phyreg_p, USHORT value_p)
 
 The function reads from a PHY register via the MDIO interface.
 
-\param  phyreg_p        PHY register to read.
+\param[in]      phyreg_p            PHY register to read.
 
 \retval The function returns the read register value.
 */
@@ -1820,10 +1854,10 @@ static UINT16 readMdioPhyReg(INT phyreg_p)
 
 The function frees the buffers of a TX queue.
 
-\param  pTxQueue_p      TX queue to be processed.
+\param[in]      pTxQueue_p      TX queue to be processed.
 */
 //------------------------------------------------------------------------------
-static void freeTxBuffersOfQueue(tEdrvQueue* pTxQueue_p)
+static void freeTxBuffersOfQueue(const tEdrvQueue* pTxQueue_p)
 {
     INT         index;
 
@@ -1901,7 +1935,7 @@ static void freeTxQueues(void)
 The function initialize the TX queue. It allocates and sets up the memory for
 the TX descriptors.
 
-\param  pTxQueue_p      Pointer to the TX queue structure to initialize.
+\param[in,out]  pTxQueue_p          Pointer to the TX queue structure to initialize.
 
 \return The function returns a tOplkError error code.
 */
@@ -1940,12 +1974,12 @@ static tOplkError initTxQueue(tEdrvQueue* pTxQueue_p)
 /**
 \brief  Configure a TX queue
 
-The function configurea a TX queue.
+The function configure a TX queue.
 
-\param  pTxQueue_p          Pointer to the queue structure to be configured.
+\param[in]      pTxQueue_p          Pointer to the queue structure to be configured.
 */
 //------------------------------------------------------------------------------
-static void configureTxQueue(tEdrvQueue* pTxQueue_p)
+static void configureTxQueue(const tEdrvQueue* pTxQueue_p)
 {
     UINT64      txDescDma;
     UINT32      reg;
@@ -2035,10 +2069,10 @@ static void freeRxQueues(void)
 
 The function frees the buffers of a RX queue.
 
-\param  pRxQueue_p      RX Queue to be processed.
+\param[in]      pRxQueue_p          RX Queue to be processed.
 */
 //------------------------------------------------------------------------------
-static void freeRxBuffersOfQueue(tEdrvQueue* pRxQueue_p)
+static void freeRxBuffersOfQueue(const tEdrvQueue* pRxQueue_p)
 {
     INT index;
 
@@ -2074,7 +2108,7 @@ static void freeRxBuffers(void)
 
 The function initializes the Rx queue with descriptors and memory resources.
 
-\param  pRxQueue_p      Pointer to the queue structure to initialize.
+\param[in,out]  pRxQueue_p          Pointer to the queue structure to initialize.
 
 \return The function returns a tOplkError error code.
 */
@@ -2123,7 +2157,7 @@ static tOplkError initRxQueue(tEdrvQueue* pRxQueue_p)
 The function allocates receive buffers and associates it with the corresponding
 descriptors.
 
-\param     pRxQueue_p  Pointer to the queue structure to allocate buffers
+\param[in,out]  pRxQueue_p          Pointer to the queue structure to allocate buffers
 
 \return The function returns a tOplkError error code.
 */
@@ -2162,10 +2196,10 @@ static tOplkError allocateRxBuffer(tEdrvQueue* pRxQueue_p)
 
 The function configures the receive queue of the I210.
 
-\param  pRxQueue_p  Pointer to the queue structure to be configured.
+\param[in]      pRxQueue_p          Pointer to the queue structure to be configured.
 */
 //------------------------------------------------------------------------------
-static void configureRxQueue(tEdrvQueue* pRxQueue_p)
+static void configureRxQueue(const tEdrvQueue* pRxQueue_p)
 {
     UINT64      rxDescDma;
     UINT32      reg;
@@ -2243,7 +2277,7 @@ static void initQavMode(void)
     EDRV_REGDW_WRITE(EDRV_TXPBSIZE_REG, txpbsize);
 
 
-#if EDRV_USE_TTTX != FALSE
+#if (EDRV_USE_TTTX != FALSE)
     tqavctrl = (EDRV_TQAVCTRL_TRANSTIM | EDRV_TQAVCTRL_SP_WAIT_SR);
 #endif
 
@@ -2262,7 +2296,6 @@ static void initQavMode(void)
     launchOff |= (4 << 5) << EDRV_LAUNCH_OSO_SHIFT;
 
     EDRV_REGDW_WRITE(EDRV_LAUNCH_OSO, launchOff);
-
 }
 
 //------------------------------------------------------------------------------
@@ -2272,9 +2305,9 @@ static void initQavMode(void)
 The function writes the IVAR register of the I210 for mapping interrupt vectors
 of Tx-Rx causes.
 
-\param  vector_p        Vector number to be assigned.
-\param  index_p         Index to determine the queue.
-\param  offset_p        Offset for the queue.
+\param[in]      vector_p            Vector number to be assigned.
+\param[in]      index_p             Index to determine the queue.
+\param[in]      offset_p            Offset for the queue.
  */
 //------------------------------------------------------------------------------
 static void writeIvarRegister(INT vector_p, INT index_p, INT offset_p)
@@ -2357,7 +2390,7 @@ static INT requestMsixIrq(void)
 This function queues the frame to be transmitted using normal transmission.
 Queue 1 is used for transmitting frames in normal mode.
 
-\param  pBuffer_p   Pointer to the Tx buffer to transmit.
+\param[in,out]  pBuffer_p           Pointer to the Tx buffer to transmit.
 
 \return The function returns a tOplkError error code.
 */
@@ -2419,7 +2452,7 @@ Exit:
     return ret;
 }
 
-#if EDRV_USE_TTTX != FALSE
+#if (EDRV_USE_TTTX != FALSE)
 //------------------------------------------------------------------------------
 /**
 \brief  Send a buffer using time triggered send
@@ -2427,7 +2460,7 @@ Exit:
 This function queues the frame to be transmitted using valid launch time based
 transmission. Queue 0 is used to transmit time triggered frames.
 
-\param  pBuffer_p   Pointer to the Tx buffer to transmit.
+\param[in,out]  pBuffer_p           Pointer to the Tx buffer to transmit.
 
 \return The function returns a tOplkError error code.
 */
@@ -2515,17 +2548,17 @@ Exit:
 
 This function initializes one PCI device.
 
-\param  pPciDev_p   Pointer to corresponding PCI device structure
-\param  pId_p       PCI device ID
+\param[in,out]  pPciDev_p           Pointer to corresponding PCI device structure
+\param[in]      pId_p               PCI device ID
 
 \return The function returns an integer error code.
 \retval 0           Successful
 \retval Otherwise   Error
 */
 //------------------------------------------------------------------------------
-static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* pId_p)
+static int initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* pId_p)
 {
-    INT             result = 0;
+    int             result = 0;
     tEdrvQueue*     pQueue;
     tEdrvQVector*   pVector;
     UINT32          reg;
@@ -2558,7 +2591,7 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
     result = dma_set_mask(&edrvInstance_l.pPciDev->dev, DMA_BIT_MASK(64));
     if (result == 0)
     {
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2, 6, 33)
+#if (LINUX_VERSION_CODE > KERNEL_VERSION(2, 6, 33))
         dma_set_coherent_mask(&edrvInstance_l.pPciDev->dev, DMA_BIT_MASK(64));
 #else
         pci_set_dma_mask(pPciDev_p, DMA_BIT_MASK(64));
@@ -2570,7 +2603,7 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
         result = dma_set_mask(&pPciDev_p->dev, DMA_BIT_MASK(32));
         if (result == 0)
         {
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2, 6, 33)
+#if (LINUX_VERSION_CODE > KERNEL_VERSION(2, 6, 33))
             result = dma_set_coherent_mask(&edrvInstance_l.pPciDev->dev,
                                            DMA_BIT_MASK(32));
 #else
@@ -2701,7 +2734,7 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
     sysTime = ktime_to_timespec(ktime_get_real());
     writeSystimRegister(&sysTime);
 
-    //Initialise the SYSTIM timer with current system time
+    //Initialize the SYSTIM timer with current system time
     reg = 0;
     reg = EDRV_REGDW_READ(EDRV_TSAUXC);
     reg &= ~(1 << 31);
@@ -2844,7 +2877,7 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
     initQavMode();
 
     // DMA configuration
-    EDRV_REGDW_WRITE(EDRV_DTX_MAX_PKTSZ_REG, EDRV_MAX_FRAME_SIZE/64);
+    EDRV_REGDW_WRITE(EDRV_DTX_MAX_PKTSZ_REG, EDRV_MAX_FRAME_SIZE / 64);
 
     // Setup Tx Configuration
     EDRV_REGDW_WRITE(EDRV_TXDCTL(0), 0);          // Disable Q0 before proceeding
@@ -2873,7 +2906,7 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
         configureTxQueue(edrvInstance_l.pTxQueue[index]);
     }
 
-    // Diasable 1st Rx Queue
+    // Disable 1st Rx Queue
     EDRV_REGDW_WRITE(EDRV_RXDCTL(0), 0);
 
     reg = 0;
@@ -2966,7 +2999,7 @@ Exit:
 
 This function removes one PCI device.
 
-\param  pPciDev_p     Pointer to corresponding PCI device structure
+\param[in,out]  pPciDev_p           Pointer to corresponding PCI device structure
 */
 //------------------------------------------------------------------------------
 static void removeOnePciDev(struct pci_dev* pPciDev_p)

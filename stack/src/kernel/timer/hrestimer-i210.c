@@ -91,9 +91,9 @@ void TgtDbgPostTraceValue(UINT32 dwTraceValue_p);
 //------------------------------------------------------------------------------
 // global function prototypes
 //------------------------------------------------------------------------------
-tOplkError edrv_startTimer(tTimerHdl* pTimerHdl_p, UINT32 index_p, UINT64 frequency_p);
-tOplkError edrv_stopTimer(tTimerHdl* pTimerHdl_p, UINT32 index_p);
-tOplkError edrv_restartTimer(tTimerHdl* pTimerHdl_p, UINT32 index_p, UINT64 frequency_p);
+tOplkError edrv_startTimer(const tTimerHdl* pTimerHdl_p, UINT32 index_p, UINT64 frequency_p);
+tOplkError edrv_stopTimer(const tTimerHdl* pTimerHdl_p, UINT32 index_p);
+tOplkError edrv_restartTimer(const tTimerHdl* pTimerHdl_p, UINT32 index_p, UINT64 frequency_p);
 tOplkError edrv_registerHresCallback(tHresCallback pfnHighResCb_p);
 
 //============================================================================//

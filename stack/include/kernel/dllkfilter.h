@@ -94,7 +94,7 @@ void dllkfilter_setupFilters(void);
 void dllkfilter_setupPresFilter(tEdrvFilter* pFilter_p, BOOL fEnable_p);
 void dllkfilter_setupPreqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p,
                                 tEdrvTxBuffer* pBuffer_p,
-                                UINT8* pMacAdrs_p);
+                                const UINT8* pMacAdrs_p);
 
 #ifdef __cplusplus
 }

@@ -22,7 +22,7 @@ number of the buffer.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -52,9 +52,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-#include <kernel/edrv.h>
 #include <common/ami.h>
 #include <common/bufalloc.h>
+#include <kernel/edrv.h>
+
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/pci.h>
@@ -70,7 +71,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <linux/sched.h>
 #include <linux/delay.h>
 #include <linux/gfp.h>
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 26)
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 26))
 #include <linux/semaphore.h>
 #endif
 
@@ -81,7 +83,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 19)
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 19))
 #error "Linux Kernel versions older 2.6.19 are not supported by this driver!"
 #endif
 
@@ -366,8 +368,7 @@ typedef struct
     UINT            headRxDesc;                             ///< Index of the head of the RX descriptor buffer
     UINT            tailRxDesc;                             ///< Index of the tail of the RX descriptor buffer
 
-
-#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
+#if (CONFIG_EDRV_USE_DIAGNOSTICS != FALSE)
     ULONGLONG       interruptCount;                         ///< Interrupt counter
     INT             rxBufFreeMin;                           ///< Minimum number of free RX buffers
     UINT            rxCount[EDRV_SAMPLE_NUM];               ///< Array of RX counter samples
@@ -379,12 +380,8 @@ typedef struct
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 19)
-static irqreturn_t edrvIrqHandler (INT irqNum_p, void* ppDevInstData_p);
-#else
-static INT edrvIrqHandler (INT irqNum_p, void* ppDevInstData_p, struct pt_regs* ptRegs_p);
-#endif
-static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* pId_p);
+static irqreturn_t edrvIrqHandler (int irqNum_p, void* ppDevInstData_p);
+static int initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* pId_p);
 static void removeOnePciDev(struct pci_dev* pPciDev_p);
 
 //------------------------------------------------------------------------------
@@ -422,19 +419,22 @@ static struct pci_driver edrvDriver_l =
 
 This function initializes the Ethernet driver.
 
-\param  pEdrvInitParam_p    Edrv initialization parameters
+\param[in]      pEdrvInitParam_p    Edrv initialization parameters
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
+tOplkError edrv_init(const tEdrvInitParam* pEdrvInitParam_p)
 {
     tOplkError  ret = kErrorOk;
-    INT         result;
+    int         result;
     INT         i;
     tBufData    bufData;
+
+    // Check parameter validity
+    ASSERT(pEdrvInitParam_p != NULL);
 
     // clear instance structure
     OPLK_MEMSET(&edrvInstance_l, 0, sizeof(edrvInstance_l));
@@ -461,7 +461,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     if (edrvInstance_l.pPciDev == NULL)
     {
         printk("%s pPciDev=NULL\n", __FUNCTION__);
-        ret = edrv_exit();
+        edrv_exit();
         ret = kErrorNoResource;
         goto Exit;
     }
@@ -519,6 +519,7 @@ tOplkError edrv_exit(void)
     {
         printk("%s PCI driver for openPOWERLINK already unregistered\n", __FUNCTION__);
     }
+
     return kErrorOk;
 }
 
@@ -533,7 +534,7 @@ This function returns the MAC address of the Ethernet controller
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-UINT8* edrv_getMacAddr(void)
+const UINT8* edrv_getMacAddr(void)
 {
     return edrvInstance_l.initParam.aMacAddr;
 }
@@ -544,21 +545,23 @@ UINT8* edrv_getMacAddr(void)
 
 This function sets a multicast entry into the Ethernet controller.
 
-\param  pMacAddr_p  Multicast address
+\param[in]      pMacAddr_p          Multicast address.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p)
+tOplkError edrv_setRxMulticastMacAddr(const UINT8* pMacAddr_p)
 {
     tOplkError  ret = kErrorOk;
     UINT32      data;
     INT         i;
 
-    // entry 0 is used for local MAC address
+    // Check parameter validity
+    ASSERT(pMacAddr_p != NULL);
 
+    // entry 0 is used for local MAC address
     for (i = 1; i < 16; i++)
     {
         data = EDRV_REGDW_READ(EDRV_REGDW_RAH(i));
@@ -591,7 +594,6 @@ tOplkError edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p)
     }
 
 Exit:
-
     return ret;
 }
 
@@ -601,20 +603,23 @@ Exit:
 
 This function removes the multicast entry from the Ethernet controller.
 
-\param  pMacAddr_p  Multicast address
+\param[in]      pMacAddr_p          Multicast address
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_clearRxMulticastMacAddr(UINT8* pMacAddr_p)
+tOplkError edrv_clearRxMulticastMacAddr(const UINT8* pMacAddr_p)
 {
     tOplkError  ret = kErrorOk;
     UINT32      data;
     INT         i;
     UINT32      addrLow;
     UINT32      addrHigh;
+
+    // Check parameter validity
+    ASSERT(pMacAddr_p != NULL);
 
     addrLow   = 0;
     addrLow  |= pMacAddr_p[0] <<  0;
@@ -654,18 +659,20 @@ If \p entryChanged_p is equal or larger count_p all Rx filters shall be changed.
 
 \note Rx filters are not supported by this driver!
 
-\param  pFilter_p           Base pointer of Rx filter array
-\param  count_p             Number of Rx filter array entries
-\param  entryChanged_p      Index of Rx filter entry that shall be changed
-\param  changeFlags_p       Bit mask that selects the changing Rx filter property
+\param[in,out]  pFilter_p           Base pointer of Rx filter array
+\param[in]      count_p             Number of Rx filter array entries
+\param[in]      entryChanged_p      Index of Rx filter entry that shall be changed
+\param[in]      changeFlags_p       Bit mask that selects the changing Rx filter property
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
-                               UINT entryChanged_p, UINT changeFlags_p)
+tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p,
+                               UINT count_p,
+                               UINT entryChanged_p,
+                               UINT changeFlags_p)
 {
     UNUSED_PARAMETER(pFilter_p);
     UNUSED_PARAMETER(count_p);
@@ -681,7 +688,7 @@ tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
 
 This function allocates a Tx buffer.
 
-\param  pBuffer_p           Tx buffer descriptor
+\param[in,out]  pBuffer_p           Tx buffer descriptor
 
 \return The function returns a tOplkError error code.
 
@@ -692,6 +699,9 @@ tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
     tOplkError  ret = kErrorOk;
     tBufData    bufData;
+
+    // Check parameter validity
+    ASSERT(pBuffer_p != NULL);
 
     if (pBuffer_p->maxBufferSize > EDRV_MAX_FRAME_SIZE)
     {
@@ -729,7 +739,7 @@ Exit:
 
 This function releases the Tx buffer.
 
-\param  pBuffer_p           Tx buffer descriptor
+\param[in,out]  pBuffer_p           Tx buffer descriptor
 
 \return The function returns a tOplkError error code.
 
@@ -740,6 +750,9 @@ tOplkError edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
     tOplkError  ret;
     tBufData    bufData;
+
+    // Check parameter validity
+    ASSERT(pBuffer_p != NULL);
 
     bufData.pBuffer = pBuffer_p->pBuffer;
     bufData.bufferNumber = pBuffer_p->txBufferNumber.value;
@@ -756,7 +769,7 @@ tOplkError edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p)
 
 This function sends the Tx buffer.
 
-\param  pBuffer_p           Tx buffer descriptor
+\param[in,out]  pBuffer_p           Tx buffer descriptor
 
 \return The function returns a tOplkError error code.
 
@@ -768,6 +781,9 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
     tOplkError      ret = kErrorOk;
     UINT            bufferNumber;
     tEdrvTxDesc*    pTxDesc;
+
+    // Check parameter validity
+    ASSERT(pBuffer_p != NULL);
 
     bufferNumber = pBuffer_p->txBufferNumber.value;
 
@@ -805,66 +821,29 @@ Exit:
     return ret;
 }
 
-//------------------------------------------------------------------------------
-/**
-\brief  Set Tx buffer ready
-
-This function sets the Tx buffer buffer ready for transmission.
-
-\param  pBuffer_p   Tx buffer buffer descriptor
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_edrv
-*/
-//------------------------------------------------------------------------------
-tOplkError edrv_setTxBufferReady(tEdrvTxBuffer* pBuffer_p)
-{
-    UNUSED_PARAMETER(pBuffer_p);
-
-    return kErrorOk;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Start ready Tx buffer
-
-This function sends the Tx buffer marked as ready.
-
-\param  pBuffer_p   Tx buffer buffer descriptor
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_edrv
-*/
-//------------------------------------------------------------------------------
-tOplkError edrv_startTxBuffer(tEdrvTxBuffer* pBuffer_p)
-{
-    UNUSED_PARAMETER(pBuffer_p);
-
-    return kErrorOk;
-}
-
-#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
+#if (CONFIG_EDRV_USE_DIAGNOSTICS != FALSE)
 //------------------------------------------------------------------------------
 /**
 \brief  Get Edrv module diagnostics
 
 This function returns the Edrv diagnostics to a provided buffer.
 
-\param  pBuffer_p   Pointer to buffer filled with diagnostics.
-\param  size_p      Size of buffer
+\param[out]     pBuffer_p           Pointer to buffer filled with diagnostics.
+\param[in]      size_p              Size of buffer
 
-\return The function returns a tOplkError error code.
+\return The function returns the size of the diagnostics information.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-INT edrv_getDiagnostics(char* pBuffer_p, INT size_p)
+int edrv_getDiagnostics(char* pBuffer_p, size_t size_p)
 {
     tEdrvTxDesc*    pTxDesc;
     UINT32          txStatus;
-    INT             usedSize = 0;
+    size_t          usedSize = 0;
+
+    // Check parameter validity
+    ASSERT(pBuffer_p != NULL);
 
     usedSize += snprintf(pBuffer_p + usedSize, size_p - usedSize,
                          "\nEdrv Diagnostic Information\n");
@@ -913,20 +892,20 @@ INT edrv_getDiagnostics(char* pBuffer_p, INT size_p)
                          (ULONG)EDRV_REGDW_READ(EDRV_REGDW_RCTL));
 
     usedSize += snprintf(pBuffer_p + usedSize, size_p - usedSize,
-                         "Receive Descripter Control Register: 0x%08lX\n",
+                         "Receive Descriptor Control Register: 0x%08lX\n",
                          (ULONG)EDRV_REGDW_READ(EDRV_REGDW_RXDCTL));
 
     usedSize += snprintf(pBuffer_p + usedSize, size_p - usedSize,
-                         "Receive Descripter Lenght Register:  0x%08lX\n",
+                         "Receive Descriptor Length Register:  0x%08lX\n",
                          (ULONG)EDRV_REGDW_READ(EDRV_REGDW_RDLEN0));
 
     usedSize += snprintf(pBuffer_p + usedSize, size_p - usedSize,
-                         "Receive Descripter Head Register:    0x%08lX (%u)\n",
+                         "Receive Descriptor Head Register:    0x%08lX (%u)\n",
                          (ULONG)EDRV_REGDW_READ(EDRV_REGDW_RDH0),
                          edrvInstance_l.headRxDesc);
 
     usedSize += snprintf(pBuffer_p + usedSize, size_p - usedSize,
-                         "Receive Descripter Tail Register:    0x%08lX (%u)\n",
+                         "Receive Descriptor Tail Register:    0x%08lX (%u)\n",
                          (ULONG)EDRV_REGDW_READ(EDRV_REGDW_RDT0),
                          edrvInstance_l.tailRxDesc);
 #endif
@@ -1037,13 +1016,14 @@ INT edrv_getDiagnostics(char* pBuffer_p, INT size_p)
 }
 #endif
 
+#if ((CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC != FALSE) || (CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC != FALSE))
 //------------------------------------------------------------------------------
 /**
 \brief  Release Rx buffer
 
 This function releases a late release Rx buffer.
 
-\param  pRxBuffer_p     Rx buffer to be released
+\param[in,out]  pRxBuffer_p         Rx buffer to be released
 
 \return The function returns a tOplkError error code.
 
@@ -1053,6 +1033,9 @@ This function releases a late release Rx buffer.
 tOplkError edrv_releaseRxBuffer(tEdrvRxBuffer* pRxBuffer_p)
 {
     tOplkError ret = kErrorEdrvInvalidRxBuf;
+
+    // Check parameter validity
+    ASSERT(pRxBuffer_p != NULL);
 
     if (edrvInstance_l.rxBufFreeTop < (EDRV_MAX_RX_BUFFERS-1))
     {
@@ -1067,6 +1050,7 @@ tOplkError edrv_releaseRxBuffer(tEdrvRxBuffer* pRxBuffer_p)
 
     return ret;
 }
+#endif
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
@@ -1080,16 +1064,19 @@ tOplkError edrv_releaseRxBuffer(tEdrvRxBuffer* pRxBuffer_p)
 
 This function is the interrupt service routine for the Ethernet driver.
 
-\param  irqNum_p            IRQ number
-\param  ppDevInstData_p     Pointer to private data provided by request_irq
+\param[in]      irqNum_p            IRQ number
+\param[in,out]  ppDevInstData_p     Pointer to private data provided by request_irq
 
 \return The function returns an IRQ handled code.
 */
 //------------------------------------------------------------------------------
-static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
+static irqreturn_t edrvIrqHandler(int irqNum_p, void* ppDevInstData_p)
 {
     UINT32  status;
     INT     handled = IRQ_HANDLED;
+
+    UNUSED_PARAMETER(irqNum_p);
+    UNUSED_PARAMETER(ppDevInstData_p);
 
     // Read the interrupt status
     status = EDRV_REGDW_READ(EDRV_REGDW_ICR);
@@ -1106,7 +1093,7 @@ static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
         EDRV_REGDW_WRITE(EDRV_REGDW_ICR, status);
     }
 
-#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
+#if (CONFIG_EDRV_USE_DIAGNOSTICS != FALSE)
     edrvInstance_l.interruptCount++;
     edrvInstance_l.rxCount[edrvInstance_l.pos] = 0;
     edrvInstance_l.txCount[edrvInstance_l.pos] = 0;
@@ -1142,7 +1129,7 @@ static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
                 UINT8                   rxStatus;
                 UINT8                   rxError;
 
-#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
+#if (CONFIG_EDRV_USE_DIAGNOSTICS != FALSE)
                 edrvInstance_l.rxCount[edrvInstance_l.pos]++;
 #endif
 
@@ -1151,7 +1138,6 @@ static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
 
                 if ((rxStatus & EDRV_RXSTAT_DD) != 0)
                 {   // Descriptor is valid
-
                     if ((rxStatus & EDRV_RXSTAT_EOP) == 0)
                     {   // Multiple descriptors used for one packet
                         EDRV_COUNT_RX_ERR_MULT;
@@ -1197,7 +1183,7 @@ static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
                                 UINT8*      pRxBufInDescPrev;
                                 ULONG       flags;
 
-#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
+#if (CONFIG_EDRV_USE_DIAGNOSTICS != FALSE)
                                 if (edrvInstance_l.rxBufFreeTop < edrvInstance_l.rxBufFreeMin)
                                 {
                                     edrvInstance_l.rxBufFreeMin = edrvInstance_l.rxBufFreeTop;
@@ -1229,7 +1215,7 @@ static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
                             else
                             {
                                 // $$$ How to signal no free RxBuffers left?
-#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
+#if (CONFIG_EDRV_USE_DIAGNOSTICS != FALSE)
                                 edrvInstance_l.rxBufFreeMin = -1;
 #endif
                             }
@@ -1255,7 +1241,7 @@ static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
                 tEdrvTxBuffer*  pTxBuffer;
                 UINT32          txStatus;
 
-#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
+#if (CONFIG_EDRV_USE_DIAGNOSTICS != FALSE)
                 edrvInstance_l.txCount[edrvInstance_l.pos]++;
 #endif
 
@@ -1338,7 +1324,7 @@ static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
         }
     }
 
-#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
+#if (CONFIG_EDRV_USE_DIAGNOSTICS != FALSE)
     edrvInstance_l.pos++;
     if (edrvInstance_l.pos == EDRV_SAMPLE_NUM)
     {
@@ -1356,17 +1342,17 @@ Exit:
 
 This function initializes one PCI device.
 
-\param  pPciDev_p   Pointer to corresponding PCI device structure
-\param  pId_p       PCI device ID
+\param[in,out]  pPciDev_p           Pointer to corresponding PCI device structure
+\param[in]      pId_p               PCI device ID
 
 \return The function returns an integer error code.
 \retval 0           Successful
 \retval Otherwise   Error
 */
 //------------------------------------------------------------------------------
-static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* pId_p)
+static int initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* pId_p)
 {
-    INT     result = 0;
+    int     result = 0;
     UINT32  temp;
     UINT64  descAddress;
     INT     i;
@@ -1511,7 +1497,7 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
     //EDRV_REGDW_WRITE(EDRV_REGDW_RDTR, 10);
     //EDRV_REGDW_WRITE(EDRV_REGDW_RADV, 100);
 
-    // Enable Message Signalled Interrupt
+    // Enable Message Signaled Interrupt
     result = pci_enable_msi(pPciDev_p);
     if (result != 0)
     {
@@ -1603,7 +1589,7 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
     }
 
     edrvInstance_l.rxBufFreeTop = EDRV_MAX_RX_BUFFERS - EDRV_MAX_RX_DESCS - 1;
-#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
+#if (CONFIG_EDRV_USE_DIAGNOSTICS != FALSE)
     edrvInstance_l.rxBufFreeMin = EDRV_MAX_RX_BUFFERS - EDRV_MAX_RX_DESCS;
 #endif
 
@@ -1729,7 +1715,7 @@ Exit:
 
 This function removes one PCI device.
 
-\param  pPciDev_p     Pointer to corresponding PCI device structure
+\param[in,out]  pPciDev_p           Pointer to corresponding PCI device structure
 */
 //------------------------------------------------------------------------------
 static void removeOnePciDev(struct pci_dev* pPciDev_p)
@@ -1758,7 +1744,7 @@ static void removeOnePciDev(struct pci_dev* pPciDev_p)
     // remove interrupt handler
     free_irq(pPciDev_p->irq, pPciDev_p);
 
-    // Disable Message Signalled Interrupt
+    // Disable Message Signaled Interrupt
     pci_disable_msi(pPciDev_p);
 
     // free buffers
@@ -1851,4 +1837,4 @@ Exit:
     return;
 }
 
-///\}
+/// \}

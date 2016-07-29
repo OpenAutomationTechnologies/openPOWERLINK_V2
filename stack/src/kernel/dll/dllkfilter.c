@@ -106,7 +106,7 @@ static void setupSoaUnspecReqFilter(tEdrvFilter* pFilter_p,
                                     UINT nodeId_p,
                                     tEdrvTxBuffer* pBuffer_p);
 #if defined(CONFIG_INCLUDE_VETH)
-static void setupVethUnicast(tEdrvFilter* pFilter_p, UINT8* pMacAdrs_p, BOOL fEnable_p);
+static void setupVethUnicast(tEdrvFilter* pFilter_p, const UINT8* pMacAdrs_p, BOOL fEnable_p);
 static void setupVethBroadcast(tEdrvFilter* pFilter_p, BOOL fEnable_p);
 #endif
 
@@ -195,7 +195,7 @@ The function sets up an PReq filter in the Edrv filter structure.
 */
 //------------------------------------------------------------------------------
 void dllkfilter_setupPreqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p,
-                                tEdrvTxBuffer* pBuffer_p, UINT8* pMacAdrs_p)
+                                tEdrvTxBuffer* pBuffer_p, const UINT8* pMacAdrs_p)
 {
     OPLK_MEMCPY(&pFilter_p->aFilterValue[0], pMacAdrs_p, 6);
     ami_setUint48Be(&pFilter_p->aFilterMask[0], C_DLL_MACADDR_MASK);
@@ -461,7 +461,7 @@ structure.
 
 */
 //------------------------------------------------------------------------------
-static void setupVethUnicast(tEdrvFilter* pFilter_p, UINT8* pMacAdrs_p, BOOL fEnable_p)
+static void setupVethUnicast(tEdrvFilter* pFilter_p, const UINT8* pMacAdrs_p, BOOL fEnable_p)
 {
     OPLK_MEMCPY(&pFilter_p->aFilterValue[0], pMacAdrs_p, 6);
     ami_setUint48Be(&pFilter_p->aFilterMask[0], C_DLL_MACADDR_MASK);

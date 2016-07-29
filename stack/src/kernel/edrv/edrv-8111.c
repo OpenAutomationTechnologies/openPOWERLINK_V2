@@ -12,7 +12,7 @@ Realtek 8111/8168.
 
 /* ------------------------------------------------------------------------------
 Copyright (c) 2014, Kalycito Infotech Private Limited
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -42,9 +42,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-#include <kernel/edrv.h>
 #include <common/ami.h>
 #include <common/bufalloc.h>
+#include <kernel/edrv.h>
+
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/pci.h>
@@ -60,7 +61,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <linux/sched.h>
 #include <linux/delay.h>
 #include <linux/gfp.h>
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 26)
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 26))
 #include <linux/semaphore.h>
 #endif
 
@@ -71,7 +73,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 19)
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 19))
 #error "Linux Kernel versions older 2.6.19 are not supported by this driver!"
 #endif
 
@@ -306,7 +308,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // Receive Configuration Register
 #define RW_REGDW_RCR                                    0x00000044      // receive-config register address offset (dep.- RW_REGB_COMMAND_RX_EN)
-#define RW_REGDW_RCR_ACC_ALL_PKTS                       0x01            // promiscious mode- accept all packets from the Phy
+#define RW_REGDW_RCR_ACC_ALL_PKTS                       0x01            // promiscuous mode- accept all packets from the Phy
 #define RW_REGDW_RCR_ACC_UNICAST_PKTS                   0x02            // accept only the packets whose destination address matches
 #define RW_REGDW_RCR_ACC_MULTICAST_PKTS                 0x04            // accept multicast packets whose dest. group addr matches
 #define RW_REGDW_RCR_ACC_BROADCAST_PKTS                 0x08            // accept Broadcast packets
@@ -319,17 +321,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // default configurations
 #define RW_REGDW_RCR_RX_FIFO_THRSHOLD_UNLMTD            RW_REGDW_RCR_RX_FIFO_THRSHLD
 #define RW_REGDW_RCR_MAX_DMA_BURST_SIZE_UNLMTD          RW_REGDW_RCR_MAX_DMA_BURST_SIZE
-#define RW_REGDW_RCR_DEF                                (RW_REGDW_RCR_RX_FIFO_THRSHOLD_UNLMTD | \
-                                                        RW_REGDW_RCR_MAX_DMA_BURST_SIZE_UNLMTD | \
-                                                        RW_REGDW_RCR_ACC_UNICAST_PKTS | \
-                                                        RW_REGDW_RCR_ACC_MULTICAST_PKTS | \
-                                                        RW_REGDW_RCR_ACC_BROADCAST_PKTS /* for arp */)
+#define RW_REGDW_RCR_DEF                                (RW_REGDW_RCR_RX_FIFO_THRSHOLD_UNLMTD |   \
+                                                         RW_REGDW_RCR_MAX_DMA_BURST_SIZE_UNLMTD | \
+                                                         RW_REGDW_RCR_ACC_UNICAST_PKTS |          \
+                                                         RW_REGDW_RCR_ACC_MULTICAST_PKTS |        \
+                                                         RW_REGDW_RCR_ACC_BROADCAST_PKTS /* for arp */)
 
 // Dump tally Counter command (DTCCR)
 #define RW_REGQW_DUMP_TALLY_COUNT                       0x10                // dump-tally-counter-command register address offset
 #define RW_REGQW_DUMP_TALLY_COUNT_CMD                   0x08                // command bit for the dump-tally-counter (1- dump counter data to the addr)
 #define RW_REGQW_DUMP_TALLY_COUNT_START_ADDR_MASK       0xFFFFFFFFFFFFFFC0  // 64 byte alignment, 64-byte long address
-#define RW_REGQW_DUMP_TALLY_COUNT_START_ADDR_MASK_LO    0x00000000FFFFFFC0  // bit-mask for lower 32-bit of dump-tally-counter start adress
+#define RW_REGQW_DUMP_TALLY_COUNT_START_ADDR_MASK_LO    0x00000000FFFFFFC0  // bit-mask for lower 32-bit of dump-tally-counter start address
 #define RW_REGQW_DUMP_TALLY_COUNT_TX_OK_OFSET           0x00                // tx-ok-counter offset from the start address
 #define RW_REGQW_DUMP_TALLY_COUNT_RX_OK_OFSET           0x08
 #define RW_REGQW_DUMP_TALLY_COUNT_TX_ERR                0x16
@@ -361,11 +363,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define RW_REGW_INT_MASK_TIMEOUT                        0x4000          // enable interrupt for timeout in TCTR
 
 // default configurations
-#define RW_REGW_INT_MASK_DEF                            (RW_REGW_INT_MASK_TX_OK | \
-                                                         RW_REGW_INT_MASK_TX_ERR | \
-                                                         RW_REGW_INT_MASK_LINK_CHNG | \
-                                                         RW_REGW_INT_MASK_RX_OK | \
-                                                         RW_REGW_INT_MASK_RX_ERR | \
+#define RW_REGW_INT_MASK_DEF                            (RW_REGW_INT_MASK_TX_OK |      \
+                                                         RW_REGW_INT_MASK_TX_ERR |     \
+                                                         RW_REGW_INT_MASK_LINK_CHNG |  \
+                                                         RW_REGW_INT_MASK_RX_OK |      \
+                                                         RW_REGW_INT_MASK_RX_ERR |     \
                                                          RW_REGW_INT_MASK_RX_FIFO_OV | \
                                                          RW_REGW_INT_MASK_RX_DESC_UNAVLBL)
 
@@ -410,15 +412,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define R_REGB_PHY_STATUS_TX_FLOW_CTRL_ON               0x0040          // flag for Phy rx flow control on
 
 // required configuration
-#define R_REGB_PHY_STATUS_CFG_MASK                      (R_REGB_PHY_STATUS_FULL_DUPLEX | \
-                                                        R_REGB_PHY_STATUS_LINK_STATUS | \
-                                                        R_REGB_PHY_STATUS_LINK_SPEED_10 | \
-                                                        R_REGB_PHY_STATUS_LINK_SPEED_100 | \
-                                                        R_REGB_PHY_STATUS_FULL_DUPLEX_1000 | \
-                                                        R_REGB_PHY_STATUS_RX_FLOW_CTRL_ON | \
-                                                        R_REGB_PHY_STATUS_TX_FLOW_CTRL_ON)
+#define R_REGB_PHY_STATUS_CFG_MASK                      (R_REGB_PHY_STATUS_FULL_DUPLEX |      \
+                                                         R_REGB_PHY_STATUS_LINK_STATUS |      \
+                                                         R_REGB_PHY_STATUS_LINK_SPEED_10 |    \
+                                                         R_REGB_PHY_STATUS_LINK_SPEED_100 |   \
+                                                         R_REGB_PHY_STATUS_FULL_DUPLEX_1000 | \
+                                                         R_REGB_PHY_STATUS_RX_FLOW_CTRL_ON |  \
+                                                         R_REGB_PHY_STATUS_TX_FLOW_CTRL_ON)
 #define R_REGB_PHY_STATUS_REQ_CFG                       (R_REGB_PHY_STATUS_LINK_SPEED_100 | \
-                                                        R_REGB_PHY_STATUS_LINK_STATUS)
+                                                         R_REGB_PHY_STATUS_LINK_STATUS)
 // PHY Basic Mode Control Register
 #define RW_REGW_PHY_BASIC_MOD_CTRL                      0x0000          // Phy basic-mode-control-register address offset
 #define RW_REGW_PHY_BASIC_MOD_CTRL_SPEED_1              0x0040          // Phy link speed selection bit 1 (00- 10 Mbps, 01- 100 Mbps)
@@ -432,12 +434,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define RW_REGW_PHY_BASIC_MOD_CTRL_RESET                0x8000          // reset Phy (register and configurations)
 
 // default configurations
-#define RW_REGW_PHY_BASIC_MOD_CTRL_DEF                  (~RW_REGW_PHY_BASIC_MOD_CTRL_SPEED_1 & \
-                                                        RW_REGW_PHY_BASIC_MOD_CTRL_SPEED_0 & \
-                                                        ~RW_REGW_PHY_BASIC_MOD_CTRL_FULL_DUPLEX_EN & \
-                                                        ~RW_REGW_PHY_BASIC_MOD_CTRL_ISOLATE & \
-                                                        ~RW_REGW_PHY_BASIC_MOD_CTRL_PWR_DWN & \
-                                                        ~RW_REGW_PHY_BASIC_MOD_CTRL_AUTONEGOTIATE_EN)
+#define RW_REGW_PHY_BASIC_MOD_CTRL_DEF                  (~RW_REGW_PHY_BASIC_MOD_CTRL_SPEED_1 &        \
+                                                         RW_REGW_PHY_BASIC_MOD_CTRL_SPEED_0 &         \
+                                                         ~RW_REGW_PHY_BASIC_MOD_CTRL_FULL_DUPLEX_EN & \
+                                                         ~RW_REGW_PHY_BASIC_MOD_CTRL_ISOLATE &        \
+                                                         ~RW_REGW_PHY_BASIC_MOD_CTRL_PWR_DWN &        \
+                                                         ~RW_REGW_PHY_BASIC_MOD_CTRL_AUTONEGOTIATE_EN)
 
 // PHY Basic Mode Status Register
 #define RW_REGW_PHY_BASIC_MOD_STATUS                    0x0001
@@ -516,9 +518,9 @@ typedef struct
     UINT64              countRxOk;                      // rx okay count
     UINT64              countTxErr;                     // tx error count
     UINT32              countRxErr;                     // rx error count
-    UINT16              countRxMissPkt;                 // rx missed packets count brcause of rx FIFO full
+    UINT16              countRxMissPkt;                 // rx missed packets count because of rx FIFO full
     UINT16              countFrameAlignErr;             // frame alignment error count
-    UINT32              countTxOkWith01Col;             // tx okay count for frames with 1 collsion
+    UINT32              countTxOkWith01Col;             // tx okay count for frames with 1 collision
     UINT32              countTxOkWith16Col;             // tx okay count for frames with less than 16 collisions
     UINT64              countRxOkWithUnicastAddrMatch;  // rx okay count for matching unicast destination address frames
     UINT64              countRxOkWithBroadcastAddr;     // rx okay count for broadcast frames
@@ -530,7 +532,7 @@ typedef struct
 // EDRV instance structure
 typedef struct
 {
-    tEdrvInitParam      initParam;                      // initialisation parameters for the EDRV passed from upper layer
+    tEdrvInitParam      initParam;                      // initialization parameters for the EDRV passed from upper layer
     struct pci_dev*     pPciDev;                        // pointer to PCI device structure
     void*               pIoAddr;                        // pointer to register space of Ethernet controller
     spinlock_t          spinLockRxBufRelease;           // rxBuffer list access spinlock
@@ -546,7 +548,7 @@ typedef struct
     INT                 rxBufFreeTop;                   // index to the top of the rx buffers stack
     INT                 pageAllocations;                // number of physical pages allocated for rxBuffers
     UINT                headRxDesc;                     // pointer to the next rx descriptor to be processed
-    UINT                headTxDesc;                     // pointer to the next tx desciptor to be processed
+    UINT                headTxDesc;                     // pointer to the next tx descriptor to be processed
     UINT                tailTxDesc;                     // pointer to the next free descriptor in the ring
     tEdrvTxBuffer*      apTxBufferInDesc[EDRV_MAX_TX_DESCS];    // array of tx buffers currently used by the respective tx descriptors(index)
     BOOL                afTxBufUsed[EDRV_MAX_TX_BUFFERS];       // status of all tx buffers(index) on whether its in use or free
@@ -554,7 +556,7 @@ typedef struct
     dma_addr_t          pDtcrDma;                       // dma pointer to the dump-tally-counter data
     tEdrvDmpTalyCnt*    pDtcr;                          // pointer to the dump-tally-counter data
 
-#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
+#if (CONFIG_EDRV_USE_DIAGNOSTICS != FALSE)
     ULONGLONG           interruptCount;
     INT                 rxBufFreeMin;
     UINT                rxCount[EDRV_SAMPLE_NUM];
@@ -566,21 +568,13 @@ typedef struct
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static INT          initOnePciDev(struct pci_dev* pPciDev_p,
+static int          initOnePciDev(struct pci_dev* pPciDev_p,
                                   const struct pci_device_id* pId_p);
 static void         removeOnePciDev(struct pci_dev* pPciDev_p);
-
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 19)
-static irqreturn_t  edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p);
-#else
-static INT          edrvIrqHandler(INT irqNum_p,
-                                   void* ppDevInstData_p,
-                                   struct pt_regs* ptRegs_p);
-#endif
-
+static irqreturn_t  edrvIrqHandler(int irqNum_p, void* ppDevInstData_p);
 static tOplkError   mdioWrite(UINT8 phyRegOffset_p, UINT16 writeValue_p);
 static tOplkError   mdioRead(UINT8 phyRegOffset_p, UINT16* pReadValue_p);
-static UINT8        calcHash(UINT8* pMacAddr_p);
+static UINT8        calcHash(const UINT8* pMacAddr_p);
 static void         reinitRx(void);
 
 //------------------------------------------------------------------------------
@@ -616,21 +610,22 @@ static struct pci_driver        edrvDriver_l =
 
 This function initializes the Ethernet driver.
 
-\param  pEdrvInitParam_p    Edrv initialization parameters
+\param[in]      pEdrvInitParam_p    Edrv initialization parameters
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
+tOplkError edrv_init(const tEdrvInitParam* pEdrvInitParam_p)
 {
-    tOplkError      ret;
-    INT             result;
+    tOplkError      ret = kErrorOk;
+    int             result;
     UINT            index;
     tBufData        bufData;
 
-    ret = kErrorOk;
+    // Check parameter validity
+    ASSERT(pEdrvInitParam_p != NULL);
 
     // clear instance structure
     OPLK_MEMSET(&edrvInstance_l, 0, sizeof(edrvInstance_l));
@@ -657,7 +652,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     if (edrvInstance_l.pPciDev == NULL)
     {
         printk("%s pPciDev=NULL\n", __FUNCTION__);
-        ret = edrv_exit();
+        edrv_exit();
         ret = kErrorNoResource;
         goto Exit;
     }
@@ -716,7 +711,7 @@ tOplkError edrv_exit(void)
     }
     else
     {
-        printk("%s pci driver for openPOWERLINK already unregisted\n", __FUNCTION__);
+        printk("%s pci driver for openPOWERLINK already unregistered\n", __FUNCTION__);
     }
 
     return kErrorOk;
@@ -733,7 +728,7 @@ This function returns the MAC address of the Ethernet controller
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-UINT8* edrv_getMacAddr(void)
+const UINT8* edrv_getMacAddr(void)
 {
     return edrvInstance_l.initParam.aMacAddr;
 }
@@ -744,7 +739,7 @@ UINT8* edrv_getMacAddr(void)
 
 This function allocates a Tx buffer.
 
-\param  pBuffer_p           Tx buffer descriptor
+\param[in,out]  pBuffer_p           Tx buffer descriptor
 
 \return The function returns a tOplkError error code.
 
@@ -755,6 +750,9 @@ tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
     tOplkError      ret = kErrorOk;
     tBufData        bufData;
+
+    // Check parameter validity
+    ASSERT(pBuffer_p != NULL);
 
     if (pBuffer_p->maxBufferSize > EDRV_MAX_FRAME_SIZE)
     {
@@ -792,7 +790,7 @@ Exit:
 
 This function releases the Tx buffer.
 
-\param  pBuffer_p           Tx buffer descriptor
+\param[in,out]  pBuffer_p           Tx buffer descriptor
 
 \return The function returns a tOplkError error code.
 
@@ -803,6 +801,9 @@ tOplkError edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
     tOplkError  ret;
     tBufData    bufData;
+
+    // Check parameter validity
+    ASSERT(pBuffer_p != NULL);
 
     bufData.pBuffer = pBuffer_p->pBuffer;
     bufData.bufferNumber = pBuffer_p->txBufferNumber.value;
@@ -819,7 +820,7 @@ tOplkError edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p)
 
 This function sends the Tx buffer.
 
-\param  pBuffer_p           Tx buffer descriptor
+\param[in,out]  pBuffer_p           Tx buffer descriptor
 
 \return The function returns a tOplkError error code.
 
@@ -832,6 +833,9 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
     UINT            bufferNumber;
     tEdrvTxDesc*    pTxDesc;
     UINT32          frameConfig_le;
+
+    // Check parameter validity
+    ASSERT(pBuffer_p != NULL);
 
     // workaround for Rx-FIFO overflow
     if (EDRV_REGW_READ(RW_REGW_INT_STATUS) & RW_REGW_INT_STATUS_RX_FIFO_OV)
@@ -901,18 +905,21 @@ Exit:
 
 This function sets a multicast entry into the Ethernet controller.
 
-\param  pMacAddr_p  Multicast address
+\param[in]      pMacAddr_p          Multicast address.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p)
+tOplkError edrv_setRxMulticastMacAddr(const UINT8* pMacAddr_p)
 {
     tOplkError      ret = kErrorOk;
     UINT32          data;
     UINT8           hash;
+
+    // Check parameter validity
+    ASSERT(pMacAddr_p != NULL);
 
     hash = calcHash(pMacAddr_p);
 
@@ -938,18 +945,21 @@ tOplkError edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p)
 
 This function removes the multicast entry from the Ethernet controller.
 
-\param  pMacAddr_p  Multicast address
+\param[in]      pMacAddr_p          Multicast address
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_clearRxMulticastMacAddr(UINT8* pMacAddr_p)
+tOplkError edrv_clearRxMulticastMacAddr(const UINT8* pMacAddr_p)
 {
     tOplkError      ret = kErrorOk;
     UINT32          data;
     UINT8           hash;
+
+    // Check parameter validity
+    ASSERT(pMacAddr_p != NULL);
 
     hash = calcHash(pMacAddr_p);
 
@@ -980,10 +990,10 @@ If \p entryChanged_p is equal or larger count_p all Rx filters shall be changed.
 
 \note Rx filters are not supported by this driver!
 
-\param  pFilter_p           Base pointer of Rx filter array
-\param  count_p             Number of Rx filter array entries
-\param  entryChanged_p      Index of Rx filter entry that shall be changed
-\param  changeFlags_p       Bit mask that selects the changing Rx filter property
+\param[in,out]  pFilter_p           Base pointer of Rx filter array
+\param[in]      count_p             Number of Rx filter array entries
+\param[in]      entryChanged_p      Index of Rx filter entry that shall be changed
+\param[in]      changeFlags_p       Bit mask that selects the changing Rx filter property
 
 \return The function returns a tOplkError error code.
 
@@ -1003,13 +1013,14 @@ tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p,
     return kErrorOk;
 }
 
+#if ((CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC != FALSE) || (CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC != FALSE))
 //------------------------------------------------------------------------------
 /**
 \brief  Release Rx buffer
 
 This function releases a late release Rx buffer.
 
-\param  pRxBuffer_p     Rx buffer to be released
+\param[in,out]  pRxBuffer_p         Rx buffer to be released
 
 \return The function returns a tOplkError error code.
 
@@ -1019,6 +1030,9 @@ This function releases a late release Rx buffer.
 tOplkError edrv_releaseRxBuffer(tEdrvRxBuffer* pRxBuffer_p)
 {
     tOplkError    ret = kErrorEdrvInvalidRxBuf;
+
+    // Check parameter validity
+    ASSERT(pRxBuffer_p != NULL);
 
     if (edrvInstance_l.rxBufFreeTop < (EDRV_MAX_RX_BUFFERS - 1))
     {
@@ -1033,68 +1047,32 @@ tOplkError edrv_releaseRxBuffer(tEdrvRxBuffer* pRxBuffer_p)
 
     return ret;
 }
+#endif
 
-//------------------------------------------------------------------------------
-/**
-\brief  Set Tx buffer ready
-
-This function sets the Tx buffer buffer ready for transmission.
-
-\param  pBuffer_p   Tx buffer buffer descriptor
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_edrv
-*/
-//------------------------------------------------------------------------------
-tOplkError edrv_setTxBufferReady(tEdrvTxBuffer* pBuffer_p)
-{
-    UNUSED_PARAMETER(pBuffer_p);
-
-    return kErrorOk;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Start ready Tx buffer
-
-This function sends the Tx buffer marked as ready.
-
-\param  pBuffer_p   Tx buffer buffer descriptor
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_edrv
-*/
-//------------------------------------------------------------------------------
-tOplkError edrv_startTxBuffer(tEdrvTxBuffer* pBuffer_p)
-{
-    UNUSED_PARAMETER(pBuffer_p);
-
-    return kErrorOk;
-}
-
-#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
+#if (CONFIG_EDRV_USE_DIAGNOSTICS != FALSE)
 //------------------------------------------------------------------------------
 /**
 \brief  Get Edrv module diagnostics
 
 This function returns the Edrv diagnostics to a provided buffer.
 
-\param  pBuffer_p   Pointer to buffer filled with diagnostics.
-\param  size_p      Size of buffer
+\param[out]     pBuffer_p           Pointer to buffer filled with diagnostics.
+\param[in]      size_p              Size of buffer
 
-\return The function returns a tOplkError error code.
+\return The function returns the size of the diagnostics information.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-INT edrv_getDiagnostics(char* pBuffer_p, INT size_p)
+int edrv_getDiagnostics(char* pBuffer_p, size_t size_p)
 {
-    tEdrvTxDesc*    pTxDesc;
-    UINT32          txStatus;
-    INT             usedSize = 0;
-    UINT            index;
+    const tEdrvTxDesc*  pTxDesc;
+    UINT32              txStatus;
+    size_t              usedSize = 0;
+    UINT                index;
+
+    // Check parameter validity
+    ASSERT(pBuffer_p != NULL);
 
     usedSize += snprintf(pBuffer_p + usedSize, size_p - usedSize,
                          "\nEdrv Diagnostic Information\n");
@@ -1109,7 +1087,7 @@ INT edrv_getDiagnostics(char* pBuffer_p, INT size_p)
     txStatus = pTxDesc->frameConfig_le;
 
     usedSize += snprintf(pBuffer_p + usedSize, size_p - usedSize,
-                         "      Headstatus: %lX\n", (ULONG) txStatus);
+                         "      Headstatus: %lX\n", (ULONG)txStatus);
 
     usedSize += snprintf(pBuffer_p + usedSize, size_p - usedSize,
                          "Tail: %u (%lu)\n",
@@ -1329,16 +1307,19 @@ INT edrv_getDiagnostics(char* pBuffer_p, INT size_p)
 
 This function is the interrupt service routine for the Ethernet driver.
 
-\param  irqNum_p            IRQ number
-\param  ppDevInstData_p     Pointer to private data provided by request_irq
+\param[in]      irqNum_p            IRQ number
+\param[in,out]  ppDevInstData_p     Pointer to private data provided by request_irq
 
 \return The function returns an IRQ handled code.
 */
 //------------------------------------------------------------------------------
-static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
+static irqreturn_t edrvIrqHandler(int irqNum_p, void* ppDevInstData_p)
 {
     UINT16      status;
     INT         handled = IRQ_HANDLED;
+
+    UNUSED_PARAMETER(irqNum_p);
+    UNUSED_PARAMETER(ppDevInstData_p);
 
     // read the interrupt status
     status = EDRV_REGW_READ(RW_REGW_INT_STATUS);
@@ -1380,7 +1361,7 @@ static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
                 tEdrvReleaseRxBuffer    retReleaseRxBuffer;
                 UINT32                  frameConfig;
 
-#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
+#if (CONFIG_EDRV_USE_DIAGNOSTICS != FALSE)
                 edrvInstance_l.rxCount[edrvInstance_l.pos]++;
 #endif
 
@@ -1446,7 +1427,7 @@ static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
                             UINT8*          pRxBufInDescPrev;
                             ULONG           flags;
 
-#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
+#if (CONFIG_EDRV_USE_DIAGNOSTICS != FALSE)
                             if (edrvInstance_l.rxBufFreeTop < edrvInstance_l.rxBufFreeMin)
                             {
                                 edrvInstance_l.rxBufFreeMin = edrvInstance_l.rxBufFreeTop;
@@ -1480,7 +1461,7 @@ static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
                         else
                         {
                             // Signal no free RxBuffers left
-#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
+#if (CONFIG_EDRV_USE_DIAGNOSTICS != FALSE)
                             edrvInstance_l.rxBufFreeMin = -1;
 #endif
                         }
@@ -1508,7 +1489,7 @@ static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
                 // Transmit finished
                 tEdrvTxBuffer*   pTxBuffer;
 
-#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
+#if (CONFIG_EDRV_USE_DIAGNOSTICS != FALSE)
                 edrvInstance_l.txCount[edrvInstance_l.pos]++;
 #endif
 
@@ -1626,15 +1607,15 @@ Exit:
 
 This function initializes one PCI device.
 
-\param  pPciDev_p   Pointer to corresponding PCI device structure
-\param  pId_p       PCI device ID
+\param[in,out]  pPciDev_p           Pointer to corresponding PCI device structure
+\param[in]      pId_p               PCI device ID
 
 \return The function returns an integer error code.
 \retval 0           Successful
 \retval Otherwise   Error
 */
 //------------------------------------------------------------------------------
-static INT initOnePciDev(struct pci_dev* pPciDev_p,
+static int initOnePciDev(struct pci_dev* pPciDev_p,
                          const struct pci_device_id* pId_p)
 {
     UINT        index;
@@ -2060,7 +2041,7 @@ Exit:
 
 This function removes one PCI device.
 
-\param  pPciDev_p     Pointer to corresponding PCI device structure
+\param[in,out]  pPciDev_p           Pointer to corresponding PCI device structure
 */
 //------------------------------------------------------------------------------
 static void removeOnePciDev(struct pci_dev* pPciDev_p)
@@ -2207,8 +2188,8 @@ Exit:
 
 This function sets the 16 bit data to the phy register.
 
-\param  phyRegOffset_p  5-bit phy Register offset address
-\param  writeValue_p    The 16-bit data to be written to the phy register
+\param[in]      phyRegOffset_p      5-bit phy Register offset address
+\param[in]      writeValue_p        The 16-bit data to be written to the phy register
 
 \return The function returns a tOplkError error code.
 */
@@ -2245,9 +2226,9 @@ static tOplkError mdioWrite(UINT8 phyRegOffset_p, UINT16 writeValue_p)
 
 This function gets the 16 bit data from the phy register.
 
-\param  phyRegOffset_p  5-bit phy Register offset address
-\param  pReadValue_p    Pointer to the address where the 16-bit read
-                        value will be stored
+\param[in]      phyRegOffset_p      5-bit phy Register offset address
+\param[out]     pReadValue_p        Pointer to the address where the 16-bit read
+                                    value will be stored
 
 \return The function returns a tOplkError error code.
 */
@@ -2289,15 +2270,15 @@ This function calculates the entry for the hash-table from MAC address.
 \return The function returns the calculated hash table.
 */
 //------------------------------------------------------------------------------
-static UINT8 calcHash(UINT8* pMacAddr_p)
+static UINT8 calcHash(const UINT8* pMacAddr_p)
 {
-    UINT32      byteCounter;
-    UINT32      bitCounter;
-    UINT32      data;
-    UINT32      crc;
-    UINT32      carry;
-    UINT8*      pData;
-    UINT8       hash;
+    UINT32       byteCounter;
+    UINT32       bitCounter;
+    UINT32       data;
+    UINT32       crc;
+    UINT32       carry;
+    const UINT8* pData;
+    UINT8        hash;
 
     pData = pMacAddr_p;
 

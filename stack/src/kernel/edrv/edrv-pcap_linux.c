@@ -10,7 +10,7 @@ This file contains the implementation of the Linux pcap Ethernet driver.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, Kalycito Infotech Private Limited
 All rights reserved.
 
@@ -79,7 +79,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define EDRV_MAX_FRAME_SIZE     0x600
+#define EDRV_MAX_FRAME_SIZE     0x0600
 
 //------------------------------------------------------------------------------
 // local types
@@ -95,7 +95,7 @@ typedef struct
     tEdrvTxBuffer*      pTransmittedTxBufferLastEntry;      ///< Pointer to the last entry of the transmitted TX buffer
     tEdrvTxBuffer*      pTransmittedTxBufferFirstEntry;     ///< Pointer to the first entry of the transmitted Tx buffer
     pthread_mutex_t     mutex;                              ///< Mutex for locking of critical sections
-    sem_t               syncSem;                            ///< Semaphore for signalling the start of the worker thread
+    sem_t               syncSem;                            ///< Semaphore for signaling the start of the worker thread
     pcap_t*             pPcap;                              ///< Pointer to the pcap interface instance
     pcap_t*             pPcapThread;                        ///< Handle of the pcap packet handler thread
     pthread_t           hThread;                            ///< Handle of the worker thread
@@ -109,10 +109,10 @@ static tEdrvInstance edrvInstance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static void packetHandler(u_char* pParam_p, const struct pcap_pkthdr* pHeader_p, const u_char* pPktData_p);
+static void  packetHandler(u_char* pParam_p, const struct pcap_pkthdr* pHeader_p, const u_char* pPktData_p);
 static void* workerThread(void* pArgument_p);
-static void getMacAdrs(const char* pIfName_p, UINT8* pMacAddr_p);
-static INT getLinkStatus(const char* pIfName_p);
+static void  getMacAdrs(const char* pIfName_p, UINT8* pMacAddr_p);
+static BOOL  getLinkStatus(const char* pIfName_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -124,17 +124,20 @@ static INT getLinkStatus(const char* pIfName_p);
 
 This function initializes the Ethernet driver.
 
-\param  pEdrvInitParam_p    Edrv initialization parameters
+\param[in]      pEdrvInitParam_p    Edrv initialization parameters
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
+tOplkError edrv_init(const tEdrvInitParam* pEdrvInitParam_p)
 {
     char                errorMessage[PCAP_ERRBUF_SIZE];
     struct sched_param  schedParam;
+
+    // Check parameter validity
+    ASSERT(pEdrvInitParam_p != NULL);
 
     // clear instance structure
     OPLK_MEMSET(&edrvInstance_l, 0, sizeof(edrvInstance_l));
@@ -142,28 +145,28 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     if (pEdrvInitParam_p->hwParam.pDevName == NULL)
         return kErrorEdrvInit;
 
+    // save the init data
+    edrvInstance_l.initParam = *pEdrvInitParam_p;
+
     /* if no MAC address was specified read MAC address of used
      * Ethernet interface
      */
-    if ((pEdrvInitParam_p->aMacAddr[0] == 0) &&
-        (pEdrvInitParam_p->aMacAddr[1] == 0) &&
-        (pEdrvInitParam_p->aMacAddr[2] == 0) &&
-        (pEdrvInitParam_p->aMacAddr[3] == 0) &&
-        (pEdrvInitParam_p->aMacAddr[4] == 0) &&
-        (pEdrvInitParam_p->aMacAddr[5] == 0))
+    if ((edrvInstance_l.initParam.aMacAddr[0] == 0) &&
+        (edrvInstance_l.initParam.aMacAddr[1] == 0) &&
+        (edrvInstance_l.initParam.aMacAddr[2] == 0) &&
+        (edrvInstance_l.initParam.aMacAddr[3] == 0) &&
+        (edrvInstance_l.initParam.aMacAddr[4] == 0) &&
+        (edrvInstance_l.initParam.aMacAddr[5] == 0))
     {   // read MAC address from controller
-        getMacAdrs(pEdrvInitParam_p->hwParam.pDevName,
-                   pEdrvInitParam_p->aMacAddr);
+        getMacAdrs(edrvInstance_l.initParam.hwParam.pDevName,
+                   edrvInstance_l.initParam.aMacAddr);
     }
-
-    // save the init data (with updated MAC address)
-    edrvInstance_l.initParam = *pEdrvInitParam_p;
 
     edrvInstance_l.pPcap = pcap_open_live(
                         edrvInstance_l.initParam.hwParam.pDevName,
                         65535,  // snaplen
                         1,      // promiscuous mode
-                        1,      // milli seconds read timeout
+                        1,      // milliseconds read timeout
                         errorMessage
                     );
 
@@ -205,7 +208,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
                                 __func__);
     }
 
-#if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 12)
+#if (defined(__GLIBC__) && (__GLIBC__ >= 2) && (__GLIBC_MINOR__ >= 12))
     pthread_setname_np(edrvInstance_l.hThread, "oplk-edrvpcap");
 #endif
 
@@ -255,7 +258,7 @@ This function returns the MAC address of the Ethernet controller
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-UINT8* edrv_getMacAddr(void)
+const UINT8* edrv_getMacAddr(void)
 {
     return edrvInstance_l.initParam.aMacAddr;
 }
@@ -266,7 +269,7 @@ UINT8* edrv_getMacAddr(void)
 
 This function sends the Tx buffer.
 
-\param  pBuffer_p           Tx buffer descriptor
+\param[in,out]  pBuffer_p           Tx buffer descriptor
 
 \return The function returns a tOplkError error code.
 
@@ -276,6 +279,9 @@ This function sends the Tx buffer.
 tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
     int         pcapRet;
+
+    // Check parameter validity
+    ASSERT(pBuffer_p != NULL);
 
     FTRACE_MARKER("%s", __func__);
 
@@ -325,7 +331,7 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
 
 This function allocates a Tx buffer.
 
-\param  pBuffer_p           Tx buffer descriptor
+\param[in,out]  pBuffer_p           Tx buffer descriptor
 
 \return The function returns a tOplkError error code.
 
@@ -334,6 +340,9 @@ This function allocates a Tx buffer.
 //------------------------------------------------------------------------------
 tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
+    // Check parameter validity
+    ASSERT(pBuffer_p != NULL);
+
     if (pBuffer_p->maxBufferSize > EDRV_MAX_FRAME_SIZE)
         return kErrorEdrvNoFreeBufEntry;
 
@@ -353,7 +362,7 @@ tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
 
 This function releases the Tx buffer.
 
-\param  pBuffer_p           Tx buffer descriptor
+\param[in,out]  pBuffer_p           Tx buffer descriptor
 
 \return The function returns a tOplkError error code.
 
@@ -362,7 +371,12 @@ This function releases the Tx buffer.
 //------------------------------------------------------------------------------
 tOplkError edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-    UINT8* pBuffer = pBuffer_p->pBuffer;
+    UINT8* pBuffer;
+
+    // Check parameter validity
+    ASSERT(pBuffer_p != NULL);
+
+    pBuffer = pBuffer_p->pBuffer;
 
     // mark buffer as free, before actually freeing it
     pBuffer_p->pBuffer = NULL;
@@ -383,18 +397,20 @@ If \p entryChanged_p is equal or larger count_p all Rx filters shall be changed.
 
 \note Rx filters are not supported by this driver!
 
-\param  pFilter_p           Base pointer of Rx filter array
-\param  count_p             Number of Rx filter array entries
-\param  entryChanged_p      Index of Rx filter entry that shall be changed
-\param  changeFlags_p       Bit mask that selects the changing Rx filter property
+\param[in,out]  pFilter_p           Base pointer of Rx filter array
+\param[in]      count_p             Number of Rx filter array entries
+\param[in]      entryChanged_p      Index of Rx filter entry that shall be changed
+\param[in]      changeFlags_p       Bit mask that selects the changing Rx filter property
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
-                               UINT entryChanged_p, UINT changeFlags_p)
+tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p,
+                               UINT count_p,
+                               UINT entryChanged_p,
+                               UINT changeFlags_p)
 {
     UNUSED_PARAMETER(pFilter_p);
     UNUSED_PARAMETER(count_p);
@@ -410,14 +426,16 @@ tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
 
 This function removes the multicast entry from the Ethernet controller.
 
-\param  pMacAddr_p  Multicast address
+\note The multicast filters are not supported by this driver.
+
+\param[in]      pMacAddr_p          Multicast address
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_clearRxMulticastMacAddr(UINT8* pMacAddr_p)
+tOplkError edrv_clearRxMulticastMacAddr(const UINT8* pMacAddr_p)
 {
     UNUSED_PARAMETER(pMacAddr_p);
 
@@ -430,14 +448,16 @@ tOplkError edrv_clearRxMulticastMacAddr(UINT8* pMacAddr_p)
 
 This function sets a multicast entry into the Ethernet controller.
 
-\param  pMacAddr_p  Multicast address
+\note The multicast filters are not supported by this driver.
+
+\param[in]      pMacAddr_p          Multicast address.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p)
+tOplkError edrv_setRxMulticastMacAddr(const UINT8* pMacAddr_p)
 {
     UNUSED_PARAMETER(pMacAddr_p);
 
@@ -456,12 +476,14 @@ tOplkError edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p)
 
 This function is the packet handler forwarding the frames to the dllk.
 
-\param  pParam_p    User specific pointer pointing to the instance structure
-\param  pHeader_p   Packet header information (e.g. size)
-\param  pPktData_p  Packet buffer
+\param[in,out]  pParam_p            User specific pointer pointing to the instance structure
+\param[in]      pHeader_p           Packet header information (e.g. size)
+\param[in]      pPktData_p          Packet buffer
 */
 //------------------------------------------------------------------------------
-static void packetHandler(u_char* pParam_p, const struct pcap_pkthdr* pHeader_p, const u_char* pPktData_p)
+static void packetHandler(u_char* pParam_p,
+                          const struct pcap_pkthdr* pHeader_p,
+                          const u_char* pPktData_p)
 {
     tEdrvInstance*  pInstance = (tEdrvInstance*)pParam_p;
     tEdrvRxBuffer   rxBuffer;
@@ -543,7 +565,7 @@ static void packetHandler(u_char* pParam_p, const struct pcap_pkthdr* pHeader_p,
 This function implements the edrv worker thread. It is responsible to handle
 pcap events.
 
-\param  pArgument_p     User specific pointer pointing to the instance structure
+\param[in,out]  pArgument_p         User specific pointer pointing to the instance structure
 
 \return The function returns a thread error code.
 */
@@ -560,7 +582,7 @@ static void* workerThread(void* pArgument_p)
         pcap_open_live(pInstance->initParam.hwParam.pDevName,
                        65535,  // snaplen
                        1,      // promiscuous mode
-                       1,      // milli seconds read timeout
+                       1,      // milliseconds read timeout
                        errorMessage);
 
    if (pInstance->pPcapThread == NULL)
@@ -607,8 +629,8 @@ static void* workerThread(void* pArgument_p)
 
 This function gets the interface's MAC address.
 
-\param  pIfName_p   Ethernet interface device name
-\param  pMacAddr_p  Pointer to store MAC address
+\param[in]      pIfName_p           Ethernet interface device name
+\param[out]     pMacAddr_p          Pointer to store MAC address
 */
 //------------------------------------------------------------------------------
 static void getMacAdrs(const char* pIfName_p, UINT8* pMacAddr_p)
@@ -634,18 +656,18 @@ static void getMacAdrs(const char* pIfName_p, UINT8* pMacAddr_p)
 
 This function returns the interface link status.
 
-\param  pIfName_p  Ethernet interface device name
+\param[in]      pIfName_p           Ethernet interface device name
 
 \return The function returns the link status.
 \retval TRUE    The link is up.
 \retval FALSE   The link is down.
 */
 //------------------------------------------------------------------------------
-static INT getLinkStatus(const char* pIfName_p)
+static BOOL getLinkStatus(const char* pIfName_p)
 {
     BOOL            fRunning;
     struct ifreq    ethreq;
-    INT             fd;
+    int             fd;
 
     fd = socket(AF_INET, SOCK_DGRAM, 0);
 

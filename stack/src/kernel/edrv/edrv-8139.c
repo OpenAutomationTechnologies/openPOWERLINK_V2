@@ -22,7 +22,7 @@ number of the buffer.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -52,8 +52,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-#include <kernel/edrv.h>
 #include <common/bufalloc.h>
+#include <kernel/edrv.h>
+
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/pci.h>
@@ -68,7 +69,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <asm/irq.h>
 #include <linux/sched.h>
 #include <linux/delay.h>
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 26)
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 26))
 #include <linux/semaphore.h>
 #endif
 
@@ -79,7 +81,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 19)
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 19))
 #error "Linux Kernel versions older 2.6.19 are not supported by this driver!"
 #endif
 
@@ -105,7 +107,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EDRV_MAX_TX_DESCS       4
 #define EDRV_TX_DESC_MASK       (EDRV_MAX_TX_DESCS-1)
 
-#define EDRV_MAX_FRAME_SIZE     0x600
+#define EDRV_MAX_FRAME_SIZE     0x0600
 
 #define EDRV_RX_BUFFER_SIZE     0x8610  // 32 kB + 16 Byte + 1,5 kB (WRAP is enabled)
 #define EDRV_RX_BUFFER_LENGTH   (EDRV_RX_BUFFER_SIZE & 0xF800)  // buffer size cut down to 2 kB alignment
@@ -114,7 +116,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define DRV_NAME                "plk"
 
-#define EDRV_HASH_BITS          6  // used bits in hash
+#define EDRV_HASH_BITS          6       // used bits in hash
 #define EDRV_CRC32_POLY         0x04C11DB6
 
 #define EDRV_REGW_INT_MASK      0x3C    // interrupt mask register
@@ -129,13 +131,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EDRV_REGW_INT_LENCHG    0x2000  // Cable length change interrupt
 #define EDRV_REGW_INT_TIMEOUT   0x4000  // Time out interrupt
 #define EDRV_REGW_INT_SERR      0x8000  // System error interrupt
-#define EDRV_REGW_INT_MASK_DEF  (EDRV_REGW_INT_ROK | \
-                                 EDRV_REGW_INT_RER | \
-                                 EDRV_REGW_INT_TOK | \
-                                 EDRV_REGW_INT_TER | \
-                                 EDRV_REGW_INT_RXOVW | \
-                                 EDRV_REGW_INT_FOVW | \
-                                 EDRV_REGW_INT_PUN | \
+#define EDRV_REGW_INT_MASK_DEF  (EDRV_REGW_INT_ROK |     \
+                                 EDRV_REGW_INT_RER |     \
+                                 EDRV_REGW_INT_TOK |     \
+                                 EDRV_REGW_INT_TER |     \
+                                 EDRV_REGW_INT_RXOVW |   \
+                                 EDRV_REGW_INT_FOVW |    \
+                                 EDRV_REGW_INT_PUN |     \
                                  EDRV_REGW_INT_TIMEOUT | \
                                  EDRV_REGW_INT_SERR)   // default interrupt mask
 
@@ -145,11 +147,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EDRV_REGB_COMMAND_TE    0x04
 #define EDRV_REGB_COMMAND_BUFE  0x01
 
-#define EDRV_REGB_CMD9346       0x50    // 93C46 command register
-#define EDRV_REGB_CMD9346_LOCK  0x00    // lock configuration registers
-#define EDRV_REGB_CMD9346_UNLOCK 0xC0   // unlock configuration registers
+#define EDRV_REGB_CMD9346       0x50        // 93C46 command register
+#define EDRV_REGB_CMD9346_LOCK  0x00        // lock configuration registers
+#define EDRV_REGB_CMD9346_UNLOCK 0xC0       // unlock configuration registers
 
-#define EDRV_REGDW_RCR          0x44    // Rx configuration register
+#define EDRV_REGDW_RCR          0x44        // Rx configuration register
 #define EDRV_REGDW_RCR_NO_FTH   0x0000E000  // no receive FIFO threshold
 #define EDRV_REGDW_RCR_RBLEN32K 0x00001000  // 32 kB receive buffer
 #define EDRV_REGDW_RCR_MXDMAUNL 0x00000700  // unlimited maximum DMA burst size
@@ -160,16 +162,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EDRV_REGDW_RCR_AM       0x00000004  // accept multicast frames
 #define EDRV_REGDW_RCR_APM      0x00000002  // accept physical match frames
 #define EDRV_REGDW_RCR_AAP      0x00000001  // accept all frames
-#define EDRV_REGDW_RCR_DEF      (EDRV_REGDW_RCR_NO_FTH |\
+#define EDRV_REGDW_RCR_DEF      (EDRV_REGDW_RCR_NO_FTH |   \
                                  EDRV_REGDW_RCR_RBLEN32K | \
                                  EDRV_REGDW_RCR_MXDMAUNL | \
-                                 EDRV_REGDW_RCR_NOWRAP | \
-                                 EDRV_REGDW_RCR_AB | \
-                                 EDRV_REGDW_RCR_AM | \
-                                 EDRV_REGDW_RCR_AAP | /* promiscuous mode */ \
-                                 EDRV_REGDW_RCR_APM)  // default value
+                                 EDRV_REGDW_RCR_NOWRAP |   \
+                                 EDRV_REGDW_RCR_AB |       \
+                                 EDRV_REGDW_RCR_AM |       \
+                                 EDRV_REGDW_RCR_AAP |           /* promiscuous mode */ \
+                                 EDRV_REGDW_RCR_APM)            // default value
 
-#define EDRV_REGDW_TCR          0x40    // Tx configuration register
+#define EDRV_REGDW_TCR          0x40        // Tx configuration register
 #define EDRV_REGDW_TCR_VER_MASK 0x7CC00000  // mask for hardware version
 #define EDRV_REGDW_TCR_VER_C    0x74000000  // RTL8139C
 #define EDRV_REGDW_TCR_VER_CP   0x74800000  // RTL8139C+
@@ -179,24 +181,24 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EDRV_REGDW_TCR_CRC      0x00010000  // disable appending of CRC by the controller
 #define EDRV_REGDW_TCR_MXDMAUNL 0x00000700  // maximum DMA burst size of 2048 b
 #define EDRV_REGDW_TCR_TXRETRY  0x00000000  // 16 retries
-#define EDRV_REGDW_TCR_DEF      (EDRV_REGDW_TCR_IFG96 | \
+#define EDRV_REGDW_TCR_DEF      (EDRV_REGDW_TCR_IFG96 |    \
                                  EDRV_REGDW_TCR_MXDMAUNL | \
                                  EDRV_REGDW_TCR_TXRETRY)
 
-#define EDRV_REGW_MULINT        0x5C    // multiple interrupt select register
+#define EDRV_REGW_MULINT        0x5C        // multiple interrupt select register
 
-#define EDRV_REGDW_MPC          0x4C    // missed packet counter register
+#define EDRV_REGDW_MPC          0x4C        // missed packet counter register
 
-#define EDRV_REGDW_TSAD0        0x20    // Transmit start address of descriptor 0
-#define EDRV_REGDW_TSAD1        0x24    // Transmit start address of descriptor 1
-#define EDRV_REGDW_TSAD2        0x28    // Transmit start address of descriptor 2
-#define EDRV_REGDW_TSAD3        0x2C    // Transmit start address of descriptor 3
+#define EDRV_REGDW_TSAD0        0x20        // Transmit start address of descriptor 0
+#define EDRV_REGDW_TSAD1        0x24        // Transmit start address of descriptor 1
+#define EDRV_REGDW_TSAD2        0x28        // Transmit start address of descriptor 2
+#define EDRV_REGDW_TSAD3        0x2C        // Transmit start address of descriptor 3
 #define EDRV_REGDW_TSAD(n)      (EDRV_REGDW_TSAD0 + 4*n)   // Transmit start address of descriptor n
 
-#define EDRV_REGDW_TSD0         0x10    // Transmit status of descriptor 0
-#define EDRV_REGDW_TSD1         0x14    // Transmit status of descriptor 1
-#define EDRV_REGDW_TSD2         0x18    // Transmit status of descriptor 2
-#define EDRV_REGDW_TSD3         0x1C    // Transmit status of descriptor 3
+#define EDRV_REGDW_TSD0         0x10        // Transmit status of descriptor 0
+#define EDRV_REGDW_TSD1         0x14        // Transmit status of descriptor 1
+#define EDRV_REGDW_TSD2         0x18        // Transmit status of descriptor 2
+#define EDRV_REGDW_TSD3         0x1C        // Transmit status of descriptor 3
 #define EDRV_REGDW_TSD(n)       (EDRV_REGDW_TSD0 + 4*n)    // Transmit status of descriptor n
 
 #define EDRV_REGDW_TSD_CRS      0x80000000  // Carrier sense lost
@@ -207,27 +209,27 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EDRV_REGDW_TSD_TUN      0x00004000  // Transmit FIFO underrun
 #define EDRV_REGDW_TSD_OWN      0x00002000  // Owner
 
-#define EDRV_REGDW_RBSTART      0x30    // Receive buffer start address
+#define EDRV_REGDW_RBSTART      0x30        // Receive buffer start address
 
-#define EDRV_REGW_CAPR          0x38    // Current address of packet read
+#define EDRV_REGW_CAPR          0x38        // Current address of packet read
 
-#define EDRV_REGDW_IDR0         0x00    // ID register 0
-#define EDRV_REGDW_IDR4         0x04    // ID register 4
+#define EDRV_REGDW_IDR0         0x00        // ID register 0
+#define EDRV_REGDW_IDR4         0x04        // ID register 4
 
-#define EDRV_REGDW_MAR0         0x08    // Multicast address register 0
-#define EDRV_REGDW_MAR4         0x0C    // Multicast address register 4
+#define EDRV_REGDW_MAR0         0x08        // Multicast address register 0
+#define EDRV_REGDW_MAR4         0x0C        // Multicast address register 4
 
 
 // defines for the status word in the receive buffer
-#define EDRV_RXSTAT_MAR         0x8000  // Multicast address received
-#define EDRV_RXSTAT_PAM         0x4000  // Physical address matched
-#define EDRV_RXSTAT_BAR         0x2000  // Broadcast address received
-#define EDRV_RXSTAT_ISE         0x0020  // Invalid symbol error
-#define EDRV_RXSTAT_RUNT        0x0010  // Runt packet received
-#define EDRV_RXSTAT_LONG        0x0008  // Long packet
-#define EDRV_RXSTAT_CRC         0x0004  // CRC error
-#define EDRV_RXSTAT_FAE         0x0002  // Frame alignment error
-#define EDRV_RXSTAT_ROK         0x0001  // Receive OK
+#define EDRV_RXSTAT_MAR         0x8000      // Multicast address received
+#define EDRV_RXSTAT_PAM         0x4000      // Physical address matched
+#define EDRV_RXSTAT_BAR         0x2000      // Broadcast address received
+#define EDRV_RXSTAT_ISE         0x0020      // Invalid symbol error
+#define EDRV_RXSTAT_RUNT        0x0010      // Runt packet received
+#define EDRV_RXSTAT_LONG        0x0008      // Long packet
+#define EDRV_RXSTAT_CRC         0x0004      // CRC error
+#define EDRV_RXSTAT_FAE         0x0002      // Frame alignment error
+#define EDRV_RXSTAT_ROK         0x0001      // Receive OK
 
 
 #define EDRV_REGDW_WRITE(dwReg, dwVal)  writel(dwVal, edrvInstance_l.pIoAddr + dwReg)
@@ -240,8 +242,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // TracePoint support for realtime-debugging
 #ifdef _DBG_TRACE_POINTS_
-    void  TgtDbgSignalTracePoint (UINT8 bTracePointNumber_p);
-    void  TgtDbgPostTraceValue (UINT32 dwTraceValue_p);
+    void TgtDbgSignalTracePoint(UINT8 bTracePointNumber_p);
+    void TgtDbgPostTraceValue(UINT32 dwTraceValue_p);
     #define TGT_DBG_SIGNAL_TRACE_POINT(p)   TgtDbgSignalTracePoint(p)
     #define TGT_DBG_POST_TRACE_VALUE(v)     TgtDbgPostTraceValue(v)
 #else
@@ -298,11 +300,11 @@ typedef struct
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static irqreturn_t edrvIrqHandler (INT irqNum_p, void* ppDevInstData_p);
-static void reinitRx(void);
-static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* pId_p);
-static void removeOnePciDev(struct pci_dev* pPciDev_p);
-static UINT8 calcHash (UINT8* pMacAddr_p);
+static irqreturn_t edrvIrqHandler(int irqNum_p, void* ppDevInstData_p);
+static void        reinitRx(void);
+static int         initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* pId_p);
+static void        removeOnePciDev(struct pci_dev* pPciDev_p);
+static UINT8       calcHash(const UINT8* pMacAddr_p);
 
 //------------------------------------------------------------------------------
 // local vars
@@ -335,19 +337,22 @@ static struct pci_driver edrvDriver_l =
 
 This function initializes the Ethernet driver.
 
-\param  pEdrvInitParam_p    Edrv initialization parameters
+\param[in]      pEdrvInitParam_p    Edrv initialization parameters
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
+tOplkError edrv_init(const tEdrvInitParam* pEdrvInitParam_p)
 {
     tOplkError  ret = kErrorOk;
-    INT         result;
-    INT         i;
+    int         result;
+    int         i;
     tBufData    bufData;
+
+    // Check parameter validity
+    ASSERT(pEdrvInitParam_p != NULL);
 
     // clear instance structure
     OPLK_MEMSET(&edrvInstance_l, 0, sizeof(edrvInstance_l));
@@ -392,7 +397,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     if (edrvInstance_l.pPciDev == NULL)
     {
         printk("%s pPciDev=NULL\n", __FUNCTION__);
-        ret = edrv_exit();
+        edrv_exit();
         ret = kErrorNoResource;
         goto Exit;
     }
@@ -436,6 +441,7 @@ tOplkError edrv_exit(void)
     {
         printk("%s PCI driver for openPOWERLINK already unregistered\n", __FUNCTION__);
     }
+
     return kErrorOk;
 }
 
@@ -450,7 +456,7 @@ This function returns the MAC address of the Ethernet controller
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-UINT8* edrv_getMacAddr(void)
+const UINT8* edrv_getMacAddr(void)
 {
     return edrvInstance_l.initParam.aMacAddr;
 }
@@ -461,18 +467,21 @@ UINT8* edrv_getMacAddr(void)
 
 This function sets a multicast entry into the Ethernet controller.
 
-\param  pMacAddr_p  Multicast address
+\param[in]      pMacAddr_p          Multicast address.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p)
+tOplkError edrv_setRxMulticastMacAddr(const UINT8* pMacAddr_p)
 {
     tOplkError  ret = kErrorOk;
     UINT32      data;
     UINT8       hash;
+
+    // Check parameter validity
+    ASSERT(pMacAddr_p != NULL);
 
     hash = calcHash(pMacAddr_p);
 
@@ -498,18 +507,21 @@ tOplkError edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p)
 
 This function removes the multicast entry from the Ethernet controller.
 
-\param  pMacAddr_p  Multicast address
+\param[in]      pMacAddr_p          Multicast address
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_clearRxMulticastMacAddr(UINT8* pMacAddr_p)
+tOplkError edrv_clearRxMulticastMacAddr(const UINT8* pMacAddr_p)
 {
     tOplkError  ret = kErrorOk;
     UINT32      data;
     UINT8       hash;
+
+    // Check parameter validity
+    ASSERT(pMacAddr_p != NULL);
 
     hash = calcHash(pMacAddr_p);
 
@@ -540,18 +552,20 @@ If \p entryChanged_p is equal or larger count_p all Rx filters shall be changed.
 
 \note Rx filters are not supported by this driver!
 
-\param  pFilter_p           Base pointer of Rx filter array
-\param  count_p             Number of Rx filter array entries
-\param  entryChanged_p      Index of Rx filter entry that shall be changed
-\param  changeFlags_p       Bit mask that selects the changing Rx filter property
+\param[in,out]  pFilter_p           Base pointer of Rx filter array
+\param[in]      count_p             Number of Rx filter array entries
+\param[in]      entryChanged_p      Index of Rx filter entry that shall be changed
+\param[in]      changeFlags_p       Bit mask that selects the changing Rx filter property
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
-                               UINT entryChanged_p, UINT changeFlags_p)
+tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p,
+                               UINT count_p,
+                               UINT entryChanged_p,
+                               UINT changeFlags_p)
 {
     UNUSED_PARAMETER(pFilter_p);
     UNUSED_PARAMETER(count_p);
@@ -567,7 +581,7 @@ tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
 
 This function allocates a Tx buffer.
 
-\param  pBuffer_p           Tx buffer descriptor
+\param[in,out]  pBuffer_p           Tx buffer descriptor
 
 \return The function returns a tOplkError error code.
 
@@ -578,6 +592,9 @@ tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
     tOplkError  ret = kErrorOk;
     tBufData    bufData;
+
+    // Check parameter validity
+    ASSERT(pBuffer_p != NULL);
 
     if (pBuffer_p->maxBufferSize > EDRV_MAX_FRAME_SIZE)
     {
@@ -615,7 +632,7 @@ Exit:
 
 This function releases the Tx buffer.
 
-\param  pBuffer_p           Tx buffer descriptor
+\param[in,out]  pBuffer_p           Tx buffer descriptor
 
 \return The function returns a tOplkError error code.
 
@@ -626,6 +643,9 @@ tOplkError edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
     tOplkError  ret;
     tBufData    bufData;
+
+    // Check parameter validity
+    ASSERT(pBuffer_p != NULL);
 
     bufData.pBuffer = pBuffer_p->pBuffer;
     bufData.bufferNumber = pBuffer_p->txBufferNumber.value;
@@ -642,7 +662,7 @@ tOplkError edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p)
 
 This function sends the Tx buffer.
 
-\param  pBuffer_p           Tx buffer descriptor
+\param[in,out]  pBuffer_p           Tx buffer descriptor
 
 \return The function returns a tOplkError error code.
 
@@ -651,12 +671,13 @@ This function sends the Tx buffer.
 //------------------------------------------------------------------------------
 tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-    tOplkError  ret;
+    tOplkError  ret = kErrorOk;
     UINT        bufferNumber;
     UINT32      temp;
     ULONG       flags;
 
-    ret = kErrorOk;
+    // Check parameter validity
+    ASSERT(pBuffer_p != NULL);
 
     bufferNumber = pBuffer_p->txBufferNumber.value;
 
@@ -712,46 +733,6 @@ Exit:
     return ret;
 }
 
-//------------------------------------------------------------------------------
-/**
-\brief  Set Tx buffer ready
-
-This function sets the Tx buffer buffer ready for transmission.
-
-\param  pBuffer_p   Tx buffer buffer descriptor
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_edrv
-*/
-//------------------------------------------------------------------------------
-tOplkError edrv_setTxBufferReady(tEdrvTxBuffer* pBuffer_p)
-{
-    UNUSED_PARAMETER(pBuffer_p);
-
-    return kErrorOk;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Start ready Tx buffer
-
-This function sends the Tx buffer marked as ready.
-
-\param  pBuffer_p   Tx buffer buffer descriptor
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_edrv
-*/
-//------------------------------------------------------------------------------
-tOplkError edrv_startTxBuffer(tEdrvTxBuffer* pBuffer_p)
-{
-    UNUSED_PARAMETER(pBuffer_p);
-
-    return kErrorOk;
-}
-
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
@@ -764,13 +745,13 @@ tOplkError edrv_startTxBuffer(tEdrvTxBuffer* pBuffer_p)
 
 This function is the interrupt service routine for the Ethernet driver.
 
-\param  irqNum_p            IRQ number
-\param  ppDevInstData_p     Pointer to private data provided by request_irq
+\param[in]      irqNum_p            IRQ number
+\param[in,out]  ppDevInstData_p     Pointer to private data provided by request_irq
 
 \return The function returns an IRQ handled code.
 */
 //------------------------------------------------------------------------------
-static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
+static irqreturn_t edrvIrqHandler(int irqNum_p, void* ppDevInstData_p)
 {
     tEdrvRxBuffer   rxBuffer;
     WORD            status;
@@ -930,7 +911,6 @@ static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
 
                 // reinitialize Rx process
                 reinitRx();
-
                 break;
             }
             else
@@ -945,12 +925,12 @@ static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
                 edrvInstance_l.initParam.pfnRxHandler(&rxBuffer);
             }
 
-            // calulate new offset (UINT32 aligned)
+            // calculate new offset (UINT32 aligned)
             curRx = (WORD)((curRx + length + sizeof(rxStatus) + 3) & ~0x3);
             EDRV_TRACE_CAPR(curRx - 0x10);
             EDRV_REGW_WRITE(EDRV_REGW_CAPR, curRx - 0x10);
 
-            // reread current offset in receive buffer
+            // re-read current offset in receive buffer
             curRx = (EDRV_REGW_READ(EDRV_REGW_CAPR) + 0x10) % EDRV_RX_BUFFER_LENGTH;
         }
     }
@@ -996,15 +976,16 @@ static void reinitRx(void)
 
 This function initializes one PCI device.
 
-\param  pPciDev_p   Pointer to corresponding PCI device structure
-\param  pId_p       PCI device ID
+\param[in,out]  pPciDev_p           Pointer to corresponding PCI device structure
+\param[in]      pId_p               PCI device ID
 
 \return The function returns an integer error code.
 \retval 0           Successful
 \retval Otherwise   Error
 */
 //------------------------------------------------------------------------------
-static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* pId_p)
+static int initOnePciDev(struct pci_dev* pPciDev_p,
+                         const struct pci_device_id* pId_p)
 {
     UINT    index;
     UINT32  temp;
@@ -1167,7 +1148,6 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
     printk("%s enable interrupts\n", __FUNCTION__);
     EDRV_REGW_WRITE(EDRV_REGW_INT_MASK, EDRV_REGW_INT_MASK_DEF);
 
-
 Exit:
     printk("%s finished with %d\n", __FUNCTION__, result);
     return result;
@@ -1179,7 +1159,7 @@ Exit:
 
 This function removes one PCI device.
 
-\param  pPciDev_p     Pointer to corresponding PCI device structure
+\param[in,out]  pPciDev_p           Pointer to corresponding PCI device structure
 */
 //------------------------------------------------------------------------------
 static void removeOnePciDev(struct pci_dev* pPciDev_p)
@@ -1236,20 +1216,20 @@ static void removeOnePciDev(struct pci_dev* pPciDev_p)
 
 This function calculates the entry for the hash-table from MAC address.
 
-\param  pMacAddr_p  Pointer to MAC address
+\param[in]      pMacAddr_p          Pointer to MAC address
 
 \return The function returns the calculated hash table.
 */
 //------------------------------------------------------------------------------
-static UINT8 calcHash(UINT8* pMacAddr_p)
+static UINT8 calcHash(const UINT8* pMacAddr_p)
 {
-    UINT32  byteCounter;
-    UINT32  bitCounter;
-    UINT32  data;
-    UINT32  crc;
-    UINT32  carry;
-    UINT8*  pData;
-    UINT8   hash;
+    UINT32       byteCounter;
+    UINT32       bitCounter;
+    UINT32       data;
+    UINT32       crc;
+    UINT32       carry;
+    const UINT8* pData;
+    UINT8        hash;
 
     pData = pMacAddr_p;
 
@@ -1278,4 +1258,4 @@ static UINT8 calcHash(UINT8* pMacAddr_p)
     return hash;
 }
 
-///\}
+/// \}

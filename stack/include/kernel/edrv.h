@@ -66,11 +66,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EDRV_FILTER_CHANGE_AUTO_RESPONSE_DELAY_DEF      0
 #endif
 
-#define EDRV_FILTER_CHANGE_ALL  (0 \
-                                 EDRV_FILTER_CHANGE_VALUE | \
-                                 EDRV_FILTER_CHANGE_MASK | \
-                                 EDRV_FILTER_CHANGE_STATE | \
-                                 EDRV_FILTER_CHANGE_AUTO_RESPONSE | \
+#define EDRV_FILTER_CHANGE_ALL  (0 |                                        \
+                                 EDRV_FILTER_CHANGE_VALUE |                 \
+                                 EDRV_FILTER_CHANGE_MASK |                  \
+                                 EDRV_FILTER_CHANGE_STATE |                 \
+                                 EDRV_FILTER_CHANGE_AUTO_RESPONSE |         \
                                  EDRV_FILTER_CHANGE_AUTO_RESPONSE_DELAY_DEF \
                                 )
 
@@ -121,9 +121,9 @@ the first or middle data of a frame!
 */
 typedef enum
 {
-    kEdrvBufferFirstInFrame     = 0x01, ///< First data of frame received
-    kEdrvBufferMiddleInFrame    = 0x02, ///< Middle data of frame received
-    kEdrvBufferLastInFrame      = 0x04  ///< Last data of frame received
+    kEdrvBufferFirstInFrame     = 0x01,     ///< First data of frame received
+    kEdrvBufferMiddleInFrame    = 0x02,     ///< Middle data of frame received
+    kEdrvBufferLastInFrame      = 0x04      ///< Last data of frame received
 } eEdrvBufferInFrame;
 
 /**
@@ -140,8 +140,8 @@ This union is used to identify the Tx buffer in the Ethernet driver module.
 */
 typedef union
 {
-    UINT    value;                      ///< Number of the TX buffer
-    void*   pArg;                       ///< Pointer to the TX buffer
+    UINT    value;                          ///< Number of the TX buffer
+    void*   pArg;                           ///< Pointer to the TX buffer
 } tEdrvTxBufferNumber;
 
 /**
@@ -173,10 +173,10 @@ This structure is the Rx buffer descriptor.
 */
 struct sEdrvRxBuffer
 {
-    tEdrvBufferInFrame  bufferInFrame;  ///< Position of Rx buffer in a frame
-    UINT                rxFrameSize;    ///< Size of Rx frame (without CRC)
-    UINT8*              pBuffer;        ///< Pointer to the Rx buffer
-    tTimestamp*         pRxTimeStamp;   ///< Pointer to Rx time stamp
+    tEdrvBufferInFrame  bufferInFrame;      ///< Position of Rx buffer in a frame
+    UINT                rxFrameSize;        ///< Size of Rx frame (without CRC)
+    UINT8*              pBuffer;            ///< Pointer to the Rx buffer
+    tTimestamp*         pRxTimeStamp;       ///< Pointer to Rx time stamp
 };
 
 /**
@@ -186,9 +186,9 @@ This structure is used to initialize the Ethernet driver module.
 */
 typedef struct
 {
-    UINT8           aMacAddr[6];        ///< Ethernet controller MAC address
-    tEdrvRxHandler  pfnRxHandler;       ///< Rx frame callback function pointer
-    tHwParam        hwParam;            ///< Hardware parameter
+    UINT8           aMacAddr[6];            ///< Ethernet controller MAC address
+    tEdrvRxHandler  pfnRxHandler;           ///< Rx frame callback function pointer
+    tHwParam        hwParam;                ///< Hardware parameter
 } tEdrvInitParam;
 
 /**
@@ -198,13 +198,13 @@ This structure is used to control the Rx filters.
 */
 typedef struct
 {
-    UINT            handle;             ///< Handle to Rx filter
-    BOOL            fEnable;            ///< Enable the Rx filter
-    UINT8           aFilterValue[22];   ///< Rx filter values
-    UINT8           aFilterMask[22];    ///< Rx filter mask
-    tEdrvTxBuffer*  pTxBuffer;          ///< Tx frame to be transmitted when filter matches
+    UINT            handle;                 ///< Handle to Rx filter
+    BOOL            fEnable;                ///< Enable the Rx filter
+    UINT8           aFilterValue[22];       ///< Rx filter values
+    UINT8           aFilterMask[22];        ///< Rx filter mask
+    tEdrvTxBuffer*  pTxBuffer;              ///< Tx frame to be transmitted when filter matches
 #if (EDRV_FILTER_WITH_RX_HANDLER != FALSE)
-tEdrvRxHandler  pfnRxHandler;           ///< Rx frame callback function pointer for this filter
+    tEdrvRxHandler  pfnRxHandler;           ///< Rx frame callback function pointer for this filter
 #endif
 } tEdrvFilter;
 
@@ -216,23 +216,33 @@ extern "C"
 {
 #endif
 
-tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p);
-tOplkError edrv_exit(void);
-UINT8*     edrv_getMacAddr(void);
-tOplkError edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p);
-tOplkError edrv_clearRxMulticastMacAddr(UINT8* pMacAddr_p);
-tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p);
-tOplkError edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p);
-tOplkError edrv_updateTxBuffer(tEdrvTxBuffer* pBuffer_p);
-tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p);
-tOplkError edrv_setTxBufferReady(tEdrvTxBuffer* pBuffer_p);
-tOplkError edrv_startTxBuffer(tEdrvTxBuffer* pBuffer_p);
-tOplkError edrv_releaseRxBuffer(tEdrvRxBuffer* pBuffer_p);
-tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p, UINT entryChanged_p, UINT changeFlags_p);
-int        edrv_getDiagnostics(char* pBuffer_p, INT size_p);
+tOplkError   edrv_init(const tEdrvInitParam* pEdrvInitParam_p);
+tOplkError   edrv_exit(void);
+const UINT8* edrv_getMacAddr(void);
+tOplkError   edrv_setRxMulticastMacAddr(const UINT8* pMacAddr_p);
+tOplkError   edrv_clearRxMulticastMacAddr(const UINT8* pMacAddr_p);
+tOplkError   edrv_changeRxFilter(tEdrvFilter* pFilter_p,
+                                 UINT count_p,
+                                 UINT entryChanged_p,
+                                 UINT changeFlags_p);
+tOplkError   edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p);
+tOplkError   edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p);
+tOplkError   edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p);
+
+#if ((CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC != FALSE) || (CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC != FALSE))
+tOplkError   edrv_releaseRxBuffer(tEdrvRxBuffer* pBuffer_p);
+#endif
+
+#if (CONFIG_EDRV_AUTO_RESPONSE != FALSE)
+tOplkError   edrv_updateTxBuffer(tEdrvTxBuffer* pBuffer_p);
+#endif
 
 #if (EDRV_USE_TTTX == TRUE)
-tOplkError edrv_getMacTime(UINT64* pCurtime_p);
+tOplkError   edrv_getMacTime(UINT64* pCurtime_p);
+#endif
+
+#if (CONFIG_EDRV_USE_DIAGNOSTICS != FALSE)
+int          edrv_getDiagnostics(char* pBuffer_p, size_t size_p);
 #endif
 
 #ifdef __cplusplus

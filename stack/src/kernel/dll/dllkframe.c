@@ -205,7 +205,7 @@ tEdrvReleaseRxBuffer dllkframe_processFrameReceived(tEdrvRxBuffer* pRxBuffer_p)
                     pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES +
                                                           dllkInstance_g.curTxBufferOffsetCycle];
 #if (CONFIG_DLL_PRES_READY_AFTER_SOA != FALSE) || (CONFIG_DLL_PRES_READY_AFTER_SOC != FALSE)
-                    ret = edrv_startTxBuffer(pTxBuffer);
+                    //ret = edrv_startTxBuffer(pTxBuffer);
 #else
                     {
                         tPlkFrame* pTxFrame = (tPlkFrame*)pTxBuffer->pBuffer;
@@ -1770,7 +1770,7 @@ static tOplkError processReceivedPreq(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
         if (pTxBuffer->pBuffer != NULL)
         {   // PRes does exist -> send PRes frame
 #if (CONFIG_DLL_PRES_READY_AFTER_SOA != FALSE) || (CONFIG_DLL_PRES_READY_AFTER_SOC != FALSE)
-            edrv_startTxBuffer(pTxBuffer);
+            //edrv_startTxBuffer(pTxBuffer);
 #else
             if ((ret = edrv_sendTxBuffer(pTxBuffer)) != kErrorOk)
                 goto Exit;
@@ -2095,9 +2095,11 @@ static tOplkError processReceivedSoc(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
     pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES + dllkInstance_g.curTxBufferOffsetCycle];
     if (pTxBuffer->pBuffer != NULL)          // Does PRes exist?
     {   // PRes does exist -> mark PRes frame as ready for transmission
+        /*
         ret = edrv_setTxBufferReady(pTxBuffer);
         if (ret != kErrorOk)
             return ret;
+        */
     }
 #endif
 

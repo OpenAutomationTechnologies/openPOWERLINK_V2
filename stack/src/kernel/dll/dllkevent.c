@@ -1078,8 +1078,8 @@ static tOplkError processPresReady(tNmtState nmtState_p)
             }
             // $$$ make function that updates Pres, StatusRes
             // mark PRes frame as ready for transmission
-            ret = edrv_setTxBufferReady(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES +
-                                                           dllkInstance_g.curTxBufferOffsetCycle]);
+            //ret = edrv_setTxBufferReady(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES +
+            //                                               dllkInstance_g.curTxBufferOffsetCycle]);
         }
     }
     return ret;
