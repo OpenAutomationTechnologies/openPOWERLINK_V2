@@ -41,7 +41,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-
 #include <sys/unistd.h>
 #include <alt_timers.h>
 #include <alt_globaltmr.h>
@@ -55,8 +54,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <system.h>
 
-#include <oplk/oplk.h>
-#include <oplk/debug.h>
+#include <common/oplkinc.h>
 #include "sleep.h"
 
 //============================================================================//
@@ -116,7 +114,7 @@ static inline UINT64 getTimerTicksFromScaled(ALT_GPT_TIMER_t timerId_p,
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-INT usleep(ULONG usecs_p)
+int usleep(unsigned long usecs_p)
 {
     UINT64          startTime = alt_globaltmr_get64();
     UINT32          timerPrescaler = alt_globaltmr_prescaler_get() + 1;
@@ -144,7 +142,7 @@ milliseconds have elapsed.
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-INT msleep(ULONG milliSeconds_p)
+int msleep(unsigned long milliSeconds_p)
 {
     UINT64                  startTickStamp = alt_globaltmr_get64();
     UINT64                  waitTickCount = getTimerTicksFromScaled(ALT_GPT_CPU_GLOBAL_TMR, SECS_TO_MILLISECS, milliSeconds_p);

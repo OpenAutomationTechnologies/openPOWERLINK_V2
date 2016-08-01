@@ -126,19 +126,19 @@ typedef enum
 // Command description
 typedef struct
 {
-    UINT8       command;
-    UINT8       padding;
-    UINT16      executionDuration;
+    uint8_t     command;
+    uint8_t     padding;
+    uint16_t    executionDuration;
 } tLcdCmdDesc;
 
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
 
-ALT_I2C_DEV_t*                  deviceHandle_l;
+ALT_I2C_DEV_t*          deviceHandle_l;
 
 // Descriptions for all supported commands
-static tLcdCmdDesc       lcdCommands_l[] =
+static tLcdCmdDesc      lcdCommands_l[] =
 {
     {0x41, 0, 100},     // LCD_COMMAND_DISPLAY_ON,
     {0x42, 0, 100},     // LCD_COMMAND_DISPLAY_OFF,
@@ -169,8 +169,8 @@ static tLcdCmdDesc       lcdCommands_l[] =
 //------------------------------------------------------------------------------
 
 static inline ALT_STATUS_CODE   sendLcdCommand(ALT_I2C_DEV_t* deviceHdl_p,
-                                              tLcdCmd command_p,
-                                              UINT8* pArg_p);
+                                               tLcdCmd command_p,
+                                               uint8_t* pArg_p);
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
 //============================================================================//
@@ -184,9 +184,9 @@ This function writes a sequence of initialization parameters to the LCD.
 //------------------------------------------------------------------------------
 void lcdl_init(void)
 {
-    INT                         ret = 0;
+    int                         ret = 0;
     ALT_I2C_MASTER_CONFIG_t     cfg;
-    UINT32                      speed;
+    uint32_t                    speed;
 
     // Init I2C module
     if (alt_i2c_init(ALT_I2C_I2C0, deviceHandle_l) != ALT_E_SUCCESS)
@@ -213,7 +213,7 @@ void lcdl_init(void)
         goto Exit;
     }
 
-    PRINTF("LCD INFO: Current I2C speed = %d Hz.\n", (INT)speed);
+    PRINTF("LCD INFO: Current I2C speed = %d Hz.\n", (int)speed);
 
     if (alt_i2c_master_config_speed_set(deviceHandle_l, &cfg, LCD_I2C_SPEED) != ALT_E_SUCCESS)
     {
@@ -228,7 +228,7 @@ void lcdl_init(void)
     }
     else
     {
-        PRINTF("LCD INFO: New I2C speed = %d Hz.\n", (INT)speed);
+        PRINTF("LCD INFO: New I2C speed = %d Hz.\n", (int)speed);
         cfg.addr_mode = ALT_I2C_ADDR_MODE_7_BIT;
         cfg.restart_enable = ALT_E_TRUE;
 
@@ -315,9 +315,9 @@ Changes to specified line of the LCD.
 \return The function returns 0 if the line is changed successfully, -1 otherwise.
 */
 //------------------------------------------------------------------------------
-INT lcdl_changeToLine(unsigned INT line_p)
+int lcdl_changeToLine(unsigned int line_p)
 {
-    UINT8      param;
+    uint8_t     param;
 
     if (line_p < 2)
         param = LCD_POS_1ST_LINE;
@@ -342,10 +342,10 @@ Writes text to the LCD currently selected.
 void lcdl_printText(const char* sText_p)
 {
     ALT_STATUS_CODE     halRet = ALT_E_SUCCESS;
-    INT                 txtLen = strlen(sText_p);
+    size_t              txtLen = strlen(sText_p);
     const char          padTxt = ' ';
 
-    for (INT i = 0; i < LCDL_COLUMN; i++)
+    for (size_t i = 0; i < LCDL_COLUMN; i++)
     {
         if (i < txtLen)
             halRet = alt_i2c_master_transmit(deviceHandle_l, &sText_p[i],
@@ -385,17 +385,17 @@ The function sends a I2C command to the LCD module.
 */
 //------------------------------------------------------------------------------
 static inline ALT_STATUS_CODE sendLcdCommand(ALT_I2C_DEV_t* deviceHdl_p,
-                                      tLcdCmd command_p,
-                                      UINT8* pArg_p)
+                                             tLcdCmd command_p,
+                                             uint8_t* pArg_p)
 {
     ALT_STATUS_CODE         halRet = ALT_E_SUCCESS;
-    tLcdCmdDesc             lcdCommandDesc = lcdCommands_l[(INT)command_p];
-    UINT8                   data[10];
-    UINT8                   dataLen = 0;
+    tLcdCmdDesc             lcdCommandDesc = lcdCommands_l[(int)command_p];
+    uint8_t                 data[10];
+    uint8_t                 dataLen = 0;
 
     data[dataLen++] = LCD_ESCAPE_CHAR;
     data[dataLen++] = lcdCommandDesc.command;
-    for (INT i = 0; i < lcdCommandDesc.padding; i++)
+    for (uint8_t i = 0; i < lcdCommandDesc.padding; i++)
     {
         data[dataLen++] = pArg_p[i];
     }
