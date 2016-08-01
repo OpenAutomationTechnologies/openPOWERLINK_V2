@@ -92,6 +92,8 @@ typedef void (*tOpenmacIrqCb)(void* pArg_p);
 
 /**
 \brief openMAC IRQ sources
+
+This enumeration defines the available IRQ sources of openMAC.
 */
 typedef enum
 {
