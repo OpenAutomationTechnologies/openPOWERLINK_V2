@@ -55,10 +55,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <socal/hps.h>
 #include <socal/socal.h>
 
-#include <oplk/debug.h>
 #include <system.h>
-#include "lcdl.h"
 #include <sleep.h>
+#include <trace/trace.h>
+#include "lcdl.h"
+
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
@@ -160,7 +161,7 @@ static tLcdCmdDesc      lcdCommands_l[] =
     {0x61, 1, 3000},    // LCD_COMMAND_CHANGE_RS_232_BAUD_RATE,
     {0x62, 1, 3000},    // LCD_COMMAND_CHANGE_I2C_ADDRESS,
     {0x70, 0, 4000},    // LCD_COMMAND_DISPLAY_FIRMWARE_VERSION_NUMBER,
-    {0x71, 0, 10000}, // LCD_COMMAND_DISPLAY_RS_232_BAUD_RATE,
+    {0x71, 0, 10000},   // LCD_COMMAND_DISPLAY_RS_232_BAUD_RATE,
     {0x72, 0, 4000},    // LCD_COMMAND_DISPLAY_I2C_ADDRESS,
 };
 
@@ -213,7 +214,7 @@ void lcdl_init(void)
         goto Exit;
     }
 
-    PRINTF("LCD INFO: Current I2C speed = %d Hz.\n", (int)speed);
+    TRACE("LCD INFO: Current I2C speed = %d Hz.\n", (int)speed);
 
     if (alt_i2c_master_config_speed_set(deviceHandle_l, &cfg, LCD_I2C_SPEED) != ALT_E_SUCCESS)
     {
@@ -228,7 +229,7 @@ void lcdl_init(void)
     }
     else
     {
-        PRINTF("LCD INFO: New I2C speed = %d Hz.\n", (int)speed);
+        TRACE("LCD INFO: New I2C speed = %d Hz.\n", (int)speed);
         cfg.addr_mode = ALT_I2C_ADDR_MODE_7_BIT;
         cfg.restart_enable = ALT_E_TRUE;
 
@@ -266,8 +267,10 @@ void lcdl_init(void)
     }
 
  Exit:
-     if (ret != 0)
-         DEBUG_LVL_ERROR_TRACE("LCD ERR: Initialization Failed!!\n");
+    if (ret != 0)
+    {
+        TRACE("LCD ERR: Initialization failed!!\n");
+    }
 
      return;
 }
@@ -300,7 +303,7 @@ void lcdl_clear(void)
     // Clear screen
     if (sendLcdCommand(deviceHandle_l, kLcdCmdClearScreen, NULL) != ALT_E_SUCCESS)
     {
-        DEBUG_LVL_ERROR_TRACE("LCD ERR: Failed to clear screen\n");
+        TRACE("LCD ERR: Failed to clear screen\n");
     }
 }
 

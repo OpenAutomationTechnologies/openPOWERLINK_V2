@@ -11,7 +11,7 @@ used by the openPOWERLINK demo applications.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2015, Kalycito Infotech Private Ltd.
 All rights reserved.
 
@@ -56,9 +56,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <system.h>
 
 #include <oplk/oplk.h>
-#include <oplk/debug.h>
+#include <trace/trace.h>
 #include <system/system.h>
 #include <sleep.h>
+
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
@@ -122,7 +123,7 @@ INT system_init(void)
 
     if (initializeTimer() != 0)
     {
-        DEBUG_LVL_ERROR_TRACE("general purpose timer module initialization Failed!!\n");
+        TRACE("General purpose timer module initialization failed!!\n");
         oplkRet = kErrorGeneralError;
         goto Exit;
     }
@@ -131,14 +132,14 @@ INT system_init(void)
     if (alt_bridge_init(ALT_BRIDGE_LWH2F, NULL, NULL) != ALT_E_SUCCESS)
     {
         oplkRet = kErrorGeneralError;
-        DEBUG_LVL_ERROR_TRACE("LWH2F initialization Failed!!\n");
+        TRACE("LWH2F initialization failed!!\n");
         goto Exit;
     }
 
     if (alt_bridge_init(ALT_BRIDGE_H2F, NULL, NULL) != ALT_E_SUCCESS)
     {
         oplkRet = kErrorGeneralError;
-        DEBUG_LVL_ERROR_TRACE("H2F initialization Failed!!\n");
+        TRACE("H2F initialization failed!!\n");
         goto Exit;
     }
 
@@ -146,7 +147,7 @@ INT system_init(void)
     // Initialize the driver processor
     if (initializeDriver() != 0)
     {
-        DEBUG_LVL_ERROR_TRACE("Initializing the driver failed!!\n");
+        TRACE("Initializing the driver failed!!\n");
         return -1;
     }
 #endif
@@ -261,14 +262,14 @@ static INT initializeFpga(void)
     /* initialize the FPGA control */
     if (alt_fpga_init() != ALT_E_SUCCESS)                       // initialize the FPGA manager
     {
-        DEBUG_LVL_ERROR_TRACE("FPGA interface initialization Failed!!\n");
+        TRACE("FPGA interface initialization failed!!\n");
         ret = -1;
         goto Exit;
     }
 
     if (alt_fpga_state_get() == ALT_FPGA_STATE_POWER_OFF)   // check the FPGA state
     {
-        DEBUG_LVL_ERROR_TRACE("FPGA is powered Off!!\n");
+        TRACE("FPGA is powered off!!\n");
         ret = -1;
         goto Exit;
     }
@@ -281,7 +282,7 @@ static INT initializeFpga(void)
 
     if (halRet != ALT_E_SUCCESS)
     {
-        DEBUG_LVL_ERROR_TRACE("FPGA interface control could not be acquired\n");
+        TRACE("FPGA interface control could not be acquired\n");
         ret = -1;
         goto Exit;
     }
@@ -291,21 +292,21 @@ static INT initializeFpga(void)
     /* Enable the HPS-FPGA bridge */
     if (alt_bridge_init(ALT_BRIDGE_F2H, NULL, NULL) != ALT_E_SUCCESS)
     {
-        DEBUG_LVL_ERROR_TRACE("F2H initialization Failed!!\n");
+        TRACE("F2H initialization failed!!\n");
         ret = -1;
         goto Exit;
     }
 
     if (alt_bridge_init(ALT_BRIDGE_H2F, NULL, NULL) != ALT_E_SUCCESS)
     {
-        DEBUG_LVL_ERROR_TRACE("H2F initialization Failed!!\n");
+        TRACE("H2F initialization failed!!\n");
         ret = -1;
         goto Exit;
     }
 
     if (alt_bridge_init(ALT_BRIDGE_LWH2F, NULL, NULL) != ALT_E_SUCCESS)
     {
-        DEBUG_LVL_ERROR_TRACE("LWH2F initialization Failed!!\n");
+        TRACE("LWH2F initialization failed!!\n");
         ret = -1;
         goto Exit;
     }
@@ -315,7 +316,7 @@ static INT initializeFpga(void)
                              ALT_ADDR_SPACE_H2F_ACCESSIBLE,
                              ALT_ADDR_SPACE_LWH2F_ACCESSIBLE) != ALT_E_SUCCESS)
     {
-        DEBUG_LVL_ERROR_TRACE("FPGA address space remapping Failed!!\n");
+        TRACE("FPGA address space remapping failed!!\n");
         ret = -1;
         goto Exit;
     }
@@ -349,9 +350,9 @@ static INT initializeDriver(void)
     char*               driverExecutableStartAddress = (char*)DDR3_EMIF_0_BASE;
 
     // Trace the driver image information.
-    DEBUG_LVL_ALWAYS_TRACE("INFO: driver Image binary at %p.\n", driverBinary);
-    DEBUG_LVL_ALWAYS_TRACE("INFO: driver Image size is %u bytes.\n", driverBinarySize);
-    DEBUG_LVL_ALWAYS_TRACE("INFO: driver Executable start is %p\n", driverExecutableStartAddress);
+    TRACE("INFO: driver Image binary at %p.\n", driverBinary);
+    TRACE("INFO: driver Image size is %u bytes.\n", driverBinarySize);
+    TRACE("INFO: driver Executable start is %p\n", driverExecutableStartAddress);
 
     // Reset the driver processor
     halRet = alt_fpga_gpo_write(0x00000001, 0x00000000);
@@ -398,7 +399,7 @@ static INT initializeTimer(void)
     halRet =  alt_globaltmr_init();
     if (halRet != ALT_E_SUCCESS)
     {
-        DEBUG_LVL_ERROR_TRACE("general purpose timer module intialization Failed!!\n");
+        TRACE("general purpose timer module initialization failed!!\n");
         ret = -1;
         goto Exit;
     }
@@ -408,14 +409,14 @@ static INT initializeTimer(void)
     if ((alt_globaltmr_autoinc_set(1) != ALT_E_SUCCESS) ||
         (alt_globaltmr_comp_set64(GLOBALTMR_MAX) != ALT_E_SUCCESS))
     {
-        DEBUG_LVL_ERROR_TRACE("Auto increment mode could not be enabled for this timer!\n");
+        TRACE("Auto increment mode could not be enabled for this timer!\n");
     }
 
     // Check if the timer  is already running
     halRet = alt_gpt_tmr_is_running(ALT_GPT_CPU_GLOBAL_TMR);
     if (halRet == ALT_E_FALSE)
     {
-        DEBUG_LVL_TIMERU_TRACE("Timer has to be started!\n");
+        TRACE("Timer has to be started!\n");
         // timer is not running, so try to start it
         halRet =  alt_globaltmr_start();
     }
@@ -440,35 +441,35 @@ static INT initializeTimer(void)
     // a bad instance as that is covered
     if (halRet != ALT_E_SUCCESS)
     {
-        DEBUG_LVL_ERROR_TRACE("Timer initialization Failed!!\n");
+        TRACE("Timer initialization failed!!\n");
         ret = -1;
         goto Exit;
     }
 
-    DEBUG_LVL_TIMERU_TRACE("Timer Comparator Mode: %u, value: %lu",
-                           alt_globaltmr_is_comp_mode(), alt_globaltmr_comp_get64() - 1);
-    DEBUG_LVL_TIMERU_TRACE("Timer Auto increment mode: %u, value: %u\n",
-                           alt_globaltmr_is_autoinc_mode(), alt_globaltmr_autoinc_get());
+    TRACE("Timer Comparator Mode: %u, value: %lu",
+          alt_globaltmr_is_comp_mode(), alt_globaltmr_comp_get64() - 1);
+    TRACE("Timer Auto increment mode: %u, value: %u\n",
+          alt_globaltmr_is_autoinc_mode(), alt_globaltmr_autoinc_get());
 
     // stop the comparison function for this timer
     if ((alt_globaltmr_autoinc_mode_stop() != ALT_E_SUCCESS) ||
         (alt_globaltmr_comp_mode_start() != ALT_E_SUCCESS))
     {
-        DEBUG_LVL_ERROR_TRACE("Timer mode could not be set\n");
+        TRACE("Timer mode could not be set\n");
         ret = -1;
         goto Exit;
     }
 
-    DEBUG_LVL_TIMERU_TRACE("Timer Comparator Mode: %u, value: %lu",
-                           alt_globaltmr_is_comp_mode(), alt_globaltmr_comp_get64() - 1);
-    DEBUG_LVL_TIMERU_TRACE("Timer Auto increment mode: %u, value: %u\n",
-                           alt_globaltmr_is_autoinc_mode(), alt_globaltmr_autoinc_get());
+    TRACE("Timer Comparator Mode: %u, value: %lu",
+          alt_globaltmr_is_comp_mode(), alt_globaltmr_comp_get64() - 1);
+    TRACE("Timer Auto increment mode: %u, value: %u\n",
+          alt_globaltmr_is_autoinc_mode(), alt_globaltmr_autoinc_get());
 
     // disable comparator interrupts from this timer
     if ((alt_globaltmr_int_disable() != ALT_E_SUCCESS) ||
         (alt_globaltmr_int_clear_pending() != ALT_E_SUCCESS))
     {
-        DEBUG_LVL_ERROR_TRACE("Timer IRQ could not be disabled\n");
+        TRACE("Timer IRQ could not be disabled\n");
         ret = -1;
         goto Exit;
     }
@@ -505,4 +506,4 @@ static INT cleanupTimer(void)
 
     return ret;
 }
-///\}
+/// \}

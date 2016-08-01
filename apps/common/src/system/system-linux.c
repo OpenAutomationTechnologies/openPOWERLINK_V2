@@ -11,7 +11,7 @@ openPOWERLINK demo applications.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
 All rights reserved.
@@ -48,7 +48,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <pthread.h>
 #include <signal.h>
 #include <sys/time.h>
-
+#include <trace/trace.h>
 #include "system.h"
 
 //============================================================================//
@@ -130,13 +130,13 @@ int system_init(void)
     /* adjust process priority */
     if (nice(-20) == -1)         // push nice level in case we have no RTPreempt
     {
-        DEBUG_LVL_ERROR_TRACE("%s() couldn't set nice value! (%s)\n", __func__, strerror(errno));
+        TRACE("%s() couldn't set nice value! (%s)\n", __func__, strerror(errno));
     }
     schedParam.sched_priority = MAIN_THREAD_PRIORITY;
     if (pthread_setschedparam(pthread_self(), SCHED_RR, &schedParam) != 0)
     {
-        DEBUG_LVL_ERROR_TRACE("%s() couldn't set thread scheduling parameters! %d\n",
-                              __func__, schedParam.sched_priority);
+        TRACE("%s() couldn't set thread scheduling parameters! %d\n",
+              __func__, schedParam.sched_priority);
     }
 
     // Register termination handler for signals with termination semantics

@@ -62,6 +62,7 @@ SET(DEMO_SOURCES
 INCLUDE_DIRECTORIES(
     ${DEMO_SOURCE_DIR}
     ${OBJDICT_DIR}/${OBJDICT}
+    ${CONTRIB_SOURCE_DIR}
     )
 
 # PResChaining is not supported by non-openMAC targets
