@@ -783,6 +783,7 @@ WARN_LOGFILE           =
 
 INPUT                  = ../../stack/src \
                          ../../stack/include \
+                         ../../apps/common/src/obdcreate \
                          calmodules.txt \
                          usermodules.txt \
                          kernelmodules.txt \
