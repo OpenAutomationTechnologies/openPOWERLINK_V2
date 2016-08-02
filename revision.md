@@ -5,6 +5,48 @@ Revision history of openPOWERLINK Protocol Stack {#page_revision_history}
 
 # Release 2 {#sect_revision_v2}
 
+## V2.4.1 {#sect_revision_v2_4_1}
+
+This is the latest release of the V2.4 release series. This release is a stable
+release, it contains fixes and optimizations.
+
+Following is a summary of changes in V2.4.1. For a detailed revision history
+refer to the Git source code history.
+
+### Fixes:
+- Fix several compiler warnings
+- Increase isochrRxMaxPayload limit
+- Remove Veth code from edrv if Veth support is disabled
+- Add findDebugfs() prototype
+- Fix openCONFORMANCE warnings in testcase 3-2-9-T2
+- Remove sync interrupt registration for Nios II in dualprocshm
+- Use Xil_L1DCache*() macros for Microblaze cache handling
+- Fix the build when no PIO are used
+- daemon PCP nios2: remove unused header
+- Add missing comment for object event forwarding
+- Fix relict in padding area of asynchronous frames
+- Fix cirbuffer return values
+- Connect atomic ipcore directly to shared memory
+- Fix circbuf locking issues with host interface CAL
+- Fix segmented read access to user specific OD
+- Fix various typos in ctrlu files
+- Enable storage attribute for PDO comm and mapp param objects
+- Force 0x1F8D/F0 object in Demo_3CN openCONFIGURATOR project
+- veth: avoid kernel header issue with musl
+- SDO read fails for VString objects
+- apps: include stdarg.h in eventlogstring.h
+- PCIe Driver: Disable Werror=date-time for kernel >= 3.14
+- Fix name of sched_priority element
+- oplkcfg.h: Remove option CONFIG_OBD_USE_LOAD_CONCISEDCF
+
+### Additions:
+- Add XDD for CiA401 slave with configuration store/restore
+- Improve user OD access comment
+
+### Known Issues:
+
+Refer to the [known issues](\ref page_known_issues).
+
 ## V2.4.0 {#sect_revision_v2_4_0}
 
 This is the first release of the V2.4 release series. It contains new features

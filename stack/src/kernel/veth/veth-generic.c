@@ -46,6 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/dllk.h>
 #include <kernel/dllkcal.h>
 
+#if defined(CONFIG_INCLUDE_VETH)
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
@@ -176,3 +177,5 @@ static tOplkError receiveFrameCb(tFrameInfo* pFrameInfo_p,
 }
 
 /// \}
+
+#endif // CONFIG_INCLUDE_VETH

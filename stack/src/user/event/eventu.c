@@ -187,7 +187,7 @@ specific module
 tOplkError eventu_process(tEvent* pEvent_p)
 {
     tOplkError              ret = kErrorOk;
-    tEventSource            eventSource;
+    tEventSource            eventSource = kEventSourceInvalid;
 
     if (!instance_l.fInitialized)
     {

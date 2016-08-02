@@ -250,7 +250,7 @@ static tOplkError initPowerlink(UINT32 cycleLen_p, char* pszCdcFileName_p,
     initParam.featureFlags            = UINT_MAX;
     initParam.cycleLen                = cycleLen_p;       // required for error detection
     initParam.isochrTxMaxPayload      = 256;              // const
-    initParam.isochrRxMaxPayload      = 256;              // const
+    initParam.isochrRxMaxPayload      = 1490;             // const
     initParam.presMaxLatency          = 50000;            // const; only required for IdentRes
     initParam.preqActPayloadLimit     = 36;               // required for initialisation (+28 bytes)
     initParam.presActPayloadLimit     = 36;               // required for initialisation of Pres frame (+28 bytes)
@@ -372,7 +372,6 @@ static void loopMain(void)
                         fExit = TRUE;
                     }
                     break;
-
                 case 'c':
                     ret = oplk_execNmtCommand(kNmtEventNmtCycleError);
                     if (ret != kErrorOk)
