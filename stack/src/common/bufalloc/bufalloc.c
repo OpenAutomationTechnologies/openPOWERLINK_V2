@@ -12,7 +12,7 @@ interface of the buffer allocation library is defined in bufalloc.h.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -60,6 +60,7 @@ Calling bufalloc_exit() frees all stored buffers from the buffer allocation.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <common/oplkinc.h>
 #include <common/bufalloc.h>
 
 //============================================================================//
@@ -85,6 +86,7 @@ Calling bufalloc_exit() frees all stored buffers from the buffer allocation.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+#define BUFALLOC_CHECKID    "bufaloc"       // Incl. trailing '0' -> 8 chars
 
 //------------------------------------------------------------------------------
 // local types
@@ -102,53 +104,53 @@ Calling bufalloc_exit() frees all stored buffers from the buffer allocation.
 //            P U B L I C   F U N C T I O N S                                 //
 //============================================================================//
 
-
 //------------------------------------------------------------------------------
 /**
 \brief  Initialize buffer allocation
 
 The function initializes a buffer allocation instance.
 
-\param  maxBuffer_p     The maximum amount of buffers
+\param[in]      maxBuffer_p         The maximum amount of buffers
 
 \return The function returns a pointer to the buffer instance.
-\retval 0           Buffer allocation instance initializing failed.
-\retval other       Buffer allocation instance successfully initialized.
+\retval NULL                        Buffer allocation instance initializing failed.
+\retval other                       Buffer allocation instance successfully initialized.
 
 \ingroup module_lib_bufalloc
 */
 //------------------------------------------------------------------------------
 tBufAlloc* bufalloc_init(UINT maxBuffer_p)
 {
-    tBufAlloc*          pBufAlloc;
+    tBufAlloc*          pBufAllocInstance;
     tBufData*           pBufData;
 
-    if (!maxBuffer_p)
+    // Check buffer number
+    if (maxBuffer_p == 0)
+        return NULL;
+
+    // Allocate buffer allocation instance
+    pBufAllocInstance = (tBufAlloc*)OPLK_MALLOC(sizeof(tBufAlloc));
+    if (pBufAllocInstance == NULL)
+        return NULL;
+
+    // initialize instance
+    OPLK_MEMSET(pBufAllocInstance, 0, sizeof(tBufAlloc));
+    OPLK_MEMCPY(pBufAllocInstance->checkId, BUFALLOC_CHECKID, sizeof(BUFALLOC_CHECKID));
+    pBufAllocInstance->maxSize = maxBuffer_p;
+
+    // Allocate buffer data instances
+    pBufData = (tBufData*)OPLK_MALLOC(sizeof(tBufData) * maxBuffer_p);
+    if (pBufData == NULL)
     {
-        pBufAlloc = NULL;
-        goto Exit;
-    }
-    if ((pBufAlloc = OPLK_MALLOC(sizeof(*pBufAlloc))) == NULL)
-    {
-        pBufAlloc = NULL;
-        goto Exit;
-    }
-    if ((pBufData = OPLK_MALLOC(sizeof(*pBufData) * maxBuffer_p)) == NULL)
-    {
-        OPLK_FREE(pBufAlloc);
-        pBufAlloc = NULL;
-        goto Exit;
+        OPLK_FREE(pBufAllocInstance);
+        return NULL;
     }
 
-    pBufAlloc->maxSize = maxBuffer_p;
-    pBufAlloc->pBufData = pBufData;
-    pBufAlloc->pBufDataBegin = (void*)pBufData;
-    pBufAlloc->allocatedBufCnt = 0;
-    pBufAlloc->releasedBufCnt = 0;
-    strncpy(pBufAlloc->checkId, BUFALLOC_CHECKID, 9);
+    // Fill buffer allocation instance
+    pBufAllocInstance->pBufData = pBufData;
+    pBufAllocInstance->pBufDataBegin = pBufData;
 
-Exit:
-    return pBufAlloc;
+    return pBufAllocInstance;
 }
 
 //------------------------------------------------------------------------------
@@ -157,39 +159,23 @@ Exit:
 
 The function deletes the buffer allocation instance.
 
-\param  pBufAlloc_p     Pointer to buffer allocation instance.
-
-\return The function returns a tOplkError error code.
-\retval kErrorOk                    Buffer allocation instance successfully deleted.
-\retval kErrorGeneralError          Buffer allocation instance deletion failed.
+\param[in]      pBufAlloc_p         Pointer to the buffer allocation instance.
 
 \ingroup module_lib_bufalloc
 */
 //------------------------------------------------------------------------------
-tOplkError bufalloc_exit(tBufAlloc* pBufAlloc_p)
+void bufalloc_exit(tBufAlloc* pBufAlloc_p)
 {
-    tOplkError          ret = kErrorGeneralError;
-    tBufData*           pBufDataBegin = NULL;
+    // Check if pBufAlloc_p is a valid buffer allocation instance
+    ASSERT(pBufAlloc_p != NULL);
+    ASSERT(!OPLK_MEMCMP(pBufAlloc_p->checkId, BUFALLOC_CHECKID, sizeof(BUFALLOC_CHECKID)));
 
-    if (pBufAlloc_p == NULL)
-    {
-        ret = kErrorGeneralError;
-        goto Exit;
-    }
-    // Check if pBufAlloc is a valid buffer allocation instance.
-    if (strncmp(pBufAlloc_p->checkId, BUFALLOC_CHECKID, 9) == 0)
-    {
-        pBufDataBegin = pBufAlloc_p->pBufDataBegin;
-        if (pBufDataBegin != NULL)
-        {
-            OPLK_FREE(pBufDataBegin);
-            ret = kErrorOk;
-        }
-        OPLK_FREE(pBufAlloc_p);
-    }
-Exit:
-    return ret;
+    // Check and free the buffer data instances
+    ASSERT(pBufAlloc_p->pBufDataBegin != NULL);
+    OPLK_FREE(pBufAlloc_p->pBufDataBegin);
 
+    // Free the buffer allocation instance
+    OPLK_FREE(pBufAlloc_p);
 }
 
 //------------------------------------------------------------------------------
@@ -198,9 +184,9 @@ Exit:
 
 The function adds a buffer to the buffer allocation instance.
 
-\param  pBufAlloc_p     Pointer to buffer allocation instance.
-\param  pFreeBuf_p      Pointer to buffer.
-\param  bufferNumber_p  Index number of the allocated buffer.
+\param[in]      pBufAlloc_p         Pointer to the buffer allocation instance.
+\param[in]      pBufData_p          Pointer to the buffer data structure that
+                                    is added to the buffer pool.
 
 \return The function returns a tOplkError error code.
 \retval kErrorGeneralError          Not enough buffer storage in allocation instance.
@@ -209,9 +195,9 @@ The function adds a buffer to the buffer allocation instance.
 \ingroup module_lib_bufalloc
 */
 //------------------------------------------------------------------------------
-tOplkError bufalloc_addBuffer(tBufAlloc* pBufAlloc_p, void* pFreeBuf_p, UINT bufferNumber_p)
+tOplkError bufalloc_addBuffer(tBufAlloc* pBufAlloc_p, const tBufData* pBufData_p)
 {
-    return bufalloc_releaseBuffer(pBufAlloc_p, pFreeBuf_p, bufferNumber_p);
+    return bufalloc_releaseBuffer(pBufAlloc_p, pBufData_p);
 }
 
 //------------------------------------------------------------------------------
@@ -221,32 +207,41 @@ tOplkError bufalloc_addBuffer(tBufAlloc* pBufAlloc_p, void* pFreeBuf_p, UINT buf
 The function gets a buffer from the buffer allocation instance and removes
 it from the instance.
 
-\param  pBufAlloc_p     Pointer to buffer allocation instance.
+\param[in]      pBufAlloc_p         Pointer to the buffer allocation instance.
+\param[out]     pBufData_p          Pointer to store the buffer data structure
+                                    that is taken from the buffer pool.
 
-\return The function returns a BufData pointer.
-\retval 0           No free buffer returned from buffer allocation instance.
-\retval other       Successfully returned a free buffer.
+\return The function returns a tOplkError error code.
+\retval kErrorGeneralError          No free buffer available in allocation instance.
+\retval kErrorOk                    Buffer successfully returned.
 
 \ingroup module_lib_bufalloc
 */
 //------------------------------------------------------------------------------
-tBufData* bufalloc_getBuffer(tBufAlloc* pBufAlloc_p)
+tOplkError bufalloc_getBuffer(tBufAlloc* pBufAlloc_p, tBufData* pBufData_p)
 {
-    tBufData*           pBuffer = NULL;
+    tOplkError          ret = kErrorGeneralError;
+    UINT                availBufCnt;
 
-    if (pBufAlloc_p == NULL)
-    {
-        pBuffer = NULL;
-        goto Exit;
-    }
-    if ((pBufAlloc_p->releasedBufCnt - pBufAlloc_p->allocatedBufCnt) > 0)
+    // Check if pBufAlloc_p is a valid buffer allocation instance
+    ASSERT(pBufAlloc_p != NULL);
+    ASSERT(!OPLK_MEMCMP(pBufAlloc_p->checkId, BUFALLOC_CHECKID, sizeof(BUFALLOC_CHECKID)));
+
+    // Check if output parameter pointers are valid
+    ASSERT(pBufData_p != NULL);
+
+    availBufCnt = pBufAlloc_p->releasedBufCnt - pBufAlloc_p->allocatedBufCnt;
+    if (availBufCnt > 0)
     {
         pBufAlloc_p->pBufData--;
         pBufAlloc_p->allocatedBufCnt++;
-        pBuffer = pBufAlloc_p->pBufData;
+
+        *pBufData_p = *(pBufAlloc_p->pBufData);
+
+        ret = kErrorOk;
     }
-Exit:
-    return pBuffer;
+
+    return ret;
 }
 
 //------------------------------------------------------------------------------
@@ -255,9 +250,9 @@ Exit:
 
 The function releases an allocated buffer to the buffer allocation instance.
 
-\param  pBufAlloc_p     Pointer to buffer allocation instance.
-\param  pFreeBuf_p      Pointer to buffer.
-\param  bufferNumber_p  Index number of the allocated buffer.
+\param[in,out]  pBufAlloc_p         Pointer to the buffer allocation instance.
+\param[in]      pBufData_p          Pointer to the buffer data structure that
+                                    is given back to the buffer pool.
 
 \return The function returns a tOplkError error code.
 \retval kErrorGeneralError          Not enough buffer storage in allocation instance.
@@ -266,32 +261,29 @@ The function releases an allocated buffer to the buffer allocation instance.
 \ingroup module_lib_bufalloc
 */
 //------------------------------------------------------------------------------
-tOplkError bufalloc_releaseBuffer(tBufAlloc* pBufAlloc_p, void* pFreeBuf_p, UINT bufferNumber_p)
+tOplkError bufalloc_releaseBuffer(tBufAlloc* pBufAlloc_p, const tBufData* pBufData_p)
 {
     tOplkError          ret = kErrorGeneralError;
-    UINT                bufCnt = 0;
+    UINT                availBufCnt;
 
-    if (pBufAlloc_p == NULL)
-    {
-        ret = kErrorGeneralError;
-        goto Exit;
-    }
-    if (pFreeBuf_p == NULL)
-    {
-        ret = kErrorGeneralError;
-        goto Exit;
-    }
+    // Check if pBufAlloc_p is a valid buffer allocation instance
+    ASSERT(pBufAlloc_p != NULL);
+    ASSERT(!OPLK_MEMCMP(pBufAlloc_p->checkId, BUFALLOC_CHECKID, sizeof(BUFALLOC_CHECKID)));
 
-    bufCnt = pBufAlloc_p->releasedBufCnt - pBufAlloc_p->allocatedBufCnt;
-    if (bufCnt < pBufAlloc_p->maxSize)
+    // Check if pBufData_p is a valid buffer data structure (i.e. not NULL)
+    ASSERT(pBufData_p != NULL);
+
+    availBufCnt = pBufAlloc_p->releasedBufCnt - pBufAlloc_p->allocatedBufCnt;
+    if (availBufCnt < pBufAlloc_p->maxSize)
     {
-        pBufAlloc_p->pBufData->pBuffer = pFreeBuf_p;
-        pBufAlloc_p->pBufData->bufferNumber = bufferNumber_p;
+        *(pBufAlloc_p->pBufData) = *pBufData_p;
+
         pBufAlloc_p->pBufData++;
         pBufAlloc_p->releasedBufCnt++;
+
         ret = kErrorOk;
     }
-Exit:
+
     return ret;
 }
 //============================================================================//

@@ -45,20 +45,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define BUFALLOC_CHECKID                       "bufalloc\0"
 
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
 /**
-\brief Structure describing the BufData
+\brief Structure describing the buffer data
 
-This structure describes BufData used in the buffer allocation stack.
+This structure describes the buffer data used in the buffer allocation stack.
 */
 typedef struct
 {
-    UINT    bufferNumber;                   ///< Index of buffer
-    UINT8*  pBuffer;                        ///< Buffer pointer
+    UINT        bufferNumber;               ///< Index of buffer
+    void*       pBuffer;                    ///< Buffer pointer
 } tBufData;
 
 /**
@@ -68,11 +67,11 @@ This structure describes a stack-based buffer allocation.
 */
 typedef struct
 {
+    char        checkId[8];                 ///< Verification string
     UINT        maxSize;                    ///< Maximum amount of buffers
-    UINT        releasedBufCnt;             ///< Counter of released buffer
-    UINT        allocatedBufCnt;            ///< Counter of allocated buffer
-    void*       pBufDataBegin;              ///< Pointer to the start of the buffer array
-    char        checkId[9];                 ///< Verification string
+    UINT        releasedBufCnt;             ///< Counter of released buffers
+    UINT        allocatedBufCnt;            ///< Counter of allocated buffers
+    tBufData*   pBufDataBegin;              ///< Pointer to the start of the buffer array
     tBufData*   pBufData;                   ///< Pointer to the next available buffer
 } tBufAlloc;
 
@@ -85,10 +84,10 @@ extern "C"
 #endif
 
 tBufAlloc* bufalloc_init(UINT maxBuffer_p);
-tOplkError bufalloc_addBuffer(tBufAlloc* pBufAlloc_p, void* pfreeBuf_p, UINT bufferNumber_p);
-tBufData*  bufalloc_getBuffer(tBufAlloc* pBufAlloc_p);
-tOplkError bufalloc_releaseBuffer(tBufAlloc* pBufAlloc_p, void* pfreeBuf_p, UINT bufferNumber_p);
-tOplkError bufalloc_exit(tBufAlloc* pBufAlloc_p);
+void       bufalloc_exit(tBufAlloc* pBufAlloc_p);
+tOplkError bufalloc_addBuffer(tBufAlloc* pBufAlloc_p, const tBufData* pBufData_p);
+tOplkError bufalloc_getBuffer(tBufAlloc* pBufAlloc_p, tBufData* pBufData_p);
+tOplkError bufalloc_releaseBuffer(tBufAlloc* pBufAlloc_p, const tBufData* pBufData_p);
 
 #ifdef __cplusplus
 }

@@ -661,6 +661,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     tOplkError      ret = kErrorOk;
     INT             result;
     INT             index;
+    tBufData        bufData;
 
     // clear instance structure
     OPLK_MEMSET(&edrvInstance_l, 0, sizeof(edrvInstance_l));
@@ -704,7 +705,10 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
 
     for (index = 0; index < EDRV_MAX_TX_BUFFERS; index++)
     {
-        bufalloc_addBuffer(pBufAlloc_l, edrvInstance_l.pTxBuf + (index * EDRV_MAX_FRAME_SIZE), index);
+        bufData.bufferNumber = index;
+        bufData.pBuffer = edrvInstance_l.pTxBuf + (index * EDRV_MAX_FRAME_SIZE);
+
+        bufalloc_addBuffer(pBufAlloc_l, &bufData);
     }
 
     // local MAC address might have been changed in EdrvInitOne
@@ -911,7 +915,7 @@ This function allocates a Tx buffer.
 tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
     tOplkError          ret = kErrorOk;
-    tBufData*           pBufData;
+    tBufData            bufData;
 
     if (pBuffer_p->maxBufferSize > EDRV_MAX_FRAME_SIZE)
     {
@@ -927,16 +931,17 @@ tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
     }
 
     // get a free Tx buffer from the allocation instance
-    if ((pBufData = bufalloc_getBuffer(pBufAlloc_l)) == NULL)
+    ret = bufalloc_getBuffer(pBufAlloc_l, &bufData);
+    if (ret != kErrorOk)
     {
         ret = kErrorEdrvNoFreeBufEntry;
         goto Exit;
     }
 
-    pBuffer_p->pBuffer = pBufData->pBuffer;
-    pBuffer_p->txBufferNumber.value = pBufData->bufferNumber;
+    pBuffer_p->pBuffer = bufData.pBuffer;
+    pBuffer_p->txBufferNumber.value = bufData.bufferNumber;
     pBuffer_p->maxBufferSize = EDRV_MAX_FRAME_SIZE;
-    edrvInstance_l.afTxBufUsed[pBufData->bufferNumber] = TRUE;
+    edrvInstance_l.afTxBufUsed[bufData.bufferNumber] = TRUE;
 
 Exit:
     return ret;
@@ -957,8 +962,16 @@ This function releases the Tx buffer.
 //------------------------------------------------------------------------------
 tOplkError edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
+    tOplkError  ret;
+    tBufData    bufData;
+
+    bufData.pBuffer = pBuffer_p->pBuffer;
+    bufData.bufferNumber = pBuffer_p->txBufferNumber.value;
+
     edrvInstance_l.afTxBufUsed[pBuffer_p->txBufferNumber.value] = FALSE;
-    return bufalloc_releaseBuffer(pBufAlloc_l, pBuffer_p->pBuffer, pBuffer_p->txBufferNumber.value);
+    ret = bufalloc_releaseBuffer(pBufAlloc_l, &bufData);
+
+    return ret;
 }
 
 //------------------------------------------------------------------------------
