@@ -277,6 +277,40 @@ tOplkError oplk_linkProcessImageObject(UINT objIndex_p, UINT firstSubindex_p,
 
 //------------------------------------------------------------------------------
 /**
+\brief  Copy RXPDO to the linked objects
+
+The function copies RPDO data to linked objects of the user application
+from stack buffers.
+
+\return The function returns a tOplkError error code.
+
+\ingroup module_api
+*/
+//------------------------------------------------------------------------------
+tOplkError oplk_copyRxPdoToApp(void)
+{
+    return pdou_copyRxPdoToPi();
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Forward the linked objects to the TXPDO
+
+The function copies TPDOs from the linked objects of the user application to
+the stack buffers.
+
+\return The function returns a tOplkError error code.
+
+\ingroup module_api
+*/
+//------------------------------------------------------------------------------
+tOplkError oplk_copyTxPdoFromApp(void)
+{
+    return pdou_copyTxPdoFromPi();
+}
+
+//------------------------------------------------------------------------------
+/**
 \brief  Exchange input process image
 
 The function exchanges the input process image.

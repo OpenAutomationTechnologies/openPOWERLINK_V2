@@ -573,6 +573,8 @@ OPLKDLLEXPORT tOplkError oplk_exchangeProcessImageIn(void);
 OPLKDLLEXPORT tOplkError oplk_exchangeProcessImageOut(void);
 OPLKDLLEXPORT void*      oplk_getProcessImageIn(void);
 OPLKDLLEXPORT void*      oplk_getProcessImageOut(void);
+OPLKDLLEXPORT tOplkError oplk_copyRxPdoToApp(void);
+OPLKDLLEXPORT tOplkError oplk_copyTxPdoFromApp(void);
 
 // objdict specific process image functions
 OPLKDLLEXPORT OPLK_DEPRECATED tOplkError oplk_setupProcessImage(void);
