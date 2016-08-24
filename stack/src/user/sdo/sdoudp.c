@@ -274,6 +274,16 @@ tOplkError sdoudp_initCon(tSdoConHdl* pSdoConHandle_p, UINT targetNodeId_p)
         pSdoUdpCon->port = htons(C_SDO_EPL_PORT);
         pSdoUdpCon->ipAddr = htonl(0xC0A86400 | targetNodeId_p);   // 192.168.100.uiTargetNodeId_p
 
+        ret = sdoudp_arpQuery(pSdoUdpCon->ipAddr);
+        if (ret != kErrorOk)
+        {
+            // Reset connection handle
+            pSdoUdpCon->port = 0;
+            pSdoUdpCon->ipAddr = 0;
+
+            return ret;
+        }
+
         // set handle
         *pSdoConHandle_p = (freeCon | SDO_UDP_HANDLE);
     }

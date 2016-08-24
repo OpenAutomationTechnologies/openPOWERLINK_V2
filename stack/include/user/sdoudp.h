@@ -85,6 +85,7 @@ tOplkError sdoudp_createSocket(tSdoUdpCon* pSdoUdpCon_p);
 tOplkError sdoudp_closeSocket(void);
 tOplkError sdoudp_sendToSocket(tSdoUdpCon* pSdoUdpCon_p, tPlkFrame* pSrcData_p, UINT32 dataSize_p);
 void       sdoudp_criticalSection(BOOL fEnable_p);
+tOplkError sdoudp_arpQuery(ULONG remoteIpAddr_p);
 #endif
 
 #ifdef __cplusplus

@@ -103,6 +103,8 @@ tOplkError      socketwrapper_send(tSocketWrapper pSocketWrapper_p,
                                    UINT8* pData_p, UINT dataSize_p);
 
 void            socketwrapper_criticalSection(BOOL fEnable_p);
+tOplkError      socketwrapper_arpQuery(tSocketWrapper pSocketWrapper_p,
+                                       UINT32 remoteIpAddress_p);
 
 #ifdef __cplusplus
 }

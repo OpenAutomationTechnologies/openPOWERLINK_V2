@@ -189,6 +189,7 @@ typedef enum
     kErrorSdoUdpNoFreeHandle        = 0x0054,       ///< No free connection handle for Udp
     kErrorSdoUdpSendError           = 0x0055,       ///< Error during sending of frame
     kErrorSdoUdpInvalidHdl          = 0x0056,       ///< The connection handle is invalid
+    kErrorSdoUdpArpInProgress       = 0x0057,       ///< ARP request is in progress or target node MAC unknown
 
     // area for SDO Sequence layer module 0x0060 - 0x006F
     kErrorSdoSeqMissCb              = 0x0060,       ///< No SDO callback function is assigned

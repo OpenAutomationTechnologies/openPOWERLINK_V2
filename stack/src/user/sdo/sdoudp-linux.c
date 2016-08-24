@@ -289,6 +289,30 @@ void sdoudp_criticalSection(BOOL fEnable_p)
     //TODO: Do we need critical section handling here?
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Query ARP table
+
+The function enables triggering ARP to obtain the remote node's Ethernet address.
+
+\param  remoteIpAddr_p      The remote node's IP address
+
+\return The function returns a tOplkError error code.
+\retval kErrorOk                    The Ethernet address for the given IP is known.
+\retval kErrorSdoUdpArpInProgress   The Ethernet address for the given IP is not known.
+                                    ARP has been triggered to obtain the Ethernet address.
+
+\ingroup module_sdo_udp
+*/
+//------------------------------------------------------------------------------
+tOplkError sdoudp_arpQuery(ULONG remoteIpAddr_p)
+{
+    UNUSED_PARAMETER(remoteIpAddr_p);
+
+    // The Linux network stack will take care, so no need to bother!
+    return kErrorOk;
+}
+
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
