@@ -205,10 +205,6 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
                                 __func__);
     }
 
-#if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 12)
-    pthread_setname_np(edrvInstance_l.hThread, "oplk-edrvpcap");
-#endif
-
     /* wait until thread is started */
     sem_wait(&edrvInstance_l.syncSem);
 
@@ -553,6 +549,10 @@ static void* workerThread(void* pArgument_p)
     tEdrvInstance*  pInstance = (tEdrvInstance*)pArgument_p;
     int             pcapRet;
     char            errorMessage[PCAP_ERRBUF_SIZE];
+
+#if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 12)
+    pthread_setname_np(pthread_self(), "oplk-edrvpcap");
+#endif
 
     DEBUG_LVL_EDRV_TRACE("%s(): ThreadId:%ld\n", __func__, syscall(SYS_gettid));
 

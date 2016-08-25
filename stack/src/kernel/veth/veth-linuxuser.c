@@ -174,10 +174,6 @@ tOplkError veth_init(const UINT8 aSrcMac_p[6])
     if (pthread_create(&vethInstance_l.threadHandle, NULL, vethRecvThread, (void*)&vethInstance_l) != 0)
         return kErrorNoFreeInstance;
 
-#if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 12)
-    pthread_setname_np(vethInstance_l.threadHandle, "oplk-veth");
-#endif
-
     // register callback function in DLL
     ret = dllk_regAsyncHandler(veth_receiveFrame);
 
@@ -311,6 +307,10 @@ static void* vethRecvThread(void* pArg_p)
     fd_set              readFds;
     int                 result;
     struct timeval      timeout;
+
+#if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 12)
+    pthread_setname_np(pthread_self(), "oplk-veth");
+#endif
 
     while (!pInstance->fStop)
     {

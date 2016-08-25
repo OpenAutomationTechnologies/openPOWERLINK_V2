@@ -152,10 +152,6 @@ tOplkError eventucal_init(void)
                               __func__, schedParam.sched_priority);
     }
 
-#if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 12)
-    pthread_setname_np(instance_l.threadId, "oplk-eventu");
-#endif
-
 Exit:
     return ret;
 }
@@ -307,6 +303,10 @@ static void* eventThread(void* arg_p)
     char        eventBuf[sizeof(tEvent) + MAX_EVENT_ARG_SIZE];
 
     UNUSED_PARAMETER(arg_p);
+
+#if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 12)
+    pthread_setname_np(pthread_self(), "oplk-eventu");
+#endif
 
     pEvent = (tEvent*)eventBuf;
 

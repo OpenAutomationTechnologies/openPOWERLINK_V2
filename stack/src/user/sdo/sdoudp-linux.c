@@ -187,10 +187,6 @@ tOplkError sdoudp_createSocket(tSdoUdpCon* pSdoUdpCon_p)
     if (pthread_create(&instance_l.threadHandle, NULL, sdoUdpThread, (void*)&instance_l) != 0)
         return kErrorSdoUdpThreadError;
 
-#if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 12)
-    pthread_setname_np(instance_l.threadHandle, "oplk-sdoudp");
-#endif
-
     return kErrorOk;
 }
 
@@ -353,6 +349,10 @@ static tThreadResult sdoUdpThread(tThreadArg pArg_p)
     fd_set                  readFds;
     int                     result;
     struct timeval          timeout;
+
+#if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 12)
+    pthread_setname_np(pthread_self(), "oplk-sdoudp");
+#endif
 
     pInstance = (tSdoUdpSocketInstance*)pArg_p;
 
