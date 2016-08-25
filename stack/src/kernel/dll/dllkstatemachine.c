@@ -305,6 +305,10 @@ static tOplkError processNmtMsPreop1(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
             // go ahead and send SoA
             ret = dllkframe_mnSendSoa(nmtState_p, &DummyDllState,
                                       (dllkInstance_g.cycleCount >= C_DLL_PREOP1_START_CYCLES));
+            if (ret != kErrorOk)
+            {
+                DEBUG_LVL_ERROR_TRACE("%s send SoA failed failed with 0x%X\n", __func__, ret);
+            }
 
             // increment cycle counter to detect if C_DLL_PREOP1_START_CYCLES empty cycles are elapsed
             dllkInstance_g.cycleCount++;

@@ -152,6 +152,11 @@ tOplkError dllknode_cleanupLocalNode(tNmtState oldNmtState_p)
 
     // remove all filters from Edrv
     ret = edrv_changeRxFilter(NULL, 0, 0, 0);
+    if (ret != kErrorOk)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s remove all filters failed with 0x%X\n",
+                              __func__, ret);
+    }
 
     // delete timer
 #if CONFIG_TIMER_USE_HIGHRES != FALSE

@@ -298,6 +298,11 @@ tOplkError pdou_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
                      mapParamIndex++)
                 {
                     ret = checkAndConfigurePdo(mapParamIndex, 0, &abortCode);
+                    if (ret != kErrorOk)
+                    {
+                        DEBUG_LVL_ERROR_TRACE("%s checkAndConfigurePdo for RPDO failed with 0x%X\n",
+                                              __func__, ret);
+                    }
                 }
 
                 for (mapParamIndex = PDOU_OBD_IDX_TX_MAPP_PARAM;
@@ -310,6 +315,11 @@ tOplkError pdou_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
                      mapParamIndex++)
                 {
                     ret = checkAndConfigurePdo(mapParamIndex, 0, &abortCode);
+                    if (ret != kErrorOk)
+                    {
+                        DEBUG_LVL_ERROR_TRACE("%s checkAndConfigurePdo for TPDO failed with 0x%X\n",
+                                              __func__, ret);
+                    }
                 }
 
                 ret = kErrorOk;
@@ -474,6 +484,11 @@ tOplkError pdou_copyRxPdoToPi(void)
         }
 
         ret = pdoucal_getRxPdo(&pPdo, channelId, pPdoChannel->nextChannelOffset - pPdoChannel->offset);
+        if (ret != kErrorOk)
+        {
+            DEBUG_LVL_ERROR_TRACE("%s pdoucal_getRxPdo failed with 0x%X\n",
+                                  __func__, ret);
+        }
 
         //TRACE("%s() Channel:%d Node:%d pPdo:%p\n", __func__, channelId, pPdoChannel->nodeId, pPdo);
 
@@ -1487,8 +1502,11 @@ static tOplkError checkAndSetObjectMapping(QWORD objectMapping_p,
     if (obdSize < byteSize)
     {   // object does not exist or has smaller size
         *pAbortCode_p = SDO_AC_GENERAL_ERROR;
-        ret = kErrorPdoSizeMismatch;
-        // todo really don't want to exit here?
+
+        DEBUG_LVL_ERROR_TRACE("%s obdu_getDataSize for 0x%X/%X returned size %d (should be %d)\n",
+                              __func__, index, subIndex, obdSize, byteSize);
+
+        //TODO: Really don't want to exit here with kErrorPdoSizeMismatch?
     }
 
     ret = obdu_isNumerical(index, subIndex, &fNumerical);

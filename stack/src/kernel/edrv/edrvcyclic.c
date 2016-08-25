@@ -365,9 +365,19 @@ tOplkError edrvcyclic_stopCycle(BOOL fKeepCycle_p)
     if (!fKeepCycle_p)
     {
         ret = hrestimer_deleteTimer(&edrvcyclicInstance_l.timerHdlCycle);
+        if (ret != kErrorOk)
+        {
+            DEBUG_LVL_ERROR_TRACE("%s delete cycle timer failed with 0x%X\n",
+                                  __func__, ret);
+        }
     }
 #if (EDRV_USE_TTTX == FALSE)
     ret = hrestimer_deleteTimer(&edrvcyclicInstance_l.timerHdlSlot);
+    if (ret != kErrorOk)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s delete cycle timer failed with 0x%X\n",
+                              __func__, ret);
+    }
 #endif
 
     // clear current and next Tx buffer list

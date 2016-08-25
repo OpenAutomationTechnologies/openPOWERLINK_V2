@@ -2019,6 +2019,10 @@ static tOplkError doPreop1(tEventNmtStateChange nmtStateChange_p)
 
     // start network scan
     ret = startBootStep1(fNmtResetAllIssued);
+    if (ret != kErrorOk)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s startBootStep1 failed with 0x%X\n", __func__, ret);
+    }
 
     // start timer for 0x1F89/2 MNTimeoutPreOp1_U32
     obdSize = sizeof(dwTimeout);
@@ -3626,7 +3630,18 @@ static tOplkError reset(void)
     for (index = 1; index <= tabentries(nmtMnuInstance_g.aNodeInfo); index++)
     {
         ret = timeru_deleteTimer(&NMTMNU_GET_NODEINFO(index)->timerHdlStatReq);
+        if (ret != kErrorOk)
+        {
+            DEBUG_LVL_ERROR_TRACE("%s delete StatReq timer failed with 0x%X\n",
+                                  __func__, ret);
+        }
+
         ret = timeru_deleteTimer(&NMTMNU_GET_NODEINFO(index)->timerHdlLonger);
+        if (ret != kErrorOk)
+        {
+            DEBUG_LVL_ERROR_TRACE("%s delete Longer timer failed with 0x%X\n",
+                                  __func__, ret);
+        }
     }
 
     nmtMnuInstance_g.prcPResMnTimeoutNs = 0;

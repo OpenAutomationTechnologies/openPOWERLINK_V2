@@ -506,62 +506,112 @@ tOplkError ctrlu_shutdownStack(void)
 
 #if defined(CONFIG_INCLUDE_CFM)
     ret = cfmu_exit();
-    DEBUG_LVL_CTRL_TRACE("cfmu_exit():    0x%X\n", ret);
+    if (ret != kErrorOk)
+    {
+        DEBUG_LVL_ERROR_TRACE("cfmu_exit():    0x%X\n", ret);
+    }
 #endif
 
 #if defined(CONFIG_INCLUDE_SDOS) || defined(CONFIG_INCLUDE_SDOC)
     ret = sdocom_exit();
-    DEBUG_LVL_CTRL_TRACE("sdocom_exit():  0x%X\n", ret);
+    if (ret != kErrorOk)
+    {
+        DEBUG_LVL_ERROR_TRACE("sdocom_exit():  0x%X\n", ret);
+    }
 #endif
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
     ret = nmtmnu_exit();
-    DEBUG_LVL_CTRL_TRACE("nmtmnu_exit():  0x%X\n", ret);
+    if (ret != kErrorOk)
+    {
+        DEBUG_LVL_ERROR_TRACE("nmtmnu_exit():  0x%X\n", ret);
+    }
 
     ret = identu_exit();
-    DEBUG_LVL_CTRL_TRACE("identu_exit():  0x%X\n", ret);
+    if (ret != kErrorOk)
+    {
+        DEBUG_LVL_ERROR_TRACE("identu_exit():  0x%X\n", ret);
+    }
 
     ret = statusu_exit();
-    DEBUG_LVL_CTRL_TRACE("statusu_exit():  0x%X\n", ret);
+    if (ret != kErrorOk)
+    {
+        DEBUG_LVL_ERROR_TRACE("statusu_exit(): 0x%X\n", ret);
+    }
 
     ret = syncu_exit();
+    if (ret != kErrorOk)
+    {
+        DEBUG_LVL_ERROR_TRACE("syncu_exit():   0x%X\n", ret);
+    }
 #endif
 
     ret = nmtcnu_exit();
-    DEBUG_LVL_CTRL_TRACE("nmtcnu_exit():  0x%X\n", ret);
+    if (ret != kErrorOk)
+    {
+        DEBUG_LVL_ERROR_TRACE("nmtcnu_exit():  0x%X\n", ret);
+    }
 
     ret = nmtu_exit();
-    DEBUG_LVL_CTRL_TRACE("nmtu_exit():    0x%X\n", ret);
+    if (ret != kErrorOk)
+    {
+        DEBUG_LVL_ERROR_TRACE("nmtu_exit():    0x%X\n", ret);
+    }
 
     timesyncu_exit();
-    DEBUG_LVL_CTRL_TRACE("timesyncu_exit()\n");
 
 #if defined(CONFIG_INCLUDE_PDO)
     ret = pdou_exit();
-    DEBUG_LVL_CTRL_TRACE("pdou_exit():    0x%X\n", ret);
+    if (ret != kErrorOk)
+    {
+        DEBUG_LVL_ERROR_TRACE("pdou_exit():    0x%X\n", ret);
+    }
 #endif
 
     ret = eventu_exit();
-    DEBUG_LVL_CTRL_TRACE("eventu_exit():  0x%X\n", ret);
+    if (ret != kErrorOk)
+    {
+        DEBUG_LVL_ERROR_TRACE("eventu_exit():  0x%X\n", ret);
+    }
 
     ret = dllucal_exit();
-    DEBUG_LVL_CTRL_TRACE("dllucal_exit(): 0x%X\n", ret);
+    if (ret != kErrorOk)
+    {
+        DEBUG_LVL_ERROR_TRACE("dllucal_exit(): 0x%X\n", ret);
+    }
 
     ret = errhndu_exit();
-    DEBUG_LVL_CTRL_TRACE("errhndu_exit():  0x%X\n", ret);
+    if (ret != kErrorOk)
+    {
+        DEBUG_LVL_ERROR_TRACE("errhndu_exit(): 0x%X\n", ret);
+    }
 
     ret = timeru_exit();
-    DEBUG_LVL_CTRL_TRACE("timeru_exit():  0x%X\n", ret);
+    if (ret != kErrorOk)
+    {
+        DEBUG_LVL_ERROR_TRACE("timeru_exit():  0x%X\n", ret);
+    }
 
     /* shutdown kernel stack */
     ret = ctrlucal_executeCmd(kCtrlCleanupStack, &retVal);
-    DEBUG_LVL_CTRL_TRACE("shoutdown kernel modules():  0x%X\n", ret);
+    if (ret != kErrorOk)
+    {
+        DEBUG_LVL_ERROR_TRACE("shutdown kernel modules():  0x%X\n", ret);
+    }
 
     ret = obdal_exit();
-    DEBUG_LVL_CTRL_TRACE("obdal_exit():  0x%X\n", ret);
+    if (ret != kErrorOk)
+    {
+        DEBUG_LVL_ERROR_TRACE("obdal_exit():   0x%X\n", ret);
+    }
 
 #if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
     ret = obdu_storeLoadObjCallback(NULL);
+    if (ret != kErrorOk)
+    {
+        DEBUG_LVL_ERROR_TRACE("obdu_storeLoadObjCallback(): 0x%X\n", ret);
+    }
+
     obdconf_exit();
 #endif
 
@@ -570,6 +620,10 @@ tOplkError ctrlu_shutdownStack(void)
 #endif
 
     ret = obdu_exit();
+    if (ret != kErrorOk)
+    {
+        DEBUG_LVL_ERROR_TRACE("obdu_exit():    0x%X\n", ret);
+    }
 
     return ret;
 }

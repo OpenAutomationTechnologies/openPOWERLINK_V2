@@ -815,6 +815,11 @@ static tOplkError handleMnCnLossPres(tEvent* pEvent_p)
             nodeOpParam.opNodeType = kDllNodeOpTypeIsochronous;
             nodeOpParam.nodeId = pErrorHandlerEvent->nodeId;
             ret = dllk_deleteNode(&nodeOpParam);
+            if (ret != kErrorOk)
+            {
+                DEBUG_LVL_ERROR_TRACE("%s remove node %d from isochronous phase failed with 0x%X\n",
+                                      __func__, nodeOpParam.nodeId, ret);
+            }
 
             // inform NmtMnu module about state change, which shall send
             // NMT command ResetNode to this CN
