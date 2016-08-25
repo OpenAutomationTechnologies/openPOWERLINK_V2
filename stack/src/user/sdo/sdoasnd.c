@@ -126,7 +126,7 @@ tOplkError sdoasnd_init(tSequLayerReceiveCb pfnReceiveCb_p)
     }
     else
     {
-        ret = kErrorSdoUdpMissCb;
+        return kErrorSdoUdpMissCb; //TODO: Wrong error code?
     }
 
     ret = dllucal_regAsndService(kDllAsndSdo, sdoAsndCb, kDllAsndFilterLocal);
