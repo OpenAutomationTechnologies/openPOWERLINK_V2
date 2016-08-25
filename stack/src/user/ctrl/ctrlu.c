@@ -1226,12 +1226,10 @@ by calling the event callback function.
 //------------------------------------------------------------------------------
 static tOplkError processUserEvent(tEvent* pEvent_p)
 {
-    tOplkError          ret;
+    tOplkError          ret = kErrorOk;
     tEventError*        pEventError;
     tOplkApiEventType   eventType;
     tOplkApiEventArg    apiEventArg;
-
-    ret = kErrorOk;
 
     switch (pEvent_p->eventType)
     {
@@ -1920,10 +1918,8 @@ The function implements the callback function for node events.
 static tOplkError cbNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtState nmtState_p,
                               UINT16 errorCode_p, BOOL fMandatory_p)
 {
-    tOplkError              ret;
+    tOplkError              ret = kErrorOk;
     tOplkApiEventArg        eventArg;
-
-    ret = kErrorOk;
 
     // call user callback
     eventArg.nodeEvent.nodeId = nodeId_p;
@@ -1960,10 +1956,8 @@ The function implements the callback function for node events.
 static tOplkError cbBootEvent(tNmtBootEvent bootEvent_p, tNmtState nmtState_p,
                               UINT16 errorCode_p)
 {
-    tOplkError              ret;
+    tOplkError              ret = kErrorOk;
     tOplkApiEventArg        eventArg;
-
-    ret = kErrorOk;
 
     // call user callback
     eventArg.bootEvent.bootEvent = bootEvent_p;
@@ -1989,10 +1983,8 @@ The function implements the callback function for CFM progress events.
 //------------------------------------------------------------------------------
 static tOplkError cbCfmEventCnProgress(tCfmEventCnProgress* pEventCnProgress_p)
 {
-    tOplkError              ret;
+    tOplkError              ret = kErrorOk;
     tOplkApiEventArg        eventArg;
-
-    ret = kErrorOk;
 
     eventArg.cfmProgress = *pEventCnProgress_p;
     ret = ctrlu_callUserEventCallback(kOplkApiEventCfmProgress, &eventArg);

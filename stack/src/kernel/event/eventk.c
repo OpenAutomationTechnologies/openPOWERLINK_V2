@@ -299,11 +299,9 @@ This function posts an error event to the API module.
 tOplkError eventk_postError(tEventSource eventSource_p, tOplkError oplkError_p,
                             UINT argSize_p, void* pArg_p)
 {
-    tOplkError          ret;
+    tOplkError          ret = kErrorOk;
     tEventError         eventError;
     tEvent              oplkEvent;
-
-    ret = kErrorOk;
 
     // create argument
     eventError.eventSource = eventSource_p;

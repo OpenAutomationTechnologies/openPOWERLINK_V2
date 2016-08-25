@@ -4098,13 +4098,12 @@ The function performs the shift phase for PRC node insertion.
 //------------------------------------------------------------------------------
 static tOplkError prcShift(UINT nodeIdPrevShift_p)
 {
-    tOplkError          ret;
+    tOplkError          ret = kErrorOk;
     UINT                nodeId;
     tNmtMnuNodeInfo*    pNodeInfo;
     tDllSyncRequest     syncRequestData;
     UINT                size;
 
-    ret = kErrorOk;
     if (nodeIdPrevShift_p == C_ADR_INVALID)
         nodeIdPrevShift_p = 254;
 
@@ -4202,7 +4201,7 @@ The function performs the add phase of a PRC node insertion.
 //------------------------------------------------------------------------------
 static tOplkError prcAdd(UINT nodeIdPrevAdd_p)
 {
-    tOplkError          ret;
+    tOplkError          ret = kErrorOk;
     tObdSize            obdSize;
     UINT32              cycleLenUs;
     UINT32              cNLossOfSocToleranceNs;
@@ -4212,7 +4211,6 @@ static tOplkError prcAdd(UINT nodeIdPrevAdd_p)
     UINT                syncReqNum;
     tNmtMnuNodeInfo*    pNodeInfoLastSyncReq;
 
-    ret = kErrorOk;
     // prepare SyncReq
     syncReqData.syncControl = PLK_SYNC_PRES_MODE_SET |
                                   PLK_SYNC_PRES_TIME_FIRST_VALID |

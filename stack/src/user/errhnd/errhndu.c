@@ -119,9 +119,7 @@ The function initializes the user error handler module.
 //------------------------------------------------------------------------------
 tOplkError errhndu_init(void)
 {
-    tOplkError      ret;
-
-    ret = kErrorOk;
+    tOplkError      ret = kErrorOk;
 
     ret = errhnducal_init(&instance_l.errorObjects);
     if (ret != kErrorOk)

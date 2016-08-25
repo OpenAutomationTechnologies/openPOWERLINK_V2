@@ -138,9 +138,8 @@ The function initializes the kernel error handler module.
 //------------------------------------------------------------------------------
 tOplkError errhndk_init(void)
 {
-    tOplkError      ret;
+    tOplkError      ret = kErrorOk;
 
-    ret = kErrorOk;
     instance_l.dllErrorEvents = 0;
 
     ret = errhndkcal_init();
@@ -182,9 +181,7 @@ It will be called by the DLL.
 //------------------------------------------------------------------------------
 tOplkError errhndk_process(tEvent* pEvent_p)
 {
-    tOplkError              ret;
-
-    ret = kErrorOk;
+    tOplkError              ret = kErrorOk;
 
     switch (pEvent_p->eventType)
     {

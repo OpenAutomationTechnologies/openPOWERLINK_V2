@@ -235,11 +235,9 @@ The function sends data via an existing SDO over ASnd connection.
 //------------------------------------------------------------------------------
 tOplkError sdoasnd_sendData(tSdoConHdl sdoConHandle_p, tPlkFrame* pSrcData_p, UINT32 dataSize_p)
 {
-    tOplkError      ret;
+    tOplkError      ret = kErrorOk;
     UINT            array;
     tFrameInfo      frameInfo;
-
-    ret = kErrorOk;
 
     array = (sdoConHandle_p & ~SDO_ASY_HANDLE_MASK);
 
