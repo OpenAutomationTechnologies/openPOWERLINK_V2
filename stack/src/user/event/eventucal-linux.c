@@ -163,10 +163,6 @@ tOplkError eventucal_init(void)
                               __func__, schedParam.sched_priority);
     }
 
-#if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 12)
-    pthread_setname_np(instance_l.threadId, "oplk-eventu");
-#endif
-
     instance_l.fInitialized = TRUE;
     return kErrorOk;
 
@@ -320,6 +316,10 @@ static void* eventThread(void* arg)
 {
     struct timespec         curTime, timeout;
     tEventuCalInstance*     pInstance = (tEventuCalInstance*)arg;
+
+#if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 12)
+    pthread_setname_np(pthread_self(), "oplk-eventu");
+#endif
 
     while (!pInstance->fStopThread)
     {

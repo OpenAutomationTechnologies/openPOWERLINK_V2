@@ -163,10 +163,6 @@ tOplkError timeru_init(void)
                                 __func__);
     }
 
-#if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 12)
-    pthread_setname_np(timeruInstance_g.processThread, "oplk-timeru");
-#endif
-
     return kErrorOk;
 }
 
@@ -467,6 +463,10 @@ static void* processThread(void* pArgument_p)
     siginfo_t       signalInfo;
 
     UNUSED_PARAMETER(pArgument_p);
+
+#if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 12)
+    pthread_setname_np(pthread_self(), "oplk-timeru");
+#endif
 
     // Uncomment to show the thread ID on Linux (include must also be uncommented)!
     // DEBUG_LVL_TIMERU_TRACE("%s() ThreadId:%d\n", __func__, syscall(SYS_gettid));

@@ -169,10 +169,6 @@ tOplkError eventucal_init(void)
                               __func__, schedParam.sched_priority);
     }
 
-#if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 12)
-    pthread_setname_np(instance_l.kernelEventThreadId, "oplk-eventufetch");
-#endif
-
     // Create thread for processing pending user data
     if (pthread_create(&instance_l.processEventThreadId, NULL, eventProcessThread, NULL) != 0)
         goto Exit;
@@ -184,9 +180,6 @@ tOplkError eventucal_init(void)
                               __func__, schedParam.sched_priority);
     }
 
-#if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 12)
-    pthread_setname_np(instance_l.processEventThreadId, "oplk-eventuprocess");
-#endif
     instance_l.fInitialized = TRUE;
     return kErrorOk;
 
@@ -370,6 +363,10 @@ static void* k2uEventFetchThread(void* pArg_p)
 
     UNUSED_PARAMETER(pArg_p);
 
+#if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 12)
+    pthread_setname_np(pthread_self(), "oplk-eventufetch");
+#endif
+
     while (!instance_l.fStopKernelThread)
     {
         ret = ioctl(instance_l.fd, PLK_CMD_GET_EVENT, pEvent);
@@ -419,6 +416,10 @@ static void* eventProcessThread(void* pArg_p)
     struct timespec         timeout;
 
     UNUSED_PARAMETER(pArg_p);
+
+#if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 12)
+    pthread_setname_np(pthread_self(), "oplk-eventuprocess");
+#endif
 
     while (!instance_l.fStopProcessThread)
     {

@@ -179,10 +179,6 @@ tOplkError hrestimer_init(void)
         return kErrorNoResource;
     }
 
-#if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 12)
-    pthread_setname_np(hresTimerInstance_l.threadId, "oplk-hrtimer");
-#endif
-
     return ret;
 }
 
@@ -461,6 +457,10 @@ static void* timerThread(void* pParm_p)
     siginfo_t                           signalInfo;
 
     UNUSED_PARAMETER(pParm_p);
+
+#if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 12)
+    pthread_setname_np(pthread_self(), "oplk-hrtimer");
+#endif
 
     DEBUG_LVL_TIMERH_TRACE("%s(): ThreadId:%ld\n", __func__, syscall(SYS_gettid));
 

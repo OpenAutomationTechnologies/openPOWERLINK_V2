@@ -266,10 +266,6 @@ void system_startSyncThread(tSyncCb pfnSync_p)
         fprintf(stderr, "pthread_create() failed with \"%d\"\n", ret);
         return;
     }
-
-#if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 12)
-    pthread_setname_np(syncThreadId_l, "oplkdemo-sync");
-#endif
 }
 
 //------------------------------------------------------------------------------
@@ -330,6 +326,10 @@ This function implements the synchronous application thread.
 static void* powerlinkSyncThread(void* arg)
 {
     tSyncThreadInstance*     pSyncThreadInstance = (tSyncThreadInstance*)arg;
+
+#if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 12)
+    pthread_setname_np(pthread_self(), "oplkdemo-sync");
+#endif
 
     printf("Synchronous data thread is starting...\n");
     while (!pSyncThreadInstance->fTerminate)
