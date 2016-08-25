@@ -135,7 +135,7 @@ tOplkError errhndu_init(void)
         goto Exit;
     }
 
-    ret = linkErrorCounter(&instance_l.errorObjects.cnLossPreq, OID_DLL_CN_LOSSPREQ_REC);
+    linkErrorCounter(&instance_l.errorObjects.cnLossPreq, OID_DLL_CN_LOSSPREQ_REC);
     // ignore return code, because object 0x1C0D is conditional
 
     ret = linkErrorCounter(&instance_l.errorObjects.cnCrcErr, OID_DLL_CN_CRCERROR_REC);

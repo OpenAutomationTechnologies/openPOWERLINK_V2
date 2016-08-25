@@ -1836,10 +1836,10 @@ static tOplkError resetRedundancy(void)
     tNmtMnuNodeInfo*    pNodeInfo;
     UINT8               count;
 
-    ret = identu_reset();
-    ret = statusu_reset();
-    ret = syncu_reset();
-    ret = reset(); // reset timers
+    identu_reset();
+    statusu_reset();
+    syncu_reset();
+    reset(); // reset timers
 
     // read number of nodes from object 0x1F81/0
     obdSize = sizeof(count);
@@ -1975,12 +1975,10 @@ static tOplkError doPreop1(tEventNmtStateChange nmtStateChange_p)
     tOplkError      ret = kErrorOk;
 
     // reset IdentResponses and running IdentRequests and StatusRequests
-    ret = identu_reset();
-    ret = statusu_reset();
-    ret = syncu_reset();
-
-    // reset timers
-    ret = reset();
+    identu_reset();
+    statusu_reset();
+    syncu_reset();
+    reset(); // reset timers
 
     // 2008/11/18 d.k. reset internal node info is not necessary,
     //                 because timer flags are important and other

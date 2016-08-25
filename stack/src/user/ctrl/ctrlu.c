@@ -1244,7 +1244,7 @@ static tOplkError processUserEvent(tEvent* pEvent_p)
                 case kEventSourceDllk:
                     eventType = kOplkApiEventCriticalError;
                     // halt the stack by entering NMT state Off
-                    ret = nmtu_postNmtEvent(kNmtEventCriticalError);
+                    nmtu_postNmtEvent(kNmtEventCriticalError);
                     break;
 
                 // the other errors are just warnings
@@ -1254,7 +1254,7 @@ static tOplkError processUserEvent(tEvent* pEvent_p)
             }
 
             // call user callback
-            ret = ctrlu_callUserEventCallback(eventType, (tOplkApiEventArg*)pEventError);
+            ctrlu_callUserEventCallback(eventType, (tOplkApiEventArg*)pEventError);
             // discard error from callback function, because this could generate an endless loop
             ret = kErrorOk;
             break;
@@ -1777,8 +1777,7 @@ static tOplkError handleObdVerifyConf(tObdCbParam MEM* pParam_p)
         UINT32  verifyConfInvalid = 0;
 
         // Set CFM_VerifyConfiguration_REC.VerifyConfInvalid_U32 to 0
-        ret = obdu_writeEntry(0x1020, 4, &verifyConfInvalid, 4);
-
+        obdu_writeEntry(0x1020, 4, &verifyConfInvalid, 4);
         // ignore any error because this object is optional
         ret = kErrorOk;
     }

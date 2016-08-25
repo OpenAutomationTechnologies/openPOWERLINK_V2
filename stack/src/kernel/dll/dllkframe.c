@@ -340,7 +340,7 @@ Exit:
         BENCHMARK_MOD_02_TOGGLE(7);
         arg = dllkInstance_g.dllState | (nmtEvent << 8);
         // Error event for API layer
-        ret = eventk_postError(kEventSourceDllk, ret, sizeof(arg), &arg);
+        eventk_postError(kEventSourceDllk, ret, sizeof(arg), &arg);
     }
     BENCHMARK_MOD_02_RESET(3);
     TGT_DLLK_LEAVE_CRITICAL_SECTION()
@@ -443,7 +443,7 @@ Exit:
     {
         BENCHMARK_MOD_02_TOGGLE(7);
         arg = dllkInstance_g.dllState | (handle << 16);
-        ret = eventk_postError(kEventSourceDllk, ret, sizeof(arg), &arg);
+        eventk_postError(kEventSourceDllk, ret, sizeof(arg), &arg);
     }
 
     TGT_DLLK_LEAVE_CRITICAL_SECTION()
@@ -517,7 +517,7 @@ Exit:
     {
         BENCHMARK_MOD_02_TOGGLE(7);
         arg = dllkInstance_g.dllState | (handle << 16);
-        ret = eventk_postError(kEventSourceDllk, ret, sizeof(arg), &arg);
+        eventk_postError(kEventSourceDllk, ret, sizeof(arg), &arg);
     }
     TGT_DLLK_LEAVE_CRITICAL_SECTION()
     return;
@@ -1158,7 +1158,7 @@ Exit:
     {
         BENCHMARK_MOD_02_TOGGLE(7);
         arg = dllkInstance_g.dllState | (handle << 16);
-        ret = eventk_postError(kEventSourceDllk, ret, sizeof(arg), &arg);
+        eventk_postError(kEventSourceDllk, ret, sizeof(arg), &arg);
     }
     TGT_DLLK_LEAVE_CRITICAL_SECTION()
     return;
@@ -1304,7 +1304,7 @@ Exit:
     {
         BENCHMARK_MOD_02_TOGGLE(7);
         arg = dllkInstance_g.dllState | (handle << 16);
-        ret = eventk_postError(kEventSourceDllk, ret, sizeof(arg), &arg);
+        eventk_postError(kEventSourceDllk, ret, sizeof(arg), &arg);
     }
     TGT_DLLK_LEAVE_CRITICAL_SECTION()
     return;
