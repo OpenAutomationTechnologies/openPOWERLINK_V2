@@ -9,7 +9,7 @@ buffer library.
 
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_circbuf_circbuf_arch_H_
 #define _INC_circbuf_circbuf_arch_H_
 
@@ -74,4 +73,3 @@ void              circbuf_unlock(tCircBufInstance* pInstance_p) SECTION_CIRCBUF_
 #endif
 
 #endif /* _INC_circbuf_circbuf_arch_H_ */
-

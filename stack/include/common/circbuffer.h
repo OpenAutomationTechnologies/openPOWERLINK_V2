@@ -129,11 +129,11 @@ tCircBufError circbuf_writeMultipleData(tCircBufInstance* pInstance_p, const voi
 tCircBufError circbuf_readData(tCircBufInstance* pInstance_p, void* pData_p,
                                size_t size_p, size_t* pDataBlockSize_p)
                                SECTION_CIRCBUF_READ_DATA;
-UINT32        circbuf_getDataCount(tCircBufInstance* pInstance_p);
+UINT32        circbuf_getDataCount(const tCircBufInstance* pInstance_p);
 tCircBufError circBuf_setSignaling(tCircBufInstance* pInstance_p, VOIDFUNCPTR pfnSigCb_p);
 
 #ifdef DEBUG_CIRCBUF_SIZE_CHECK
-UINT32        circbuf_getMaxSize(tCircBufInstance* pInstance_p);
+UINT32        circbuf_getMaxSize(const tCircBufInstance* pInstance_p);
 #endif
 
 #ifdef __cplusplus

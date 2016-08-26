@@ -96,7 +96,7 @@ const tHostifInstanceId hostifInstance[NR_OF_CIRC_BUFFERS] =
         kHostifInstIdTxVethQueue,   ///< Queue for sending virtual Ethernet frames in the DLLCAL
 };
 
-#if CONFIG_HOSTIF_PCP == TRUE
+#if (CONFIG_HOSTIF_PCP == TRUE)
 #define CIRCBUF_HOSTIF_LOCK_LOCAL       0
 #define CIRCBUF_HOSTIF_LOCK_OTHER       1
 #else
@@ -152,10 +152,10 @@ tCircBufInstance        instance_l[NR_OF_CIRC_BUFFERS];
 
 The function allocates the memory needed for the circular buffer instance.
 
-\param  id_p                ID of the circular buffer.
-\param  fNew_p              The parameter determines if a new circular buffer
-                            instance should be created (TRUE) or if it should
-                            connect to an existing instance (FALSE).
+\param[in]      id_p                ID of the circular buffer.
+\param[in]      fNew_p              The parameter determines if a new circular buffer
+                                    instance should be created (TRUE) or if it should
+                                    connect to an existing instance (FALSE).
 
 \return The function returns the pointer to the buffer instance or NULL on error.
 
@@ -201,7 +201,7 @@ tCircBufInstance* circbuf_createInstance(UINT8 id_p, BOOL fNew_p)
 
 The function frees the allocated memory used by the circular buffer instance.
 
-\param  pInstance_p         Pointer to circular buffer instance.
+\param[in]      pInstance_p         Pointer to circular buffer instance.
 
 \ingroup module_lib_circbuf
 */
@@ -220,9 +220,9 @@ The function allocates the memory needed for the circular buffer.
 Circular buffer instances for host interface use memory buffers provided by
 hostif drivers. All other instances are allocated locally.
 
-\param  pInstance_p         Pointer to the circular buffer instance.
-\param  pSize_p             Size of memory to allocate.
-                            Returns the actually allocated buffer size.
+\param[in]      pInstance_p         Pointer to the circular buffer instance.
+\param[in,out]  pSize_p             Size of memory to allocate.
+                                    Returns the actually allocated buffer size.
 
 \return The function returns a tCircBufError error code.
 
@@ -231,14 +231,20 @@ hostif drivers. All other instances are allocated locally.
 //------------------------------------------------------------------------------
 tCircBufError circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t* pSize_p)
 {
-    size_t size = *pSize_p;
+    size_t size;
+
+    // Check parameter validity
+    ASSERT(pInstance_p != NULL);
+    ASSERT(pSize_p != NULL);
+
+    size = *pSize_p;
 
     if (pInstance_p->pCircBufArchInstance == NULL)
     {
         // Allocate requested size + header
         size += sizeof(tCircBufHeader);
 
-        pInstance_p->pCircBufHeader = OPLK_MALLOC(size);
+        pInstance_p->pCircBufHeader = (tCircBufHeader*)OPLK_MALLOC(size);
 
         if (pInstance_p->pCircBufHeader == NULL)
         {
@@ -297,13 +303,16 @@ tCircBufError circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t* pSize_p
 
 The function frees the allocated memory used by the circular buffer.
 
-\param  pInstance_p         Pointer to circular buffer instance.
+\param[in]      pInstance_p         Pointer to circular buffer instance.
 
 \ingroup module_lib_circbuf
 */
 //------------------------------------------------------------------------------
 void circbuf_freeBuffer(tCircBufInstance* pInstance_p)
 {
+    // Check parameter validity
+    ASSERT(pInstance_p != NULL);
+
     if (pInstance_p->pCircBufArchInstance == NULL)
         OPLK_FREE(pInstance_p->pCircBufHeader);
 }
@@ -314,7 +323,7 @@ void circbuf_freeBuffer(tCircBufInstance* pInstance_p)
 
 The function connects the calling thread to the circular buffer.
 
-\param  pInstance_p         Pointer to circular buffer instance.
+\param[in]      pInstance_p         Pointer to circular buffer instance.
 
 \return The function returns a tCircBufError error code.
 
@@ -323,6 +332,9 @@ The function connects the calling thread to the circular buffer.
 //------------------------------------------------------------------------------
 tCircBufError circbuf_connectBuffer(tCircBufInstance* pInstance_p)
 {
+    // Check parameter validity
+    ASSERT(pInstance_p != NULL);
+
     if (pInstance_p->pCircBufArchInstance != NULL)
     {   // Queue must use host interface
         tHostifReturn           ret;
@@ -356,7 +368,7 @@ tCircBufError circbuf_connectBuffer(tCircBufInstance* pInstance_p)
 
 The function disconnects the calling thread from the circular buffer.
 
-\param  pInstance_p         Pointer to circular buffer instance.
+\param[in]      pInstance_p         Pointer to circular buffer instance.
 
 \ingroup module_lib_circbuf
 */
@@ -375,13 +387,16 @@ The function enters a locked section of the circular buffer.
 The locking between two processors is achieved using Peterson's algorithm
 (https://en.wikipedia.org/wiki/Peterson's_algorithm).
 
-\param  pInstance_p         Pointer to circular buffer instance.
+\param[in]      pInstance_p         Pointer to circular buffer instance.
 
 \ingroup module_lib_circbuf
 */
 //------------------------------------------------------------------------------
 void circbuf_lock(tCircBufInstance* pInstance_p)
 {
+    // Check parameter validity
+    ASSERT(pInstance_p != NULL);
+
     if (pInstance_p->pCircBufArchInstance != NULL)
     {
         tCircBufHostiBuffer*    pHostifBuf = GET_QUEUE_BUF_BASE(pInstance_p->pCircBufHeader);
@@ -417,13 +432,16 @@ void circbuf_lock(tCircBufInstance* pInstance_p)
 
 The function leaves a locked section of the circular buffer.
 
-\param  pInstance_p         Pointer to circular buffer instance.
+\param[in]      pInstance_p         Pointer to circular buffer instance.
 
 \ingroup module_lib_circbuf
 */
 //------------------------------------------------------------------------------
 void circbuf_unlock(tCircBufInstance* pInstance_p)
 {
+    // Check parameter validity
+    ASSERT(pInstance_p != NULL);
+
     if (pInstance_p->pCircBufArchInstance != NULL)
     {
         tCircBufHostiBuffer* pHostifBuf = GET_QUEUE_BUF_BASE(pInstance_p->pCircBufHeader);
