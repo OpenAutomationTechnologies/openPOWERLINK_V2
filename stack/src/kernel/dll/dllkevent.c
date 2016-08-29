@@ -730,6 +730,12 @@ static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtSta
                     if (ret != kErrorOk)
                         goto Exit;
                 }
+                else if (!((nmtState_p == kNmtCsBasicEthernet) || (nmtState_p == kNmtMsBasicEthernet)))
+                {
+                    // frame is silently dropped for POWERLINK states < PreOp1
+                    // to avoid deadlocks and higher layer confusions
+                    *pTxBufferState = kDllkTxBufEmpty;
+                }
 #endif
             }
             else if (ret == kErrorDllAsyncTxBufferEmpty)
