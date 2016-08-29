@@ -215,4 +215,25 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DEBUG_LVL_EDRV_TRACE(...)
 #endif
 
+//------------------------------------------------------------------------------
+// Definition of ASSERT
+//
+// assert.h should be available on all platforms - at least in user-space.
+// For Linux kernel, WARN_ON() is called for failed assertions.
+// For Windows kernel, ASSERT() is already defined in Ntddk.h
+//------------------------------------------------------------------------------
+#ifndef ASSERT
+// In Linux kernel, use WARN_ON() macro for failed assertions
+#if ((TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__))
+#if !defined(NDEBUG)
+#define ASSERT(p)   WARN_ON(p)
+#else
+#define ASSERT(p)
+#endif /* NDEBUG */
+#else
+#include <assert.h>
+#define ASSERT(p)   assert(p)
+#endif
+#endif /* ASSERT */
+
 #endif /* _INC_common_debug_H_ */
