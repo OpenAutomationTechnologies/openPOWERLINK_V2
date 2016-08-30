@@ -11,7 +11,7 @@ The hostiflib provides several features like queues and linear memory modules.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_hostiflib_H_
 #define _INC_hostiflib_H_
 
@@ -49,8 +48,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #error "Define CONFIG_HOSTIF_PCP to TRUE if this is PCP, otherwise FALSE!"
 #endif
 
-#if CONFIG_HOSTIF_PCP != FALSE
-#include <hostiflib-mem.h> // Only Pcp has access to the ipcore settings
+#if (CONFIG_HOSTIF_PCP != FALSE)
+#include <hostiflib-mem.h> // Only PCP has access to the ipcore settings
 #else
 /* This is the host interface version for host. */
 #define HOSTIF_VERSION_MAJOR            1
@@ -121,7 +120,7 @@ typedef enum eHostifIrqSrc
 /**
 \brief Function type definition for interrupt callback
 
-This function callback is called for a given interrupt source, registerd by the
+This function callback is called for a given interrupt source, registered by the
 host.
 */
 typedef void (*tHostifIrqCb)(void* pArg_p);
@@ -133,7 +132,7 @@ The instance ids for the resources.
 */
 typedef enum eHostifInstanceId
 {
-#if CONFIG_HOSTIF_PCP != FALSE
+#if (CONFIG_HOSTIF_PCP != FALSE)
     kHostifInstIdErrCount = 0,                      ///< error counters
 #else
     /* Dynamic buffer instances have id 0 to HOSTIF_DYNBUF_COUNT */
@@ -188,10 +187,10 @@ typedef void* tHostifInstance;
 extern "C" {
 #endif
 
-tHostifReturn   hostif_create(tHostifConfig* pConfig_p,
+tHostifReturn   hostif_create(const tHostifConfig* pConfig_p,
                               tHostifInstance* ppInstance_p);
 tHostifReturn   hostif_delete(tHostifInstance pInstance_p);
-tHostifInstance hostif_getInstance(UINT Instance_p);
+tHostifInstance hostif_getInstance(UINT instance_p);
 
 tHostifReturn   hostif_irqRegHdl(tHostifInstance pInstance_p,
                                  tHostifIrqSrc irqSrc_p, tHostifIrqCb pfnCb_p);
@@ -211,7 +210,7 @@ tHostifReturn   hostif_getHeartbeat(tHostifInstance pInstance_p, UINT16* pHeartb
 
 tHostifReturn   hostif_dynBufAcquire(tHostifInstance pInstance_p, UINT32 pcpBaseAddr_p,
                                      UINT8** ppBufBase_p);
-tHostifReturn   hostif_dynBufFree(tHostifInstance pInstance_p, UINT8* pBufBase_p);
+tHostifReturn   hostif_dynBufFree(tHostifInstance pInstance_p, const UINT8* pBufBase_p);
 
 tHostifReturn   hostif_getBuf(tHostifInstance pInstance_p, tHostifInstanceId instId_p,
                               UINT8** ppBufBase_p, UINT* pBufSize_p);

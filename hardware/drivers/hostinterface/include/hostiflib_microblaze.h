@@ -54,7 +54,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#if CONFIG_HOSTIF_PCP != FALSE
+#if (CONFIG_HOSTIF_PCP != FALSE)
 
 #define HOSTIF_BASE             XPAR_AXI_HOSTINTERFACE_0_BASEADDR
 #define HOSTIF_IRQ_IC_ID        -1
@@ -73,7 +73,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #else
 
-#error No Valid Interrupt Controller found for Host!
+#error "No Valid Interrupt Controller found for Host!"
 
 #endif // XPAR_HOST_INTC_DEVICE_ID
 
@@ -89,12 +89,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #else
 
-#error No Valid Interrupt Controller found for Host!
+#error "No Valid Interrupt Controller found for Host!"
 
 #endif  // XPAR_HOST_INTC_DEVICE_ID
 
 #endif  // defined(XPAR_AXI_HOSTINTERFACE_0_HOST_BASEADDR)
-#endif  // CONFIG_HOSTIF_PCP != FALSE
+#endif  // (CONFIG_HOSTIF_PCP != FALSE)
 
 #if (XPAR_MICROBLAZE_USE_DCACHE == 1)
 #define HOSTIF_SYNC_DCACHE      TRUE

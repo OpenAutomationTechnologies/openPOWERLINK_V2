@@ -10,7 +10,7 @@ The file contains the high level driver for the host interface library.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -102,8 +102,7 @@ static tHostif* paHostifInstance_l[HOSTIF_INSTANCE_COUNT] =
 // local function prototypes
 //------------------------------------------------------------------------------
 /* Local functions for PCP and Host */
-static void freePtr(void* p);
-static tHostifReturn checkMagic(UINT8* pBase_p);
+static tHostifReturn checkMagic(const UINT8* pBase_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -116,33 +115,34 @@ static tHostifReturn checkMagic(UINT8* pBase_p);
 This function creates a host interface instance, and initializes it depending
 on the pConfig_p parameters.
 
-\param  pConfig_p               The caller provides the configuration
-                                parameters with this pointer.
-\param  ppInstance_p            The function returns with this double-pointer
-                                the created instance pointer. (return)
+\param[in]      pConfig_p           The caller provides the configuration
+                                    parameters with this pointer.
+\param[out]     ppInstance_p        The function returns with this double-pointer
+                                    the created instance pointer. (return)
 
 \return The function returns a tHostifReturn error code.
-\retval kHostifSuccessful       The host interface is configured successfully
-                                with the provided parameters.
-\retval kHostifInvalidParameter The caller has provided incorrect parameters.
-\retval kHostifNoResource       Heap allocation was impossible or to many
-                                instances are present.
-\retval kHostifWrongMagic       Can't find a valid host interface (invalid
-                                magic).
-\retval kHostifWrongVersion     The version fields in hardware mismatches those
-                                in software.
+\retval kHostifSuccessful           The host interface is configured successfully
+                                    with the provided parameters.
+\retval kHostifInvalidParameter     The caller has provided incorrect parameters.
+\retval kHostifNoResource           Heap allocation was impossible or to many
+                                    instances are present.
+\retval kHostifWrongMagic           Can't find a valid host interface (invalid
+                                    magic).
+\retval kHostifWrongVersion         The version fields in hardware mismatches those
+                                    in software.
 
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-tHostifReturn hostif_create(tHostifConfig* pConfig_p, tHostifInstance* ppInstance_p)
+tHostifReturn hostif_create(const tHostifConfig* pConfig_p,
+                            tHostifInstance* ppInstance_p)
 {
     tHostifReturn   ret = kHostifSuccessful;
     tHostif*        pHostif = NULL;
-    UINT8*          pBase_p = NULL;
-    int i;
+    UINT8*          pBase_p;
+    int             i;
 
-    if (pConfig_p == NULL || ppInstance_p == NULL)
+    if ((pConfig_p == NULL) || (ppInstance_p == NULL))
     {
         ret = kHostifInvalidParameter;
         goto Exit;
@@ -152,7 +152,6 @@ tHostifReturn hostif_create(tHostifConfig* pConfig_p, tHostifInstance* ppInstanc
 
     // check magic
     ret = checkMagic(pBase_p);
-
     if (ret != kHostifSuccessful)
     {
         goto Exit;
@@ -160,7 +159,6 @@ tHostifReturn hostif_create(tHostifConfig* pConfig_p, tHostifInstance* ppInstanc
 
     // check version
     ret = hostif_checkVersion(pBase_p, &pConfig_p->version);
-
     if (ret != kHostifSuccessful)
     {
         goto Exit;
@@ -168,7 +166,6 @@ tHostifReturn hostif_create(tHostifConfig* pConfig_p, tHostifInstance* ppInstanc
 
     // create instance
     pHostif = (tHostif*)malloc(sizeof(tHostif));
-
     if (pHostif == NULL)
     {
         ret = kHostifNoResource;
@@ -223,13 +220,13 @@ Exit:
 
 This function deletes a host interface instance.
 
-\param  pInstance_p             The host interface instance that should be
-                                deleted
+\param[in]      pInstance_p         The host interface instance that should be
+                                    deleted
 
 \return The function returns a tHostifReturn error code.
-\retval kHostifSuccessful       The host interface is deleted successfully.
-\retval kHostifInvalidParameter The caller has provided incorrect parameters.
-\retval kHostifHwWriteError     Deactivation of hardware is faulty.
+\retval kHostifSuccessful           The host interface is deleted successfully.
+\retval kHostifInvalidParameter     The caller has provided incorrect parameters.
+\retval kHostifHwWriteError         Deactivation of hardware is faulty.
 
 \ingroup module_hostiflib
 */
@@ -238,7 +235,7 @@ tHostifReturn hostif_delete(tHostifInstance pInstance_p)
 {
     tHostifReturn ret = kHostifSuccessful;
     tHostif*      pHostif = (tHostif*)pInstance_p;
-    int i;
+    int           i;
 
     if (pInstance_p == NULL)
     {
@@ -246,10 +243,9 @@ tHostifReturn hostif_delete(tHostifInstance pInstance_p)
         goto Exit;
     }
 
-    if ((ret = hostif_deleteInt(pHostif)) != kHostifSuccessful)
-    {
+    ret = hostif_deleteInt(pHostif);
+    if (ret != kHostifSuccessful)
         goto Exit;
-    }
 
     // delete instance in instance array
     for (i = 0; i < HOSTIF_INSTANCE_COUNT; i++)
@@ -261,7 +257,7 @@ tHostifReturn hostif_delete(tHostifInstance pInstance_p)
         }
     }
 
-    freePtr(pHostif);
+    free(pHostif);
 
 Exit:
     return ret;
@@ -273,23 +269,23 @@ Exit:
 
 If the instance is not found NULL is returned.
 
-\param  Instance_p              Processor instance
+\param[in]      instance_p          Processor instance
 
 \return The function returns an host interface instance.
-\retval NULL                    Host interface instance not found
+\retval NULL                        Host interface instance not found
 
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-tHostifInstance hostif_getInstance(UINT Instance_p)
+tHostifInstance hostif_getInstance(UINT instance_p)
 {
     tHostifInstance pHostif = NULL;
-    int i;
+    int             i;
 
     // search through array and return the matching one
     for (i = 0; i < HOSTIF_INSTANCE_COUNT; i++)
     {
-        if (paHostifInstance_l[i]->config.instanceNum == Instance_p)
+        if (paHostifInstance_l[i]->config.instanceNum == instance_p)
         {
             pHostif = (tHostifInstance)paHostifInstance_l[i];
             break;
@@ -303,12 +299,12 @@ tHostifInstance hostif_getInstance(UINT Instance_p)
 /**
 \brief  This function sets a command to the host interface
 
-\param  pInstance_p             host interface instance
-\param  cmd_p                   command
+\param[in]      pInstance_p         Host interface instance
+\param[in]      cmd_p               Command
 
 \return The function returns a tHostifReturn error code.
-\retval kHostifSuccessful       The process function exit without errors.
-\retval kHostifInvalidParameter The caller has provided incorrect parameters.
+\retval kHostifSuccessful           The process function exit without errors.
+\retval kHostifInvalidParameter     The caller has provided incorrect parameters.
 
 \ingroup module_hostiflib
 */
@@ -334,22 +330,22 @@ Exit:
 /**
 \brief  This function gets a command from the host interface
 
-\param  pInstance_p             host interface instance
-\param  pCmd_p                  command
+\param[in]      pInstance_p         Host interface instance
+\param[out]     pCmd_p              Command
 
 \return The function returns a tHostifReturn error code.
-\retval kHostifSuccessful       The process function exit without errors.
-\retval kHostifInvalidParameter The caller has provided incorrect parameters.
+\retval kHostifSuccessful           The process function exit without errors.
+\retval kHostifInvalidParameter     The caller has provided incorrect parameters.
 
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
 tHostifReturn hostif_getCommand(tHostifInstance pInstance_p, tHostifCommand* pCmd_p)
 {
-    tHostifReturn ret = kHostifSuccessful;
-    tHostif*      pHostif = (tHostif*)pInstance_p;
+    tHostifReturn  ret = kHostifSuccessful;
+    const tHostif* pHostif = (const tHostif*)pInstance_p;
 
-    if (pInstance_p == NULL || pCmd_p == NULL)
+    if ((pInstance_p == NULL) || (pCmd_p == NULL))
     {
         ret = kHostifInvalidParameter;
         goto Exit;
@@ -367,12 +363,12 @@ Exit:
 
 Note that only the PCP is allowed to write to this register!
 
-\param  pInstance_p             host interface instance
-\param  err_p                   error/return code
+\param[in]      pInstance_p         Host interface instance
+\param[in]      err_p               Error/return code
 
 \return The function returns a tHostifReturn error code.
-\retval kHostifSuccessful       The process function exit without errors.
-\retval kHostifInvalidParameter The caller has provided incorrect parameters.
+\retval kHostifSuccessful           The process function exit without errors.
+\retval kHostifInvalidParameter     The caller has provided incorrect parameters.
 
 \ingroup module_hostiflib
 */
@@ -400,14 +396,14 @@ Exit:
 
 This function gets the buffer base and size of the addressed instance.
 
-\param  pInstance_p             Host interface instance
-\param  instId_p                Addressed instance
-\param  ppBufBase_p             Returned buffer base address
-\param  pBufSize_p              Returned buffer size
+\param[in]      pInstance_p         Host interface instance
+\param[in]      instId_p            Addressed instance
+\param[out]     ppBufBase_p         Returned buffer base address
+\param[out]     pBufSize_p          Returned buffer size
 
 \return The function returns a tHostifReturn error code.
-\retval kHostifSuccessful       Dynamic buffer freed
-\retval kHostifInvalidParameter The caller has provided incorrect parameters.
+\retval kHostifSuccessful           Dynamic buffer freed
+\retval kHostifInvalidParameter     The caller has provided incorrect parameters.
 
 \ingroup module_hostiflib
 */
@@ -415,10 +411,10 @@ This function gets the buffer base and size of the addressed instance.
 tHostifReturn hostif_getBuf(tHostifInstance pInstance_p, tHostifInstanceId instId_p,
                             UINT8** ppBufBase_p, UINT* pBufSize_p)
 {
-    tHostifReturn ret = kHostifSuccessful;
-    tHostif*      pHostif = (tHostif*)pInstance_p;
+    tHostifReturn  ret = kHostifSuccessful;
+    const tHostif* pHostif = (const tHostif*)pInstance_p;
 
-    if (pInstance_p == NULL || ppBufBase_p == NULL || pBufSize_p == NULL ||
+    if ((pInstance_p == NULL) || (ppBufBase_p == NULL) || (pBufSize_p == NULL) ||
         !(instId_p < kHostifInstIdLast))
     {
         ret = kHostifInvalidParameter;
@@ -438,35 +434,19 @@ Exit:
 
 //------------------------------------------------------------------------------
 /**
-\brief  Free pointers which are not NULL
-
-The function frees a pointer if it isn't NULL.
-
-\param  p                       Pointer to be freed
-*/
-//------------------------------------------------------------------------------
-static void freePtr(void* p)
-{
-    if (p != NULL)
-        free(p);
-}
-
-//------------------------------------------------------------------------------
-/**
 \brief  Check magic word of IP-Core
 
 This function reads and verifies the magic word from the host interface.
 
-\param  pBase_p     Base address to host interface hardware
+\param[in]      pBase_p             Base address to host interface hardware
 
 \return The function returns a tHostifReturn error code.
 */
 //------------------------------------------------------------------------------
-static tHostifReturn checkMagic(UINT8* pBase_p)
+static tHostifReturn checkMagic(const UINT8* pBase_p)
 {
     if (hostif_readMagic(pBase_p) == HOSTIF_MAGIC)
         return kHostifSuccessful;
     else
         return kHostifWrongMagic;
 }
-

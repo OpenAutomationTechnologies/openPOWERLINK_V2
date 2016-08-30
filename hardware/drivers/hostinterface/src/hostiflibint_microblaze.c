@@ -11,7 +11,7 @@ Microblaze targets.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -104,8 +104,8 @@ modules.
 This function registers the interrupt service routine in the host processor
 interrupt services.
 
-\param  pfnIrqCb_p              The interrupt service routine callback
-\param  pArg_p                  Argument pointer provided to the callback
+\param[in]      pfnIrqCb_p          The interrupt service routine callback
+\param[in]      pArg_p              Argument pointer provided to the callback
 
 \return The function always returns with kHostifSuccessful.
 
@@ -125,8 +125,8 @@ tHostifReturn hostif_sysIrqRegHandler(tHostifIrqCb pfnIrqCb_p, void* pArg_p)
 
 This function enables the interrupt for the host interface driver instance.
 
-\param  fEnable_p   Determines if the interrupt must be enabled (TRUE) or
-                    disabled (FALSE)
+\param[in]      fEnable_p           Determines if the interrupt must be enabled (TRUE) or
+                                    disabled (FALSE)
 
 \return The function always returns with kHostifSuccessful.
 
