@@ -1121,8 +1121,8 @@ static tOplkError setupLocalNodeCn(void)
         ami_setUint8Be(&dllkInstance_g.aFilter[handle].aFilterMask[16], 0xFF);
     }
 
-    handle = DLLK_FILTER_PRES;
 #if NMT_MAX_NODE_ID > 0
+    handle = DLLK_FILTER_PRES;
     for (index = 0, pIntNodeInfo = &dllkInstance_g.aNodeInfo[0];
          index < tabentries (dllkInstance_g.aNodeInfo);
          index++, pIntNodeInfo++)
