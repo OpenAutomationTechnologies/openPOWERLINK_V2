@@ -2019,6 +2019,11 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
     // At this point we know that we are in a cyclic state due to the checks above!
     if ((nmtState_p != kNmtCsPreOperational2) && (nmtState_p != kNmtMsPreOperational2))
     {
+        if (pIntNodeInfo == NULL)
+        {
+            ret = kErrorDllNoNodeInfo;
+            return ret;
+        }
         // So we are in ReadyToOp or Operational after the check and can inform the PDO module now.
         if (presFrameFormatIsInvalid(pFrameInfo_p, pIntNodeInfo, nodeNmtState))
         {

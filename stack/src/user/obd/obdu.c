@@ -565,7 +565,7 @@ tOplkError obdu_registerUserOd(tObdEntryPtr pUserOd_p)
 /**
 \brief  Initialize VarEntry
 
-The function initializes the VarEntry dependant on the object type.
+The function initializes the VarEntry dependent on the object type.
 The function will not be used for strings.
 
 \param  pVarEntry_p             Pointer to VarEntry structure.
@@ -577,21 +577,25 @@ The function will not be used for strings.
 //------------------------------------------------------------------------------
 void obdu_initVarEntry(tObdVarEntry MEM* pVarEntry_p, tObdType type_p, tObdSize obdSize_p)
 {
-    if ((type_p == kObdTypeDomain))
+    if (pVarEntry_p != NULL)
     {
-        // variables which are defined as DOMAIN or VSTRING should not point to
-        // trash object, because this trash object contains only 8 bytes. DOMAINS or
-        // STRINGS can be longer.
-        pVarEntry_p->pData = NULL;
-        pVarEntry_p->size  = 0;
-    }
-    else
-    {
-        // set address to variable data to trash object
-        // This prevents an access violation if user forgets to call obdu_defineVar()
-        // for this variable but mappes it in a PDO.
-        pVarEntry_p->pData = &obdInstance_l.obdTrashObject[0];
-        pVarEntry_p->size  = obdSize_p;
+        if ((type_p == kObdTypeDomain))
+        {
+            // variables which are defined as DOMAIN or VSTRING should not point to
+            // trash object, because this trash object contains only 8 bytes. DOMAINS or
+            // STRINGS can be longer.
+            pVarEntry_p->pData = NULL;
+            pVarEntry_p->size  = 0;
+        }
+        else
+        {
+            // set address to variable data to trash object
+            // This prevents an access violation if user forgets to call obdu_defineVar()
+            // for this variable but maps it in a PDO.
+
+            pVarEntry_p->pData = &obdInstance_l.obdTrashObject[0];
+            pVarEntry_p->size  = obdSize_p;
+        }
     }
 }
 
