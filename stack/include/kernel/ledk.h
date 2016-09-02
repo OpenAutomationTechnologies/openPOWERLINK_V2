@@ -68,7 +68,7 @@ extern "C"
 //ledk functions
 tOplkError ledk_init(void);
 tOplkError ledk_exit(void);
-tOplkError ledk_handleNmtStateChange(tEventNmtStateChange nmtStateChange_p);
+tOplkError ledk_handleNmtStateChange(const tEventNmtStateChange* pNmtStateChange_p);
 tOplkError ledk_process(void);
 
 //ledktimer functions

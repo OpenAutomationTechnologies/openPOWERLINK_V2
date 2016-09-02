@@ -315,7 +315,7 @@ tOplkError nmtk_process(tEvent* pEvent_p)
 
 #if defined(CONFIG_INCLUDE_LEDK)
         //ledk state change
-        ret = ledk_handleNmtStateChange(nmtStateChange);
+        ret = ledk_handleNmtStateChange(&nmtStateChange);
         if (ret != kErrorOk)
            return ret;
 #endif

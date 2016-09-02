@@ -12,6 +12,7 @@ Target timer will configure the timeout value for blinking.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Kalycito Infotech Private Limited.
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -80,10 +81,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 typedef struct
 {
-    tLedMode                    statusLedMode;          ///< Mode of the status LED
-    UINT32                      statusLedState;         ///< State of the status LED
-    UINT32                      startTimeInMs;          ///< Holds the start time value of the current led state
-    UINT32                      timeoutInMs;            ///< Holds the time out value of the current led state
+    tLedMode            statusLedMode;          ///< Mode of the status LED
+    UINT32              statusLedState;         ///< State of the status LED
+    UINT32              startTimeInMs;          ///< Holds the start time value of the current led state
+    UINT32              timeoutInMs;            ///< Holds the time out value of the current led state
 } tLedkInstance;
 
 //------------------------------------------------------------------------------
@@ -113,6 +114,7 @@ The function initializes the kernel LED timer module.
 tOplkError ledk_timerInit(void)
 {
     OPLK_MEMSET(&ledkInstance_l, 0, sizeof(tLedkInstance));
+
     return kErrorOk;
 }
 
@@ -145,16 +147,16 @@ This function updates the status LED state. The blinking is achieved by using th
 //------------------------------------------------------------------------------
 tOplkError ledk_updateLedState(void)
 {
-    UINT                timeout = 0;
-    UINT32              tickCount = 0;
-    BOOL                fLedOn = FALSE;
-    tOplkError          ret = kErrorOk;
+    UINT        timeout;
+    UINT32      tickCount;
+    BOOL        fLedOn = FALSE;
+    tOplkError  ret = kErrorOk;
 
     // Setting the new timeout value
     tickCount = target_getTickCount();
     timeout = tickCount - ledkInstance_l.startTimeInMs;
 
-    if (timeout >= ledkInstance_l.timeoutInMs && timeout > 0)
+    if ((timeout >= ledkInstance_l.timeoutInMs) && (timeout > 0))
     {
         ledkInstance_l.statusLedState++;
 
@@ -208,7 +210,6 @@ tOplkError ledk_updateLedState(void)
                     fLedOn = ((ledkInstance_l.statusLedState & 0x01) != 0x00) ?
                         TRUE : FALSE;
                 }
-
                 break;
 
             case kLedModeDoubleFlash:
@@ -224,7 +225,6 @@ tOplkError ledk_updateLedState(void)
                     fLedOn = ((ledkInstance_l.statusLedState & 0x01) != 0x00) ?
                         TRUE : FALSE;
                 }
-
                 break;
 
             case kLedModeTripleFlash:
@@ -240,7 +240,6 @@ tOplkError ledk_updateLedState(void)
                     fLedOn = ((ledkInstance_l.statusLedState & 0x01) != 0x00) ?
                         TRUE : FALSE;
                 }
-
                 break;
         }
 
@@ -259,8 +258,8 @@ Exit:
 
 The function sets the LED mode.
 
-\param  ledType_p           The type of LED.
-\param  newMode_p           The new mode to set.
+\param[in]      ledType_p           The type of LED.
+\param[in]      newMode_p           The new mode to set.
 
 \return The function returns a tOplkError error code.
 
@@ -269,10 +268,10 @@ The function sets the LED mode.
 //------------------------------------------------------------------------------
 tOplkError ledk_setLedMode(tLedType ledType_p, tLedMode newMode_p)
 {
-    tOplkError      ret = kErrorOk;
-    tLedMode        oldMode;
-    UINT32          timeout = 0;
-    BOOL            fLedOn = FALSE;
+    tOplkError  ret = kErrorOk;
+    tLedMode    oldMode;
+    UINT32      timeout = 0;
+    BOOL        fLedOn = FALSE;
 
     oldMode = ledkInstance_l.statusLedMode;
     if (oldMode != newMode_p)
