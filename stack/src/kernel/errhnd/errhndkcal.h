@@ -10,7 +10,7 @@ module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_errhndkcal_H_
 #define _INC_errhndkcal_H_
 
@@ -70,31 +69,43 @@ tErrHndObjects* errhndkcal_getMemPtr(void);
 void errhndkcal_getCnLossSocError(UINT32* pCumulativeCnt_p, UINT32* pThresholdCnt_p, UINT32* pThreshold_p);
 void errhndkcal_getCnLossPreqError(UINT32* pCumulativeCnt_p, UINT32* pThresholdCnt_p, UINT32* pThreshold_p);
 void errhndkcal_getCnCrcError(UINT32* pCumulativeCnt_p, UINT32* pThresholdCnt_p, UINT32* pThreshold_p);
+
+#if defined(CONFIG_INCLUDE_NMT_MN)
 void errhndkcal_getMnCrcError(UINT32* pCumulativeCnt_p, UINT32* pThresholdCnt_p, UINT32* pThreshold_p) SECTION_ERRHNDKCAL_GETMNCNT;
 void errhndkcal_getMnCycTimeExceedError(UINT32* pCumulativeCnt_p, UINT32* pThresholdCnt_p, UINT32* pThreshold_p) SECTION_ERRHNDKCAL_GETMNCNT;
 void errhndkcal_getMnCnLossPresError(UINT nodeIdx_p, UINT32* pCumulativeCnt_p, UINT32* pThresholdCnt_p, UINT32* pThreshold_p) SECTION_ERRHNDKCAL_GETMNCNT;
+#endif
 
 void errhndkcal_getLossSocThresholdCnt(UINT32* pThresholdCnt_p);
 void errhndkcal_getLossPreqThresholdCnt(UINT32* pThresholdCnt_p);
 void errhndkcal_getCnCrcThresholdCnt(UINT32* pThresholdCnt_p);
+
+#if defined(CONFIG_INCLUDE_NMT_MN)
 void errhndkcal_getMnCrcThresholdCnt(UINT32* pThresholdCnt_p) SECTION_ERRHNDKCAL_GETMNCNT;
 void errhndkcal_getMnCycTimeExceedThresholdCnt(UINT32* pThresholdCnt_p) SECTION_ERRHNDKCAL_GETMNCNT;
 void errhndkcal_getMnCnLossPresThresholdCnt(UINT nodeIdx_p, UINT32* pThresholdCnt_p) SECTION_ERRHNDKCAL_GETMNCNT;
+#endif
 
 /* Writing of error counters */
 void errhndkcal_setCnLossSocCounters(UINT32 cumulativeCnt_p, UINT32 thresholdCnt_p);
 void errhndkcal_setCnLossPreqCounters(UINT32 cumulativeCnt_p, UINT32 thresholdCnt_p);
 void errhndkcal_setCnCrcCounters(UINT32 cumulativeCnt_p, UINT32 thresholdCnt_p);
+
+#if defined(CONFIG_INCLUDE_NMT_MN)
 void errhndkcal_setMnCrcCounters(UINT32 cumulativeCnt_p, UINT32 thresholdCnt_p) SECTION_ERRHNDKCAL_SETMNCNT;
 void errhndkcal_setMnCycTimeExceedCounters(UINT32 cumulativeCnt_p, UINT32 thresholdCnt_p) SECTION_ERRHNDKCAL_SETMNCNT;
 void errhndkcal_setMnCnLossPresCounters(UINT nodeIdx_p, UINT32 cumulativeCnt_p, UINT32 thresholdCnt_p) SECTION_ERRHNDKCAL_SETMNCNT;
+#endif
 
 void errhndkcal_setLossSocThresholdCnt(UINT32 thresholdCnt_p);
 void errhndkcal_setLossPreqThresholdCnt(UINT32 thresholdCnt_p);
 void errhndkcal_setCnCrcThresholdCnt(UINT32 thresholdCnt_p);
+
+#if defined(CONFIG_INCLUDE_NMT_MN)
 void errhndkcal_setMnCrcThresholdCnt(UINT32 thresholdCnt_p) SECTION_ERRHNDKCAL_SETMNCNT;
 void errhndkcal_setMnCycTimeExceedThresholdCnt(UINT32 thresholdCnt_p) SECTION_ERRHNDKCAL_SETMNCNT;
 void errhndkcal_setMnCnLossPresThresholdCnt(UINT nodeIdx_p, UINT32 thresholdCnt_p) SECTION_ERRHNDKCAL_SETMNCNT;
+#endif
 
 #ifdef __cplusplus
 }

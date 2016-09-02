@@ -13,7 +13,7 @@ in the same domain and global variables can be shared.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -107,7 +107,7 @@ tOplkError errhndkcal_init(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief    shutdown error handler user CAL module
+\brief    Shutdown error handler user CAL module
 
 The function is used to deinitialize and shutdown the user layer
 CAL module of the error handler.
@@ -121,7 +121,7 @@ void errhndkcal_exit(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief    get pointer to error handler objects
+\brief    Get pointer to error handler objects
 
 The function returns a pointer to the memory block where the error handler
 objects are stored.
@@ -142,9 +142,9 @@ tErrHndObjects* errhndkcal_getMemPtr(void)
 /**
 \brief  Get error objects for LossOfSoc error
 
-\param  pCumulativeCnt_p      Pointer to store cumulative counter.
-\param  pThresholdCnt_p       Pointer to store threshold counter.
-\param  pThreshold_p          Pointer to store threshold.
+\param[out]     pCumulativeCnt_p    Pointer to store cumulative counter.
+\param[out]     pThresholdCnt_p     Pointer to store threshold counter.
+\param[out]     pThreshold_p        Pointer to store threshold.
 
 \ingroup module_errhndkcal
 */
@@ -153,6 +153,11 @@ void errhndkcal_getCnLossSocError(UINT32* pCumulativeCnt_p,
                                   UINT32* pThresholdCnt_p,
                                   UINT32* pThreshold_p)
 {
+    // Check parameter validity
+    ASSERT(pCumulativeCnt_p != NULL);
+    ASSERT(pThresholdCnt_p != NULL);
+    ASSERT(pThreshold_p != NULL);
+
     *pCumulativeCnt_p = errhndk_errorObjects_g.cnLossSoc.cumulativeCnt;
     *pThresholdCnt_p = errhndk_errorObjects_g.cnLossSoc.thresholdCnt;
     *pThreshold_p = errhndk_errorObjects_g.cnLossSoc.threshold;
@@ -162,9 +167,9 @@ void errhndkcal_getCnLossSocError(UINT32* pCumulativeCnt_p,
 /**
 \brief  Get error objects for LossOfPreq error
 
-\param  pCumulativeCnt_p      Pointer to store cumulative counter.
-\param  pThresholdCnt_p       Pointer to store threshold counter.
-\param  pThreshold_p          Pointer to store threshold.
+\param[out]     pCumulativeCnt_p    Pointer to store cumulative counter.
+\param[out]     pThresholdCnt_p     Pointer to store threshold counter.
+\param[out]     pThreshold_p        Pointer to store threshold.
 
 \ingroup module_errhndkcal
 */
@@ -173,6 +178,11 @@ void errhndkcal_getCnLossPreqError(UINT32* pCumulativeCnt_p,
                                    UINT32* pThresholdCnt_p,
                                    UINT32* pThreshold_p)
 {
+    // Check parameter validity
+    ASSERT(pCumulativeCnt_p != NULL);
+    ASSERT(pThresholdCnt_p != NULL);
+    ASSERT(pThreshold_p != NULL);
+
     *pCumulativeCnt_p = errhndk_errorObjects_g.cnLossPreq.cumulativeCnt;
     *pThresholdCnt_p = errhndk_errorObjects_g.cnLossPreq.thresholdCnt;
     *pThreshold_p = errhndk_errorObjects_g.cnLossPreq.threshold;
@@ -182,9 +192,9 @@ void errhndkcal_getCnLossPreqError(UINT32* pCumulativeCnt_p,
 /**
 \brief  Get error objects for CN CRC error
 
-\param  pCumulativeCnt_p      Pointer to store cumulative counter.
-\param  pThresholdCnt_p       Pointer to store threshold counter.
-\param  pThreshold_p          Pointer to store threshold.
+\param[out]     pCumulativeCnt_p    Pointer to store cumulative counter.
+\param[out]     pThresholdCnt_p     Pointer to store threshold counter.
+\param[out]     pThreshold_p        Pointer to store threshold.
 
 \ingroup module_errhndkcal
 */
@@ -192,8 +202,12 @@ void errhndkcal_getCnLossPreqError(UINT32* pCumulativeCnt_p,
 void errhndkcal_getCnCrcError(UINT32* pCumulativeCnt_p,
                               UINT32* pThresholdCnt_p,
                               UINT32* pThreshold_p)
-
 {
+    // Check parameter validity
+    ASSERT(pCumulativeCnt_p != NULL);
+    ASSERT(pThresholdCnt_p != NULL);
+    ASSERT(pThreshold_p != NULL);
+
     *pCumulativeCnt_p = errhndk_errorObjects_g.cnCrcErr.cumulativeCnt;
     *pThresholdCnt_p = errhndk_errorObjects_g.cnCrcErr.thresholdCnt;
     *pThreshold_p = errhndk_errorObjects_g.cnCrcErr.threshold;
@@ -204,9 +218,9 @@ void errhndkcal_getCnCrcError(UINT32* pCumulativeCnt_p,
 /**
 \brief  Get error objects for MN CRC error
 
-\param  pCumulativeCnt_p      Pointer to store cumulative counter.
-\param  pThresholdCnt_p       Pointer to store threshold counter.
-\param  pThreshold_p          Pointer to store threshold.
+\param[out]     pCumulativeCnt_p    Pointer to store cumulative counter.
+\param[out]     pThresholdCnt_p     Pointer to store threshold counter.
+\param[out]     pThreshold_p        Pointer to store threshold.
 
 \ingroup module_errhndkcal
 */
@@ -215,6 +229,11 @@ void errhndkcal_getMnCrcError(UINT32* pCumulativeCnt_p,
                               UINT32* pThresholdCnt_p,
                               UINT32* pThreshold_p)
 {
+    // Check parameter validity
+    ASSERT(pCumulativeCnt_p != NULL);
+    ASSERT(pThresholdCnt_p != NULL);
+    ASSERT(pThreshold_p != NULL);
+
     *pCumulativeCnt_p = errhndk_errorObjects_g.mnCrcErr.cumulativeCnt;
     *pThresholdCnt_p = errhndk_errorObjects_g.mnCrcErr.thresholdCnt;
     *pThreshold_p = errhndk_errorObjects_g.mnCrcErr.threshold;
@@ -224,9 +243,9 @@ void errhndkcal_getMnCrcError(UINT32* pCumulativeCnt_p,
 /**
 \brief  Get error objects for MNCycleTimeExceed error
 
-\param  pCumulativeCnt_p      Pointer to store cumulative counter.
-\param  pThresholdCnt_p       Pointer to store threshold counter.
-\param  pThreshold_p          Pointer to store threshold.
+\param[out]     pCumulativeCnt_p    Pointer to store cumulative counter.
+\param[out]     pThresholdCnt_p     Pointer to store threshold counter.
+\param[out]     pThreshold_p        Pointer to store threshold.
 
 \ingroup module_errhndkcal
 */
@@ -235,6 +254,11 @@ void errhndkcal_getMnCycTimeExceedError(UINT32* pCumulativeCnt_p,
                                         UINT32* pThresholdCnt_p,
                                         UINT32* pThreshold_p)
 {
+    // Check parameter validity
+    ASSERT(pCumulativeCnt_p != NULL);
+    ASSERT(pThresholdCnt_p != NULL);
+    ASSERT(pThreshold_p != NULL);
+
     *pCumulativeCnt_p = errhndk_errorObjects_g.mnCycTimeExceed.cumulativeCnt;
     *pThresholdCnt_p = errhndk_errorObjects_g.mnCycTimeExceed.thresholdCnt;
     *pThreshold_p = errhndk_errorObjects_g.mnCycTimeExceed.threshold;
@@ -244,10 +268,10 @@ void errhndkcal_getMnCycTimeExceedError(UINT32* pCumulativeCnt_p,
 /**
 \brief  Get error objects for MNCNLossPres error
 
-\param  nodeIdx_p             Index of node (node ID - 1).
-\param  pCumulativeCnt_p      Pointer to store cumulative counter.
-\param  pThresholdCnt_p       Pointer to store threshold counter.
-\param  pThreshold_p          Pointer to store threshold.
+\param[in]      nodeIdx_p           Index of node (node ID - 1).
+\param[out]     pCumulativeCnt_p    Pointer to store cumulative counter.
+\param[out]     pThresholdCnt_p     Pointer to store threshold counter.
+\param[out]     pThreshold_p        Pointer to store threshold.
 
 \ingroup module_errhndkcal
 */
@@ -257,6 +281,11 @@ void errhndkcal_getMnCnLossPresError(UINT nodeIdx_p,
                                      UINT32* pThresholdCnt_p,
                                      UINT32* pThreshold_p)
 {
+    // Check parameter validity
+    ASSERT(pCumulativeCnt_p != NULL);
+    ASSERT(pThresholdCnt_p != NULL);
+    ASSERT(pThreshold_p != NULL);
+
     *pCumulativeCnt_p = errhndk_errorObjects_g.aMnCnLossPres[nodeIdx_p].cumulativeCnt;
     *pThresholdCnt_p = errhndk_errorObjects_g.aMnCnLossPres[nodeIdx_p].thresholdCnt;
     *pThreshold_p = errhndk_errorObjects_g.aMnCnLossPres[nodeIdx_p].threshold;
@@ -267,39 +296,48 @@ void errhndkcal_getMnCnLossPresError(UINT nodeIdx_p,
 /**
 \brief  Get threshold counter for LosSoc error
 
-\param  pThresholdCnt_p       Pointer to store threshold counter.
+\param[out]     pThresholdCnt_p     Pointer to store threshold counter.
 
 \ingroup module_errhndkcal
 */
 //------------------------------------------------------------------------------
 void errhndkcal_getLossSocThresholdCnt(UINT32* pThresholdCnt_p)
 {
+    // Check parameter validity
+    ASSERT(pThresholdCnt_p != NULL);
+
     *pThresholdCnt_p = errhndk_errorObjects_g.cnLossSoc.thresholdCnt;
 }
 //------------------------------------------------------------------------------
 /**
 \brief  Get threshold counter for LosPreq error
 
-\param  pThresholdCnt_p       Pointer to store threshold counter.
+\param[out]     pThresholdCnt_p     Pointer to store threshold counter.
 
 \ingroup module_errhndkcal
 */
 //------------------------------------------------------------------------------
 void errhndkcal_getLossPreqThresholdCnt(UINT32* pThresholdCnt_p)
 {
+    // Check parameter validity
+    ASSERT(pThresholdCnt_p != NULL);
+
     *pThresholdCnt_p = errhndk_errorObjects_g.cnLossPreq.thresholdCnt;
 }
 //------------------------------------------------------------------------------
 /**
 \brief  Get threshold counter for CnCrc error
 
-\param  pThresholdCnt_p       Pointer to store threshold counter.
+\param[out]     pThresholdCnt_p     Pointer to store threshold counter.
 
 \ingroup module_errhndkcal
 */
 //------------------------------------------------------------------------------
 void errhndkcal_getCnCrcThresholdCnt(UINT32* pThresholdCnt_p)
 {
+    // Check parameter validity
+    ASSERT(pThresholdCnt_p != NULL);
+
     *pThresholdCnt_p = errhndk_errorObjects_g.cnCrcErr.thresholdCnt;
 }
 
@@ -308,26 +346,32 @@ void errhndkcal_getCnCrcThresholdCnt(UINT32* pThresholdCnt_p)
 /**
 \brief  Get threshold counter for MnCrc error
 
-\param  pThresholdCnt_p       Pointer to store threshold counter.
+\param[out]     pThresholdCnt_p     Pointer to store threshold counter.
 
 \ingroup module_errhndkcal
 */
 //------------------------------------------------------------------------------
 void errhndkcal_getMnCrcThresholdCnt(UINT32* pThresholdCnt_p)
 {
+    // Check parameter validity
+    ASSERT(pThresholdCnt_p != NULL);
+
     *pThresholdCnt_p = errhndk_errorObjects_g.mnCrcErr.thresholdCnt;
 }
 //------------------------------------------------------------------------------
 /**
 \brief  Get threshold counter for MnCycTimeExceed error
 
-\param  pThresholdCnt_p       Pointer to store threshold counter.
+\param[out]     pThresholdCnt_p     Pointer to store threshold counter.
 
 \ingroup module_errhndkcal
 */
 //------------------------------------------------------------------------------
 void errhndkcal_getMnCycTimeExceedThresholdCnt(UINT32* pThresholdCnt_p)
 {
+    // Check parameter validity
+    ASSERT(pThresholdCnt_p != NULL);
+
     *pThresholdCnt_p = errhndk_errorObjects_g.mnCycTimeExceed.thresholdCnt;
 }
 
@@ -335,8 +379,8 @@ void errhndkcal_getMnCycTimeExceedThresholdCnt(UINT32* pThresholdCnt_p)
 /**
 \brief  Get threshold counter for MnCnLossPres error
 
-\param  nodeIdx_p             Index of node (node ID - 1).
-\param  pThresholdCnt_p       Pointer to store threshold counter.
+\param[in]      nodeIdx_p           Index of node (node ID - 1).
+\param[out]     pThresholdCnt_p     Pointer to store threshold counter.
 
 \ingroup module_errhndkcal
 */
@@ -344,6 +388,9 @@ void errhndkcal_getMnCycTimeExceedThresholdCnt(UINT32* pThresholdCnt_p)
 void errhndkcal_getMnCnLossPresThresholdCnt(UINT nodeIdx_p,
                                             UINT32* pThresholdCnt_p)
 {
+    // Check parameter validity
+    ASSERT(pThresholdCnt_p != NULL);
+
     *pThresholdCnt_p = errhndk_errorObjects_g.aMnCnLossPres[nodeIdx_p].thresholdCnt;
 }
 #endif
@@ -356,8 +403,8 @@ void errhndkcal_getMnCnLossPresThresholdCnt(UINT nodeIdx_p,
 /**
 \brief  Set error counters of LossSoc error
 
-\param  cumulativeCnt_p       Cumulative counter to set.
-\param  thresholdCnt_p        Threshold counter to set.
+\param[in]      cumulativeCnt_p     Cumulative counter to set.
+\param[in]      thresholdCnt_p      Threshold counter to set.
 
 \ingroup module_errhndkcal
 */
@@ -373,8 +420,8 @@ void errhndkcal_setCnLossSocCounters(UINT32 cumulativeCnt_p,
 /**
 \brief  Set error counters of LossPreq error
 
-\param  cumulativeCnt_p       Cumulative counter to set.
-\param  thresholdCnt_p        Threshold counter to set.
+\param[in]      cumulativeCnt_p     Cumulative counter to set.
+\param[in]      thresholdCnt_p      Threshold counter to set.
 
 \ingroup module_errhndkcal
 */
@@ -390,8 +437,8 @@ void errhndkcal_setCnLossPreqCounters(UINT32 cumulativeCnt_p,
 /**
 \brief  Set error counters of CnCrc error
 
-\param  cumulativeCnt_p       Cumulative counter to set.
-\param  thresholdCnt_p        Threshold counter to set.
+\param[in]      cumulativeCnt_p     Cumulative counter to set.
+\param[in]      thresholdCnt_p      Threshold counter to set.
 
 \ingroup module_errhndkcal
 */
@@ -408,8 +455,8 @@ void errhndkcal_setCnCrcCounters(UINT32 cumulativeCnt_p,
 /**
 \brief  Set error counters of MnCrc error
 
-\param  cumulativeCnt_p       Cumulative counter to set.
-\param  thresholdCnt_p        Threshold counter to set.
+\param[in]      cumulativeCnt_p     Cumulative counter to set.
+\param[in]      thresholdCnt_p      Threshold counter to set.
 
 \ingroup module_errhndkcal
 */
@@ -425,8 +472,8 @@ void errhndkcal_setMnCrcCounters(UINT32 cumulativeCnt_p,
 /**
 \brief  Set error counters of CycTimeExceed error
 
-\param  cumulativeCnt_p       Cumulative counter to set.
-\param  thresholdCnt_p        Threshold counter to set.
+\param[in]      cumulativeCnt_p     Cumulative counter to set.
+\param[in]      thresholdCnt_p      Threshold counter to set.
 
 \ingroup module_errhndkcal
 */
@@ -442,9 +489,9 @@ void errhndkcal_setMnCycTimeExceedCounters(UINT32 cumulativeCnt_p,
 /**
 \brief  Set error counters of MnCnLossPres error
 
-\param  nodeIdx_p               Index of node (node ID - 1).
-\param  cumulativeCnt_p       Cumulative counter to set.
-\param  thresholdCnt_p        Threshold counter to set.
+\param[in]      nodeIdx_p           Index of node (node ID - 1).
+\param[in]      cumulativeCnt_p     Cumulative counter to set.
+\param[in]      thresholdCnt_p      Threshold counter to set.
 
 \ingroup module_errhndkcal
 */
@@ -462,7 +509,7 @@ void errhndkcal_setMnCnLossPresCounters(UINT nodeIdx_p,
 /**
 \brief  Set threshold counter of LossSoc error
 
-\param  thresholdCnt_p        Threshold counter to set.
+\param[in]      thresholdCnt_p      Threshold counter to set.
 
 \ingroup module_errhndkcal
 */
@@ -476,7 +523,7 @@ void errhndkcal_setLossSocThresholdCnt(UINT32 thresholdCnt_p)
 /**
 \brief  Set threshold counter of LossPreq error
 
-\param  thresholdCnt_p        Threshold counter to set.
+\param[in]      thresholdCnt_p      Threshold counter to set.
 
 \ingroup module_errhndkcal
 */
@@ -490,7 +537,7 @@ void errhndkcal_setLossPreqThresholdCnt(UINT32 thresholdCnt_p)
 /**
 \brief  Set threshold counter of CnCrc error
 
-\param  thresholdCnt_p        Threshold counter to set.
+\param[in]      thresholdCnt_p      Threshold counter to set.
 
 \ingroup module_errhndkcal
 */
@@ -505,7 +552,7 @@ void errhndkcal_setCnCrcThresholdCnt(UINT32 thresholdCnt_p)
 /**
 \brief  Set threshold counter of MnCrc error
 
-\param  thresholdCnt_p        Threshold counter to set.
+\param[in]      thresholdCnt_p      Threshold counter to set.
 
 \ingroup module_errhndkcal
 */
@@ -519,7 +566,7 @@ void errhndkcal_setMnCrcThresholdCnt(UINT32 thresholdCnt_p)
 /**
 \brief  Set threshold counter of MnCycTimeExceed error
 
-\param  thresholdCnt_p        Threshold counter to set.
+\param[in]      thresholdCnt_p      Threshold counter to set.
 
 \ingroup module_errhndkcal
 */
@@ -533,8 +580,8 @@ void errhndkcal_setMnCycTimeExceedThresholdCnt(UINT32 thresholdCnt_p)
 /**
 \brief  Set threshold counter of MnCnLossPres error
 
-\param  nodeIdx_p             Index of node (node ID - 1).
-\param  thresholdCnt_p      Threshold counter to set.
+\param[in]      nodeIdx_p           Index of node (node ID - 1).
+\param[in]      thresholdCnt_p      Threshold counter to set.
 
 \ingroup module_errhndkcal
 */
@@ -552,4 +599,4 @@ void errhndkcal_setMnCnLossPresThresholdCnt(UINT nodeIdx_p,
 /// \name Private Functions
 /// \{
 
-///\}
+/// \}
