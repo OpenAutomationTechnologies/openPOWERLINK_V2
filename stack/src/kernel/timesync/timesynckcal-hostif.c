@@ -10,7 +10,7 @@ The sync module is responsible to synchronize the user layer.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -153,7 +153,7 @@ tOplkError timesynckcal_sendSyncEvent(void)
 
 The function enables sync events.
 
-\param  fEnable_p               Enable/disable sync event
+\param[in]      fEnable_p           Enable/disable sync event
 
 \return The function returns a tOplkError error code.
 
@@ -171,6 +171,25 @@ tOplkError timesynckcal_controlSync(BOOL fEnable_p)
     return enableSyncIrq(fEnable_p);
 }
 
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+//------------------------------------------------------------------------------
+/**
+\brief  Get timesync shared memory
+
+The function returns the reference to the timesync shared memory.
+
+\return The function returns a pointer to the timesync shared memory.
+
+\ingroup module_timesynckcal
+*/
+//------------------------------------------------------------------------------
+tTimesyncSharedMemory* timesynckcal_getSharedMemory(void)
+{
+    // Not implemented yet
+    return NULL;
+}
+#endif
+
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
@@ -181,7 +200,7 @@ tOplkError timesynckcal_controlSync(BOOL fEnable_p)
 /**
 \brief  Enable sync interrupt source in host interface IP-Core
 
-\param  fEnable_p               enable/disable sync interrupt source
+\param[in]      fEnable_p           enable/disable sync interrupt source
 
 \return The function returns a tOplkError error code.
 */
@@ -191,15 +210,15 @@ static tOplkError enableSyncIrq(BOOL fEnable_p)
     tHostifReturn hifRet;
 
     hifRet = hostif_irqSourceEnable(pHifInstance_l, kHostifIrqSrcSync, fEnable_p);
-
     if (hifRet != kHostifSuccessful)
     {
         DEBUG_LVL_ERROR_TRACE("%s irq not possible (%d)!\n",
-                   fEnable_p ? "enable" : "disable", hifRet);
+                              fEnable_p ? "enable" : "disable",
+                              hifRet);
         return kErrorNoResource;
     }
 
     return kErrorOk;
 }
 
-///\}
+/// \}

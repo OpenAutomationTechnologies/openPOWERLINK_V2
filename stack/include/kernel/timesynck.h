@@ -62,10 +62,10 @@ tOplkError timesynck_init(void);
 void       timesynck_exit(void);
 tOplkError timesynck_setCycleTime(UINT32 cycleLen_p, UINT32 minSyncTime_p);
 tOplkError timesynck_sendSyncEvent(void);
-tOplkError timesynck_process(tEvent* pEvent_p);
+tOplkError timesynck_process(const tEvent* pEvent_p);
 
 #if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
-tOplkError timesynck_setSocTime(tTimesyncSocTime* pSocTime_p);
+tOplkError timesynck_setSocTime(const tTimesyncSocTime* pSocTime_p);
 #endif /* defined(CONFIG_INCLUDE_SOC_TIME_FORWARD) */
 
 #ifdef __cplusplus

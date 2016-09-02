@@ -60,8 +60,12 @@ extern "C"
 tOplkError timesynckcal_init(void);
 void       timesynckcal_exit(void);
 tOplkError timesynckcal_controlSync(BOOL fEnable_p);
-tOplkError timesynckcal_waitSyncEvent(void);
 tOplkError timesynckcal_sendSyncEvent(void);
+
+#if (((TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)) || \
+     ((TARGET_SYSTEM == _WIN32_) && defined(_KERNEL_MODE)))
+tOplkError timesynckcal_waitSyncEvent(void);
+#endif
 
 #if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
 tTimesyncSharedMemory* timesynckcal_getSharedMemory(void);

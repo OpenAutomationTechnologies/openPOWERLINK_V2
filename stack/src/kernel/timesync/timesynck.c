@@ -10,7 +10,7 @@ This file contains the main implementation of the kernel timesync module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -162,8 +162,8 @@ void timesynck_exit(void)
 
 The function sets the POWERLINK cycle time to the timesync module
 
-\param  cycleLen_p      POWERLINK Cycle time [us]
-\param  minSyncTime_p   Minimum period for sending sync event [us]
+\param[in]      cycleLen_p          POWERLINK Cycle time [us]
+\param[in]      minSyncTime_p       Minimum period for sending sync event [us]
 
 \return The function returns a tOplkError error code.
 
@@ -225,21 +225,24 @@ tOplkError timesynck_sendSyncEvent(void)
 
 The function processes events intended for the kernel timesync module.
 
-\param  pEvent_p        Pointer to event
+\param[in]      pEvent_p            Pointer to event
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_timesynck
 */
 //------------------------------------------------------------------------------
-tOplkError timesynck_process(tEvent* pEvent_p)
+tOplkError timesynck_process(const tEvent* pEvent_p)
 {
-    tOplkError ret = kErrorOk;
+    tOplkError ret;
+
+    // Check parameter validity
+    ASSERT(pEvent_p != NULL);
 
     switch (pEvent_p->eventType)
     {
         case kEventTypeTimesynckControl:
-            ret = timesynckcal_controlSync(*((BOOL*)pEvent_p->eventArg.pEventArg));
+            ret = timesynckcal_controlSync(*((const BOOL*)pEvent_p->eventArg.pEventArg));
             break;
 
         default:
@@ -257,21 +260,21 @@ tOplkError timesynck_process(tEvent* pEvent_p)
 
 The function sets the given SoC time to the timesync module.
 
-\param  pSocTime_p      Pointer to SoC time information structure
+\param[in]      pSocTime_p          Pointer to SoC time information structure
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_timesynck
 */
 //------------------------------------------------------------------------------
-tOplkError timesynck_setSocTime(tTimesyncSocTime* pSocTime_p)
+tOplkError timesynck_setSocTime(const tTimesyncSocTime* pSocTime_p)
 {
     tTimesyncSocTimeTripleBuf*  pTripleBuf;
     OPLK_ATOMIC_T               writeBuf;
     tTimesyncSocTime*           pBuffer;
 
-    if (pSocTime_p == NULL)
-        return kErrorNoResource;
+    // Check parameter validity
+    ASSERT(pSocTime_p != NULL);
 
     if (timesynckInstance_l.pSharedMemory == NULL)
     {
