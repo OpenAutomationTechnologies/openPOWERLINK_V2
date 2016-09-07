@@ -11,7 +11,7 @@ This file contains the implementation of the NMT kernel module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, SYSTEC electronic GmbH
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -60,17 +60,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // TracePoint support for realtime-debugging
 #ifdef _DBG_TRACE_POINTS_
-    void  TgtDbgSignalTracePoint(BYTE bTracePointNumber_p);
-    void  TgtDbgPostTraceValue(DWORD dwTraceValue_p);
-    #define TGT_DBG_SIGNAL_TRACE_POINT(p)   TgtDbgSignalTracePoint(p)
-    #define TGT_DBG_POST_TRACE_VALUE(v)     TgtDbgPostTraceValue(v)
+void TgtDbgSignalTracePoint(BYTE bTracePointNumber_p);
+void TgtDbgPostTraceValue(DWORD dwTraceValue_p);
+#define TGT_DBG_SIGNAL_TRACE_POINT(p)   TgtDbgSignalTracePoint(p)
+#define TGT_DBG_POST_TRACE_VALUE(v)     TgtDbgPostTraceValue(v)
 #else
-    #define TGT_DBG_SIGNAL_TRACE_POINT(p)
-    #define TGT_DBG_POST_TRACE_VALUE(v)
+#define TGT_DBG_SIGNAL_TRACE_POINT(p)
+#define TGT_DBG_POST_TRACE_VALUE(v)
 #endif
 
 #define OPLK_NMTK_DBG_POST_TRACE_VALUE(nmtEvent_p, oldNmtState_p, newNmtState_p) \
-    TGT_DBG_POST_TRACE_VALUE((kEventSinkNmtk << 28) | ((mtEvent_p) << 16) | \
+    TGT_DBG_POST_TRACE_VALUE((kEventSinkNmtk << 28) | ((nmtEvent_p) << 16) | \
                              (((oldNmtState_p) & 0xFF) << 8) | \
                              ((newNmtState_p) & 0xFF))
 
@@ -224,7 +224,7 @@ The function initializes an instance of the NMT kernel module
 //------------------------------------------------------------------------------
 tOplkError nmtk_init(void)
 {
-    // initialize intern vaiables
+    // initialize internal variables
     nmtkInstance_g.stateIndex = kNmtkGsOff;
     nmtkInstance_g.fEnableReadyToOperate = FALSE;
     nmtkInstance_g.fAppReadyToOperate = FALSE;
@@ -250,6 +250,7 @@ The function shuts down the NMT kernel module.
 tOplkError nmtk_exit(void)
 {
     nmtkInstance_g.stateIndex = kNmtkGsOff;
+
     return kErrorOk;
 }
 
@@ -259,14 +260,14 @@ tOplkError nmtk_exit(void)
 
 The function processes NMT kernel events. It implements the NMT state machine.
 
-\param  pEvent_p        Event to process.
+\param[in]      pEvent_p            Event to process.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_nmtk
 */
 //------------------------------------------------------------------------------
-tOplkError nmtk_process(tEvent* pEvent_p)
+tOplkError nmtk_process(const tEvent* pEvent_p)
 {
     tOplkError              ret;
     tNmtkStateIndexes       oldState;
@@ -274,16 +275,14 @@ tOplkError nmtk_process(tEvent* pEvent_p)
     tEvent                  event;
     tEventNmtStateChange    nmtStateChange;
 
-    ret = kErrorOk;
-
     switch (pEvent_p->eventType)
     {
         case kEventTypeNmtEvent:
-            nmtEvent = *((tNmtEvent*)pEvent_p->eventArg.pEventArg);
+            nmtEvent = *((const tNmtEvent*)pEvent_p->eventArg.pEventArg);
             break;
 
         case kEventTypeTimer:
-            nmtEvent = (tNmtEvent)((tTimerEventArg*)pEvent_p->eventArg.pEventArg)->argument.value;
+            nmtEvent = (tNmtEvent)((const tTimerEventArg*)pEvent_p->eventArg.pEventArg)->argument.value;
             break;
 
         default:
@@ -294,7 +293,7 @@ tOplkError nmtk_process(tEvent* pEvent_p)
     // needed for later comparison to inform higher layer about state change
     oldState = nmtkInstance_g.stateIndex;
 
-    // process NMT-State-Maschine
+    // process NMT state machine
     ret = nmtkStates_g[nmtkInstance_g.stateIndex].pfnState(nmtEvent);
 
     // inform higher layer about State-Change if needed
@@ -302,16 +301,14 @@ tOplkError nmtk_process(tEvent* pEvent_p)
     {
         OPLK_NMTK_DBG_POST_TRACE_VALUE(nmtEvent, nmtkStates_g[oldState].nmtState,
                                        nmtkStates_g[nmtkInstance_g.stateIndex].nmtState);
-        DEBUG_LVL_NMTK_TRACE("nmtk_process(NMT-event = 0x%04X): New NMT-State = 0x%03X\n",
-                              nmtEvent, nmtkStates_g[nmtkInstance_g.stateIndex].nmtState);
+        DEBUG_LVL_NMTK_TRACE("%s(): (NMT-event = 0x%04X): New NMT-State = 0x%03X\n",
+                             __func__,
+                             nmtEvent,
+                             nmtkStates_g[nmtkInstance_g.stateIndex].nmtState);
 
         nmtStateChange.newNmtState = nmtkStates_g[nmtkInstance_g.stateIndex].nmtState;
         nmtStateChange.oldNmtState = nmtkStates_g[oldState].nmtState;
         nmtStateChange.nmtEvent = nmtEvent;
-        event.eventType = kEventTypeNmtStateChange;
-        OPLK_MEMSET(&event.netTime, 0x00, sizeof(event.netTime));
-        event.eventArg.pEventArg = &nmtStateChange;
-        event.eventArgSize = sizeof(nmtStateChange);
 
 #if defined(CONFIG_INCLUDE_LEDK)
         //ledk state change
@@ -321,7 +318,12 @@ tOplkError nmtk_process(tEvent* pEvent_p)
 #endif
 
         // inform DLLk module about state change
+        event.eventType = kEventTypeNmtStateChange;
+        OPLK_MEMSET(&event.netTime, 0x00, sizeof(event.netTime));
+        event.eventArg.pEventArg = &nmtStateChange;
+        event.eventArgSize = sizeof(nmtStateChange);
         event.eventSink = kEventSinkDllk;
+
         ret = dllk_process(&event);
         if (ret != kErrorOk)
            return ret;
@@ -349,7 +351,7 @@ tOplkError nmtk_process(tEvent* pEvent_p)
 
 The function processes the NMT state GS_OFF.
 
-\param  nmtEvent_p      NMT event to be processed.
+\param[in]      nmtEvent_p          NMT event to be processed.
 
 \return The function returns a tOplkError error code.
 */
@@ -360,6 +362,7 @@ static tOplkError doStateGsOff(tNmtEvent nmtEvent_p)
     {   // NMT_GT8, NMT_GT1 -> new state kNmtGsInitialising
         nmtkInstance_g.stateIndex = kNmtkGsInitialising;
     }
+
     return kErrorOk;
 }
 
@@ -370,7 +373,7 @@ static tOplkError doStateGsOff(tNmtEvent nmtEvent_p)
 The function processes the NMT state GS_INITIALISING.
 In this state the first init of the hardware will be done.
 
-\param  nmtEvent_p      NMT event to be processed.
+\param[in]      nmtEvent_p          NMT event to be processed.
 
 \return The function returns a tOplkError error code.
 */
@@ -396,6 +399,7 @@ static tOplkError doStateGsInitialising(tNmtEvent nmtEvent_p)
         default:
             break;
     }
+
     return kErrorOk;
 }
 
@@ -405,9 +409,9 @@ static tOplkError doStateGsInitialising(tNmtEvent nmtEvent_p)
 
 The function processes the NMT state GS_RESET_APPLICATION.
 In this state the initialization of the manufacturer-specific profile area
-and the standardised device profile area is done.
+and the standardized device profile area is done.
 
-\param  nmtEvent_p      NMT event to be processed.
+\param[in]      nmtEvent_p          NMT event to be processed.
 
 \return The function returns a tOplkError error code.
 */
@@ -441,6 +445,7 @@ static tOplkError doStateGsResetApplication(tNmtEvent nmtEvent_p)
         default:
             break;
     }
+
     return kErrorOk;
 }
 
@@ -451,7 +456,7 @@ static tOplkError doStateGsResetApplication(tNmtEvent nmtEvent_p)
 The function processes the NMT state GS_RESET_COMMUNICATION.
 In this state the initialization of the communication profile area is done.
 
-\param  nmtEvent_p      NMT event to be processed.
+\param[in]      nmtEvent_p          NMT event to be processed.
 
 \return The function returns a tOplkError error code.
 */
@@ -490,6 +495,7 @@ static tOplkError doStateGsResetCommunication(tNmtEvent nmtEvent_p)
         default:
             break;
     }
+
     return kErrorOk;
 }
 
@@ -500,7 +506,7 @@ static tOplkError doStateGsResetCommunication(tNmtEvent nmtEvent_p)
 The function processes the NMT state GS_RESET_CONFIGURATION.
 In this state we build the configuration with information from the OD.
 
-\param  nmtEvent_p      NMT event to be processed.
+\param[in]      nmtEvent_p          NMT event to be processed.
 
 \return The function returns a tOplkError error code.
 */
@@ -557,6 +563,7 @@ static tOplkError doStateGsResetConfiguration(tNmtEvent nmtEvent_p)
                 nmtkInstance_g.stateIndex = kNmtkMsNotActive;
 #endif
             break;
+
 #if defined(CONFIG_INCLUDE_NMT_RMN)
         case kNmtEventEnterRmsNotActive:
             // Node should be RMN (NMT_RMT1)
@@ -569,6 +576,7 @@ static tOplkError doStateGsResetConfiguration(tNmtEvent nmtEvent_p)
         default:
             break;
     }
+
     return kErrorOk;
 }
 
@@ -579,7 +587,7 @@ static tOplkError doStateGsResetConfiguration(tNmtEvent nmtEvent_p)
 The function processes the NMT state CS_NOT_ACTIVE.
 In this state the node listens for POWERLINK frames and checks timeout.
 
-\param  nmtEvent_p      NMT event to be processed.
+\param[in]      nmtEvent_p          NMT event to be processed.
 
 \return The function returns a tOplkError error code.
 */
@@ -636,6 +644,7 @@ static tOplkError doStateCsNotActive(tNmtEvent nmtEvent_p)
         default:
             break;
     }
+
     return kErrorOk;
 }
 
@@ -646,7 +655,7 @@ static tOplkError doStateCsNotActive(tNmtEvent nmtEvent_p)
 The function processes the NMT state CS_PRE_OPERATIONAL1.
 In this state the node processes only async frames.
 
-\param  nmtEvent_p      NMT event to be processed.
+\param[in]      nmtEvent_p          NMT event to be processed.
 
 \return The function returns a tOplkError error code.
 */
@@ -703,6 +712,7 @@ static tOplkError doStateCsPreOperational1(tNmtEvent nmtEvent_p)
         default:
             break;
     }
+
     return kErrorOk;
 }
 
@@ -713,7 +723,7 @@ static tOplkError doStateCsPreOperational1(tNmtEvent nmtEvent_p)
 The function processes the NMT state CS_PRE_OPERATIONAL2.
 In this state the node processes isochronous and asynchronous frames.
 
-\param  nmtEvent_p      NMT event to be processed.
+\param[in]      nmtEvent_p          NMT event to be processed.
 
 \return The function returns a tOplkError error code.
 */
@@ -812,6 +822,7 @@ static tOplkError doStateCsPreOperational2(tNmtEvent nmtEvent_p)
         default:
             break;
     }
+
     return kErrorOk;
 }
 
@@ -822,7 +833,7 @@ static tOplkError doStateCsPreOperational2(tNmtEvent nmtEvent_p)
 The function processes the NMT state CS_READY_TO_OPERATE.
 In this state the node should be configured and application is ready.
 
-\param  nmtEvent_p      NMT event to be processed.
+\param[in]      nmtEvent_p          NMT event to be processed.
 
 \return The function returns a tOplkError error code.
 */
@@ -890,6 +901,7 @@ static tOplkError doStateCsReadyToOperate(tNmtEvent nmtEvent_p)
         default:
             break;
     }
+
     return kErrorOk;
 }
 
@@ -900,7 +912,7 @@ static tOplkError doStateCsReadyToOperate(tNmtEvent nmtEvent_p)
 The function processes the NMT state CS_OPERATIONAL.
 This is the normal working state of a CN.
 
-\param  nmtEvent_p      NMT event to be processed.
+\param[in]      nmtEvent_p          NMT event to be processed.
 
 \return The function returns a tOplkError error code.
 */
@@ -968,6 +980,7 @@ static tOplkError doStateCsOperational(tNmtEvent nmtEvent_p)
         default:
             break;
     }
+
     return kErrorOk;
 }
 
@@ -979,7 +992,7 @@ The function processes the NMT state CS_NOT_ACTIVE.
 In this state the node is stopped by the MN it processes only asynchronous
 frames.
 
-\param  nmtEvent_p      NMT event to be processed.
+\param[in]      nmtEvent_p          NMT event to be processed.
 
 \return The function returns a tOplkError error code.
 */
@@ -1042,6 +1055,7 @@ static tOplkError doStateCsStopped(tNmtEvent nmtEvent_p)
         default:
             break;
     }
+
     return kErrorOk;
 }
 
@@ -1053,7 +1067,7 @@ The function processes the NMT state CS_BASIC_ETHERNET.
 In this state there is no POWERLINK cycle and the node performs normal Ethernet
 communication.
 
-\param  nmtEvent_p      NMT event to be processed.
+\param[in]      nmtEvent_p          NMT event to be processed.
 
 \return The function returns a tOplkError error code.
 */
@@ -1110,6 +1124,7 @@ static tOplkError doStateCsBasicEthernet(tNmtEvent nmtEvent_p)
         default:
             break;
     }
+
     return kErrorOk;
 }
 
@@ -1121,14 +1136,13 @@ The function processes the NMT state MS_NOT_ACTIVE.
 In this state the MN listens to the network. If there is no POWERLINK traffic,
 the node goes to the next state.
 
-\param  nmtEvent_p      NMT event to be processed.
+\param[in]      nmtEvent_p          NMT event to be processed.
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 static tOplkError doStateMsNotActive(tNmtEvent nmtEvent_p)
 {
-
 #if !defined(CONFIG_INCLUDE_NMT_MN)
     UNUSED_PARAMETER(nmtEvent_p);
 
@@ -1200,9 +1214,9 @@ static tOplkError doStateMsNotActive(tNmtEvent nmtEvent_p)
 
         default:
             break;
-
     }
 #endif
+
     return kErrorOk;
 }
 
@@ -1214,14 +1228,13 @@ The function processes the NMT state RMS_NOT_ACTIVE.
 In this state the RMN listens to the network. If there is no POWERLINK traffic,
 the node goes to the next state.
 
-\param  nmtEvent_p      NMT event to be processed.
+\param[in]      nmtEvent_p          NMT event to be processed.
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 static tOplkError doStateRmsNotActive(tNmtEvent nmtEvent_p)
 {
-
 #if !defined(CONFIG_INCLUDE_NMT_RMN)
     UNUSED_PARAMETER(nmtEvent_p);
 
@@ -1283,14 +1296,13 @@ static tOplkError doStateRmsNotActive(tNmtEvent nmtEvent_p)
 
         default:
             break;
-
     }
 #endif
+
     return kErrorOk;
 }
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
-
 //------------------------------------------------------------------------------
 /**
 \brief  Process State MS_PRE_OPERATIONAL1
@@ -1298,7 +1310,7 @@ static tOplkError doStateRmsNotActive(tNmtEvent nmtEvent_p)
 The function processes the NMT state MS_PRE_OPERATIONAL1.
 In this state the MN processes the reduced POWERLINK cycle.
 
-\param  nmtEvent_p      NMT event to be processed.
+\param[in]      nmtEvent_p          NMT event to be processed.
 
 \return The function returns a tOplkError error code.
 */
@@ -1390,8 +1402,8 @@ static tOplkError doStateMsPreOperational1(tNmtEvent nmtEvent_p)
 
         default:
             break;
-
     }
+
     return kErrorOk;
 }
 
@@ -1402,7 +1414,7 @@ static tOplkError doStateMsPreOperational1(tNmtEvent nmtEvent_p)
 The function processes the NMT state MS_PRE_OPERATIONAL2.
 In this state the MN processes the full POWERLINK cycle.
 
-\param  nmtEvent_p      NMT event to be processed.
+\param[in]      nmtEvent_p          NMT event to be processed.
 
 \return The function returns a tOplkError error code.
 */
@@ -1474,6 +1486,7 @@ static tOplkError doStateMsPreOperational2(tNmtEvent nmtEvent_p)
         default:
             break;
     }
+
     return kErrorOk;
 }
 
@@ -1485,7 +1498,7 @@ The function processes the NMT state MS_READY_TO_OPERATE.
 In this state all mandatory CNs are ready to operate. The MN processes the full
 POWERLINK cycle.
 
-\param  nmtEvent_p      NMT event to be processed.
+\param[in]      nmtEvent_p          NMT event to be processed.
 
 \return The function returns a tOplkError error code.
 */
@@ -1557,6 +1570,7 @@ static tOplkError doStateMsReadyToOperate(tNmtEvent nmtEvent_p)
         default:
             break;
     }
+
     return kErrorOk;
 }
 //------------------------------------------------------------------------------
@@ -1566,7 +1580,7 @@ static tOplkError doStateMsReadyToOperate(tNmtEvent nmtEvent_p)
 The function processes the NMT state MS_OPERATIONAL.
 This is the normal working state of a MN.
 
-\param  nmtEvent_p      NMT event to be processed.
+\param[in]      nmtEvent_p          NMT event to be processed.
 
 \return The function returns a tOplkError error code.
 */
@@ -1633,6 +1647,7 @@ static tOplkError doStateMsOperational(tNmtEvent nmtEvent_p)
         default:
             break;
     }
+
     return kErrorOk;
 }
 
@@ -1643,7 +1658,7 @@ static tOplkError doStateMsOperational(tNmtEvent nmtEvent_p)
 The function processes the NMT state MS_BASIC_ETHERNET.
 In this state the MN processes normal Ethernet traffic.
 
-\param  nmtEvent_p      NMT event to be processed.
+\param[in]      nmtEvent_p          NMT event to be processed.
 
 \return The function returns a tOplkError error code.
 */
@@ -1700,6 +1715,7 @@ static tOplkError doStateMsBasicEthernet(tNmtEvent nmtEvent_p)
         default:
             break;
     }
+
     return kErrorOk;
 }
 
