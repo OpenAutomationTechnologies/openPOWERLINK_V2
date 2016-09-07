@@ -226,7 +226,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // In Linux kernel, use WARN_ON() macro for failed assertions
 #if ((TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__))
 #if !defined(NDEBUG)
-#define ASSERT(p)   WARN_ON(p)
+#define ASSERT(p)   WARN_ON(!(p))
 #else
 #define ASSERT(p)
 #endif /* NDEBUG */
