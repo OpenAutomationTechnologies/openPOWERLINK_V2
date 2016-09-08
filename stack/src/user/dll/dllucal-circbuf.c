@@ -11,7 +11,7 @@ the circular buffer library for communication with the kernel layer.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -97,8 +97,8 @@ typedef struct
 //------------------------------------------------------------------------------
 static tOplkError addInstance(tDllCalQueueInstance* ppDllCalQueue_p, tDllCalQueue DllCalQueue_p);
 static tOplkError delInstance(tDllCalQueueInstance pDllCalQueue_p);
-static tOplkError insertDataBlock(tDllCalQueueInstance pDllCalQueue_p, BYTE* pData_p, UINT* pDataSize_p);
-static tOplkError getDataBlock(tDllCalQueueInstance pDllCalQueue_p, BYTE* pData_p, UINT* pDataSize_p);
+static tOplkError insertDataBlock(tDllCalQueueInstance pDllCalQueue_p, const UINT8* pData_p, UINT dataSize_p);
+static tOplkError getDataBlock(tDllCalQueueInstance pDllCalQueue_p, UINT8* pData_p, UINT* pDataSize_p);
 static tOplkError getDataBlockCount(tDllCalQueueInstance pDllCalQueue_p, ULONG* pDataBlockCount_p);
 static tOplkError resetDataBlockQueue(tDllCalQueueInstance pDllCalQueue_p, ULONG timeOutMs_p);
 
@@ -242,8 +242,7 @@ Inserts a data block into the DLL CAL queue.
 
 \param  pDllCalQueue_p          Pointer to DllCal Queue instance
 \param  pData_p                 Pointer to the data block to be inserted
-\param  pDataSize_p             Pointer to the size of the data block to be
-                                insert
+\param  dataSize_p              Size of the data block to be inserted
 
 \return The function returns a tOplkError error code.
 \retval kErrorOk          if function executes correctly
@@ -251,7 +250,7 @@ Inserts a data block into the DLL CAL queue.
 */
 //------------------------------------------------------------------------------
 static tOplkError insertDataBlock(tDllCalQueueInstance pDllCalQueue_p,
-                                  BYTE* pData_p, UINT* pDataSize_p)
+                                  const UINT8* pData_p, UINT dataSize_p)
 {
     tOplkError                  ret = kErrorOk;
     tCircBufError               error;
@@ -265,7 +264,7 @@ static tOplkError insertDataBlock(tDllCalQueueInstance pDllCalQueue_p,
     }
 
     error = circbuf_writeData(pDllCalCircBufInstance->pCircBufInstance,
-                              pData_p, *pDataSize_p);
+                              pData_p, dataSize_p);
     switch (error)
     {
         case kCircBufOk:
@@ -302,7 +301,7 @@ Gets a data block from the DLL CAL queue.
 */
 //------------------------------------------------------------------------------
 static tOplkError getDataBlock(tDllCalQueueInstance pDllCalQueue_p,
-                               BYTE* pData_p, UINT* pDataSize_p)
+                               UINT8* pData_p, UINT* pDataSize_p)
 {
     tOplkError              ret = kErrorOk;
     tCircBufError           error;

@@ -118,7 +118,7 @@ typedef struct
 } tDllkPrcCycleTiming;
 
 // callback function for frame processing
-typedef tOplkError (*tDllkCbProcessRpdo)(tFrameInfo* pFrameInfo_p);
+typedef tOplkError (*tDllkCbProcessRpdo)(const tFrameInfo* pFrameInfo_p);
 typedef tOplkError (*tDllkCbProcessTpdo)(tFrameInfo* pFrameInfo_p, BOOL fReadyFlag_p);
 
 /**
@@ -158,8 +158,8 @@ extern "C"
 
 tOplkError dllk_init(void);
 tOplkError dllk_exit(void);
-tOplkError dllk_config(tDllConfigParam* pDllConfigParam_p);
-tOplkError dllk_setIdentity(tDllIdentParam* pDllIdentParam_p);
+tOplkError dllk_config(const tDllConfigParam* pDllConfigParam_p);
+tOplkError dllk_setIdentity(const tDllIdentParam* pDllIdentParam_p);
 tOplkError dllk_regAsyncHandler(tDllkCbAsync pfnDllkCbAsync_p);
 tOplkError dllk_deregAsyncHandler(tDllkCbAsync pfnDllkCbAsync_p);
 tOplkError dllk_setAsndServiceIdFilter(tDllAsndServiceId ServiceId_p, tDllAsndFilter Filter_p);
@@ -177,10 +177,10 @@ tOplkError dllk_releaseRxFrame(tPlkFrame* pFrame_p, UINT uiFrameSize_p);
 #endif
 
 #if (NMT_MAX_NODE_ID > 0)
-tOplkError dllk_configNode(tDllNodeInfo* pNodeInfo_p);
-tOplkError dllk_addNode(tDllNodeOpParam* pNodeOpParam_p);
-tOplkError dllk_deleteNode(tDllNodeOpParam* pNodeOpParam_p);
-#endif /* (NMT_MAX_NODE_ID > 0) */
+tOplkError dllk_configNode(const tDllNodeInfo* pNodeInfo_p);
+tOplkError dllk_addNode(const tDllNodeOpParam* pNodeOpParam_p);
+tOplkError dllk_deleteNode(const tDllNodeOpParam* pNodeOpParam_p);
+#endif // NMT_MAX_NODE_ID > 0
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
 tOplkError dllk_setFlag1OfNode(UINT nodeId_p, UINT8 soaFlag1_p);
@@ -189,7 +189,7 @@ tOplkError dllk_getCnMacAddress(UINT nodeId_p, UINT8* pCnMacAddress_p);
 #endif /* defined(CONFIG_INCLUDE_NMT_MN) */
 
 // dllkevent.c
-tOplkError dllk_process(tEvent* pEvent_p) SECTION_DLLK_PROCESS;
+tOplkError dllk_process(const tEvent* pEvent_p) SECTION_DLLK_PROCESS;
 
 #ifdef __cplusplus
 }

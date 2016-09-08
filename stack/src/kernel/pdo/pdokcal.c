@@ -82,7 +82,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError cbProcessRpdo(tFrameInfo* pFrameInfo_p) SECTION_PDOK_PROCESS_RPDO;
+static tOplkError cbProcessRpdo(const tFrameInfo* pFrameInfo_p) SECTION_PDOK_PROCESS_RPDO;
 
 
 //============================================================================//
@@ -214,7 +214,7 @@ valid.
 \return The function returns a tOplkError error code.
 **/
 //------------------------------------------------------------------------------
-static tOplkError cbProcessRpdo(tFrameInfo* pFrameInfo_p)
+static tOplkError cbProcessRpdo(const tFrameInfo* pFrameInfo_p)
 {
     tOplkError      ret = kErrorOk;
     tEvent          event;
@@ -223,7 +223,7 @@ static tOplkError cbProcessRpdo(tFrameInfo* pFrameInfo_p)
     event.eventType = kEventTypePdoRx;
 #if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC != FALSE
     event.eventArgSize   = sizeof(tFrameInfo);
-    event.eventArg.pEventArg = pFrameInfo_p;
+    event.eventArg.pEventArg = (void*)pFrameInfo_p;
 #else
     // limit copied data to size of PDO (because from some CNs the frame is larger than necessary)
     event.eventArgSize = ami_getUint16Le(&pFrameInfo_p->frame.pBuffer->data.pres.sizeLe) +

@@ -16,6 +16,7 @@ layer running on the external PCIe card.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -97,7 +98,7 @@ typedef struct
 //------------------------------------------------------------------------------
 static tOplkError addInstance(tDllCalQueueInstance* ppDllCalQueue_p, tDllCalQueue dllCalQueue_p);
 static tOplkError delInstance(tDllCalQueueInstance pDllCalQueue_p);
-static tOplkError insertDataBlock(tDllCalQueueInstance pDllCalQueue_p, UINT8* pData_p, UINT* pDataSize_p);
+static tOplkError insertDataBlock(tDllCalQueueInstance pDllCalQueue_p, const UINT8* pData_p, UINT dataSize_p);
 
 /* define external function interface */
 static tDllCalFuncIntf    funcIntf_l =
@@ -201,8 +202,7 @@ Inserts a data block into the DLL CAL queue.
 
 \param  pDllCalQueue_p          Pointer to DllCal Queue instance.
 \param  pData_p                 Pointer to the data block to be inserted.
-\param  pDataSize_p             Pointer to the size of the data block to be
-                                inserted.
+\param  dataSize_p              Size of the data block to be inserted.
 
 \return The function returns a tOplkError error code.
 \retval kErrorOk                Function executes correctly
@@ -210,7 +210,7 @@ Inserts a data block into the DLL CAL queue.
 */
 //------------------------------------------------------------------------------
 static tOplkError insertDataBlock(tDllCalQueueInstance pDllCalQueue_p,
-                                  UINT8* pData_p, UINT* pDataSize_p)
+                                  const UINT8* pData_p, UINT dataSize_p)
 {
     tOplkError              ret = kErrorOk;
     tDllCalIoctlInstance*   pInstance = (tDllCalIoctlInstance*)pDllCalQueue_p;
@@ -222,22 +222,22 @@ static tOplkError insertDataBlock(tDllCalQueueInstance pDllCalQueue_p,
     if (pInstance == NULL)
         return kErrorInvalidInstanceParam;
 
-    pIoctlAsyncBuf = OPLK_MALLOC(sizeof(tIoctlDllCalAsync) + *pDataSize_p);
+    pIoctlAsyncBuf = OPLK_MALLOC(sizeof(tIoctlDllCalAsync) + dataSize_p);
 
     if (pIoctlAsyncBuf == NULL)
         return kErrorNoResource;
 
-    ioctlAsyncFrame.size = *pDataSize_p;
+    ioctlAsyncFrame.size = dataSize_p;
     ioctlAsyncFrame.queue = pInstance->dllCalQueue;
     // Set the data pointer as NULL to specify that the ASync frame is copied
     // at the end of the buffer.
     ioctlAsyncFrame.pData = NULL;
 
     OPLK_MEMCPY(pIoctlAsyncBuf, &ioctlAsyncFrame, sizeof(tIoctlDllCalAsync));
-    OPLK_MEMCPY((pIoctlAsyncBuf + sizeof(tIoctlDllCalAsync)), pData_p, *pDataSize_p);
+    OPLK_MEMCPY((pIoctlAsyncBuf + sizeof(tIoctlDllCalAsync)), pData_p, dataSize_p);
 
     fIoctlRet = DeviceIoControl(pInstance->hFileHandle, PLK_CMD_DLLCAL_ASYNCSEND,
-                                pIoctlAsyncBuf, (sizeof(tIoctlDllCalAsync) + *pDataSize_p),
+                                pIoctlAsyncBuf, (sizeof(tIoctlDllCalAsync) + dataSize_p),
                                 0, 0,
                                 &bytesReturned, NULL);
     if (fIoctlRet == 0 || bytesReturned == 0)

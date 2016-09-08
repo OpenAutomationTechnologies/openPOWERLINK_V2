@@ -11,7 +11,7 @@ It is part of the DLL kernel module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_dllknode_H_
 #define _INC_dllknode_H_
 
@@ -70,15 +69,22 @@ tOplkError dllknode_setupLocalNode(tNmtState nmtState_p);
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
 tOplkError dllknode_addNodeIsochronous(tDllkNodeInfo* pIntNodeInfo_p);
-tOplkError dllknode_deleteNodeIsochronous(tDllkNodeInfo* pIntNodeInfo_p);
-tOplkError dllknode_setupAsyncPhase(tNmtState nmtState_p, UINT nextTxBufferOffset_p,
-                                    UINT32 nextTimeOffsetNs_p, UINT* pIndex_p) SECTION_DLLK_PROCESS_SYNC;
-tOplkError dllknode_setupSyncPhase(tNmtState nmtState_p, BOOL fReadyFlag_p, UINT nextTxBufferOffset_p,
-                                   UINT32* pNextTimeOffsetNs_p, UINT* pIndex_p) SECTION_DLLK_PROCESS_SYNC;
+tOplkError dllknode_deleteNodeIsochronous(const tDllkNodeInfo* pIntNodeInfo_p);
+tOplkError dllknode_setupAsyncPhase(tNmtState nmtState_p,
+                                    UINT nextTxBufferOffset_p,
+                                    UINT32 nextTimeOffsetNs_p,
+                                    UINT* pIndex_p)
+                                    SECTION_DLLK_PROCESS_SYNC;
+tOplkError dllknode_setupSyncPhase(tNmtState nmtState_p,
+                                   BOOL fReadyFlag_p,
+                                   UINT nextTxBufferOffset_p,
+                                   UINT32* pNextTimeOffsetNs_p,
+                                   UINT* pIndex_p)
+                                   SECTION_DLLK_PROCESS_SYNC;
 tOplkError dllknode_issueLossOfPres(UINT nodeId_p);
 #endif
 
-#if NMT_MAX_NODE_ID > 0
+#if (NMT_MAX_NODE_ID > 0)
 tDllkNodeInfo* dllknode_getNodeInfo(UINT uiNodeId_p) SECTION_DLLK_GETNODEINFO;
 tOplkError     dllknode_addNodeFilter(tDllkNodeInfo* pIntNodeInfo_p,
                                       tDllNodeOpType NodeOpType_p,
@@ -92,4 +98,4 @@ tOplkError     dllknode_deleteNodeFilter(tDllkNodeInfo* pIntNodeInfo_p,
 }
 #endif
 
-#endif  // #ifndef _INC_dllknode_H_
+#endif  /* _INC_dllknode_H_ */

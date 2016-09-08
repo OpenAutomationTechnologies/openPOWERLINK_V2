@@ -11,7 +11,7 @@ Linux ioctl for communication with the kernel layer.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -101,7 +101,7 @@ typedef struct
 //------------------------------------------------------------------------------
 static tOplkError addInstance(tDllCalQueueInstance* ppDllCalQueue_p, tDllCalQueue DllCalQueue_p);
 static tOplkError delInstance(tDllCalQueueInstance pDllCalQueue_p);
-static tOplkError insertDataBlock(tDllCalQueueInstance pDllCalQueue_p, BYTE* pData_p, UINT* pDataSize_p);
+static tOplkError insertDataBlock(tDllCalQueueInstance pDllCalQueue_p, const UINT8* pData_p, UINT dataSize_p);
 
 /* define external function interface */
 static tDllCalFuncIntf funcintf_l =
@@ -207,8 +207,7 @@ Inserts a data block into the DLL CAL queue.
 
 \param  pDllCalQueue_p          Pointer to DllCal Queue instance
 \param  pData_p                 Pointer to the data block to be inserted
-\param  pDataSize_p             Pointer to the size of the data block to be
-                                insert
+\param  dataSize_p              Size of the data block to be inserted
 
 \return The function returns a tOplkError error code.
 \retval kErrorOk                Function executes correctly
@@ -216,7 +215,7 @@ Inserts a data block into the DLL CAL queue.
 */
 //------------------------------------------------------------------------------
 static tOplkError insertDataBlock(tDllCalQueueInstance pDllCalQueue_p,
-                                  BYTE* pData_p, UINT* pDataSize_p)
+                                  const UINT8* pData_p, UINT dataSize_p)
 {
     tOplkError                      ret = kErrorOk;
     tDllCalIoctlInstance*           pInstance =
@@ -230,9 +229,9 @@ static tOplkError insertDataBlock(tDllCalQueueInstance pDllCalQueue_p,
         goto Exit;
     }
 
-    ioctlAsyncFrame.size = *pDataSize_p;
+    ioctlAsyncFrame.size = dataSize_p;
     ioctlAsyncFrame.queue = pInstance->dllCalQueue;
-    ioctlAsyncFrame.pData = pData_p;
+    ioctlAsyncFrame.pData = (void*)pData_p;
     //TRACE ("%s() send async frame: size:%d\n", __func__, pFrameInfo_p->frameSize);
     ioctlRet = ioctl(pInstance->fd, PLK_CMD_DLLCAL_ASYNCSEND, (ULONG)&ioctlAsyncFrame);
     if (ioctlRet < 0)

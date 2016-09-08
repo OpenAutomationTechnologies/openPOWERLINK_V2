@@ -125,7 +125,7 @@ typedef struct
 {
     tOplkError (*pfnAddInstance)(tDllCalQueueInstance* ppDllCalQueue_p, tDllCalQueue DllCalQueue_p);
     tOplkError (*pfnDelInstance)(tDllCalQueueInstance pDllCalQueue_p);
-    tOplkError (*pfnInsertDataBlock)(tDllCalQueueInstance pDllCalQueue_p, UINT8* pData_p, UINT* pDataSize_p);
+    tOplkError (*pfnInsertDataBlock)(tDllCalQueueInstance pDllCalQueue_p, const UINT8* pData_p, UINT dataSize_p);
     tOplkError (*pfnGetDataBlock)(tDllCalQueueInstance pDllCalQueue_p, UINT8* pData_p, UINT* pDataSize_p);
     tOplkError (*pfnGetDataBlockCount)(tDllCalQueueInstance pDllCalQueue_p, ULONG* pDataBlockCount_p);
     tOplkError (*pfnResetDataBlockQueue)(tDllCalQueueInstance pDllCalQueue_p, ULONG timeOutMs_p);

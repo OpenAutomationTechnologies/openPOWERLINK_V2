@@ -10,7 +10,7 @@ This file contains the user DLL CAL module.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -435,7 +435,7 @@ tOplkError dllucal_sendAsyncFrame(tFrameInfo* pFrameInfo_p,
             ret = instance_l.pTxNmtFuncs->pfnInsertDataBlock(
                                         instance_l.dllCalQueueTxNmt,
                                         (BYTE*)pFrameInfo_p->frame.pBuffer,
-                                        &(pFrameInfo_p->frameSize));
+                                        pFrameInfo_p->frameSize);
             break;
 
         default:
@@ -527,7 +527,7 @@ tOplkError dllucal_issueSyncRequest(tDllSyncRequest* pSyncRequest_p, UINT size_p
     tOplkError  ret = kErrorOk;
 
     ret = instance_l.pTxSyncFuncs->pfnInsertDataBlock(instance_l.dllCalQueueTxSync,
-                                                      (BYTE*)pSyncRequest_p, &size_p);
+                                                      (BYTE*)pSyncRequest_p, size_p);
     return ret;
 }
 #endif
@@ -848,7 +848,7 @@ static tOplkError sendGenericAsyncFrame(tFrameInfo* pFrameInfo_p)
         ret = instance_l.pTxGenFuncs->pfnInsertDataBlock(
                                     instance_l.dllCalQueueTxGen,
                                     (BYTE*)pFrameInfo_p->frame.pBuffer,
-                                    &(pFrameInfo_p->frameSize));
+                                    pFrameInfo_p->frameSize);
     }
     else
     {
@@ -856,7 +856,7 @@ static tOplkError sendGenericAsyncFrame(tFrameInfo* pFrameInfo_p)
         ret = instance_l.pTxVethFuncs->pfnInsertDataBlock(
                                     instance_l.dllCalQueueTxVeth,
                                     (UINT8*)pFrameInfo_p->frame.pBuffer,
-                                    &(pFrameInfo_p->frameSize));
+                                    pFrameInfo_p->frameSize);
 #else
     // Return error since virtual Ethernet is not existing!
     ret = kErrorIllegalInstance;

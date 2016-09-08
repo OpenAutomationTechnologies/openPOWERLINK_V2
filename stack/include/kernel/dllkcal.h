@@ -79,27 +79,34 @@ tOplkError dllkcal_init(void);
 tOplkError dllkcal_exit(void);
 tOplkError dllkcal_getAsyncTxCount(tDllAsyncReqPriority* pPriority_p,
                                    UINT* pCount_p);
-tOplkError dllkcal_getAsyncTxFrame(void* pFrame_p, UINT* pFrameSize_p,
+tOplkError dllkcal_getAsyncTxFrame(void* pFrame_p,
+                                   UINT* pFrameSize_p,
                                    tDllAsyncReqPriority priority_p);
 
 // only frames with registered AsndServiceIds are passed to CAL
 tOplkError dllkcal_asyncFrameReceived(tFrameInfo* pFrameInfo_p) SECTION_DLLKCAL_ASYNCRX;
-tOplkError dllkcal_nmtCmdReceived(tNmtCommandService* pNmtCommand_p);
+tOplkError dllkcal_nmtCmdReceived(const tNmtCommandService* pNmtCommand_p);
 tOplkError dllkcal_sendAsyncFrame(tFrameInfo* pFrameInfo_p, tDllAsyncReqPriority priority_p);
 tOplkError dllkcal_writeAsyncFrame(tFrameInfo* pFrameInfo_p, tDllCalQueue dllQueue);
 tOplkError dllkcal_clearAsyncBuffer(void);
 tOplkError dllkcal_getStatistics(tDllkCalStatistics** ppStatistics);
-tOplkError dllkcal_process(tEvent* pEvent_p);
+tOplkError dllkcal_process(const tEvent* pEvent_p);
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
 tOplkError dllkcal_clearAsyncQueues(void);
-tOplkError dllkcal_issueRequest(tDllReqServiceId service_p, UINT nodeId_p,
+tOplkError dllkcal_issueRequest(tDllReqServiceId service_p,
+                                UINT nodeId_p,
                                 BYTE soaFlag1_p);
 tOplkError dllkcal_getSoaRequest(tDllReqServiceId* pReqServiceId_p,
-                                 UINT* pNodeId_p, tSoaPayload* pSoaPayload_p) SECTION_DLLKCAL_GETSOAREQ;
-tOplkError dllkcal_setAsyncPendingRequests(UINT nodeId_p, tDllAsyncReqPriority asyncReqPrio_p,
-                                           UINT count_p) SECTION_DLLKCAL_GETPENREQ;
-tOplkError dllkcal_ackAsyncRequest(UINT nodeId_p, tDllReqServiceId reqServiceId_p)
+                                 UINT* pNodeId_p,
+                                 tSoaPayload* pSoaPayload_p)
+                                 SECTION_DLLKCAL_GETSOAREQ;
+tOplkError dllkcal_setAsyncPendingRequests(UINT nodeId_p,
+                                           tDllAsyncReqPriority asyncReqPrio_p,
+                                           UINT count_p)
+                                           SECTION_DLLKCAL_GETPENREQ;
+tOplkError dllkcal_ackAsyncRequest(UINT nodeId_p,
+                                   tDllReqServiceId reqServiceId_p)
                                    SECTION_DLLKCAL_GETPENREQ;
 #endif /* defined(CONFIG_INCLUDE_NMT_MN) */
 
