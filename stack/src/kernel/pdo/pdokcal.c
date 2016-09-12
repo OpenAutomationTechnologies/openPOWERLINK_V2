@@ -11,7 +11,7 @@ This file contains the implementation of the kernel PDO CAL module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -102,14 +102,15 @@ The function initializes the PDO user CAL module.
 //------------------------------------------------------------------------------
 tOplkError pdokcal_init(void)
 {
-    tOplkError      Ret = kErrorOk;
+    tOplkError  ret;
 
-    if ((Ret = pdokcal_openMem()) != kErrorOk)
-        return Ret;
+    ret = pdokcal_openMem();
+    if (ret != kErrorOk)
+        return ret;
 
     dllk_regRpdoHandler(cbProcessRpdo);
 
-    return Ret;
+    return ret;
 }
 
 //------------------------------------------------------------------------------
@@ -126,6 +127,7 @@ The function de-initializes the PDO kernel CAL module.
 tOplkError pdokcal_exit(void)
 {
     pdokcal_closeMem();
+
     return kErrorOk;
 }
 
@@ -133,65 +135,69 @@ tOplkError pdokcal_exit(void)
 /**
 \brief  Process events from PdouCal module.
 
-\param  pEvent_p                Pointer to event structure
+\param[in]      pEvent_p            Pointer to event structure
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_pdokcal
 **/
 //------------------------------------------------------------------------------
-tOplkError pdokcal_process(tEvent* pEvent_p)
+tOplkError pdokcal_process(const tEvent* pEvent_p)
 {
-    tOplkError                  Ret = kErrorOk;
+    tOplkError  ret;
 
     switch (pEvent_p->eventType)
     {
         case kEventTypePdokAlloc:
             {
-                tPdoAllocationParam* pAllocationParam;
-                pAllocationParam = (tPdoAllocationParam*)pEvent_p->eventArg.pEventArg;
-                Ret = pdok_allocChannelMem(pAllocationParam);
+                const tPdoAllocationParam* pAllocationParam;
+
+                pAllocationParam = (const tPdoAllocationParam*)pEvent_p->eventArg.pEventArg;
+                ret = pdok_allocChannelMem(pAllocationParam);
             }
             break;
 
         case kEventTypePdokConfig:
             {
-                tPdoChannelConf* pChannelConf;
-                pChannelConf = (tPdoChannelConf*)pEvent_p->eventArg.pEventArg;
-                Ret = pdok_configureChannel(pChannelConf);
+                const tPdoChannelConf* pChannelConf;
+
+                pChannelConf = (const tPdoChannelConf*)pEvent_p->eventArg.pEventArg;
+                ret = pdok_configureChannel(pChannelConf);
             }
             break;
 
         case kEventTypePdokSetupPdoBuf:
             {
-                tPdoMemSize*     pPdoMemSize;
-                pPdoMemSize = (tPdoMemSize*)pEvent_p->eventArg.pEventArg;
-                Ret = pdok_setupPdoBuffers(pPdoMemSize->rxPdoMemSize,
+                const tPdoMemSize* pPdoMemSize;
+
+                pPdoMemSize = (const tPdoMemSize*)pEvent_p->eventArg.pEventArg;
+                ret = pdok_setupPdoBuffers(pPdoMemSize->rxPdoMemSize,
                                            pPdoMemSize->txPdoMemSize);
             }
             break;
 
         case kEventTypePdoRx:
             {
-#if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC != FALSE
-                tFrameInfo*  pFrameInfo;
-                pFrameInfo = (tFrameInfo*)pEvent_p->eventArg.pEventArg;
-                Ret = pdok_processRxPdo(pFrameInfo->frame.pBuffer, pFrameInfo->frameSize);
+#if (CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC != FALSE)
+                const tFrameInfo* pFrameInfo;
+
+                pFrameInfo = (const tFrameInfo*)pEvent_p->eventArg.pEventArg;
+                ret = pdok_processRxPdo(pFrameInfo->frame.pBuffer, pFrameInfo->frameSize);
 #else
-                tPlkFrame* pFrame;
+                const tPlkFrame* pFrame;
 
-                pFrame = (tPlkFrame*)pEvent_p->eventArg.pEventArg;
-
-                Ret = pdok_processRxPdo(pFrame, pEvent_p->eventArgSize);
+                pFrame = (const tPlkFrame*)pEvent_p->eventArg.pEventArg;
+                ret = pdok_processRxPdo(pFrame, pEvent_p->eventArgSize);
 #endif
             }
             break;
 
         default:
-            Ret = kErrorInvalidEvent;
+            ret = kErrorInvalidEvent;
             break;
     }
-    return Ret;
+
+    return ret;
 }
 
 //============================================================================//
@@ -209,36 +215,34 @@ It posts the frame to the event queue. It is called in states
 NMT_CS_READY_TO_OPERATE and NMT_CS_OPERATIONAL. The passed PDO needs not to be
 valid.
 
-\param  pFrameInfo_p            pointer to frame info structure
+\param[in]      pFrameInfo_p        Pointer to frame info structure
 
 \return The function returns a tOplkError error code.
 **/
 //------------------------------------------------------------------------------
 static tOplkError cbProcessRpdo(const tFrameInfo* pFrameInfo_p)
 {
-    tOplkError      ret = kErrorOk;
-    tEvent          event;
+    tOplkError  ret;
+    tEvent      event;
 
     event.eventSink = kEventSinkPdokCal;
     event.eventType = kEventTypePdoRx;
-#if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC != FALSE
-    event.eventArgSize   = sizeof(tFrameInfo);
+#if (CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC != FALSE)
+    event.eventArgSize = sizeof(tFrameInfo);
     event.eventArg.pEventArg = (void*)pFrameInfo_p;
 #else
     // limit copied data to size of PDO (because from some CNs the frame is larger than necessary)
     event.eventArgSize = ami_getUint16Le(&pFrameInfo_p->frame.pBuffer->data.pres.sizeLe) +
-                                         PLK_FRAME_OFFSET_PDO_PAYLOAD; // pFrameInfo_p->frameSize;
-    event.eventArg.pEventArg = pFrameInfo_p->frame.pBuffer;
+                          PLK_FRAME_OFFSET_PDO_PAYLOAD; // pFrameInfo_p->frameSize;
+    event.eventArg.pEventArg = (void*)pFrameInfo_p->frame.pBuffer;
 #endif
     ret = eventk_postEvent(&event);
-#if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC != FALSE
+#if (CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC != FALSE)
     if (ret == kErrorOk)
-    {
         ret = kErrorReject; // Reject release of rx buffer
-    }
 #endif
 
     return ret;
 }
 
-///\}
+/// \}

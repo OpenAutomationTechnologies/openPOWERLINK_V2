@@ -11,7 +11,7 @@ used for fast searching of PDO channels for a specific node.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -91,8 +91,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 The function clears the PDO lookup table.
 
-\param  pLut_p          Pointer to the PDO lookup table.
-\param  numEntries_p    Number of entries in the PDO lookup table.
+\param[in,out]  pLut_p              Pointer to the PDO lookup table.
+\param[in]      numEntries_p        Number of entries in the PDO lookup table.
 
 \return The function returns a tOplkError error code.
 
@@ -103,6 +103,9 @@ void pdoklut_clear(tPdoklutEntry* pLut_p, UINT32 numEntries_p)
 {
     UINT32      i;
     UINT32      j;
+
+    // Check parameter validity
+    ASSERT(pLut_p != NULL);
 
     for (i = 0; i < numEntries_p; ++i)
     {
@@ -119,21 +122,27 @@ void pdoklut_clear(tPdoklutEntry* pLut_p, UINT32 numEntries_p)
 
 This function adds a new PDO channel to the lookup table.
 
-\param  pLut_p              Pointer to the PDO lookup table
-\param  pPdoChannel_p       Pointer to the PDO channel which should be added to
-                            the lookup table.
-\param  channelId_p         Channel ID of the PDO channel to be added.
+\param[in,out]  pLut_p              Pointer to the PDO lookup table
+\param[in]      pPdoChannel_p       Pointer to the PDO channel which should be added to
+                                    the lookup table.
+\param[in]      channelId_p         Channel ID of the PDO channel to be added.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_pdoklut
 **/
 //------------------------------------------------------------------------------
-tOplkError pdoklut_addChannel(tPdoklutEntry* pLut_p, tPdoChannel* pPdoChannel_p, UINT channelId_p)
+tOplkError pdoklut_addChannel(tPdoklutEntry* pLut_p,
+                              const tPdoChannel* pPdoChannel_p,
+                              UINT channelId_p)
 {
     tOplkError      ret = kErrorIllegalInstance;
     int             i;
     UINT8           nodeId;
+
+    // Check parameter validity
+    ASSERT(pLut_p != NULL);
+    ASSERT(pPdoChannel_p != NULL);
 
     nodeId = pPdoChannel_p->nodeId;
     if (nodeId == 255)
@@ -160,9 +169,9 @@ tOplkError pdoklut_addChannel(tPdoklutEntry* pLut_p, tPdoChannel* pPdoChannel_p,
 The function gets the PDO channel with index \p searchIndex_p from the
 PDO lookup table of node \p nodeId_p.
 
-\param  pLut_p          Pointer to the PDO lookup table.
-\param  index_p         The index of the entry to get from the lookup table.
-\param  nodeId_p        The node for which to get the channel.
+\param[in]      pLut_p              Pointer to the PDO lookup table.
+\param[in]      index_p             The index of the entry to get from the lookup table.
+\param[in]      nodeId_p            The node for which to get the channel.
 
 \return The function returns the channel ID. If no more channel is found,
         PDOKLUT_INVALID_CHANNEL is returned.
@@ -170,8 +179,10 @@ PDO lookup table of node \p nodeId_p.
 \ingroup module_pdoklut
 **/
 //------------------------------------------------------------------------------
-UINT pdoklut_getChannel(tPdoklutEntry* pLut_p, UINT8 index_p, UINT8 nodeId_p)
+UINT pdoklut_getChannel(const tPdoklutEntry* pLut_p, UINT8 index_p, UINT8 nodeId_p)
 {
+    // Check parameter validity
+    ASSERT(pLut_p != NULL);
 
     if (index_p >= PDOKLUT_MAX_CHANNELS_PER_NODE)
     {
@@ -191,4 +202,4 @@ UINT pdoklut_getChannel(tPdoklutEntry* pLut_p, UINT8 index_p, UINT8 nodeId_p)
 /// \name Private Functions
 /// \{
 
-///\}
+/// \}

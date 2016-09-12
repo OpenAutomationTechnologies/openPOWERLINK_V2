@@ -61,12 +61,12 @@ extern "C"
 {
 #endif
 
-tOplkError pdok_processRxPdo(tPlkFrame* pFrame_p, UINT frameSize_p) SECTION_PDOK_PROCESS_RPDO;
+tOplkError pdok_processRxPdo(const tPlkFrame* pFrame_p, UINT frameSize_p) SECTION_PDOK_PROCESS_RPDO;
 tOplkError pdok_init(void);
 tOplkError pdok_exit(void);
 tOplkError pdok_deAllocChannelMem(void);
-tOplkError pdok_allocChannelMem(tPdoAllocationParam* pAllocationParam_p);
-tOplkError pdok_configureChannel(tPdoChannelConf* pChannelConf_p);
+tOplkError pdok_allocChannelMem(const tPdoAllocationParam* pAllocationParam_p);
+tOplkError pdok_configureChannel(const tPdoChannelConf* pChannelConf_p);
 tOplkError pdok_setupPdoBuffers(size_t rxPdoMemSize_p, size_t txPdoMemSize_p);
 
 #ifdef __cplusplus
