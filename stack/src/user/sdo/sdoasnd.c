@@ -95,7 +95,7 @@ static tSdoAsndInstance  sdoAsndInstance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError sdoAsndCb(tFrameInfo* pFrameInfo_p);
+static tOplkError sdoAsndCb(const tFrameInfo* pFrameInfo_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -311,7 +311,7 @@ receiving ASnd frames.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError sdoAsndCb(tFrameInfo* pFrameInfo_p)
+static tOplkError sdoAsndCb(const tFrameInfo* pFrameInfo_p)
 {
     tOplkError      ret = kErrorOk;
     UINT            count;

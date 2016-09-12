@@ -56,11 +56,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 * This function type is used for callback functions handling received ASnd
 * frames.
 *
-* \param pFrameInfo_p       Information about received ASnd frame.
+* \param[in]    pFrameInfo_p        Information about received ASnd frame.
 *
 * \return The function returns a tOplkError error code
 */
-typedef tOplkError (*tDlluCbAsnd)(tFrameInfo* pFrameInfo_p);
+typedef tOplkError (*tDlluCbAsnd)(const tFrameInfo* pFrameInfo_p);
 
 /**
 * \brief Callback function for handling received Non-PLK frames
@@ -68,11 +68,11 @@ typedef tOplkError (*tDlluCbAsnd)(tFrameInfo* pFrameInfo_p);
 * This function type is used for callback functions handling received non-
 * POWERLINK (Ethernet) frames.
 *
-* \param pFrameInfo_p       Information about received frame.
+* \param[in]    pFrameInfo_p        Information about received frame.
 *
 * \return The function returns a tOplkError error code
 */
-typedef tOplkError (*tDlluCbNonPlk)(tFrameInfo* pFrameInfo_p);
+typedef tOplkError (*tDlluCbNonPlk)(const tFrameInfo* pFrameInfo_p);
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -84,8 +84,8 @@ extern "C"
 
 tOplkError dllucal_init(void);
 tOplkError dllucal_exit(void);
-tOplkError dllucal_config(tDllConfigParam* pDllConfigParam_p);
-tOplkError dllucal_setIdentity(tDllIdentParam* pDllIdentParam_p);
+tOplkError dllucal_config(const tDllConfigParam* pDllConfigParam_p);
+tOplkError dllucal_setIdentity(const tDllIdentParam* pDllIdentParam_p);
 
 #if defined(CONFIG_INCLUDE_VETH)
 tOplkError dllucal_regNonPlkHandler(tDlluCbNonPlk pfnNonPlkCb_p);
@@ -94,18 +94,22 @@ tOplkError dllucal_regNonPlkHandler(tDlluCbNonPlk pfnNonPlkCb_p);
 tOplkError dllucal_regAsndService(tDllAsndServiceId ServiceId_p,
                                   tDlluCbAsnd pfnDlluCbAsnd_p,
                                   tDllAsndFilter Filter_p);
-tOplkError dllucal_sendAsyncFrame(tFrameInfo* pFrameInfo, tDllAsyncReqPriority Priority_p);
-tOplkError dllucal_process(tEvent* pEvent_p);
+tOplkError dllucal_sendAsyncFrame(const tFrameInfo* pFrameInfo,
+                                  tDllAsyncReqPriority priority_p);
+tOplkError dllucal_process(const tEvent* pEvent_p);
 
 #if (NMT_MAX_NODE_ID > 0)
-tOplkError dllucal_configNode(tDllNodeInfo* pNodeInfo_p);
-tOplkError dllucal_addNode(tDllNodeOpParam* pNodeOpParam_p);
-tOplkError dllucal_deleteNode(tDllNodeOpParam* pNodeOpParam_p);
+tOplkError dllucal_configNode(const tDllNodeInfo* pNodeInfo_p);
+tOplkError dllucal_addNode(const tDllNodeOpParam* pNodeOpParam_p);
+tOplkError dllucal_deleteNode(const tDllNodeOpParam* pNodeOpParam_p);
 #endif
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
-tOplkError dllucal_issueRequest(tDllReqServiceId Service_p, unsigned int uiNodeId_p, BYTE bSoaFlag1_p);
-tOplkError dllucal_issueSyncRequest(tDllSyncRequest* pSyncRequest_p, unsigned int uiSize_p);
+tOplkError dllucal_issueRequest(tDllReqServiceId service_p,
+                                UINT nodeId_p,
+                                UINT8 soaFlag1_p);
+tOplkError dllucal_issueSyncRequest(const tDllSyncRequest* pSyncRequest_p,
+                                    size_t size_p);
 #endif
 
 #ifdef __cplusplus

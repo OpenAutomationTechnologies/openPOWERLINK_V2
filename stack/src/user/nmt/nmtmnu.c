@@ -316,7 +316,7 @@ static tNmtMnuInstance   nmtMnuInstance_g;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError cbNmtRequest(tFrameInfo* pFrameInfo_p);
+static tOplkError cbNmtRequest(const tFrameInfo* pFrameInfo_p);
 static tOplkError cbIdentResponse(UINT nodeId_p, tIdentResponse* pIdentResponse_p);
 static tOplkError cbStatusResponse(UINT nodeId_p, tStatusResponse* pStatusResponse_p);
 static tOplkError cbNodeAdded(UINT nodeId_p);
@@ -1457,7 +1457,7 @@ The function implements the callback function for NMT requests.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError cbNmtRequest(tFrameInfo* pFrameInfo_p)
+static tOplkError cbNmtRequest(const tFrameInfo* pFrameInfo_p)
 {
     tOplkError              ret = kErrorOk;
     UINT                    targetNodeId;

@@ -86,7 +86,7 @@ static tStatusuInstance   instance_g;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError statusu_cbStatusResponse(tFrameInfo* pFrameInfo_p);
+static tOplkError statusu_cbStatusResponse(const tFrameInfo* pFrameInfo_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -233,7 +233,7 @@ StatusResponse is received.
 \ingroup module_statusu
 */
 //------------------------------------------------------------------------------
-static tOplkError statusu_cbStatusResponse(tFrameInfo* pFrameInfo_p)
+static tOplkError statusu_cbStatusResponse(const tFrameInfo* pFrameInfo_p)
 {
     tOplkError          ret = kErrorOk;
     UINT                nodeId;

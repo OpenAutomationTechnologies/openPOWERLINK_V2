@@ -118,9 +118,9 @@ static BOOL fStackInitialized_l = FALSE;
 #if defined(CONFIG_INCLUDE_SDOC)
 static tOplkError cbSdoCon(tSdoComFinished* pSdoComFinished_p);
 #endif
-static tOplkError cbReceivedAsnd(tFrameInfo *pFrameInfo_p);
+static tOplkError cbReceivedAsnd(const tFrameInfo* pFrameInfo_p);
 #if defined(CONFIG_INCLUDE_VETH)
-static tOplkError cbReceivedEth(tFrameInfo* pFrameInfo_p);
+static tOplkError cbReceivedEth(const tFrameInfo* pFrameInfo_p);
 #endif
 
 //============================================================================//
@@ -1633,7 +1633,7 @@ Frames will be forwarded to the application by sending a user event.
 \return The function returns a \ref tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError cbReceivedAsnd(tFrameInfo* pFrameInfo_p)
+static tOplkError cbReceivedAsnd(const tFrameInfo* pFrameInfo_p)
 {
     tOplkError              ret = kErrorOk;
     UINT                    asndOffset;
@@ -1669,7 +1669,7 @@ Frames will be forwarded to the application by sending a user event.
 \return The function returns a \ref tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError cbReceivedEth(tFrameInfo* pFrameInfo_p)
+static tOplkError cbReceivedEth(const tFrameInfo* pFrameInfo_p)
 {
     tOplkError          ret = kErrorOk;
     tOplkApiEventArg    eventArg;

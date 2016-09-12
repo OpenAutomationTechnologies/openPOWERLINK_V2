@@ -87,7 +87,7 @@ static tIdentuInstance   instance_g;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError   identu_cbIdentResponse(tFrameInfo* pFrameInfo_p);
+static tOplkError   identu_cbIdentResponse(const tFrameInfo* pFrameInfo_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -314,7 +314,7 @@ IdentResponse is received.
 \ingroup module_identu
 */
 //------------------------------------------------------------------------------
-static tOplkError identu_cbIdentResponse(tFrameInfo* pFrameInfo_p)
+static tOplkError identu_cbIdentResponse(const tFrameInfo* pFrameInfo_p)
 {
     tOplkError              ret = kErrorOk;
     UINT                    nodeId;

@@ -109,7 +109,7 @@ static tSyncuInstance   syncuInstance_g;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError syncResponseCb(tFrameInfo* pFrameInfo_p);
+static tOplkError syncResponseCb(const tFrameInfo* pFrameInfo_p);
 static tSyncuCbResponse readResponseQueue(UINT nodeId_p);
 static tOplkError writeResponseQueue(UINT nodeId_p, tSyncuCbResponse pfnCbResp_p);
 
@@ -244,7 +244,7 @@ SyncResponse is received.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError syncResponseCb(tFrameInfo* pFrameInfo_p)
+static tOplkError syncResponseCb(const tFrameInfo* pFrameInfo_p)
 {
     tOplkError          ret = kErrorOk;
     UINT                nodeId;
