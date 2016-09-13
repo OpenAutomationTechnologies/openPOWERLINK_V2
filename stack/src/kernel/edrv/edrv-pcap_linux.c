@@ -158,7 +158,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
 
     // save the init data (with updated MAC address)
     edrvInstance_l.initParam = *pEdrvInitParam_p;
-
+#ifndef PCAP_ERROR_TSTAMP_PRECISION_NOTSUP
     edrvInstance_l.pPcap = pcap_open_live(
                         edrvInstance_l.initParam.hwParam.pDevName,
                         65535,  // snaplen
@@ -166,12 +166,44 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
                         1,      // milli seconds read timeout
                         errorMessage
                     );
-
     if (edrvInstance_l.pPcap == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Error!! Can't open pcap: %s\n", __func__, errorMessage);
         return kErrorEdrvInit;
     }
+#else
+    /* PCAP_ERROR_TSTAMP_PRECISION_NOTSUP is the only way to differenciate libpcap 1.4 and newer */
+
+    /* The TPACKET_V3 mechanism, which is the default in 1.5.0 and later and which works better for the packet-capture case,
+     * doesn't work well for the request-and-response application case. Falling back to TPACKET_V2 in immmediate mode. */
+
+    /* create a live capture handle */
+    edrvInstance_l.pPcap = pcap_create(edrvInstance_l.initParam.hwParam.pDevName, errorMessage);
+    if (edrvInstance_l.pPcap == NULL) {
+        DEBUG_LVL_ERROR_TRACE("%s() Error!! Can't open pcap: %s\n", __func__, errorMessage);
+        return kErrorEdrvInit;
+    }
+
+    /* set promiscuous mode for a not-yet-activated capture handle */
+    if(pcap_set_promisc(edrvInstance_l.pPcap, 1) < 0) {
+        DEBUG_LVL_ERROR_TRACE("%s() couldn't set PCAP promiscious mode\n", __func__);
+        return kErrorEdrvInit;
+    }
+
+    /* set immediate mode for a not-yet-activated capture handle */
+    if(pcap_set_immediate_mode(edrvInstance_l.pPcap, 1) < 0) {
+        DEBUG_LVL_ERROR_TRACE("%s() couldn't set PCAP immediate mode\n", __func__);
+        return kErrorEdrvInit;
+    }
+
+    /* activate a packet capture handle to look at packets on the network,
+     * with the options that were set on the handle being in effect
+     */
+    if(pcap_activate(edrvInstance_l.pPcap) < 0) {
+        DEBUG_LVL_ERROR_TRACE("%s() couldn't activate PCAP\n", __func__);
+        return kErrorEdrvInit;
+    }
+#endif
 
     if (pcap_setdirection(edrvInstance_l.pPcap, PCAP_D_OUT) < 0)
     {
@@ -556,6 +588,7 @@ static void* workerThread(void* pArgument_p)
 
     DEBUG_LVL_EDRV_TRACE("%s(): ThreadId:%ld\n", __func__, syscall(SYS_gettid));
 
+#ifndef PCAP_ERROR_TSTAMP_PRECISION_NOTSUP
     pInstance->pPcapThread =
         pcap_open_live(pInstance->initParam.hwParam.pDevName,
                        65535,  // snaplen
@@ -568,7 +601,36 @@ static void* workerThread(void* pArgument_p)
        DEBUG_LVL_ERROR_TRACE("%s() Error!! Can't open pcap: %s\n", __func__, errorMessage);
        return NULL;
    }
+#else
+    /* PCAP_ERROR_TSTAMP_PRECISION_NOTSUP is the only way to differenciate libpcap 1.4 and libpcap 1.5 */
 
+    /* The TPACKET_V3 mechanism, which is the default in 1.5.0 and later and which works better for the packet-capture case,
+     * doesn't work well for the request-and-response application case. Falling back to TPACKET_V2 in immmediate mode. */
+
+    /* create a live capture handle */
+    pInstance->pPcapThread = pcap_create(pInstance->initParam.hwParam.pDevName, errorMessage);
+    if (pInstance->pPcapThread == NULL)	{
+       DEBUG_LVL_ERROR_TRACE("%s() Error!! Can't open pcap: %s\n", __func__, errorMessage);
+       return NULL;
+    }
+
+    /* set promiscuous mode for a not-yet-activated capture handle */
+    if(pcap_set_promisc(pInstance->pPcapThread, 1) < 0) {
+        DEBUG_LVL_ERROR_TRACE("%s() couldn't set PCAP promiscious mode\n", __func__);
+    }
+
+    /* set immediate mode for a not-yet-activated capture handle */
+    if(pcap_set_immediate_mode(pInstance->pPcapThread, 1) < 0) {
+        DEBUG_LVL_ERROR_TRACE("%s() couldn't set PCAP immediate mode\n", __func__);
+    }
+
+    /* activate a packet capture handle to look at packets on the network,
+     * with the options that were set on the handle being in effect
+     */
+    if(pcap_activate(pInstance->pPcapThread) < 0) {
+        DEBUG_LVL_ERROR_TRACE("%s() couldn't activate PCAP\n", __func__);
+    }
+#endif
    if (pcap_setdirection(pInstance->pPcapThread, PCAP_D_INOUT) < 0)
    {
        DEBUG_LVL_ERROR_TRACE("%s() couldn't set PCAP direction1\n", __func__);
