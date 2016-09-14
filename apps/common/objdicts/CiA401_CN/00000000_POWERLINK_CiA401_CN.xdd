@@ -104,6 +104,22 @@
             </characteristic>
           </characteristicsList>
         </capabilities>
+        <picturesList>
+            <picture URI="image_generic_cn.png" type="frontPicture">
+                <label lang="en">Front picture</label>
+            </picture>
+            <picture URI="icon_generic_cn.ico" type="icon">
+                <label lang="en">Icon</label>
+            </picture>
+        </picturesList>
+        <connectorList>
+            <connector id="PLK_IF1" connectorType="POWERLINK" positioning="remote" posX="157" posY="215" >
+                <label lang="en">PLK_IF1</label>
+            </connector>
+            <connector id="PLK_IF2" connectorType="POWERLINK" positioning="remote" posX="282" posY="215" >
+                <label lang="en">PLK_IF2</label>
+            </connector>
+        </connectorList>
       </DeviceFunction>
     </ProfileBody>
   </ISO15745Profile>
