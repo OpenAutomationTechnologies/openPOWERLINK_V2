@@ -11,7 +11,7 @@ This implementation is used if user and kernel layer run in the same domain.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -96,7 +96,7 @@ static tSyncCb      pfnSyncCb_l;
 
 The function initializes the user CAL timesync module
 
-\param  pfnSyncCb_p             Function that is called in case of sync event
+\param[in]      pfnSyncCb_p         Function that is called in case of sync event
 
 \return The function returns a tOplkError error code.
 
@@ -106,6 +106,7 @@ The function initializes the user CAL timesync module
 tOplkError timesyncucal_init(tSyncCb pfnSyncCb_p)
 {
     pfnSyncCb_l = pfnSyncCb_p;
+
     return kErrorOk;
 }
 
@@ -129,12 +130,12 @@ void timesyncucal_exit(void)
 
 The function waits for a sync event.
 
-\param  timeout_p       Specifies a timeout in microseconds. If 0 it waits
-                        forever.
+\param[in]      timeout_p           Specifies a timeout in microseconds. If 0 it waits
+                                    forever.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk              Successfully received sync event
-\retval kErrorGeneralError    Error while waiting on sync event
+\retval kErrorOk                    Successfully received sync event
+\retval kErrorGeneralError          Error while waiting on sync event
 
 \ingroup module_timesyncucal
 */
@@ -160,9 +161,8 @@ The function calls the registered sync callback function
 tOplkError timesyncucal_callSyncCb(void)
 {
     if (pfnSyncCb_l != NULL)
-    {
         return pfnSyncCb_l();
-    }
+
     return kErrorOk;
 }
 
@@ -190,4 +190,4 @@ tTimesyncSharedMemory* timesyncucal_getSharedMemory(void)
 /// \name Private Functions
 /// \{
 
-///\}
+/// \}

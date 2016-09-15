@@ -11,7 +11,8 @@ module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014 Kalycito Infotech Private Limited
+Copyright (c) 2014, Kalycito Infotech Private Limited
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -112,7 +113,7 @@ static void irqSyncCb(void);
 
 The function initializes the user CAL timesync module
 
-\param  pfnSyncCb_p             Function that is called in case of sync event
+\param[in]      pfnSyncCb_p         Function that is called in case of sync event
 
 \return The function returns a tOplkError error code.
 
@@ -121,11 +122,11 @@ The function initializes the user CAL timesync module
 //------------------------------------------------------------------------------
 tOplkError timesyncucal_init(tSyncCb pfnSyncCb_p)
 {
-    tDualprocReturn         dualRet;
+    tDualprocReturn dualRet;
 #if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
-    UINT8*                  pBuffer;
-    size_t                  memSize = sizeof(tTimesyncSharedMemory);
-    INT                     loopCount = 0;
+    UINT8*          pBuffer;
+    size_t          memSize = sizeof(tTimesyncSharedMemory);
+    INT             loopCount = 0;
 #endif
 
     OPLK_MEMSET(&instance_l, 0, sizeof(instance_l));
@@ -151,8 +152,10 @@ tOplkError timesyncucal_init(tSyncCb pfnSyncCb_p)
     for (loopCount = 0; loopCount < DUALPROCSHM_ADDR_READ_TIMEOUT_MS; loopCount++)
     {
         dualRet = dualprocshm_getMemory(instance_l.pDrvInstance,
-                                        DUALPROCSHM_BUFF_ID_TIMESYNC, &pBuffer,
-                                        &memSize, FALSE);
+                                        DUALPROCSHM_BUFF_ID_TIMESYNC,
+                                        &pBuffer,
+                                        &memSize,
+                                        FALSE);
 
         if (dualRet == kDualprocSuccessful)
             break;
@@ -163,7 +166,8 @@ tOplkError timesyncucal_init(tSyncCb pfnSyncCb_p)
     if (loopCount == DUALPROCSHM_ADDR_READ_TIMEOUT_MS)
     {
         DEBUG_LVL_ERROR_TRACE("%s() couldn't allocate timesync buffer (%d)\n",
-                              __func__, dualRet);
+                              __func__,
+                              dualRet);
         return kErrorNoResource;
     }
 
@@ -189,14 +193,11 @@ void timesyncucal_exit(void)
     instance_l.pSharedMemory = NULL;
 #endif
 
-    if (instance_l.pDrvInstance == NULL)
+    if (instance_l.pDrvInstance != NULL)
     {
-        // Simply skip here because the next calls won't work anyway...
-        return;
+        dualprocshm_registerHandler(instance_l.pDrvInstance, TARGET_SYNC_INTERRUPT_ID, NULL);
+        dualprocshm_freeMemory(instance_l.pDrvInstance, DUALPROCSHM_BUFF_ID_TIMESYNC, FALSE);
     }
-
-    dualprocshm_registerHandler(instance_l.pDrvInstance, TARGET_SYNC_INTERRUPT_ID, NULL);
-    dualprocshm_freeMemory(instance_l.pDrvInstance, DUALPROCSHM_BUFF_ID_TIMESYNC, FALSE);
 }
 
 //------------------------------------------------------------------------------
@@ -205,12 +206,12 @@ void timesyncucal_exit(void)
 
 The function waits for a sync event.
 
-\param  timeout_p       Specifies a timeout in microseconds. If 0 it waits
-                        forever.
+\param[in]      timeout_p           Specifies a timeout in microseconds. If 0 it waits
+                                    forever.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk              Successfully received sync event
-\retval kErrorGeneralError    Error while waiting on sync event
+\retval kErrorOk                    Successfully received sync event
+\retval kErrorGeneralError          Error while waiting on sync event
 
 \ingroup module_timesyncucal
 */
@@ -218,6 +219,7 @@ The function waits for a sync event.
 tOplkError timesyncucal_waitSyncEvent(ULONG timeout_p)
 {
     UNUSED_PARAMETER(timeout_p);
+
     return kErrorOk;
 }
 
