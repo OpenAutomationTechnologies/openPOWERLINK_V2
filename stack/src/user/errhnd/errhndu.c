@@ -16,7 +16,7 @@ module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -98,7 +98,7 @@ static tErrHnduInstance        instance_l;
 static tOplkError linkErrorCounter(tErrorObject* pErrorCounter_p, UINT index_p);
 
 #ifdef CONFIG_INCLUDE_NMT_MN
-static tOplkError checkErrorObject(UINT index_p, BYTE* pEntries_p);
+static tOplkError checkErrorObject(UINT index_p, UINT8* pEntries_p);
 static tOplkError linkMnCnLossPresErrors(tErrHndObjects* pError_p);
 #endif
 
@@ -119,9 +119,7 @@ The function initializes the user error handler module.
 //------------------------------------------------------------------------------
 tOplkError errhndu_init(void)
 {
-    tOplkError      ret;
-
-    ret = kErrorOk;
+    tOplkError  ret;
 
     ret = errhnducal_init(&instance_l.errorObjects);
     if (ret != kErrorOk)
@@ -133,45 +131,34 @@ tOplkError errhndu_init(void)
     // link counters to OD
     ret = linkErrorCounter(&instance_l.errorObjects.cnLossSoc, OID_DLL_CN_LOSSSOC_REC);
     if (ret != kErrorOk)
-    {
         goto Exit;
-    }
 
     ret = linkErrorCounter(&instance_l.errorObjects.cnLossPreq, OID_DLL_CN_LOSSPREQ_REC);
     // ignore return code, because object 0x1C0D is conditional
 
     ret = linkErrorCounter(&instance_l.errorObjects.cnCrcErr, OID_DLL_CN_CRCERROR_REC);
     if (ret != kErrorOk)
-    {
         goto Exit;
-    }
 
 #ifdef CONFIG_INCLUDE_NMT_MN
     ret = linkErrorCounter(&instance_l.errorObjects.mnCrcErr, OID_DLL_MN_CRCERROR_REC);
     if (ret != kErrorOk)
-    {
         goto Exit;
-    }
 
     ret = linkErrorCounter(&instance_l.errorObjects.mnCycTimeExceed,
                            OID_DLL_MN_CYCTIME_EXCEED_REC);
     if (ret != kErrorOk)
-    {
         goto Exit;
-    }
 
     ret = linkMnCnLossPresErrors(&instance_l.errorObjects);
     if (ret != kErrorOk)
-    {
         goto Exit;
-    }
 #endif
 
 Exit:
     if (ret != kErrorOk)
-    {
         errhnducal_exit();
-    }
+
     return ret;
 }
 
@@ -189,6 +176,7 @@ The function shuts down the user error handler module.
 tOplkError errhndu_exit()
 {
     errhnducal_exit();
+
     return kErrorOk;
 }
 
@@ -201,20 +189,22 @@ error objects so that error counters can be updated in shared memory by
 PostWrite events and local objects will be updated from shared memory on
 PreRead events.
 
-\param  pParam_p            OD callback parameter
+\param[in,out]  pParam_p            OD callback parameter
 
 \return Returns always kErrorOk
 */
 //------------------------------------------------------------------------------
 tOplkError errhndu_cbObdAccess(tObdCbParam* pParam_p)
 {
+    // Check parameter validity
+    ASSERT(pParam_p != NULL);
+
     switch (pParam_p->obdEvent)
     {
         case kObdEvPostDefault:
             if (pParam_p->subIndex == SUBIDX_DLL_ERROR_CUM_CNT)
-            {
                 break;
-            }
+
             // fall through!
         case kObdEvPostWrite:
             switch (pParam_p->subIndex)
@@ -225,7 +215,7 @@ tOplkError errhndu_cbObdAccess(tObdCbParam* pParam_p)
                 case SUBIDX_DLL_ERROR_THRESHOLD:
                     errhnducal_writeErrorObject(pParam_p->index,
                                                 pParam_p->subIndex,
-                                                (UINT32*)pParam_p->pArg);
+                                                (const UINT32*)pParam_p->pArg);
                     break;
             }
             break;
@@ -247,6 +237,7 @@ tOplkError errhndu_cbObdAccess(tObdCbParam* pParam_p)
         default:
             break;
     }
+
     return kErrorOk;
 }
 
@@ -262,7 +253,7 @@ error objects so that error counters can be updated in shared memory by
 PostWrite events and local objects will be updated from shared memory on
 PreRead objects.
 
-\param  pParam_p            OD callback parameter
+\param[in,out]  pParam_p            OD callback parameter
 
 \return Returns always kErrorOk
 
@@ -271,7 +262,10 @@ PreRead objects.
 //------------------------------------------------------------------------------
 tOplkError errhndu_mnCnLossPresCbObdAccess(tObdCbParam* pParam_p)
 {
-    tOplkError          ret = kErrorOk;
+    tOplkError  ret = kErrorOk;
+
+    // Check parameter validity
+    ASSERT(pParam_p != NULL);
 
     if (pParam_p->subIndex == 0)
         return kErrorOk;
@@ -280,9 +274,8 @@ tOplkError errhndu_mnCnLossPresCbObdAccess(tObdCbParam* pParam_p)
     {
         case kObdEvPostDefault:
             if (pParam_p->index == OID_DLL_MNCN_LOSSPRES_CUMCNT_AU32)
-            {
                 break;
-            }
+
             // fall through!
         case kObdEvPostWrite:
             switch (pParam_p->index)
@@ -293,7 +286,7 @@ tOplkError errhndu_mnCnLossPresCbObdAccess(tObdCbParam* pParam_p)
                 case OID_DLL_MNCN_LOSSPRES_THRESHOLD_AU32:
                     errhnducal_writeErrorObject(pParam_p->index,
                                                 pParam_p->subIndex,
-                                                (UINT32*)pParam_p->pArg);
+                                                (const UINT32*)pParam_p->pArg);
                     break;
             }
             break;
@@ -333,8 +326,8 @@ tOplkError errhndu_mnCnLossPresCbObdAccess(tObdCbParam* pParam_p)
 The function links an error counter structure to the according object
 directory entry.
 
-\param  pErrorCounter_p     Pointer to error counter structure
-\param  index_p             OD index
+\param[in]      pErrorCounter_p     Pointer to error counter structure
+\param[in]      index_p             OD index
 
 \return Returns a tOplkError error code.
 
@@ -343,8 +336,8 @@ directory entry.
 //------------------------------------------------------------------------------
 static tOplkError linkErrorCounter(tErrorObject* pErrorCounter_p, UINT index_p)
 {
-    tOplkError      ret = kErrorOk;
-    tVarParam       varParam;
+    tOplkError  ret = kErrorOk;
+    tVarParam   varParam;
 
     varParam.validFlag = kVarValidAll;
     varParam.index = index_p;
@@ -365,6 +358,7 @@ static tOplkError linkErrorCounter(tErrorObject* pErrorCounter_p, UINT index_p)
     varParam.pData = &(pErrorCounter_p->threshold);
     varParam.subindex = 0x03;
     ret = obdu_defineVar(&varParam);
+
     return ret;
 }
 
@@ -376,26 +370,24 @@ static tOplkError linkErrorCounter(tErrorObject* pErrorCounter_p, UINT index_p)
 The function checks if the specified error object exists in the object
 dictionary.
 
-\param  index_p             Object index of object to check.
-\param  pEntries_p          Pointer to store the number of entries of this
-                            object.
+\param[in]      index_p             Object index of object to check.
+\param[out]     pEntries_p          Pointer to store the number of entries of this
+                                    object.
 
 \return Returns a tOplkError error code.
-\retval kErrorOk                  Object exists
-\retval kErrorObdIndexNotExist    Index does not exist
+\retval kErrorOk                    Object exists
+\retval kErrorObdIndexNotExist      Index does not exist
 
 \ingroup module_errhndu
 */
 //------------------------------------------------------------------------------
-static tOplkError checkErrorObject(UINT index_p, BYTE* pEntries_p)
+static tOplkError checkErrorObject(UINT index_p, UINT8* pEntries_p)
 {
-    tOplkError      ret = kErrorOk;
-    tObdSize        entrySize;
-    BYTE            indexEntries;
+    tOplkError  ret;
+    UINT8       indexEntries;
+    tObdSize    entrySize = (tObdSize)sizeof(indexEntries);
 
-    entrySize = (tObdSize)sizeof(indexEntries);
     ret = obdu_readEntry(index_p, 0x00, (void*)&indexEntries, &entrySize);
-
     if ((ret != kErrorOk) || (indexEntries == 0x00))
     {
         // Object doesn't exist or invalid entry number
@@ -403,6 +395,7 @@ static tOplkError checkErrorObject(UINT index_p, BYTE* pEntries_p)
     }
 
     *pEntries_p = indexEntries;
+
     return kErrorOk;
 }
 
@@ -414,7 +407,7 @@ The function links the Loss of PRes error to the object dictionary. This
 error must be handled differently because its entries are stored as
 subindexes for each node ID.
 
-\param  pError_p            Pointer to error handler object data.
+\param[in]      pError_p            Pointer to error handler object data.
 
 \return Returns a tOplkError error code.
 
@@ -423,10 +416,10 @@ subindexes for each node ID.
 //------------------------------------------------------------------------------
 static tOplkError linkMnCnLossPresErrors(tErrHndObjects* pError_p)
 {
-    tOplkError      ret = kErrorOk;
+    tOplkError      ret;
     tVarParam       varParam;
-    BYTE            indexEntries;
-    BYTE            numObjs;
+    UINT8           indexEntries;
+    UINT8           numObjs;
     tErrorObject*   pErrCnt;
 
     /* Check if error objects exist and use the minimum number of subindexes
@@ -478,9 +471,10 @@ static tOplkError linkMnCnLossPresErrors(tErrHndObjects* pError_p)
 
         pErrCnt++;
     }
+
     return ret;
 }
 
 #endif
 
-///\}
+/// \}
