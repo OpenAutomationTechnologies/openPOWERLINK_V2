@@ -14,7 +14,8 @@ queues. User-internal events are processed directly.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014 Kalycito Infotech Private Limited
+Copyright (c) 2014, Kalycito Infotech Private Limited
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -108,8 +109,8 @@ The function initializes the architecture specific stuff of the user event
 CAL module.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventucal
 */
@@ -120,6 +121,7 @@ tOplkError eventucal_init(void)
 
     if (eventucal_initQueueCircbuf(kEventQueueU2K) != kErrorOk)
         goto Exit;
+
     if (eventucal_initQueueCircbuf(kEventQueueK2U) != kErrorOk)
         goto Exit;
 
@@ -141,8 +143,8 @@ The function cleans up the kernel event CAL module. For cleanup it calls the exi
 functions of the queue implementations for each used queue.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventucal
 */
@@ -167,20 +169,24 @@ This function posts an event to a queue. It is called from the generic kernel
 event post function in the event handler. Depending on the sink the appropriate
 queue post function is called.
 
-\param  pEvent_p                Event to be posted.
+\param[in]      pEvent_p            Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-tOplkError eventucal_postKernelEvent(tEvent* pEvent_p)
+tOplkError eventucal_postKernelEvent(const tEvent* pEvent_p)
 {
-    tOplkError    ret;
+    tOplkError  ret;
+
+    // Check parameter validity
+    ASSERT(pEvent_p != NULL);
 
     ret = eventucal_postEventCircbuf(kEventQueueU2K, pEvent_p);
+
     return ret;
 }
 
@@ -192,18 +198,21 @@ This function posts an event to a queue. It is called from the generic kernel
 event post function in the event handler. Depending on the sink the appropriate
 queue post function is called.
 
-\param  pEvent_p                Event to be posted.
+\param[in]      pEvent_p            Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-tOplkError eventucal_postUserEvent(tEvent* pEvent_p)
+tOplkError eventucal_postUserEvent(const tEvent* pEvent_p)
 {
-    tOplkError    ret;
+    tOplkError  ret;
+
+    // Check parameter validity
+    ASSERT(pEvent_p != NULL);
 
     ret = eventu_process(pEvent_p);
 
@@ -222,9 +231,7 @@ This function will be called by the systems process function.
 void eventucal_process(void)
 {
     if (eventucal_getEventCountCircbuf(kEventQueueK2U) > 0)
-    {
         eventucal_processEventCircbuf(kEventQueueK2U);
-    }
 }
 
 //============================================================================//

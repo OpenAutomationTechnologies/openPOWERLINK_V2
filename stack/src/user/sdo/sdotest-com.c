@@ -373,7 +373,7 @@ Handles events that come from the event module
 \ingroup module_sdotest_com
 */
 //------------------------------------------------------------------------------
-tOplkError sdotestcom_cbEvent(tEvent* pOplkEvent_p)
+tOplkError sdotestcom_cbEvent(const tEvent* pOplkEvent_p)
 {
     tOplkError               ret;
     tOplkError               Sequret;

@@ -13,7 +13,7 @@ platform. It uses the circular buffer interface for all event queues.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <common/oplkinc.h>
 #include <user/eventucal.h>
 #include <user/eventucalintf.h>
-//#include <oplk/debugstr.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -99,8 +98,8 @@ tEventuCalInstance          instance_l;             ///< Instance variable of us
 // local function prototypes
 //------------------------------------------------------------------------------
 static DWORD WINAPI eventThread(LPVOID arg);
-static void signalUserEvent(void);
-static void signalKernelEvent(void);
+static void         signalUserEvent(void);
+static void         signalKernelEvent(void);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -115,16 +114,14 @@ configuration it gets the function pointer interface of the used queue
 implementations and calls the appropriate init functions.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
 tOplkError eventucal_init(void)
 {
-    tOplkError      ret = kErrorOk;
-
     OPLK_MEMSET(&instance_l, 0, sizeof(tEventuCalInstance));
 
     if ((instance_l.semUserData = CreateSemaphore(NULL, 0, 100, "Local\\semUserEvent")) == NULL)
@@ -147,10 +144,16 @@ tOplkError eventucal_init(void)
     eventucal_setSignalingCircbuf(kEventQueueUInt, signalUserEvent);
 
     instance_l.fStopThread = FALSE;
-    if ((instance_l.threadHandle = CreateThread(NULL, 0, eventThread, (LPVOID)&instance_l,
-                                                0, NULL)) == NULL)
+    if ((instance_l.threadHandle = CreateThread(NULL,
+                                                0,
+                                                eventThread,
+                                                (LPVOID)&instance_l,
+                                                0,
+                                                NULL)) == NULL)
     {
-        DEBUG_LVL_ERROR_TRACE("%s() CreateThread fails! Error:%ld\n", __func__, GetLastError());
+        DEBUG_LVL_ERROR_TRACE("%s() CreateThread fails! Error:%ld\n",
+                              __func__,
+                              GetLastError());
         goto Exit;
     }
 
@@ -184,8 +187,8 @@ The function cleans up the kernel event CAL module. For cleanup it calls the exi
 functions of the queue implementations for each used queue.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventucal
 */
@@ -218,23 +221,24 @@ This function posts an event to a queue. It is called from the generic kernel
 event post function in the event handler. Depending on the sink the appropriate
 queue post function is called.
 
-\param  pEvent_p                Event to be posted.
+\param[in]      pEvent_p            Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-tOplkError eventucal_postKernelEvent(tEvent* pEvent_p)
+tOplkError eventucal_postKernelEvent(const tEvent* pEvent_p)
 {
-    tOplkError      ret;
-    /*TRACE("U2K type:%s(%d) sink:%s(%d) size:%d!\n",
-                   debugstr_getEventTypeStr(pEvent_p->eventType), pEvent_p->eventType,
-                   debugstr_getEventSinkStr(pEvent_p->eventSink), pEvent_p->eventSink,
-                   pEvent_p->eventArgSize);*/
+    tOplkError  ret;
+
+    // Check parameter validity
+    ASSERT(pEvent_p != NULL);
+
     ret = eventucal_postEventCircbuf(kEventQueueU2K, pEvent_p);
+
     return ret;
 }
 
@@ -246,24 +250,24 @@ This function posts an event to a queue. It is called from the generic kernel
 event post function in the event handler. Depending on the sink the appropriate
 queue post function is called.
 
-\param  pEvent_p                Event to be posted.
+\param[in]      pEvent_p            Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-tOplkError eventucal_postUserEvent(tEvent* pEvent_p)
+tOplkError eventucal_postUserEvent(const tEvent* pEvent_p)
 {
-    tOplkError      ret;
+    tOplkError  ret;
 
-    /*TRACE("UINT  type:%s(%d) sink:%s(%d) size:%d!\n",
-                   debugstr_getEventTypeStr(pEvent_p->eventType), pEvent_p->eventType,
-                   debugstr_getEventSinkStr(pEvent_p->eventSink), pEvent_p->eventSink,
-                   pEvent_p->eventArgSize);*/
+    // Check parameter validity
+    ASSERT(pEvent_p != NULL);
+
     ret = eventucal_postEventCircbuf(kEventQueueUInt, pEvent_p);
+
     return ret;
 }
 
@@ -293,7 +297,7 @@ void eventucal_process(void)
 
 This function contains the main function for the event handler thread.
 
-\param  arg                     Thread parameter. Not used!
+\param[in,out]  arg                 Thread parameter. Used to access the module instance.
 
 \return The function returns the thread exit code.
 */
@@ -303,7 +307,9 @@ static DWORD WINAPI eventThread(LPVOID arg)
     tEventuCalInstance*     pInstance = (tEventuCalInstance*)arg;
     DWORD                   waitResult;
 
-    DEBUG_LVL_EVENTU_TRACE("User event thread %d waiting for events...\n", GetCurrentThreadId());
+    DEBUG_LVL_EVENTU_TRACE("%s(): User event thread %d waiting for events...\n",
+                           __func__,
+                           GetCurrentThreadId());
 
     while (!pInstance->fStopThread)
     {
@@ -311,18 +317,15 @@ static DWORD WINAPI eventThread(LPVOID arg)
         switch (waitResult)
         {
             case WAIT_OBJECT_0:
-                //TRACE("Received user event!\n");
+                DEBUG_LVL_EVENTU_TRACE("%s(): Received user event!\n", __func__);
+
                 /* first handle all kernel to user events --> higher priority! */
                 if (eventucal_getEventCountCircbuf(kEventQueueK2U) > 0)
-                {
                     eventucal_processEventCircbuf(kEventQueueK2U);
-                }
                 else
                 {
                     if (eventucal_getEventCountCircbuf(kEventQueueUInt) > 0)
-                    {
                         eventucal_processEventCircbuf(kEventQueueUInt);
-                    }
                 }
                 break;
 
@@ -331,11 +334,13 @@ static DWORD WINAPI eventThread(LPVOID arg)
 
             default:
                 DEBUG_LVL_ERROR_TRACE("%s() Semaphore wait unknown error! Error:%ld\n",
-                                      __func__, GetLastError());
+                                      __func__,
+                                      GetLastError());
                 break;
         }
     }
-    DEBUG_LVL_EVENTU_TRACE("User Event Thread is exiting!\n");
+
+    DEBUG_LVL_EVENTU_TRACE("%s(): User event thread is exiting!\n", __func__);
     return 0;
 }
 

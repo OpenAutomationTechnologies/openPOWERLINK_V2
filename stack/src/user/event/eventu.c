@@ -12,7 +12,7 @@ interface for posting and receiving events to/from other user modules.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -51,11 +51,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/nmtmnu.h>
 #endif
 
-#if defined(CONFIG_INCLUDE_SDOC) || defined(CONFIG_INCLUDE_SDOS)
+#if (defined(CONFIG_INCLUDE_SDOC) || defined(CONFIG_INCLUDE_SDOS))
 #include <user/sdoseq.h>
 #include <user/sdotest.h>
 #endif
 
+#include <oplk/debugstr.h>
 #include <stddef.h>
 
 //============================================================================//
@@ -89,23 +90,23 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /**
 \brief Event user instance type
 
-The user event instance holds the Api process callback function pointer.
+The user event instance holds the API process callback function pointer.
 */
 typedef struct
 {
-    tProcessEventCb         pfnApiProcessEventCb;  ///< Callback for generic api events
+    tProcessEventCb         pfnApiProcessEventCb;  ///< Callback for generic API events
     BOOL                    fInitialized;          ///< Flag to determine status of eventu module
 } tEventuInstance;
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError callApiEventCb(tEvent* pEvent_p);
+static tOplkError callApiEventCb(const tEvent* pEvent_p);
 
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static tEventuInstance              instance_l;
+static tEventuInstance      instance_l;
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -118,25 +119,24 @@ static tEventuInstance              instance_l;
 The function initializes the user event module. It is also responsible to call
 the init function of its CAL module.
 
-\param  pfnApiProcessEventCb_p  Function pointer to generic event callback function.
+\param[in]      pfnApiProcessEventCb_p  Function pointer to generic event callback function.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventu
 */
 //------------------------------------------------------------------------------
 tOplkError eventu_init(tProcessEventCb pfnApiProcessEventCb_p)
 {
-    tOplkError ret = kErrorOk;
+    tOplkError  ret;
 
     OPLK_MEMSET(&instance_l, 0, sizeof(tEventuInstance));
 
     instance_l.pfnApiProcessEventCb = pfnApiProcessEventCb_p;
 
     ret = eventucal_init();
-
     if (ret == kErrorOk)
         instance_l.fInitialized = TRUE;
 
@@ -150,18 +150,17 @@ tOplkError eventu_init(tProcessEventCb pfnApiProcessEventCb_p)
 This function cleans up the user event module.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventu
 */
 //------------------------------------------------------------------------------
 tOplkError eventu_exit(void)
 {
-    tOplkError ret = kErrorOk;
+    tOplkError  ret;
 
     ret = eventucal_exit();
-
     instance_l.fInitialized = FALSE;
 
     return ret;
@@ -175,19 +174,22 @@ This function processes events posted to the user layer. It examines the
 sink and forwards the events by calling the event process function of the
 specific module
 
-\param  pEvent_p                Received event.
+\param[in]      pEvent_p            Received event.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventu
 */
 //------------------------------------------------------------------------------
-tOplkError eventu_process(tEvent* pEvent_p)
+tOplkError eventu_process(const tEvent* pEvent_p)
 {
-    tOplkError              ret = kErrorOk;
-    tEventSource            eventSource = kEventSourceInvalid;
+    tOplkError      ret = kErrorOk;
+    tEventSource    eventSource = kEventSourceInvalid;
+
+    // Check parameter validity
+    ASSERT(pEvent_p != NULL);
 
     if (!instance_l.fInitialized)
     {
@@ -214,7 +216,7 @@ tOplkError eventu_process(tEvent* pEvent_p)
             break;
 #endif
 
-#if defined(CONFIG_INCLUDE_SDOC) || defined(CONFIG_INCLUDE_SDOS)
+#if (defined(CONFIG_INCLUDE_SDOC) || defined(CONFIG_INCLUDE_SDOS))
         case kEventSinkSdoAsySeq:
             ret = sdoseq_processEvent(pEvent_p);
             eventSource = kEventSourceSdoAsySeq;
@@ -236,7 +238,8 @@ tOplkError eventu_process(tEvent* pEvent_p)
 
         default:
             // Unknown sink, provide error event to API layer
-            eventu_postError(kEventSourceEventu, ret,
+            eventu_postError(kEventSourceEventu,
+                             ret,
                              sizeof(pEvent_p->eventSink),
                              &pEvent_p->eventSink);
             ret = kErrorEventUnknownSink;
@@ -246,7 +249,8 @@ tOplkError eventu_process(tEvent* pEvent_p)
     if ((ret != kErrorOk) && (ret != kErrorShutdown))
     {
         // forward error event to API layer
-        eventu_postError(kEventSourceEventu, ret,
+        eventu_postError(kEventSourceEventu,
+                         ret,
                          sizeof(eventSource),
                          &eventSource);
     }
@@ -261,18 +265,21 @@ tOplkError eventu_process(tEvent* pEvent_p)
 This function posts an event to a queue. It calls the post function of the
 CAL module which distributes the event to the suitable event queue.
 
-\param  pEvent_p                Event to be posted.
+\param[in]      pEvent_p            Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventu
 */
 //------------------------------------------------------------------------------
-tOplkError eventu_postEvent(tEvent* pEvent_p)
+tOplkError eventu_postEvent(const tEvent* pEvent_p)
 {
-    tOplkError ret = kErrorOk;
+    tOplkError  ret = kErrorOk;
+
+    // Check parameter validity
+    ASSERT(pEvent_p != NULL);
 
     if (!instance_l.fInitialized)
     {
@@ -292,7 +299,17 @@ tOplkError eventu_postEvent(tEvent* pEvent_p)
         case kEventSinkPdokCal:
         case kEventSinkErrk:
         case kEventSinkTimesynck:
+            DEBUG_LVL_EVENTU_TRACE("U2K type:%s(%d) sink:%s(%d) size:%d!\n",
+                                   debugstr_getEventTypeStr(pEvent_p->eventType),
+                                   pEvent_p->eventType,
+                                   debugstr_getEventSinkStr(pEvent_p->eventSink),
+                                   pEvent_p->eventSink,
+                                   pEvent_p->eventArgSize);
             ret = eventucal_postKernelEvent(pEvent_p);
+            if (ret != kErrorOk)
+            {
+                DEBUG_LVL_ERROR_TRACE("User to kernel event could not be posted!!\n");
+            }
             break;
 
         // user layer modules
@@ -303,13 +320,24 @@ tOplkError eventu_postEvent(tEvent* pEvent_p)
         case kEventSinkSdoTest:
         case kEventSinkDlluCal:
         case kEventSinkErru:
+            DEBUG_LVL_EVENTU_TRACE("UINT  type:%s(%d) sink:%s(%d) size:%d!\n",
+                                   debugstr_getEventTypeStr(pEvent_p->eventType),
+                                   pEvent_p->eventType,
+                                   debugstr_getEventSinkStr(pEvent_p->eventSink),
+                                   pEvent_p->eventSink,
+                                   pEvent_p->eventArgSize);
             ret = eventucal_postUserEvent(pEvent_p);
+            if (ret != kErrorOk)
+            {
+                DEBUG_LVL_ERROR_TRACE("User internal event could not be posted!!\n");
+            }
             break;
 
         default:
             ret = kErrorEventUnknownSink;
             break;
     }
+
     return ret;
 }
 
@@ -319,26 +347,29 @@ tOplkError eventu_postEvent(tEvent* pEvent_p)
 
 This function posts an error event to the API module.
 
-\param  eventSource_p           Source that caused the error
-\param  error_p                 Error code
-\param  argSize_p               Size of error argument
-\param  pArg_p                  Error argument
+\param[in]      eventSource_p       Source that caused the error
+\param[in]      error_p             Error code
+\param[in]      argSize_p           Size of error argument
+\param[in]      pArg_p              Error argument
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventu
 */
 //------------------------------------------------------------------------------
-tOplkError eventu_postError(tEventSource eventSource_p, tOplkError error_p,
-                            UINT argSize_p, const void* pArg_p)
+tOplkError eventu_postError(tEventSource eventSource_p,
+                            tOplkError error_p,
+                            UINT argSize_p,
+                            const void* pArg_p)
 {
-    tOplkError          ret;
-    tEventError         eventError;
-    tEvent              event;
+    tOplkError  ret;
+    tEventError eventError;
+    tEvent      event;
 
-    ret = kErrorOk;
+    // Check parameter validity
+    ASSERT(pArg_p != NULL);
 
     // create argument
     eventError.eventSource = eventSource_p;
@@ -371,17 +402,16 @@ tOplkError eventu_postError(tEventSource eventSource_p, tOplkError error_p,
 This function implements an API event handler wrapper. It determines if an API
 event callback was registered and calls it.
 
-\param  pEvent_p            Pointer to event.
+\param[in]      pEvent_p            Pointer to event.
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError callApiEventCb(tEvent* pEvent_p)
+static tOplkError callApiEventCb(const tEvent* pEvent_p)
 {
     if (instance_l.pfnApiProcessEventCb != NULL)
-    {
         return instance_l.pfnApiProcessEventCb(pEvent_p);
-    }
+
     return kErrorEventPostError;
 }
 

@@ -13,7 +13,7 @@ userspace platform. It uses the circular buffer interface for all event queues.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/eventucal.h>
 #include <user/eventucalintf.h>
 #include <common/target.h>
-//#include <oplk/debugstr.h>
 
 #include <time.h>
 #include <fcntl.h>
@@ -106,8 +105,8 @@ static tEventuCalInstance       instance_l;             ///< Instance variable o
 // local function prototypes
 //------------------------------------------------------------------------------
 static void* eventThread(void* arg);
-static void signalUserEvent(void);
-static void signalKernelEvent(void);
+static void  signalUserEvent(void);
+static void  signalKernelEvent(void);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -121,8 +120,8 @@ The function initializes the architecture specific stuff of the user event
 CAL module.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventucal
 */
@@ -160,10 +159,11 @@ tOplkError eventucal_init(void)
     if (pthread_setschedparam(instance_l.threadId, SCHED_FIFO, &schedParam) != 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s(): couldn't set thread scheduling parameters! %d\n",
-                              __func__, schedParam.sched_priority);
+                              __func__,
+                              schedParam.sched_priority);
     }
 
-#if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 12)
+#if (defined(__GLIBC__) && (__GLIBC__ >= 2) && (__GLIBC_MINOR__ >= 12))
     pthread_setname_np(instance_l.threadId, "oplk-eventu");
 #endif
 
@@ -192,15 +192,15 @@ The function cleans up the kernel event CAL module. For cleanup it calls the exi
 functions of the queue implementations for each used queue.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
 tOplkError eventucal_exit(void)
 {
-    UINT            i = 0;
+    UINT    i = 0;
 
     if (instance_l.fInitialized == TRUE)
     {
@@ -210,7 +210,8 @@ tOplkError eventucal_exit(void)
             target_msleep(10);
             if (i++ > 100)
             {
-                DEBUG_LVL_EVENTU_TRACE("Event Thread is not terminating, continue shutdown...!\n");
+                DEBUG_LVL_EVENTU_TRACE("%s(): Event thread is not terminating, continue shutdown...!\n",
+                                       __func__);
                 break;
             }
         }
@@ -235,23 +236,24 @@ This function posts an event to a queue. It is called from the generic kernel
 event post function in the event handler. Depending on the sink the appropriate
 queue post function is called.
 
-\param  pEvent_p                Event to be posted.
+\param[in]      pEvent_p            Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-tOplkError eventucal_postKernelEvent(tEvent* pEvent_p)
+tOplkError eventucal_postKernelEvent(const tEvent* pEvent_p)
 {
-    tOplkError      ret;
-    /*TRACE("U2K type:%s(%d) sink:%s(%d) size:%d!\n",
-                   debugstr_getEventTypeStr(pEvent_p->eventType), pEvent_p->eventType,
-                   debugstr_getEventSinkStr(pEvent_p->eventSink), pEvent_p->eventSink,
-                   pEvent_p->eventArgSize);*/
+    tOplkError  ret;
+
+    // Check parameter validity
+    ASSERT(pEvent_p != NULL);
+
     ret = eventucal_postEventCircbuf(kEventQueueU2K, pEvent_p);
+
     return ret;
 }
 
@@ -263,23 +265,22 @@ This function posts an event to a queue. It is called from the generic kernel
 event post function in the event handler. Depending on the sink the appropriate
 queue post function is called.
 
-\param  pEvent_p                Event to be posted.
+\param[in]      pEvent_p            Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-tOplkError eventucal_postUserEvent(tEvent* pEvent_p)
+tOplkError eventucal_postUserEvent(const tEvent* pEvent_p)
 {
-    tOplkError      ret;
+    tOplkError  ret;
 
-    /*TRACE("UINT  type:%s(%d) sink:%s(%d) size:%d!\n",
-                   debugstr_getEventTypeStr(pEvent_p->eventType), pEvent_p->eventType,
-                   debugstr_getEventSinkStr(pEvent_p->eventSink), pEvent_p->eventSink,
-                   pEvent_p->eventArgSize);*/
+    // Check parameter validity
+    ASSERT(pEvent_p != NULL);
+
     ret = eventucal_postEventCircbuf(kEventQueueUInt, pEvent_p);
 
     return ret;
@@ -311,7 +312,7 @@ void eventucal_process(void)
 
 This function contains the main function for the event handler thread.
 
-\param  arg                     Thread parameter. Not used!
+\param[in,out]  arg                 Thread parameter. Used to access the module instance.
 
 \return The function returns the thread exit code.
 */
@@ -332,15 +333,11 @@ static void* eventThread(void* arg)
         {
             /* first handle all user to kernel events --> higher priority! */
             if (eventucal_getEventCountCircbuf(kEventQueueK2U) > 0)
-            {
                 eventucal_processEventCircbuf(kEventQueueK2U);
-            }
             else
             {
                 if (eventucal_getEventCountCircbuf(kEventQueueUInt) > 0)
-                {
                     eventucal_processEventCircbuf(kEventQueueUInt);
-                }
             }
         }
     }

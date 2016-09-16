@@ -100,7 +100,7 @@ tOplkError sdotestcom_init(sdoApiCbComTest sdoComuCbApi_p);
 tOplkError sdotestcom_exit(void);
 tOplkError sdotestcom_sendFrame(UINT nodeId_p, tSdoType sdo_type_p, tAsySdoCom* pSdoCom_p, size_t sdoSize_p);
 tOplkError sdotestcom_closeCon(void);
-tOplkError sdotestcom_cbEvent(tEvent* pEvent_p);
+tOplkError sdotestcom_cbEvent(const tEvent* pEvent_p);
 
 #ifdef __cplusplus
 }

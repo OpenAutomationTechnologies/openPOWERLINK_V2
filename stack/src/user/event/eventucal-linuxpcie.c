@@ -11,7 +11,7 @@ calls on Linux to communicate with the openPOWERLINK PCIe driver.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2015, Kalycito Infotech Private Limited
 All rights reserved.
 
@@ -48,13 +48,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/ctrlucal.h>
 #include <common/target.h>
 #include <common/driver.h>
+#include <oplk/debugstr.h>
 
 #include <pthread.h>
 #include <sys/ioctl.h>
 #include <time.h>
 #include <fcntl.h>
 #include <semaphore.h>
-#include <common/target.h>
+
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -101,7 +102,7 @@ typedef struct
     BOOL                fStopKernelThread;      ///< Flag to start stop K2U event thread.
     BOOL                fStopProcessThread;     ///< Flag to start stop UInt event thread.
     BOOL                fInitialized;           ///< Flag indicate the valid state of this module.
-    sem_t*              semUserData;            ///< Semaphore for signalling pending events to be processed.
+    sem_t*              semUserData;            ///< Semaphore for signaling pending events to be processed.
 } tEventuCalInstance;
 
 //------------------------------------------------------------------------------
@@ -115,7 +116,7 @@ static tEventuCalInstance    instance_l;
 static void         signalUIntEvent(void);
 static void*        k2uEventFetchThread(void* pArg_p);
 static void*        eventProcessThread(void* pArg_p);
-static tOplkError   postEvent(tEvent* pEvent_p);
+static tOplkError   postEvent(const tEvent* pEvent_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -130,16 +131,16 @@ configuration, it gets the function pointer interface of the used queue
 implementations and calls the appropriate init functions.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
 tOplkError eventucal_init(void)
 {
-    tOplkError                  ret = kErrorOk;
-    struct sched_param          schedParam;
+    tOplkError          ret = kErrorOk;
+    struct sched_param  schedParam;
 
     OPLK_MEMSET(&instance_l, 0, sizeof(tEventuCalInstance));
 
@@ -166,10 +167,11 @@ tOplkError eventucal_init(void)
     if (pthread_setschedparam(instance_l.kernelEventThreadId, SCHED_FIFO, &schedParam) != 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s(): couldn't set K2U thread scheduling parameters! %d\n",
-                              __func__, schedParam.sched_priority);
+                              __func__,
+                              schedParam.sched_priority);
     }
 
-#if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 12)
+#if (defined(__GLIBC__) && (__GLIBC__ >= 2) && (__GLIBC_MINOR__ >= 12))
     pthread_setname_np(instance_l.kernelEventThreadId, "oplk-eventufetch");
 #endif
 
@@ -181,10 +183,11 @@ tOplkError eventucal_init(void)
     if (pthread_setschedparam(instance_l.processEventThreadId, SCHED_FIFO, &schedParam) != 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s(): couldn't set event process thread scheduling parameters! %d\n",
-                              __func__, schedParam.sched_priority);
+                              __func__,
+                              schedParam.sched_priority);
     }
 
-#if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 12)
+#if (defined(__GLIBC__) && (__GLIBC__ >= 2) && (__GLIBC_MINOR__ >= 12))
     pthread_setname_np(instance_l.processEventThreadId, "oplk-eventuprocess");
 #endif
     instance_l.fInitialized = TRUE;
@@ -203,8 +206,8 @@ The function cleans up the user event CAL module. For cleanup it calls the exit
 functions of the queue implementations for each used queue.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventucal
 */
@@ -221,7 +224,8 @@ tOplkError eventucal_exit(void)
             target_msleep(10);
             if (timeout++ > 1000)
             {
-                DEBUG_LVL_ERROR_TRACE("Kernel-User Event Thread is not terminating, continue shutdown...!\n");
+                DEBUG_LVL_ERROR_TRACE("%s(): Kernel-user event thread is not terminating, continue shutdown...!\n",
+                                      __func__);
                 break;
             }
         }
@@ -236,7 +240,8 @@ tOplkError eventucal_exit(void)
             target_msleep(10);
             if (timeout++ > 1000)
             {
-                DEBUG_LVL_ERROR_TRACE("Process Event Thread is not terminating, continue shutdown...!\n");
+                DEBUG_LVL_ERROR_TRACE("%s(): Process event thread is not terminating, continue shutdown...!\n",
+                                      __func__);
                 break;
             }
         }
@@ -244,6 +249,7 @@ tOplkError eventucal_exit(void)
 
     eventucal_exitQueueCircbuf(kEventQueueUInt);
     instance_l.fd = (OPLK_FILE_HANDLE)0;
+
     return kErrorOk;
 }
 
@@ -254,24 +260,23 @@ tOplkError eventucal_exit(void)
 This function is called from the generic user event post function in the
 event handler and posts an user event to the UInt queue using circular buffer.
 
-\param  pEvent_p                Event to be posted.
+\param[in]      pEvent_p            Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-tOplkError eventucal_postUserEvent(tEvent* pEvent_p)
+tOplkError eventucal_postUserEvent(const tEvent* pEvent_p)
 {
-    tOplkError    ret = kErrorOk;
+    tOplkError  ret;
+
+    // Check parameter validity
+    ASSERT(pEvent_p != NULL);
 
     ret = eventucal_postEventCircbuf(kEventQueueUInt, pEvent_p);
-    if (ret != kErrorOk)
-    {
-        DEBUG_LVL_ERROR_TRACE("User internal event could not be posted!!\n");
-    }
 
     return ret;
 }
@@ -284,17 +289,20 @@ This function is called from the generic user event post function in the
 event handler and posts an user event to the U2K queue using the ioctl
 interface.
 
-\param  pEvent_p                Event to be posted.
+\param[in]      pEvent_p            Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-tOplkError eventucal_postKernelEvent(tEvent* pEvent_p)
+tOplkError eventucal_postKernelEvent(const tEvent* pEvent_p)
 {
+    // Check parameter validity
+    ASSERT(pEvent_p != NULL);
+
     return postEvent(pEvent_p);
 }
 
@@ -325,21 +333,16 @@ void eventucal_process(void)
 This function posts an user event to the U2K queue via the PCIe interface
 driver using ioctl interface.
 
-\param  pEvent_p                Event to be posted.
+\param[in]      pEvent_p            Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 */
 //------------------------------------------------------------------------------
-static tOplkError postEvent(tEvent* pEvent_p)
+static tOplkError postEvent(const tEvent* pEvent_p)
 {
     int    ioctlret;
-
-    /* TRACE("%s() Event type:%s(%d) sink:%s(%d) size:%d!\n", __func__,
-             debugstr_getEventTypeStr(pEvent_p->eventType), pEvent_p->eventType,
-             debugstr_getEventSinkStr(pEvent_p->eventSink), pEvent_p->eventSink,
-             pEvent_p->eventArgSize); */
 
     ioctlret = ioctl(instance_l.fd, PLK_CMD_POST_EVENT, pEvent_p);
     if (ioctlret != 0)
@@ -357,7 +360,7 @@ interface to the PCIe driver to wait for an event to be posted from the PCP.
 Once an event has been retrieved, this function posts the event into the UInt
 event queue to be processed by process event thread.
 
-\param  pArg_p              Thread argument.
+\param[in,out]  pArg_p              Thread argument.
 
 \return The function returns a NULL pointer.
 */
@@ -366,7 +369,7 @@ static void* k2uEventFetchThread(void* pArg_p)
 {
     UINT8   aEventBuf[sizeof(tEvent) + MAX_EVENT_ARG_SIZE];
     tEvent* pEvent = (tEvent*)aEventBuf;
-    INT         ret;
+    INT     ret;
 
     UNUSED_PARAMETER(pArg_p);
 
@@ -375,10 +378,13 @@ static void* k2uEventFetchThread(void* pArg_p)
         ret = ioctl(instance_l.fd, PLK_CMD_GET_EVENT, pEvent);
         if (ret == 0)
         {
-            /*
-                DEBUG_LVL_EVENTK_TRACE("%s() User: got event type:%d(%s) sink:%d(%s)\n", __func__,
-                    pEvent->eventType, debugstr_getEventTypeStr(pEvent->eventType),
-                    pEvent->eventSink, debugstr_getEventSinkStr(pEvent->eventSink));*/
+            DEBUG_LVL_EVENTU_TRACE("%s() User: got event type:%d(%s) sink:%d(%s)\n",
+                                   __func__,
+                                   pEvent->eventType,
+                                   debugstr_getEventTypeStr(pEvent->eventType),
+                                   pEvent->eventSink,
+                                   debugstr_getEventSinkStr(pEvent->eventSink));
+
             if (pEvent->eventArgSize == 0)
                 pEvent->eventArg.pEventArg = NULL;
             else
@@ -386,13 +392,13 @@ static void* k2uEventFetchThread(void* pArg_p)
 
             if (eventucal_postEventCircbuf(kEventQueueUInt, pEvent) != kErrorOk)
             {
-                DEBUG_LVL_ERROR_TRACE("K2U event is dropped!!\n");
+                DEBUG_LVL_ERROR_TRACE("%s(): K2U event is dropped!!\n", __func__);
             }
         }
         else
         {
             // Ignore errors from kernel
-            DEBUG_LVL_EVENTK_TRACE("Error in retrieving kernel to user event!!\n");
+            DEBUG_LVL_EVENTU_TRACE("%s(): Error in retrieving kernel to user event!!\n", __func__);
         }
     }
 
@@ -406,17 +412,17 @@ static void* k2uEventFetchThread(void* pArg_p)
 \brief    Event thread function
 
 This function implements the event processing thread. The thread waits for a user
-or kernel event to be fetched and then processes it, once signalled.
+or kernel event to be fetched and then processes it, once signaled.
 
-\param  pArg_p              Thread argument.
+\param[in,out]  pArg_p              Thread argument.
 
 \return The function returns a NULL pointer.
 */
 //------------------------------------------------------------------------------
 static void* eventProcessThread(void* pArg_p)
 {
-    struct timespec         curTime;
-    struct timespec         timeout;
+    struct timespec curTime;
+    struct timespec timeout;
 
     UNUSED_PARAMETER(pArg_p);
 
@@ -430,9 +436,7 @@ static void* eventProcessThread(void* pArg_p)
         if (sem_timedwait(instance_l.semUserData, &timeout) == 0)
         {
             if (eventucal_getEventCountCircbuf(kEventQueueUInt) > 0)
-            {
                 eventucal_processEventCircbuf(kEventQueueUInt);
-            }
         }
     }
 

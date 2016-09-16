@@ -64,7 +64,7 @@ extern "C"
 /* circular buffer event interface */
 tOplkError eventucal_initQueueCircbuf(tEventQueue eventQueue_p);
 tOplkError eventucal_exitQueueCircbuf(tEventQueue eventQueue_p);
-tOplkError eventucal_postEventCircbuf(tEventQueue eventQueue_p, tEvent* pEvent_p);
+tOplkError eventucal_postEventCircbuf(tEventQueue eventQueue_p, const tEvent* pEvent_p);
 tOplkError eventucal_processEventCircbuf(tEventQueue eventQueue_p);
 UINT       eventucal_getEventCountCircbuf(tEventQueue eventQueue_p);
 tOplkError eventucal_setSignalingCircbuf(tEventQueue eventQueue_p, VOIDFUNCPTR pfnSignalCb_p);

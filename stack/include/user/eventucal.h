@@ -64,8 +64,8 @@ extern "C"
 
 tOplkError eventucal_init(void);
 tOplkError eventucal_exit(void);
-tOplkError eventucal_postKernelEvent(tEvent* pEvent_p);
-tOplkError eventucal_postUserEvent(tEvent* pEvent_p);
+tOplkError eventucal_postKernelEvent(const tEvent* pEvent_p);
+tOplkError eventucal_postUserEvent(const tEvent* pEvent_p);
 void       eventucal_process(void);
 
 #ifdef __cplusplus

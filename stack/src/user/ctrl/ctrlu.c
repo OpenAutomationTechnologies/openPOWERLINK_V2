@@ -167,7 +167,7 @@ static tOplkError handleObdResetCmd(tObdCbParam* pParam_p);
 static tOplkError handleObdIpAddrTable(tObdCbParam* pParam_p);
 #endif
 
-static tOplkError processUserEvent(tEvent* pEvent_p);
+static tOplkError processUserEvent(const tEvent* pEvent_p);
 static tOplkError cbCnCheckEvent(tNmtEvent NmtEvent_p);
 static tOplkError cbNmtStateChange(tEventNmtStateChange nmtStateChange_p);
 
@@ -1274,7 +1274,7 @@ by calling the event callback function.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError processUserEvent(tEvent* pEvent_p)
+static tOplkError processUserEvent(const tEvent* pEvent_p)
 {
     tOplkError          ret;
     tEventError*        pEventError;

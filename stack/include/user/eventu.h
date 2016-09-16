@@ -58,11 +58,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 This callback is used to call event processing over the module boundaries.
 e.g. eventucal-* -> eventu_process
 
-\param pEvent_p          Pointer to event which should be processed.
+\param[in]      pEvent_p            Pointer to event which should be processed.
 
 \return The function returns a tOplkError error code.
 */
-typedef tOplkError (*tProcessEventCb)(tEvent* pEvent_p);
+typedef tOplkError (*tProcessEventCb)(const tEvent* pEvent_p);
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -74,10 +74,12 @@ extern "C"
 
 tOplkError eventu_init(tProcessEventCb pfnApiProcessEventCb_p);
 tOplkError eventu_exit(void);
-tOplkError eventu_process(tEvent* pEvent_p);
-tOplkError eventu_postEvent(tEvent* pEvent_p);
-tOplkError eventu_postError(tEventSource EventSource_p, tOplkError error_p,
-                            UINT argSize_p, const void* pArg_p);
+tOplkError eventu_process(const tEvent* pEvent_p);
+tOplkError eventu_postEvent(const tEvent* pEvent_p);
+tOplkError eventu_postError(tEventSource eventSource_p,
+                            tOplkError error_p,
+                            UINT argSize_p,
+                            const void* pArg_p);
 
 #ifdef __cplusplus
 }
