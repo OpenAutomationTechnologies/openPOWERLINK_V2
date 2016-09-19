@@ -755,7 +755,7 @@ The function writes to the given base address plus the provided offset the given
 //------------------------------------------------------------------------------
 static void hostifWrite16(UINT8* pAddr_p, UINT offset_p, UINT16 val_p)
 {
-    HOSTIF_WR32(pAddr_p + offset_p, val_p);
+    HOSTIF_WR16(pAddr_p + offset_p, val_p);
 
     HOSTIF_DCACHE_FLUSH(pAddr_p + offset_p, sizeof(UINT16));
 }
